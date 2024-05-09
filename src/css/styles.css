@@ -3,6 +3,11 @@
  * \brief Main stylesheet for the default theme.
  */
 
+ /*Test frames vertical handle size*/
+ [class^="ui-resizable"] {
+  width: 300em;
+ }
+
 body
 {
   background-color: #FFFFFF;
@@ -14,6 +19,7 @@ body
   margin-left: auto;
   margin-right: auto;
 }
+
 
 input[type=text]
 {
@@ -496,7 +502,7 @@ img.lwtlogoright
 /**
 * General footer style.
 */
-footer 
+ footer 
 {
   position: fixed;
   width: 100%;
@@ -507,7 +513,7 @@ footer
   height: 45px;
   line-height: 30px;
   border-top: 1px solid #000000;
-}
+} 
 
 /** 
 * Separate a footer section from the document 
@@ -524,7 +530,18 @@ footer
 */
 #footer
 {
-  background: #DDDDDD;
+  width: inherit;
+  display: flex;
+  bottom: 0.02999999999999936em;
+  position: fixed;
+  /* width: 41.1em; */
+  height: 2em;
+  line-height: 1.890em;
+  background: #DDD;
+  font-size: 0.882em;
+  text-align: right;
+  border-top: 1px solid #000;
+  justify-content: center;
 }
 
 .borderl

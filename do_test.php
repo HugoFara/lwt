@@ -190,38 +190,51 @@ function do_test_desktop_page($property = null)
     <div id="frame-h">
         <?php
         start_test_header_page($language);
-    ?>
+        ?>
     </div>
     <hr />
     <div id="frame-l">
         <?php
-    if (getreq('type') == 'table') {
-        do_test_table();
-    } else {
-        $identifier = do_test_get_identifier(
-            $_REQUEST['selection'] ?? null,
-            $_SESSION['testsql'] ?? null,
-            $_REQUEST['lang'] ?? null,
-            $_REQUEST['text'] ?? null
-        );
-        do_test_test_content_ajax($identifier[0], $identifier[1]);
-    }
-    ?>
+        if (getreq('type') == 'table') {
+            do_test_table();
+        } else {
+            $identifier = do_test_get_identifier(
+                $_REQUEST['selection'] ?? null, $_SESSION['testsql'] ?? null, 
+                $_REQUEST['lang'] ?? null, $_REQUEST['text'] ?? null
+            );
+            do_test_test_content_ajax($identifier[0], $identifier[1]);
+        }
+        ?>
     </div>
 </div>
 <div id="frames-r" 
-style="position: fixed; top: 2%; right: 0; height: 90%; 
-width: <?php echo 97 - $frame_l_width; ?>%;">
+style="position: fixed; top: 2%; right: 0; height: 98vh; 
+width: <?php echo 100 - $frame_l_width; ?>%;display:flex; flex-direction: column;">
     <!-- iFrames wrapper for events -->
-    <iframe src="empty.html" scrolling="auto" name="ro" 
+    <iframe src="empty.html" scrolling="auto"  id="ro" name="ro" 
     style="height: 50%; width: 100%;">
         Your browser doesn't support iFrames, update it!
     </iframe>
-    <iframe src="empty.html" scrolling="auto" name="ru" 
+    <iframe src="empty.html" scrolling="auto"  id="ru" name="ru" 
     style="height: 50%; width: 100%;">
         Your browser doesn't support iFrames, update it!
     </iframe>
 </div>
+<script>
+function adjustIframeHeights(entries) {
+  for (const entry of entries) {
+
+
+
+
+            const heightDifference = $("#frames-r").height() - entry.contentRect.height - $('#ru').height();
+            $('#ru').height($('#ru').height() + heightDifference + 'px');
+}
+        }
+
+        var iframeObserver = new ResizeObserver(adjustIframeHeights);
+        iframeObserver.observe(document.getElementById("ro"));
+</script>
 <audio id="success_sound">
     <source src="<?php print_file_path("sounds/success.mp3") ?>" type="audio/mpeg" />
     Your browser does not support audio element!
@@ -248,12 +261,54 @@ function do_test_page($p)
 {
     pagestart_nobody(
         'Test',
-        "body {
+        "
+        #test-html {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: none;
+          }
+        
+        body {
             margin: 20px;
             max-width: 100%;
-        }"
-    );
+            overflow: hidden;
+        }
+        #frame-h {
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+            align-items: stretch;
+            overflow: hidden;
+            height: 10.773em;
+        }
+        #frames-l {
+            top: 2%;
+            left: 0;
+            width: 50%;
+            position: absolute;
+            overflow: hidden;
+        }
+        #frames-r{
+            overflow: hidden;
+            position: absolute;
+            top: 2%;
+            right: 0;
+            height: 99vh;
+            width: 50%;
+        }
+        .h4{ 
 
+            display: block;
+            margin-top: 1.33em;
+            margin-bottom: 1.33em;
+            margin-left: 0;
+            margin-right: 0;
+            font-weight: bold;
+        }
+        "
+    );
+    
     if (is_mobile()) {
         do_test_mobile_page();
     } else {

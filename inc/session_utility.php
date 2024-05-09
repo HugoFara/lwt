@@ -4176,7 +4176,7 @@ function framesetheader($title): void
     @header('Cache-Control: no-cache, must-revalidate, max-age=0');
     @header('Pragma: no-cache');
     ?><!DOCTYPE html>
-    <?php echo '<html lang="en">'; ?>
+    <?php echo '<html id="'. strtolower($title).'-html"  lang="en">'; ?>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/styles.css');?>" />
@@ -4234,7 +4234,7 @@ function pagestart_nobody($title, $addcss=''): void
     @header('Pragma: no-cache');
     ?><!DOCTYPE html>
     <?php 
-    echo '<html lang="en">';
+    echo '<html id="'. strtolower($title).'-html"  lang="en">';
     ?>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />

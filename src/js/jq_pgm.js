@@ -1391,7 +1391,7 @@ function prepareMainAreas () {
     handles: 'w',
     stop: function (_event, ui) {
       // Resize left frames
-      $('#frames-l').css('width', ui.position.left - 20);
+      $('#frames-l').css('width', ui.position.left);
       // Save settings
       do_ajax_save_setting(
         'set-text-l-framewidth-percent',

@@ -132,32 +132,32 @@ function get_test_counts($testsql)
 
 /**
  * Make the header row for tests.
- *
+ * 
  * @param mixed $_p URL property to use (unnused), will be removed in LWT 3.0.0
- *
+ * 
  * @return void
  */
 function do_test_header_row($_p)
 {
     ?>
-<div class="flex-header">
+<div class="h4" style="
+    display: flex;">
     <div>
         <a href="edit_texts.php" target="_top">
             <?php echo_lwt_logo(); ?>
-        </a>
-    </div>
-    <?php
+            LWT-fork
+        </a>&nbsp; | &nbsp;</div>
+    <?php 
     // This part only works if $textid is set
     if (is_numeric(getreq('text'))) {
         $textid = (int) getreq('text');
         echo '<div>' . getPreviousAndNextTextLinks(
-            $textid,
-            'do_test.php?text=',
-            false,
-            ''
-        ) . '</div>';
-
+            $textid, 'do_test.php?text=', false, ''
+        ) . '</div>&nbsp; | &nbsp;';
+        
         ?>
+    <div>
+        <?php quickMenu("test"); ?>&nbsp; | &nbsp;</div>
     <div>
         <a href="do_text.php?start=<?php echo $textid; ?>" target="_top">
             <img src="icn/book-open-bookmark.png" title="Read" alt="Read" />
@@ -170,9 +170,6 @@ function do_test_header_row($_p)
         <?php
     }
     ?>
-    <div>
-        <?php quickMenu(); ?>
-    </div>
 </div>
     <?php
 }
@@ -246,7 +243,7 @@ function do_test_header_js()
 function do_test_header_content($title, $p, $totalcountdue, $totalcount, $language)
 {
     ?>
-<h1>TEST ▶ <?php echo tohtml($title) ?></h1>
+<h3>TEST ▶ <?php echo tohtml($title) ?></h3>
 <div style="margin: 5px;">
     Word<?php echo intval($totalcount) > 1 ? 's' : ''; ?> due today:
     <?php echo htmlspecialchars($totalcount); ?>,
