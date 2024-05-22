@@ -106,7 +106,10 @@ function get_first_value($sql)
  */
 function prepare_textdata($s): string 
 {
-    return str_replace("\r\n", "\n", $s);
+	if ($s == null)
+		return "";
+	else
+		return str_replace("\r\n", "\n", $s);
 }
 
 // -------------------------------------------------------------
