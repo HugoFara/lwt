@@ -38,7 +38,7 @@
     "eslint-plugin-n": "^16.6.1",
     "eslint-plugin-promise": "^6.1.1",
     "jsdoc": "^4.0.2",
-    "mocha": "^10.2.0",
+    "mocha": "^10.8.2",
     "superagent": "^8.1.2",
     "supertest": "^6.3.3"
   }
