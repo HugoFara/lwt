@@ -381,8 +381,8 @@ function index_do_main_page()
         if ($langcnt == 0) {
             ?> 
         <div><p>Hint: The database seems to be empty.</p></div>
-        <a href="install_demo.php">Install the LWT demo database, </a>
-        <a href="edit_languages.php?new=1">Define the first language you want to learn.</a>
+        <a href="install_demo.php">Install the LWT demo database</a>
+        <a href="edit_languages.php?new=1">Define the first language you want to learn</a>
             <?php
         } else if ($langcnt > 0) {
             do_language_selectable($currentlang);
