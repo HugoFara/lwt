@@ -5,9 +5,19 @@ other versions come from the canonical LWT ("official" branch on Git).
 For git tags, official releases are marked like "v1.0.0", while unofficial
 ones are marked like "v1.0.0-fork".
 
-## 2.10.0-fork (April 1 2024)
+## [UNRELEASED]
 
 ### Added
+
+* Official support for PHP 8.3 and 8.4.
+
+### Deprecated
+
+* Removed testing for PHP 8.0.
+
+## 2.10.0-fork (April 1 2024)
+
+### Added in 2.10.0-fork
 
 * Support for Japanese with MeCab on Mac! This was added thanks to
 [quopquai](https://github.com/quopquai) on [#135](https://github.com/HugoFara/lwt/issues/135).
@@ -41,7 +51,7 @@ Many thanks to [@ProgramComputer](https://github.com/ProgramComputer)!
   * The "Read words aloud" setting is now saved, PR [#185](https://github.com/HugoFara/lwt/pull/185).
   * UX change: You can click on "Read words aloud" text to check the checkbox.
 
-### Changed
+### Changed in 2.10.0-fork
 
 * Adds missing documentation in the Docker image:
   * MarkDown files in the root folder are now included.
@@ -78,7 +88,7 @@ behavior.
   * Image updated from `apache-buster` to `apache-bullseye`.
 * Composer dependencies up to date 2024-03-24.
 
-### Fixed
+### Fixed in 2.10.0-fork
 
 * The database wizard was broken since 2.9.0.
 * Word status:
@@ -122,7 +132,7 @@ missing in `INSTALL.sh` (and `composer.json`), as stated in
 resulting in failed installation the first time.
 * Editing test annotation would not display since 2.9.1 [#193](https://github.com/HugoFara/lwt/issues/193).
 
-### Deprecated
+### Deprecated in 2.10.0-fork
 
 * Using any function from `unloadformcheck.js` without using `lwtFormCheck` is deprecated.
 * `get_database_prefixes` is deprecated, superseded by `getDatabasePrefix` which is much cleaner.

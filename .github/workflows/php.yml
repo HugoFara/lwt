@@ -17,7 +17,7 @@ jobs:
         config:
           - os: ubuntu-latest
           - os: windows-latest
-        php-version: [ 8.1, latest ]
+        php-version: [ 8.2, latest ]
 
     steps:
     - uses: actions/checkout@v2
@@ -37,8 +37,6 @@ jobs:
       with:
         path: vendor
         key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        # restore-keys: |
-        #  ${{ runner.os }}-php-2-
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
