@@ -28,8 +28,8 @@ function get_annotated_text($textid)
 {
     global $tbpref;
     $ann = get_first_value(
-        "SELECT TxAnnotatedText AS value 
-        FROM " . $tbpref . "texts 
+        "SELECT TxAnnotatedText AS value
+        FROM " . $tbpref . "texts
         WHERE TxID = " . $textid
     );
     return (string)$ann;
@@ -46,8 +46,8 @@ function get_annotated_text($textid)
 function get_display_impr_text_text_data($textid)
 {
     global $tbpref;
-    $sql = "SELECT LgTextSize, LgRightToLeft 
-    FROM {$tbpref}texts 
+    $sql = "SELECT LgTextSize, LgRightToLeft
+    FROM {$tbpref}texts
     JOIN {$tbpref}languages ON LgID = TxLgID
     WHERE TxID = $textid";
     $res = do_mysqli_query($sql);
@@ -146,7 +146,7 @@ function get_word_annotations($vals)
         if ($vals[2] !== '') {
             $wid = (int)$vals[2];
             $rom = get_first_value(
-                "SELECT WoRomanization AS value 
+                "SELECT WoRomanization AS value
                 FROM " . $tbpref . "words WHERE WoID = " . $wid
             );
             if (!isset($rom)) {

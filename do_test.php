@@ -42,14 +42,14 @@ function get_l2_language_name()
     if (getreq('lang') != '') {
         $langid = (int) getreq('lang');
         $lang = (string) get_first_value(
-            "SELECT LgName AS value FROM {$tbpref}languages 
+            "SELECT LgName AS value FROM {$tbpref}languages
             WHERE LgID = $langid
             LIMIT 1"
         );
     } elseif (getreq('text') != '') {
         $textid = (int) getreq('text');
         $lang = (string) get_first_value(
-            "SELECT LgName AS value 
+            "SELECT LgName AS value
             FROM {$tbpref}texts
             JOIN {$tbpref}languages
             ON TxLgID = LgID
@@ -66,8 +66,8 @@ function get_l2_language_name()
         );
         if ($cntlang == 1) {
             $lang = (string) get_first_value(
-                "SELECT LgName AS value 
-                FROM {$tbpref}languages, {$test_sql} AND LgID = WoLgID 
+                "SELECT LgName AS value
+                FROM {$tbpref}languages, {$test_sql} AND LgID = WoLgID
                 LIMIT 1"
             );
         }
@@ -150,8 +150,8 @@ function do_test_mobile_page($property = null)
     ?>
     </div>
 </div>
-<div id="frames-r" 
-style="position: fixed; top: 0; right: -100%; width: 100%; height: 100%;" 
+<div id="frames-r"
+style="position: fixed; top: 0; right: -100%; width: 100%; height: 100%;"
 onclick="hideRightFrames();">
     <!-- iFrames wrapper for events -->
     <div style="margin-left: 50%; height: 99%;">
@@ -209,15 +209,15 @@ function do_test_desktop_page($property = null)
     ?>
     </div>
 </div>
-<div id="frames-r" 
-style="position: fixed; top: 2%; right: 0; height: 90%; 
+<div id="frames-r"
+style="position: fixed; top: 2%; right: 0; height: 90%;
 width: <?php echo 97 - $frame_l_width; ?>%;">
     <!-- iFrames wrapper for events -->
-    <iframe src="empty.html" scrolling="auto" name="ro" 
+    <iframe src="empty.html" scrolling="auto" name="ro"
     style="height: 50%; width: 100%;">
         Your browser doesn't support iFrames, update it!
     </iframe>
-    <iframe src="empty.html" scrolling="auto" name="ru" 
+    <iframe src="empty.html" scrolling="auto" name="ru"
     style="height: 50%; width: 100%;">
         Your browser doesn't support iFrames, update it!
     </iframe>

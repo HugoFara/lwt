@@ -3,7 +3,7 @@
 /**
  * \file
  * \brief Define the Language class
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt
@@ -15,9 +15,9 @@
 
 /**
  * A language represented as an object.
- * 
+ *
  * This structure is experimental and subject to change.
- * 
+ *
  * @since 2.10.0-fork Get new ttsvoiceapi, showromanization properties
  */
 class Language
@@ -51,7 +51,7 @@ class Language
      */
     public $textsize;
     /**
-     * @var string $charactersubst Character to substitue. 
+     * @var string $charactersubst Character to substitue.
      */
     public $charactersubst;
     /**
@@ -95,8 +95,8 @@ class Language
 
     /**
      * Export word data as a JSON dictionnary.
-     * 
-     * @return string JSON disctionnary. 
+     *
+     * @return string JSON disctionnary.
      */
     public function export_js_dict()
     {

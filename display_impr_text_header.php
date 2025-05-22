@@ -31,7 +31,7 @@ function do_diplay_impr_text_header_data($textid)
     global $tbpref;
 
     $sql =
-    'SELECT TxLgID, TxTitle, TxAudioURI, TxSourceURI 
+    'SELECT TxLgID, TxTitle, TxAudioURI, TxSourceURI
     FROM ' . $tbpref . 'texts
     WHERE TxID = ' . $textid;
     $res = do_mysqli_query($sql);
@@ -68,7 +68,7 @@ function do_diplay_impr_text_header_js()
 
     /** Hide traslations. */
     function do_hide_t() {
-        $('#showt').show(); 
+        $('#showt').show();
         $('#hidet').hide();
         $('.anntermruby')
         .css('color','#E5E4E2').css('background-color', '#E5E4E2');
@@ -76,7 +76,7 @@ function do_diplay_impr_text_header_js()
 
     /** Show translations. */
     function do_show_t() {
-        $('#showt').hide(); 
+        $('#showt').hide();
         $('#hidet').show();
         $('.anntermruby')
         .css('color','inherit').css('background-color', '');
@@ -84,15 +84,15 @@ function do_diplay_impr_text_header_js()
 
     /** Hide annotations. */
     function do_hide_a() {
-        $('#show').show(); 
-        $('#hide').hide(); 
+        $('#show').show();
+        $('#hide').hide();
         $('.anntransruby2')
         .css('color','#C8DCF0').css('background-color', '#C8DCF0');
     }
 
     /** Show annotations. */
     function do_show_a() {
-        $('#show').hide(); 
+        $('#show').hide();
         $('#hide').show();
         $('.anntransruby2')
         .css('color','').css('background-color', '');
@@ -117,23 +117,23 @@ function do_diplay_impr_text_header_js()
 function do_diplay_impr_text_header_content($title, $textid, $audio, $sourceURI)
 {
     $text_links = getPreviousAndNextTextLinks(
-        $textid, 
-        'display_impr_text.php?text=', 
-        true, 
+        $textid,
+        'display_impr_text.php?text=',
+        true,
         ' &nbsp; &nbsp; '
     );
     ?>
     <h1><?php echo tohtml($title); ?></h1>
 <div class="flex-spaced">
     <div>
-        <img id="hidet" class="click" src="icn/light-bulb-T.png" 
+        <img id="hidet" class="click" src="icn/light-bulb-T.png"
         title="Toggle Text Display (Now ON)" alt="Toggle Text Display (Now ON)" onclick="do_hide_t();" />
-        <img id="showt" style="display:none;" class="click" src="icn/light-bulb-off-T.png" 
+        <img id="showt" style="display:none;" class="click" src="icn/light-bulb-off-T.png"
         title="Toggle Text Display (Now OFF)" alt="Toggle Text Display (Now OFF)" onclick="do_show_t();" />
-        <img id="hide" class="click" src="icn/light-bulb-A.png" 
+        <img id="hide" class="click" src="icn/light-bulb-A.png"
         title="Toggle Annotation Display (Now ON)" alt="Toggle Annotation Display (Now ON)" onclick="do_hide_a();" />
-        <img id="show" style="display:none;" class="click" src="icn/light-bulb-off-A.png" 
-        title="Toggle Annotation Display (Now OFF)" alt="Toggle Annotation Display (Now OFF)" onclick="do_show_a();" /> 
+        <img id="show" style="display:none;" class="click" src="icn/light-bulb-off-A.png"
+        title="Toggle Annotation Display (Now OFF)" alt="Toggle Annotation Display (Now OFF)" onclick="do_show_a();" />
     </div>
     <div>
         <?php

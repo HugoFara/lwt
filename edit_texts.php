@@ -3,7 +3,7 @@
 /**
  * \file
  * \brief Manage active texts
- * 
+ *
  * Call: edit_texts.php?....
  *     ... markaction=[opcode] ... do actions on marked texts
  *     ... del=[textid] ... do delete
@@ -19,9 +19,9 @@
  *     ... sort=[sortcode] ... sort
  *     ... page=[pageno] ... page
  *     ... query=[titlefilter] ... title filter
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  * @package  Lwt
  * @author   LWT Project <lwt-project@hotmail.com>
@@ -37,11 +37,11 @@ require_once 'inc/classes/Text.php';
 
 /**
  * Get the value of $wh_query.
- * 
+ *
  * @param string $currentquery     Current database query
  * @param string $currentquerymode
  * @param string $currentregexmode
- * 
+ *
  * @return string Content for $wh_query.
  */
 function edit_texts_get_wh_query($currentquery, $currentquerymode, $currentregexmode)
@@ -67,30 +67,30 @@ function edit_texts_get_wh_query($currentquery, $currentquerymode, $currentregex
         break;
     }
     if ($currentquery!=='') {
-        if ($currentregexmode !== ''  
+        if ($currentregexmode !== ''
             && @mysqli_query(
-                $GLOBALS["DBCONNECTION"], 
+                $GLOBALS["DBCONNECTION"],
                 'SELECT "test" RLIKE ' . convert_string_to_sqlsyntax($currentquery)
             ) === false
         ) {
             $wh_query = '';
             unset($_SESSION['currentwordquery']);
-            if (isset($_REQUEST['query'])) { 
-                echo '<p id="hide3" style="color:red;text-align:center;">' . 
-                '+++ Warning: Invalid Search +++</p>'; 
+            if (isset($_REQUEST['query'])) {
+                echo '<p id="hide3" style="color:red;text-align:center;">' .
+                '+++ Warning: Invalid Search +++</p>';
             }
         }
-    } else { 
-        $wh_query = ''; 
+    } else {
+        $wh_query = '';
     }
     return $wh_query;
 }
 
 /**
  * Return the value for $wh_tag.
- * 
+ *
  * @param string|int $currentlang Current language ID
- * 
+ *
  * @return string Content for $wh_tag.
  */
 function edit_texts_get_wh_tag($currentlang)
@@ -98,11 +98,11 @@ function edit_texts_get_wh_tag($currentlang)
     $wh_tag1 = null;
     $wh_tag2 = null;
     $currenttag1 = validateTextTag(
-        (string) processSessParam("tag1", "currenttexttag1", '', false), 
+        (string) processSessParam("tag1", "currenttexttag1", '', false),
         $currentlang
     );
     $currenttag2 = validateTextTag(
-        (string) processSessParam("tag2", "currenttexttag2", '', false), 
+        (string) processSessParam("tag2", "currenttexttag2", '', false),
         $currentlang
     );
     $currenttag12 = (string) processSessParam("tag12", "currenttexttag12", '', false);
@@ -111,28 +111,28 @@ function edit_texts_get_wh_tag($currentlang)
     }
     if ($currenttag1 != '') {
         if ($currenttag1 == -1) {
-            $wh_tag1 = "group_concat(TtT2ID) IS NULL"; 
+            $wh_tag1 = "group_concat(TtT2ID) IS NULL";
         }
         else {
-            $wh_tag1 = "concat('/',group_concat(TtT2ID separator '/'),'/') like '%/" 
-            . $currenttag1 . "/%'"; 
+            $wh_tag1 = "concat('/',group_concat(TtT2ID separator '/'),'/') like '%/"
+            . $currenttag1 . "/%'";
         }
     }
     if ($currenttag2 != '') {
         if ($currenttag2 == -1) {
-            $wh_tag2 = "group_concat(TtT2ID) IS NULL"; 
+            $wh_tag2 = "group_concat(TtT2ID) IS NULL";
         }
         else {
-            $wh_tag2 = "concat('/',group_concat(TtT2ID separator '/'),'/') like '%/" 
-            . $currenttag2 . "/%'"; 
+            $wh_tag2 = "concat('/',group_concat(TtT2ID separator '/'),'/') like '%/"
+            . $currenttag2 . "/%'";
         }
     }
     if ($currenttag1 != '' && $currenttag2 == '') {
-        return " having (" . $wh_tag1 . ') '; 
+        return " having (" . $wh_tag1 . ') ';
     }
     if ($currenttag2 != '' && $currenttag1 == '') {
         return " having (" . $wh_tag2 . ') ';
-    } 
+    }
     return " HAVING (($wh_tag1) " . ($currenttag12 ? 'AND' : 'OR') . " ($wh_tag2)) ";
 }
 
@@ -170,37 +170,37 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
 
     if ($markaction == 'del') {
         $message3 = runsql(
-            'delete from ' . $tbpref . 'textitems2 where Ti2TxID in ' . $list, 
+            'delete from ' . $tbpref . 'textitems2 where Ti2TxID in ' . $list,
             "Text items deleted"
         );
         $message2 = runsql(
-            'delete from ' . $tbpref . 'sentences where SeTxID in ' . $list, 
+            'delete from ' . $tbpref . 'sentences where SeTxID in ' . $list,
             "Sentences deleted"
         );
         $message1 = runsql(
-            'delete from ' . $tbpref . 'texts where TxID in ' . $list, 
+            'delete from ' . $tbpref . 'texts where TxID in ' . $list,
             "Texts deleted"
         );
         $message = $message1 . " / " . $message2 . " / " . $message3;
         adjust_autoincr('texts', 'TxID');
         adjust_autoincr('sentences', 'SeID');
         runsql(
-            "DELETE " . $tbpref . "texttags 
+            "DELETE " . $tbpref . "texttags
             FROM (
-                " . $tbpref . "texttags 
-                LEFT JOIN " . $tbpref . "texts 
+                " . $tbpref . "texttags
+                LEFT JOIN " . $tbpref . "texts
                 ON TtTxID = TxID
-            ) 
-            WHERE TxID IS NULL", 
+            )
+            WHERE TxID IS NULL",
             ''
         );
     } elseif ($markaction == 'arch') {
         runsql(
-            'delete from ' . $tbpref . 'textitems2 where Ti2TxID in ' . $list, 
+            'delete from ' . $tbpref . 'textitems2 where Ti2TxID in ' . $list,
             ""
         );
         runsql(
-            'delete from ' . $tbpref . 'sentences where SeTxID in ' . $list, 
+            'delete from ' . $tbpref . 'sentences where SeTxID in ' . $list,
             ""
         );
         $count = 0;
@@ -211,17 +211,17 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
             $count += (int)runsql(
                 'insert into ' . $tbpref . 'archivedtexts (
                     AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
-                ) 
-                select TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI 
-                from ' . $tbpref . 'texts where TxID = ' . $id, 
+                )
+                select TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
+                from ' . $tbpref . 'texts where TxID = ' . $id,
                 ""
             );
             $aid = get_last_key();
             runsql(
-                'insert into ' . $tbpref . 'archtexttags (AgAtID, AgT2ID) 
-                select ' . $aid . ', TtT2ID 
-                from ' . $tbpref . 'texttags 
-                where TtTxID = ' . $id, 
+                'insert into ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
+                select ' . $aid . ', TtT2ID
+                from ' . $tbpref . 'texttags
+                where TtTxID = ' . $id,
                 ""
             );
         }
@@ -229,13 +229,13 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
         $message = 'Text(s) archived: ' . $count;
         runsql('delete from ' . $tbpref . 'texts where TxID in ' . $list, "");
         runsql(
-            "DELETE " . $tbpref . "texttags 
+            "DELETE " . $tbpref . "texttags
             FROM (
-                " . $tbpref . "texttags 
-                LEFT JOIN " . $tbpref . "texts 
+                " . $tbpref . "texttags
+                LEFT JOIN " . $tbpref . "texts
                 on TtTxID = TxID
-            ) 
-            WHERE TxID IS NULL", 
+            )
+            WHERE TxID IS NULL",
             ''
         );
         adjust_autoincr('texts', 'TxID');
@@ -248,23 +248,23 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
         exit();
     } elseif ($markaction == 'setsent') {
         $count = 0;
-        $sql = "select WoID, WoTextLC, min(Ti2SeID) as SeID 
-        from " . $tbpref . "words, " . $tbpref . "textitems2 
-        where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in " . $list . " and 
-        ifnull(WoSentence,'') not like concat('%{',WoText,'}%') 
+        $sql = "select WoID, WoTextLC, min(Ti2SeID) as SeID
+        from " . $tbpref . "words, " . $tbpref . "textitems2
+        where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in " . $list . " and
+        ifnull(WoSentence,'') not like concat('%{',WoText,'}%')
         group by WoID order by WoID, min(Ti2SeID)";
 
         $res = do_mysqli_query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $sent = getSentence(
-                $record['SeID'], 
-                $record['WoTextLC'], 
+                $record['SeID'],
+                $record['WoTextLC'],
                 (int) getSettingWithDefault('set-term-sentence-count')
             );
             $count += (int) runsql(
-                'UPDATE ' . $tbpref . 'words 
-                SET WoSentence = ' . convert_string_to_sqlsyntax(repl_tab_nl($sent[1])) . ' 
-                WHERE WoID = ' . $record['WoID'], 
+                'UPDATE ' . $tbpref . 'words
+                SET WoSentence = ' . convert_string_to_sqlsyntax(repl_tab_nl($sent[1])) . '
+                WHERE WoID = ' . $record['WoID'],
                 ''
             );
         }
@@ -272,25 +272,25 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
         $message = 'Term Sentences set from Text(s): ' . $count;
     } elseif ($markaction == 'setactsent') {
         $count = 0;
-        $sql = "SELECT WoID, WoTextLC, MIN(Ti2SeID) AS SeID 
-        FROM " . $tbpref . "words, " . $tbpref . "textitems2 
-        WHERE Ti2LgID = WoLgID AND WoStatus != 98 AND WoStatus != 99 AND 
-        Ti2WoID = WoID AND Ti2TxID IN " . $list . " AND 
-        IFNULL(WoSentence,'') NOT LIKE CONCAT('%{',WoText,'}%') 
-        GROUP BY WoID 
+        $sql = "SELECT WoID, WoTextLC, MIN(Ti2SeID) AS SeID
+        FROM " . $tbpref . "words, " . $tbpref . "textitems2
+        WHERE Ti2LgID = WoLgID AND WoStatus != 98 AND WoStatus != 99 AND
+        Ti2WoID = WoID AND Ti2TxID IN " . $list . " AND
+        IFNULL(WoSentence,'') NOT LIKE CONCAT('%{',WoText,'}%')
+        GROUP BY WoID
         ORDER BY WoID, MIN(Ti2SeID)";
 
         $res = do_mysqli_query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $sent = getSentence(
-                $record['SeID'], 
-                $record['WoTextLC'], 
+                $record['SeID'],
+                $record['WoTextLC'],
                 (int) getSettingWithDefault('set-term-sentence-count')
             );
             $count += (int) runsql(
-                'update ' . $tbpref . 'words 
-                set WoSentence = ' . convert_string_to_sqlsyntax(repl_tab_nl($sent[1])) . ' 
-                where WoID = ' . $record['WoID'], 
+                'update ' . $tbpref . 'words
+                set WoSentence = ' . convert_string_to_sqlsyntax(repl_tab_nl($sent[1])) . '
+                where WoID = ' . $record['WoID'],
                 ''
             );
         }
@@ -303,11 +303,11 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
         while ($record = mysqli_fetch_assoc($res)) {
             $id = (int)$record['TxID'];
             runsql(
-                'delete from ' . $tbpref . 'sentences where SeTxID = ' . $id, 
+                'delete from ' . $tbpref . 'sentences where SeTxID = ' . $id,
                 "Sentences deleted"
             );
             runsql(
-                'delete from ' . $tbpref . 'textitems2 where Ti2TxID = ' . $id, 
+                'delete from ' . $tbpref . 'textitems2 where Ti2TxID = ' . $id,
                 "Text items deleted"
             );
             adjust_autoincr('sentences', 'SeID');
@@ -315,7 +315,7 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
                 get_first_value(
                     'select TxText as value from ' . $tbpref . 'texts where TxID = ' . $id
                 ),
-                $record['TxLgID'], $id 
+                $record['TxLgID'], $id
             );
             $count++;
         }
@@ -358,13 +358,13 @@ function edit_texts_delete($txid): string
     adjust_autoincr('texts', 'TxID');
     adjust_autoincr('sentences', 'SeID');
     runsql(
-        "DELETE {$tbpref}texttags 
+        "DELETE {$tbpref}texttags
         FROM (
-            {$tbpref}texttags 
-            LEFT JOIN {$tbpref}texts 
+            {$tbpref}texttags
+            LEFT JOIN {$tbpref}texts
             ON TtTxID = TxID
-        ) 
-        WHERE TxID IS NULL", 
+        )
+        WHERE TxID IS NULL",
         ''
     );
     return $message;
@@ -394,34 +394,34 @@ function edit_texts_archive($txid): string
     $message4 = runsql(
         "INSERT INTO {$tbpref}archivedtexts (
             AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
-        ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI 
-        FROM {$tbpref}texts 
-        WHERE TxID = $txid", 
+        ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
+        FROM {$tbpref}texts
+        WHERE TxID = $txid",
         "Archived Texts saved"
     );
     $id = get_last_key();
     runsql(
-        "INSERT INTO {$tbpref}archtexttags (AgAtID, AgT2ID) 
-        SELECT $id, TtT2ID 
-        FROM {$tbpref}texttags 
-        WHERE TtTxID = $txid", 
+        "INSERT INTO {$tbpref}archtexttags (AgAtID, AgT2ID)
+        SELECT $id, TtT2ID
+        FROM {$tbpref}texttags
+        WHERE TtTxID = $txid",
         ""
     );
     $message1 = runsql(
-        "DELETE FROM {$tbpref}texts WHERE TxID = $txid", 
+        "DELETE FROM {$tbpref}texts WHERE TxID = $txid",
         "Texts deleted"
     );
     $message =  "$message4 / $message1 / $message2 / $message3";
     adjust_autoincr('texts', 'TxID');
     adjust_autoincr('sentences', 'SeID');
     runsql(
-        "DELETE {$tbpref}texttags 
+        "DELETE {$tbpref}texttags
         FROM (
-            {$tbpref}texttags 
-            LEFT JOIN {$tbpref}texts 
+            {$tbpref}texttags
+            LEFT JOIN {$tbpref}texts
             ON TtTxID = TxID
-        ) 
-        WHERE TxID IS NULL", 
+        )
+        WHERE TxID IS NULL",
         ''
     );
     return $message;
@@ -448,8 +448,8 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
         $currentlang = (int) validateLang(
             (string) processDBParam("filterlang", 'currentlanguage', '', false)
         );
-        if ($no_pagestart) { 
-            pagestart('My ' . getLanguage($currentlang) . ' Texts', true); 
+        if ($no_pagestart) {
+            pagestart('My ' . getLanguage($currentlang) . ' Texts', true);
         }
         return $message;
     }
@@ -474,15 +474,15 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
         // INSERT
         runsql(
             "INSERT INTO {$tbpref}texts (
-                TxLgID, TxTitle, TxText, TxAnnotatedText, 
+                TxLgID, TxTitle, TxText, TxAnnotatedText,
                 TxAudioURI, TxSourceURI
-            ) values( " . 
-            $_REQUEST["TxLgID"] . ', ' . 
-            convert_string_to_sqlsyntax($_REQUEST["TxTitle"]) . ', ' . 
+            ) values( " .
+            $_REQUEST["TxLgID"] . ', ' .
+            convert_string_to_sqlsyntax($_REQUEST["TxTitle"]) . ', ' .
             convert_string_to_sqlsyntax(remove_soft_hyphens($_REQUEST["TxText"])) . ",
             '', " .
             convert_string_to_sqlsyntax_nonull($_REQUEST["TxAudioURI"]) . ', ' .
-            convert_string_to_sqlsyntax($_REQUEST["TxSourceURI"]) . ')', 
+            convert_string_to_sqlsyntax($_REQUEST["TxSourceURI"]) . ')',
             "Saved"
         );
         $id = get_last_key();
@@ -513,22 +513,22 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
 
     splitCheckText(
         get_first_value(
-            "SELECT TxText AS value FROM {$tbpref}texts 
+            "SELECT TxText AS value FROM {$tbpref}texts
             WHERE TxID = $id"
         ),
-        $_REQUEST["TxLgID"], 
-        $id 
+        $_REQUEST["TxLgID"],
+        $id
     );
 
-    $message =  "$message1 / $message2" . 
+    $message =  "$message1 / $message2" .
     " / Sentences added: " . get_first_value(
-        "SELECT COUNT(*) AS value 
-        FROM {$tbpref}sentences 
+        "SELECT COUNT(*) AS value
+        FROM {$tbpref}sentences
         WHERE SeTxID = $id"
-    ) . 
+    ) .
     " / Text items added: " . get_first_value(
-        "SELECT COUNT(*) AS value 
-        FROM {$tbpref}textitems2 
+        "SELECT COUNT(*) AS value
+        FROM {$tbpref}textitems2
         WHERE Ti2TxID = $id"
     );
 
@@ -541,17 +541,17 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
 
 /**
  * Display the main form for text creation and edition.
- * 
+ *
  * @param Text $text      Text object to edit
  * @param bool $annotated True if this text has annotations
- * 
+ *
  * @return void
  */
 function edit_texts_form($text, $annotated)
 {
     global $tbpref;
     $new_text = $text->id == 0;
-    $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages 
+    $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages
     WHERE LgGoogleTranslateURI<>''";
     $res = do_mysqli_query($sql);
     $return = array();
@@ -561,14 +561,14 @@ function edit_texts_form($text, $annotated)
     }
     ?>
     <h2>
-        <?php echo ($new_text ? "New" : "Edit") ?> Text 
+        <?php echo ($new_text ? "New" : "Edit") ?> Text
         <a target="_blank" href="docs/info.html#howtotext">
             <img src="icn/question-frame.png" title="Help" alt="Help" />
         </a>
     </h2>
     <script type="text/javascript" charset="utf-8">
         /**
-         * Change the language of inputs for text and title based on selected 
+         * Change the language of inputs for text and title based on selected
          * language.
          */
         function change_textboxes_language() {
@@ -577,7 +577,7 @@ function edit_texts_form($text, $annotated)
             $('#TxTitle').attr('lang', language_data[lid]);
             $('#TxText').attr('lang', language_data[lid]);
         }
-    
+
         $(document).ready(lwtFormCheck.askBeforeExit);
         $(document).ready(change_textboxes_language);
     </script>
@@ -590,13 +590,13 @@ function edit_texts_form($text, $annotated)
         </div>
         <div>
             <a href="long_text_import.php">
-                <img src="icn/plus-button.png"> 
+                <img src="icn/plus-button.png">
                 Long Text Import
             </a>
         </div>
         <div>
             <a href="do_feeds.php?page=1&amp;check_autoupdate=1">
-                <img src="icn/plus-button.png"> 
+                <img src="icn/plus-button.png">
                 Newsfeed Import
             </a>
         </div>
@@ -620,23 +620,23 @@ function edit_texts_form($text, $annotated)
             <tr>
                 <td class="td1 right">Language:</td>
                 <td class="td1">
-                    <select name="TxLgID" id="TxLgID" class="notempty setfocus" 
+                    <select name="TxLgID" id="TxLgID" class="notempty setfocus"
                     onchange="change_textboxes_language();">
                     <?php
                     echo get_languages_selectoptions($text->lgid, "[Choose...]");
                     ?>
-                    </select> 
-                    <img src="icn/status-busy.png" title="Field must not be empty" 
+                    </select>
+                    <img src="icn/status-busy.png" title="Field must not be empty"
                     alt="Field must not be empty" />
                 </td>
             </tr>
             <tr>
                 <td class="td1 right">Title:</td>
                 <td class="td1">
-                    <input type="text" class="notempty checkoutsidebmp respinput" 
-                    data_info="Title" name="TxTitle" id="TxTitle" 
+                    <input type="text" class="notempty checkoutsidebmp respinput"
+                    data_info="Title" name="TxTitle" id="TxTitle"
                     value="<?php echo tohtml($text->title); ?>" maxlength="200" />
-                    <img src="icn/status-busy.png" title="Field must not be empty" 
+                    <img src="icn/status-busy.png" title="Field must not be empty"
                     alt="Field must not be empty" />
                 </td>
             </tr>
@@ -645,27 +645,27 @@ function edit_texts_form($text, $annotated)
                     Text:<br /><br />(max.<br />65,000<br />bytes)
                 </td>
                 <td class="td1">
-                <textarea <?php echo getScriptDirectionTag($text->lgid); ?> 
+                <textarea <?php echo getScriptDirectionTag($text->lgid); ?>
                 name="TxText" id="TxText"
-                class="notempty checkbytes checkoutsidebmp respinput" 
+                class="notempty checkbytes checkoutsidebmp respinput"
                 data_maxlength="65000" data_info="Text" rows="20"
-                ><?php echo tohtml($text->text); ?></textarea> 
-                <img src="icn/status-busy.png" title="Field must not be empty" 
+                ><?php echo tohtml($text->text); ?></textarea>
+                <img src="icn/status-busy.png" title="Field must not be empty"
                 alt="Field must not be empty" />
                 </td>
             </tr>
             <tr <?php echo ($new_text ? 'style="display: none;"' : ''); ?>>
                 <td class="td1 right">Ann. Text:</td>
                 <td class="td1">
-                    <?php 
+                    <?php
                     if ($annotated) {
-                        echo '<img src="icn/tick.png" title="With Improved Annotation" alt="With Improved Annotation" /> '. 
-                        'Exists - May be partially or fully lost if you change the text!<br />' . 
-                        '<input type="button" value="Print/Edit..." onclick="location.href=\'print_impr_text.php?text=' . 
+                        echo '<img src="icn/tick.png" title="With Improved Annotation" alt="With Improved Annotation" /> '.
+                        'Exists - May be partially or fully lost if you change the text!<br />' .
+                        '<input type="button" value="Print/Edit..." onclick="location.href=\'print_impr_text.php?text=' .
                         $text->id . '\';" />';
                     } else {
                         echo '<img src="icn/cross.png" title="No Improved Annotation" alt="No Improved Annotation" /> ' .
-                        '- None | <input type="button" value="Create/Print..." onclick="location.href=\'print_impr_text.php?edit=1&amp;text=' . 
+                        '- None | <input type="button" value="Create/Print..." onclick="location.href=\'print_impr_text.php?edit=1&amp;text=' .
                         $text->id . '\';" />';
                     }
                     ?>
@@ -674,9 +674,9 @@ function edit_texts_form($text, $annotated)
             <tr>
                 <td class="td1 right">Source URI:</td>
                 <td class="td1">
-                    <input type="url" class="checkurl checkoutsidebmp respinput" 
-                    data_info="Source URI" name="TxSourceURI" 
-                    value="<?php echo tohtml($text->source); ?>" 
+                    <input type="url" class="checkurl checkoutsidebmp respinput"
+                    data_info="Source URI" name="TxSourceURI"
+                    value="<?php echo tohtml($text->source); ?>"
                     maxlength="1000" />
                 </td>
             </tr>
@@ -691,12 +691,12 @@ function edit_texts_form($text, $annotated)
                     Media URI:
                 </td>
                 <td class="td1">
-                    <input type="text" class="checkoutsidebmp respinput" 
+                    <input type="text" class="checkoutsidebmp respinput"
                     data_info="Audio-URI" name="TxAudioURI" maxlength="2048"
-                    value="<?php echo tohtml($text->media_uri); ?>"  /> 
+                    value="<?php echo tohtml($text->media_uri); ?>"  />
                     <span id="mediaselect">
                         <?php echo selectmediapath('TxAudioURI'); ?>
-                    </span>        
+                    </span>
                 </td>
             </tr>
             <?php if ($new_text && YT_API_KEY != null) {
@@ -704,12 +704,12 @@ function edit_texts_form($text, $annotated)
             } ?>
             <tr>
                 <td class="td1 right" colspan="2">
-                    <input type="button" value="Cancel" 
+                    <input type="button" value="Cancel"
                     onclick="{lwtFormCheck.resetDirty(); location.href='edit_texts.php<?php echo ($new_text ? '' : '#rec' . $text->id); ?>';}" />
                     <input type="submit" name="op" value="Check" />
-                    <input type="submit" name="op" 
+                    <input type="submit" name="op"
                     value="<?php echo ($new_text ? 'Save' : 'Change') ?>" />
-                    <input type="submit" name="op" 
+                    <input type="submit" name="op"
                     value="<?php echo ($new_text ? 'Save' : 'Change') ?> and Open" />
                 </td>
             </tr>
@@ -721,11 +721,11 @@ function edit_texts_form($text, $annotated)
 
 /**
  * Create a window to make a new text in the target language.
- * 
+ *
  * @param int $lid Language ID
- * 
+ *
  * @return void
- * 
+ *
  * @global string $tbpref
  */
 function edit_texts_new($lid)
@@ -739,19 +739,19 @@ function edit_texts_new($lid)
 
 /**
  * Create the main window to edit an existing text.
- * 
+ *
  * @param int $txid Text ID
- * 
+ *
  * @return void
- * 
+ *
  * @global string $tbpref Database table prefix
  */
 function edit_texts_change($txid)
 {
     global $tbpref;
-    $sql = "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI, 
-    TxAnnotatedText <> '' AS annot_exists 
-    FROM {$tbpref}texts 
+    $sql = "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
+    TxAnnotatedText <> '' AS annot_exists
+    FROM {$tbpref}texts
     WHERE TxID = {$txid}";
     $res = do_mysqli_query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
@@ -764,12 +764,12 @@ function edit_texts_change($txid)
 
 /**
  * Do the filters form for texts display.
- * 
+ *
  * @param string $currentlang Current language ID
- * @param int    $recno 
+ * @param int    $recno
  * @param int    $currentpage Current page number
  * @param int    $pages       Total number of pages
- * 
+ *
  * @return void
  */
 function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
@@ -780,11 +780,11 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
     );
     $currentregexmode = getSettingWithDefault("set-regex-mode");
     $currenttag1 = validateTextTag(
-        (string) processSessParam("tag1", "currenttexttag1", '', false), 
+        (string) processSessParam("tag1", "currenttexttag1", '', false),
         $currentlang
     );
     $currenttag2 = validateTextTag(
-        (string) processSessParam("tag2", "currenttexttag2", '', false), 
+        (string) processSessParam("tag2", "currenttexttag2", '', false),
         $currentlang
     );
     $currentsort = (int) processDBParam("sort", 'currenttextsort', '1', true);
@@ -803,26 +803,26 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
             </td>
             <td class="td1 center" colspan="2">
                 <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='edit_texts.php?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
-                    <option value="title,text"<?php 
-                    if($currentquerymode=="title,text") { 
-                        echo ' selected="selected"'; 
+                    <option value="title,text"<?php
+                    if($currentquerymode=="title,text") {
+                        echo ' selected="selected"';
                     } ?>>Title &amp; Text</option>
                     <option disabled="disabled">------------</option>
-                    <option value="title"<?php 
-                    if($currentquerymode=="title") { 
-                        echo ' selected="selected"'; 
+                    <option value="title"<?php
+                    if($currentquerymode=="title") {
+                        echo ' selected="selected"';
                     } ?>>Title</option>
-                    <option value="text"<?php 
+                    <option value="text"<?php
                     echo ($currentquerymode=="text" ? ' selected="selected"' : '');
                     ?>>Text</option>
                 </select>
                 <?php
-                if($currentregexmode=='') { 
-                    echo '<span style="vertical-align: middle"> (Wildc.=*): </span>'; 
-                } elseif ($currentregexmode=='r') { 
+                if($currentregexmode=='') {
+                    echo '<span style="vertical-align: middle"> (Wildc.=*): </span>';
+                } elseif ($currentregexmode=='r') {
                     echo '<span style="vertical-align: middle"> RegEx Mode: </span>';
-                } else { 
-                    echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>'; 
+                } else {
+                    echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
                 }?>
                 <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
                 <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val); location.href='edit_texts.php?page=1&amp;query=' + val;}" />&nbsp;
@@ -837,7 +837,7 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
                 </select>
             </td>
             <td class="td1 center">
-                Tag #1 .. 
+                Tag #1 ..
                 <select name="tag12" onchange="{val=document.form1.tag12.options[document.form1.tag12.selectedIndex].value; location.href='edit_texts.php?page=1&amp;tag12=' + val;}">
                     <?php echo get_andor_selectoptions($currenttag12); ?>
                 </select> .. Tag #2
@@ -849,7 +849,7 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
                 </select>
             </td>
         </tr>
-        <?php 
+        <?php
         if($recno > 0) {
             ?>
         <tr>
@@ -866,7 +866,7 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
                 </select>
             </th>
         </tr>
-            <?php 
+            <?php
         }
         ?>
     </table>
@@ -876,9 +876,9 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
 
 /**
  * Make links to navigate to other pages if necessary.
- * 
+ *
  * @param int $recno Record number
- * 
+ *
  * @return void
  */
 function edit_texts_other_pages($recno)
@@ -888,16 +888,16 @@ function edit_texts_other_pages($recno)
 
     $pages = $recno == 0 ? 0 : (intval(($recno-1) / $maxperpage) + 1);
 
-    if ($pages <= 0) { 
+    if ($pages <= 0) {
         return;
     }
 
     $currentpage = (int) processSessParam("page", "currenttextpage", '1', true);
-    if ($currentpage < 1) { 
-        $currentpage = 1; 
+    if ($currentpage < 1) {
+        $currentpage = 1;
     }
-    if ($currentpage > $pages) { 
-        $currentpage = $pages; 
+    if ($currentpage > $pages) {
+        $currentpage = $pages;
     }
     ?>
 <table class="tab2" cellspacing="0" cellpadding="5">
@@ -915,16 +915,16 @@ function edit_texts_other_pages($recno)
 
 /**
  * Display the content of a table row for text edition.
- * 
- * @param array                                         $txrecord    
+ *
+ * @param array                                         $txrecord
  *                                                                   Various information about the text should contain 'TxID' at least.
- * @param string                                        $currentlang 
+ * @param string                                        $currentlang
  *                                                                   Current language ID
  * @param array{int<0, 5>|98|99, array{string, string}} $statuses
  * List of statuses WITH unknown words (status 0)
- * 
+ *
  * @return void
- * 
+ *
  * @since 2.6.0-fork Audio was never shown
  */
 function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
@@ -933,9 +933,9 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
     if (isset($txrecord['TxAudioURI'])) {
         $audio = trim($txrecord['TxAudioURI']);
     } else {
-        $audio = ''; 
+        $audio = '';
     }
-    
+
     ?>
     <tr>
         <td class="td1 center">
@@ -966,16 +966,16 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
             </span>
         </td>
     <?php
-    if ($currentlang == '') { 
-        echo '<td class="td1 center">' . tohtml($txrecord['LgName']) . '</td>'; 
+    if ($currentlang == '') {
+        echo '<td class="td1 center">' . tohtml($txrecord['LgName']) . '</td>';
     }
 
     // title
-    echo '<td class="td1 center">' . tohtml($txrecord['TxTitle']) . ' 
-        <span class="smallgray2">' . tohtml($txrecord['taglist']) . '</span> &nbsp;' ; 
-    if ($audio != '') { 
+    echo '<td class="td1 center">' . tohtml($txrecord['TxTitle']) . '
+        <span class="smallgray2">' . tohtml($txrecord['taglist']) . '</span> &nbsp;' ;
+    if ($audio != '') {
         echo '<img src="' . get_file_path('icn/speaker-volume.png') . '" title="With Audio" alt="With Audio" />';
-    } 
+    }
     if (isset($txrecord['TxSourceURI']) && substr(trim($txrecord['TxSourceURI']), 0, 1)!='#') {
         echo ' <a href="' . $txrecord['TxSourceURI'] . '" target="_blank">
             <img src="'.get_file_path('icn/chain.png').'" title="Link to Text Source" alt="Link to Text Source" />
@@ -995,7 +995,7 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
     </td>
     <td class="td1 center">
         <span title="Saved" data_id="<?php echo $txid; ?>">
-            <a class="status4" id="saved_<?php echo $txid; ?>" 
+            <a class="status4" id="saved_<?php echo $txid; ?>"
             href="edit_words.php?page=1&amp;query=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=&amp;text_mode=0&amp;text=<?php echo $txid; ?>">
             </a>
         </span>
@@ -1012,11 +1012,11 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
     <td class="td1 center">
         <ul class="barchart">
 
-    <?php    
+    <?php
     $i = array(0,1,2,3,4,5,99,98);
     foreach ($i as $cnt) {
-        echo '<li class="bc' . $cnt . 
-        ' "title="' . $statuses[$cnt]["name"] . ' (' . $statuses[$cnt]["abbr"] . 
+        echo '<li class="bc' . $cnt .
+        ' "title="' . $statuses[$cnt]["name"] . ' (' . $statuses[$cnt]["abbr"] .
         ')" style="border-top-width: 25px;">
             <span id="stat_' . $cnt . '_' . $txid .'">0</span>
         </li>';
@@ -1030,15 +1030,15 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
 
 /**
  * Main form for displaying multiple texts.
- * 
+ *
  * @param string $currentlang Current language ID
  * @param string $showCounts  Number of items to show, put into a string
  * @param string $sql         SQL string to execute
  * @param int    $recno       Record number
- * 
+ *
  * @return void
- * 
- * @global int $debug Display debug information. 
+ *
+ * @global int $debug Display debug information.
  */
 function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
 {
@@ -1048,14 +1048,14 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
     $statuses[0]["abbr"] = 'Ukn';
     $res = do_mysqli_query($sql);
     $showCounts = (int)getSettingWithDefault('set-show-text-word-counts');
-    
+
     ?>
 <form name="form2" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 <input type="hidden" name="data" value="" />
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr>
         <th class="th1" colspan="2">
-            Multi Actions 
+            Multi Actions
             <img src="icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
         </th>
     </tr>
@@ -1078,14 +1078,14 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
         <th class="th1 sorttable_nosort">Mark</th>
         <th class="th1 sorttable_nosort">Read<br />&amp;&nbsp;Test</th>
         <th class="th1 sorttable_nosort">Actions</th>
-        <?php if ($currentlang == '') { 
-            echo '<th class="th1 clickable">Lang.</th>'; 
+        <?php if ($currentlang == '') {
+            echo '<th class="th1 clickable">Lang.</th>';
         } ?>
         <th class="th1 clickable">
             Title [Tags] / Audio:&nbsp;
-            <img src="<?php print_file_path('icn/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />, 
+            <img src="<?php print_file_path('icn/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />,
             Src.Link:&nbsp;
-            <img src="<?php print_file_path('icn/chain.png'); ?>" title="Source Link available" alt="Source Link available" />, 
+            <img src="<?php print_file_path('icn/chain.png'); ?>" title="Source Link available" alt="Source Link available" />,
             Ann.Text:&nbsp;
             <img src="icn/tick.png" title="Annotated Text available" alt="Annotated Text available" />
         </th>
@@ -1123,8 +1123,8 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
 </thead>
 <tbody>
     <?php
-    if ($debug) { 
-        echo $sql; 
+    if ($debug) {
+        echo $sql;
     }
     while ($record = mysqli_fetch_assoc($res)) {
         edit_texts_show_text_row($record, $currentlang, $statuses);
@@ -1134,7 +1134,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
     ?>
 </tbody>
 </table>
-    <?php 
+    <?php
     edit_texts_other_pages($recno);
     ?>
 </form>
@@ -1143,11 +1143,11 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
 
 /**
  * Main display for the edit text functionality.
- * 
+ *
  * @param string $message Message to display.
- * 
+ *
  * @return void
- * 
+ *
  * @global string $tbpref Database table prefix
  * @global int    $debug  Debug mode active or not
  */
@@ -1180,40 +1180,40 @@ function edit_texts_display($message)
 
     echo error_message_with_hide($message, false);
 
-    $sql = "SELECT COUNT(*) AS value 
+    $sql = "SELECT COUNT(*) AS value
     FROM (
-        SELECT TxID 
+        SELECT TxID
         FROM (
-            {$tbpref}texts 
-            LEFT JOIN {$tbpref}texttags 
+            {$tbpref}texts
+            LEFT JOIN {$tbpref}texttags
             ON TxID = TtTxID
         ) WHERE (1=1) {$wh_lang}{$wh_query}
         GROUP BY TxID {$wh_tag}
     ) AS dummy";
     $recno = (int) get_first_value($sql);
-    if ($debug) { 
-        echo $sql . ' ===&gt; ' . $recno; 
+    if ($debug) {
+        echo $sql . ' ===&gt; ' . $recno;
     }
 
     $maxperpage = (int) getSettingWithDefault('set-texts-per-page');
 
     $pages = $recno == 0 ? 0 : (intval(($recno-1) / $maxperpage) + 1);
 
-    if ($currentpage < 1) { 
-        $currentpage = 1; 
+    if ($currentpage < 1) {
+        $currentpage = 1;
     }
-    if ($currentpage > $pages) { 
-        $currentpage = $pages; 
+    if ($currentpage > $pages) {
+        $currentpage = $pages;
     }
     $limit = 'LIMIT ' . (($currentpage-1) * $maxperpage) . ',' . $maxperpage;
 
     $sorts = array('TxTitle','TxID desc','TxID asc');
     $lsorts = count($sorts);
-    if ($currentsort < 1) { 
-        $currentsort = 1; 
+    if ($currentsort < 1) {
+        $currentsort = 1;
     }
-    if ($currentsort > $lsorts) { 
-        $currentsort = $lsorts; 
+    if ($currentsort > $lsorts) {
+        $currentsort = $lsorts;
     }
 
     ?>
@@ -1254,27 +1254,27 @@ function edit_texts_display($message)
         <?php
         return;
     }
-    // TODO: check out the no coherent code on $showCounts 
+    // TODO: check out the no coherent code on $showCounts
     $showCounts = getSettingWithDefault('set-show-text-word-counts');
-    if (strlen($showCounts) != 5) { 
-        $showCounts = "11111"; 
+    if (strlen($showCounts) != 5) {
+        $showCounts = "11111";
     }
-    $sql = "SELECT TxID, TxTitle, LgName, TxAudioURI, TxSourceURI, 
+    $sql = "SELECT TxID, TxTitle, LgName, TxAudioURI, TxSourceURI,
     LENGTH(TxAnnotatedText) AS annotlen,
     IF(
-        COUNT(T2Text)=0, 
-        '', 
+        COUNT(T2Text)=0,
+        '',
         CONCAT(
             '[',group_concat(DISTINCT T2Text ORDER BY T2Text separator ', '),']'
         )
     ) AS taglist
     FROM (
-        ({$tbpref}texts LEFT JOIN {$tbpref}texttags ON TxID = TtTxID) 
+        ({$tbpref}texts LEFT JOIN {$tbpref}texttags ON TxID = TtTxID)
         LEFT JOIN {$tbpref}tags2 ON T2ID = TtT2ID
     ), {$tbpref}languages
-    WHERE LgID=TxLgID {$wh_lang}{$wh_query} 
+    WHERE LgID=TxLgID {$wh_lang}{$wh_query}
     GROUP BY TxID $wh_tag
-    ORDER BY {$sorts[$currentsort-1]} 
+    ORDER BY {$sorts[$currentsort-1]}
     {$limit}";
     edit_texts_texts_form($currentlang, $showCounts, $sql, $recno);
     ?>
@@ -1289,7 +1289,7 @@ function edit_texts_display($message)
 
 /**
  * Main function for displaying the edit_texts page.
- * 
+ *
  * @return void
  */
 function edit_texts_do_page()
@@ -1297,8 +1297,8 @@ function edit_texts_do_page()
     $currentlang = validateLang(
         (string) processDBParam("filterlang", 'currentlanguage', '', false)
     );
-    $no_pagestart = getreq('markaction') == 'test' || 
-    getreq('markaction') == 'deltag' || 
+    $no_pagestart = getreq('markaction') == 'test' ||
+    getreq('markaction') == 'deltag' ||
     substr(getreq('op'), -8) == 'and Open';
 
     if (!$no_pagestart) {

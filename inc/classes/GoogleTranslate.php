@@ -3,20 +3,20 @@
 /**
  * \file
  * \brief Defines GoogleTranslate class for word translation
- * 
+ *
  * Usage:
  * use Lwt\Classes\GoogleTranslate;
- * 
+ *
  * require_once( 'GoogleTranslate.php' );
  * $translations = GoogleTranslate::staticTranslate('Hello','en','de');
- * 
- * if(!$translations) 
+ *
+ * if(!$translations)
  *      echo 'Error: No translation found!';
  * else
  *      foreach($translations as $transl){
  *          echo $transl, '<br />';
  *      }
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt
@@ -26,7 +26,7 @@ namespace Lwt\Classes;
 
 /**
  * Wrapper class to get translation.
- * 
+ *
  * See staticTranslate for a clssical translation.
  */
 class GoogleTranslate
@@ -38,8 +38,8 @@ class GoogleTranslate
     private static $gglDomain;
     private static $headers;
     //&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss
-    private static $urlFormat = "http://translate.google.%s/translate_a/single" . 
-    "?client=t&q=%s&hl=en&sl=%s&tl=%s&dt=t&dt=at&dt=bd&ie=UTF-8&oe=UTF-8&oc=1&" . 
+    private static $urlFormat = "http://translate.google.%s/translate_a/single" .
+    "?client=t&q=%s&hl=en&sl=%s&tl=%s&dt=t&dt=at&dt=bd&ie=UTF-8&oe=UTF-8&oc=1&" .
     "otf=2&ssel=0&tsel=3&tk=%s";
 
     private static function setHeaders(): void
@@ -75,44 +75,44 @@ class GoogleTranslate
         foreach ($d as $b) {
             $c += $b;
             $b = $c << 10;
-            if ($b & $x) { 
-                $b |= $y; 
-            } else { 
-                $b &= $z; 
+            if ($b & $x) {
+                $b |= $y;
+            } else {
+                $b &= $z;
             }
             $c += $b;
             $b = (($c >> 6) & (0x03ffffff));
             $c ^= $b;
-            if ($c & $x) { 
-                $c |= $y; 
-            } else { 
-                $c &= $z; 
+            if ($c & $x) {
+                $c |= $y;
+            } else {
+                $c &= $z;
             }
         }
         $b = $c << 3;
-        if($b & $x) { 
-            $b |= $y; 
-        } else { 
-            $b &= $z; 
+        if($b & $x) {
+            $b |= $y;
+        } else {
+            $b &= $z;
         }
         $c += $b;
         $b = (($c >> 11) & (0x001fffff));
         $c ^= $b;
         $b = $c << 15;
-        if($b & $x) { 
-            $b |= $y; 
-        } else { 
-            $b &= $z; 
+        if($b & $x) {
+            $b |= $y;
+        } else {
+            $b &= $z;
         }
         $c += $b;
         $c ^= isset($tok)?$tok[1]:585515986;//todo create from time() / TKK ggltrns
         $c &= $z;
         if (0 > $c) {
             $c = (($x ^ $c));
-            if(5000000 > $c) { 
-                $c += 483648; 
-            } else { 
-                $c -= 516352; 
+            if(5000000 > $c) {
+                $c += 483648;
+            } else {
+                $c -= 516352;
             }
         }
         $c %= 1000000;
@@ -120,20 +120,20 @@ class GoogleTranslate
     }
     /**
      * Return the current domain.
-     * 
+     *
      * @param string|void $domain (Optionnal) Google Translate domain to use.
      *                            * Usually two letters (e.g "en" or "com")
      *                            * Random if not provided.
-     * 
-     * @return string 
+     *
+     * @return string
      */
-    public static function getDomain($domain) 
+    public static function getDomain($domain)
     {
         $loc = array(
-            'com.ar', 'at', 'com.au', 'be', 'com.br', 'ca', 'cat', 'ch', 'cl', 'cn', 
-            'cz', 'de', 'dk', 'es', 'fi', 'fr', 'gr', 'com.hk', 'hr', 'hu', 'co.id', 
-            'ie', 'co.il', 'im', 'co.in', 'it', 'co.jp', 'co.kr', 'com.mx', 
-            'nl', 'no', 'pl', 'pt', 'ru', 'se', 'com.sg', 'co.th', 'com.tw', 
+            'com.ar', 'at', 'com.au', 'be', 'com.br', 'ca', 'cat', 'ch', 'cl', 'cn',
+            'cz', 'de', 'dk', 'es', 'fi', 'fr', 'gr', 'com.hk', 'hr', 'hu', 'co.id',
+            'ie', 'co.il', 'im', 'co.in', 'it', 'co.jp', 'co.kr', 'com.mx',
+            'nl', 'no', 'pl', 'pt', 'ru', 'se', 'com.sg', 'co.th', 'com.tw',
             'co.uk', 'com'
         );
         if (empty($domain) || !in_array($domain, $loc, true)) {
@@ -210,32 +210,32 @@ class GoogleTranslate
     }
     /**
      * Returns an array of Translations
-     * 
+     *
      * @param string     $string     Word to translate
      * @param string     $from       Source language code (i.e. en,de,fr,...)
      * @param string     $to         Target language code (i.e. en,de,fr,...)
-     *                               all supported language codes can be found here: 
+     *                               all supported language codes can be found here:
      *                               https://cloud.google.com/translate/docs/basic/discovering-supported-languages#getting_a_list_of_supported_languages
-     * 
-     * @param int[]|null $time_token (optional) array() from 
+     *
+     * @param int[]|null $time_token (optional) array() from
      *                               https://translate.google.com. If empty, array(408254,585515986) is used
-     * @param string     $domain     (optional) Connect to Google Domain 
-     *                               (i.e. 'com' for  https://translate.google.com). If empty, 
+     * @param string     $domain     (optional) Connect to Google Domain
+     *                               (i.e. 'com' for  https://translate.google.com). If empty,
      *                               a random domain will be used (the default value can be altered by changing DEFAULT_DOMAIN)
      *                               Possible values:
-     *                               ('com.ar', 'at', 'com.au', 'be', 'com.br', 'ca', 'cat', 'ch', 'cl', 'cn', 'cz', 
-     *                               'de', 'dk', 'es', 'fi', 'fr', 'gr', 'com.hk', 'hr', 'hu', 'co.id', 'ie', 
-     *                               'co.il', 'im', 'co.in', 'it', 'co.jp', 'co.kr', 'com.mx', 'nl', 'no', 'pl', 
+     *                               ('com.ar', 'at', 'com.au', 'be', 'com.br', 'ca', 'cat', 'ch', 'cl', 'cn', 'cz',
+     *                               'de', 'dk', 'es', 'fi', 'fr', 'gr', 'com.hk', 'hr', 'hu', 'co.id', 'ie',
+     *                               'co.il', 'im', 'co.in', 'it', 'co.jp', 'co.kr', 'com.mx', 'nl', 'no', 'pl',
      *                               'pt', 'ru', 'se', 'com.sg', 'co.th', 'com.tw', 'co.uk', 'com')
-     * 
+     *
      * @return string[]|false An array of translation, or false if an error occured.
      */
     public static function staticTranslate(
         $string, $from, $to, $time_token = null, $domain = self::DEFAULT_DOMAIN
-    ): array|false { 
+    ): array|false {
         self::setDomain($domain);
         $url = sprintf(
-            self::$urlFormat, self::$gglDomain, rawurlencode($string), 
+            self::$urlFormat, self::$gglDomain, rawurlencode($string),
             $from, $to, self::generateToken($string, $time_token)
         );
         $result = preg_replace('!([[,])(?=,)!', '$1[]', self::makeCurl($url));

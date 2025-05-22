@@ -50,7 +50,7 @@ function do_operation($text, $lgid)
 function display_form()
 {
     global $tbpref;
-    $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages 
+    $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages
     WHERE LgGoogleTranslateURI<>''";
     $res = do_mysqli_query($sql);
     $return = array();
@@ -59,16 +59,16 @@ function display_form()
         $return[$lg_record["LgID"]] = langFromDict($url);
     }
     $languages_option = get_languages_selectoptions(
-        getSetting('currentlanguage'), 
+        getSetting('currentlanguage'),
         '[Choose...]'
     );
     ?>
 
     <script type="text/javascript" charset="utf-8">
         /**
-         * Change the language of inputs for text and title based on selected 
+         * Change the language of inputs for text and title based on selected
          * language.
-         * 
+         *
          * @returns {undefined}
          */
         function change_textboxes_language() {
@@ -88,20 +88,20 @@ function display_form()
     <td class="td1">
         <select name="TxLgID" id="TxLgID" class="notempty setfocus" onchange="change_textboxes_language();">
             <?php echo $languages_option;?>
-        </select> 
+        </select>
         <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
     </tr>
     <tr>
         <td class="td1 right">Text:<br /><br />(max.<br />65,000<br />bytes)</td>
         <td class="td1">
-            <textarea name="TxText" id="TxText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"></textarea> 
+            <textarea name="TxText" id="TxText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"></textarea>
             <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <tr>
         <td class="td1 right" colspan="2">
-            <input type="button" value="&lt;&lt; Back" onclick="location.href='index.php';" /> 
+            <input type="button" value="&lt;&lt; Back" onclick="location.href='index.php';" />
             <input type="submit" name="op" value="Check" />
         </td>
 </tr>

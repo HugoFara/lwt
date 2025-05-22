@@ -40,31 +40,31 @@ function bulk_save_terms($terms, $tid, $cleanUp): void
             '"*"' :
             convert_string_to_sqlsyntax($row['trans'])
         ) .
-        ', 
-        "", 
-        "", 
+        ',
+        "",
+        "",
         NOW(), ' .
         make_score_random_insert_update('id') .
         ')';
     }
     $sqltext = "INSERT INTO {$tbpref}words (
-        WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence, 
+        WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
         WoRomanization, WoStatusChanged," .
         make_score_random_insert_update('iv') . "
     ) VALUES " . rtrim(implode(',', $sqlarr), ',');
     runsql($sqltext, '');
     $tooltip_mode = getSettingWithDefault('set-tooltip-mode');
     $res = do_mysqli_query(
-        "SELECT WoID, WoTextLC, WoStatus, WoTranslation 
-        FROM {$tbpref}words 
+        "SELECT WoID, WoTextLC, WoStatus, WoTranslation
+        FROM {$tbpref}words
         where WoID > $max"
     );
 
 
     do_mysqli_query(
-        "UPDATE {$tbpref}textitems2 
-        JOIN {$tbpref}words 
-        ON lower(Ti2Text)=WoTextLC AND Ti2WordCount=1 AND Ti2LgID=WoLgID AND WoID>$max 
+        "UPDATE {$tbpref}textitems2
+        JOIN {$tbpref}words
+        ON lower(Ti2Text)=WoTextLC AND Ti2WordCount=1 AND Ti2LgID=WoLgID AND WoID>$max
         SET Ti2WoID = WoID"
     );
     ?>
@@ -83,11 +83,11 @@ function bulk_save_terms($terms, $tid, $cleanUp): void
         .attr("data_wid", term.WoID)
         .attr("data_status", term.WoStatus)
         .attr("data_trans", term.translation);
-        if (tooltip) { 
+        if (tooltip) {
             $(".TERM" + term.hex, context).each(
                 function() {
                     this.title = make_tooltip(
-                        $(this).text(), $(this).attr('data_trans'), 
+                        $(this).text(), $(this).attr('data_trans'),
                         $(this).attr('data_rom'), $(this).attr('data_status')
                     );
                 }
@@ -124,8 +124,8 @@ function bulk_do_content($tid, $sl, $tl, $pos): void
     $cnt = 0;
     $offset = '';
     $limit = (int)getSettingWithDefault('set-ggl-translation-per-page') + 1;
-    $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI 
-    FROM {$tbpref}languages, {$tbpref}texts 
+    $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI
+    FROM {$tbpref}languages, {$tbpref}texts
     WHERE LgID = TxLgID AND TxID = $tid";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
@@ -169,7 +169,7 @@ function bulk_do_content($tid, $sl, $tl, $pos): void
     $('h3,h4,title').addClass('notranslate');
 
     function clickDictionary() {
-        if ($(this).hasClass( "dict1" )) 
+        if ($(this).hasClass( "dict1" ))
             WBLINK = LWT_DATA.language.dict_link1;
         if ($(this).hasClass( "dict2" ))
             WBLINK = LWT_DATA.language.dict_link2;
@@ -231,8 +231,8 @@ function bulk_do_content($tid, $sl, $tl, $pos): void
                     const cnt = $(this).attr('id').replace('Trans_', '');
                     $(this).addClass('notranslate')
                     .html(
-                        '<input type="text" name="term[' + cnt + '][trans]" value="' 
-                        + txt + '" maxlength="100" class="respinput"></input>' + 
+                        '<input type="text" name="term[' + cnt + '][trans]" value="'
+                        + txt + '" maxlength="100" class="respinput"></input>' +
                         '<div class="del_trans"></div>'
                     );
                 });
@@ -258,7 +258,7 @@ function bulk_do_content($tid, $sl, $tl, $pos): void
         window.parent.frames['ru'].location.href = 'empty.html';
         $('input[type="checkbox"]').change(function(){
             let v = parseInt($(this).val());
-            const e = '[name=term\\[' + v + '\\]\\[text\\]],[name=term\\[' + v + 
+            const e = '[name=term\\[' + v + '\\]\\[text\\]],[name=term\\[' + v +
             '\\]\\[lg\\]],[name=term\\[' + v + '\\]\\[status\\]]';
             $(e).prop('disabled', !this.checked);
             $('#Trans_'+v+' input').prop('disabled', !this.checked);
@@ -282,9 +282,9 @@ function bulk_do_content($tid, $sl, $tl, $pos): void
 
     function googleTranslateElementInit() {
         new google.translate.TranslateElement({
-            pageLanguage: '<?php echo $sl; ?>', 
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE, 
-            includedLanguages: '<?php echo $tl; ?>', 
+            pageLanguage: '<?php echo $sl; ?>',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            includedLanguages: '<?php echo $tl; ?>',
             autoDisplay: false
             }, 'google_translate_element');
     }
@@ -314,7 +314,7 @@ function bulk_do_content($tid, $sl, $tl, $pos): void
             });
             elem.prop('selectedIndex',0);
             return false;
-        } 
+        }
         if (v==7) {
             $('.markcheck:checked').each(function() {
                 $('#Trans_' + elem.val() + ' input').val('*');
@@ -375,11 +375,11 @@ function bulk_do_content($tid, $sl, $tl, $pos): void
         </tr>
     <?php
     $res = do_mysqli_query(
-        "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos 
-        FROM {$tbpref}textitems2 
-        WHERE Ti2WoID = 0 AND Ti2TxID = $tid AND Ti2WordCount = 1 
-        GROUP BY LOWER(Ti2Text) 
-        ORDER BY pos 
+        "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos
+        FROM {$tbpref}textitems2
+        WHERE Ti2WoID = 0 AND Ti2TxID = $tid AND Ti2WordCount = 1
+        GROUP BY LOWER(Ti2Text)
+        ORDER BY pos
         LIMIT $pos, $limit"
     );
     while ($record = mysqli_fetch_assoc($res)) {

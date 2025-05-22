@@ -1,10 +1,10 @@
-<?php 
+<?php
 /**
  * \file
  * \brief From to import a file from YouTube.
- * 
+ *
  * You need a personal YouTube API key.
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt
@@ -16,7 +16,7 @@ require_once 'inc/settings.php';
 
 /**
  * @var string|null YT_API_KEY Text from YouTube API key
- * 
+ *
  * You can change the key here.
  */
 define('YT_API_KEY', null);
@@ -36,7 +36,7 @@ function do_form_fragment(): void
     <?php
 }
 
-function do_js(): void 
+function do_js(): void
 {
     ?>
 <script>
@@ -53,8 +53,8 @@ const fetching_success = function (data) {
     $('[name=TxTitle]').attr('value', snippet.title);
     $('[name=TxText]').attr('value', snippet.description);
     $('[name=TxSourceURI]').attr('value', `https://youtube.com/watch?v=${ytVideoId}`);
-  } 
-}  
+  }
+}
 
 function getYtTextData() {
   setYtDataStatus('Fetching YouTube data...');

@@ -16,7 +16,7 @@ function regenGoogleTimeToken(): array|null
     if (is_callable('curl_init')) {
         $curl = curl_init("https://translate.google.com");
         curl_setopt(
-            $curl, CURLOPT_HTTPHEADER, 
+            $curl, CURLOPT_HTTPHEADER,
             array("User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
         );
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -41,15 +41,15 @@ function regenGoogleTimeToken(): array|null
     }
     // May be replaced by /TKK=eval\D+3d([\d-]+)\D+3d([\d-]+)\D+(\d+)\D/
     preg_match_all(
-        "/TKK=eval[^0-9]+3d([0-9-]+)[^0-9]+3d([0-9-]+)[^0-9]+([0-9]+)[^0-9]/u", 
+        "/TKK=eval[^0-9]+3d([0-9-]+)[^0-9]+3d([0-9-]+)[^0-9]+([0-9]+)[^0-9]/u",
         $g, $ma
     );
     if (isset($ma[1][0]) && isset($ma[2][0]) && isset($ma[3][0])) {
-        $tok = strval($ma[3][0]) . "." . 
+        $tok = strval($ma[3][0]) . "." .
         strval(intval($ma[1][0]) + intval($ma[2][0]));
         do_mysqli_query(
-            "INSERT INTO _lwtgeneral (LWTKey, LWTValue) 
-            VALUES ('GoogleTimeToken', '$tok') 
+            "INSERT INTO _lwtgeneral (LWTKey, LWTValue)
+            VALUES ('GoogleTimeToken', '$tok')
             ON DUPLICATE KEY UPDATE LWTValue = '$tok'"
         );
         return array(intval($ma[3][0]), intval($ma[1][0]) + intval($ma[2][0]));
@@ -59,7 +59,7 @@ function regenGoogleTimeToken(): array|null
 
 /**
  * Get the time token to use for Google, generating a new one if necessary.
- * 
+ *
  * @return int[]|null
  *
  * @psalm-return array{0: int, 1: int}|null
@@ -73,7 +73,7 @@ function getGoogleTimeToken(): ?array
     if (intval($arr[0]) < floor(time()/3600) - 100) {
         //Token renewed after 100 hours
         return regenGoogleTimeToken();
-    } 
+    }
     return array(intval($arr[0]), intval($arr[1]));
 }
 ?>

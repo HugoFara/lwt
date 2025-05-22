@@ -1,8 +1,8 @@
 <?php
-/** 
+/**
  * \file
  * \brief Start a PHP session.
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt
@@ -16,13 +16,13 @@ require_once __DIR__ . '/kernel_utility.php';
 
 /**
  * Starts or not the error reporting.
- * 
- * @param int $dsplerrors not 0: start error reporting for ALL errors  
+ *
+ * @param int $dsplerrors not 0: start error reporting for ALL errors
  *                        0: don't report
- * 
+ *
  * @return void
  */
-function set_error_reporting($dsplerrors): void 
+function set_error_reporting($dsplerrors): void
 {
     if ($dsplerrors) {
         @error_reporting(E_ALL);
@@ -37,35 +37,35 @@ function set_error_reporting($dsplerrors): void
 
 /**
  * Set configuration values as script limit time and such...
- * 
+ *
  * @return void
  */
-function set_configuration_options(): void 
+function set_configuration_options(): void
 {
     // Set script time limit
     @ini_set('max_execution_time', '600');  // 10 min.
     @set_time_limit(600);  // 10 min.
 
     @ini_set('memory_limit', '999M');
-}  
+}
 
 /**
  * Start the session and checks for its sanity.
- * 
+ *
  * @return void
  */
-function start_session(): void 
+function start_session(): void
 {
     // session isn't started
     $err = @session_start();
-    if ($err === false) { 
-        my_die('SESSION error (Impossible to start a PHP session)'); 
+    if ($err === false) {
+        my_die('SESSION error (Impossible to start a PHP session)');
     }
     if (session_id() == '') {
-        my_die('SESSION ID empty (Impossible to start a PHP session)'); 
+        my_die('SESSION ID empty (Impossible to start a PHP session)');
     }
     if (!isset($_SESSION)) {
-        my_die('SESSION array not set (Impossible to start a PHP session)'); 
+        my_die('SESSION array not set (Impossible to start a PHP session)');
     }
 }
 
@@ -74,7 +74,7 @@ function start_session(): void
  *
  * @return void
  */
-function start_session_main(): void 
+function start_session_main(): void
 {
     set_error_reporting($GLOBALS['dsplerrors']);
     set_configuration_options();

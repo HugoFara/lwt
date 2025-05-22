@@ -2,7 +2,7 @@
 /**
  * \file
  * \brief Handle interactions with mobile platforms
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt
@@ -12,7 +12,7 @@
  * @since   2.2.0
  * @since   2.2.1 You should not longer use this library as mobile detect is removed.
  *                However, this interface is unchanged for backward compatibility.
- * @since   2.6.0 Mobile detect is back and does no longer use external libraries. 
+ * @since   2.6.0 Mobile detect is back and does no longer use external libraries.
  */
 
 require_once __DIR__ . '/database_connect.php';
@@ -32,38 +32,38 @@ function is_mobile(): bool
         return true;
     }
     $mobile_detect = preg_match(
-        "/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini" . 
-        "|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i", 
+        "/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini" .
+        "|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i",
         $_SERVER["HTTP_USER_AGENT"]
     );
     if ($mobileDisplayMode == 0 && $mobile_detect) {
         return true;
     }
-    
+
     return false;
 }
 
 /**
  * Echo frameset content for a mobile page.
- * 
+ *
  * @param string $frame_h_uri  URI for the frame-h-2 iframe.
  * @param string $frame_l_uri  URI for the frame-l-2 iframe.
  * @param bool   $right_frames Create or not a space for right frames.
- * 
+ *
  * @return void
- * 
+ *
  * @deprecated Since 2.2.1-fork, Do not use frames
  */
-function do_frameset_mobile_page_content($frame_h_uri, $frame_l_uri, $right_frames) 
+function do_frameset_mobile_page_content($frame_h_uri, $frame_l_uri, $right_frames)
 {
     ?>
 <div id="frame-h">
     <iframe id="frame-h-2" src="<?php echo $frame_h_uri; ?>" scrolling="yes" name="h">
     </iframe>
 </div>
-    <?php 
+    <?php
     if ($right_frames) {
-        ?> 
+        ?>
 <div id="frame-ro">
     <iframe id="frame-ro-2" src="empty.html" scrolling="yes" name="ro"></iframe>
 </div>
@@ -74,9 +74,9 @@ function do_frameset_mobile_page_content($frame_h_uri, $frame_l_uri, $right_fram
     <iframe id="frame-l-2" src="<?php echo $frame_l_uri; ?>" scrolling="yes" name="l">
     </iframe>
 </div>
-    <?php 
+    <?php
     if ($right_frames) {
-        ?> 
+        ?>
 <div id="frame-ru">
     <iframe id="frame-ru-2" src="empty.html" scrolling="yes" name="ru"></iframe>
 </div>
@@ -86,28 +86,28 @@ function do_frameset_mobile_page_content($frame_h_uri, $frame_l_uri, $right_fram
 
 /**
  * Echo the CSS content for mobile frameset page.
- * 
+ *
  * @return void
- * 
- * @deprecated Since 2.6.0-fork, the display for mobile changed, making this code 
- *             useless  
+ *
+ * @deprecated Since 2.6.0-fork, the display for mobile changed, making this code
+ *             useless
  */
-function do_frameset_mobile_css() 
+function do_frameset_mobile_css()
 {
     ?>
-<style type="text/css"> 
+<style type="text/css">
     body {
         background-color: #cccccc;
         margin: 0;
         overflow: hidden;
     }
     #frame-h, #frame-l, #frame-ro, #frame-ru {
-        position: absolute; 
-        overflow: scroll; 
+        position: absolute;
+        overflow: scroll;
         -webkit-overflow-scrolling: touch;
     }
     #frame-h-2, #frame-l-2, #frame-ro-2, #frame-ru-2 {
-        display: inline-block;    
+        display: inline-block;
     }
 </style>
     <?php
@@ -116,23 +116,23 @@ function do_frameset_mobile_css()
 
 /**
  * Echo the JS code for the mobile version of a frameset page.
- * 
+ *
  * @param string|null $audio Audio URI
- * 
+ *
  * @return void
- * 
+ *
  * @deprecated Since 2.2.1-fork, we do no longer use frameset
  */
 function do_frameset_mobile_js($audio=null)
 {
 
-    ?>    
+    ?>
     <script type="text/javascript" src="js/jquery.js" charset="utf-8"></script>
-    
+
     <script type="text/javascript">
        //<![CDATA[
        function rsizeIframes() {
-            const h_height = <?php 
+            const h_height = <?php
             if (isset($audio)) {
                 getSettingWithDefault('set-text-h-frameheight-with-audio');
             } else {
@@ -164,18 +164,18 @@ function do_frameset_mobile_js($audio=null)
             $('#frame-ru-2').width('100%').height('100%')
             .css('top',0).css('left',0);
         }
-    
+
         function init() {
             rsizeIframes();
             $(window).resize(rsizeIframes);
         }
-    
+
         $(document).ready(init);
         //]]>
     </script>
-    
+
     <?php
-    
+
 }
 
 ?>

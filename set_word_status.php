@@ -3,12 +3,12 @@
 /**
  * \file
  * \brief Change status of term while reading
- * 
+ *
  * Call: set_word_status.php?...
  *      ... tid=[textid]&wid=[wordid]&status=1..5/98/99
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category Helper_Frame
  * @package Lwt
  * @author  LWT Project <lwt-project@hotmail.com>
@@ -20,23 +20,23 @@ require_once 'inc/session_utility.php';
 
 /**
  * Get various data for the word corresponding to the ID.
- * 
+ *
  * @param string $wid ID of the word
- * 
- * @return array{0: string, 1: string, 2: string} The word in plain text, 
+ *
+ * @return array{0: string, 1: string, 2: string} The word in plain text,
  * his translation and his romanization
- * 
- * @global string $tbpref 
+ *
+ * @global string $tbpref
  */
 function get_word_data($wid)
 {
     global $tbpref;
-    $sql = "SELECT WoText, WoTranslation, WoRomanization 
+    $sql = "SELECT WoText, WoTranslation, WoRomanization
     FROM {$tbpref}words WHERE WoID = $wid";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
     if (!$record) {
-        my_die("Word not found in set_word_status.php"); 
+        my_die("Word not found in set_word_status.php");
     }
     $word = $record['WoText'];
     $trans = repl_tab_nl($record['WoTranslation']) . getWordTagList($wid, ' ', 1, 0);
@@ -60,7 +60,7 @@ function set_word_status_ajax($wid, $status): void
     const status = parseInt(<?php echo $status; ?>, 10);
     $.post(
         'api.php/v1/terms/' + wordid + '/status/' + status,
-        {}, 
+        {},
         function (data) {
             if (data == "" || "error" in data) {
                 word_update_error();
@@ -76,22 +76,22 @@ function set_word_status_ajax($wid, $status): void
 
 /**
  * Edit the term status in the database.
- * 
+ *
  * @param string $wid    ID of the word to update
  * @param string $status New status to set
- * 
+ *
  * @return string Some edit message, number of affected rows or error message
- * 
- * @global string $tbpref 
+ *
+ * @global string $tbpref
  */
 function set_word_status_database($wid, $status)
 {
     global $tbpref;
     $m1 = runsql(
-        "UPDATE {$tbpref}words 
-        SET WoStatus = $status, WoStatusChanged = NOW()," . 
-        make_score_random_insert_update('u') . " 
-        WHERE WoID = $wid", 
+        "UPDATE {$tbpref}words
+        SET WoStatus = $status, WoStatusChanged = NOW()," .
+        make_score_random_insert_update('u') . "
+        WHERE WoID = $wid",
         'Status changed'
     );
     return $m1;
@@ -99,15 +99,15 @@ function set_word_status_database($wid, $status)
 
 /**
  * Do the JavaScript action for changing display of the word.
- * 
+ *
  * @param string $tid    Text ID
  * @param string $wid    ID of the word that changed status, unnused
  * @param string $status New status, unnused
  * @param string $word   Word in plain text
  * @param string $trans  Translation of the word
  * @param string $roman  Romanization of the word
- * 
- * @return void 
+ *
+ * @return void
  */
 function set_word_status_javascript($tid, $wid, $status, $word, $trans, $roman)
 {
@@ -137,9 +137,9 @@ function set_word_status_javascript($tid, $wid, $status, $word, $trans, $roman)
     function apply_word_update(wid, status) {
         $('#status_change_log').text('Term status changed to ' + status);
         update_word_display(
-            wid, status, 
-            <?php echo json_encode($word); ?>, 
-            <?php echo json_encode($trans); ?>, 
+            wid, status,
+            <?php echo json_encode($word); ?>,
+            <?php echo json_encode($trans); ?>,
             <?php echo json_encode($roman); ?>,
             <?php echo json_encode($todo_content); ?>
         );
@@ -151,15 +151,15 @@ function set_word_status_javascript($tid, $wid, $status, $word, $trans, $roman)
 
 /**
  * Echo the HTML content of the page.
- * 
+ *
  * @param string $tid    Text ID
  * @param string $wid    ID of the word that changed status
  * @param string $status New status
  * @param string $word   Word in plain text
  * @param string $trans  Translation of the word
  * @param string $roman  Romanization of the word
- * 
- * @return void 
+ *
+ * @return void
  */
 function set_word_status_display_page($tid, $wid, $status, $word, $trans, $roman)
 {
@@ -175,13 +175,13 @@ function set_word_status_display_page($tid, $wid, $status, $word, $trans, $roman
  * Complete workflow for updating a word.
  * It edits the database, show the success message
  * and do JavaScript action to change its display.
- * 
+ *
  * @param string $textid ID of the affected text
  * @param string $wordid ID of the word to update
  * @param string $status New status for this word
- * 
+ *
  * @return void
- * 
+ *
  * @since 2.0.4-fork
  */
 function do_set_word_status($textid, $wordid, $status)

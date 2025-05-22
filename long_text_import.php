@@ -1,14 +1,14 @@
 <?php
 
 /**
- * \file 
+ * \file
  * \brief Long Text Import
- * 
+ *
  * Call: long_text_import.php?...
  *                          op=...
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  * @package Lwt
  * @author  LWT Project <lwt-project@hotmail.com>
@@ -21,14 +21,14 @@ require_once 'inc/session_utility.php';
 
 /**
  * Display the check page before a long text import.
- * 
+ *
  * @param int $max_input_vars Maximale bytes size for the text.
- * 
+ *
  * @return void
  */
 function long_text_check($max_input_vars): void
 {
-        
+
     $langid = (int) $_REQUEST["LgID"];
     $title = (string) $_REQUEST["TxTitle"];
     $paragraph_handling = (int) $_REQUEST["paragraph_handling"];
@@ -38,10 +38,10 @@ function long_text_check($max_input_vars): void
     if (isset($_REQUEST["TextTags"])) {
         $texttags = json_encode($_REQUEST["TextTags"]);
     }
-    
-    // Get $data with \n line endings 
-    if (isset($_FILES["thefile"])  
-        && $_FILES["thefile"]["tmp_name"] != ""  
+
+    // Get $data with \n line endings
+    if (isset($_FILES["thefile"])
+        && $_FILES["thefile"]["tmp_name"] != ""
         && $_FILES["thefile"]["error"] == 0
     ) {
         $data = file_get_contents($_FILES["thefile"]["tmp_name"]);
@@ -51,7 +51,7 @@ function long_text_check($max_input_vars): void
     }
     $data = replace_supp_unicode_planes_char($data);
     $data = trim($data);
-    
+
     // Use ¶ symbol for paragraphs separation
     if ($paragraph_handling == 2) {
         $data = preg_replace('/\n\s*?\n/u', '¶', $data);
@@ -76,8 +76,8 @@ function long_text_check($max_input_vars): void
         $bytes = 0;
         foreach ($sent_array as $item) {
             $item_len = strlen($item) + 1;
-            if ($item != '¶') { 
-                $cnt++; 
+            if ($item != '¶') {
+                $cnt++;
             }
             if ($cnt <= $maxsent && $bytes+$item_len < 65000) {
                 $texts[$text_index][] = $item;
@@ -92,10 +92,10 @@ function long_text_check($max_input_vars): void
         $textcount = count($texts);
         $plural = ($textcount==1 ? '' : 's');
         $shorter = ($textcount==1 ? ' ' : ' shorter ');
-        
+
         if ($textcount > $max_input_vars-20) {
-            $message = "Error: Too many texts (" . $textcount . " > " . 
-            ($max_input_vars-20) . 
+            $message = "Error: Too many texts (" . $textcount . " > " .
+            ($max_input_vars-20) .
             "). You must increase 'Maximum Sentences per Text'!";
             echo error_message_with_hide($message, false);
         } else {
@@ -121,9 +121,9 @@ function long_text_check($max_input_vars): void
     </tr>
     <tr>
         <td class="td1 right" colspan="2">
-            <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='index.php';}" /> 
+            <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='index.php';}" />
             <span class="nowrap"></span>
-            <input type="button" value="Go Back" onclick="{lwtFormCheck.resetDirty(); history.back();}" /> 
+            <input type="button" value="Go Back" onclick="{lwtFormCheck.resetDirty(); history.back();}" />
             <span class="nowrap"></span>
             <input type="submit" name="op" value="Create <?php echo $textcount; ?> text<?php echo $plural; ?>" />
         </td>
@@ -134,7 +134,7 @@ function long_text_check($max_input_vars): void
                 $textno++;
                 $textstring = str_replace("¶", "\n", implode(" ", $item));
                 $bytes = strlen($textstring);
-                ?>            
+                ?>
     <tr>
         <td class="td1 right">
             <b>Text <?php echo $textno+1; ?>:</b>
@@ -142,8 +142,8 @@ function long_text_check($max_input_vars): void
             Length:<br /><?php echo $bytes; ?><br />Bytes
         </td>
         <td class="td1">
-            <textarea readonly="readonly" 
-            <?php echo getScriptDirectionTag($langid); ?> 
+            <textarea readonly="readonly"
+            <?php echo getScriptDirectionTag($langid); ?>
             name="text[<?php echo $textno; ?>]" cols="60" rows="10">
                     <?php echo $textstring; ?>
             </textarea>
@@ -162,9 +162,9 @@ function long_text_check($max_input_vars): void
 
 /**
  * Save a long text to the database.
- * 
+ *
  * @return void
- * 
+ *
  * @global string $tppref Database table prefix.
  */
 function long_text_save(): void
@@ -178,7 +178,7 @@ function long_text_save(): void
     }
     $textcount = (int)$_REQUEST["TextCount"];
     $texts = $_REQUEST["text"];
-    
+
     if (count($texts) != $textcount ) {
         $message = "Error: Number of texts wrong: " .  count($texts) . " != " . $textcount;
     } else {
@@ -186,30 +186,30 @@ function long_text_save(): void
         for ($i = 0; $i < $textcount; $i++) {
             $texts[$i] = remove_soft_hyphens($texts[$i]);
             $counter = makeCounterWithTotal($textcount, $i+1);
-            $thistitle = $title . ($counter == '' ? '' : (' (' . $counter . ')')); 
+            $thistitle = $title . ($counter == '' ? '' : (' (' . $counter . ')'));
             $imported += (int) runsql(
                 'insert into ' . $tbpref . 'texts (
-                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, 
+                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
                     TxSourceURI
-                ) values( ' . 
-                    $langid . ', ' . 
-                    convert_string_to_sqlsyntax($thistitle) . ', ' . 
-                    convert_string_to_sqlsyntax($texts[$i]) . ", '', 
+                ) values( ' .
+                    $langid . ', ' .
+                    convert_string_to_sqlsyntax($thistitle) . ', ' .
+                    convert_string_to_sqlsyntax($texts[$i]) . ", '',
                     NULL, " .
-                    convert_string_to_sqlsyntax($source_uri) . 
-                ')', 
+                    convert_string_to_sqlsyntax($source_uri) .
+                ')',
                 ''
             );
             $id = get_last_key();
-            saveTextTags($id);    
+            saveTextTags($id);
             splitCheckText($texts[$i], $langid, $id);
         }
         $message = $imported . " Text(s) imported!";
     }
-    
+
     echo error_message_with_hide($message, false);
 
-    ?>        
+    ?>
  <p>&nbsp;<br /><input type="button" value="Show Texts" onclick="location.href='edit_texts.php';" /></p>
     <?php
 
@@ -217,17 +217,17 @@ function long_text_save(): void
 
 /**
  * Display the main page for a long tex import.
- * 
+ *
  * @param int $max_input_vars Maximal number of bytes for the text.
- * 
+ *
  * @global $tbpref
- * 
+ *
  * @return void
  */
 function long_text_display($max_input_vars)
 {
     global $tbpref;
-    $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages 
+    $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages
     WHERE LgGoogleTranslateURI<>''";
     $res = do_mysqli_query($sql);
     $return = array();
@@ -239,9 +239,9 @@ function long_text_display($max_input_vars)
 
     <script type="text/javascript" charset="utf-8">
         /**
-         * Change the language of inputs for text and title based on selected 
+         * Change the language of inputs for text and title based on selected
          * language.
-         * 
+         *
          * @returns undefined
          */
         function change_textboxes_language() {
@@ -291,8 +291,8 @@ function long_text_display($max_input_vars)
                     <?php
                     echo get_languages_selectoptions(getSetting('currentlanguage'), '[Choose...]');
                     ?>
-                </select> 
-                <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /> 
+                </select>
+                <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
@@ -310,20 +310,20 @@ function long_text_display($max_input_vars)
             <td class="td1">
                 Either specify a <b>File to upload</b>:<br />
                 <input name="thefile" type="file" /><br /><br />
-                <b>Or</b> paste a text from the clipboard 
+                <b>Or</b> paste a text from the clipboard
                 (and do <b>NOT</b> specify file):<br />
 
-                <textarea class="checkoutsidebmp respinput" data_info="Upload" 
+                <textarea class="checkoutsidebmp respinput" data_info="Upload"
                 name="Upload" id="TxText" rows="15"></textarea>
-            
+
                 <p class="smallgray">
                     If the text is too long, the import may not be possible. <wbr />
                     Current upload limits (in bytes):
                     <br />
-                    <b>post_max_size</b>: 
+                    <b>post_max_size</b>:
                     <?php echo ini_get('post_max_size'); ?>
                     <br />
-                    <b>upload_max_filesize</b>: 
+                    <b>upload_max_filesize</b>:
                     <?php echo ini_get('upload_max_filesize'); ?>
                     <br />
                     If needed, increase in <wbr />"<?php echo tohtml(php_ini_loaded_file()); ?>" <wbr />
@@ -348,15 +348,15 @@ function long_text_display($max_input_vars)
         <tr>
             <td class="td1 right">Maximum sentences per text:</td>
             <td class="td1">
-                <input type="number" min="0" max="999" class="notempty posintnumber" 
+                <input type="number" min="0" max="999" class="notempty posintnumber"
                 data_info="Maximum Sentences per Text" name="maxsent" value="50" maxlength="3" size="3" />
                 <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
                 <br />
                 <span class="smallgray">
-                    Values higher than 100 may slow down text display. 
+                    Values higher than 100 may slow down text display.
                     Very low values (< 5) may result in too many texts.
                     <br />
-                    The maximum number of new texts must not exceed <?php echo ($max_input_vars-20); ?>. 
+                    The maximum number of new texts must not exceed <?php echo ($max_input_vars-20); ?>.
                     A single new text will never exceed the length of 65,000 bytes.
                 </span>
             </td>
@@ -364,7 +364,7 @@ function long_text_display($max_input_vars)
         <tr>
             <td class="td1 right">Source URI:</td>
             <td class="td1">
-                <input type="url" class="checkurl checkoutsidebmp respinput" 
+                <input type="url" class="checkurl checkoutsidebmp respinput"
                 data_info="Source URI" name="TxSourceURI" value="" maxlength="1000" />
             </td>
         </tr>
@@ -389,7 +389,7 @@ function long_text_display($max_input_vars)
 
 /**
  * Do the main page for the long text import.
- * 
+ *
  * @return void
  */
 function long_text_do_page(): void
@@ -397,8 +397,8 @@ function long_text_do_page(): void
     pagestart('Long Text Import', true);
 
     $max_input_vars = ini_get('max_input_vars');
-    if ($max_input_vars === false || $max_input_vars == '') { 
-        $max_input_vars = 1000; 
+    if ($max_input_vars === false || $max_input_vars == '') {
+        $max_input_vars = 1000;
     }
 
     if (isset($_REQUEST['op'])) {

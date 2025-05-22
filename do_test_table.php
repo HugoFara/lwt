@@ -40,7 +40,7 @@ function get_test_table_sql()
     } elseif (isset($_REQUEST['lang'])) {
         $testsql = ' ' . $tbpref . 'words where WoLgID = ' . $_REQUEST['lang'] . ' ';
     } elseif (isset($_REQUEST['text'])) {
-        $testsql = ' ' . $tbpref . 'words, ' . $tbpref . 'textitems2 
+        $testsql = ' ' . $tbpref . 'words, ' . $tbpref . 'textitems2
         WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ' . $_REQUEST['text'] . ' ';
     } else {
         my_die("do_test_table.php called with wrong parameters");
@@ -67,7 +67,7 @@ function do_test_table_language_settings($testsql)
         exit();
     }
 
-    $sql = 'SELECT LgTextSize, LgRegexpWordCharacters, LgRightToLeft 
+    $sql = 'SELECT LgTextSize, LgRegexpWordCharacters, LgRightToLeft
     FROM ' . $tbpref . 'languages WHERE LgID = ' . $lang;
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
@@ -104,21 +104,21 @@ function do_test_table_javascript(): void
             if($('#cbEdit').is(':checked')) {
                 $('td:nth-child(1),th:nth-child(1)').show();
                 do_ajax_save_setting('currenttabletestsetting1','1');
-            } else { 
+            } else {
                 $('td:nth-child(1),th:nth-child(1)').hide();
                 do_ajax_save_setting('currenttabletestsetting1','0');
             }
             $('th,td').css('border-top-left-radius','').css('border-bottom-left-radius','');
             $('th:visible').eq(0).css('border-top-left-radius','inherit')
             .css('border-bottom-left-radius','0px');
-            $('tr:last-child>td:visible').eq(0).css('border-bottom-left-radius','inherit');                    
+            $('tr:last-child>td:visible').eq(0).css('border-bottom-left-radius','inherit');
         });
-        
+
         $('#cbStatus').change(function() {
             if($('#cbStatus').is(':checked')) {
                 $('td:nth-child(2),th:nth-child(2)').show();
                 do_ajax_save_setting('currenttabletestsetting2','1');
-            } else { 
+            } else {
                 $('td:nth-child(2),th:nth-child(2)').hide();
                 do_ajax_save_setting('currenttabletestsetting2','0');
             }
@@ -127,19 +127,19 @@ function do_test_table_javascript(): void
             $('th:visible').eq(0).css('border-top-left-radius','inherit')
             .css('border-bottom-left-radius','0px');
             $('tr:last-child>td:visible').eq(0)
-            .css('border-bottom-left-radius','inherit');                    
+            .css('border-bottom-left-radius','inherit');
         });
-        
+
         $('#cbTerm').change(function() {
             if($('#cbTerm').is(':checked')) {
                 $('td:nth-child(3)').css('color', 'black').css('cursor', 'auto');
                 do_ajax_save_setting('currenttabletestsetting3','1');
-            } else { 
+            } else {
                 $('td:nth-child(3)').css('color', 'white').css('cursor', 'pointer');
                 do_ajax_save_setting('currenttabletestsetting3','0');
             }
         });
-        
+
         $('#cbTrans').change(function() {
             if($('#cbTrans').is(':checked')) {
                 $('td:nth-child(4)').css('color', 'black').css('cursor', 'auto');
@@ -149,7 +149,7 @@ function do_test_table_javascript(): void
                 do_ajax_save_setting('currenttabletestsetting4','0');
             }
         });
-        
+
         $('#cbRom').change(function() {
             if ($('#cbRom').is(':checked')) {
                 $('td:nth-child(5),th:nth-child(5)').show();
@@ -162,9 +162,9 @@ function do_test_table_javascript(): void
             .css('border-bottom-right-radius','');
             $('th:visible:last').css('border-top-right-radius','inherit');
             $('tr:last-child>td:visible:last')
-            .css('border-bottom-right-radius','inherit');                    
+            .css('border-bottom-right-radius','inherit');
         });
-        
+
         $('#cbSentence').change(function() {
             if($('#cbSentence').is(':checked')) {
                 $('td:nth-child(6),th:nth-child(6)').show();
@@ -177,22 +177,22 @@ function do_test_table_javascript(): void
             .css('border-bottom-right-radius','');
             $('th:visible:last').css('border-top-right-radius','inherit');
             $('tr:last-child>td:visible:last')
-            .css('border-bottom-right-radius','inherit');                    
+            .css('border-bottom-right-radius','inherit');
         });
-        
+
         $('td').on('click', function() {
             $(this).css('color', 'black').css('cursor', 'auto');
         });
-        
+
         $('td').css('background-color', 'white');
-        
+
         $('#cbEdit').change();
         $('#cbStatus').change();
         $('#cbTerm').change();
         $('#cbTrans').change();
         $('#cbRom').change();
         $('#cbSentence').change();
-        
+
     });
 //]]>
 </script>
@@ -204,17 +204,17 @@ function do_test_table_settings($settings): void
 {
     ?>
 <p>
-    <input type="checkbox" id="cbEdit" <?php echo get_checked($settings[0]); ?> /> 
+    <input type="checkbox" id="cbEdit" <?php echo get_checked($settings[0]); ?> />
     Edit
-    <input type="checkbox" id="cbStatus" <?php echo get_checked($settings[1]); ?> /> 
+    <input type="checkbox" id="cbStatus" <?php echo get_checked($settings[1]); ?> />
     Status
-    <input type="checkbox" id="cbTerm" <?php echo get_checked($settings[2]); ?> /> 
+    <input type="checkbox" id="cbTerm" <?php echo get_checked($settings[2]); ?> />
     Term
-    <input type="checkbox" id="cbTrans" <?php echo get_checked($settings[3]); ?> /> 
+    <input type="checkbox" id="cbTrans" <?php echo get_checked($settings[3]); ?> />
     Translation
-    <input type="checkbox" id="cbRom" <?php echo get_checked($settings[4]); ?> /> 
+    <input type="checkbox" id="cbRom" <?php echo get_checked($settings[4]); ?> />
     Romanization
-    <input type="checkbox" id="cbSentence" <?php echo get_checked($settings[5]); ?> /> 
+    <input type="checkbox" id="cbSentence" <?php echo get_checked($settings[5]); ?> />
     Sentence
 </p>
     <?php
@@ -246,10 +246,10 @@ function do_test_table_table_content($lang_record, $testsql): void
     $span1 = ($rtlScript ? '<span dir="rtl">' : '');
     $span2 = ($rtlScript ? '</span>' : '');
 
-    $sql = 'SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization, 
-    WoSentence, WoStatus, WoTodayScore As Score 
-    FROM ' . $testsql . ' AND WoStatus BETWEEN 1 AND 5 
-    AND WoTranslation != \'\' AND WoTranslation != \'*\' 
+    $sql = 'SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization,
+    WoSentence, WoStatus, WoTodayScore As Score
+    FROM ' . $testsql . ' AND WoStatus BETWEEN 1 AND 5
+    AND WoTranslation != \'\' AND WoTranslation != \'*\'
     ORDER BY WoTodayScore, WoRandom*RAND()';
 
     if ($debug) {
@@ -277,7 +277,7 @@ function do_test_table_row($record, $regexword, $textsize, $span1, $span2): void
     ?>
 <tr>
     <td class="td1 center" nowrap="nowrap">
-        <a 
+        <a
             href="edit_tword.php?wid=<?php echo $record['WoID']; ?>" target="ro"
             onclick="showRightFrames();"
         >

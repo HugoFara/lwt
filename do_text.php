@@ -63,16 +63,16 @@ function do_text_mobile_content($textid, $audio = null)
         <?php do_text_text_content($textid, true); ?>
     </div>
 </div>
-<div id="frames-r" 
-style="position: fixed; top: 0; right: -100%; width: 100%; height: 100%;" 
+<div id="frames-r"
+style="position: fixed; top: 0; right: -100%; width: 100%; height: 100%;"
 onclick="hideRightFrames();">
     <!-- iFrames wrapper for events -->
     <div style="margin-left: 50%; height: 99%;">
-        <iframe src="empty.html" scrolling="auto" name="ro" 
+        <iframe src="empty.html" scrolling="auto" name="ro"
         style="height: 50%; width: 100%;">
             Your browser doesn't support iFrames, update it!
         </iframe>
-        <iframe src="empty.html" scrolling="auto" name="ru" 
+        <iframe src="empty.html" scrolling="auto" name="ru"
         style="height: 50%; width: 100%;">
             Your browser doesn't support iFrames, update it!
         </iframe>
@@ -103,15 +103,15 @@ function do_text_desktop_content($textid, $audio = null)
         <?php do_text_text_content($textid, true); ?>
     </div>
 </div>
-<div id="frames-r" 
-style="position: fixed; top: 2%; right: 0; height: 95%; 
+<div id="frames-r"
+style="position: fixed; top: 2%; right: 0; height: 95%;
 width: <?php echo 97 - $frame_l_width; ?>%;">
     <!-- iFrames wrapper for events -->
-    <iframe src="empty.html" scrolling="auto" name="ro" 
+    <iframe src="empty.html" scrolling="auto" name="ro"
     style="height: 50%; width: 100%;">
         Your browser doesn't support iFrames, update it!
     </iframe>
-    <iframe src="empty.html" scrolling="auto" name="ru" 
+    <iframe src="empty.html" scrolling="auto" name="ru"
     style="height: 50%; width: 100%;">
         Your browser doesn't support iFrames, update it!
     </iframe>

@@ -2,7 +2,7 @@
 /**
  * \file
  * \brief Simple Mardown to HTML utility file.
- * 
+ *
  * PHP version 8.1
  *
  * @category Documentation
@@ -18,12 +18,12 @@ use League\CommonMark\GithubFlavoredMarkdownConverter;
 
 /**
  * Convert a markdown file to HTML and return the result.
- * 
+ *
  * @param string $file_path Full path for the file to use, including extension.
- * 
+ *
  * @return string An HTML-formatted string
  */
-function markdown_converter($file_path) 
+function markdown_converter($file_path)
 {
     $converter = new GithubFlavoredMarkdownConverter();
     $markdown = file_get_contents($file_path);
@@ -37,7 +37,7 @@ function markdown_converter($file_path)
  *
  * @param string $file_path Full path for the file to use, including extension (should be ".md")
  */
-function markdown_integration($file_path): void 
+function markdown_integration($file_path): void
 {
     $id = basename($file_path, ".md");
     $html = markdown_converter($file_path);

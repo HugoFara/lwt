@@ -3,7 +3,7 @@
 /**
  * \file
  * \brief PHP Utility Functions to calculate similar terms of a term.
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt
@@ -20,7 +20,7 @@ require_once __DIR__ . '/session_utility.php';
  *
  * @psalm-return array<0|positive-int, string>
  */
-function letterPairs($str): array 
+function letterPairs($str): array
 {
     $numPairs = mb_strlen($str) - 1;
     $pairs = array();
@@ -34,7 +34,7 @@ function letterPairs($str): array
  * @psalm-return list<string>
  * @return       string[]
  */
-function wordLetterPairs($str): array 
+function wordLetterPairs($str): array
 {
     $allPairs = array();
     $words = explode(' ', $str);
@@ -49,19 +49,19 @@ function wordLetterPairs($str): array
 
 /**
  * Similarity ranking of two UTF-8 strings $str1 and $str2
- * 
+ *
  * Source http://www.catalysoft.com/articles/StrikeAMatch.html
  * Source http://stackoverflow.com/questions/653157
- * 
+ *
  * @return float SimilarityRanking
  */
-function getSimilarityRanking($str1, $str2) 
+function getSimilarityRanking($str1, $str2)
 {
     $pairs1 = wordLetterPairs($str1);
     $pairs2 = wordLetterPairs($str2);
     $union = count($pairs1) + count($pairs2);
-    if ($union == 0) { 
-        return 0; 
+    if ($union == 0) {
+        return 0;
     }
     $intersection = count(array_intersect($pairs1, $pairs2));
     return 2 * $intersection / $union;
@@ -70,23 +70,23 @@ function getSimilarityRanking($str1, $str2)
 /**
  * For a language $lang_id and a term $compared_term (UTF-8).
  * If string is already in database, it will be excluded in results.
- * 
+ *
  * @param int    $lang_id       Language ID
  * @param string $compared_term Term to compare with
  * @param int    $max_count     Maximum number of terms to display
  * @param float  $min_ranking   For terms to match
  *
- * @return int[] All $max_count wordids with a similarity ranking > $min_ranking, 
+ * @return int[] All $max_count wordids with a similarity ranking > $min_ranking,
  *               sorted decending
  *
  * @psalm-return array<positive-int, int>
  */
 function get_similar_terms(
     $lang_id, $compared_term, $max_count, $min_ranking
-): array { 
+): array {
     global $tbpref;
     $compared_term_lc = mb_strtolower($compared_term, 'UTF-8');
-    $sql = "SELECT WoID, WoTextLC FROM {$tbpref}words 
+    $sql = "SELECT WoID, WoTextLC FROM {$tbpref}words
     WHERE WoLgID = $lang_id
     AND WoTextLC <> " . convert_string_to_sqlsyntax($compared_term_lc);
     $res = do_mysqli_query($sql);
@@ -101,8 +101,8 @@ function get_similar_terms(
     $r = array();
     $i = 0;
     foreach ($termlsd as $key => $val) {
-        if ($i >= $max_count || $val < $min_ranking) { 
-            break; 
+        if ($i >= $max_count || $val < $min_ranking) {
+            break;
         }
         $i++;
         $r[$i] = $key;
@@ -112,34 +112,34 @@ function get_similar_terms(
 
 /**
  * Prepare a field with a similar term to copy.
- * 
+ *
  * @param int    $termid  Initial term ID
  * @param string $compare Similar term to copy.
- * 
+ *
  * @return string HTNL-formatted string with the similar term displayed.
- * 
+ *
  * @global string $tbpref
  */
 function format_term($termid, $compare)
 {
     global $tbpref;
-    $sql = "SELECT WoText, WoTranslation, WoRomanization 
+    $sql = "SELECT WoText, WoTranslation, WoRomanization
     FROM {$tbpref}words WHERE WoID = $termid";
     $res = do_mysqli_query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
         $term = tohtml($record["WoText"]);
         if (stripos($compare, $term) !== false) {
-            $term = '<span class="red3">' . $term . '</span>'; 
+            $term = '<span class="red3">' . $term . '</span>';
         } else {
             $term = str_replace(
-                $compare, 
-                '<span class="red3"><u>' . $compare . '</u></span>', 
+                $compare,
+                '<span class="red3"><u>' . $compare . '</u></span>',
                 $term
-            ); 
+            );
         }
         $tra = (string) $record["WoTranslation"];
-        if ($tra == "*") { 
-            $tra = "???"; 
+        if ($tra == "*") {
+            $tra = "???";
         }
         if (trim((string) $record["WoRomanization"]) !== '') {
             $rom = (string) $record["WoRomanization"];
@@ -148,12 +148,12 @@ function format_term($termid, $compare)
             $rom = "";
             $romd = "";
         }
-        $js_event = "setTransRoman(" . prepare_textdata_js($tra) . ',' . 
+        $js_event = "setTransRoman(" . prepare_textdata_js($tra) . ',' .
         prepare_textdata_js($rom) . ')';
         $output = '<img class="clickedit" src="icn/tick-button-small.png" ' .
         'title="Copy → Translation &amp; Romanization Field(s)" ' .
-        'onclick="' . tohtml($js_event) .'" /> ' . 
-        $term . tohtml($romd) . ' — ' . tohtml($tra) . 
+        'onclick="' . tohtml($js_event) .'" /> ' .
+        $term . tohtml($romd) . ' — ' . tohtml($tra) .
         '<br />';
         mysqli_free_result($res);
         return $output;
@@ -163,21 +163,21 @@ function format_term($termid, $compare)
 }
 
 /**
- * Get Term and translation of terms in termid array (calculated 
+ * Get Term and translation of terms in termid array (calculated
  * in function get_similar_terms(...)) as string for echo
- * 
+ *
  * @param int    $lang_id       Language ID
  * @param string $compared_term Similar term we compare to
  */
-function print_similar_terms($lang_id, $compared_term): string 
+function print_similar_terms($lang_id, $compared_term): string
 {
     $max_count = (int)getSettingWithDefault("set-similar-terms-count");
-    if ($max_count <= 0) { 
-        return ''; 
+    if ($max_count <= 0) {
+        return '';
     }
-    if (trim($compared_term) == '') { 
-        return '&nbsp;'; 
-    } 
+    if (trim($compared_term) == '') {
+        return '&nbsp;';
+    }
     $compare = tohtml($compared_term);
     $termarr = get_similar_terms($lang_id, $compared_term, $max_count, 0.33);
     $rarr = array();
@@ -188,23 +188,23 @@ function print_similar_terms($lang_id, $compared_term): string
         }
     }
     if (count($rarr) == 0) {
-        return "(none)"; 
+        return "(none)";
     }
-    return implode($rarr); 
+    return implode($rarr);
 }
 
 /**
  * Print a row for similar terms if the feature is enabled.
  */
-function print_similar_terms_tabrow(): void 
+function print_similar_terms_tabrow(): void
 {
-    if ((int)getSettingWithDefault("set-similar-terms-count") > 0) { 
+    if ((int)getSettingWithDefault("set-similar-terms-count") > 0) {
         echo '<tr>
             <td class="td1 right">Similar<br />Terms:</td>
             <td class="td1"><span id="simwords" class="smaller">&nbsp;</span></td>
-        </tr>'; 
+        </tr>';
     }
-} 
+}
 
 
 ?>

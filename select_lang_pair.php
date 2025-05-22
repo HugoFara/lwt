@@ -3,11 +3,11 @@
 /**
  * \file
  * \brief Display Language Pair Selection Window for Wizard
- * 
+ *
  * Call: select_lang_pair.php
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category Helper_Frame
  * @package Lwt
  * @author https://sourceforge.net/projects/lwt/ LWT Project
@@ -20,7 +20,7 @@ require_once 'inc/langdefs.php';
 /**
  * Returns a dropdown menu of the different languages
  */
-function get_wizard_selectoptions($v): string 
+function get_wizard_selectoptions($v): string
 {
     $r = "<option value=\"\"" . get_selected($v, "") . ">[Choose...]</option>";
     $keys = array_keys(LWT_LANGUAGES_ARRAY);
@@ -63,23 +63,23 @@ $currentnativelanguage = getSetting('currentnativelanguage');
                 wizard_exit();
             }
         var context = w.document;
-        $('input[name="LgName"]',context).val(l2);    
+        $('input[name="LgName"]',context).val(l2);
         $('input[name="LgDict1URI"]',context).val(
-            'https://de.glosbe.com/' + LANGDEFS[l2][0] + '/' + 
+            'https://de.glosbe.com/' + LANGDEFS[l2][0] + '/' +
             LANGDEFS[l1][0] + '/lwt_term'
         );
         $('input[name="LgDict1PopUp"]', context).attr('checked', true);
         $('input[name="LgGoogleTranslateURI"]',context).val(
-            'http://translate.google.com/?ie=UTF-8&sl=' + 
+            'http://translate.google.com/?ie=UTF-8&sl=' +
             LANGDEFS[l2][1] + '&tl=' + LANGDEFS[l1][1] + '&text=lwt_term'
         );
         $('input[name="LgGoogleTranslatePopUp"]', context).attr('checked', true);
-        $('input[name="LgTextSize"]',context).val(LANGDEFS[l2][2] ? 200 : 150);    
-        $('input[name="LgRegexpSplitSentences"]',context).val(LANGDEFS[l2][4]);    
-        $('input[name="LgRegexpWordCharacters"]',context).val(LANGDEFS[l2][3]);    
-        $('select[name="LgSplitEachChar"]',context).val(LANGDEFS[l2][5] ? 1 : 0);    
-        $('select[name="LgRemoveSpaces"]',context).val(LANGDEFS[l2][6] ? 1 : 0);    
-        $('select[name="LgRightToLeft"]',context).val(LANGDEFS[l2][7] ? 1 : 0);    
+        $('input[name="LgTextSize"]',context).val(LANGDEFS[l2][2] ? 200 : 150);
+        $('input[name="LgRegexpSplitSentences"]',context).val(LANGDEFS[l2][4]);
+        $('input[name="LgRegexpWordCharacters"]',context).val(LANGDEFS[l2][3]);
+        $('select[name="LgSplitEachChar"]',context).val(LANGDEFS[l2][5] ? 1 : 0);
+        $('select[name="LgRemoveSpaces"]',context).val(LANGDEFS[l2][6] ? 1 : 0);
+        $('select[name="LgRightToLeft"]',context).val(LANGDEFS[l2][7] ? 1 : 0);
         wizard_exit();
     }
 
@@ -108,7 +108,7 @@ $currentnativelanguage = getSetting('currentnativelanguage');
     <p class="wizard">
         <b>My Native language is:</b>
         <br />
-        L1: 
+        L1:
         <select name="l1" id="l1" onchange="{do_ajax_save_setting('currentnativelanguage',($('#l1').val()));}">
             <?php echo get_wizard_selectoptions($currentnativelanguage); ?>
         </select>
@@ -116,7 +116,7 @@ $currentnativelanguage = getSetting('currentnativelanguage');
     <p class="wizard">
         <b>I want to study:</b>
         <br />
-        L2: 
+        L2:
         <select name="l2" id="l2">
             <?php echo get_wizard_selectoptions(''); ?>
         </select>

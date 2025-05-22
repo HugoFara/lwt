@@ -2,7 +2,7 @@
 /**
  * \file
  * \brief Proceed to the general settings.
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt
@@ -13,22 +13,22 @@
  */
 
 
-/** 
- * @var int $debug 
- * 
+/**
+ * @var int $debug
+ *
  * Debug switch / Display PHP error settings
- * 
- * 1 = debugging on, 0 = .. off 
+ *
+ * 1 = debugging on, 0 = .. off
  */
-$debug = 0;     
-/** 
- * @var int $dsplerrors 
- * 1 = display all errors on, 0 = .. off 
- */   
+$debug = 0;
+/**
+ * @var int $dsplerrors
+ * 1 = display all errors on, 0 = .. off
+ */
 $dsplerrors = 0;
-/** 
- * @var int $dspltime 
- * 1 = display time on, 0 = .. off 
+/**
+ * @var int $dspltime
+ * 1 = display time on, 0 = .. off
  */
 $dspltime = 0;
 

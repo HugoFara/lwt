@@ -2,7 +2,7 @@
 
 /**
  * PHP version 8.1
- * 
+ *
  * @category Helper_Frame
  * @package Lwt
  */
@@ -12,18 +12,18 @@ use Lwt\Classes\GoogleTranslate;
 require_once 'inc/session_utility.php';
 require_once 'inc/classes/GoogleTranslate.php' ;
 
-$translation = '*'; 
+$translation = '*';
 if ($_REQUEST['status']==1) {
     $tl = $_GET["tl"];
     $sl = $_GET["sl"];
     $text = $_GET["text"];
 
     $tl_array = GoogleTranslate::staticTranslate($text, $sl, $tl);
-    if ($tl_array) { 
-        $translation = $tl_array[0]; 
+    if ($tl_array) {
+        $translation = $tl_array[0];
     }
-    if ($translation == $_GET["text"]) { 
-        $translation = '*'; 
+    if ($translation == $_GET["text"]) {
+        $translation = '*';
     }
 
     header('Pragma: no-cache');
@@ -34,24 +34,24 @@ $word = convert_string_to_sqlsyntax($_REQUEST['text']);
 $wordlc = convert_string_to_sqlsyntax(mb_strtolower($_REQUEST['text'], 'UTF-8'));
 
 $langid = get_first_value(
-    "SELECT TxLgID AS value FROM {$tbpref}texts WHERE TxID = " . 
+    "SELECT TxLgID AS value FROM {$tbpref}texts WHERE TxID = " .
     $_REQUEST['tid']
 );
 
 runsql(
     "INSERT INTO {$tbpref}words (
-        WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence, 
-        WoRomanization, WoStatusChanged," . 
+        WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
+        WoRomanization, WoStatusChanged," .
         make_score_random_insert_update('iv') . ") values(
-            $langid, $wordlc, $word, " . $_REQUEST["status"] . ', ' . 
-            convert_string_to_sqlsyntax($translation) . ', "", "", NOW(), ' .  
+            $langid, $wordlc, $word, " . $_REQUEST["status"] . ', ' .
+            convert_string_to_sqlsyntax($translation) . ', "", "", NOW(), ' .
             make_score_random_insert_update('id') . '
-        )', 
+        )',
     "Term saved"
 );
 $wid = get_last_key();
 do_mysqli_query(
-    "UPDATE {$tbpref}textitems2 SET Ti2WoID = $wid 
+    "UPDATE {$tbpref}textitems2 SET Ti2WoID = $wid
     WHERE Ti2LgID = $langid AND LOWER(Ti2Text) = $wordlc"
 );
 $hex = strToClassName(
@@ -61,8 +61,8 @@ $hex = strToClassName(
 pagestart("New Term: " . $word, false);
 
 echo '<p>Status: ' . get_colored_status_msg($_REQUEST['status']) . '</p><br />';
-if ($translation != '*') { 
-    echo '<p>Translation: <b>' . tohtml($translation)  . '</b></p>'; 
+if ($translation != '*') {
+    echo '<p>Translation: <b>' . tohtml($translation)  . '</b></p>';
 }
 
 ?>

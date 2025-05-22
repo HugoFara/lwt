@@ -2,9 +2,9 @@
 
 /**
  * Show term
- * 
+ *
  * Call: show_word.php?wid=...&ann=...
- * 
+ *
  * PHP version 8.1
  */
 
@@ -15,20 +15,20 @@ pagestart_nobody('Term');
 $wid = getreq('wid');
 $ann = $_REQUEST["ann"];
 
-if ($wid == '') { 
-    my_die('Word not found in show_word.php'); 
+if ($wid == '') {
+    my_die('Word not found in show_word.php');
 }
 
-$sql = 'select WoLgID, WoText, WoTranslation, WoSentence, WoRomanization, WoStatus 
+$sql = 'select WoLgID, WoText, WoTranslation, WoSentence, WoRomanization, WoStatus
 from ' . $tbpref . 'words where WoID = ' . $wid;
 $res = do_mysqli_query($sql);
 if ($record = mysqli_fetch_assoc($res)) {
 
     $transl = repl_tab_nl($record['WoTranslation']);
-    if($transl == '*') { 
-        $transl=''; 
+    if($transl == '*') {
+        $transl='';
     }
-    
+
     $tags = getWordTagList($wid, '', 0, 0);
     $rom = $record['WoRomanization'];
     $scrdir = getScriptDirectionTag((int) $record['WoLgID']);
@@ -45,14 +45,14 @@ if ($record = mysqli_fetch_assoc($res)) {
     <td class="td1 right">Translation:</td>
     <td class="td1" style="font-size:120%;"><b><?php
     if(!empty($ann)) {
-        echo 
+        echo
         str_replace_first(
-            tohtml($ann), 
-            '<span style="color:red">' . tohtml($ann) . '</span>', 
+            tohtml($ann),
+            '<span style="color:red">' . tohtml($ann) . '</span>',
             tohtml($transl)
         );
-    } else { 
-        echo tohtml($transl); 
+    } else {
+        echo tohtml($transl);
     }
     ?></b></td>
 </tr>
@@ -61,14 +61,14 @@ if ($record = mysqli_fetch_assoc($res)) {
 <td class="td1 right">Tags:</td>
 <td class="td1" style="font-size:120%;"><b><?php echo tohtml($tags); ?></b></td>
 </tr>
-        <?php 
+        <?php
     } ?>
     <?php if ($rom != '') { ?>
 <tr>
 <td class="td1 right">Romaniz.:</td>
 <td class="td1" style="font-size:120%;"><b><?php echo tohtml($rom); ?></b></td>
 </tr>
-        <?php 
+        <?php
     } ?>
 <tr>
 <td class="td1 right">Sentence<br />Term in {...}:</td>

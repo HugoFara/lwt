@@ -2,21 +2,21 @@
 
 /**
  * Manage tags
- * 
+ *
  * Call: edit_texttags.php?....
  *  ... markaction=[opcode] ... do actions on marked text tags
  *  ... allaction=[opcode] ... do actions on all text tags
  *  ... del=[wordid] ... do delete
- *  ... op=Save ... do insert new 
+ *  ... op=Save ... do insert new
  *  ... op=Change ... do update
- *  ... new=1 ... display new text tag screen 
- *  ... chg=[wordid] ... display edit screen 
- *  ... sort=[sortcode] ... sort 
- *  ... page=[pageno] ... page  
- *  ... query=[tagtextfilter] ... tag text filter    
- * 
+ *  ... new=1 ... display new text tag screen
+ *  ... chg=[wordid] ... display edit screen
+ *  ... sort=[sortcode] ... sort
+ *  ... page=[pageno] ... page
+ *  ... query=[tagtextfilter] ... tag text filter
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  * @package Lwt
  */
@@ -45,7 +45,7 @@ if (isset($_REQUEST['markaction'])) {
             $l = count($_REQUEST['marked']);
             if ($l > 0 ) {
                 $list = "(" . $_REQUEST['marked'][0];
-                for ($i=1; $i<$l; $i++) { $list .= "," . $_REQUEST['marked'][$i]; 
+                for ($i=1; $i<$l; $i++) { $list .= "," . $_REQUEST['marked'][$i];
                 }
                 $list .= ")";
                 if ($markaction == 'del') {
@@ -60,7 +60,7 @@ if (isset($_REQUEST['markaction'])) {
 }
 
 
-// ALL ACTIONS 
+// ALL ACTIONS
 
 if (isset($_REQUEST['allaction'])) {
     $allaction = $_REQUEST['allaction'];
@@ -80,11 +80,11 @@ if (isset($_REQUEST['allaction'])) {
     // INS/UPD
 
     // INSERT
-    
+
     if ($_REQUEST['op'] == 'Save') {
-    
+
         $message = runsql(
-            'insert into ' . $tbpref . 'tags2 (T2Text, T2Comment) values(' . 
+            'insert into ' . $tbpref . 'tags2 (T2Text, T2Comment) values(' .
             convert_string_to_sqlsyntax($_REQUEST["T2Text"]) . ', ' .
             convert_string_to_sqlsyntax_nonull($_REQUEST["T2Comment"]) . ')', "Saved", $sqlerrdie = false
         );
@@ -93,8 +93,8 @@ if (isset($_REQUEST['allaction'])) {
         // UPDATE
 
         $message = runsql(
-            'update ' . $tbpref . 'tags2 set T2Text = ' . 
-            convert_string_to_sqlsyntax($_REQUEST["T2Text"]) . ', T2Comment = ' . 
+            'update ' . $tbpref . 'tags2 set T2Text = ' .
+            convert_string_to_sqlsyntax($_REQUEST["T2Text"]) . ', T2Comment = ' .
             convert_string_to_sqlsyntax_nonull($_REQUEST["T2Comment"]) . ' where T2ID = ' . $_REQUEST["T2ID"], "Updated", $sqlerrdie = false
         );
 
@@ -105,7 +105,7 @@ if (isset($_REQUEST['allaction'])) {
 // NEW
 
 if (isset($_REQUEST['new'])) {
-    
+
     ?>
 
     <h2>New Tag</h2>
@@ -117,7 +117,7 @@ if (isset($_REQUEST['new'])) {
     <tr>
         <td class="td1 right">Tag:</td>
         <td class="td1">
-            <input class="notempty setfocus noblanksnocomma checkoutsidebmp respinput" 
+            <input class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
             type="text" name="T2Text" data_info="Tag" value="" maxlength="20" />
             <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
@@ -125,23 +125,23 @@ if (isset($_REQUEST['new'])) {
     <tr>
     <td class="td1 right">Comment:</td>
     <td class="td1">
-        <textarea class="textarea-noreturn checklength checkoutsidebmp respinput" 
+        <textarea class="textarea-noreturn checklength checkoutsidebmp respinput"
         data_maxlength="200" data_info="Comment" name="T2Comment" rows="3"></textarea>
     </td>
     </tr>
     <tr>
         <td class="td1 right" colspan="2">
-        <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='edit_texttags.php';}" /> 
+        <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='edit_texttags.php';}" />
         <input type="submit" name="op" value="Save" /></td>
     </tr>
     </table>
     </form>
-    
+
     <?php
-    
+
 } elseif (isset($_REQUEST['chg'])) {
     // CHG
-    
+
     $sql = 'select * from ' . $tbpref . 'tags2 where T2ID = ' . $_REQUEST['chg'];
     $res = do_mysqli_query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
@@ -156,20 +156,20 @@ if (isset($_REQUEST['new'])) {
         <tr>
         <td class="td1 right">Tag:</td>
         <td class="td1">
-            <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput" 
-            type="text" name="T2Text" value="<?php echo tohtml($record['T2Text']); ?>" maxlength="20" /> 
+            <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
+            type="text" name="T2Text" value="<?php echo tohtml($record['T2Text']); ?>" maxlength="20" />
             <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
         </tr>
         <tr>
             <td class="td1 right">Comment:</td>
             <td class="td1">
-                <textarea class="textarea-noreturn checklength checkoutsidebmp respinput" 
+                <textarea class="textarea-noreturn checklength checkoutsidebmp respinput"
                 data_maxlength="200" data_info="Comment" name="T2Comment" rows="3"><?php echo tohtml($record['T2Comment']); ?></textarea>
             </td>
         </tr>
         <tr>
         <td class="td1 right" colspan="2">
-        <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='edit_texttags.php#rec<?php echo $_REQUEST['chg']; ?>'};" /> 
+        <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='edit_texttags.php#rec<?php echo $_REQUEST['chg']; ?>'};" />
         <input type="submit" name="op" value="Change" /></td>
         </tr>
         </table>
@@ -179,43 +179,43 @@ if (isset($_REQUEST['new'])) {
     mysqli_free_result($res);
 } else {
     // DISPLAY
-    if (substr($message, 0, 24) == "Error: Duplicate entry '"  
+    if (substr($message, 0, 24) == "Error: Duplicate entry '"
         && substr($message, -18) == "' for key 'T2Text'"
     ) {
-        $message = substr($message, 24);    
+        $message = substr($message, 24);
         $message = substr($message, 0, strlen($message)-18);
         $message = "Error: Text Tag '" . $message . "' already exists. Please go back and correct this!";
-    }     
+    }
     echo error_message_with_hide($message, false);
-    
+
     get_texttags($refresh = 1);   // refresh tags cache
 
     $sql = 'select count(T2ID) as value from ' . $tbpref . 'tags2 where (1=1) ' . $wh_query;
     $recno = (int) get_first_value($sql);
-    if ($debug) { 
-        echo $sql . ' ===&gt; ' . $recno; 
+    if ($debug) {
+        echo $sql . ' ===&gt; ' . $recno;
     }
-    
+
     $maxperpage = (int) getSettingWithDefault('set-tags-per-page');
 
     $pages = $recno == 0 ? 0 : (intval(($recno-1) / $maxperpage) + 1);
-    
-    if ($currentpage < 1) { 
-        $currentpage = 1; 
+
+    if ($currentpage < 1) {
+        $currentpage = 1;
     }
-    if ($currentpage > $pages) { 
-        $currentpage = $pages; 
+    if ($currentpage > $pages) {
+        $currentpage = $pages;
     }
     $limit = 'LIMIT ' . (($currentpage-1) * $maxperpage) . ',' . $maxperpage;
 
     $sorts = array('T2Text','T2Comment','T2ID desc','T2ID asc');
     $lsorts = count($sorts);
-    if ($currentsort < 1) { $currentsort = 1; 
+    if ($currentsort < 1) { $currentsort = 1;
     }
-    if ($currentsort > $lsorts) { 
-        $currentsort = $lsorts; 
+    if ($currentsort > $lsorts) {
+        $currentsort = $lsorts;
     }
-    
+
     ?>
 <p><a href="<?php echo $_SERVER['PHP_SELF']; ?>?new=1"><img src="icn/plus-button.png" title="New" alt="New" /> New Text Tag ...</a></p>
 
@@ -244,7 +244,7 @@ if (isset($_REQUEST['new'])) {
 Sort Order:
 <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='edit_texttags.php?page=1&amp;sort=' + val;}"><?php echo get_tagsort_selectoptions($currentsort); ?></select>
 </th></tr>
-        <?php 
+        <?php
     } ?>
 </table>
 </form>
@@ -263,14 +263,14 @@ Sort Order:
 Multi Actions <img src="icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
 </th></tr>
 <tr><td class="td1 center" colspan="2">
-<b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp; 
+<b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
 <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo get_alltagsactions_selectoptions(); ?></select>
 </td></tr>
 <tr><td class="td1 center">
 <input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
 <input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
 </td>
-<td class="td1 center">Marked Tags:&nbsp; 
+<td class="td1 center">Marked Tags:&nbsp;
 <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo get_multipletagsactions_selectoptions(); ?></select>
 </td></tr></table>
 
@@ -286,11 +286,11 @@ Multi Actions <img src="icn/lightning.png" title="Multi Actions" alt="Multi Acti
 
         <?php
 
-        $sql = 'select T2ID, T2Text, T2Comment 
-        from ' . $tbpref . 'tags2 where (1=1) ' . $wh_query . ' 
+        $sql = 'select T2ID, T2Text, T2Comment
+        from ' . $tbpref . 'tags2 where (1=1) ' . $wh_query . '
         order by ' . $sorts[$currentsort-1] . ' ' . $limit;
-        if ($debug) { 
-            echo $sql; 
+        if ($debug) {
+            echo $sql;
         }
         $res = do_mysqli_query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
@@ -319,7 +319,7 @@ Multi Actions <img src="icn/lightning.png" title="Multi Actions" alt="Multi Acti
 </th><th class="th1" nowrap="nowrap">
             <?php makePager($currentpage, $pages, 'edit_texttags.php', 'form2'); ?>
 </th></tr></table></form>
-            <?php 
+            <?php
         } ?>
 
         <?php

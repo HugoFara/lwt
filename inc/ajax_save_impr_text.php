@@ -2,9 +2,9 @@
 /**
  * \file
  * \brief Save Improved Annotation
- * 
+ *
  * Call: inc/ajax_save_impr_text.php
- * 
+ *
  * @package Lwt
  * @author  LWT Project <lwt-project@hotmail.com>
  * @license Unlicense <http://unlicense.org/>
@@ -29,19 +29,19 @@ function save_impr_text_data($textid, $line, $val): string
 {
     global $tbpref;
     $ann = (string) get_first_value(
-        "SELECT TxAnnotatedText AS value 
-        FROM {$tbpref}texts 
+        "SELECT TxAnnotatedText AS value
+        FROM {$tbpref}texts
         WHERE TxID = $textid"
     );
     $items = preg_split('/[\n]/u', $ann);
     if (count($items) <= $line) {
-        return "Unreachable translation: line request is $line, but only " . 
-        count($items) . " translations were found"; 
+        return "Unreachable translation: line request is $line, but only " .
+        count($items) . " translations were found";
     }
     // Annotation should be in format "pos   term text   term ID    translation"
     $vals = preg_split('/[\t]/u', $items[$line]);
     if ((int)$vals[0] <= -1) {
-        return "Term is punctation! Term position is {$vals[0]}"; 
+        return "Term is punctation! Term position is {$vals[0]}";
     }
     if (count($vals) < 4) {
         return "Not enough columns: " . count($vals);
@@ -49,10 +49,10 @@ function save_impr_text_data($textid, $line, $val): string
     // Change term translation
     $items[$line] = implode("\t", array($vals[0], $vals[1], $vals[2], $val));
     runsql(
-        "UPDATE {$tbpref}texts 
-        SET TxAnnotatedText = " . 
-        convert_string_to_sqlsyntax(implode("\n", $items)) . " 
-        WHERE TxID = $textid", 
+        "UPDATE {$tbpref}texts
+        SET TxAnnotatedText = " .
+        convert_string_to_sqlsyntax(implode("\n", $items)) . "
+        WHERE TxID = $textid",
         ""
     );
     return "OK";
@@ -67,7 +67,7 @@ function save_impr_text_data($textid, $line, $val): string
  *
  * @return string Success string
  */
-function do_ajax_save_impr_text($textid, $elem, $data): string 
+function do_ajax_save_impr_text($textid, $elem, $data): string
 {
     chdir('..');
 
@@ -90,7 +90,7 @@ function do_ajax_save_impr_text($textid, $elem, $data): string
  *
  * @psalm-return array{error?: string, success?: 'OK'}
  */
-function save_impr_text($textid, $elem, $data): array 
+function save_impr_text($textid, $elem, $data): array
 {
     $new_annotation = $data->{$elem};
     $line = (int)substr($elem, 2);
@@ -108,8 +108,8 @@ function save_impr_text($textid, $elem, $data): array
 
 if (isset($_POST['id']) && isset($_POST['elem']) && isset($_POST['data'])) {
     echo do_ajax_save_impr_text(
-        (int)$_POST['id'], 
-        $_POST['elem'], 
+        (int)$_POST['id'],
+        $_POST['elem'],
         json_decode($_POST['data'])
     );
 }

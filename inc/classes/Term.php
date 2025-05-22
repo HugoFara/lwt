@@ -3,7 +3,7 @@
 /**
  * \file
  * \brief Define the Term class
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt
@@ -43,7 +43,7 @@ class Term
      */
     public $translation;
     /**
-     * @var string $sentence Sentence containing the term. 
+     * @var string $sentence Sentence containing the term.
      */
     public $sentence;
     /**

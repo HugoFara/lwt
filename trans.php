@@ -3,14 +3,14 @@
 /**
  * \file
  * \brief Get a translation from Web Dictionary
- * 
+ *
  * Call 1: trans.php?x=1&t=[textid]&i=[textpos]
  *         Display translator for sentence in Text t, Pos i
  * Call 2: trans.php?x=2&t=[text]&i=[dictURI]
  *         translates text t with dict via dict-url i
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  * @package Lwt
  * @author  LWT Project <lwt-project@hotmail.com>
@@ -30,25 +30,25 @@ require_once 'inc/session_utility.php';
 function translator_url($term, $order)
 {
     global $tbpref;
-    $sql = "SELECT SeText, LgGoogleTranslateURI 
-    FROM {$tbpref}languages, {$tbpref}sentences, {$tbpref}textitems2 
+    $sql = "SELECT SeText, LgGoogleTranslateURI
+    FROM {$tbpref}languages, {$tbpref}sentences, {$tbpref}textitems2
     WHERE Ti2SeID = SeID AND Ti2LgID = LgID AND Ti2TxID = $term AND Ti2Order = $order";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
     if ($record) {
         $satz = $record['SeText'];
-        $trans = isset($record['LgGoogleTranslateURI']) ? 
+        $trans = isset($record['LgGoogleTranslateURI']) ?
         (string) $record['LgGoogleTranslateURI'] : "";
-        if (substr($trans, 0, 1) == '*') { 
-            $trans = substr($trans, 1); 
+        if (substr($trans, 0, 1) == '*') {
+            $trans = substr($trans, 1);
         }
     } else {
-        my_die("No results: $sql"); 
+        my_die("No results: $sql");
     }
     mysqli_free_result($res);
     if ($trans != '') {
         $parsed_url = parse_url($trans, PHP_URL_PATH);
-        if (substr($trans, 0, 7) == 'ggl.php'  
+        if (substr($trans, 0, 7) == 'ggl.php'
             || $parsed_url && str_ends_with($parsed_url, 'ggl.php')
         ) {
             $trans = str_replace('?', '?sent=1&', $trans);

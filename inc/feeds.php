@@ -12,7 +12,7 @@ function load_feeds($currentfeed): void
     echo '<script type="text/javascript">';
     if (isset($_REQUEST['check_autoupdate'])) {
         $result = do_mysqli_query(
-            "SELECT * FROM " . $tbpref . "newsfeeds 
+            "SELECT * FROM " . $tbpref . "newsfeeds
             where `NfOptions` like '%autoupdate=%'"
         );
         while($row = mysqli_fetch_assoc($result)){
@@ -26,16 +26,16 @@ function load_feeds($currentfeed): void
                 } elseif(strpos($autoupdate, 'w')!==false) {
                     $autoupdate=str_replace('w', '', $autoupdate);
                     $autoupdate=60 * 60 * 24 * 7 * (int)$autoupdate;
-                } else { 
-                    continue; 
+                } else {
+                    continue;
                 }
                 if(time()>($autoupdate + (int) $row['NfUpdate'])) {
-                    $ajax[$cnt]=  "$.ajax({type: 'POST',beforeSend: function(){ $('#feed_" . 
-                        $row['NfID'] . "').replaceWith( '<div id=\"feed_" . $row['NfID'] . "\" class=\"msgblue\"><p>". 
+                    $ajax[$cnt]=  "$.ajax({type: 'POST',beforeSend: function(){ $('#feed_" .
+                        $row['NfID'] . "').replaceWith( '<div id=\"feed_" . $row['NfID'] . "\" class=\"msgblue\"><p>".
                         addslashes((string) $row['NfName']).": loading</p></div>' );},url:'inc/ajax_load_feed.php', data: { NfID: '".
                             $row['NfID']."', NfSourceURI: '". $row['NfSourceURI']."', NfName: '". addslashes((string) $row['NfName']).
                             "', NfOptions: '". $row['NfOptions']."', cnt: '". $cnt.
-                            "' },success:function (data) {feedcnt+=1;$('#feedcount').text(feedcnt);$('#feed_" . 
+                            "' },success:function (data) {feedcnt+=1;$('#feedcount').text(feedcnt);$('#feed_" .
                                 $row['NfID'] . "').replaceWith( data );}})";
                     $cnt+=1;
                     $feeds[$row['NfID']]=$row['NfName'];
@@ -47,12 +47,12 @@ function load_feeds($currentfeed): void
         $sql="SELECT * FROM " . $tbpref . "newsfeeds WHERE NfID in ($currentfeed)";
         $result = do_mysqli_query($sql);
         while($row = mysqli_fetch_assoc($result)){
-            $ajax[$cnt]=  "$.ajax({type: 'POST',beforeSend: function(){ $('#feed_" . 
-                $row['NfID'] . "').replaceWith( '<div id=\"feed_" . $row['NfID'] . "\" class=\"msgblue\"><p>". 
+            $ajax[$cnt]=  "$.ajax({type: 'POST',beforeSend: function(){ $('#feed_" .
+                $row['NfID'] . "').replaceWith( '<div id=\"feed_" . $row['NfID'] . "\" class=\"msgblue\"><p>".
                 addslashes((string) $row['NfName']).": loading</p></div>' );},url:'inc/ajax_load_feed.php', data: { NfID: '".
-                    $row['NfID']."', NfSourceURI: '". $row['NfSourceURI']."', NfName: '". 
-                    addslashes((string) $row['NfName'])."', NfOptions: '". $row['NfOptions']."', cnt: '". 
-                    $cnt."' },success:function (data) {feedcnt+=1;$('#feedcount').text(feedcnt);$('#feed_" . 
+                    $row['NfID']."', NfSourceURI: '". $row['NfSourceURI']."', NfName: '".
+                    addslashes((string) $row['NfName'])."', NfOptions: '". $row['NfOptions']."', cnt: '".
+                    $cnt."' },success:function (data) {feedcnt+=1;$('#feedcount').text(feedcnt);$('#feed_" .
                         $row['NfID'] . "').replaceWith( data );}})";
             $cnt+=1;
             $feeds[$row['NfID']]=$row['NfName'];
@@ -66,12 +66,12 @@ function load_feeds($currentfeed): void
         }
         echo "feedcnt=0;\n";
         echo '$(document).ready(function(){ $.when(',implode(',', $ajax),").then(function(",implode(',', $z),"){window.location.replace(\"",$_SERVER['PHP_SELF'],"\");});});";
-    } else { 
-        echo "window.location.replace(\"",$_SERVER['PHP_SELF'],"\");"; 
+    } else {
+        echo "window.location.replace(\"",$_SERVER['PHP_SELF'],"\");";
     }
     echo "\n</script>\n";
-    if($cnt!=1) { 
-        echo "<div class=\"msgblue\"><p>UPDATING <span id=\"feedcount\">0</span>/",$cnt," FEEDS</p></div>"; 
+    if($cnt!=1) {
+        echo "<div class=\"msgblue\"><p>UPDATING <span id=\"feedcount\">0</span>/",$cnt," FEEDS</p></div>";
     }
     foreach($feeds as $k=>$v){
         echo "<div id='feed_$k' class=\"msgblue\"><p>". $v.": waiting</p></div>";
@@ -103,48 +103,48 @@ function write_rss_to_db($texts): string
                     foreach($text['TagList'] as $tag){
                         if(! in_array($tag, $_SESSION['TEXTTAGS'])) {
                             do_mysqli_query(
-                                'insert into ' . $tbpref . 'tags2 (T2Text) 
+                                'insert into ' . $tbpref . 'tags2 (T2Text)
                                 values (' . convert_string_to_sqlsyntax($tag) . ')'
                             );
                         }
                     }
                     $nf_max_texts = $text['Nf_Max_Texts'];
                 }
-                echo '<div class="msgblue"><p class="hide_message">+++ "' . 
+                echo '<div class="msgblue"><p class="hide_message">+++ "' .
                 $text['TxTitle']. '" added! +++</p></div>';
                 do_mysqli_query(
                     'INSERT INTO ' . $tbpref . 'texts (
                         TxLgID,TxTitle,TxText,TxAudioURI,TxSourceURI
                     ) VALUES (
-                        '.$text['TxLgID'].',' . 
-                        convert_string_to_sqlsyntax($text['TxTitle']) .','. 
-                        convert_string_to_sqlsyntax($text['TxText']) .','. 
+                        '.$text['TxLgID'].',' .
+                        convert_string_to_sqlsyntax($text['TxTitle']) .','.
+                        convert_string_to_sqlsyntax($text['TxText']) .','.
                         convert_string_to_sqlsyntax($text['TxAudioURI']) .','.
                         convert_string_to_sqlsyntax($text['TxSourceURI']) .')'
                 );
                 $id = get_last_key();
                 splitCheckText(
                     get_first_value(
-                        'select TxText as value from ' . $tbpref . 'texts 
+                        'select TxText as value from ' . $tbpref . 'texts
                         where TxID = ' . $id
-                    ), 
+                    ),
                     get_first_value(
-                        'select TxLgID as value from ' . $tbpref . 'texts 
+                        'select TxLgID as value from ' . $tbpref . 'texts
                         where TxID = ' . $id
-                    ), 
-                    $id 
+                    ),
+                    $id
                 );
                 do_mysqli_query(
-                    'insert into ' . $tbpref . 'texttags (TtTxID, TtT2ID) 
-                    select ' . $id . ', T2ID from ' . $tbpref . 'tags2 
+                    'insert into ' . $tbpref . 'texttags (TtTxID, TtT2ID)
+                    select ' . $id . ', T2ID from ' . $tbpref . 'tags2
                     where T2Text in (' . $Nf_tag .')'
-                );        
+                );
             }
         }
         get_texttags(1);
         $result=do_mysqli_query(
-            "SELECT TtTxID FROM " . $tbpref . "texttags 
-            join " . $tbpref . "tags2 on TtT2ID=T2ID 
+            "SELECT TtTxID FROM " . $tbpref . "texttags
+            join " . $tbpref . "tags2 on TtT2ID=T2ID
             WHERE T2Text in (". $Nf_tag .")"
         );
         $text_count=0;
@@ -157,58 +157,58 @@ function write_rss_to_db($texts): string
             $text_item=array_slice($text_item, 0, $text_count-$nf_max_texts);
             foreach ($text_item as $text_ID){
                 $message3 += (int) runsql(
-                    'delete from ' . $tbpref . 'textitems2 
-                    where Ti2TxID = ' . $text_ID, 
+                    'delete from ' . $tbpref . 'textitems2
+                    where Ti2TxID = ' . $text_ID,
                     ""
                 );
                 $message2 += (int) runsql(
-                    'delete from ' . $tbpref . 'sentences 
-                    where SeTxID = ' . $text_ID, 
+                    'delete from ' . $tbpref . 'sentences
+                    where SeTxID = ' . $text_ID,
                     ""
                 );
                 $message4 += (int) runsql(
                     'insert into ' . $tbpref . 'archivedtexts (
-                        AtLgID, AtTitle, AtText, AtAnnotatedText, 
+                        AtLgID, AtTitle, AtText, AtAnnotatedText,
                         AtAudioURI, AtSourceURI
-                    ) select TxLgID, TxTitle, TxText, TxAnnotatedText, 
-                    TxAudioURI, TxSourceURI 
-                    from ' . $tbpref . 'texts 
-                    where TxID = ' . $text_ID, 
+                    ) select TxLgID, TxTitle, TxText, TxAnnotatedText,
+                    TxAudioURI, TxSourceURI
+                    from ' . $tbpref . 'texts
+                    where TxID = ' . $text_ID,
                     ""
                 );
                 $id = get_last_key();
                 runsql(
-                    'insert into ' . $tbpref . 'archtexttags (AgAtID, AgT2ID) 
-                    select ' . $id . ', TtT2ID from ' . $tbpref . 'texttags 
-                    where TtTxID = ' . $text_ID, 
+                    'insert into ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
+                    select ' . $id . ', TtT2ID from ' . $tbpref . 'texttags
+                    where TtTxID = ' . $text_ID,
                     ""
-                );    
+                );
                 $message1 += (int) runsql(
-                    'delete from ' . $tbpref . 'texts 
-                    where TxID = ' . $text_ID, 
+                    'delete from ' . $tbpref . 'texts
+                    where TxID = ' . $text_ID,
                     ""
                 );
                 // $message .= $message4 . " / " . $message1 . " / " . $message2 . " / " . $message3;
                 adjust_autoincr('texts', 'TxID');
                 adjust_autoincr('sentences', 'SeID');
                 runsql(
-                    "DELETE " . $tbpref . "texttags 
-                    FROM (" 
-                        . $tbpref . "texttags 
+                    "DELETE " . $tbpref . "texttags
+                    FROM ("
+                        . $tbpref . "texttags
                         LEFT JOIN " . $tbpref . "texts on TtTxID = TxID
-                    ) 
-                    WHERE TxID IS NULL", 
+                    )
+                    WHERE TxID IS NULL",
                     ''
-                );        
+                );
             }
         }
     }
-    if ($message4>0 || $message1>0) { 
-        return "Texts archived: " . $message1 . 
-        " / Sentences deleted: " . $message2 . " / Text items deleted: " . $message3; 
+    if ($message4>0 || $message1>0) {
+        return "Texts archived: " . $message1 .
+        " / Sentences deleted: " . $message2 . " / Text items deleted: " . $message3;
     }
-    else { 
-        return ''; 
+    else {
+        return '';
     }
 }
 
@@ -231,13 +231,13 @@ function print_last_feed_update($diff): void
             if($x>=1) {
                 echo " last update: $x ";
                 print_r($periods[$key][1]);
-                if($x>1) { echo 's'; 
+                if($x>1) { echo 's';
                 }echo ' ago';break;
             }
         }
     }
-    else { 
-        echo ' up to date'; 
+    else {
+        echo ' up to date';
     }
 }
 
@@ -250,20 +250,20 @@ function get_nf_option($str,$option)
 {
     $arr=explode(',', $str);
     $all = null;
-    if($option=='all') { 
+    if($option=='all') {
         $all = array();
     }
     foreach($arr as $value){
         $res=explode('=', $value);
-        if(trim($res[0])==$option) { 
-            return $res[1]; 
+        if(trim($res[0])==$option) {
+            return $res[1];
         }
-        if($option=='all') { 
-            $all[$res[0]]=$res[1]; 
+        if($option=='all') {
+            $all[$res[0]]=$res[1];
         }
     }
-    if($option=='all') { 
-        return $all; 
+    if($option=='all') {
+        return $all;
     }
     return null;
 }
@@ -277,8 +277,8 @@ function get_nf_option($str,$option)
 function get_links_from_new_feed($NfSourceURI): array|false
 {
     $rss = new DOMDocument('1.0', 'utf-8');
-    if (!$rss->load($NfSourceURI, LIBXML_NOCDATA | ENT_NOQUOTES)) { 
-        return false; 
+    if (!$rss->load($NfSourceURI, LIBXML_NOCDATA | ENT_NOQUOTES)) {
+        return false;
     }
     $rss_data = array();
     $desc_count=0;
@@ -299,24 +299,24 @@ function get_links_from_new_feed($NfSourceURI): array|false
             'description' => 'summary',
             'link' => 'link'
         );
-    } else { 
-        return false; 
+    } else {
+        return false;
     }
     foreach ($rss->getElementsByTagName($feed_tags['item']) as $node) {
-        $item = array ( 
+        $item = array (
             'title' => preg_replace(
-                array('/\s\s+/','/\ \&\ /','/\"/'), 
-                array(' ',' &amp; ','\"'), 
+                array('/\s\s+/','/\ \&\ /','/\"/'),
+                array(' ',' &amp; ','\"'),
                 trim($node->getElementsByTagName($feed_tags['title'])->item(0)->nodeValue)
             ),
             'desc' => preg_replace(
-                array('/\s\s+/','/\ \&\ /','/\<[^\>]*\>/','/\"/'), 
-                array(' ',' &amp; ','','\"'), 
+                array('/\s\s+/','/\ \&\ /','/\<[^\>]*\>/','/\"/'),
+                array(' ',' &amp; ','','\"'),
                 trim($node->getElementsByTagName($feed_tags['description'])->item(0)->nodeValue)
             ),
             'link' => trim(
-                ($feed_tags['item']=='entry') ? 
-                ($node->getElementsByTagName($feed_tags['link'])->item(0)->getAttribute('href')) : 
+                ($feed_tags['item']=='entry') ?
+                ($node->getElementsByTagName($feed_tags['link'])->item(0)->getAttribute('href')) :
                 ($node->getElementsByTagName($feed_tags['link'])->item(0)->nodeValue)
             ),
         );
@@ -325,8 +325,8 @@ function get_links_from_new_feed($NfSourceURI): array|false
                 if($txt_node->parentNode===$node) {
                     $item['encoded'] = $txt_node->ownerDocument->saveHTML($txt_node);
                     $item['encoded'] = mb_convert_encoding(
-                        html_entity_decode($item['encoded'], ENT_NOQUOTES, "UTF-8"), 
-                        "HTML-ENTITIES", 
+                        html_entity_decode($item['encoded'], ENT_NOQUOTES, "UTF-8"),
+                        "HTML-ENTITIES",
                         "UTF-8"
                     );
                 }
@@ -335,24 +335,24 @@ function get_links_from_new_feed($NfSourceURI): array|false
                 if($txt_node->parentNode===$node) {
                     $item['description'] = $txt_node->ownerDocument->saveHTML($txt_node);
                     $item['description'] = mb_convert_encoding(
-                        html_entity_decode($item['description'], ENT_NOQUOTES, "UTF-8"), 
-                        "HTML-ENTITIES", 
+                        html_entity_decode($item['description'], ENT_NOQUOTES, "UTF-8"),
+                        "HTML-ENTITIES",
                         "UTF-8"
                     );
                 }
             }
             if (isset($item['desc'])) {
-                if(mb_strlen($item['desc'], "UTF-8")>900) { 
-                    $desc_count++; 
-                } else { 
-                    $desc_nocount++; 
+                if(mb_strlen($item['desc'], "UTF-8")>900) {
+                    $desc_count++;
+                } else {
+                    $desc_nocount++;
                 }
             }
             if (isset($item['encoded'])) {
-                if(mb_strlen($item['encoded'], "UTF-8")>900) { 
-                    $enc_count++; 
-                } else { 
-                    $enc_nocount++; 
+                if(mb_strlen($item['encoded'], "UTF-8")>900) {
+                    $enc_count++;
+                } else {
+                    $enc_nocount++;
                 }
             }
         }
@@ -362,21 +362,21 @@ function get_links_from_new_feed($NfSourceURI): array|false
                     $item['content'] = $txt_node->ownerDocument->saveHTML($txt_node);
                     $item['content'] = mb_convert_encoding(
                         html_entity_decode($item['content'], ENT_NOQUOTES, "UTF-8"),
-                        "HTML-ENTITIES", 
+                        "HTML-ENTITIES",
                         "UTF-8"
                     );
                 }
             }
             if (isset($item['content'])) {
-                if (mb_strlen($item['content'], "UTF-8")>900) { 
-                    $desc_count++; 
-                } else { 
-                    $desc_nocount++; 
+                if (mb_strlen($item['content'], "UTF-8")>900) {
+                    $desc_count++;
+                } else {
+                    $desc_nocount++;
                 }
             }
         }
-        if ($item['title'] != "" && $item['link'] != "") { 
-            array_push($rss_data, $item); 
+        if ($item['title'] != "" && $item['link'] != "") {
+            array_push($rss_data, $item);
         }
     }
     if ($desc_count > $desc_nocount) {
@@ -413,8 +413,8 @@ function get_links_from_new_feed($NfSourceURI): array|false
 function get_links_from_rss($NfSourceURI,$NfArticleSection): array|false
 {
     $rss = new DOMDocument('1.0', 'utf-8');
-    if(!$rss->load($NfSourceURI, LIBXML_NOCDATA | ENT_NOQUOTES)) { 
-        return false; 
+    if(!$rss->load($NfSourceURI, LIBXML_NOCDATA | ENT_NOQUOTES)) {
+        return false;
     }
     $rss_data = array();
     if($rss->getElementsByTagName('rss')->length !== 0) {
@@ -431,19 +431,19 @@ function get_links_from_rss($NfSourceURI,$NfArticleSection): array|false
             'url' => 'href'
         );
     }
-    else { 
-        return false; 
+    else {
+        return false;
     }
     foreach ($rss->getElementsByTagName($feed_tags['item']) as $node) {
         $item = array (
         'title' => preg_replace(
-            array('/\s\s+/','/\ \&\ /'), array(' ',' &amp; '), 
+            array('/\s\s+/','/\ \&\ /'), array(' ',' &amp; '),
             trim($node->getElementsByTagName($feed_tags['title'])->item(0)->nodeValue)
         ),
-        'desc' => isset($node->getElementsByTagName($feed_tags['description'])->item(0)->nodeValue) ? 
+        'desc' => isset($node->getElementsByTagName($feed_tags['description'])->item(0)->nodeValue) ?
         preg_replace(
-            array('/\ \&\ /','/<br(\s+)?\/?>/i','/<br [^>]*?>/i','/\<[^\>]*\>/','/(\n)[\s^\n]*\n[\s]*/'), 
-            array(' &amp; ',"\n","\n",'','$1$1'), 
+            array('/\ \&\ /','/<br(\s+)?\/?>/i','/<br [^>]*?>/i','/\<[^\>]*\>/','/(\n)[\s^\n]*\n[\s]*/'),
+            array(' &amp; ',"\n","\n",'','$1$1'),
             trim($node->getElementsByTagName($feed_tags['description'])->item(0)->nodeValue)
         ) : '',
         'link' => trim(
@@ -463,13 +463,13 @@ function get_links_from_rss($NfSourceURI,$NfArticleSection): array|false
         else{
             $item['date'] = date(
                 "Y-m-d H:i:s", mktime(
-                    $pubDate['hour'], 
-                    $pubDate['minute'], $pubDate['second'], $pubDate['month'], 
+                    $pubDate['hour'],
+                    $pubDate['minute'], $pubDate['second'], $pubDate['month'],
                     $pubDate['day'], $pubDate['year']
                 )
             );
         }
-        if(strlen($item['desc'])>1000) { $item['desc']=mb_substr($item['desc'], 0, 995, "utf-8") . '...'; 
+        if(strlen($item['desc'])>1000) { $item['desc']=mb_substr($item['desc'], 0, 995, "utf-8") . '...';
         }
         if ($NfArticleSection) {
             foreach ($node->getElementsByTagName($NfArticleSection) as $txt_node) {
@@ -483,10 +483,10 @@ function get_links_from_rss($NfSourceURI,$NfArticleSection): array|false
         $item['audio'] = "";
         foreach($node->getElementsByTagName($feed_tags['enclosure']) as $enc){
             $type=$enc->getAttribute('type');
-            if($type=="audio/mpeg") { $item['audio']=$enc->getAttribute($feed_tags['url']); 
+            if($type=="audio/mpeg") { $item['audio']=$enc->getAttribute($feed_tags['url']);
             }
         }
-        if($item['title']!="" && ($item['link']!="" || ($NfArticleSection!="" && !empty($item['text'])))) { array_push($rss_data, $item); 
+        if($item['title']!="" && ($item['link']!="" || ($NfArticleSection!="" && !empty($item['text'])))) { array_push($rss_data, $item);
         }
     }
     return $rss_data;
@@ -503,7 +503,7 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
     global $tbpref;
     $data = null;
     foreach ($feed_data as $key =>$val) {
-        if (strncmp($NfArticleSection, 'redirect:', 9)==0) {    
+        if (strncmp($NfArticleSection, 'redirect:', 9)==0) {
             $dom = new DOMDocument;
             $HTMLString = file_get_contents(trim($feed_data[$key]['link']));
             $dom->loadHTML($HTMLString);
@@ -513,7 +513,7 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
             $redirect = substr($redirect[0], 9);
             $feed_host = parse_url(trim($feed_data[$key]['link']));
             foreach ($xPath->query($redirect) as $node) {
-                if (empty(trim($node->localName)) 
+                if (empty(trim($node->localName))
                     || $node->nodeType == XML_TEXT_NODE
                     || !$node->hasAttributes()
                 ) {
@@ -523,12 +523,12 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
                 May be better but yet untested*/
                 /**
                  * @psalm-suppress NullIterator
-                 */  
+                 */
                 foreach ($node->attributes as $attr) {
                     if ($attr->name=='href') {
                         $feed_data[$key]['link'] = $attr->value;
                         if (strncmp($feed_data[$key]['link'], '..', 2)==0) {
-                            $feed_data[$key]['link'] = 'http://'.$feed_host['host'] . 
+                            $feed_data[$key]['link'] = 'http://'.$feed_host['host'] .
                             substr($feed_data[$key]['link'], 2);
                         }
                     }
@@ -542,7 +542,7 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
                             $feed_data[$key]['link'] = 'http://'.$feed_host['host'] . substr($feed_data[$key]['link'], 2);
                         }
                     }
-                } */   
+                } */
             }
             unset($dom);
             unset($HTMLString);
@@ -560,16 +560,16 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
             $link = trim($feed_data[$key]['link']);
             if(substr($link, 0, 1)=='#') {
                 runsql(
-                    'UPDATE ' . $tbpref . 'feedlinks 
-                    SET FlLink=' . convert_string_to_sqlsyntax($link) . ' 
-                    where FlID = ' .substr($link, 1), 
+                    'UPDATE ' . $tbpref . 'feedlinks
+                    SET FlLink=' . convert_string_to_sqlsyntax($link) . '
+                    where FlID = ' .substr($link, 1),
                     ""
                 );
             }
             $data[$key]['TxSourceURI'] = $link;
             $HTMLString=str_replace(
-                array('>','<'), 
-                array('> ',' <'), 
+                array('>','<'),
+                array('> ',' <'),
                 $feed_data[$key]['text']
             );//$HTMLString=str_replace (array('>','<'),array('> ',' <'),$HTMLString);
         } else {
@@ -589,20 +589,20 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
                             }
                             $pos = strpos($encod, 'charset=');
                             if (($pos!==false) && (strpos($encod, 'text/html;')!==false)) {
-                                $encod=substr($encod, $pos+8);    
+                                $encod=substr($encod, $pos+8);
                                 break;
-                            } else { 
-                                $encod=''; 
+                            } else {
+                                $encod='';
                             }
                         }
-                        
+
                     }
                 } else {
-                    if ($NfCharset!='meta') { 
-                        $encod  = $NfCharset; 
+                    if ($NfCharset!='meta') {
+                        $encod  = $NfCharset;
                     }
                 }
-                
+
                 if (empty($encod)) {
                     $doc = new DOMDocument;
                     $previous_value = libxml_use_internal_errors(true);
@@ -624,10 +624,10 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
                                     $encod=substr($node->attributes->item($i)->value, $pos+8);
                                     unset($doc);
                                     unset($nodes);
-                                    break 2;    
+                                    break 2;
                                 }
                             }
-                        }    
+                        }
                     }
                     if(empty($encod)) {
                         foreach($nodes as $node){
@@ -636,10 +636,10 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
                                 if($node->attributes->item(0)->name=='charset') {
 
                                     $encod=$node->attributes->item(0)->value;
-                                    break;    
+                                    break;
                                 }
                             }
-                        }    
+                        }
                     }
                 }
                 unset($doc);
@@ -670,9 +670,9 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
                     break;
                 }
                 $HTMLString = '<meta http-equiv="Content-Type" content="text/html; charset='. $chset .'">' .$HTMLString;
-                if($encod!=$chset) { $HTMLString = iconv($encod, 'utf-8', $HTMLString); 
+                if($encod!=$chset) { $HTMLString = iconv($encod, 'utf-8', $HTMLString);
                 }
-                else { $HTMLString=mb_convert_encoding($HTMLString, 'HTML-ENTITIES', $encod); 
+                else { $HTMLString=mb_convert_encoding($HTMLString, 'HTML-ENTITIES', $encod);
                 }
             }
         }
@@ -734,9 +734,9 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
                 }
             }
             $data[$key]['TxText'] = html_entity_decode($data[$key]['TxText'], ENT_NOQUOTES, "UTF-8");
-        }        
+        }
         else{
-            $article_tags = explode("!?!", $NfArticleSection);if(strncmp($NfArticleSection, 'redirect:', 9)==0) { unset($article_tags[0]); 
+            $article_tags = explode("!?!", $NfArticleSection);if(strncmp($NfArticleSection, 'redirect:', 9)==0) { unset($article_tags[0]);
             }
             foreach ($article_tags as $article_tag) {
                 foreach ($selector->query($article_tag) as $text_temp) {
@@ -745,11 +745,11 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
                     }
                 }
             }
-        }        
-                
+        }
+
         if($data[$key]['TxText']=="") {
             unset($data[$key]);
-            if(!isset($data['error']['message'])) { $data['error']['message']=''; 
+            if(!isset($data['error']['message'])) { $data['error']['message']='';
             }
             $data['error']['message'].= '"<a href=' . $feed_data[$key]['link'] .' onclick="window.open(this.href, \'child\'); return false">'  . $feed_data[$key]['title'] . '</a>" has no text section!<br />';
             $data['error']['link'][]=$feed_data[$key]['link'];

@@ -30,7 +30,7 @@ function feed_wizard_insert_uri(): void
                     if (isset($_SESSION['wizard']['rss_url'])) {
                         echo 'value="' . $_SESSION['wizard']['rss_url'] .'" ';
                     }?>
-                /> 
+                />
                 <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
@@ -45,8 +45,8 @@ function feed_wizard_insert_uri(): void
     $('h1')
     .eq(-1)
     .html(
-        'Feed Wizard | Step 1 - Insert Newsfeed URI ' + 
-        '<a href="docs/info.html#feed_wizard" target="_blank">' + 
+        'Feed Wizard | Step 1 - Insert Newsfeed URI ' +
+        '<a href="docs/info.html#feed_wizard" target="_blank">' +
         '<img alt="Help" title="Help" src="icn/question-frame.png"></img></a>'
     )
     .css('text-align','center');
@@ -62,8 +62,8 @@ function feed_wizard_select_text(): void
     if (isset($_REQUEST['edit_feed']) && !isset($_SESSION['wizard'])) {
         $_SESSION['wizard']['edit_feed'] = $_REQUEST['edit_feed'];
         $result = do_mysqli_query(
-            "SELECT * 
-            FROM " . $tbpref . "newsfeeds 
+            "SELECT *
+            FROM " . $tbpref . "newsfeeds
             WHERE NfID=".$_REQUEST['edit_feed']
         );
         $row = mysqli_fetch_assoc($result);
@@ -309,7 +309,7 @@ function feed_wizard_select_text(): void
     <div id="settings" style="display: none;">
         <p><b>Feed Wizard | Settings</b></p>
         <div style="margin-left:150px;text-align:left">
-            Selection Mode: 
+            Selection Mode:
             <select name="select_mode" onchange="lwt_wiz_select_test.changeSelectMode()">
                 <option value="0"<?php if($_SESSION['wizard']['select_mode'] == '0') {
                     echo ' selected';
@@ -354,9 +354,9 @@ function feed_wizard_select_text(): void
             <tr>
                 <td class="td1" style="text-align:left">Name: </td>
                 <td class="td1">
-                    <input class="notempty" size="50" type="text" name="NfName" 
+                    <input class="notempty" size="50" type="text" name="NfName"
                     value="<?php echo htmlspecialchars($_SESSION['wizard']['feed']['feed_title'], ENT_COMPAT); ?>" />
-                    <img src="icn/status-busy.png" title="Field must not be empty" 
+                    <img src="icn/status-busy.png" title="Field must not be empty"
                     alt="Field must not be empty" />
                 </td>
             </tr>
@@ -369,7 +369,7 @@ function feed_wizard_select_text(): void
             <tr>
                 <td class="td1" style="text-align:left">Article Source: </td>
                 <td class="td1" style="text-align:left">
-                    <select name="NfArticleSection" 
+                    <select name="NfArticleSection"
                     onchange="lwt_wiz_select_test.changeArticleSection()">
                         <option value="" <?php
     if (
@@ -405,15 +405,15 @@ function feed_wizard_select_text(): void
             <table style="width:100%;">
                 <tr>
                     <td>
-                        <input type="hidden" name="rss_url" 
+                        <input type="hidden" name="rss_url"
                         value="<?php echo $_SESSION['wizard']['rss_url']; ?>" />
-                        <input type="button" value="Cancel" 
+                        <input type="button" value="Cancel"
                         onclick="location.href='edit_feeds.php?del_wiz=1';return false;" />
                     </td>
                     <td>
                         <span>
-                            <select name="selected_feed" 
-                            style="width:250px;max-width:200px;" 
+                            <select name="selected_feed"
+                            style="width:250px;max-width:200px;"
                             onchange="lwt_wiz_select_test.changeSelectedFeed()">
                                 <?php
     $current_host = '';
@@ -478,12 +478,12 @@ function feed_wizard_select_text(): void
                         <option value="">[Click On Text]</option>
                     </select>
                     <button id="get_button" name="button" disabled>Get</button>
-                    <img src="icn/wrench-screwdriver.png" title="Settings" alt="-" 
+                    <img src="icn/wrench-screwdriver.png" title="Settings" alt="-"
                     onclick="$('#settings').show();return false;" />
                 </td>
                 <td>
                     <span>
-                        <input type="button" value="Back" 
+                        <input type="button" value="Back"
                         onclick="lwt_wiz_select_test.clickBack()" />
                         <button id="next">Next</button>
                     </span>
@@ -491,7 +491,7 @@ function feed_wizard_select_text(): void
                 <td style="width:63px"></td>
             </tr>
         </table>
-        <button style="position:absolute;right:10px;top:10px" 
+        <button style="position:absolute;right:10px;top:10px"
         onclick="lwt_wiz_select_test.clickMinMax()">
             min/max
         </button>
@@ -703,7 +703,7 @@ function feed_wizard_filter_text(): void
 <div id="settings" style="display: none;">
     <p><b>Feed Wizard | Settings</b></p>
     <div style="margin-left:150px;text-align:left">
-        Selection Mode: 
+        Selection Mode:
         <select name="select_mode" onchange="lwt_wizard_filter.changeSelectMode()">
             <option value="0"<?php if($_SESSION['wizard']['select_mode'] == '0') {
                 echo ' selected';
@@ -715,7 +715,7 @@ function feed_wizard_filter_text(): void
                 echo ' selected';
             }?>>Advanced Selection</option>
         </select><br />
-        Hide Images: 
+        Hide Images:
         <select name="hide_images" onchange="lwt_wizard_filter.changeHideImage()">
             <option value="yes"<?php if($_SESSION['wizard']['hide_images'] == 'yes') {
                 echo ' selected';
@@ -775,7 +775,7 @@ function feed_wizard_filter_text(): void
                 </td>
                 <td>
                     <span>
-                        <select name="selected_feed" style="width:250px;max-width:200px;" 
+                        <select name="selected_feed" style="width:250px;max-width:200px;"
                         onchange="lwt_wizard_filter.changeSelectedFeed()">
                             <?php
     $current_host = '';
@@ -830,12 +830,12 @@ function feed_wizard_filter_text(): void
                         <option value="">[Click On Text]</option>
                     </select>
                     <button id="filter_button" name="button" disabled>Filter</button>
-                    <img src="icn/wrench-screwdriver.png" title="Settings" alt="-" 
+                    <img src="icn/wrench-screwdriver.png" title="Settings" alt="-"
                     onclick="$('#settings').show();return false;" />
                 </td>
                 <td>
                     <span>
-                        <input type="button" value="Back" 
+                        <input type="button" value="Back"
                         onclick="lwt_wizard_filter.clickBack()" />
                         <button id="next">Next</button>
                     </span>
@@ -843,7 +843,7 @@ function feed_wizard_filter_text(): void
                 <td style="width:63px"></td>
             </tr>
         </table>
-        <button style="position:absolute;right:10px;top:10px" 
+        <button style="position:absolute;right:10px;top:10px"
         onclick="lwt_wizard_filter.clickMinMax()">
             min/max
         </button>
@@ -896,9 +896,9 @@ function feed_wizard_edit_options(): void
                 <?php
 
         $result = do_mysqli_query(
-            "SELECT LgName, LgID 
-        FROM " . $tbpref . "languages 
-        WHERE LgName<>'' 
+            "SELECT LgName, LgID
+        FROM " . $tbpref . "languages
+        WHERE LgName<>''
         ORDER BY LgName"
         );
     while($row_l = mysqli_fetch_assoc($result)) {
@@ -919,43 +919,43 @@ function feed_wizard_edit_options(): void
 
     ?>
                 </select>
-                <img src="icn/status-busy.png" title="Field must not be empty" 
+                <img src="icn/status-busy.png" title="Field must not be empty"
                 alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
             <td class="td1">Name: </td>
             <td class="td1">
-                <input class="notempty" style="width:95%" type="text" name="NfName" 
-                value="<?php echo htmlspecialchars($_SESSION['wizard']['feed']['feed_title'], ENT_COMPAT); ?>" /> 
-                <img src="icn/status-busy.png" title="Field must not be empty" 
+                <input class="notempty" style="width:95%" type="text" name="NfName"
+                value="<?php echo htmlspecialchars($_SESSION['wizard']['feed']['feed_title'], ENT_COMPAT); ?>" />
+                <img src="icn/status-busy.png" title="Field must not be empty"
                 alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
             <td class="td1">Newsfeed url: </td>
             <td class="td1">
-                <input class="notempty" style="width:95%" type="text" 
-                name="NfSourceURI" 
-                value="<?php echo htmlspecialchars($_SESSION['wizard']['rss_url']); ?>" /> 
-                <img src="icn/status-busy.png" title="Field must not be empty" 
+                <input class="notempty" style="width:95%" type="text"
+                name="NfSourceURI"
+                value="<?php echo htmlspecialchars($_SESSION['wizard']['rss_url']); ?>" />
+                <img src="icn/status-busy.png" title="Field must not be empty"
                 alt="Field must not be empty" />
             </td>
         </tr>
             <tr>
                 <td class="td1">Article Section: </td>
                 <td class="td1">
-                    <input class="notempty" style="width:95%" type="text" 
-                    name="NfArticleSectionTags" 
-                    value="<?php echo htmlspecialchars(preg_replace('/[ ]+/', ' ', trim($_SESSION['wizard']['redirect'].$_SESSION['wizard']['article_section']))); ?>" /> 
-                    <img src="icn/status-busy.png" title="Field must not be empty" 
+                    <input class="notempty" style="width:95%" type="text"
+                    name="NfArticleSectionTags"
+                    value="<?php echo htmlspecialchars(preg_replace('/[ ]+/', ' ', trim($_SESSION['wizard']['redirect'].$_SESSION['wizard']['article_section']))); ?>" />
+                    <img src="icn/status-busy.png" title="Field must not be empty"
                     alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
             <td class="td1">Filter Tags: </td>
             <td class="td1">
-                <input type="text" style="width:95%" name="NfFilterTags" 
+                <input type="text" style="width:95%" name="NfFilterTags"
                 value="<?php echo htmlspecialchars(preg_replace('/[ ]+/', ' ', trim($_REQUEST['html']))); ?>" />
             </td>
         </tr>
@@ -968,20 +968,20 @@ function feed_wizard_edit_options(): void
                             <input type="checkbox" name="edit_text"<?php
                 if(get_nf_option($_SESSION['wizard']['options'], 'edit_text') !== null) {
                     echo ' checked="checked"';
-                } ?> 
-                            /> Edit Text 
+                } ?>
+                            /> Edit Text
                         </td>
                         <td>
                             <input type="checkbox" name="c_autoupdate"<?php
                 if($auto_upd_i !== null) {
                     echo ' checked="checked"';
-                } ?> 
-                            /> Auto Update Interval: 
+                } ?>
+                            /> Auto Update Interval:
                             <input class="posintnumber<?php
                             if(get_nf_option($_SESSION['wizard']['options'], 'autoupdate') !== null) {
                                 echo ' notempty';
                             }
-                            ?>" data_info="Auto Update Interval" type="number" 
+                            ?>" data_info="Auto Update Interval" type="number"
                                                     min="0" size="4" name="autoupdate" value="<?php
                             echo $auto_upd_i; ?>" <?php
                             if($auto_upd_i == null) {
@@ -1008,11 +1008,11 @@ function feed_wizard_edit_options(): void
                         <td>
                             <input type="checkbox" name="c_max_links"<?php if(get_nf_option($_SESSION['wizard']['options'], 'max_links') !== null) {
                                 echo ' checked="checked"';
-                            } ?> /> Max. Links: 
+                            } ?> /> Max. Links:
                             <input class="<?php if(get_nf_option($_SESSION['wizard']['options'], 'max_links') !== null) {
                                 echo 'notempty ';
-                            } ?>posintnumber maxint_300" data_info="Max. Links" 
-                            type="number" min="0" max="300" size="4" name="max_links" 
+                            } ?>posintnumber maxint_300" data_info="Max. Links"
+                            type="number" min="0" max="300" size="4" name="max_links"
                             value="<?php
                                 echo get_nf_option($_SESSION['wizard']['options'], 'max_links');
                             ?>" <?php
@@ -1030,20 +1030,20 @@ function feed_wizard_edit_options(): void
                                 ?>" <?php
                                 if(get_nf_option($_SESSION['wizard']['options'], 'charset') == null) {
                                     echo ' disabled';
-                                } ?> /> 
+                                } ?> />
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <input type="checkbox" 
+                            <input type="checkbox"
                             name="c_max_texts"<?php if(get_nf_option($_SESSION['wizard']['options'], 'max_texts') !== null) {
                                 echo ' checked="checked"';
-                            } ?> /> 
-                            Max. Texts: 
+                            } ?> />
+                            Max. Texts:
                             <input class="<?php if(get_nf_option($_SESSION['wizard']['options'], 'max_texts') !== null) {
                                 echo 'notempty ';
-                            } ?>posintnumber maxint_30" data_info="Max. Texts" 
-                            type="number" min="0" max="30" size="4" name="max_texts" 
+                            } ?>posintnumber maxint_30" data_info="Max. Texts"
+                            type="number" min="0" max="30" size="4" name="max_texts"
                             value="<?php
                             echo get_nf_option($_SESSION['wizard']['options'], 'max_texts');
                             ?>" <?php
@@ -1052,18 +1052,18 @@ function feed_wizard_edit_options(): void
                             } ?> />
                         </td>
                         <td>
-                            <input type="checkbox" 
+                            <input type="checkbox"
                             name="c_tag"<?php if(get_nf_option($_SESSION['wizard']['options'], 'tag') !== null) {
                                 echo ' checked="checked"';
-                            } ?> /> 
-                            Tag: 
+                            } ?> />
+                            Tag:
                             <input <?php if(get_nf_option($_SESSION['wizard']['options'], 'tag') !== null) {
                                 echo 'class="notempty" ';
-                            } ?>type="text" data_info="Tag" size="20" name="tag" 
-                            value="<?php echo get_nf_option($_SESSION['wizard']['options'], 'tag'); ?>" 
+                            } ?>type="text" data_info="Tag" size="20" name="tag"
+                            value="<?php echo get_nf_option($_SESSION['wizard']['options'], 'tag'); ?>"
                             <?php if(get_nf_option($_SESSION['wizard']['options'], 'tag') == null) {
                                 echo ' disabled';
-                            } ?> /> 
+                            } ?> />
                         </td>
                     </tr>
                 </table>
@@ -1075,7 +1075,7 @@ function feed_wizard_edit_options(): void
     }?>
     <input type="button" value="Cancel" onclick="location.href='edit_feeds.php?del_wiz=1';" />
     <input type="hidden" name="NfOptions" value="" />
-    <input type="hidden" name="article_source" 
+    <input type="hidden" name="article_source"
     value="<?php echo htmlspecialchars($_SESSION['wizard']['feed']['feed_text']); ?>" />
     <input type="hidden" name="save_feed" value="1" />
     <input type="button" value="Back" onclick="str=$('[name=\'edit_text\']:checked').length > 0?'edit_text=1,':'';$('[name^=\'c_\']').each(function(){str+=this.checked ? $(this).parent().children('input[type=\'text\']').attr('name') + '='+ $(this).parent().children('input[type=\'text\']').val() + ($(this).attr('name')=='c_autoupdate' ? $(this).parent().find('select').val() + ',' : ','): '';});location.href='feed_wizard.php?step=3&amp;NfOptions='+str+'&amp;NfLgID='+$('select[name=\'NfLgID\']').val()+'&amp;NfName='+$('input[name=\'NfName\']').val();return false;" />
@@ -1093,8 +1093,8 @@ function feed_wizard_edit_options(): void
     $('h1')
     .eq(-1)
     .html(
-        'Feed Wizard | Step 4 - Edit Options ' + 
-        '<a href="docs/info.html#feed_wizard" target="_blank">' + 
+        'Feed Wizard | Step 4 - Edit Options ' +
+        '<a href="docs/info.html#feed_wizard" target="_blank">' +
         '<img alt="Help" title="Help" src="icn/question-frame.png"></img></a>'
     )
     .css('text-align','center');
@@ -1112,13 +1112,13 @@ function feed_wizard_edit_options(): void
     $('[type="submit"]').on('click', function(){
         var str;
         str=$('[name="edit_text"]:checked').length > 0?"edit_text=1,":"";
-        $('[name^="c_"]').each(function(){        
+        $('[name^="c_"]').each(function(){
             str+=this.checked ? $(this).parent()
             .children('input[type="text"]').attr('name') + '='
             + $(this).parent().children('input[type="text"]').val()
             + (
-                $(this).attr('name')=='c_autoupdate' ? 
-                $(this).parent().find('select').val() + ',' : 
+                $(this).attr('name')=='c_autoupdate' ?
+                $(this).parent().find('select').val() + ',' :
                 ','
             ) : '';
         });

@@ -2,9 +2,9 @@
 
 /**
  * Save a Setting (k/v) and redirect to URI u
- * 
+ *
  * Call: save_setting_redirect.php?k=[key]&v=[value]&u=[RedirURI]
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt
@@ -22,7 +22,7 @@ require_once __DIR__ . '/session_utility.php';
  *
  * @psalm-return list{string, string, string}
  */
-function get_parameters(): array 
+function get_parameters(): array
 {
     $k = getreq('k');
     $v = getreq('v');
@@ -32,8 +32,8 @@ function get_parameters(): array
 
 /**
  * Unset all session settings, and set current text to default.
- * 
- * @return void 
+ *
+ * @return void
  */
 function unset_settings(): void
 {
@@ -43,7 +43,7 @@ function unset_settings(): void
     unset($_SESSION['currenttexttag1']);
     unset($_SESSION['currenttexttag2']);
     unset($_SESSION['currenttexttag12']);
-    
+
     unset($_SESSION['currentwordpage']);
     unset($_SESSION['currentwordquery']);
     unset($_SESSION['currentwordquerymode']);
@@ -54,34 +54,34 @@ function unset_settings(): void
     unset($_SESSION['currentwordtag12']);
     unset($_SESSION['currentwordtextmode']);
     unset($_SESSION['currentwordtexttag']);
-    
+
     unset($_SESSION['currentarchivepage']);
     unset($_SESSION['currentarchivequery']);
     unset($_SESSION['currentarchivequerymode']);
     unset($_SESSION['currentarchivetexttag1']);
     unset($_SESSION['currentarchivetexttag2']);
     unset($_SESSION['currentarchivetexttag12']);
-    
+
     unset($_SESSION['currentrsspage']);
     unset($_SESSION['currentrssfeed']);
     unset($_SESSION['currentrssquery']);
     unset($_SESSION['currentrssquerymode']);
-    
+
     unset($_SESSION['currentfeedspage']);
     unset($_SESSION['currentmanagefeedsquery']);
-    
-    
+
+
     saveSetting('currenttext', '');
 
 }
 
 /**
  * Save settings and go to a page.
- * 
+ *
  * @param string $k Setting key
  * @param string $v Setting value
  * @param string $u URL to go to
- * 
+ *
  * @return void
  */
 function save($k, $v): void
@@ -89,7 +89,7 @@ function save($k, $v): void
     if ($k == 'currentlanguage') {
         unset_settings();
     }
-    
+
     saveSetting($k, $v);
 
 }

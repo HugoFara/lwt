@@ -33,7 +33,7 @@ function get_text_data($textid)
 {
     global $tbpref;
     $sql =
-    'SELECT TxLgID, TxTitle, TxAnnotatedText, TxPosition 
+    'SELECT TxLgID, TxTitle, TxAnnotatedText, TxPosition
     FROM ' . $tbpref . 'texts
     WHERE TxID = ' . $textid;
     $res = do_mysqli_query($sql);
@@ -79,7 +79,7 @@ function get_language_settings($langid)
 {
     global $tbpref;
     $sql =
-    'SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, 
+    'SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
     LgTextSize, LgRegexpWordCharacters, LgRemoveSpaces, LgRightToLeft
     FROM ' . $tbpref . 'languages
     WHERE LgID = ' . $langid;
@@ -490,13 +490,13 @@ function main_word_loop($textid, $showAll): void
      CASE WHEN `Ti2WordCount`>0 THEN Ti2WordCount ELSE 1 END AS Code,
      CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE `WoText` END AS TiText,
      CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN LOWER(Ti2Text) ELSE `WoTextLC` END AS TiTextLC,
-     Ti2Order, Ti2SeID, 
+     Ti2Order, Ti2SeID,
      CASE WHEN `Ti2WordCount`>0 THEN 0 ELSE 1 END AS TiIsNotWord,
-     CASE 
-        WHEN CHAR_LENGTH(Ti2Text)>0 
-        THEN CHAR_LENGTH(Ti2Text) 
-        ELSE CHAR_LENGTH(`WoTextLC`) 
-     END AS TiTextLength, 
+     CASE
+        WHEN CHAR_LENGTH(Ti2Text)>0
+        THEN CHAR_LENGTH(Ti2Text)
+        ELSE CHAR_LENGTH(`WoTextLC`)
+     END AS TiTextLength,
      WoID, WoText, WoStatus, WoTranslation, WoRomanization
      FROM {$tbpref}textitems2 LEFT JOIN {$tbpref}words ON Ti2WoID = WoID
      WHERE Ti2TxID = $textid
@@ -621,7 +621,7 @@ function do_text_text_style($showLearning, $mode_trans, $textsize, $ann_exists):
     ($mode_trans == 1 ? 'margin-left: 0.2em;' : ''),
     ($mode_trans == 3 ? 'margin-right: 0.2em;' : ''),
     ($ann_exists ? '' : '
-        overflow: hidden; 
+        overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
         display: inline-block;
@@ -706,7 +706,7 @@ function do_text_text_javascript($var_array): void
     /**
      * Save the current reading position.
      * @global {string} LWT_DATA.text.id Text ID
-     * 
+     *
      * @since 2.0.3-fork
      */
     function saveCurrentPosition() {
@@ -835,7 +835,7 @@ function do_text_text_content($textid, $only_body = true): void
     <div id="thetext" <?php echo ($rtlScript ? 'dir="rtl"' : '') ?>>
         <p style="margin-bottom: 10px;
             <?php echo $removeSpaces ? 'word-break:break-all;' : ''; ?>
-            font-size: <?php echo $textsize; ?>%; 
+            font-size: <?php echo $textsize; ?>%;
             line-height: <?php echo $ruby ? '1' : '1.4'; ?>;"
         >
             <!-- Start displaying words -->

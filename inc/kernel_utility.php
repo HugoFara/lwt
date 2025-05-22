@@ -2,7 +2,7 @@
 /**
  * \file
  * \brief Core utility functions that do not require a complete session.
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt
@@ -20,7 +20,7 @@
  define('LWT_APP_VERSION', '2.10.0-fork');
 
  /**
-  * @var string Date of the lastest published release of LWT 
+  * @var string Date of the lastest published release of LWT
   */
  define('LWT_RELEASE_DATE', "2024-04-01");
 
@@ -33,14 +33,14 @@
  * @global bool $debug If true adds a red "DEBUG"
  *
  * @return string Version number HTML-formatted
- * 
+ *
  * @psalm-return '2.9.1-fork (December 29 2023) <span class="red">DEBUG</span>'|'2.9.1-fork (December 29 2023)'
  */
-function get_version(): string 
+function get_version(): string
 {
     global $debug;
     $formattedDate = date("F d Y", strtotime(LWT_RELEASE_DATE));
-    $version = LWT_APP_VERSION . " ($formattedDate)"; 
+    $version = LWT_APP_VERSION . " ($formattedDate)";
     if ($debug) {
         $version .= ' <span class="red">DEBUG</span>';
     }
@@ -52,36 +52,36 @@ function get_version(): string
  *
  * @return string Machine-readable version, for instance v001.006.031 for version 1.6.31.
  */
-function get_version_number(): string 
+function get_version_number(): string
 {
     $r = 'v';
     $v = get_version();
     // Escape any detail like "-fork"
     $v = preg_replace('/-\w+\d*/', '', $v);
     $pos = strpos($v, ' ', 0);
-    if ($pos === false) { 
-        my_die('Wrong version: '. $v); 
+    if ($pos === false) {
+        my_die('Wrong version: '. $v);
     }
     $vn = preg_split("/[.]/", substr($v, 0, $pos));
-    if (count($vn) < 3) { 
-        my_die('Wrong version: '. $v); 
+    if (count($vn) < 3) {
+        my_die('Wrong version: '. $v);
     }
-    for ($i=0; $i<3; $i++) { 
-        $r .= substr('000' . $vn[$i], -3); 
+    for ($i=0; $i<3; $i++) {
+        $r .= substr('000' . $vn[$i], -3);
     }
     return $r;
 }
 
 /**
  * Escape special HTML characters.
- * 
+ *
  * @param  string $s String to escape.
  * @return string htmlspecialchars($s, ENT_COMPAT, "UTF-8");
  */
-function tohtml($s) 
+function tohtml($s)
 {
     if (!isset($s)) {
-        return ''; 
+        return '';
     }
     return htmlspecialchars($s, ENT_COMPAT, "UTF-8");
 }
@@ -90,15 +90,15 @@ function tohtml($s)
 /**
  * Echo debugging informations.
  */
-function showRequest(): void 
+function showRequest(): void
 {
     $olderr = error_reporting(0);
     echo "<pre>** DEBUGGING **********************************\n";
-    echo '$GLOBALS...'; 
+    echo '$GLOBALS...';
     print_r($GLOBALS);
-    echo 'get_version_number()...'; 
+    echo 'get_version_number()...';
     echo get_version_number() . "\n";
-    echo 'get_magic_quotes_gpc()...'; 
+    echo 'get_magic_quotes_gpc()...';
     echo "NOT EXISTS (FALSE)\n";
     echo "********************************** DEBUGGING **</pre>";
     error_reporting($olderr);
@@ -106,7 +106,7 @@ function showRequest(): void
 
 /**
  * Get the time since the last call
- * 
+ *
  * @return float Time sonce last call
  */
 function get_execution_time()
@@ -121,10 +121,10 @@ function get_execution_time()
 
 /**
  * Reload $setting_data if necessary
- * 
+ *
  * @return array $setting_data
  */
-function get_setting_data() 
+function get_setting_data()
 {
     static $setting_data;
     if (!$setting_data) {
@@ -234,15 +234,15 @@ function get_setting_data()
 
 /**
  * Remove all spaces from a string.
- * 
+ *
  * @param string      $s      Input string
  * @param string|bool $remove Do not do anything if empty or false
- * 
+ *
  * @return string String without spaces if requested.
  */
-function remove_spaces($s, $remove) 
+function remove_spaces($s, $remove)
 {
-    if (!$remove) { 
+    if (!$remove) {
         return $s;
     }
     // '' enthält &#x200B;
@@ -260,31 +260,31 @@ function remove_spaces($s, $remove)
  * @since 2.3.1-fork Much more verifications added
  * @since 2.10.0-fork Support for Mac OS added
  */
-function get_mecab_path($mecab_args = ''): string 
+function get_mecab_path($mecab_args = ''): string
 {
     $os = strtoupper(PHP_OS);
     $mecab_args = escapeshellcmd($mecab_args);
     if (str_starts_with($os, 'LIN') || str_starts_with($os, 'DAR')) {
         if (shell_exec("command -v mecab")) {
-            return 'mecab' . $mecab_args; 
+            return 'mecab' . $mecab_args;
         }
         my_die(
-            "MeCab not detected! " . 
+            "MeCab not detected! " .
             "Please install it or add it to your PATH (see documentation)."
         );
     }
     if (str_starts_with($os, 'WIN')) {
-        if (shell_exec('where /R "%ProgramFiles%\\MeCab\\bin" mecab.exe')) { 
+        if (shell_exec('where /R "%ProgramFiles%\\MeCab\\bin" mecab.exe')) {
             return '"%ProgramFiles%\\MeCab\\bin\\mecab.exe"' . $mecab_args;
-        } 
+        }
         if (shell_exec('where /R "%ProgramFiles(x86)%\\MeCab\\bin" mecab.exe')) {
-            return '"%ProgramFiles(x86)%\\MeCab\\bin\\mecab.exe"' . $mecab_args; 
+            return '"%ProgramFiles(x86)%\\MeCab\\bin\\mecab.exe"' . $mecab_args;
         }
         if (shell_exec('where mecab.exe')) {
-            return 'mecab.exe' . $mecab_args; 
+            return 'mecab.exe' . $mecab_args;
         }
         my_die(
-            "MeCab not detected! " . 
+            "MeCab not detected! " .
             "Install it or add it to the PATH (see documentation)."
         );
     }
@@ -294,30 +294,30 @@ function get_mecab_path($mecab_args = ''): string
 
 /**
  * Find end-of-sentence characters in a sentence using latin alphabet.
- * 
+ *
  * @param string[] $matches       All the matches from a capturing regex
  * @param string   $noSentenceEnd If different from '', can declare that a string a not the end of a sentence.
- * 
+ *
  * @return string $matches[0] with ends of sentences marked with \t and \r.
  */
 function find_latin_sentence_end($matches, $noSentenceEnd)
 {
-    if (!strlen($matches[6]) && strlen($matches[7]) && preg_match('/[a-zA-Z0-9]/', substr($matches[1], -1))) { 
-        return preg_replace("/[.]/", ".\t", $matches[0]); 
+    if (!strlen($matches[6]) && strlen($matches[7]) && preg_match('/[a-zA-Z0-9]/', substr($matches[1], -1))) {
+        return preg_replace("/[.]/", ".\t", $matches[0]);
     }
     if (is_numeric($matches[1])) {
-        if (strlen($matches[1]) < 3) { 
+        if (strlen($matches[1]) < 3) {
             return $matches[0];
         }
     } else if ($matches[3] && (preg_match('/^[B-DF-HJ-NP-TV-XZb-df-hj-np-tv-xz][b-df-hj-np-tv-xzñ]*$/u', $matches[1]) || preg_match('/^[AEIOUY]$/', $matches[1]))
-    ) { 
-        return $matches[0]; 
+    ) {
+        return $matches[0];
     }
     if (preg_match('/[.:]/', $matches[2]) && preg_match('/^[a-z]/', $matches[7])) {
         return $matches[0];
     }
     if ($noSentenceEnd != '' && preg_match("/^($noSentenceEnd)$/", $matches[0])) {
-        return $matches[0]; 
+        return $matches[0];
     }
     return $matches[0] . "\r";
 }
@@ -329,19 +329,19 @@ function find_latin_sentence_end($matches, $noSentenceEnd)
  * @param string $text Error text to output
  *
  * @return never
- * 
+ *
  * @since 2.5.3-fork Add a link to the Discord community
  */
-function my_die($text) 
+function my_die($text)
 {
     echo '</select></p></div><div style="padding: 1em; color:red; font-size:120%; background-color:#CEECF5;">' .
-    '<p><b>Fatal Error:</b> ' . 
-    tohtml($text) . 
+    '<p><b>Fatal Error:</b> ' .
+    tohtml($text) .
     "</p></div><hr /><pre>Backtrace:\n\n";
     debug_print_backtrace();
     echo '</pre><hr />
-    <p>Signal this issue on 
-    <a href="https://github.com/HugoFara/lwt/issues/new/choose">GitHub</a> or 
+    <p>Signal this issue on
+    <a href="https://github.com/HugoFara/lwt/issues/new/choose">GitHub</a> or
     <a href="https://discord.gg/xrkRZR2jtt">Discord</a>.</p>';
     die('</body></html>');
 }
@@ -349,7 +349,7 @@ function my_die($text)
 /**
  * Display the main menu of navigation as a dropdown
  */
-function quickMenu(): void 
+function quickMenu(): void
 {
     ?>
 
@@ -390,7 +390,7 @@ function quickMenu(): void
  * @global string $tbpref The database table prefix if true
  * @global int    $debug  Show the requests if true
  */
-function pagestart_kernel_nobody($title, $addcss=''): void 
+function pagestart_kernel_nobody($title, $addcss=''): void
 {
     global $tbpref, $debug;
     @header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
@@ -398,13 +398,13 @@ function pagestart_kernel_nobody($title, $addcss=''): void
     @header('Cache-Control: no-cache, must-revalidate, max-age=0');
     @header('Pragma: no-cache');
     ?><!DOCTYPE html>
-    <?php 
+    <?php
     echo '<html lang="en">';
     ?>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <!-- 
-        <?php echo file_get_contents("UNLICENSE.md");?> 
+    <!--
+        <?php echo file_get_contents("UNLICENSE.md");?>
     -->
     <meta name="viewport" content="width=900" />
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
@@ -413,7 +413,7 @@ function pagestart_kernel_nobody($title, $addcss=''): void
     <link rel="apple-touch-icon" sizes="114x114" href="img/apple-touch-icon-114x114.png" />
     <link rel="apple-touch-startup-image" href="img/apple-touch-startup.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    
+
     <link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
     <link rel="stylesheet" type="text/css" href="css/jquery.tagit.css" />
     <link rel="stylesheet" type="text/css" href="css/styles.css" />
@@ -421,7 +421,7 @@ function pagestart_kernel_nobody($title, $addcss=''): void
     <style type="text/css">
         <?php echo $addcss . "\n"; ?>
     </style>
-    
+
     <script type="text/javascript" src="js/jquery.js" charset="utf-8"></script>
     <script type="text/javascript" src="js/jquery.scrollTo.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="js/jquery-ui.min.js"  charset="utf-8"></script>
@@ -435,7 +435,7 @@ function pagestart_kernel_nobody($title, $addcss=''): void
         var STATUSES = <?php echo json_encode(get_statuses()); ?>;
         //]]>
     </script>
-    
+
     <title>LWT :: <?php echo tohtml($title); ?></title>
 </head>
     <?php
@@ -444,8 +444,8 @@ function pagestart_kernel_nobody($title, $addcss=''): void
 <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
     <?php
     flush();
-    if ($debug) { 
-        showRequest(); 
+    if ($debug) {
+        showRequest();
     }
 }
 
@@ -455,18 +455,18 @@ function pagestart_kernel_nobody($title, $addcss=''): void
  * @global bool $debug Show the requests if true
  * @global float $dspltime Total execution time since the PHP session started
  */
-function pageend(): void 
+function pageend(): void
 {
     global $debug, $dspltime;
-    if ($debug) { 
-        showRequest(); 
+    if ($debug) {
+        showRequest();
     }
-    if ($dspltime) { 
-        echo "\n<p class=\"smallgray2\">" . 
-        round(get_execution_time(), 5) . " secs</p>\n"; 
+    if ($dspltime) {
+        echo "\n<p class=\"smallgray2\">" .
+        round(get_execution_time(), 5) . " secs</p>\n";
     }
     echo '</body></html>';
-} 
+}
 
 /**
  * Debug function only.
@@ -476,10 +476,10 @@ function pageend(): void
  *
  * @global bool $debug This functions doesn't do anything is $debug is false.
  */
-function echodebug($var,$text): void 
+function echodebug($var,$text): void
 {
     global $debug;
-    if ($debug) { 
+    if ($debug) {
         echo "<pre> **DEBUGGING** " . tohtml($text) . ' = [[[';
         print_r($var);
         echo "]]]\n--------------</pre>";
@@ -488,13 +488,13 @@ function echodebug($var,$text): void
 
 
 /**
- * Return an associative array of all possible statuses 
- * 
- * @return array<int<1, 5>|98|99, array{string, string}> 
- * Statuses, keys are 1, 2, 3, 4, 5, 98, 99. 
- * Values are associative arrays of keys abbr and name 
- */  
-function get_statuses() 
+ * Return an associative array of all possible statuses
+ *
+ * @return array<int<1, 5>|98|99, array{string, string}>
+ * Statuses, keys are 1, 2, 3, 4, 5, 98, 99.
+ * Values are associative arrays of keys abbr and name
+ */
+function get_statuses()
 {
     static $statuses;
     if (!$statuses) {
@@ -513,16 +513,16 @@ function get_statuses()
 
 /**
  * Replace the first occurence of $needle in $haystack by $replace
- * 
+ *
  * @param  string $needle   Text to replace
  * @param  string $replace  Text to replace by
  * @param  string $haystack Input string
  * @return string String with replaced text
  */
-function str_replace_first($needle, $replace, $haystack) 
+function str_replace_first($needle, $replace, $haystack)
 {
     if ($needle === '') {
-        return $haystack; 
+        return $haystack;
     }
     $pos = strpos($haystack, $needle);
     if ($pos !== false) {
@@ -538,10 +538,10 @@ function str_replace_first($needle, $replace, $haystack)
  *
  * @return string A JSON-encoded version of the annotations
  */
-function annotation_to_json($ann): string|false 
+function annotation_to_json($ann): string|false
 {
     if ($ann == '') {
-        return "{}"; 
+        return "{}";
     }
     $arr = array();
     $items = preg_split('/[\n]/u', $ann);
@@ -560,11 +560,11 @@ function annotation_to_json($ann): string|false
 
 /**
  * Get a request when possible. Otherwise, return an empty string.
- * 
+ *
  * @param  string $s Request key
  * @return string Trimmed request or empty string
  */
-function getreq($s) 
+function getreq($s)
 {
     if (isset($_REQUEST[$s])) {
         return trim($_REQUEST[$s]);
@@ -574,15 +574,15 @@ function getreq($s)
 
 /**
  * Get a session variable when possible. Otherwise, return an empty string.
- * 
+ *
  * @param  string $s Session variable key
  * @return string Trimmed sesseion variable or empty string
  */
-function getsess($s) 
+function getsess($s)
 {
     if (isset($_SESSION[$s]) ) {
         return trim($_SESSION[$s]);
-    } 
+    }
     return '';
 }
 
@@ -591,24 +591,24 @@ function getsess($s)
  *
  * @return string base URL
  */
-function url_base(): string 
+function url_base(): string
 {
     $url = parse_url("http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
     $r = $url["scheme"] . "://" . $url["host"];
-    if (isset($url["port"])) { 
-        $r .= ":" . $url["port"]; 
+    if (isset($url["port"])) {
+        $r .= ":" . $url["port"];
     }
     if(isset($url["path"])) {
         $b = basename($url["path"]);
-        if (substr($b, -4) == ".php" || substr($b, -4) == ".htm" || substr($b, -5) == ".html") { 
-            $r .= dirname($url["path"]); 
+        if (substr($b, -4) == ".php" || substr($b, -4) == ".htm" || substr($b, -5) == ".html") {
+            $r .= dirname($url["path"]);
         }
         else {
-            $r .= $url["path"]; 
+            $r .= $url["path"];
         }
     }
-    if (substr($r, -1) !== "/") { 
-        $r .= "/"; 
+    if (substr($r, -1) !== "/") {
+        $r .= "/";
     }
     return $r;
 }
@@ -624,18 +624,18 @@ function url_base(): string
  *
  * @return string SQL code to use
  */
-function make_score_random_insert_update($type): string 
+function make_score_random_insert_update($type): string
 {
     // $type='iv'/'id'/'u'
     if ($type == 'iv') {
         return ' WoTodayScore, WoTomorrowScore, WoRandom ';
-    } 
+    }
     if ($type == 'id') {
         return ' ' . getsqlscoreformula(2) . ', ' . getsqlscoreformula(3) . ', RAND() ';
-    } 
+    }
     if ($type == 'u') {
         return ' WoTodayScore = ' . getsqlscoreformula(2) . ', WoTomorrowScore = ' . getsqlscoreformula(3) . ', WoRandom = RAND() ';
-    } 
+    }
     return '';
 }
 
@@ -647,7 +647,7 @@ function make_score_random_insert_update($type): string
  * @return string SQL score computation string
  *
  * @psalm-return '
-        GREATEST(-125, CASE 
+        GREATEST(-125, CASE
             WHEN WoStatus > 5 THEN 100
             WHEN WoStatus = 1 THEN ROUND(-7 * DATEDIFF(NOW(),WoStatusChanged))
             WHEN WoStatus = 2 THEN ROUND(6.9 - 3.5 * DATEDIFF(NOW(),WoStatusChanged))
@@ -655,34 +655,34 @@ function make_score_random_insert_update($type): string
             WHEN WoStatus = 4 THEN ROUND(46.4 - 1.75 * DATEDIFF(NOW(),WoStatusChanged))
             WHEN WoStatus = 5 THEN ROUND(100 - 1.4 * DATEDIFF(NOW(),WoStatusChanged))
         END)'|'
-        GREATEST(-125, CASE 
-            WHEN WoStatus > 5 THEN 100 
-            WHEN WoStatus = 1 THEN ROUND(-7 -7 * DATEDIFF(NOW(),WoStatusChanged)) 
-            WHEN WoStatus = 2 THEN ROUND(3.4 - 3.5 * DATEDIFF(NOW(),WoStatusChanged)) 
-            WHEN WoStatus = 3 THEN ROUND(17.7 - 2.3 * DATEDIFF(NOW(),WoStatusChanged)) 
-            WHEN WoStatus = 4 THEN ROUND(44.65 - 1.75 * DATEDIFF(NOW(),WoStatusChanged)) 
-            WHEN WoStatus = 5 THEN ROUND(98.6 - 1.4 * DATEDIFF(NOW(),WoStatusChanged)) 
+        GREATEST(-125, CASE
+            WHEN WoStatus > 5 THEN 100
+            WHEN WoStatus = 1 THEN ROUND(-7 -7 * DATEDIFF(NOW(),WoStatusChanged))
+            WHEN WoStatus = 2 THEN ROUND(3.4 - 3.5 * DATEDIFF(NOW(),WoStatusChanged))
+            WHEN WoStatus = 3 THEN ROUND(17.7 - 2.3 * DATEDIFF(NOW(),WoStatusChanged))
+            WHEN WoStatus = 4 THEN ROUND(44.65 - 1.75 * DATEDIFF(NOW(),WoStatusChanged))
+            WHEN WoStatus = 5 THEN ROUND(98.6 - 1.4 * DATEDIFF(NOW(),WoStatusChanged))
         END)'|'0'
  */
-function getsqlscoreformula($method): string 
+function getsqlscoreformula($method): string
 {
-    // 
+    //
     // Formula: {{{2.4^{Status}+Status-Days-1} over Status -2.4} over 0.14325248}
-        
-    if ($method == 3) { 
+
+    if ($method == 3) {
         return '
-        GREATEST(-125, CASE 
-            WHEN WoStatus > 5 THEN 100 
-            WHEN WoStatus = 1 THEN ROUND(-7 -7 * DATEDIFF(NOW(),WoStatusChanged)) 
-            WHEN WoStatus = 2 THEN ROUND(3.4 - 3.5 * DATEDIFF(NOW(),WoStatusChanged)) 
-            WHEN WoStatus = 3 THEN ROUND(17.7 - 2.3 * DATEDIFF(NOW(),WoStatusChanged)) 
-            WHEN WoStatus = 4 THEN ROUND(44.65 - 1.75 * DATEDIFF(NOW(),WoStatusChanged)) 
-            WHEN WoStatus = 5 THEN ROUND(98.6 - 1.4 * DATEDIFF(NOW(),WoStatusChanged)) 
+        GREATEST(-125, CASE
+            WHEN WoStatus > 5 THEN 100
+            WHEN WoStatus = 1 THEN ROUND(-7 -7 * DATEDIFF(NOW(),WoStatusChanged))
+            WHEN WoStatus = 2 THEN ROUND(3.4 - 3.5 * DATEDIFF(NOW(),WoStatusChanged))
+            WHEN WoStatus = 3 THEN ROUND(17.7 - 2.3 * DATEDIFF(NOW(),WoStatusChanged))
+            WHEN WoStatus = 4 THEN ROUND(44.65 - 1.75 * DATEDIFF(NOW(),WoStatusChanged))
+            WHEN WoStatus = 5 THEN ROUND(98.6 - 1.4 * DATEDIFF(NOW(),WoStatusChanged))
         END)';
     }
-    if ($method == 2) { 
+    if ($method == 2) {
         return '
-        GREATEST(-125, CASE 
+        GREATEST(-125, CASE
             WHEN WoStatus > 5 THEN 100
             WHEN WoStatus = 1 THEN ROUND(-7 * DATEDIFF(NOW(),WoStatusChanged))
             WHEN WoStatus = 2 THEN ROUND(6.9 - 3.5 * DATEDIFF(NOW(),WoStatusChanged))
@@ -690,37 +690,37 @@ function getsqlscoreformula($method): string
             WHEN WoStatus = 4 THEN ROUND(46.4 - 1.75 * DATEDIFF(NOW(),WoStatusChanged))
             WHEN WoStatus = 5 THEN ROUND(100 - 1.4 * DATEDIFF(NOW(),WoStatusChanged))
         END)';
-    } 
+    }
     return '0';
 }
 
 
 /**
  * Display a error message vanishing after a few seconds.
- * 
+ *
  * @param string $msg    Message to display.
  * @param bool   $noback If true, don't display a button to go back
- * 
+ *
  * @return string HTML-formatted string for an automating vanishing message.
  */
-function error_message_with_hide($msg, $noback): string 
+function error_message_with_hide($msg, $noback): string
 {
-    if (trim($msg) == '') { 
-        return ''; 
+    if (trim($msg) == '') {
+        return '';
     }
     if (substr($msg, 0, 5) == "Error" ) {
-        return '<p class="red">*** ' . tohtml($msg) . ' ***' . 
-        ($noback ? 
-        '' : 
-        '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" onclick="history.back();" />' ) . 
-        '</p>'; 
-    } 
-    return '<p id="hide3" class="msgblue">+++ ' . tohtml($msg) . ' +++</p>'; 
+        return '<p class="red">*** ' . tohtml($msg) . ' ***' .
+        ($noback ?
+        '' :
+        '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" onclick="history.back();" />' ) .
+        '</p>';
+    }
+    return '<p id="hide3" class="msgblue">+++ ' . tohtml($msg) . ' +++</p>';
 }
 
 /**
  * Get a two-letter language code from dictionary source language.
- * 
+ *
  * @param string $url Input URL, usually Google Translate or LibreTranslate
  */
 function langFromDict($url)
@@ -730,7 +730,7 @@ function langFromDict($url)
     }
     $query = parse_url($url, PHP_URL_QUERY);
     parse_str($query, $parsed_query);
-    if (array_key_exists("lwt_translator", $parsed_query)  
+    if (array_key_exists("lwt_translator", $parsed_query)
         && $parsed_query["lwt_translator"] == "libretranslate"
     ) {
         return $parsed_query["source"] ?? "";
@@ -741,7 +741,7 @@ function langFromDict($url)
 
 /**
  * Get a two-letter language code from dictionary target language
- * 
+ *
  * @param string $url Input URL, usually Google Translate or LibreTranslate
  */
 function targetLangFromDict($url)
@@ -751,7 +751,7 @@ function targetLangFromDict($url)
     }
     $query = parse_url($url, PHP_URL_QUERY);
     parse_str($query, $parsed_query);
-    if (array_key_exists("lwt_translator", $parsed_query)  
+    if (array_key_exists("lwt_translator", $parsed_query)
         && $parsed_query["lwt_translator"] == "libretranslate"
     ) {
         return $parsed_query["target"] ?? "";
@@ -762,13 +762,13 @@ function targetLangFromDict($url)
 
 /**
  * Parse a SQL file by returning an array of the different queries it contains.
- * 
+ *
  * @param string $filename File name
- * 
+ *
  * @return array
  */
 function parseSQLFile($filename)
-{  
+{
     $handle = fopen($filename, 'r');
     if ($handle === false) {
         return array();
@@ -798,10 +798,10 @@ function parseSQLFile($filename)
 }
 
 /*****************
- * Wrappers for PHP <8.0  
+ * Wrappers for PHP <8.0
 ********************/
 if (!function_exists('str_starts_with')) {
-    function str_starts_with($haystack, $needle) 
+    function str_starts_with($haystack, $needle)
     {
         return substr($haystack, 0, strlen($needle)) == $needle;
     }
@@ -815,7 +815,7 @@ if (!function_exists('str_ends_with')) {
 }
 
 if (!function_exists('str_contains')) {
-    function str_contains($haystack, $needle) 
+    function str_contains($haystack, $needle)
     {
         return strpos($haystack, $needle) !== false;
     }

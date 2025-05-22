@@ -27,12 +27,12 @@ $word = get_first_value(
 );
 pagestart("Term: " . $word, false);
 $m1 = runsql(
-    'delete from ' . $tbpref . 'words where WoID = ' . $wid, 
+    'delete from ' . $tbpref . 'words where WoID = ' . $wid,
     ''
 );
 adjust_autoincr('words', 'WoID');
 runsql(
-    'delete from ' . $tbpref . 'textitems2 where Ti2WordCount>1 AND Ti2WoID = ' . $wid, 
+    'delete from ' . $tbpref . 'textitems2 where Ti2WordCount>1 AND Ti2WoID = ' . $wid,
     ''
 );
 

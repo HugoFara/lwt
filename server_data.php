@@ -3,11 +3,11 @@
 /**
  * \file
  * \brief Useful software data.
- * 
+ *
  * Call: server_data.php
- * 
+ *
  * PHP version 8.1.1
- * 
+ *
  * @category User_Interface
  * @package  Lwt
  * @author   HugoFara <hugo.farajallah@protonmail.com>
@@ -23,9 +23,9 @@ require_once 'inc/session_utility.php';
 /**
  * Return a lot of different server state variables.
  *
- * @return (false|float|string)[] {"db_prefix": string, "db_size": float, "server_soft": string[], 
- * "apache": string, "php": string, "mysql": string} 
- * Table prefix, database size, server software, apache version, PHP version, MySQL 
+ * @return (false|float|string)[] {"db_prefix": string, "db_size": float, "server_soft": string[],
+ * "apache": string, "php": string, "mysql": string}
+ * Table prefix, database size, server software, apache version, PHP version, MySQL
  * version
  *
  * @global string $tbpref Database table prefix
@@ -33,7 +33,7 @@ require_once 'inc/session_utility.php';
  *
  * @psalm-return array{db_name: string, db_prefix: string, db_size: float, server_soft: string, apache: string, php: false|string, mysql: string}
  */
-function get_server_data_table(): array 
+function get_server_data_table(): array
 {
     global $tbpref, $dbname;
     $dbaccess_format = convert_string_to_sqlsyntax($dbname);
@@ -41,20 +41,20 @@ function get_server_data_table(): array
     $data_table["db_name"] = $dbname;
     $data_table["db_prefix"] = $tbpref;
     $temp_size = get_first_value(
-        "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value 
-        FROM information_schema.TABLES 
-        WHERE table_schema = $dbaccess_format 
+        "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
+        FROM information_schema.TABLES
+        WHERE table_schema = $dbaccess_format
         AND table_name IN (
-            '{$tbpref}archivedtexts', '{$tbpref}archtexttags', 
+            '{$tbpref}archivedtexts', '{$tbpref}archtexttags',
             '{$tbpref}feedlinks', '{$tbpref}languages',
-            '{$tbpref}newsfeeds', '{$tbpref}sentences', '{$tbpref}settings', 
-            '{$tbpref}tags', '{$tbpref}tags2', 
-            '{$tbpref}textitems2', '{$tbpref}texts', '{$tbpref}texttags', 
+            '{$tbpref}newsfeeds', '{$tbpref}sentences', '{$tbpref}settings',
+            '{$tbpref}tags', '{$tbpref}tags2',
+            '{$tbpref}textitems2', '{$tbpref}texts', '{$tbpref}texttags',
             '{$tbpref}words', '{$tbpref}wordtags'
         )"
     );
-    if ($temp_size === null) { 
-        $data_table["db_size"] = 0.0; 
+    if ($temp_size === null) {
+        $data_table["db_size"] = 0.0;
     } else {
         $data_table["db_size"] = floatval($temp_size);
     }
@@ -72,7 +72,7 @@ function get_server_data_table(): array
 
 /**
  * Display the main content for the page.
- * 
+ *
  * @return void
  */
 function display_content(): void
@@ -105,7 +105,7 @@ function display_content(): void
         <tr>
             <td>Server Software</td>
             <td>
-                <a href="https://en.wikipedia.org/wiki/Apache_HTTP_Server" 
+                <a href="https://en.wikipedia.org/wiki/Apache_HTTP_Server"
                 target="_blank">
                     <?php echo $data["apache"]; ?>
                 </a>

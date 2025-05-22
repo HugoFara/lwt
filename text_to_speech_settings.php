@@ -3,9 +3,9 @@
 /**
  * \file
  * \brief Utility for calling system speech synthesizer
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  * @package  Lwt
  * @author   chaosarium <leonluleonlu@gmail.com>
@@ -20,19 +20,19 @@ require_once 'inc/langdefs.php';
 
 /**
  * Two-letter language code from from language name (e. g. : "English" = > "en" ).
- * 
+ *
  * @param string $language Language name, for instance "English"
- * 
+ *
  * @return string Two-letter language name
- * 
+ *
  * @ðeprecated Since 2.9.1-fork, use getLanguageCode
  */
 function get_language_code($language)
 {
     global $tbpref;
     $lg_id = (int) get_first_value(
-        "SELECT LgID as value 
-        FROM {$tbpref}languages 
+        "SELECT LgID as value
+        FROM {$tbpref}languages
         WHERE LgName = " . convert_string_to_sqlsyntax($language)
     );
     return getLanguageCode($lg_id, LWT_LANGUAGES_ARRAY);
@@ -40,12 +40,12 @@ function get_language_code($language)
 
 /**
  * Return the language ID from a two-letter language code or a BCP 47 tag.
- * 
+ *
  * If two languages have the same country name, only thte first one will be returned.
- * 
- * @param string $code Two letters, or four letters separated with caret 
+ *
+ * @param string $code Two letters, or four letters separated with caret
  *                     ("fr" or "en-US").
- * 
+ *
  * @return int Language ID if found, -1 otherwise.
  */
 function language_id_from_code($code)
@@ -62,7 +62,7 @@ function language_id_from_code($code)
 
 /**
  * String to population a SELECT tag.
- * 
+ *
  * @return string HTML-formatted string.
  */
 function tts_language_options()
@@ -80,7 +80,7 @@ function tts_language_options()
 
 /**
  * Prepare a from for all the TTS settings.
- * 
+ *
  * @return void
  */
 function tts_settings_form()
@@ -97,13 +97,13 @@ function tts_settings_form()
             <th class="th1 center" rowspan="2">Language</th>
             <td class="td1 center">Language code</td>
             <td class="td1 center">
-            <select name="LgName" id="get-language" class="notempty respinput" 
+            <select name="LgName" id="get-language" class="notempty respinput"
             onchange="tts_settings.populateVoiceList();">
                 <?php echo tts_language_options(); ?>
             </select>
             </td>
             <td class="td1 center">
-                <img src="<?php print_file_path("icn/status-busy.png") ?>" 
+                <img src="<?php print_file_path("icn/status-busy.png") ?>"
                 title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
@@ -114,7 +114,7 @@ function tts_settings_form()
                 </select>
             </td>
             <td class="td1 center">
-                <img src="<?php print_file_path("icn/status-busy.png") ?>" 
+                <img src="<?php print_file_path("icn/status-busy.png") ?>"
                 title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
@@ -122,21 +122,21 @@ function tts_settings_form()
             <th class="th1 center" rowspan="2">Speech</th>
             <td class="td1 center">Reading Rate</td>
             <td class="td1 center">
-                <input type="range" name="LgTTSRate" class="respinput" 
+                <input type="range" name="LgTTSRate" class="respinput"
                 min="0.5" max="2" value="1" step="0.1" id="rate">
             </td>
             <td class="td1 center">
-                <img src="<?php print_file_path("icn/status.png") ?>" />
+                <img src="<?php print_file_path("icn/status.png") ?>" alt="status icon"/>
             </td>
         </tr>
         <tr>
             <td class="td1 center">Pitch</td>
             <td class="td1 center">
-                <input type="range" name="LgPitch" class="respinput" min="0" 
+                <input type="range" name="LgPitch" class="respinput" min="0"
                 max="2" value="1" step="0.1" id="pitch">
             </td>
             <td class="td1 center">
-                <img src="<?php print_file_path("icn/status.png") ?>" />
+                <img src="<?php print_file_path("icn/status.png") ?>" alt="status icon" />
             </td>
         </tr>
         <tr>
@@ -144,8 +144,8 @@ function tts_settings_form()
         </tr>
         <tr>
             <td class="td1 right" colspan="4">
-                <input type="button" value="Cancel" 
-                onclick="tts_settings.clickCancel();" /> 
+                <input type="button" value="Cancel"
+                onclick="tts_settings.clickCancel();" />
                 <input type="submit" name="op" value="Save" />
             </td>
         </tr>
@@ -156,7 +156,7 @@ function tts_settings_form()
 
 /**
  * Prepare a demo for TTS.
- * 
+ *
  * @return void
  */
 function tts_demo()
@@ -175,7 +175,7 @@ function tts_demo()
 
 /**
  * Prepare the JavaScript content for text-to-speech.
- * 
+ *
  * @return void
  */
 function tts_js()
@@ -197,17 +197,17 @@ function tts_js()
         },
 
         /**
-         * Get the language country code from the page. 
-         * 
+         * Get the language country code from the page.
+         *
          * @returns {string} Language code (e. g. "en")
          */
         getLanguageCode: function() {
             return $('#get-language').val();
         },
 
-        /** 
+        /**
          * Gather data in the page to read the demo.
-         * 
+         *
          * @returns {undefined}
          */
         readingDemo: function() {
@@ -235,7 +235,7 @@ function tts_js()
 
         /**
          * Populate the languages region list.
-         * 
+         *
          * @returns {undefined}
          */
         populateVoiceList: function() {
@@ -259,7 +259,7 @@ function tts_js()
         },
 
         clickCancel: function() {
-            lwtFormCheck.resetDirty(); 
+            lwtFormCheck.resetDirty();
             location.href = 'text_to_speech_settings.php';
         }
     };
@@ -271,10 +271,10 @@ function tts_js()
 
 
     /**
-     * Get the language country code from the page. 
-     * 
+     * Get the language country code from the page.
+     *
      * @returns {string} Language code (e. g. "en")
-     * 
+     *
      * @deprecated Since 2.10.0-fork
      */
     function getLanguageCode()
@@ -282,11 +282,11 @@ function tts_js()
         return tts_settings.getLanguageCode();
     }
 
-    /** 
+    /**
      * Gather data in the page to read the demo.
-     * 
+     *
      * @returns {undefined}
-     * 
+     *
      * @deprecated Since 2.10.0-fork
      */
     function readingDemo()
@@ -296,7 +296,7 @@ function tts_js()
 
     /**
      * Set the Text-to-Speech data using cookies
-     * 
+     *
      * @deprecated Since 2.10.0-fork
      */
     function presetTTSData()
@@ -306,9 +306,9 @@ function tts_js()
 
     /**
      * Populate the languages region list.
-     * 
+     *
      * @returns {undefined}
-     * 
+     *
      * @deprecated Since 2.10.0-fork
      */
     function populateVoiceList() {
@@ -324,7 +324,7 @@ function tts_js()
 
 /**
  * Make only a partial, embedable page for text-to-speech settings.
- * 
+ *
  * @return void
  */
 function tts_settings_minimal_page()
@@ -334,7 +334,7 @@ function tts_settings_minimal_page()
     <p>
         <b>Note</b>: language settings depend on your web browser, as different web
         browser have different ways to read languages. Saving anything here will save
-        it as a cookie on your browser and will not be accessible by the LWT database. 
+        it as a cookie on your browser and will not be accessible by the LWT database.
     </p>
     <?php
     tts_js();
@@ -342,9 +342,9 @@ function tts_settings_minimal_page()
 
 /**
  * Make the complete HTML page for text-to-speech settings.
- * 
+ *
  * @param string $message A message to display when page loads.
- * 
+ *
  * @return void
  */
 function tts_settings_full_page($message)
@@ -366,7 +366,7 @@ function tts_settings_full_page($message)
  * Save the text-to-speech settings as cookies.
  *
  * @param array $form Inputs from the main form.
- * 
+ *
  * @return void
  */
 function tts_save_settings($form): void

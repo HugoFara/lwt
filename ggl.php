@@ -2,12 +2,12 @@
 
 /**
  * Google Translate interface
- * 
+ *
  * Call: ggl.php?text=[text]&sl=[source language]&tl=[target language] ... translate text
  *     ... sent=[int] ... single sentence mode.
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @package Lwt
  * @author  LWT Project <lwt-project@hotmail.com>
  * @license Unlicense <http://unlicense.org/>
@@ -27,10 +27,10 @@ use function Lwt\Includes\getGoogleTimeToken;
 
 /**
  * Translate a single sentence using Google Translate.
- * 
+ *
  * @param string $text        Text to translate
  * @param string $translation Sentence translation
- * 
+ *
  * @return void
  */
 function translate_sentence($text, $translation): void
@@ -47,12 +47,12 @@ function translate_sentence($text, $translation): void
 
 /**
  * Translate input text using Google Translate.
- * 
+ *
  * @param string $text   Text to translate
- * @param array  $file   Array of translated terms 
+ * @param array  $file   Array of translated terms
  * @param string $sl     Source language (e. g. "es")
  * @param string $tl     Target language (e. g. "en")
- * 
+ *
  * @return void
  */
 function translate_term($text, $file, $sl, $tl): void
@@ -60,16 +60,16 @@ function translate_term($text, $file, $sl, $tl): void
     global $tbpref;
     $lg_id = getSetting('currentlangage');
     $voiceApi = get_first_value(
-        "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages 
+        "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages
         WHERE LgID = $lg_id"
     );
     ?>
 <h2 title="Translate with Google Translate">
-    Word translation: <?php echo tohtml($text) ?> 
+    Word translation: <?php echo tohtml($text) ?>
     <img id="textToSpeech" style="cursor: pointer;" title="Click to read!"
     src="<?php print_file_path('icn/speaker-volume.png'); ?>" ></img>
 
-    <img id="del_translation" style="cursor: pointer;" 
+    <img id="del_translation" style="cursor: pointer;"
     title="Empty Translation Field" onclick="deleteTranslation ();"
     src="<?php print_file_path('icn/broom.png'); ?>" ></img>
 </h2>
@@ -81,26 +81,26 @@ function translate_term($text, $file, $sl, $tl): void
     });
 
     $(document).ready(function() {
-        if (window.parent.frames['ro'] === undefined && window.opener === undefined) 
+        if (window.parent.frames['ro'] === undefined && window.opener === undefined)
             $('#del_translation').remove();
     });
 </script>
     <?php
     foreach ($file as $word){
-        echo '<span class="click" onclick="addTranslation(' . 
-        prepare_textdata_js($word) . ');">' . 
-        '<img src="icn/tick-button.png" title="Copy" alt="Copy" /> &nbsp; ' . 
+        echo '<span class="click" onclick="addTranslation(' .
+        prepare_textdata_js($word) . ');">' .
+        '<img src="icn/tick-button.png" title="Copy" alt="Copy" /> &nbsp; ' .
         tohtml($word) . '</span><br />';
     }
     ?>
     <p>
-        (Click on <img src="icn/tick-button.png" title="Choose" alt="Choose" /> 
+        (Click on <img src="icn/tick-button.png" title="Choose" alt="Choose" />
         to copy word(s) into above term)<br />&nbsp;
     </p>
     <hr />
     <form action="ggl.php" method="get">
-        Unhappy?<br/>Change term: 
-        <input type="text" name="text" maxlength="250" size="15" 
+        Unhappy?<br/>Change term:
+        <input type="text" name="text" maxlength="250" size="15"
         value="<?php echo tohtml($text); ?>">
         <input type="hidden" name="sl" value="<?php echo tohtml($sl); ?>">
         <input type="hidden" name="tl" value="<?php echo tohtml($tl); ?>">
@@ -111,12 +111,12 @@ function translate_term($text, $file, $sl, $tl): void
 
 /**
  * Translate input text using Google Translate.
- * 
+ *
  * @param string $text Text to translate
  * @param string $sl Source language (e. g. "es")
  * @param string $tl Target language (e. g. "en")
  * @param bool $sentence_mode Set to true for full sentence translation
- * 
+ *
  * @return void
  */
 function translate_text($text, $sl, $tl, $sentence_mode): void
@@ -131,9 +131,9 @@ function translate_text($text, $sl, $tl, $sentence_mode): void
 
     $gglink = makeOpenDictStr(
         createTheDictLink(
-            "https://translate.google.com/?sl=$sl&tl=$tl&text=lwt_term&lwt_popup=true", 
+            "https://translate.google.com/?sl=$sl&tl=$tl&text=lwt_term&lwt_popup=true",
             $text
-        ), 
+        ),
         "View on Google Translate"
     );
 
@@ -148,9 +148,9 @@ function translate_text($text, $sl, $tl, $sentence_mode): void
 
 /**
  * Translate input text using Google Translate.
- * 
+ *
  * @param string $text Text to translate
- * 
+ *
  * @return void
  */
 function do_content($text): void

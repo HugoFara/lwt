@@ -32,12 +32,12 @@ function all_words_wellknown_get_words($txid)
 {
     global $tbpref;
     $sql = "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-    FROM ( 
-        {$tbpref}textitems2 
-        LEFT JOIN {$tbpref}words 
+    FROM (
+        {$tbpref}textitems2
+        LEFT JOIN {$tbpref}words
         ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
-    ) 
-    WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = $txid 
+    )
+    WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = $txid
     ORDER BY Ti2Order";
     return do_mysqli_query($sql);
 }
@@ -61,7 +61,7 @@ function all_words_wellknown_process_word($status, $term, $termlc, $langid): arr
 {
     global $tbpref;
     $wid = get_first_value(
-        "SELECT WoID AS value FROM words 
+        "SELECT WoID AS value FROM words
         WHERE WoTextLC = " . convert_string_to_sqlsyntax($termlc)
     );
     if ($wid !== null) {
@@ -71,8 +71,8 @@ function all_words_wellknown_process_word($status, $term, $termlc, $langid): arr
             "INSERT INTO {$tbpref}words (
                 WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged,"
                 . make_score_random_insert_update('iv') .
-            ") 
-            VALUES( 
+            ")
+            VALUES(
                 $langid, " .
                 convert_string_to_sqlsyntax($term) . ", " .
                 convert_string_to_sqlsyntax($termlc) . ", $status, NOW(), " .
@@ -122,8 +122,8 @@ function all_words_wellknown_main_loop($txid, $status): array
 {
     global $tbpref;
     $langid = get_first_value(
-        "SELECT TxLgID AS value 
-        FROM {$tbpref}texts 
+        "SELECT TxLgID AS value
+        FROM {$tbpref}texts
         WHERE TxID = $txid"
     );
     $javascript = "let title='';";
@@ -143,9 +143,9 @@ function all_words_wellknown_main_loop($txid, $status): array
 
     // Associate existing textitems.
     runsql(
-        "UPDATE {$tbpref}words 
-        JOIN {$tbpref}textitems2 
-        ON Ti2WoID = 0 AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID 
+        "UPDATE {$tbpref}words
+        JOIN {$tbpref}textitems2
+        ON Ti2WoID = 0 AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
         SET Ti2WoID = WoID",
         ''
     );
@@ -202,7 +202,7 @@ function all_words_wellknown_javascript($txid, $javascript)
 <script type="text/javascript">
     //<![CDATA[
     const context = window.parent.document;
-    <?php echo $javascript; ?> 
+    <?php echo $javascript; ?>
     $('#learnstatus', context).html('<?php echo addslashes($content); ?>');
     window.parent.setTimeout(window.parent.cClick, 1000);
     //]]>

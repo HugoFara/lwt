@@ -3,7 +3,7 @@
 /**
  * \file
  * \brief Define the Text class
- * 
+ *
  * PHP version 8.1
  *
  * @package Lwt

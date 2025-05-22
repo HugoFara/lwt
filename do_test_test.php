@@ -50,7 +50,7 @@ function do_test_get_identifier($selection, $sess_testsql, $lang, $text): array
                 // Deprecated behavior in 2.9.0, to be removed on 3.0.0
                 $test_sql = $sess_testsql;
                 $cntlang = get_first_value(
-                    "SELECT COUNT(DISTINCT WoLgID) AS value 
+                    "SELECT COUNT(DISTINCT WoLgID) AS value
                     FROM $test_sql"
                 );
                 if ($cntlang > 1) {
@@ -155,9 +155,9 @@ function do_test_test_css()
     ?>
 <style type="text/css">
     html, body {
-        width:100%; 
-        height:100%; 
-    } 
+        width:100%;
+        height:100%;
+    }
 
 </style>
     <?php
@@ -173,8 +173,8 @@ function do_test_test_css()
 function do_test_get_tomorrow_tests_count($testsql): int
 {
     return (int) get_first_value(
-        "SELECT COUNT(DISTINCT WoID) AS value 
-        FROM $testsql AND WoStatus BETWEEN 1 AND 5 
+        "SELECT COUNT(DISTINCT WoID) AS value
+        FROM $testsql AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTomorrowScore < 0"
     );
 }
@@ -252,7 +252,7 @@ function do_test_test_sentence($wid, $lang, $wordlc): array
     ) AS sUnknownCount ON sUnknownCount.Ti2SeID = ti.Ti2SeID
     WHERE ti.Ti2WoID = $wid
     -- Sort words with known ratio above 70%, then random
-    ORDER BY KnownRatio < 0.7, RAND() 
+    ORDER BY KnownRatio < 0.7, RAND()
     LIMIT 1";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
@@ -393,15 +393,15 @@ function do_test_get_word($testsql): array
     $pass = 0;
     while ($pass < 2) {
         $pass++;
-        $sql = "SELECT DISTINCT WoID, WoText, WoTextLC, WoTranslation, 
-        WoRomanization, WoSentence, WoLgID, 
-        (IFNULL(WoSentence, '') NOT LIKE CONCAT('%{', WoText, '}%')) AS notvalid, 
-        WoStatus, 
-        DATEDIFF( NOW( ), WoStatusChanged ) AS Days, WoTodayScore AS Score 
-        FROM $testsql AND WoStatus BETWEEN 1 AND 5 
+        $sql = "SELECT DISTINCT WoID, WoText, WoTextLC, WoTranslation,
+        WoRomanization, WoSentence, WoLgID,
+        (IFNULL(WoSentence, '') NOT LIKE CONCAT('%{', WoText, '}%')) AS notvalid,
+        WoStatus,
+        DATEDIFF( NOW( ), WoStatusChanged ) AS Days, WoTodayScore AS Score
+        FROM $testsql AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0 " .
-        ($pass == 1 ? 'AND WoRandom > RAND()' : '') . ' 
-        ORDER BY WoTodayScore, WoRandom 
+        ($pass == 1 ? 'AND WoRandom > RAND()' : '') . '
+        ORDER BY WoTodayScore, WoRandom
         LIMIT 1';
         $res = do_mysqli_query($sql);
         $record = mysqli_fetch_assoc($res);
@@ -472,8 +472,8 @@ function do_test_prepare_ajax_test_area(
         "SELECT WoLgID AS value FROM $testsql LIMIT 1"
     );
 
-    $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgTextSize, 
-    LgRemoveSpaces, LgRegexpWordCharacters, LgRightToLeft 
+    $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgTextSize,
+    LgRemoveSpaces, LgRegexpWordCharacters, LgRightToLeft
     FROM {$tbpref}languages WHERE LgID = $lgid";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
@@ -503,7 +503,7 @@ function do_test_prepare_ajax_test_area(
     <script type="text/javascript">
         /**
          * Get a new word test.
-         * 
+         *
          * @param {array} review_data Data to use
          */
         function get_new_word(review_data)
@@ -519,7 +519,7 @@ function do_test_prepare_ajax_test_area(
         });
     </script>
 
-    <p id="term-test" dir="<?php echo($lang['rtlScript'] ? 'rtl' : 'ltr'); ?>" 
+    <p id="term-test" dir="<?php echo($lang['rtlScript'] ? 'rtl' : 'ltr'); ?>"
     style="<?php echo($lang['removeSpaces'] ? 'word-break:break-all;' : ''); ?>
     font-size: <?php echo $lang['textsize'] ?>%; line-height: 1.4; text-align:center; margin-bottom:300px;"
     >
@@ -572,8 +572,8 @@ function prepare_test_area($testsql, $totaltests, $count, $testtype): int
 
     $lang = get_first_value("SELECT WoLgID AS value FROM $testsql LIMIT 1");
 
-    $sql = 'SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgTextSize, 
-    LgRemoveSpaces, LgRegexpWordCharacters, LgRightToLeft 
+    $sql = 'SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgTextSize,
+    LgRemoveSpaces, LgRegexpWordCharacters, LgRightToLeft
     FROM ' . $tbpref . 'languages WHERE LgID = ' . $lang;
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
@@ -598,15 +598,15 @@ function prepare_test_area($testsql, $totaltests, $count, $testtype): int
     $wordlc = null;
     while ($pass < 2) {
         $pass++;
-        $sql = "SELECT DISTINCT WoID, WoText, WoTextLC, WoTranslation, 
-        WoRomanization, WoSentence, WoLgID, 
-        (IFNULL(WoSentence, '') NOT LIKE CONCAT('%{', WoText, '}%')) AS notvalid, 
-        WoStatus, 
-        DATEDIFF( NOW( ), WoStatusChanged ) AS Days, WoTodayScore AS Score 
-        FROM $testsql AND WoStatus BETWEEN 1 AND 5 
+        $sql = "SELECT DISTINCT WoID, WoText, WoTextLC, WoTranslation,
+        WoRomanization, WoSentence, WoLgID,
+        (IFNULL(WoSentence, '') NOT LIKE CONCAT('%{', WoText, '}%')) AS notvalid,
+        WoStatus,
+        DATEDIFF( NOW( ), WoStatusChanged ) AS Days, WoTodayScore AS Score
+        FROM $testsql AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0 " .
-        ($pass == 1 ? 'AND WoRandom > RAND()' : '') . ' 
-        ORDER BY WoTodayScore, WoRandom 
+        ($pass == 1 ? 'AND WoRandom > RAND()' : '') . '
+        ORDER BY WoTodayScore, WoRandom
         LIMIT 1';
         if ($debug) {
             echo 'DEBUG TEST-SQL: ' . $sql . '<br />';
@@ -731,17 +731,17 @@ function do_test_test_javascript_clickable($wo_record, $solution)
     global $tbpref;
     $wid = $wo_record['WoID'];
     $voiceApi = get_first_value(
-        "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages 
+        "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages
         WHERE LgID = " . $wo_record['WoLgID']
     );
     ?>
 <script type="text/javascript">
-    /** 
+    /**
      * Read the word aloud
      */
     function read_word() {
         speechDispatcher(
-            <?php echo json_encode($wo_record['WoText']); ?>, 
+            <?php echo json_encode($wo_record['WoText']); ?>,
             <?php echo json_encode($wo_record['WoLgID']); ?>
         );
     }
@@ -831,24 +831,24 @@ function do_test_footer($notyettested, $wrong, $correct)
         <span id="timer" title="Elapsed Time"></span>
     </span>
     <span style="margin-left: 15px; margin-right: 15px;">
-        <img id="not-tested-box" class="borderl" 
-        src="<?php print_file_path('icn/test_notyet.png');?>" 
-        title="Not yet tested" alt="Not yet tested" height="10" 
-        width="<?php echo $l_notyet; ?>" 
-        /><img 
-        id="wrong-tests-box" class="bordermiddle" 
-        src="<?php print_file_path('icn/test_wrong.png');?>" 
-        title="Wrong" alt="Wrong" height="10" width="<?php echo $l_wrong; ?>" 
-        /><img 
-        id="correct-tests-box" class="borderr" 
-        src="<?php print_file_path('icn/test_correct.png');?>" 
-        title="Correct" alt="Correct" height="10" 
+        <img id="not-tested-box" class="borderl"
+        src="<?php print_file_path('icn/test_notyet.png');?>"
+        title="Not yet tested" alt="Not yet tested" height="10"
+        width="<?php echo $l_notyet; ?>"
+        /><img
+        id="wrong-tests-box" class="bordermiddle"
+        src="<?php print_file_path('icn/test_wrong.png');?>"
+        title="Wrong" alt="Wrong" height="10" width="<?php echo $l_wrong; ?>"
+        /><img
+        id="correct-tests-box" class="borderr"
+        src="<?php print_file_path('icn/test_correct.png');?>"
+        title="Correct" alt="Correct" height="10"
         width="<?php echo $l_correct; ?>" />
     </span>
     <span style="margin-left: 15px; margin-right: 15px;">
         <span title="Total number of tests" id="total_tests">
             <?php echo $totaltests; ?>
-        </span> 
+        </span>
         =
         <span class="todosty" title="Not yet tested" id="not-tested">
             <?php echo $notyettested; ?>
@@ -897,7 +897,7 @@ function do_test_test_javascript($count)
             window.parent.frames['ro'].location.href = 'empty.html';
         } else {
             setTimeout(
-                'window.parent.frames["ro"].location.href="empty.html";', 
+                'window.parent.frames["ro"].location.href="empty.html";',
                 time_data.wait_time
             );
         }
@@ -908,7 +908,7 @@ function do_test_test_javascript($count)
 
     /**
      * Adds a word reading event.
-     * 
+     *
      * @param {string} term_text Term to read
      * @param {int}    lang_id   Language ID
      */
@@ -922,10 +922,10 @@ function do_test_test_javascript($count)
 
     /**
      * Insert a new word test.
-     * 
+     *
      * @param {number} word_id   Word ID
      * @param {string} solution  Test answer
-     * @param {string} group     HTML group to display (either term, translation, 
+     * @param {string} group     HTML group to display (either term, translation,
      *                           sentence...)
      */
     function insert_new_word(word_id, solution, group) {
@@ -942,7 +942,7 @@ function do_test_test_javascript($count)
 
     /**
     * Handles an ajax query for word tests.
-    * 
+    *
     * @param {JSON}   current_test Current test data
     * @param {number} total_tests  Total number of tests for the day
     * @param {string} test_key     Key identifier for the test to run
@@ -953,8 +953,8 @@ function do_test_test_javascript($count)
         if (current_test['word_id'] == 0) {
             do_test_finished(total_tests);
             $.getJSON(
-                'api.php/v1/review/tomorrow-count', 
-                { 
+                'api.php/v1/review/tomorrow-count',
+                {
                     test_key: test_key,
                     selection: selection
                 },
@@ -962,7 +962,7 @@ function do_test_test_javascript($count)
                     if (tomorrow_test.count) {
                         $('#tests-tomorrow').css("display", "inherit");
                         $('#tests-tomorrow').text(
-                            "Tomorrow you'll find here " + tomorrow_test.count + 
+                            "Tomorrow you'll find here " + tomorrow_test.count +
                             ' test' + (tomorrow_test.count < 2 ? '' : 's') + "!"
                         );
                     }
@@ -970,8 +970,8 @@ function do_test_test_javascript($count)
             );
         } else {
             insert_new_word(
-                current_test.word_id, 
-                current_test.solution, 
+                current_test.word_id,
+                current_test.solution,
                 current_test.group
             );
             if ($('#utterance-allowed').prop('checked')) {
@@ -982,13 +982,13 @@ function do_test_test_javascript($count)
 
     /**
     * Get new term to test through AJAX
-    * 
+    *
     * @param {JSON} review_data Various data on the current test
     */
     function query_next_term(review_data)
     {
         $.getJSON(
-            'api.php/v1/review/next-word', 
+            'api.php/v1/review/next-word',
             {
                 test_key: review_data.test_key,
                 selection: review_data.selection,
@@ -1046,8 +1046,8 @@ function do_test_test_content()
     $totaltests = $_SESSION['testtotal'];
     $testtype = do_test_get_test_type((int)getreq('type'));
     $count = get_first_value(
-        "SELECT COUNT(DISTINCT WoID) AS value 
-        FROM $testsql AND WoStatus BETWEEN 1 AND 5 
+        "SELECT COUNT(DISTINCT WoID) AS value
+        FROM $testsql AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0"
     );
     if ($debug) {
@@ -1080,8 +1080,8 @@ function do_test_test_content_ajax($selector, $selection)
     $testtype = do_test_get_test_type((int)getreq('type'));
     $test_sql = do_test_test_get_projection($selector, $selection);
     $count = get_first_value(
-        "SELECT COUNT(DISTINCT WoID) AS value 
-        FROM $test_sql AND WoStatus BETWEEN 1 AND 5 
+        "SELECT COUNT(DISTINCT WoID) AS value
+        FROM $test_sql AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0"
     );
     if ($debug) {

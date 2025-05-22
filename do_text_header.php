@@ -36,9 +36,9 @@ function getData($textid)
 {
     global $tbpref;
     $sql =
-    'SELECT LgName, TxLgID, TxText, TxTitle, TxAudioURI, TxSourceURI, TxAudioPosition 
-    FROM ' . $tbpref . 'texts 
-    JOIN ' . $tbpref . 'languages ON TxLgID = LgID 
+    'SELECT LgName, TxLgID, TxText, TxTitle, TxAudioURI, TxSourceURI, TxAudioPosition
+    FROM ' . $tbpref . 'texts
+    JOIN ' . $tbpref . 'languages ON TxLgID = LgID
     WHERE TxID = ' . $textid;
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
@@ -77,18 +77,18 @@ function do_header_row($textid, $langid): void
     <div>
         <a href="do_test.php?text=<?php echo $textid; ?>" target="_top">
             <img src="icn/question-balloon.png" title="Test" alt="Test" />
-        </a> 
+        </a>
         <a href="print_text.php?text=<?php echo $textid; ?>" target="_top">
             <img src="icn/printer.png" title="Print" alt="Print" />
         </a>
-        <?php echo get_annotation_link($textid); ?> 
+        <?php echo get_annotation_link($textid); ?>
         <a target="_top" href="edit_texts.php?chg=<?php echo $textid; ?>">
             <img src="icn/document--pencil.png" title="Edit Text" alt="Edit Text" />
         </a>
     </div>
     <div>
-        <a 
-            href="new_word.php?text=<?php echo $textid; ?>&amp;lang=<?php echo $langid; ?>" 
+        <a
+            href="new_word.php?text=<?php echo $textid; ?>&amp;lang=<?php echo $langid; ?>"
             target="ro" onclick="showRightFrames();"
         >
             <img src="icn/sticky-note--plus.png" title="New Term" alt="New Term" />
@@ -112,7 +112,7 @@ function do_header_row($textid, $langid): void
 function do_title($title, $sourceURI): void
 {
     ?>
-    <h1>READ ▶ 
+    <h1>READ ▶
         <?php
     echo tohtml($title);
     if (isset($sourceURI) && !str_starts_with(trim($sourceURI), '#')) {
@@ -146,18 +146,18 @@ function do_settings($textid): void
         Unknown words:
         <span id="learnstatus"><?php echo todo_words_content((int) $textid); ?></span>
     </div>
-    <div 
+    <div
     title="[Show All] = ON: ALL terms are shown, and all multi-word terms are shown as superscripts before the first word. The superscript indicates the number of words in the multi-word term.
 [Show All] = OFF: Multi-word terms now hide single words and shorter or overlapping multi-word terms.">
         <label for="showallwords">Show All</label>&nbsp;
-        <input type="checkbox" id="showallwords" <?php echo get_checked($showAll); ?> 
+        <input type="checkbox" id="showallwords" <?php echo get_checked($showAll); ?>
         onclick="showAllwordsClick();" />
 </div>
-    <div 
+    <div
     title="[Learning Translations] = ON: Terms with Learning Level&nbsp;1 display their translations under the term.
 [Learning Translations] = OFF: No translations are shown in the reading mode.">
         <label for="showlearningtranslations">Translations</label>&nbsp;
-        <input type="checkbox" id="showlearningtranslations" 
+        <input type="checkbox" id="showlearningtranslations"
         <?php echo get_checked($showLearning); ?> onclick="showAllwordsClick();" />
 </div>
     <div id="thetextid" class="hide"><?php echo $textid; ?></div>
@@ -182,15 +182,15 @@ function browser_tts($text, $languageName): void
 {
     global $tbpref;
     $lg_id = (int) get_first_value(
-        "SELECT LgID as value 
-        FROM {$tbpref}languages 
+        "SELECT LgID as value
+        FROM {$tbpref}languages
         WHERE LgName = " . convert_string_to_sqlsyntax($languageName)
     );
     $languageCode = getLanguageCode($lg_id, LWT_LANGUAGES_ARRAY);
     // Phonetic reading for this text. As it can be long do not use AJAX
     $phoneticText = phoneticReading($text, $lg_id);
     $voiceApi = get_first_value(
-        "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages 
+        "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages
         WHERE LgID = $lg_id"
     );
     ?>
@@ -210,16 +210,16 @@ function browser_tts($text, $languageName): void
 
     LWT_DATA.language.ttsVoiceApi = <?php echo json_encode($voiceApi); ?>;
 
-    /** 
-     * Check browser compatibility before reading 
+    /**
+     * Check browser compatibility before reading
      */
     function init_reading() {
         if (!('speechSynthesis' in window)) {
             alert('Your browser does not support speechSynthesis!');
             return;
-        } 
+        }
         readRawTextAloud(
-            text_reader.text, getLangFromDict(LWT_DATA.language.translator_link) || text_reader.lang 
+            text_reader.text, getLangFromDict(LWT_DATA.language.translator_link) || text_reader.lang
         );
     }
 
@@ -237,9 +237,9 @@ function browser_tts($text, $languageName): void
         }
     }
 
-    /** 
-     * Change the annotations display mode 
-     * 
+    /**
+     * Change the annotations display mode
+     *
      * @param {string} mode The new annotation mode
      */
     function annotationModeChanged(mode) {
@@ -271,7 +271,7 @@ function save_audio_position($textid): void
      * Save text status, for instance audio position
      */
     function saveTextStatus() {
-        // Save audio if present 
+        // Save audio if present
         if ($("#jquery_jplayer_1") === null || $("#jquery_jplayer_1").length == 0) {
             return;
         }

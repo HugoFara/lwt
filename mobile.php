@@ -11,9 +11,9 @@
  *      ...action=3&lang=[langid]&text=[textid] ... Sentences of a text
  *      ...action=4&lang=[langid]&text=[textid]&sent=[sentid] ... Terms of a sentence
  *      ...action=5&lang=[langid]&text=[textid]&sent=[sentid] ... Terms of a sentence (next sent)
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  * @package Lwt
  * @author  LWT Project <lwt-project@hotmail.com>
@@ -32,33 +32,33 @@ if (isset($_REQUEST["action"])) {  // Action
 
     /* -------------------------------------------------------- */
 
-    if ($action == 1) { 
-    
+    if ($action == 1) {
+
         $lang = $_REQUEST["lang"];
         $langname = getLanguage($lang);
 
         ?>
-        
+
      <ul id="<?php echo $action . '-' . $lang; ?>" title="<?php echo tohtml($langname); ?>">
       <li class="group"><?php echo tohtml($langname); ?> Texts</li>
-      <li><a href="mobile.php?action=2&amp;lang=<?php echo $lang; ?>">All <?php echo tohtml($langname); ?> Texts</a></li>                    
-      <li><a href="mobile.php#notyetimpl">Text Tags</a></li>                    
+      <li><a href="mobile.php?action=2&amp;lang=<?php echo $lang; ?>">All <?php echo tohtml($langname); ?> Texts</a></li>
+      <li><a href="mobile.php#notyetimpl">Text Tags</a></li>
       <li class="group"><?php echo tohtml($langname); ?> Terms</li>
-      <li><a href="mobile.php#notyetimpl">All <?php echo tohtml($langname); ?> Terms</a></li>                    
-      <li><a href="mobile.php#notyetimpl">Term Tags</a></li>                    
+      <li><a href="mobile.php#notyetimpl">All <?php echo tohtml($langname); ?> Terms</a></li>
+      <li><a href="mobile.php#notyetimpl">Term Tags</a></li>
      </ul>
-        
+
         <?php
-    
+
     } // $action == 1
-    
+
     /* -------------------------------------------------------- */
-    
-    elseif ($action == 2) { 
-    
+
+    elseif ($action == 2) {
+
         $lang = $_REQUEST["lang"];
         $langname = getLanguage($lang);
-        $sql = 'select TxID, TxTitle from ' . $tbpref . 'texts where TxLgID = ' . $lang . 
+        $sql = 'select TxID, TxTitle from ' . $tbpref . 'texts where TxLgID = ' . $lang .
         ' order by TxTitle';
         $res = do_mysqli_query($sql);
 
@@ -69,9 +69,9 @@ if (isset($_REQUEST["action"])) {  // Action
         <?php
 
         while ($record = mysqli_fetch_assoc($res)) {
-            echo '<li><a href="mobile.php?action=3&amp;lang=' . 
+            echo '<li><a href="mobile.php?action=3&amp;lang=' .
             $lang . '&amp;text=' . $record["TxID"] . '">' .
-            tohtml($record["TxTitle"]) . '</a></li>';    
+            tohtml($record["TxTitle"]) . '</a></li>';
         }
 
         ?>
@@ -79,13 +79,13 @@ if (isset($_REQUEST["action"])) {  // Action
      </ul>
         <?php
         mysqli_free_result($res);
-    
+
     } // $action == 2
-    
+
     /* -------------------------------------------------------- */
-    
-    elseif ($action == 3) { 
-    
+
+    elseif ($action == 3) {
+
         $lang = $_REQUEST["lang"];
         $text = $_REQUEST["text"];
         $texttitle = (string) get_first_value(
@@ -121,30 +121,30 @@ if (isset($_REQUEST["action"])) {  // Action
      <li class="group">Text</li>
 
         <?php
-        
+
         while ($record = mysqli_fetch_assoc($res)) {
             if (trim((string) $record["SeText"]) != '¶') {
-                echo '<li><a href="mobile.php?action=4&amp;lang=' . 
-                $lang . '&amp;text=' . $text . 
+                echo '<li><a href="mobile.php?action=4&amp;lang=' .
+                $lang . '&amp;text=' . $text .
                 '&amp;sent=' . $record["SeID"] . '">' .
-                tohtml($record["SeText"]) . '</a></li>'; 
-            }    
+                tohtml($record["SeText"]) . '</a></li>';
+            }
         }
 
         ?>
-        
+
      </ul>
 
         <?php
-        
+
         mysqli_free_result($res);
-    
+
     } // $action == 3
-    
+
     /* -------------------------------------------------------- */
-    
-    elseif ($action == 4 || $action == 5) { 
-    
+
+    elseif ($action == 4 || $action == 5) {
+
         $lang = $_REQUEST["lang"];
         $text = $_REQUEST["text"];
         $sent = $_REQUEST["sent"];
@@ -152,45 +152,45 @@ if (isset($_REQUEST["action"])) {  // Action
             'SELECT SeText AS value FROM ' . $tbpref . 'sentences WHERE SeID = ' . $sent
         );
         $nextsent = get_first_value(
-            'SELECT SeID AS value 
-            FROM ' . $tbpref . 'sentences 
-            WHERE SeTxID = ' . $text . ' AND trim(SeText) != \'¶\' AND SeID > ' . $sent . ' 
-            ORDER BY SeID 
+            'SELECT SeID AS value
+            FROM ' . $tbpref . 'sentences
+            WHERE SeTxID = ' . $text . ' AND trim(SeText) != \'¶\' AND SeID > ' . $sent . '
+            ORDER BY SeID
             LIMIT 1'
         );
-        $sql = 
-            'SELECT 
-            CASE WHEN Ti2WordCount>0 THEN Ti2WordCount ELSE 1 END as Code, 
-            CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE WoText END AS TiText, 
-            Ti2Order, 
-            CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END AS TiIsNotWord, 
-            WoID, WoTranslation, WoRomanization, WoStatus 
-            FROM (' . 
-                $tbpref . 'textitems2 
-                LEFT JOIN ' . $tbpref . 'words 
+        $sql =
+            'SELECT
+            CASE WHEN Ti2WordCount>0 THEN Ti2WordCount ELSE 1 END as Code,
+            CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE WoText END AS TiText,
+            Ti2Order,
+            CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END AS TiIsNotWord,
+            WoID, WoTranslation, WoRomanization, WoStatus
+            FROM (' .
+                $tbpref . 'textitems2
+                LEFT JOIN ' . $tbpref . 'words
                 ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
-            ) 
-            WHERE Ti2SeID = ' . $sent . ' 
+            )
+            WHERE Ti2SeID = ' . $sent . '
             ORDER BY Ti2Order asc, Ti2WordCount desc';
         $res = do_mysqli_query($sql);
-        
+
         if ($action == 4) {
             ?>
 
         <ul id="<?php echo $action . '-' . $sent; ?>" title="<?php echo tohtml($senttext); ?>">
-        
+
             <?php
-        
+
         }
-        
+
         ?>
-        
+
      <li class="group">Sentence</li>
      <li><?php echo tohtml($senttext); ?></li>
      <li class="group">Terms</li>
 
         <?php
-        
+
         $saveterm = '';
         $savetrans = '';
         $saverom = '';
@@ -199,15 +199,15 @@ if (isset($_REQUEST["action"])) {  // Action
         while ($record = mysqli_fetch_assoc($res)) {
             $actcode = (int)$record['Code'];
             $order = (int)$record['Ti2Order'];
-            
+
             if ($order <= $until ) {
                 continue;
             }
             if ($order > $until ) {
                 if (trim($saveterm) != '') {
                     $desc = trim(($saverom != '' ? '[' . $saverom . '] ' : '') . $savetrans);
-                    echo '<li><span class="status' . $savestat . '">' . tohtml($saveterm) . '</span>' . 
-                    tohtml($desc != '' ? ' → ' . $desc : '') . '</li>';    
+                    echo '<li><span class="status' . $savestat . '">' . tohtml($saveterm) . '</span>' .
+                    tohtml($desc != '' ? ' → ' . $desc : '') . '</li>';
                 }
                 $saveterm = '';
                 $savetrans = '';
@@ -219,12 +219,12 @@ if (isset($_REQUEST["action"])) {  // Action
                 echo '<li>' . tohtml($record['TiText']) . '</li>';
             }
             else {
-                $until = $order + 2 * ($actcode-1);                
+                $until = $order + 2 * ($actcode-1);
                 $saveterm = (string) $record['TiText'];
                 $savetrans = '';
                 if(isset($record['WoID'])) {
                     $savetrans = $record['WoTranslation'];
-                    if ($savetrans == '*') { $savetrans = ''; 
+                    if ($savetrans == '*') { $savetrans = '';
                     }
                 }
                 $saverom = trim(
@@ -233,34 +233,34 @@ if (isset($_REQUEST["action"])) {  // Action
                 );
                 $savestat = $record['WoStatus'];
             }
-        } 
+        }
         mysqli_free_result($res);
         if (trim($saveterm) != '') {
             $desc = trim(($saverom != '' ? '[' . $saverom . '] ' : '') . $savetrans);
-            echo '<li><span class="status' . $savestat . '">' . tohtml($saveterm) . '</span>' . 
-            tohtml($desc != '' ? ' → ' . $desc : '') . '</li>';    
+            echo '<li><span class="status' . $savestat . '">' . tohtml($saveterm) . '</span>' .
+            tohtml($desc != '' ? ' → ' . $desc : '') . '</li>';
         }
-        
+
         if (isset($nextsent)) {
-            echo '<li><a target="_replace" href="mobile.php?action=5&amp;lang=' . 
-            $lang . '&amp;text=' . $text . 
+            echo '<li><a target="_replace" href="mobile.php?action=5&amp;lang=' .
+            $lang . '&amp;text=' . $text .
             '&amp;sent=' . $nextsent . '">Next Sentence</a></li>';
         }
 
         if ($action == 4) {
-        
+
             ?>
-        
+
         </ul>
 
             <?php
-        
+
         }
-        
+
     } // $action == 4 / 5
-    
+
     /* -------------------------------------------------------- */
-    
+
 } // isset($_REQUEST["action"])
 
 /**************************************************************/
@@ -316,7 +316,7 @@ span.status5 {
     $res = do_mysqli_query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         echo '<li><a href="mobile.php?action=2&amp;lang=' . $record["LgID"] . '">' .
-        tohtml($record["LgName"]) . '</a></li>';    
+        tohtml($record["LgName"]) . '</a></li>';
     }
     mysqli_free_result($res);
     ?>
@@ -339,7 +339,7 @@ This is "Learning With Texts" (LWT) for Mobile Devices<br />Version <?php echo g
 </html>
 
     <?php
-    
+
 } // No Action = Start screen
 
 ?>

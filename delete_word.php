@@ -28,8 +28,8 @@ function get_term($wid)
 {
     global $tbpref;
     $term = get_first_value(
-        "SELECT WoText AS value 
-        FROM " . $tbpref . "words 
+        "SELECT WoText AS value
+        FROM " . $tbpref . "words
         WHERE WoID = " . $wid
     );
     return (string)$term;
@@ -48,14 +48,14 @@ function delete_word_from_database($wid)
 {
     global $tbpref;
     $m1 = runsql(
-        'DELETE FROM ' . $tbpref . 'words 
+        'DELETE FROM ' . $tbpref . 'words
         WHERE WoID = ' . $wid,
         ''
     );
     adjust_autoincr('words', 'WoID');
     runsql(
-        "UPDATE  " . $tbpref . "textitems2 
-        SET Ti2WoID  = 0 
+        "UPDATE  " . $tbpref . "textitems2
+        SET Ti2WoID  = 0
         WHERE Ti2WordCount=1 AND Ti2WoID  = " . $wid,
         ''
     );
@@ -78,21 +78,21 @@ function delete_word_javascript($wid, $tid)
 
     /**
      * Make the visual effects to delete a word from the page.
-     * 
+     *
      * @param {int} wid Word ID
-     * 
-     * @returns {undefined} 
+     *
+     * @returns {undefined}
      */
     function delete_word(wid) {
         const context = window.parent.document;
         const elem = $('.word' + wid, context);
         let title = "";
-        if (!window.parent.document.LWT_DATA.settings.jQuery_tooltip) { 
+        if (!window.parent.document.LWT_DATA.settings.jQuery_tooltip) {
             const ann = elem.attr('data_ann');
             title = make_tooltip(
-                <?php echo prepare_textdata_js(get_term($wid)); ?>, 
-                ann + (ann ? ' / ' : '') + elem.attr('data_trans'), 
-                elem.attr('data_rom'), 
+                <?php echo prepare_textdata_js(get_term($wid)); ?>,
+                ann + (ann ? ' / ' : '') + elem.attr('data_trans'),
+                elem.attr('data_rom'),
                 elem.attr('data_status')
             );
         }

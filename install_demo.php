@@ -2,9 +2,9 @@
 
 /**
  * Install LWT Demo Database
- * 
+ *
  * Call: install_demo.php
- * 
+ *
  * PHP version 8.1
  */
 
@@ -16,7 +16,7 @@ $message = '';
 
 /**
  * Restore demo database from file.
- * 
+ *
  * @return string Status message
  */
 function restore_demo_db()
@@ -27,7 +27,7 @@ function restore_demo_db()
         if ($handle === false) {
             return "Error: File ' . $file . ' could not be opened";
             // $handle not OK
-        } else { 
+        } else {
             // $handle OK
             return restore_file($handle, "Demo Database");
         } // $handle OK
@@ -39,7 +39,7 @@ function restore_demo_db()
 
 if (isset($_REQUEST['install'])) {
     $message = restore_demo_db();
-} 
+}
 
 pagestart('Install LWT Demo Database', true);
 
@@ -47,10 +47,10 @@ echo error_message_with_hide($message, true);
 
 $langcnt = get_first_value("SELECT COUNT(*) AS value FROM {$tbpref}languages");
 
-if ($tbpref == '') { 
-    $prefinfo = "(Default Table Set)"; 
+if ($tbpref == '') {
+    $prefinfo = "(Default Table Set)";
 } else {
-    $prefinfo = "(Table Set: <i>" . tohtml(substr($tbpref, 0, -1)) . "</i>)"; 
+    $prefinfo = "(Table Set: <i>" . tohtml(substr($tbpref, 0, -1)) . "</i>)";
 }
 
 ?>
@@ -60,22 +60,22 @@ if ($tbpref == '') {
         <th class="th1 center">Install Demo</th>
         <td class="td1">
             <p class="smallgray2">
-                The database <i><?php echo tohtml($dbname); ?></i> 
-                <?php echo $prefinfo; ?> will be <b>replaced</b> by the LWT 
+                The database <i><?php echo tohtml($dbname); ?></i>
+                <?php echo $prefinfo; ?> will be <b>replaced</b> by the LWT
                 demo database.
-                <?php 
-                if ($langcnt > 0) { 
+                <?php
+                if ($langcnt > 0) {
                     ?>
                     <br />The existent database will be <b>overwritten!</b>
-                    <?php 
-                } 
+                    <?php
+                }
                 ?>
 
             </p>
             <p class="right">
                 &nbsp;<br /><span class="red2">
                     YOU MAY LOSE DATA - BE CAREFUL: &nbsp; &nbsp; &nbsp;
-                </span> 
+                </span>
             <input type="submit" name="install" value="Install LWT demo database" /></p>
         </td>
     </tr>

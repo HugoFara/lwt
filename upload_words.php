@@ -3,12 +3,12 @@
 /**
  * \file
  * \brief Import terms from file or Text area
- * 
+ *
  *  Call: upload_words.php?....
  *      ... op=Import ... do the import
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  */
 
@@ -16,16 +16,16 @@ require_once 'inc/session_utility.php';
 
 /**
  * Get the CSV from a string.
- * 
+ *
  * @param string $input Input string.
- * 
+ *
  * @return (null|string)[]|false|null
  *
  * @psalm-return false|non-empty-list<null|string>|null
- * 
+ *
  * @deprecated 2.9.0 This function is no longer used and will be removed
  */
-function my_str_getcsv($input) 
+function my_str_getcsv($input)
 {
     $temp = fopen("php://memory", "rw");
     fwrite($temp, $input);
@@ -37,29 +37,29 @@ function my_str_getcsv($input)
 
 function upload_words_import_simple(
     $lang, $fields, $columns, $tabs, $file_name, $status
-): void 
+): void
 {
     global $tbpref;
     $removeSpaces = get_first_value(
         "SELECT LgRemoveSpaces AS value FROM {$tbpref}languages WHERE LgID=$lang"
     );
     $local_infile_enabled = in_array(
-        get_first_value("SELECT @@GLOBAL.local_infile as value"), 
+        get_first_value("SELECT @@GLOBAL.local_infile as value"),
         array(1, '1', 'ON')
     );
     if ($local_infile_enabled) {
-        $sql = "LOAD DATA LOCAL INFILE " . 
-        convert_string_to_sqlsyntax($file_name) . 
-        " IGNORE INTO TABLE {$tbpref}words 
-        FIELDS TERMINATED BY '$tabs' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' 
+        $sql = "LOAD DATA LOCAL INFILE " .
+        convert_string_to_sqlsyntax($file_name) .
+        " IGNORE INTO TABLE {$tbpref}words
+        FIELDS TERMINATED BY '$tabs' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'
         " . ($_REQUEST["IgnFirstLine"] == '1' ? "IGNORE 1 LINES" : "") . "
-        $columns 
-        SET WoLgID = $lang, " . 
-        ($removeSpaces ? 
+        $columns
+        SET WoLgID = $lang, " .
+        ($removeSpaces ?
         'WoTextLC = LOWER(REPLACE(@wotext," ","")),
         WoText = REPLACE(@wotext, " ", "")':
-        'WoTextLC = LOWER(WoText)') . ", 
-        WoStatus = $status, WoStatusChanged = NOW(), " . 
+        'WoTextLC = LOWER(WoText)') . ",
+        WoStatus = $status, WoStatusChanged = NOW(), " .
         make_score_random_insert_update('u');
         runsql($sql, '');
     } else {
@@ -73,7 +73,7 @@ function upload_words_import_simple(
                 continue;
             }
             $row = array();
-            $parsed_line = explode($tabs, $line); 
+            $parsed_line = explode($tabs, $line);
             $wotext = $parsed_line[$fields["txt"] - 1];
             // Fill WoText and WoTextLC
             if ($removeSpaces) {
@@ -96,7 +96,7 @@ function upload_words_import_simple(
             $row = array_map('convert_string_to_sqlsyntax', $row);
             $row = array_merge(
                 $row, array(
-                    (string)$lang, (string)$status, "NOW()", 
+                    (string)$lang, (string)$status, "NOW()",
                     getsqlscoreformula(2), getsqlscoreformula(3), "RAND()"
                 )
             );
@@ -104,11 +104,11 @@ function upload_words_import_simple(
         }
         do_mysqli_query(
             "INSERT INTO {$tbpref}words(
-                WoText, WoTextLC, " . 
-                ($fields["tr"] != 0 ? 'WoTranslation, ' : '') . 
-                ($fields["ro"] != 0 ? 'WoRomanization, ' : '') . 
-                ($fields["se"] != 0 ? 'WoSentence, ' : '') . 
-                "WoLgID, WoStatus, WoStatusChanged, 
+                WoText, WoTextLC, " .
+                ($fields["tr"] != 0 ? 'WoTranslation, ' : '') .
+                ($fields["ro"] != 0 ? 'WoRomanization, ' : '') .
+                ($fields["se"] != 0 ? 'WoSentence, ' : '') .
+                "WoLgID, WoStatus, WoStatusChanged,
                 WoTodayScore, WoTomorrowScore, WoRandom
             )
             VALUES " . implode(',', $values)
@@ -128,32 +128,32 @@ function upload_words_import_complete(
     $sql = 'LOAD DATA LOCAL INFILE '. convert_string_to_sqlsyntax($file_name);
     //$sql.= ($overwrite)?' REPLACE':(' IGNORE') ;
     $local_infile_enabled = in_array(
-        get_first_value("SELECT @@GLOBAL.local_infile as value"), 
+        get_first_value("SELECT @@GLOBAL.local_infile as value"),
         array(1, '1', 'ON')
     );
     runsql('SET GLOBAL max_heap_table_size = 1024 * 1024 * 1024 * 2', '');
     runsql(
-        "CREATE TEMPORARY TABLE IF NOT EXISTS {$tbpref}numbers( 
+        "CREATE TEMPORARY TABLE IF NOT EXISTS {$tbpref}numbers(
             n  tinyint(3) unsigned NOT NULL
-        )", 
+        )",
         ''
     );
     runsql(
         "INSERT IGNORE INTO {$tbpref}numbers(n) VALUES ('1'),('2'),('3'),
-        ('4'),('5'),('6'),('7'),('8'),('9')", 
+        ('4'),('5'),('6'),('7'),('8'),('9')",
         ''
     );
     if ($local_infile_enabled) {
-        $sql .= " INTO TABLE {$tbpref}tempwords 
-        FIELDS TERMINATED BY '$tabs' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' 
-        " . ($_REQUEST["IgnFirstLine"] == '1' ? "IGNORE 1 LINES" : "") . 
+        $sql .= " INTO TABLE {$tbpref}tempwords
+        FIELDS TERMINATED BY '$tabs' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'
+        " . ($_REQUEST["IgnFirstLine"] == '1' ? "IGNORE 1 LINES" : "") .
         "$columns SET " . (
-            $removeSpaces ? 
+            $removeSpaces ?
             'WoTextLC = LOWER(REPLACE(@wotext," ","")), WoText = REPLACE(@wotext," ","")':
             'WoTextLC = LOWER(WoText)'
         );
-        if ($fields["tl"] != 0) { 
-            $sql .= ', WoTaglist = REPLACE(@taglist, " ", ",")'; 
+        if ($fields["tl"] != 0) {
+            $sql .= ', WoTaglist = REPLACE(@taglist, " ", ",")';
         }
         runsql($sql, '');
     } else {
@@ -186,10 +186,10 @@ function upload_words_import_complete(
             if ($fields["se"] != 0) {
                 $row[] = $parsed_line[$fields["se"] - 1];
             }
-            if ($fields["tl"] != 0) { 
+            if ($fields["tl"] != 0) {
                 $row[] = str_replace(
                     " ", ",", $parsed_line[$fields['tl'] - 1]
-                ); 
+                );
             }
             $values[] = "(" . implode(
                 ",", array_map(
@@ -199,82 +199,82 @@ function upload_words_import_complete(
         }
         do_mysqli_query(
             "INSERT INTO {$tbpref}tempwords(
-                WoText, WoTextLC" . 
-                ($fields["tr"] != 0 ? ', WoTranslation' : '') . 
-                ($fields["ro"] != 0 ? ', WoRomanization' : '') . 
-                ($fields["se"] != 0 ? ', WoSentence' : '') . 
+                WoText, WoTextLC" .
+                ($fields["tr"] != 0 ? ', WoTranslation' : '') .
+                ($fields["ro"] != 0 ? ', WoRomanization' : '') .
+                ($fields["se"] != 0 ? ', WoSentence' : '') .
                 ($fields["tl"] != 0 ? ", WoTaglist" : "") .
             ")
             VALUES " . implode(',', $values)
         );
     }
-    
+
     if ($overwrite>3) {
         runsql(
             "CREATE TEMPORARY TABLE IF NOT EXISTS {$tbpref}merge_words(
-                MID mediumint(8) unsigned NOT NULL AUTO_INCREMENT, 
-                MText varchar(250) NOT NULL,  
-                MTranslation  varchar(250) NOT NULL, 
-                PRIMARY KEY (MID), 
-                UNIQUE KEY (MText, MTranslation) 
-            ) DEFAULT CHARSET=utf8", 
+                MID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+                MText varchar(250) NOT NULL,
+                MTranslation  varchar(250) NOT NULL,
+                PRIMARY KEY (MID),
+                UNIQUE KEY (MText, MTranslation)
+            ) DEFAULT CHARSET=utf8",
             ''
         );
 
         $wosep = getSettingWithDefault('set-term-translation-delimiters');
         if (empty($wosep)) {
-            if (getreq("Tab") == 'h') { 
-                $wosep[0] = "#"; 
-            } elseif (getreq("Tab") == 'c') { 
+            if (getreq("Tab") == 'h') {
+                $wosep[0] = "#";
+            } elseif (getreq("Tab") == 'c') {
                 $wosep[0] = ",";
-            } else { 
-                $wosep[0] = "\t"; 
+            } else {
+                $wosep[0] = "\t";
             }
         }
         $seplen = mb_strlen($wosep, 'UTF-8');
         $WoTrRepl = $tbpref . 'words.WoTranslation';
         for ($i=1; $i < $seplen; $i++) {
             $WoTrRepl = 'REPLACE(
-                ' . $WoTrRepl . ', ' . 
-                convert_string_to_sqlsyntax($wosep[$i]) . ', ' . 
+                ' . $WoTrRepl . ', ' .
+                convert_string_to_sqlsyntax($wosep[$i]) . ', ' .
                 convert_string_to_sqlsyntax($wosep[0]) . '
                 )';
         }
 
         runsql(
-            "INSERT IGNORE INTO {$tbpref}merge_words(MText,MTranslation) 
-            SELECT b.WoTextLC, 
+            "INSERT IGNORE INTO {$tbpref}merge_words(MText,MTranslation)
+            SELECT b.WoTextLC,
             trim(
                 SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
-                        b.WoTranslation, 
-                        " . convert_string_to_sqlsyntax($wosep[0]) . ", 
+                        b.WoTranslation,
+                        " . convert_string_to_sqlsyntax($wosep[0]) . ",
                         {$tbpref}numbers.n
-                    ), 
-                    " . convert_string_to_sqlsyntax($wosep[0]) . 
+                    ),
+                    " . convert_string_to_sqlsyntax($wosep[0]) .
                     ", -1
                 )
-            ) name 
-            FROM {$tbpref}numbers 
+            ) name
+            FROM {$tbpref}numbers
             INNER JOIN (
-                SELECT {$tbpref}words.WoTextLC as WoTextLC, $WoTrRepl as WoTranslation 
-                FROM {$tbpref}tempwords 
-                LEFT JOIN {$tbpref}words 
+                SELECT {$tbpref}words.WoTextLC as WoTextLC, $WoTrRepl as WoTranslation
+                FROM {$tbpref}tempwords
+                LEFT JOIN {$tbpref}words
                 ON {$tbpref}words.WoTextLC = {$tbpref}tempwords.WoTextLC AND {$tbpref}words.WoTranslation != '*' AND {$tbpref}words.WoLgID = $lang
-            ) b 
-            ON CHAR_LENGTH(b.WoTranslation)-CHAR_LENGTH(REPLACE(b.WoTranslation, " . convert_string_to_sqlsyntax($wosep[0]) . ", ''))>= {$tbpref}numbers.n-1 
-            ORDER BY b.WoTextLC, n", 
+            ) b
+            ON CHAR_LENGTH(b.WoTranslation)-CHAR_LENGTH(REPLACE(b.WoTranslation, " . convert_string_to_sqlsyntax($wosep[0]) . ", ''))>= {$tbpref}numbers.n-1
+            ORDER BY b.WoTextLC, n",
             ''
         );
 
         $tesep = $_REQUEST["transl_delim"];
         if (empty($tesep)) {
-            if (getreq("Tab") == 'h') { 
-                $tesep[0] = "#"; 
-            } elseif (getreq("Tab") == 'c') { 
+            if (getreq("Tab") == 'h') {
+                $tesep[0] = "#";
+            } elseif (getreq("Tab") == 'c') {
                 $tesep[0] = ",";
-            } else { 
-                $tesep[0] = "\t"; 
+            } else {
+                $tesep[0] = "\t";
             }
         }
 
@@ -282,49 +282,49 @@ function upload_words_import_complete(
         $WoTrRepl = $tbpref . 'tempwords.WoTranslation';
         for ($i=1; $i<$seplen; $i++) {
             $WoTrRepl = 'REPLACE(
-                ' . $WoTrRepl . ', ' . 
-                convert_string_to_sqlsyntax($tesep[$i]) . ', ' . 
+                ' . $WoTrRepl . ', ' .
+                convert_string_to_sqlsyntax($tesep[$i]) . ', ' .
                 convert_string_to_sqlsyntax($tesep[0]) . '
                 )';
         }
 
         runsql(
-            "INSERT IGNORE INTO {$tbpref}merge_words(MText,MTranslation) 
-            SELECT {$tbpref}tempwords.WoTextLC, 
+            "INSERT IGNORE INTO {$tbpref}merge_words(MText,MTranslation)
+            SELECT {$tbpref}tempwords.WoTextLC,
             trim(
                 SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
-                        $WoTrRepl," . 
-                        convert_string_to_sqlsyntax($tesep[0]) . " , 
+                        $WoTrRepl," .
+                        convert_string_to_sqlsyntax($tesep[0]) . " ,
                         {$tbpref}numbers.n
-                    ), " . 
-                    convert_string_to_sqlsyntax($tesep[0]) . ", 
+                    ), " .
+                    convert_string_to_sqlsyntax($tesep[0]) . ",
                     -1
                 )
-            ) name 
-            FROM {$tbpref}numbers 
-            INNER JOIN {$tbpref}tempwords 
-            ON CHAR_LENGTH({$tbpref}tempwords.WoTranslation)-CHAR_LENGTH(REPLACE($WoTrRepl, " . convert_string_to_sqlsyntax($tesep[0]) . ", ''))>= {$tbpref}numbers.n-1 
-            ORDER BY {$tbpref}tempwords.WoTextLC, n", 
+            ) name
+            FROM {$tbpref}numbers
+            INNER JOIN {$tbpref}tempwords
+            ON CHAR_LENGTH({$tbpref}tempwords.WoTranslation)-CHAR_LENGTH(REPLACE($WoTrRepl, " . convert_string_to_sqlsyntax($tesep[0]) . ", ''))>= {$tbpref}numbers.n-1
+            ORDER BY {$tbpref}tempwords.WoTextLC, n",
             ''
         );
-        if ($wosep[0]==',' or $wosep[0]==';') { 
-            $wosep = $wosep[0] . ' '; 
-        } else { 
-            $wosep = ' ' . $wosep[0] . ' '; 
+        if ($wosep[0]==',' or $wosep[0]==';') {
+            $wosep = $wosep[0] . ' ';
+        } else {
+            $wosep = ' ' . $wosep[0] . ' ';
         }
         runsql(
-            "UPDATE {$tbpref}tempwords 
+            "UPDATE {$tbpref}tempwords
             LEFT JOIN (
-                SELECT MText, GROUP_CONCAT(trim(MTranslation) 
-                    ORDER BY MID 
+                SELECT MText, GROUP_CONCAT(trim(MTranslation)
+                    ORDER BY MID
                     SEPERATOR " . convert_string_to_sqlsyntax_notrim_nonull($wosep) . "
-                ) AS Translation 
-                FROM {$tbpref}merge_words 
+                ) AS Translation
+                FROM {$tbpref}merge_words
                 GROUP BY MText
-            ) A 
-            ON MText=WoTextLC 
-            SET WoTranslation = Translation", 
+            ) A
+            ON MText=WoTextLC
+            SET WoTranslation = Translation",
             ''
         );
         runsql("DROP TABLE {$tbpref}merge_words", '');
@@ -334,99 +334,99 @@ function upload_words_import_complete(
         $sql = "INSERT " . ($overwrite != 0 ? '' : 'IGNORE ') .
         " INTO {$tbpref}words (
             WoTextLC , WoText, WoTranslation, WoRomanization, WoSentence,
-            WoStatus, WoStatusChanged, WoLgID, 
+            WoStatus, WoStatusChanged, WoLgID,
             " .  make_score_random_insert_update('iv')  . "
-        ) 
+        )
         SELECT *, $lang as LgID, " . make_score_random_insert_update('id') . "
         FROM (
-            SELECT WoTextLC , WoText, WoTranslation, WoRomanization, 
-            WoSentence, $status AS WoStatus, 
-            NOW() AS WoStatusChanged 
+            SELECT WoTextLC , WoText, WoTranslation, WoRomanization,
+            WoSentence, $status AS WoStatus,
+            NOW() AS WoStatusChanged
             FROM {$tbpref}tempwords
         ) AS tw";
-        if ($overwrite==1 or $overwrite==4) { 
-            $sql .= " ON DUPLICATE KEY UPDATE " . 
-            ($fields["tr"] ? "{$tbpref}words.WoTranslation = tw.WoTranslation, ":"") . 
-            ($fields["ro"]?"{$tbpref}words.WoRomanization = tw.WoRomanization, ":'') . 
-            ($fields["se"]?"{$tbpref}words.WoSentence = tw.WoSentence, ":'') . 
-            "{$tbpref}words.WoStatus = tw.WoStatus, 
-            {$tbpref}words.WoStatusChanged = tw.WoStatusChanged"; 
+        if ($overwrite==1 or $overwrite==4) {
+            $sql .= " ON DUPLICATE KEY UPDATE " .
+            ($fields["tr"] ? "{$tbpref}words.WoTranslation = tw.WoTranslation, ":"") .
+            ($fields["ro"]?"{$tbpref}words.WoRomanization = tw.WoRomanization, ":'') .
+            ($fields["se"]?"{$tbpref}words.WoSentence = tw.WoSentence, ":'') .
+            "{$tbpref}words.WoStatus = tw.WoStatus,
+            {$tbpref}words.WoStatusChanged = tw.WoStatusChanged";
         }
-        if ($overwrite==2) { 
-            $sql .= " ON DUPLICATE KEY UPDATE {$tbpref}words.WoTranslation = case 
-                when {$tbpref}words.WoTranslation = \"*\" then tw.WoTranslation 
-                else {$tbpref}words.WoTranslation 
-            end, 
-            {$tbpref}words.WoRomanization = case 
-                when {$tbpref}words.WoRomanization IS NULL then tw.WoRomanization 
-                else {$tbpref}words.WoRomanization 
-            end, 
-            {$tbpref}words.WoSentence = case 
-                when {$tbpref}words.WoSentence IS NULL then tw.WoSentence 
-                else {$tbpref}words.WoSentence 
-            end, 
-            {$tbpref}words.WoStatusChanged = case 
-                when {$tbpref}words.WoSentence IS NULL or {$tbpref}words.WoRomanization IS NULL or {$tbpref}words.WoTranslation = \"*\" then tw.WoStatusChanged 
-                else {$tbpref}words.WoStatusChanged 
+        if ($overwrite==2) {
+            $sql .= " ON DUPLICATE KEY UPDATE {$tbpref}words.WoTranslation = case
+                when {$tbpref}words.WoTranslation = \"*\" then tw.WoTranslation
+                else {$tbpref}words.WoTranslation
+            end,
+            {$tbpref}words.WoRomanization = case
+                when {$tbpref}words.WoRomanization IS NULL then tw.WoRomanization
+                else {$tbpref}words.WoRomanization
+            end,
+            {$tbpref}words.WoSentence = case
+                when {$tbpref}words.WoSentence IS NULL then tw.WoSentence
+                else {$tbpref}words.WoSentence
+            end,
+            {$tbpref}words.WoStatusChanged = case
+                when {$tbpref}words.WoSentence IS NULL or {$tbpref}words.WoRomanization IS NULL or {$tbpref}words.WoTranslation = \"*\" then tw.WoStatusChanged
+                else {$tbpref}words.WoStatusChanged
             end";
         }
     } else {
-        $sql = "UPDATE {$tbpref}words AS a 
-        JOIN {$tbpref}tempwords AS b 
-        ON a.WoTextLC = b.WoTextLC SET a.WoTranslation = CASE 
-            WHEN b.WoTranslation = '' or b.WoTranslation = '*' THEN a.WoTranslation 
-            ELSE b.WoTranslation 
-        END, 
-        a.WoRomanization = CASE 
-            WHEN b.WoRomanization IS NULL or b.WoRomanization = '' THEN a.WoRomanization 
-            ELSE b.WoRomanization 
-        END, 
-        a.WoSentence = CASE 
-            WHEN b.WoSentence IS NULL or b.WoSentence = '' THEN a.WoSentence 
-            ELSE b.WoSentence 
-        END, 
-        a.WoStatusChanged = CASE 
-            WHEN (b.WoTranslation = '' OR b.WoTranslation = '*') AND (b.WoRomanization IS NULL OR b.WoRomanization = '') AND (b.WoSentence IS NULL OR b.WoSentence = '') THEN a.WoStatusChanged 
-            ELSE NOW() 
+        $sql = "UPDATE {$tbpref}words AS a
+        JOIN {$tbpref}tempwords AS b
+        ON a.WoTextLC = b.WoTextLC SET a.WoTranslation = CASE
+            WHEN b.WoTranslation = '' or b.WoTranslation = '*' THEN a.WoTranslation
+            ELSE b.WoTranslation
+        END,
+        a.WoRomanization = CASE
+            WHEN b.WoRomanization IS NULL or b.WoRomanization = '' THEN a.WoRomanization
+            ELSE b.WoRomanization
+        END,
+        a.WoSentence = CASE
+            WHEN b.WoSentence IS NULL or b.WoSentence = '' THEN a.WoSentence
+            ELSE b.WoSentence
+        END,
+        a.WoStatusChanged = CASE
+            WHEN (b.WoTranslation = '' OR b.WoTranslation = '*') AND (b.WoRomanization IS NULL OR b.WoRomanization = '') AND (b.WoSentence IS NULL OR b.WoSentence = '') THEN a.WoStatusChanged
+            ELSE NOW()
         END";
     }
     runsql($sql, '');
     if ($fields["tl"]!=0) {
         runsql(
-            "INSERT IGNORE INTO {$tbpref}tags (TgText) 
+            "INSERT IGNORE INTO {$tbpref}tags (TgText)
             SELECT name FROM (
-                SELECT {$tbpref}tempwords.WoTextLC, 
+                SELECT {$tbpref}tempwords.WoTextLC,
                 SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
-                        {$tbpref}tempwords.WoTaglist, ',', 
+                        {$tbpref}tempwords.WoTaglist, ',',
                         {$tbpref}numbers.n
-                    ), ',', -1) name 
-                FROM {$tbpref}numbers 
-                INNER JOIN {$tbpref}tempwords 
-                ON CHAR_LENGTH({$tbpref}tempwords.WoTaglist)-CHAR_LENGTH(REPLACE({$tbpref}tempwords.WoTaglist, ',', ''))>={$tbpref}numbers.n-1 
+                    ), ',', -1) name
+                FROM {$tbpref}numbers
+                INNER JOIN {$tbpref}tempwords
+                ON CHAR_LENGTH({$tbpref}tempwords.WoTaglist)-CHAR_LENGTH(REPLACE({$tbpref}tempwords.WoTaglist, ',', ''))>={$tbpref}numbers.n-1
                 ORDER BY WoTextLC, n) A",
             ''
         );
         runsql(
-            "INSERT IGNORE INTO {$tbpref}wordtags 
-            select WoID,TgID 
+            "INSERT IGNORE INTO {$tbpref}wordtags
+            select WoID,TgID
             FROM (
                 SELECT {$tbpref}tempwords.WoTextLC, SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
                         {$tbpref}tempwords.WoTaglist, ',', {$tbpref}numbers.n
-                    ), ',', -1) name 
-                FROM {$tbpref}numbers 
-                INNER JOIN {$tbpref}tempwords ON CHAR_LENGTH({$tbpref}tempwords.WoTaglist)-CHAR_LENGTH(REPLACE({$tbpref}tempwords.WoTaglist, ',', ''))>={$tbpref}numbers.n-1 
+                    ), ',', -1) name
+                FROM {$tbpref}numbers
+                INNER JOIN {$tbpref}tempwords ON CHAR_LENGTH({$tbpref}tempwords.WoTaglist)-CHAR_LENGTH(REPLACE({$tbpref}tempwords.WoTaglist, ',', ''))>={$tbpref}numbers.n-1
                 ORDER BY WoTextLC, n
-            ) A, {$tbpref}tags, {$tbpref}words 
-            WHERE name=TgText AND A.WoTextLC={$tbpref}words.WoTextLC AND WoLgID=$lang", 
+            ) A, {$tbpref}tags, {$tbpref}words
+            WHERE name=TgText AND A.WoTextLC={$tbpref}words.WoTextLC AND WoLgID=$lang",
             ''
         );
     }
     runsql("DROP TABLE {$tbpref}numbers", '');
     runsql("TRUNCATE {$tbpref}tempwords", '');
-    if ($fields["tl"]!=0) { 
-        get_tags(1); 
+    if ($fields["tl"]!=0) {
+        get_tags(1);
     }
 
 }
@@ -435,21 +435,21 @@ function upload_words_handle_multiwords($lang, $last_update): void
 {
     global $tbpref;
     $mwords = get_first_value(
-        "SELECT count(*) AS value from {$tbpref}words 
-        WHERE WoWordCount>1 AND WoCreated > " . 
+        "SELECT count(*) AS value from {$tbpref}words
+        WHERE WoWordCount>1 AND WoCreated > " .
         convert_string_to_sqlsyntax($last_update)
     );
     if ($mwords > 40) {
         runsql(
-            "DELETE FROM {$tbpref}sentences WHERE SeLgID = $lang", 
+            "DELETE FROM {$tbpref}sentences WHERE SeLgID = $lang",
             "Sentences deleted"
         );
         runsql(
-            "DELETE FROM {$tbpref}textitems2 WHERE Ti2LgID = $lang", 
+            "DELETE FROM {$tbpref}textitems2 WHERE Ti2LgID = $lang",
             "Text items deleted"
         );
         adjust_autoincr('sentences', 'SeID');
-        $sql = "SELECT TxID, TxText FROM {$tbpref}texts 
+        $sql = "SELECT TxID, TxText FROM {$tbpref}texts
         WHERE TxLgID = $lang ORDER BY TxID";
         $res = do_mysqli_query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
@@ -461,9 +461,9 @@ function upload_words_handle_multiwords($lang, $last_update): void
     } else if ($mwords!=0) {
         $sqlarr = array();
         $res = do_mysqli_query(
-            "SELECT WoID, WoTextLC, WoWordCount 
-            FROM {$tbpref}words 
-            WHERE WoWordCount>1 AND WoCreated > " . 
+            "SELECT WoID, WoTextLC, WoWordCount
+            FROM {$tbpref}words
+            WHERE WoWordCount>1 AND WoCreated > " .
             convert_string_to_sqlsyntax($last_update)
         );
         while ($record = mysqli_fetch_assoc($res)) {
@@ -508,14 +508,14 @@ function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): floa
     $columns = '(' . rtrim(implode(',', $col), ',') . ')';
     $temp_tabs = $tabs;
     if ($temp_tabs == 'h') {
-        $tabs = "#";  
-    } else if ($temp_tabs == 'c') { 
+        $tabs = "#";
+    } else if ($temp_tabs == 'c') {
         $tabs = ",";
     } else {
-        $tabs = "\\t"; 
+        $tabs = "\\t";
     }
-    if ($file_upl) { 
-        $file_name = $_FILES["thefile"]["tmp_name"]; 
+    if ($file_upl) {
+        $file_name = $_FILES["thefile"]["tmp_name"];
     } else {
         $file_name = tempnam(sys_get_temp_dir(), "LWT");
         $temp = fopen($file_name, "w");
@@ -537,10 +537,10 @@ function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): floa
     }
     init_word_count();
     runsql(
-        "UPDATE {$tbpref}words 
-        JOIN {$tbpref}textitems2 
-        ON WoWordCount=1 AND Ti2WoID=0 AND lower(Ti2Text)=WoTextLC AND Ti2LgID = WoLgID 
-        SET Ti2WoID=WoID", 
+        "UPDATE {$tbpref}words
+        JOIN {$tbpref}textitems2
+        ON WoWordCount=1 AND Ti2WoID=0 AND lower(Ti2Text)=WoTextLC AND Ti2LgID = WoLgID
+        SET Ti2WoID=WoID",
         ''
     );
     upload_words_handle_multiwords($lang, $last_update);
@@ -551,14 +551,14 @@ function display_imported_terms($last_update, $rtl): void
 {
     global $tbpref;
     $recno = (int)get_first_value(
-        "SELECT count(*) AS value FROM {$tbpref}words 
+        "SELECT count(*) AS value FROM {$tbpref}words
         where WoStatusChanged > " . convert_string_to_sqlsyntax($last_update)
     );
     ?>
 <script type="text/javascript">
     /**
      * Navigation header for the imported terms.
-     * 
+     *
      * @param {JSON} data Data object for navigation.
      * @param {string} last_update Terms import timestamp for SQL
      * @param {bool} rtl If text is right-to-left
@@ -591,8 +591,8 @@ function formatImportedTermsNavigation(data, last_update, rtl) {
     }
     let options = "";
     for (let i = 1; i < totalPages + 1; i++) {
-            options = '<option value="' + i + '"' + 
-            (i == currentPage ? ' selected="selected"' : '') + '>' + i + 
+            options = '<option value="' + i + '"' +
+            (i == currentPage ? ' selected="selected"' : '') + '>' + i +
             '</option>';
     }
     $("#res_data-navigation-quick_nav").html(options);
@@ -615,10 +615,10 @@ function formatImportedTermsNavigation(data, last_update, rtl) {
 
 /**
  * Create the rows with the imported terms.
- * 
+ *
  * @param {JSON} data Data object containing terms.
  * @param {bool} rtl If text is right-to-left.
- * 
+ *
  * @returns {string} HTML-formated rows to display
  */
 function formatImportedTerms(data, rtl) {
@@ -627,31 +627,31 @@ function formatImportedTerms(data, rtl) {
         record = data[i];
         row = `<tr>
             <td class="td1">
-                <span` + (rtl ? ` dir="rtl" ` : ``) + `>` + 
+                <span` + (rtl ? ` dir="rtl" ` : ``) + `>` +
                 escape_html_chars(record[`WoText`]) + `</span>` +
-                    ` / <span id="roman` + record[`WoText`] + `" class="edit_area clickedit">` + 
-                    (record[`WoText`] != `` ? escape_html_chars(record[`WoText`]) : `*`) + 
+                    ` / <span id="roman` + record[`WoText`] + `" class="edit_area clickedit">` +
+                    (record[`WoText`] != `` ? escape_html_chars(record[`WoText`]) : `*`) +
                 `</span>
             </td>
             <td class="td1">
-                <span id="trans` + record[`WoID`] + `" class="edit_area clickedit">` + 
-                escape_html_chars(record[`WoTranslation`]) + 
+                <span id="trans` + record[`WoID`] + `" class="edit_area clickedit">` +
+                escape_html_chars(record[`WoTranslation`]) +
                 `</span>
             </td>
             <td class="td1">
                 <span class="smallgray2">` + escape_html_chars(record[`taglist`]) + `</span>
             </td>
             <td class="td1 center">
-                <b>` + 
+                <b>` +
                     (
-                        record[`SentOK`] !=0  ? 
-                        `<img src="icn/status.png" title="` + escape_html_chars(record[`WoSentence`]) + `" alt="Yes" />` : 
+                        record[`SentOK`] !=0  ?
+                        `<img src="icn/status.png" title="` + escape_html_chars(record[`WoSentence`]) + `" alt="Yes" />` :
                         `<img src="icn/status-busy.png" title="(No valid sentence)" alt="No" />`
-                    ) + 
+                    ) +
                 `</b>
             </td>
-            <td class="td1 center" title="` + escape_html_chars(STATUSES[record[`WoStatus`]].name) + `">` + 
-                escape_html_chars(STATUSES[record[`WoStatus`]].abbr) + 
+            <td class="td1 center" title="` + escape_html_chars(STATUSES[record[`WoStatus`]].name) + `">` +
+                escape_html_chars(STATUSES[record[`WoStatus`]].abbr) +
             `</td>
         </tr>`;
         output += row;
@@ -660,8 +660,8 @@ function formatImportedTerms(data, rtl) {
 }
 
 /**
- * Display page content based on raw server answer. 
- * 
+ * Display page content based on raw server answer.
+ *
  * @param {JSON} data Data object for navigation.
  * @param {string} last_update Terms import timestamp for SQL
  * @param {bool} rtl If text is right-to-left
@@ -676,7 +676,7 @@ function imported_terms_handle_answer(data, last_update, rtl)
 
 /**
  * Show the terms imported.
- * 
+ *
  * @param {string} last_update Last update date in SQL compatible format
  * @param {bool} rtl If text is right-to-left
  * @param {int} count Number of terms imported
@@ -705,39 +705,39 @@ function showImportedTerms(last_update, rtl, count, page) {
     }
 }
 </script>
-<form name="form1" action="#" 
+<form name="form1" action="#"
 onsubmit="showImportedTerms('<?php echo $last_update; ?>', <?php echo $rtl; ?>, <?php echo $recno; ?>, document.form1.page.options[document.form1.page.selectedIndex].value); return false;">
 <div id="res_data">
     <table id="res_data-navigation" class="tab2" cellspacing="0" cellpadding="2">
     <tr>
         <th class="th1" colspan="2" nowrap="nowrap">
-            <span id="recno"><?php echo $recno; ?></span> 
+            <span id="recno"><?php echo $recno; ?></span>
             Term<?php echo ($recno == 1 ? '':'s'); ?>
         </th>
         <th class="th1 flex-spaced" colspan="1" nowrap="nowrap">
             <span>
                 <span id="res_data-navigation-prev">
-                    <img id="res_data-navigation-prev-first" 
-                    src="icn/control-stop-180.png" title="First Page" 
+                    <img id="res_data-navigation-prev-first"
+                    src="icn/control-stop-180.png" title="First Page"
                     alt="First Page" />
                     &nbsp;
-                    <img id="res_data-navigation-prev-minus" 
-                    src="icn/control-180.png" title="Previous Page" 
+                    <img id="res_data-navigation-prev-minus"
+                    src="icn/control-180.png" title="Previous Page"
                     alt="Previous Page" />
                 </span>
             </span>
             <span>
                 Page
                 <span id="res_data-navigation-no_quick_nav">1</span>
-                <select id="res_data-navigation-quick_nav" name="page"></select> 
+                <select id="res_data-navigation-quick_nav" name="page"></select>
                 of <span id="res_data-navigation-totalPages"></span>
             </span>
             <span>
                 <span id="res_data-navigation-next">
-                    <img id="res_data-navigation-next-plus" 
+                    <img id="res_data-navigation-next-plus"
                     src="icn/control.png" title="Next Page" alt="Next Page" />
                     &nbsp;
-                    <img id="res_data-navigation-next-last" 
+                    <img id="res_data-navigation-next-last"
                     src="icn/control-stop.png" title="Last Page" alt="Last Page" />
                 </span>
             </span>
@@ -763,14 +763,14 @@ onsubmit="showImportedTerms('<?php echo $last_update; ?>', <?php echo $rtl; ?>, 
 </form>
 <script type="text/javascript">
     showImportedTerms(
-        '<?php echo $last_update; ?>', '<?php echo $rtl; ?>', 
+        '<?php echo $last_update; ?>', '<?php echo $rtl; ?>',
         <?php echo $recno; ?>, '1'
     );
 
     $(document).ready(function() {
         $('.edit_area').editable(
-            'inline_edit.php', 
-            { 
+            'inline_edit.php',
+            {
                 type      : 'textarea',
                 indicator : '<img src="icn/indicator.gif">',
                 tooltip   : 'Click to edit...',
@@ -787,13 +787,13 @@ onsubmit="showImportedTerms('<?php echo $last_update; ?>', <?php echo $rtl; ?>, 
 
 /**
  * Import term tags only to the database.
- * 
+ *
  * @param array  $fields   Fields indexes
  * @param string $tabs     Columns separator
  * @param bool   $file_upl If the input text is an uploaded file
- * 
+ *
  * @return void
- * 
+ *
  * @global string $tbpref Database table prefix
  */
 function upload_words_import_tags($fields, $tabs, $file_upl): void
@@ -807,14 +807,14 @@ function upload_words_import_tags($fields, $tabs, $file_upl): void
     $temp_tabs = $tabs;
     $tabs = " ";
     if ($temp_tabs == 'h') {
-        $tabs .= "#"; 
+        $tabs .= "#";
     } elseif ($temp_tabs == 'c') {
         $tabs .= ",";
     } else {
-        $tabs .= "\\t"; 
+        $tabs .= "\\t";
     }
     if ($file_upl) {
-        $file_name = $_FILES["thefile"]["tmp_name"]; 
+        $file_name = $_FILES["thefile"]["tmp_name"];
     } else {
         $file_name = tempnam(sys_get_temp_dir(), "LWT");
         $temp = fopen($file_name, "w");
@@ -823,15 +823,15 @@ function upload_words_import_tags($fields, $tabs, $file_upl): void
         fclose($temp);
     }
     if (in_array(
-        get_first_value("SELECT @@GLOBAL.local_infile as value"), 
+        get_first_value("SELECT @@GLOBAL.local_infile as value"),
         array(1, '1', 'ON')
     )
     ) {
-        $sql = "LOAD DATA LOCAL INFILE " . convert_string_to_sqlsyntax($file_name) . 
-        " IGNORE INTO TABLE {$tbpref}tempwords 
+        $sql = "LOAD DATA LOCAL INFILE " . convert_string_to_sqlsyntax($file_name) .
+        " IGNORE INTO TABLE {$tbpref}tempwords
         FIELDS TERMINATED BY '$tabs' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'
         " . ($_REQUEST["IgnFirstLine"] == '1' ? "IGNORE 1 LINES" : "") . "
-        $columns 
+        $columns
         SET WoTextLC = REPLACE(@taglist, ' ', ',')";
         runsql($sql, '');
     } else {
@@ -849,32 +849,32 @@ function upload_words_import_tags($fields, $tabs, $file_upl): void
             $texts[] = convert_string_to_sqlsyntax($tags);
         }
         do_mysqli_query(
-            "INSERT INTO {$tbpref}tempwords(WoTextLC) 
+            "INSERT INTO {$tbpref}tempwords(WoTextLC)
             VALUES " . implode(',', $texts)
         );
     }
     runsql(
-        "CREATE TEMPORARY TABLE IF NOT EXISTS {$tbpref}numbers( 
+        "CREATE TEMPORARY TABLE IF NOT EXISTS {$tbpref}numbers(
             n  tinyint(3) unsigned NOT NULL
-        )", 
+        )",
         ''
     );
     runsql(
         "INSERT IGNORE INTO {$tbpref}numbers(n) VALUES ('1'),('2'),('3'),
-        ('4'),('5'),('6'),('7'),('8'),('9')", 
+        ('4'),('5'),('6'),('7'),('8'),('9')",
         ''
     );
     runsql(
-        "INSERT IGNORE INTO {$tbpref}tags (TgText) 
+        "INSERT IGNORE INTO {$tbpref}tags (TgText)
         SELECT NAME FROM (
             SELECT SUBSTRING_INDEX(
                 SUBSTRING_INDEX(
                     {$tbpref}tempwords.WoTextLC, ',',  {$tbpref}numbers.n
-                ), ',', -1) name 
-            FROM {$tbpref}numbers 
-            INNER JOIN {$tbpref}tempwords 
-            ON CHAR_LENGTH({$tbpref}tempwords.WoTextLC)-CHAR_LENGTH(REPLACE({$tbpref}tempwords.WoTextLC, ',', ''))>= {$tbpref}numbers.n-1 
-            ORDER BY WoTextLC, n) A", 
+                ), ',', -1) name
+            FROM {$tbpref}numbers
+            INNER JOIN {$tbpref}tempwords
+            ON CHAR_LENGTH({$tbpref}tempwords.WoTextLC)-CHAR_LENGTH(REPLACE({$tbpref}tempwords.WoTextLC, ',', ''))>= {$tbpref}numbers.n-1
+            ORDER BY WoTextLC, n) A",
         ''
     );
     runsql("DROP TABLE {$tbpref}numbers", '');
@@ -887,9 +887,9 @@ function upload_words_import_tags($fields, $tabs, $file_upl): void
 
 /**
  * Import terms of tags to the database.
- * 
+ *
  * @return void
- * 
+ *
  * @global string $tbpref Database table prefix
  */
 function upload_words_import(): void
@@ -912,15 +912,15 @@ function upload_words_import(): void
 
     $fields = array("txt"=>0,"tr"=>0,"ro"=>0,"se"=>0,"tl"=>0);
     $file_upl = (
-        isset($_FILES["thefile"]) && 
-        $_FILES["thefile"]["tmp_name"] != "" && 
+        isset($_FILES["thefile"]) &&
+        $_FILES["thefile"]["tmp_name"] != "" &&
         $_FILES["thefile"]["error"] == 0
     );
 
     $max = max(array_keys($col));
     for ($j=1; $j<=$max; $j++) {
         if (!isset($col[$j])) {
-            $col[$j]='@dummy'; 
+            $col[$j]='@dummy';
         } else {
             switch ($col[$j]){
             case 'w':
@@ -944,15 +944,15 @@ function upload_words_import(): void
                 $fields["tl"]=$j;
                 break;
             case 'x':
-                if ($j==$max) { 
-                    unset($col[$j]); 
-                } else { 
-                    $col[$j] = '@dummy'; 
+                if ($j==$max) {
+                    unset($col[$j]);
+                } else {
+                    $col[$j] = '@dummy';
                 }
                 break;
             }
         }
-    
+
     }
     if ($fields["txt"] > 0) {
         $last_update = upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang);
@@ -968,7 +968,7 @@ function upload_words_import(): void
 
 /**
  * Display the main for adding new words.
- * 
+ *
  * @return void
  */
 function upload_words_display(): void
@@ -982,7 +982,7 @@ function upload_words_display(): void
             if (parseInt(value, 10) > 3) {
                 $('#imp_transl_delim').removeClass('hide');
                 $('#imp_transl_delim input').addClass('notempty');
-            } else { 
+            } else {
                 $('#imp_transl_delim input').removeClass('notempty');
                 $('#imp_transl_delim').addClass('hide');
             }
@@ -990,8 +990,8 @@ function upload_words_display(): void
     </script>
     <p>
         <b>Important:</b><br />
-        You must specify the term. 
-        <wbr />Translation, romanization, sentence and tag list are optional. 
+        You must specify the term.
+        <wbr />Translation, romanization, sentence and tag list are optional.
         <wbr />The tag list must be separated either by spaces or commas.
     </p>
     <form enctype="multipart/form-data" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" >
@@ -1004,7 +1004,7 @@ function upload_words_display(): void
                     echo get_languages_selectoptions(getSetting('currentlanguage'), '[Choose...]');
                     ?>
                 </select>
-                <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /> 
+                <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
@@ -1035,7 +1035,7 @@ function upload_words_display(): void
             </td>
         </tr>
         <tr>
-            <td class="td1"><b>Ignore first line</b>:</td> 
+            <td class="td1"><b>Ignore first line</b>:</td>
             <td class="td1">
                 <select name="IgnFirstLine" class="respinput">
                     <option value="0" selected="selected">No</option>
@@ -1061,7 +1061,7 @@ function upload_words_display(): void
         </tr>
         <tr>
             <td class="td1">"C2":</td>
-            <td class="td1"> 
+            <td class="td1">
                 <select name="Col2" class="respinput">
                     <option value="w">Term</option>
                     <option value="t" selected="selected">Translation</option>
@@ -1154,7 +1154,7 @@ function upload_words_display(): void
         <tr>
             <td class="td1 center" colspan="2">
                 <span class="red2">
-                    A DATABASE <input type="button" value="BACKUP" onclick="location.href='backup_restore.php';" /> 
+                    A DATABASE <input type="button" value="BACKUP" onclick="location.href='backup_restore.php';" />
                     MAY BE ADVISABLE!<br />
                     PLEASE DOUBLE-CHECK EVERYTHING!
                 </span>
@@ -1166,7 +1166,7 @@ function upload_words_display(): void
         </tr>
     </table>
     </form>
-    
+
     <p>
         Sentences should contain the term in curly brackets "... {term} ...".<br />
         If not, such sentences can be automatically created later with the <br />
@@ -1183,7 +1183,7 @@ pagestart('Import Terms', true);
 // Import
 if (isset($_REQUEST['op'])) {
     // INSERT
-    if ($_REQUEST['op'] == 'Import') { 
+    if ($_REQUEST['op'] == 'Import') {
         upload_words_import();
     } else {
         // $_REQUEST['op'] == 'Import'

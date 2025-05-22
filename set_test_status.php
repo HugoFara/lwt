@@ -3,12 +3,12 @@
 /**
  * \file
  * \brief Change status of term while testing
- * 
+ *
  * Call: set_test_status.php?wid=[wordid]&stchange=+1/-1&[ajax=1]
  *       set_test_status.php?wid=[wordid]&status=1..5/98/99&[ajax=1]
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category Helper_Frame
  * @package Lwt
  * @author  LWT Project <lwt-project@hotmail.com>
@@ -22,21 +22,21 @@ require_once 'inc/start_session.php';
 
 /**
  * Echo the page HTML content when setting word status.
- * 
+ *
  * @param int $status    New learning status for the word
  * @param int $oldstatus Previous learning status
  * @param int $newscore  New score for the word
  * @param int $oldscore  Previous score
- * 
+ *
  * @return void
  */
-function do_set_test_status_html($status, $oldstatus, $newscore, $oldscore) 
+function do_set_test_status_html($status, $oldstatus, $newscore, $oldscore)
 {
     if ($oldstatus == $status) {
-        echo '<p>Status ' . get_colored_status_msg($status) . ' not changed.</p>'; 
+        echo '<p>Status ' . get_colored_status_msg($status) . ' not changed.</p>';
     } else {
         echo '<p>
-        Status changed from ' . get_colored_status_msg($oldstatus) . 
+        Status changed from ' . get_colored_status_msg($oldstatus) .
         ' to ' . get_colored_status_msg($status) . '
         .</p>';
     }
@@ -65,7 +65,7 @@ function set_test_status_change_progress($stchange): array
             $_SESSION['testcorrect']++;
         } else {
             $wrong++;
-            $_SESSION['testwrong']++; 
+            $_SESSION['testwrong']++;
         }
         $notyettested--;
     }
@@ -73,15 +73,15 @@ function set_test_status_change_progress($stchange): array
         "total" => $totaltests, "wrong" => $wrong, "correct" => $correct,
         "nottested" => $notyettested
     );
-}        
+}
 
 /**
  * Make the JavaScript action for setting a word status.
- * 
+ *
  * @param int $wid      Word ID
  * @param int $status   New learning status for the word
  * @param int $stchange -1, 0, or 1 if status is rising or not
- * 
+ *
  * @return void
  */
 function do_set_test_status_javascript(
@@ -96,8 +96,8 @@ function do_set_test_status_javascript(
     .attr('data_status','<?php echo $status; ?>')
     .attr('data_todo','0');
     // Waittime <= 0 causes the page to loop-reloading
-    const waittime = <?php 
-    echo json_encode((int)getSettingWithDefault('set-test-main-frame-waiting-time')); 
+    const waittime = <?php
+    echo json_encode((int)getSettingWithDefault('set-test-main-frame-waiting-time'));
     ?> + 500;
 
     function page_reloader(waittime, target) {
@@ -159,37 +159,37 @@ function do_set_test_status_javascript(
 
 /**
  * Make the page content of the word status page.
- * 
+ *
  * @param int $wid       Word ID
  * @param int $status    New learning status for the word
  * @param int $oldstatus Previous learning status
  * @param int $stchange  -1, 0, or 1 if status is rising or not
- * 
+ *
  * @return void
- * 
- * @global string $tbpref Database table prefix 
+ *
+ * @global string $tbpref Database table prefix
  */
 function do_set_test_status_content($wid, $status, $oldstatus, $stchange, $ajax=false)
 {
     global $tbpref;
     $word = get_first_value(
-        "SELECT WoText AS value FROM {$tbpref}words 
+        "SELECT WoText AS value FROM {$tbpref}words
         WHERE WoID = $wid"
     );
 
     $oldscore = (int)get_first_value(
-        "SELECT greatest(0,round(WoTodayScore,0)) AS value 
+        "SELECT greatest(0,round(WoTodayScore,0)) AS value
         FROM {$tbpref}words WHERE WoID = $wid"
     );
     runsql(
-        "UPDATE {$tbpref}words SET WoStatus = $status, WoStatusChanged = NOW()," . 
-        make_score_random_insert_update('u') . " 
-        WHERE WoID = $wid", 
+        "UPDATE {$tbpref}words SET WoStatus = $status, WoStatusChanged = NOW()," .
+        make_score_random_insert_update('u') . "
+        WHERE WoID = $wid",
         'Status changed'
     );
-        
+
     $newscore = (int)get_first_value(
-        "SELECT greatest(0,round(WoTodayScore,0)) AS value 
+        "SELECT greatest(0,round(WoTodayScore,0)) AS value
         FROM {$tbpref}words WHERE WoID = $wid"
     );
     pagestart("Term: " . $word, false);
@@ -200,10 +200,10 @@ function do_set_test_status_content($wid, $status, $oldstatus, $stchange, $ajax=
 }
 
 /**
- * Start the word status set page. 
- * 
+ * Start the word status set page.
+ *
  * @return void
- * 
+ *
  * @global string $tbpref Database table prefix
  */
 function start_set_text_status()
@@ -216,25 +216,25 @@ function start_set_text_status()
 
     $wid = (int)getreq('wid');
     $oldstatus = (int)get_first_value(
-        "SELECT WoStatus AS value FROM {$tbpref}words 
+        "SELECT WoStatus AS value FROM {$tbpref}words
         WHERE WoID = $wid"
     );
 
     if (is_numeric(getreq('stchange'))) {
         $stchange = (int)getreq('stchange');
         $status = $oldstatus + $stchange;
-        if ($status < 1) { 
-            $status = 1; 
-        } else if ($status > 5) { 
-            $status = 5; 
+        if ($status < 1) {
+            $status = 1;
+        } else if ($status > 5) {
+            $status = 5;
         }
     } else {
         $status = (int)getreq('status');
         $stchange = $status - $oldstatus;
-        if ($stchange <= 0) { 
-            $stchange = -1; 
-        } else if ($stchange > 0) { 
-            $stchange = 1; 
+        if ($stchange <= 0) {
+            $stchange = -1;
+        } else if ($stchange > 0) {
+            $stchange = 1;
         }
     }
     $use_ajax = array_key_exists("ajax", $_REQUEST);

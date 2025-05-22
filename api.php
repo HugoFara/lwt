@@ -161,12 +161,12 @@ function media_files($get_req)
 /**
  * The way text should be read
  */
-function readingConfiguration($get_req): array 
+function readingConfiguration($get_req): array
 {
     global $tbpref;
     // language, voiceAPI, abbr
     $req = do_mysqli_query(
-        "SELECT LgName, LgTTSVoiceAPI, LgRegexpWordCharacters FROM {$tbpref}languages 
+        "SELECT LgName, LgTTSVoiceAPI, LgRegexpWordCharacters FROM {$tbpref}languages
         WHERE LgID = " . $get_req["lang_id"]
     );
     $record = mysqli_fetch_assoc($req);
@@ -195,7 +195,7 @@ function readingConfiguration($get_req): array
  * @return string[] JSON-encoded result
  *
  * @psalm-return array{phonetic_reading: string}
- * 
+ *
  * @since 2.10.0-fork Can also accept a language ID with "lgid" parameter
  */
 function get_phonetic_reading($get_req): array

@@ -2,11 +2,11 @@
 
 /**
  * Display statistics
- * 
+ *
  * Call: statistics.php
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  */
 
@@ -58,7 +58,7 @@ $sql = 'SELECT LgID, LgName FROM ' . $tbpref . 'languages where LgName<>"" ORDER
 $res = do_mysqli_query($sql);
 while ($record = mysqli_fetch_assoc($res)) {
     $lang = $record['LgID'];
-    
+
     $s1 = isset($term_stat[$record['LgID']][1])?($term_stat[$record['LgID']][1]):0;
     $s2 = isset($term_stat[$record['LgID']][2])?($term_stat[$record['LgID']][2]):0;
     $s3 = isset($term_stat[$record['LgID']][3])?($term_stat[$record['LgID']][3]):0;
@@ -70,7 +70,7 @@ while ($record = mysqli_fetch_assoc($res)) {
     $s15 = $s14 + $s5;
     $s599 = $s5 + $s99;
     $all = $s15 + $s98 + $s99;
-    
+
     $sum1 += $s1;
     $sum2 += $s2;
     $sum3 += $s3;
@@ -97,7 +97,7 @@ while ($record = mysqli_fetch_assoc($res)) {
     echo '<td class="td1 center"><span class="status5stat">&nbsp;<a href="edit_words.php?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=599&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s599 . '</b></a>&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status98">&nbsp;<a href="edit_words.php?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=98&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s98 . '</b></a>&nbsp;</span></td>';
     echo '</tr>';
-    
+
 }
 mysqli_free_result($res);
 echo '<tr>';
@@ -190,17 +190,17 @@ while ($record = mysqli_fetch_assoc($res)) {
         switch($record['WoStatus']){
         case ($record['WoStatus']==5 || $record['WoStatus']==99):
             if(!isset($term_known[$record['WoLgID']][$record['Changed']])) {
-                $term_known[$record['WoLgID']][$record['Changed']]=0; 
+                $term_known[$record['WoLgID']][$record['Changed']]=0;
             }
             $term_known[$record['WoLgID']][$record['Changed']]+=$record['value'];
             if(!isset($term_active[$record['WoLgID']][$record['Changed']])) {
-                $term_active[$record['WoLgID']][$record['Changed']]=0; 
+                $term_active[$record['WoLgID']][$record['Changed']]=0;
             }
             $term_active[$record['WoLgID']][$record['Changed']]+=$record['value'];
             break;
         case ($record['WoStatus']>0 and $record['WoStatus']<5):
             if(!isset($term_active[$record['WoLgID']][$record['Changed']])) {
-                $term_active[$record['WoLgID']][$record['Changed']]=0; 
+                $term_active[$record['WoLgID']][$record['Changed']]=0;
             }
             $term_active[$record['WoLgID']][$record['Changed']]+=$record['value'];
             break;
@@ -328,34 +328,34 @@ while ($record = mysqli_fetch_assoc($res)) {
     $sumcall += $call;
     $sumaall += $aall;
     $sumkall += $kall;
-    
+
     echo '<tr>';
     echo '<td class="td1">' . tohtml($record['LgName']) . '</td>';
-    
+
     echo '<td class="td1 center"><span class="status1">&nbsp;' . $ct . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status3">&nbsp;' . $at . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status5stat">&nbsp;' . $kt . '&nbsp;</span></td>';
-    
+
     echo '<td class="td1 center"><span class="status1">&nbsp;' . $cy . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status3">&nbsp;' . $ay . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status5stat">&nbsp;' . $ky . '&nbsp;</span></td>';
-    
+
     echo '<td class="td1 center"><span class="status1">&nbsp;' . $cw . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status3">&nbsp;' . $aw . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status5stat">&nbsp;' . $kw . '&nbsp;</span></td>';
-    
+
     echo '<td class="td1 center"><span class="status1">&nbsp;' . $cm . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status3">&nbsp;' . $am . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status5stat">&nbsp;' . $km . '&nbsp;</span></td>';
-    
+
     echo '<td class="td1 center"><span class="status1">&nbsp;' . $ca . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status3">&nbsp;' . $aa . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status5stat">&nbsp;' . $ka . '&nbsp;</span></td>';
-    
+
     echo '<td class="td1 center"><span class="status1">&nbsp;' . $call . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status3">&nbsp;' . $aall . '&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status5stat">&nbsp;' . $kall . '&nbsp;</span></td>';
-    
+
     echo '</tr>';
 }
 mysqli_free_result($res);
@@ -388,7 +388,7 @@ echo '<th class="th1 center"><span class="status5stat">&nbsp;' . $sumkall . '&nb
 
 echo '</tr>';
 ?>
-</table> 
+</table>
 <p>
     <input type="button" value="&lt;&lt; Back" onclick="location.href='index.php';" />
 </p>

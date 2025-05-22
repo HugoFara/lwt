@@ -2,13 +2,13 @@
 
 /**
  * \file
- * 
+ *
  * \brief Analyse DB tables, select Table Set, start LWT
- * 
+ *
  * Call: start.php
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  * @package Lwt
  * @author  LWT Project <lwt-project@hotmail.com>
@@ -21,12 +21,12 @@ require_once 'inc/session_utility.php';
 
 /**
  * Save a database prefix.
- * 
+ *
  * @param string $pref Database prefix to save.
- * 
+ *
  * @return void
  */
-function start_save_prefix($pref) 
+function start_save_prefix($pref)
 {
     $tbpref = $pref;
     LWTTableSet("current_table_prefix", $tbpref);
@@ -34,13 +34,13 @@ function start_save_prefix($pref)
 
 /**
  * Do a short page to edit the database prefix.
- * 
+ *
  * @global string $tbpref       Database table prefix
  * @global int    $fixed_tbpref If the table prefix is fixed and cannot be changed
- * 
+ *
  * @return void
  */
-function start_do_page() 
+function start_do_page()
 {
     global $tbpref, $fixed_tbpref;
     $prefix = getprefixes();
@@ -54,8 +54,8 @@ function start_do_page()
         <th class="th1">
             <form name="f1" class="inline" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
             <p>
-                Select: 
-                <select name="prefix" <?php 
+                Select:
+                <select name="prefix" <?php
                 if ($fixed_tbpref) {
                     echo 'disabled title="Database prefix is fixed and cannot be changed!"';
                 }?> >
@@ -67,7 +67,7 @@ function start_do_page()
                         <?php echo tohtml($value); ?>
                     </option>
                     <?php } ?>
-                </select> 
+                </select>
             </p>
             <p class="center">
                 <input type="submit" name="op" value="Start LWT" />

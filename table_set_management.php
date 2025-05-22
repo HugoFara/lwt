@@ -2,11 +2,11 @@
 
 /**
  * Analyse DB tables, and manage Table Sets
- * 
+ *
  * Call: table_set_management.php
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  */
 
@@ -47,7 +47,7 @@ elseif (isset($_REQUEST['newpref'])) {
         $tbpref = $_REQUEST['newpref'];
         LWTTableSet("current_table_prefix", $tbpref);
         header("Location: index.php");
-        exit(); 
+        exit();
     }
 }
 
@@ -56,7 +56,7 @@ elseif (isset($_REQUEST['prefix'])) {
         $tbpref = $_REQUEST['prefix'];
         LWTTableSet("current_table_prefix", $tbpref);
         header("Location: index.php");
-        exit(); 
+        exit();
     }
 }
 
@@ -73,7 +73,7 @@ if ($fixed_tbpref) {
     <p>These features are not currently not available.<br /><br />
     Reason:<br /><b>$tbpref</b> is set to a fixed value in <i>connect.inc.php</i>.<br />
     Please remove the definition<br /><span class="red"><b>$tbpref = '<?php echo substr($tbpref, 0, -1); ?>';</b></span></br />
-    in <i>connect.inc.php</i> to make these features available.<br /> 
+    in <i>connect.inc.php</i> to make these features available.<br />
     Then try again.</p>
     <p class="right">
         &nbsp;<br />
@@ -83,7 +83,7 @@ if ($fixed_tbpref) {
 </tr>
 </table>
 
-    <?php	
+    <?php
 
 } else {
 
@@ -107,7 +107,7 @@ if ($fixed_tbpref) {
         <?php
     }
     ?>
-</select> 
+</select>
 </p>
 <p class="right">&nbsp;<br /><input type="submit" name="op" value="Start LWT with selected Table Set" />
 </p>
@@ -145,7 +145,7 @@ if ($fixed_tbpref) {
 </select>
 <br />
 (You cannot delete the Default Table Set.)
-</p> 
+</p>
 <p class="right">&nbsp;<br /><span class="red2">YOU MAY LOSE DATA - BE CAREFUL: &nbsp; &nbsp; &nbsp;</span><input type="submit" name="op" value="DELETE Table Set" />
 </p>
 </form>
@@ -153,7 +153,7 @@ if ($fixed_tbpref) {
 </tr>
 
 <tr>
-<td class="td1 right" colspan="2"> 
+<td class="td1 right" colspan="2">
 <input type="button" value="&lt;&lt; Back" onclick="location.href='index.php';" /></td>
 </tr>
 

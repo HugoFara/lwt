@@ -3,63 +3,63 @@
 /**
  * \file
  * \brief LWT Start screen and main menu
- * 
+ *
  * Call: index.php
- * 
+ *
  * PHP version 8.1
- * 
+ *
  * @category User_Interface
  * @package Lwt
  * @author  LWT Project <lwt-project@hotmail.com>
  * @license Unlicense <http://unlicense.org/>
  * @link    https://hugofara.github.io/lwt/docs/php/files/index.html
  * @since   1.0.3
- * 
- * "Learning with Texts" (LWT) is free and unencumbered software 
+ *
+ * "Learning with Texts" (LWT) is free and unencumbered software
  * released into the PUBLIC DOMAIN.
- * 
+ *
  * Anyone is free to copy, modify, publish, use, compile, sell, or
  * distribute this software, either in source code form or as a
  * compiled binary, for any purpose, commercial or non-commercial,
  * and by any means.
- * 
+ *
  * In jurisdictions that recognize copyright laws, the author or
  * authors of this software dedicate any and all copyright
  * interest in the software to the public domain. We make this
- * dedication for the benefit of the public at large and to the 
- * detriment of our heirs and successors. We intend this 
+ * dedication for the benefit of the public at large and to the
+ * detriment of our heirs and successors. We intend this
  * dedication to be an overt act of relinquishment in perpetuity
  * of all present and future rights to this software under
  * copyright law.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE 
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE 
+ * AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE
  * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * 
+ *
  * For more information, please refer to [http://unlicense.org/].
  */
 
  /**
   * Echo an error page if connect.inc.php was not found.
-  * 
+  *
   * @return void
-  * 
-  * @since 2.7.0-fork Now display a link to the connect.ing.php creation wizard, 
-  * return void instead of dying. 
+  *
+  * @since 2.7.0-fork Now display a link to the connect.ing.php creation wizard,
+  * return void instead of dying.
   */
-function no_connectinc_error_page() 
+function no_connectinc_error_page()
 {
     ?>
     <html>
         <body>
             <div style="padding: 1em; color:red; font-size:120%; background-color:#CEECF5;">
                 <p>
-                    <b>Fatal Error:</b> 
+                    <b>Fatal Error:</b>
                     Cannot find file: "connect.inc.php"!<br />
                     Please do one of the following:
                     <ul>
@@ -70,7 +70,7 @@ function no_connectinc_error_page()
                         <li>
                             <a href="database_wizard.php">Use the wizard</a>.
                         </li>
-                    </ul>  
+                    </ul>
                     Please read the documentation: <a href="https://hugofara.github.io/lwt/README.md">https://hugofara.github.io/lwt/README.md</a>
                 </p>
             </div>
@@ -112,62 +112,62 @@ function get_span_groups(): array
     } else {
         $span1 = '<span title="Manage Table Sets" onclick="location.href=\'table_set_management.php\';" class="click">';
         if (count(getprefixes()) > 0) {
-            $span3 = '<span title="Select Table Set" onclick="location.href=\'start.php\';" class="click">'; 
+            $span3 = '<span title="Select Table Set" onclick="location.href=\'start.php\';" class="click">';
         } else {
-            $span3 = '<span>'; 
-        }    
+            $span3 = '<span>';
+        }
     }
     return array($span1, $span2, $span3);
 }
 
 /**
  * Display the current text options.
- * 
+ *
  * @return void
- * 
+ *
  * @global string $tbpref Database table prefix
  */
 function do_current_text_info($textid)
 {
     global $tbpref;
     $txttit = get_first_value(
-        'SELECT TxTitle AS value 
-        FROM ' . $tbpref . 'texts 
+        'SELECT TxTitle AS value
+        FROM ' . $tbpref . 'texts
         WHERE TxID=' . $textid
     );
     if (!isset($txttit)) {
         return;
-    } 
+    }
     $txtlng = get_first_value(
         'SELECT TxLgID AS value FROM ' . $tbpref . 'texts WHERE TxID=' . $textid
     );
     $lngname = getLanguage($txtlng);
     $annotated = (int)get_first_value(
-        "SELECT LENGTH(TxAnnotatedText) AS value 
-        FROM " . $tbpref . "texts 
+        "SELECT LENGTH(TxAnnotatedText) AS value
+        FROM " . $tbpref . "texts
         WHERE TxID = " . $textid
     ) > 0;
     ?>
- 
+
  <div style="height: 85px;">
-    Last Text (<?php echo tohtml($lngname); ?>):<br /> 
+    Last Text (<?php echo tohtml($lngname); ?>):<br />
     <i><?php echo tohtml($txttit); ?></i>
     <br />
     <a href="do_text.php?start=<?php echo $textid; ?>">
         <img src="icn/book-open-bookmark.png" title="Read" alt="Read" />&nbsp;Read
     </a>
-    &nbsp; &nbsp; 
+    &nbsp; &nbsp;
     <a href="do_test.php?text=<?php echo $textid; ?>">
         <img src="icn/question-balloon.png" title="Test" alt="Test" />&nbsp;Test
     </a>
-    &nbsp; &nbsp; 
+    &nbsp; &nbsp;
     <a href="print_text.php?text=<?php echo $textid; ?>">
         <img src="icn/printer.png" title="Print" alt="Print" />&nbsp;Print
     </a>
     <?php
     if ($annotated) {
         ?>
-    &nbsp; &nbsp; 
+    &nbsp; &nbsp;
     <a href="print_impr_text.php?text=<?php echo $textid; ?>">
         <img src="icn/tick.png" title="Improved Annotated Text" alt="Improved Annotated Text" />&nbsp;Ann. Text
     </a>
@@ -180,24 +180,24 @@ function do_current_text_info($textid)
 
 /**
  * Echo a select element to switch between languages.
- * 
+ *
  * @return void
  */
 function do_language_selectable($langid)
 {
     ?>
-<div for="filterlang">Language: 
+<div for="filterlang">Language:
     <select id="filterlang" onchange="{setLang(document.getElementById('filterlang'),'index.php');}">
         <?php echo get_languages_selectoptions($langid, '[Select...]'); ?>
     </select>
-</div>   
+</div>
     <?php
 }
 
 /**
  * When on a WordPress server, make a logout button
- * 
- * @return void 
+ *
+ * @return void
  */
 function wordpress_logout_link()
 {
@@ -217,8 +217,8 @@ function wordpress_logout_link()
 /**
  * Return a lot of different server state variables.
  *
- * @return (false|float|string|string[])[] {0: string, 1: float, 2: string[], 3: string, 4: string, 5: string} 
- * Table prefix, database size, server software, apache version, PHP version, MySQL 
+ * @return (false|float|string|string[])[] {0: string, 1: float, 2: string[], 3: string, 4: string, 5: string}
+ * Table prefix, database size, server software, apache version, PHP version, MySQL
  * version
  *
  * @deprecated Use get_server_data_table, will be removed in 3.0.0.
@@ -227,42 +227,42 @@ function wordpress_logout_link()
  * @global string $tbpref Database table prefix
  * @global string $dbname Database name
  */
-function get_server_data(): array 
+function get_server_data(): array
 {
     global $tbpref, $dbname;
     $dbaccess_format = convert_string_to_sqlsyntax($dbname);
     $data_table = array();
     $data_table["prefix"] = convert_string_to_sqlsyntax_nonull($tbpref);
     $data_table["db_size"] = (float)get_first_value(
-        "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value 
-        FROM information_schema.TABLES 
-        WHERE table_schema = $dbaccess_format 
+        "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
+        FROM information_schema.TABLES
+        WHERE table_schema = $dbaccess_format
         AND table_name IN (
             '{$tbpref}archivedtexts', '{$tbpref}archtexttags', '{$tbpref}feedlinks', '{$tbpref}languages',
-            '{$tbpref}newsfeeds', '{$tbpref}sentences', '{$tbpref}settings', '{$tbpref}tags', '{$tbpref}tags2', 
+            '{$tbpref}newsfeeds', '{$tbpref}sentences', '{$tbpref}settings', '{$tbpref}tags', '{$tbpref}tags2',
             '{$tbpref}textitems2', '{$tbpref}texts', '{$tbpref}texttags', '{$tbpref}words', '{$tbpref}wordtags'
         )"
     );
-    if (!isset($data_table["db_size"])) { 
-        $data_table["db_size"] = 0.0; 
+    if (!isset($data_table["db_size"])) {
+        $data_table["db_size"] = 0.0;
     }
 
     $data_table["serversoft"] = explode(' ', $_SERVER['SERVER_SOFTWARE']);
     $data_table["apache"] = "Apache/?";
-    if (substr($data_table["serversoft"][0], 0, 7) == "Apache/") { 
-        $data_table["apache"] = $data_table["serversoft"][0]; 
+    if (substr($data_table["serversoft"][0], 0, 7) == "Apache/") {
+        $data_table["apache"] = $data_table["serversoft"][0];
     }
     $data_table["php"] = phpversion();
     $data_table["mysql"] = (string)get_first_value("SELECT VERSION() as value");
     return array(
-        $data_table["prefix"], $data_table["db_size"], $data_table["serversoft"], 
+        $data_table["prefix"], $data_table["db_size"], $data_table["serversoft"],
         $data_table["apache"], $data_table["php"], $data_table["mysql"]
     );
 }
 
 /**
  * Load the content of warnings for visual display.
- * 
+ *
  * @return void
  */
 function index_load_warnings()
@@ -293,7 +293,7 @@ function index_load_warnings()
                     return false;
                 }
             }
-            
+
             return null;
         },
 
@@ -301,7 +301,7 @@ function index_load_warnings()
             const php_min_version = '8.0.0';
             if (loadWarnings.shouldUpdate(php_version, php_min_version)) {
                 $('#php_update_required').html(
-                    '*** Your PHP version is ' + php_version + ', but version ' + 
+                    '*** Your PHP version is ' + php_version + ', but version ' +
                     php_min_version + ' is required. Please update it. ***'
                 )
             }
@@ -315,8 +315,8 @@ function index_load_warnings()
                 if (loadWarnings.shouldUpdate(lwt_version, latest_version)) {
                     $('#lwt_new_version').html(
                         '*** An update for LWT is available: ' +
-                        latest_version +', your version is ' + lwt_version + 
-                        '. <a href="https://github.com/HugoFara/lwt/releases/tag/' + 
+                        latest_version +', your version is ' + lwt_version +
+                        '. <a href="https://github.com/HugoFara/lwt/releases/tag/' +
                         latest_version + '">Download</a>.***'
                     );
                 }
@@ -334,16 +334,16 @@ function index_load_warnings()
 
 /**
  * Display the main body of the page.
- * 
+ *
  * @return void
- * 
+ *
  * @global string $tbpref Database table prefix
  * @global int    $debug  Debug mode enabled
  */
-function index_do_main_page() 
+function index_do_main_page()
 {
     global $tbpref, $debug;
-    
+
     $currentlang = null;
     if (is_numeric(getSetting('currentlanguage'))) {
         $currentlang = (int) getSetting('currentlanguage');
@@ -357,7 +357,7 @@ function index_do_main_page()
     $langcnt = (int) get_first_value("SELECT COUNT(*) AS value FROM {$tbpref}languages");
 
     pagestart_nobody(
-        "Home", 
+        "Home",
         "
         body {
             max-width: 1920px;
@@ -368,18 +368,18 @@ function index_do_main_page()
     echo '<h1>Learning With Texts (LWT)</h1>
     <h2>Home' . ($debug ? ' <span class="red">DEBUG</span>' : '') . '</h2>';
 
-    ?>    
+    ?>
 <div class="red"><p id="php_update_required"></p></div>
 <div class="red"><p id="cookies_disabled"></p></div>
 <div class="msgblue"><p id="lwt_new_version"></p></div>
 
-<p style="text-align: center;">Welcome to your language learning app!</p> 
+<p style="text-align: center;">Welcome to your language learning app!</p>
 
 <div style="display: flex; justify-content: space-evenly; flex-wrap: wrap;">
     <div class="menu">
         <?php
         if ($langcnt == 0) {
-            ?> 
+            ?>
         <div><p>Hint: The database seems to be empty.</p></div>
         <a href="install_demo.php">Install the LWT demo database</a>
         <a href="edit_languages.php?new=1">Define the first language you want to learn</a>
@@ -389,7 +389,7 @@ function index_do_main_page()
             if ($currenttext !== null) {
                 do_current_text_info($currenttext);
             }
-        } 
+        }
         ?>
             <a href="edit_languages.php">Languages</a>
     </div>
@@ -397,18 +397,18 @@ function index_do_main_page()
     <div class="menu">
         <a href="edit_texts.php">Texts</a>
         <a href="edit_archivedtexts.php">Text Archive</a>
-        
+
         <a href="edit_texttags.php">Text Tags</a>
         <a href="check_text.php">Check Text</a>
         <a href="long_text_import.php">Import Long Text</a>
     </div>
-    
+
     <div class="menu">
         <a href="edit_words.php" title="View and edit saved words and expressions">Terms</a>
         <a href="edit_tags.php">Term Tags</a>
         <a href="upload_words.php">Import Terms</a>
     </div>
-    
+
     <div class="menu">
         <a href="do_feeds.php?check_autoupdate=1">Newsfeeds</a>
         <a href="backup_restore.php" title="Backup, restore or empty database">Database</a>
@@ -425,12 +425,12 @@ function index_do_main_page()
         <a href="text_to_speech_settings.php" title="Text-to-Speech settings">Text-to-Speech</a>
         <a href="mobile.php" title="Mobile LWT is a legacy function">Mobile LWT (Deprecated)</a>
     </div>
-        
+
     <?php wordpress_logout_link(); ?>
 
 </div>
 <p>
-    This is LWT Version <?php echo get_version(); ?>, 
+    This is LWT Version <?php echo get_version(); ?>,
     <a href="start.php"><?php echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"') ?></a>.
     </p>
 <br style="clear: both;" />
@@ -439,9 +439,9 @@ function index_do_main_page()
         <a target="_blank" href="http://unlicense.org/" style="vertical-align: top;">
             <img alt="Public Domain" title="Public Domain" src="img/public_domain.png" style="display: inline;" />
         </a>
-        <a href="https://sourceforge.net/projects/learning-with-texts/" target="_blank">"Learning with Texts" (LWT)</a> is free 
-        and unencumbered software released into the 
-        <a href="https://en.wikipedia.org/wiki/Public_domain_software" target="_blank">PUBLIC DOMAIN</a>. 
+        <a href="https://sourceforge.net/projects/learning-with-texts/" target="_blank">"Learning with Texts" (LWT)</a> is free
+        and unencumbered software released into the
+        <a href="https://en.wikipedia.org/wiki/Public_domain_software" target="_blank">PUBLIC DOMAIN</a>.
         <a href="http://unlicense.org/" target="_blank">More information and detailed Unlicense ...</a>
     </p>
 </footer>

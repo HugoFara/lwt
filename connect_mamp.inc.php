@@ -3,7 +3,7 @@
 /**
  * \file
  * \brief DB variables for MAMP
- * 
+ *
  * PHP version 8.1
  */
 
