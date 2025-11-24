@@ -1071,5 +1071,179 @@ class DatabaseConnectTest extends TestCase
         $this->assertTrue($result === null || $result === false, 'Empty language ID should return null or false');
     }
 
+    /**
+     * Test get_first_value function
+     */
+    public function testGetFirstValue(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Test with a simple SELECT query (must use 'value' as column alias)
+        $result = get_first_value("SELECT 'test_value' as value");
+        $this->assertEquals('test_value', $result);
+
+        // Test with NULL result
+        $result = get_first_value("SELECT NULL as value");
+        $this->assertNull($result, 'NULL should return null');
+
+        // Test with numeric result
+        $result = get_first_value("SELECT 42 as value");
+        $this->assertEquals('42', $result);
+
+        // Test with empty result set
+        $result = get_first_value(
+            "SELECT 'value' FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='nonexistent_key_xyz123'"
+        );
+        $this->assertEquals('', $result, 'Empty result set should return empty string');
+
+        // Test with COUNT query (needs 'value' alias)
+        $result = get_first_value("SELECT COUNT(*) as value FROM " . $GLOBALS['tbpref'] . "settings");
+        $this->assertTrue(is_numeric($result) || $result === null, 'COUNT should return numeric value or null');
+    }
+
+    /**
+     * Test prepare_textdata_js function (escaping for JavaScript) - Extended tests
+     */
+    public function testPrepareTextdataJsExtended(): void
+    {
+        // Basic string with space - should be quoted
+        $result = prepare_textdata_js('hello world');
+        $this->assertEquals("\\'hello world\\'", $result);
+
+        // String with single quotes - should be escaped
+        $result = prepare_textdata_js("it's working");
+        $this->assertStringContainsString("\\'", $result, 'Single quotes should be escaped');
+
+        // String with double quotes - should be escaped
+        $result = prepare_textdata_js('He said "hello"');
+        $this->assertStringContainsString('\\"', $result, 'Double quotes should be escaped');
+
+        // String with backslashes - should be escaped
+        $result = prepare_textdata_js('path\\to\\file');
+        $this->assertStringContainsString('\\\\', $result, 'Backslashes should be escaped');
+
+        // String with newlines - should be converted to \n
+        $result = prepare_textdata_js("line1\nline2");
+        $this->assertStringContainsString('\\n', $result, 'Newlines should be escaped');
+
+        // String with Windows line endings
+        $result = prepare_textdata_js("line1\r\nline2");
+        $this->assertStringContainsString('\\n', $result, 'Windows line endings should be converted');
+        $this->assertStringNotContainsString("\r", $result, 'Carriage returns should be removed');
+
+        // Empty string - should return '' (two single quotes)
+        $result = prepare_textdata_js('');
+        $this->assertEquals("''", $result);
+
+        // UTF-8 characters should pass through (but still be quoted)
+        $result = prepare_textdata_js('日本語');
+        $this->assertStringContainsString('日本語', $result);
+        $this->assertStringStartsWith("\\'", $result);
+
+        // Combined special characters
+        $result = prepare_textdata_js("It's a \"test\"\nwith\\backslash");
+        $this->assertStringContainsString("\\'", $result);
+        $this->assertStringContainsString('\\"', $result);
+        $this->assertStringContainsString('\\n', $result);
+        $this->assertStringContainsString('\\\\', $result);
+    }
+
+    /**
+     * Test LWTTableCheck, LWTTableSet, LWTTableGet functions
+     */
+    public function testLWTTableFunctions(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Ensure table exists
+        LWTTableCheck();
+
+        // Set a value
+        LWTTableSet('test_key_lwt', 'test_value_lwt');
+
+        // Get the value back
+        $result = LWTTableGet('test_key_lwt');
+        $this->assertEquals('test_value_lwt', $result);
+
+        // Update existing value
+        LWTTableSet('test_key_lwt', 'updated_value');
+        $result = LWTTableGet('test_key_lwt');
+        $this->assertEquals('updated_value', $result);
+
+        // Get non-existent key should return empty string
+        $result = LWTTableGet('nonexistent_lwt_key');
+        $this->assertEquals('', $result);
+
+        // Set multiple values
+        LWTTableSet('test_key_1', 'value_1');
+        LWTTableSet('test_key_2', 'value_2');
+        $result1 = LWTTableGet('test_key_1');
+        $result2 = LWTTableGet('test_key_2');
+        $this->assertEquals('value_1', $result1);
+        $this->assertEquals('value_2', $result2);
+
+        // Clean up
+        do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey LIKE 'test_key%'");
+    }
+
+    /**
+     * Test that critical functions handle edge cases properly
+     */
+    public function testEdgeCasesForSQLFunctions(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Test convert_string_to_sqlsyntax with various edge cases
+        // Very long string
+        $long_string = str_repeat('test ', 1000);
+        $result = convert_string_to_sqlsyntax($long_string);
+        $this->assertStringStartsWith("'", $result);
+        $this->assertStringEndsWith("'", $result);
+
+        // String with null byte (should be handled safely)
+        $result = convert_string_to_sqlsyntax("test\0value");
+        $this->assertStringStartsWith("'", $result);
+
+        // String with only special characters
+        $result = convert_string_to_sqlsyntax("'\"\\");
+        $this->assertStringContainsString("\\'", $result);
+        $this->assertStringContainsString('\\"', $result);
+        $this->assertStringContainsString("\\\\", $result);
+
+        // prepare_textdata with mixed line endings
+        // Note: prepare_textdata only converts \r\n to \n, not standalone \r
+        $result = prepare_textdata("line1\r\nline2\nline3\rline4");
+        $this->assertStringContainsString("line1\n", $result);
+        $this->assertStringContainsString("line2\n", $result);
+
+        // prepare_textdata_js with control characters
+        $result = prepare_textdata_js("test\ttab\bbackspace");
+        $this->assertIsString($result);
+    }
+
 }
 ?>

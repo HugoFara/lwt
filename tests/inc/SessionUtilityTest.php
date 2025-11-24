@@ -541,5 +541,173 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('value="2"', $result);
         $this->assertStringContainsString('Ignore All', $result);
     }
+
+    // ========== ADDITIONAL FUNCTIONS FOR BETTER COVERAGE ==========
+
+    public function testProcessSessParamExtended()
+    {
+        // Mock a request parameter
+        $_REQUEST['test_param'] = '42';
+
+        // Test with numeric parameter
+        $result = processSessParam('test_param', 'sess_key', '0', 1);
+        $this->assertEquals(42, $result);
+        $this->assertEquals(42, $_SESSION['sess_key']);
+
+        // Test with string parameter
+        $_REQUEST['test_string'] = 'hello';
+        $result = processSessParam('test_string', 'sess_str', 'default', 0);
+        $this->assertEquals('hello', $result);
+
+        // Test with missing parameter (should return default)
+        $result = processSessParam('nonexistent', 'sess_none', 'default_val', 0);
+        $this->assertEquals('default_val', $result);
+
+        // Clean up
+        unset($_REQUEST['test_param']);
+        unset($_REQUEST['test_string']);
+        unset($_SESSION['sess_key']);
+        unset($_SESSION['sess_str']);
+        unset($_SESSION['sess_none']);
+    }
+
+    public function testProcessDBParamExtended()
+    {
+        // Mock a request parameter
+        $_REQUEST['test_db_param'] = '123';
+
+        // Test with numeric parameter
+        $result = processDBParam('test_db_param', 'db_key', '0', 1);
+        $this->assertEquals(123, $result);
+
+        // Verify it was saved to settings
+        $saved = getSetting('db_key');
+        $this->assertEquals('123', $saved);
+
+        // Test with string parameter
+        $_REQUEST['test_db_string'] = 'test_value';
+        $result = processDBParam('test_db_string', 'db_str_key', 'default', 0);
+        $this->assertEquals('test_value', $result);
+
+        // Test with missing parameter (should return default)
+        $result = processDBParam('nonexistent_db', 'db_none_key', 'default_val', 0);
+        $this->assertEquals('default_val', $result);
+
+        // Clean up
+        global $tbpref;
+        unset($_REQUEST['test_db_param']);
+        unset($_REQUEST['test_db_string']);
+        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey IN ('db_key', 'db_str_key', 'db_none_key')");
+    }
+
+    public function testGetPrefixesExtended()
+    {
+        $prefixes = getprefixes();
+        $this->assertIsArray($prefixes);
+        // getprefixes() returns table prefixes by looking for *_settings tables
+        // In a test environment, there may be 0 or more prefixes depending on setup
+        // Just verify it returns an array
+    }
+
+    public function testSelectMediaPathExtended()
+    {
+        // Test with non-existent path - returns HTML with select UI
+        $result = selectmediapath('nonexistent.mp3');
+        $this->assertIsString($result);
+        $this->assertStringContainsString('<select', $result);
+
+        // Test with empty string - also returns HTML UI
+        $result = selectmediapath('');
+        $this->assertIsString($result);
+        $this->assertStringContainsString('select', $result);
+    }
+
+    public function testPrintFilePathExtended()
+    {
+        // Test that it outputs something
+        ob_start();
+        print_file_path('test.mp3');
+        $output = ob_get_clean();
+
+        $this->assertIsString($output);
+        // Should contain the filename
+        $this->assertStringContainsString('test.mp3', $output);
+    }
+
+    public function testEchoLwtLogoExtended()
+    {
+        // Test that it outputs the logo HTML
+        ob_start();
+        echo_lwt_logo();
+        $output = ob_get_clean();
+
+        $this->assertIsString($output);
+        // Should contain logo image
+        $this->assertStringContainsString('<img', $output);
+    }
+
+    public function testGetPreviousAndNextTextLinksExtended()
+    {
+        global $tbpref;
+
+        // Create test texts
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+             VALUES ('Test Lang', 'http://test', 'http://test')"
+        );
+        $lang_id = get_last_key();
+
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID)
+             VALUES ('Text 1', 'Content 1', $lang_id)"
+        );
+        $text1_id = get_last_key();
+
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID)
+             VALUES ('Text 2', 'Content 2', $lang_id)"
+        );
+        $text2_id = get_last_key();
+
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID)
+             VALUES ('Text 3', 'Content 3', $lang_id)"
+        );
+        $text3_id = get_last_key();
+
+        // Test getting navigation for middle text
+        $result = getPreviousAndNextTextLinks($text2_id, 'do_text.php', 0, '');
+        $this->assertIsString($result);
+        // Should contain navigation elements
+        $this->assertNotEmpty($result);
+
+        // Test with first text (no previous)
+        $result = getPreviousAndNextTextLinks($text1_id, 'do_text.php', 0, '');
+        $this->assertIsString($result);
+
+        // Test with last text (no next)
+        $result = getPreviousAndNextTextLinks($text3_id, 'do_text.php', 0, '');
+        $this->assertIsString($result);
+
+        // Clean up
+        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxLgID = $lang_id");
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lang_id");
+    }
+
+
+    public function testMediaPathsSearchExtended()
+    {
+        // Test with a directory
+        $result = media_paths_search('.');
+        $this->assertIsArray($result);
+    }
+
+    public function testSelectMediaPathOptionsExtended()
+    {
+        // Test with current directory
+        $result = selectmediapathoptions('.');
+        $this->assertIsString($result);
+        $this->assertStringContainsString('<option', $result);
+    }
 }
 ?>
