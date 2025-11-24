@@ -1245,5 +1245,291 @@ class DatabaseConnectTest extends TestCase
         $this->assertIsString($result);
     }
 
+    /**
+     * Test parseSQLFile function (parses SQL migration files)
+     */
+    public function testParseSQLFile(): void
+    {
+        // Create a temporary SQL file
+        $temp_file = tempnam(sys_get_temp_dir(), 'lwt_test_sql_');
+        file_put_contents(
+            $temp_file, "-- Comment\nSELECT 1;\n\nSELECT 2;\n-- Another comment\nSELECT 3;"
+        );
+
+        $queries = parseSQLFile($temp_file);
+        $this->assertIsArray($queries);
+        $this->assertCount(3, $queries);
+        $this->assertStringContainsString('SELECT 1', $queries[0]);
+        $this->assertStringContainsString('SELECT 2', $queries[1]);
+        $this->assertStringContainsString('SELECT 3', $queries[2]);
+
+        unlink($temp_file);
+    }
+
+    /**
+     * Test get_database_prefixes function (deprecated wrapper)
+     */
+    public function testGetDatabasePrefixesDeprecated(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        $tbpref = '';
+        $fixed = get_database_prefixes($tbpref);
+
+        // Should return 0 or 1
+        $this->assertTrue($fixed === 0 || $fixed === 1);
+        $this->assertIsString($tbpref);
+    }
+
+    /**
+     * Test find_latin_sentence_end function (callback for regex)
+     */
+    public function testFindLatinSentenceEnd(): void
+    {
+        // Test sentence ending detection
+        // This function is used as a callback in text parsing
+        // Test with typical sentence end
+        $matches = [
+            0 => 'Hello.',  // Full match
+            1 => 'Hello',   // Word before punctuation
+            2 => '',        // Optional punctuation
+            3 => '.',       // Sentence delimiter
+            4 => '',        // Split sentence char
+            5 => '',        // Closing quotes
+            6 => ' ',       // Following whitespace
+            7 => 'World'    // Next word
+        ];
+        $result = find_latin_sentence_end($matches, '');
+        $this->assertIsString($result);
+
+        // Test with exception (e.g., "Dr." should not split)
+        $matches[1] = 'Dr';
+        $result = find_latin_sentence_end($matches, 'Dr|Mr|Mrs');
+        $this->assertIsString($result);
+    }
+
+    /**
+     * Test remove_spaces function
+     */
+    public function testRemoveSpaces(): void
+    {
+        // Test with remove spaces = 0 (no removal)
+        $result = remove_spaces('hello world', '0');
+        $this->assertEquals('hello world', $result);
+
+        // Test with remove spaces = 1 (remove all spaces)
+        $result = remove_spaces('hello world test', '1');
+        $this->assertEquals('helloworldtest', $result);
+
+        // Test with empty string
+        $result = remove_spaces('', '1');
+        $this->assertEquals('', $result);
+
+        // Test with multiple spaces
+        $result = remove_spaces('test  multiple   spaces', '1');
+        $this->assertEquals('testmultiplespaces', $result);
+    }
+
+    /**
+     * Test make_score_random_insert_update function
+     */
+    public function testMakeScoreRandomInsertUpdate(): void
+    {
+        // Test insert variable mode (column names)
+        $result = make_score_random_insert_update('iv');
+        $this->assertIsString($result);
+        $this->assertStringContainsString('WoTodayScore', $result);
+        $this->assertStringContainsString('WoRandom', $result);
+
+        // Test insert data mode (values)
+        $result = make_score_random_insert_update('id');
+        $this->assertIsString($result);
+        $this->assertStringContainsString('RAND()', $result);
+
+        // Test update mode
+        $result = make_score_random_insert_update('u');
+        $this->assertIsString($result);
+        $this->assertStringContainsString('WoTodayScore', $result);
+
+        // Test with invalid mode (should return empty string)
+        $result = make_score_random_insert_update('x');
+        $this->assertIsString($result);
+        $this->assertEquals('', $result);
+    }
+
+    /**
+     * Test get_version_number function
+     */
+    public function testGetVersionNumber(): void
+    {
+        $version = get_version_number();
+        $this->assertIsString($version);
+        $this->assertStringStartsWith('v', $version);
+        // Version format: vXXXYYYZZZ (e.g., v002009001 for 2.9.1)
+        $this->assertMatchesRegularExpression('/^v\d{9}$/', $version);
+    }
+
+    /**
+     * Test get_mecab_path function
+     * Note: Only tests that function exists, as MeCab may not be installed
+     */
+    public function testGetMecabPath(): void
+    {
+        // Just verify function exists
+        // Actual execution would require MeCab installation
+        $this->assertTrue(function_exists('get_mecab_path'));
+    }
+
+    /**
+     * Test tohtml function (HTML entity encoding)
+     */
+    public function testTohtml(): void
+    {
+        // Basic HTML escaping
+        $this->assertEquals('&lt;script&gt;', tohtml('<script>'));
+        $this->assertEquals('&quot;test&quot;', tohtml('"test"'));
+        $this->assertEquals('hello &amp; world', tohtml('hello & world'));
+
+        // Test with empty string
+        $this->assertEquals('', tohtml(''));
+
+        // Test with already encoded entities (should double-encode)
+        $result = tohtml('&lt;');
+        $this->assertStringContainsString('&', $result);
+
+        // Test with UTF-8 characters
+        $result = tohtml('日本語');
+        $this->assertStringContainsString('日本語', $result);
+    }
+
+    /**
+     * Test my_die function behavior
+     * Note: Can't fully test as it calls die(), but we can test it's defined
+     */
+    public function testMyDieExists(): void
+    {
+        $this->assertTrue(function_exists('my_die'));
+    }
+
+    /**
+     * Test get_setting_data function
+     */
+    public function testGetSettingData(): void
+    {
+        $settings = get_setting_data();
+        $this->assertIsArray($settings);
+
+        // Should contain common settings
+        $this->assertArrayHasKey('set-texts-per-page', $settings);
+        $this->assertArrayHasKey('set-show-text-word-counts', $settings);
+
+        // Each setting should have structure: dft, num, min, max (for numeric)
+        $this->assertIsArray($settings['set-texts-per-page']);
+        $this->assertArrayHasKey('dft', $settings['set-texts-per-page']);
+    }
+
+    /**
+     * Test database charset and collation
+     */
+    public function testDatabaseCharsetCollation(): void
+    {
+        global $DBCONNECTION;
+
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Check connection charset (should be utf8, utf8mb3, or utf8mb4)
+        $charset = mysqli_character_set_name($DBCONNECTION);
+        $this->assertContains(
+            $charset,
+            ['utf8', 'utf8mb3', 'utf8mb4'],
+            'Database connection should use UTF-8 encoding (utf8, utf8mb3, or utf8mb4)'
+        );
+
+        // Check database charset (should be utf8, utf8mb3, or utf8mb4)
+        $result = do_mysqli_query("SHOW VARIABLES LIKE 'character_set_database'");
+        $row = mysqli_fetch_assoc($result);
+        $this->assertContains(
+            $row['Value'],
+            ['utf8', 'utf8mb3', 'utf8mb4'],
+            'Database should use UTF-8 encoding (utf8, utf8mb3, or utf8mb4)'
+        );
+        mysqli_free_result($result);
+    }
+
+    /**
+     * Test transaction handling
+     * Note: MyISAM engine doesn't support transactions, so this test
+     * verifies the transaction API works but may not actually rollback
+     */
+    public function testTransactionHandling(): void
+    {
+        global $DBCONNECTION, $tbpref;
+
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Check if table uses MyISAM (which doesn't support transactions)
+        $engine_result = do_mysqli_query("SHOW TABLE STATUS LIKE '{$tbpref}settings'");
+        $engine_row = mysqli_fetch_assoc($engine_result);
+        $is_myisam = ($engine_row['Engine'] === 'MyISAM');
+
+        // Start transaction
+        mysqli_begin_transaction($DBCONNECTION);
+
+        // Insert test data
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}settings (StKey, StValue)
+             VALUES ('test_transaction', 'value1')"
+        );
+
+        // Rollback
+        mysqli_rollback($DBCONNECTION);
+
+        // Verify behavior (MyISAM will commit regardless of rollback)
+        $result = getSetting('test_transaction');
+        if ($is_myisam) {
+            // MyISAM doesn't support transactions, data will be there
+            $this->assertTrue($result === 'value1' || $result === '');
+        } else {
+            // InnoDB or other transactional engine should rollback
+            $this->assertEquals('', $result);
+        }
+
+        // Clean up first insert if it exists
+        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey='test_transaction'");
+
+        // Test commit
+        mysqli_begin_transaction($DBCONNECTION);
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}settings (StKey, StValue)
+             VALUES ('test_transaction', 'value2')"
+        );
+        mysqli_commit($DBCONNECTION);
+
+        // Verify data was committed (works for both MyISAM and InnoDB)
+        $result = getSetting('test_transaction');
+        $this->assertEquals('value2', $result);
+
+        // Clean up
+        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey='test_transaction'");
+    }
+
 }
 ?>

@@ -226,7 +226,11 @@ function get_setting_data()
             "dft" => '0', "num" => 0
         ),
         'set-similar-terms-count' => array(
-            "dft" => '0', "num" => 1, "min" => 0, "max" => 9)
+            "dft" => '0', "num" => 1, "min" => 0, "max" => 9
+        ),
+        'set-show-text-word-counts' => array(
+            "dft" => '1', "num" => 0
+        )
         );
     }
     return $setting_data;
@@ -789,6 +793,7 @@ function parseSQLFile($filename)
     if ($handle === false) {
         return array();
     }
+    $queries_list = array();
     $curr_content = '';
     while ($stream = fgets($handle)) {
         // Skip comments
@@ -805,6 +810,10 @@ function parseSQLFile($filename)
         foreach ($queries as $query) {
             $queries_list[] = trim($query);
         }
+    }
+    // Add final query if there's any remaining content
+    if (!empty(trim($curr_content))) {
+        $queries_list[] = trim($curr_content);
     }
     if (!feof($handle)) {
         // Throw error
