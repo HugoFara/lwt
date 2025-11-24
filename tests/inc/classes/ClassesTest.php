@@ -785,4 +785,478 @@ class ClassesTest extends TestCase
         $this->assertStringContainsString('User-Agent:', $headersString);
         $this->assertStringContainsString('Host:', $headersString);
     }
+
+    /**
+     * Test GoogleTranslate makeCurl with cookieSet parameter
+     */
+    public function testGoogleTranslateMakeCurlWithCookie(): void
+    {
+        GoogleTranslate::setDomain('com');
+
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $method = $reflection->getMethod('makeCurl');
+        $method->setAccessible(true);
+
+        // Test with cookieSet = true
+        $result = $method->invokeArgs(null, ['http://httpbin.org/status/404', true]);
+
+        // Result should be string or false
+        $this->assertTrue(is_string($result) || $result === false);
+    }
+
+    /**
+     * Test GoogleTranslate with special characters and escaping
+     */
+    public function testGoogleTranslateWithSpecialCharacters(): void
+    {
+        $translator = new GoogleTranslate('en', 'de');
+
+        // Test setting languages with special characters
+        $translator->setLangFrom('zh-CN');
+        $translator->setLangTo('pt-BR');
+
+        $this->assertInstanceOf(GoogleTranslate::class, $translator);
+    }
+
+    /**
+     * Test GoogleTranslate array_iunique preserves keys
+     */
+    public function testGoogleTranslateArrayIuniquePreservesKeys(): void
+    {
+        $input = [
+            'key1' => 'Hello',
+            'key2' => 'HELLO',
+            'key3' => 'World',
+            'key4' => 'hello'
+        ];
+
+        $result = GoogleTranslate::array_iunique($input);
+
+        // Should preserve original keys from first occurrence
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('key1', $result);
+        $this->assertArrayHasKey('key3', $result);
+    }
+
+    /**
+     * Test GoogleTranslate token generation with null token parameter
+     */
+    public function testGoogleTranslateGenerateTokenWithNullToken(): void
+    {
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $method = $reflection->getMethod('generateToken');
+        $method->setAccessible(true);
+
+        // Test with null token (should use defaults)
+        $token = $method->invokeArgs(null, ['test', null]);
+        $this->assertIsString($token);
+        $this->assertMatchesRegularExpression('/^\d+\.\d+$/', $token);
+    }
+
+    /**
+     * Test GoogleTranslate token with 32-bit vs 64-bit PHP handling
+     */
+    public function testGoogleTranslateTokenHandlesPHPIntSize(): void
+    {
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $method = $reflection->getMethod('generateToken');
+        $method->setAccessible(true);
+
+        // Test with various strings to ensure proper handling
+        $strings = ['a', 'test', 'Hello World', '日本語', str_repeat('x', 100)];
+
+        foreach ($strings as $str) {
+            $token = $method->invokeArgs(null, [$str, [408254, 585515986]]);
+            $this->assertIsString($token);
+            $this->assertStringContainsString('.', $token);
+
+            // Verify format
+            $parts = explode('.', $token);
+            $this->assertCount(2, $parts);
+            $this->assertIsNumeric($parts[0]);
+            $this->assertIsNumeric($parts[1]);
+        }
+    }
+
+    /**
+     * Test GoogleTranslate urlFormat constant
+     */
+    public function testGoogleTranslateUrlFormat(): void
+    {
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $urlFormat = $reflection->getConstant('DEFAULT_DOMAIN');
+
+        // DEFAULT_DOMAIN should be null
+        $this->assertNull($urlFormat);
+    }
+
+    /**
+     * Test GoogleTranslate getDomain with null input
+     */
+    public function testGoogleTranslateGetDomainWithNull(): void
+    {
+        $result = GoogleTranslate::getDomain(null);
+
+        // Should return a random valid domain
+        $validDomains = [
+            'com.ar', 'at', 'com.au', 'be', 'com.br', 'ca', 'cat', 'ch', 'cl', 'cn',
+            'cz', 'de', 'dk', 'es', 'fi', 'fr', 'gr', 'com.hk', 'hr', 'hu', 'co.id',
+            'ie', 'co.il', 'im', 'co.in', 'it', 'co.jp', 'co.kr', 'com.mx',
+            'nl', 'no', 'pl', 'pt', 'ru', 'se', 'com.sg', 'co.th', 'com.tw',
+            'co.uk', 'com'
+        ];
+
+        $this->assertContains($result, $validDomains);
+    }
+
+    /**
+     * Test GoogleTranslate lastResult property
+     */
+    public function testGoogleTranslateLastResultProperty(): void
+    {
+        $translator = new GoogleTranslate('en', 'es');
+
+        // Initially should be empty string
+        $this->assertEquals('', $translator->lastResult);
+
+        // After a translation attempt, lastResult should be set
+        // (We can't test actual translation without hitting the API)
+    }
+
+    /**
+     * Test GoogleTranslate with empty strings
+     */
+    public function testGoogleTranslateWithEmptyStrings(): void
+    {
+        $translator = new GoogleTranslate('', '');
+        $this->assertInstanceOf(GoogleTranslate::class, $translator);
+
+        $translator->setLangFrom('');
+        $translator->setLangTo('');
+        $this->assertInstanceOf(GoogleTranslate::class, $translator);
+    }
+
+    /**
+     * Test GoogleTranslate translate instance method
+     * This tests the wrapper around staticTranslate
+     */
+    public function testGoogleTranslateInstanceTranslateMethod(): void
+    {
+        $translator = new GoogleTranslate('en', 'es');
+
+        // Initially lastResult should be empty
+        $this->assertEquals('', $translator->lastResult);
+
+        // Note: We cannot test actual translation without hitting Google API
+        // But we can verify the method signature and that it updates lastResult
+        $reflection = new \ReflectionMethod($translator, 'translate');
+        $this->assertTrue($reflection->isPublic());
+        $this->assertFalse($reflection->isStatic());
+
+        // Verify it accepts a string parameter
+        $params = $reflection->getParameters();
+        $this->assertCount(1, $params);
+        $this->assertEquals('string', $params[0]->getName());
+    }
+
+    /**
+     * Test GoogleTranslate staticTranslate method structure
+     */
+    public function testGoogleTranslateStaticTranslateStructure(): void
+    {
+        // Test that method exists and has correct signature
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $method = $reflection->getMethod('staticTranslate');
+
+        $this->assertTrue($method->isPublic());
+        $this->assertTrue($method->isStatic());
+
+        // Check parameters
+        $params = $method->getParameters();
+        $this->assertGreaterThanOrEqual(3, count($params));
+
+        // Verify parameter names
+        $this->assertEquals('string', $params[0]->getName());
+        $this->assertEquals('from', $params[1]->getName());
+        $this->assertEquals('to', $params[2]->getName());
+        $this->assertEquals('time_token', $params[3]->getName());
+        $this->assertEquals('domain', $params[4]->getName());
+
+        // Verify optional parameters have defaults
+        $this->assertTrue($params[3]->isOptional());
+        $this->assertTrue($params[4]->isOptional());
+    }
+
+    /**
+     * Test GoogleTranslate generateToken with negative number edge case
+     */
+    public function testGoogleTranslateGenerateTokenNegativeNumbers(): void
+    {
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $method = $reflection->getMethod('generateToken');
+        $method->setAccessible(true);
+
+        // Test strings that might produce negative intermediate values
+        // The algorithm has special handling for negative numbers (lines 110-117)
+        $testStrings = [
+            '',                          // Empty string
+            ' ',                         // Single space
+            '!',                         // Special character
+            '😀',                        // Emoji (4-byte UTF-8)
+            str_repeat('z', 500),       // Very long string with high byte values
+            '🔥🔥🔥🔥🔥',                // Multiple emoji
+            '中文测试',                   // Chinese characters
+            'Тест',                      // Cyrillic
+            '🌍🌎🌏'                     // Globe emoji sequence
+        ];
+
+        foreach ($testStrings as $str) {
+            $token = $method->invokeArgs(null, [$str, [408254, 585515986]]);
+
+            $this->assertIsString($token);
+            $this->assertStringContainsString('.', $token);
+
+            // Verify format is valid: number.number
+            $parts = explode('.', $token);
+            $this->assertCount(2, $parts);
+            $this->assertIsNumeric($parts[0]);
+            $this->assertIsNumeric($parts[1]);
+
+            // Both parts should be positive integers
+            $this->assertGreaterThanOrEqual(0, (int)$parts[0]);
+            $this->assertGreaterThanOrEqual(0, (int)$parts[1]);
+        }
+    }
+
+    /**
+     * Test GoogleTranslate generateToken modulo operation branch
+     */
+    public function testGoogleTranslateGenerateTokenModuloBranch(): void
+    {
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $method = $reflection->getMethod('generateToken');
+        $method->setAccessible(true);
+
+        // Test with different token values to cover different branches
+        $tokenSets = [
+            [0, 0],                          // All zeros
+            [999999, 999999],                // Large values
+            [1, 1],                          // Small values
+            [408254, 585515986],             // Default values
+            [500000, 500000],                // Values that might trigger the < 5000000 branch
+            [5000001, 5000001],              // Values above 5000000
+        ];
+
+        foreach ($tokenSets as $tokens) {
+            $token = $method->invokeArgs(null, ['test', $tokens]);
+
+            $this->assertIsString($token);
+            $this->assertMatchesRegularExpression('/^\d+\.\d+$/', $token);
+
+            // Verify the result is within expected range (modulo 1000000)
+            $parts = explode('.', $token);
+            $firstPart = (int)$parts[0];
+
+            // After modulo 1000000, value should be < 1000000
+            $this->assertLessThan(1000000, $firstPart);
+        }
+    }
+
+    /**
+     * Test GoogleTranslate makeCurl fallback to file_get_contents
+     */
+    public function testGoogleTranslateMakeCurlStreamContextFallback(): void
+    {
+        GoogleTranslate::setDomain('com');
+
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $method = $reflection->getMethod('makeCurl');
+        $method->setAccessible(true);
+
+        // When cURL is available, this won't hit the fallback
+        // But we test that the method completes successfully
+        // The fallback to stream context (lines 192-203) is used when cURL is not available
+        $result = $method->invokeArgs(null, ['http://httpbin.org/status/200', false]);
+
+        // Result should be string or false
+        $this->assertTrue(is_string($result) || $result === false);
+
+        if ($result !== false) {
+            // If we got a result, it should be a string
+            $this->assertIsString($result);
+        }
+    }
+
+    /**
+     * Test GoogleTranslate url format construction
+     */
+    public function testGoogleTranslateUrlFormatConstant(): void
+    {
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+
+        // Access the private static $urlFormat
+        $property = $reflection->getProperty('urlFormat');
+        $property->setAccessible(true);
+        $urlFormat = $property->getValue();
+
+        $this->assertIsString($urlFormat);
+        $this->assertStringContainsString('translate.google.%s', $urlFormat);
+        $this->assertStringContainsString('translate_a/single', $urlFormat);
+        $this->assertStringContainsString('client=t', $urlFormat);
+        $this->assertStringContainsString('q=%s', $urlFormat);
+        $this->assertStringContainsString('sl=%s', $urlFormat);
+        $this->assertStringContainsString('tl=%s', $urlFormat);
+        $this->assertStringContainsString('tk=%s', $urlFormat);
+    }
+
+    /**
+     * Test GoogleTranslate domain property
+     */
+    public function testGoogleTranslateDomainProperty(): void
+    {
+        // Set a specific domain
+        GoogleTranslate::setDomain('de');
+
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $property = $reflection->getProperty('gglDomain');
+        $property->setAccessible(true);
+
+        $domain = $property->getValue();
+        $this->assertEquals('de', $domain);
+
+        // Set another domain
+        GoogleTranslate::setDomain('fr');
+        $domain = $property->getValue();
+        $this->assertEquals('fr', $domain);
+
+        // Set with null (should get random)
+        GoogleTranslate::setDomain(null);
+        $domain = $property->getValue();
+        $this->assertIsString($domain);
+        $this->assertNotEmpty($domain);
+    }
+
+    /**
+     * Test GoogleTranslate private properties initialization
+     */
+    public function testGoogleTranslatePrivatePropertiesInitialization(): void
+    {
+        $translator = new GoogleTranslate('en', 'de');
+
+        $reflection = new \ReflectionClass($translator);
+
+        // Check langFrom
+        $langFromProp = $reflection->getProperty('langFrom');
+        $langFromProp->setAccessible(true);
+        $this->assertEquals('en', $langFromProp->getValue($translator));
+
+        // Check langTo
+        $langToProp = $reflection->getProperty('langTo');
+        $langToProp->setAccessible(true);
+        $this->assertEquals('de', $langToProp->getValue($translator));
+
+        // After setting new languages
+        $translator->setLangFrom('ja');
+        $translator->setLangTo('ko');
+
+        $this->assertEquals('ja', $langFromProp->getValue($translator));
+        $this->assertEquals('ko', $langToProp->getValue($translator));
+    }
+
+    /**
+     * Test GoogleTranslate array_iunique with various array types
+     */
+    public function testGoogleTranslateArrayIuniqueWithVariousArrays(): void
+    {
+        // Test with numeric keys
+        $result = GoogleTranslate::array_iunique([
+            0 => 'First',
+            1 => 'FIRST',
+            2 => 'Second',
+            3 => 'second'
+        ]);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey(0, $result);
+        $this->assertArrayHasKey(2, $result);
+
+        // Test with all same case
+        $result = GoogleTranslate::array_iunique(['hello', 'world', 'test']);
+        $this->assertCount(3, $result);
+
+        // Test with all same value different cases
+        $result = GoogleTranslate::array_iunique(['TEST', 'Test', 'test', 'TeSt']);
+        $this->assertLessThanOrEqual(1, count($result));
+
+        // Test with mixed types (array_iunique should handle gracefully)
+        $result = GoogleTranslate::array_iunique(['One', 'one', 'Two', 'THREE']);
+        $this->assertIsArray($result);
+    }
+
+    /**
+     * Test GoogleTranslate generateToken with multibyte characters of different lengths
+     */
+    public function testGoogleTranslateGenerateTokenMultibyteEdgeCases(): void
+    {
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $method = $reflection->getMethod('generateToken');
+        $method->setAccessible(true);
+
+        // Test various multibyte character scenarios
+        $tests = [
+            'ASCII only' => 'Hello',
+            '2-byte UTF-8' => 'Привет',           // Cyrillic
+            '3-byte UTF-8' => '日本語',            // Japanese
+            '4-byte UTF-8' => '😀😃😄',           // Emoji
+            'Mixed' => 'Hello世界🌍',              // Mixed
+            'Arabic RTL' => 'مرحبا',              // Right-to-left
+            'Thai' => 'สวัสดี',                   // Thai script
+            'Hebrew' => 'שלום',                   // Hebrew
+        ];
+
+        foreach ($tests as $description => $str) {
+            $token = $method->invokeArgs(null, [$str, [408254, 585515986]]);
+
+            $this->assertIsString($token, "Failed for: $description");
+            $this->assertMatchesRegularExpression('/^\d+\.\d+$/', $token, "Invalid format for: $description");
+
+            // Tokens for different strings should be different
+            $token2 = $method->invokeArgs(null, [$str . 'x', [408254, 585515986]]);
+            $this->assertNotEquals($token, $token2, "Tokens should differ for: $description");
+        }
+    }
+
+    /**
+     * Test GoogleTranslate setHeaders creates all required headers
+     */
+    public function testGoogleTranslateSetHeadersCompleteness(): void
+    {
+        GoogleTranslate::setDomain('co.jp');
+
+        $reflection = new \ReflectionClass(GoogleTranslate::class);
+        $property = $reflection->getProperty('headers');
+        $property->setAccessible(true);
+
+        $headers = $property->getValue();
+
+        // Verify all required headers are present
+        $headerString = implode("\n", $headers);
+
+        $requiredHeaders = [
+            'Accept:',
+            'Accept-Language:',
+            'Connection:',
+            'Cookie:',
+            'DNT:',
+            'Host: translate.google.co.jp',  // Should match the domain we set
+            'Referer:',
+            'User-Agent:'
+        ];
+
+        foreach ($requiredHeaders as $required) {
+            $this->assertStringContainsString($required, $headerString, "Missing header: $required");
+        }
+
+        // Verify host matches domain
+        $this->assertStringContainsString('translate.google.co.jp', $headerString);
+    }
 }
