@@ -95,6 +95,18 @@ class TextParsingTest extends TestCase
     }
 
     /**
+     * Helper method to call prepare_text_parsing with output buffering
+     * This prevents HTML output from polluting the test output
+     */
+    private function callPrepareTextParsing($text, $id, $lid)
+    {
+        ob_start();
+        $result = prepare_text_parsing($text, $id, $lid);
+        ob_end_clean();
+        return $result;
+    }
+
+    /**
      * Test prepare_text_parsing with basic text
      */
     public function testPrepareTextParsingBasic(): void
@@ -107,7 +119,7 @@ class TextParsingTest extends TestCase
 
         // Test with split mode (-2) which returns sentences array
         $text = "Hello world. This is a test.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should return array in split mode');
         $this->assertNotEmpty($result, 'Should have parsed sentences');
@@ -147,7 +159,7 @@ class TextParsingTest extends TestCase
 
         // Test text with German characters
         $text = "Größe Käse Tür";
-        $result = prepare_text_parsing($text, -2, $germanLangId);
+        $result = $this->callPrepareTextParsing($text, -2, $germanLangId);
 
         $this->assertIsArray($result, 'Should return array');
 
@@ -172,7 +184,7 @@ class TextParsingTest extends TestCase
 
         // Text with braces should have them replaced with brackets
         $text = "Text with {braces} and more {content}.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should return array');
         $this->assertNotEmpty($result, 'Should parse text with braces');
@@ -192,7 +204,7 @@ class TextParsingTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = prepare_text_parsing('', -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing('', -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should return array even for empty text');
         // May return empty array or array with single empty element, both are acceptable
@@ -210,7 +222,7 @@ class TextParsingTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = prepare_text_parsing("   \n\t  ", -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing("   \n\t  ", -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should return array');
         // Whitespace may be treated as one or two sentences depending on paragraph marker handling
@@ -230,7 +242,7 @@ class TextParsingTest extends TestCase
 
         // Text with various Unicode characters
         $text = "Hello 世界. Γεια σου κόσμε. مرحبا بالعالم.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle Unicode text');
         $this->assertNotEmpty($result, 'Should parse Unicode text');
@@ -248,7 +260,7 @@ class TextParsingTest extends TestCase
         }
 
         $text = "First paragraph here.\n\nSecond paragraph here.\n\nThird paragraph.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should return array');
         $this->assertGreaterThanOrEqual(3, count($result), 'Should have at least 3 sentences');
@@ -267,7 +279,7 @@ class TextParsingTest extends TestCase
 
         // Text with Windows line endings
         $text = "Line one.\r\nLine two.\r\nLine three.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle Windows line endings');
         $this->assertNotEmpty($result, 'Should parse text with CRLF');
@@ -285,7 +297,7 @@ class TextParsingTest extends TestCase
         }
 
         $text = "Question? Exclamation! Period. Comma, semicolon; colon: dash-word.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle special punctuation');
         $this->assertGreaterThanOrEqual(3, count($result), 'Should split on sentence punctuation');
@@ -304,7 +316,7 @@ class TextParsingTest extends TestCase
 
         // Should try not to split on Mr. or Dr. (in exception list)
         $text = "Mr. Smith met Dr. Jones. They talked.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle abbreviations');
         // Abbreviation handling may vary, expecting 2-3 sentences
@@ -324,7 +336,7 @@ class TextParsingTest extends TestCase
         }
 
         $text = "The value is 3.14. Another number is 42. Version 2.0.1 is here.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle numbers');
         $this->assertGreaterThanOrEqual(3, count($result), 'Should split sentences but not on decimal points');
@@ -342,7 +354,7 @@ class TextParsingTest extends TestCase
         }
 
         $text = "UPPERCASE SENTENCE. lowercase sentence. MiXeD CaSe SeNtEnCe.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle mixed case');
         $this->assertEquals(3, count($result), 'Should have 3 sentences');
@@ -360,7 +372,7 @@ class TextParsingTest extends TestCase
         }
 
         $text = '"First sentence." "Second sentence." \'Third sentence.\'';
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle quoted text');
         $this->assertGreaterThanOrEqual(3, count($result), 'Should have at least 3 sentences');
@@ -380,7 +392,7 @@ class TextParsingTest extends TestCase
         // Mode -1 (check) outputs HTML and returns null
         $text = "Test sentence.";
 
-        // Capture the HTML output
+        // Capture the HTML output - call prepare_text_parsing directly to get output
         ob_start();
         $result = prepare_text_parsing($text, -1, self::$testLanguageId);
         $output = ob_get_clean();
@@ -407,7 +419,7 @@ class TextParsingTest extends TestCase
         }
         $text = implode(' ', $sentences);
 
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle long text');
         // May have 50 or 51 sentences depending on parsing (allow some margin)
@@ -428,7 +440,7 @@ class TextParsingTest extends TestCase
 
         // Text with SQL-special characters
         $text = "Test with 'single quotes'. Test with \"double quotes\". Test with \\ backslash.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle special SQL characters');
         $this->assertNotEmpty($result, 'Should parse text with special characters');
@@ -446,7 +458,7 @@ class TextParsingTest extends TestCase
         }
 
         $text = "Hello 😀 world. How are you 🌍 doing?";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle emoji');
         $this->assertNotEmpty($result, 'Should parse text with emoji');
@@ -465,7 +477,7 @@ class TextParsingTest extends TestCase
 
         // Invalid language ID should cause issues (may not throw exception, but will fail to parse)
         // The function may return null or empty array, or the mysqli_fetch_assoc may return false
-        $result = prepare_text_parsing("Test text.", -2, 99999);
+        $result = $this->callPrepareTextParsing("Test text.", -2, 99999);
 
         // We just verify it doesn't crash and returns an array or null
         $this->assertTrue($result === null || is_array($result), 'Should handle invalid language gracefully');
@@ -483,7 +495,7 @@ class TextParsingTest extends TestCase
         }
 
         $text = "Wait for it... Here it comes. Done.";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle ellipsis');
         $this->assertNotEmpty($result, 'Should parse text with ellipsis');
@@ -501,7 +513,7 @@ class TextParsingTest extends TestCase
         }
 
         $text = "Text without any sentence ending punctuation marks";
-        $result = prepare_text_parsing($text, -2, self::$testLanguageId);
+        $result = $this->callPrepareTextParsing($text, -2, self::$testLanguageId);
 
         $this->assertIsArray($result, 'Should handle text without punctuation');
         $this->assertNotEmpty($result, 'Should still return the text as one sentence');

@@ -585,7 +585,7 @@ function getreq($s)
 function getsess($s)
 {
     if (isset($_SESSION[$s]) ) {
-        return trim($_SESSION[$s]);
+        return trim((string)$_SESSION[$s]);
     }
     return '';
 }
@@ -597,7 +597,13 @@ function getsess($s)
  */
 function url_base(): string
 {
-    $url = parse_url("http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
+    // Detect if using HTTPS
+    $scheme = 'http';
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        $scheme = 'https';
+    }
+
+    $url = parse_url("$scheme://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
     $r = $url["scheme"] . "://" . $url["host"];
     if (isset($url["port"])) {
         $r .= ":" . $url["port"];
@@ -733,6 +739,9 @@ function langFromDict($url)
         return '';
     }
     $query = parse_url($url, PHP_URL_QUERY);
+    if ($query === null) {
+        return '';
+    }
     parse_str($query, $parsed_query);
     if (array_key_exists("lwt_translator", $parsed_query)
         && $parsed_query["lwt_translator"] == "libretranslate"
@@ -754,6 +763,9 @@ function targetLangFromDict($url)
         return '';
     }
     $query = parse_url($url, PHP_URL_QUERY);
+    if ($query === null) {
+        return '';
+    }
     parse_str($query, $parsed_query);
     if (array_key_exists("lwt_translator", $parsed_query)
         && $parsed_query["lwt_translator"] == "libretranslate"

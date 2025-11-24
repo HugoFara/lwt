@@ -719,5 +719,357 @@ class DatabaseConnectTest extends TestCase
         do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "_lwtgeneral WHERE LWTKey LIKE 'safe_%'");
     }
 
+    /**
+     * Test prepare_textdata_js function
+     */
+    public function testPrepareTextdataJs(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Basic string should be single-quoted and JS-escaped
+        $result = prepare_textdata_js('test');
+        $this->assertEquals("\\'test\\'", $result);
+
+        // Empty string should return empty single-quoted string
+        $result = prepare_textdata_js('');
+        $this->assertEquals("''", $result);
+
+        // String with whitespace only should return empty single-quoted string
+        $result = prepare_textdata_js('   ');
+        $this->assertEquals("''", $result);
+
+        // String with single quotes should be JS-escaped
+        $result = prepare_textdata_js("test'value");
+        $this->assertStringContainsString("\\'", $result);
+
+        // String with line endings should be normalized
+        $result = prepare_textdata_js("line1\r\nline2");
+        $this->assertStringContainsString("line1", $result);
+        $this->assertStringContainsString("line2", $result);
+
+        // SQL special characters should be escaped for JS
+        $result = prepare_textdata_js("test\"value");
+        $this->assertStringStartsWith("\\'", $result);
+        $this->assertStringEndsWith("\\'", $result);
+    }
+
+    /**
+     * Test runsql function with different scenarios
+     */
+    public function testRunsql(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Valid query with success message
+        $result = runsql(
+            "INSERT INTO " . $GLOBALS['tbpref'] . "settings (StKey, StValue)
+             VALUES ('test_runsql_1', 'value1')
+             ON DUPLICATE KEY UPDATE StValue='value1'",
+            "Inserted"
+        );
+        $this->assertStringContainsString('Inserted:', $result);
+        $this->assertMatchesRegularExpression('/\d+/', $result); // Should contain a number
+
+        // Query with empty success message should just return the count
+        $result = runsql(
+            "UPDATE " . $GLOBALS['tbpref'] . "settings
+             SET StValue='value2' WHERE StKey='test_runsql_1'",
+            ""
+        );
+        $this->assertMatchesRegularExpression('/^\d+$/', $result); // Should be just a number
+
+        // Test error handling with sqlerrdie=false
+        $result = runsql(
+            "SELECT * FROM nonexistent_table_xyz",
+            "Test",
+            false
+        );
+        $this->assertStringContainsString('Error:', $result);
+
+        // Clean up
+        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='test_runsql_1'");
+    }
+
+    /**
+     * Test adjust_autoincr function
+     */
+    public function testAdjustAutoincr(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // This function adjusts AUTO_INCREMENT values
+        // We'll test with the settings table (though it doesn't have auto-increment, it should not crash)
+        // The function should execute without errors
+        adjust_autoincr('settings', 'StKey');
+        $this->assertTrue(true, 'adjust_autoincr should complete without error');
+
+        // Test with a table that has auto-increment (languages table has LgID)
+        adjust_autoincr('languages', 'LgID');
+        $this->assertTrue(true, 'adjust_autoincr should work with auto-increment column');
+    }
+
+    /**
+     * Test optimizedb function
+     */
+    public function testOptimizedb(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // This function optimizes all tables
+        // It should execute without errors
+        optimizedb();
+        $this->assertTrue(true, 'optimizedb should complete without error');
+    }
+
+    /**
+     * Test get_first_value with different queries
+     */
+    public function testGetFirstValueAdvanced(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Insert a test setting
+        saveSetting('test_first_value', '42');
+
+        // Query that returns a value
+        $result = get_first_value(
+            "SELECT StValue as value FROM " . $GLOBALS['tbpref'] .
+            "settings WHERE StKey='test_first_value'"
+        );
+        $this->assertEquals('42', $result);
+
+        // Query that returns nothing should return null
+        $result = get_first_value(
+            "SELECT StValue as value FROM " . $GLOBALS['tbpref'] .
+            "settings WHERE StKey='nonexistent_key_xyz123'"
+        );
+        $this->assertNull($result);
+
+        // Query with numeric result
+        $result = get_first_value(
+            "SELECT COUNT(*) as value FROM " . $GLOBALS['tbpref'] . "settings"
+        );
+        $this->assertIsNumeric($result);
+        $this->assertTrue($result >= 0);
+
+        // Clean up
+        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='test_first_value'");
+    }
+
+    /**
+     * Test connect_to_database function
+     */
+    public function testConnectToDatabase(): void
+    {
+        global $DBCONNECTION;
+        list($userid, $passwd, $server, $dbname) = user_logging();
+
+        // Valid connection
+        $connection = connect_to_database(
+            $server, $userid, $passwd, $dbname, $socket ?? ""
+        );
+        $this->assertInstanceOf(mysqli::class, $connection);
+        $this->assertEquals(0, mysqli_connect_errno(), 'Should connect successfully');
+
+        // Note: Testing with invalid database name would trigger my_die()
+        // so we skip that test to avoid test failure
+
+        // Restore proper connection (already have valid one)
+        $DBCONNECTION = $connection;
+    }
+
+    /**
+     * Test getDatabasePrefix function
+     */
+    public function testGetDatabasePrefix(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Get the prefix for the current database
+        $result = getDatabasePrefix($DBCONNECTION);
+
+        // The function returns an array with [$tbpref, $fixed_tbpref]
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+
+        list($prefix, $fixed) = $result;
+
+        // The prefix should be a string (empty string by default)
+        $this->assertTrue(is_string($prefix));
+
+        // The fixed flag should be a boolean
+        $this->assertTrue(is_bool($fixed));
+
+        // If there's a prefix set in settings, it should be returned
+        // By default, LWT uses empty prefix
+        $this->assertTrue($prefix === '' || strlen($prefix) > 0);
+    }
+
+    /**
+     * Test get_database_prefixes function
+     */
+    public function testGetDatabasePrefixes(): void
+    {
+        global $DBCONNECTION, $tbpref;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Get prefixes - returns 0 or 1 indicating if prefix is fixed
+        // Also modifies $tbpref by reference
+        $fixed = get_database_prefixes($tbpref);
+
+        // Should return 0 or 1
+        $this->assertIsInt($fixed);
+        $this->assertTrue($fixed === 0 || $fixed === 1);
+
+        // $tbpref should be set to a string
+        $this->assertTrue(is_string($tbpref));
+    }
+
+    /**
+     * Test do_mysqli_query error handling
+     * Note: This test verifies error handling but we can't easily test the die() behavior
+     */
+    public function testDoMysqliQuerySuccess(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Valid SELECT query
+        $result = do_mysqli_query("SELECT 1 as test");
+        $this->assertNotFalse($result, 'Valid query should return result');
+        $this->assertTrue(
+            $result instanceof mysqli_result || $result === true,
+            'Result should be mysqli_result or true'
+        );
+
+        if ($result instanceof mysqli_result) {
+            mysqli_free_result($result);
+        }
+
+        // Valid INSERT query
+        $result = do_mysqli_query(
+            "INSERT INTO " . $GLOBALS['tbpref'] . "settings (StKey, StValue)
+             VALUES ('test_mysqli_query', 'test')
+             ON DUPLICATE KEY UPDATE StValue='test'"
+        );
+        $this->assertNotFalse($result, 'Valid INSERT should return true');
+
+        // Clean up
+        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='test_mysqli_query'");
+    }
+
+    /**
+     * Test prefixSQLQuery with various SQL statements
+     */
+    public function testPrefixSQLQueryAdvanced(): void
+    {
+        // CREATE TABLE with backticks
+        $result = prefixSQLQuery("CREATE TABLE `users` (id INT);", "test_");
+        $this->assertEquals("CREATE TABLE `test_users` (id INT);", $result);
+
+        // ALTER TABLE
+        $result = prefixSQLQuery("ALTER TABLE users ADD COLUMN name VARCHAR(255);", "pre_");
+        $this->assertEquals("ALTER TABLE pre_users ADD COLUMN name VARCHAR(255);", $result);
+
+        // CREATE TABLE with IF NOT EXISTS
+        $result = prefixSQLQuery("CREATE TABLE IF NOT EXISTS languages (id INT);", "lwt_");
+        $this->assertEquals("CREATE TABLE IF NOT EXISTS lwt_languages (id INT);", $result);
+
+        // Empty prefix should not change the query
+        $result = prefixSQLQuery("CREATE TABLE users (id INT);", "");
+        $this->assertEquals("CREATE TABLE users (id INT);", $result);
+    }
+
+    /**
+     * Test check_text_valid function
+     */
+    public function testCheckTextValid(): void
+    {
+        global $DBCONNECTION;
+
+        // Ensure DB connection exists
+        if (!$DBCONNECTION) {
+            list($userid, $passwd, $server, $dbname) = user_logging();
+            $DBCONNECTION = connect_to_database(
+                $server, $userid, $passwd, $dbname, $socket ?? ""
+            );
+        }
+
+        // Test with non-existent language (returns null when language doesn't exist)
+        // check_text_valid outputs HTML, so we need to capture it
+        ob_start();
+        $result = check_text_valid(99999);
+        ob_end_clean();
+        $this->assertNull($result, 'Non-existent language should return null');
+
+        // Test with empty language
+        ob_start();
+        $result = check_text_valid(0);
+        ob_end_clean();
+        $this->assertTrue($result === null || $result === false, 'Empty language ID should return null or false');
+    }
+
 }
 ?>

@@ -117,7 +117,7 @@ function prepare_textdata_js($s): string
     if ($s == "NULL") {
         return "''";
     }
-    return str_replace("''", "\\'", $s);
+    return str_replace("'", "\\'", $s);
 }
 
 

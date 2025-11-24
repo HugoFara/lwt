@@ -11,6 +11,12 @@ ones are marked like "v1.0.0-fork".
 
 * Official support for PHP 8.3 and 8.4.
 
+### Fixed
+
+* **PHP 8.3 Compatibility**: Fixed deprecation warnings in `langFromDict()` and
+  `targetLangFromDict()` - both functions now check for null query strings before
+  calling `parse_str()`.
+
 ### Security
 
 * Fixed SQL injection vulnerabilities in `validateLang()`, `validateText()`,

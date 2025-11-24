@@ -367,4 +367,611 @@ final class KernelUtilityTest extends TestCase
         $this->assertEquals("ab\u{200B}cd", $result, 'Should remove regular spaces but keep zero-width');
     }
 
+    /**
+     * Test getsqlscoreformula with different methods
+     */
+    public function testGetsqlscoreformula(): void
+    {
+        // Method 2: WoTodayScore formula with DATEDIFF and GREATEST
+        $result = getsqlscoreformula(2);
+        $this->assertStringContainsString('DATEDIFF', $result);
+        $this->assertStringContainsString('NOW()', $result);
+        $this->assertStringContainsString('GREATEST', $result);
+        $this->assertStringContainsString('WoStatus', $result);
+        $this->assertStringContainsString('CASE', $result);
+
+        // Method 3: WoTomorrowScore formula with DATEDIFF and GREATEST
+        $result = getsqlscoreformula(3);
+        $this->assertStringContainsString('DATEDIFF', $result);
+        $this->assertStringContainsString('NOW()', $result);
+        $this->assertStringContainsString('GREATEST', $result);
+        $this->assertStringContainsString('WoStatus', $result);
+        $this->assertStringContainsString('CASE', $result);
+
+        // Default/other methods: Returns '0'
+        $result = getsqlscoreformula(0);
+        $this->assertEquals('0', $result);
+
+        $result = getsqlscoreformula(1);
+        $this->assertEquals('0', $result);
+
+        $result = getsqlscoreformula(99);
+        $this->assertEquals('0', $result);
+    }
+
+    /**
+     * Test make_score_random_insert_update with different types
+     */
+    public function testMakeScoreRandomInsertUpdate(): void
+    {
+        // Test 'iv' type - column names only
+        $result = make_score_random_insert_update('iv');
+        $this->assertStringContainsString('WoTodayScore', $result);
+        $this->assertStringContainsString('WoTomorrowScore', $result);
+        $this->assertStringContainsString('WoRandom', $result);
+        $this->assertStringNotContainsString('=', $result);
+
+        // Test 'id' type - values only (for INSERT)
+        $result = make_score_random_insert_update('id');
+        $this->assertStringContainsString('RAND()', $result);
+        $this->assertStringContainsString('GREATEST', $result);
+        $this->assertStringContainsString('WoStatus', $result);
+        // Note: The result contains '=' in CASE conditions like "WoStatus = 1"
+        // but not in assignment context (no "column = value")
+
+        // Test 'u' type - key=value pairs for UPDATE
+        $result = make_score_random_insert_update('u');
+        $this->assertStringContainsString('WoTodayScore =', $result);
+        $this->assertStringContainsString('WoTomorrowScore =', $result);
+        $this->assertStringContainsString('WoRandom = RAND()', $result);
+        $this->assertStringContainsString('GREATEST', $result);
+
+        // Test default case (should return empty string)
+        $result = make_score_random_insert_update('anything_else');
+        $this->assertEquals('', $result);
+    }
+
+    /**
+     * Test error_message_with_hide function
+     */
+    public function testErrorMessageWithHide(): void
+    {
+        // Test with non-error message (noback=true - no back button)
+        $result = error_message_with_hide('Test message', true);
+        $this->assertStringContainsString('Test message', $result);
+        $this->assertStringContainsString('msgblue', $result);
+        $this->assertStringNotContainsString('onclick="history.back();"', $result);
+
+        // Test with Error prefix (should show red error with back button when noback=false)
+        $result = error_message_with_hide('Error: Something went wrong', false);
+        $this->assertStringContainsString('Error: Something went wrong', $result);
+        $this->assertStringContainsString('class="red"', $result);
+        $this->assertStringContainsString('onclick="history.back();"', $result);
+
+        // Test with Error prefix and noback=true (no back button)
+        $result = error_message_with_hide('Error: Another problem', true);
+        $this->assertStringContainsString('Error: Another problem', $result);
+        $this->assertStringContainsString('class="red"', $result);
+        $this->assertStringNotContainsString('onclick="history.back()"', $result);
+
+        // Test empty message (should return empty string)
+        $result = error_message_with_hide('', true);
+        $this->assertEquals('', $result);
+
+        // Test whitespace-only message (should return empty string)
+        $result = error_message_with_hide('   ', false);
+        $this->assertEquals('', $result);
+    }
+
+    /**
+     * Test getsess function for session variable retrieval
+     */
+    public function testGetsess(): void
+    {
+        // Start session if not already started
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Set up test session variables
+        $_SESSION['test_key'] = '  test_value  ';
+        $_SESSION['empty'] = '';
+        $_SESSION['null_value'] = null;
+
+        // Should trim values
+        $this->assertEquals('test_value', getsess('test_key'));
+
+        // Should return empty string for empty values
+        $this->assertEquals('', getsess('empty'));
+
+        // Should return empty string for null values
+        $this->assertEquals('', getsess('null_value'));
+
+        // Should return empty string for non-existent keys
+        $this->assertEquals('', getsess('nonexistent'));
+
+        // Clean up
+        unset($_SESSION['test_key']);
+        unset($_SESSION['empty']);
+        unset($_SESSION['null_value']);
+    }
+
+    /**
+     * Test get_mecab_path function (Japanese morphological analyzer)
+     * Note: This test is skipped because get_mecab_path calls my_die() if MeCab is not installed
+     * and requires system-level MeCab installation to test properly
+     */
+    public function testGetMecabPath(): void
+    {
+        // Skip this test - get_mecab_path() calls my_die() if MeCab not installed
+        // This would require MeCab to be installed on the system running tests
+        $this->markTestSkipped('get_mecab_path requires MeCab to be installed on the system');
+    }
+
+    /**
+     * Test get_setting_data function
+     */
+    public function testGetSettingData(): void
+    {
+        $settings = get_setting_data();
+
+        // Should return an array
+        $this->assertIsArray($settings);
+        $this->assertNotEmpty($settings);
+
+        // Each setting should have 'dft' (default) and 'num' at minimum
+        foreach ($settings as $key => $setting) {
+            $this->assertIsArray($setting);
+            $this->assertArrayHasKey('dft', $setting, "Setting '$key' should have 'dft' key");
+            $this->assertArrayHasKey('num', $setting, "Setting '$key' should have 'num' key");
+
+            // If numeric ('num' == 1), should have min and max
+            if ($setting['num'] == 1) {
+                $this->assertArrayHasKey('min', $setting, "Numeric setting '$key' should have 'min'");
+                $this->assertArrayHasKey('max', $setting, "Numeric setting '$key' should have 'max'");
+            }
+        }
+
+        // Test some known settings exist (using array keys)
+        $settingKeys = array_keys($settings);
+        $this->assertContains('set-texts-per-page', $settingKeys);
+        $this->assertContains('set-terms-per-page', $settingKeys);
+        $this->assertContains('set-theme_dir', $settingKeys);
+
+        // Verify specific setting structure
+        $this->assertEquals('10', $settings['set-texts-per-page']['dft']);
+        $this->assertEquals(1, $settings['set-texts-per-page']['num']);
+    }
+
+    /**
+     * Test get_execution_time function
+     */
+    public function testGetExecutionTime(): void
+    {
+        // This function depends on REQUEST_TIME_FLOAT being set
+        if (isset($_SERVER['REQUEST_TIME_FLOAT'])) {
+            $time = get_execution_time();
+            $this->assertIsFloat($time);
+            $this->assertGreaterThanOrEqual(0, $time);
+        } else {
+            // If REQUEST_TIME_FLOAT not set, should return 0
+            $_SERVER['REQUEST_TIME_FLOAT'] = microtime(true);
+            usleep(1000); // Sleep 1ms to ensure time passes
+            $time = get_execution_time();
+            $this->assertIsFloat($time);
+            $this->assertGreaterThan(0, $time);
+        }
+    }
+
+    /**
+     * Test parseSQLFile function
+     */
+    public function testParseSQLFile(): void
+    {
+        // Create a temporary SQL file
+        $sqlContent = "-- Test SQL file\n" .
+                      "CREATE TABLE test (id INT);\n" .
+                      "INSERT INTO test VALUES (1);\n" .
+                      "-- Comment line\n" .
+                      "SELECT * FROM test;";
+
+        $tempFile = sys_get_temp_dir() . '/test_sql_' . uniqid() . '.sql';
+        file_put_contents($tempFile, $sqlContent);
+
+        // Parse the file
+        $queries = parseSQLFile($tempFile);
+
+        // Should return an array of queries
+        $this->assertIsArray($queries);
+        $this->assertNotEmpty($queries);
+
+        // Queries should be separated
+        $this->assertGreaterThan(0, count($queries));
+
+        // Clean up
+        unlink($tempFile);
+    }
+
+    /**
+     * Test parseSQLFile with non-existent file
+     */
+    public function testParseSQLFileNonexistent(): void
+    {
+        $result = parseSQLFile('/nonexistent/file.sql');
+
+        // Should return empty array or handle gracefully
+        $this->assertTrue($result === false || (is_array($result) && empty($result)));
+    }
+
+    /**
+     * Test annotation_to_json with edge cases
+     */
+    public function testAnnotationToJsonEdgeCases(): void
+    {
+        // Annotation with special characters
+        $annotation = "1\tword's\t5\t\"translation\"";
+        $result = annotation_to_json($annotation);
+        $this->assertJson($result);
+
+        // Annotation with tabs in translation
+        $annotation = "1\tword\t5\ttranslation\twith\ttabs";
+        $result = annotation_to_json($annotation);
+        $this->assertJson($result);
+
+        // Malformed annotation (missing fields)
+        $annotation = "1\tword";
+        $result = annotation_to_json($annotation);
+        $this->assertJson($result);
+
+        // Unicode in annotations
+        $annotation = "1\t日本語\t5\ttranslation";
+        $result = annotation_to_json($annotation);
+        $this->assertJson($result);
+        $decoded = json_decode($result, true);
+        $this->assertStringContainsString('日本語', $decoded[0][0]);
+    }
+
+    /**
+     * Test url_base with different server configurations
+     */
+    public function testUrlBaseVariousConfigurations(): void
+    {
+        // Save original values
+        $origHost = $_SERVER['HTTP_HOST'] ?? null;
+        $origUri = $_SERVER['REQUEST_URI'] ?? null;
+        $origHttps = $_SERVER['HTTPS'] ?? null;
+
+        // Test with HTTPS
+        $_SERVER['HTTPS'] = 'on';
+        $_SERVER['HTTP_HOST'] = 'secure.example.com';
+        $_SERVER['REQUEST_URI'] = '/lwt/page.php';
+
+        $base = url_base();
+        $this->assertStringStartsWith('https://', $base);
+        $this->assertStringContainsString('secure.example.com', $base);
+
+        // Test without HTTPS
+        $_SERVER['HTTPS'] = 'off';
+        $_SERVER['HTTP_HOST'] = 'example.com';
+        $_SERVER['REQUEST_URI'] = '/test/index.php';
+
+        $base = url_base();
+        $this->assertStringStartsWith('http://', $base);
+        $this->assertStringContainsString('example.com', $base);
+
+        // Test with port number
+        $_SERVER['HTTP_HOST'] = 'localhost:8080';
+        $_SERVER['REQUEST_URI'] = '/lwt/index.php';
+
+        $base = url_base();
+        $this->assertStringContainsString('localhost:8080', $base);
+
+        // Restore original values
+        if ($origHost !== null) {
+            $_SERVER['HTTP_HOST'] = $origHost;
+        }
+        if ($origUri !== null) {
+            $_SERVER['REQUEST_URI'] = $origUri;
+        }
+        if ($origHttps !== null) {
+            $_SERVER['HTTPS'] = $origHttps;
+        }
+    }
+
+    /**
+     * Test langFromDict with edge cases
+     */
+    public function testLangFromDictEdgeCases(): void
+    {
+        // URL without language parameter
+        $this->assertEquals('', langFromDict('http://example.com/page.php'));
+
+        // Malformed URL
+        $this->assertEquals('', langFromDict('not-a-url'));
+
+        // Multiple sl parameters (parse_str uses the last one)
+        $url = 'http://example.com/?sl=en&sl=fr';
+        $result = langFromDict($url);
+        // parse_str uses the last value when there are duplicates
+        $this->assertEquals('fr', $result);
+
+        // URL with fragment
+        $this->assertEquals('de', langFromDict('http://example.com/?sl=de#fragment'));
+
+        // Case sensitivity - query parameters are case-sensitive
+        // 'SL' is different from 'sl', so this should return empty
+        $this->assertEquals('', langFromDict('http://example.com/?SL=en'));
+    }
+
+    /**
+     * Test targetLangFromDict with edge cases
+     */
+    public function testTargetLangFromDictEdgeCases(): void
+    {
+        // URL without target parameter
+        $this->assertEquals('', targetLangFromDict('http://example.com/page.php'));
+
+        // Malformed URL
+        $this->assertEquals('', targetLangFromDict('not-a-url'));
+
+        // URL with only source language
+        $this->assertEquals('', targetLangFromDict('http://example.com/?sl=en'));
+
+        // LibreTranslate without target
+        $this->assertEquals('', targetLangFromDict('http://localhost:5000/?source=en'));
+
+        // URL with fragment
+        $this->assertEquals('es', targetLangFromDict('http://example.com/?tl=es#fragment'));
+    }
+
+    /**
+     * Test str_replace_first with special regex characters
+     */
+    public function testStrReplaceFirstRegexCharacters(): void
+    {
+        // Needle with regex special characters - str_replace_first is NOT regex based
+        // so special characters should be treated literally
+        $this->assertEquals('[bcd]efg[abc]', str_replace_first('[abc]', '[bcd]', '[abc]efg[abc]'));
+        $this->assertEquals('testworld...', str_replace_first('...', 'test', '...world...'));
+
+        // Replacement with regex special characters
+        $this->assertEquals('$test world', str_replace_first('hello', '$test', 'hello world'));
+        $this->assertEquals('\\test world', str_replace_first('hello', '\\test', 'hello world'));
+    }
+
+    /**
+     * Test get_statuses structure and values
+     */
+    public function testGetStatusesStructure(): void
+    {
+        $statuses = get_statuses();
+
+        // Each status should have 'name' and 'abbr' keys
+        foreach ($statuses as $status => $data) {
+            $this->assertArrayHasKey('name', $data);
+            $this->assertArrayHasKey('abbr', $data);
+            $this->assertIsString($data['name']);
+            $this->assertIsString($data['abbr']);
+        }
+
+        // Verify color/style information if present
+        foreach ([1, 2, 3, 4] as $status) {
+            $this->assertEquals('Learning', $statuses[$status]['name']);
+        }
+
+        $this->assertNotEquals($statuses[98]['name'], $statuses[99]['name']);
+        $this->assertNotEquals($statuses[98]['abbr'], $statuses[99]['abbr']);
+    }
+
+    /**
+     * Test remove_spaces with Unicode characters
+     */
+    public function testRemoveSpacesUnicode(): void
+    {
+        // Chinese characters with spaces
+        $this->assertEquals('你好世界', remove_spaces('你 好 世 界', true));
+        $this->assertEquals('你 好 世 界', remove_spaces('你 好 世 界', false));
+
+        // Japanese with spaces
+        $this->assertEquals('こんにちは', remove_spaces('こ ん に ち は', true));
+
+        // Arabic with spaces
+        $this->assertEquals('مرحبا', remove_spaces('م ر ح ب ا', true));
+
+        // Mixed languages
+        $this->assertEquals('Hello世界', remove_spaces('Hello 世界', true));
+    }
+
+    /**
+     * Test tohtml with various edge cases
+     */
+    public function testTohtmlEdgeCases(): void
+    {
+        // Already escaped HTML
+        $this->assertEquals('&amp;lt;script&amp;gt;', tohtml('&lt;script&gt;'));
+
+        // Multiple special characters
+        $this->assertEquals('&lt;&amp;&gt;&quot;', tohtml('<&>"'));
+
+        // Long string with special characters
+        $longString = str_repeat('<div>&amp;</div>', 100);
+        $result = tohtml($longString);
+        $this->assertStringContainsString('&lt;div&gt;', $result);
+        $this->assertStringNotContainsString('<div>', $result);
+
+        // Newlines and tabs should be preserved
+        $this->assertEquals("line1\nline2\tindented", tohtml("line1\nline2\tindented"));
+    }
+
+    /**
+     * Test getreq with special characters and trimming
+     */
+    public function testGetreqSpecialCharacters(): void
+    {
+        // HTML in request
+        $_REQUEST['html_test'] = '<script>alert("XSS")</script>';
+        $result = getreq('html_test');
+        $this->assertEquals('<script>alert("XSS")</script>', $result);
+        $this->assertStringNotContainsString('&lt;', $result);
+
+        // Unicode with whitespace
+        $_REQUEST['unicode_test'] = '  日本語  ';
+        $this->assertEquals('日本語', getreq('unicode_test'));
+
+        // Newlines and tabs in value
+        $_REQUEST['whitespace_test'] = "  value\twith\nnewlines  ";
+        $result = getreq('whitespace_test');
+        // trim() only removes leading/trailing whitespace, not internal
+        $this->assertEquals("value\twith\nnewlines", $result);
+
+        // Clean up
+        unset($_REQUEST['html_test']);
+        unset($_REQUEST['unicode_test']);
+        unset($_REQUEST['whitespace_test']);
+    }
+
+    /**
+     * Test getsess with various data types
+     */
+    public function testGetsessDataTypes(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Integer value
+        $_SESSION['int_value'] = 42;
+        $result = getsess('int_value');
+        $this->assertEquals('42', $result); // Should be converted to string
+
+        // Array value (should be converted to string)
+        $_SESSION['array_value'] = ['test'];
+        $result = getsess('array_value');
+        $this->assertIsString($result);
+
+        // Boolean values
+        $_SESSION['bool_true'] = true;
+        $_SESSION['bool_false'] = false;
+        $this->assertEquals('1', getsess('bool_true'));
+        $this->assertEquals('', getsess('bool_false'));
+
+        // Clean up
+        unset($_SESSION['int_value']);
+        unset($_SESSION['array_value']);
+        unset($_SESSION['bool_true']);
+        unset($_SESSION['bool_false']);
+    }
+
+    /**
+     * Test quickMenu function
+     */
+    public function testQuickMenu(): void
+    {
+        // Capture output
+        ob_start();
+        quickMenu();
+        $output = ob_get_clean();
+
+        // Should output a select element
+        $this->assertStringContainsString('<select', $output);
+        $this->assertStringContainsString('id="quickmenu"', $output);
+        $this->assertStringContainsString('onchange=', $output);
+
+        // Should contain various menu options
+        $this->assertStringContainsString('value="index"', $output);
+        $this->assertStringContainsString('value="edit_languages"', $output);
+        $this->assertStringContainsString('value="edit_texts"', $output);
+        $this->assertStringContainsString('value="edit_words"', $output);
+    }
+
+    /**
+     * Test pagestart_kernel_nobody function
+     */
+    public function testPagestartKernelNobody(): void
+    {
+        // Capture output
+        ob_start();
+        pagestart_kernel_nobody('Test Page', 'body { color: red; }');
+        $output = ob_get_clean();
+
+        // Should output HTML document structure
+        $this->assertStringContainsString('<!DOCTYPE html>', $output);
+        $this->assertStringContainsString('<html lang="en">', $output);
+        $this->assertStringContainsString('<head>', $output);
+        $this->assertStringContainsString('<title>LWT :: Test Page</title>', $output);
+
+        // Should include custom CSS
+        $this->assertStringContainsString('body { color: red; }', $output);
+
+        // Should have meta tags
+        $this->assertStringContainsString('charset=utf-8', $output);
+        $this->assertStringContainsString('viewport', $output);
+    }
+
+    /**
+     * Test pageend function
+     */
+    public function testPageend(): void
+    {
+        // Capture output
+        ob_start();
+        pageend();
+        $output = ob_get_clean();
+
+        // Should close body and html tags
+        $this->assertStringContainsString('</body>', $output);
+        $this->assertStringContainsString('</html>', $output);
+    }
+
+    /**
+     * Test showRequest function
+     */
+    public function testShowRequest(): void
+    {
+        // Set up test request data
+        $_REQUEST['test_key'] = 'test_value';
+        $_REQUEST['another'] = 'data';
+
+        // Capture output
+        ob_start();
+        showRequest();
+        $output = ob_get_clean();
+
+        // Should output request data
+        $this->assertStringContainsString('_REQUEST', $output);
+
+        // Clean up
+        unset($_REQUEST['test_key']);
+        unset($_REQUEST['another']);
+    }
+
+    /**
+     * Test echodebug function
+     */
+    public function testEchodebug(): void
+    {
+        global $debug;
+        $originalDebug = $debug ?? null;
+
+        // Test with debug enabled
+        $debug = 1;
+        ob_start();
+        echodebug('test value', 'Test Label');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('Test Label', $output);
+        $this->assertStringContainsString('test value', $output);
+
+        // Test with debug disabled
+        $debug = 0;
+        ob_start();
+        echodebug('test value', 'Test Label');
+        $output = ob_get_clean();
+
+        $this->assertEquals('', $output, 'Should not output anything when debug is disabled');
+
+        // Restore original debug value
+        $debug = $originalDebug;
+    }
+
 }
