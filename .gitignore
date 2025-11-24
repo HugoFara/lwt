@@ -42,3 +42,7 @@ tools/*
 
 # phpDocumentor cache
 .phpdoc/*
+
+# PHPUnit coverage reports
+coverage-report/
+coverage.xml

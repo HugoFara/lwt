@@ -92,6 +92,16 @@ Alternatively:
 
  ``./vendor/bin/phpunit``
 
+#### Code Coverage Report
+
+To generate a code coverage report (requires Xdebug):
+
+```bash
+XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text
+```
+
+This will generate an HTML report in `coverage-report/index.html` and display a text summary in the terminal. Open the HTML report in your browser for detailed line-by-line coverage analysis.
+
 ### Security Check
 
 We use Psalm to find code flaws and inconsistencies. Use ``./vendor/bin/psalm``.
