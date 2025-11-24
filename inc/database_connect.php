@@ -974,12 +974,18 @@ function parse_standard_text($text, $id, $lid): ?array
     $sql = "SELECT * FROM {$tbpref}languages WHERE LgID=$lid";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
+    mysqli_free_result($res);
+
+    // Return null if language not found
+    if (!$record) {
+        return null;
+    }
+
     $removeSpaces = (string)$record['LgRemoveSpaces'];
     $splitSentence = (string)$record['LgRegexpSplitSentences'];
     $noSentenceEnd = (string)$record['LgExceptionsSplitSentences'];
     $termchar = (string)$record['LgRegexpWordCharacters'];
     $rtlScript = $record['LgRightToLeft'];
-    mysqli_free_result($res);
     // Split text paragraphs using " ¶" symbol
     $text = str_replace("\n", " ¶", $text);
     $text = trim($text);
@@ -1119,9 +1125,15 @@ function prepare_text_parsing($text, $id, $lid): ?array
     $sql = "SELECT * FROM {$tbpref}languages WHERE LgID = $lid";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
+    mysqli_free_result($res);
+
+    // Return null if language not found
+    if (!$record) {
+        return null;
+    }
+
     $termchar = (string)$record['LgRegexpWordCharacters'];
     $replace = explode("|", (string) $record['LgCharacterSubstitutions']);
-    mysqli_free_result($res);
     $text = prepare_textdata($text);
     //if(is_callable('normalizer_normalize')) $s = normalizer_normalize($s);
     do_mysqli_query('TRUNCATE TABLE ' . $tbpref . 'temptextitems');

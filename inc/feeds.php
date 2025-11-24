@@ -256,10 +256,10 @@ function get_nf_option($str,$option)
     foreach($arr as $value){
         $res=explode('=', $value);
         if(trim($res[0])==$option) {
-            return $res[1];
+            return $res[1] ?? null;
         }
         if($option=='all') {
-            $all[$res[0]]=$res[1];
+            $all[$res[0]]=$res[1] ?? '';
         }
     }
     if($option=='all') {
@@ -575,7 +575,7 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
         } else {
             $data[$key]['TxSourceURI'] = $feed_data[$key]['link'];
             $context = stream_context_create(array('http' => array('follow_location' => true )));
-            $HTMLString = file_get_contents(trim($data[$key]['TxSourceURI']), false, $context);
+            $HTMLString = @file_get_contents(trim($data[$key]['TxSourceURI']), false, $context);
             if (!empty($HTMLString)) {
                 $encod  = '';
                 if (empty($NfCharset)) {
@@ -739,9 +739,12 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
             $article_tags = explode("!?!", $NfArticleSection);if(strncmp($NfArticleSection, 'redirect:', 9)==0) { unset($article_tags[0]);
             }
             foreach ($article_tags as $article_tag) {
-                foreach ($selector->query($article_tag) as $text_temp) {
-                    if($text_temp->nodeValue != '') {
-                        $data[$key]['TxText'].= $text_temp->nodeValue;
+                $queryResult = @$selector->query($article_tag);
+                if ($queryResult !== false) {
+                    foreach ($queryResult as $text_temp) {
+                        if($text_temp->nodeValue != '') {
+                            $data[$key]['TxText'].= $text_temp->nodeValue;
+                        }
                     }
                 }
             }

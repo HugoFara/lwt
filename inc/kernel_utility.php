@@ -302,7 +302,11 @@ function get_mecab_path($mecab_args = ''): string
  */
 function find_latin_sentence_end($matches, $noSentenceEnd)
 {
-    if (!strlen($matches[6]) && strlen($matches[7]) && preg_match('/[a-zA-Z0-9]/', substr($matches[1], -1))) {
+    // Handle potentially null values in $matches array
+    $match6 = $matches[6] ?? '';
+    $match7 = $matches[7] ?? '';
+
+    if (!strlen($match6) && strlen($match7) && preg_match('/[a-zA-Z0-9]/', substr($matches[1], -1))) {
         return preg_replace("/[.]/", ".\t", $matches[0]);
     }
     if (is_numeric($matches[1])) {
@@ -313,7 +317,7 @@ function find_latin_sentence_end($matches, $noSentenceEnd)
     ) {
         return $matches[0];
     }
-    if (preg_match('/[.:]/', $matches[2]) && preg_match('/^[a-z]/', $matches[7])) {
+    if (preg_match('/[.:]/', $matches[2]) && preg_match('/^[a-z]/', $match7)) {
         return $matches[0];
     }
     if ($noSentenceEnd != '' && preg_match("/^($noSentenceEnd)$/", $matches[0])) {

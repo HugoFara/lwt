@@ -76,33 +76,33 @@ class GoogleTranslate
             $c += $b;
             $b = $c << 10;
             if ($b & $x) {
-                $b |= $y;
+                $b = ((int)$b | (int)$y);
             } else {
-                $b &= $z;
+                $b = ((int)$b & (int)$z);
             }
             $c += $b;
             $b = (($c >> 6) & (0x03ffffff));
             $c ^= $b;
             if ($c & $x) {
-                $c |= $y;
+                $c = ((int)$c | (int)$y);
             } else {
-                $c &= $z;
+                $c = ((int)$c & (int)$z);
             }
         }
         $b = $c << 3;
         if($b & $x) {
-            $b |= $y;
+            $b = ((int)$b | (int)$y);
         } else {
-            $b &= $z;
+            $b = ((int)$b & (int)$z);
         }
         $c += $b;
         $b = (($c >> 11) & (0x001fffff));
         $c ^= $b;
         $b = $c << 15;
         if($b & $x) {
-            $b |= $y;
+            $b = ((int)$b | (int)$y);
         } else {
-            $b &= $z;
+            $b = ((int)$b & (int)$z);
         }
         $c += $b;
         $c ^= isset($tok)?$tok[1]:585515986;//todo create from time() / TKK ggltrns
