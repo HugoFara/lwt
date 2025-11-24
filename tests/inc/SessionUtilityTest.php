@@ -14,7 +14,7 @@ class SessionUtilityTest extends TestCase
         $result = do_mysqli_query("SHOW TABLES LIKE 'texts'");
         $res = mysqli_fetch_assoc($result);
 
-        if ($res && $res["num_rows"] > 0) {
+        if ($res) {
             truncateUserDatabase();
         }
 
@@ -32,7 +32,7 @@ class SessionUtilityTest extends TestCase
         $result = do_mysqli_query("SHOW TABLES LIKE 'texts'");
         $res = mysqli_fetch_assoc($result);
 
-        if ($res && $res["num_rows"] > 0) {
+        if ($res) {
             truncateUserDatabase();
         }
 
@@ -515,6 +515,31 @@ class SessionUtilityTest extends TestCase
         do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoID = $word_id");
         do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgID = $tag_id");
         do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lang_id");
+    }
+
+    // ========== ADDITIONAL HELPER FUNCTIONS TESTS ==========
+
+    public function testGetWordsToDoButtonsSelectOptions()
+    {
+        // Test with value 0 (I Know All & Ignore All)
+        $result = get_words_to_do_buttons_selectoptions(0);
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('<option', $result);
+        $this->assertStringContainsString('value="0"', $result);
+        $this->assertStringContainsString('I Know All &amp; Ignore All', $result);
+        $this->assertStringContainsString('selected', $result);
+
+        // Test with value 1 (I Know All)
+        $result = get_words_to_do_buttons_selectoptions(1);
+        $this->assertStringContainsString('value="1"', $result);
+        $this->assertStringContainsString('I Know All</option>', $result);
+        $this->assertStringContainsString('selected', $result);
+
+        // Test with value 2 (Ignore All)
+        $result = get_words_to_do_buttons_selectoptions(2);
+        $this->assertStringContainsString('value="2"', $result);
+        $this->assertStringContainsString('Ignore All', $result);
     }
 }
 ?>

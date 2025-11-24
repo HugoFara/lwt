@@ -377,11 +377,16 @@ class TextParsingTest extends TestCase
             $this->markTestSkipped('Database connection not available');
         }
 
-        // Mode -1 (check) should return null
+        // Mode -1 (check) outputs HTML and returns null
         $text = "Test sentence.";
+
+        // Capture the HTML output
+        ob_start();
         $result = prepare_text_parsing($text, -1, self::$testLanguageId);
+        $output = ob_get_clean();
 
         $this->assertNull($result, 'Check mode (-1) should return null');
+        $this->assertStringContainsString('Test sentence', $output, 'Output should contain the text');
     }
 
     /**
