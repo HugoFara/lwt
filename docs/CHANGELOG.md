@@ -17,6 +17,12 @@ ones are marked like "v1.0.0-fork".
   `validateTag()`, and `validateArchTextTag()` functions. All validation
   functions now properly sanitize non-numeric input before executing SQL
   queries.
+* Fixed SQL injection vulnerabilities in `inc/tags.php`: `getTextTitle()`,
+  `saveWordTags()`, `saveTextTags()`, and `saveArchivedTextTags()` now
+  validate numeric input before using in SQL queries.
+* Fixed SQL syntax errors in tag list functions when handling empty lists or
+  failed tag creation. Functions now return gracefully instead of generating
+  invalid SQL.
 
 ### Deprecated
 

@@ -71,10 +71,14 @@ function get_texttags($refresh = 0)
 function getTextTitle($textid): string
 {
     global $tbpref;
+    // Validate that textid is numeric
+    if (!is_numeric($textid)) {
+        return "?";
+    }
     $text = get_first_value(
         "SELECT TxTitle AS value
         FROM " . $tbpref . "texts
-        WHERE TxID=" . $textid
+        WHERE TxID=" . (int)$textid
     );
     if (!isset($text)) {
         $text = "?";
@@ -246,7 +250,11 @@ function get_archivedtexttag_selectoptions($v,$l): string
 function saveWordTags($wid)
 {
     global $tbpref;
-    runsql("DELETE from " . $tbpref . "wordtags WHERE WtWoID =" . $wid, '');
+    // Validate that wid is numeric
+    if (!is_numeric($wid)) {
+        return;
+    }
+    runsql("DELETE from " . $tbpref . "wordtags WHERE WtWoID =" . (int)$wid, '');
     if (!isset($_REQUEST['TermTags'])
         || !is_array($_REQUEST['TermTags'])
         || !isset($_REQUEST['TermTags']['TagList'])
@@ -288,8 +296,12 @@ function saveWordTags($wid)
 function saveTextTags($tid): void
 {
     global $tbpref;
+    // Validate that tid is numeric
+    if (!is_numeric($tid)) {
+        return;
+    }
     runsql(
-        "DELETE FROM " . $tbpref . "texttags WHERE TtTxID =" . $tid,
+        "DELETE FROM " . $tbpref . "texttags WHERE TtTxID =" . (int)$tid,
         ''
     );
     if (!isset($_REQUEST['TextTags'])
@@ -334,7 +346,11 @@ function saveTextTags($tid): void
 function saveArchivedTextTags($tid): void
 {
     global $tbpref;
-    runsql("DELETE from " . $tbpref . "archtexttags WHERE AgAtID =" . $tid, '');
+    // Validate that tid is numeric
+    if (!is_numeric($tid)) {
+        return;
+    }
+    runsql("DELETE from " . $tbpref . "archtexttags WHERE AgAtID =" . (int)$tid, '');
     if (!isset($_REQUEST['TextTags'])
         || !is_array($_REQUEST['TextTags'])
         || !isset($_REQUEST['TextTags']['TagList'])
@@ -448,6 +464,10 @@ function getArchivedTextTags($tid): string
 function addtaglist($item, $list): string
 {
     global $tbpref;
+    // Handle empty list
+    if ($list === '()') {
+        return "Tag added in 0 Terms";
+    }
     $tagid = get_first_value(
         'select TgID as value
         from ' . $tbpref . 'tags
@@ -464,6 +484,10 @@ function addtaglist($item, $list): string
             from ' . $tbpref . 'tags
             where TgText = ' . convert_string_to_sqlsyntax($item)
         );
+        // If still not set, tag creation failed
+        if (!isset($tagid)) {
+            return "Failed to create tag";
+        }
     }
     $sql = 'select WoID
     from ' . $tbpref . 'words
@@ -489,6 +513,10 @@ function addtaglist($item, $list): string
 function addarchtexttaglist($item, $list): string
 {
     global $tbpref;
+    // Handle empty list
+    if ($list === '()') {
+        return "Tag added in 0 Texts";
+    }
     $tagid = get_first_value(
         'select T2ID as value from ' . $tbpref . 'tags2
         where T2Text = ' . convert_string_to_sqlsyntax($item)
@@ -504,6 +532,10 @@ function addarchtexttaglist($item, $list): string
             from ' . $tbpref . 'tags2
             where T2Text = ' . convert_string_to_sqlsyntax($item)
         );
+        // If still not set, tag creation failed
+        if (!isset($tagid)) {
+            return "Failed to create tag";
+        }
     }
     $sql = 'select AtID from ' . $tbpref . 'archivedtexts
     LEFT JOIN ' . $tbpref . 'archtexttags
@@ -528,6 +560,10 @@ function addarchtexttaglist($item, $list): string
 function addtexttaglist($item, $list): string
 {
     global $tbpref;
+    // Handle empty list
+    if ($list === '()') {
+        return "Tag added in 0 Texts";
+    }
     $tagid = get_first_value(
         'select T2ID as value
         from ' . $tbpref . 'tags2
@@ -544,6 +580,10 @@ function addtexttaglist($item, $list): string
             from ' . $tbpref . 'tags2
             where T2Text = ' . convert_string_to_sqlsyntax($item)
         );
+        // If still not set, tag creation failed
+        if (!isset($tagid)) {
+            return "Failed to create tag";
+        }
     }
     $sql = 'select TxID from ' . $tbpref . 'texts
      LEFT JOIN ' . $tbpref . 'texttags
@@ -568,6 +608,10 @@ function addtexttaglist($item, $list): string
 function removetaglist($item, $list): string
 {
     global $tbpref;
+    // Handle empty list
+    if ($list === '()') {
+        return "Tag removed in 0 Terms";
+    }
     $tagid = get_first_value(
         'SELECT TgID AS value
         FROM ' . $tbpref . 'tags
@@ -596,6 +640,10 @@ function removetaglist($item, $list): string
 function removearchtexttaglist($item, $list): string
 {
     global $tbpref;
+    // Handle empty list
+    if ($list === '()') {
+        return "Tag removed in 0 Texts";
+    }
     $tagid = get_first_value(
         'select T2ID as value
         from ' . $tbpref . 'tags2
@@ -624,6 +672,10 @@ function removearchtexttaglist($item, $list): string
 function removetexttaglist($item, $list): string
 {
     global $tbpref;
+    // Handle empty list
+    if ($list === '()') {
+        return "Tag removed in 0 Texts";
+    }
     $tagid = get_first_value(
         'select T2ID as value from ' . $tbpref . 'tags2
         where T2Text = ' . convert_string_to_sqlsyntax($item)
