@@ -223,12 +223,26 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals('', $result);
 
         // Test with a language that doesn't exist (should return empty)
-        // Using a numeric value to avoid SQL errors
         $result = validateLang('99999');
         $this->assertEquals('', $result);
 
-        // Note: Non-numeric values cause SQL errors in the current implementation
-        // This is a potential bug that should be fixed by sanitizing input before SQL
+        // Test SQL injection attempts - these should be safely rejected
+        $result = validateLang("1 OR 1=1");
+        $this->assertEquals('', $result, 'SQL injection attempt should be rejected');
+
+        $result = validateLang("invalid");
+        $this->assertEquals('', $result, 'Non-numeric input should be rejected');
+
+        $result = validateLang("1; DROP TABLE languages; --");
+        $this->assertEquals('', $result, 'SQL injection with DROP TABLE should be rejected');
+
+        $result = validateLang("1' OR '1'='1");
+        $this->assertEquals('', $result, 'SQL injection with quotes should be rejected');
+
+        // Valid numeric strings should work (if language exists)
+        $result = validateLang('1');
+        // Result depends on if language ID 1 exists, but shouldn't crash
+        $this->assertTrue($result === '' || $result === '1', 'Valid numeric ID should return empty or the ID');
     }
 
     /**
@@ -251,12 +265,26 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals('', $result);
 
         // Test with a text that doesn't exist (should return empty)
-        // Using a numeric value to avoid SQL errors
         $result = validateText('99999');
         $this->assertEquals('', $result);
 
-        // Note: Non-numeric values cause SQL errors in the current implementation
-        // This is a potential bug that should be fixed by sanitizing input before SQL
+        // Test SQL injection attempts - these should be safely rejected
+        $result = validateText("1 OR 1=1");
+        $this->assertEquals('', $result, 'SQL injection attempt should be rejected');
+
+        $result = validateText("invalid");
+        $this->assertEquals('', $result, 'Non-numeric input should be rejected');
+
+        $result = validateText("1; DROP TABLE texts; --");
+        $this->assertEquals('', $result, 'SQL injection with DROP TABLE should be rejected');
+
+        $result = validateText("1' UNION SELECT * FROM users --");
+        $this->assertEquals('', $result, 'SQL injection with UNION should be rejected');
+
+        // Valid numeric strings should work (if text exists)
+        $result = validateText('1');
+        // Result depends on if text ID 1 exists, but shouldn't crash
+        $this->assertTrue($result === '' || $result === '1', 'Valid numeric ID should return empty or the ID');
     }
 
     /**

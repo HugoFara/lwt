@@ -11,6 +11,13 @@ ones are marked like "v1.0.0-fork".
 
 * Official support for PHP 8.3 and 8.4.
 
+### Security
+
+* Fixed SQL injection vulnerabilities in `validateLang()`, `validateText()`,
+  `validateTag()`, and `validateArchTextTag()` functions. All validation
+  functions now properly sanitize non-numeric input before executing SQL
+  queries.
+
 ### Deprecated
 
 * Removed testing for PHP 8.0.
@@ -661,7 +668,7 @@ from 1.8.0 to 1.10.2. This brings some bug fixes.
 ### Fixed in 2.4.1-fork
 
 * A typo was breaking the feeds count in ``edit_languages.php``, creating annoying notices as illustrated at [#35](https://github.com/HugoFara/lwt/issues/35).
-* The error "[1290] The MySQL server is running with the --secure-file-priv option" should no longer appear when trying to save Japanese texts. It was referenced [here](https://github.com/HugoFara/lwt/issues/34#issuecomment-1141976723) in [issue #34](https://github.com/HugoFara/lwt/issues/34).
+* The error "[1290] The MySQL server is running with the --secure-file-priv option" should no longer appear when trying to save Japanese texts. It was referenced [in this comment](https://github.com/HugoFara/lwt/issues/34#issuecomment-1141976723) in [issue #34](https://github.com/HugoFara/lwt/issues/34).
 * The "Undefined index: trans in .../bulk_translate_word.php" notice fixed.
 * The "Undefined index: WoText in .../delete_word.php" notice fixed.
 * Repaired ``long_text_import.php`` for non-Japanese texts, it was broken since 2.4.0. Thanks to [@rc-ops](https://github.com/rc-ops) for this issue [#33](https://github.com/HugoFara/lwt/issues/33).
@@ -999,7 +1006,7 @@ This version should be the stable merge between official v2.0.2 and community ma
 
 ### Added in 1.6.1
 
-* [Link](info.html#links) to Chinese text segmentation "Jieba" added in documentation (Important Links - Additional Resources - For learners of Chinese).
+* [Chinese text segmentation "Jieba" link](info.html#links) added in documentation (Important Links - Additional Resources - For learners of Chinese).
 
 ### Changed in 1.6.1
 
@@ -1566,8 +1573,8 @@ Changes from official LWT version 1.5.20 imported:
 
 ### Added in 1.5.5
 
-* Integration of the Glosbe API into LWT via a "special" dictionary link. Read more [here](info.html#glosbe).
-* LWT-WordPress integration, read more [here](info.html#wp) (only for users who want to use WordPress authentication together with the LWT multiple user/table set feature introduced in version 1.5.3).
+* Integration of the Glosbe API into LWT via a "special" dictionary link. Read more [in the Glosbe documentation](info.html#glosbe).
+* LWT-WordPress integration, read more [in the WordPress integration guide](info.html#wp) (only for users who want to use WordPress authentication together with the LWT multiple user/table set feature introduced in version 1.5.3).
 
 ### Changed in 1.5.5
 
@@ -1590,7 +1597,7 @@ Changes from official LWT version 1.5.20 imported:
 
 ### Added in 1.5.3
 
-* New Feature: It is now possible to create and to use not only ONE set of LWT tables within one database. You are now able to create and use unlimited LWT table sets within one database (as space and MySQL limitations permit). This feature is especially useful for users who want to set up a multi user environment with a set of tables for each user. You can also create one table set for every language you study - this allows you to create different term/text tags for each language. If you don't need this feature, you just use LWT like in earlier versions with the "default table set". Read more [here](info.html#mue) and [here](info.html#database).  
+* New Feature: It is now possible to create and to use not only ONE set of LWT tables within one database. You are now able to create and use unlimited LWT table sets within one database (as space and MySQL limitations permit). This feature is especially useful for users who want to set up a multi user environment with a set of tables for each user. You can also create one table set for every language you study - this allows you to create different term/text tags for each language. If you don't need this feature, you just use LWT like in earlier versions with the "default table set". Read more [in the multi-user environment guide](info.html#mue) and [database documentation](info.html#database).  
 
 ### Changed in 1.5.3
 
@@ -1622,7 +1629,7 @@ Changes from official LWT version 1.5.20 imported:
 
 ### Added in 1.5.0
 
-* New Feature: Create and edit an improved annotated text version (as [interlinear text](http://en.wikipedia.org/wiki/Interlinear_gloss)) for online or offline learning. Read more [here](info.html#il).  
+* New Feature: Create and edit an improved annotated text version (as [interlinear text](http://en.wikipedia.org/wiki/Interlinear_gloss)) for online or offline learning. Read more [in the interlinear text documentation](info.html#il).  
 * In-Place-editing of translations and romanizations now possible within the terms table.
 * You may now empty (= delete the contents of) the LWT database in the "Backup/Restore/Empty Database" screen.
 
@@ -1841,7 +1848,7 @@ Changes from official LWT version 1.5.20 imported:
 
 ### Added in 1.0.2
 
-* Language definition: If the searchword in the Uniform Resource Identifiers (URIs) needs to be converted into a different encoding (standard is UTF-8), you can now use *###encoding###* as a placeholder. Example: *<http://mywebdict.com?q=###ISO-8859-15###>*. A list of encodings can be found [here](http://php.net/manual/en/mbstring.supported-encodings.php) (omit the asterisk if one is at the end).
+* Language definition: If the searchword in the Uniform Resource Identifiers (URIs) needs to be converted into a different encoding (standard is UTF-8), you can now use *###encoding###* as a placeholder. Example: *<http://mywebdict.com?q=###ISO-8859-15###>*. A list of encodings can be found [in the PHP mbstring documentation](http://php.net/manual/en/mbstring.supported-encodings.php) (omit the asterisk if one is at the end).
 
 ### Changed in 1.0.2
 
@@ -1860,7 +1867,7 @@ Changes from official LWT version 1.5.20 imported:
 
 ## 1.0.0 (August 01 2011)
 
-* First stable release. For some time, there won't be any new releases. I hope you'll understand that. Please post all problems, questions, and (hopefully not too many) bugs [here](http://sourceforge.net/projects/lwt/forums/forum/1813497), and ideas and suggestions for new features [here](http://lwt.uservoice.com). Thanks!  
+* First stable release. For some time, there won't be any new releases. I hope you'll understand that. Please post all problems, questions, and (hopefully not too many) bugs [on the SourceForge forum](http://sourceforge.net/projects/lwt/forums/forum/1813497), and ideas and suggestions for new features [on UserVoice](http://lwt.uservoice.com). Thanks!  
 
 ## 0.9.8 (July 31 2011)
 

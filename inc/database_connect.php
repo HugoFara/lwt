@@ -202,16 +202,18 @@ function convert_regexp_to_sqlsyntax($input): string
 function validateLang($currentlang): string
 {
     global $tbpref;
-    if ($currentlang == '') {
+    if ($currentlang == '' || !is_numeric($currentlang)) {
         return '';
     }
+    // Cast to integer for safety against SQL injection
+    $currentlang_int = (int)$currentlang;
     $sql_string = 'SELECT count(LgID) AS value
     FROM ' . $tbpref . 'languages
-    WHERE LgID=' . $currentlang;
+    WHERE LgID=' . $currentlang_int;
     if (get_first_value($sql_string) == 0) {
         return '';
     }
-    return $currentlang;
+    return (string)$currentlang_int;
 }
 
 /**
@@ -219,23 +221,25 @@ function validateLang($currentlang): string
  *
  * @param string $currenttext Text ID to validate
  *
- * @global string '' if the text is not valid, $currenttext otherwise
+ * @return string '' if the text is not valid, $currenttext otherwise
  *
  * @global string $tbpref Table name prefix
  */
 function validateText($currenttext): string
 {
     global $tbpref;
-    if ($currenttext == '') {
+    if ($currenttext == '' || !is_numeric($currenttext)) {
         return '';
     }
+    // Cast to integer for safety against SQL injection
+    $currenttext_int = (int)$currenttext;
     $sql_string = 'SELECT count(TxID) AS value
     FROM ' . $tbpref . 'texts WHERE TxID=' .
-    $currenttext;
+    $currenttext_int;
     if (get_first_value($sql_string) == 0) {
         return '';
     }
-    return $currenttext;
+    return (string)$currenttext_int;
 }
 
 // -------------------------------------------------------------
@@ -244,12 +248,27 @@ function validateTag($currenttag,$currentlang)
 {
     global $tbpref;
     if ($currenttag != '' && $currenttag != -1) {
+        // Sanitize inputs to prevent SQL injection
+        if (!is_numeric($currenttag)) {
+            return '';
+        }
+        $currenttag_int = (int)$currenttag;
+
+        $lang_condition = '';
+        if ($currentlang != '') {
+            if (!is_numeric($currentlang)) {
+                return '';
+            }
+            $currentlang_int = (int)$currentlang;
+            $lang_condition = " AND WoLgID = " . $currentlang_int;
+        }
+
         $sql = "SELECT (
-            " . $currenttag . " IN (
+            " . $currenttag_int . " IN (
                 SELECT TgID
                 FROM {$tbpref}words, {$tbpref}tags, {$tbpref}wordtags
                 WHERE TgID = WtTgID AND WtWoID = WoID" .
-                ($currentlang != '' ? " AND WoLgID = " . $currentlang : '') .
+                $lang_condition .
                 " group by TgID order by TgText
             )
         ) AS value";
@@ -289,9 +308,15 @@ function validateArchTextTag($currenttag,$currentlang)
 {
     global $tbpref;
     if ($currenttag != '' && $currenttag != -1) {
+        // Sanitize inputs to prevent SQL injection
+        if (!is_numeric($currenttag)) {
+            return '';
+        }
+        $currenttag_int = (int)$currenttag;
+
         if ($currentlang == '') {
             $sql = "select (
-                " . $currenttag . " in (
+                " . $currenttag_int . " in (
                     select T2ID
                     from {$tbpref}archivedtexts,
                     {$tbpref}tags2,
@@ -302,13 +327,17 @@ function validateArchTextTag($currenttag,$currentlang)
             ) as value";
         }
         else {
+            if (!is_numeric($currentlang)) {
+                return '';
+            }
+            $currentlang_int = (int)$currentlang;
             $sql = "select (
-                " . $currenttag . " in (
+                " . $currenttag_int . " in (
                     select T2ID
                     from {$tbpref}archivedtexts,
                     {$tbpref}tags2,
                     {$tbpref}archtexttags
-                    where T2ID = AgT2ID and AgAtID = AtID and AtLgID = $currentlang
+                    where T2ID = AgT2ID and AgAtID = AtID and AtLgID = " . $currentlang_int . "
                     group by T2ID order by T2Text
                 )
             ) as value";
