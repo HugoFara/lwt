@@ -20,7 +20,7 @@ implemented on the client-side to protect user data.
 
 The REST API should follow [semantic versioning](https://semver.org/).
 In the API URL, `v1` indicates "MAJOR version 1", and so on for the future versions.
-A track of all changes is kept in the [CHANGELOG.md](./CHANGELOG.md).
+A track of all changes is kept in the [CHANGELOG.md](../../CHANGELOG.md).
 
 ## GET API Endpoints
 

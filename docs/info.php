@@ -275,7 +275,7 @@ require_once __DIR__ . '/../src/tools/markdown_converter.php';
 
 			<?php markdown_integration(__DIR__ . "/reference/export-templates.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/developer/contributing.md"); ?>
+			<?php markdown_integration(__DIR__ . "/../CONTRIBUTING.md"); ?>
 
 			<?php markdown_integration(__DIR__ . "/user/troubleshooting/wordpress.md"); ?>
 
@@ -283,7 +283,7 @@ require_once __DIR__ . '/../src/tools/markdown_converter.php';
 
 			<?php markdown_integration(__DIR__ . "/reference/database-schema.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/CHANGELOG.md"); ?>
+			<?php markdown_integration(__DIR__ . "/../CHANGELOG.md"); ?>
 
 			<footer>
 				<p class="smallgray">
