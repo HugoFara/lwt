@@ -20,16 +20,19 @@
  *
  * 1 = debugging on, 0 = .. off
  */
-$debug = 0;
+$GLOBALS['debug'] = 0;
+$debug = &$GLOBALS['debug'];
 /**
  * @var int $dsplerrors
  * 1 = display all errors on, 0 = .. off
  */
-$dsplerrors = 0;
+$GLOBALS['dsplerrors'] = 0;
+$dsplerrors = &$GLOBALS['dsplerrors'];
 /**
  * @var int $dspltime
  * 1 = display time on, 0 = .. off
  */
-$dspltime = 0;
+$GLOBALS['dspltime'] = 0;
+$dspltime = &$GLOBALS['dspltime'];
 
 ?>

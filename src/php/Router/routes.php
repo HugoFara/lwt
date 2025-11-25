@@ -21,6 +21,12 @@ return function (Router $router) {
     $router->registerLegacy('do_text_header.php', '/text/read');
     $router->registerLegacy('do_text_text.php', '/text/read');
 
+    // Empty iframe placeholder (used in text read, test, and word pages)
+    $router->register('/text/empty.html', 'src/php/inc/empty.html');
+    $router->register('/test/empty.html', 'src/php/inc/empty.html');
+    $router->register('/word/empty.html', 'src/php/inc/empty.html');
+    $router->registerLegacy('empty.html', '/text/empty.html');
+
     // Edit texts
     $router->register('/text/edit', 'src/php/Legacy/text_edit.php');
     $router->register('/texts', 'src/php/Legacy/text_edit.php');
@@ -214,8 +220,8 @@ return function (Router $router) {
 
     // ==================== API ROUTES ====================
 
-    // Main API
-    $router->register('/api/v1', 'src/php/Legacy/api_v1.php');
+    // Main API - use prefix to catch all sub-paths
+    $router->registerPrefix('/api/v1', 'src/php/Legacy/api_v1.php');
     $router->registerLegacy('api.php', '/api/v1');
 
     // Translation APIs

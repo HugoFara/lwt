@@ -12,6 +12,7 @@ class Router
 {
     private array $routes = [];
     private array $legacyMap = [];
+    private array $prefixRoutes = [];
 
     /**
      * Register a route
@@ -23,6 +24,18 @@ class Router
     public function register(string $path, string $handler, string $method = '*'): void
     {
         $this->routes[$path][$method] = $handler;
+    }
+
+    /**
+     * Register a prefix route (matches all paths starting with the prefix)
+     *
+     * @param string $prefix The URL prefix (e.g., '/api/v1')
+     * @param string $handler The handler (file path or controller@method)
+     * @param string $method HTTP method (GET, POST, or *)
+     */
+    public function registerPrefix(string $prefix, string $handler, string $method = '*'): void
+    {
+        $this->prefixRoutes[$prefix][$method] = $handler;
     }
 
     /**
@@ -53,7 +66,8 @@ class Router
         // Remove leading/trailing slashes for consistency
         $path = '/' . trim($path, '/');
 
-        // Check for legacy file access (e.g., /do_text.php)
+        // Check for legacy file access (e.g., /do_text.php or /api.php/v1/endpoint)
+        // First try basename for simple cases like /do_text.php
         $filename = basename($path);
         if (str_ends_with($filename, '.php') && isset($this->legacyMap[$filename])) {
             // Legacy file accessed - redirect to new route
@@ -66,6 +80,34 @@ class Router
                 'url' => $redirectUrl,
                 'code' => 301  // Permanent redirect
             ];
+        }
+
+        // Handle legacy paths with path info after .php (e.g., /api.php/v1/version)
+        if (preg_match('/^\/([^\/]+\.php)(\/.*)?$/', $path, $matches)) {
+            $phpFile = $matches[1];
+            $pathInfo = $matches[2] ?? '';
+
+            if (isset($this->legacyMap[$phpFile])) {
+                $newPath = $this->legacyMap[$phpFile];
+                $queryString = $_SERVER['QUERY_STRING'] ?? '';
+
+                // For API routes, the path info contains the version prefix we need to strip
+                // e.g., /api.php/v1/version -> /api/v1/version (not /api/v1/v1/version)
+                // The pathInfo is /v1/version, but newPath is already /api/v1
+                // So we need to remove the /v1 prefix from pathInfo if it matches newPath's suffix
+                if (!empty($pathInfo) && str_ends_with($newPath, '/v1')) {
+                    // Strip /v1 or /vX prefix from pathInfo if present
+                    $pathInfo = preg_replace('/^\/v\d+/', '', $pathInfo);
+                }
+
+                $redirectUrl = $newPath . $pathInfo . ($queryString ? '?' . $queryString : '');
+
+                return [
+                    'type' => 'redirect',
+                    'url' => $redirectUrl,
+                    'code' => 301  // Permanent redirect
+                ];
+            }
         }
 
         // Try exact match first
@@ -102,6 +144,20 @@ class Router
                         'type' => 'handler',
                         'handler' => $handler,
                         'params' => array_merge($_GET, $matches)
+                    ];
+                }
+            }
+        }
+
+        // Try prefix matching (for API routes that handle multiple sub-paths)
+        foreach ($this->prefixRoutes as $prefix => $methods) {
+            if (str_starts_with($path, $prefix)) {
+                $handler = $methods[$requestMethod] ?? $methods['*'] ?? null;
+                if ($handler) {
+                    return [
+                        'type' => 'handler',
+                        'handler' => $handler,
+                        'params' => $_GET
                     ];
                 }
             }
@@ -210,19 +266,26 @@ class Router
     /**
      * Execute a legacy file
      *
-     * @param string $filePath Path to PHP file
+     * @param string $filePath Path to PHP file or static file
      * @param array $params Parameters (made available to included file)
      * @return void
      */
     private function executeFile(string $filePath, array $params): void
     {
-        // Make params available to the included file
-        extract($params, EXTR_SKIP);
-
         if (!file_exists($filePath)) {
             $this->handle500("File not found: {$filePath}");
             return;
         }
+
+        // Handle static HTML files
+        if (str_ends_with($filePath, '.html')) {
+            header('Content-Type: text/html; charset=utf-8');
+            readfile($filePath);
+            return;
+        }
+
+        // Make params available to the included file
+        extract($params, EXTR_SKIP);
 
         // Include the file
         include $filePath;
