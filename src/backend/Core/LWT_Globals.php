@@ -109,8 +109,6 @@ class LWT_Globals
     public static function setDbConnection(\mysqli $connection): void
     {
         self::$dbConnection = $connection;
-        // Backward compatibility: also set in $GLOBALS
-        $GLOBALS['DBCONNECTION'] = $connection;
     }
 
     /**
@@ -120,7 +118,7 @@ class LWT_Globals
      */
     public static function getDbConnection(): ?\mysqli
     {
-        return self::$dbConnection ?? $GLOBALS['DBCONNECTION'] ?? null;
+        return self::$dbConnection;
     }
 
     /**
@@ -135,9 +133,6 @@ class LWT_Globals
     {
         self::$tablePrefix = $prefix;
         self::$tablePrefixIsFixed = $isFixed;
-        // Backward compatibility: also set in $GLOBALS
-        $GLOBALS['tbpref'] = $prefix;
-        $GLOBALS['fixed_tbpref'] = (int) $isFixed;
     }
 
     /**
@@ -147,10 +142,6 @@ class LWT_Globals
      */
     public static function getTablePrefix(): string
     {
-        // Check $GLOBALS first for backward compatibility during transition
-        if (isset($GLOBALS['tbpref'])) {
-            return $GLOBALS['tbpref'];
-        }
         return self::$tablePrefix;
     }
 
@@ -164,9 +155,6 @@ class LWT_Globals
      */
     public static function isTablePrefixFixed(): bool
     {
-        if (isset($GLOBALS['fixed_tbpref'])) {
-            return (bool) $GLOBALS['fixed_tbpref'];
-        }
         return self::$tablePrefixIsFixed;
     }
 
@@ -202,7 +190,6 @@ class LWT_Globals
     public static function setDebug(int $value): void
     {
         self::$debug = $value;
-        $GLOBALS['debug'] = $value;
     }
 
     /**
@@ -212,7 +199,7 @@ class LWT_Globals
      */
     public static function isDebug(): bool
     {
-        return (bool) ($GLOBALS['debug'] ?? self::$debug);
+        return (bool) self::$debug;
     }
 
     /**
@@ -222,7 +209,7 @@ class LWT_Globals
      */
     public static function getDebug(): int
     {
-        return (int) ($GLOBALS['debug'] ?? self::$debug);
+        return self::$debug;
     }
 
     /**
