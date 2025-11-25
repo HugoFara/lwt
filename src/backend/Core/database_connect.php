@@ -22,25 +22,25 @@ use Lwt\Core\EnvLoader;
 /**
  * Load database configuration from .env file.
  *
- * @return void Sets $server, $userid, $passwd, $dbname, $socket, $tbpref globals
+ * @return void Sets $DB_SERVER, $DB_USERID, $DB_PASSWD, $DB_NAME, $DB_SOCKET, $tbpref globals
  *
  * @since 3.0.0
  */
 function loadDatabaseConfiguration(): void
 {
-    // Define variables in global scope
-    global $server, $userid, $passwd, $dbname, $socket, $tbpref;
+    // Define variables in global scope (uppercase for globals)
+    global $DB_SERVER, $DB_USERID, $DB_PASSWD, $DB_NAME, $DB_SOCKET, $tbpref;
 
     $envPath = __DIR__ . "/../../../.env";
 
     // Load .env file
     if (EnvLoader::load($envPath)) {
         $config = EnvLoader::getDatabaseConfig();
-        $server = $config['server'];
-        $userid = $config['userid'];
-        $passwd = $config['passwd'];
-        $dbname = $config['dbname'];
-        $socket = $config['socket'];
+        $DB_SERVER = $config['server'];
+        $DB_USERID = $config['userid'];
+        $DB_PASSWD = $config['passwd'];
+        $DB_NAME = $config['dbname'];
+        $DB_SOCKET = $config['socket'];
         // Only set $tbpref if explicitly configured in .env
         if ($config['tbpref'] !== null) {
             $tbpref = $config['tbpref'];
@@ -49,11 +49,11 @@ function loadDatabaseConfiguration(): void
     }
 
     // No configuration found - use defaults, connection function will show proper error
-    $server = 'localhost';
-    $userid = 'root';
-    $passwd = '';
-    $dbname = 'learning-with-texts';
-    $socket = '';
+    $DB_SERVER = 'localhost';
+    $DB_USERID = 'root';
+    $DB_PASSWD = '';
+    $DB_NAME = 'learning-with-texts';
+    $DB_SOCKET = '';
 }
 
 // Load configuration
@@ -131,7 +131,7 @@ function get_first_value($sql)
 {
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
-    if ($record) {
+    if ($record && array_key_exists("value", $record)) {
         $d = $record["value"];
     } else {
         $d = null;
@@ -2254,6 +2254,9 @@ if (LWT_Globals::shouldDisplayTime()) {
     get_execution_time();
 }
 
+// Access the global variables set by loadDatabaseConfiguration()
+global $DB_SERVER, $DB_USERID, $DB_PASSWD, $DB_NAME, $DB_SOCKET;
+
 /**
  * @var \mysqli $DBCONNECTION Connection to the database
  *
@@ -2261,7 +2264,7 @@ if (LWT_Globals::shouldDisplayTime()) {
  * @see LWT_Globals::getDbConnection()
  */
 $DBCONNECTION = connect_to_database(
-    $server, $userid, $passwd, $dbname, $socket ?? ""
+    $DB_SERVER, $DB_USERID, $DB_PASSWD, $DB_NAME, $DB_SOCKET ?? ""
 );
 // Register with LWT_Globals for new code
 LWT_Globals::setDbConnection($DBCONNECTION);
@@ -2284,12 +2287,12 @@ list($tbpref, $bool_fixed_tbpref) = getDatabasePrefix($DBCONNECTION);
 
 // Register with LWT_Globals for new code
 LWT_Globals::setTablePrefix($tbpref, (bool) $bool_fixed_tbpref);
-LWT_Globals::setDatabaseName($dbname);
+LWT_Globals::setDatabaseName($DB_NAME);
 
 // Convert to int, will be removed in LWT 3.0.0
 $fixed_tbpref = (int) $bool_fixed_tbpref;
 
 // check/update db
-check_update_db(LWT_Globals::getDebug(), $tbpref, $dbname);
+check_update_db(LWT_Globals::getDebug(), $tbpref, $DB_NAME);
 
 ?>

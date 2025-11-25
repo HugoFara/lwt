@@ -588,8 +588,12 @@ function getreq($s)
  */
 function getsess($s)
 {
-    if (isset($_SESSION[$s]) ) {
-        return trim((string)$_SESSION[$s]);
+    if (isset($_SESSION[$s])) {
+        $value = $_SESSION[$s];
+        if (is_array($value)) {
+            return '';
+        }
+        return trim((string)$value);
     }
     return '';
 }
@@ -789,7 +793,7 @@ function targetLangFromDict($url)
  */
 function parseSQLFile($filename)
 {
-    $handle = fopen($filename, 'r');
+    $handle = @fopen($filename, 'r');
     if ($handle === false) {
         return array();
     }
