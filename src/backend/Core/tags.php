@@ -7,13 +7,12 @@ require_once __DIR__ . '/database_connect.php';
  *
  * @param int $refresh If true, refresh all tags for session
  *
- * @global string $tbpref Table name prefix
  *
  * @return array<string> All tags
  */
 function get_tags($refresh = 0)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (isset($_SESSION['TAGS'])
         && is_array($_SESSION['TAGS'])
         && isset($_SESSION['TBPREF_TAGS'])
@@ -39,13 +38,12 @@ function get_tags($refresh = 0)
  *
  * @param int $refresh If true, refresh all text tags for session
  *
- * @global string $tbpref Table name prefix
  *
  * @return array<string> All text tags
  */
 function get_texttags($refresh = 0)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (isset($_SESSION['TEXTTAGS'])
         && is_array($_SESSION['TEXTTAGS'])
         && isset($_SESSION['TBPREF_TEXTTAGS'])
@@ -70,7 +68,7 @@ function get_texttags($refresh = 0)
 
 function getTextTitle($textid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Validate that textid is numeric
     if (!is_numeric($textid)) {
         return "?";
@@ -90,7 +88,7 @@ function getTextTitle($textid): string
 
 function get_tag_selectoptions($v,$l): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (!isset($v)) {
         $v = '';
     }
@@ -129,7 +127,7 @@ function get_tag_selectoptions($v,$l): string
 
 function get_texttag_selectoptions($v,$l): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (!isset($v) ) {
         $v = '';
     }
@@ -168,7 +166,7 @@ function get_texttag_selectoptions($v,$l): string
 
 function get_txtag_selectoptions($l,$v): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (!isset($v)) {
         $v = '';
     }
@@ -204,7 +202,7 @@ function get_txtag_selectoptions($l,$v): string
 
 function get_archivedtexttag_selectoptions($v,$l): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (!isset($v)) {
         $v = '';
     }
@@ -249,7 +247,7 @@ function get_archivedtexttag_selectoptions($v,$l): string
  */
 function saveWordTags($wid)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Validate that wid is numeric
     if (!is_numeric($wid)) {
         return;
@@ -295,7 +293,7 @@ function saveWordTags($wid)
  */
 function saveTextTags($tid): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Validate that tid is numeric
     if (!is_numeric($tid)) {
         return;
@@ -345,7 +343,7 @@ function saveTextTags($tid): void
  */
 function saveArchivedTextTags($tid): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Validate that tid is numeric
     if (!is_numeric($tid)) {
         return;
@@ -385,7 +383,7 @@ function saveArchivedTextTags($tid): void
 
 function getWordTags($wid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $r = '<ul id="termtags">';
     if ($wid > 0) {
         $sql = 'select TgText
@@ -413,7 +411,7 @@ function getWordTags($wid): string
  */
 function getTextTags($tid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $r = '<ul id="texttags" class="respinput">';
     if ($tid > 0) {
         $sql = "SELECT T2Text
@@ -442,7 +440,7 @@ function getTextTags($tid): string
  */
 function getArchivedTextTags($tid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $r = '<ul id="texttags">';
     if ($tid > 0) {
         $sql = 'SELECT T2Text
@@ -463,7 +461,7 @@ function getArchivedTextTags($tid): string
 
 function addtaglist($item, $list): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Handle empty list
     if ($list === '()') {
         return "Tag added in 0 Terms";
@@ -512,7 +510,7 @@ function addtaglist($item, $list): string
 
 function addarchtexttaglist($item, $list): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Handle empty list
     if ($list === '()') {
         return "Tag added in 0 Texts";
@@ -559,7 +557,7 @@ function addarchtexttaglist($item, $list): string
 
 function addtexttaglist($item, $list): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Handle empty list
     if ($list === '()') {
         return "Tag added in 0 Texts";
@@ -607,7 +605,7 @@ function addtexttaglist($item, $list): string
 
 function removetaglist($item, $list): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Handle empty list
     if ($list === '()') {
         return "Tag removed in 0 Terms";
@@ -639,7 +637,7 @@ function removetaglist($item, $list): string
 
 function removearchtexttaglist($item, $list): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Handle empty list
     if ($list === '()') {
         return "Tag removed in 0 Texts";
@@ -671,7 +669,7 @@ function removearchtexttaglist($item, $list): string
 
 function removetexttaglist($item, $list): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Handle empty list
     if ($list === '()') {
         return "Tag removed in 0 Texts";
