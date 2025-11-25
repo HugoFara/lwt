@@ -25,7 +25,7 @@ class SessionUtilityTest extends TestCase
         }
 
         // Install the demo DB
-        $filename = getcwd() . '/install_demo_db.sql';
+        $filename = getcwd() . '/db/seeds/demo.sql';
         if (file_exists($filename) && is_readable($filename)) {
             $handle = fopen($filename, "r");
             restore_file($handle, "Demo Database");
@@ -43,7 +43,7 @@ class SessionUtilityTest extends TestCase
         }
 
         // Install the demo DB
-        $filename = getcwd() . '/install_demo_db.sql';
+        $filename = getcwd() . '/db/seeds/demo.sql';
         $this->assertFileExists($filename);
         $this->assertFileIsReadable($filename);
         $handle = fopen($filename, "r");

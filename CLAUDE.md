@@ -114,9 +114,10 @@ composer clean-doc               # Clear all generated documentation
 - `resources/` - Non-runtime resources
   - `resources/anki/` - Anki flashcard export templates
 
-- `db/` - Database schema and migrations
+- `db/` - Database schema, migrations, and seed data
   - `db/schema/baseline.sql` - Complete database schema
   - `db/migrations/` - Migration files for database updates
+  - `db/seeds/demo.sql` - Demo database for testing/onboarding
 
 - `tests/` - PHPUnit tests and API tests
 - `docs/` - Markdown documentation and generated API docs
@@ -268,3 +269,13 @@ The `_migrations` table tracks applied migrations. When adding migrations:
 ## MeCab Support
 
 For Japanese word-by-word translation, LWT supports MeCab integration. This is optional and requires external MeCab installation on the server.
+
+## Version 3 Changes
+
+Version 3 introduces major architectural changes. See `docs/developer/v3-changes.md` for full details:
+
+- **Front Controller Pattern:** All requests routed through `index.php`
+- **MVC Structure:** New controllers in `src/backend/Controllers/`
+- **Routing System:** Clean URLs (e.g., `/text/read` instead of `do_text.php`)
+- **LWT_Globals Class:** Type-safe access to global state (replaces `global $tbpref`, etc.)
+- **Environment Config:** `.env` file support (replaces `connect.inc.php`)

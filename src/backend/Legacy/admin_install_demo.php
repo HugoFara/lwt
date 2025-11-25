@@ -21,7 +21,7 @@ $message = '';
  */
 function restore_demo_db()
 {
-    $file = getcwd() . '/install_demo_db.sql';
+    $file = getcwd() . '/db/seeds/demo.sql';
     if (file_exists($file) ) {
         $handle = fopen($file, "r");
         if ($handle === false) {
