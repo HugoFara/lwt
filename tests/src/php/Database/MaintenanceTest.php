@@ -413,7 +413,6 @@ class MaintenanceTest extends TestCase
         }
 
         // The optimizeDatabase function should work correctly with table prefix
-        $tbpref = self::$tbpref;
 
         // This mainly tests that the SQL is constructed correctly with prefix
         Maintenance::optimizeDatabase();

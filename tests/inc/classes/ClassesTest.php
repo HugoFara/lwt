@@ -1676,7 +1676,6 @@ class ClassesTest extends TestCase
 
         // After new translation, it should update
         $translator->translate('test2');
-        $secondResult = $translator->lastResult;
 
         // If both succeeded or both failed, they might be equal, but the property should be set
         $this->assertNotNull($translator->lastResult);

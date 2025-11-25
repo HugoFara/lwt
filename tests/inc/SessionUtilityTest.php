@@ -752,7 +752,7 @@ class SessionUtilityTest extends TestCase
 
         // Verify data was restored
         $value1 = getSetting('test_restore');
-        $value2 = getSetting('test_restore2');
+        getSetting('test_restore2');
 
         // Clean up - fclose is automatic for tmpfile when it goes out of scope
         // Don't call fclose() as the resource may already be closed by restore_file

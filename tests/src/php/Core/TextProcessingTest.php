@@ -1,0 +1,519 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Lwt\Tests\Core;
+
+require_once __DIR__ . '/../../../../src/backend/Core/EnvLoader.php';
+
+use Lwt\Core\EnvLoader;
+use Lwt\Core\LWT_Globals;
+use PHPUnit\Framework\TestCase;
+
+// Load config from .env and use test database
+EnvLoader::load(__DIR__ . '/../../../../.env');
+$config = EnvLoader::getDatabaseConfig();
+$GLOBALS['dbname'] = "test_" . $config['dbname'];
+
+require_once __DIR__ . '/../../../../src/backend/Core/database_connect.php';
+require_once __DIR__ . '/../../../../src/backend/Core/session_utility.php';
+
+/**
+ * Unit tests for text processing functions.
+ *
+ * Tests word counting, statistics, language utilities, and text operations.
+ */
+class TextProcessingTest extends TestCase
+{
+    private static bool $dbConnected = false;
+    private static string $tbpref = '';
+
+    public static function setUpBeforeClass(): void
+    {
+        $config = EnvLoader::getDatabaseConfig();
+        $testDbname = "test_" . $config['dbname'];
+
+        if (!LWT_Globals::getDbConnection()) {
+            $connection = connect_to_database(
+                $config['server'],
+                $config['userid'],
+                $config['passwd'],
+                $testDbname,
+                $config['socket'] ?? ''
+            );
+            LWT_Globals::setDbConnection($connection);
+        }
+        self::$dbConnected = (LWT_Globals::getDbConnection() !== null);
+        self::$tbpref = LWT_Globals::getTablePrefix();
+    }
+
+    protected function tearDown(): void
+    {
+        if (!self::$dbConnected) {
+            return;
+        }
+
+        // Clean up test data
+        $tbpref = self::$tbpref;
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'test_proc_%'");
+    }
+
+    // ===== get_languages() tests =====
+
+    public function testGetLanguagesReturnsArray(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $languages = get_languages();
+        $this->assertIsArray($languages);
+    }
+
+    public function testGetLanguagesContainsNameIdPairs(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+        
+        // Insert test language
+        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+                         VALUES ('test_proc_lang', 'http://test', 'http://test')");
+        $lgId = get_last_key();
+        
+        $languages = get_languages();
+        
+        $this->assertArrayHasKey('test_proc_lang', $languages);
+        $this->assertEquals($lgId, $languages['test_proc_lang']);
+        
+        // Clean up
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+    }
+
+    public function testGetLanguagesExcludesEmptyNames(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+        
+        // Insert language with empty name
+        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+                         VALUES ('', 'http://test', 'http://test')");
+        $lgId = get_last_key();
+        
+        $languages = get_languages();
+        
+        // Empty name should not be in array
+        $this->assertNotContains($lgId, $languages);
+        
+        // Clean up
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+    }
+
+    // ===== getLanguage() tests =====
+
+    public function testGetLanguageWithIntId(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+        
+        // Insert test language
+        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+                         VALUES ('test_proc_getlang', 'http://test', 'http://test')");
+        $lgId = get_last_key();
+        
+        $name = getLanguage($lgId);
+        
+        $this->assertEquals('test_proc_getlang', $name);
+        
+        // Clean up
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+    }
+
+    public function testGetLanguageWithStringId(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+        
+        // Insert test language
+        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+                         VALUES ('test_proc_string', 'http://test', 'http://test')");
+        $lgId = get_last_key();
+        
+        $name = getLanguage((string)$lgId);
+        
+        $this->assertEquals('test_proc_string', $name);
+        
+        // Clean up
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+    }
+
+    public function testGetLanguageWithInvalidId(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $name = getLanguage(999999);
+        $this->assertEquals('', $name);
+    }
+
+    public function testGetLanguageWithEmptyString(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $name = getLanguage('');
+        $this->assertEquals('', $name);
+    }
+
+    public function testGetLanguageWithNonNumericString(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $name = getLanguage('invalid');
+        $this->assertEquals('', $name);
+    }
+
+    // ===== getScriptDirectionTag() tests =====
+
+    public function testGetScriptDirectionTagWithLTRLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+        
+        // Insert test language (LTR)
+        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
+                         VALUES ('test_proc_ltr', 'http://test', 'http://test', 0)");
+        $lgId = get_last_key();
+        
+        $tag = getScriptDirectionTag($lgId);
+        
+        $this->assertEquals('', $tag);
+        
+        // Clean up
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+    }
+
+    public function testGetScriptDirectionTagWithRTLLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+        
+        // Insert test language (RTL)
+        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
+                         VALUES ('test_proc_rtl', 'http://test', 'http://test', 1)");
+        $lgId = get_last_key();
+        
+        $tag = getScriptDirectionTag($lgId);
+        
+        $this->assertEquals(' dir="rtl" ', $tag);
+        
+        // Clean up
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+    }
+
+    public function testGetScriptDirectionTagWithStringId(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+        
+        // Insert test language (RTL)
+        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
+                         VALUES ('test_proc_rtl_str', 'http://test', 'http://test', 1)");
+        $lgId = get_last_key();
+        
+        $tag = getScriptDirectionTag((string)$lgId);
+        
+        $this->assertEquals(' dir="rtl" ', $tag);
+        
+        // Clean up
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+    }
+
+    public function testGetScriptDirectionTagWithNull(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tag = getScriptDirectionTag(null);
+        $this->assertEquals('', $tag);
+    }
+
+    public function testGetScriptDirectionTagWithEmptyString(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tag = getScriptDirectionTag('');
+        $this->assertEquals('', $tag);
+    }
+
+    public function testGetScriptDirectionTagWithNonNumericString(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tag = getScriptDirectionTag('invalid');
+        $this->assertEquals('', $tag);
+    }
+
+    // ===== todo_words_count() tests =====
+
+    public function testTodoWordsCountWithNoUnknownWords(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Use a non-existent text ID
+        $count = todo_words_count(999999);
+        $this->assertEquals(0, $count);
+    }
+
+    public function testTodoWordsCountReturnsInteger(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $count = todo_words_count(1);
+        $this->assertIsInt($count);
+        $this->assertGreaterThanOrEqual(0, $count);
+    }
+
+    // ===== return_textwordcount() tests =====
+
+    public function testReturnTextWordCountReturnsArray(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = return_textwordcount('1');
+        
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('total', $result);
+        $this->assertArrayHasKey('expr', $result);
+        $this->assertArrayHasKey('stat', $result);
+        $this->assertArrayHasKey('totalu', $result);
+        $this->assertArrayHasKey('expru', $result);
+        $this->assertArrayHasKey('statu', $result);
+    }
+
+    public function testReturnTextWordCountWithMultipleTexts(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = return_textwordcount('1,2');
+        
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('total', $result);
+    }
+
+    public function testReturnTextWordCountWithNonExistentText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = return_textwordcount('999999');
+        
+        $this->assertIsArray($result);
+        // Should return empty arrays for each key
+        $this->assertIsArray($result['total']);
+    }
+
+    // ===== Additional helper function tests =====
+
+    public function testGetFirstSepaReturnsString(): void
+    {
+        $sepa = get_first_sepa();
+        $this->assertIsString($sepa);
+        $this->assertNotEmpty($sepa);
+        $this->assertEquals(1, mb_strlen($sepa, 'UTF-8'));
+    }
+
+    public function testGetSepassReturnsString(): void
+    {
+        $sepas = get_sepas();
+        $this->assertIsString($sepas);
+        $this->assertNotEmpty($sepas);
+    }
+
+    public function testGetStatusNameReturnsStrings(): void
+    {
+        // Test all valid statuses
+        for ($i = 1; $i <= 5; $i++) {
+            $name = get_status_name($i);
+            $this->assertIsString($name);
+            $this->assertNotEmpty($name);
+        }
+        
+        $ignored = get_status_name(98);
+        $this->assertEquals('Ignored', $ignored);
+        
+        $wellKnown = get_status_name(99);
+        $this->assertEquals('Well Known', $wellKnown);
+    }
+
+    public function testGetStatusAbbrReturnsStrings(): void
+    {
+        // Test all valid statuses
+        for ($i = 1; $i <= 5; $i++) {
+            $abbr = get_status_abbr($i);
+            $this->assertIsString($abbr);
+            $this->assertNotEmpty($abbr);
+        }
+        
+        $ignored = get_status_abbr(98);
+        $this->assertEquals('Ign', $ignored);
+        
+        $wellKnown = get_status_abbr(99);
+        $this->assertEquals('WKn', $wellKnown);
+    }
+
+    public function testCheckStatusRangeWithValidRanges(): void
+    {
+        // Status 1 within range 15 (1-5)
+        $this->assertTrue(checkStatusRange(1, 15));
+        $this->assertTrue(checkStatusRange(3, 15));
+        $this->assertTrue(checkStatusRange(5, 15));
+        
+        // Status 5 or 99 within range 599
+        $this->assertTrue(checkStatusRange(5, 599));
+        $this->assertTrue(checkStatusRange(99, 599));
+    }
+
+    public function testCheckStatusRangeWithInvalidRanges(): void
+    {
+        $this->assertFalse(checkStatusRange(1, 23)); // 1 < 2
+        $this->assertFalse(checkStatusRange(4, 599)); // 4 != 5 and 4 != 99
+        $this->assertFalse(checkStatusRange(1, '')); // Empty range
+        $this->assertFalse(checkStatusRange(1, 0)); // Invalid range
+    }
+
+    public function testGetColoredStatusMsgReturnsHTML(): void
+    {
+        $msg = get_colored_status_msg(1);
+        $this->assertStringContainsString('Learning', $msg);
+        $this->assertStringContainsString('status', $msg);
+        
+        $msg = get_colored_status_msg(98);
+        $this->assertStringContainsString('Ignored', $msg);
+    }
+
+    public function testRemoveSoftHyphens(): void
+    {
+        $this->assertEquals('hello', remove_soft_hyphens('hel­lo'));
+        $this->assertEquals('world', remove_soft_hyphens('world'));
+        $this->assertEquals('', remove_soft_hyphens(''));
+        $this->assertEquals('testing', remove_soft_hyphens('test­­ing'));
+    }
+
+    public function testReplaceSupplementaryUnicodePlanes(): void
+    {
+        // Characters in supplementary planes should be replaced with U+2588 (█)
+        $result = replace_supp_unicode_planes_char('hello 𝕳𝖊𝖑𝖑𝖔 world');
+        $this->assertStringContainsString('hello', $result);
+        $this->assertStringContainsString('█', $result);
+        
+        // Regular characters should pass through unchanged
+        $this->assertEquals('hello world', replace_supp_unicode_planes_char('hello world'));
+        
+        // Empty string
+        $this->assertEquals('', replace_supp_unicode_planes_char(''));
+    }
+
+    public function testMakeCounterWithTotal(): void
+    {
+        // Single item - should return empty
+        $this->assertEquals('', makeCounterWithTotal(1, 1));
+        
+        // Less than 10 items
+        $this->assertEquals('3/5', makeCounterWithTotal(5, 3));
+        $this->assertEquals('1/9', makeCounterWithTotal(9, 1));
+        
+        // 10 or more items - should pad with zeros
+        $this->assertEquals('03/10', makeCounterWithTotal(10, 3));
+        $this->assertEquals('025/100', makeCounterWithTotal(100, 25));
+        $this->assertEquals('0005/1000', makeCounterWithTotal(1000, 5));
+    }
+
+    public function testEncodeURI(): void
+    {
+        $this->assertEquals('hello%20world', encodeURI('hello world'));
+        $this->assertEquals('test-file_name.txt', encodeURI('test-file_name.txt'));
+        $this->assertEquals('path/to/file', encodeURI('path/to/file'));
+        $this->assertEquals('query?param=value&other=2', encodeURI('query?param=value&other=2'));
+        $this->assertEquals('#anchor', encodeURI('#anchor'));
+    }
+
+    public function testGetChecked(): void
+    {
+        $this->assertEquals(' checked="checked" ', get_checked(true));
+        $this->assertEquals(' checked="checked" ', get_checked(1));
+        $this->assertEquals(' checked="checked" ', get_checked('yes'));
+        $this->assertEquals('', get_checked(false));
+        $this->assertEquals('', get_checked(0));
+        $this->assertEquals('', get_checked(''));
+        $this->assertEquals('', get_checked(null));
+    }
+
+    public function testGetSelected(): void
+    {
+        $this->assertEquals(' selected="selected" ', get_selected('apple', 'apple'));
+        $this->assertEquals(' selected="selected" ', get_selected(5, 5));
+        $this->assertEquals('', get_selected('apple', 'orange'));
+        $this->assertEquals('', get_selected(5, 10));
+        $this->assertEquals(' selected="selected" ', get_selected('0', 0));
+    }
+
+    public function testStrToHex(): void
+    {
+        // strToHex returns UPPERCASE hex
+        $this->assertEquals('68656C6C6F', strToHex('hello'));
+        $this->assertEquals('776F726C64', strToHex('world'));
+        $this->assertEquals('', strToHex(''));
+        
+        // Test with UTF-8
+        $hex = strToHex('你好');
+        $this->assertIsString($hex);
+        $this->assertNotEmpty($hex);
+    }
+
+    public function testReplTabNl(): void
+    {
+        $this->assertEquals('hello world', repl_tab_nl("hello\tworld"));
+        $this->assertEquals('line one line two', repl_tab_nl("line one\nline two"));
+        // Multiple whitespace is collapsed to single space
+        $this->assertEquals('test spaces', repl_tab_nl("test\t\nspaces"));
+    }
+}

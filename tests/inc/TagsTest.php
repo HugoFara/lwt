@@ -46,7 +46,7 @@ class TagsTest extends TestCase
      */
     public function testAddTagList(): void
     {
-        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+        \Lwt\Core\LWT_Globals::getTablePrefix();
 
         if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
