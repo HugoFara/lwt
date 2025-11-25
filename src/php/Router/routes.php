@@ -32,10 +32,6 @@ return function (Router $router) {
     $router->registerLegacy('display_impr_text_header.php', '/text/display');
     $router->registerLegacy('display_impr_text_text.php', '/text/display');
 
-    // Print dictionary
-    $router->register('/text/print-dict', 'src/php/Legacy/text_print_dict.php');
-    $router->registerLegacy('print_impr_text_dict.php', '/text/print-dict');
-
     // Print text
     $router->register('/text/print', 'src/php/Legacy/text_print.php');
     $router->registerLegacy('print_impr_text.php', '/text/print');
