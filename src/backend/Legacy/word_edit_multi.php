@@ -139,7 +139,7 @@ function edit_mword_do_operation($term)
  */
 function edit_mword_do_insert($term)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $titletext = "New Term: " . tohtml($term->textlc);
     pagestart_nobody($titletext);
     echo '<h1>' . $titletext . '</h1>';
@@ -184,7 +184,7 @@ function edit_mword_do_insert($term)
  */
 function edit_mword_do_update($term, $newstatus)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $titletext = "Edit Term: " . tohtml($term->textlc);
     pagestart_nobody($titletext);
     echo '<h1>' . $titletext . '</h1>';
@@ -253,7 +253,7 @@ function edit_mword_do_update($term, $newstatus)
  */
 function edit_mword_new($text, $tid, $ord, $len)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $term = new Term();
     $term->lgid = get_first_value(
@@ -289,7 +289,7 @@ function edit_mword_new($text, $tid, $ord, $len)
  */
 function edit_mword_update($wid, $tid, $ord)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $term = new Term();
 
@@ -321,7 +321,7 @@ function edit_mword_update($wid, $tid, $ord)
  */
 function edit_mword_display_new($term, $tid, $ord, $len)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $scrdir = getScriptDirectionTag($term->lgid);
     $seid = get_first_value(
         "SELECT Ti2SeID AS value
@@ -423,7 +423,7 @@ function edit_mword_display_new($term, $tid, $ord, $len)
  */
 function edit_mword_display_change($term, $tid, $ord)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $scrdir = getScriptDirectionTag($term->lgid);
     $sql = 'SELECT WoTranslation, WoSentence, WoRomanization, WoStatus
     FROM ' . $tbpref . 'words WHERE WoID = ' . $term->id;

@@ -37,7 +37,7 @@ require_once 'Core/langdefs.php';
  */
 function insert_new_word($textlc, $translation): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $titletext = "New Term: " . tohtml(prepare_textdata($_REQUEST["WoTextLC"]));
     pagestart_nobody($titletext);
@@ -79,7 +79,7 @@ function insert_new_word($textlc, $translation): array
  */
 function edit_term($translation)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $titletext = "Edit Term: " . tohtml(prepare_textdata($_REQUEST["WoTextLC"]));
     pagestart_nobody($titletext);
@@ -229,7 +229,7 @@ function edit_word_do_operation($translation, $fromAnn): void
  */
 function edit_word_do_form($wid, $text_id, $ord, $fromAnn)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $lang = null;
     $term = null;
 

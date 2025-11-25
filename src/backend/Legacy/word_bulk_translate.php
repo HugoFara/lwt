@@ -26,7 +26,7 @@ require_once 'Core/session_utility.php';
 
 function bulk_save_terms($terms, $tid, $cleanUp): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sqlarr = array();
     $max = get_first_value("SELECT max(WoID) AS value FROM {$tbpref}words");
     foreach ($terms as $row) {
@@ -120,7 +120,7 @@ function bulk_save_terms($terms, $tid, $cleanUp): void
 
 function bulk_do_content($tid, $sl, $tl, $pos): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $cnt = 0;
     $offset = '';
     $limit = (int)getSettingWithDefault('set-ggl-translation-per-page') + 1;
