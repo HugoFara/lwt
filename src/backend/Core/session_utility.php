@@ -3355,7 +3355,6 @@ function insertExpressions($textlc, $lid, $wid, $len, $mode): null|string
 function restore_file($handle, $title): string
 {
     global $tbpref;
-    global $dbname;
     $message = "";
     $install_status = array(
         "queries" => 0,
@@ -3433,7 +3432,7 @@ function restore_file($handle, $title): string
     }
     if ($install_status["errors"] == 0) {
         runsql("DROP TABLE IF EXISTS {$tbpref}textitems", '');
-        check_update_db(\Lwt\Core\LWT_Globals::getDebug(), $tbpref, $dbname);
+        check_update_db();
         reparse_all_texts();
         optimizedb();
         get_tags(1);

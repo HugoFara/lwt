@@ -1787,18 +1787,15 @@ function reparse_all_texts(): void
 /**
  * Update the database if it is using an outdate version.
  *
- * @param string $dbname Name of the database
- *
- * @global string $tbpref Database table prefix
- * @global 0|1    $debug  Output debug messages.
- *
  * @return void
  *
  * @since 2.10.0-fork Migrations are defined thourgh SQL, and not directly here
+ * @since 3.0.0 Parameters removed in favor of LWT_Globals
  */
-function update_database($dbname)
+function update_database(): void
 {
     $tbpref = LWT_Globals::getTablePrefix();
+    $dbname = LWT_Globals::getDatabaseName();
 
     // DB Version
     $currversion = get_version_number();
@@ -1912,12 +1909,12 @@ function prefixSQLQuery($sql_line, $prefix): string
 /**
  * Check and/or update the database.
  *
- * @global mysqli $DBCONNECTION Connection to the database.
- *
  * @since 2.10.0 Use confiduration files instead of containing all the data.
+ * @since 3.0.0 Parameters removed in favor of LWT_Globals
  */
-function check_update_db($debug, $tbpref, $dbname): void
+function check_update_db(): void
 {
+    $tbpref = LWT_Globals::getTablePrefix();
     $tables = array();
 
     $res = do_mysqli_query(
@@ -1949,7 +1946,7 @@ function check_update_db($debug, $tbpref, $dbname): void
     }
 
     // Update the database (if necessary)
-    update_database($dbname);
+    update_database();
 
     if (!in_array("{$tbpref}textitems2", $tables)) {
         // Add data from the old database system
@@ -1978,7 +1975,7 @@ function check_update_db($debug, $tbpref, $dbname): void
 
     if ($count > 0) {
         // Rebuild Text Cache if cache tables new
-        if ($debug) {
+        if (LWT_Globals::isDebug()) {
             echo '<p>DEBUG: rebuilding cache tables</p>';
         }
         reparse_all_texts();
@@ -1989,7 +1986,7 @@ function check_update_db($debug, $tbpref, $dbname): void
     $lastscorecalc = getSetting('lastscorecalc');
     $today = date('Y-m-d');
     if ($lastscorecalc != $today) {
-        if ($debug) {
+        if (LWT_Globals::isDebug()) {
             echo '<p>DEBUG: Doing score recalc. Today: ' . $today .
             ' / Last: ' . $lastscorecalc . '</p>';
         }
@@ -2268,6 +2265,6 @@ LWT_Globals::setDatabaseName($DB_NAME);
 $fixed_tbpref = (int) $bool_fixed_tbpref;
 
 // check/update db
-check_update_db(LWT_Globals::getDebug(), $tbpref, $DB_NAME);
+check_update_db();
 
 ?>

@@ -82,7 +82,6 @@ class LWT_Globals
      * Initialize all global variables.
      *
      * This should be called once during application bootstrap.
-     * It also populates $GLOBALS for backward compatibility.
      *
      * @return void
      */
@@ -92,10 +91,10 @@ class LWT_Globals
             return;
         }
 
-        // Settings are initialized with defaults in settings.php
-        self::$debug = $GLOBALS['debug'] ?? 0;
-        self::$displayErrors = $GLOBALS['dsplerrors'] ?? 0;
-        self::$displayTime = $GLOBALS['dspltime'] ?? 0;
+        // All settings default to 0 (off)
+        self::$debug = 0;
+        self::$displayErrors = 0;
+        self::$displayTime = 0;
 
         self::$initialized = true;
     }
@@ -181,7 +180,6 @@ class LWT_Globals
     public static function setDatabaseName(string $name): void
     {
         self::$databaseName = $name;
-        $GLOBALS['dbname'] = $name;
     }
 
     /**
@@ -191,9 +189,6 @@ class LWT_Globals
      */
     public static function getDatabaseName(): string
     {
-        if (isset($GLOBALS['dbname'])) {
-            return $GLOBALS['dbname'];
-        }
         return self::$databaseName;
     }
 
@@ -240,7 +235,6 @@ class LWT_Globals
     public static function setDisplayErrors(int $value): void
     {
         self::$displayErrors = $value;
-        $GLOBALS['dsplerrors'] = $value;
     }
 
     /**
@@ -250,7 +244,7 @@ class LWT_Globals
      */
     public static function shouldDisplayErrors(): bool
     {
-        return (bool) ($GLOBALS['dsplerrors'] ?? self::$displayErrors);
+        return (bool) self::$displayErrors;
     }
 
     /**
@@ -263,7 +257,6 @@ class LWT_Globals
     public static function setDisplayTime(int $value): void
     {
         self::$displayTime = $value;
-        $GLOBALS['dspltime'] = $value;
     }
 
     /**
@@ -273,7 +266,7 @@ class LWT_Globals
      */
     public static function shouldDisplayTime(): bool
     {
-        return (bool) ($GLOBALS['dspltime'] ?? self::$displayTime);
+        return (bool) self::$displayTime;
     }
 
     /**

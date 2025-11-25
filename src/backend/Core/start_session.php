@@ -14,17 +14,18 @@
 
 require_once __DIR__ . '/kernel_utility.php';
 
+use Lwt\Core\LWT_Globals;
+
 /**
  * Starts or not the error reporting.
  *
- * @param int $dsplerrors not 0: start error reporting for ALL errors
- *                        0: don't report
+ * @param bool $displayErrors True to start error reporting for ALL errors
  *
  * @return void
  */
-function set_error_reporting($dsplerrors): void
+function set_error_reporting(bool $displayErrors): void
 {
-    if ($dsplerrors) {
+    if ($displayErrors) {
         @error_reporting(E_ALL);
         @ini_set('display_errors', '1');
         @ini_set('display_startup_errors', '1');
@@ -76,7 +77,7 @@ function start_session(): void
  */
 function start_session_main(): void
 {
-    set_error_reporting($GLOBALS['dsplerrors']);
+    set_error_reporting(LWT_Globals::shouldDisplayErrors());
     set_configuration_options();
     // Start a PHP session if not one already exists
     if (session_id() == '') {

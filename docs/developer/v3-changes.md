@@ -371,6 +371,9 @@ The following global variables have been **fully removed** from the codebase and
 |----------------|-------------|--------|
 | `$DBCONNECTION` | `LWT_Globals::getDbConnection()` | **Removed** |
 | `$debug` | `LWT_Globals::isDebug()` / `LWT_Globals::getDebug()` | **Removed** |
+| `$dbname` | `LWT_Globals::getDatabaseName()` | **Removed** |
+| `$dsplerrors` | `LWT_Globals::shouldDisplayErrors()` | **Removed** |
+| `$dspltime` | `LWT_Globals::shouldDisplayTime()` | **Removed** |
 
 These globals no longer appear in any source files. All usages have been migrated to use the `LWT_Globals` class.
 
@@ -382,9 +385,6 @@ The following global variables are deprecated in favor of `LWT_Globals` methods 
 |-------------------|-------------|
 | `$tbpref` | `LWT_Globals::getTablePrefix()` |
 | `$fixed_tbpref` | `LWT_Globals::isTablePrefixFixed()` |
-| `$dbname` | `LWT_Globals::getDatabaseName()` |
-| `$dsplerrors` | `LWT_Globals::shouldDisplayErrors()` |
-| `$dspltime` | `LWT_Globals::shouldDisplayTime()` |
 
 #### Migration Guide
 
