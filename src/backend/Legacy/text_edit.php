@@ -155,7 +155,7 @@ function edit_texts_get_wh_tag($currentlang)
  */
 function edit_texts_mark_action($markaction, $marked, $actiondata): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $message = "Multiple Actions: 0";
     if (!isset($marked) || !is_array($marked)) {
         return array($message, null);
@@ -343,7 +343,7 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
  */
 function edit_texts_delete($txid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $message3 = runsql(
         'DELETE FROM ' . $tbpref . 'textitems2 where Ti2TxID = ' . $txid,
         "Text items deleted"
@@ -384,7 +384,7 @@ function edit_texts_delete($txid): string
  */
 function edit_texts_archive($txid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $message3 = runsql(
         "DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = $txid",
         "Text items deleted"
@@ -444,7 +444,7 @@ function edit_texts_archive($txid): string
  */
 function edit_texts_do_operation($op, $message1, $no_pagestart): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (strlen(prepare_textdata($_REQUEST['TxText'])) > 65000) {
         $message = "Error: Text too long, must be below 65000 Bytes";
         $currentlang = (int) validateLang(
@@ -551,7 +551,7 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
  */
 function edit_texts_form($text, $annotated)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $new_text = $text->id == 0;
     $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages
     WHERE LgGoogleTranslateURI<>''";
@@ -750,7 +750,7 @@ function edit_texts_new($lid)
  */
 function edit_texts_change($txid)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
     TxAnnotatedText <> '' AS annot_exists
     FROM {$tbpref}texts
@@ -1154,7 +1154,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
  */
 function edit_texts_display($message)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     // Page, Sort, etc.
 

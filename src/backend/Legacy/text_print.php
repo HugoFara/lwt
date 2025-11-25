@@ -70,7 +70,7 @@ function edit_mode_display($textid, $ann_exists): void
 
 function print_mode_display($textid, $langid, $audio, $ann, $title): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT LgTextSize, LgRemoveSpaces, LgRightToLeft, LgGoogleTranslateURI
     from {$tbpref}languages where LgID = $langid";
     $res = do_mysqli_query($sql);
@@ -151,7 +151,7 @@ function print_mode_display($textid, $langid, $audio, $ann, $title): void
  */
 function do_content()
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $textid = (int)getreq('text');
     $editmode = getreq('edit');
     $editmode = ($editmode == '' ? 0 : (int)$editmode);

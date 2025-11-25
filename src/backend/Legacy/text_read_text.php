@@ -31,7 +31,7 @@ require_once 'Core/session_utility.php';
  */
 function get_text_data($textid)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql =
     'SELECT TxLgID, TxTitle, TxAnnotatedText, TxPosition
     FROM ' . $tbpref . 'texts
@@ -77,7 +77,7 @@ function getTextData($textid)
  */
 function get_language_settings($langid)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql =
     'SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
     LgTextSize, LgRegexpWordCharacters, LgRemoveSpaces, LgRightToLeft
@@ -483,7 +483,7 @@ function wordParser($record, $showAll, $currcharcount, $hideuntil): int
  */
 function main_word_loop($textid, $showAll): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $sql =
     "SELECT

@@ -49,7 +49,7 @@ function do_operation($text, $lgid)
  */
 function display_form()
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages
     WHERE LgGoogleTranslateURI<>''";
     $res = do_mysqli_query($sql);
