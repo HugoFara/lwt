@@ -84,7 +84,7 @@ function getSimilarityRanking($str1, $str2)
 function get_similar_terms(
     $lang_id, $compared_term, $max_count, $min_ranking
 ): array {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $compared_term_lc = mb_strtolower($compared_term, 'UTF-8');
     $sql = "SELECT WoID, WoTextLC FROM {$tbpref}words
     WHERE WoLgID = $lang_id
@@ -122,7 +122,7 @@ function get_similar_terms(
  */
 function format_term($termid, $compare)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT WoText, WoTranslation, WoRomanization
     FROM {$tbpref}words WHERE WoID = $termid";
     $res = do_mysqli_query($sql);

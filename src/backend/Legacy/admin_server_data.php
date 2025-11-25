@@ -36,7 +36,7 @@ require_once 'Core/session_utility.php';
 function get_server_data_table(): array
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    $dbname = \Lwt\Core\LWT_Globals::getDbName();
+    $dbname = \Lwt\Core\LWT_Globals::getDatabaseName();
     $dbaccess_format = convert_string_to_sqlsyntax($dbname);
     $data_table = array();
     $data_table["db_name"] = $dbname;
