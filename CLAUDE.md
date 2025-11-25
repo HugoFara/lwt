@@ -85,16 +85,17 @@ composer clean-doc               # Clear all generated documentation
   - `assets/vendor/iui/` - iUI mobile framework (third-party)
 
 - `src/` - Source files
-  - `src/php/` - PHP application code
-    - `src/php/Controllers/` - MVC Controllers
-    - `src/php/Legacy/` - Legacy PHP files (being migrated)
-    - `src/php/Router/` - Routing system
-    - `src/php/inc/` - Core PHP modules (database, utilities)
+  - `src/backend/` - PHP application code
+    - `src/backend/Controllers/` - MVC Controllers
+    - `src/backend/Legacy/` - Legacy PHP files (being migrated)
+    - `src/backend/Router/` - Routing system
+    - `src/backend/Core/` - Core PHP modules (database, utilities)
       - `database_connect.php` - Database connection and query wrappers
       - `session_utility.php` - Session management and utility functions
       - `kernel_utility.php` - Core utilities that don't require full session
       - `ajax_*.php` - AJAX endpoints (15+ files)
       - `classes/` - PHP classes (GoogleTranslate, Language, Term, Text)
+  - `src/tools/` - Build tools (minifier, markdown converter)
   - `src/frontend/` - Frontend assets (compiled to `assets/`)
     - `src/frontend/js/` - Unminified JavaScript source
     - `src/frontend/css/` - Unminified CSS source
@@ -137,8 +138,8 @@ LWT uses a MySQL/MariaDB database with MyISAM engine. Key tables:
 **Frontend-Backend Split:**
 
 - Root PHP files handle routing, HTML generation, and form processing
-- `inc/` provides business logic, database operations, and utilities
-- AJAX endpoints in `inc/ajax_*.php` provide dynamic functionality
+- `src/backend/Core/` provides business logic, database operations, and utilities
+- AJAX endpoints in `src/backend/Core/ajax_*.php` provide dynamic functionality
 - Client-side JS in `src/frontend/js/` handles interactivity
 
 **Text Processing Flow:**
@@ -173,10 +174,10 @@ Key endpoints in `api.php`:
 
 ### Modifying PHP Code
 
-PHP code is spread across root files (user-facing pages) and `inc/` (shared logic). When editing:
+PHP code is spread across root files (user-facing pages) and `src/backend/Core/` (shared logic). When editing:
 
 1. Use functions from `session_utility.php` for database queries and utilities
-2. Follow the existing pattern: root files include `inc/session_utility.php` which includes `database_connect.php`
+2. Follow the existing pattern: root files include `Core/session_utility.php` which includes `database_connect.php`
 3. Use `do_mysqli_query()` wrapper instead of direct `mysqli_query()` for better error handling
 4. Database queries use `$tbpref` global variable for table prefix (usually empty, but supports multi-tenant)
 
@@ -226,7 +227,7 @@ Before committing:
 (For maintainers)
 
 1. Update `CHANGELOG.md` with release number and date
-2. Update `LWT_APP_VERSION` and `LWT_RELEASE_DATE` in `inc/kernel_utility.php`
+2. Update `LWT_APP_VERSION` and `LWT_RELEASE_DATE` in `src/backend/Core/kernel_utility.php`
 3. Update `PROJECT_NUMBER` in `Doxyfile`
 4. Run `composer doc` to regenerate documentation
 5. Commit: `git commit -m "Regenerates documentation for release X.Y.Z"`

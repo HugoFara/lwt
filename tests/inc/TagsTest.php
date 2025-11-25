@@ -2,8 +2,8 @@
 
 require __DIR__ . "/../../connect.inc.php";
 $GLOBALS['dbname'] = "test_" . $dbname;
-require_once __DIR__ . '/../../src/php/inc/database_connect.php';
-require_once __DIR__ . '/../../src/php/inc/tags.php';
+require_once __DIR__ . '/../../src/backend/Core/database_connect.php';
+require_once __DIR__ . '/../../src/backend/Core/tags.php';
 
 use PHPUnit\Framework\TestCase;
 

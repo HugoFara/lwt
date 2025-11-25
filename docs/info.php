@@ -13,8 +13,8 @@
  * @since   1.0.3
  */
 
-require __DIR__ . '/../inc/kernel_utility.php'; 
-require_once __DIR__ . '/../src/php/markdown_converter.php';
+require __DIR__ . '/../src/backend/Core/kernel_utility.php';
+require_once __DIR__ . '/../src/tools/markdown_converter.php';
 
 ?>
 <!DOCTYPE html>

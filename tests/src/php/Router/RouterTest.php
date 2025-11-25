@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Router;
 
-require_once __DIR__ . '/../../../../src/php/Router/Router.php';
+require_once __DIR__ . '/../../../../src/backend/Router/Router.php';
 
 use Lwt\Router\Router;
 use PHPUnit\Framework\TestCase;

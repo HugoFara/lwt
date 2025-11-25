@@ -28,9 +28,9 @@ ini_set('display_errors', '1');
 define('LWT_BASE_PATH', __DIR__);
 
 // Set include path so legacy files can use their original relative paths
-// This allows 'inc/session_utility.php' to work from any location
-// We add src/php so that 'inc/...' resolves to 'src/php/inc/...'
-set_include_path(get_include_path() . PATH_SEPARATOR . LWT_BASE_PATH . PATH_SEPARATOR . LWT_BASE_PATH . '/src/php');
+// This allows 'Core/session_utility.php' to work from any location
+// We add src/backend so that 'Core/...' resolves to 'src/backend/Core/...'
+set_include_path(get_include_path() . PATH_SEPARATOR . LWT_BASE_PATH . PATH_SEPARATOR . LWT_BASE_PATH . '/src/backend');
 
 // Change to base directory so relative paths work correctly
 chdir(LWT_BASE_PATH);
@@ -38,9 +38,9 @@ chdir(LWT_BASE_PATH);
 // Autoloader for new classes
 spl_autoload_register(function ($class) {
     // Convert namespace to file path
-    // Lwt\Router\Router -> src/php/Router/Router.php
+    // Lwt\Router\Router -> src/backend/Router/Router.php
     $prefix = 'Lwt\\';
-    $baseDir = LWT_BASE_PATH . '/src/php/';
+    $baseDir = LWT_BASE_PATH . '/src/backend/';
 
     // Check if class uses our namespace
     $len = strlen($prefix);
@@ -134,7 +134,7 @@ use Lwt\Router\Router;
 $router = new Router();
 
 // Load route configuration
-$registerRoutes = require LWT_BASE_PATH . '/src/php/Router/routes.php';
+$registerRoutes = require LWT_BASE_PATH . '/src/backend/Router/routes.php';
 $registerRoutes($router);
 
 // Resolve and execute the request

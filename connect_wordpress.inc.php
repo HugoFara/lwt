@@ -22,6 +22,6 @@
 // database name
 // $dbname = "";
 
-require_once 'inc/wp_logincheck.php' ;
+require_once 'Core/wp_logincheck.php' ;
 
 ?>

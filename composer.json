@@ -36,7 +36,7 @@
             "./node_modules/.bin/jsdoc -c jsdoc.json",
             "php tools/phpDocumentor"
         ],
-        "minify": "php -r \"require 'src/php/minifier.php';minify_everything();\"",
+        "minify": "php -r \"require 'src/tools/minifier.php';minify_everything();\"",
         "no-minify": [
             "rm js/pgm.js",
             "cat src/frontend/js/third_party/* >> js/pgm.js",

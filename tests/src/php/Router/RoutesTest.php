@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Router;
 
-require_once __DIR__ . '/../../../../src/php/Router/Router.php';
+require_once __DIR__ . '/../../../../src/backend/Router/Router.php';
 
 use Lwt\Router\Router;
 use PHPUnit\Framework\TestCase;
@@ -34,7 +34,7 @@ class RoutesTest extends TestCase
         $this->basePath = dirname(__DIR__, 4); // Go up to project root
 
         // Load routes
-        $registerRoutes = require $this->basePath . '/src/php/Router/routes.php';
+        $registerRoutes = require $this->basePath . '/src/backend/Router/routes.php';
         $registerRoutes($this->router);
 
         // Save original superglobals
@@ -520,7 +520,7 @@ class RoutesTest extends TestCase
 
     public function testAllHandlerFilesExist(): void
     {
-        $routesFile = $this->basePath . '/src/php/Router/routes.php';
+        $routesFile = $this->basePath . '/src/backend/Router/routes.php';
 
         // Extract all handler paths from routes.php
         $content = file_get_contents($routesFile);
