@@ -974,7 +974,7 @@ class DatabaseConnectTest extends TestCase
      */
     public function testGetDatabasePrefixes(): void
     {
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
         // Ensure DB connection exists
         if (!LWT_Globals::getDbConnection()) {
@@ -1493,7 +1493,7 @@ class DatabaseConnectTest extends TestCase
      */
     public function testTransactionHandling(): void
     {
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
         if (!LWT_Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();

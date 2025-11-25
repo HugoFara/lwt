@@ -55,7 +55,7 @@ class TextParsingTest extends TestCase
      */
     private static function createTestLanguage(): void
     {
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
         // Insert test language
         $sql = "INSERT INTO {$tbpref}languages (
@@ -93,7 +93,7 @@ class TextParsingTest extends TestCase
      */
     public static function tearDownAfterClass(): void
     {
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
         if (self::$testLanguageId) {
             do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLanguageId);
@@ -141,7 +141,7 @@ class TextParsingTest extends TestCase
      */
     public function testPrepareTextParsingCharacterSubstitution(): void
     {
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
         if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');

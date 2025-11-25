@@ -434,7 +434,7 @@ class SessionUtilityTest extends TestCase
     public function testGetLastKey(): void
     {
         // Insert a test record and get its ID
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
         do_mysqli_query(
             "INSERT INTO {$tbpref}tags (TgText) VALUES ('test_tag_" . time() . "')"
         );
@@ -498,7 +498,7 @@ class SessionUtilityTest extends TestCase
 
     public function testWordTagList(): void
     {
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
         // Create a test word with tags
         do_mysqli_query(
@@ -610,7 +610,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals('default_val', $result);
 
         // Clean up
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
         unset($_REQUEST['test_db_param']);
         unset($_REQUEST['test_db_string']);
         do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey IN ('db_key', 'db_str_key', 'db_none_key')");
@@ -664,7 +664,7 @@ class SessionUtilityTest extends TestCase
 
     public function testGetPreviousAndNextTextLinksExtended(): void
     {
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
         // Create test texts
         do_mysqli_query(
@@ -733,7 +733,7 @@ class SessionUtilityTest extends TestCase
      */
     public function testRestoreFileBasic(): void
     {
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
         // Create a simple SQL dump
         $sql_content = "INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_restore', 'value1');\n";
@@ -770,7 +770,7 @@ class SessionUtilityTest extends TestCase
      */
     public function testTruncateUserDatabase(): void
     {
-        global $tbpref;
+        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
         // Insert test data
         do_mysqli_query(
