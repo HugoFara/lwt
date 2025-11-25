@@ -333,7 +333,7 @@ function edit_word_do_form($wid, $text_id, $ord, $fromAnn)
             data_info="New Term" type="text"
             name="WoText" id="wordfield" value="<?php echo tohtml($term); ?>"
             maxlength="250" size="35" />
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -477,7 +477,7 @@ function edit_word_do_form($wid, $text_id, $ord, $fromAnn)
                 data_info="Term" type="text"
                 name="WoText" id="wordfield"
                 value="<?php echo tohtml($term); ?>" maxlength="250" size="35" />
-                <img src="/icn/status-busy.png" title="Field must not be empty"
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty"
                 alt="Field must not be empty" />
             </td>
         </tr>

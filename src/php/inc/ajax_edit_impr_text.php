@@ -73,31 +73,31 @@ function make_trans($i, $wid, $trans, $word, $lang): string
     '" id="tx' . $i . '" value="' . ($set ? tohtml($trans) : '') .
     '" maxlength="50" size="40" />
      &nbsp;
-    <img class="click" src="/icn/eraser.png" title="Erase Text Field"
+    <img class="click" src="/assets/icons/eraser.png" title="Erase Text Field"
     alt="Erase Text Field"
     onclick="$(\'#tx' . $i . '\').val(\'\').trigger(\'change\');" />
      &nbsp;
-    <img class="click" src="/icn/star.png" title="* (Set to Term)"
+    <img class="click" src="/assets/icons/star.png" title="* (Set to Term)"
     alt="* (Set to Term)"
     onclick="$(\'#tx' . $i . '\').val(\'*\').trigger(\'change\');" />
     &nbsp;';
     // Add the "plus button" to add a translation
     if ($widset) {
         $r .=
-        '<img class="click" src="/icn/plus-button.png"
+        '<img class="click" src="/assets/icons/plus-button.png"
         title="Save another translation to existent term"
         alt="Save another translation to existent term"
         onclick="updateTermTranslation(' . $wid . ', \'#tx' . $i . '\');" />';
     } else {
         $r .=
-        '<img class="click" src="/icn/plus-button.png"
+        '<img class="click" src="/assets/icons/plus-button.png"
         title="Save translation to new term"
         alt="Save translation to new term"
         onclick="addTermTranslation(\'#tx' . $i . '\',' . prepare_textdata_js($word) . ',' . $lang . ');" />';
     }
     $r .= '&nbsp;&nbsp;
     <span id="wait' . $i . '">
-        <img src="/icn/empty.gif" />
+        <img src="/assets/icons/empty.gif" />
     </span>
     </span>';
     return $r;
@@ -253,7 +253,7 @@ function edit_term_interaction($wordlc, $textid): string
         $plus = '<a name="rec' . $trans_data["ann_index"] . '"></a>
         <span class="click" onclick="oewin(\'edit_word.php?fromAnn=\' + $(document).scrollTop() + \'&amp;wid=' .
         $trans_data["wid"] . '\');">
-            <img src="/icn/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
+            <img src="/assets/icons/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
         </span>';
     } else {
         $plus = '&nbsp;';
@@ -328,7 +328,7 @@ function edit_term_form($textid): string
                         $nontermbuffer .
                     '</td>
                     <td class="td1 right" colspan="3">
-                    <img class="click" src="/icn/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" onclick="location.href=\'print_impr_text.php?text=' . $textid . '\';" />
+                    <img class="click" src="/assets/icons/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" onclick="location.href=\'print_impr_text.php?text=' . $textid . '\';" />
                     </td>
                 </tr>';
                 $nontermbuffer = '';
@@ -361,7 +361,7 @@ function edit_term_form($textid): string
                 <span class="click"
                 onclick="oewin(\'edit_word.php?fromAnn=\' + $(document).scrollTop() + \'&amp;wid=' .
                 $wid . '&amp;tid=' . $textid . '&amp;ord=' . (int)$vals[0] . '\');">
-                    <img src="/icn/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
+                    <img src="/assets/icons/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
                 </span>';
             }
             $r .= '<tr>
@@ -386,7 +386,7 @@ function edit_term_form($textid): string
             // Not a term, may add a new line
             $nontermbuffer .= str_replace(
                 "¶",
-                '<img src="/icn/new_line.png" title="New Line" alt="New Line" />',
+                '<img src="/assets/icons/new_line.png" title="New Line" alt="New Line" />',
                 tohtml(trim($vals[1]))
             );
         }
@@ -397,7 +397,7 @@ function edit_term_form($textid): string
             $nontermbuffer .
             '</td>
             <td class="td1 right" colspan="3">
-                <img class="click" src="/icn/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" onclick="location.href=\'print_impr_text.php?text=' . $textid . '\';" />
+                <img class="click" src="/assets/icons/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" onclick="location.href=\'print_impr_text.php?text=' . $textid . '\';" />
             </td>
         </tr>';
     }
@@ -484,7 +484,7 @@ function make_form($textid, $wordlc): array
                         $nontermbuffer .
                     '</td>
                     <td class="td1 right" colspan="3">
-                    <img class="click" src="/icn/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" onclick="location.href=\'print_impr_text.php?text=' . $textid . '\';" />
+                    <img class="click" src="/assets/icons/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" onclick="location.href=\'print_impr_text.php?text=' . $textid . '\';" />
                     </td>
                 </tr>';
                 $nontermbuffer ='';
@@ -527,7 +527,7 @@ function make_form($textid, $wordlc): array
             } else {
                 $plus = '<a name="rec' . $i . '"></a>
                 <span class="click" onclick="oewin(\'edit_word.php?fromAnn=\' + $(document).scrollTop() + \'&amp;wid=' . $wid . '\');">
-                    <img src="/icn/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
+                    <img src="/assets/icons/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
                 </span>';
             }
             $mustredo = trim($wordlc) == mb_strtolower(trim($vals[1]), 'UTF-8');
@@ -551,7 +551,7 @@ function make_form($textid, $wordlc): array
             if (trim($vals[1]) != '') {
                 $nontermbuffer .= str_replace(
                     "¶",
-                    '<img src="/icn/new_line.png" title="New Line" alt="New Line" />',
+                    '<img src="/assets/icons/new_line.png" title="New Line" alt="New Line" />',
                     tohtml($vals[1])
                 );
             }
@@ -563,7 +563,7 @@ function make_form($textid, $wordlc): array
             $nontermbuffer .
             '</td>
             <td class="td1 right" colspan="3">
-                <img class="click" src="/icn/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" onclick="location.href=\'print_impr_text.php?text=' . $textid . '\';" />
+                <img class="click" src="/assets/icons/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" onclick="location.href=\'print_impr_text.php?text=' . $textid . '\';" />
             </td>
         </tr>';
     }

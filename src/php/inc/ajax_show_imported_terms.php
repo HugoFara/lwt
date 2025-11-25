@@ -51,10 +51,10 @@ function imported_terms_header($recno, $currentpage, $last_update, $maxperpage=1
             <?php
             if ($currentpage > 1) {
                 ?>
-            <img src="/icn/control-stop-180.png" title="First Page" alt="First Page"
+            <img src="/assets/icons/control-stop-180.png" title="First Page" alt="First Page"
             onclick="showImportedTerms('<?php echo $last_update; ?>', undefined, $('#recno').text(), '1')" />
             &nbsp;
-            <img  src="/icn/control-180.png" title="Previous Page" alt="Previous Page"
+            <img  src="/assets/icons/control-180.png" title="Previous Page" alt="Previous Page"
             onclick="showImportedTerms('<?php echo $last_update; ?>', undefined, $('#recno').text(), <?php echo $currentpage-1; ?>)" />
                 <?php
             } else {
@@ -79,10 +79,10 @@ function imported_terms_header($recno, $currentpage, $last_update, $maxperpage=1
             echo ' of ' . $pages . '&nbsp; ';
             if ($currentpage < $pages) {
                 ?>
-            <img src="/icn/control.png" title="Next Page" alt="Next Page"
+            <img src="/assets/icons/control.png" title="Next Page" alt="Next Page"
             onclick="showImportedTerms('<?php echo $last_update; ?>', undefined, $('#recno').text(), '<?php echo $currentpage+1; ?>')" />
             &nbsp;
-            <img src="/icn/control-stop.png" title="Last Page" alt="Last Page"
+            <img src="/assets/icons/control-stop.png" title="Last Page" alt="Last Page"
             onclick="showImportedTerms('<?php echo $last_update; ?>', undefined, $('#recno').text(), <?php echo $pages; ?>)" />
                 <?php
             } else {
@@ -194,8 +194,8 @@ function show_imported_terms($last_update, $limit, $rtl)
                 <b>' .
                     (
                         $record['SentOK'] !=0  ?
-                        '<img src="/icn/status.png" title="' . tohtml($record['WoSentence']) . '" alt="Yes" />' :
-                        '<img src="/icn/status-busy.png" title="(No valid sentence)" alt="No" />'
+                        '<img src="/assets/icons/status.png" title="' . tohtml($record['WoSentence']) . '" alt="Yes" />' :
+                        '<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />'
                     ) .
                 '</b>
             </td>
@@ -212,7 +212,7 @@ function show_imported_terms($last_update, $limit, $rtl)
                 'inline_edit.php',
                 {
                     type      : 'textarea',
-                    indicator : '<img src="/icn/indicator.gif">',
+                    indicator : '<img src="/assets/icons/indicator.gif">',
                     tooltip   : 'Click to edit...',
                     submit    : 'Save',
                     cancel    : 'Cancel',

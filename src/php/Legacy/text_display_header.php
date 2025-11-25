@@ -126,27 +126,27 @@ function do_diplay_impr_text_header_content($title, $textid, $audio, $sourceURI)
     <h1><?php echo tohtml($title); ?></h1>
 <div class="flex-spaced">
     <div>
-        <img id="hidet" class="click" src="/icn/light-bulb-T.png"
+        <img id="hidet" class="click" src="/assets/icons/light-bulb-T.png"
         title="Toggle Text Display (Now ON)" alt="Toggle Text Display (Now ON)" onclick="do_hide_t();" />
-        <img id="showt" style="display:none;" class="click" src="/icn/light-bulb-off-T.png"
+        <img id="showt" style="display:none;" class="click" src="/assets/icons/light-bulb-off-T.png"
         title="Toggle Text Display (Now OFF)" alt="Toggle Text Display (Now OFF)" onclick="do_show_t();" />
-        <img id="hide" class="click" src="/icn/light-bulb-A.png"
+        <img id="hide" class="click" src="/assets/icons/light-bulb-A.png"
         title="Toggle Annotation Display (Now ON)" alt="Toggle Annotation Display (Now ON)" onclick="do_hide_a();" />
-        <img id="show" style="display:none;" class="click" src="/icn/light-bulb-off-A.png"
+        <img id="show" style="display:none;" class="click" src="/assets/icons/light-bulb-off-A.png"
         title="Toggle Annotation Display (Now OFF)" alt="Toggle Annotation Display (Now OFF)" onclick="do_show_a();" />
     </div>
     <div>
         <?php
         if (isset($sourceURI)) {
             echo ' <a href="' . $sourceURI . '" target="_blank">
-                <img src="'.get_file_path('icn/chain.png').'" title="Text Source" alt="Text Source" />
+                <img src="'.get_file_path('assets/icons/chain.png').'" title="Text Source" alt="Text Source" />
             </a>';
         }
         echo $text_links;
     ?>
     </div>
     <div>
-        <img class="click" src="/icn/cross.png" title="Close Window" alt="Close Window" onclick="top.close();" />
+        <img class="click" src="/assets/icons/cross.png" title="Close Window" alt="Close Window" onclick="top.close();" />
     </div>
 </div>
     <?php

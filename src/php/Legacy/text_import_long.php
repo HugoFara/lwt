@@ -258,25 +258,25 @@ function long_text_display($max_input_vars)
     <div class="flex-spaced">
         <div title="Import of a single text, max. 65,000 bytes long, with optional audio">
             <a href="/texts?new=1">
-                <img src="/icn/plus-button.png">
+                <img src="/assets/icons/plus-button.png">
                 Short Text Import
             </a>
         </div>
         <div>
             <a href="/feeds?page=1&amp;check_autoupdate=1">
-                <img src="/icn/plus-button.png">
+                <img src="/assets/icons/plus-button.png">
                 Newsfeed Import
             </a>
         </div>
         <div>
             <a href="/texts?query=&amp;page=1">
-                <img src="/icn/drawer--plus.png">
+                <img src="/assets/icons/drawer--plus.png">
                 Active Texts
             </a>
         </div>
         <div>
             <a href="/text/archived?query=&amp;page=1">
-                <img src="/icn/drawer--minus.png">
+                <img src="/assets/icons/drawer--minus.png">
                 Archived Texts
             </a>
         </div>
@@ -292,7 +292,7 @@ function long_text_display($max_input_vars)
                     echo get_languages_selectoptions(getSetting('currentlanguage'), '[Choose...]');
                     ?>
                 </select>
-                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
@@ -300,7 +300,7 @@ function long_text_display($max_input_vars)
             <td class="td1">
                 <input type="text" class="notempty checkoutsidebmp respinput"
                 data_info="Title" name="TxTitle" id="TxTitle" value="" maxlength="200" />
-                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
@@ -342,7 +342,7 @@ function long_text_display($max_input_vars)
                         TWO NEWLINEs: Paragraph ends. Single NEWLINE converted to SPACE
                     </option>
                 </select>
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
@@ -350,7 +350,7 @@ function long_text_display($max_input_vars)
             <td class="td1">
                 <input type="number" min="0" max="999" class="notempty posintnumber"
                 data_info="Maximum Sentences per Text" name="maxsent" value="50" maxlength="3" size="3" />
-                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
                 <br />
                 <span class="smallgray">
                     Values higher than 100 may slow down text display.

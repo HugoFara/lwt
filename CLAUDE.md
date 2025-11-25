@@ -71,34 +71,36 @@ composer clean-doc               # Clear all generated documentation
 
 ### File Structure
 
-**Root Directory:** Contains 60+ PHP page files that render directly to the client. Each file represents a specific user-facing feature:
-
-- `do_text.php` - Main text reading interface
-- `do_test.php` - Word testing/review interface
-- `edit_*.php` - Management interfaces (languages, texts, words, tags, feeds)
-- `backup_restore.php` - Database backup/restore
-- `api.php` - REST API entry point
+**Root Directory:** Contains `index.php` as the front controller entry point.
 
 **Key Directories:**
 
-- `inc/` - Core PHP modules not rendered directly
-  - `database_connect.php` - Database connection and query wrappers
-  - `session_utility.php` - Session management and utility functions (4000+ lines)
-  - `kernel_utility.php` - Core utilities that don't require full session
-  - `feeds.php` - RSS feed parsing and import
-  - `tags.php` - Tag management functions
-  - `ajax_*.php` - AJAX endpoints (15+ files)
-  - `classes/` - PHP classes (GoogleTranslate, Language, Term, Text)
+- `assets/` - All static assets (generated and third-party)
+  - `assets/icons/` - UI icons (PNG files)
+  - `assets/images/` - Documentation images, logos, app icons
+  - `assets/css/` - Minified CSS (generated from `src/css/`)
+  - `assets/js/` - Minified JavaScript (generated from `src/js/`)
+  - `assets/themes/` - Minified themes (generated from `src/themes/`)
+  - `assets/sounds/` - Audio feedback files
+  - `assets/vendor/iui/` - iUI mobile framework (third-party)
 
-- `src/` - Source files for assets requiring build step
+- `src/` - Source files
+  - `src/php/` - PHP application code
+    - `src/php/Controllers/` - MVC Controllers
+    - `src/php/Legacy/` - Legacy PHP files (being migrated)
+    - `src/php/Router/` - Routing system
+    - `src/php/inc/` - Core PHP modules (database, utilities)
+      - `database_connect.php` - Database connection and query wrappers
+      - `session_utility.php` - Session management and utility functions
+      - `kernel_utility.php` - Core utilities that don't require full session
+      - `ajax_*.php` - AJAX endpoints (15+ files)
+      - `classes/` - PHP classes (GoogleTranslate, Language, Term, Text)
   - `src/js/` - Unminified JavaScript source
   - `src/css/` - Unminified CSS source
   - `src/themes/` - Theme source files
-  - `src/php/` - Development-only PHP utilities (minifier, markdown converter)
 
-- `js/` - Minified JavaScript (generated, do not edit directly)
-- `css/` - Minified CSS (generated, do not edit directly)
-- `themes/` - Minified themes (generated, do not edit directly)
+- `resources/` - Non-runtime resources
+  - `resources/anki/` - Anki flashcard export templates
 
 - `db/` - Database schema and migrations
   - `db/schema/baseline.sql` - Complete database schema
@@ -106,6 +108,7 @@ composer clean-doc               # Clear all generated documentation
 
 - `tests/` - PHPUnit tests and API tests
 - `docs/` - Markdown documentation and generated API docs
+- `media/` - User media files (audio for texts)
 
 ### Database Architecture
 
@@ -150,8 +153,9 @@ LWT uses a MySQL/MariaDB database with MyISAM engine. Key tables:
 
 - Themes in `src/themes/[theme-name]/` with CSS files
 - Relative paths auto-adjusted during minification
-- Can reference shared images from `css/images/` using `../../../css/theimage`
+- Can reference shared images from `assets/css/images/` using `../../../assets/css/theimage`
 - Missing theme files fall back to `src/css/` defaults
+- Generated themes output to `assets/themes/`
 
 ### REST API
 
@@ -192,8 +196,8 @@ PHP code is spread across root files (user-facing pages) and `inc/` (shared logi
 
 1. Create folder `src/themes/your-theme/`
 2. Add CSS files (don't need all files from `src/css/`, missing files fall back to defaults)
-3. Reference images: `../../../css/images/file.png` (for shared images) or `./file.png` (theme-specific)
-4. Run `composer minify` to build, or `composer no-minify` for debugging (warning: breaks relative paths to shared images)
+3. Reference images: `../../../assets/css/images/file.png` (for shared images) or `./file.png` (theme-specific)
+4. Run `composer minify` to build (outputs to `assets/themes/`), or `composer no-minify` for debugging
 
 ### Writing Tests
 

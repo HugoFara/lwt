@@ -158,24 +158,24 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
         if($list[$i] == $textid) {
             if ($list[$i-1] !== 0) {
                 $title = tohtml(getTextTitle($list[$i-1]));
-                $prev = '<a href="' . $url . $list[$i-1] . '" target="_top"><img src="/icn/navigation-180-button.png" title="Previous Text: ' . $title . '" alt="Previous Text: ' . $title . '" /></a>';
+                $prev = '<a href="' . $url . $list[$i-1] . '" target="_top"><img src="/assets/icons/navigation-180-button.png" title="Previous Text: ' . $title . '" alt="Previous Text: ' . $title . '" /></a>';
             }
             else {
-                $prev = '<img src="/icn/navigation-180-button-light.png" title="No Previous Text" alt="No Previous Text" />';
+                $prev = '<img src="/assets/icons/navigation-180-button-light.png" title="No Previous Text" alt="No Previous Text" />';
             }
             if ($list[$i+1] !== 0) {
                 $title = tohtml(getTextTitle($list[$i+1]));
                 $next = '<a href="' . $url . $list[$i+1] .
-                '" target="_top"><img src="/icn/navigation-000-button.png" title="Next Text: ' . $title . '" alt="Next Text: ' . $title . '" /></a>';
+                '" target="_top"><img src="/assets/icons/navigation-000-button.png" title="Next Text: ' . $title . '" alt="Next Text: ' . $title . '" /></a>';
             }
             else {
-                $next = '<img src="/icn/navigation-000-button-light.png" title="No Next Text" alt="No Next Text" />';
+                $next = '<img src="/assets/icons/navigation-000-button-light.png" title="No Next Text" alt="No Next Text" />';
             }
             return $add . $prev . ' ' . $next;
         }
     }
-    return $add . '<img src="/icn/navigation-180-button-light.png" title="No Previous Text" alt="No Previous Text" />
-    <img src="/icn/navigation-000-button-light.png" title="No Next Text" alt="No Next Text" />';
+    return $add . '<img src="/assets/icons/navigation-180-button-light.png" title="No Previous Text" alt="No Previous Text" />
+    <img src="/assets/icons/navigation-000-button-light.png" title="No Next Text" alt="No Next Text" />';
 }
 
 
@@ -186,7 +186,7 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
  */
 function echo_lwt_logo(): void
 {
-    echo '<img class="lwtlogo" src="' . get_file_path('img/lwt_icon.png') . '" title="LWT" alt="LWT logo" />';
+    echo '<img class="lwtlogo" src="' . get_file_path('assets/images/lwt_icon.png') . '" title="LWT" alt="LWT logo" />';
 }
 
 
@@ -322,13 +322,13 @@ function selectmediapath($f): string
         (only mp3, mp4, ogg, wav, webm files shown):
     </p>
     <p style="display: none;" id="mediaSelectErrorMessage"></p>
-    <img style="float: right; display: none;" id="mediaSelectLoadingImg" src="/icn/waiting2.gif" />
+    <img style="float: right; display: none;" id="mediaSelectLoadingImg" src="/assets/icons/waiting2.gif" />
     <select name="Dir" style="display: none; width: 200px;"
     onchange="{val=this.form.Dir.options[this.form.Dir.selectedIndex].value; if (val != \'\') this.form.'
         . $f . '.value = val; this.form.Dir.value=\'\';}">
     </select>
     <span class="click" onclick="do_ajax_update_media_select();" style="margin-left: 16px;">
-        <img src="/icn/arrow-circle-135.png" title="Refresh Media Selection" alt="Refresh Media Selection" />
+        <img src="/assets/icons/arrow-circle-135.png" title="Refresh Media Selection" alt="Refresh Media Selection" />
         Refresh
     </span>
     <script type="text/javascript">
@@ -569,12 +569,12 @@ function get_tooltip_selectoptions($v): string
 
 function get_themes_selectoptions($v): string
 {
-    $themes = glob('themes/*', GLOB_ONLYDIR);
-    $r = '<option value="themes/Default/">Default</option>';
+    $themes = glob('assets/themes/*', GLOB_ONLYDIR);
+    $r = '<option value="assets/themes/Default/">Default</option>';
     foreach($themes as $theme){
-        if($theme!='themes/Default') {
+        if($theme!='assets/themes/Default') {
             $r.= '<option value="'.$theme.'/" '. get_selected($v, $theme.'/');
-            $r .= ">". str_replace(array('themes/','_'), array('',' '), $theme) ."</option>";
+            $r .= ">". str_replace(array('assets/themes/','_'), array('',' '), $theme) ."</option>";
         }
     }
     return $r;
@@ -844,14 +844,14 @@ function make_status_controls_test_table($score, $status, $wordid): string
     }
 
     if ($status <= 5 || $status == 98) {
-        $plus = '<img src="/icn/plus.png" class="click" title="+" alt="+" onclick="changeTableTestStatus(' . $wordid .',true);" />';
+        $plus = '<img src="/assets/icons/plus.png" class="click" title="+" alt="+" onclick="changeTableTestStatus(' . $wordid .',true);" />';
     } else {
-        $plus = '<img src="'.get_file_path('icn/placeholder.png').'" title="" alt="" />';
+        $plus = '<img src="'.get_file_path('assets/icons/placeholder.png').'" title="" alt="" />';
     }
     if ($status >=1 ) {
-        $minus = '<img src="/icn/minus.png" class="click" title="-" alt="-" onclick="changeTableTestStatus(' . $wordid .',false);" />';
+        $minus = '<img src="/assets/icons/minus.png" class="click" title="-" alt="-" onclick="changeTableTestStatus(' . $wordid .',false);" />';
     } else {
-        $minus = '<img src="'.get_file_path('icn/placeholder.png').'" title="" alt="" />';
+        $minus = '<img src="'.get_file_path('assets/icons/placeholder.png').'" title="" alt="" />';
     }
     return ($status == 98 ? '' : $minus . ' ') . $scoret . ($status == 99 ? '' : ' ' . $plus);
 }
@@ -1320,10 +1320,10 @@ function makePager($currentpage, $pages, $script, $formname): void
     if ($currentpage > 1) {
         ?>
 <a href="<?php echo $script; ?>?page=1" <?php echo $marger; ?>>
-    <img src="/icn/control-stop-180.png" title="First Page" alt="First Page" />
+    <img src="/assets/icons/control-stop-180.png" title="First Page" alt="First Page" />
 </a>
 <a href="<?php echo $script; ?>?page=<?php echo $currentpage-1; ?>" <?php echo $marger; ?>>
-    <img src="/icn/control-180.png" title="Previous Page" alt="Previous Page" />
+    <img src="/assets/icons/control-180.png" title="Previous Page" alt="Previous Page" />
 </a>
         <?php
     }
@@ -1344,10 +1344,10 @@ Page
     if ($currentpage < $pages) {
         ?>
 <a href="<?php echo $script; ?>?page=<?php echo $currentpage+1; ?>" <?php echo $marger; ?>>
-    <img src="/icn/control.png" title="Next Page" alt="Next Page" />
+    <img src="/assets/icons/control.png" title="Next Page" alt="Next Page" />
 </a>
 <a href="<?php echo $script; ?>?page=<?php echo $pages; ?>" <?php echo $marger; ?>>
-    <img src="/icn/control-stop.png" title="Last Page" alt="Last Page" />
+    <img src="/assets/icons/control-stop.png" title="Last Page" alt="Last Page" />
 </a>
         <?php
     }
@@ -2275,7 +2275,7 @@ function todo_words_content($textid): string
 
     $res = '<span title="Number of unknown words" class="status0" ' .
     'style="padding: 0 5px; margin: 0 5px;">' . $c . '</span>' .
-    '<img src="/icn/script-import.png" ' .
+    '<img src="/assets/icons/script-import.png" ' .
     'onclick="showRightFrames(\'bulk_translate_words.php?tid=' . $textid .
     '&offset=0&sl=' . $sl . '&tl=' . $tl . '\');" ' .
     'style="cursor: pointer; vertical-align:middle" title="Lookup New Words" ' .
@@ -2595,18 +2595,18 @@ function example_sentences_area($lang, $termlc, $selector, $wid): void
         <span class="click" onclick="do_ajax_show_sentences(
             <?php echo $lang; ?>, <?php echo prepare_textdata_js($termlc); ?>,
             <?php echo htmlentities(json_encode($selector)); ?>, <?php echo $wid; ?>);">
-            <img src="/icn/sticky-notes-stack.png" title="Show Sentences" alt="Show Sentences" />
+            <img src="/assets/icons/sticky-notes-stack.png" title="Show Sentences" alt="Show Sentences" />
             Show Sentences
         </span>
     </div>
     <!-- Loading icon -->
-    <img id="exsent-waiting" style="display: none;" src="/icn/waiting2.gif" />
+    <img id="exsent-waiting" style="display: none;" src="/assets/icons/waiting2.gif" />
     <!-- Displayed output -->
     <div id="exsent-sentences" style="display: none;">
         <p><b>Sentences in active texts with <i><?php echo tohtml($termlc) ?></i></b></p>
         <p>
             (Click on
-            <img src="/icn/tick-button.png" title="Choose" alt="Choose" />
+            <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
             to copy sentence into above term)
         </p>
     </div>
@@ -2633,13 +2633,13 @@ function example_sentences_area($lang, $termlc, $selector, $wid): void
 function get20Sentences($lang, $wordlc, $wid, $jsctlname, $mode): string
 {
     $r = '<p><b>Sentences in active texts with <i>' . tohtml($wordlc) . '</i></b></p>
-    <p>(Click on <img src="/icn/tick-button.png" title="Choose" alt="Choose" />
+    <p>(Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
     to copy sentence into above term)</p>';
     $sentences = sentences_with_word($lang, $wordlc, $wid, $mode);
     foreach ($sentences as $sentence) {
         $r .= '<span class="click" onclick="{' . $jsctlname . '.value=' .
             prepare_textdata_js($sentence[1]) . '; makeDirty();}">
-        <img src="/icn/tick-button.png" title="Choose" alt="Choose" />
+        <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
         </span> &nbsp;' . $sentence[0] . '<br />';
     }
     $r .= '</p>';
@@ -3655,7 +3655,7 @@ function get_annotation_link($textid): string
     global $tbpref;
     if (get_first_value('select length(TxAnnotatedText) as value from ' . $tbpref . 'texts where TxID=' . $textid) > 0) {
         return ' &nbsp;<a href="print_impr_text.php?text=' . $textid .
-        '" target="_top"><img src="/icn/tick.png" title="Annotated Text" alt="Annotated Text" /></a>';
+        '" target="_top"><img src="/assets/icons/tick.png" title="Annotated Text" alt="Annotated Text" /></a>';
     } else {
         return '';
     }
@@ -3983,17 +3983,17 @@ function makeAudioPlayer($audio, $offset=0)
     }
     ?>
 <link type="text/css" href="<?php print_file_path('css/jplayer.css');?>" rel="stylesheet" />
-<script type="text/javascript" src="/js/jquery.jplayer.js"></script>
+<script type="text/javascript" src="/assets/js/jquery.jplayer.js"></script>
 <table style="margin-top: 5px; margin-left: auto; margin-right: auto;" cellspacing="0" cellpadding="0">
     <tr>
         <td class="center borderleft" style="padding-left:10px;">
             <span id="do-single" class="click<?php echo ($repeatMode ? '' : ' hide'); ?>"
                 style="color:#09F;font-weight: bold;" title="Toggle Repeat (Now ON)">
-                <img src="/icn/arrow-repeat.png" alt="Toggle Repeat (Now ON)" title="Toogle Repeat (Now ON)" style="width:24px;height:24px;">
+                <img src="/assets/icons/arrow-repeat.png" alt="Toggle Repeat (Now ON)" title="Toogle Repeat (Now ON)" style="width:24px;height:24px;">
             </span>
             <span id="do-repeat" class="click<?php echo ($repeatMode ? ' hide' : ''); ?>"
                 style="color:grey;font-weight: bold;" title="Toggle Repeat (Now OFF)">
-                <img src="/icn/arrow-norepeat.png" alt="Toggle Repeat (Now OFF)" title="Toggle Repeat (Now OFF)" style="width:24px;height:24px;">
+                <img src="/assets/icons/arrow-norepeat.png" alt="Toggle Repeat (Now OFF)" title="Toggle Repeat (Now OFF)" style="width:24px;height:24px;">
             </span>
         </td>
         <td class="center bordermiddle">&nbsp;</td>
@@ -4042,10 +4042,10 @@ function makeAudioPlayer($audio, $offset=0)
             </select>
             <br />
             <span id="backbutt" class="click">
-                <img src="/icn/arrow-circle-225-left.png" alt="Rewind n seconds" title="Rewind n seconds" />
+                <img src="/assets/icons/arrow-circle-225-left.png" alt="Rewind n seconds" title="Rewind n seconds" />
             </span>&nbsp;&nbsp;
             <span id="forwbutt" class="click">
-                <img src="/icn/arrow-circle-315.png" alt="Forward n seconds" title="Forward n seconds" />
+                <img src="/assets/icons/arrow-circle-315.png" alt="Forward n seconds" title="Forward n seconds" />
             </span>
             <span id="playTime" class="hide"></span>
         </td>
@@ -4056,15 +4056,15 @@ function makeAudioPlayer($audio, $offset=0)
             </select>
             <br />
             <span id="slower" class="click">
-                <img src="/icn/minus.png" alt="Slower" title="Slower" style="margin-top:3px" />
+                <img src="/assets/icons/minus.png" alt="Slower" title="Slower" style="margin-top:3px" />
             </span>
             &nbsp;
             <span id="stdspeed" class="click">
-                <img src="/icn/status-away.png" alt="Normal" title="Normal" style="margin-top:3px" />
+                <img src="/assets/icons/status-away.png" alt="Normal" title="Normal" style="margin-top:3px" />
             </span>
             &nbsp;
             <span id="faster" class="click">
-                <img src="/icn/plus.png" alt="Faster" title="Faster" style="margin-top:3px" />
+                <img src="/assets/icons/plus.png" alt="Faster" title="Faster" style="margin-top:3px" />
             </span>
         </td>
     </tr>
@@ -4248,7 +4248,7 @@ function pagestart_nobody($title, $addcss=''): void
     <link rel="apple-touch-icon" href="<?php print_file_path('img/apple-touch-icon-57x57.png');?>" />
     <link rel="apple-touch-icon" sizes="72x72" href="<?php print_file_path('img/apple-touch-icon-72x72.png');?>" />
     <link rel="apple-touch-icon" sizes="114x114" href="<?php print_file_path('img/apple-touch-icon-114x114.png');?>" />
-    <link rel="apple-touch-startup-image" href="/img/apple-touch-startup.png" />
+    <link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/jquery-ui.css');?>" />
@@ -4259,12 +4259,12 @@ function pagestart_nobody($title, $addcss=''): void
         <?php echo $addcss . "\n"; ?>
     </style>
 
-    <script type="text/javascript" src="/js/jquery.js" charset="utf-8"></script>
-    <script type="text/javascript" src="/js/jquery.scrollTo.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="/js/jquery-ui.min.js"  charset="utf-8"></script>
-    <script type="text/javascript" src="/js/jquery.jeditable.mini.js" charset="utf-8"></script>
-    <script type="text/javascript" src="/js/tag-it.js" charset="utf-8"></script>
-    <script type="text/javascript" src="/js/overlib/overlib_mini.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery.scrollTo.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>
     <!-- URLBASE : "<?php echo tohtml(url_base()); ?>" -->
     <!-- TBPREF  : "<?php echo tohtml($tbpref);  ?>" -->
     <script type="text/javascript">
@@ -4274,7 +4274,7 @@ function pagestart_nobody($title, $addcss=''): void
         var TEXTTAGS = <?php echo json_encode(get_texttags()); ?>;
         //]]>
     </script>
-    <script type="text/javascript" src="/js/pgm.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>
 
     <title>LWT :: <?php echo tohtml($title); ?></title>
 </head>

@@ -35,7 +35,7 @@ function edit_mode_display($textid, $ann_exists): void
     ?>
 <div id="printoptions">
     <h2>Improved Annotated Text (Edit Mode)
-        <img src="/icn/question-frame.png" title="Help" alt="Help" class="click"
+        <img src="/assets/icons/question-frame.png" title="Help" alt="Help" class="click"
         onclick="window.open('docs/info.html#il');" />
     </h2>
     <input type="button" value="Display/Print Mode" onclick="location.href='/text/print?text=<?php echo $textid; ?>';" />
@@ -225,16 +225,16 @@ function do_content()
         </div>
         <div>
             <a href="/text/read?start=<?php echo $textid; ?>" target="_top">
-                <img src="/icn/book-open-bookmark.png" title="Read" alt="Read" />
+                <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" />
             </a>
             <a href="/test?text=<?php echo $textid; ?>" target="_top">
-                <img src="/icn/question-balloon.png" title="Test" alt="Test" />
+                <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />
             </a>
             <a href="print_text.php?text=<?php echo $textid; ?>" target="_top">
-                <img src="/icn/printer.png" title="Print" alt="Print" />
+                <img src="/assets/icons/printer.png" title="Print" alt="Print" />
             </a>
             <a target="_top" href="/texts?chg=<?php echo $textid; ?>">
-                <img src="/icn/document--pencil.png" title="Edit Text"
+                <img src="/assets/icons/document--pencil.png" title="Edit Text"
                 alt="Edit Text" />
             </a>
         </div>
@@ -245,7 +245,7 @@ function do_content()
     <h1>ANN.TEXT ▶ <?php echo tohtml($title) .
     (isset($record['TxSourceURI']) && substr(trim($sourceURI), 0, 1) != '#' ?
     ' <a href="<?php echo $sourceURI; ?>" target="_blank">
-        <img src="'.get_file_path('icn/chain.png') .
+        <img src="'.get_file_path('assets/icons/chain.png') .
         '" title="Text Source" alt="Text Source" />
     </a>'
     : '') ?>

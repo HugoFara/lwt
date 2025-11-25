@@ -160,10 +160,10 @@ function do_test_header_row($_p)
         ?>
     <div>
         <a href="/text/read?start=<?php echo $textid; ?>" target="_top">
-            <img src="/icn/book-open-bookmark.png" title="Read" alt="Read" />
+            <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" />
         </a>
         <a href="/text/print-plain?text=<?php echo $textid; ?>" target="_top">
-            <img src="/icn/printer.png" title="Print" alt="Print" />
+            <img src="/assets/icons/printer.png" title="Print" alt="Print" />
         </a>
         <?php echo get_annotation_link($textid); ?>
     </div>

@@ -645,8 +645,8 @@ function formatImportedTerms(data, rtl) {
                 <b>` +
                     (
                         record[`SentOK`] !=0  ?
-                        `<img src="/icn/status.png" title="` + escape_html_chars(record[`WoSentence`]) + `" alt="Yes" />` :
-                        `<img src="/icn/status-busy.png" title="(No valid sentence)" alt="No" />`
+                        `<img src="/assets/icons/status.png" title="` + escape_html_chars(record[`WoSentence`]) + `" alt="Yes" />` :
+                        `<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />`
                     ) +
                 `</b>
             </td>
@@ -718,11 +718,11 @@ onsubmit="showImportedTerms('<?php echo $last_update; ?>', <?php echo $rtl; ?>, 
             <span>
                 <span id="res_data-navigation-prev">
                     <img id="res_data-navigation-prev-first"
-                    src="/icn/control-stop-180.png" title="First Page"
+                    src="/assets/icons/control-stop-180.png" title="First Page"
                     alt="First Page" />
                     &nbsp;
                     <img id="res_data-navigation-prev-minus"
-                    src="/icn/control-180.png" title="Previous Page"
+                    src="/assets/icons/control-180.png" title="Previous Page"
                     alt="Previous Page" />
                 </span>
             </span>
@@ -735,10 +735,10 @@ onsubmit="showImportedTerms('<?php echo $last_update; ?>', <?php echo $rtl; ?>, 
             <span>
                 <span id="res_data-navigation-next">
                     <img id="res_data-navigation-next-plus"
-                    src="/icn/control.png" title="Next Page" alt="Next Page" />
+                    src="/assets/icons/control.png" title="Next Page" alt="Next Page" />
                     &nbsp;
                     <img id="res_data-navigation-next-last"
-                    src="/icn/control-stop.png" title="Last Page" alt="Last Page" />
+                    src="/assets/icons/control-stop.png" title="Last Page" alt="Last Page" />
                 </span>
             </span>
         </th>
@@ -772,7 +772,7 @@ onsubmit="showImportedTerms('<?php echo $last_update; ?>', <?php echo $rtl; ?>, 
             'inline_edit.php',
             {
                 type      : 'textarea',
-                indicator : '<img src="/icn/indicator.gif">',
+                indicator : '<img src="/assets/icons/indicator.gif">',
                 tooltip   : 'Click to edit...',
                 submit    : 'Save',
                 cancel    : 'Cancel',
@@ -1004,7 +1004,7 @@ function upload_words_display(): void
                     echo get_languages_selectoptions(getSetting('currentlanguage'), '[Choose...]');
                     ?>
                 </select>
-                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
@@ -1137,7 +1137,7 @@ function upload_words_display(): void
             <div class="hide" id="imp_transl_delim">
                 Import Translation Delimiter:<br />
                 <input class="notempty" type="text" name="transl_delim" style="width:4em;" value="<?php echo getSettingWithDefault('set-term-translation-delimiters'); ?>" />
-                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </div>
             </td>
         </tr>
@@ -1148,7 +1148,7 @@ function upload_words_display(): void
                 <select class="notempty respinput" name="WoStatus">
                     <?php echo get_wordstatus_selectoptions(null, false, false); ?>
                 </select>
-                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <tr>

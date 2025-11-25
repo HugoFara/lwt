@@ -121,7 +121,7 @@ function text_mode_page_content($showAll, $showLearning, $oldShowLearning)
     pagestart("Text Display Mode changed", false);
 
     echo '<p><span id="waiting"><img src="' .
-    get_file_path('icn/waiting.gif') .
+    get_file_path('assets/icons/waiting.gif') .
     '" alt="Please wait" title="Please wait" />&nbsp;&nbsp;Please wait ...</span>';
     flush();
     text_annotations_mode_javascript($showLearning, $oldShowLearning);

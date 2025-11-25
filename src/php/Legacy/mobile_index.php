@@ -274,15 +274,15 @@ else {  // No Action = Start screen
 <meta http-equiv="content-language" content="en" />
 <title>Mobile LWT</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<link rel="apple-touch-icon" href="img/apple-touch-icon-57x57.png" />
-<link rel="apple-touch-icon" sizes="72x72" href="img/apple-touch-icon-72x72.png" />
-<link rel="apple-touch-icon" sizes="114x114" href="img/apple-touch-icon-114x114.png" />
-<link rel="apple-touch-startup-image" href="img/apple-touch-startup.png">
+<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon-57x57.png" />
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/apple-touch-icon-72x72.png" />
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/apple-touch-icon-114x114.png" />
+<link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png">
 <meta name="apple-touch-fullscreen" content="YES" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <style type="text/css" media="screen">
-@import "./iui/iui.css";
+@import "/assets/vendor/iui/iui.css";
 span.status1 {
     background-color: #F5B8A9;
 }
@@ -299,7 +299,7 @@ span.status5 {
     background-color: #DDFFDD;
 }
 </style>
-<script type="text/javascript" src="./iui/iui.js" charset="utf-8"></script>
+<script type="text/javascript" src="/assets/vendor/iui/iui.js" charset="utf-8"></script>
 </head>
 <body>
 

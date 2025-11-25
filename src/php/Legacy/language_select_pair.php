@@ -99,7 +99,7 @@ $currentnativelanguage = getSetting('currentnativelanguage');
 
 <div class="center">
     <p class="wizard">
-        <img src="/icn/wizard.png" title="Language Settings Wizard" alt="Language Settings Wizard" />
+        <img src="/assets/icons/wizard.png" title="Language Settings Wizard" alt="Language Settings Wizard" />
     </p>
 
     <h1 class="wizard">

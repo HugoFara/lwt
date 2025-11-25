@@ -113,7 +113,7 @@ function display_new_feed($currentlang): void
 <a href="/feeds?page=1">My Feeds</a>
 <span class="nowrap"></span>
 <a href="/feeds/wizard?step=1">
-    <img src="/icn/wizard.png" title="new_feed_wizard" alt="new_feed_wizard" style="height: 20px;"/>
+    <img src="/assets/icons/wizard.png" title="new_feed_wizard" alt="new_feed_wizard" style="height: 20px;"/>
     New Feed Wizard
 </a>
 <br></br>
@@ -133,15 +133,15 @@ function display_new_feed($currentlang): void
 <tr><td class="td1">
 Name: </td><td class="td1">
     <input class="notempty" style="width:95%" type="text" name="NfName" />
-<img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+<img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
 </td></tr>
 <tr><td class="td1">Newsfeed url: </td>
 <td class="td1"><input class="notempty" style="width:95%" type="text" name="NfSourceURI" />
-<img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+<img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
 </td></tr>
 <tr><td class="td1">Article Section: </td>
 <td class="td1"><input class="notempty" style="width:95%" type="text" name="NfArticleSectionTags" />
-<img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+<img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
 </td></tr>
 <tr><td class="td1">Filter Tags: </td>
 <td class="td1"><input type="text" style="width:95%" name="NfFilterTags" /></td></tr>
@@ -218,13 +218,13 @@ function edit_feed($currentfeed): void
 <h2>
     Edit Feed
     <a target="_blank" href="docs/info.html#new_feed">
-        <img src="/icn/question-frame.png" title="Help" alt="Help" />
+        <img src="/assets/icons/question-frame.png" title="Help" alt="Help" />
     </a>
 </h2>
 <a href="/feeds?page=1"> My Feeds</a>
 <span class="nowrap"></span>
 <a href="/feeds/wizard?step=2&amp;edit_feed=<?php echo $currentfeed;?>">
-<img src="/icn/wizard.png" title="feed_wizard" alt="feed_wizard" />Feed Wizard</a>
+<img src="/assets/icons/wizard.png" title="feed_wizard" alt="feed_wizard" />Feed Wizard</a>
 <form class="validate" action="/feeds/edit" method="post">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
@@ -256,7 +256,7 @@ function edit_feed($currentfeed): void
     <td class="td1">
         <input class="notempty" style="width:95%" type="text" name="NfName"
         value="<?php echo tohtml($row['NfName']); ?>" />
-        <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
 </tr>
 <tr>
@@ -264,7 +264,7 @@ function edit_feed($currentfeed): void
     <td class="td1">
         <input class="notempty" style="width:95%" type="text" name="NfSourceURI"
         value="<?php echo tohtml($row['NfSourceURI']); ?>" />
-        <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
 </tr>
 <tr>
@@ -272,7 +272,7 @@ function edit_feed($currentfeed): void
     <td class="td1">
         <input class="notempty" style="width:95%" type="text"
         name="NfArticleSectionTags" value="<?php echo tohtml($row['NfArticleSectionTags']); ?>" />
-        <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
 </tr>
 <tr>
@@ -507,14 +507,14 @@ function display_main_page(
     <div><a href="/feeds">My Feeds</a></div>
     <div>
         <a href="/feeds/edit?new_feed=1">
-            <img src="/icn/feed--plus.png" title="new feed" alt="new feed" />
+            <img src="/assets/icons/feed--plus.png" title="new feed" alt="new feed" />
             New Feed...
         </a>
     </div>
 </div>
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab2" cellspacing="0" cellpadding="5"><tr>
-<th class="th1" colspan="4">Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+<th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
 <input type="button" value="Reset All" onclick="resetAll('/feeds/edit');" /></th>
 </tr>
 <tr>
@@ -538,7 +538,7 @@ function display_main_page(
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
     <th class="th1" colspan="3">
-        Multi Actions <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
+        Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
     </th>
 </tr>
 <tr><td class="td1 center" style="width:30%;">
@@ -626,14 +626,14 @@ function display_main_page(
                 <input type="checkbox" name="marked[]" class="markcheck" value="' . $row['NfID'] . '" /></td>
                 <td style="white-space: nowrap" class="td1 center">
                 <a href="' . $_SERVER['PHP_SELF'] . '?edit_feed=1&amp;selected_feed=' . $row['NfID'] . '">
-                <img src="/icn/feed--pencil.png" title="Edit" alt="Edit" />
+                <img src="/assets/icons/feed--pencil.png" title="Edit" alt="Edit" />
                 </a>
                 &nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?manage_feeds=1&amp;load_feed=1&amp;selected_feed=' . $row['NfID'] . '">
-                <span title="Update Feed"><img src="/icn/arrow-circle-135.png" alt="-" /></span></a>&nbsp;
+                <span title="Update Feed"><img src="/assets/icons/arrow-circle-135.png" alt="-" /></span></a>&nbsp;
                 <a href="' . $row['NfSourceURI'] . '" onclick="window.open(this.href); return false">
-                <img src="/icn/external.png" title="Show Feed" alt="Link" /></a>&nbsp;
+                <img src="/assets/icons/external.png" title="Show Feed" alt="Link" /></a>&nbsp;
                 <span class="click" onclick="if (confirm (\'Are you sure?\')) location.href=\'' . $_SERVER['PHP_SELF'] . '?markaction=del&amp;selected_feed=' . $row['NfID'] . '\';">
-                <img src="/icn/minus-button.png" title="Delete" alt="Delete" /></span></td>
+                <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></span></td>
                 <td class="td1 center">'.$row['NfName'].'</td>
                 <td class="td1 center">'.str_replace(',', ', ', $row['NfOptions']).'</td>
                 <td class="td1 center" sorttable_customkey="'.$diff.'">';

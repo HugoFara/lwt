@@ -359,7 +359,7 @@ function edit_mword_display_new($term, $tid, $ord, $len)
             <td class="td1 right"><b>New Term:</b></td>
             <td class="td1">
                 <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="New Term" type="text" name="WoText" id="wordfield" value="<?php echo tohtml($term->text); ?>" maxlength="250" size="35" />
-                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <?php print_similar_terms_tabrow(); ?>
@@ -483,7 +483,7 @@ function edit_mword_display_change($term, $tid, $ord)
                 <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp"
                 data_info="Term" type="text" name="WoText" id="wordfield"
                 value="<?php echo tohtml($term->text); ?>" maxlength="250" size="35" />
-                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <?php print_similar_terms_tabrow(); ?>

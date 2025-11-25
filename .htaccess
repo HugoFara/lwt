@@ -10,6 +10,15 @@
         Require all denied
     </FilesMatch>
 
+    # Legacy asset redirects (for backward compatibility, can remove in future)
+    RedirectMatch 301 ^/icn/(.*)$ /assets/icons/$1
+    RedirectMatch 301 ^/img/(.*)$ /assets/images/$1
+    RedirectMatch 301 ^/iui/(.*)$ /assets/vendor/iui/$1
+    RedirectMatch 301 ^/css/(.*)$ /assets/css/$1
+    RedirectMatch 301 ^/js/(.*)$ /assets/js/$1
+    RedirectMatch 301 ^/themes/(.*)$ /assets/themes/$1
+    RedirectMatch 301 ^/sounds/(.*)$ /assets/sounds/$1
+
     # Allow direct access to assets (CSS, JS, images, fonts)
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]

@@ -152,13 +152,13 @@ pagestart_nobody('Print');
     </div>
 <div>
 <a href="/text/read?start=<?php echo $textid; ?>" target="_top">
-<img src="/icn/book-open-bookmark.png" title="Read" alt="Read" /></a>
+<img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" /></a>
 <a href="/test?text=<?php echo $textid; ?>" target="_top">
-<img src="/icn/question-balloon.png" title="Test" alt="Test" />
+<img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />
 </a>
 <?php echo get_annotation_link($textid); ?>
 <a target="_top" href="/texts?chg=<?php echo $textid; ?>">
-<img src="/icn/document--pencil.png" title="Edit Text" alt="Edit Text" />
+<img src="/assets/icons/document--pencil.png" title="Edit Text" alt="Edit Text" />
 </a>
 </div>
 <div>
@@ -169,7 +169,7 @@ pagestart_nobody('Print');
 echo tohtml($title);
 (isset($record['TxSourceURI']) && substr(trim($sourceURI), 0, 1)!='#' ?
 ' <a href="' . $sourceURI . '" target="_blank">
-<img src="'.get_file_path('icn/chain.png').'" title="Text Source" alt="Text Source" /></a>' :
+<img src="'.get_file_path('assets/icons/chain.png').'" title="Text Source" alt="Text Source" /></a>' :
 '') ?></h1>
 <p id="printoptions">
     Terms with <b>status(es)</b>
@@ -204,7 +204,7 @@ if (((int)get_first_value("select length(TxAnnotatedText) as value from {$tbpref
     ?>
     <input type="button" value="Create"
     onclick="location.href='print_impr_text.php?edit=1&amp;text=<?php echo $textid; ?>';" /> an
-    <b>Improved Annotated Text</b> [<img src="/icn/tick.png" title="Annotated Text" alt="Annotated Text" />]."
+    <b>Improved Annotated Text</b> [<img src="/assets/icons/tick.png" title="Annotated Text" alt="Annotated Text" />]."
     <?php
 }
 ?>

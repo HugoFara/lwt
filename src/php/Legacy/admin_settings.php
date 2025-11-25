@@ -233,7 +233,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -250,7 +250,7 @@ echo error_message_with_hide($message, true);
             value="<?php echo tohtml(getSettingWithDefault('set-text-h-frameheight-no-audio')); ?>" maxlength="3"
             size="3" /><br />Pixel </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -268,7 +268,7 @@ echo error_message_with_hide($message, true);
             Pixel
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -283,7 +283,7 @@ echo error_message_with_hide($message, true);
             <br />Percent
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -297,7 +297,7 @@ echo error_message_with_hide($message, true);
             <br />Percent
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -313,7 +313,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -329,7 +329,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -344,7 +344,7 @@ echo error_message_with_hide($message, true);
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -361,7 +361,7 @@ echo error_message_with_hide($message, true);
             <br />Pixel
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -376,7 +376,7 @@ echo error_message_with_hide($message, true);
             <br />Percent
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -391,7 +391,7 @@ echo error_message_with_hide($message, true);
             Percent
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -409,7 +409,7 @@ echo error_message_with_hide($message, true);
             Milliseconds
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -427,7 +427,7 @@ echo error_message_with_hide($message, true);
             Milliseconds
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -445,7 +445,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -466,7 +466,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -483,7 +483,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -500,7 +500,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -517,7 +517,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -534,7 +534,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -552,7 +552,7 @@ echo error_message_with_hide($message, true);
             maxlength="1" size="1" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -568,7 +568,7 @@ echo error_message_with_hide($message, true);
             value="<?php echo tohtml(getSettingWithDefault('set-term-translation-delimiters')); ?>" maxlength="8" size="8" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -580,7 +580,7 @@ echo error_message_with_hide($message, true);
             <?php echo ((int)getSettingWithDefault('set-tts') ? "checked" : ""); ?>  />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -597,7 +597,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -611,7 +611,7 @@ echo error_message_with_hide($message, true);
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -625,7 +625,7 @@ echo error_message_with_hide($message, true);
             value="<?php echo tohtml(getSettingWithDefault('set-archivedtexts-per-page')); ?>" maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -637,7 +637,7 @@ echo error_message_with_hide($message, true);
             value="<?php echo tohtml(getSettingWithDefault('set-terms-per-page')); ?>" maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -650,7 +650,7 @@ echo error_message_with_hide($message, true);
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -663,7 +663,7 @@ echo error_message_with_hide($message, true);
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -676,7 +676,7 @@ echo error_message_with_hide($message, true);
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -693,7 +693,7 @@ echo error_message_with_hide($message, true);
             </select>
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -709,7 +709,7 @@ echo error_message_with_hide($message, true);
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -726,7 +726,7 @@ echo error_message_with_hide($message, true);
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -741,7 +741,7 @@ echo error_message_with_hide($message, true);
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/icn/status-busy.png" title="Field must not be empty"
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>

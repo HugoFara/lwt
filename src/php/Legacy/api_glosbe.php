@@ -22,8 +22,8 @@ $phrase = mb_strtolower(trim($_REQUEST["phrase"]), 'UTF-8');
 
 pagestart_nobody('');
 $titletext = '<a href="http://glosbe.com/' . $from . '/' . $dest . '/' . $phrase . '">Glosbe Dictionary (' . tohtml($from) . "-" . tohtml($dest) . "):  &nbsp; <span class=\"red2\">" . tohtml($phrase) . "</span></a>";
-echo '<h3>' . $titletext . ' <img id="del_translation" src="/icn/broom.png" title="Empty Translation Field" style="cursor:pointer" onclick="deleteTranslation ();"></img></h3>';
-echo '<p>(Click on <img src="/icn/tick-button.png" title="Choose" alt="Choose" /> to copy word(s) into above term)<br />&nbsp;</p>';
+echo '<h3>' . $titletext . ' <img id="del_translation" src="/assets/icons/broom.png" title="Empty Translation Field" style="cursor:pointer" onclick="deleteTranslation ();"></img></h3>';
+echo '<p>(Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" /> to copy word(s) into above term)<br />&nbsp;</p>';
 
 ?>
 <script type="text/javascript">

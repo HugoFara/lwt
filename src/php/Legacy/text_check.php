@@ -89,14 +89,14 @@ function display_form()
         <select name="TxLgID" id="TxLgID" class="notempty setfocus" onchange="change_textboxes_language();">
             <?php echo $languages_option;?>
         </select>
-        <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
     </tr>
     <tr>
         <td class="td1 right">Text:<br /><br />(max.<br />65,000<br />bytes)</td>
         <td class="td1">
             <textarea name="TxText" id="TxText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"></textarea>
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <tr>

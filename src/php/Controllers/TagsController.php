@@ -243,7 +243,7 @@ class TagsController extends BaseController
                 <td class="td1">
                     <input class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
                     type="text" name="TgText" data_info="Tag" value="" maxlength="20" size="20" />
-                    <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                    <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
                 </td>
             </tr>
             <tr>
@@ -289,7 +289,7 @@ class TagsController extends BaseController
                     <td class="td1">
                         <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
                         type="text" name="TgText" value="<?php echo tohtml($record['TgText']); ?>" maxlength="20" size="20" />
-                        <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                        <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
                     </td>
                 </tr>
                 <tr>
@@ -371,12 +371,12 @@ class TagsController extends BaseController
         }
 
         ?>
-        <p><a href="/tags?new=1"><img src="/icn/plus-button.png" title="New" alt="New" /> New Term Tag ...</a></p>
+        <p><a href="/tags?new=1"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Term Tag ...</a></p>
 
         <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
         <table class="tab2" cellspacing="0" cellpadding="5">
         <tr>
-        <th class="th1" colspan="4">Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+        <th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
         <input type="button" value="Reset All" onclick="{location.href='/tags?page=1&amp;query=';}" /></th>
         </tr>
         <tr>
@@ -412,7 +412,7 @@ class TagsController extends BaseController
             <input type="hidden" name="data" value="" />
             <table class="tab2" cellspacing="0" cellpadding="5">
             <tr><th class="th1 center" colspan="2">
-            Multi Actions <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
+            Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
             </th></tr>
             <tr><td class="td1 center" colspan="2">
             <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
@@ -449,7 +449,7 @@ class TagsController extends BaseController
                         <a name="rec' . $record['TgID'] . '">
                         <input name="marked[]" type="checkbox" class="markcheck" value="' . $record['TgID'] . '" ' . checkTest($record['TgID'], 'marked') . ' />
                         </a></td>
-                    <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags?chg=' . $record['TgID'] . '"><img src="/icn/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags?del=' . $record['TgID'] . '"><img src="/icn/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
+                    <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags?chg=' . $record['TgID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags?del=' . $record['TgID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
                     <td class="td1 center">' . tohtml($record['TgText']) . '</td>
                     <td class="td1 center">' . tohtml($record['TgComment']) . '</td>
                     <td class="td1 center">' . ($c > 0 ? '<a href="/words/edit?page=1&amp;query=&amp;text=&amp;status=&amp;filterlang=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['TgID'] . '">' . $c . '</a>' : '0') . '</td>
@@ -618,7 +618,7 @@ class TagsController extends BaseController
             <td class="td1">
                 <input class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
                 type="text" name="T2Text" data_info="Tag" value="" maxlength="20" />
-                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
@@ -663,7 +663,7 @@ class TagsController extends BaseController
                 <td class="td1">
                     <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
                     type="text" name="T2Text" value="<?php echo tohtml($record['T2Text']); ?>" maxlength="20" />
-                    <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
+                    <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
                 </tr>
                 <tr>
                     <td class="td1 right">Comment:</td>
@@ -743,13 +743,13 @@ class TagsController extends BaseController
         }
 
         ?>
-        <p><a href="/tags/text?new=1"><img src="/icn/plus-button.png" title="New" alt="New" /> New Text Tag ...</a></p>
+        <p><a href="/tags/text?new=1"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Text Tag ...</a></p>
 
         <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
         <table class="tab1" cellspacing="0" cellpadding="5">
         <tr>
             <th class="th1" colspan="4">
-                Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+                Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
             <input type="button" value="Reset All" onclick="{location.href='/tags/text?page=1&amp;query=';}" /></th>
         </tr>
         <tr>
@@ -785,7 +785,7 @@ class TagsController extends BaseController
             <input type="hidden" name="data" value="" />
             <table class="tab2" cellspacing="0" cellpadding="5">
             <tr><th class="th1 center" colspan="2">
-            Multi Actions <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
+            Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
             </th></tr>
             <tr><td class="td1 center" colspan="2">
             <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
@@ -821,7 +821,7 @@ class TagsController extends BaseController
                 $ca = $this->getValue('select count(*) as value from ' . $this->table('archtexttags') . ' where AgT2ID=' . $record['T2ID']);
                 echo '<tr>';
                 echo '<td class="td1 center"><a name="rec' . $record['T2ID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['T2ID'] . '" ' . checkTest($record['T2ID'], 'marked') . ' /></a></td>';
-                echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags/text?chg=' . $record['T2ID'] . '"><img src="/icn/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags/text?del=' . $record['T2ID'] . '"><img src="/icn/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';
+                echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags/text?chg=' . $record['T2ID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags/text?del=' . $record['T2ID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';
                 echo '<td class="td1 center">' . tohtml($record['T2Text']) . '</td>';
                 echo '<td class="td1 center">' . tohtml($record['T2Comment']) . '</td>';
                 echo '<td class="td1 center">' . ($c > 0 ? '<a href="/text/edit?page=1&amp;query=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['T2ID'] . '">' . $c . '</a>' : '0') . '</td>';

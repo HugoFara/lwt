@@ -30,15 +30,15 @@ require_once __DIR__ . '/../src/php/markdown_converter.php';
 		<meta name="description" content="Learning with Texts (LWT) is a tool for Language Learning, inspired by Stephen Krashen's principles in Second Language Acquisition, Steve Kaufmann's LingQ System and ideas (e. g. Massive-Context Cloze Deletion Cards = MCDs) from Khatzumoto, published at AJATT - All Japanese All The Time. It is an Alternative to LingQ, 100 % free, Open Source, and in the Public Domain." />
 		<meta name="revisit-after" content="2 days" />
 		<meta name="viewport" content="width=1280, user-scalable=yes" />
-		<link rel="apple-touch-icon" href="../img/apple-touch-icon-57x57.png" />
-		<link rel="apple-touch-icon" sizes="72x72" href="../img/apple-touch-icon-72x72.png" />
-		<link rel="apple-touch-icon" sizes="114x114" href="../img/apple-touch-icon-114x114.png" />
-		<link rel="apple-touch-startup-image" href="../img/apple-touch-startup.png" />
+		<link rel="apple-touch-icon" href="../assets/images/apple-touch-icon-57x57.png" />
+		<link rel="apple-touch-icon" sizes="72x72" href="../assets/images/apple-touch-icon-72x72.png" />
+		<link rel="apple-touch-icon" sizes="114x114" href="../assets/images/apple-touch-icon-114x114.png" />
+		<link rel="apple-touch-startup-image" href="../assets/images/apple-touch-startup.png" />
 		<style type="text/css">
-			@import url(../css/styles.css);
+			@import url(../assets/css/styles.css);
 			.hidden {display:none;}
 		</style>
-		<script type="text/javascript" src="../js/jquery.js"></script>
+		<script type="text/javascript" src="../assets/js/jquery.js"></script>
  		<script type="text/javascript">
 			/**
 			 * Perform an AJAX query to get the current theme style sheet.
@@ -125,7 +125,7 @@ require_once __DIR__ . '/../src/php/markdown_converter.php';
 
 			<h4>
 				<a href="../index.php" target="_top">
-					<img src="../img/lwt_icon_big.png" class="lwtlogoright" alt="Logo" />
+					<img src="../assets/images/lwt_icon_big.png" class="lwtlogoright" alt="Logo" />
 					Learning with Texts
 				</a>
 				<br /><br />
@@ -295,7 +295,7 @@ require_once __DIR__ . '/../src/php/markdown_converter.php';
 			<footer>
 				<p class="smallgray">
 					<a target="_blank" href="http://en.wikipedia.org/wiki/Public_domain_software">
-						<img class="lwtlogo" src="../img/public_domain.png" alt="Public Domain" />
+						<img class="lwtlogo" src="../assets/images/public_domain.png" alt="Public Domain" />
 					</a>
 					<a href="http://sourceforge.net/projects/learning-with-texts/" target="_blank">
 						"Learning with Texts" (LWT)

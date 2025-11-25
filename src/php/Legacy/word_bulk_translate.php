@@ -69,7 +69,7 @@ function bulk_save_terms($terms, $tid, $cleanUp): void
     );
     ?>
 <p id="displ_message">
-    <img src="/icn/waiting2.gif" /> Updating Texts
+    <img src="/assets/icons/waiting2.gif" /> Updating Texts
 </p>
 <script type="text/javascript">
     const context = window.parent.document;

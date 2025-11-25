@@ -3,8 +3,8 @@
  * \file
  * \brief JS and CSS minifier.
  *
- * Use this script to minify JS and CSS files from src/js and src/css to js/ and
- * css/.
+ * Use this script to minify JS and CSS files from src/js and src/css to assets/js/ and
+ * assets/css/.
  *
  * PHP version 8.1
  *
@@ -103,7 +103,7 @@ function minifyAllJS(): string
         }
     }
     // Save minified file to disk
-    return $minifier->minify("js/pgm.js");
+    return $minifier->minify("assets/js/pgm.js");
 }
 
 /**
@@ -118,7 +118,7 @@ function minifyAllCSS()
     foreach (LWT_CSS_FILES as $path) {
         $name = basename($path);
         if (file_exists($path)) {
-            minifyCSS($path, 'css/' . $name);
+            minifyCSS($path, 'assets/css/' . $name);
         }
     }
 }
@@ -133,14 +133,14 @@ function minifyAllCSS()
  */
 function regenerateSingleTheme($parent_folder, $theme_folder)
 {
-    if (!is_dir('themes/' . $theme_folder)) {
-        mkdir('themes/' . $theme_folder);
+    if (!is_dir('assets/themes/' . $theme_folder)) {
+        mkdir('assets/themes/' . $theme_folder);
     }
     $file_scan = scandir($parent_folder . $theme_folder);
     foreach ($file_scan as $file) {
         if (!is_dir($file) && $file != '.' && $file != '..') {
             $filepath = $parent_folder . $theme_folder . '/' . $file;
-            $outputpath = 'themes/' . $theme_folder . '/' . $file;
+            $outputpath = 'assets/themes/' . $theme_folder . '/' . $file;
             if (str_ends_with($filepath, '.css')) {
                 minifyCSS($filepath, $outputpath);
             } else {

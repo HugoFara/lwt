@@ -76,14 +76,14 @@ function do_header_row($textid, $langid): void
     </div>
     <div>
         <a href="/test?text=<?php echo $textid; ?>" target="_top">
-            <img src="/icn/question-balloon.png" title="Test" alt="Test" />
+            <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />
         </a>
         <a href="/text/print-plain?text=<?php echo $textid; ?>" target="_top">
-            <img src="/icn/printer.png" title="Print" alt="Print" />
+            <img src="/assets/icons/printer.png" title="Print" alt="Print" />
         </a>
         <?php echo get_annotation_link($textid); ?>
         <a target="_top" href="/texts?chg=<?php echo $textid; ?>">
-            <img src="/icn/document--pencil.png" title="Edit Text" alt="Edit Text" />
+            <img src="/assets/icons/document--pencil.png" title="Edit Text" alt="Edit Text" />
         </a>
     </div>
     <div>
@@ -91,7 +91,7 @@ function do_header_row($textid, $langid): void
             href="/word/new?text=<?php echo $textid; ?>&amp;lang=<?php echo $langid; ?>"
             target="ro" onclick="showRightFrames();"
         >
-            <img src="/icn/sticky-note--plus.png" title="New Term" alt="New Term" />
+            <img src="/assets/icons/sticky-note--plus.png" title="New Term" alt="New Term" />
         </a>
     </div>
     <div>
@@ -118,7 +118,7 @@ function do_title($title, $sourceURI): void
     if (isset($sourceURI) && !str_starts_with(trim($sourceURI), '#')) {
         ?>
         <a href="<?php echo $sourceURI ?>" target="_blank">
-            <img src="<?php echo get_file_path('icn/chain.png') ?>" title="Text Source" alt="Text Source" />
+            <img src="<?php echo get_file_path('assets/icons/chain.png') ?>" title="Text Source" alt="Text Source" />
         </a>
             <?php
     }

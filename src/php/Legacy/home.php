@@ -116,22 +116,22 @@ function do_current_text_info($textid)
     <i><?php echo tohtml($txttit); ?></i>
     <br />
     <a href="/text/read?start=<?php echo $textid; ?>">
-        <img src="/icn/book-open-bookmark.png" title="Read" alt="Read" />&nbsp;Read
+        <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" />&nbsp;Read
     </a>
     &nbsp; &nbsp;
     <a href="/test?text=<?php echo $textid; ?>">
-        <img src="/icn/question-balloon.png" title="Test" alt="Test" />&nbsp;Test
+        <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />&nbsp;Test
     </a>
     &nbsp; &nbsp;
     <a href="/text/print-plain?text=<?php echo $textid; ?>">
-        <img src="/icn/printer.png" title="Print" alt="Print" />&nbsp;Print
+        <img src="/assets/icons/printer.png" title="Print" alt="Print" />&nbsp;Print
     </a>
     <?php
     if ($annotated) {
         ?>
     &nbsp; &nbsp;
     <a href="/text/print?text=<?php echo $textid; ?>">
-        <img src="/icn/tick.png" title="Improved Annotated Text" alt="Improved Annotated Text" />&nbsp;Ann. Text
+        <img src="/assets/icons/tick.png" title="Improved Annotated Text" alt="Improved Annotated Text" />&nbsp;Ann. Text
     </a>
         <?php
     }
@@ -399,7 +399,7 @@ function index_do_main_page()
 <footer>
     <p class="small">
         <a target="_blank" href="http://unlicense.org/" style="vertical-align: top;">
-            <img alt="Public Domain" title="Public Domain" src="/img/public_domain.png" style="display: inline;" />
+            <img alt="Public Domain" title="Public Domain" src="/assets/images/public_domain.png" style="display: inline;" />
         </a>
         <a href="https://sourceforge.net/projects/learning-with-texts/" target="_blank">"Learning with Texts" (LWT)</a> is free
         and unencumbered software released into the

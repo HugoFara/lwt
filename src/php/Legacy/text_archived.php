@@ -351,23 +351,23 @@ if (isset($_REQUEST['chg'])) {
                 echo get_languages_selectoptions($record['AtLgID'], "[Choose...]");
                 ?>
             </select>
-            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
         </tr>
         <tr>
             <td class="td1 right">Title:</td>
-            <td class="td1"><input type="text" class="notempty checkoutsidebmp" data_info="Title" name="AtTitle" value="<?php echo tohtml($record['AtTitle']); ?>" maxlength="200" size="60" /> <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
+            <td class="td1"><input type="text" class="notempty checkoutsidebmp" data_info="Title" name="AtTitle" value="<?php echo tohtml($record['AtTitle']); ?>" maxlength="200" size="60" /> <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
         </tr>
         <tr>
             <td class="td1 right">Text:</td>
             <td class="td1">
-            <textarea name="AtText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"><?php echo tohtml($record['AtText']); ?></textarea> <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <textarea name="AtText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"><?php echo tohtml($record['AtText']); ?></textarea> <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
         </tr>
         <tr>
             <td class="td1 right">Ann.Text:</td>
             <td class="td1">
-                <?php echo ($record['annotlen'] ? '<img src="/icn/tick.png" title="With Annotation" alt="With Annotation" /> Exists - May be partially or fully lost if you change the text!' : '<img src="/icn/cross.png" title="No Annotation" alt="No Annotation" /> - None'); ?>
+                <?php echo ($record['annotlen'] ? '<img src="/assets/icons/tick.png" title="With Annotation" alt="With Annotation" /> Exists - May be partially or fully lost if you change the text!' : '<img src="/assets/icons/cross.png" title="No Annotation" alt="No Annotation" /> - None'); ?>
             </td>
         </tr>
         <tr>
@@ -445,25 +445,25 @@ if (isset($_REQUEST['chg'])) {
 <div class="flex-spaced">
     <div>
         <a href="/texts?new=1">
-            <img src="/icn/plus-button.png">
+            <img src="/assets/icons/plus-button.png">
             New Text
         </a>
     </div>
     <div>
         <a href="/text/import-long">
-            <img src="/icn/plus-button.png">
+            <img src="/assets/icons/plus-button.png">
             Long Text Import
         </a>
     </div>
     <div>
         <a href="/feeds?page=1&amp;check_autoupdate=1">
-            <img src="/icn/plus-button.png">
+            <img src="/assets/icons/plus-button.png">
             Newsfeed Import
         </a>
     </div>
     <div>
         <a href="/texts?query=&amp;page=1">
-            <img src="/icn/drawer--plus.png">
+            <img src="/assets/icons/drawer--plus.png">
             Active Texts
         </a>
     </div>
@@ -471,7 +471,7 @@ if (isset($_REQUEST['chg'])) {
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr>
-        <th class="th1" colspan="4">Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+        <th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
             <input type="button" value="Reset All" onclick="resetAll('/text/archived');" />
         </th>
     </tr>
@@ -556,7 +556,7 @@ if (isset($_REQUEST['chg'])) {
     <tr>
         <th class="th1" colspan="2">
             Multi Actions
-            <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
+            <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
         </th>
     </tr>
     <tr>
@@ -582,7 +582,7 @@ if (isset($_REQUEST['chg'])) {
             Title [Tags] / Audio:&nbsp;
             <img src="<?php print_file_path('icn/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />, Src.Link:&nbsp;
             <img src="<?php print_file_path('icn/chain.png'); ?>" title="Source Link available" alt="Source Link available" />, Ann.Text:&nbsp;
-            <img src="/icn/tick.png" title="Annotated Text available" alt="Annotated Text available" />
+            <img src="/assets/icons/tick.png" title="Annotated Text available" alt="Annotated Text available" />
         </th>
     </tr>
         <?php
@@ -623,13 +623,13 @@ if (isset($_REQUEST['chg'])) {
             ' /></a></td>
             <td nowrap="nowrap" class="td1 center">&nbsp;
             <a href="' . $_SERVER['PHP_SELF'] . '?unarch=' . $record['AtID'] . '">
-            <img src="/icn/inbox-upload.png" title="Unarchive" alt="Unarchive" />
+            <img src="/assets/icons/inbox-upload.png" title="Unarchive" alt="Unarchive" />
             </a>&nbsp;
             <a href="' . $_SERVER['PHP_SELF'] . '?chg=' . $record['AtID'] . '">
-            <img src="/icn/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp;
+            <img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp;
             <span class="click" onclick="if (confirmDelete()) location.href=\''
             . $_SERVER['PHP_SELF'] . '?del=' . $record['AtID'] . '\';">
-            <img src="/icn/minus-button.png" title="Delete" alt="Delete" />
+            <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" />
             </span>&nbsp;</td>';
             if ($currentlang == '') {
                 echo '<td class="td1 center">' . tohtml($record['LgName']) . '</td>';
@@ -637,18 +637,18 @@ if (isset($_REQUEST['chg'])) {
             echo '<td class="td1 center">' . tohtml($record['AtTitle']) .
             ' <span class="smallgray2">' . tohtml($record['taglist']) . '</span> &nbsp;';
             if (isset($record['AtAudioURI'])) {
-                echo '<img src="' . get_file_path('icn/speaker-volume.png') .
+                echo '<img src="' . get_file_path('assets/icons/speaker-volume.png') .
                 '" title="With Audio" alt="With Audio" />';
             } else {
                 echo '';
             }
             if (isset($record['AtSourceURI'])) {
                 echo ' <a href="' . $record['AtSourceURI'] . '" target="_blank">
-                <img src="'.get_file_path('icn/chain.png') .
+                <img src="'.get_file_path('assets/icons/chain.png') .
                 '" title="Link to Text Source" alt="Link to Text Source" /></a>';
             }
             if ($record['annotlen']) {
-                echo ' <img src="/icn/tick.png" title="Annotated Text available" ' .
+                echo ' <img src="/assets/icons/tick.png" title="Annotated Text available" ' .
                 'alt="Annotated Text available" />';
             }
             echo '</td>';

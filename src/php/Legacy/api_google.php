@@ -89,12 +89,12 @@ function translate_term($text, $file, $sl, $tl): void
     foreach ($file as $word){
         echo '<span class="click" onclick="addTranslation(' .
         prepare_textdata_js($word) . ');">' .
-        '<img src="/icn/tick-button.png" title="Copy" alt="Copy" /> &nbsp; ' .
+        '<img src="/assets/icons/tick-button.png" title="Copy" alt="Copy" /> &nbsp; ' .
         tohtml($word) . '</span><br />';
     }
     ?>
     <p>
-        (Click on <img src="/icn/tick-button.png" title="Choose" alt="Choose" />
+        (Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
         to copy word(s) into above term)<br />&nbsp;
     </p>
     <hr />

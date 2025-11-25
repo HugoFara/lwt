@@ -565,7 +565,7 @@ function edit_texts_form($text, $annotated)
     <h2>
         <?php echo ($new_text ? "New" : "Edit") ?> Text
         <a target="_blank" href="docs/info.html#howtotext">
-            <img src="/icn/question-frame.png" title="Help" alt="Help" />
+            <img src="/assets/icons/question-frame.png" title="Help" alt="Help" />
         </a>
     </h2>
     <script type="text/javascript" charset="utf-8">
@@ -586,31 +586,31 @@ function edit_texts_form($text, $annotated)
     <div class="flex-spaced">
         <div style="<?php echo ($new_text ? "display: none": ''); ?>">
             <a href="/texts?new=1">
-                <img src="/icn/plus-button.png">
+                <img src="/assets/icons/plus-button.png">
                 New Text
             </a>
         </div>
         <div>
             <a href="/text/import-long">
-                <img src="/icn/plus-button.png">
+                <img src="/assets/icons/plus-button.png">
                 Long Text Import
             </a>
         </div>
         <div>
             <a href="/feeds?page=1&amp;check_autoupdate=1">
-                <img src="/icn/plus-button.png">
+                <img src="/assets/icons/plus-button.png">
                 Newsfeed Import
             </a>
         </div>
         <div>
             <a href="/texts?query=&amp;page=1">
-                <img src="/icn/drawer--plus.png">
+                <img src="/assets/icons/drawer--plus.png">
                 Active Texts
             </a>
         </div>
         <div style="<?php echo ($new_text ? "": 'display: none'); ?>">
             <a href="/text/archived?query=&amp;page=1">
-                <img src="/icn/drawer--minus.png">
+                <img src="/assets/icons/drawer--minus.png">
                 Archived Texts
             </a>
         </div>
@@ -628,7 +628,7 @@ function edit_texts_form($text, $annotated)
                     echo get_languages_selectoptions($text->lgid, "[Choose...]");
                     ?>
                     </select>
-                    <img src="/icn/status-busy.png" title="Field must not be empty"
+                    <img src="/assets/icons/status-busy.png" title="Field must not be empty"
                     alt="Field must not be empty" />
                 </td>
             </tr>
@@ -638,7 +638,7 @@ function edit_texts_form($text, $annotated)
                     <input type="text" class="notempty checkoutsidebmp respinput"
                     data_info="Title" name="TxTitle" id="TxTitle"
                     value="<?php echo tohtml($text->title); ?>" maxlength="200" />
-                    <img src="/icn/status-busy.png" title="Field must not be empty"
+                    <img src="/assets/icons/status-busy.png" title="Field must not be empty"
                     alt="Field must not be empty" />
                 </td>
             </tr>
@@ -652,7 +652,7 @@ function edit_texts_form($text, $annotated)
                 class="notempty checkbytes checkoutsidebmp respinput"
                 data_maxlength="65000" data_info="Text" rows="20"
                 ><?php echo tohtml($text->text); ?></textarea>
-                <img src="/icn/status-busy.png" title="Field must not be empty"
+                <img src="/assets/icons/status-busy.png" title="Field must not be empty"
                 alt="Field must not be empty" />
                 </td>
             </tr>
@@ -661,12 +661,12 @@ function edit_texts_form($text, $annotated)
                 <td class="td1">
                     <?php
                     if ($annotated) {
-                        echo '<img src="/icn/tick.png" title="With Improved Annotation" alt="With Improved Annotation" /> '.
+                        echo '<img src="/assets/icons/tick.png" title="With Improved Annotation" alt="With Improved Annotation" /> '.
                         'Exists - May be partially or fully lost if you change the text!<br />' .
                         '<input type="button" value="Print/Edit..." onclick="location.href=\'/text/print?text=' .
                         $text->id . '\';" />';
                     } else {
-                        echo '<img src="/icn/cross.png" title="No Improved Annotation" alt="No Improved Annotation" /> ' .
+                        echo '<img src="/assets/icons/cross.png" title="No Improved Annotation" alt="No Improved Annotation" /> ' .
                         '- None | <input type="button" value="Create/Print..." onclick="location.href=\'print_impr_text.php?edit=1&amp;text=' .
                         $text->id . '\';" />';
                     }
@@ -795,7 +795,7 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
     <table class="tab2" cellspacing="0" cellpadding="5">
         <tr>
-            <th class="th1" colspan="4">Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+            <th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
             <input type="button" value="Reset All" onclick="resetAll('/texts');" /></th>
         </tr>
         <tr>
@@ -947,24 +947,24 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
         </td>
         <td class="td1 center">
             <a href="/text/read?start=<?php echo $txid; ?>">
-                <img src="/icn/book-open-bookmark.png" title="Read" alt="Read" />
+                <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" />
             </a>
             <a href="/test?text=<?php echo $txid; ?>">
-                <img src="/icn/question-balloon.png" title="Test" alt="Test" />
+                <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />
             </a>
         </td>
         <td class="td1 center">
             <a href="/text/print-plain?text=<?php echo $txid; ?>">
-                <img src="/icn/printer.png" title="Print" alt="Print" />
+                <img src="/assets/icons/printer.png" title="Print" alt="Print" />
             </a>
             <a href="<?php echo $_SERVER['PHP_SELF']; ?>?arch=<?php echo $txid; ?>">
-                <img src="/icn/inbox-download.png" title="Archive" alt="Archive" />
+                <img src="/assets/icons/inbox-download.png" title="Archive" alt="Archive" />
             </a>
             <a href="<?php echo $_SERVER['PHP_SELF']; ?>?chg=<?php echo $txid; ?>">
-                <img src="/icn/document--pencil.png" title="Edit" alt="Edit" />
+                <img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" />
             </a>
             <span class="click" onclick="if (confirmDelete()) location.href='<?php echo $_SERVER['PHP_SELF']; ?>?del=<?php echo $txid; ?>';">
-                <img src="/icn/minus-button.png" title="Delete" alt="Delete" />
+                <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" />
             </span>
         </td>
     <?php
@@ -976,16 +976,16 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
     echo '<td class="td1 center">' . tohtml($txrecord['TxTitle']) . '
         <span class="smallgray2">' . tohtml($txrecord['taglist']) . '</span> &nbsp;' ;
     if ($audio != '') {
-        echo '<img src="' . get_file_path('icn/speaker-volume.png') . '" title="With Audio" alt="With Audio" />';
+        echo '<img src="' . get_file_path('assets/icons/speaker-volume.png') . '" title="With Audio" alt="With Audio" />';
     }
     if (isset($txrecord['TxSourceURI']) && substr(trim($txrecord['TxSourceURI']), 0, 1)!='#') {
         echo ' <a href="' . $txrecord['TxSourceURI'] . '" target="_blank">
-            <img src="'.get_file_path('icn/chain.png').'" title="Link to Text Source" alt="Link to Text Source" />
+            <img src="'.get_file_path('assets/icons/chain.png').'" title="Link to Text Source" alt="Link to Text Source" />
         </a>';
     }
     if ($txrecord['annotlen']) {
         echo ' <a href="/text/print?text=' . $txid . '">
-            <img src="/icn/tick.png" title="Annotated Text available" alt="Annotated Text available" />
+            <img src="/assets/icons/tick.png" title="Annotated Text available" alt="Annotated Text available" />
         </a>';
     }
     echo '</td>';
@@ -1058,7 +1058,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
     <tr>
         <th class="th1" colspan="2">
             Multi Actions
-            <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
+            <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
         </th>
     </tr>
     <tr>
@@ -1089,7 +1089,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
             Src.Link:&nbsp;
             <img src="<?php print_file_path('icn/chain.png'); ?>" title="Source Link available" alt="Source Link available" />,
             Ann.Text:&nbsp;
-            <img src="/icn/tick.png" title="Annotated Text available" alt="Annotated Text available" />
+            <img src="/assets/icons/tick.png" title="Annotated Text available" alt="Annotated Text available" />
         </th>
         <th class="th1 sorttable_numeric clickable">
             Total<br />Words<br />
@@ -1224,25 +1224,25 @@ function edit_texts_display($message)
 <div class="flex-spaced">
     <div>
         <a href="<?php echo $_SERVER['PHP_SELF']; ?>?new=1">
-            <img src="/icn/plus-button.png">
+            <img src="/assets/icons/plus-button.png">
             New Text
         </a>
     </div>
     <div>
         <a href="/text/import-long">
-            <img src="/icn/plus-button.png">
+            <img src="/assets/icons/plus-button.png">
             Long Text Import
         </a>
     </div>
     <div>
         <a href="/feeds?page=1&amp;check_autoupdate=1">
-            <img src="/icn/plus-button.png">
+            <img src="/assets/icons/plus-button.png">
             Newsfeed Import
         </a>
     </div>
     <div>
         <a href="/text/archived?query=&amp;page=1">
-            <img src="/icn/drawer--minus.png">
+            <img src="/assets/icons/drawer--minus.png">
             Archived Texts
         </a>
     </div>
