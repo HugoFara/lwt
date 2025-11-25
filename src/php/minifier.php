@@ -3,7 +3,7 @@
  * \file
  * \brief JS and CSS minifier.
  *
- * Use this script to minify JS and CSS files from src/js and src/css to assets/js/ and
+ * Use this script to minify JS and CSS files from src/frontend/js and src/frontend/css to assets/js/ and
  * assets/css/.
  *
  * PHP version 8.1
@@ -29,11 +29,11 @@ use MatthiasMullie\Minify;
 define(
     'LWT_JS_FILES',
     array(
-        'src/js/audio_controller.js', 'src/js/third_party/countuptimer.js',
-        'src/js/jq_feedwizard.js', 'src/js/text_events.js',
-        'src/js/jq_pgm.js', 'src/js/overlib_interface.js', 'src/js/pgm.js',
-        'src/js/translation_api.js', 'src/js/unloadformcheck.js',
-        'src/js/third_party/sorttable.js', 'src/js/user_interactions.js',
+        'src/frontend/js/audio_controller.js', 'src/frontend/js/third_party/countuptimer.js',
+        'src/frontend/js/jq_feedwizard.js', 'src/frontend/js/text_events.js',
+        'src/frontend/js/jq_pgm.js', 'src/frontend/js/overlib_interface.js', 'src/frontend/js/pgm.js',
+        'src/frontend/js/translation_api.js', 'src/frontend/js/unloadformcheck.js',
+        'src/frontend/js/third_party/sorttable.js', 'src/frontend/js/user_interactions.js',
     )
 );
 
@@ -43,9 +43,9 @@ define(
 define(
     'LWT_CSS_FILES',
     array(
-        'src/css/css_charts.css', 'src/css/feed_wizard.css', 'src/css/gallery.css',
-        'src/css/jplayer.css', 'src/css/jquery-ui.css', 'src/css/jquery.tagit.css',
-        'src/css/styles.css',
+        'src/frontend/css/css_charts.css', 'src/frontend/css/feed_wizard.css', 'src/frontend/css/gallery.css',
+        'src/frontend/css/jplayer.css', 'src/frontend/css/jquery-ui.css', 'src/frontend/css/jquery.tagit.css',
+        'src/frontend/css/styles.css',
     )
 );
 
@@ -159,7 +159,7 @@ function regenerateSingleTheme($parent_folder, $theme_folder)
  */
 function regenerateThemes()
 {
-    $folder = 'src/themes/';
+    $folder = 'src/frontend/themes/';
     $folder_scan = scandir($folder);
     foreach ($folder_scan as $parent_file) {
         if (is_dir($folder . $parent_file)

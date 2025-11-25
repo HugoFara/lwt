@@ -39,10 +39,10 @@
         "minify": "php -r \"require 'src/php/minifier.php';minify_everything();\"",
         "no-minify": [
             "rm js/pgm.js",
-            "cat src/js/third_party/* >> js/pgm.js",
-            "cat src/js/*.js >> js/pgm.js",
-            "cp -r src/css .",
-            "cp -r src/themes ."
+            "cat src/frontend/js/third_party/* >> js/pgm.js",
+            "cat src/frontend/js/*.js >> js/pgm.js",
+            "cp -r src/frontend/css .",
+            "cp -r src/frontend/themes ."
         ],
         "clean-doc": [
             "rm docs/info.html",

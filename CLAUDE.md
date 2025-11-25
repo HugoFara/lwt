@@ -78,9 +78,9 @@ composer clean-doc               # Clear all generated documentation
 - `assets/` - All static assets (generated and third-party)
   - `assets/icons/` - UI icons (PNG files)
   - `assets/images/` - Documentation images, logos, app icons
-  - `assets/css/` - Minified CSS (generated from `src/css/`)
-  - `assets/js/` - Minified JavaScript (generated from `src/js/`)
-  - `assets/themes/` - Minified themes (generated from `src/themes/`)
+  - `assets/css/` - Minified CSS (generated from `src/frontend/css/`)
+  - `assets/js/` - Minified JavaScript (generated from `src/frontend/js/`)
+  - `assets/themes/` - Minified themes (generated from `src/frontend/themes/`)
   - `assets/sounds/` - Audio feedback files
   - `assets/vendor/iui/` - iUI mobile framework (third-party)
 
@@ -95,9 +95,10 @@ composer clean-doc               # Clear all generated documentation
       - `kernel_utility.php` - Core utilities that don't require full session
       - `ajax_*.php` - AJAX endpoints (15+ files)
       - `classes/` - PHP classes (GoogleTranslate, Language, Term, Text)
-  - `src/js/` - Unminified JavaScript source
-  - `src/css/` - Unminified CSS source
-  - `src/themes/` - Theme source files
+  - `src/frontend/` - Frontend assets (compiled to `assets/`)
+    - `src/frontend/js/` - Unminified JavaScript source
+    - `src/frontend/css/` - Unminified CSS source
+    - `src/frontend/themes/` - Theme source files
 
 - `resources/` - Non-runtime resources
   - `resources/anki/` - Anki flashcard export templates
@@ -138,7 +139,7 @@ LWT uses a MySQL/MariaDB database with MyISAM engine. Key tables:
 - Root PHP files handle routing, HTML generation, and form processing
 - `inc/` provides business logic, database operations, and utilities
 - AJAX endpoints in `inc/ajax_*.php` provide dynamic functionality
-- Client-side JS in `src/js/` handles interactivity
+- Client-side JS in `src/frontend/js/` handles interactivity
 
 **Text Processing Flow:**
 
@@ -151,10 +152,10 @@ LWT uses a MySQL/MariaDB database with MyISAM engine. Key tables:
 
 **Theme System:**
 
-- Themes in `src/themes/[theme-name]/` with CSS files
+- Themes in `src/frontend/themes/[theme-name]/` with CSS files
 - Relative paths auto-adjusted during minification
 - Can reference shared images from `assets/css/images/` using `../../../assets/css/theimage`
-- Missing theme files fall back to `src/css/` defaults
+- Missing theme files fall back to `src/frontend/css/` defaults
 - Generated themes output to `assets/themes/`
 
 ### REST API
@@ -181,10 +182,10 @@ PHP code is spread across root files (user-facing pages) and `inc/` (shared logi
 
 ### Modifying JavaScript/CSS
 
-1. Edit source files in `src/js/` or `src/css/` or `src/themes/`
+1. Edit source files in `src/frontend/js/` or `src/frontend/css/` or `src/frontend/themes/`
 2. Test with `composer no-minify` (copies unminified to working directories)
 3. Before committing, run `composer minify` to generate production assets
-4. JS modules in `src/js/`:
+4. JS modules in `src/frontend/js/`:
    - `pgm.js` - Main program logic
    - `jq_pgm.js` - jQuery-dependent functionality
    - `text_events.js` - Text reading interface events
@@ -194,8 +195,8 @@ PHP code is spread across root files (user-facing pages) and `inc/` (shared logi
 
 ### Creating/Editing Themes
 
-1. Create folder `src/themes/your-theme/`
-2. Add CSS files (don't need all files from `src/css/`, missing files fall back to defaults)
+1. Create folder `src/frontend/themes/your-theme/`
+2. Add CSS files (don't need all files from `src/frontend/css/`, missing files fall back to defaults)
 3. Reference images: `../../../assets/css/images/file.png` (for shared images) or `./file.png` (theme-specific)
 4. Run `composer minify` to build (outputs to `assets/themes/`), or `composer no-minify` for debugging
 
@@ -217,7 +218,7 @@ Before committing:
 
 1. Run `composer test` and `./vendor/bin/psalm` to check for issues
 2. Ensure code follows PSR standards (use phpcs/phpcbf)
-3. If you modified `src/js/`, `src/css/`, or `src/themes/`, run `composer minify`
+3. If you modified `src/frontend/js/`, `src/frontend/css/`, or `src/frontend/themes/`, run `composer minify`
 4. Update documentation if adding new features
 
 ### Version Release Process
