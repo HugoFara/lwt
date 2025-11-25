@@ -513,14 +513,51 @@ class MaintenanceTest extends TestCase
 
     public function testInitWordCountSplitEachChar(): void
     {
-        // NOTE: This test exposes a pre-existing bug in Maintenance::initWordCount
-        // where preg_match_all with Chinese character regex returns 0 matches,
-        // causing an invalid SQL CASE statement to be generated.
-        // The bug should be fixed in the Maintenance class, but for now we skip
-        // this test to avoid blocking other tests.
-        $this->markTestSkipped(
-            'Skipped: initWordCount has a bug with split-each-char languages - ' .
-            'generates invalid SQL when regex returns 0 matches'
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+
+        // Create a Chinese-like language with LgSplitEachChar = 1
+        $sql = "INSERT INTO {$tbpref}languages (
+            LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
+            LgCharacterSubstitutions, LgRegexpSplitSentences,
+            LgExceptionsSplitSentences, LgRegexpWordCharacters,
+            LgRemoveSpaces, LgSplitEachChar, LgRightToLeft
+        ) VALUES (
+            'Test Chinese',
+            'https://www.mdbg.net/chinese/dictionary?wdqb=###',
+            'https://translate.google.com/?text=###',
+            100, '', '。！？', '', '\\x{4E00}-\\x{9FFF}', 1, 1, 0
+        )";
+        do_mysqli_query($sql);
+        $chLangId = mysqli_insert_id(LWT_Globals::getDbConnection());
+
+        // Insert a Chinese word with WoWordCount = 0
+        $sql = "INSERT INTO {$tbpref}words (
+            WoLgID, WoText, WoTextLC, WoStatus, WoWordCount
+        ) VALUES (
+            $chLangId,
+            '你好',
+            '你好',
+            1,
+            0
+        )";
+        do_mysqli_query($sql);
+        $wordId = mysqli_insert_id(LWT_Globals::getDbConnection());
+
+        // Run initWordCount - this should NOT cause SQL syntax error anymore
+        Maintenance::initWordCount();
+
+        // Check that word count was updated (should be at least 1)
+        $count = get_first_value(
+            "SELECT WoWordCount as value FROM {$tbpref}words WHERE WoID = $wordId"
         );
+        $this->assertGreaterThanOrEqual(1, (int)$count, 'Split-each-char word count should be at least 1');
+
+        // Clean up
+        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $chLangId");
     }
 }

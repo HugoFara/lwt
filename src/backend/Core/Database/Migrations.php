@@ -38,11 +38,13 @@ class Migrations
      */
     public static function prefixQuery(string $sql_line, string $prefix): string
     {
-        if (substr($sql_line, 0, 12) == "INSERT INTO ") {
+        // Handle INSERT INTO (case-insensitive)
+        if (strcasecmp(substr($sql_line, 0, 12), "INSERT INTO ") === 0) {
             return substr($sql_line, 0, 12) . $prefix . substr($sql_line, 12);
         }
+        // Handle DROP/CREATE/ALTER TABLE with optional IF [NOT] EXISTS (case-insensitive)
         $res = preg_match(
-            '/^(?:DROP|CREATE|ALTER) TABLE (?:IF NOT EXISTS )?`?/',
+            '/^(?:DROP|CREATE|ALTER) TABLE (?:IF (?:NOT )?EXISTS )?`?/i',
             $sql_line,
             $matches
         );

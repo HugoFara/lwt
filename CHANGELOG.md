@@ -16,6 +16,12 @@ ones are marked like "v1.0.0-fork".
 * **PHP 8.3 Compatibility**: Fixed deprecation warnings in `langFromDict()` and
   `targetLangFromDict()` - both functions now check for null query strings before
   calling `parse_str()`.
+* **Database Maintenance**: Fixed `initWordCount()` generating invalid SQL for
+  split-each-char languages (e.g., Chinese). When `preg_match_all` returned 0
+  matches, the CASE statement was malformed. Word count now defaults to 1 minimum.
+* **SQL Prefix Queries**: Fixed `prefixQuery()` in database migrations:
+  * Now handles `DROP TABLE IF EXISTS` syntax (previously only `IF NOT EXISTS`).
+  * Now case-insensitive for SQL keywords (CREATE, DROP, ALTER, INSERT).
 
 ### Security
 

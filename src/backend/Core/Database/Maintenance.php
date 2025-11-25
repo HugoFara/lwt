@@ -197,12 +197,16 @@ class Maintenance
             } else {
                 $textlc = $rec['WoTextLC'];
             }
-            $sqlarr[] = ' WHEN ' . $rec['WoID'] . '
-            THEN ' . preg_match_all(
+            $wordCount = preg_match_all(
                 '/([' . $rec['LgRegexpWordCharacters'] . ']+)/u',
                 $textlc,
                 $ma
             );
+            // Ensure word count is at least 1 to avoid invalid SQL CASE statement
+            if ($wordCount < 1) {
+                $wordCount = 1;
+            }
+            $sqlarr[] = ' WHEN ' . $rec['WoID'] . ' THEN ' . $wordCount;
             if (++$i % 1000 == 0) {
                 $max = $rec['WoID'];
                 $sqltext = "UPDATE  {$tbpref}words

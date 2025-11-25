@@ -166,13 +166,11 @@ class MigrationsTest extends TestCase
                 "pre_",
                 "DROP TABLE pre_temp_data;"
             ],
-            // Note: DROP TABLE IF EXISTS is not currently supported by prefixQuery
-            // The regex only handles "IF NOT EXISTS" (for CREATE TABLE)
-            // 'DROP TABLE IF EXISTS' => [
-            //     "DROP TABLE IF EXISTS temp_data;",
-            //     "lwt_",
-            //     "DROP TABLE IF EXISTS lwt_temp_data;"
-            // ],
+            'DROP TABLE IF EXISTS' => [
+                "DROP TABLE IF EXISTS temp_data;",
+                "lwt_",
+                "DROP TABLE IF EXISTS lwt_temp_data;"
+            ],
             'DROP TABLE with backticks' => [
                 "DROP TABLE `old_table`;",
                 "test_",
@@ -329,14 +327,24 @@ class MigrationsTest extends TestCase
         $this->assertEquals("CREATE TABLE app123_users (id INT);", $result);
     }
 
-    public function testPrefixQueryCaseSensitive(): void
+    public function testPrefixQueryCaseInsensitive(): void
     {
-        // Note: prefixQuery is case-sensitive - it only handles uppercase SQL keywords
-        // This is a known limitation of the current implementation
+        // prefixQuery should handle SQL keywords case-insensitively
         $sql = "create table users (id INT);";
         $result = Migrations::prefixQuery($sql, "pre_");
-        // Lowercase SQL keywords are NOT modified (returns original)
-        $this->assertEquals($sql, $result, 'Lowercase SQL keywords should not be modified');
+        $this->assertStringContainsString("pre_users", $result, 'Lowercase CREATE TABLE should be prefixed');
+
+        $sql = "Create Table users (id INT);";
+        $result = Migrations::prefixQuery($sql, "pre_");
+        $this->assertStringContainsString("pre_users", $result, 'Mixed case CREATE TABLE should be prefixed');
+
+        $sql = "insert into languages (LgName) VALUES ('Test');";
+        $result = Migrations::prefixQuery($sql, "pre_");
+        $this->assertStringContainsString("pre_languages", $result, 'Lowercase INSERT INTO should be prefixed');
+
+        $sql = "drop table IF EXISTS temp_data;";
+        $result = Migrations::prefixQuery($sql, "pre_");
+        $this->assertStringContainsString("pre_temp_data", $result, 'Lowercase DROP TABLE should be prefixed');
     }
 
     public function testPrefixQueryInsertMultipleValues(): void
