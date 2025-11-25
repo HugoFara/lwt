@@ -8,6 +8,9 @@
  *
  * @author https://sourceforge.net/projects/lwt/ LWT Project
  * @since  1.5.5
+ *
+ * @deprecated 3.0.0 Use .env file instead. Copy .env.example to .env and configure
+ *                   your WordPress database credentials.
  */
 
 // database server

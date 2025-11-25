@@ -14,9 +14,62 @@
  */
 
 require_once __DIR__ . "/kernel_utility.php";
-require_once __DIR__ . "/../../../connect.inc.php";
+require_once __DIR__ . "/EnvLoader.php";
 
 use Lwt\Core\LWT_Globals;
+use Lwt\Core\EnvLoader;
+
+/**
+ * Load database configuration from .env file or connect.inc.php.
+ *
+ * Priority:
+ * 1. .env file in the project root (if exists)
+ * 2. connect.inc.php (legacy, for backward compatibility)
+ *
+ * @return void Sets $server, $userid, $passwd, $dbname, $socket, $tbpref globals
+ *
+ * @since 3.0.0
+ */
+function loadDatabaseConfiguration(): void
+{
+    // Define variables in global scope
+    global $server, $userid, $passwd, $dbname, $socket, $tbpref;
+
+    $envPath = __DIR__ . "/../../../.env";
+
+    // Try to load .env file first (modern approach)
+    if (EnvLoader::load($envPath)) {
+        $config = EnvLoader::getDatabaseConfig();
+        $server = $config['server'];
+        $userid = $config['userid'];
+        $passwd = $config['passwd'];
+        $dbname = $config['dbname'];
+        $socket = $config['socket'];
+        // Only set $tbpref if explicitly configured in .env
+        if ($config['tbpref'] !== null) {
+            $tbpref = $config['tbpref'];
+        }
+        return;
+    }
+
+    // Fallback to connect.inc.php (legacy approach)
+    $connectPath = __DIR__ . "/../../../connect.inc.php";
+    if (file_exists($connectPath)) {
+        require_once $connectPath;
+        return;
+    }
+
+    // No configuration found - this will cause an error later
+    // but we let the connection function handle it with a proper message
+    $server = 'localhost';
+    $userid = 'root';
+    $passwd = '';
+    $dbname = 'learning-with-texts';
+    $socket = '';
+}
+
+// Load configuration
+loadDatabaseConfiguration();
 
 /**
  * Do a SQL query to the database.

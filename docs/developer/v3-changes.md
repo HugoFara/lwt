@@ -415,6 +415,186 @@ To update your code:
    if (LWT_Globals::isDebug()) { ... }
    ```
 
+### 9. Environment-Based Configuration (.env)
+
+Version 3 introduces `.env` file support for database configuration, replacing the legacy `connect.inc.php` approach.
+
+#### The Problem with connect.inc.php
+
+Previously, LWT used PHP files for configuration:
+
+```php
+// connect.inc.php (or connect_xampp.inc.php, connect_mamp.inc.php, etc.)
+$server = "localhost";
+$userid = "root";
+$passwd = "";
+$dbname = "learning-with-texts";
+```
+
+This approach had issues:
+
+- PHP files can execute code, creating security risks
+- Different template files for each environment (XAMPP, MAMP, etc.)
+- Not compatible with modern deployment workflows
+- Harder to use with Docker and container orchestration
+
+#### The New .env Approach
+
+LWT now supports `.env` files, the modern standard for application configuration:
+
+```bash
+# .env file
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=learning-with-texts
+```
+
+#### Configuration File Priority
+
+LWT loads configuration in this order:
+
+1. `.env` file in the project root (if exists) - **recommended**
+2. `connect.inc.php` (legacy, for backward compatibility)
+
+#### Available Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB_HOST` | Database server hostname or IP | `localhost` |
+| `DB_USER` | Database username | `root` |
+| `DB_PASSWORD` | Database password | (empty) |
+| `DB_NAME` | Database name | `learning-with-texts` |
+| `DB_SOCKET` | Database socket (optional) | (empty) |
+| `DB_TABLE_PREFIX` | Table prefix for multi-instance setups | (empty) |
+
+#### Setting Up .env
+
+1. Copy the template file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` with your database credentials:
+
+   ```bash
+   DB_HOST=localhost
+   DB_USER=your_username
+   DB_PASSWORD=your_password
+   DB_NAME=your_database
+   ```
+
+3. That's it! LWT will automatically use these values.
+
+#### Environment-Specific Examples
+
+**Standard localhost:**
+
+```bash
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=learning-with-texts
+```
+
+**MAMP (macOS):**
+
+```bash
+DB_HOST=localhost:8889
+DB_USER=root
+DB_PASSWORD=root
+DB_NAME=learning-with-texts
+```
+
+**Docker:**
+
+```bash
+DB_HOST=db
+DB_USER=lwt
+DB_PASSWORD=secret
+DB_NAME=lwt
+```
+
+**With table prefix (multiple instances):**
+
+```bash
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=shared_database
+DB_TABLE_PREFIX=lwt_
+```
+
+#### EnvLoader Class
+
+A new `Lwt\Core\EnvLoader` class (`src/backend/Core/EnvLoader.php`) provides the parsing functionality:
+
+```php
+use Lwt\Core\EnvLoader;
+
+// Load .env file
+EnvLoader::load('/path/to/.env');
+
+// Get values with defaults
+$host = EnvLoader::get('DB_HOST', 'localhost');
+
+// Get as boolean
+$debug = EnvLoader::getBool('DEBUG', false);
+
+// Get as integer
+$port = EnvLoader::getInt('DB_PORT', 3306);
+
+// Get complete database config
+$config = EnvLoader::getDatabaseConfig();
+```
+
+#### Deprecated Files
+
+The following files are deprecated and will be removed in a future version:
+
+| Deprecated File | Replacement |
+|-----------------|-------------|
+| `connect.inc.php` | `.env` |
+| `connect_xampp.inc.php` | `.env` with XAMPP settings |
+| `connect_mamp.inc.php` | `.env` with MAMP settings |
+| `connect_easyphp.inc.php` | `.env` with EasyPHP settings |
+| `connect_wordpress.inc.php` | `.env` with WordPress settings |
+
+#### Migrating to .env
+
+To migrate from `connect.inc.php` to `.env`:
+
+1. Create `.env` from the template:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Copy your values from `connect.inc.php`:
+
+   ```php
+   // Old connect.inc.php
+   $server = "localhost";
+   $userid = "myuser";
+   $passwd = "mypass";
+   $dbname = "mydb";
+   ```
+
+   Becomes:
+
+   ```bash
+   # New .env
+   DB_HOST=localhost
+   DB_USER=myuser
+   DB_PASSWORD=mypass
+   DB_NAME=mydb
+   ```
+
+3. Test that LWT works with the new configuration
+
+4. Optionally, remove `connect.inc.php` (LWT will use `.env` exclusively)
+
 ## Future Improvements
 
 This refactoring enables:
@@ -425,6 +605,7 @@ This refactoring enables:
 4. **Modular architecture:** Clear separation of concerns
 5. **Namespace support:** PHP autoloading with PSR-4 style namespaces
 6. **Explicit dependencies:** The `LWT_Globals` class makes global state visible and trackable
+7. **Modern configuration:** `.env` files work with Docker, CI/CD, and modern deployment workflows
 
 ## Commit History
 
