@@ -1893,7 +1893,7 @@ function update_database($dbname)
  * @param string $sql_line SQL string to prefix.
  * @param string $prefix   Prefix to add
  */
-function prefixSQLQuery($sql_line, $prefix)
+function prefixSQLQuery($sql_line, $prefix): string
 {
     if (substr($sql_line, 0, 12) == "INSERT INTO ") {
         return substr($sql_line, 0, 12) . $prefix . substr($sql_line, 12);

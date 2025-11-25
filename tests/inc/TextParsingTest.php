@@ -103,8 +103,14 @@ class TextParsingTest extends TestCase
     /**
      * Helper method to call prepare_text_parsing with output buffering
      * This prevents HTML output from polluting the test output
+     *
+     * @psalm-param -2 $id
+     *
+     * @return null|string[]
+     *
+     * @psalm-return non-empty-list<string>|null
      */
-    private function callPrepareTextParsing($text, $id, $lid)
+    private function callPrepareTextParsing(string $text, int $id, int|string $lid): array|null
     {
         ob_start();
         $result = prepare_text_parsing($text, $id, $lid);

@@ -68,7 +68,7 @@ class SimtermsTest extends TestCase
 
     // ========== LETTER PAIRS FUNCTION ==========
 
-    public function testLetterPairs()
+    public function testLetterPairs(): void
     {
         // Basic word
         $pairs = letterPairs('hello');
@@ -99,7 +99,7 @@ class SimtermsTest extends TestCase
 
     // ========== WORD LETTER PAIRS FUNCTION ==========
 
-    public function testWordLetterPairs()
+    public function testWordLetterPairs(): void
     {
         // Single word
         $pairs = wordLetterPairs('hello');
@@ -130,7 +130,7 @@ class SimtermsTest extends TestCase
 
     // ========== SIMILARITY RANKING FUNCTION ==========
 
-    public function testGetSimilarityRanking()
+    public function testGetSimilarityRanking(): void
     {
         // Identical strings should have ranking of 1.0
         $ranking = getSimilarityRanking('hello', 'hello');
@@ -177,7 +177,7 @@ class SimtermsTest extends TestCase
 
     // ========== GET SIMILAR TERMS FUNCTION ==========
 
-    public function testGetSimilarTerms()
+    public function testGetSimilarTerms(): void
     {
         // Find similar terms to 'hello'
         $similar = get_similar_terms(1, 'hello', 5, 0.3);
@@ -224,7 +224,7 @@ class SimtermsTest extends TestCase
 
     // ========== FORMAT TERM FUNCTION ==========
 
-    public function testFormatTerm()
+    public function testFormatTerm(): void
     {
         // Format existing term
         $output = format_term(1, 'hello');
@@ -284,7 +284,7 @@ class SimtermsTest extends TestCase
 
     // ========== PRINT SIMILAR TERMS FUNCTION ==========
 
-    public function testPrintSimilarTerms()
+    public function testPrintSimilarTerms(): void
     {
         // Set the similar terms count setting
         saveSetting('set-similar-terms-count', '5');
@@ -327,7 +327,7 @@ class SimtermsTest extends TestCase
 
     // ========== PRINT SIMILAR TERMS TABROW FUNCTION ==========
 
-    public function testPrintSimilarTermsTabrow()
+    public function testPrintSimilarTermsTabrow(): void
     {
         // Enable feature
         saveSetting('set-similar-terms-count', '5');
@@ -358,7 +358,7 @@ class SimtermsTest extends TestCase
 
     // ========== EDGE CASES AND UTF-8 SUPPORT ==========
 
-    public function testUTF8Support()
+    public function testUTF8Support(): void
     {
         // Insert UTF-8 words
         do_mysqli_query(
@@ -396,7 +396,7 @@ class SimtermsTest extends TestCase
         do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "words WHERE WoID IN (200, 201)");
     }
 
-    public function testSimilarityRankingEdgeCases()
+    public function testSimilarityRankingEdgeCases(): void
     {
         // Very long strings
         $long_str = str_repeat('test ', 100);

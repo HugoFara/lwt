@@ -13,7 +13,12 @@ require_once __DIR__ . '/../../src/backend/Core/database_connect.php';
 use PHPUnit\Framework\TestCase;
 
 
-function user_logging()
+/**
+ * @return string[]
+ *
+ * @psalm-return list{string, string, string, string}
+ */
+function user_logging(): array
 {
     $config = EnvLoader::getDatabaseConfig();
     $db_schema = __DIR__ . "../../db/schema/baseline.sql";
@@ -40,7 +45,7 @@ function user_logging()
 class DatabaseConnectTest extends TestCase
 {
 
-    public function testDatabaseInstallation()
+    public function testDatabaseInstallation(): void
     {
         global $DBCONNECTION;
         list($userid, $passwd, $server, $dbname) = user_logging();
@@ -55,7 +60,7 @@ class DatabaseConnectTest extends TestCase
         );
     }
 
-    public function testPrefixSQLQuery()
+    public function testPrefixSQLQuery(): void
     {
         $value = prefixSQLQuery("CREATE TABLE `languages` test;", "prefix");
         $this->assertEquals("CREATE TABLE `prefixlanguages` test;", $value);

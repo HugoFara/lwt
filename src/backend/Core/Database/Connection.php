@@ -157,9 +157,11 @@ class Connection
      *
      * @param string $sql The SQL query to execute
      *
-     * @return int Number of affected rows
+     * @return int|numeric-string Number of affected rows
+     *
+     * @psalm-return int<-1, max>|numeric-string
      */
-    public static function execute(string $sql): int
+    public static function execute(string $sql): int|string
     {
         self::query($sql);
         return mysqli_affected_rows(self::getInstance());

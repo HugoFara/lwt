@@ -32,7 +32,7 @@ class SessionUtilityTest extends TestCase
         }
     }
 
-    public function testInstallDemoDB()
+    public function testInstallDemoDB(): void
     {
         // Truncate the database if not empty
         $result = do_mysqli_query("SHOW TABLES LIKE 'texts'");
@@ -53,7 +53,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== STRING MANIPULATION FUNCTIONS ==========
 
-    public function testRemoveSoftHyphens()
+    public function testRemoveSoftHyphens(): void
     {
         $this->assertEquals('hello', remove_soft_hyphens('hel­lo'));
         $this->assertEquals('world', remove_soft_hyphens('world'));
@@ -62,7 +62,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals('testing', remove_soft_hyphens('test­­ing'));
     }
 
-    public function testReplaceSupplementaryUnicodePlanes()
+    public function testReplaceSupplementaryUnicodePlanes(): void
     {
         // Characters in supplementary planes (U+10000-U+10FFFF) should be replaced with U+2588 (█)
         $result = replace_supp_unicode_planes_char('hello 𝕳𝖊𝖑𝖑𝖔 world');
@@ -76,7 +76,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals('', replace_supp_unicode_planes_char(''));
     }
 
-    public function testMakeCounterWithTotal()
+    public function testMakeCounterWithTotal(): void
     {
         // Single item - should return empty
         $this->assertEquals('', makeCounterWithTotal(1, 1));
@@ -91,7 +91,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals('0005/1000', makeCounterWithTotal(1000, 5));
     }
 
-    public function testEncodeURI()
+    public function testEncodeURI(): void
     {
         $this->assertEquals('hello%20world', encodeURI('hello world'));
         $this->assertEquals('test-file_name.txt', encodeURI('test-file_name.txt'));
@@ -100,7 +100,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals('#anchor', encodeURI('#anchor'));
     }
 
-    public function testGetFilePath()
+    public function testGetFilePath(): void
     {
         // Test with a file that doesn't exist - should return absolute path
         $result = get_file_path('nonexistent_file.png');
@@ -112,7 +112,7 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('file.png', $result);
     }
 
-    public function testGetSepas()
+    public function testGetSepas(): void
     {
         $sepas = get_sepas();
         $this->assertIsString($sepas);
@@ -123,7 +123,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals($sepas, $sepas2);
     }
 
-    public function testGetFirstSepa()
+    public function testGetFirstSepa(): void
     {
         $sepa = get_first_sepa();
         $this->assertIsString($sepa);
@@ -134,7 +134,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals($sepa, $sepa2);
     }
 
-    public function testGetChecked()
+    public function testGetChecked(): void
     {
         $this->assertEquals(' checked="checked" ', get_checked(true));
         $this->assertEquals(' checked="checked" ', get_checked(1));
@@ -145,7 +145,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals('', get_checked(null));
     }
 
-    public function testGetSelected()
+    public function testGetSelected(): void
     {
         $this->assertEquals(' selected="selected" ', get_selected('apple', 'apple'));
         $this->assertEquals(' selected="selected" ', get_selected(5, 5));
@@ -154,7 +154,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals(' selected="selected" ', get_selected('0', 0));
     }
 
-    public function testStrToHex()
+    public function testStrToHex(): void
     {
         // strToHex returns UPPERCASE hex
         $this->assertEquals('68656C6C6F', strToHex('hello'));
@@ -167,7 +167,7 @@ class SessionUtilityTest extends TestCase
         $this->assertNotEmpty($hex);
     }
 
-    public function testStrToClassName()
+    public function testStrToClassName(): void
     {
         $this->assertEquals('hello', strToClassName('hello'));
         $this->assertEquals('test123', strToClassName('test123'));
@@ -181,7 +181,7 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('¤', $result);
     }
 
-    public function testReplTabNl()
+    public function testReplTabNl(): void
     {
         $this->assertEquals('hello world', repl_tab_nl("hello\tworld"));
         $this->assertEquals('line one line two', repl_tab_nl("line one\nline two"));
@@ -191,7 +191,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== STATUS AND VALIDATION FUNCTIONS ==========
 
-    public function testCheckStatusRange()
+    public function testCheckStatusRange(): void
     {
         // Status range works with special codes (not simple "1-5")
         // Range 12-15 means status 1 to (range % 10)
@@ -210,7 +210,7 @@ class SessionUtilityTest extends TestCase
         $this->assertFalse(checkStatusRange(1, 0));
     }
 
-    public function testGetStatusName()
+    public function testGetStatusName(): void
     {
         $this->assertEquals('Learning', get_status_name(1));
         $this->assertEquals('Learned', get_status_name(5));
@@ -225,7 +225,7 @@ class SessionUtilityTest extends TestCase
         }
     }
 
-    public function testGetStatusAbbr()
+    public function testGetStatusAbbr(): void
     {
         // Abbreviations are just numbers for 1-5, special for 98/99
         $this->assertEquals('1', get_status_abbr(1));
@@ -235,7 +235,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals('WKn', get_status_abbr(99));
     }
 
-    public function testGetColoredStatusMsg()
+    public function testGetColoredStatusMsg(): void
     {
         // Should return HTML with status color
         $msg1 = get_colored_status_msg(1);
@@ -251,7 +251,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== SELECT OPTIONS GENERATION ==========
 
-    public function testGetSecondsSelectOptions()
+    public function testGetSecondsSelectOptions(): void
     {
         $options = get_seconds_selectoptions(3);
         $this->assertStringContainsString('<option', $options);
@@ -259,7 +259,7 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('3', $options);
     }
 
-    public function testGetPlaybackRateSelectOptions()
+    public function testGetPlaybackRateSelectOptions(): void
     {
         // Playback rates are 0.5-1.5 (values 5-15)
         $options = get_playbackrate_selectoptions(10); // 1.0x
@@ -267,21 +267,21 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('1.0', $options);
     }
 
-    public function testGetMobileDisplayModeSelectOptions()
+    public function testGetMobileDisplayModeSelectOptions(): void
     {
         $options = get_mobile_display_mode_selectoptions(0);
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('selected', $options);
     }
 
-    public function testGetSentenceCountSelectOptions()
+    public function testGetSentenceCountSelectOptions(): void
     {
         $options = get_sentence_count_selectoptions(1);
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('value="1"', $options);
     }
 
-    public function testGetRegexSelectOptions()
+    public function testGetRegexSelectOptions(): void
     {
         $options = get_regex_selectoptions(0);
         $this->assertStringContainsString('<option', $options);
@@ -289,14 +289,14 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('RegEx', $options);
     }
 
-    public function testGetTooltipSelectOptions()
+    public function testGetTooltipSelectOptions(): void
     {
         $options = get_tooltip_selectoptions(1);
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('selected', $options);
     }
 
-    public function testGetWordStatusRadioOptions()
+    public function testGetWordStatusRadioOptions(): void
     {
         $options = get_wordstatus_radiooptions(1);
         $this->assertStringContainsString('type="radio"', $options);
@@ -304,7 +304,7 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('status1', $options);
     }
 
-    public function testGetWordStatusSelectOptions()
+    public function testGetWordStatusSelectOptions(): void
     {
         // Test basic select
         $options = get_wordstatus_selectoptions(1, false, false);
@@ -320,7 +320,7 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('<option', $options_no_9899);
     }
 
-    public function testGetAndOrSelectOptions()
+    public function testGetAndOrSelectOptions(): void
     {
         // Takes numeric value: 0=OR, 1=AND
         $options = get_andor_selectoptions(1);
@@ -331,6 +331,9 @@ class SessionUtilityTest extends TestCase
 
     // ========== TEXT AND WORD COUNT FUNCTIONS ==========
 
+    /**
+     * @return void
+     */
     public function testReturnTextWordCount()
     {
         // Get first text from demo DB
@@ -350,6 +353,9 @@ class SessionUtilityTest extends TestCase
         }
     }
 
+    /**
+     * @return void
+     */
     public function testTodoWordsCount()
     {
         $text_res = do_mysqli_query("SELECT TxID FROM texts LIMIT 1");
@@ -366,7 +372,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== SENTENCE FUNCTIONS ==========
 
-    public function testSentencesContainingWordLcQuery()
+    public function testSentencesContainingWordLcQuery(): void
     {
         $query = sentences_containing_word_lc_query('test', 1);
         $this->assertIsString($query);
@@ -374,14 +380,14 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('SeID', $query);
     }
 
-    public function testMaskTermInSentenceV2()
+    public function testMaskTermInSentenceV2(): void
     {
         $result = mask_term_in_sentence_v2('This is a test sentence');
         $this->assertIsString($result);
         $this->assertNotEmpty($result);
     }
 
-    public function testMaskTermInSentence()
+    public function testMaskTermInSentence(): void
     {
         $result = mask_term_in_sentence('This is a test', 'test');
         $this->assertIsString($result);
@@ -389,7 +395,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== LANGUAGE FUNCTIONS ==========
 
-    public function testGetLanguages()
+    public function testGetLanguages(): void
     {
         $languages = get_languages();
         $this->assertIsArray($languages);
@@ -401,6 +407,9 @@ class SessionUtilityTest extends TestCase
         }
     }
 
+    /**
+     * @return void
+     */
     public function testGetScriptDirectionTag()
     {
         // Test with a language from demo DB
@@ -422,7 +431,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== DATABASE HELPER FUNCTIONS ==========
 
-    public function testGetLastKey()
+    public function testGetLastKey(): void
     {
         // Insert a test record and get its ID
         global $tbpref;
@@ -438,7 +447,7 @@ class SessionUtilityTest extends TestCase
         do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgID = $last_id");
     }
 
-    public function testTrimValue()
+    public function testTrimValue(): void
     {
         $value = "  hello world  ";
         trim_value($value);
@@ -449,7 +458,7 @@ class SessionUtilityTest extends TestCase
         $this->assertEquals('test', $value2);
     }
 
-    public function testGetFirstTranslation()
+    public function testGetFirstTranslation(): void
     {
         $sepa = get_first_sepa();
         $trans = "hello{$sepa}world{$sepa}test";
@@ -462,7 +471,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== MEDIA FUNCTIONS ==========
 
-    public function testGetMediaPaths()
+    public function testGetMediaPaths(): void
     {
         $paths = get_media_paths();
         $this->assertIsArray($paths);
@@ -470,7 +479,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== THEME FUNCTIONS ==========
 
-    public function testGetThemesSelectOptions()
+    public function testGetThemesSelectOptions(): void
     {
         $current_theme = getSettingWithDefault('set-theme-dir');
         $options = get_themes_selectoptions($current_theme);
@@ -479,7 +488,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== VALIDATION FUNCTIONS (from database_connect.php) ==========
 
-    public function testCheckTest()
+    public function testCheckTest(): void
     {
         $result = checkTest('value', 'fieldname');
         $this->assertIsString($result);
@@ -487,7 +496,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== COMPLEX INTEGRATION TESTS ==========
 
-    public function testWordTagList()
+    public function testWordTagList(): void
     {
         global $tbpref;
 
@@ -526,7 +535,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== ADDITIONAL HELPER FUNCTIONS TESTS ==========
 
-    public function testGetWordsToDoButtonsSelectOptions()
+    public function testGetWordsToDoButtonsSelectOptions(): void
     {
         // Test with value 0 (I Know All & Ignore All)
         $result = get_words_to_do_buttons_selectoptions(0);
@@ -551,7 +560,7 @@ class SessionUtilityTest extends TestCase
 
     // ========== ADDITIONAL FUNCTIONS FOR BETTER COVERAGE ==========
 
-    public function testProcessSessParamExtended()
+    public function testProcessSessParamExtended(): void
     {
         // Mock a request parameter
         $_REQUEST['test_param'] = '42';
@@ -578,7 +587,7 @@ class SessionUtilityTest extends TestCase
         unset($_SESSION['sess_none']);
     }
 
-    public function testProcessDBParamExtended()
+    public function testProcessDBParamExtended(): void
     {
         // Mock a request parameter
         $_REQUEST['test_db_param'] = '123';
@@ -607,7 +616,7 @@ class SessionUtilityTest extends TestCase
         do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey IN ('db_key', 'db_str_key', 'db_none_key')");
     }
 
-    public function testGetPrefixesExtended()
+    public function testGetPrefixesExtended(): void
     {
         $prefixes = getprefixes();
         $this->assertIsArray($prefixes);
@@ -616,7 +625,7 @@ class SessionUtilityTest extends TestCase
         // Just verify it returns an array
     }
 
-    public function testSelectMediaPathExtended()
+    public function testSelectMediaPathExtended(): void
     {
         // Test with non-existent path - returns HTML with select UI
         $result = selectmediapath('nonexistent.mp3');
@@ -629,7 +638,7 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('select', $result);
     }
 
-    public function testPrintFilePathExtended()
+    public function testPrintFilePathExtended(): void
     {
         // Test that it outputs something
         ob_start();
@@ -641,7 +650,7 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('test.mp3', $output);
     }
 
-    public function testEchoLwtLogoExtended()
+    public function testEchoLwtLogoExtended(): void
     {
         // Test that it outputs the logo HTML
         ob_start();
@@ -653,7 +662,7 @@ class SessionUtilityTest extends TestCase
         $this->assertStringContainsString('<img', $output);
     }
 
-    public function testGetPreviousAndNextTextLinksExtended()
+    public function testGetPreviousAndNextTextLinksExtended(): void
     {
         global $tbpref;
 
@@ -702,14 +711,14 @@ class SessionUtilityTest extends TestCase
     }
 
 
-    public function testMediaPathsSearchExtended()
+    public function testMediaPathsSearchExtended(): void
     {
         // Test with a directory
         $result = media_paths_search('.');
         $this->assertIsArray($result);
     }
 
-    public function testSelectMediaPathOptionsExtended()
+    public function testSelectMediaPathOptionsExtended(): void
     {
         // Test with current directory
         $result = selectmediapathoptions('.');

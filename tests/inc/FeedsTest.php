@@ -31,7 +31,7 @@ class FeedsTest extends TestCase
      * Test get_nf_option function - parses options from feed options string
      * Note: Uses comma as separator, not semicolon
      */
-    public function testGetNfOption()
+    public function testGetNfOption(): void
     {
         // Test basic option retrieval (comma-separated)
         $options = "max_texts=10";
@@ -66,7 +66,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_links_from_rss function exists
      */
-    public function testGetLinksFromRss()
+    public function testGetLinksFromRss(): void
     {
         // Function may throw errors with empty/invalid URLs due to DOMDocument->load()
         // Just verify the function exists
@@ -76,7 +76,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_links_from_new_feed function exists
      */
-    public function testGetLinksFromNewFeed()
+    public function testGetLinksFromNewFeed(): void
     {
         // Function may throw errors with empty/invalid URLs due to DOMDocument->load()
         // Just verify the function exists
@@ -86,7 +86,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_text_from_rsslink function
      */
-    public function testGetTextFromRsslink()
+    public function testGetTextFromRsslink(): void
     {
         // Test with empty feed data
         $result = get_text_from_rsslink([], '', '', null);
@@ -100,7 +100,7 @@ class FeedsTest extends TestCase
     /**
      * Test write_rss_to_db function signature
      */
-    public function testWriteRssToDbExists()
+    public function testWriteRssToDbExists(): void
     {
         // Verify function exists
         $this->assertTrue(function_exists('write_rss_to_db'));
@@ -110,7 +110,7 @@ class FeedsTest extends TestCase
      * Test write_rss_to_db function exists
      * Note: Full integration test would require complex feed data structures
      */
-    public function testWriteRssToDb()
+    public function testWriteRssToDb(): void
     {
         // The write_rss_to_db function has complex requirements for the data structure
         // Testing with empty or malformed data causes internal PHP errors
@@ -121,7 +121,7 @@ class FeedsTest extends TestCase
     /**
      * Test print_last_feed_update function
      */
-    public function testPrintLastFeedUpdate()
+    public function testPrintLastFeedUpdate(): void
     {
         // Test with various time differences
         ob_start();
@@ -146,7 +146,7 @@ class FeedsTest extends TestCase
     /**
      * Test feed date parsing functionality
      */
-    public function testFeedDateParsing()
+    public function testFeedDateParsing(): void
     {
         // RFC 822 format (RSS)
         $date = 'Mon, 01 Jan 2024 12:00:00 GMT';
@@ -169,7 +169,7 @@ class FeedsTest extends TestCase
     /**
      * Test autoupdate interval parsing
      */
-    public function testAutoupdateIntervalParsing()
+    public function testAutoupdateIntervalParsing(): void
     {
         // Test hours
         $interval = '12h';
@@ -187,7 +187,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_nf_option with edge cases
      */
-    public function testGetNfOptionEdgeCases()
+    public function testGetNfOptionEdgeCases(): void
     {
         // Test with empty string
         $result = get_nf_option('', 'max_texts');
@@ -211,7 +211,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_nf_option with special characters
      */
-    public function testGetNfOptionWithSpecialCharacters()
+    public function testGetNfOptionWithSpecialCharacters(): void
     {
         // Test with special characters in value
         $options = 'tag=news&entertainment,max_texts=10';
@@ -227,7 +227,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_nf_option with 'all' parameter
      */
-    public function testGetNfOptionAll()
+    public function testGetNfOptionAll(): void
     {
         $options = 'max_texts=10,autoupdate=12h,tag=news';
         $result = get_nf_option($options, 'all');
@@ -244,7 +244,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_nf_option with 'all' on empty string
      */
-    public function testGetNfOptionAllEmpty()
+    public function testGetNfOptionAllEmpty(): void
     {
         $result = get_nf_option('', 'all');
         $this->assertIsArray($result);
@@ -255,7 +255,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_nf_option with single option
      */
-    public function testGetNfOptionSingleOption()
+    public function testGetNfOptionSingleOption(): void
     {
         $options = 'max_texts=25';
         $result = get_nf_option($options, 'max_texts');
@@ -265,7 +265,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_nf_option with whitespace in option
      */
-    public function testGetNfOptionWithWhitespace()
+    public function testGetNfOptionWithWhitespace(): void
     {
         // With leading/trailing spaces (trim is used in function)
         $options = ' max_texts = 10 ,autoupdate=1d';
@@ -276,7 +276,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_nf_option with duplicate keys
      */
-    public function testGetNfOptionDuplicateKeys()
+    public function testGetNfOptionDuplicateKeys(): void
     {
         // Last occurrence should win
         $options = 'max_texts=10,max_texts=20';
@@ -288,7 +288,7 @@ class FeedsTest extends TestCase
     /**
      * Test print_last_feed_update with various time intervals
      */
-    public function testPrintLastFeedUpdateVariousIntervals()
+    public function testPrintLastFeedUpdateVariousIntervals(): void
     {
         // Test years
         ob_start();
@@ -319,7 +319,7 @@ class FeedsTest extends TestCase
     /**
      * Test print_last_feed_update with zero/negative diff
      */
-    public function testPrintLastFeedUpdateUpToDate()
+    public function testPrintLastFeedUpdateUpToDate(): void
     {
         // Test with 0
         ob_start();
@@ -337,7 +337,7 @@ class FeedsTest extends TestCase
     /**
      * Test print_last_feed_update pluralization
      */
-    public function testPrintLastFeedUpdatePluralization()
+    public function testPrintLastFeedUpdatePluralization(): void
     {
         // Single hour
         ob_start();
@@ -358,7 +358,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_text_from_rsslink with empty feed data
      */
-    public function testGetTextFromRsslinkEmptyData()
+    public function testGetTextFromRsslinkEmptyData(): void
     {
         $result = get_text_from_rsslink([], '', '', null);
         $this->assertTrue($result === null || $result === '' || is_array($result));
@@ -367,7 +367,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_text_from_rsslink error handling
      */
-    public function testGetTextFromRsslinkErrorHandling()
+    public function testGetTextFromRsslinkErrorHandling(): void
     {
         // Test with minimal valid structure
         $feed_data = [
@@ -383,7 +383,7 @@ class FeedsTest extends TestCase
     /**
      * Test write_rss_to_db with empty array
      */
-    public function testWriteRssToDbEmptyArray()
+    public function testWriteRssToDbEmptyArray(): void
     {
         // Function requires complex data structure
         // Just verify it exists and accepts empty array
@@ -393,7 +393,7 @@ class FeedsTest extends TestCase
     /**
      * Test load_feeds function exists
      */
-    public function testLoadFeedsExists()
+    public function testLoadFeedsExists(): void
     {
         $this->assertTrue(function_exists('load_feeds'));
     }
@@ -401,7 +401,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_nf_option with numeric values
      */
-    public function testGetNfOptionNumericValues()
+    public function testGetNfOptionNumericValues(): void
     {
         $options = 'max_texts=100,min_length=50';
 
@@ -416,7 +416,7 @@ class FeedsTest extends TestCase
     /**
      * Test get_nf_option case sensitivity
      */
-    public function testGetNfOptionCaseSensitivity()
+    public function testGetNfOptionCaseSensitivity(): void
     {
         $options = 'MaxTexts=10,max_texts=20';
 
@@ -431,7 +431,7 @@ class FeedsTest extends TestCase
     /**
      * Test print_last_feed_update edge case - exactly 1 unit
      */
-    public function testPrintLastFeedUpdateExactlyOneUnit()
+    public function testPrintLastFeedUpdateExactlyOneUnit(): void
     {
         // Exactly 1 day
         ob_start();

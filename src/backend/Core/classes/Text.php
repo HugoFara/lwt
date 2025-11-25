@@ -57,7 +57,7 @@ class Text
      */
     public $audio_pos;
 
-    public function load_from_db_record($record)
+    public function load_from_db_record(array $record): void
     {
         $this->id = $record['TxID'];
         $this->lgid = $record['TxLgID'];

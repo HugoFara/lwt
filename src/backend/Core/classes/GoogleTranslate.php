@@ -55,7 +55,12 @@ class GoogleTranslate
             'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1'
         );
     }
-    private static function generateToken($str, $tok): string
+    /**
+     * @param int[]|null $tok
+     *
+     * @psalm-param array<int>|null $tok
+     */
+    private static function generateToken(string $str, array|null $tok): string
     {
         $t = $c = isset($tok)?$tok[0]:408254;//todo floor(time()/3600);
         $x = hexdec(80000000);
@@ -141,24 +146,32 @@ class GoogleTranslate
         }
         return $domain;
     }
-    public static function array_iunique($array): array
+    /**
+     * @param (mixed|string)[] $array
+     *
+     * @psalm-param array{0?: mixed|string, 1?: mixed|string, 2?: mixed|string, 3?: mixed|string, 4?: 'WORLD'|mixed, key1?: 'Hello', key2?: 'HELLO', key3?: 'World', key4?: 'hello',...} $array
+     */
+    public static function array_iunique(array $array): array
     {
         return array_intersect_key(
             $array,
             array_unique(array_map("StrToLower", $array))
         );
     }
-    public function setLangFrom($lang): GoogleTranslate
+    public function setLangFrom(string $lang): GoogleTranslate
     {
         $this->langFrom = $lang;
         return $this;
     }
-    public function setLangTo($lang): GoogleTranslate
+    public function setLangTo(string $lang): GoogleTranslate
     {
         $this->langTo = $lang;
         return $this;
     }
-    public static function setDomain($domain): void
+    /**
+     * @param null|string $domain
+     */
+    public static function setDomain(string|null $domain): void
     {
         self::$gglDomain = self::getDomain($domain);
         self::setHeaders();
@@ -167,7 +180,7 @@ class GoogleTranslate
     {
         $this->setLangFrom($from)->setLangTo($to);
     }
-    public static function makeCurl($url, $cookieSet = false): string|bool
+    public static function makeCurl(string $url, $cookieSet = false): string|bool
     {
         if (is_callable('curl_init')) {
             if (!$cookieSet) {
@@ -202,7 +215,7 @@ class GoogleTranslate
         }
         return $output;
     }
-    public function translate($string): array|false
+    public function translate(string $string): array|false
     {
         return $this->lastResult = self::staticTranslate(
             $string, $this->langFrom, $this->langTo
