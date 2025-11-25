@@ -150,7 +150,7 @@ function format_term($termid, $compare)
         }
         $js_event = "setTransRoman(" . prepare_textdata_js($tra) . ',' .
         prepare_textdata_js($rom) . ')';
-        $output = '<img class="clickedit" src="icn/tick-button-small.png" ' .
+        $output = '<img class="clickedit" src="/icn/tick-button-small.png" ' .
         'title="Copy → Translation &amp; Romanization Field(s)" ' .
         'onclick="' . tohtml($js_event) .'" /> ' .
         $term . tohtml($romd) . ' — ' . tohtml($tra) .

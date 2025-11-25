@@ -7,6 +7,9 @@ require_once __DIR__ . '/../../../src/php/inc/classes/GoogleTranslate.php';
 
 use PHPUnit\Framework\TestCase;
 use Lwt\Classes\GoogleTranslate;
+use Lwt\Classes\Language;
+use Lwt\Classes\Term;
+use Lwt\Classes\Text;
 
 /**
  * Comprehensive tests for PHP classes: Language, Term, Text, GoogleTranslate

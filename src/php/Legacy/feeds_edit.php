@@ -110,14 +110,14 @@ function display_new_feed($currentlang): void
     );
     ?>
 <h2>New Feed</h2>
-<a href="do_feeds.php?page=1">My Feeds</a>
+<a href="/feeds?page=1">My Feeds</a>
 <span class="nowrap"></span>
-<a href="feed_wizard.php?step=1">
-    <img src="icn/wizard.png" title="new_feed_wizard" alt="new_feed_wizard" style="height: 20px;"/>
+<a href="/feeds/wizard?step=1">
+    <img src="/icn/wizard.png" title="new_feed_wizard" alt="new_feed_wizard" style="height: 20px;"/>
     New Feed Wizard
 </a>
 <br></br>
-<form class="validate" action="edit_feeds.php" method="post">
+<form class="validate" action="/feeds/edit" method="post">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr><td class="td1">Language: </td><td class="td1"><select name="NfLgID">
     <?php
@@ -133,15 +133,15 @@ function display_new_feed($currentlang): void
 <tr><td class="td1">
 Name: </td><td class="td1">
     <input class="notempty" style="width:95%" type="text" name="NfName" />
-<img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+<img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
 </td></tr>
 <tr><td class="td1">Newsfeed url: </td>
 <td class="td1"><input class="notempty" style="width:95%" type="text" name="NfSourceURI" />
-<img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+<img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
 </td></tr>
 <tr><td class="td1">Article Section: </td>
 <td class="td1"><input class="notempty" style="width:95%" type="text" name="NfArticleSectionTags" />
-<img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+<img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
 </td></tr>
 <tr><td class="td1">Filter Tags: </td>
 <td class="td1"><input type="text" style="width:95%" name="NfFilterTags" /></td></tr>
@@ -174,7 +174,7 @@ Name: </td><td class="td1">
 </table><input type="submit" value="Save" />
 <input type="hidden" name="NfOptions" value="" />
 <input type="hidden" name="save_feed" value="1" />
-<input type="button" value="Cancel" onclick="location.href='edit_feeds.php';" />
+<input type="button" value="Cancel" onclick="location.href='/feeds/edit';" />
 </form>
 <script type="text/javascript">
 $('[name^="c_"]').change(function(){
@@ -218,14 +218,14 @@ function edit_feed($currentfeed): void
 <h2>
     Edit Feed
     <a target="_blank" href="docs/info.html#new_feed">
-        <img src="icn/question-frame.png" title="Help" alt="Help" />
+        <img src="/icn/question-frame.png" title="Help" alt="Help" />
     </a>
 </h2>
-<a href="do_feeds.php?page=1"> My Feeds</a>
+<a href="/feeds?page=1"> My Feeds</a>
 <span class="nowrap"></span>
-<a href="feed_wizard.php?step=2&amp;edit_feed=<?php echo $currentfeed;?>">
-<img src="icn/wizard.png" title="feed_wizard" alt="feed_wizard" />Feed Wizard</a>
-<form class="validate" action="edit_feeds.php" method="post">
+<a href="/feeds/wizard?step=2&amp;edit_feed=<?php echo $currentfeed;?>">
+<img src="/icn/wizard.png" title="feed_wizard" alt="feed_wizard" />Feed Wizard</a>
+<form class="validate" action="/feeds/edit" method="post">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
     <td class="td1">Language: </td>
@@ -256,7 +256,7 @@ function edit_feed($currentfeed): void
     <td class="td1">
         <input class="notempty" style="width:95%" type="text" name="NfName"
         value="<?php echo tohtml($row['NfName']); ?>" />
-        <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
 </tr>
 <tr>
@@ -264,7 +264,7 @@ function edit_feed($currentfeed): void
     <td class="td1">
         <input class="notempty" style="width:95%" type="text" name="NfSourceURI"
         value="<?php echo tohtml($row['NfSourceURI']); ?>" />
-        <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
 </tr>
 <tr>
@@ -272,7 +272,7 @@ function edit_feed($currentfeed): void
     <td class="td1">
         <input class="notempty" style="width:95%" type="text"
         name="NfArticleSectionTags" value="<?php echo tohtml($row['NfArticleSectionTags']); ?>" />
-        <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
 </tr>
 <tr>
@@ -393,7 +393,7 @@ if(get_nf_option($row['NfOptions'], 'article_source')==null) {
 </table>
 <input type="submit" value="Update" />
 <input type="hidden" name="NfID" value="<?php echo tohtml($row['NfID']); ?>" />
-<input type="button" value="Cancel" onclick="location.href='edit_feeds.php';" />
+<input type="button" value="Cancel" onclick="location.href='/feeds/edit';" />
 <input type="hidden" name="NfOptions" value="" />
 <input type="hidden" name="update_feed" value="1" />
 </form>
@@ -441,7 +441,7 @@ function multi_load_feed($currentlang): void
 <form name="form1" action="do_feeds.php" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab3"  style="border-left: none;border-top: none; background-color:inherit" cellspacing="0" cellpadding="5">
 <tr>
-<th class="th1 borderleft" colspan="2">Language:<select name="filterlang" onchange="{setLang(document.form1.filterlang,'edit_feeds.php?multi_load_feed=1%26page=1');}">
+<th class="th1 borderleft" colspan="2">Language:<select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds/edit?multi_load_feed=1%26page=1');}">
     <?php
     echo get_languages_selectoptions($currentlang, '[Filter off]');
     ?>
@@ -482,7 +482,7 @@ function multi_load_feed($currentlang): void
 <input type="hidden" name="load_feed" value="1" />
 <button id="markaction">Update Marked Newsfeeds</button></th>
 <th class="th1 borderright">
-    <input type="button" value="Cancel" onclick="location.href='do_feeds.php?selected_feed=0'; return false;" /></th></tr>
+    <input type="button" value="Cancel" onclick="location.href='/feeds?selected_feed=0'; return false;" /></th></tr>
 </table>
 </form>
 
@@ -504,22 +504,22 @@ function display_main_page(
     ?>
 
 <div class="flex-spaced">
-    <div><a href="do_feeds.php">My Feeds</a></div>
+    <div><a href="/feeds">My Feeds</a></div>
     <div>
-        <a href="edit_feeds.php?new_feed=1">
-            <img src="icn/feed--plus.png" title="new feed" alt="new feed" />
+        <a href="/feeds/edit?new_feed=1">
+            <img src="/icn/feed--plus.png" title="new feed" alt="new feed" />
             New Feed...
         </a>
     </div>
 </div>
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab2" cellspacing="0" cellpadding="5"><tr>
-<th class="th1" colspan="4">Filter <img src="icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
-<input type="button" value="Reset All" onclick="resetAll('edit_feeds.php');" /></th>
+<th class="th1" colspan="4">Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+<input type="button" value="Reset All" onclick="resetAll('/feeds/edit');" /></th>
 </tr>
 <tr>
     <td class="td1 center" colspan="2" style="width:30%;">
-    Language:&nbsp;<select name="filterlang" onchange="{setLang(document.form1.filterlang,'edit_feeds.php?manage_feeds=1');}">
+    Language:&nbsp;<select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds/edit?manage_feeds=1');}">
     <?php
     echo get_languages_selectoptions($currentlang, '[Filter off]');
     ?>
@@ -528,8 +528,8 @@ function display_main_page(
 <td class="td1 center" colspan="4">
     Feed Name (Wildc.=*):
     <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
-    <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='edit_feeds.php?page=1&amp;query=' + val;}" />&nbsp;
-    <input type="button" value="Clear" onclick="{location.href='edit_feeds.php?page=1&amp;query=';}" />
+    <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='/feeds/edit?page=1&amp;query=' + val;}" />&nbsp;
+    <input type="button" value="Clear" onclick="{location.href='/feeds/edit?page=1&amp;query=';}" />
 </td>
 </tr>
 </table>
@@ -538,7 +538,7 @@ function display_main_page(
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
     <th class="th1" colspan="3">
-        Multi Actions <img src="icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
+        Multi Actions <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
     </th>
 </tr>
 <tr><td class="td1 center" style="width:30%;">
@@ -587,7 +587,7 @@ function display_main_page(
         }
             echo '<tr><th class="th1" style="width:30%;"> '. $total=$recno .' newsfeeds ';///
         echo '</th><th class="th1">';
-        makePager($currentpage, $pages, 'edit_feeds.php', 'form1');
+        makePager($currentpage, $pages, '/feeds/edit', 'form1');
         if (!empty($currentlang)) {
             $result = do_mysqli_query(
                 "SELECT * FROM " . $tbpref . "newsfeeds
@@ -604,7 +604,7 @@ function display_main_page(
         </th>
         <th class="th1" colspan="1" nowrap="nowrap">
         Sort Order:
-        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='edit_feeds.php?page=1&amp;sort=' + val;}"><?php echo get_textssort_selectoptions($currentsort); ?></select>
+        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/feeds/edit?page=1&amp;sort=' + val;}"><?php echo get_textssort_selectoptions($currentsort); ?></select>
 </th>
 </table>
 </form>
@@ -626,14 +626,14 @@ function display_main_page(
                 <input type="checkbox" name="marked[]" class="markcheck" value="' . $row['NfID'] . '" /></td>
                 <td style="white-space: nowrap" class="td1 center">
                 <a href="' . $_SERVER['PHP_SELF'] . '?edit_feed=1&amp;selected_feed=' . $row['NfID'] . '">
-                <img src="icn/feed--pencil.png" title="Edit" alt="Edit" />
+                <img src="/icn/feed--pencil.png" title="Edit" alt="Edit" />
                 </a>
                 &nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?manage_feeds=1&amp;load_feed=1&amp;selected_feed=' . $row['NfID'] . '">
-                <span title="Update Feed"><img src="icn/arrow-circle-135.png" alt="-" /></span></a>&nbsp;
+                <span title="Update Feed"><img src="/icn/arrow-circle-135.png" alt="-" /></span></a>&nbsp;
                 <a href="' . $row['NfSourceURI'] . '" onclick="window.open(this.href); return false">
-                <img src="icn/external.png" title="Show Feed" alt="Link" /></a>&nbsp;
+                <img src="/icn/external.png" title="Show Feed" alt="Link" /></a>&nbsp;
                 <span class="click" onclick="if (confirm (\'Are you sure?\')) location.href=\'' . $_SERVER['PHP_SELF'] . '?markaction=del&amp;selected_feed=' . $row['NfID'] . '\';">
-                <img src="icn/minus-button.png" title="Delete" alt="Delete" /></span></td>
+                <img src="/icn/minus-button.png" title="Delete" alt="Delete" /></span></td>
                 <td class="td1 center">'.$row['NfName'].'</td>
                 <td class="td1 center">'.str_replace(',', ', ', $row['NfOptions']).'</td>
                 <td class="td1 center" sorttable_customkey="'.$diff.'">';
@@ -653,7 +653,7 @@ function display_main_page(
             <tr><th class="th1" style="width:30%;">';
             echo $total ;
             echo '</th><th class="th1">';
-            makePager($currentpage, $pages, 'do_feeds.php', 'form3');
+            makePager($currentpage, $pages, '/feeds', 'form3');
             echo '</th></tr></table></form>';
         }
     }

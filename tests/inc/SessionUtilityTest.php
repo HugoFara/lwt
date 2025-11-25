@@ -96,12 +96,13 @@ class SessionUtilityTest extends TestCase
 
     public function testGetFilePath()
     {
-        // Test with a file that doesn't exist - should return the filename
+        // Test with a file that doesn't exist - should return absolute path
         $result = get_file_path('nonexistent_file.png');
-        $this->assertEquals('nonexistent_file.png', $result);
+        $this->assertEquals('/nonexistent_file.png', $result);
 
-        // Test with path separator
+        // Test with path separator - should return absolute path
         $result = get_file_path('path/to/file.png');
+        $this->assertStringStartsWith('/', $result);
         $this->assertStringContainsString('file.png', $result);
     }
 

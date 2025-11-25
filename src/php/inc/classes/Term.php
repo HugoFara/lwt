@@ -13,6 +13,8 @@
  * @since   2.7.0
  */
 
+namespace Lwt\Classes;
+
 /**
  * A term (word or mutli-word) represented as an object.
  */

@@ -142,7 +142,7 @@ function do_test_header_row($_p)
     ?>
 <div class="flex-header">
     <div>
-        <a href="edit_texts.php" target="_top">
+        <a href="/texts" target="_top">
             <?php echo_lwt_logo(); ?>
         </a>
     </div>
@@ -152,18 +152,18 @@ function do_test_header_row($_p)
         $textid = (int) getreq('text');
         echo '<div>' . getPreviousAndNextTextLinks(
             $textid,
-            'do_test.php?text=',
+            '/test?text=',
             false,
             ''
         ) . '</div>';
 
         ?>
     <div>
-        <a href="do_text.php?start=<?php echo $textid; ?>" target="_top">
-            <img src="icn/book-open-bookmark.png" title="Read" alt="Read" />
+        <a href="/text/read?start=<?php echo $textid; ?>" target="_top">
+            <img src="/icn/book-open-bookmark.png" title="Read" alt="Read" />
         </a>
-        <a href="print_text.php?text=<?php echo $textid; ?>" target="_top">
-            <img src="icn/printer.png" title="Print" alt="Print" />
+        <a href="/text/print-plain?text=<?php echo $textid; ?>" target="_top">
+            <img src="/icn/printer.png" title="Print" alt="Print" />
         </a>
         <?php echo get_annotation_link($textid); ?>
     </div>
@@ -216,7 +216,7 @@ function do_test_header_js()
      */
     function startWordTest(type, property) {
         resetFrames();
-        window.location.href = 'do_test.php?type=' + type + '&' + property;
+        window.location.href = '/test?type=' + type + '&' + property;
     }
 
     /**
@@ -224,7 +224,7 @@ function do_test_header_js()
      */
     function startTestTable(property) {
         resetFrames();
-        window.location.href = 'do_test.php?type=table&' + property;
+        window.location.href = '/test?type=table&' + property;
     }
 
     $(setUtteranceSetting)

@@ -3,7 +3,7 @@
 /**
  * Manage tags
  *
- * Call: edit_tags.php?....
+ * Call: /tags?....
  *  ... markaction=[opcode] ... do actions on marked tags
  *  ... allaction=[opcode] ... do actions on all tags
  *  ... del=[wordid] ... do delete
@@ -137,7 +137,7 @@ if (isset($_REQUEST['new'])) {
             <td class="td1">
                 <input class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
                 type="text" name="TgText" data_info="Tag" value="" maxlength="20" size="20" />
-                <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
@@ -149,7 +149,7 @@ if (isset($_REQUEST['new'])) {
         </tr>
         <tr>
             <td class="td1 right" colspan="2">
-                <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='edit_tags.php';}" />
+                <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/tags';}" />
                 <input type="submit" name="op" value="Save" />
             </td>
         </tr>
@@ -176,7 +176,7 @@ if (isset($_REQUEST['new'])) {
             <td class="td1">
                 <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
                 type="text" name="TgText" value="<?php echo tohtml($record['TgText']); ?>" maxlength="20" size="20" />
-                <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
+                <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
         </tr>
         <tr>
             <td class="td1 right">Comment:</td>
@@ -187,7 +187,7 @@ if (isset($_REQUEST['new'])) {
         </tr>
         <tr>
         <td class="td1 right" colspan="2">
-            <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='edit_tags.php#rec<?php echo $_REQUEST['chg']; ?>';}" />
+            <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/tags#rec<?php echo $_REQUEST['chg']; ?>';}" />
             <input type="submit" name="op" value="Change" /></td>
         </tr>
     </table>
@@ -236,20 +236,20 @@ if (isset($_REQUEST['new'])) {
     }
 
     ?>
-<p><a href="<?php echo $_SERVER['PHP_SELF']; ?>?new=1"><img src="icn/plus-button.png" title="New" alt="New" /> New Term Tag ...</a></p>
+<p><a href="<?php echo $_SERVER['PHP_SELF']; ?>?new=1"><img src="/icn/plus-button.png" title="New" alt="New" /> New Term Tag ...</a></p>
 
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
-<th class="th1" colspan="4">Filter <img src="icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
-<input type="button" value="Reset All" onclick="{location.href='edit_tags.php?page=1&amp;query=';}" /></th>
+<th class="th1" colspan="4">Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+<input type="button" value="Reset All" onclick="{location.href='/tags?page=1&amp;query=';}" /></th>
 </tr>
 <tr>
 <td class="td1 center" colspan="4">
 Tag Text or Comment:
 <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
-<input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='edit_tags.php?page=1&amp;query=' + val;}" />&nbsp;
-<input type="button" value="Clear" onclick="{location.href='edit_tags.php?page=1&amp;query=';}" />
+<input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='/tags?page=1&amp;query=' + val;}" />&nbsp;
+<input type="button" value="Clear" onclick="{location.href='/tags?page=1&amp;query=';}" />
 </td>
 </tr>
     <?php if($recno > 0) { ?>
@@ -257,10 +257,10 @@ Tag Text or Comment:
 <th class="th1" colspan="1" nowrap="nowrap">
         <?php echo $recno; ?> Tag<?php echo ($recno==1?'':'s'); ?>
 </th><th class="th1" colspan="2" nowrap="nowrap">
-        <?php makePager($currentpage, $pages, 'edit_tags.php', 'form1'); ?>
+        <?php makePager($currentpage, $pages, '/tags', 'form1'); ?>
 </th><th class="th1" nowrap="nowrap">
 Sort Order:
-<select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='edit_tags.php?page=1&amp;sort=' + val;}"><?php echo get_tagsort_selectoptions($currentsort); ?></select>
+<select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags?page=1&amp;sort=' + val;}"><?php echo get_tagsort_selectoptions($currentsort); ?></select>
 </th></tr>
         <?php
     } ?>
@@ -278,7 +278,7 @@ Sort Order:
 <input type="hidden" name="data" value="" />
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr><th class="th1 center" colspan="2">
-Multi Actions <img src="icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
+Multi Actions <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
 </th></tr>
 <tr><td class="td1 center" colspan="2">
 <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
@@ -315,7 +315,7 @@ Multi Actions <img src="icn/lightning.png" title="Multi Actions" alt="Multi Acti
                     <a name="rec' . $record['TgID'] . '">
                     <input name="marked[]" type="checkbox" class="markcheck" value="' . $record['TgID'] . '" ' . checkTest($record['TgID'], 'marked') . ' />
                     </a></td>
-                    <td class="td1 center" nowrap="nowrap">&nbsp;<a href="' . $_SERVER['PHP_SELF'] . '?chg=' . $record['TgID'] . '"><img src="icn/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="' . $_SERVER['PHP_SELF'] . '?del=' . $record['TgID'] . '"><img src="icn/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
+                    <td class="td1 center" nowrap="nowrap">&nbsp;<a href="' . $_SERVER['PHP_SELF'] . '?chg=' . $record['TgID'] . '"><img src="/icn/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="' . $_SERVER['PHP_SELF'] . '?del=' . $record['TgID'] . '"><img src="/icn/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
                     <td class="td1 center">' . tohtml($record['TgText']) . '</td>
                     <td class="td1 center">' . tohtml($record['TgComment']) . '</td>
                     <td class="td1 center">' . ($c > 0 ? '<a href="edit_words.php?page=1&amp;query=&amp;text=&amp;status=&amp;filterlang=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['TgID'] . '">' . $c . '</a>' : '0' ) . '</td>
@@ -334,7 +334,7 @@ Multi Actions <img src="icn/lightning.png" title="Multi Actions" alt="Multi Acti
             <?php echo $recno; ?> Tag<?php echo ($recno==1?'':'s'); ?>
         </th>
         <th class="th1" nowrap="nowrap">
-            <?php makePager($currentpage, $pages, 'edit_tags.php', 'form2'); ?>
+            <?php makePager($currentpage, $pages, '/tags', 'form2'); ?>
         </th>
     </tr>
 </table>

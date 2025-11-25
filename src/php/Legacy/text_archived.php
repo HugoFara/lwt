@@ -3,7 +3,7 @@
 /**
  * Manage archived texts
  *
- * Call: edit_archivedtexts.php?....
+ * Call: /text/archived?....
  *  ... markaction=[opcode] ... do actions on marked texts
  *  ... del=[textid] ... do delete
  *  ... unarch=[textid] ... do unarchive
@@ -351,23 +351,23 @@ if (isset($_REQUEST['chg'])) {
                 echo get_languages_selectoptions($record['AtLgID'], "[Choose...]");
                 ?>
             </select>
-            <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
         </tr>
         <tr>
             <td class="td1 right">Title:</td>
-            <td class="td1"><input type="text" class="notempty checkoutsidebmp" data_info="Title" name="AtTitle" value="<?php echo tohtml($record['AtTitle']); ?>" maxlength="200" size="60" /> <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
+            <td class="td1"><input type="text" class="notempty checkoutsidebmp" data_info="Title" name="AtTitle" value="<?php echo tohtml($record['AtTitle']); ?>" maxlength="200" size="60" /> <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
         </tr>
         <tr>
             <td class="td1 right">Text:</td>
             <td class="td1">
-            <textarea name="AtText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"><?php echo tohtml($record['AtText']); ?></textarea> <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <textarea name="AtText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"><?php echo tohtml($record['AtText']); ?></textarea> <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
         </tr>
         <tr>
             <td class="td1 right">Ann.Text:</td>
             <td class="td1">
-                <?php echo ($record['annotlen'] ? '<img src="icn/tick.png" title="With Annotation" alt="With Annotation" /> Exists - May be partially or fully lost if you change the text!' : '<img src="icn/cross.png" title="No Annotation" alt="No Annotation" /> - None'); ?>
+                <?php echo ($record['annotlen'] ? '<img src="/icn/tick.png" title="With Annotation" alt="With Annotation" /> Exists - May be partially or fully lost if you change the text!' : '<img src="/icn/cross.png" title="No Annotation" alt="No Annotation" /> - None'); ?>
             </td>
         </tr>
         <tr>
@@ -389,7 +389,7 @@ if (isset($_REQUEST['chg'])) {
         </tr>
         <tr>
             <td class="td1 right" colspan="2">
-                <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='edit_archivedtexts.php#rec<?php echo $_REQUEST['chg']; ?>';}" />
+                <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/text/archived#rec<?php echo $_REQUEST['chg']; ?>';}" />
                 <input type="submit" name="op" value="Change" />
             </td>
         </tr>
@@ -444,26 +444,26 @@ if (isset($_REQUEST['chg'])) {
 
 <div class="flex-spaced">
     <div>
-        <a href="edit_texts.php?new=1">
-            <img src="icn/plus-button.png">
+        <a href="/texts?new=1">
+            <img src="/icn/plus-button.png">
             New Text
         </a>
     </div>
     <div>
-        <a href="long_text_import.php">
-            <img src="icn/plus-button.png">
+        <a href="/text/import-long">
+            <img src="/icn/plus-button.png">
             Long Text Import
         </a>
     </div>
     <div>
-        <a href="do_feeds.php?page=1&amp;check_autoupdate=1">
-            <img src="icn/plus-button.png">
+        <a href="/feeds?page=1&amp;check_autoupdate=1">
+            <img src="/icn/plus-button.png">
             Newsfeed Import
         </a>
     </div>
     <div>
-        <a href="edit_texts.php?query=&amp;page=1">
-            <img src="icn/drawer--plus.png">
+        <a href="/texts?query=&amp;page=1">
+            <img src="/icn/drawer--plus.png">
             Active Texts
         </a>
     </div>
@@ -471,19 +471,19 @@ if (isset($_REQUEST['chg'])) {
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr>
-        <th class="th1" colspan="4">Filter <img src="icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
-            <input type="button" value="Reset All" onclick="resetAll('edit_archivedtexts.php');" />
+        <th class="th1" colspan="4">Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+            <input type="button" value="Reset All" onclick="resetAll('/text/archived');" />
         </th>
     </tr>
     <tr>
         <td class="td1 center" colspan="2">
             Language:
-            <select name="filterlang" onchange="{setLang(document.form1.filterlang,'edit_archivedtexts.php');}">
+            <select name="filterlang" onchange="{setLang(document.form1.filterlang,'/text/archived');}">
                 <?php echo get_languages_selectoptions($currentlang, '[Filter off]'); ?>
             </select>
         </td>
         <td class="td1 center" colspan="2">
-            <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='edit_archivedtexts.php?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
+            <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/text/archived?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
                 <option value="title,text"<?php
                 if($currentquerymode=="title,text") {
                     echo ' selected="selected"';
@@ -508,22 +508,22 @@ if (isset($_REQUEST['chg'])) {
                 echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
             }?>
             <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
-            <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val); location.href='edit_archivedtexts.php?page=1&amp;query=' + val;}" />&nbsp;
-            <input type="button" value="Clear" onclick="{location.href='edit_archivedtexts.php?page=1&amp;query=';}" />
+            <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val); location.href='/text/archived?page=1&amp;query=' + val;}" />&nbsp;
+            <input type="button" value="Clear" onclick="{location.href='/text/archived?page=1&amp;query=';}" />
         </td>
     </tr>
     <tr>
         <td class="td1 center" colspan="2" nowrap="nowrap">
             Tag #1:
-            <select name="tag1" onchange="{val=document.form1.tag1.options[document.form1.tag1.selectedIndex].value; location.href='edit_archivedtexts.php?page=1&amp;tag1=' + val;}"><?php echo get_archivedtexttag_selectoptions($currenttag1, $currentlang); ?></select>
+            <select name="tag1" onchange="{val=document.form1.tag1.options[document.form1.tag1.selectedIndex].value; location.href='/text/archived?page=1&amp;tag1=' + val;}"><?php echo get_archivedtexttag_selectoptions($currenttag1, $currentlang); ?></select>
         </td>
         <td class="td1 center" nowrap="nowrap">
             Tag #1 ..
-            <select name="tag12" onchange="{val=document.form1.tag12.options[document.form1.tag12.selectedIndex].value; location.href='edit_archivedtexts.php?page=1&amp;tag12=' + val;}"><?php echo get_andor_selectoptions($currenttag12); ?></select> .. Tag #2
+            <select name="tag12" onchange="{val=document.form1.tag12.options[document.form1.tag12.selectedIndex].value; location.href='/text/archived?page=1&amp;tag12=' + val;}"><?php echo get_andor_selectoptions($currenttag12); ?></select> .. Tag #2
         </td>
         <td class="td1 center" nowrap="nowrap">
             Tag #2:
-            <select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='edit_archivedtexts.php?page=1&amp;tag2=' + val;}"><?php echo get_archivedtexttag_selectoptions($currenttag2, $currentlang); ?></select>
+            <select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='/text/archived?page=1&amp;tag2=' + val;}"><?php echo get_archivedtexttag_selectoptions($currenttag2, $currentlang); ?></select>
         </td>
     </tr>
         <?php if($recno > 0) { ?>
@@ -532,11 +532,11 @@ if (isset($_REQUEST['chg'])) {
             <?php echo $recno; ?> Text<?php echo ($recno==1?'':'s'); ?>
     </th>
     <th class="th1" colspan="1" nowrap="nowrap">
-            <?php makePager($currentpage, $pages, 'edit_archivedtexts.php', 'form1'); ?>
+            <?php makePager($currentpage, $pages, '/text/archived', 'form1'); ?>
     </th>
     <th class="th1" nowrap="nowrap">
     Sort Order:
-    <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='edit_archivedtexts.php?page=1&amp;sort=' + val;}"><?php echo get_textssort_selectoptions($currentsort); ?></select>
+    <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/text/archived?page=1&amp;sort=' + val;}"><?php echo get_textssort_selectoptions($currentsort); ?></select>
     </th></tr>
             <?php
         } ?>
@@ -556,7 +556,7 @@ if (isset($_REQUEST['chg'])) {
     <tr>
         <th class="th1" colspan="2">
             Multi Actions
-            <img src="icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
+            <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
         </th>
     </tr>
     <tr>
@@ -582,7 +582,7 @@ if (isset($_REQUEST['chg'])) {
             Title [Tags] / Audio:&nbsp;
             <img src="<?php print_file_path('icn/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />, Src.Link:&nbsp;
             <img src="<?php print_file_path('icn/chain.png'); ?>" title="Source Link available" alt="Source Link available" />, Ann.Text:&nbsp;
-            <img src="icn/tick.png" title="Annotated Text available" alt="Annotated Text available" />
+            <img src="/icn/tick.png" title="Annotated Text available" alt="Annotated Text available" />
         </th>
     </tr>
         <?php
@@ -623,13 +623,13 @@ if (isset($_REQUEST['chg'])) {
             ' /></a></td>
             <td nowrap="nowrap" class="td1 center">&nbsp;
             <a href="' . $_SERVER['PHP_SELF'] . '?unarch=' . $record['AtID'] . '">
-            <img src="icn/inbox-upload.png" title="Unarchive" alt="Unarchive" />
+            <img src="/icn/inbox-upload.png" title="Unarchive" alt="Unarchive" />
             </a>&nbsp;
             <a href="' . $_SERVER['PHP_SELF'] . '?chg=' . $record['AtID'] . '">
-            <img src="icn/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp;
+            <img src="/icn/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp;
             <span class="click" onclick="if (confirmDelete()) location.href=\''
             . $_SERVER['PHP_SELF'] . '?del=' . $record['AtID'] . '\';">
-            <img src="icn/minus-button.png" title="Delete" alt="Delete" />
+            <img src="/icn/minus-button.png" title="Delete" alt="Delete" />
             </span>&nbsp;</td>';
             if ($currentlang == '') {
                 echo '<td class="td1 center">' . tohtml($record['LgName']) . '</td>';
@@ -648,7 +648,7 @@ if (isset($_REQUEST['chg'])) {
                 '" title="Link to Text Source" alt="Link to Text Source" /></a>';
             }
             if ($record['annotlen']) {
-                echo ' <img src="icn/tick.png" title="Annotated Text available" ' .
+                echo ' <img src="/icn/tick.png" title="Annotated Text available" ' .
                 'alt="Annotated Text available" />';
             }
             echo '</td>';
@@ -666,7 +666,7 @@ if (isset($_REQUEST['chg'])) {
             <?php echo $recno; ?> Text<?php echo ($recno==1?'':'s'); ?>
         </th>
         <th class="th1" nowrap="nowrap">
-            <?php makePager($currentpage, $pages, 'edit_archivedtexts.php', 'form2'); ?>
+            <?php makePager($currentpage, $pages, '/text/archived', 'form2'); ?>
         </th>
     </tr>
 </table>

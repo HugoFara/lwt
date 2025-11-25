@@ -281,7 +281,7 @@ function do_test_table_row($record, $regexword, $textsize, $span1, $span2): void
             href="edit_tword.php?wid=<?php echo $record['WoID']; ?>" target="ro"
             onclick="showRightFrames();"
         >
-            <img src="icn/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
+            <img src="/icn/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
         </a>
     </td>
     <td class="td1 center" nowrap="nowrap">

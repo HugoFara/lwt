@@ -4,7 +4,7 @@
  * \file
  * \brief Manage active texts
  *
- * Call: edit_texts.php?....
+ * Call: /texts?....
  *     ... markaction=[opcode] ... do actions on marked texts
  *     ... del=[textid] ... do delete
  *     ... arch=[textid] ... do archive
@@ -34,6 +34,8 @@ require_once 'inc/session_utility.php';
 require_once 'inc/start_session.php';
 require_once 'inc/text_from_yt.php';
 require_once 'inc/classes/Text.php';
+
+use Lwt\Classes\Text;
 
 /**
  * Get the value of $wh_query.
@@ -533,7 +535,7 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
     );
 
     if (str_ends_with($op, "and Open")) {
-        header('Location: do_text.php?start=' . $id);
+        header('Location: /text/read?start=' . $id);
         exit();
     }
     return $message;
@@ -563,7 +565,7 @@ function edit_texts_form($text, $annotated)
     <h2>
         <?php echo ($new_text ? "New" : "Edit") ?> Text
         <a target="_blank" href="docs/info.html#howtotext">
-            <img src="icn/question-frame.png" title="Help" alt="Help" />
+            <img src="/icn/question-frame.png" title="Help" alt="Help" />
         </a>
     </h2>
     <script type="text/javascript" charset="utf-8">
@@ -583,32 +585,32 @@ function edit_texts_form($text, $annotated)
     </script>
     <div class="flex-spaced">
         <div style="<?php echo ($new_text ? "display: none": ''); ?>">
-            <a href="edit_texts.php?new=1">
-                <img src="icn/plus-button.png">
+            <a href="/texts?new=1">
+                <img src="/icn/plus-button.png">
                 New Text
             </a>
         </div>
         <div>
-            <a href="long_text_import.php">
-                <img src="icn/plus-button.png">
+            <a href="/text/import-long">
+                <img src="/icn/plus-button.png">
                 Long Text Import
             </a>
         </div>
         <div>
-            <a href="do_feeds.php?page=1&amp;check_autoupdate=1">
-                <img src="icn/plus-button.png">
+            <a href="/feeds?page=1&amp;check_autoupdate=1">
+                <img src="/icn/plus-button.png">
                 Newsfeed Import
             </a>
         </div>
         <div>
-            <a href="edit_texts.php?query=&amp;page=1">
-                <img src="icn/drawer--plus.png">
+            <a href="/texts?query=&amp;page=1">
+                <img src="/icn/drawer--plus.png">
                 Active Texts
             </a>
         </div>
         <div style="<?php echo ($new_text ? "": 'display: none'); ?>">
-            <a href="edit_archivedtexts.php?query=&amp;page=1">
-                <img src="icn/drawer--minus.png">
+            <a href="/text/archived?query=&amp;page=1">
+                <img src="/icn/drawer--minus.png">
                 Archived Texts
             </a>
         </div>
@@ -626,7 +628,7 @@ function edit_texts_form($text, $annotated)
                     echo get_languages_selectoptions($text->lgid, "[Choose...]");
                     ?>
                     </select>
-                    <img src="icn/status-busy.png" title="Field must not be empty"
+                    <img src="/icn/status-busy.png" title="Field must not be empty"
                     alt="Field must not be empty" />
                 </td>
             </tr>
@@ -636,7 +638,7 @@ function edit_texts_form($text, $annotated)
                     <input type="text" class="notempty checkoutsidebmp respinput"
                     data_info="Title" name="TxTitle" id="TxTitle"
                     value="<?php echo tohtml($text->title); ?>" maxlength="200" />
-                    <img src="icn/status-busy.png" title="Field must not be empty"
+                    <img src="/icn/status-busy.png" title="Field must not be empty"
                     alt="Field must not be empty" />
                 </td>
             </tr>
@@ -650,7 +652,7 @@ function edit_texts_form($text, $annotated)
                 class="notempty checkbytes checkoutsidebmp respinput"
                 data_maxlength="65000" data_info="Text" rows="20"
                 ><?php echo tohtml($text->text); ?></textarea>
-                <img src="icn/status-busy.png" title="Field must not be empty"
+                <img src="/icn/status-busy.png" title="Field must not be empty"
                 alt="Field must not be empty" />
                 </td>
             </tr>
@@ -659,12 +661,12 @@ function edit_texts_form($text, $annotated)
                 <td class="td1">
                     <?php
                     if ($annotated) {
-                        echo '<img src="icn/tick.png" title="With Improved Annotation" alt="With Improved Annotation" /> '.
+                        echo '<img src="/icn/tick.png" title="With Improved Annotation" alt="With Improved Annotation" /> '.
                         'Exists - May be partially or fully lost if you change the text!<br />' .
-                        '<input type="button" value="Print/Edit..." onclick="location.href=\'print_impr_text.php?text=' .
+                        '<input type="button" value="Print/Edit..." onclick="location.href=\'/text/print?text=' .
                         $text->id . '\';" />';
                     } else {
-                        echo '<img src="icn/cross.png" title="No Improved Annotation" alt="No Improved Annotation" /> ' .
+                        echo '<img src="/icn/cross.png" title="No Improved Annotation" alt="No Improved Annotation" /> ' .
                         '- None | <input type="button" value="Create/Print..." onclick="location.href=\'print_impr_text.php?edit=1&amp;text=' .
                         $text->id . '\';" />';
                     }
@@ -705,7 +707,7 @@ function edit_texts_form($text, $annotated)
             <tr>
                 <td class="td1 right" colspan="2">
                     <input type="button" value="Cancel"
-                    onclick="{lwtFormCheck.resetDirty(); location.href='edit_texts.php<?php echo ($new_text ? '' : '#rec' . $text->id); ?>';}" />
+                    onclick="{lwtFormCheck.resetDirty(); location.href='/texts<?php echo ($new_text ? '' : '#rec' . $text->id); ?>';}" />
                     <input type="submit" name="op" value="Check" />
                     <input type="submit" name="op"
                     value="<?php echo ($new_text ? 'Save' : 'Change') ?>" />
@@ -793,16 +795,16 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
     <table class="tab2" cellspacing="0" cellpadding="5">
         <tr>
-            <th class="th1" colspan="4">Filter <img src="icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
-            <input type="button" value="Reset All" onclick="resetAll('edit_texts.php');" /></th>
+            <th class="th1" colspan="4">Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+            <input type="button" value="Reset All" onclick="resetAll('/texts');" /></th>
         </tr>
         <tr>
             <td class="td1 center" colspan="2">
                 Language:
-                <select name="filterlang" onchange="{setLang(document.form1.filterlang,'edit_texts.php');}"><?php echo get_languages_selectoptions($currentlang, '[Filter off]'); ?></select>
+                <select name="filterlang" onchange="{setLang(document.form1.filterlang,'/texts');}"><?php echo get_languages_selectoptions($currentlang, '[Filter off]'); ?></select>
             </td>
             <td class="td1 center" colspan="2">
-                <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='edit_texts.php?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
+                <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/texts?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
                     <option value="title,text"<?php
                     if($currentquerymode=="title,text") {
                         echo ' selected="selected"';
@@ -825,26 +827,26 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
                     echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
                 }?>
                 <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
-                <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val); location.href='edit_texts.php?page=1&amp;query=' + val;}" />&nbsp;
-                <input type="button" value="Clear" onclick="{location.href='edit_texts.php?page=1&amp;query=';}" />
+                <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val); location.href='/texts?page=1&amp;query=' + val;}" />&nbsp;
+                <input type="button" value="Clear" onclick="{location.href='/texts?page=1&amp;query=';}" />
             </td>
         </tr>
         <tr>
             <td class="td1 center" colspan="2">
                 Tag #1:
-                <select name="tag1" onchange="{val=document.form1.tag1.options[document.form1.tag1.selectedIndex].value; location.href='edit_texts.php?page=1&amp;tag1=' + val;}">
+                <select name="tag1" onchange="{val=document.form1.tag1.options[document.form1.tag1.selectedIndex].value; location.href='/texts?page=1&amp;tag1=' + val;}">
                     <?php echo get_texttag_selectoptions($currenttag1, $currentlang); ?>
                 </select>
             </td>
             <td class="td1 center">
                 Tag #1 ..
-                <select name="tag12" onchange="{val=document.form1.tag12.options[document.form1.tag12.selectedIndex].value; location.href='edit_texts.php?page=1&amp;tag12=' + val;}">
+                <select name="tag12" onchange="{val=document.form1.tag12.options[document.form1.tag12.selectedIndex].value; location.href='/texts?page=1&amp;tag12=' + val;}">
                     <?php echo get_andor_selectoptions($currenttag12); ?>
                 </select> .. Tag #2
             </td>
             <td class="td1 center">
                 Tag #2:
-                <select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='edit_texts.php?page=1&amp;tag2=' + val;}">
+                <select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='/texts?page=1&amp;tag2=' + val;}">
                     <?php echo get_texttag_selectoptions($currenttag2, $currentlang); ?>
                 </select>
             </td>
@@ -857,11 +859,11 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
                 <?php echo $recno; ?> Text<?php echo ($recno==1?'':'s'); ?>
             </th>
             <th class="th1" colspan="1">
-                <?php makePager($currentpage, $pages, 'edit_texts.php', 'form1'); ?>
+                <?php makePager($currentpage, $pages, '/texts', 'form1'); ?>
             </th>
             <th class="th1" colspan="1">
                 Sort Order:
-                <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='edit_texts.php?page=1&amp;sort=' + val;}">
+                <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/texts?page=1&amp;sort=' + val;}">
                     <?php echo get_textssort_selectoptions($currentsort); ?>
                 </select>
             </th>
@@ -906,7 +908,7 @@ function edit_texts_other_pages($recno)
             <?php echo $recno; ?> Text<?php echo ($recno==1?'':'s'); ?>
         </th>
         <th class="th1">
-            <?php makePager($currentpage, $pages, 'edit_texts.php', 'form2'); ?>
+            <?php makePager($currentpage, $pages, '/texts', 'form2'); ?>
         </th>
     </tr>
 </table>
@@ -944,25 +946,25 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
             </a>
         </td>
         <td class="td1 center">
-            <a href="do_text.php?start=<?php echo $txid; ?>">
-                <img src="icn/book-open-bookmark.png" title="Read" alt="Read" />
+            <a href="/text/read?start=<?php echo $txid; ?>">
+                <img src="/icn/book-open-bookmark.png" title="Read" alt="Read" />
             </a>
-            <a href="do_test.php?text=<?php echo $txid; ?>">
-                <img src="icn/question-balloon.png" title="Test" alt="Test" />
+            <a href="/test?text=<?php echo $txid; ?>">
+                <img src="/icn/question-balloon.png" title="Test" alt="Test" />
             </a>
         </td>
         <td class="td1 center">
-            <a href="print_text.php?text=<?php echo $txid; ?>">
-                <img src="icn/printer.png" title="Print" alt="Print" />
+            <a href="/text/print-plain?text=<?php echo $txid; ?>">
+                <img src="/icn/printer.png" title="Print" alt="Print" />
             </a>
             <a href="<?php echo $_SERVER['PHP_SELF']; ?>?arch=<?php echo $txid; ?>">
-                <img src="icn/inbox-download.png" title="Archive" alt="Archive" />
+                <img src="/icn/inbox-download.png" title="Archive" alt="Archive" />
             </a>
             <a href="<?php echo $_SERVER['PHP_SELF']; ?>?chg=<?php echo $txid; ?>">
-                <img src="icn/document--pencil.png" title="Edit" alt="Edit" />
+                <img src="/icn/document--pencil.png" title="Edit" alt="Edit" />
             </a>
             <span class="click" onclick="if (confirmDelete()) location.href='<?php echo $_SERVER['PHP_SELF']; ?>?del=<?php echo $txid; ?>';">
-                <img src="icn/minus-button.png" title="Delete" alt="Delete" />
+                <img src="/icn/minus-button.png" title="Delete" alt="Delete" />
             </span>
         </td>
     <?php
@@ -982,8 +984,8 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
         </a>';
     }
     if ($txrecord['annotlen']) {
-        echo ' <a href="print_impr_text.php?text=' . $txid . '">
-            <img src="icn/tick.png" title="Annotated Text available" alt="Annotated Text available" />
+        echo ' <a href="/text/print?text=' . $txid . '">
+            <img src="/icn/tick.png" title="Annotated Text available" alt="Annotated Text available" />
         </a>';
     }
     echo '</td>';
@@ -996,7 +998,7 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
     <td class="td1 center">
         <span title="Saved" data_id="<?php echo $txid; ?>">
             <a class="status4" id="saved_<?php echo $txid; ?>"
-            href="edit_words.php?page=1&amp;query=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=&amp;text_mode=0&amp;text=<?php echo $txid; ?>">
+            href="/words/edit?page=1&amp;query=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=&amp;text_mode=0&amp;text=<?php echo $txid; ?>">
             </a>
         </span>
     </td>
@@ -1056,7 +1058,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
     <tr>
         <th class="th1" colspan="2">
             Multi Actions
-            <img src="icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
+            <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
         </th>
     </tr>
     <tr>
@@ -1087,7 +1089,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
             Src.Link:&nbsp;
             <img src="<?php print_file_path('icn/chain.png'); ?>" title="Source Link available" alt="Source Link available" />,
             Ann.Text:&nbsp;
-            <img src="icn/tick.png" title="Annotated Text available" alt="Annotated Text available" />
+            <img src="/icn/tick.png" title="Annotated Text available" alt="Annotated Text available" />
         </th>
         <th class="th1 sorttable_numeric clickable">
             Total<br />Words<br />
@@ -1222,25 +1224,25 @@ function edit_texts_display($message)
 <div class="flex-spaced">
     <div>
         <a href="<?php echo $_SERVER['PHP_SELF']; ?>?new=1">
-            <img src="icn/plus-button.png">
+            <img src="/icn/plus-button.png">
             New Text
         </a>
     </div>
     <div>
-        <a href="long_text_import.php">
-            <img src="icn/plus-button.png">
+        <a href="/text/import-long">
+            <img src="/icn/plus-button.png">
             Long Text Import
         </a>
     </div>
     <div>
-        <a href="do_feeds.php?page=1&amp;check_autoupdate=1">
-            <img src="icn/plus-button.png">
+        <a href="/feeds?page=1&amp;check_autoupdate=1">
+            <img src="/icn/plus-button.png">
             Newsfeed Import
         </a>
     </div>
     <div>
-        <a href="edit_archivedtexts.php?query=&amp;page=1">
-            <img src="icn/drawer--minus.png">
+        <a href="/text/archived?query=&amp;page=1">
+            <img src="/icn/drawer--minus.png">
             Archived Texts
         </a>
     </div>

@@ -260,7 +260,7 @@ function tts_js()
 
         clickCancel: function() {
             lwtFormCheck.resetDirty();
-            location.href = 'text_to_speech_settings.php';
+            location.href = '/admin/settings/tts';
         }
     };
 

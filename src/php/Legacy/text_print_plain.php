@@ -151,14 +151,14 @@ pagestart_nobody('Print');
         <?php echo getPreviousAndNextTextLinks($textid, 'print_text.php?text=', false, ''); ?>
     </div>
 <div>
-<a href="do_text.php?start=<?php echo $textid; ?>" target="_top">
-<img src="icn/book-open-bookmark.png" title="Read" alt="Read" /></a>
-<a href="do_test.php?text=<?php echo $textid; ?>" target="_top">
-<img src="icn/question-balloon.png" title="Test" alt="Test" />
+<a href="/text/read?start=<?php echo $textid; ?>" target="_top">
+<img src="/icn/book-open-bookmark.png" title="Read" alt="Read" /></a>
+<a href="/test?text=<?php echo $textid; ?>" target="_top">
+<img src="/icn/question-balloon.png" title="Test" alt="Test" />
 </a>
 <?php echo get_annotation_link($textid); ?>
-<a target="_top" href="edit_texts.php?chg=<?php echo $textid; ?>">
-<img src="icn/document--pencil.png" title="Edit Text" alt="Edit Text" />
+<a target="_top" href="/texts?chg=<?php echo $textid; ?>">
+<img src="/icn/document--pencil.png" title="Edit Text" alt="Edit Text" />
 </a>
 </div>
 <div>
@@ -204,7 +204,7 @@ if (((int)get_first_value("select length(TxAnnotatedText) as value from {$tbpref
     ?>
     <input type="button" value="Create"
     onclick="location.href='print_impr_text.php?edit=1&amp;text=<?php echo $textid; ?>';" /> an
-    <b>Improved Annotated Text</b> [<img src="icn/tick.png" title="Annotated Text" alt="Annotated Text" />]."
+    <b>Improved Annotated Text</b> [<img src="/icn/tick.png" title="Annotated Text" alt="Annotated Text" />]."
     <?php
 }
 ?>

@@ -13,6 +13,8 @@
  * @since   2.7.0
  */
 
+namespace Lwt\Classes;
+
 /**
  * A language represented as an object.
  *

@@ -3,7 +3,7 @@
 /**
  * Manage terms
  *
- * Call: edit_words.php?....
+ * Call: /words/edit?....
  *  ... markaction=[opcode] ... do actions on marked terms
  *  ... allaction=[opcode] ... do actions on all terms
  *  ... del=[wordid] ... do delete
@@ -698,7 +698,7 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
     <td class="td1">
         <input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp"
         data_info="Term" type="text" name="WoText" id="wordfield" value="" maxlength="250" />
-        <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
+        <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
     </tr>
     <?php print_similar_terms_tabrow(); ?>
     <tr>
@@ -732,7 +732,7 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
     'document.forms[\'newword\'].WoSentence',
     'document.forms[\'newword\'].WoText'); ?>
         &nbsp; &nbsp;
-    <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='edit_words.php';}" />
+    <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/words/edit';}" />
     <input type="submit" name="op" value="Save" /></td>
     </tr>
     </table>
@@ -772,7 +772,7 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
      </tr>
      <tr title="Normally only change uppercase/lowercase here!">
         <td class="td1 right">Term:</td>
-        <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="wordfield" value="<?php echo tohtml($record['WoText']); ?>" maxlength="250" size="40" /> <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="wordfield" value="<?php echo tohtml($record['WoText']); ?>" maxlength="250" size="40" /> <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
         <?php print_similar_terms_tabrow(); ?>
@@ -809,7 +809,7 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
         <td class="td1 right" colspan="2">  &nbsp;
             <?php echo createDictLinksInEditWin2($record['WoLgID'], 'document.forms[\'editword\'].WoSentence', 'document.forms[\'editword\'].WoText'); ?>
             &nbsp; &nbsp;
-            <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='edit_words.php#rec<?php echo $_REQUEST['chg']; ?>';}" />
+            <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/words/edit#rec<?php echo $_REQUEST['chg']; ?>';}" />
             <input type="submit" name="op" value="Change" />
         </td>
      </tr>
@@ -866,11 +866,11 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
 
     if ($currentlang != '') {
     ?>
-   <p><a href="<?php echo $_SERVER['PHP_SELF']; ?>?new=1&amp;lang=<?php echo $currentlang; ?>"><img src="icn/plus-button.png" title="New" alt="New" /> New <?php echo tohtml(getLanguage($currentlang)); ?> Term ...</a></p>
+   <p><a href="<?php echo $_SERVER['PHP_SELF']; ?>?new=1&amp;lang=<?php echo $currentlang; ?>"><img src="/icn/plus-button.png" title="New" alt="New" /> New <?php echo tohtml(getLanguage($currentlang)); ?> Term ...</a></p>
 <?php
     } else {
     ?>
-   <p><img src="icn/plus-button.png" title="New" alt="New" /> New Term? - Set Language Filter first ...</p>
+   <p><img src="/icn/plus-button.png" title="New" alt="New" /> New Term? - Set Language Filter first ...</p>
     <?php
     }
 ?>
@@ -878,30 +878,30 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
-<th class="th1" colspan="4">Filter <img src="icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
-<input type="button" value="Reset All" onclick="resetAll('edit_words.php');" /></th>
+<th class="th1" colspan="4">Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+<input type="button" value="Reset All" onclick="resetAll('/words/edit');" /></th>
 </tr>
 <tr>
 <td class="td1 center" colspan="2">
 Language:
-<select name="filterlang" onchange="{setLang(document.form1.filterlang,'edit_words.php');}"><?php	echo get_languages_selectoptions($currentlang, '[Filter off]'); ?></select>
+<select name="filterlang" onchange="{setLang(document.form1.filterlang,'/words/edit');}"><?php	echo get_languages_selectoptions($currentlang, '[Filter off]'); ?></select>
 </td>
 <td class="td1 center" colspan="2">
-<select name="text_mode" onchange="{val=document.form1.text_mode.value; location.href='edit_words.php?page=1&amp;texttag=&amp;text=&amp;text_mode=' + val;}">
+<select name="text_mode" onchange="{val=document.form1.text_mode.value; location.href='/words/edit?page=1&amp;texttag=&amp;text=&amp;text_mode=' + val;}">
 <option value="0"<?php if($currenttextmode=="0") { echo ' selected="selected"';
 } ?>>Text:</option>
 <option value="1"<?php if($currenttextmode=="1") { echo ' selected="selected"';
 } ?>>Text Tag:</option>
 </select>
-<select name="text" onchange="{val=document.form1.text.options[document.form1.text.selectedIndex].value; location.href='edit_words.php?page=1&amp;text=' + val;}"><?php echo ($currenttextmode!=1)?(get_texts_selectoptions($currentlang, $currenttext)):(get_txtag_selectoptions($currentlang, $currenttexttag)); ?></select>
+<select name="text" onchange="{val=document.form1.text.options[document.form1.text.selectedIndex].value; location.href='/words/edit?page=1&amp;text=' + val;}"><?php echo ($currenttextmode!=1)?(get_texts_selectoptions($currentlang, $currenttext)):(get_txtag_selectoptions($currentlang, $currenttexttag)); ?></select>
 </td>
 </tr>
 <tr>
 <td class="td1 center" colspan="2" nowrap="nowrap">
 Status:
-<select name="status" onchange="{val=document.form1.status.options[document.form1.status.selectedIndex].value; location.href='edit_words.php?page=1&amp;status=' + val;}"><?php echo get_wordstatus_selectoptions($currentstatus, true, false); ?></select>
+<select name="status" onchange="{val=document.form1.status.options[document.form1.status.selectedIndex].value; location.href='/words/edit?page=1&amp;status=' + val;}"><?php echo get_wordstatus_selectoptions($currentstatus, true, false); ?></select>
 </td>
-<td class="td1 center" colspan="2" nowrap="nowrap"><select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='edit_words.php?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
+<td class="td1 center" colspan="2" nowrap="nowrap"><select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/words/edit?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
 <option value="term,rom,transl"<?php if($currentquerymode=="term,rom,transl") { echo ' selected="selected"';
 } ?>>Term, Rom., Transl.</option>
 <option disabled="disabled">------------</option>
@@ -924,21 +924,21 @@ if($currentregexmode=='') { echo '<span style="vertical-align: middle"> (Wildc.=
 } else { echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
 }?>
 <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
-<input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val);mode=document.form1.query_mode.value; location.href='edit_words.php?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}" />&nbsp;
-<input type="button" value="Clear" onclick="{location.href='edit_words.php?page=1&amp;query=';}" />
+<input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val);mode=document.form1.query_mode.value; location.href='/words/edit?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}" />&nbsp;
+<input type="button" value="Clear" onclick="{location.href='/words/edit?page=1&amp;query=';}" />
 </td>
 </tr>
 <tr>
 <td class="td1 center" colspan="2" nowrap="nowrap">
 Tag #1:
-<select name="tag1" onchange="{val=document.form1.tag1.options[document.form1.tag1.selectedIndex].value; location.href='edit_words.php?page=1&amp;tag1=' + val;}"><?php echo get_tag_selectoptions($currenttag1, $currentlang); ?></select>
+<select name="tag1" onchange="{val=document.form1.tag1.options[document.form1.tag1.selectedIndex].value; location.href='/words/edit?page=1&amp;tag1=' + val;}"><?php echo get_tag_selectoptions($currenttag1, $currentlang); ?></select>
 </td>
 <td class="td1 center" nowrap="nowrap">
-Tag #1 .. <select name="tag12" onchange="{val=document.form1.tag12.options[document.form1.tag12.selectedIndex].value; location.href='edit_words.php?page=1&amp;tag12=' + val;}"><?php echo get_andor_selectoptions($currenttag12); ?></select> .. Tag #2
+Tag #1 .. <select name="tag12" onchange="{val=document.form1.tag12.options[document.form1.tag12.selectedIndex].value; location.href='/words/edit?page=1&amp;tag12=' + val;}"><?php echo get_andor_selectoptions($currenttag12); ?></select> .. Tag #2
 </td>
 <td class="td1 center" nowrap="nowrap">
 Tag #2:
-<select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='edit_words.php?page=1&amp;tag2=' + val;}"><?php echo get_tag_selectoptions($currenttag2, $currentlang); ?></select>
+<select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='/words/edit?page=1&amp;tag2=' + val;}"><?php echo get_tag_selectoptions($currenttag2, $currentlang); ?></select>
 </td>
 </tr>
 <?php if($recno > 0) { ?>
@@ -946,10 +946,10 @@ Tag #2:
 <th class="th1" colspan="2" nowrap="nowrap">
 <?php echo $recno; ?> Term<?php echo ($recno==1?'':'s'); ?>
 </th><th class="th1" colspan="1" nowrap="nowrap">
-<?php makePager($currentpage, $pages, 'edit_words.php', 'form1'); ?>
+<?php makePager($currentpage, $pages, '/words/edit', 'form1'); ?>
 </th><th class="th1" nowrap="nowrap">
 Sort Order:
-<select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='edit_words.php?page=1&amp;sort=' + val;}"><?php echo get_wordssort_selectoptions($currentsort); ?></select>
+<select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/words/edit?page=1&amp;sort=' + val;}"><?php echo get_wordssort_selectoptions($currentsort); ?></select>
 </th></tr>
 <?php
 } ?>
@@ -967,7 +967,7 @@ if ($recno==0) {
 <input type="hidden" name="data" value="" />
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr><th class="th1 center" colspan="2">
-Multi Actions <img src="icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
+Multi Actions <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" />
 </th></tr>
 <tr><td class="td1 center" colspan="2">
 <b>ALL</b> <?php echo ($recno == 1 ? '1 Term' : $recno . ' Terms'); ?>:&nbsp;
@@ -1094,13 +1094,13 @@ while ($record = mysqli_fetch_assoc($res)) {
     }
     $score = $record['Score'];
     if ($score < 0 ) {
-        $score='<span class="scorered">0 <img src="icn/status-busy.png" title="Test today!" alt="Test today!" /></span>';
+        $score='<span class="scorered">0 <img src="/icn/status-busy.png" title="Test today!" alt="Test today!" /></span>';
     } else {
-        $score='<span class="scoregreen">' . floor((int)$score) . ($record['Score2'] < 0 ? ' <img src="icn/status-away.png" title="Test tomorrow!" alt="Test tomorrow!" />' : ' <img src="icn/status.png" title="-" alt="-" />') . '</span>';
+        $score='<span class="scoregreen">' . floor((int)$score) . ($record['Score2'] < 0 ? ' <img src="/icn/status-away.png" title="Test tomorrow!" alt="Test tomorrow!" />' : ' <img src="/icn/status.png" title="-" alt="-" />') . '</span>';
     }
     echo '<tr>';
     echo '<td class="td1 center"><a name="rec' . $record['WoID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['WoID'] . '" ' . checkTest($record['WoID'], 'marked') . ' /></a></td>';
-    echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="' . $_SERVER['PHP_SELF'] . '?chg=' . $record['WoID'] . '"><img src="icn/sticky-note--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="' . $_SERVER['PHP_SELF'] . '?del=' . $record['WoID'] . '"><img src="icn/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';
+    echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="' . $_SERVER['PHP_SELF'] . '?chg=' . $record['WoID'] . '"><img src="/icn/sticky-note--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="' . $_SERVER['PHP_SELF'] . '?del=' . $record['WoID'] . '"><img src="/icn/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';
     if ($currentlang == '') {
         echo '<td class="td1 center">' . tohtml($record['LgName']) . '</td>';
     }
@@ -1113,7 +1113,7 @@ while ($record = mysqli_fetch_assoc($res)) {
     }
     echo ($record['LgRightToLeft'] ? ' dir="rtl" ' : '') . '>' . tohtml($record['WoText']) . '</span>' . ($record['WoRomanization'] != '' ? (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">' . tohtml(repl_tab_nl($record['WoRomanization'])) . '</span>') : (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">*</span>')) . '</td>';
     echo '<td class="td1"><span id="trans' . $record['WoID'] . '" class="edit_area clickedit">' . tohtml(repl_tab_nl($record['WoTranslation'])) . '</span> <span class="smallgray2">' . tohtml($record['taglist']) . '</span></td>';
-    echo '<td class="td1 center"><b>' . ($record['SentOK']!=0 ? '<img src="icn/status.png" title="' . tohtml($record['WoSentence']) . '" alt="Yes" />' : '<img src="icn/status-busy.png" title="(No valid sentence)" alt="No" />') . '</b></td>';
+    echo '<td class="td1 center"><b>' . ($record['SentOK']!=0 ? '<img src="/icn/status.png" title="' . tohtml($record['WoSentence']) . '" alt="Yes" />' : '<img src="/icn/status-busy.png" title="(No valid sentence)" alt="No" />') . '</b></td>';
     echo '<td class="td1 center" title="' . tohtml(get_status_name($record['WoStatus'])) . '">' . tohtml(get_status_abbr($record['WoStatus'])) . ($record['WoStatus'] < 98 ? '/' . $days : '') . '</td>';
     echo '<td class="td1 center" nowrap="nowrap">' . $score . '</td>';
     if ($currentsort == 7) {
@@ -1140,7 +1140,7 @@ mysqli_free_result($res);
             <?php echo $recno; ?> Term<?php echo ($recno==1?'':'s'); ?>
         </th>
         <th class="th1" nowrap="nowrap">
-            <?php makePager($currentpage, $pages, 'edit_words.php', 'form2'); ?>
+            <?php makePager($currentpage, $pages, '/words/edit', 'form2'); ?>
         </th>
     </tr>
 </table>

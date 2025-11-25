@@ -398,7 +398,7 @@ method="post" onsubmit="return confirm('Are you sure?');">
             <p class="right">
                 &nbsp;<br />
                 <input type="button" value="Install LWT Demo Database"
-                onclick="location.href='install_demo.php';" />
+                onclick="location.href='/admin/install-demo';" />
             </p>
         </td>
     </tr>

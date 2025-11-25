@@ -60,7 +60,7 @@ function do_header_row($textid, $langid): void
     ?>
 <div class="flex-header">
     <div>
-    <a href="edit_texts.php" target="_top">
+    <a href="/texts" target="_top">
         <?php echo_lwt_logo(); ?>
     </a>
     </div>
@@ -68,30 +68,30 @@ function do_header_row($textid, $langid): void
         <?php
         echo getPreviousAndNextTextLinks(
             $textid,
-            'do_text.php?start=',
+            '/text/read?start=',
             false,
             ''
         );
     ?>
     </div>
     <div>
-        <a href="do_test.php?text=<?php echo $textid; ?>" target="_top">
-            <img src="icn/question-balloon.png" title="Test" alt="Test" />
+        <a href="/test?text=<?php echo $textid; ?>" target="_top">
+            <img src="/icn/question-balloon.png" title="Test" alt="Test" />
         </a>
-        <a href="print_text.php?text=<?php echo $textid; ?>" target="_top">
-            <img src="icn/printer.png" title="Print" alt="Print" />
+        <a href="/text/print-plain?text=<?php echo $textid; ?>" target="_top">
+            <img src="/icn/printer.png" title="Print" alt="Print" />
         </a>
         <?php echo get_annotation_link($textid); ?>
-        <a target="_top" href="edit_texts.php?chg=<?php echo $textid; ?>">
-            <img src="icn/document--pencil.png" title="Edit Text" alt="Edit Text" />
+        <a target="_top" href="/texts?chg=<?php echo $textid; ?>">
+            <img src="/icn/document--pencil.png" title="Edit Text" alt="Edit Text" />
         </a>
     </div>
     <div>
         <a
-            href="new_word.php?text=<?php echo $textid; ?>&amp;lang=<?php echo $langid; ?>"
+            href="/word/new?text=<?php echo $textid; ?>&amp;lang=<?php echo $langid; ?>"
             target="ro" onclick="showRightFrames();"
         >
-            <img src="icn/sticky-note--plus.png" title="New Term" alt="New Term" />
+            <img src="/icn/sticky-note--plus.png" title="New Term" alt="New Term" />
         </a>
     </div>
     <div>

@@ -38,7 +38,7 @@ function dummy_function_1(): array
             if ($edit_text==1) {
                 $count++;
             } else {
-                echo '<form class="validate" action="do_feeds.php" method="post">';
+                echo '<form class="validate" action="/feeds" method="post">';
                 $edit_text=1;
             }
         }
@@ -86,7 +86,7 @@ function dummy_function_1(): array
         </td>
         <td class="td1">
             <input type="text" class="notempty" name="feed[<?php echo $count; ?>][TxTitle]" value="<?php echo tohtml($text['TxTitle']); ?>" maxlength="200" size="60" />
-            <img src="icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <img src="/icn/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
     <tr>
@@ -118,7 +118,7 @@ function dummy_function_1(): array
             name="feed[<?php echo $count; ?>][TxText]" class="notempty checkbytes"
             cols="60" rows="20"
             ><?php echo tohtml($text['TxText']); ?></textarea>
-            <img src="icn/status-busy.png" title="Field must not be empty"
+            <img src="/icn/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
     </tr>
@@ -280,7 +280,7 @@ function dummy_function_1(): array
     if ($edit_text==1) {
         ?>
    <input id="markaction" type="submit" value="Save" />
-   <input type="button" value="Cancel" onclick="location.href='do_feeds.php';" />
+   <input type="button" value="Cancel" onclick="location.href='/feeds';" />
    <input type="hidden" name="checked_feeds_save" value="1" />
    </form>
 
@@ -402,26 +402,26 @@ function dummy_function_2($currentlang, $currentfeed): void
 
 <div class="flex-spaced">
     <div title="Import of a single text, max. 65,000 bytes long, with optional audio">
-        <a href="edit_feeds.php?new_feed=1">
-            <img src="icn/feed--plus.png">
+        <a href="/feeds/edit?new_feed=1">
+            <img src="/icn/feed--plus.png">
             New Feed
         </a>
     </div>
     <div>
-        <a href="edit_feeds.php?manage_feeds=1">
-            <img src="icn/plus-button.png" title="manage feeds" alt="manage feeds" />
+        <a href="/feeds/edit?manage_feeds=1">
+            <img src="/icn/plus-button.png" title="manage feeds" alt="manage feeds" />
             Manage Feeds
         </a>
     </div>
     <div>
-        <a href="edit_texts.php?query=&amp;page=1">
-            <img src="icn/drawer--plus.png">
+        <a href="/texts?query=&amp;page=1">
+            <img src="/icn/drawer--plus.png">
             Active Texts
         </a>
     </div>
     <div>
-        <a href="edit_archivedtexts.php?query=&amp;page=1">
-            <img src="icn/drawer--minus.png">
+        <a href="/text/archived?query=&amp;page=1">
+            <img src="/icn/drawer--minus.png">
             Archived Texts
         </a>
     </div>
@@ -429,19 +429,19 @@ function dummy_function_2($currentlang, $currentfeed): void
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab2" cellspacing="0" cellpadding="5"><tr>
     <th class="th1" colspan="4">
-        Filter <img src="icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
-        <input type="button" value="Reset All" onclick="resetAll('do_feeds.php');" />
+        Filter <img src="/icn/funnel.png" title="Filter" alt="Filter" />&nbsp;
+        <input type="button" value="Reset All" onclick="resetAll('/feeds');" />
     </th>
     </tr>
     <tr>
         <td class="td1 center" style="width:30%;">
             Language:&nbsp;
-            <select name="filterlang" onchange="{setLang(document.form1.filterlang,'do_feeds.php?page=1%26selected_feed=0');}">
+            <select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds?page=1%26selected_feed=0');}">
                 <?php echo get_languages_selectoptions($currentlang, '[Filter off]'); ?>
             </select>
         </td>
         <td class="td1 center" colspan="3">
-            <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='do_feeds.php?page=1&amp;query=' + val + '&amp;query_mode=' + mode;return false;}">
+            <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/feeds?page=1&amp;query=' + val + '&amp;query_mode=' + mode;return false;}">
                 <option value="title,desc,text"<?php
                 if ($currentquerymode=="title,desc,text") {
                     echo ' selected="selected"';
@@ -464,8 +464,8 @@ function dummy_function_2($currentlang, $currentfeed): void
             ?>
             </span>
             <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
-            <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val); location.href='do_feeds.php?page=1&amp;query=' + val;return false;}" />&nbsp;
-            <input type="button" value="Clear" onclick="{location.href='do_feeds.php?page=1&amp;query=';return false;}" />
+            <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val); location.href='/feeds?page=1&amp;query=' + val;return false;}" />&nbsp;
+            <input type="button" value="Clear" onclick="{location.href='/feeds?page=1&amp;query=';return false;}" />
         </td>
     </tr>
     <tr>
@@ -486,7 +486,7 @@ function dummy_function_2($currentlang, $currentfeed): void
         }
         if (mysqli_data_seek($result, 0)) {
             ?>Newsfeed:
-    <select name="selected_feed" onchange="{val=document.form1.selected_feed.value;location.href='do_feeds.php?page=1&amp;selected_feed=' + val;return false;}">
+    <select name="selected_feed" onchange="{val=document.form1.selected_feed.value;location.href='/feeds?page=1&amp;selected_feed=' + val;return false;}">
         <option value="0">[Filter off]</option>
                 <?php
                 $feeds_list = '';
@@ -511,9 +511,9 @@ function dummy_function_2($currentlang, $currentfeed): void
 
                 if (strpos($currentfeed, ',')===false) {
                     echo '<a href="' . $_SERVER['PHP_SELF'] . '?page=1&amp;load_feed=1&amp;selected_feed=' . $currentfeed . '">
-        <span title="update feed"><img src="icn/arrow-circle-135.png" alt="-" /></span></a>';
+        <span title="update feed"><img src="/icn/arrow-circle-135.png" alt="-" /></span></a>';
                 } else {
-                    echo '<a href="edit_feeds.php?multi_load_feed=1&amp;selected_feed=' . $currentfeed . '">
+                    echo '<a href="/feeds/edit?multi_load_feed=1&amp;selected_feed=' . $currentfeed . '">
         update multiple feeds</a>';
                 }
                 if ($time) {
@@ -547,18 +547,18 @@ function dummy_function_2($currentlang, $currentfeed): void
                     }
                     echo '<tr><th class="th1" style="width:30%;"> '. $total=$recno .' articles ';///
                     echo '</th><th class="th1">';
-                    makePager($currentpage, $pages, 'do_feeds.php', 'form1');
+                    makePager($currentpage, $pages, '/feeds', 'form1');
                     ?>
   </th>
   <th class="th1" colspan="2" nowrap="nowrap">
   Sort Order:
-  <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='do_feeds.php?page=1&amp;sort=' + val;return false;}"><?php echo get_textssort_selectoptions($currentsort); ?></select>
+  <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/feeds?page=1&amp;sort=' + val;return false;}"><?php echo get_textssort_selectoptions($currentsort); ?></select>
   </th>
   </tr>
   </table></form>
   <form name="form2" action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
   <table class="tab2" cellspacing="0" cellpadding="5">
-  <tr><th class="th1" colspan="2">Multi Actions <img src="icn/lightning.png" title="Multi Actions" alt="Multi Actions" /></th></tr>
+  <tr><th class="th1" colspan="2">Multi Actions <img src="/icn/lightning.png" title="Multi Actions" alt="Multi Actions" /></th></tr>
   <tr><td class="td1 center" style="width:30%;">
   <input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
   <input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
@@ -588,16 +588,16 @@ function dummy_function_2($currentlang, $currentfeed): void
                     while ($row = mysqli_fetch_assoc($result)) {
                         echo '<tr>';
                         if ($row['TxID']) {
-                            echo '<td class="td1 center"><a href="do_text.php?start=' .
+                            echo '<td class="td1 center"><a href="/text/read?start=' .
                             $row['TxID'] . '" >
-                            <img src="icn/book-open-bookmark.png" title="Read" alt="-" /></a>';
+                            <img src="/icn/book-open-bookmark.png" title="Read" alt="-" /></a>';
                         } elseif ($row['AtID']) {
-                            echo '<td class="td1 center"><span title="archived"><img src="icn/status-busy.png" alt="-" /></span>';
+                            echo '<td class="td1 center"><span title="archived"><img src="/icn/status-busy.png" alt="-" /></span>';
                         } elseif (!empty($row['FlLink']) && str_starts_with((string) $row['FlLink'], ' ')) {
                             echo '<td class="td1 center">
                             <img class="not_found" name="' .
                             $row['FlID'] .
-                            '" title="download error" src="icn/exclamation-button.png" alt="-" />';
+                            '" title="download error" src="/icn/exclamation-button.png" alt="-" />';
                         } else {
                             echo '<td class="td1 center"><input type="checkbox" class="markcheck" name="marked_items[]" value="' .
                             $row['FlID'] . '" />';
@@ -620,7 +620,7 @@ function dummy_function_2($currentlang, $currentfeed): void
                             echo '<a href="' . trim((string) $row['FlLink']) . '"  title="' .
                             trim((string) $row['FlLink']) . '" onclick="window.open(\'' .
                             $row['FlLink'] . '\');return false;">
-                            <img src="icn/external.png" alt="-" /></a>';
+                            <img src="/icn/external.png" alt="-" /></a>';
                         }
                         echo  '</td><td class="td1 center">' . $row['FlDate'] . '</td></tr>';
                     }
@@ -633,7 +633,7 @@ function dummy_function_2($currentlang, $currentfeed): void
             <tr><th class="th1" style="width:30%;">';
                         echo $total;
                         echo '</th><th class="th1">';
-                        makePager($currentpage, $pages, 'do_feeds.php', 'form3');
+                        makePager($currentpage, $pages, '/feeds', 'form3');
                         echo '</th></tr></table></form>';
                     }
                 } else {

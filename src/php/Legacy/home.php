@@ -72,9 +72,9 @@ function get_span_groups(): array
         $span1 = '<span>';
         $span3 = '<span>';
     } else {
-        $span1 = '<span title="Manage Table Sets" onclick="location.href=\'table_set_management.php\';" class="click">';
+        $span1 = '<span title="Manage Table Sets" onclick="location.href=\'/admin/tables\';" class="click">';
         if (count(getprefixes()) > 0) {
-            $span3 = '<span title="Select Table Set" onclick="location.href=\'start.php\';" class="click">';
+            $span3 = '<span title="Select Table Set" onclick="location.href=\'/mobile/start\';" class="click">';
         } else {
             $span3 = '<span>';
         }
@@ -115,23 +115,23 @@ function do_current_text_info($textid)
     Last Text (<?php echo tohtml($lngname); ?>):<br />
     <i><?php echo tohtml($txttit); ?></i>
     <br />
-    <a href="do_text.php?start=<?php echo $textid; ?>">
-        <img src="icn/book-open-bookmark.png" title="Read" alt="Read" />&nbsp;Read
+    <a href="/text/read?start=<?php echo $textid; ?>">
+        <img src="/icn/book-open-bookmark.png" title="Read" alt="Read" />&nbsp;Read
     </a>
     &nbsp; &nbsp;
-    <a href="do_test.php?text=<?php echo $textid; ?>">
-        <img src="icn/question-balloon.png" title="Test" alt="Test" />&nbsp;Test
+    <a href="/test?text=<?php echo $textid; ?>">
+        <img src="/icn/question-balloon.png" title="Test" alt="Test" />&nbsp;Test
     </a>
     &nbsp; &nbsp;
-    <a href="print_text.php?text=<?php echo $textid; ?>">
-        <img src="icn/printer.png" title="Print" alt="Print" />&nbsp;Print
+    <a href="/text/print-plain?text=<?php echo $textid; ?>">
+        <img src="/icn/printer.png" title="Print" alt="Print" />&nbsp;Print
     </a>
     <?php
     if ($annotated) {
         ?>
     &nbsp; &nbsp;
-    <a href="print_impr_text.php?text=<?php echo $textid; ?>">
-        <img src="icn/tick.png" title="Improved Annotated Text" alt="Improved Annotated Text" />&nbsp;Ann. Text
+    <a href="/text/print?text=<?php echo $textid; ?>">
+        <img src="/icn/tick.png" title="Improved Annotated Text" alt="Improved Annotated Text" />&nbsp;Ann. Text
     </a>
         <?php
     }
@@ -149,7 +149,7 @@ function do_language_selectable($langid)
 {
     ?>
 <div for="filterlang">Language:
-    <select id="filterlang" onchange="{setLang(document.getElementById('filterlang'),'index.php');}">
+    <select id="filterlang" onchange="{setLang(document.getElementById('filterlang'),'/');}"">
         <?php echo get_languages_selectoptions($langid, '[Select...]'); ?>
     </select>
 </div>
@@ -167,7 +167,7 @@ function wordpress_logout_link()
         ?>
 
 <div class="menu">
-    <a href="wp_lwt_stop.php">
+    <a href="/wordpress/stop">
         <span style="font-size:115%; font-weight:bold; color:red;">LOGOUT</span> (from WordPress and LWT)
     </a>
 </div>
@@ -343,8 +343,8 @@ function index_do_main_page()
         if ($langcnt == 0) {
             ?>
         <div><p>Hint: The database seems to be empty.</p></div>
-        <a href="install_demo.php">Install the LWT demo database</a>
-        <a href="edit_languages.php?new=1">Define the first language you want to learn</a>
+        <a href="/admin/install-demo">Install the LWT demo database</a>
+        <a href="/languages?new=1">Define the first language you want to learn</a>
             <?php
         } else if ($langcnt > 0) {
             do_language_selectable($currentlang);
@@ -353,39 +353,39 @@ function index_do_main_page()
             }
         }
         ?>
-            <a href="edit_languages.php">Languages</a>
+            <a href="/languages">Languages</a>
     </div>
 
     <div class="menu">
-        <a href="edit_texts.php">Texts</a>
-        <a href="edit_archivedtexts.php">Text Archive</a>
+        <a href="/texts">Texts</a>
+        <a href="/text/archived">Text Archive</a>
 
-        <a href="edit_texttags.php">Text Tags</a>
-        <a href="check_text.php">Check Text</a>
-        <a href="long_text_import.php">Import Long Text</a>
+        <a href="/tags/text">Text Tags</a>
+        <a href="/text/check">Check Text</a>
+        <a href="/text/import-long">Import Long Text</a>
     </div>
 
     <div class="menu">
-        <a href="edit_words.php" title="View and edit saved words and expressions">Terms</a>
-        <a href="edit_tags.php">Term Tags</a>
-        <a href="upload_words.php">Import Terms</a>
+        <a href="/words/edit" title="View and edit saved words and expressions">Terms</a>
+        <a href="/tags">Term Tags</a>
+        <a href="/word/upload">Import Terms</a>
     </div>
 
     <div class="menu">
-        <a href="do_feeds.php?check_autoupdate=1">Newsfeeds</a>
-        <a href="backup_restore.php" title="Backup, restore or empty database">Database</a>
+        <a href="/feeds?check_autoupdate=1">Newsfeeds</a>
+        <a href="/admin/backup" title="Backup, restore or empty database">Database</a>
     </div>
 
     <div class="menu">
-        <a href="statistics.php" title="Text statistics">Statistics</a>
+        <a href="/admin/statistics" title="Text statistics">Statistics</a>
         <a href="docs/info.html">Help</a>
-        <a href="server_data.php" title="Various data useful for debug">Server Data</a>
+        <a href="/admin/server-data" title="Various data useful for debug">Server Data</a>
     </div>
 
     <div class="menu">
-        <a href="settings.php">Settings</a>
-        <a href="text_to_speech_settings.php" title="Text-to-Speech settings">Text-to-Speech</a>
-        <a href="mobile.php" title="Mobile LWT is a legacy function">Mobile LWT (Deprecated)</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="/admin/settings/tts" title="Text-to-Speech settings">Text-to-Speech</a>
+        <a href="/mobile" title="Mobile LWT is a legacy function">Mobile LWT (Deprecated)</a>
     </div>
 
     <?php wordpress_logout_link(); ?>
@@ -393,13 +393,13 @@ function index_do_main_page()
 </div>
 <p>
     This is LWT Version <?php echo get_version(); ?>,
-    <a href="start.php"><?php echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"') ?></a>.
+    <a href="/mobile/start"><?php echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"') ?></a>.
     </p>
 <br style="clear: both;" />
 <footer>
     <p class="small">
         <a target="_blank" href="http://unlicense.org/" style="vertical-align: top;">
-            <img alt="Public Domain" title="Public Domain" src="img/public_domain.png" style="display: inline;" />
+            <img alt="Public Domain" title="Public Domain" src="/img/public_domain.png" style="display: inline;" />
         </a>
         <a href="https://sourceforge.net/projects/learning-with-texts/" target="_blank">"Learning with Texts" (LWT)</a> is free
         and unencumbered software released into the

@@ -4,7 +4,7 @@
  * \file
  * \brief Print/Edit an improved annotated text
  *
- * Call: print_impr_text.php?text=[textid]&...
+ * Call: /text/print?text=[textid]&...
  *      ... edit=1 ... edit own annotation
  *      ... del=1  ... delete own annotation
  *
@@ -35,10 +35,10 @@ function edit_mode_display($textid, $ann_exists): void
     ?>
 <div id="printoptions">
     <h2>Improved Annotated Text (Edit Mode)
-        <img src="icn/question-frame.png" title="Help" alt="Help" class="click"
+        <img src="/icn/question-frame.png" title="Help" alt="Help" class="click"
         onclick="window.open('docs/info.html#il');" />
     </h2>
-    <input type="button" value="Display/Print Mode" onclick="location.href='print_impr_text.php?text=<?php echo $textid; ?>';" />
+    <input type="button" value="Display/Print Mode" onclick="location.href='/text/print?text=<?php echo $textid; ?>';" />
     </div>
 </div>
 <!-- noprint -->
@@ -63,7 +63,7 @@ function edit_mode_display($textid, $ann_exists): void
     ?>
     <div class="noprint">
         <input type="button" value="Display/Print Mode"
-        onclick="location.href='print_impr_text.php?text=<?php echo $textid; ?>" />
+        onclick="location.href='/text/print?text=<?php echo $textid; ?>" />
     </div>
     <?php
 }
@@ -220,21 +220,21 @@ function do_content()
         </div>
         <div>
             <?php echo getPreviousAndNextTextLinks(
-                $textid, 'print_impr_text.php?text=', true, ''
+                $textid, '/text/print?text=', true, ''
             ); ?>
         </div>
         <div>
-            <a href="do_text.php?start=<?php echo $textid; ?>" target="_top">
-                <img src="icn/book-open-bookmark.png" title="Read" alt="Read" />
+            <a href="/text/read?start=<?php echo $textid; ?>" target="_top">
+                <img src="/icn/book-open-bookmark.png" title="Read" alt="Read" />
             </a>
-            <a href="do_test.php?text=<?php echo $textid; ?>" target="_top">
-                <img src="icn/question-balloon.png" title="Test" alt="Test" />
+            <a href="/test?text=<?php echo $textid; ?>" target="_top">
+                <img src="/icn/question-balloon.png" title="Test" alt="Test" />
             </a>
             <a href="print_text.php?text=<?php echo $textid; ?>" target="_top">
-                <img src="icn/printer.png" title="Print" alt="Print" />
+                <img src="/icn/printer.png" title="Print" alt="Print" />
             </a>
-            <a target="_top" href="edit_texts.php?chg=<?php echo $textid; ?>">
-                <img src="icn/document--pencil.png" title="Edit Text"
+            <a target="_top" href="/texts?chg=<?php echo $textid; ?>">
+                <img src="/icn/document--pencil.png" title="Edit Text"
                 alt="Edit Text" />
             </a>
         </div>

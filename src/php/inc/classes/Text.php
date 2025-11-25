@@ -13,6 +13,7 @@
  * @since   2.9.0
  */
 
+namespace Lwt\Classes;
 
 /**
  * A text represented as an object.

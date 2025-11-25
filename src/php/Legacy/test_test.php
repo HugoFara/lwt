@@ -193,7 +193,7 @@ function do_test_test_finished($testsql, $totaltests, $ajax = false)
     $tomorrow_tests = do_test_get_tomorrow_tests_count($testsql);
     echo '<p id="test-finished-area" class="center" style="display: ' .
     ($ajax ? 'none' : 'inherit') . ';">
-            <img src="img/ok.png" alt="Done!" />
+            <img src="/img/ok.png" alt="Done!" />
             <br /><br />
             <span class="red2">
                 <span id="tests-done-today">
@@ -827,7 +827,7 @@ function do_test_footer($notyettested, $wrong, $correct)
     ?>
 <footer id="footer">
     <span style="margin-left: 15px; margin-right: 15px;">
-        <img src="icn/clock.png" title="Elapsed Time" alt="Elapsed Time" />
+        <img src="/icn/clock.png" title="Elapsed Time" alt="Elapsed Time" />
         <span id="timer" title="Elapsed Time"></span>
     </span>
     <span style="margin-left: 15px; margin-right: 15px;">

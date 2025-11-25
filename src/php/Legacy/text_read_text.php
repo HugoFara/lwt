@@ -786,7 +786,7 @@ function do_text_text_content($textid, $only_body = true): void
         pagestart_nobody($title);
     }
     ?>
-    <script type="text/javascript" src="js/jquery.hoverIntent.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/js/jquery.hoverIntent.js" charset="utf-8"></script>
     <?php
     $visit_status = getSettingWithDefault('set-text-visit-statuses-via-key');
     if ($visit_status == '') {

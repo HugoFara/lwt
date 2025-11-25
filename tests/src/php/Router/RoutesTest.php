@@ -14,8 +14,10 @@ use PHPUnit\Framework\TestCase;
  *
  * Tests that all routes defined in routes.php:
  * 1. Resolve correctly to their handlers
- * 2. Have existing handler files
+ * 2. Have existing handler files (for file handlers) or valid controller format
  * 3. Handle legacy redirects properly
+ *
+ * @since 3.0.0 Updated to expect controller handlers instead of legacy file paths
  */
 class RoutesTest extends TestCase
 {
@@ -89,15 +91,14 @@ class RoutesTest extends TestCase
     {
         $result = $this->simulateRequest('/');
         $this->assertEquals('handler', $result['type']);
-        $this->assertEquals('src/php/Legacy/home.php', $result['handler']);
-        $this->assertHandlerFileExists($result['handler']);
+        $this->assertEquals('HomeController@index', $result['handler']);
     }
 
     public function testIndexPhpRoute(): void
     {
         $result = $this->simulateRequest('/index.php');
         $this->assertEquals('handler', $result['type']);
-        $this->assertEquals('src/php/Legacy/home.php', $result['handler']);
+        $this->assertEquals('HomeController@index', $result['handler']);
     }
 
     // ==================== TEXT ROUTES TESTS ====================
@@ -116,16 +117,16 @@ class RoutesTest extends TestCase
     public static function textRoutesProvider(): array
     {
         return [
-            'text read' => ['/text/read', 'src/php/Legacy/text_read.php'],
-            'text edit' => ['/text/edit', 'src/php/Legacy/text_edit.php'],
-            'texts list' => ['/texts', 'src/php/Legacy/text_edit.php'],
-            'text display' => ['/text/display', 'src/php/Legacy/text_display.php'],
-            'text print' => ['/text/print', 'src/php/Legacy/text_print.php'],
-            'text print-plain' => ['/text/print-plain', 'src/php/Legacy/text_print_plain.php'],
-            'text import-long' => ['/text/import-long', 'src/php/Legacy/text_import_long.php'],
-            'text set-mode' => ['/text/set-mode', 'src/php/Legacy/text_set_mode.php'],
-            'text check' => ['/text/check', 'src/php/Legacy/text_check.php'],
-            'text archived' => ['/text/archived', 'src/php/Legacy/text_archived.php'],
+            'text read' => ['/text/read', 'TextController@read'],
+            'text edit' => ['/text/edit', 'TextController@edit'],
+            'texts list' => ['/texts', 'TextController@edit'],
+            'text display' => ['/text/display', 'TextController@display'],
+            'text print' => ['/text/print', 'TextController@printText'],
+            'text print-plain' => ['/text/print-plain', 'TextController@printPlain'],
+            'text import-long' => ['/text/import-long', 'TextController@importLong'],
+            'text set-mode' => ['/text/set-mode', 'TextController@setMode'],
+            'text check' => ['/text/check', 'TextController@check'],
+            'text archived' => ['/text/archived', 'TextController@archived'],
         ];
     }
 
@@ -145,20 +146,20 @@ class RoutesTest extends TestCase
     public static function wordRoutesProvider(): array
     {
         return [
-            'word edit' => ['/word/edit', 'src/php/Legacy/word_edit.php'],
-            'words edit list' => ['/words/edit', 'src/php/Legacy/words_edit.php'],
-            'word edit-multi' => ['/word/edit-multi', 'src/php/Legacy/word_edit_multi.php'],
-            'word delete' => ['/word/delete', 'src/php/Legacy/word_delete.php'],
-            'word delete-multi' => ['/word/delete-multi', 'src/php/Legacy/word_delete_multi.php'],
-            'words list' => ['/words', 'src/php/Legacy/words_all.php'],
-            'word new' => ['/word/new', 'src/php/Legacy/word_new.php'],
-            'word show' => ['/word/show', 'src/php/Legacy/word_show.php'],
-            'word insert-wellknown' => ['/word/insert-wellknown', 'src/php/Legacy/word_insert_wellknown.php'],
-            'word insert-ignore' => ['/word/insert-ignore', 'src/php/Legacy/word_insert_ignore.php'],
-            'word inline-edit' => ['/word/inline-edit', 'src/php/Legacy/word_inline_edit.php'],
-            'word bulk-translate' => ['/word/bulk-translate', 'src/php/Legacy/word_bulk_translate.php'],
-            'word set-status' => ['/word/set-status', 'src/php/Legacy/word_set_status.php'],
-            'word upload' => ['/word/upload', 'src/php/Legacy/word_upload.php'],
+            'word edit' => ['/word/edit', 'WordController@edit'],
+            'words edit list' => ['/words/edit', 'WordController@listEdit'],
+            'word edit-multi' => ['/word/edit-multi', 'WordController@editMulti'],
+            'word delete' => ['/word/delete', 'WordController@delete'],
+            'word delete-multi' => ['/word/delete-multi', 'WordController@deleteMulti'],
+            'words list' => ['/words', 'WordController@all'],
+            'word new' => ['/word/new', 'WordController@create'],
+            'word show' => ['/word/show', 'WordController@show'],
+            'word insert-wellknown' => ['/word/insert-wellknown', 'WordController@insertWellknown'],
+            'word insert-ignore' => ['/word/insert-ignore', 'WordController@insertIgnore'],
+            'word inline-edit' => ['/word/inline-edit', 'WordController@inlineEdit'],
+            'word bulk-translate' => ['/word/bulk-translate', 'WordController@bulkTranslate'],
+            'word set-status' => ['/word/set-status', 'WordController@setStatus'],
+            'word upload' => ['/word/upload', 'WordController@upload'],
         ];
     }
 
@@ -178,8 +179,8 @@ class RoutesTest extends TestCase
     public static function reviewTestRoutesProvider(): array
     {
         return [
-            'test index' => ['/test', 'src/php/Legacy/test_index.php'],
-            'test set-status' => ['/test/set-status', 'src/php/Legacy/test_set_status.php'],
+            'test index' => ['/test', 'TestController@index'],
+            'test set-status' => ['/test/set-status', 'TestController@setStatus'],
         ];
     }
 
@@ -199,8 +200,8 @@ class RoutesTest extends TestCase
     public static function languageRoutesProvider(): array
     {
         return [
-            'languages list' => ['/languages', 'src/php/Legacy/language_edit.php'],
-            'languages select-pair' => ['/languages/select-pair', 'src/php/Legacy/language_select_pair.php'],
+            'languages list' => ['/languages', 'LanguageController@index'],
+            'languages select-pair' => ['/languages/select-pair', 'LanguageController@selectPair'],
         ];
     }
 
@@ -220,8 +221,8 @@ class RoutesTest extends TestCase
     public static function tagRoutesProvider(): array
     {
         return [
-            'tags list' => ['/tags', 'src/php/Legacy/tags_edit.php'],
-            'tags text' => ['/tags/text', 'src/php/Legacy/tags_text_edit.php'],
+            'tags list' => ['/tags', 'TagsController@index'],
+            'tags text' => ['/tags/text', 'TagsController@textTags'],
         ];
     }
 
@@ -241,9 +242,9 @@ class RoutesTest extends TestCase
     public static function feedRoutesProvider(): array
     {
         return [
-            'feeds index' => ['/feeds', 'src/php/Legacy/feeds_index.php'],
-            'feeds edit' => ['/feeds/edit', 'src/php/Legacy/feeds_edit.php'],
-            'feeds wizard' => ['/feeds/wizard', 'src/php/Legacy/feeds_wizard.php'],
+            'feeds index' => ['/feeds', 'FeedsController@index'],
+            'feeds edit' => ['/feeds/edit', 'FeedsController@edit'],
+            'feeds wizard' => ['/feeds/wizard', 'FeedsController@wizard'],
         ];
     }
 
@@ -263,15 +264,15 @@ class RoutesTest extends TestCase
     public static function adminRoutesProvider(): array
     {
         return [
-            'admin backup' => ['/admin/backup', 'src/php/Legacy/admin_backup.php'],
-            'admin wizard' => ['/admin/wizard', 'src/php/Legacy/admin_wizard.php'],
-            'admin statistics' => ['/admin/statistics', 'src/php/Legacy/admin_statistics.php'],
-            'admin install-demo' => ['/admin/install-demo', 'src/php/Legacy/admin_install_demo.php'],
-            'admin settings' => ['/admin/settings', 'src/php/Legacy/admin_settings.php'],
-            'admin settings hover' => ['/admin/settings/hover', 'src/php/Legacy/settings_hover.php'],
-            'admin settings tts' => ['/admin/settings/tts', 'src/php/Legacy/admin_tts_settings.php'],
-            'admin tables' => ['/admin/tables', 'src/php/Legacy/admin_table_management.php'],
-            'admin server-data' => ['/admin/server-data', 'src/php/Legacy/admin_server_data.php'],
+            'admin backup' => ['/admin/backup', 'AdminController@backup'],
+            'admin wizard' => ['/admin/wizard', 'AdminController@wizard'],
+            'admin statistics' => ['/admin/statistics', 'AdminController@statistics'],
+            'admin install-demo' => ['/admin/install-demo', 'AdminController@installDemo'],
+            'admin settings' => ['/admin/settings', 'AdminController@settings'],
+            'admin settings hover' => ['/admin/settings/hover', 'AdminController@settingsHover'],
+            'admin settings tts' => ['/admin/settings/tts', 'AdminController@settingsTts'],
+            'admin tables' => ['/admin/tables', 'AdminController@tables'],
+            'admin server-data' => ['/admin/server-data', 'AdminController@serverData'],
         ];
     }
 
@@ -291,8 +292,8 @@ class RoutesTest extends TestCase
     public static function mobileRoutesProvider(): array
     {
         return [
-            'mobile index' => ['/mobile', 'src/php/Legacy/mobile_index.php'],
-            'mobile start' => ['/mobile/start', 'src/php/Legacy/mobile_start.php'],
+            'mobile index' => ['/mobile', 'MobileController@index'],
+            'mobile start' => ['/mobile/start', 'MobileController@start'],
         ];
     }
 
@@ -312,8 +313,8 @@ class RoutesTest extends TestCase
     public static function wordpressRoutesProvider(): array
     {
         return [
-            'wordpress start' => ['/wordpress/start', 'src/php/Legacy/wordpress_start.php'],
-            'wordpress stop' => ['/wordpress/stop', 'src/php/Legacy/wordpress_stop.php'],
+            'wordpress start' => ['/wordpress/start', 'WordPressController@start'],
+            'wordpress stop' => ['/wordpress/stop', 'WordPressController@stop'],
         ];
     }
 
@@ -333,10 +334,10 @@ class RoutesTest extends TestCase
     public static function apiRoutesProvider(): array
     {
         return [
-            'api v1' => ['/api/v1', 'src/php/Legacy/api_v1.php'],
-            'api translate' => ['/api/translate', 'src/php/Legacy/api_translate.php'],
-            'api google' => ['/api/google', 'src/php/Legacy/api_google.php'],
-            'api glosbe' => ['/api/glosbe', 'src/php/Legacy/api_glosbe.php'],
+            'api v1' => ['/api/v1', 'ApiController@v1'],
+            'api translate' => ['/api/translate', 'ApiController@translate'],
+            'api google' => ['/api/google', 'ApiController@google'],
+            'api glosbe' => ['/api/glosbe', 'ApiController@glosbe'],
         ];
     }
 

@@ -5,7 +5,7 @@
  * \file
  * \brief LWT Mobile
  *
- * Call: mobile.php?...
+ * Call: /mobile?...
  *      ...action=1&lang=[langid] ... Language menu
  *      ...action=2&lang=[langid] ... Texts in a language
  *      ...action=3&lang=[langid]&text=[textid] ... Sentences of a text
@@ -41,11 +41,11 @@ if (isset($_REQUEST["action"])) {  // Action
 
      <ul id="<?php echo $action . '-' . $lang; ?>" title="<?php echo tohtml($langname); ?>">
       <li class="group"><?php echo tohtml($langname); ?> Texts</li>
-      <li><a href="mobile.php?action=2&amp;lang=<?php echo $lang; ?>">All <?php echo tohtml($langname); ?> Texts</a></li>
-      <li><a href="mobile.php#notyetimpl">Text Tags</a></li>
+      <li><a href="/mobile?action=2&amp;lang=<?php echo $lang; ?>">All <?php echo tohtml($langname); ?> Texts</a></li>
+      <li><a href="/mobile#notyetimpl">Text Tags</a></li>
       <li class="group"><?php echo tohtml($langname); ?> Terms</li>
-      <li><a href="mobile.php#notyetimpl">All <?php echo tohtml($langname); ?> Terms</a></li>
-      <li><a href="mobile.php#notyetimpl">Term Tags</a></li>
+      <li><a href="/mobile#notyetimpl">All <?php echo tohtml($langname); ?> Terms</a></li>
+      <li><a href="/mobile#notyetimpl">Term Tags</a></li>
      </ul>
 
         <?php
@@ -69,7 +69,7 @@ if (isset($_REQUEST["action"])) {  // Action
         <?php
 
         while ($record = mysqli_fetch_assoc($res)) {
-            echo '<li><a href="mobile.php?action=3&amp;lang=' .
+            echo '<li><a href="/mobile?action=3&amp;lang=' .
             $lang . '&amp;text=' . $record["TxID"] . '">' .
             tohtml($record["TxTitle"]) . '</a></li>';
         }
@@ -124,7 +124,7 @@ if (isset($_REQUEST["action"])) {  // Action
 
         while ($record = mysqli_fetch_assoc($res)) {
             if (trim((string) $record["SeText"]) != '¶') {
-                echo '<li><a href="mobile.php?action=4&amp;lang=' .
+                echo '<li><a href="/mobile?action=4&amp;lang=' .
                 $lang . '&amp;text=' . $text .
                 '&amp;sent=' . $record["SeID"] . '">' .
                 tohtml($record["SeText"]) . '</a></li>';
@@ -242,7 +242,7 @@ if (isset($_REQUEST["action"])) {  // Action
         }
 
         if (isset($nextsent)) {
-            echo '<li><a target="_replace" href="mobile.php?action=5&amp;lang=' .
+            echo '<li><a target="_replace" href="/mobile?action=5&amp;lang=' .
             $lang . '&amp;text=' . $text .
             '&amp;sent=' . $nextsent . '">Next Sentence</a></li>';
         }
@@ -306,7 +306,7 @@ span.status5 {
 <div class="toolbar">
     <h1 id="pageTitle"></h1>
     <a id="backButton" class="button" href="#"></a>
-    <a class="button" href="mobile.php" target="_self">Home</a>
+    <a class="button" href="/mobile" target="_self">Home</a>
 </div>
 
 <ul id="home" title="Mobile LWT" selected="true">
@@ -315,7 +315,7 @@ span.status5 {
     $sql = 'select LgID, LgName from ' . $tbpref . 'languages where LgName<>"" order by LgName';
     $res = do_mysqli_query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
-        echo '<li><a href="mobile.php?action=2&amp;lang=' . $record["LgID"] . '">' .
+        echo '<li><a href="/mobile?action=2&amp;lang=' . $record["LgID"] . '">' .
         tohtml($record["LgName"]) . '</a></li>';
     }
     mysqli_free_result($res);
