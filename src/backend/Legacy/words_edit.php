@@ -400,7 +400,6 @@ if (isset($_REQUEST['allaction'])) {
         $res = do_mysqli_query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $id = $record['WoID'];
-            $message='0';
             if ($allaction == 'delall' ) {
                 $message = runsql(
                     'delete from ' . $tbpref . 'words

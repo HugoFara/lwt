@@ -154,7 +154,7 @@ else {  // if (! isset($_REQUEST['op']))
         $sentence = repl_tab_nl($record['WoSentence']);
         $rom = $record['WoRomanization'];
         $status = $record['WoStatus'];
-        $showRoman = (bool) get_first_value(
+        (bool) get_first_value(
             "SELECT LgShowRomanization AS value
             FROM {$tbpref}languages
             WHERE LgID = $lang"

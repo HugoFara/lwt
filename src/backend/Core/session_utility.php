@@ -541,10 +541,9 @@ function get_last_key()
  *                         - 'text': selection from single text
  * @param array|int $value Object to select.
  *
- * @return string SQL projection necessary
- *
+ * @return null|string SQL projection necessary
  */
-function do_test_test_get_projection($key, $value): string
+function do_test_test_get_projection($key, $value): string|null
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $testsql = null;
@@ -601,9 +600,9 @@ function do_test_test_get_projection($key, $value): string
  * @param int    $selection_type. 2 is words selection and 3 is terms selection.
  * @param string $selection_data  Comma separated ID of elements to test.
  *
- * @return string SQL formatted string suitable to projection (inserted in a "FROM ")
+ * @return null|string SQL formatted string suitable to projection (inserted in a "FROM ")
  */
-function do_test_test_from_selection($selection_type, $selection_data)
+function do_test_test_from_selection($selection_type, $selection_data): string|null
 {
     $data_string_array = explode(",", trim($selection_data, "()"));
     $data_int_array = array_map('intval', $data_string_array);

@@ -230,8 +230,6 @@ function edit_word_do_operation($translation, $fromAnn): void
 function edit_word_do_form($wid, $text_id, $ord, $fromAnn)
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    $lang = null;
-    $term = null;
 
     if ($wid == -1) {
         // Get the $wid from the term text

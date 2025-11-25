@@ -235,7 +235,7 @@ function findStandardExpression($textlc, $lid): array
         if ($splitEachChar) {
             $string = preg_replace('/([^\s])/u', "$1 ", $string);
         } else if ($removeSpaces && empty($rSflag)) {
-            $rSflag = preg_match(
+            preg_match(
                 '/(?<=[ ])(' . preg_replace('/(.)/ui', "$1[ ]*", $textlc) .
                 ')(?=[ ])/ui',
                 $string, $ma

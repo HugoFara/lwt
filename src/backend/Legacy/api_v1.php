@@ -1030,7 +1030,6 @@ function endpoint_exits($method, $requestUri)
     }
     // endpoint without prepending URL, like 'version'
     $req_endpoint = rtrim(str_replace($matches[1], '', $uri_query), '/');
-    $methods_allowed = array();
     if (array_key_exists($req_endpoint, $endpoints)) {
         $methods_allowed = $endpoints[$req_endpoint];
     } else {

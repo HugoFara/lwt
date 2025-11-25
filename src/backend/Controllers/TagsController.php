@@ -46,7 +46,6 @@ class TagsController extends BaseController
 
         $this->render('My Term Tags', true);
 
-        $message = '';
 
         // Process actions
         $message = $this->processTermTagActions($wh_query);
@@ -85,7 +84,6 @@ class TagsController extends BaseController
 
         $this->render('My Text Tags', true);
 
-        $message = '';
 
         // Process actions
         $message = $this->processTextTagActions($wh_query);

@@ -256,21 +256,21 @@ function validateText($currenttext): string
 
 // -------------------------------------------------------------
 
-function validateTag($currenttag, $currentlang)
+function validateTag($currenttag, $currentlang): string
 {
     return Validation::tag($currenttag, $currentlang);
 }
 
 // -------------------------------------------------------------
 
-function validateArchTextTag($currenttag, $currentlang)
+function validateArchTextTag($currenttag, $currentlang): string
 {
     return Validation::archTextTag($currenttag, $currentlang);
 }
 
 // -------------------------------------------------------------
 
-function validateTextTag($currenttag, $currentlang)
+function validateTextTag($currenttag, $currentlang): string
 {
     return Validation::textTag($currenttag, $currentlang);
 }
@@ -887,7 +887,6 @@ if (LWT_Globals::shouldDisplayTime()) {
 global $DB_SERVER, $DB_USERID, $DB_PASSWD, $DB_NAME, $DB_SOCKET;
 
 /**
- * @var \mysqli $DBCONNECTION Connection to the database
  *
  * @deprecated 3.0.0 Use LWT_Globals::getDbConnection() instead
  * @see LWT_Globals::getDbConnection()

@@ -148,14 +148,13 @@ class Migrations
                 echo "<p>DEBUG: do DB updates: $dbversion --&gt; $currversion</p>";
             }
 
-            $changes = 0;
             $res = do_mysqli_query("SELECT filename FROM _migrations");
             while ($record = mysqli_fetch_assoc($res)) {
                 $queries = parseSQLFile(
                     __DIR__ . '/../../../../db/migrations/' . $record["filename"]
                 );
                 foreach ($queries as $sql_query) {
-                    $changes += (int) runsql($sql_query, '', false);
+                    (int) runsql($sql_query, '', false);
                 }
             }
 

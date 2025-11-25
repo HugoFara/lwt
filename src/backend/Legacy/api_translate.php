@@ -36,7 +36,7 @@ function translator_url($term, $order)
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
     if ($record) {
-        $satz = $record['SeText'];
+        $record['SeText'];
         $trans = isset($record['LgGoogleTranslateURI']) ?
         (string) $record['LgGoogleTranslateURI'] : "";
         if (substr($trans, 0, 1) == '*') {
