@@ -12,7 +12,7 @@ Whatever installation you choose, the steps will look like the following:
 
 1. Set-up a server with a database system.
 2. Download [LWT](https://github.com/HugoFara/lwt/releases).
-3. Create ``connect.inc.php`` file with your password.
+3. Copy ``.env.example`` to ``.env`` and configure your database credentials.
 4. Start the server and ready to go!
 
 There are two main ways to install LWT: on your computer or using [containers](#run-in-a-docker-container). We recommend the first solution as the most straightforward. The second solution has a simpler installation method, but takes a lot of storage.
@@ -32,7 +32,7 @@ Two main softwares can be used to set up a local server on your computer: XAMPP 
 
    You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/master.zip) if you want the cutting-edge updates (that may include some bugs)
 
-3. Now go into "C:\xampp\htdocs\lwt". Rename the file "connect_xampp.inc.php" to "connect.inc.php". Sometimes the "php" extension is hidden, so be careful! You can display file extensions via the Windows Explorer settings and check it.
+3. Now go into "C:\xampp\htdocs\lwt". Copy the file ".env.example" to ".env" and edit it with your database credentials (the defaults usually work for XAMPP).
 
 4. Start LWT server
    1. Start the "XAMPP Control Panel" ("C:\xampp\xampp-control.exe") and start the two modules Apache and MySQL. Now the two module names should have a green background color.
@@ -67,7 +67,7 @@ Now you must only do step 4.2 to start LWT.
 
 4. Install everything
    1. Go to "C:\Program Files (x86)\EasyPHP-Devserver-17\eds-www\lwt".
-   2. Rename the file "connect_easyphp.inc.php" to "connect.inc.php". Sometimes the "php" extension is hidden, so be careful! You can display file extensions via the Windows Explorer settings and check it.
+   2. Copy the file ".env.example" to ".env" and edit it with your database credentials.
 
 5. Start EasyPHP
    1. Start EasyPHP via Desktop Icon (Devserver 17). In the Task Bar near the clock appears the EasyPHP app icon (it may be hidden!).
@@ -95,7 +95,7 @@ Now you must only do step 5.2 to start LWT.
 
    You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/master.zip) if you want the cutting-edge updates (that may include some bugs)
 
-5. Go to ``/Applications/MAMP/htdocs/lwt``. Rename the file ``connect_mamp.inc.php`` to ``connect.inc.php``.
+5. Go to ``/Applications/MAMP/htdocs/lwt``. Copy the file ``.env.example`` to ``.env``. Edit it and set ``DB_HOST=localhost:8889`` (MAMP uses port 8889 for MySQL).
 
 6. Open ``MAMP.app`` in ``/Applications/MAMP``. Accept the messages from the firewall. Apache and MySQL start automatically.
 
@@ -175,10 +175,9 @@ The following instruction were tested on Raspbian Stretch.
   
 3. Unzip it.
 
-4. Rename the file ``connect_xampp.inc.php`` (in the unzipped folder) to ``connect.inc.php``.
+4. Copy the file ``.env.example`` (in the unzipped folder) to ``.env``.
 
-5. Edit ``connect.inc.php`` and set the MySQL password in line
-``$passwd = "";``. Change it to ``$passwd = "abcxyz";``. Save the edited file connect.inc.php.
+5. Edit ``.env`` and set the database password: change ``DB_PASSWORD=`` to ``DB_PASSWORD=abcxyz``. Save the file.
 
 6. Open a terminal, type and execute the following commands:
 
@@ -238,7 +237,7 @@ The official repository is at <https://packagist.org/packages/hugofara/lwt>.
 
 3. Unzip it.
 
-4. Copy the following (if not already at its place and OK) from your LWT backup into the LWT directory: "connect.inc.php" and the whole "media" sub-directory (if you created one; contains your MP3 audio files).
+4. Copy the following (if not already at its place and OK) from your LWT backup into the LWT directory: ".env" and the whole "media" sub-directory (if you created one; contains your MP3 audio files).
 
 5. Clear the web browser cache and open LWT as usual.
 

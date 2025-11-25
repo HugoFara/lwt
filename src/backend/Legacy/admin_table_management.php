@@ -71,9 +71,9 @@ if ($fixed_tbpref) {
 <tr>
 <td class="td1">
     <p>These features are not currently not available.<br /><br />
-    Reason:<br /><b>$tbpref</b> is set to a fixed value in <i>connect.inc.php</i>.<br />
-    Please remove the definition<br /><span class="red"><b>$tbpref = '<?php echo substr($tbpref, 0, -1); ?>';</b></span></br />
-    in <i>connect.inc.php</i> to make these features available.<br />
+    Reason:<br /><b>DB_TABLE_PREFIX</b> is set to a fixed value in <i>.env</i>.<br />
+    Please remove the definition<br /><span class="red"><b>DB_TABLE_PREFIX=<?php echo substr($tbpref, 0, -1); ?></b></span></br />
+    in <i>.env</i> to make these features available.<br />
     Then try again.</p>
     <p class="right">
         &nbsp;<br />

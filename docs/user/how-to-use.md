@@ -382,23 +382,23 @@ The number of items per page on different screens can be set, and you can decide
 * The use of the "Multiple LWT table sets" feature on an external web server may cause a **monstrous database size** if some users import many or large texts. LWT with activated "Multiple LWT table sets" is in its current version **not suitable** to be run in a public environment on an external web server!
 * Another better system may be implemented, use this feature at your own risks!  
 
-When you start using LWT, you store all your data in the "Default Table Set" within the database you have defined in the file "connect.inc.php" during the LWT installation.  
+When you start using LWT, you store all your data in the "Default Table Set" within the database you have defined in the `.env` file during the LWT installation.
 
-Beginning with LWT Version 1.5.3, you are able to create and to use unlimited LWT table sets within one database (as space and MySQL limitations permit). This feature is especially useful for users who want to set up a multi user environment with a set of tables for each user. You can also create one table set for every language you study - this allows you to create different term/text tags for each language. If you don't need this feature, you just use LWT like in earlier versions with the "default table set". Please observe that the "Backup/Restore/Empty Database" function only works for the CURRENT table set, NOT for ALL table sets you have created!  
+Beginning with LWT Version 1.5.3, you are able to create and to use unlimited LWT table sets within one database (as space and MySQL limitations permit). This feature is especially useful for users who want to set up a multi user environment with a set of tables for each user. You can also create one table set for every language you study - this allows you to create different term/text tags for each language. If you don't need this feature, you just use LWT like in earlier versions with the "default table set". Please observe that the "Backup/Restore/Empty Database" function only works for the CURRENT table set, NOT for ALL table sets you have created!
 
-Just click on the link at the bottom of the LWT home screen where the current table set name (or "Default") is displayed. In a new screen "Select, Create or Delete a Table Set" you may switch and manage table sets. A table set name is max. 20 characters long. Allowed characters are only: a-z, A-Z, 0-9, and the underscore "\_".  
+Just click on the link at the bottom of the LWT home screen where the current table set name (or "Default") is displayed. In a new screen "Select, Create or Delete a Table Set" you may switch and manage table sets. A table set name is max. 20 characters long. Allowed characters are only: a-z, A-Z, 0-9, and the underscore "\_".
 
-![Image](../img/31.jpg)  
+![Image](../img/31.jpg)
 
-If you want "switch off" this feature, and use just one table set, you may define the name in the file "connect.inc.php":  
+If you want "switch off" this feature, and use just one table set, you may define the name in the `.env` file:
 
-```php
-$tbpref = "";          // only the default table set  
-$tbpref = "setname";   // only the table set "setname"  
+```bash
+DB_TABLE_PREFIX=         # only the default table set
+DB_TABLE_PREFIX=setname  # only the table set "setname"
 ```
 
-After adding such a line in the file "connect.inc.php", you are not able to select, create or delete table sets anymore. Only the one you have defined in "connect.inc.php" will be used. Please observe the rules for table set names (see above)!
+After adding such a line in the `.env` file, you are not able to select, create or delete table sets anymore. Only the one you have defined in `.env` will be used. Please observe the rules for table set names (see above)!
 
-If more than one table set exists, and $tbpref was NOT set to a fixed value in "connect.inc.php", you can select the desired table set via "start.php" (use this as start page if several people use their own table set), or by clicking on the LWT icon or title in the LWT menu screen "index.php".
+If more than one table set exists, and DB_TABLE_PREFIX was NOT set to a fixed value in `.env`, you can select the desired table set via "start.php" (use this as start page if several people use their own table set), or by clicking on the LWT icon or title in the LWT menu screen "index.php".
 
 By hovering over the LWT icon in the top left corner of every screen, you can display the current table set in a yellow tooltip.

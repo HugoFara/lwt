@@ -1,7 +1,13 @@
 <?php declare(strict_types=1);
 
-require __DIR__ . "/../../connect.inc.php";
-$GLOBALS['dbname'] = "test_" . $dbname;
+require_once __DIR__ . '/../../src/backend/Core/EnvLoader.php';
+use Lwt\Core\EnvLoader;
+
+// Load config from .env and use test database
+EnvLoader::load(__DIR__ . '/../../.env');
+$config = EnvLoader::getDatabaseConfig();
+$GLOBALS['dbname'] = "test_" . $config['dbname'];
+
 require_once __DIR__ . '/../../src/backend/Core/simterms.php';
 
 use PHPUnit\Framework\TestCase;

@@ -4,7 +4,7 @@
  * \file
  * \brief WordPress Login Check
  *
- * To be inserted in "connect.inc.php" when LWT used with WordPress
+ * WordPress login check integration for LWT
  *
  * PHP version 8.1
  *

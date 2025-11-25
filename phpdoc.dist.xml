@@ -16,7 +16,6 @@
             </source>
             <ignore hidden="true" symlinks="true">
                 <path>vendor</path>
-                <path>connect.inc.php</path>
             </ignore>
             <default-package-name>Lwt</default-package-name>
         </api>

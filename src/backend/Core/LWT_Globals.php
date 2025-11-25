@@ -49,7 +49,7 @@ class LWT_Globals
     private static string $tablePrefix = '';
 
     /**
-     * @var bool Whether the table prefix is fixed (from connect.inc.php) or from DB
+     * @var bool Whether the table prefix is fixed (from .env) or from DB
      */
     private static bool $tablePrefixIsFixed = false;
 
@@ -128,7 +128,7 @@ class LWT_Globals
      * Set the database table prefix.
      *
      * @param string $prefix  The table prefix
-     * @param bool   $isFixed Whether the prefix is fixed (from connect.inc.php)
+     * @param bool   $isFixed Whether the prefix is fixed (from .env)
      *
      * @return void
      */
@@ -158,7 +158,7 @@ class LWT_Globals
     /**
      * Check if the table prefix is fixed.
      *
-     * A fixed prefix means it was set in connect.inc.php rather than
+     * A fixed prefix means it was set in .env rather than
      * being determined from the database.
      *
      * @return bool True if prefix is fixed

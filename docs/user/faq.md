@@ -25,18 +25,18 @@ Please install/copy/move it into the correct directory.
 
 ## Database connection error
 
-![Image](../img/prob3.png)  
+![Image](../img/prob3.png)
 
 Answer: Either the database (MySQL/MariaDB) is not running, or the database connection
-parameters in _../htlwt/connect.inc.php_ are wrong.
-Please check/correct the database connection parameters and/or start MySQL via the MAMP or EasyPHP control program/panel.  
+parameters in your _.env_ file are wrong.
+Please check/correct the database connection parameters and/or start MySQL via the MAMP or EasyPHP control program/panel.
 
-## Cannot find connect.inc.php
+## Cannot find .env
 
-![Image](../img/prob4.png)  
+![Image](../img/prob4.png)
 
-Answer: The Webserver and the database is running, but the database connection parameter file _../htlwt/connect.inc.php_ is not found.
-Please rename one of the connection files (according to your server) to _../htlwt/connect.inc.php_.  
+Answer: The Webserver and the database is running, but the database connection parameter file _.env_ is not found.
+Please copy `.env.example` to `.env` and configure your database credentials.
 
 ## Do not run on Linux after installation/update
 

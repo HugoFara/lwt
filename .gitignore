@@ -2,9 +2,6 @@
 
 # Environment configuration (contains secrets)
 .env
-
-# Legacy settings file (deprecated, use .env instead)
-connect.inc.php
 # Local audio files
 media/
 # Text-to-Speech files

@@ -26,11 +26,21 @@ npm install  # Optional, for API testing and JS documentation
 
 ### Database Configuration
 
-Create `connect.inc.php` with your database credentials. Example templates exist for different server setups:
+Copy `.env.example` to `.env` and update the database credentials:
 
-- `connect_xampp.inc.php` - For XAMPP
-- `connect_mamp.inc.php` - For MAMP
-- `connect_easyphp.inc.php` - For EasyPHP
+```bash
+cp .env.example .env
+# Edit .env with your database credentials
+```
+
+The `.env` file contains:
+
+- `DB_HOST` - Database server (default: localhost)
+- `DB_USER` - Database username (default: root)
+- `DB_PASSWORD` - Database password
+- `DB_NAME` - Database name (default: learning-with-texts)
+- `DB_SOCKET` - Optional database socket
+- `DB_TABLE_PREFIX` - Optional table prefix for multiple instances
 
 ## Common Commands
 

@@ -49,8 +49,8 @@ Install [Docker](https://docs.docker.com/get-docker/) (if not already done).
 
 ### Other Systems
 
-1. **Please follow**: [docs/install.md](docs/install.md) for setup  instructions.
-2. Create ``connect.inc.php`` with an existing database user. Everything is explained at [docs/info.html](https://hugofara.github.io/lwt/docs/info.html#install).
+1. **Please follow**: [docs/install.md](docs/install.md) for setup instructions.
+2. Copy `.env.example` to `.env` and configure your database credentials. Everything is explained at [docs/info.html](https://hugofara.github.io/lwt/docs/info.html#install).
 
 And you are ready to go!
 

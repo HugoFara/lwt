@@ -20,11 +20,7 @@ use Lwt\Core\LWT_Globals;
 use Lwt\Core\EnvLoader;
 
 /**
- * Load database configuration from .env file or connect.inc.php.
- *
- * Priority:
- * 1. .env file in the project root (if exists)
- * 2. connect.inc.php (legacy, for backward compatibility)
+ * Load database configuration from .env file.
  *
  * @return void Sets $server, $userid, $passwd, $dbname, $socket, $tbpref globals
  *
@@ -37,7 +33,7 @@ function loadDatabaseConfiguration(): void
 
     $envPath = __DIR__ . "/../../../.env";
 
-    // Try to load .env file first (modern approach)
+    // Load .env file
     if (EnvLoader::load($envPath)) {
         $config = EnvLoader::getDatabaseConfig();
         $server = $config['server'];
@@ -52,15 +48,7 @@ function loadDatabaseConfiguration(): void
         return;
     }
 
-    // Fallback to connect.inc.php (legacy approach)
-    $connectPath = __DIR__ . "/../../../connect.inc.php";
-    if (file_exists($connectPath)) {
-        require_once $connectPath;
-        return;
-    }
-
-    // No configuration found - this will cause an error later
-    // but we let the connection function handle it with a proper message
+    // No configuration found - use defaults, connection function will show proper error
     $server = 'localhost';
     $userid = 'root';
     $passwd = '';
@@ -2143,7 +2131,7 @@ function connect_to_database($server, $userid, $passwd, $dbname, $socket="")
         if (!$success) {
             my_die(
                 'DB connect error, connection parameters may be wrong,
-                please check file "connect.inc.php".
+                please check your ".env" file.
                 You can refer to the documentation:
                 https://hugofara.github.io/lwt/docs/install.html
                 [Error Code: ' . mysqli_connect_errno() .
@@ -2167,7 +2155,7 @@ function connect_to_database($server, $userid, $passwd, $dbname, $socket="")
     if (!$success) {
         my_die(
             'DB connect error, connection parameters may be wrong,
-            please check file "connect.inc.php"
+            please check your ".env" file.
             You can refer to the documentation:
             https://hugofara.github.io/lwt/docs/install.html
             [Error Code: ' . mysqli_connect_errno() .
@@ -2185,7 +2173,7 @@ function connect_to_database($server, $userid, $passwd, $dbname, $socket="")
 /**
  * Get the prefixes for the database.
  *
- * Is $tbpref set in connect.inc.php? Take it and $fixed_tbpref=1.
+ * Is $tbpref set in .env? Take it and $fixed_tbpref=1.
  * If not: $fixed_tbpref=0. Is it set in table "_lwtgeneral"? Take it.
  * If not: Use $tbpref = '' (no prefix, old/standard behaviour).
  *
@@ -2210,7 +2198,7 @@ function getDatabasePrefix($dbconnection)
             my_die(
                 'Table prefix/set "' . $tbpref .
                 '" longer than 20 digits or characters.' .
-                ' Please fix in "connect.inc.php".'
+                ' Please fix DB_TABLE_PREFIX in ".env".'
             );
         }
         for ($i=0; $i < $len_tbpref; $i++) {
@@ -2222,7 +2210,7 @@ function getDatabasePrefix($dbconnection)
                 my_die(
                     'Table prefix/set "' . $tbpref .
                     '" contains characters or digits other than 0-9, a-z, A-Z ' .
-                    'or _. Please fix in "connect.inc.php".'
+                    'or _. Please fix DB_TABLE_PREFIX in ".env".'
                 );
             }
         }
@@ -2242,7 +2230,7 @@ function getDatabasePrefix($dbconnection)
 /**
  * Get the prefixes for the database.
  *
- * Is $tbpref set in connect.inc.php? Take it and $fixed_tbpref=1.
+ * Is $tbpref set in .env? Take it and $fixed_tbpref=1.
  * If not: $fixed_tbpref=0. Is it set in table "_lwtgeneral"? Take it.
  * If not: Use $tbpref = '' (no prefix, old/standard behaviour).
  *

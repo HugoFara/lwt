@@ -1,7 +1,13 @@
 <?php declare(strict_types=1);
 
-require __DIR__ . "/../../connect.inc.php";
-$GLOBALS['dbname'] = "test_" . $dbname;
+require_once __DIR__ . '/../../src/backend/Core/EnvLoader.php';
+use Lwt\Core\EnvLoader;
+
+// Load config from .env and use test database
+EnvLoader::load(__DIR__ . '/../../.env');
+$config = EnvLoader::getDatabaseConfig();
+$GLOBALS['dbname'] = "test_" . $config['dbname'];
+
 require_once __DIR__ . '/../../src/backend/Core/session_utility.php';
 
 use PHPUnit\Framework\TestCase;
@@ -13,10 +19,10 @@ class FeedsTest extends TestCase
         // Ensure we have a test database set up
         global $DBCONNECTION;
         if (!$DBCONNECTION) {
-            include __DIR__ . "/../../connect.inc.php";
-            $test_dbname = "test_" . $dbname;
+            $config = EnvLoader::getDatabaseConfig();
+            $test_dbname = "test_" . $config['dbname'];
             $DBCONNECTION = connect_to_database(
-                $server, $userid, $passwd, $test_dbname, $socket ?? ""
+                $config['server'], $config['userid'], $config['passwd'], $test_dbname, $config['socket']
             );
         }
     }

@@ -1,7 +1,13 @@
 <?php declare(strict_types=1);
 
-require __DIR__ . "/../../connect.inc.php";
-$GLOBALS['dbname'] = "test_" . $dbname;
+require_once __DIR__ . '/../../src/backend/Core/EnvLoader.php';
+use Lwt\Core\EnvLoader;
+
+// Load config from .env and use test database
+EnvLoader::load(__DIR__ . '/../../.env');
+$config = EnvLoader::getDatabaseConfig();
+$GLOBALS['dbname'] = "test_" . $config['dbname'];
+
 require_once __DIR__ . '/../../src/backend/Core/database_connect.php';
 require_once __DIR__ . '/../../src/backend/Core/tags.php';
 
@@ -23,12 +29,12 @@ class TagsTest extends TestCase
     {
         global $DBCONNECTION;
 
-        include __DIR__ . "/../../connect.inc.php";
-        $testDbname = "test_" . $dbname;
+        $config = EnvLoader::getDatabaseConfig();
+        $testDbname = "test_" . $config['dbname'];
 
         if (!$DBCONNECTION) {
             $DBCONNECTION = connect_to_database(
-                $server, $userid, $passwd, $testDbname, $socket ?? ""
+                $config['server'], $config['userid'], $config['passwd'], $testDbname, $config['socket']
             );
         }
 

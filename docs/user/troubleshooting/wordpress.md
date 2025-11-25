@@ -13,7 +13,7 @@ The following instructions are for users who have installed WordPress, and want 
 
 1. [Download](https://wordpress.org/) and install WordPress.
 2. [Download](https://github.com/hugofara/lwt/) and install LWT into a new subdirectory "lwt", located in the main directory of your WordPress installation.
-3. In subdirectory "lwt", rename the file _connect\_wordpress.inc.php_ into _connect.inc.php_, and enter the database parameters $server (database server), $userid (database user id), $passwd (database password), and $dbname (database name, can be the same like your wordpress database, or a different one) by editing the file with a text editor.
+3. In subdirectory "lwt", copy `.env.example` to `.env`, and enter the database parameters DB_HOST (database server), DB_USER (database user id), DB_PASSWORD (database password), and DB_NAME (database name, can be the same as your WordPress database, or a different one) by editing the file with a text editor.
 4. In the WordPress General Settings, decide whether anyone can register and use LWT (Membership = "Anyone can register"), or not (an administrator must create new users). The "New User Default Role" should be "Subscriber".
 5. The link to start LWT with **complete** WordPress authentication is:  
     _http&#58;&#47;&#47;...path-to-wp-blog.../lwt/wp\_lwt\_start.php_

@@ -60,8 +60,8 @@ spl_autoload_register(function ($class) {
     }
 });
 
-// Check for connect.inc.php
-if (!file_exists(LWT_BASE_PATH . '/connect.inc.php')) {
+// Check for .env configuration
+if (!file_exists(LWT_BASE_PATH . '/.env')) {
     // Special handling for database wizard
     $requestUri = $_SERVER['REQUEST_URI'] ?? '';
     if (str_contains($requestUri, 'database_wizard') || str_contains($requestUri, 'admin/wizard')) {
@@ -71,16 +71,16 @@ if (!file_exists(LWT_BASE_PATH . '/connect.inc.php')) {
     }
 
     // Show error page
-    no_connectinc_error_page();
+    no_env_error_page();
     exit;
 }
 
 /**
- * Echo an error page if connect.inc.php was not found.
+ * Echo an error page if .env was not found.
  *
  * @return void
  */
-function no_connectinc_error_page()
+function no_env_error_page()
 {
     ?>
     <!DOCTYPE html>
@@ -98,19 +98,20 @@ function no_connectinc_error_page()
             a:hover { text-decoration: underline; }
             .btn { display: inline-block; padding: 10px 20px; background: #1976d2; color: white; border-radius: 3px; margin: 10px 5px; }
             .btn:hover { background: #1565c0; text-decoration: none; }
+            code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>⚠️ Configuration Required</h1>
+            <h1>Configuration Required</h1>
             <p class="error">
-                <strong>Cannot find file: "connect.inc.php"</strong>
+                <strong>Cannot find file: ".env"</strong>
             </p>
             <p>Please do one of the following:</p>
             <ul>
                 <li>
-                    Rename the correct file <code>connect_[servertype].inc.php</code> to <code>connect.inc.php</code><br>
-                    <small>([servertype] is the name of your server: xampp, mamp, or easyphp)</small>
+                    Copy <code>.env.example</code> to <code>.env</code> and update the database credentials<br>
+                    <small>(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)</small>
                 </li>
                 <li>
                     <a href="/admin/wizard" class="btn">Use the Database Setup Wizard</a>
