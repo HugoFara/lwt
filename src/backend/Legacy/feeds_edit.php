@@ -103,7 +103,7 @@ if (isset($_REQUEST['save_feed'])) {
 
 function display_new_feed($currentlang): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $result = do_mysqli_query(
         "SELECT LgName,LgID FROM " . $tbpref . "languages
         where LgName<>'' ORDER BY LgName"
@@ -205,7 +205,7 @@ $('[type="submit"]').on('click', function(){
 
 function edit_feed($currentfeed): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $result = do_mysqli_query(
         "SELECT * FROM " . $tbpref . "newsfeeds WHERE NfID=$currentfeed"
     );
@@ -425,7 +425,7 @@ $('[type="submit"]').on('click', function(){
 
 function multi_load_feed($currentlang): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if(!empty($currentlang)) {
         $result = do_mysqli_query(
             "SELECT NfName,NfID,NfUpdate FROM " . $tbpref . "newsfeeds
@@ -500,7 +500,8 @@ $( "button" ).on('click', function() {
 function display_main_page(
     $currentlang, $currentquery, $currentpage, $currentsort, $wh_query
 ): void {
-    global $tbpref, $debug;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $debug = \Lwt\Core\LWT_Globals::isDebug();
     ?>
 
 <div class="flex-spaced">

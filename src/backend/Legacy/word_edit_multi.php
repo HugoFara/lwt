@@ -550,7 +550,7 @@ function edit_mword_display_change($term, $tid, $ord)
  */
 function edit_mword_page()
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     if (isset($_REQUEST['op'])) {
         // INS/UPD

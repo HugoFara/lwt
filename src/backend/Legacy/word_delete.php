@@ -26,7 +26,7 @@ require_once 'Core/session_utility.php';
  */
 function get_term($wid)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $term = get_first_value(
         "SELECT WoText AS value
         FROM " . $tbpref . "words
@@ -46,7 +46,7 @@ function get_term($wid)
  */
 function delete_word_from_database($wid)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $m1 = runsql(
         'DELETE FROM ' . $tbpref . 'words
         WHERE WoID = ' . $wid,

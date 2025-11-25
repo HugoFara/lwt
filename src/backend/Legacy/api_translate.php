@@ -29,7 +29,7 @@ require_once 'Core/session_utility.php';
  */
 function translator_url($term, $order)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT SeText, LgGoogleTranslateURI
     FROM {$tbpref}languages, {$tbpref}sentences, {$tbpref}textitems2
     WHERE Ti2SeID = SeID AND Ti2LgID = LgID AND Ti2TxID = $term AND Ti2Order = $order";

@@ -76,7 +76,7 @@ function edit_languages_alert_duplicate()
  */
 function edit_languages_refresh($lid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $message2 = runsql(
         "DELETE FROM {$tbpref}sentences where SeLgID = $lid",
         "Sentences deleted"
@@ -124,7 +124,7 @@ function edit_languages_refresh($lid): string
  */
 function edit_languages_delete($lid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $anztexts = get_first_value(
         "SELECT count(TxID) as value
         FROM {$tbpref}texts
@@ -167,7 +167,7 @@ function edit_languages_delete($lid): string
  */
 function edit_languages_op_save(): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $val = get_first_value(
         "SELECT MIN(LgID) AS value FROM {$tbpref}languages WHERE LgName=''"
     );
@@ -234,7 +234,7 @@ function edit_languages_op_save(): string
  */
 function edit_languages_op_change($lid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Get old values
     $sql = "SELECT * FROM {$tbpref}languages where LgID = $lid";
     $res = do_mysqli_query($sql);
@@ -326,7 +326,7 @@ function edit_languages_op_change($lid): string
  */
 function load_language($lgid)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $language = new Language();
     $language->id = $lgid;
@@ -1273,7 +1273,7 @@ function edit_languages_new()
  */
 function edit_languages_change($lid)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT * FROM {$tbpref}languages WHERE LgID = $lid";
     $res = do_mysqli_query($sql);
     if (mysqli_fetch_assoc($res)) {
@@ -1315,7 +1315,8 @@ function edit_languages_change($lid)
  */
 function edit_languages_display($message)
 {
-    global $tbpref, $debug;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $debug = \Lwt\Core\LWT_Globals::isDebug();
 
     echo error_message_with_hide($message, false);
 

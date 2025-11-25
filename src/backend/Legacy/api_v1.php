@@ -164,7 +164,7 @@ function media_files($get_req)
  */
 function readingConfiguration($get_req): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // language, voiceAPI, abbr
     $req = do_mysqli_query(
         "SELECT LgName, LgTTSVoiceAPI, LgRegexpWordCharacters FROM {$tbpref}languages

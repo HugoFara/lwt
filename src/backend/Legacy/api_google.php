@@ -57,7 +57,7 @@ function translate_sentence($text, $translation): void
  */
 function translate_term($text, $file, $sl, $tl): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $lg_id = getSetting('currentlangage');
     $voiceApi = get_first_value(
         "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages
