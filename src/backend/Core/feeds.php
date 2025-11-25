@@ -32,11 +32,12 @@ function load_feeds($currentfeed): void
                 if(time()>($autoupdate + (int) $row['NfUpdate'])) {
                     $ajax[$cnt]=  "$.ajax({type: 'POST',beforeSend: function(){ $('#feed_" .
                         $row['NfID'] . "').replaceWith( '<div id=\"feed_" . $row['NfID'] . "\" class=\"msgblue\"><p>".
-                        addslashes((string) $row['NfName']).": loading</p></div>' );},url:'inc/ajax_load_feed.php', data: { NfID: '".
-                            $row['NfID']."', NfSourceURI: '". $row['NfSourceURI']."', NfName: '". addslashes((string) $row['NfName']).
-                            "', NfOptions: '". $row['NfOptions']."', cnt: '". $cnt.
-                            "' },success:function (data) {feedcnt+=1;$('#feedcount').text(feedcnt);$('#feed_" .
-                                $row['NfID'] . "').replaceWith( data );}})";
+                        addslashes((string) $row['NfName']).": loading</p></div>' );},url:'api.php/v1/feeds/".
+                            $row['NfID']."/load', data: { name: '". addslashes((string) $row['NfName']).
+                            "', source_uri: '". $row['NfSourceURI'].
+                            "', options: '". $row['NfOptions'].
+                            "' },success:function (data) {feedcnt+=1;$('#feedcount').text(feedcnt);var msg = data.error ? '<div class=\"red\"><p>' + data.error + '</p></div>' : '<div class=\"msgblue\"><p>' + data.message + '</p></div>';$('#feed_" .
+                                $row['NfID'] . "').replaceWith( msg );}})";
                     $cnt+=1;
                     $feeds[$row['NfID']]=$row['NfName'];
                 }
@@ -49,11 +50,12 @@ function load_feeds($currentfeed): void
         while($row = mysqli_fetch_assoc($result)){
             $ajax[$cnt]=  "$.ajax({type: 'POST',beforeSend: function(){ $('#feed_" .
                 $row['NfID'] . "').replaceWith( '<div id=\"feed_" . $row['NfID'] . "\" class=\"msgblue\"><p>".
-                addslashes((string) $row['NfName']).": loading</p></div>' );},url:'inc/ajax_load_feed.php', data: { NfID: '".
-                    $row['NfID']."', NfSourceURI: '". $row['NfSourceURI']."', NfName: '".
-                    addslashes((string) $row['NfName'])."', NfOptions: '". $row['NfOptions']."', cnt: '".
-                    $cnt."' },success:function (data) {feedcnt+=1;$('#feedcount').text(feedcnt);$('#feed_" .
-                        $row['NfID'] . "').replaceWith( data );}})";
+                addslashes((string) $row['NfName']).": loading</p></div>' );},url:'api.php/v1/feeds/".
+                    $row['NfID']."/load', data: { name: '".
+                    addslashes((string) $row['NfName'])."', source_uri: '". $row['NfSourceURI'].
+                    "', options: '". $row['NfOptions'].
+                    "' },success:function (data) {feedcnt+=1;$('#feedcount').text(feedcnt);var msg = data.error ? '<div class=\"red\"><p>' + data.error + '</p></div>' : '<div class=\"msgblue\"><p>' + data.message + '</p></div>';$('#feed_" .
+                        $row['NfID'] . "').replaceWith( msg );}})";
             $cnt+=1;
             $feeds[$row['NfID']]=$row['NfName'];
         }

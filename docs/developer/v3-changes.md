@@ -581,6 +581,97 @@ To migrate from `connect.inc.php` to `.env`:
 
 4. Optionally, remove `connect.inc.php` (LWT will use `.env` exclusively)
 
+### 10. AJAX Files Consolidation
+
+Version 3 consolidates all legacy AJAX files into the REST API (`api_v1.php`), eliminating 15 separate entry points.
+
+#### The Problem with Scattered AJAX Files
+
+Previously, LWT had 15 separate `ajax_*.php` files in `src/backend/Core/`:
+
+```text
+ajax_add_term_transl.php     ajax_save_impr_text.php
+ajax_chg_term_status.php     ajax_save_setting.php
+ajax_check_regexp.php        ajax_save_text_position.php
+ajax_edit_impr_text.php      ajax_show_imported_terms.php
+ajax_get_phonetic.php        ajax_show_sentences.php
+ajax_get_theme.php           ajax_show_similar_terms.php
+ajax_load_feed.php           ajax_update_media_select.php
+ajax_word_counts.php
+```
+
+This pattern had several issues:
+
+- **15 separate entry points** - Hard to maintain, secure, and document
+- **Inconsistent response formats** - Some returned HTML, some JSON, some JavaScript
+- **No HTTP status codes** - Always returned 200 OK, even on errors
+- **No input validation** - Mixed usage of `$_GET`, `$_POST`, `$_REQUEST`
+- **Fragile `chdir('..')` calls** - Many files changed directory assuming they were in `/Core/`
+
+#### The New Consolidated API
+
+All AJAX functionality has been moved into `src/backend/Legacy/api_v1.php`:
+
+| Deleted File | New REST Endpoint | HTTP Method |
+|-------------|-------------------|-------------|
+| `ajax_add_term_transl.php` | `/api.php/v1/terms/new` | POST |
+| `ajax_chg_term_status.php` | `/api.php/v1/terms/{id}/status/up` or `/down` | POST |
+| `ajax_check_regexp.php` | (removed - no active usage) | - |
+| `ajax_edit_impr_text.php` | Functions in `Lwt\Ajax\Improved_Text` namespace | - |
+| `ajax_get_phonetic.php` | `/api.php/v1/phonetic-reading` | GET |
+| `ajax_get_theme.php` | `/api.php/v1/settings/theme-path` | GET |
+| `ajax_load_feed.php` | `/api.php/v1/feeds/{id}/load` | POST |
+| `ajax_save_impr_text.php` | `/api.php/v1/texts/{id}/annotation` | POST |
+| `ajax_save_setting.php` | `/api.php/v1/settings` | POST |
+| `ajax_save_text_position.php` | `/api.php/v1/texts/{id}/reading-position` | POST |
+| `ajax_show_imported_terms.php` | `/api.php/v1/terms/imported` | GET |
+| `ajax_show_sentences.php` | `/api.php/v1/sentences-with-term` | GET |
+| `ajax_show_similar_terms.php` | `/api.php/v1/similar-terms` | GET |
+| `ajax_update_media_select.php` | `/api.php/v1/media-files` | GET |
+| `ajax_word_counts.php` | `/api.php/v1/texts/statistics` | GET |
+
+#### Namespace Organization
+
+Functions are organized into namespaces within `api_v1.php`:
+
+- `Lwt\Ajax` - Main namespace with term, status, position, and settings functions
+- `Lwt\Ajax\Improved_Text` - Functions for annotated text editing (`make_trans`, `edit_term_form`, etc.)
+- `Lwt\Ajax\Feed` - Feed loading functions (`load_feed`, `get_feeds_list`, etc.)
+
+#### Benefits
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| Entry points | 15 separate files | 1 centralized API |
+| Response format | HTML/JSON/JS (mixed) | JSON (consistent) |
+| HTTP status codes | Always 200 | 200/400/404/405 |
+| Error handling | Minimal/none | Structured JSON errors |
+| Maintainability | Hard to track | Single file to maintain |
+
+#### Migration for Custom Code
+
+If you have custom code calling the old AJAX files:
+
+```javascript
+// Old way
+$.post('Core/ajax_save_setting.php', { k: 'mykey', v: 'myvalue' });
+
+// New way
+$.post('api.php/v1/settings', { key: 'mykey', value: 'myvalue' });
+```
+
+```javascript
+// Old way
+$.post('inc/ajax_load_feed.php', {
+    NfID: feedId, NfSourceURI: uri, NfName: name, NfOptions: opts
+});
+
+// New way
+$.post('api.php/v1/feeds/' + feedId + '/load', {
+    name: name, source_uri: uri, options: opts
+});
+```
+
 ## Future Improvements
 
 This refactoring enables:

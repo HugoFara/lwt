@@ -21,7 +21,7 @@
 namespace Lwt\Interface\Print_Impr_text;
 
 require_once 'Core/session_utility.php';
-require_once 'Core/ajax_edit_impr_text.php';
+require_once __DIR__ . '/api_v1.php';
 
 use function Lwt\Ajax\Improved_Text\edit_term_form;
 
