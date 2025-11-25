@@ -672,6 +672,40 @@ $.post('api.php/v1/feeds/' + feedId + '/load', {
 });
 ```
 
+## Code Monolith Splitting
+
+Version 3 breaks up the large monolithic PHP files into smaller, focused modules for better maintainability.
+
+### database_connect.php Split
+
+The original `database_connect.php` was split into focused modules:
+
+| New File | Purpose |
+|----------|---------|
+| `database_connect.php` | Core database connection and query wrappers |
+| `tags.php` | Tag management functions |
+| `feeds.php` | RSS feed handling functions |
+| `settings.php` | Application settings management |
+
+### session_utility.php Split
+
+The original `session_utility.php` (4300+ lines) was split into 4 files:
+
+| New File | Lines | Purpose |
+|----------|-------|---------|
+| `session_utility.php` | ~1,000 | Core session functions, navigation, media handling, string utilities |
+| `ui_helpers.php` | ~960 | HTML/UI generation (logos, selects, pagers, page headers, status indicators) |
+| `export_helpers.php` | ~240 | Export functions (Anki, TSV, flexible format exports) |
+| `text_helpers.php` | ~2,100 | Text/sentence processing, MeCab integration, annotations, expression handling |
+
+All functions remain in the global namespace for backward compatibility. The `session_utility.php` file requires all helper files automatically:
+
+```php
+require_once __DIR__ . '/ui_helpers.php';
+require_once __DIR__ . '/export_helpers.php';
+require_once __DIR__ . '/text_helpers.php';
+```
+
 ## Future Improvements
 
 This refactoring enables:
