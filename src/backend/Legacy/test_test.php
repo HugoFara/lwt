@@ -230,7 +230,7 @@ function do_test_test_finished($testsql, $totaltests, $ajax = false)
  */
 function do_test_test_sentence($wid, $lang, $wordlc): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sent = null;
 
     // Select sentences where at least 70 % of words are known in priority. Otherwise take any sentence
@@ -456,7 +456,7 @@ function do_test_prepare_ajax_test_area(
     $count,
     $testtype
 ): int {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $word_mode = false;
     if ($testtype > 3) {
@@ -556,7 +556,7 @@ function do_test_prepare_ajax_test_area(
  */
 function prepare_test_area($testsql, $totaltests, $count, $testtype): int
 {
-    global $tbpref, $debug;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $nosent = 0;
     if ($testtype > 3) {
         $testtype -= 3;
@@ -608,7 +608,7 @@ function prepare_test_area($testsql, $totaltests, $count, $testtype): int
         ($pass == 1 ? 'AND WoRandom > RAND()' : '') . '
         ORDER BY WoTodayScore, WoRandom
         LIMIT 1';
-        if ($debug) {
+        if (\Lwt\Core\LWT_Globals::isDebug()) {
             echo 'DEBUG TEST-SQL: ' . $sql . '<br />';
         }
         $res = do_mysqli_query($sql);
@@ -648,7 +648,7 @@ function prepare_test_area($testsql, $totaltests, $count, $testtype): int
         if ($notvalid) {
             $sent = "{" . $word . "}";
         }
-        if ($debug) {
+        if (\Lwt\Core\LWT_Globals::isDebug()) {
             echo "DEBUG not found, use sent = $sent<br />";
         }
     }
@@ -728,7 +728,7 @@ function do_test_test_interaction_globals($wb1, $wb2, $wb3, $lg_id)
  */
 function do_test_test_javascript_clickable($wo_record, $solution)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $wid = $wo_record['WoID'];
     $voiceApi = get_first_value(
         "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages

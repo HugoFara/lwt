@@ -33,7 +33,7 @@ require_once 'Core/session_utility.php';
  */
 function get_sql_test_data(&$title, &$p)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $p = "selection=" . $_REQUEST['selection'];
     $testsql = do_test_test_from_selection(
         $_REQUEST['selection'],
@@ -72,7 +72,7 @@ function get_sql_test_data(&$title, &$p)
  */
 function get_lang_test_data(&$title, &$p): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $langid = getreq('lang');
     $p = "lang=" . $langid;
     $title = "All Terms in " . get_first_value(
@@ -94,7 +94,7 @@ function get_lang_test_data(&$title, &$p): string
  */
 function get_text_test_data(&$title, &$p): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $textid = getreq('text');
     $p = "text=" . $textid;
     $title = get_first_value(

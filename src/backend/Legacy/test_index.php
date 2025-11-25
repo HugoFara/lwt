@@ -36,7 +36,7 @@ require_once 'test_table.php';
  */
 function get_l2_language_name()
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $lang = 'L2';
     if (getreq('lang') != '') {

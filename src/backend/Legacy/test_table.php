@@ -28,7 +28,7 @@ require_once 'Core/session_utility.php';
  */
 function get_test_table_sql()
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (isset($_REQUEST['selection']) && isset($_SESSION['testsql'])) {
         $testsql = $_SESSION['testsql'];
         $cntlang = get_first_value('SELECT count(distinct WoLgID) AS value FROM ' . $testsql);
@@ -56,7 +56,7 @@ function get_test_table_sql()
  */
 function do_test_table_language_settings($testsql)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $lang = get_first_value('SELECT WoLgID AS value FROM ' . $testsql . ' LIMIT 1');
 
