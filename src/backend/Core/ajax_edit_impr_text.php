@@ -31,7 +31,7 @@ require_once __DIR__ . '/session_utility.php';
  */
 function make_trans($i, $wid, $trans, $word, $lang): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $trans = trim($trans);
     $widset = is_numeric($wid);
     $r = "";
@@ -115,7 +115,7 @@ function make_trans($i, $wid, $trans, $word, $lang): string
  */
 function get_translations($word_id): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $translations = array();
     $alltrans = (string) get_first_value(
         "SELECT WoTranslation AS value FROM {$tbpref}words
@@ -145,7 +145,7 @@ function get_translations($word_id): array
  */
 function get_term_translations($wordlc, $textid): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT TxLgID, TxAnnotatedText
     FROM {$tbpref}texts WHERE TxID = $textid";
     $res = do_mysqli_query($sql);
@@ -280,7 +280,7 @@ function edit_term_interaction($wordlc, $textid): string
  */
 function edit_term_form($textid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT TxLgID, TxAnnotatedText
     FROM {$tbpref}texts WHERE TxID = $textid";
     $res = do_mysqli_query($sql);
@@ -433,7 +433,7 @@ function edit_term_form($textid): string
  */
 function make_form($textid, $wordlc): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = 'SELECT TxLgID, TxAnnotatedText
     FROM ' . $tbpref . 'texts WHERE TxID = ' . $textid;
     $res = do_mysqli_query($sql);

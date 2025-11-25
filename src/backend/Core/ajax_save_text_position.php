@@ -29,7 +29,7 @@ require_once __DIR__ . '/session_utility.php';
  */
 function save_text_position($textid, $position)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     runsql(
         "UPDATE {$tbpref}texts
         SET TxPosition = $position
@@ -50,7 +50,7 @@ function save_text_position($textid, $position)
  */
 function save_audio_position($textid, $audioposition)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     runsql(
         "UPDATE {$tbpref}texts
         SET TxAudioPosition = $audioposition

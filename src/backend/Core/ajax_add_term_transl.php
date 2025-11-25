@@ -32,7 +32,7 @@ require_once __DIR__ . '/session_utility.php';
  */
 function add_new_term_transl($text, $lang, $data): array|string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $textlc = mb_strtolower($text, 'UTF-8');
     $dummy = runsql(
         "INSERT INTO {$tbpref}words (
@@ -77,7 +77,7 @@ function add_new_term_transl($text, $lang, $data): array|string
  */
 function edit_term_transl($wid, $new_trans)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $oldtrans = (string) get_first_value(
         "SELECT WoTranslation AS value
         FROM {$tbpref}words
@@ -128,7 +128,7 @@ function edit_term_transl($wid, $new_trans)
  */
 function do_ajax_check_update_translation($wid, $new_trans)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $cnt_words = (int)get_first_value(
         "SELECT COUNT(WoID) AS value
         FROM {$tbpref}words

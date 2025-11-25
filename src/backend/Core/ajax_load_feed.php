@@ -24,7 +24,7 @@ require_once __DIR__ . '/session_utility.php';
  */
 function get_feeds_list($feed, $nfid): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $valuesArr = array();
     foreach ($feed as $data) {
         $d_title=convert_string_to_sqlsyntax($data['title']);
@@ -60,7 +60,7 @@ function get_feeds_list($feed, $nfid): array
  */
 function print_feed_result($imported_feed, $nif, $nfname, $nfid, $nfoptions)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     do_mysqli_query(
         'UPDATE ' . $tbpref . 'newsfeeds
         SET NfUpdate="' . time() . '"

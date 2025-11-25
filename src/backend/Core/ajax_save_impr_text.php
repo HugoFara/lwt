@@ -23,11 +23,10 @@ require_once __DIR__ . '/session_utility.php';
  *
  * @return string Error message, or "OK" if success.
  *
- * @global string $tbpref Database table prefix.
  */
 function save_impr_text_data($textid, $line, $val): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $ann = (string) get_first_value(
         "SELECT TxAnnotatedText AS value
         FROM {$tbpref}texts

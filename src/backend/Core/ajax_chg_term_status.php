@@ -25,11 +25,10 @@ require_once __DIR__ . '/session_utility.php';
  *
  * @return string Number of affected rows or error message
  *
- * @global string $tbpref
  */
 function set_word_status($wid, $status)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $m1 = runsql(
         "UPDATE {$tbpref}words
         SET WoStatus = $status, WoStatusChanged = NOW()," .
@@ -81,7 +80,7 @@ function get_new_status($oldstatus, $up)
  */
 function update_word_status($wid, $currstatus)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (($currstatus >= 1 && $currstatus <= 5) || $currstatus == 99 || $currstatus == 98) {
         $m1 = (int)set_word_status($wid, $currstatus);
         if ($m1 == 1) {
@@ -113,7 +112,7 @@ function update_word_status($wid, $currstatus)
  */
 function ajax_increment_term_status($wid, $up)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $tempstatus = get_first_value(
         "SELECT WoStatus as value

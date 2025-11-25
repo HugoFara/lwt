@@ -127,7 +127,7 @@ function get_imported_terms($recno, $currentpage, $last_update): string
  */
 function select_imported_terms($last_update, $offset, $max_terms): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT WoID, WoText, WoTranslation, WoRomanization, WoSentence,
     IFNULL(WoSentence, '') LIKE CONCAT('%{', WoText, '}%') AS SentOK,
     WoStatus,
