@@ -32,7 +32,6 @@
         "info.html": "@php docs/info.php > docs/info.html",
         "doc": [
             "@info.html",
-            "doxygen Doxyfile",
             "./node_modules/.bin/jsdoc -c jsdoc.json",
             "php tools/phpDocumentor"
         ],
@@ -46,9 +45,8 @@
         ],
         "clean-doc": [
             "rm docs/info.html",
-            "rm -rf docs/html",
-            "rm -rf docs/js",
-            "rm -rf docs/php"
+            "rm -rf docs/api/js",
+            "rm -rf docs/api/php"
         ]
     },
     "scripts-descriptions": {
