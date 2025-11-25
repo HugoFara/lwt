@@ -12,22 +12,71 @@
         <directory name="." />
         <ignoreFiles>
             <directory name="vendor" />
-            <!-- Ignore WordPress server configuration files-->
-            <file name="wp_lwt_st*.php" />
-            <!-- Should this really be ignored? -->
-            <file name="inc/classes/GoogleTranslate.php" />
+            <directory name="node_modules" />
+            <!-- Generated/minified assets -->
+            <directory name="assets" />
+            <!-- Documentation -->
+            <directory name="docs" />
+            <!-- Build tools -->
+            <directory name="src/tools" />
         </ignoreFiles>
     </projectFiles>
 
     <globals>
-        <!-- Globals from connect.inc.php -->
-        <var name="$server" type="string" />
-        <var name="$userid" type="string" />
-        <var name="$passwd" type="string" />
-        <var name="$dbname" type="string" />
+        <!-- Database globals from database_connect.php -->
+        <var name="$DBCONNECTION" type="mysqli|null" />
+        <var name="$tbpref" type="string" />
+        <!-- Debug mode from kernel_utility.php -->
+        <var name="$debug" type="bool" />
+        <!-- Alternative table prefix used in some contexts -->
+        <var name="$fixed_tbpref" type="string" />
     </globals>
 
-    <stubs>
-        <file name="connect_easyphp.inc.php" />
-    </stubs>
+    <issueHandlers>
+        <!--
+            Legacy code suppressions:
+            These files are being migrated from the old procedural structure to MVC.
+            They use global functions and variables that are valid at runtime but
+            Psalm cannot track through dynamic includes.
+        -->
+        <UndefinedGlobalVariable>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Legacy" />
+            </errorLevel>
+        </UndefinedGlobalVariable>
+
+        <UndefinedFunction>
+            <errorLevel type="suppress">
+                <!-- Legacy files call functions defined in session_utility.php -->
+                <directory name="src/backend/Legacy" />
+            </errorLevel>
+        </UndefinedFunction>
+
+        <MissingFile>
+            <errorLevel type="suppress">
+                <!-- Legacy files may include files that are being reorganized -->
+                <directory name="src/backend/Legacy" />
+            </errorLevel>
+        </MissingFile>
+
+        <!--
+            Test files are flagged as unused because they're loaded by PHPUnit,
+            not by explicit require/include statements.
+        -->
+        <UnusedClass>
+            <errorLevel type="suppress">
+                <directory name="tests" />
+            </errorLevel>
+        </UnusedClass>
+
+        <!--
+            Controller $params are required by the routing interface signature
+            even when not used in methods that delegate to legacy includes.
+        -->
+        <PossiblyUnusedParam>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+            </errorLevel>
+        </PossiblyUnusedParam>
+    </issueHandlers>
 </psalm>

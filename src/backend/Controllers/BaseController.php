@@ -60,7 +60,7 @@ abstract class BaseController
      */
     protected function render(string $title, bool $showMenu = true): void
     {
-        pagestart($title, $showMenu);
+        \pagestart($title, $showMenu);
     }
 
     /**
@@ -70,7 +70,7 @@ abstract class BaseController
      */
     protected function endRender(): void
     {
-        pageend();
+        \pageend();
     }
 
     /**
@@ -83,7 +83,7 @@ abstract class BaseController
      */
     protected function message(string $message, bool $autoHide = true): void
     {
-        echo error_message_with_hide($message, $autoHide);
+        echo \error_message_with_hide($message, $autoHide);
     }
 
     /**
@@ -168,7 +168,7 @@ abstract class BaseController
      */
     protected function query(string $sql): \mysqli_result|bool
     {
-        return do_mysqli_query($sql);
+        return \do_mysqli_query($sql);
     }
 
     /**
@@ -182,7 +182,7 @@ abstract class BaseController
      */
     protected function execute(string $sql, string $message = '', bool $errDie = true): string
     {
-        return runsql($sql, $message, $errDie);
+        return \runsql($sql, $message, $errDie);
     }
 
     /**
@@ -194,7 +194,7 @@ abstract class BaseController
      */
     protected function getValue(string $sql): mixed
     {
-        return get_first_value($sql);
+        return \get_first_value($sql);
     }
 
     /**
@@ -218,7 +218,7 @@ abstract class BaseController
      */
     protected function escape(string $value): string
     {
-        return convert_string_to_sqlsyntax($value);
+        return \convert_string_to_sqlsyntax($value);
     }
 
     /**
@@ -230,7 +230,7 @@ abstract class BaseController
      */
     protected function escapeNonNull(string $value): string
     {
-        return convert_string_to_sqlsyntax_nonull($value);
+        return \convert_string_to_sqlsyntax_nonull($value);
     }
 
     /**
@@ -280,7 +280,7 @@ abstract class BaseController
         mixed $default,
         bool $isNumeric = false
     ): mixed {
-        return processSessParam($reqKey, $sessKey, $default, $isNumeric);
+        return \processSessParam($reqKey, $sessKey, $default, $isNumeric);
     }
 
     /**
@@ -299,6 +299,6 @@ abstract class BaseController
         mixed $default,
         bool $isNumeric = false
     ): mixed {
-        return processDBParam($reqKey, $dbKey, $default, $isNumeric);
+        return \processDBParam($reqKey, $dbKey, $default, $isNumeric);
     }
 }

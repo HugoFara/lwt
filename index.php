@@ -66,7 +66,7 @@ if (!file_exists(LWT_BASE_PATH . '/.env')) {
     $requestUri = $_SERVER['REQUEST_URI'] ?? '';
     if (str_contains($requestUri, 'database_wizard') || str_contains($requestUri, 'admin/wizard')) {
         // Allow wizard to run without database connection
-        include LWT_BASE_PATH . '/database_wizard.php';
+        include LWT_BASE_PATH . '/src/backend/Legacy/admin_wizard.php';
         exit;
     }
 

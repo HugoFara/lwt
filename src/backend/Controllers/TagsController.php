@@ -131,7 +131,7 @@ class TagsController extends BaseController
                     "Deleted"
                 );
                 $this->cleanupOrphanedTermTagLinks();
-                adjust_autoincr('tags', 'TgID');
+                \adjust_autoincr('tags', 'TgID');
             }
         }
         // Single delete
@@ -141,7 +141,7 @@ class TagsController extends BaseController
                 "Deleted"
             );
             $this->cleanupOrphanedTermTagLinks();
-            adjust_autoincr('tags', 'TgID');
+            \adjust_autoincr('tags', 'TgID');
         }
         // Insert/Update
         elseif ($this->param('op')) {
@@ -173,7 +173,7 @@ class TagsController extends BaseController
                     "Deleted"
                 );
                 $this->cleanupOrphanedTermTagLinks();
-                adjust_autoincr('tags', 'TgID');
+                \adjust_autoincr('tags', 'TgID');
             }
         }
 
@@ -288,7 +288,7 @@ class TagsController extends BaseController
                     <td class="td1 right">Tag:</td>
                     <td class="td1">
                         <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
-                        type="text" name="TgText" value="<?php echo tohtml($record['TgText']); ?>" maxlength="20" size="20" />
+                        type="text" name="TgText" value="<?php echo \tohtml($record['TgText']); ?>" maxlength="20" size="20" />
                         <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
                     </td>
                 </tr>
@@ -296,7 +296,7 @@ class TagsController extends BaseController
                     <td class="td1 right">Comment:</td>
                     <td class="td1">
                         <textarea class="textarea-noreturn checklength checkoutsidebmp respinput"
-                        data_maxlength="200" data_info="Comment" name="TgComment" rows="3"><?php echo tohtml($record['TgComment']); ?></textarea>
+                        data_maxlength="200" data_info="Comment" name="TgComment" rows="3"><?php echo \tohtml($record['TgComment']); ?></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -342,7 +342,7 @@ class TagsController extends BaseController
         }
         $this->message($message, false);
 
-        get_tags($refresh = 1);   // refresh tags cache
+        \get_tags(1);   // refresh tags cache
 
         $sql = 'select count(TgID) as value from ' . $this->table('tags') . ' where (1=1) ' . $wh_query;
         $recno = (int) $this->getValue($sql);
@@ -350,7 +350,7 @@ class TagsController extends BaseController
             echo $sql . ' ===&gt; ' . $recno;
         }
 
-        $maxperpage = (int) getSettingWithDefault('set-tags-per-page');
+        $maxperpage = (int) \getSettingWithDefault('set-tags-per-page');
         $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
         if ($currentpage < 1) {
@@ -382,7 +382,7 @@ class TagsController extends BaseController
         <tr>
         <td class="td1 center" colspan="4">
         Tag Text or Comment:
-        <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
+        <input type="text" name="query" value="<?php echo \tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
         <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='/tags?page=1&amp;query=' + val;}" />&nbsp;
         <input type="button" value="Clear" onclick="{location.href='/tags?page=1&amp;query=';}" />
         </td>
@@ -392,10 +392,10 @@ class TagsController extends BaseController
         <th class="th1" colspan="1" nowrap="nowrap">
             <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
         </th><th class="th1" colspan="2" nowrap="nowrap">
-            <?php makePager($currentpage, $pages, '/tags', 'form1'); ?>
+            <?php \makePager($currentpage, $pages, '/tags', 'form1'); ?>
         </th><th class="th1" nowrap="nowrap">
         Sort Order:
-        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags?page=1&amp;sort=' + val;}"><?php echo get_tagsort_selectoptions($currentsort); ?></select>
+        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags?page=1&amp;sort=' + val;}"><?php echo \get_tagsort_selectoptions($currentsort); ?></select>
         </th></tr>
         <?php } ?>
         </table>
@@ -416,14 +416,14 @@ class TagsController extends BaseController
             </th></tr>
             <tr><td class="td1 center" colspan="2">
             <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
-            <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo get_alltagsactions_selectoptions(); ?></select>
+            <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo \get_alltagsactions_selectoptions(); ?></select>
             </td></tr>
             <tr><td class="td1 center">
             <input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
             <input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
             </td>
             <td class="td1 center">Marked Tags:&nbsp;
-            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo get_multipletagsactions_selectoptions(); ?></select>
+            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo \get_multipletagsactions_selectoptions(); ?></select>
             </td></tr></table>
 
             <table class="sortable tab2" cellspacing="0" cellpadding="5">
@@ -447,11 +447,11 @@ class TagsController extends BaseController
                 echo '<tr>
                     <td class="td1 center">
                         <a name="rec' . $record['TgID'] . '">
-                        <input name="marked[]" type="checkbox" class="markcheck" value="' . $record['TgID'] . '" ' . checkTest($record['TgID'], 'marked') . ' />
+                        <input name="marked[]" type="checkbox" class="markcheck" value="' . $record['TgID'] . '" ' . \checkTest($record['TgID'], 'marked') . ' />
                         </a></td>
                     <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags?chg=' . $record['TgID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags?del=' . $record['TgID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
-                    <td class="td1 center">' . tohtml($record['TgText']) . '</td>
-                    <td class="td1 center">' . tohtml($record['TgComment']) . '</td>
+                    <td class="td1 center">' . \tohtml($record['TgText']) . '</td>
+                    <td class="td1 center">' . \tohtml($record['TgComment']) . '</td>
                     <td class="td1 center">' . ($c > 0 ? '<a href="/words/edit?page=1&amp;query=&amp;text=&amp;status=&amp;filterlang=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['TgID'] . '">' . $c . '</a>' : '0') . '</td>
                 </tr>';
             }
@@ -466,7 +466,7 @@ class TagsController extends BaseController
                         <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
                     </th>
                     <th class="th1" nowrap="nowrap">
-                        <?php makePager($currentpage, $pages, '/tags', 'form2'); ?>
+                        <?php \makePager($currentpage, $pages, '/tags', 'form2'); ?>
                     </th>
                 </tr>
             </table>
@@ -500,7 +500,7 @@ class TagsController extends BaseController
                     "Deleted"
                 );
                 $this->cleanupOrphanedTextTagLinks();
-                adjust_autoincr('tags2', 'T2ID');
+                \adjust_autoincr('tags2', 'T2ID');
             }
         }
         // Single delete
@@ -510,7 +510,7 @@ class TagsController extends BaseController
                 "Deleted"
             );
             $this->cleanupOrphanedTextTagLinks();
-            adjust_autoincr('tags2', 'T2ID');
+            \adjust_autoincr('tags2', 'T2ID');
         }
         // Insert/Update
         elseif ($this->param('op')) {
@@ -542,7 +542,7 @@ class TagsController extends BaseController
                     "Deleted"
                 );
                 $this->cleanupOrphanedTextTagLinks();
-                adjust_autoincr('tags2', 'T2ID');
+                \adjust_autoincr('tags2', 'T2ID');
             }
         }
 
@@ -662,14 +662,14 @@ class TagsController extends BaseController
                 <td class="td1 right">Tag:</td>
                 <td class="td1">
                     <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
-                    type="text" name="T2Text" value="<?php echo tohtml($record['T2Text']); ?>" maxlength="20" />
+                    type="text" name="T2Text" value="<?php echo \tohtml($record['T2Text']); ?>" maxlength="20" />
                     <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
                 </tr>
                 <tr>
                     <td class="td1 right">Comment:</td>
                     <td class="td1">
                         <textarea class="textarea-noreturn checklength checkoutsidebmp respinput"
-                        data_maxlength="200" data_info="Comment" name="T2Comment" rows="3"><?php echo tohtml($record['T2Comment']); ?></textarea>
+                        data_maxlength="200" data_info="Comment" name="T2Comment" rows="3"><?php echo \tohtml($record['T2Comment']); ?></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -714,7 +714,7 @@ class TagsController extends BaseController
         }
         $this->message($message, false);
 
-        get_texttags($refresh = 1);   // refresh tags cache
+        \get_texttags(1);   // refresh tags cache
 
         $sql = 'select count(T2ID) as value from ' . $this->table('tags2') . ' where (1=1) ' . $wh_query;
         $recno = (int) $this->getValue($sql);
@@ -722,7 +722,7 @@ class TagsController extends BaseController
             echo $sql . ' ===&gt; ' . $recno;
         }
 
-        $maxperpage = (int) getSettingWithDefault('set-tags-per-page');
+        $maxperpage = (int) \getSettingWithDefault('set-tags-per-page');
         $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
         if ($currentpage < 1) {
@@ -755,7 +755,7 @@ class TagsController extends BaseController
         <tr>
         <td class="td1 center" colspan="4">
             Tag Text or Comment:
-            <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
+            <input type="text" name="query" value="<?php echo \tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
             <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='/tags/text?page=1&amp;query=' + val;}" />&nbsp;
             <input type="button" value="Clear" onclick="{location.href='/tags/text?page=1&amp;query=';}" />
         </td>
@@ -765,10 +765,10 @@ class TagsController extends BaseController
         <th class="th1" colspan="1" nowrap="nowrap">
             <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
         </th><th class="th1" colspan="2" nowrap="nowrap">
-            <?php makePager($currentpage, $pages, '/tags/text', 'form1'); ?>
+            <?php \makePager($currentpage, $pages, '/tags/text', 'form1'); ?>
         </th><th class="th1" nowrap="nowrap">
         Sort Order:
-        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags/text?page=1&amp;sort=' + val;}"><?php echo get_tagsort_selectoptions($currentsort); ?></select>
+        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags/text?page=1&amp;sort=' + val;}"><?php echo \get_tagsort_selectoptions($currentsort); ?></select>
         </th></tr>
         <?php } ?>
         </table>
@@ -789,14 +789,14 @@ class TagsController extends BaseController
             </th></tr>
             <tr><td class="td1 center" colspan="2">
             <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
-            <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo get_alltagsactions_selectoptions(); ?></select>
+            <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo \get_alltagsactions_selectoptions(); ?></select>
             </td></tr>
             <tr><td class="td1 center">
             <input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
             <input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
             </td>
             <td class="td1 center">Marked Tags:&nbsp;
-            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo get_multipletagsactions_selectoptions(); ?></select>
+            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo \get_multipletagsactions_selectoptions(); ?></select>
             </td></tr></table>
 
             <table class="sortable tab2" cellspacing="0" cellpadding="5">
@@ -820,10 +820,10 @@ class TagsController extends BaseController
                 $c = $this->getValue('select count(*) as value from ' . $this->table('texttags') . ' where TtT2ID=' . $record['T2ID']);
                 $ca = $this->getValue('select count(*) as value from ' . $this->table('archtexttags') . ' where AgT2ID=' . $record['T2ID']);
                 echo '<tr>';
-                echo '<td class="td1 center"><a name="rec' . $record['T2ID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['T2ID'] . '" ' . checkTest($record['T2ID'], 'marked') . ' /></a></td>';
+                echo '<td class="td1 center"><a name="rec' . $record['T2ID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['T2ID'] . '" ' . \checkTest($record['T2ID'], 'marked') . ' /></a></td>';
                 echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags/text?chg=' . $record['T2ID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags/text?del=' . $record['T2ID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';
-                echo '<td class="td1 center">' . tohtml($record['T2Text']) . '</td>';
-                echo '<td class="td1 center">' . tohtml($record['T2Comment']) . '</td>';
+                echo '<td class="td1 center">' . \tohtml($record['T2Text']) . '</td>';
+                echo '<td class="td1 center">' . \tohtml($record['T2Comment']) . '</td>';
                 echo '<td class="td1 center">' . ($c > 0 ? '<a href="/text/edit?page=1&amp;query=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['T2ID'] . '">' . $c . '</a>' : '0') . '</td>';
                 echo '<td class="td1 center">' . ($ca > 0 ? '<a href="/text/archived?page=1&amp;query=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['T2ID'] . '">' . $ca . '</a>' : '0') . '</td>';
                 echo '</tr>';
@@ -838,7 +838,7 @@ class TagsController extends BaseController
             <th class="th1" nowrap="nowrap">
                 <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
             </th><th class="th1" nowrap="nowrap">
-                <?php makePager($currentpage, $pages, '/tags/text', 'form2'); ?>
+                <?php \makePager($currentpage, $pages, '/tags/text', 'form2'); ?>
             </th></tr></table></form>
             <?php }
         }
