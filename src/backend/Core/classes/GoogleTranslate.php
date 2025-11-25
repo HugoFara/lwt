@@ -63,7 +63,7 @@ class GoogleTranslate
     private static function generateToken(string $str, array|null $tok): string
     {
         $t = $c = isset($tok)?$tok[0]:408254;//todo floor(time()/3600);
-        $x = hexdec(80000000);
+        $x = hexdec('80000000');
         $z = 0xffffffff;
         $y = PHP_INT_SIZE==8?0xffffffff00000000:0x00000000;
         $d = array();
@@ -81,33 +81,33 @@ class GoogleTranslate
             $c += $b;
             $b = $c << 10;
             if ($b & $x) {
-                $b = ((int)$b | (int)$y);
+                $b = ($b | $y);
             } else {
-                $b = ((int)$b & (int)$z);
+                $b = ($b & $z);
             }
             $c += $b;
             $b = (($c >> 6) & (0x03ffffff));
             $c ^= $b;
             if ($c & $x) {
-                $c = ((int)$c | (int)$y);
+                $c = ($c | $y);
             } else {
-                $c = ((int)$c & (int)$z);
+                $c = ($c & $z);
             }
         }
         $b = $c << 3;
         if($b & $x) {
-            $b = ((int)$b | (int)$y);
+            $b = ($b | $y);
         } else {
-            $b = ((int)$b & (int)$z);
+            $b = ($b & $z);
         }
         $c += $b;
         $b = (($c >> 11) & (0x001fffff));
         $c ^= $b;
         $b = $c << 15;
         if($b & $x) {
-            $b = ((int)$b | (int)$y);
+            $b = ($b | $y);
         } else {
-            $b = ((int)$b & (int)$z);
+            $b = ($b & $z);
         }
         $c += $b;
         $c ^= isset($tok)?$tok[1]:585515986;//todo create from time() / TKK ggltrns

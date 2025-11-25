@@ -829,7 +829,7 @@ function get_feeds_list($feed, $nfid): array
         $d_desc=convert_string_to_sqlsyntax($data['desc']);
         $d_date=convert_string_to_sqlsyntax($data['date']);
         $d_audio=convert_string_to_sqlsyntax($data['audio']);
-        $d_feed=convert_string_to_sqlsyntax($nfid);
+        $d_feed=convert_string_to_sqlsyntax((string)$nfid);
         $valuesArr[] = "($d_title,$d_link,$d_text,$d_desc,$d_date,$d_audio,$d_feed)";
     }
     $sql = 'INSERT IGNORE INTO ' . $tbpref . 'feedlinks (FlTitle,FlLink,FlText,FlDescription,FlDate,FlAudio,FlNfID)

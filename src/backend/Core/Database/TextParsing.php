@@ -256,7 +256,7 @@ class TextParsing
             // Arrow functions were introduced in PHP 7.4
             //fn ($matches) => find_latin_sentence_end($matches, $noSentenceEnd)
             function ($matches) use ($noSentenceEnd) {
-                return find_latin_sentence_end($matches, $noSentenceEnd);
+                return \find_latin_sentence_end($matches, $noSentenceEnd);
             },
             $text
         );
