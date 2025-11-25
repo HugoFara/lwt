@@ -168,7 +168,7 @@ function do_content()
     }
 
     if ($textid == 0) {
-        header("Location: edit_texts.php");
+        header("Location: /text/edit");
         exit();
     }
 
@@ -188,7 +188,7 @@ function do_content()
             WHERE TxID = $textid"
         ) > 0;
         if (!$ann_exists) {
-            header("Location: print_text.php?text=$textid");
+            header("Location: /text/print-plain?text=$textid");
             exit();
         }
     }

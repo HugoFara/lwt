@@ -18,8 +18,8 @@
 
 require_once 'inc/session_utility.php';
 require_once 'inc/mobile_interactions.php';
-require_once 'display_impr_text_header.php';
-require_once 'display_impr_text_text.php';
+require_once 'text_display_header.php';
+require_once 'text_display_text.php';
 
 /**
  * Make the page content to display printed texts on mobile.
@@ -111,7 +111,7 @@ function do_display_impr_text_page($textid)
 if (isset($_REQUEST['text'])) {
     do_display_impr_text_page((int) getreq('text'));
 } else {
-    header("Location: edit_texts.php");
+    header("Location: /text/edit");
     exit();
 }
 

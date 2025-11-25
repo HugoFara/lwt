@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-require_once __DIR__ . '/../../inc/kernel_utility.php';
+require_once __DIR__ . '/../../src/php/inc/kernel_utility.php';
 
 use PHPUnit\Framework\TestCase;
 

@@ -207,7 +207,7 @@ if (isset($_REQUEST['markaction'])) {
                     $message = addtaglist($actiondata, $list);
                 } elseif ($markaction == 'deltag' ) {
                     removetaglist($actiondata, $list);
-                    header("Location: edit_words.php");
+                    header("Location: /words/edit");
                     exit();
                 } elseif ($markaction == 'spl1' ) {
                     $message = runsql(
@@ -358,7 +358,7 @@ if (isset($_REQUEST['markaction'])) {
                     );
                 } elseif ($markaction == 'test') {
                     $_SESSION['testsql'] = $list;
-                    header("Location: do_test.php?selection=2");
+                    header("Location: /test?selection=2");
                     exit();
                 }
             }
@@ -497,7 +497,7 @@ if (isset($_REQUEST['allaction'])) {
         }
         mysqli_free_result($res);
         if ($allaction == 'deltagall') {
-            header("Location: edit_words.php");
+            header("Location: /words/edit");
             exit();
         }
         if ($allaction == 'addtagall') {
@@ -589,7 +589,7 @@ if (isset($_REQUEST['allaction'])) {
         }
         mysqli_free_result($res);
         $_SESSION['testsql'] = "(" . implode(",", $id_list) . ")";
-        header("Location: do_test.php?selection=2");
+        header("Location: /test?selection=2");
         exit();
     }
 

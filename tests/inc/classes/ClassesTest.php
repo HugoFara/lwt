@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-require_once __DIR__ . '/../../../inc/classes/Language.php';
-require_once __DIR__ . '/../../../inc/classes/Term.php';
-require_once __DIR__ . '/../../../inc/classes/Text.php';
-require_once __DIR__ . '/../../../inc/classes/GoogleTranslate.php';
+require_once __DIR__ . '/../../../src/php/inc/classes/Language.php';
+require_once __DIR__ . '/../../../src/php/inc/classes/Term.php';
+require_once __DIR__ . '/../../../src/php/inc/classes/Text.php';
+require_once __DIR__ . '/../../../src/php/inc/classes/GoogleTranslate.php';
 
 use PHPUnit\Framework\TestCase;
 use Lwt\Classes\GoogleTranslate;

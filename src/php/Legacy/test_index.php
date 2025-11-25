@@ -23,9 +23,9 @@
 require_once 'inc/session_utility.php';
 require_once 'inc/mobile_interactions.php';
 require_once 'inc/start_session.php';
-require_once 'do_test_header.php';
-require_once 'do_test_test.php';
-require_once 'do_test_table.php';
+require_once 'test_header.php';
+require_once 'test_test.php';
+require_once 'test_table.php';
 
 /**
  * Find the L2 language name.
@@ -276,7 +276,7 @@ function try_start_test($p): void
     if ($p != '') {
         do_test_page($p);
     } else {
-        header("Location: edit_texts.php");
+        header("Location: /text/edit");
         exit();
     }
 }

@@ -158,7 +158,7 @@ if (isset($_REQUEST['markaction'])) {
                     $message = addarchtexttaglist($actiondata, $list);
                 } elseif ($markaction == 'deltag' ) {
                     removearchtexttaglist($actiondata, $list);
-                    header("Location: edit_archivedtexts.php");
+                    header("Location: /text/archived");
                     exit();
                 } elseif ($markaction == 'unarch') {
                     $count = 0;

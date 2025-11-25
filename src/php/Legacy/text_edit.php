@@ -244,7 +244,7 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
         $message = addtexttaglist($actiondata, $list);
     } elseif ($markaction == 'deltag' ) {
         removetexttaglist($actiondata, $list);
-        header("Location: edit_texts.php");
+        header("Location: /text/edit");
         exit();
     } elseif ($markaction == 'setsent') {
         $count = 0;
@@ -323,7 +323,7 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
         $message = 'Text(s) reparsed: ' . $count;
     } elseif ($markaction == 'test' ) {
         $_SESSION['testsql'] = $list;
-        header("Location: do_test.php?selection=3");
+        header("Location: /test?selection=3");
         exit();
     }
     return array($message, null);

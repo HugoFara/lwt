@@ -213,7 +213,7 @@ function do_display_impr_text_text_main($textid = null)
     do_diplay_impr_text_text_js();
     $ann = get_annotated_text($textid);
     if ($textid == 0 || strlen($ann) <= 0) {
-        header("Location: edit_texts.php");
+        header("Location: /text/edit");
         exit();
     }
     list($textsize, $rtlScript) = get_display_impr_text_text_data($textid);

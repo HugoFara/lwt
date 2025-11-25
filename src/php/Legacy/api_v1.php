@@ -4,7 +4,7 @@ namespace Lwt\Ajax;
 
 require_once __DIR__ . '/inc/session_utility.php';
 require_once __DIR__ . '/inc/simterms.php';
-require_once 'do_test_test.php';
+require_once 'test_test.php';
 require_once __DIR__ . '/inc/ajax_add_term_transl.php';
 require_once __DIR__ . '/inc/ajax_check_regexp.php';
 require_once __DIR__ . '/inc/ajax_chg_term_status.php';

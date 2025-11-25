@@ -46,7 +46,7 @@ elseif (isset($_REQUEST['newpref'])) {
     } else {
         $tbpref = $_REQUEST['newpref'];
         LWTTableSet("current_table_prefix", $tbpref);
-        header("Location: index.php");
+        header("Location: /");
         exit();
     }
 }
@@ -55,7 +55,7 @@ elseif (isset($_REQUEST['prefix'])) {
     if($_REQUEST['prefix'] !== '-') {
         $tbpref = $_REQUEST['prefix'];
         LWTTableSet("current_table_prefix", $tbpref);
-        header("Location: index.php");
+        header("Location: /");
         exit();
     }
 }

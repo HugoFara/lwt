@@ -88,7 +88,7 @@ function output_text($saveterm,$saverom,$savetrans,$savetags,
 
 $textid = (int)getreq('text');
 if ($textid==0) {
-    header("Location: edit_texts.php");
+    header("Location: /text/edit");
     exit();
 }
 

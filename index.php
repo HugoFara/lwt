@@ -29,7 +29,8 @@ define('LWT_BASE_PATH', __DIR__);
 
 // Set include path so legacy files can use their original relative paths
 // This allows 'inc/session_utility.php' to work from any location
-set_include_path(get_include_path() . PATH_SEPARATOR . LWT_BASE_PATH);
+// We add src/php so that 'inc/...' resolves to 'src/php/inc/...'
+set_include_path(get_include_path() . PATH_SEPARATOR . LWT_BASE_PATH . PATH_SEPARATOR . LWT_BASE_PATH . '/src/php');
 
 // Change to base directory so relative paths work correctly
 chdir(LWT_BASE_PATH);

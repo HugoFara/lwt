@@ -19,8 +19,8 @@
 
 require_once 'inc/session_utility.php';
 require_once 'inc/mobile_interactions.php';
-require_once 'do_text_header.php';
-require_once 'do_text_text.php';
+require_once 'text_read_header.php';
+require_once 'text_read_text.php';
 
 /**
  * Get text ID (if possible).
@@ -153,7 +153,7 @@ if (get_text_id() !== null) {
     do_text_page(get_text_id());
 } else {
     // Document not ready
-    header("Location: edit_texts.php");
+    header("Location: /text/edit");
     exit();
 }
 

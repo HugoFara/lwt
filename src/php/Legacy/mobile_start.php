@@ -84,7 +84,7 @@ function start_do_page()
 
 if (isset($_REQUEST['prefix']) && $_REQUEST['prefix'] !== '-') {
     start_save_prefix(getreq('prefix'));
-    header("Location: index.php");
+    header("Location: /");
     exit();
 }
 start_do_page();

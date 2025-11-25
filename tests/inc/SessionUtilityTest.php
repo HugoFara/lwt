@@ -2,7 +2,7 @@
 
 require __DIR__ . "/../../connect.inc.php";
 $GLOBALS['dbname'] = "test_" . $dbname;
-require_once __DIR__ . '/../../inc/session_utility.php';
+require_once __DIR__ . '/../../src/php/inc/session_utility.php';
 
 use PHPUnit\Framework\TestCase;
 

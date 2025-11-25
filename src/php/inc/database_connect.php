@@ -14,7 +14,7 @@
  */
 
 require_once __DIR__ . "/kernel_utility.php";
-require_once __DIR__ . "/../connect.inc.php";
+require_once __DIR__ . "/../../../connect.inc.php";
 
 /**
  * Do a SQL query to the database.
@@ -1829,7 +1829,7 @@ function update_database($dbname)
         $res = do_mysqli_query("SELECT filename FROM _migrations");
         while ($record = mysqli_fetch_assoc($res)) {
             $queries = parseSQLFile(
-                __DIR__ . '/../db/migrations/' . $record["filename"]
+                __DIR__ . '/../../../db/migrations/' . $record["filename"]
             );
             foreach ($queries as $sql_query) {
                 $changes += (int) runsql($sql_query, '', false);
@@ -1907,7 +1907,7 @@ function check_update_db($debug, $tbpref, $dbname): void
     $count = 0;
 
     // Rebuild in missing table
-    $queries = parseSQLFile(__DIR__ . "/../db/schema/baseline.sql");
+    $queries = parseSQLFile(__DIR__ . "/../../../db/schema/baseline.sql");
     foreach ($queries as $query) {
         if (str_contains($query, "_migrations")) {
             // Do not prefix meta tables
