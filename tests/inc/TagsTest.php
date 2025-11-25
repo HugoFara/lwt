@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../../src/backend/Core/EnvLoader.php';
 use Lwt\Core\EnvLoader;
+use Lwt\Core\LWT_Globals;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../.env');
@@ -27,18 +28,17 @@ class TagsTest extends TestCase
      */
     public static function setUpBeforeClass(): void
     {
-        global $DBCONNECTION;
-
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
 
-        if (!$DBCONNECTION) {
-            $DBCONNECTION = connect_to_database(
+        if (!LWT_Globals::getDbConnection()) {
+            $connection = connect_to_database(
                 $config['server'], $config['userid'], $config['passwd'], $testDbname, $config['socket']
             );
+            LWT_Globals::setDbConnection($connection);
         }
 
-        self::$dbConnection = $DBCONNECTION;
+        self::$dbConnection = LWT_Globals::getDbConnection();
     }
 
     /**
@@ -46,9 +46,9 @@ class TagsTest extends TestCase
      */
     public function testAddTagList(): void
     {
-        global $DBCONNECTION, $tbpref;
+        global $tbpref;
 
-        if (!$DBCONNECTION) {
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -65,9 +65,8 @@ class TagsTest extends TestCase
      */
     public function testAddTagListWithSpecialCharacters(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -91,9 +90,8 @@ class TagsTest extends TestCase
      */
     public function testAddTagListSQLInjection(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -111,9 +109,8 @@ class TagsTest extends TestCase
      */
     public function testAddTagListWhitespaceTag(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -127,9 +124,8 @@ class TagsTest extends TestCase
      */
     public function testAddTagListEmptyList(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -143,9 +139,8 @@ class TagsTest extends TestCase
      */
     public function testAddArchTextTagList(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -159,9 +154,8 @@ class TagsTest extends TestCase
      */
     public function testAddArchTextTagListSpecialChars(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -174,9 +168,8 @@ class TagsTest extends TestCase
      */
     public function testAddTextTagList(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -190,9 +183,8 @@ class TagsTest extends TestCase
      */
     public function testRemoveTagList(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -210,9 +202,8 @@ class TagsTest extends TestCase
      */
     public function testRemoveTagListNonExistent(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -226,9 +217,8 @@ class TagsTest extends TestCase
      */
     public function testRemoveArchTextTagList(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -246,9 +236,8 @@ class TagsTest extends TestCase
      */
     public function testRemoveTextTagList(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -266,9 +255,8 @@ class TagsTest extends TestCase
      */
     public function testGetTags(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -281,9 +269,8 @@ class TagsTest extends TestCase
      */
     public function testGetTagsRefresh(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -296,9 +283,8 @@ class TagsTest extends TestCase
      */
     public function testGetTextTags(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -311,9 +297,8 @@ class TagsTest extends TestCase
      */
     public function testGetTextTagsRefresh(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -326,9 +311,8 @@ class TagsTest extends TestCase
      */
     public function testTagFunctionsWithUnicode(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -348,9 +332,8 @@ class TagsTest extends TestCase
      */
     public function testTagFunctionsWithLongNames(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -365,9 +348,8 @@ class TagsTest extends TestCase
      */
     public function testSequentialTagOperations(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -388,9 +370,8 @@ class TagsTest extends TestCase
      */
     public function testGetTextTitle(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -412,9 +393,8 @@ class TagsTest extends TestCase
      */
     public function testGetTextTitleSQLInjection(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -427,9 +407,8 @@ class TagsTest extends TestCase
      */
     public function testGetTagSelectOptions(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -449,9 +428,8 @@ class TagsTest extends TestCase
      */
     public function testGetTagSelectOptionsWithLanguage(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -470,9 +448,8 @@ class TagsTest extends TestCase
      */
     public function testGetTagSelectOptionsWithSelected(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -491,9 +468,8 @@ class TagsTest extends TestCase
      */
     public function testGetTextTagSelectOptions(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -512,9 +488,8 @@ class TagsTest extends TestCase
      */
     public function testGetTextTagSelectOptionsWithLanguage(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -532,9 +507,8 @@ class TagsTest extends TestCase
      */
     public function testGetTxTagSelectOptions(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -553,9 +527,8 @@ class TagsTest extends TestCase
      */
     public function testGetTxTagSelectOptionsWithLanguage(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -573,9 +546,8 @@ class TagsTest extends TestCase
      */
     public function testGetArchivedTextTagSelectOptions(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -594,9 +566,8 @@ class TagsTest extends TestCase
      */
     public function testGetArchivedTextTagSelectOptionsWithLanguage(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -614,9 +585,8 @@ class TagsTest extends TestCase
      */
     public function testGetWordTags(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -632,9 +602,8 @@ class TagsTest extends TestCase
      */
     public function testGetWordTagsWithZeroId(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -649,9 +618,8 @@ class TagsTest extends TestCase
      */
     public function testGetWordTagsWithNegativeId(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -665,9 +633,8 @@ class TagsTest extends TestCase
      */
     public function testGetTextTagsFunction(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -683,9 +650,8 @@ class TagsTest extends TestCase
      */
     public function testGetTextTagsWithZeroId(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -700,9 +666,8 @@ class TagsTest extends TestCase
      */
     public function testGetArchivedTextTagsFunction(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -718,9 +683,8 @@ class TagsTest extends TestCase
      */
     public function testGetArchivedTextTagsWithZeroId(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -734,9 +698,8 @@ class TagsTest extends TestCase
      */
     public function testSaveWordTagsInvalidId(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -755,9 +718,8 @@ class TagsTest extends TestCase
      */
     public function testSaveTextTagsInvalidId(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -776,9 +738,8 @@ class TagsTest extends TestCase
      */
     public function testSaveArchivedTextTagsInvalidId(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -797,9 +758,8 @@ class TagsTest extends TestCase
      */
     public function testRemoveTagListEmptyTag(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -813,9 +773,8 @@ class TagsTest extends TestCase
      */
     public function testRemoveTextTagListEmptyTag(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -829,9 +788,8 @@ class TagsTest extends TestCase
      */
     public function testRemoveArchTextTagListEmptyTag(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -845,9 +803,8 @@ class TagsTest extends TestCase
      */
     public function testGetTextTitleZeroId(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -860,9 +817,8 @@ class TagsTest extends TestCase
      */
     public function testGetTextTitleNegativeId(): void
     {
-        global $DBCONNECTION;
-
-        if (!$DBCONNECTION) {
+        
+        if (!LWT_Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 

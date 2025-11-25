@@ -361,19 +361,28 @@ use Lwt\Core\LWT_Globals;
 $sql = "SELECT * FROM " . LWT_Globals::table('words');
 ```
 
-All existing code using `global $tbpref`, `global $DBCONNECTION`, etc. continues to function. However, these are now marked as deprecated and will display deprecation notices in future versions.
+All existing code using `global $tbpref`, etc. continues to function. However, these are now marked as deprecated and will display deprecation notices in future versions.
+
+#### Removed Global Variables
+
+The following global variables have been **fully removed** from the codebase and replaced with `LWT_Globals` methods:
+
+| Removed Global | Replacement | Status |
+|----------------|-------------|--------|
+| `$DBCONNECTION` | `LWT_Globals::getDbConnection()` | **Removed** |
+| `$debug` | `LWT_Globals::isDebug()` / `LWT_Globals::getDebug()` | **Removed** |
+
+These globals no longer appear in any source files. All usages have been migrated to use the `LWT_Globals` class.
 
 #### Deprecated Global Variables
 
-The following global variables are deprecated in favor of `LWT_Globals` methods:
+The following global variables are deprecated in favor of `LWT_Globals` methods but still exist for backward compatibility:
 
 | Deprecated Global | Replacement |
 |-------------------|-------------|
-| `$DBCONNECTION` | `LWT_Globals::getDbConnection()` |
 | `$tbpref` | `LWT_Globals::getTablePrefix()` |
 | `$fixed_tbpref` | `LWT_Globals::isTablePrefixFixed()` |
 | `$dbname` | `LWT_Globals::getDatabaseName()` |
-| `$debug` | `LWT_Globals::isDebug()` / `LWT_Globals::getDebug()` |
 | `$dsplerrors` | `LWT_Globals::shouldDisplayErrors()` |
 | `$dspltime` | `LWT_Globals::shouldDisplayTime()` |
 

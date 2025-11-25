@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../../src/backend/Core/EnvLoader.php';
 use Lwt\Core\EnvLoader;
+use Lwt\Core\LWT_Globals;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../.env');
@@ -17,13 +18,13 @@ class FeedsTest extends TestCase
     protected function setUp(): void
     {
         // Ensure we have a test database set up
-        global $DBCONNECTION;
-        if (!$DBCONNECTION) {
+        if (!LWT_Globals::getDbConnection()) {
             $config = EnvLoader::getDatabaseConfig();
             $test_dbname = "test_" . $config['dbname'];
-            $DBCONNECTION = connect_to_database(
+            $connection = connect_to_database(
                 $config['server'], $config['userid'], $config['passwd'], $test_dbname, $config['socket']
             );
+            LWT_Globals::setDbConnection($connection);
         }
     }
 
