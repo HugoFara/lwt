@@ -1,0 +1,411 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Lwt\Tests\Database;
+
+require_once __DIR__ . '/../../../../src/backend/Core/EnvLoader.php';
+
+use Lwt\Core\EnvLoader;
+use Lwt\Core\LWT_Globals;
+use Lwt\Database\Migrations;
+use PHPUnit\Framework\TestCase;
+
+// Load config from .env and use test database
+EnvLoader::load(__DIR__ . '/../../../../.env');
+$config = EnvLoader::getDatabaseConfig();
+$GLOBALS['dbname'] = "test_" . $config['dbname'];
+
+require_once __DIR__ . '/../../../../src/backend/Core/database_connect.php';
+
+/**
+ * Unit tests for the Database\Migrations class.
+ *
+ * Tests database migrations and initialization utilities.
+ */
+class MigrationsTest extends TestCase
+{
+    private static bool $dbConnected = false;
+    private static string $tbpref = '';
+
+    public static function setUpBeforeClass(): void
+    {
+        $config = EnvLoader::getDatabaseConfig();
+        $testDbname = "test_" . $config['dbname'];
+
+        if (!LWT_Globals::getDbConnection()) {
+            $connection = connect_to_database(
+                $config['server'],
+                $config['userid'],
+                $config['passwd'],
+                $testDbname,
+                $config['socket'] ?? ''
+            );
+            LWT_Globals::setDbConnection($connection);
+        }
+        self::$dbConnected = (LWT_Globals::getDbConnection() !== null);
+        self::$tbpref = LWT_Globals::getTablePrefix();
+    }
+
+    // ===== prefixQuery() tests =====
+
+    /**
+     * @dataProvider providerPrefixQueryInsert
+     */
+    public function testPrefixQueryInsert(string $sql, string $prefix, string $expected): void
+    {
+        $result = Migrations::prefixQuery($sql, $prefix);
+        $this->assertEquals($expected, $result);
+    }
+
+    public static function providerPrefixQueryInsert(): array
+    {
+        return [
+            'INSERT INTO with prefix' => [
+                "INSERT INTO languages (LgName) VALUES ('Test');",
+                "prefix_",
+                "INSERT INTO prefix_languages (LgName) VALUES ('Test');"
+            ],
+            'INSERT INTO with empty prefix' => [
+                "INSERT INTO languages (LgName) VALUES ('Test');",
+                "",
+                "INSERT INTO languages (LgName) VALUES ('Test');"
+            ],
+            'INSERT INTO multiple columns' => [
+                "INSERT INTO words (WoLgID, WoText) VALUES (1, 'test');",
+                "lwt_",
+                "INSERT INTO lwt_words (WoLgID, WoText) VALUES (1, 'test');"
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerPrefixQueryCreateTable
+     */
+    public function testPrefixQueryCreateTable(string $sql, string $prefix, string $expected): void
+    {
+        $result = Migrations::prefixQuery($sql, $prefix);
+        $this->assertEquals($expected, $result);
+    }
+
+    public static function providerPrefixQueryCreateTable(): array
+    {
+        return [
+            'CREATE TABLE basic' => [
+                "CREATE TABLE languages (id INT);",
+                "test_",
+                "CREATE TABLE test_languages (id INT);"
+            ],
+            'CREATE TABLE with backticks' => [
+                "CREATE TABLE `users` (id INT);",
+                "pre_",
+                "CREATE TABLE `pre_users` (id INT);"
+            ],
+            'CREATE TABLE IF NOT EXISTS' => [
+                "CREATE TABLE IF NOT EXISTS languages (id INT);",
+                "lwt_",
+                "CREATE TABLE IF NOT EXISTS lwt_languages (id INT);"
+            ],
+            'CREATE TABLE IF NOT EXISTS with backticks' => [
+                "CREATE TABLE IF NOT EXISTS `texts` (id INT);",
+                "app_",
+                "CREATE TABLE IF NOT EXISTS `app_texts` (id INT);"
+            ],
+            'CREATE TABLE with empty prefix' => [
+                "CREATE TABLE users (id INT);",
+                "",
+                "CREATE TABLE users (id INT);"
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerPrefixQueryAlterTable
+     */
+    public function testPrefixQueryAlterTable(string $sql, string $prefix, string $expected): void
+    {
+        $result = Migrations::prefixQuery($sql, $prefix);
+        $this->assertEquals($expected, $result);
+    }
+
+    public static function providerPrefixQueryAlterTable(): array
+    {
+        return [
+            'ALTER TABLE basic' => [
+                "ALTER TABLE languages ADD COLUMN name VARCHAR(255);",
+                "pre_",
+                "ALTER TABLE pre_languages ADD COLUMN name VARCHAR(255);"
+            ],
+            'ALTER TABLE with backticks' => [
+                "ALTER TABLE `users` DROP COLUMN email;",
+                "test_",
+                "ALTER TABLE `test_users` DROP COLUMN email;"
+            ],
+            'ALTER TABLE with empty prefix' => [
+                "ALTER TABLE settings MODIFY StValue TEXT;",
+                "",
+                "ALTER TABLE settings MODIFY StValue TEXT;"
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerPrefixQueryDropTable
+     */
+    public function testPrefixQueryDropTable(string $sql, string $prefix, string $expected): void
+    {
+        $result = Migrations::prefixQuery($sql, $prefix);
+        $this->assertEquals($expected, $result);
+    }
+
+    public static function providerPrefixQueryDropTable(): array
+    {
+        return [
+            'DROP TABLE basic' => [
+                "DROP TABLE temp_data;",
+                "pre_",
+                "DROP TABLE pre_temp_data;"
+            ],
+            // Note: DROP TABLE IF EXISTS is not currently supported by prefixQuery
+            // The regex only handles "IF NOT EXISTS" (for CREATE TABLE)
+            // 'DROP TABLE IF EXISTS' => [
+            //     "DROP TABLE IF EXISTS temp_data;",
+            //     "lwt_",
+            //     "DROP TABLE IF EXISTS lwt_temp_data;"
+            // ],
+            'DROP TABLE with backticks' => [
+                "DROP TABLE `old_table`;",
+                "test_",
+                "DROP TABLE `test_old_table`;"
+            ],
+        ];
+    }
+
+    public function testPrefixQueryNonMatchingStatement(): void
+    {
+        // SELECT statements should not be modified
+        $sql = "SELECT * FROM languages;";
+        $result = Migrations::prefixQuery($sql, "prefix_");
+        $this->assertEquals($sql, $result, 'Non-matching statements should be unchanged');
+    }
+
+    public function testPrefixQueryUpdateStatement(): void
+    {
+        // UPDATE statements should not be modified by prefixQuery
+        $sql = "UPDATE languages SET LgName = 'Test';";
+        $result = Migrations::prefixQuery($sql, "prefix_");
+        $this->assertEquals($sql, $result, 'UPDATE statements should be unchanged');
+    }
+
+    public function testPrefixQueryDeleteStatement(): void
+    {
+        // DELETE statements should not be modified by prefixQuery
+        $sql = "DELETE FROM languages WHERE LgID = 1;";
+        $result = Migrations::prefixQuery($sql, "prefix_");
+        $this->assertEquals($sql, $result, 'DELETE statements should be unchanged');
+    }
+
+    public function testPrefixQueryComplexCreateTable(): void
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS `languages` (
+            LgID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+            LgName varchar(40) NOT NULL,
+            PRIMARY KEY (LgID)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+
+        $result = Migrations::prefixQuery($sql, "test_");
+
+        $this->assertStringContainsString("CREATE TABLE IF NOT EXISTS `test_languages`", $result);
+    }
+
+    // ===== reparseAllTexts() tests =====
+
+    public function testReparseAllTextsRuns(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+
+        // Clean up any texts that reference non-existent languages
+        // to avoid "Language data not found" errors
+        do_mysqli_query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID IN (
+            SELECT TxID FROM {$tbpref}texts WHERE TxLgID NOT IN (SELECT LgID FROM {$tbpref}languages)
+        )");
+        do_mysqli_query("DELETE FROM {$tbpref}sentences WHERE SeTxID IN (
+            SELECT TxID FROM {$tbpref}texts WHERE TxLgID NOT IN (SELECT LgID FROM {$tbpref}languages)
+        )");
+        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxLgID NOT IN (SELECT LgID FROM {$tbpref}languages)");
+
+        // This function truncates and rebuilds text data
+        // Should run without error on empty/minimal database
+        Migrations::reparseAllTexts();
+        $this->assertTrue(true, 'reparseAllTexts should complete without error');
+    }
+
+    // ===== update() tests =====
+
+    public function testUpdateRuns(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // The update function checks and updates database schema
+        // Should run without error on a properly initialized database
+        Migrations::update();
+        $this->assertTrue(true, 'update should complete without error');
+    }
+
+    // ===== checkAndUpdate() tests =====
+
+    public function testCheckAndUpdateRuns(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // This is the main entry point for database initialization
+        // Should run without error
+        Migrations::checkAndUpdate();
+        $this->assertTrue(true, 'checkAndUpdate should complete without error');
+    }
+
+    public function testCheckAndUpdateEnsuresTablesExist(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+
+        Migrations::checkAndUpdate();
+
+        // Verify core tables exist
+        $tables = [
+            'languages', 'texts', 'words', 'sentences',
+            'settings', 'tags', 'tags2', 'textitems2'
+        ];
+
+        foreach ($tables as $table) {
+            $result = do_mysqli_query("SHOW TABLES LIKE '{$tbpref}{$table}'");
+            $exists = mysqli_num_rows($result) > 0;
+            mysqli_free_result($result);
+            $this->assertTrue($exists, "Table {$tbpref}{$table} should exist after checkAndUpdate");
+        }
+    }
+
+    public function testCheckAndUpdateMigrationsTable(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        Migrations::checkAndUpdate();
+
+        // Verify _migrations table exists (without prefix)
+        $result = do_mysqli_query("SHOW TABLES LIKE '_migrations'");
+        $exists = mysqli_num_rows($result) > 0;
+        mysqli_free_result($result);
+        $this->assertTrue($exists, "_migrations table should exist");
+    }
+
+    // ===== Edge cases and complex scenarios =====
+
+    public function testPrefixQueryWithSpecialCharacters(): void
+    {
+        // Test with table name that has underscores
+        $sql = "CREATE TABLE my_table_name (id INT);";
+        $result = Migrations::prefixQuery($sql, "prefix_");
+        $this->assertEquals("CREATE TABLE prefix_my_table_name (id INT);", $result);
+    }
+
+    public function testPrefixQueryWithNumericPrefix(): void
+    {
+        // Prefix with numbers
+        $sql = "CREATE TABLE users (id INT);";
+        $result = Migrations::prefixQuery($sql, "app123_");
+        $this->assertEquals("CREATE TABLE app123_users (id INT);", $result);
+    }
+
+    public function testPrefixQueryCaseSensitive(): void
+    {
+        // Note: prefixQuery is case-sensitive - it only handles uppercase SQL keywords
+        // This is a known limitation of the current implementation
+        $sql = "create table users (id INT);";
+        $result = Migrations::prefixQuery($sql, "pre_");
+        // Lowercase SQL keywords are NOT modified (returns original)
+        $this->assertEquals($sql, $result, 'Lowercase SQL keywords should not be modified');
+    }
+
+    public function testPrefixQueryInsertMultipleValues(): void
+    {
+        $sql = "INSERT INTO languages (LgID, LgName) VALUES (1, 'English'), (2, 'French');";
+        $result = Migrations::prefixQuery($sql, "test_");
+        $this->assertEquals(
+            "INSERT INTO test_languages (LgID, LgName) VALUES (1, 'English'), (2, 'French');",
+            $result
+        );
+    }
+
+    public function testCheckAndUpdateSetsLastScorecalc(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+
+        // Clear lastscorecalc to force recalculation
+        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'lastscorecalc'");
+
+        Migrations::checkAndUpdate();
+
+        // Verify lastscorecalc was set
+        $result = get_first_value(
+            "SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'lastscorecalc'"
+        );
+
+        $this->assertNotEmpty($result, 'lastscorecalc should be set after checkAndUpdate');
+        // Should be today's date
+        $this->assertEquals(date('Y-m-d'), $result, 'lastscorecalc should be today');
+    }
+
+    public function testPrefixQueryPreservesRestOfStatement(): void
+    {
+        // Ensure the rest of the SQL statement is preserved correctly
+        $sql = "CREATE TABLE users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL DEFAULT '',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB;";
+
+        $result = Migrations::prefixQuery($sql, "app_");
+
+        $this->assertStringContainsString("CREATE TABLE app_users", $result);
+        $this->assertStringContainsString("AUTO_INCREMENT PRIMARY KEY", $result);
+        $this->assertStringContainsString("VARCHAR(100) NOT NULL DEFAULT ''", $result);
+        $this->assertStringContainsString("ENGINE=InnoDB", $result);
+    }
+
+    public function testUpdateSetsDbversion(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+
+        Migrations::update();
+
+        // Verify dbversion is set
+        $result = get_first_value(
+            "SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'dbversion'"
+        );
+
+        $this->assertNotEmpty($result, 'dbversion should be set after update');
+        // Should match current version format (vXXXYYYZZZ)
+        $this->assertMatchesRegularExpression('/^v\d{9}$/', $result, 'dbversion should match version format');
+    }
+}

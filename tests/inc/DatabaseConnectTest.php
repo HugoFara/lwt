@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../src/backend/Core/EnvLoader.php';
 use Lwt\Core\EnvLoader;
 use Lwt\Core\LWT_Globals;
+use Lwt\Database\Escaping;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../.env');
@@ -534,9 +535,17 @@ class DatabaseConnectTest extends TestCase
         $result = getSetting('');
         $this->assertEquals('', $result, 'Empty key should return empty string');
 
-        // SQL injection in key
-        $result = getSetting("key'; DROP TABLE settings; --");
-        $this->assertEquals('', $result, 'SQL injection should be safely handled');
+        // SQL injection in key - first clean up any previously saved value
+        $tbpref = LWT_Globals::getTablePrefix();
+        $injectionKey = "key'; DROP TABLE settings; --";
+        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+
+        $result = getSetting($injectionKey);
+        $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
+
+        // More importantly, verify the table still exists (injection didn't work)
+        $tableExists = mysqli_num_rows(do_mysqli_query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
+        $this->assertTrue($tableExists, 'SQL injection should not drop the table');
 
         // Test special key 'currentlanguage' (triggers validateLang)
         $result = getSetting('currentlanguage');
@@ -577,9 +586,17 @@ class DatabaseConnectTest extends TestCase
         $result = getSettingWithDefault('nonexistent_setting_xyz123');
         $this->assertEquals('', $result, 'Non-existent setting without default should return empty');
 
-        // SQL injection attempt
-        $result = getSettingWithDefault("key'; DROP TABLE settings; --");
-        $this->assertEquals('', $result, 'SQL injection should be safely handled');
+        // SQL injection attempt - first clean up any previously saved value
+        $tbpref = LWT_Globals::getTablePrefix();
+        $injectionKey = "injectkey'; DROP TABLE settings; --";
+        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+
+        $result = getSettingWithDefault($injectionKey);
+        $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
+
+        // More importantly, verify the table still exists (injection didn't work)
+        $tableExists = mysqli_num_rows(do_mysqli_query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
+        $this->assertTrue($tableExists, 'SQL injection should not drop the table');
 
         // Empty key
         $result = getSettingWithDefault('');
