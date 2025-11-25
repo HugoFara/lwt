@@ -15,9 +15,14 @@
 
 require_once __DIR__ . "/kernel_utility.php";
 require_once __DIR__ . "/EnvLoader.php";
+require_once __DIR__ . "/Database/Connection.php";
+require_once __DIR__ . "/Database/QueryBuilder.php";
+require_once __DIR__ . "/Database/DB.php";
 
 use Lwt\Core\LWT_Globals;
 use Lwt\Core\EnvLoader;
+use Lwt\Database\Connection;
+use Lwt\Database\DB;
 
 /**
  * Load database configuration from .env file.
@@ -65,15 +70,14 @@ loadDatabaseConfiguration();
  *
  * @param string $sql Query using SQL syntax
  *
- * @global mysqli $DBCONNECTION Connection to the database
- *
  * @return mysqli_result|true
+ *
+ * @deprecated 3.0.0 Use DB::query() or Connection::query() for new code
  */
 function do_mysqli_query($sql)
 {
-    // @deprecated 3.0.0 Use LWT_Globals::getDbConnection() instead of global $DBCONNECTION
-    global $DBCONNECTION;
-    $res = mysqli_query($DBCONNECTION, $sql);
+    $connection = LWT_Globals::getDbConnection();
+    $res = mysqli_query($connection, $sql);
     if ($res != false) {
         return $res;
     }
@@ -83,9 +87,9 @@ function do_mysqli_query($sql)
     tohtml($sql) .
     '</p>' .
     '<p><b>Error Code &amp; Message:</b> [' .
-    mysqli_errno($DBCONNECTION) .
+    mysqli_errno($connection) .
     '] ' .
-    tohtml(mysqli_error($DBCONNECTION)) .
+    tohtml(mysqli_error($connection)) .
     "</p></div><hr /><pre>Backtrace:\n\n";
     debug_print_backtrace();
     echo '</pre><hr />';
@@ -100,18 +104,21 @@ function do_mysqli_query($sql)
  * @param bool   $sqlerrdie To die on errors (default = TRUE)
  *
  * @return string Error message if failure, or the number of affected rows
+ *
+ * @deprecated 3.0.0 Use DB::execute() for new code
  */
 function runsql($sql, $m, $sqlerrdie = true): string
 {
+    $connection = LWT_Globals::getDbConnection();
     if ($sqlerrdie) {
         $res = do_mysqli_query($sql);
     } else {
-        $res = mysqli_query($GLOBALS['DBCONNECTION'], $sql);
+        $res = mysqli_query($connection, $sql);
     }
     if ($res == false) {
-        $message = "Error: " . mysqli_error($GLOBALS['DBCONNECTION']);
+        $message = "Error: " . mysqli_error($connection);
     } else {
-        $num = mysqli_affected_rows($GLOBALS['DBCONNECTION']);
+        $num = mysqli_affected_rows($connection);
         $message = ($m == '') ? (string)$num : $m . ": " . $num;
     }
     return $message;
@@ -172,19 +179,17 @@ function prepare_textdata_js($s): string
  *
  * @return string Properly escaped and trimmed string. "NULL" if the input string is empty.
  *
- * @global $DBCONNECTION
- *
- * @deprecated-global 3.0.0 The global $DBCONNECTION usage is deprecated.
- *                          Use LWT_Globals::getDbConnection() for new code.
+ * @deprecated 3.0.0 Use DB::escapeOrNull() for new code
  */
 function convert_string_to_sqlsyntax($data): string
 {
-    // @deprecated 3.0.0 Use LWT_Globals::getDbConnection() instead of global $DBCONNECTION
-    global $DBCONNECTION;
     $result = "NULL";
     $data = trim(prepare_textdata($data));
     if ($data != "") {
-        $result = "'".mysqli_real_escape_string($DBCONNECTION, $data)."'";
+        $result = "'" . mysqli_real_escape_string(
+            LWT_Globals::getDbConnection(),
+            $data
+        ) . "'";
     }
     return $result;
 }
@@ -195,11 +200,13 @@ function convert_string_to_sqlsyntax($data): string
  * @param string $data Input string
  *
  * @return string Properly escaped and trimmed string
+ *
+ * @deprecated 3.0.0 Use DB::escapeString() for new code
  */
 function convert_string_to_sqlsyntax_nonull($data): string
 {
     $data = trim(prepare_textdata($data));
-    return  "'" . mysqli_real_escape_string($GLOBALS['DBCONNECTION'], $data) . "'";
+    return "'" . mysqli_real_escape_string(LWT_Globals::getDbConnection(), $data) . "'";
 }
 
 /**
@@ -208,11 +215,13 @@ function convert_string_to_sqlsyntax_nonull($data): string
  * @param string $data Input string
  *
  * @return string Properly escaped string
+ *
+ * @deprecated 3.0.0 Use DB::escapeString() for new code
  */
 function convert_string_to_sqlsyntax_notrim_nonull($data): string
 {
     return "'" .
-    mysqli_real_escape_string($GLOBALS['DBCONNECTION'], prepare_textdata($data)) .
+    mysqli_real_escape_string(LWT_Globals::getDbConnection(), prepare_textdata($data)) .
     "'";
 }
 
@@ -244,23 +253,16 @@ function convert_regexp_to_sqlsyntax($input): string
  * @param string $currentlang Language ID to validate
  *
  * @return string '' if the language is not valid, $currentlang otherwise
- *
- * @global string $tbpref Table name prefix
- *
- * @deprecated-global 3.0.0 The global $tbpref usage is deprecated.
- *                          Use LWT_Globals::getTablePrefix() for new code.
  */
 function validateLang($currentlang): string
 {
-    // @deprecated 3.0.0 Use LWT_Globals::getTablePrefix() instead of global $tbpref
-    global $tbpref;
     if ($currentlang == '' || !is_numeric($currentlang)) {
         return '';
     }
     // Cast to integer for safety against SQL injection
     $currentlang_int = (int)$currentlang;
     $sql_string = 'SELECT count(LgID) AS value
-    FROM ' . $tbpref . 'languages
+    FROM ' . LWT_Globals::getTablePrefix() . 'languages
     WHERE LgID=' . $currentlang_int;
     if (get_first_value($sql_string) == 0) {
         return '';
@@ -274,19 +276,16 @@ function validateLang($currentlang): string
  * @param string $currenttext Text ID to validate
  *
  * @return string '' if the text is not valid, $currenttext otherwise
- *
- * @global string $tbpref Table name prefix
  */
 function validateText($currenttext): string
 {
-    global $tbpref;
     if ($currenttext == '' || !is_numeric($currenttext)) {
         return '';
     }
     // Cast to integer for safety against SQL injection
     $currenttext_int = (int)$currenttext;
     $sql_string = 'SELECT count(TxID) AS value
-    FROM ' . $tbpref . 'texts WHERE TxID=' .
+    FROM ' . LWT_Globals::getTablePrefix() . 'texts WHERE TxID=' .
     $currenttext_int;
     if (get_first_value($sql_string) == 0) {
         return '';
@@ -298,7 +297,7 @@ function validateText($currenttext): string
 
 function validateTag($currenttag,$currentlang)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     if ($currenttag != '' && $currenttag != -1) {
         // Sanitize inputs to prevent SQL injection
         if (!is_numeric($currenttag)) {
@@ -324,28 +323,6 @@ function validateTag($currenttag,$currentlang)
                 " group by TgID order by TgText
             )
         ) AS value";
-        /*if ($currentlang == '') {
-            $sql = "SELECT (
-                $currenttag in (
-                    select TgID from {$tbpref}words,
-                    {$tbpref}tags,
-                    {$tbpref}wordtags
-                    where TgID = WtTgID and WtWoID = WoID
-                    group by TgID
-                    order by TgText
-                    )
-                ) as value";
-        } else {
-            $sql = "SELECT (
-                $currenttag in (
-                    select TgID
-                    from {$tbpref}words, {$tbpref}tags,
-                    {$tbpref}wordtags
-                    where TgID = WtTgID and WtWoID = WoID and WoLgID = $currentlang
-                    group by TgID order by TgText
-                )
-                ) as value";
-        }*/
         $r = get_first_value($sql);
         if ($r == 0) {
             $currenttag = '';
@@ -358,7 +335,7 @@ function validateTag($currenttag,$currentlang)
 
 function validateArchTextTag($currenttag,$currentlang)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     if ($currenttag != '' && $currenttag != -1) {
         // Sanitize inputs to prevent SQL injection
         if (!is_numeric($currenttag)) {
@@ -406,11 +383,17 @@ function validateArchTextTag($currenttag,$currentlang)
 
 function validateTextTag($currenttag,$currentlang)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     if ($currenttag != '' && $currenttag != -1) {
+        // Sanitize inputs to prevent SQL injection
+        if (!is_numeric($currenttag)) {
+            return '';
+        }
+        $currenttag_int = (int)$currenttag;
+
         if ($currentlang == '') {
             $sql = "select (
-                $currenttag in (
+                $currenttag_int in (
                     select T2ID
                     from {$tbpref}texts, {$tbpref}tags2, {$tbpref}texttags
                     where T2ID = TtT2ID and TtTxID = TxID
@@ -419,11 +402,15 @@ function validateTextTag($currenttag,$currentlang)
                 )
             ) as value";
         } else {
+            if (!is_numeric($currentlang)) {
+                return '';
+            }
+            $currentlang_int = (int)$currentlang;
             $sql = "select (
-                $currenttag in (
+                $currenttag_int in (
                     select T2ID
                     from {$tbpref}texts, {$tbpref}tags2, {$tbpref}texttags
-                    where T2ID = TtT2ID and TtTxID = TxID and TxLgID = $currentlang
+                    where T2ID = TtT2ID and TtTxID = TxID and TxLgID = $currentlang_int
                     group by T2ID order by T2Text
                 )
             ) as value";
@@ -459,18 +446,12 @@ function getSettingZeroOrOne($key, $dft): int
  * @param  string $key Setting key. If $key is 'currentlanguage' or
  *                     'currenttext', we validate language/text.
  * @return string $val Value in the database if found, or an empty string
- * @global string $tbpref Table name prefix
- *
- * @deprecated-global 3.0.0 The global $tbpref usage is deprecated.
- *                          Use LWT_Globals::getTablePrefix() for new code.
  */
 function getSetting($key)
 {
-    // @deprecated 3.0.0 Use LWT_Globals::getTablePrefix() instead of global $tbpref
-    global $tbpref;
     $val = get_first_value(
         'SELECT StValue AS value
-        FROM ' . $tbpref . 'settings
+        FROM ' . LWT_Globals::getTablePrefix() . 'settings
         WHERE StKey = ' . convert_string_to_sqlsyntax($key)
     );
     if (isset($val)) {
@@ -492,12 +473,10 @@ function getSetting($key)
  * @param string $key Settings key
  *
  * @return string Requested setting, or default value, or ''
- *
- * @global string $tbpref Table name prefix
  */
 function getSettingWithDefault($key)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $dft = get_setting_data();
     $val = (string) get_first_value(
         'SELECT StValue AS value
@@ -520,15 +499,13 @@ function getSettingWithDefault($key)
  * @param string $k Setting key
  * @param mixed  $v Setting value, will get converted to string
  *
- * @global string $tbpref Table name prefix
- *
  * @return string Success message (starts by "OK: "), or error message
  *
  * @since 2.9.0 Success message starts by "OK: "
  */
 function saveSetting($k, $v)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $dft = get_setting_data();
     if (!isset($v)) {
         return 'Value is not set!';
@@ -614,11 +591,12 @@ function LWTTableGet($key): string
 /**
  * Adjust the auto-incrementation in the database.
  *
- * @global string $tbpref Database table prefix
+ * @param string $table Table name (without prefix)
+ * @param string $key   Primary key column name
  */
 function adjust_autoincr($table, $key): void
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $val = get_first_value(
         'SELECT max(' . $key .')+1 AS value FROM ' . $tbpref . $table
     );
@@ -631,12 +609,10 @@ function adjust_autoincr($table, $key): void
 
 /**
  * Optimize the database.
- *
- * @global string $trbpref Table prefix
  */
 function optimizedb(): void
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     adjust_autoincr('archivedtexts', 'AtID');
     adjust_autoincr('languages', 'LgID');
     adjust_autoincr('sentences', 'SeID');
@@ -670,12 +646,10 @@ function optimizedb(): void
  * @param int $japid Japanese language ID
  *
  * @return void
- *
- * @global string $tbpref Database table prefix.
  */
 function update_japanese_word_count($japid)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
 
     // STEP 1: write the useful info to a file
     $db_to_mecab = tempnam(sys_get_temp_dir(), "{$tbpref}db_to_mecab");
@@ -750,12 +724,10 @@ function update_japanese_word_count($japid)
  * Only terms with a word count set to 0 are changed.
  *
  * @return void
- *
- * @global string $tbpref Database table prefix
  */
 function init_word_count(): void
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $sqlarr = array();
     $i = 0;
     $min = 0;
@@ -841,7 +813,7 @@ function set_word_count()
  */
 function parse_japanese_text($text, $id): ?array
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $text = preg_replace('/[ \t]+/u', ' ', $text);
     $text = trim($text);
     if ($id == -1) {
@@ -976,7 +948,7 @@ function parse_japanese_text($text, $id): ?array
  */
 function save_processed_text_with_sql($text, $id): void
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $file_name = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $tbpref . "tmpti.txt";
     $fp = fopen($file_name, 'w');
     fwrite($fp, $text);
@@ -1026,7 +998,7 @@ function save_processed_text_with_sql($text, $id): void
  */
 function parse_standard_text($text, $id, $lid): ?array
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $sql = "SELECT * FROM {$tbpref}languages WHERE LgID=$lid";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
@@ -1177,7 +1149,7 @@ function parse_standard_text($text, $id, $lid): ?array
  */
 function prepare_text_parsing($text, $id, $lid): ?array
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $sql = "SELECT * FROM {$tbpref}languages WHERE LgID = $lid";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
@@ -1220,7 +1192,7 @@ function prepare_text_parsing($text, $id, $lid): ?array
  */
 function check_text_valid($lid)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $wo = $nw = array();
     $res = do_mysqli_query(
         'SELECT GROUP_CONCAT(TiText order by TiOrder SEPARATOR "")
@@ -1274,7 +1246,7 @@ function check_text_valid($lid)
  */
 function registerSentencesTextItems($tid, $lid, $hasmultiword)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
 
     $sql = '';
     // Text has multi-words, add them to the query
@@ -1331,7 +1303,7 @@ function registerSentencesTextItems($tid, $lid, $hasmultiword)
  */
 function update_default_values($id, $lid, $_sql)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $hasmultiword = false;
 
     // Get multi-word count
@@ -1362,7 +1334,7 @@ function update_default_values($id, $lid, $_sql)
  */
 function displayTextStatistics($lid, $rtlScript, $multiwords)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
 
     $mw = array();
     if ($multiwords) {
@@ -1498,7 +1470,7 @@ function check_text($sql, $rtlScript, $wl)
  */
 function checkExpressions($wl): void
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
 
     $wl_max = 0;
     $mw_sql = '';
@@ -1616,7 +1588,7 @@ function checkExpressions($wl): void
  */
 function check_text_with_expressions($id, $lid, $wl, $wl_max, $mw_sql): string
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
 
     $set_wo_sql = $set_wo_sql_2 = $del_wo_sql = $init_var = '';
     do_mysqli_query('SET GLOBAL max_heap_table_size = 1024 * 1024 * 1024 * 2');
@@ -1725,7 +1697,7 @@ function check_text_with_expressions($id, $lid, $wl, $wl_max, $mw_sql): string
  */
 function splitCheckText($text, $lid, $id)
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     $wl = array();
     $lid = (int) $lid;
     $sql = "SELECT LgRightToLeft FROM {$tbpref}languages WHERE LgID = $lid";
@@ -1791,7 +1763,7 @@ function splitCheckText($text, $lid, $id)
  */
 function reparse_all_texts(): void
 {
-    global $tbpref;
+    $tbpref = LWT_Globals::getTablePrefix();
     runsql("TRUNCATE {$tbpref}sentences", '');
     runsql("TRUNCATE {$tbpref}textitems2", '');
     adjust_autoincr('sentences', 'SeID');
@@ -1826,18 +1798,20 @@ function reparse_all_texts(): void
  */
 function update_database($dbname)
 {
-    global $tbpref, $debug;
+    global $debug;
+    $tbpref = LWT_Globals::getTablePrefix();
 
     // DB Version
     $currversion = get_version_number();
+    $connection = LWT_Globals::getDbConnection();
 
     $res = mysqli_query(
-        $GLOBALS['DBCONNECTION'],
+        $connection,
         "SELECT StValue AS value
         FROM {$tbpref}settings
         WHERE StKey = 'dbversion'"
     );
-    if (mysqli_errno($GLOBALS['DBCONNECTION']) != 0) {
+    if (mysqli_errno($connection) != 0) {
         my_die(
             'There is something wrong with your database ' . $dbname .
             '. Please reinstall.'
@@ -2177,14 +2151,17 @@ function connect_to_database($server, $userid, $passwd, $dbname, $socket="")
  * If not: $fixed_tbpref=0. Is it set in table "_lwtgeneral"? Take it.
  * If not: Use $tbpref = '' (no prefix, old/standard behaviour).
  *
- * @param string|null $tbpref Temporary database table prefix
+ * @param \mysqli $dbconnection Database connection
  *
  * @return array Table prefix, and if table prefix should be fixed
  */
 function getDatabasePrefix($dbconnection)
 {
-    global $DBCONNECTION;
-    $DBCONNECTION = $dbconnection;
+    // Set connection in LWT_Globals for backward compatibility
+    LWT_Globals::setDbConnection($dbconnection);
+    // Also set global for legacy code during transition
+    $GLOBALS['DBCONNECTION'] = $dbconnection;
+
     if (!isset($tbpref)) {
         $fixed_tbpref = false;
         $tbpref = LWTTableGet("current_table_prefix");
@@ -2242,8 +2219,7 @@ function getDatabasePrefix($dbconnection)
  */
 function get_database_prefixes(&$tbpref)
 {
-    global $DBCONNECTION;
-    list($tbpref, $fixed_tbpref) = getDatabasePrefix($DBCONNECTION);
+    list($tbpref, $fixed_tbpref) = getDatabasePrefix(LWT_Globals::getDbConnection());
     return (int) $fixed_tbpref;
 }
 

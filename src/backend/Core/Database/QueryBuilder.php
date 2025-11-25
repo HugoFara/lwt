@@ -1,0 +1,683 @@
+<?php
+
+/**
+ * \file
+ * \brief Fluent query builder for database operations.
+ *
+ * PHP version 8.1
+ *
+ * @category Database
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/inc-database-querybuilder.html
+ * @since    3.0.0
+ */
+
+namespace Lwt\Database;
+
+use Lwt\Core\LWT_Globals;
+
+/**
+ * Fluent query builder for constructing SQL queries.
+ *
+ * Usage:
+ * ```php
+ * // SELECT query
+ * $users = QueryBuilder::table('words')
+ *     ->select(['WoID', 'WoText'])
+ *     ->where('WoLgID', '=', 1)
+ *     ->orderBy('WoText')
+ *     ->limit(10)
+ *     ->get();
+ *
+ * // INSERT query
+ * $id = QueryBuilder::table('words')
+ *     ->insert(['WoText' => 'hello', 'WoLgID' => 1]);
+ *
+ * // UPDATE query
+ * QueryBuilder::table('words')
+ *     ->where('WoID', '=', 5)
+ *     ->update(['WoStatus' => 2]);
+ *
+ * // DELETE query
+ * QueryBuilder::table('words')
+ *     ->where('WoID', '=', 5)
+ *     ->delete();
+ * ```
+ *
+ * @since 3.0.0
+ */
+class QueryBuilder
+{
+    /**
+     * @var string The table name (with prefix)
+     */
+    private string $table;
+
+    /**
+     * @var array<int, string> Columns to select
+     */
+    private array $columns = ['*'];
+
+    /**
+     * @var array<int, array{column: string, operator: string, value: mixed, boolean: string}> WHERE conditions
+     */
+    private array $wheres = [];
+
+    /**
+     * @var array<int, array{column: string, direction: string}> ORDER BY clauses
+     */
+    private array $orders = [];
+
+    /**
+     * @var array<int, string> GROUP BY columns
+     */
+    private array $groups = [];
+
+    /**
+     * @var int|null LIMIT value
+     */
+    private ?int $limitValue = null;
+
+    /**
+     * @var int|null OFFSET value
+     */
+    private ?int $offsetValue = null;
+
+    /**
+     * @var array<int, array{type: string, table: string, first: string, operator: string, second: string}> JOIN clauses
+     */
+    private array $joins = [];
+
+    /**
+     * @var bool Whether to use DISTINCT
+     */
+    private bool $distinct = false;
+
+    /**
+     * Create a new query builder instance for a table.
+     *
+     * @param string $tableName The table name (without prefix)
+     */
+    public function __construct(string $tableName)
+    {
+        $this->table = LWT_Globals::getTablePrefix() . $tableName;
+    }
+
+    /**
+     * Create a new query builder for a table.
+     *
+     * @param string $tableName The table name (without prefix)
+     *
+     * @return self
+     */
+    public static function table(string $tableName): self
+    {
+        return new self($tableName);
+    }
+
+    /**
+     * Set the columns to select.
+     *
+     * @param array<int, string>|string $columns Columns to select
+     *
+     * @return self
+     */
+    public function select(array|string $columns = ['*']): self
+    {
+        $this->columns = is_array($columns) ? $columns : [$columns];
+        return $this;
+    }
+
+    /**
+     * Add DISTINCT to the query.
+     *
+     * @return self
+     */
+    public function distinct(): self
+    {
+        $this->distinct = true;
+        return $this;
+    }
+
+    /**
+     * Add a WHERE clause.
+     *
+     * @param string $column   The column name
+     * @param string $operator The comparison operator
+     * @param mixed  $value    The value to compare against
+     * @param string $boolean  The boolean connector (AND/OR)
+     *
+     * @return self
+     */
+    public function where(
+        string $column,
+        string $operator = '=',
+        mixed $value = null,
+        string $boolean = 'AND'
+    ): self {
+        // Handle simple equality: where('col', 'value')
+        if ($value === null && !in_array(strtoupper($operator), ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'])) {
+            $value = $operator;
+            $operator = '=';
+        }
+
+        $this->wheres[] = [
+            'column' => $column,
+            'operator' => strtoupper($operator),
+            'value' => $value,
+            'boolean' => strtoupper($boolean)
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Add an OR WHERE clause.
+     *
+     * @param string $column   The column name
+     * @param string $operator The comparison operator
+     * @param mixed  $value    The value to compare against
+     *
+     * @return self
+     */
+    public function orWhere(string $column, string $operator = '=', mixed $value = null): self
+    {
+        return $this->where($column, $operator, $value, 'OR');
+    }
+
+    /**
+     * Add a WHERE IN clause.
+     *
+     * @param string       $column The column name
+     * @param array<mixed> $values The values to check against
+     * @param string       $boolean The boolean connector
+     * @param bool         $not    Whether to use NOT IN
+     *
+     * @return self
+     */
+    public function whereIn(
+        string $column,
+        array $values,
+        string $boolean = 'AND',
+        bool $not = false
+    ): self {
+        $operator = $not ? 'NOT IN' : 'IN';
+        return $this->where($column, $operator, $values, $boolean);
+    }
+
+    /**
+     * Add a WHERE NOT IN clause.
+     *
+     * @param string       $column The column name
+     * @param array<mixed> $values The values to check against
+     *
+     * @return self
+     */
+    public function whereNotIn(string $column, array $values): self
+    {
+        return $this->whereIn($column, $values, 'AND', true);
+    }
+
+    /**
+     * Add a WHERE NULL clause.
+     *
+     * @param string $column  The column name
+     * @param string $boolean The boolean connector
+     * @param bool   $not     Whether to use IS NOT NULL
+     *
+     * @return self
+     */
+    public function whereNull(string $column, string $boolean = 'AND', bool $not = false): self
+    {
+        $operator = $not ? 'IS NOT NULL' : 'IS NULL';
+        return $this->where($column, $operator, null, $boolean);
+    }
+
+    /**
+     * Add a WHERE NOT NULL clause.
+     *
+     * @param string $column The column name
+     *
+     * @return self
+     */
+    public function whereNotNull(string $column): self
+    {
+        return $this->whereNull($column, 'AND', true);
+    }
+
+    /**
+     * Add a raw WHERE clause.
+     *
+     * @param string $sql     Raw SQL for the WHERE clause
+     * @param string $boolean The boolean connector
+     *
+     * @return self
+     */
+    public function whereRaw(string $sql, string $boolean = 'AND'): self
+    {
+        $this->wheres[] = [
+            'column' => '',
+            'operator' => 'RAW',
+            'value' => $sql,
+            'boolean' => strtoupper($boolean)
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Add a JOIN clause.
+     *
+     * @param string $table    The table to join
+     * @param string $first    The first column
+     * @param string $operator The join operator
+     * @param string $second   The second column
+     * @param string $type     The join type (INNER, LEFT, RIGHT)
+     *
+     * @return self
+     */
+    public function join(
+        string $table,
+        string $first,
+        string $operator = '=',
+        string $second = '',
+        string $type = 'INNER'
+    ): self {
+        // Handle simple join: join('table', 'col1', 'col2')
+        if ($second === '' && !in_array($operator, ['=', '!=', '<', '>', '<=', '>='])) {
+            $second = $operator;
+            $operator = '=';
+        }
+
+        $this->joins[] = [
+            'type' => strtoupper($type),
+            'table' => LWT_Globals::getTablePrefix() . $table,
+            'first' => $first,
+            'operator' => $operator,
+            'second' => $second
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Add a LEFT JOIN clause.
+     *
+     * @param string $table    The table to join
+     * @param string $first    The first column
+     * @param string $operator The join operator
+     * @param string $second   The second column
+     *
+     * @return self
+     */
+    public function leftJoin(string $table, string $first, string $operator = '=', string $second = ''): self
+    {
+        return $this->join($table, $first, $operator, $second, 'LEFT');
+    }
+
+    /**
+     * Add a RIGHT JOIN clause.
+     *
+     * @param string $table    The table to join
+     * @param string $first    The first column
+     * @param string $operator The join operator
+     * @param string $second   The second column
+     *
+     * @return self
+     */
+    public function rightJoin(string $table, string $first, string $operator = '=', string $second = ''): self
+    {
+        return $this->join($table, $first, $operator, $second, 'RIGHT');
+    }
+
+    /**
+     * Add an ORDER BY clause.
+     *
+     * @param string $column    The column to order by
+     * @param string $direction The sort direction (ASC/DESC)
+     *
+     * @return self
+     */
+    public function orderBy(string $column, string $direction = 'ASC'): self
+    {
+        $this->orders[] = [
+            'column' => $column,
+            'direction' => strtoupper($direction)
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Add a descending ORDER BY clause.
+     *
+     * @param string $column The column to order by
+     *
+     * @return self
+     */
+    public function orderByDesc(string $column): self
+    {
+        return $this->orderBy($column, 'DESC');
+    }
+
+    /**
+     * Add a GROUP BY clause.
+     *
+     * @param string|array<int, string> $columns The column(s) to group by
+     *
+     * @return self
+     */
+    public function groupBy(string|array $columns): self
+    {
+        $columns = is_array($columns) ? $columns : [$columns];
+        $this->groups = array_merge($this->groups, $columns);
+
+        return $this;
+    }
+
+    /**
+     * Set the LIMIT value.
+     *
+     * @param int $limit The maximum number of rows
+     *
+     * @return self
+     */
+    public function limit(int $limit): self
+    {
+        $this->limitValue = $limit;
+        return $this;
+    }
+
+    /**
+     * Set the OFFSET value.
+     *
+     * @param int $offset The number of rows to skip
+     *
+     * @return self
+     */
+    public function offset(int $offset): self
+    {
+        $this->offsetValue = $offset;
+        return $this;
+    }
+
+    /**
+     * Build the SELECT SQL query.
+     *
+     * @return string The SQL query
+     */
+    public function toSql(): string
+    {
+        $sql = 'SELECT ';
+
+        if ($this->distinct) {
+            $sql .= 'DISTINCT ';
+        }
+
+        $sql .= implode(', ', $this->columns);
+        $sql .= ' FROM ' . $this->table;
+
+        // Add JOINs
+        foreach ($this->joins as $join) {
+            $sql .= ' ' . $join['type'] . ' JOIN ' . $join['table'];
+            $sql .= ' ON ' . $join['first'] . ' ' . $join['operator'] . ' ' . $join['second'];
+        }
+
+        // Add WHERE clauses
+        if (!empty($this->wheres)) {
+            $sql .= ' WHERE ' . $this->compileWheres();
+        }
+
+        // Add GROUP BY
+        if (!empty($this->groups)) {
+            $sql .= ' GROUP BY ' . implode(', ', $this->groups);
+        }
+
+        // Add ORDER BY
+        if (!empty($this->orders)) {
+            $orderClauses = array_map(
+                fn($order) => $order['column'] . ' ' . $order['direction'],
+                $this->orders
+            );
+            $sql .= ' ORDER BY ' . implode(', ', $orderClauses);
+        }
+
+        // Add LIMIT
+        if ($this->limitValue !== null) {
+            $sql .= ' LIMIT ' . $this->limitValue;
+        }
+
+        // Add OFFSET
+        if ($this->offsetValue !== null) {
+            $sql .= ' OFFSET ' . $this->offsetValue;
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Compile WHERE clauses into SQL.
+     *
+     * @return string The WHERE clause SQL
+     */
+    private function compileWheres(): string
+    {
+        $sql = '';
+
+        foreach ($this->wheres as $index => $where) {
+            // Add boolean connector (skip for first condition)
+            if ($index > 0) {
+                $sql .= ' ' . $where['boolean'] . ' ';
+            }
+
+            if ($where['operator'] === 'RAW') {
+                $sql .= $where['value'];
+                continue;
+            }
+
+            if (in_array($where['operator'], ['IS NULL', 'IS NOT NULL'])) {
+                $sql .= $where['column'] . ' ' . $where['operator'];
+                continue;
+            }
+
+            if (in_array($where['operator'], ['IN', 'NOT IN'])) {
+                $values = array_map(
+                    fn($v) => $this->quoteValue($v),
+                    $where['value']
+                );
+                $sql .= $where['column'] . ' ' . $where['operator'] . ' (' . implode(', ', $values) . ')';
+                continue;
+            }
+
+            $sql .= $where['column'] . ' ' . $where['operator'] . ' ' . $this->quoteValue($where['value']);
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Quote a value for use in SQL.
+     *
+     * @param mixed $value The value to quote
+     *
+     * @return string The quoted value
+     */
+    private function quoteValue(mixed $value): string
+    {
+        if ($value === null) {
+            return 'NULL';
+        }
+
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (string) $value;
+        }
+
+        return "'" . Connection::escape((string) $value) . "'";
+    }
+
+    /**
+     * Execute the query and return all results.
+     *
+     * @return array<int, array<string, mixed>> Array of rows
+     */
+    public function get(): array
+    {
+        return Connection::fetchAll($this->toSql());
+    }
+
+    /**
+     * Execute the query and return the first result.
+     *
+     * @return array<string, mixed>|null The first row or null
+     */
+    public function first(): ?array
+    {
+        $this->limit(1);
+        return Connection::fetchOne($this->toSql());
+    }
+
+    /**
+     * Execute the query and return a single column value.
+     *
+     * @param string $column The column to retrieve
+     *
+     * @return mixed The value or null
+     */
+    public function value(string $column): mixed
+    {
+        $this->select($column);
+        $row = $this->first();
+
+        return $row[$column] ?? null;
+    }
+
+    /**
+     * Get the count of matching rows.
+     *
+     * @param string $column The column to count (default: *)
+     *
+     * @return int The count
+     */
+    public function count(string $column = '*'): int
+    {
+        $this->columns = ["COUNT($column) AS cnt"];
+        $row = Connection::fetchOne($this->toSql());
+
+        return (int) ($row['cnt'] ?? 0);
+    }
+
+    /**
+     * Check if any rows exist matching the query.
+     *
+     * @return bool True if rows exist
+     */
+    public function exists(): bool
+    {
+        return $this->count() > 0;
+    }
+
+    /**
+     * Insert a new row.
+     *
+     * @param array<string, mixed> $data Column => value pairs to insert
+     *
+     * @return int|string The last insert ID
+     */
+    public function insert(array $data): int|string
+    {
+        $columns = array_keys($data);
+        $values = array_map(fn($v) => $this->quoteValue($v), array_values($data));
+
+        $sql = 'INSERT INTO ' . $this->table;
+        $sql .= ' (' . implode(', ', $columns) . ')';
+        $sql .= ' VALUES (' . implode(', ', $values) . ')';
+
+        Connection::execute($sql);
+
+        return Connection::lastInsertId();
+    }
+
+    /**
+     * Insert multiple rows.
+     *
+     * @param array<int, array<string, mixed>> $rows Array of column => value pairs
+     *
+     * @return int Number of inserted rows
+     */
+    public function insertMany(array $rows): int
+    {
+        if (empty($rows)) {
+            return 0;
+        }
+
+        $columns = array_keys($rows[0]);
+        $valueGroups = [];
+
+        foreach ($rows as $row) {
+            $values = array_map(fn($v) => $this->quoteValue($v), array_values($row));
+            $valueGroups[] = '(' . implode(', ', $values) . ')';
+        }
+
+        $sql = 'INSERT INTO ' . $this->table;
+        $sql .= ' (' . implode(', ', $columns) . ')';
+        $sql .= ' VALUES ' . implode(', ', $valueGroups);
+
+        return Connection::execute($sql);
+    }
+
+    /**
+     * Update matching rows.
+     *
+     * @param array<string, mixed> $data Column => value pairs to update
+     *
+     * @return int Number of affected rows
+     */
+    public function update(array $data): int
+    {
+        $setClauses = [];
+        foreach ($data as $column => $value) {
+            $setClauses[] = $column . ' = ' . $this->quoteValue($value);
+        }
+
+        $sql = 'UPDATE ' . $this->table;
+        $sql .= ' SET ' . implode(', ', $setClauses);
+
+        if (!empty($this->wheres)) {
+            $sql .= ' WHERE ' . $this->compileWheres();
+        }
+
+        return Connection::execute($sql);
+    }
+
+    /**
+     * Delete matching rows.
+     *
+     * @return int Number of deleted rows
+     */
+    public function delete(): int
+    {
+        $sql = 'DELETE FROM ' . $this->table;
+
+        if (!empty($this->wheres)) {
+            $sql .= ' WHERE ' . $this->compileWheres();
+        }
+
+        return Connection::execute($sql);
+    }
+
+    /**
+     * Truncate the table.
+     *
+     * @return void
+     */
+    public function truncate(): void
+    {
+        Connection::execute('TRUNCATE TABLE ' . $this->table);
+    }
+}

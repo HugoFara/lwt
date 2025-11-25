@@ -632,8 +632,10 @@ class DatabaseConnectTest extends TestCase
         $result = saveSetting('set-texts-per-page', '50');
         $this->assertStringContainsString('OK:', $result, 'Valid numeric value should save');
 
-        // Clean up test keys
+        // Clean up test keys (including SQL injection test keys)
         do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey LIKE 'test_%'");
+        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey LIKE 'key%'");
+        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey = 'safe_key'");
     }
 
     /**

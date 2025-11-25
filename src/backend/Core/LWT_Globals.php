@@ -291,6 +291,34 @@ class LWT_Globals
     }
 
     /**
+     * Get a query builder instance for a table.
+     *
+     * Convenience method to start building a database query.
+     *
+     * Usage:
+     * ```php
+     * // SELECT query
+     * $words = LWT_Globals::query('words')
+     *     ->where('WoLgID', '=', 1)
+     *     ->get();
+     *
+     * // INSERT query
+     * LWT_Globals::query('words')
+     *     ->insert(['WoText' => 'hello', 'WoLgID' => 1]);
+     * ```
+     *
+     * @param string $tableName The base table name (e.g., 'words')
+     *
+     * @return \Lwt\Database\QueryBuilder
+     *
+     * @since 3.0.0
+     */
+    public static function query(string $tableName): \Lwt\Database\QueryBuilder
+    {
+        return \Lwt\Database\QueryBuilder::table($tableName);
+    }
+
+    /**
      * Reset all globals to initial state.
      *
      * Primarily used for testing.

@@ -3412,7 +3412,8 @@ function restore_file($handle, $title): string
             if ($sql_line != "") {
                 if (!str_starts_with($query, '-- ')) {
                     $res = mysqli_query(
-                        $GLOBALS['DBCONNECTION'], prefixSQLQuery($query, $tbpref)
+                        \Lwt\Core\LWT_Globals::getDbConnection(),
+                        prefixSQLQuery($query, $tbpref)
                     );
                     $install_status["queries"]++;
                     if ($res == false) {

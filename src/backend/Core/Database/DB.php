@@ -1,0 +1,210 @@
+<?php
+
+/**
+ * \file
+ * \brief Database facade for simplified database operations.
+ *
+ * PHP version 8.1
+ *
+ * @category Database
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/inc-database-db.html
+ * @since    3.0.0
+ */
+
+namespace Lwt\Database;
+
+/**
+ * Database facade providing a simplified interface for common operations.
+ *
+ * This is the main entry point for database operations in LWT 3.0+.
+ *
+ * Usage:
+ * ```php
+ * use Lwt\Database\DB;
+ *
+ * // Query builder
+ * $words = DB::table('words')->where('WoLgID', 1)->get();
+ *
+ * // Raw queries
+ * $result = DB::query('SELECT * FROM words WHERE WoID = 1');
+ * $rows = DB::fetchAll('SELECT * FROM words LIMIT 10');
+ * $row = DB::fetchOne('SELECT * FROM words WHERE WoID = 1');
+ * $value = DB::fetchValue('SELECT COUNT(*) AS value FROM words');
+ *
+ * // Execute non-SELECT queries
+ * $affected = DB::execute('UPDATE words SET WoStatus = 2 WHERE WoID = 1');
+ *
+ * // Escaping
+ * $safe = DB::escape($userInput);
+ * $quoted = DB::escapeString($userInput);  // Returns 'escaped_value'
+ * $nullable = DB::escapeOrNull($userInput); // Returns 'value' or NULL
+ * ```
+ *
+ * @since 3.0.0
+ */
+class DB
+{
+    /**
+     * Start a query builder for a table.
+     *
+     * @param string $tableName The table name (without prefix)
+     *
+     * @return QueryBuilder
+     */
+    public static function table(string $tableName): QueryBuilder
+    {
+        return QueryBuilder::table($tableName);
+    }
+
+    /**
+     * Execute a raw SQL query.
+     *
+     * @param string $sql The SQL query to execute
+     *
+     * @return \mysqli_result|bool Query result or true for non-SELECT queries
+     */
+    public static function query(string $sql): \mysqli_result|bool
+    {
+        return Connection::query($sql);
+    }
+
+    /**
+     * Execute a query and return all rows.
+     *
+     * @param string $sql The SQL query to execute
+     *
+     * @return array<int, array<string, mixed>> Array of associative arrays
+     */
+    public static function fetchAll(string $sql): array
+    {
+        return Connection::fetchAll($sql);
+    }
+
+    /**
+     * Execute a query and return the first row.
+     *
+     * @param string $sql The SQL query to execute
+     *
+     * @return array<string, mixed>|null The first row or null
+     */
+    public static function fetchOne(string $sql): ?array
+    {
+        return Connection::fetchOne($sql);
+    }
+
+    /**
+     * Execute a query and return a single value.
+     *
+     * @param string $sql    The SQL query to execute
+     * @param string $column The column name to retrieve (default: 'value')
+     *
+     * @return mixed The value or null
+     */
+    public static function fetchValue(string $sql, string $column = 'value'): mixed
+    {
+        return Connection::fetchValue($sql, $column);
+    }
+
+    /**
+     * Execute an INSERT/UPDATE/DELETE query.
+     *
+     * @param string $sql The SQL query to execute
+     *
+     * @return int Number of affected rows
+     */
+    public static function execute(string $sql): int
+    {
+        return Connection::execute($sql);
+    }
+
+    /**
+     * Get the last inserted ID.
+     *
+     * @return int|string The last insert ID
+     */
+    public static function lastInsertId(): int|string
+    {
+        return Connection::lastInsertId();
+    }
+
+    /**
+     * Escape a value for use in SQL.
+     *
+     * @param string $value The value to escape
+     *
+     * @return string The escaped string (without quotes)
+     */
+    public static function escape(string $value): string
+    {
+        return Connection::escape($value);
+    }
+
+    /**
+     * Escape and quote a string for SQL.
+     *
+     * @param string $value The value to escape
+     *
+     * @return string The escaped and quoted string
+     */
+    public static function escapeString(string $value): string
+    {
+        return Connection::escapeString($value);
+    }
+
+    /**
+     * Escape and quote a string, returning 'NULL' for empty strings.
+     *
+     * @param string $value The value to escape
+     *
+     * @return string The escaped and quoted string, or 'NULL'
+     */
+    public static function escapeOrNull(string $value): string
+    {
+        return Connection::escapeOrNull($value);
+    }
+
+    /**
+     * Get the raw mysqli connection.
+     *
+     * For backward compatibility and advanced operations.
+     *
+     * @return \mysqli The database connection
+     */
+    public static function connection(): \mysqli
+    {
+        return Connection::getInstance();
+    }
+
+    /**
+     * Begin a transaction.
+     *
+     * @return bool True on success
+     */
+    public static function beginTransaction(): bool
+    {
+        return mysqli_begin_transaction(Connection::getInstance());
+    }
+
+    /**
+     * Commit a transaction.
+     *
+     * @return bool True on success
+     */
+    public static function commit(): bool
+    {
+        return mysqli_commit(Connection::getInstance());
+    }
+
+    /**
+     * Rollback a transaction.
+     *
+     * @return bool True on success
+     */
+    public static function rollback(): bool
+    {
+        return mysqli_rollback(Connection::getInstance());
+    }
+}
