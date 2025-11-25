@@ -394,12 +394,11 @@ function quickMenu(): void
  * @param string $title  Title of the page
  * @param string $addcss Some CSS to be embed in a style tag
  *
- * @global string $tbpref The database table prefix if true
- * @global int    $debug  Show the requests if true
  */
 function pagestart_kernel_nobody($title, $addcss=''): void
 {
-    global $tbpref, $debug;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $debug = \Lwt\Core\LWT_Globals::isDebug();
     @header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
     @header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
     @header('Cache-Control: no-cache, must-revalidate, max-age=0');

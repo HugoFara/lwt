@@ -1329,8 +1329,6 @@ function update_default_values($id, $lid, $_sql)
  * @param bool $multiwords Display if text has multi-words
  *
  * @return void
- *
- * @global $tbpref
  */
 function displayTextStatistics($lid, $rtlScript, $multiwords)
 {

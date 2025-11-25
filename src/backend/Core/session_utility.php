@@ -32,7 +32,7 @@ require_once __DIR__ . '/tags.php';
  */
 function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $currentlang = validateLang(
         (string) processDBParam("filterlang", 'currentlanguage', '', false)
     );
@@ -642,7 +642,7 @@ function processDBParam($reqkey, $dbkey, $default, $isnum)
 
 function getWordTagList($wid, $before=' ', $brack=1, $tohtml=1): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $lbrack = $rbrack = '';
     if ($brack) {
         $lbrack = "[";
@@ -738,11 +738,10 @@ function get_selected($value, $selval): string
  *
  * @return string SQL projection necessary
  *
- * @global string $tbpref
  */
 function do_test_test_get_projection($key, $value): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $testsql = null;
     switch ($key)
     {
@@ -864,7 +863,7 @@ function make_status_controls_test_table($score, $status, $wordid): string
  */
 function get_languages_selectoptions($v, $dt): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT LgID, LgName FROM {$tbpref}languages
     WHERE LgName<>'' ORDER BY LgName";
     $res = do_mysqli_query($sql);
@@ -1278,7 +1277,7 @@ function get_multiplearchivedtextactions_selectoptions(): string
 
 function get_texts_selectoptions($lang, $v): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (! isset($v) ) { $v = '';
     }
     if (! isset($lang) ) { $lang = '';
@@ -1503,13 +1502,11 @@ function createTheDictLink($u, $t)
  *
  * @return string HTML-formatted interface
  *
- * @global string $tbpref Database table prefix
  */
 function createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst): string
 {
-    global $tbpref;
     $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-    FROM ' . $tbpref . 'languages
+    FROM ' . \Lwt\Core\LWT_Globals::table('languages') . '
     WHERE LgID = ' . $lang;
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
@@ -1656,13 +1653,11 @@ function makeOpenDictStrDynSent($url, $sentctljs, $txt): string
  *
  * @return string HTML formatted interface
  *
- * @global string $tbpref Database table prefix
  */
 function createDictLinksInEditWin2($lang, $sentctljs, $wordctljs): string
 {
-    global $tbpref;
     $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-    FROM {$tbpref}languages WHERE LgID = $lang";
+    FROM " . \Lwt\Core\LWT_Globals::table('languages') . " WHERE LgID = $lang";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
     $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
@@ -1706,9 +1701,8 @@ function createDictLinksInEditWin2($lang, $sentctljs, $wordctljs): string
 
 function makeDictLinks($lang, $wordctljs): string
 {
-    global $tbpref;
     $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-    FROM ' . $tbpref . 'languages WHERE LgID = ' . $lang;
+    FROM ' . \Lwt\Core\LWT_Globals::table('languages') . ' WHERE LgID = ' . $lang;
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
     $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
@@ -1744,9 +1738,8 @@ function makeDictLinks($lang, $wordctljs): string
 
 function createDictLinksInEditWin3($lang, $sentctljs, $wordctljs): string
 {
-    global $tbpref;
     $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-    FROM {$tbpref}languages WHERE LgID = $lang";
+    FROM " . \Lwt\Core\LWT_Globals::table('languages') . " WHERE LgID = $lang";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
 
@@ -2126,7 +2119,7 @@ function mask_term_in_sentence($s,$regexword): string
  */
 function return_textwordcount($texts_id): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $r = array(
         // Total for text
@@ -2206,14 +2199,12 @@ function textwordcount($textID): void
  *
  * @return int Number of words
  *
- * @global string $tbpref
  */
 function todo_words_count($textid): int
 {
-    global $tbpref;
     $count = get_first_value(
         "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS value
-        FROM {$tbpref}textitems2
+        FROM " . \Lwt\Core\LWT_Globals::table('textitems2') . "
         WHERE Ti2WordCount=1 AND Ti2WoID=0 AND Ti2TxID=$textid"
     );
     if ($count === null) {
@@ -2237,7 +2228,7 @@ function todo_words_count($textid): int
  */
 function todo_words_content($textid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $c = todo_words_count($textid);
     if ($c <= 0) {
         return '<span title="No unknown word remaining" class="status0" ' .
@@ -2322,7 +2313,7 @@ function texttodocount2($textid): string
  */
 function sentences_containing_word_lc_query($wordlc, $lid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $mecab_str = null;
     $res = do_mysqli_query(
         "SELECT LgRegexpWordCharacters, LgRemoveSpaces
@@ -2407,7 +2398,7 @@ function sentences_containing_word_lc_query($wordlc, $lid): string
  */
 function sentences_from_word($wid, $wordlc, $lid, $limit=-1): bool|mysqli_result
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (empty($wid)) {
         $sql = "SELECT DISTINCT SeID, SeText
         FROM {$tbpref}sentences, {$tbpref}textitems2
@@ -2446,7 +2437,7 @@ function sentences_from_word($wid, $wordlc, $lid, $limit=-1): bool|mysqli_result
  */
 function getSentence($seid, $wordlc, $mode): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $res = do_mysqli_query(
         "SELECT
         CONCAT(
@@ -2654,9 +2645,8 @@ function get20Sentences($lang, $wordlc, $wid, $jsctlname, $mode): string
  */
 function get_languages(): array
 {
-    global $tbpref;
     $langs = array();
-    $sql = "SELECT LgID, LgName FROM {$tbpref}languages WHERE LgName<>''";
+    $sql = "SELECT LgID, LgName FROM " . \Lwt\Core\LWT_Globals::table('languages') . " WHERE LgName<>''";
     $res = do_mysqli_query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         $langs[(string)$record['LgName']] = (int)$record['LgID'];
@@ -2672,11 +2662,10 @@ function get_languages(): array
  * @param string|int $lid Language ID
  *
  * @return string Language name
- * @global string $tbpref Table name prefix
  */
 function getLanguage($lid)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (is_int($lid)) {
         $lg_id = $lid;
     } else if (isset($lid) && trim($lid) != '' && ctype_digit($lid)) {
@@ -2708,7 +2697,7 @@ function getLanguage($lid)
  */
 function getLanguageCode($lg_id, $languages_table)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $query = "SELECT LgName, LgGoogleTranslateURI
     FROM {$tbpref}languages
     WHERE LgID = $lg_id";
@@ -2741,7 +2730,7 @@ function getLanguageCode($lg_id, $languages_table)
  */
 function getScriptDirectionTag($lid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (!isset($lid)) {
         return '';
     }
@@ -2779,7 +2768,7 @@ function getScriptDirectionTag($lid): string
  */
 function findMecabExpression($text, $lid): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
 
     $db_to_mecab = tempnam(sys_get_temp_dir(), "{$tbpref}db_to_mecab");
     $mecab_args = " -F %m\\t%t\\t\\n -U %m\\t%t\\t\\n -E \\t\\n ";
@@ -2945,7 +2934,7 @@ function insertExpressionFromMeCab($textlc, $lid, $wid, $len, $mode): array
  */
 function findStandardExpression($textlc, $lid): array
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $occurences = array();
     $res = do_mysqli_query("SELECT * FROM {$tbpref}languages WHERE LgID=$lid");
     $record = mysqli_fetch_assoc($res);
@@ -3134,7 +3123,7 @@ function new_expression_interactable($hex, $appendtext, $sid, $len): void
  */
 function new_expression_interactable2($hex, $appendtext, $wid, $len): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $showAll = (bool)getSettingZeroOrOne('showallwords', 1);
     $showType = $showAll ? "m" : "";
 
@@ -3202,7 +3191,7 @@ function new_expression_interactable2($hex, $appendtext, $wid, $len): void
  */
 function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $showAll = (bool)getSettingZeroOrOne('showallwords', 1);
     $showType = $showAll ? "m" : "";
 
@@ -3271,7 +3260,7 @@ function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
  */
 function insertExpressions($textlc, $lid, $wid, $len, $mode): null|string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $regexp = (string)get_first_value(
         "SELECT LgRegexpWordCharacters AS value
         FROM {$tbpref}languages WHERE LgID=$lid"
@@ -3354,7 +3343,7 @@ function insertExpressions($textlc, $lid, $wid, $len, $mode): null|string
  */
 function restore_file($handle, $title): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $message = "";
     $install_status = array(
         "queries" => 0,
@@ -3462,7 +3451,7 @@ function restore_file($handle, $title): string
  */
 function recreate_save_ann($textid, $oldann): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Get the translations from $oldann:
     $oldtrans = array();
     $olditems = preg_split('/[\n]/u', $oldann);
@@ -3521,7 +3510,7 @@ function recreate_save_ann($textid, $oldann): string
  */
 function create_ann($textid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $ann = '';
     $sql =
     "SELECT
@@ -3574,7 +3563,7 @@ function create_ann($textid): string
 
 function create_save_ann($textid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $ann = create_ann($textid);
     runsql(
         'update ' . $tbpref . 'texts set ' .
@@ -3597,7 +3586,7 @@ function create_save_ann($textid): string
  */
 function truncateUserDatabase(): void
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     runsql("TRUNCATE {$tbpref}archivedtexts", '');
     runsql("TRUNCATE {$tbpref}archtexttags", '');
     runsql("TRUNCATE {$tbpref}feedlinks", '');
@@ -3651,7 +3640,7 @@ function get_first_translation($trans): string
 
 function get_annotation_link($textid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (get_first_value('select length(TxAnnotatedText) as value from ' . $tbpref . 'texts where TxID=' . $textid) > 0) {
         return ' &nbsp;<a href="print_impr_text.php?text=' . $textid .
         '" target="_top"><img src="/assets/icons/tick.png" title="Annotated Text" alt="Annotated Text" /></a>';
@@ -3683,7 +3672,7 @@ function trim_value(&$value): void
  */
 function phoneticReading($text, $lgid)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sentence_split = get_first_value(
         "SELECT LgRegexpWordCharacters AS value FROM {$tbpref}languages
         WHERE LgID = $lgid"
@@ -3734,7 +3723,7 @@ function phoneticReading($text, $lgid)
  */
 function phonetic_reading($text, $lang)
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // Many languages are already phonetic
     if (!str_starts_with($lang, "ja") && !str_starts_with($lang, "jp")) {
         return $text;
@@ -3775,7 +3764,7 @@ function phonetic_reading($text, $lang)
  */
 function refreshText($word,$tid): string
 {
-    global $tbpref;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // $word : only sentences with $word
     // $tid : textid
     // only to be used when $showAll = 0 !
@@ -4222,12 +4211,11 @@ function pagestart($title, $close): void
  * @param string $title  Title of the page
  * @param string $addcss Some CSS to be embed in a style tag
  *
- * @global string $tbpref The database table prefix if true
- * @global int    $debug  Show the requests if true
  */
 function pagestart_nobody($title, $addcss=''): void
 {
-    global $tbpref, $debug;
+    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $debug = \Lwt\Core\LWT_Globals::isDebug();
     @header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
     @header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
     @header('Cache-Control: no-cache, must-revalidate, max-age=0');
