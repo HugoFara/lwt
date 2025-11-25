@@ -280,6 +280,141 @@ $router->register('/my/route', 'MyController@myAction');
 | Route definitions | 0 | 80+ |
 | Test files for routing | 0 | 2 (1000+ lines) |
 
+### 8. Global Variables Refactoring
+
+Version 3 introduces the `LWT_Globals` class to clearly identify and manage global state throughout the application.
+
+#### The Problem with Globals
+
+Previously, LWT used PHP global variables scattered throughout the codebase:
+
+```php
+// Old way - globals are implicit and hard to track
+function someFunction() {
+    global $tbpref;
+    global $DBCONNECTION;
+    $sql = "SELECT * FROM " . $tbpref . "words";
+    // ...
+}
+```
+
+This pattern had several issues:
+
+- Dependencies were hidden inside functions
+- Hard to trace where globals were initialized
+- Testing required manipulating `$GLOBALS` directly
+- No type safety or IDE autocompletion
+
+#### The New LWT_Globals Class
+
+A new class `Lwt\Core\LWT_Globals` (`src/backend/Core/LWT_Globals.php`) provides explicit, type-safe access to global state:
+
+```php
+// New way - dependencies are explicit
+use Lwt\Core\LWT_Globals;
+
+function someFunction() {
+    $prefix = LWT_Globals::getTablePrefix();
+    $db = LWT_Globals::getDbConnection();
+    $sql = "SELECT * FROM " . $prefix . "words";
+    // ...
+}
+```
+
+#### Available Methods
+
+| Method | Description | Replaces |
+|--------|-------------|----------|
+| `LWT_Globals::getDbConnection()` | Get the mysqli database connection | `global $DBCONNECTION` |
+| `LWT_Globals::getTablePrefix()` | Get the database table prefix | `global $tbpref` |
+| `LWT_Globals::table($name)` | Get prefixed table name (e.g., `table('words')` → `lwt_words`) | `$tbpref . 'words'` |
+| `LWT_Globals::isTablePrefixFixed()` | Check if prefix is fixed in connect.inc.php | `global $fixed_tbpref` |
+| `LWT_Globals::getDatabaseName()` | Get the database name | `global $dbname` |
+| `LWT_Globals::isDebug()` | Check if debug mode is enabled | `global $debug` |
+| `LWT_Globals::getDebug()` | Get debug value as integer (0 or 1) | `global $debug` |
+| `LWT_Globals::shouldDisplayErrors()` | Check if error display is enabled | `global $dsplerrors` |
+| `LWT_Globals::shouldDisplayTime()` | Check if execution time display is enabled | `global $dspltime` |
+
+#### Setter Methods (for initialization)
+
+| Method | Description |
+|--------|-------------|
+| `LWT_Globals::setDbConnection($conn)` | Set the database connection |
+| `LWT_Globals::setTablePrefix($prefix, $fixed)` | Set the table prefix |
+| `LWT_Globals::setDatabaseName($name)` | Set the database name |
+| `LWT_Globals::setDebug($value)` | Set debug mode |
+| `LWT_Globals::setDisplayErrors($value)` | Set error display mode |
+| `LWT_Globals::setDisplayTime($value)` | Set time display mode |
+| `LWT_Globals::reset()` | Reset all globals (for testing) |
+
+#### Backward Compatibility Maintained
+
+The old global variables still work and are still populated:
+
+```php
+// Both of these work:
+global $tbpref;
+$sql = "SELECT * FROM " . $tbpref . "words";
+
+// New recommended way:
+use Lwt\Core\LWT_Globals;
+$sql = "SELECT * FROM " . LWT_Globals::table('words');
+```
+
+All existing code using `global $tbpref`, `global $DBCONNECTION`, etc. continues to function. However, these are now marked as deprecated and will display deprecation notices in future versions.
+
+#### Deprecated Global Variables
+
+The following global variables are deprecated in favor of `LWT_Globals` methods:
+
+| Deprecated Global | Replacement |
+|-------------------|-------------|
+| `$DBCONNECTION` | `LWT_Globals::getDbConnection()` |
+| `$tbpref` | `LWT_Globals::getTablePrefix()` |
+| `$fixed_tbpref` | `LWT_Globals::isTablePrefixFixed()` |
+| `$dbname` | `LWT_Globals::getDatabaseName()` |
+| `$debug` | `LWT_Globals::isDebug()` / `LWT_Globals::getDebug()` |
+| `$dsplerrors` | `LWT_Globals::shouldDisplayErrors()` |
+| `$dspltime` | `LWT_Globals::shouldDisplayTime()` |
+
+#### Migration Guide
+
+To update your code:
+
+1. Add the use statement at the top of your file:
+
+   ```php
+   use Lwt\Core\LWT_Globals;
+   ```
+
+2. Replace global declarations with method calls:
+
+   ```php
+   // Before
+   function myFunction() {
+       global $tbpref, $DBCONNECTION;
+       $sql = "SELECT * FROM " . $tbpref . "words";
+       $result = mysqli_query($DBCONNECTION, $sql);
+   }
+
+   // After
+   function myFunction() {
+       $sql = "SELECT * FROM " . LWT_Globals::table('words');
+       $result = mysqli_query(LWT_Globals::getDbConnection(), $sql);
+   }
+   ```
+
+3. For debug checks:
+
+   ```php
+   // Before
+   global $debug;
+   if ($debug) { ... }
+
+   // After
+   if (LWT_Globals::isDebug()) { ... }
+   ```
+
 ## Future Improvements
 
 This refactoring enables:
@@ -289,6 +424,7 @@ This refactoring enables:
 3. **Cleaner URLs:** SEO-friendly URLs without `.php` extensions
 4. **Modular architecture:** Clear separation of concerns
 5. **Namespace support:** PHP autoloading with PSR-4 style namespaces
+6. **Explicit dependencies:** The `LWT_Globals` class makes global state visible and trackable
 
 ## Commit History
 

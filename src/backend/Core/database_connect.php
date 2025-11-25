@@ -16,6 +16,8 @@
 require_once __DIR__ . "/kernel_utility.php";
 require_once __DIR__ . "/../../../connect.inc.php";
 
+use Lwt\Core\LWT_Globals;
+
 /**
  * Do a SQL query to the database.
  * It is a wrapper for mysqli_query function.
@@ -28,6 +30,7 @@ require_once __DIR__ . "/../../../connect.inc.php";
  */
 function do_mysqli_query($sql)
 {
+    // @deprecated 3.0.0 Use LWT_Globals::getDbConnection() instead of global $DBCONNECTION
     global $DBCONNECTION;
     $res = mysqli_query($DBCONNECTION, $sql);
     if ($res != false) {
@@ -128,10 +131,14 @@ function prepare_textdata_js($s): string
  *
  * @return string Properly escaped and trimmed string. "NULL" if the input string is empty.
  *
- * @global $DBDONNECTION
+ * @global $DBCONNECTION
+ *
+ * @deprecated-global 3.0.0 The global $DBCONNECTION usage is deprecated.
+ *                          Use LWT_Globals::getDbConnection() for new code.
  */
 function convert_string_to_sqlsyntax($data): string
 {
+    // @deprecated 3.0.0 Use LWT_Globals::getDbConnection() instead of global $DBCONNECTION
     global $DBCONNECTION;
     $result = "NULL";
     $data = trim(prepare_textdata($data));
@@ -198,9 +205,13 @@ function convert_regexp_to_sqlsyntax($input): string
  * @return string '' if the language is not valid, $currentlang otherwise
  *
  * @global string $tbpref Table name prefix
+ *
+ * @deprecated-global 3.0.0 The global $tbpref usage is deprecated.
+ *                          Use LWT_Globals::getTablePrefix() for new code.
  */
 function validateLang($currentlang): string
 {
+    // @deprecated 3.0.0 Use LWT_Globals::getTablePrefix() instead of global $tbpref
     global $tbpref;
     if ($currentlang == '' || !is_numeric($currentlang)) {
         return '';
@@ -408,9 +419,13 @@ function getSettingZeroOrOne($key, $dft): int
  *                     'currenttext', we validate language/text.
  * @return string $val Value in the database if found, or an empty string
  * @global string $tbpref Table name prefix
+ *
+ * @deprecated-global 3.0.0 The global $tbpref usage is deprecated.
+ *                          Use LWT_Globals::getTablePrefix() for new code.
  */
 function getSetting($key)
 {
+    // @deprecated 3.0.0 Use LWT_Globals::getTablePrefix() instead of global $tbpref
     global $tbpref;
     $val = get_first_value(
         'SELECT StValue AS value
@@ -2194,30 +2209,46 @@ function get_database_prefixes(&$tbpref)
 // --------------------  S T A R T  --------------------------- //
 
 // Start Timer
-if (!empty($dspltime)) {
+if (LWT_Globals::shouldDisplayTime()) {
     get_execution_time();
 }
 
 /**
  * @var \mysqli $DBCONNECTION Connection to the database
+ *
+ * @deprecated 3.0.0 Use LWT_Globals::getDbConnection() instead
+ * @see LWT_Globals::getDbConnection()
  */
 $DBCONNECTION = connect_to_database(
     $server, $userid, $passwd, $dbname, $socket ?? ""
 );
+// Register with LWT_Globals for new code
+LWT_Globals::setDbConnection($DBCONNECTION);
+
 /**
  * @var string $tbpref Database table prefix
+ *
+ * @deprecated 3.0.0 Use LWT_Globals::getTablePrefix() instead
+ * @see LWT_Globals::getTablePrefix()
  */
 $tbpref = null;
 /**
  * @var int $fixed_tbpref Database prefix is fixed (1) or not (0)
+ *
+ * @deprecated 3.0.0 Use LWT_Globals::isTablePrefixFixed() instead
+ * @see LWT_Globals::isTablePrefixFixed()
  */
 $fixed_tbpref = null;
 list($tbpref, $bool_fixed_tbpref) = getDatabasePrefix($DBCONNECTION);
+
+// Register with LWT_Globals for new code
+LWT_Globals::setTablePrefix($tbpref, (bool) $bool_fixed_tbpref);
+LWT_Globals::setDatabaseName($dbname);
 
 // Convert to int, will be removed in LWT 3.0.0
 $fixed_tbpref = (int) $bool_fixed_tbpref;
 
 // check/update db
-check_update_db($debug, $tbpref, $dbname);
+check_update_db(LWT_Globals::getDebug(), $tbpref, $dbname);
 
 ?>
