@@ -35,8 +35,6 @@ class TagsController extends BaseController
      */
     public function index(array $params): void
     {
-        global $debug;
-
         $currentsort = (int) $this->dbParam("sort", 'currenttagsort', '1', true);
         $currentpage = (int) $this->sessionParam("page", "currenttagpage", '1', true);
         $currentquery = (string) $this->sessionParam("query", "currenttagquery", '', false);
@@ -59,7 +57,7 @@ class TagsController extends BaseController
         } elseif ($this->param('chg')) {
             $this->showEditTermTagForm((int)$this->param('chg'));
         } else {
-            $this->showTermTagsList($message, $currentquery, $wh_query, $currentsort, $currentpage, $debug);
+            $this->showTermTagsList($message, $currentquery, $wh_query, $currentsort, $currentpage, \Lwt\Core\LWT_Globals::isDebug());
         }
 
         $this->endRender();
@@ -76,8 +74,6 @@ class TagsController extends BaseController
      */
     public function textTags(array $params): void
     {
-        global $debug;
-
         $currentsort = (int) $this->dbParam("sort", 'currenttexttagsort', '1', true);
         $currentpage = (int) $this->sessionParam("page", "currenttexttagpage", '1', true);
         $currentquery = (string) $this->sessionParam("query", "currenttexttagquery", '', false);
@@ -100,7 +96,7 @@ class TagsController extends BaseController
         } elseif ($this->param('chg')) {
             $this->showEditTextTagForm((int)$this->param('chg'));
         } else {
-            $this->showTextTagsList($message, $currentquery, $wh_query, $currentsort, $currentpage, $debug);
+            $this->showTextTagsList($message, $currentquery, $wh_query, $currentsort, $currentpage, \Lwt\Core\LWT_Globals::isDebug());
         }
 
         $this->endRender();

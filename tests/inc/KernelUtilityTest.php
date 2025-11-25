@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../src/backend/Core/kernel_utility.php';
 
 use PHPUnit\Framework\TestCase;
+use Lwt\Core\LWT_Globals;
 
 final class KernelUtilityTest extends TestCase
 {
@@ -950,11 +951,10 @@ final class KernelUtilityTest extends TestCase
      */
     public function testEchodebug(): void
     {
-        global $debug;
-        $originalDebug = $debug ?? null;
+        $originalDebug = LWT_Globals::getDebug();
 
         // Test with debug enabled
-        $debug = 1;
+        LWT_Globals::setDebug(1);
         ob_start();
         echodebug('test value', 'Test Label');
         $output = ob_get_clean();
@@ -963,7 +963,7 @@ final class KernelUtilityTest extends TestCase
         $this->assertStringContainsString('test value', $output);
 
         // Test with debug disabled
-        $debug = 0;
+        LWT_Globals::setDebug(0);
         ob_start();
         echodebug('test value', 'Test Label');
         $output = ob_get_clean();
@@ -971,7 +971,7 @@ final class KernelUtilityTest extends TestCase
         $this->assertEquals('', $output, 'Should not output anything when debug is disabled');
 
         // Restore original debug value
-        $debug = $originalDebug;
+        LWT_Globals::setDebug($originalDebug);
     }
 
 }

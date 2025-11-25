@@ -1044,7 +1044,6 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
  */
 function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
 {
-    global $debug;
     $statuses = get_statuses();
     $statuses[0]["name"] = 'Unknown';
     $statuses[0]["abbr"] = 'Ukn';
@@ -1125,7 +1124,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
 </thead>
 <tbody>
     <?php
-    if ($debug) {
+    if (\Lwt\Core\LWT_Globals::isDebug()) {
         echo $sql;
     }
     while ($record = mysqli_fetch_assoc($res)) {
@@ -1155,7 +1154,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
  */
 function edit_texts_display($message)
 {
-    global $tbpref, $debug;
+    global $tbpref;
 
     // Page, Sort, etc.
 
@@ -1193,7 +1192,7 @@ function edit_texts_display($message)
         GROUP BY TxID {$wh_tag}
     ) AS dummy";
     $recno = (int) get_first_value($sql);
-    if ($debug) {
+    if (\Lwt\Core\LWT_Globals::isDebug()) {
         echo $sql . ' ===&gt; ' . $recno;
     }
 

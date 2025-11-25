@@ -1798,7 +1798,6 @@ function reparse_all_texts(): void
  */
 function update_database($dbname)
 {
-    global $debug;
     $tbpref = LWT_Globals::getTablePrefix();
 
     // DB Version
@@ -1829,7 +1828,7 @@ function update_database($dbname)
 
     if ($dbversion < $currversion) {
 
-        if ($debug) {
+        if (LWT_Globals::isDebug()) {
             echo "<p>DEBUG: check DB collation: ";
         }
         if ('utf8utf8_general_ci' != get_first_value(
@@ -1844,14 +1843,14 @@ function update_database($dbname)
                 '` CHARACTER SET utf8 COLLATE utf8_general_ci',
                 ''
             );
-            if ($debug) {
+            if (LWT_Globals::isDebug()) {
                 echo 'changed to utf8_general_ci</p>';
             }
-        } else if ($debug) {
+        } else if (LWT_Globals::isDebug()) {
             echo 'OK</p>';
         }
 
-        if ($debug) {
+        if (LWT_Globals::isDebug()) {
             echo "<p>DEBUG: do DB updates: $dbversion --&gt; $currversion</p>";
         }
 
@@ -1866,7 +1865,7 @@ function update_database($dbname)
             }
         }
 
-        if ($debug) {
+        if (LWT_Globals::isDebug()) {
             echo '<p>DEBUG: rebuilding tts</p>';
         }
         runsql(

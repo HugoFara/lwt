@@ -1035,8 +1035,6 @@ function do_test_test_javascript($count)
  */
 function do_test_test_content()
 {
-    global $debug;
-
     $testsql = do_test_get_test_sql(
         $_REQUEST['selection'],
         $_SESSION['testsql'],
@@ -1050,7 +1048,7 @@ function do_test_test_content()
         FROM $testsql AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0"
     );
-    if ($debug) {
+    if (\Lwt\Core\LWT_Globals::isDebug()) {
         echo "DEBUG - COUNT TO TEST: $count<br />";
     }
     if (!is_numeric($count)) {
@@ -1075,8 +1073,6 @@ function do_test_test_content()
  */
 function do_test_test_content_ajax($selector, $selection)
 {
-    global $debug;
-
     $testtype = do_test_get_test_type((int)getreq('type'));
     $test_sql = do_test_test_get_projection($selector, $selection);
     $count = get_first_value(
@@ -1084,7 +1080,7 @@ function do_test_test_content_ajax($selector, $selection)
         FROM $test_sql AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0"
     );
-    if ($debug) {
+    if (\Lwt\Core\LWT_Globals::isDebug()) {
         echo "DEBUG - COUNT TO TEST: $count<br />";
     }
     if (!is_numeric($count)) {

@@ -237,7 +237,6 @@ function do_test_table_header(): void
 
 function do_test_table_table_content($lang_record, $testsql): void
 {
-    global $debug;
 
     $textsize = round(((int)$lang_record['LgTextSize'] - 100) / 2, 0) + 100;
 
@@ -252,7 +251,7 @@ function do_test_table_table_content($lang_record, $testsql): void
     AND WoTranslation != \'\' AND WoTranslation != \'*\'
     ORDER BY WoTodayScore, WoRandom*RAND()';
 
-    if ($debug) {
+    if (\Lwt\Core\LWT_Globals::isDebug()) {
         echo $sql;
     }
     $res = do_mysqli_query($sql);

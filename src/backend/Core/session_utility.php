@@ -3355,7 +3355,6 @@ function insertExpressions($textlc, $lid, $wid, $len, $mode): null|string
 function restore_file($handle, $title): string
 {
     global $tbpref;
-    global $debug;
     global $dbname;
     $message = "";
     $install_status = array(
@@ -3434,7 +3433,7 @@ function restore_file($handle, $title): string
     }
     if ($install_status["errors"] == 0) {
         runsql("DROP TABLE IF EXISTS {$tbpref}textitems", '');
-        check_update_db($debug, $tbpref, $dbname);
+        check_update_db(\Lwt\Core\LWT_Globals::getDebug(), $tbpref, $dbname);
         reparse_all_texts();
         optimizedb();
         get_tags(1);
@@ -4204,7 +4203,6 @@ function framesetheader($title): void
  */
 function pagestart($title, $close): void
 {
-    global $debug;
     pagestart_nobody($title);
     echo '<div>';
     if ($close) {
@@ -4216,7 +4214,7 @@ function pagestart($title, $close): void
         quickMenu();
     }
     echo '</div>
-    <h1>' . tohtml($title) . ($debug ? ' <span class="red">DEBUG</span>' : '') . '</h1>';
+    <h1>' . tohtml($title) . (\Lwt\Core\LWT_Globals::isDebug() ? ' <span class="red">DEBUG</span>' : '') . '</h1>';
 }
 
 /**

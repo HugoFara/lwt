@@ -38,10 +38,9 @@
  */
 function get_version(): string
 {
-    global $debug;
     $formattedDate = date("F d Y", strtotime(LWT_RELEASE_DATE));
     $version = LWT_APP_VERSION . " ($formattedDate)";
-    if ($debug) {
+    if (\Lwt\Core\LWT_Globals::isDebug()) {
         $version .= ' <span class="red">DEBUG</span>';
     }
     return $version;
@@ -465,11 +464,10 @@ function pagestart_kernel_nobody($title, $addcss=''): void
  */
 function pageend(): void
 {
-    global $debug, $dspltime;
-    if ($debug) {
+    if (\Lwt\Core\LWT_Globals::isDebug()) {
         showRequest();
     }
-    if ($dspltime) {
+    if (\Lwt\Core\LWT_Globals::shouldDisplayTime()) {
         echo "\n<p class=\"smallgray2\">" .
         round(get_execution_time(), 5) . " secs</p>\n";
     }
@@ -486,8 +484,7 @@ function pageend(): void
  */
 function echodebug($var,$text): void
 {
-    global $debug;
-    if ($debug) {
+    if (\Lwt\Core\LWT_Globals::isDebug()) {
         echo "<pre> **DEBUGGING** " . tohtml($text) . ' = [[[';
         print_r($var);
         echo "]]]\n--------------</pre>";
