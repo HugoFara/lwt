@@ -92,9 +92,8 @@ require_once __DIR__ . '/../src/tools/markdown_converter.php';
 		<div id="floatdiv">
 			<a href="#">↑ TOP ↑</a>
 			<div>&nbsp;</div>
-			<a href="#preface">Preface</a>
+			<a href="#getting-started">Getting Started</a>
 			<a href="#current">Curr. Version </a>
-			<a href="#abstract">Abstract</a>
 			<a href="#install">Installation</a>
 			<a href="#postinstall">Post-<wbr>Installation</a>
 			<a href="#features">Features</a>
@@ -138,14 +137,11 @@ require_once __DIR__ . '/../src/tools/markdown_converter.php';
 					<option value="" selected="selected">
 						[Select...]
 					</option>
-					<option value="preface">
-						Preface
+					<option value="getting-started">
+						Getting Started
 					</option>
 					<option value="current">
 						Current Version
-					</option>
-					<option value="abstract">
-						Abstract
 					</option>
 					<option value="install">
 						Installation
@@ -213,7 +209,7 @@ require_once __DIR__ . '/../src/tools/markdown_converter.php';
 				</select>
 			</p>
 
-			<?php markdown_integration(__DIR__ . "/preface.md"); ?>
+			<?php markdown_integration(__DIR__ . "/user/getting-started.md"); ?>
 
 			<h2 name="current" id="current">
 				▶ Current Version - <a href="#">[↑]</a>
@@ -224,17 +220,14 @@ require_once __DIR__ . '/../src/tools/markdown_converter.php';
 				<br>
 				<a href="#CHANGELOG">View the Changelog.</a>
 			</p>
-			
 
-			<?php markdown_integration(__DIR__ . "/abstract.md"); ?>
-			
-			<?php markdown_integration(__DIR__ . "/install.md"); ?>
+			<?php markdown_integration(__DIR__ . "/user/installation.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/postinstall.md"); ?>
+			<?php markdown_integration(__DIR__ . "/user/post-installation.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/features.md"); ?>
+			<?php markdown_integration(__DIR__ . "/reference/features.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/newfeatures.md"); ?>
+			<?php markdown_integration(__DIR__ . "/reference/new-features.md"); ?>
 			
 			<h2 name="screencasts" id="screencasts">
 				▶ Screencasts/Videos - <a href="#">[↑]</a>
@@ -258,38 +251,38 @@ require_once __DIR__ . '/../src/tools/markdown_converter.php';
 				<a href="http://www.fluentin3months.com/learning-with-texts/" target="_blank">Fluent In 3 Months: Introducing LWT</a>.<br />
 			</p>
 
-			<?php markdown_integration(__DIR__ . "/links.md"); ?>
+			<?php markdown_integration(__DIR__ . "/legal/links.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/restrictions.md"); ?>
+			<?php markdown_integration(__DIR__ . "/reference/restrictions.md"); ?>
 
 			<?php markdown_integration(__DIR__ . "/../UNLICENSE.md" ) ?>
 
-			<?php markdown_integration(__DIR__ . "/thirdpartylicenses.md" ) ?>
+			<?php markdown_integration(__DIR__ . "/legal/third-party-licenses.md" ) ?>
 
-			<?php markdown_integration(__DIR__ . "/learn.md"); ?>
+			<?php markdown_integration(__DIR__ . "/user/how-to-learn.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/howto.md"); ?>
+			<?php markdown_integration(__DIR__ . "/user/how-to-use.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/faq.md"); ?>
+			<?php markdown_integration(__DIR__ . "/user/faq.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/ipad.md"); ?>
-		
-			<?php markdown_integration(__DIR__ . '/langsetup.md'); ?>
+			<?php markdown_integration(__DIR__ . "/user/troubleshooting/ipad.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/termscores.md"); ?>
+			<?php markdown_integration(__DIR__ . '/user/language-setup.md'); ?>
 
-			<?php markdown_integration(__DIR__ . "/keybind.md"); ?>
+			<?php markdown_integration(__DIR__ . "/reference/term-scores.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/export.md"); ?>
-			
-			<?php markdown_integration(__DIR__ . "/contribute.md"); ?>
+			<?php markdown_integration(__DIR__ . "/user/keyboard-shortcuts.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/wordpress.md"); ?>
+			<?php markdown_integration(__DIR__ . "/reference/export-templates.md"); ?>
 
-			<?php markdown_integration(__DIR__ . "/api.md"); ?>
-			
-			<?php markdown_integration(__DIR__ . "/database.md"); ?>
-			
+			<?php markdown_integration(__DIR__ . "/developer/contributing.md"); ?>
+
+			<?php markdown_integration(__DIR__ . "/user/troubleshooting/wordpress.md"); ?>
+
+			<?php markdown_integration(__DIR__ . "/developer/api.md"); ?>
+
+			<?php markdown_integration(__DIR__ . "/reference/database-schema.md"); ?>
+
 			<?php markdown_integration(__DIR__ . "/CHANGELOG.md"); ?>
 
 			<footer>
