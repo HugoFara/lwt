@@ -1,0 +1,32 @@
+/**
+ * Vite entry point - bridges ES modules and global scripts
+ *
+ * This file serves as the main entry point for the Vite build system.
+ * It imports CSS and sets up jQuery globally for backward compatibility
+ * with legacy scripts.
+ */
+
+// Import CSS
+import '../css/styles.css';
+import '../css/jquery-ui.css';
+import '../css/jquery.tagit.css';
+import '../css/feed_wizard.css';
+
+// Import jQuery from npm and expose globally (for legacy compatibility)
+import $ from 'jquery';
+import 'jquery-ui-dist/jquery-ui';
+
+// Expose jQuery globally for legacy scripts and plugins
+declare global {
+  interface Window {
+    $: typeof $;
+    jQuery: typeof $;
+    LWT_VITE_LOADED: boolean;
+  }
+}
+
+window.$ = $;
+window.jQuery = $;
+window.LWT_VITE_LOADED = true;
+
+console.log('LWT Vite bundle loaded');
