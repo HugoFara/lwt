@@ -408,7 +408,7 @@ function get_links_from_new_feed($NfSourceURI): array|false
 /**
  * @return (false|null|string)[][]|false
  *
- * @psalm-return false|list{0?: array{title: null|string, desc: null|string, link: string, date: string, text?: false|string, audio: string},...}
+ * @psalm-return false|list<array{audio: string, date: string, desc: null|string, link: string, text?: false|string, title: non-empty-string|null}>
  */
 function get_links_from_rss($NfSourceURI, $NfArticleSection): array|false
 {
@@ -501,7 +501,7 @@ function get_links_from_rss($NfSourceURI, $NfArticleSection): array|false
 /**
  * @return (array|mixed|null|string)[][]|null|string
  *
- * @psalm-return array<array{TxTitle: mixed, TxAudioURI: mixed|null, TxText: string, TxSourceURI: mixed|string, message?: string, link?: list{mixed,...}}>|null|string
+ * @psalm-return array<array{TxTitle: mixed, TxAudioURI: mixed|null, TxText: string, TxSourceURI: mixed|string, message?: string, link?: non-empty-list<mixed>}>|null|string
  */
 function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $NfCharset = null): array|string|null
 {

@@ -256,7 +256,7 @@ function media_paths_search($dir): array
  *
  * @return ((mixed|string)[]|string)[]
  *
- * @psalm-return array{base_path: string, paths?: array{0: mixed|string, 1?: mixed|string,...}, folders?: array{0: mixed|string,...}, error?: 'does_not_exist'|'not_a_directory'}
+ * @psalm-return array{base_path: string, paths?: list{0: string, 1?: mixed|string,...}, folders?: list{0: string, 1?: mixed|string,...}, error?: 'does_not_exist'|'not_a_directory'}
  */
 function get_media_paths(): array
 {
@@ -544,7 +544,7 @@ function get_last_key()
  *                         - 'text': selection from single text
  * @param array|int $value Object to select.
  *
- * @return null|string SQL projection necessary
+ * @return string|null SQL projection necessary
  */
 function do_test_test_get_projection($key, $value): string|null
 {

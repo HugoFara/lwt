@@ -202,10 +202,8 @@ class QueryBuilder
      *
      * @param string       $column The column name
      * @param array<mixed> $values The values to check against
-     *
-     * @return self
      */
-    public function whereNotIn(string $column, array $values): self
+    public function whereNotIn(string $column, array $values): static
     {
         return $this->whereIn($column, $values, 'AND', true);
     }
@@ -227,10 +225,8 @@ class QueryBuilder
      * Add a WHERE NOT NULL clause.
      *
      * @param string $column The column name
-     *
-     * @return self
      */
-    public function whereNotNull(string $column): self
+    public function whereNotNull(string $column): static
     {
         return $this->whereNull($column, 'AND', true);
     }

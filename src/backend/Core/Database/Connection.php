@@ -96,7 +96,7 @@ class Connection
      *
      * @return (float|int|null|string)[][]
      *
-     * @psalm-return list{0?: array<string, float|int|null|string>,...}
+     * @psalm-return list<non-empty-array<string, float|int|null|string>>
      */
     public static function fetchAll(string $sql): array
     {

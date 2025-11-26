@@ -177,7 +177,7 @@ class Configuration
      * @param \mysqli     $dbconnection     Database connection
      * @param string|null $configuredPrefix Prefix from configuration (or null if not set)
      *
-     * @return (bool|string)[] Table prefix and whether it's fixed
+     * @return (bool|string)[]
      *
      * @psalm-return list{string, bool}
      */

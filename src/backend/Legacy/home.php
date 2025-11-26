@@ -51,12 +51,12 @@ require_once 'Core/session_utility.php';
 /**
  * Prepare the different SPAN opening tags
  *
- * @return string[] Array of three span opening tags
+ * @return string[]
  *
  * @global string $tbpref       Database table prefix
  * @global string $fixed_tbpref Fixed database table prefix
  *
- * @psalm-return array{0: string, 1: string, 2: string}
+ * @psalm-return list{'<span title="Manage Table Sets" onclick="location.href='/admin/tables';" class="click">'|'<span>', string, '<span title="Select Table Set" onclick="location.href='/mobile/start';" class="click">'|'<span>'}
  */
 function get_span_groups(): array
 {
