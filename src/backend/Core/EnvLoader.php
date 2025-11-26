@@ -243,6 +243,12 @@ class EnvLoader
      */
     public static function reset(): void
     {
+        // Clear environment variables that were set
+        foreach (array_keys(self::$env) as $key) {
+            unset($_ENV[$key]);
+            putenv($key);
+        }
+        
         self::$env = [];
         self::$loaded = false;
     }

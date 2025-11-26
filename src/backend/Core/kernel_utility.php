@@ -341,6 +341,12 @@ function find_latin_sentence_end($matches, $noSentenceEnd)
  */
 function my_die($text)
 {
+    // In testing environment (PHPUnit), throw exception instead of dying
+    if (class_exists('PHPUnit\Framework\TestCase', false)) {
+        throw new \RuntimeException("Fatal Error: " . $text);
+    }
+    
+    // In production, output HTML error and die (legacy behavior)
     echo '</select></p></div><div style="padding: 1em; color:red; font-size:120%; background-color:#CEECF5;">' .
     '<p><b>Fatal Error:</b> ' .
     tohtml($text) .
