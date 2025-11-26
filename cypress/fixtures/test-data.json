@@ -1,0 +1,41 @@
+{
+  "demoLanguages": [
+    "French",
+    "Chinese",
+    "German",
+    "Chinese2",
+    "Japanese",
+    "Korean",
+    "Thai",
+    "Hebrew"
+  ],
+  "demoTexts": [
+    "Mon premier don du sang",
+    "The Man and the Dog",
+    "Die Leiden des jungen Werther"
+  ],
+  "testLanguage": {
+    "name": "Test Language",
+    "wordCharacters": "a-zA-Z",
+    "sentenceSplitters": ".!?",
+    "dict1": "https://www.example.com/dict?q=###"
+  },
+  "testText": {
+    "title": "Test Text",
+    "content": "This is a test. It has multiple sentences. Each sentence can be parsed."
+  },
+  "legacyRedirects": [
+    { "from": "/do_text.php", "to": "/text/read" },
+    { "from": "/edit_texts.php", "to": "/text/edit" },
+    { "from": "/edit_words.php", "to": "/words/edit" },
+    { "from": "/edit_languages.php", "to": "/languages" },
+    { "from": "/edit_tags.php", "to": "/tags" },
+    { "from": "/all_words_wellknown.php", "to": "/words" },
+    { "from": "/do_test.php", "to": "/test" },
+    { "from": "/statistics.php", "to": "/admin/statistics" },
+    { "from": "/settings.php", "to": "/admin/settings" },
+    { "from": "/backup_restore.php", "to": "/admin/backup" },
+    { "from": "/edit_archivedtexts.php", "to": "/text/archived" },
+    { "from": "/long_text_import.php", "to": "/text/import-long" }
+  ]
+}

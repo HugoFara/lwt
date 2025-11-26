@@ -151,6 +151,42 @@ To test the API:
 npm test
 ```
 
+## End-to-End Testing (Cypress)
+
+LWT uses [Cypress](https://www.cypress.io/) for end-to-end testing. E2E tests verify that the application works correctly from a user's perspective.
+
+### Running E2E Tests
+
+Make sure the development server is running on `http://localhost:8000`, then:
+
+```bash
+npm run e2e          # Run all E2E tests headlessly
+npx cypress open     # Open Cypress interactive UI
+```
+
+### Test Structure
+
+E2E tests are located in `cypress/e2e/` and cover:
+
+* `01-setup.cy.ts` - Database setup and demo installation
+* `02-home.cy.ts` - Home page and navigation
+* `03-legacy-redirects.cy.ts` - Legacy URL redirects
+* `04-languages.cy.ts` - Language management
+* `05-texts.cy.ts` - Text management
+* `06-words.cy.ts` - Word/term management
+* `07-admin.cy.ts` - Admin pages (settings, statistics, backup)
+* `08-api.cy.ts` - REST API endpoints
+
+Test fixtures are in `cypress/fixtures/test-data.json`.
+
+### Writing E2E Tests
+
+When adding new features or fixing bugs that affect user-facing functionality, consider adding or updating E2E tests:
+
+1. Create or modify test files in `cypress/e2e/`
+2. Use fixtures for test data
+3. Run tests locally before submitting PRs
+
 ## Improving Documentation
 
 To regenerate all PHP and Markdown documentation, use ``composer doc``.

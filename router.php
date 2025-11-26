@@ -8,7 +8,7 @@
  * Usage: php -S localhost:8000 router.php
  */
 
-$uri = $_SERVER['REQUEST_URI'];
+$uri = $_SERVER['REQUEST_URI'] ?? '/';
 $path = parse_url($uri, PHP_URL_PATH);
 
 // Serve static files directly

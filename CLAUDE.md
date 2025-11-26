@@ -50,7 +50,16 @@ The `.env` file contains:
 composer test                    # Run PHPUnit tests
 ./vendor/bin/phpunit             # Alternative test command
 npm test                         # Test REST API (requires Node.js)
+npm run e2e                      # Run Cypress E2E tests (requires server on localhost:8000)
 ```
+
+**When to run E2E tests:** Run `npm run e2e` after making changes to:
+
+- Routes or URL handling (`src/backend/Router/`)
+- Controllers (`src/backend/Controllers/`)
+- Legacy PHP files that handle user-facing pages (`src/backend/Legacy/`)
+- Form handling or navigation
+- REST API endpoints
 
 ### Code Quality
 
