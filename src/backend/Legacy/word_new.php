@@ -110,11 +110,9 @@ if (isset($_REQUEST['op'])) {
             <?php
         } // (substr($message,0,5) != 'Error')
     } // $_REQUEST['op'] == 'Save'
-} // if (isset($_REQUEST['op']))
-
-// FORM
-
-else {  // if (! isset($_REQUEST['op']))
+} else {
+    // FORM
+    // if (! isset($_REQUEST['op']))
     // new_word.php?text=..&lang=..
 
     $lang = (int)getreq('lang');

@@ -90,7 +90,7 @@ class ClassesTest extends TestCase
     }
 
     /**
-     * Test Language export_js_dict method - JSON export
+     * Test Language exportJsDict method - JSON export
      */
     public function testLanguageExportJsDict(): void
     {
@@ -113,7 +113,7 @@ class ClassesTest extends TestCase
         $lang->ttsvoiceapi = 'http://tts.test/###';
         $lang->showromanization = 'hide';
 
-        $json = $lang->export_js_dict();
+        $json = $lang->exportJsDict();
 
         // Should return valid JSON
         $this->assertJson($json);
@@ -146,7 +146,7 @@ class ClassesTest extends TestCase
     {
         $lang = new Language();
 
-        $json = $lang->export_js_dict();
+        $json = $lang->exportJsDict();
         $this->assertJson($json);
 
         $decoded = json_decode($json, true);
@@ -165,7 +165,7 @@ class ClassesTest extends TestCase
         $lang->name = 'Test "Language" with \'quotes\'';
         $lang->charactersubst = 'ß=ss|"quoted"=test';
 
-        $json = $lang->export_js_dict();
+        $json = $lang->exportJsDict();
         $this->assertJson($json);
 
         $decoded = json_decode($json, true);
@@ -284,7 +284,7 @@ class ClassesTest extends TestCase
     }
 
     /**
-     * Test Text load_from_db_record method
+     * Test Text loadFromDbRecord method
      */
     public function testTextLoadFromDbRecord(): void
     {
@@ -302,7 +302,7 @@ class ClassesTest extends TestCase
             'TxAudioPosition' => 5.75
         ];
 
-        $text->load_from_db_record($record);
+        $text->loadFromDbRecord($record);
 
         $this->assertEquals(789, $text->id);
         $this->assertEquals(2, $text->lgid);
@@ -334,7 +334,7 @@ class ClassesTest extends TestCase
             'TxAudioPosition' => 0.0
         ];
 
-        $text->load_from_db_record($record);
+        $text->loadFromDbRecord($record);
 
         $this->assertNull($text->annotated);
         $this->assertNull($text->media_uri);
@@ -383,12 +383,12 @@ class ClassesTest extends TestCase
     }
 
     /**
-     * Test GoogleTranslate array_iunique method
+     * Test GoogleTranslate arrayIunique method
      */
     public function testGoogleTranslateArrayIunique(): void
     {
         $input = ['Hello', 'HELLO', 'hello', 'World', 'WORLD'];
-        $result = GoogleTranslate::array_iunique($input);
+        $result = GoogleTranslate::arrayIunique($input);
 
         // Should remove case-insensitive duplicates
         $this->assertLessThanOrEqual(2, count($result));
@@ -543,7 +543,7 @@ class ClassesTest extends TestCase
         $lang->spliteachchar = false;
         $lang->rightoleft = true;
 
-        $json = $lang->export_js_dict();
+        $json = $lang->exportJsDict();
         $decoded = json_decode($json, true);
 
         // Should be able to reconstruct from JSON
@@ -695,33 +695,33 @@ class ClassesTest extends TestCase
     }
 
     /**
-     * Test GoogleTranslate array_iunique with various inputs
+     * Test GoogleTranslate arrayIunique with various inputs
      */
     public function testGoogleTranslateArrayIuniqueExtensive(): void
     {
         // Test with empty array
-        $result = GoogleTranslate::array_iunique([]);
+        $result = GoogleTranslate::arrayIunique([]);
         $this->assertIsArray($result);
         $this->assertEmpty($result);
 
         // Test with single element
-        $result = GoogleTranslate::array_iunique(['Test']);
+        $result = GoogleTranslate::arrayIunique(['Test']);
         $this->assertCount(1, $result);
 
         // Test with mixed case duplicates
-        $result = GoogleTranslate::array_iunique(['Hello', 'hello', 'HELLO', 'HeLLo']);
+        $result = GoogleTranslate::arrayIunique(['Hello', 'hello', 'HELLO', 'HeLLo']);
         $this->assertLessThanOrEqual(1, count($result));
 
         // Test with different words
-        $result = GoogleTranslate::array_iunique(['Apple', 'Banana', 'Cherry']);
+        $result = GoogleTranslate::arrayIunique(['Apple', 'Banana', 'Cherry']);
         $this->assertCount(3, $result);
 
         // Test with Unicode duplicates (may preserve multiple due to Unicode handling)
-        $result = GoogleTranslate::array_iunique(['Café', 'café', 'CAFÉ']);
+        $result = GoogleTranslate::arrayIunique(['Café', 'café', 'CAFÉ']);
         $this->assertGreaterThanOrEqual(1, count($result));
 
         // Test preserving first occurrence
-        $result = GoogleTranslate::array_iunique(['First', 'FIRST', 'Second']);
+        $result = GoogleTranslate::arrayIunique(['First', 'FIRST', 'Second']);
         $this->assertContains('First', $result);
         $this->assertContains('Second', $result);
     }
@@ -822,7 +822,7 @@ class ClassesTest extends TestCase
     }
 
     /**
-     * Test GoogleTranslate array_iunique preserves keys
+     * Test GoogleTranslate arrayIunique preserves keys
      */
     public function testGoogleTranslateArrayIuniquePreservesKeys(): void
     {
@@ -833,7 +833,7 @@ class ClassesTest extends TestCase
             'key4' => 'hello'
         ];
 
-        $result = GoogleTranslate::array_iunique($input);
+        $result = GoogleTranslate::arrayIunique($input);
 
         // Should preserve original keys from first occurrence
         $this->assertIsArray($result);
@@ -1167,12 +1167,12 @@ class ClassesTest extends TestCase
     }
 
     /**
-     * Test GoogleTranslate array_iunique with various array types
+     * Test GoogleTranslate arrayIunique with various array types
      */
     public function testGoogleTranslateArrayIuniqueWithVariousArrays(): void
     {
         // Test with numeric keys
-        $result = GoogleTranslate::array_iunique([
+        $result = GoogleTranslate::arrayIunique([
             0 => 'First',
             1 => 'FIRST',
             2 => 'Second',
@@ -1183,15 +1183,15 @@ class ClassesTest extends TestCase
         $this->assertArrayHasKey(2, $result);
 
         // Test with all same case
-        $result = GoogleTranslate::array_iunique(['hello', 'world', 'test']);
+        $result = GoogleTranslate::arrayIunique(['hello', 'world', 'test']);
         $this->assertCount(3, $result);
 
         // Test with all same value different cases
-        $result = GoogleTranslate::array_iunique(['TEST', 'Test', 'test', 'TeSt']);
+        $result = GoogleTranslate::arrayIunique(['TEST', 'Test', 'test', 'TeSt']);
         $this->assertLessThanOrEqual(1, count($result));
 
-        // Test with mixed types (array_iunique should handle gracefully)
-        $result = GoogleTranslate::array_iunique(['One', 'one', 'Two', 'THREE']);
+        // Test with mixed types (arrayIunique should handle gracefully)
+        $result = GoogleTranslate::arrayIunique(['One', 'one', 'Two', 'THREE']);
         $this->assertIsArray($result);
     }
 
@@ -1857,7 +1857,7 @@ class ClassesTest extends TestCase
         $result = GoogleTranslate::staticTranslate('run', 'en', 'es');
         $this->assertTrue(is_array($result) || $result === false);
 
-        // If successful, verify unique results (array_iunique is applied)
+        // If successful, verify unique results (arrayIunique is applied)
         if (is_array($result) && count($result) > 0) {
             // Check that results are unique (case-insensitive)
             $lowerResults = array_map('strtolower', $result);

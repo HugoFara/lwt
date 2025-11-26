@@ -189,8 +189,8 @@ function refreshText($word, $tid): string
                 } else {  // MULTIWORD PLACEHOLDER - NO DISPLAY
                     $out .= "$('#" . $spanid . "',context).addClass('hide');\n";
                 }
-            } // ($actcode > 1) -- A MULTIWORD FOUND
-            else {  // ($actcode == 1)  -- A WORD FOUND
+            } else {
+                // ($actcode == 1)  -- A WORD FOUND
                 $out .= "$('#" . $spanid . "',context)." . $hidetag . "\n";
             }
         }

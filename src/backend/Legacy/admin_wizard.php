@@ -29,7 +29,7 @@ require_once 'Core/kernel_utility.php';
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/database-wizard.html
  */
-class Database_Connection
+class DatabaseConnection
 {
     /**
      * @var string Server name
@@ -141,7 +141,7 @@ class Database_Connection
 /**
  * Save the connection to the .env file.
  *
- * @param Database_Connection $conn Connection object.
+ * @param DatabaseConnection $conn Connection object.
  *
  * @return void
  */
@@ -221,7 +221,7 @@ function doOperation($op)
         $dbname = getreq("dbname");
         $socket = getreq("socket");
     }
-    $conn = new Database_Connection(
+    $conn = new DatabaseConnection(
         $server,
         $userid,
         $passwd,
@@ -237,8 +237,8 @@ function doOperation($op)
 /**
  * Generate a form to edit the connection.
  *
- * @param Database_Connection $conn          Database connection object
- * @param string|null         $error_message Error message to display
+ * @param DatabaseConnection $conn          Database connection object
+ * @param string|null        $error_message Error message to display
  *
  * @return void
  */
@@ -296,7 +296,7 @@ function displayForm($conn, $error_message = null)
  */
 function editConnection()
 {
-    $conn = new Database_Connection();
+    $conn = new DatabaseConnection();
     // May be dangerous to expose passwords in clear
     $conn->loadFile(__DIR__ . '/../../../.env');
     displayForm($conn);
@@ -309,7 +309,7 @@ function editConnection()
  */
 function createNewConnection()
 {
-    displayForm(new Database_Connection());
+    displayForm(new DatabaseConnection());
 }
 
 if (getreq('op') != '') {

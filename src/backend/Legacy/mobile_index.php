@@ -46,11 +46,9 @@ if (isset($_REQUEST["action"])) {  // Action
      </ul>
 
         <?php
-    } // $action == 1
-
-    /* -------------------------------------------------------- */
-
-    elseif ($action == 2) {
+    } elseif ($action == 2) {
+        // $action == 2
+        /* -------------------------------------------------------- */
         $lang = $_REQUEST["lang"];
         $langname = getLanguage($lang);
         $sql = 'select TxID, TxTitle from ' . $tbpref . 'texts where TxLgID = ' . $lang .
@@ -74,11 +72,9 @@ if (isset($_REQUEST["action"])) {  // Action
      </ul>
         <?php
         mysqli_free_result($res);
-    } // $action == 2
-
-    /* -------------------------------------------------------- */
-
-    elseif ($action == 3) {
+    } elseif ($action == 3) {
+        // $action == 3
+        /* -------------------------------------------------------- */
         $lang = $_REQUEST["lang"];
         $text = $_REQUEST["text"];
         $texttitle = (string) get_first_value(
@@ -129,11 +125,9 @@ if (isset($_REQUEST["action"])) {  // Action
         <?php
 
         mysqli_free_result($res);
-    } // $action == 3
-
-    /* -------------------------------------------------------- */
-
-    elseif ($action == 4 || $action == 5) {
+    } elseif ($action == 4 || $action == 5) {
+        // $action == 4 or 5
+        /* -------------------------------------------------------- */
         $lang = $_REQUEST["lang"];
         $text = $_REQUEST["text"];
         $sent = $_REQUEST["sent"];
@@ -245,11 +239,9 @@ if (isset($_REQUEST["action"])) {  // Action
     } // $action == 4 / 5
 
     /* -------------------------------------------------------- */
-} // isset($_REQUEST["action"])
-
-/**************************************************************/
-
-else {  // No Action = Start screen
+} else {
+    // No Action = Start screen
+    /**************************************************************/
     ?>
 <html>
 <head>

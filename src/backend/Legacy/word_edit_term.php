@@ -128,11 +128,9 @@ cleanupRightFrames();
 </script>
 
     <?php
-} // if (isset($_REQUEST['op']))
-
-// FORM
-
-else {  // if (! isset($_REQUEST['op']))
+} else {
+    // FORM
+    // if (! isset($_REQUEST['op']))
     $wid = getreq('wid');
 
     if ($wid == '') {

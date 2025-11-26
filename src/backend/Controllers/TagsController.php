@@ -116,9 +116,8 @@ class TagsController extends BaseController
         // Mark actions
         if ($this->param('markaction')) {
             $message = $this->handleTermTagMarkAction($this->param('markaction'));
-        }
-        // All actions
-        elseif ($this->param('allaction')) {
+        } elseif ($this->param('allaction')) {
+            // All actions
             if ($this->param('allaction') == 'delall') {
                 $message = $this->execute(
                     'delete from ' . $this->table('tags') . ' where (1=1) ' . $wh_query,
@@ -127,18 +126,16 @@ class TagsController extends BaseController
                 $this->cleanupOrphanedTermTagLinks();
                 \adjust_autoincr('tags', 'TgID');
             }
-        }
-        // Single delete
-        elseif ($this->param('del')) {
+        } elseif ($this->param('del')) {
+            // Single delete
             $message = $this->execute(
                 'delete from ' . $this->table('tags') . ' where TgID = ' . (int)$this->param('del'),
                 "Deleted"
             );
             $this->cleanupOrphanedTermTagLinks();
             \adjust_autoincr('tags', 'TgID');
-        }
-        // Insert/Update
-        elseif ($this->param('op')) {
+        } elseif ($this->param('op')) {
+            // Insert/Update
             $message = $this->saveTermTag();
         }
 
@@ -486,9 +483,8 @@ class TagsController extends BaseController
         // Mark actions
         if ($this->param('markaction')) {
             $message = $this->handleTextTagMarkAction($this->param('markaction'));
-        }
-        // All actions
-        elseif ($this->param('allaction')) {
+        } elseif ($this->param('allaction')) {
+            // All actions
             if ($this->param('allaction') == 'delall') {
                 $message = $this->execute(
                     'delete from ' . $this->table('tags2') . ' where (1=1) ' . $wh_query,
@@ -497,18 +493,16 @@ class TagsController extends BaseController
                 $this->cleanupOrphanedTextTagLinks();
                 \adjust_autoincr('tags2', 'T2ID');
             }
-        }
-        // Single delete
-        elseif ($this->param('del')) {
+        } elseif ($this->param('del')) {
+            // Single delete
             $message = $this->execute(
                 'delete from ' . $this->table('tags2') . ' where T2ID = ' . (int)$this->param('del'),
                 "Deleted"
             );
             $this->cleanupOrphanedTextTagLinks();
             \adjust_autoincr('tags2', 'T2ID');
-        }
-        // Insert/Update
-        elseif ($this->param('op')) {
+        } elseif ($this->param('op')) {
+            // Insert/Update
             $message = $this->saveTextTag();
         }
 

@@ -100,7 +100,7 @@ class Language
      *
      * @return string JSON disctionnary.
      */
-    public function export_js_dict()
+    public function exportJsDict()
     {
         return json_encode(
             array(

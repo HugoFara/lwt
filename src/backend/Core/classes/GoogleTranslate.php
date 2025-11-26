@@ -151,7 +151,7 @@ class GoogleTranslate
      *
      * @psalm-param array{0?: mixed|string, 1?: mixed|string, 2?: mixed|string, 3?: mixed|string, 4?: 'WORLD'|mixed, key1?: 'Hello', key2?: 'HELLO', key3?: 'World', key4?: 'hello',...} $array
      */
-    public static function array_iunique(array $array): array
+    public static function arrayIunique(array $array): array
     {
         return array_intersect_key(
             $array,

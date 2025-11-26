@@ -81,19 +81,13 @@ if (isset($_REQUEST['allaction'])) {
         runsql("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "tags on WtTgID = TgID) WHERE TgID IS NULL", '');
         adjust_autoincr('tags', 'TgID');
     }
-}
-
-// DEL
-
-elseif (isset($_REQUEST['del'])) {
+} elseif (isset($_REQUEST['del'])) {
+    // DEL
     $message = runsql('delete from ' . $tbpref . 'tags where TgID = ' . $_REQUEST['del'], "Deleted");
     runsql("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "tags on WtTgID = TgID) WHERE TgID IS NULL", '');
     adjust_autoincr('tags', 'TgID');
-}
-
-// INS/UPD
-
-elseif (isset($_REQUEST['op'])) {
+} elseif (isset($_REQUEST['op'])) {
+    // INS/UPD
     // INSERT
 
     if ($_REQUEST['op'] == 'Save') {
@@ -104,11 +98,8 @@ elseif (isset($_REQUEST['op'])) {
             "Saved",
             $sqlerrdie = false
         );
-    }
-
-    // UPDATE
-
-    elseif ($_REQUEST['op'] == 'Change') {
+    } elseif ($_REQUEST['op'] == 'Change') {
+        // UPDATE
         $message = runsql(
             'update ' . $tbpref . 'tags set TgText = ' .
             convert_string_to_sqlsyntax($_REQUEST["TgText"]) . ', TgComment = ' .
