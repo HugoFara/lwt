@@ -271,9 +271,9 @@ function get_nf_option(string $str, string $option)
 
 
 /**
- * @return ((false|null|string)[]|null|string)[]|false
+ * @return ((string|false|null)[]|null|string)[]|false
  *
- * @psalm-return array{feed_title: null|string,...}|false
+ * @psalm-return array{feed_title: string|null,...}|false
  */
 function get_links_from_new_feed(string $NfSourceURI): array|false
 {
@@ -498,9 +498,9 @@ function get_links_from_rss(string $NfSourceURI, string $NfArticleSection): arra
 
 
 /**
- * @return (array|mixed|null|string)[][]|null|string
+ * @return (array|mixed|null|string)[][]|string|null
  *
- * @psalm-return array<array{TxTitle: mixed, TxAudioURI: mixed|null, TxText: string, TxSourceURI: mixed|string, message?: string, link?: non-empty-list<mixed>}>|null|string
+ * @psalm-return array<array{TxTitle: mixed, TxAudioURI: mixed|null, TxText: string, TxSourceURI: mixed|string, message?: string, link?: list{mixed,...}}>|null|string
  */
 function get_text_from_rsslink(array $feed_data, string $NfArticleSection, string $NfFilterTags, ?string $NfCharset = null): array|string|null
 {

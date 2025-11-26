@@ -255,10 +255,10 @@ while ($record = mysqli_fetch_assoc($res)) {
     }
     if ($order > $until) {
         output_text(
-            (string)$saveterm,
-            (string)$saverom,
-            (string)$savetrans,
-            (string)$savetags,
+            $saveterm,
+            $saverom,
+            $savetrans,
+            $savetags,
             $show_rom,
             $show_trans,
             $show_tags,
@@ -297,7 +297,7 @@ while ($record = mysqli_fetch_assoc($res)) {
 mysqli_free_result($res);
 output_text(
     (string)$saveterm,
-    (string)$saverom,
+    $saverom,
     (string)$savetrans,
     (string)$savetags,
     $show_rom,

@@ -21,9 +21,11 @@
  *
  * @param string $filename File name
  *
- * @return array
+ * @return string[]
+ *
+ * @psalm-return list{0?: string,...}
  */
-function parseSQLFile($filename)
+function parseSQLFile($filename): array
 {
     $handle = @fopen($filename, 'r');
     if ($handle === false) {

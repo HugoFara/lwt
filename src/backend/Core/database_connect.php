@@ -1049,7 +1049,7 @@ Globals::setDbConnection($DBCONNECTION);
 list($tbpref, $bool_fixed_tbpref) = getDatabasePrefix($DBCONNECTION);
 
 // Register with Globals for new code
-Globals::setTablePrefix($tbpref, (bool) $bool_fixed_tbpref);
+Globals::setTablePrefix($tbpref, $bool_fixed_tbpref);
 Globals::setDatabaseName($DB_NAME);
 
 // Convert to int, will be removed in LWT 3.0.0

@@ -19,8 +19,6 @@
 use Lwt\Database\Settings;
 
 /**
- * @return string|string[]
- *
  * @psalm-return array<string>|string
  */
 function remove_soft_hyphens(string $str): array|string
@@ -29,7 +27,7 @@ function remove_soft_hyphens(string $str): array|string
 }
 
 /**
- * @return null|string|string[]
+ * @return array|string|null
  *
  * @psalm-return array<string>|null|string
  */

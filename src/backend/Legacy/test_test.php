@@ -43,7 +43,7 @@ function do_test_get_identifier($selection, $sess_testsql, $lang, $text): array
     if (isset($selection) && isset($sess_testsql)) {
         $data_string_array = explode(",", trim($sess_testsql, "()"));
         $data_int_array = array_map('intval', $data_string_array);
-        switch ((int)$selection) {
+        switch ($selection) {
             case 2:
                 return array('words', $data_int_array);
                 break;

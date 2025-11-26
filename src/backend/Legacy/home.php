@@ -58,7 +58,7 @@ use Lwt\Database\Settings;
  * @global string $tbpref       Database table prefix
  * @global string $fixed_tbpref Fixed database table prefix
  *
- * @psalm-return list{string, string, string}
+ * @psalm-return list{'<span title="Manage Table Sets" onclick="location.href='/admin/tables';" class="click">'|'<span>', string, '<span title="Select Table Set" onclick="location.href='/mobile/start';" class="click">'|'<span>'}
  */
 function get_span_groups(): array
 {

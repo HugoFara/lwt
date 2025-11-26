@@ -35,14 +35,31 @@ namespace Lwt\Classes;
  * @link     https://hugofara.github.io/lwt/docs/php/
  */ class GoogleTranslate
 {
-    public $lastResult = "";
+    /**
+     * @var false|string|string[]
+     *
+     * @psalm-var ''|array<string>|false
+     */
+    public array|string|false $lastResult = "";
+
+    /**
+     * @var null|string
+     */
     private $langFrom;
+
+    /**
+     * @var null|string
+     */
     private $langTo;
     const DEFAULT_DOMAIN = null;//change the domain here / NULL <> random domain
-    private static $gglDomain;
-    private static $headers;
+    private static string|null $gglDomain;
+
+    /**
+     * @var null|string[]
+     */
+    private static array|null $headers;
     //&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss
-    private static $urlFormat = "http://translate.google.%s/translate_a/single" .
+    private static string $urlFormat = "http://translate.google.%s/translate_a/single" .
     "?client=t&q=%s&hl=en&sl=%s&tl=%s&dt=t&dt=at&dt=bd&ie=UTF-8&oe=UTF-8&oc=1&" .
     "otf=2&ssel=0&tsel=3&tk=%s";
 

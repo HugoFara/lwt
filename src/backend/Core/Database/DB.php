@@ -76,7 +76,9 @@ class DB
      *
      * @param string $sql The SQL query to execute
      *
-     * @return array<int, array<string, mixed>> Array of associative arrays
+     * @return (float|int|null|string)[][] Array of associative arrays
+     *
+     * @psalm-return list<non-empty-array<string, float|int|null|string>>
      */
     public static function fetchAll(string $sql): array
     {

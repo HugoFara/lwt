@@ -29,7 +29,7 @@ use Lwt\Database\Maintenance;
 $currentsort = (int) processDBParam("sort", 'currenttexttagsort', '1', true);
 
 $currentpage = (int) processSessParam("page", "currenttexttagpage", '1', true);
-$currentquery = (string) (string) processSessParam("query", "currenttexttagquery", '', false);
+$currentquery = (string) processSessParam("query", "currenttexttagquery", '', false);
 
 $wh_query = convert_string_to_sqlsyntax(str_replace("*", "%", $currentquery));
 $wh_query = ($currentquery != '') ? (' and (T2Text like ' . $wh_query . ' or T2Comment like ' . $wh_query . ')') : '';

@@ -99,7 +99,7 @@ class Language
     /**
      * Export word data as a JSON dictionnary.
      *
-     * @return false|string JSON disctionnary.
+     * @return string|false JSON disctionnary.
      */
     public function exportJsDict(): string|false
     {

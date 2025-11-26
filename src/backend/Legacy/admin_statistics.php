@@ -67,13 +67,13 @@ if ($res instanceof \mysqli_result) {
         $lgId = (string)$record['LgID'];
         $lang = $lgId;
 
-        $s1 = (int)($term_stat[$lgId][1] ?? 0);
-        $s2 = (int)($term_stat[$lgId][2] ?? 0);
-        $s3 = (int)($term_stat[$lgId][3] ?? 0);
-        $s4 = (int)($term_stat[$lgId][4] ?? 0);
-        $s5 = (int)($term_stat[$lgId][5] ?? 0);
-        $s98 = (int)($term_stat[$lgId][98] ?? 0);
-        $s99 = (int)($term_stat[$lgId][99] ?? 0);
+        $s1 = $term_stat[$lgId][1] ?? 0;
+        $s2 = $term_stat[$lgId][2] ?? 0;
+        $s3 = $term_stat[$lgId][3] ?? 0;
+        $s4 = $term_stat[$lgId][4] ?? 0;
+        $s5 = $term_stat[$lgId][5] ?? 0;
+        $s98 = $term_stat[$lgId][98] ?? 0;
+        $s99 = $term_stat[$lgId][99] ?? 0;
         $s14 = $s1 + $s2 + $s3 + $s4;
         $s15 = $s14 + $s5;
         $s599 = $s5 + $s99;

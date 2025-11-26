@@ -490,7 +490,9 @@ class QueryBuilder
     /**
      * Execute the query and return all results.
      *
-     * @return array<int, array<string, mixed>> Array of rows
+     * @return (float|int|null|string)[][] Array of rows
+     *
+     * @psalm-return list<non-empty-array<string, float|int|null|string>>
      */
     public function get(): array
     {

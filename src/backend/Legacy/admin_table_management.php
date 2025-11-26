@@ -18,6 +18,7 @@ require_once 'Core/session_utility.php';
 
 $message = "";
 
+$tbpref = null;
 if (isset($_REQUEST['delpref'])) {
     if ($_REQUEST['delpref'] !== '-') {
         runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_archivedtexts', '');

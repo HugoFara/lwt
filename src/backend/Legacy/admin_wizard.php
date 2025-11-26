@@ -169,10 +169,10 @@ function doOperation($op)
     $dbname = null;
     $socket = null;
     if ($op == "Autocomplete") {
-        $server = (string) $_SERVER['SERVER_ADDR'];
+        $server = $_SERVER['SERVER_ADDR'];
         $userid = "";
         $passwd = "";
-        $dbname = (string) $_SERVER['SERVER_NAME'];
+        $dbname = $_SERVER['SERVER_NAME'];
         $socket = "";
     } elseif ($op == "Check") {
         $server = getreq("server");

@@ -30,7 +30,7 @@ use Lwt\Database\Settings;
  *
  * @global string $tbpref Table name prefix
  *
- * @psalm-return list<array{SeID: int, TxID: int, SeTxID?: int, position: int<min, max>, term: string}>
+ * @psalm-return list{0?: array{SeID: int, TxID: int, position: int<min, max>, term: string},...}
  */
 function findMecabExpression($text, $lid): array
 {
@@ -202,7 +202,7 @@ function insertExpressionFromMeCab($textlc, $lid, $wid, $len, $mode): array
  *
  * @global string $tbpref Table name prefix
  *
- * @psalm-return list<array{SeID: int, SeTxID: int, TxID?: int, position: int<min, max>, term: null|string, term_display: null|string}>
+ * @psalm-return list{0?: array{SeID: int, SeTxID: int, position: int<min, max>, term: null|string, term_display: null|string},...}
  */
 function findStandardExpression($textlc, $lid): array
 {
@@ -535,7 +535,7 @@ function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
  *                       - 1: Runs an expresion inserter interactable
  *                       - 2: Return the sql output
  *
- * @return null|string If $mode == 2 return values to insert in textitems2, nothing otherwise.
+ * @return string|null If $mode == 2 return values to insert in textitems2, nothing otherwise.
  *
  * @global string $tbpref Table name prefix
  */

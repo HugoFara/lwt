@@ -475,6 +475,8 @@ function make_trans($i, $wid, $trans, $word, $lang): string
     $trans = trim($trans);
     $widset = is_numeric($wid);
     $r = "";
+    $set = null;
+    $set_default = null;
     if ($widset) {
         $alltrans = (string) get_first_value(
             "SELECT WoTranslation AS value FROM {$tbpref}words
@@ -482,13 +484,11 @@ function make_trans($i, $wid, $trans, $word, $lang): string
         );
         $transarr = preg_split('/[' . get_sepas()  . ']/u', $alltrans);
         $set = false;
-        $set_default = true;
         foreach ($transarr as $t) {
             $tt = trim($t);
             if ($tt == '*' || $tt == '') {
                 continue;
             }
-            $set_default = false;
             // true if the translation should be checked (this translation is set)
             $set = $set || $tt == $trans;
             // Add a candidate annotation
@@ -1558,8 +1558,8 @@ function add_translation($post_req): array
     );
     $raw_answer = array();
     if (is_array($result)) {
-        $raw_answer["term_id"] = (int) $result[0];
-        $raw_answer["term_lc"] = (string) $result[1];
+        $raw_answer["term_id"] = $result[0];
+        $raw_answer["term_lc"] = $result[1];
     } elseif ($result == mb_strtolower($text, 'UTF-8')) {
         $raw_answer["add"] = $result;
     } else {
