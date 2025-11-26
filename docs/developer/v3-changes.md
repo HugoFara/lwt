@@ -706,6 +706,74 @@ require_once __DIR__ . '/export_helpers.php';
 require_once __DIR__ . '/text_helpers.php';
 ```
 
+### Language Definitions as JSON
+
+Version 3 converts the language definitions from a PHP array to a JSON file for better maintainability and separation of data from code.
+
+#### Before (v2)
+
+Language definitions were hardcoded in `langdefs.php` as a PHP array:
+
+```php
+define('LWT_LANGUAGES_ARRAY', array(
+    "English" => array(
+        "en", "en", false,
+        "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        ".!?:;",
+        false, false, false
+    ),
+    // ... 38 more languages
+));
+```
+
+#### After (v3)
+
+Language definitions are stored in `langdefs.json` with descriptive keys:
+
+```json
+{
+    "English": {
+        "glosbeIso": "en",
+        "googleIso": "en",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    }
+}
+```
+
+The `langdefs.php` file now loads the JSON and converts it to the legacy indexed array format for backward compatibility:
+
+```php
+define('LWT_LANGUAGES_ARRAY', loadLanguageDefinitions());
+```
+
+#### Benefits
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| Data format | PHP code | Pure JSON data |
+| Field names | Numeric indices (0-7) | Descriptive keys |
+| Editability | Requires PHP knowledge | Human-readable JSON |
+| Reusability | PHP only | Any language can parse JSON |
+| Validation | Runtime errors | JSON schema validation possible |
+
+#### Field Mapping
+
+| Index | JSON Key | Description |
+|-------|----------|-------------|
+| 0 | `glosbeIso` | ISO code for Glosbe dictionary |
+| 1 | `googleIso` | ISO code for Google Translate |
+| 2 | `biggerFont` | Whether to use larger font size |
+| 3 | `wordCharRegExp` | Regex for valid word characters |
+| 4 | `sentSplRegExp` | Regex for sentence splitting |
+| 5 | `makeCharacterWord` | Treat each character as a word (CJK) |
+| 6 | `removeSpaces` | Remove spaces between words (CJK) |
+| 7 | `rightToLeft` | Right-to-left text direction |
+
 ## Future Improvements
 
 This refactoring enables:

@@ -1,0 +1,392 @@
+{
+    "Afrikaans": {
+        "glosbeIso": "af",
+        "googleIso": "af",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Arabic": {
+        "glosbeIso": "ar",
+        "googleIso": "ar",
+        "biggerFont": true,
+        "wordCharRegExp": "\\x{610}-\\x{614}\\x{621}-\\x{65F}\\x{671}-\\x{6D3}\\x{6DE}-\\x{6FF}",
+        "sentSplRegExp": ".!?:;\\x{061B}\\x{061F}",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": true
+    },
+    "Belarusian": {
+        "glosbeIso": "be",
+        "googleIso": "be",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Bulgarian": {
+        "glosbeIso": "bg",
+        "googleIso": "bg",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Catalan": {
+        "glosbeIso": "ca",
+        "googleIso": "ca",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Chinese (Simplified)": {
+        "glosbeIso": "zh",
+        "googleIso": "zh-CN",
+        "biggerFont": true,
+        "wordCharRegExp": "\\x{4E00}-\\x{9FFF}\\x{F900}-\\x{FAFF}",
+        "sentSplRegExp": ".!?:;。！？：；",
+        "makeCharacterWord": true,
+        "removeSpaces": true,
+        "rightToLeft": false
+    },
+    "Chinese (Traditional)": {
+        "glosbeIso": "zh",
+        "googleIso": "zh-TW",
+        "biggerFont": true,
+        "wordCharRegExp": "\\x{4E00}-\\x{9FFF}\\x{F900}-\\x{FAFF}\\x{3100}-\\x{312F}",
+        "sentSplRegExp": ".!?:;。！？：；",
+        "makeCharacterWord": true,
+        "removeSpaces": true,
+        "rightToLeft": false
+    },
+    "Croatian": {
+        "glosbeIso": "hr",
+        "googleIso": "hr",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Czech": {
+        "glosbeIso": "cs",
+        "googleIso": "cs",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Danish": {
+        "glosbeIso": "da",
+        "googleIso": "da",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Dutch": {
+        "glosbeIso": "nl",
+        "googleIso": "nl",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "English": {
+        "glosbeIso": "en",
+        "googleIso": "en",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Esperanto": {
+        "glosbeIso": "eo",
+        "googleIso": "eo",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Estonian": {
+        "glosbeIso": "et",
+        "googleIso": "et",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Finnish": {
+        "glosbeIso": "fi",
+        "googleIso": "fi",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "French": {
+        "glosbeIso": "fr",
+        "googleIso": "fr",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "German": {
+        "glosbeIso": "de",
+        "googleIso": "de",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Greek (Modern)": {
+        "glosbeIso": "el",
+        "googleIso": "el",
+        "biggerFont": false,
+        "wordCharRegExp": "\\x{0370}-\\x{03FF}\\x{1F00}-\\x{1FFF}",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Hebrew": {
+        "glosbeIso": "he",
+        "googleIso": "iw",
+        "biggerFont": true,
+        "wordCharRegExp": "\\x{0590}-\\x{05FF}",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": true
+    },
+    "Hungarian": {
+        "glosbeIso": "hu",
+        "googleIso": "hu",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Italian": {
+        "glosbeIso": "it",
+        "googleIso": "it",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Japanese": {
+        "glosbeIso": "ja",
+        "googleIso": "ja",
+        "biggerFont": true,
+        "wordCharRegExp": "\\x{4E00}-\\x{9FFF}\\x{F900}-\\x{FAFF}\\x{3040}-\\x{30FF}\\x{31F0}-\\x{31FF}",
+        "sentSplRegExp": ".!?:;。！？：；",
+        "makeCharacterWord": true,
+        "removeSpaces": true,
+        "rightToLeft": false
+    },
+    "Korean": {
+        "glosbeIso": "ko",
+        "googleIso": "ko",
+        "biggerFont": true,
+        "wordCharRegExp": "\\x{4E00}-\\x{9FFF}\\x{F900}-\\x{FAFF}\\x{1100}-\\x{11FF}\\x{3130}-\\x{318F}\\x{AC00}-\\x{D7A0}",
+        "sentSplRegExp": ".!?:;。！？：；",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Latin": {
+        "glosbeIso": "la",
+        "googleIso": "la",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Latvian": {
+        "glosbeIso": "lv",
+        "googleIso": "lv",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Lithuanian": {
+        "glosbeIso": "lt",
+        "googleIso": "lt",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Macedonian": {
+        "glosbeIso": "mk",
+        "googleIso": "mk",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Norwegian Bokmål": {
+        "glosbeIso": "nb",
+        "googleIso": "no",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Polish": {
+        "glosbeIso": "pl",
+        "googleIso": "pl",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Portuguese": {
+        "glosbeIso": "pt",
+        "googleIso": "pt",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Romanian": {
+        "glosbeIso": "ro",
+        "googleIso": "ro",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Russian": {
+        "glosbeIso": "ru",
+        "googleIso": "ru",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Serbian": {
+        "glosbeIso": "sr",
+        "googleIso": "sr",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Slovak": {
+        "glosbeIso": "sk",
+        "googleIso": "sk",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Spanish": {
+        "glosbeIso": "es",
+        "googleIso": "es",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Swedish": {
+        "glosbeIso": "sv",
+        "googleIso": "sv",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Thai": {
+        "glosbeIso": "th",
+        "googleIso": "th",
+        "biggerFont": true,
+        "wordCharRegExp": "\\x{0E00}-\\x{0E7F}",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Turkish": {
+        "glosbeIso": "tr",
+        "googleIso": "tr",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    },
+    "Ukrainian": {
+        "glosbeIso": "uk",
+        "googleIso": "uk",
+        "biggerFont": false,
+        "wordCharRegExp": "\\'a-zA-ZÀ-ÖØ-öø-ȳЀ-ӹ",
+        "sentSplRegExp": ".!?:;",
+        "makeCharacterWord": false,
+        "removeSpaces": false,
+        "rightToLeft": false
+    }
+}

@@ -53,4 +53,4 @@ coverage-report/
 coverage.xml
 
 # Vitest coverage report
-converage/
+coverage/
