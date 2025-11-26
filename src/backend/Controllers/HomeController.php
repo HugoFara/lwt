@@ -6,8 +6,9 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @category Lwt
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
  * @link    https://hugofara.github.io/lwt/docs/php/files/src-php-controllers-homecontroller.html
  * @since   3.0.0
@@ -17,6 +18,13 @@ namespace Lwt\Controllers;
 
 /**
  * Controller for home/dashboard page.
+ *
+ * @category Lwt
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
 class HomeController extends BaseController
 {

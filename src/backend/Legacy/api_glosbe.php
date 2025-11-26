@@ -11,6 +11,8 @@
  *                  Glosbe API (see http://glosbe.com/a-api)
  *
  * PHP version 8.1
+ *
+ * @category Lwt
  */
 
 require_once 'Core/session_utility.php';

@@ -6,8 +6,9 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @category Lwt
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
  * @link    https://hugofara.github.io/lwt/docs/php/files/src-php-controllers-tagscontroller.html
  * @since   3.0.0
@@ -21,6 +22,13 @@ namespace Lwt\Controllers;
  * Handles CRUD operations for:
  * - Term tags (tags table) - tags applied to vocabulary words
  * - Text tags (tags2 table) - tags applied to texts
+ *
+ * @category Lwt
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
 class TagsController extends BaseController
 {

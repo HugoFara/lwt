@@ -11,6 +11,8 @@
  * @category Helper_Frame
  * @package  Lwt
  * @author   https://sourceforge.net/projects/lwt/ LWT Project
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    1.5.11
  */
 

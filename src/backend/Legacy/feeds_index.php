@@ -10,6 +10,7 @@
  * @package  Lwt
  * @author   andreask7 <andreask7@users.noreply.github.com>
  * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    1.6.0-fork
  * @since    2.7.1-fork Functional refactoring
  */

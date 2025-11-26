@@ -6,8 +6,9 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @category Lwt
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
  * @link    https://hugofara.github.io/lwt/docs/php/files/src-php-controllers-feedscontroller.html
  * @since   3.0.0
@@ -22,6 +23,13 @@ namespace Lwt\Controllers;
  * - Feed listing and browsing
  * - Feed editing (add/edit/delete)
  * - Feed import wizard
+ *
+ * @category Lwt
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
 class FeedsController extends BaseController
 {

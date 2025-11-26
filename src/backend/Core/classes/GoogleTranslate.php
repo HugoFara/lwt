@@ -19,7 +19,8 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
+ * @category Lwt
+ * @package  Lwt
  */
 
 namespace Lwt\Classes;
@@ -28,8 +29,11 @@ namespace Lwt\Classes;
  * Wrapper class to get translation.
  *
  * See staticTranslate for a clssical translation.
- */
-class GoogleTranslate
+ *
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ */ class GoogleTranslate
 {
     public $lastResult = "";
     private $langFrom;
@@ -284,7 +288,7 @@ class GoogleTranslate
                     }
                 }
             }
-            return self::array_iunique($finalResult);
+            return self::arrayIunique($finalResult);
         }
         return false;
     }

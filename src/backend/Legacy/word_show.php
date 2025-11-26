@@ -6,6 +6,8 @@
  * Call: show_word.php?wid=...&ann=...
  *
  * PHP version 8.1
+ *
+ * @category Lwt
  */
 
 require_once 'Core/session_utility.php';

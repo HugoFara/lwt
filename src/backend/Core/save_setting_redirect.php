@@ -7,7 +7,11 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
+ * @category Lwt
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
  * @since   2.6.0-fork You can omit either u, or (k, v).
  */
 

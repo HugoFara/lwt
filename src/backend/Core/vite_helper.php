@@ -7,7 +7,11 @@
  * supporting both development mode (with HMR) and production mode
  * (with manifest-based asset loading).
  *
+ * @category Lwt
  * @package LWT
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
  * @since 3.0.0
  */
 

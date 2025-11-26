@@ -8,7 +8,8 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
+ * @category Lwt
+ * @package  Lwt
  */
 
 namespace Lwt\Text_From_Youtube;
