@@ -1,9 +1,9 @@
 # Frontend Modernization Plan
 
 **Project:** Learning with Texts (LWT)
-**Document Version:** 3.0
+**Document Version:** 4.0
 **Last Updated:** November 26, 2025
-**Status:** Phase 1 Complete - TypeScript Migration Done
+**Status:** Phase 2 Complete - Build Pipeline Integrated
 
 ---
 
@@ -14,11 +14,10 @@
 3. [Modernization Goals](#modernization-goals)
 4. [Technology Stack Decisions](#technology-stack-decisions)
 5. [Migration Phases](#migration-phases)
-6. [Implementation Details](#implementation-details)
-7. [Risk Management](#risk-management)
-8. [Success Metrics](#success-metrics)
-9. [Timeline & Milestones](#timeline--milestones)
-10. [Resources & References](#resources--references)
+6. [Risk Management](#risk-management)
+7. [Success Metrics](#success-metrics)
+8. [Timeline & Milestones](#timeline--milestones)
+9. [Resources & References](#resources--references)
 
 ---
 
@@ -637,15 +636,48 @@ declare global {
 
 ---
 
-### Phase 2: Build Pipeline Integration 🔧 **OPTIONAL**
+### Phase 2: Build Pipeline Integration ✅ **COMPLETE**
 
 **Goals:**
 
 - Update `composer.json` to use Vite build
-- Integrate Vite output with existing deployment workflow
+- Remove legacy PHP-based JS/CSS minification
 - Add development workflow documentation
 
-> **Note:** jQuery removal was originally planned for this phase. Since we're keeping jQuery 1.12.4 from npm for backward compatibility, this phase focuses on build pipeline integration instead. jQuery removal can be considered as a future enhancement.
+**Completed Tasks:**
+
+1. ✅ Simplified composer scripts:
+   - `composer build` - Alias for `npm run build`
+   - `composer build:themes` - Regenerate theme CSS only
+
+2. ✅ Cleaned up `src/tools/minifier.php`:
+   - Removed all JS minification code
+   - Removed CSS minification code
+   - Now only handles theme CSS regeneration
+
+3. ✅ Updated `CLAUDE.md` documentation:
+   - Simplified asset building commands
+   - Updated file structure with Vite directories
+   - TypeScript module documentation
+   - Frontend development workflow
+
+**Build Commands:**
+
+```bash
+npm run build                    # Build Vite JS/CSS bundles (production)
+npm run dev                      # Start Vite dev server with HMR
+npm run typecheck                # Run TypeScript type checking
+composer build                   # Alias for npm run build
+composer build:themes            # Regenerate theme CSS files only
+```
+
+**Testing Results:**
+
+- ✅ `npm run build` produces production bundles
+- ✅ Legacy PHP minifier removed
+- ✅ All documentation updated
+
+> **Note:** jQuery removal was originally planned for this phase. Since we're keeping jQuery 1.12.4 from npm for backward compatibility, this phase focused on build pipeline integration instead. jQuery removal can be considered as a future enhancement.
 
 ---
 
@@ -2658,6 +2690,8 @@ export default {
 | 1.0 | 2025-11-26 | Frontend Team | Initial version |
 | 2.0 | 2025-11-26 | Claude Code | Phase 0 complete: Vite + TypeScript setup, jQuery kept from npm, PHP integration added |
 | 3.0 | 2025-11-26 | Claude Code | Phase 1 complete: All JS files migrated to TypeScript, type errors fixed, ES modules working |
+| 4.0 | 2025-11-26 | Claude Code | Phase 2 complete: Build pipeline integrated, composer.json updated, documentation updated |
+| 4.1 | 2025-11-26 | Claude Code | Removed legacy PHP minification, simplified to Vite-only build |
 
 ---
 

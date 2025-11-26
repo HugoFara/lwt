@@ -35,14 +35,8 @@
             "./node_modules/.bin/jsdoc -c jsdoc.json",
             "php tools/phpDocumentor"
         ],
-        "minify": "php -r \"require 'src/tools/minifier.php';minify_everything();\"",
-        "no-minify": [
-            "rm js/pgm.js",
-            "cat src/frontend/js/third_party/* >> js/pgm.js",
-            "cat src/frontend/js/*.js >> js/pgm.js",
-            "cp -r src/frontend/css .",
-            "cp -r src/frontend/themes ."
-        ],
+        "build": "npm run build",
+        "build:themes": "php -r \"require 'src/tools/minifier.php';regenerateThemes();\"",
         "clean-doc": [
             "rm docs/info.html",
             "rm -rf docs/api/js",
@@ -53,8 +47,8 @@
         "test": "Run all tests!",
         "info.html": "Regenerate one-file documentation",
         "doc": "Regenerate all documentation",
-        "minify": "Regenerate minified JS, CSS and themes",
-        "no-minify": "Development versions do not need minification",
+        "build": "Build frontend assets with Vite",
+        "build:themes": "Regenerate theme CSS files only",
         "clean-doc": "Clear documentation"
     }
 }

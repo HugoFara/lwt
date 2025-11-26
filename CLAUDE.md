@@ -63,11 +63,20 @@ php ./vendor/bin/squizlabs/phpcbf.phar [file]  # Auto-fix code style
 ### Asset Building
 
 ```bash
-composer minify                  # Minify all JS, CSS, and themes (production)
-composer no-minify               # Copy unminified assets (development)
+npm run build                    # Build Vite JS/CSS bundles (production)
+npm run dev                      # Start Vite dev server with HMR
+npm run typecheck                # Run TypeScript type checking
+composer build                   # Alias for npm run build
+composer build:themes            # Regenerate theme CSS files only
 ```
 
-**Important:** During development, use `composer no-minify` to work with readable source. Before committing changes to JS/CSS/themes, run `composer minify` to generate production assets.
+**Frontend Development Workflow:**
+
+1. Run `npm run dev` for development with Hot Module Replacement
+2. Run `npm run typecheck` to check TypeScript errors
+3. Run `npm run build` to build production Vite bundles
+
+**Note:** All JavaScript and CSS is now built with Vite. TypeScript source files are in `src/frontend/js/*.ts`.
 
 ### Documentation Generation
 
@@ -88,8 +97,11 @@ composer clean-doc               # Clear all generated documentation
 - `assets/` - All static assets (generated and third-party)
   - `assets/icons/` - UI icons (PNG files)
   - `assets/images/` - Documentation images, logos, app icons
-  - `assets/css/` - Minified CSS (generated from `src/frontend/css/`)
-  - `assets/js/` - Minified JavaScript (generated from `src/frontend/js/`)
+  - `assets/css/` - Legacy minified CSS (generated from `src/frontend/css/`)
+  - `assets/css/vite/` - Vite-bundled CSS with hashed filenames
+  - `assets/js/` - Legacy minified JavaScript
+  - `assets/js/vite/` - Vite-bundled JavaScript with hashed filenames
+  - `assets/.vite/` - Vite manifest for PHP asset loading
   - `assets/themes/` - Minified themes (generated from `src/frontend/themes/`)
   - `assets/sounds/` - Audio feedback files
   - `assets/vendor/iui/` - iUI mobile framework (third-party)
@@ -107,8 +119,10 @@ composer clean-doc               # Clear all generated documentation
       - `classes/` - PHP classes (GoogleTranslate, Language, Term, Text)
   - `src/tools/` - Build tools (minifier, markdown converter)
   - `src/frontend/` - Frontend assets (compiled to `assets/`)
-    - `src/frontend/js/` - Unminified JavaScript source
-    - `src/frontend/css/` - Unminified CSS source
+    - `src/frontend/js/` - TypeScript source files (built with Vite)
+    - `src/frontend/js/types/` - TypeScript type declarations
+    - `src/frontend/js/third_party/` - Third-party JavaScript libraries
+    - `src/frontend/css/` - CSS source files
     - `src/frontend/themes/` - Theme source files
 
 - `resources/` - Non-runtime resources
@@ -192,25 +206,37 @@ PHP code is spread across root files (user-facing pages) and `src/backend/Core/`
 3. Use `do_mysqli_query()` wrapper instead of direct `mysqli_query()` for better error handling
 4. Database queries use `$tbpref` global variable for table prefix (usually empty, but supports multi-tenant)
 
-### Modifying JavaScript/CSS
+### Modifying JavaScript/TypeScript
 
-1. Edit source files in `src/frontend/js/` or `src/frontend/css/` or `src/frontend/themes/`
-2. Test with `composer no-minify` (copies unminified to working directories)
-3. Before committing, run `composer minify` to generate production assets
-4. JS modules in `src/frontend/js/`:
-   - `pgm.js` - Main program logic
-   - `jq_pgm.js` - jQuery-dependent functionality
-   - `text_events.js` - Text reading interface events
-   - `audio_controller.js` - Audio playback
-   - `translation_api.js` - Translation API integration
-   - `user_interactions.js` - UI interactions
+1. Edit TypeScript source files in `src/frontend/js/*.ts`
+2. Run `npm run dev` for development with Hot Module Replacement (HMR)
+3. Run `npm run typecheck` to verify TypeScript types
+4. Before committing, run `npm run build` to generate production bundles
+5. TypeScript modules in `src/frontend/js/`:
+   - `main.ts` - Vite entry point, imports all modules
+   - `pgm.ts` - Main program logic and utilities
+   - `jq_pgm.ts` - jQuery-dependent functionality
+   - `text_events.ts` - Text reading interface events
+   - `audio_controller.ts` - Audio playback
+   - `translation_api.ts` - Translation API integration
+   - `user_interactions.ts` - UI interactions
+   - `overlib_interface.ts` - Popup/tooltip interface
+   - `unloadformcheck.ts` - Form change tracking
+   - `jq_feedwizard.ts` - Feed wizard functionality
+   - `types/globals.d.ts` - Type declarations for PHP-injected globals
+
+### Modifying CSS
+
+1. Edit CSS source files in `src/frontend/css/`
+2. CSS is imported in `main.ts` and bundled by Vite
+3. Run `npm run build` to regenerate production bundles
 
 ### Creating/Editing Themes
 
 1. Create folder `src/frontend/themes/your-theme/`
 2. Add CSS files (don't need all files from `src/frontend/css/`, missing files fall back to defaults)
 3. Reference images: `../../../assets/css/images/file.png` (for shared images) or `./file.png` (theme-specific)
-4. Run `composer minify` to build (outputs to `assets/themes/`), or `composer no-minify` for debugging
+4. Run `composer build:themes` to regenerate theme CSS files
 
 ### Writing Tests
 

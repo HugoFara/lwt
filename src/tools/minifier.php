@@ -2,21 +2,21 @@
 
 /**
  * \file
- * \brief JS and CSS minifier.
+ * \brief Theme CSS minifier.
  *
- * Use this script to minify JS and CSS files from src/frontend/js and src/frontend/css to assets/js/ and
- * assets/css/.
+ * Use this script to regenerate theme CSS files from src/frontend/themes to assets/themes/.
+ *
+ * Note: JS and main CSS are now built with Vite (npm run build).
  *
  * PHP version 8.1
  *
- * @category Documentation
- * @package Lwt_Documentation
+ * @category Build
+ * @package Lwt_Build
  * @author  HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
  * @link    https://hugofara.github.io/lwt/docs/php/files/src-php-minifier.html
  * @since   2.0.3-fork
- * @since   2.9.1-fork $jsFiles was replaced by LWT_JS_FILES and $cssFiles by
- *                      LWT_CSS_FILES
+ * @since   3.0.0-fork JS and CSS now built with Vite, this file only handles themes
  */
 
 require __DIR__ . '/../../vendor/autoload.php';
@@ -24,54 +24,7 @@ use MatthiasMullie\Minify;
 
 
 /**
- * @var string[] LWT_JS_FILES All the paths of JS files to be minified.
- *
- * @since 2.10.0-fork Adds src/js/overlib_interface.js and src/js/text_events.js
- */
-define(
-    'LWT_JS_FILES',
-    array(
-        'src/frontend/js/audio_controller.js', 'src/frontend/js/third_party/countuptimer.js',
-        'src/frontend/js/jq_feedwizard.js', 'src/frontend/js/text_events.js',
-        'src/frontend/js/jq_pgm.js', 'src/frontend/js/overlib_interface.js', 'src/frontend/js/pgm.js',
-        'src/frontend/js/translation_api.js', 'src/frontend/js/unloadformcheck.js',
-        'src/frontend/js/third_party/sorttable.js', 'src/frontend/js/user_interactions.js',
-    )
-);
-
-/**
- * @var string[] LWT_CSS_FILES All the paths of CSS files to be minified.
- */
-define(
-    'LWT_CSS_FILES',
-    array(
-        'src/frontend/css/css_charts.css', 'src/frontend/css/feed_wizard.css', 'src/frontend/css/gallery.css',
-        'src/frontend/css/jplayer.css', 'src/frontend/css/jquery-ui.css', 'src/frontend/css/jquery.tagit.css',
-        'src/frontend/css/styles.css',
-    )
-);
-
-
-/**
- * Minify a JavaScript file and outputs the result to js/
- *
- * @param string $path       Input file path with extension.
- * @param string $outputPath Output file path with extension
- *
- * @return string Minified content
- *
- * @since 2.2.2-fork Relative paths in the returned content is the same as the saved content.
- */
-function minifyJS($path, $outputPath)
-{
-    $minifier = new Minify\JS();
-    $minifier->add($path);
-    // Save minified file to disk
-    return $minifier->minify($outputPath);
-}
-
-/**
- * Minify a JavaScript file and outputs the result to css/
+ * Minify a CSS file and output to the specified path.
  *
  * @param string $path       Input file path with extension.
  * @param string $outputPath Output file path with extension
@@ -86,43 +39,6 @@ function minifyCSS($path, $outputPath)
     $minifier->add($path);
     // Save minified file to disk
     return $minifier->minify($outputPath);
-}
-
-/**
- * Minify all JavaScript files
- *
- * @return string Minified code
- *
- * @since 2.0.3-fork
- * @since 2.3.0-fork JS code is "combined" above being minified: only one file is outputted.
- */
-function minifyAllJS(): string
-{
-    $minifier = new Minify\JS();
-    foreach (LWT_JS_FILES as $path) {
-        if (file_exists($path)) {
-            $minifier->add($path);
-        }
-    }
-    // Save minified file to disk
-    return $minifier->minify("assets/js/pgm.js");
-}
-
-/**
- * Minify all Cascading-Style Sheet (CSS) files
- *
- * @return void
- *
- * @since 2.0.3-fork
- */
-function minifyAllCSS()
-{
-    foreach (LWT_CSS_FILES as $path) {
-        $name = basename($path);
-        if (file_exists($path)) {
-            minifyCSS($path, 'assets/css/' . $name);
-        }
-    }
 }
 
 /**
@@ -161,6 +77,7 @@ function regenerateSingleTheme($parent_folder, $theme_folder)
  */
 function regenerateThemes()
 {
+    echo "Regenerating themes...\n";
     $folder = 'src/frontend/themes/';
     $folder_scan = scandir($folder);
     foreach ($folder_scan as $parent_file) {
@@ -168,22 +85,9 @@ function regenerateThemes()
             is_dir($folder . $parent_file)
             && $parent_file != '.' && $parent_file != '..'
         ) {
+            echo "  - $parent_file\n";
             regenerateSingleTheme($folder, $parent_file);
         }
     }
-}
-
-/**
- * One-do-all command to minify all your JS, CSS, and regenerate themes.
- *
- * @return void
- */
-function minify_everything()
-{
-    echo "Minifying CSS...\n";
-    minifyAllCSS();
-    echo "Minifying JS...\n";
-    minifyAllJS();
-    echo "Regenerating themes...\n";
-    regenerateThemes();
+    echo "Done.\n";
 }
