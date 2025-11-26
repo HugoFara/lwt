@@ -1,9 +1,9 @@
 # Frontend Modernization Plan
 
-**Project:** Learning with Texts (LWT)  
-**Document Version:** 1.0  
-**Last Updated:** November 26, 2025  
-**Status:** Planning Phase
+**Project:** Learning with Texts (LWT)
+**Document Version:** 2.0
+**Last Updated:** November 26, 2025
+**Status:** Phase 0 Complete - Foundation Established
 
 ---
 
@@ -28,16 +28,17 @@ This document outlines a comprehensive plan to modernize the Learning with Texts
 
 **Key Objectives:**
 
-- Remove jQuery dependency (~85KB bundle reduction)
-- Implement modern JavaScript (ES6+ modules)
-- Establish component-based architecture
-- Modernize build system (Vite)
+- ✅ Modernize build system (Vite) - **COMPLETE**
+- ✅ Add TypeScript for type safety - **COMPLETE**
+- Convert to ES6+ modules (incremental)
+- Keep jQuery 1.12.4 from npm (minimize breaking changes during transition)
 - Improve CSS organization and theming
 - Enhance code maintainability and testability
 
-**Timeline:** 4-6 months (incremental approach)  
-**Risk Level:** Medium (mitigated through phased approach)  
+**Risk Level:** Medium (mitigated through phased approach)
 **Expected ROI:** High (improved DX, performance, maintainability)
+
+> **Note:** The original plan suggested removing jQuery. After discussion, the decision was made to **keep jQuery 1.12.4** from npm to minimize breaking changes during the initial modernization. jQuery removal can be considered in a future phase.
 
 ---
 
@@ -338,416 +339,271 @@ function do_ajax_edit_impr_text(pagepos, word, term_id) {
 
 ## Migration Phases
 
-### Phase 0: Preparation (Week 1) ✅ **START HERE**
+### Phase 0: Foundation Setup ✅ **COMPLETE**
 
 **Goals:**
 
-- Set up development environment
-- Establish migration infrastructure
-- Create proof of concept
+- Set up Vite build system alongside existing PHP minifier
+- Add TypeScript support
+- Move vendored libraries to npm
+- Create PHP integration for conditional asset loading
 
-**Tasks:**
+**Completed Tasks:**
 
-1. ✅ Install Node.js dependencies
-2. ✅ Set up Vite configuration
-3. ✅ Create new directory structure
-4. ✅ Set up linting (ESLint + Prettier)
-5. ✅ Create migration documentation
-6. ✅ Set up version control branching strategy
+1. ✅ Install Node.js dependencies (Vite, TypeScript, jQuery from npm)
+2. ✅ Set up Vite configuration with legacy browser support
+3. ✅ Create TypeScript configuration
+4. ✅ Create type declarations for PHP-injected globals
+5. ✅ Create PHP helper for Vite asset loading
+6. ✅ Modify `ui_helpers.php` for conditional asset loading
 
-**Deliverables:**
+**Files Created/Modified:**
 
-- `package.json` with dependencies
-- `vite.config.js`
-- `.eslintrc.js` and `.prettierrc`
-- Updated `README.md` with dev instructions
-- Git branch: `feature/frontend-modernization`
+```text
+package.json              # Updated with Vite, TypeScript, jQuery 1.12.4, jquery-ui-dist 1.12.1
+tsconfig.json             # NEW - TypeScript configuration
+vite.config.ts            # NEW - Vite build configuration
+src/frontend/js/main.ts   # NEW - Vite entry point
+src/frontend/js/types/globals.d.ts  # NEW - Type declarations for LWT_DATA, STATUSES, etc.
+src/backend/Core/vite_helper.php    # NEW - PHP helper functions
+src/backend/Core/ui_helpers.php     # Modified - conditional Vite/legacy loading
+```
 
-**Testing:**
+**Key Implementation Details:**
 
-- Vite dev server runs successfully
-- Build produces optimized output
-- Hot reload works
-
----
-
-### Phase 1: Foundation (Weeks 2-3) 🔨 **CRITICAL PATH**
-
-**Goals:**
-
-- Replace build system
-- Convert to ES6 modules
-- Remove Overlib
-- Establish new patterns
-
-#### Task 1.1: Vite Build System
-
-**Setup Configuration:**
-
-```javascript
-// vite.config.js
-import { defineConfig } from 'vite';
-
+```typescript
+// vite.config.ts - Key configuration
 export default defineConfig({
-  root: 'src/frontend',
+  root: resolve(__dirname, 'src/frontend'),
   build: {
-    outDir: '../../assets',
+    outDir: resolve(__dirname, 'assets'),
     emptyOutDir: false,
+    manifest: true,
     rollupOptions: {
-      input: {
-        main: 'src/frontend/js/main.js',
-        textReader: 'src/frontend/js/text-reader.js',
-        audio: 'src/frontend/js/audio.js'
-      },
+      input: { main: resolve(__dirname, 'src/frontend/js/main.ts') },
       output: {
-        entryFileNames: 'js/[name].js',
-        chunkFileNames: 'js/[name]-[hash].js',
-        assetFileNames: 'css/[name].[ext]'
+        entryFileNames: 'js/vite/[name].[hash].js',
+        chunkFileNames: 'js/vite/chunks/[name].[hash].js',
+        assetFileNames: 'css/vite/[name].[hash][extname]'
       }
     }
   },
-  server: {
-    proxy: {
-      '/api.php': 'http://localhost:8080'
-    }
-  }
+  plugins: [legacy({ targets: ['defaults', 'not IE 11'] })],
+  server: { port: 5173 }
 });
 ```
 
-**Update Scripts:**
-
-```json
-// package.json
-{
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint src/frontend/js --ext .js",
-    "format": "prettier --write 'src/frontend/**/*.{js,css}'"
-  },
-  "devDependencies": {
-    "vite": "^5.0.0",
-    "eslint": "^8.55.0",
-    "prettier": "^3.1.0"
-  }
+```php
+// PHP asset loading (vite_helper.php)
+function should_use_vite(): bool {
+    $mode = getenv('LWT_ASSET_MODE') ?: 'auto';
+    if ($mode === 'legacy') return false;
+    if ($mode === 'vite') return true;
+    return get_vite_manifest() !== null;  // Auto-detect
 }
 ```
 
-**Update Composer:**
+**Environment Variables:**
 
-```json
-// composer.json
-{
-  "scripts": {
-    "minify": "npm run build",
-    "no-minify": "npm run dev"
-  }
-}
+- `LWT_ASSET_MODE`: `vite` | `legacy` | `auto` (default: auto)
+- `VITE_DEV_MODE`: Set to enable dev server detection
+
+**NPM Scripts:**
+
+```bash
+npm run dev        # Start Vite dev server with HMR
+npm run build      # Build production assets to assets/
+npm run preview    # Preview production build
+npm run typecheck  # Run TypeScript type checking
 ```
 
-#### Task 1.2: Module System
+**Testing Results:**
 
-**Convert `pgm.js` to Modules:**
+- ✅ `npm run build` produces: `assets/js/vite/main.[hash].js`, `assets/css/vite/main.[hash].css`
+- ✅ Manifest generated at `assets/.vite/manifest.json`
+- ✅ PHP tests pass
+- ✅ Legacy asset loading still works (backward compatible)
 
-```javascript
-// Before: src/frontend/js/pgm.js (global)
-function createTheDictUrl(u, w) { ... }
-function getStatusName(status) { ... }
+---
 
-// After: src/frontend/js/utils/dictionary.js
-export function createDictUrl(url, word) {
-  const trimmedUrl = url.trim();
-  const term = word.trim();
-  // ... implementation
-}
+### Phase 1: TypeScript Migration 🔨 **NEXT PHASE**
 
-// After: src/frontend/js/utils/status.js
-const STATUSES = {
-  0: { name: 'Unknown', abbr: '?' },
-  1: { name: 'Learning 1', abbr: '1' },
+**Goals:**
+
+- Incrementally convert JavaScript files to TypeScript
+- Add type safety to existing code
+- Maintain backward compatibility with global exports
+
+**Strategy:**
+
+Since the Vite build system is now in place, we can incrementally migrate files:
+
+1. Start with utility files (lowest risk)
+2. Move to API/data handling files
+3. Finally migrate DOM interaction files
+
+#### Task 1.1: Migrate `pgm.js` → `pgm.ts`
+
+**Priority files to migrate:**
+
+```text
+src/frontend/js/pgm.js            → src/frontend/js/pgm.ts
+src/frontend/js/translation_api.js → src/frontend/js/translation_api.ts
+src/frontend/js/audio_controller.js → src/frontend/js/audio_controller.ts
+```
+
+**Migration pattern:**
+
+```typescript
+// Before: pgm.js (global scope)
+function createTheDictUrl(u, w) {
   // ...
-};
-
-export function getStatusName(status) {
-  return STATUSES[status]?.name ?? 'Unknown';
 }
 
-export function getStatusAbbr(status) {
-  return STATUSES[status]?.abbr ?? '?';
+// After: pgm.ts (typed, exported, but also global for legacy support)
+export function createTheDictUrl(url: string, word: string): string {
+  // ...
+}
+
+// Legacy global export (temporary, for PHP templates)
+if (typeof window !== 'undefined') {
+  (window as any).createTheDictUrl = createTheDictUrl;
 }
 ```
 
-**Create Entry Point:**
+#### Task 1.2: Update main.ts Entry Point
 
-```javascript
-// src/frontend/js/main.js
-import { createDictUrl } from './utils/dictionary.js';
-import { getStatusName, getStatusAbbr } from './utils/status.js';
-import { initTextReader } from './components/text-reader.js';
+The entry point imports migrated modules and exposes globals for legacy code:
 
-// Export for legacy PHP templates (temporary)
-window.LWT = {
-  createDictUrl,
-  getStatusName,
-  getStatusAbbr
-};
+```typescript
+// src/frontend/js/main.ts (current implementation)
+import '../css/styles.css';
+import '../css/jquery-ui.css';
+import '../css/jquery.tagit.css';
+import '../css/feed_wizard.css';
+
+import $ from 'jquery';
+import 'jquery-ui-dist/jquery-ui';
+
+// Import migrated TypeScript modules
+import * as pgm from './pgm';           // After migration
+import * as translation from './translation_api';
+
+// Expose jQuery globally (required for legacy code)
+declare global {
+  interface Window {
+    $: typeof $;
+    jQuery: typeof $;
+    LWT_VITE_LOADED: boolean;
+  }
+}
+window.$ = $;
+window.jQuery = $;
+window.LWT_VITE_LOADED = true;
 
 // Initialize when DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('thetext')) {
-    initTextReader();
-  }
+  console.log('LWT Vite bundle loaded');
 });
 ```
 
-**Module Structure:**
+**Planned Module Structure:**
 
 ```text
 src/frontend/js/
-├── main.js                     # Entry point
-├── utils/
-│   ├── dictionary.js           # Dictionary URL utilities
-│   ├── status.js               # Word status utilities
-│   ├── cookies.js              # Cookie management
-│   ├── validation.js           # Form validation
-│   └── dom.js                  # DOM helpers
-├── api/
-│   ├── client.js               # Base API client
-│   ├── terms.js                # Terms API
-│   ├── texts.js                # Texts API
-│   └── settings.js             # Settings API
-├── components/
-│   ├── text-reader.js          # Main text reading interface
-│   ├── word-tooltip.js         # Word tooltip component
-│   ├── audio-player.js         # Audio controller
-│   └── translation-dialog.js   # Translation popup
-└── legacy/
-    └── jquery-bridge.js        # Temporary jQuery compatibility
+├── main.ts                     # Entry point (EXISTS)
+├── types/
+│   └── globals.d.ts            # Type declarations (EXISTS)
+├── pgm.ts                      # Migrated from pgm.js
+├── jq_pgm.ts                   # Migrated from jq_pgm.js
+├── text_events.ts              # Migrated from text_events.js
+├── audio_controller.ts         # Migrated from audio_controller.js
+├── translation_api.ts          # Migrated from translation_api.js
+├── user_interactions.ts        # Migrated from user_interactions.js
+└── utils/                      # New utility modules (optional refactor)
+    ├── dictionary.ts
+    ├── status.ts
+    └── cookies.ts
 ```
 
-#### Task 1.3: Remove Overlib
+#### Task 1.3: Add Type Definitions for LWT_DATA
 
-**Replace with Native `<dialog>` Element:**
+The `globals.d.ts` file (already created) provides type safety for PHP-injected globals:
 
-```javascript
-// src/frontend/js/components/word-dialog.js
-export class WordDialog {
-  constructor() {
-    this.dialog = this.createDialog();
-    document.body.appendChild(this.dialog);
-  }
-
-  createDialog() {
-    const dialog = document.createElement('dialog');
-    dialog.id = 'word-dialog';
-    dialog.className = 'word-dialog';
-    dialog.innerHTML = `
-      <div class="dialog-content">
-        <button class="close-btn" aria-label="Close">&times;</button>
-        <div class="dialog-body"></div>
-      </div>
-    `;
-    
-    dialog.querySelector('.close-btn').addEventListener('click', () => {
-      this.close();
-    });
-    
-    // Close on backdrop click
-    dialog.addEventListener('click', (e) => {
-      if (e.target === dialog) this.close();
-    });
-    
-    // Close on Escape key
-    dialog.addEventListener('cancel', (e) => {
-      e.preventDefault();
-      this.close();
-    });
-    
-    return dialog;
-  }
-
-  show(content) {
-    this.dialog.querySelector('.dialog-body').innerHTML = content;
-    this.dialog.showModal();
-  }
-
-  close() {
-    this.dialog.close();
-  }
+```typescript
+// src/frontend/js/types/globals.d.ts (EXISTS)
+export interface LwtData {
+  language: LwtLanguage;
+  text: LwtText;
+  word: LwtWord;
+  test: LwtTest;
+  settings: LwtSettings;
 }
 
-// Usage
-const wordDialog = new WordDialog();
-wordDialog.show('<h3>Word Definition</h3><p>Translation here...</p>');
-```
-
-**Or use Floating UI for Tooltips:**
-
-```javascript
-// src/frontend/js/components/word-tooltip.js
-import { computePosition, flip, shift, offset } from '@floating-ui/dom';
-
-export class WordTooltip {
-  constructor(trigger, content) {
-    this.trigger = trigger;
-    this.tooltip = this.createTooltip(content);
-    this.attachEvents();
-  }
-
-  createTooltip(content) {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'word-tooltip';
-    tooltip.setAttribute('role', 'tooltip');
-    tooltip.innerHTML = content;
-    document.body.appendChild(tooltip);
-    return tooltip;
-  }
-
-  async show() {
-    this.tooltip.style.display = 'block';
-    
-    const { x, y } = await computePosition(this.trigger, this.tooltip, {
-      placement: 'top',
-      middleware: [offset(8), flip(), shift({ padding: 5 })]
-    });
-    
-    Object.assign(this.tooltip.style, {
-      left: `${x}px`,
-      top: `${y}px`
-    });
-  }
-
-  hide() {
-    this.tooltip.style.display = 'none';
-  }
-
-  attachEvents() {
-    this.trigger.addEventListener('mouseenter', () => this.show());
-    this.trigger.addEventListener('mouseleave', () => this.hide());
+declare global {
+  interface Window {
+    STATUSES: Record<string, WordStatus>;
+    TAGS: Record<string, string>;
+    TEXTTAGS: Record<string, string>;
+    LWT_DATA: LwtData;
   }
 }
 ```
 
-#### Task 1.4: CSS Variables
+#### Task 1.4: Migrate Files One at a Time
 
-**Add Theme System:**
+**Migration Order (by complexity):**
 
-```css
-/* src/frontend/css/variables.css */
-:root {
-  /* Status Colors */
-  --status-0-bg: #ADDFFF;
-  --status-1-bg: #F5B8A9;
-  --status-2-bg: #F5CCA9;
-  --status-3-bg: #F5E1A9;
-  --status-4-bg: #F5F3A9;
-  --status-5-bg: #DDFFDD;
-  --status-98-bg: #F8F8F8;
-  --status-99-bg: #F8F8F8;
-  
-  /* Text Colors */
-  --text-primary: #000000;
-  --text-secondary: #666666;
-  --text-error: #d32f2f;
-  
-  /* Backgrounds */
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #F5F5F5;
-  
-  /* Borders */
-  --border-color: #C6C6C6;
-  --border-radius: 4px;
-  
-  /* Spacing */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  
-  /* Typography */
-  --font-family: "Lucida Grande", Arial, sans-serif, STHeiti, "Arial Unicode MS", MingLiu;
-  --font-size-base: 16px;
-  --font-size-sm: 14px;
-  --font-size-lg: 18px;
-}
+1. `audio_controller.js` (125 lines) - Standalone, minimal dependencies
+2. `translation_api.js` (183 lines) - API utilities
+3. `pgm.js` (663 lines) - Core utilities
+4. `user_interactions.js` (385 lines) - UI interactions
+5. `text_events.js` (699 lines) - Complex DOM interactions
+6. `jq_pgm.js` (1,435 lines) - Heavy jQuery usage, migrate last
 
-/* Dark theme */
-[data-theme="dark"] {
-  --status-0-bg: #1a4d66;
-  --status-1-bg: #663930;
-  --status-2-bg: #664e30;
-  --status-3-bg: #666230;
-  --status-4-bg: #656630;
-  --status-5-bg: #2d4d2d;
-  --status-98-bg: #2a2a2a;
-  --status-99-bg: #2a2a2a;
-  
-  --text-primary: #e0e0e0;
-  --text-secondary: #aaaaaa;
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #2a2a2a;
-  --border-color: #444444;
-}
+**For each file:**
 
-/* Update existing styles */
-.word {
-  background-color: var(--status-bg);
-  color: var(--text-primary);
-  border-radius: var(--border-radius);
-  padding: var(--spacing-xs);
-}
-
-.status0 { --status-bg: var(--status-0-bg); }
-.status1 { --status-bg: var(--status-1-bg); }
-.status2 { --status-bg: var(--status-2-bg); }
-/* ... etc */
-```
-
-**Theme Switcher:**
-
-```javascript
-// src/frontend/js/utils/theme.js
-export function setTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
-}
-
-export function getTheme() {
-  return localStorage.getItem('theme') || 'light';
-}
-
-export function initTheme() {
-  const savedTheme = getTheme();
-  setTheme(savedTheme);
-}
-```
+1. Rename `.js` → `.ts`
+2. Add type annotations to function parameters/returns
+3. Fix TypeScript errors
+4. Import in `main.ts`
+5. Test that existing functionality works
+6. Run `npm run typecheck` to verify
 
 **Phase 1 Deliverables:**
 
-- ✅ Vite building and serving successfully
-- ✅ All JavaScript converted to ES6 modules
-- ✅ Overlib removed and replaced
-- ✅ CSS variables implemented for all themes
-- ✅ Development workflow documented
-- ✅ Legacy code isolated in `/legacy` folder
+- [ ] Core utility files converted to TypeScript
+- [ ] Type safety for LWT_DATA and global state
+- [ ] `npm run typecheck` passes with no errors
+- [ ] Legacy PHP templates still work (globals exposed)
 
 **Success Criteria:**
 
 - [ ] `npm run dev` starts dev server with HMR
 - [ ] `npm run build` produces optimized bundles
+- [ ] `npm run typecheck` passes
 - [ ] All existing functionality still works
 - [ ] No console errors on any page
-- [ ] Bundle size reduced by 15-20%
 
 ---
 
-### Phase 2: jQuery Removal (Weeks 4-7) 🎯 **HIGH IMPACT**
+### Phase 2: Build Pipeline Integration 🔧 **OPTIONAL**
 
 **Goals:**
 
-- Replace jQuery DOM manipulation
+- Update `composer.json` to use Vite build
+- Integrate Vite output with existing deployment workflow
+- Add development workflow documentation
+
+> **Note:** jQuery removal was originally planned for this phase. Since we're keeping jQuery 1.12.4 from npm for backward compatibility, this phase focuses on build pipeline integration instead. jQuery removal can be considered as a future enhancement.
+
+---
+
+### Phase 3 (Future): jQuery Removal 🎯 **DEFERRED**
+
+**Goals (if pursued later):**
+
+- Replace jQuery DOM manipulation with vanilla JS
 - Replace jQuery AJAX with Fetch API
 - Remove jQuery dependencies
 - Maintain functionality
@@ -2750,6 +2606,7 @@ export default {
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-11-26 | Frontend Team | Initial version |
+| 2.0 | 2025-11-26 | Claude Code | Phase 0 complete: Vite + TypeScript setup, jQuery kept from npm, PHP integration added |
 
 ---
 

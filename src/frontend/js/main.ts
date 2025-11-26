@@ -16,6 +16,11 @@ import '../css/feed_wizard.css';
 import $ from 'jquery';
 import 'jquery-ui-dist/jquery-ui';
 
+// Import TypeScript modules (these auto-register globals for backward compat)
+import './pgm';
+import './audio_controller';
+import './translation_api';
+
 // Expose jQuery globally for legacy scripts and plugins
 declare global {
   interface Window {
@@ -29,4 +34,7 @@ window.$ = $;
 window.jQuery = $;
 window.LWT_VITE_LOADED = true;
 
-console.log('LWT Vite bundle loaded');
+// Log to console in development
+if (import.meta.env.DEV) {
+  console.log('LWT Vite bundle loaded (development mode)');
+}
