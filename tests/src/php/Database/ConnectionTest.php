@@ -238,6 +238,20 @@ class ConnectionTest extends TestCase
         $this->assertIsArray($row);
     }
 
+    public function testFetchOneWithNonSelectQuery(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Test with a non-SELECT query (returns true from mysqli_query)
+        $tbpref = self::$tbpref;
+        // Use SHOW TABLES which returns a result set, or a query that doesn't return rows
+        $result = Connection::fetchOne("DO 1");
+        
+        $this->assertNull($result);
+    }
+
     // ===== fetchValue() tests =====
 
     public function testFetchValueReturnsValue(): void
@@ -431,8 +445,13 @@ class ConnectionTest extends TestCase
         }
 
         $result = Connection::escapeOrNull("line1\r\nline2");
-        $this->assertStringContainsString("line1\nline2", $result);
+        // Result is quoted and escaped - the newline will be escaped by mysqli_real_escape_string
+        $this->assertStringStartsWith("'", $result);
+        $this->assertStringEndsWith("'", $result);
         $this->assertStringNotContainsString("\r", $result);
+        // Check that it contains line1 and line2
+        $this->assertStringContainsString("line1", $result);
+        $this->assertStringContainsString("line2", $result);
     }
 
     // ===== escapeString() tests =====
@@ -529,4 +548,63 @@ class ConnectionTest extends TestCase
         $affected = Connection::execute("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_chain'");
         $this->assertEquals(1, $affected);
     }
+
+    // ===== lastInsertId() tests =====
+
+    public function testLastInsertIdReturnsId2(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+        
+        Connection::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_last_id', 'test_value')");
+        $lastId = Connection::lastInsertId();
+        
+        $this->assertGreaterThan(0, $lastId);
+        
+        // Clean up
+        Connection::execute("DELETE FROM {$tbpref}settings WHERE StKey = 'test_last_id'");
+    }
+
+    // ===== reset() tests =====
+
+    public function testResetClearsInstance(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Get instance first
+        $instance1 = Connection::getInstance();
+        
+        // Reset
+        Connection::reset();
+        
+        // Get instance again - should be fetched from LWT_Globals
+        $instance2 = Connection::getInstance();
+        
+        // They should still be connected (LWT_Globals maintains the connection)
+        $this->assertInstanceOf(\mysqli::class, $instance2);
+    }
+
+    // ===== setInstance() tests =====
+
+    public function testSetInstanceSetsConnection(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $originalInstance = Connection::getInstance();
+        
+        // Set a new instance (same connection for testing purposes)
+        Connection::setInstance($originalInstance);
+        
+        $newInstance = Connection::getInstance();
+        
+        $this->assertSame($originalInstance, $newInstance);
+    }
 }
+

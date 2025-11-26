@@ -385,6 +385,17 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals('test_qb_value', $value);
     }
 
+    public function testValueReturnsNullWhenNoMatch(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $value = QueryBuilder::table('tags')->where('TgText', 'nonexistent_xyz_123')->value('TgText');
+        
+        $this->assertNull($value);
+    }
+
     // ===== count() tests =====
 
     public function testCountReturnsInteger(): void
@@ -574,15 +585,28 @@ class QueryBuilderTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
+        // Use random suffix to avoid conflicts (TgText is varchar(20))
+        $rand = substr(uniqid(), -6);
+        $tag1 = "qb_{$rand}_1";
+        $tag2 = "qb_{$rand}_2";
+        $tag3 = "qb_{$rand}_3";
+        
+        // Clean up any potential leftovers
+        try {
+            QueryBuilder::table('tags')->where('TgText', 'LIKE', "qb_{$rand}%")->delete();
+        } catch (\Exception $e) {
+            // Ignore if nothing to delete
+        }
+        
         // Insert test data
         QueryBuilder::table('tags')->insertMany([
-            ['TgText' => 'test_qb_delete_multi1'],
-            ['TgText' => 'test_qb_delete_multi2'],
-            ['TgText' => 'test_qb_delete_multi3']
+            ['TgText' => $tag1],
+            ['TgText' => $tag2],
+            ['TgText' => $tag3]
         ]);
         
         // Delete
-        $affected = QueryBuilder::table('tags')->where('TgText', 'LIKE', 'test_qb_delete_multi%')->delete();
+        $affected = QueryBuilder::table('tags')->where('TgText', 'LIKE', "qb_{$rand}%")->delete();
         
         $this->assertEquals(3, $affected);
     }
