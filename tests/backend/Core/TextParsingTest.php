@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
 
-require_once __DIR__ . '/../../src/backend/Core/EnvLoader.php';
+require_once __DIR__ . '/../../../src/backend/Core/EnvLoader.php';
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 
 // Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../.env');
+EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
-require_once __DIR__ . '/../../src/backend/Core/database_connect.php';
+require_once __DIR__ . '/../../../src/backend/Core/database_connect.php';
 
 use PHPUnit\Framework\TestCase;
 

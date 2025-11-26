@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-require_once __DIR__ . '/../../../src/tools/markdown_converter.php';
+require_once __DIR__ . '/../../src/tools/markdown_converter.php';
 
 use PHPUnit\Framework\TestCase;
 

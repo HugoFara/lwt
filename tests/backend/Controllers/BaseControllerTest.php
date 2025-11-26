@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Controllers;
 
-require_once __DIR__ . '/../../../../src/backend/Core/EnvLoader.php';
-require_once __DIR__ . '/../../../../src/backend/Controllers/BaseController.php';
+require_once __DIR__ . '/../../../src/backend/Core/EnvLoader.php';
+require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 
 use Lwt\Controllers\BaseController;
 use Lwt\Core\EnvLoader;
@@ -13,11 +13,11 @@ use Lwt\Core\Globals;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../../.env');
+EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
-require_once __DIR__ . '/../../../../src/backend/Core/database_connect.php';
+require_once __DIR__ . '/../../../src/backend/Core/database_connect.php';
 
 /**
  * Unit tests for the BaseController class.
