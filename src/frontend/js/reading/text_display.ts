@@ -177,12 +177,3 @@ export const lwt = {
   }
 };
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.do_ajax_word_counts = do_ajax_word_counts;
-  w.set_barchart_item = set_barchart_item;
-  w.set_word_counts = set_word_counts;
-  w.word_count_click = word_count_click;
-  w.lwt = lwt;
-}

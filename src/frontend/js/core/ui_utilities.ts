@@ -10,7 +10,7 @@ import $ from 'jquery';
 import { LWT_DATA } from './lwt_state';
 import { check, containsCharacterOutsideBasicMultilingualPlane } from '../forms/form_validation';
 import { changeImprAnnText, changeImprAnnRadio, do_ajax_show_similar_terms } from '../terms/term_operations';
-import { readRawTextAloud } from '../legacy/user_interactions';
+import { readRawTextAloud } from './user_interactions';
 import { do_ajax_save_setting } from './ajax_utilities';
 
 // Extend jQuery with custom methods
@@ -344,14 +344,3 @@ $(window).on('load', wrapRadioButtons);
 
 $(document).ready(prepareMainAreas);
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.markClick = markClick;
-  w.confirmDelete = confirmDelete;
-  w.showAllwordsClick = showAllwordsClick;
-  w.noShowAfter3Secs = noShowAfter3Secs;
-  w.setTheFocus = setTheFocus;
-  w.wrapRadioButtons = wrapRadioButtons;
-  w.prepareMainAreas = prepareMainAreas;
-}

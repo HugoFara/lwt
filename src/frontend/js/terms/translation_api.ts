@@ -240,13 +240,3 @@ export async function getLibreTranslateTranslation(
   );
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.deleteTranslation = deleteTranslation;
-  w.addTranslation = addTranslation;
-  w.getGlosbeTranslation = getGlosbeTranslation;
-  w.getTranslationFromGlosbeApi = getTranslationFromGlosbeApi;
-  w.getLibreTranslateTranslationBase = getLibreTranslateTranslationBase;
-  w.getLibreTranslateTranslation = getLibreTranslateTranslation;
-}

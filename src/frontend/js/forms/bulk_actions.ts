@@ -129,10 +129,3 @@ export function allActionGo(f: FormWithData | undefined, sel: HTMLSelectElement 
   }
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.selectToggle = selectToggle;
-  w.multiActionGo = multiActionGo;
-  w.allActionGo = allActionGo;
-}

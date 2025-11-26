@@ -59,10 +59,3 @@ export function make_tooltip(word: string, trans: string, roman: string, status:
   return title;
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.getStatusName = getStatusName;
-  w.getStatusAbbr = getStatusAbbr;
-  w.make_tooltip = make_tooltip;
-}

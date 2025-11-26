@@ -102,14 +102,3 @@ export let WBLINK3 = '';
 /** Right-to-left indicator, deprecated in 2.10.0 use LWT_DATA.language.rtl */
 export let RTL = 0;
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.LWT_DATA = LWT_DATA;
-  w.WID = WID;
-  w.TID = TID;
-  w.WBLINK1 = WBLINK1;
-  w.WBLINK2 = WBLINK2;
-  w.WBLINK3 = WBLINK3;
-  w.RTL = RTL;
-}

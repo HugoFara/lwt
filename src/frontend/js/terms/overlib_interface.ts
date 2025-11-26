@@ -5,17 +5,10 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import {
-  escape_html_chars,
-  escape_html_chars_2,
-  make_tooltip,
-  getStatusName,
-  getStatusAbbr,
-  createTheDictLink,
-  createSentLookupLink,
-  getLangFromDict
-} from '../legacy/pgm';
-import { speechDispatcher } from '../legacy/user_interactions';
+import { escape_html_chars, escape_html_chars_2 } from '../core/html_utils';
+import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
+import { createTheDictLink, createSentLookupLink, getLangFromDict } from './dictionary';
+import { speechDispatcher } from '../core/user_interactions';
 
 // Declare external functions from overlib library
 declare function overlib(content: string, ...args: unknown[]): boolean;
@@ -815,47 +808,3 @@ export function make_overlib_audio(txt: string, lang: string): string {
   return img.outerHTML;
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  // Global variables
-  w.ol_textfont = ol_textfont;
-  w.ol_textsize = ol_textsize;
-  w.ol_sticky = ol_sticky;
-  w.ol_captionfont = ol_captionfont;
-  w.ol_captionsize = ol_captionsize;
-  w.ol_width = ol_width;
-  w.ol_close = ol_close;
-  w.ol_offsety = ol_offsety;
-  w.ol_offsetx = ol_offsetx;
-  w.ol_fgcolor = ol_fgcolor;
-  w.ol_closecolor = ol_closecolor;
-  // Functions
-  w.run_overlib_status_98 = run_overlib_status_98;
-  w.run_overlib_status_99 = run_overlib_status_99;
-  w.run_overlib_status_1_to_5 = run_overlib_status_1_to_5;
-  w.run_overlib_status_unknown = run_overlib_status_unknown;
-  w.run_overlib_multiword = run_overlib_multiword;
-  w.run_overlib_test = run_overlib_test;
-  w.make_overlib_link_new_multiword = make_overlib_link_new_multiword;
-  w.make_overlib_link_wb = make_overlib_link_wb;
-  w.make_overlib_link_wbnl = make_overlib_link_wbnl;
-  w.make_overlib_link_wbnl2 = make_overlib_link_wbnl2;
-  w.make_overlib_link_change_status_all = make_overlib_link_change_status_all;
-  w.make_overlib_link_change_status_alltest = make_overlib_link_change_status_alltest;
-  w.make_overlib_link_change_status = make_overlib_link_change_status;
-  w.make_overlib_link_change_status_test2 = make_overlib_link_change_status_test2;
-  w.make_overlib_link_change_status_test = make_overlib_link_change_status_test;
-  w.make_overlib_link_new_word = make_overlib_link_new_word;
-  w.make_overlib_link_edit_multiword = make_overlib_link_edit_multiword;
-  w.make_overlib_link_edit_multiword_title = make_overlib_link_edit_multiword_title;
-  w.make_overlib_link_create_edit_multiword = make_overlib_link_create_edit_multiword;
-  w.make_overlib_link_create_edit_multiword_rtl = make_overlib_link_create_edit_multiword_rtl;
-  w.make_overlib_link_edit_word = make_overlib_link_edit_word;
-  w.make_overlib_link_edit_word_title = make_overlib_link_edit_word_title;
-  w.make_overlib_link_delete_word = make_overlib_link_delete_word;
-  w.make_overlib_link_delete_multiword = make_overlib_link_delete_multiword;
-  w.make_overlib_link_wellknown_word = make_overlib_link_wellknown_word;
-  w.make_overlib_link_ignore_word = make_overlib_link_ignore_word;
-  w.make_overlib_audio = make_overlib_audio;
-}

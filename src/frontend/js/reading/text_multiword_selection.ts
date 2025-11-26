@@ -307,9 +307,3 @@ export function mword_drag_n_drop_select(this: HTMLElement, event: JQuery.Trigge
   mwordDragNDrop.timeout = setTimeout(mwordDragNDrop.startInteraction, 300);
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.mwordDragNDrop = mwordDragNDrop;
-  w.mword_drag_n_drop_select = mword_drag_n_drop_select;
-}

@@ -489,22 +489,3 @@ export function do_ajax_show_sentences(lang: number, word: string, ctl: string, 
   }
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.setTransRoman = setTransRoman;
-  w.do_ajax_save_impr_text = do_ajax_save_impr_text;
-  w.changeImprAnnText = changeImprAnnText;
-  w.changeImprAnnRadio = changeImprAnnRadio;
-  w.updateTermTranslation = updateTermTranslation;
-  w.addTermTranslation = addTermTranslation;
-  w.changeTableTestStatus = changeTableTestStatus;
-  w.translation_radio = translation_radio;
-  w.edit_term_ann_translations = edit_term_ann_translations;
-  w.do_ajax_edit_impr_text = do_ajax_edit_impr_text;
-  w.do_ajax_req_sim_terms = do_ajax_req_sim_terms;
-  w.do_ajax_show_similar_terms = do_ajax_show_similar_terms;
-  w.display_example_sentences = display_example_sentences;
-  w.change_example_sentences_zone = change_example_sentences_zone;
-  w.do_ajax_show_sentences = do_ajax_show_sentences;
-}

@@ -102,11 +102,3 @@ export function areCookiesEnabled(): boolean {
   return cookie_set;
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.getCookie = getCookie;
-  w.setCookie = setCookie;
-  w.deleteCookie = deleteCookie;
-  w.areCookiesEnabled = areCookiesEnabled;
-}

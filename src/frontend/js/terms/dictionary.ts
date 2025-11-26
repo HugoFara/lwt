@@ -273,18 +273,3 @@ export function translateWord3(url: string, word: string): void {
   owin(createTheDictUrl(url, word));
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.owin = owin;
-  w.oewin = oewin;
-  w.createTheDictUrl = createTheDictUrl;
-  w.createTheDictLink = createTheDictLink;
-  w.createSentLookupLink = createSentLookupLink;
-  w.getLangFromDict = getLangFromDict;
-  w.translateSentence = translateSentence;
-  w.translateSentence2 = translateSentence2;
-  w.translateWord = translateWord;
-  w.translateWord2 = translateWord2;
-  w.translateWord3 = translateWord3;
-}

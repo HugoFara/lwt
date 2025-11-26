@@ -57,11 +57,3 @@ export function quick_select_to_input(select_elem: HTMLSelectElement, input_elem
   select_elem.value = '';
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.do_ajax_save_setting = do_ajax_save_setting;
-  w.scrollToAnchor = scrollToAnchor;
-  w.get_position_from_id = get_position_from_id;
-  w.quick_select_to_input = quick_select_to_input;
-}

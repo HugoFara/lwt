@@ -150,14 +150,3 @@ export function ask_before_exiting(): void {
   return lwtFormCheck.askBeforeExit();
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.DIRTY = DIRTY;
-  w.lwtFormCheck = lwtFormCheck;
-  w.askConfirmIfDirty = askConfirmIfDirty;
-  w.makeDirty = makeDirty;
-  w.resetDirty = resetDirty;
-  w.tagChanged = tagChanged;
-  w.ask_before_exiting = ask_before_exiting;
-}

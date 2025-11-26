@@ -5,8 +5,8 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { make_tooltip } from '../legacy/pgm';
-import { speechDispatcher } from '../legacy/user_interactions';
+import { make_tooltip } from '../terms/word_status';
+import { speechDispatcher } from '../core/user_interactions';
 import {
   getAttr,
   word_each_do_text_text,
@@ -18,7 +18,7 @@ import {
   mword_drag_n_drop_select
 } from './text_multiword_selection';
 
-// Re-export for backward compatibility
+// Re-export from submodules
 export {
   getAttr,
   word_each_do_text_text,
@@ -292,18 +292,3 @@ export function prepareTextInteractions(): void {
   );
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.word_each_do_text_text = word_each_do_text_text;
-  w.mword_each_do_text_text = mword_each_do_text_text;
-  w.word_dblclick_event_do_text_text = word_dblclick_event_do_text_text;
-  w.word_click_event_do_text_text = word_click_event_do_text_text;
-  w.mword_click_event_do_text_text = mword_click_event_do_text_text;
-  w.mwordDragNDrop = mwordDragNDrop;
-  w.mword_drag_n_drop_select = mword_drag_n_drop_select;
-  w.word_hover_over = word_hover_over;
-  w.word_hover_out = word_hover_out;
-  w.keydown_event_do_text_text = keydown_event_do_text_text;
-  w.prepareTextInteractions = prepareTextInteractions;
-}

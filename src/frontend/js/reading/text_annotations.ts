@@ -5,7 +5,7 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { make_tooltip } from '../legacy/pgm';
+import { make_tooltip } from '../terms/word_status';
 
 /**
  * Helper to safely get an HTML attribute value as a string.
@@ -140,9 +140,3 @@ export function mword_each_do_text_text(this: HTMLElement, _: number): void {
   }
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.word_each_do_text_text = word_each_do_text_text;
-  w.mword_each_do_text_text = mword_each_do_text_text;
-}

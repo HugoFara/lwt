@@ -211,36 +211,6 @@ export function saveAudioPosition(text_id: number, pos: number): void {
 }
 
 /**
- * Get the phonetic version of a text.
- *
- * @param text Text to convert to phonetics.
- * @param lang Language, either two letters code or four letters (BCP 47).
- *
- * @deprecated Since 2.10.0 use getPhoneticTextAsync
- */
-export function getPhoneticText(text: string, lang: string): string | undefined {
-  let phoneticText: string | undefined;
-  $.ajax(
-    'api.php/v1/phonetic-reading',
-    {
-      async: false,
-      data: {
-        text: text,
-        lang: lang
-      },
-      dataType: 'json',
-      type: 'GET'
-    }
-  )
-    .done(
-      function (data: { phonetic_reading: string }) {
-        phoneticText = data.phonetic_reading;
-      }
-    );
-  return phoneticText;
-}
-
-/**
  * Get the phonetic version of a text, asynchronous.
  *
  * @param text Text to convert to phonetics.
@@ -516,22 +486,3 @@ export function speechDispatcher(
   );
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.quickMenuRedirection = quickMenuRedirection;
-  w.newExpressionInteractable = newExpressionInteractable;
-  w.goToLastPosition = goToLastPosition;
-  w.saveReadingPosition = saveReadingPosition;
-  w.saveAudioPosition = saveAudioPosition;
-  w.getPhoneticText = getPhoneticText;
-  w.getPhoneticTextAsync = getPhoneticTextAsync;
-  w.deepReplace = deepReplace;
-  w.deepFindValue = deepFindValue;
-  w.readTextWithExternal = readTextWithExternal;
-  w.cookieTTSSettings = cookieTTSSettings;
-  w.readRawTextAloud = readRawTextAloud;
-  w.readTextAloud = readTextAloud;
-  w.handleReadingConfiguration = handleReadingConfiguration;
-  w.speechDispatcher = speechDispatcher;
-}

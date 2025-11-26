@@ -109,9 +109,3 @@ export function keydown_event_do_test_test(e: JQuery.KeyDownEvent): boolean {
   return true;
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.word_click_event_do_test_test = word_click_event_do_test_test;
-  w.keydown_event_do_test_test = keydown_event_do_test_test;
-}

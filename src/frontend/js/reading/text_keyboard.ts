@@ -5,8 +5,8 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { getLangFromDict, createTheDictUrl } from '../legacy/pgm';
-import { speechDispatcher } from '../legacy/user_interactions';
+import { getLangFromDict, createTheDictUrl } from '../terms/dictionary';
+import { speechDispatcher } from '../core/user_interactions';
 import { getAttr } from './text_annotations';
 
 // Declare external functions
@@ -334,8 +334,3 @@ export function keydown_event_do_text_text(e: JQuery.KeyDownEvent): boolean {
   return true;
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.keydown_event_do_text_text = keydown_event_do_text_text;
-}

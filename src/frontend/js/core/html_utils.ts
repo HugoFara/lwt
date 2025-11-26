@@ -53,10 +53,3 @@ export function escape_apostrophes(s: string): string {
   return s.replace(/'/g, "\\'");
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.escape_html_chars = escape_html_chars;
-  w.escape_html_chars_2 = escape_html_chars_2;
-  w.escape_apostrophes = escape_apostrophes;
-}

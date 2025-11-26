@@ -1,31 +1,13 @@
 /**
- * LWT Javascript functions
- *
- * This file re-exports functions from specialized modules for backward compatibility,
- * and contains miscellaneous utility functions.
+ * Language settings utilities.
  *
  * @author  andreask7 <andreasks7@users.noreply.github.com>
  * @license Unlicense <http://unlicense.org/>
- * @since   1.6.16-fork
- * @since   2.10.0-fork Split into specialized modules
- *
- * "Learning with Texts" (LWT) is free and unencumbered software
- * released into the PUBLIC DOMAIN.
+ * @since   2.10.0-fork Extracted from legacy/pgm.ts
  */
-
-// Re-export all functions from specialized modules for backward compatibility
-export * from '../terms/word_status';
-export * from '../terms/dictionary';
-export * from '../core/html_utils';
-export * from '../core/cookies';
-export * from '../forms/bulk_actions';
 
 // Declare external functions that are defined elsewhere
 declare function showRightFrames(url1?: string, url2?: string): void;
-
-/**************************************************************
- * Miscellaneous utility functions
- **************************************************************/
 
 /**
  * Set the current language.
@@ -78,13 +60,4 @@ export function check_table_prefix(p: string): boolean {
     );
   }
   return r;
-}
-
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.setLang = setLang;
-  w.resetAll = resetAll;
-  w.iknowall = iknowall;
-  w.check_table_prefix = check_table_prefix;
 }

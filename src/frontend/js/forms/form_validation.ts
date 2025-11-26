@@ -276,13 +276,3 @@ export function textareaKeydown(event: JQuery.KeyDownEvent): boolean {
   }
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.containsCharacterOutsideBasicMultilingualPlane = containsCharacterOutsideBasicMultilingualPlane;
-  w.alertFirstCharacterOutsideBasicMultilingualPlane = alertFirstCharacterOutsideBasicMultilingualPlane;
-  w.getUTF8Length = getUTF8Length;
-  w.isInt = isInt;
-  w.check = check;
-  w.textareaKeydown = textareaKeydown;
-}

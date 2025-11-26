@@ -82,12 +82,3 @@ export function failureSound(): Promise<void> {
   return (document.getElementById('failure_sound') as HTMLAudioElement)?.play();
 }
 
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.showRightFrames = showRightFrames;
-  w.hideRightFrames = hideRightFrames;
-  w.cleanupRightFrames = cleanupRightFrames;
-  w.successSound = successSound;
-  w.failureSound = failureSound;
-}

@@ -549,15 +549,6 @@ export const lwt_feed_wizard = {
   }
 };
 
-/**
- * A mess of different things for preparing interactions with feed wizard.
- *
- * @deprecated Since 2.9.1, use lwt_feed_wizard.prepareInteractions
- */
-export function feedwizard_prepare_interaction(): void {
-  return lwt_feed_wizard.prepareInteractions();
-}
-
 // Set up event handlers
 $(document).on('click', '.delete_selection', lwt_feed_wizard.deleteSelection);
 
@@ -574,12 +565,3 @@ $(document).on('click', '#get_button,#filter_button', lwt_feed_wizard.clickGetOr
 $(document).on('click', '#next', lwt_feed_wizard.clickNextButton);
 
 $(document).on('change', '#host_status', lwt_feed_wizard.changeHostStatus);
-
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  const w = window as unknown as Record<string, unknown>;
-  w.extend_adv_xpath = extend_adv_xpath;
-  w.lwt_feed_wiz_opt_inter = lwt_feed_wiz_opt_inter;
-  w.lwt_feed_wizard = lwt_feed_wizard;
-  w.feedwizard_prepare_interaction = feedwizard_prepare_interaction;
-}

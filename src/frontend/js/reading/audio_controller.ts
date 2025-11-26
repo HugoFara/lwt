@@ -143,19 +143,3 @@ export const lwt_audio_controller = {
   }
 };
 
-/**
- * Change the position of the audio player head.
- *
- * @param p New player head
- *
- * @deprecated Since LWT 2.9.1, use lwt_audio_controller.newPosition
- */
-export function new_pos(p: number): void {
-  return lwt_audio_controller.newPosition(p);
-}
-
-// Expose globally for backward compatibility with PHP templates
-if (typeof window !== 'undefined') {
-  (window as unknown as Record<string, unknown>).lwt_audio_controller = lwt_audio_controller;
-  (window as unknown as Record<string, unknown>).new_pos = new_pos;
-}
