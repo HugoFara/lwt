@@ -8,8 +8,8 @@ import {
   deepFindValue,
   cookieTTSSettings,
   readRawTextAloud,
-} from '@/user_interactions';
-import * as pgm from '@/pgm';
+} from '../../../src/frontend/js/legacy/user_interactions';
+import * as cookies from '../../../src/frontend/js/core/cookies';
 
 // Mock SpeechSynthesisUtterance for jsdom environment
 class MockSpeechSynthesisUtterance {
@@ -297,7 +297,7 @@ describe('user_interactions.ts', () => {
       });
 
       // Mock getCookie to return empty for TTS settings
-      vi.spyOn(pgm, 'getCookie').mockReturnValue(null);
+      vi.spyOn(cookies, 'getCookie').mockReturnValue(null);
     });
 
     it('creates SpeechSynthesisUtterance with text', () => {
@@ -347,7 +347,7 @@ describe('user_interactions.ts', () => {
     });
 
     it('uses TTS settings from cookies when no explicit params', () => {
-      vi.spyOn(pgm, 'getCookie')
+      vi.spyOn(cookies, 'getCookie')
         .mockReturnValueOnce('1.3') // Rate
         .mockReturnValueOnce('0.9') // Pitch
         .mockReturnValueOnce('Google UK English'); // Voice
@@ -360,7 +360,7 @@ describe('user_interactions.ts', () => {
     });
 
     it('prioritizes explicit params over cookie settings', () => {
-      vi.spyOn(pgm, 'getCookie')
+      vi.spyOn(cookies, 'getCookie')
         .mockReturnValueOnce('1.3') // Rate from cookie
         .mockReturnValueOnce('0.9') // Pitch from cookie
         .mockReturnValueOnce(null); // No voice in cookie
@@ -428,7 +428,7 @@ describe('user_interactions.ts', () => {
         vi.fn().mockReturnValue([]);
 
       // Mock getCookie to return no TTS settings
-      vi.spyOn(pgm, 'getCookie').mockReturnValue(null);
+      vi.spyOn(cookies, 'getCookie').mockReturnValue(null);
 
       const result = readRawTextAloud(
         'Hello',

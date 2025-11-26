@@ -20,7 +20,7 @@ import {
   deleteCookie,
   areCookiesEnabled,
   check_table_prefix,
-} from '@/pgm';
+} from '../../../src/frontend/js/legacy/pgm';
 
 // Mock window.STATUSES
 const mockStatuses = {

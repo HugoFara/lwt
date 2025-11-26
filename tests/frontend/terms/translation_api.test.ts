@@ -1,11 +1,11 @@
 /**
  * Tests for translation_api.ts - Translation API functions
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
   getLibreTranslateTranslationBase,
   getLibreTranslateTranslation,
-} from '@/translation_api';
+} from '../../../src/frontend/js/terms/translation_api';
 
 describe('translation_api.ts', () => {
   afterEach(() => {
@@ -106,7 +106,7 @@ describe('translation_api.ts', () => {
 
     it('handles empty text', async () => {
       const mockResponse = { translatedText: '' };
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         json: () => Promise.resolve(mockResponse),
       } as Response);
 
