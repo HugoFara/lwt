@@ -67,7 +67,9 @@ class Migrations
         Connection::execute("TRUNCATE {$tbpref}textitems2");
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         Maintenance::initWordCount();
-        $sql = "SELECT TxID, TxLgID FROM {$tbpref}texts";
+        // Only reparse texts that have a valid language reference
+        $sql = "SELECT t.TxID, t.TxLgID FROM {$tbpref}texts t
+                INNER JOIN {$tbpref}languages l ON t.TxLgID = l.LgID";
         $res = Connection::query($sql);
         if ($res === false || $res === true) {
             return;
@@ -75,7 +77,7 @@ class Migrations
         while ($record = mysqli_fetch_assoc($res)) {
             $id = (int) $record['TxID'];
             TextParsing::splitCheck(
-                (string)get_first_value(
+                (string)\get_first_value(
                     "SELECT TxText AS value
                     FROM {$tbpref}texts
                     WHERE TxID = $id"
@@ -98,7 +100,7 @@ class Migrations
         $dbname = Globals::getDatabaseName();
 
         // DB Version
-        $currversion = get_version_number();
+        $currversion = \get_version_number();
         $connection = Globals::getDbConnection();
 
         $res = mysqli_query(
@@ -108,7 +110,7 @@ class Migrations
             WHERE StKey = 'dbversion'"
         );
         if (mysqli_errno($connection) != 0) {
-            my_die(
+            \my_die(
                 'There is something wrong with your database ' . $dbname .
                 '. Please reinstall.'
             );
@@ -132,7 +134,7 @@ class Migrations
                 echo "<p>DEBUG: check DB collation: ";
             }
             if (
-                'utf8utf8_general_ci' != get_first_value(
+                'utf8utf8_general_ci' != \get_first_value(
                     'SELECT concat(default_character_set_name, default_collation_name) AS value
                 FROM information_schema.SCHEMATA
                 WHERE schema_name = "' . $dbname . '"'
@@ -157,7 +159,7 @@ class Migrations
             $res = Connection::query("SELECT filename FROM _migrations");
             if ($res !== false && $res !== true) {
                 while ($record = mysqli_fetch_assoc($res)) {
-                    $queries = parseSQLFile(
+                    $queries = \parseSQLFile(
                         __DIR__ . '/../../../../db/migrations/' . $record["filename"]
                     );
                     foreach ($queries as $sql_query) {
@@ -218,7 +220,7 @@ class Migrations
         $count = 0;
 
         // Rebuild in missing table
-        $queries = parseSQLFile(__DIR__ . "/../../../../db/schema/baseline.sql");
+        $queries = \parseSQLFile(__DIR__ . "/../../../../db/schema/baseline.sql");
         foreach ($queries as $query) {
             if (str_contains($query, "_migrations")) {
                 // Do not prefix meta tables
@@ -276,7 +278,7 @@ class Migrations
             }
             Connection::execute(
                 "UPDATE {$tbpref}words
-                SET " . make_score_random_insert_update('u') . "
+                SET " . \make_score_random_insert_update('u') . "
                 WHERE WoTodayScore>=-100 AND WoStatus<98"
             );
             Connection::execute(

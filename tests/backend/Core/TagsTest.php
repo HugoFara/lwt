@@ -10,7 +10,7 @@ $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/database_connect.php';
-require_once __DIR__ . '/../../../src/backend/Core/tags.php';
+require_once __DIR__ . '/../../../src/backend/Core/Tag/tags.php';
 
 use PHPUnit\Framework\TestCase;
 

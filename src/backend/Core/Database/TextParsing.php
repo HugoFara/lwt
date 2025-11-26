@@ -47,7 +47,7 @@ class TextParsing
         if ($id == -1) {
             echo '<div id="check_text" style="margin-right:50px;">
             <h2>Text</h2>
-            <p>' . str_replace("\n", "<br /><br />", tohtml($text)) . '</p>';
+            <p>' . str_replace("\n", "<br /><br />", \tohtml($text)) . '</p>';
         } elseif ($id == -2) {
             $text = preg_replace("/[\n]+/u", "\n¶", $text);
             return explode("\n", $text);
@@ -57,7 +57,7 @@ class TextParsing
         // We use the format "word  num num" for all nodes
         $mecab_args = " -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n";
         $mecab_args .= " -o $file_name ";
-        $mecab = get_mecab_path($mecab_args);
+        $mecab = \get_mecab_path($mecab_args);
 
         // WARNING: \n is converted to PHP_EOL here!
         $handle = popen($mecab, 'w');
@@ -81,7 +81,7 @@ class TextParsing
         $order = 0;
         $sid = 1;
         if ($id > 0) {
-            $sid = (int)get_first_value(
+            $sid = (int)\get_first_value(
                 "SELECT IFNULL(MAX(`SeID`)+1,1) as value
                 FROM {$tbpref}sentences"
             );
@@ -326,7 +326,7 @@ class TextParsing
             echo "<div id=\"check_text\" style=\"margin-right:50px;\">
             <h4>Text</h4>
             <p " . ($rtlScript ? 'dir="rtl"' : '') . ">" .
-            str_replace("¶", "<br /><br />", tohtml($text)) .
+            str_replace("¶", "<br /><br />", \tohtml($text)) .
             "</p>";
         }
         // "\r" => Sentence delimiter, "\t" and "\n" => Word delimiter
@@ -351,7 +351,7 @@ class TextParsing
             $text
         );
         if ($id == -2) {
-            $text = remove_spaces(
+            $text = \remove_spaces(
                 str_replace(
                     array("\r\r", "\t", "\n"),
                     array("\r", "", ""),
@@ -382,14 +382,14 @@ class TextParsing
                 str_replace(array("\t", "\n\n"), array("\n", ""), $text)
             )
         );
-        $text = remove_spaces(
+        $text = \remove_spaces(
             preg_replace("/(\n|^)(?!1\t)/u", "\n0\t", $text),
             $removeSpaces
         );
         // It is faster to write to a file and let SQL do its magic, but may run into
         // security restrictions
         $use_local_infile = in_array(
-            get_first_value("SELECT @@GLOBAL.local_infile as value"),
+            \get_first_value("SELECT @@GLOBAL.local_infile as value"),
             array(1, '1', 'ON')
         );
         if ($use_local_infile) {
@@ -399,7 +399,7 @@ class TextParsing
             $order = 0;
             $sid = 1;
             if ($id > 0) {
-                $sid = (int)get_first_value(
+                $sid = (int)\get_first_value(
                     "SELECT IFNULL(MAX(`SeID`)+1,1) as value
                     FROM {$tbpref}sentences"
                 );
@@ -497,7 +497,7 @@ class TextParsing
         if ($res !== false && $res !== true) {
             echo '<h4>Sentences</h4><ol>';
             while ($record = mysqli_fetch_assoc($res)) {
-                echo "<li>" . tohtml($record['Sent']) . "</li>";
+                echo "<li>" . \tohtml($record['Sent']) . "</li>";
             }
             mysqli_free_result($res);
         }
@@ -512,14 +512,14 @@ class TextParsing
         while ($record = mysqli_fetch_assoc($res)) {
             if ($record['len'] == 1) {
                 $wo[] = array(
-                    tohtml($record['word']),
+                    \tohtml($record['word']),
                     $record['cnt'],
-                    tohtml($record['WoTranslation'])
+                    \tohtml($record['WoTranslation'])
                 );
             } else {
                 $nw[] = array(
-                    tohtml((string)$record['word']),
-                    tohtml((string)$record['cnt'])
+                    \tohtml((string)$record['word']),
+                    \tohtml((string)$record['cnt'])
                 );
             }
         }
@@ -610,9 +610,9 @@ class TextParsing
             );
             while ($record = mysqli_fetch_assoc($res)) {
                 $mw[] = array(
-                    tohtml((string)$record['word']),
+                    \tohtml((string)$record['word']),
                     $record['cnt'],
-                    tohtml((string)$record['WoTranslation'])
+                    \tohtml((string)$record['WoTranslation'])
                 );
             }
             mysqli_free_result($res);
@@ -790,7 +790,7 @@ class TextParsing
         $record = mysqli_fetch_assoc($res);
         // Just checking if LgID exists with ID should be enough
         if ($record == false) {
-            my_die("Language data not found: $sql");
+            \my_die("Language data not found: $sql");
         }
         $rtlScript = $record['LgRightToLeft'];
         mysqli_free_result($res);

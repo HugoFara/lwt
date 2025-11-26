@@ -15,8 +15,11 @@
 
 // Core utilities (replaces kernel_utility.php)
 require_once __DIR__ . "/settings.php";
+require_once __DIR__ . "/version.php";
 require_once __DIR__ . "/Utils/string_utilities.php";
 require_once __DIR__ . "/Utils/debug_utilities.php";
+require_once __DIR__ . "/Utils/sql_file_parser.php";
+require_once __DIR__ . "/Utils/error_handling.php";
 
 require_once __DIR__ . "/Bootstrap/EnvLoader.php";
 require_once __DIR__ . "/Database/Connection.php";
