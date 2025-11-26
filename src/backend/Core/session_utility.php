@@ -744,7 +744,7 @@ function makeOpenDictStr($url, $txt): string
         $query = parse_url($url, PHP_URL_QUERY);
         if ($query !== false && $query !== null) {
             parse_str($query, $url_query);
-            $popup = $popup || array_key_exists('lwt_popup', $url_query);
+            $popup = array_key_exists('lwt_popup', $url_query);
         }
     }
     if ($popup) {

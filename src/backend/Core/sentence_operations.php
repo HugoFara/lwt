@@ -107,9 +107,9 @@ function sentences_containing_word_lc_query($wordlc, $lid): string
  * @param int      $lid    Language ID
  * @param int      $limit  Maximum number of sentences to return
  *
- * @return mysqli_result|true Query
+ * @return mysqli_result|false Query result or false on failure
  */
-function sentences_from_word($wid, $wordlc, $lid, $limit=-1): bool|\mysqli_result
+function sentences_from_word($wid, $wordlc, $lid, $limit=-1): \mysqli_result|false
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (empty($wid)) {

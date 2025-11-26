@@ -26,9 +26,9 @@ require_once 'Core/session_utility.php';
  *
  * @param int $txid Text id
  *
- * @return mysqli_result|true SQL query.
+ * @return mysqli_result|false SQL query result or false on failure.
  */
-function all_words_wellknown_get_words($txid)
+function all_words_wellknown_get_words($txid): \mysqli_result|false
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC

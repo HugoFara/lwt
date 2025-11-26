@@ -21,7 +21,6 @@
  *
  * @param string     $text Text to insert
  * @param string|int $lid  Language ID
- * @param int        $len  Number of words in the expression
  *
  * @return (int|string)[][] Each found multi-word details
  *
@@ -230,11 +229,12 @@ function findStandardExpression($textlc, $lid): array
     $notermchar = "/[^$termchar]($textlc)[^$termchar]/ui";
     // For each sentence in the language containing the query
     $matches = null;
+    $rSflag = false; // Flag to prevent repeat space-removal processing
     while ($record = mysqli_fetch_assoc($res)){
         $string = ' ' . $record['SeText'] . ' ';
         if ($splitEachChar) {
             $string = preg_replace('/([^\s])/u', "$1 ", $string);
-        } else if ($removeSpaces && empty($rSflag)) {
+        } else if ($removeSpaces && !$rSflag) {
             preg_match(
                 '/(?<=[ ])(' . preg_replace('/(.)/ui', "$1[ ]*", $textlc) .
                 ')(?=[ ])/ui',
@@ -243,6 +243,7 @@ function findStandardExpression($textlc, $lid): array
             if (!empty($ma[1])) {
                 $textlc = trim($ma[1]);
                 $notermchar = "/[^$termchar]($textlc)[^$termchar]/ui";
+                $rSflag = true; // Pattern found, stop further processing
             }
         }
         $last_pos = mb_strripos($string, $textlc, 0, 'UTF-8');

@@ -109,9 +109,9 @@ function do_diplay_impr_text_text_js()
 /**
  * Make the main content for a printed text.
  *
- * @param string $ann       Annotations separated b tabulations "\t"
- * @param string $textsize  Text size
- * @param bool   $rtlScript True if this text is right-to-left
+ * @param string   $ann       Annotations separated b tabulations "\t"
+ * @param int|string $textsize  Text size
+ * @param bool     $rtlScript True if this text is right-to-left
  *
  * @return void
  */

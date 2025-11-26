@@ -105,7 +105,7 @@ if (isset($_REQUEST["action"])) {  // Action
 
         <?php
 
-        if (isset($textaudio) && trim($textaudio) != '') {
+        if (trim($textaudio) != '') {
 
             ?>
 

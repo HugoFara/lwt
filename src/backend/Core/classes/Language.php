@@ -91,7 +91,7 @@ class Language
     public $ttsvoiceapi;
 
     /**
-     * @var string $showromanization Setting to show or hide romanization
+     * @var bool $showromanization Setting to show or hide romanization
      */
     public $showromanization;
 

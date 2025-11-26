@@ -1048,7 +1048,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
     $statuses[0]["name"] = 'Unknown';
     $statuses[0]["abbr"] = 'Ukn';
     $res = do_mysqli_query($sql);
-    $showCounts = (int)getSettingWithDefault('set-show-text-word-counts');
+    $showCounts = getSettingWithDefault('set-show-text-word-counts');
 
     ?>
 <form name="form2" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">

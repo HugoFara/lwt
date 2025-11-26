@@ -80,7 +80,6 @@ function unset_settings(): void
  *
  * @param string $k Setting key
  * @param string $v Setting value
- * @param string $u URL to go to
  *
  * @return void
  */

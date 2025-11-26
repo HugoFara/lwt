@@ -309,14 +309,10 @@ class TextParsing
         );
         // It is faster to write to a file and let SQL do its magic, but may run into
         // security restrictions
-        $use_local_infile = false;
-        if (!in_array(
+        $use_local_infile = in_array(
             get_first_value("SELECT @@GLOBAL.local_infile as value"),
             array(1, '1', 'ON')
-        )
-        ) {
-            $use_local_infile = false;
-        }
+        );
         if ($use_local_infile) {
             self::saveWithSql($text, $id);
         } else {

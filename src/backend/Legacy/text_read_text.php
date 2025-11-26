@@ -458,8 +458,6 @@ function word_parser($record, $showAll, $currcharcount, $hideuntil): int
  * @param string[] $record        Record information
  * @param 0|1      $showAll       Show all words or not
  * @param int      $currcharcount Current number of caracters
- * @param int      $cnt
- * @param int      $sid           Sentence ID
  * @param int      $hideuntil     Should the value be hidden or not
  *
  * @return int New value for $hideuntil

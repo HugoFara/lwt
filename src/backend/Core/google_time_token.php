@@ -45,8 +45,8 @@ function regenGoogleTimeToken(): array|null
         $g, $ma
     );
     if (isset($ma[1][0]) && isset($ma[2][0]) && isset($ma[3][0])) {
-        strval($ma[3][0]) . "." .
-        strval(intval($ma[1][0]) + intval($ma[2][0]));
+        $tok = strval($ma[3][0]) . "." .
+            strval(intval($ma[1][0]) + intval($ma[2][0]));
         do_mysqli_query(
             "INSERT INTO _lwtgeneral (LWTKey, LWTValue)
             VALUES ('GoogleTimeToken', '$tok')
