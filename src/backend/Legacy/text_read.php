@@ -19,6 +19,8 @@
 
 require_once 'Core/session_utility.php';
 require_once 'Core/mobile_interactions.php';
+
+use Lwt\Database\Settings;
 require_once 'text_read_header.php';
 require_once 'text_read_text.php';
 
@@ -90,7 +92,7 @@ onclick="hideRightFrames();">
  */
 function do_text_desktop_content($textid)
 {
-    $frame_l_width = (int)getSettingWithDefault('set-text-l-framewidth-percent');
+    $frame_l_width = (int)Settings::getWithDefault('set-text-l-framewidth-percent');
     ?>
 <div style="width: <?php echo $frame_l_width; ?>%;" id="frames-l">
     <div id="frame-h">

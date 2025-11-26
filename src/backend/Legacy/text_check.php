@@ -21,6 +21,11 @@ namespace Lwt\Interface\Check_Text;
 
 require_once 'Core/session_utility.php';
 
+use \Lwt\Database\Settings;
+
+use \Lwt\Database\Escaping;
+use \Lwt\Database\TextParsing;
+
 /**
  * Do the check text operation.
  *
@@ -32,10 +37,10 @@ require_once 'Core/session_utility.php';
 function do_operation($text, $lgid)
 {
     echo '<p><input type="button" value="&lt;&lt; Back" onclick="history.back();" /></p>';
-    if (strlen(prepare_textdata($text)) > 65000) {
+    if (strlen(Escaping::prepareTextdata($text)) > 65000) {
         echo "<p>Error: Text too long, must be below 65000 Bytes.</p>";
     } else {
-        splitCheckText($text, $lgid, -1);
+        TextParsing::splitCheck($text, $lgid, -1);
     }
     echo '<p><input type="button" value="&lt;&lt; Back" onclick="history.back();" /></p>';
 }
@@ -59,7 +64,7 @@ function display_form()
         $return[$lg_record["LgID"]] = langFromDict($url);
     }
     $languages_option = get_languages_selectoptions(
-        getSetting('currentlanguage'),
+        Settings::get('currentlanguage'),
         '[Choose...]'
     );
     ?>

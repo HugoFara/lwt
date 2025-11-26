@@ -19,6 +19,8 @@
 require_once 'Core/session_utility.php';
 require_once 'Core/langdefs.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Returns a dropdown menu of the different languages
  */
@@ -34,7 +36,7 @@ function get_wizard_selectoptions(string $v): string
 
 pagestart_nobody('Language Settings Wizard', 'html{background-color: rgba(0, 0, 0, 0);}');
 
-$currentnativelanguage = getSetting('currentnativelanguage');
+$currentnativelanguage = Settings::get('currentnativelanguage');
 
 ?>
 

@@ -22,6 +22,9 @@
 require_once 'Core/session_utility.php';
 require_once 'Core/langdefs.php';
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+
 /**
  * Get the SQL string to perform tests.
  *
@@ -260,7 +263,7 @@ function do_test_test_sentence($wid, $lang, $wordlc): array
         list($_, $sent) = getSentence(
             $seid,
             $wordlc,
-            (int)getSettingWithDefault('set-test-sentence-count')
+            (int)Settings::getWithDefault('set-test-sentence-count')
         );
     }
     mysqli_free_result($res);
@@ -745,7 +748,7 @@ function do_test_test_javascript_clickable($wo_record, $solution)
     }
 
     LWT_DATA.language.id = <?php echo json_encode($wo_record['WoLgID']); ?>;
-    LWT_DATA.test.solution = <?php echo prepare_textdata_js($solution); ?>;
+    LWT_DATA.test.solution = <?php echo Escaping::prepareTextdataJs($solution); ?>;
     LWT_DATA.word.id = <?php echo $wid; ?>;
     LWT_DATA.language.ttsVoiceApi = <?php echo json_encode($voiceApi); ?>;
 
@@ -874,7 +877,7 @@ function do_test_footer($notyettested, $wrong, $correct)
 function do_test_test_javascript($count)
 {
     $time_data = array(
-        "wait_time" => (int) getSettingWithDefault(
+        "wait_time" => (int) Settings::getWithDefault(
             'set-test-edit-frame-waiting-time'
         ),
         "time" => time(),

@@ -17,6 +17,9 @@
  * @since   3.0.0 Split from text_helpers.php
  */
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+
 /**
  * Create an HTML media player, audio or video.
  *
@@ -143,12 +146,12 @@ function makeAudioPlayer($audio, $offset = 0)
         return;
     }
     $audio = trim($audio);
-    $repeatMode = (bool) getSettingZeroOrOne('currentplayerrepeatmode', 0);
-    $currentplayerseconds = getSetting('currentplayerseconds');
+    $repeatMode = (bool) Settings::getZeroOrOne('currentplayerrepeatmode', 0);
+    $currentplayerseconds = Settings::get('currentplayerseconds');
     if ($currentplayerseconds == '') {
         $currentplayerseconds = 5;
     }
-    $currentplaybackrate = getSetting('currentplaybackrate');
+    $currentplaybackrate = Settings::get('currentplaybackrate');
     if ($currentplaybackrate == '') {
         $currentplaybackrate = 10;
     }
@@ -244,7 +247,7 @@ function makeAudioPlayer($audio, $offset = 0)
 <script type="text/javascript">
     //<![CDATA[
 
-    const MEDIA = <?php echo prepare_textdata_js(encodeURI($audio)); ?>;
+    const MEDIA = <?php echo Escaping::prepareTextdataJs(encodeURI($audio)); ?>;
     const MEDIA_OFFSET = <?php echo $offset; ?>;
 
     /**

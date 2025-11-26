@@ -16,6 +16,8 @@
  * @since    3.0.0
  */
 
+use Lwt\Database\Settings;
+
 /**
  * @return string|string[]
  *
@@ -87,7 +89,7 @@ function print_file_path($filename): void
  */
 function get_file_path($filename): string
 {
-    $file = getSettingWithDefault('set-theme-dir') . preg_replace('/.*\//', '', $filename);
+    $file = Settings::getWithDefault('set-theme-dir') . preg_replace('/.*\//', '', $filename);
     if (file_exists($file)) {
         // Return absolute path for clean URL compatibility
         return '/' . $file;
@@ -100,7 +102,7 @@ function get_sepas()
 {
     static $sepa;
     if (!$sepa) {
-        $sepa = preg_quote(getSettingWithDefault('set-term-translation-delimiters'), '/');
+        $sepa = preg_quote(Settings::getWithDefault('set-term-translation-delimiters'), '/');
     }
     return $sepa;
 }
@@ -110,7 +112,7 @@ function get_first_sepa()
     static $sepa;
     if (!$sepa) {
         $sepa = mb_substr(
-            getSettingWithDefault('set-term-translation-delimiters'),
+            Settings::getWithDefault('set-term-translation-delimiters'),
             0,
             1,
             'UTF-8'

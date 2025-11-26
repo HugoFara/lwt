@@ -19,6 +19,10 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+use Lwt\Database\TextParsing;
+
 /**
  * Display the check page before a long text import.
  *
@@ -48,7 +52,7 @@ function long_text_check($max_input_vars): void
         $data = file_get_contents($_FILES["thefile"]["tmp_name"]);
         $data = str_replace("\r\n", "\n", $data);
     } else {
-        $data = prepare_textdata($_REQUEST["Upload"]);
+        $data = Escaping::prepareTextdata($_REQUEST["Upload"]);
     }
     $data = replace_supp_unicode_planes_char($data);
     $data = trim($data);
@@ -69,7 +73,7 @@ function long_text_check($max_input_vars): void
         $message = "Error: No text specified!";
         echo error_message_with_hide($message, false);
     } else {
-        $sent_array = splitCheckText($data, $langid, -2);
+        $sent_array = TextParsing::splitCheck($data, $langid, -2);
         $texts = array();
         $text_index = 0;
         $texts[$text_index] = array();
@@ -201,7 +205,7 @@ function long_text_save(): void
             );
             $id = get_last_key();
             saveTextTags($id);
-            splitCheckText($texts[$i], $langid, $id);
+            TextParsing::splitCheck($texts[$i], $langid, $id);
         }
         $message = $imported . " Text(s) imported!";
     }
@@ -287,7 +291,7 @@ function long_text_display($max_input_vars)
             <td class="td1">
                 <select name="LgID" id="TxLgID" class="notempty setfocus" onchange="change_textboxes_language();">
                     <?php
-                    echo get_languages_selectoptions(getSetting('currentlanguage'), '[Choose...]');
+                    echo get_languages_selectoptions(Settings::get('currentlanguage'), '[Choose...]');
                     ?>
                 </select>
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />

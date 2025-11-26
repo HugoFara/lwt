@@ -28,6 +28,9 @@ require_once 'Core/langdefs.php';
 require_once 'Core/classes/Language.php';
 
 use Lwt\Classes\Language;
+use Lwt\Database\Maintenance;
+use Lwt\Database\Settings;
+use Lwt\Database\TextParsing;
 
 
 /**
@@ -85,7 +88,7 @@ function edit_languages_refresh($lid): string
         "DELETE FROM {$tbpref}textitems2 where Ti2LgID = $lid",
         "Text items deleted"
     );
-    adjust_autoincr('sentences', 'SeID');
+    Maintenance::adjustAutoIncrement('sentences', 'SeID');
     $sql = "select TxID, TxText from " . $tbpref . "texts
     where TxLgID = " . $lid . "
     order by TxID";
@@ -93,7 +96,7 @@ function edit_languages_refresh($lid): string
     while ($record = mysqli_fetch_assoc($res)) {
         $txtid = (int)$record["TxID"];
         $txttxt = $record["TxText"];
-        splitCheckText($txttxt, $lid, $txtid);
+        TextParsing::splitCheck($txttxt, $lid, $txtid);
     }
     mysqli_free_result($res);
     $message = $message2 .
@@ -291,12 +294,12 @@ function edit_languages_op_change($lid): string
             "DELETE FROM {$tbpref}textitems2 where Ti2LgID = $lid",
             "Text items deleted"
         );
-        adjust_autoincr('sentences', 'SeID');
+        Maintenance::adjustAutoIncrement('sentences', 'SeID');
         runsql(
             "UPDATE {$tbpref}words SET WoWordCount = 0 WHERE WoLgID = $lid",
             ''
         );
-        init_word_count();
+        Maintenance::initWordCount();
         $sql = "SELECT TxID, TxText FROM {$tbpref}texts
         WHERE TxLgID = $lid ORDER BY TxID";
         $res = do_mysqli_query($sql);
@@ -304,7 +307,7 @@ function edit_languages_op_change($lid): string
         while ($record = mysqli_fetch_assoc($res)) {
             $txtid = (int)$record["TxID"];
             $txttxt = $record["TxText"];
-            splitCheckText($txttxt, $lid, $txtid);
+            TextParsing::splitCheck($txttxt, $lid, $txtid);
             $cntrp++;
         }
         mysqli_free_result($res);
@@ -405,7 +408,7 @@ function edit_language_form($language): void
 {
     $sourceLg = '';
     $targetLg = '';
-    $currentnativelanguage = getSetting('currentnativelanguage');
+    $currentnativelanguage = Settings::get('currentnativelanguage');
     if (array_key_exists($currentnativelanguage, LWT_LANGUAGES_ARRAY)) {
         $targetLg = LWT_LANGUAGES_ARRAY[$currentnativelanguage][1];
     }
@@ -1119,7 +1122,7 @@ function get_wizard_selectoptions($currentnativelanguage): string
  */
 function edit_languages_new()
 {
-    $currentnativelanguage = getSetting('currentnativelanguage');
+    $currentnativelanguage = Settings::get('currentnativelanguage');
     ?>
     <h2>
         New Language
@@ -1319,7 +1322,7 @@ function edit_languages_display($message)
 
     echo error_message_with_hide($message, false);
 
-    $current = (int) getSetting('currentlanguage');
+    $current = (int) Settings::get('currentlanguage');
 
     $recno = get_first_value(
         "SELECT COUNT(*) AS value

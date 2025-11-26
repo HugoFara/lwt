@@ -18,6 +18,8 @@
  */
 
 use Lwt\Database\Connection;
+use Lwt\Database\Maintenance;
+use Lwt\Database\Migrations;
 
 /**
  * Restore the database from a file.
@@ -117,9 +119,9 @@ function restore_file($handle, $title): string
     }
     if ($install_status["errors"] == 0) {
         Connection::execute("DROP TABLE IF EXISTS {$tbpref}textitems");
-        check_update_db();
-        reparse_all_texts();
-        optimizedb();
+        Migrations::checkAndUpdate();
+        Migrations::reparseAllTexts();
+        Maintenance::optimizeDatabase();
         get_tags(1);
         get_texttags(1);
         $message = "Success: $title restored";
@@ -163,7 +165,7 @@ function truncateUserDatabase(): void
     Connection::execute("TRUNCATE {$tbpref}words");
     Connection::execute("TRUNCATE {$tbpref}wordtags");
     Connection::execute("DELETE FROM {$tbpref}settings where StKey = 'currenttext'");
-    optimizedb();
+    Maintenance::optimizeDatabase();
     get_tags(1);
     get_texttags(1);
 }

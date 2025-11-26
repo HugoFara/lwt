@@ -14,6 +14,8 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Settings;
+
 function output_text(
     string $saveterm,
     string $saverom,
@@ -101,7 +103,7 @@ if ($textid == 0) {
 
 $ann = getreq('ann');
 if ($ann == '') {
-    $ann = getSetting('currentprintannotation');
+    $ann = Settings::get('currentprintannotation');
 }
 if ($ann == '') {
     $ann = 3;
@@ -112,7 +114,7 @@ $show_tags = $ann & 4;
 
 $statusrange = getreq('status');
 if ($statusrange == '') {
-    $statusrange = getSetting('currentprintstatus');
+    $statusrange = Settings::get('currentprintstatus');
 }
 if ($statusrange == '') {
     $statusrange = 14;
@@ -120,7 +122,7 @@ if ($statusrange == '') {
 
 $annplcmnt = getreq('annplcmnt');
 if ($annplcmnt == '') {
-    $annplcmnt = getSetting('currentprintannotationplacement');
+    $annplcmnt = Settings::get('currentprintannotationplacement');
 }
 if ($annplcmnt == '') {
     $annplcmnt = 0;
@@ -141,10 +143,10 @@ $textsize = $record['LgTextSize'];
 $rtlScript = $record['LgRightToLeft'];
 mysqli_free_result($res);
 
-saveSetting('currenttext', $textid);
-saveSetting('currentprintannotation', $ann);
-saveSetting('currentprintstatus', $statusrange);
-saveSetting('currentprintannotationplacement', $annplcmnt);
+Settings::save('currenttext', $textid);
+Settings::save('currentprintannotation', $ann);
+Settings::save('currentprintstatus', $statusrange);
+Settings::save('currentprintannotationplacement', $annplcmnt);
 
 pagestart_nobody('Print');
 

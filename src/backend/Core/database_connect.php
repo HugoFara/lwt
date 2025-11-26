@@ -396,7 +396,7 @@ function getSettingWithDefault($key)
  *
  * @deprecated 3.0.0 Use Settings::save() for new code
  */
-function saveSetting(string $k, string $v)
+function saveSetting(string $k, mixed $v)
 {
     return Settings::save($k, $v);
 }

@@ -18,6 +18,8 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Get the record for this text in the database.
  *
@@ -580,7 +582,7 @@ function mainWordLoop($textid, $showAll): void
  */
 function do_text_text_style(int $showLearning, int $mode_trans, int $textsize, bool $ann_exists): void
 {
-    $displaystattrans = (int)getSettingWithDefault('set-display-text-frame-term-translation');
+    $displaystattrans = (int)Settings::getWithDefault('set-display-text-frame-term-translation');
     $pseudo_element = ($mode_trans < 3) ? 'after' : 'before';
     $data_trans = $ann_exists ? 'data_ann' : 'data_trans';
     $stat_arr = array(1, 2, 3, 4, 5, 98, 99);
@@ -769,13 +771,13 @@ function do_text_text_content($textid, $only_body = true): void
     $rtlScript = (bool)$record['LgRightToLeft'];
 
     // User settings
-    $showAll = getSettingZeroOrOne('showallwords', 1);
-    $showLearning = getSettingZeroOrOne('showlearningtranslations', 1);
+    $showAll = Settings::getZeroOrOne('showallwords', 1);
+    $showLearning = Settings::getZeroOrOne('showlearningtranslations', 1);
 
     /**
      * Annotation position between 0 and 4
      */
-    $mode_trans = (int) getSettingWithDefault('set-text-frame-annotation-position');
+    $mode_trans = (int) Settings::getWithDefault('set-text-frame-annotation-position');
     /**
      * Ruby annotations
      */
@@ -788,7 +790,7 @@ function do_text_text_content($textid, $only_body = true): void
     ?>
     <script type="text/javascript" src="/assets/js/jquery.hoverIntent.js" charset="utf-8"></script>
     <?php
-    $visit_status = getSettingWithDefault('set-text-visit-statuses-via-key');
+    $visit_status = Settings::getWithDefault('set-text-visit-statuses-via-key');
     if ($visit_status == '') {
         $visit_status = '0';
     }
@@ -805,7 +807,7 @@ function do_text_text_content($textid, $only_body = true): void
                     str_replace(
                         array('\\',']','-','^'),
                         array('\\\\','\\]','\\-','\\^'),
-                        getSettingWithDefault('set-term-translation-delimiters')
+                        Settings::getWithDefault('set-term-translation-delimiters')
                     )
                 ),
                 'word_parsing'    => $record['LgRegexpWordCharacters'],
@@ -820,9 +822,9 @@ function do_text_text_content($textid, $only_body = true): void
 
             'settings' => array(
                 'jQuery_tooltip'     => (
-                    getSettingWithDefault('set-tooltip-mode') == 2 ? 1 : 0
+                    Settings::getWithDefault('set-tooltip-mode') == 2 ? 1 : 0
                 ),
-                'hts'                => getSettingWithDefault('set-hts'),
+                'hts'                => Settings::getWithDefault('set-hts'),
                 'word_status_filter' => makeStatusClassFilter((int)$visit_status),
                 'annotations_mode'   => $mode_trans
             ),

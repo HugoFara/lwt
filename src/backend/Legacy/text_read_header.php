@@ -20,6 +20,8 @@ require_once 'Core/session_utility.php';
 // To get the BCP 47 language tag
 require_once 'Core/langdefs.php' ;
 
+use Lwt\Database\Settings;
+
 /**
  * Get the text and language data associated with the text.
  *
@@ -138,8 +140,8 @@ function do_title($title, $sourceURI): void
 function do_settings($textid): void
 {
     // User settings
-    $showAll = getSettingZeroOrOne('showallwords', 1);
-    $showLearning = getSettingZeroOrOne('showlearningtranslations', 1);
+    $showAll = Settings::getZeroOrOne('showallwords', 1);
+    $showLearning = Settings::getZeroOrOne('showlearningtranslations', 1);
 
     ?>
 <div class="flex-spaced">
@@ -312,7 +314,7 @@ function do_text_header_content($textid, $only_body = true): void
     $media = trim($media);
 
 
-    saveSetting('currenttext', $textid);
+    Settings::save('currenttext', $textid);
 
     if (!$only_body) {
         pagestart_nobody($title, 'html, body {margin-bottom:0;}');

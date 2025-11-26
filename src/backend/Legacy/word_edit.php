@@ -27,6 +27,9 @@ require_once 'Core/session_utility.php';
 require_once 'Core/simterms.php';
 require_once 'Core/langdefs.php';
 
+use \Lwt\Database\Escaping;
+use \Lwt\Database\Settings;
+
 /**
  * Insert a new word to the database
  *
@@ -41,7 +44,7 @@ function insert_new_word($textlc, $translation): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
-    $titletext = "New Term: " . tohtml(prepare_textdata($_REQUEST["WoTextLC"]));
+    $titletext = "New Term: " . tohtml(Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
     pagestart_nobody($titletext);
     echo '<h1>' . $titletext . '</h1>';
 
@@ -83,7 +86,7 @@ function edit_term($translation)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
-    $titletext = "Edit Term: " . tohtml(prepare_textdata($_REQUEST["WoTextLC"]));
+    $titletext = "Edit Term: " . tohtml(Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
     pagestart_nobody($titletext);
     echo '<h1>' . $titletext . '</h1>';
 
@@ -116,7 +119,7 @@ function edit_term($translation)
  */
 function lowercase_term_not_equal($textlc): void
 {
-    $titletext = "New/Edit Term: " . tohtml(prepare_textdata($_REQUEST["WoTextLC"]));
+    $titletext = "New/Edit Term: " . tohtml(Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
     pagestart_nobody($titletext);
     echo '<h1>' . $titletext . '</h1>';
     $message =
@@ -134,18 +137,18 @@ function change_term_display(int $wid, string $translation, ?string $hex): void
 <script type="text/javascript">
     const context = window.parent.document.getElementById('frame-l');
     const contexth = window.parent.document.getElementById('frame-h');
-    const woid = <?php echo prepare_textdata_js($wid); ?>;
-    const status = <?php echo prepare_textdata_js($_REQUEST["WoStatus"]); ?>;
+    const woid = <?php echo Escaping::prepareTextdataJs($wid); ?>;
+    const status = <?php echo Escaping::prepareTextdataJs($_REQUEST["WoStatus"]); ?>;
     const trans = <?php
-    echo prepare_textdata_js($translation . getWordTagList($wid, ' ', 1, 0));
+    echo Escaping::prepareTextdataJs($translation . getWordTagList($wid, ' ', 1, 0));
     ?>;
-    const roman = <?php echo prepare_textdata_js($_REQUEST["WoRomanization"]); ?>;
+    const roman = <?php echo Escaping::prepareTextdataJs($_REQUEST["WoRomanization"]); ?>;
     let title;
     if (window.parent.LWT_DATA.settings.jQuery_tooltip) {
         title = '';
     } else {
         title = make_tooltip(
-            <?php echo prepare_textdata_js($_REQUEST["WoText"]); ?>,
+            <?php echo Escaping::prepareTextdataJs($_REQUEST["WoText"]); ?>,
             trans, roman, status
         );
     }
@@ -185,8 +188,8 @@ function change_term_display(int $wid, string $translation, ?string $hex): void
 function edit_word_do_operation(string $translation, string $fromAnn): void
 {
     $hex = null;
-    $textlc = trim(prepare_textdata($_REQUEST["WoTextLC"]));
-    $text = trim(prepare_textdata($_REQUEST["WoText"]));
+    $textlc = trim(Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
+    $text = trim(Escaping::prepareTextdata($_REQUEST["WoText"]));
 
     if (mb_strtolower($text, 'UTF-8') != $textlc) {
         lowercase_term_not_equal($textlc);
@@ -197,7 +200,7 @@ function edit_word_do_operation(string $translation, string $fromAnn): void
     if ($_REQUEST['op'] == 'Save') {
         // Insert new term
         $output = insert_new_word($textlc, $translation);
-        $hex = strToClassName(prepare_textdata($_REQUEST["WoTextLC"]));
+        $hex = strToClassName(Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
     } else {
         // Update existing term
         $output = edit_term($translation);
@@ -217,7 +220,7 @@ function edit_word_do_operation(string $translation, string $fromAnn): void
 <script type="text/javascript">
     window.opener.do_ajax_edit_impr_text(
         <?php echo $fromAnn; ?>,
-        <?php echo prepare_textdata_js($textlc); ?>,
+        <?php echo Escaping::prepareTextdataJs($textlc); ?>,
         <?php echo $wid; ?>
         );
 </script>
@@ -300,7 +303,7 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
         $sent = getSentence(
             $seid,
             $termlc,
-            (int) getSettingWithDefault('set-term-sentence-count')
+            (int) Settings::getWithDefault('set-term-sentence-count')
         );
         $trans_uri = (string) get_first_value(
             "SELECT LgGoogleTranslateURI AS value FROM {$tbpref}languages
@@ -450,7 +453,7 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
                     "SELECT Ti2SeID as value from {$tbpref}textitems2
                     where Ti2TxID = $text_id and Ti2WordCount = 1 and Ti2Order = $ord"
                 );
-                $sent = getSentence($seid, $termlc, (int) getSettingWithDefault('set-term-sentence-count'));
+                $sent = getSentence($seid, $termlc, (int) Settings::getWithDefault('set-term-sentence-count'));
                 $sentence = repl_tab_nl($sent[1]);
             }
             $transl = repl_tab_nl($record['WoTranslation']);

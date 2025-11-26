@@ -18,6 +18,8 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Return the annotatino of a text.
  *
@@ -218,7 +220,7 @@ function do_display_impr_text_text_main($textid = null)
         exit();
     }
     list($textsize, $rtlScript) = get_display_impr_text_text_data($textid);
-    saveSetting('currenttext', $textid);
+    Settings::save('currenttext', $textid);
     do_diplay_impr_text_text_area($ann, $textsize, $rtlScript);
 }
 

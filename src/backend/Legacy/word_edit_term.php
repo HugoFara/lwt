@@ -20,6 +20,8 @@
 require_once 'Core/session_utility.php';
 require_once 'Core/simterms.php';
 
+use Lwt\Database\Escaping;
+
 $translation_raw = repl_tab_nl(getreq("WoTranslation"));
 if ($translation_raw == '') {
     $translation = '*';
@@ -32,14 +34,14 @@ if ($translation_raw == '') {
 $message = '';
 $wid = null;
 if (isset($_REQUEST['op'])) {
-    $textlc = trim(prepare_textdata($_REQUEST["WoTextLC"]));
-    $text = trim(prepare_textdata($_REQUEST["WoText"]));
+    $textlc = trim(Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
+    $text = trim(Escaping::prepareTextdata($_REQUEST["WoText"]));
 
     if (mb_strtolower($text, 'UTF-8') == $textlc) {
         // UPDATE
 
         if ($_REQUEST['op'] == 'Change') {
-            $titletext = "Edit Term: " . tohtml(prepare_textdata($_REQUEST["WoTextLC"]));
+            $titletext = "Edit Term: " . tohtml(Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
             pagestart_nobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
@@ -65,7 +67,7 @@ if (isset($_REQUEST['op'])) {
             saveWordTags($wid);
         }
     } else {
-        $titletext = "New/Edit Term: " . tohtml(prepare_textdata($_REQUEST["WoTextLC"]));
+        $titletext = "New/Edit Term: " . tohtml(Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
         pagestart_nobody($titletext);
         echo '<h1>' . $titletext . '</h1>';
         $message = 'Error: Term in lowercase must be exactly = "' . $textlc . '", please go back and correct this!';
@@ -104,20 +106,20 @@ if (isset($_REQUEST['op'])) {
 <script type="text/javascript">
 //<![CDATA[
 var context = window.parent.document;
-var woid = <?php echo prepare_textdata_js($wid); ?>;
+var woid = <?php echo Escaping::prepareTextdataJs($wid); ?>;
 if(window.parent.location.href.includes('type=table')) {
     // Table Test
-    $('#STAT' + woid, context).html(<?php echo prepare_textdata_js(make_status_controls_test_table(1, (int) $_REQUEST["WoStatus"], $wid)); ?>);
-    $('#TERM' + woid, context).html(<?php echo prepare_textdata_js(tohtml($_REQUEST["WoText"])); ?>);
-    $('#TRAN' + woid, context).html(<?php echo prepare_textdata_js(tohtml($translation)); ?>);
-    $('#ROMA' + woid, context).html(<?php echo prepare_textdata_js(tohtml($_REQUEST["WoRomanization"])); ?>);
-    $('#SENT' + woid, context).html(<?php echo prepare_textdata_js($sent1); ?>);
+    $('#STAT' + woid, context).html(<?php echo Escaping::prepareTextdataJs(make_status_controls_test_table(1, (int) $_REQUEST["WoStatus"], $wid)); ?>);
+    $('#TERM' + woid, context).html(<?php echo Escaping::prepareTextdataJs(tohtml($_REQUEST["WoText"])); ?>);
+    $('#TRAN' + woid, context).html(<?php echo Escaping::prepareTextdataJs(tohtml($translation)); ?>);
+    $('#ROMA' + woid, context).html(<?php echo Escaping::prepareTextdataJs(tohtml($_REQUEST["WoRomanization"])); ?>);
+    $('#SENT' + woid, context).html(<?php echo Escaping::prepareTextdataJs($sent1); ?>);
 } else {
     // Normal Test
-    var wotext = <?php echo prepare_textdata_js($_REQUEST["WoText"]); ?>;
-    var status = <?php echo prepare_textdata_js($_REQUEST["WoStatus"]); ?>;
-    var trans = <?php echo prepare_textdata_js($translation . getWordTagList($wid, ' ', 1, 0)); ?>;
-    var roman = <?php echo prepare_textdata_js($_REQUEST["WoRomanization"]); ?>;
+    var wotext = <?php echo Escaping::prepareTextdataJs($_REQUEST["WoText"]); ?>;
+    var status = <?php echo Escaping::prepareTextdataJs($_REQUEST["WoStatus"]); ?>;
+    var trans = <?php echo Escaping::prepareTextdataJs($translation . getWordTagList($wid, ' ', 1, 0)); ?>;
+    var roman = <?php echo Escaping::prepareTextdataJs($_REQUEST["WoRomanization"]); ?>;
     $('.word' + woid, context).attr('data_text',wotext).attr('data_trans',trans).attr('data_rom',roman).attr('data_status',status);
 }
 cleanupRightFrames();

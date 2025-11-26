@@ -4,6 +4,8 @@ require_once __DIR__ . '/database_connect.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Database\Maintenance;
+use Lwt\Database\TextParsing;
 
 // -------------------------------------------------------------
 
@@ -128,7 +130,7 @@ function write_rss_to_db(array $texts): string
                         Escaping::toSqlSyntax($text['TxSourceURI']) . ')'
                 );
                 $id = get_last_key();
-                splitCheckText(
+                TextParsing::splitCheck(
                     get_first_value(
                         'select TxText as value from ' . $tbpref . 'texts
                         where TxID = ' . $id
@@ -189,8 +191,8 @@ function write_rss_to_db(array $texts): string
                     where TxID = ' . $text_ID
                 );
                 // $message .= $message4 . " / " . $message1 . " / " . $message2 . " / " . $message3;
-                adjust_autoincr('texts', 'TxID');
-                adjust_autoincr('sentences', 'SeID');
+                Maintenance::adjustAutoIncrement('texts', 'TxID');
+                Maintenance::adjustAutoIncrement('sentences', 'SeID');
                 Connection::execute(
                     "DELETE " . $tbpref . "texttags
                     FROM ("

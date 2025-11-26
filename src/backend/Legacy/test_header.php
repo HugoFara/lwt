@@ -21,6 +21,8 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Set useful data for the test using SQL query.
  *
@@ -100,7 +102,7 @@ function get_text_test_data(&$title, &$p): string
     $title = get_first_value(
         'SELECT TxTitle AS value FROM ' . $tbpref . 'texts WHERE TxID = ' . $textid
     );
-    saveSetting('currenttext', $_REQUEST['text']);
+    Settings::save('currenttext', $_REQUEST['text']);
     $testsql =
     ' ' . $tbpref . 'words, ' . $tbpref . 'textitems2
     WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ' . $textid . ' ';

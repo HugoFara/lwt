@@ -18,6 +18,8 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Escaping;
+
 /**
  * Return the word at a specific position in a text.
  *
@@ -99,7 +101,7 @@ function insert_word_wellknown_javascript($word, $wid, $hex, $textid)
     //<![CDATA[
     var context = window.parent.document.getElementById('frame-l');
     var contexth = window.parent.document.getElementById('frame-h');
-    var title = make_tooltip(<?php echo prepare_textdata_js($word); ?>,'*','','99');
+    var title = make_tooltip(<?php echo Escaping::prepareTextdataJs($word); ?>,'*','','99');
     $('.TERM<?php echo $hex; ?>', context)
     .removeClass('status0')
     .addClass('status99 word<?php echo $wid; ?>')

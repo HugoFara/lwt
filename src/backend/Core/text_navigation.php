@@ -19,6 +19,9 @@
 require_once __DIR__ . '/database_connect.php';
 require_once __DIR__ . '/tags.php';
 
+use Lwt\Database\Validation;
+use Lwt\Database\Settings;
+
 /**
  * Return navigation arrows to previous and next texts.
  *
@@ -32,7 +35,7 @@ require_once __DIR__ . '/tags.php';
 function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $currentlang = validateLang(
+    $currentlang = Validation::language(
         (string) processDBParam("filterlang", 'currentlanguage', '', false)
     );
     $wh_lang = '';
@@ -47,7 +50,7 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
         'title,text',
         false
     );
-    $currentregexmode = getSettingWithDefault("set-regex-mode");
+    $currentregexmode = Settings::getWithDefault("set-regex-mode");
     $wh_query = $currentregexmode . 'LIKE ';
     if ($currentregexmode == '') {
         $wh_query .= convert_string_to_sqlsyntax(
@@ -71,11 +74,11 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
         $wh_query = '';
     }
 
-    $currenttag1 = validateTextTag(
+    $currenttag1 = Validation::textTag(
         (string) processSessParam("tag1", "currenttexttag1", '', false),
         $currentlang
     );
-    $currenttag2 = validateTextTag(
+    $currenttag2 = Validation::textTag(
         (string) processSessParam("tag2", "currenttexttag2", '', false),
         $currentlang
     );

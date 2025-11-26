@@ -48,6 +48,8 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Prepare the different SPAN opening tags
  *
@@ -310,13 +312,13 @@ function index_do_main_page()
     $debug = \Lwt\Core\Globals::isDebug();
 
     $currentlang = null;
-    if (is_numeric(getSetting('currentlanguage'))) {
-        $currentlang = (int) getSetting('currentlanguage');
+    if (is_numeric(Settings::get('currentlanguage'))) {
+        $currentlang = (int) Settings::get('currentlanguage');
     }
 
     $currenttext = null;
-    if (is_numeric(getSetting('currenttext'))) {
-        $currenttext = (int) getSetting('currenttext');
+    if (is_numeric(Settings::get('currenttext'))) {
+        $currenttext = (int) Settings::get('currenttext');
     }
 
     $langcnt = (int) get_first_value("SELECT COUNT(*) AS value FROM {$tbpref}languages");

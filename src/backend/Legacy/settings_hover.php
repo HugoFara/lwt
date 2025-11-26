@@ -8,6 +8,7 @@
  */
 
 use Lwt\Classes\GoogleTranslate;
+use Lwt\Database\Escaping;
 
 require_once 'Core/session_utility.php';
 require_once 'Core/classes/GoogleTranslate.php' ;
@@ -55,7 +56,7 @@ do_mysqli_query(
     WHERE Ti2LgID = $langid AND LOWER(Ti2Text) = $wordlc"
 );
 $hex = strToClassName(
-    prepare_textdata(mb_strtolower($_REQUEST['text'], 'UTF-8'))
+    Escaping::prepareTextdata(mb_strtolower($_REQUEST['text'], 'UTF-8'))
 );
 
 pagestart("New Term: " . $word, false);
@@ -71,8 +72,8 @@ if ($translation != '*') {
     let title = '';
     if (window.parent.LWT_DATA.settings.jQuery_tooltip)
         title = make_tooltip(
-            <?php echo prepare_textdata_js($_REQUEST['text']); ?>,
-            <?php echo prepare_textdata_js($translation); ?>,
+            <?php echo Escaping::prepareTextdataJs($_REQUEST['text']); ?>,
+            <?php echo Escaping::prepareTextdataJs($translation); ?>,
             '',
             '<?php echo $_REQUEST["status"]; ?>'
         );

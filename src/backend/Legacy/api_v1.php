@@ -3,6 +3,9 @@
 namespace Lwt\Ajax;
 
 require_once 'Core/session_utility.php';
+
+use \Lwt\Database\Escaping;
+use \Lwt\Database\Settings;
 require_once 'Core/simterms.php';
 require_once __DIR__ . '/test_test.php';
 require_once 'Core/langdefs.php';
@@ -453,6 +456,8 @@ function imported_terms_list($last_update, $currentpage, $recno): array
 
 namespace Lwt\Ajax\Improved_Text;
 
+use \Lwt\Database\Settings;
+
 /**
  * Make the translations choices for a term.
  *
@@ -528,7 +533,7 @@ function make_trans($i, $wid, $trans, $word, $lang): string
         '<img class="click" src="/assets/icons/plus-button.png"
         title="Save translation to new term"
         alt="Save translation to new term"
-        onclick="addTermTranslation(\'#tx' . $i . '\',' . prepare_textdata_js($word) . ',' . $lang . ');" />';
+        onclick="addTermTranslation(\'#tx' . $i . '\',' . Escaping::prepareTextdataJs($word) . ',' . $lang . ');" />';
     }
     $r .= '&nbsp;&nbsp;
     <span id="wait' . $i . '">
@@ -699,7 +704,7 @@ function edit_term_form($textid): string
                 <th class="th1 center">Edit<br />Term</th>
                 <th class="th1 center">
                     Term Translations (Delim.: ' .
-                    tohtml(getSettingWithDefault('set-term-translation-delimiters')) . ')
+                    tohtml(Settings::getWithDefault('set-term-translation-delimiters')) . ')
                     <br />
                     <input type="button" value="Reload" onclick="do_ajax_edit_impr_text(0,\'\');" />
                 </th>
@@ -758,7 +763,7 @@ function edit_term_form($textid): string
                     '</span>
                 </td>
                 <td class="td1 center" nowrap="nowrap">' .
-                    makeDictLinks($langid, prepare_textdata_js($vals[1])) .
+                    makeDictLinks($langid, Escaping::prepareTextdataJs($vals[1])) .
                 '</td>
                 <td class="td1 center">
                     <span id="editlink' . $i . '">' . $word_link . '</span>
@@ -794,7 +799,7 @@ function edit_term_form($textid): string
                 <th class="th1 center">Edit<br />Term</th>
                 <th class="th1 center">
                     Term Translations (Delim.: ' .
-                    tohtml(getSettingWithDefault('set-term-translation-delimiters')) . ')
+                    tohtml(Settings::getWithDefault('set-term-translation-delimiters')) . ')
                     <br />
                     <input type="button" value="Reload" onclick="do_ajax_edit_impr_text(1e6,\'\');" />
                     <a name="bottom"></a>
@@ -810,6 +815,8 @@ function edit_term_form($textid): string
 // ============================================================================
 
 namespace Lwt\Ajax\Feed;
+
+use \Lwt\Database\Settings;
 
 /**
  * Get the list of feeds.
@@ -864,9 +871,9 @@ function get_feed_result($imported_feed, $nif, $nfname, $nfid, $nfoptions): stri
     $nf_max_links = get_nf_option($nfoptions, 'max_links');
     if (!$nf_max_links) {
         if (get_nf_option($nfoptions, 'article_source')) {
-            $nf_max_links = getSettingWithDefault('set-max-articles-with-text');
+            $nf_max_links = Settings::getWithDefault('set-max-articles-with-text');
         } else {
-            $nf_max_links = getSettingWithDefault('set-max-articles-without-text');
+            $nf_max_links = Settings::getWithDefault('set-max-articles-without-text');
         }
     }
     $msg = $nfname . ": ";
@@ -1387,7 +1394,7 @@ function unknown_get_action_type(array $get_req, bool $action_exists = false): a
  */
 function save_setting($post_req): array
 {
-    $status = saveSetting($post_req['key'], $post_req['value']);
+    $status = Settings::save($post_req['key'], $post_req['value']);
     $raw_answer = array();
     if (str_starts_with($status, "OK: ")) {
         $raw_answer["message"] = substr($status, 4);

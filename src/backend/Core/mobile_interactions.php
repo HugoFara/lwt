@@ -19,6 +19,8 @@
 
 require_once __DIR__ . '/database_connect.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Return false. Before 2.2.1, return true if we should use mobile mode.
  *
@@ -29,7 +31,7 @@ require_once __DIR__ . '/database_connect.php';
  */
 function is_mobile(): bool
 {
-    $mobileDisplayMode = (int)getSettingWithDefault('set-mobile-display-mode');
+    $mobileDisplayMode = (int)Settings::getWithDefault('set-mobile-display-mode');
     if ($mobileDisplayMode == 2) {
         return true;
     }
@@ -136,12 +138,12 @@ function do_frameset_mobile_js($audio = null)
        function rsizeIframes() {
             const h_height = <?php
             if (isset($audio)) {
-                getSettingWithDefault('set-text-h-frameheight-with-audio');
+                Settings::getWithDefault('set-text-h-frameheight-with-audio');
             } else {
-                getSettingWithDefault('set-text-h-frameheight-no-audio');
+                Settings::getWithDefault('set-text-h-frameheight-no-audio');
             } ?> + 10;
-            const lr_perc = <?php echo getSettingWithDefault('set-text-l-framewidth-percent'); ?>;
-            const r_perc = <?php echo getSettingWithDefault('set-text-r-frameheight-percent'); ?>;
+            const lr_perc = <?php echo Settings::getWithDefault('set-text-l-framewidth-percent'); ?>;
+            const r_perc = <?php echo Settings::getWithDefault('set-text-r-frameheight-percent'); ?>;
             const w = $(window).width();
             const h = $(window).height();
             const l_width = w * lr_perc / 100;

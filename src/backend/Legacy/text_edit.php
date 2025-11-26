@@ -30,6 +30,12 @@
  * @since    1.0.3
  */
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Validation;
+use Lwt\Database\Settings;
+use Lwt\Database\Maintenance;
+use Lwt\Database\TextParsing;
+
 require_once 'Core/session_utility.php';
 require_once 'Core/start_session.php';
 require_once 'Core/text_from_yt.php';
@@ -100,11 +106,11 @@ function edit_texts_get_wh_tag($currentlang)
 {
     $wh_tag1 = null;
     $wh_tag2 = null;
-    $currenttag1 = validateTextTag(
+    $currenttag1 = Validation::textTag(
         (string) processSessParam("tag1", "currenttexttag1", '', false),
         $currentlang
     );
-    $currenttag2 = validateTextTag(
+    $currenttag2 = Validation::textTag(
         (string) processSessParam("tag2", "currenttexttag2", '', false),
         $currentlang
     );
@@ -183,8 +189,8 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
             "Texts deleted"
         );
         $message = $message1 . " / " . $message2 . " / " . $message3;
-        adjust_autoincr('texts', 'TxID');
-        adjust_autoincr('sentences', 'SeID');
+        Maintenance::adjustAutoIncrement('texts', 'TxID');
+        Maintenance::adjustAutoIncrement('sentences', 'SeID');
         runsql(
             "DELETE " . $tbpref . "texttags
             FROM (
@@ -239,8 +245,8 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
             WHERE TxID IS NULL",
             ''
         );
-        adjust_autoincr('texts', 'TxID');
-        adjust_autoincr('sentences', 'SeID');
+        Maintenance::adjustAutoIncrement('texts', 'TxID');
+        Maintenance::adjustAutoIncrement('sentences', 'SeID');
     } elseif ($markaction == 'addtag') {
         $message = addtexttaglist($actiondata, $list);
     } elseif ($markaction == 'deltag') {
@@ -260,7 +266,7 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
             $sent = getSentence(
                 $record['SeID'],
                 $record['WoTextLC'],
-                (int) getSettingWithDefault('set-term-sentence-count')
+                (int) Settings::getWithDefault('set-term-sentence-count')
             );
             $count += (int) runsql(
                 'UPDATE ' . $tbpref . 'words
@@ -286,7 +292,7 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
             $sent = getSentence(
                 $record['SeID'],
                 $record['WoTextLC'],
-                (int) getSettingWithDefault('set-term-sentence-count')
+                (int) Settings::getWithDefault('set-term-sentence-count')
             );
             $count += (int) runsql(
                 'update ' . $tbpref . 'words
@@ -311,8 +317,8 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
                 'delete from ' . $tbpref . 'textitems2 where Ti2TxID = ' . $id,
                 "Text items deleted"
             );
-            adjust_autoincr('sentences', 'SeID');
-            splitCheckText(
+            Maintenance::adjustAutoIncrement('sentences', 'SeID');
+            TextParsing::splitCheck(
                 get_first_value(
                     'select TxText as value from ' . $tbpref . 'texts where TxID = ' . $id
                 ),
@@ -357,8 +363,8 @@ function edit_texts_delete($txid): string
         "Texts deleted"
     );
     $message = $message1 . " / " . $message2 . " / " . $message3;
-    adjust_autoincr('texts', 'TxID');
-    adjust_autoincr('sentences', 'SeID');
+    Maintenance::adjustAutoIncrement('texts', 'TxID');
+    Maintenance::adjustAutoIncrement('sentences', 'SeID');
     runsql(
         "DELETE {$tbpref}texttags
         FROM (
@@ -413,8 +419,8 @@ function edit_texts_archive($txid): string
         "Texts deleted"
     );
     $message =  "$message4 / $message1 / $message2 / $message3";
-    adjust_autoincr('texts', 'TxID');
-    adjust_autoincr('sentences', 'SeID');
+    Maintenance::adjustAutoIncrement('texts', 'TxID');
+    Maintenance::adjustAutoIncrement('sentences', 'SeID');
     runsql(
         "DELETE {$tbpref}texttags
         FROM (
@@ -444,9 +450,9 @@ function edit_texts_archive($txid): string
 function edit_texts_do_operation($op, $message1, $no_pagestart): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    if (strlen(prepare_textdata($_REQUEST['TxText'])) > 65000) {
+    if (strlen(Escaping::prepareTextdata($_REQUEST['TxText'])) > 65000) {
         $message = "Error: Text too long, must be below 65000 Bytes";
-        $currentlang = (int) validateLang(
+        $currentlang = (int) Validation::language(
             (string) processDBParam("filterlang", 'currentlanguage', '', false)
         );
         if ($no_pagestart) {
@@ -462,7 +468,7 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
         echo '<p>
             <input type="button" value="&lt;&lt; Back" onclick="history.back();" />
         </p>';
-        splitCheckText(
+        TextParsing::splitCheck(
             remove_soft_hyphens($_REQUEST['TxText']),
             (int)$_REQUEST['TxLgID'],
             -1
@@ -513,9 +519,9 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
         "DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = $id",
         "Textitems deleted"
     );
-    adjust_autoincr('sentences', 'SeID');
+    Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-    splitCheckText(
+    TextParsing::splitCheck(
         get_first_value(
             "SELECT TxText AS value FROM {$tbpref}texts
             WHERE TxID = $id"
@@ -785,12 +791,12 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
         'title,text',
         false
     );
-    $currentregexmode = getSettingWithDefault("set-regex-mode");
-    $currenttag1 = validateTextTag(
+    $currentregexmode = Settings::getWithDefault("set-regex-mode");
+    $currenttag1 = Validation::textTag(
         (string) processSessParam("tag1", "currenttexttag1", '', false),
         $currentlang
     );
-    $currenttag2 = validateTextTag(
+    $currenttag2 = Validation::textTag(
         (string) processSessParam("tag2", "currenttexttag2", '', false),
         $currentlang
     );
@@ -891,7 +897,7 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
 function edit_texts_other_pages($recno)
 {
 
-    $maxperpage = (int) getSettingWithDefault('set-texts-per-page');
+    $maxperpage = (int) Settings::getWithDefault('set-texts-per-page');
 
     $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
@@ -1053,7 +1059,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
     $statuses[0]["name"] = 'Unknown';
     $statuses[0]["abbr"] = 'Ukn';
     $res = do_mysqli_query($sql);
-    $showCounts = getSettingWithDefault('set-show-text-word-counts');
+    $showCounts = Settings::getWithDefault('set-show-text-word-counts');
 
     ?>
 <form name="form2" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
@@ -1163,7 +1169,7 @@ function edit_texts_display($message)
 
     // Page, Sort, etc.
 
-    $currentlang = validateLang(
+    $currentlang = Validation::language(
         (string) processDBParam("filterlang", 'currentlanguage', '', false)
     );
     $currentsort = (int) processDBParam("sort", 'currenttextsort', '1', true);
@@ -1176,7 +1182,7 @@ function edit_texts_display($message)
         'title,text',
         false
     );
-    $currentregexmode = getSettingWithDefault("set-regex-mode");
+    $currentregexmode = Settings::getWithDefault("set-regex-mode");
 
     $wh_lang = ($currentlang != '') ? (' and TxLgID=' . $currentlang) : '';
 
@@ -1206,7 +1212,7 @@ function edit_texts_display($message)
         echo $sql . ' ===&gt; ' . $recno;
     }
 
-    $maxperpage = (int) getSettingWithDefault('set-texts-per-page');
+    $maxperpage = (int) Settings::getWithDefault('set-texts-per-page');
 
     $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
@@ -1266,7 +1272,7 @@ function edit_texts_display($message)
         return;
     }
     // TODO: check out the no coherent code on $showCounts
-    $showCounts = getSettingWithDefault('set-show-text-word-counts');
+    $showCounts = Settings::getWithDefault('set-show-text-word-counts');
     if (strlen($showCounts) != 5) {
         $showCounts = "11111";
     }
@@ -1305,7 +1311,7 @@ function edit_texts_display($message)
  */
 function edit_texts_do_page()
 {
-    $currentlang = validateLang(
+    $currentlang = Validation::language(
         (string) processDBParam("filterlang", 'currentlanguage', '', false)
     );
     $no_pagestart = getreq('markaction') == 'test' ||

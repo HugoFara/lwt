@@ -21,6 +21,9 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+
 /**
  * Make the SQL query for all words in the text.
  *
@@ -93,9 +96,9 @@ function all_words_wellknown_process_word($status, $term, $termlc, $langid): arr
         $wid = get_last_key();
     }
     $javascript = '';
-    if (getSettingWithDefault('set-tooltip-mode') == 1 && $rows > 0) {
+    if (Settings::getWithDefault('set-tooltip-mode') == 1 && $rows > 0) {
         $javascript .= "title = make_tooltip(" .
-        prepare_textdata_js($term) . ", '*', '', '$status');";
+        Escaping::prepareTextdataJs($term) . ", '*', '', '$status');";
     }
     $javascript .= "$('.TERM" . strToClassName($termlc) . "', context)
     .removeClass('status0')

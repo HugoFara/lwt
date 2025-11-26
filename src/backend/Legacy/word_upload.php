@@ -14,6 +14,11 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+use Lwt\Database\Maintenance;
+use Lwt\Database\TextParsing;
+
 /**
  * Get the CSV from a string.
  *
@@ -234,7 +239,7 @@ function upload_words_import_complete(
             ''
         );
 
-        $wosep = getSettingWithDefault('set-term-translation-delimiters');
+        $wosep = Settings::getWithDefault('set-term-translation-delimiters');
         if (empty($wosep)) {
             if (getreq("Tab") == 'h') {
                 $wosep[0] = "#";
@@ -460,14 +465,14 @@ function upload_words_handle_multiwords($lang, $last_update): void
             "DELETE FROM {$tbpref}textitems2 WHERE Ti2LgID = $lang",
             "Text items deleted"
         );
-        adjust_autoincr('sentences', 'SeID');
+        Maintenance::adjustAutoIncrement('sentences', 'SeID');
         $sql = "SELECT TxID, TxText FROM {$tbpref}texts
         WHERE TxLgID = $lang ORDER BY TxID";
         $res = do_mysqli_query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $txtid = (int) $record["TxID"];
             $txttxt = $record["TxText"];
-            splitCheckText($txttxt, $lang, $txtid);
+            TextParsing::splitCheck($txttxt, $lang, $txtid);
         }
         mysqli_free_result($res);
     } elseif ($mwords != 0) {
@@ -531,7 +536,7 @@ function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): stri
     } else {
         $file_name = tempnam(sys_get_temp_dir(), "LWT");
         $temp = fopen($file_name, "w");
-        fwrite($temp, prepare_textdata($_REQUEST["Upload"]));
+        fwrite($temp, Escaping::prepareTextdata($_REQUEST["Upload"]));
         fseek($temp, 0);
         fclose($temp);
     }
@@ -558,7 +563,7 @@ function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): stri
     if (!$file_upl) {
         unlink($file_name);
     }
-    init_word_count();
+    Maintenance::initWordCount();
     runsql(
         "UPDATE {$tbpref}words
         JOIN {$tbpref}textitems2
@@ -841,7 +846,7 @@ function upload_words_import_tags($fields, $tabs, $file_upl): void
     } else {
         $file_name = tempnam(sys_get_temp_dir(), "LWT");
         $temp = fopen($file_name, "w");
-        fwrite($temp, prepare_textdata($_REQUEST["Upload"]));
+        fwrite($temp, Escaping::prepareTextdata($_REQUEST["Upload"]));
         fseek($temp, 0);
         fclose($temp);
     }
@@ -1024,7 +1029,7 @@ function upload_words_display(): void
             <td class="td1">
                 <select name="LgID" class="notempty setfocus">
                     <?php
-                    echo get_languages_selectoptions(getSetting('currentlanguage'), '[Choose...]');
+                    echo get_languages_selectoptions(Settings::get('currentlanguage'), '[Choose...]');
                     ?>
                 </select>
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
@@ -1159,7 +1164,7 @@ function upload_words_display(): void
                 </select>
             <div class="hide" id="imp_transl_delim">
                 Import Translation Delimiter:<br />
-                <input class="notempty" type="text" name="transl_delim" style="width:4em;" value="<?php echo getSettingWithDefault('set-term-translation-delimiters'); ?>" />
+                <input class="notempty" type="text" name="transl_delim" style="width:4em;" value="<?php echo Settings::getWithDefault('set-term-translation-delimiters'); ?>" />
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </div>
             </td>

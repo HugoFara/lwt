@@ -21,6 +21,8 @@
 namespace Lwt\Interface\Print_Impr_text;
 
 require_once 'Core/session_utility.php';
+
+use Lwt\Database\Settings;
 require_once __DIR__ . '/api_v1.php';
 
 use function Lwt\Ajax\Improved_Text\edit_term_form;
@@ -209,7 +211,7 @@ function do_content()
     $audio = trim($audio);
     mysqli_free_result($res);
 
-    saveSetting('currenttext', $textid);
+    Settings::save('currenttext', $textid);
 
     pagestart_nobody('Annotated Text', 'input[type="radio"]{display:inline;}');
 

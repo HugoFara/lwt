@@ -17,6 +17,9 @@
  * @since   3.0.0 Split from text_helpers.php
  */
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+
 /**
  * Return a SQL string to find sentences containing a word.
  *
@@ -82,7 +85,7 @@ function sentences_containing_word_lc_query($wordlc, $lid): string
         if ($removeSpaces == 1) {
             $pattern = convert_string_to_sqlsyntax($wordlc);
         } else {
-            $pattern = convert_regexp_to_sqlsyntax(
+            $pattern = Escaping::regexpToSqlSyntax(
                 '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
                  . remove_spaces($wordlc, $removeSpaces)
                  . '([^' . $record["LgRegexpWordCharacters"] . ']|$)'
@@ -274,7 +277,7 @@ function sentences_with_word($lang, $wordlc, $wid, $mode = 0, $limit = 20): arra
     $res = sentences_from_word($wid, $wordlc, $lang, $limit);
     $last = '';
     if (is_null($mode)) {
-        $mode = (int) getSettingWithDefault('set-term-sentence-count');
+        $mode = (int) Settings::getWithDefault('set-term-sentence-count');
     }
     while ($record = mysqli_fetch_assoc($res)) {
         if ($last != $record['SeText']) {
@@ -299,7 +302,7 @@ function example_sentences_area(int $lang, string $termlc, string $selector, int
     <!-- Interactable text -->
     <div id="exsent-interactable">
         <span class="click" onclick="do_ajax_show_sentences(
-            <?php echo $lang; ?>, <?php echo prepare_textdata_js($termlc); ?>,
+            <?php echo $lang; ?>, <?php echo Escaping::prepareTextdataJs($termlc); ?>,
             <?php echo htmlentities(json_encode($selector)); ?>, <?php echo $wid; ?>);">
             <img src="/assets/icons/sticky-notes-stack.png" title="Show Sentences" alt="Show Sentences" />
             Show Sentences
@@ -344,7 +347,7 @@ function get20Sentences($lang, $wordlc, $wid, $jsctlname, $mode): string
     $sentences = sentences_with_word($lang, $wordlc, $wid, $mode);
     foreach ($sentences as $sentence) {
         $r .= '<span class="click" onclick="{' . $jsctlname . '.value=' .
-            prepare_textdata_js($sentence[1]) . '; makeDirty();}">
+            Escaping::prepareTextdataJs($sentence[1]) . '; makeDirty();}">
         <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
         </span> &nbsp;' . $sentence[0] . '<br />';
     }

@@ -25,6 +25,9 @@ require_once 'Core/simterms.php';
 require_once 'Core/classes/Term.php';
 
 use Lwt\Classes\Term;
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+use Lwt\Database\Maintenance;
 
 /**
  * Export term data as a JSON dictionnary.
@@ -79,8 +82,8 @@ function edit_mword_prepare_term()
     $translation_raw = repl_tab_nl(getreq("WoTranslation"));
     $translation = ($translation_raw == '') ? '*' : $translation_raw;
     $term->translation = $translation;
-    $term->text = prepare_textdata($_REQUEST["WoText"]);
-    $term->textlc = prepare_textdata($textlc);
+    $term->text = Escaping::prepareTextdata($_REQUEST["WoText"]);
+    $term->textlc = Escaping::prepareTextdata($textlc);
     $term->roman = $_REQUEST["WoRomanization"];
     // Words count is not necessary when updating multi-word
     if (!empty($_REQUEST["len"])) {
@@ -163,7 +166,7 @@ function edit_mword_do_insert($term)
         ')',
         "Term saved"
     );
-    init_word_count();
+    Maintenance::initWordCount();
     // strToClassName($textlc);
     $term->id = get_last_key();
     saveWordTags($term->id);
@@ -259,7 +262,7 @@ function edit_mword_new($text, $tid, $ord, $len)
     $term->lgid = get_first_value(
         "SELECT TxLgID AS value FROM {$tbpref}texts WHERE TxID = $tid"
     );
-    $term->text = prepare_textdata($text);
+    $term->text = Escaping::prepareTextdata($text);
     $term->textlc = mb_strtolower($term->text, 'UTF-8');
 
     $term->id = get_first_value(
@@ -330,7 +333,7 @@ function edit_mword_display_new($term, $tid, $ord, $len)
     $sent = getSentence(
         $seid,
         $term->textlc,
-        (int) getSettingWithDefault('set-term-sentence-count')
+        (int) Settings::getWithDefault('set-term-sentence-count')
     );
     $showRoman = (bool) get_first_value(
         "SELECT LgShowRomanization AS value
@@ -453,7 +456,7 @@ function edit_mword_display_change($term, $tid, $ord)
             $sent = getSentence(
                 $seid,
                 $term->textlc,
-                (int) getSettingWithDefault('set-term-sentence-count')
+                (int) Settings::getWithDefault('set-term-sentence-count')
             );
             $sentence = repl_tab_nl($sent[1]);
         }
@@ -571,7 +574,7 @@ function edit_mword_page()
                 WHERE TxID = " . ((int) getreq('tid'))
             );
             $textlc = convert_string_to_sqlsyntax(
-                mb_strtolower(prepare_textdata(getreq('txt')), 'UTF-8')
+                mb_strtolower(Escaping::prepareTextdata(getreq('txt')), 'UTF-8')
             );
 
             $str_id = get_first_value(

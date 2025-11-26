@@ -20,6 +20,8 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Set sql request for the word test.
  *
@@ -83,12 +85,12 @@ function do_test_table_language_settings(string $testsql)
  */
 function get_test_table_settings(): array
 {
-    $currenttabletestsetting1 = getSettingZeroOrOne('currenttabletestsetting1', 1);
-    $currenttabletestsetting2 = getSettingZeroOrOne('currenttabletestsetting2', 1);
-    $currenttabletestsetting3 = getSettingZeroOrOne('currenttabletestsetting3', 0);
-    $currenttabletestsetting4 = getSettingZeroOrOne('currenttabletestsetting4', 1);
-    $currenttabletestsetting5 = getSettingZeroOrOne('currenttabletestsetting5', 0);
-    $currenttabletestsetting6 = getSettingZeroOrOne('currenttabletestsetting6', 1);
+    $currenttabletestsetting1 = Settings::getZeroOrOne('currenttabletestsetting1', 1);
+    $currenttabletestsetting2 = Settings::getZeroOrOne('currenttabletestsetting2', 1);
+    $currenttabletestsetting3 = Settings::getZeroOrOne('currenttabletestsetting3', 0);
+    $currenttabletestsetting4 = Settings::getZeroOrOne('currenttabletestsetting4', 1);
+    $currenttabletestsetting5 = Settings::getZeroOrOne('currenttabletestsetting5', 0);
+    $currenttabletestsetting6 = Settings::getZeroOrOne('currenttabletestsetting6', 1);
     return array(
         $currenttabletestsetting1, $currenttabletestsetting2, $currenttabletestsetting3,
         $currenttabletestsetting4, $currenttabletestsetting5, $currenttabletestsetting6

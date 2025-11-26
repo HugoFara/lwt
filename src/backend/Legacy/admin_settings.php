@@ -20,9 +20,11 @@ namespace Lwt\Interface\Settings;
 
 require_once 'Core/session_utility.php';
 
+use \Lwt\Database\Settings;
+
 if (isset($_REQUEST['op'])) {
     if ($_REQUEST['op'] == 'Save') {
-        saveSetting(
+        Settings::save(
             'set-theme-dir',
             $_REQUEST['set-theme-dir']
         );
@@ -35,77 +37,77 @@ $message = '';
 
 if (isset($_REQUEST['op'])) {
     if ($_REQUEST['op'] == 'Save') {
-        saveSetting(
+        Settings::save(
             'set-text-h-frameheight-no-audio',
             $_REQUEST['set-text-h-frameheight-no-audio']
         );
 
-        saveSetting(
+        Settings::save(
             'set-text-h-frameheight-with-audio',
             $_REQUEST['set-text-h-frameheight-with-audio']
         );
 
-        saveSetting(
+        Settings::save(
             'set-text-l-framewidth-percent',
             $_REQUEST['set-text-l-framewidth-percent']
         );
 
-        saveSetting(
+        Settings::save(
             'set-text-r-frameheight-percent',
             $_REQUEST['set-text-r-frameheight-percent']
         );
 
-        saveSetting(
+        Settings::save(
             'set-test-h-frameheight',
             $_REQUEST['set-test-h-frameheight']
         );
 
-        saveSetting(
+        Settings::save(
             'set-test-l-framewidth-percent',
             $_REQUEST['set-test-l-framewidth-percent']
         );
 
-        saveSetting(
+        Settings::save(
             'set-test-r-frameheight-percent',
             $_REQUEST['set-test-r-frameheight-percent']
         );
 
-        saveSetting(
+        Settings::save(
             'set-words-to-do-buttons',
             $_REQUEST['set-words-to-do-buttons']
         );
 
-        saveSetting(
+        Settings::save(
             'set-tooltip-mode',
             $_REQUEST['set-tooltip-mode']
         );
 
-        saveSetting(
+        Settings::save(
             'set-ggl-translation-per-page',
             $_REQUEST['set-ggl-translation-per-page']
         );
 
-        saveSetting(
+        Settings::save(
             'set-test-main-frame-waiting-time',
             $_REQUEST['set-test-main-frame-waiting-time']
         );
 
-        saveSetting(
+        Settings::save(
             'set-test-edit-frame-waiting-time',
             $_REQUEST['set-test-edit-frame-waiting-time']
         );
 
-        saveSetting(
+        Settings::save(
             'set-test-sentence-count',
             $_REQUEST['set-test-sentence-count']
         );
 
-        saveSetting(
+        Settings::save(
             'set-term-sentence-count',
             $_REQUEST['set-term-sentence-count']
         );
 
-        saveSetting(
+        Settings::save(
             'set-tts',
             (string)(
                 array_key_exists('set-tts', $_REQUEST) &&
@@ -114,87 +116,87 @@ if (isset($_REQUEST['op'])) {
             )
         );
 
-        saveSetting(
+        Settings::save(
             'set-hts',
             $_REQUEST['set-hts']
         );
 
-        saveSetting(
+        Settings::save(
             'set-archivedtexts-per-page',
             $_REQUEST['set-archivedtexts-per-page']
         );
 
-        saveSetting(
+        Settings::save(
             'set-texts-per-page',
             $_REQUEST['set-texts-per-page']
         );
 
-        saveSetting(
+        Settings::save(
             'set-terms-per-page',
             $_REQUEST['set-terms-per-page']
         );
 
-        saveSetting(
+        Settings::save(
             'set-regex-mode',
             $_REQUEST['set-regex-mode']
         );
 
-        saveSetting(
+        Settings::save(
             'set-tags-per-page',
             $_REQUEST['set-tags-per-page']
         );
 
-        saveSetting(
+        Settings::save(
             'set-articles-per-page',
             $_REQUEST['set-articles-per-page']
         );
 
-        saveSetting(
+        Settings::save(
             'set-feeds-per-page',
             $_REQUEST['set-feeds-per-page']
         );
 
-        saveSetting(
+        Settings::save(
             'set-max-articles-with-text',
             $_REQUEST['set-max-articles-with-text']
         );
 
-        saveSetting(
+        Settings::save(
             'set-max-articles-without-text',
             $_REQUEST['set-max-articles-without-text']
         );
 
-        saveSetting(
+        Settings::save(
             'set-max-texts-per-feed',
             $_REQUEST['set-max-texts-per-feed']
         );
 
-        saveSetting(
+        Settings::save(
             'set-text-visit-statuses-via-key',
             $_REQUEST['set-text-visit-statuses-via-key']
         );
 
-        saveSetting(
+        Settings::save(
             'set-display-text-frame-term-translation',
             $_REQUEST['set-display-text-frame-term-translation']
         );
 
-        saveSetting(
+        Settings::save(
             'set-text-frame-annotation-position',
             $_REQUEST['set-text-frame-annotation-position']
         );
 
-        saveSetting(
+        Settings::save(
             'set-term-translation-delimiters',
             $_REQUEST['set-term-translation-delimiters']
         );
 
-        saveSetting(
+        Settings::save(
             'set-mobile-display-mode',
             $_REQUEST['set-mobile-display-mode']
         );
 
-        saveSetting(
+        Settings::save(
             'set-similar-terms-count',
             $_REQUEST['set-similar-terms-count']
         );
@@ -227,7 +229,7 @@ echo error_message_with_hide($message, true);
             <select name="set-theme-dir" class="notempty respinput">
                 <?php
                 echo get_themes_selectoptions(
-                    getSettingWithDefault('set-theme-dir')
+                    Settings::getWithDefault('set-theme-dir')
                 );
                 ?>
             </select>
@@ -247,7 +249,7 @@ echo error_message_with_hide($message, true);
             <input class="notempty posintnumber right setfocus respinput"
             type="number" min="0"
             name="set-text-h-frameheight-no-audio" data_info="Height of left top frame without audioplayer"
-            value="<?php echo tohtml(getSettingWithDefault('set-text-h-frameheight-no-audio')); ?>" maxlength="3"
+            value="<?php echo tohtml(Settings::getWithDefault('set-text-h-frameheight-no-audio')); ?>" maxlength="3"
             size="3" /><br />Pixel </td>
         <td class="td1 center">
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
@@ -263,7 +265,7 @@ echo error_message_with_hide($message, true);
             min="0"
             name="set-text-h-frameheight-with-audio"
             data_info="Height of left top frame with audioplayer"
-            value="<?php echo tohtml(getSettingWithDefault('set-text-h-frameheight-with-audio')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-text-h-frameheight-with-audio')); ?>"
             maxlength="3" size="3" /><br />
             Pixel
         </td>
@@ -278,7 +280,7 @@ echo error_message_with_hide($message, true);
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-text-l-framewidth-percent" data_info="Width of left frames"
-            value="<?php echo tohtml(getSettingWithDefault('set-text-l-framewidth-percent')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-text-l-framewidth-percent')); ?>"
             maxlength="2" size="2" />
             <br />Percent
         </td>
@@ -293,7 +295,7 @@ echo error_message_with_hide($message, true);
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-text-r-frameheight-percent"  data_info="Height of right top frame"
-            value="<?php echo tohtml(getSettingWithDefault('set-text-r-frameheight-percent')); ?>" maxlength="2" size="2" />
+            value="<?php echo tohtml(Settings::getWithDefault('set-text-r-frameheight-percent')); ?>" maxlength="2" size="2" />
             <br />Percent
         </td>
         <td class="td1 center">
@@ -307,7 +309,7 @@ echo error_message_with_hide($message, true);
             <select name="set-words-to-do-buttons" class="notempty respinput">
             <?php
             echo get_words_to_do_buttons_selectoptions(
-                getSettingWithDefault('set-words-to-do-buttons')
+                Settings::getWithDefault('set-words-to-do-buttons')
             );
             ?>
             </select>
@@ -323,7 +325,7 @@ echo error_message_with_hide($message, true);
             <select name="set-tooltip-mode" class="notempty respinput">
         <?php
         echo get_tooltip_selectoptions(
-            getSettingWithDefault('set-tooltip-mode')
+            Settings::getWithDefault('set-tooltip-mode')
         );
         ?>
             </select>
@@ -340,7 +342,7 @@ echo error_message_with_hide($message, true);
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-ggl-translation-per-page"  data_info="New Term Translations per Page"
-            value="<?php echo tohtml(getSettingWithDefault('set-ggl-translation-per-page')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-ggl-translation-per-page')); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -356,7 +358,7 @@ echo error_message_with_hide($message, true);
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-test-h-frameheight" data_info="Height of left top frame"
-            value="<?php echo tohtml(getSettingWithDefault('set-test-h-frameheight')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-test-h-frameheight')); ?>"
             maxlength="3" size="3" />
             <br />Pixel
         </td>
@@ -371,7 +373,7 @@ echo error_message_with_hide($message, true);
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-test-l-framewidth-percent"  data_info="Width of left frames"
-            value="<?php echo tohtml(getSettingWithDefault('set-test-l-framewidth-percent')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-test-l-framewidth-percent')); ?>"
             maxlength="2" size="2" />
             <br />Percent
         </td>
@@ -386,7 +388,7 @@ echo error_message_with_hide($message, true);
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-test-r-frameheight-percent"  data_info="Height of right top frame"
-            value="<?php echo tohtml(getSettingWithDefault('set-test-r-frameheight-percent')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-test-r-frameheight-percent')); ?>"
             maxlength="2" size="2" /><br />
             Percent
         </td>
@@ -404,7 +406,7 @@ echo error_message_with_hide($message, true);
             type="number" min="0"
             name="set-test-main-frame-waiting-time"
             data_info="Waiting time after assessment to display next test"
-            value="<?php echo tohtml(getSettingWithDefault('set-test-main-frame-waiting-time')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-test-main-frame-waiting-time')); ?>"
             maxlength="4" size="4" /><br />
             Milliseconds
         </td>
@@ -422,7 +424,7 @@ echo error_message_with_hide($message, true);
             type="number" min="0"
             name="set-test-edit-frame-waiting-time"
             data_info="Waiting Time to clear the message/edit frame"
-            value="<?php echo tohtml(getSettingWithDefault('set-test-edit-frame-waiting-time')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-test-edit-frame-waiting-time')); ?>"
             maxlength="8" size="8" /><br />
             Milliseconds
         </td>
@@ -439,7 +441,7 @@ echo error_message_with_hide($message, true);
             <select name="set-mobile-display-mode" class="respinput">
             <?php
             echo get_mobile_display_mode_selectoptions(
-                getSettingWithDefault('set-mobile-display-mode') // , true, true, true what is it???
+                Settings::getWithDefault('set-mobile-display-mode') // , true, true, true what is it???
             );
             ?>
             </select>
@@ -460,7 +462,7 @@ echo error_message_with_hide($message, true);
             <select name="set-text-visit-statuses-via-key" class="respinput">
             <?php
             echo get_wordstatus_selectoptions(
-                getSettingWithDefault('set-text-visit-statuses-via-key'),
+                Settings::getWithDefault('set-text-visit-statuses-via-key'),
                 true,
                 true,
                 true
@@ -480,7 +482,7 @@ echo error_message_with_hide($message, true);
             <select name="set-display-text-frame-term-translation" class="respinput">
             <?php
             echo get_wordstatus_selectoptions(
-                getSettingWithDefault('set-display-text-frame-term-translation'),
+                Settings::getWithDefault('set-display-text-frame-term-translation'),
                 true,
                 true,
                 true
@@ -500,7 +502,7 @@ echo error_message_with_hide($message, true);
             <select name="set-text-frame-annotation-position" class="notempty respinput">
             <?php
             echo get_annotation_position_selectoptions(
-                getSettingWithDefault('set-text-frame-annotation-position')
+                Settings::getWithDefault('set-text-frame-annotation-position')
             );
             ?>
             </select>
@@ -517,7 +519,7 @@ echo error_message_with_hide($message, true);
             <select name="set-test-sentence-count" class="notempty respinput">
             <?php
             echo get_sentence_count_selectoptions(
-                getSettingWithDefault('set-test-sentence-count')
+                Settings::getWithDefault('set-test-sentence-count')
             );
             ?>
             </select>
@@ -534,7 +536,7 @@ echo error_message_with_hide($message, true);
             <select name="set-term-sentence-count" class="notempty respinput">
             <?php
             echo get_sentence_count_selectoptions(
-                getSettingWithDefault('set-term-sentence-count')
+                Settings::getWithDefault('set-term-sentence-count')
             );
             ?>
             </select>
@@ -554,7 +556,7 @@ echo error_message_with_hide($message, true);
             type="number" min="0"
             name="set-similar-terms-count"
             data_info="Similar terms to be displayed while adding/editing a term"
-            value="<?php echo tohtml(getSettingWithDefault('set-similar-terms-count')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-similar-terms-count')); ?>"
             maxlength="1" size="1" />
         </td>
         <td class="td1 center">
@@ -571,7 +573,7 @@ echo error_message_with_hide($message, true);
         <td class="td1 center">
             <input class="notempty center respinput" type="text"
             name="set-term-translation-delimiters"
-            value="<?php echo tohtml(getSettingWithDefault('set-term-translation-delimiters')); ?>" maxlength="8" size="8" />
+            value="<?php echo tohtml(Settings::getWithDefault('set-term-translation-delimiters')); ?>" maxlength="8" size="8" />
         </td>
         <td class="td1 center">
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
@@ -583,7 +585,7 @@ echo error_message_with_hide($message, true);
         <td class="td1 center">Save Audio Files to Disk</td>
         <td class="td1 center">
             <input type="checkbox" name="set-tts" value="1"
-            <?php echo ((int)getSettingWithDefault('set-tts') ? "checked" : ""); ?>  />
+            <?php echo ((int)Settings::getWithDefault('set-tts') ? "checked" : ""); ?>  />
         </td>
         <td class="td1 center">
             <img src="/assets/icons/status-busy.png" title="Field must not be empty"
@@ -597,7 +599,7 @@ echo error_message_with_hide($message, true);
             <select name="set-hts" class="notempty respinput">
             <?php
             echo get_hts_selectoptions(
-                getSettingWithDefault('set-hts')
+                Settings::getWithDefault('set-hts')
             );
             ?>
             </select>
@@ -613,7 +615,7 @@ echo error_message_with_hide($message, true);
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-texts-per-page" data_info="Texts per Page"
-            value="<?php echo tohtml(getSettingWithDefault('set-texts-per-page')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-texts-per-page')); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -628,7 +630,7 @@ echo error_message_with_hide($message, true);
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-archivedtexts-per-page"
             data_info="Archived Texts per Page"
-            value="<?php echo tohtml(getSettingWithDefault('set-archivedtexts-per-page')); ?>" maxlength="4" size="4" />
+            value="<?php echo tohtml(Settings::getWithDefault('set-archivedtexts-per-page')); ?>" maxlength="4" size="4" />
         </td>
         <td class="td1 center">
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
@@ -640,7 +642,7 @@ echo error_message_with_hide($message, true);
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-terms-per-page" data_info="Terms per Page"
-            value="<?php echo tohtml(getSettingWithDefault('set-terms-per-page')); ?>" maxlength="4" size="4" />
+            value="<?php echo tohtml(Settings::getWithDefault('set-terms-per-page')); ?>" maxlength="4" size="4" />
         </td>
         <td class="td1 center">
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
@@ -652,7 +654,7 @@ echo error_message_with_hide($message, true);
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-tags-per-page" data_info="Tags per Page"
-            value="<?php echo tohtml(getSettingWithDefault('set-tags-per-page')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-tags-per-page')); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -665,7 +667,7 @@ echo error_message_with_hide($message, true);
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-articles-per-page" data_info="Feed Articles per Page"
-            value="<?php echo tohtml(getSettingWithDefault('set-articles-per-page')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-articles-per-page')); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -678,7 +680,7 @@ echo error_message_with_hide($message, true);
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-feeds-per-page" data_info="Feeds per Page"
-            value="<?php echo tohtml(getSettingWithDefault('set-feeds-per-page')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-feeds-per-page')); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -693,7 +695,7 @@ echo error_message_with_hide($message, true);
             <select name="set-regex-mode" class="respinput">
             <?php
             echo get_regex_selectoptions(
-                getSettingWithDefault('set-regex-mode')
+                Settings::getWithDefault('set-regex-mode')
             );
             ?>
             </select>
@@ -711,7 +713,7 @@ echo error_message_with_hide($message, true);
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-max-articles-with-text"
             data_info="Max Articles per Feed with cached text"
-            value="<?php echo tohtml(getSettingWithDefault('set-max-articles-with-text')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-max-articles-with-text')); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -728,7 +730,7 @@ echo error_message_with_hide($message, true);
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-max-articles-without-text"
             data_info="Max Articles per Feed without cached text"
-            value="<?php echo tohtml(getSettingWithDefault('set-max-articles-without-text')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-max-articles-without-text')); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -743,7 +745,7 @@ echo error_message_with_hide($message, true);
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-max-texts-per-feed" data_info="Max Texts per Feed"
-            value="<?php echo tohtml(getSettingWithDefault('set-max-texts-per-feed')); ?>"
+            value="<?php echo tohtml(Settings::getWithDefault('set-max-texts-per-feed')); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">

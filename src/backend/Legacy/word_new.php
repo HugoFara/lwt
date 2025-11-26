@@ -21,11 +21,15 @@ namespace Lwt\Interface\New_Word;
 require_once 'Core/session_utility.php';
 require_once 'Core/simterms.php';
 
+use \Lwt\Database\Escaping;
+use \Lwt\Database\Settings;
+use \Lwt\Database\Maintenance;
+
 // INSERT
 
 if (isset($_REQUEST['op'])) {
     if ($_REQUEST['op'] == 'Save') {
-        $text = trim(prepare_textdata($_REQUEST["WoText"]));
+        $text = trim(Escaping::prepareTextdata($_REQUEST["WoText"]));
         $textlc = mb_strtolower($text, 'UTF-8');
         $translation_raw = repl_tab_nl(getreq("WoTranslation"));
         if ($translation_raw == '') {
@@ -60,7 +64,7 @@ if (isset($_REQUEST['op'])) {
         $wid = get_last_key();
 
         saveWordTags($wid);
-        init_word_count();
+        Maintenance::initWordCount();
         //        $showAll = getSettingZeroOrOne('showallwords',1);
         ?>
 
@@ -72,7 +76,7 @@ if (isset($_REQUEST['op'])) {
             if ($len > 1) {
                 insertExpressions($textlc, $_REQUEST["WoLgID"], $wid, $len, 0);
             } elseif ($len == 1) {
-                $hex = strToClassName(prepare_textdata($textlc));
+                $hex = strToClassName(Escaping::prepareTextdata($textlc));
                 do_mysqli_query(
                     'UPDATE ' . $tbpref . 'textitems2 SET Ti2WoID = ' . $wid . '
                     WHERE Ti2LgID = ' . $_REQUEST["WoLgID"] . ' AND LOWER(Ti2Text) = ' . convert_string_to_sqlsyntax_notrim_nonull($textlc)
@@ -80,14 +84,14 @@ if (isset($_REQUEST['op'])) {
                 ?>
 <script type="text/javascript">
     var context = window.parent.document;
-    var woid = <?php echo prepare_textdata_js($wid); ?>;
-    var status = <?php echo prepare_textdata_js($_REQUEST["WoStatus"]); ?>;
-    var trans = <?php echo prepare_textdata_js($translation . getWordTagList($wid, ' ', 1, 0)); ?>;
-    var roman = <?php echo prepare_textdata_js($_REQUEST["WoRomanization"]); ?>;
+    var woid = <?php echo Escaping::prepareTextdataJs($wid); ?>;
+    var status = <?php echo Escaping::prepareTextdataJs($_REQUEST["WoStatus"]); ?>;
+    var trans = <?php echo Escaping::prepareTextdataJs($translation . getWordTagList($wid, ' ', 1, 0)); ?>;
+    var roman = <?php echo Escaping::prepareTextdataJs($_REQUEST["WoRomanization"]); ?>;
     var title = '';
     if (window.parent.LWT_DATA.settings.jQuery_tooltip) {
         title = make_tooltip(
-                <?php echo prepare_textdata_js($_REQUEST["WoText"]); ?>,
+                <?php echo Escaping::prepareTextdataJs($_REQUEST["WoText"]); ?>,
             trans, roman, status
         );
     }

@@ -17,6 +17,8 @@
  * @since   3.0.0 Split from text_helpers.php
  */
 
+use Lwt\Database\Settings;
+
 /**
  * Return statistics about a list of text ID.
  *
@@ -189,7 +191,7 @@ function todo_words_content($textid): string
     'style="cursor: pointer; vertical-align:middle" title="Lookup New Words" ' .
     'alt="Lookup New Words" />';
 
-    $show_buttons = (int) getSettingWithDefault('set-words-to-do-buttons');
+    $show_buttons = (int) Settings::getWithDefault('set-words-to-do-buttons');
     if ($show_buttons != 2) {
         $res .= '<input type="button" onclick="iknowall(' . $textid .
         ');" value="Set All to Known" />';

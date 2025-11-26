@@ -18,6 +18,9 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Maintenance;
+
 /**
  * Return the term corresponding to the ID.
  *
@@ -55,7 +58,7 @@ function delete_word_from_database($wid)
         WHERE WoID = ' . $wid,
         ''
     );
-    adjust_autoincr('words', 'WoID');
+    Maintenance::adjustAutoIncrement('words', 'WoID');
     runsql(
         "UPDATE  " . $tbpref . "textitems2
         SET Ti2WoID  = 0
@@ -93,7 +96,7 @@ function delete_word_javascript($wid, $tid)
         if (!window.parent.document.LWT_DATA.settings.jQuery_tooltip) {
             const ann = elem.attr('data_ann');
             title = make_tooltip(
-                <?php echo prepare_textdata_js(get_term($wid)); ?>,
+                <?php echo Escaping::prepareTextdataJs(get_term($wid)); ?>,
                 ann + (ann ? ' / ' : '') + elem.attr('data_trans'),
                 elem.attr('data_rom'),
                 elem.attr('data_status')

@@ -18,6 +18,8 @@
 require_once 'Core/session_utility.php';
 require_once 'Core/langdefs.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Two-letter language code from from language name (e. g. : "English" = > "en" ).
  *
@@ -182,7 +184,7 @@ function tts_demo()
  */
 function tts_js()
 {
-    $lid = (int) getSetting('currentlanguage');
+    $lid = (int) Settings::get('currentlanguage');
     $lg_code = getLanguageCode($lid, LWT_LANGUAGES_ARRAY);
     ?>
 <script type="text/javascript" charset="utf-8">

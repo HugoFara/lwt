@@ -21,6 +21,8 @@ require_once 'Core/mobile_interactions.php';
 require_once 'text_display_header.php';
 require_once 'text_display_text.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Make the page content to display printed texts on mobile.
  *
@@ -59,9 +61,9 @@ function do_desktop_display_impr_text($textid, $audio)
 <!--
 <frameset border="3" bordercolor="" rows="<?php
 if (isset($audio)) {
-    echo (int)getSettingWithDefault('set-text-h-frameheight-with-audio') - 90;
+    echo (int)Settings::getWithDefault('set-text-h-frameheight-with-audio') - 90;
 } else {
-    echo (int)getSettingWithDefault('set-text-h-frameheight-no-audio') - 90;
+    echo (int)Settings::getWithDefault('set-text-h-frameheight-no-audio') - 90;
 } ?>,*">
     <frame src="display_impr_text_header.php?text=<?php echo $_REQUEST['text']; ?>" scrolling="no" name="header" />
     <frame src="display_impr_text_text.php?text=<?php echo $_REQUEST['text']; ?>" scrolling="auto" name="text" />

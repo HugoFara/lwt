@@ -25,6 +25,9 @@ namespace Lwt\Interface\Edit_Tags;
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Settings;
+use Lwt\Database\Maintenance;
+
 $currentsort = (int) processDBParam("sort", 'currenttagsort', '1', true);
 
 $currentpage = (int) processSessParam("page", "currenttagpage", '1', true);
@@ -64,7 +67,7 @@ if (isset($_REQUEST['markaction'])) {
                         ) WHERE TgID IS NULL",
                         ''
                     );
-                    adjust_autoincr('tags', 'TgID');
+                    Maintenance::adjustAutoIncrement('tags', 'TgID');
                 }
             }
         }
@@ -79,13 +82,13 @@ if (isset($_REQUEST['allaction'])) {
     if ($allaction == 'delall') {
         $message = runsql('delete from ' . $tbpref . 'tags where (1=1) ' . $wh_query, "Deleted");
         runsql("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "tags on WtTgID = TgID) WHERE TgID IS NULL", '');
-        adjust_autoincr('tags', 'TgID');
+        Maintenance::adjustAutoIncrement('tags', 'TgID');
     }
 } elseif (isset($_REQUEST['del'])) {
     // DEL
     $message = runsql('delete from ' . $tbpref . 'tags where TgID = ' . $_REQUEST['del'], "Deleted");
     runsql("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "tags on WtTgID = TgID) WHERE TgID IS NULL", '');
-    adjust_autoincr('tags', 'TgID');
+    Maintenance::adjustAutoIncrement('tags', 'TgID');
 } elseif (isset($_REQUEST['op'])) {
     // INS/UPD
     // INSERT
@@ -204,7 +207,7 @@ if (isset($_REQUEST['new'])) {
         echo $sql . ' ===&gt; ' . $recno;
     }
 
-    $maxperpage = (int) getSettingWithDefault('set-tags-per-page');
+    $maxperpage = (int) Settings::getWithDefault('set-tags-per-page');
 
     $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 

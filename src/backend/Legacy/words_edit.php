@@ -31,7 +31,11 @@ require_once 'Core/session_utility.php';
 require_once 'Core/simterms.php';
 require_once 'Core/start_session.php';
 
-$currentlang = validateLang((string) processDBParam("filterlang", 'currentlanguage', '', false));
+use Lwt\Database\Validation;
+use Lwt\Database\Settings;
+use Lwt\Database\Maintenance;
+
+$currentlang = Validation::language((string) processDBParam("filterlang", 'currentlanguage', '', false));
 $currentsort = (int) processDBParam("sort", 'currentwordsort', '1', true);
 
 $currentpage = (int) processSessParam("page", "currentwordpage", '1', true);
@@ -42,16 +46,16 @@ $currentquerymode = (string) processSessParam(
     'term,rom,transl',
     false
 );
-$currentregexmode = getSettingWithDefault("set-regex-mode");
+$currentregexmode = Settings::getWithDefault("set-regex-mode");
 $currentstatus = (string) processSessParam("status", "currentwordstatus", '', false);
-$currenttext = validateText((string) processSessParam("text", "currentwordtext", '', false));
+$currenttext = Validation::text((string) processSessParam("text", "currentwordtext", '', false));
 $currenttexttag = (string) processSessParam("texttag", "currentwordtexttag", '', false);
 $currenttextmode = (string) processSessParam("text_mode", "currentwordtextmode", 0, false);
-$currenttag1 = validateTag(
+$currenttag1 = Validation::tag(
     (string) processSessParam("tag1", "currentwordtag1", '', false),
     $currentlang
 );
-$currenttag2 = validateTag(
+$currenttag2 = Validation::tag(
     (string) processSessParam("tag2", "currentwordtag2", '', false),
     $currentlang
 );
@@ -196,7 +200,7 @@ if (isset($_REQUEST['markaction'])) {
                         'delete from ' . $tbpref . 'textitems2
                         where Ti2WoID in ' . $list
                     );
-                    adjust_autoincr('words', 'WoID');
+                    Maintenance::adjustAutoIncrement('words', 'WoID');
                     runsql(
                         "DELETE " . $tbpref . "wordtags
                         FROM (
@@ -507,7 +511,7 @@ if (isset($_REQUEST['allaction'])) {
             $message = "Tag added in $cnt Terms";
         } elseif ($allaction == 'delall') {
             $message = "Deleted: $cnt Terms";
-            adjust_autoincr('words', 'WoID');
+            Maintenance::adjustAutoIncrement('words', 'WoID');
             runsql(
                 "DELETE " . $tbpref . "wordtags FROM (
                     " . $tbpref . "wordtags
@@ -603,7 +607,7 @@ if (isset($_REQUEST['allaction'])) {
 } elseif (isset($_REQUEST['del'])) {
     // DEL
     $message = runsql('delete from ' . $tbpref . 'words where WoID = ' . $_REQUEST['del'], "Deleted");
-    adjust_autoincr('words', 'WoID');
+    Maintenance::adjustAutoIncrement('words', 'WoID');
     do_mysqli_query('update ' . $tbpref . 'textitems2 set Ti2WoID = 0 where Ti2WordCount = 1 and Ti2WoID = ' . $_REQUEST['del']);
     do_mysqli_query('delete from ' . $tbpref . 'textitems2 where Ti2WoID  = ' . $_REQUEST['del']);
     runsql("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "words on WtWoID = WoID) WHERE WoID IS NULL", '');
@@ -635,7 +639,7 @@ if (isset($_REQUEST['allaction'])) {
         );
 
         $wid = get_last_key();
-        init_word_count();
+        Maintenance::initWordCount();
         $len = get_first_value(
             'select WoWordCount as value
             from ' . $tbpref . 'words where WoID = ' . $wid
@@ -853,7 +857,7 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
         echo $sql . ' ===&gt; ' . $recno;
     }
 
-    $maxperpage = (int) getSettingWithDefault('set-terms-per-page');
+    $maxperpage = (int) Settings::getWithDefault('set-terms-per-page');
 
     $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 

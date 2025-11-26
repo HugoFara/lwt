@@ -18,7 +18,10 @@
 
 require_once 'Core/session_utility.php';
 
-$showAll = getSettingZeroOrOne('showallwords', 1);
+use Lwt\Database\Settings;
+use Lwt\Database\Maintenance;
+
+$showAll = Settings::getZeroOrOne('showallwords', 1);
 
 $tid = $_REQUEST['tid'];
 $wid = $_REQUEST['wid'];
@@ -30,7 +33,7 @@ $m1 = runsql(
     'delete from ' . $tbpref . 'words where WoID = ' . $wid,
     ''
 );
-adjust_autoincr('words', 'WoID');
+Maintenance::adjustAutoIncrement('words', 'WoID');
 runsql(
     'delete from ' . $tbpref . 'textitems2 where Ti2WordCount>1 AND Ti2WoID = ' . $wid,
     ''

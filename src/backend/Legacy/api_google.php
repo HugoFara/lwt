@@ -24,6 +24,8 @@ require_once 'Core/google_time_token.php' ;
 require_once 'Core/classes/GoogleTranslate.php';
 
 use Lwt\Classes\GoogleTranslate as GoogleTranslate;
+use \Lwt\Database\Escaping;
+use \Lwt\Database\Settings;
 
 use function Lwt\Includes\getGoogleTimeToken;
 
@@ -60,7 +62,7 @@ function translate_sentence($text, $translation): void
 function translate_term($text, $file, $sl, $tl): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $lg_id = getSetting('currentlangage');
+    $lg_id = Settings::get('currentlangage');
     get_first_value(
         "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages
         WHERE LgID = $lg_id"
@@ -90,7 +92,7 @@ function translate_term($text, $file, $sl, $tl): void
     <?php
     foreach ($file as $word) {
         echo '<span class="click" onclick="addTranslation(' .
-        prepare_textdata_js($word) . ');">' .
+        Escaping::prepareTextdataJs($word) . ');">' .
         '<img src="/assets/icons/tick-button.png" title="Copy" alt="Copy" /> &nbsp; ' .
         tohtml($word) . '</span><br />';
     }

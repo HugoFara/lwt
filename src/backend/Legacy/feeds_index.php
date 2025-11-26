@@ -19,6 +19,11 @@ namespace Lwt\Interface\Do_Feeds;
 
 require_once 'Core/session_utility.php';
 
+use \Lwt\Database\Validation;
+use \Lwt\Database\Settings;
+use \Lwt\Database\Maintenance;
+use \Lwt\Database\TextParsing;
+
 
 /**
  * @return (int|string)[]
@@ -67,7 +72,7 @@ function dummy_function_1(): array
             $nf_tag_name = mb_substr($NfName, 0, 20, "utf-8");
         }
         if (!$nf_max_texts = (int)get_nf_option($nf_options, 'max_texts')) {
-            $nf_max_texts = (int)getSettingWithDefault('set-max-texts-per-feed');
+            $nf_max_texts = (int)Settings::getWithDefault('set-max-texts-per-feed');
         }
         $texts = get_text_from_rsslink(
             $doc,
@@ -188,7 +193,7 @@ function dummy_function_1(): array
                     )'
                 );
                 $id = get_last_key();
-                splitCheckText(
+                TextParsing::splitCheck(
                     get_first_value(
                         'select TxText as value from ' . $tbpref . 'texts
                         where TxID = ' . $id
@@ -268,8 +273,8 @@ function dummy_function_1(): array
                         if (is_numeric($temp)) {
                             $message1 += (int) $temp;
                         }
-                        adjust_autoincr('texts', 'TxID');
-                        adjust_autoincr('sentences', 'SeID');
+                        Maintenance::adjustAutoIncrement('texts', 'TxID');
+                        Maintenance::adjustAutoIncrement('sentences', 'SeID');
                         runsql(
                             "DELETE " . $tbpref . "texttags
                             FROM ("
@@ -383,7 +388,7 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
         'title,desc,text',
         false
     );
-    $currentregexmode = getSettingWithDefault("set-regex-mode");
+    $currentregexmode = Settings::getWithDefault("set-regex-mode");
     $wh_query = $currentregexmode . 'like ' .  convert_string_to_sqlsyntax(
         ($currentregexmode == '') ?
         str_replace("*", "%", mb_strtolower($currentquery, 'UTF-8')) :
@@ -544,7 +549,7 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
                     echo $sql . ' ===&gt; ' . $recno;
                 }
                 if ($recno) {
-                    $maxperpage = (int)getSettingWithDefault('set-articles-per-page');
+                    $maxperpage = (int)Settings::getWithDefault('set-articles-per-page');
                     $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
                     if ($currentpage < 1) {
                         $currentpage = 1;
@@ -677,7 +682,7 @@ $('img.not_found').on('click', function () {
 function do_page(): void
 {
     session_start();
-    $currentlang = validateLang(
+    $currentlang = Validation::language(
         (string) processDBParam("filterlang", 'currentlanguage', '', false)
     );
     pagestart('My ' . getLanguage($currentlang) . ' Feeds', true);

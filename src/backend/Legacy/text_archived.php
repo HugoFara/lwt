@@ -22,7 +22,12 @@
 
 require_once 'Core/session_utility.php';
 
-$currentlang = validateLang((string) processDBParam("filterlang", 'currentlanguage', '', false));
+use Lwt\Database\Validation;
+use Lwt\Database\Settings;
+use Lwt\Database\Maintenance;
+use Lwt\Database\TextParsing;
+
+$currentlang = Validation::language((string) processDBParam("filterlang", 'currentlanguage', '', false));
 $currentsort = (int) processDBParam("sort", 'currentarchivesort', '1', true);
 
 $currentpage = (int) processSessParam("page", "currentarchivepage", '1', true);
@@ -33,12 +38,12 @@ $currentquerymode = (string) processSessParam(
     'title,text',
     false
 );
-$currentregexmode = getSettingWithDefault("set-regex-mode");
-$currenttag1 = validateArchTextTag(
+$currentregexmode = Settings::getWithDefault("set-regex-mode");
+$currenttag1 = Validation::archTextTag(
     (string) processSessParam("tag1", "currentarchivetexttag1", '', false),
     $currentlang
 );
-$currenttag2 = validateArchTextTag(
+$currenttag2 = Validation::archTextTag(
     (string) processSessParam("tag2", "currentarchivetexttag2", '', false),
     $currentlang
 );
@@ -150,7 +155,7 @@ if (isset($_REQUEST['markaction'])) {
                         where AtID in ' . $list,
                         "Archived Texts deleted"
                     );
-                    adjust_autoincr('archivedtexts', 'AtID');
+                    Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
                     runsql(
                         "DELETE " . $tbpref . "archtexttags
                         FROM (
@@ -195,7 +200,7 @@ if (isset($_REQUEST['markaction'])) {
                             where AgAtID = ' . $ida,
                             ""
                         );
-                        splitCheckText(
+                        TextParsing::splitCheck(
                             get_first_value(
                                 'select TxText as value
                                 from ' . $tbpref . 'texts
@@ -211,7 +216,7 @@ if (isset($_REQUEST['markaction'])) {
                         );
                     }
                     mysqli_free_result($res);
-                    adjust_autoincr('archivedtexts', 'AtID');
+                    Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
                     runsql(
                         "DELETE " . $tbpref . "archtexttags
                         FROM (
@@ -236,7 +241,7 @@ if (isset($_REQUEST['del'])) {
         'delete from ' . $tbpref . 'archivedtexts where AtID = ' . $_REQUEST['del'],
         "Archived Texts deleted"
     );
-    adjust_autoincr('archivedtexts', 'AtID');
+    Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
     runsql(
         "DELETE " . $tbpref . "archtexttags
         FROM (
@@ -264,7 +269,7 @@ if (isset($_REQUEST['del'])) {
         where AgAtID = ' . $_REQUEST['unarch'],
         ""
     );
-    splitCheckText(
+    TextParsing::splitCheck(
         get_first_value(
             'select TxText as value from ' . $tbpref . 'texts where TxID = ' . $id
         ),
@@ -287,7 +292,7 @@ if (isset($_REQUEST['del'])) {
         'select count(*) as value from ' . $tbpref . 'textitems2
         where Ti2TxID = ' . $id
     );
-    adjust_autoincr('archivedtexts', 'AtID');
+    Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
     runsql(
         "DELETE " . $tbpref . "archtexttags
         FROM (" . $tbpref . "archtexttags
@@ -421,7 +426,7 @@ if (isset($_REQUEST['chg'])) {
         echo $sql . ' ===&gt; ' . $recno;
     }
 
-    $maxperpage = (int)getSettingWithDefault('set-archivedtexts-per-page');
+    $maxperpage = (int)Settings::getWithDefault('set-archivedtexts-per-page');
 
     $pages = $recno == 0 ? 0 : intval(($recno - 1) / $maxperpage) + 1;
 

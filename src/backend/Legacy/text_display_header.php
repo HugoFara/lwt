@@ -18,6 +18,8 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Return the useful data for the header part of a printed text.
  *
@@ -50,7 +52,7 @@ function do_diplay_impr_text_header_data($textid)
     $sourceURI = $record['TxSourceURI'];
     mysqli_free_result($res);
 
-    saveSetting('currenttext', $textid);
+    Settings::save('currenttext', $textid);
     return array($title, $audio, $sourceURI);
 }
 

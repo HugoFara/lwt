@@ -15,6 +15,9 @@
 
 require_once __DIR__ . '/session_utility.php';
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+
 
 /**
  * Get letter pairs from string
@@ -165,8 +168,8 @@ function format_term($termid, $compare)
             $rom = "";
             $romd = "";
         }
-        $js_event = "setTransRoman(" . prepare_textdata_js($tra) . ',' .
-        prepare_textdata_js($rom) . ')';
+        $js_event = "setTransRoman(" . Escaping::prepareTextdataJs($tra) . ',' .
+        Escaping::prepareTextdataJs($rom) . ')';
         $output = '<img class="clickedit" src="/assets/icons/tick-button-small.png" ' .
         'title="Copy → Translation &amp; Romanization Field(s)" ' .
         'onclick="' . tohtml($js_event) . '" /> ' .
@@ -188,7 +191,7 @@ function format_term($termid, $compare)
  */
 function print_similar_terms($lang_id, $compared_term): string
 {
-    $max_count = (int)getSettingWithDefault("set-similar-terms-count");
+    $max_count = (int)Settings::getWithDefault("set-similar-terms-count");
     if ($max_count <= 0) {
         return '';
     }
@@ -215,7 +218,7 @@ function print_similar_terms($lang_id, $compared_term): string
  */
 function print_similar_terms_tabrow(): void
 {
-    if ((int)getSettingWithDefault("set-similar-terms-count") > 0) {
+    if ((int)Settings::getWithDefault("set-similar-terms-count") > 0) {
         echo '<tr>
             <td class="td1 right">Similar<br />Terms:</td>
             <td class="td1"><span id="simwords" class="smaller">&nbsp;</span></td>

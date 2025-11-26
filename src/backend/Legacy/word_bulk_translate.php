@@ -23,6 +23,8 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
 
 function bulk_save_terms(array $terms, int $tid, bool $cleanUp): void
 {
@@ -53,7 +55,7 @@ function bulk_save_terms(array $terms, int $tid, bool $cleanUp): void
         make_score_random_insert_update('iv') . "
     ) VALUES " . rtrim(implode(',', $sqlarr), ',');
     runsql($sqltext, '');
-    $tooltip_mode = getSettingWithDefault('set-tooltip-mode');
+    $tooltip_mode = Settings::getWithDefault('set-tooltip-mode');
     $res = do_mysqli_query(
         "SELECT WoID, WoTextLC, WoStatus, WoTranslation
         FROM {$tbpref}words
@@ -99,7 +101,7 @@ function bulk_save_terms(array $terms, int $tid, bool $cleanUp): void
     }
     <?php
     while ($record = mysqli_fetch_assoc($res)) {
-        $record["hex"] = strToClassName(prepare_textdata($record["WoTextLC"]));
+        $record["hex"] = strToClassName(Escaping::prepareTextdata($record["WoTextLC"]));
         $record["translation"] = $record["WoTranslation"];
         echo "change_term(" . json_encode($record) . ");";
     }
@@ -123,7 +125,7 @@ function bulk_do_content(int $tid, string $sl, string $tl, int $pos): void
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $cnt = 0;
     $offset = '';
-    $limit = (int)getSettingWithDefault('set-ggl-translation-per-page') + 1;
+    $limit = (int)Settings::getWithDefault('set-ggl-translation-per-page') + 1;
     $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI
     FROM {$tbpref}languages, {$tbpref}texts
     WHERE LgID = TxLgID AND TxID = $tid";

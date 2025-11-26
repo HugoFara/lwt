@@ -18,6 +18,8 @@
 
 require_once __DIR__ . '/database_connect.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Get a session value and update it if necessary.
  *
@@ -57,10 +59,10 @@ function processSessParam($reqkey, $sesskey, $default, $isnum)
  */
 function processDBParam($reqkey, $dbkey, $default, $isnum)
 {
-    $dbdata = getSetting($dbkey);
+    $dbdata = Settings::get($dbkey);
     if (isset($_REQUEST[$reqkey])) {
         $reqdata = trim($_REQUEST[$reqkey]);
-        saveSetting($dbkey, $reqdata);
+        Settings::save($dbkey, $reqdata);
         $result = $reqdata;
     } elseif ($dbdata != '') {
         $result = $dbdata;

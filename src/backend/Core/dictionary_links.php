@@ -18,6 +18,8 @@
 
 require_once __DIR__ . '/database_connect.php';
 
+use Lwt\Database\Escaping;
+
 /**
  * Create and verify a dictionary URL link
  *
@@ -140,7 +142,7 @@ function makeOpenDictStr($url, $txt): string
     }
     if ($popup) {
         $r = ' <span class="click" onclick="owin(' .
-        prepare_textdata_js($url) . ');">' .
+        Escaping::prepareTextdataJs($url) . ');">' .
         tohtml($txt) .
         '</span> ';
     } else {
@@ -166,9 +168,9 @@ function makeOpenDictStrJS(string $url): string
             $popup = $popup || array_key_exists('lwt_popup', $url_query);
         }
         if ($popup) {
-            $r = "owin(" . prepare_textdata_js($url) . ");\n";
+            $r = "owin(" . Escaping::prepareTextdataJs($url) . ");\n";
         } else {
-            $r = "top.frames['ru'].location.href=" . prepare_textdata_js($url) . ";\n";
+            $r = "top.frames['ru'].location.href=" . Escaping::prepareTextdataJs($url) . ";\n";
         }
     }
     return $r;
@@ -214,7 +216,7 @@ function makeOpenDictStrDynSent($url, $sentctljs, $txt): string
         $url = str_replace('?', '?sent=1&', $url);
     }
     return '<span class="click" onclick="translateSentence' . ($popup ? '2' : '') . '(' .
-    prepare_textdata_js($url) . ',' . $sentctljs . ');">' .
+    Escaping::prepareTextdataJs($url) . ',' . $sentctljs . ');">' .
     tohtml($txt) . '</span>';
 }
 
@@ -249,19 +251,19 @@ function createDictLinksInEditWin2($lang, $sentctljs, $wordctljs): string
     mysqli_free_result($res);
 
     $r = 'Lookup Term:
-    <span class="click" onclick="translateWord2(' . prepare_textdata_js($wb1) .
+    <span class="click" onclick="translateWord2(' . Escaping::prepareTextdataJs($wb1) .
     ',' . $wordctljs . ');">Dict1</span> ';
     if ($wb2 != "") {
         $r .= '<span class="click" onclick="translateWord2(' .
-        prepare_textdata_js($wb2) . ',' . $wordctljs . ');">Dict2</span> ';
+        Escaping::prepareTextdataJs($wb2) . ',' . $wordctljs . ');">Dict2</span> ';
     }
     if ($wb3 != "") {
         $sent_mode = substr($wb3, 0, 7) == 'ggl.php' ||
         str_ends_with(parse_url($wb3, PHP_URL_PATH), '/ggl.php');
         $r .= '<span class="click" onclick="translateWord2(' .
-        prepare_textdata_js($wb3) . ',' . $wordctljs . ');">Translator</span>
+        Escaping::prepareTextdataJs($wb3) . ',' . $wordctljs . ');">Translator</span>
          | <span class="click" onclick="translateSentence2(' .
-        prepare_textdata_js(
+        Escaping::prepareTextdataJs(
             $sent_mode ?
             str_replace('?', '?sent=1&', $wb3) : $wb3
         ) . ',' . $sentctljs .
@@ -292,14 +294,14 @@ function makeDictLinks(int $lang, string $wordctljs): string
     mysqli_free_result($res);
     $r = '<span class="smaller">';
     $r .= '<span class="click" onclick="translateWord3(' .
-    prepare_textdata_js($wb1) . ',' . $wordctljs . ');">[1]</span> ';
+    Escaping::prepareTextdataJs($wb1) . ',' . $wordctljs . ');">[1]</span> ';
     if ($wb2 != "") {
         $r .= '<span class="click" onclick="translateWord3(' .
-        prepare_textdata_js($wb2) . ',' . $wordctljs . ');">[2]</span> ';
+        Escaping::prepareTextdataJs($wb2) . ',' . $wordctljs . ');">[2]</span> ';
     }
     if ($wb3 != "") {
         $r .= '<span class="click" onclick="translateWord3(' .
-        prepare_textdata_js($wb3) . ',' . $wordctljs . ');">[G]</span>';
+        Escaping::prepareTextdataJs($wb3) . ',' . $wordctljs . ');">[G]</span>';
     }
     $r .= '</span>';
     return $r;
@@ -320,9 +322,9 @@ function createDictLinksInEditWin3(int $lang, string $sentctljs, string $wordctl
     }
     $popup = $popup || str_contains($wb1, "lwt_popup=");
     if ($popup) {
-        $f1 = 'translateWord2(' . prepare_textdata_js($wb1);
+        $f1 = 'translateWord2(' . Escaping::prepareTextdataJs($wb1);
     } else {
-        $f1 = 'translateWord(' . prepare_textdata_js($wb1);
+        $f1 = 'translateWord(' . Escaping::prepareTextdataJs($wb1);
     }
 
     $wb2 = isset($record['LgDict2URI']) ? (string) $record['LgDict2URI'] : "";
@@ -333,9 +335,9 @@ function createDictLinksInEditWin3(int $lang, string $sentctljs, string $wordctl
     }
     $popup = $popup || str_contains($wb2, "lwt_popup=");
     if ($popup) {
-        $f2 = 'translateWord2(' . prepare_textdata_js($wb2);
+        $f2 = 'translateWord2(' . Escaping::prepareTextdataJs($wb2);
     } else {
-        $f2 = 'translateWord(' . prepare_textdata_js($wb2);
+        $f2 = 'translateWord(' . Escaping::prepareTextdataJs($wb2);
     }
 
     $wb3 = isset($record['LgGoogleTranslateURI']) ?
@@ -355,11 +357,11 @@ function createDictLinksInEditWin3(int $lang, string $sentctljs, string $wordctl
         $popup = $popup || array_key_exists('lwt_popup', $url_query);
     }
     if ($popup) {
-        $f3 = 'translateWord2(' . prepare_textdata_js($wb3);
-        $f4 = 'translateSentence2(' . prepare_textdata_js($wb3);
+        $f3 = 'translateWord2(' . Escaping::prepareTextdataJs($wb3);
+        $f4 = 'translateSentence2(' . Escaping::prepareTextdataJs($wb3);
     } else {
-        $f3 = 'translateWord(' . prepare_textdata_js($wb3);
-        $f4 = 'translateSentence(' . prepare_textdata_js(
+        $f3 = 'translateWord(' . Escaping::prepareTextdataJs($wb3);
+        $f4 = 'translateSentence(' . Escaping::prepareTextdataJs(
             (str_ends_with($parsed_url['path'] ?? '', "/ggl.php")) ?
             str_replace('?', '?sent=1&', $wb3) : $wb3
         );

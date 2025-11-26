@@ -18,6 +18,8 @@
  */
 
 require_once 'Core/session_utility.php';
+
+use Lwt\Database\Settings;
 require_once 'Core/start_session.php';
 
 /**
@@ -101,7 +103,7 @@ function do_set_test_status_javascript(
     .attr('data_todo','0');
     // Waittime <= 0 causes the page to loop-reloading
     const waittime = <?php
-    echo json_encode((int)getSettingWithDefault('set-test-main-frame-waiting-time'));
+    echo json_encode((int)Settings::getWithDefault('set-test-main-frame-waiting-time'));
     ?> + 500;
 
     function page_reloader(waittime, target) {

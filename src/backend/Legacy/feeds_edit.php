@@ -4,7 +4,10 @@ namespace Lwt\Interface\Edit_Feeds;
 
 require_once 'Core/session_utility.php';
 
-$currentlang = validateLang((string) processDBParam("filterlang", 'currentlanguage', '', false));
+use \Lwt\Database\Settings;
+use \Lwt\Database\Validation;
+
+$currentlang = Validation::language((string) processDBParam("filterlang", 'currentlanguage', '', false));
 $currentsort = (int) processDBParam("sort", 'currentmanagefeedssort', '2', true);
 $currentquery = (string) processSessParam("query", "currentmanagefeedsquery", '', false);
 $currentpage = (int) processSessParam("page", "currentmanagefeedspage", '1', true);
@@ -575,7 +578,7 @@ function display_main_page(
         echo $sql . ' ===&gt; ' . $recno;
     }
     if ($recno) {
-        $maxperpage = (int) getSettingWithDefault('set-feeds-per-page');
+        $maxperpage = (int) Settings::getWithDefault('set-feeds-per-page');
         $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
         if ($currentpage < 1) {
             $currentpage = 1;

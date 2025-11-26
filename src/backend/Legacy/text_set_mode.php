@@ -18,6 +18,8 @@
 
 require_once 'Core/session_utility.php';
 
+use Lwt\Database\Settings;
+
 
 /**
  * Save text mode settings.
@@ -31,9 +33,9 @@ require_once 'Core/session_utility.php';
  */
 function text_mode_save_settings($showAll, $showLearning): int
 {
-    saveSetting('showallwords', $showAll);
-    $oldShowLearning = getSettingZeroOrOne('showlearningtranslations', 1);
-    saveSetting('showlearningtranslations', $showLearning);
+    Settings::save('showallwords', $showAll);
+    $oldShowLearning = Settings::getZeroOrOne('showlearningtranslations', 1);
+    Settings::save('showlearningtranslations', $showLearning);
     return $oldShowLearning;
 }
 

@@ -16,6 +16,9 @@
 
 namespace Lwt\Controllers;
 
+use \Lwt\Database\Settings;
+use \Lwt\Database\Maintenance;
+
 /**
  * Controller for managing tags (both term tags and text tags).
  *
@@ -132,7 +135,7 @@ class TagsController extends BaseController
                     "Deleted"
                 );
                 $this->cleanupOrphanedTermTagLinks();
-                \adjust_autoincr('tags', 'TgID');
+                Maintenance::adjustAutoIncrement('tags', 'TgID');
             }
         } elseif ($this->param('del')) {
             // Single delete
@@ -141,7 +144,7 @@ class TagsController extends BaseController
                 "Deleted"
             );
             $this->cleanupOrphanedTermTagLinks();
-            \adjust_autoincr('tags', 'TgID');
+            Maintenance::adjustAutoIncrement('tags', 'TgID');
         } elseif ($this->param('op')) {
             // Insert/Update
             $message = $this->saveTermTag();
@@ -172,7 +175,7 @@ class TagsController extends BaseController
                     "Deleted"
                 );
                 $this->cleanupOrphanedTermTagLinks();
-                \adjust_autoincr('tags', 'TgID');
+                Maintenance::adjustAutoIncrement('tags', 'TgID');
             }
         }
 
@@ -350,7 +353,7 @@ class TagsController extends BaseController
             echo $sql . ' ===&gt; ' . $recno;
         }
 
-        $maxperpage = (int) \getSettingWithDefault('set-tags-per-page');
+        $maxperpage = (int) Settings::getWithDefault('set-tags-per-page');
         $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
         if ($currentpage < 1) {
@@ -499,7 +502,7 @@ class TagsController extends BaseController
                     "Deleted"
                 );
                 $this->cleanupOrphanedTextTagLinks();
-                \adjust_autoincr('tags2', 'T2ID');
+                Maintenance::adjustAutoIncrement('tags2', 'T2ID');
             }
         } elseif ($this->param('del')) {
             // Single delete
@@ -508,7 +511,7 @@ class TagsController extends BaseController
                 "Deleted"
             );
             $this->cleanupOrphanedTextTagLinks();
-            \adjust_autoincr('tags2', 'T2ID');
+            Maintenance::adjustAutoIncrement('tags2', 'T2ID');
         } elseif ($this->param('op')) {
             // Insert/Update
             $message = $this->saveTextTag();
@@ -539,7 +542,7 @@ class TagsController extends BaseController
                     "Deleted"
                 );
                 $this->cleanupOrphanedTextTagLinks();
-                \adjust_autoincr('tags2', 'T2ID');
+                Maintenance::adjustAutoIncrement('tags2', 'T2ID');
             }
         }
 
@@ -720,7 +723,7 @@ class TagsController extends BaseController
             echo $sql . ' ===&gt; ' . $recno;
         }
 
-        $maxperpage = (int) \getSettingWithDefault('set-tags-per-page');
+        $maxperpage = (int) Settings::getWithDefault('set-tags-per-page');
         $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
         if ($currentpage < 1) {

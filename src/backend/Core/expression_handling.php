@@ -17,6 +17,9 @@
  * @since    3.0.0 Split from text_helpers.php
  */
 
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+
 /**
  * Find all occurences of an expression using MeCab.
  *
@@ -132,7 +135,7 @@ function insert_expression_from_mecab($text, $lid, $wid, $len): array
     foreach ($occurences as $occ) {
         $txId = $occ['SeTxID'] ?? $occ['TxID'] ?? 0;
         $mwords[$txId] = array();
-        if (getSettingZeroOrOne('showallwords', 1)) {
+        if (Settings::getZeroOrOne('showallwords', 1)) {
             $mwords[$txId][$occ['position']] = "&nbsp;$len&nbsp";
         } else {
             $mwords[$txId][$occ['position']] = $occ['term'];
@@ -320,7 +323,7 @@ function insert_standard_expression($textlc, $lid, $wid, $len, $mode): array
     foreach ($occurences as $occ) {
         $txId = $occ['SeTxID'] ?? $occ['TxID'] ?? 0;
         $mwords[$txId] = array();
-        if (getSettingZeroOrOne('showallwords', 1)) {
+        if (Settings::getZeroOrOne('showallwords', 1)) {
             $mwords[$txId][$occ['position']] = "&nbsp;$len&nbsp";
         } else {
             $mwords[$txId][$occ['position']] = $occ['term_display'] ?? $occ['term'] ?? '';
@@ -362,7 +365,7 @@ function insert_standard_expression($textlc, $lid, $wid, $len, $mode): array
  */
 function new_expression_interactable(string $hex, string $appendtext, int $sid, int $len): void
 {
-    $showAll = (bool) getSettingZeroOrOne('showallwords', 1);
+    $showAll = (bool) Settings::getZeroOrOne('showallwords', 1);
     $showType = $showAll ? "m" : '';
 
     ?>
@@ -401,7 +404,7 @@ function new_expression_interactable(string $hex, string $appendtext, int $sid, 
 function new_expression_interactable2($hex, $appendtext, $wid, $len): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $showAll = (bool)getSettingZeroOrOne('showallwords', 1);
+    $showAll = (bool)Settings::getZeroOrOne('showallwords', 1);
     $showType = $showAll ? "m" : "";
 
     $sql = "SELECT * FROM {$tbpref}words WHERE WoID=$wid";
@@ -469,7 +472,7 @@ function new_expression_interactable2($hex, $appendtext, $wid, $len): void
 function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $showAll = (bool)getSettingZeroOrOne('showallwords', 1);
+    $showAll = (bool)Settings::getZeroOrOne('showallwords', 1);
     $showType = $showAll ? "m" : "";
 
     $sql = "SELECT * FROM {$tbpref}words WHERE WoID=$wid";
@@ -556,7 +559,7 @@ function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mo
         foreach ($occurences as $occ) {
             $txId = $occ['SeTxID'] ?? $occ['TxID'] ?? 0;
             $appendtext[$txId] = array();
-            if (getSettingZeroOrOne('showallwords', 1)) {
+            if (Settings::getZeroOrOne('showallwords', 1)) {
                 $appendtext[$txId][$occ['position']] = "&nbsp;$len&nbsp";
             } else {
                 if ('MECAB' == strtoupper(trim($regexp))) {
@@ -566,7 +569,7 @@ function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mo
                 }
             }
         }
-        $hex = strToClassName(prepare_textdata($textlc));
+        $hex = strToClassName(Escaping::prepareTextdata($textlc));
         newMultiWordInteractable($hex, $appendtext, $wid, $len);
     }
     $sqltext = null;
