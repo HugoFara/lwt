@@ -80,5 +80,5 @@ function display_page(int $type, int $term, int $order)
 }
 
 if (isset($_REQUEST["x"]) && is_numeric($_REQUEST["x"])) {
-    display_page($_REQUEST["x"], $_REQUEST["i"], $_REQUEST["t"]);
+    display_page((int)$_REQUEST["x"], (int)$_REQUEST["i"], (int)$_REQUEST["t"]);
 }

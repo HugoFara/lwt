@@ -116,9 +116,9 @@ function getLanguagesSettings($langid)
  *
  * @param int                   $actcode       Action code, number of words forming
  *                                             the term (> 1 for multiword)
- * @param int                   $showAll       Show all words or not
- * @param int                   $hideuntil     Unused
+ * @param bool                  $showAll       Show all words or not
  * @param string                $spanid        ID for this span element
+ * @param string                $hidetag       Hide tag string
  * @param int                   $currcharcount Current number of characters
  * @param array<string, string> $record        Various data
  * @param array                 $exprs         Current expressions
@@ -245,9 +245,10 @@ function echo_term(
  * Print the output when the word is a term.
  *
  * @param int                   $actcode       Action code, > 1 for multiword
- * @param int                   $showAll       Show all words or not
- * @param int                   $hideuntil     Unused
+ * @param bool                  $showAll       Show all words or not
+ * @param int                   $hideuntil     Unused, kept for backwards compatibility
  * @param string                $spanid        ID for this span element
+ * @param string                $hidetag       Hide tag string
  * @param int                   $currcharcount Current number of characters
  * @param array<string, string> $record        Various data
  *
@@ -306,7 +307,7 @@ function wordProcessor($record, $showAll, $currcharcount): int
     } else {
         echo_term(
             $actcode,
-            $showAll,
+            (bool)$showAll,
             $spanid,
             $hidetag,
             $currcharcount,
@@ -392,7 +393,7 @@ function item_parser(
         // A term (word or multi-word)
         echo_term(
             $actcode,
-            $showAll,
+            (bool)$showAll,
             $spanid,
             $hidetag,
             $currcharcount,
@@ -438,7 +439,7 @@ function word_parser($record, $showAll, $currcharcount, $hideuntil): int
         // A term (word or multi-word)
         echo_term(
             $actcode,
-            $showAll,
+            (bool)$showAll,
             $spanid,
             $hidetag,
             $currcharcount,
@@ -573,7 +574,7 @@ function mainWordLoop($textid, $showAll): void
  * @param int       $showLearning 1 to show learning translations
  * @param int<1, 4> $mode_trans   Annotation position
  * @param int       $textsize     Text font size
- * @param bool      $ann_exist    Does annotations exist for this text
+ * @param bool      $ann_exists   Does annotations exist for this text
  *
  * @return void
  */
@@ -642,7 +643,7 @@ function do_text_text_style(int $showLearning, int $mode_trans, int $textsize, b
  * @param int       $showLearning 1 to show learning translations
  * @param int<1, 4> $mode_trans   Annotation position
  * @param int       $textsize     Text font size
- * @param bool      $ann_exist    Does annotations exist for this text
+ * @param bool      $ann_exists   Does annotations exist for this text
  *
  * @return void
  *
@@ -828,7 +829,7 @@ function do_text_text_content($textid, $only_body = true): void
         )
     );
     do_text_text_javascript($var_array);
-    do_text_text_style($showLearning, $mode_trans, $textsize, strlen($ann) > 0);
+    do_text_text_style($showLearning, $mode_trans, (int)$textsize, strlen($ann) > 0);
     ?>
 
     <div id="thetext" <?php echo ($rtlScript ? 'dir="rtl"' : '') ?>>

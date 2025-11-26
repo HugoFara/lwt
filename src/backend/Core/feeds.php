@@ -19,7 +19,7 @@ function load_feeds(int $currentfeed): void
             where `NfOptions` like '%autoupdate=%'"
         );
         while ($row = mysqli_fetch_assoc($result)) {
-            if ($autoupdate = get_nf_option($row['NfOptions'], 'autoupdate')) {
+            if ($autoupdate = get_nf_option((string)$row['NfOptions'], 'autoupdate')) {
                 if (strpos($autoupdate, 'h') !== false) {
                     $autoupdate = str_replace('h', '', $autoupdate);
                     $autoupdate = 60 * 60 * (int)$autoupdate;

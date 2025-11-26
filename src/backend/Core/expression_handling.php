@@ -523,13 +523,14 @@ function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
 /**
  * Alter the database to add a new word
  *
- * @param string     $textlc Text in lower case
- * @param string|int $lid    Language ID
- * @param int        $len    Number of words in the expression
- * @param int        $mode   Function mode
- *                           - 0: Default mode, do nothing special
- *                           - 1: Runs an expresion inserter interactable
- *                           - 2: Return the sql output
+ * @param string $textlc Text in lower case
+ * @param int    $lid    Language ID
+ * @param int    $wid    Word ID
+ * @param int    $len    Number of words in the expression
+ * @param int    $mode   Function mode
+ *                       - 0: Default mode, do nothing special
+ *                       - 1: Runs an expresion inserter interactable
+ *                       - 2: Return the sql output
  *
  * @return null|string If $mode == 2 return values to insert in textitems2, nothing otherwise.
  *

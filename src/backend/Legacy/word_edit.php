@@ -210,7 +210,7 @@ function edit_word_do_operation(string $translation, string $fromAnn): void
 
     if ($fromAnn === "") {
         // Word was edited from reading screen
-        change_term_display($wid, $translation, $hex);
+        change_term_display((int)$wid, $translation, $hex);
     } else {
         // Word is from the annotation editing window
         ?>
@@ -445,7 +445,7 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
                 $status = 1;
             }
             $sentence = repl_tab_nl($record['WoSentence']);
-            if ($sentence == '' && isset($text_id) && isset($ord)) {
+            if ($sentence == '' && $text_id !== 0 && $ord !== 0) {
                 $seid = get_first_value(
                     "SELECT Ti2SeID as value from {$tbpref}textitems2
                     where Ti2TxID = $text_id and Ti2WordCount = 1 and Ti2Order = $ord"
@@ -576,18 +576,14 @@ function do_content(): void
         edit_word_do_operation($translation, $fromAnn);
     } else {
         // Display a form
-        $from_ann = false;
         if (array_key_exists("wid", $_REQUEST) && is_integer(getreq('wid'))) {
             $wid = (int)getreq('wid');
         } else {
             $wid = -1;
         }
-        if ($fromAnn != "") {
-            $from_ann = true;
-        }
         $text_id = (int)getreq("tid");
         $ord = (int)getreq("ord");
-        edit_word_do_form($wid, $text_id, $ord, $from_ann);
+        edit_word_do_form($wid, $text_id, $ord, $fromAnn);
     }
 
     pageend();

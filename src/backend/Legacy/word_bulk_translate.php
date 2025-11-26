@@ -438,7 +438,7 @@ if (isset($_REQUEST['term'])) {
         $pos -= $cnt;
     }
     pagestart($cnt . ' New Word' . ($cnt == 1 ? '' : 's') . ' Saved', false);
-    bulk_save_terms($_REQUEST['term'], $tid, !isset($pos));
+    bulk_save_terms($_REQUEST['term'], (int)$tid, !isset($pos));
 } else {
     pagestart_nobody('Translate New Words');
 }
@@ -449,7 +449,7 @@ if (isset($pos)) {
         $sl = $_REQUEST["sl"];
         $tl = $_REQUEST["tl"];
     }
-    bulk_do_content($tid, $sl, $tl, $pos);
+    bulk_do_content((int)$tid, $sl, $tl, $pos);
 }
 pageend();
 ?>

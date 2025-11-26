@@ -672,14 +672,14 @@ if (
 ) {
     load_feeds($currentfeed);
 } elseif (isset($_REQUEST['new_feed'])) {
-    display_new_feed($currentlang);
+    display_new_feed((int)$currentlang);
 } elseif (isset($_REQUEST['edit_feed'])) {
-    edit_feed($currentfeed);
+    edit_feed((int)$currentfeed);
 } elseif (isset($_REQUEST['multi_load_feed'])) {
-    multi_load_feed($currentlang);
+    multi_load_feed((int)$currentlang);
 } else {
     display_main_page(
-        $currentlang,
+        (int)$currentlang,
         $currentquery,
         $currentpage,
         $currentsort,

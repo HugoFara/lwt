@@ -121,8 +121,7 @@ width: <?php echo 97 - $frame_l_width; ?>%;">
 /**
  * Echo the text page.
  *
- * @param int  $textit Text ID
- * @param bool $mobile Set to true if you want the mobile version of the page.
+ * @param int $textid Text ID
  *
  * @since 2.2.1 The $mobile parameter is no longer required.
  * @since 2.7.0 Adds a CSS rule to auto-enlarge the body.

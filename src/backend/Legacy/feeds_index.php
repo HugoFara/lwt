@@ -520,12 +520,12 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
                 echo '</select>
     </td>
     <td class="td1 center" colspan="2">';
-                if ($currentfeed == 0 || $currentfeed == '' || strpos($feeds_list, $currentfeed) === false) {
+                if ($currentfeed == 0 || $currentfeed == '' || strpos($feeds_list, (string)$currentfeed) === false) {
                     $currentfeed = substr($feeds_list, 1);
                     // explode(',', $feeds_list)[0] may work as well (2.8.0)
                 }
 
-                if (strpos($currentfeed, ',') === false) {
+                if (strpos((string)$currentfeed, ',') === false) {
                     echo '<a href="' . $_SERVER['PHP_SELF'] . '?page=1&amp;load_feed=1&amp;selected_feed=' . $currentfeed . '">
         <span title="update feed"><img src="/assets/icons/arrow-circle-135.png" alt="-" /></span></a>';
                 } else {
@@ -701,7 +701,7 @@ function do_page(): void
     ) {
         load_feeds($currentfeed);
     } elseif (empty($edit_text)) {
-        dummy_function_2($currentlang, $currentfeed);
+        dummy_function_2((int)$currentlang, (int)$currentfeed);
     }
 
     pageend();

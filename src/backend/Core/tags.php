@@ -112,7 +112,7 @@ function get_tag_selectoptions(int|string|null $v, int|string $l): string
         $d = $record["TgText"];
         $cnt++;
         $r .= "<option value=\"" . $record["TgID"] . "\"" .
-         get_selected($v, $record["TgID"]) . ">" . tohtml($d) . "</option>";
+         get_selected($v, (int)$record["TgID"]) . ">" . tohtml($d) . "</option>";
     }
     mysqli_free_result($res);
     if ($cnt > 0) {
@@ -151,7 +151,7 @@ function get_texttag_selectoptions(int|string|null $v, int|string $l): string
         $d = $record["T2Text"];
         $cnt++;
         $r .= "<option value=\"" . $record["T2ID"] . "\"" .
-        get_selected($v, $record["T2ID"]) . ">" . tohtml($d) . "</option>";
+        get_selected($v, (int)$record["T2ID"]) . ">" . tohtml($d) . "</option>";
     }
     mysqli_free_result($res);
     if ($cnt > 0) {
@@ -189,7 +189,7 @@ function get_txtag_selectoptions(int|string $l, int|string|null $v): string
             ">UNTAGGED</option>";
         } else {
             $r .= "<option value=\"" . $record['TextID'] . "&amp;texttag=" .
-            $record['TagID'] . "\"" . get_selected($v, $record['TagID']) . ">" .
+            $record['TagID'] . "\"" . get_selected($v, (int)$record['TagID']) . ">" .
             $record['TagName'] . "</option>";
         }
     }
@@ -228,7 +228,7 @@ function get_archivedtexttag_selectoptions(int|string|null $v, int|string $l): s
         $d = $record["T2Text"];
         $cnt++;
         $r .= "<option value=\"" . $record["T2ID"] . "\"" .
-        get_selected($v, $record["T2ID"]) . ">" . tohtml($d) . "</option>";
+        get_selected($v, (int)$record["T2ID"]) . ">" . tohtml($d) . "</option>";
     }
     mysqli_free_result($res);
     if ($cnt > 0) {

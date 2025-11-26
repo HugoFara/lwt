@@ -359,8 +359,8 @@ function makeCounterWithTotal(int $max, int $num): string
         return $num . "/" . $max;
     }
     return substr(
-        str_repeat("0", strlen($max)) . $num,
-        -strlen($max)
+        str_repeat("0", strlen((string)$max)) . $num,
+        -strlen((string)$max)
     ) . "/" . $max;
 }
 
@@ -607,7 +607,7 @@ function do_test_test_from_selection(int $selection_type, string $selection_data
 {
     $data_string_array = explode(",", trim($selection_data, "()"));
     $data_int_array = array_map('intval', $data_string_array);
-    switch ((int)$selection_type) {
+    switch ($selection_type) {
         case 2:
             $test_sql = do_test_test_get_projection('words', $data_int_array);
             break;

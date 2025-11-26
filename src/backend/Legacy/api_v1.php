@@ -971,7 +971,7 @@ function send_response($status = 200, $data = null)
  * Check if an API endpoint exists.
  *
  * @param string $method     Method name (e.g. 'GET' or 'POST')
- * @param string $requestURI The URI being requested.
+ * @param string $requestUri The URI being requested.
  *
  * @return string The first matching endpoint
  */
@@ -1588,7 +1588,7 @@ function unknown_post_action_type($post_req, $action_exists = false): array
  * Main handler for any provided request, while answer the result.
  *
  * @param string     $method     Method name (e.g. 'GET' or 'POST')
- * @param string     $requestURI The URI being requested.
+ * @param string     $requestUri The URI being requested.
  * @param array|null $post_param Post arguments, usually equal to $_POST
  *
  * @return void

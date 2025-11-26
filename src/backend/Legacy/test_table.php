@@ -257,7 +257,7 @@ function do_test_table_table_content(array $lang_record, string $testsql): void
     }
     $res = do_mysqli_query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
-        do_test_table_row($record, $regexword, $textsize, $span1, $span2);
+        do_test_table_row($record, $regexword, (int)$textsize, $span1, $span2);
     }
     mysqli_free_result($res);
 }
