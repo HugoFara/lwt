@@ -14,7 +14,7 @@
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-session-utility.html
- * @since    2.10.0-fork Split from text_helpers.php
+ * @since    3.0.0 Split from text_helpers.php
  */
 
 /**
@@ -396,7 +396,7 @@ function new_expression_interactable(string $hex, string $appendtext, int $sid, 
  *
  * @global string $tbpref Database table prefix.
  *
- * @since 2.10.0-fork Fixes a bug inserting wrong title in tooltip
+ * @since 3.0.0 Fixes a bug inserting wrong title in tooltip
  */
 function new_expression_interactable2($hex, $appendtext, $wid, $len): void
 {
@@ -464,7 +464,7 @@ function new_expression_interactable2($hex, $appendtext, $wid, $len): void
  *
  * @global string $tbpref Database table prefix.
  *
- * @since 2.10.0-fork Fixes a bug inserting wrong title in tooltip
+ * @since 3.0.0 Fixes a bug inserting wrong title in tooltip
  */
 function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
 {

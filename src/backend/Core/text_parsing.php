@@ -14,7 +14,7 @@
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-text-parsing.html
- * @since    2.10.0-fork Split from kernel_utility.php
+ * @since    3.0.0 Split from kernel_utility.php
  */
 
 /**
@@ -26,7 +26,7 @@
  * @return string OS-compatible command
  *
  * @since 2.3.1-fork Much more verifications added
- * @since 2.10.0-fork Support for Mac OS added
+ * @since 3.0.0 Support for Mac OS added
  */
 function get_mecab_path($mecab_args = ''): string
 {

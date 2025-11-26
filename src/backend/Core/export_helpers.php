@@ -14,7 +14,7 @@
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-session-utility.html
- * @since    2.10.0-fork Split from session_utility.php
+ * @since    3.0.0 Split from session_utility.php
  */
 
 // -------------------------------------------------------------

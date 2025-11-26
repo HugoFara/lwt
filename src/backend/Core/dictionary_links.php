@@ -13,7 +13,7 @@
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-dictionary-links.html
- * @since    2.10.0-fork
+ * @since    3.0.0
  */
 
 require_once __DIR__ . '/database_connect.php';
