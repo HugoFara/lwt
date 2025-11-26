@@ -6,7 +6,7 @@ require_once __DIR__ . '/database_connect.php';
 
 function load_feeds($currentfeed): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $cnt = 0;
     $ajax = $feeds = array();
     echo '<script type="text/javascript">';
@@ -86,7 +86,7 @@ function load_feeds($currentfeed): void
 
 function write_rss_to_db($texts): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $texts = array_reverse($texts);
     $message1 = $message2 = $message3 = $message4 = 0;
     $Nf_ID = null;
@@ -505,7 +505,7 @@ function get_links_from_rss($NfSourceURI, $NfArticleSection): array|false
  */
 function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $NfCharset = null): array|string|null
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $data = null;
     foreach ($feed_data as $key => $val) {
         if (strncmp($NfArticleSection, 'redirect:', 9) == 0) {

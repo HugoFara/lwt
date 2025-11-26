@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../../src/backend/Core/EnvLoader.php';
 use Lwt\Core\EnvLoader;
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 use Lwt\Database\Escaping;
 
 // Load config from .env and use test database
@@ -55,7 +55,7 @@ class DatabaseConnectTest extends TestCase
         $connection = connect_to_database(
             $server, $userid, $passwd, $dbname, $socket ?? ""
         );
-        LWT_Globals::setDbConnection($connection);
+        Globals::setDbConnection($connection);
         $this->assertTrue(
             mysqli_connect_errno() === 0,
             'Could not connect to the database: ' . mysqli_connect_error()
@@ -77,12 +77,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Basic string
@@ -132,12 +132,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Basic string
@@ -169,12 +169,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // String with leading/trailing spaces should preserve them
@@ -197,12 +197,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Basic regex pattern
@@ -226,12 +226,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Empty string should return empty
@@ -268,12 +268,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Empty string should return empty
@@ -331,12 +331,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Empty tag should return empty
@@ -390,12 +390,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Empty tag should return empty
@@ -434,12 +434,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Empty tag should return empty
@@ -471,12 +471,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Multiple hex escapes
@@ -519,12 +519,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Non-existent key should return empty string
@@ -536,7 +536,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals('', $result, 'Empty key should return empty string');
 
         // SQL injection in key - first clean up any previously saved value
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $injectionKey = "key'; DROP TABLE settings; --";
         do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
@@ -569,12 +569,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Known setting with default: 'set-texts-per-page' defaults to '10'
@@ -587,7 +587,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals('', $result, 'Non-existent setting without default should return empty');
 
         // SQL injection attempt - first clean up any previously saved value
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $injectionKey = "injectkey'; DROP TABLE settings; --";
         do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
@@ -610,12 +610,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Test saving valid setting
@@ -668,12 +668,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Save a setting with value '1'
@@ -706,12 +706,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // LWTTableCheck ensures _lwtgeneral table exists
@@ -760,12 +760,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Basic string should be single-quoted and JS-escaped
@@ -802,12 +802,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Valid query with success message
@@ -847,12 +847,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // This function adjusts AUTO_INCREMENT values
@@ -873,12 +873,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // This function optimizes all tables
@@ -894,12 +894,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Insert a test setting
@@ -948,7 +948,7 @@ class DatabaseConnectTest extends TestCase
         // so we skip that test to avoid test failure
 
         // Restore proper connection (already have valid one)
-        LWT_Globals::setDbConnection($connection);
+        Globals::setDbConnection($connection);
     }
 
     /**
@@ -958,16 +958,16 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Get the prefix for the current database
-        $result = getDatabasePrefix(LWT_Globals::getDbConnection());
+        $result = getDatabasePrefix(Globals::getDbConnection());
 
         // The function returns an array with [$tbpref, $fixed_tbpref]
         $this->assertIsArray($result);
@@ -991,15 +991,15 @@ class DatabaseConnectTest extends TestCase
      */
     public function testGetDatabasePrefixes(): void
     {
-        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Get prefixes - returns 0 or 1 indicating if prefix is fixed
@@ -1022,12 +1022,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Valid SELECT query
@@ -1083,12 +1083,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Test with non-existent language (returns null when language doesn't exist)
@@ -1112,12 +1112,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Test with a simple SELECT query (must use 'value' as column alias)
@@ -1197,12 +1197,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Ensure table exists
@@ -1243,12 +1243,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Test convert_string_to_sqlsyntax with various edge cases
@@ -1307,12 +1307,12 @@ class DatabaseConnectTest extends TestCase
     {
         
         // Ensure DB connection exists
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         $tbpref = '';
@@ -1476,16 +1476,16 @@ class DatabaseConnectTest extends TestCase
     public function testDatabaseCharsetCollation(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Check connection charset (should be utf8, utf8mb3, or utf8mb4)
-        $charset = mysqli_character_set_name(LWT_Globals::getDbConnection());
+        $charset = mysqli_character_set_name(Globals::getDbConnection());
         $this->assertContains(
             $charset,
             ['utf8', 'utf8mb3', 'utf8mb4'],
@@ -1510,14 +1510,14 @@ class DatabaseConnectTest extends TestCase
      */
     public function testTransactionHandling(): void
     {
-        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
             $connection = connect_to_database(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
         // Check if table uses MyISAM (which doesn't support transactions)
@@ -1526,7 +1526,7 @@ class DatabaseConnectTest extends TestCase
         $is_myisam = ($engine_row['Engine'] === 'MyISAM');
 
         // Start transaction
-        mysqli_begin_transaction(LWT_Globals::getDbConnection());
+        mysqli_begin_transaction(Globals::getDbConnection());
 
         // Insert test data
         do_mysqli_query(
@@ -1535,7 +1535,7 @@ class DatabaseConnectTest extends TestCase
         );
 
         // Rollback
-        mysqli_rollback(LWT_Globals::getDbConnection());
+        mysqli_rollback(Globals::getDbConnection());
 
         // Verify behavior (MyISAM will commit regardless of rollback)
         $result = getSetting('test_transaction');
@@ -1551,12 +1551,12 @@ class DatabaseConnectTest extends TestCase
         do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey='test_transaction'");
 
         // Test commit
-        mysqli_begin_transaction(LWT_Globals::getDbConnection());
+        mysqli_begin_transaction(Globals::getDbConnection());
         do_mysqli_query(
             "INSERT INTO {$tbpref}settings (StKey, StValue)
              VALUES ('test_transaction', 'value2')"
         );
-        mysqli_commit(LWT_Globals::getDbConnection());
+        mysqli_commit(Globals::getDbConnection());
 
         // Verify data was committed (works for both MyISAM and InnoDB)
         $result = getSetting('test_transaction');

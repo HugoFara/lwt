@@ -304,5 +304,5 @@ Version 3 introduces major architectural changes. See `docs/developer/v3-changes
 - **Front Controller Pattern:** All requests routed through `index.php`
 - **MVC Structure:** New controllers in `src/backend/Controllers/`
 - **Routing System:** Clean URLs (e.g., `/text/read` instead of `do_text.php`)
-- **LWT_Globals Class:** Type-safe access to global state (replaces `global $tbpref`, etc.)
+- **Globals Class:** Type-safe access to global state (replaces `global $tbpref`, etc.)
 - **Environment Config:** `.env` file support (replaces `connect.inc.php`)

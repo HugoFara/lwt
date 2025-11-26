@@ -282,7 +282,7 @@ $router->register('/my/route', 'MyController@myAction');
 
 ### 8. Global Variables Refactoring
 
-Version 3 introduces the `LWT_Globals` class to clearly identify and manage global state throughout the application.
+Version 3 introduces the `Globals` class to clearly identify and manage global state throughout the application.
 
 #### The Problem with Globals
 
@@ -305,17 +305,17 @@ This pattern had several issues:
 - Testing required manipulating `$GLOBALS` directly
 - No type safety or IDE autocompletion
 
-#### The New LWT_Globals Class
+#### The New Globals Class
 
-A new class `Lwt\Core\LWT_Globals` (`src/backend/Core/LWT_Globals.php`) provides explicit, type-safe access to global state:
+A new class `Lwt\Core\Globals` (`src/backend/Core/Globals.php`) provides explicit, type-safe access to global state:
 
 ```php
 // New way - dependencies are explicit
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 function someFunction() {
-    $prefix = LWT_Globals::getTablePrefix();
-    $db = LWT_Globals::getDbConnection();
+    $prefix = Globals::getTablePrefix();
+    $db = Globals::getDbConnection();
     $sql = "SELECT * FROM " . $prefix . "words";
     // ...
 }
@@ -325,43 +325,43 @@ function someFunction() {
 
 | Method | Description | Replaces |
 |--------|-------------|----------|
-| `LWT_Globals::getDbConnection()` | Get the mysqli database connection | `global $DBCONNECTION` |
-| `LWT_Globals::getTablePrefix()` | Get the database table prefix | `global $tbpref` |
-| `LWT_Globals::table($name)` | Get prefixed table name (e.g., `table('words')` → `lwt_words`) | `$tbpref . 'words'` |
-| `LWT_Globals::isTablePrefixFixed()` | Check if prefix is fixed in connect.inc.php | `global $fixed_tbpref` |
-| `LWT_Globals::getDatabaseName()` | Get the database name | `global $dbname` |
-| `LWT_Globals::isDebug()` | Check if debug mode is enabled | `global $debug` |
-| `LWT_Globals::getDebug()` | Get debug value as integer (0 or 1) | `global $debug` |
-| `LWT_Globals::shouldDisplayErrors()` | Check if error display is enabled | `global $dsplerrors` |
-| `LWT_Globals::shouldDisplayTime()` | Check if execution time display is enabled | `global $dspltime` |
+| `Globals::getDbConnection()` | Get the mysqli database connection | `global $DBCONNECTION` |
+| `Globals::getTablePrefix()` | Get the database table prefix | `global $tbpref` |
+| `Globals::table($name)` | Get prefixed table name (e.g., `table('words')` → `lwt_words`) | `$tbpref . 'words'` |
+| `Globals::isTablePrefixFixed()` | Check if prefix is fixed in connect.inc.php | `global $fixed_tbpref` |
+| `Globals::getDatabaseName()` | Get the database name | `global $dbname` |
+| `Globals::isDebug()` | Check if debug mode is enabled | `global $debug` |
+| `Globals::getDebug()` | Get debug value as integer (0 or 1) | `global $debug` |
+| `Globals::shouldDisplayErrors()` | Check if error display is enabled | `global $dsplerrors` |
+| `Globals::shouldDisplayTime()` | Check if execution time display is enabled | `global $dspltime` |
 
 #### Setter Methods (for initialization)
 
 | Method | Description |
 |--------|-------------|
-| `LWT_Globals::setDbConnection($conn)` | Set the database connection |
-| `LWT_Globals::setTablePrefix($prefix, $fixed)` | Set the table prefix |
-| `LWT_Globals::setDatabaseName($name)` | Set the database name |
-| `LWT_Globals::setDebug($value)` | Set debug mode |
-| `LWT_Globals::setDisplayErrors($value)` | Set error display mode |
-| `LWT_Globals::setDisplayTime($value)` | Set time display mode |
-| `LWT_Globals::reset()` | Reset all globals (for testing) |
+| `Globals::setDbConnection($conn)` | Set the database connection |
+| `Globals::setTablePrefix($prefix, $fixed)` | Set the table prefix |
+| `Globals::setDatabaseName($name)` | Set the database name |
+| `Globals::setDebug($value)` | Set debug mode |
+| `Globals::setDisplayErrors($value)` | Set error display mode |
+| `Globals::setDisplayTime($value)` | Set time display mode |
+| `Globals::reset()` | Reset all globals (for testing) |
 
 #### All Global Variables Removed
 
-All global variables have been **fully removed** from the LWT codebase. The `LWT_Globals` class is now the only way to access this state:
+All global variables have been **fully removed** from the LWT codebase. The `Globals` class is now the only way to access this state:
 
 | Removed Global | Replacement |
 |----------------|-------------|
-| `$tbpref` | `LWT_Globals::getTablePrefix()` or `LWT_Globals::table('tablename')` |
-| `$fixed_tbpref` | `LWT_Globals::isTablePrefixFixed()` |
-| `$DBCONNECTION` | `LWT_Globals::getDbConnection()` |
-| `$debug` | `LWT_Globals::isDebug()` / `LWT_Globals::getDebug()` |
-| `$dbname` | `LWT_Globals::getDatabaseName()` |
-| `$dsplerrors` | `LWT_Globals::shouldDisplayErrors()` |
-| `$dspltime` | `LWT_Globals::shouldDisplayTime()` |
+| `$tbpref` | `Globals::getTablePrefix()` or `Globals::table('tablename')` |
+| `$fixed_tbpref` | `Globals::isTablePrefixFixed()` |
+| `$DBCONNECTION` | `Globals::getDbConnection()` |
+| `$debug` | `Globals::isDebug()` / `Globals::getDebug()` |
+| `$dbname` | `Globals::getDatabaseName()` |
+| `$dsplerrors` | `Globals::shouldDisplayErrors()` |
+| `$dspltime` | `Globals::shouldDisplayTime()` |
 
-No `global $variable` declarations remain in any source files. The backward compatibility layer that previously synchronized `LWT_Globals` with `$GLOBALS` has also been removed.
+No `global $variable` declarations remain in any source files. The backward compatibility layer that previously synchronized `Globals` with `$GLOBALS` has also been removed.
 
 #### Migration Guide
 
@@ -370,7 +370,7 @@ To update your code:
 1. Add the use statement at the top of your file:
 
    ```php
-   use Lwt\Core\LWT_Globals;
+   use Lwt\Core\Globals;
    ```
 
 2. Replace global declarations with method calls:
@@ -385,8 +385,8 @@ To update your code:
 
    // After
    function myFunction() {
-       $sql = "SELECT * FROM " . LWT_Globals::table('words');
-       $result = mysqli_query(LWT_Globals::getDbConnection(), $sql);
+       $sql = "SELECT * FROM " . Globals::table('words');
+       $result = mysqli_query(Globals::getDbConnection(), $sql);
    }
    ```
 
@@ -398,7 +398,7 @@ To update your code:
    if ($debug) { ... }
 
    // After
-   if (LWT_Globals::isDebug()) { ... }
+   if (Globals::isDebug()) { ... }
    ```
 
 ### 9. Environment-Based Configuration (.env)
@@ -783,7 +783,7 @@ This refactoring enables:
 3. **Cleaner URLs:** SEO-friendly URLs without `.php` extensions
 4. **Modular architecture:** Clear separation of concerns
 5. **Namespace support:** PHP autoloading with PSR-4 style namespaces
-6. **Explicit dependencies:** The `LWT_Globals` class makes global state visible and trackable
+6. **Explicit dependencies:** The `Globals` class makes global state visible and trackable
 7. **Modern configuration:** `.env` files work with Docker, CI/CD, and modern deployment workflows
 
 ## Commit History

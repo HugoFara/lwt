@@ -7,7 +7,7 @@ namespace Lwt\Tests\Database;
 require_once __DIR__ . '/../../../../src/backend/Core/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 use Lwt\Database\Maintenance;
 use PHPUnit\Framework\TestCase;
 
@@ -34,7 +34,7 @@ class MaintenanceTest extends TestCase
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
 
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $connection = connect_to_database(
                 $config['server'],
                 $config['userid'],
@@ -42,10 +42,10 @@ class MaintenanceTest extends TestCase
                 $testDbname,
                 $config['socket'] ?? ''
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
-        self::$dbConnected = (LWT_Globals::getDbConnection() !== null);
-        self::$tbpref = LWT_Globals::getTablePrefix();
+        self::$dbConnected = (Globals::getDbConnection() !== null);
+        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             self::createTestData();
@@ -84,7 +84,7 @@ class MaintenanceTest extends TestCase
             100, '', '.!?', '', 'a-zA-Z', 0, 0, 0
         )";
         do_mysqli_query($sql);
-        self::$testLanguageId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        self::$testLanguageId = mysqli_insert_id(Globals::getDbConnection());
     }
 
     public static function tearDownAfterClass(): void
@@ -276,7 +276,7 @@ class MaintenanceTest extends TestCase
             0
         )";
         do_mysqli_query($sql);
-        $wordId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $wordId = mysqli_insert_id(Globals::getDbConnection());
 
         // Run initWordCount
         Maintenance::initWordCount();
@@ -312,7 +312,7 @@ class MaintenanceTest extends TestCase
             0
         )";
         do_mysqli_query($sql);
-        $wordId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $wordId = mysqli_insert_id(Globals::getDbConnection());
 
         // Run initWordCount
         Maintenance::initWordCount();
@@ -348,7 +348,7 @@ class MaintenanceTest extends TestCase
             5
         )";
         do_mysqli_query($sql);
-        $wordId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $wordId = mysqli_insert_id(Globals::getDbConnection());
 
         // Run initWordCount
         Maintenance::initWordCount();
@@ -394,7 +394,7 @@ class MaintenanceTest extends TestCase
             100, '', '。！？', '', 'MECAB', 0, 0, 0
         )";
         do_mysqli_query($sql);
-        $japLangId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $japLangId = mysqli_insert_id(Globals::getDbConnection());
 
         // With MeCab installed, this should work
         Maintenance::updateJapaneseWordCount($japLangId);
@@ -442,7 +442,7 @@ class MaintenanceTest extends TestCase
                 0
             )";
             do_mysqli_query($sql);
-            $wordIds[] = mysqli_insert_id(LWT_Globals::getDbConnection());
+            $wordIds[] = mysqli_insert_id(Globals::getDbConnection());
         }
 
         // Run initWordCount
@@ -481,7 +481,7 @@ class MaintenanceTest extends TestCase
             100, '', '.!?', '', 'a-zA-ZàâäéèêëïîôùûüœæçÀÂÄÉÈÊËÏÎÔÙÛÜŒÆÇ', 0, 0, 0
         )";
         do_mysqli_query($sql);
-        $frLangId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $frLangId = mysqli_insert_id(Globals::getDbConnection());
 
         // Insert a French word with accents
         $sql = "INSERT INTO {$tbpref}words (
@@ -494,7 +494,7 @@ class MaintenanceTest extends TestCase
             0
         )";
         do_mysqli_query($sql);
-        $wordId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $wordId = mysqli_insert_id(Globals::getDbConnection());
 
         // Run initWordCount
         Maintenance::initWordCount();
@@ -531,7 +531,7 @@ class MaintenanceTest extends TestCase
             100, '', '。！？', '', '\\x{4E00}-\\x{9FFF}', 1, 1, 0
         )";
         do_mysqli_query($sql);
-        $chLangId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $chLangId = mysqli_insert_id(Globals::getDbConnection());
 
         // Insert a Chinese word with WoWordCount = 0
         $sql = "INSERT INTO {$tbpref}words (
@@ -544,7 +544,7 @@ class MaintenanceTest extends TestCase
             0
         )";
         do_mysqli_query($sql);
-        $wordId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $wordId = mysqli_insert_id(Globals::getDbConnection());
 
         // Run initWordCount - this should NOT cause SQL syntax error anymore
         Maintenance::initWordCount();

@@ -92,7 +92,7 @@ if (isset($audio)) {
  */
 function do_display_impr_text_page($textid)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $audio = get_first_value(
         'SELECT TxAudioURI AS value FROM ' . $tbpref . 'texts
         WHERE TxID = ' . $_REQUEST['text']

@@ -16,7 +16,7 @@
 
 namespace Lwt\Database;
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 /**
  * Fluent query builder for constructing SQL queries.
@@ -102,7 +102,7 @@ class QueryBuilder
      */
     public function __construct(string $tableName)
     {
-        $this->table = LWT_Globals::getTablePrefix() . $tableName;
+        $this->table = Globals::getTablePrefix() . $tableName;
     }
 
     /**
@@ -277,7 +277,7 @@ class QueryBuilder
 
         $this->joins[] = [
             'type' => strtoupper($type),
-            'table' => LWT_Globals::getTablePrefix() . $table,
+            'table' => Globals::getTablePrefix() . $table,
             'first' => $first,
             'operator' => $operator,
             'second' => $second

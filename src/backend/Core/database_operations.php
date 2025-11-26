@@ -36,7 +36,7 @@
  */
 function restore_file($handle, $title): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $message = "";
     $install_status = array(
         "queries" => 0,
@@ -93,7 +93,7 @@ function restore_file($handle, $title): string
             if ($sql_line != "") {
                 if (!str_starts_with($query, '-- ')) {
                     $res = mysqli_query(
-                        \Lwt\Core\LWT_Globals::getDbConnection(),
+                        \Lwt\Core\Globals::getDbConnection(),
                         prefixSQLQuery($query, $tbpref)
                     );
                     $install_status["queries"]++;
@@ -146,7 +146,7 @@ function restore_file($handle, $title): string
  */
 function truncateUserDatabase(): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     runsql("TRUNCATE {$tbpref}archivedtexts", '');
     runsql("TRUNCATE {$tbpref}archtexttags", '');
     runsql("TRUNCATE {$tbpref}feedlinks", '');

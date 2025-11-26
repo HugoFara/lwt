@@ -168,7 +168,7 @@ function long_text_check($max_input_vars): void
  */
 function long_text_save(): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $langid = (int) $_REQUEST["LgID"];
     $title = $_REQUEST["TxTitle"];
     $source_uri = $_REQUEST["TxSourceURI"];
@@ -224,7 +224,7 @@ function long_text_save(): void
  */
 function long_text_display($max_input_vars)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages
     WHERE LgGoogleTranslateURI<>''";
     $res = do_mysqli_query($sql);

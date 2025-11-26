@@ -26,7 +26,7 @@ require_once __DIR__ . "/Database/Maintenance.php";
 require_once __DIR__ . "/Database/TextParsing.php";
 require_once __DIR__ . "/Database/Migrations.php";
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 use Lwt\Core\EnvLoader;
 use Lwt\Database\Configuration;
 use Lwt\Database\Escaping;
@@ -89,7 +89,7 @@ loadDatabaseConfiguration();
  */
 function do_mysqli_query($sql)
 {
-    $connection = LWT_Globals::getDbConnection();
+    $connection = Globals::getDbConnection();
     $res = mysqli_query($connection, $sql);
     if ($res != false) {
         return $res;
@@ -134,7 +134,7 @@ function do_mysqli_query($sql)
  */
 function runsql($sql, $m, $sqlerrdie = true): string
 {
-    $connection = LWT_Globals::getDbConnection();
+    $connection = Globals::getDbConnection();
     if ($sqlerrdie) {
         $res = do_mysqli_query($sql);
     } else {
@@ -544,7 +544,7 @@ function registerSentencesTextItems($tid, $lid, $hasmultiword)
  */
 function update_default_values($id, $lid, $_sql)
 {
-    $tbpref = LWT_Globals::getTablePrefix();
+    $tbpref = Globals::getTablePrefix();
     $hasmultiword = false;
 
     // Get multi-word count
@@ -671,7 +671,7 @@ function checkExpressions($wl): void
  */
 function check_text_with_expressions($id, $lid, $wl, $wl_max, $mw_sql): string
 {
-    $tbpref = LWT_Globals::getTablePrefix();
+    $tbpref = Globals::getTablePrefix();
 
     $set_wo_sql = $set_wo_sql_2 = $del_wo_sql = $init_var = '';
     do_mysqli_query('SET GLOBAL max_heap_table_size = 1024 * 1024 * 1024 * 2');
@@ -800,7 +800,7 @@ function reparse_all_texts(): void
  * @return void
  *
  * @since 2.10.0-fork Migrations are defined thourgh SQL, and not directly here
- * @since 3.0.0 Parameters removed in favor of LWT_Globals
+ * @since 3.0.0 Parameters removed in favor of Globals
  */
 function update_database(): void
 {
@@ -823,7 +823,7 @@ function prefixSQLQuery($sql_line, $prefix): string
  * Check and/or update the database.
  *
  * @since 2.10.0 Use confiduration files instead of containing all the data.
- * @since 3.0.0 Parameters removed in favor of LWT_Globals
+ * @since 3.0.0 Parameters removed in favor of Globals
  */
 function check_update_db(): void
 {
@@ -886,14 +886,14 @@ function getDatabasePrefix($dbconnection): array
  */
 function get_database_prefixes(&$tbpref)
 {
-    list($tbpref, $fixed_tbpref) = getDatabasePrefix(LWT_Globals::getDbConnection());
+    list($tbpref, $fixed_tbpref) = getDatabasePrefix(Globals::getDbConnection());
     return (int) $fixed_tbpref;
 }
 
 // --------------------  S T A R T  --------------------------- //
 
 // Start Timer
-if (LWT_Globals::shouldDisplayTime()) {
+if (Globals::shouldDisplayTime()) {
     get_execution_time();
 }
 
@@ -902,8 +902,8 @@ global $DB_SERVER, $DB_USERID, $DB_PASSWD, $DB_NAME, $DB_SOCKET;
 
 /**
  *
- * @deprecated 3.0.0 Use LWT_Globals::getDbConnection() instead
- * @see        LWT_Globals::getDbConnection()
+ * @deprecated 3.0.0 Use Globals::getDbConnection() instead
+ * @see        Globals::getDbConnection()
  */
 $DBCONNECTION = connect_to_database(
     $DB_SERVER,
@@ -912,25 +912,25 @@ $DBCONNECTION = connect_to_database(
     $DB_NAME,
     $DB_SOCKET ?? ""
 );
-// Register with LWT_Globals for new code
-LWT_Globals::setDbConnection($DBCONNECTION);
+// Register with Globals for new code
+Globals::setDbConnection($DBCONNECTION);
 
 /**
  * @var string $tbpref Database table prefix
  *
- * @deprecated 3.0.0 Use LWT_Globals::getTablePrefix() instead
- * @see        LWT_Globals::getTablePrefix()
+ * @deprecated 3.0.0 Use Globals::getTablePrefix() instead
+ * @see        Globals::getTablePrefix()
  */
 /**
  *
- * @deprecated 3.0.0 Use LWT_Globals::isTablePrefixFixed() instead
- * @see        LWT_Globals::isTablePrefixFixed()
+ * @deprecated 3.0.0 Use Globals::isTablePrefixFixed() instead
+ * @see        Globals::isTablePrefixFixed()
  */
 list($tbpref, $bool_fixed_tbpref) = getDatabasePrefix($DBCONNECTION);
 
-// Register with LWT_Globals for new code
-LWT_Globals::setTablePrefix($tbpref, (bool) $bool_fixed_tbpref);
-LWT_Globals::setDatabaseName($DB_NAME);
+// Register with Globals for new code
+Globals::setTablePrefix($tbpref, (bool) $bool_fixed_tbpref);
+Globals::setDatabaseName($DB_NAME);
 
 // Convert to int, will be removed in LWT 3.0.0
 

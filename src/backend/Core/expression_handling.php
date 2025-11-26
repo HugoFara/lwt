@@ -31,7 +31,7 @@
  */
 function findMecabExpression($text, $lid): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     $db_to_mecab = tempnam(sys_get_temp_dir(), "{$tbpref}db_to_mecab");
     $mecab_args = " -F %m\\t%t\\t\\n -U %m\\t%t\\t\\n -E \\t\\n ";
@@ -201,7 +201,7 @@ function insertExpressionFromMeCab($textlc, $lid, $wid, $len, $mode): array
  */
 function findStandardExpression($textlc, $lid): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $occurences = array();
     $res = do_mysqli_query("SELECT * FROM {$tbpref}languages WHERE LgID=$lid");
     $record = mysqli_fetch_assoc($res);
@@ -396,7 +396,7 @@ function new_expression_interactable($hex, $appendtext, $sid, $len): void
  */
 function new_expression_interactable2($hex, $appendtext, $wid, $len): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $showAll = (bool)getSettingZeroOrOne('showallwords', 1);
     $showType = $showAll ? "m" : "";
 
@@ -464,7 +464,7 @@ function new_expression_interactable2($hex, $appendtext, $wid, $len): void
  */
 function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $showAll = (bool)getSettingZeroOrOne('showallwords', 1);
     $showType = $showAll ? "m" : "";
 
@@ -533,7 +533,7 @@ function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
  */
 function insertExpressions($textlc, $lid, $wid, $len, $mode): string|null
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $regexp = (string)get_first_value(
         "SELECT LgRegexpWordCharacters AS value
         FROM {$tbpref}languages WHERE LgID=$lid"

@@ -42,8 +42,8 @@ function start_save_prefix($pref)
  */
 function start_do_page()
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    $fixed_tbpref = \Lwt\Core\LWT_Globals::isTablePrefixFixed();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $fixed_tbpref = \Lwt\Core\Globals::isTablePrefixFixed();
     $prefix = getprefixes();
 
     pagestart('Select Table Set', false);

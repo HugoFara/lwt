@@ -43,7 +43,7 @@ function upload_words_import_simple(
     $file_name,
     $status
 ): void {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $removeSpaces = get_first_value(
         "SELECT LgRemoveSpaces AS value FROM {$tbpref}languages WHERE LgID=$lang"
     );
@@ -130,7 +130,7 @@ function upload_words_import_complete(
     $status,
     $overwrite
 ): void {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $removeSpaces = get_first_value(
         "SELECT LgRemoveSpaces AS value FROM {$tbpref}languages WHERE LgID=$lang"
     );
@@ -445,7 +445,7 @@ function upload_words_import_complete(
 
 function upload_words_handle_multiwords($lang, $last_update): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $mwords = get_first_value(
         "SELECT count(*) AS value from {$tbpref}words
         WHERE WoWordCount>1 AND WoCreated > " .
@@ -511,7 +511,7 @@ function upload_words_handle_multiwords($lang, $last_update): void
  */
 function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): string|int|null
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $last_update = (string) get_first_value(
         "SELECT max(WoStatusChanged) AS value FROM {$tbpref}words"
     );
@@ -572,7 +572,7 @@ function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): stri
 
 function display_imported_terms($last_update, $rtl): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $recno = (int)get_first_value(
         "SELECT count(*) AS value FROM {$tbpref}words
         where WoStatusChanged > " . convert_string_to_sqlsyntax($last_update)
@@ -821,7 +821,7 @@ onsubmit="showImportedTerms('<?php echo $last_update; ?>', <?php echo $rtl; ?>, 
  */
 function upload_words_import_tags($fields, $tabs, $file_upl): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $columns = '';
     for ($j = 1; $j <= $fields["tl"]; $j++) {
         $columns .= ($j == 1 ? '(' : ',') . ($j == $fields["tl"] ? '@taglist' : '@dummy');
@@ -918,7 +918,7 @@ function upload_words_import_tags($fields, $tabs, $file_upl): void
  */
 function upload_words_import(): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $tabs = $_REQUEST["Tab"];
     $lang = (int) $_REQUEST["LgID"];
     $sql = "SELECT * FROM {$tbpref}languages WHERE LgID=$lang";

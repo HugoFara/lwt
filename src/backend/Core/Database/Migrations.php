@@ -16,7 +16,7 @@
 
 namespace Lwt\Database;
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 /**
  * Database migrations and initialization utilities.
@@ -62,7 +62,7 @@ class Migrations
      */
     public static function reparseAllTexts(): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         runsql("TRUNCATE {$tbpref}sentences", '');
         runsql("TRUNCATE {$tbpref}textitems2", '');
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
@@ -91,12 +91,12 @@ class Migrations
      */
     public static function update(): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
-        $dbname = LWT_Globals::getDatabaseName();
+        $tbpref = Globals::getTablePrefix();
+        $dbname = Globals::getDatabaseName();
 
         // DB Version
         $currversion = get_version_number();
-        $connection = LWT_Globals::getDbConnection();
+        $connection = Globals::getDbConnection();
 
         $res = mysqli_query(
             $connection,
@@ -121,7 +121,7 @@ class Migrations
         // Do DB Updates if tables seem to be old versions
 
         if ($dbversion < $currversion) {
-            if (LWT_Globals::isDebug()) {
+            if (Globals::isDebug()) {
                 echo "<p>DEBUG: check DB collation: ";
             }
             if (
@@ -137,14 +137,14 @@ class Migrations
                     '` CHARACTER SET utf8 COLLATE utf8_general_ci',
                     ''
                 );
-                if (LWT_Globals::isDebug()) {
+                if (Globals::isDebug()) {
                     echo 'changed to utf8_general_ci</p>';
                 }
-            } elseif (LWT_Globals::isDebug()) {
+            } elseif (Globals::isDebug()) {
                 echo 'OK</p>';
             }
 
-            if (LWT_Globals::isDebug()) {
+            if (Globals::isDebug()) {
                 echo "<p>DEBUG: do DB updates: $dbversion --&gt; $currversion</p>";
             }
 
@@ -158,7 +158,7 @@ class Migrations
                 }
             }
 
-            if (LWT_Globals::isDebug()) {
+            if (Globals::isDebug()) {
                 echo '<p>DEBUG: rebuilding tts</p>';
             }
             runsql(
@@ -185,7 +185,7 @@ class Migrations
      */
     public static function checkAndUpdate(): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $tables = array();
 
         $res = do_mysqli_query(
@@ -246,7 +246,7 @@ class Migrations
 
         if ($count > 0) {
             // Rebuild Text Cache if cache tables new
-            if (LWT_Globals::isDebug()) {
+            if (Globals::isDebug()) {
                 echo '<p>DEBUG: rebuilding cache tables</p>';
             }
             self::reparseAllTexts();
@@ -257,7 +257,7 @@ class Migrations
         $lastscorecalc = Settings::get('lastscorecalc');
         $today = date('Y-m-d');
         if ($lastscorecalc != $today) {
-            if (LWT_Globals::isDebug()) {
+            if (Globals::isDebug()) {
                 echo '<p>DEBUG: Doing score recalc. Today: ' . $today .
                 ' / Last: ' . $lastscorecalc . '</p>';
             }

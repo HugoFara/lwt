@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../../src/backend/Core/EnvLoader.php';
 use Lwt\Core\EnvLoader;
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../.env');
@@ -37,14 +37,14 @@ class TextParsingTest extends TestCase
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
 
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $connection = connect_to_database(
                 $config['server'], $config['userid'], $config['passwd'], $testDbname, $config['socket']
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
 
-        self::$dbConnection = LWT_Globals::getDbConnection();
+        self::$dbConnection = Globals::getDbConnection();
 
         // Create a test language for parsing tests
         self::createTestLanguage();
@@ -55,7 +55,7 @@ class TextParsingTest extends TestCase
      */
     private static function createTestLanguage(): void
     {
-        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
         // Insert test language
         $sql = "INSERT INTO {$tbpref}languages (
@@ -93,7 +93,7 @@ class TextParsingTest extends TestCase
      */
     public static function tearDownAfterClass(): void
     {
-        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
         if (self::$testLanguageId) {
             do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLanguageId);
@@ -124,7 +124,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingBasic(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -141,9 +141,9 @@ class TextParsingTest extends TestCase
      */
     public function testPrepareTextParsingCharacterSubstitution(): void
     {
-        $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -166,7 +166,7 @@ class TextParsingTest extends TestCase
         )";
 
         do_mysqli_query($sql);
-        $germanLangId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $germanLangId = mysqli_insert_id(Globals::getDbConnection());
 
         // Test text with German characters
         $text = "Größe Käse Tür";
@@ -188,7 +188,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingBraceReplacement(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -209,7 +209,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingEmpty(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -226,7 +226,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingWhitespaceOnly(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -243,7 +243,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingUnicode(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -261,7 +261,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingMultipleParagraphs(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -278,7 +278,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingWindowsLineEndings(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -296,7 +296,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingSpecialPunctuation(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -313,7 +313,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingAbbreviations(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -333,7 +333,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingNumbers(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -350,7 +350,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingMixedCase(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -367,7 +367,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingQuotes(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -384,7 +384,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingCheckMode(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -406,7 +406,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingLongText(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -431,7 +431,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingSpecialCharacters(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -449,7 +449,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingEmoji(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -466,7 +466,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingInvalidLanguage(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -484,7 +484,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingEllipsis(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
@@ -501,7 +501,7 @@ class TextParsingTest extends TestCase
     public function testPrepareTextParsingNoPunctuation(): void
     {
         
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 

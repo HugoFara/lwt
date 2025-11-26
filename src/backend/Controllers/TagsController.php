@@ -64,7 +64,7 @@ class TagsController extends BaseController
         } elseif ($this->param('chg')) {
             $this->showEditTermTagForm((int)$this->param('chg'));
         } else {
-            $this->showTermTagsList($message, $currentquery, $wh_query, $currentsort, $currentpage, \Lwt\Core\LWT_Globals::isDebug());
+            $this->showTermTagsList($message, $currentquery, $wh_query, $currentsort, $currentpage, \Lwt\Core\Globals::isDebug());
         }
 
         $this->endRender();
@@ -102,7 +102,7 @@ class TagsController extends BaseController
         } elseif ($this->param('chg')) {
             $this->showEditTextTagForm((int)$this->param('chg'));
         } else {
-            $this->showTextTagsList($message, $currentquery, $wh_query, $currentsort, $currentpage, \Lwt\Core\LWT_Globals::isDebug());
+            $this->showTextTagsList($message, $currentquery, $wh_query, $currentsort, $currentpage, \Lwt\Core\Globals::isDebug());
         }
 
         $this->endRender();

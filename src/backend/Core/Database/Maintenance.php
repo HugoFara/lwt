@@ -16,7 +16,7 @@
 
 namespace Lwt\Database;
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 /**
  * Database maintenance and optimization utilities.
@@ -38,7 +38,7 @@ class Maintenance
      */
     public static function adjustAutoIncrement(string $table, string $key): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $val = get_first_value(
             'SELECT max(' . $key . ')+1 AS value FROM ' . $tbpref . $table
         );
@@ -56,7 +56,7 @@ class Maintenance
      */
     public static function optimizeDatabase(): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         self::adjustAutoIncrement('archivedtexts', 'AtID');
         self::adjustAutoIncrement('languages', 'LgID');
         self::adjustAutoIncrement('sentences', 'SeID');
@@ -92,7 +92,7 @@ class Maintenance
      */
     public static function updateJapaneseWordCount(int $japid): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
 
         // STEP 1: write the useful info to a file
         $db_to_mecab = tempnam(sys_get_temp_dir(), "{$tbpref}db_to_mecab");
@@ -170,7 +170,7 @@ class Maintenance
      */
     public static function initWordCount(): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $sqlarr = array();
         $i = 0;
         $min = 0;

@@ -16,7 +16,7 @@
 
 require_once __DIR__ . '/kernel_utility.php';
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 /**
  * Starts or not the error reporting.
@@ -79,7 +79,7 @@ function start_session(): void
  */
 function start_session_main(): void
 {
-    set_error_reporting(LWT_Globals::shouldDisplayErrors());
+    set_error_reporting(Globals::shouldDisplayErrors());
     set_configuration_options();
     // Start a PHP session if not one already exists
     if (session_id() == '') {

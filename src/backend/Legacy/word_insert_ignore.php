@@ -31,7 +31,7 @@ require_once 'Core/session_utility.php';
  */
 function get_word($textid, $textpos)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $word = (string)get_first_value(
         "SELECT Ti2Text AS value
         FROM " . $tbpref . "textitems2
@@ -54,7 +54,7 @@ function get_word($textid, $textpos)
  */
 function insert_word_ignore_to_database($textid, $word)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     $wordlc = mb_strtolower($word, 'UTF-8');
 

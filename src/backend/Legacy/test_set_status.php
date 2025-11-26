@@ -175,7 +175,7 @@ function do_set_test_status_javascript(
  */
 function do_set_test_status_content($wid, $status, $oldstatus, $stchange, $ajax = false)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $word = get_first_value(
         "SELECT WoText AS value FROM {$tbpref}words
         WHERE WoID = $wid"
@@ -212,7 +212,7 @@ function do_set_test_status_content($wid, $status, $oldstatus, $stchange, $ajax 
  */
 function start_set_text_status()
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     if (!is_numeric(getreq('status')) && !is_numeric(getreq('stchange'))) {
         my_die('status or stchange should be specified!');

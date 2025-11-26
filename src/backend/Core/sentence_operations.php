@@ -27,7 +27,7 @@
  */
 function sentences_containing_word_lc_query($wordlc, $lid): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $mecab_str = null;
     $res = do_mysqli_query(
         "SELECT LgRegexpWordCharacters, LgRemoveSpaces
@@ -112,7 +112,7 @@ function sentences_containing_word_lc_query($wordlc, $lid): string
  */
 function sentences_from_word($wid, $wordlc, $lid, $limit = -1): \mysqli_result|false
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (empty($wid)) {
         $sql = "SELECT DISTINCT SeID, SeText
         FROM {$tbpref}sentences, {$tbpref}textitems2
@@ -151,7 +151,7 @@ function sentences_from_word($wid, $wordlc, $lid, $limit = -1): \mysqli_result|f
  */
 function getSentence($seid, $wordlc, $mode): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $res = do_mysqli_query(
         "SELECT
         CONCAT(

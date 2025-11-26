@@ -16,13 +16,13 @@
 
 namespace Lwt\Database;
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 /**
  * Database connection wrapper providing a clean interface for database operations.
  *
  * This class wraps mysqli and provides methods for common database operations.
- * It uses LWT_Globals internally for backward compatibility.
+ * It uses Globals internally for backward compatibility.
  *
  * @since 3.0.0
  */
@@ -42,7 +42,7 @@ class Connection
     public static function getInstance(): \mysqli
     {
         if (self::$instance === null) {
-            self::$instance = LWT_Globals::getDbConnection();
+            self::$instance = Globals::getDbConnection();
         }
 
         if (self::$instance === null) {
@@ -62,7 +62,7 @@ class Connection
     public static function setInstance(\mysqli $connection): void
     {
         self::$instance = $connection;
-        LWT_Globals::setDbConnection($connection);
+        Globals::setDbConnection($connection);
     }
 
     /**

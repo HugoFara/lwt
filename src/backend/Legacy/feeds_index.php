@@ -27,7 +27,7 @@ require_once 'Core/session_utility.php';
  */
 function dummy_function_1(): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $edit_text = 0;
     $message = '';
     if (is_array($_REQUEST['marked_items'])) {
@@ -374,8 +374,8 @@ function check_errors($message): void
 
 function dummy_function_2($currentlang, $currentfeed): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    $debug = \Lwt\Core\LWT_Globals::isDebug();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $debug = \Lwt\Core\Globals::isDebug();
     $currentquery = (string) processSessParam("query", "currentrssquery", '', false);
     $currentquerymode = (string) processSessParam(
         "query_mode",

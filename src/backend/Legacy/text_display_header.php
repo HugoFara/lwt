@@ -30,7 +30,7 @@ require_once 'Core/session_utility.php';
  */
 function do_diplay_impr_text_header_data($textid)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     $sql =
     'SELECT TxLgID, TxTitle, TxAudioURI, TxSourceURI

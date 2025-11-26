@@ -30,7 +30,7 @@ require_once 'Core/session_utility.php';
  */
 function all_words_wellknown_get_words($txid): \mysqli_result|false
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
     FROM (
         {$tbpref}textitems2
@@ -59,7 +59,7 @@ function all_words_wellknown_get_words($txid): \mysqli_result|false
  */
 function all_words_wellknown_process_word($status, $term, $termlc, $langid): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $wid = get_first_value(
         "SELECT WoID AS value FROM words
         WHERE WoTextLC = " . convert_string_to_sqlsyntax($termlc)
@@ -120,7 +120,7 @@ function all_words_wellknown_process_word($status, $term, $termlc, $langid): arr
  */
 function all_words_wellknown_main_loop($txid, $status): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $langid = get_first_value(
         "SELECT TxLgID AS value
         FROM {$tbpref}texts

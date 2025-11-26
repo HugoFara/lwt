@@ -16,7 +16,7 @@
 
 namespace Lwt\Database;
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 use Lwt\Core\EnvLoader;
 
 /**
@@ -183,8 +183,8 @@ class Configuration
      */
     public static function getPrefix(\mysqli $dbconnection, ?string $configuredPrefix = null): array
     {
-        // Set connection in LWT_Globals for backward compatibility
-        LWT_Globals::setDbConnection($dbconnection);
+        // Set connection in Globals for backward compatibility
+        Globals::setDbConnection($dbconnection);
         // Also set global for legacy code during transition
         $GLOBALS['DBCONNECTION'] = $dbconnection;
 

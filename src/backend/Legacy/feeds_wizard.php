@@ -57,7 +57,7 @@ function feed_wizard_insert_uri(): void
 
 function feed_wizard_select_text(): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     session_start();
     if (isset($_REQUEST['edit_feed']) && !isset($_SESSION['wizard'])) {
         $_SESSION['wizard']['edit_feed'] = $_REQUEST['edit_feed'];
@@ -875,7 +875,7 @@ function feed_wizard_filter_text(): void
 
 function feed_wizard_edit_options(): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     session_start();
     pagestart('Feed Wizard', false);
     if (isset($_REQUEST['filter_tags'])) {

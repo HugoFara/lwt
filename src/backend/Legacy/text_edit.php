@@ -154,7 +154,7 @@ function edit_texts_get_wh_tag($currentlang)
  */
 function edit_texts_mark_action($markaction, $marked, $actiondata): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $message = "Multiple Actions: 0";
     if (!isset($marked) || !is_array($marked)) {
         return array($message, null);
@@ -343,7 +343,7 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
  */
 function edit_texts_delete($txid): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $message3 = runsql(
         'DELETE FROM ' . $tbpref . 'textitems2 where Ti2TxID = ' . $txid,
         "Text items deleted"
@@ -383,7 +383,7 @@ function edit_texts_delete($txid): string
  */
 function edit_texts_archive($txid): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $message3 = runsql(
         "DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = $txid",
         "Text items deleted"
@@ -443,7 +443,7 @@ function edit_texts_archive($txid): string
  */
 function edit_texts_do_operation($op, $message1, $no_pagestart): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (strlen(prepare_textdata($_REQUEST['TxText'])) > 65000) {
         $message = "Error: Text too long, must be below 65000 Bytes";
         $currentlang = (int) validateLang(
@@ -553,7 +553,7 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
  */
 function edit_texts_form($text, $annotated)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $new_text = $text->id == 0;
     $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages
     WHERE LgGoogleTranslateURI<>''";
@@ -752,7 +752,7 @@ function edit_texts_new($lid)
  */
 function edit_texts_change($txid)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
     TxAnnotatedText <> '' AS annot_exists
     FROM {$tbpref}texts
@@ -1129,7 +1129,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
 </thead>
 <tbody>
     <?php
-    if (\Lwt\Core\LWT_Globals::isDebug()) {
+    if (\Lwt\Core\Globals::isDebug()) {
         echo $sql;
     }
     while ($record = mysqli_fetch_assoc($res)) {
@@ -1159,7 +1159,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
  */
 function edit_texts_display($message)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     // Page, Sort, etc.
 
@@ -1202,7 +1202,7 @@ function edit_texts_display($message)
         GROUP BY TxID {$wh_tag}
     ) AS dummy";
     $recno = (int) get_first_value($sql);
-    if (\Lwt\Core\LWT_Globals::isDebug()) {
+    if (\Lwt\Core\Globals::isDebug()) {
         echo $sql . ' ===&gt; ' . $recno;
     }
 

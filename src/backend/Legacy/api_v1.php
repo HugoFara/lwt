@@ -27,7 +27,7 @@ require_once 'Core/langdefs.php';
  */
 function add_new_term_transl($text, $lang, $data): array|string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $textlc = mb_strtolower($text, 'UTF-8');
     $dummy = runsql(
         "INSERT INTO {$tbpref}words (
@@ -71,7 +71,7 @@ function add_new_term_transl($text, $lang, $data): array|string
  */
 function edit_term_transl($wid, $new_trans)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $oldtrans = (string) get_first_value(
         "SELECT WoTranslation AS value
         FROM {$tbpref}words
@@ -120,7 +120,7 @@ function edit_term_transl($wid, $new_trans)
  */
 function do_ajax_check_update_translation($wid, $new_trans)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $cnt_words = (int)get_first_value(
         "SELECT COUNT(WoID) AS value
         FROM {$tbpref}words
@@ -146,7 +146,7 @@ function do_ajax_check_update_translation($wid, $new_trans)
  */
 function set_word_status($wid, $status)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $m1 = runsql(
         "UPDATE {$tbpref}words
         SET WoStatus = $status, WoStatusChanged = NOW()," .
@@ -196,7 +196,7 @@ function get_new_status($oldstatus, $up)
  */
 function update_word_status($wid, $currstatus)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (($currstatus >= 1 && $currstatus <= 5) || $currstatus == 99 || $currstatus == 98) {
         $m1 = (int)set_word_status($wid, $currstatus);
         if ($m1 == 1) {
@@ -224,7 +224,7 @@ function update_word_status($wid, $currstatus)
  */
 function ajax_increment_term_status($wid, $up)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     $tempstatus = get_first_value(
         "SELECT WoStatus as value
@@ -256,7 +256,7 @@ function ajax_increment_term_status($wid, $up)
  */
 function save_text_position($textid, $position)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     runsql(
         "UPDATE {$tbpref}texts
         SET TxPosition = $position
@@ -275,7 +275,7 @@ function save_text_position($textid, $position)
  */
 function save_audio_position($textid, $audioposition)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     runsql(
         "UPDATE {$tbpref}texts
         SET TxAudioPosition = $audioposition
@@ -299,7 +299,7 @@ function save_audio_position($textid, $audioposition)
  */
 function save_impr_text_data($textid, $line, $val): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $ann = (string) get_first_value(
         "SELECT TxAnnotatedText AS value
         FROM {$tbpref}texts
@@ -395,7 +395,7 @@ function limit_current_page($currentpage, $recno, $maxperpage)
  */
 function select_imported_terms($last_update, $offset, $max_terms): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT WoID, WoText, WoTranslation, WoRomanization, WoSentence,
     IFNULL(WoSentence, '') LIKE CONCAT('%{', WoText, '}%') AS SentOK,
     WoStatus,
@@ -466,7 +466,7 @@ namespace Lwt\Ajax\Improved_Text;
  */
 function make_trans($i, $wid, $trans, $word, $lang): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $trans = trim($trans);
     $widset = is_numeric($wid);
     $r = "";
@@ -550,7 +550,7 @@ function make_trans($i, $wid, $trans, $word, $lang): string
  */
 function get_translations($word_id): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $translations = array();
     $alltrans = (string) get_first_value(
         "SELECT WoTranslation AS value FROM {$tbpref}words
@@ -580,7 +580,7 @@ function get_translations($word_id): array
  */
 function get_term_translations($wordlc, $textid): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT TxLgID, TxAnnotatedText
     FROM {$tbpref}texts WHERE TxID = $textid";
     $res = do_mysqli_query($sql);
@@ -667,7 +667,7 @@ function get_term_translations($wordlc, $textid): array
  */
 function edit_term_form($textid): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT TxLgID, TxAnnotatedText
     FROM {$tbpref}texts WHERE TxID = $textid";
     $res = do_mysqli_query($sql);
@@ -821,7 +821,7 @@ namespace Lwt\Ajax\Feed;
  */
 function get_feeds_list($feed, $nfid): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $valuesArr = array();
     foreach ($feed as $data) {
         $d_title = convert_string_to_sqlsyntax($data['title']);
@@ -855,7 +855,7 @@ function get_feeds_list($feed, $nfid): array
  */
 function get_feed_result($imported_feed, $nif, $nfname, $nfid, $nfoptions): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     do_mysqli_query(
         'UPDATE ' . $tbpref . 'newsfeeds
         SET NfUpdate="' . time() . '"
@@ -1089,7 +1089,7 @@ function media_files()
  */
 function readingConfiguration($get_req): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // language, voiceAPI, abbr
     $req = do_mysqli_query(
         "SELECT LgName, LgTTSVoiceAPI, LgRegexpWordCharacters FROM {$tbpref}languages

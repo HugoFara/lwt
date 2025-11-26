@@ -36,7 +36,7 @@ require_once __DIR__ . '/text_helpers.php';
  */
 function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $currentlang = validateLang(
         (string) processDBParam("filterlang", 'currentlanguage', '', false)
     );
@@ -489,7 +489,7 @@ function processDBParam($reqkey, $dbkey, $default, $isnum)
 
 function getWordTagList($wid, $before = ' ', $brack = 1, $tohtml = 1): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $lbrack = $rbrack = '';
     if ($brack) {
         $lbrack = "[";
@@ -548,7 +548,7 @@ function get_last_key()
  */
 function do_test_test_get_projection($key, $value): string|null
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $testsql = null;
     switch ($key) {
         case 'words':
@@ -694,7 +694,7 @@ function createTheDictLink($u, $t)
 function createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst): string
 {
     $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-    FROM ' . \Lwt\Core\LWT_Globals::table('languages') . '
+    FROM ' . \Lwt\Core\Globals::table('languages') . '
     WHERE LgID = ' . $lang;
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
@@ -843,7 +843,7 @@ function makeOpenDictStrDynSent($url, $sentctljs, $txt): string
 function createDictLinksInEditWin2($lang, $sentctljs, $wordctljs): string
 {
     $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-    FROM " . \Lwt\Core\LWT_Globals::table('languages') . " WHERE LgID = $lang";
+    FROM " . \Lwt\Core\Globals::table('languages') . " WHERE LgID = $lang";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
     $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
@@ -886,7 +886,7 @@ function createDictLinksInEditWin2($lang, $sentctljs, $wordctljs): string
 function makeDictLinks($lang, $wordctljs): string
 {
     $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-    FROM ' . \Lwt\Core\LWT_Globals::table('languages') . ' WHERE LgID = ' . $lang;
+    FROM ' . \Lwt\Core\Globals::table('languages') . ' WHERE LgID = ' . $lang;
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
     $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
@@ -921,7 +921,7 @@ function makeDictLinks($lang, $wordctljs): string
 function createDictLinksInEditWin3($lang, $sentctljs, $wordctljs): string
 {
     $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-    FROM " . \Lwt\Core\LWT_Globals::table('languages') . " WHERE LgID = $lang";
+    FROM " . \Lwt\Core\Globals::table('languages') . " WHERE LgID = $lang";
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
 

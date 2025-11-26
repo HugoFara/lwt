@@ -16,7 +16,7 @@
 
 namespace Lwt\Database;
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 /**
  * Database ID and tag validation utilities.
@@ -43,7 +43,7 @@ class Validation
         // Cast to integer for safety against SQL injection
         $currentlang_int = (int)$currentlang;
         $sql_string = 'SELECT count(LgID) AS value
-        FROM ' . LWT_Globals::getTablePrefix() . 'languages
+        FROM ' . Globals::getTablePrefix() . 'languages
         WHERE LgID=' . $currentlang_int;
         if (get_first_value($sql_string) == 0) {
             return '';
@@ -66,7 +66,7 @@ class Validation
         // Cast to integer for safety against SQL injection
         $currenttext_int = (int)$currenttext;
         $sql_string = 'SELECT count(TxID) AS value
-        FROM ' . LWT_Globals::getTablePrefix() . 'texts WHERE TxID=' .
+        FROM ' . Globals::getTablePrefix() . 'texts WHERE TxID=' .
         $currenttext_int;
         if (get_first_value($sql_string) == 0) {
             return '';
@@ -84,7 +84,7 @@ class Validation
      */
     public static function tag(string $currenttag, string $currentlang): string
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         if ($currenttag != '' && $currenttag != '-1') {
             // Sanitize inputs to prevent SQL injection
             if (!is_numeric($currenttag)) {
@@ -128,7 +128,7 @@ class Validation
      */
     public static function archTextTag(string $currenttag, string $currentlang): string
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         if ($currenttag != '' && $currenttag != '-1') {
             // Sanitize inputs to prevent SQL injection
             if (!is_numeric($currenttag)) {
@@ -181,7 +181,7 @@ class Validation
      */
     public static function textTag(string $currenttag, string $currentlang): string
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         if ($currenttag != '' && $currenttag != '-1') {
             // Sanitize inputs to prevent SQL injection
             if (!is_numeric($currenttag)) {

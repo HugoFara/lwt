@@ -29,7 +29,7 @@ require_once 'Core/langdefs.php';
  */
 function get_language_code($language)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $lg_id = (int) get_first_value(
         "SELECT LgID as value
         FROM {$tbpref}languages

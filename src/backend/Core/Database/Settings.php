@@ -16,7 +16,7 @@
 
 namespace Lwt\Database;
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 /**
  * Application settings management.
@@ -57,7 +57,7 @@ class Settings
     {
         $val = get_first_value(
             'SELECT StValue AS value
-            FROM ' . LWT_Globals::getTablePrefix() . 'settings
+            FROM ' . Globals::getTablePrefix() . 'settings
             WHERE StKey = ' . Escaping::toSqlSyntax($key)
         );
         if (isset($val)) {
@@ -82,7 +82,7 @@ class Settings
      */
     public static function getWithDefault(string $key): string
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $dft = get_setting_data();
         $val = (string) get_first_value(
             'SELECT StValue AS value
@@ -110,7 +110,7 @@ class Settings
      */
     public static function save(string $k, mixed $v): string
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $dft = get_setting_data();
         if (!isset($v)) {
             return 'Value is not set!';

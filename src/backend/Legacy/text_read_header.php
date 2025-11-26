@@ -35,7 +35,7 @@ require_once 'Core/langdefs.php' ;
  */
 function getData($textid)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql =
     'SELECT LgName, TxLgID, TxText, TxTitle, TxAudioURI, TxSourceURI, TxAudioPosition
     FROM ' . $tbpref . 'texts
@@ -181,7 +181,7 @@ function do_settings($textid): void
  */
 function browser_tts($text, $languageName): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $lg_id = (int) get_first_value(
         "SELECT LgID as value
         FROM {$tbpref}languages

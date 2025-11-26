@@ -16,7 +16,7 @@
 
 namespace Lwt\Database;
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 /**
  * Text parsing and processing utilities.
@@ -41,7 +41,7 @@ class TextParsing
      */
     public static function parseJapanese(string $text, int $id): ?array
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $text = preg_replace('/[ \t]+/u', ' ', $text);
         $text = trim($text);
         if ($id == -1) {
@@ -174,7 +174,7 @@ class TextParsing
      */
     public static function saveWithSql(string $text, int $id): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $file_name = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $tbpref . "tmpti.txt";
         $fp = fopen($file_name, 'w');
         fwrite($fp, $text);
@@ -228,8 +228,8 @@ class TextParsing
      */
     private static function saveWithSqlFallback(string $text, int $id): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
-        $connection = LWT_Globals::getDbConnection();
+        $tbpref = Globals::getTablePrefix();
+        $connection = Globals::getDbConnection();
 
         // Get starting sentence ID
         if ($id > 0) {
@@ -296,7 +296,7 @@ class TextParsing
      */
     public static function parseStandard(string $text, int $id, int $lid): ?array
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $sql = "SELECT * FROM {$tbpref}languages WHERE LgID=$lid";
         $res = do_mysqli_query($sql);
         $record = mysqli_fetch_assoc($res);
@@ -444,7 +444,7 @@ class TextParsing
      */
     public static function prepare(string $text, int $id, int $lid): ?array
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $sql = "SELECT * FROM {$tbpref}languages WHERE LgID = $lid";
         $res = do_mysqli_query($sql);
         $record = mysqli_fetch_assoc($res);
@@ -485,7 +485,7 @@ class TextParsing
      */
     public static function checkValid(int $lid): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $wo = $nw = array();
         $res = do_mysqli_query(
             'SELECT GROUP_CONCAT(TiText order by TiOrder SEPARATOR "")
@@ -537,7 +537,7 @@ class TextParsing
      */
     public static function registerSentencesTextItems(int $tid, int $lid, bool $hasmultiword): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
 
         $sql = '';
         // Text has multi-words, add them to the query
@@ -590,7 +590,7 @@ class TextParsing
      */
     public static function displayStatistics(int $lid, bool $rtlScript, bool $multiwords): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
 
         $mw = array();
         if ($multiwords) {
@@ -660,7 +660,7 @@ class TextParsing
      */
     public static function checkExpressions(array $wl): void
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
 
         $wl_max = 0;
         $mw_sql = '';
@@ -777,7 +777,7 @@ class TextParsing
      */
     public static function splitCheck(string $text, string|int $lid, int $id): ?array
     {
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $wl = array();
         $lid = (int) $lid;
         $sql = "SELECT LgRightToLeft FROM {$tbpref}languages WHERE LgID = $lid";

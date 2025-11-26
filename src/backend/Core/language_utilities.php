@@ -25,7 +25,7 @@
 function get_languages(): array
 {
     $langs = array();
-    $sql = "SELECT LgID, LgName FROM " . \Lwt\Core\LWT_Globals::table('languages') . " WHERE LgName<>''";
+    $sql = "SELECT LgID, LgName FROM " . \Lwt\Core\Globals::table('languages') . " WHERE LgName<>''";
     $res = do_mysqli_query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         $langs[(string)$record['LgName']] = (int)$record['LgID'];
@@ -44,7 +44,7 @@ function get_languages(): array
  */
 function getLanguage($lid)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (is_int($lid)) {
         $lg_id = $lid;
     } elseif (isset($lid) && trim($lid) != '' && ctype_digit($lid)) {
@@ -76,7 +76,7 @@ function getLanguage($lid)
  */
 function getLanguageCode($lg_id, $languages_table)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $query = "SELECT LgName, LgGoogleTranslateURI
     FROM {$tbpref}languages
     WHERE LgID = $lg_id";
@@ -111,7 +111,7 @@ function getLanguageCode($lg_id, $languages_table)
  */
 function getScriptDirectionTag($lid): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (!isset($lid)) {
         return '';
     }

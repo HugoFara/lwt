@@ -16,7 +16,7 @@
 
 namespace Lwt\Database;
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
 /**
  * SQL escaping and text preparation utilities.
@@ -69,7 +69,7 @@ class Escaping
         $data = trim(self::prepareTextdata($data));
         if ($data != "") {
             $result = "'" . mysqli_real_escape_string(
-                LWT_Globals::getDbConnection(),
+                Globals::getDbConnection(),
                 $data
             ) . "'";
         }
@@ -86,7 +86,7 @@ class Escaping
     public static function toSqlSyntaxNoNull(string $data): string
     {
         $data = trim(self::prepareTextdata($data));
-        return "'" . mysqli_real_escape_string(LWT_Globals::getDbConnection(), $data) . "'";
+        return "'" . mysqli_real_escape_string(Globals::getDbConnection(), $data) . "'";
     }
 
     /**
@@ -99,7 +99,7 @@ class Escaping
     public static function toSqlSyntaxNoTrimNoNull(string $data): string
     {
         return "'" .
-        mysqli_real_escape_string(LWT_Globals::getDbConnection(), self::prepareTextdata($data)) .
+        mysqli_real_escape_string(Globals::getDbConnection(), self::prepareTextdata($data)) .
         "'";
     }
 

@@ -7,7 +7,7 @@ namespace Lwt\Tests\Database;
 require_once __DIR__ . '/../../../../src/backend/Core/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 use Lwt\Database\Validation;
 use PHPUnit\Framework\TestCase;
 
@@ -37,7 +37,7 @@ class ValidationTest extends TestCase
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
 
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $connection = connect_to_database(
                 $config['server'],
                 $config['userid'],
@@ -45,10 +45,10 @@ class ValidationTest extends TestCase
                 $testDbname,
                 $config['socket'] ?? ''
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
-        self::$dbConnected = (LWT_Globals::getDbConnection() !== null);
-        self::$tbpref = LWT_Globals::getTablePrefix();
+        self::$dbConnected = (Globals::getDbConnection() !== null);
+        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             self::createTestData();
@@ -81,7 +81,7 @@ class ValidationTest extends TestCase
             100, '', '.!?', '', 'a-zA-Z', 0, 0, 0
         )";
         do_mysqli_query($sql);
-        self::$testLanguageId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        self::$testLanguageId = mysqli_insert_id(Globals::getDbConnection());
 
         // Create test text
         $sql = "INSERT INTO {$tbpref}texts (
@@ -93,17 +93,17 @@ class ValidationTest extends TestCase
             ''
         )";
         do_mysqli_query($sql);
-        self::$testTextId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        self::$testTextId = mysqli_insert_id(Globals::getDbConnection());
 
         // Create test tag (for words)
         $sql = "INSERT INTO {$tbpref}tags (TgText, TgComment) VALUES ('test_validation_tag', 'Test tag')";
         do_mysqli_query($sql);
-        self::$testTagId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        self::$testTagId = mysqli_insert_id(Globals::getDbConnection());
 
         // Create test tag2 (for texts)
         $sql = "INSERT INTO {$tbpref}tags2 (T2Text, T2Comment) VALUES ('test_validation_tag2', 'Test tag2')";
         do_mysqli_query($sql);
-        self::$testTag2Id = mysqli_insert_id(LWT_Globals::getDbConnection());
+        self::$testTag2Id = mysqli_insert_id(Globals::getDbConnection());
     }
 
     public static function tearDownAfterClass(): void

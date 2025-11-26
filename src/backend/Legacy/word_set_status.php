@@ -31,7 +31,7 @@ require_once 'Core/session_utility.php';
  */
 function get_word_data($wid)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT WoText, WoTranslation, WoRomanization
     FROM {$tbpref}words WHERE WoID = $wid";
     $res = do_mysqli_query($sql);
@@ -87,7 +87,7 @@ function set_word_status_ajax($wid, $status): void
  */
 function set_word_status_database($wid, $status)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $m1 = runsql(
         "UPDATE {$tbpref}words
         SET WoStatus = $status, WoStatusChanged = NOW()," .

@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../../../src/backend/Controllers/BaseController.php'
 
 use Lwt\Controllers\BaseController;
 use Lwt\Core\EnvLoader;
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -39,7 +39,7 @@ class BaseControllerTest extends TestCase
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
 
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $connection = connect_to_database(
                 $config['server'],
                 $config['userid'],
@@ -47,9 +47,9 @@ class BaseControllerTest extends TestCase
                 $testDbname,
                 $config['socket'] ?? ''
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
-        self::$dbConnected = (LWT_Globals::getDbConnection() !== null);
+        self::$dbConnected = (Globals::getDbConnection() !== null);
     }
 
     protected function setUp(): void
@@ -81,7 +81,7 @@ class BaseControllerTest extends TestCase
         
         // Clean up test data
         if (self::$dbConnected) {
-            $tbpref = LWT_Globals::getTablePrefix();
+            $tbpref = Globals::getTablePrefix();
             do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_ctrl_%'");
         }
         
@@ -190,7 +190,7 @@ class BaseControllerTest extends TestCase
     public function testTableAddsPrefix(): void
     {
         $tableName = $this->controller->testTable('tags');
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $this->assertEquals($tbpref . 'tags', $tableName);
     }
 
@@ -248,7 +248,7 @@ class BaseControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $result = $this->controller->testQuery("SELECT * FROM {$tbpref}tags LIMIT 1");
         
         $this->assertInstanceOf(\mysqli_result::class, $result);
@@ -263,7 +263,7 @@ class BaseControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $result = $this->controller->testExecute(
             "INSERT INTO {$tbpref}tags (TgText) VALUES ('test_ctrl_exec')",
             "Test insert"
@@ -285,7 +285,7 @@ class BaseControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         
         // Insert test data
         do_mysqli_query("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_ctrl_value')");
@@ -384,7 +384,7 @@ class BaseControllerTest extends TestCase
         $this->assertEquals('123', $saved);
         
         // Clean up
-        $tbpref = LWT_Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_key'");
     }
 }

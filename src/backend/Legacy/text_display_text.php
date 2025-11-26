@@ -27,7 +27,7 @@ require_once 'Core/session_utility.php';
  */
 function get_annotated_text($textid)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $ann = get_first_value(
         "SELECT TxAnnotatedText AS value
         FROM " . $tbpref . "texts
@@ -47,7 +47,7 @@ function get_annotated_text($textid)
  */
 function get_display_impr_text_text_data($textid): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT LgTextSize, LgRightToLeft
     FROM {$tbpref}texts
     JOIN {$tbpref}languages ON LgID = TxLgID
@@ -139,7 +139,7 @@ function do_diplay_impr_text_text_area($ann, $textsize, $rtlScript)
  */
 function get_word_annotations($vals)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $trans = '';
     $c = count($vals);
     $rom = '';

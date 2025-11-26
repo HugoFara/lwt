@@ -29,10 +29,10 @@ namespace Lwt\Core;
  * Usage:
  * ```php
  * // Instead of: global $tbpref;
- * $prefix = LWT_Globals::getTablePrefix();
+ * $prefix = Globals::getTablePrefix();
  *
  * // Instead of: global $DBCONNECTION;
- * $db = LWT_Globals::getDbConnection();
+ * $db = Globals::getDbConnection();
  * ```
  *
  * @category Lwt
@@ -42,7 +42,7 @@ namespace Lwt\Core;
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-LWT-Globals.html
  * @since    3.0.0
  */
-class LWT_Globals
+class Globals
 {
     /**
      * Database connection object
@@ -302,12 +302,12 @@ class LWT_Globals
      * Usage:
      * ```php
      * // SELECT query
-     * $words = LWT_Globals::query('words')
+     * $words = Globals::query('words')
      *     ->where('WoLgID', '=', 1)
      *     ->get();
      *
      * // INSERT query
-     * LWT_Globals::query('words')
+     * Globals::query('words')
      *     ->insert(['WoText' => 'hello', 'WoLgID' => 1]);
      * ```
      *

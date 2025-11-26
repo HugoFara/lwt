@@ -202,7 +202,7 @@ function get_selected($value, $selval): string
  */
 function get_languages_selectoptions($v, $dt): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT LgID, LgName FROM {$tbpref}languages
     WHERE LgName<>'' ORDER BY LgName";
     $res = do_mysqli_query($sql);
@@ -619,7 +619,7 @@ function get_multiplearchivedtextactions_selectoptions(): string
 
 function get_texts_selectoptions($lang, $v): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (! isset($v)) {
         $v = '';
     }
@@ -889,7 +889,7 @@ function pagestart($title, $close): void
         quickMenu();
     }
     echo '</div>
-    <h1>' . tohtml($title) . (\Lwt\Core\LWT_Globals::isDebug() ? ' <span class="red">DEBUG</span>' : '') . '</h1>';
+    <h1>' . tohtml($title) . (\Lwt\Core\Globals::isDebug() ? ' <span class="red">DEBUG</span>' : '') . '</h1>';
 }
 
 /**
@@ -900,8 +900,8 @@ function pagestart($title, $close): void
  */
 function pagestart_nobody($title, $addcss = ''): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    $debug = \Lwt\Core\LWT_Globals::isDebug();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $debug = \Lwt\Core\Globals::isDebug();
     @header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
     @header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
     @header('Cache-Control: no-cache, must-revalidate, max-age=0');

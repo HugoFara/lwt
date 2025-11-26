@@ -14,9 +14,9 @@
  * @since   2.0.3-fork
  */
 
-require_once __DIR__ . '/LWT_Globals.php';
+require_once __DIR__ . '/Globals.php';
 
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 
-// Initialize the LWT_Globals class with default values
-LWT_Globals::initialize();
+// Initialize the Globals class with default values
+Globals::initialize();

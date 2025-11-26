@@ -53,8 +53,8 @@ abstract class BaseController
      */
     public function __construct()
     {
-        $this->tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-        $this->db = \Lwt\Core\LWT_Globals::getDbConnection();
+        $this->tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $this->db = \Lwt\Core\Globals::getDbConnection();
     }
 
     /**

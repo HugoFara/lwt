@@ -7,7 +7,7 @@ namespace Lwt\Tests\Database;
 require_once __DIR__ . '/../../../../src/backend/Core/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 use Lwt\Database\TextParsing;
 use PHPUnit\Framework\TestCase;
 
@@ -34,7 +34,7 @@ class TextParsingTest extends TestCase
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
 
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $connection = connect_to_database(
                 $config['server'],
                 $config['userid'],
@@ -42,10 +42,10 @@ class TextParsingTest extends TestCase
                 $testDbname,
                 $config['socket'] ?? ''
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
-        self::$dbConnected = (LWT_Globals::getDbConnection() !== null);
-        self::$tbpref = LWT_Globals::getTablePrefix();
+        self::$dbConnected = (Globals::getDbConnection() !== null);
+        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             self::createTestLanguage();
@@ -76,7 +76,7 @@ class TextParsingTest extends TestCase
             100, '', '.!?', 'Mr.|Dr.|Mrs.|Ms.', 'a-zA-Z', 0, 0, 0
         )";
         do_mysqli_query($sql);
-        self::$testLanguageId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        self::$testLanguageId = mysqli_insert_id(Globals::getDbConnection());
     }
 
     public static function tearDownAfterClass(): void
@@ -353,7 +353,7 @@ class TextParsingTest extends TestCase
         $sql = "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAudioURI)
                 VALUES (" . self::$testLanguageId . ", 'Register Test', 'Hello world.', '')";
         do_mysqli_query($sql);
-        $textId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $textId = mysqli_insert_id(Globals::getDbConnection());
 
         // Prepare the text (populates temptextitems)
         $this->callPrepare("Hello world.", $textId, self::$testLanguageId);
@@ -531,7 +531,7 @@ class TextParsingTest extends TestCase
             100, 'ß=ss|ä=ae|ö=oe|ü=ue', '.!?', '', 'a-zA-ZäöüßÄÖÜ', 0, 0, 0
         )";
         do_mysqli_query($sql);
-        $germanLangId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $germanLangId = mysqli_insert_id(Globals::getDbConnection());
 
         $text = "Größe Käse Tür";
         $result = $this->callPrepare($text, -2, $germanLangId);
@@ -566,7 +566,7 @@ class TextParsingTest extends TestCase
             100, '', '。', '', 'a-zA-Z', 0, 1, 0
         )";
         do_mysqli_query($sql);
-        $splitLangId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $splitLangId = mysqli_insert_id(Globals::getDbConnection());
 
         $text = "Hello。";
         $result = $this->callPrepare($text, -2, $splitLangId);
@@ -600,7 +600,7 @@ class TextParsingTest extends TestCase
             100, '', '。!?', '', '\\x{0600}-\\x{06FF}', 0, 0, 1
         )";
         do_mysqli_query($sql);
-        $rtlLangId = mysqli_insert_id(LWT_Globals::getDbConnection());
+        $rtlLangId = mysqli_insert_id(Globals::getDbConnection());
 
         $text = "مرحبا. كيف حالك.";
         $result = $this->callPrepare($text, -2, $rtlLangId);

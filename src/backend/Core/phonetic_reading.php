@@ -29,7 +29,7 @@
  */
 function phoneticReading($text, $lgid)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sentence_split = get_first_value(
         "SELECT LgRegexpWordCharacters AS value FROM {$tbpref}languages
         WHERE LgID = $lgid"
@@ -80,7 +80,7 @@ function phoneticReading($text, $lgid)
  */
 function phonetic_reading($text, $lang)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Many languages are already phonetic
     if (!str_starts_with($lang, "ja") && !str_starts_with($lang, "jp")) {
         return $text;
@@ -121,7 +121,7 @@ function phonetic_reading($text, $lang)
  */
 function refreshText($word, $tid): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // $word : only sentences with $word
     // $tid : textid
     // only to be used when $showAll = 0 !

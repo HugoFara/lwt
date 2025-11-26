@@ -46,7 +46,7 @@ function get_version(): string
 {
     $formattedDate = date("F d Y", strtotime(LWT_RELEASE_DATE));
     $version = LWT_APP_VERSION . " ($formattedDate)";
-    if (\Lwt\Core\LWT_Globals::isDebug()) {
+    if (\Lwt\Core\Globals::isDebug()) {
         $version .= ' <span class="red">DEBUG</span>';
     }
     return $version;
@@ -409,8 +409,8 @@ function quickMenu(): void
  */
 function pagestart_kernel_nobody($title, $addcss = ''): void
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    $debug = \Lwt\Core\LWT_Globals::isDebug();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $debug = \Lwt\Core\Globals::isDebug();
     @header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
     @header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
     @header('Cache-Control: no-cache, must-revalidate, max-age=0');
@@ -475,10 +475,10 @@ function pagestart_kernel_nobody($title, $addcss = ''): void
  */
 function pageend(): void
 {
-    if (\Lwt\Core\LWT_Globals::isDebug()) {
+    if (\Lwt\Core\Globals::isDebug()) {
         showRequest();
     }
-    if (\Lwt\Core\LWT_Globals::shouldDisplayTime()) {
+    if (\Lwt\Core\Globals::shouldDisplayTime()) {
         echo "\n<p class=\"smallgray2\">" .
         round(get_execution_time(), 5) . " secs</p>\n";
     }
@@ -495,7 +495,7 @@ function pageend(): void
  */
 function echodebug($var, $text): void
 {
-    if (\Lwt\Core\LWT_Globals::isDebug()) {
+    if (\Lwt\Core\Globals::isDebug()) {
         echo "<pre> **DEBUGGING** " . tohtml($text) . ' = [[[';
         print_r($var);
         echo "]]]\n--------------</pre>";

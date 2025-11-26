@@ -29,7 +29,7 @@ require_once 'Core/session_utility.php';
  */
 function get_test_table_sql()
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (isset($_REQUEST['selection']) && isset($_SESSION['testsql'])) {
         $testsql = $_SESSION['testsql'];
         $cntlang = get_first_value('SELECT count(distinct WoLgID) AS value FROM ' . $testsql);
@@ -57,7 +57,7 @@ function get_test_table_sql()
  */
 function do_test_table_language_settings($testsql)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     $lang = get_first_value('SELECT WoLgID AS value FROM ' . $testsql . ' LIMIT 1');
 
@@ -252,7 +252,7 @@ function do_test_table_table_content($lang_record, $testsql): void
     AND WoTranslation != \'\' AND WoTranslation != \'*\'
     ORDER BY WoTodayScore, WoRandom*RAND()';
 
-    if (\Lwt\Core\LWT_Globals::isDebug()) {
+    if (\Lwt\Core\Globals::isDebug()) {
         echo $sql;
     }
     $res = do_mysqli_query($sql);

@@ -139,7 +139,7 @@ function edit_mword_do_operation($term)
  */
 function edit_mword_do_insert($term)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $titletext = "New Term: " . tohtml($term->textlc);
     pagestart_nobody($titletext);
     echo '<h1>' . $titletext . '</h1>';
@@ -184,7 +184,7 @@ function edit_mword_do_insert($term)
  */
 function edit_mword_do_update($term, $newstatus)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $titletext = "Edit Term: " . tohtml($term->textlc);
     pagestart_nobody($titletext);
     echo '<h1>' . $titletext . '</h1>';
@@ -253,7 +253,7 @@ function edit_mword_do_update($term, $newstatus)
  */
 function edit_mword_new($text, $tid, $ord, $len)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     $term = new Term();
     $term->lgid = get_first_value(
@@ -288,7 +288,7 @@ function edit_mword_new($text, $tid, $ord, $len)
  */
 function edit_mword_update($wid, $tid, $ord)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     $term = new Term();
 
@@ -320,7 +320,7 @@ function edit_mword_update($wid, $tid, $ord)
  */
 function edit_mword_display_new($term, $tid, $ord, $len)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $scrdir = getScriptDirectionTag($term->lgid);
     $seid = get_first_value(
         "SELECT Ti2SeID AS value
@@ -426,7 +426,7 @@ function edit_mword_display_new($term, $tid, $ord, $len)
  */
 function edit_mword_display_change($term, $tid, $ord)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $scrdir = getScriptDirectionTag($term->lgid);
     $sql = 'SELECT WoTranslation, WoSentence, WoRomanization, WoStatus
     FROM ' . $tbpref . 'words WHERE WoID = ' . $term->id;
@@ -556,7 +556,7 @@ function edit_mword_display_change($term, $tid, $ord)
  */
 function edit_mword_page()
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     if (isset($_REQUEST['op'])) {
         // INS/UPD

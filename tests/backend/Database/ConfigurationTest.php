@@ -7,7 +7,7 @@ namespace Lwt\Tests\Database;
 require_once __DIR__ . '/../../../../src/backend/Core/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
 use PHPUnit\Framework\TestCase;
 
@@ -33,7 +33,7 @@ class ConfigurationTest extends TestCase
         self::$dbConfig = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . self::$dbConfig['dbname'];
 
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $connection = connect_to_database(
                 self::$dbConfig['server'],
                 self::$dbConfig['userid'],
@@ -41,9 +41,9 @@ class ConfigurationTest extends TestCase
                 $testDbname,
                 self::$dbConfig['socket'] ?? ''
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
-        self::$dbConnected = (LWT_Globals::getDbConnection() !== null);
+        self::$dbConnected = (Globals::getDbConnection() !== null);
     }
 
     // ===== loadFromEnv() tests =====
@@ -193,7 +193,7 @@ class ConfigurationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $connection = LWT_Globals::getDbConnection();
+        $connection = Globals::getDbConnection();
         $result = Configuration::getPrefix($connection, null);
 
         $this->assertIsArray($result);
@@ -211,7 +211,7 @@ class ConfigurationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $connection = LWT_Globals::getDbConnection();
+        $connection = Globals::getDbConnection();
         $result = Configuration::getPrefix($connection, 'test');
 
         $this->assertIsArray($result);
@@ -228,7 +228,7 @@ class ConfigurationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $connection = LWT_Globals::getDbConnection();
+        $connection = Globals::getDbConnection();
         $result = Configuration::getPrefix($connection, '');
 
         $this->assertIsArray($result);
@@ -265,7 +265,7 @@ class ConfigurationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $connection = LWT_Globals::getDbConnection();
+        $connection = Globals::getDbConnection();
         $result = Configuration::getPrefix($connection, 'my_prefix');
 
         list($prefix, $fixed) = $result;
@@ -278,7 +278,7 @@ class ConfigurationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $connection = LWT_Globals::getDbConnection();
+        $connection = Globals::getDbConnection();
         $result = Configuration::getPrefix($connection, 'app123');
 
         list($prefix, $fixed) = $result;
@@ -291,11 +291,11 @@ class ConfigurationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $connection = LWT_Globals::getDbConnection();
+        $connection = Globals::getDbConnection();
         Configuration::getPrefix($connection, 'test');
 
-        // The function sets the connection in LWT_Globals and $GLOBALS
-        $this->assertSame($connection, LWT_Globals::getDbConnection());
+        // The function sets the connection in Globals and $GLOBALS
+        $this->assertSame($connection, Globals::getDbConnection());
         $this->assertSame($connection, $GLOBALS['DBCONNECTION']);
     }
 
@@ -355,7 +355,7 @@ class ConfigurationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $connection = LWT_Globals::getDbConnection();
+        $connection = Globals::getDbConnection();
 
         // Clear any existing prefix
         do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey = 'current_table_prefix'");
@@ -406,7 +406,7 @@ class ConfigurationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $connection = LWT_Globals::getDbConnection();
+        $connection = Globals::getDbConnection();
 
         // Test all valid character types
         $validPrefixes = [
@@ -432,7 +432,7 @@ class ConfigurationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $connection = LWT_Globals::getDbConnection();
+        $connection = Globals::getDbConnection();
 
         // 20 characters is the max allowed
         $maxPrefix = str_repeat('a', 20);

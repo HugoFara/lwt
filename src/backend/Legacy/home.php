@@ -60,8 +60,8 @@ require_once 'Core/session_utility.php';
  */
 function get_span_groups(): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    $fixed_tbpref = \Lwt\Core\LWT_Globals::isTablePrefixFixed();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $fixed_tbpref = \Lwt\Core\Globals::isTablePrefixFixed();
 
     if ($tbpref == '') {
         $span2 = "<i>Default</i> Table Set</span>";
@@ -92,7 +92,7 @@ function get_span_groups(): array
  */
 function do_current_text_info($textid)
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $txttit = get_first_value(
         'SELECT TxTitle AS value
         FROM ' . $tbpref . 'texts
@@ -192,8 +192,8 @@ function wordpress_logout_link()
  */
 function get_server_data(): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    $dbname = \Lwt\Core\LWT_Globals::getDatabaseName();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $dbname = \Lwt\Core\Globals::getDatabaseName();
     $dbaccess_format = convert_string_to_sqlsyntax($dbname);
     $data_table = array();
     $data_table["prefix"] = convert_string_to_sqlsyntax_nonull($tbpref);
@@ -306,8 +306,8 @@ function index_load_warnings()
  */
 function index_do_main_page()
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    $debug = \Lwt\Core\LWT_Globals::isDebug();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $debug = \Lwt\Core\Globals::isDebug();
 
     $currentlang = null;
     if (is_numeric(getSetting('currentlanguage'))) {

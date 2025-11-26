@@ -7,7 +7,7 @@ namespace Lwt\Tests\Database;
 require_once __DIR__ . '/../../../../src/backend/Core/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
-use Lwt\Core\LWT_Globals;
+use Lwt\Core\Globals;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use PHPUnit\Framework\TestCase;
@@ -34,7 +34,7 @@ class SettingsTest extends TestCase
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
 
-        if (!LWT_Globals::getDbConnection()) {
+        if (!Globals::getDbConnection()) {
             $connection = connect_to_database(
                 $config['server'],
                 $config['userid'],
@@ -42,10 +42,10 @@ class SettingsTest extends TestCase
                 $testDbname,
                 $config['socket'] ?? ''
             );
-            LWT_Globals::setDbConnection($connection);
+            Globals::setDbConnection($connection);
         }
-        self::$dbConnected = (LWT_Globals::getDbConnection() !== null);
-        self::$tbpref = LWT_Globals::getTablePrefix();
+        self::$dbConnected = (Globals::getDbConnection() !== null);
+        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function tearDown(): void

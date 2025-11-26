@@ -27,7 +27,7 @@
  */
 function recreate_save_ann($textid, $oldann): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Get the translations from $oldann:
     $oldtrans = array();
     $olditems = preg_split('/[\n]/u', $oldann);
@@ -86,7 +86,7 @@ function recreate_save_ann($textid, $oldann): string
  */
 function create_ann($textid): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $ann = '';
     $sql =
     "SELECT
@@ -148,7 +148,7 @@ function create_ann($textid): string
  */
 function create_save_ann($textid): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $ann = create_ann($textid);
     runsql(
         'update ' . $tbpref . 'texts set ' .
@@ -216,7 +216,7 @@ function get_first_translation($trans): string
  */
 function get_annotation_link($textid): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (get_first_value('select length(TxAnnotatedText) as value from ' . $tbpref . 'texts where TxID=' . $textid) > 0) {
         return ' &nbsp;<a href="print_impr_text.php?text=' . $textid .
         '" target="_top"><img src="/assets/icons/tick.png" title="Annotated Text" alt="Annotated Text" /></a>';

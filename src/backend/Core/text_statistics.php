@@ -37,7 +37,7 @@
  */
 function return_textwordcount($texts_id): array
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     $r = array(
         // Total for text
@@ -121,7 +121,7 @@ function todo_words_count($textid): int
 {
     $count = get_first_value(
         "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS value
-        FROM " . \Lwt\Core\LWT_Globals::table('textitems2') . "
+        FROM " . \Lwt\Core\Globals::table('textitems2') . "
         WHERE Ti2WordCount=1 AND Ti2WoID=0 AND Ti2TxID=$textid"
     );
     if ($count === null) {
@@ -144,7 +144,7 @@ function todo_words_count($textid): int
  */
 function todo_words_content($textid): string
 {
-    $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $c = todo_words_count($textid);
     if ($c <= 0) {
         return '<span title="No unknown word remaining" class="status0" ' .
