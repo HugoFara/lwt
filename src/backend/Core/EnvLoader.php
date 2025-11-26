@@ -139,7 +139,7 @@ class EnvLoader
 
         // Check $_ENV
         if (isset($_ENV[$key])) {
-            return $_ENV[$key];
+            return is_string($_ENV[$key]) ? $_ENV[$key] : (string)$_ENV[$key];
         }
 
         // Check getenv()
@@ -247,7 +247,7 @@ class EnvLoader
     {
         // Clear environment variables that were set
         foreach (array_keys(self::$env) as $key) {
-            if (is_string($key) && $key !== '') {
+            if ($key !== '') {
                 unset($_ENV[$key]);
                 putenv($key);
             }
@@ -275,11 +275,11 @@ class EnvLoader
     public static function getDatabaseConfig(): array
     {
         return [
-            'server' => self::get('DB_HOST', 'localhost'),
-            'userid' => self::get('DB_USER', 'root'),
-            'passwd' => self::get('DB_PASSWORD', ''),
-            'dbname' => self::get('DB_NAME', 'learning-with-texts'),
-            'socket' => self::get('DB_SOCKET', ''),
+            'server' => self::get('DB_HOST', 'localhost') ?? 'localhost',
+            'userid' => self::get('DB_USER', 'root') ?? 'root',
+            'passwd' => self::get('DB_PASSWORD', '') ?? '',
+            'dbname' => self::get('DB_NAME', 'learning-with-texts') ?? 'learning-with-texts',
+            'socket' => self::get('DB_SOCKET', '') ?? '',
             'tbpref' => self::get('DB_TABLE_PREFIX'),
         ];
     }

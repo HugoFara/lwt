@@ -30,19 +30,24 @@ function anki_export(string $sql)
 {
     // WoID, LgRightToLeft, LgRegexpWordCharacters, LgName, WoText, WoTranslation, WoRomanization, WoSentence, taglist
     $res = do_mysqli_query($sql);
+    if (!($res instanceof \mysqli_result)) {
+        header('Content-type: text/plain; charset=utf-8');
+        header("Content-disposition: attachment; filename=lwt_anki_export_" . date('Y-m-d-H-i-s') . ".txt");
+        exit();
+    }
     $x = '';
     while ($record = mysqli_fetch_assoc($res)) {
         if ('MECAB' == strtoupper(trim((string) $record['LgRegexpWordCharacters']))) {
             $termchar = '一-龥ぁ-ヾ';
         } else {
-            $termchar = $record['LgRegexpWordCharacters'];
+            $termchar = (string)$record['LgRegexpWordCharacters'];
         }
         $rtlScript = (int)$record['LgRightToLeft'] === 1;
         $span1 = ($rtlScript ? '<span dir="rtl">' : '');
         $span2 = ($rtlScript ? '</span>' : '');
         $lpar = ($rtlScript ? ']' : '[');
         $rpar = ($rtlScript ? '[' : ']');
-        $sent = tohtml(repl_tab_nl($record["WoSentence"]));
+        $sent = tohtml(repl_tab_nl((string)$record["WoSentence"]));
         $sent1 = str_replace(
             "{",
             '<span style="font-weight:600; color:#0000ff;">' . $lpar,
@@ -53,12 +58,12 @@ function anki_export(string $sql)
             )
         );
         $sent2 = str_replace("{", '<span style="font-weight:600; color:#0000ff;">', str_replace("}", '</span>', $sent));
-        $x .= $span1 . tohtml(repl_tab_nl($record["WoText"])) . $span2 . "\t" .
-        tohtml(repl_tab_nl($record["WoTranslation"])) . "\t" .
-        tohtml(repl_tab_nl($record["WoRomanization"])) . "\t" .
+        $x .= $span1 . tohtml(repl_tab_nl((string)$record["WoText"])) . $span2 . "\t" .
+        tohtml(repl_tab_nl((string)$record["WoTranslation"])) . "\t" .
+        tohtml(repl_tab_nl((string)$record["WoRomanization"])) . "\t" .
         $span1 . $sent1 . $span2 . "\t" .
         $span1 . $sent2 . $span2 . "\t" .
-        tohtml(repl_tab_nl($record["LgName"])) . "\t" .
+        tohtml(repl_tab_nl((string)$record["LgName"])) . "\t" .
         tohtml($record["WoID"]) . "\t" .
         tohtml($record["taglist"]) .
         "\r\n";
@@ -83,14 +88,22 @@ function tsv_export(string $sql)
 {
     // WoID, LgName, WoText, WoTranslation, WoRomanization, WoSentence, WoStatus, taglist
     $res = do_mysqli_query($sql);
+    if (!($res instanceof \mysqli_result)) {
+        header('Content-type: text/plain; charset=utf-8');
+        header(
+            "Content-disposition: attachment; filename=lwt_tsv_export_" .
+            date('Y-m-d-H-i-s') . ".txt"
+        );
+        exit();
+    }
     $x = '';
     while ($record = mysqli_fetch_assoc($res)) {
-        $x .= repl_tab_nl($record["WoText"]) . "\t" .
-        repl_tab_nl($record["WoTranslation"]) . "\t" .
-        repl_tab_nl($record["WoSentence"]) . "\t" .
-        repl_tab_nl($record["WoRomanization"]) . "\t" .
+        $x .= repl_tab_nl((string)$record["WoText"]) . "\t" .
+        repl_tab_nl((string)$record["WoTranslation"]) . "\t" .
+        repl_tab_nl((string)$record["WoSentence"]) . "\t" .
+        repl_tab_nl((string)$record["WoRomanization"]) . "\t" .
         ($record["WoStatus"] ?? '') . "\t" .
-        repl_tab_nl($record["LgName"]) . "\t" .
+        repl_tab_nl((string)$record["LgName"]) . "\t" .
         ($record["WoID"] ?? '') . "\t" .
         ($record["taglist"] ?? '') . "\r\n";
     }
@@ -107,25 +120,37 @@ function tsv_export(string $sql)
 // -------------------------------------------------------------
 
 /**
+ * Export terms using a flexible export template.
+ *
+ * @param string $sql SQL query to retrieve terms
+ *
  * @return never
  */
-function flexible_export($sql)
+function flexible_export(string $sql)
 {
     // WoID, LgName, LgExportTemplate, LgRightToLeft, WoText, WoTextLC, WoTranslation, WoRomanization, WoSentence, WoStatus, taglist
     $res = do_mysqli_query($sql);
+    if (!($res instanceof \mysqli_result)) {
+        header('Content-type: text/plain; charset=utf-8');
+        header(
+            "Content-disposition: attachment; filename=lwt_flexible_export_" .
+            date('Y-m-d-H-i-s') . ".txt"
+        );
+        exit();
+    }
     $x = '';
     while ($record = mysqli_fetch_assoc($res)) {
         if (isset($record['LgExportTemplate'])) {
-            $woid = $record['WoID'];
-            $langname = repl_tab_nl($record['LgName']);
+            $woid = (string)$record['WoID'];
+            $langname = repl_tab_nl((string)$record['LgName']);
             $rtlScript = (int)$record['LgRightToLeft'] === 1;
             $span1 = ($rtlScript ? '<span dir="rtl">' : '');
             $span2 = ($rtlScript ? '</span>' : '');
-            $term = repl_tab_nl($record['WoText']);
-            $term_lc = repl_tab_nl($record['WoTextLC']);
-            $transl = repl_tab_nl($record['WoTranslation']);
-            $rom = repl_tab_nl($record['WoRomanization']);
-            $sent_raw = repl_tab_nl($record['WoSentence']);
+            $term = repl_tab_nl((string)$record['WoText']);
+            $term_lc = repl_tab_nl((string)$record['WoTextLC']);
+            $transl = repl_tab_nl((string)$record['WoTranslation']);
+            $rom = repl_tab_nl((string)$record['WoRomanization']);
+            $sent_raw = repl_tab_nl((string)$record['WoSentence']);
             $sent = str_replace('{', '', str_replace('}', '', $sent_raw));
             $sent_c = mask_term_in_sentence_v2($sent_raw);
             $sent_d = str_replace('{', '[', str_replace('}', ']', $sent_raw));
@@ -135,9 +160,9 @@ function flexible_export($sql)
                 '{{c1::',
                 str_replace('}', '::' . $transl . '}}', $sent_raw)
             );
-            $status = $record['WoStatus'];
-            $taglist = trim((string) $record['taglist']);
-            $xx = repl_tab_nl($record['LgExportTemplate']);
+            $status = (string)$record['WoStatus'];
+            $taglist = trim((string)$record['taglist']);
+            $xx = repl_tab_nl((string)$record['LgExportTemplate']);
             $xx = str_replace('%w', $term, $xx);
             $xx = str_replace('%t', $transl, $xx);
             $xx = str_replace('%s', $sent, $xx);
@@ -181,7 +206,14 @@ function flexible_export($sql)
 
 // -------------------------------------------------------------
 
-function mask_term_in_sentence_v2($s): string
+/**
+ * Mask the term in a sentence by replacing it with "[...]".
+ *
+ * @param string $s Sentence with term marked by {} brackets
+ *
+ * @return string Sentence with term replaced by "[...]"
+ */
+function mask_term_in_sentence_v2(string $s): string
 {
     $l = mb_strlen($s, 'utf-8');
     $r = '';
@@ -208,10 +240,11 @@ function mask_term_in_sentence_v2($s): string
  * Replace all white space characters by a simple space ' '.
  * The output string is also trimmed.
  *
- * @param  string $s String to parse
+ * @param string $s String to parse
+ *
  * @return string String with only simple whitespaces.
  */
-function repl_tab_nl($s)
+function repl_tab_nl(string $s): string
 {
     $s = str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $s);
     $s = preg_replace('/\s/u', ' ', $s);
@@ -221,7 +254,15 @@ function repl_tab_nl($s)
 
 // -------------------------------------------------------------
 
-function mask_term_in_sentence($s, $regexword): string
+/**
+ * Mask the term in a sentence by replacing characters with bullets.
+ *
+ * @param string $s         Sentence with term marked by {} brackets
+ * @param string $regexword Regex pattern for word characters
+ *
+ * @return string Sentence with term characters replaced by bullets
+ */
+function mask_term_in_sentence(string $s, string $regexword): string
 {
     $l = mb_strlen($s, 'utf-8');
     $r = '';

@@ -50,55 +50,64 @@ $sumall = 0;
 
 $sql = 'SELECT WoLgID,WoStatus,count(*) AS value FROM ' . $tbpref . 'words GROUP BY WoLgID,WoStatus';
 $res = do_mysqli_query($sql);
-$term_stat = null;
-while ($record = mysqli_fetch_assoc($res)) {
-    $term_stat[$record['WoLgID']][$record['WoStatus']] = $record['value'];
+/** @var array<int|string, array<int|string, int>> $term_stat */
+$term_stat = [];
+if ($res instanceof \mysqli_result) {
+    while ($record = mysqli_fetch_assoc($res)) {
+        $lgId = (string)$record['WoLgID'];
+        $status = (string)$record['WoStatus'];
+        $term_stat[$lgId][$status] = (int)$record['value'];
+    }
+    mysqli_free_result($res);
 }
 $sql = 'SELECT LgID, LgName FROM ' . $tbpref . 'languages where LgName<>"" ORDER BY LgName';
 $res = do_mysqli_query($sql);
-while ($record = mysqli_fetch_assoc($res)) {
-    $lang = $record['LgID'];
+if ($res instanceof \mysqli_result) {
+    while ($record = mysqli_fetch_assoc($res)) {
+        $lgId = (string)$record['LgID'];
+        $lang = $lgId;
 
-    $s1 = isset($term_stat[$record['LgID']][1]) ? ($term_stat[$record['LgID']][1]) : 0;
-    $s2 = isset($term_stat[$record['LgID']][2]) ? ($term_stat[$record['LgID']][2]) : 0;
-    $s3 = isset($term_stat[$record['LgID']][3]) ? ($term_stat[$record['LgID']][3]) : 0;
-    $s4 = isset($term_stat[$record['LgID']][4]) ? ($term_stat[$record['LgID']][4]) : 0;
-    $s5 = isset($term_stat[$record['LgID']][5]) ? ($term_stat[$record['LgID']][5]) : 0;
-    $s98 = isset($term_stat[$record['LgID']][98]) ? ($term_stat[$record['LgID']][98]) : 0;
-    $s99 = isset($term_stat[$record['LgID']][99]) ? ($term_stat[$record['LgID']][99]) : 0;
-    $s14 = $s1 + $s2 + $s3 + $s4;
-    $s15 = $s14 + $s5;
-    $s599 = $s5 + $s99;
-    $all = $s15 + $s98 + $s99;
+        $s1 = (int)($term_stat[$lgId][1] ?? 0);
+        $s2 = (int)($term_stat[$lgId][2] ?? 0);
+        $s3 = (int)($term_stat[$lgId][3] ?? 0);
+        $s4 = (int)($term_stat[$lgId][4] ?? 0);
+        $s5 = (int)($term_stat[$lgId][5] ?? 0);
+        $s98 = (int)($term_stat[$lgId][98] ?? 0);
+        $s99 = (int)($term_stat[$lgId][99] ?? 0);
+        $s14 = $s1 + $s2 + $s3 + $s4;
+        $s15 = $s14 + $s5;
+        $s599 = $s5 + $s99;
+        $all = $s15 + $s98 + $s99;
 
-    $sum1 += $s1;
-    $sum2 += $s2;
-    $sum3 += $s3;
-    $sum4 += $s4;
-    $sum5 += $s5;
-    $sum98 += $s98;
-    $sum99 += $s99;
-    $sum14 += $s14;
-    $sum15 += $s15;
-    $sum599 += $s599;
-    $sumall += $all;
+        $sum1 += $s1;
+        $sum2 += $s2;
+        $sum3 += $s3;
+        $sum4 += $s4;
+        $sum5 += $s5;
+        $sum98 += $s98;
+        $sum99 += $s99;
+        $sum14 += $s14;
+        $sum15 += $s15;
+        $sum599 += $s599;
+        $sumall += $all;
 
-    echo '<tr>';
-    echo '<td class="td1">' . tohtml($record['LgName']) . '</td>';
-    echo '<td class="td1 center"><a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $all . '</b></a></td>';
-    echo '<td class="td1 center"><a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=15&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s15 . '</b></a></td>';
-    echo '<td class="td1 center"><a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=14&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s14 . '</b></a></td>';
-    echo '<td class="td1 center"><span class="status1">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=1&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s1 . '</a>&nbsp;</span></td>';
-    echo '<td class="td1 center"><span class="status2">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=2&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s2 . '</a>&nbsp;</span></td>';
-    echo '<td class="td1 center"><span class="status3">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=3&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s3 . '</a>&nbsp;</span></td>';
-    echo '<td class="td1 center"><span class="status4">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=4&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s4 . '</a>&nbsp;</span></td>';
-    echo '<td class="td1 center"><span class="status5">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=5&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s5 . '</a>&nbsp;</span></td>';
-    echo '<td class="td1 center"><span class="status99">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=99&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s99 . '</a>&nbsp;</span></td>';
-    echo '<td class="td1 center"><span class="status5stat">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=599&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s599 . '</b></a>&nbsp;</span></td>';
-    echo '<td class="td1 center"><span class="status98">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=98&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s98 . '</b></a>&nbsp;</span></td>';
-    echo '</tr>';
+        echo '<tr>';
+        echo '<td class="td1">' . tohtml($record['LgName']) . '</td>';
+        echo '<td class="td1 center"><a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $all . '</b></a></td>';
+        echo '<td class="td1 center"><a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=15&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s15 . '</b></a></td>';
+        echo '<td class="td1 center"><a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=14&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s14 . '</b></a></td>';
+        echo '<td class="td1 center"><span class="status1">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=1&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s1 . '</a>&nbsp;</span></td>';
+        echo '<td class="td1 center"><span class="status2">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=2&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s2 . '</a>&nbsp;</span></td>';
+        echo '<td class="td1 center"><span class="status3">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=3&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s3 . '</a>&nbsp;</span></td>';
+        echo '<td class="td1 center"><span class="status4">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=4&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s4 . '</a>&nbsp;</span></td>';
+        echo '<td class="td1 center"><span class="status5">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=5&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s5 . '</a>&nbsp;</span></td>';
+        echo '<td class="td1 center"><span class="status99">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=99&amp;tag12=0&amp;tag2=&amp;tag1=">' . $s99 . '</a>&nbsp;</span></td>';
+        echo '<td class="td1 center"><span class="status5stat">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=599&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s599 . '</b></a>&nbsp;</span></td>';
+        echo '<td class="td1 center"><span class="status98">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=98&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s98 . '</b></a>&nbsp;</span></td>';
+        echo '</tr>';
+    }
+    mysqli_free_result($res);
 }
-mysqli_free_result($res);
 echo '<tr>';
 echo '<th class="th1"><b>TOTAL</b></th>';
 echo '<th class="th1 center"><a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $sumall . '</b></a></th>';

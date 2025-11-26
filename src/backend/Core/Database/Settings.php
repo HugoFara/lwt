@@ -41,8 +41,10 @@ class Settings
     public static function getZeroOrOne(string $key, string|int $dft): int
     {
         $r = self::get($key);
-        $r = ($r == '' ? $dft : (((int)$r !== 0) ? 1 : 0));
-        return (int)$r;
+        if ($r === '') {
+            return (int)$dft !== 0 ? 1 : 0;
+        }
+        return (int)$r !== 0 ? 1 : 0;
     }
 
     /**

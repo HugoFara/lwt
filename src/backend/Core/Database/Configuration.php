@@ -87,7 +87,7 @@ class Configuration
                 You can refer to the documentation:
                 https://hugofara.github.io/lwt/docs/install.html
                 [Error Code: ' . mysqli_connect_errno() .
-                ' / Error Message: ' . mysqli_connect_error() . ']'
+                ' / Error Message: ' . (mysqli_connect_error() ?? 'Unknown error') . ']'
             );
         }
 
@@ -128,7 +128,7 @@ class Configuration
                     You can refer to the documentation:
                     https://hugofara.github.io/lwt/docs/install.html
                     [Error Code: ' . mysqli_connect_errno() .
-                    ' / Error Message: ' . mysqli_connect_error() . ']'
+                    ' / Error Message: ' . (mysqli_connect_error() ?? 'Unknown error') . ']'
                 );
             }
             $result = mysqli_query(
@@ -156,7 +156,7 @@ class Configuration
                 You can refer to the documentation:
                 https://hugofara.github.io/lwt/docs/install.html
                 [Error Code: ' . mysqli_connect_errno() .
-                ' / Error Message: ' . mysqli_connect_error() . ']'
+                ' / Error Message: ' . (mysqli_connect_error() ?? 'Unknown error') . ']'
             );
         }
 

@@ -450,7 +450,7 @@ class QueryBuilder
 
             if (in_array($where['operator'], ['IN', 'NOT IN'])) {
                 $values = array_map(
-                    fn($v) => $this->quoteValue($v),
+                    fn(mixed $v): string => $this->quoteValue($v),
                     $where['value']
                 );
                 $sql .= $where['column'] . ' ' . $where['operator'] . ' (' . implode(', ', $values) . ')';
