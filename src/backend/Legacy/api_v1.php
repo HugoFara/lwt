@@ -4,8 +4,8 @@ namespace Lwt\Ajax;
 
 require_once 'Core/session_utility.php';
 
-use \Lwt\Database\Escaping;
-use \Lwt\Database\Settings;
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
 require_once 'Core/simterms.php';
 require_once __DIR__ . '/test_test.php';
 require_once 'Core/Language/langdefs.php';
@@ -456,7 +456,7 @@ function imported_terms_list($last_update, $currentpage, $recno): array
 
 namespace Lwt\Ajax\Improved_Text;
 
-use \Lwt\Database\Settings;
+use Lwt\Database\Settings;
 
 /**
  * Make the translations choices for a term.
@@ -816,7 +816,7 @@ function edit_term_form($textid): string
 
 namespace Lwt\Ajax\Feed;
 
-use \Lwt\Database\Settings;
+use Lwt\Database\Settings;
 
 /**
  * Get the list of feeds.

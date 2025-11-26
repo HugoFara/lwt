@@ -16,8 +16,8 @@
 
 namespace Lwt\Controllers;
 
-use \Lwt\Database\Settings;
-use \Lwt\Database\Maintenance;
+use Lwt\Database\Settings;
+use Lwt\Database\Maintenance;
 
 /**
  * Controller for managing tags (both term tags and text tags).

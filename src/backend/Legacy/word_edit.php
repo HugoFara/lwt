@@ -27,8 +27,8 @@ require_once 'Core/session_utility.php';
 require_once 'Core/simterms.php';
 require_once 'Core/Language/langdefs.php';
 
-use \Lwt\Database\Escaping;
-use \Lwt\Database\Settings;
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
 
 /**
  * Insert a new word to the database

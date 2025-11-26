@@ -21,10 +21,10 @@ namespace Lwt\Interface\Check_Text;
 
 require_once 'Core/session_utility.php';
 
-use \Lwt\Database\Settings;
+use Lwt\Database\Settings;
 
-use \Lwt\Database\Escaping;
-use \Lwt\Database\TextParsing;
+use Lwt\Database\Escaping;
+use Lwt\Database\TextParsing;
 
 /**
  * Do the check text operation.

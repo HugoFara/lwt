@@ -21,9 +21,9 @@ namespace Lwt\Interface\New_Word;
 require_once 'Core/session_utility.php';
 require_once 'Core/simterms.php';
 
-use \Lwt\Database\Escaping;
-use \Lwt\Database\Settings;
-use \Lwt\Database\Maintenance;
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+use Lwt\Database\Maintenance;
 
 // INSERT
 

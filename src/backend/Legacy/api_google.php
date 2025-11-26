@@ -24,8 +24,8 @@ require_once 'Core/Integration/google_time_token.php' ;
 require_once 'Core/Entity/GoogleTranslate.php';
 
 use Lwt\Classes\GoogleTranslate as GoogleTranslate;
-use \Lwt\Database\Escaping;
-use \Lwt\Database\Settings;
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
 
 use function Lwt\Includes\getGoogleTimeToken;
 

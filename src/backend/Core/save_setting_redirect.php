@@ -19,7 +19,7 @@ namespace SaveSetting;
 
 require_once __DIR__ . '/session_utility.php';
 
-use \Lwt\Database\Settings;
+use Lwt\Database\Settings;
 
 /**
  * Return the parameters from the URL.

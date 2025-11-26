@@ -4,8 +4,8 @@ namespace Lwt\Interface\Edit_Feeds;
 
 require_once 'Core/session_utility.php';
 
-use \Lwt\Database\Settings;
-use \Lwt\Database\Validation;
+use Lwt\Database\Settings;
+use Lwt\Database\Validation;
 
 $currentlang = Validation::language((string) processDBParam("filterlang", 'currentlanguage', '', false));
 $currentsort = (int) processDBParam("sort", 'currentmanagefeedssort', '2', true);

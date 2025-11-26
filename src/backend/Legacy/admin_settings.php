@@ -20,7 +20,7 @@ namespace Lwt\Interface\Settings;
 
 require_once 'Core/session_utility.php';
 
-use \Lwt\Database\Settings;
+use Lwt\Database\Settings;
 
 if (isset($_REQUEST['op'])) {
     if ($_REQUEST['op'] == 'Save') {

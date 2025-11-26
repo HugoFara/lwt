@@ -19,10 +19,10 @@ namespace Lwt\Interface\Do_Feeds;
 
 require_once 'Core/session_utility.php';
 
-use \Lwt\Database\Validation;
-use \Lwt\Database\Settings;
-use \Lwt\Database\Maintenance;
-use \Lwt\Database\TextParsing;
+use Lwt\Database\Validation;
+use Lwt\Database\Settings;
+use Lwt\Database\Maintenance;
+use Lwt\Database\TextParsing;
 
 
 /**
