@@ -642,39 +642,41 @@ declare global {
 
 - Update `composer.json` to use Vite build
 - Remove legacy PHP-based JS/CSS minification
-- Add development workflow documentation
+- Consolidate all frontend builds in npm
 
 **Completed Tasks:**
 
-1. ✅ Simplified composer scripts:
-   - `composer build` - Alias for `npm run build`
-   - `composer build:themes` - Regenerate theme CSS only
+1. ✅ Created Node.js theme builder (`scripts/build-themes.js`):
+   - Minifies CSS files in themes
+   - Copies image/asset files as-is
+   - Pure JavaScript, no PHP dependencies
 
-2. ✅ Cleaned up `src/tools/minifier.php`:
-   - Removed all JS minification code
-   - Removed CSS minification code
-   - Now only handles theme CSS regeneration
+2. ✅ Removed PHP minification entirely:
+   - Deleted `src/tools/minifier.php`
+   - Removed `matthiasmullie/minify` from composer.json
 
-3. ✅ Updated `CLAUDE.md` documentation:
-   - Simplified asset building commands
-   - Updated file structure with Vite directories
-   - TypeScript module documentation
-   - Frontend development workflow
+3. ✅ Updated npm scripts:
+   - `npm run build` - Vite JS/CSS bundles
+   - `npm run build:themes` - Theme CSS minification
+   - `npm run build:all` - Complete build (Vite + themes)
+
+4. ✅ Updated `CLAUDE.md` documentation
 
 **Build Commands:**
 
 ```bash
-npm run build                    # Build Vite JS/CSS bundles (production)
+npm run build                    # Build Vite JS/CSS bundles
+npm run build:themes             # Build theme CSS files
+npm run build:all                # Build everything (Vite + themes)
 npm run dev                      # Start Vite dev server with HMR
 npm run typecheck                # Run TypeScript type checking
-composer build                   # Alias for npm run build
-composer build:themes            # Regenerate theme CSS files only
+composer build                   # Alias for npm run build:all
 ```
 
 **Testing Results:**
 
-- ✅ `npm run build` produces production bundles
-- ✅ Legacy PHP minifier removed
+- ✅ `npm run build:all` produces all production assets
+- ✅ PHP minifier completely removed
 - ✅ All documentation updated
 
 > **Note:** jQuery removal was originally planned for this phase. Since we're keeping jQuery 1.12.4 from npm for backward compatibility, this phase focused on build pipeline integration instead. jQuery removal can be considered as a future enhancement.
@@ -2692,6 +2694,7 @@ export default {
 | 3.0 | 2025-11-26 | Claude Code | Phase 1 complete: All JS files migrated to TypeScript, type errors fixed, ES modules working |
 | 4.0 | 2025-11-26 | Claude Code | Phase 2 complete: Build pipeline integrated, composer.json updated, documentation updated |
 | 4.1 | 2025-11-26 | Claude Code | Removed legacy PHP minification, simplified to Vite-only build |
+| 4.2 | 2025-11-26 | Claude Code | Moved theme building to npm, removed matthiasmullie/minify dependency |
 
 ---
 

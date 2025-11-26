@@ -63,20 +63,21 @@ php ./vendor/bin/squizlabs/phpcbf.phar [file]  # Auto-fix code style
 ### Asset Building
 
 ```bash
-npm run build                    # Build Vite JS/CSS bundles (production)
+npm run build                    # Build Vite JS/CSS bundles
+npm run build:themes             # Build theme CSS files
+npm run build:all                # Build everything (Vite + themes)
 npm run dev                      # Start Vite dev server with HMR
 npm run typecheck                # Run TypeScript type checking
-composer build                   # Alias for npm run build
-composer build:themes            # Regenerate theme CSS files only
+composer build                   # Alias for npm run build:all
 ```
 
 **Frontend Development Workflow:**
 
 1. Run `npm run dev` for development with Hot Module Replacement
 2. Run `npm run typecheck` to check TypeScript errors
-3. Run `npm run build` to build production Vite bundles
+3. Run `npm run build:all` (or `composer build`) for production build
 
-**Note:** All JavaScript and CSS is now built with Vite. TypeScript source files are in `src/frontend/js/*.ts`.
+**Note:** All frontend assets are built with npm/Node.js. TypeScript source files are in `src/frontend/js/*.ts`.
 
 ### Documentation Generation
 
@@ -236,7 +237,7 @@ PHP code is spread across root files (user-facing pages) and `src/backend/Core/`
 1. Create folder `src/frontend/themes/your-theme/`
 2. Add CSS files (don't need all files from `src/frontend/css/`, missing files fall back to defaults)
 3. Reference images: `../../../assets/css/images/file.png` (for shared images) or `./file.png` (theme-specific)
-4. Run `composer build:themes` to regenerate theme CSS files
+4. Run `npm run build:themes` to regenerate theme CSS files
 
 ### Writing Tests
 

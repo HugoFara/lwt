@@ -2,83 +2,103 @@
 
 This guide is mainly aimed at developers, but it can give useful insights on how LWT is structured, which could help with debugging. The first step you need to take is to clone LWT from the official GitHub repository ([HugoFara/lwt](https://github.com/HugoFara/lwt)).
 
-## Get Composer
+## Prerequisites
 
-Getting [Composer](https://getcomposer.org/download/) is required if you want to edit LWT on the server side, but it will also be useful to edit JS and CSS code, so it is *highly recommended*. Composer is a lightweight dependency manager that *does not need* a server to run.
+### Composer (PHP)
 
-Once Composer is ready, go to the lwt folder (most likely ``lwt/``), and type
+Getting [Composer](https://getcomposer.org/download/) is required for PHP development (testing, static analysis). Go to the lwt folder and run:
 
 ```bash
 composer install --dev
 ```
 
-This will automatically download all the required dependencies.
+### Node.js and npm (Frontend)
+
+[Node.js](https://nodejs.org/) is required for frontend development (JavaScript/TypeScript, CSS). Install dependencies with:
+
+```bash
+npm install
+```
+
+This is required for building frontend assets, running the dev server, and type checking.
 
 ## Create and Edit Themes
 
-Themes are stored at ``src/themes/``. If you want to create a new theme, simply add it to a subfolder. You can also edit existing themes.
+Themes are stored at `src/frontend/themes/`. If you want to create a new theme, simply add it to a subfolder. You can also edit existing themes.
 
-To apply the changes you made to a theme, run
-
-```bash
-composer minify
-```
-
-This command will minify all CSS and JS.
-
-Alternatively, you can run
+To build themes, run:
 
 ```bash
-php -r "require 'src/php/minifier.php'; minifyAllCSS();"
+npm run build:themes
 ```
 
- It minifies only CSS.
-
-### Debug your theme
-
-You may not want to see your code minified, so you can use
-
-```bash
-composer no-minify
-```
-
-It has the same effect as copying the folder ``src/themes/`` to ``themes/``. WARNING: It can break your relative paths!
+This minifies CSS files and copies assets to `assets/themes/`.
 
 ### Add Images to your Themes
 
-We support a smart minifying system: relative paths are automatically adapted to point to the previous location *while minifying only*.
-As a consequence:
+You can include images in your theme:
 
-* You can use images from ``css/images/`` in your theme.
-  * If your theme is under ``src/themes/mytheme/``, you should use the path ``../../../css/theimage``.
-* You can add your own files under your custom theme folder.
-  * Hence, the path should look like ``./myimage``.
-
-When debugging your theme, files are simply copied to the ``themes/`` folder, which can break the path to files in ``css/``.
+* Use images from `assets/css/images/` with path `../../../assets/css/images/theimage.png`
+* Add your own files to your theme folder and reference with `./myimage.png`
 
 ### My theme does not contain all the Skinning Files
 
-That's not a problem at all. When LWT looks for a file that should be contained in ``src/themes/{{The Theme}}/``, it checks if the file exists. If not, it goes to ``css/`` and tries to get the same file. With this system, your themes **do not need to have the same files as ``src/css/``**.
+That's not a problem at all. When LWT looks for a file that should be contained in `assets/themes/{{The Theme}}/`, it checks if the file exists. If not, it falls back to `assets/css/` and tries to get the same file. With this system, your themes **do not need to have all the same files as `src/frontend/css/`**.
 
-## Change JS behavior
+## Frontend Development (JavaScript/TypeScript)
 
-As with themes, LWT minifies JS code for a better user experience. Please refer to the previous section for detailed explanations; this section will only go through import points.
+LWT uses TypeScript for frontend code, built with Vite.
 
-### Edit JS code
+### Source Files
 
-Clear code is stored at ``src/js/``. Once again, the *actual* code used by LWT should be at ``js/``. After you have done any modification, either run ``composer minify`` or ``php -r "require 'src/php/minifier.php'; minifyAllJS();"``.
+TypeScript source files are in `src/frontend/js/`:
 
-### Debug JS code
+* `main.ts` - Vite entry point
+* `pgm.ts` - Core utilities
+* `jq_pgm.ts` - jQuery-dependent functions
+* `text_events.ts` - Text reading interface
+* `audio_controller.ts` - Audio playback
+* And more...
 
-To copy code in a non-obfuscated form, run ``composer no-minify`` or replace the content of ``js/`` with ``src/js/``.
+### Development Workflow
+
+1. Start the dev server with Hot Module Replacement:
+
+   ```bash
+   npm run dev
+   ```
+
+2. Check TypeScript types:
+
+   ```bash
+   npm run typecheck
+   ```
+
+3. Build for production:
+
+   ```bash
+   npm run build
+   ```
+
+### Build Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server with HMR |
+| `npm run build` | Build Vite JS/CSS bundles |
+| `npm run build:themes` | Build theme CSS files |
+| `npm run build:all` | Build everything (Vite + themes) |
+| `npm run typecheck` | Run TypeScript type checking |
+| `composer build` | Alias for `npm run build:all` |
 
 ## Edit PHP code
 
-The PHP codebase is not yet well structured, but here is a general organization:
+The PHP codebase structure:
 
-* Pages rendered to the client are under the root folder (``do_text.php``, ``do_test.php``, etc...)
-* Files that should not be rendered directly are under the ``inc/`` ("include") folder.
-* Other files useful for *development only* are under ``src/php/``.
+* `index.php` - Front controller entry point
+* `src/backend/Controllers/` - MVC Controllers
+* `src/backend/Core/` - Core modules (database, utilities, AJAX handlers)
+* `src/backend/Legacy/` - Legacy PHP files being migrated
 
 ### Testing your Code
 
@@ -124,11 +144,12 @@ Starting from 2.9.0-fork, LWT provides a RESTful API. The main handler for the A
 You can find a more exhaustive API documentation at [api.md](./api.md).
 
 If you plan to develop the API, please follow the RESTful standards.
-To debug:
 
-1. Install Node and NPM.
-2. Run `npm install` in the main LWT folder.
-3. Run `npm test` to test the API.
+To test the API:
+
+```bash
+npm test
+```
 
 ## Improving Documentation
 
@@ -169,13 +190,14 @@ This section is mainly intended for the maintainers, but feel free to take a pea
 The steps to publish a new version are:
 
 1. In the [CHANGELOG](./CHANGELOG.md), add the latest release number and date.
-2. In `inc/kernel_utility.php`, update `LWT_APP_VERSION` and `LWT_RELEASE_DATE`.
+2. In `src/backend/Core/kernel_utility.php`, update `LWT_APP_VERSION` and `LWT_RELEASE_DATE`.
 3. Update `PROJECT_NUMBER` in `Doxyfile` to the latest release number.
-4. Regenerate documentation with `composer doc`.
-5. Commit your changes, `git commit -m "Regenerates documentation for release []."`
-6. Add a version tag with annotation `git tag -a [release number]` and push the changes.
-7. If all the GitHub actions are successfull, write a new release on GitHub linking to the previously created tag.
-8. The new version is live!
+4. Build frontend assets with `npm run build:all`.
+5. Regenerate documentation with `composer doc`.
+6. Commit your changes, `git commit -m "Regenerates documentation for release []."`
+7. Add a version tag with annotation `git tag -a [release number]` and push the changes.
+8. If all the GitHub actions are successful, write a new release on GitHub linking to the previously created tag.
+9. The new version is live!
 
 ## Other Ways of Contribution
 
