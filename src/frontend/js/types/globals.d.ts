@@ -14,19 +14,23 @@ export interface WordStatus {
 
 export interface LwtLanguage {
   id: number;
+  name?: string;
+  abbreviation?: string;
   dict_link1: string;
   dict_link2: string;
   translator_link: string;
   delimiter: string;
-  word_parsing: number;
+  word_parsing: number | string;
   rtl: boolean;
   ttsVoiceApi: string;
+  reading_mode?: 'direct' | 'internal' | 'external';
+  voiceapi?: string;
 }
 
 export interface LwtText {
   id: number;
   reading_position: number;
-  annotations: number;
+  annotations: Record<string, [unknown, string, string]> | number;
 }
 
 export interface LwtWord {
@@ -42,6 +46,7 @@ export interface LwtSettings {
   jQuery_tooltip: boolean;
   hts: number;
   word_status_filter: string;
+  annotations_mode?: number;
 }
 
 export interface LwtData {
@@ -52,16 +57,31 @@ export interface LwtData {
   settings: LwtSettings;
 }
 
+export interface WordCounts {
+  expr: Record<string, number>;
+  expru: Record<string, number>;
+  total: Record<string, number>;
+  totalu: Record<string, number>;
+  stat: Record<string, Record<string, number>>;
+  statu: Record<string, Record<string, number>>;
+}
+
 declare global {
   interface Window {
     STATUSES: Record<string, WordStatus>;
     TAGS: Record<string, string>;
     TEXTTAGS: Record<string, string>;
     LWT_DATA: LwtData;
+    WORDCOUNTS: WordCounts;
+    SUW: number;
+    SHOWUNIQUE: number;
   }
 
   const STATUSES: Record<string, WordStatus>;
   const TAGS: Record<string, string>;
   const TEXTTAGS: Record<string, string>;
   const LWT_DATA: LwtData;
+  const WORDCOUNTS: WordCounts;
+  let SUW: number;
+  const SHOWUNIQUE: number;
 }

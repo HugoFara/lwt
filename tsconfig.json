@@ -8,8 +8,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowJs": true,
-    "checkJs": false,
+    "allowJs": false,
     "declaration": false,
     "baseUrl": ".",
     "paths": {

@@ -9,54 +9,73 @@
  * @since   2.10.0-fork This file was refactored in a single object, use it instead
  */
 
+// Type for tagit UI object
+interface TagItUI {
+  duringInitialization?: boolean;
+}
+
+// Type for tagit options
+interface TagItOptions {
+  afterTagAdded?: (event: unknown, ui: TagItUI) => boolean;
+  afterTagRemoved?: (event: unknown, ui: TagItUI) => boolean;
+}
+
+// Extend JQuery interface for tagit plugin
+declare global {
+  interface JQuery {
+    tagit(options: TagItOptions): JQuery;
+  }
+}
+
 /**
  * Set to 1 if a form was altered (set "dirty"),
  * ask for confirmation before leaving.
  *
  * @deprecated Since 2.10.0, use lwtFormCheck instead
  */
-let DIRTY = 0;
+export let DIRTY = 0;
 
 /**
  * Keeps track of a modified form.
  */
-const lwtFormCheck = {
+export const lwtFormCheck = {
 
   dirty: false,
 
   /**
    * Check the DIRTY status and ask before leaving.
    *
-   * @returns {string} Confirmation string
+   * @returns Confirmation string
    */
-  isDirtyMessage: function () {
+  isDirtyMessage: function (): string | undefined {
     if (lwtFormCheck.dirty) {
       return '** You have unsaved changes! **';
     }
+    return undefined;
   },
 
   /**
    * Set the DIRTY variable to 1.
    */
-  makeDirty: function () {
+  makeDirty: function (): void {
     lwtFormCheck.dirty = true;
   },
 
   /**
    * Set the DIRTY variable to 0.
    */
-  resetDirty: function () {
+  resetDirty: function (): void {
     lwtFormCheck.dirty = false;
   },
 
   /**
    * Set DIRTY to 1 if tag object changed.
    *
-   * @param {*}      _  An event, unused
-   * @param {object} ui UI object
-   * @returns {true} Always return true
+   * @param _  An event, unused
+   * @param ui UI object
+   * @returns Always return true
    */
-  tagChanged: function (_, ui) {
+  tagChanged: function (_: unknown, ui: TagItUI): boolean {
     if (!ui.duringInitialization) {
       lwtFormCheck.dirty = true;
     }
@@ -66,10 +85,8 @@ const lwtFormCheck = {
   /**
    * Call this function if you want to ask the user
    * before exiting the form.
-   *
-   * @returns {undefined}
    */
-  askBeforeExit: function () {
+  askBeforeExit: function (): void {
     $('#termtags').tagit({
       afterTagAdded: lwtFormCheck.tagChanged,
       afterTagRemoved: lwtFormCheck.tagChanged
@@ -88,18 +105,18 @@ const lwtFormCheck = {
 /**
  * Check the DIRTY status and ask before leaving.
  *
- * @returns {string} Confirmation string
+ * @returns Confirmation string
  * @deprecated Since 2.10.0, use return lwtFormCheck.isDirtyMessage instead
  */
-function askConfirmIfDirty () {
-  return lwtFormCheck.askConfirmIfDirty();
+export function askConfirmIfDirty(): string | undefined {
+  return lwtFormCheck.isDirtyMessage();
 }
 
 /**
  * Set the DIRTY variable to 1.
  * @deprecated Since 2.10.0, use return lwtFormCheck.makeDirty instead
  */
-function makeDirty () {
+export function makeDirty(): void {
   return lwtFormCheck.makeDirty();
 }
 
@@ -107,19 +124,19 @@ function makeDirty () {
  * Set the DIRTY variable to 0.
  * @deprecated Since 2.10.0, use return lwtFormCheck.resetDirty instead
  */
-function resetDirty () {
+export function resetDirty(): void {
   return lwtFormCheck.resetDirty();
 }
 
 /**
  * Set DIRTY to 1 if tag object changed.
  *
- * @param {*}      _  An event, unused
- * @param {object} ui UI object
- * @returns {true} Always return true
+ * @param _  An event, unused
+ * @param ui UI object
+ * @returns Always return true
  * @deprecated Since 2.10.0, use return lwtFormCheck.tagChanged instead
  */
-function tagChanged (_, ui) {
+export function tagChanged(_: unknown, ui: TagItUI): boolean {
   return lwtFormCheck.tagChanged(_, ui);
 }
 
@@ -127,9 +144,20 @@ function tagChanged (_, ui) {
  * Call this function if you want to ask the user
  * before exiting the form.
  *
- * @returns {undefined}
  * @deprecated Since 2.10.0, use return lwtFormCheck.askBeforeExit instead
  */
-function ask_before_exiting () {
+export function ask_before_exiting(): void {
   return lwtFormCheck.askBeforeExit();
+}
+
+// Expose globally for backward compatibility with PHP templates
+if (typeof window !== 'undefined') {
+  const w = window as unknown as Record<string, unknown>;
+  w.DIRTY = DIRTY;
+  w.lwtFormCheck = lwtFormCheck;
+  w.askConfirmIfDirty = askConfirmIfDirty;
+  w.makeDirty = makeDirty;
+  w.resetDirty = resetDirty;
+  w.tagChanged = tagChanged;
+  w.ask_before_exiting = ask_before_exiting;
 }

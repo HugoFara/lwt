@@ -1,9 +1,9 @@
 # Frontend Modernization Plan
 
 **Project:** Learning with Texts (LWT)
-**Document Version:** 2.0
+**Document Version:** 3.0
 **Last Updated:** November 26, 2025
-**Status:** Phase 0 Complete - Foundation Established
+**Status:** Phase 1 Complete - TypeScript Migration Done
 
 ---
 
@@ -30,7 +30,7 @@ This document outlines a comprehensive plan to modernize the Learning with Texts
 
 - ✅ Modernize build system (Vite) - **COMPLETE**
 - ✅ Add TypeScript for type safety - **COMPLETE**
-- Convert to ES6+ modules (incremental)
+- ✅ Convert to ES6+ modules - **COMPLETE** (all JS files migrated to TypeScript with ES modules)
 - Keep jQuery 1.12.4 from npm (minimize breaking changes during transition)
 - Improve CSS organization and theming
 - Enhance code maintainability and testability
@@ -426,7 +426,7 @@ npm run typecheck  # Run TypeScript type checking
 
 ---
 
-### Phase 1: TypeScript Migration 🔨 **NEXT PHASE**
+### Phase 1: TypeScript Migration ✅ **COMPLETE**
 
 **Goals:**
 
@@ -434,7 +434,57 @@ npm run typecheck  # Run TypeScript type checking
 - Add type safety to existing code
 - Maintain backward compatibility with global exports
 
-**Strategy:**
+**Completed Tasks:**
+
+1. ✅ Convert all JavaScript files to TypeScript:
+   - `pgm.js` → `pgm.ts` (663 lines)
+   - `jq_pgm.js` → `jq_pgm.ts` (1,435 lines)
+   - `text_events.js` → `text_events.ts` (699 lines)
+   - `audio_controller.js` → `audio_controller.ts` (125 lines)
+   - `translation_api.js` → `translation_api.ts` (183 lines)
+   - `user_interactions.js` → `user_interactions.ts` (385 lines)
+   - `overlib_interface.js` → `overlib_interface.ts`
+   - `unloadformcheck.js` → `unloadformcheck.ts`
+   - `jq_feedwizard.js` → `jq_feedwizard.ts`
+2. ✅ Fix all TypeScript errors (type safety issues with jQuery, etc.)
+3. ✅ Import all modules in `main.ts` entry point
+4. ✅ Remove old `.js` source files (TypeScript files are now the source of truth)
+5. ✅ Update `tsconfig.json` to disable `allowJs`
+6. ✅ Verify build produces working bundles
+
+**Files Modified:**
+
+```text
+src/frontend/js/
+├── main.ts                     # Entry point - imports all modules
+├── pgm.ts                      # Core utilities (migrated)
+├── jq_pgm.ts                   # jQuery functions (migrated)
+├── text_events.ts              # Text reading interactions (migrated)
+├── audio_controller.ts         # Audio playback (migrated)
+├── translation_api.ts          # Translation APIs (migrated)
+├── user_interactions.ts        # UI interactions (migrated)
+├── overlib_interface.ts        # Popup library interface (migrated)
+├── unloadformcheck.ts          # Form change tracking (migrated)
+├── jq_feedwizard.ts            # Feed wizard (migrated)
+└── types/
+    └── globals.d.ts            # Type declarations for PHP-injected globals
+```
+
+**Build Output:**
+
+- Main JS bundle: `main.[hash].js` (440 KB, 126 KB gzipped)
+- Legacy bundle: `main-legacy.[hash].js` (475 KB, 132 KB gzipped)
+- Main CSS: `main.[hash].css` (37 KB, 9 KB gzipped)
+- All functions exported to global scope for backward compatibility
+
+**Testing Results:**
+
+- ✅ `npm run typecheck` passes with no errors
+- ✅ `npm run build` produces optimized bundles
+- ✅ Legacy PHP templates can still call global functions
+- ✅ Manifest generated at `assets/.vite/manifest.json`
+
+**Strategy (for reference):**
 
 Since the Vite build system is now in place, we can incrementally migrate files:
 
@@ -2607,6 +2657,7 @@ export default {
 |---------|------|--------|---------|
 | 1.0 | 2025-11-26 | Frontend Team | Initial version |
 | 2.0 | 2025-11-26 | Claude Code | Phase 0 complete: Vite + TypeScript setup, jQuery kept from npm, PHP integration added |
+| 3.0 | 2025-11-26 | Claude Code | Phase 1 complete: All JS files migrated to TypeScript, type errors fixed, ES modules working |
 
 ---
 

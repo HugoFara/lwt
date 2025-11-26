@@ -20,6 +20,12 @@ import 'jquery-ui-dist/jquery-ui';
 import './pgm';
 import './audio_controller';
 import './translation_api';
+import './jq_pgm';
+import './text_events';
+import './user_interactions';
+import './unloadformcheck';
+import './jq_feedwizard';
+import './overlib_interface';
 
 // Expose jQuery globally for legacy scripts and plugins
 declare global {
