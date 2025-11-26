@@ -60,7 +60,7 @@ $currenttag12 = (string) processSessParam("tag12", "currentwordtag12", '', false
 $wh_lang = ($currentlang != '') ? (' and WoLgID=' . $currentlang ) : '';
 $wh_stat = '';
 if ($currentstatus != '') {
-    $wh_stat = ' and ' . makeStatusCondition('WoStatus', $currentstatus);
+    $wh_stat = ' and ' . makeStatusCondition('WoStatus', (int)$currentstatus);
 }
 $wh_query = $currentregexmode . 'like ' .
 convert_string_to_sqlsyntax(

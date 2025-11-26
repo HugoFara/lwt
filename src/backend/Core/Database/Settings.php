@@ -141,6 +141,7 @@ class Settings
         if (is_numeric($dum)) {
             return "OK: $dum rows changed";
         }
+        /** @var string $dum Error message from runsql */
         return $dum;
     }
 

@@ -117,13 +117,11 @@ function do_test_mobile_page_content($property)
 /**
  * Make the mobile test page.
  *
- * @param string $property Unnused, null by default
- *
  * @return void
  *
  * @since 2.6.0-fork Function rewrote and no longer deprecated
  */
-function do_test_mobile_page($property = null)
+function do_test_mobile_page()
 {
     $language = get_l2_language_name();
     ?>
@@ -140,10 +138,10 @@ function do_test_mobile_page($property = null)
             do_test_table();
         } else {
             $identifier = do_test_get_identifier(
-                $_REQUEST['selection'] ?? null,
+                isset($_REQUEST['selection']) ? (int)$_REQUEST['selection'] : null,
                 $_SESSION['testsql'] ?? null,
-                $_REQUEST['lang'] ?? null,
-                $_REQUEST['text'] ?? null
+                isset($_REQUEST['lang']) ? (int)$_REQUEST['lang'] : null,
+                isset($_REQUEST['text']) ? (int)$_REQUEST['text'] : null
             );
             do_test_test_content_ajax($identifier[0], $identifier[1]);
         }
@@ -177,11 +175,9 @@ onclick="hideRightFrames();">
 /**
  * Make the desktop test page
  *
- * @param string $property Unnused, null by default
- *
  * @return void
  */
-function do_test_desktop_page($property = null)
+function do_test_desktop_page()
 {
     $frame_l_width = (int)getSettingWithDefault('set-text-l-framewidth-percent');
     $language = get_l2_language_name();
@@ -199,10 +195,10 @@ function do_test_desktop_page($property = null)
             do_test_table();
         } else {
             $identifier = do_test_get_identifier(
-                $_REQUEST['selection'] ?? null,
+                isset($_REQUEST['selection']) ? (int)$_REQUEST['selection'] : null,
                 $_SESSION['testsql'] ?? null,
-                $_REQUEST['lang'] ?? null,
-                $_REQUEST['text'] ?? null
+                isset($_REQUEST['lang']) ? (int)$_REQUEST['lang'] : null,
+                isset($_REQUEST['text']) ? (int)$_REQUEST['text'] : null
             );
             do_test_test_content_ajax($identifier[0], $identifier[1]);
         }
@@ -236,15 +232,13 @@ width: <?php echo 97 - $frame_l_width; ?>%;">
 /**
  * Start the test page.
  *
- * @param string $p Unnused.
- *
  * @since 2.2.1 The $mobile parameter is no longer required.
  * @since 2.6.0 Mobile interface is back and self-set.
  * @since 2.7.0 Adds a CSS rule to auto-enlarge the body.
  *
  * @return void
  */
-function do_test_page($p)
+function do_test_page()
 {
     pagestart_nobody(
         'Test',
@@ -274,7 +268,7 @@ function do_test_page($p)
 function try_start_test($p): void
 {
     if ($p != '') {
-        do_test_page($p);
+        do_test_page();
     } else {
         header("Location: /text/edit");
         exit();

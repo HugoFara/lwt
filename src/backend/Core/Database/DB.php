@@ -64,7 +64,7 @@ class DB
      *
      * @param string $sql The SQL query to execute
      *
-     * @return \mysqli_result|bool Query result or true for non-SELECT queries
+     * @return \mysqli_result|true Query result or true for non-SELECT queries
      */
     public static function query(string $sql): \mysqli_result|bool
     {
@@ -88,9 +88,11 @@ class DB
      *
      * @param string $sql The SQL query to execute
      *
-     * @return array<string, mixed>|null The first row or null
+     * @return (float|int|null|string)[]|null The first row or null
+     *
+     * @psalm-return array<string, float|int|null|string>|null
      */
-    public static function fetchOne(string $sql): ?array
+    public static function fetchOne(string $sql): array|null
     {
         return Connection::fetchOne($sql);
     }

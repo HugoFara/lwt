@@ -158,9 +158,9 @@ abstract class BaseController
      * @param string $url        URL to redirect to
      * @param int    $statusCode HTTP status code (default: 302)
      *
-     * @return void
+     * @return never
      */
-    protected function redirect(string $url, int $statusCode = 302): void
+    protected function redirect(string $url, int $statusCode = 302)
     {
         header("Location: $url", true, $statusCode);
         exit;
@@ -246,9 +246,9 @@ abstract class BaseController
      * @param mixed $data   Data to encode as JSON
      * @param int   $status HTTP status code (default: 200)
      *
-     * @return void
+     * @return never
      */
-    protected function json(mixed $data, int $status = 200): void
+    protected function json(mixed $data, int $status = 200)
     {
         http_response_code($status);
         header('Content-Type: application/json; charset=utf-8');
@@ -261,7 +261,9 @@ abstract class BaseController
      *
      * @param string|array $marked The 'marked' request parameter value
      *
-     * @return array Array of integer IDs
+     * @return int[] Array of integer IDs
+     *
+     * @psalm-return array<int>
      */
     protected function getMarkedIds(string|array $marked): array
     {

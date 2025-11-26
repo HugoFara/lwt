@@ -26,7 +26,7 @@ require_once 'Core/session_utility.php';
  *
  * @param int $txid Text id
  *
- * @return mysqli_result|false SQL query result or false on failure.
+ * @return bool|mysqli_result SQL query result or false on failure.
  */
 function all_words_wellknown_get_words($txid): \mysqli_result|false
 {
@@ -50,7 +50,7 @@ function all_words_wellknown_get_words($txid): \mysqli_result|false
  * @param string $termlc Same as $term, but in lowercase.
  * @param int    $langid Language ID
  *
- * @return array [int, string] Number of rows edited and a javascript query.
+ * @return (int|string)[]
  *
  * @since 2.5.3-fork Do not crash when echoing an error
  * @since 2.5.3-fork Do not crash when a word is already registred to the database
@@ -112,7 +112,7 @@ function all_words_wellknown_process_word($status, $term, $termlc, $langid): arr
  * @param int $txid   Text ID
  * @param int $status New status to apply to all words.
  *
- * @return array [int, string] Number of edited words, and JavaScript query to change their display
+ * @return (int|string)[]
  *
  * @since 2.5.3-fork Use 'let' instead of 'var' in returned JS
  *

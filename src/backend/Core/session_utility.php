@@ -209,9 +209,9 @@ function getprefixes(): array
  *
  * @param string $dir Directory to search into.
  *
- * @return array[] All paths found (matching files and folders) in "paths" and folders in "folders".
+ * @return (mixed|string)[][]
  *
- * @psalm-return array{paths: array, folders: array}
+ * @psalm-return array{paths: list{0: string, 1?: mixed|string,...}, folders: list{0: string, 1?: mixed|string,...}}
  */
 function media_paths_search($dir): array
 {
@@ -254,7 +254,9 @@ function media_paths_search($dir): array
 /**
  * Return the paths for all media files.
  *
- * @return array Paths of media files, in the form array<string, string>
+ * @return ((mixed|string)[]|string)[]
+ *
+ * @psalm-return array{base_path: string, paths?: array{0: mixed|string, 1?: mixed|string,...}, folders?: array{0: mixed|string,...}, error?: 'does_not_exist'|'not_a_directory'}
  */
 function get_media_paths(): array
 {
@@ -396,7 +398,7 @@ function print_file_path($filename): void
  *
  * @return string File path if it exists, otherwise the filename
  */
-function get_file_path($filename)
+function get_file_path($filename): string
 {
     $file = getSettingWithDefault('set-theme-dir') . preg_replace('/.*\//', '', $filename);
     if (file_exists($file)) {

@@ -31,7 +31,7 @@ require_once 'Core/langdefs.php';
  *                                  $lang ID
  * @param int|null    $text         Testing text with ID $text
  *
- * @return (int|int[]|string)[] Test identifier as an array(key, value)
+ * @return (int|int[]|string)[]
  *
  * @psalm-return list{string, int|non-empty-list<int>|string}
  */
@@ -94,14 +94,11 @@ function do_test_get_test_sql($selection, $sess_testsql, $lang, $text): string
  *
  * @param int $testtype Initial test type value
  *
- * @return int Clamped $testtype
- *                     - 1: Test type is ..[L2]..
- *                     - 2: Test type is ..[L1]..
- *                     - 3: Test type is ..[..]..
- *                     - 4: Test type is [L2]
- *                     - 5: Test type is [L1]
+ * @return int Clamped $testtype - 1: Test type is ..[L2].. - 2: Test type is ..[L1].. - 3: Test type is ..[..].. - 4: Test type is [L2] - 5: Test type is [L1]
+ *
+ * @psalm-return int<1, 5>
  */
-function do_test_get_test_type($testtype)
+function do_test_get_test_type($testtype): int
 {
     if ($testtype < 1) {
         $testtype = 1;
@@ -124,10 +121,10 @@ function do_test_get_test_type($testtype)
 function get_test_sql()
 {
     return do_test_get_test_sql(
-        $_REQUEST['selection'],
-        $_SESSION['testsql'],
-        $_REQUEST['lang'],
-        $_REQUEST['text']
+        isset($_REQUEST['selection']) ? (int)$_REQUEST['selection'] : null,
+        $_SESSION['testsql'] ?? null,
+        isset($_REQUEST['lang']) ? (int)$_REQUEST['lang'] : null,
+        isset($_REQUEST['text']) ? (int)$_REQUEST['text'] : null
     );
 }
 
@@ -1037,10 +1034,10 @@ function do_test_test_javascript($count)
 function do_test_test_content()
 {
     $testsql = do_test_get_test_sql(
-        $_REQUEST['selection'],
-        $_SESSION['testsql'],
-        $_REQUEST['lang'],
-        $_REQUEST['text']
+        isset($_REQUEST['selection']) ? (int)$_REQUEST['selection'] : null,
+        $_SESSION['testsql'] ?? null,
+        isset($_REQUEST['lang']) ? (int)$_REQUEST['lang'] : null,
+        isset($_REQUEST['text']) ? (int)$_REQUEST['text'] : null
     );
     $totaltests = $_SESSION['testtotal'];
     $testtype = do_test_get_test_type((int)getreq('type'));

@@ -23,11 +23,11 @@
  * @param string     $text Text to insert
  * @param string|int $lid  Language ID
  *
- * @return (int|string)[][] Each found multi-word details
+ * @return (int|string)[][]
  *
  * @global string $tbpref Table name prefix
  *
- * @psalm-return list{0?: array{SeID: int, TxID: int, position: int, term: string},...}
+ * @psalm-return list{0?: array{SeID: int, TxID: int, position: int<min, max>, term: string},...}
  */
 function findMecabExpression($text, $lid): array
 {
@@ -193,11 +193,11 @@ function insertExpressionFromMeCab($textlc, $lid, $wid, $len, $mode): array
  * @param string     $textlc Text to insert in lower case
  * @param string|int $lid    Language ID
  *
- * @return (int|null|string)[][] Each inserted mutli-word details
+ * @return (int|null|string)[][]
  *
  * @global string $tbpref Table name prefix
  *
- * @psalm-return list{0?: array{SeID: int, SeTxID: int, position: int, term: null|string, term_display: null|string},...}
+ * @psalm-return list{0?: array{SeID: int, SeTxID: int, position: int<min, max>, term: null|string, term_display: null|string},...}
  */
 function findStandardExpression($textlc, $lid): array
 {
@@ -531,7 +531,7 @@ function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
  *
  * @global string $tbpref Table name prefix
  */
-function insertExpressions($textlc, $lid, $wid, $len, $mode): null|string
+function insertExpressions($textlc, $lid, $wid, $len, $mode): string|null
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $regexp = (string)get_first_value(

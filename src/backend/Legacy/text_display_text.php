@@ -41,10 +41,11 @@ function get_annotated_text($textid)
  *
  * @param int $textid Text ID
  *
- * @return array{0: int, 1: bool} Text size, and if this text
- * is rigth-to-left.
+ * @return (bool|int)[] Text size, and if this text is rigth-to-left.
+ *
+ * @psalm-return list{int, bool}
  */
-function get_display_impr_text_text_data($textid)
+function get_display_impr_text_text_data($textid): array
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $sql = "SELECT LgTextSize, LgRightToLeft

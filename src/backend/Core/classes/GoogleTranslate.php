@@ -136,7 +136,7 @@ namespace Lwt\Classes;
      *
      * @return string
      */
-    public static function getDomain($domain)
+    public static function getDomain($domain): string
     {
         $loc = array(
             'com.ar', 'at', 'com.au', 'be', 'com.br', 'ca', 'cat', 'ch', 'cl', 'cn',
@@ -162,12 +162,12 @@ namespace Lwt\Classes;
             array_unique(array_map("StrToLower", $array))
         );
     }
-    public function setLangFrom(string $lang): GoogleTranslate
+    public function setLangFrom(string $lang): static
     {
         $this->langFrom = $lang;
         return $this;
     }
-    public function setLangTo(string $lang): GoogleTranslate
+    public function setLangTo(string $lang): static
     {
         $this->langTo = $lang;
         return $this;
@@ -219,6 +219,11 @@ namespace Lwt\Classes;
         }
         return $output;
     }
+    /**
+     * @return false|string[]
+     *
+     * @psalm-return array<string>|false
+     */
     public function translate(string $string): array|false
     {
         return $this->lastResult = self::staticTranslate(

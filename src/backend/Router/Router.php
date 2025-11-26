@@ -81,7 +81,9 @@ class Router
     /**
      * Resolve the current request to a handler
      *
-     * @return array [handler, params] or [null, []] if not found
+     * @return (((array|string)[]|string)[]|int|mixed|string)[]
+     *
+     * @psalm-return array{type: 'handler'|'not_found'|'redirect', path?: string, url?: string, code?: 301, handler?: mixed, params?: array<array<int|string, array<int|string, mixed>|string>|string>}
      */
     public function resolve(): array
     {
@@ -241,7 +243,6 @@ class Router
 
             case 'not_found':
                 $this->handle404($resolution['path']);
-                break;
 
             default:
                 $this->handle500(
@@ -291,7 +292,6 @@ class Router
 
         if (!class_exists($controllerClass)) {
             $this->handle500("Controller not found: {$controllerClass}");
-            return;
         }
 
         $controller = new $controllerClass();
@@ -300,7 +300,6 @@ class Router
             $this->handle500(
                 "Method not found: {$controllerClass}::{$method}"
             );
-            return;
         }
 
         // Call the controller method
@@ -319,7 +318,6 @@ class Router
     {
         if (!file_exists($filePath)) {
             $this->handle500("File not found: {$filePath}");
-            return;
         }
 
         // Handle static HTML files
@@ -341,9 +339,9 @@ class Router
      *
      * @param string $path Requested path
      *
-     * @return void
+     * @return never
      */
-    private function handle404(string $path): void
+    private function handle404(string $path)
     {
         http_response_code(404);
         ?>
@@ -376,9 +374,9 @@ class Router
      *
      * @param string $message Error message
      *
-     * @return void
+     * @return never
      */
-    private function handle500(string $message): void
+    private function handle500(string $message)
     {
         http_response_code(500);
         ?>

@@ -31,7 +31,7 @@
  *
  * @global string $tbpref Table name prefix
  *
- * @return ((float|int|null|string)[]|float|int|null|string)[][] Statistics under the form of an array
+ * @return ((float|int|null|string)[]|float|int|null|string)[][]
  *
  * @psalm-return array{total: array<float|int|string, float|int|null|string>, expr: array<float|int|string, float|int|null|string>, stat: array<float|int|string, array<float|int|string, float|int|null|string>>, totalu: array<float|int|string, float|int|null|string>, expru: array<float|int|string, float|int|null|string>, statu: array<float|int|string, array<float|int|string, float|int|null|string>>}
  */

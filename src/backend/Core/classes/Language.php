@@ -99,9 +99,9 @@ class Language
     /**
      * Export word data as a JSON dictionnary.
      *
-     * @return string JSON disctionnary.
+     * @return false|string JSON disctionnary.
      */
-    public function exportJsDict()
+    public function exportJsDict(): string|false
     {
         return json_encode(
             array(

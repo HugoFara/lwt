@@ -408,7 +408,7 @@ function get_links_from_new_feed($NfSourceURI): array|false
 /**
  * @return (false|null|string)[][]|false
  *
- * @psalm-return false|list<array{title: null|string, desc: null|string, link: string, date: string, text?: false|string, audio: string}>
+ * @psalm-return false|list{0?: array{title: null|string, desc: null|string, link: string, date: string, text?: false|string, audio: string},...}
  */
 function get_links_from_rss($NfSourceURI, $NfArticleSection): array|false
 {

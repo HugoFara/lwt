@@ -70,7 +70,8 @@ class Connection
      *
      * @param string $sql The SQL query to execute
      *
-     * @return \mysqli_result|bool Query result or true for non-SELECT queries
+     * @return \mysqli_result|true Query result or true for non-SELECT queries
+     *
      * @throws \RuntimeException On query failure
      */
     public static function query(string $sql): \mysqli_result|bool
@@ -93,7 +94,9 @@ class Connection
      *
      * @param string $sql The SQL query to execute
      *
-     * @return array<int, array<string, mixed>> Array of associative arrays
+     * @return (float|int|null|string)[][]
+     *
+     * @psalm-return list{0?: array<string, float|int|null|string>,...}
      */
     public static function fetchAll(string $sql): array
     {
@@ -117,9 +120,11 @@ class Connection
      *
      * @param string $sql The SQL query to execute
      *
-     * @return array<string, mixed>|null The first row or null if no results
+     * @return (float|int|null|string)[]|null
+     *
+     * @psalm-return array<string, float|int|null|string>|null
      */
-    public static function fetchOne(string $sql): ?array
+    public static function fetchOne(string $sql): array|null
     {
         $result = self::query($sql);
 

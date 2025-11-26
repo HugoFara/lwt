@@ -760,7 +760,7 @@ function edit_texts_change($txid)
     $res = do_mysqli_query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
         $text = new Text();
-        $text->load_from_db_record($record);
+        $text->loadFromDbRecord($record);
         edit_texts_form($text, (bool)$record['annot_exists']);
     }
     mysqli_free_result($res);
@@ -923,11 +923,11 @@ function edit_texts_other_pages($recno)
 /**
  * Display the content of a table row for text edition.
  *
- * @param array                                         $txrecord
- *                                                                   Various information about the text should contain 'TxID' at least.
- * @param string                                        $currentlang
- *                                                                   Current language ID
- * @param array{int<0, 5>|98|99, array{string, string}} $statuses
+ * @param array                                            $txrecord
+ *                                                                      Various information about the text should contain 'TxID' at least.
+ * @param string                                           $currentlang
+ *                                                                      Current language ID
+ * @param array<int, array{abbr: string, name: string}> $statuses
  * List of statuses WITH unknown words (status 0)
  *
  * @return void

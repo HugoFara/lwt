@@ -66,9 +66,9 @@ function regenGoogleTimeToken(): array|null
  *
  * @return int[]|null
  *
- * @psalm-return array{0: int, 1: int}|null
+ * @psalm-return list{int, int}|null
  */
-function getGoogleTimeToken(): ?array
+function getGoogleTimeToken(): array|null
 {
     $val = (string) get_first_value(
         'SELECT LWTValue AS value from _lwtgeneral WHERE LWTKey = "GoogleTimeToken"'

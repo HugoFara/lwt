@@ -247,8 +247,10 @@ class EnvLoader
     {
         // Clear environment variables that were set
         foreach (array_keys(self::$env) as $key) {
-            unset($_ENV[$key]);
-            putenv($key);
+            if (is_string($key) && $key !== '') {
+                unset($_ENV[$key]);
+                putenv($key);
+            }
         }
 
         self::$env = [];

@@ -65,7 +65,7 @@ function language_id_from_code($code)
  *
  * @return string HTML-formatted string.
  */
-function tts_language_options()
+function tts_language_options(): string
 {
     $output = '';
     foreach (get_languages() as $language => $language_id) {

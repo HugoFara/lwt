@@ -28,10 +28,11 @@
 require_once 'Core/kernel_utility.php';
 require_once '../wp-load.php' ;
 
-if (is_user_logged_in()) {
+if (\is_user_logged_in()) {
+    /** @psalm-suppress InvalidGlobal */
     global $current_user;
 
-    get_currentuserinfo();
+    \get_currentuserinfo();
     $wpuser = $current_user->ID;
 
     $err = @session_start();

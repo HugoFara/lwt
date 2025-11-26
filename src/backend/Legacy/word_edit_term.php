@@ -29,13 +29,7 @@ if ($translation_raw == '') {
 
 // UPDATE
 
-$lang = null;
 $message = '';
-$rom = null;
-$sentence = null;
-$status = null;
-$term = null;
-$transl = null;
 $wid = null;
 if (isset($_REQUEST['op'])) {
     $textlc = trim(prepare_textdata($_REQUEST["WoTextLC"]));

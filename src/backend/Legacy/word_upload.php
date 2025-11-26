@@ -509,7 +509,7 @@ function upload_words_handle_multiwords($lang, $last_update): void
  *
  * @global string $tbpref Database table prefix
  */
-function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): float|int|string|null
+function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): string|int|null
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $last_update = (string) get_first_value(
@@ -927,11 +927,11 @@ function upload_words_import(): void
     $removeSpaces = $record["LgRemoveSpaces"];
 
     $col = array();
-    $col[1] = $_REQUEST["Col1"];
-    $col[2] = $_REQUEST["Col2"];
-    $col[3] = $_REQUEST["Col3"];
-    $col[4] = $_REQUEST["Col4"];
-    $col[5] = $_REQUEST["Col5"];
+    $col[1] = is_string($_REQUEST["Col1"]) ? $_REQUEST["Col1"] : '';
+    $col[2] = is_string($_REQUEST["Col2"]) ? $_REQUEST["Col2"] : '';
+    $col[3] = is_string($_REQUEST["Col3"]) ? $_REQUEST["Col3"] : '';
+    $col[4] = is_string($_REQUEST["Col4"]) ? $_REQUEST["Col4"] : '';
+    $col[5] = is_string($_REQUEST["Col5"]) ? $_REQUEST["Col5"] : '';
     $col = array_unique($col);
 
     $fields = array("txt" => 0,"tr" => 0,"ro" => 0,"se" => 0,"tl" => 0);

@@ -44,14 +44,13 @@ function get_text_id()
  * Echo the page content for the mobile version of do_text.
  *
  * @param int   $textid Text ID
- * @param mixed $audio  Audio URI, unnused, null by default
  *
  * @return void
  *
  * @since 2.2.1 It also calls do_frameset_mobile_css and do_frameset_mobile_js
  * @since 2.6.0-fork Rewrote to match the desktop version (between 2.2.1 and 2.6.0)
  */
-function do_text_mobile_content($textid, $audio = null)
+function do_text_mobile_content($textid)
 {
     ?>
 <div style="width: 95%; height: 100%;">
@@ -86,11 +85,10 @@ onclick="hideRightFrames();">
  * Echo the page content for the desktop version of do_text.
  *
  * @param int   $textid Text ID
- * @param mixed $audio  Audio URI, unnused, null by default
  *
  * @return void
  */
-function do_text_desktop_content($textid, $audio = null)
+function do_text_desktop_content($textid)
 {
     $frame_l_width = (int)getSettingWithDefault('set-text-l-framewidth-percent');
     ?>

@@ -49,9 +49,9 @@ function do_set_test_status_html($status, $oldstatus, $newscore, $oldscore)
  *
  * @param int $stchange -1, 0, or 1 if status is rising or not
  *
- * @return int[] Tests data
+ * @return int[]
  *
- * @psalm-return array{total: int, wrong: int, correct: int, nottested: int}
+ * @psalm-return array{total: int, wrong: int, correct: int, nottested: int<min, max>}
  */
 function set_test_status_change_progress($stchange): array
 {

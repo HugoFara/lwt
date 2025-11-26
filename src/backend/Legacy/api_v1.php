@@ -426,9 +426,9 @@ function select_imported_terms($last_update, $offset, $max_terms): array
  * @param int    $currentpage Current page number
  * @param int    $recno       Number of imported terms
  *
- * @return ((int|mixed)[]|mixed)[]
+ * @return ((float|int|null|string)[]|int)[][]
  *
- * @psalm-return array{navigation: array{current_page: mixed, total_pages: int}, terms: mixed}
+ * @psalm-return array{navigation: array{current_page: int, total_pages: int}, terms: list<list<float|int|null|string>>}
  */
 function imported_terms_list($last_update, $currentpage, $recno): array
 {
@@ -574,9 +574,9 @@ function get_translations($word_id): array
  * @param string $wordlc Term in lower case
  * @param int    $textid Text ID
  *
- * @return (array|int|null|string)[] Return the useful data to edit a term annotation on a specific text.
+ * @return (int|null|string|string[])[]
  *
- * @psalm-return array{term_lc?: string, wid?: int|null, trans?: string, ann_index?: int<0, max>, term_ord?: int, translations?: array, lang_id?: int, error?: 'Annotation line is ill-formatted'|'Annotation not found'}
+ * @psalm-return array{term_lc?: string, wid?: int|null, trans?: string, ann_index?: int<0, max>, term_ord?: int, translations?: list<non-empty-string>, lang_id?: int, error?: 'Annotation line is ill-formatted'|'Annotation not found'}
  */
 function get_term_translations($wordlc, $textid): array
 {
@@ -912,7 +912,9 @@ function get_feed_result($imported_feed, $nif, $nfname, $nfid, $nfoptions): stri
  * @param string $nfsourceuri News feed source
  * @param string $nfoptions   News feed options
  *
- * @return array Result with success or error message
+ * @return (int|string|true)[]
+ *
+ * @psalm-return array{success?: true, message?: string, imported?: int, duplicates?: int, error?: string}
  */
 function load_feed($nfname, $nfid, $nfsourceuri, $nfoptions): array
 {
@@ -1055,13 +1057,11 @@ function endpoint_exits($method, $requestUri)
 /**
  * Return the API version.
  *
- * @param array $get_req GET request, unnused
- *
  * @return string[] JSON-encoded version
  *
  * @psalm-return array{version: '0.1.1', release_date: '2023-12-29'}
  */
-function rest_api_version($get_req): array
+function rest_api_version(): array
 {
     return array(
         "version"      => LWT_API_VERSION,
@@ -1072,11 +1072,9 @@ function rest_api_version($get_req): array
 /**
  * List the audio and video files in the media folder.
  *
- * @param array $get_req Unnused
- *
  * @return string[] Path of media files
  */
-function media_files($get_req)
+function media_files()
 {
     return get_media_paths();
 }
@@ -1084,6 +1082,10 @@ function media_files($get_req)
 
 /**
  * The way text should be read
+ *
+ * @return (float|int|mixed|null|string)[]
+ *
+ * @psalm-return array{name: float|int|null|string, voiceapi: float|int|null|string, word_parsing: float|int|null|string, abbreviation: mixed, reading_mode: 'direct'|'external'|'internal'}
  */
 function readingConfiguration($get_req): array
 {
@@ -1142,9 +1144,9 @@ function get_phonetic_reading($get_req): array
  * @param string $wordregex Word selection regular expression
  * @param int    $testtype  Test type
  *
- * @return (int|mixed|string)[] Next word formatted as an array.
+ * @return (float|int|null|string)[]
  *
- * @psalm-return array{word_id: 0|mixed, solution?: string, word_text: string, group: string}
+ * @psalm-return array{word_id: float|int|null|string, solution?: string, word_text: string, group: string}
  */
 function get_word_test_ajax($testsql, $word_mode, $lgid, $wordregex, $testtype): array
 {
@@ -1197,7 +1199,9 @@ function get_word_test_ajax($testsql, $word_mode, $lgid, $wordregex, $testtype):
  *                       lg_id: int, word_regex: string, type: int
  *                       }
  *
- * @return array Next word formatted as JSON.
+ * @return (float|int|null|string)[]
+ *
+ * @psalm-return array{word_id: float|int|null|string, solution?: string, word_text: string, group: string}
  */
 function word_test_ajax($get_req): array
 {
@@ -1314,9 +1318,11 @@ function similar_terms($get_req): array
  *
  * @param array $get_req Get request with fields "last_update", "page" and "count".
  *
- * @return array
+ * @return ((float|int|null|string)[]|int)[][]
+ *
+ * @psalm-return array{navigation: array{current_page: int, total_pages: int}, terms: list<list<float|int|null|string>>}
  */
-function imported_terms($get_req)
+function imported_terms($get_req): array
 {
     return imported_terms_list(
         $get_req["last_update"],
@@ -1331,6 +1337,10 @@ function imported_terms($get_req)
  * Translations for a term to choose an annotation.
  *
  * @param array $get_req Get request with fields "text_id" and "term_lc".
+ *
+ * @return (int|null|string|string[])[]
+ *
+ * @psalm-return array{term_lc?: string, wid?: int|null, trans?: string, ann_index?: int<0, max>, term_ord?: int, translations?: list<non-empty-string>, lang_id?: int, error?: 'Annotation line is ill-formatted'|'Annotation not found'}
  */
 function term_translations($get_req): array
 {
@@ -1348,7 +1358,7 @@ function term_translations($get_req): array
  * @param bool  $action_exists Set to true if the action is recognized but not
  *                             the action_type
  *
- * @return array JSON-encoded error message.
+ * @return string[]
  *
  * @psalm-return array{error: string}
  */
@@ -1392,9 +1402,9 @@ function save_setting($post_req): array
  *
  * @param array $post_req Post request with keys "text_id", "elem" and "data".
  *
- * @return string[] JSON-encoded result
+ * @return string[]
  *
- * @psalm-return array{save_impr_text?: string, error?: string}
+ * @psalm-return array{save_impr_text?: 'OK', error?: string}
  */
 function set_annotation($post_req): array
 {
@@ -1456,7 +1466,7 @@ function set_text_position($post_req): array
  *
  * @param array $post_req Array with the fields "term_id" (int) and "status_up" (1 or 0)
  *
- * @return string[] Status message
+ * @return string[]
  *
  * @psalm-return array{increment?: string, error?: ''}
  */
@@ -1503,7 +1513,7 @@ function set_term_status($post_req): array
  *
  * @param array $post_req Array with the fields "term_id" (int) and "translation".
  *
- * @return string[] Term in lower case, or "" if term does not exist
+ * @return string[]
  *
  * @psalm-return array{update?: string, error?: string}
  */
@@ -1527,9 +1537,9 @@ function update_translation($post_req): array
  *
  * @param array $post_req Array with the fields "term_text", "lg_id" (int) and "translation".
  *
- * @return (int|string)[] Error message in case of failure, lowercase term otherwise
+ * @return (int|string)[]
  *
- * @psalm-return array{error?: string, add?: string, term_id?: mixed, term_lc?: mixed}
+ * @psalm-return array{error?: string, add?: string, term_id?: int, term_lc?: string}
  */
 function add_translation($post_req): array
 {
@@ -1558,7 +1568,7 @@ function add_translation($post_req): array
  * @param bool  $action_exists Set to true if the action is recognized but not
  *                             the action_type
  *
- * @return string[] JSON-encoded error message
+ * @return string[]
  *
  * @psalm-return array{error: string}
  */
@@ -1581,9 +1591,9 @@ function unknown_post_action_type($post_req, $action_exists = false): array
  * @param string     $requestURI The URI being requested.
  * @param array|null $post_param Post arguments, usually equal to $_POST
  *
- * @return never
+ * @return void
  */
-function request_handler($method, $requestUri, $post_param)
+function request_handler($method, $requestUri, $post_param): void
 {
     // Extract requested endpoint from URI
     $req_endpoint = endpoint_exits($method, $requestUri);
@@ -1621,7 +1631,7 @@ function request_handler($method, $requestUri, $post_param)
                 }
                 break;
             case 'media-files':
-                $answer = media_files($req_param);
+                $answer = media_files();
                 send_response(200, $answer);
                 break;
             case 'phonetic-reading':
@@ -1710,7 +1720,7 @@ function request_handler($method, $requestUri, $post_param)
                 }
                 break;
             case 'version':
-                $answer = rest_api_version($req_param);
+                $answer = rest_api_version();
                 send_response(200, $answer);
                 break;
                 // Add more GET handlers for other endpoints

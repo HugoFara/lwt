@@ -128,7 +128,7 @@ function do_mysqli_query($sql)
  * @param string $m         Success phrase to prepend to the number of affected rows
  * @param bool   $sqlerrdie To die on errors (default = TRUE)
  *
- * @return string Error message if failure, or the number of affected rows
+ * @return numeric-string Error message if failure, or the number of affected rows
  *
  * @deprecated 3.0.0 Use DB::execute() for new code
  */
@@ -862,9 +862,11 @@ function connect_to_database($server, $userid, $passwd, $dbname, $socket = "")
  *
  * @param \mysqli $dbconnection Database connection
  *
- * @return array Table prefix, and if table prefix should be fixed
+ * @return (bool|string)[]
+ *
+ * @psalm-return list{string, bool}
  */
-function getDatabasePrefix($dbconnection)
+function getDatabasePrefix($dbconnection): array
 {
     return Configuration::getPrefix($dbconnection);
 }
@@ -919,14 +921,11 @@ LWT_Globals::setDbConnection($DBCONNECTION);
  * @deprecated 3.0.0 Use LWT_Globals::getTablePrefix() instead
  * @see        LWT_Globals::getTablePrefix()
  */
-$tbpref = null;
 /**
- * @var int $fixed_tbpref Database prefix is fixed (1) or not (0)
  *
  * @deprecated 3.0.0 Use LWT_Globals::isTablePrefixFixed() instead
  * @see        LWT_Globals::isTablePrefixFixed()
  */
-$fixed_tbpref = null;
 list($tbpref, $bool_fixed_tbpref) = getDatabasePrefix($DBCONNECTION);
 
 // Register with LWT_Globals for new code
@@ -934,7 +933,6 @@ LWT_Globals::setTablePrefix($tbpref, (bool) $bool_fixed_tbpref);
 LWT_Globals::setDatabaseName($DB_NAME);
 
 // Convert to int, will be removed in LWT 3.0.0
-$fixed_tbpref = (int) $bool_fixed_tbpref;
 
 // check/update db
 check_update_db();

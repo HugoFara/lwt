@@ -23,10 +23,7 @@ require_once 'Core/session_utility.php';
 /**
  * Return a lot of different server state variables.
  *
- * @return (false|float|string)[] {"db_prefix": string, "db_size": float, "server_soft": string[],
- * "apache": string, "php": string, "mysql": string}
- * Table prefix, database size, server software, apache version, PHP version, MySQL
- * version
+ * @return (false|float|string)[]
  *
  * @global string $tbpref Database table prefix
  * @global string $dbname Database name

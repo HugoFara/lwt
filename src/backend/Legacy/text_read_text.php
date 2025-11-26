@@ -296,7 +296,7 @@ function wordProcessor($record, $showAll, $currcharcount): int
     $hidetag = '';
 
     if ($cnt < $record['Ti2Order']) {
-        echo '<span id="ID-' . $cnt++ . '-1"></span>';
+        echo '<span id="ID-' . $cnt . '-1"></span>';
     }
     // The current word is not a term
     if ($record['TiIsNotWord'] != 0) {

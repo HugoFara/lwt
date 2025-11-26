@@ -106,6 +106,8 @@ function getLanguageCode($lg_id, $languages_table)
  * @param string|int|null $lid Language ID
  *
  * @return string ' dir="rtl" '|''
+ *
+ * @psalm-return ' dir="rtl" '|''
  */
 function getScriptDirectionTag($lid): string
 {

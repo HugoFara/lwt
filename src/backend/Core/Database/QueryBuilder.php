@@ -121,10 +121,8 @@ class QueryBuilder
      * Set the columns to select.
      *
      * @param array<int, string>|string $columns Columns to select
-     *
-     * @return self
      */
-    public function select(array|string $columns = ['*']): self
+    public function select(array|string $columns = ['*']): static
     {
         $this->columns = is_array($columns) ? $columns : [$columns];
         return $this;
@@ -132,10 +130,8 @@ class QueryBuilder
 
     /**
      * Add DISTINCT to the query.
-     *
-     * @return self
      */
-    public function distinct(): self
+    public function distinct(): static
     {
         $this->distinct = true;
         return $this;
@@ -148,15 +144,13 @@ class QueryBuilder
      * @param mixed  $operator The comparison operator or value (if using 2-arg form)
      * @param mixed  $value    The value to compare against
      * @param string $boolean  The boolean connector (AND/OR)
-     *
-     * @return self
      */
     public function where(
         string $column,
         mixed $operator = '=',
         mixed $value = null,
         string $boolean = 'AND'
-    ): self {
+    ): static {
         // Handle simple equality: where('col', 'value')
         if ($value === null && !in_array(strtoupper((string)$operator), ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'])) {
             $value = $operator;
@@ -179,10 +173,8 @@ class QueryBuilder
      * @param string $column   The column name
      * @param mixed  $operator The comparison operator or value (if using 2-arg form)
      * @param mixed  $value    The value to compare against
-     *
-     * @return self
      */
-    public function orWhere(string $column, mixed $operator = '=', mixed $value = null): self
+    public function orWhere(string $column, mixed $operator = '=', mixed $value = null): static
     {
         return $this->where($column, $operator, $value, 'OR');
     }
@@ -194,15 +186,13 @@ class QueryBuilder
      * @param array<mixed> $values  The values to check against
      * @param string       $boolean The boolean connector
      * @param bool         $not     Whether to use NOT IN
-     *
-     * @return self
      */
     public function whereIn(
         string $column,
         array $values,
         string $boolean = 'AND',
         bool $not = false
-    ): self {
+    ): static {
         $operator = $not ? 'NOT IN' : 'IN';
         return $this->where($column, $operator, $values, $boolean);
     }
@@ -226,10 +216,8 @@ class QueryBuilder
      * @param string $column  The column name
      * @param string $boolean The boolean connector
      * @param bool   $not     Whether to use IS NOT NULL
-     *
-     * @return self
      */
-    public function whereNull(string $column, string $boolean = 'AND', bool $not = false): self
+    public function whereNull(string $column, string $boolean = 'AND', bool $not = false): static
     {
         $operator = $not ? 'IS NOT NULL' : 'IS NULL';
         return $this->where($column, $operator, null, $boolean);
@@ -252,10 +240,8 @@ class QueryBuilder
      *
      * @param string $sql     Raw SQL for the WHERE clause
      * @param string $boolean The boolean connector
-     *
-     * @return self
      */
-    public function whereRaw(string $sql, string $boolean = 'AND'): self
+    public function whereRaw(string $sql, string $boolean = 'AND'): static
     {
         $this->wheres[] = [
             'column' => '',
@@ -275,8 +261,6 @@ class QueryBuilder
      * @param string $operator The join operator
      * @param string $second   The second column
      * @param string $type     The join type (INNER, LEFT, RIGHT)
-     *
-     * @return self
      */
     public function join(
         string $table,
@@ -284,7 +268,7 @@ class QueryBuilder
         string $operator = '=',
         string $second = '',
         string $type = 'INNER'
-    ): self {
+    ): static {
         // Handle simple join: join('table', 'col1', 'col2')
         if ($second === '' && !in_array($operator, ['=', '!=', '<', '>', '<=', '>='])) {
             $second = $operator;
@@ -309,10 +293,8 @@ class QueryBuilder
      * @param string $first    The first column
      * @param string $operator The join operator
      * @param string $second   The second column
-     *
-     * @return self
      */
-    public function leftJoin(string $table, string $first, string $operator = '=', string $second = ''): self
+    public function leftJoin(string $table, string $first, string $operator = '=', string $second = ''): static
     {
         return $this->join($table, $first, $operator, $second, 'LEFT');
     }
@@ -324,10 +306,8 @@ class QueryBuilder
      * @param string $first    The first column
      * @param string $operator The join operator
      * @param string $second   The second column
-     *
-     * @return self
      */
-    public function rightJoin(string $table, string $first, string $operator = '=', string $second = ''): self
+    public function rightJoin(string $table, string $first, string $operator = '=', string $second = ''): static
     {
         return $this->join($table, $first, $operator, $second, 'RIGHT');
     }
@@ -337,10 +317,8 @@ class QueryBuilder
      *
      * @param string $column    The column to order by
      * @param string $direction The sort direction (ASC/DESC)
-     *
-     * @return self
      */
-    public function orderBy(string $column, string $direction = 'ASC'): self
+    public function orderBy(string $column, string $direction = 'ASC'): static
     {
         $this->orders[] = [
             'column' => $column,
@@ -354,10 +332,8 @@ class QueryBuilder
      * Add a descending ORDER BY clause.
      *
      * @param string $column The column to order by
-     *
-     * @return self
      */
-    public function orderByDesc(string $column): self
+    public function orderByDesc(string $column): static
     {
         return $this->orderBy($column, 'DESC');
     }
@@ -366,10 +342,8 @@ class QueryBuilder
      * Add a GROUP BY clause.
      *
      * @param string|array<int, string> $columns The column(s) to group by
-     *
-     * @return self
      */
-    public function groupBy(string|array $columns): self
+    public function groupBy(string|array $columns): static
     {
         $columns = is_array($columns) ? $columns : [$columns];
         $this->groups = array_merge($this->groups, $columns);
@@ -381,10 +355,8 @@ class QueryBuilder
      * Set the LIMIT value.
      *
      * @param int $limit The maximum number of rows
-     *
-     * @return self
      */
-    public function limit(int $limit): self
+    public function limit(int $limit): static
     {
         $this->limitValue = $limit;
         return $this;
@@ -394,10 +366,8 @@ class QueryBuilder
      * Set the OFFSET value.
      *
      * @param int $offset The number of rows to skip
-     *
-     * @return self
      */
-    public function offset(int $offset): self
+    public function offset(int $offset): static
     {
         $this->offsetValue = $offset;
         return $this;
@@ -534,9 +504,11 @@ class QueryBuilder
     /**
      * Execute the query and return the first result.
      *
-     * @return array<string, mixed>|null The first row or null
+     * @return (float|int|null|string)[]|null The first row or null
+     *
+     * @psalm-return array<string, float|int|null|string>|null
      */
-    public function first(): ?array
+    public function first(): array|null
     {
         $this->limit(1);
         return Connection::fetchOne($this->toSql());

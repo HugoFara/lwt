@@ -20,12 +20,21 @@ namespace Lwt\Interface\Do_Feeds;
 require_once 'Core/session_utility.php';
 
 
+/**
+ * @return (int|string)[]
+ *
+ * @psalm-return list{0|1, string}
+ */
 function dummy_function_1(): array
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $edit_text = 0;
     $message = '';
-    $marked_items = implode(',', $_REQUEST['marked_items']);
+    if (is_array($_REQUEST['marked_items'])) {
+        $marked_items = implode(',', array_filter($_REQUEST['marked_items'], 'is_scalar'));
+    } else {
+        $marked_items = $_REQUEST['marked_items'];
+    }
     $res = do_mysqli_query(
         "SELECT * FROM (
             SELECT * FROM {$tbpref}feedlinks
