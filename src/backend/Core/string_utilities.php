@@ -158,3 +158,54 @@ function strToClassName($string): string
     }
     return $r;
 }
+
+/**
+ * Escape special HTML characters.
+ *
+ * @param  string $s String to escape.
+ * @return string htmlspecialchars($s, ENT_COMPAT, "UTF-8");
+ */
+function tohtml($s)
+{
+    if (!isset($s)) {
+        return '';
+    }
+    return htmlspecialchars($s, ENT_COMPAT, "UTF-8");
+}
+
+/**
+ * Remove all spaces from a string.
+ *
+ * @param string      $s      Input string
+ * @param string|bool $remove Do not do anything if empty or false
+ *
+ * @return string String without spaces if requested.
+ */
+function remove_spaces($s, $remove)
+{
+    if (!$remove) {
+        return $s;
+    }
+    // '' enthält &#x200B;
+    return str_replace(' ', '', $s);
+}
+
+/**
+ * Replace the first occurence of $needle in $haystack by $replace
+ *
+ * @param  string $needle   Text to replace
+ * @param  string $replace  Text to replace by
+ * @param  string $haystack Input string
+ * @return string String with replaced text
+ */
+function str_replace_first($needle, $replace, $haystack)
+{
+    if ($needle === '') {
+        return $haystack;
+    }
+    $pos = strpos($haystack, $needle);
+    if ($pos !== false) {
+        return substr_replace($haystack, $replace, $pos, strlen($needle));
+    }
+    return $haystack;
+}

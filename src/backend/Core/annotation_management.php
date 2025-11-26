@@ -234,3 +234,30 @@ function trim_value(&$value): void
 {
     $value = trim($value);
 }
+
+/**
+ * Convert annotations in a JSON format.
+ *
+ * @param string $ann Annotations.
+ *
+ * @return string A JSON-encoded version of the annotations
+ */
+function annotation_to_json($ann): string|false
+{
+    if ($ann == '') {
+        return "{}";
+    }
+    $arr = array();
+    $items = preg_split('/[\n]/u', $ann);
+    foreach ($items as $item) {
+        $vals = preg_split('/[\t]/u', $item);
+        if (count($vals) > 3 && $vals[0] >= 0 && $vals[2] > 0) {
+            $arr[intval($vals[0]) - 1] = array($vals[1], $vals[2], $vals[3]);
+        }
+    }
+    $json_data = json_encode($arr);
+    if ($json_data === false) {
+        my_die("Unable to format to JSON");
+    }
+    return $json_data;
+}

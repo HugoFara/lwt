@@ -20,6 +20,125 @@
 require_once __DIR__ . '/vite_helper.php';
 
 /**
+ * Display the main menu of navigation as a dropdown
+ */
+function quickMenu(): void
+{
+    ?>
+
+<select id="quickmenu" onchange="quickMenuRedirection(value)">
+    <option value="" selected="selected">[Menu]</option>
+    <option value="index">Home</option>
+    <optgroup label="Texts">
+        <option value="edit_texts">Texts</option>
+        <option value="edit_archivedtexts">Text Archive</option>
+        <option value="edit_texttags">Text Tags</option>
+        <option value="check_text">Text Check</option>
+        <option value="long_text_import">Long Text Import</option>
+    </optgroup>
+    <option value="edit_languages">Languages</option>
+    <optgroup label="Terms">
+        <option value="edit_words">Terms</option>
+        <option value="edit_tags">Term Tags</option>
+        <option value="upload_words">Term Import</option>
+    </optgroup>
+    <option value="statistics">Statistics</option>
+    <option value="rss_import">Newsfeed Import</option>
+    <optgroup label="Other">
+        <option value="backup_restore">Backup/Restore</option>
+        <option value="settings">Settings</option>
+        <option value="text_to_speech_settings">Text-to-Speech Settings</option>
+        <option value="INFO">Help</option>
+    </optgroup>
+</select>
+    <?php
+}
+
+/**
+ * Start a page without connecting to the database with a complete header and a non-closed body.
+ *
+ * @param string $title  Title of the page
+ * @param string $addcss Some CSS to be embed in a style tag
+ */
+function pagestart_kernel_nobody($title, $addcss = ''): void
+{
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $debug = \Lwt\Core\Globals::isDebug();
+    @header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+    @header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+    @header('Cache-Control: no-cache, must-revalidate, max-age=0');
+    @header('Pragma: no-cache');
+    ?><!DOCTYPE html>
+    <?php
+    echo '<html lang="en">';
+    ?>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <!--
+        <?php echo file_get_contents("UNLICENSE.md");?>
+    -->
+    <meta name="viewport" content="width=900" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/assets/images/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/assets/images/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <link rel="stylesheet" type="text/css" href="/assets/css/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/jquery.tagit.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/feed_wizard.css" />
+    <style type="text/css">
+        <?php echo $addcss . "\n"; ?>
+    </style>
+
+    <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery.scrollTo.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>
+    <!-- URLBASE : "<?php echo tohtml(url_base()); ?>" -->
+    <!-- TBPREF  : "<?php echo tohtml($tbpref);  ?>" -->
+    <script type="text/javascript">
+        //<![CDATA[
+        var STATUSES = <?php echo json_encode(get_statuses()); ?>;
+        //]]>
+    </script>
+
+    <title>LWT :: <?php echo tohtml($title); ?></title>
+</head>
+    <?php
+    echo '<body>';
+    ?>
+<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
+    <?php
+    flush();
+    if ($debug) {
+        showRequest();
+    }
+}
+
+/**
+ * Add a closing body tag.
+ *
+ * @global bool $debug Show the requests if true
+ * @global float $dspltime Total execution time since the PHP session started
+ */
+function pageend(): void
+{
+    if (\Lwt\Core\Globals::isDebug()) {
+        showRequest();
+    }
+    if (\Lwt\Core\Globals::shouldDisplayTime()) {
+        echo "\n<p class=\"smallgray2\">" .
+        round(get_execution_time(), 5) . " secs</p>\n";
+    }
+    echo '</body></html>';
+}
+
+/**
  * Return an HTML formatted logo of the application.
  *
  * @since 2.7.0 Do no longer indicate database prefix in logo

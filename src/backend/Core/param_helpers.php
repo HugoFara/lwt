@@ -72,3 +72,35 @@ function processDBParam($reqkey, $dbkey, $default, $isnum)
     }
     return $result;
 }
+
+/**
+ * Get a request when possible. Otherwise, return an empty string.
+ *
+ * @param  string $s Request key
+ * @return string Trimmed request or empty string
+ */
+function getreq($s)
+{
+    if (isset($_REQUEST[$s])) {
+        return trim($_REQUEST[$s]);
+    }
+    return '';
+}
+
+/**
+ * Get a session variable when possible. Otherwise, return an empty string.
+ *
+ * @param  string $s Session variable key
+ * @return string Trimmed sesseion variable or empty string
+ */
+function getsess($s)
+{
+    if (isset($_SESSION[$s])) {
+        $value = $_SESSION[$s];
+        if (is_array($value)) {
+            return '';
+        }
+        return trim((string)$value);
+    }
+    return '';
+}
