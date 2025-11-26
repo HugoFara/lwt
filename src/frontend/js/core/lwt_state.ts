@@ -88,17 +88,4 @@ export const LWT_DATA: LwtDataInterface = {
   }
 };
 
-// Legacy global variables (deprecated)
-/** Word ID, deprecated Since 2.10.0, use LWT_DATA.word.id instead */
-export let WID = 0;
-/** Text ID (int), deprecated Since 2.10.0, use LWT_DATA.text.id */
-export let TID = 0;
-/** First dictionary URL, deprecated in 2.10.0 use LWT_DATA.language.dict_link1 */
-export let WBLINK1 = '';
-/** Second dictionary URL, deprecated in 2.10.0 use LWT_DATA.language.dict_link2 */
-export let WBLINK2 = '';
-/** Translator URL, deprecated in 2.10.0 use LWT_DATA.language.translator_link */
-export let WBLINK3 = '';
-/** Right-to-left indicator, deprecated in 2.10.0 use LWT_DATA.language.rtl */
-export let RTL = 0;
 

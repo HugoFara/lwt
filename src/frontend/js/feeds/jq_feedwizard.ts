@@ -48,7 +48,6 @@ export function extend_adv_xpath(this: JQuery): void {
   const el = this[0];
   const selectedData = $('#mark_action :selected').data() as { tagName?: string } | undefined;
   const val1 = selectedData?.tagName?.toLowerCase() ?? '';
-  let attr = '';
   let node_count = 0;
   let attr_v = '';
   let attr_p = '';

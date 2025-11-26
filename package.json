@@ -16,6 +16,8 @@
     "build": "vite build",
     "build:themes": "node scripts/build-themes.js",
     "build:all": "npm run build && npm run build:themes",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "cy:open": "cypress open",

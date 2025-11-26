@@ -143,12 +143,11 @@ export function createTheDictLink(u: string, w: string, t: string, b: string): s
 export function createSentLookupLink(torder: number, txid: number, url: string, txt: string): string {
   url = url.trim();
   txt = txt.trim();
-  let r = '';
   let popup = false;
   let external = false;
   const target_url = 'trans.php?x=1&i=' + torder + '&t=' + txid;
   if (url === '' || txt === '') {
-    return r;
+    return '';
   }
   if (url.startsWith('*')) {
     url = url.substring(1);
@@ -171,7 +170,7 @@ export function createSentLookupLink(torder: number, txid: number, url: string, 
     return ' <a href="' + target_url + '" target="ru" onclick="showRightFrames();">' +
       txt + '</a> ';
   }
-  return r;
+  return '';
 }
 
 /**

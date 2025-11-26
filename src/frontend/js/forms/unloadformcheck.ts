@@ -28,14 +28,6 @@ declare global {
 }
 
 /**
- * Set to 1 if a form was altered (set "dirty"),
- * ask for confirmation before leaving.
- *
- * @deprecated Since 2.10.0, use lwtFormCheck instead
- */
-export let DIRTY = 0;
-
-/**
  * Keeps track of a modified form.
  */
 export const lwtFormCheck = {
