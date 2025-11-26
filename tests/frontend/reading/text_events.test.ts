@@ -8,7 +8,7 @@ import {
   word_hover_over,
   word_hover_out,
 } from '../../../src/frontend/js/reading/text_events';
-import * as userInteractions from '../../../src/frontend/js/legacy/user_interactions';
+import * as userInteractions from '../../../src/frontend/js/core/user_interactions';
 
 // Mock LWT_DATA global
 const mockLWT_DATA = {

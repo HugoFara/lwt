@@ -21,8 +21,8 @@
  */
 
 require_once 'Core/session_utility.php';
-require_once 'Core/simterms.php';
-require_once 'Core/classes/Term.php';
+require_once 'Core/Text/simterms.php';
+require_once 'Core/Entity/Term.php';
 
 use Lwt\Classes\Term;
 use Lwt\Database\Escaping;

@@ -16,7 +16,7 @@
  * @since   2.0.3-fork
  */
 
-require_once __DIR__ . '/start_session.php';
+require_once __DIR__ . '/../Bootstrap/start_session.php';
 
 if (isset($_SESSION['LWT-WP-User'])) {
     $tbpref = $_SESSION['LWT-WP-User'];

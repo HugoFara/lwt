@@ -17,7 +17,7 @@
  */
 
 require_once 'Core/session_utility.php';
-require_once 'Core/mobile_interactions.php';
+require_once 'Core/Mobile/mobile_interactions.php';
 require_once 'text_display_header.php';
 require_once 'text_display_text.php';
 

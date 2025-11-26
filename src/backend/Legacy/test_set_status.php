@@ -20,7 +20,7 @@
 require_once 'Core/session_utility.php';
 
 use Lwt\Database\Settings;
-require_once 'Core/start_session.php';
+require_once 'Core/Bootstrap/start_session.php';
 
 /**
  * Echo the page HTML content when setting word status.

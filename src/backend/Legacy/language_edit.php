@@ -24,8 +24,8 @@
  */
 
 require_once 'Core/session_utility.php';
-require_once 'Core/langdefs.php';
-require_once 'Core/classes/Language.php';
+require_once 'Core/Language/langdefs.php';
+require_once 'Core/Entity/Language.php';
 
 use Lwt\Classes\Language;
 use Lwt\Database\Maintenance;

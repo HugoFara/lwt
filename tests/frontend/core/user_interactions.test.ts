@@ -8,7 +8,7 @@ import {
   deepFindValue,
   cookieTTSSettings,
   readRawTextAloud,
-} from '../../../src/frontend/js/legacy/user_interactions';
+} from '../../../src/frontend/js/core/user_interactions';
 import * as cookies from '../../../src/frontend/js/core/cookies';
 
 // Mock SpeechSynthesisUtterance for jsdom environment

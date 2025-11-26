@@ -37,9 +37,9 @@ use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
 
 require_once 'Core/session_utility.php';
-require_once 'Core/start_session.php';
-require_once 'Core/text_from_yt.php';
-require_once 'Core/classes/Text.php';
+require_once 'Core/Bootstrap/start_session.php';
+require_once 'Core/Integration/text_from_yt.php';
+require_once 'Core/Entity/Text.php';
 
 use Lwt\Classes\Text;
 

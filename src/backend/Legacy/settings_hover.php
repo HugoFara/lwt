@@ -11,7 +11,7 @@ use Lwt\Classes\GoogleTranslate;
 use Lwt\Database\Escaping;
 
 require_once 'Core/session_utility.php';
-require_once 'Core/classes/GoogleTranslate.php' ;
+require_once 'Core/Entity/GoogleTranslate.php' ;
 
 $translation = '*';
 if ($_REQUEST['status'] == 1) {

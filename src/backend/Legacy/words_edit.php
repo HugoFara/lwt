@@ -28,8 +28,8 @@
  */
 
 require_once 'Core/session_utility.php';
-require_once 'Core/simterms.php';
-require_once 'Core/start_session.php';
+require_once 'Core/Text/simterms.php';
+require_once 'Core/Bootstrap/start_session.php';
 
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;

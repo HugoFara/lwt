@@ -18,7 +18,7 @@
  */
 
 require_once 'Core/session_utility.php';
-require_once 'Core/simterms.php';
+require_once 'Core/Text/simterms.php';
 
 use Lwt\Database\Escaping;
 

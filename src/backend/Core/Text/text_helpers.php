@@ -35,19 +35,19 @@ require_once __DIR__ . '/text_statistics.php';
 require_once __DIR__ . '/sentence_operations.php';
 
 // Language utilities (get language info, codes, direction)
-require_once __DIR__ . '/language_utilities.php';
+require_once __DIR__ . '/../Language/language_utilities.php';
 
 // Expression handling (multi-words, MeCab)
-require_once __DIR__ . '/expression_handling.php';
+require_once __DIR__ . '/../Word/expression_handling.php';
 
 // Annotation management (create, save, update annotations)
 require_once __DIR__ . '/annotation_management.php';
 
 // Database operations (backup, restore, truncate)
-require_once __DIR__ . '/database_operations.php';
+require_once __DIR__ . '/../database_operations.php';
 
 // Media players (audio, video)
-require_once __DIR__ . '/media_players.php';
+require_once __DIR__ . '/../Media/media_players.php';
 
 // Phonetic reading (Japanese/MeCab)
-require_once __DIR__ . '/phonetic_reading.php';
+require_once __DIR__ . '/../Language/phonetic_reading.php';

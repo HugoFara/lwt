@@ -1,26 +1,34 @@
 /**
- * Tests for pgm.ts - Core LWT JavaScript utility functions
+ * Tests for core utility functions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   getStatusName,
   getStatusAbbr,
-  getLangFromDict,
   make_tooltip,
-  escape_html_chars,
-  escape_html_chars_2,
-  escape_apostrophes,
+} from '../../../src/frontend/js/terms/word_status';
+import {
+  getLangFromDict,
   createTheDictUrl,
   createTheDictLink,
   createSentLookupLink,
   owin,
   oewin,
+} from '../../../src/frontend/js/terms/dictionary';
+import {
+  escape_html_chars,
+  escape_html_chars_2,
+  escape_apostrophes,
+} from '../../../src/frontend/js/core/html_utils';
+import {
   getCookie,
   setCookie,
   deleteCookie,
   areCookiesEnabled,
+} from '../../../src/frontend/js/core/cookies';
+import {
   check_table_prefix,
-} from '../../../src/frontend/js/legacy/pgm';
+} from '../../../src/frontend/js/core/language_settings';
 
 // Mock window.STATUSES
 const mockStatuses = {

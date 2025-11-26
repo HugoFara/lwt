@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Controllers;
 
-require_once __DIR__ . '/../../../src/backend/Core/EnvLoader.php';
+require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 
 use Lwt\Controllers\BaseController;

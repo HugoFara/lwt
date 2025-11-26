@@ -13,8 +13,8 @@
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-database-connect.html
  */
 
-require_once __DIR__ . "/kernel_utility.php";
-require_once __DIR__ . "/EnvLoader.php";
+require_once __DIR__ . "/Bootstrap/kernel_utility.php";
+require_once __DIR__ . "/Bootstrap/EnvLoader.php";
 require_once __DIR__ . "/Database/Connection.php";
 require_once __DIR__ . "/Database/QueryBuilder.php";
 require_once __DIR__ . "/Database/DB.php";

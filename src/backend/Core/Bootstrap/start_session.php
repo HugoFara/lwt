@@ -14,7 +14,7 @@
  * @since   2.0.3-fork
  */
 
-require_once __DIR__ . '/kernel_utility.php';
+require_once __DIR__ . '/kernel_utility.php';  // Same directory after move
 
 use Lwt\Core\Globals;
 

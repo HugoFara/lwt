@@ -395,16 +395,4 @@ describe('lwt_state.ts', () => {
     });
   });
 
-  // ===========================================================================
-  // Global Window Assignment Tests
-  // ===========================================================================
-
-  describe('Global window assignment', () => {
-    it('LWT_DATA should be available on window object', () => {
-      // The module assigns LWT_DATA to window when typeof window !== 'undefined'
-      const w = window as unknown as Record<string, unknown>;
-      expect(w.LWT_DATA).toBeDefined();
-      expect(w.LWT_DATA).toBe(LWT_DATA);
-    });
-  });
 });

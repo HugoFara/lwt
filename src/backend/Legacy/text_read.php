@@ -18,7 +18,7 @@
  */
 
 require_once 'Core/session_utility.php';
-require_once 'Core/mobile_interactions.php';
+require_once 'Core/Mobile/mobile_interactions.php';
 
 use Lwt\Database\Settings;
 require_once 'text_read_header.php';

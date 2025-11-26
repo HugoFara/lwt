@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-require_once __DIR__ . '/../../../src/backend/Core/kernel_utility.php';
+require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/kernel_utility.php';
 
 use PHPUnit\Framework\TestCase;
 use Lwt\Core\Globals;

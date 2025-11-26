@@ -16,8 +16,8 @@
  * @since    3.0.0
  */
 
-require_once __DIR__ . '/database_connect.php';
-require_once __DIR__ . '/tags.php';
+require_once __DIR__ . '/../database_connect.php';
+require_once __DIR__ . '/../tags.php';
 
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;

@@ -18,7 +18,7 @@
 
 require_once 'Core/session_utility.php';
 // To get the BCP 47 language tag
-require_once 'Core/langdefs.php' ;
+require_once 'Core/Language/langdefs.php' ;
 
 use Lwt\Database\Settings;
 

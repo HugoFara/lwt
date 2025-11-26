@@ -18,19 +18,19 @@
  */
 
 require_once __DIR__ . '/database_connect.php';
-require_once __DIR__ . '/feeds.php';
-require_once __DIR__ . '/tags.php';
-require_once __DIR__ . '/ui_helpers.php';
-require_once __DIR__ . '/export_helpers.php';
-require_once __DIR__ . '/text_helpers.php';
+require_once __DIR__ . '/Feed/feeds.php';
+require_once __DIR__ . '/Tag/tags.php';
+require_once __DIR__ . '/UI/ui_helpers.php';
+require_once __DIR__ . '/Export/export_helpers.php';
+require_once __DIR__ . '/Text/text_helpers.php';
 
 // Split modules for focused functionality (since 3.0.0-fork)
-require_once __DIR__ . '/param_helpers.php';
-require_once __DIR__ . '/string_utilities.php';
-require_once __DIR__ . '/media_helpers.php';
-require_once __DIR__ . '/text_navigation.php';
-require_once __DIR__ . '/dictionary_links.php';
-require_once __DIR__ . '/test_helpers.php';
+require_once __DIR__ . '/Http/param_helpers.php';
+require_once __DIR__ . '/Utils/string_utilities.php';
+require_once __DIR__ . '/Media/media_helpers.php';
+require_once __DIR__ . '/Text/text_navigation.php';
+require_once __DIR__ . '/Word/dictionary_links.php';
+require_once __DIR__ . '/Test/test_helpers.php';
 
 /**
  * Return all different database prefixes that are in use.

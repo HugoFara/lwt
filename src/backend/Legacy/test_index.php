@@ -23,8 +23,8 @@
 require_once 'Core/session_utility.php';
 
 use Lwt\Database\Settings;
-require_once 'Core/mobile_interactions.php';
-require_once 'Core/start_session.php';
+require_once 'Core/Mobile/mobile_interactions.php';
+require_once 'Core/Bootstrap/start_session.php';
 require_once 'test_header.php';
 require_once 'test_test.php';
 require_once 'test_table.php';

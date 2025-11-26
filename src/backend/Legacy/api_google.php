@@ -20,8 +20,8 @@
 namespace Lwt\Interface;
 
 require_once 'Core/session_utility.php';
-require_once 'Core/google_time_token.php' ;
-require_once 'Core/classes/GoogleTranslate.php';
+require_once 'Core/Integration/google_time_token.php' ;
+require_once 'Core/Entity/GoogleTranslate.php';
 
 use Lwt\Classes\GoogleTranslate as GoogleTranslate;
 use \Lwt\Database\Escaping;

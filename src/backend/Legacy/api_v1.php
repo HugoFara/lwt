@@ -8,7 +8,7 @@ use \Lwt\Database\Escaping;
 use \Lwt\Database\Settings;
 require_once 'Core/simterms.php';
 require_once __DIR__ . '/test_test.php';
-require_once 'Core/langdefs.php';
+require_once 'Core/Language/langdefs.php';
 
 // ============================================================================
 // Functions migrated from ajax_add_term_transl.php
