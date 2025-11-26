@@ -10,11 +10,12 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
- * @author  HugoFara <hugo.farajallah@protonmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/inc-LWT-Globals.html
- * @since   3.0.0
+ * @category Lwt
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/inc-LWT-Globals.html
+ * @since    3.0.0
  */
 
 namespace Lwt\Core;
@@ -34,49 +35,70 @@ namespace Lwt\Core;
  * $db = LWT_Globals::getDbConnection();
  * ```
  *
- * @since 3.0.0
+ * @category Lwt
+ * @package  Lwt\Core
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/inc-LWT-Globals.html
+ * @since    3.0.0
  */
 class LWT_Globals
 {
     /**
-     * @var \mysqli|null Database connection object
+     * Database connection object
+     *
+     * @var \mysqli|null
      */
-    private static ?\mysqli $dbConnection = null;
+    private static ?\mysqli $_dbConnection = null;
 
     /**
-     * @var string Database table prefix (usually empty string)
+     * Database table prefix (usually empty string)
+     *
+     * @var string
      */
-    private static string $tablePrefix = '';
+    private static string $_tablePrefix = '';
 
     /**
-     * @var bool Whether the table prefix is fixed (from .env) or from DB
+     * Whether the table prefix is fixed (from .env) or from DB
+     *
+     * @var bool
      */
-    private static bool $tablePrefixIsFixed = false;
+    private static bool $_tablePrefixIsFixed = false;
 
     /**
-     * @var int Debug mode flag (0=off, 1=on)
+     * Debug mode flag (0=off, 1=on)
+     *
+     * @var int
      */
-    private static int $debug = 0;
+    private static int $_debug = 0;
 
     /**
-     * @var int Error display flag (0=off, 1=on)
+     * Error display flag (0=off, 1=on)
+     *
+     * @var int
      */
-    private static int $displayErrors = 0;
+    private static int $_displayErrors = 0;
 
     /**
-     * @var int Execution time display flag (0=off, 1=on)
+     * Execution time display flag (0=off, 1=on)
+     *
+     * @var int
      */
-    private static int $displayTime = 0;
+    private static int $_displayTime = 0;
 
     /**
-     * @var string Database name
+     * Database name
+     *
+     * @var string
      */
-    private static string $databaseName = '';
+    private static string $_databaseName = '';
 
     /**
-     * @var bool Whether globals have been initialized
+     * Whether globals have been initialized
+     *
+     * @var bool
      */
-    private static bool $initialized = false;
+    private static bool $_initialized = false;
 
     /**
      * Initialize all global variables.
@@ -87,16 +109,16 @@ class LWT_Globals
      */
     public static function initialize(): void
     {
-        if (self::$initialized) {
+        if (self::$_initialized) {
             return;
         }
 
         // All settings default to 0 (off)
-        self::$debug = 0;
-        self::$displayErrors = 0;
-        self::$displayTime = 0;
+        self::$_debug = 0;
+        self::$_displayErrors = 0;
+        self::$_displayTime = 0;
 
-        self::$initialized = true;
+        self::$_initialized = true;
     }
 
     /**
@@ -108,7 +130,7 @@ class LWT_Globals
      */
     public static function setDbConnection(\mysqli $connection): void
     {
-        self::$dbConnection = $connection;
+        self::$_dbConnection = $connection;
     }
 
     /**
@@ -118,21 +140,23 @@ class LWT_Globals
      */
     public static function getDbConnection(): ?\mysqli
     {
-        return self::$dbConnection;
+        return self::$_dbConnection;
     }
 
     /**
      * Set the database table prefix.
      *
      * @param string $prefix  The table prefix
-     * @param bool   $isFixed Whether the prefix is fixed (from .env)
+     * @param bool   $isFixed Whether the prefix is fixed
      *
      * @return void
      */
-    public static function setTablePrefix(string $prefix, bool $isFixed = false): void
-    {
-        self::$tablePrefix = $prefix;
-        self::$tablePrefixIsFixed = $isFixed;
+    public static function setTablePrefix(
+        string $prefix, 
+        bool $isFixed = false
+    ): void {
+        self::$_tablePrefix = $prefix;
+        self::$_tablePrefixIsFixed = $isFixed;
     }
 
     /**
@@ -142,7 +166,7 @@ class LWT_Globals
      */
     public static function getTablePrefix(): string
     {
-        return self::$tablePrefix;
+        return self::$_tablePrefix;
     }
 
     /**
@@ -155,7 +179,7 @@ class LWT_Globals
      */
     public static function isTablePrefixFixed(): bool
     {
-        return self::$tablePrefixIsFixed;
+        return self::$_tablePrefixIsFixed;
     }
 
     /**
@@ -167,7 +191,7 @@ class LWT_Globals
      */
     public static function setDatabaseName(string $name): void
     {
-        self::$databaseName = $name;
+        self::$_databaseName = $name;
     }
 
     /**
@@ -177,7 +201,7 @@ class LWT_Globals
      */
     public static function getDatabaseName(): string
     {
-        return self::$databaseName;
+        return self::$_databaseName;
     }
 
     /**
@@ -189,7 +213,7 @@ class LWT_Globals
      */
     public static function setDebug(int $value): void
     {
-        self::$debug = $value;
+        self::$_debug = $value;
     }
 
     /**
@@ -199,7 +223,7 @@ class LWT_Globals
      */
     public static function isDebug(): bool
     {
-        return (bool) self::$debug;
+        return (bool) self::$_debug;
     }
 
     /**
@@ -209,7 +233,7 @@ class LWT_Globals
      */
     public static function getDebug(): int
     {
-        return self::$debug;
+        return self::$_debug;
     }
 
     /**
@@ -221,7 +245,7 @@ class LWT_Globals
      */
     public static function setDisplayErrors(int $value): void
     {
-        self::$displayErrors = $value;
+        self::$_displayErrors = $value;
     }
 
     /**
@@ -231,7 +255,7 @@ class LWT_Globals
      */
     public static function shouldDisplayErrors(): bool
     {
-        return (bool) self::$displayErrors;
+        return (bool) self::$_displayErrors;
     }
 
     /**
@@ -243,7 +267,7 @@ class LWT_Globals
      */
     public static function setDisplayTime(int $value): void
     {
-        self::$displayTime = $value;
+        self::$_displayTime = $value;
     }
 
     /**
@@ -253,7 +277,7 @@ class LWT_Globals
      */
     public static function shouldDisplayTime(): bool
     {
-        return (bool) self::$displayTime;
+        return (bool) self::$_displayTime;
     }
 
     /**
@@ -307,13 +331,13 @@ class LWT_Globals
      */
     public static function reset(): void
     {
-        self::$dbConnection = null;
-        self::$tablePrefix = '';
-        self::$tablePrefixIsFixed = false;
-        self::$debug = 0;
-        self::$displayErrors = 0;
-        self::$displayTime = 0;
-        self::$databaseName = '';
-        self::$initialized = false;
+        self::$_dbConnection = null;
+        self::$_tablePrefix = '';
+        self::$_tablePrefixIsFixed = false;
+        self::$_debug = 0;
+        self::$_displayErrors = 0;
+        self::$_displayTime = 0;
+        self::$_databaseName = '';
+        self::$_initialized = false;
     }
 }

@@ -6,16 +6,21 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
- * @author  LWT Project <lwt-project@hotmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/inc-simterms.html
+ * @category Lwt
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/inc-simterms.html
  */
 
 require_once __DIR__ . '/session_utility.php';
 
 
 /**
+ * Get letter pairs from string
+ *
+ * @param string $str Input string
+ *
  * @return string[]
  *
  * @psalm-return array<0|positive-int, string>
@@ -31,8 +36,13 @@ function letterPairs($str): array
 }
 
 /**
+ * Get word letter pairs from string
+ *
+ * @param string $str Input string
+ *
+ * @return string[]
+ *
  * @psalm-return list<string>
- * @return       string[]
  */
 function wordLetterPairs($str): array
 {
@@ -48,10 +58,13 @@ function wordLetterPairs($str): array
 }
 
 /**
- * Similarity ranking of two UTF-8 strings $str1 and $str2
+ * Similarity ranking of two UTF-8 strings
  *
  * Source http://www.catalysoft.com/articles/StrikeAMatch.html
  * Source http://stackoverflow.com/questions/653157
+ *
+ * @param string $str1 First string
+ * @param string $str2 Second string
  *
  * @return float SimilarityRanking
  */

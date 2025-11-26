@@ -6,7 +6,14 @@
  * This file defines all routes for the application.
  * Routes map URL paths to controller methods.
  *
- * @since 3.0.0 All routes now use controller methods instead of legacy file includes
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Router
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0 All routes now use controller methods
  */
 
 use Lwt\Router\Router;

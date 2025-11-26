@@ -9,7 +9,12 @@
  *
  * PHP version 8.1
  *
- * @since 1.5.5
+ * @category Lwt
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    1.5.5
  */
 
 require_once '../wp-load.php' ;

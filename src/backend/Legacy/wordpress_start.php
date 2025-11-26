@@ -17,11 +17,12 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
- * @author  LWT Project <lwt-project@hotmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/wp-lwt-start.html
- * @since   1.5.5
+ * @category Lwt
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/wp-lwt-start.html
+ * @since    1.5.5
  */
 
 require_once 'Core/kernel_utility.php';

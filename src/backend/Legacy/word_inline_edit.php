@@ -5,6 +5,12 @@
  *  ...
  *
  * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
  */
 
 require_once 'Core/session_utility.php';

@@ -6,13 +6,18 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
- * @author  LWT Project <lwt-project@hotmail.com>
- * @since   2.9.1 Use LWT_LANGUAGES_ARRAY instead of $langDefs
+ * @category Lwt
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    2.9.1 Use LWT_LANGUAGES_ARRAY instead of $langDefs
  */
 
 /**
- * @var array LWT_LANG_DEFS Associative array for all the supported languages
+ * Associative array for all the supported languages
+ *
+ * @var array LWT_LANG_DEFS
  *
  * "Name" =>
  *  ("glosbeIso", "googleIso", biggerFont, "wordCharRegExp",

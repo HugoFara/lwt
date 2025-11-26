@@ -6,22 +6,27 @@
  *
  * PHP version 8.1
  *
- * @package Lwt
- * @author  HugoFara <hugo.farajallah@protonmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/inc-kernel-utility.html
- * @since   2.0.3-fork
+ * @category Lwt
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/inc-kernel-utility.html
+ * @since    2.0.3-fork
  */
 
  require __DIR__ . '/settings.php';
 
 /**
- * @var string Version of this current LWT application.
+ * Version of this current LWT application
+ *
+ * @var string
  */
  define('LWT_APP_VERSION', '2.10.0-fork');
 
  /**
-  * @var string Date of the lastest published release of LWT
+  * Date of the lastest published release of LWT
+  *
+  * @var string
   */
  define('LWT_RELEASE_DATE', "2024-04-01");
 

@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * Simple Router for LWT Front Controller
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Router
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
 namespace Lwt\Router;
 
 /**
@@ -7,6 +20,13 @@ namespace Lwt\Router;
  *
  * Handles routing from old URLs to new controller-based structure
  * while maintaining backward compatibility
+ *
+ * @category Lwt
+ * @package  Lwt\Router
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
 class Router
 {
@@ -20,6 +40,8 @@ class Router
      * @param string $path    The URL path
      * @param string $handler The handler (file path or controller@method)
      * @param string $method  HTTP method (GET, POST, or *)
+     *
+     * @return void
      */
     public function register(string $path, string $handler, string $method = '*'): void
     {
@@ -27,14 +49,19 @@ class Router
     }
 
     /**
-     * Register a prefix route (matches all paths starting with the prefix)
+     * Register a prefix route (matches all paths starting with prefix)
      *
      * @param string $prefix  The URL prefix (e.g., '/api/v1')
-     * @param string $handler The handler (file path or controller@method)
+     * @param string $handler The handler (file path or method)
      * @param string $method  HTTP method (GET, POST, or *)
+     *
+     * @return void
      */
-    public function registerPrefix(string $prefix, string $handler, string $method = '*'): void
-    {
+    public function registerPrefix(
+        string $prefix, 
+        string $handler, 
+        string $method = '*'
+    ): void {
         $this->prefixRoutes[$prefix][$method] = $handler;
     }
 
@@ -43,6 +70,8 @@ class Router
      *
      * @param string $legacyFile Old filename (e.g., 'do_text.php')
      * @param string $newPath    New route path (e.g., '/text/read')
+     *
+     * @return void
      */
     public function registerLegacy(string $legacyFile, string $newPath): void
     {
@@ -132,7 +161,7 @@ class Router
 
         // Try pattern matching for dynamic routes (e.g., /text/{id})
         foreach ($this->routes as $pattern => $methods) {
-            $regex = $this->convertPatternToRegex($pattern);
+            $regex = $this->_convertPatternToRegex($pattern);
             if (preg_match($regex, $path, $matches)) {
                 array_shift($matches); // Remove full match
 
@@ -173,10 +202,11 @@ class Router
     /**
      * Convert route pattern to regex
      *
-     * @param  string $pattern Route pattern (e.g., '/text/{id}')
+     * @param string $pattern Route pattern (e.g., '/text/{id}')
+     *
      * @return string Regex pattern
      */
-    private function convertPatternToRegex(string $pattern): string
+    private function _convertPatternToRegex(string $pattern): string
     {
         // Escape slashes
         $pattern = str_replace('/', '\/', $pattern);
@@ -190,72 +220,86 @@ class Router
     /**
      * Execute the resolved handler
      *
-     * @param  array $resolution Result from resolve()
+     * @param array $resolution Result from resolve()
+     *
      * @return void
      */
     public function execute(array $resolution): void
     {
         switch ($resolution['type']) {
             case 'redirect':
-                header("Location: {$resolution['url']}", true, $resolution['code']);
+                $code = $resolution['code'];
+                header("Location: {$resolution['url']}", true, $code);
                 exit;
 
             case 'handler':
-                $this->executeHandler($resolution['handler'], $resolution['params']);
+                $this->_executeHandler(
+                    $resolution['handler'], 
+                    $resolution['params']
+                );
                 break;
 
             case 'not_found':
-                $this->handle404($resolution['path']);
+                $this->_handle404($resolution['path']);
                 break;
 
             default:
-                $this->handle500("Unknown resolution type: {$resolution['type']}");
+                $this->_handle500(
+                    "Unknown resolution type: {$resolution['type']}"
+                );
         }
     }
 
     /**
      * Execute a handler (file include or controller method)
      *
-     * @param  string $handler Handler string
-     * @param  array  $params  Request parameters
+     * @param string $handler Handler string
+     * @param array  $params  Request parameters
+     *
      * @return void
      */
-    private function executeHandler(string $handler, array $params): void
+    private function _executeHandler(string $handler, array $params): void
     {
         // Check if it's a controller@method format
         if (str_contains($handler, '@')) {
             list($controller, $method) = explode('@', $handler, 2);
-            $this->executeController($controller, $method, $params);
+            $this->_executeController($controller, $method, $params);
         } else {
             // It's a file path - include it
-            $this->executeFile($handler, $params);
+            $this->_executeFile($handler, $params);
         }
     }
 
     /**
      * Execute a controller method
      *
-     * @param  string $controllerClass Controller class name
-     * @param  string $method          Method name
-     * @param  array  $params          Parameters
+     * @param string $controllerClass Controller class name
+     * @param string $method          Method name
+     * @param array  $params          Parameters
+     *
      * @return void
      */
-    private function executeController(string $controllerClass, string $method, array $params): void
-    {
+    private function _executeController(
+        string $controllerClass, 
+        string $method, 
+        array $params
+    ): void {
         // Add namespace if not present
         if (!str_contains($controllerClass, '\\')) {
             $controllerClass = "Lwt\\Controllers\\{$controllerClass}";
         }
 
         if (!class_exists($controllerClass)) {
-            $this->handle500("Controller not found: {$controllerClass}");
+            $this->_handle500("Controller not found: {$controllerClass}");
             return;
         }
 
         $controller = new $controllerClass();
 
         if (!method_exists($controller, $method)) {
-            $this->handle500("Method not found: {$controllerClass}::{$method}");
+            $this->_handle500(
+                "Method not found: {$controllerClass}::{$method}"
+            );
             return;
         }
 
@@ -266,14 +310,15 @@ class Router
     /**
      * Execute a legacy file
      *
-     * @param  string $filePath Path to PHP file or static file
-     * @param  array  $params   Parameters (made available to included file)
+     * @param string $filePath Path to PHP file or static file
+     * @param array  $params   Parameters (available to file)
+     *
      * @return void
      */
-    private function executeFile(string $filePath, array $params): void
+    private function _executeFile(string $filePath, array $params): void
     {
         if (!file_exists($filePath)) {
-            $this->handle500("File not found: {$filePath}");
+            $this->_handle500("File not found: {$filePath}");
             return;
         }
 
@@ -294,10 +339,11 @@ class Router
     /**
      * Handle 404 Not Found
      *
-     * @param  string $path Requested path
+     * @param string $path Requested path
+     *
      * @return void
      */
-    private function handle404(string $path): void
+    private function _handle404(string $path): void
     {
         http_response_code(404);
         ?>
@@ -328,10 +374,11 @@ class Router
     /**
      * Handle 500 Internal Server Error
      *
-     * @param  string $message Error message
+     * @param string $message Error message
+     *
      * @return void
      */
-    private function handle500(string $message): void
+    private function _handle500(string $message): void
     {
         http_response_code(500);
         ?>
