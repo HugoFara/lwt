@@ -17,6 +17,8 @@
  * @since    2.10.0-fork Split from text_helpers.php
  */
 
+use Lwt\Database\Connection;
+
 /**
  * Restore the database from a file.
  *
@@ -114,7 +116,7 @@ function restore_file($handle, $title): string
         }
     }
     if ($install_status["errors"] == 0) {
-        runsql("DROP TABLE IF EXISTS {$tbpref}textitems", '');
+        Connection::execute("DROP TABLE IF EXISTS {$tbpref}textitems");
         check_update_db();
         reparse_all_texts();
         optimizedb();
@@ -147,20 +149,20 @@ function restore_file($handle, $title): string
 function truncateUserDatabase(): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    runsql("TRUNCATE {$tbpref}archivedtexts", '');
-    runsql("TRUNCATE {$tbpref}archtexttags", '');
-    runsql("TRUNCATE {$tbpref}feedlinks", '');
-    runsql("TRUNCATE {$tbpref}languages", '');
-    runsql("TRUNCATE {$tbpref}textitems2", '');
-    runsql("TRUNCATE {$tbpref}newsfeeds", '');
-    runsql("TRUNCATE {$tbpref}sentences", '');
-    runsql("TRUNCATE {$tbpref}tags", '');
-    runsql("TRUNCATE {$tbpref}tags2", '');
-    runsql("TRUNCATE {$tbpref}texts", '');
-    runsql("TRUNCATE {$tbpref}texttags", '');
-    runsql("TRUNCATE {$tbpref}words", '');
-    runsql("TRUNCATE {$tbpref}wordtags", '');
-    runsql("DELETE FROM {$tbpref}settings where StKey = 'currenttext'", '');
+    Connection::execute("TRUNCATE {$tbpref}archivedtexts");
+    Connection::execute("TRUNCATE {$tbpref}archtexttags");
+    Connection::execute("TRUNCATE {$tbpref}feedlinks");
+    Connection::execute("TRUNCATE {$tbpref}languages");
+    Connection::execute("TRUNCATE {$tbpref}textitems2");
+    Connection::execute("TRUNCATE {$tbpref}newsfeeds");
+    Connection::execute("TRUNCATE {$tbpref}sentences");
+    Connection::execute("TRUNCATE {$tbpref}tags");
+    Connection::execute("TRUNCATE {$tbpref}tags2");
+    Connection::execute("TRUNCATE {$tbpref}texts");
+    Connection::execute("TRUNCATE {$tbpref}texttags");
+    Connection::execute("TRUNCATE {$tbpref}words");
+    Connection::execute("TRUNCATE {$tbpref}wordtags");
+    Connection::execute("DELETE FROM {$tbpref}settings where StKey = 'currenttext'");
     optimizedb();
     get_tags(1);
     get_texttags(1);

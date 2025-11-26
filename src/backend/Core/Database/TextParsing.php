@@ -64,15 +64,14 @@ class TextParsing
         fwrite($handle, $text);
         pclose($handle);
 
-        runsql(
+        Connection::execute(
             "CREATE TEMPORARY TABLE IF NOT EXISTS temptextitems2 (
                 TiCount smallint(5) unsigned NOT NULL,
                 TiSeID mediumint(8) unsigned NOT NULL,
                 TiOrder smallint(5) unsigned NOT NULL,
                 TiWordCount tinyint(3) unsigned NOT NULL,
                 TiText varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
-            ) DEFAULT CHARSET=utf8",
-            ''
+            ) DEFAULT CHARSET=utf8"
         );
         $handle = fopen($file_name, 'r');
         $mecabed = fread($handle, filesize($file_name));
@@ -143,14 +142,14 @@ class TextParsing
         foreach ($values as $key => $value) {
             $formatted_string[$key] = "(" . implode(",", $value) . ")";
         }
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO temptextitems2 (
                 TiSeID, TiCount, TiOrder, TiText, TiWordCount
             ) VALUES " . implode(',', $formatted_string)
         );
         // Delete elements TiOrder=@order
-        do_mysqli_query("DELETE FROM temptextitems2 WHERE TiOrder=$order");
-        do_mysqli_query(
+        Connection::execute("DELETE FROM temptextitems2 WHERE TiOrder=$order");
+        Connection::query(
             "INSERT INTO {$tbpref}temptextitems (
                 TiCount, TiSeID, TiOrder, TiWordCount, TiText
             )
@@ -159,7 +158,7 @@ class TextParsing
             FROM temptextitems2
             GROUP BY TiOrder"
         );
-        do_mysqli_query("DROP TABLE temptextitems2");
+        Connection::execute("DROP TABLE temptextitems2");
         unlink($file_name);
         return null;
     }
@@ -179,9 +178,9 @@ class TextParsing
         $fp = fopen($file_name, 'w');
         fwrite($fp, $text);
         fclose($fp);
-        do_mysqli_query("SET @order=0, @sid=1, @count = 0;");
+        Connection::query("SET @order=0, @sid=1, @count = 0;");
         if ($id > 0) {
-            do_mysqli_query(
+            Connection::query(
                 "SET @sid=(SELECT ifnull(max(`SeID`)+1,1) FROM `{$tbpref}sentences`);"
             );
         }
@@ -206,7 +205,7 @@ class TextParsing
 
         // Try LOAD DATA LOCAL INFILE, fall back to INSERT if it fails
         try {
-            do_mysqli_query($sql);
+            Connection::query($sql);
         } catch (\RuntimeException $e) {
             // If LOAD DATA LOCAL INFILE is disabled, use fallback method
             if (strpos($e->getMessage(), 'LOAD DATA LOCAL INFILE is forbidden') !== false) {
@@ -233,7 +232,7 @@ class TextParsing
 
         // Get starting sentence ID
         if ($id > 0) {
-            $result = do_mysqli_query(
+            $result = Connection::query(
                 "SELECT ifnull(max(`SeID`)+1,1) as maxid FROM `{$tbpref}sentences`"
             );
             if ($result === false || $result === true) {
@@ -279,9 +278,9 @@ class TextParsing
 
             $escaped_term = mysqli_real_escape_string($connection, $term);
 
-            do_mysqli_query(
-                "INSERT INTO `{$tbpref}temptextitems` 
-                (TiSeID, TiCount, TiOrder, TiText, TiWordCount) 
+            Connection::query(
+                "INSERT INTO `{$tbpref}temptextitems`
+                (TiSeID, TiCount, TiOrder, TiText, TiWordCount)
                 VALUES ($sid, $current_count, $order, '$escaped_term', $word_count)"
             );
         }
@@ -302,7 +301,7 @@ class TextParsing
     {
         $tbpref = Globals::getTablePrefix();
         $sql = "SELECT * FROM {$tbpref}languages WHERE LgID=$lid";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         mysqli_free_result($res);
 
@@ -425,7 +424,7 @@ class TextParsing
                 $row[4] = (int)$word_count; // TiWordCount
                 $values[] = "(" . implode(",", $row) . ")";
             }
-            do_mysqli_query(
+            Connection::query(
                 "INSERT INTO {$tbpref}temptextitems (
                     TiSeID, TiCount, TiOrder, TiText, TiWordCount
                 ) VALUES " . implode(',', $values)
@@ -450,7 +449,7 @@ class TextParsing
     {
         $tbpref = Globals::getTablePrefix();
         $sql = "SELECT * FROM {$tbpref}languages WHERE LgID = $lid";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         mysqli_free_result($res);
 
@@ -463,7 +462,7 @@ class TextParsing
         $replace = explode("|", (string) $record['LgCharacterSubstitutions']);
         $text = Escaping::prepareTextdata($text);
         //if(is_callable('normalizer_normalize')) $s = normalizer_normalize($s);
-        do_mysqli_query('TRUNCATE TABLE ' . $tbpref . 'temptextitems');
+        Connection::execute('TRUNCATE TABLE ' . $tbpref . 'temptextitems');
 
         // because of sentence special characters
         $text = str_replace(array('}', '{'), array(']', '['), $text);
@@ -491,7 +490,7 @@ class TextParsing
     {
         $tbpref = Globals::getTablePrefix();
         $wo = $nw = array();
-        $res = do_mysqli_query(
+        $res = Connection::query(
             'SELECT GROUP_CONCAT(TiText order by TiOrder SEPARATOR "")
             Sent FROM ' . $tbpref . 'temptextitems group by TiSeID'
         );
@@ -503,7 +502,7 @@ class TextParsing
             mysqli_free_result($res);
         }
         echo '</ol>';
-        $res = do_mysqli_query(
+        $res = Connection::query(
             "SELECT count(`TiOrder`) cnt, if(0=TiWordCount,0,1) as len,
             LOWER(TiText) as word, WoTranslation
             FROM {$tbpref}temptextitems
@@ -558,7 +557,7 @@ class TextParsing
         }
 
         // Insert text items (and eventual multi-words)
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}textitems2 (
                 Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
             ) $sql
@@ -570,8 +569,8 @@ class TextParsing
         );
 
         // Add new sentences
-        do_mysqli_query('SET @i=0;');
-        do_mysqli_query(
+        Connection::query('SET @i=0;');
+        Connection::query(
             "INSERT INTO {$tbpref}sentences (
                 SeLgID, SeTxID, SeOrder, SeFirstPos, SeText
             ) SELECT
@@ -600,7 +599,7 @@ class TextParsing
 
         $mw = array();
         if ($multiwords) {
-            $res = do_mysqli_query(
+            $res = Connection::query(
                 "SELECT COUNT(WoID) cnt, n as len,
                 LOWER(WoText) AS word, WoTranslation
                 FROM {$tbpref}tempexprs
@@ -686,23 +685,23 @@ class TextParsing
             $init_var .= "@a$i=0,";
         }
         // 2.8.1-fork: @a0 is always 0? @f always '' but necessary to force code execution
-        do_mysqli_query(
+        Connection::query(
             "SET $init_var@a1=0, @a0=0, @se_id=0, @c='', @d=0, @f='', @ti_or=0;"
         );
         // Create a table to store length of each terms
-        do_mysqli_query(
+        Connection::query(
             "CREATE TEMPORARY TABLE IF NOT EXISTS {$tbpref}numbers(
                 n tinyint(3) unsigned NOT NULL
             );"
         );
-        do_mysqli_query("TRUNCATE TABLE {$tbpref}numbers");
-        do_mysqli_query(
+        Connection::execute("TRUNCATE TABLE {$tbpref}numbers");
+        Connection::query(
             "INSERT IGNORE INTO {$tbpref}numbers(n) VALUES (" .
             implode('),(', $wl) .
             ');'
         );
         // Store garbage
-        do_mysqli_query(
+        Connection::query(
             "CREATE TABLE IF NOT EXISTS {$tbpref}tempexprs (
                 sent mediumint unsigned,
                 word varchar(250),
@@ -711,8 +710,8 @@ class TextParsing
                 n tinyint(3) unsigned NOT NULL
             )"
         );
-        do_mysqli_query("TRUNCATE TABLE {$tbpref}tempexprs");
-        do_mysqli_query(
+        Connection::execute("TRUNCATE TABLE {$tbpref}tempexprs");
+        Connection::query(
             "INSERT IGNORE INTO {$tbpref}tempexprs
             (sent, word, lword, TiOrder, n)
             -- 2.10.0-fork: straight_join may be irrelevant as the query is less skewed
@@ -787,7 +786,7 @@ class TextParsing
         $wl = array();
         $lid = (int) $lid;
         $sql = "SELECT LgRightToLeft FROM {$tbpref}languages WHERE LgID = $lid";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         // Just checking if LgID exists with ID should be enough
         if ($record == false) {
@@ -815,7 +814,7 @@ class TextParsing
         }
 
         // Get multi-word count
-        $res = do_mysqli_query(
+        $res = Connection::query(
             "SELECT DISTINCT(WoWordCount)
             FROM {$tbpref}words
             WHERE WoLgID = $lid AND WoWordCount > 1"
@@ -838,7 +837,7 @@ class TextParsing
             self::displayStatistics($lid, (bool)$rtlScript, !empty($wl));
         }
 
-        do_mysqli_query("TRUNCATE TABLE {$tbpref}temptextitems");
+        Connection::execute("TRUNCATE TABLE {$tbpref}temptextitems");
         return null;
     }
 }

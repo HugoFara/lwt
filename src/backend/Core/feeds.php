@@ -2,6 +2,9 @@
 
 require_once __DIR__ . '/database_connect.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
+
 // -------------------------------------------------------------
 
 function load_feeds($currentfeed): void
@@ -11,7 +14,7 @@ function load_feeds($currentfeed): void
     $ajax = $feeds = array();
     echo '<script type="text/javascript">';
     if (isset($_REQUEST['check_autoupdate'])) {
-        $result = do_mysqli_query(
+        $result = Connection::query(
             "SELECT * FROM " . $tbpref . "newsfeeds
             where `NfOptions` like '%autoupdate=%'"
         );
@@ -46,7 +49,7 @@ function load_feeds($currentfeed): void
         mysqli_free_result($result);
     } else {
         $sql = "SELECT * FROM " . $tbpref . "newsfeeds WHERE NfID in ($currentfeed)";
-        $result = do_mysqli_query($sql);
+        $result = Connection::query($sql);
         while ($row = mysqli_fetch_assoc($result)) {
             $ajax[$cnt] =  "$.ajax({type: 'POST',beforeSend: function(){ $('#feed_" .
                 ($row['NfID'] ?? '') . "').replaceWith( '<div id=\"feed_" . ($row['NfID'] ?? '') . "\" class=\"msgblue\"><p>" .
@@ -104,9 +107,9 @@ function write_rss_to_db($texts): string
                     $Nf_tag = '"' . implode('","', $text['TagList']) . '"';
                     foreach ($text['TagList'] as $tag) {
                         if (! in_array($tag, $_SESSION['TEXTTAGS'])) {
-                            do_mysqli_query(
+                            Connection::query(
                                 'insert into ' . $tbpref . 'tags2 (T2Text)
-                                values (' . convert_string_to_sqlsyntax($tag) . ')'
+                                values (' . Escaping::toSqlSyntax($tag) . ')'
                             );
                         }
                     }
@@ -114,15 +117,15 @@ function write_rss_to_db($texts): string
                 }
                 echo '<div class="msgblue"><p class="hide_message">+++ "' .
                 $text['TxTitle'] . '" added! +++</p></div>';
-                do_mysqli_query(
+                Connection::query(
                     'INSERT INTO ' . $tbpref . 'texts (
                         TxLgID,TxTitle,TxText,TxAudioURI,TxSourceURI
                     ) VALUES (
                         ' . $text['TxLgID'] . ',' .
-                        convert_string_to_sqlsyntax($text['TxTitle']) . ',' .
-                        convert_string_to_sqlsyntax($text['TxText']) . ',' .
-                        convert_string_to_sqlsyntax($text['TxAudioURI']) . ',' .
-                        convert_string_to_sqlsyntax($text['TxSourceURI']) . ')'
+                        Escaping::toSqlSyntax($text['TxTitle']) . ',' .
+                        Escaping::toSqlSyntax($text['TxText']) . ',' .
+                        Escaping::toSqlSyntax($text['TxAudioURI']) . ',' .
+                        Escaping::toSqlSyntax($text['TxSourceURI']) . ')'
                 );
                 $id = get_last_key();
                 splitCheckText(
@@ -136,7 +139,7 @@ function write_rss_to_db($texts): string
                     ),
                     $id
                 );
-                do_mysqli_query(
+                Connection::query(
                     'insert into ' . $tbpref . 'texttags (TtTxID, TtT2ID)
                     select ' . $id . ', T2ID from ' . $tbpref . 'tags2
                     where T2Text in (' . $Nf_tag . ')'
@@ -144,7 +147,7 @@ function write_rss_to_db($texts): string
             }
         }
         get_texttags(1);
-        $result = do_mysqli_query(
+        $result = Connection::query(
             "SELECT TtTxID FROM " . $tbpref . "texttags
             join " . $tbpref . "tags2 on TtT2ID=T2ID
             WHERE T2Text in (" . $Nf_tag . ")"
@@ -158,49 +161,43 @@ function write_rss_to_db($texts): string
             sort($text_item, SORT_NUMERIC);
             $text_item = array_slice($text_item, 0, $text_count - $nf_max_texts);
             foreach ($text_item as $text_ID) {
-                $message3 += (int) runsql(
+                $message3 += (int) Connection::execute(
                     'delete from ' . $tbpref . 'textitems2
-                    where Ti2TxID = ' . $text_ID,
-                    ""
+                    where Ti2TxID = ' . $text_ID
                 );
-                $message2 += (int) runsql(
+                $message2 += (int) Connection::execute(
                     'delete from ' . $tbpref . 'sentences
-                    where SeTxID = ' . $text_ID,
-                    ""
+                    where SeTxID = ' . $text_ID
                 );
-                $message4 += (int) runsql(
+                $message4 += (int) Connection::execute(
                     'insert into ' . $tbpref . 'archivedtexts (
                         AtLgID, AtTitle, AtText, AtAnnotatedText,
                         AtAudioURI, AtSourceURI
                     ) select TxLgID, TxTitle, TxText, TxAnnotatedText,
                     TxAudioURI, TxSourceURI
                     from ' . $tbpref . 'texts
-                    where TxID = ' . $text_ID,
-                    ""
+                    where TxID = ' . $text_ID
                 );
                 $id = get_last_key();
-                runsql(
+                Connection::execute(
                     'insert into ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
                     select ' . $id . ', TtT2ID from ' . $tbpref . 'texttags
-                    where TtTxID = ' . $text_ID,
-                    ""
+                    where TtTxID = ' . $text_ID
                 );
-                $message1 += (int) runsql(
+                $message1 += (int) Connection::execute(
                     'delete from ' . $tbpref . 'texts
-                    where TxID = ' . $text_ID,
-                    ""
+                    where TxID = ' . $text_ID
                 );
                 // $message .= $message4 . " / " . $message1 . " / " . $message2 . " / " . $message3;
                 adjust_autoincr('texts', 'TxID');
                 adjust_autoincr('sentences', 'SeID');
-                runsql(
+                Connection::execute(
                     "DELETE " . $tbpref . "texttags
                     FROM ("
                         . $tbpref . "texttags
                         LEFT JOIN " . $tbpref . "texts on TtTxID = TxID
                     )
-                    WHERE TxID IS NULL",
-                    ''
+                    WHERE TxID IS NULL"
                 );
             }
         }
@@ -565,11 +562,10 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
         if (isset($feed_data[$key]['text'])) {
             $link = trim($feed_data[$key]['link']);
             if (substr($link, 0, 1) == '#') {
-                runsql(
+                Connection::execute(
                     'UPDATE ' . $tbpref . 'feedlinks
-                    SET FlLink=' . convert_string_to_sqlsyntax($link) . '
-                    where FlID = ' . substr($link, 1),
-                    ""
+                    SET FlLink=' . Escaping::toSqlSyntax($link) . '
+                    where FlID = ' . substr($link, 1)
                 );
             }
             $data[$key]['TxSourceURI'] = $link;

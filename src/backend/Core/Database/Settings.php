@@ -120,10 +120,9 @@ class Settings
         if ($v === '') {
             return 'Value is an empty string!';
         }
-        runsql(
+        Connection::execute(
             "DELETE FROM {$tbpref}settings
-            WHERE StKey = " . Escaping::toSqlSyntax($k),
-            ''
+            WHERE StKey = " . Escaping::toSqlSyntax($k)
         );
         if (isset($dft[$k]) && $dft[$k]['num']) {
             $v = (int)$v;
@@ -134,17 +133,12 @@ class Settings
                 $v = $dft[$k]['dft'];
             }
         }
-        $dum = runsql(
+        $dum = Connection::execute(
             "INSERT INTO {$tbpref}settings (StKey, StValue) VALUES(" .
             Escaping::toSqlSyntax($k) . ', ' .
-            Escaping::toSqlSyntax((string)$v) . ')',
-            ''
+            Escaping::toSqlSyntax((string)$v) . ')'
         );
-        if (is_numeric($dum)) {
-            return "OK: $dum rows changed";
-        }
-        /** @var string $dum Error message from runsql */
-        return $dum;
+        return "OK: $dum rows changed";
     }
 
     /**
@@ -154,17 +148,16 @@ class Settings
      */
     public static function lwtTableCheck(): void
     {
-        $res = do_mysqli_query("SHOW TABLES LIKE '\\_lwtgeneral'");
+        $res = Connection::query("SHOW TABLES LIKE '\\_lwtgeneral'");
         if ($res === false || $res === true || mysqli_num_rows($res) == 0) {
-            runsql(
+            Connection::execute(
                 "CREATE TABLE IF NOT EXISTS _lwtgeneral (
                     LWTKey varchar(40) NOT NULL,
                     LWTValue varchar(40) DEFAULT NULL,
                     PRIMARY KEY (LWTKey)
-                ) ENGINE=MyISAM DEFAULT CHARSET=utf8",
-                ''
+                ) ENGINE=MyISAM DEFAULT CHARSET=utf8"
             );
-            $res2 = do_mysqli_query("SHOW TABLES LIKE '\\_lwtgeneral'");
+            $res2 = Connection::query("SHOW TABLES LIKE '\\_lwtgeneral'");
             if (
                 $res2 === false || $res2 === true || mysqli_num_rows($res2) == 0
             ) {
@@ -184,12 +177,11 @@ class Settings
     public static function lwtTableSet(string $key, string $val): void
     {
         self::lwtTableCheck();
-        runsql(
+        Connection::execute(
             "INSERT INTO _lwtgeneral (LWTKey, LWTValue) VALUES (
                 " . Escaping::toSqlSyntax($key) . ",
                 " . Escaping::toSqlSyntax($val) . "
-            ) ON DUPLICATE KEY UPDATE LWTValue = " . Escaping::toSqlSyntax($val),
-            ''
+            ) ON DUPLICATE KEY UPDATE LWTValue = " . Escaping::toSqlSyntax($val)
         );
     }
 

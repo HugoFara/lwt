@@ -2,6 +2,9 @@
 
 require_once __DIR__ . '/database_connect.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
+
 /**
  * Return the list of all tags.
  *
@@ -23,7 +26,7 @@ function get_tags($refresh = 0)
     }
     $tags = array();
     $sql = 'SELECT TgText FROM ' . $tbpref . 'tags ORDER BY TgText';
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         $tags[] = (string)$record["TgText"];
     }
@@ -54,7 +57,7 @@ function get_texttags($refresh = 0)
     }
     $tags = array();
     $sql = 'SELECT T2Text FROM ' . $tbpref . 'tags2 ORDER BY T2Text';
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         $tags[] = (string)$record["T2Text"];
     }
@@ -103,7 +106,7 @@ function get_tag_selectoptions(int|string|null $v, int|string $l): string
         group by TgID
         order by UPPER(TgText)";
     }
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $cnt = 0;
     while ($record = mysqli_fetch_assoc($res)) {
         $d = $record["TgText"];
@@ -142,7 +145,7 @@ function get_texttag_selectoptions(int|string|null $v, int|string $l): string
         group by T2ID
         order by UPPER(T2Text)";
     }
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $cnt = 0;
     while ($record = mysqli_fetch_assoc($res)) {
         $d = $record["T2Text"];
@@ -178,7 +181,7 @@ function get_txtag_selectoptions(int|string $l, int|string|null $v): string
         $sql .= ' WHERE TxLgID=' . $l;
     }
     $sql .= ' GROUP BY UPPER(TagName)';
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         if ($record['TagName'] == 1) {
             $u = "<option disabled=\"disabled\">--------</option><option value=\"" .
@@ -219,7 +222,7 @@ function get_archivedtexttag_selectoptions(int|string|null $v, int|string $l): s
         group by T2ID
         order by UPPER(T2Text)";
     }
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $cnt = 0;
     while ($record = mysqli_fetch_assoc($res)) {
         $d = $record["T2Text"];
@@ -244,7 +247,7 @@ function get_archivedtexttag_selectoptions(int|string|null $v, int|string $l): s
 function saveWordTags(int $wid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    runsql("DELETE from " . $tbpref . "wordtags WHERE WtWoID =" . $wid, '');
+    Connection::execute("DELETE from " . $tbpref . "wordtags WHERE WtWoID =" . $wid);
     if (
         !isset($_REQUEST['TermTags'])
         || !is_array($_REQUEST['TermTags'])
@@ -259,18 +262,16 @@ function saveWordTags(int $wid): void
     for ($i = 0; $i < $cnt; $i++) {
         $tag = $_REQUEST['TermTags']['TagList'][$i];
         if (!in_array($tag, $_SESSION['TAGS'])) {
-            runsql(
+            Connection::execute(
                 "INSERT INTO {$tbpref}tags (TgText)
-                VALUES(" . convert_string_to_sqlsyntax($tag) . ")",
-                ""
+                VALUES(" . Escaping::toSqlSyntax($tag) . ")"
             );
         }
-        runsql(
+        Connection::execute(
             "INSERT INTO {$tbpref}wordtags (WtWoID, WtTgID)
             SELECT $wid, TgID
             FROM {$tbpref}tags
-            WHERE TgText = " . convert_string_to_sqlsyntax($tag),
-            ""
+            WHERE TgText = " . Escaping::toSqlSyntax($tag)
         );
     }
     // refresh tags cache
@@ -287,9 +288,8 @@ function saveWordTags(int $wid): void
 function saveTextTags(int $tid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    runsql(
-        "DELETE FROM " . $tbpref . "texttags WHERE TtTxID =" . $tid,
-        ''
+    Connection::execute(
+        "DELETE FROM " . $tbpref . "texttags WHERE TtTxID =" . $tid
     );
     if (
         !isset($_REQUEST['TextTags'])
@@ -305,18 +305,16 @@ function saveTextTags(int $tid): void
     for ($i = 0; $i < $cnt; $i++) {
         $tag = $_REQUEST['TextTags']['TagList'][$i];
         if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
-            runsql(
+            Connection::execute(
                 "INSERT INTO {$tbpref}tags2 (T2Text)
-                VALUES(" . convert_string_to_sqlsyntax($tag) . ")",
-                ""
+                VALUES(" . Escaping::toSqlSyntax($tag) . ")"
             );
         }
-        runsql(
+        Connection::execute(
             "INSERT INTO {$tbpref}texttags (TtTxID, TtT2ID)
             SELECT $tid, T2ID
             FROM {$tbpref}tags2
-            WHERE T2Text = " . convert_string_to_sqlsyntax($tag),
-            ""
+            WHERE T2Text = " . Escaping::toSqlSyntax($tag)
         );
     }
     // refresh tags cache
@@ -334,7 +332,7 @@ function saveTextTags(int $tid): void
 function saveArchivedTextTags(int $tid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    runsql("DELETE from " . $tbpref . "archtexttags WHERE AgAtID =" . $tid, '');
+    Connection::execute("DELETE from " . $tbpref . "archtexttags WHERE AgAtID =" . $tid);
     if (
         !isset($_REQUEST['TextTags'])
         || !is_array($_REQUEST['TextTags'])
@@ -348,18 +346,16 @@ function saveArchivedTextTags(int $tid): void
     for ($i = 0; $i < $cnt; $i++) {
         $tag = $_REQUEST['TextTags']['TagList'][$i];
         if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
-            runsql(
-                'INSERT INTO {$tbpref}tags2 (T2Text)
-                VALUES(' . convert_string_to_sqlsyntax($tag) . ')',
-                ""
+            Connection::execute(
+                "INSERT INTO {$tbpref}tags2 (T2Text)
+                VALUES(" . Escaping::toSqlSyntax($tag) . ")"
             );
         }
-        runsql(
+        Connection::execute(
             "INSERT INTO {$tbpref}archtexttags (AgAtID, AgT2ID)
             SELECT $tid, T2ID
             FROM {$tbpref}tags2
-            WHERE T2Text = " . convert_string_to_sqlsyntax($tag),
-            ""
+            WHERE T2Text = " . Escaping::toSqlSyntax($tag)
         );
         // refresh tags cache
         get_texttags(1);
@@ -377,7 +373,7 @@ function getWordTags(int $wid): string
         from ' . $tbpref . 'wordtags, ' . $tbpref . 'tags
         where TgID = WtTgID and WtWoID = ' . $wid . '
         order by TgText';
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $r .= '<li>' . tohtml($record["TgText"]) . '</li>';
         }
@@ -405,7 +401,7 @@ function getTextTags($tid): string
         FROM {$tbpref}texttags, {$tbpref}tags2
         WHERE T2ID = TtT2ID AND TtTxID = $tid
         ORDER BY T2Text";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $r .= '<li>' . tohtml($record["T2Text"]) . '</li>';
         }
@@ -434,7 +430,7 @@ function getArchivedTextTags($tid): string
         FROM ' . $tbpref . 'archtexttags, ' . $tbpref . 'tags2
         WHERE T2ID = AgT2ID AND AgAtID = ' . $tid . '
         ORDER BY T2Text';
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $r .= '<li>' . tohtml($record["T2Text"]) . '</li>';
         }
@@ -456,18 +452,17 @@ function addtaglist(string $item, string $list): string
     $tagid = get_first_value(
         'select TgID as value
         from ' . $tbpref . 'tags
-        where TgText = ' . convert_string_to_sqlsyntax($item)
+        where TgText = ' . Escaping::toSqlSyntax($item)
     );
     if (!isset($tagid)) {
-        runsql(
+        Connection::execute(
             'insert into ' . $tbpref . 'tags (TgText)
-            values(' . convert_string_to_sqlsyntax($item) . ')',
-            ""
+            values(' . Escaping::toSqlSyntax($item) . ')'
         );
         $tagid = get_first_value(
             'select TgID as value
             from ' . $tbpref . 'tags
-            where TgText = ' . convert_string_to_sqlsyntax($item)
+            where TgText = ' . Escaping::toSqlSyntax($item)
         );
         // If still not set, tag creation failed
         if (!isset($tagid)) {
@@ -479,13 +474,12 @@ function addtaglist(string $item, string $list): string
     LEFT JOIN ' . $tbpref . 'wordtags
     ON WoID = WtWoID AND WtTgID = ' . $tagid . '
     WHERE WtTgID IS NULL AND WoID in ' . $list;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $cnt = 0;
     while ($record = mysqli_fetch_assoc($res)) {
-        $cnt += (int) runsql(
+        $cnt += (int) Connection::execute(
             'insert ignore into ' . $tbpref . 'wordtags (WtWoID, WtTgID)
-            values(' . $record['WoID'] . ', ' . $tagid . ')',
-            ""
+            values(' . $record['WoID'] . ', ' . $tagid . ')'
         );
     }
     mysqli_free_result($res);
@@ -504,18 +498,17 @@ function addarchtexttaglist(string $item, string $list): string
     }
     $tagid = get_first_value(
         'select T2ID as value from ' . $tbpref . 'tags2
-        where T2Text = ' . convert_string_to_sqlsyntax($item)
+        where T2Text = ' . Escaping::toSqlSyntax($item)
     );
     if (!isset($tagid)) {
-        runsql(
+        Connection::execute(
             'insert into ' . $tbpref . 'tags2 (T2Text)
-            values(' . convert_string_to_sqlsyntax($item) . ')',
-            ""
+            values(' . Escaping::toSqlSyntax($item) . ')'
         );
         $tagid = get_first_value(
             'select T2ID as value
             from ' . $tbpref . 'tags2
-            where T2Text = ' . convert_string_to_sqlsyntax($item)
+            where T2Text = ' . Escaping::toSqlSyntax($item)
         );
         // If still not set, tag creation failed
         if (!isset($tagid)) {
@@ -526,13 +519,12 @@ function addarchtexttaglist(string $item, string $list): string
     LEFT JOIN ' . $tbpref . 'archtexttags
     ON AtID = AgAtID AND AgT2ID = ' . $tagid . '
     WHERE AgT2ID IS NULL AND AtID in ' . $list;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $cnt = 0;
     while ($record = mysqli_fetch_assoc($res)) {
-        $cnt += (int) runsql(
+        $cnt += (int) Connection::execute(
             'insert ignore into ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
-            values(' . $record['AtID'] . ', ' . $tagid . ')',
-            ""
+            values(' . $record['AtID'] . ', ' . $tagid . ')'
         );
     }
     mysqli_free_result($res);
@@ -552,18 +544,17 @@ function addtexttaglist(string $item, string $list): string
     $tagid = get_first_value(
         'select T2ID as value
         from ' . $tbpref . 'tags2
-        where T2Text = ' . convert_string_to_sqlsyntax($item)
+        where T2Text = ' . Escaping::toSqlSyntax($item)
     );
     if (!isset($tagid)) {
-        runsql(
+        Connection::execute(
             'insert into ' . $tbpref . 'tags2 (T2Text)
-            values(' . convert_string_to_sqlsyntax($item) . ')',
-            ""
+            values(' . Escaping::toSqlSyntax($item) . ')'
         );
         $tagid = get_first_value(
             'select T2ID as value
             from ' . $tbpref . 'tags2
-            where T2Text = ' . convert_string_to_sqlsyntax($item)
+            where T2Text = ' . Escaping::toSqlSyntax($item)
         );
         // If still not set, tag creation failed
         if (!isset($tagid)) {
@@ -574,13 +565,12 @@ function addtexttaglist(string $item, string $list): string
      LEFT JOIN ' . $tbpref . 'texttags
      ON TxID = TtTxID AND TtT2ID = ' . $tagid . '
      WHERE TtT2ID IS NULL AND TxID in ' . $list;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $cnt = 0;
     while ($record = mysqli_fetch_assoc($res)) {
-        $cnt += (int) runsql(
+        $cnt += (int) Connection::execute(
             'insert ignore into ' . $tbpref . 'texttags (TtTxID, TtT2ID)
-            values(' . $record['TxID'] . ', ' . $tagid . ')',
-            ""
+            values(' . $record['TxID'] . ', ' . $tagid . ')'
         );
     }
     mysqli_free_result($res);
@@ -600,20 +590,19 @@ function removetaglist(string $item, string $list): string
     $tagid = get_first_value(
         'SELECT TgID AS value
         FROM ' . $tbpref . 'tags
-        WHERE TgText = ' . convert_string_to_sqlsyntax($item)
+        WHERE TgText = ' . Escaping::toSqlSyntax($item)
     );
     if (! isset($tagid)) {
         return "Tag " . $item . " not found";
     }
     $sql = 'select WoID from ' . $tbpref . 'words where WoID in ' . $list;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $cnt = 0;
     while ($record = mysqli_fetch_assoc($res)) {
         $cnt++;
-        runsql(
+        Connection::execute(
             'DELETE FROM ' . $tbpref . 'wordtags
-            WHERE WtWoID = ' . $record['WoID'] . ' AND WtTgID = ' . $tagid,
-            ""
+            WHERE WtWoID = ' . $record['WoID'] . ' AND WtTgID = ' . $tagid
         );
     }
     mysqli_free_result($res);
@@ -632,20 +621,19 @@ function removearchtexttaglist(string $item, string $list): string
     $tagid = get_first_value(
         'select T2ID as value
         from ' . $tbpref . 'tags2
-        where T2Text = ' . convert_string_to_sqlsyntax($item)
+        where T2Text = ' . Escaping::toSqlSyntax($item)
     );
     if (!isset($tagid)) {
         return "Tag " . $item . " not found";
     }
     $sql = 'select AtID from ' . $tbpref . 'archivedtexts where AtID in ' . $list;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $cnt = 0;
     while ($record = mysqli_fetch_assoc($res)) {
         $cnt++;
-        runsql(
+        Connection::execute(
             'delete from ' . $tbpref . 'archtexttags
-            where AgAtID = ' . $record['AtID'] . ' and AgT2ID = ' . $tagid,
-            ""
+            where AgAtID = ' . $record['AtID'] . ' and AgT2ID = ' . $tagid
         );
     }
     mysqli_free_result($res);
@@ -663,20 +651,19 @@ function removetexttaglist(string $item, string $list): string
     }
     $tagid = get_first_value(
         'select T2ID as value from ' . $tbpref . 'tags2
-        where T2Text = ' . convert_string_to_sqlsyntax($item)
+        where T2Text = ' . Escaping::toSqlSyntax($item)
     );
     if (!isset($tagid)) {
         return "Tag " . $item . " not found";
     }
     $sql = 'select TxID from ' . $tbpref . 'texts where TxID in ' . $list;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $cnt = 0;
     while ($record = mysqli_fetch_assoc($res)) {
         $cnt++;
-        runsql(
+        Connection::execute(
             'delete from ' . $tbpref . 'texttags
-            where TtTxID = ' . $record['TxID'] . ' and TtT2ID = ' . $tagid,
-            ""
+            where TtTxID = ' . $record['TxID'] . ' and TtT2ID = ' . $tagid
         );
     }
     mysqli_free_result($res);

@@ -46,7 +46,7 @@ class Maintenance
             $val = 1;
         }
         $sql = 'ALTER TABLE ' . $tbpref . $table . ' AUTO_INCREMENT = ' . $val;
-        do_mysqli_query($sql);
+        Connection::query($sql);
     }
 
     /**
@@ -76,12 +76,12 @@ class Maintenance
         } else {
             $sql .= " LIKE " . Escaping::toSqlSyntax(rtrim($tbpref, '_')) . "'\\_%" . "'";
         }
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         if ($res === false || $res === true) {
             return;
         }
         while ($row = mysqli_fetch_assoc($res)) {
-            runsql('OPTIMIZE TABLE ' . $row['Name'], '');
+            Connection::execute('OPTIMIZE TABLE ' . $row['Name']);
         }
         mysqli_free_result($res);
     }
@@ -104,7 +104,7 @@ class Maintenance
 
         $sql = "SELECT WoID, WoTextLC FROM {$tbpref}words
         WHERE WoLgID = $japid AND WoWordCount = 0";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         if ($res === false || $res === true) {
             return;
         }
@@ -148,7 +148,7 @@ class Maintenance
 
 
         // STEP 3: edit the database
-        do_mysqli_query(
+        Connection::query(
             "CREATE TEMPORARY TABLE {$tbpref}mecab (
                 MID mediumint(8) unsigned NOT NULL,
                 MWordCount tinyint(3) unsigned NOT NULL,
@@ -156,13 +156,13 @@ class Maintenance
             ) CHARSET=utf8"
         );
 
-        do_mysqli_query($sql);
-        do_mysqli_query(
+        Connection::query($sql);
+        Connection::query(
             "UPDATE {$tbpref}words
             JOIN {$tbpref}mecab ON MID = WoID
             SET WoWordCount = MWordCount"
         );
-        do_mysqli_query("DROP TABLE {$tbpref}mecab");
+        Connection::execute("DROP TABLE {$tbpref}mecab");
 
         unlink($db_to_mecab);
     }
@@ -196,11 +196,11 @@ class Maintenance
         FROM {$tbpref}words, {$tbpref}languages
         WHERE WoWordCount = 0 AND WoLgID = LgID
         ORDER BY WoID";
-        $result = do_mysqli_query($sql);
+        $result = Connection::query($sql);
         if ($result === false || $result === true) {
             return;
         }
-        while (($rec = mysqli_fetch_assoc($result)) !== false) {
+        while (($rec = mysqli_fetch_assoc($result)) !== null) {
             if ((int)$rec['LgSplitEachChar'] === 1) {
                 $textlc = preg_replace('/([^\s])/u', "$1 ", $rec['WoTextLC']);
             } else {
@@ -222,7 +222,7 @@ class Maintenance
                 SET WoWordCount = CASE WoID" . implode(' ', $sqlarr) . "
                 END
                 WHERE WoWordCount=0 AND WoID BETWEEN $min AND $max";
-                do_mysqli_query($sqltext);
+                Connection::query($sqltext);
                 $min = $max;
                 $sqlarr = array();
             }
@@ -232,7 +232,7 @@ class Maintenance
             $sqltext = "UPDATE {$tbpref}words
             SET WoWordCount = CASE WoID" . implode(' ', $sqlarr) . '
             END where WoWordCount=0';
-            do_mysqli_query($sqltext);
+            Connection::query($sqltext);
         }
     }
 }

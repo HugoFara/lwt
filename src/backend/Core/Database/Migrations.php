@@ -63,12 +63,12 @@ class Migrations
     public static function reparseAllTexts(): void
     {
         $tbpref = Globals::getTablePrefix();
-        runsql("TRUNCATE {$tbpref}sentences", '');
-        runsql("TRUNCATE {$tbpref}textitems2", '');
+        Connection::execute("TRUNCATE {$tbpref}sentences");
+        Connection::execute("TRUNCATE {$tbpref}textitems2");
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         Maintenance::initWordCount();
         $sql = "SELECT TxID, TxLgID FROM {$tbpref}texts";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         if ($res === false || $res === true) {
             return;
         }
@@ -138,11 +138,10 @@ class Migrations
                 WHERE schema_name = "' . $dbname . '"'
                 )
             ) {
-                runsql("SET collation_connection = 'utf8_general_ci'", '');
-                runsql(
+                Connection::query("SET collation_connection = 'utf8_general_ci'");
+                Connection::execute(
                     'ALTER DATABASE `' . $dbname .
-                    '` CHARACTER SET utf8 COLLATE utf8_general_ci',
-                    ''
+                    '` CHARACTER SET utf8 COLLATE utf8_general_ci'
                 );
                 if (Globals::isDebug()) {
                     echo 'changed to utf8_general_ci</p>';
@@ -155,14 +154,18 @@ class Migrations
                 echo "<p>DEBUG: do DB updates: $dbversion --&gt; $currversion</p>";
             }
 
-            $res = do_mysqli_query("SELECT filename FROM _migrations");
+            $res = Connection::query("SELECT filename FROM _migrations");
             if ($res !== false && $res !== true) {
                 while ($record = mysqli_fetch_assoc($res)) {
                     $queries = parseSQLFile(
                         __DIR__ . '/../../../../db/migrations/' . $record["filename"]
                     );
                     foreach ($queries as $sql_query) {
-                        (int) runsql($sql_query, '', false);
+                        try {
+                            Connection::execute($sql_query);
+                        } catch (\RuntimeException $e) {
+                            // Ignore errors in migration queries (they may already be applied)
+                        }
                     }
                 }
             }
@@ -170,15 +173,14 @@ class Migrations
             if (Globals::isDebug()) {
                 echo '<p>DEBUG: rebuilding tts</p>';
             }
-            runsql(
+            Connection::execute(
                 "CREATE TABLE IF NOT EXISTS tts (
                     TtsID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
                     TtsTxt varchar(100) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
                     TtsLc varchar(8) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
                     PRIMARY KEY (TtsID),
                     UNIQUE KEY TtsTxtLC (TtsTxt,TtsLc)
-                ) ENGINE=MyISAM DEFAULT CHARSET=utf8 PACK_KEYS=1",
-                ''
+                ) ENGINE=MyISAM DEFAULT CHARSET=utf8 PACK_KEYS=1"
             );
 
             // Set database to current version
@@ -197,7 +199,7 @@ class Migrations
         $tbpref = Globals::getTablePrefix();
         $tables = array();
 
-        $res = do_mysqli_query(
+        $res = Connection::query(
             str_replace(
                 '_',
                 "\\_",
@@ -220,11 +222,11 @@ class Migrations
         foreach ($queries as $query) {
             if (str_contains($query, "_migrations")) {
                 // Do not prefix meta tables
-                runsql($query, "");
+                $count += (int) Connection::execute($query);
             } else {
                 $prefixed_query = self::prefixQuery($query, $tbpref);
                 // Increment count for new tables only
-                $count += (int) runsql($prefixed_query, "");
+                $count += (int) Connection::execute($prefixed_query);
             }
         }
 
@@ -234,7 +236,7 @@ class Migrations
         if (!in_array("{$tbpref}textitems2", $tables)) {
             // Add data from the old database system
             if (in_array("{$tbpref}textitems", $tables)) {
-                runsql(
+                Connection::execute(
                     "INSERT INTO {$tbpref}textitems2 (
                         Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount,
                         Ti2Text
@@ -248,10 +250,9 @@ class Migrations
                     END AS Text
                     FROM {$tbpref}textitems
                     LEFT JOIN {$tbpref}words ON TiTextLC=WoTextLC AND TiLgID=WoLgID
-                    WHERE TiWordCount<2 OR WoID IS NOT NULL",
-                    ''
+                    WHERE TiWordCount<2 OR WoID IS NOT NULL"
                 );
-                runsql("TRUNCATE {$tbpref}textitems", '');
+                Connection::execute("TRUNCATE {$tbpref}textitems");
             }
             $count++;
         }
@@ -273,53 +274,46 @@ class Migrations
                 echo '<p>DEBUG: Doing score recalc. Today: ' . $today .
                 ' / Last: ' . $lastscorecalc . '</p>';
             }
-            runsql(
+            Connection::execute(
                 "UPDATE {$tbpref}words
                 SET " . make_score_random_insert_update('u') . "
-                WHERE WoTodayScore>=-100 AND WoStatus<98",
-                ''
+                WHERE WoTodayScore>=-100 AND WoStatus<98"
             );
-            runsql(
+            Connection::execute(
                 "DELETE {$tbpref}wordtags
                 FROM ({$tbpref}wordtags LEFT JOIN {$tbpref}tags on WtTgID = TgID)
-                WHERE TgID IS NULL",
-                ''
+                WHERE TgID IS NULL"
             );
-            runsql(
+            Connection::execute(
                 "DELETE {$tbpref}wordtags
                 FROM ({$tbpref}wordtags LEFT JOIN {$tbpref}words ON WtWoID = WoID)
-                WHERE WoID IS NULL",
-                ''
+                WHERE WoID IS NULL"
             );
-            runsql(
+            Connection::execute(
                 "DELETE {$tbpref}texttags
                 FROM ({$tbpref}texttags LEFT JOIN {$tbpref}tags2 ON TtT2ID = T2ID)
-                WHERE T2ID IS NULL",
-                ''
+                WHERE T2ID IS NULL"
             );
-            runsql(
+            Connection::execute(
                 "DELETE {$tbpref}texttags
                 FROM ({$tbpref}texttags LEFT JOIN {$tbpref}texts ON TtTxID = TxID)
-                WHERE TxID IS NULL",
-                ''
+                WHERE TxID IS NULL"
             );
-            runsql(
+            Connection::execute(
                 "DELETE {$tbpref}archtexttags
                 FROM (
                     {$tbpref}archtexttags
                     LEFT JOIN {$tbpref}tags2 ON AgT2ID = T2ID
                 )
-                WHERE T2ID IS NULL",
-                ''
+                WHERE T2ID IS NULL"
             );
-            runsql(
+            Connection::execute(
                 "DELETE {$tbpref}archtexttags
                 FROM (
                     {$tbpref}archtexttags
                     LEFT JOIN {$tbpref}archivedtexts ON AgAtID = AtID
                 )
-                WHERE AtID IS NULL",
-                ''
+                WHERE AtID IS NULL"
             );
             Maintenance::optimizeDatabase();
             Settings::save('lastscorecalc', $today);
