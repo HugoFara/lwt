@@ -158,6 +158,8 @@ function runsql($sql, $m, $sqlerrdie = true): string
  * @return float|int|string|null Any returned value from the database.
  *
  * @since 2.6.0-fork Officially return numeric types.
+ *
+ * @deprecated 3.0.0 Use DB::queryValue() for new code
  */
 function get_first_value($sql)
 {
@@ -179,6 +181,8 @@ function get_first_value($sql)
  * @param string $s Input string
  *
  * @return string Adapted string.
+ *
+ * @deprecated 3.0.0 Use Escaping::prepareTextdata() for new code
  */
 function prepare_textdata($s): string
 {
@@ -193,6 +197,8 @@ function prepare_textdata($s): string
  * @param string $s Input string
  *
  * @return string Escaped string safe for JavaScript
+ *
+ * @deprecated 3.0.0 Use Escaping::prepareTextdataJs() for new code
  */
 function prepare_textdata_js(string $s): string
 {
@@ -250,6 +256,8 @@ function convert_string_to_sqlsyntax_notrim_nonull($data): string
  * @param string $input Regular expression pattern
  *
  * @return string SQL-compatible pattern
+ *
+ * @deprecated 3.0.0 Use Escaping::regexpToSqlSyntax() for new code
  */
 function convert_regexp_to_sqlsyntax(string $input): string
 {
@@ -262,6 +270,8 @@ function convert_regexp_to_sqlsyntax(string $input): string
  * @param string $currentlang Language ID to validate
  *
  * @return string '' if the language is not valid, $currentlang otherwise
+ *
+ * @deprecated 3.0.0 Use Validation::language() for new code
  */
 function validateLang($currentlang): string
 {
@@ -274,6 +284,8 @@ function validateLang($currentlang): string
  * @param string $currenttext Text ID to validate
  *
  * @return string '' if the text is not valid, $currenttext otherwise
+ *
+ * @deprecated 3.0.0 Use Validation::text() for new code
  */
 function validateText(string $currenttext): string
 {
@@ -287,6 +299,8 @@ function validateText(string $currenttext): string
  * @param string $currentlang Language ID
  *
  * @return string '' if invalid, $currenttag otherwise
+ *
+ * @deprecated 3.0.0 Use Validation::tag() for new code
  */
 function validateTag(string $currenttag, string $currentlang): string
 {
@@ -300,6 +314,8 @@ function validateTag(string $currenttag, string $currentlang): string
  * @param string $currentlang Language ID
  *
  * @return string '' if invalid, $currenttag otherwise
+ *
+ * @deprecated 3.0.0 Use Validation::archTextTag() for new code
  */
 function validateArchTextTag(string $currenttag, string $currentlang): string
 {
@@ -308,6 +324,16 @@ function validateArchTextTag(string $currenttag, string $currentlang): string
 
 // -------------------------------------------------------------
 
+/**
+ * Validate a text tag ID.
+ *
+ * @param string $currenttag Tag ID to validate
+ * @param string $currentlang Language ID
+ *
+ * @return string '' if invalid, $currenttag otherwise
+ *
+ * @deprecated 3.0.0 Use Validation::textTag() for new code
+ */
 function validateTextTag(string $currenttag, string $currentlang): string
 {
     return Validation::textTag($currenttag, $currentlang);
@@ -322,6 +348,8 @@ function validateTextTag(string $currenttag, string $currentlang): string
  * @return int
  *
  * @psalm-return 0|1
+ *
+ * @deprecated 3.0.0 Use Settings::getZeroOrOne() for new code
  */
 function getSettingZeroOrOne($key, $dft): int
 {
@@ -334,6 +362,8 @@ function getSettingZeroOrOne($key, $dft): int
  * @param  string $key Setting key. If $key is 'currentlanguage' or
  *                     'currenttext', we validate language/text.
  * @return string $val Value in the database if found, or an empty string
+ *
+ * @deprecated 3.0.0 Use Settings::get() for new code
  */
 function getSetting($key)
 {
@@ -346,6 +376,8 @@ function getSetting($key)
  * @param string $key Settings key
  *
  * @return string Requested setting, or default value, or ''
+ *
+ * @deprecated 3.0.0 Use Settings::getWithDefault() for new code
  */
 function getSettingWithDefault($key)
 {
@@ -361,6 +393,8 @@ function getSettingWithDefault($key)
  * @return string Success message (starts by "OK: "), or error message
  *
  * @since 2.9.0 Success message starts by "OK: "
+ *
+ * @deprecated 3.0.0 Use Settings::save() for new code
  */
 function saveSetting(string $k, string $v)
 {
@@ -369,6 +403,8 @@ function saveSetting(string $k, string $v)
 
 /**
  * Check if the _lwtgeneral table exists, create it if not.
+ *
+ * @deprecated 3.0.0 Use Settings::lwtTableCheck() for new code
  */
 function LWTTableCheck(): void
 {
@@ -380,6 +416,8 @@ function LWTTableCheck(): void
  *
  * @param string $key Setting key
  * @param string $val Setting value
+ *
+ * @deprecated 3.0.0 Use Settings::lwtTableSet() for new code
  */
 function LWTTableSet(string $key, string $val): void
 {
@@ -392,6 +430,8 @@ function LWTTableSet(string $key, string $val): void
  * @param string $key Setting key
  *
  * @return string Setting value or empty string if not found
+ *
+ * @deprecated 3.0.0 Use Settings::lwtTableGet() for new code
  */
 function LWTTableGet(string $key): string
 {
@@ -403,6 +443,8 @@ function LWTTableGet(string $key): string
  *
  * @param string $table Table name (without prefix)
  * @param string $key   Primary key column name
+ *
+ * @deprecated 3.0.0 Use Maintenance::adjustAutoIncrement() for new code
  */
 function adjust_autoincr($table, $key): void
 {
@@ -411,6 +453,8 @@ function adjust_autoincr($table, $key): void
 
 /**
  * Optimize the database.
+ *
+ * @deprecated 3.0.0 Use Maintenance::optimizeDatabase() for new code
  */
 function optimizedb(): void
 {
@@ -423,6 +467,8 @@ function optimizedb(): void
  * @param int $japid Japanese language ID
  *
  * @return void
+ *
+ * @deprecated 3.0.0 Use Maintenance::updateJapaneseWordCount() for new code
  */
 function update_japanese_word_count($japid)
 {
@@ -435,6 +481,8 @@ function update_japanese_word_count($japid)
  * Only terms with a word count set to 0 are changed.
  *
  * @return void
+ *
+ * @deprecated 3.0.0 Use Maintenance::initWordCount() for new code
  */
 function init_word_count(): void
 {
@@ -473,6 +521,8 @@ function set_word_count()
  * @global string $tbpref Database table prefix
  *
  * @psalm-return non-empty-list<string>|null
+ *
+ * @deprecated 3.0.0 Use TextParsing::parseJapanese() for new code
  */
 function parse_japanese_text($text, $id): ?array
 {
@@ -488,6 +538,8 @@ function parse_japanese_text($text, $id): ?array
  * @return void
  *
  * @global string $tbpref Database table prefix
+ *
+ * @deprecated 3.0.0 Use TextParsing::saveWithSql() for new code
  */
 function save_processed_text_with_sql($text, $id): void
 {
@@ -508,6 +560,8 @@ function save_processed_text_with_sql($text, $id): void
  * @global string $tbpref Database table prefix
  *
  * @psalm-return non-empty-list<string>|null
+ *
+ * @deprecated 3.0.0 Use TextParsing::parseStandard() for new code
  */
 function parse_standard_text($text, $id, $lid): ?array
 {
@@ -527,6 +581,8 @@ function parse_standard_text($text, $id, $lid): ?array
  * @global string $tbpref Database table prefix
  *
  * @psalm-return non-empty-list<string>|null
+ *
+ * @deprecated 3.0.0 Use TextParsing::prepare() for new code
  */
 function prepare_text_parsing($text, $id, $lid): ?array
 {
@@ -541,6 +597,8 @@ function prepare_text_parsing($text, $id, $lid): ?array
  * @global string $tbpref Database table prefix
  *
  * @return void
+ *
+ * @deprecated 3.0.0 Use TextParsing::checkValid() for new code
  */
 function check_text_valid($lid)
 {
@@ -558,6 +616,8 @@ function check_text_valid($lid)
  * @return void
  *
  * @global string $tbpref Database table prefix
+ *
+ * @deprecated 3.0.0 Use TextParsing::registerSentencesTextItems() for new code
  */
 function registerSentencesTextItems($tid, $lid, $hasmultiword)
 {
@@ -605,6 +665,8 @@ function update_default_values($id, $lid, $_sql)
  * @param bool $multiwords Display if text has multi-words
  *
  * @return void
+ *
+ * @deprecated 3.0.0 Use TextParsing::displayStatistics() for new code
  */
 function displayTextStatistics($lid, $rtlScript, $multiwords)
 {
@@ -683,6 +745,8 @@ function check_text($sql, $rtlScript, $wl)
  * @param int[] $wl All the different expression length in the language.
  *
  * @global string $tbpref Database table prefix
+ *
+ * @deprecated 3.0.0 Use TextParsing::checkExpressions() for new code
  */
 function checkExpressions($wl): void
 {
@@ -812,6 +876,8 @@ function check_text_with_expressions($id, $lid, $wl, $wl_max, $mw_sql): string
  * @return null|string[] The sentence array if $id = -2
  *
  * @psalm-return non-empty-list<string>|null
+ *
+ * @deprecated 3.0.0 Use TextParsing::splitCheck() for new code
  */
 function splitCheckText($text, $lid, $id)
 {
@@ -823,6 +889,8 @@ function splitCheckText($text, $lid, $id)
  * Reparse all texts in order.
  *
  * @global string $tbpref Database table prefix
+ *
+ * @deprecated 3.0.0 Use Migrations::reparseAllTexts() for new code
  */
 function reparse_all_texts(): void
 {
@@ -836,6 +904,8 @@ function reparse_all_texts(): void
  *
  * @since 2.10.0-fork Migrations are defined thourgh SQL, and not directly here
  * @since 3.0.0 Parameters removed in favor of Globals
+ *
+ * @deprecated 3.0.0 Use Migrations::update() for new code
  */
 function update_database(): void
 {
@@ -848,6 +918,8 @@ function update_database(): void
  *
  * @param string $sql_line SQL string to prefix.
  * @param string $prefix   Prefix to add
+ *
+ * @deprecated 3.0.0 Use Migrations::prefixQuery() for new code
  */
 function prefixSQLQuery($sql_line, $prefix): string
 {
@@ -859,6 +931,8 @@ function prefixSQLQuery($sql_line, $prefix): string
  *
  * @since 2.10.0 Use confiduration files instead of containing all the data.
  * @since 3.0.0 Parameters removed in favor of Globals
+ *
+ * @deprecated 3.0.0 Use Migrations::checkAndUpdate() for new code
  */
 function check_update_db(): void
 {
@@ -882,6 +956,8 @@ function check_update_db(): void
  * @since 2.6.0-fork Use mysqli_init and mysql_real_connect instead of deprecated mysql_connect
  * @since 2.6.0-fork Tries to allow local infiles for the connection.
  * @since 2.9.0 Can accept a $socket as an optional argument
+ *
+ * @deprecated 3.0.0 Use Configuration::connect() for new code
  */
 function connect_to_database($server, $userid, $passwd, $dbname, $socket = "")
 {
@@ -900,6 +976,8 @@ function connect_to_database($server, $userid, $passwd, $dbname, $socket = "")
  * @return (bool|string)[]
  *
  * @psalm-return list{string, bool}
+ *
+ * @deprecated 3.0.0 Use Configuration::getPrefix() for new code
  */
 function getDatabasePrefix($dbconnection): array
 {
