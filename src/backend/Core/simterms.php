@@ -24,7 +24,7 @@ function letterPairs($str): array
 {
     $numPairs = mb_strlen($str) - 1;
     $pairs = array();
-    for ($i = 0; $i < $numPairs; $i ++) {
+    for ($i = 0; $i < $numPairs; $i++) {
         $pairs[$i] = mb_substr($str, $i, 2);
     }
     return $pairs;
@@ -38,9 +38,9 @@ function wordLetterPairs($str): array
 {
     $allPairs = array();
     $words = explode(' ', $str);
-    for ($w = 0; $w < count($words); $w ++) {
+    for ($w = 0; $w < count($words); $w++) {
         $pairsInWord = letterPairs($words[$w]);
-        for ($p = 0; $p < count($pairsInWord); $p ++) {
+        for ($p = 0; $p < count($pairsInWord); $p++) {
             $allPairs[$pairsInWord[$p]] = $pairsInWord[$p];
         }
     }
@@ -82,7 +82,10 @@ function getSimilarityRanking($str1, $str2)
  * @psalm-return array<positive-int, int>
  */
 function get_similar_terms(
-    $lang_id, $compared_term, $max_count, $min_ranking
+    $lang_id,
+    $compared_term,
+    $max_count,
+    $min_ranking
 ): array {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $compared_term_lc = mb_strtolower($compared_term, 'UTF-8');
@@ -93,7 +96,8 @@ function get_similar_terms(
     $termlsd = array();
     while ($record = mysqli_fetch_assoc($res)) {
         $termlsd[(int)$record["WoID"]] = getSimilarityRanking(
-            $compared_term_lc, $record["WoTextLC"]
+            $compared_term_lc,
+            $record["WoTextLC"]
         );
     }
     mysqli_free_result($res);
@@ -152,7 +156,7 @@ function format_term($termid, $compare)
         prepare_textdata_js($rom) . ')';
         $output = '<img class="clickedit" src="/assets/icons/tick-button-small.png" ' .
         'title="Copy → Translation &amp; Romanization Field(s)" ' .
-        'onclick="' . tohtml($js_event) .'" /> ' .
+        'onclick="' . tohtml($js_event) . '" /> ' .
         $term . tohtml($romd) . ' — ' . tohtml($tra) .
         '<br />';
         mysqli_free_result($res);
@@ -205,6 +209,3 @@ function print_similar_terms_tabrow(): void
         </tr>';
     }
 }
-
-
-?>

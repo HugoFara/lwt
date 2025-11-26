@@ -52,20 +52,20 @@ $sql = 'SELECT WoLgID,WoStatus,count(*) AS value FROM ' . $tbpref . 'words GROUP
 $res = do_mysqli_query($sql);
 $term_stat = null;
 while ($record = mysqli_fetch_assoc($res)) {
-    $term_stat[$record['WoLgID']][$record['WoStatus']]=$record['value'];
+    $term_stat[$record['WoLgID']][$record['WoStatus']] = $record['value'];
 }
 $sql = 'SELECT LgID, LgName FROM ' . $tbpref . 'languages where LgName<>"" ORDER BY LgName';
 $res = do_mysqli_query($sql);
 while ($record = mysqli_fetch_assoc($res)) {
     $lang = $record['LgID'];
 
-    $s1 = isset($term_stat[$record['LgID']][1])?($term_stat[$record['LgID']][1]):0;
-    $s2 = isset($term_stat[$record['LgID']][2])?($term_stat[$record['LgID']][2]):0;
-    $s3 = isset($term_stat[$record['LgID']][3])?($term_stat[$record['LgID']][3]):0;
-    $s4 = isset($term_stat[$record['LgID']][4])?($term_stat[$record['LgID']][4]):0;
-    $s5 = isset($term_stat[$record['LgID']][5])?($term_stat[$record['LgID']][5]):0;
-    $s98 = isset($term_stat[$record['LgID']][98])?($term_stat[$record['LgID']][98]):0;
-    $s99 = isset($term_stat[$record['LgID']][99])?($term_stat[$record['LgID']][99]):0;
+    $s1 = isset($term_stat[$record['LgID']][1]) ? ($term_stat[$record['LgID']][1]) : 0;
+    $s2 = isset($term_stat[$record['LgID']][2]) ? ($term_stat[$record['LgID']][2]) : 0;
+    $s3 = isset($term_stat[$record['LgID']][3]) ? ($term_stat[$record['LgID']][3]) : 0;
+    $s4 = isset($term_stat[$record['LgID']][4]) ? ($term_stat[$record['LgID']][4]) : 0;
+    $s5 = isset($term_stat[$record['LgID']][5]) ? ($term_stat[$record['LgID']][5]) : 0;
+    $s98 = isset($term_stat[$record['LgID']][98]) ? ($term_stat[$record['LgID']][98]) : 0;
+    $s99 = isset($term_stat[$record['LgID']][99]) ? ($term_stat[$record['LgID']][99]) : 0;
     $s14 = $s1 + $s2 + $s3 + $s4;
     $s15 = $s14 + $s5;
     $s599 = $s5 + $s99;
@@ -97,7 +97,6 @@ while ($record = mysqli_fetch_assoc($res)) {
     echo '<td class="td1 center"><span class="status5stat">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=599&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s599 . '</b></a>&nbsp;</span></td>';
     echo '<td class="td1 center"><span class="status98">&nbsp;<a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=' . $lang . '&amp;status=98&amp;tag12=0&amp;tag2=&amp;tag1="><b>' . $s98 . '</b></a>&nbsp;</span></td>';
     echo '</tr>';
-
 }
 mysqli_free_result($res);
 echo '<tr>';
@@ -178,7 +177,7 @@ $sql = 'select WoLgID,TO_DAYS(curdate())-TO_DAYS(cast(WoCreated as date)) Create
 $res = do_mysqli_query($sql);
 $term_created = null;
 while ($record = mysqli_fetch_assoc($res)) {
-    $term_created[$record['WoLgID']][$record['Created']]=$record['value'];
+    $term_created[$record['WoLgID']][$record['Created']] = $record['value'];
 }
 
 $sql = 'select WoLgID,WoStatus,TO_DAYS(curdate())-TO_DAYS(cast(WoStatusChanged as date)) Changed,count(WoID) as value from ' . $tbpref . 'words GROUP BY WoLgID,WoStatus,WoStatusChanged';
@@ -186,26 +185,26 @@ $res = do_mysqli_query($sql);
 $term_active = null;
 $term_known = null;
 while ($record = mysqli_fetch_assoc($res)) {
-    if(!empty($record['WoStatus'])) {
-        switch($record['WoStatus']){
-        case ($record['WoStatus']==5 || $record['WoStatus']==99):
-            if(!isset($term_known[$record['WoLgID']][$record['Changed']])) {
-                $term_known[$record['WoLgID']][$record['Changed']]=0;
-            }
-            $term_known[$record['WoLgID']][$record['Changed']]+=$record['value'];
-            if(!isset($term_active[$record['WoLgID']][$record['Changed']])) {
-                $term_active[$record['WoLgID']][$record['Changed']]=0;
-            }
-            $term_active[$record['WoLgID']][$record['Changed']]+=$record['value'];
-            break;
-        case ($record['WoStatus']>0 and $record['WoStatus']<5):
-            if(!isset($term_active[$record['WoLgID']][$record['Changed']])) {
-                $term_active[$record['WoLgID']][$record['Changed']]=0;
-            }
-            $term_active[$record['WoLgID']][$record['Changed']]+=$record['value'];
-            break;
-        default:
-            break;
+    if (!empty($record['WoStatus'])) {
+        switch ($record['WoStatus']) {
+            case ($record['WoStatus'] == 5 || $record['WoStatus'] == 99):
+                if (!isset($term_known[$record['WoLgID']][$record['Changed']])) {
+                    $term_known[$record['WoLgID']][$record['Changed']] = 0;
+                }
+                $term_known[$record['WoLgID']][$record['Changed']] += $record['value'];
+                if (!isset($term_active[$record['WoLgID']][$record['Changed']])) {
+                    $term_active[$record['WoLgID']][$record['Changed']] = 0;
+                }
+                $term_active[$record['WoLgID']][$record['Changed']] += $record['value'];
+                break;
+            case ($record['WoStatus'] > 0 and $record['WoStatus'] < 5):
+                if (!isset($term_active[$record['WoLgID']][$record['Changed']])) {
+                    $term_active[$record['WoLgID']][$record['Changed']] = 0;
+                }
+                $term_active[$record['WoLgID']][$record['Changed']] += $record['value'];
+                break;
+            default:
+                break;
         }
     }
 }
@@ -213,102 +212,101 @@ while ($record = mysqli_fetch_assoc($res)) {
 $sql = 'SELECT LgID, LgName FROM ' . $tbpref . 'languages where LgName<>"" ORDER BY LgName';
 $res = do_mysqli_query($sql);
 while ($record = mysqli_fetch_assoc($res)) {
+    $cw = 0;
+    $cm = 0;
+    $ca = 0;
+    $call = 0;
+    $aw = 0;
+    $am = 0;
+    $aa = 0;
+    $aall = 0;
+    $kw = 0;
+    $km = 0;
+    $ka = 0;
+    $kall = 0;
 
-    $cw=0;
-    $cm=0;
-    $ca=0;
-    $call=0;
-    $aw=0;
-    $am=0;
-    $aa=0;
-    $aall=0;
-    $kw=0;
-    $km=0;
-    $ka=0;
-    $kall=0;
-
-    if(isset($term_created[$record['LgID']])) {
-        foreach($term_created[$record['LgID']] as $created => $val){
-            switch ($created){
-            case($created==='0'):
-                $cw+=$val;
-                break;
-            case ($created>364):
-                $call+=$val;
-                break;
-            case ($created>29):
-                $ca+=$val;
-                break;
-            case ($created>6):
-                $cm+=$val;
-                break;
-            default:
-                $cw+=$val;
-                break;
+    if (isset($term_created[$record['LgID']])) {
+        foreach ($term_created[$record['LgID']] as $created => $val) {
+            switch ($created) {
+                case ($created === '0'):
+                    $cw += $val;
+                    break;
+                case ($created > 364):
+                    $call += $val;
+                    break;
+                case ($created > 29):
+                    $ca += $val;
+                    break;
+                case ($created > 6):
+                    $cm += $val;
+                    break;
+                default:
+                    $cw += $val;
+                    break;
             }
         }
     }
 
-    $ct=isset($term_created[$record['LgID']][0])?$term_created[$record['LgID']][0]:0;
-    $cy=isset($term_created[$record['LgID']][1])?$term_created[$record['LgID']][1]:0;
-    $cm+=$cw;
-    $ca+=$cm;
-    $call+=$ca;
-    if(isset($term_active[$record['LgID']])) {
-        foreach($term_active[$record['LgID']] as $active=>$val){
-            switch ($active){
-            case($active==='0'):
-                $aw+=$val;
-                break;
-            case ($active>364):
-                $aall+=$val;
-                break;
-            case ($active>29):
-                $aa+=$val;
-                break;
-            case ($active>6):
-                $am+=$val;
-                break;
-            default:
-                $aw+=$val;
-                break;
+    $ct = isset($term_created[$record['LgID']][0]) ? $term_created[$record['LgID']][0] : 0;
+    $cy = isset($term_created[$record['LgID']][1]) ? $term_created[$record['LgID']][1] : 0;
+    $cm += $cw;
+    $ca += $cm;
+    $call += $ca;
+    if (isset($term_active[$record['LgID']])) {
+        foreach ($term_active[$record['LgID']] as $active => $val) {
+            switch ($active) {
+                case ($active === '0'):
+                    $aw += $val;
+                    break;
+                case ($active > 364):
+                    $aall += $val;
+                    break;
+                case ($active > 29):
+                    $aa += $val;
+                    break;
+                case ($active > 6):
+                    $am += $val;
+                    break;
+                default:
+                    $aw += $val;
+                    break;
             }
         }
     }
 
-    $at=isset($term_active[$record['LgID']][0])?$term_active[$record['LgID']][0]:0;
-    $ay=isset($term_active[$record['LgID']][1])?$term_active[$record['LgID']][1]:0;
-    $am+=$aw;
-    $aa+=$am;
-    $aall+=$aa;
+    $at = isset($term_active[$record['LgID']][0]) ? $term_active[$record['LgID']][0] : 0;
+    $ay = isset($term_active[$record['LgID']][1]) ? $term_active[$record['LgID']][1] : 0;
+    $am += $aw;
+    $aa += $am;
+    $aall += $aa;
 
-    if(isset($term_known[$record['LgID']])) {
-        foreach($term_known[$record['LgID']] as $known=>$val){
-            switch ($known){
-            case($known==='0'):
-                $kw+=$val;
-                break;
-            case ($known>364):
-                $kall+=$val;
-                break;
-            case ($known>29):
-                $ka+=$val;
-                break;
-            case ($known>6):
-                $km+=$val;
-                break;
-            default:
-                $kw+=$val;
-                break;
+    if (isset($term_known[$record['LgID']])) {
+        foreach ($term_known[$record['LgID']] as $known => $val) {
+            switch ($known) {
+                case ($known === '0'):
+                    $kw += $val;
+                    break;
+                case ($known > 364):
+                    $kall += $val;
+                    break;
+                case ($known > 29):
+                    $ka += $val;
+                    break;
+                case ($known > 6):
+                    $km += $val;
+                    break;
+                default:
+                    $kw += $val;
+                    break;
             }
         }
     }
 
-    $kt=isset($term_known[$record['LgID']][0])?$term_known[$record['LgID']][0]:0;
-    $ky=isset($term_known[$record['LgID']][1])?$term_known[$record['LgID']][1]:0;
-    $km+=$kw;
-    $ka+=$km;
-    $kall+=$ka;
+    $kt = isset($term_known[$record['LgID']][0]) ? $term_known[$record['LgID']][0] : 0;
+    $ky = isset($term_known[$record['LgID']][1]) ? $term_known[$record['LgID']][1] : 0;
+    $km += $kw;
+    $ka += $km;
+    $kall += $ka;
 
     $sumct += $ct;
     $sumat += $at;

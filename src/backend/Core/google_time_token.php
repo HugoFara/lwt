@@ -16,7 +16,8 @@ function regenGoogleTimeToken(): array|null
     if (is_callable('curl_init')) {
         $curl = curl_init("https://translate.google.com");
         curl_setopt(
-            $curl, CURLOPT_HTTPHEADER,
+            $curl,
+            CURLOPT_HTTPHEADER,
             array("User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
         );
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -27,13 +28,15 @@ function regenGoogleTimeToken(): array|null
         }
     } else {
         $ctx = stream_context_create(
-            array("http"=>array(
-                "method"=>"GET",
-                "header"=>"User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1\r\n"
+            array("http" => array(
+                "method" => "GET",
+                "header" => "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1\r\n"
             ))
         );
         $g = file_get_contents(
-            "https://translate.google.com", false, $ctx
+            "https://translate.google.com",
+            false,
+            $ctx
         );
         if ($g === false) {
             return null;
@@ -42,7 +45,8 @@ function regenGoogleTimeToken(): array|null
     // May be replaced by /TKK=eval\D+3d([\d-]+)\D+3d([\d-]+)\D+(\d+)\D/
     preg_match_all(
         "/TKK=eval[^0-9]+3d([0-9-]+)[^0-9]+3d([0-9-]+)[^0-9]+([0-9]+)[^0-9]/u",
-        $g, $ma
+        $g,
+        $ma
     );
     if (isset($ma[1][0]) && isset($ma[2][0]) && isset($ma[3][0])) {
         $tok = strval($ma[3][0]) . "." .
@@ -70,10 +74,9 @@ function getGoogleTimeToken(): ?array
         'SELECT LWTValue AS value from _lwtgeneral WHERE LWTKey = "GoogleTimeToken"'
     );
     $arr = empty($val) ? array('0') : explode('.', $val);
-    if (intval($arr[0]) < floor(time()/3600) - 100) {
+    if (intval($arr[0]) < floor(time() / 3600) - 100) {
         //Token renewed after 100 hours
         return regenGoogleTimeToken();
     }
     return array(intval($arr[0]), intval($arr[1]));
 }
-?>

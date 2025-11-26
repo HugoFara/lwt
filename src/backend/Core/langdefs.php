@@ -305,4 +305,3 @@ define(
  * @deprecated 2.9.1-fork, will be removed in 3.0.0
  */
 $langDefs = LWT_LANGUAGES_ARRAY;
-?>

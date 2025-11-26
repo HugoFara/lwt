@@ -40,25 +40,25 @@ function do_test_get_identifier($selection, $sess_testsql, $lang, $text): array
         $data_string_array = explode(",", trim($sess_testsql, "()"));
         $data_int_array = array_map('intval', $data_string_array);
         switch ((int)$selection) {
-        case 2:
-            return array('words', $data_int_array);
+            case 2:
+                return array('words', $data_int_array);
                 break;
-        case 3:
-            return array('texts', $data_int_array);
+            case 3:
+                return array('texts', $data_int_array);
                 break;
-        default:
-            // Deprecated behavior in 2.9.0, to be removed on 3.0.0
-            $test_sql = $sess_testsql;
-            $cntlang = get_first_value(
-                "SELECT COUNT(DISTINCT WoLgID) AS value
+            default:
+                // Deprecated behavior in 2.9.0, to be removed on 3.0.0
+                $test_sql = $sess_testsql;
+                $cntlang = get_first_value(
+                    "SELECT COUNT(DISTINCT WoLgID) AS value
                     FROM $test_sql"
-            );
-            if ($cntlang > 1) {
-                echo "<p>Sorry - The selected terms are in $cntlang languages," .
-                " but tests are only possible in one language at a time.</p>";
-                exit();
-            }
-            return array('raw_sql', $test_sql);
+                );
+                if ($cntlang > 1) {
+                    echo "<p>Sorry - The selected terms are in $cntlang languages," .
+                    " but tests are only possible in one language at a time.</p>";
+                    exit();
+                }
+                return array('raw_sql', $test_sql);
                 break;
         }
     } elseif (isset($lang) && is_numeric($lang)) {

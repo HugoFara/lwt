@@ -21,16 +21,13 @@ require_once 'Core/simterms.php';
 // INSERT
 
 if (isset($_REQUEST['op'])) {
-
     if ($_REQUEST['op'] == 'Save') {
-
         $text = trim(prepare_textdata($_REQUEST["WoText"]));
         $textlc = mb_strtolower($text, 'UTF-8');
         $translation_raw = repl_tab_nl(getreq("WoTranslation"));
-        if ($translation_raw == '' ) {
+        if ($translation_raw == '') {
             $translation = '*';
-        }
-        else {
+        } else {
             $translation = $translation_raw;
         }
 
@@ -48,7 +45,9 @@ if (isset($_REQUEST['op'])) {
             convert_string_to_sqlsyntax($translation) . ', ' .
             convert_string_to_sqlsyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', ' .
             convert_string_to_sqlsyntax($_REQUEST["WoRomanization"]) . ', NOW(), ' .
-            make_score_random_insert_update('id') . ')', "Term saved", $sqlerrdie = false
+            make_score_random_insert_update('id') . ')',
+            "Term saved",
+            $sqlerrdie = false
         );
 
         if (substr($message, 0, 22) == 'Error: Duplicate entry') {
@@ -66,11 +65,10 @@ if (isset($_REQUEST['op'])) {
 
         <?php
         if (substr($message, 0, 5) != 'Error') {
-
             $len = get_first_value('select WoWordCount as value from ' . $tbpref . 'words where WoID = ' . $wid);
             if ($len > 1) {
                 insertExpressions($textlc, $_REQUEST["WoLgID"], $wid, $len, 0);
-            } else if ($len == 1) {
+            } elseif ($len == 1) {
                 $hex = strToClassName(prepare_textdata($textlc));
                 do_mysqli_query(
                     'UPDATE ' . $tbpref . 'textitems2 SET Ti2WoID = ' . $wid . '
@@ -111,15 +109,12 @@ if (isset($_REQUEST['op'])) {
 </script>
             <?php
         } // (substr($message,0,5) != 'Error')
-
     } // $_REQUEST['op'] == 'Save'
-
 } // if (isset($_REQUEST['op']))
 
 // FORM
 
 else {  // if (! isset($_REQUEST['op']))
-
     // new_word.php?text=..&lang=..
 
     $lang = (int)getreq('lang');
@@ -193,7 +188,6 @@ else {  // if (! isset($_REQUEST['op']))
     </form>
 
     <?php
-
 }
 
 pageend();

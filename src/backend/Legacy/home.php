@@ -349,7 +349,7 @@ function index_do_main_page()
         <a href="/admin/install-demo">Install the LWT demo database</a>
         <a href="/languages?new=1">Define the first language you want to learn</a>
             <?php
-        } else if ($langcnt > 0) {
+        } elseif ($langcnt > 0) {
             do_language_selectable($currentlang);
             if ($currenttext !== null) {
                 do_current_text_info($currenttext);

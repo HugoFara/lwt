@@ -1,4 +1,5 @@
 <?php
+
 /**
  * \file
  * \brief Proceed to the general settings.
@@ -18,5 +19,3 @@ use Lwt\Core\LWT_Globals;
 
 // Initialize the LWT_Globals class with default values
 LWT_Globals::initialize();
-
-?>

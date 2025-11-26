@@ -48,7 +48,8 @@ function translator_url($term, $order)
     mysqli_free_result($res);
     if ($trans != '') {
         $parsed_url = parse_url($trans, PHP_URL_PATH);
-        if (substr($trans, 0, 7) == 'ggl.php'
+        if (
+            substr($trans, 0, 7) == 'ggl.php'
             || $parsed_url && str_ends_with($parsed_url, 'ggl.php')
         ) {
             $trans = str_replace('?', '?sent=1&', $trans);
@@ -81,5 +82,3 @@ function display_page($type, $term, $order)
 if (isset($_REQUEST["x"]) && is_numeric($_REQUEST["x"])) {
     display_page($_REQUEST["x"], $_REQUEST["i"], $_REQUEST["t"]);
 }
-
-?>

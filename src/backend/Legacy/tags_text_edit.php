@@ -43,9 +43,10 @@ if (isset($_REQUEST['markaction'])) {
     if (isset($_REQUEST['marked'])) {
         if (is_array($_REQUEST['marked'])) {
             $l = count($_REQUEST['marked']);
-            if ($l > 0 ) {
+            if ($l > 0) {
                 $list = "(" . $_REQUEST['marked'][0];
-                for ($i=1; $i<$l; $i++) { $list .= "," . $_REQUEST['marked'][$i];
+                for ($i = 1; $i < $l; $i++) {
+                    $list .= "," . $_REQUEST['marked'][$i];
                 }
                 $list .= ")";
                 if ($markaction == 'del') {
@@ -82,30 +83,29 @@ if (isset($_REQUEST['allaction'])) {
     // INSERT
 
     if ($_REQUEST['op'] == 'Save') {
-
         $message = runsql(
             'insert into ' . $tbpref . 'tags2 (T2Text, T2Comment) values(' .
             convert_string_to_sqlsyntax($_REQUEST["T2Text"]) . ', ' .
-            convert_string_to_sqlsyntax_nonull($_REQUEST["T2Comment"]) . ')', "Saved", $sqlerrdie = false
+            convert_string_to_sqlsyntax_nonull($_REQUEST["T2Comment"]) . ')',
+            "Saved",
+            $sqlerrdie = false
         );
-
     } elseif ($_REQUEST['op'] == 'Change') {
         // UPDATE
 
         $message = runsql(
             'update ' . $tbpref . 'tags2 set T2Text = ' .
             convert_string_to_sqlsyntax($_REQUEST["T2Text"]) . ', T2Comment = ' .
-            convert_string_to_sqlsyntax_nonull($_REQUEST["T2Comment"]) . ' where T2ID = ' . $_REQUEST["T2ID"], "Updated", $sqlerrdie = false
+            convert_string_to_sqlsyntax_nonull($_REQUEST["T2Comment"]) . ' where T2ID = ' . $_REQUEST["T2ID"],
+            "Updated",
+            $sqlerrdie = false
         );
-
     }
-
 }
 
 // NEW
 
 if (isset($_REQUEST['new'])) {
-
     ?>
 
     <h2>New Tag</h2>
@@ -138,7 +138,6 @@ if (isset($_REQUEST['new'])) {
     </form>
 
     <?php
-
 } elseif (isset($_REQUEST['chg'])) {
     // CHG
 
@@ -179,11 +178,12 @@ if (isset($_REQUEST['new'])) {
     mysqli_free_result($res);
 } else {
     // DISPLAY
-    if (substr($message, 0, 24) == "Error: Duplicate entry '"
+    if (
+        substr($message, 0, 24) == "Error: Duplicate entry '"
         && substr($message, -18) == "' for key 'T2Text'"
     ) {
         $message = substr($message, 24);
-        $message = substr($message, 0, strlen($message)-18);
+        $message = substr($message, 0, strlen($message) - 18);
         $message = "Error: Text Tag '" . $message . "' already exists. Please go back and correct this!";
     }
     echo error_message_with_hide($message, false);
@@ -198,7 +198,7 @@ if (isset($_REQUEST['new'])) {
 
     $maxperpage = (int) getSettingWithDefault('set-tags-per-page');
 
-    $pages = $recno == 0 ? 0 : (intval(($recno-1) / $maxperpage) + 1);
+    $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
     if ($currentpage < 1) {
         $currentpage = 1;
@@ -206,11 +206,12 @@ if (isset($_REQUEST['new'])) {
     if ($currentpage > $pages) {
         $currentpage = $pages;
     }
-    $limit = 'LIMIT ' . (($currentpage-1) * $maxperpage) . ',' . $maxperpage;
+    $limit = 'LIMIT ' . (($currentpage - 1) * $maxperpage) . ',' . $maxperpage;
 
     $sorts = array('T2Text','T2Comment','T2ID desc','T2ID asc');
     $lsorts = count($sorts);
-    if ($currentsort < 1) { $currentsort = 1;
+    if ($currentsort < 1) {
+        $currentsort = 1;
     }
     if ($currentsort > $lsorts) {
         $currentsort = $lsorts;
@@ -234,10 +235,10 @@ if (isset($_REQUEST['new'])) {
     <input type="button" value="Clear" onclick="{location.href='/tags/text?page=1&amp;query=';}" />
 </td>
 </tr>
-    <?php if($recno > 0) { ?>
+    <?php if ($recno > 0) { ?>
 <tr>
 <th class="th1" colspan="1" nowrap="nowrap">
-        <?php echo $recno; ?> Tag<?php echo ($recno==1?'':'s'); ?>
+        <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
 </th><th class="th1" colspan="2" nowrap="nowrap">
         <?php makePager($currentpage, $pages, '/tags/text', 'form1'); ?>
 </th><th class="th1" nowrap="nowrap">
@@ -250,7 +251,7 @@ Sort Order:
 </form>
 
     <?php
-    if ($recno==0) {
+    if ($recno == 0) {
         ?>
 <p>No tags found.</p>
         <?php
@@ -288,7 +289,7 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 
         $sql = 'select T2ID, T2Text, T2Comment
         from ' . $tbpref . 'tags2 where (1=1) ' . $wh_query . '
-        order by ' . $sorts[$currentsort-1] . ' ' . $limit;
+        order by ' . $sorts[$currentsort - 1] . ' ' . $limit;
         if ($debug) {
             echo $sql;
         }
@@ -311,11 +312,11 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 </table>
 
 
-        <?php if($pages > 1) { ?>
+        <?php if ($pages > 1) { ?>
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
 <th class="th1" nowrap="nowrap">
-            <?php echo $recno; ?> Tag<?php echo ($recno==1?'':'s'); ?>
+            <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
 </th><th class="th1" nowrap="nowrap">
             <?php makePager($currentpage, $pages, '/tags/text', 'form2'); ?>
 </th></tr></table></form>
@@ -324,7 +325,6 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 
         <?php
     }
-
 }
 
 pageend();

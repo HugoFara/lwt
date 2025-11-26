@@ -1,4 +1,5 @@
 <?php
+
 /**
  * \file
  * \brief Prepare RSS feeds.
@@ -32,19 +33,19 @@ function dummy_function_1(): array
         ) A
         left join {$tbpref}newsfeeds ON NfID=FlNfID"
     );
-    $count=$message1=$message2=$message3=$message4=0;
+    $count = $message1 = $message2 = $message3 = $message4 = 0;
     while ($row = mysqli_fetch_assoc($res)) {
         if (get_nf_option($row['NfOptions'], 'edit_text') == 1) {
-            if ($edit_text==1) {
+            if ($edit_text == 1) {
                 $count++;
             } else {
                 echo '<form class="validate" action="/feeds" method="post">';
-                $edit_text=1;
+                $edit_text = 1;
             }
         }
         $doc = array();
         $doc[0] = array(
-            'link' => empty($row['FlLink'])?('#'.$row['FlID']):$row['FlLink'],
+            'link' => empty($row['FlLink']) ? ('#' . $row['FlID']) : $row['FlLink'],
             'title' => $row['FlTitle'],
             'audio' => $row['FlAudio'],
             'text' => $row['FlText']
@@ -59,7 +60,9 @@ function dummy_function_1(): array
             $nf_max_texts = (int)getSettingWithDefault('set-max-texts-per-feed');
         }
         $texts = get_text_from_rsslink(
-            $doc, $row['NfArticleSectionTags'], $row['NfFilterTags'],
+            $doc,
+            $row['NfArticleSectionTags'],
+            $row['NfFilterTags'],
             get_nf_option($nf_options, 'charset')
         );
         if (isset($texts['error'])) {
@@ -68,14 +71,14 @@ function dummy_function_1(): array
                 runsql(
                     'UPDATE ' . $tbpref . 'feedlinks
                     SET FlLink=CONCAT(" ",FlLink)
-                    where FlLink in ('.convert_string_to_sqlsyntax($err_links).')',
+                    where FlLink in (' . convert_string_to_sqlsyntax($err_links) . ')',
                     ""
                 );
             }
             unset($texts['error']);
         }
 
-        if (get_nf_option($nf_options, 'edit_text')==1) {
+        if (get_nf_option($nf_options, 'edit_text') == 1) {
             foreach ($texts as $text) {
                 ?>
 <table class="tab3" cellspacing="0" cellpadding="5">
@@ -100,7 +103,7 @@ function dummy_function_1(): array
                 );
                 while ($row_l = mysqli_fetch_assoc($result)) {
                     echo '<option value="' . $row_l['LgID'] . '"';
-                    if ($row['NfLgID']===$row_l['LgID']) {
+                    if ($row['NfLgID'] === $row_l['LgID']) {
                         echo ' selected="selected"';
                     }
                     echo '>' . $row_l['LgName'] . '</option>';
@@ -160,18 +163,18 @@ function dummy_function_1(): array
             );
             foreach ($texts as $text) {
                 echo '<div class="msgblue">
-                <p class="hide_message">+++ "' . $text['TxTitle']. '" added! +++</p>
+                <p class="hide_message">+++ "' . $text['TxTitle'] . '" added! +++</p>
                 </div>';
                 do_mysqli_query(
                     'INSERT INTO ' . $tbpref . 'texts (
                         TxLgID,TxTitle,TxText,TxAudioURI,TxSourceURI
                     )
                     VALUES (
-                        '.$row['NfLgID'].',' .
-                        convert_string_to_sqlsyntax($text['TxTitle']) .','.
-                        convert_string_to_sqlsyntax($text['TxText']) .','.
-                        convert_string_to_sqlsyntax($text['TxAudioURI']) .','.
-                        convert_string_to_sqlsyntax($text['TxSourceURI']) .'
+                        ' . $row['NfLgID'] . ',' .
+                        convert_string_to_sqlsyntax($text['TxTitle']) . ',' .
+                        convert_string_to_sqlsyntax($text['TxText']) . ',' .
+                        convert_string_to_sqlsyntax($text['TxAudioURI']) . ',' .
+                        convert_string_to_sqlsyntax($text['TxSourceURI']) . '
                     )'
                 );
                 $id = get_last_key();
@@ -190,7 +193,7 @@ function dummy_function_1(): array
                     'insert into ' . $tbpref . 'texttags (TtTxID, TtT2ID)
                     select ' . $id . ', T2ID
                     from ' . $tbpref . 'tags2
-                    where T2Text = "' . $nf_tag_name .'"',
+                    where T2Text = "' . $nf_tag_name . '"',
                     ""
                 );
             }
@@ -198,9 +201,9 @@ function dummy_function_1(): array
             $result = do_mysqli_query(
                 "SELECT TtTxID FROM " . $tbpref . "texttags
                 join " . $tbpref . "tags2 on TtT2ID=T2ID
-                WHERE T2Text='". $nf_tag_name ."'"
+                WHERE T2Text='" . $nf_tag_name . "'"
             );
-            $text_count=0;
+            $text_count = 0;
             $text_item = array();
             while ($row = mysqli_fetch_assoc($result)) {
                 $text_item[$text_count++] = $row['TtTxID'];
@@ -208,8 +211,8 @@ function dummy_function_1(): array
             mysqli_free_result($result);
             if (!empty($text_item)) {
                 sort($text_item, SORT_NUMERIC);
-                if ($text_count>$nf_max_texts) {
-                    $text_item=array_slice($text_item, 0, $text_count-$nf_max_texts);
+                if ($text_count > $nf_max_texts) {
+                    $text_item = array_slice($text_item, 0, $text_count - $nf_max_texts);
                     foreach ($text_item as $text_ID) {
                         $temp = runsql(
                             'delete from ' . $tbpref . 'textitems2 where Ti2TxID = ' . $text_ID,
@@ -273,11 +276,11 @@ function dummy_function_1(): array
         }
     }
     mysqli_free_result($res);
-    if ($message4>0 || $message1>0) {
+    if ($message4 > 0 || $message1 > 0) {
         $message = "Texts archived: $message1 / Sentences deleted: $message2" .
         " / Text items deleted: $message3";
     }
-    if ($edit_text==1) {
+    if ($edit_text == 1) {
         ?>
    <input id="markaction" type="submit" value="Save" />
    <input type="button" value="Cancel" onclick="location.href='/feeds';" />
@@ -318,7 +321,7 @@ function dummy_function_1(): array
    </script>
         <?php
     }
-    if ($edit_text==1) {
+    if ($edit_text == 1) {
         echo '</form>';
     }
     ?>
@@ -355,7 +358,6 @@ function check_errors($message): void
     </script>
         <?php
         unset($_SESSION['feed_loaded']);
-
     }
     echo error_message_with_hide($message, false);
 }
@@ -366,7 +368,10 @@ function dummy_function_2($currentlang, $currentfeed): void
     $debug = \Lwt\Core\LWT_Globals::isDebug();
     $currentquery = (string) processSessParam("query", "currentrssquery", '', false);
     $currentquerymode = (string) processSessParam(
-        "query_mode", "currentrssquerymode", 'title,desc,text', false
+        "query_mode",
+        "currentrssquerymode",
+        'title,desc,text',
+        false
     );
     $currentregexmode = getSettingWithDefault("set-regex-mode");
     $wh_query = $currentregexmode . 'like ' .  convert_string_to_sqlsyntax(
@@ -375,18 +380,18 @@ function dummy_function_2($currentlang, $currentfeed): void
         $currentquery
     );
     switch ($currentquerymode) {
-    case 'title,desc,text':
-        $wh_query=' and (FlTitle ' . $wh_query . ' or FlDescription ' . $wh_query . ' or FlText ' . $wh_query . ')';
-        break;
-    case 'title':
-        $wh_query=' and (FlTitle ' . $wh_query . ')';
-        break;
+        case 'title,desc,text':
+            $wh_query = ' and (FlTitle ' . $wh_query . ' or FlDescription ' . $wh_query . ' or FlText ' . $wh_query . ')';
+            break;
+        case 'title':
+            $wh_query = ' and (FlTitle ' . $wh_query . ')';
+            break;
     }
 
-    if ($currentquery!=='') {
-        if ($currentregexmode!=='') {
-            if (@mysqli_query($GLOBALS["DBCONNECTION"], 'select "test" rlike ' . convert_string_to_sqlsyntax($currentquery))===false) {
-                $currentquery='';
+    if ($currentquery !== '') {
+        if ($currentregexmode !== '') {
+            if (@mysqli_query($GLOBALS["DBCONNECTION"], 'select "test" rlike ' . convert_string_to_sqlsyntax($currentquery)) === false) {
+                $currentquery = '';
                 $wh_query = '';
                 unset($_SESSION['currentwordquery']);
                 if (isset($_REQUEST['query'])) {
@@ -444,20 +449,20 @@ function dummy_function_2($currentlang, $currentfeed): void
         <td class="td1 center" colspan="3">
             <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/feeds?page=1&amp;query=' + val + '&amp;query_mode=' + mode;return false;}">
                 <option value="title,desc,text"<?php
-                if ($currentquerymode=="title,desc,text") {
+                if ($currentquerymode == "title,desc,text") {
                     echo ' selected="selected"';
                 } ?>>Title, Desc., Text</option>
                 <option disabled="disabled">------------</option>
                 <option value="title"<?php
-                if ($currentquerymode=="title") {
+                if ($currentquerymode == "title") {
                     echo ' selected="selected"';
                 } ?>>Title</option>
             </select>
             <span style="vertical-align: middle">
             <?php
-            if ($currentregexmode=='') {
+            if ($currentregexmode == '') {
                 echo ' (Wildc.=*):';
-            } elseif ($currentregexmode=='r') {
+            } elseif ($currentregexmode == 'r') {
                 echo 'RegEx Mode:';
             } else {
                 echo 'RegEx(CS) Mode:';
@@ -491,7 +496,7 @@ function dummy_function_2($currentlang, $currentfeed): void
         <option value="0">[Filter off]</option>
                 <?php
                 $feeds_list = '';
-                $time='';
+                $time = '';
                 while ($row = mysqli_fetch_assoc($result)) {
                     echo '<option value="' . $row['NfID'] . '"';
                     if ($currentfeed === $row['NfID']) {
@@ -510,7 +515,7 @@ function dummy_function_2($currentlang, $currentfeed): void
                     // explode(',', $feeds_list)[0] may work as well (2.8.0)
                 }
 
-                if (strpos($currentfeed, ',')===false) {
+                if (strpos($currentfeed, ',') === false) {
                     echo '<a href="' . $_SERVER['PHP_SELF'] . '?page=1&amp;load_feed=1&amp;selected_feed=' . $currentfeed . '">
         <span title="update feed"><img src="/assets/icons/arrow-circle-135.png" alt="-" /></span></a>';
                 } else {
@@ -530,14 +535,14 @@ function dummy_function_2($currentlang, $currentfeed): void
                 }
                 if ($recno) {
                     $maxperpage = (int)getSettingWithDefault('set-articles-per-page');
-                    $pages = $recno == 0 ? 0 : (intval(($recno-1) / $maxperpage) + 1);
+                    $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
                     if ($currentpage < 1) {
                         $currentpage = 1;
                     }
                     if ($currentpage > $pages) {
                         $currentpage = $pages;
                     }
-                    $limit = 'LIMIT ' . (($currentpage-1) * $maxperpage) . ',' . $maxperpage;
+                    $limit = 'LIMIT ' . (($currentpage - 1) * $maxperpage) . ',' . $maxperpage;
                     $sorts = array('FlTitle','FlDate DESC','FlDate ASC');
                     $lsorts = count($sorts);
                     if ($currentsort < 1) {
@@ -546,7 +551,7 @@ function dummy_function_2($currentlang, $currentfeed): void
                     if ($currentsort > $lsorts) {
                         $currentsort = $lsorts;
                     }
-                    echo '<tr><th class="th1" style="width:30%;"> '. $total=$recno .' articles ';///
+                    echo '<tr><th class="th1" style="width:30%;"> ' . $total = $recno . ' articles ';///
                     echo '</th><th class="th1">';
                     makePager($currentpage, $pages, '/feeds', 'form1');
                     ?>
@@ -583,8 +588,8 @@ function dummy_function_2($currentlang, $currentfeed): void
                             on TxSourceURI=trim(FlLink)
                             left join " . $tbpref . "archivedtexts
                             on AtSourceURI=trim(FlLink)
-                            WHERE FlNfID in ($currentfeed) ".$wh_query."
-                            ORDER BY " . $sorts[$currentsort-1] . " ". $limit
+                            WHERE FlNfID in ($currentfeed) " . $wh_query . "
+                            ORDER BY " . $sorts[$currentsort - 1] . " " . $limit
                         );
                     while ($row = mysqli_fetch_assoc($result)) {
                         echo '<tr>';
@@ -610,11 +615,14 @@ function dummy_function_2($currentlang, $currentfeed): void
                         if ($row['FlAudio']) {
                             echo '<a href="' . $row['FlAudio'] .
                             '" onclick="window.open(this.href, \'child\', \'scrollbars,width=650,height=600\'); return false;">
-                            <img src="'; print_file_path('icn/speaker-volume.png'); echo '" alt="-" /></a>';
+                            <img src="';
+                            print_file_path('icn/speaker-volume.png');
+                            echo '" alt="-" /></a>';
                         }
                         echo '</td>
             <td class="td1 center" style="vertical-align: middle">';
-                        if (!empty($row['FlLink']) 
+                        if (
+                            !empty($row['FlLink'])
                             && !str_starts_with(trim((string) $row['FlLink']), '#')
                         ) {
                             echo '<a href="' . trim((string) $row['FlLink']) . '"  title="' .
@@ -664,7 +672,10 @@ function do_page(): void
     );
     pagestart('My ' . getLanguage($currentlang) . ' Feeds', true);
     $currentfeed = (string) processSessParam(
-        "selected_feed", "currentrssfeed", '', false
+        "selected_feed",
+        "currentrssfeed",
+        '',
+        false
     );
 
     $edit_text = 0;
@@ -674,11 +685,12 @@ function do_page(): void
     }
     check_errors($message);
 
-    if (isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
-        || (isset($_REQUEST['markaction']) && $_REQUEST['markaction']=='update')
+    if (
+        isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
+        || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
     ) {
         load_feeds($currentfeed);
-    } else if (empty($edit_text)) {
+    } elseif (empty($edit_text)) {
         dummy_function_2($currentlang, $currentfeed);
     }
 

@@ -22,7 +22,7 @@ $message = '';
 function restore_demo_db()
 {
     $file = getcwd() . '/db/seeds/demo.sql';
-    if (file_exists($file) ) {
+    if (file_exists($file)) {
         $handle = fopen($file, "r");
         if ($handle === false) {
             return "Error: File ' . $file . ' could not be opened";

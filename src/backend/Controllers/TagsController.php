@@ -327,7 +327,8 @@ class TagsController extends BaseController
         bool $debug = false
     ): void {
         // Handle duplicate entry error message
-        if (substr($message, 0, 24) == "Error: Duplicate entry '"
+        if (
+            substr($message, 0, 24) == "Error: Duplicate entry '"
             && substr($message, -18) == "' for key 'TgText'"
         ) {
             $message = substr($message, 24);
@@ -699,7 +700,8 @@ class TagsController extends BaseController
         bool $debug = false
     ): void {
         // Handle duplicate entry error message
-        if (substr($message, 0, 24) == "Error: Duplicate entry '"
+        if (
+            substr($message, 0, 24) == "Error: Duplicate entry '"
             && substr($message, -18) == "' for key 'T2Text'"
         ) {
             $message = substr($message, 24);

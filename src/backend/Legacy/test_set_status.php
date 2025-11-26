@@ -85,7 +85,11 @@ function set_test_status_change_progress($stchange): array
  * @return void
  */
 function do_set_test_status_javascript(
-    $wid, $status, $stchange, $tests_status=array(), $ajax=false
+    $wid,
+    $status,
+    $stchange,
+    $tests_status = array(),
+    $ajax = false
 ) {
     ?>
 <script type="text/javascript">
@@ -169,7 +173,7 @@ function do_set_test_status_javascript(
  *
  * @global string $tbpref Database table prefix
  */
-function do_set_test_status_content($wid, $status, $oldstatus, $stchange, $ajax=false)
+function do_set_test_status_content($wid, $status, $oldstatus, $stchange, $ajax = false)
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $word = get_first_value(
@@ -225,7 +229,7 @@ function start_set_text_status()
         $status = $oldstatus + $stchange;
         if ($status < 1) {
             $status = 1;
-        } else if ($status > 5) {
+        } elseif ($status > 5) {
             $status = 5;
         }
     } else {
@@ -233,7 +237,7 @@ function start_set_text_status()
         $stchange = $status - $oldstatus;
         if ($stchange <= 0) {
             $stchange = -1;
-        } else if ($stchange > 0) {
+        } elseif ($stchange > 0) {
             $stchange = 1;
         }
     }

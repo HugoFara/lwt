@@ -203,7 +203,7 @@ class TextParsing
             ),
             TiText = @term,
             TiWordCount = @word_count";
-        
+
         // Try LOAD DATA LOCAL INFILE, fall back to INSERT if it fails
         try {
             do_mysqli_query($sql);
@@ -217,7 +217,7 @@ class TextParsing
         }
         unlink($file_name);
     }
-    
+
     /**
      * Fallback method to insert text data when LOAD DATA LOCAL INFILE is disabled.
      *
@@ -230,7 +230,7 @@ class TextParsing
     {
         $tbpref = LWT_Globals::getTablePrefix();
         $connection = LWT_Globals::getDbConnection();
-        
+
         // Get starting sentence ID
         if ($id > 0) {
             $result = do_mysqli_query(
@@ -241,25 +241,25 @@ class TextParsing
         } else {
             $sid = 1;
         }
-        
+
         $lines = explode("\n", $text);
         $order = 0;
         $count = 0;
-        
+
         foreach ($lines as $line) {
             $line = trim($line);
             if ($line === '') {
                 continue;
             }
-            
+
             $parts = explode("\t", $line);
             if (count($parts) < 2) {
                 continue;
             }
-            
+
             $word_count = (int)$parts[0];
             $term = $parts[1];
-            
+
             // Handle line breaks (increase sentence ID)
             if (substr($term, -1) === "\r") {
                 $term = rtrim($term, "\r");
@@ -269,12 +269,12 @@ class TextParsing
             } else {
                 $order++;
             }
-            
+
             $current_count = $count;
             $count += strlen($term) + 1;
-            
+
             $escaped_term = mysqli_real_escape_string($connection, $term);
-            
+
             do_mysqli_query(
                 "INSERT INTO `{$tbpref}temptextitems` 
                 (TiSeID, TiCount, TiOrder, TiText, TiWordCount) 

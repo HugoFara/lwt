@@ -40,7 +40,8 @@ function long_text_check($max_input_vars): void
     }
 
     // Get $data with \n line endings
-    if (isset($_FILES["thefile"])
+    if (
+        isset($_FILES["thefile"])
         && $_FILES["thefile"]["tmp_name"] != ""
         && $_FILES["thefile"]["error"] == 0
     ) {
@@ -79,7 +80,7 @@ function long_text_check($max_input_vars): void
             if ($item != '¶') {
                 $cnt++;
             }
-            if ($cnt <= $maxsent && $bytes+$item_len < 65000) {
+            if ($cnt <= $maxsent && $bytes + $item_len < 65000) {
                 $texts[$text_index][] = $item;
                 $bytes += $item_len;
             } else {
@@ -90,16 +91,15 @@ function long_text_check($max_input_vars): void
             }
         }
         $textcount = count($texts);
-        $plural = ($textcount==1 ? '' : 's');
-        $shorter = ($textcount==1 ? ' ' : ' shorter ');
+        $plural = ($textcount == 1 ? '' : 's');
+        $shorter = ($textcount == 1 ? ' ' : ' shorter ');
 
-        if ($textcount > $max_input_vars-20) {
+        if ($textcount > $max_input_vars - 20) {
             $message = "Error: Too many texts (" . $textcount . " > " .
-            ($max_input_vars-20) .
+            ($max_input_vars - 20) .
             "). You must increase 'Maximum Sentences per Text'!";
             echo error_message_with_hide($message, false);
         } else {
-
             ?>
 <script type="text/javascript">
     //<![CDATA[
@@ -137,7 +137,7 @@ function long_text_check($max_input_vars): void
                 ?>
     <tr>
         <td class="td1 right">
-            <b>Text <?php echo $textno+1; ?>:</b>
+            <b>Text <?php echo $textno + 1; ?>:</b>
             <br /><br /><br />
             Length:<br /><?php echo $bytes; ?><br />Bytes
         </td>
@@ -157,7 +157,6 @@ function long_text_check($max_input_vars): void
             <?php
         }
     }
-
 }
 
 /**
@@ -179,13 +178,13 @@ function long_text_save(): void
     $textcount = (int)$_REQUEST["TextCount"];
     $texts = $_REQUEST["text"];
 
-    if (count($texts) != $textcount ) {
+    if (count($texts) != $textcount) {
         $message = "Error: Number of texts wrong: " .  count($texts) . " != " . $textcount;
     } else {
         $imported = 0;
         for ($i = 0; $i < $textcount; $i++) {
             $texts[$i] = remove_soft_hyphens($texts[$i]);
-            $counter = makeCounterWithTotal($textcount, $i+1);
+            $counter = makeCounterWithTotal($textcount, $i + 1);
             $thistitle = $title . ($counter == '' ? '' : (' (' . $counter . ')'));
             $imported += (int) runsql(
                 'insert into ' . $tbpref . 'texts (
@@ -212,7 +211,6 @@ function long_text_save(): void
     ?>
  <p>&nbsp;<br /><input type="button" value="Show Texts" onclick="location.href='/texts';" /></p>
     <?php
-
 }
 
 /**
@@ -356,7 +354,7 @@ function long_text_display($max_input_vars)
                     Values higher than 100 may slow down text display.
                     Very low values (< 5) may result in too many texts.
                     <br />
-                    The maximum number of new texts must not exceed <?php echo ($max_input_vars-20); ?>.
+                    The maximum number of new texts must not exceed <?php echo ($max_input_vars - 20); ?>.
                     A single new text will never exceed the length of 65,000 bytes.
                 </span>
             </td>
@@ -384,7 +382,6 @@ function long_text_display($max_input_vars)
     </form>
 
     <?php
-
 }
 
 /**

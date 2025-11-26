@@ -127,7 +127,11 @@ function create_ann($textid): string
         }
         // Append the annotation
         $ann .= process_term(
-            $savenonterm, $saveterm, $savetrans, $savewordid, $order
+            $savenonterm,
+            $saveterm,
+            $savetrans,
+            $savewordid,
+            $order
         );
     }
     mysqli_free_result($res);
@@ -148,7 +152,8 @@ function create_save_ann($textid): string
     runsql(
         'update ' . $tbpref . 'texts set ' .
         'TxAnnotatedText = ' . convert_string_to_sqlsyntax($ann) . '
-        where TxID = ' . $textid, ""
+        where TxID = ' . $textid,
+        ""
     );
     return (string)get_first_value(
         "select TxAnnotatedText as value

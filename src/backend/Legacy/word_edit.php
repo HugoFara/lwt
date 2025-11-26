@@ -99,7 +99,8 @@ function edit_term($translation)
         convert_string_to_sqlsyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', WoRomanization = ' .
         convert_string_to_sqlsyntax($_REQUEST["WoRomanization"]) . $xx . ',' .
         make_score_random_insert_update('u') .
-        ' where WoID = ' . $_REQUEST["WoID"], "Updated"
+        ' where WoID = ' . $_REQUEST["WoID"],
+        "Updated"
     );
     $wid = $_REQUEST["WoID"];
     return array($wid, $message);
@@ -220,7 +221,6 @@ function edit_word_do_operation($translation, $fromAnn): void
 </script>
         <?php
     }
-
 }
 
 
@@ -296,7 +296,8 @@ function edit_word_do_form($wid, $text_id, $ord, $fromAnn)
             WHERE Ti2TxID = $text_id AND Ti2WordCount = 1 AND Ti2Order = $ord"
         );
         $sent = getSentence(
-            $seid, $termlc,
+            $seid,
+            $termlc,
             (int) getSettingWithDefault('set-term-sentence-count')
         );
         $trans_uri = (string) get_first_value(
@@ -378,7 +379,10 @@ function edit_word_do_form($wid, $text_id, $ord, $fromAnn)
     <tr>
         <td class="td1 right" colspan="2">
             <?php echo createDictLinksInEditWin(
-                $lang, $term, 'document.forms[0].WoSentence', !isset($_GET['nodict'])
+                $lang,
+                $term,
+                'document.forms[0].WoSentence',
+                !isset($_GET['nodict'])
             ); ?>
         &nbsp; &nbsp; &nbsp;
         <input type="submit" name="op" value="Save" /></td>
@@ -530,7 +534,8 @@ function edit_word_do_form($wid, $text_id, $ord, $fromAnn)
                     );
                 } else {
                     echo createDictLinksInEditWin(
-                        $lang, $term,
+                        $lang,
+                        $term,
                         'document.forms[0].WoSentence',
                         !isset($_GET['nodict'])
                     );
@@ -545,7 +550,10 @@ function edit_word_do_form($wid, $text_id, $ord, $fromAnn)
             <?php
             // Display example sentences button
             example_sentences_area(
-                $lang, $termlc, 'document.forms.editword.WoSentence', $wid
+                $lang,
+                $termlc,
+                'document.forms.editword.WoSentence',
+                $wid
             );
         }
         mysqli_free_result($res);
@@ -584,7 +592,8 @@ function do_content(): void
 }
 
 
-if (getreq("wid") != ""
+if (
+    getreq("wid") != ""
     || getreq("tid") . getreq("ord") != ""
     || array_key_exists("op", $_REQUEST)
 ) {

@@ -80,7 +80,8 @@ function print_mode_display($textid, $langid, $audio, $ann, $title): void
     $ttsClass = '';
     if (!empty($record['LgGoogleTranslateURI'])) {
         $ttsLg = preg_replace(
-            '/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1',
+            '/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/',
+            '$1',
             $record['LgGoogleTranslateURI']
         );
         if ($record['LgGoogleTranslateURI'] != $ttsLg) {
@@ -131,7 +132,7 @@ function print_mode_display($textid, $langid, $audio, $ann, $title): void
                     <span class="anntransruby2">' . tohtml($trans) . '</span>
                 </rt>
             </ruby> ';
-        } else if (count($vals) >= 2) {
+        } elseif (count($vals) >= 2) {
             echo str_replace(
                 "¶",
                 '</p><p style="font-size:' . $textsize . '%;line-height: 1.3; margin-bottom: 10px;">',
@@ -220,7 +221,10 @@ function do_content()
         </div>
         <div>
             <?php echo getPreviousAndNextTextLinks(
-                $textid, '/text/print?text=', true, ''
+                $textid,
+                '/text/print?text=',
+                true,
+                ''
             ); ?>
         </div>
         <div>
@@ -245,7 +249,7 @@ function do_content()
     <h1>ANN.TEXT ▶ <?php echo tohtml($title) .
     (isset($record['TxSourceURI']) && substr(trim($sourceURI), 0, 1) != '#' ?
     ' <a href="<?php echo $sourceURI; ?>" target="_blank">
-        <img src="'.get_file_path('assets/icons/chain.png') .
+        <img src="' . get_file_path('assets/icons/chain.png') .
         '" title="Text Source" alt="Text Source" />
     </a>'
     : '') ?>
@@ -255,7 +259,11 @@ function do_content()
         edit_mode_display($textid, $ann_exists);
     } else {
         print_mode_display(
-            $textid, $langid, $audio, $ann, $title
+            $textid,
+            $langid,
+            $audio,
+            $ann,
+            $title
         );
     }
 

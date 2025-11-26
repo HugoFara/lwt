@@ -110,7 +110,6 @@ function insert_word_wellknown_javascript($word, $wid, $hex, $textid)
     //]]>
     </script>
     <?php
-
 }
 
 /**

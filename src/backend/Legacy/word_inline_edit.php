@@ -15,7 +15,8 @@ $id = (isset($_POST['id'])) ? $_POST['id'] : "";
 
 if (substr($id, 0, 5) == "trans") {
     $id = substr($id, 5);
-    if($value == '') { $value='*';
+    if ($value == '') {
+        $value = '*';
     }
     runsql(
         'update ' . $tbpref . 'words set WoTranslation = ' .
@@ -27,7 +28,8 @@ if (substr($id, 0, 5) == "trans") {
 }
 
 if (substr($id, 0, 5) == "roman") {
-    if ($value == '*') { $value='';
+    if ($value == '*') {
+        $value = '';
     }
     $id = substr($id, 5);
     runsql(
@@ -38,13 +40,10 @@ if (substr($id, 0, 5) == "roman") {
     $value = get_first_value("select WoRomanization as value from " . $tbpref . "words where WoID = " . $id);
     if ($value == '') {
         echo '*';
-    }
-    else {
+    } else {
         echo $value;
     }
     exit;
 }
 
 echo "ERROR - please refresh page!";
-
-?>

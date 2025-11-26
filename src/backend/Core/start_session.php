@@ -1,4 +1,5 @@
 <?php
+
 /**
  * \file
  * \brief Start a PHP session.
@@ -86,5 +87,3 @@ function start_session_main(): void
 }
 
 start_session_main();
-
-?>

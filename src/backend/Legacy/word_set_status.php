@@ -167,7 +167,6 @@ function set_word_status_display_page($tid, $wid, $status, $word, $trans, $roman
     echo "<p id='status_change_log'>Term status updating...</p>";
     set_word_status_javascript($tid, $wid, $status, $word, $trans, $roman);
     pageend();
-
 }
 
 

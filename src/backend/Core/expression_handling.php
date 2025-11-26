@@ -50,7 +50,8 @@ function findMecabExpression($text, $lid): array
         $row = fgets($handle, 16132);
         $arr = explode("\t", $row, 4);
         // Not a word (punctuation)
-        if (!empty($arr[0]) && $arr[0] != "EOP"
+        if (
+            !empty($arr[0]) && $arr[0] != "EOP"
             && in_array($arr[1], ["2", "6", "7"])
         ) {
             $parsed_text .= $arr[0] . ' ';
@@ -72,7 +73,8 @@ function findMecabExpression($text, $lid): array
             $row = fgets($handle, 16132);
             $arr = explode("\t", $row, 4);
             // Not a word (punctuation)
-            if (!empty($arr[0]) && $arr[0] != "EOP"
+            if (
+                !empty($arr[0]) && $arr[0] != "EOP"
                 && in_array($arr[1], ["2", "6", "7"])
             ) {
                 $parsed_sentence .= $arr[0] . ' ';
@@ -135,9 +137,11 @@ function insert_expression_from_mecab($text, $lid, $wid, $len): array
         }
     }
     $flat_mwords = array_reduce(
-        $mwords, function ($carry, $item) {
+        $mwords,
+        function ($carry, $item) {
             return $carry + $item;
-        }, []
+        },
+        []
     );
 
     $sqlarr = array();
@@ -230,15 +234,16 @@ function findStandardExpression($textlc, $lid): array
     // For each sentence in the language containing the query
     $matches = null;
     $rSflag = false; // Flag to prevent repeat space-removal processing
-    while ($record = mysqli_fetch_assoc($res)){
+    while ($record = mysqli_fetch_assoc($res)) {
         $string = ' ' . $record['SeText'] . ' ';
         if ($splitEachChar) {
             $string = preg_replace('/([^\s])/u', "$1 ", $string);
-        } else if ($removeSpaces && !$rSflag) {
+        } elseif ($removeSpaces && !$rSflag) {
             preg_match(
                 '/(?<=[ ])(' . preg_replace('/(.)/ui', "$1[ ]*", $textlc) .
                 ')(?=[ ])/ui',
-                $string, $ma
+                $string,
+                $ma
             );
             if (!empty($ma[1])) {
                 $textlc = trim($ma[1]);
@@ -249,7 +254,8 @@ function findStandardExpression($textlc, $lid): array
         $last_pos = mb_strripos($string, $textlc, 0, 'UTF-8');
         // For each occurence of query in sentence
         while ($last_pos !== false) {
-            if ($splitEachChar || $removeSpaces
+            if (
+                $splitEachChar || $removeSpaces
                 || preg_match($notermchar, " $string ", $matches, 0, $last_pos - 1)
             ) {
                 // Number of terms before group
@@ -317,9 +323,11 @@ function insert_standard_expression($textlc, $lid, $wid, $len, $mode): array
         }
     }
     $flat_mwords = array_reduce(
-        $mwords, function ($carry, $item) {
+        $mwords,
+        function ($carry, $item) {
             return $carry + $item;
-        }, []
+        },
+        []
     );
 
     $sqlarr = array();

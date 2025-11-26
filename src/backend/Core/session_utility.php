@@ -46,7 +46,10 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
 
     $currentquery = (string) processSessParam("query", "currenttextquery", '', false);
     $currentquerymode = (string) processSessParam(
-        "query_mode", "currenttextquerymode", 'title,text', false
+        "query_mode",
+        "currenttextquerymode",
+        'title,text',
+        false
     );
     $currentregexmode = getSettingWithDefault("set-regex-mode");
     $wh_query = $currentregexmode . 'LIKE ';
@@ -58,17 +61,17 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
         $wh_query .= convert_string_to_sqlsyntax($currentquery);
     }
     switch ($currentquerymode) {
-    case 'title,text':
-        $wh_query=' AND (TxTitle ' . $wh_query . ' OR TxText ' . $wh_query . ')';
-        break;
-    case 'title':
-        $wh_query=' AND (TxTitle ' . $wh_query . ')';
-        break;
-    case 'text':
-        $wh_query=' AND (TxText ' . $wh_query . ')';
-        break;
+        case 'title,text':
+            $wh_query = ' AND (TxTitle ' . $wh_query . ' OR TxText ' . $wh_query . ')';
+            break;
+        case 'title':
+            $wh_query = ' AND (TxTitle ' . $wh_query . ')';
+            break;
+        case 'text':
+            $wh_query = ' AND (TxText ' . $wh_query . ')';
+            break;
     }
-    if ($currentquery=='') {
+    if ($currentquery == '') {
         $wh_query = '';
     }
 
@@ -96,15 +99,13 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
         if ($currenttag2 != '') {
             if ($currenttag2 == -1) {
                 $wh_tag2 = "group_concat(TtT2ID) IS NULL";
-            }
-            else {
+            } else {
                 $wh_tag2 = "concat('/',group_concat(TtT2ID separator '/'),'/') like '%/" . $currenttag2 . "/%'";
             }
         }
         if ($currenttag1 != '' && $currenttag2 == '') {
             $wh_tag = " having (" . $wh_tag1 . ') ';
-        }
-        elseif ($currenttag2 != '' && $currenttag1 == '') {
+        } elseif ($currenttag2 != '' && $currenttag1 == '') {
             $wh_tag = " having (" . $wh_tag2 . ') ';
         } else {
             $wh_tag = " having ((" . $wh_tag1 . ($currenttag12 ? ') AND (' : ') OR (') . $wh_tag2 . ')) ';
@@ -133,9 +134,8 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
         WHERE LgID = TxLgID AND LENGTH(TxAnnotatedText) > 0 '
         . $wh_lang . $wh_query . '
         GROUP BY TxID ' . $wh_tag . '
-        ORDER BY ' . $sorts[$currentsort-1];
-    }
-    else {
+        ORDER BY ' . $sorts[$currentsort - 1];
+    } else {
         $sql =
         'SELECT TxID
         FROM (
@@ -146,7 +146,7 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
         ), ' . $tbpref . 'languages
         WHERE LgID = TxLgID ' . $wh_lang . $wh_query . '
         GROUP BY TxID ' . $wh_tag . '
-        ORDER BY ' . $sorts[$currentsort-1];
+        ORDER BY ' . $sorts[$currentsort - 1];
     }
 
     $list = array(0);
@@ -157,21 +157,19 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
     mysqli_free_result($res);
     array_push($list, 0);
     $listlen = count($list);
-    for ($i=1; $i < $listlen-1; $i++) {
-        if($list[$i] == $textid) {
-            if ($list[$i-1] !== 0) {
-                $title = tohtml(getTextTitle($list[$i-1]));
-                $prev = '<a href="' . $url . $list[$i-1] . '" target="_top"><img src="/assets/icons/navigation-180-button.png" title="Previous Text: ' . $title . '" alt="Previous Text: ' . $title . '" /></a>';
-            }
-            else {
+    for ($i = 1; $i < $listlen - 1; $i++) {
+        if ($list[$i] == $textid) {
+            if ($list[$i - 1] !== 0) {
+                $title = tohtml(getTextTitle($list[$i - 1]));
+                $prev = '<a href="' . $url . $list[$i - 1] . '" target="_top"><img src="/assets/icons/navigation-180-button.png" title="Previous Text: ' . $title . '" alt="Previous Text: ' . $title . '" /></a>';
+            } else {
                 $prev = '<img src="/assets/icons/navigation-180-button-light.png" title="No Previous Text" alt="No Previous Text" />';
             }
-            if ($list[$i+1] !== 0) {
-                $title = tohtml(getTextTitle($list[$i+1]));
-                $next = '<a href="' . $url . $list[$i+1] .
+            if ($list[$i + 1] !== 0) {
+                $title = tohtml(getTextTitle($list[$i + 1]));
+                $next = '<a href="' . $url . $list[$i + 1] .
                 '" target="_top"><img src="/assets/icons/navigation-000-button.png" title="Next Text: ' . $title . '" alt="Next Text: ' . $title . '" /></a>';
-            }
-            else {
+            } else {
                 $next = '<img src="/assets/icons/navigation-000-button-light.png" title="No Next Text" alt="No Next Text" />';
             }
             return $add . $prev . ' ' . $next;
@@ -264,7 +262,7 @@ function get_media_paths(): array
     );
     if (!file_exists('media')) {
         $answer["error"] = "does_not_exist";
-    } else if (!is_dir('media')) {
+    } elseif (!is_dir('media')) {
         $answer["error"] = "not_a_directory";
     } else {
         $paths = media_paths_search('media');
@@ -366,15 +364,15 @@ function makeCounterWithTotal($max, $num): string
 function encodeURI($url): string
 {
     $reserved = array(
-    '%2D'=>'-','%5F'=>'_','%2E'=>'.','%21'=>'!',
-    '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')'
+    '%2D' => '-','%5F' => '_','%2E' => '.','%21' => '!',
+    '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')'
     );
     $unescaped = array(
-    '%3B'=>';','%2C'=>',','%2F'=>'/','%3F'=>'?','%3A'=>':',
-    '%40'=>'@','%26'=>'&','%3D'=>'=','%2B'=>'+','%24'=>'$'
+    '%3B' => ';','%2C' => ',','%2F' => '/','%3F' => '?','%3A' => ':',
+    '%40' => '@','%26' => '&','%3D' => '=','%2B' => '+','%24' => '$'
     );
     $score = array(
-    '%23'=>'#'
+    '%23' => '#'
     );
     return strtr(rawurlencode($url), array_merge($reserved, $unescaped, $score));
 }
@@ -399,7 +397,7 @@ function print_file_path($filename): void
  */
 function get_file_path($filename)
 {
-    $file = getSettingWithDefault('set-theme-dir').preg_replace('/.*\//', '', $filename);
+    $file = getSettingWithDefault('set-theme-dir') . preg_replace('/.*\//', '', $filename);
     if (file_exists($file)) {
         // Return absolute path for clean URL compatibility
         return '/' . $file;
@@ -423,7 +421,9 @@ function get_first_sepa()
     if (!$sepa) {
         $sepa = mb_substr(
             getSettingWithDefault('set-term-translation-delimiters'),
-            0, 1, 'UTF-8'
+            0,
+            1,
+            'UTF-8'
         );
     }
     return $sepa;
@@ -445,7 +445,7 @@ function processSessParam($reqkey, $sesskey, $default, $isnum)
         $reqdata = trim($_REQUEST[$reqkey]);
         $_SESSION[$sesskey] = $reqdata;
         $result = $reqdata;
-    } elseif(isset($_SESSION[$sesskey])) {
+    } elseif (isset($_SESSION[$sesskey])) {
         $result = $_SESSION[$sesskey];
     } else {
         $result = $default;
@@ -484,7 +484,7 @@ function processDBParam($reqkey, $dbkey, $default, $isnum)
     return $result;
 }
 
-function getWordTagList($wid, $before=' ', $brack=1, $tohtml=1): string
+function getWordTagList($wid, $before = ' ', $brack = 1, $tohtml = 1): string
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $lbrack = $rbrack = '';
@@ -547,48 +547,47 @@ function do_test_test_get_projection($key, $value): string|null
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $testsql = null;
-    switch ($key)
-    {
-    case 'words':
-        // Test words in a list of words ID
-        $id_string = implode(",", $value);
-        $testsql = " {$tbpref}words WHERE WoID IN ($id_string) ";
-        $cntlang = get_first_value(
-            "SELECT COUNT(DISTINCT WoLgID) AS value
+    switch ($key) {
+        case 'words':
+            // Test words in a list of words ID
+            $id_string = implode(",", $value);
+            $testsql = " {$tbpref}words WHERE WoID IN ($id_string) ";
+            $cntlang = get_first_value(
+                "SELECT COUNT(DISTINCT WoLgID) AS value
                 FROM $testsql"
-        );
-        if ($cntlang > 1) {
-            echo "<p>Sorry - The selected terms are in $cntlang languages," .
-            " but tests are only possible in one language at a time.</p>";
-            exit();
-        }
-        break;
-    case 'texts':
-        // Test text items from a list of texts ID
-        $id_string = implode(",", $value);
-        $testsql = " {$tbpref}words, {$tbpref}textitems2
+            );
+            if ($cntlang > 1) {
+                echo "<p>Sorry - The selected terms are in $cntlang languages," .
+                " but tests are only possible in one language at a time.</p>";
+                exit();
+            }
+            break;
+        case 'texts':
+            // Test text items from a list of texts ID
+            $id_string = implode(",", $value);
+            $testsql = " {$tbpref}words, {$tbpref}textitems2
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($id_string) ";
-        $cntlang = get_first_value(
-            "SELECT COUNT(DISTINCT WoLgID) AS value
+            $cntlang = get_first_value(
+                "SELECT COUNT(DISTINCT WoLgID) AS value
             FROM $testsql"
-        );
-        if ($cntlang > 1) {
-            echo "<p>Sorry - The selected terms are in $cntlang languages," .
-            " but tests are only possible in one language at a time.</p>";
-            exit();
-        }
-        break;
-    case 'lang':
-        // Test words from a specific language
-        $testsql = " {$tbpref}words WHERE WoLgID = $value ";
-        break;
-    case 'text':
-        // Test text items from a specific text ID
-        $testsql = " {$tbpref}words, {$tbpref}textitems2
+            );
+            if ($cntlang > 1) {
+                echo "<p>Sorry - The selected terms are in $cntlang languages," .
+                " but tests are only possible in one language at a time.</p>";
+                exit();
+            }
+            break;
+        case 'lang':
+            // Test words from a specific language
+            $testsql = " {$tbpref}words WHERE WoLgID = $value ";
+            break;
+        case 'text':
+            // Test text items from a specific text ID
+            $testsql = " {$tbpref}words, {$tbpref}textitems2
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $value ";
-        break;
-    default:
-        my_die("do_test_test.php called with wrong parameters");
+            break;
+        default:
+            my_die("do_test_test.php called with wrong parameters");
     }
     return $testsql;
 }
@@ -606,23 +605,23 @@ function do_test_test_from_selection($selection_type, $selection_data): string|n
     $data_string_array = explode(",", trim($selection_data, "()"));
     $data_int_array = array_map('intval', $data_string_array);
     switch ((int)$selection_type) {
-    case 2:
-        $test_sql = do_test_test_get_projection('words', $data_int_array);
-        break;
-    case 3:
-        $test_sql = do_test_test_get_projection('texts', $data_int_array);
-        break;
-    default:
-        $test_sql = $selection_data;
-        $cntlang = get_first_value(
-            "SELECT COUNT(DISTINCT WoLgID) AS value
+        case 2:
+            $test_sql = do_test_test_get_projection('words', $data_int_array);
+            break;
+        case 3:
+            $test_sql = do_test_test_get_projection('texts', $data_int_array);
+            break;
+        default:
+            $test_sql = $selection_data;
+            $cntlang = get_first_value(
+                "SELECT COUNT(DISTINCT WoLgID) AS value
                 FROM $test_sql"
-        );
-        if ($cntlang > 1) {
-            echo "<p>Sorry - The selected terms are in $cntlang languages," .
-            " but tests are only possible in one language at a time.</p>";
-            exit();
-        }
+            );
+            if ($cntlang > 1) {
+                echo "<p>Sorry - The selected terms are in $cntlang languages," .
+                " but tests are only possible in one language at a time.</p>";
+                exit();
+            }
     }
     return $test_sql;
 }
@@ -665,12 +664,14 @@ function createTheDictLink($u, $t)
     // Get encoding
     $enc = trim(
         substr(
-            $url, $pos + mb_strlen($matches[0]), $pos2 - $pos - mb_strlen($matches[0])
+            $url,
+            $pos + mb_strlen($matches[0]),
+            $pos2 - $pos - mb_strlen($matches[0])
         )
     );
     $r = substr($url, 0, $pos);
     $r .= urlencode(mb_convert_encoding($trm, $enc, 'UTF-8'));
-    if ($pos2+3 < strlen($url)) {
+    if ($pos2 + 3 < strlen($url)) {
         $r .= substr($url, $pos2 + 3);
     }
     return $r;
@@ -699,7 +700,7 @@ function createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst): string
     $wb3 = isset($record['LgGoogleTranslateURI']) ?
     $record['LgGoogleTranslateURI'] : "";
     mysqli_free_result($res);
-    $r ='';
+    $r = '';
     if ($openfirst) {
         $r .= '<script type="text/javascript">';
         $r .= "\n//<![CDATA[\n";
@@ -816,12 +817,13 @@ function makeOpenDictStrDynSent($url, $sentctljs, $txt): string
     }
     parse_str($parsed_url['query'], $url_query);
     $popup = $popup || array_key_exists('lwt_popup', $url_query);
-    if (str_starts_with($url, "ggl.php")
+    if (
+        str_starts_with($url, "ggl.php")
         || str_ends_with($parsed_url['path'], "/ggl.php")
     ) {
         $url = str_replace('?', '?sent=1&', $url);
     }
-    return '<span class="click" onclick="translateSentence'.($popup ? '2' : '').'(' .
+    return '<span class="click" onclick="translateSentence' . ($popup ? '2' : '') . '(' .
     prepare_textdata_js($url) . ',' . $sentctljs . ');">' .
     tohtml($txt) . '</span>';
 }
@@ -898,7 +900,7 @@ function makeDictLinks($lang, $wordctljs): string
         $wb3 = substr($wb3, 1);
     }
     mysqli_free_result($res);
-    $r ='<span class="smaller">';
+    $r = '<span class="smaller">';
     $r .= '<span class="click" onclick="translateWord3(' .
     prepare_textdata_js($wb1) . ',' . $wordctljs . ');">[1]</span> ';
     if ($wb2 != "") {
@@ -974,7 +976,7 @@ function createDictLinksInEditWin3($lang, $sentctljs, $wordctljs): string
     }
 
     mysqli_free_result($res);
-    $r ='';
+    $r = '';
     $r .= 'Lookup Term: ';
     $r .= '<span class="click" onclick="' . $f1 . ',' . $wordctljs . ');">
     Dict1</span> ';
@@ -993,14 +995,12 @@ function createDictLinksInEditWin3($lang, $sentctljs, $wordctljs): string
 
 function strToHex($string): string
 {
-    $hex='';
-    for ($i=0; $i < strlen($string); $i++)
-    {
+    $hex = '';
+    for ($i = 0; $i < strlen($string); $i++) {
         $h = dechex(ord($string[$i]));
-        if (strlen($h) == 1 ) {
+        if (strlen($h) == 1) {
             $hex .= "0" . $h;
-        }
-        else {
+        } else {
             $hex .= $h;
         }
     }
@@ -1016,11 +1016,11 @@ function strToClassName($string): string
 {
     $length = mb_strlen($string, 'UTF-8');
     $r = '';
-    for ($i=0; $i < $length; $i++)
-    {
+    for ($i = 0; $i < $length; $i++) {
         $c = mb_substr($string, $i, 1, 'UTF-8');
         $o = ord($c);
-        if (($o < 48)
+        if (
+            ($o < 48)
             || ($o > 57 && $o < 65)
             || ($o > 90 && $o < 97)
             || ($o > 122 && $o < 165)

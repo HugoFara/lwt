@@ -1,4 +1,5 @@
 <?php
+
 /**
  * \file
  * \brief Display an improved annotated text (top frame)
@@ -101,7 +102,6 @@ function do_diplay_impr_text_header_js()
 </script>
 
     <?php
-
 }
 
 /**
@@ -139,7 +139,7 @@ function do_diplay_impr_text_header_content($title, $textid, $audio, $sourceURI)
         <?php
         if (isset($sourceURI)) {
             echo ' <a href="' . $sourceURI . '" target="_blank">
-                <img src="'.get_file_path('assets/icons/chain.png').'" title="Text Source" alt="Text Source" />
+                <img src="' . get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" />
             </a>';
         }
         echo $text_links;

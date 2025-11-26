@@ -71,7 +71,9 @@ function tts_language_options()
     foreach (get_languages() as $language => $language_id) {
         $languageCode = getLanguageCode($language_id, LWT_LANGUAGES_ARRAY);
         $output .= sprintf(
-            '<option value="%s">%s</option>', $languageCode, $language
+            '<option value="%s">%s</option>',
+            $languageCode,
+            $language
         );
     }
     return $output;

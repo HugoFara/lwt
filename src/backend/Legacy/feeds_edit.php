@@ -23,17 +23,19 @@ if (isset($_REQUEST['markaction'])) {
     if ($_REQUEST['markaction'] == 'del') {
         $message = runsql(
             'delete from ' . $tbpref . 'feedlinks
-            where FlNfID in(' . $currentfeed . ')', "Article item(s) deleted"
+            where FlNfID in(' . $currentfeed . ')',
+            "Article item(s) deleted"
         );
-        $message.= runsql(
+        $message .= runsql(
             'delete from ' . $tbpref . 'newsfeeds
-            where NfID in(' . $currentfeed . ')', " / Newsfeed(s) deleted"
+            where NfID in(' . $currentfeed . ')',
+            " / Newsfeed(s) deleted"
         );
         echo error_message_with_hide($message, false);
         unset($message);
     }
 
-    if ($_REQUEST['markaction']=='del_art') {
+    if ($_REQUEST['markaction'] == 'del_art') {
         $message = runsql(
             'delete from ' . $tbpref . 'feedlinks
             where FlNfID in(' . $currentfeed . ')',
@@ -42,12 +44,12 @@ if (isset($_REQUEST['markaction'])) {
         echo error_message_with_hide($message, false);
         unset($message);
         do_mysqli_query(
-            'UPDATE ' . $tbpref . 'newsfeeds SET NfUpdate="'.time().'"
+            'UPDATE ' . $tbpref . 'newsfeeds SET NfUpdate="' . time() . '"
             where NfID in(' . $currentfeed . ')'
         );
     }
 
-    if ($_REQUEST['markaction']=='res_art') {
+    if ($_REQUEST['markaction'] == 'res_art') {
         $message = runsql(
             'UPDATE ' . $tbpref . 'feedlinks SET FlLink=TRIM(FlLink)
             where FlNfID in (' . $currentfeed . ')',
@@ -58,7 +60,7 @@ if (isset($_REQUEST['markaction'])) {
     }
 }
 if (isset($_SESSION['feed_loaded'])) {
-    foreach($_SESSION['feed_loaded'] as $lf){
+    foreach ($_SESSION['feed_loaded'] as $lf) {
         echo "\n<div class=\"msgblue\"><p class=\"hide_message\">+++ ",$lf," +++</p></div>";
     }
     ?>
@@ -73,13 +75,13 @@ if (isset($_REQUEST['update_feed'])) {
     $currentfeed = $_REQUEST['NfID'];
     runsql(
         'UPDATE ' . $tbpref . 'newsfeeds SET
-        NfLgID=' . convert_string_to_sqlsyntax($_REQUEST['NfLgID']) .',
-        NfName=' . convert_string_to_sqlsyntax($_REQUEST['NfName']) .',
-        NfSourceURI=' . convert_string_to_sqlsyntax($_REQUEST['NfSourceURI']) .',
-        NfArticleSectionTags=' . convert_string_to_sqlsyntax($_REQUEST['NfArticleSectionTags']) .',
-        NfFilterTags=' . convert_string_to_sqlsyntax_nonull($_REQUEST['NfFilterTags']) .',
-        NfOptions=' . convert_string_to_sqlsyntax_nonull(rtrim($_REQUEST['NfOptions'], ',')) .'
-        where NfID='.$_REQUEST['NfID'],
+        NfLgID=' . convert_string_to_sqlsyntax($_REQUEST['NfLgID']) . ',
+        NfName=' . convert_string_to_sqlsyntax($_REQUEST['NfName']) . ',
+        NfSourceURI=' . convert_string_to_sqlsyntax($_REQUEST['NfSourceURI']) . ',
+        NfArticleSectionTags=' . convert_string_to_sqlsyntax($_REQUEST['NfArticleSectionTags']) . ',
+        NfFilterTags=' . convert_string_to_sqlsyntax_nonull($_REQUEST['NfFilterTags']) . ',
+        NfOptions=' . convert_string_to_sqlsyntax_nonull(rtrim($_REQUEST['NfOptions'], ',')) . '
+        where NfID=' . $_REQUEST['NfID'],
         ""
     );
 }
@@ -89,11 +91,11 @@ if (isset($_REQUEST['save_feed'])) {
         'insert into ' . $tbpref . 'newsfeeds (
             NfLgID, NfName, NfSourceURI, NfArticleSectionTags, NfFilterTags, NfOptions
         )
-        VALUES (' . convert_string_to_sqlsyntax($_REQUEST['NfLgID']) .',' .
-        convert_string_to_sqlsyntax($_REQUEST['NfName']) .',' .
-        convert_string_to_sqlsyntax($_REQUEST['NfSourceURI']) .',' .
-        convert_string_to_sqlsyntax($_REQUEST['NfArticleSectionTags']) .',' .
-        convert_string_to_sqlsyntax_nonull($_REQUEST['NfFilterTags']) .',' .
+        VALUES (' . convert_string_to_sqlsyntax($_REQUEST['NfLgID']) . ',' .
+        convert_string_to_sqlsyntax($_REQUEST['NfName']) . ',' .
+        convert_string_to_sqlsyntax($_REQUEST['NfSourceURI']) . ',' .
+        convert_string_to_sqlsyntax($_REQUEST['NfArticleSectionTags']) . ',' .
+        convert_string_to_sqlsyntax_nonull($_REQUEST['NfFilterTags']) . ',' .
         convert_string_to_sqlsyntax_nonull(rtrim($_REQUEST['NfOptions'], ',')) .
         ')',
         ""
@@ -121,9 +123,9 @@ function display_new_feed($currentlang): void
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr><td class="td1">Language: </td><td class="td1"><select name="NfLgID">
     <?php
-    while($row_l = mysqli_fetch_assoc($result)){
+    while ($row_l = mysqli_fetch_assoc($result)) {
         echo '<option value="' . $row_l['LgID'] . '"';
-        if($currentlang===$row_l['LgID']) {
+        if ($currentlang === $row_l['LgID']) {
             echo ' selected="selected"';
         }
         echo '>' . $row_l['LgName'] . '</option>';
@@ -234,18 +236,18 @@ function edit_feed($currentfeed): void
     <?php
     while ($row_l = mysqli_fetch_assoc($result)) {
         echo '<option value="' . $row_l['LgID'] . '"';
-        if($row['NfLgID']===$row_l['LgID']) {
+        if ($row['NfLgID'] === $row_l['LgID']) {
             echo ' selected="selected"';
         }
         echo '>' . $row_l['LgName'] . '</option>';
     }
     mysqli_free_result($result);
-    $auto_upd_i=get_nf_option($row['NfOptions'], 'autoupdate');
-    if($auto_upd_i==null) {
-        $auto_upd_v=null;
+    $auto_upd_i = get_nf_option($row['NfOptions'], 'autoupdate');
+    if ($auto_upd_i == null) {
+        $auto_upd_v = null;
     } else {
-        $auto_upd_v=substr($auto_upd_i, -1);
-        $auto_upd_i=substr($auto_upd_i, 0, -1);
+        $auto_upd_v = substr($auto_upd_i, -1);
+        $auto_upd_i = substr($auto_upd_i, 0, -1);
     }
     ?>
         </select>
@@ -289,100 +291,100 @@ function edit_feed($currentfeed): void
         <tr>
             <td style="width:35%">
             <input type="checkbox" name="edit_text"<?php
-            if(get_nf_option($row['NfOptions'], 'edit_text')!==null) {
+            if (get_nf_option($row['NfOptions'], 'edit_text') !== null) {
                 echo ' checked="checked"';
             } ?> />
             Edit Text
         </td>
 <td>
-    <input type="checkbox" name="c_autoupdate"<?php if($auto_upd_i!==null) {
+    <input type="checkbox" name="c_autoupdate"<?php if ($auto_upd_i !== null) {
         echo ' checked="checked"';
-} ?> />
-Auto Update Interval: <input class="posintnumber<?php if(get_nf_option($row['NfOptions'], 'autoupdate')!==null) {
+                                              } ?> />
+Auto Update Interval: <input class="posintnumber<?php if (get_nf_option($row['NfOptions'], 'autoupdate') !== null) {
     echo ' notempty';
-} ?>" data_info="Auto Update Interval" type="number" min="0" size="4" name="autoupdate" value="<?php echo $auto_upd_i; ?>"
+                                                } ?>" data_info="Auto Update Interval" type="number" min="0" size="4" name="autoupdate" value="<?php echo $auto_upd_i; ?>"
     <?php
-    if ($auto_upd_i==null) {
+    if ($auto_upd_i == null) {
         echo ' disabled';
     } ?> />
 <select name="autoupdate" value="<?php
     echo $auto_upd_v . '"';
-if ($auto_upd_v==null) {
+if ($auto_upd_v == null) {
     echo ' disabled';
 } ?>>
-<option value="h" <?php if($auto_upd_v=='h') {
+<option value="h" <?php if ($auto_upd_v == 'h') {
     echo ' selected="selected"';
-}?>>Hour(s)</option>
-<option value="d"<?php if($auto_upd_v=='d') {
+                  }?>>Hour(s)</option>
+<option value="d"<?php if ($auto_upd_v == 'd') {
     echo ' selected="selected"';
-}?>>Day(s)</option>
-<option value="w"<?php if($auto_upd_v=='w') {
+                 }?>>Day(s)</option>
+<option value="w"<?php if ($auto_upd_v == 'w') {
     echo ' selected="selected"';
-}?>>Week(s)</option>
+                 }?>>Week(s)</option>
 </select>
 </td>
 </tr>
 <tr>
     <td>
-        <input type="checkbox" name="c_max_links"<?php if(get_nf_option($row['NfOptions'], 'max_links')!==null) {
-    echo ' checked="checked"';
-} ?> />
+        <input type="checkbox" name="c_max_links"<?php if (get_nf_option($row['NfOptions'], 'max_links') !== null) {
+            echo ' checked="checked"';
+                                                 } ?> />
 Max. Links: <input class="<?php
-if (get_nf_option($row['NfOptions'], 'max_links')!==null) {
+if (get_nf_option($row['NfOptions'], 'max_links') !== null) {
     echo 'notempty ';
 } ?>posintnumber maxint_300" data_info="Max. Links" type="number" min="0" max="300" size="4" name="max_links" value="<?php echo get_nf_option($row['NfOptions'], 'max_links') . '"';
-if(get_nf_option($row['NfOptions'], 'max_links')==null) {
+if (get_nf_option($row['NfOptions'], 'max_links') == null) {
     echo ' disabled';
 } ?> />
 </td>
 <td>
     <input type="checkbox" name="c_charset"<?php
-if (get_nf_option($row['NfOptions'], 'charset')!==null) {
-    echo ' checked="checked"';
-} ?> />
-Charset: <input <?php if(get_nf_option($row['NfOptions'], 'charset')!==null) {
+    if (get_nf_option($row['NfOptions'], 'charset') !== null) {
+        echo ' checked="checked"';
+    } ?> />
+Charset: <input <?php if (get_nf_option($row['NfOptions'], 'charset') !== null) {
     echo 'class="notempty" ';
-} ?>type="text" data_info="Charset" size="20" name="charset" value="<?php echo get_nf_option($row['NfOptions'], 'charset') . '"';
-if (get_nf_option($row['NfOptions'], 'charset')==null) {
+                } ?>type="text" data_info="Charset" size="20" name="charset" value="<?php echo get_nf_option($row['NfOptions'], 'charset') . '"';
+if (get_nf_option($row['NfOptions'], 'charset') == null) {
     echo ' disabled';
 } ?> />
 </td>
 </tr>
 <tr>
     <td>
-        <input type="checkbox" name="c_max_texts"<?php if(get_nf_option($row['NfOptions'], 'max_texts')!==null) {
-    echo ' checked="checked"';
-} ?> />
+        <input type="checkbox" name="c_max_texts"<?php if (get_nf_option($row['NfOptions'], 'max_texts') !== null) {
+            echo ' checked="checked"';
+                                                 } ?> />
 Max. Texts:
-<input class="<?php if(get_nf_option($row['NfOptions'], 'max_texts')!==null) {
+<input class="<?php if (get_nf_option($row['NfOptions'], 'max_texts') !== null) {
     echo 'notempty ';
-} ?>posintnumber maxint_30" data_info="Max. Texts" type="number" min="0" max="30"
+              } ?>posintnumber maxint_30" data_info="Max. Texts" type="number" min="0" max="30"
 size="4" name="max_texts"
-value="<?php echo get_nf_option($row['NfOptions'], 'max_texts') . '"';if(get_nf_option($row['NfOptions'], 'max_texts')==null) {
+value="<?php echo get_nf_option($row['NfOptions'], 'max_texts') . '"';if (get_nf_option($row['NfOptions'], 'max_texts') == null) {
     echo ' disabled';
-} ?> />
+       } ?> />
 </td>
 <td>
-    <input type="checkbox" name="c_tag"<?php if(get_nf_option($row['NfOptions'], 'tag')!==null) {
-    echo ' checked="checked"';
-       } ?> />
-       Tag: <input <?php if(get_nf_option($row['NfOptions'], 'tag')!==null) {
-    echo 'class="notempty" ';
-       } ?>type="text" data_info="Tag" size="20" name="tag" value="<?php echo get_nf_option($row['NfOptions'], 'tag') . '"';
-if(get_nf_option($row['NfOptions'], 'tag')==null) {
+    <input type="checkbox" name="c_tag"<?php if (get_nf_option($row['NfOptions'], 'tag') !== null) {
+        echo ' checked="checked"';
+                                       } ?> />
+       Tag: <input <?php if (get_nf_option($row['NfOptions'], 'tag') !== null) {
+            echo 'class="notempty" ';
+                   } ?>type="text" data_info="Tag" size="20" name="tag" value="<?php echo get_nf_option($row['NfOptions'], 'tag') . '"';
+if (get_nf_option($row['NfOptions'], 'tag') == null) {
     echo ' disabled';
 } ?> />
 </td>
 </tr>
 <tr>
     <td colspan="2">
-    <input type="checkbox" name="c_article_source"<?php if(get_nf_option($row['NfOptions'], 'article_source')!==null) {
+    <input type="checkbox" name="c_article_source"<?php if (get_nf_option($row['NfOptions'], 'article_source') !== null) {
         echo ' checked="checked"';
-} ?> />
-Article Source: <input class="<?php if(get_nf_option($row['NfOptions'], 'article_source')!==null) {
+                                                  } ?> />
+Article Source: <input class="<?php if (get_nf_option($row['NfOptions'], 'article_source') !== null) {
     echo 'notempty ';
-                                                  } ?>" data_info="Article Source" type="text" size="20" name="article_source" value="<?php echo get_nf_option($row['NfOptions'], 'article_source') . '"';
-if(get_nf_option($row['NfOptions'], 'article_source')==null) {
+                              } ?>" data_info="Article Source" type="text" size="20" name="article_source" value="<?php echo get_nf_option($row['NfOptions'], 'article_source') . '"';
+if (get_nf_option($row['NfOptions'], 'article_source') == null) {
     echo ' disabled';
 } ?> />
 </td>
@@ -426,7 +428,7 @@ $('[type="submit"]').on('click', function(){
 function multi_load_feed($currentlang): void
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    if(!empty($currentlang)) {
+    if (!empty($currentlang)) {
         $result = do_mysqli_query(
             "SELECT NfName,NfID,NfUpdate FROM " . $tbpref . "newsfeeds
             WHERE NfLgID=$currentlang ORDER BY NfUpdate DESC"
@@ -459,15 +461,15 @@ function multi_load_feed($currentlang): void
 <th class="th1 sorttable_numeric clickable">Last Update</th>
 </tr>
     <?php
-    $time=time();
-    while($row = mysqli_fetch_assoc($result)){
-        $diff= $time - (int) $row['NfUpdate'];
+    $time = time();
+    while ($row = mysqli_fetch_assoc($result)) {
+        $diff = $time - (int) $row['NfUpdate'];
         echo '<tr><td class="td1 center">
         <input class="markcheck" type="checkbox" name="selected_feed[]" value="' . $row['NfID'] . '" checked="checked" />
         </td>
-        <td class="td1 center" colspan="2">'.$row['NfName'].'</td>
-        <td class="td1 center" sorttable_customkey="'.$diff.'">';
-        if($row['NfUpdate']) {
+        <td class="td1 center" colspan="2">' . $row['NfName'] . '</td>
+        <td class="td1 center" sorttable_customkey="' . $diff . '">';
+        if ($row['NfUpdate']) {
             print_last_feed_update($diff);
         }
         echo '</td></tr>';
@@ -498,7 +500,11 @@ $( "button" ).on('click', function() {
 }
 
 function display_main_page(
-    $currentlang, $currentquery, $currentpage, $currentsort, $wh_query
+    $currentlang,
+    $currentquery,
+    $currentpage,
+    $currentsort,
+    $wh_query
 ): void {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $debug = \Lwt\Core\LWT_Globals::isDebug();
@@ -559,8 +565,8 @@ function display_main_page(
 </select></td></tr>
     <?php
         $sql = 'select count(*) as value from ' . $tbpref . 'newsfeeds where ';
-    if ($currentlang>0) {
-        $sql .= 'NfLgID ='.$currentlang . $wh_query;
+    if ($currentlang > 0) {
+        $sql .= 'NfLgID =' . $currentlang . $wh_query;
     } else {
         $sql .= '1=1' . $wh_query;
     }
@@ -570,7 +576,7 @@ function display_main_page(
     }
     if ($recno) {
         $maxperpage = (int) getSettingWithDefault('set-feeds-per-page');
-        $pages = $recno == 0 ? 0 : (intval(($recno-1) / $maxperpage) + 1);
+        $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
         if ($currentpage < 1) {
             $currentpage = 1;
         }
@@ -586,19 +592,19 @@ function display_main_page(
         if ($currentsort > $lsorts) {
             $currentsort = $lsorts;
         }
-            echo '<tr><th class="th1" style="width:30%;"> '. $total=$recno .' newsfeeds ';///
+            echo '<tr><th class="th1" style="width:30%;"> ' . $total = $recno . ' newsfeeds ';///
         echo '</th><th class="th1">';
         makePager($currentpage, $pages, '/feeds/edit', 'form1');
         if (!empty($currentlang)) {
             $result = do_mysqli_query(
                 "SELECT * FROM " . $tbpref . "newsfeeds
                     WHERE NfLgID=$currentlang $wh_query
-                    ORDER BY " . $sorts[$currentsort-1]
+                    ORDER BY " . $sorts[$currentsort - 1]
             );
         } else {
             $result = do_mysqli_query(
                 "SELECT * FROM " . $tbpref . "newsfeeds WHERE (1=1) $wh_query
-                    ORDER BY " . $sorts[$currentsort-1]
+                    ORDER BY " . $sorts[$currentsort - 1]
             );
         }
         ?>
@@ -619,9 +625,9 @@ function display_main_page(
     <th class="th1 sorttable_numeric clickable">Last Update</th>
 </tr>
             <?php
-            $time=time();
-            while($row = mysqli_fetch_assoc($result)) {
-                $diff = $time- (int) $row['NfUpdate'];
+            $time = time();
+            while ($row = mysqli_fetch_assoc($result)) {
+                $diff = $time - (int) $row['NfUpdate'];
                 echo '<tr>
                 <td class="td1 center">
                 <input type="checkbox" name="marked[]" class="markcheck" value="' . $row['NfID'] . '" /></td>
@@ -635,9 +641,9 @@ function display_main_page(
                 <img src="/assets/icons/external.png" title="Show Feed" alt="Link" /></a>&nbsp;
                 <span class="click" onclick="if (confirm (\'Are you sure?\')) location.href=\'' . $_SERVER['PHP_SELF'] . '?markaction=del&amp;selected_feed=' . $row['NfID'] . '\';">
                 <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></span></td>
-                <td class="td1 center">'.$row['NfName'].'</td>
-                <td class="td1 center">'.str_replace(',', ', ', $row['NfOptions']).'</td>
-                <td class="td1 center" sorttable_customkey="'.$diff.'">';
+                <td class="td1 center">' . $row['NfName'] . '</td>
+                <td class="td1 center">' . str_replace(',', ', ', $row['NfOptions']) . '</td>
+                <td class="td1 center" sorttable_customkey="' . $diff . '">';
                 if ($row['NfUpdate']) {
                     print_last_feed_update($diff);
                 }
@@ -660,11 +666,12 @@ function display_main_page(
     }
 }
 
-if (isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
-    || (isset($_REQUEST['markaction']) && $_REQUEST['markaction']=='update')
+if (
+    isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
+    || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
 ) {
     load_feeds($currentfeed);
-} elseif(isset($_REQUEST['new_feed'])) {
+} elseif (isset($_REQUEST['new_feed'])) {
     display_new_feed($currentlang);
 } elseif (isset($_REQUEST['edit_feed'])) {
     edit_feed($currentfeed);
@@ -672,7 +679,11 @@ if (isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
     multi_load_feed($currentlang);
 } else {
     display_main_page(
-        $currentlang, $currentquery, $currentpage, $currentsort, $wh_query
+        $currentlang,
+        $currentquery,
+        $currentpage,
+        $currentsort,
+        $wh_query
     );
 }
 pageend();

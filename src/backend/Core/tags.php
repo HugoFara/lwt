@@ -12,7 +12,8 @@ require_once __DIR__ . '/database_connect.php';
 function get_tags($refresh = 0)
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    if (isset($_SESSION['TAGS'])
+    if (
+        isset($_SESSION['TAGS'])
         && is_array($_SESSION['TAGS'])
         && isset($_SESSION['TBPREF_TAGS'])
         && $_SESSION['TBPREF_TAGS'] == $tbpref . url_base()
@@ -42,7 +43,8 @@ function get_tags($refresh = 0)
 function get_texttags($refresh = 0)
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    if (isset($_SESSION['TEXTTAGS'])
+    if (
+        isset($_SESSION['TEXTTAGS'])
         && is_array($_SESSION['TEXTTAGS'])
         && isset($_SESSION['TBPREF_TEXTTAGS'])
         && $refresh == 0
@@ -84,7 +86,7 @@ function getTextTitle($textid): string
 
 // -------------------------------------------------------------
 
-function get_tag_selectoptions($v,$l): string
+function get_tag_selectoptions($v, $l): string
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (!isset($v)) {
@@ -123,10 +125,10 @@ function get_tag_selectoptions($v,$l): string
 
 // -------------------------------------------------------------
 
-function get_texttag_selectoptions($v,$l): string
+function get_texttag_selectoptions($v, $l): string
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    if (!isset($v) ) {
+    if (!isset($v)) {
         $v = '';
     }
     $r = "<option value=\"\"" . get_selected($v, '');
@@ -162,13 +164,13 @@ function get_texttag_selectoptions($v,$l): string
 
 // -------------------------------------------------------------
 
-function get_txtag_selectoptions($l,$v): string
+function get_txtag_selectoptions($l, $v): string
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (!isset($v)) {
         $v = '';
     }
-    $u ='';
+    $u = '';
     $r = "<option value=\"&amp;texttag\"" . get_selected($v, '');
     $r .= ">[Filter off]</option>";
     $sql = 'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID, GROUP_CONCAT(TxID
@@ -182,23 +184,23 @@ function get_txtag_selectoptions($l,$v): string
     $sql .= ' GROUP BY UPPER(TagName)';
     $res = do_mysqli_query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
-        if ($record['TagName']==1) {
-            $u ="<option disabled=\"disabled\">--------</option><option value=\"" .
+        if ($record['TagName'] == 1) {
+            $u = "<option disabled=\"disabled\">--------</option><option value=\"" .
             $record['TextID'] . "&amp;texttag=-1\"" . get_selected($v, "-1") .
             ">UNTAGGED</option>";
         } else {
-            $r .= "<option value=\"" .$record['TextID']."&amp;texttag=".
+            $r .= "<option value=\"" . $record['TextID'] . "&amp;texttag=" .
             $record['TagID'] . "\"" . get_selected($v, $record['TagID']) . ">" .
             $record['TagName'] . "</option>";
         }
     }
     mysqli_free_result($res);
-    return $r.$u;
+    return $r . $u;
 }
 
 // -------------------------------------------------------------
 
-function get_archivedtexttag_selectoptions($v,$l): string
+function get_archivedtexttag_selectoptions($v, $l): string
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (!isset($v)) {
@@ -251,7 +253,8 @@ function saveWordTags($wid)
         return;
     }
     runsql("DELETE from " . $tbpref . "wordtags WHERE WtWoID =" . (int)$wid, '');
-    if (!isset($_REQUEST['TermTags'])
+    if (
+        !isset($_REQUEST['TermTags'])
         || !is_array($_REQUEST['TermTags'])
         || !isset($_REQUEST['TermTags']['TagList'])
         || !is_array($_REQUEST['TermTags']['TagList'])
@@ -263,7 +266,7 @@ function saveWordTags($wid)
 
     for ($i = 0; $i < $cnt; $i++) {
         $tag = $_REQUEST['TermTags']['TagList'][$i];
-        if(!in_array($tag, $_SESSION['TAGS'])) {
+        if (!in_array($tag, $_SESSION['TAGS'])) {
             runsql(
                 "INSERT INTO {$tbpref}tags (TgText)
                 VALUES(" . convert_string_to_sqlsyntax($tag) . ")",
@@ -300,7 +303,8 @@ function saveTextTags($tid): void
         "DELETE FROM " . $tbpref . "texttags WHERE TtTxID =" . (int)$tid,
         ''
     );
-    if (!isset($_REQUEST['TextTags'])
+    if (
+        !isset($_REQUEST['TextTags'])
         || !is_array($_REQUEST['TextTags'])
         || !isset($_REQUEST['TextTags']['TagList'])
         || !is_array($_REQUEST['TextTags']['TagList'])
@@ -347,7 +351,8 @@ function saveArchivedTextTags($tid): void
         return;
     }
     runsql("DELETE from " . $tbpref . "archtexttags WHERE AgAtID =" . (int)$tid, '');
-    if (!isset($_REQUEST['TextTags'])
+    if (
+        !isset($_REQUEST['TextTags'])
         || !is_array($_REQUEST['TextTags'])
         || !isset($_REQUEST['TextTags']['TagList'])
         || !is_array($_REQUEST['TextTags']['TagList'])
@@ -693,5 +698,3 @@ function removetexttaglist($item, $list): string
     mysqli_free_result($res);
     return "Tag removed in $cnt Texts";
 }
-
-?>

@@ -37,7 +37,10 @@ $currentsort = (int) processDBParam("sort", 'currentwordsort', '1', true);
 $currentpage = (int) processSessParam("page", "currentwordpage", '1', true);
 $currentquery = (string) processSessParam("query", "currentwordquery", '', false);
 $currentquerymode = (string) processSessParam(
-    "query_mode", "currentwordquerymode", 'term,rom,transl', false
+    "query_mode",
+    "currentwordquerymode",
+    'term,rom,transl',
+    false
 );
 $currentregexmode = getSettingWithDefault("set-regex-mode");
 $currentstatus = (string) processSessParam("status", "currentwordstatus", '', false);
@@ -45,10 +48,12 @@ $currenttext = validateText((string) processSessParam("text", "currentwordtext",
 $currenttexttag = (string) processSessParam("texttag", "currentwordtexttag", '', false);
 $currenttextmode = (string) processSessParam("text_mode", "currentwordtextmode", 0, false);
 $currenttag1 = validateTag(
-    (string) processSessParam("tag1", "currentwordtag1", '', false), $currentlang
+    (string) processSessParam("tag1", "currentwordtag1", '', false),
+    $currentlang
 );
 $currenttag2 = validateTag(
-    (string) processSessParam("tag2", "currentwordtag2", '', false), $currentlang
+    (string) processSessParam("tag2", "currentwordtag2", '', false),
+    $currentlang
 );
 $currenttag12 = (string) processSessParam("tag12", "currentwordtag12", '', false);
 
@@ -64,42 +69,43 @@ convert_string_to_sqlsyntax(
     $currentquery
 );
 switch ($currentquerymode) {
-case 'term,rom,transl':
-    $wh_query =' and (WoText ' . $wh_query . ' or IFNULL(WoRomanization,\'*\') ' .
-    $wh_query . ' or WoTranslation ' . $wh_query . ')';
-    break;
-case 'term,rom':
-    $wh_query = ' and (WoText ' . $wh_query . ' or IFNULL(WoRomanization,\'*\') ' .
-    $wh_query . ')';
-    break;
-case 'rom,transl':
-    $wh_query = ' and (IFNULL(WoRomanization,\'*\') ' . $wh_query .
-    ' or WoTranslation ' . $wh_query . ')';
-    break;
-case 'term,transl':
-    $wh_query=' and (WoText ' . $wh_query . ' or WoTranslation ' . $wh_query . ')';
-    break;
-case 'term':
-    $wh_query=' and (WoText ' . $wh_query . ')';
-    break;
-case 'rom':
-    $wh_query=' and (IFNULL(WoRomanization,\'*\') ' . $wh_query . ')';
-    break;
-case 'transl':
-    $wh_query=' and (WoTranslation ' . $wh_query . ')';
-    break;
+    case 'term,rom,transl':
+        $wh_query = ' and (WoText ' . $wh_query . ' or IFNULL(WoRomanization,\'*\') ' .
+        $wh_query . ' or WoTranslation ' . $wh_query . ')';
+        break;
+    case 'term,rom':
+        $wh_query = ' and (WoText ' . $wh_query . ' or IFNULL(WoRomanization,\'*\') ' .
+        $wh_query . ')';
+        break;
+    case 'rom,transl':
+        $wh_query = ' and (IFNULL(WoRomanization,\'*\') ' . $wh_query .
+        ' or WoTranslation ' . $wh_query . ')';
+        break;
+    case 'term,transl':
+        $wh_query = ' and (WoText ' . $wh_query . ' or WoTranslation ' . $wh_query . ')';
+        break;
+    case 'term':
+        $wh_query = ' and (WoText ' . $wh_query . ')';
+        break;
+    case 'rom':
+        $wh_query = ' and (IFNULL(WoRomanization,\'*\') ' . $wh_query . ')';
+        break;
+    case 'transl':
+        $wh_query = ' and (WoTranslation ' . $wh_query . ')';
+        break;
 }
-if ($currentquery!=='') {
-    if ($currentregexmode!=='') {
+if ($currentquery !== '') {
+    if ($currentregexmode !== '') {
         if (
             @mysqli_query(
                 $GLOBALS["DBCONNECTION"],
                 'select "test" rlike ' . convert_string_to_sqlsyntax($currentquery)
-            )===false) {
-            $currentquery='';
+            ) === false
+        ) {
+            $currentquery = '';
             $wh_query = '';
             unset($_SESSION['currentwordquery']);
-            if(isset($_REQUEST['query'])) {
+            if (isset($_REQUEST['query'])) {
                 echo '<p id="hide3" style="color:red;text-align:center;">' .
                 '+++ Warning: Invalid Search +++</p>';
             }
@@ -113,13 +119,11 @@ $wh_tag1 = null;
 $wh_tag2 = null;
 if ($currenttag1 == '' && $currenttag2 == '') {
     $wh_tag = '';
-}
-else {
+} else {
     if ($currenttag1 != '') {
         if ($currenttag1 == -1) {
             $wh_tag1 = "group_concat(WtTgID) IS NULL";
-        }
-        else {
+        } else {
             $wh_tag1 = "concat('/',group_concat(WtTgID separator '/'),'/') like '%/" .
             $currenttag1 . "/%'";
         }
@@ -127,16 +131,14 @@ else {
     if ($currenttag2 != '') {
         if ($currenttag2 == -1) {
             $wh_tag2 = "group_concat(WtTgID) IS NULL";
-        }
-        else {
+        } else {
             $wh_tag2 = "concat('/',group_concat(WtTgID separator '/'),'/') like '%/" .
             $currenttag2 . "/%'";
         }
     }
     if ($currenttag1 != '' && $currenttag2 == '') {
         $wh_tag = " having (" . $wh_tag1 . ') ';
-    }
-    elseif ($currenttag2 != '' && $currenttag1 == '') {
+    } elseif ($currenttag2 != '' && $currenttag1 == '') {
         $wh_tag = " having (" . $wh_tag2 . ') ';
     } else {
         $wh_tag = " having ((" . $wh_tag1 . ($currenttag12 ? ') AND (' : ') OR (') .
@@ -158,7 +160,8 @@ $no_pagestart =
 
 if (!$no_pagestart) {
     pagestart(
-        'My ' . getLanguage($currentlang) . ' Terms (Words and Expressions)', true
+        'My ' . getLanguage($currentlang) . ' Terms (Words and Expressions)',
+        true
     );
 }
 
@@ -203,13 +206,13 @@ if (isset($_REQUEST['markaction'])) {
                         ) WHERE WoID IS NULL",
                         ''
                     );
-                } elseif ($markaction == 'addtag' ) {
+                } elseif ($markaction == 'addtag') {
                     $message = addtaglist($actiondata, $list);
-                } elseif ($markaction == 'deltag' ) {
+                } elseif ($markaction == 'deltag') {
                     removetaglist($actiondata, $list);
                     header("Location: /words/edit");
                     exit();
-                } elseif ($markaction == 'spl1' ) {
+                } elseif ($markaction == 'spl1') {
                     $message = runsql(
                         'update ' . $tbpref . 'words
                         set WoStatus=WoStatus+1, WoStatusChanged = NOW(),' .
@@ -217,7 +220,7 @@ if (isset($_REQUEST['markaction'])) {
                         where WoStatus in (1,2,3,4) and WoID in ' . $list,
                         "Updated Status (+1)"
                     );
-                } elseif ($markaction == 'smi1' ) {
+                } elseif ($markaction == 'smi1') {
                     $message = runsql(
                         'update ' . $tbpref . 'words
                         set WoStatus=WoStatus-1, WoStatusChanged = NOW(),' .
@@ -225,7 +228,7 @@ if (isset($_REQUEST['markaction'])) {
                         where WoStatus in (2,3,4,5) and WoID in ' . $list,
                         "Updated Status (-1)"
                     );
-                } elseif ($markaction == 's5' ) {
+                } elseif ($markaction == 's5') {
                     $message = runsql(
                         'update ' . $tbpref . 'words
                         set WoStatus=5, WoStatusChanged = NOW(),' .
@@ -233,7 +236,7 @@ if (isset($_REQUEST['markaction'])) {
                         where WoID in ' . $list,
                         "Updated Status (=5)"
                     );
-                } elseif ($markaction == 's1' ) {
+                } elseif ($markaction == 's1') {
                     $message = runsql(
                         'update ' . $tbpref . 'words
                         set WoStatus=1, WoStatusChanged = NOW(),' .
@@ -241,7 +244,7 @@ if (isset($_REQUEST['markaction'])) {
                         where WoID in ' . $list,
                         "Updated Status (=1)"
                     );
-                } elseif ($markaction == 's99' ) {
+                } elseif ($markaction == 's99') {
                     $message = runsql(
                         'update ' . $tbpref . 'words
                         set WoStatus=99, WoStatusChanged = NOW(),' .
@@ -249,7 +252,7 @@ if (isset($_REQUEST['markaction'])) {
                         where WoID in ' . $list,
                         "Updated Status (=99)"
                     );
-                } elseif ($markaction == 's98' ) {
+                } elseif ($markaction == 's98') {
                     $message = runsql(
                         'update ' . $tbpref . 'words
                         set WoStatus=98, WoStatusChanged = NOW(),' .
@@ -257,7 +260,7 @@ if (isset($_REQUEST['markaction'])) {
                         where WoID in ' . $list,
                         "Updated Status (=98)"
                     );
-                } elseif ($markaction == 'today' ) {
+                } elseif ($markaction == 'today') {
                     $message = runsql(
                         'update ' . $tbpref . 'words
                         set WoStatusChanged = NOW(),' .
@@ -265,21 +268,21 @@ if (isset($_REQUEST['markaction'])) {
                         where WoID in ' . $list,
                         "Updated Status Date (= Now)"
                     );
-                } elseif ($markaction == 'delsent' ) {
+                } elseif ($markaction == 'delsent') {
                     $message = runsql(
                         'update ' . $tbpref . 'words
                         set WoSentence = NULL
                         where WoID in ' . $list,
                         "Term Sentence(s) deleted"
                     );
-                } elseif ($markaction == 'lower' ) {
+                } elseif ($markaction == 'lower') {
                     $message = runsql(
                         'update ' . $tbpref . 'words
                         set WoText = WoTextLC
                         where WoID in ' . $list,
                         "Term(s) set to lowercase"
                     );
-                } elseif ($markaction == 'cap' ) {
+                } elseif ($markaction == 'cap') {
                     $message = runsql(
                         'update ' . $tbpref . 'words
                         set WoText = CONCAT(
@@ -288,7 +291,7 @@ if (isset($_REQUEST['markaction'])) {
                         where WoID in ' . $list,
                         "Term(s) capitalized"
                     );
-                } elseif ($markaction == 'exp' ) {
+                } elseif ($markaction == 'exp') {
                     anki_export(
                         'select distinct WoID, LgRightToLeft,
                         LgRegexpWordCharacters, LgName, WoText, WoTranslation,
@@ -316,7 +319,7 @@ if (isset($_REQUEST['markaction'])) {
                         WoID in ' . $list . '
                         group by WoID'
                     );
-                } elseif ($markaction == 'exp2' ) {
+                } elseif ($markaction == 'exp2') {
                     tsv_export(
                         'select distinct WoID, LgName, WoText, WoTranslation,
                         WoRomanization, WoSentence, WoStatus,
@@ -336,7 +339,7 @@ if (isset($_REQUEST['markaction'])) {
                         where WoLgID = LgID and WoID in ' . $list . '
                         group by WoID'
                     );
-                } elseif ($markaction == 'exp3' ) {
+                } elseif ($markaction == 'exp3') {
                     flexible_export(
                         'select distinct WoID, LgName, LgExportTemplate,
                         LgRightToLeft, WoText, WoTextLC, WoTranslation,
@@ -393,14 +396,14 @@ if (isset($_REQUEST['allaction'])) {
                 left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID
             ), ' . $tbpref . 'textitems2
             where Ti2LgID = WoLgID and Ti2WoID = WoID and
-            Ti2TxID in (' . $currenttext. ')' . $wh_lang . $wh_stat . $wh_query .
+            Ti2TxID in (' . $currenttext . ')' . $wh_lang . $wh_stat . $wh_query .
             ' group by WoID ' . $wh_tag;
         }
-        $cnt=0;
+        $cnt = 0;
         $res = do_mysqli_query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $id = $record['WoID'];
-            if ($allaction == 'delall' ) {
+            if ($allaction == 'delall') {
                 $message = runsql(
                     'delete from ' . $tbpref . 'words
                     where WoID = ' . $id,
@@ -415,13 +418,13 @@ if (isset($_REQUEST['allaction'])) {
                     'delete from ' . $tbpref . 'textitems2
                     where Ti2WoID  = ' . $id
                 );
-            } elseif ($allaction == 'addtagall' ) {
+            } elseif ($allaction == 'addtagall') {
                 addtaglist($actiondata, '(' . $id . ')');
                 $message = 1;
-            } elseif ($allaction == 'deltagall' ) {
+            } elseif ($allaction == 'deltagall') {
                 removetaglist($actiondata, '(' . $id . ')');
                 $message = 1;
-            } elseif ($allaction == 'spl1all' ) {
+            } elseif ($allaction == 'spl1all') {
                 $message = runsql(
                     'update ' . $tbpref . 'words
                     set WoStatus=WoStatus+1, WoStatusChanged = NOW(),' .
@@ -429,7 +432,7 @@ if (isset($_REQUEST['allaction'])) {
                     where WoStatus in (1,2,3,4) and WoID = ' . $id,
                     ""
                 );
-            } elseif ($allaction == 'smi1all' ) {
+            } elseif ($allaction == 'smi1all') {
                 $message = runsql(
                     'update ' . $tbpref . 'words
                     set WoStatus=WoStatus-1, WoStatusChanged = NOW(),' .
@@ -437,51 +440,52 @@ if (isset($_REQUEST['allaction'])) {
                     where WoStatus in (2,3,4,5) and WoID = ' . $id,
                     ""
                 );
-            } elseif ($allaction == 's5all' ) {
+            } elseif ($allaction == 's5all') {
                 $message = runsql(
                     'update ' . $tbpref . 'words
                     set WoStatus=5, WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . ' where WoID = ' . $id,
                     ""
                 );
-            } elseif ($allaction == 's1all' ) {
+            } elseif ($allaction == 's1all') {
                 $message = runsql(
                     'update ' . $tbpref . 'words
                     set WoStatus=1, WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . ' where WoID = ' . $id,
                     ""
                 );
-            } elseif ($allaction == 's99all' ) {
+            } elseif ($allaction == 's99all') {
                 $message = runsql(
                     'update ' . $tbpref . 'words
                     set WoStatus=99, WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . ' where WoID = ' . $id,
                     ""
                 );
-            } elseif ($allaction == 's98all' ) {
+            } elseif ($allaction == 's98all') {
                 $message = runsql(
                     'update ' . $tbpref . 'words
                     set WoStatus=98, WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . ' where WoID = ' . $id,
                     ""
                 );
-            } elseif ($allaction == 'todayall' ) {
+            } elseif ($allaction == 'todayall') {
                 $message = runsql(
                     'update ' . $tbpref . 'words
                     set WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . ' where WoID = ' . $id,
                     ""
                 );
-            } elseif ($allaction == 'delsentall' ) {
+            } elseif ($allaction == 'delsentall') {
                 $message = runsql(
                     'update ' . $tbpref . 'words
                     set WoSentence = NULL where WoID = ' . $id,
                     ""
                 );
-            } elseif ($allaction == 'lowerall' ) {
-                $message = runsql('update ' . $tbpref . 'words
+            } elseif ($allaction == 'lowerall') {
+                $message = runsql(
+                    'update ' . $tbpref . 'words
                 set WoText = WoTextLC where WoID = ' . $id,
-                ""
+                    ""
                 );
             } else {
                 // $allaction == 'capall' by default
@@ -501,7 +505,7 @@ if (isset($_REQUEST['allaction'])) {
         }
         if ($allaction == 'addtagall') {
             $message = "Tag added in $cnt Terms";
-        } else if ($allaction == 'delall') {
+        } elseif ($allaction == 'delall') {
             $message = "Deleted: $cnt Terms";
             adjust_autoincr('words', 'WoID');
             runsql(
@@ -515,7 +519,7 @@ if (isset($_REQUEST['allaction'])) {
         } else {
             $message = "$cnt Terms changed";
         }
-    } elseif ($allaction == 'expall' ) {
+    } elseif ($allaction == 'expall') {
         if ($currenttext == '') {
             anki_export(
                 'select distinct WoID, LgRightToLeft, LgRegexpWordCharacters,
@@ -542,35 +546,40 @@ if (isset($_REQUEST['allaction'])) {
                 'select distinct WoID, LgRightToLeft, LgRegexpWordCharacters,
                 LgName, WoText, WoTranslation, WoRomanization, WoSentence,
                 ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-                from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages, ' . $tbpref . 'textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' . $currenttext . ')' . ' and WoLgID = LgID AND WoTranslation != \'*\' and WoSentence like concat(\'%{\',WoText,\'}%\') ' . $wh_lang . $wh_stat . $wh_query . ' group by WoID ' . $wh_tag);
+                from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages, ' . $tbpref . 'textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' . $currenttext . ')' . ' and WoLgID = LgID AND WoTranslation != \'*\' and WoSentence like concat(\'%{\',WoText,\'}%\') ' . $wh_lang . $wh_stat . $wh_query . ' group by WoID ' . $wh_tag
+            );
         }
-    } elseif ($allaction == 'expall2' ) {
+    } elseif ($allaction == 'expall2') {
         if ($currenttext == '') {
             tsv_export(
                 'select distinct WoID, LgName, WoText, WoTranslation,
                 WoRomanization, WoSentence, WoStatus,
-                ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages where WoLgID = LgID ' . $wh_lang . $wh_stat .  $wh_query . ' group by WoID ' . $wh_tag);
+                ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages where WoLgID = LgID ' . $wh_lang . $wh_stat .  $wh_query . ' group by WoID ' . $wh_tag
+            );
         } else {
             tsv_export(
                 'select distinct WoID, LgName, WoText, WoTranslation,
                 WoRomanization, WoSentence, WoStatus,
-                ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages, ' . $tbpref . 'textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' . $currenttext . ')' . ' and WoLgID = LgID ' . $wh_lang . $wh_stat . $wh_query . ' group by WoID ' . $wh_tag);
+                ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages, ' . $tbpref . 'textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' . $currenttext . ')' . ' and WoLgID = LgID ' . $wh_lang . $wh_stat . $wh_query . ' group by WoID ' . $wh_tag
+            );
         }
-    } elseif ($allaction == 'expall3' ) {
+    } elseif ($allaction == 'expall3') {
         if ($currenttext == '') {
             flexible_export(
                 'select distinct WoID, LgName, LgExportTemplate, LgRightToLeft,
                  WoText, WoTextLC, WoTranslation, WoRomanization, WoSentence,
                  WoStatus,
-                 ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages where WoLgID = LgID ' . $wh_lang . $wh_stat .  $wh_query . ' group by WoID ' . $wh_tag);
+                 ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages where WoLgID = LgID ' . $wh_lang . $wh_stat .  $wh_query . ' group by WoID ' . $wh_tag
+            );
         } else {
             flexible_export(
                 'select distinct WoID, LgName, LgExportTemplate, LgRightToLeft,
                 WoText, WoTextLC, WoTranslation, WoRomanization, WoSentence,
                 WoStatus,
-                ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages, ' . $tbpref . 'textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' . $currenttext . ')' . ' and WoLgID = LgID ' . $wh_lang . $wh_stat . $wh_query . ' group by WoID ' . $wh_tag);
+                ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages, ' . $tbpref . 'textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' . $currenttext . ')' . ' and WoLgID = LgID ' . $wh_lang . $wh_stat . $wh_query . ' group by WoID ' . $wh_tag
+            );
         }
-    } elseif ($allaction == 'testall' ) {
+    } elseif ($allaction == 'testall') {
         if ($currenttext == '') {
             $sql = 'select distinct WoID
             from (' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID)
@@ -591,7 +600,6 @@ if (isset($_REQUEST['allaction'])) {
         header("Location: /test?selection=2");
         exit();
     }
-
 } elseif (isset($_REQUEST['del'])) {
     // DEL
     $message = runsql('delete from ' . $tbpref . 'words where WoID = ' . $_REQUEST['del'], "Deleted");
@@ -602,7 +610,7 @@ if (isset($_REQUEST['allaction'])) {
 } elseif (isset($_REQUEST['op'])) {
     // INS/UPD
     $translation_raw = repl_tab_nl(getreq("WoTranslation"));
-    if ($translation_raw == '' ) {
+    if ($translation_raw == '') {
         $translation = '*';
     } else {
         $translation = $translation_raw;
@@ -621,7 +629,9 @@ if (isset($_REQUEST['allaction'])) {
             convert_string_to_sqlsyntax($translation) . ', ' .
             convert_string_to_sqlsyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', ' .
             convert_string_to_sqlsyntax($_REQUEST["WoRomanization"]) . ', NOW(), ' .
-            make_score_random_insert_update('id') . ')', "Saved", $sqlerrdie = false
+            make_score_random_insert_update('id') . ')',
+            "Saved",
+            $sqlerrdie = false
         );
 
         $wid = get_last_key();
@@ -631,14 +641,15 @@ if (isset($_REQUEST['allaction'])) {
             from ' . $tbpref . 'words where WoID = ' . $wid
         );
         $textlc = mb_strtolower($_REQUEST["WoText"], 'UTF-8');
-        if($len > 1) {
+        if ($len > 1) {
             insertExpressions($textlc, $_REQUEST["WoLgID"], $wid, $len, 1);
         } else {
             do_mysqli_query(
                 'UPDATE ' . $tbpref . 'textitems2
                 SET Ti2WoID = ' . $wid . '
                 WHERE Ti2LgID = ' . $_REQUEST["WoLgID"] . ' AND LOWER(Ti2Text) = ' .
-                convert_string_to_sqlsyntax_notrim_nonull($textlc));
+                convert_string_to_sqlsyntax_notrim_nonull($textlc)
+            );
         }
     } else {
         // UPDATE
@@ -660,12 +671,12 @@ if (isset($_REQUEST['allaction'])) {
             convert_string_to_sqlsyntax($_REQUEST["WoRomanization"]) . $xx . ',' .
             make_score_random_insert_update('u') .
             ' where WoID = ' . $_REQUEST["WoID"],
-            "Updated", $sqlerrdie = false
+            "Updated",
+            $sqlerrdie = false
         );
     }
 
     saveWordTags($wid);
-
 }
 
 
@@ -727,9 +738,11 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
     </tr>
     <tr>
     <td class="td1 right" colspan="2">  &nbsp;
-    <?php echo createDictLinksInEditWin2((int) $_REQUEST['lang'],
-    'document.forms[\'newword\'].WoSentence',
-    'document.forms[\'newword\'].WoText'); ?>
+    <?php echo createDictLinksInEditWin2(
+        (int) $_REQUEST['lang'],
+        'document.forms[\'newword\'].WoSentence',
+        'document.forms[\'newword\'].WoText'
+    ); ?>
         &nbsp; &nbsp;
     <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/words/edit';}" />
     <input type="submit" name="op" value="Save" /></td>
@@ -738,18 +751,16 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
     </form>
 
     <?php
-
 } elseif (isset($_REQUEST['chg'])) {
     // CHG
     $sql = 'select * from ' . $tbpref . 'words, ' . $tbpref . 'languages
     where LgID = WoLgID and WoID = ' . $_REQUEST['chg'];
     $res = do_mysqli_query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
-
         $wordlc = $record['WoTextLC'];
         $transl = repl_tab_nl($record['WoTranslation']);
         if ($transl == '*') {
-            $transl='';
+            $transl = '';
         }
         $scrdir = ($record['LgRightToLeft'] ? ' dir="rtl" ' : '');
         $showRoman = $record['LgShowRomanization'];
@@ -814,27 +825,28 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
      </tr>
      </table>
      </form>
-    <?php
+        <?php
         // Display example sentence button
         example_sentences_area($record['LgID'], $wordlc, "document.forms['editword'].WoSentence", $_REQUEST['chg']);
     }
     mysqli_free_result($res);
 } else {
     // DISPLAY
-    if (substr($message, 0, 24) == "Error: Duplicate entry '"
+    if (
+        substr($message, 0, 24) == "Error: Duplicate entry '"
         && substr($message, -24) == "' for key 'WoLgIDTextLC'"
     ) {
         $lgID = $_REQUEST["WoLgID"] . "-";
-        $message = substr($message, 24+strlen($lgID));
-        $message = substr($message, 0, strlen($message)-24);
+        $message = substr($message, 24 + strlen($lgID));
+        $message = substr($message, 0, strlen($message) - 24);
         $message = "Error: Term '" . $message . "' already exists. Please go back and correct this!";
     }
     echo error_message_with_hide($message, false);
 
     if ($currenttext == '') {
-        $sql = 'select count(*) as value from (select WoID from (' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) where (1=1) ' . $wh_lang . $wh_stat .  $wh_query . ' group by WoID ' . $wh_tag .') as dummy';
+        $sql = 'select count(*) as value from (select WoID from (' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) where (1=1) ' . $wh_lang . $wh_stat .  $wh_query . ' group by WoID ' . $wh_tag . ') as dummy';
     } else {
-        $sql = 'select count(*) as value from (select WoID from (' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID), ' . $tbpref . 'textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' . $currenttext . ')' . $wh_lang . $wh_stat . $wh_query . ' group by WoID ' . $wh_tag .') as dummy';
+        $sql = 'select count(*) as value from (select WoID from (' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID), ' . $tbpref . 'textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' . $currenttext . ')' . $wh_lang . $wh_stat . $wh_query . ' group by WoID ' . $wh_tag . ') as dummy';
     }
     $recno = (int) get_first_value($sql);
     if ($debug) {
@@ -843,7 +855,7 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
 
     $maxperpage = (int) getSettingWithDefault('set-terms-per-page');
 
-    $pages = $recno == 0 ? 0 : (intval(($recno-1) / $maxperpage) + 1);
+    $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
     if ($currentpage < 1) {
         $currentpage = 1;
@@ -851,7 +863,7 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
     if ($currentpage > $pages) {
         $currentpage = $pages;
     }
-    $limit = 'LIMIT ' . (($currentpage-1) * $maxperpage) . ',' . $maxperpage;
+    $limit = 'LIMIT ' . (($currentpage - 1) * $maxperpage) . ',' . $maxperpage;
 
     $sorts = array('WoTextLC','lower(WoTranslation)','WoID desc','WoID asc','WoStatus, WoTextLC','WoTodayScore','textswordcount desc, WoTextLC asc');
     $lsorts = count($sorts);
@@ -864,15 +876,15 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
 
 
     if ($currentlang != '') {
-    ?>
+        ?>
    <p><a href="<?php echo $_SERVER['PHP_SELF']; ?>?new=1&amp;lang=<?php echo $currentlang; ?>"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New <?php echo tohtml(getLanguage($currentlang)); ?> Term ...</a></p>
-<?php
+        <?php
     } else {
-    ?>
+        ?>
    <p><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Term? - Set Language Filter first ...</p>
-    <?php
+        <?php
     }
-?>
+    ?>
 
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab2" cellspacing="0" cellpadding="5">
@@ -887,12 +899,14 @@ Language:
 </td>
 <td class="td1 center" colspan="2">
 <select name="text_mode" onchange="{val=document.form1.text_mode.value; location.href='/words/edit?page=1&amp;texttag=&amp;text=&amp;text_mode=' + val;}">
-<option value="0"<?php if($currenttextmode=="0") { echo ' selected="selected"';
-} ?>>Text:</option>
-<option value="1"<?php if($currenttextmode=="1") { echo ' selected="selected"';
-} ?>>Text Tag:</option>
+<option value="0"<?php if ($currenttextmode == "0") {
+    echo ' selected="selected"';
+                 } ?>>Text:</option>
+<option value="1"<?php if ($currenttextmode == "1") {
+    echo ' selected="selected"';
+                 } ?>>Text Tag:</option>
 </select>
-<select name="text" onchange="{val=document.form1.text.options[document.form1.text.selectedIndex].value; location.href='/words/edit?page=1&amp;text=' + val;}"><?php echo ($currenttextmode!=1)?(get_texts_selectoptions($currentlang, $currenttext)):(get_txtag_selectoptions($currentlang, $currenttexttag)); ?></select>
+<select name="text" onchange="{val=document.form1.text.options[document.form1.text.selectedIndex].value; location.href='/words/edit?page=1&amp;text=' + val;}"><?php echo ($currenttextmode != 1) ? (get_texts_selectoptions($currentlang, $currenttext)) : (get_txtag_selectoptions($currentlang, $currenttexttag)); ?></select>
 </td>
 </tr>
 <tr>
@@ -901,26 +915,36 @@ Status:
 <select name="status" onchange="{val=document.form1.status.options[document.form1.status.selectedIndex].value; location.href='/words/edit?page=1&amp;status=' + val;}"><?php echo get_wordstatus_selectoptions($currentstatus, true, false); ?></select>
 </td>
 <td class="td1 center" colspan="2" nowrap="nowrap"><select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/words/edit?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
-<option value="term,rom,transl"<?php if($currentquerymode=="term,rom,transl") { echo ' selected="selected"';
-} ?>>Term, Rom., Transl.</option>
+<option value="term,rom,transl"<?php if ($currentquerymode == "term,rom,transl") {
+    echo ' selected="selected"';
+                               } ?>>Term, Rom., Transl.</option>
 <option disabled="disabled">------------</option>
-<option value="term"<?php if($currentquerymode=="term") { echo ' selected="selected"';
-} ?>>Term</option>
-<option value="rom"<?php if($currentquerymode=="rom") { echo ' selected="selected"';
-} ?>>Romanization</option>
-<option value="transl"<?php if($currentquerymode=="transl") { echo ' selected="selected"';
-} ?>>Translation</option>
+<option value="term"<?php if ($currentquerymode == "term") {
+    echo ' selected="selected"';
+                    } ?>>Term</option>
+<option value="rom"<?php if ($currentquerymode == "rom") {
+    echo ' selected="selected"';
+                   } ?>>Romanization</option>
+<option value="transl"<?php if ($currentquerymode == "transl") {
+    echo ' selected="selected"';
+                      } ?>>Translation</option>
 <option disabled="disabled">------------</option>
-<option value="term,rom"<?php if($currentquerymode=="term,rom") { echo ' selected="selected"';
-} ?>>Term, Rom.</option>
-<option value="term,transl"<?php if($currentquerymode=="term,transl") { echo ' selected="selected"';
-} ?>>Term, Transl.</option>
-<option value="rom,transl"<?php if($currentquerymode=="rom,transl") { echo ' selected="selected"';
-} ?>>Rom., Transl.</option>
+<option value="term,rom"<?php if ($currentquerymode == "term,rom") {
+    echo ' selected="selected"';
+                        } ?>>Term, Rom.</option>
+<option value="term,transl"<?php if ($currentquerymode == "term,transl") {
+    echo ' selected="selected"';
+                           } ?>>Term, Transl.</option>
+<option value="rom,transl"<?php if ($currentquerymode == "rom,transl") {
+    echo ' selected="selected"';
+                          } ?>>Rom., Transl.</option>
 </select><?php
-if($currentregexmode=='') { echo '<span style="vertical-align: middle"> (Wildc.=*): </span>';
-} elseif ($currentregexmode=='r') { echo '<span style="vertical-align: middle"> RegEx Mode: </span>';
-} else { echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
+if ($currentregexmode == '') {
+    echo '<span style="vertical-align: middle"> (Wildc.=*): </span>';
+} elseif ($currentregexmode == 'r') {
+    echo '<span style="vertical-align: middle"> RegEx Mode: </span>';
+} else {
+    echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
 }?>
 <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
 <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val);mode=document.form1.query_mode.value; location.href='/words/edit?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}" />&nbsp;
@@ -940,28 +964,28 @@ Tag #2:
 <select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='/words/edit?page=1&amp;tag2=' + val;}"><?php echo get_tag_selectoptions($currenttag2, $currentlang); ?></select>
 </td>
 </tr>
-<?php if($recno > 0) { ?>
+    <?php if ($recno > 0) { ?>
 <tr>
 <th class="th1" colspan="2" nowrap="nowrap">
-<?php echo $recno; ?> Term<?php echo ($recno==1?'':'s'); ?>
+        <?php echo $recno; ?> Term<?php echo ($recno == 1 ? '' : 's'); ?>
 </th><th class="th1" colspan="1" nowrap="nowrap">
-<?php makePager($currentpage, $pages, '/words/edit', 'form1'); ?>
+        <?php makePager($currentpage, $pages, '/words/edit', 'form1'); ?>
 </th><th class="th1" nowrap="nowrap">
 Sort Order:
 <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/words/edit?page=1&amp;sort=' + val;}"><?php echo get_wordssort_selectoptions($currentsort); ?></select>
 </th></tr>
-<?php
-} ?>
+        <?php
+    } ?>
 </table>
 </form>
 
-<?php
-if ($recno==0) {
-?>
+    <?php
+    if ($recno == 0) {
+        ?>
 <p>No terms found.</p>
-<?php
-} else {
-?>
+        <?php
+    } else {
+        ?>
 <form name="form2" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 <input type="hidden" name="data" value="" />
 <table class="tab2" cellspacing="0" cellpadding="5">
@@ -984,30 +1008,31 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 <tr>
 <th class="th1 sorttable_nosort">Mark</th>
 <th class="th1 sorttable_nosort">Act.</th>
-<?php if ($currentlang == '') { echo '<th class="th1 clickable">Lang.</th>';
-} ?>
+        <?php if ($currentlang == '') {
+            echo '<th class="th1 clickable">Lang.</th>';
+        } ?>
 <th class="th1 clickable">Term /<br />Romanization</th>
 <th class="th1 clickable">Translation [Tags]<br /><span id="waitinfo">Please <img src="<?php print_file_path('icn/waiting2.gif'); ?>" /> wait ...</span></th>
 <th class="th1 sorttable_nosort">Se.<br />?</th>
 <th class="th1 sorttable_numeric clickable">Stat./<br />Days</th>
 <th class="th1 sorttable_numeric clickable">Score<br />%</th>
 
-<?php
-if ($currentsort == 7) {
-?>
+        <?php
+        if ($currentsort == 7) {
+            ?>
 <th class="th1 sorttable_numeric clickable" title="Word Count in Active Texts">WCnt<br />Txts</th>
-<?php
-}
-?>
+            <?php
+        }
+        ?>
 </tr>
 
-<?php
+        <?php
 
-if ($currentsort == 7) {
-    if ($currenttext != '') {
-        $sql = '';
-    } else {
-        $sql = 'select WoID, 0 AS textswordcount, WoText, WoTranslation,
+        if ($currentsort == 7) {
+            if ($currenttext != '') {
+                $sql = '';
+            } else {
+                $sql = 'select WoID, 0 AS textswordcount, WoText, WoTranslation,
         WoRomanization, WoSentence,
         ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
         WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
@@ -1020,8 +1045,8 @@ if ($currentsort == 7) {
         where WoLgID = LgID and WoID NOT IN (SELECT DISTINCT Ti2WoID
         from ' . $tbpref . 'textitems2 where Ti2LgID = LgID) ' . $wh_lang . $wh_stat .  $wh_query . '
         group by WoID ' . $wh_tag . ' UNION ';
-    }
-    $sql .= 'select WoID, count(WoID) AS textswordcount, WoText, WoTranslation,
+            }
+            $sql .= 'select WoID, count(WoID) AS textswordcount, WoText, WoTranslation,
     WoRomanization, WoSentence,
     ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
     WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
@@ -1032,14 +1057,14 @@ if ($currentsort == 7) {
     from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID)
     left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages, ' . $tbpref . 'textitems2
     where Ti2LgID = WoLgID and Ti2WoID = WoID and WoLgID = LgID ';
-    if ($currenttext != '') {
-        $sql .= 'and Ti2TxID in (' . $currenttext . ')' . ' ';
-    }
-    $sql .= $wh_lang . $wh_stat .  $wh_query . ' group by WoID ' . $wh_tag . ' order by ' . $sorts[$currentsort-1] . ' ' . $limit;
-} else {
-    if ($currenttext == '') {
-        if ($wh_tag=='') {
-            $sql = 'select WoID, WoText, WoTranslation, WoRomanization, WoSentence,
+            if ($currenttext != '') {
+                $sql .= 'and Ti2TxID in (' . $currenttext . ')' . ' ';
+            }
+            $sql .= $wh_lang . $wh_stat .  $wh_query . ' group by WoID ' . $wh_tag . ' order by ' . $sorts[$currentsort - 1] . ' ' . $limit;
+        } else {
+            if ($currenttext == '') {
+                if ($wh_tag == '') {
+                    $sql = 'select WoID, WoText, WoTranslation, WoRomanization, WoSentence,
             SentOK, WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,  Days,
             WoTodayScore AS Score, WoTomorrowScore AS Score2,
             ifnull(concat(\'[\',group_concat(distinct TgText order by TgText separator \', \'),\']\'),\'\') as taglist
@@ -1052,21 +1077,21 @@ if ($currentsort == 7) {
             from ' . $tbpref . 'words, ' . $tbpref . 'languages
             where WoLgID = LgID ' . $wh_lang . $wh_stat .  $wh_query . '
             group by WoID
-            order by ' . $sorts[$currentsort-1] . ' ' . $limit . ') AS AA
+            order by ' . $sorts[$currentsort - 1] . ' ' . $limit . ') AS AA
             left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID
             left join ' . $tbpref . 'tags on TgID = WtTgID
             group by WoID
-            order by ' . $sorts[$currentsort-1];
-        } else {
-            $sql = 'select WoID, WoText, WoTranslation, WoRomanization, WoSentence,
+            order by ' . $sorts[$currentsort - 1];
+                } else {
+                    $sql = 'select WoID, WoText, WoTranslation, WoRomanization, WoSentence,
             ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
             WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
             DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
             WoTomorrowScore AS Score2,
-            ifnull(concat(\'[\',group_concat(distinct TgText order by TgText separator \', \'),\']\'),\'\') as taglist from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages where WoLgID = LgID ' . $wh_lang . $wh_stat .  $wh_query . ' group by WoID ' . $wh_tag . ' order by ' . $sorts[$currentsort-1] . ' ' . $limit;
-        }
-    } else {
-        $sql = 'select distinct WoID, WoText, WoTranslation, WoRomanization,
+            ifnull(concat(\'[\',group_concat(distinct TgText order by TgText separator \', \'),\']\'),\'\') as taglist from ((' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID) left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages where WoLgID = LgID ' . $wh_lang . $wh_stat .  $wh_query . ' group by WoID ' . $wh_tag . ' order by ' . $sorts[$currentsort - 1] . ' ' . $limit;
+                }
+            } else {
+                $sql = 'select distinct WoID, WoText, WoTranslation, WoRomanization,
         WoSentence, ifnull(WoSentence,\'\') like \'%{%}%\' as SentOK, WoStatus,
         LgName, LgRightToLeft, LgGoogleTranslateURI,
         DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
@@ -1077,52 +1102,52 @@ if ($currentsort == 7) {
         left join ' . $tbpref . 'tags on TgID = WtTgID), ' . $tbpref . 'languages, ' . $tbpref . 'textitems2
         where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' . $currenttext . ') and WoLgID = LgID ' . $wh_lang . $wh_stat . $wh_query . '
         group by WoID ' . $wh_tag . '
-        order by ' . $sorts[$currentsort-1] . ' ' . $limit;
-    }
-}
+        order by ' . $sorts[$currentsort - 1] . ' ' . $limit;
+            }
+        }
 
-if ($debug) {
-    echo $sql;
-}
-flush();
-$res = do_mysqli_query($sql);
-while ($record = mysqli_fetch_assoc($res)) {
-    $days = $record['Days'];
-    if ($record['WoStatus'] > 5 ) {
-        $days="-";
-    }
-    $score = $record['Score'];
-    if ($score < 0 ) {
-        $score='<span class="scorered">0 <img src="/assets/icons/status-busy.png" title="Test today!" alt="Test today!" /></span>';
-    } else {
-        $score='<span class="scoregreen">' . floor((int)$score) . ($record['Score2'] < 0 ? ' <img src="/assets/icons/status-away.png" title="Test tomorrow!" alt="Test tomorrow!" />' : ' <img src="/assets/icons/status.png" title="-" alt="-" />') . '</span>';
-    }
-    echo '<tr>';
-    echo '<td class="td1 center"><a name="rec' . $record['WoID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['WoID'] . '" ' . checkTest($record['WoID'], 'marked') . ' /></a></td>';
-    echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="' . $_SERVER['PHP_SELF'] . '?chg=' . $record['WoID'] . '"><img src="/assets/icons/sticky-note--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="' . $_SERVER['PHP_SELF'] . '?del=' . $record['WoID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';
-    if ($currentlang == '') {
-        echo '<td class="td1 center">' . tohtml($record['LgName']) . '</td>';
-    }
-    echo '<td class="td1"><span';
-    if (
-        !empty($record['LgGoogleTranslateURI']) && strpos((string) $record['LgGoogleTranslateURI'], '&sl=') !== false
-    ) {
-            echo ' class="tts_' . preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']) .
-            '"';
-    }
-    echo ($record['LgRightToLeft'] ? ' dir="rtl" ' : '') . '>' . tohtml($record['WoText']) . '</span>' . ($record['WoRomanization'] != '' ? (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">' . tohtml(repl_tab_nl($record['WoRomanization'])) . '</span>') : (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">*</span>')) . '</td>';
-    echo '<td class="td1"><span id="trans' . $record['WoID'] . '" class="edit_area clickedit">' . tohtml(repl_tab_nl($record['WoTranslation'])) . '</span> <span class="smallgray2">' . tohtml($record['taglist']) . '</span></td>';
-    echo '<td class="td1 center"><b>' . ($record['SentOK']!=0 ? '<img src="/assets/icons/status.png" title="' . tohtml($record['WoSentence']) . '" alt="Yes" />' : '<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />') . '</b></td>';
-    echo '<td class="td1 center" title="' . tohtml(get_status_name($record['WoStatus'])) . '">' . tohtml(get_status_abbr($record['WoStatus'])) . ($record['WoStatus'] < 98 ? '/' . $days : '') . '</td>';
-    echo '<td class="td1 center" nowrap="nowrap">' . $score . '</td>';
-    if ($currentsort == 7) {
-        echo '<td class="td1 center" nowrap="nowrap">' . $record['textswordcount'] . '</td>';
-    }
-    echo "</tr>\n";
-}
-mysqli_free_result($res);
+        if ($debug) {
+            echo $sql;
+        }
+        flush();
+        $res = do_mysqli_query($sql);
+        while ($record = mysqli_fetch_assoc($res)) {
+            $days = $record['Days'];
+            if ($record['WoStatus'] > 5) {
+                $days = "-";
+            }
+            $score = $record['Score'];
+            if ($score < 0) {
+                $score = '<span class="scorered">0 <img src="/assets/icons/status-busy.png" title="Test today!" alt="Test today!" /></span>';
+            } else {
+                $score = '<span class="scoregreen">' . floor((int)$score) . ($record['Score2'] < 0 ? ' <img src="/assets/icons/status-away.png" title="Test tomorrow!" alt="Test tomorrow!" />' : ' <img src="/assets/icons/status.png" title="-" alt="-" />') . '</span>';
+            }
+            echo '<tr>';
+            echo '<td class="td1 center"><a name="rec' . $record['WoID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['WoID'] . '" ' . checkTest($record['WoID'], 'marked') . ' /></a></td>';
+            echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="' . $_SERVER['PHP_SELF'] . '?chg=' . $record['WoID'] . '"><img src="/assets/icons/sticky-note--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="' . $_SERVER['PHP_SELF'] . '?del=' . $record['WoID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';
+            if ($currentlang == '') {
+                echo '<td class="td1 center">' . tohtml($record['LgName']) . '</td>';
+            }
+            echo '<td class="td1"><span';
+            if (
+                !empty($record['LgGoogleTranslateURI']) && strpos((string) $record['LgGoogleTranslateURI'], '&sl=') !== false
+            ) {
+                echo ' class="tts_' . preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']) .
+                '"';
+            }
+            echo ($record['LgRightToLeft'] ? ' dir="rtl" ' : '') . '>' . tohtml($record['WoText']) . '</span>' . ($record['WoRomanization'] != '' ? (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">' . tohtml(repl_tab_nl($record['WoRomanization'])) . '</span>') : (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">*</span>')) . '</td>';
+            echo '<td class="td1"><span id="trans' . $record['WoID'] . '" class="edit_area clickedit">' . tohtml(repl_tab_nl($record['WoTranslation'])) . '</span> <span class="smallgray2">' . tohtml($record['taglist']) . '</span></td>';
+            echo '<td class="td1 center"><b>' . ($record['SentOK'] != 0 ? '<img src="/assets/icons/status.png" title="' . tohtml($record['WoSentence']) . '" alt="Yes" />' : '<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />') . '</b></td>';
+            echo '<td class="td1 center" title="' . tohtml(get_status_name($record['WoStatus'])) . '">' . tohtml(get_status_abbr($record['WoStatus'])) . ($record['WoStatus'] < 98 ? '/' . $days : '') . '</td>';
+            echo '<td class="td1 center" nowrap="nowrap">' . $score . '</td>';
+            if ($currentsort == 7) {
+                echo '<td class="td1 center" nowrap="nowrap">' . $record['textswordcount'] . '</td>';
+            }
+            echo "</tr>\n";
+        }
+        mysqli_free_result($res);
 
-?>
+        ?>
 </table>
 
 
@@ -1132,11 +1157,11 @@ mysqli_free_result($res);
 //]]>
 </script>
 
-<?php if($pages > 1) { ?>
+        <?php if ($pages > 1) { ?>
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr>
         <th class="th1" nowrap="nowrap">
-            <?php echo $recno; ?> Term<?php echo ($recno==1?'':'s'); ?>
+            <?php echo $recno; ?> Term<?php echo ($recno == 1 ? '' : 's'); ?>
         </th>
         <th class="th1" nowrap="nowrap">
             <?php makePager($currentpage, $pages, '/words/edit', 'form2'); ?>
@@ -1145,10 +1170,10 @@ mysqli_free_result($res);
 </table>
 </form>
 
-<?php
-} ?>
+            <?php
+        } ?>
 
-<?php
+        <?php
     }
 }
 

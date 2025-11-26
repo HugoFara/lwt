@@ -51,7 +51,8 @@ function restore_file($handle, $title): string
     while ($stream = fgets($handle)) {
         // Check file header
         if ($start) {
-            if (!str_starts_with($stream, "-- lwt-backup-")
+            if (
+                !str_starts_with($stream, "-- lwt-backup-")
                 && !str_starts_with($stream, "-- lwt-exp_version-backup-")
             ) {
                 $message = "Error: Invalid $title Restore file " .
@@ -99,11 +100,11 @@ function restore_file($handle, $title): string
                         $install_status["errors"]++;
                     } else {
                         $install_status["successes"]++;
-                        if (str_starts_with($query,  "INSERT INTO")) {
+                        if (str_starts_with($query, "INSERT INTO")) {
                             $install_status["inserts"]++;
-                        } else if (str_starts_with($query, "DROP TABLE")) {
+                        } elseif (str_starts_with($query, "DROP TABLE")) {
                             $install_status["drops"]++;
-                        } else if (str_starts_with($query, "CREATE TABLE")) {
+                        } elseif (str_starts_with($query, "CREATE TABLE")) {
                             $install_status["creates"]++;
                         }
                     }
@@ -119,15 +120,18 @@ function restore_file($handle, $title): string
         get_tags(1);
         get_texttags(1);
         $message = "Success: $title restored";
-    } else if ($message == "") {
+    } elseif ($message == "") {
         $message = "Error: $title NOT restored";
     }
     $message .= sprintf(
         " - %d queries - %d successful (%d/%d tables dropped/created, " .
         "%d records added), %d failed.",
-        $install_status["queries"], $install_status["successes"],
-        $install_status["drops"], $install_status["creates"],
-        $install_status["inserts"], $install_status["errors"]
+        $install_status["queries"],
+        $install_status["successes"],
+        $install_status["drops"],
+        $install_status["creates"],
+        $install_status["inserts"],
+        $install_status["errors"]
     );
     return $message;
 }

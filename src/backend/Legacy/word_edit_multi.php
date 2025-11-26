@@ -273,7 +273,6 @@ function edit_mword_new($text, $tid, $ord, $len)
         );
     }
     edit_mword_display_new($term, $tid, $ord, $len);
-
 }
 
 /**
@@ -329,7 +328,9 @@ function edit_mword_display_new($term, $tid, $ord, $len)
         WHERE Ti2TxID = $tid AND Ti2Order = $ord"
     );
     $sent = getSentence(
-        $seid, $term->textlc, (int) getSettingWithDefault('set-term-sentence-count')
+        $seid,
+        $term->textlc,
+        (int) getSettingWithDefault('set-term-sentence-count')
     );
     $showRoman = (bool) get_first_value(
         "SELECT LgShowRomanization AS value
@@ -396,7 +397,9 @@ function edit_mword_display_new($term, $tid, $ord, $len)
         <tr>
             <td class="td1 right" colspan="2">
                 <?php echo createDictLinksInEditWin(
-                    $term->lgid, $term->text, 'document.forms[0].WoSentence',
+                    $term->lgid,
+                    $term->text,
+                    'document.forms[0].WoSentence',
                     !isset($_GET['nodict'])
                 ); ?>
                 &nbsp; &nbsp; &nbsp;
@@ -448,7 +451,8 @@ function edit_mword_display_change($term, $tid, $ord)
                 WHERE Ti2TxID = $tid AND Ti2Order = $ord"
             );
             $sent = getSentence(
-                $seid, $term->textlc,
+                $seid,
+                $term->textlc,
                 (int) getSettingWithDefault('set-term-sentence-count')
             );
             $sentence = repl_tab_nl($sent[1]);
@@ -525,7 +529,9 @@ function edit_mword_display_change($term, $tid, $ord)
         <tr>
             <td class="td1 right" colspan="2">
                 <?php echo createDictLinksInEditWin(
-                    $term->lgid, $term->text, 'document.forms[0].WoSentence',
+                    $term->lgid,
+                    $term->text,
+                    'document.forms[0].WoSentence',
                     !isset($_GET['nodict'])
                 ); ?>
                 &nbsp; &nbsp; &nbsp;
@@ -577,7 +583,9 @@ function edit_mword_page()
             // edit_mword.php?tid=..&ord=..&txt=.. for new multi-word
             pagestart_nobody("New Term: " . getreq('txt'));
             edit_mword_new(
-                getreq('txt'), (int) getreq('tid'), (int) getreq('ord'),
+                getreq('txt'),
+                (int) getreq('tid'),
+                (int) getreq('ord'),
                 (int) getreq('len')
             );
         } else {
@@ -587,7 +595,9 @@ function edit_mword_page()
             );
             pagestart_nobody("Edit Term: " . $text);
             edit_mword_update(
-                (int) $str_id, (int) getreq('tid'), (int) getreq('ord')
+                (int) $str_id,
+                (int) getreq('tid'),
+                (int) getreq('ord')
             );
         }
     }

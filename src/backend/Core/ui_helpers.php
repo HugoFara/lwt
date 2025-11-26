@@ -32,11 +32,11 @@ function echo_lwt_logo(): void
 
 function get_seconds_selectoptions($v): string
 {
-    if (!isset($v) ) {
+    if (!isset($v)) {
         $v = 5;
     }
     $r = '';
-    for ($i=1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 10; $i++) {
         $r .= "<option value=\"" . $i . "\"" . get_selected($v, $i);
         $r .= ">" . $i . " sec</option>";
     }
@@ -47,12 +47,12 @@ function get_seconds_selectoptions($v): string
 
 function get_playbackrate_selectoptions($v): string
 {
-    if (!isset($v) ) {
+    if (!isset($v)) {
         $v = '10';
     }
     $r = '';
-    for ($i=5; $i <= 15; $i++) {
-        $text = ($i<10 ? (' 0.' . $i . ' x ') : (' 1.' . ($i-10) . ' x ') );
+    for ($i = 5; $i <= 15; $i++) {
+        $text = ($i < 10 ? (' 0.' . $i . ' x ') : (' 1.' . ($i - 10) . ' x ') );
         $r .= "<option value=\"" . $i . "\"" . get_selected($v, $i);
         $r .= ">&nbsp;" . $text . "&nbsp;</option>";
     }
@@ -146,10 +146,10 @@ function get_themes_selectoptions($v): string
 {
     $themes = glob('assets/themes/*', GLOB_ONLYDIR);
     $r = '<option value="assets/themes/Default/">Default</option>';
-    foreach($themes as $theme){
-        if($theme!='assets/themes/Default') {
-            $r.= '<option value="'.$theme.'/" '. get_selected($v, $theme.'/');
-            $r .= ">". str_replace(array('assets/themes/','_'), array('',' '), $theme) ."</option>";
+    foreach ($themes as $theme) {
+        if ($theme != 'assets/themes/Default') {
+            $r .= '<option value="' . $theme . '/" ' . get_selected($v, $theme . '/');
+            $r .= ">" . str_replace(array('assets/themes/','_'), array('',' '), $theme) . "</option>";
         }
     }
     return $r;
@@ -212,7 +212,7 @@ function get_languages_selectoptions($v, $dt): string
     $r .= ">$dt</option>";
     while ($record = mysqli_fetch_assoc($res)) {
         $d = (string) $record["LgName"];
-        if (strlen($d) > 30 ) {
+        if (strlen($d) > 30) {
             $d = substr($d, 0, 30) . "...";
         }
         $r .= "<option value=\"" . $record["LgID"] . "\" " .
@@ -262,7 +262,7 @@ function get_wordstatus_radiooptions($v): string
 
 // -------------------------------------------------------------
 
-function get_wordstatus_selectoptions($v, $all, $not9899, $off=true): string
+function get_wordstatus_selectoptions($v, $all, $not9899, $off = true): string
 {
     if (!isset($v)) {
         if ($all) {
@@ -281,7 +281,7 @@ function get_wordstatus_selectoptions($v, $all, $not9899, $off=true): string
         if ($not9899 && ($n == 98 || $n == 99)) {
             continue;
         }
-        $r .= "<option value =\"" . $n . "\"" . get_selected($v, $n!=0?$n:'0');
+        $r .= "<option value =\"" . $n . "\"" . get_selected($v, $n != 0 ? $n : '0');
         $r .= ">" . tohtml($status['name']) . " [" .
         tohtml($status['abbr']) . "]</option>";
     }
@@ -338,7 +338,8 @@ function get_wordstatus_selectoptions($v, $all, $not9899, $off=true): string
 
 function get_annotation_position_selectoptions($v): string
 {
-    if (! isset($v) ) { $v = 1;
+    if (! isset($v)) {
+        $v = 1;
     }
     $r = "<option value=\"1\"" . get_selected($v, 1);
     $r .= ">Behind</option>";
@@ -366,7 +367,9 @@ function get_hts_selectoptions($current_setting): string
     foreach ($options as $key => $value) {
         $r .= sprintf(
             '<option value="%d"%s>%s</option>',
-            $key, get_selected($current_setting, $key), $value
+            $key,
+            get_selected($current_setting, $key),
+            $value
         );
     }
     return $r;
@@ -377,7 +380,7 @@ function get_hts_selectoptions($current_setting): string
 function get_paging_selectoptions($currentpage, $pages): string
 {
     $r = "";
-    for ($i=1; $i<=$pages; $i++) {
+    for ($i = 1; $i <= $pages; $i++) {
         $r .= "<option value=\"" . $i . "\"" . get_selected($i, $currentpage);
         $r .= ">$i</option>";
     }
@@ -388,7 +391,7 @@ function get_paging_selectoptions($currentpage, $pages): string
 
 function get_wordssort_selectoptions($v): string
 {
-    if (! isset($v) ) {
+    if (! isset($v)) {
         $v = 1;
     }
     $r  = "<option value=\"1\"" . get_selected($v, 1);
@@ -414,7 +417,7 @@ function get_wordssort_selectoptions($v): string
 
 function get_tagsort_selectoptions($v): string
 {
-    if (! isset($v) ) {
+    if (! isset($v)) {
         $v = 1;
     }
     $r  = "<option value=\"1\"" . get_selected($v, 1);
@@ -616,14 +619,15 @@ function get_multiplearchivedtextactions_selectoptions(): string
 function get_texts_selectoptions($lang, $v): string
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
-    if (! isset($v) ) { $v = '';
+    if (! isset($v)) {
+        $v = '';
     }
-    if (! isset($lang) ) { $lang = '';
+    if (! isset($lang)) {
+        $lang = '';
     }
-    if ($lang=="" ) {
+    if ($lang == "") {
         $l = "";
-    }
-    else {
+    } else {
         $l = "and TxLgID=" . $lang;
     }
     $r = "<option value=\"\"" . get_selected($v, '');
@@ -635,11 +639,11 @@ function get_texts_selectoptions($lang, $v): string
     $res = do_mysqli_query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         $d = (string) $record["TxTitle"];
-        if (mb_strlen($d, 'UTF-8') > 30 ) {
+        if (mb_strlen($d, 'UTF-8') > 30) {
             $d = mb_substr($d, 0, 30, 'UTF-8') . "...";
         }
         $r .= "<option value=\"" . $record["TxID"] . "\"" .
-        get_selected($v, $record["TxID"]) . ">" . tohtml(($lang!="" ? "" : ($record["LgName"] . ": ")) . $d) . "</option>";
+        get_selected($v, $record["TxID"]) . ">" . tohtml(($lang != "" ? "" : ($record["LgName"] . ": ")) . $d) . "</option>";
     }
     mysqli_free_result($res);
     return $r;
@@ -659,7 +663,7 @@ function makePager($currentpage, $pages, $script, $formname): void
 <a href="<?php echo $script; ?>?page=1" <?php echo $marger; ?>>
     <img src="/assets/icons/control-stop-180.png" title="First Page" alt="First Page" />
 </a>
-<a href="<?php echo $script; ?>?page=<?php echo $currentpage-1; ?>" <?php echo $marger; ?>>
+<a href="<?php echo $script; ?>?page=<?php echo $currentpage - 1; ?>" <?php echo $marger; ?>>
     <img src="/assets/icons/control-180.png" title="Previous Page" alt="Previous Page" />
 </a>
         <?php
@@ -669,8 +673,7 @@ Page
     <?php
     if ($pages == 1) {
         echo '1';
-    }
-    else {
+    } else {
         ?>
 <select name="page" onchange="{val=document.<?php echo $formname; ?>.page.options[document.<?php echo $formname; ?>.page.selectedIndex].value; location.href='<?php echo $script; ?>?page=' + val;}">
         <?php echo get_paging_selectoptions($currentpage, $pages); ?>
@@ -680,7 +683,7 @@ Page
     echo ' of ' . $pages . ' ';
     if ($currentpage < $pages) {
         ?>
-<a href="<?php echo $script; ?>?page=<?php echo $currentpage+1; ?>" <?php echo $marger; ?>>
+<a href="<?php echo $script; ?>?page=<?php echo $currentpage + 1; ?>" <?php echo $marger; ?>>
     <img src="/assets/icons/control.png" title="Next Page" alt="Next Page" />
 </a>
 <a href="<?php echo $script; ?>?page=<?php echo $pages; ?>" <?php echo $marger; ?>>
@@ -752,7 +755,7 @@ function makeStatusClassFilter($status)
         makeStatusClassFilterHelper($status, $liste);
     } else {
         $from = (int) ($status / 10);
-        $to = $status - ($from*10);
+        $to = $status - ($from * 10);
         for ($i = $from; $i <= $to; $i++) {
             makeStatusClassFilterHelper($i, $liste);
         }
@@ -823,14 +826,14 @@ function make_status_controls_test_table($score, $status, $wordid): string
     }
 
     if ($status <= 5 || $status == 98) {
-        $plus = '<img src="/assets/icons/plus.png" class="click" title="+" alt="+" onclick="changeTableTestStatus(' . $wordid .',true);" />';
+        $plus = '<img src="/assets/icons/plus.png" class="click" title="+" alt="+" onclick="changeTableTestStatus(' . $wordid . ',true);" />';
     } else {
-        $plus = '<img src="'.get_file_path('assets/icons/placeholder.png').'" title="" alt="" />';
+        $plus = '<img src="' . get_file_path('assets/icons/placeholder.png') . '" title="" alt="" />';
     }
-    if ($status >=1 ) {
-        $minus = '<img src="/assets/icons/minus.png" class="click" title="-" alt="-" onclick="changeTableTestStatus(' . $wordid .',false);" />';
+    if ($status >= 1) {
+        $minus = '<img src="/assets/icons/minus.png" class="click" title="-" alt="-" onclick="changeTableTestStatus(' . $wordid . ',false);" />';
     } else {
-        $minus = '<img src="'.get_file_path('assets/icons/placeholder.png').'" title="" alt="" />';
+        $minus = '<img src="' . get_file_path('assets/icons/placeholder.png') . '" title="" alt="" />';
     }
     return ($status == 98 ? '' : $minus . ' ') . $scoret . ($status == 99 ? '' : ' ' . $plus);
 }
@@ -894,7 +897,7 @@ function pagestart($title, $close): void
  * @param string $title  Title of the page
  * @param string $addcss Some CSS to be embed in a style tag
  */
-function pagestart_nobody($title, $addcss=''): void
+function pagestart_nobody($title, $addcss = ''): void
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $debug = \Lwt\Core\LWT_Globals::isDebug();
@@ -919,10 +922,10 @@ function pagestart_nobody($title, $addcss=''): void
     <link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
-    <?php if (should_use_vite()): ?>
+    <?php if (should_use_vite()) : ?>
     <!-- Vite assets -->
-    <?php echo vite_assets('js/main.ts'); ?>
-    <?php else: ?>
+        <?php echo vite_assets('js/main.ts'); ?>
+    <?php else : ?>
     <!-- Legacy assets -->
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/jquery-ui.css');?>" />
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/jquery.tagit.css');?>" />
@@ -947,7 +950,7 @@ function pagestart_nobody($title, $addcss=''): void
         var TEXTTAGS = <?php echo json_encode(get_texttags()); ?>;
         //]]>
     </script>
-    <?php if (!should_use_vite()): ?>
+    <?php if (!should_use_vite()) : ?>
     <script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>
     <?php endif; ?>
 

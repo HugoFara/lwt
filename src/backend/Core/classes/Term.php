@@ -60,5 +60,4 @@ class Term
      * @var int $statuschanged Last status change date.
      */
     public $statuschanged;
-
 }

@@ -41,7 +41,8 @@ function add_new_term_transl($text, $lang, $data): array|string
         convert_string_to_sqlsyntax($data) . ', ' .
         convert_string_to_sqlsyntax('') . ', ' .
         convert_string_to_sqlsyntax('') . ', NOW(), ' .
-        make_score_random_insert_update('id') . ')', ""
+        make_score_random_insert_update('id') . ')',
+        ""
     );
     if (!is_numeric($dummy)) {
         // Error message
@@ -171,14 +172,14 @@ function get_new_status($oldstatus, $up)
         $currstatus++; // 98,1,2,3,4,5 => 99,2,3,4,5,6
         if ($currstatus == 99) {
             $currstatus = 1;  // 98->1
-        } else if ($currstatus == 6) {
+        } elseif ($currstatus == 6) {
             $currstatus = 99;  // 5->99
         }
     } else {
         $currstatus--; // 1,2,3,4,5,99 => 0,1,2,3,4,98
         if ($currstatus == 98) {
             $currstatus = 5;  // 99->5
-        } else if ($currstatus == 0) {
+        } elseif ($currstatus == 0) {
             $currstatus = 98;  // 1->98
         }
     }
@@ -371,7 +372,7 @@ function save_impr_text($textid, $elem, $data): array
  */
 function limit_current_page($currentpage, $recno, $maxperpage)
 {
-    $pages = intval(($recno-1) / $maxperpage) + 1;
+    $pages = intval(($recno - 1) / $maxperpage) + 1;
     if ($currentpage < 1) {
         $currentpage = 1;
     }
@@ -435,7 +436,7 @@ function imported_terms_list($last_update, $currentpage, $recno): array
     $currentpage = limit_current_page($currentpage, $recno, $maxperpage);
     $offset = ($currentpage - 1) * $maxperpage;
 
-    $pages = intval(($recno-1) / $maxperpage) + 1;
+    $pages = intval(($recno - 1) / $maxperpage) + 1;
     $output = array(
         "navigation" => array(
             "current_page" => $currentpage,
@@ -704,7 +705,7 @@ function edit_term_form($textid): string
                 </th>
             </tr>';
     $items = preg_split('/[\n]/u', $ann);
-    $nontermbuffer ='';
+    $nontermbuffer = '';
     foreach (array_values($items) as $i => $item) {
         $vals = preg_split('/[\t]/u', $item);
         if ((int)$vals[0] > -1) {
@@ -823,13 +824,13 @@ function get_feeds_list($feed, $nfid): array
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $valuesArr = array();
     foreach ($feed as $data) {
-        $d_title=convert_string_to_sqlsyntax($data['title']);
-        $d_link=convert_string_to_sqlsyntax($data['link']);
-        $d_text=convert_string_to_sqlsyntax(isset($data['text']) ?  $data['text'] : null);
-        $d_desc=convert_string_to_sqlsyntax($data['desc']);
-        $d_date=convert_string_to_sqlsyntax($data['date']);
-        $d_audio=convert_string_to_sqlsyntax($data['audio']);
-        $d_feed=convert_string_to_sqlsyntax((string)$nfid);
+        $d_title = convert_string_to_sqlsyntax($data['title']);
+        $d_link = convert_string_to_sqlsyntax($data['link']);
+        $d_text = convert_string_to_sqlsyntax(isset($data['text']) ?  $data['text'] : null);
+        $d_desc = convert_string_to_sqlsyntax($data['desc']);
+        $d_date = convert_string_to_sqlsyntax($data['date']);
+        $d_audio = convert_string_to_sqlsyntax($data['audio']);
+        $d_feed = convert_string_to_sqlsyntax((string)$nfid);
         $valuesArr[] = "($d_title,$d_link,$d_text,$d_desc,$d_date,$d_audio,$d_feed)";
     }
     $sql = 'INSERT IGNORE INTO ' . $tbpref . 'feedlinks (FlTitle,FlLink,FlText,FlDescription,FlDate,FlAudio,FlNfID)
@@ -863,9 +864,9 @@ function get_feed_result($imported_feed, $nif, $nfname, $nfid, $nfoptions): stri
     $nf_max_links = get_nf_option($nfoptions, 'max_links');
     if (!$nf_max_links) {
         if (get_nf_option($nfoptions, 'article_source')) {
-            $nf_max_links=getSettingWithDefault('set-max-articles-with-text');
+            $nf_max_links = getSettingWithDefault('set-max-articles-with-text');
         } else {
-            $nf_max_links=getSettingWithDefault('set-max-articles-without-text');
+            $nf_max_links = getSettingWithDefault('set-max-articles-without-text');
         }
     }
     $msg = $nfname . ": ";
@@ -881,24 +882,24 @@ function get_feed_result($imported_feed, $nif, $nfname, $nfid, $nfoptions): stri
     $msg .= " imported";
     if ($nif > 1) {
         $msg .= ", $nif articles are dublicates";
-    } else if ($nif==1) {
-        $msg.= ", $nif dublicated article";
+    } elseif ($nif == 1) {
+        $msg .= ", $nif dublicated article";
     }
-    $result=do_mysqli_query(
+    $result = do_mysqli_query(
         "SELECT COUNT(*) AS total
         FROM " . $tbpref . "feedlinks
-        WHERE FlNfID IN (".$nfid.")"
+        WHERE FlNfID IN (" . $nfid . ")"
     );
     $row = mysqli_fetch_assoc($result);
     $to = ($row['total'] - $nf_max_links);
-    if ($to>0) {
+    if ($to > 0) {
         do_mysqli_query(
             "DELETE FROM " . $tbpref . "feedlinks
-            WHERE FlNfID in (".$nfid.")
+            WHERE FlNfID in (" . $nfid . ")
             ORDER BY FlDate
             LIMIT $to"
         );
-        $msg.= ", $to old article(s) deleted";
+        $msg .= ", $to old article(s) deleted";
     }
     return $msg;
 }
@@ -1598,245 +1599,245 @@ function request_handler($method, $requestUri, $post_param)
             parse_str($uri_query, $req_param);
         }
         switch ($endpoint_fragments[0]) {
-        case 'languages':
-            if (ctype_digit($endpoint_fragments[1])) {
-                if ($endpoint_fragments[2] == 'reading-configuration') {
-                    $req_param['lang_id'] = (int) $endpoint_fragments[1];
-                    $answer = readingConfiguration($req_param);
-                    send_response(200, $answer);
-                } else {
-                    send_response(
-                        404,
-                        ['error' => 'Expected "reading-configuration", Got ' .
-                        $endpoint_fragments[2]]
-                    );
-                }
-            } else {
-                send_response(
-                    404,
-                    ['error' => 'Expected Language ID, found ' .
-                    $endpoint_fragments[1]]
-                );
-            }
-            break;
-        case 'media-files':
-            $answer = media_files($req_param);
-            send_response(200, $answer);
-            break;
-        case 'phonetic-reading':
-            $answer = get_phonetic_reading($req_param);
-            send_response(200, $answer);
-            break;
-        case 'review':
-            switch ($endpoint_fragments[1]) {
-            case 'next-word':
-                $answer = word_test_ajax($req_param);
-                send_response(200, $answer);
-                break;
-            case 'tomorrow-count':
-                $answer = tomorrow_test_count($req_param);
-                send_response(200, $answer);
-                break;
-            default:
-                send_response(
-                    404,
-                    ['error' => 'Endpoint Not Found' .
-                    $endpoint_fragments[1]]
-                );
-            }
-            break;
-        case 'sentences-with-term':
-            if (ctype_digit($endpoint_fragments[1])) {
-                $req_param['word_id'] = (int) $endpoint_fragments[1];
-                $answer = sentences_with_registred_term($req_param);
-            } else {
-                $answer = sentences_with_new_term($req_param);
-            }
-            send_response(200, $answer);
-            break;
-        case 'similar-terms':
-            $answer = similar_terms($req_param);
-            send_response(200, $answer);
-            break;
-        case 'settings':
-            switch ($endpoint_fragments[1]) {
-            case 'theme-path':
-                $answer = get_theme_path($req_param);
-                send_response(200, $answer);
-                break;
-            default:
-                send_response(
-                    404,
-                    ['error' => 'Endpoint Not Found: ' .
-                    $endpoint_fragments[1]]
-                );
-            }
-            break;
-        case 'terms':
-            if ($endpoint_fragments[1] == "imported") {
-                $answer = imported_terms($req_param);
-                send_response(200, $answer);
-            } elseif (ctype_digit($endpoint_fragments[1])) {
-                if ($endpoint_fragments[2] == 'translations') {
-                    $req_param['term_id'] = $endpoint_fragments[1];
-                    $answer = term_translations($req_param);
-                    send_response(200, $answer);
-                } else {
-                    send_response(
-                        404,
-                        ['error' => 'Expected "translation", Got ' .
-                        $endpoint_fragments[2]]
-                    );
-                }
-            } else {
-                send_response(
-                    404,
-                    ['error' => 'Endpoint Not Found' .
-                    $endpoint_fragments[1]]
-                );
-            }
-            break;
-        case 'texts':
-            if ($endpoint_fragments[1] == 'statistics') {
-                $answer = get_texts_statistics($req_param);
-                send_response(200, $answer);
-            } else {
-                send_response(
-                    404,
-                    ['error' => 'Expected "statistics", Got ' .
-                    $endpoint_fragments[1]]
-                );
-            }
-            break;
-        case 'version':
-            $answer = rest_api_version($req_param);
-            send_response(200, $answer);
-            break;
-                // Add more GET handlers for other endpoints
-        default:
-            send_response(
-                404,
-                ['error' => 'Endpoint Not Found: ' .
-                $endpoint_fragments[0]]
-            );
-        }
-    } elseif ($method === 'POST') {
-        // Handle POST request for each endpoint
-        switch ($endpoint_fragments[0]) {
-        case 'settings':
-            $answer = save_setting($post_param);
-            send_response(200, $answer);
-            break;
-        case 'texts':
-            if (!ctype_digit($endpoint_fragments[1])) {
-                send_response(
-                    404,
-                    ['error' => 'Text ID (Integer) Expected, Got ' .
-                    $endpoint_fragments[1]]
-                );
-            }
-            $post_param["text_id"] = (int) $endpoint_fragments[1];
-            switch ($endpoint_fragments[2]) {
-            case 'annotation':
-                $answer = set_annotation($post_param);
-                send_response(200, $answer);
-                break;
-            case 'audio-position':
-                $answer = set_audio_position($post_param);
-                send_response(200, $answer);
-                break;
-            case 'reading-position':
-                $answer = set_text_position($post_param);
-                send_response(200, $answer);
-                break;
-            default:
-                send_response(
-                    404,
-                    ['error' => 'Endpoint Not Found: ' .
-                    $endpoint_fragments[2]]
-                );
-            }
-            break;
-        case 'terms':
-            if (ctype_digit($endpoint_fragments[1])) {
-                $post_param['term_id'] = (int) $endpoint_fragments[1];
-                if ($endpoint_fragments[2] == "status") {
-                    if ($endpoint_fragments[3] == 'down') {
-                        $post_param['status_up'] = 0;
-                        $answer = increment_term_status($post_param);
-                        send_response(200, $answer);
-                    } elseif ($endpoint_fragments[3] == 'up') {
-                        $post_param['status_up'] = 1;
-                        $answer = increment_term_status($post_param);
-                        send_response(200, $answer);
-                    } elseif (ctype_digit($endpoint_fragments[3])) {
-                        $post_param['status'] = (int) $endpoint_fragments[3];
-                        $answer = set_term_status($post_param);
+            case 'languages':
+                if (ctype_digit($endpoint_fragments[1])) {
+                    if ($endpoint_fragments[2] == 'reading-configuration') {
+                        $req_param['lang_id'] = (int) $endpoint_fragments[1];
+                        $answer = readingConfiguration($req_param);
                         send_response(200, $answer);
                     } else {
                         send_response(
                             404,
-                            ['error' => 'Endpoint Not Found: ' .
-                            $endpoint_fragments[3]]
+                            ['error' => 'Expected "reading-configuration", Got ' .
+                            $endpoint_fragments[2]]
                         );
                     }
-                } elseif ($endpoint_fragments[2] == 'translations') {
-                    $answer = update_translation($post_param);
+                } else {
+                    send_response(
+                        404,
+                        ['error' => 'Expected Language ID, found ' .
+                        $endpoint_fragments[1]]
+                    );
+                }
+                break;
+            case 'media-files':
+                $answer = media_files($req_param);
+                send_response(200, $answer);
+                break;
+            case 'phonetic-reading':
+                $answer = get_phonetic_reading($req_param);
+                send_response(200, $answer);
+                break;
+            case 'review':
+                switch ($endpoint_fragments[1]) {
+                    case 'next-word':
+                        $answer = word_test_ajax($req_param);
+                        send_response(200, $answer);
+                        break;
+                    case 'tomorrow-count':
+                        $answer = tomorrow_test_count($req_param);
+                        send_response(200, $answer);
+                        break;
+                    default:
+                        send_response(
+                            404,
+                            ['error' => 'Endpoint Not Found' .
+                            $endpoint_fragments[1]]
+                        );
+                }
+                break;
+            case 'sentences-with-term':
+                if (ctype_digit($endpoint_fragments[1])) {
+                    $req_param['word_id'] = (int) $endpoint_fragments[1];
+                    $answer = sentences_with_registred_term($req_param);
+                } else {
+                    $answer = sentences_with_new_term($req_param);
+                }
+                send_response(200, $answer);
+                break;
+            case 'similar-terms':
+                $answer = similar_terms($req_param);
+                send_response(200, $answer);
+                break;
+            case 'settings':
+                switch ($endpoint_fragments[1]) {
+                    case 'theme-path':
+                        $answer = get_theme_path($req_param);
+                        send_response(200, $answer);
+                        break;
+                    default:
+                        send_response(
+                            404,
+                            ['error' => 'Endpoint Not Found: ' .
+                            $endpoint_fragments[1]]
+                        );
+                }
+                break;
+            case 'terms':
+                if ($endpoint_fragments[1] == "imported") {
+                    $answer = imported_terms($req_param);
+                    send_response(200, $answer);
+                } elseif (ctype_digit($endpoint_fragments[1])) {
+                    if ($endpoint_fragments[2] == 'translations') {
+                        $req_param['term_id'] = $endpoint_fragments[1];
+                        $answer = term_translations($req_param);
+                        send_response(200, $answer);
+                    } else {
+                        send_response(
+                            404,
+                            ['error' => 'Expected "translation", Got ' .
+                            $endpoint_fragments[2]]
+                        );
+                    }
+                } else {
+                    send_response(
+                        404,
+                        ['error' => 'Endpoint Not Found' .
+                        $endpoint_fragments[1]]
+                    );
+                }
+                break;
+            case 'texts':
+                if ($endpoint_fragments[1] == 'statistics') {
+                    $answer = get_texts_statistics($req_param);
+                    send_response(200, $answer);
+                } else {
+                    send_response(
+                        404,
+                        ['error' => 'Expected "statistics", Got ' .
+                        $endpoint_fragments[1]]
+                    );
+                }
+                break;
+            case 'version':
+                $answer = rest_api_version($req_param);
+                send_response(200, $answer);
+                break;
+                // Add more GET handlers for other endpoints
+            default:
+                send_response(
+                    404,
+                    ['error' => 'Endpoint Not Found: ' .
+                    $endpoint_fragments[0]]
+                );
+        }
+    } elseif ($method === 'POST') {
+        // Handle POST request for each endpoint
+        switch ($endpoint_fragments[0]) {
+            case 'settings':
+                $answer = save_setting($post_param);
+                send_response(200, $answer);
+                break;
+            case 'texts':
+                if (!ctype_digit($endpoint_fragments[1])) {
+                    send_response(
+                        404,
+                        ['error' => 'Text ID (Integer) Expected, Got ' .
+                        $endpoint_fragments[1]]
+                    );
+                }
+                $post_param["text_id"] = (int) $endpoint_fragments[1];
+                switch ($endpoint_fragments[2]) {
+                    case 'annotation':
+                        $answer = set_annotation($post_param);
+                        send_response(200, $answer);
+                        break;
+                    case 'audio-position':
+                        $answer = set_audio_position($post_param);
+                        send_response(200, $answer);
+                        break;
+                    case 'reading-position':
+                        $answer = set_text_position($post_param);
+                        send_response(200, $answer);
+                        break;
+                    default:
+                        send_response(
+                            404,
+                            ['error' => 'Endpoint Not Found: ' .
+                            $endpoint_fragments[2]]
+                        );
+                }
+                break;
+            case 'terms':
+                if (ctype_digit($endpoint_fragments[1])) {
+                    $post_param['term_id'] = (int) $endpoint_fragments[1];
+                    if ($endpoint_fragments[2] == "status") {
+                        if ($endpoint_fragments[3] == 'down') {
+                            $post_param['status_up'] = 0;
+                            $answer = increment_term_status($post_param);
+                            send_response(200, $answer);
+                        } elseif ($endpoint_fragments[3] == 'up') {
+                            $post_param['status_up'] = 1;
+                            $answer = increment_term_status($post_param);
+                            send_response(200, $answer);
+                        } elseif (ctype_digit($endpoint_fragments[3])) {
+                            $post_param['status'] = (int) $endpoint_fragments[3];
+                            $answer = set_term_status($post_param);
+                            send_response(200, $answer);
+                        } else {
+                            send_response(
+                                404,
+                                ['error' => 'Endpoint Not Found: ' .
+                                $endpoint_fragments[3]]
+                            );
+                        }
+                    } elseif ($endpoint_fragments[2] == 'translations') {
+                        $answer = update_translation($post_param);
+                        send_response(200, $answer);
+                    } else {
+                        send_response(
+                            404,
+                            [
+                            'error' =>
+                            '"status" or "translations"' .
+                            ' Expected, Got ' . $endpoint_fragments[2]
+                            ]
+                        );
+                    }
+                } elseif ($endpoint_fragments[1] == 'new') {
+                    $answer = add_translation($post_param);
                     send_response(200, $answer);
                 } else {
                     send_response(
                         404,
                         [
-                            'error' =>
-                            '"status" or "translations"' .
-                            ' Expected, Got ' . $endpoint_fragments[2]
-                        ]
-                    );
-                }
-            } elseif ($endpoint_fragments[1] == 'new') {
-                $answer = add_translation($post_param);
-                send_response(200, $answer);
-            } else {
-                send_response(
-                    404,
-                    [
                         'error' =>
                         'Term ID (Integer) or "new" Expected,' .
                         ' Got ' . $endpoint_fragments[1]
-                    ]
-                );
-            }
-            break;
-        case 'feeds':
-            if (ctype_digit($endpoint_fragments[1])) {
-                // Load feed: POST /feeds/{id}/load
-                if ($endpoint_fragments[2] == 'load') {
-                    $answer = \Lwt\Ajax\Feed\load_feed(
-                        $post_param['name'],
-                        (int)$endpoint_fragments[1],
-                        $post_param['source_uri'],
-                        $post_param['options']
+                        ]
                     );
-                    send_response(200, $answer);
+                }
+                break;
+            case 'feeds':
+                if (ctype_digit($endpoint_fragments[1])) {
+                    // Load feed: POST /feeds/{id}/load
+                    if ($endpoint_fragments[2] == 'load') {
+                        $answer = \Lwt\Ajax\Feed\load_feed(
+                            $post_param['name'],
+                            (int)$endpoint_fragments[1],
+                            $post_param['source_uri'],
+                            $post_param['options']
+                        );
+                        send_response(200, $answer);
+                    } else {
+                        send_response(
+                            404,
+                            ['error' => 'Expected "load", Got ' . $endpoint_fragments[2]]
+                        );
+                    }
                 } else {
                     send_response(
                         404,
-                        ['error' => 'Expected "load", Got ' . $endpoint_fragments[2]]
+                        ['error' => 'Feed ID (Integer) Expected, Got ' . $endpoint_fragments[1]]
                     );
                 }
-            } else {
+                break;
+            default:
                 send_response(
                     404,
-                    ['error' => 'Feed ID (Integer) Expected, Got ' . $endpoint_fragments[1]]
+                    ['error' => 'Endpoint Not Found On POST: ' .
+                    $endpoint_fragments[0]]
                 );
-            }
-            break;
-        default:
-            send_response(
-                404,
-                ['error' => 'Endpoint Not Found On POST: ' .
-                $endpoint_fragments[0]]
-            );
         }
     }
 }
@@ -1852,5 +1853,3 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET' && $_SERVER['REQUEST_METHOD'] !== 'POST
         $_POST
     );
 }
-
-?>

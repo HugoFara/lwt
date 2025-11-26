@@ -24,7 +24,7 @@
  *
  * @return void
  */
-function makeMediaPlayer($path, $offset=0)
+function makeMediaPlayer($path, $offset = 0)
 {
     if ($path == '') {
         return;
@@ -47,45 +47,53 @@ function makeMediaPlayer($path, $offset=0)
  * @param string $path   URL or local file path
  * @param int    $offset Offset from the beginning of the video
  */
-function makeVideoPlayer($path, $offset=0): void
+function makeVideoPlayer($path, $offset = 0): void
 {
     $online = false;
     $url = null;
-    if (preg_match(
-        "/(?:https:\/\/)?www\.youtube\.com\/watch\?v=([\d\w]+)/iu",
-        $path, $matches
-    )
+    if (
+        preg_match(
+            "/(?:https:\/\/)?www\.youtube\.com\/watch\?v=([\d\w]+)/iu",
+            $path,
+            $matches
+        )
     ) {
         // Youtube video
         $domain = "https://www.youtube.com/embed/";
         $id = $matches[1];
         $url = $domain . $id . "?t=" . $offset;
         $online = true;
-    } else if (preg_match(
-        "/(?:https:\/\/)?youtu\.be\/([\d\w]+)/iu",
-        $path, $matches
-    )
+    } elseif (
+        preg_match(
+            "/(?:https:\/\/)?youtu\.be\/([\d\w]+)/iu",
+            $path,
+            $matches
+        )
     ) {
         // Youtube video
         $domain = "https://www.youtube.com/embed/";
         $id = $matches[1];
         $url = $domain . $id . "?t=" . $offset;
         $online = true;
-    } else if (preg_match(
-        "/(?:https:\/\/)?dai\.ly\/([^\?]+)/iu",
-        $path, $matches
-    )
+    } elseif (
+        preg_match(
+            "/(?:https:\/\/)?dai\.ly\/([^\?]+)/iu",
+            $path,
+            $matches
+        )
     ) {
         // Dailymotion
         $domain = "https://www.dailymotion.com/embed/video/";
         $id = $matches[1];
         $url = $domain . $id;
         $online = true;
-    } else if (preg_match(
-        "/(?:https:\/\/)?vimeo\.com\/(\d+)/iu",
-        // Vimeo
-        $path, $matches
-    )
+    } elseif (
+        preg_match(
+            "/(?:https:\/\/)?vimeo\.com\/(\d+)/iu",
+            // Vimeo
+            $path,
+            $matches
+        )
     ) {
         $domain = "https://player.vimeo.com/video/";
         $id = $matches[1];
@@ -128,7 +136,7 @@ style="width: 100%; height: 300px; display: block; margin-left: auto; margin-rig
  *
  * @return void
  */
-function makeAudioPlayer($audio, $offset=0)
+function makeAudioPlayer($audio, $offset = 0)
 {
     if ($audio == '') {
         return;

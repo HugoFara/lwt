@@ -14,8 +14,15 @@
 
 require_once 'Core/session_utility.php';
 
-function output_text($saveterm,$saverom,$savetrans,$savetags,
-    $show_rom,$show_trans,$show_tags,$annplcmnt
+function output_text(
+    $saveterm,
+    $saverom,
+    $savetrans,
+    $savetags,
+    $show_rom,
+    $show_trans,
+    $show_tags,
+    $annplcmnt
 ): void {
     if ($show_tags) {
         if ($savetrans == '' && $savetags != '') {
@@ -87,7 +94,7 @@ function output_text($saveterm,$saverom,$savetrans,$savetags,
 }
 
 $textid = (int)getreq('text');
-if ($textid==0) {
+if ($textid == 0) {
     header("Location: /text/edit");
     exit();
 }
@@ -167,9 +174,9 @@ pagestart_nobody('Print');
 </div>
 <h1>PRINT ▶ <?php
 echo tohtml($title);
-(isset($record['TxSourceURI']) && substr(trim($sourceURI), 0, 1)!='#' ?
+(isset($record['TxSourceURI']) && substr(trim($sourceURI), 0, 1) != '#' ?
 ' <a href="' . $sourceURI . '" target="_blank">
-<img src="'.get_file_path('assets/icons/chain.png').'" title="Text Source" alt="Text Source" /></a>' :
+<img src="' . get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" /></a>' :
 '') ?></h1>
 <p id="printoptions">
     Terms with <b>status(es)</b>
@@ -238,7 +245,6 @@ $until = 0;
 $res = do_mysqli_query($sql);
 
 while ($record = mysqli_fetch_assoc($res)) {
-
     $actcode = (int)$record['Code'];
     $order = (int)$record['Ti2Order'];
 
@@ -247,8 +253,14 @@ while ($record = mysqli_fetch_assoc($res)) {
     }
     if ($order > $until) {
         output_text(
-            $saveterm, $saverom, $savetrans, $savetags,
-            $show_rom, $show_trans, $show_tags, $annplcmnt
+            $saveterm,
+            $saverom,
+            $savetrans,
+            $savetags,
+            $show_rom,
+            $show_trans,
+            $show_tags,
+            $annplcmnt
         );
         $saveterm = '';
         $savetrans = '';
@@ -263,7 +275,7 @@ while ($record = mysqli_fetch_assoc($res)) {
             tohtml($record['TiText'])
         );
     } else {
-        $until = $order + 2 * ($actcode-1);
+        $until = $order + 2 * ($actcode - 1);
         $saveterm = $record['TiText'];
         $savetrans = '';
         $savetags = '';
@@ -282,8 +294,14 @@ while ($record = mysqli_fetch_assoc($res)) {
 } // while
 mysqli_free_result($res);
 output_text(
-    $saveterm, $saverom, $savetrans, $savetags,
-    $show_rom, $show_trans, $show_tags, $annplcmnt
+    $saveterm,
+    $saverom,
+    $savetrans,
+    $savetags,
+    $show_rom,
+    $show_trans,
+    $show_tags,
+    $annplcmnt
 );
 echo "</p></div>";
 

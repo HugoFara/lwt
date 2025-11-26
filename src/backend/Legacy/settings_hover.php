@@ -13,7 +13,7 @@ require_once 'Core/session_utility.php';
 require_once 'Core/classes/GoogleTranslate.php' ;
 
 $translation = '*';
-if ($_REQUEST['status']==1) {
+if ($_REQUEST['status'] == 1) {
     $tl = $_GET["tl"];
     $sl = $_GET["sl"];
     $text = $_GET["text"];

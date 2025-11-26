@@ -59,5 +59,3 @@ if (is_user_logged_in()) {
     header("Location: ../wp-login.php?redirect_to=./lwt/wp_lwt_start.php");
     exit();
 }
-
-?>

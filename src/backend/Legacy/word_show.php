@@ -23,10 +23,9 @@ $sql = 'select WoLgID, WoText, WoTranslation, WoSentence, WoRomanization, WoStat
 from ' . $tbpref . 'words where WoID = ' . $wid;
 $res = do_mysqli_query($sql);
 if ($record = mysqli_fetch_assoc($res)) {
-
     $transl = repl_tab_nl($record['WoTranslation']);
-    if($transl == '*') {
-        $transl='';
+    if ($transl == '*') {
+        $transl = '';
     }
 
     $tags = getWordTagList($wid, '', 0, 0);
@@ -44,7 +43,7 @@ if ($record = mysqli_fetch_assoc($res)) {
 <tr>
     <td class="td1 right">Translation:</td>
     <td class="td1" style="font-size:120%;"><b><?php
-    if(!empty($ann)) {
+    if (!empty($ann)) {
         echo
         str_replace_first(
             tohtml($ann),

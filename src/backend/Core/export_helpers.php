@@ -27,7 +27,7 @@ function anki_export($sql)
     $res = do_mysqli_query($sql);
     $x = '';
     while ($record = mysqli_fetch_assoc($res)) {
-        if ('MECAB'== strtoupper(trim((string) $record['LgRegexpWordCharacters']))) {
+        if ('MECAB' == strtoupper(trim((string) $record['LgRegexpWordCharacters']))) {
             $termchar = '一-龥ぁ-ヾ';
         } else {
             $termchar = $record['LgRegexpWordCharacters'];
@@ -39,8 +39,11 @@ function anki_export($sql)
         $rpar = ($rtlScript ? '[' : ']');
         $sent = tohtml(repl_tab_nl($record["WoSentence"]));
         $sent1 = str_replace(
-            "{", '<span style="font-weight:600; color:#0000ff;">' . $lpar, str_replace(
-                "}", $rpar . '</span>',
+            "{",
+            '<span style="font-weight:600; color:#0000ff;">' . $lpar,
+            str_replace(
+                "}",
+                $rpar . '</span>',
                 mask_term_in_sentence($sent, $termchar)
             )
         );
@@ -119,7 +122,9 @@ function flexible_export($sql)
             $sent_d = str_replace('{', '[', str_replace('}', ']', $sent_raw));
             $sent_x = str_replace('{', '{{c1::', str_replace('}', '}}', $sent_raw));
             $sent_y = str_replace(
-                '{', '{{c1::', str_replace('}', '::' . $transl . '}}', $sent_raw)
+                '{',
+                '{{c1::',
+                str_replace('}', '::' . $transl . '}}', $sent_raw)
             );
             $status = $record['WoStatus'];
             $taglist = trim((string) $record['taglist']);
@@ -172,7 +177,7 @@ function mask_term_in_sentence_v2($s): string
     $l = mb_strlen($s, 'utf-8');
     $r = '';
     $on = 0;
-    for ($i=0; $i < $l; $i++) {
+    for ($i = 0; $i < $l; $i++) {
         $c = mb_substr($s, $i, 1, 'UTF-8');
         if ($c == '}') {
             $on = 0;
@@ -207,14 +212,15 @@ function repl_tab_nl($s)
 
 // -------------------------------------------------------------
 
-function mask_term_in_sentence($s,$regexword): string
+function mask_term_in_sentence($s, $regexword): string
 {
     $l = mb_strlen($s, 'utf-8');
     $r = '';
     $on = 0;
-    for ($i=0; $i < $l; $i++) {
+    for ($i = 0; $i < $l; $i++) {
         $c = mb_substr($s, $i, 1, 'UTF-8');
-        if ($c == '}') { $on = 0;
+        if ($c == '}') {
+            $on = 0;
         }
         if ($on) {
             if (preg_match('/[' . $regexword . ']/u', $c)) {
@@ -222,8 +228,7 @@ function mask_term_in_sentence($s,$regexword): string
             } else {
                 $r .= $c;
             }
-        }
-        else {
+        } else {
             $r .= $c;
         }
         if ($c == '{') {
@@ -232,5 +237,3 @@ function mask_term_in_sentence($s,$regexword): string
     }
     return $r;
 }
-
-?>

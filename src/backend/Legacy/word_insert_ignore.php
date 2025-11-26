@@ -114,7 +114,6 @@ function do_javascript_action($word, $wid, $hex, $textid)
     //]]>
     </script>
     <?php
-
 }
 
 /**

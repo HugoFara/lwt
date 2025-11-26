@@ -57,19 +57,20 @@ function edit_texts_get_wh_query($currentquery, $currentquerymode, $currentregex
         $wh_query .= convert_string_to_sqlsyntax($currentquery);
     }
 
-    switch($currentquerymode){
-    case 'title,text':
-        $wh_query = ' and (TxTitle ' . $wh_query . ' or TxText ' . $wh_query . ')';
-        break;
-    case 'title':
-        $wh_query = ' and (TxTitle ' . $wh_query . ')';
-        break;
-    case 'text':
-        $wh_query = ' and (TxText ' . $wh_query . ')';
-        break;
+    switch ($currentquerymode) {
+        case 'title,text':
+            $wh_query = ' and (TxTitle ' . $wh_query . ' or TxText ' . $wh_query . ')';
+            break;
+        case 'title':
+            $wh_query = ' and (TxTitle ' . $wh_query . ')';
+            break;
+        case 'text':
+            $wh_query = ' and (TxText ' . $wh_query . ')';
+            break;
     }
-    if ($currentquery!=='') {
-        if ($currentregexmode !== ''
+    if ($currentquery !== '') {
+        if (
+            $currentregexmode !== ''
             && @mysqli_query(
                 $GLOBALS["DBCONNECTION"],
                 'SELECT "test" RLIKE ' . convert_string_to_sqlsyntax($currentquery)
@@ -114,8 +115,7 @@ function edit_texts_get_wh_tag($currentlang)
     if ($currenttag1 != '') {
         if ($currenttag1 == -1) {
             $wh_tag1 = "group_concat(TtT2ID) IS NULL";
-        }
-        else {
+        } else {
             $wh_tag1 = "concat('/',group_concat(TtT2ID separator '/'),'/') like '%/"
             . $currenttag1 . "/%'";
         }
@@ -123,8 +123,7 @@ function edit_texts_get_wh_tag($currentlang)
     if ($currenttag2 != '') {
         if ($currenttag2 == -1) {
             $wh_tag2 = "group_concat(TtT2ID) IS NULL";
-        }
-        else {
+        } else {
             $wh_tag2 = "concat('/',group_concat(TtT2ID separator '/'),'/') like '%/"
             . $currenttag2 . "/%'";
         }
@@ -242,9 +241,9 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
         );
         adjust_autoincr('texts', 'TxID');
         adjust_autoincr('sentences', 'SeID');
-    } elseif ($markaction == 'addtag' ) {
+    } elseif ($markaction == 'addtag') {
         $message = addtexttaglist($actiondata, $list);
-    } elseif ($markaction == 'deltag' ) {
+    } elseif ($markaction == 'deltag') {
         removetexttaglist($actiondata, $list);
         header("Location: /text/edit");
         exit();
@@ -317,13 +316,14 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
                 get_first_value(
                     'select TxText as value from ' . $tbpref . 'texts where TxID = ' . $id
                 ),
-                $record['TxLgID'], $id
+                $record['TxLgID'],
+                $id
             );
             $count++;
         }
         mysqli_free_result($res);
         $message = 'Text(s) reparsed: ' . $count;
-    } elseif ($markaction == 'test' ) {
+    } elseif ($markaction == 'test') {
         $_SESSION['testsql'] = $list;
         header("Location: /test?selection=3");
         exit();
@@ -370,7 +370,6 @@ function edit_texts_delete($txid): string
         ''
     );
     return $message;
-
 }
 
 /**
@@ -464,7 +463,9 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
             <input type="button" value="&lt;&lt; Back" onclick="history.back();" />
         </p>';
         splitCheckText(
-            remove_soft_hyphens($_REQUEST['TxText']), (int)$_REQUEST['TxLgID'], -1
+            remove_soft_hyphens($_REQUEST['TxText']),
+            (int)$_REQUEST['TxLgID'],
+            -1
         );
         echo '<p>
             <input type="button" value="&lt;&lt; Back" onclick="history.back();" />
@@ -488,7 +489,7 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
             "Saved"
         );
         $id = get_last_key();
-    } else if (str_starts_with($op, 'Change')) {
+    } elseif (str_starts_with($op, 'Change')) {
         // UPDATE
         runsql(
             "UPDATE {$tbpref}texts SET " .
@@ -497,7 +498,8 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
             'TxText = ' . convert_string_to_sqlsyntax(remove_soft_hyphens($_REQUEST["TxText"])) . ', ' .
             'TxAudioURI = ' . convert_string_to_sqlsyntax_nonull($_REQUEST["TxAudioURI"]) . ', ' .
             'TxSourceURI = ' . convert_string_to_sqlsyntax($_REQUEST["TxSourceURI"]) . ' ' .
-            'where TxID = ' . $_REQUEST["TxID"], "Updated"
+            'where TxID = ' . $_REQUEST["TxID"],
+            "Updated"
         );
         $id = (int) $_REQUEST["TxID"];
     }
@@ -584,7 +586,7 @@ function edit_texts_form($text, $annotated)
         $(document).ready(change_textboxes_language);
     </script>
     <div class="flex-spaced">
-        <div style="<?php echo ($new_text ? "display: none": ''); ?>">
+        <div style="<?php echo ($new_text ? "display: none" : ''); ?>">
             <a href="/texts?new=1">
                 <img src="/assets/icons/plus-button.png">
                 New Text
@@ -608,7 +610,7 @@ function edit_texts_form($text, $annotated)
                 Active Texts
             </a>
         </div>
-        <div style="<?php echo ($new_text ? "": 'display: none'); ?>">
+        <div style="<?php echo ($new_text ? "" : 'display: none'); ?>">
             <a href="/text/archived?query=&amp;page=1">
                 <img src="/assets/icons/drawer--minus.png">
                 Archived Texts
@@ -661,7 +663,7 @@ function edit_texts_form($text, $annotated)
                 <td class="td1">
                     <?php
                     if ($annotated) {
-                        echo '<img src="/assets/icons/tick.png" title="With Improved Annotation" alt="With Improved Annotation" /> '.
+                        echo '<img src="/assets/icons/tick.png" title="With Improved Annotation" alt="With Improved Annotation" /> ' .
                         'Exists - May be partially or fully lost if you change the text!<br />' .
                         '<input type="button" value="Print/Edit..." onclick="location.href=\'/text/print?text=' .
                         $text->id . '\';" />';
@@ -778,7 +780,10 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
 {
     $currentquery = (string) processSessParam("query", "currenttextquery", '', false);
     $currentquerymode = (string) processSessParam(
-        "query_mode", "currenttextquerymode", 'title,text', false
+        "query_mode",
+        "currenttextquerymode",
+        'title,text',
+        false
     );
     $currentregexmode = getSettingWithDefault("set-regex-mode");
     $currenttag1 = validateTextTag(
@@ -806,22 +811,22 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
             <td class="td1 center" colspan="2">
                 <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/texts?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
                     <option value="title,text"<?php
-                    if($currentquerymode=="title,text") {
+                    if ($currentquerymode == "title,text") {
                         echo ' selected="selected"';
                     } ?>>Title &amp; Text</option>
                     <option disabled="disabled">------------</option>
                     <option value="title"<?php
-                    if($currentquerymode=="title") {
+                    if ($currentquerymode == "title") {
                         echo ' selected="selected"';
                     } ?>>Title</option>
                     <option value="text"<?php
-                    echo ($currentquerymode=="text" ? ' selected="selected"' : '');
+                    echo ($currentquerymode == "text" ? ' selected="selected"' : '');
                     ?>>Text</option>
                 </select>
                 <?php
-                if($currentregexmode=='') {
+                if ($currentregexmode == '') {
                     echo '<span style="vertical-align: middle"> (Wildc.=*): </span>';
-                } elseif ($currentregexmode=='r') {
+                } elseif ($currentregexmode == 'r') {
                     echo '<span style="vertical-align: middle"> RegEx Mode: </span>';
                 } else {
                     echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
@@ -852,11 +857,11 @@ function edit_texts_filters_form($currentlang, $recno, $currentpage, $pages)
             </td>
         </tr>
         <?php
-        if($recno > 0) {
+        if ($recno > 0) {
             ?>
         <tr>
             <th class="th1" colspan="2">
-                <?php echo $recno; ?> Text<?php echo ($recno==1?'':'s'); ?>
+                <?php echo $recno; ?> Text<?php echo ($recno == 1 ? '' : 's'); ?>
             </th>
             <th class="th1" colspan="1">
                 <?php makePager($currentpage, $pages, '/texts', 'form1'); ?>
@@ -888,7 +893,7 @@ function edit_texts_other_pages($recno)
 
     $maxperpage = (int) getSettingWithDefault('set-texts-per-page');
 
-    $pages = $recno == 0 ? 0 : (intval(($recno-1) / $maxperpage) + 1);
+    $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
     if ($pages <= 0) {
         return;
@@ -905,7 +910,7 @@ function edit_texts_other_pages($recno)
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr>
         <th class="th1">
-            <?php echo $recno; ?> Text<?php echo ($recno==1?'':'s'); ?>
+            <?php echo $recno; ?> Text<?php echo ($recno == 1 ? '' : 's'); ?>
         </th>
         <th class="th1">
             <?php makePager($currentpage, $pages, '/texts', 'form2'); ?>
@@ -978,9 +983,9 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
     if ($audio != '') {
         echo '<img src="' . get_file_path('assets/icons/speaker-volume.png') . '" title="With Audio" alt="With Audio" />';
     }
-    if (isset($txrecord['TxSourceURI']) && substr(trim($txrecord['TxSourceURI']), 0, 1)!='#') {
+    if (isset($txrecord['TxSourceURI']) && substr(trim($txrecord['TxSourceURI']), 0, 1) != '#') {
         echo ' <a href="' . $txrecord['TxSourceURI'] . '" target="_blank">
-            <img src="'.get_file_path('assets/icons/chain.png').'" title="Link to Text Source" alt="Link to Text Source" />
+            <img src="' . get_file_path('assets/icons/chain.png') . '" title="Link to Text Source" alt="Link to Text Source" />
         </a>';
     }
     if ($txrecord['annotlen']) {
@@ -1020,7 +1025,7 @@ function edit_texts_show_text_row($txrecord, $currentlang, $statuses)
         echo '<li class="bc' . $cnt .
         ' "title="' . $statuses[$cnt]["name"] . ' (' . $statuses[$cnt]["abbr"] .
         ')" style="border-top-width: 25px;">
-            <span id="stat_' . $cnt . '_' . $txid .'">0</span>
+            <span id="stat_' . $cnt . '_' . $txid . '">0</span>
         </li>';
     }
     ?>
@@ -1166,14 +1171,19 @@ function edit_texts_display($message)
     $currentpage = (int) processSessParam("page", "currenttextpage", '1', true);
     $currentquery = (string) processSessParam("query", "currenttextquery", '', false);
     $currentquerymode = (string) processSessParam(
-        "query_mode", "currenttextquerymode", 'title,text', false
+        "query_mode",
+        "currenttextquerymode",
+        'title,text',
+        false
     );
     $currentregexmode = getSettingWithDefault("set-regex-mode");
 
     $wh_lang = ($currentlang != '') ? (' and TxLgID=' . $currentlang) : '';
 
     $wh_query = edit_texts_get_wh_query(
-        $currentquery, $currentquerymode, $currentregexmode
+        $currentquery,
+        $currentquerymode,
+        $currentregexmode
     );
 
 
@@ -1198,7 +1208,7 @@ function edit_texts_display($message)
 
     $maxperpage = (int) getSettingWithDefault('set-texts-per-page');
 
-    $pages = $recno == 0 ? 0 : (intval(($recno-1) / $maxperpage) + 1);
+    $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
 
     if ($currentpage < 1) {
         $currentpage = 1;
@@ -1206,7 +1216,7 @@ function edit_texts_display($message)
     if ($currentpage > $pages) {
         $currentpage = $pages;
     }
-    $limit = 'LIMIT ' . (($currentpage-1) * $maxperpage) . ',' . $maxperpage;
+    $limit = 'LIMIT ' . (($currentpage - 1) * $maxperpage) . ',' . $maxperpage;
 
     $sorts = array('TxTitle','TxID desc','TxID asc');
     $lsorts = count($sorts);
@@ -1311,7 +1321,9 @@ function edit_texts_do_page()
 
     if (isset($_REQUEST['markaction'])) {
         list($message, $_) = edit_texts_mark_action(
-            $_REQUEST['markaction'], $_REQUEST['marked'], getreq('data')
+            $_REQUEST['markaction'],
+            $_REQUEST['marked'],
+            getreq('data')
         );
     }
     if (isset($_REQUEST['del'])) {
@@ -1323,7 +1335,9 @@ function edit_texts_do_page()
     } elseif (isset($_REQUEST['op'])) {
         // INS/UPD
         $message .= " / " . edit_texts_do_operation(
-            $_REQUEST['op'], null, $no_pagestart
+            $_REQUEST['op'],
+            null,
+            $no_pagestart
         );
     }
 

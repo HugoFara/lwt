@@ -118,7 +118,7 @@ function phonetic_reading($text, $lang)
  * @deprecated No longer used, incompatible with new database system.
  * @since      1.6.25-fork Not compatible with the database
  */
-function refreshText($word,$tid): string
+function refreshText($word, $tid): string
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     // $word : only sentences with $word
@@ -168,8 +168,8 @@ function refreshText($word,$tid): string
         $termex = isset($record['WoID']);
         $spanid = 'ID-' . $order . '-' . $actcode;
 
-        if ($hideuntil > 0 ) {
-            if ($order <= $hideuntil ) {
+        if ($hideuntil > 0) {
+            if ($order <= $hideuntil) {
                 $hidetag = "addClass('hide');";
             } else {
                 $hideuntil = -1;
@@ -182,7 +182,8 @@ function refreshText($word,$tid): string
         } else {   // A TERM
             if ($actcode > 1) {   // A MULTIWORD FOUND
                 if ($termex) {  // MULTIWORD FOUND - DISPLAY
-                    if ($hideuntil == -1) { $hideuntil = $order + ($actcode - 1) * 2;
+                    if ($hideuntil == -1) {
+                        $hideuntil = $order + ($actcode - 1) * 2;
                     }
                     $out .= "$('#" . $spanid . "',context)." . $hidetag . "\n";
                 } else {  // MULTIWORD PLACEHOLDER - NO DISPLAY

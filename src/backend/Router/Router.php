@@ -196,20 +196,20 @@ class Router
     public function execute(array $resolution): void
     {
         switch ($resolution['type']) {
-        case 'redirect':
-            header("Location: {$resolution['url']}", true, $resolution['code']);
-            exit;
+            case 'redirect':
+                header("Location: {$resolution['url']}", true, $resolution['code']);
+                exit;
 
-        case 'handler':
-            $this->executeHandler($resolution['handler'], $resolution['params']);
-            break;
+            case 'handler':
+                $this->executeHandler($resolution['handler'], $resolution['params']);
+                break;
 
-        case 'not_found':
-            $this->handle404($resolution['path']);
-            break;
+            case 'not_found':
+                $this->handle404($resolution['path']);
+                break;
 
-        default:
-            $this->handle500("Unknown resolution type: {$resolution['type']}");
+            default:
+                $this->handle500("Unknown resolution type: {$resolution['type']}");
         }
     }
 

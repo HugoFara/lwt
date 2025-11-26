@@ -72,7 +72,6 @@ function unset_settings(): void
 
 
     saveSetting('currenttext', '');
-
 }
 
 /**
@@ -90,7 +89,6 @@ function save($k, $v): void
     }
 
     saveSetting($k, $v);
-
 }
 
 list($k, $v, $url) = get_parameters();
@@ -107,4 +105,3 @@ if ($url != '') {
     }
     exit();
 }
-?>

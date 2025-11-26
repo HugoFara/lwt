@@ -30,9 +30,7 @@ pagestart('Settings/Preferences', true);
 $message = '';
 
 if (isset($_REQUEST['op'])) {
-
     if ($_REQUEST['op'] == 'Save') {
-
         saveSetting(
             'set-text-h-frameheight-no-audio',
             $_REQUEST['set-text-h-frameheight-no-audio']
@@ -198,11 +196,9 @@ if (isset($_REQUEST['op'])) {
         );
 
         $message = 'Settings saved';
-
     } else {
         $message = 'All Settings reset to default values';
     }
-
 }
 
 echo error_message_with_hide($message, true);
@@ -460,7 +456,10 @@ echo error_message_with_hide($message, true);
             <select name="set-text-visit-statuses-via-key" class="respinput">
             <?php
             echo get_wordstatus_selectoptions(
-                getSettingWithDefault('set-text-visit-statuses-via-key'), true, true, true
+                getSettingWithDefault('set-text-visit-statuses-via-key'),
+                true,
+                true,
+                true
             );
             ?>
             </select>
@@ -477,7 +476,10 @@ echo error_message_with_hide($message, true);
             <select name="set-display-text-frame-term-translation" class="respinput">
             <?php
             echo get_wordstatus_selectoptions(
-                getSettingWithDefault('set-display-text-frame-term-translation'), true, true, true
+                getSettingWithDefault('set-display-text-frame-term-translation'),
+                true,
+                true,
+                true
             );
             ?>
             </select>

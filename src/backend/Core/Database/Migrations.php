@@ -121,15 +121,15 @@ class Migrations
         // Do DB Updates if tables seem to be old versions
 
         if ($dbversion < $currversion) {
-
             if (LWT_Globals::isDebug()) {
                 echo "<p>DEBUG: check DB collation: ";
             }
-            if ('utf8utf8_general_ci' != get_first_value(
-                'SELECT concat(default_character_set_name, default_collation_name) AS value
+            if (
+                'utf8utf8_general_ci' != get_first_value(
+                    'SELECT concat(default_character_set_name, default_collation_name) AS value
                 FROM information_schema.SCHEMATA
                 WHERE schema_name = "' . $dbname . '"'
-            )
+                )
             ) {
                 runsql("SET collation_connection = 'utf8_general_ci'", '');
                 runsql(

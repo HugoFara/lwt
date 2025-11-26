@@ -51,7 +51,7 @@ class GoogleTranslate
             'Cookie: OGPC=4061130-1:',
             'DNT: 1',
             'Host: translate.google.' . self::$gglDomain,
-            'Referer: https://translate.google.' . self::$gglDomain .'/',
+            'Referer: https://translate.google.' . self::$gglDomain . '/',
             'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1'
         );
     }
@@ -62,16 +62,16 @@ class GoogleTranslate
      */
     private static function generateToken(string $str, array|null $tok): string
     {
-        $t = $c = isset($tok)?$tok[0]:408254;//todo floor(time()/3600);
+        $t = $c = isset($tok) ? $tok[0] : 408254;//todo floor(time()/3600);
         $x = hexdec('80000000');
         $z = 0xffffffff;
-        $y = PHP_INT_SIZE==8?0xffffffff00000000:0x00000000;
+        $y = PHP_INT_SIZE == 8 ? 0xffffffff00000000 : 0x00000000;
         $d = array();
         $strlen = mb_strlen($str, "UTF-8");
         while ($strlen) {
             $charString = mb_substr($str, 0, 1, "UTF-8");
             $size = strlen($charString);
-            for($i = 0; $i < $size; $i++){
+            for ($i = 0; $i < $size; $i++) {
                 $d[] = ord($charString[$i]);
             }
             $str = mb_substr($str, 1, $strlen, "UTF-8");
@@ -95,7 +95,7 @@ class GoogleTranslate
             }
         }
         $b = $c << 3;
-        if($b & $x) {
+        if ($b & $x) {
             $b = ($b | $y);
         } else {
             $b = ($b & $z);
@@ -104,17 +104,17 @@ class GoogleTranslate
         $b = (($c >> 11) & (0x001fffff));
         $c ^= $b;
         $b = $c << 15;
-        if($b & $x) {
+        if ($b & $x) {
             $b = ($b | $y);
         } else {
             $b = ($b & $z);
         }
         $c += $b;
-        $c ^= isset($tok)?$tok[1]:585515986;//todo create from time() / TKK ggltrns
+        $c ^= isset($tok) ? $tok[1] : 585515986;//todo create from time() / TKK ggltrns
         $c &= $z;
         if (0 > $c) {
             $c = (($x ^ $c));
-            if(5000000 > $c) {
+            if (5000000 > $c) {
                 $c += 483648;
             } else {
                 $c -= 516352;
@@ -206,8 +206,8 @@ class GoogleTranslate
             $ctx = stream_context_create(
                 array(
                     "http" => array(
-                        "method"=>"GET",
-                        "header"=>implode("\r\n", self::$headers) . "\r\n"
+                        "method" => "GET",
+                        "header" => implode("\r\n", self::$headers) . "\r\n"
                     )
                 )
             );
@@ -218,7 +218,9 @@ class GoogleTranslate
     public function translate(string $string): array|false
     {
         return $this->lastResult = self::staticTranslate(
-            $string, $this->langFrom, $this->langTo
+            $string,
+            $this->langFrom,
+            $this->langTo
         );
     }
     /**
@@ -244,12 +246,20 @@ class GoogleTranslate
      * @return string[]|false An array of translation, or false if an error occured.
      */
     public static function staticTranslate(
-        $string, $from, $to, $time_token = null, $domain = self::DEFAULT_DOMAIN
+        $string,
+        $from,
+        $to,
+        $time_token = null,
+        $domain = self::DEFAULT_DOMAIN
     ): array|false {
         self::setDomain($domain);
         $url = sprintf(
-            self::$urlFormat, self::$gglDomain, rawurlencode($string),
-            $from, $to, self::generateToken($string, $time_token)
+            self::$urlFormat,
+            self::$gglDomain,
+            rawurlencode($string),
+            $from,
+            $to,
+            self::generateToken($string, $time_token)
         );
         $result = preg_replace('!([[,])(?=,)!', '$1[]', self::makeCurl($url));
         $resultArray = json_decode($result, true);
@@ -279,5 +289,3 @@ class GoogleTranslate
         return false;
     }
 }
-
-?>

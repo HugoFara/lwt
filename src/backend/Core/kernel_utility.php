@@ -1,4 +1,5 @@
 <?php
+
 /**
  * \file
  * \brief Core utility functions that do not require a complete session.
@@ -59,13 +60,13 @@ function get_version_number(): string
     $v = preg_replace('/-\w+\d*/', '', $v);
     $pos = strpos($v, ' ', 0);
     if ($pos === false) {
-        my_die('Wrong version: '. $v);
+        my_die('Wrong version: ' . $v);
     }
     $vn = preg_split("/[.]/", substr($v, 0, $pos));
     if (count($vn) < 3) {
-        my_die('Wrong version: '. $v);
+        my_die('Wrong version: ' . $v);
     }
-    for ($i=0; $i<3; $i++) {
+    for ($i = 0; $i < 3; $i++) {
         $r .= substr('000' . $vn[$i], -3);
     }
     return $r;
@@ -316,7 +317,8 @@ function find_latin_sentence_end($matches, $noSentenceEnd)
         if (strlen($matches[1]) < 3) {
             return $matches[0];
         }
-    } else if ($matches[3] && (preg_match('/^[B-DF-HJ-NP-TV-XZb-df-hj-np-tv-xz][b-df-hj-np-tv-xzñ]*$/u', $matches[1]) || preg_match('/^[AEIOUY]$/', $matches[1]))
+    } elseif (
+        $matches[3] && (preg_match('/^[B-DF-HJ-NP-TV-XZb-df-hj-np-tv-xz][b-df-hj-np-tv-xzñ]*$/u', $matches[1]) || preg_match('/^[AEIOUY]$/', $matches[1]))
     ) {
         return $matches[0];
     }
@@ -345,7 +347,7 @@ function my_die($text)
     if (class_exists('PHPUnit\Framework\TestCase', false)) {
         throw new \RuntimeException("Fatal Error: " . $text);
     }
-    
+
     // In production, output HTML error and die (legacy behavior)
     echo '</select></p></div><div style="padding: 1em; color:red; font-size:120%; background-color:#CEECF5;">' .
     '<p><b>Fatal Error:</b> ' .
@@ -400,7 +402,7 @@ function quickMenu(): void
  * @param string $title  Title of the page
  * @param string $addcss Some CSS to be embed in a style tag
  */
-function pagestart_kernel_nobody($title, $addcss=''): void
+function pagestart_kernel_nobody($title, $addcss = ''): void
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $debug = \Lwt\Core\LWT_Globals::isDebug();
@@ -486,7 +488,7 @@ function pageend(): void
  *
  * @global bool $debug This functions doesn't do anything is $debug is false.
  */
-function echodebug($var,$text): void
+function echodebug($var, $text): void
 {
     if (\Lwt\Core\LWT_Globals::isDebug()) {
         echo "<pre> **DEBUGGING** " . tohtml($text) . ' = [[[';
@@ -557,7 +559,7 @@ function annotation_to_json($ann): string|false
     foreach ($items as $item) {
         $vals = preg_split('/[\t]/u', $item);
         if (count($vals) > 3 && $vals[0] >= 0 && $vals[2] > 0) {
-            $arr[intval($vals[0])-1] = array($vals[1], $vals[2], $vals[3]);
+            $arr[intval($vals[0]) - 1] = array($vals[1], $vals[2], $vals[3]);
         }
     }
     $json_data = json_encode($arr);
@@ -617,12 +619,11 @@ function url_base(): string
     if (isset($url["port"])) {
         $r .= ":" . $url["port"];
     }
-    if(isset($url["path"])) {
+    if (isset($url["path"])) {
         $b = basename($url["path"]);
         if (substr($b, -4) == ".php" || substr($b, -4) == ".htm" || substr($b, -5) == ".html") {
             $r .= dirname($url["path"]);
-        }
-        else {
+        } else {
             $r .= $url["path"];
         }
     }
@@ -725,7 +726,7 @@ function error_message_with_hide($msg, $noback): string
     if (trim($msg) == '') {
         return '';
     }
-    if (substr($msg, 0, 5) == "Error" ) {
+    if (substr($msg, 0, 5) == "Error") {
         return '<p class="red">*** ' . tohtml($msg) . ' ***' .
         ($noback ?
         '' :
@@ -750,7 +751,8 @@ function langFromDict($url)
         return '';
     }
     parse_str($query, $parsed_query);
-    if (array_key_exists("lwt_translator", $parsed_query)
+    if (
+        array_key_exists("lwt_translator", $parsed_query)
         && $parsed_query["lwt_translator"] == "libretranslate"
     ) {
         return $parsed_query["source"] ?? "";
@@ -774,7 +776,8 @@ function targetLangFromDict($url)
         return '';
     }
     parse_str($query, $parsed_query);
-    if (array_key_exists("lwt_translator", $parsed_query)
+    if (
+        array_key_exists("lwt_translator", $parsed_query)
         && $parsed_query["lwt_translator"] == "libretranslate"
     ) {
         return $parsed_query["target"] ?? "";

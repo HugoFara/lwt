@@ -181,17 +181,17 @@ function edit_languages_op_save(): string
                 LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization
             ) VALUES(" .
                 convert_string_to_sqlsyntax($_REQUEST["LgName"]) . ', ' .
-                convert_string_to_sqlsyntax($_REQUEST["LgDict1URI"]) . ', '.
-                convert_string_to_sqlsyntax($_REQUEST["LgDict2URI"]) . ', '.
-                convert_string_to_sqlsyntax($_REQUEST["LgGoogleTranslateURI"]) . ', '.
-                convert_string_to_sqlsyntax($_REQUEST["LgExportTemplate"]) . ', '.
-                convert_string_to_sqlsyntax($_REQUEST["LgTextSize"]) . ', '.
-                convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgCharacterSubstitutions"]) . ', '.
-                convert_string_to_sqlsyntax($_REQUEST["LgRegexpSplitSentences"]) . ', '.
-                convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgExceptionsSplitSentences"]) . ', '.
-                convert_string_to_sqlsyntax($_REQUEST["LgRegexpWordCharacters"]) . ', '.
-                ((int)isset($_REQUEST["LgRemoveSpaces"])) . ', '.
-                ((int)isset($_REQUEST["LgSplitEachChar"])) . ', '.
+                convert_string_to_sqlsyntax($_REQUEST["LgDict1URI"]) . ', ' .
+                convert_string_to_sqlsyntax($_REQUEST["LgDict2URI"]) . ', ' .
+                convert_string_to_sqlsyntax($_REQUEST["LgGoogleTranslateURI"]) . ', ' .
+                convert_string_to_sqlsyntax($_REQUEST["LgExportTemplate"]) . ', ' .
+                convert_string_to_sqlsyntax($_REQUEST["LgTextSize"]) . ', ' .
+                convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgCharacterSubstitutions"]) . ', ' .
+                convert_string_to_sqlsyntax($_REQUEST["LgRegexpSplitSentences"]) . ', ' .
+                convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgExceptionsSplitSentences"]) . ', ' .
+                convert_string_to_sqlsyntax($_REQUEST["LgRegexpWordCharacters"]) . ', ' .
+                ((int)isset($_REQUEST["LgRemoveSpaces"])) . ', ' .
+                ((int)isset($_REQUEST["LgSplitEachChar"])) . ', ' .
                 ((int)isset($_REQUEST["LgRightToLeft"])) . ', ' .
                 convert_string_to_sqlsyntax_nonull($_REQUEST["LgTTSVoiceAPI"]) . ', ' .
                 ((int)isset($_REQUEST["LgShowRomanization"])) .
@@ -1093,7 +1093,6 @@ function edit_language_form($language): void
     </table>
 </form>
     <?php
-
 }
 
 /**
@@ -1337,7 +1336,7 @@ function edit_languages_display($message)
 </p>
 
     <?php
-    if ($recno==0) {
+    if ($recno == 0) {
         ?>
 <p>No languages found.</p>
         <?php
@@ -1410,14 +1409,14 @@ function edit_languages_display($message)
         $wordcount = is_numeric($foo) ? (int)$foo : 0;
         if (is_null($newsfeedcount)) {
             $nfcount = 0;
-        } else if (isset($newsfeedcount[$lid])) {
+        } elseif (isset($newsfeedcount[$lid])) {
             $nfcount = (int)$newsfeedcount[$lid];
         } else {
             $nfcount = 0;
         }
         if (is_null($feedarticlescount)) {
             $fartcount = 0;
-        } else if (isset($feedarticlescount[$lid])) {
+        } elseif (isset($feedarticlescount[$lid])) {
             $fartcount = (int)$feedarticlescount[$lid];
         } else {
             $fartcount = 0;
@@ -1442,7 +1441,7 @@ function edit_languages_display($message)
         echo '<td' . $style . ' class="td1 center"><a href="do_test.php?lang=' . $lid . '">
             <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" /></a>
         </' . $tdth . '>
-        <td' . $style. ' class="td1 center">
+        <td' . $style . ' class="td1 center">
             <a href="' . $_SERVER['PHP_SELF'] . '?chg=' . $lid . '">
                 <img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" />
             </a>';
@@ -1486,7 +1485,6 @@ function edit_languages_display($message)
 </table>
 
         <?php
-
 }
 
 /**

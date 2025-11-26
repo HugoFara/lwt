@@ -30,9 +30,9 @@ echo '<p>(Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="
     //<![CDATA[
     $(document).ready( function() {
     <?php
-    if($from=='' or $dest=='') {
+    if ($from == '' or $dest == '') {
         echo '$("body").html("<p class=\"red\">There seems to be something wrong with the Glosbe API!</p><p class=\"red\">Please check the dictionaries in the Language Settings!</p>"); ';
-    } else if($phrase=='') {
+    } elseif ($phrase == '') {
         echo '$("body").html("<p class=\"msgblue\">Term is not set!</p>");';
     } else {
         ?>

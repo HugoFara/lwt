@@ -60,11 +60,11 @@ function start_do_page()
                 if ($fixed_tbpref) {
                     echo 'disabled title="Database prefix is fixed and cannot be changed!"';
                 }?> >
-                    <option value="" <?php echo ($tbpref == '' ? 'selected="selected"': ''); ?>>
+                    <option value="" <?php echo ($tbpref == '' ? 'selected="selected"' : ''); ?>>
                         Default Table Set
                     </option>
                     <?php foreach ($prefix as $value) { ?>
-                    <option value="<?php echo tohtml($value); ?>" <?php echo (substr($tbpref, 0, -1) == $value ? 'selected="selected"': ''); ?>>
+                    <option value="<?php echo tohtml($value); ?>" <?php echo (substr($tbpref, 0, -1) == $value ? 'selected="selected"' : ''); ?>>
                         <?php echo tohtml($value); ?>
                     </option>
                     <?php } ?>

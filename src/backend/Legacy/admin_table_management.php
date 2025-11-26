@@ -15,7 +15,7 @@ require_once 'Core/session_utility.php';
 $message = "";
 
 if (isset($_REQUEST['delpref'])) {
-    if($_REQUEST['delpref'] !== '-') {
+    if ($_REQUEST['delpref'] !== '-') {
         runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_archivedtexts', '');
         runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_archtexttags', '');
         runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_languages', '');
@@ -38,9 +38,7 @@ if (isset($_REQUEST['delpref'])) {
             LWTTableSet("current_table_prefix", $tbpref);
         }
     }
-}
-
-elseif (isset($_REQUEST['newpref'])) {
+} elseif (isset($_REQUEST['newpref'])) {
     if (in_array($_REQUEST['newpref'], getprefixes())) {
         $message = 'Table Set "' . $_REQUEST['newpref'] . '" already exists';
     } else {
@@ -49,10 +47,8 @@ elseif (isset($_REQUEST['newpref'])) {
         header("Location: /");
         exit();
     }
-}
-
-elseif (isset($_REQUEST['prefix'])) {
-    if($_REQUEST['prefix'] !== '-') {
+} elseif (isset($_REQUEST['prefix'])) {
+    if ($_REQUEST['prefix'] !== '-') {
         $tbpref = $_REQUEST['prefix'];
         LWTTableSet("current_table_prefix", $tbpref);
         header("Location: /");
@@ -64,7 +60,6 @@ pagestart('Select, Create or Delete a Table Set', false);
 echo error_message_with_hide($message, false);
 
 if ($fixed_tbpref) {
-
     ?>
 
 <table class="tab2" cellspacing="0" cellpadding="5">
@@ -84,9 +79,7 @@ if ($fixed_tbpref) {
 </table>
 
     <?php
-
 } else {
-
     $prefix = getprefixes();
 
     ?>
@@ -160,7 +153,6 @@ if ($fixed_tbpref) {
 </table>
 
     <?php
-
 }
 
 pageend();

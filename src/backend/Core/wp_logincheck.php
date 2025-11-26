@@ -23,14 +23,12 @@ if (isset($_SESSION['LWT-WP-User'])) {
     $url = '';
     if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $url = $_SERVER['REQUEST_URI'];
-    } else if (isset($_SERVER['HTTP_REFERER'])) {
+    } elseif (isset($_SERVER['HTTP_REFERER'])) {
         $url = $_SERVER['HTTP_REFERER'];
     }
     if (strpos($url, "/") !== false) {
         $url = substr($url, strrpos($url, '/') + 1);
     }
-    header("Location: ./wp_lwt_start.php?rd=". urlencode($url));
+    header("Location: ./wp_lwt_start.php?rd=" . urlencode($url));
     exit();
 }
-
-?>

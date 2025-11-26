@@ -28,7 +28,10 @@ $currentsort = (int) processDBParam("sort", 'currentarchivesort', '1', true);
 $currentpage = (int) processSessParam("page", "currentarchivepage", '1', true);
 $currentquery = (string) processSessParam("query", "currentarchivequery", '', false);
 $currentquerymode = (string) processSessParam(
-    "query_mode", "currentarchivequerymode", 'title,text', false
+    "query_mode",
+    "currentarchivequerymode",
+    'title,text',
+    false
 );
 $currentregexmode = getSettingWithDefault("set-regex-mode");
 $currenttag1 = validateArchTextTag(
@@ -40,7 +43,10 @@ $currenttag2 = validateArchTextTag(
     $currentlang
 );
 $currenttag12 = (string) processSessParam(
-    "tag12", "currentarchivetexttag12", '', false
+    "tag12",
+    "currentarchivetexttag12",
+    '',
+    false
 );
 
 $wh_lang = ($currentlang != '') ? (' and AtLgID=' . $currentlang) : '';
@@ -51,27 +57,28 @@ convert_string_to_sqlsyntax(
     $currentquery
 );
 switch ($currentquerymode) {
-case 'title,text':
-    $wh_query=' and (AtTitle ' . $wh_query . ' or AtText ' . $wh_query . ')';
-    break;
-case 'title':
-    $wh_query=' and (AtTitle ' . $wh_query . ')';
-    break;
-case 'text':
-    $wh_query=' and (AtText ' . $wh_query . ')';
-    break;
+    case 'title,text':
+        $wh_query = ' and (AtTitle ' . $wh_query . ' or AtText ' . $wh_query . ')';
+        break;
+    case 'title':
+        $wh_query = ' and (AtTitle ' . $wh_query . ')';
+        break;
+    case 'text':
+        $wh_query = ' and (AtText ' . $wh_query . ')';
+        break;
 }
-if ($currentquery!=='') {
-    if ($currentregexmode!=='') {
-        if (@mysqli_query(
-            $GLOBALS["DBCONNECTION"],
-            'select "test" rlike ' . convert_string_to_sqlsyntax($currentquery)
-        ) === false
+if ($currentquery !== '') {
+    if ($currentregexmode !== '') {
+        if (
+            @mysqli_query(
+                $GLOBALS["DBCONNECTION"],
+                'select "test" rlike ' . convert_string_to_sqlsyntax($currentquery)
+            ) === false
         ) {
-            $currentquery='';
+            $currentquery = '';
             $wh_query = '';
             unset($_SESSION['currentwordquery']);
-            if(isset($_REQUEST['query'])) {
+            if (isset($_REQUEST['query'])) {
                 echo '<p id="hide3" style="color:red;text-align:center;">' .
                 '+++ Warning: Invalid Search +++</p>';
             }
@@ -132,7 +139,7 @@ if (isset($_REQUEST['markaction'])) {
             $l = count($_REQUEST['marked']);
             if ($l > 0) {
                 $list = "(" . $_REQUEST['marked'][0];
-                for ($i=1; $i<$l; $i++) {
+                for ($i = 1; $i < $l; $i++) {
                     $list .= "," . $_REQUEST['marked'][$i];
                 }
                 $list .= ")";
@@ -154,9 +161,9 @@ if (isset($_REQUEST['markaction'])) {
                         WHERE AtID IS NULL",
                         ''
                     );
-                } elseif ($markaction == 'addtag' ) {
+                } elseif ($markaction == 'addtag') {
                     $message = addarchtexttaglist($actiondata, $list);
-                } elseif ($markaction == 'deltag' ) {
+                } elseif ($markaction == 'deltag') {
                     removearchtexttaglist($actiondata, $list);
                     header("Location: /text/archived");
                     exit();
@@ -217,7 +224,6 @@ if (isset($_REQUEST['markaction'])) {
                     );
                     $message = 'Unarchived Text(s): ' . $count;
                 }
-
             }
         }
     }
@@ -286,7 +292,8 @@ if (isset($_REQUEST['del'])) {
         "DELETE " . $tbpref . "archtexttags
         FROM (" . $tbpref . "archtexttags
         LEFT JOIN " . $tbpref . "archivedtexts on AgAtID = AtID)
-        WHERE AtID IS NULL", ''
+        WHERE AtID IS NULL",
+        ''
     );
 } elseif (isset($_REQUEST['op'])) {
     // UPD
@@ -306,7 +313,7 @@ if (isset($_REQUEST['del'])) {
             'AtText = ' . convert_string_to_sqlsyntax($_REQUEST["AtText"]) . ', ' .
             'AtAudioURI = ' . convert_string_to_sqlsyntax($_REQUEST["AtAudioURI"]) .
             ', ' .
-            'AtSourceURI = ' .convert_string_to_sqlsyntax($_REQUEST["AtSourceURI"]) .
+            'AtSourceURI = ' . convert_string_to_sqlsyntax($_REQUEST["AtSourceURI"]) .
             ' WHERE AtID = ' . $_REQUEST["AtID"],
             "Updated"
         );
@@ -321,7 +328,6 @@ if (isset($_REQUEST['del'])) {
         $id = $_REQUEST["AtID"];
     }
     saveArchivedTextTags($id);
-
 }
 
 
@@ -333,7 +339,6 @@ if (isset($_REQUEST['chg'])) {
     where AtID = ' . $_REQUEST['chg'];
     $res = do_mysqli_query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
-
         ?>
 
      <script type="text/javascript" charset="utf-8">
@@ -397,10 +402,8 @@ if (isset($_REQUEST['chg'])) {
      </form>
 
         <?php
-
     }
     mysqli_free_result($res);
-
 } else {
     // DISPLAY
 
@@ -420,7 +423,7 @@ if (isset($_REQUEST['chg'])) {
 
     $maxperpage = (int)getSettingWithDefault('set-archivedtexts-per-page');
 
-    $pages = $recno == 0 ? 0 : intval(($recno-1) / $maxperpage) + 1;
+    $pages = $recno == 0 ? 0 : intval(($recno - 1) / $maxperpage) + 1;
 
     if ($currentpage < 1) {
         $currentpage = 1;
@@ -428,7 +431,7 @@ if (isset($_REQUEST['chg'])) {
     if ($currentpage > $pages) {
         $currentpage = $pages;
     }
-    $limit = 'LIMIT ' . (($currentpage-1) * $maxperpage) . ',' . $maxperpage;
+    $limit = 'LIMIT ' . (($currentpage - 1) * $maxperpage) . ',' . $maxperpage;
 
     $sorts = array('AtTitle','AtID desc','AtID');
     $lsorts = count($sorts);
@@ -485,24 +488,23 @@ if (isset($_REQUEST['chg'])) {
         <td class="td1 center" colspan="2">
             <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/text/archived?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
                 <option value="title,text"<?php
-                if($currentquerymode=="title,text") {
+                if ($currentquerymode == "title,text") {
                     echo ' selected="selected"';
                 } ?>>Title &amp; Text</option>
                 <option disabled="disabled">------------</option>
                 <option value="title"<?php
-                if($currentquerymode=="title") {
+                if ($currentquerymode == "title") {
                     echo ' selected="selected"';
                 } ?>>Title</option>
                 <option value="text"<?php
-                if($currentquerymode=="text") {
+                if ($currentquerymode == "text") {
                     echo ' selected="selected"';
                 } ?>>Text</option>
             </select>
             <?php
-            if($currentregexmode=='') {
+            if ($currentregexmode == '') {
                 echo '<span style="vertical-align: middle"> (Wildc.=*): </span>';
-            }
-            elseif($currentregexmode=='r') {
+            } elseif ($currentregexmode == 'r') {
                 echo '<span style="vertical-align: middle"> RegEx Mode: </span>';
             } else {
                 echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
@@ -526,10 +528,10 @@ if (isset($_REQUEST['chg'])) {
             <select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='/text/archived?page=1&amp;tag2=' + val;}"><?php echo get_archivedtexttag_selectoptions($currenttag2, $currentlang); ?></select>
         </td>
     </tr>
-        <?php if($recno > 0) { ?>
+        <?php if ($recno > 0) { ?>
     <tr>
     <th class="th1" colspan="2" nowrap="nowrap">
-            <?php echo $recno; ?> Text<?php echo ($recno==1?'':'s'); ?>
+            <?php echo $recno; ?> Text<?php echo ($recno == 1 ? '' : 's'); ?>
     </th>
     <th class="th1" colspan="1" nowrap="nowrap">
             <?php makePager($currentpage, $pages, '/text/archived', 'form1'); ?>
@@ -544,7 +546,7 @@ if (isset($_REQUEST['chg'])) {
 </form>
 
     <?php
-    if ($recno==0) {
+    if ($recno == 0) {
         ?>
 <p>No archived texts found.</p>
         <?php
@@ -644,7 +646,7 @@ if (isset($_REQUEST['chg'])) {
             }
             if (isset($record['AtSourceURI'])) {
                 echo ' <a href="' . $record['AtSourceURI'] . '" target="_blank">
-                <img src="'.get_file_path('assets/icons/chain.png') .
+                <img src="' . get_file_path('assets/icons/chain.png') .
                 '" title="Link to Text Source" alt="Link to Text Source" /></a>';
             }
             if ($record['annotlen']) {
@@ -659,11 +661,11 @@ if (isset($_REQUEST['chg'])) {
 </table>
 
 
-        <?php if($pages > 1) { ?>
+        <?php if ($pages > 1) { ?>
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr>
         <th class="th1" nowrap="nowrap">
-            <?php echo $recno; ?> Text<?php echo ($recno==1?'':'s'); ?>
+            <?php echo $recno; ?> Text<?php echo ($recno == 1 ? '' : 's'); ?>
         </th>
         <th class="th1" nowrap="nowrap">
             <?php makePager($currentpage, $pages, '/text/archived', 'form2'); ?>

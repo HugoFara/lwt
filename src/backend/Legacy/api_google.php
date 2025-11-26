@@ -15,6 +15,7 @@
  * @since   1.6.0
  * @since   2.7.0 Refactored with functional paradigm
  */
+
 namespace Lwt\Interface;
 
 require_once 'Core/session_utility.php';
@@ -86,7 +87,7 @@ function translate_term($text, $file, $sl, $tl): void
     });
 </script>
     <?php
-    foreach ($file as $word){
+    foreach ($file as $word) {
         echo '<span class="click" onclick="addTranslation(' .
         prepare_textdata_js($word) . ');">' .
         '<img src="/assets/icons/tick-button.png" title="Copy" alt="Copy" /> &nbsp; ' .
@@ -122,7 +123,10 @@ function translate_term($text, $file, $sl, $tl): void
 function translate_text($text, $sl, $tl, $sentence_mode): void
 {
     $file = GoogleTranslate::staticTranslate(
-        $text, $sl, $tl, getGoogleTimeToken()
+        $text,
+        $sl,
+        $tl,
+        getGoogleTimeToken()
     );
 
     if ($file === false) {

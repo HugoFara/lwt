@@ -46,7 +46,7 @@ function getLanguage($lid)
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (is_int($lid)) {
         $lg_id = $lid;
-    } else if (isset($lid) && trim($lid) != '' && ctype_digit($lid)) {
+    } elseif (isset($lid) && trim($lid) != '' && ctype_digit($lid)) {
         $lg_id = (int) $lid;
     } else {
         return '';

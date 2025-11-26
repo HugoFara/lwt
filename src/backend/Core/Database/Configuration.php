@@ -204,10 +204,11 @@ class Configuration
                 );
             }
             for ($i = 0; $i < $len_tbpref; $i++) {
-                if (strpos(
-                    "_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-                    substr($tbpref, $i, 1)
-                ) === false
+                if (
+                    strpos(
+                        "_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                        substr($tbpref, $i, 1)
+                    ) === false
                 ) {
                     my_die(
                         'Table prefix/set "' . $tbpref .

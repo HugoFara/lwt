@@ -36,7 +36,7 @@ function sentences_containing_word_lc_query($wordlc, $lid): string
     $record = mysqli_fetch_assoc($res);
     mysqli_free_result($res);
     $removeSpaces = $record["LgRemoveSpaces"];
-    if ('MECAB'== strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
+    if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
         $mecab_file = sys_get_temp_dir() . "/" . $tbpref . "mecab_to_db.txt";
         //$mecab_args = ' -F {%m%t\\t -U {%m%t\\t -E \\n ';
         // For instance, "このラーメン" becomes "この    6    68\nラーメン    7    38"
@@ -109,7 +109,7 @@ function sentences_containing_word_lc_query($wordlc, $lid): string
  *
  * @return mysqli_result|false Query result or false on failure
  */
-function sentences_from_word($wid, $wordlc, $lid, $limit=-1): \mysqli_result|false
+function sentences_from_word($wid, $wordlc, $lid, $limit = -1): \mysqli_result|false
 {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     if (empty($wid)) {
@@ -118,7 +118,7 @@ function sentences_from_word($wid, $wordlc, $lid, $limit=-1): \mysqli_result|fal
         WHERE LOWER(Ti2Text) = " . convert_string_to_sqlsyntax($wordlc) . "
         AND Ti2WoID = 0 AND SeID = Ti2SeID AND SeLgID = $lid
         ORDER BY CHAR_LENGTH(SeText), SeText";
-    } else if ($wid == -1) {
+    } elseif ($wid == -1) {
         $sql = sentences_containing_word_lc_query($wordlc, $lid);
     } else {
         $sql
@@ -164,8 +164,9 @@ function getSentence($seid, $wordlc, $mode): array
     $removeSpaces = (int)$record["LgRemoveSpaces"] == 1;
     $splitEachChar = (int)$record['LgSplitEachChar'] != 0;
     $txtid = $record["SeTxID"];
-    if (($removeSpaces && !$splitEachChar)
-        || 'MECAB'== strtoupper(trim((string) $record["LgRegexpWordCharacters"]))
+    if (
+        ($removeSpaces && !$splitEachChar)
+        || 'MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))
     ) {
         $text = $record["SeText"];
         $wordlc = '[​]*' . preg_replace('/(.)/u', "$1[​]*", $wordlc);
@@ -266,7 +267,7 @@ function getSentence($seid, $wordlc, $mode): array
  *
  * @psalm-return list{0?: array{0: string, 1: string},...}
  */
-function sentences_with_word($lang, $wordlc, $wid, $mode=0, $limit=20): array
+function sentences_with_word($lang, $wordlc, $wid, $mode = 0, $limit = 20): array
 {
     $r = array();
     $res = sentences_from_word($wid, $wordlc, $lang, $limit);

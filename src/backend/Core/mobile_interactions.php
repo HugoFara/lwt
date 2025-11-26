@@ -1,4 +1,5 @@
 <?php
+
 /**
  * \file
  * \brief Handle interactions with mobile platforms
@@ -123,7 +124,7 @@ function do_frameset_mobile_css()
  *
  * @deprecated Since 2.2.1-fork, we do no longer use frameset
  */
-function do_frameset_mobile_js($audio=null)
+function do_frameset_mobile_js($audio = null)
 {
 
     ?>
@@ -175,7 +176,6 @@ function do_frameset_mobile_js($audio=null)
     </script>
 
     <?php
-
 }
 
 ?>

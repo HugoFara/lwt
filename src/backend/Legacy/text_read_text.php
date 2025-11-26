@@ -143,7 +143,6 @@ function echo_term(
         }
 
         if (isset($record['WoID'])) {
-
             $attributes = array(
             'id' => $spanid,
             'class' => implode(
@@ -531,7 +530,8 @@ function main_word_loop($textid, $showAll): void
             (int) $record['Ti2Order'] + ((int)$record['Code'] - 1) * 2
         );
         if ($showAll) {
-            if (isset($record['WoID'])
+            if (
+                isset($record['WoID'])
                 && !array_key_exists((int) $record['WoID'], $hidden_items) // !$hide
             ) {
                 $hidden_items[(int) $record['WoID']] = (int) $record['Ti2Order']
@@ -626,7 +626,7 @@ function do_text_text_style($showLearning, $mode_trans, $textsize, $ann_exists):
         vertical-align: -25%;'),
     '}';
 
-    echo '.hide {'.
+    echo '.hide {' .
         'display:none !important;
     }';
     echo '.tword:',

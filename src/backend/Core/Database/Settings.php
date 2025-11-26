@@ -160,9 +160,10 @@ class Settings
                 ) ENGINE=MyISAM DEFAULT CHARSET=utf8",
                 ''
             );
-            if (mysqli_num_rows(
-                do_mysqli_query("SHOW TABLES LIKE '\\_lwtgeneral'")
-            ) == 0
+            if (
+                mysqli_num_rows(
+                    do_mysqli_query("SHOW TABLES LIKE '\\_lwtgeneral'")
+                ) == 0
             ) {
                 my_die("Unable to create table '_lwtgeneral'!");
             }

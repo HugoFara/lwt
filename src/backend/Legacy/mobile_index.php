@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * \file
  * \brief LWT Mobile
@@ -27,13 +26,11 @@ require_once 'Core/session_utility.php';
 /**************************************************************/
 
 if (isset($_REQUEST["action"])) {  // Action
-
     $action = (int) $_REQUEST["action"]; // Action code
 
     /* -------------------------------------------------------- */
 
     if ($action == 1) {
-
         $lang = $_REQUEST["lang"];
         $langname = getLanguage($lang);
 
@@ -49,13 +46,11 @@ if (isset($_REQUEST["action"])) {  // Action
      </ul>
 
         <?php
-
     } // $action == 1
 
     /* -------------------------------------------------------- */
 
     elseif ($action == 2) {
-
         $lang = $_REQUEST["lang"];
         $langname = getLanguage($lang);
         $sql = 'select TxID, TxTitle from ' . $tbpref . 'texts where TxLgID = ' . $lang .
@@ -79,13 +74,11 @@ if (isset($_REQUEST["action"])) {  // Action
      </ul>
         <?php
         mysqli_free_result($res);
-
     } // $action == 2
 
     /* -------------------------------------------------------- */
 
     elseif ($action == 3) {
-
         $lang = $_REQUEST["lang"];
         $text = $_REQUEST["text"];
         $texttitle = (string) get_first_value(
@@ -106,14 +99,12 @@ if (isset($_REQUEST["action"])) {  // Action
         <?php
 
         if (trim($textaudio) != '') {
-
             ?>
 
         <li class="group">Audio</li>
         <li>Play: <audio src="<?php echo trim($textaudio); ?>" controls></audio></li>
 
             <?php
-
         }
 
         ?>
@@ -138,13 +129,11 @@ if (isset($_REQUEST["action"])) {  // Action
         <?php
 
         mysqli_free_result($res);
-
     } // $action == 3
 
     /* -------------------------------------------------------- */
 
     elseif ($action == 4 || $action == 5) {
-
         $lang = $_REQUEST["lang"];
         $text = $_REQUEST["text"];
         $sent = $_REQUEST["sent"];
@@ -180,7 +169,6 @@ if (isset($_REQUEST["action"])) {  // Action
         <ul id="<?php echo $action . '-' . $sent; ?>" title="<?php echo tohtml($senttext); ?>">
 
             <?php
-
         }
 
         ?>
@@ -200,10 +188,10 @@ if (isset($_REQUEST["action"])) {  // Action
             $actcode = (int)$record['Code'];
             $order = (int)$record['Ti2Order'];
 
-            if ($order <= $until ) {
+            if ($order <= $until) {
                 continue;
             }
-            if ($order > $until ) {
+            if ($order > $until) {
                 if (trim($saveterm) != '') {
                     $desc = trim(($saverom != '' ? '[' . $saverom . '] ' : '') . $savetrans);
                     echo '<li><span class="status' . $savestat . '">' . tohtml($saveterm) . '</span>' .
@@ -217,14 +205,14 @@ if (isset($_REQUEST["action"])) {  // Action
             }
             if ($record['TiIsNotWord'] != 0 && trim((string) $record['TiText']) != '') {
                 echo '<li>' . tohtml($record['TiText']) . '</li>';
-            }
-            else {
-                $until = $order + 2 * ($actcode-1);
+            } else {
+                $until = $order + 2 * ($actcode - 1);
                 $saveterm = (string) $record['TiText'];
                 $savetrans = '';
-                if(isset($record['WoID'])) {
+                if (isset($record['WoID'])) {
                     $savetrans = $record['WoTranslation'];
-                    if ($savetrans == '*') { $savetrans = '';
+                    if ($savetrans == '*') {
+                        $savetrans = '';
                     }
                 }
                 $saverom = trim(
@@ -248,25 +236,20 @@ if (isset($_REQUEST["action"])) {  // Action
         }
 
         if ($action == 4) {
-
             ?>
 
         </ul>
 
             <?php
-
         }
-
     } // $action == 4 / 5
 
     /* -------------------------------------------------------- */
-
 } // isset($_REQUEST["action"])
 
 /**************************************************************/
 
 else {  // No Action = Start screen
-
     ?>
 <html>
 <head>
@@ -339,7 +322,6 @@ This is "Learning With Texts" (LWT) for Mobile Devices<br />Version <?php echo g
 </html>
 
     <?php
-
 } // No Action = Start screen
 
 ?>

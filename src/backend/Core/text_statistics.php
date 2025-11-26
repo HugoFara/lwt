@@ -40,13 +40,13 @@ function return_textwordcount($texts_id): array
 
     $r = array(
         // Total for text
-        'total'=> array(),
-        'expr'=> array(),
-        'stat'=> array(),
+        'total' => array(),
+        'expr' => array(),
+        'stat' => array(),
         // Unique words
         'totalu' => array(),
         'expru' => array(),
-        'statu'=> array()
+        'statu' => array()
     );
     $res = do_mysqli_query(
         "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS value,
@@ -167,7 +167,8 @@ function todo_words_content($textid): string
             $dict = "http://" . $dict;
         }
         parse_str(parse_url($dict, PHP_URL_QUERY), $url_query);
-        if (array_key_exists('lwt_translator', $url_query)
+        if (
+            array_key_exists('lwt_translator', $url_query)
             && $url_query['lwt_translator'] == "libretranslate"
         ) {
             $tl = $url_query['target'];

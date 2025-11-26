@@ -103,7 +103,6 @@ function do_diplay_impr_text_text_js()
 </script>
 
     <?php
-
 }
 
 /**

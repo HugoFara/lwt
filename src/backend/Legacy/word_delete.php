@@ -132,7 +132,6 @@ function delete_word_page_content($tid, $wid, $term, $m1)
     echo "<p>OK, term deleted, now unknown (" . $m1 . ").</p>";
     delete_word_javascript($wid, $tid);
     pageend();
-
 }
 
 /**

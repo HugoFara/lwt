@@ -18,7 +18,7 @@ require_once 'Core/session_utility.php';
 require_once 'Core/simterms.php';
 
 $translation_raw = repl_tab_nl(getreq("WoTranslation"));
-if ($translation_raw == '' ) {
+if ($translation_raw == '') {
     $translation = '*';
 } else {
     $translation = $translation_raw;
@@ -35,16 +35,13 @@ $term = null;
 $transl = null;
 $wid = null;
 if (isset($_REQUEST['op'])) {
-
     $textlc = trim(prepare_textdata($_REQUEST["WoTextLC"]));
     $text = trim(prepare_textdata($_REQUEST["WoText"]));
 
     if (mb_strtolower($text, 'UTF-8') == $textlc) {
-
         // UPDATE
 
         if ($_REQUEST['op'] == 'Change') {
-
             $titletext = "Edit Term: " . tohtml(prepare_textdata($_REQUEST["WoTextLC"]));
             pagestart_nobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
@@ -69,7 +66,6 @@ if (isset($_REQUEST['op'])) {
             );
             $wid = (int)$_REQUEST["WoID"];
             saveWordTags($wid);
-
         }
     } else {
         $titletext = "New/Edit Term: " . tohtml(prepare_textdata($_REQUEST["WoTextLC"]));
@@ -97,8 +93,11 @@ if (isset($_REQUEST['op'])) {
     }
     $sent = tohtml(repl_tab_nl($_REQUEST["WoSentence"]));
     $sent1 = str_replace(
-        "{", ' <b>[', str_replace(
-            "}", ']</b> ',
+        "{",
+        ' <b>[',
+        str_replace(
+            "}",
+            ']</b> ',
             mask_term_in_sentence($sent, $regexword)
         )
     );
@@ -129,16 +128,15 @@ cleanupRightFrames();
 </script>
 
     <?php
-
 } // if (isset($_REQUEST['op']))
 
 // FORM
 
 else {  // if (! isset($_REQUEST['op']))
-
     $wid = getreq('wid');
 
-    if ($wid == '') { my_die("Term ID missing in edit_tword.php");
+    if ($wid == '') {
+        my_die("Term ID missing in edit_tword.php");
     }
 
     $sql = 'select WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus from ' . $tbpref . 'words where WoID = ' . $wid;
@@ -148,8 +146,8 @@ else {  // if (! isset($_REQUEST['op']))
         $term = (string) $record['WoText'];
         $lang = (int) $record['WoLgID'];
         $transl = repl_tab_nl($record['WoTranslation']);
-        if($transl == '*') {
-            $transl='';
+        if ($transl == '*') {
+            $transl = '';
         }
         $sentence = repl_tab_nl($record['WoSentence']);
         $rom = $record['WoRomanization'];
