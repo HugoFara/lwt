@@ -1,0 +1,67 @@
+/**
+ * AJAX Utilities - Common AJAX operations and settings
+ *
+ * @license unlicense
+ * @author  andreask7 <andreasks7@users.noreply.github.com>
+ * @since   1.6.16-fork
+ */
+
+import $ from 'jquery';
+
+/**
+ * Save a setting to the database.
+ *
+ * @param k Setting name as a key
+ * @param v Setting value
+ */
+export function do_ajax_save_setting(k: string, v: string): void {
+  $.post(
+    'api.php/v1/settings',
+    {
+      key: k,
+      value: v
+    }
+  );
+}
+
+/**
+ * Force the user scrolling to an anchor.
+ *
+ * @param aid Anchor ID
+ */
+export function scrollToAnchor(aid: string): void {
+  document.location.href = '#' + aid;
+}
+
+/**
+ * Extract position number from an HTML element ID string.
+ *
+ * @param id_string HTML element ID containing position information (e.g., "ID-3-42")
+ * @returns Position number extracted from the ID, or -1 if undefined/invalid
+ */
+export function get_position_from_id(id_string: string): number {
+  if (typeof id_string === 'undefined') return -1;
+  const arr = id_string.split('-');
+  return parseInt(arr[1], 10) * 10 + 10 - parseInt(arr[2], 10);
+}
+
+/**
+ * Assign the display value of a select element to the value element of another input.
+ *
+ * @param select_elem
+ * @param input_elem
+ */
+export function quick_select_to_input(select_elem: HTMLSelectElement, input_elem: HTMLInputElement): void {
+  const val = select_elem.options[select_elem.selectedIndex].value;
+  if (val !== '') { input_elem.value = val; }
+  select_elem.value = '';
+}
+
+// Expose globally for backward compatibility with PHP templates
+if (typeof window !== 'undefined') {
+  const w = window as unknown as Record<string, unknown>;
+  w.do_ajax_save_setting = do_ajax_save_setting;
+  w.scrollToAnchor = scrollToAnchor;
+  w.get_position_from_id = get_position_from_id;
+  w.quick_select_to_input = quick_select_to_input;
+}
