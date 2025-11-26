@@ -13,11 +13,11 @@
  * PHP version 8.1
  *
  * @category User_Interface
- * @package Lwt
- * @author  LWT Project <lwt-project@hotmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/backup-restore.html
- * @since   1.0.3
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/backup-restore.html
+ * @since    1.0.3
  */
 
 require_once 'Core/session_utility.php';
@@ -135,8 +135,8 @@ if (isset($_REQUEST['restore'])) {
         $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
 
         switch($table) {
-            case 'archivedtexts':
-                $out .= "CREATE TABLE `archivedtexts` (
+        case 'archivedtexts':
+            $out .= "CREATE TABLE `archivedtexts` (
                 `AtID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `AtLgID` int(11) unsigned NOT NULL,
                 `AtTitle` varchar(200) NOT NULL,
@@ -147,18 +147,18 @@ if (isset($_REQUEST['restore'])) {
                 PRIMARY KEY (`AtID`),
                 KEY `AtLgID` (`AtLgID`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'archtexttags':
-                $out .= "CREATE TABLE `archtexttags` (
+            break;
+        case 'archtexttags':
+            $out .= "CREATE TABLE `archtexttags` (
                 `AgAtID` int(11) unsigned NOT NULL,
                 `AgT2ID` int(11) unsigned NOT NULL,
                 PRIMARY KEY (`AgAtID`,`AgT2ID`),
                 KEY `AgAtID` (`AgAtID`),
                 KEY `AgT2ID` (`AgT2ID`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'languages':
-                $out .= "CREATE TABLE `languages` (
+            break;
+        case 'languages':
+            $out .= "CREATE TABLE `languages` (
                 `LgID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `LgName` varchar(40) NOT NULL,
                 `LgDict1URI` varchar(200) NOT NULL,
@@ -176,9 +176,9 @@ if (isset($_REQUEST['restore'])) {
                 PRIMARY KEY (`LgID`),
                 UNIQUE KEY `LgName` (`LgName`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'sentences':
-                $out .= "CREATE TABLE `sentences` (
+            break;
+        case 'sentences':
+            $out .= "CREATE TABLE `sentences` (
                 `SeID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `SeLgID` int(11) unsigned NOT NULL,
                 `SeTxID` int(11) unsigned NOT NULL,
@@ -189,34 +189,34 @@ if (isset($_REQUEST['restore'])) {
                 KEY `SeTxID` (`SeTxID`),
                 KEY `SeOrder` (`SeOrder`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'settings':
-                $out .= "CREATE TABLE `settings` (
+            break;
+        case 'settings':
+            $out .= "CREATE TABLE `settings` (
                 `StKey` varchar(40) NOT NULL,
                 `StValue` varchar(40) DEFAULT NULL,
                 PRIMARY KEY (`StKey`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'tags':
-                $out .= "CREATE TABLE `tags` (
+            break;
+        case 'tags':
+            $out .= "CREATE TABLE `tags` (
                 `TgID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `TgText` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
                 `TgComment` varchar(200) NOT NULL DEFAULT '',
                 PRIMARY KEY (`TgID`),
                 UNIQUE KEY `TgText` (`TgText`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'tags2':
-                $out .= "CREATE TABLE `tags2` (
+            break;
+        case 'tags2':
+            $out .= "CREATE TABLE `tags2` (
                 `T2ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `T2Text` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
                 `T2Comment` varchar(200) NOT NULL DEFAULT '',
                 PRIMARY KEY (`T2ID`),
                 UNIQUE KEY `T2Text` (`T2Text`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'textitems':
-                $out .= "CREATE TABLE `textitems` (
+            break;
+        case 'textitems':
+            $out .= "CREATE TABLE `textitems` (
                 `TiID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `TiLgID` int(11) unsigned NOT NULL,
                 `TiTxID` int(11) unsigned NOT NULL,
@@ -234,9 +234,9 @@ if (isset($_REQUEST['restore'])) {
                 KEY `TiTextLC` (`TiTextLC`),
                 KEY `TiIsNotWord` (`TiIsNotWord`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'texts':
-                $out .= "CREATE TABLE `texts` (
+            break;
+        case 'texts':
+            $out .= "CREATE TABLE `texts` (
                 `TxID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `TxLgID` int(11) unsigned NOT NULL,
                 `TxTitle` varchar(200) NOT NULL,
@@ -247,18 +247,18 @@ if (isset($_REQUEST['restore'])) {
                 PRIMARY KEY (`TxID`),
                 KEY `TxLgID` (`TxLgID`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'texttags':
-                $out .= "CREATE TABLE `texttags` (
+            break;
+        case 'texttags':
+            $out .= "CREATE TABLE `texttags` (
                 `TtTxID` int(11) unsigned NOT NULL,
                 `TtT2ID` int(11) unsigned NOT NULL,
                 PRIMARY KEY (`TtTxID`,`TtT2ID`),
                 KEY `TtTxID` (`TtTxID`),
                 KEY `TtT2ID` (`TtT2ID`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'words':
-                $out .= "CREATE TABLE `words` (
+            break;
+        case 'words':
+            $out .= "CREATE TABLE `words` (
                 `WoID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `WoLgID` int(11) unsigned NOT NULL,
                 `WoText` varchar(250) NOT NULL,
@@ -284,16 +284,16 @@ if (isset($_REQUEST['restore'])) {
                 KEY `WoTomorrowScore` (`WoTomorrowScore`),
                 KEY `WoRandom` (`WoRandom`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
-            case 'wordtags':
-                $out .= "CREATE TABLE `wordtags` (
+            break;
+        case 'wordtags':
+            $out .= "CREATE TABLE `wordtags` (
                 `WtWoID` int(11) unsigned NOT NULL,
                 `WtTgID` int(11) unsigned NOT NULL,
                 PRIMARY KEY (`WtWoID`,`WtTgID`),
                 KEY `WtTgID` (`WtTgID`),
                 KEY `WtWoID` (`WtWoID`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\n";
-                break;
+            break;
         }
 
         if ($table !== 'sentences' && $table !== 'textitems' && $table !== 'settings'

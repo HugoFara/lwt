@@ -17,9 +17,9 @@ class Router
     /**
      * Register a route
      *
-     * @param string $path The URL path
+     * @param string $path    The URL path
      * @param string $handler The handler (file path or controller@method)
-     * @param string $method HTTP method (GET, POST, or *)
+     * @param string $method  HTTP method (GET, POST, or *)
      */
     public function register(string $path, string $handler, string $method = '*'): void
     {
@@ -29,9 +29,9 @@ class Router
     /**
      * Register a prefix route (matches all paths starting with the prefix)
      *
-     * @param string $prefix The URL prefix (e.g., '/api/v1')
+     * @param string $prefix  The URL prefix (e.g., '/api/v1')
      * @param string $handler The handler (file path or controller@method)
-     * @param string $method HTTP method (GET, POST, or *)
+     * @param string $method  HTTP method (GET, POST, or *)
      */
     public function registerPrefix(string $prefix, string $handler, string $method = '*'): void
     {
@@ -42,7 +42,7 @@ class Router
      * Register a legacy file mapping for backward compatibility
      *
      * @param string $legacyFile Old filename (e.g., 'do_text.php')
-     * @param string $newPath New route path (e.g., '/text/read')
+     * @param string $newPath    New route path (e.g., '/text/read')
      */
     public function registerLegacy(string $legacyFile, string $newPath): void
     {
@@ -173,7 +173,7 @@ class Router
     /**
      * Convert route pattern to regex
      *
-     * @param string $pattern Route pattern (e.g., '/text/{id}')
+     * @param  string $pattern Route pattern (e.g., '/text/{id}')
      * @return string Regex pattern
      */
     private function convertPatternToRegex(string $pattern): string
@@ -190,34 +190,34 @@ class Router
     /**
      * Execute the resolved handler
      *
-     * @param array $resolution Result from resolve()
+     * @param  array $resolution Result from resolve()
      * @return void
      */
     public function execute(array $resolution): void
     {
         switch ($resolution['type']) {
-            case 'redirect':
-                header("Location: {$resolution['url']}", true, $resolution['code']);
-                exit;
+        case 'redirect':
+            header("Location: {$resolution['url']}", true, $resolution['code']);
+            exit;
 
-            case 'handler':
-                $this->executeHandler($resolution['handler'], $resolution['params']);
-                break;
+        case 'handler':
+            $this->executeHandler($resolution['handler'], $resolution['params']);
+            break;
 
-            case 'not_found':
-                $this->handle404($resolution['path']);
-                break;
+        case 'not_found':
+            $this->handle404($resolution['path']);
+            break;
 
-            default:
-                $this->handle500("Unknown resolution type: {$resolution['type']}");
+        default:
+            $this->handle500("Unknown resolution type: {$resolution['type']}");
         }
     }
 
     /**
      * Execute a handler (file include or controller method)
      *
-     * @param string $handler Handler string
-     * @param array $params Request parameters
+     * @param  string $handler Handler string
+     * @param  array  $params  Request parameters
      * @return void
      */
     private function executeHandler(string $handler, array $params): void
@@ -235,9 +235,9 @@ class Router
     /**
      * Execute a controller method
      *
-     * @param string $controllerClass Controller class name
-     * @param string $method Method name
-     * @param array $params Parameters
+     * @param  string $controllerClass Controller class name
+     * @param  string $method          Method name
+     * @param  array  $params          Parameters
      * @return void
      */
     private function executeController(string $controllerClass, string $method, array $params): void
@@ -266,8 +266,8 @@ class Router
     /**
      * Execute a legacy file
      *
-     * @param string $filePath Path to PHP file or static file
-     * @param array $params Parameters (made available to included file)
+     * @param  string $filePath Path to PHP file or static file
+     * @param  array  $params   Parameters (made available to included file)
      * @return void
      */
     private function executeFile(string $filePath, array $params): void
@@ -294,7 +294,7 @@ class Router
     /**
      * Handle 404 Not Found
      *
-     * @param string $path Requested path
+     * @param  string $path Requested path
      * @return void
      */
     private function handle404(string $path): void
@@ -328,7 +328,7 @@ class Router
     /**
      * Handle 500 Internal Server Error
      *
-     * @param string $message Error message
+     * @param  string $message Error message
      * @return void
      */
     private function handle500(string $message): void

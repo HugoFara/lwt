@@ -173,9 +173,9 @@ abstract class BaseController
     /**
      * Execute an INSERT/UPDATE/DELETE query with message.
      *
-     * @param string $sql      SQL query
-     * @param string $message  Success message
-     * @param bool   $errDie   Whether to die on error (default: true)
+     * @param string $sql     SQL query
+     * @param string $message Success message
+     * @param bool   $errDie  Whether to die on error (default: true)
      *
      * @return string Result message with affected row count
      */
@@ -266,9 +266,9 @@ abstract class BaseController
     /**
      * Process a session parameter using LWT utility.
      *
-     * @param string $reqKey   Request parameter key
-     * @param string $sessKey  Session key
-     * @param mixed  $default  Default value
+     * @param string $reqKey    Request parameter key
+     * @param string $sessKey   Session key
+     * @param mixed  $default   Default value
      * @param bool   $isNumeric Whether the value is numeric
      *
      * @return mixed The processed value
@@ -285,9 +285,9 @@ abstract class BaseController
     /**
      * Process a database setting parameter using LWT utility.
      *
-     * @param string $reqKey   Request parameter key
-     * @param string $dbKey    Database setting key
-     * @param mixed  $default  Default value
+     * @param string $reqKey    Request parameter key
+     * @param string $dbKey     Database setting key
+     * @param mixed  $default   Default value
      * @param bool   $isNumeric Whether the value is numeric
      *
      * @return mixed The processed value

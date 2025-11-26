@@ -686,7 +686,6 @@ function createTheDictLink($u, $t)
  *                          first
  *
  * @return string HTML-formatted interface
- *
  */
 function createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst): string
 {
@@ -835,7 +834,6 @@ function makeOpenDictStrDynSent($url, $sentctljs, $txt): string
  * @param string $wordctljs
  *
  * @return string HTML formatted interface
- *
  */
 function createDictLinksInEditWin2($lang, $sentctljs, $wordctljs): string
 {

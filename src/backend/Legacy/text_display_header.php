@@ -143,7 +143,7 @@ function do_diplay_impr_text_header_content($title, $textid, $audio, $sourceURI)
             </a>';
         }
         echo $text_links;
-    ?>
+        ?>
     </div>
     <div>
         <img class="click" src="/assets/icons/cross.png" title="Close Window" alt="Close Window" onclick="top.close();" />

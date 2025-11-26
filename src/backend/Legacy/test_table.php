@@ -291,7 +291,7 @@ function do_test_table_row($record, $regexword, $textsize, $span1, $span2): void
                 $record['WoStatus'],
                 $record['WoID']
             );
-    ?>
+            ?>
         </span>
     </td>
     <td class="td1 center" style="font-size:<?php echo $textsize; ?>%;">

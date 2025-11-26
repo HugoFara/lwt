@@ -7,8 +7,8 @@
  * PHP version 8.1
  *
  * @package Lwt
- * @author LWT Project <lwt-project@hotmail.com>
- * @since 2.9.1 Use LWT_LANGUAGES_ARRAY instead of $langDefs
+ * @author  LWT Project <lwt-project@hotmail.com>
+ * @since   2.9.1 Use LWT_LANGUAGES_ARRAY instead of $langDefs
  */
 
 /**

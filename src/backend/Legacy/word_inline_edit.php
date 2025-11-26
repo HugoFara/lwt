@@ -5,7 +5,6 @@
  *  ...
  *
  * PHP version 8.1
- *
  */
 
 require_once 'Core/session_utility.php';

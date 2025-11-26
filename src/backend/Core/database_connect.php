@@ -504,9 +504,9 @@ function check_text_valid($lid)
 /**
  * Append sentences and text items in the database.
  *
- * @param int    $tid          ID of text from which insert data
- * @param int    $lid          ID of the language of the text
- * @param bool   $hasmultiword Set to true to insert multi-words as well.
+ * @param int  $tid          ID of text from which insert data
+ * @param int  $lid          ID of the language of the text
+ * @param bool $hasmultiword Set to true to insert multi-words as well.
  *
  * @return void
  *
@@ -889,7 +889,7 @@ global $DB_SERVER, $DB_USERID, $DB_PASSWD, $DB_NAME, $DB_SOCKET;
 /**
  *
  * @deprecated 3.0.0 Use LWT_Globals::getDbConnection() instead
- * @see LWT_Globals::getDbConnection()
+ * @see        LWT_Globals::getDbConnection()
  */
 $DBCONNECTION = connect_to_database(
     $DB_SERVER,
@@ -905,14 +905,14 @@ LWT_Globals::setDbConnection($DBCONNECTION);
  * @var string $tbpref Database table prefix
  *
  * @deprecated 3.0.0 Use LWT_Globals::getTablePrefix() instead
- * @see LWT_Globals::getTablePrefix()
+ * @see        LWT_Globals::getTablePrefix()
  */
 $tbpref = null;
 /**
  * @var int $fixed_tbpref Database prefix is fixed (1) or not (0)
  *
  * @deprecated 3.0.0 Use LWT_Globals::isTablePrefixFixed() instead
- * @see LWT_Globals::isTablePrefixFixed()
+ * @see        LWT_Globals::isTablePrefixFixed()
  */
 $fixed_tbpref = null;
 list($tbpref, $bool_fixed_tbpref) = getDatabasePrefix($DBCONNECTION);

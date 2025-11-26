@@ -11,7 +11,7 @@
  * PHP version 8.1
  *
  * @category Helper_Frame
- * @package Lwt
+ * @package  Lwt
  */
 
 require_once 'Core/session_utility.php';

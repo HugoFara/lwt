@@ -393,7 +393,6 @@ function quickMenu(): void
  *
  * @param string $title  Title of the page
  * @param string $addcss Some CSS to be embed in a style tag
- *
  */
 function pagestart_kernel_nobody($title, $addcss=''): void
 {

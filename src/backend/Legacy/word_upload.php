@@ -37,8 +37,7 @@ function my_str_getcsv($input)
 
 function upload_words_import_simple(
     $lang, $fields, $columns, $tabs, $file_name, $status
-): void
-{
+): void {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $removeSpaces = get_first_value(
         "SELECT LgRemoveSpaces AS value FROM {$tbpref}languages WHERE LgID=$lang"
@@ -119,8 +118,7 @@ function upload_words_import_simple(
 
 function upload_words_import_complete(
     $lang, $fields, $columns, $tabs, $file_name, $status, $overwrite
-): void
-{
+): void {
     $tbpref = \Lwt\Core\LWT_Globals::getTablePrefix();
     $removeSpaces = get_first_value(
         "SELECT LgRemoveSpaces AS value FROM {$tbpref}languages WHERE LgID=$lang"

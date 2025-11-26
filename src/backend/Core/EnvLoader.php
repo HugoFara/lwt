@@ -91,9 +91,8 @@ class EnvLoader
             $value = trim(substr($line, $pos + 1));
 
             // Remove surrounding quotes if present
-            if (
-                (str_starts_with($value, '"') && str_ends_with($value, '"')) ||
-                (str_starts_with($value, "'") && str_ends_with($value, "'"))
+            if ((str_starts_with($value, '"') && str_ends_with($value, '"')) 
+                || (str_starts_with($value, "'") && str_ends_with($value, "'"))
             ) {
                 $value = substr($value, 1, -1);
             }

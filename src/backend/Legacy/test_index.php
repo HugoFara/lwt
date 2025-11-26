@@ -13,11 +13,11 @@
  * PHP version 8.1
  *
  * @category User_Interface
- * @package Lwt
- * @author  LWT Project <lwt-project@hotmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/do-test.html
- * @since   1.0.3
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/do-test.html
+ * @since    1.0.3
  */
 
 require_once 'Core/session_utility.php';
@@ -131,23 +131,23 @@ function do_test_mobile_page($property = null)
     <div id="frame-h">
         <?php
         start_test_header_page($language);
-    ?>
+        ?>
     </div>
     <hr />
     <div id="frame-l">
         <?php
-    if (getreq('type') == 'table') {
-        do_test_table();
-    } else {
-        $identifier = do_test_get_identifier(
-            $_REQUEST['selection'] ?? null,
-            $_SESSION['testsql'] ?? null,
-            $_REQUEST['lang'] ?? null,
-            $_REQUEST['text'] ?? null
-        );
-        do_test_test_content_ajax($identifier[0], $identifier[1]);
-    }
-    ?>
+        if (getreq('type') == 'table') {
+            do_test_table();
+        } else {
+            $identifier = do_test_get_identifier(
+                $_REQUEST['selection'] ?? null,
+                $_SESSION['testsql'] ?? null,
+                $_REQUEST['lang'] ?? null,
+                $_REQUEST['text'] ?? null
+            );
+            do_test_test_content_ajax($identifier[0], $identifier[1]);
+        }
+        ?>
     </div>
 </div>
 <div id="frames-r"
@@ -190,23 +190,23 @@ function do_test_desktop_page($property = null)
     <div id="frame-h">
         <?php
         start_test_header_page($language);
-    ?>
+        ?>
     </div>
     <hr />
     <div id="frame-l">
         <?php
-    if (getreq('type') == 'table') {
-        do_test_table();
-    } else {
-        $identifier = do_test_get_identifier(
-            $_REQUEST['selection'] ?? null,
-            $_SESSION['testsql'] ?? null,
-            $_REQUEST['lang'] ?? null,
-            $_REQUEST['text'] ?? null
-        );
-        do_test_test_content_ajax($identifier[0], $identifier[1]);
-    }
-    ?>
+        if (getreq('type') == 'table') {
+            do_test_table();
+        } else {
+            $identifier = do_test_get_identifier(
+                $_REQUEST['selection'] ?? null,
+                $_SESSION['testsql'] ?? null,
+                $_REQUEST['lang'] ?? null,
+                $_REQUEST['text'] ?? null
+            );
+            do_test_test_content_ajax($identifier[0], $identifier[1]);
+        }
+        ?>
     </div>
 </div>
 <div id="frames-r"

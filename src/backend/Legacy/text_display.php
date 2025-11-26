@@ -9,11 +9,11 @@
  * PHP version 8.1
  *
  * @category User_Interface
- * @package Lwt
- * @author  LWT Project <lwt-project@hotmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/display-impr-text.html
- * @since   1.5.0
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/display-impr-text.html
+ * @since    1.5.0
  */
 
 require_once 'Core/session_utility.php';

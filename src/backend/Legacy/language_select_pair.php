@@ -9,9 +9,9 @@
  * PHP version 8.1
  *
  * @category Helper_Frame
- * @package Lwt
- * @author https://sourceforge.net/projects/lwt/ LWT Project
- * @since  1.5.11
+ * @package  Lwt
+ * @author   https://sourceforge.net/projects/lwt/ LWT Project
+ * @since    1.5.11
  */
 
 require_once 'Core/session_utility.php';

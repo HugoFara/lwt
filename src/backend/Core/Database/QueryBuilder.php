@@ -190,10 +190,10 @@ class QueryBuilder
     /**
      * Add a WHERE IN clause.
      *
-     * @param string       $column The column name
-     * @param array<mixed> $values The values to check against
+     * @param string       $column  The column name
+     * @param array<mixed> $values  The values to check against
      * @param string       $boolean The boolean connector
-     * @param bool         $not    Whether to use NOT IN
+     * @param bool         $not     Whether to use NOT IN
      *
      * @return self
      */

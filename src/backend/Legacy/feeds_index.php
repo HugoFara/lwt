@@ -6,11 +6,11 @@
  * PHP version 8.1
  *
  * @category User_Interface
- * @package Lwt
- * @author  andreask7 <andreask7@users.noreply.github.com>
- * @license Unlicense <http://unlicense.org/>
- * @since   1.6.0-fork
- * @since   2.7.1-fork Functional refactoring
+ * @package  Lwt
+ * @author   andreask7 <andreask7@users.noreply.github.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @since    1.6.0-fork
+ * @since    2.7.1-fork Functional refactoring
  */
 
 namespace Lwt\Interface\Do_Feeds;
@@ -114,7 +114,7 @@ function dummy_function_1(): array
         <td class="td1 right">Text:</td>
         <td class="td1">
             <textarea
-            <?php echo getScriptDirectionTag((int) $row['NfLgID']); ?>
+                <?php echo getScriptDirectionTag((int) $row['NfLgID']); ?>
             name="feed[<?php echo $count; ?>][TxText]" class="notempty checkbytes"
             cols="60" rows="20"
             ><?php echo tohtml($text['TxText']); ?></textarea>
@@ -606,7 +606,7 @@ function dummy_function_2($currentlang, $currentfeed): void
                         echo '</td>
             <td class="td1 center">
             <span title="' . htmlentities((string) $row['FlDescription'], ENT_QUOTES, 'UTF-8', false) . '"><b>' .
-            $row['FlTitle'] . '</b></span>';
+                        $row['FlTitle'] . '</b></span>';
                         if ($row['FlAudio']) {
                             echo '<a href="' . $row['FlAudio'] .
                             '" onclick="window.open(this.href, \'child\', \'scrollbars,width=650,height=600\'); return false;">
@@ -614,9 +614,8 @@ function dummy_function_2($currentlang, $currentfeed): void
                         }
                         echo '</td>
             <td class="td1 center" style="vertical-align: middle">';
-                        if (
-                            !empty($row['FlLink']) &&
-                            !str_starts_with(trim((string) $row['FlLink']), '#')
+                        if (!empty($row['FlLink']) 
+                            && !str_starts_with(trim((string) $row['FlLink']), '#')
                         ) {
                             echo '<a href="' . trim((string) $row['FlLink']) . '"  title="' .
                             trim((string) $row['FlLink']) . '" onclick="window.open(\'' .

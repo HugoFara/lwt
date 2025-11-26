@@ -48,10 +48,10 @@ function translate_sentence($text, $translation): void
 /**
  * Translate input text using Google Translate.
  *
- * @param string $text   Text to translate
- * @param array  $file   Array of translated terms
- * @param string $sl     Source language (e. g. "es")
- * @param string $tl     Target language (e. g. "en")
+ * @param string $text Text to translate
+ * @param array  $file Array of translated terms
+ * @param string $sl   Source language (e. g. "es")
+ * @param string $tl   Target language (e. g. "en")
  *
  * @return void
  */
@@ -112,10 +112,10 @@ function translate_term($text, $file, $sl, $tl): void
 /**
  * Translate input text using Google Translate.
  *
- * @param string $text Text to translate
- * @param string $sl Source language (e. g. "es")
- * @param string $tl Target language (e. g. "en")
- * @param bool $sentence_mode Set to true for full sentence translation
+ * @param string $text          Text to translate
+ * @param string $sl            Source language (e. g. "es")
+ * @param string $tl            Target language (e. g. "en")
+ * @param bool   $sentence_mode Set to true for full sentence translation
  *
  * @return void
  */

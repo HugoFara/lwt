@@ -174,8 +174,8 @@ class Configuration
      * If not: $fixed_tbpref=false. Is it set in table "_lwtgeneral"? Take it.
      * If not: Use $tbpref = '' (no prefix, old/standard behaviour).
      *
-     * @param \mysqli      $dbconnection Database connection
-     * @param string|null  $configuredPrefix Prefix from configuration (or null if not set)
+     * @param \mysqli     $dbconnection     Database connection
+     * @param string|null $configuredPrefix Prefix from configuration (or null if not set)
      *
      * @return array{0: string, 1: bool} Table prefix and whether it's fixed
      */

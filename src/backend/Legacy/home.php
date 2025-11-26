@@ -9,11 +9,11 @@
  * PHP version 8.1
  *
  * @category User_Interface
- * @package Lwt
- * @author  LWT Project <lwt-project@hotmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/index.html
- * @since   1.0.3
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/index.html
+ * @since    1.0.3
  *
  * "Learning with Texts" (LWT) is free and unencumbered software
  * released into the PUBLIC DOMAIN.
@@ -187,8 +187,8 @@ function wordpress_logout_link()
  * @deprecated Use get_server_data_table, will be removed in 3.0.0.
  *
  * @psalm-return list{string, float, non-empty-list<string>, string, false|string, string}
- * @global string $tbpref Database table prefix
- * @global string $dbname Database name
+ * @global       string $tbpref Database table prefix
+ * @global       string $dbname Database name
  */
 function get_server_data(): array
 {

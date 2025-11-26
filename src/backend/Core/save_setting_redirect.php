@@ -8,7 +8,7 @@
  * PHP version 8.1
  *
  * @package Lwt
- * @since 2.6.0-fork You can omit either u, or (k, v).
+ * @since   2.6.0-fork You can omit either u, or (k, v).
  */
 
 namespace SaveSetting;

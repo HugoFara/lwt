@@ -99,21 +99,21 @@ class Database_Connection
             $key = trim($key);
             $value = trim($value);
             switch ($key) {
-                case 'DB_HOST':
-                    $this->server = $value;
-                    break;
-                case 'DB_USER':
-                    $this->userid = $value;
-                    break;
-                case 'DB_PASSWORD':
-                    $this->passwd = $value;
-                    break;
-                case 'DB_NAME':
-                    $this->dbname = $value;
-                    break;
-                case 'DB_SOCKET':
-                    $this->socket = $value;
-                    break;
+            case 'DB_HOST':
+                $this->server = $value;
+                break;
+            case 'DB_USER':
+                $this->userid = $value;
+                break;
+            case 'DB_PASSWORD':
+                $this->passwd = $value;
+                break;
+            case 'DB_NAME':
+                $this->dbname = $value;
+                break;
+            case 'DB_SOCKET':
+                $this->socket = $value;
+                break;
             }
         }
     }

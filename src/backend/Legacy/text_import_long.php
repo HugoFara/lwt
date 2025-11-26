@@ -10,11 +10,11 @@
  * PHP version 8.1
  *
  * @category User_Interface
- * @package Lwt
- * @author  LWT Project <lwt-project@hotmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/long-text-import.html
- * @since   1.5.9
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/long-text-import.html
+ * @since    1.5.9
  */
 
 require_once 'Core/session_utility.php';
@@ -143,7 +143,7 @@ function long_text_check($max_input_vars): void
         </td>
         <td class="td1">
             <textarea readonly="readonly"
-            <?php echo getScriptDirectionTag($langid); ?>
+                <?php echo getScriptDirectionTag($langid); ?>
             name="text[<?php echo $textno; ?>]" cols="60" rows="10">
                     <?php echo $textstring; ?>
             </textarea>

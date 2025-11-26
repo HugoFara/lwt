@@ -17,7 +17,7 @@
  * PHP version 8.1
  *
  * @category User_Interface
- * @package Lwt
+ * @package  Lwt
  */
 
 require_once 'Core/session_utility.php';

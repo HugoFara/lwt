@@ -10,7 +10,7 @@
  * PHP version 8.1
  *
  * @category Helper_Frame
- * @package Lwt
+ * @package  Lwt
  */
 
 namespace Lwt\Interface\New_Word;
@@ -86,7 +86,7 @@ if (isset($_REQUEST['op'])) {
     var title = '';
     if (window.parent.LWT_DATA.settings.jQuery_tooltip) {
         title = make_tooltip(
-            <?php echo prepare_textdata_js($_REQUEST["WoText"]); ?>,
+                <?php echo prepare_textdata_js($_REQUEST["WoText"]); ?>,
             trans, roman, status
         );
     }

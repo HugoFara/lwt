@@ -14,11 +14,11 @@
  * PHP version 8.1
  *
  * @category Helper_Frame
- * @package Lwt
- * @author  LWT Project <lwt-project@hotmail.com>
- * @license Unlicense <http://unlicense.org/>
- * @link    https://hugofara.github.io/lwt/docs/php/files/bulk-translate-words.html
- * @since   1.6.1
+ * @package  Lwt
+ * @author   LWT Project <lwt-project@hotmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/bulk-translate-words.html
+ * @since    1.6.1
  */
 
 require_once 'Core/session_utility.php';

@@ -72,7 +72,7 @@ function do_header_row($textid, $langid): void
             false,
             ''
         );
-    ?>
+        ?>
     </div>
     <div>
         <a href="/test?text=<?php echo $textid; ?>" target="_top">
@@ -114,15 +114,15 @@ function do_title($title, $sourceURI): void
     ?>
     <h1>READ ▶
         <?php
-    echo tohtml($title);
-    if (isset($sourceURI) && !str_starts_with(trim($sourceURI), '#')) {
-        ?>
+        echo tohtml($title);
+        if (isset($sourceURI) && !str_starts_with(trim($sourceURI), '#')) {
+            ?>
         <a href="<?php echo $sourceURI ?>" target="_blank">
             <img src="<?php echo get_file_path('assets/icons/chain.png') ?>" title="Text Source" alt="Text Source" />
         </a>
             <?php
-    }
-    ?>
+        }
+        ?>
     </h1>
     <?php
 }
@@ -295,7 +295,7 @@ function save_audio_position($textid): void
  *
  * @param string|int $textid    ID of the required text
  * @param bool       $only_body If true, only show the inner body. If false, create a
- *                          complete HTML document.
+ *                              complete HTML document.
  *
  * @since 2.0.3-fork
  */

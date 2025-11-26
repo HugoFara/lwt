@@ -7,7 +7,6 @@ require_once __DIR__ . '/database_connect.php';
  *
  * @param int $refresh If true, refresh all tags for session
  *
- *
  * @return array<string> All tags
  */
 function get_tags($refresh = 0)
@@ -37,7 +36,6 @@ function get_tags($refresh = 0)
  * Return the list of all text tags.
  *
  * @param int $refresh If true, refresh all text tags for session
- *
  *
  * @return array<string> All text tags
  */

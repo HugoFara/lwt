@@ -172,8 +172,8 @@ class Settings
     /**
      * Set a value in the _lwtgeneral table.
      *
-     * @param string $key   Key to set
-     * @param string $val   Value to store
+     * @param string $key Key to set
+     * @param string $val Value to store
      *
      * @return void
      */
