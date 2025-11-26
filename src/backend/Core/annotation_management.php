@@ -32,7 +32,7 @@ function recreate_save_ann($textid, $oldann): string
     $olditems = preg_split('/[\n]/u', $oldann);
     foreach ($olditems as $olditem) {
         $oldvals = preg_split('/[\t]/u', $olditem);
-        if ((int)$oldvals[0] > -1) {
+        if (count($oldvals) >= 2 && (int)$oldvals[0] > -1) {
             $trans = '';
             if (count($oldvals) > 3) {
                 $trans = $oldvals[3];

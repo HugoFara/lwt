@@ -1094,13 +1094,13 @@ class DatabaseConnectTest extends TestCase
         // Test with non-existent language (returns null when language doesn't exist)
         // check_text_valid outputs HTML, so we need to capture it
         ob_start();
-        check_text_valid(99999);
+        $result = check_text_valid(99999);
         ob_end_clean();
         $this->assertNull($result, 'Non-existent language should return null');
 
         // Test with empty language
         ob_start();
-        check_text_valid(0);
+        $result = check_text_valid(0);
         ob_end_clean();
         $this->assertTrue($result === null || $result === false, 'Empty language ID should return null or false');
     }

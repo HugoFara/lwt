@@ -203,8 +203,84 @@ class TextParsing
             ),
             TiText = @term,
             TiWordCount = @word_count";
-        do_mysqli_query($sql);
+        
+        // Try LOAD DATA LOCAL INFILE, fall back to INSERT if it fails
+        try {
+            do_mysqli_query($sql);
+        } catch (\RuntimeException $e) {
+            // If LOAD DATA LOCAL INFILE is disabled, use fallback method
+            if (strpos($e->getMessage(), 'LOAD DATA LOCAL INFILE is forbidden') !== false) {
+                self::saveWithSqlFallback($text, $id);
+            } else {
+                throw $e;
+            }
+        }
         unlink($file_name);
+    }
+    
+    /**
+     * Fallback method to insert text data when LOAD DATA LOCAL INFILE is disabled.
+     *
+     * @param string $text Preprocessed text to insert
+     * @param int    $id   Text ID
+     *
+     * @return void
+     */
+    private static function saveWithSqlFallback(string $text, int $id): void
+    {
+        $tbpref = LWT_Globals::getTablePrefix();
+        $connection = LWT_Globals::getDbConnection();
+        
+        // Get starting sentence ID
+        if ($id > 0) {
+            $result = do_mysqli_query(
+                "SELECT ifnull(max(`SeID`)+1,1) as maxid FROM `{$tbpref}sentences`"
+            );
+            $row = mysqli_fetch_assoc($result);
+            $sid = (int)$row['maxid'];
+        } else {
+            $sid = 1;
+        }
+        
+        $lines = explode("\n", $text);
+        $order = 0;
+        $count = 0;
+        
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            
+            $parts = explode("\t", $line);
+            if (count($parts) < 2) {
+                continue;
+            }
+            
+            $word_count = (int)$parts[0];
+            $term = $parts[1];
+            
+            // Handle line breaks (increase sentence ID)
+            if (substr($term, -1) === "\r") {
+                $term = rtrim($term, "\r");
+                $order++;
+                $count = 0;
+                $sid++;
+            } else {
+                $order++;
+            }
+            
+            $current_count = $count;
+            $count += strlen($term) + 1;
+            
+            $escaped_term = mysqli_real_escape_string($connection, $term);
+            
+            do_mysqli_query(
+                "INSERT INTO `{$tbpref}temptextitems` 
+                (TiSeID, TiCount, TiOrder, TiText, TiWordCount) 
+                VALUES ($sid, $current_count, $order, '$escaped_term', $word_count)"
+            );
+        }
     }
 
     /**
