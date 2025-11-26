@@ -7,7 +7,7 @@ use Lwt\Database\Escaping;
 
 // -------------------------------------------------------------
 
-function load_feeds($currentfeed): void
+function load_feeds(int $currentfeed): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $cnt = 0;
@@ -87,7 +87,7 @@ function load_feeds($currentfeed): void
 // -------------------------------------------------------------
 
 
-function write_rss_to_db($texts): string
+function write_rss_to_db(array $texts): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $texts = array_reverse($texts);
@@ -212,7 +212,7 @@ function write_rss_to_db($texts): string
 
 // -------------------------------------------------------------
 
-function print_last_feed_update($diff): void
+function print_last_feed_update(int $diff): void
 {
     $periods = array(
     array(60 * 60 * 24 * 365 , 'year'),
@@ -245,7 +245,7 @@ function print_last_feed_update($diff): void
  *
  * @psalm-return array<string, string>|null|string
  */
-function get_nf_option($str, $option)
+function get_nf_option(string $str, string $option)
 {
     $arr = explode(',', $str);
     $all = null;
@@ -273,7 +273,7 @@ function get_nf_option($str, $option)
  *
  * @psalm-return array{feed_title: null|string,...}|false
  */
-function get_links_from_new_feed($NfSourceURI): array|false
+function get_links_from_new_feed(string $NfSourceURI): array|false
 {
     $rss = new DOMDocument('1.0', 'utf-8');
     if (!$rss->load($NfSourceURI, LIBXML_NOCDATA | ENT_NOQUOTES)) {
@@ -407,7 +407,7 @@ function get_links_from_new_feed($NfSourceURI): array|false
  *
  * @psalm-return false|list<array{audio: string, date: string, desc: null|string, link: string, text?: false|string, title: non-empty-string|null}>
  */
-function get_links_from_rss($NfSourceURI, $NfArticleSection): array|false
+function get_links_from_rss(string $NfSourceURI, string $NfArticleSection): array|false
 {
     $rss = new DOMDocument('1.0', 'utf-8');
     if (!$rss->load($NfSourceURI, LIBXML_NOCDATA | ENT_NOQUOTES)) {
@@ -500,7 +500,7 @@ function get_links_from_rss($NfSourceURI, $NfArticleSection): array|false
  *
  * @psalm-return array<array{TxTitle: mixed, TxAudioURI: mixed|null, TxText: string, TxSourceURI: mixed|string, message?: string, link?: non-empty-list<mixed>}>|null|string
  */
-function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $NfCharset = null): array|string|null
+function get_text_from_rsslink(array $feed_data, string $NfArticleSection, string $NfFilterTags, ?string $NfCharset = null): array|string|null
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $data = null;

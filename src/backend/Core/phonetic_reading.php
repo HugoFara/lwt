@@ -119,7 +119,7 @@ function phonetic_reading($text, $lang)
  * @deprecated No longer used, incompatible with new database system.
  * @since      1.6.25-fork Not compatible with the database
  */
-function refreshText($word, $tid): string
+function refreshText(string $word, int $tid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // $word : only sentences with $word

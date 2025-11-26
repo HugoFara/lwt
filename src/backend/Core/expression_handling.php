@@ -360,7 +360,7 @@ function insert_standard_expression($textlc, $lid, $wid, $len, $mode): array
  *
  * @return void
  */
-function new_expression_interactable($hex, $appendtext, $sid, $len): void
+function new_expression_interactable(string $hex, string $appendtext, int $sid, int $len): void
 {
     $showAll = (bool) getSettingZeroOrOne('showallwords', 1);
     $showType = $showAll ? "m" : '';
@@ -535,7 +535,7 @@ function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
  *
  * @global string $tbpref Table name prefix
  */
-function insertExpressions($textlc, $lid, $wid, $len, $mode): string|null
+function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mode): string|null
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $regexp = (string)get_first_value(

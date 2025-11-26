@@ -25,7 +25,7 @@ require_once __DIR__ . '/api_v1.php';
 
 use function Lwt\Ajax\Improved_Text\edit_term_form;
 
-function edit_mode_display($textid, $ann_exists): void
+function edit_mode_display(int $textid, bool $ann_exists): void
 {
     if (!$ann_exists) {
         // No annotations, try create them
@@ -68,7 +68,7 @@ function edit_mode_display($textid, $ann_exists): void
     <?php
 }
 
-function print_mode_display($textid, $langid, $audio, $ann, $title): void
+function print_mode_display(int $textid, int $langid, string $audio, string $ann, string $title): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT LgTextSize, LgRemoveSpaces, LgRightToLeft, LgGoogleTranslateURI

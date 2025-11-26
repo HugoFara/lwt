@@ -90,7 +90,7 @@ function get_span_groups(): array
  *
  * @global string $tbpref Database table prefix
  */
-function do_current_text_info($textid)
+function do_current_text_info(int $textid)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $txttit = get_first_value(
@@ -146,7 +146,7 @@ function do_current_text_info($textid)
  *
  * @return void
  */
-function do_language_selectable($langid)
+function do_language_selectable(int $langid)
 {
     ?>
 <div for="filterlang">Language:

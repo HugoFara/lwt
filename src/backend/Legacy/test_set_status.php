@@ -85,11 +85,11 @@ function set_test_status_change_progress($stchange): array
  * @return void
  */
 function do_set_test_status_javascript(
-    $wid,
-    $status,
-    $stchange,
-    $tests_status = array(),
-    $ajax = false
+    int $wid,
+    int $status,
+    int $stchange,
+    array $tests_status = array(),
+    bool $ajax = false
 ) {
     ?>
 <script type="text/javascript">
@@ -173,7 +173,7 @@ function do_set_test_status_javascript(
  *
  * @global string $tbpref Database table prefix
  */
-function do_set_test_status_content($wid, $status, $oldstatus, $stchange, $ajax = false)
+function do_set_test_status_content(int $wid, int $status, int $oldstatus, int $stchange, bool $ajax = false)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $word = get_first_value(

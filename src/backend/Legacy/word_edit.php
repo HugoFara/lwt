@@ -128,7 +128,7 @@ function lowercase_term_not_equal($textlc): void
 /**
  * Echoes a JavaScript element, that will edit terms diplay
  */
-function change_term_display($wid, $translation, $hex): void
+function change_term_display(int $wid, string $translation, ?string $hex): void
 {
     ?>
 <script type="text/javascript">
@@ -182,7 +182,7 @@ function change_term_display($wid, $translation, $hex): void
 }
 
 // INS/UPD
-function edit_word_do_operation($translation, $fromAnn): void
+function edit_word_do_operation(string $translation, string $fromAnn): void
 {
     $hex = null;
     $textlc = trim(prepare_textdata($_REQUEST["WoTextLC"]));
@@ -229,7 +229,7 @@ function edit_word_do_operation($translation, $fromAnn): void
 /**
  * @return void
  */
-function edit_word_do_form($wid, $text_id, $ord, $fromAnn)
+function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
 

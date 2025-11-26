@@ -103,7 +103,7 @@ if (isset($_REQUEST['save_feed'])) {
 }
 
 
-function display_new_feed($currentlang): void
+function display_new_feed(int $currentlang): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $result = do_mysqli_query(
@@ -205,7 +205,7 @@ $('[type="submit"]').on('click', function(){
     <?php
 }
 
-function edit_feed($currentfeed): void
+function edit_feed(int $currentfeed): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $result = do_mysqli_query(
@@ -425,7 +425,7 @@ $('[type="submit"]').on('click', function(){
     <?php
 }
 
-function multi_load_feed($currentlang): void
+function multi_load_feed(int $currentlang): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (!empty($currentlang)) {
@@ -500,11 +500,11 @@ $( "button" ).on('click', function() {
 }
 
 function display_main_page(
-    $currentlang,
-    $currentquery,
-    $currentpage,
-    $currentsort,
-    $wh_query
+    int $currentlang,
+    string $currentquery,
+    int $currentpage,
+    int $currentsort,
+    string $wh_query
 ): void {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $debug = \Lwt\Core\Globals::isDebug();

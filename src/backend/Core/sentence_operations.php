@@ -292,7 +292,7 @@ function sentences_with_word($lang, $wordlc, $wid, $mode = 0, $limit = 20): arra
 /**
  * Prepare the area to for examples sentences of a word.
  */
-function example_sentences_area($lang, $termlc, $selector, $wid): void
+function example_sentences_area(int $lang, string $termlc, string $selector, int $wid): void
 {
     ?>
 <div id="exsent">

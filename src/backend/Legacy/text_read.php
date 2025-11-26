@@ -129,7 +129,7 @@ width: <?php echo 97 - $frame_l_width; ?>%;">
  *
  * @return void
  */
-function do_text_page($textid)
+function do_text_page(int $textid)
 {
     pagestart_nobody(
         'Read',

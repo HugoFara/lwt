@@ -342,7 +342,7 @@ $(".hide_message").delay(2500).slideUp(1000);
     return array($edit_text, $message);
 }
 
-function check_errors($message): void
+function check_errors(string $message): void
 {
 
     if (isset($_REQUEST['checked_feeds_save'])) {
@@ -372,7 +372,7 @@ function check_errors($message): void
     echo error_message_with_hide($message, false);
 }
 
-function dummy_function_2($currentlang, $currentfeed): void
+function dummy_function_2(int $currentlang, int $currentfeed): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $debug = \Lwt\Core\Globals::isDebug();

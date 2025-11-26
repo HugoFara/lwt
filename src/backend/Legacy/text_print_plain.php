@@ -15,14 +15,14 @@
 require_once 'Core/session_utility.php';
 
 function output_text(
-    $saveterm,
-    $saverom,
-    $savetrans,
-    $savetags,
-    $show_rom,
-    $show_trans,
-    $show_tags,
-    $annplcmnt
+    string $saveterm,
+    string $saverom,
+    string $savetrans,
+    string $savetags,
+    int $show_rom,
+    int $show_trans,
+    int $show_tags,
+    int $annplcmnt
 ): void {
     if ($show_tags) {
         if ($savetrans == '' && $savetags != '') {

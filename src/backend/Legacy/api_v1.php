@@ -975,7 +975,7 @@ function send_response($status = 200, $data = null)
  *
  * @return string The first matching endpoint
  */
-function endpoint_exits($method, $requestUri)
+function endpoint_exits(string $method, string $requestUri)
 {
     // Set up API endpoints
     $endpoints = [
@@ -1087,7 +1087,7 @@ function media_files()
  *
  * @psalm-return array{name: float|int|null|string, voiceapi: float|int|null|string, word_parsing: float|int|null|string, abbreviation: mixed, reading_mode: 'direct'|'external'|'internal'}
  */
-function readingConfiguration($get_req): array
+function readingConfiguration(array $get_req): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // language, voiceAPI, abbr
@@ -1362,7 +1362,7 @@ function term_translations($get_req): array
  *
  * @psalm-return array{error: string}
  */
-function unknown_get_action_type($get_req, $action_exists = false): array
+function unknown_get_action_type(array $get_req, bool $action_exists = false): array
 {
     if ($action_exists) {
         $message = 'action_type with value "' . $get_req["action_type"] .
@@ -1593,7 +1593,7 @@ function unknown_post_action_type($post_req, $action_exists = false): array
  *
  * @return void
  */
-function request_handler($method, $requestUri, $post_param): void
+function request_handler(string $method, string $requestUri, ?array $post_param): void
 {
     // Extract requested endpoint from URI
     $req_endpoint = endpoint_exits($method, $requestUri);

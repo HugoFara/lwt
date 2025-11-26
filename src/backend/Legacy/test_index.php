@@ -265,7 +265,7 @@ function do_test_page()
  * the page, the page will be redirected to
  * edit_texts.php.
  */
-function try_start_test($p): void
+function try_start_test(string $p): void
 {
     if ($p != '') {
         do_test_page();

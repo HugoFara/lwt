@@ -24,7 +24,7 @@
 require_once 'Core/session_utility.php';
 
 
-function bulk_save_terms($terms, $tid, $cleanUp): void
+function bulk_save_terms(array $terms, int $tid, bool $cleanUp): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sqlarr = array();
@@ -118,7 +118,7 @@ function bulk_save_terms($terms, $tid, $cleanUp): void
 }
 
 
-function bulk_do_content($tid, $sl, $tl, $pos): void
+function bulk_do_content(int $tid, string $sl, string $tl, int $pos): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $cnt = 0;

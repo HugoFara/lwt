@@ -128,13 +128,13 @@ function getLanguagesSettings($langid)
  * @since 2.8.0-fork Takes a new argument $exprs
  */
 function echo_term(
-    $actcode,
-    $showAll,
-    $spanid,
-    $hidetag,
-    $currcharcount,
-    $record,
-    &$exprs = array()
+    int $actcode,
+    bool $showAll,
+    string $spanid,
+    string $hidetag,
+    int $currcharcount,
+    array $record,
+    array &$exprs = array()
 ) {
     $actcode = (int)$record['Code'];
     if ($actcode > 1) {
@@ -256,13 +256,13 @@ function echo_term(
  * @deprecated Use echo_term instead.
  */
 function echoTerm(
-    $actcode,
-    $showAll,
-    $hideuntil,
-    $spanid,
-    $hidetag,
-    $currcharcount,
-    $record
+    int $actcode,
+    bool $showAll,
+    int $hideuntil,
+    string $spanid,
+    string $hidetag,
+    int $currcharcount,
+    array $record
 ): int {
     echo_term($actcode, $showAll, $spanid, $hidetag, $currcharcount, $record);
     return 0;
@@ -577,7 +577,7 @@ function mainWordLoop($textid, $showAll): void
  *
  * @return void
  */
-function do_text_text_style($showLearning, $mode_trans, $textsize, $ann_exists): void
+function do_text_text_style(int $showLearning, int $mode_trans, int $textsize, bool $ann_exists): void
 {
     $displaystattrans = (int)getSettingWithDefault('set-display-text-frame-term-translation');
     $pseudo_element = ($mode_trans < 3) ? 'after' : 'before';
@@ -648,7 +648,7 @@ function do_text_text_style($showLearning, $mode_trans, $textsize, $ann_exists):
  *
  * @deprecated Use do_text_text_style instead.
  */
-function prepareStyle($showLearning, $mode_trans, $textsize, $ann_exists): void
+function prepareStyle(int $showLearning, int $mode_trans, int $textsize, bool $ann_exists): void
 {
     do_text_text_style($showLearning, $mode_trans, $textsize, $ann_exists);
 }
@@ -660,7 +660,7 @@ function prepareStyle($showLearning, $mode_trans, $textsize, $ann_exists): void
  *
  * @return void
  */
-function do_text_text_javascript($var_array): void
+function do_text_text_javascript(array $var_array): void
 {
     ?>
 <script type="text/javascript">
@@ -738,7 +738,7 @@ function do_text_text_javascript($var_array): void
  *
  * @deprecated Use do_text_text_javascript instead.
  */
-function do_text_javascript($var_array): void
+function do_text_javascript(array $var_array): void
 {
     do_text_text_javascript($var_array);
 }

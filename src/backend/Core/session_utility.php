@@ -334,7 +334,7 @@ function selectmediapath($f): string
  *
  * @psalm-return array<string>|string
  */
-function remove_soft_hyphens($str): array|string
+function remove_soft_hyphens(string $str): array|string
 {
     return str_replace('­', '', $str);  // first '..' contains Softhyphen 0xC2 0xAD
 }
@@ -344,13 +344,13 @@ function remove_soft_hyphens($str): array|string
  *
  * @psalm-return array<string>|null|string
  */
-function replace_supp_unicode_planes_char($s): array|string|null
+function replace_supp_unicode_planes_char(string $s): array|string|null
 {
     return preg_replace('/[\x{10000}-\x{10FFFF}]/u', "\xE2\x96\x88", $s);
     /* U+2588 = UTF8: E2 96 88 = FULL BLOCK = ⬛︎  */
 }
 
-function makeCounterWithTotal($max, $num): string
+function makeCounterWithTotal(int $max, int $num): string
 {
     if ($max == 1) {
         return '';
@@ -364,7 +364,7 @@ function makeCounterWithTotal($max, $num): string
     ) . "/" . $max;
 }
 
-function encodeURI($url): string
+function encodeURI(string $url): string
 {
     $reserved = array(
     '%2D' => '-','%5F' => '_','%2E' => '.','%21' => '!',
@@ -487,7 +487,7 @@ function processDBParam($reqkey, $dbkey, $default, $isnum)
     return $result;
 }
 
-function getWordTagList($wid, $before = ' ', $brack = 1, $tohtml = 1): string
+function getWordTagList(int $wid, string $before = ' ', int $brack = 1, int $tohtml = 1): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $lbrack = $rbrack = '';
@@ -603,7 +603,7 @@ function do_test_test_get_projection($key, $value): string|null
  *
  * @return null|string SQL formatted string suitable to projection (inserted in a "FROM ")
  */
-function do_test_test_from_selection($selection_type, $selection_data): string|null
+function do_test_test_from_selection(int $selection_type, string $selection_data): string|null
 {
     $data_string_array = explode(",", trim($selection_data, "()"));
     $data_int_array = array_map('intval', $data_string_array);
@@ -764,7 +764,7 @@ function makeOpenDictStr($url, $txt): string
     return $r;
 }
 
-function makeOpenDictStrJS($url): string
+function makeOpenDictStrJS(string $url): string
 {
     $r = '';
     if ($url != '') {
@@ -883,7 +883,7 @@ function createDictLinksInEditWin2($lang, $sentctljs, $wordctljs): string
     return $r;
 }
 
-function makeDictLinks($lang, $wordctljs): string
+function makeDictLinks(int $lang, string $wordctljs): string
 {
     $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
     FROM ' . \Lwt\Core\Globals::table('languages') . ' WHERE LgID = ' . $lang;
@@ -918,7 +918,7 @@ function makeDictLinks($lang, $wordctljs): string
     return $r;
 }
 
-function createDictLinksInEditWin3($lang, $sentctljs, $wordctljs): string
+function createDictLinksInEditWin3(int $lang, string $sentctljs, string $wordctljs): string
 {
     $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
     FROM " . \Lwt\Core\Globals::table('languages') . " WHERE LgID = $lang";
@@ -996,7 +996,7 @@ function createDictLinksInEditWin3($lang, $sentctljs, $wordctljs): string
     return $r;
 }
 
-function strToHex($string): string
+function strToHex(string $string): string
 {
     $hex = '';
     for ($i = 0; $i < strlen($string); $i++) {

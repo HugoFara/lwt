@@ -55,7 +55,7 @@ function get_test_table_sql()
  *
  * @psalm-return array<string, float|int|null|string>|false|null
  */
-function do_test_table_language_settings($testsql)
+function do_test_table_language_settings(string $testsql)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
@@ -201,7 +201,7 @@ function do_test_table_javascript(): void
 }
 
 
-function do_test_table_settings($settings): void
+function do_test_table_settings(array $settings): void
 {
     ?>
 <p>
@@ -236,7 +236,7 @@ function do_test_table_header(): void
     <?php
 }
 
-function do_test_table_table_content($lang_record, $testsql): void
+function do_test_table_table_content(array $lang_record, string $testsql): void
 {
 
     $textsize = round(((int)$lang_record['LgTextSize'] - 100) / 2, 0) + 100;
@@ -262,7 +262,7 @@ function do_test_table_table_content($lang_record, $testsql): void
     mysqli_free_result($res);
 }
 
-function do_test_table_row($record, $regexword, $textsize, $span1, $span2): void
+function do_test_table_row(array $record, string $regexword, int $textsize, string $span1, string $span2): void
 {
     $sent = tohtml(repl_tab_nl($record["WoSentence"]));
     $sent1 = str_replace(

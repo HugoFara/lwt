@@ -27,7 +27,7 @@ require_once 'Core/session_utility.php';
 /**
  * @return null|string
  */
-function translator_url($term, $order)
+function translator_url(int $term, int $order)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT SeText, LgGoogleTranslateURI
@@ -62,7 +62,7 @@ function translator_url($term, $order)
 /**
  * @return void
  */
-function display_page($type, $term, $order)
+function display_page(int $type, int $term, int $order)
 {
     // Translate sentence
     if ($type == 1) {

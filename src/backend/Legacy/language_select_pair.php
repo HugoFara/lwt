@@ -22,7 +22,7 @@ require_once 'Core/langdefs.php';
 /**
  * Returns a dropdown menu of the different languages
  */
-function get_wizard_selectoptions($v): string
+function get_wizard_selectoptions(string $v): string
 {
     $r = "<option value=\"\"" . get_selected($v, "") . ">[Choose...]</option>";
     $keys = array_keys(LWT_LANGUAGES_ARRAY);
