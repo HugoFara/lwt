@@ -13,7 +13,7 @@
  * @since   1.0.3
  */
 
-require __DIR__ . '/../src/backend/Core/Bootstrap/kernel_utility.php';
+require __DIR__ . '/../src/backend/Core/version.php';
 require_once __DIR__ . '/../src/tools/markdown_converter.php';
 
 ?>

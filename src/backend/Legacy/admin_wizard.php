@@ -18,7 +18,8 @@
 
 namespace Lwt\Interface\Database_Wizard;
 
-require_once 'Core/Bootstrap/kernel_utility.php';
+require_once 'Core/Http/param_helpers.php';
+require_once 'Core/UI/ui_helpers.php';
 
 /**
  * A connection to database stored as an object.

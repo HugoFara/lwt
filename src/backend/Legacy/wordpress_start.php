@@ -25,7 +25,7 @@
  * @since    1.5.5
  */
 
-require_once 'Core/Bootstrap/kernel_utility.php';
+require_once 'Core/Utils/error_handling.php';
 require_once '../wp-load.php' ;
 
 if (\is_user_logged_in()) {
