@@ -49,56 +49,56 @@ class LWT_Globals
      *
      * @var \mysqli|null
      */
-    private static ?\mysqli $_dbConnection = null;
+    private static ?\mysqli $dbConnection = null;
 
     /**
      * Database table prefix (usually empty string)
      *
      * @var string
      */
-    private static string $_tablePrefix = '';
+    private static string $tablePrefix = '';
 
     /**
      * Whether the table prefix is fixed (from .env) or from DB
      *
      * @var bool
      */
-    private static bool $_tablePrefixIsFixed = false;
+    private static bool $tablePrefixIsFixed = false;
 
     /**
      * Debug mode flag (0=off, 1=on)
      *
      * @var int
      */
-    private static int $_debug = 0;
+    private static int $debug = 0;
 
     /**
      * Error display flag (0=off, 1=on)
      *
      * @var int
      */
-    private static int $_displayErrors = 0;
+    private static int $displayErrors = 0;
 
     /**
      * Execution time display flag (0=off, 1=on)
      *
      * @var int
      */
-    private static int $_displayTime = 0;
+    private static int $displayTime = 0;
 
     /**
      * Database name
      *
      * @var string
      */
-    private static string $_databaseName = '';
+    private static string $databaseName = '';
 
     /**
      * Whether globals have been initialized
      *
      * @var bool
      */
-    private static bool $_initialized = false;
+    private static bool $initialized = false;
 
     /**
      * Initialize all global variables.
@@ -109,16 +109,16 @@ class LWT_Globals
      */
     public static function initialize(): void
     {
-        if (self::$_initialized) {
+        if (self::$initialized) {
             return;
         }
 
         // All settings default to 0 (off)
-        self::$_debug = 0;
-        self::$_displayErrors = 0;
-        self::$_displayTime = 0;
+        self::$debug = 0;
+        self::$displayErrors = 0;
+        self::$displayTime = 0;
 
-        self::$_initialized = true;
+        self::$initialized = true;
     }
 
     /**
@@ -130,7 +130,7 @@ class LWT_Globals
      */
     public static function setDbConnection(\mysqli $connection): void
     {
-        self::$_dbConnection = $connection;
+        self::$dbConnection = $connection;
     }
 
     /**
@@ -140,7 +140,7 @@ class LWT_Globals
      */
     public static function getDbConnection(): ?\mysqli
     {
-        return self::$_dbConnection;
+        return self::$dbConnection;
     }
 
     /**
@@ -155,8 +155,8 @@ class LWT_Globals
         string $prefix,
         bool $isFixed = false
     ): void {
-        self::$_tablePrefix = $prefix;
-        self::$_tablePrefixIsFixed = $isFixed;
+        self::$tablePrefix = $prefix;
+        self::$tablePrefixIsFixed = $isFixed;
     }
 
     /**
@@ -166,7 +166,7 @@ class LWT_Globals
      */
     public static function getTablePrefix(): string
     {
-        return self::$_tablePrefix;
+        return self::$tablePrefix;
     }
 
     /**
@@ -179,7 +179,7 @@ class LWT_Globals
      */
     public static function isTablePrefixFixed(): bool
     {
-        return self::$_tablePrefixIsFixed;
+        return self::$tablePrefixIsFixed;
     }
 
     /**
@@ -191,7 +191,7 @@ class LWT_Globals
      */
     public static function setDatabaseName(string $name): void
     {
-        self::$_databaseName = $name;
+        self::$databaseName = $name;
     }
 
     /**
@@ -201,7 +201,7 @@ class LWT_Globals
      */
     public static function getDatabaseName(): string
     {
-        return self::$_databaseName;
+        return self::$databaseName;
     }
 
     /**
@@ -213,7 +213,7 @@ class LWT_Globals
      */
     public static function setDebug(int $value): void
     {
-        self::$_debug = $value;
+        self::$debug = $value;
     }
 
     /**
@@ -223,7 +223,7 @@ class LWT_Globals
      */
     public static function isDebug(): bool
     {
-        return (bool) self::$_debug;
+        return (bool) self::$debug;
     }
 
     /**
@@ -233,7 +233,7 @@ class LWT_Globals
      */
     public static function getDebug(): int
     {
-        return self::$_debug;
+        return self::$debug;
     }
 
     /**
@@ -245,7 +245,7 @@ class LWT_Globals
      */
     public static function setDisplayErrors(int $value): void
     {
-        self::$_displayErrors = $value;
+        self::$displayErrors = $value;
     }
 
     /**
@@ -255,7 +255,7 @@ class LWT_Globals
      */
     public static function shouldDisplayErrors(): bool
     {
-        return (bool) self::$_displayErrors;
+        return (bool) self::$displayErrors;
     }
 
     /**
@@ -267,7 +267,7 @@ class LWT_Globals
      */
     public static function setDisplayTime(int $value): void
     {
-        self::$_displayTime = $value;
+        self::$displayTime = $value;
     }
 
     /**
@@ -277,7 +277,7 @@ class LWT_Globals
      */
     public static function shouldDisplayTime(): bool
     {
-        return (bool) self::$_displayTime;
+        return (bool) self::$displayTime;
     }
 
     /**
@@ -331,13 +331,13 @@ class LWT_Globals
      */
     public static function reset(): void
     {
-        self::$_dbConnection = null;
-        self::$_tablePrefix = '';
-        self::$_tablePrefixIsFixed = false;
-        self::$_debug = 0;
-        self::$_displayErrors = 0;
-        self::$_displayTime = 0;
-        self::$_databaseName = '';
-        self::$_initialized = false;
+        self::$dbConnection = null;
+        self::$tablePrefix = '';
+        self::$tablePrefixIsFixed = false;
+        self::$debug = 0;
+        self::$displayErrors = 0;
+        self::$displayTime = 0;
+        self::$databaseName = '';
+        self::$initialized = false;
     }
 }

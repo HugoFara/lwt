@@ -161,7 +161,7 @@ class Router
 
         // Try pattern matching for dynamic routes (e.g., /text/{id})
         foreach ($this->routes as $pattern => $methods) {
-            $regex = $this->_convertPatternToRegex($pattern);
+            $regex = $this->convertPatternToRegex($pattern);
             if (preg_match($regex, $path, $matches)) {
                 array_shift($matches); // Remove full match
 
@@ -206,7 +206,7 @@ class Router
      *
      * @return string Regex pattern
      */
-    private function _convertPatternToRegex(string $pattern): string
+    private function convertPatternToRegex(string $pattern): string
     {
         // Escape slashes
         $pattern = str_replace('/', '\/', $pattern);
@@ -233,18 +233,18 @@ class Router
                 exit;
 
             case 'handler':
-                $this->_executeHandler(
+                $this->executeHandler(
                     $resolution['handler'],
                     $resolution['params']
                 );
                 break;
 
             case 'not_found':
-                $this->_handle404($resolution['path']);
+                $this->handle404($resolution['path']);
                 break;
 
             default:
-                $this->_handle500(
+                $this->handle500(
                     "Unknown resolution type: {$resolution['type']}"
                 );
         }
@@ -258,15 +258,15 @@ class Router
      *
      * @return void
      */
-    private function _executeHandler(string $handler, array $params): void
+    private function executeHandler(string $handler, array $params): void
     {
         // Check if it's a controller@method format
         if (str_contains($handler, '@')) {
             list($controller, $method) = explode('@', $handler, 2);
-            $this->_executeController($controller, $method, $params);
+            $this->executeController($controller, $method, $params);
         } else {
             // It's a file path - include it
-            $this->_executeFile($handler, $params);
+            $this->executeFile($handler, $params);
         }
     }
 
@@ -279,7 +279,7 @@ class Router
      *
      * @return void
      */
-    private function _executeController(
+    private function executeController(
         string $controllerClass,
         string $method,
         array $params
@@ -290,14 +290,14 @@ class Router
         }
 
         if (!class_exists($controllerClass)) {
-            $this->_handle500("Controller not found: {$controllerClass}");
+            $this->handle500("Controller not found: {$controllerClass}");
             return;
         }
 
         $controller = new $controllerClass();
 
         if (!method_exists($controller, $method)) {
-            $this->_handle500(
+            $this->handle500(
                 "Method not found: {$controllerClass}::{$method}"
             );
             return;
@@ -315,10 +315,10 @@ class Router
      *
      * @return void
      */
-    private function _executeFile(string $filePath, array $params): void
+    private function executeFile(string $filePath, array $params): void
     {
         if (!file_exists($filePath)) {
-            $this->_handle500("File not found: {$filePath}");
+            $this->handle500("File not found: {$filePath}");
             return;
         }
 
@@ -343,7 +343,7 @@ class Router
      *
      * @return void
      */
-    private function _handle404(string $path): void
+    private function handle404(string $path): void
     {
         http_response_code(404);
         ?>
@@ -378,7 +378,7 @@ class Router
      *
      * @return void
      */
-    private function _handle500(string $message): void
+    private function handle500(string $message): void
     {
         http_response_code(500);
         ?>

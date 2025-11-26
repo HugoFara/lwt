@@ -595,9 +595,7 @@ function feed_wizard_filter_text(): void
     filter_Array = [];
     const lwt_wizard_filter = {
         updateFilterArray: function() {
-            articleSection = <?php echo json_encode(
-                (string) $_SESSION['wizard']['article_selector']
-                             ); ?>;
+            articleSection = <?php echo json_encode((string) $_SESSION['wizard']['article_selector']); ?>;
             articleSection.trim();
             if (articleSection == '') {
                 alert("Article section is empty!")
