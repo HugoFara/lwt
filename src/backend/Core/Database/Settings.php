@@ -152,7 +152,8 @@ class Settings
      */
     public static function lwtTableCheck(): void
     {
-        if (mysqli_num_rows(do_mysqli_query("SHOW TABLES LIKE '\\_lwtgeneral'")) == 0) {
+        $res = do_mysqli_query("SHOW TABLES LIKE '\\_lwtgeneral'");
+        if ($res === false || $res === true || mysqli_num_rows($res) == 0) {
             runsql(
                 "CREATE TABLE IF NOT EXISTS _lwtgeneral (
                     LWTKey varchar(40) NOT NULL,
@@ -161,10 +162,9 @@ class Settings
                 ) ENGINE=MyISAM DEFAULT CHARSET=utf8",
                 ''
             );
+            $res2 = do_mysqli_query("SHOW TABLES LIKE '\\_lwtgeneral'");
             if (
-                mysqli_num_rows(
-                    do_mysqli_query("SHOW TABLES LIKE '\\_lwtgeneral'")
-                ) == 0
+                $res2 === false || $res2 === true || mysqli_num_rows($res2) == 0
             ) {
                 my_die("Unable to create table '_lwtgeneral'!");
             }

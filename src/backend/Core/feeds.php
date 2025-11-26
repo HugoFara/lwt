@@ -31,13 +31,13 @@ function load_feeds($currentfeed): void
                 }
                 if (time() > ($autoupdate + (int) $row['NfUpdate'])) {
                     $ajax[$cnt] =  "$.ajax({type: 'POST',beforeSend: function(){ $('#feed_" .
-                        $row['NfID'] . "').replaceWith( '<div id=\"feed_" . $row['NfID'] . "\" class=\"msgblue\"><p>" .
+                        ($row['NfID'] ?? '') . "').replaceWith( '<div id=\"feed_" . ($row['NfID'] ?? '') . "\" class=\"msgblue\"><p>" .
                         addslashes((string) $row['NfName']) . ": loading</p></div>' );},url:'api.php/v1/feeds/" .
-                            $row['NfID'] . "/load', data: { name: '" . addslashes((string) $row['NfName']) .
-                            "', source_uri: '" . $row['NfSourceURI'] .
-                            "', options: '" . $row['NfOptions'] .
+                            ($row['NfID'] ?? '') . "/load', data: { name: '" . addslashes((string) $row['NfName']) .
+                            "', source_uri: '" . ($row['NfSourceURI'] ?? '') .
+                            "', options: '" . ($row['NfOptions'] ?? '') .
                             "' },success:function (data) {feedcnt+=1;$('#feedcount').text(feedcnt);var msg = data.error ? '<div class=\"red\"><p>' + data.error + '</p></div>' : '<div class=\"msgblue\"><p>' + data.message + '</p></div>';$('#feed_" .
-                                $row['NfID'] . "').replaceWith( msg );}})";
+                                ($row['NfID'] ?? '') . "').replaceWith( msg );}})";
                     $cnt += 1;
                     $feeds[$row['NfID']] = $row['NfName'];
                 }
@@ -49,13 +49,13 @@ function load_feeds($currentfeed): void
         $result = do_mysqli_query($sql);
         while ($row = mysqli_fetch_assoc($result)) {
             $ajax[$cnt] =  "$.ajax({type: 'POST',beforeSend: function(){ $('#feed_" .
-                $row['NfID'] . "').replaceWith( '<div id=\"feed_" . $row['NfID'] . "\" class=\"msgblue\"><p>" .
+                ($row['NfID'] ?? '') . "').replaceWith( '<div id=\"feed_" . ($row['NfID'] ?? '') . "\" class=\"msgblue\"><p>" .
                 addslashes((string) $row['NfName']) . ": loading</p></div>' );},url:'api.php/v1/feeds/" .
-                    $row['NfID'] . "/load', data: { name: '" .
-                    addslashes((string) $row['NfName']) . "', source_uri: '" . $row['NfSourceURI'] .
-                    "', options: '" . $row['NfOptions'] .
+                    ($row['NfID'] ?? '') . "/load', data: { name: '" .
+                    addslashes((string) $row['NfName']) . "', source_uri: '" . ($row['NfSourceURI'] ?? '') .
+                    "', options: '" . ($row['NfOptions'] ?? '') .
                     "' },success:function (data) {feedcnt+=1;$('#feedcount').text(feedcnt);var msg = data.error ? '<div class=\"red\"><p>' + data.error + '</p></div>' : '<div class=\"msgblue\"><p>' + data.message + '</p></div>';$('#feed_" .
-                        $row['NfID'] . "').replaceWith( msg );}})";
+                        ($row['NfID'] ?? '') . "').replaceWith( msg );}})";
             $cnt += 1;
             $feeds[$row['NfID']] = $row['NfName'];
         }
@@ -76,7 +76,7 @@ function load_feeds($currentfeed): void
         echo "<div class=\"msgblue\"><p>UPDATING <span id=\"feedcount\">0</span>/",$cnt," FEEDS</p></div>";
     }
     foreach ($feeds as $k => $v) {
-        echo "<div id='feed_$k' class=\"msgblue\"><p>" . $v . ": waiting</p></div>";
+        echo "<div id='feed_$k' class=\"msgblue\"><p>" . ($v ?? 'Feed') . ": waiting</p></div>";
     }
     echo "<div class=\"center\"><button onclick='window.location.replace(\"",($_SERVER['PHP_SELF'] ?? '/'),"\");'>Continue</button></div>";
 }

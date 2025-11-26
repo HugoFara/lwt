@@ -69,6 +69,9 @@ class Migrations
         Maintenance::initWordCount();
         $sql = "SELECT TxID, TxLgID FROM {$tbpref}texts";
         $res = do_mysqli_query($sql);
+        if ($res === false || $res === true) {
+            return;
+        }
         while ($record = mysqli_fetch_assoc($res)) {
             $id = (int) $record['TxID'];
             TextParsing::splitCheck(
@@ -110,13 +113,17 @@ class Migrations
                 '. Please reinstall.'
             );
         }
-        $record = mysqli_fetch_assoc($res);
-        if ($record !== false && $record !== null) {
-            $dbversion = $record["value"];
-        } else {
+        if ($res === false || $res === true) {
             $dbversion = 'v001000000';
+        } else {
+            $record = mysqli_fetch_assoc($res);
+            if ($record !== false && $record !== null) {
+                $dbversion = $record["value"];
+            } else {
+                $dbversion = 'v001000000';
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
 
         // Do DB Updates if tables seem to be old versions
 
@@ -149,12 +156,14 @@ class Migrations
             }
 
             $res = do_mysqli_query("SELECT filename FROM _migrations");
-            while ($record = mysqli_fetch_assoc($res)) {
-                $queries = parseSQLFile(
-                    __DIR__ . '/../../../../db/migrations/' . $record["filename"]
-                );
-                foreach ($queries as $sql_query) {
-                    (int) runsql($sql_query, '', false);
+            if ($res !== false && $res !== true) {
+                while ($record = mysqli_fetch_assoc($res)) {
+                    $queries = parseSQLFile(
+                        __DIR__ . '/../../../../db/migrations/' . $record["filename"]
+                    );
+                    foreach ($queries as $sql_query) {
+                        (int) runsql($sql_query, '', false);
+                    }
                 }
             }
 
@@ -195,6 +204,9 @@ class Migrations
                 "SHOW TABLES LIKE " . Escaping::toSqlSyntaxNoNull($tbpref . '%')
             )
         );
+        if ($res === false || $res === true) {
+            return;
+        }
         while ($row = mysqli_fetch_row($res)) {
             $tables[] = $row[0];
         }

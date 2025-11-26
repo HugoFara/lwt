@@ -236,8 +236,12 @@ class TextParsing
             $result = do_mysqli_query(
                 "SELECT ifnull(max(`SeID`)+1,1) as maxid FROM `{$tbpref}sentences`"
             );
-            $row = mysqli_fetch_assoc($result);
-            $sid = (int)$row['maxid'];
+            if ($result === false || $result === true) {
+                $sid = 1;
+            } else {
+                $row = mysqli_fetch_assoc($result);
+                $sid = $row ? (int)$row['maxid'] : 1;
+            }
         } else {
             $sid = 1;
         }
@@ -491,11 +495,13 @@ class TextParsing
             'SELECT GROUP_CONCAT(TiText order by TiOrder SEPARATOR "")
             Sent FROM ' . $tbpref . 'temptextitems group by TiSeID'
         );
-        echo '<h4>Sentences</h4><ol>';
-        while ($record = mysqli_fetch_assoc($res)) {
-            echo "<li>" . tohtml($record['Sent']) . "</li>";
+        if ($res !== false && $res !== true) {
+            echo '<h4>Sentences</h4><ol>';
+            while ($record = mysqli_fetch_assoc($res)) {
+                echo "<li>" . tohtml($record['Sent']) . "</li>";
+            }
+            mysqli_free_result($res);
         }
-        mysqli_free_result($res);
         echo '</ol>';
         $res = do_mysqli_query(
             "SELECT count(`TiOrder`) cnt, if(0=TiWordCount,0,1) as len,

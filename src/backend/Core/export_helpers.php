@@ -89,10 +89,10 @@ function tsv_export(string $sql)
         repl_tab_nl($record["WoTranslation"]) . "\t" .
         repl_tab_nl($record["WoSentence"]) . "\t" .
         repl_tab_nl($record["WoRomanization"]) . "\t" .
-        $record["WoStatus"] . "\t" .
+        ($record["WoStatus"] ?? '') . "\t" .
         repl_tab_nl($record["LgName"]) . "\t" .
-        $record["WoID"] . "\t" .
-        $record["taglist"] . "\r\n";
+        ($record["WoID"] ?? '') . "\t" .
+        ($record["taglist"] ?? '') . "\r\n";
     }
     mysqli_free_result($res);
     header('Content-type: text/plain; charset=utf-8');

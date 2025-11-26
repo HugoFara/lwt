@@ -77,6 +77,9 @@ class Maintenance
             $sql .= " LIKE " . Escaping::toSqlSyntax(rtrim($tbpref, '_')) . "'\\_%" . "'";
         }
         $res = do_mysqli_query($sql);
+        if ($res === false || $res === true) {
+            return;
+        }
         while ($row = mysqli_fetch_assoc($res)) {
             runsql('OPTIMIZE TABLE ' . $row['Name'], '');
         }
@@ -102,6 +105,9 @@ class Maintenance
         $sql = "SELECT WoID, WoTextLC FROM {$tbpref}words
         WHERE WoLgID = $japid AND WoWordCount = 0";
         $res = do_mysqli_query($sql);
+        if ($res === false || $res === true) {
+            return;
+        }
         $fp = fopen($db_to_mecab, 'w');
         while ($record = mysqli_fetch_assoc($res)) {
             fwrite($fp, $record['WoID'] . "\t" . $record['WoTextLC'] . "\n");
@@ -191,6 +197,9 @@ class Maintenance
         WHERE WoWordCount = 0 AND WoLgID = LgID
         ORDER BY WoID";
         $result = do_mysqli_query($sql);
+        if ($result === false || $result === true) {
+            return;
+        }
         while (($rec = mysqli_fetch_assoc($result)) !== false) {
             if ((int)$rec['LgSplitEachChar'] === 1) {
                 $textlc = preg_replace('/([^\s])/u', "$1 ", $rec['WoTextLC']);
