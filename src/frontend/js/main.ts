@@ -18,6 +18,11 @@ import 'jquery-ui-dist/jquery-ui';
 
 // Import TypeScript modules (these auto-register globals for backward compat)
 import './pgm';
+import './word_status';
+import './dictionary';
+import './html_utils';
+import './cookies';
+import './bulk_actions';
 import './audio_controller';
 import './translation_api';
 import './jq_pgm';
