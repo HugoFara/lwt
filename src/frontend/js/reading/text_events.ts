@@ -5,8 +5,8 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { make_tooltip } from './pgm';
-import { speechDispatcher } from './user_interactions';
+import { make_tooltip } from '../legacy/pgm';
+import { speechDispatcher } from '../legacy/user_interactions';
 import {
   getAttr,
   word_each_do_text_text,

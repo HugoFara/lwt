@@ -8,9 +8,9 @@
 
 import $ from 'jquery';
 import { LWT_DATA } from './lwt_state';
-import { check, containsCharacterOutsideBasicMultilingualPlane } from './form_validation';
-import { changeImprAnnText, changeImprAnnRadio, do_ajax_show_similar_terms } from './term_operations';
-import { readRawTextAloud } from './user_interactions';
+import { check, containsCharacterOutsideBasicMultilingualPlane } from '../forms/form_validation';
+import { changeImprAnnText, changeImprAnnRadio, do_ajax_show_similar_terms } from '../terms/term_operations';
+import { readRawTextAloud } from '../legacy/user_interactions';
 import { do_ajax_save_setting } from './ajax_utilities';
 
 // Extend jQuery with custom methods

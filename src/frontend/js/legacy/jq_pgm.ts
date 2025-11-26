@@ -36,7 +36,7 @@ export {
   type LwtWord,
   type LwtTest,
   type LwtSettings
-} from './lwt_state';
+} from '../core/lwt_state';
 
 // Form validation
 export {
@@ -46,7 +46,7 @@ export {
   isInt,
   check,
   textareaKeydown
-} from './form_validation';
+} from '../forms/form_validation';
 
 // Term operations
 export {
@@ -66,7 +66,7 @@ export {
   change_example_sentences_zone,
   do_ajax_show_sentences,
   type TransData
-} from './term_operations';
+} from '../terms/term_operations';
 
 // Text display
 export {
@@ -75,13 +75,13 @@ export {
   set_word_counts,
   word_count_click,
   lwt
-} from './text_display';
+} from '../reading/text_display';
 
 // Test mode
 export {
   word_click_event_do_test_test,
   keydown_event_do_test_test
-} from './test_mode';
+} from '../testing/test_mode';
 
 // UI utilities
 export {
@@ -92,7 +92,7 @@ export {
   setTheFocus,
   wrapRadioButtons,
   prepareMainAreas
-} from './ui_utilities';
+} from '../core/ui_utilities';
 
 // Frame management
 export {
@@ -103,14 +103,14 @@ export {
   cleanupRightFrames as cleanupRightFramesImpl,
   successSound,
   failureSound
-} from './frame_management';
+} from '../reading/frame_management';
 
 // Media selection
 export {
   select_media_path,
   media_select_receive_data,
   do_ajax_update_media_select
-} from './media_selection';
+} from '../media/media_selection';
 
 // AJAX utilities
 export {
@@ -118,4 +118,4 @@ export {
   scrollToAnchor,
   get_position_from_id,
   quick_select_to_input
-} from './ajax_utilities';
+} from '../core/ajax_utilities';

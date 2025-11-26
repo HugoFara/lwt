@@ -14,11 +14,11 @@
  */
 
 // Re-export all functions from specialized modules for backward compatibility
-export * from './word_status';
-export * from './dictionary';
-export * from './html_utils';
-export * from './cookies';
-export * from './bulk_actions';
+export * from '../terms/word_status';
+export * from '../terms/dictionary';
+export * from '../core/html_utils';
+export * from '../core/cookies';
+export * from '../forms/bulk_actions';
 
 // Declare external functions that are defined elsewhere
 declare function showRightFrames(url1?: string, url2?: string): void;

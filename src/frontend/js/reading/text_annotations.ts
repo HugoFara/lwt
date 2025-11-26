@@ -5,7 +5,7 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { make_tooltip } from './pgm';
+import { make_tooltip } from '../legacy/pgm';
 
 /**
  * Helper to safely get an HTML attribute value as a string.

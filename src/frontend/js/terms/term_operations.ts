@@ -7,8 +7,8 @@
  */
 
 import $ from 'jquery';
-import { escape_html_chars } from './pgm';
-import { isInt } from './form_validation';
+import { escape_html_chars } from '../core/html_utils';
+import { isInt } from '../forms/form_validation';
 
 // Interface for lwtFormCheck
 interface LwtFormCheck {

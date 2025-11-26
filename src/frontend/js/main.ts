@@ -17,20 +17,32 @@ import $ from 'jquery';
 import 'jquery-ui-dist/jquery-ui';
 
 // Import TypeScript modules (these auto-register globals for backward compat)
-import './pgm';
-import './word_status';
-import './dictionary';
-import './html_utils';
-import './cookies';
-import './bulk_actions';
-import './audio_controller';
-import './translation_api';
-import './jq_pgm';
-import './text_events';
-import './user_interactions';
-import './unloadformcheck';
-import './jq_feedwizard';
-import './overlib_interface';
+
+// Core utilities
+import './core/html_utils';
+import './core/cookies';
+
+// Legacy modules (being refactored)
+import './legacy/pgm';
+import './legacy/jq_pgm';
+import './legacy/user_interactions';
+
+// Terms/vocabulary management
+import './terms/word_status';
+import './terms/dictionary';
+import './terms/translation_api';
+import './terms/overlib_interface';
+
+// Reading interface
+import './reading/audio_controller';
+import './reading/text_events';
+
+// Forms
+import './forms/bulk_actions';
+import './forms/unloadformcheck';
+
+// Feeds
+import './feeds/jq_feedwizard';
 
 // Expose jQuery globally for legacy scripts and plugins
 declare global {

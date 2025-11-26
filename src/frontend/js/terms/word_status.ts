@@ -8,7 +8,7 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
-import type { WordStatus } from './types/globals';
+import type { WordStatus } from '../types/globals';
 
 /**
  * Return the name of a given status.

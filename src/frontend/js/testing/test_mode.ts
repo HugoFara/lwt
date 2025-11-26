@@ -7,7 +7,7 @@
  */
 
 import $ from 'jquery';
-import { LWT_DATA } from './lwt_state';
+import { LWT_DATA } from '../core/lwt_state';
 
 // Declare external functions
 declare function run_overlib_test(

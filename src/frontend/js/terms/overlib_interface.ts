@@ -14,8 +14,8 @@ import {
   createTheDictLink,
   createSentLookupLink,
   getLangFromDict
-} from './pgm';
-import { speechDispatcher } from './user_interactions';
+} from '../legacy/pgm';
+import { speechDispatcher } from '../legacy/user_interactions';
 
 // Declare external functions from overlib library
 declare function overlib(content: string, ...args: unknown[]): boolean;

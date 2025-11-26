@@ -6,7 +6,7 @@
  * @since   2.0.3-fork
  */
 
-import { getCookie } from './pgm';
+import { getCookie } from '../core/cookies';
 
 // Declare external functions and variables
 declare function overlib(): void;

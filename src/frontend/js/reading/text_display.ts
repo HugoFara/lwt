@@ -7,7 +7,7 @@
  */
 
 import $ from 'jquery';
-import { do_ajax_save_setting } from './ajax_utilities';
+import { do_ajax_save_setting } from '../core/ajax_utilities';
 
 // Word counts globals
 declare let WORDCOUNTS: {

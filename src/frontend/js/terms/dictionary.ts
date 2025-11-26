@@ -8,7 +8,7 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
-import { escape_apostrophes } from './html_utils';
+import { escape_apostrophes } from '../core/html_utils';
 
 // Declare external functions that are defined elsewhere
 declare function showRightFrames(url1?: string, url2?: string): void;

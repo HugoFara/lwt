@@ -5,8 +5,8 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { getLangFromDict, createTheDictUrl } from './pgm';
-import { speechDispatcher } from './user_interactions';
+import { getLangFromDict, createTheDictUrl } from '../legacy/pgm';
+import { speechDispatcher } from '../legacy/user_interactions';
 import { getAttr } from './text_annotations';
 
 // Declare external functions
