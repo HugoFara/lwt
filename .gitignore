@@ -51,3 +51,6 @@ tools/*
 # PHPUnit coverage reports
 coverage-report/
 coverage.xml
+
+# Vitest coverage report
+converage/
