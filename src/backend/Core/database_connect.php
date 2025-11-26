@@ -546,7 +546,7 @@ function update_default_values($id, $lid, $_sql)
         $hasmultiword = true;
     }
     mysqli_free_result($res);
-    return registerSentencesTextItems($id, $lid, $hasmultiword);
+    registerSentencesTextItems($id, $lid, $hasmultiword);
 }
 
 

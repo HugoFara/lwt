@@ -232,7 +232,7 @@ class GoogleTranslate
      *
      * @param int[]|null $time_token (optional) array() from
      *                               https://translate.google.com. If empty, array(408254,585515986) is used
-     * @param string     $domain     (optional) Connect to Google Domain
+     * @param string|null $domain    (optional) Connect to Google Domain
      *                               (i.e. 'com' for  https://translate.google.com). If empty,
      *                               a random domain will be used (the default value can be altered by changing DEFAULT_DOMAIN)
      *                               Possible values:

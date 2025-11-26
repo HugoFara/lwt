@@ -117,7 +117,7 @@ class DB
      */
     public static function execute(string $sql): int
     {
-        return Connection::execute($sql);
+        return (int) Connection::execute($sql);
     }
 
     /**

@@ -145,7 +145,7 @@ class QueryBuilder
      * Add a WHERE clause.
      *
      * @param string $column   The column name
-     * @param string $operator The comparison operator
+     * @param mixed  $operator The comparison operator or value (if using 2-arg form)
      * @param mixed  $value    The value to compare against
      * @param string $boolean  The boolean connector (AND/OR)
      *
@@ -153,12 +153,12 @@ class QueryBuilder
      */
     public function where(
         string $column,
-        string $operator = '=',
+        mixed $operator = '=',
         mixed $value = null,
         string $boolean = 'AND'
     ): self {
         // Handle simple equality: where('col', 'value')
-        if ($value === null && !in_array(strtoupper($operator), ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'])) {
+        if ($value === null && !in_array(strtoupper((string)$operator), ['=', '!=', '<>', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS NULL', 'IS NOT NULL'])) {
             $value = $operator;
             $operator = '=';
         }
@@ -177,12 +177,12 @@ class QueryBuilder
      * Add an OR WHERE clause.
      *
      * @param string $column   The column name
-     * @param string $operator The comparison operator
+     * @param mixed  $operator The comparison operator or value (if using 2-arg form)
      * @param mixed  $value    The value to compare against
      *
      * @return self
      */
-    public function orWhere(string $column, string $operator = '=', mixed $value = null): self
+    public function orWhere(string $column, mixed $operator = '=', mixed $value = null): self
     {
         return $this->where($column, $operator, $value, 'OR');
     }
@@ -628,7 +628,7 @@ class QueryBuilder
         $sql .= ' (' . implode(', ', $columns) . ')';
         $sql .= ' VALUES ' . implode(', ', $valueGroups);
 
-        return Connection::execute($sql);
+        return (int) Connection::execute($sql);
     }
 
     /**
@@ -652,7 +652,7 @@ class QueryBuilder
             $sql .= ' WHERE ' . $this->compileWheres();
         }
 
-        return Connection::execute($sql);
+        return (int) Connection::execute($sql);
     }
 
     /**
@@ -668,7 +668,7 @@ class QueryBuilder
             $sql .= ' WHERE ' . $this->compileWheres();
         }
 
-        return Connection::execute($sql);
+        return (int) Connection::execute($sql);
     }
 
     /**

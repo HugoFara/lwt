@@ -212,7 +212,7 @@ class Migrations
             } else {
                 $prefixed_query = self::prefixQuery($query, $tbpref);
                 // Increment count for new tables only
-                $count += runsql($prefixed_query, "");
+                $count += (int) runsql($prefixed_query, "");
             }
         }
 
