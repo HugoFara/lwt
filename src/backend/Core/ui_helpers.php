@@ -16,6 +16,8 @@
  * @since   2.10.0-fork Split from session_utility.php
  */
 
+require_once __DIR__ . '/vite_helper.php';
+
 /**
  * Return an HTML formatted logo of the application.
  *
@@ -917,20 +919,25 @@ function pagestart_nobody($title, $addcss=''): void
     <link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
+    <?php if (should_use_vite()): ?>
+    <!-- Vite assets -->
+    <?php echo vite_assets('js/main.ts'); ?>
+    <?php else: ?>
+    <!-- Legacy assets -->
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/jquery-ui.css');?>" />
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/jquery.tagit.css');?>" />
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/styles.css');?>" />
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/feed_wizard.css');?>" />
-    <style type="text/css">
-        <?php echo $addcss . "\n"; ?>
-    </style>
-
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery.scrollTo.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
+    <?php endif; ?>
     <script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>
+    <style type="text/css">
+        <?php echo $addcss . "\n"; ?>
+    </style>
     <!-- URLBASE : "<?php echo tohtml(url_base()); ?>" -->
     <!-- TBPREF  : "<?php echo tohtml($tbpref);  ?>" -->
     <script type="text/javascript">
@@ -940,7 +947,9 @@ function pagestart_nobody($title, $addcss=''): void
         var TEXTTAGS = <?php echo json_encode(get_texttags()); ?>;
         //]]>
     </script>
+    <?php if (!should_use_vite()): ?>
     <script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>
+    <?php endif; ?>
 
     <title>LWT :: <?php echo tohtml($title); ?></title>
 </head>
