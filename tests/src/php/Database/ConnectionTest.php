@@ -559,13 +559,14 @@ class ConnectionTest extends TestCase
 
         $tbpref = self::$tbpref;
         
-        Connection::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_last_id', 'test_value')");
+        // Use tags table which has AUTO_INCREMENT
+        Connection::execute("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_last_insert_id')");
         $lastId = Connection::lastInsertId();
         
         $this->assertGreaterThan(0, $lastId);
         
         // Clean up
-        Connection::execute("DELETE FROM {$tbpref}settings WHERE StKey = 'test_last_id'");
+        Connection::execute("DELETE FROM {$tbpref}tags WHERE TgText = 'test_last_insert_id'");
     }
 
     // ===== reset() tests =====

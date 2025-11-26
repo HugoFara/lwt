@@ -158,6 +158,47 @@ class QueryBuilderTest extends TestCase
         $this->assertStringContainsString("WHERE TgID > 1 AND TgText LIKE 'test%'", $sql);
     }
 
+    public function testWhereWithBooleanTrue(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $sql = QueryBuilder::table('tags')->where('TgID', '=', true)->toSql();
+        $this->assertStringContainsString("WHERE TgID = 1", $sql);
+    }
+
+    public function testWhereWithBooleanFalse(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $sql = QueryBuilder::table('tags')->where('TgID', '=', false)->toSql();
+        $this->assertStringContainsString("WHERE TgID = 0", $sql);
+    }
+
+    public function testWhereWithFloat(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $sql = QueryBuilder::table('tags')->where('TgID', '>', 3.14)->toSql();
+        $this->assertStringContainsString("WHERE TgID > 3.14", $sql);
+    }
+
+    public function testWhereWithNull(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // When using null with =, it should produce IS NULL
+        $sql = QueryBuilder::table('tags')->whereNull('TgComment')->toSql();
+        $this->assertStringContainsString("WHERE TgComment IS NULL", $sql);
+    }
+
     // ===== orWhere() tests =====
 
     public function testOrWhere(): void
@@ -248,6 +289,17 @@ class QueryBuilderTest extends TestCase
             ->toSql();
         
         $this->assertStringContainsString("RIGHT JOIN {$tbpref}wordtags", $sql);
+    }
+
+    public function testJoinWithNonEqualityOperator(): void
+    {
+        $tbpref = self::$tbpref;
+        $sql = QueryBuilder::table('tags')
+            ->join('wordtags', 'tags.TgID', '!=', 'wordtags.WtTgID')
+            ->toSql();
+        
+        $this->assertStringContainsString("INNER JOIN {$tbpref}wordtags", $sql);
+        $this->assertStringContainsString("ON tags.TgID != wordtags.WtTgID", $sql);
     }
 
     // ===== orderBy() tests =====
@@ -543,18 +595,19 @@ class QueryBuilderTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        // Insert test data
-        $id = QueryBuilder::table('tags')->insert(['TgText' => 'test_qb_update_multi']);
+        // Insert test data with unique suffix
+        $suffix = substr(uniqid(), -6);
+        $id = QueryBuilder::table('tags')->insert(['TgText' => "test_qb_upd_m_{$suffix}"]);
         
         // Update
         QueryBuilder::table('tags')->where('TgID', $id)->update([
-            'TgText' => 'updated_text',
+            'TgText' => "upd_txt_{$suffix}",
             'TgComment' => 'updated_comment'
         ]);
         
         // Verify
         $row = QueryBuilder::table('tags')->where('TgID', $id)->first();
-        $this->assertEquals('updated_text', $row['TgText']);
+        $this->assertEquals("upd_txt_{$suffix}", $row['TgText']);
         $this->assertEquals('updated_comment', $row['TgComment']);
     }
 
