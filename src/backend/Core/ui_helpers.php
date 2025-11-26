@@ -31,7 +31,7 @@ function echo_lwt_logo(): void
 
 // -------------------------------------------------------------
 
-function get_seconds_selectoptions($v): string
+function get_seconds_selectoptions(int|string|null $v): string
 {
     if (!isset($v)) {
         $v = 5;
@@ -46,7 +46,7 @@ function get_seconds_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_playbackrate_selectoptions($v): string
+function get_playbackrate_selectoptions(int|string|null $v): string
 {
     if (!isset($v)) {
         $v = '10';
@@ -81,7 +81,7 @@ function get_mobile_display_mode_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_sentence_count_selectoptions($v): string
+function get_sentence_count_selectoptions(int|string|null $v): string
 {
     if (!isset($v)) {
         $v = 1;
@@ -97,7 +97,7 @@ function get_sentence_count_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_words_to_do_buttons_selectoptions($v): string
+function get_words_to_do_buttons_selectoptions(int|string|null $v): string
 {
     if (!isset($v)) {
         $v = "1";
@@ -113,7 +113,7 @@ function get_words_to_do_buttons_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_regex_selectoptions($v): string
+function get_regex_selectoptions(string|null $v): string
 {
     if (!isset($v)) {
         $v = "";
@@ -129,7 +129,7 @@ function get_regex_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_tooltip_selectoptions($v): string
+function get_tooltip_selectoptions(int|string|null $v): string
 {
     if (!isset($v)) {
         $v = 1;
@@ -143,7 +143,7 @@ function get_tooltip_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_themes_selectoptions($v): string
+function get_themes_selectoptions(string|null $v): string
 {
     $themes = glob('assets/themes/*', GLOB_ONLYDIR);
     $r = '<option value="assets/themes/Default/">Default</option>';
@@ -183,7 +183,7 @@ function get_checked($value): string
  *
  * @psalm-return ' selected="selected" '|''
  */
-function get_selected($value, $selval): string
+function get_selected(int|string|null $value, int|string $selval): string
 {
     if (!isset($value)) {
         return '';
@@ -225,7 +225,7 @@ function get_languages_selectoptions($v, $dt): string
 
 // -------------------------------------------------------------
 
-function get_languagessize_selectoptions($v): string
+function get_languagessize_selectoptions(int|string|null $v): string
 {
     if (!isset($v)) {
         $v = 100;
@@ -243,7 +243,7 @@ function get_languagessize_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_wordstatus_radiooptions($v): string
+function get_wordstatus_radiooptions(int|string|null $v): string
 {
     if (!isset($v)) {
         $v = 1;
@@ -263,8 +263,12 @@ function get_wordstatus_radiooptions($v): string
 
 // -------------------------------------------------------------
 
-function get_wordstatus_selectoptions($v, $all, $not9899, $off = true): string
-{
+function get_wordstatus_selectoptions(
+    int|string|null $v,
+    bool $all,
+    bool $not9899,
+    bool $off = true
+): string {
     if (!isset($v)) {
         if ($all) {
             $v = "";
@@ -337,7 +341,7 @@ function get_wordstatus_selectoptions($v, $all, $not9899, $off = true): string
 
 // -------------------------------------------------------------
 
-function get_annotation_position_selectoptions($v): string
+function get_annotation_position_selectoptions(int|string|null $v): string
 {
     if (! isset($v)) {
         $v = 1;
@@ -354,7 +358,7 @@ function get_annotation_position_selectoptions($v): string
 }
 // -------------------------------------------------------------
 
-function get_hts_selectoptions($current_setting): string
+function get_hts_selectoptions(int|string|null $current_setting): string
 {
     if (!isset($current_setting)) {
         $current_setting = 1;
@@ -378,7 +382,7 @@ function get_hts_selectoptions($current_setting): string
 
 // -------------------------------------------------------------
 
-function get_paging_selectoptions($currentpage, $pages): string
+function get_paging_selectoptions(int $currentpage, int $pages): string
 {
     $r = "";
     for ($i = 1; $i <= $pages; $i++) {
@@ -390,7 +394,7 @@ function get_paging_selectoptions($currentpage, $pages): string
 
 // -------------------------------------------------------------
 
-function get_wordssort_selectoptions($v): string
+function get_wordssort_selectoptions(int|string|null $v): string
 {
     if (! isset($v)) {
         $v = 1;
@@ -416,7 +420,7 @@ function get_wordssort_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_tagsort_selectoptions($v): string
+function get_tagsort_selectoptions(int|string|null $v): string
 {
     if (! isset($v)) {
         $v = 1;
@@ -434,7 +438,7 @@ function get_tagsort_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_textssort_selectoptions($v): string
+function get_textssort_selectoptions(int|string|null $v): string
 {
     if (!isset($v)) {
         $v = 1;
@@ -451,7 +455,7 @@ function get_textssort_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_andor_selectoptions($v): string
+function get_andor_selectoptions(int|string|null $v): string
 {
     if (!isset($v)) {
         $v = 0;
@@ -465,7 +469,7 @@ function get_andor_selectoptions($v): string
 
 // -------------------------------------------------------------
 
-function get_set_status_option($n, $suffix = ""): string
+function get_set_status_option(int $n, string $suffix = ""): string
 {
     return "<option value=\"s" . $n . $suffix . "\">Set Status to " .
     tohtml(get_status_name($n)) . " [" . tohtml(get_status_abbr($n)) .
@@ -474,7 +478,7 @@ function get_set_status_option($n, $suffix = ""): string
 
 // -------------------------------------------------------------
 
-function get_status_name($n): string
+function get_status_name(int $n): string
 {
     $statuses = get_statuses();
     return $statuses[$n]["name"];
@@ -482,7 +486,7 @@ function get_status_name($n): string
 
 // -------------------------------------------------------------
 
-function get_status_abbr($n): string
+function get_status_abbr(int $n): string
 {
     $statuses = get_statuses();
     return $statuses[$n]["abbr"];
@@ -490,7 +494,7 @@ function get_status_abbr($n): string
 
 // -------------------------------------------------------------
 
-function get_colored_status_msg($n): string
+function get_colored_status_msg(int $n): string
 {
     return '<span class="status' . $n . '">&nbsp;' . tohtml(get_status_name($n)) .
     '&nbsp;[' . tohtml(get_status_abbr($n)) . ']&nbsp;</span>';
@@ -617,7 +621,7 @@ function get_multiplearchivedtextactions_selectoptions(): string
 
 // -------------------------------------------------------------
 
-function get_texts_selectoptions($lang, $v): string
+function get_texts_selectoptions(int|string|null $lang, int|string|null $v): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (! isset($v)) {
@@ -656,7 +660,7 @@ function get_texts_selectoptions($lang, $v): string
  *
  * @return void
  */
-function makePager($currentpage, $pages, $script, $formname): void
+function makePager(int $currentpage, int $pages, string $script, string $formname): void
 {
     $marger = 'style="margin-left: 4px; margin-right: 4px;"';
     if ($currentpage > 1) {
@@ -696,7 +700,7 @@ Page
 
 // -------------------------------------------------------------
 
-function makeStatusCondition($fieldname, $statusrange): string
+function makeStatusCondition(string $fieldname, int $statusrange): string
 {
     if ($statusrange >= 12 && $statusrange <= 15) {
         return '(' . $fieldname . ' between 1 and ' . ($statusrange % 10) . ')';
@@ -715,7 +719,7 @@ function makeStatusCondition($fieldname, $statusrange): string
 
 // -------------------------------------------------------------
 
-function checkStatusRange($currstatus, $statusrange): bool
+function checkStatusRange(int $currstatus, int $statusrange): bool
 {
     if ($statusrange >= 12 && $statusrange <= 15) {
         return ($currstatus >= 1 && $currstatus <= ($statusrange % 10));

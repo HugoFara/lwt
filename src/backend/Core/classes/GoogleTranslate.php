@@ -180,11 +180,11 @@ namespace Lwt\Classes;
         self::$gglDomain = self::getDomain($domain);
         self::setHeaders();
     }
-    public function __construct($from, $to)
+    public function __construct(string|null $from, string $to)
     {
         $this->setLangFrom($from)->setLangTo($to);
     }
-    public static function makeCurl(string $url, $cookieSet = false): string|bool
+    public static function makeCurl(string $url, bool $cookieSet = false): string|bool
     {
         if (is_callable('curl_init')) {
             if (!$cookieSet) {

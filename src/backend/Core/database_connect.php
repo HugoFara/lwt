@@ -308,7 +308,7 @@ function validateArchTextTag(string $currenttag, string $currentlang): string
 
 // -------------------------------------------------------------
 
-function validateTextTag($currenttag, $currentlang): string
+function validateTextTag(string $currenttag, string $currentlang): string
 {
     return Validation::textTag($currenttag, $currentlang);
 }

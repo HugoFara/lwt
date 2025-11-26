@@ -66,7 +66,7 @@ function get_texttags($refresh = 0)
 
 // -------------------------------------------------------------
 
-function getTextTitle($textid): string
+function getTextTitle(int $textid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Validate that textid is numeric
@@ -86,7 +86,7 @@ function getTextTitle($textid): string
 
 // -------------------------------------------------------------
 
-function get_tag_selectoptions($v, $l): string
+function get_tag_selectoptions(int|string|null $v, int|string $l): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (!isset($v)) {
@@ -125,7 +125,7 @@ function get_tag_selectoptions($v, $l): string
 
 // -------------------------------------------------------------
 
-function get_texttag_selectoptions($v, $l): string
+function get_texttag_selectoptions(int|string|null $v, int|string $l): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (!isset($v)) {
@@ -164,7 +164,7 @@ function get_texttag_selectoptions($v, $l): string
 
 // -------------------------------------------------------------
 
-function get_txtag_selectoptions($l, $v): string
+function get_txtag_selectoptions(int|string $l, int|string|null $v): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (!isset($v)) {
@@ -200,7 +200,7 @@ function get_txtag_selectoptions($l, $v): string
 
 // -------------------------------------------------------------
 
-function get_archivedtexttag_selectoptions($v, $l): string
+function get_archivedtexttag_selectoptions(int|string|null $v, int|string $l): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (!isset($v)) {
@@ -245,7 +245,7 @@ function get_archivedtexttag_selectoptions($v, $l): string
  *
  * @return void
  */
-function saveWordTags($wid)
+function saveWordTags(int $wid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Validate that wid is numeric
@@ -292,7 +292,7 @@ function saveWordTags($wid)
  *
  * @global string $tbpref Database table prefix.
  */
-function saveTextTags($tid): void
+function saveTextTags(int $tid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Validate that tid is numeric
@@ -343,7 +343,7 @@ function saveTextTags($tid): void
  *
  * @global string $tbpref Databse table prefix.
  */
-function saveArchivedTextTags($tid): void
+function saveArchivedTextTags(int $tid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Validate that tid is numeric
@@ -384,7 +384,7 @@ function saveArchivedTextTags($tid): void
 
 // -------------------------------------------------------------
 
-function getWordTags($wid): string
+function getWordTags(int $wid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $r = '<ul id="termtags">';
@@ -462,7 +462,7 @@ function getArchivedTextTags($tid): string
 
 // -------------------------------------------------------------
 
-function addtaglist($item, $list): string
+function addtaglist(string $item, string $list): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Handle empty list
@@ -511,7 +511,7 @@ function addtaglist($item, $list): string
 
 // -------------------------------------------------------------
 
-function addarchtexttaglist($item, $list): string
+function addarchtexttaglist(string $item, string $list): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Handle empty list
@@ -558,7 +558,7 @@ function addarchtexttaglist($item, $list): string
 
 // -------------------------------------------------------------
 
-function addtexttaglist($item, $list): string
+function addtexttaglist(string $item, string $list): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Handle empty list
@@ -606,7 +606,7 @@ function addtexttaglist($item, $list): string
 
 // -------------------------------------------------------------
 
-function removetaglist($item, $list): string
+function removetaglist(string $item, string $list): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Handle empty list
@@ -638,7 +638,7 @@ function removetaglist($item, $list): string
 
 // -------------------------------------------------------------
 
-function removearchtexttaglist($item, $list): string
+function removearchtexttaglist(string $item, string $list): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Handle empty list
@@ -670,7 +670,7 @@ function removearchtexttaglist($item, $list): string
 
 // -------------------------------------------------------------
 
-function removetexttaglist($item, $list): string
+function removetexttaglist(string $item, string $list): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Handle empty list
