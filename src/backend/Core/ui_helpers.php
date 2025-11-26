@@ -217,7 +217,7 @@ function get_languages_selectoptions($v, $dt): string
             $d = substr($d, 0, 30) . "...";
         }
         $r .= "<option value=\"" . $record["LgID"] . "\" " .
-        get_selected($v, $record["LgID"]) . ">" . tohtml($d) . "</option>";
+        get_selected($v, (int)$record["LgID"]) . ">" . tohtml($d) . "</option>";
     }
     mysqli_free_result($res);
     return $r;
@@ -621,6 +621,9 @@ function get_multiplearchivedtextactions_selectoptions(): string
 
 // -------------------------------------------------------------
 
+/**
+ * @psalm-suppress UnusedParam Parameters are used after null coalescing
+ */
 function get_texts_selectoptions(int|string|null $lang, int|string|null $v): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
@@ -648,7 +651,7 @@ function get_texts_selectoptions(int|string|null $lang, int|string|null $v): str
             $d = mb_substr($d, 0, 30, 'UTF-8') . "...";
         }
         $r .= "<option value=\"" . $record["TxID"] . "\"" .
-        get_selected($v, $record["TxID"]) . ">" . tohtml(($lang != "" ? "" : ($record["LgName"] . ": ")) . $d) . "</option>";
+        get_selected($v, (int)$record["TxID"]) . ">" . tohtml(($lang != "" ? "" : ($record["LgName"] . ": ")) . $d) . "</option>";
     }
     mysqli_free_result($res);
     return $r;

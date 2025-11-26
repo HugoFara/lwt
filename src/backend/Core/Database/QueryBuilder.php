@@ -86,7 +86,7 @@ class QueryBuilder
     private ?int $offsetValue = null;
 
     /**
-     * @var array<int, array{type: string, table: string, first: string, operator: string, second: string}> JOIN clauses
+     * @var list<array{type: string, table: string, first: string, operator: string, second: string}> JOIN clauses
      */
     private array $joins = [];
 

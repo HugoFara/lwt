@@ -69,14 +69,10 @@ function get_texttags($refresh = 0)
 function getTextTitle(int $textid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    // Validate that textid is numeric
-    if (!is_numeric($textid)) {
-        return "?";
-    }
     $text = get_first_value(
         "SELECT TxTitle AS value
         FROM " . $tbpref . "texts
-        WHERE TxID=" . (int)$textid
+        WHERE TxID=" . $textid
     );
     if (!isset($text)) {
         $text = "?";
@@ -248,11 +244,7 @@ function get_archivedtexttag_selectoptions(int|string|null $v, int|string $l): s
 function saveWordTags(int $wid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    // Validate that wid is numeric
-    if (!is_numeric($wid)) {
-        return;
-    }
-    runsql("DELETE from " . $tbpref . "wordtags WHERE WtWoID =" . (int)$wid, '');
+    runsql("DELETE from " . $tbpref . "wordtags WHERE WtWoID =" . $wid, '');
     if (
         !isset($_REQUEST['TermTags'])
         || !is_array($_REQUEST['TermTags'])
@@ -295,12 +287,8 @@ function saveWordTags(int $wid): void
 function saveTextTags(int $tid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    // Validate that tid is numeric
-    if (!is_numeric($tid)) {
-        return;
-    }
     runsql(
-        "DELETE FROM " . $tbpref . "texttags WHERE TtTxID =" . (int)$tid,
+        "DELETE FROM " . $tbpref . "texttags WHERE TtTxID =" . $tid,
         ''
     );
     if (
@@ -346,11 +334,7 @@ function saveTextTags(int $tid): void
 function saveArchivedTextTags(int $tid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    // Validate that tid is numeric
-    if (!is_numeric($tid)) {
-        return;
-    }
-    runsql("DELETE from " . $tbpref . "archtexttags WHERE AgAtID =" . (int)$tid, '');
+    runsql("DELETE from " . $tbpref . "archtexttags WHERE AgAtID =" . $tid, '');
     if (
         !isset($_REQUEST['TextTags'])
         || !is_array($_REQUEST['TextTags'])
