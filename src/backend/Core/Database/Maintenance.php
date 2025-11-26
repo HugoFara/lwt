@@ -121,7 +121,7 @@ class Maintenance
         while (!feof($handle)) {
             $row = fgets($handle, 1024);
             $arr = explode("4\t", $row, 2);
-            if (!empty($arr[1])) {
+            if (isset($arr[1]) && $arr[1] !== '') {
                 //TODO Add tests
                 $cnt = substr_count(
                     preg_replace('$[^2678]\\t$u', '', $arr[1]),
@@ -183,7 +183,7 @@ class Maintenance
             WHERE UPPER(LgRegexpWordCharacters)='MECAB'"
         );
 
-        if ($japid) {
+        if ($japid !== null && $japid !== '') {
             self::updateJapaneseWordCount((int)$japid);
         }
         $sql = "SELECT WoID, WoTextLC, LgRegexpWordCharacters, LgSplitEachChar
@@ -191,8 +191,8 @@ class Maintenance
         WHERE WoWordCount = 0 AND WoLgID = LgID
         ORDER BY WoID";
         $result = do_mysqli_query($sql);
-        while ($rec = mysqli_fetch_assoc($result)) {
-            if ($rec['LgSplitEachChar']) {
+        while (($rec = mysqli_fetch_assoc($result)) !== false) {
+            if ((int)$rec['LgSplitEachChar'] === 1) {
                 $textlc = preg_replace('/([^\s])/u', "$1 ", $rec['WoTextLC']);
             } else {
                 $textlc = $rec['WoTextLC'];

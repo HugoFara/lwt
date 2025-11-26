@@ -163,7 +163,7 @@ function get_first_value($sql)
 {
     $res = do_mysqli_query($sql);
     $record = mysqli_fetch_assoc($res);
-    if ($record && array_key_exists("value", $record)) {
+    if ($record !== false && $record !== null && array_key_exists("value", $record)) {
         $d = $record["value"];
     } else {
         $d = null;
@@ -187,7 +187,14 @@ function prepare_textdata($s): string
 
 // -------------------------------------------------------------
 
-function prepare_textdata_js($s): string
+/**
+ * Prepare text data for JavaScript output.
+ *
+ * @param string $s Input string
+ *
+ * @return string Escaped string safe for JavaScript
+ */
+function prepare_textdata_js(string $s): string
 {
     return Escaping::prepareTextdataJs($s);
 }
@@ -237,7 +244,14 @@ function convert_string_to_sqlsyntax_notrim_nonull($data): string
 
 // -------------------------------------------------------------
 
-function convert_regexp_to_sqlsyntax($input): string
+/**
+ * Convert regular expression to SQL syntax.
+ *
+ * @param string $input Regular expression pattern
+ *
+ * @return string SQL-compatible pattern
+ */
+function convert_regexp_to_sqlsyntax(string $input): string
 {
     return Escaping::regexpToSqlSyntax($input);
 }
@@ -261,21 +275,33 @@ function validateLang($currentlang): string
  *
  * @return string '' if the text is not valid, $currenttext otherwise
  */
-function validateText($currenttext): string
+function validateText(string $currenttext): string
 {
     return Validation::text($currenttext);
 }
 
-// -------------------------------------------------------------
-
-function validateTag($currenttag, $currentlang): string
+/**
+ * Validate a tag ID for a given language.
+ *
+ * @param string $currenttag Tag ID to validate
+ * @param string $currentlang Language ID
+ *
+ * @return string '' if invalid, $currenttag otherwise
+ */
+function validateTag(string $currenttag, string $currentlang): string
 {
     return Validation::tag($currenttag, $currentlang);
 }
 
-// -------------------------------------------------------------
-
-function validateArchTextTag($currenttag, $currentlang): string
+/**
+ * Validate an archived text tag ID.
+ *
+ * @param string $currenttag Tag ID to validate
+ * @param string $currentlang Language ID
+ *
+ * @return string '' if invalid, $currenttag otherwise
+ */
+function validateArchTextTag(string $currenttag, string $currentlang): string
 {
     return Validation::archTextTag($currenttag, $currentlang);
 }
@@ -336,7 +362,7 @@ function getSettingWithDefault($key)
  *
  * @since 2.9.0 Success message starts by "OK: "
  */
-function saveSetting($k, $v)
+function saveSetting(string $k, string $v)
 {
     return Settings::save($k, $v);
 }
@@ -349,16 +375,25 @@ function LWTTableCheck(): void
     Settings::lwtTableCheck();
 }
 
-// -------------------------------------------------------------
-
-function LWTTableSet($key, $val): void
+/**
+ * Set a value in the _lwtgeneral table.
+ *
+ * @param string $key Setting key
+ * @param string $val Setting value
+ */
+function LWTTableSet(string $key, string $val): void
 {
     Settings::lwtTableSet($key, $val);
 }
 
-// -------------------------------------------------------------
-
-function LWTTableGet($key): string
+/**
+ * Get a value from the _lwtgeneral table.
+ *
+ * @param string $key Setting key
+ *
+ * @return string Setting value or empty string if not found
+ */
+function LWTTableGet(string $key): string
 {
     return Settings::lwtTableGet($key);
 }
@@ -554,7 +589,7 @@ function update_default_values($id, $lid, $_sql)
         WHERE WoLgID = $lid AND WoWordCount > 1"
     );
     // Text has multi-words
-    if (mysqli_fetch_assoc($res)) {
+    if (mysqli_fetch_assoc($res) !== false) {
         $hasmultiword = true;
     }
     mysqli_free_result($res);

@@ -303,7 +303,7 @@ class TextParsing
         mysqli_free_result($res);
 
         // Return null if language not found
-        if (!$record) {
+        if ($record === false || $record === null) {
             return null;
         }
 
@@ -315,7 +315,7 @@ class TextParsing
         // Split text paragraphs using " ¶" symbol
         $text = str_replace("\n", " ¶", $text);
         $text = trim($text);
-        if ($record['LgSplitEachChar']) {
+        if ((int)$record['LgSplitEachChar'] === 1) {
             $text = preg_replace('/([^\s])/u', "$1\t", $text);
         }
         $text = preg_replace('/\s+/u', ' ', $text);
@@ -451,7 +451,7 @@ class TextParsing
         mysqli_free_result($res);
 
         // Return null if language not found
-        if (!$record) {
+        if ($record === false || $record === null) {
             return null;
         }
 

@@ -274,7 +274,7 @@ class TagsController extends BaseController
     {
         $sql = 'select * from ' . $this->table('tags') . ' where TgID = ' . $tagId;
         $res = $this->query($sql);
-        if ($record = mysqli_fetch_assoc($res)) {
+        if (($record = mysqli_fetch_assoc($res)) !== false) {
             ?>
             <h2>Edit Tag</h2>
             <script type="text/javascript" charset="utf-8">
@@ -646,7 +646,7 @@ class TagsController extends BaseController
     {
         $sql = 'select * from ' . $this->table('tags2') . ' where T2ID = ' . $tagId;
         $res = $this->query($sql);
-        if ($record = mysqli_fetch_assoc($res)) {
+        if (($record = mysqli_fetch_assoc($res)) !== false) {
             ?>
             <h2>Edit Tag</h2>
             <script type="text/javascript" charset="utf-8">

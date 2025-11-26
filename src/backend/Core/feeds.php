@@ -67,9 +67,9 @@ function load_feeds($currentfeed): void
             $z[] = 'a' . $i;
         }
         echo "feedcnt=0;\n";
-        echo '$(document).ready(function(){ $.when(',implode(',', $ajax),").then(function(",implode(',', $z),"){window.location.replace(\"",$_SERVER['PHP_SELF'],"\");});});";
+        echo '$(document).ready(function(){ $.when(',implode(',', $ajax),").then(function(",implode(',', $z),"){window.location.replace(\"",($_SERVER['PHP_SELF'] ?? '/'),"\");});});";
     } else {
-        echo "window.location.replace(\"",$_SERVER['PHP_SELF'],"\");";
+        echo "window.location.replace(\"",($_SERVER['PHP_SELF'] ?? '/'),"\");";
     }
     echo "\n</script>\n";
     if ($cnt != 1) {
@@ -78,7 +78,7 @@ function load_feeds($currentfeed): void
     foreach ($feeds as $k => $v) {
         echo "<div id='feed_$k' class=\"msgblue\"><p>" . $v . ": waiting</p></div>";
     }
-    echo "<div class=\"center\"><button onclick='window.location.replace(\"",$_SERVER['PHP_SELF'],"\");'>Continue</button></div>";
+    echo "<div class=\"center\"><button onclick='window.location.replace(\"",($_SERVER['PHP_SELF'] ?? '/'),"\");'>Continue</button></div>";
 }
 
 // -------------------------------------------------------------
@@ -386,14 +386,14 @@ function get_links_from_new_feed($NfSourceURI): array|false
         $rss_data['feed_text'] = $source;
         foreach ($rss_data as $i => $val) {
             if (is_array($val)) {
-                $rss_data[$i]['text'] = $val[$source];
+                $rss_data[$i]['text'] = $val[$source] ?? '';
             }
         }
     } elseif ($enc_count > $enc_nocount) {
         $rss_data['feed_text'] = 'encoded';
         foreach ($rss_data as $i => $val) {
             if (is_array($val)) {
-                $rss_data[$i]['text'] = $val['encoded'];
+                $rss_data[$i]['text'] = $val['encoded'] ?? '';
             }
         }
     } else {
@@ -514,7 +514,7 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
             $dom->loadHTML($HTMLString);
             $xPath = new DOMXPath($dom);
             $redirect = explode(" | ", $NfArticleSection, 2);
-            $NfArticleSection = $redirect[1];
+            $NfArticleSection = $redirect[1] ?? '';
             $redirect = substr($redirect[0], 9);
             $feed_host = parse_url(trim($feed_data[$key]['link']));
             foreach ($xPath->query($redirect) as $node) {
@@ -534,7 +534,7 @@ function get_text_from_rsslink($feed_data, $NfArticleSection, $NfFilterTags, $Nf
                     if ($attr->name == 'href') {
                         $feed_data[$key]['link'] = $attr->value;
                         if (strncmp($feed_data[$key]['link'], '..', 2) == 0) {
-                            $feed_data[$key]['link'] = 'http://' . $feed_host['host'] .
+                            $feed_data[$key]['link'] = 'http://' . ($feed_host['host'] ?? 'localhost') .
                             substr($feed_data[$key]['link'], 2);
                         }
                     }

@@ -111,7 +111,7 @@ class Migrations
             );
         }
         $record = mysqli_fetch_assoc($res);
-        if ($record) {
+        if ($record !== false && $record !== null) {
             $dbversion = $record["value"];
         } else {
             $dbversion = 'v001000000';

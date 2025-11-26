@@ -22,8 +22,8 @@ if (isset($_SESSION['LWT-WP-User'])) {
     $tbpref = $_SESSION['LWT-WP-User'];
 } else {
     $url = '';
-    if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-        $url = $_SERVER['REQUEST_URI'];
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') == 'GET') {
+        $url = $_SERVER['REQUEST_URI'] ?? '/';
     } elseif (isset($_SERVER['HTTP_REFERER'])) {
         $url = $_SERVER['HTTP_REFERER'];
     }

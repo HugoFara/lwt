@@ -619,8 +619,8 @@ function url_base(): string
         $scheme = 'https';
     }
 
-    $url = parse_url("$scheme://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
-    $r = $url["scheme"] . "://" . $url["host"];
+    $url = parse_url("$scheme://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ($_SERVER['REQUEST_URI'] ?? '/'));
+    $r = ($url["scheme"] ?? $scheme) . "://" . ($url["host"] ?? 'localhost');
     if (isset($url["port"])) {
         $r .= ":" . $url["port"];
     }

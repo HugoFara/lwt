@@ -818,11 +818,11 @@ function makeOpenDictStrDynSent($url, $sentctljs, $txt): string
         $prefix = 'http://';
         $parsed_url = parse_url($prefix . $url);
     }
-    parse_str($parsed_url['query'], $url_query);
+    parse_str($parsed_url['query'] ?? '', $url_query);
     $popup = $popup || array_key_exists('lwt_popup', $url_query);
     if (
         str_starts_with($url, "ggl.php")
-        || str_ends_with($parsed_url['path'], "/ggl.php")
+        || str_ends_with($parsed_url['path'] ?? '', "/ggl.php")
     ) {
         $url = str_replace('?', '?sent=1&', $url);
     }
@@ -973,7 +973,7 @@ function createDictLinksInEditWin3($lang, $sentctljs, $wordctljs): string
     } else {
         $f3 = 'translateWord(' . prepare_textdata_js($wb3);
         $f4 = 'translateSentence(' . prepare_textdata_js(
-            (str_ends_with($parsed_url['path'], "/ggl.php")) ?
+            (str_ends_with($parsed_url['path'] ?? '', "/ggl.php")) ?
             str_replace('?', '?sent=1&', $wb3) : $wb3
         );
     }

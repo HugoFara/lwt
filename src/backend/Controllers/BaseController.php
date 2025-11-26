@@ -139,7 +139,7 @@ abstract class BaseController
      */
     protected function isPost(): bool
     {
-        return $_SERVER['REQUEST_METHOD'] === 'POST';
+        return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
     }
 
     /**
@@ -149,7 +149,7 @@ abstract class BaseController
      */
     protected function isGet(): bool
     {
-        return $_SERVER['REQUEST_METHOD'] === 'GET';
+        return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET';
     }
 
     /**

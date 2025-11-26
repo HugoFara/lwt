@@ -135,7 +135,7 @@ class Connection
         $row = mysqli_fetch_assoc($result);
         mysqli_free_result($result);
 
-        return $row ?: null;
+        return ($row !== false) ? $row : null;
     }
 
     /**

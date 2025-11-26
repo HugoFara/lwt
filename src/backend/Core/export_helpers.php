@@ -20,9 +20,13 @@
 // -------------------------------------------------------------
 
 /**
+ * Export terms to Anki format.
+ *
+ * @param string $sql SQL query to retrieve terms
+ *
  * @return never
  */
-function anki_export($sql)
+function anki_export(string $sql)
 {
     // WoID, LgRightToLeft, LgRegexpWordCharacters, LgName, WoText, WoTranslation, WoRomanization, WoSentence, taglist
     $res = do_mysqli_query($sql);
@@ -33,7 +37,7 @@ function anki_export($sql)
         } else {
             $termchar = $record['LgRegexpWordCharacters'];
         }
-        $rtlScript = $record['LgRightToLeft'];
+        $rtlScript = (int)$record['LgRightToLeft'] === 1;
         $span1 = ($rtlScript ? '<span dir="rtl">' : '');
         $span2 = ($rtlScript ? '</span>' : '');
         $lpar = ($rtlScript ? ']' : '[');
@@ -69,9 +73,13 @@ function anki_export($sql)
 // -------------------------------------------------------------
 
 /**
+ * Export terms to TSV format.
+ *
+ * @param string $sql SQL query to retrieve terms
+ *
  * @return never
  */
-function tsv_export($sql)
+function tsv_export(string $sql)
 {
     // WoID, LgName, WoText, WoTranslation, WoRomanization, WoSentence, WoStatus, taglist
     $res = do_mysqli_query($sql);
@@ -110,7 +118,7 @@ function flexible_export($sql)
         if (isset($record['LgExportTemplate'])) {
             $woid = $record['WoID'];
             $langname = repl_tab_nl($record['LgName']);
-            $rtlScript = $record['LgRightToLeft'];
+            $rtlScript = (int)$record['LgRightToLeft'] === 1;
             $span1 = ($rtlScript ? '<span dir="rtl">' : '');
             $span2 = ($rtlScript ? '</span>' : '');
             $term = repl_tab_nl($record['WoText']);

@@ -145,7 +145,7 @@ namespace Lwt\Classes;
             'nl', 'no', 'pl', 'pt', 'ru', 'se', 'com.sg', 'co.th', 'com.tw',
             'co.uk', 'com'
         );
-        if (empty($domain) || !in_array($domain, $loc, true)) {
+        if ($domain === null || $domain === '' || !in_array($domain, $loc, true)) {
             return $loc[mt_rand(0, count($loc) - 1)];
         }
         return $domain;

@@ -130,11 +130,12 @@ function insert_expression_from_mecab($text, $lid, $wid, $len): array
 
     $mwords = array();
     foreach ($occurences as $occ) {
-        $mwords[$occ['SeTxID']] = array();
+        $txId = $occ['SeTxID'] ?? $occ['TxID'] ?? 0;
+        $mwords[$txId] = array();
         if (getSettingZeroOrOne('showallwords', 1)) {
-            $mwords[$occ['SeTxID']][$occ['position']] = "&nbsp;$len&nbsp";
+            $mwords[$txId][$occ['position']] = "&nbsp;$len&nbsp";
         } else {
-            $mwords[$occ['SeTxID']][$occ['position']] = $occ['term'];
+            $mwords[$txId][$occ['position']] = $occ['term'];
         }
     }
     $flat_mwords = array_reduce(
@@ -147,10 +148,11 @@ function insert_expression_from_mecab($text, $lid, $wid, $len): array
 
     $sqlarr = array();
     foreach ($occurences as $occ) {
+        $txId = $occ["SeTxID"] ?? $occ["TxID"] ?? 0;
         $sqlarr[] = "(" . implode(
             ",",
             [
-            $wid, $lid, $occ["SeTxID"], $occ["SeID"],
+            $wid, $lid, $txId, $occ["SeID"],
             $occ["position"], $len,
             convert_string_to_sqlsyntax_notrim_nonull($occ["term"])
             ]
@@ -316,11 +318,12 @@ function insert_standard_expression($textlc, $lid, $wid, $len, $mode): array
 
     $mwords = array();
     foreach ($occurences as $occ) {
-        $mwords[$occ['SeTxID']] = array();
+        $txId = $occ['SeTxID'] ?? $occ['TxID'] ?? 0;
+        $mwords[$txId] = array();
         if (getSettingZeroOrOne('showallwords', 1)) {
-            $mwords[$occ['SeTxID']][$occ['position']] = "&nbsp;$len&nbsp";
+            $mwords[$txId][$occ['position']] = "&nbsp;$len&nbsp";
         } else {
-            $mwords[$occ['SeTxID']][$occ['position']] = $occ['term_display'];
+            $mwords[$txId][$occ['position']] = $occ['term_display'] ?? $occ['term'] ?? '';
         }
     }
     $flat_mwords = array_reduce(
@@ -333,10 +336,11 @@ function insert_standard_expression($textlc, $lid, $wid, $len, $mode): array
 
     $sqlarr = array();
     foreach ($occurences as $occ) {
+        $txId = $occ["SeTxID"] ?? $occ["TxID"] ?? 0;
         $sqlarr[] = "(" . implode(
             ",",
             [
-            $wid, $lid, $occ["SeTxID"], $occ["SeID"],
+            $wid, $lid, $txId, $occ["SeID"],
             $occ["position"], $len,
             convert_string_to_sqlsyntax_notrim_nonull($occ["term"])
             ]
@@ -549,14 +553,15 @@ function insertExpressions($textlc, $lid, $wid, $len, $mode): string|null
     if ($mode == 0) {
         $appendtext = array();
         foreach ($occurences as $occ) {
-            $appendtext[$occ['SeTxID']] = array();
+            $txId = $occ['SeTxID'] ?? $occ['TxID'] ?? 0;
+            $appendtext[$txId] = array();
             if (getSettingZeroOrOne('showallwords', 1)) {
-                $appendtext[$occ['SeTxID']][$occ['position']] = "&nbsp;$len&nbsp";
+                $appendtext[$txId][$occ['position']] = "&nbsp;$len&nbsp";
             } else {
                 if ('MECAB' == strtoupper(trim($regexp))) {
-                    $appendtext[$occ['SeTxID']][$occ['position']] = $occ['term'];
+                    $appendtext[$txId][$occ['position']] = $occ['term'];
                 } else {
-                    $appendtext[$occ['SeTxID']][$occ['position']] = $occ['term_display'];
+                    $appendtext[$txId][$occ['position']] = $occ['term_display'] ?? $occ['term'];
                 }
             }
         }
@@ -567,10 +572,11 @@ function insertExpressions($textlc, $lid, $wid, $len, $mode): string|null
     if (!empty($occurences)) {
         $sqlarr = array();
         foreach ($occurences as $occ) {
+            $txId = $occ["SeTxID"] ?? $occ["TxID"] ?? 0;
             $sqlarr[] = "(" . implode(
                 ",",
                 [
-                $wid, $lid, $occ["SeTxID"], $occ["SeID"],
+                $wid, $lid, $txId, $occ["SeID"],
                 $occ["position"], $len,
                 convert_string_to_sqlsyntax_notrim_nonull($occ["term"])
                 ]

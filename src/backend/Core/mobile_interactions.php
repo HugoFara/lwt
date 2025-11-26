@@ -36,7 +36,7 @@ function is_mobile(): bool
     $mobile_detect = preg_match(
         "/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini" .
         "|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i",
-        $_SERVER["HTTP_USER_AGENT"]
+        $_SERVER["HTTP_USER_AGENT"] ?? ''
     );
     if ($mobileDisplayMode == 0 && $mobile_detect) {
         return true;
