@@ -1,4 +1,5 @@
 <?php
+
 /**
  * \file
  * \brief Simple Mardown to HTML utility file.
@@ -12,6 +13,7 @@
  * @link    https://hugofara.github.io/lwt/docs/php/files/src-php-markdown-converter.html
  * @since   2.0.3-fork
  */
+
 require __DIR__ . '/../../vendor/autoload.php';
 
 use League\CommonMark\GithubFlavoredMarkdownConverter;
@@ -54,14 +56,16 @@ function markdown_integration($file_path): void
                 $link = $dom->createElement('a', '[↑]');
                 $link->setAttribute('href', '#');
                 $new_header = $dom->createElement(
-                    'h2', '▶ ' . $old_header->nodeValue . ' - '
+                    'h2',
+                    '▶ ' . $old_header->nodeValue . ' - '
                 );
                 $new_header->setAttribute('id', $id);
                 $new_header->setAttribute('name', $id);
                 $new_header->appendChild($link);
             } else {
                 $new_header = $dom->createElement(
-                    'h' . ($i + 1), $old_header->nodeValue
+                    'h' . ($i + 1),
+                    $old_header->nodeValue
                 );
             }
             $old_header->parentNode->replaceChild($new_header, $old_header);
@@ -72,4 +76,3 @@ function markdown_integration($file_path): void
     $output = substr(substr($output, 6), 0, -7);
     echo $output;
 }
-?>

@@ -58,8 +58,8 @@ class Router
      * @return void
      */
     public function registerPrefix(
-        string $prefix, 
-        string $handler, 
+        string $prefix,
+        string $handler,
         string $method = '*'
     ): void {
         $this->prefixRoutes[$prefix][$method] = $handler;
@@ -234,7 +234,7 @@ class Router
 
             case 'handler':
                 $this->_executeHandler(
-                    $resolution['handler'], 
+                    $resolution['handler'],
                     $resolution['params']
                 );
                 break;
@@ -280,8 +280,8 @@ class Router
      * @return void
      */
     private function _executeController(
-        string $controllerClass, 
-        string $method, 
+        string $controllerClass,
+        string $method,
         array $params
     ): void {
         // Add namespace if not present

@@ -152,7 +152,7 @@ class LWT_Globals
      * @return void
      */
     public static function setTablePrefix(
-        string $prefix, 
+        string $prefix,
         bool $isFixed = false
     ): void {
         self::$_tablePrefix = $prefix;

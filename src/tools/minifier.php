@@ -1,4 +1,5 @@
 <?php
+
 /**
  * \file
  * \brief JS and CSS minifier.
@@ -17,6 +18,7 @@
  * @since   2.9.1-fork $jsFiles was replaced by LWT_JS_FILES and $cssFiles by
  *                      LWT_CSS_FILES
  */
+
 require __DIR__ . '/../../vendor/autoload.php';
 use MatthiasMullie\Minify;
 
@@ -162,7 +164,8 @@ function regenerateThemes()
     $folder = 'src/frontend/themes/';
     $folder_scan = scandir($folder);
     foreach ($folder_scan as $parent_file) {
-        if (is_dir($folder . $parent_file)
+        if (
+            is_dir($folder . $parent_file)
             && $parent_file != '.' && $parent_file != '..'
         ) {
             regenerateSingleTheme($folder, $parent_file);
@@ -184,5 +187,3 @@ function minify_everything()
     echo "Regenerating themes...\n";
     regenerateThemes();
 }
-
-?>
