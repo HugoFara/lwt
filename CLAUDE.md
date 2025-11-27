@@ -124,7 +124,7 @@ composer clean-doc               # Clear all generated documentation
     - `src/backend/Core/` - Core PHP modules (database, utilities)
       - `database_connect.php` - Database connection and query wrappers
       - `session_utility.php` - Session management and utility functions
-      - `kernel_utility.php` - Core utilities that don't require full session
+      - `Bootstrap/` - Application bootstrap (start_session.php, EnvLoader, etc.)
       - `ajax_*.php` - AJAX endpoints (15+ files)
       - `classes/` - PHP classes (GoogleTranslate, Language, Term, Text)
   - `src/tools/` - Build tools (minifier, markdown converter)
@@ -274,7 +274,7 @@ Before committing:
 (For maintainers)
 
 1. Update `CHANGELOG.md` with release number and date
-2. Update `LWT_APP_VERSION` and `LWT_RELEASE_DATE` in `src/backend/Core/kernel_utility.php`
+2. Update `LWT_APP_VERSION` and `LWT_RELEASE_DATE` in `src/backend/Core/version.php`
 3. Update `PROJECT_NUMBER` in `Doxyfile`
 4. Run `composer doc` to regenerate documentation
 5. Commit: `git commit -m "Regenerates documentation for release X.Y.Z"`
