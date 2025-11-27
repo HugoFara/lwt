@@ -21,6 +21,7 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
+require_once 'Core/Export/export_helpers.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;

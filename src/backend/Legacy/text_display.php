@@ -1,10 +1,9 @@
 <?php
 
 /**
- * \file
- * \brief Display an improved annotated text (frame set)
+ * Display an improved annotated text (frame set)
  *
- * Call: display_impr_text.php?text=[textid]
+ * Call: /text/display?text=[textid]
  *
  * PHP version 8.1
  *
@@ -16,6 +15,8 @@
  * @since    1.5.0
  */
 
+namespace Lwt\Interface\TextDisplay;
+
 require_once 'Core/Bootstrap/db_bootstrap.php';
 require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Text/text_helpers.php';
@@ -25,13 +26,14 @@ require_once 'Core/Mobile/mobile_interactions.php';
 require_once 'text_display_header.php';
 require_once 'text_display_text.php';
 
-use Lwt\Database\Connection;
-use Lwt\Database\Settings;
+use Lwt\Services\TextDisplayService;
+
+require_once __DIR__ . '/../Services/TextDisplayService.php';
 
 /**
  * Make the page content to display printed texts on mobile.
  *
- * @param int    $textid Text ID
+ * @param int    $textId Text ID
  * @param string $audio  Media URI
  *
  * @return     void
@@ -39,13 +41,13 @@ use Lwt\Database\Settings;
  * @since      2.2.0 This function should not longer be used, and should cause issues. Use
  * do_desktop_display_impr_text instead.
  */
-function do_mobile_display_impr_text($textid, $audio)
+function do_mobile_display_impr_text($textId, $audio)
 {
     do_frameset_mobile_css();
     do_frameset_mobile_js($audio);
     do_frameset_mobile_page_content(
-        "display_impr_text_header.php?text=" . $textid,
-        "display_impr_text_text.php?text=" . $textid,
+        "display_impr_text_header.php?text=" . $textId,
+        "display_impr_text_text.php?text=" . $textId,
         false
     );
 }
@@ -53,73 +55,47 @@ function do_mobile_display_impr_text($textid, $audio)
 /**
  * Make the main page content to display printed texts for desktop.
  *
- * @param int    $textid Text ID
- * @param string $audio  Media URI
+ * @param int         $textId Text ID
+ * @param string|null $audio  Media URI (unused, kept for compatibility)
  *
  * @return void
+ *
+ * @psalm-suppress UnusedParam Parameters kept for compatibility
+ * @psalm-suppress UnusedVariable $textId is used in included view file
  */
-function do_desktop_display_impr_text($textid, $audio)
+function do_desktop_display_impr_text($textId, $audio)
 {
-
-    ?>
-
-<!--
-<frameset border="3" bordercolor="" rows="<?php
-if (isset($audio)) {
-    echo (int)Settings::getWithDefault('set-text-h-frameheight-with-audio') - 90;
-} else {
-    echo (int)Settings::getWithDefault('set-text-h-frameheight-no-audio') - 90;
-} ?>,*">
-    <frame src="display_impr_text_header.php?text=<?php echo $_REQUEST['text']; ?>" scrolling="no" name="header" />
-    <frame src="display_impr_text_text.php?text=<?php echo $_REQUEST['text']; ?>" scrolling="auto" name="text" />
-</frameset>
-<noframes><body><p>Sorry - your browser does not support frames.</p></body></noframes>
-</frameset>
-</html>-->
-<div style="width: 95%; height: 100%;">
-    <div id="frame-h">
-        <?php do_diplay_impr_text_header_main($textid);?>
-    </div>
-    <hr />
-    <div id="frame-l">
-        <?php do_display_impr_text_text_main($textid); ?>
-    </div>
-</div>
-    <?php
+    // $textId is used in the included view
+    include __DIR__ . '/../Views/Text/display_main.php';
 }
 
 /**
  * Do the page to display printed text.
  *
- * @param int $textid Text ID
- *
- * @global string $tbpref Database table prefix
+ * @param int $textId Text ID
  *
  * @return void
  */
-function do_display_impr_text_page($textid)
+function do_display_impr_text_page($textId)
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $audio = Connection::fetchValue(
-        'SELECT TxAudioURI AS value FROM ' . $tbpref . 'texts
-        WHERE TxID = ' . $_REQUEST['text']
-    );
+    $service = new TextDisplayService();
+    $audio = $service->getAudioUri($textId);
+
     pagestart_nobody('Display');
 
     if (is_mobile()) {
-        do_mobile_display_impr_text($textid, $audio);
+        do_mobile_display_impr_text($textId, $audio);
     } else {
-        do_desktop_display_impr_text($textid, $audio);
+        do_desktop_display_impr_text($textId, $audio);
     }
 
     pageend();
 }
 
+// Main entry point
 if (isset($_REQUEST['text'])) {
     do_display_impr_text_page((int) getreq('text'));
 } else {
     header("Location: /text/edit");
     exit();
 }
-
-?>

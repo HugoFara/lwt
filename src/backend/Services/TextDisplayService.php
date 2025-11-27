@@ -1,0 +1,229 @@
+<?php
+
+/**
+ * Text Display Service - Business logic for displaying annotated texts
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Services
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Services;
+
+use Lwt\Core\Globals;
+use Lwt\Database\Connection;
+use Lwt\Database\Settings;
+
+/**
+ * Service class for displaying annotated texts.
+ *
+ * Handles data retrieval for improved text display views.
+ *
+ * @category Lwt
+ * @package  Lwt\Services
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+class TextDisplayService
+{
+    private string $tbpref;
+
+    public function __construct()
+    {
+        $this->tbpref = Globals::getTablePrefix();
+    }
+
+    /**
+     * Get header data for a text.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{title: string, audio: string, sourceUri: string|null}|null
+     */
+    public function getHeaderData(int $textId): ?array
+    {
+        $sql = "SELECT TxTitle, TxAudioURI, TxSourceURI
+                FROM {$this->tbpref}texts
+                WHERE TxID = $textId";
+        $res = Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+
+        if ($record === null) {
+            return null;
+        }
+
+        $audio = '';
+        if (isset($record['TxAudioURI'])) {
+            $audio = trim((string) $record['TxAudioURI']);
+        }
+
+        Settings::save('currenttext', $textId);
+
+        return [
+            'title' => $record['TxTitle'],
+            'audio' => $audio,
+            'sourceUri' => $record['TxSourceURI']
+        ];
+    }
+
+    /**
+     * Get text display settings (text size, RTL).
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{textSize: int, rtlScript: bool}|null
+     */
+    public function getTextDisplaySettings(int $textId): ?array
+    {
+        $sql = "SELECT LgTextSize, LgRightToLeft
+                FROM {$this->tbpref}texts
+                JOIN {$this->tbpref}languages ON LgID = TxLgID
+                WHERE TxID = $textId";
+        $res = Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+
+        if ($record === null) {
+            return null;
+        }
+
+        return [
+            'textSize' => (int) $record['LgTextSize'],
+            'rtlScript' => (bool) $record['LgRightToLeft']
+        ];
+    }
+
+    /**
+     * Get annotated text content.
+     *
+     * @param int $textId Text ID
+     *
+     * @return string Annotated text
+     */
+    public function getAnnotatedText(int $textId): string
+    {
+        $ann = Connection::fetchValue(
+            "SELECT TxAnnotatedText AS value
+            FROM {$this->tbpref}texts
+            WHERE TxID = $textId"
+        );
+        return (string) $ann;
+    }
+
+    /**
+     * Get audio URI for a text.
+     *
+     * @param int $textId Text ID
+     *
+     * @return string|null Audio URI or null
+     */
+    public function getAudioUri(int $textId): ?string
+    {
+        $audio = Connection::fetchValue(
+            "SELECT TxAudioURI AS value FROM {$this->tbpref}texts
+            WHERE TxID = $textId"
+        );
+        return $audio !== null ? (string) $audio : null;
+    }
+
+    /**
+     * Get word romanization by ID.
+     *
+     * @param int $wordId Word ID
+     *
+     * @return string Romanization or empty string
+     */
+    public function getWordRomanization(int $wordId): string
+    {
+        $rom = Connection::fetchValue(
+            "SELECT WoRomanization AS value
+            FROM {$this->tbpref}words
+            WHERE WoID = $wordId"
+        );
+        return $rom !== null ? (string) $rom : '';
+    }
+
+    /**
+     * Parse annotation item into display data.
+     *
+     * @param string $item Annotation item (tab-separated values)
+     *
+     * @return array{type: int, text: string, trans: string, rom: string}|null
+     */
+    public function parseAnnotationItem(string $item): ?array
+    {
+        $vals = preg_split('/[\t]/u', $item);
+
+        if (!is_array($vals) || count($vals) < 2) {
+            return null;
+        }
+
+        $type = (int) $vals[0];
+        $text = $vals[1];
+        $trans = '';
+        $rom = '';
+
+        if ($type > -1) {
+            // Word with potential annotation
+            if (count($vals) > 2 && $vals[2] !== '') {
+                $wid = (int) $vals[2];
+                $rom = $this->getWordRomanization($wid);
+            }
+            if (count($vals) > 3) {
+                $trans = $vals[3];
+            }
+            if ($trans === '*') {
+                $trans = $text . " "; // <- U+200A HAIR SPACE
+            }
+        }
+
+        return [
+            'type' => $type,
+            'text' => $text,
+            'trans' => $trans,
+            'rom' => $rom
+        ];
+    }
+
+    /**
+     * Parse all annotations from annotated text.
+     *
+     * @param string $annotatedText Raw annotated text
+     *
+     * @return array Array of parsed annotation items
+     */
+    public function parseAnnotations(string $annotatedText): array
+    {
+        $items = preg_split('/[\n]/u', $annotatedText);
+        $parsed = [];
+
+        foreach ($items as $item) {
+            $parsedItem = $this->parseAnnotationItem($item);
+            if ($parsedItem !== null) {
+                $parsed[] = $parsedItem;
+            }
+        }
+
+        return $parsed;
+    }
+
+    /**
+     * Save current text ID to settings.
+     *
+     * @param int $textId Text ID
+     *
+     * @return void
+     */
+    public function saveCurrentText(int $textId): void
+    {
+        Settings::save('currenttext', $textId);
+    }
+}
