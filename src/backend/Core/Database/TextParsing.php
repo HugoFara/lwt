@@ -83,7 +83,7 @@ class TextParsing
         $order = 0;
         $sid = 1;
         if ($id > 0) {
-            $sid = (int)\get_first_value(
+            $sid = (int)Connection::fetchValue(
                 "SELECT IFNULL(MAX(`SeID`)+1,1) as value
                 FROM {$tbpref}sentences"
             );
@@ -303,12 +303,10 @@ class TextParsing
     {
         $tbpref = Globals::getTablePrefix();
         $sql = "SELECT * FROM {$tbpref}languages WHERE LgID=$lid";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = Connection::fetchOne($sql);
 
         // Return null if language not found
-        if ($record === false || $record === null) {
+        if ($record === null) {
             return null;
         }
 
@@ -391,7 +389,7 @@ class TextParsing
         // It is faster to write to a file and let SQL do its magic, but may run into
         // security restrictions
         $use_local_infile = in_array(
-            \get_first_value("SELECT @@GLOBAL.local_infile as value"),
+            Connection::fetchValue("SELECT @@GLOBAL.local_infile as value"),
             array(1, '1', 'ON')
         );
         if ($use_local_infile) {
@@ -401,7 +399,7 @@ class TextParsing
             $order = 0;
             $sid = 1;
             if ($id > 0) {
-                $sid = (int)\get_first_value(
+                $sid = (int)Connection::fetchValue(
                     "SELECT IFNULL(MAX(`SeID`)+1,1) as value
                     FROM {$tbpref}sentences"
                 );
@@ -451,12 +449,10 @@ class TextParsing
     {
         $tbpref = Globals::getTablePrefix();
         $sql = "SELECT * FROM {$tbpref}languages WHERE LgID = $lid";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = Connection::fetchOne($sql);
 
         // Return null if language not found
-        if ($record === false || $record === null) {
+        if ($record === null) {
             return null;
         }
 
@@ -492,26 +488,23 @@ class TextParsing
     {
         $tbpref = Globals::getTablePrefix();
         $wo = $nw = array();
-        $res = Connection::query(
+        $sentences = Connection::fetchAll(
             'SELECT GROUP_CONCAT(TiText order by TiOrder SEPARATOR "")
             Sent FROM ' . $tbpref . 'temptextitems group by TiSeID'
         );
-        if ($res !== false && $res !== true) {
-            echo '<h4>Sentences</h4><ol>';
-            while ($record = mysqli_fetch_assoc($res)) {
-                echo "<li>" . \tohtml($record['Sent']) . "</li>";
-            }
-            mysqli_free_result($res);
+        echo '<h4>Sentences</h4><ol>';
+        foreach ($sentences as $record) {
+            echo "<li>" . \tohtml($record['Sent']) . "</li>";
         }
         echo '</ol>';
-        $res = Connection::query(
+        $rows = Connection::fetchAll(
             "SELECT count(`TiOrder`) cnt, if(0=TiWordCount,0,1) as len,
             LOWER(TiText) as word, WoTranslation
             FROM {$tbpref}temptextitems
             LEFT JOIN {$tbpref}words ON lower(TiText)=WoTextLC AND WoLgID=$lid
             GROUP BY lower(TiText)"
         );
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             if ($record['len'] == 1) {
                 $wo[] = array(
                     \tohtml($record['word']),
@@ -525,7 +518,6 @@ class TextParsing
                 );
             }
         }
-        mysqli_free_result($res);
         echo '<script type="text/javascript">
         WORDS = ', json_encode($wo), ';
         NOWORDS = ', json_encode($nw), ';
@@ -601,7 +593,7 @@ class TextParsing
 
         $mw = array();
         if ($multiwords) {
-            $res = Connection::query(
+            $rows = Connection::fetchAll(
                 "SELECT COUNT(WoID) cnt, n as len,
                 LOWER(WoText) AS word, WoTranslation
                 FROM {$tbpref}tempexprs
@@ -610,14 +602,13 @@ class TextParsing
                 WHERE lword IS NOT NULL AND WoLgID = $lid
                 GROUP BY WoID ORDER BY WoTextLC"
             );
-            while ($record = mysqli_fetch_assoc($res)) {
+            foreach ($rows as $record) {
                 $mw[] = array(
                     \tohtml((string)$record['word']),
                     $record['cnt'],
                     \tohtml((string)$record['WoTranslation'])
                 );
             }
-            mysqli_free_result($res);
         }
         ?>
 <script type="text/javascript">
@@ -788,14 +779,12 @@ class TextParsing
         $wl = array();
         $lid = (int) $lid;
         $sql = "SELECT LgRightToLeft FROM {$tbpref}languages WHERE LgID = $lid";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
+        $record = Connection::fetchOne($sql);
         // Just checking if LgID exists with ID should be enough
-        if ($record == false) {
+        if ($record === null) {
             \my_die("Language data not found: $sql");
         }
         $rtlScript = $record['LgRightToLeft'];
-        mysqli_free_result($res);
 
         if ($id == -2) {
             /*
@@ -816,15 +805,14 @@ class TextParsing
         }
 
         // Get multi-word count
-        $res = Connection::query(
+        $rows = Connection::fetchAll(
             "SELECT DISTINCT(WoWordCount)
             FROM {$tbpref}words
             WHERE WoLgID = $lid AND WoWordCount > 1"
         );
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             $wl[] = (int)$record['WoWordCount'];
         }
-        mysqli_free_result($res);
         // Text has multi-words
         if (!empty($wl)) {
             self::checkExpressions($wl);

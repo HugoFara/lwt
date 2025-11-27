@@ -57,7 +57,7 @@ class Settings
      */
     public static function get(string $key): string
     {
-        $val = get_first_value(
+        $val = Connection::fetchValue(
             'SELECT StValue AS value
             FROM ' . Globals::getTablePrefix() . 'settings
             WHERE StKey = ' . Escaping::toSqlSyntax($key)
@@ -86,7 +86,7 @@ class Settings
     {
         $tbpref = Globals::getTablePrefix();
         $dft = get_setting_data();
-        $val = (string) get_first_value(
+        $val = (string) Connection::fetchValue(
             'SELECT StValue AS value
              FROM ' . $tbpref . 'settings
              WHERE StKey = ' . Escaping::toSqlSyntax($key)
@@ -148,8 +148,8 @@ class Settings
      */
     public static function lwtTableCheck(): void
     {
-        $res = Connection::query("SHOW TABLES LIKE '\\_lwtgeneral'");
-        if ($res === false || $res === true || mysqli_num_rows($res) == 0) {
+        $tables = Connection::fetchAll("SHOW TABLES LIKE '\\_lwtgeneral'");
+        if (empty($tables)) {
             Connection::execute(
                 "CREATE TABLE IF NOT EXISTS _lwtgeneral (
                     LWTKey varchar(40) NOT NULL,
@@ -157,11 +157,9 @@ class Settings
                     PRIMARY KEY (LWTKey)
                 ) ENGINE=MyISAM DEFAULT CHARSET=utf8"
             );
-            $res2 = Connection::query("SHOW TABLES LIKE '\\_lwtgeneral'");
-            if (
-                $res2 === false || $res2 === true || mysqli_num_rows($res2) == 0
-            ) {
-                my_die("Unable to create table '_lwtgeneral'!");
+            $tables2 = Connection::fetchAll("SHOW TABLES LIKE '\\_lwtgeneral'");
+            if (empty($tables2)) {
+                \my_die("Unable to create table '_lwtgeneral'!");
             }
         }
     }
@@ -195,7 +193,7 @@ class Settings
     public static function lwtTableGet(string $key): string
     {
         self::lwtTableCheck();
-        return (string)get_first_value(
+        return (string)Connection::fetchValue(
             "SELECT LWTValue as value
             FROM _lwtgeneral
             WHERE LWTKey = " . Escaping::toSqlSyntax($key)

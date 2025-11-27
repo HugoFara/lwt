@@ -72,14 +72,11 @@ class Migrations
         // Only reparse texts that have a valid language reference
         $sql = "SELECT t.TxID, t.TxLgID FROM {$tbpref}texts t
                 INNER JOIN {$tbpref}languages l ON t.TxLgID = l.LgID";
-        $res = Connection::query($sql);
-        if ($res === false || $res === true) {
-            return;
-        }
-        while ($record = mysqli_fetch_assoc($res)) {
+        $rows = Connection::fetchAll($sql);
+        foreach ($rows as $record) {
             $id = (int) $record['TxID'];
             TextParsing::splitCheck(
-                (string)\get_first_value(
+                (string)Connection::fetchValue(
                     "SELECT TxText AS value
                     FROM {$tbpref}texts
                     WHERE TxID = $id"
@@ -88,7 +85,6 @@ class Migrations
                 $id
             );
         }
-        mysqli_free_result($res);
     }
 
     /**
@@ -103,30 +99,21 @@ class Migrations
 
         // DB Version
         $currversion = \get_version_number();
-        $connection = Globals::getDbConnection();
 
-        $res = mysqli_query(
-            $connection,
-            "SELECT StValue AS value
-            FROM {$tbpref}settings
-            WHERE StKey = 'dbversion'"
-        );
-        if (mysqli_errno($connection) != 0) {
+        try {
+            $dbversion = Connection::fetchValue(
+                "SELECT StValue AS value
+                FROM {$tbpref}settings
+                WHERE StKey = 'dbversion'"
+            );
+            if ($dbversion === null) {
+                $dbversion = 'v001000000';
+            }
+        } catch (\RuntimeException $e) {
             \my_die(
                 'There is something wrong with your database ' . $dbname .
                 '. Please reinstall.'
             );
-        }
-        if ($res === false || $res === true) {
-            $dbversion = 'v001000000';
-        } else {
-            $record = mysqli_fetch_assoc($res);
-            if ($record !== false && $record !== null) {
-                $dbversion = $record["value"];
-            } else {
-                $dbversion = 'v001000000';
-            }
-            mysqli_free_result($res);
         }
 
         // Do DB Updates if tables seem to be old versions
@@ -136,7 +123,7 @@ class Migrations
                 echo "<p>DEBUG: check DB collation: ";
             }
             if (
-                'utf8utf8_general_ci' != \get_first_value(
+                'utf8utf8_general_ci' != Connection::fetchValue(
                     'SELECT concat(default_character_set_name, default_collation_name) AS value
                 FROM information_schema.SCHEMATA
                 WHERE schema_name = "' . $dbname . '"'
@@ -158,18 +145,16 @@ class Migrations
                 echo "<p>DEBUG: do DB updates: $dbversion --&gt; $currversion</p>";
             }
 
-            $res = Connection::query("SELECT filename FROM _migrations");
-            if ($res !== false && $res !== true) {
-                while ($record = mysqli_fetch_assoc($res)) {
-                    $queries = \parseSQLFile(
-                        __DIR__ . '/../../../../db/migrations/' . $record["filename"]
-                    );
-                    foreach ($queries as $sql_query) {
-                        try {
-                            Connection::execute($sql_query);
-                        } catch (\RuntimeException $e) {
-                            // Ignore errors in migration queries (they may already be applied)
-                        }
+            $migrations = Connection::fetchAll("SELECT filename FROM _migrations");
+            foreach ($migrations as $record) {
+                $queries = \parseSQLFile(
+                    __DIR__ . '/../../../../db/migrations/' . $record["filename"]
+                );
+                foreach ($queries as $sql_query) {
+                    try {
+                        Connection::execute($sql_query);
+                    } catch (\RuntimeException $e) {
+                        // Ignore errors in migration queries (they may already be applied)
                     }
                 }
             }
@@ -203,20 +188,16 @@ class Migrations
         $tbpref = Globals::getTablePrefix();
         $tables = array();
 
-        $res = Connection::query(
+        $res = Connection::fetchAll(
             str_replace(
                 '_',
                 "\\_",
                 "SHOW TABLES LIKE " . Escaping::toSqlSyntaxNoNull($tbpref . '%')
             )
         );
-        if ($res === false || $res === true) {
-            return;
+        foreach ($res as $row) {
+            $tables[] = array_values($row)[0];
         }
-        while ($row = mysqli_fetch_row($res)) {
-            $tables[] = $row[0];
-        }
-        mysqli_free_result($res);
 
         /// counter for cache rebuild
         $count = 0;

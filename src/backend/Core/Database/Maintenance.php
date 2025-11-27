@@ -39,7 +39,7 @@ class Maintenance
     public static function adjustAutoIncrement(string $table, string $key): void
     {
         $tbpref = Globals::getTablePrefix();
-        $val = get_first_value(
+        $val = Connection::fetchValue(
             'SELECT max(' . $key . ')+1 AS value FROM ' . $tbpref . $table
         );
         if (!isset($val)) {
@@ -76,14 +76,10 @@ class Maintenance
         } else {
             $sql .= " LIKE " . Escaping::toSqlSyntax(rtrim($tbpref, '_')) . "'\\_%" . "'";
         }
-        $res = Connection::query($sql);
-        if ($res === false || $res === true) {
-            return;
-        }
-        while ($row = mysqli_fetch_assoc($res)) {
+        $rows = Connection::fetchAll($sql);
+        foreach ($rows as $row) {
             Connection::execute('OPTIMIZE TABLE ' . $row['Name']);
         }
-        mysqli_free_result($res);
     }
 
     /**
@@ -104,15 +100,14 @@ class Maintenance
 
         $sql = "SELECT WoID, WoTextLC FROM {$tbpref}words
         WHERE WoLgID = $japid AND WoWordCount = 0";
-        $res = Connection::query($sql);
-        if ($res === false || $res === true) {
+        $rows = Connection::fetchAll($sql);
+        if (empty($rows)) {
             return;
         }
         $fp = fopen($db_to_mecab, 'w');
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             fwrite($fp, $record['WoID'] . "\t" . $record['WoTextLC'] . "\n");
         }
-        mysqli_free_result($res);
         fclose($fp);
 
         // STEP 2: process the data with MeCab and refine the output
@@ -183,7 +178,7 @@ class Maintenance
         /**
          * @var string|null ID for the Japanese language using MeCab
          */
-        $japid = get_first_value(
+        $japid = Connection::fetchValue(
             "SELECT group_concat(LgID) value
             FROM {$tbpref}languages
             WHERE UPPER(LgRegexpWordCharacters)='MECAB'"
@@ -196,11 +191,8 @@ class Maintenance
         FROM {$tbpref}words, {$tbpref}languages
         WHERE WoWordCount = 0 AND WoLgID = LgID
         ORDER BY WoID";
-        $result = Connection::query($sql);
-        if ($result === false || $result === true) {
-            return;
-        }
-        while (($rec = mysqli_fetch_assoc($result)) !== null) {
+        $rows = Connection::fetchAll($sql);
+        foreach ($rows as $rec) {
             if ((int)$rec['LgSplitEachChar'] === 1) {
                 $textlc = preg_replace('/([^\s])/u', "$1 ", $rec['WoTextLC']);
             } else {
@@ -227,7 +219,6 @@ class Maintenance
                 $sqlarr = array();
             }
         }
-        mysqli_free_result($result);
         if (!empty($sqlarr)) {
             $sqltext = "UPDATE {$tbpref}words
             SET WoWordCount = CASE WoID" . implode(' ', $sqlarr) . '

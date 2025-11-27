@@ -45,7 +45,7 @@ class Validation
         $sql_string = 'SELECT count(LgID) AS value
         FROM ' . Globals::getTablePrefix() . 'languages
         WHERE LgID=' . $currentlang_int;
-        if (get_first_value($sql_string) == 0) {
+        if (Connection::fetchValue($sql_string) == 0) {
             return '';
         }
         return (string)$currentlang_int;
@@ -68,7 +68,7 @@ class Validation
         $sql_string = 'SELECT count(TxID) AS value
         FROM ' . Globals::getTablePrefix() . 'texts WHERE TxID=' .
         $currenttext_int;
-        if (get_first_value($sql_string) == 0) {
+        if (Connection::fetchValue($sql_string) == 0) {
             return '';
         }
         return (string)$currenttext_int;
@@ -110,7 +110,7 @@ class Validation
                     " group by TgID order by TgText
                 )
             ) AS value";
-            $r = get_first_value($sql);
+            $r = Connection::fetchValue($sql);
             if ($r == 0) {
                 $currenttag = '';
             }
@@ -163,7 +163,7 @@ class Validation
                     )
                 ) as value";
             }
-            $r = get_first_value($sql);
+            $r = Connection::fetchValue($sql);
             if ($r == 0) {
                 $currenttag = '';
             }
@@ -213,7 +213,7 @@ class Validation
                     )
                 ) as value";
             }
-            $r = get_first_value($sql);
+            $r = Connection::fetchValue($sql);
             if ($r == 0) {
                 $currenttag = '';
             }
