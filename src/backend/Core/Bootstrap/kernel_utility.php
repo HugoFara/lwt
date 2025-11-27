@@ -7,6 +7,22 @@
  * This file serves as a loader for all kernel utility modules.
  * Each module has been split into focused files for better maintainability.
  *
+ * @deprecated This is a facade file for backwards compatibility only.
+ *             New code should import the specific modules directly:
+ *             - Core/settings.php - Global settings and Globals class
+ *             - Core/Utils/string_utilities.php - String functions (tohtml, etc.)
+ *             - Core/Utils/error_handling.php - Error handling (my_die, etc.)
+ *             - Core/version.php - Version information
+ *             - Core/Utils/debug_utilities.php - Debug utilities
+ *             - Core/Text/text_parsing.php - Text parsing utilities
+ *             - Core/Word/word_status.php - Word status definitions
+ *             - Core/Http/url_utilities.php - URL utilities
+ *             - Core/Word/word_scoring.php - Word scoring SQL formulas
+ *             - Core/Utils/sql_file_parser.php - SQL file parser
+ *             - Core/Http/param_helpers.php - Parameter helpers (getreq, getsess)
+ *             - Core/Text/annotation_management.php - Annotation utilities
+ *             - Core/UI/ui_helpers.php - UI helpers (quickMenu, pagestart, pageend)
+ *
  * PHP version 8.1
  *
  * @category Lwt

@@ -1,0 +1,33 @@
+<?php declare(strict_types=1);
+
+namespace Lwt\Tests\Core;
+
+require_once __DIR__ . '/../../../src/backend/Core/settings.php';
+require_once __DIR__ . '/../../../src/backend/Core/version.php';
+
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Tests for version.php functions
+ */
+final class VersionTest extends TestCase
+{
+    /**
+     * Test the display of version as a string
+     */
+    public function testGetVersion(): void
+    {
+        $version = get_version();
+        $this->assertIsString($version);
+    }
+
+    /**
+     * Test the correct format of version as v{3-digit MAJOR}{3-digit MINOR}{3-digit PATCH}
+     */
+    public function testGetVersionNumber(): void
+    {
+        $version = get_version_number();
+        $this->assertTrue(str_starts_with($version, 'v'));
+        $this->assertSame(10, strlen($version));
+    }
+}
