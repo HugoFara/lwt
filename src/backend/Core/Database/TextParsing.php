@@ -16,6 +16,8 @@
 
 namespace Lwt\Database;
 
+require_once __DIR__ . '/../Text/text_parsing.php';
+
 use Lwt\Core\Globals;
 
 /**

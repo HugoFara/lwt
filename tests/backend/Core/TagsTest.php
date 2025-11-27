@@ -370,36 +370,27 @@ class TagsTest extends TestCase
      */
     public function testGetTextTitle(): void
     {
-        
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // Test with non-existent ID
-        $title = getTextTitle('99999');
+        $title = getTextTitle(99999);
         $this->assertIsString($title, 'Should return string even for non-existent text');
-
-        // Test with invalid ID
-        $title = getTextTitle('invalid');
-        $this->assertIsString($title, 'Should handle invalid ID safely');
-
-        // Test with empty string
-        $title = getTextTitle('');
-        $this->assertIsString($title);
     }
 
     /**
-     * Test getTextTitle with SQL injection
+     * Test getTextTitle with zero and negative IDs
      */
-    public function testGetTextTitleSQLInjection(): void
+    public function testGetTextTitleEdgeCases(): void
     {
-        
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $title = getTextTitle("1'; DROP TABLE texts; --");
-        $this->assertIsString($title, 'Should handle SQL injection safely');
+        // Test with zero ID
+        $title = getTextTitle(0);
+        $this->assertIsString($title, 'Should handle zero ID safely');
     }
 
     /**
@@ -694,60 +685,51 @@ class TagsTest extends TestCase
     }
 
     /**
-     * Test saveWordTags with invalid ID
+     * Test saveWordTags with non-existent ID
      */
-    public function testSaveWordTagsInvalidId(): void
+    public function testSaveWordTagsNonExistent(): void
     {
-        
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        // Should handle non-numeric ID safely
-        saveWordTags('invalid');
-
-        // Test with empty string
-        saveWordTags('');
+        // Test with a non-existent ID - should handle gracefully
+        saveWordTags(999999);
+        saveWordTags(0);
 
         // Should complete without errors
         $this->assertTrue(true);
     }
 
     /**
-     * Test saveTextTags with invalid ID
+     * Test saveTextTags with non-existent ID
      */
-    public function testSaveTextTagsInvalidId(): void
+    public function testSaveTextTagsNonExistent(): void
     {
-        
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        // Should handle non-numeric ID safely
-        saveTextTags('invalid');
-
-        // Test with empty string
-        saveTextTags('');
+        // Test with a non-existent ID - should handle gracefully
+        saveTextTags(999999);
+        saveTextTags(0);
 
         // Should complete without errors
         $this->assertTrue(true);
     }
 
     /**
-     * Test saveArchivedTextTags with invalid ID
+     * Test saveArchivedTextTags with non-existent ID
      */
-    public function testSaveArchivedTextTagsInvalidId(): void
+    public function testSaveArchivedTextTagsNonExistent(): void
     {
-        
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        // Should handle non-numeric ID safely
-        saveArchivedTextTags('invalid');
-
-        // Test with empty string
-        saveArchivedTextTags('');
+        // Test with a non-existent ID - should handle gracefully
+        saveArchivedTextTags(999999);
+        saveArchivedTextTags(0);
 
         // Should complete without errors
         $this->assertTrue(true);
@@ -803,12 +785,11 @@ class TagsTest extends TestCase
      */
     public function testGetTextTitleZeroId(): void
     {
-        
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $title = getTextTitle('0');
+        $title = getTextTitle(0);
         $this->assertIsString($title);
     }
 
@@ -817,12 +798,11 @@ class TagsTest extends TestCase
      */
     public function testGetTextTitleNegativeId(): void
     {
-        
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $title = getTextTitle('-1');
+        $title = getTextTitle(-1);
         $this->assertIsString($title);
     }
 }

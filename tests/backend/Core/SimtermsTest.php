@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\EnvLoader;
+use Lwt\Core\Globals;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
@@ -16,6 +17,21 @@ class SimtermsTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
+        // Ensure database connection is established
+        $config = EnvLoader::getDatabaseConfig();
+        $testDbname = "test_" . $config['dbname'];
+
+        if (!Globals::getDbConnection()) {
+            $connection = connect_to_database(
+                $config['server'],
+                $config['userid'],
+                $config['passwd'],
+                $testDbname,
+                $config['socket'] ?? ''
+            );
+            Globals::setDbConnection($connection);
+        }
+
         // Ensure we have a test database set up
         $result = do_mysqli_query("SHOW TABLES LIKE 'words'");
         $res = mysqli_fetch_assoc($result);

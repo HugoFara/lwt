@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../database_connect.php';
+require_once __DIR__ . '/../Http/url_utilities.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;

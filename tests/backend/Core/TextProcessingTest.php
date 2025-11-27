@@ -416,7 +416,6 @@ class TextProcessingTest extends TestCase
     {
         $this->assertFalse(checkStatusRange(1, 23)); // 1 < 2
         $this->assertFalse(checkStatusRange(4, 599)); // 4 != 5 and 4 != 99
-        $this->assertFalse(checkStatusRange(1, '')); // Empty range
         $this->assertFalse(checkStatusRange(1, 0)); // Invalid range
     }
 

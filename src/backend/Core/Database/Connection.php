@@ -41,8 +41,11 @@ class Connection
      */
     public static function getInstance(): \mysqli
     {
-        if (self::$instance === null) {
-            self::$instance = Globals::getDbConnection();
+        // Always check Globals first to ensure we use the current connection
+        // This is important for tests that set connection via Globals::setDbConnection()
+        $globalConnection = Globals::getDbConnection();
+        if ($globalConnection !== null) {
+            self::$instance = $globalConnection;
         }
 
         if (self::$instance === null) {

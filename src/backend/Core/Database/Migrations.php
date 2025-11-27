@@ -16,6 +16,8 @@
 
 namespace Lwt\Database;
 
+require_once __DIR__ . '/../Word/word_scoring.php';
+
 use Lwt\Core\Globals;
 
 /**

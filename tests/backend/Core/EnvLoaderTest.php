@@ -35,10 +35,12 @@ class EnvLoaderTest extends TestCase
         if (file_exists($this->testEnvFile)) {
             unlink($this->testEnvFile);
         }
-        
-        // Reset EnvLoader state after each test
+
+        // Reset EnvLoader state and reload the project's .env file
+        // to ensure subsequent tests have the correct configuration
         EnvLoader::reset();
-        
+        EnvLoader::load(__DIR__ . '/../../../.env');
+
         parent::tearDown();
     }
 

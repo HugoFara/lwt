@@ -16,6 +16,8 @@
 
 namespace Lwt\Controllers;
 
+require_once __DIR__ . '/../Core/Http/param_helpers.php';
+
 /**
  * Abstract base controller providing common functionality for all controllers.
  *
