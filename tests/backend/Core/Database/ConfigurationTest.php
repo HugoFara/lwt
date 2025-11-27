@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Lwt\Tests\Database;
+namespace Lwt\Tests\Core\Database;
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
@@ -12,11 +12,11 @@ use Lwt\Database\Configuration;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
+EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
-require_once __DIR__ . '/../../../src/backend/Core/database_connect.php';
+require_once __DIR__ . '/../../../../src/backend/Core/database_connect.php';
 
 /**
  * Unit tests for the Database\Configuration class.
@@ -50,7 +50,7 @@ class ConfigurationTest extends TestCase
 
     public function testLoadFromEnvWithValidPath(): void
     {
-        $envPath = __DIR__ . '/../../../.env';
+        $envPath = __DIR__ . '/../../../../.env';
 
         if (!file_exists($envPath)) {
             $this->markTestSkipped('.env file not found');
@@ -83,7 +83,7 @@ class ConfigurationTest extends TestCase
 
     public function testLoadFromEnvReturnsCompleteConfig(): void
     {
-        $envPath = __DIR__ . '/../../../.env';
+        $envPath = __DIR__ . '/../../../../.env';
 
         if (!file_exists($envPath)) {
             $this->markTestSkipped('.env file not found');
@@ -327,7 +327,7 @@ class ConfigurationTest extends TestCase
 
     public function testLoadFromEnvAndConnect(): void
     {
-        $envPath = __DIR__ . '/../../../.env';
+        $envPath = __DIR__ . '/../../../../.env';
 
         if (!file_exists($envPath)) {
             $this->markTestSkipped('.env file not found');

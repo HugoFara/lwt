@@ -1,18 +1,20 @@
 <?php declare(strict_types=1);
 
-require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
+namespace Lwt\Tests\Core\Tag;
+
+require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
-EnvLoader::load(__DIR__ . '/../../../.env');
+EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
-require_once __DIR__ . '/../../../src/backend/Core/database_connect.php';
-require_once __DIR__ . '/../../../src/backend/Core/Tag/tags.php';
-
-use PHPUnit\Framework\TestCase;
+require_once __DIR__ . '/../../../../src/backend/Core/database_connect.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Tag/tags.php';
 
 /**
  * Comprehensive tests for tag management functions
