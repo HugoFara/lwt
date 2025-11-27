@@ -40,7 +40,8 @@ if (isset($_REQUEST['op'])) {
     }
 }
 
-// Load current settings for the form
+// Load current settings for the form (used by included view)
+/** @psalm-suppress UnusedVariable - Variables used by included view */
 $settings = $settingsService->getAll();
 
 // Render page

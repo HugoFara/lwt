@@ -678,61 +678,81 @@ function do_text_text_javascript(array $var_array): void
     /// Map global variables as a JSON object
     const new_globals = <?php echo json_encode($var_array); ?>;
 
-    // Set global variables
-    for (let key in new_globals) {
-        if (typeof new_globals[key] !== 'string') {
-            for (let subkey1 in new_globals[key]) {
-                if (typeof new_globals[key] !== 'string') {
-                    for (let subkey2 in new_globals[key][subkey1]) {
-                        window[key][subkey1][subkey2] = new_globals[key][subkey1][subkey2];
-                    }
-                } else {
-                    window[key][subkey1] = new_globals[key][subkey1];
-                }
-            }
-        } else {
-            window[key] = new_globals[key];
-        }
-    }
-    LANG = getLangFromDict(LWT_DATA.language.translator_link);
-    LWT_DATA.text.reading_position = -1;
-    // Note from 2.10.0: is the next line necessary on text?
-    LWT_DATA.test.answer_opened = false;
-    // Change the language of the current frame
-    if (LANG && LANG != LWT_DATA.language.translator_link) {
-        $("html").attr('lang', LANG);
-    }
-
-    if (LWT_DATA.settings.jQuery_tooltip) {
-        $(function () {
-            $('#overDiv').tooltip();
-            $('#thetext').tooltip_wsty_init();
-        });
-    }
-
-
     /**
-     * Save the current reading position.
-     * @global {string} LWT_DATA.text.id Text ID
-     *
-     * @since 2.0.3-fork
+     * Initialize the text reading interface.
+     * Called after LWT Vite bundle is loaded or immediately if not using Vite.
      */
-    function saveCurrentPosition() {
-        let pos = 0;
-        // First position from the top
-        const top_pos = $(window).scrollTop() - $('.wsty').not('.hide').eq(0).height();
-        $('.wsty').not('.hide').each(function() {
-            if ($(this).offset().top >= top_pos) {
-                pos = $(this).attr('data_pos');
-                return;
+    function initTextReading() {
+        // Set global variables
+        for (let key in new_globals) {
+            if (typeof new_globals[key] !== 'string') {
+                for (let subkey1 in new_globals[key]) {
+                    if (typeof new_globals[key] !== 'string') {
+                        for (let subkey2 in new_globals[key][subkey1]) {
+                            window[key][subkey1][subkey2] = new_globals[key][subkey1][subkey2];
+                        }
+                    } else {
+                        window[key][subkey1] = new_globals[key][subkey1];
+                    }
+                }
+            } else {
+                window[key] = new_globals[key];
             }
-        });
-        saveReadingPosition(LWT_DATA.text.id, pos);
+        }
+        LANG = getLangFromDict(LWT_DATA.language.translator_link);
+        LWT_DATA.text.reading_position = -1;
+        // Note from 2.10.0: is the next line necessary on text?
+        LWT_DATA.test.answer_opened = false;
+        // Change the language of the current frame
+        if (LANG && LANG != LWT_DATA.language.translator_link) {
+            $("html").attr('lang', LANG);
+        }
+
+        if (LWT_DATA.settings.jQuery_tooltip) {
+            $(function () {
+                $('#overDiv').tooltip();
+                $('#thetext').tooltip_wsty_init();
+            });
+        }
+
+        /**
+         * Save the current reading position.
+         * @global {string} LWT_DATA.text.id Text ID
+         *
+         * @since 2.0.3-fork
+         */
+        function saveCurrentPosition() {
+            let pos = 0;
+            // First position from the top
+            const top_pos = $(window).scrollTop() - $('.wsty').not('.hide').eq(0).height();
+            $('.wsty').not('.hide').each(function() {
+                if ($(this).offset().top >= top_pos) {
+                    pos = $(this).attr('data_pos');
+                    return;
+                }
+            });
+            saveReadingPosition(LWT_DATA.text.id, pos);
+        }
+
+        $(document).ready(prepareTextInteractions);
+        $(document).ready(goToLastPosition);
+        $(window).on('beforeunload', saveCurrentPosition);
     }
 
-    $(document).ready(prepareTextInteractions);
-    $(document).ready(goToLastPosition);
-    $(window).on('beforeunload', saveCurrentPosition);
+    // Wait for Vite bundle to load before initializing
+    if (window.LWT_VITE_LOADED) {
+        initTextReading();
+    } else {
+        // Poll for Vite bundle to load (ES modules are deferred)
+        const checkVite = setInterval(function() {
+            if (window.LWT_VITE_LOADED) {
+                clearInterval(checkVite);
+                initTextReading();
+            }
+        }, 10);
+        // Timeout after 5 seconds
+        setTimeout(function() { clearInterval(checkVite); }, 5000);
+    }
     //]]>
 </script>
     <?php

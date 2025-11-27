@@ -271,4 +271,3 @@ export function translateWord2(url: string, wordctl: HTMLInputElement | undefine
 export function translateWord3(url: string, word: string): void {
   owin(createTheDictUrl(url, word));
 }
-

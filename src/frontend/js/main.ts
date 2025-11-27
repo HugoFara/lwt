@@ -53,6 +53,9 @@ import './media/media_selection';
 // Feeds
 import './feeds/jq_feedwizard';
 
+// Global exports for inline PHP scripts
+import './globals';
+
 // Expose jQuery globally for plugins
 declare global {
   interface Window {
