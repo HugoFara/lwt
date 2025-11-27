@@ -11,7 +11,6 @@ import { getCookie } from '../core/cookies';
 // Declare external functions and variables
 declare function overlib(): void;
 declare function cClick(): void;
-declare function showRightFrames(url1?: string, url2?: string): void;
 
 // Type for LWT_DATA global
 interface LwtLanguage {

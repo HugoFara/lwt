@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 const host = 'http://localhost';
 const apiPath = '/lwt/api.php/v1';
@@ -292,14 +292,16 @@ describe('GET /terms/imported', () => {
       page: '1',
       count: '5',
     });
-    const body1 = await response1.json();
+    // Consume the response body to ensure request completes
+    await response1.json();
 
     const response2 = await apiGet('/terms/imported', {
       last_update: '',
       page: '2',
       count: '5',
     });
-    const body2 = await response2.json();
+    // Consume the response body to ensure request completes
+    await response2.json();
 
     expect(response1.status).toBe(200);
     expect(response2.status).toBe(200);

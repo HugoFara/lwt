@@ -18,9 +18,9 @@ interface MediaSelectResponse {
 /**
  * Return an HTML group of options to add to a select field.
  *
- * @param paths     All paths (files and folders)
- * @param folders   Folders paths, should be a subset of paths
- * @param base_path Base path for LWT to append
+ * @param paths      All paths (files and folders)
+ * @param folders    Folders paths, should be a subset of paths
+ * @param _base_path Base path for LWT to append (deprecated, no longer used since 2.9.1-fork)
  *
  * @returns List of options to append to the select.
  *
@@ -29,7 +29,7 @@ interface MediaSelectResponse {
 export function select_media_path(
   paths: string[],
   folders: string[],
-  base_path: string
+  _base_path: string // eslint-disable-line @typescript-eslint/no-unused-vars
 ): HTMLOptionElement[] {
   const options: HTMLOptionElement[] = [];
   let temp_option = document.createElement('option');

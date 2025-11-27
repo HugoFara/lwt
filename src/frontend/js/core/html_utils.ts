@@ -24,6 +24,7 @@ export function escape_html_chars(s: string): string {
     '\x0d': '<br />' // This one inserts HTML, delete? (2.9.0)
   };
 
+  // eslint-disable-next-line no-control-regex -- intentionally matching carriage return
   return s.replace(/[&<>"'\x0d]/g, function (m) { return map[m]; });
 }
 

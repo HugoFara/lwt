@@ -161,7 +161,7 @@ export function getTranslationFromGlosbeApi(data: GlosbeResponse): void {
           'Glosbe API</a>.</p><hr />'
         );
     }
-  } catch (err) {
+  } catch {
     $('#translations')
       .text(
         'Retrieval error. Possible reason: There is a limit of Glosbe API ' +

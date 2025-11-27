@@ -13,10 +13,7 @@ import {
   mword_each_do_text_text
 } from './text_annotations';
 import { keydown_event_do_text_text } from './text_keyboard';
-import {
-  mwordDragNDrop,
-  mword_drag_n_drop_select
-} from './text_multiword_selection';
+import { mword_drag_n_drop_select } from './text_multiword_selection';
 
 // Re-export from submodules
 export {

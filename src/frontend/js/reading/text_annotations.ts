@@ -53,9 +53,12 @@ declare const LWT_DATA: LwtDataGlobal;
 /**
  * Add annotations to a word.
  *
- * @param _ Unused, usually word number
+ * @param _index Unused iteration index (required by jQuery .each() signature)
  */
-export function word_each_do_text_text(this: HTMLElement, _: number): void {
+export function word_each_do_text_text(
+  this: HTMLElement,
+  _index: number // eslint-disable-line @typescript-eslint/no-unused-vars
+): void {
   const $this = $(this);
   const wid = getAttr($this, 'data_wid');
   if (wid !== '') {
@@ -96,9 +99,12 @@ export function word_each_do_text_text(this: HTMLElement, _: number): void {
  * Checks for matching word IDs in nearby annotations and combines translations.
  *
  * @param this The HTML element being processed (word span)
- * @param _ Unused iteration index parameter
+ * @param _index Unused iteration index (required by jQuery .each() signature)
  */
-export function mword_each_do_text_text(this: HTMLElement, _: number): void {
+export function mword_each_do_text_text(
+  this: HTMLElement,
+  _index: number // eslint-disable-line @typescript-eslint/no-unused-vars
+): void {
   const $this = $(this);
   if (getAttr($this, 'data_status') !== '') {
     const wid = getAttr($this, 'data_wid');

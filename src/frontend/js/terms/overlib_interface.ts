@@ -8,16 +8,22 @@
 import { escape_html_chars, escape_html_chars_2 } from '../core/html_utils';
 import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
 import { createTheDictLink, createSentLookupLink, getLangFromDict } from './dictionary';
-import { speechDispatcher } from '../core/user_interactions';
 
 // Declare external functions from overlib library
 declare function overlib(content: string, ...args: unknown[]): boolean;
 declare const CAPTION: unknown;
 
-// Declare external functions
+// The following imports/declares are used only in string templates (onclick handlers)
+// and not called directly in TypeScript code:
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { speechDispatcher } from '../core/user_interactions';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare function showRightFrames(url?: string): void;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare function confirmDelete(): boolean;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare function successSound(): void;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare function failureSound(): void;
 
 // Type for LWT_DATA global
@@ -152,7 +158,7 @@ export function run_overlib_status_99(
  * @param stat
  * @param multi_words
  * @param rtl         Right-to-left text indicator
- * @param ann         Unused
+ * @param _ann        Unused annotation parameter (kept for API consistency)
  * @returns
  */
 export function run_overlib_status_1_to_5(
@@ -167,7 +173,7 @@ export function run_overlib_status_1_to_5(
   stat: string | number,
   multi_words: (string | undefined)[],
   rtl: boolean,
-  _ann: string
+  _ann: string // eslint-disable-line @typescript-eslint/no-unused-vars
 ): boolean {
   const lang = getLangFromDict(wblink3);
   return overlib(
@@ -278,7 +284,7 @@ export function run_overlib_multiword(
  * @param stat    Word learning status
  * @param sent    Lookup sentence in Google Translate
  * @param todo    If 1, the user should say if he knows the word.
- * @param oldstat Old status, unused
+ * @param _oldstat Old status, unused (kept for API consistency)
  * @returns An overlib object
  */
 export function run_overlib_test(
@@ -292,7 +298,7 @@ export function run_overlib_test(
   stat: string | number,
   sent: string,
   todo: number,
-  _oldstat: unknown
+  _oldstat: unknown // eslint-disable-line @typescript-eslint/no-unused-vars
 ): boolean {
   const s = parseInt(String(stat), 10);
   let c = s + 1;
@@ -791,12 +797,14 @@ export function make_overlib_link_ignore_word(
 /**
  * Create a clickable button to read a word aloud.
  *
- * @param txt  Word to say
- * @param lang Language name (two letters or four letters separated with a
- *             caret)
+ * @param txt   Word to say
+ * @param _lang Language name (deprecated - uses LWT_DATA.language.id instead)
  * @return HTML-formatted clickable icon
  */
-export function make_overlib_audio(txt: string, lang: string): string {
+export function make_overlib_audio(
+  txt: string,
+  _lang: string // eslint-disable-line @typescript-eslint/no-unused-vars
+): string {
   const img = document.createElement('img');
   img.title = 'Click to read!';
   img.src = 'icn/speaker-volume.png';

@@ -272,6 +272,7 @@ export const lwt_feed_wiz_opt_inter = {
           if ($(this).hasClass('lwt_highlighted_text')) {
             $('*').removeClass('lwt_highlighted_text');
           } else {
+            // eslint-disable-next-line @typescript-eslint/no-this-alias -- needed for closure scope
             const el = this;
             $('*').removeClass('lwt_selected_text');
             filter_array = [];
@@ -534,11 +535,11 @@ export const lwt_feed_wizard = {
     const current_host = $('input[name=\'host_name\']').val() as string;
     $('select[name=\'selected_feed\'] option').each(function () {
       const opt_str = $(this).text();
-      const host_name = opt_str.replace(/[▸\-][0-9\s]*[★☆\-][\s]*host:/, '');
+      const host_name = opt_str.replace(/[▸-][0-9\s]*[★☆-][\s]*host:/, '');
       if (host_name.trim() === current_host.trim()) {
         $(this).text(
           opt_str.replace(
-            /([▸\-][0-9\s]*?)\s[★☆\-]\s(.*)/,
+            /([▸-][0-9\s]*?)\s[★☆-]\s(.*)/,
             '$1 ' + host_status.trim() + ' $2'
           )
         );
