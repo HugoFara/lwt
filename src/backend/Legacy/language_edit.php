@@ -23,7 +23,10 @@
  * @since    2.4.0 Refactored with functional paradigm
  */
 
-require_once 'Core/session_utility.php';
+require_once 'Core/database_connect.php';
+require_once 'Core/UI/ui_helpers.php';
+require_once 'Core/Http/param_helpers.php';
+require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Language/langdefs.php';
 require_once 'Core/Entity/Language.php';
 

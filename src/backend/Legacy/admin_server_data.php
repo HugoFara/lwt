@@ -18,7 +18,8 @@
 
 namespace Lwt\Interface\Server\Data;
 
-require_once 'Core/session_utility.php';
+require_once 'Core/database_connect.php';
+require_once 'Core/UI/ui_helpers.php';
 
 /**
  * Return a lot of different server state variables.

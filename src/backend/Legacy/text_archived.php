@@ -20,7 +20,12 @@
  * @package  Lwt
  */
 
-require_once 'Core/session_utility.php';
+require_once 'Core/database_connect.php';
+require_once 'Core/UI/ui_helpers.php';
+require_once 'Core/Tag/tags.php';
+require_once 'Core/Text/text_helpers.php';
+require_once 'Core/Http/param_helpers.php';
+require_once 'Core/Language/language_utilities.php';
 
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;

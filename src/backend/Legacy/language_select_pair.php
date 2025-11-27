@@ -16,7 +16,9 @@
  * @since    1.5.11
  */
 
-require_once 'Core/session_utility.php';
+require_once 'Core/database_connect.php';
+require_once 'Core/UI/ui_helpers.php';
+require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Language/langdefs.php';
 
 use Lwt\Database\Settings;

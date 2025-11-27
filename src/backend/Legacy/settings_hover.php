@@ -10,7 +10,9 @@
 use Lwt\Classes\GoogleTranslate;
 use Lwt\Database\Escaping;
 
-require_once 'Core/session_utility.php';
+require_once 'Core/database_connect.php';
+require_once 'Core/UI/ui_helpers.php';
+require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Entity/GoogleTranslate.php' ;
 
 $translation = '*';

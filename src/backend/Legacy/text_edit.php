@@ -36,7 +36,14 @@ use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
 
-require_once 'Core/session_utility.php';
+require_once 'Core/database_connect.php';
+require_once 'Core/UI/ui_helpers.php';
+require_once 'Core/Tag/tags.php';
+require_once 'Core/Text/text_helpers.php';
+require_once 'Core/Http/param_helpers.php';
+require_once 'Core/Media/media_helpers.php';
+require_once 'Core/Language/language_utilities.php';
+require_once 'Core/Word/word_status.php';
 require_once 'Core/Bootstrap/start_session.php';
 require_once 'Core/Integration/text_from_yt.php';
 require_once 'Core/Entity/Text.php';

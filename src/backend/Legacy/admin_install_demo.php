@@ -14,7 +14,9 @@
  * @link     https://hugofara.github.io/lwt/docs/php/
  */
 
-require_once 'Core/session_utility.php';
+require_once 'Core/database_connect.php';
+require_once 'Core/UI/ui_helpers.php';
+require_once 'Core/Text/text_helpers.php';
 
 $message = '';
 

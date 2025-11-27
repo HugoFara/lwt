@@ -2,7 +2,11 @@
 
 namespace Lwt\Interface\Feed_Wizard;
 
-require_once 'Core/session_utility.php';
+require_once 'Core/database_connect.php';
+require_once 'Core/UI/ui_helpers.php';
+require_once 'Core/Feed/feeds.php';
+require_once 'Core/Http/param_helpers.php';
+require_once 'Core/Language/language_utilities.php';
 
 function feed_wizard_insert_uri(): void
 {

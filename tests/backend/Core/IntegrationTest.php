@@ -9,11 +9,29 @@ EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
-require_once __DIR__ . '/../../../src/backend/Core/session_utility.php';
+require_once __DIR__ . '/../../../src/backend/Core/database_connect.php';
+require_once __DIR__ . '/../../../src/backend/Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../../../src/backend/Core/Tag/tags.php';
+require_once __DIR__ . '/../../../src/backend/Core/Feed/feeds.php';
+require_once __DIR__ . '/../../../src/backend/Core/Text/text_helpers.php';
+require_once __DIR__ . '/../../../src/backend/Core/Export/export_helpers.php';
+require_once __DIR__ . '/../../../src/backend/Core/Http/param_helpers.php';
+require_once __DIR__ . '/../../../src/backend/Core/Media/media_helpers.php';
+require_once __DIR__ . '/../../../src/backend/Core/Text/text_navigation.php';
+require_once __DIR__ . '/../../../src/backend/Core/Word/dictionary_links.php';
+require_once __DIR__ . '/../../../src/backend/Core/Test/test_helpers.php';
+require_once __DIR__ . '/../../../src/backend/Core/Language/language_utilities.php';
+require_once __DIR__ . '/../../../src/backend/Core/Word/word_status.php';
 
 use PHPUnit\Framework\TestCase;
 
-class SessionUtilityTest extends TestCase
+/**
+ * Integration tests for core functionality.
+ *
+ * These tests require database access and test cross-module functionality.
+ * Renamed from SessionUtilityTest since session_utility.php was removed.
+ */
+class IntegrationTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {

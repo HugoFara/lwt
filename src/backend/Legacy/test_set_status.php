@@ -17,7 +17,10 @@
  * @since    1.0.3
  */
 
-require_once 'Core/session_utility.php';
+require_once 'Core/database_connect.php';
+require_once 'Core/UI/ui_helpers.php';
+require_once 'Core/Word/word_status.php';
+require_once 'Core/Http/param_helpers.php';
 
 use Lwt\Database\Settings;
 require_once 'Core/Bootstrap/start_session.php';

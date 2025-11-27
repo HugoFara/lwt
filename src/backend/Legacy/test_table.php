@@ -18,7 +18,14 @@
  * @since   1.5.4
  */
 
-require_once 'Core/session_utility.php';
+require_once 'Core/database_connect.php';
+require_once 'Core/UI/ui_helpers.php';
+require_once 'Core/Tag/tags.php';
+require_once 'Core/Test/test_helpers.php';
+require_once 'Core/Http/param_helpers.php';
+require_once 'Core/Language/language_utilities.php';
+require_once 'Core/Word/word_status.php';
+require_once 'Core/Word/dictionary_links.php';
 
 use Lwt\Database\Settings;
 

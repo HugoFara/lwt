@@ -50,8 +50,8 @@ abstract class BaseController
     /**
      * Initialize controller with database connection and table prefix.
      *
-     * Note: The database connection may not be available until session_utility.php
-     * is loaded by the controller action.
+     * Note: The database connection may not be available until Globals are
+     * loaded by the controller action.
      */
     public function __construct()
     {
