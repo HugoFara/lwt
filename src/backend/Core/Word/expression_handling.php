@@ -555,6 +555,7 @@ function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mo
 
     // Update the term visually through JS
     if ($mode == 0) {
+        /** @var array<int, array<int, string>> $appendtext */
         $appendtext = array();
         foreach ($occurences as $occ) {
             $txId = $occ['SeTxID'] ?? $occ['TxID'] ?? 0;
@@ -563,9 +564,9 @@ function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mo
                 $appendtext[$txId][$occ['position']] = "&nbsp;$len&nbsp";
             } else {
                 if ('MECAB' == strtoupper(trim($regexp))) {
-                    $appendtext[$txId][$occ['position']] = $occ['term'];
+                    $appendtext[$txId][$occ['position']] = (string)($occ['term'] ?? '');
                 } else {
-                    $appendtext[$txId][$occ['position']] = $occ['term_display'] ?? $occ['term'];
+                    $appendtext[$txId][$occ['position']] = (string)($occ['term_display'] ?? $occ['term'] ?? '');
                 }
             }
         }

@@ -113,7 +113,7 @@ function upload_words_import_simple(
                 $row,
                 array(
                     (string)$lang, (string)$status, "NOW()",
-                    getsqlscoreformula(2), getsqlscoreformula(3), "RAND()"
+                    SCORE_FORMULA_TODAY, SCORE_FORMULA_TOMORROW, "RAND()"
                 )
             );
             $values[] = "(" . implode(",", $row) . ")";

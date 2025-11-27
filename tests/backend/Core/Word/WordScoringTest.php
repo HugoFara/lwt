@@ -13,38 +13,6 @@ use PHPUnit\Framework\TestCase;
 final class WordScoringTest extends TestCase
 {
     /**
-     * Test getsqlscoreformula with different methods
-     */
-    public function testGetsqlscoreformula(): void
-    {
-        // Method 2: WoTodayScore formula with DATEDIFF and GREATEST
-        $result = getsqlscoreformula(2);
-        $this->assertStringContainsString('DATEDIFF', $result);
-        $this->assertStringContainsString('NOW()', $result);
-        $this->assertStringContainsString('GREATEST', $result);
-        $this->assertStringContainsString('WoStatus', $result);
-        $this->assertStringContainsString('CASE', $result);
-
-        // Method 3: WoTomorrowScore formula with DATEDIFF and GREATEST
-        $result = getsqlscoreformula(3);
-        $this->assertStringContainsString('DATEDIFF', $result);
-        $this->assertStringContainsString('NOW()', $result);
-        $this->assertStringContainsString('GREATEST', $result);
-        $this->assertStringContainsString('WoStatus', $result);
-        $this->assertStringContainsString('CASE', $result);
-
-        // Default/other methods: Returns '0'
-        $result = getsqlscoreformula(0);
-        $this->assertEquals('0', $result);
-
-        $result = getsqlscoreformula(1);
-        $this->assertEquals('0', $result);
-
-        $result = getsqlscoreformula(99);
-        $this->assertEquals('0', $result);
-    }
-
-    /**
      * Test make_score_random_insert_update with different types
      */
     public function testMakeScoreRandomInsertUpdate(): void

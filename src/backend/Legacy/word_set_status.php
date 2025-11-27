@@ -38,16 +38,16 @@ use Lwt\Database\Connection;
  */
 function get_word_data($wid)
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $sql = "SELECT WoText, WoTranslation, WoRomanization
-    FROM {$tbpref}words WHERE WoID = $wid";
-    $res = Connection::query($sql);
+    $res = Connection::query(
+        "SELECT WoText, WoTranslation, WoRomanization
+        FROM " . \Lwt\Core\Globals::getTablePrefix() . "words WHERE WoID = " . $wid
+    );
     $record = mysqli_fetch_assoc($res);
     if (!$record) {
         my_die("Word not found in set_word_status.php");
     }
     $word = $record['WoText'];
-    $trans = repl_tab_nl($record['WoTranslation']) . getWordTagList($wid, ' ', 1, 0);
+    $trans = repl_tab_nl($record['WoTranslation']) . getWordTagList((int)$wid, ' ', 1, 0);
     $roman = $record['WoRomanization'];
     mysqli_free_result($res);
     return array($word, $trans, $roman);
@@ -93,18 +93,21 @@ function set_word_status_ajax($wid, $status): void
  * @global string $tbpref
  *
  * @psalm-return int<-1, max>|numeric-string
+ *
+ * @psalm-suppress UnusedParam Params are used in sprintf
  */
 function set_word_status_database($wid, $status): int|string
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $m1 = Connection::execute(
-        "UPDATE {$tbpref}words
-        SET WoStatus = $status, WoStatusChanged = NOW()," .
-        make_score_random_insert_update('u') . "
-        WHERE WoID = $wid",
+    return Connection::execute(
+        sprintf(
+            "UPDATE %swords SET WoStatus = %s, WoStatusChanged = NOW(),%s WHERE WoID = %s",
+            \Lwt\Core\Globals::getTablePrefix(),
+            $status,
+            make_score_random_insert_update('u'),
+            $wid
+        ),
         'Status changed'
     );
-    return $m1;
 }
 
 /**
