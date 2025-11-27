@@ -28,181 +28,71 @@ require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 require_once 'Core/simterms.php';
 
-use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
-use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
+use Lwt\Services\WordService;
 
-// INSERT
+require_once __DIR__ . '/../Services/WordService.php';
 
-if (isset($_REQUEST['op'])) {
-    if ($_REQUEST['op'] == 'Save') {
-        $text = trim(Escaping::prepareTextdata($_REQUEST["WoText"]));
-        $textlc = mb_strtolower($text, 'UTF-8');
-        $translation_raw = repl_tab_nl(getreq("WoTranslation"));
-        if ($translation_raw == '') {
-            $translation = '*';
+$wordService = new WordService();
+
+// Handle save operation
+if (isset($_REQUEST['op']) && $_REQUEST['op'] == 'Save') {
+    $result = $wordService->create($_REQUEST);
+
+    $titletext = "New Term: " . tohtml($result['textlc']);
+    pagestart_nobody($titletext);
+    echo '<h1>' . $titletext . '</h1>';
+
+    if (!$result['success']) {
+        // Handle duplicate entry error
+        if (strpos($result['message'], 'Duplicate entry') !== false) {
+            $message = 'Error: <b>Duplicate entry for <i>' . $result['textlc'] .
+                '</i></b><br /><br /><input type="button" value="&lt;&lt; Back" onclick="history.back();" />';
         } else {
-            $translation = $translation_raw;
+            $message = $result['message'];
         }
-
-        $titletext = "New Term: " . tohtml($textlc);
-        pagestart_nobody($titletext);
-        echo '<h1>' . $titletext . '</h1>';
-
-        $message = Connection::execute(
-            'insert into ' . $tbpref . 'words (WoLgID, WoTextLC, WoText, ' .
-            'WoStatus, WoTranslation, WoSentence, WoRomanization, WoStatusChanged,' .  make_score_random_insert_update('iv') . ') values( ' .
-            $_REQUEST["WoLgID"] . ', ' .
-            Escaping::toSqlSyntax($textlc) . ', ' .
-            Escaping::toSqlSyntax($text) . ', ' .
-            $_REQUEST["WoStatus"] . ', ' .
-            Escaping::toSqlSyntax($translation) . ', ' .
-            Escaping::toSqlSyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', ' .
-            Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . ', NOW(), ' .
-            make_score_random_insert_update('id') . ')',
-            "Term saved",
-            $sqlerrdie = false
-        );
-
-        if (substr($message, 0, 22) == 'Error: Duplicate entry') {
-            $message = 'Error: <b>Duplicate entry for <i>' . $textlc . '</i></b><br /><br /><input type="button" value="&lt;&lt; Back" onclick="history.back();" />';
-        }
-
-        $wid = get_last_key();
-
+        echo '<p>' . $message . '</p>';
+    } else {
+        $wid = $result['id'];
         saveWordTags($wid);
         Maintenance::initWordCount();
-        //        $showAll = getSettingZeroOrOne('showallwords',1);
-        ?>
 
-   <p><?php echo $message; ?></p>
+        echo '<p>' . $result['message'] . '</p>';
 
-        <?php
-        if (substr($message, 0, 5) != 'Error') {
-            $len = Connection::fetchValue('select WoWordCount as value from ' . $tbpref . 'words where WoID = ' . $wid);
-            if ($len > 1) {
-                insertExpressions($textlc, $_REQUEST["WoLgID"], $wid, $len, 0);
-            } elseif ($len == 1) {
-                $hex = strToClassName(Escaping::prepareTextdata($textlc));
-                Connection::query(
-                    'UPDATE ' . $tbpref . 'textitems2 SET Ti2WoID = ' . $wid . '
-                    WHERE Ti2LgID = ' . $_REQUEST["WoLgID"] . ' AND LOWER(Ti2Text) = ' . Escaping::toSqlSyntaxNoTrimNoNull($textlc)
-                );
-                ?>
-<script type="text/javascript">
-    var context = window.parent.document;
-    var woid = <?php echo Escaping::prepareTextdataJs($wid); ?>;
-    var status = <?php echo Escaping::prepareTextdataJs($_REQUEST["WoStatus"]); ?>;
-    var trans = <?php echo Escaping::prepareTextdataJs($translation . getWordTagList($wid, ' ', 1, 0)); ?>;
-    var roman = <?php echo Escaping::prepareTextdataJs($_REQUEST["WoRomanization"]); ?>;
-    var title = '';
-    if (window.parent.LWT_DATA.settings.jQuery_tooltip) {
-        title = make_tooltip(
-                <?php echo Escaping::prepareTextdataJs($_REQUEST["WoText"]); ?>,
-            trans, roman, status
-        );
+        $len = $wordService->getWordCount($wid);
+        if ($len > 1) {
+            insertExpressions($result['textlc'], $_REQUEST["WoLgID"], $wid, $len, 0);
+        } elseif ($len == 1) {
+            $wordService->linkToTextItems($wid, $_REQUEST["WoLgID"], $result['textlc']);
+
+            // Prepare view variables
+            $hex = $wordService->textToClassName($result['textlc']);
+            $translation = repl_tab_nl(getreq("WoTranslation"));
+            if ($translation == '') {
+                $translation = '*';
+            }
+            $status = $_REQUEST["WoStatus"];
+            $romanization = $_REQUEST["WoRomanization"];
+            $text = $result['text'];
+            $textId = (int)$_REQUEST['tid'];
+            $success = true;
+
+            include __DIR__ . '/../Views/Word/save_result.php';
+        }
     }
-
-    if($('.TERM<?php echo $hex; ?>', context).length){
-        $('.TERM<?php echo $hex; ?>', context)
-        .removeClass('status0')
-        .addClass('word' + woid + ' ' + 'status' + status)
-        .attr('data_trans',trans)
-        .attr('data_rom',roman)
-        .attr('data_status',status)
-        .attr('data_wid',woid)
-        .attr('title',title);
-        $('#learnstatus', context).html('<?php echo addslashes(todo_words_content((int) $_REQUEST['tid'])); ?>');
-    }
-</script>
-                <?php
-                flush();
-            } ?>
-<script type="text/javascript">
-    cleanupRightFrames();
-</script>
-            <?php
-        } // (substr($message,0,5) != 'Error')
-    } // $_REQUEST['op'] == 'Save'
 } else {
-    // FORM
-    // if (! isset($_REQUEST['op']))
-    // new_word.php?text=..&lang=..
-
+    // Display the new word form
     $lang = (int)getreq('lang');
-    $text = (int)getreq('text');
+    $textId = (int)getreq('text');
     $scrdir = getScriptDirectionTag($lang);
-    $showRoman = (bool) Connection::fetchValue(
-        "SELECT LgShowRomanization AS value
-        FROM {$tbpref}languages
-        WHERE LgID = $lang"
-    );
+
+    $langData = $wordService->getLanguageData($lang);
+    $showRoman = $langData['showRoman'];
+
     pagestart_nobody('');
-    ?>
-    <script type="text/javascript">
-        $(document).ready(lwtFormCheck.askBeforeExit);
-        $(window).on('beforeunload', function() {
-            setTimeout(function() {window.parent.frames['ru'].location.href = 'empty.html';}, 0);
-        });
-    </script>
 
-    <form name="newword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
-        <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />
-        <input type="hidden" name="tid" value="<?php echo $text; ?>" />
-        <table class="tab2" cellspacing="0" cellpadding="5">
-            <tr>
-                <td class="td1 right"><b>New Term:</b></td>
-                <td class="td1"><input <?php echo $scrdir; ?>
-                class="notempty setfocus checkoutsidebmp" data_info="New Term"
-                type="text" name="WoText" id="wordfield" value="" maxlength="250" size="35" />
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
-            </tr>
-            <?php print_similar_terms_tabrow(); ?>
-            <tr>
-                <td class="td1 right">Translation:</td>
-                <td class="td1">
-                    <textarea class="textarea-noreturn checklength checkoutsidebmp"
-                    data_maxlength="500" data_info="Translation" name="WoTranslation" cols="35" rows="3"></textarea>
-                </td>
-            </tr>
-            <tr>
-                <td class="td1 right">Tags:</td>
-                <td class="td1">
-                <?php echo getWordTags(0); ?>
-            </td>
-            </tr>
-            <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
-                <td class="td1 right">Romaniz.:</td>
-                <td class="td1">
-                    <input type="text" class="checkoutsidebmp" data_info="Romanization" name="WoRomanization" value="" maxlength="100" size="35" />
-                </td>
-            </tr>
-            <tr>
-                <td class="td1 right">Sentence<br />Term in {...}:</td>
-                <td class="td1">
-                    <textarea <?php echo $scrdir; ?> name="WoSentence" cols="35" rows="3" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence"></textarea>
-                </td>
-            </tr>
-            <tr>
-                <td class="td1 right">Status:</td>
-                <td class="td1">
-                    <?php echo get_wordstatus_radiooptions(1); ?>
-                </td>
-            </tr>
-            <tr>
-                <td class="td1 right" colspan="2">  &nbsp;
-                    <?php echo createDictLinksInEditWin3($lang, 'document.forms[\'newword\'].WoSentence', 'document.forms[\'newword\'].WoText'); ?>
-                    &nbsp; &nbsp;
-                    <input type="submit" name="op" value="Save" />
-                </td>
-            </tr>
-        </table>
-    </form>
-
-    <?php
+    include __DIR__ . '/../Views/Word/form_new.php';
 }
 
 pageend();
-
-?>

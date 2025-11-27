@@ -18,6 +18,8 @@
  */
 
 require_once __DIR__ . '/vite_helper.php';
+require_once __DIR__ . '/../Http/url_utilities.php';
+require_once __DIR__ . '/../Tag/tags.php';
 require_once __DIR__ . '/../Word/word_status.php';
 
 /**
