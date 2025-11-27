@@ -3,12 +3,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  DIRTY,
   lwtFormCheck,
-  askConfirmIfDirty,
-  makeDirty,
-  resetDirty,
-  tagChanged,
 } from '../../../src/frontend/js/forms/unloadformcheck';
 
 describe('unloadformcheck.ts', () => {
@@ -106,57 +101,6 @@ describe('unloadformcheck.ts', () => {
         lwtFormCheck.tagChanged({}, {});
         expect(lwtFormCheck.dirty).toBe(true);
       });
-    });
-  });
-
-  // ===========================================================================
-  // Deprecated Function Tests
-  // ===========================================================================
-
-  describe('Deprecated Functions', () => {
-    describe('askConfirmIfDirty', () => {
-      it('delegates to lwtFormCheck.isDirtyMessage', () => {
-        lwtFormCheck.dirty = false;
-        expect(askConfirmIfDirty()).toBeUndefined();
-
-        lwtFormCheck.dirty = true;
-        expect(askConfirmIfDirty()).toBe('** You have unsaved changes! **');
-      });
-    });
-
-    describe('makeDirty (deprecated)', () => {
-      it('delegates to lwtFormCheck.makeDirty', () => {
-        lwtFormCheck.dirty = false;
-        makeDirty();
-        expect(lwtFormCheck.dirty).toBe(true);
-      });
-    });
-
-    describe('resetDirty (deprecated)', () => {
-      it('delegates to lwtFormCheck.resetDirty', () => {
-        lwtFormCheck.dirty = true;
-        resetDirty();
-        expect(lwtFormCheck.dirty).toBe(false);
-      });
-    });
-
-    describe('tagChanged (deprecated)', () => {
-      it('delegates to lwtFormCheck.tagChanged', () => {
-        lwtFormCheck.dirty = false;
-        const result = tagChanged({}, { duringInitialization: false });
-        expect(lwtFormCheck.dirty).toBe(true);
-        expect(result).toBe(true);
-      });
-    });
-  });
-
-  // ===========================================================================
-  // DIRTY Variable Tests (Legacy)
-  // ===========================================================================
-
-  describe('DIRTY variable (legacy)', () => {
-    it('is exported and initialized to 0', () => {
-      expect(DIRTY).toBe(0);
     });
   });
 

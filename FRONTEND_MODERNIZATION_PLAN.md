@@ -2701,7 +2701,7 @@ export default {
 ## Sign-off
 
 **Prepared By:** Frontend Team  
-**Reviewed By:** _____________  
+**Reviewed By:** _____________
 **Approved By:** _____________  
 **Date:** _____________
 

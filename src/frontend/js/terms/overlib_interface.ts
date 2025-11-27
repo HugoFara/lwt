@@ -7,7 +7,7 @@
 
 import { escape_html_chars, escape_html_chars_2 } from '../core/html_utils';
 import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
-import { createTheDictLink, createSentLookupLink, getLangFromDict } from './dictionary';
+import { createTheDictLink, createSentLookupLink } from './dictionary';
 
 // Declare external functions from overlib library
 declare function overlib(content: string, ...args: unknown[]): boolean;
@@ -89,9 +89,8 @@ export function run_overlib_status_98(
   rtl: boolean,
   ann: string
 ): boolean {
-  const lang = getLangFromDict(wblink3);
   return overlib(
-    make_overlib_audio(txt, lang) +
+    make_overlib_audio(txt) +
     '<b>' + escape_html_chars_2(hints, ann) + '</b><br/>' +
     make_overlib_link_new_word(txid, torder, wid) + ' | ' +
     make_overlib_link_delete_word(txid, wid) +
@@ -131,9 +130,8 @@ export function run_overlib_status_99(
   rtl: boolean,
   ann: string
 ): boolean {
-  const lang = getLangFromDict(wblink3);
   return overlib(
-    make_overlib_audio(txt, lang) +
+    make_overlib_audio(txt) +
     '<b>' + escape_html_chars_2(hints, ann) + '</b><br/> ' +
     make_overlib_link_new_word(txid, torder, wid) + ' | ' +
     make_overlib_link_delete_word(txid, wid) +
@@ -175,9 +173,8 @@ export function run_overlib_status_1_to_5(
   rtl: boolean,
   _ann: string // eslint-disable-line @typescript-eslint/no-unused-vars
 ): boolean {
-  const lang = getLangFromDict(wblink3);
   return overlib(
-    '<div>' + make_overlib_audio(txt, lang) + '<span>(Read)</span></div>' +
+    '<div>' + make_overlib_audio(txt) + '<span>(Read)</span></div>' +
     make_overlib_link_change_status_all(txid, torder, wid, stat) + ' <br /> ' +
     make_overlib_link_edit_word(txid, torder, wid) + ' | ' +
     make_overlib_link_delete_word(txid, wid) +
@@ -216,9 +213,8 @@ export function run_overlib_status_unknown(
   multi_words: (string | undefined)[],
   rtl: boolean
 ): boolean {
-  const lang = getLangFromDict(wblink3);
   return overlib(
-    make_overlib_audio(txt, lang) + '<b>' + escape_html_chars(hints) + '</b><br /> ' +
+    make_overlib_audio(txt) + '<b>' + escape_html_chars(hints) + '</b><br /> ' +
     make_overlib_link_wellknown_word(txid, torder) + ' <br /> ' +
     make_overlib_link_ignore_word(txid, torder) +
     make_overlib_link_new_multiword(txid, torder, multi_words, rtl) + ' <br /> ' +
@@ -257,9 +253,8 @@ export function run_overlib_multiword(
   wcnt: string,
   ann: string
 ): boolean {
-  const lang = getLangFromDict(wblink3);
   return overlib(
-    make_overlib_audio(txt, lang) + '<b>' + escape_html_chars_2(hints, ann) + '</b><br /> ' +
+    make_overlib_audio(txt) + '<b>' + escape_html_chars_2(hints, ann) + '</b><br /> ' +
     make_overlib_link_change_status_all(txid, torder, wid, stat) + ' <br /> ' +
     make_overlib_link_edit_multiword(txid, torder, wid) + ' | ' +
     make_overlib_link_delete_multiword(txid, wid) + ' <br /> ' +
@@ -797,14 +792,10 @@ export function make_overlib_link_ignore_word(
 /**
  * Create a clickable button to read a word aloud.
  *
- * @param txt   Word to say
- * @param _lang Language name (deprecated - uses LWT_DATA.language.id instead)
+ * @param txt Word to say
  * @return HTML-formatted clickable icon
  */
-export function make_overlib_audio(
-  txt: string,
-  _lang: string // eslint-disable-line @typescript-eslint/no-unused-vars
-): string {
+export function make_overlib_audio(txt: string): string {
   const img = document.createElement('img');
   img.title = 'Click to read!';
   img.src = 'icn/speaker-volume.png';

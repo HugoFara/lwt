@@ -347,7 +347,7 @@ function get20Sentences($lang, $wordlc, $wid, $jsctlname, $mode): string
     $sentences = sentences_with_word($lang, $wordlc, $wid, $mode);
     foreach ($sentences as $sentence) {
         $r .= '<span class="click" onclick="{' . $jsctlname . '.value=' .
-            Escaping::prepareTextdataJs($sentence[1]) . '; makeDirty();}">
+            Escaping::prepareTextdataJs($sentence[1]) . '; lwtFormCheck.makeDirty();}">
         <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
         </span> &nbsp;' . $sentence[0] . '<br />';
     }
