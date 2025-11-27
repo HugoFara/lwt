@@ -30,6 +30,8 @@ require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 require_once 'Core/Word/dictionary_links.php';
 
+use Lwt\Database\Connection;
+
 /**************************************************************/
 
 if (isset($_REQUEST["action"])) {  // Action
@@ -60,7 +62,7 @@ if (isset($_REQUEST["action"])) {  // Action
         $langname = getLanguage($lang);
         $sql = 'select TxID, TxTitle from ' . $tbpref . 'texts where TxLgID = ' . $lang .
         ' order by TxTitle';
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
 
         ?>
 
@@ -84,14 +86,14 @@ if (isset($_REQUEST["action"])) {  // Action
         /* -------------------------------------------------------- */
         $lang = $_REQUEST["lang"];
         $text = $_REQUEST["text"];
-        $texttitle = (string) get_first_value(
+        $texttitle = (string) Connection::fetchValue(
             'select TxTitle as value from ' . $tbpref . 'texts where TxID = ' . $text
         );
-        $textaudio = (string) get_first_value(
+        $textaudio = (string) Connection::fetchValue(
             'select TxAudioURI as value from ' . $tbpref . 'texts where TxID = ' . $text
         );
         $sql = 'select SeID, SeText from ' . $tbpref . 'sentences where SeTxID = ' . $text . ' order by SeOrder';
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
 
         ?>
 
@@ -138,10 +140,10 @@ if (isset($_REQUEST["action"])) {  // Action
         $lang = $_REQUEST["lang"];
         $text = $_REQUEST["text"];
         $sent = $_REQUEST["sent"];
-        $senttext = get_first_value(
+        $senttext = Connection::fetchValue(
             'SELECT SeText AS value FROM ' . $tbpref . 'sentences WHERE SeID = ' . $sent
         );
-        $nextsent = get_first_value(
+        $nextsent = Connection::fetchValue(
             'SELECT SeID AS value
             FROM ' . $tbpref . 'sentences
             WHERE SeTxID = ' . $text . ' AND trim(SeText) != \'¶\' AND SeID > ' . $sent . '
@@ -162,7 +164,7 @@ if (isset($_REQUEST["action"])) {  // Action
             )
             WHERE Ti2SeID = ' . $sent . '
             ORDER BY Ti2Order asc, Ti2WordCount desc';
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
 
         if ($action == 4) {
             ?>
@@ -295,7 +297,7 @@ span.status5 {
     <li class="group">Languages</li>
     <?php
     $sql = 'select LgID, LgName from ' . $tbpref . 'languages where LgName<>"" order by LgName';
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         echo '<li><a href="/mobile?action=2&amp;lang=' . $record["LgID"] . '">' .
         tohtml($record["LgName"]) . '</a></li>';

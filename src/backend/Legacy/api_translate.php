@@ -27,6 +27,8 @@ require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 
+use Lwt\Database\Connection;
+
 
 /**
  * @return null|string
@@ -37,7 +39,7 @@ function translator_url(int $term, int $order)
     $sql = "SELECT SeText, LgGoogleTranslateURI
     FROM {$tbpref}languages, {$tbpref}sentences, {$tbpref}textitems2
     WHERE Ti2SeID = SeID AND Ti2LgID = LgID AND Ti2TxID = $term AND Ti2Order = $order";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     if ($record) {
         $record['SeText'];

@@ -26,6 +26,7 @@ require_once 'Core/Integration/google_time_token.php' ;
 require_once 'Core/Entity/GoogleTranslate.php';
 
 use Lwt\Classes\GoogleTranslate as GoogleTranslate;
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
@@ -65,7 +66,7 @@ function translate_term($text, $file, $sl, $tl): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $lg_id = Settings::get('currentlangage');
-    get_first_value(
+    Connection::fetchValue(
         "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages
         WHERE LgID = $lg_id"
     );

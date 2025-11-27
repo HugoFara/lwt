@@ -131,7 +131,7 @@ function edit_mword_do_operation($term)
      *
      * if (isset($sqltext)) {
         flush();
-        do_mysqli_query($sqltext);
+        Connection::query($sqltext);
         echo '<p>OK: ',tohtml($message),'</p>';
     }*/
 }

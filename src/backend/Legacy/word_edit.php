@@ -34,6 +34,7 @@ require_once 'Core/Word/word_status.php';
 require_once 'Core/simterms.php';
 require_once 'Core/Language/langdefs.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
@@ -55,7 +56,7 @@ function insert_new_word($textlc, $translation): array
     pagestart_nobody($titletext);
     echo '<h1>' . $titletext . '</h1>';
 
-    $message = runsql(
+    $message = Connection::execute(
         'INSERT INTO ' . $tbpref . 'words
         (
             WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
@@ -63,21 +64,21 @@ function insert_new_word($textlc, $translation): array
             .  make_score_random_insert_update('iv') . '
         ) VALUES(
             ' . $_REQUEST["WoLgID"] . ', ' .
-            convert_string_to_sqlsyntax($_REQUEST["WoTextLC"]) . ', ' .
-            convert_string_to_sqlsyntax($_REQUEST["WoText"]) . ', ' .
+            Escaping::toSqlSyntax($_REQUEST["WoTextLC"]) . ', ' .
+            Escaping::toSqlSyntax($_REQUEST["WoText"]) . ', ' .
             $_REQUEST["WoStatus"] . ', ' .
-            convert_string_to_sqlsyntax($translation) . ', ' .
-            convert_string_to_sqlsyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', 1, ' .
-            convert_string_to_sqlsyntax($_REQUEST["WoRomanization"]) . ', NOW(), ' .
+            Escaping::toSqlSyntax($translation) . ', ' .
+            Escaping::toSqlSyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', 1, ' .
+            Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . ', NOW(), ' .
             make_score_random_insert_update('id') .
         ')',
         "Term saved"
     );
     $wid = get_last_key();
-    do_mysqli_query(
+    Connection::query(
         'UPDATE ' . $tbpref . 'textitems2 SET Ti2WoID = ' . $wid . '
         WHERE Ti2LgID = ' . $_REQUEST["WoLgID"] . ' AND LOWER(Ti2Text) =' .
-        convert_string_to_sqlsyntax_notrim_nonull($textlc)
+        Escaping::toSqlSyntaxNoTrimNoNull($textlc)
     );
     return array($wid, $message);
 }
@@ -104,12 +105,12 @@ function edit_term($translation)
         $xx = ', WoStatus = ' .    $newstatus . ', WoStatusChanged = NOW()';
     }
 
-    $message = runsql(
+    $message = Connection::execute(
         'update ' . $tbpref . 'words set WoText = ' .
-        convert_string_to_sqlsyntax($_REQUEST["WoText"]) . ', WoTranslation = ' .
-        convert_string_to_sqlsyntax($translation) . ', WoSentence = ' .
-        convert_string_to_sqlsyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', WoRomanization = ' .
-        convert_string_to_sqlsyntax($_REQUEST["WoRomanization"]) . $xx . ',' .
+        Escaping::toSqlSyntax($_REQUEST["WoText"]) . ', WoTranslation = ' .
+        Escaping::toSqlSyntax($translation) . ', WoSentence = ' .
+        Escaping::toSqlSyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', WoRomanization = ' .
+        Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . $xx . ',' .
         make_score_random_insert_update('u') .
         ' where WoID = ' . $_REQUEST["WoID"],
         "Updated"
@@ -248,7 +249,7 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
         $sql =
         "SELECT Ti2Text, Ti2LgID FROM {$tbpref}textitems2
         WHERE Ti2TxID = $text_id AND Ti2WordCount = 1 AND Ti2Order = $ord";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         if ($record === false) {
             my_die("Failure while running the SQL query!");
@@ -262,11 +263,11 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
 
         $termlc = mb_strtolower($term, 'UTF-8');
 
-        $temp_id = get_first_value(
+        $temp_id = Connection::fetchValue(
             "SELECT WoID AS value
             FROM {$tbpref}words
             WHERE WoLgID = $lang AND WoTextLC = " .
-            convert_string_to_sqlsyntax($termlc)
+            Escaping::toSqlSyntax($termlc)
         );
         if ($temp_id === null) {
             $new = true;
@@ -276,7 +277,7 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
         }
     } else {
         $sql = "SELECT WoText, WoLgID FROM {$tbpref}words WHERE WoID = $wid";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         if (!$record) {
             my_die("Cannot access Term and Language in edit_word.php");
@@ -303,7 +304,7 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
     // NEW
 
     if ($new) {
-        $seid = get_first_value(
+        $seid = Connection::fetchValue(
             "SELECT Ti2SeID AS value FROM " . $tbpref . "textitems2
             WHERE Ti2TxID = $text_id AND Ti2WordCount = 1 AND Ti2Order = $ord"
         );
@@ -312,17 +313,17 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
             $termlc,
             (int) Settings::getWithDefault('set-term-sentence-count')
         );
-        $trans_uri = (string) get_first_value(
+        $trans_uri = (string) Connection::fetchValue(
             "SELECT LgGoogleTranslateURI AS value FROM {$tbpref}languages
             WHERE LgID = $lang"
         );
-        $lgname = (string) get_first_value(
+        $lgname = (string) Connection::fetchValue(
             "SELECT LgName AS value FROM {$tbpref}languages
             WHERE LgID = $lang"
         );
         $lang_short = array_key_exists($lgname, LWT_LANGUAGES_ARRAY) ?
         LWT_LANGUAGES_ARRAY[$lgname][1] : '';
-        $showRoman = (bool) get_first_value(
+        $showRoman = (bool) Connection::fetchValue(
             "SELECT LgShowRomanization AS value
             FROM {$tbpref}languages
             WHERE LgID = $lang"
@@ -448,7 +449,7 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
         // CHG
         $sql = "SELECT WoTranslation, WoSentence, WoRomanization, WoStatus
         FROM {$tbpref}words WHERE WoID = $wid";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         if ($record = mysqli_fetch_assoc($res)) {
             $status = $record['WoStatus'];
             if ($fromAnn == '' && $status >= 98) {
@@ -456,7 +457,7 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
             }
             $sentence = repl_tab_nl($record['WoSentence']);
             if ($sentence == '' && $text_id !== 0 && $ord !== 0) {
-                $seid = get_first_value(
+                $seid = Connection::fetchValue(
                     "SELECT Ti2SeID as value from {$tbpref}textitems2
                     where Ti2TxID = $text_id and Ti2WordCount = 1 and Ti2Order = $ord"
                 );
@@ -467,7 +468,7 @@ function edit_word_do_form(int $wid, int $text_id, int $ord, string $fromAnn)
             if ($transl == '*') {
                 $transl = '';
             }
-            $showRoman = (bool) get_first_value(
+            $showRoman = (bool) Connection::fetchValue(
                 "SELECT LgShowRomanization AS value
                 FROM {$tbpref}languages JOIN {$tbpref}texts
                 ON TxLgID = LgID

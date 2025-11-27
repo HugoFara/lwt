@@ -501,12 +501,12 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
     <tr>
         <td class="td1 center" colspan="2" style="width:70%;"><?php
         if (!empty($currentlang)) {
-            $result = do_mysqli_query(
+            $result = Connection::query(
                 "SELECT NfName, NfID, NfUpdate FROM {$tbpref}newsfeeds
         WHERE NfLgID=$currentlang ORDER BY NfUpdate DESC"
             );
         } else {
-            $result = do_mysqli_query(
+            $result = Connection::query(
                 "SELECT NfName, NfID, NfUpdate FROM {$tbpref}newsfeeds
         ORDER BY NfUpdate DESC"
             );

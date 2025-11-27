@@ -13,6 +13,7 @@ require_once 'Core/Word/word_status.php';
 require_once 'Core/Word/dictionary_links.php';
 require_once 'Core/Media/media_helpers.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 require_once 'Core/simterms.php';
@@ -41,18 +42,18 @@ function add_new_term_transl($text, $lang, $data): array|string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $textlc = mb_strtolower($text, 'UTF-8');
-    $dummy = runsql(
+    $dummy = Connection::execute(
         "INSERT INTO {$tbpref}words (
             WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
             WoSentence, WoRomanization, WoStatusChanged,
             " .  make_score_random_insert_update('iv') . '
         ) VALUES( ' .
         $lang . ', ' .
-        convert_string_to_sqlsyntax($textlc) . ', ' .
-        convert_string_to_sqlsyntax($text) . ', 1, ' .
-        convert_string_to_sqlsyntax($data) . ', ' .
-        convert_string_to_sqlsyntax('') . ', ' .
-        convert_string_to_sqlsyntax('') . ', NOW(), ' .
+        Escaping::toSqlSyntax($textlc) . ', ' .
+        Escaping::toSqlSyntax($text) . ', 1, ' .
+        Escaping::toSqlSyntax($data) . ', ' .
+        Escaping::toSqlSyntax('') . ', ' .
+        Escaping::toSqlSyntax('') . ', NOW(), ' .
         make_score_random_insert_update('id') . ')',
         ""
     );
@@ -64,11 +65,11 @@ function add_new_term_transl($text, $lang, $data): array|string
         return "Error: $dummy rows affected, expected 1!";
     }
     $wid = get_last_key();
-    do_mysqli_query(
+    Connection::query(
         "UPDATE {$tbpref}textitems2
         SET Ti2WoID = $wid
         WHERE Ti2LgID = $lang AND LOWER(Ti2Text) = " .
-        convert_string_to_sqlsyntax_notrim_nonull($textlc)
+        Escaping::toSqlSyntaxNoTrimNoNull($textlc)
     );
     return array($wid, $textlc);
 }
@@ -84,7 +85,7 @@ function add_new_term_transl($text, $lang, $data): array|string
 function edit_term_transl($wid, $new_trans)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $oldtrans = (string) get_first_value(
+    $oldtrans = (string) Connection::fetchValue(
         "SELECT WoTranslation AS value
         FROM {$tbpref}words
         WHERE WoID = $wid"
@@ -93,7 +94,7 @@ function edit_term_transl($wid, $new_trans)
     $oldtransarr = preg_split('/[' . get_sepas()  . ']/u', $oldtrans);
     if ($oldtransarr === false) {
         // Something wrong happened, stop here
-        return (string)get_first_value(
+        return (string)Connection::fetchValue(
             "SELECT WoTextLC AS value
             FROM {$tbpref}words
             WHERE WoID = $wid"
@@ -107,14 +108,14 @@ function edit_term_transl($wid, $new_trans)
         } else {
             $oldtrans .= ' ' . get_first_sepa() . ' ' . $new_trans;
         }
-        runsql(
+        Connection::execute(
             "UPDATE {$tbpref}words
-            SET WoTranslation = " . convert_string_to_sqlsyntax($oldtrans) .
+            SET WoTranslation = " . Escaping::toSqlSyntax($oldtrans) .
             " WHERE WoID = $wid",
             ""
         );
     }
-    return (string)get_first_value(
+    return (string)Connection::fetchValue(
         "SELECT WoTextLC AS value
         FROM {$tbpref}words
         WHERE WoID = $wid"
@@ -133,7 +134,7 @@ function edit_term_transl($wid, $new_trans)
 function do_ajax_check_update_translation($wid, $new_trans)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $cnt_words = (int)get_first_value(
+    $cnt_words = (int)Connection::fetchValue(
         "SELECT COUNT(WoID) AS value
         FROM {$tbpref}words
         WHERE WoID = $wid"
@@ -159,7 +160,7 @@ function do_ajax_check_update_translation($wid, $new_trans)
 function set_word_status($wid, $status)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $m1 = runsql(
+    $m1 = Connection::execute(
         "UPDATE {$tbpref}words
         SET WoStatus = $status, WoStatusChanged = NOW()," .
         make_score_random_insert_update('u') . "
@@ -212,7 +213,7 @@ function update_word_status($wid, $currstatus)
     if (($currstatus >= 1 && $currstatus <= 5) || $currstatus == 99 || $currstatus == 98) {
         $m1 = (int)set_word_status($wid, $currstatus);
         if ($m1 == 1) {
-            $currstatus = get_first_value(
+            $currstatus = Connection::fetchValue(
                 "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoID = $wid"
             );
             if (!isset($currstatus)) {
@@ -238,7 +239,7 @@ function ajax_increment_term_status($wid, $up)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
-    $tempstatus = get_first_value(
+    $tempstatus = Connection::fetchValue(
         "SELECT WoStatus as value
         FROM {$tbpref}words
         WHERE WoID = $wid"
@@ -269,7 +270,7 @@ function ajax_increment_term_status($wid, $up)
 function save_text_position($textid, $position)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    runsql(
+    Connection::execute(
         "UPDATE {$tbpref}texts
         SET TxPosition = $position
         WHERE TxID = $textid",
@@ -288,7 +289,7 @@ function save_text_position($textid, $position)
 function save_audio_position($textid, $audioposition)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    runsql(
+    Connection::execute(
         "UPDATE {$tbpref}texts
         SET TxAudioPosition = $audioposition
         WHERE TxID = $textid",
@@ -312,7 +313,7 @@ function save_audio_position($textid, $audioposition)
 function save_impr_text_data($textid, $line, $val): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $ann = (string) get_first_value(
+    $ann = (string) Connection::fetchValue(
         "SELECT TxAnnotatedText AS value
         FROM {$tbpref}texts
         WHERE TxID = $textid"
@@ -332,10 +333,10 @@ function save_impr_text_data($textid, $line, $val): string
     }
     // Change term translation
     $items[$line] = implode("\t", array($vals[0], $vals[1], $vals[2], $val));
-    runsql(
+    Connection::execute(
         "UPDATE {$tbpref}texts
         SET TxAnnotatedText = " .
-        convert_string_to_sqlsyntax(implode("\n", $items)) . "
+        Escaping::toSqlSyntax(implode("\n", $items)) . "
         WHERE TxID = $textid",
         ""
     );
@@ -422,10 +423,10 @@ function select_imported_terms($last_update, $offset, $max_terms): array
         ({$tbpref}words LEFT JOIN {$tbpref}wordtags ON WoID = WtWoID)
         LEFT JOIN {$tbpref}tags ON TgID = WtTgID
     )
-    WHERE WoStatusChanged > " . convert_string_to_sqlsyntax($last_update) . "
+    WHERE WoStatusChanged > " . Escaping::toSqlSyntax($last_update) . "
     GROUP BY WoID
     LIMIT $offset, $max_terms";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $records = mysqli_fetch_all($res);
     mysqli_free_result($res);
     return $records;
@@ -487,7 +488,7 @@ function make_trans($i, $wid, $trans, $word, $lang): string
     $set = null;
     $set_default = null;
     if ($widset) {
-        $alltrans = (string) get_first_value(
+        $alltrans = (string) \Lwt\Database\Connection::fetchValue(
             "SELECT WoTranslation AS value FROM {$tbpref}words
             WHERE WoID = $wid"
         );
@@ -566,7 +567,7 @@ function get_translations($word_id): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $translations = array();
-    $alltrans = (string) get_first_value(
+    $alltrans = (string) \Lwt\Database\Connection::fetchValue(
         "SELECT WoTranslation AS value FROM {$tbpref}words
         WHERE WoID = $word_id"
     );
@@ -597,7 +598,7 @@ function get_term_translations($wordlc, $textid): array
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT TxLgID, TxAnnotatedText
     FROM {$tbpref}texts WHERE TxID = $textid";
-    $res = do_mysqli_query($sql);
+    $res = \Lwt\Database\Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $langid = (int)$record['TxLgID'];
     $ann = (string)$record['TxAnnotatedText'];
@@ -650,7 +651,7 @@ function get_term_translations($wordlc, $textid): array
     // Word exists and has an ID
     if (count($vals) > 2 && ctype_digit($vals[2])) {
         $wid = (int)$vals[2];
-        $temp_wid = (int)get_first_value(
+        $temp_wid = (int)\Lwt\Database\Connection::fetchValue(
             "SELECT COUNT(WoID) AS value
             FROM {$tbpref}words
             WHERE WoID = $wid"
@@ -684,7 +685,7 @@ function edit_term_form($textid): string
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT TxLgID, TxAnnotatedText
     FROM {$tbpref}texts WHERE TxID = $textid";
-    $res = do_mysqli_query($sql);
+    $res = \Lwt\Database\Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $langid = (int) $record['TxLgID'];
     $ann = (string) $record['TxAnnotatedText'];
@@ -695,7 +696,7 @@ function edit_term_form($textid): string
 
     $sql = "SELECT LgTextSize, LgRightToLeft
     FROM {$tbpref}languages WHERE LgID = $langid";
-    $res = do_mysqli_query($sql);
+    $res = \Lwt\Database\Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $textsize = (int)$record['LgTextSize'];
     if ($textsize > 100) {
@@ -739,7 +740,7 @@ function edit_term_form($textid): string
             if (count($vals) > 2) {
                 $str_wid = $vals[2];
                 if (is_numeric($str_wid)) {
-                    $temp_wid = (int)get_first_value(
+                    $temp_wid = (int)\Lwt\Database\Connection::fetchValue(
                         "SELECT COUNT(WoID) AS value
                         FROM {$tbpref}words
                         WHERE WoID = $str_wid"
@@ -840,18 +841,18 @@ function get_feeds_list($feed, $nfid): array
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $valuesArr = array();
     foreach ($feed as $data) {
-        $d_title = convert_string_to_sqlsyntax($data['title']);
-        $d_link = convert_string_to_sqlsyntax($data['link']);
-        $d_text = convert_string_to_sqlsyntax(isset($data['text']) ?  $data['text'] : null);
-        $d_desc = convert_string_to_sqlsyntax($data['desc']);
-        $d_date = convert_string_to_sqlsyntax($data['date']);
-        $d_audio = convert_string_to_sqlsyntax($data['audio']);
-        $d_feed = convert_string_to_sqlsyntax((string)$nfid);
+        $d_title = \Lwt\Database\Escaping::toSqlSyntax($data['title']);
+        $d_link = \Lwt\Database\Escaping::toSqlSyntax($data['link']);
+        $d_text = \Lwt\Database\Escaping::toSqlSyntax(isset($data['text']) ?  $data['text'] : null);
+        $d_desc = \Lwt\Database\Escaping::toSqlSyntax($data['desc']);
+        $d_date = \Lwt\Database\Escaping::toSqlSyntax($data['date']);
+        $d_audio = \Lwt\Database\Escaping::toSqlSyntax($data['audio']);
+        $d_feed = \Lwt\Database\Escaping::toSqlSyntax((string)$nfid);
         $valuesArr[] = "($d_title,$d_link,$d_text,$d_desc,$d_date,$d_audio,$d_feed)";
     }
     $sql = 'INSERT IGNORE INTO ' . $tbpref . 'feedlinks (FlTitle,FlLink,FlText,FlDescription,FlDate,FlAudio,FlNfID)
     VALUES ' . implode(',', $valuesArr);
-    do_mysqli_query($sql);
+    \Lwt\Database\Connection::query($sql);
     $imported_feed = mysqli_affected_rows($GLOBALS["DBCONNECTION"]);
     $nif = count($valuesArr) - $imported_feed;
     unset($valuesArr);
@@ -872,7 +873,7 @@ function get_feeds_list($feed, $nfid): array
 function get_feed_result($imported_feed, $nif, $nfname, $nfid, $nfoptions): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    do_mysqli_query(
+    \Lwt\Database\Connection::query(
         'UPDATE ' . $tbpref . 'newsfeeds
         SET NfUpdate="' . time() . '"
         WHERE NfID=' . $nfid
@@ -901,7 +902,7 @@ function get_feed_result($imported_feed, $nif, $nfname, $nfid, $nfoptions): stri
     } elseif ($nif == 1) {
         $msg .= ", $nif dublicated article";
     }
-    $result = do_mysqli_query(
+    $result = \Lwt\Database\Connection::query(
         "SELECT COUNT(*) AS total
         FROM " . $tbpref . "feedlinks
         WHERE FlNfID IN (" . $nfid . ")"
@@ -909,7 +910,7 @@ function get_feed_result($imported_feed, $nif, $nfname, $nfid, $nfoptions): stri
     $row = mysqli_fetch_assoc($result);
     $to = ($row['total'] - $nf_max_links);
     if ($to > 0) {
-        do_mysqli_query(
+        \Lwt\Database\Connection::query(
             "DELETE FROM " . $tbpref . "feedlinks
             WHERE FlNfID in (" . $nfid . ")
             ORDER BY FlDate
@@ -1107,7 +1108,7 @@ function readingConfiguration(array $get_req): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // language, voiceAPI, abbr
-    $req = do_mysqli_query(
+    $req = \Lwt\Database\Connection::query(
         "SELECT LgName, LgTTSVoiceAPI, LgRegexpWordCharacters FROM {$tbpref}languages
         WHERE LgID = " . $get_req["lang_id"]
     );

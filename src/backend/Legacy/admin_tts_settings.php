@@ -20,6 +20,8 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Language/langdefs.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 /**
@@ -34,10 +36,10 @@ use Lwt\Database\Settings;
 function get_language_code($language)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $lg_id = (int) get_first_value(
+    $lg_id = (int) Connection::fetchValue(
         "SELECT LgID as value
         FROM {$tbpref}languages
-        WHERE LgName = " . convert_string_to_sqlsyntax($language)
+        WHERE LgName = " . Escaping::toSqlSyntax($language)
     );
     return getLanguageCode($lg_id, LWT_LANGUAGES_ARRAY);
 }
