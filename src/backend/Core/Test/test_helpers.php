@@ -16,7 +16,11 @@
  * @since    3.0.0
  */
 
-require_once __DIR__ . '/../database_connect.php';
+require_once __DIR__ . '/../Globals.php';
+require_once __DIR__ . '/../Database/Connection.php';
+require_once __DIR__ . '/../Utils/error_handling.php';
+
+use Lwt\Database\Connection;
 
 /**
  * Create a projection operator do perform word test.
@@ -39,7 +43,7 @@ function do_test_test_get_projection($key, $value): string|null
             // Test words in a list of words ID
             $id_string = implode(",", $value);
             $testsql = " {$tbpref}words WHERE WoID IN ($id_string) ";
-            $cntlang = get_first_value(
+            $cntlang = Connection::fetchValue(
                 "SELECT COUNT(DISTINCT WoLgID) AS value
                 FROM $testsql"
             );
@@ -54,7 +58,7 @@ function do_test_test_get_projection($key, $value): string|null
             $id_string = implode(",", $value);
             $testsql = " {$tbpref}words, {$tbpref}textitems2
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($id_string) ";
-            $cntlang = get_first_value(
+            $cntlang = Connection::fetchValue(
                 "SELECT COUNT(DISTINCT WoLgID) AS value
             FROM $testsql"
             );
@@ -100,7 +104,7 @@ function do_test_test_from_selection(int $selection_type, string $selection_data
             break;
         default:
             $test_sql = $selection_data;
-            $cntlang = get_first_value(
+            $cntlang = Connection::fetchValue(
                 "SELECT COUNT(DISTINCT WoLgID) AS value
                 FROM $test_sql"
             );

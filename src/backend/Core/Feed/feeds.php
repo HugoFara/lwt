@@ -1,6 +1,11 @@
 <?php
 
-require_once __DIR__ . '/../database_connect.php';
+require_once __DIR__ . '/../Globals.php';
+require_once __DIR__ . '/../Database/Connection.php';
+require_once __DIR__ . '/../Database/Escaping.php';
+require_once __DIR__ . '/../Database/Maintenance.php';
+require_once __DIR__ . '/../Database/TextParsing.php';
+require_once __DIR__ . '/../Tag/tags.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
@@ -129,13 +134,13 @@ function write_rss_to_db(array $texts): string
                         Escaping::toSqlSyntax($text['TxAudioURI']) . ',' .
                         Escaping::toSqlSyntax($text['TxSourceURI']) . ')'
                 );
-                $id = get_last_key();
+                $id = (int) Connection::lastInsertId();
                 TextParsing::splitCheck(
-                    get_first_value(
+                    Connection::fetchValue(
                         'select TxText as value from ' . $tbpref . 'texts
                         where TxID = ' . $id
                     ),
-                    get_first_value(
+                    Connection::fetchValue(
                         'select TxLgID as value from ' . $tbpref . 'texts
                         where TxID = ' . $id
                     ),
@@ -180,7 +185,7 @@ function write_rss_to_db(array $texts): string
                     from ' . $tbpref . 'texts
                     where TxID = ' . $text_ID
                 );
-                $id = get_last_key();
+                $id = (int) Connection::lastInsertId();
                 Connection::execute(
                     'insert into ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
                     select ' . $id . ', TtT2ID from ' . $tbpref . 'texttags

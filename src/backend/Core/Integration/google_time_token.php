@@ -2,7 +2,9 @@
 
 namespace Lwt\Includes;
 
-require_once __DIR__ . '/../database_connect.php';
+require_once __DIR__ . '/../Database/Connection.php';
+
+use Lwt\Database\Connection;
 
 /**
  * Generate a new token for Google.
@@ -51,7 +53,7 @@ function regenGoogleTimeToken(): array|null
     if (isset($ma[1][0]) && isset($ma[2][0]) && isset($ma[3][0])) {
         $tok = strval($ma[3][0]) . "." .
             strval(intval($ma[1][0]) + intval($ma[2][0]));
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO _lwtgeneral (LWTKey, LWTValue)
             VALUES ('GoogleTimeToken', '$tok')
             ON DUPLICATE KEY UPDATE LWTValue = '$tok'"
@@ -70,7 +72,7 @@ function regenGoogleTimeToken(): array|null
  */
 function getGoogleTimeToken(): array|null
 {
-    $val = (string) get_first_value(
+    $val = (string) Connection::fetchValue(
         'SELECT LWTValue AS value from _lwtgeneral WHERE LWTKey = "GoogleTimeToken"'
     );
     $arr = empty($val) ? array('0') : explode('.', $val);

@@ -16,8 +16,12 @@
  * @since    3.0.0
  */
 
-require_once __DIR__ . '/../database_connect.php';
+require_once __DIR__ . '/../Globals.php';
+require_once __DIR__ . '/../Database/Connection.php';
+require_once __DIR__ . '/../Database/Escaping.php';
+require_once __DIR__ . '/../Utils/string_utilities.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 
 /**
@@ -85,7 +89,7 @@ function createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst): string
     $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
     FROM ' . \Lwt\Core\Globals::table('languages') . '
     WHERE LgID = ' . $lang;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $wb1 = isset($record['LgDict1URI']) ? $record['LgDict1URI'] : "";
     $wb2 = isset($record['LgDict2URI']) ? $record['LgDict2URI'] : "";
@@ -233,7 +237,7 @@ function createDictLinksInEditWin2($lang, $sentctljs, $wordctljs): string
 {
     $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
     FROM " . \Lwt\Core\Globals::table('languages') . " WHERE LgID = $lang";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
     if (substr($wb1, 0, 1) == '*') {
@@ -276,7 +280,7 @@ function makeDictLinks(int $lang, string $wordctljs): string
 {
     $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
     FROM ' . \Lwt\Core\Globals::table('languages') . ' WHERE LgID = ' . $lang;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
     if (substr($wb1, 0, 1) == '*') {
@@ -311,7 +315,7 @@ function createDictLinksInEditWin3(int $lang, string $sentctljs, string $wordctl
 {
     $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
     FROM " . \Lwt\Core\Globals::table('languages') . " WHERE LgID = $lang";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
 
     $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";

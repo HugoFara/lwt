@@ -16,9 +16,15 @@
  * @since    3.0.0
  */
 
-require_once __DIR__ . '/../database_connect.php';
+require_once __DIR__ . '/../Globals.php';
+require_once __DIR__ . '/../Database/Connection.php';
+require_once __DIR__ . '/../Database/Escaping.php';
+require_once __DIR__ . '/../Database/Validation.php';
+require_once __DIR__ . '/../Database/Settings.php';
 require_once __DIR__ . '/../Tag/tags.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;
 
@@ -53,11 +59,11 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
     $currentregexmode = Settings::getWithDefault("set-regex-mode");
     $wh_query = $currentregexmode . 'LIKE ';
     if ($currentregexmode == '') {
-        $wh_query .= convert_string_to_sqlsyntax(
+        $wh_query .= Escaping::toSqlSyntax(
             str_replace("*", "%", mb_strtolower($currentquery, 'UTF-8'))
         );
     } else {
-        $wh_query .= convert_string_to_sqlsyntax($currentquery);
+        $wh_query .= Escaping::toSqlSyntax($currentquery);
     }
     switch ($currentquerymode) {
         case 'title,text':
@@ -149,7 +155,7 @@ function getPreviousAndNextTextLinks($textid, $url, $onlyann, $add): string
     }
 
     $list = array(0);
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         array_push($list, (int) $record['TxID']);
     }

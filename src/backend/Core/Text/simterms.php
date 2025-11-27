@@ -13,8 +13,13 @@
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-simterms.html
  */
 
-require_once __DIR__ . '/../database_connect.php';
+require_once __DIR__ . '/../Globals.php';
+require_once __DIR__ . '/../Database/Connection.php';
+require_once __DIR__ . '/../Database/Escaping.php';
+require_once __DIR__ . '/../Database/Settings.php';
+require_once __DIR__ . '/../Utils/string_utilities.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
@@ -107,8 +112,8 @@ function get_similar_terms(
     $compared_term_lc = mb_strtolower($compared_term, 'UTF-8');
     $sql = "SELECT WoID, WoTextLC FROM {$tbpref}words
     WHERE WoLgID = $lang_id
-    AND WoTextLC <> " . convert_string_to_sqlsyntax($compared_term_lc);
-    $res = do_mysqli_query($sql);
+    AND WoTextLC <> " . Escaping::toSqlSyntax($compared_term_lc);
+    $res = Connection::query($sql);
     $termlsd = array();
     while ($record = mysqli_fetch_assoc($res)) {
         $termlsd[(int)$record["WoID"]] = getSimilarityRanking(
@@ -145,7 +150,7 @@ function format_term($termid, $compare)
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT WoText, WoTranslation, WoRomanization
     FROM {$tbpref}words WHERE WoID = $termid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
         $term = tohtml($record["WoText"]);
         if (stripos($compare, $term) !== false) {

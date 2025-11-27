@@ -1,6 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../database_connect.php';
+require_once __DIR__ . '/../Globals.php';
+require_once __DIR__ . '/../Database/Connection.php';
+require_once __DIR__ . '/../Database/Escaping.php';
+require_once __DIR__ . '/../Utils/string_utilities.php';
 require_once __DIR__ . '/../Http/url_utilities.php';
 
 use Lwt\Database\Connection;
@@ -73,7 +76,7 @@ function get_texttags($refresh = 0)
 function getTextTitle(int $textid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $text = get_first_value(
+    $text = Connection::fetchValue(
         "SELECT TxTitle AS value
         FROM " . $tbpref . "texts
         WHERE TxID=" . $textid
@@ -450,7 +453,7 @@ function addtaglist(string $item, string $list): string
     if ($list === '()') {
         return "Tag added in 0 Terms";
     }
-    $tagid = get_first_value(
+    $tagid = Connection::fetchValue(
         'select TgID as value
         from ' . $tbpref . 'tags
         where TgText = ' . Escaping::toSqlSyntax($item)
@@ -460,7 +463,7 @@ function addtaglist(string $item, string $list): string
             'insert into ' . $tbpref . 'tags (TgText)
             values(' . Escaping::toSqlSyntax($item) . ')'
         );
-        $tagid = get_first_value(
+        $tagid = Connection::fetchValue(
             'select TgID as value
             from ' . $tbpref . 'tags
             where TgText = ' . Escaping::toSqlSyntax($item)
@@ -497,7 +500,7 @@ function addarchtexttaglist(string $item, string $list): string
     if ($list === '()') {
         return "Tag added in 0 Texts";
     }
-    $tagid = get_first_value(
+    $tagid = Connection::fetchValue(
         'select T2ID as value from ' . $tbpref . 'tags2
         where T2Text = ' . Escaping::toSqlSyntax($item)
     );
@@ -506,7 +509,7 @@ function addarchtexttaglist(string $item, string $list): string
             'insert into ' . $tbpref . 'tags2 (T2Text)
             values(' . Escaping::toSqlSyntax($item) . ')'
         );
-        $tagid = get_first_value(
+        $tagid = Connection::fetchValue(
             'select T2ID as value
             from ' . $tbpref . 'tags2
             where T2Text = ' . Escaping::toSqlSyntax($item)
@@ -542,7 +545,7 @@ function addtexttaglist(string $item, string $list): string
     if ($list === '()') {
         return "Tag added in 0 Texts";
     }
-    $tagid = get_first_value(
+    $tagid = Connection::fetchValue(
         'select T2ID as value
         from ' . $tbpref . 'tags2
         where T2Text = ' . Escaping::toSqlSyntax($item)
@@ -552,7 +555,7 @@ function addtexttaglist(string $item, string $list): string
             'insert into ' . $tbpref . 'tags2 (T2Text)
             values(' . Escaping::toSqlSyntax($item) . ')'
         );
-        $tagid = get_first_value(
+        $tagid = Connection::fetchValue(
             'select T2ID as value
             from ' . $tbpref . 'tags2
             where T2Text = ' . Escaping::toSqlSyntax($item)
@@ -588,7 +591,7 @@ function removetaglist(string $item, string $list): string
     if ($list === '()') {
         return "Tag removed in 0 Terms";
     }
-    $tagid = get_first_value(
+    $tagid = Connection::fetchValue(
         'SELECT TgID AS value
         FROM ' . $tbpref . 'tags
         WHERE TgText = ' . Escaping::toSqlSyntax($item)
@@ -619,7 +622,7 @@ function removearchtexttaglist(string $item, string $list): string
     if ($list === '()') {
         return "Tag removed in 0 Texts";
     }
-    $tagid = get_first_value(
+    $tagid = Connection::fetchValue(
         'select T2ID as value
         from ' . $tbpref . 'tags2
         where T2Text = ' . Escaping::toSqlSyntax($item)
@@ -650,7 +653,7 @@ function removetexttaglist(string $item, string $list): string
     if ($list === '()') {
         return "Tag removed in 0 Texts";
     }
-    $tagid = get_first_value(
+    $tagid = Connection::fetchValue(
         'select T2ID as value from ' . $tbpref . 'tags2
         where T2Text = ' . Escaping::toSqlSyntax($item)
     );
@@ -691,7 +694,7 @@ function getWordTagList(int $wid, string $before = ' ', int $brack = 1, int $toh
         $lbrack = "[";
         $rbrack = "]";
     }
-    $r = get_first_value(
+    $r = Connection::fetchValue(
         "SELECT IFNULL(
             GROUP_CONCAT(DISTINCT TgText ORDER BY TgText separator ', '),
             ''
