@@ -13,7 +13,7 @@
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-simterms.html
  */
 
-require_once __DIR__ . '/../session_utility.php';
+require_once __DIR__ . '/../database_connect.php';
 
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;

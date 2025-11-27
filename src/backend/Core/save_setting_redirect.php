@@ -17,7 +17,8 @@
 
 namespace SaveSetting;
 
-require_once __DIR__ . '/session_utility.php';
+require_once __DIR__ . '/database_connect.php';
+require_once __DIR__ . '/Http/param_helpers.php';
 
 use Lwt\Database\Settings;
 

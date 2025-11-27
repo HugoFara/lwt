@@ -670,3 +670,48 @@ function removetexttaglist(string $item, string $list): string
     mysqli_free_result($res);
     return "Tag removed in $cnt Texts";
 }
+
+// -------------------------------------------------------------
+
+/**
+ * Get the tag list for a word as a formatted string.
+ *
+ * @param int    $wid    Word ID
+ * @param string $before String to prepend if tags exist
+ * @param int    $brack  If 1, wrap tags in brackets
+ * @param int    $tohtml If 1, convert to HTML entities
+ *
+ * @return string Formatted tag list
+ */
+function getWordTagList(int $wid, string $before = ' ', int $brack = 1, int $tohtml = 1): string
+{
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $lbrack = $rbrack = '';
+    if ($brack) {
+        $lbrack = "[";
+        $rbrack = "]";
+    }
+    $r = get_first_value(
+        "SELECT IFNULL(
+            GROUP_CONCAT(DISTINCT TgText ORDER BY TgText separator ', '),
+            ''
+        ) AS value
+        FROM (
+            (
+                {$tbpref}words
+                LEFT JOIN {$tbpref}wordtags
+                ON WoID = WtWoID
+            )
+            LEFT JOIN {$tbpref}tags
+            ON TgID = WtTgID
+        )
+        WHERE WoID = $wid"
+    );
+    if ($r != '') {
+        $r = $before . $lbrack . $r . $rbrack;
+    }
+    if ($tohtml) {
+        $r = tohtml($r);
+    }
+    return $r;
+}

@@ -2,7 +2,7 @@
 
 namespace Lwt\Includes;
 
-require_once __DIR__ . '/../session_utility.php';
+require_once __DIR__ . '/../database_connect.php';
 
 /**
  * Generate a new token for Google.
