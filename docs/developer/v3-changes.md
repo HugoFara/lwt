@@ -53,8 +53,8 @@ Frontend source files moved from `src/` to `src/frontend/`:
 | Old Location | New Location |
 |-------------|--------------|
 | `src/js/` | `src/frontend/js/` |
-| `src/css/` | `src/frontend/css/` |
-| `src/themes/` | `src/frontend/themes/` |
+| `src/css/` | `src/frontend/css/base/` |
+| `src/themes/` | `src/frontend/css/themes/` |
 
 ### 3. Routing System
 

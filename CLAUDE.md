@@ -107,12 +107,12 @@ composer clean-doc               # Clear all generated documentation
 - `assets/` - All static assets (generated and third-party)
   - `assets/icons/` - UI icons (PNG files)
   - `assets/images/` - Documentation images, logos, app icons
-  - `assets/css/` - Legacy minified CSS (generated from `src/frontend/css/`)
+  - `assets/css/` - Legacy minified CSS (generated from `src/frontend/css/base/`)
   - `assets/css/vite/` - Vite-bundled CSS with hashed filenames
   - `assets/js/` - Legacy minified JavaScript
   - `assets/js/vite/` - Vite-bundled JavaScript with hashed filenames
   - `assets/.vite/` - Vite manifest for PHP asset loading
-  - `assets/themes/` - Minified themes (generated from `src/frontend/themes/`)
+  - `assets/themes/` - Minified themes (generated from `src/frontend/css/themes/`)
   - `assets/sounds/` - Audio feedback files
   - `assets/vendor/iui/` - iUI mobile framework (third-party)
 
@@ -132,8 +132,9 @@ composer clean-doc               # Clear all generated documentation
     - `src/frontend/js/` - TypeScript source files (built with Vite)
     - `src/frontend/js/types/` - TypeScript type declarations
     - `src/frontend/js/third_party/` - Third-party JavaScript libraries
-    - `src/frontend/css/` - CSS source files
-    - `src/frontend/themes/` - Theme source files
+    - `src/frontend/css/` - All CSS source files
+      - `src/frontend/css/base/` - Core CSS styles
+      - `src/frontend/css/themes/` - Theme variants (override base styles)
 
 - `resources/` - Non-runtime resources
   - `resources/anki/` - Anki flashcard export templates
@@ -188,10 +189,10 @@ LWT uses a MySQL/MariaDB database with MyISAM engine. Key tables:
 
 **Theme System:**
 
-- Themes in `src/frontend/themes/[theme-name]/` with CSS files
+- Themes in `src/frontend/css/themes/[theme-name]/` with CSS files
 - Relative paths auto-adjusted during minification
 - Can reference shared images from `assets/css/images/` using `../../../assets/css/theimage`
-- Missing theme files fall back to `src/frontend/css/` defaults
+- Missing theme files fall back to `src/frontend/css/base/` defaults
 - Generated themes output to `assets/themes/`
 
 ### REST API
@@ -237,14 +238,14 @@ PHP code is spread across root files (user-facing pages) and `src/backend/Core/`
 
 ### Modifying CSS
 
-1. Edit CSS source files in `src/frontend/css/`
+1. Edit CSS source files in `src/frontend/css/base/`
 2. CSS is imported in `main.ts` and bundled by Vite
 3. Run `npm run build` to regenerate production bundles
 
 ### Creating/Editing Themes
 
-1. Create folder `src/frontend/themes/your-theme/`
-2. Add CSS files (don't need all files from `src/frontend/css/`, missing files fall back to defaults)
+1. Create folder `src/frontend/css/themes/your-theme/`
+2. Add CSS files (don't need all files from `src/frontend/css/base/`, missing files fall back to defaults)
 3. Reference images: `../../../assets/css/images/file.png` (for shared images) or `./file.png` (theme-specific)
 4. Run `npm run build:themes` to regenerate theme CSS files
 
@@ -266,7 +267,7 @@ Before committing:
 
 1. Run `composer test` and `./vendor/bin/psalm` to check for issues
 2. Ensure code follows PSR standards (use phpcs/phpcbf)
-3. If you modified `src/frontend/js/`, `src/frontend/css/`, or `src/frontend/themes/`, run `composer minify`
+3. If you modified `src/frontend/js/` or `src/frontend/css/`, run `composer minify`
 4. Update documentation if adding new features
 
 ### Version Release Process

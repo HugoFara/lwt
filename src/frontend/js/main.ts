@@ -5,11 +5,11 @@
  * It imports CSS and all TypeScript modules.
  */
 
-// Import CSS
-import '../css/styles.css';
-import '../css/jquery-ui.css';
-import '../css/jquery.tagit.css';
-import '../css/feed_wizard.css';
+// Import CSS from base directory
+import '../css/base/styles.css';
+import '../css/base/jquery-ui.css';
+import '../css/base/jquery.tagit.css';
+import '../css/base/feed_wizard.css';
 
 // Import jQuery from npm and expose globally for plugins
 import $ from 'jquery';

@@ -1,7 +1,7 @@
 /**
  * Theme CSS minifier and asset copier.
  *
- * This script processes theme folders from src/frontend/themes/ to assets/themes/.
+ * This script processes theme folders from src/frontend/css/themes/ to assets/themes/.
  * CSS files are minified, other files (images, etc.) are copied as-is.
  *
  * Usage: node scripts/build-themes.js
@@ -11,7 +11,7 @@ import { readdir, readFile, writeFile, mkdir, copyFile, stat } from 'fs/promises
 import { join, extname } from 'path';
 import { existsSync } from 'fs';
 
-const THEMES_SRC = 'src/frontend/themes';
+const THEMES_SRC = 'src/frontend/css/themes';
 const THEMES_DEST = 'assets/themes';
 
 /**

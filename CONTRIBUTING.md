@@ -24,7 +24,7 @@ This is required for building frontend assets, running the dev server, and type 
 
 ## Create and Edit Themes
 
-Themes are stored at `src/frontend/themes/`. If you want to create a new theme, simply add it to a subfolder. You can also edit existing themes.
+Themes are stored at `src/frontend/css/themes/`. If you want to create a new theme, simply add it to a subfolder. You can also edit existing themes.
 
 To build themes, run:
 
@@ -43,7 +43,7 @@ You can include images in your theme:
 
 ### My theme does not contain all the Skinning Files
 
-That's not a problem at all. When LWT looks for a file that should be contained in `assets/themes/{{The Theme}}/`, it checks if the file exists. If not, it falls back to `assets/css/` and tries to get the same file. With this system, your themes **do not need to have all the same files as `src/frontend/css/`**.
+That's not a problem at all. When LWT looks for a file that should be contained in `assets/themes/{{The Theme}}/`, it checks if the file exists. If not, it falls back to `assets/css/` and tries to get the same file. With this system, your themes **do not need to have all the same files as `src/frontend/css/base/`**.
 
 ## Frontend Development (JavaScript/TypeScript)
 

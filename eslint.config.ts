@@ -91,9 +91,9 @@ export default defineConfig([
     },
   },
 
-  // CSS files
+  // CSS files (base styles and themes)
   {
-    files: ["src/frontend/css/**/*.css", "src/frontend/themes/**/*.css"],
+    files: ["src/frontend/css/**/*.css"],
     plugins: { css },
     language: "css/css",
     extends: ["css/recommended"],
