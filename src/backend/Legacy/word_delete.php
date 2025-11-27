@@ -51,11 +51,13 @@ function get_term($wid)
  *
  * @param string $wid ID of the word to delete
  *
- * @return string Some edit message, number of affected rows or error message
+ * @return int|numeric-string Some edit message, number of affected rows or error message
  *
  * @global string $tbpref
+ *
+ * @psalm-return int<-1, max>|numeric-string
  */
-function delete_word_from_database($wid)
+function delete_word_from_database($wid): int|string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $m1 = Connection::execute(

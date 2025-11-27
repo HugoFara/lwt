@@ -157,13 +157,11 @@ global $DBCONNECTION, $tbpref, $dbname;
 $DBCONNECTION = Globals::getDbConnection();
 
 /**
- * @var string $tbpref Database table prefix
  * @deprecated 3.0.0 Use Globals::getTablePrefix() instead
  */
 $tbpref = Globals::getTablePrefix();
 
 /**
- * @var string $dbname Database name
  * @deprecated 3.0.0 Use Globals::getDatabaseName() instead
  */
 $dbname = Globals::getDatabaseName();

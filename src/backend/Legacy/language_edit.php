@@ -126,11 +126,13 @@ function edit_languages_refresh($lid): string
  *
  * @param int $lid Language ID
  *
- * @return string Info on the number of languages deleted
+ * @return int|string Info on the number of languages deleted
  *
  * @global string $tbpref Database table prefix
+ *
+ * @psalm-return int<-1, max>|string
  */
-function edit_languages_delete($lid): string
+function edit_languages_delete($lid): int|string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $anztexts = Connection::fetchValue(
@@ -169,11 +171,13 @@ function edit_languages_delete($lid): string
 /**
  * Save a new language to the database.
  *
- * @return string Success or error message
+ * @return int|numeric-string Success or error message
  *
  * @global string $tbpref Database table prefix
+ *
+ * @psalm-return int<-1, max>|numeric-string
  */
-function edit_languages_op_save(): string
+function edit_languages_op_save(): int|string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $val = Connection::fetchValue(

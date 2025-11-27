@@ -141,14 +141,16 @@ function edit_mword_do_operation($term)
  *
  * @param Term $term Multi-word to be inserted.
  *
- * @return string "Terms saved: n"
+ * @return int|numeric-string "Terms saved: n"
  *
  * @global string $tbpref Database table prefix.
  *
  * @since 2.5.2-fork Use the "wordcount" attribute of $term instead of the
  * wrong word_count.
+ *
+ * @psalm-return int<-1, max>|numeric-string
  */
-function edit_mword_do_insert($term)
+function edit_mword_do_insert($term): int|string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $titletext = "New Term: " . tohtml($term->textlc);
@@ -189,11 +191,13 @@ function edit_mword_do_insert($term)
  * @param Term $term      Multi-word to be inserted.
  * @param int  $newstatus New multi-word status
  *
- * @return string "Terms updated: n"
+ * @return int|numeric-string "Terms updated: n"
  *
  * @global string $tbpref Database table prefix.
+ *
+ * @psalm-return int<-1, max>|numeric-string
  */
-function edit_mword_do_update($term, $newstatus)
+function edit_mword_do_update($term, $newstatus): int|string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $titletext = "Edit Term: " . tohtml($term->textlc);

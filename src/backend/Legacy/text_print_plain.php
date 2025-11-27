@@ -306,7 +306,7 @@ output_text(
     (string)$saveterm,
     $saverom,
     (string)$savetrans,
-    (string)$savetags,
+    $savetags,
     $show_rom,
     $show_trans,
     $show_tags,

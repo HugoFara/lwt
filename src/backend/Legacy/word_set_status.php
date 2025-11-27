@@ -88,11 +88,13 @@ function set_word_status_ajax($wid, $status): void
  * @param string $wid    ID of the word to update
  * @param string $status New status to set
  *
- * @return string Some edit message, number of affected rows or error message
+ * @return int|numeric-string Some edit message, number of affected rows or error message
  *
  * @global string $tbpref
+ *
+ * @psalm-return int<-1, max>|numeric-string
  */
-function set_word_status_database($wid, $status)
+function set_word_status_database($wid, $status): int|string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $m1 = Connection::execute(

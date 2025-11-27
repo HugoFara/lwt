@@ -44,9 +44,9 @@ use Lwt\Database\Settings;
  * @param string $textlc      The word to insert, in lowercase
  * @param string $translation Translation of this term
  *
- * @return (int|string)[] Word id, and then an insertion message
+ * @return (int|numeric-string)[]
  *
- * @psalm-return list{int, string}
+ * @psalm-return list{int, int<-1, max>|numeric-string}
  */
 function insert_new_word($textlc, $translation): array
 {
@@ -88,9 +88,11 @@ function insert_new_word($textlc, $translation): array
  *
  * @param string $translation New translation for this term
  *
- * @return array{0: string, 1: string} Word id, and then an insertion message
+ * @return ((array|string)[]|int|string)[] Word id, and then an insertion message
+ *
+ * @psalm-return list{array<int|string, array<int|string, mixed>|string>|string, int<-1, max>|numeric-string}
  */
-function edit_term($translation)
+function edit_term($translation): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
 

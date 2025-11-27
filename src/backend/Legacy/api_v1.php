@@ -155,9 +155,11 @@ function do_ajax_check_update_translation($wid, $new_trans)
  * @param string|int $wid    ID of the word to edit
  * @param string|int $status New status to set
  *
- * @return string Number of affected rows or error message
+ * @return int|numeric-string Number of affected rows or error message
+ *
+ * @psalm-return int<-1, max>|numeric-string
  */
-function set_word_status($wid, $status)
+function set_word_status($wid, $status): int|string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $m1 = Connection::execute(
