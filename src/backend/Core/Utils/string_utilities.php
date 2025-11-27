@@ -81,19 +81,56 @@ function print_file_path($filename): void
 /**
  * Get the path of a file using the theme directory
  *
+ * Maps legacy paths to new asset locations:
+ * - css/* -> assets/css/*
+ * - icn/* -> assets/icons/*
+ * - img/* -> assets/images/*
+ * - js/* -> assets/js/*
+ *
  * @param string $filename Filename
  *
  * @return string File path if it exists, otherwise the filename
  */
 function get_file_path($filename): string
 {
-    $file = Settings::getWithDefault('set-theme-dir') . preg_replace('/.*\//', '', $filename);
-    if (file_exists($file)) {
-        // Return absolute path for clean URL compatibility
-        return '/' . $file;
+    // Legacy path mappings
+    $mappings = [
+        'css/' => 'assets/css/',
+        'icn/' => 'assets/icons/',
+        'img/' => 'assets/images/',
+        'js/' => 'assets/js/',
+    ];
+
+    // Normalize the path (remove leading slash if present)
+    $normalizedPath = ltrim($filename, '/');
+
+    // Apply legacy path mappings
+    foreach ($mappings as $oldPrefix => $newPrefix) {
+        if (str_starts_with($normalizedPath, $oldPrefix)) {
+            $normalizedPath = $newPrefix . substr($normalizedPath, strlen($oldPrefix));
+            break;
+        }
     }
-    // Return absolute path for clean URL compatibility
-    return '/' . ltrim($filename, '/');
+
+    // Check if theme has an override for this file (for CSS/icons)
+    $themeDir = Settings::getWithDefault('set-theme-dir');
+    if ($themeDir) {
+        $basename = basename($normalizedPath);
+        $themePath = $themeDir . $basename;
+        if (file_exists($themePath)) {
+            // Return absolute path for clean URL compatibility
+            return '/' . $themePath;
+        }
+    }
+
+    // Check if the file exists at the normalized path
+    if (file_exists($normalizedPath)) {
+        return '/' . $normalizedPath;
+    }
+
+    // Return the normalized path even if file doesn't exist
+    // (let the browser/router handle 404)
+    return '/' . $normalizedPath;
 }
 
 function get_sepas()

@@ -102,3 +102,18 @@ export function areCookiesEnabled(): boolean {
   return cookie_set;
 }
 
+// Expose functions globally for inline scripts
+declare global {
+  interface Window {
+    getCookie: typeof getCookie;
+    setCookie: typeof setCookie;
+    deleteCookie: typeof deleteCookie;
+    areCookiesEnabled: typeof areCookiesEnabled;
+  }
+}
+
+window.getCookie = getCookie;
+window.setCookie = setCookie;
+window.deleteCookie = deleteCookie;
+window.areCookiesEnabled = areCookiesEnabled;
+

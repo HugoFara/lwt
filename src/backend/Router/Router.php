@@ -83,7 +83,7 @@ class Router
      *
      * @return (((array|string)[]|string)[]|int|mixed|string)[]
      *
-     * @psalm-return array{type: 'handler'|'not_found'|'redirect', path?: string, url?: string, code?: 301, handler?: mixed, params?: array<array<int|string, array<int|string, mixed>|string>|string>}
+     * @psalm-return array{type: 'handler'|'not_found'|'redirect'|'static', path?: string, url?: string, code?: 301, handler?: mixed, params?: array<array<int|string, array<int|string, mixed>|string>|string>, file?: string, mime?: string}
      */
     public function resolve(): array
     {
@@ -96,6 +96,12 @@ class Router
 
         // Remove leading/trailing slashes for consistency
         $path = '/' . trim($path, '/');
+
+        // Check for static assets
+        $staticResult = $this->resolveStaticAsset($path);
+        if ($staticResult !== null) {
+            return $staticResult;
+        }
 
         // Check for legacy file access (e.g., /do_text.php or /api.php/v1/endpoint)
         // First try basename for simple cases like /do_text.php
@@ -202,6 +208,123 @@ class Router
     }
 
     /**
+     * Resolve static asset requests
+     *
+     * Maps legacy paths to new asset locations:
+     * - /css/* -> /assets/css/*
+     * - /icn/* -> /assets/icons/*
+     * - /img/* -> /assets/images/*
+     * - /js/* -> /assets/js/*
+     * - /assets/* -> /assets/* (direct access)
+     * - /docs/* -> /docs/* (documentation)
+     * - /favicon.ico -> /favicon.ico
+     *
+     * @param string $path Request path
+     *
+     * @return array|null Resolution array or null if not a static asset
+     */
+    private function resolveStaticAsset(string $path): ?array
+    {
+        // Path mappings from legacy to new structure
+        $mappings = [
+            '/css/' => '/assets/css/',
+            '/icn/' => '/assets/icons/',
+            '/img/' => '/assets/images/',
+            '/js/' => '/assets/js/',
+        ];
+
+        // Check if it's a legacy path that needs mapping
+        foreach ($mappings as $oldPrefix => $newPrefix) {
+            if (str_starts_with($path, $oldPrefix)) {
+                $newPath = $newPrefix . substr($path, strlen($oldPrefix));
+                $filePath = LWT_BASE_PATH . $newPath;
+
+                if (file_exists($filePath) && is_file($filePath)) {
+                    return [
+                        'type' => 'static',
+                        'file' => $filePath,
+                        'mime' => $this->getMimeType($filePath)
+                    ];
+                }
+                // Return 404 for non-existent mapped paths
+                return null;
+            }
+        }
+
+        // Direct static asset paths
+        $directPaths = ['/assets/', '/docs/', '/media/'];
+        foreach ($directPaths as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                $filePath = LWT_BASE_PATH . $path;
+                if (file_exists($filePath) && is_file($filePath)) {
+                    return [
+                        'type' => 'static',
+                        'file' => $filePath,
+                        'mime' => $this->getMimeType($filePath)
+                    ];
+                }
+                // Return 404 for non-existent direct paths
+                return null;
+            }
+        }
+
+        // Special files at root level
+        $rootFiles = ['/favicon.ico', '/UNLICENSE.md'];
+        if (in_array($path, $rootFiles)) {
+            $filePath = LWT_BASE_PATH . $path;
+            if (file_exists($filePath)) {
+                return [
+                    'type' => 'static',
+                    'file' => $filePath,
+                    'mime' => $this->getMimeType($filePath)
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get MIME type for a file
+     *
+     * @param string $filePath Path to file
+     *
+     * @return string MIME type
+     */
+    private function getMimeType(string $filePath): string
+    {
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+
+        $mimeTypes = [
+            'css' => 'text/css',
+            'js' => 'application/javascript',
+            'json' => 'application/json',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+            'ico' => 'image/x-icon',
+            'woff' => 'font/woff',
+            'woff2' => 'font/woff2',
+            'ttf' => 'font/ttf',
+            'eot' => 'application/vnd.ms-fontobject',
+            'mp3' => 'audio/mpeg',
+            'wav' => 'audio/wav',
+            'ogg' => 'audio/ogg',
+            'mp4' => 'video/mp4',
+            'webm' => 'video/webm',
+            'html' => 'text/html',
+            'htm' => 'text/html',
+            'txt' => 'text/plain',
+            'md' => 'text/markdown',
+            'xml' => 'application/xml',
+        ];
+
+        return $mimeTypes[$extension] ?? 'application/octet-stream';
+    }
+
+    /**
      * Convert route pattern to regex
      *
      * @param string $pattern Route pattern (e.g., '/text/{id}')
@@ -234,6 +357,13 @@ class Router
                 header("Location: {$resolution['url']}", true, $code);
                 exit;
 
+            case 'static':
+                $this->serveStaticFile(
+                    $resolution['file'],
+                    $resolution['mime']
+                );
+                break;
+
             case 'handler':
                 $this->executeHandler(
                     $resolution['handler'],
@@ -249,6 +379,28 @@ class Router
                     "Unknown resolution type: {$resolution['type']}"
                 );
         }
+    }
+
+    /**
+     * Serve a static file with proper headers
+     *
+     * @param string $filePath Full path to the file
+     * @param string $mimeType MIME type of the file
+     *
+     * @return void
+     */
+    private function serveStaticFile(string $filePath, string $mimeType): void
+    {
+        // Set cache headers for static assets (1 week)
+        $maxAge = 604800;
+        header('Cache-Control: public, max-age=' . $maxAge);
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $maxAge) . ' GMT');
+        header('Content-Type: ' . $mimeType);
+        header('Content-Length: ' . filesize($filePath));
+
+        // Send file contents
+        readfile($filePath);
+        exit;
     }
 
     /**
