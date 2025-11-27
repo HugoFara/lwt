@@ -27,6 +27,8 @@ require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
@@ -61,7 +63,7 @@ $currenttag12 = (string) processSessParam(
 
 $wh_lang = ($currentlang != '') ? (' and AtLgID=' . $currentlang) : '';
 $wh_query = $currentregexmode . 'LIKE ' .
-convert_string_to_sqlsyntax(
+Escaping::toSqlSyntax(
     ($currentregexmode == '') ?
     str_replace("*", "%", mb_strtolower($currentquery, 'UTF-8')) :
     $currentquery
@@ -82,7 +84,7 @@ if ($currentquery !== '') {
         if (
             @mysqli_query(
                 $GLOBALS["DBCONNECTION"],
-                'select "test" rlike ' . convert_string_to_sqlsyntax($currentquery)
+                'select "test" rlike ' . Escaping::toSqlSyntax($currentquery)
             ) === false
         ) {
             $currentquery = '';
@@ -155,13 +157,13 @@ if (isset($_REQUEST['markaction'])) {
                 $list .= ")";
 
                 if ($markaction == 'del') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'delete from ' . $tbpref . 'archivedtexts
                         where AtID in ' . $list,
                         "Archived Texts deleted"
                     );
                     Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
-                    runsql(
+                    Connection::execute(
                         "DELETE " . $tbpref . "archtexttags
                         FROM (
                             " . $tbpref . "archtexttags
@@ -182,10 +184,10 @@ if (isset($_REQUEST['markaction'])) {
                     $sql = "select AtID, AtLgID
                     from " . $tbpref . "archivedtexts
                     where AtID in " . $list;
-                    $res = do_mysqli_query($sql);
+                    $res = Connection::query($sql);
                     while ($record = mysqli_fetch_assoc($res)) {
                         $ida = $record['AtID'];
-                        $mess = (int)runsql(
+                        $mess = (int)Connection::execute(
                             'insert into ' . $tbpref . 'texts (
                                 TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
                                 TxSourceURI
@@ -198,7 +200,7 @@ if (isset($_REQUEST['markaction'])) {
                         );
                         $count += $mess;
                         $id = get_last_key();
-                        runsql(
+                        Connection::execute(
                             'insert into ' . $tbpref . 'texttags (TtTxID, TtT2ID)
                             select ' . $id . ', AgT2ID
                             from ' . $tbpref . 'archtexttags
@@ -206,7 +208,7 @@ if (isset($_REQUEST['markaction'])) {
                             ""
                         );
                         TextParsing::splitCheck(
-                            get_first_value(
+                            Connection::fetchValue(
                                 'select TxText as value
                                 from ' . $tbpref . 'texts
                                 where TxID = ' . $id
@@ -214,7 +216,7 @@ if (isset($_REQUEST['markaction'])) {
                             $record['AtLgID'],
                             $id
                         );
-                        runsql(
+                        Connection::execute(
                             'delete from ' . $tbpref . 'archivedtexts
                             where AtID = ' . $ida,
                             ""
@@ -222,7 +224,7 @@ if (isset($_REQUEST['markaction'])) {
                     }
                     mysqli_free_result($res);
                     Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
-                    runsql(
+                    Connection::execute(
                         "DELETE " . $tbpref . "archtexttags
                         FROM (
                             " . $tbpref . "archtexttags
@@ -242,12 +244,12 @@ if (isset($_REQUEST['markaction'])) {
 
 if (isset($_REQUEST['del'])) {
     // DEL
-    $message = runsql(
+    $message = Connection::execute(
         'delete from ' . $tbpref . 'archivedtexts where AtID = ' . $_REQUEST['del'],
         "Archived Texts deleted"
     );
     Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
-    runsql(
+    Connection::execute(
         "DELETE " . $tbpref . "archtexttags
         FROM (
             " . $tbpref . "archtexttags
@@ -258,7 +260,7 @@ if (isset($_REQUEST['del'])) {
     );
 } elseif (isset($_REQUEST['unarch'])) {
     // UNARCH
-    $message2 = runsql(
+    $message2 = Connection::execute(
         'insert into ' . $tbpref . 'texts (
             TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
         ) select AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
@@ -267,7 +269,7 @@ if (isset($_REQUEST['del'])) {
         "Texts added"
     );
     $id = get_last_key();
-    runsql(
+    Connection::execute(
         'insert into ' . $tbpref . 'texttags (TtTxID, TtT2ID)
         select ' . $id . ', AgT2ID
         from ' . $tbpref . 'archtexttags
@@ -275,30 +277,30 @@ if (isset($_REQUEST['del'])) {
         ""
     );
     TextParsing::splitCheck(
-        get_first_value(
+        Connection::fetchValue(
             'select TxText as value from ' . $tbpref . 'texts where TxID = ' . $id
         ),
-        get_first_value(
+        Connection::fetchValue(
             'select TxLgID as value from ' . $tbpref . 'texts where TxID = ' . $id
         ),
         $id
     );
-    $message1 = runsql(
+    $message1 = Connection::execute(
         'delete from ' . $tbpref . 'archivedtexts
         where AtID = ' . $_REQUEST['unarch'],
         "Archived Texts deleted"
     );
     $message = $message1 . " / " . $message2 . " / Sentences added: " .
-    get_first_value(
+    Connection::fetchValue(
         'select count(*) as value
         from ' . $tbpref . 'sentences
         where SeTxID = ' . $id
-    ) . " / Text items added: " . get_first_value(
+    ) . " / Text items added: " . Connection::fetchValue(
         'select count(*) as value from ' . $tbpref . 'textitems2
         where Ti2TxID = ' . $id
     );
     Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
-    runsql(
+    Connection::execute(
         "DELETE " . $tbpref . "archtexttags
         FROM (" . $tbpref . "archtexttags
         LEFT JOIN " . $tbpref . "archivedtexts on AgAtID = AtID)
@@ -309,26 +311,26 @@ if (isset($_REQUEST['del'])) {
     // UPD
     if ($_REQUEST['op'] == 'Change') {
         // UPDATE
-        $oldtext = get_first_value(
+        $oldtext = Connection::fetchValue(
             'select AtText as value
             from ' . $tbpref . 'archivedtexts
             where AtID = ' . $_REQUEST["AtID"]
         );
-        $textsdiffer = (convert_string_to_sqlsyntax($_REQUEST["AtText"]) !=
-        convert_string_to_sqlsyntax($oldtext));
-        $message = runsql(
+        $textsdiffer = (Escaping::toSqlSyntax($_REQUEST["AtText"]) !=
+        Escaping::toSqlSyntax($oldtext));
+        $message = Connection::execute(
             'UPDATE ' . $tbpref . 'archivedtexts SET ' .
             'AtLgID = ' . $_REQUEST["AtLgID"] . ', ' .
-            'AtTitle = ' . convert_string_to_sqlsyntax($_REQUEST["AtTitle"]) . ', ' .
-            'AtText = ' . convert_string_to_sqlsyntax($_REQUEST["AtText"]) . ', ' .
-            'AtAudioURI = ' . convert_string_to_sqlsyntax($_REQUEST["AtAudioURI"]) .
+            'AtTitle = ' . Escaping::toSqlSyntax($_REQUEST["AtTitle"]) . ', ' .
+            'AtText = ' . Escaping::toSqlSyntax($_REQUEST["AtText"]) . ', ' .
+            'AtAudioURI = ' . Escaping::toSqlSyntax($_REQUEST["AtAudioURI"]) .
             ', ' .
-            'AtSourceURI = ' . convert_string_to_sqlsyntax($_REQUEST["AtSourceURI"]) .
+            'AtSourceURI = ' . Escaping::toSqlSyntax($_REQUEST["AtSourceURI"]) .
             ' WHERE AtID = ' . $_REQUEST["AtID"],
             "Updated"
         );
         if ($message == 'Updated: 1' && $textsdiffer) {
-            runsql(
+            Connection::execute(
                 "update " . $tbpref . "archivedtexts set
                 AtAnnotatedText = ''
                 where AtID = " . $_REQUEST["AtID"],
@@ -347,7 +349,7 @@ if (isset($_REQUEST['chg'])) {
     length(AtAnnotatedText) as annotlen
     from ' . $tbpref . 'archivedtexts
     where AtID = ' . $_REQUEST['chg'];
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
         ?>
 
@@ -426,7 +428,7 @@ if (isset($_REQUEST['chg'])) {
         ON AtID = AgAtID
     ) where (1=1) ' . $wh_lang . $wh_query . '
     group by AtID ' . $wh_tag . ') as dummy';
-    $recno = (int)get_first_value($sql);
+    $recno = (int)Connection::fetchValue($sql);
     if ($debug) {
         echo $sql . ' ===&gt; ' . $recno;
     }
@@ -625,7 +627,7 @@ if (isset($_REQUEST['chg'])) {
             echo $sql;
         }
 
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             echo '<tr>
             <td class="td1 center">

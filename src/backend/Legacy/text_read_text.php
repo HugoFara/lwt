@@ -22,6 +22,7 @@ require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 /**
@@ -43,7 +44,7 @@ function get_text_data($textid)
     'SELECT TxLgID, TxTitle, TxAnnotatedText, TxPosition
     FROM ' . $tbpref . 'texts
     WHERE TxID = ' . $textid;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     mysqli_free_result($res);
     return $record;
@@ -90,7 +91,7 @@ function get_language_settings($langid)
     LgTextSize, LgRegexpWordCharacters, LgRemoveSpaces, LgRightToLeft
     FROM ' . $tbpref . 'languages
     WHERE LgID = ' . $langid;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     mysqli_free_result($res);
     return $record;
@@ -507,7 +508,7 @@ function main_word_loop($textid, $showAll): void
      WHERE Ti2TxID = $textid
      ORDER BY Ti2Order asc, Ti2WordCount desc";
 
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $currcharcount = 0;
     $hidden_items = array();
     $exprs = array();

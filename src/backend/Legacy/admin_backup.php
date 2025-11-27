@@ -24,6 +24,9 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
+
 $message = '';
 
 if ($tbpref == '') {
@@ -64,10 +67,10 @@ if (isset($_REQUEST['restore'])) {
     $out = "-- " . $fname . "\n";
     foreach ($tables as $table) {
         // foreach table
-        $result = do_mysqli_query('SELECT * FROM ' . $tbpref . $table);
+        $result = Connection::query('SELECT * FROM ' . $tbpref . $table);
         $num_fields = mysqli_num_fields($result);
         $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
-        $row2 = mysqli_fetch_row(do_mysqli_query("SHOW CREATE TABLE $tbpref$table"));
+        $row2 = mysqli_fetch_row(Connection::query("SHOW CREATE TABLE $tbpref$table"));
         $out .= str_replace(
             $tbpref . $table,
             $table,
@@ -79,7 +82,7 @@ if (isset($_REQUEST['restore'])) {
                 $return = 'INSERT INTO ' . $table . ' VALUES(';
                 for ($j = 0; $j < $num_fields; $j++) {
                     // foreach field
-                    $return .= convert_string_to_sqlsyntax_nonull($row[$j]);
+                    $return .= Escaping::toSqlSyntaxNoNull($row[$j]);
                     if ($j < ($num_fields - 1)) {
                         $return .= ',';
                     }
@@ -102,14 +105,14 @@ if (isset($_REQUEST['restore'])) {
 
     foreach ($tables as $table) {
         if ($table == 'texts') {
-            $result = do_mysqli_query(
+            $result = Connection::query(
                 'SELECT TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
                 TxSourceURI
                 FROM ' . $tbpref . $table
             );
             $num_fields = 7;
         } elseif ($table == 'words') {
-            $result = do_mysqli_query(
+            $result = Connection::query(
                 'SELECT WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation,
                 WoRomanization, WoSentence, WoCreated, WoStatusChanged, WoTodayScore,
                 WoTomorrowScore, WoRandom
@@ -117,7 +120,7 @@ if (isset($_REQUEST['restore'])) {
             );
             $num_fields = 13;
         } elseif ($table == 'languages') {
-            $result = do_mysqli_query(
+            $result = Connection::query(
                 'SELECT LgID, LgName, LgDict1URI, LgDict2URI,
                 REPLACE(
                     LgGoogleTranslateURI, "ggl.php", "http://translate.google.com"
@@ -133,7 +136,7 @@ if (isset($_REQUEST['restore'])) {
             $table !== 'sentences' && $table !== 'textitems'
             && $table !== 'settings'
         ) {
-            $result = do_mysqli_query('SELECT * FROM ' . $tbpref . $table);
+            $result = Connection::query('SELECT * FROM ' . $tbpref . $table);
             $num_fields = mysqli_num_fields($result);
         }
         $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
@@ -306,7 +309,7 @@ if (isset($_REQUEST['restore'])) {
             while ($row = mysqli_fetch_row($result)) { // foreach record
                 $return = 'INSERT INTO ' . $table . ' VALUES(';
                 for ($j = 0; $j < $num_fields; $j++) { // foreach field
-                    $return .= convert_string_to_sqlsyntax_nonull($row[$j]);
+                    $return .= Escaping::toSqlSyntaxNoNull($row[$j]);
                     if ($j < ($num_fields - 1)) {
                         $return .= ',';
                     }

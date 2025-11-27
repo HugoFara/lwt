@@ -30,6 +30,7 @@
  * @since    1.0.3
  */
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;
@@ -63,11 +64,11 @@ function edit_texts_get_wh_query($currentquery, $currentquerymode, $currentregex
 {
     $wh_query = $currentregexmode . 'LIKE ';
     if ($currentregexmode == '') {
-        $wh_query .= convert_string_to_sqlsyntax(
+        $wh_query .= Escaping::toSqlSyntax(
             str_replace("*", "%", mb_strtolower($currentquery, 'UTF-8'))
         );
     } else {
-        $wh_query .= convert_string_to_sqlsyntax($currentquery);
+        $wh_query .= Escaping::toSqlSyntax($currentquery);
     }
 
     switch ($currentquerymode) {
@@ -86,7 +87,7 @@ function edit_texts_get_wh_query($currentquery, $currentquerymode, $currentregex
             $currentregexmode !== ''
             && @mysqli_query(
                 $GLOBALS["DBCONNECTION"],
-                'SELECT "test" RLIKE ' . convert_string_to_sqlsyntax($currentquery)
+                'SELECT "test" RLIKE ' . Escaping::toSqlSyntax($currentquery)
             ) === false
         ) {
             $wh_query = '';
@@ -183,22 +184,22 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
     $list = "(" . implode(",", $id_list) . ")";
 
     if ($markaction == 'del') {
-        $message3 = runsql(
+        $message3 = Connection::execute(
             'delete from ' . $tbpref . 'textitems2 where Ti2TxID in ' . $list,
             "Text items deleted"
         );
-        $message2 = runsql(
+        $message2 = Connection::execute(
             'delete from ' . $tbpref . 'sentences where SeTxID in ' . $list,
             "Sentences deleted"
         );
-        $message1 = runsql(
+        $message1 = Connection::execute(
             'delete from ' . $tbpref . 'texts where TxID in ' . $list,
             "Texts deleted"
         );
         $message = $message1 . " / " . $message2 . " / " . $message3;
         Maintenance::adjustAutoIncrement('texts', 'TxID');
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
-        runsql(
+        Connection::execute(
             "DELETE " . $tbpref . "texttags
             FROM (
                 " . $tbpref . "texttags
@@ -209,20 +210,20 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
             ''
         );
     } elseif ($markaction == 'arch') {
-        runsql(
+        Connection::execute(
             'delete from ' . $tbpref . 'textitems2 where Ti2TxID in ' . $list,
             ""
         );
-        runsql(
+        Connection::execute(
             'delete from ' . $tbpref . 'sentences where SeTxID in ' . $list,
             ""
         );
         $count = 0;
         $sql = "select TxID from " . $tbpref . "texts where TxID in " . $list;
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $id = $record['TxID'];
-            $count += (int)runsql(
+            $count += (int)Connection::execute(
                 'insert into ' . $tbpref . 'archivedtexts (
                     AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
                 )
@@ -231,7 +232,7 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
                 ""
             );
             $aid = get_last_key();
-            runsql(
+            Connection::execute(
                 'insert into ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
                 select ' . $aid . ', TtT2ID
                 from ' . $tbpref . 'texttags
@@ -241,8 +242,8 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
         }
         mysqli_free_result($res);
         $message = 'Text(s) archived: ' . $count;
-        runsql('delete from ' . $tbpref . 'texts where TxID in ' . $list, "");
-        runsql(
+        Connection::execute('delete from ' . $tbpref . 'texts where TxID in ' . $list, "");
+        Connection::execute(
             "DELETE " . $tbpref . "texttags
             FROM (
                 " . $tbpref . "texttags
@@ -268,16 +269,16 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
         ifnull(WoSentence,'') not like concat('%{',WoText,'}%')
         group by WoID order by WoID, min(Ti2SeID)";
 
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $sent = getSentence(
                 $record['SeID'],
                 $record['WoTextLC'],
                 (int) Settings::getWithDefault('set-term-sentence-count')
             );
-            $count += (int) runsql(
+            $count += (int) Connection::execute(
                 'UPDATE ' . $tbpref . 'words
-                SET WoSentence = ' . convert_string_to_sqlsyntax(repl_tab_nl($sent[1])) . '
+                SET WoSentence = ' . Escaping::toSqlSyntax(repl_tab_nl($sent[1])) . '
                 WHERE WoID = ' . $record['WoID'],
                 ''
             );
@@ -294,16 +295,16 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
         GROUP BY WoID
         ORDER BY WoID, MIN(Ti2SeID)";
 
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $sent = getSentence(
                 $record['SeID'],
                 $record['WoTextLC'],
                 (int) Settings::getWithDefault('set-term-sentence-count')
             );
-            $count += (int) runsql(
+            $count += (int) Connection::execute(
                 'update ' . $tbpref . 'words
-                set WoSentence = ' . convert_string_to_sqlsyntax(repl_tab_nl($sent[1])) . '
+                set WoSentence = ' . Escaping::toSqlSyntax(repl_tab_nl($sent[1])) . '
                 where WoID = ' . $record['WoID'],
                 ''
             );
@@ -313,20 +314,20 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
     } elseif ($markaction == 'rebuild') {
         $count = 0;
         $sql = "select TxID, TxLgID from " . $tbpref . "texts where TxID in " . $list;
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $id = (int)$record['TxID'];
-            runsql(
+            Connection::execute(
                 'delete from ' . $tbpref . 'sentences where SeTxID = ' . $id,
                 "Sentences deleted"
             );
-            runsql(
+            Connection::execute(
                 'delete from ' . $tbpref . 'textitems2 where Ti2TxID = ' . $id,
                 "Text items deleted"
             );
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
             TextParsing::splitCheck(
-                get_first_value(
+                Connection::fetchValue(
                     'select TxText as value from ' . $tbpref . 'texts where TxID = ' . $id
                 ),
                 $record['TxLgID'],
@@ -357,22 +358,22 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
 function edit_texts_delete($txid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $message3 = runsql(
+    $message3 = Connection::execute(
         'DELETE FROM ' . $tbpref . 'textitems2 where Ti2TxID = ' . $txid,
         "Text items deleted"
     );
-    $message2 = runsql(
+    $message2 = Connection::execute(
         'DELETE FROM ' . $tbpref . 'sentences where SeTxID = ' . $txid,
         "Sentences deleted"
     );
-    $message1 = runsql(
+    $message1 = Connection::execute(
         'DELETE FROM ' . $tbpref . 'texts where TxID = ' . $txid,
         "Texts deleted"
     );
     $message = $message1 . " / " . $message2 . " / " . $message3;
     Maintenance::adjustAutoIncrement('texts', 'TxID');
     Maintenance::adjustAutoIncrement('sentences', 'SeID');
-    runsql(
+    Connection::execute(
         "DELETE {$tbpref}texttags
         FROM (
             {$tbpref}texttags
@@ -397,15 +398,15 @@ function edit_texts_delete($txid): string
 function edit_texts_archive($txid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $message3 = runsql(
+    $message3 = Connection::execute(
         "DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = $txid",
         "Text items deleted"
     );
-    $message2 = runsql(
+    $message2 = Connection::execute(
         "DELETE FROM {$tbpref}sentences WHERE SeTxID = $txid",
         "Sentences deleted"
     );
-    $message4 = runsql(
+    $message4 = Connection::execute(
         "INSERT INTO {$tbpref}archivedtexts (
             AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
         ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
@@ -414,21 +415,21 @@ function edit_texts_archive($txid): string
         "Archived Texts saved"
     );
     $id = get_last_key();
-    runsql(
+    Connection::execute(
         "INSERT INTO {$tbpref}archtexttags (AgAtID, AgT2ID)
         SELECT $id, TtT2ID
         FROM {$tbpref}texttags
         WHERE TtTxID = $txid",
         ""
     );
-    $message1 = runsql(
+    $message1 = Connection::execute(
         "DELETE FROM {$tbpref}texts WHERE TxID = $txid",
         "Texts deleted"
     );
     $message =  "$message4 / $message1 / $message2 / $message3";
     Maintenance::adjustAutoIncrement('texts', 'TxID');
     Maintenance::adjustAutoIncrement('sentences', 'SeID');
-    runsql(
+    Connection::execute(
         "DELETE {$tbpref}texttags
         FROM (
             {$tbpref}texttags
@@ -488,29 +489,29 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
     }
     if (str_starts_with($op, 'Save')) {
         // INSERT
-        runsql(
+        Connection::execute(
             "INSERT INTO {$tbpref}texts (
                 TxLgID, TxTitle, TxText, TxAnnotatedText,
                 TxAudioURI, TxSourceURI
             ) values( " .
             $_REQUEST["TxLgID"] . ', ' .
-            convert_string_to_sqlsyntax($_REQUEST["TxTitle"]) . ', ' .
-            convert_string_to_sqlsyntax(remove_soft_hyphens($_REQUEST["TxText"])) . ",
+            Escaping::toSqlSyntax($_REQUEST["TxTitle"]) . ', ' .
+            Escaping::toSqlSyntax(remove_soft_hyphens($_REQUEST["TxText"])) . ",
             '', " .
-            convert_string_to_sqlsyntax_nonull($_REQUEST["TxAudioURI"]) . ', ' .
-            convert_string_to_sqlsyntax($_REQUEST["TxSourceURI"]) . ')',
+            Escaping::toSqlSyntaxNoNull($_REQUEST["TxAudioURI"]) . ', ' .
+            Escaping::toSqlSyntax($_REQUEST["TxSourceURI"]) . ')',
             "Saved"
         );
         $id = get_last_key();
     } elseif (str_starts_with($op, 'Change')) {
         // UPDATE
-        runsql(
+        Connection::execute(
             "UPDATE {$tbpref}texts SET " .
             'TxLgID = ' . $_REQUEST["TxLgID"] . ', ' .
-            'TxTitle = ' . convert_string_to_sqlsyntax($_REQUEST["TxTitle"]) . ', ' .
-            'TxText = ' . convert_string_to_sqlsyntax(remove_soft_hyphens($_REQUEST["TxText"])) . ', ' .
-            'TxAudioURI = ' . convert_string_to_sqlsyntax_nonull($_REQUEST["TxAudioURI"]) . ', ' .
-            'TxSourceURI = ' . convert_string_to_sqlsyntax($_REQUEST["TxSourceURI"]) . ' ' .
+            'TxTitle = ' . Escaping::toSqlSyntax($_REQUEST["TxTitle"]) . ', ' .
+            'TxText = ' . Escaping::toSqlSyntax(remove_soft_hyphens($_REQUEST["TxText"])) . ', ' .
+            'TxAudioURI = ' . Escaping::toSqlSyntaxNoNull($_REQUEST["TxAudioURI"]) . ', ' .
+            'TxSourceURI = ' . Escaping::toSqlSyntax($_REQUEST["TxSourceURI"]) . ' ' .
             'where TxID = ' . $_REQUEST["TxID"],
             "Updated"
         );
@@ -518,18 +519,18 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
     }
     saveTextTags($id);
 
-    $message1 = runsql(
+    $message1 = Connection::execute(
         "DELETE FROM {$tbpref}sentences WHERE SeTxID = $id",
         "Sentences deleted"
     );
-    $message2 = runsql(
+    $message2 = Connection::execute(
         "DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = $id",
         "Textitems deleted"
     );
     Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
     TextParsing::splitCheck(
-        get_first_value(
+        Connection::fetchValue(
             "SELECT TxText AS value FROM {$tbpref}texts
             WHERE TxID = $id"
         ),
@@ -538,12 +539,12 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
     );
 
     $message =  "$message1 / $message2" .
-    " / Sentences added: " . get_first_value(
+    " / Sentences added: " . Connection::fetchValue(
         "SELECT COUNT(*) AS value
         FROM {$tbpref}sentences
         WHERE SeTxID = $id"
     ) .
-    " / Text items added: " . get_first_value(
+    " / Text items added: " . Connection::fetchValue(
         "SELECT COUNT(*) AS value
         FROM {$tbpref}textitems2
         WHERE Ti2TxID = $id"
@@ -570,7 +571,7 @@ function edit_texts_form($text, $annotated)
     $new_text = $text->id == 0;
     $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages
     WHERE LgGoogleTranslateURI<>''";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $return = array();
     while ($lg_record = mysqli_fetch_assoc($res)) {
         $url = $lg_record["LgGoogleTranslateURI"];
@@ -770,7 +771,7 @@ function edit_texts_change($txid)
     TxAnnotatedText <> '' AS annot_exists
     FROM {$tbpref}texts
     WHERE TxID = {$txid}";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
         $text = new Text();
         $text->loadFromDbRecord($record);
@@ -1065,7 +1066,7 @@ function edit_texts_texts_form($currentlang, $showCounts, $sql, $recno)
     $statuses = get_statuses();
     $statuses[0]["name"] = 'Unknown';
     $statuses[0]["abbr"] = 'Ukn';
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $showCounts = Settings::getWithDefault('set-show-text-word-counts');
 
     ?>
@@ -1214,7 +1215,7 @@ function edit_texts_display($message)
         ) WHERE (1=1) {$wh_lang}{$wh_query}
         GROUP BY TxID {$wh_tag}
     ) AS dummy";
-    $recno = (int) get_first_value($sql);
+    $recno = (int) Connection::fetchValue($sql);
     if (\Lwt\Core\Globals::isDebug()) {
         echo $sql . ' ===&gt; ' . $recno;
     }

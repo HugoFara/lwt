@@ -30,6 +30,7 @@ require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 require_once 'Core/Language/langdefs.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
@@ -61,7 +62,7 @@ function do_test_get_identifier($selection, $sess_testsql, $lang, $text): array
             default:
                 // Deprecated behavior in 2.9.0, to be removed on 3.0.0
                 $test_sql = $sess_testsql;
-                $cntlang = get_first_value(
+                $cntlang = Connection::fetchValue(
                     "SELECT COUNT(DISTINCT WoLgID) AS value
                     FROM $test_sql"
                 );
@@ -181,7 +182,7 @@ function do_test_test_css()
  */
 function do_test_get_tomorrow_tests_count($testsql): int
 {
-    return (int) get_first_value(
+    return (int) Connection::fetchValue(
         "SELECT COUNT(DISTINCT WoID) AS value
         FROM $testsql AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTomorrowScore < 0"
@@ -263,7 +264,7 @@ function do_test_test_sentence($wid, $lang, $wordlc): array
     -- Sort words with known ratio above 70%, then random
     ORDER BY KnownRatio < 0.7, RAND()
     LIMIT 1";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     // If sentence found
     if ($record) {
@@ -412,7 +413,7 @@ function do_test_get_word($testsql): array
         ($pass == 1 ? 'AND WoRandom > RAND()' : '') . '
         ORDER BY WoTodayScore, WoRandom
         LIMIT 1';
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         if ($record) {
             return $record;
@@ -477,14 +478,14 @@ function do_test_prepare_ajax_test_area(
 
     echo '<div id="body">';
 
-    $lgid = (int) get_first_value(
+    $lgid = (int) Connection::fetchValue(
         "SELECT WoLgID AS value FROM $testsql LIMIT 1"
     );
 
     $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgTextSize,
     LgRemoveSpaces, LgRegexpWordCharacters, LgRightToLeft
     FROM {$tbpref}languages WHERE LgID = $lgid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $lang = array(
         'wb1' => isset($record['LgDict1URI']) ? $record['LgDict1URI'] : "",
@@ -579,12 +580,12 @@ function prepare_test_area($testsql, $totaltests, $count, $testtype): int
         return 0;
     }
 
-    $lang = get_first_value("SELECT WoLgID AS value FROM $testsql LIMIT 1");
+    $lang = Connection::fetchValue("SELECT WoLgID AS value FROM $testsql LIMIT 1");
 
     $sql = 'SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgTextSize,
     LgRemoveSpaces, LgRegexpWordCharacters, LgRightToLeft
     FROM ' . $tbpref . 'languages WHERE LgID = ' . $lang;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $wb1 = isset($record['LgDict1URI']) ? $record['LgDict1URI'] : "";
     $wb2 = isset($record['LgDict2URI']) ? $record['LgDict2URI'] : "";
@@ -620,7 +621,7 @@ function prepare_test_area($testsql, $totaltests, $count, $testtype): int
         if (\Lwt\Core\Globals::isDebug()) {
             echo 'DEBUG TEST-SQL: ' . $sql . '<br />';
         }
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         if ($record) {
             $num = 1;
@@ -739,7 +740,7 @@ function do_test_test_javascript_clickable($wo_record, $solution)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $wid = $wo_record['WoID'];
-    $voiceApi = get_first_value(
+    $voiceApi = Connection::fetchValue(
         "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages
         WHERE LgID = " . $wo_record['WoLgID']
     );
@@ -1052,7 +1053,7 @@ function do_test_test_content()
     );
     $totaltests = $_SESSION['testtotal'];
     $testtype = do_test_get_test_type((int)getreq('type'));
-    $count = get_first_value(
+    $count = Connection::fetchValue(
         "SELECT COUNT(DISTINCT WoID) AS value
         FROM $testsql AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0"
@@ -1084,7 +1085,7 @@ function do_test_test_content_ajax($selector, $selection)
 {
     $testtype = do_test_get_test_type((int)getreq('type'));
     $test_sql = do_test_test_get_projection($selector, $selection);
-    $count = get_first_value(
+    $count = Connection::fetchValue(
         "SELECT COUNT(DISTINCT WoID) AS value
         FROM $test_sql AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0"

@@ -25,6 +25,7 @@ require_once 'Core/Mobile/mobile_interactions.php';
 require_once 'text_display_header.php';
 require_once 'text_display_text.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 /**
@@ -99,7 +100,7 @@ if (isset($audio)) {
 function do_display_impr_text_page($textid)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $audio = get_first_value(
+    $audio = Connection::fetchValue(
         'SELECT TxAudioURI AS value FROM ' . $tbpref . 'texts
         WHERE TxID = ' . $_REQUEST['text']
     );

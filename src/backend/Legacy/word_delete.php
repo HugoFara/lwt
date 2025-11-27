@@ -22,6 +22,7 @@ require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Maintenance;
 
@@ -37,7 +38,7 @@ use Lwt\Database\Maintenance;
 function get_term($wid)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $term = get_first_value(
+    $term = Connection::fetchValue(
         "SELECT WoText AS value
         FROM " . $tbpref . "words
         WHERE WoID = " . $wid
@@ -57,13 +58,13 @@ function get_term($wid)
 function delete_word_from_database($wid)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $m1 = runsql(
+    $m1 = Connection::execute(
         'DELETE FROM ' . $tbpref . 'words
         WHERE WoID = ' . $wid,
         ''
     );
     Maintenance::adjustAutoIncrement('words', 'WoID');
-    runsql(
+    Connection::execute(
         "UPDATE  " . $tbpref . "textitems2
         SET Ti2WoID  = 0
         WHERE Ti2WordCount=1 AND Ti2WoID  = " . $wid,

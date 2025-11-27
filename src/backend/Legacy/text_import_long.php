@@ -23,6 +23,7 @@ require_once 'Core/Tag/tags.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\TextParsing;
@@ -194,16 +195,16 @@ function long_text_save(): void
             $texts[$i] = remove_soft_hyphens($texts[$i]);
             $counter = makeCounterWithTotal($textcount, $i + 1);
             $thistitle = $title . ($counter == '' ? '' : (' (' . $counter . ')'));
-            $imported += (int) runsql(
+            $imported += (int) Connection::execute(
                 'insert into ' . $tbpref . 'texts (
                     TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
                     TxSourceURI
                 ) values( ' .
                     $langid . ', ' .
-                    convert_string_to_sqlsyntax($thistitle) . ', ' .
-                    convert_string_to_sqlsyntax($texts[$i]) . ", '',
+                    Escaping::toSqlSyntax($thistitle) . ', ' .
+                    Escaping::toSqlSyntax($texts[$i]) . ", '',
                     NULL, " .
-                    convert_string_to_sqlsyntax($source_uri) .
+                    Escaping::toSqlSyntax($source_uri) .
                 ')',
                 ''
             );
@@ -235,7 +236,7 @@ function long_text_display($max_input_vars)
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages
     WHERE LgGoogleTranslateURI<>''";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $return = array();
     while ($lg_record = mysqli_fetch_assoc($res)) {
         $url = $lg_record["LgGoogleTranslateURI"];

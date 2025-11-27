@@ -26,6 +26,7 @@ require_once 'Core/Test/test_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 /**
@@ -46,11 +47,11 @@ function get_sql_test_data(&$title, &$p)
         $_REQUEST['selection'],
         $_SESSION['testsql']
     );
-    $totalcount = get_first_value(
+    $totalcount = Connection::fetchValue(
         "SELECT count(distinct WoID) AS value FROM $testsql"
     );
     $title = 'Selected ' . $totalcount . ' Term' . ($totalcount < 2 ? '' : 's');
-    $cntlang = get_first_value(
+    $cntlang = Connection::fetchValue(
         'SELECT count(distinct WoLgID) AS value FROM ' . $testsql
     );
     if ($cntlang > 1) {
@@ -59,7 +60,7 @@ function get_sql_test_data(&$title, &$p)
         echo error_message_with_hide($message, true);
         return '';
     }
-    $title .= ' IN ' . get_first_value(
+    $title .= ' IN ' . Connection::fetchValue(
         "SELECT LgName AS value
         FROM {$tbpref}languages, {$testsql} AND LgID = WoLgID
         LIMIT 1"
@@ -82,7 +83,7 @@ function get_lang_test_data(&$title, &$p): string
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $langid = getreq('lang');
     $p = "lang=" . $langid;
-    $title = "All Terms in " . get_first_value(
+    $title = "All Terms in " . Connection::fetchValue(
         "SELECT LgName AS value FROM {$tbpref}languages WHERE LgID = $langid"
     );
     $testsql = ' ' . $tbpref . 'words WHERE WoLgID = ' . $langid . ' ';
@@ -104,7 +105,7 @@ function get_text_test_data(&$title, &$p): string
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $textid = getreq('text');
     $p = "text=" . $textid;
-    $title = get_first_value(
+    $title = Connection::fetchValue(
         'SELECT TxTitle AS value FROM ' . $tbpref . 'texts WHERE TxID = ' . $textid
     );
     Settings::save('currenttext', $_REQUEST['text']);
@@ -123,12 +124,12 @@ function get_text_test_data(&$title, &$p): string
  */
 function get_test_counts($testsql)
 {
-    $totalcountdue = get_first_value(
+    $totalcountdue = Connection::fetchValue(
         "SELECT count(distinct WoID) AS value
         FROM " . $testsql . " AND WoStatus BETWEEN 1 AND 5
         AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0"
     );
-    $totalcount = get_first_value(
+    $totalcount = Connection::fetchValue(
         "SELECT count(distinct WoID) AS value
         FROM " . $testsql . " AND WoStatus BETWEEN 1 AND 5 AND WoTranslation != ''
         AND WoTranslation != '*'"

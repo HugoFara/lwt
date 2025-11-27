@@ -31,6 +31,8 @@ require_once 'Core/Language/langdefs.php';
 require_once 'Core/Entity/Language.php';
 
 use Lwt\Classes\Language;
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Maintenance;
 use Lwt\Database\Settings;
 use Lwt\Database\TextParsing;
@@ -83,11 +85,11 @@ function edit_languages_alert_duplicate()
 function edit_languages_refresh($lid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $message2 = runsql(
+    $message2 = Connection::execute(
         "DELETE FROM {$tbpref}sentences where SeLgID = $lid",
         "Sentences deleted"
     );
-    $message3 = runsql(
+    $message3 = Connection::execute(
         "DELETE FROM {$tbpref}textitems2 where Ti2LgID = $lid",
         "Text items deleted"
     );
@@ -95,7 +97,7 @@ function edit_languages_refresh($lid): string
     $sql = "select TxID, TxText from " . $tbpref . "texts
     where TxLgID = " . $lid . "
     order by TxID";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         $txtid = (int)$record["TxID"];
         $txttxt = $record["TxText"];
@@ -104,12 +106,12 @@ function edit_languages_refresh($lid): string
     mysqli_free_result($res);
     $message = $message2 .
     " / " . $message3 .
-    " / Sentences added: " . get_first_value(
+    " / Sentences added: " . Connection::fetchValue(
         "SELECT count(*) as value
         FROM {$tbpref}sentences
         where SeLgID = $lid"
     ) .
-    " / Text items added: " . get_first_value(
+    " / Text items added: " . Connection::fetchValue(
         "SELECT count(*) as value
         FROM {$tbpref}textitems2
         where Ti2LgID = $lid"
@@ -131,22 +133,22 @@ function edit_languages_refresh($lid): string
 function edit_languages_delete($lid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $anztexts = get_first_value(
+    $anztexts = Connection::fetchValue(
         "SELECT count(TxID) as value
         FROM {$tbpref}texts
         where TxLgID = $lid"
     );
-    $anzarchtexts = get_first_value(
+    $anzarchtexts = Connection::fetchValue(
         "SELECT count(AtID) as value
         FROM {$tbpref}archivedtexts
         where AtLgID = $lid"
     );
-    $anzwords = get_first_value(
+    $anzwords = Connection::fetchValue(
         "SELECT count(WoID) as value
         FROM {$tbpref}words
         where WoLgID = $lid"
     );
-    $anzfeeds = get_first_value(
+    $anzfeeds = Connection::fetchValue(
         "SELECT count(NfID) as value
         FROM {$tbpref}newsfeeds
         where NfLgID = $lid"
@@ -154,7 +156,7 @@ function edit_languages_delete($lid): string
     if ($anztexts > 0 || $anzarchtexts > 0 || $anzwords > 0 || $anzfeeds > 0) {
         $message = 'You must first delete texts, archived texts, newsfeeds and words with this language!';
     } else {
-        $message = runsql(
+        $message = Connection::execute(
             "DELETE FROM {$tbpref}languages
             WHERE LgID = $lid",
             "Deleted"
@@ -174,11 +176,11 @@ function edit_languages_delete($lid): string
 function edit_languages_op_save(): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $val = get_first_value(
+    $val = Connection::fetchValue(
         "SELECT MIN(LgID) AS value FROM {$tbpref}languages WHERE LgName=''"
     );
     if (!isset($val)) {
-        $message = runsql(
+        $message = Connection::execute(
             "INSERT INTO {$tbpref}languages (
                 LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
                 LgExportTemplate, LgTextSize, LgCharacterSubstitutions,
@@ -186,41 +188,41 @@ function edit_languages_op_save(): string
                 LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar,
                 LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization
             ) VALUES(" .
-                convert_string_to_sqlsyntax($_REQUEST["LgName"]) . ', ' .
-                convert_string_to_sqlsyntax($_REQUEST["LgDict1URI"]) . ', ' .
-                convert_string_to_sqlsyntax($_REQUEST["LgDict2URI"]) . ', ' .
-                convert_string_to_sqlsyntax($_REQUEST["LgGoogleTranslateURI"]) . ', ' .
-                convert_string_to_sqlsyntax($_REQUEST["LgExportTemplate"]) . ', ' .
-                convert_string_to_sqlsyntax($_REQUEST["LgTextSize"]) . ', ' .
-                convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgCharacterSubstitutions"]) . ', ' .
-                convert_string_to_sqlsyntax($_REQUEST["LgRegexpSplitSentences"]) . ', ' .
-                convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgExceptionsSplitSentences"]) . ', ' .
-                convert_string_to_sqlsyntax($_REQUEST["LgRegexpWordCharacters"]) . ', ' .
+                Escaping::toSqlSyntax($_REQUEST["LgName"]) . ', ' .
+                Escaping::toSqlSyntax($_REQUEST["LgDict1URI"]) . ', ' .
+                Escaping::toSqlSyntax($_REQUEST["LgDict2URI"]) . ', ' .
+                Escaping::toSqlSyntax($_REQUEST["LgGoogleTranslateURI"]) . ', ' .
+                Escaping::toSqlSyntax($_REQUEST["LgExportTemplate"]) . ', ' .
+                Escaping::toSqlSyntax($_REQUEST["LgTextSize"]) . ', ' .
+                Escaping::toSqlSyntaxNoTrimNoNull($_REQUEST["LgCharacterSubstitutions"]) . ', ' .
+                Escaping::toSqlSyntax($_REQUEST["LgRegexpSplitSentences"]) . ', ' .
+                Escaping::toSqlSyntaxNoTrimNoNull($_REQUEST["LgExceptionsSplitSentences"]) . ', ' .
+                Escaping::toSqlSyntax($_REQUEST["LgRegexpWordCharacters"]) . ', ' .
                 ((int)isset($_REQUEST["LgRemoveSpaces"])) . ', ' .
                 ((int)isset($_REQUEST["LgSplitEachChar"])) . ', ' .
                 ((int)isset($_REQUEST["LgRightToLeft"])) . ', ' .
-                convert_string_to_sqlsyntax_nonull($_REQUEST["LgTTSVoiceAPI"]) . ', ' .
+                Escaping::toSqlSyntaxNoNull($_REQUEST["LgTTSVoiceAPI"]) . ', ' .
                 ((int)isset($_REQUEST["LgShowRomanization"])) .
             ')',
             'Saved'
         );
     } else {
-        $message = runsql(
+        $message = Connection::execute(
             "UPDATE {$tbpref}languages SET " .
-            'LgName = ' . convert_string_to_sqlsyntax($_REQUEST["LgName"]) . ', ' .
-            'LgDict1URI = ' . convert_string_to_sqlsyntax($_REQUEST["LgDict1URI"]) . ', ' .
-            'LgDict2URI = ' . convert_string_to_sqlsyntax($_REQUEST["LgDict2URI"]) . ', ' .
-            'LgGoogleTranslateURI = ' . convert_string_to_sqlsyntax($_REQUEST["LgGoogleTranslateURI"]) . ', ' .
-            'LgExportTemplate = ' . convert_string_to_sqlsyntax($_REQUEST["LgExportTemplate"]) . ', ' .
-            'LgTextSize = ' . convert_string_to_sqlsyntax($_REQUEST["LgTextSize"]) . ', ' .
-            'LgCharacterSubstitutions = ' . convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgCharacterSubstitutions"]) . ', ' .
-            'LgRegexpSplitSentences = ' . convert_string_to_sqlsyntax($_REQUEST["LgRegexpSplitSentences"]) . ', ' .
-            'LgExceptionsSplitSentences = ' . convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgExceptionsSplitSentences"]) . ', ' .
-            'LgRegexpWordCharacters = ' . convert_string_to_sqlsyntax($_REQUEST["LgRegexpWordCharacters"]) . ', ' .
+            'LgName = ' . Escaping::toSqlSyntax($_REQUEST["LgName"]) . ', ' .
+            'LgDict1URI = ' . Escaping::toSqlSyntax($_REQUEST["LgDict1URI"]) . ', ' .
+            'LgDict2URI = ' . Escaping::toSqlSyntax($_REQUEST["LgDict2URI"]) . ', ' .
+            'LgGoogleTranslateURI = ' . Escaping::toSqlSyntax($_REQUEST["LgGoogleTranslateURI"]) . ', ' .
+            'LgExportTemplate = ' . Escaping::toSqlSyntax($_REQUEST["LgExportTemplate"]) . ', ' .
+            'LgTextSize = ' . Escaping::toSqlSyntax($_REQUEST["LgTextSize"]) . ', ' .
+            'LgCharacterSubstitutions = ' . Escaping::toSqlSyntaxNoTrimNoNull($_REQUEST["LgCharacterSubstitutions"]) . ', ' .
+            'LgRegexpSplitSentences = ' . Escaping::toSqlSyntax($_REQUEST["LgRegexpSplitSentences"]) . ', ' .
+            'LgExceptionsSplitSentences = ' . Escaping::toSqlSyntaxNoTrimNoNull($_REQUEST["LgExceptionsSplitSentences"]) . ', ' .
+            'LgRegexpWordCharacters = ' . Escaping::toSqlSyntax($_REQUEST["LgRegexpWordCharacters"]) . ', ' .
             'LgRemoveSpaces = ' . ((int)isset($_REQUEST["LgRemoveSpaces"])) . ', ' .
             'LgSplitEachChar = ' . ((int)isset($_REQUEST["LgSplitEachChar"])) . ', ' .
             'LgRightToLeft = ' . ((int)isset($_REQUEST["LgRightToLeft"])) . ', ' .
-            "LgTTSVoiceAPI = " . convert_string_to_sqlsyntax_nonull($_REQUEST["LgTTSVoiceAPI"]) . ', ' .
+            "LgTTSVoiceAPI = " . Escaping::toSqlSyntaxNoNull($_REQUEST["LgTTSVoiceAPI"]) . ', ' .
             "LgShowRomanization = " . ((int)isset($_REQUEST["LgShowRomanization"])) .
             " WHERE LgID = $val",
             'Saved'
@@ -243,69 +245,69 @@ function edit_languages_op_change($lid): string
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     // Get old values
     $sql = "SELECT * FROM {$tbpref}languages where LgID = $lid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     if ($record == false) {
         my_die("Cannot access language data: $sql");
     }
 
     $needReParse = (
-        convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgCharacterSubstitutions"])
-        != convert_string_to_sqlsyntax_notrim_nonull($record['LgCharacterSubstitutions'])
+        Escaping::toSqlSyntaxNoTrimNoNull($_REQUEST["LgCharacterSubstitutions"])
+        != Escaping::toSqlSyntaxNoTrimNoNull($record['LgCharacterSubstitutions'])
     ) || (
-        convert_string_to_sqlsyntax($_REQUEST["LgRegexpSplitSentences"]) !=
-        convert_string_to_sqlsyntax($record['LgRegexpSplitSentences'])
+        Escaping::toSqlSyntax($_REQUEST["LgRegexpSplitSentences"]) !=
+        Escaping::toSqlSyntax($record['LgRegexpSplitSentences'])
     ) || (
-        convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgExceptionsSplitSentences"])
-        != convert_string_to_sqlsyntax_notrim_nonull($record['LgExceptionsSplitSentences'])
+        Escaping::toSqlSyntaxNoTrimNoNull($_REQUEST["LgExceptionsSplitSentences"])
+        != Escaping::toSqlSyntaxNoTrimNoNull($record['LgExceptionsSplitSentences'])
     ) || (
-        convert_string_to_sqlsyntax($_REQUEST["LgRegexpWordCharacters"]) !=
-        convert_string_to_sqlsyntax($record['LgRegexpWordCharacters'])
+        Escaping::toSqlSyntax($_REQUEST["LgRegexpWordCharacters"]) !=
+        Escaping::toSqlSyntax($record['LgRegexpWordCharacters'])
     ) || ((isset($_REQUEST["LgRemoveSpaces"]) ? 1 : 0) != $record['LgRemoveSpaces']) ||
     ((isset($_REQUEST["LgSplitEachChar"]) ? 1 : 0) != $record['LgSplitEachChar']);
 
     mysqli_free_result($res);
 
 
-    $message = runsql(
+    $message = Connection::execute(
         "UPDATE {$tbpref}languages SET " .
-        'LgName = ' . convert_string_to_sqlsyntax($_REQUEST["LgName"]) . ', ' .
-        'LgDict1URI = ' . convert_string_to_sqlsyntax($_REQUEST["LgDict1URI"]) . ', ' .
-        'LgDict2URI = ' . convert_string_to_sqlsyntax($_REQUEST["LgDict2URI"]) . ', ' .
-        'LgGoogleTranslateURI = ' . convert_string_to_sqlsyntax($_REQUEST["LgGoogleTranslateURI"]) . ', ' .
-        'LgExportTemplate = ' . convert_string_to_sqlsyntax($_REQUEST["LgExportTemplate"]) . ', ' .
-        'LgTextSize = ' . convert_string_to_sqlsyntax($_REQUEST["LgTextSize"]) . ', ' .
-        'LgCharacterSubstitutions = ' . convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgCharacterSubstitutions"]) . ', ' .
-        'LgRegexpSplitSentences = ' . convert_string_to_sqlsyntax($_REQUEST["LgRegexpSplitSentences"]) . ', ' .
-        'LgExceptionsSplitSentences = ' . convert_string_to_sqlsyntax_notrim_nonull($_REQUEST["LgExceptionsSplitSentences"]) . ', ' .
-        'LgRegexpWordCharacters = ' . convert_string_to_sqlsyntax($_REQUEST["LgRegexpWordCharacters"]) . ', ' .
+        'LgName = ' . Escaping::toSqlSyntax($_REQUEST["LgName"]) . ', ' .
+        'LgDict1URI = ' . Escaping::toSqlSyntax($_REQUEST["LgDict1URI"]) . ', ' .
+        'LgDict2URI = ' . Escaping::toSqlSyntax($_REQUEST["LgDict2URI"]) . ', ' .
+        'LgGoogleTranslateURI = ' . Escaping::toSqlSyntax($_REQUEST["LgGoogleTranslateURI"]) . ', ' .
+        'LgExportTemplate = ' . Escaping::toSqlSyntax($_REQUEST["LgExportTemplate"]) . ', ' .
+        'LgTextSize = ' . Escaping::toSqlSyntax($_REQUEST["LgTextSize"]) . ', ' .
+        'LgCharacterSubstitutions = ' . Escaping::toSqlSyntaxNoTrimNoNull($_REQUEST["LgCharacterSubstitutions"]) . ', ' .
+        'LgRegexpSplitSentences = ' . Escaping::toSqlSyntax($_REQUEST["LgRegexpSplitSentences"]) . ', ' .
+        'LgExceptionsSplitSentences = ' . Escaping::toSqlSyntaxNoTrimNoNull($_REQUEST["LgExceptionsSplitSentences"]) . ', ' .
+        'LgRegexpWordCharacters = ' . Escaping::toSqlSyntax($_REQUEST["LgRegexpWordCharacters"]) . ', ' .
         'LgRemoveSpaces = ' . ((int)isset($_REQUEST["LgRemoveSpaces"])) . ', ' .
         'LgSplitEachChar = ' . ((int)isset($_REQUEST["LgSplitEachChar"])) . ', ' .
         'LgRightToLeft = ' . ((int)isset($_REQUEST["LgRightToLeft"])) . ', ' .
-        'LgTTSVoiceAPI = ' . convert_string_to_sqlsyntax_nonull($_REQUEST["LgTTSVoiceAPI"]) . ', ' .
+        'LgTTSVoiceAPI = ' . Escaping::toSqlSyntaxNoNull($_REQUEST["LgTTSVoiceAPI"]) . ', ' .
         'LgShowRomanization = ' . ((int)isset($_REQUEST["LgShowRomanization"])) .
         " WHERE LgID = $lid",
         'Updated'
     );
 
     if ($needReParse) {
-        runsql(
+        Connection::execute(
             "DELETE FROM {$tbpref}sentences where SeLgID = $lid",
             "Sentences deleted"
         );
-        runsql(
+        Connection::execute(
             "DELETE FROM {$tbpref}textitems2 where Ti2LgID = $lid",
             "Text items deleted"
         );
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
-        runsql(
+        Connection::execute(
             "UPDATE {$tbpref}words SET WoWordCount = 0 WHERE WoLgID = $lid",
             ''
         );
         Maintenance::initWordCount();
         $sql = "SELECT TxID, TxText FROM {$tbpref}texts
         WHERE TxLgID = $lid ORDER BY TxID";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         $cntrp = 0;
         while ($record = mysqli_fetch_assoc($res)) {
             $txtid = (int)$record["TxID"];
@@ -355,7 +357,7 @@ function load_language($lgid)
     } else {
         // Load data from database
         $sql = "SELECT * FROM {$tbpref}languages WHERE LgID = $lgid";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         $language->name =  $record["LgName"];
         $language->dict1uri = $record["LgDict1URI"];
@@ -1280,7 +1282,7 @@ function edit_languages_change($lid)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT * FROM {$tbpref}languages WHERE LgID = $lid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     if (mysqli_fetch_assoc($res)) {
         ?>
     <script type="text/javascript" charset="utf-8">
@@ -1327,7 +1329,7 @@ function edit_languages_display($message)
 
     $current = (int) Settings::get('currentlanguage');
 
-    $recno = get_first_value(
+    $recno = Connection::fetchValue(
         "SELECT COUNT(*) AS value
         FROM {$tbpref}languages
         WHERE LgName<>''"
@@ -1372,7 +1374,7 @@ function edit_languages_display($message)
         echo $sql;
     }
     // May be refactored with KISS principle
-    $res = do_mysqli_query(
+    $res = Connection::query(
         "SELECT NfLgID, count(*) as value
         FROM {$tbpref}newsfeeds
         group by NfLgID"
@@ -1382,7 +1384,7 @@ function edit_languages_display($message)
         $newsfeedcount[$record['NfLgID']] = $record['value'];
     }
     // May be refactored with KISS principle
-    $res = do_mysqli_query(
+    $res = Connection::query(
         "SELECT NfLgID, count(*) AS value
         FROM {$tbpref}newsfeeds, {$tbpref}feedlinks
         WHERE NfID=FlNfID
@@ -1392,22 +1394,22 @@ function edit_languages_display($message)
     while ($record = mysqli_fetch_assoc($res)) {
         $feedarticlescount[$record['NfLgID']] = $record['value'];
     }
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         $lid = (int)$record['LgID'];
-        $foo = get_first_value(
+        $foo = Connection::fetchValue(
             "SELECT count(TxID) as value
             FROM {$tbpref}texts
             where TxLgID = $lid"
         );
         $textcount = is_numeric($foo) ? (int)$foo : 0;
-        $foo = get_first_value(
+        $foo = Connection::fetchValue(
             "SELECT count(AtID) as value
             FROM {$tbpref}archivedtexts
             where AtLgID = $lid"
         );
         $archtextcount = is_numeric($foo) ? (int)$foo : 0;
-        $foo = get_first_value(
+        $foo = Connection::fetchValue(
             "SELECT count(WoID) as value
             FROM {$tbpref}words
             where WoLgID = $lid"

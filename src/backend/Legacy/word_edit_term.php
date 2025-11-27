@@ -27,6 +27,7 @@ require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 require_once 'Core/Text/simterms.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 
 $translation_raw = repl_tab_nl(getreq("WoTranslation"));
@@ -59,13 +60,13 @@ if (isset($_REQUEST['op'])) {
                 $xx = ', WoStatus = ' .    $newstatus . ', WoStatusChanged = NOW()';
             }
 
-            runsql(
+            Connection::execute(
                 'update ' . $tbpref . 'words set WoText = ' .
-                convert_string_to_sqlsyntax($_REQUEST["WoText"]) . ', WoTranslation = ' .
-                convert_string_to_sqlsyntax($translation) . ', WoSentence = ' .
-                convert_string_to_sqlsyntax(repl_tab_nl($_REQUEST["WoSentence"])) .
+                Escaping::toSqlSyntax($_REQUEST["WoText"]) . ', WoTranslation = ' .
+                Escaping::toSqlSyntax($translation) . ', WoSentence = ' .
+                Escaping::toSqlSyntax(repl_tab_nl($_REQUEST["WoSentence"])) .
                 ', WoRomanization = ' .
-                convert_string_to_sqlsyntax($_REQUEST["WoRomanization"]) . $xx .
+                Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . $xx .
                 ',' . make_score_random_insert_update('u') .
                 ' where WoID = ' . $_REQUEST["WoID"],
                 "Updated"
@@ -89,11 +90,11 @@ if (isset($_REQUEST['op'])) {
 
     <?php
 
-    $lang = get_first_value('select WoLgID as value from ' . $tbpref . 'words where WoID = ' . $wid);
+    $lang = Connection::fetchValue('select WoLgID as value from ' . $tbpref . 'words where WoID = ' . $wid);
     if (!isset($lang)) {
         my_die('Cannot retrieve language in edit_tword.php');
     }
-    $regexword = get_first_value('select LgRegexpWordCharacters as value from ' . $tbpref . 'languages where LgID = ' . $lang);
+    $regexword = Connection::fetchValue('select LgRegexpWordCharacters as value from ' . $tbpref . 'languages where LgID = ' . $lang);
     if (!isset($regexword)) {
         my_die('Cannot retrieve language data in edit_tword.php');
     }
@@ -144,7 +145,7 @@ cleanupRightFrames();
     }
 
     $sql = 'select WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus from ' . $tbpref . 'words where WoID = ' . $wid;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     if ($record) {
         $term = (string) $record['WoText'];
@@ -156,7 +157,7 @@ cleanupRightFrames();
         $sentence = repl_tab_nl($record['WoSentence']);
         $rom = $record['WoRomanization'];
         $status = $record['WoStatus'];
-        (bool) get_first_value(
+        $showRoman = (bool) Connection::fetchValue(
             "SELECT LgShowRomanization AS value
             FROM {$tbpref}languages
             WHERE LgID = $lang"

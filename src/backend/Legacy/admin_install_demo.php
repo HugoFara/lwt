@@ -18,6 +18,8 @@ require_once 'Core/database_connect.php';
 require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Text/text_helpers.php';
 
+use Lwt\Database\Connection;
+
 $message = '';
 
 // RESTORE DEMO
@@ -53,7 +55,7 @@ pagestart('Install LWT Demo Database', true);
 
 echo error_message_with_hide($message, true);
 
-$langcnt = get_first_value("SELECT COUNT(*) AS value FROM {$tbpref}languages");
+$langcnt = Connection::fetchValue("SELECT COUNT(*) AS value FROM {$tbpref}languages");
 
 if ($tbpref == '') {
     $prefinfo = "(Default Table Set)";

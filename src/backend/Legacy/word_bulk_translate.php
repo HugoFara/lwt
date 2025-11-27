@@ -26,6 +26,7 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
@@ -33,17 +34,17 @@ function bulk_save_terms(array $terms, int $tid, bool $cleanUp): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sqlarr = array();
-    $max = get_first_value("SELECT max(WoID) AS value FROM {$tbpref}words");
+    $max = Connection::fetchValue("SELECT max(WoID) AS value FROM {$tbpref}words");
     foreach ($terms as $row) {
         $sqlarr[] =  '(' .
-        convert_string_to_sqlsyntax($row['lg']) . ',' .
-        convert_string_to_sqlsyntax(mb_strtolower($row['text'], 'UTF-8')) . ',' .
-        convert_string_to_sqlsyntax($row['text']) . ',' .
-        convert_string_to_sqlsyntax($row['status']) . ',' .
+        Escaping::toSqlSyntax($row['lg']) . ',' .
+        Escaping::toSqlSyntax(mb_strtolower($row['text'], 'UTF-8')) . ',' .
+        Escaping::toSqlSyntax($row['text']) . ',' .
+        Escaping::toSqlSyntax($row['status']) . ',' .
         (
             (!isset($row['trans']) || $row['trans'] == '') ?
             '"*"' :
-            convert_string_to_sqlsyntax($row['trans'])
+            Escaping::toSqlSyntax($row['trans'])
         ) .
         ',
         "",
@@ -57,16 +58,16 @@ function bulk_save_terms(array $terms, int $tid, bool $cleanUp): void
         WoRomanization, WoStatusChanged," .
         make_score_random_insert_update('iv') . "
     ) VALUES " . rtrim(implode(',', $sqlarr), ',');
-    runsql($sqltext, '');
+    Connection::execute($sqltext, '');
     $tooltip_mode = Settings::getWithDefault('set-tooltip-mode');
-    $res = do_mysqli_query(
+    $res = Connection::query(
         "SELECT WoID, WoTextLC, WoStatus, WoTranslation
         FROM {$tbpref}words
         where WoID > $max"
     );
 
 
-    do_mysqli_query(
+    Connection::query(
         "UPDATE {$tbpref}textitems2
         JOIN {$tbpref}words
         ON lower(Ti2Text)=WoTextLC AND Ti2WordCount=1 AND Ti2LgID=WoLgID AND WoID>$max
@@ -132,7 +133,7 @@ function bulk_do_content(int $tid, string $sl, string $tl, int $pos): void
     $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI
     FROM {$tbpref}languages, {$tbpref}texts
     WHERE LgID = TxLgID AND TxID = $tid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $wb1 = isset($record['LgDict1URI']) ? $record['LgDict1URI'] : "";
     $wb2 = isset($record['LgDict2URI']) ? $record['LgDict2URI'] : "";
@@ -379,7 +380,7 @@ function bulk_do_content(int $tid, string $sl, string $tl, int $pos): void
             <th class="th1">Status</th>
         </tr>
     <?php
-    $res = do_mysqli_query(
+    $res = Connection::query(
         "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos
         FROM {$tbpref}textitems2
         WHERE Ti2WoID = 0 AND Ti2TxID = $tid AND Ti2WordCount = 1

@@ -27,6 +27,8 @@ require_once 'Core/Media/media_helpers.php';
 // To get the BCP 47 language tag
 require_once 'Core/Language/langdefs.php' ;
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 /**
@@ -50,7 +52,7 @@ function getData($textid)
     FROM ' . $tbpref . 'texts
     JOIN ' . $tbpref . 'languages ON TxLgID = LgID
     WHERE TxID = ' . $textid;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     mysqli_free_result($res);
     return $record;
@@ -191,15 +193,15 @@ function do_settings($textid): void
 function browser_tts($text, $languageName): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $lg_id = (int) get_first_value(
+    $lg_id = (int) Connection::fetchValue(
         "SELECT LgID as value
         FROM {$tbpref}languages
-        WHERE LgName = " . convert_string_to_sqlsyntax($languageName)
+        WHERE LgName = " . Escaping::toSqlSyntax($languageName)
     );
     $languageCode = getLanguageCode($lg_id, LWT_LANGUAGES_ARRAY);
     // Phonetic reading for this text. As it can be long do not use AJAX
     $phoneticText = phoneticReading($text, $lg_id);
-    $voiceApi = get_first_value(
+    $voiceApi = Connection::fetchValue(
         "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages
         WHERE LgID = $lg_id"
     );

@@ -26,6 +26,8 @@ require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Media/media_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
@@ -47,7 +49,7 @@ function dummy_function_1(): array
     } else {
         $marked_items = $_REQUEST['marked_items'];
     }
-    $res = do_mysqli_query(
+    $res = Connection::query(
         "SELECT * FROM (
             SELECT * FROM {$tbpref}feedlinks
             WHERE FlID IN ($marked_items)
@@ -90,10 +92,10 @@ function dummy_function_1(): array
         if (isset($texts['error'])) {
             echo $texts['error']['message'];
             foreach ($texts['error']['link'] as $err_links) {
-                runsql(
+                Connection::execute(
                     'UPDATE ' . $tbpref . 'feedlinks
                     SET FlLink=CONCAT(" ",FlLink)
-                    where FlLink in (' . convert_string_to_sqlsyntax($err_links) . ')',
+                    where FlLink in (' . Escaping::toSqlSyntax($err_links) . ')',
                     ""
                 );
             }
@@ -119,7 +121,7 @@ function dummy_function_1(): array
         <td class="td1">
             <select name="feed[<?php echo $count; ?>][TxLgID]" class="notempty setfocus">
                 <?php
-                $result = do_mysqli_query(
+                $result = Connection::query(
                     "SELECT LgName,LgID FROM " . $tbpref . "languages
                     where LgName<>'' ORDER BY LgName"
                 );
@@ -179,7 +181,7 @@ function dummy_function_1(): array
                 <?php
             }
         } else {
-            do_mysqli_query(
+            Connection::query(
                 'insert ignore into ' . $tbpref . 'tags2 (T2Text)
                 values("' . $nf_tag_name . '")'
             );
@@ -187,31 +189,31 @@ function dummy_function_1(): array
                 echo '<div class="msgblue">
                 <p class="hide_message">+++ "' . $text['TxTitle'] . '" added! +++</p>
                 </div>';
-                do_mysqli_query(
+                Connection::query(
                     'INSERT INTO ' . $tbpref . 'texts (
                         TxLgID,TxTitle,TxText,TxAudioURI,TxSourceURI
                     )
                     VALUES (
                         ' . $row['NfLgID'] . ',' .
-                        convert_string_to_sqlsyntax($text['TxTitle']) . ',' .
-                        convert_string_to_sqlsyntax($text['TxText']) . ',' .
-                        convert_string_to_sqlsyntax($text['TxAudioURI']) . ',' .
-                        convert_string_to_sqlsyntax($text['TxSourceURI']) . '
+                        Escaping::toSqlSyntax($text['TxTitle']) . ',' .
+                        Escaping::toSqlSyntax($text['TxText']) . ',' .
+                        Escaping::toSqlSyntax($text['TxAudioURI']) . ',' .
+                        Escaping::toSqlSyntax($text['TxSourceURI']) . '
                     )'
                 );
                 $id = get_last_key();
                 TextParsing::splitCheck(
-                    get_first_value(
+                    Connection::fetchValue(
                         'select TxText as value from ' . $tbpref . 'texts
                         where TxID = ' . $id
                     ),
-                    get_first_value(
+                    Connection::fetchValue(
                         'select TxLgID as value from ' . $tbpref . 'texts
                         where TxID = ' . $id
                     ),
                     $id
                 );
-                runsql(
+                Connection::execute(
                     'insert into ' . $tbpref . 'texttags (TtTxID, TtT2ID)
                     select ' . $id . ', T2ID
                     from ' . $tbpref . 'tags2
@@ -220,7 +222,7 @@ function dummy_function_1(): array
                 );
             }
             get_texttags(1);
-            $result = do_mysqli_query(
+            $result = Connection::query(
                 "SELECT TtTxID FROM " . $tbpref . "texttags
                 join " . $tbpref . "tags2 on TtT2ID=T2ID
                 WHERE T2Text='" . $nf_tag_name . "'"
@@ -236,21 +238,21 @@ function dummy_function_1(): array
                 if ($text_count > $nf_max_texts) {
                     $text_item = array_slice($text_item, 0, $text_count - $nf_max_texts);
                     foreach ($text_item as $text_ID) {
-                        $temp = runsql(
+                        $temp = Connection::execute(
                             'delete from ' . $tbpref . 'textitems2 where Ti2TxID = ' . $text_ID,
                             ""
                         );
                         if (is_numeric($temp)) {
                             $message3 += (int) $temp;
                         }
-                        $temp = runsql(
+                        $temp = Connection::execute(
                             'delete from ' . $tbpref . 'sentences where SeTxID = ' . $text_ID,
                             ""
                         );
                         if (is_numeric($temp)) {
                             $message2 += (int) $temp;
                         }
-                        $temp = runsql(
+                        $temp = Connection::execute(
                             'INSERT INTO ' . $tbpref . 'archivedtexts (
                                 AtLgID, AtTitle, AtText,
                                 AtAnnotatedText, AtAudioURI, AtSourceURI
@@ -265,14 +267,14 @@ function dummy_function_1(): array
                             $message4 += (int) $temp;
                         }
                         $id = get_last_key();
-                        runsql(
+                        Connection::execute(
                             'INSERT INTO ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
                             SELECT ' . $id . ', TtT2ID
                             FROM ' . $tbpref . 'texttags
                             WHERE TtTxID = ' . $text_ID,
                             ""
                         );
-                        $temp = runsql(
+                        $temp = Connection::execute(
                             'DELETE FROM ' . $tbpref . 'texts
                             WHERE TxID = ' . $text_ID,
                             ""
@@ -282,7 +284,7 @@ function dummy_function_1(): array
                         }
                         Maintenance::adjustAutoIncrement('texts', 'TxID');
                         Maintenance::adjustAutoIncrement('sentences', 'SeID');
-                        runsql(
+                        Connection::execute(
                             "DELETE " . $tbpref . "texttags
                             FROM ("
                                 . $tbpref . "texttags
@@ -396,7 +398,7 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
         false
     );
     $currentregexmode = Settings::getWithDefault("set-regex-mode");
-    $wh_query = $currentregexmode . 'like ' .  convert_string_to_sqlsyntax(
+    $wh_query = $currentregexmode . 'like ' .  Escaping::toSqlSyntax(
         ($currentregexmode == '') ?
         str_replace("*", "%", mb_strtolower($currentquery, 'UTF-8')) :
         $currentquery
@@ -412,7 +414,7 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
 
     if ($currentquery !== '') {
         if ($currentregexmode !== '') {
-            if (@mysqli_query($GLOBALS["DBCONNECTION"], 'select "test" rlike ' . convert_string_to_sqlsyntax($currentquery)) === false) {
+            if (@mysqli_query($GLOBALS["DBCONNECTION"], 'select "test" rlike ' . Escaping::toSqlSyntax($currentquery)) === false) {
                 $currentquery = '';
                 $wh_query = '';
                 unset($_SESSION['currentwordquery']);
@@ -551,7 +553,7 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
                 echo '</td></tr>';
                 $sql = "SELECT count(*) AS value FROM {$tbpref}feedlinks
     WHERE FlNfID in ($currentfeed)$wh_query";
-                $recno = (int)get_first_value($sql);
+                $recno = (int)Connection::fetchValue($sql);
                 if ($debug) {
                     echo $sql . ' ===&gt; ' . $recno;
                 }
@@ -602,7 +604,7 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
   <th class="th1 clickable" style="min-width:90px;">Date</th>
   </tr>
                     <?php
-                        $result = do_mysqli_query(
+                        $result = Connection::query(
                             "SELECT FlID, FlTitle, FlLink, FlDescription, FlDate,
                             FlAudio,TxID, AtID
                             FROM " . $tbpref . "feedlinks

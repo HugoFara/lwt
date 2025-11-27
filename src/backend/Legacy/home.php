@@ -52,6 +52,8 @@ require_once 'Core/Tag/tags.php';
 require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 /**
@@ -99,7 +101,7 @@ function get_span_groups(): array
 function do_current_text_info(int $textid)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $txttit = get_first_value(
+    $txttit = Connection::fetchValue(
         'SELECT TxTitle AS value
         FROM ' . $tbpref . 'texts
         WHERE TxID=' . $textid
@@ -107,11 +109,11 @@ function do_current_text_info(int $textid)
     if (!isset($txttit)) {
         return;
     }
-    $txtlng = get_first_value(
+    $txtlng = Connection::fetchValue(
         'SELECT TxLgID AS value FROM ' . $tbpref . 'texts WHERE TxID=' . $textid
     );
     $lngname = getLanguage($txtlng);
-    $annotated = (int)get_first_value(
+    $annotated = (int)Connection::fetchValue(
         "SELECT LENGTH(TxAnnotatedText) AS value
         FROM " . $tbpref . "texts
         WHERE TxID = " . $textid
@@ -200,10 +202,10 @@ function get_server_data(): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $dbname = \Lwt\Core\Globals::getDatabaseName();
-    $dbaccess_format = convert_string_to_sqlsyntax($dbname);
+    $dbaccess_format = Escaping::toSqlSyntax($dbname);
     $data_table = array();
-    $data_table["prefix"] = convert_string_to_sqlsyntax_nonull($tbpref);
-    $data_table["db_size"] = (float)get_first_value(
+    $data_table["prefix"] = Escaping::toSqlSyntaxNoNull($tbpref);
+    $data_table["db_size"] = (float)Connection::fetchValue(
         "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
         FROM information_schema.TABLES
         WHERE table_schema = $dbaccess_format
@@ -223,7 +225,7 @@ function get_server_data(): array
         $data_table["apache"] = $data_table["serversoft"][0];
     }
     $data_table["php"] = phpversion();
-    $data_table["mysql"] = (string)get_first_value("SELECT VERSION() as value");
+    $data_table["mysql"] = (string)Connection::fetchValue("SELECT VERSION() as value");
     return array(
         $data_table["prefix"], $data_table["db_size"], $data_table["serversoft"],
         $data_table["apache"], $data_table["php"], $data_table["mysql"]
@@ -325,7 +327,7 @@ function index_do_main_page()
         $currenttext = (int) Settings::get('currenttext');
     }
 
-    $langcnt = (int) get_first_value("SELECT COUNT(*) AS value FROM {$tbpref}languages");
+    $langcnt = (int) Connection::fetchValue("SELECT COUNT(*) AS value FROM {$tbpref}languages");
 
     pagestart_nobody(
         "Home",

@@ -26,6 +26,8 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Tag/tags.php';
 require_once 'Core/Http/param_helpers.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 
@@ -34,7 +36,7 @@ $currentsort = (int) processDBParam("sort", 'currenttexttagsort', '1', true);
 $currentpage = (int) processSessParam("page", "currenttexttagpage", '1', true);
 $currentquery = (string) processSessParam("query", "currenttexttagquery", '', false);
 
-$wh_query = convert_string_to_sqlsyntax(str_replace("*", "%", $currentquery));
+$wh_query = Escaping::toSqlSyntax(str_replace("*", "%", $currentquery));
 $wh_query = ($currentquery != '') ? (' and (T2Text like ' . $wh_query . ' or T2Comment like ' . $wh_query . ')') : '';
 
 pagestart('My Text Tags', true);
@@ -56,9 +58,9 @@ if (isset($_REQUEST['markaction'])) {
                 }
                 $list .= ")";
                 if ($markaction == 'del') {
-                    $message = runsql('delete from ' . $tbpref . 'tags2 where T2ID in ' . $list, "Deleted");
-                    runsql("DELETE " . $tbpref . "texttags FROM (" . $tbpref . "texttags LEFT JOIN " . $tbpref . "tags2 on TtT2ID = T2ID) WHERE T2ID IS NULL", '');
-                    runsql("DELETE " . $tbpref . "archtexttags FROM (" . $tbpref . "archtexttags LEFT JOIN " . $tbpref . "tags2 on AgT2ID = T2ID) WHERE T2ID IS NULL", '');
+                    $message = Connection::execute('delete from ' . $tbpref . 'tags2 where T2ID in ' . $list, "Deleted");
+                    Connection::execute("DELETE " . $tbpref . "texttags FROM (" . $tbpref . "texttags LEFT JOIN " . $tbpref . "tags2 on TtT2ID = T2ID) WHERE T2ID IS NULL", '');
+                    Connection::execute("DELETE " . $tbpref . "archtexttags FROM (" . $tbpref . "archtexttags LEFT JOIN " . $tbpref . "tags2 on AgT2ID = T2ID) WHERE T2ID IS NULL", '');
                     Maintenance::adjustAutoIncrement('tags2', 'T2ID');
                 }
             }
@@ -72,16 +74,16 @@ if (isset($_REQUEST['markaction'])) {
 if (isset($_REQUEST['allaction'])) {
     $allaction = $_REQUEST['allaction'];
     if ($allaction == 'delall') {
-        $message = runsql('delete from ' . $tbpref . 'tags2 where (1=1) ' . $wh_query, "Deleted");
-        runsql("DELETE " . $tbpref . "texttags FROM (" . $tbpref . "texttags LEFT JOIN " . $tbpref . "tags2 on TtT2ID = T2ID) WHERE T2ID IS NULL", '');
-        runsql("DELETE " . $tbpref . "archtexttags FROM (" . $tbpref . "archtexttags LEFT JOIN " . $tbpref . "tags2 on AgT2ID = T2ID) WHERE T2ID IS NULL", '');
+        $message = Connection::execute('delete from ' . $tbpref . 'tags2 where (1=1) ' . $wh_query, "Deleted");
+        Connection::execute("DELETE " . $tbpref . "texttags FROM (" . $tbpref . "texttags LEFT JOIN " . $tbpref . "tags2 on TtT2ID = T2ID) WHERE T2ID IS NULL", '');
+        Connection::execute("DELETE " . $tbpref . "archtexttags FROM (" . $tbpref . "archtexttags LEFT JOIN " . $tbpref . "tags2 on AgT2ID = T2ID) WHERE T2ID IS NULL", '');
         Maintenance::adjustAutoIncrement('tags2', 'T2ID');
     }
 } elseif (isset($_REQUEST['del'])) {
     // DEL
-    $message = runsql('delete from ' . $tbpref . 'tags2 where T2ID = ' . $_REQUEST['del'], "Deleted");
-    runsql("DELETE " . $tbpref . "texttags FROM (" . $tbpref . "texttags LEFT JOIN " . $tbpref . "tags2 on TtT2ID = T2ID) WHERE T2ID IS NULL", '');
-    runsql("DELETE " . $tbpref . "archtexttags FROM (" . $tbpref . "archtexttags LEFT JOIN " . $tbpref . "tags2 on AgT2ID = T2ID) WHERE T2ID IS NULL", '');
+    $message = Connection::execute('delete from ' . $tbpref . 'tags2 where T2ID = ' . $_REQUEST['del'], "Deleted");
+    Connection::execute("DELETE " . $tbpref . "texttags FROM (" . $tbpref . "texttags LEFT JOIN " . $tbpref . "tags2 on TtT2ID = T2ID) WHERE T2ID IS NULL", '');
+    Connection::execute("DELETE " . $tbpref . "archtexttags FROM (" . $tbpref . "archtexttags LEFT JOIN " . $tbpref . "tags2 on AgT2ID = T2ID) WHERE T2ID IS NULL", '');
     Maintenance::adjustAutoIncrement('tags2', 'T2ID');
 } elseif (isset($_REQUEST['op'])) {
     // INS/UPD
@@ -89,20 +91,20 @@ if (isset($_REQUEST['allaction'])) {
     // INSERT
 
     if ($_REQUEST['op'] == 'Save') {
-        $message = runsql(
+        $message = Connection::execute(
             'insert into ' . $tbpref . 'tags2 (T2Text, T2Comment) values(' .
-            convert_string_to_sqlsyntax($_REQUEST["T2Text"]) . ', ' .
-            convert_string_to_sqlsyntax_nonull($_REQUEST["T2Comment"]) . ')',
+            Escaping::toSqlSyntax($_REQUEST["T2Text"]) . ', ' .
+            Escaping::toSqlSyntaxNoNull($_REQUEST["T2Comment"]) . ')',
             "Saved",
             $sqlerrdie = false
         );
     } elseif ($_REQUEST['op'] == 'Change') {
         // UPDATE
 
-        $message = runsql(
+        $message = Connection::execute(
             'update ' . $tbpref . 'tags2 set T2Text = ' .
-            convert_string_to_sqlsyntax($_REQUEST["T2Text"]) . ', T2Comment = ' .
-            convert_string_to_sqlsyntax_nonull($_REQUEST["T2Comment"]) . ' where T2ID = ' . $_REQUEST["T2ID"],
+            Escaping::toSqlSyntax($_REQUEST["T2Text"]) . ', T2Comment = ' .
+            Escaping::toSqlSyntaxNoNull($_REQUEST["T2Comment"]) . ' where T2ID = ' . $_REQUEST["T2ID"],
             "Updated",
             $sqlerrdie = false
         );
@@ -148,7 +150,7 @@ if (isset($_REQUEST['new'])) {
     // CHG
 
     $sql = 'select * from ' . $tbpref . 'tags2 where T2ID = ' . $_REQUEST['chg'];
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
         ?>
      <h2>Edit Tag</h2>
@@ -197,7 +199,7 @@ if (isset($_REQUEST['new'])) {
     get_texttags($refresh = 1);   // refresh tags cache
 
     $sql = 'select count(T2ID) as value from ' . $tbpref . 'tags2 where (1=1) ' . $wh_query;
-    $recno = (int) get_first_value($sql);
+    $recno = (int) Connection::fetchValue($sql);
     if ($debug) {
         echo $sql . ' ===&gt; ' . $recno;
     }
@@ -299,10 +301,10 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
         if ($debug) {
             echo $sql;
         }
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
-            $c = get_first_value('select count(*) as value from ' . $tbpref . 'texttags where TtT2ID=' . $record['T2ID']);
-            $ca = get_first_value('select count(*) as value from ' . $tbpref . 'archtexttags where AgT2ID=' . $record['T2ID']);
+            $c = Connection::fetchValue('select count(*) as value from ' . $tbpref . 'texttags where TtT2ID=' . $record['T2ID']);
+            $ca = Connection::fetchValue('select count(*) as value from ' . $tbpref . 'archtexttags where AgT2ID=' . $record['T2ID']);
             echo '<tr>';
             echo '<td class="td1 center"><a name="rec' . $record['T2ID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['T2ID'] . '" ' . checkTest($record['T2ID'], 'marked') . ' /></a></td>';
             echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="' . $_SERVER['PHP_SELF'] . '?chg=' . $record['T2ID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="' . $_SERVER['PHP_SELF'] . '?del=' . $record['T2ID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';

@@ -17,6 +17,8 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
+
 pagestart('My Statistics', true);
 
 ?>
@@ -52,7 +54,7 @@ $sum599 = 0;
 $sumall = 0;
 
 $sql = 'SELECT WoLgID,WoStatus,count(*) AS value FROM ' . $tbpref . 'words GROUP BY WoLgID,WoStatus';
-$res = do_mysqli_query($sql);
+$res = Connection::query($sql);
 /** @var array<int|string, array<int|string, int>> $term_stat */
 $term_stat = [];
 if ($res instanceof \mysqli_result) {
@@ -64,7 +66,7 @@ if ($res instanceof \mysqli_result) {
     mysqli_free_result($res);
 }
 $sql = 'SELECT LgID, LgName FROM ' . $tbpref . 'languages where LgName<>"" ORDER BY LgName';
-$res = do_mysqli_query($sql);
+$res = Connection::query($sql);
 if ($res instanceof \mysqli_result) {
     while ($record = mysqli_fetch_assoc($res)) {
         $lgId = (string)$record['LgID'];
@@ -186,14 +188,14 @@ $sumkall = 0;
 <?php
 
 $sql = 'select WoLgID,TO_DAYS(curdate())-TO_DAYS(cast(WoCreated as date)) Created,count(WoID) as value from ' . $tbpref . 'words where WoStatus in (1,2,3,4,5,99) GROUP BY WoLgID,Created';
-$res = do_mysqli_query($sql);
+$res = Connection::query($sql);
 $term_created = null;
 while ($record = mysqli_fetch_assoc($res)) {
     $term_created[$record['WoLgID']][$record['Created']] = $record['value'];
 }
 
 $sql = 'select WoLgID,WoStatus,TO_DAYS(curdate())-TO_DAYS(cast(WoStatusChanged as date)) Changed,count(WoID) as value from ' . $tbpref . 'words GROUP BY WoLgID,WoStatus,WoStatusChanged';
-$res = do_mysqli_query($sql);
+$res = Connection::query($sql);
 $term_active = null;
 $term_known = null;
 while ($record = mysqli_fetch_assoc($res)) {
@@ -222,7 +224,7 @@ while ($record = mysqli_fetch_assoc($res)) {
 }
 
 $sql = 'SELECT LgID, LgName FROM ' . $tbpref . 'languages where LgName<>"" ORDER BY LgName';
-$res = do_mysqli_query($sql);
+$res = Connection::query($sql);
 while ($record = mysqli_fetch_assoc($res)) {
     $cw = 0;
     $cm = 0;

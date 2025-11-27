@@ -25,6 +25,7 @@ require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
@@ -46,7 +47,7 @@ function all_words_wellknown_get_words($txid): \mysqli_result|false
     )
     WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = $txid
     ORDER BY Ti2Order";
-    return do_mysqli_query($sql);
+    return Connection::query($sql);
 }
 
 /**
@@ -67,22 +68,22 @@ function all_words_wellknown_get_words($txid): \mysqli_result|false
 function all_words_wellknown_process_word($status, $term, $termlc, $langid): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $wid = get_first_value(
+    $wid = Connection::fetchValue(
         "SELECT WoID AS value FROM words
-        WHERE WoTextLC = " . convert_string_to_sqlsyntax($termlc)
+        WHERE WoTextLC = " . Escaping::toSqlSyntax($termlc)
     );
     if ($wid !== null) {
         $rows = 0;
     } else {
-        $message = runsql(
+        $message = Connection::execute(
             "INSERT INTO {$tbpref}words (
                 WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged,"
                 . make_score_random_insert_update('iv') .
             ")
             VALUES(
                 $langid, " .
-                convert_string_to_sqlsyntax($term) . ", " .
-                convert_string_to_sqlsyntax($termlc) . ", $status, NOW(), " .
+                Escaping::toSqlSyntax($term) . ", " .
+                Escaping::toSqlSyntax($termlc) . ", $status, NOW(), " .
                 make_score_random_insert_update('id') .
             ")",
             ''
@@ -128,7 +129,7 @@ function all_words_wellknown_process_word($status, $term, $termlc, $langid): arr
 function all_words_wellknown_main_loop($txid, $status): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $langid = get_first_value(
+    $langid = Connection::fetchValue(
         "SELECT TxLgID AS value
         FROM {$tbpref}texts
         WHERE TxID = $txid"
@@ -149,7 +150,7 @@ function all_words_wellknown_main_loop($txid, $status): array
     mysqli_free_result($res);
 
     // Associate existing textitems.
-    runsql(
+    Connection::execute(
         "UPDATE {$tbpref}words
         JOIN {$tbpref}textitems2
         ON Ti2WoID = 0 AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID

@@ -22,6 +22,7 @@ require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 
 /**
@@ -37,7 +38,7 @@ use Lwt\Database\Escaping;
 function get_word($textid, $textpos)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $word = (string)get_first_value(
+    $word = (string)Connection::fetchValue(
         "SELECT Ti2Text AS value
         FROM " . $tbpref . "textitems2
         WHERE Ti2WordCount = 1 AND Ti2TxID = " . $textid . " AND Ti2Order = " . $textpos
@@ -63,28 +64,28 @@ function insert_word_ignore_to_database($textid, $word)
 
     $wordlc = mb_strtolower($word, 'UTF-8');
 
-    $langid = get_first_value(
+    $langid = Connection::fetchValue(
         "SELECT TxLgID AS value
         FROM " . $tbpref . "texts
         WHERE TxID = " . $textid
     );
-    runsql(
+    Connection::execute(
         'INSERT INTO ' . $tbpref . 'words (
             WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged,' .  make_score_random_insert_update('iv') . '
         ) values( ' .
             $langid . ', ' .
-            convert_string_to_sqlsyntax($word) . ', ' .
-            convert_string_to_sqlsyntax($wordlc) . ', 98, 1, NOW(), ' .
+            Escaping::toSqlSyntax($word) . ', ' .
+            Escaping::toSqlSyntax($wordlc) . ', 98, 1, NOW(), ' .
             make_score_random_insert_update('id') . '
         )',
         'Term added'
     );
     $wid = get_last_key();
 
-    do_mysqli_query(
+    Connection::query(
         "UPDATE  " . $tbpref . "textitems2
         SET Ti2WoID  = " . $wid . "
-        WHERE Ti2LgID = " . $langid . " AND lower(Ti2Text) = " . convert_string_to_sqlsyntax($wordlc)
+        WHERE Ti2LgID = " . $langid . " AND lower(Ti2Text) = " . Escaping::toSqlSyntax($wordlc)
     );
     return $wid;
 }

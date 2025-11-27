@@ -26,6 +26,7 @@ require_once 'Core/Test/test_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 require_once 'Core/Mobile/mobile_interactions.php';
 require_once 'Core/Bootstrap/start_session.php';
@@ -47,14 +48,14 @@ function get_l2_language_name()
     $lang = 'L2';
     if (getreq('lang') != '') {
         $langid = (int) getreq('lang');
-        $lang = (string) get_first_value(
+        $lang = (string) Connection::fetchValue(
             "SELECT LgName AS value FROM {$tbpref}languages
             WHERE LgID = $langid
             LIMIT 1"
         );
     } elseif (getreq('text') != '') {
         $textid = (int) getreq('text');
-        $lang = (string) get_first_value(
+        $lang = (string) Connection::fetchValue(
             "SELECT LgName AS value
             FROM {$tbpref}texts
             JOIN {$tbpref}languages
@@ -67,11 +68,11 @@ function get_l2_language_name()
             (int)getreq('selection'),
             $_SESSION['testsql']
         );
-        $cntlang = get_first_value(
+        $cntlang = Connection::fetchValue(
             "SELECT count(distinct WoLgID) AS value FROM $test_sql"
         );
         if ($cntlang == 1) {
-            $lang = (string) get_first_value(
+            $lang = (string) Connection::fetchValue(
                 "SELECT LgName AS value
                 FROM {$tbpref}languages, {$test_sql} AND LgID = WoLgID
                 LIMIT 1"

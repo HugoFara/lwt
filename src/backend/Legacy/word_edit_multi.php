@@ -32,6 +32,7 @@ require_once 'Core/Text/simterms.php';
 require_once 'Core/Entity/Term.php';
 
 use Lwt\Classes\Term;
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
@@ -154,19 +155,19 @@ function edit_mword_do_insert($term)
     pagestart_nobody($titletext);
     echo '<h1>' . $titletext . '</h1>';
 
-    $message = runsql(
+    $message = Connection::execute(
         "INSERT INTO {$tbpref}words (
             WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
             WoRomanization, WoWordCount, WoStatusChanged,"
             .  make_score_random_insert_update('iv') . '
         ) VALUES( ' .
             $term->lgid . ', ' .
-            convert_string_to_sqlsyntax($term->textlc) . ', ' .
-            convert_string_to_sqlsyntax($term->text) . ', ' .
+            Escaping::toSqlSyntax($term->textlc) . ', ' .
+            Escaping::toSqlSyntax($term->text) . ', ' .
             $term->status . ', ' .
-            convert_string_to_sqlsyntax($term->translation) . ', ' .
-            convert_string_to_sqlsyntax(repl_tab_nl($term->sentence)) . ', ' .
-            convert_string_to_sqlsyntax($term->roman) . ', ' .
+            Escaping::toSqlSyntax($term->translation) . ', ' .
+            Escaping::toSqlSyntax(repl_tab_nl($term->sentence)) . ', ' .
+            Escaping::toSqlSyntax($term->roman) . ', ' .
             $term->wordcount . ',
             NOW(), ' .
             make_score_random_insert_update('id') .
@@ -205,14 +206,14 @@ function edit_mword_do_update($term, $newstatus)
         $status_change = ', WoStatus = ' . $newstatus . ', WoStatusChanged = NOW()';
     }
 
-    $message = runsql(
+    $message = Connection::execute(
         'UPDATE ' . $tbpref . 'words set
-        WoText = ' . convert_string_to_sqlsyntax($term->text) . ',
-        WoTranslation = ' . convert_string_to_sqlsyntax($term->translation) . ',
-        WoSentence = ' . convert_string_to_sqlsyntax(
+        WoText = ' . Escaping::toSqlSyntax($term->text) . ',
+        WoTranslation = ' . Escaping::toSqlSyntax($term->translation) . ',
+        WoSentence = ' . Escaping::toSqlSyntax(
             repl_tab_nl($term->sentence)
         ) . ',
-        WoRomanization = ' . convert_string_to_sqlsyntax($term->roman) .
+        WoRomanization = ' . Escaping::toSqlSyntax($term->roman) .
         $status_change . ',' .
         make_score_random_insert_update('u') . '
         where WoID = ' . $term->id,
@@ -266,19 +267,19 @@ function edit_mword_new($text, $tid, $ord, $len)
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
     $term = new Term();
-    $term->lgid = get_first_value(
+    $term->lgid = Connection::fetchValue(
         "SELECT TxLgID AS value FROM {$tbpref}texts WHERE TxID = $tid"
     );
     $term->text = Escaping::prepareTextdata($text);
     $term->textlc = mb_strtolower($term->text, 'UTF-8');
 
-    $term->id = get_first_value(
+    $term->id = Connection::fetchValue(
         "SELECT WoID AS value FROM {$tbpref}words
         WHERE WoLgID = $term->lgid AND WoTextLC = " .
-        convert_string_to_sqlsyntax($term->textlc)
+        Escaping::toSqlSyntax($term->textlc)
     );
     if (isset($term->id)) {
-        $term->text = get_first_value(
+        $term->text = Connection::fetchValue(
             "SELECT WoText AS value FROM {$tbpref}words WHERE WoID = $term->id"
         );
     }
@@ -304,7 +305,7 @@ function edit_mword_update($wid, $tid, $ord)
 
     $term->id = $wid;
     $sql = "SELECT WoText, WoLgID FROM {$tbpref}words WHERE WoID = $term->id";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     if (!$record) {
         my_die("Cannot access Term and Language in edit_mword.php");
@@ -332,7 +333,7 @@ function edit_mword_display_new($term, $tid, $ord, $len)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $scrdir = getScriptDirectionTag($term->lgid);
-    $seid = get_first_value(
+    $seid = Connection::fetchValue(
         "SELECT Ti2SeID AS value
         FROM {$tbpref}textitems2
         WHERE Ti2TxID = $tid AND Ti2Order = $ord"
@@ -342,7 +343,7 @@ function edit_mword_display_new($term, $tid, $ord, $len)
         $term->textlc,
         (int) Settings::getWithDefault('set-term-sentence-count')
     );
-    $showRoman = (bool) get_first_value(
+    $showRoman = (bool) Connection::fetchValue(
         "SELECT LgShowRomanization AS value
         FROM {$tbpref}languages JOIN {$tbpref}texts
         ON TxLgID = LgID
@@ -440,8 +441,8 @@ function edit_mword_display_change($term, $tid, $ord)
     $scrdir = getScriptDirectionTag($term->lgid);
     $sql = 'SELECT WoTranslation, WoSentence, WoRomanization, WoStatus
     FROM ' . $tbpref . 'words WHERE WoID = ' . $term->id;
-    $res = do_mysqli_query($sql);
-    $showRoman = (bool) get_first_value(
+    $res = Connection::query($sql);
+    $showRoman = (bool) Connection::fetchValue(
         "SELECT LgShowRomanization AS value
         FROM {$tbpref}languages JOIN {$tbpref}texts
         ON TxLgID = LgID
@@ -455,7 +456,7 @@ function edit_mword_display_change($term, $tid, $ord)
         }
         $sentence = repl_tab_nl($record['WoSentence']);
         if ($sentence == '') {
-            $seid = get_first_value(
+            $seid = Connection::fetchValue(
                 "SELECT Ti2SeID AS value
                 FROM " . $tbpref . "textitems2
                 WHERE Ti2TxID = $tid AND Ti2Order = $ord"
@@ -576,15 +577,15 @@ function edit_mword_page()
         $str_id = getreq('wid');
         // No ID provided: check if text exists in database.
         if ($str_id == "" || !is_numeric($str_id)) {
-            $lgid = get_first_value(
+            $lgid = Connection::fetchValue(
                 "SELECT TxLgID AS value FROM {$tbpref}texts
                 WHERE TxID = " . ((int) getreq('tid'))
             );
-            $textlc = convert_string_to_sqlsyntax(
+            $textlc = Escaping::toSqlSyntax(
                 mb_strtolower(Escaping::prepareTextdata(getreq('txt')), 'UTF-8')
             );
 
-            $str_id = get_first_value(
+            $str_id = Connection::fetchValue(
                 "SELECT WoID AS value FROM {$tbpref}words
                 WHERE WoLgID = $lgid AND WoTextLC = $textlc"
             );
@@ -600,7 +601,7 @@ function edit_mword_page()
             );
         } else {
             // edit_mword.php?tid=..&ord=..&wid=.. for multi-word edit.
-            $text = get_first_value(
+            $text = Connection::fetchValue(
                 "SELECT WoText AS value FROM {$tbpref}words WHERE WoID = $str_id"
             );
             pagestart_nobody("Edit Term: " . $text);

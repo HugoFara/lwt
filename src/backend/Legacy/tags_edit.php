@@ -28,6 +28,8 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Tag/tags.php';
 require_once 'Core/Http/param_helpers.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 
@@ -36,7 +38,7 @@ $currentsort = (int) processDBParam("sort", 'currenttagsort', '1', true);
 $currentpage = (int) processSessParam("page", "currenttagpage", '1', true);
 $currentquery = (string) processSessParam("query", "currenttagquery", '', false);
 
-$wh_query = convert_string_to_sqlsyntax(str_replace("*", "%", $currentquery));
+$wh_query = Escaping::toSqlSyntax(str_replace("*", "%", $currentquery));
 $wh_query = ($currentquery != '') ? (' and (TgText like ' . $wh_query . ' or TgComment like ' . $wh_query . ')') : '';
 
 pagestart('My Term Tags', true);
@@ -58,12 +60,12 @@ if (isset($_REQUEST['markaction'])) {
                 }
                 $list .= ")";
                 if ($markaction == 'del') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'delete from ' . $tbpref . 'tags
                         where TgID in ' . $list,
                         "Deleted"
                     );
-                    runsql(
+                    Connection::execute(
                         "DELETE " . $tbpref . "wordtags FROM (
                             " . $tbpref . "wordtags LEFT JOIN " . $tbpref . "tags
                             on WtTgID = TgID
@@ -83,33 +85,33 @@ if (isset($_REQUEST['markaction'])) {
 if (isset($_REQUEST['allaction'])) {
     $allaction = $_REQUEST['allaction'];
     if ($allaction == 'delall') {
-        $message = runsql('delete from ' . $tbpref . 'tags where (1=1) ' . $wh_query, "Deleted");
-        runsql("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "tags on WtTgID = TgID) WHERE TgID IS NULL", '');
+        $message = Connection::execute('delete from ' . $tbpref . 'tags where (1=1) ' . $wh_query, "Deleted");
+        Connection::execute("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "tags on WtTgID = TgID) WHERE TgID IS NULL", '');
         Maintenance::adjustAutoIncrement('tags', 'TgID');
     }
 } elseif (isset($_REQUEST['del'])) {
     // DEL
-    $message = runsql('delete from ' . $tbpref . 'tags where TgID = ' . $_REQUEST['del'], "Deleted");
-    runsql("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "tags on WtTgID = TgID) WHERE TgID IS NULL", '');
+    $message = Connection::execute('delete from ' . $tbpref . 'tags where TgID = ' . $_REQUEST['del'], "Deleted");
+    Connection::execute("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "tags on WtTgID = TgID) WHERE TgID IS NULL", '');
     Maintenance::adjustAutoIncrement('tags', 'TgID');
 } elseif (isset($_REQUEST['op'])) {
     // INS/UPD
     // INSERT
 
     if ($_REQUEST['op'] == 'Save') {
-        $message = runsql(
+        $message = Connection::execute(
             'insert into ' . $tbpref . 'tags (TgText, TgComment) values(' .
-            convert_string_to_sqlsyntax($_REQUEST["TgText"]) . ', ' .
-            convert_string_to_sqlsyntax_nonull($_REQUEST["TgComment"]) . ')',
+            Escaping::toSqlSyntax($_REQUEST["TgText"]) . ', ' .
+            Escaping::toSqlSyntaxNoNull($_REQUEST["TgComment"]) . ')',
             "Saved",
             $sqlerrdie = false
         );
     } elseif ($_REQUEST['op'] == 'Change') {
         // UPDATE
-        $message = runsql(
+        $message = Connection::execute(
             'update ' . $tbpref . 'tags set TgText = ' .
-            convert_string_to_sqlsyntax($_REQUEST["TgText"]) . ', TgComment = ' .
-            convert_string_to_sqlsyntax_nonull($_REQUEST["TgComment"]) . ' where TgID = ' . $_REQUEST["TgID"],
+            Escaping::toSqlSyntax($_REQUEST["TgText"]) . ', TgComment = ' .
+            Escaping::toSqlSyntaxNoNull($_REQUEST["TgComment"]) . ' where TgID = ' . $_REQUEST["TgID"],
             "Updated",
             $sqlerrdie = false
         );
@@ -154,7 +156,7 @@ if (isset($_REQUEST['new'])) {
 } elseif (isset($_REQUEST['chg'])) {
     // CHG
     $sql = 'select * from ' . $tbpref . 'tags where TgID = ' . $_REQUEST['chg'];
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
         ?>
      <h2>Edit Tag</h2>
@@ -205,7 +207,7 @@ if (isset($_REQUEST['new'])) {
     get_tags($refresh = 1);   // refresh tags cache
 
     $sql = 'select count(TgID) as value from ' . $tbpref . 'tags where (1=1) ' . $wh_query;
-    $recno = (int) get_first_value($sql);
+    $recno = (int) Connection::fetchValue($sql);
     if ($debug) {
         echo $sql . ' ===&gt; ' . $recno;
     }
@@ -303,9 +305,9 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
         if ($debug) {
             echo $sql;
         }
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
-            $c = get_first_value('select count(*) as value from ' . $tbpref . 'wordtags where WtTgID=' . $record['TgID']);
+            $c = Connection::fetchValue('select count(*) as value from ' . $tbpref . 'wordtags where WtTgID=' . $record['TgID']);
             echo '<tr>
                 <td class="td1 center">
                     <a name="rec' . $record['TgID'] . '">

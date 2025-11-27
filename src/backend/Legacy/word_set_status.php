@@ -24,6 +24,8 @@ require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
+
 /**
  * Get various data for the word corresponding to the ID.
  *
@@ -39,7 +41,7 @@ function get_word_data($wid)
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT WoText, WoTranslation, WoRomanization
     FROM {$tbpref}words WHERE WoID = $wid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     if (!$record) {
         my_die("Word not found in set_word_status.php");
@@ -93,7 +95,7 @@ function set_word_status_ajax($wid, $status): void
 function set_word_status_database($wid, $status)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $m1 = runsql(
+    $m1 = Connection::execute(
         "UPDATE {$tbpref}words
         SET WoStatus = $status, WoStatusChanged = NOW()," .
         make_score_random_insert_update('u') . "

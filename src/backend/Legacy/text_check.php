@@ -24,6 +24,7 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Http/param_helpers.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 use Lwt\Database\Escaping;
@@ -60,7 +61,7 @@ function display_form()
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$tbpref}languages
     WHERE LgGoogleTranslateURI<>''";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $return = array();
     while ($lg_record = mysqli_fetch_assoc($res)) {
         $url = $lg_record["LgGoogleTranslateURI"];

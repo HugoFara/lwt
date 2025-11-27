@@ -24,6 +24,7 @@ require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Media/media_helpers.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 /**
@@ -44,7 +45,7 @@ function do_diplay_impr_text_header_data($textid)
     'SELECT TxLgID, TxTitle, TxAudioURI, TxSourceURI
     FROM ' . $tbpref . 'texts
     WHERE TxID = ' . $textid;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
 
 

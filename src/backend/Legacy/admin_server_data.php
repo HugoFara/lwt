@@ -21,6 +21,9 @@ namespace Lwt\Interface\Server\Data;
 require_once 'Core/database_connect.php';
 require_once 'Core/UI/ui_helpers.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
+
 /**
  * Return a lot of different server state variables.
  *
@@ -35,11 +38,11 @@ function get_server_data_table(): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $dbname = \Lwt\Core\Globals::getDatabaseName();
-    $dbaccess_format = convert_string_to_sqlsyntax($dbname);
+    $dbaccess_format = Escaping::toSqlSyntax($dbname);
     $data_table = array();
     $data_table["db_name"] = $dbname;
     $data_table["db_prefix"] = $tbpref;
-    $temp_size = get_first_value(
+    $temp_size = Connection::fetchValue(
         "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
         FROM information_schema.TABLES
         WHERE table_schema = $dbaccess_format
@@ -65,7 +68,7 @@ function get_server_data_table(): array
         $data_table["apache"] = $temp_soft[0];
     }
     $data_table["php"] = phpversion();
-    $data_table["mysql"] = (string)get_first_value("SELECT VERSION() AS value");
+    $data_table["mysql"] = (string)Connection::fetchValue("SELECT VERSION() AS value");
     return $data_table;
 }
 

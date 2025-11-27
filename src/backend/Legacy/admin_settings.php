@@ -23,6 +23,8 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Media/media_helpers.php';
 
+use Lwt\Core\Globals;
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 if (isset($_REQUEST['op'])) {
@@ -32,7 +34,8 @@ if (isset($_REQUEST['op'])) {
             $_REQUEST['set-theme-dir']
         );
     } else {
-        runsql("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'set-%'", '');
+        $tbpref = Globals::getTablePrefix();
+        Connection::execute("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'set-%'");
     }
 }
 pagestart('Settings/Preferences', true);

@@ -8,6 +8,7 @@
  */
 
 use Lwt\Classes\GoogleTranslate;
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 
 require_once 'Core/database_connect.php';
@@ -33,27 +34,27 @@ if ($_REQUEST['status'] == 1) {
     header('Expires: 0');
 }
 
-$word = convert_string_to_sqlsyntax($_REQUEST['text']);
-$wordlc = convert_string_to_sqlsyntax(mb_strtolower($_REQUEST['text'], 'UTF-8'));
+$word = Escaping::toSqlSyntax($_REQUEST['text']);
+$wordlc = Escaping::toSqlSyntax(mb_strtolower($_REQUEST['text'], 'UTF-8'));
 
-$langid = get_first_value(
+$langid = Connection::fetchValue(
     "SELECT TxLgID AS value FROM {$tbpref}texts WHERE TxID = " .
     $_REQUEST['tid']
 );
 
-runsql(
+Connection::execute(
     "INSERT INTO {$tbpref}words (
         WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
         WoRomanization, WoStatusChanged," .
         make_score_random_insert_update('iv') . ") values(
             $langid, $wordlc, $word, " . $_REQUEST["status"] . ', ' .
-            convert_string_to_sqlsyntax($translation) . ', "", "", NOW(), ' .
+            Escaping::toSqlSyntax($translation) . ', "", "", NOW(), ' .
             make_score_random_insert_update('id') . '
         )',
     "Term saved"
 );
 $wid = get_last_key();
-do_mysqli_query(
+Connection::query(
     "UPDATE {$tbpref}textitems2 SET Ti2WoID = $wid
     WHERE Ti2LgID = $langid AND LOWER(Ti2Text) = $wordlc"
 );

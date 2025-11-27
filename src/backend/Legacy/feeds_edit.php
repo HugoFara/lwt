@@ -8,6 +8,8 @@ require_once 'Core/Feed/feeds.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 
@@ -16,7 +18,7 @@ $currentsort = (int) processDBParam("sort", 'currentmanagefeedssort', '2', true)
 $currentquery = (string) processSessParam("query", "currentmanagefeedsquery", '', false);
 $currentpage = (int) processSessParam("page", "currentmanagefeedspage", '1', true);
 $currentfeed = (string) processSessParam("selected_feed", "currentmanagefeedsfeed", '', false);
-$wh_query = convert_string_to_sqlsyntax(str_replace("*", "%", $currentquery));
+$wh_query = Escaping::toSqlSyntax(str_replace("*", "%", $currentquery));
 $wh_query = ($currentquery != '') ? (' and (NfName like ' . $wh_query . ')') : '';
 
 pagestart('Manage ' . getLanguage($currentlang) . ' Feeds', true);
@@ -28,12 +30,12 @@ if (isset($_SESSION['wizard'])) {
 
 if (isset($_REQUEST['markaction'])) {
     if ($_REQUEST['markaction'] == 'del') {
-        $message = runsql(
+        $message = Connection::execute(
             'delete from ' . $tbpref . 'feedlinks
             where FlNfID in(' . $currentfeed . ')',
             "Article item(s) deleted"
         );
-        $message .= runsql(
+        $message .= Connection::execute(
             'delete from ' . $tbpref . 'newsfeeds
             where NfID in(' . $currentfeed . ')',
             " / Newsfeed(s) deleted"
@@ -43,21 +45,21 @@ if (isset($_REQUEST['markaction'])) {
     }
 
     if ($_REQUEST['markaction'] == 'del_art') {
-        $message = runsql(
+        $message = Connection::execute(
             'delete from ' . $tbpref . 'feedlinks
             where FlNfID in(' . $currentfeed . ')',
             "Article item(s) deleted"
         );
         echo error_message_with_hide($message, false);
         unset($message);
-        do_mysqli_query(
+        Connection::query(
             'UPDATE ' . $tbpref . 'newsfeeds SET NfUpdate="' . time() . '"
             where NfID in(' . $currentfeed . ')'
         );
     }
 
     if ($_REQUEST['markaction'] == 'res_art') {
-        $message = runsql(
+        $message = Connection::execute(
             'UPDATE ' . $tbpref . 'feedlinks SET FlLink=TRIM(FlLink)
             where FlNfID in (' . $currentfeed . ')',
             "Article(s) reset"
@@ -80,30 +82,30 @@ $(".hide_message").delay(2500).slideUp(1000);
 
 if (isset($_REQUEST['update_feed'])) {
     $currentfeed = $_REQUEST['NfID'];
-    runsql(
+    Connection::execute(
         'UPDATE ' . $tbpref . 'newsfeeds SET
-        NfLgID=' . convert_string_to_sqlsyntax($_REQUEST['NfLgID']) . ',
-        NfName=' . convert_string_to_sqlsyntax($_REQUEST['NfName']) . ',
-        NfSourceURI=' . convert_string_to_sqlsyntax($_REQUEST['NfSourceURI']) . ',
-        NfArticleSectionTags=' . convert_string_to_sqlsyntax($_REQUEST['NfArticleSectionTags']) . ',
-        NfFilterTags=' . convert_string_to_sqlsyntax_nonull($_REQUEST['NfFilterTags']) . ',
-        NfOptions=' . convert_string_to_sqlsyntax_nonull(rtrim($_REQUEST['NfOptions'], ',')) . '
+        NfLgID=' . Escaping::toSqlSyntax($_REQUEST['NfLgID']) . ',
+        NfName=' . Escaping::toSqlSyntax($_REQUEST['NfName']) . ',
+        NfSourceURI=' . Escaping::toSqlSyntax($_REQUEST['NfSourceURI']) . ',
+        NfArticleSectionTags=' . Escaping::toSqlSyntax($_REQUEST['NfArticleSectionTags']) . ',
+        NfFilterTags=' . Escaping::toSqlSyntaxNoNull($_REQUEST['NfFilterTags']) . ',
+        NfOptions=' . Escaping::toSqlSyntaxNoNull(rtrim($_REQUEST['NfOptions'], ',')) . '
         where NfID=' . $_REQUEST['NfID'],
         ""
     );
 }
 
 if (isset($_REQUEST['save_feed'])) {
-    runsql(
+    Connection::execute(
         'insert into ' . $tbpref . 'newsfeeds (
             NfLgID, NfName, NfSourceURI, NfArticleSectionTags, NfFilterTags, NfOptions
         )
-        VALUES (' . convert_string_to_sqlsyntax($_REQUEST['NfLgID']) . ',' .
-        convert_string_to_sqlsyntax($_REQUEST['NfName']) . ',' .
-        convert_string_to_sqlsyntax($_REQUEST['NfSourceURI']) . ',' .
-        convert_string_to_sqlsyntax($_REQUEST['NfArticleSectionTags']) . ',' .
-        convert_string_to_sqlsyntax_nonull($_REQUEST['NfFilterTags']) . ',' .
-        convert_string_to_sqlsyntax_nonull(rtrim($_REQUEST['NfOptions'], ',')) .
+        VALUES (' . Escaping::toSqlSyntax($_REQUEST['NfLgID']) . ',' .
+        Escaping::toSqlSyntax($_REQUEST['NfName']) . ',' .
+        Escaping::toSqlSyntax($_REQUEST['NfSourceURI']) . ',' .
+        Escaping::toSqlSyntax($_REQUEST['NfArticleSectionTags']) . ',' .
+        Escaping::toSqlSyntaxNoNull($_REQUEST['NfFilterTags']) . ',' .
+        Escaping::toSqlSyntaxNoNull(rtrim($_REQUEST['NfOptions'], ',')) .
         ')',
         ""
     );
@@ -113,7 +115,7 @@ if (isset($_REQUEST['save_feed'])) {
 function display_new_feed(int $currentlang): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $result = do_mysqli_query(
+    $result = Connection::query(
         "SELECT LgName,LgID FROM " . $tbpref . "languages
         where LgName<>'' ORDER BY LgName"
     );
@@ -215,11 +217,11 @@ $('[type="submit"]').on('click', function(){
 function edit_feed(int $currentfeed): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $result = do_mysqli_query(
+    $result = Connection::query(
         "SELECT * FROM " . $tbpref . "newsfeeds WHERE NfID=$currentfeed"
     );
     $row = mysqli_fetch_assoc($result);
-    $result = do_mysqli_query(
+    $result = Connection::query(
         "SELECT LgName,LgID FROM " . $tbpref . "languages
         where LgName<>'' ORDER BY LgName"
     );
@@ -436,12 +438,12 @@ function multi_load_feed(int $currentlang): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (!empty($currentlang)) {
-        $result = do_mysqli_query(
+        $result = Connection::query(
             "SELECT NfName,NfID,NfUpdate FROM " . $tbpref . "newsfeeds
             WHERE NfLgID=$currentlang ORDER BY NfUpdate DESC"
         );
     } else {
-        $result = do_mysqli_query(
+        $result = Connection::query(
             "SELECT NfName,NfID,NfUpdate FROM " . $tbpref . "newsfeeds
             ORDER BY NfUpdate DESC"
         );
@@ -577,7 +579,7 @@ function display_main_page(
     } else {
         $sql .= '1=1' . $wh_query;
     }
-        $recno = (int) get_first_value($sql);
+        $recno = (int) Connection::fetchValue($sql);
     if ($debug) {
         echo $sql . ' ===&gt; ' . $recno;
     }
@@ -603,13 +605,13 @@ function display_main_page(
         echo '</th><th class="th1">';
         makePager($currentpage, $pages, '/feeds/edit', 'form1');
         if (!empty($currentlang)) {
-            $result = do_mysqli_query(
+            $result = Connection::query(
                 "SELECT * FROM " . $tbpref . "newsfeeds
                     WHERE NfLgID=$currentlang $wh_query
                     ORDER BY " . $sorts[$currentsort - 1]
             );
         } else {
-            $result = do_mysqli_query(
+            $result = Connection::query(
                 "SELECT * FROM " . $tbpref . "newsfeeds WHERE (1=1) $wh_query
                     ORDER BY " . $sorts[$currentsort - 1]
             );

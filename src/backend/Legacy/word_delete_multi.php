@@ -22,6 +22,7 @@ require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 
@@ -29,16 +30,16 @@ $showAll = Settings::getZeroOrOne('showallwords', 1);
 
 $tid = $_REQUEST['tid'];
 $wid = $_REQUEST['wid'];
-$word = get_first_value(
+$word = Connection::fetchValue(
     "select WoText as value from " . $tbpref . "words where WoID = " . $wid
 );
 pagestart("Term: " . $word, false);
-$m1 = runsql(
+$m1 = Connection::execute(
     'delete from ' . $tbpref . 'words where WoID = ' . $wid,
     ''
 );
 Maintenance::adjustAutoIncrement('words', 'WoID');
-runsql(
+Connection::execute(
     'delete from ' . $tbpref . 'textitems2 where Ti2WordCount>1 AND Ti2WoID = ' . $wid,
     ''
 );

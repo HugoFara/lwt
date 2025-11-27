@@ -28,6 +28,7 @@ require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 require_once 'Core/simterms.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
@@ -49,16 +50,16 @@ if (isset($_REQUEST['op'])) {
         pagestart_nobody($titletext);
         echo '<h1>' . $titletext . '</h1>';
 
-        $message = runsql(
+        $message = Connection::execute(
             'insert into ' . $tbpref . 'words (WoLgID, WoTextLC, WoText, ' .
             'WoStatus, WoTranslation, WoSentence, WoRomanization, WoStatusChanged,' .  make_score_random_insert_update('iv') . ') values( ' .
             $_REQUEST["WoLgID"] . ', ' .
-            convert_string_to_sqlsyntax($textlc) . ', ' .
-            convert_string_to_sqlsyntax($text) . ', ' .
+            Escaping::toSqlSyntax($textlc) . ', ' .
+            Escaping::toSqlSyntax($text) . ', ' .
             $_REQUEST["WoStatus"] . ', ' .
-            convert_string_to_sqlsyntax($translation) . ', ' .
-            convert_string_to_sqlsyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', ' .
-            convert_string_to_sqlsyntax($_REQUEST["WoRomanization"]) . ', NOW(), ' .
+            Escaping::toSqlSyntax($translation) . ', ' .
+            Escaping::toSqlSyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', ' .
+            Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . ', NOW(), ' .
             make_score_random_insert_update('id') . ')',
             "Term saved",
             $sqlerrdie = false
@@ -79,14 +80,14 @@ if (isset($_REQUEST['op'])) {
 
         <?php
         if (substr($message, 0, 5) != 'Error') {
-            $len = get_first_value('select WoWordCount as value from ' . $tbpref . 'words where WoID = ' . $wid);
+            $len = Connection::fetchValue('select WoWordCount as value from ' . $tbpref . 'words where WoID = ' . $wid);
             if ($len > 1) {
                 insertExpressions($textlc, $_REQUEST["WoLgID"], $wid, $len, 0);
             } elseif ($len == 1) {
                 $hex = strToClassName(Escaping::prepareTextdata($textlc));
-                do_mysqli_query(
+                Connection::query(
                     'UPDATE ' . $tbpref . 'textitems2 SET Ti2WoID = ' . $wid . '
-                    WHERE Ti2LgID = ' . $_REQUEST["WoLgID"] . ' AND LOWER(Ti2Text) = ' . convert_string_to_sqlsyntax_notrim_nonull($textlc)
+                    WHERE Ti2LgID = ' . $_REQUEST["WoLgID"] . ' AND LOWER(Ti2Text) = ' . Escaping::toSqlSyntaxNoTrimNoNull($textlc)
                 );
                 ?>
 <script type="text/javascript">
@@ -132,7 +133,7 @@ if (isset($_REQUEST['op'])) {
     $lang = (int)getreq('lang');
     $text = (int)getreq('text');
     $scrdir = getScriptDirectionTag($lang);
-    $showRoman = (bool) get_first_value(
+    $showRoman = (bool) Connection::fetchValue(
         "SELECT LgShowRomanization AS value
         FROM {$tbpref}languages
         WHERE LgID = $lang"

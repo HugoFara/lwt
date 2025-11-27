@@ -17,27 +17,29 @@
 require_once 'Core/database_connect.php';
 require_once 'Core/UI/ui_helpers.php';
 
+use Lwt\Database\Connection;
+
 $message = "";
 
 $tbpref = null;
 if (isset($_REQUEST['delpref'])) {
     if ($_REQUEST['delpref'] !== '-') {
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_archivedtexts', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_archtexttags', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_languages', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_sentences', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_tags', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_tags2', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_temptextitems', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_tempwords', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_textitems2', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_texts', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_texttags', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_words', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_newsfeeds', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_feedlinks', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_wordtags', '');
-        runsql('DROP TABLE ' . $_REQUEST['delpref'] . '_settings', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_archivedtexts', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_archtexttags', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_languages', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_sentences', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_tags', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_tags2', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_temptextitems', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_tempwords', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_textitems2', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_texts', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_texttags', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_words', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_newsfeeds', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_feedlinks', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_wordtags', '');
+        Connection::execute('DROP TABLE ' . $_REQUEST['delpref'] . '_settings', '');
         $message = 'Table Set "' . $_REQUEST['delpref'] . '" deleted';
         if ($_REQUEST['delpref'] == substr($tbpref, 0, -1)) {
             $tbpref = "";

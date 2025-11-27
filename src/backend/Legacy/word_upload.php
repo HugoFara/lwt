@@ -19,6 +19,7 @@ require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
@@ -54,16 +55,16 @@ function upload_words_import_simple(
     $status
 ): void {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $removeSpaces = get_first_value(
+    $removeSpaces = Connection::fetchValue(
         "SELECT LgRemoveSpaces AS value FROM {$tbpref}languages WHERE LgID=$lang"
     );
     $local_infile_enabled = in_array(
-        get_first_value("SELECT @@GLOBAL.local_infile as value"),
+        Connection::fetchValue("SELECT @@GLOBAL.local_infile as value"),
         array(1, '1', 'ON')
     );
     if ($local_infile_enabled) {
         $sql = "LOAD DATA LOCAL INFILE " .
-        convert_string_to_sqlsyntax($file_name) .
+        Escaping::toSqlSyntax($file_name) .
         " IGNORE INTO TABLE {$tbpref}words
         FIELDS TERMINATED BY '$tabs' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'
         " . ($_REQUEST["IgnFirstLine"] == '1' ? "IGNORE 1 LINES" : "") . "
@@ -75,7 +76,7 @@ function upload_words_import_simple(
         'WoTextLC = LOWER(WoText)') . ",
         WoStatus = $status, WoStatusChanged = NOW(), " .
         make_score_random_insert_update('u');
-        runsql($sql, '');
+        Connection::execute($sql, '');
     } else {
         $handle = fopen($file_name, 'r');
         $data_text = fread($handle, filesize($file_name));
@@ -107,7 +108,7 @@ function upload_words_import_simple(
                 $row[] = $parsed_line[$fields["se"] - 1];
             }
 
-            $row = array_map('convert_string_to_sqlsyntax', $row);
+            $row = array_map([Escaping::class, 'toSqlSyntax'], $row);
             $row = array_merge(
                 $row,
                 array(
@@ -117,7 +118,7 @@ function upload_words_import_simple(
             );
             $values[] = "(" . implode(",", $row) . ")";
         }
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}words(
                 WoText, WoTextLC, " .
                 ($fields["tr"] != 0 ? 'WoTranslation, ' : '') .
@@ -141,23 +142,23 @@ function upload_words_import_complete(
     $overwrite
 ): void {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $removeSpaces = get_first_value(
+    $removeSpaces = Connection::fetchValue(
         "SELECT LgRemoveSpaces AS value FROM {$tbpref}languages WHERE LgID=$lang"
     );
-    $sql = 'LOAD DATA LOCAL INFILE ' . convert_string_to_sqlsyntax($file_name);
+    $sql = 'LOAD DATA LOCAL INFILE ' . Escaping::toSqlSyntax($file_name);
     //$sql.= ($overwrite)?' REPLACE':(' IGNORE') ;
     $local_infile_enabled = in_array(
-        get_first_value("SELECT @@GLOBAL.local_infile as value"),
+        Connection::fetchValue("SELECT @@GLOBAL.local_infile as value"),
         array(1, '1', 'ON')
     );
-    runsql('SET GLOBAL max_heap_table_size = 1024 * 1024 * 1024 * 2', '');
-    runsql(
+    Connection::execute('SET GLOBAL max_heap_table_size = 1024 * 1024 * 1024 * 2', '');
+    Connection::execute(
         "CREATE TEMPORARY TABLE IF NOT EXISTS {$tbpref}numbers(
             n  tinyint(3) unsigned NOT NULL
         )",
         ''
     );
-    runsql(
+    Connection::execute(
         "INSERT IGNORE INTO {$tbpref}numbers(n) VALUES ('1'),('2'),('3'),
         ('4'),('5'),('6'),('7'),('8'),('9')",
         ''
@@ -174,7 +175,7 @@ function upload_words_import_complete(
         if ($fields["tl"] != 0) {
             $sql .= ', WoTaglist = REPLACE(@taglist, " ", ",")';
         }
-        runsql($sql, '');
+        Connection::execute($sql, '');
     } else {
         $handle = fopen($file_name, 'r');
         $data_text = fread($handle, filesize($file_name));
@@ -215,12 +216,12 @@ function upload_words_import_complete(
             $values[] = "(" . implode(
                 ",",
                 array_map(
-                    'convert_string_to_sqlsyntax',
+                    [Escaping::class, 'toSqlSyntax'],
                     $row
                 )
             ) . ")";
         }
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}tempwords(
                 WoText, WoTextLC" .
                 ($fields["tr"] != 0 ? ', WoTranslation' : '') .
@@ -233,7 +234,7 @@ function upload_words_import_complete(
     }
 
     if ($overwrite > 3) {
-        runsql(
+        Connection::execute(
             "CREATE TEMPORARY TABLE IF NOT EXISTS {$tbpref}merge_words(
                 MID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
                 MText varchar(250) NOT NULL,
@@ -259,22 +260,22 @@ function upload_words_import_complete(
         for ($i = 1; $i < $seplen; $i++) {
             $WoTrRepl = 'REPLACE(
                 ' . $WoTrRepl . ', ' .
-                convert_string_to_sqlsyntax($wosep[$i]) . ', ' .
-                convert_string_to_sqlsyntax($wosep[0]) . '
+                Escaping::toSqlSyntax($wosep[$i]) . ', ' .
+                Escaping::toSqlSyntax($wosep[0]) . '
                 )';
         }
 
-        runsql(
+        Connection::execute(
             "INSERT IGNORE INTO {$tbpref}merge_words(MText,MTranslation)
             SELECT b.WoTextLC,
             trim(
                 SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
                         b.WoTranslation,
-                        " . convert_string_to_sqlsyntax($wosep[0]) . ",
+                        " . Escaping::toSqlSyntax($wosep[0]) . ",
                         {$tbpref}numbers.n
                     ),
-                    " . convert_string_to_sqlsyntax($wosep[0]) .
+                    " . Escaping::toSqlSyntax($wosep[0]) .
                     ", -1
                 )
             ) name
@@ -285,7 +286,7 @@ function upload_words_import_complete(
                 LEFT JOIN {$tbpref}words
                 ON {$tbpref}words.WoTextLC = {$tbpref}tempwords.WoTextLC AND {$tbpref}words.WoTranslation != '*' AND {$tbpref}words.WoLgID = $lang
             ) b
-            ON CHAR_LENGTH(b.WoTranslation)-CHAR_LENGTH(REPLACE(b.WoTranslation, " . convert_string_to_sqlsyntax($wosep[0]) . ", ''))>= {$tbpref}numbers.n-1
+            ON CHAR_LENGTH(b.WoTranslation)-CHAR_LENGTH(REPLACE(b.WoTranslation, " . Escaping::toSqlSyntax($wosep[0]) . ", ''))>= {$tbpref}numbers.n-1
             ORDER BY b.WoTextLC, n",
             ''
         );
@@ -306,28 +307,28 @@ function upload_words_import_complete(
         for ($i = 1; $i < $seplen; $i++) {
             $WoTrRepl = 'REPLACE(
                 ' . $WoTrRepl . ', ' .
-                convert_string_to_sqlsyntax($tesep[$i]) . ', ' .
-                convert_string_to_sqlsyntax($tesep[0]) . '
+                Escaping::toSqlSyntax($tesep[$i]) . ', ' .
+                Escaping::toSqlSyntax($tesep[0]) . '
                 )';
         }
 
-        runsql(
+        Connection::execute(
             "INSERT IGNORE INTO {$tbpref}merge_words(MText,MTranslation)
             SELECT {$tbpref}tempwords.WoTextLC,
             trim(
                 SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
                         $WoTrRepl," .
-                        convert_string_to_sqlsyntax($tesep[0]) . " ,
+                        Escaping::toSqlSyntax($tesep[0]) . " ,
                         {$tbpref}numbers.n
                     ), " .
-                    convert_string_to_sqlsyntax($tesep[0]) . ",
+                    Escaping::toSqlSyntax($tesep[0]) . ",
                     -1
                 )
             ) name
             FROM {$tbpref}numbers
             INNER JOIN {$tbpref}tempwords
-            ON CHAR_LENGTH({$tbpref}tempwords.WoTranslation)-CHAR_LENGTH(REPLACE($WoTrRepl, " . convert_string_to_sqlsyntax($tesep[0]) . ", ''))>= {$tbpref}numbers.n-1
+            ON CHAR_LENGTH({$tbpref}tempwords.WoTranslation)-CHAR_LENGTH(REPLACE($WoTrRepl, " . Escaping::toSqlSyntax($tesep[0]) . ", ''))>= {$tbpref}numbers.n-1
             ORDER BY {$tbpref}tempwords.WoTextLC, n",
             ''
         );
@@ -336,12 +337,12 @@ function upload_words_import_complete(
         } else {
             $wosep = ' ' . $wosep[0] . ' ';
         }
-        runsql(
+        Connection::execute(
             "UPDATE {$tbpref}tempwords
             LEFT JOIN (
                 SELECT MText, GROUP_CONCAT(trim(MTranslation)
                     ORDER BY MID
-                    SEPERATOR " . convert_string_to_sqlsyntax_notrim_nonull($wosep) . "
+                    SEPERATOR " . Escaping::toSqlSyntaxNoTrimNoNull($wosep) . "
                 ) AS Translation
                 FROM {$tbpref}merge_words
                 GROUP BY MText
@@ -350,7 +351,7 @@ function upload_words_import_complete(
             SET WoTranslation = Translation",
             ''
         );
-        runsql("DROP TABLE {$tbpref}merge_words", '');
+        Connection::execute("DROP TABLE {$tbpref}merge_words", '');
     }
     // */
     if ($overwrite != 3 and $overwrite != 5) {
@@ -413,9 +414,9 @@ function upload_words_import_complete(
             ELSE NOW()
         END";
     }
-    runsql($sql, '');
+    Connection::execute($sql, '');
     if ($fields["tl"] != 0) {
-        runsql(
+        Connection::execute(
             "INSERT IGNORE INTO {$tbpref}tags (TgText)
             SELECT name FROM (
                 SELECT {$tbpref}tempwords.WoTextLC,
@@ -430,7 +431,7 @@ function upload_words_import_complete(
                 ORDER BY WoTextLC, n) A",
             ''
         );
-        runsql(
+        Connection::execute(
             "INSERT IGNORE INTO {$tbpref}wordtags
             select WoID,TgID
             FROM (
@@ -446,8 +447,8 @@ function upload_words_import_complete(
             ''
         );
     }
-    runsql("DROP TABLE {$tbpref}numbers", '');
-    runsql("TRUNCATE {$tbpref}tempwords", '');
+    Connection::execute("DROP TABLE {$tbpref}numbers", '');
+    Connection::execute("TRUNCATE {$tbpref}tempwords", '');
     if ($fields["tl"] != 0) {
         get_tags(1);
     }
@@ -456,24 +457,24 @@ function upload_words_import_complete(
 function upload_words_handle_multiwords($lang, $last_update): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $mwords = get_first_value(
+    $mwords = Connection::fetchValue(
         "SELECT count(*) AS value from {$tbpref}words
         WHERE WoWordCount>1 AND WoCreated > " .
-        convert_string_to_sqlsyntax($last_update)
+        Escaping::toSqlSyntax($last_update)
     );
     if ($mwords > 40) {
-        runsql(
+        Connection::execute(
             "DELETE FROM {$tbpref}sentences WHERE SeLgID = $lang",
             "Sentences deleted"
         );
-        runsql(
+        Connection::execute(
             "DELETE FROM {$tbpref}textitems2 WHERE Ti2LgID = $lang",
             "Text items deleted"
         );
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         $sql = "SELECT TxID, TxText FROM {$tbpref}texts
         WHERE TxLgID = $lang ORDER BY TxID";
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $txtid = (int) $record["TxID"];
             $txttxt = $record["TxText"];
@@ -482,11 +483,11 @@ function upload_words_handle_multiwords($lang, $last_update): void
         mysqli_free_result($res);
     } elseif ($mwords != 0) {
         $sqlarr = array();
-        $res = do_mysqli_query(
+        $res = Connection::query(
             "SELECT WoID, WoTextLC, WoWordCount
             FROM {$tbpref}words
             WHERE WoWordCount>1 AND WoCreated > " .
-            convert_string_to_sqlsyntax($last_update)
+            Escaping::toSqlSyntax($last_update)
         );
         while ($record = mysqli_fetch_assoc($res)) {
             $len = $record['WoWordCount'];
@@ -501,7 +502,7 @@ function upload_words_handle_multiwords($lang, $last_update): void
                 Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount,
                 Ti2Text
             ) VALUES " . rtrim(implode(',', $sqlarr), ',');
-            do_mysqli_query($sqltext);
+            Connection::query($sqltext);
         }
     }
 }
@@ -522,7 +523,7 @@ function upload_words_handle_multiwords($lang, $last_update): void
 function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): string|int|null
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $last_update = (string) get_first_value(
+    $last_update = (string) Connection::fetchValue(
         "SELECT max(WoStatusChanged) AS value FROM {$tbpref}words"
     );
     $overwrite = (int) $_REQUEST["Over"];
@@ -569,7 +570,7 @@ function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): stri
         unlink($file_name);
     }
     Maintenance::initWordCount();
-    runsql(
+    Connection::execute(
         "UPDATE {$tbpref}words
         JOIN {$tbpref}textitems2
         ON WoWordCount=1 AND Ti2WoID=0 AND lower(Ti2Text)=WoTextLC AND Ti2LgID = WoLgID
@@ -583,9 +584,9 @@ function upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang): stri
 function display_imported_terms($last_update, $rtl): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $recno = (int)get_first_value(
+    $recno = (int)Connection::fetchValue(
         "SELECT count(*) AS value FROM {$tbpref}words
-        where WoStatusChanged > " . convert_string_to_sqlsyntax($last_update)
+        where WoStatusChanged > " . Escaping::toSqlSyntax($last_update)
     );
     ?>
 <script type="text/javascript">
@@ -857,17 +858,17 @@ function upload_words_import_tags($fields, $tabs, $file_upl): void
     }
     if (
         in_array(
-            get_first_value("SELECT @@GLOBAL.local_infile as value"),
+            Connection::fetchValue("SELECT @@GLOBAL.local_infile as value"),
             array(1, '1', 'ON')
         )
     ) {
-        $sql = "LOAD DATA LOCAL INFILE " . convert_string_to_sqlsyntax($file_name) .
+        $sql = "LOAD DATA LOCAL INFILE " . Escaping::toSqlSyntax($file_name) .
         " IGNORE INTO TABLE {$tbpref}tempwords
         FIELDS TERMINATED BY '$tabs' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'
         " . ($_REQUEST["IgnFirstLine"] == '1' ? "IGNORE 1 LINES" : "") . "
         $columns
         SET WoTextLC = REPLACE(@taglist, ' ', ',')";
-        runsql($sql, '');
+        Connection::execute($sql, '');
     } else {
         $handle = fopen($file_name, 'r');
         $data_text = fread($handle, filesize($file_name));
@@ -880,25 +881,25 @@ function upload_words_import_tags($fields, $tabs, $file_upl): void
             }
             $tags = explode($tabs, $line)[$fields["tl"] - 1];
             $tags = str_replace(' ', ',', $tags);
-            $texts[] = convert_string_to_sqlsyntax($tags);
+            $texts[] = Escaping::toSqlSyntax($tags);
         }
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}tempwords(WoTextLC)
             VALUES " . implode(',', $texts)
         );
     }
-    runsql(
+    Connection::execute(
         "CREATE TEMPORARY TABLE IF NOT EXISTS {$tbpref}numbers(
             n  tinyint(3) unsigned NOT NULL
         )",
         ''
     );
-    runsql(
+    Connection::execute(
         "INSERT IGNORE INTO {$tbpref}numbers(n) VALUES ('1'),('2'),('3'),
         ('4'),('5'),('6'),('7'),('8'),('9')",
         ''
     );
-    runsql(
+    Connection::execute(
         "INSERT IGNORE INTO {$tbpref}tags (TgText)
         SELECT NAME FROM (
             SELECT SUBSTRING_INDEX(
@@ -911,8 +912,8 @@ function upload_words_import_tags($fields, $tabs, $file_upl): void
             ORDER BY WoTextLC, n) A",
         ''
     );
-    runsql("DROP TABLE {$tbpref}numbers", '');
-    runsql("TRUNCATE {$tbpref}tempwords", '');
+    Connection::execute("DROP TABLE {$tbpref}numbers", '');
+    Connection::execute("TRUNCATE {$tbpref}tempwords", '');
     get_tags(1);
     if (!$file_upl) {
         unlink($file_name);
@@ -932,7 +933,7 @@ function upload_words_import(): void
     $tabs = $_REQUEST["Tab"];
     $lang = (int) $_REQUEST["LgID"];
     $sql = "SELECT * FROM {$tbpref}languages WHERE LgID=$lang";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $removeSpaces = $record["LgRemoveSpaces"];
 
@@ -989,7 +990,7 @@ function upload_words_import(): void
     }
     if ($fields["txt"] > 0) {
         $last_update = upload_words_import_terms($fields, $tabs, $file_upl, $col, $lang);
-        $rtl = get_first_value(
+        $rtl = Connection::fetchValue(
             "SELECT LgRightToLeft AS value FROM {$tbpref}languages WHERE LgID=$lang"
         );
         display_imported_terms($last_update, $rtl);

@@ -21,6 +21,7 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 /**
@@ -33,7 +34,7 @@ use Lwt\Database\Settings;
 function get_annotated_text($textid)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $ann = get_first_value(
+    $ann = Connection::fetchValue(
         "SELECT TxAnnotatedText AS value
         FROM " . $tbpref . "texts
         WHERE TxID = " . $textid
@@ -57,7 +58,7 @@ function get_display_impr_text_text_data($textid): array
     FROM {$tbpref}texts
     JOIN {$tbpref}languages ON LgID = TxLgID
     WHERE TxID = $textid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $textsize = (int) $record['LgTextSize'];
     $rtlScript = (bool) $record['LgRightToLeft'];
@@ -151,7 +152,7 @@ function get_word_annotations($vals)
     if ($c > 2) {
         if ($vals[2] !== '') {
             $wid = (int)$vals[2];
-            $rom = get_first_value(
+            $rom = Connection::fetchValue(
                 "SELECT WoRomanization AS value
                 FROM " . $tbpref . "words WHERE WoID = " . $wid
             );

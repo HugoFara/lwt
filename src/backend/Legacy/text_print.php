@@ -29,6 +29,7 @@ require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/dictionary_links.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 require_once __DIR__ . '/api_v1.php';
 
@@ -82,7 +83,7 @@ function print_mode_display(int $textid, int $langid, string $audio, string $ann
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT LgTextSize, LgRemoveSpaces, LgRightToLeft, LgGoogleTranslateURI
     from {$tbpref}languages where LgID = $langid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $textsize = $record['LgTextSize'];
     $rtlScript = $record['LgRightToLeft'];
@@ -167,7 +168,7 @@ function do_content()
     $editmode = ($editmode == '' ? 0 : (int)$editmode);
     $delmode = getreq('del');
     $delmode = ($delmode == '' ? 0 : (int)$delmode);
-    $ann = (string) get_first_value(
+    $ann = (string) Connection::fetchValue(
         "SELECT TxAnnotatedText AS value FROM {$tbpref}texts
         WHERE TxID = $textid"
     );
@@ -185,14 +186,14 @@ function do_content()
     if ($delmode) {
         // Delete
         if ($ann_exists) {
-            runsql(
+            Connection::execute(
                 "UPDATE {$tbpref}texts
                 SET TxAnnotatedText = NULL
                 WHERE TxID = $textid",
                 ""
             );
         }
-        $ann_exists = (int)get_first_value(
+        $ann_exists = (int)Connection::fetchValue(
             "SELECT LENGTH(TxAnnotatedText) AS value
             FROM {$tbpref}texts
             WHERE TxID = $textid"
@@ -205,7 +206,7 @@ function do_content()
 
     $sql = "SELECT TxLgID, TxTitle, TxAudioURI, TxSourceURI
     from {$tbpref}texts where TxID = $textid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     $title = (string) $record['TxTitle'];
     $sourceURI = (string) $record['TxSourceURI'];

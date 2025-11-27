@@ -20,6 +20,7 @@ require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 function output_text(
@@ -135,7 +136,7 @@ if ($annplcmnt == '') {
 }
 
 $sql = 'select TxLgID, TxTitle, TxSourceURI from ' . $tbpref . 'texts where TxID = ' . $textid;
-$res = do_mysqli_query($sql);
+$res = Connection::query($sql);
 $record = mysqli_fetch_assoc($res);
 $title = (string) $record['TxTitle'];
 $sourceURI = (string) $record['TxSourceURI'];
@@ -143,7 +144,7 @@ $langid = (int) $record['TxLgID'];
 mysqli_free_result($res);
 
 $sql = 'select LgTextSize, LgRemoveSpaces, LgRightToLeft from ' . $tbpref . 'languages where LgID = ' . $langid;
-$res = do_mysqli_query($sql);
+$res = Connection::query($sql);
 $record = mysqli_fetch_assoc($res);
 $textsize = $record['LgTextSize'];
 $rtlScript = $record['LgRightToLeft'];
@@ -209,7 +210,7 @@ will be <b>annotated</b> with
 (only the text below the line)
 <span class="nowrap"></span>
 <?php
-if (((int)get_first_value("select length(TxAnnotatedText) as value from {$tbpref}texts where TxID = $textid")) > 0) {
+if (((int)Connection::fetchValue("select length(TxAnnotatedText) as value from {$tbpref}texts where TxID = $textid")) > 0) {
     ?> Or
     <input type="button" value="Print/Edit/Delete"
     onclick="location.href='print_impr_text.php?text=<?php echo $textid; ?>';" /> your
@@ -250,7 +251,7 @@ $saverom = '';
 $savetags = '';
 $until = 0;
 
-$res = do_mysqli_query($sql);
+$res = Connection::query($sql);
 
 while ($record = mysqli_fetch_assoc($res)) {
     $actcode = (int)$record['Code'];

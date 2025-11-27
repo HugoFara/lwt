@@ -27,6 +27,7 @@ require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 require_once 'Core/Word/dictionary_links.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 /**
@@ -41,7 +42,7 @@ function get_test_table_sql()
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     if (isset($_REQUEST['selection']) && isset($_SESSION['testsql'])) {
         $testsql = $_SESSION['testsql'];
-        $cntlang = get_first_value('SELECT count(distinct WoLgID) AS value FROM ' . $testsql);
+        $cntlang = Connection::fetchValue('SELECT count(distinct WoLgID) AS value FROM ' . $testsql);
         if ($cntlang > 1) {
             echo '<p>Sorry - The selected terms are in ' . $cntlang .
             ' languages, but tests are only possible in one language at a time.</p>';
@@ -68,7 +69,7 @@ function do_test_table_language_settings(string $testsql)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
-    $lang = get_first_value('SELECT WoLgID AS value FROM ' . $testsql . ' LIMIT 1');
+    $lang = Connection::fetchValue('SELECT WoLgID AS value FROM ' . $testsql . ' LIMIT 1');
 
     if (!isset($lang)) {
         echo '<p class="center">&nbsp;<br />
@@ -79,7 +80,7 @@ function do_test_table_language_settings(string $testsql)
 
     $sql = 'SELECT LgTextSize, LgRegexpWordCharacters, LgRightToLeft
     FROM ' . $tbpref . 'languages WHERE LgID = ' . $lang;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $record = mysqli_fetch_assoc($res);
     mysqli_free_result($res);
     return $record;
@@ -264,7 +265,7 @@ function do_test_table_table_content(array $lang_record, string $testsql): void
     if (\Lwt\Core\Globals::isDebug()) {
         echo $sql;
     }
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         do_test_table_row($record, $regexword, (int)$textsize, $span1, $span2);
     }

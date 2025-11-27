@@ -39,6 +39,8 @@ require_once 'Core/Word/word_status.php';
 require_once 'Core/Text/simterms.php';
 require_once 'Core/Bootstrap/start_session.php';
 
+use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
@@ -75,7 +77,7 @@ if ($currentstatus != '') {
     $wh_stat = ' and ' . makeStatusCondition('WoStatus', (int)$currentstatus);
 }
 $wh_query = $currentregexmode . 'like ' .
-convert_string_to_sqlsyntax(
+Escaping::toSqlSyntax(
     ($currentregexmode == '') ?
     (str_replace("*", "%", mb_strtolower($currentquery, 'UTF-8'))) :
     $currentquery
@@ -111,7 +113,7 @@ if ($currentquery !== '') {
         if (
             @mysqli_query(
                 $GLOBALS["DBCONNECTION"],
-                'select "test" rlike ' . convert_string_to_sqlsyntax($currentquery)
+                'select "test" rlike ' . Escaping::toSqlSyntax($currentquery)
             ) === false
         ) {
             $currentquery = '';
@@ -195,21 +197,21 @@ if (isset($_REQUEST['markaction'])) {
                 }
                 $list = "(" . implode(",", $id_list) . ")";
                 if ($markaction == 'del') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'delete from ' . $tbpref . 'words where WoID in ' . $list,
                         "Deleted"
                     );
-                    do_mysqli_query(
+                    Connection::query(
                         'update ' . $tbpref . 'textitems2
                         set Ti2WoID = 0
                         where Ti2WordCount = 1 and Ti2WoID in ' . $list
                     );
-                    do_mysqli_query(
+                    Connection::query(
                         'delete from ' . $tbpref . 'textitems2
                         where Ti2WoID in ' . $list
                     );
                     Maintenance::adjustAutoIncrement('words', 'WoID');
-                    runsql(
+                    Connection::execute(
                         "DELETE " . $tbpref . "wordtags
                         FROM (
                             " . $tbpref . "wordtags
@@ -225,7 +227,7 @@ if (isset($_REQUEST['markaction'])) {
                     header("Location: /words/edit");
                     exit();
                 } elseif ($markaction == 'spl1') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'update ' . $tbpref . 'words
                         set WoStatus=WoStatus+1, WoStatusChanged = NOW(),' .
                         make_score_random_insert_update('u') . '
@@ -233,7 +235,7 @@ if (isset($_REQUEST['markaction'])) {
                         "Updated Status (+1)"
                     );
                 } elseif ($markaction == 'smi1') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'update ' . $tbpref . 'words
                         set WoStatus=WoStatus-1, WoStatusChanged = NOW(),' .
                         make_score_random_insert_update('u') . '
@@ -241,7 +243,7 @@ if (isset($_REQUEST['markaction'])) {
                         "Updated Status (-1)"
                     );
                 } elseif ($markaction == 's5') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'update ' . $tbpref . 'words
                         set WoStatus=5, WoStatusChanged = NOW(),' .
                         make_score_random_insert_update('u') . '
@@ -249,7 +251,7 @@ if (isset($_REQUEST['markaction'])) {
                         "Updated Status (=5)"
                     );
                 } elseif ($markaction == 's1') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'update ' . $tbpref . 'words
                         set WoStatus=1, WoStatusChanged = NOW(),' .
                         make_score_random_insert_update('u') . '
@@ -257,7 +259,7 @@ if (isset($_REQUEST['markaction'])) {
                         "Updated Status (=1)"
                     );
                 } elseif ($markaction == 's99') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'update ' . $tbpref . 'words
                         set WoStatus=99, WoStatusChanged = NOW(),' .
                         make_score_random_insert_update('u') . '
@@ -265,7 +267,7 @@ if (isset($_REQUEST['markaction'])) {
                         "Updated Status (=99)"
                     );
                 } elseif ($markaction == 's98') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'update ' . $tbpref . 'words
                         set WoStatus=98, WoStatusChanged = NOW(),' .
                         make_score_random_insert_update('u') . '
@@ -273,7 +275,7 @@ if (isset($_REQUEST['markaction'])) {
                         "Updated Status (=98)"
                     );
                 } elseif ($markaction == 'today') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'update ' . $tbpref . 'words
                         set WoStatusChanged = NOW(),' .
                         make_score_random_insert_update('u') . '
@@ -281,21 +283,21 @@ if (isset($_REQUEST['markaction'])) {
                         "Updated Status Date (= Now)"
                     );
                 } elseif ($markaction == 'delsent') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'update ' . $tbpref . 'words
                         set WoSentence = NULL
                         where WoID in ' . $list,
                         "Term Sentence(s) deleted"
                     );
                 } elseif ($markaction == 'lower') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'update ' . $tbpref . 'words
                         set WoText = WoTextLC
                         where WoID in ' . $list,
                         "Term(s) set to lowercase"
                     );
                 } elseif ($markaction == 'cap') {
-                    $message = runsql(
+                    $message = Connection::execute(
                         'update ' . $tbpref . 'words
                         set WoText = CONCAT(
                             UPPER(LEFT(WoTextLC,1)),SUBSTRING(WoTextLC,2)
@@ -412,21 +414,21 @@ if (isset($_REQUEST['allaction'])) {
             ' group by WoID ' . $wh_tag;
         }
         $cnt = 0;
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $id = $record['WoID'];
             if ($allaction == 'delall') {
-                $message = runsql(
+                $message = Connection::execute(
                     'delete from ' . $tbpref . 'words
                     where WoID = ' . $id,
                     ""
                 );
-                do_mysqli_query(
+                Connection::query(
                     'update ' . $tbpref . 'textitems2
                     set Ti2WoID = 0
                     where Ti2WordCount = 1 and Ti2WoID = ' . $id
                 );
-                do_mysqli_query(
+                Connection::query(
                     'delete from ' . $tbpref . 'textitems2
                     where Ti2WoID  = ' . $id
                 );
@@ -437,7 +439,7 @@ if (isset($_REQUEST['allaction'])) {
                 removetaglist($actiondata, '(' . $id . ')');
                 $message = 1;
             } elseif ($allaction == 'spl1all') {
-                $message = runsql(
+                $message = Connection::execute(
                     'update ' . $tbpref . 'words
                     set WoStatus=WoStatus+1, WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . '
@@ -445,7 +447,7 @@ if (isset($_REQUEST['allaction'])) {
                     ""
                 );
             } elseif ($allaction == 'smi1all') {
-                $message = runsql(
+                $message = Connection::execute(
                     'update ' . $tbpref . 'words
                     set WoStatus=WoStatus-1, WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . '
@@ -453,55 +455,55 @@ if (isset($_REQUEST['allaction'])) {
                     ""
                 );
             } elseif ($allaction == 's5all') {
-                $message = runsql(
+                $message = Connection::execute(
                     'update ' . $tbpref . 'words
                     set WoStatus=5, WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . ' where WoID = ' . $id,
                     ""
                 );
             } elseif ($allaction == 's1all') {
-                $message = runsql(
+                $message = Connection::execute(
                     'update ' . $tbpref . 'words
                     set WoStatus=1, WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . ' where WoID = ' . $id,
                     ""
                 );
             } elseif ($allaction == 's99all') {
-                $message = runsql(
+                $message = Connection::execute(
                     'update ' . $tbpref . 'words
                     set WoStatus=99, WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . ' where WoID = ' . $id,
                     ""
                 );
             } elseif ($allaction == 's98all') {
-                $message = runsql(
+                $message = Connection::execute(
                     'update ' . $tbpref . 'words
                     set WoStatus=98, WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . ' where WoID = ' . $id,
                     ""
                 );
             } elseif ($allaction == 'todayall') {
-                $message = runsql(
+                $message = Connection::execute(
                     'update ' . $tbpref . 'words
                     set WoStatusChanged = NOW(),' .
                     make_score_random_insert_update('u') . ' where WoID = ' . $id,
                     ""
                 );
             } elseif ($allaction == 'delsentall') {
-                $message = runsql(
+                $message = Connection::execute(
                     'update ' . $tbpref . 'words
                     set WoSentence = NULL where WoID = ' . $id,
                     ""
                 );
             } elseif ($allaction == 'lowerall') {
-                $message = runsql(
+                $message = Connection::execute(
                     'update ' . $tbpref . 'words
                 set WoText = WoTextLC where WoID = ' . $id,
                     ""
                 );
             } else {
                 // $allaction == 'capall' by default
-                $message = runsql(
+                $message = Connection::execute(
                     'update ' . $tbpref . 'words
                     set WoText = CONCAT(UPPER(LEFT(WoTextLC,1)),SUBSTRING(WoTextLC,2))
                     where WoID = ' . $id,
@@ -520,7 +522,7 @@ if (isset($_REQUEST['allaction'])) {
         } elseif ($allaction == 'delall') {
             $message = "Deleted: $cnt Terms";
             Maintenance::adjustAutoIncrement('words', 'WoID');
-            runsql(
+            Connection::execute(
                 "DELETE " . $tbpref . "wordtags FROM (
                     " . $tbpref . "wordtags
                     LEFT JOIN " . $tbpref . "words
@@ -603,7 +605,7 @@ if (isset($_REQUEST['allaction'])) {
             group by WoID ' . $wh_tag;
         }
         $id_list = array();
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $id_list[] = $record['WoID'];
         }
@@ -614,11 +616,11 @@ if (isset($_REQUEST['allaction'])) {
     }
 } elseif (isset($_REQUEST['del'])) {
     // DEL
-    $message = runsql('delete from ' . $tbpref . 'words where WoID = ' . $_REQUEST['del'], "Deleted");
+    $message = Connection::execute('delete from ' . $tbpref . 'words where WoID = ' . $_REQUEST['del'], "Deleted");
     Maintenance::adjustAutoIncrement('words', 'WoID');
-    do_mysqli_query('update ' . $tbpref . 'textitems2 set Ti2WoID = 0 where Ti2WordCount = 1 and Ti2WoID = ' . $_REQUEST['del']);
-    do_mysqli_query('delete from ' . $tbpref . 'textitems2 where Ti2WoID  = ' . $_REQUEST['del']);
-    runsql("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "words on WtWoID = WoID) WHERE WoID IS NULL", '');
+    Connection::query('update ' . $tbpref . 'textitems2 set Ti2WoID = 0 where Ti2WordCount = 1 and Ti2WoID = ' . $_REQUEST['del']);
+    Connection::query('delete from ' . $tbpref . 'textitems2 where Ti2WoID  = ' . $_REQUEST['del']);
+    Connection::execute("DELETE " . $tbpref . "wordtags FROM (" . $tbpref . "wordtags LEFT JOIN " . $tbpref . "words on WtWoID = WoID) WHERE WoID IS NULL", '');
 } elseif (isset($_REQUEST['op'])) {
     // INS/UPD
     $translation_raw = repl_tab_nl(getreq("WoTranslation"));
@@ -630,17 +632,17 @@ if (isset($_REQUEST['allaction'])) {
 
     if ($_REQUEST['op'] == 'Save') {
         // INSERT
-        $message = runsql(
+        $message = Connection::execute(
             'insert into ' . $tbpref . 'words (WoLgID, WoTextLC, WoText, ' .
             'WoStatus, WoTranslation, WoSentence, WoRomanization, WoStatusChanged,' .
             make_score_random_insert_update('iv') . ') values( ' .
             $_REQUEST["WoLgID"] . ', ' .
-            convert_string_to_sqlsyntax(mb_strtolower($_REQUEST["WoText"], 'UTF-8')) . ', ' .
-            convert_string_to_sqlsyntax($_REQUEST["WoText"]) . ', ' .
+            Escaping::toSqlSyntax(mb_strtolower($_REQUEST["WoText"], 'UTF-8')) . ', ' .
+            Escaping::toSqlSyntax($_REQUEST["WoText"]) . ', ' .
             $_REQUEST["WoStatus"] . ', ' .
-            convert_string_to_sqlsyntax($translation) . ', ' .
-            convert_string_to_sqlsyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', ' .
-            convert_string_to_sqlsyntax($_REQUEST["WoRomanization"]) . ', NOW(), ' .
+            Escaping::toSqlSyntax($translation) . ', ' .
+            Escaping::toSqlSyntax(repl_tab_nl($_REQUEST["WoSentence"])) . ', ' .
+            Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . ', NOW(), ' .
             make_score_random_insert_update('id') . ')',
             "Saved",
             $sqlerrdie = false
@@ -648,7 +650,7 @@ if (isset($_REQUEST['allaction'])) {
 
         $wid = get_last_key();
         Maintenance::initWordCount();
-        $len = get_first_value(
+        $len = Connection::fetchValue(
             'select WoWordCount as value
             from ' . $tbpref . 'words where WoID = ' . $wid
         );
@@ -656,11 +658,11 @@ if (isset($_REQUEST['allaction'])) {
         if ($len > 1) {
             insertExpressions($textlc, $_REQUEST["WoLgID"], $wid, $len, 1);
         } else {
-            do_mysqli_query(
+            Connection::query(
                 'UPDATE ' . $tbpref . 'textitems2
                 SET Ti2WoID = ' . $wid . '
                 WHERE Ti2LgID = ' . $_REQUEST["WoLgID"] . ' AND LOWER(Ti2Text) = ' .
-                convert_string_to_sqlsyntax_notrim_nonull($textlc)
+                Escaping::toSqlSyntaxNoTrimNoNull($textlc)
             );
         }
     } else {
@@ -672,15 +674,15 @@ if (isset($_REQUEST['allaction'])) {
             $xx = ', WoStatus = ' .    $newstatus . ', WoStatusChanged = NOW()';
         }
         $wid = (int)$_REQUEST["WoID"];
-        $message = runsql(
+        $message = Connection::execute(
             'update ' . $tbpref . 'words set WoText = ' .
-            convert_string_to_sqlsyntax($_REQUEST["WoText"]) . ', WoTextLC = ' .
-            convert_string_to_sqlsyntax(mb_strtolower($_REQUEST["WoText"], 'UTF-8')) .
+            Escaping::toSqlSyntax($_REQUEST["WoText"]) . ', WoTextLC = ' .
+            Escaping::toSqlSyntax(mb_strtolower($_REQUEST["WoText"], 'UTF-8')) .
             ', WoTranslation = ' .
-            convert_string_to_sqlsyntax($translation) . ', WoSentence = ' .
-            convert_string_to_sqlsyntax(repl_tab_nl($_REQUEST["WoSentence"])) .
+            Escaping::toSqlSyntax($translation) . ', WoSentence = ' .
+            Escaping::toSqlSyntax(repl_tab_nl($_REQUEST["WoSentence"])) .
             ', WoRomanization = ' .
-            convert_string_to_sqlsyntax($_REQUEST["WoRomanization"]) . $xx . ',' .
+            Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . $xx . ',' .
             make_score_random_insert_update('u') .
             ' where WoID = ' . $_REQUEST["WoID"],
             "Updated",
@@ -696,7 +698,7 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
     // NEW
     $lgid = (int) $_REQUEST['lang'];
     $scrdir = getScriptDirectionTag($lgid);
-    $showRoman = (bool) get_first_value(
+    $showRoman = (bool) Connection::fetchValue(
         "SELECT LgShowRomanization AS value
         FROM {$tbpref}languages
         WHERE LgID = $lgid"
@@ -767,7 +769,7 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
     // CHG
     $sql = 'select * from ' . $tbpref . 'words, ' . $tbpref . 'languages
     where LgID = WoLgID and WoID = ' . $_REQUEST['chg'];
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     if ($record = mysqli_fetch_assoc($res)) {
         $wordlc = $record['WoTextLC'];
         $transl = repl_tab_nl($record['WoTranslation']);
@@ -860,7 +862,7 @@ if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
     } else {
         $sql = 'select count(*) as value from (select WoID from (' . $tbpref . 'words left JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID), ' . $tbpref . 'textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' . $currenttext . ')' . $wh_lang . $wh_stat . $wh_query . ' group by WoID ' . $wh_tag . ') as dummy';
     }
-    $recno = (int) get_first_value($sql);
+    $recno = (int) Connection::fetchValue($sql);
     if ($debug) {
         echo $sql . ' ===&gt; ' . $recno;
     }
@@ -1122,7 +1124,7 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
             echo $sql;
         }
         flush();
-        $res = do_mysqli_query($sql);
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $days = $record['Days'];
             if ($record['WoStatus'] > 5) {

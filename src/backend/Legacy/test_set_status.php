@@ -22,6 +22,7 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Word/word_status.php';
 require_once 'Core/Http/param_helpers.php';
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 require_once 'Core/Bootstrap/start_session.php';
 
@@ -181,23 +182,23 @@ function do_set_test_status_javascript(
 function do_set_test_status_content(int $wid, int $status, int $oldstatus, int $stchange, bool $ajax = false)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $word = get_first_value(
+    $word = Connection::fetchValue(
         "SELECT WoText AS value FROM {$tbpref}words
         WHERE WoID = $wid"
     );
 
-    $oldscore = (int)get_first_value(
+    $oldscore = (int)Connection::fetchValue(
         "SELECT greatest(0,round(WoTodayScore,0)) AS value
         FROM {$tbpref}words WHERE WoID = $wid"
     );
-    runsql(
+    Connection::execute(
         "UPDATE {$tbpref}words SET WoStatus = $status, WoStatusChanged = NOW()," .
         make_score_random_insert_update('u') . "
         WHERE WoID = $wid",
         'Status changed'
     );
 
-    $newscore = (int)get_first_value(
+    $newscore = (int)Connection::fetchValue(
         "SELECT greatest(0,round(WoTodayScore,0)) AS value
         FROM {$tbpref}words WHERE WoID = $wid"
     );
@@ -224,7 +225,7 @@ function start_set_text_status()
     }
 
     $wid = (int)getreq('wid');
-    $oldstatus = (int)get_first_value(
+    $oldstatus = (int)Connection::fetchValue(
         "SELECT WoStatus AS value FROM {$tbpref}words
         WHERE WoID = $wid"
     );

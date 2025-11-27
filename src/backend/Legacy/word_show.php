@@ -19,6 +19,8 @@ require_once 'Core/Word/dictionary_links.php';
 require_once 'Core/Language/language_utilities.php';
 require_once 'Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
+
 pagestart_nobody('Term');
 
 $wid = getreq('wid');
@@ -30,7 +32,7 @@ if ($wid == '') {
 
 $sql = 'select WoLgID, WoText, WoTranslation, WoSentence, WoRomanization, WoStatus
 from ' . $tbpref . 'words where WoID = ' . $wid;
-$res = do_mysqli_query($sql);
+$res = Connection::query($sql);
 if ($record = mysqli_fetch_assoc($res)) {
     $transl = repl_tab_nl($record['WoTranslation']);
     if ($transl == '*') {
