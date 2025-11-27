@@ -20,7 +20,7 @@
  * @since    1.0.3-fork
  */
 
-require_once 'Core/database_connect.php';
+require_once 'Core/Bootstrap/db_bootstrap.php';
 require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Tag/tags.php';
 require_once 'Core/Text/text_helpers.php';

@@ -13,7 +13,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
-require_once __DIR__ . '/../../../../src/backend/Core/database_connect.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/backend/Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Feed/feeds.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Language/language_utilities.php';

@@ -2,7 +2,7 @@
 
 namespace Lwt\Interface\Feed_Wizard;
 
-require_once 'Core/database_connect.php';
+require_once 'Core/Bootstrap/db_bootstrap.php';
 
 use Lwt\Database\Connection;
 require_once 'Core/UI/ui_helpers.php';

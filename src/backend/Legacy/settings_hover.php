@@ -11,7 +11,7 @@ use Lwt\Classes\GoogleTranslate;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 
-require_once 'Core/database_connect.php';
+require_once 'Core/Bootstrap/db_bootstrap.php';
 require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Entity/GoogleTranslate.php' ;

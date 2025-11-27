@@ -17,7 +17,7 @@
  * @since   2.6.0 Mobile detect is back and does no longer use external libraries.
  */
 
-require_once __DIR__ . '/../database_connect.php';
+require_once __DIR__ . '/../Bootstrap/db_bootstrap.php';
 
 use Lwt\Database\Settings;
 

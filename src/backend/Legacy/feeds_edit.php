@@ -2,7 +2,7 @@
 
 namespace Lwt\Interface\Edit_Feeds;
 
-require_once 'Core/database_connect.php';
+require_once 'Core/Bootstrap/db_bootstrap.php';
 require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Feed/feeds.php';
 require_once 'Core/Http/param_helpers.php';

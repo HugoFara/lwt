@@ -122,9 +122,9 @@ composer clean-doc               # Clear all generated documentation
     - `src/backend/Legacy/` - Legacy PHP files (being migrated)
     - `src/backend/Router/` - Routing system
     - `src/backend/Core/` - Core PHP modules (database, utilities)
-      - `database_connect.php` - Database connection and query wrappers
       - `session_utility.php` - Session management and utility functions
-      - `Bootstrap/` - Application bootstrap (start_session.php, EnvLoader, etc.)
+      - `Bootstrap/` - Application bootstrap (db_bootstrap.php, start_session.php, EnvLoader, etc.)
+      - `Database/` - Database classes (Connection, DB, Escaping, Settings, etc.)
       - `ajax_*.php` - AJAX endpoints (15+ files)
       - `classes/` - PHP classes (GoogleTranslate, Language, Term, Text)
   - `src/tools/` - Build tools (minifier, markdown converter)
@@ -212,7 +212,7 @@ Key endpoints in `api.php`:
 PHP code is spread across root files (user-facing pages) and `src/backend/Core/` (shared logic). When editing:
 
 1. Use functions from `session_utility.php` for database queries and utilities
-2. Follow the existing pattern: root files include `Core/session_utility.php` which includes `database_connect.php`
+2. Follow the existing pattern: root files include `Core/session_utility.php` which includes `Bootstrap/db_bootstrap.php`
 3. Use `do_mysqli_query()` wrapper instead of direct `mysqli_query()` for better error handling
 4. Database queries use `$tbpref` global variable for table prefix (usually empty, but supports multi-tenant)
 

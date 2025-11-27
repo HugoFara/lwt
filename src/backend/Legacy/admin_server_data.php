@@ -18,7 +18,7 @@
 
 namespace Lwt\Interface\Server\Data;
 
-require_once 'Core/database_connect.php';
+require_once 'Core/Bootstrap/db_bootstrap.php';
 require_once 'Core/UI/ui_helpers.php';
 
 use Lwt\Database\Connection;

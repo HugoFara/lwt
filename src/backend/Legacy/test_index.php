@@ -20,7 +20,7 @@
  * @since    1.0.3
  */
 
-require_once 'Core/database_connect.php';
+require_once 'Core/Bootstrap/db_bootstrap.php';
 require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Test/test_helpers.php';
 require_once 'Core/Http/param_helpers.php';

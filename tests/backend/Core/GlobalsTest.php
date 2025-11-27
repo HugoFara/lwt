@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Core;
 
 require_once __DIR__ . '/../../../src/backend/Core/Globals.php';
-require_once __DIR__ . '/../../../src/backend/Core/database_connect.php';
+require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 
 use Lwt\Core\Globals;
 use Lwt\Database\QueryBuilder;

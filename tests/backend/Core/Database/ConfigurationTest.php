@@ -16,7 +16,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
-require_once __DIR__ . '/../../../../src/backend/Core/database_connect.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 
 /**
  * Unit tests for the Database\Configuration class.
