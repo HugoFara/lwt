@@ -597,7 +597,7 @@ class TextParsingTest extends TestCase
             'Test Arabic',
             'https://example.com/###',
             'https://translate.google.com/?text=###',
-            100, '', '。!?', '', '\\x{0600}-\\x{06FF}', 0, 0, 1
+            100, '', '。!?', '', '؀-ۿ', 0, 0, 1
         )";
         do_mysqli_query($sql);
         $rtlLangId = mysqli_insert_id(Globals::getDbConnection());

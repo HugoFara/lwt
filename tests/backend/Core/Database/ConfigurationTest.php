@@ -30,6 +30,8 @@ class ConfigurationTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
+        // Ensure EnvLoader has loaded the .env file (may have been reset by other tests)
+        EnvLoader::load(__DIR__ . '/../../../../.env');
         self::$dbConfig = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . self::$dbConfig['dbname'];
 

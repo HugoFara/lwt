@@ -49,6 +49,8 @@ class IntegrationTest extends TestCase
             );
             Globals::setDbConnection($connection);
         }
+        // Set the database name in Globals for migrations
+        Globals::setDatabaseName($testDbname);
 
         // Ensure we have a test database set up
         $result = do_mysqli_query("SHOW TABLES LIKE 'texts'");

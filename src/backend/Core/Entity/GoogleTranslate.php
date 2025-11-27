@@ -86,7 +86,9 @@ namespace Lwt\Classes;
         $t = $c = isset($tok) ? $tok[0] : 408254;//todo floor(time()/3600);
         $x = hexdec('80000000');
         $z = 0xffffffff;
-        $y = PHP_INT_SIZE == 8 ? 0xffffffff00000000 : 0x00000000;
+        // Use signed int representation to avoid float conversion on 64-bit systems
+        // 0xffffffff00000000 as signed 64-bit int is -4294967296
+        $y = PHP_INT_SIZE == 8 ? -4294967296 : 0x00000000;
         $d = array();
         $strlen = mb_strlen($str, "UTF-8");
         while ($strlen) {
@@ -102,7 +104,7 @@ namespace Lwt\Classes;
             $c += $b;
             $b = $c << 10;
             if ($b & $x) {
-                $b = ($b | $y);
+                $b = (int)($b | $y);
             } else {
                 $b = ($b & $z);
             }
@@ -110,14 +112,14 @@ namespace Lwt\Classes;
             $b = (($c >> 6) & (0x03ffffff));
             $c ^= $b;
             if ($c & $x) {
-                $c = ($c | $y);
+                $c = (int)($c | $y);
             } else {
                 $c = ($c & $z);
             }
         }
         $b = $c << 3;
         if ($b & $x) {
-            $b = ($b | $y);
+            $b = (int)($b | $y);
         } else {
             $b = ($b & $z);
         }
@@ -126,7 +128,7 @@ namespace Lwt\Classes;
         $c ^= $b;
         $b = $c << 15;
         if ($b & $x) {
-            $b = ($b | $y);
+            $b = (int)($b | $y);
         } else {
             $b = ($b & $z);
         }

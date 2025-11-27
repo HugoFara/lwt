@@ -528,7 +528,7 @@ class MaintenanceTest extends TestCase
             'Test Chinese',
             'https://www.mdbg.net/chinese/dictionary?wdqb=###',
             'https://translate.google.com/?text=###',
-            100, '', '。！？', '', '\\x{4E00}-\\x{9FFF}', 1, 1, 0
+            100, '', '。！？', '', '一-龥', 1, 1, 0
         )";
         do_mysqli_query($sql);
         $chLangId = mysqli_insert_id(Globals::getDbConnection());
