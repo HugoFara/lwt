@@ -424,13 +424,241 @@ class WordController extends BaseController
     /**
      * Edit multi-word expression (replaces word_edit_multi.php)
      *
+     * Call: ?op=Save ... do insert new
+     *       ?op=Change ... do update
+     *       ?tid=[textid]&ord=[textpos]&wid=[wordid] ... edit existing
+     *       ?tid=[textid]&ord=[textpos]&txt=[word] ... new or edit
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function editMulti(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_edit_multi.php';
+        if (isset($_REQUEST['op'])) {
+            // Handle save/update operation
+            $this->handleMultiWordOperation();
+        } else {
+            // Display form
+            $this->displayMultiWordForm();
+        }
+
+        \pageend();
+    }
+
+    /**
+     * Handle multi-word save/update operation.
+     *
+     * @return void
+     */
+    private function handleMultiWordOperation(): void
+    {
+        $textlc = trim(\getreq("WoTextLC"));
+        $text = trim(\getreq("WoText"));
+
+        // Validate lowercase matches
+        if (mb_strtolower($text, 'UTF-8') != $textlc) {
+            $titletext = "New/Edit Term: " . \tohtml($textlc);
+            \pagestart_nobody($titletext);
+            echo '<h1>' . $titletext . '</h1>';
+            $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
+                '", please go back and correct this!';
+            echo \error_message_with_hide($message, false);
+            return;
+        }
+
+        $translationRaw = \repl_tab_nl(\getreq("WoTranslation"));
+        $translation = ($translationRaw == '') ? '*' : $translationRaw;
+
+        $data = [
+            'text' => \Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoText"]),
+            'textlc' => \Lwt\Database\Escaping::prepareTextdata($textlc),
+            'translation' => $translation,
+            'roman' => $_REQUEST["WoRomanization"] ?? '',
+            'sentence' => $_REQUEST["WoSentence"] ?? '',
+        ];
+
+        if ($_REQUEST['op'] == 'Save') {
+            // Insert new multi-word
+            $data['status'] = (int) $_REQUEST["WoStatus"];
+            $data['lgid'] = (int) $_REQUEST["WoLgID"];
+            $data['wordcount'] = (int) ($_REQUEST["len"] ?? 0);
+
+            $titletext = "New Term: " . \tohtml($data['textlc']);
+            \pagestart_nobody($titletext);
+            echo '<h1>' . $titletext . '</h1>';
+
+            $result = $this->wordService->createMultiWord($data);
+            $wid = $result['id'];
+        } else {
+            // Update existing multi-word
+            $wid = (int) $_REQUEST["WoID"];
+            $oldStatus = (int) $_REQUEST["WoOldStatus"];
+            $newStatus = (int) $_REQUEST["WoStatus"];
+
+            $titletext = "Edit Term: " . \tohtml($data['textlc']);
+            \pagestart_nobody($titletext);
+            echo '<h1>' . $titletext . '</h1>';
+
+            $result = $this->wordService->updateMultiWord($wid, $data, $oldStatus, $newStatus);
+
+            // Prepare data for view
+            $termJson = $this->wordService->exportTermAsJson(
+                $wid,
+                $data['text'],
+                $data['roman'],
+                $translation . \getWordTagList($wid, ' ', 1, 0),
+                $newStatus
+            );
+            $oldStatusValue = $oldStatus;
+
+            include __DIR__ . '/../Views/Word/edit_multi_update_result.php';
+        }
+
+        // Output cleanup script
+        echo '<script type="text/javascript">cleanupRightFrames();</script>';
+    }
+
+    /**
+     * Display multi-word edit form (new or existing).
+     *
+     * @return void
+     */
+    private function displayMultiWordForm(): void
+    {
+        $tid = (int) \getreq('tid');
+        $ord = (int) \getreq('ord');
+        $strWid = \getreq('wid');
+
+        // Determine if we're editing an existing word or creating new
+        if ($strWid == "" || !is_numeric($strWid)) {
+            // No ID provided: check if text exists in database
+            $lgid = $this->wordService->getLanguageIdFromText($tid);
+            $txtParam = \getreq('txt');
+            $textlc = mb_strtolower(
+                \Lwt\Database\Escaping::prepareTextdata($txtParam),
+                'UTF-8'
+            );
+
+            $strWid = $this->wordService->findMultiWordByText($textlc, (int) $lgid);
+        }
+
+        if ($strWid === null) {
+            // New multi-word
+            $txtParam = \getreq('txt');
+            $len = (int) \getreq('len');
+            \pagestart_nobody("New Term: " . $txtParam);
+            $this->displayNewMultiWordForm($txtParam, $tid, $ord, $len);
+        } else {
+            // Edit existing multi-word
+            $wid = (int) $strWid;
+            $wordData = $this->wordService->getMultiWordData($wid);
+            if ($wordData === null) {
+                \my_die("Cannot access Term and Language in edit_mword.php");
+            }
+            \pagestart_nobody("Edit Term: " . $wordData['text']);
+            $this->displayEditMultiWordForm($wid, $wordData, $tid, $ord);
+        }
+    }
+
+    /**
+     * Display form for new multi-word.
+     *
+     * @param string $text Original text
+     * @param int    $tid  Text ID
+     * @param int    $ord  Text order
+     * @param int    $len  Number of words
+     *
+     * @return void
+     */
+    private function displayNewMultiWordForm(string $text, int $tid, int $ord, int $len): void
+    {
+        $lgid = $this->wordService->getLanguageIdFromText($tid);
+        $termText = \Lwt\Database\Escaping::prepareTextdata($text);
+        $textlc = mb_strtolower($termText, 'UTF-8');
+
+        // Check if word already exists
+        $existingWid = $this->wordService->findMultiWordByText($textlc, (int) $lgid);
+        if ($existingWid !== null) {
+            // Get text from existing word
+            $wordData = $this->wordService->getMultiWordData($existingWid);
+            if ($wordData !== null) {
+                $termText = $wordData['text'];
+            }
+        }
+
+        $scrdir = \getScriptDirectionTag((int) $lgid);
+        $seid = $this->wordService->getSentenceIdAtPosition($tid, $ord);
+        $sent = \getSentence(
+            $seid,
+            $textlc,
+            (int) \Lwt\Database\Settings::getWithDefault('set-term-sentence-count')
+        );
+        $showRoman = $this->wordService->shouldShowRomanization($tid);
+
+        // Variables for view
+        $term = (object) [
+            'lgid' => $lgid,
+            'text' => $termText,
+            'textlc' => $textlc,
+            'id' => $existingWid
+        ];
+        $sentence = \repl_tab_nl($sent[1] ?? '');
+
+        include __DIR__ . '/../Views/Word/form_edit_multi_new.php';
+    }
+
+    /**
+     * Display form for editing existing multi-word.
+     *
+     * @param int   $wid      Word ID
+     * @param array $wordData Word data from service
+     * @param int   $tid      Text ID
+     * @param int   $ord      Text order
+     *
+     * @return void
+     */
+    private function displayEditMultiWordForm(int $wid, array $wordData, int $tid, int $ord): void
+    {
+        $lgid = $wordData['lgid'];
+        $termText = $wordData['text'];
+        $textlc = mb_strtolower($termText, 'UTF-8');
+
+        $scrdir = \getScriptDirectionTag($lgid);
+        $showRoman = $this->wordService->shouldShowRomanization($tid);
+
+        $status = $wordData['status'];
+        if ($status >= 98) {
+            $status = 1;
+        }
+
+        $sentence = $wordData['sentence'];
+        if ($sentence == '') {
+            $seid = $this->wordService->getSentenceIdAtPosition($tid, $ord);
+            $sent = \getSentence(
+                $seid,
+                $textlc,
+                (int) \Lwt\Database\Settings::getWithDefault('set-term-sentence-count')
+            );
+            $sentence = \repl_tab_nl($sent[1] ?? '');
+        }
+
+        $transl = $wordData['translation'];
+        if ($transl == '*') {
+            $transl = '';
+        }
+
+        // Variables for view
+        $term = (object) [
+            'id' => $wid,
+            'lgid' => $lgid,
+            'text' => $termText,
+            'textlc' => $textlc
+        ];
+        $romanization = $wordData['romanization'];
+        $originalStatus = $wordData['status'];
+
+        include __DIR__ . '/../Views/Word/form_edit_multi_existing.php';
     }
 
     /**

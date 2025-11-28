@@ -1312,4 +1312,226 @@ class WordService
             LIMIT $offset, $limit"
         );
     }
+
+    // ===== Multi-word expression methods =====
+
+    /**
+     * Create a new multi-word expression.
+     *
+     * @param array $data Multi-word data with keys:
+     *                    - lgid: Language ID
+     *                    - text: Term text
+     *                    - textlc: Lowercase term text
+     *                    - status: Learning status (1-5)
+     *                    - translation: Translation text
+     *                    - sentence: Example sentence
+     *                    - roman: Romanization/phonetic
+     *                    - wordcount: Number of words in expression
+     *
+     * @return array{id: int, message: string}
+     */
+    public function createMultiWord(array $data): array
+    {
+        $message = Connection::execute(
+            "INSERT INTO {$this->tbpref}words (
+                WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
+                WoRomanization, WoWordCount, WoStatusChanged," .
+                \make_score_random_insert_update('iv') . '
+            ) VALUES( ' .
+                (int) $data['lgid'] . ', ' .
+                Escaping::toSqlSyntax($data['textlc']) . ', ' .
+                Escaping::toSqlSyntax($data['text']) . ', ' .
+                (int) $data['status'] . ', ' .
+                Escaping::toSqlSyntax($data['translation']) . ', ' .
+                Escaping::toSqlSyntax(\repl_tab_nl($data['sentence'])) . ', ' .
+                Escaping::toSqlSyntax($data['roman']) . ', ' .
+                (int) $data['wordcount'] . ',
+                NOW(), ' .
+                \make_score_random_insert_update('id') .
+            ')',
+            "Term saved"
+        );
+
+        // Get insert ID BEFORE any other queries (initWordCount runs queries)
+        $wid = (int) Connection::lastInsertId();
+
+        \Lwt\Database\Maintenance::initWordCount();
+        \saveWordTags($wid);
+        \insertExpressions($data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
+
+        return [
+            'id' => $wid,
+            'message' => is_numeric($message) ? 'Term saved' : (string) $message
+        ];
+    }
+
+    /**
+     * Update an existing multi-word expression.
+     *
+     * @param int   $wordId    Word ID
+     * @param array $data      Multi-word data (same keys as createMultiWord)
+     * @param int   $oldStatus Previous status for comparison
+     * @param int   $newStatus New status to set
+     *
+     * @return array{id: int, message: string, status: int}
+     */
+    public function updateMultiWord(int $wordId, array $data, int $oldStatus, int $newStatus): array
+    {
+        $statusChange = '';
+        if ($oldStatus != $newStatus) {
+            $statusChange = ', WoStatus = ' . $newStatus . ', WoStatusChanged = NOW()';
+        }
+
+        $message = Connection::execute(
+            'UPDATE ' . $this->tbpref . 'words SET
+            WoText = ' . Escaping::toSqlSyntax($data['text']) . ',
+            WoTranslation = ' . Escaping::toSqlSyntax($data['translation']) . ',
+            WoSentence = ' . Escaping::toSqlSyntax(\repl_tab_nl($data['sentence'])) . ',
+            WoRomanization = ' . Escaping::toSqlSyntax($data['roman']) .
+            $statusChange . ',' .
+            \make_score_random_insert_update('u') . '
+            WHERE WoID = ' . $wordId,
+            "Updated"
+        );
+
+        \saveWordTags($wordId);
+
+        return [
+            'id' => $wordId,
+            'message' => is_numeric($message) ? 'Updated' : (string) $message,
+            'status' => $newStatus
+        ];
+    }
+
+    /**
+     * Get multi-word data for editing.
+     *
+     * @param int $wordId Word ID
+     *
+     * @return array|null Multi-word data or null if not found
+     */
+    public function getMultiWordData(int $wordId): ?array
+    {
+        $sql = "SELECT WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus
+                FROM {$this->tbpref}words WHERE WoID = $wordId";
+        $res = Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+
+        if (!$record) {
+            return null;
+        }
+
+        return [
+            'text' => (string) $record['WoText'],
+            'lgid' => (int) $record['WoLgID'],
+            'translation' => \repl_tab_nl($record['WoTranslation']),
+            'sentence' => \repl_tab_nl($record['WoSentence']),
+            'romanization' => (string) $record['WoRomanization'],
+            'status' => (int) $record['WoStatus']
+        ];
+    }
+
+    /**
+     * Get language ID for a text.
+     *
+     * @param int $textId Text ID
+     *
+     * @return int|null Language ID or null if not found
+     */
+    public function getLanguageIdFromText(int $textId): ?int
+    {
+        $lgid = Connection::fetchValue(
+            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = $textId"
+        );
+        return $lgid !== null ? (int) $lgid : null;
+    }
+
+    /**
+     * Get sentence ID at a text position.
+     *
+     * @param int $textId Text ID
+     * @param int $ord    Position in text
+     *
+     * @return int|null Sentence ID or null if not found
+     */
+    public function getSentenceIdAtPosition(int $textId, int $ord): ?int
+    {
+        $seid = Connection::fetchValue(
+            "SELECT Ti2SeID AS value
+            FROM {$this->tbpref}textitems2
+            WHERE Ti2TxID = $textId AND Ti2Order = $ord"
+        );
+        return $seid !== null ? (int) $seid : null;
+    }
+
+    /**
+     * Check if romanization should be shown for a text's language.
+     *
+     * @param int $textId Text ID
+     *
+     * @return bool Whether to show romanization
+     */
+    public function shouldShowRomanization(int $textId): bool
+    {
+        return (bool) Connection::fetchValue(
+            "SELECT LgShowRomanization AS value
+            FROM {$this->tbpref}languages JOIN {$this->tbpref}texts
+            ON TxLgID = LgID
+            WHERE TxID = $textId"
+        );
+    }
+
+    /**
+     * Find multi-word by text and language.
+     *
+     * @param string $textlc Lowercase text
+     * @param int    $langId Language ID
+     *
+     * @return int|null Word ID or null if not found
+     */
+    public function findMultiWordByText(string $textlc, int $langId): ?int
+    {
+        $wid = Connection::fetchValue(
+            "SELECT WoID AS value FROM {$this->tbpref}words
+            WHERE WoLgID = $langId AND WoTextLC = " . Escaping::toSqlSyntax($textlc)
+        );
+        return $wid !== null ? (int) $wid : null;
+    }
+
+    /**
+     * Export term data as JSON for JavaScript.
+     *
+     * @param int    $wordId      Word ID
+     * @param string $text        Term text
+     * @param string $roman       Romanization
+     * @param string $translation Translation with tags
+     * @param int    $status      Word status
+     *
+     * @return string JSON encoded data
+     */
+    public function exportTermAsJson(
+        int $wordId,
+        string $text,
+        string $roman,
+        string $translation,
+        int $status
+    ): string {
+        $data = [
+            "woid" => $wordId,
+            "text" => $text,
+            "romanization" => $roman,
+            "translation" => $translation,
+            "status" => $status
+        ];
+
+        $json = json_encode($data);
+        if ($json === false) {
+            $json = json_encode(["error" => "Unable to return data."]);
+            if ($json === false) {
+                throw new \RuntimeException("Unable to return data");
+            }
+        }
+        return $json;
+    }
 }

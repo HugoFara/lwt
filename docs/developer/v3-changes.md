@@ -144,7 +144,7 @@ All 59 root-level PHP page files have been moved to `src/php/Legacy/` with renam
 | `set_test_status.php` | `test_set_status.php` |
 | `edit_word.php` | `word_edit.php` |
 | `edit_words.php` | `words_edit.php` |
-| `edit_mword.php` | `word_edit_multi.php` |
+| `edit_mword.php` | Fully migrated to `WordController@editMulti` |
 | `edit_tword.php` | `word_edit_term.php` |
 | `delete_word.php` | `word_delete.php` |
 | `delete_mword.php` | `word_delete_multi.php` |

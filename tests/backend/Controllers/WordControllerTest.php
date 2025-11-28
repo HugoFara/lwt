@@ -22,6 +22,8 @@ $GLOBALS['dbname'] = "test_" . $config['dbname'];
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/Export/export_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/word_scoring.php';
+require_once __DIR__ . '/../../../src/backend/Core/Tag/tags.php';
+require_once __DIR__ . '/../../../src/backend/Core/Word/expression_handling.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/WordController.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordService.php';
@@ -924,5 +926,153 @@ class WordControllerTest extends TestCase
         mysqli_free_result($res);
 
         $this->assertTrue($found);
+    }
+
+    // ===== Multi-word edit tests =====
+
+    public function testEditMultiMethodExists(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+
+        $this->assertTrue(method_exists($controller, 'editMulti'));
+    }
+
+    public function testCreateMultiWordThroughController(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $data = [
+            'lgid' => self::$testLangId,
+            'text' => 'ctrl_multi_word_test',
+            'textlc' => 'ctrl_multi_word_test',
+            'status' => 1,
+            'translation' => 'controller multi word',
+            'sentence' => '',
+            'roman' => '',
+            'wordcount' => 3,
+        ];
+
+        // Buffer output since insertExpressions outputs JS
+        ob_start();
+        $result = $service->createMultiWord($data);
+        ob_end_clean();
+
+        $this->assertArrayHasKey('id', $result);
+        $this->assertGreaterThan(0, $result['id']);
+
+        // Verify
+        $word = $service->findById($result['id']);
+        $this->assertNotNull($word);
+        $this->assertEquals('ctrl_multi_word_test', $word['WoTextLC']);
+    }
+
+    public function testUpdateMultiWordThroughController(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create first (buffer output)
+        $createData = [
+            'lgid' => self::$testLangId,
+            'text' => 'ctrl_update_multi',
+            'textlc' => 'ctrl_update_multi',
+            'status' => 1,
+            'translation' => 'original',
+            'sentence' => '',
+            'roman' => '',
+            'wordcount' => 2,
+        ];
+        ob_start();
+        $created = $service->createMultiWord($createData);
+        ob_end_clean();
+
+        // Update
+        $updateData = [
+            'text' => 'ctrl_update_multi',
+            'textlc' => 'ctrl_update_multi',
+            'translation' => 'updated via controller',
+            'sentence' => 'Updated sentence',
+            'roman' => 'updated roman',
+        ];
+
+        $result = $service->updateMultiWord($created['id'], $updateData, 1, 3);
+
+        $this->assertEquals($created['id'], $result['id']);
+        $this->assertEquals(3, $result['status']);
+
+        // Verify
+        $word = $service->findById($created['id']);
+        $this->assertEquals('updated via controller', $word['WoTranslation']);
+        $this->assertEquals('3', $word['WoStatus']);
+    }
+
+    public function testGetMultiWordDataThroughController(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create a multi-word (buffer output)
+        $createData = [
+            'lgid' => self::$testLangId,
+            'text' => 'ctrl_get_multi',
+            'textlc' => 'ctrl_get_multi',
+            'status' => 2,
+            'translation' => 'get test',
+            'sentence' => 'Test sentence.',
+            'roman' => 'test roman',
+            'wordcount' => 2,
+        ];
+        ob_start();
+        $created = $service->createMultiWord($createData);
+        ob_end_clean();
+
+        $result = $service->getMultiWordData($created['id']);
+
+        $this->assertNotNull($result);
+        $this->assertEquals('ctrl_get_multi', $result['text']);
+        $this->assertEquals(self::$testLangId, $result['lgid']);
+        $this->assertEquals('get test', $result['translation']);
+        $this->assertEquals(2, $result['status']);
+    }
+
+    public function testExportTermAsJsonThroughController(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $json = $service->exportTermAsJson(
+            456,
+            'controller test',
+            'ctrl roman',
+            'ctrl translation',
+            3
+        );
+
+        $decoded = json_decode($json, true);
+        $this->assertNotNull($decoded);
+        $this->assertEquals(456, $decoded['woid']);
+        $this->assertEquals('controller test', $decoded['text']);
+        $this->assertEquals(3, $decoded['status']);
     }
 }

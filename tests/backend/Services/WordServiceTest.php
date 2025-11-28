@@ -21,6 +21,8 @@ $GLOBALS['dbname'] = "test_" . $config['dbname'];
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/Export/export_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/word_scoring.php';
+require_once __DIR__ . '/../../../src/backend/Core/Tag/tags.php';
+require_once __DIR__ . '/../../../src/backend/Core/Word/expression_handling.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordService.php';
 
 /**
@@ -1046,5 +1048,182 @@ class WordServiceTest extends TestCase
         $this->assertArrayHasKey('dict1', $result);
         $this->assertArrayHasKey('dict2', $result);
         $this->assertArrayHasKey('translate', $result);
+    }
+
+    // ===== Multi-word expression tests =====
+
+    public function testCreateMultiWordCreatesExpression(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $data = [
+            'lgid' => self::$testLangId,
+            'text' => 'test multi word',
+            'textlc' => 'test multi word',
+            'status' => 1,
+            'translation' => 'multi word translation',
+            'sentence' => 'This is a {test multi word} sentence.',
+            'roman' => 'test romanization',
+            'wordcount' => 3,
+        ];
+
+        // Buffer output since insertExpressions outputs JS
+        ob_start();
+        $result = $this->service->createMultiWord($data);
+        ob_end_clean();
+
+        $this->assertArrayHasKey('id', $result);
+        $this->assertArrayHasKey('message', $result);
+        $this->assertGreaterThan(0, $result['id']);
+
+        // Verify word was created
+        $word = $this->service->findById($result['id']);
+        $this->assertNotNull($word);
+        $this->assertEquals('test multi word', $word['WoTextLC']);
+        $this->assertEquals('1', $word['WoStatus']);
+        $this->assertEquals('3', $word['WoWordCount']);
+    }
+
+    public function testUpdateMultiWordUpdatesExpression(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // First create a multi-word (buffer output)
+        $createData = [
+            'lgid' => self::$testLangId,
+            'text' => 'update multi word',
+            'textlc' => 'update multi word',
+            'status' => 1,
+            'translation' => 'original translation',
+            'sentence' => '',
+            'roman' => '',
+            'wordcount' => 3,
+        ];
+        ob_start();
+        $created = $this->service->createMultiWord($createData);
+        ob_end_clean();
+        $wid = $created['id'];
+
+        // Now update it
+        $updateData = [
+            'text' => 'update multi word',
+            'textlc' => 'update multi word',
+            'translation' => 'updated translation',
+            'sentence' => 'Updated sentence.',
+            'roman' => 'updated roman',
+        ];
+
+        $result = $this->service->updateMultiWord($wid, $updateData, 1, 2);
+
+        $this->assertEquals($wid, $result['id']);
+        $this->assertEquals(2, $result['status']);
+
+        // Verify update
+        $word = $this->service->findById($wid);
+        $this->assertEquals('updated translation', $word['WoTranslation']);
+        $this->assertEquals('2', $word['WoStatus']);
+    }
+
+    public function testGetMultiWordDataReturnsData(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a multi-word (buffer output)
+        $createData = [
+            'lgid' => self::$testLangId,
+            'text' => 'get multi word',
+            'textlc' => 'get multi word',
+            'status' => 2,
+            'translation' => 'get translation',
+            'sentence' => 'Get sentence.',
+            'roman' => 'get roman',
+            'wordcount' => 3,
+        ];
+        ob_start();
+        $created = $this->service->createMultiWord($createData);
+        ob_end_clean();
+
+        $result = $this->service->getMultiWordData($created['id']);
+
+        $this->assertNotNull($result);
+        $this->assertEquals('get multi word', $result['text']);
+        $this->assertEquals(self::$testLangId, $result['lgid']);
+        $this->assertEquals('get translation', $result['translation']);
+        $this->assertEquals(2, $result['status']);
+    }
+
+    public function testGetMultiWordDataReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->getMultiWordData(999999);
+        $this->assertNull($result);
+    }
+
+    public function testFindMultiWordByTextFindsWord(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a multi-word (buffer output)
+        $createData = [
+            'lgid' => self::$testLangId,
+            'text' => 'find multi word',
+            'textlc' => 'find multi word',
+            'status' => 1,
+            'translation' => '*',
+            'sentence' => '',
+            'roman' => '',
+            'wordcount' => 3,
+        ];
+        ob_start();
+        $created = $this->service->createMultiWord($createData);
+        ob_end_clean();
+
+        $result = $this->service->findMultiWordByText('find multi word', self::$testLangId);
+
+        $this->assertEquals($created['id'], $result);
+    }
+
+    public function testFindMultiWordByTextReturnsNullWhenNotFound(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->findMultiWordByText('nonexistent multi word xyz', self::$testLangId);
+        $this->assertNull($result);
+    }
+
+    public function testExportTermAsJsonReturnsValidJson(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $json = $this->service->exportTermAsJson(
+            123,
+            'test term',
+            'test roman',
+            'test translation',
+            2
+        );
+
+        $decoded = json_decode($json, true);
+        $this->assertNotNull($decoded);
+        $this->assertEquals(123, $decoded['woid']);
+        $this->assertEquals('test term', $decoded['text']);
+        $this->assertEquals('test roman', $decoded['romanization']);
+        $this->assertEquals('test translation', $decoded['translation']);
+        $this->assertEquals(2, $decoded['status']);
     }
 }
