@@ -30,6 +30,7 @@ This document outlines a comprehensive plan to modernize the Learning with Texts
 - ✅ Modernize build system (Vite) - **COMPLETE**
 - ✅ Add TypeScript for type safety - **COMPLETE**
 - ✅ Convert to ES6+ modules - **COMPLETE** (all JS files migrated to TypeScript with ES modules)
+- 🔧 Extract backend-embedded JavaScript - **NEW** (Phase 2.5)
 - Keep jQuery 1.12.4 from npm (minimize breaking changes during transition)
 - Improve CSS organization and theming
 - Enhance code maintainability and testability
@@ -98,7 +99,8 @@ src/frontend/themes/
 
 - jQuery 1.12.4 (~85KB minified)
 - jQuery UI 1.12.1 (~250KB with CSS)
-- jQuery plugins: jeditable, scrollTo, hoverIntent, xpath
+- jQuery plugins: xpath
+- ~~jQuery plugins: jeditable, scrollTo, hoverIntent~~ (removed - replaced with native implementations)
 - Tagify (tag input - replacement for tag-it)
 - ~~jPlayer~~ (removed - replaced with HTML5 `<audio>`)
 - ~~Overlib~~ (removed - replaced with jQuery UI tooltips)
@@ -111,24 +113,24 @@ src/frontend/themes/
 |---------|------|------|---------|--------|
 | **jQuery** | `jquery.js` | 97KB | DOM manipulation, AJAX | ✅ Kept (from npm) |
 | **jQuery UI** | `jquery-ui.min.js` | 240KB | UI widgets (dialogs, tooltips, draggable) | ✅ Kept (provides tooltip, dialog, resizable) |
-| **jQuery scrollTo** | `jquery.scrollTo.min.js` | 2KB | Smooth scrolling | Future: Replace with native `scrollIntoView()` |
-| **jQuery jeditable** | `jquery.jeditable.mini.js` | 8KB | In-place editing | Future: Replace with custom or contenteditable |
-| **jQuery hoverIntent** | `jquery.hoverIntent.js` | 2KB | Delayed hover events | Future: Replace with CSS or native JS |
+| ~~**jQuery scrollTo**~~ | ~~`jquery.scrollTo.min.js`~~ | ~~2KB~~ | ~~Smooth scrolling~~ | ✅ **REMOVED** - replaced with native `scrollTo()` in `hover_intent.ts` |
+| ~~**jQuery jeditable**~~ | ~~`jquery.jeditable.mini.js`~~ | ~~8KB~~ | ~~In-place editing~~ | ✅ **REMOVED** - was unused |
+| ~~**jQuery hoverIntent**~~ | ~~`jquery.hoverIntent.js`~~ | ~~2KB~~ | ~~Delayed hover events~~ | ✅ **REMOVED** - replaced with native `hoverIntent()` in `hover_intent.ts` |
 | ~~**jQuery jPlayer**~~ | ~~`jquery.jplayer.min.js`~~ | ~~61KB~~ | ~~Audio/video player~~ | ✅ **REMOVED** - replaced with HTML5 `<audio>` |
 | **jQuery XPath** | `jquery.xpath.min.js` | 80KB | XPath selector (feed wizard) | Future: Evaluate if needed, else remove |
 | ~~**tag-it**~~ | ~~`tag-it.js`~~ | ~~10KB~~ | ~~Tag input widget~~ | ✅ **REMOVED** - replaced with Tagify |
-| ~~**overlib**~~ | ~~`overlib/overlib_mini.js` + plugins~~ | ~~~75KB~~ | ~~Popup/tooltip library~~ | ✅ **REMOVED** - replaced with jQuery UI tooltips |
+| ~~**overlib**~~ | ~~`overlib/overlib_mini.js` + plugins~~ | ~~75KB~~ | ~~Popup/tooltip library~~ | ✅ **REMOVED** - replaced with jQuery UI tooltips |
 
-**Current JS size:** ~439KB (uncompressed) - reduced from ~575KB
+**Current JS size:** ~427KB (uncompressed) - reduced from ~575KB
 
 #### Priority Removal Order (Future)
 
 1. ~~**overlib** (75KB)~~ - ✅ **REMOVED** - replaced with jQuery UI tooltips
 2. ~~**jPlayer** (61KB)~~ - ✅ **REMOVED** - replaced with HTML5 `<audio>`
 3. **jquery.xpath** (80KB) - Only used in feed wizard, may not be needed
-4. **jquery.hoverIntent** (2KB) - Easy to replace with CSS/native
-5. **jquery.scrollTo** (2KB) - Native `scrollIntoView()` works well
-6. **jquery.jeditable** (8KB) - Can use `contenteditable` or custom
+4. ~~**jquery.hoverIntent** (2KB)~~ - ✅ **REMOVED** - replaced with native `hoverIntent()` in `hover_intent.ts`
+5. ~~**jquery.scrollTo** (2KB)~~ - ✅ **REMOVED** - replaced with native `scrollTo()` in `hover_intent.ts`
+6. ~~**jquery.jeditable** (8KB)~~ - ✅ **REMOVED** - was unused
 7. ~~**tag-it** (10KB)~~ - ✅ **REMOVED** - replaced with Tagify
 8. **jQuery + jQuery UI** (337KB) - Last, requires significant refactoring
 
@@ -174,6 +176,7 @@ onclick="updateTermTranslation(<?php echo $wid; ?>, '#tx<?php echo $i; ?>');"
 - ~~**Overlib:** Unmaintained since 2005~~ - ✅ REMOVED
 - **jQuery UI:** Last major update 2016 (still in use)
 - ~~**jPlayer:** Better alternatives exist~~ - ✅ REMOVED (replaced with HTML5 `<audio>`)
+- ~~**hoverIntent, scrollTo, jeditable:** jQuery plugins~~ - ✅ REMOVED (replaced with native implementations or unused)
 
 #### 6. Poor Separation of Concerns
 
@@ -184,11 +187,79 @@ function do_ajax_edit_impr_text(pagepos, word, term_id) {
   $.getJSON('api.php/v1/terms/' + term_id + '/translations', ...)
     .then(function(data) {
       edit_term_ann_translations(data, textid);
-      $.scrollTo(pagepos);
+      scrollTo(pagepos);  // Now uses native implementation
       // Direct DOM manipulation in AJAX callback
     });
 }
 ```
+
+#### 7. Backend-Embedded JavaScript (NEW)
+
+The PHP backend contains significant JavaScript code embedded in Views and Core files. This creates maintenance issues and prevents proper frontend optimization.
+
+**Types of embedded JS identified:**
+
+1. **Inline `<script>` blocks in Views** (~25 files)
+
+   ```php
+   // src/backend/Views/Text/edit_form.php
+   <script type="text/javascript">
+       function change_textboxes_language() {
+           const lid = document.getElementById("TxLgID").value;
+           const language_data = <?php echo json_encode($languageData); ?>;
+           // ...
+       }
+   </script>
+   ```
+
+2. **Inline event handlers** (`onclick`, `onchange`, `onsubmit`)
+
+   ```php
+   // src/backend/Views/Feed/browse.php
+   <select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds?page=1')}">
+   <input type="button" onclick="{val=document.form1.query.value; location.href='...'}" />
+   ```
+
+3. **PHP functions generating JavaScript strings**
+
+   ```php
+   // src/backend/Core/Feed/feeds.php
+   function load_feeds(int $currentfeed): void {
+       echo '<script type="text/javascript">';
+       $ajax[$cnt] = "$.ajax({type: 'POST', ...})";  // JS built via string concat
+       echo implode(',', $ajax);
+       echo '</script>';
+   }
+   ```
+
+4. **JSON-encoded data** (✅ Good pattern - keep this)
+
+   ```php
+   // src/backend/Views/Text/read_text.php
+   <script>
+       const LWT_DATA = <?php echo json_encode($varArray); ?>;
+   </script>
+   ```
+
+**Files with significant embedded JS:**
+
+| File | Lines | JS Type | Priority |
+|------|-------|---------|----------|
+| `Views/Word/form_edit_new.php` | 34-150 | Inline script | High |
+| `Views/Feed/browse.php` | 61-217 | Inline + handlers | High |
+| `Views/Text/edit_form.php` | 42-56, 97 | Inline + handlers | Medium |
+| `Core/Feed/feeds.php` | 24-93 | Generated AJAX | High |
+| `Core/Word/dictionary_links.php` | 87-277 | Generated HTML+JS | Medium |
+| `Core/Text/simterms.php` | 175-182 | Generated handlers | Low |
+| `Core/UI/ui_helpers.php` | 102-106, 912-918 | JSON data | Keep |
+
+**Impact:**
+
+- Cannot tree-shake or optimize backend JS
+- Duplicated logic between frontend and backend
+- No TypeScript type checking for embedded JS
+- Difficult to test
+- Violates separation of concerns
 
 ### Technical Debt Metrics
 
@@ -698,6 +769,291 @@ composer build                   # Alias for npm run build:all
 - ✅ All documentation updated
 
 > **Note:** jQuery removal was originally planned for this phase. Since we're keeping jQuery 1.12.4 from npm for backward compatibility, this phase focused on build pipeline integration instead. jQuery removal can be considered as a future enhancement.
+
+---
+
+### Phase 2.5: Backend JavaScript Extraction 🔧 **NEW**
+
+**Goals:**
+
+- Extract JavaScript from PHP backend files into frontend TypeScript modules
+- Replace inline event handlers with data attributes and event delegation
+- Eliminate PHP functions that generate JavaScript strings
+- Keep JSON-encoded data pattern (it's the correct approach)
+
+**Priority:** Should be done before or alongside Phase 3 (jQuery Removal)
+
+#### Task 2.5.1: Audit and Inventory
+
+Identify all backend-embedded JavaScript:
+
+```bash
+# Find inline script tags in Views
+grep -r "<script" src/backend/Views/ --include="*.php"
+
+# Find inline event handlers
+grep -rE "onclick=|onchange=|onsubmit=|onload=" src/backend/ --include="*.php"
+
+# Find PHP functions generating JS
+grep -rE "echo.*<script|echo.*onclick" src/backend/Core/ --include="*.php"
+```
+
+**Current Inventory (25+ files affected):**
+
+| Category | Files | Estimated Lines | Priority |
+|----------|-------|-----------------|----------|
+| Inline `<script>` blocks | 15 | ~800 | High |
+| Inline event handlers | 20 | ~200 | High |
+| PHP-generated JS functions | 5 | ~300 | Medium |
+| JSON data (keep as-is) | 8 | ~100 | N/A |
+
+#### Task 2.5.2: Replace Inline Event Handlers
+
+**Pattern: Data attributes + Event delegation**
+
+**Before (PHP):**
+
+```php
+// src/backend/Views/Feed/browse.php
+<select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds?page=1')}">
+<input type="button" value="Filter"
+       onclick="{val=document.form1.query.value; location.href='/feeds?page=1&query=' + val}" />
+```
+
+**After (PHP):**
+
+```php
+// src/backend/Views/Feed/browse.php
+<select name="filterlang" data-action="filter-language" data-url="/feeds?page=1">
+<input type="button" value="Filter" data-action="filter-query" data-base-url="/feeds?page=1" />
+```
+
+**After (TypeScript):**
+
+```typescript
+// src/frontend/js/feeds/browse.ts
+export function initFeedBrowse(): void {
+  const form = document.querySelector('form[name="form1"]');
+  if (!form) return;
+
+  // Language filter
+  form.querySelector('[data-action="filter-language"]')
+    ?.addEventListener('change', (e) => {
+      const select = e.target as HTMLSelectElement;
+      const url = select.dataset.url;
+      setLang(select, url);
+    });
+
+  // Query filter
+  form.querySelector('[data-action="filter-query"]')
+    ?.addEventListener('click', () => {
+      const input = form.querySelector<HTMLInputElement>('[name="query"]');
+      const baseUrl = (form.querySelector('[data-action="filter-query"]') as HTMLElement)
+        .dataset.baseUrl;
+      const val = encodeURIComponent(input?.value || '');
+      location.href = `${baseUrl}&query=${val}`;
+    });
+}
+```
+
+#### Task 2.5.3: Extract Inline Script Blocks
+
+**Pattern: Move to TypeScript modules, use JSON for data**
+
+**Before (PHP):**
+
+```php
+// src/backend/Views/Word/form_edit_new.php
+<script type="text/javascript">
+    const TRANS_URI = <?php echo json_encode($transUri); ?>
+    const LANG_SHORT = <?php echo json_encode($langShort); ?>
+
+    const autoTranslate = function () {
+        // 50+ lines of JS logic
+    }
+    autoTranslate();
+</script>
+```
+
+**After (PHP):**
+
+```php
+// src/backend/Views/Word/form_edit_new.php
+<script type="application/json" id="word-form-config">
+<?php echo json_encode([
+    'transUri' => $transUri,
+    'langShort' => $langShort,
+    'langId' => $lang,
+]); ?>
+</script>
+```
+
+**After (TypeScript):**
+
+```typescript
+// src/frontend/js/words/form-edit.ts
+interface WordFormConfig {
+  transUri: string;
+  langShort: string;
+  langId: number;
+}
+
+export function initWordForm(): void {
+  const configEl = document.getElementById('word-form-config');
+  if (!configEl) return;
+
+  const config: WordFormConfig = JSON.parse(configEl.textContent || '{}');
+
+  autoTranslate(config);
+  autoRomanization(config.langId);
+}
+
+function autoTranslate(config: WordFormConfig): void {
+  // Migrated and typed logic
+}
+```
+
+#### Task 2.5.4: Refactor PHP Functions That Generate JS
+
+**High Priority Files:**
+
+1. **`src/backend/Core/Feed/feeds.php`** - `load_feeds()` function
+2. **`src/backend/Core/Word/dictionary_links.php`** - `createDictLinksInEditWin()` functions
+3. **`src/backend/Core/Text/simterms.php`** - `print_similar_terms()`
+
+**Pattern: Return data, let frontend handle JS**
+
+**Before (PHP):**
+
+```php
+// src/backend/Core/Feed/feeds.php
+function load_feeds(int $currentfeed): void {
+    echo '<script type="text/javascript">';
+    foreach ($feeds as $row) {
+        $ajax[] = "$.ajax({type: 'POST', url: '/api/feeds/" . $row['NfID'] . "'...})";
+    }
+    echo "$(document).ready(function(){ $.when(" . implode(',', $ajax) . ")...});";
+    echo '</script>';
+}
+```
+
+**After (PHP):**
+
+```php
+// src/backend/Core/Feed/feeds.php
+function get_feeds_for_loading(int $currentfeed): array {
+    $feeds = [];
+    // Query feeds...
+    foreach ($result as $row) {
+        $feeds[] = [
+            'id' => $row['NfID'],
+            'url' => $row['NfSourceURI'],
+            'name' => $row['NfName'],
+        ];
+    }
+    return $feeds;
+}
+
+// In View:
+<script type="application/json" id="feeds-config">
+<?php echo json_encode(['feeds' => get_feeds_for_loading($currentfeed)]); ?>
+</script>
+```
+
+**After (TypeScript):**
+
+```typescript
+// src/frontend/js/feeds/loader.ts
+interface FeedConfig {
+  id: number;
+  url: string;
+  name: string;
+}
+
+export async function loadFeeds(): Promise<void> {
+  const configEl = document.getElementById('feeds-config');
+  if (!configEl) return;
+
+  const { feeds } = JSON.parse(configEl.textContent || '{ "feeds": [] }') as { feeds: FeedConfig[] };
+
+  const promises = feeds.map(feed => loadSingleFeed(feed));
+  await Promise.all(promises);
+
+  // Redirect after all complete
+  window.location.replace(window.location.pathname);
+}
+
+async function loadSingleFeed(feed: FeedConfig): Promise<void> {
+  const response = await fetch(`/api/feeds/${feed.id}`, { method: 'POST' });
+  // Handle response...
+}
+```
+
+#### Task 2.5.5: Migration Checklist
+
+**High Priority (do first):**
+
+- [ ] `Views/Feed/browse.php` - Replace all onclick/onchange handlers
+- [ ] `Views/Word/form_edit_new.php` - Extract auto-translate logic
+- [ ] `Core/Feed/feeds.php` - Refactor `load_feeds()` to return data
+
+**Medium Priority:**
+
+- [ ] `Views/Text/edit_form.php` - Extract language switching logic
+- [ ] `Core/Word/dictionary_links.php` - Refactor dictionary link generation
+- [ ] `Views/Feed/index.php` - Replace inline handlers
+- [ ] `Views/Feed/multi_load.php` - Extract feed loading logic
+
+**Low Priority (after jQuery removal):**
+
+- [ ] `Core/Text/simterms.php` - Refactor similar terms display
+- [ ] `Core/UI/ui_helpers.php` - Keep JSON patterns, remove any inline JS
+- [ ] Remaining Views with minor inline handlers
+
+**Files to keep unchanged:**
+
+- Any file using only `json_encode()` for data passing (correct pattern)
+- `ui_helpers.php` STATUSES/TAGS injection (needed for global config)
+
+#### Task 2.5.6: Update Frontend Entry Point
+
+After extraction, register new modules in `main.ts`:
+
+```typescript
+// src/frontend/js/main.ts
+import { initFeedBrowse } from './feeds/browse';
+import { initWordForm } from './words/form-edit';
+import { loadFeeds } from './feeds/loader';
+
+// Page-specific initialization
+document.addEventListener('DOMContentLoaded', () => {
+  // Detect page and initialize appropriate modules
+  if (document.getElementById('feeds-config')) {
+    loadFeeds();
+  }
+  if (document.getElementById('word-form-config')) {
+    initWordForm();
+  }
+  if (document.querySelector('form[name="form1"]')) {
+    initFeedBrowse();
+  }
+});
+```
+
+**Phase 2.5 Deliverables:**
+
+- [ ] All inline event handlers replaced with data attributes
+- [ ] All `<script>` blocks moved to TypeScript modules
+- [ ] PHP functions return data instead of generating JS
+- [ ] New TypeScript modules created and tested
+- [ ] Documentation updated
+
+**Success Criteria:**
+
+- [ ] Zero inline `onclick`/`onchange` attributes in Views
+- [ ] Zero PHP functions that `echo` JavaScript
+- [ ] All extracted JS has TypeScript types
+- [ ] Existing functionality preserved (E2E tests pass)
 
 ---
 
@@ -2393,9 +2749,16 @@ gantt
     Foundation (Vite/TS)  :done, p1, after p0, 1d
     Build Pipeline        :done, p2, after p1, 1d
 
+    section Phase 2.5 (New)
+    Backend JS Extraction :p25, after p2, 3w
+    Audit & Inventory     :p25a, after p2, 3d
+    Inline Handlers       :p25b, after p25a, 1w
+    Script Blocks         :p25c, after p25b, 1w
+    PHP Functions         :p25d, after p25c, 4d
+
     section Phase 3 (Future)
-    jQuery Removal        :p3, after p2, 4w
-    Utilities             :p3a, after p2, 1w
+    jQuery Removal        :p3, after p25, 4w
+    Utilities             :p3a, after p25, 1w
     Core Functions        :p3b, after p3a, 2w
     Testing               :p3c, after p3b, 1w
 
@@ -2439,6 +2802,14 @@ gantt
 - Updated npm scripts
 - **Milestone:** Build pipeline fully integrated
 
+**Phase 2.5: Backend JavaScript Extraction** 🔧 **NEW**
+
+- Audit all backend-embedded JavaScript (~25 files)
+- Replace inline event handlers with data attributes
+- Extract `<script>` blocks to TypeScript modules
+- Refactor PHP functions that generate JS strings
+- **Milestone:** All JS in frontend, PHP only outputs data
+
 **Phase 3 (Future): jQuery Removal** 🎯 **DEFERRED**
 
 - Create utility functions
@@ -2480,6 +2851,21 @@ gantt
 - ✅ Legacy libraries removed (overlib, jPlayer)
 - ✅ Build pipeline integrated
 - **Decision:** Foundation complete, future phases optional
+
+**Before Backend JS Extraction (Phase 2.5):**
+
+- [ ] Audit complete (all embedded JS identified)
+- [ ] Migration patterns documented
+- [ ] Test coverage for affected pages exists
+- **Decision:** Proceed with extraction
+
+**After Phase 2.5:**
+
+- [ ] Zero inline event handlers in Views
+- [ ] Zero PHP functions generating JS
+- [ ] All new TypeScript modules tested
+- [ ] E2E tests pass
+- **Decision:** Foundation solid, proceed with jQuery removal
 
 **Before jQuery Removal (Phase 3):**
 
@@ -2701,6 +3087,7 @@ export default {
 | 4.1 | 2025-11-26 | Claude Code | Removed legacy PHP minification, simplified to Vite-only build |
 | 4.2 | 2025-11-26 | Claude Code | Moved theme building to npm, removed matthiasmullie/minify dependency |
 | 5.0 | 2025-11-28 | Claude Code | Document cleanup: Updated file listings to reflect TypeScript migration, marked removed libraries, updated metrics and milestones to reflect current state |
+| 6.0 | 2025-11-28 | Claude Code | Added Phase 2.5: Backend JavaScript Extraction - new critical issue #7, detailed migration plan for extracting JS from PHP Views/Core files, updated timeline and milestones |
 
 ---
 

@@ -11,6 +11,7 @@ import { getAttr } from './text_annotations';
 import { cClick } from '../ui/word_popup';
 import { showRightFrames } from './frame_management';
 import { get_position_from_id } from '../core/ajax_utilities';
+import { scrollTo } from '../core/hover_intent';
 
 // Type definitions
 interface LwtLanguage {
@@ -43,13 +44,6 @@ interface LwtDataGlobal {
 
 declare const LWT_DATA: LwtDataGlobal;
 
-// Extend JQuery for scrollTo plugin
-declare global {
-  interface JQuery {
-    scrollTo(target: unknown, options?: { axis?: string; offset?: number }): JQuery;
-  }
-}
-
 // Audio controller type for frame access
 // We only need the newPosition method for seeking audio
 interface FramesWithH {
@@ -80,7 +74,7 @@ export function keydown_event_do_text_text(e: JQuery.KeyDownEvent): boolean {
     $('span.uwordmarked').removeClass('uwordmarked');
     const unknownwordlist = $('span.status0.word:not(.hide):first');
     if (unknownwordlist.length === 0) return false;
-    $(window).scrollTo(unknownwordlist, { axis: 'y', offset: -150 });
+    scrollTo(unknownwordlist[0], { offset: -150 });
     unknownwordlist.addClass('uwordmarked').trigger('click');
     cClick();
     return false;
@@ -102,7 +96,7 @@ export function keydown_event_do_text_text(e: JQuery.KeyDownEvent): boolean {
     LWT_DATA.text.reading_position = 0;
     curr = knownwordlist.eq(LWT_DATA.text.reading_position);
     curr.addClass('kwordmarked');
-    $(window).scrollTo(curr, { axis: 'y', offset: -150 });
+    scrollTo(curr[0], { offset: -150 });
     ann = getAttr(curr, 'data_ann');
     showRightFrames(
       'show_word.php?wid=' + getAttr(curr, 'data_wid') + '&ann=' +
@@ -115,7 +109,7 @@ export function keydown_event_do_text_text(e: JQuery.KeyDownEvent): boolean {
     LWT_DATA.text.reading_position = l_knownwordlist - 1;
     curr = knownwordlist.eq(LWT_DATA.text.reading_position);
     curr.addClass('kwordmarked');
-    $(window).scrollTo(curr, { axis: 'y', offset: -150 });
+    scrollTo(curr[0], { offset: -150 });
     ann = getAttr(curr, 'data_ann');
     showRightFrames(
       'show_word.php?wid=' + getAttr(curr, 'data_wid') + '&ann=' +
@@ -144,7 +138,7 @@ export function keydown_event_do_text_text(e: JQuery.KeyDownEvent): boolean {
     }
     curr = knownwordlist.eq(LWT_DATA.text.reading_position);
     curr.addClass('kwordmarked');
-    $(window).scrollTo(curr, { axis: 'y', offset: -150 });
+    scrollTo(curr[0], { offset: -150 });
     ann = getAttr(curr, 'data_ann');
     showRightFrames(
       'show_word.php?wid=' + getAttr(curr, 'data_wid') + '&ann=' +
@@ -174,7 +168,7 @@ export function keydown_event_do_text_text(e: JQuery.KeyDownEvent): boolean {
 
     curr = knownwordlist.eq(LWT_DATA.text.reading_position);
     curr.addClass('kwordmarked');
-    $(window).scrollTo(curr, { axis: 'y', offset: -150 });
+    scrollTo(curr[0], { offset: -150 });
     ann = getAttr(curr, 'data_ann');
     showRightFrames(
       'show_word.php?wid=' + getAttr(curr, 'data_wid') + '&ann=' +

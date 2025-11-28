@@ -169,14 +169,17 @@ export function hoverIntent(
  */
 export function scrollTo(
   target: HTMLElement | number,
-  options?: { behavior?: ScrollBehavior }
+  options?: { behavior?: ScrollBehavior; offset?: number }
 ): void {
   const behavior = options?.behavior ?? 'instant';
+  const offset = options?.offset ?? 0;
 
   if (typeof target === 'number') {
-    window.scrollTo({ top: target, behavior });
+    window.scrollTo({ top: target + offset, behavior });
   } else {
-    // Scroll to element
-    target.scrollIntoView({ behavior, block: 'start' });
+    // Get element position and apply offset
+    const rect = target.getBoundingClientRect();
+    const absoluteTop = rect.top + window.scrollY + offset;
+    window.scrollTo({ top: absoluteTop, behavior });
   }
 }
