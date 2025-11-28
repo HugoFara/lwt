@@ -16,7 +16,7 @@
 namespace Lwt\Services;
 
 require_once __DIR__ . '/../Core/Text/sentence_operations.php';
-require_once __DIR__ . '/../Core/Export/export_helpers.php';
+require_once __DIR__ . '/ExportService.php';
 require_once __DIR__ . '/WordStatusService.php';
 require_once __DIR__ . '/ExpressionService.php';
 

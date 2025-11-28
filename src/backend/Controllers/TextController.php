@@ -92,7 +92,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Mobile/mobile_interactions.php';
         require_once __DIR__ . '/../Services/MediaService.php';
         require_once __DIR__ . '/../Services/WordStatusService.php';
-        require_once __DIR__ . '/../Core/Export/export_helpers.php';
+        require_once __DIR__ . '/../Services/ExportService.php';
 
         // Get text ID from request
         $textId = $this->getTextIdFromRequest();
