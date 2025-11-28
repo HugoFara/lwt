@@ -12,10 +12,7 @@
  */
 ?>
 <h2>New Term</h2>
-<script type="text/javascript" charset="utf-8">
-    $(document).ready(lwtFormCheck.askBeforeExit);
-</script>
-<form name="newword" class="validate" action="/words/edit" method="post">
+<form name="newword" class="validate" action="/words/edit" method="post" data-lwt-form-check="true">
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lgid; ?>" />
 <table class="tab1" cellspacing="0" cellpadding="5">
 <tr>

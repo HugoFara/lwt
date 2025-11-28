@@ -213,9 +213,227 @@ HTML;
      */
     public static function buildOverlibDiv(): string
     {
-        if (function_exists('should_use_vite') && should_use_vite()) {
+        if (ViteHelper::shouldUse()) {
             return '';
         }
         return '<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>';
+    }
+
+    // =========================================================================
+    // Methods migrated from Core/UI/ui_helpers.php
+    // =========================================================================
+
+    /**
+     * Render a minimal page header (kernel, no database).
+     *
+     * Outputs directly to browser. Sets cache control headers,
+     * renders HTML5 doctype, head, and opening body.
+     *
+     * @param string $title  Page title
+     * @param string $addCss Optional additional inline CSS
+     *
+     * @return void
+     */
+    public static function renderPageStartKernelNobody(string $title, string $addCss = ''): void
+    {
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $debug = \Lwt\Core\Globals::isDebug();
+
+        self::sendNoCacheHeaders();
+
+        echo '<!DOCTYPE html>';
+        echo '<html lang="en">';
+        echo '<head>';
+        echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
+        echo '<!--' . "\n";
+        echo file_get_contents("UNLICENSE.md");
+        echo '-->';
+        echo '<meta name="viewport" content="width=900" />';
+        echo '<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>';
+        echo '<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon-57x57.png" />';
+        echo '<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/apple-touch-icon-72x72.png" />';
+        echo '<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/apple-touch-icon-114x114.png" />';
+        echo '<link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />';
+        echo '<meta name="apple-mobile-web-app-capable" content="yes" />';
+
+        if (ViteHelper::shouldUse()) {
+            echo '<!-- Vite assets -->';
+            echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
+            echo '<script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>';
+            echo ViteHelper::assets('js/main.ts');
+        } else {
+            echo '<!-- Legacy assets -->';
+            echo '<link rel="stylesheet" type="text/css" href="/assets/css/jquery-ui.css" />';
+            echo '<link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />';
+            echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
+            echo '<script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>';
+            echo '<!-- Legacy only: overlib (Vite uses jQuery UI dialogs) -->';
+            echo '<script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>';
+        }
+
+        echo '<style type="text/css">' . $addCss . "\n" . '</style>';
+        echo '<!-- URLBASE : "' . tohtml(url_base()) . '" -->';
+        echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
+        echo '<script type="text/javascript">';
+        echo '//<![CDATA[';
+        echo 'var STATUSES = ' . json_encode(\Lwt\Services\WordStatusService::getStatuses()) . ';';
+        echo '//]]>';
+        echo '</script>';
+        echo '<title>LWT :: ' . tohtml($title) . '</title>';
+        echo '</head>';
+        echo '<body>';
+
+        if (!ViteHelper::shouldUse()) {
+            echo '<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>';
+        }
+
+        flush();
+        if ($debug) {
+            showRequest();
+        }
+    }
+
+    /**
+     * Render a full page header (no database).
+     *
+     * Outputs directly to browser. Sets cache control headers,
+     * renders HTML5 doctype, full head with assets, and opening body.
+     *
+     * @param string $title  Page title
+     * @param string $addCss Optional additional inline CSS
+     *
+     * @return void
+     */
+    public static function renderPageStartNobody(string $title, string $addCss = ''): void
+    {
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $debug = \Lwt\Core\Globals::isDebug();
+
+        self::sendNoCacheHeaders();
+
+        echo '<!DOCTYPE html>';
+        echo '<html lang="en">';
+        echo '<head>';
+        echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
+        echo '<!--' . "\n";
+        echo file_get_contents("UNLICENSE.md");
+        echo '-->';
+        echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
+        echo '<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>';
+        echo '<link rel="apple-touch-icon" href="' . get_file_path('img/apple-touch-icon-57x57.png') . '" />';
+        echo '<link rel="apple-touch-icon" sizes="72x72" href="' . get_file_path('img/apple-touch-icon-72x72.png') . '" />';
+        echo '<link rel="apple-touch-icon" sizes="114x114" href="' . get_file_path('img/apple-touch-icon-114x114.png') . '" />';
+        echo '<link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />';
+        echo '<meta name="apple-mobile-web-app-capable" content="yes" />';
+
+        if (ViteHelper::shouldUse()) {
+            echo '<!-- Vite assets -->';
+            echo '<!-- Load jQuery synchronously for inline scripts compatibility -->';
+            echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
+            echo '<script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>';
+            echo ViteHelper::assets('js/main.ts');
+        } else {
+            echo '<!-- Legacy assets -->';
+            echo '<link rel="stylesheet" type="text/css" href="' . get_file_path('css/jquery-ui.css') . '" />';
+            echo '<link rel="stylesheet" type="text/css" href="' . get_file_path('css/styles.css') . '" />';
+            echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
+            echo '<script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>';
+            echo '<!-- Legacy only: overlib (Vite uses jQuery UI dialogs) -->';
+            echo '<script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>';
+            echo '<script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>';
+        }
+
+        echo '<style type="text/css">' . $addCss . "\n" . '</style>';
+        echo '<!-- URLBASE : "' . tohtml(url_base()) . '" -->';
+        echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
+        echo '<script type="text/javascript">';
+        echo '//<![CDATA[';
+        echo 'var STATUSES = ' . json_encode(\Lwt\Services\WordStatusService::getStatuses()) . ';';
+        echo 'var TAGS = ' . json_encode(\Lwt\Services\TagService::getAllTermTags()) . ';';
+        echo 'var TEXTTAGS = ' . json_encode(\Lwt\Services\TagService::getAllTextTags()) . ';';
+        echo '//]]>';
+        echo '</script>';
+        echo '<title>LWT :: ' . tohtml($title) . '</title>';
+        echo '</head>';
+        echo '<body>';
+
+        if (!ViteHelper::shouldUse()) {
+            echo '<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>';
+        }
+
+        flush();
+        if ($debug) {
+            showRequest();
+        }
+    }
+
+    /**
+     * Render a standard page header with navigation.
+     *
+     * Calls renderPageStartNobody then adds logo and navigation menu.
+     *
+     * @param string $title Page title
+     * @param bool   $close Whether to wrap logo in link to index
+     *
+     * @return void
+     */
+    public static function renderPageStart(string $title, bool $close): void
+    {
+        self::renderPageStartNobody($title);
+        echo '<div>';
+        if ($close) {
+            echo '<a href="index.php" target="_top">';
+        }
+        echo self::buildLogo();
+        if ($close) {
+            echo '</a>';
+            echo self::buildQuickMenu();
+        }
+        echo '</div>';
+        echo self::buildPageTitle($title, \Lwt\Core\Globals::isDebug());
+    }
+
+    /**
+     * Render the page footer (closing body and html tags).
+     *
+     * Outputs directly to browser. Shows debug info and execution time if configured.
+     *
+     * @return void
+     */
+    public static function renderPageEnd(): void
+    {
+        if (\Lwt\Core\Globals::isDebug()) {
+            showRequest();
+        }
+        if (\Lwt\Core\Globals::shouldDisplayTime()) {
+            echo "\n" . self::buildExecutionTime(get_execution_time()) . "\n";
+        }
+        echo '</body></html>';
+    }
+
+    /**
+     * Render a frameset page header.
+     *
+     * Outputs directly to browser. For legacy frameset-based pages.
+     *
+     * @param string $title Page title
+     *
+     * @return void
+     */
+    public static function renderFramesetHeader(string $title): void
+    {
+        self::sendNoCacheHeaders();
+
+        echo '<!DOCTYPE html>';
+        echo '<html lang="en">';
+        echo '<head>';
+        echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
+        echo '<link rel="stylesheet" type="text/css" href="' . get_file_path('css/styles.css') . '" />';
+        echo '<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>';
+        echo '<!--' . "\n";
+        echo file_get_contents("UNLICENSE.md");
+        echo '-->';
+        echo '<title>LWT :: ' . tohtml($title) . '</title>';
+        echo '</head>';
     }
 }

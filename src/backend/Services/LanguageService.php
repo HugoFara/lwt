@@ -743,4 +743,33 @@ class LanguageService
         unlink($mecab_file);
         return $mecab_str;
     }
+
+    // =========================================================================
+    // Methods migrated from Core/UI/ui_helpers.php
+    // =========================================================================
+
+    /**
+     * Get languages formatted for select dropdown options.
+     *
+     * @return array<int, array{id: int, name: string}> Array of language data
+     */
+    public function getLanguagesForSelect(): array
+    {
+        $result = [];
+        $sql = "SELECT LgID, LgName FROM " . Globals::table('languages')
+             . " WHERE LgName<>'' ORDER BY LgName";
+        $res = Connection::query($sql);
+        while ($record = mysqli_fetch_assoc($res)) {
+            $name = (string)$record['LgName'];
+            if (strlen($name) > 30) {
+                $name = substr($name, 0, 30) . '...';
+            }
+            $result[] = [
+                'id' => (int)$record['LgID'],
+                'name' => $name
+            ];
+        }
+        mysqli_free_result($res);
+        return $result;
+    }
 }

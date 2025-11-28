@@ -342,4 +342,328 @@ class SelectOptionsBuilder
     {
         return '<option value="" selected="selected">[Choose...]</option>';
     }
+
+    // =========================================================================
+    // Methods migrated from Core/UI/ui_helpers.php
+    // =========================================================================
+
+    /**
+     * Build language select options from data array.
+     *
+     * @param array<int, array{id: int, name: string}> $languages   Language data from LanguageService
+     * @param int|string|null                          $selected    Selected language ID
+     * @param string                                   $defaultText Default option text
+     *
+     * @return string HTML options string
+     */
+    public static function forLanguages(
+        array $languages,
+        int|string|null $selected,
+        string $defaultText = '[Filter off]'
+    ): string {
+        $isSelected = !isset($selected) || trim((string)$selected) === '';
+        $result = '<option value=""' . ($isSelected ? ' selected="selected"' : '') . '>'
+                . htmlspecialchars($defaultText, ENT_QUOTES, 'UTF-8') . '</option>';
+        foreach ($languages as $lang) {
+            $result .= FormHelper::buildOption(
+                $lang['id'],
+                htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8'),
+                $selected
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Build text select options from data array.
+     *
+     * @param array<int, array{id: int, title: string, language: string}> $texts        Text data from TextService
+     * @param int|string|null                                              $selected     Selected text ID
+     * @param bool                                                         $showLanguage Whether to prefix with language name
+     *
+     * @return string HTML options string
+     */
+    public static function forTexts(
+        array $texts,
+        int|string|null $selected,
+        bool $showLanguage = true
+    ): string {
+        $result = self::buildFilterOffOption($selected);
+        foreach ($texts as $text) {
+            $label = $showLanguage
+                ? ($text['language'] . ': ' . $text['title'])
+                : $text['title'];
+            $result .= FormHelper::buildOption(
+                $text['id'],
+                htmlspecialchars($label, ENT_QUOTES, 'UTF-8'),
+                $selected
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * Build theme select options from data array.
+     *
+     * @param array<int, array{path: string, name: string}> $themes   Theme data from ThemeService
+     * @param string|null                                   $selected Selected theme path
+     *
+     * @return string HTML options string
+     */
+    public static function forThemes(array $themes, ?string $selected): string
+    {
+        $result = '';
+        foreach ($themes as $theme) {
+            $result .= '<option value="' . htmlspecialchars($theme['path'], ENT_QUOTES, 'UTF-8') . '"'
+                    . FormHelper::getSelected($selected, $theme['path'])
+                    . '>' . htmlspecialchars($theme['name'], ENT_QUOTES, 'UTF-8') . '</option>';
+        }
+        return $result;
+    }
+
+    /**
+     * Build word status radio options.
+     *
+     * @param int|string|null $selected Currently selected status (default: 1)
+     *
+     * @return string HTML radio options string
+     */
+    public static function forWordStatusRadio(int|string|null $selected = null): string
+    {
+        if (!isset($selected)) {
+            $selected = 1;
+        }
+        $result = '';
+        $statuses = \Lwt\Services\WordStatusService::getStatuses();
+        foreach ($statuses as $n => $status) {
+            $result .= '<span class="status' . $n . '" title="'
+                    . htmlspecialchars($status['name'], ENT_QUOTES, 'UTF-8') . '">';
+            $result .= '&nbsp;<input type="radio" name="WoStatus" value="' . $n . '"';
+            if ($selected == $n) {
+                $result .= ' checked="checked"';
+            }
+            $result .= ' />' . htmlspecialchars($status['abbr'], ENT_QUOTES, 'UTF-8') . '&nbsp;</span> ';
+        }
+        return $result;
+    }
+
+    /**
+     * Build word status select options with optional ranges.
+     *
+     * @param int|string|null $selected  Currently selected status
+     * @param bool            $all       Include "Filter off" and ranges
+     * @param bool            $not9899   Exclude statuses 98 and 99
+     * @param bool            $off       Include "Filter off" option (when $all is true)
+     *
+     * @return string HTML options string
+     */
+    public static function forWordStatus(
+        int|string|null $selected,
+        bool $all,
+        bool $not9899,
+        bool $off = true
+    ): string {
+        if (!isset($selected)) {
+            $selected = $all ? '' : 1;
+        }
+        $result = '';
+        if ($all && $off) {
+            $result .= '<option value=""' . FormHelper::getSelected($selected, '')
+                    . '>[Filter off]</option>';
+        }
+        $statuses = \Lwt\Services\WordStatusService::getStatuses();
+        foreach ($statuses as $n => $status) {
+            if ($not9899 && ($n == 98 || $n == 99)) {
+                continue;
+            }
+            $result .= '<option value="' . $n . '"' . FormHelper::getSelected($selected, $n != 0 ? $n : '0')
+                    . '>' . htmlspecialchars($status['name'], ENT_QUOTES, 'UTF-8') . ' ['
+                    . htmlspecialchars($status['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+        }
+        if ($all) {
+            $result .= '<option disabled="disabled">--------</option>';
+            $s1name = htmlspecialchars($statuses[1]['name'], ENT_QUOTES, 'UTF-8');
+            $s1abbr = htmlspecialchars($statuses[1]['abbr'], ENT_QUOTES, 'UTF-8');
+            $result .= '<option value="12"' . FormHelper::getSelected($selected, 12)
+                    . '>' . $s1name . ' [' . $s1abbr . '..'
+                    . htmlspecialchars($statuses[2]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+            $result .= '<option value="13"' . FormHelper::getSelected($selected, 13)
+                    . '>' . $s1name . ' [' . $s1abbr . '..'
+                    . htmlspecialchars($statuses[3]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+            $result .= '<option value="14"' . FormHelper::getSelected($selected, 14)
+                    . '>' . $s1name . ' [' . $s1abbr . '..'
+                    . htmlspecialchars($statuses[4]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+            $result .= '<option value="15"' . FormHelper::getSelected($selected, 15)
+                    . '>Learning/-ed [' . $s1abbr . '..'
+                    . htmlspecialchars($statuses[5]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+            $result .= '<option disabled="disabled">--------</option>';
+            $s2name = htmlspecialchars($statuses[2]['name'], ENT_QUOTES, 'UTF-8');
+            $s2abbr = htmlspecialchars($statuses[2]['abbr'], ENT_QUOTES, 'UTF-8');
+            $result .= '<option value="23"' . FormHelper::getSelected($selected, 23)
+                    . '>' . $s2name . ' [' . $s2abbr . '..'
+                    . htmlspecialchars($statuses[3]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+            $result .= '<option value="24"' . FormHelper::getSelected($selected, 24)
+                    . '>' . $s2name . ' [' . $s2abbr . '..'
+                    . htmlspecialchars($statuses[4]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+            $result .= '<option value="25"' . FormHelper::getSelected($selected, 25)
+                    . '>Learning/-ed [' . $s2abbr . '..'
+                    . htmlspecialchars($statuses[5]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+            $result .= '<option disabled="disabled">--------</option>';
+            $s3name = htmlspecialchars($statuses[3]['name'], ENT_QUOTES, 'UTF-8');
+            $s3abbr = htmlspecialchars($statuses[3]['abbr'], ENT_QUOTES, 'UTF-8');
+            $result .= '<option value="34"' . FormHelper::getSelected($selected, 34)
+                    . '>' . $s3name . ' [' . $s3abbr . '..'
+                    . htmlspecialchars($statuses[4]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+            $result .= '<option value="35"' . FormHelper::getSelected($selected, 35)
+                    . '>Learning/-ed [' . $s3abbr . '..'
+                    . htmlspecialchars($statuses[5]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+            $result .= '<option disabled="disabled">--------</option>';
+            $result .= '<option value="45"' . FormHelper::getSelected($selected, 45)
+                    . '>Learning/-ed [' . htmlspecialchars($statuses[4]['abbr'], ENT_QUOTES, 'UTF-8') . '..'
+                    . htmlspecialchars($statuses[5]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+            $result .= '<option disabled="disabled">--------</option>';
+            $result .= '<option value="599"' . FormHelper::getSelected($selected, 599)
+                    . '>All known [' . htmlspecialchars($statuses[5]['abbr'], ENT_QUOTES, 'UTF-8') . '+'
+                    . htmlspecialchars($statuses[99]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+        }
+        return $result;
+    }
+
+    /**
+     * Build multiple words actions dropdown options.
+     *
+     * @return string HTML options string
+     */
+    public static function forMultipleWordsActions(): string
+    {
+        $result = self::buildChooseOption();
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="test">Test Marked Terms</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="spl1">Increase Status by 1 [+1]</option>';
+        $result .= '<option value="smi1">Reduce Status by 1 [-1]</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= StatusHelper::buildSetStatusOption(1, StatusHelper::getName(1), StatusHelper::getAbbr(1));
+        $result .= StatusHelper::buildSetStatusOption(5, StatusHelper::getName(5), StatusHelper::getAbbr(5));
+        $result .= StatusHelper::buildSetStatusOption(99, StatusHelper::getName(99), StatusHelper::getAbbr(99));
+        $result .= StatusHelper::buildSetStatusOption(98, StatusHelper::getName(98), StatusHelper::getAbbr(98));
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="today">Set Status Date to Today</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="lower">Set Marked Terms to Lowercase</option>';
+        $result .= '<option value="cap">Capitalize Marked Terms</option>';
+        $result .= '<option value="delsent">Delete Sentences of Marked Terms</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="addtag">Add Tag</option>';
+        $result .= '<option value="deltag">Remove Tag</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="exp">Export Marked Terms (Anki)</option>';
+        $result .= '<option value="exp2">Export Marked Terms (TSV)</option>';
+        $result .= '<option value="exp3">Export Marked Terms (Flexible)</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="del">Delete Marked Terms</option>';
+        return $result;
+    }
+
+    /**
+     * Build multiple tags actions dropdown options.
+     *
+     * @return string HTML options string
+     */
+    public static function forMultipleTagsActions(): string
+    {
+        $result = self::buildChooseOption();
+        $result .= '<option value="del">Delete Marked Tags</option>';
+        return $result;
+    }
+
+    /**
+     * Build all words actions dropdown options.
+     *
+     * @return string HTML options string
+     */
+    public static function forAllWordsActions(): string
+    {
+        $result = self::buildChooseOption();
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="testall">Test ALL Terms</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="spl1all">Increase Status by 1 [+1]</option>';
+        $result .= '<option value="smi1all">Reduce Status by 1 [-1]</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= StatusHelper::buildSetStatusOption(1, StatusHelper::getName(1), StatusHelper::getAbbr(1), 'all');
+        $result .= StatusHelper::buildSetStatusOption(5, StatusHelper::getName(5), StatusHelper::getAbbr(5), 'all');
+        $result .= StatusHelper::buildSetStatusOption(99, StatusHelper::getName(99), StatusHelper::getAbbr(99), 'all');
+        $result .= StatusHelper::buildSetStatusOption(98, StatusHelper::getName(98), StatusHelper::getAbbr(98), 'all');
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="todayall">Set Status Date to Today</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="lowerall">Set ALL Terms to Lowercase</option>';
+        $result .= '<option value="capall">Capitalize ALL Terms</option>';
+        $result .= '<option value="delsentall">Delete Sentences of ALL Terms</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="addtagall">Add Tag</option>';
+        $result .= '<option value="deltagall">Remove Tag</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="expall">Export ALL Terms (Anki)</option>';
+        $result .= '<option value="expall2">Export ALL Terms (TSV)</option>';
+        $result .= '<option value="expall3">Export ALL Terms (Flexible)</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="delall">Delete ALL Terms</option>';
+        return $result;
+    }
+
+    /**
+     * Build all tags actions dropdown options.
+     *
+     * @return string HTML options string
+     */
+    public static function forAllTagsActions(): string
+    {
+        $result = self::buildChooseOption();
+        $result .= '<option value="delall">Delete ALL Tags</option>';
+        return $result;
+    }
+
+    /**
+     * Build multiple texts actions dropdown options.
+     *
+     * @return string HTML options string
+     */
+    public static function forMultipleTextsActions(): string
+    {
+        $result = self::buildChooseOption();
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="test">Test Marked Texts</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="addtag">Add Tag</option>';
+        $result .= '<option value="deltag">Remove Tag</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="rebuild">Reparse Texts</option>';
+        $result .= '<option value="setsent">Set Term Sentences</option>';
+        $result .= '<option value="setactsent">Set Active Term Sentences</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="arch">Archive Marked Texts</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="del">Delete Marked Texts</option>';
+        return $result;
+    }
+
+    /**
+     * Build multiple archived texts actions dropdown options.
+     *
+     * @return string HTML options string
+     */
+    public static function forMultipleArchivedTextsActions(): string
+    {
+        $result = self::buildChooseOption();
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="addtag">Add Tag</option>';
+        $result .= '<option value="deltag">Remove Tag</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="unarch">Unarchive Marked Texts</option>';
+        $result .= '<option disabled="disabled">------------</option>';
+        $result .= '<option value="del">Delete Marked Texts</option>';
+        return $result;
+    }
 }

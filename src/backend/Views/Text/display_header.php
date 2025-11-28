@@ -26,54 +26,21 @@
 // $title, $audio, $sourceUri, $textLinks
 
 ?>
-<script type="text/javascript">
-    //<![CDATA[
-
-    /** Hide translations. */
-    function do_hide_t() {
-        $('#showt').show();
-        $('#hidet').hide();
-        $('.anntermruby')
-        .css('color','#E5E4E2').css('background-color', '#E5E4E2');
-    }
-
-    /** Show translations. */
-    function do_show_t() {
-        $('#showt').hide();
-        $('#hidet').show();
-        $('.anntermruby')
-        .css('color','inherit').css('background-color', '');
-    }
-
-    /** Hide annotations. */
-    function do_hide_a() {
-        $('#show').show();
-        $('#hide').hide();
-        $('.anntransruby2')
-        .css('color','#C8DCF0').css('background-color', '#C8DCF0');
-    }
-
-    /** Show annotations. */
-    function do_show_a() {
-        $('#show').hide();
-        $('#hide').show();
-        $('.anntransruby2')
-        .css('color','').css('background-color', '');
-    }
-    //]]>
-</script>
-
 <h1><?php echo tohtml($title); ?></h1>
 <div class="flex-spaced">
     <div>
         <img id="hidet" class="click" src="/assets/icons/light-bulb-T.png"
-        title="Toggle Text Display (Now ON)" alt="Toggle Text Display (Now ON)" onclick="do_hide_t();" />
+        title="Toggle Text Display (Now ON)" alt="Toggle Text Display (Now ON)"
+        data-action="hide-translations" />
         <img id="showt" style="display:none;" class="click" src="/assets/icons/light-bulb-off-T.png"
-        title="Toggle Text Display (Now OFF)" alt="Toggle Text Display (Now OFF)" onclick="do_show_t();" />
+        title="Toggle Text Display (Now OFF)" alt="Toggle Text Display (Now OFF)"
+        data-action="show-translations" />
         <img id="hide" class="click" src="/assets/icons/light-bulb-A.png"
-        title="Toggle Annotation Display (Now ON)" alt="Toggle Annotation Display (Now ON)" onclick="do_hide_a();" />
+        title="Toggle Annotation Display (Now ON)" alt="Toggle Annotation Display (Now ON)"
+        data-action="hide-annotations" />
         <img id="show" style="display:none;" class="click" src="/assets/icons/light-bulb-off-A.png"
-        title="Toggle Annotation Display (Now OFF)" alt="Toggle Annotation Display (Now OFF)" onclick="do_show_a();" />
+        title="Toggle Annotation Display (Now OFF)" alt="Toggle Annotation Display (Now OFF)"
+        data-action="show-annotations" />
     </div>
     <div>
         <?php
@@ -86,7 +53,8 @@
         ?>
     </div>
     <div>
-        <img class="click" src="/assets/icons/cross.png" title="Close Window" alt="Close Window" onclick="top.close();" />
+        <img class="click" src="/assets/icons/cross.png" title="Close Window" alt="Close Window"
+        data-action="close-window" />
     </div>
 </div>
 <?php

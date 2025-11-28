@@ -229,4 +229,34 @@ class StatusHelper
 
         return ($status == 98 ? '' : $minus . ' ') . $scoreText . ($status == 99 ? '' : ' ' . $plus);
     }
+
+    // =========================================================================
+    // Methods migrated from Core/UI/ui_helpers.php
+    // =========================================================================
+
+    /**
+     * Get status name by status code.
+     *
+     * @param int $status Status value (1-5, 98, or 99)
+     *
+     * @return string Status display name
+     */
+    public static function getName(int $status): string
+    {
+        $statuses = \Lwt\Services\WordStatusService::getStatuses();
+        return $statuses[$status]['name'] ?? '';
+    }
+
+    /**
+     * Get status abbreviation by status code.
+     *
+     * @param int $status Status value (1-5, 98, or 99)
+     *
+     * @return string Status abbreviation
+     */
+    public static function getAbbr(int $status): string
+    {
+        $statuses = \Lwt\Services\WordStatusService::getStatuses();
+        return $statuses[$status]['abbr'] ?? '';
+    }
 }

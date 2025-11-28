@@ -1563,4 +1563,39 @@ class TextService
             'redirect' => false
         ];
     }
+
+    // =========================================================================
+    // Methods migrated from Core/UI/ui_helpers.php
+    // =========================================================================
+
+    /**
+     * Get texts formatted for select dropdown options.
+     *
+     * @param int|null $langId Filter by language ID (null for all languages)
+     *
+     * @return array<int, array{id: int, title: string, language: string}> Array of text data
+     */
+    public function getTextsForSelect(?int $langId = null): array
+    {
+        $result = [];
+        $langFilter = $langId !== null ? "AND TxLgID = $langId" : '';
+        $sql = "SELECT TxID, TxTitle, LgName
+            FROM {$this->tbpref}languages, {$this->tbpref}texts
+            WHERE LgID = TxLgID $langFilter
+            ORDER BY LgName, TxTitle";
+        $res = Connection::query($sql);
+        while ($record = mysqli_fetch_assoc($res)) {
+            $title = (string)$record['TxTitle'];
+            if (mb_strlen($title, 'UTF-8') > 30) {
+                $title = mb_substr($title, 0, 30, 'UTF-8') . '...';
+            }
+            $result[] = [
+                'id' => (int)$record['TxID'],
+                'title' => $title,
+                'language' => (string)$record['LgName']
+            ];
+        }
+        mysqli_free_result($res);
+        return $result;
+    }
 }

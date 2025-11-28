@@ -31,14 +31,16 @@ namespace Lwt\Views\Word;
 use Lwt\Core\Http\InputValidator;
 
 ?>
-<script type="text/javascript">
-    $(document).ready(lwtFormCheck.askBeforeExit);
-    $(window).on('beforeunload',function() {
-        setTimeout(function() {window.parent.frames['ru'].location.href = 'empty.html';}, 0);
-    });
-</script>
 
-<form name="newword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+<script type="application/json" id="word-form-config">
+<?php echo json_encode([
+    'transUri' => $transUri,
+    'langShort' => $langShort,
+    'lang' => $lang,
+]); ?>
+</script>
+<form name="newword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"
+data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="fromAnn" value="<?php echo $fromAnn; ?>" />
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />
 <input type="hidden" name="WoTextLC" value="<?php echo tohtml($termlc); ?>" />
@@ -109,45 +111,6 @@ use Lwt\Core\Http\InputValidator;
    </tr>
 </table>
 </form>
-<script type="text/javascript">
-    const TRANS_URI = <?php echo json_encode($transUri); ?>
-    const LANG_SHORT = <?php echo json_encode($langShort); ?> ||
-    getLangFromDict(TRANS_URI);
-
-    /**
-     * Sets the translation of a term.
-     */
-    const autoTranslate = function () {
-        const translator_url = new URL(TRANS_URI);
-        const urlParams = translator_url.searchParams;
-        if (urlParams.get("lwt_translator") == "libretranslate") {
-            const term = $('#wordfield').val();
-            getLibreTranslateTranslation(
-                translator_url, term,
-                (urlParams.has("source") ?
-                urlParams.get("source") : LANG_SHORT),
-                urlParams.get("target")
-            )
-            .then(function (translation) {
-                newword.WoTranslation.value = translation;
-            });
-        }
-    }
-
-    /**
-     * Sets the romanization of a term.
-     */
-    const autoRomanization = function (lgid) {
-        const term = $('#wordfield').val();
-        getPhoneticTextAsync(term, lgid)
-        .then(function (phonetic) {
-            newword.WoRomanization.value = phonetic["phonetic_reading"];
-        });
-    }
-
-    autoTranslate();
-    autoRomanization(<?php echo json_encode($lang); ?>);
-</script>
 <?php
 // Display example sentence button
 example_sentences_area($lang, $termlc, 'document.forms.newword.WoSentence', 0);
