@@ -307,12 +307,26 @@ class LanguageController extends BaseController
     /**
      * Select language pair page (replaces language_select_pair.php)
      *
+     * This is a popup wizard for selecting L1 (native) and L2 (study) languages.
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function selectPair(array $params): void
     {
-        include __DIR__ . '/../Legacy/language_select_pair.php';
+        \pagestart_nobody(
+            'Language Settings Wizard',
+            'html{background-color: rgba(0, 0, 0, 0);}'
+        );
+
+        $currentnativelanguage = Settings::get('currentnativelanguage');
+        $languageOptions = $this->getWizardSelectOptions($currentnativelanguage);
+        $languageOptionsEmpty = $this->getWizardSelectOptions('');
+        $languagesJson = json_encode(LWT_LANGUAGES_ARRAY);
+
+        include __DIR__ . '/../Views/Language/select_pair.php';
+
+        \pageend();
     }
 }

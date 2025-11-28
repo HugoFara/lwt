@@ -17,10 +17,12 @@
 namespace Lwt\Controllers;
 
 use Lwt\Services\TextService;
+use Lwt\Services\TextDisplayService;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 
 require_once __DIR__ . '/../Services/TextService.php';
+require_once __DIR__ . '/../Services/TextDisplayService.php';
 
 /**
  * Controller for text management and reading interface.
@@ -86,10 +88,73 @@ class TextController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
     public function display(array $params): void
     {
-        include __DIR__ . '/../Legacy/text_display.php';
+        require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+        require_once __DIR__ . '/../Core/Text/text_helpers.php';
+        require_once __DIR__ . '/../Core/Http/param_helpers.php';
+        require_once __DIR__ . '/../Core/Language/language_utilities.php';
+        require_once __DIR__ . '/../Core/Media/media_helpers.php';
+
+        $textId = (int) \getreq('text');
+
+        if ($textId === 0) {
+            header("Location: /text/edit");
+            exit();
+        }
+
+        $displayService = new TextDisplayService();
+
+        // Get annotated text
+        $annotatedText = $displayService->getAnnotatedText($textId);
+        if (strlen($annotatedText) <= 0) {
+            header("Location: /text/edit");
+            exit();
+        }
+
+        // Get display settings
+        $settings = $displayService->getTextDisplaySettings($textId);
+        if ($settings === null) {
+            header("Location: /text/edit");
+            exit();
+        }
+
+        // Get header data
+        $headerData = $displayService->getHeaderData($textId);
+        if ($headerData === null) {
+            header("Location: /text/edit");
+            exit();
+        }
+
+        // Prepare view variables
+        $title = $headerData['title'];
+        $audio = $headerData['audio'];
+        $sourceUri = $headerData['sourceUri'];
+        $textSize = $settings['textSize'];
+        $rtlScript = $settings['rtlScript'];
+
+        // Get navigation links
+        $textLinks = \getPreviousAndNextTextLinks(
+            $textId,
+            'display_impr_text.php?text=',
+            true,
+            ' &nbsp; &nbsp; '
+        );
+
+        // Parse annotations
+        $annotations = $displayService->parseAnnotations($annotatedText);
+
+        // Save current text
+        $displayService->saveCurrentText($textId);
+
+        // Render page
+        \pagestart_nobody('Display');
+        include __DIR__ . '/../Views/Text/display_main.php';
+        \pageend();
     }
 
     /**
@@ -134,10 +199,37 @@ class TextController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
     public function setMode(array $params): void
     {
-        include __DIR__ . '/../Legacy/text_set_mode.php';
+        require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+        require_once __DIR__ . '/../Core/Http/param_helpers.php';
+
+        $textId = \getreq('text');
+        if ($textId === '') {
+            return;
+        }
+
+        $showAll = (int) \getreq('mode');
+        $showLearning = (int) \getreq('showLearning');
+
+        // Save settings and get the old value
+        Settings::save('showallwords', $showAll);
+        $oldShowLearning = Settings::getZeroOrOne('showlearningtranslations', 1);
+        Settings::save('showlearningtranslations', $showLearning);
+
+        // Display result page
+        \pagestart("Text Display Mode changed", false);
+
+        $waitingIconPath = \get_file_path('assets/icons/waiting.gif');
+        flush();
+
+        include __DIR__ . '/../Views/Text/set_mode_result.php';
+
+        \pageend();
     }
 
     /**

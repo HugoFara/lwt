@@ -1,51 +1,31 @@
 <?php
 
 /**
- * \file
- * \brief Display Language Pair Selection Window for Wizard
+ * Language Pair Selection View - Wizard popup for selecting language pairs
  *
- * Call: select_lang_pair.php
+ * Variables expected:
+ * - $currentnativelanguage: string current native language setting
+ * - $languageOptions: string HTML options for native language (L1) select
+ * - $languageOptionsEmpty: string HTML options for target language (L2) select
+ * - $languagesJson: string JSON-encoded LWT_LANGUAGES_ARRAY
  *
  * PHP version 8.1
  *
- * @category Helper_Frame
- * @package  Lwt
- * @author   https://sourceforge.net/projects/lwt/ LWT Project
+ * @category Lwt
+ * @package  Lwt\Views
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
- * @since    1.5.11
+ * @since    3.0.0
  */
 
-require_once 'Core/Bootstrap/db_bootstrap.php';
-require_once 'Core/UI/ui_helpers.php';
-require_once 'Core/Language/language_utilities.php';
-require_once 'Core/Language/langdefs.php';
-
-use Lwt\Database\Settings;
-
-/**
- * Returns a dropdown menu of the different languages
- */
-function get_wizard_selectoptions(string $v): string
-{
-    $r = "<option value=\"\"" . get_selected($v, "") . ">[Choose...]</option>";
-    $keys = array_keys(LWT_LANGUAGES_ARRAY);
-    foreach ($keys as $item) {
-        $r .= "<option value=\"" . $item . "\"" . get_selected($v, $item) . ">" . $item . "</option>";
-    }
-    return $r;
-}
-
-pagestart_nobody('Language Settings Wizard', 'html{background-color: rgba(0, 0, 0, 0);}');
-
-$currentnativelanguage = Settings::get('currentnativelanguage');
+namespace Lwt\Views\Language;
 
 ?>
-
 <script type="text/javascript">
     //<![CDATA[
 
-    const LANGDEFS = <?php echo json_encode(LWT_LANGUAGES_ARRAY); ?>;
+    const LANGDEFS = <?php echo $languagesJson; ?>;
 
     /// Execute the wizard
     function wizard_go() {
@@ -116,7 +96,7 @@ $currentnativelanguage = Settings::get('currentnativelanguage');
         <br />
         L1:
         <select name="l1" id="l1" onchange="{do_ajax_save_setting('currentnativelanguage',($('#l1').val()));}">
-            <?php echo get_wizard_selectoptions($currentnativelanguage); ?>
+            <?php echo $languageOptions; ?>
         </select>
     </p>
     <p class="wizard">
@@ -124,7 +104,7 @@ $currentnativelanguage = Settings::get('currentnativelanguage');
         <br />
         L2:
         <select name="l2" id="l2">
-            <?php echo get_wizard_selectoptions(''); ?>
+            <?php echo $languageOptionsEmpty; ?>
         </select>
     </p>
     <p class="wizard">
@@ -135,8 +115,3 @@ $currentnativelanguage = Settings::get('currentnativelanguage');
         <input type="button" value="Cancel" onclick="wizard_exit();" />
     </p>
 </div>
-<?php
-
-pageend();
-
-?>

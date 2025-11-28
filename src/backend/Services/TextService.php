@@ -1146,4 +1146,148 @@ class TextService
         mysqli_free_result($res);
         return $result;
     }
+
+    // ===========================
+    // LONG TEXT IMPORT METHODS
+    // ===========================
+
+    /**
+     * Prepare text data for long text import.
+     *
+     * Handles file upload or clipboard paste, normalizes line endings,
+     * and processes paragraphs.
+     *
+     * @param array  $files             $_FILES array
+     * @param string $uploadText        Text from textarea
+     * @param int    $paragraphHandling 1=one newline ends paragraph, 2=two newlines
+     *
+     * @return string Processed text data
+     */
+    public function prepareLongTextData(
+        array $files,
+        string $uploadText,
+        int $paragraphHandling
+    ): string {
+        // Get $data with \n line endings
+        if (
+            isset($files["thefile"])
+            && $files["thefile"]["tmp_name"] != ""
+            && $files["thefile"]["error"] == 0
+        ) {
+            $data = file_get_contents($files["thefile"]["tmp_name"]);
+            $data = str_replace("\r\n", "\n", $data);
+        } else {
+            $data = Escaping::prepareTextdata($uploadText);
+        }
+        $data = \replace_supp_unicode_planes_char($data);
+        $data = trim($data);
+
+        // Use pilcrow symbol for paragraphs separation
+        if ($paragraphHandling == 2) {
+            $data = preg_replace('/\n\s*?\n/u', '¶', $data);
+            $data = str_replace("\n", ' ', $data);
+        } else {
+            $data = str_replace("\n", '¶', $data);
+        }
+        $data = preg_replace('/\s{2,}/u', ' ', $data);
+        $data = str_replace('¶ ', '¶', $data);
+        // Separate paragraphs by \n finally
+        $data = str_replace('¶', "\n", $data);
+
+        return $data;
+    }
+
+    /**
+     * Split long text into smaller texts.
+     *
+     * @param string $data    Prepared text data
+     * @param int    $langId  Language ID
+     * @param int    $maxSent Maximum sentences per text
+     *
+     * @return array Array of text arrays (each containing sentences)
+     */
+    public function splitLongText(string $data, int $langId, int $maxSent): array
+    {
+        $sentArray = TextParsing::splitCheck($data, $langId, -2);
+        $texts = [];
+        $textIndex = 0;
+        $texts[$textIndex] = [];
+        $cnt = 0;
+        $bytes = 0;
+
+        foreach ($sentArray as $item) {
+            $itemLen = strlen($item) + 1;
+            if ($item != '¶') {
+                $cnt++;
+            }
+            if ($cnt <= $maxSent && $bytes + $itemLen < 65000) {
+                $texts[$textIndex][] = $item;
+                $bytes += $itemLen;
+            } else {
+                $textIndex++;
+                $texts[$textIndex] = [$item];
+                $cnt = 1;
+                $bytes = $itemLen;
+            }
+        }
+
+        return $texts;
+    }
+
+    /**
+     * Save long text import (multiple texts).
+     *
+     * @param int    $langId    Language ID
+     * @param string $title     Base title
+     * @param string $sourceUri Source URI
+     * @param array  $texts     Array of text contents
+     * @param int    $textCount Expected text count
+     *
+     * @return array{success: bool, message: string, imported: int}
+     */
+    public function saveLongTextImport(
+        int $langId,
+        string $title,
+        string $sourceUri,
+        array $texts,
+        int $textCount
+    ): array {
+        if (count($texts) != $textCount) {
+            return [
+                'success' => false,
+                'message' => "Error: Number of texts wrong: " . count($texts) . " != " . $textCount,
+                'imported' => 0
+            ];
+        }
+
+        $imported = 0;
+        for ($i = 0; $i < $textCount; $i++) {
+            $texts[$i] = $this->removeSoftHyphens($texts[$i]);
+            $counter = \makeCounterWithTotal($textCount, $i + 1);
+            $thisTitle = $title . ($counter == '' ? '' : (' (' . $counter . ')'));
+
+            $imported += (int) Connection::execute(
+                'INSERT INTO ' . $this->tbpref . 'texts (
+                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
+                    TxSourceURI
+                ) VALUES ( ' .
+                    $langId . ', ' .
+                    Escaping::toSqlSyntax($thisTitle) . ', ' .
+                    Escaping::toSqlSyntax($texts[$i]) . ", '',
+                    NULL, " .
+                    Escaping::toSqlSyntax($sourceUri) .
+                ')',
+                ''
+            );
+            $id = Connection::lastInsertId();
+            \saveTextTags($id);
+            TextParsing::splitCheck($texts[$i], $langId, $id);
+        }
+
+        return [
+            'success' => true,
+            'message' => $imported . " Text(s) imported!",
+            'imported' => $imported
+        ];
+    }
 }

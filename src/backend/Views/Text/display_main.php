@@ -5,6 +5,13 @@
  *
  * Variables expected:
  * - $textId: int - Text ID
+ * - $title: string - Text title
+ * - $audio: string - Audio URI
+ * - $sourceUri: string|null - Source URI
+ * - $textLinks: string - Previous/next text navigation links
+ * - $annotations: array - Parsed annotation items
+ * - $textSize: int - Text size percentage
+ * - $rtlScript: bool - Whether text is right-to-left
  *
  * PHP version 8.1
  *
@@ -16,22 +23,15 @@
  * @since    3.0.0
  *
  * @psalm-suppress UndefinedGlobalVariable Variables are injected by including file
- * @psalm-suppress UndefinedFunction Functions are defined in the including namespace
  */
-
-// Variables injected from text_display.php:
-// $textId
-
-// Functions from Lwt\Interface\TextDisplay namespace are available because
-// this file is included from text_display.php which defines them
 
 ?>
 <div style="width: 95%; height: 100%;">
     <div id="frame-h">
-        <?php \Lwt\Interface\TextDisplay\do_diplay_impr_text_header_main($textId); ?>
+        <?php include __DIR__ . '/display_header.php'; ?>
     </div>
     <hr />
     <div id="frame-l">
-        <?php \Lwt\Interface\TextDisplay\do_display_impr_text_text_main($textId); ?>
+        <?php include __DIR__ . '/display_text.php'; ?>
     </div>
 </div>
