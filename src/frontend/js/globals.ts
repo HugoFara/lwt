@@ -19,6 +19,7 @@ import { markClick, confirmDelete, showAllwordsClick } from './core/ui_utilities
 import { selectToggle, multiActionGo, allActionGo } from './forms/bulk_actions';
 import { updateTermTranslation, addTermTranslation, changeTableTestStatus, do_ajax_edit_impr_text } from './terms/term_operations';
 import { lwt_audio_controller, setupAudioPlayer, getAudioPlayer } from './media/html5_audio_player';
+import { LWT_DATA, LwtDataInterface } from './core/lwt_state';
 
 // Declare global window interface extensions
 declare global {
@@ -78,6 +79,9 @@ declare global {
     showExportTemplateHelp: typeof showExportTemplateHelp;
     openModal: typeof openModal;
     closeModal: typeof closeModal;
+
+    // Global state object
+    LWT_DATA: LwtDataInterface;
   }
 }
 
@@ -126,3 +130,6 @@ window.getAudioPlayer = getAudioPlayer;
 window.showExportTemplateHelp = showExportTemplateHelp;
 window.openModal = openModal;
 window.closeModal = closeModal;
+
+// Global state object
+window.LWT_DATA = LWT_DATA;

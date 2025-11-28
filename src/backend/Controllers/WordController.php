@@ -16,6 +16,9 @@
 
 namespace Lwt\Controllers;
 
+require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../Core/Language/language_utilities.php';
+
 use Lwt\Services\WordService;
 use Lwt\Services\WordListService;
 use Lwt\Services\WordUploadService;

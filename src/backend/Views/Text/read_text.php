@@ -85,11 +85,15 @@ $varArray = [
      * Called after LWT Vite bundle is loaded or immediately if not using Vite.
      */
     function initTextReading() {
-        // Set global variables
+        // Set global variables - merge PHP values into existing LWT_DATA
         for (let key in new_globals) {
-            if (typeof new_globals[key] !== 'string') {
+            if (typeof window[key] === 'undefined') {
+                window[key] = new_globals[key];
+            } else if (typeof new_globals[key] === 'object' && new_globals[key] !== null) {
                 for (let subkey1 in new_globals[key]) {
-                    if (typeof new_globals[key] !== 'string') {
+                    if (typeof window[key][subkey1] === 'undefined') {
+                        window[key][subkey1] = new_globals[key][subkey1];
+                    } else if (typeof new_globals[key][subkey1] === 'object' && new_globals[key][subkey1] !== null) {
                         for (let subkey2 in new_globals[key][subkey1]) {
                             window[key][subkey1][subkey2] = new_globals[key][subkey1][subkey2];
                         }

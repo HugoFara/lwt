@@ -1075,4 +1075,771 @@ class WordControllerTest extends TestCase
         $this->assertEquals('controller test', $decoded['text']);
         $this->assertEquals(3, $decoded['status']);
     }
+
+    // ===== Additional Controller Action Tests =====
+
+    // ===== edit() method tests =====
+
+    public function testEditReturnsEarlyWithNoParameters(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+
+        // Without wid, tid, ord, or op, should return early
+        $_REQUEST = [];
+        ob_start();
+        $controller->edit([]);
+        $output = ob_get_clean();
+
+        // Should produce no output (early return)
+        $this->assertEmpty($output);
+    }
+
+    // ===== editTerm() method tests =====
+
+    public function testEditTermMethodExists(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $this->assertTrue(method_exists($controller, 'editTerm'));
+    }
+
+    // ===== listEdit() method tests =====
+
+    public function testListEditMethodExists(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $this->assertTrue(method_exists($controller, 'listEdit'));
+    }
+
+    // ===== all() method tests =====
+
+    public function testAllReturnsEarlyWithoutTextParam(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+
+        $_REQUEST = [];
+        ob_start();
+        $controller->all([]);
+        $output = ob_get_clean();
+
+        $this->assertEmpty($output);
+    }
+
+    public function testAllMethodExists(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $this->assertTrue(method_exists($controller, 'all'));
+    }
+
+    // ===== inlineEdit() method tests =====
+
+    public function testInlineEditTranslation(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create a word first
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_inline_trans',
+            'WoStatus' => 1,
+            'WoTranslation' => 'original translation',
+        ];
+        $result = $service->create($data);
+        $wordId = $result['id'];
+
+        $_POST = [
+            'id' => 'trans' . $wordId,
+            'value' => 'new inline translation'
+        ];
+
+        ob_start();
+        $controller->inlineEdit([]);
+        $output = ob_get_clean();
+
+        $this->assertEquals('new inline translation', $output);
+
+        // Verify in database
+        $word = $service->findById($wordId);
+        $this->assertEquals('new inline translation', $word['WoTranslation']);
+    }
+
+    public function testInlineEditRomanization(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create a word first
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_inline_roman',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+            'WoRomanization' => 'original roman',
+        ];
+        $result = $service->create($data);
+        $wordId = $result['id'];
+
+        $_POST = [
+            'id' => 'roman' . $wordId,
+            'value' => 'new romanization'
+        ];
+
+        ob_start();
+        $controller->inlineEdit([]);
+        $output = ob_get_clean();
+
+        $this->assertEquals('new romanization', $output);
+    }
+
+    public function testInlineEditWithInvalidIdReturnsError(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+
+        $_POST = [
+            'id' => 'invalid123',
+            'value' => 'some value'
+        ];
+
+        ob_start();
+        $controller->inlineEdit([]);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('ERROR', $output);
+    }
+
+    public function testInlineEditEmptyTranslationBecomesStar(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create a word
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_empty_trans',
+            'WoStatus' => 1,
+            'WoTranslation' => 'has translation',
+        ];
+        $result = $service->create($data);
+        $wordId = $result['id'];
+
+        $_POST = [
+            'id' => 'trans' . $wordId,
+            'value' => ''
+        ];
+
+        ob_start();
+        $controller->inlineEdit([]);
+        $output = ob_get_clean();
+
+        $this->assertEquals('*', $output);
+    }
+
+    // ===== deleteMulti() method tests =====
+
+    public function testDeleteMultiMethodExists(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $this->assertTrue(method_exists($controller, 'deleteMulti'));
+    }
+
+    // ===== show() method tests =====
+
+    public function testShowMethodExists(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $this->assertTrue(method_exists($controller, 'show'));
+    }
+
+    // ===== upload() method tests =====
+
+    public function testUploadMethodExists(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $this->assertTrue(method_exists($controller, 'upload'));
+    }
+
+    public function testGetUploadServiceForTest(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $uploadService = $controller->getUploadServiceForTest();
+
+        $this->assertNotNull($uploadService);
+    }
+
+    // ===== WordService additional method tests =====
+
+    public function testFindByTextReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $result = $service->findByText('nonexistent_word_xyz', self::$testLangId);
+
+        $this->assertNull($result);
+    }
+
+    public function testFindByTextReturnsIdForExisting(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create a word
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_findbytext',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+        ];
+        $result = $service->create($data);
+        $wordId = $result['id'];
+
+        $foundId = $service->findByText('ctrl_test_findbytext', self::$testLangId);
+
+        $this->assertEquals($wordId, $foundId);
+    }
+
+    public function testGetTermFromTextItemReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Non-existent text and ord should return null
+        $result = $service->getTermFromTextItem(999999, 999999);
+
+        $this->assertNull($result);
+    }
+
+    public function testGetLanguageDataReturnsExpectedKeys(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $data = $service->getLanguageData(self::$testLangId);
+
+        $this->assertIsArray($data);
+        $this->assertArrayHasKey('showRoman', $data);
+        $this->assertArrayHasKey('translateUri', $data);
+        $this->assertArrayHasKey('name', $data);
+    }
+
+    public function testGetTextLanguageIdReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $result = $service->getTextLanguageId(999999);
+
+        $this->assertNull($result);
+    }
+
+    public function testGetFilteredWordIdsWithEmptyFilters(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Empty filters should return all words
+        $ids = $service->getFilteredWordIds([]);
+
+        $this->assertIsArray($ids);
+    }
+
+    public function testGetFilteredWordIdsWithLangFilter(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create some words
+        for ($i = 1; $i <= 3; $i++) {
+            $data = [
+                'WoLgID' => self::$testLangId,
+                'WoText' => "ctrl_test_filter_$i",
+                'WoStatus' => 1,
+                'WoTranslation' => "translation $i",
+            ];
+            $service->create($data);
+        }
+
+        $ids = $service->getFilteredWordIds(['langId' => self::$testLangId]);
+
+        $this->assertIsArray($ids);
+        $this->assertNotEmpty($ids);
+    }
+
+    public function testUpdateWithStatusChange(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create a word with status 1
+        $createData = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_update_status',
+            'WoStatus' => 1,
+            'WoTranslation' => 'original',
+        ];
+        $createResult = $service->create($createData);
+        $wordId = $createResult['id'];
+
+        // Update with status change
+        $updateData = [
+            'WoText' => 'ctrl_test_update_status',
+            'WoTranslation' => 'updated',
+            'WoStatus' => 3,
+            'WoOldStatus' => 1,
+        ];
+        $updateResult = $service->update($wordId, $updateData);
+
+        $this->assertTrue($updateResult['success']);
+
+        // Verify status changed
+        $word = $service->findById($wordId);
+        $this->assertEquals('3', $word['WoStatus']);
+    }
+
+    public function testCreateWithDuplicateReturnsError(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create first word
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_duplicate',
+            'WoStatus' => 1,
+            'WoTranslation' => 'first',
+        ];
+        $result1 = $service->create($data);
+        $this->assertTrue($result1['success']);
+
+        // Try to create duplicate
+        $result2 = $service->create($data);
+        $this->assertFalse($result2['success']);
+        $this->assertStringContainsString('Duplicate', $result2['message']);
+    }
+
+    public function testGetSentenceForTermWithNonExistentPosition(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $result = $service->getSentenceForTerm(999999, 999999, 'test');
+
+        $this->assertEquals('', $result);
+    }
+
+    public function testTextToClassNameConvertsCorrectly(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $hex = $service->textToClassName('hello');
+
+        $this->assertIsString($hex);
+        $this->assertNotEmpty($hex);
+    }
+
+    public function testGetWordCountReturnsZeroForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $count = $service->getWordCount(999999);
+
+        $this->assertEquals(0, $count);
+    }
+
+    public function testLinkToTextItemsDoesNotThrowException(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // This should not throw an exception even with non-existent data
+        $service->linkToTextItems(999999, self::$testLangId, 'test');
+
+        // If we get here, the test passes
+        $this->assertTrue(true);
+    }
+
+    public function testGetUnknownWordsInTextReturnsResult(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // This should return a result even for non-existent text
+        $result = $service->getUnknownWordsInText(999999);
+
+        $this->assertNotFalse($result);
+        mysqli_free_result($result);
+    }
+
+    public function testLinkAllTextItemsDoesNotThrowException(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // This should not throw an exception
+        $service->linkAllTextItems();
+
+        // If we get here, the test passes
+        $this->assertTrue(true);
+    }
+
+    public function testGetWordAtPositionReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $result = $service->getWordAtPosition(999999, 999999);
+
+        $this->assertNull($result);
+    }
+
+    public function testGetWordDetailsReturnsCorrectStructure(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create a word
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_details',
+            'WoStatus' => 2,
+            'WoTranslation' => 'details translation',
+            'WoRomanization' => 'details roman',
+            'WoSentence' => 'Test {ctrl_test_details} sentence.',
+        ];
+        $result = $service->create($data);
+
+        $details = $service->getWordDetails($result['id']);
+
+        $this->assertIsArray($details);
+        $this->assertArrayHasKey('langId', $details);
+        $this->assertArrayHasKey('text', $details);
+        $this->assertArrayHasKey('translation', $details);
+        $this->assertArrayHasKey('sentence', $details);
+        $this->assertArrayHasKey('romanization', $details);
+        $this->assertArrayHasKey('status', $details);
+        $this->assertEquals('ctrl_test_details', $details['text']);
+        $this->assertEquals(2, $details['status']);
+    }
+
+    public function testGetWordDetailsReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $details = $service->getWordDetails(999999);
+
+        $this->assertNull($details);
+    }
+
+    public function testGetWordDetailsNormalizesStarTranslation(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create a word with * translation (empty)
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_star_trans',
+            'WoStatus' => 1,
+            'WoTranslation' => '',  // Will become * in DB
+        ];
+        $result = $service->create($data);
+
+        $details = $service->getWordDetails($result['id']);
+
+        // Star should be converted to empty string for display
+        $this->assertEquals('', $details['translation']);
+    }
+
+    public function testFindMultiWordByTextReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $result = $service->findMultiWordByText('nonexistent_multiword', self::$testLangId);
+
+        $this->assertNull($result);
+    }
+
+    public function testGetLanguageIdFromTextReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $result = $service->getLanguageIdFromText(999999);
+
+        $this->assertNull($result);
+    }
+
+    public function testGetSentenceIdAtPositionReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $result = $service->getSentenceIdAtPosition(999999, 999999);
+
+        $this->assertNull($result);
+    }
+
+    public function testShouldShowRomanizationForNonExistentText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Should return false for non-existent text
+        $result = $service->shouldShowRomanization(999999);
+
+        $this->assertFalse($result);
+    }
+
+    public function testGetMultiWordDataReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $result = $service->getMultiWordData(999999);
+
+        $this->assertNull($result);
+    }
+
+    public function testUpdateRomanizationWithStarBecomesEmpty(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create a word with romanization
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_roman_star',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+            'WoRomanization' => 'some roman',
+        ];
+        $result = $service->create($data);
+        $wordId = $result['id'];
+
+        // Update with * (should become empty)
+        $updated = $service->updateRomanization($wordId, '*');
+
+        // Should return * for display since it's now empty
+        $this->assertEquals('*', $updated);
+
+        // Verify in database it's empty
+        $word = $service->findById($wordId);
+        $this->assertEquals('', $word['WoRomanization']);
+    }
+
+    public function testGetAllUnknownWordsInTextReturnsResult(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Should return a result even for non-existent text
+        $result = $service->getAllUnknownWordsInText(999999);
+
+        $this->assertNotFalse($result);
+        mysqli_free_result($result);
+    }
+
+    public function testDeleteMultiWordMethod(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Create a multi-word (buffer output)
+        $createData = [
+            'lgid' => self::$testLangId,
+            'text' => 'ctrl_delete_multi_test',
+            'textlc' => 'ctrl_delete_multi_test',
+            'status' => 1,
+            'translation' => 'to be deleted',
+            'sentence' => '',
+            'roman' => '',
+            'wordcount' => 3,
+        ];
+        ob_start();
+        $created = $service->createMultiWord($createData);
+        ob_end_clean();
+
+        // Delete it
+        $result = $service->deleteMultiWord($created['id']);
+
+        // Verify deleted
+        $word = $service->findById($created['id']);
+        $this->assertNull($word);
+    }
+
+    // ===== create() action tests =====
+
+    public function testCreateActionMethodExists(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $this->assertTrue(method_exists($controller, 'create'));
+    }
 }

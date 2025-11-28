@@ -15,6 +15,9 @@
 
 namespace Lwt\Services;
 
+require_once __DIR__ . '/../Core/Text/sentence_operations.php';
+require_once __DIR__ . '/../Core/Export/export_helpers.php';
+
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;

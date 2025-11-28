@@ -138,20 +138,33 @@
 <?php makeMediaPlayer($media, (int) $audioPosition); ?>
 
 <script type="text/javascript">
+    // Store PHP values for later use after Vite loads
+    const _lwtPhoneticText = <?php echo json_encode($phoneticText); ?>;
+    const _lwtLanguageCode = <?php echo json_encode($languageCode); ?>;
+    const _lwtVoiceApi = <?php echo json_encode($voiceApi); ?>;
 
     /// Main object for text-to-speech interaction with SpeechSynthesisUtterance
-    const text_reader = {
-        /// The text to read
-        text: <?php echo json_encode($phoneticText); ?>,
+    let text_reader = null;
 
-        /// {string} ISO code for the language
-        lang: getLangFromDict(LWT_DATA.language.translator_link) || <?php echo json_encode($languageCode); ?>,
+    /**
+     * Initialize TTS after Vite bundle is loaded.
+     */
+    function initTTS() {
+        text_reader = {
+            /// The text to read
+            text: _lwtPhoneticText,
 
-        /// {string} Rate at wich the speech is done, deprecated since 2.10.0
-        rate: 0.8
-    };
+            /// {string} ISO code for the language
+            lang: (typeof getLangFromDict === 'function' ? getLangFromDict(LWT_DATA.language.translator_link) : '') || _lwtLanguageCode,
 
-    LWT_DATA.language.ttsVoiceApi = <?php echo json_encode($voiceApi); ?>;
+            /// {string} Rate at which the speech is done, deprecated since 2.10.0
+            rate: 0.8
+        };
+
+        if (typeof LWT_DATA !== 'undefined' && LWT_DATA.language) {
+            LWT_DATA.language.ttsVoiceApi = _lwtVoiceApi;
+        }
+    }
 
     /**
      * Check browser compatibility before reading
@@ -161,9 +174,13 @@
             alert('Your browser does not support speechSynthesis!');
             return;
         }
-        readRawTextAloud(
-            text_reader.text, getLangFromDict(LWT_DATA.language.translator_link) || text_reader.lang
-        );
+        if (!text_reader) {
+            initTTS();
+        }
+        const lang = (typeof getLangFromDict === 'function' ? getLangFromDict(LWT_DATA.language.translator_link) : '') || text_reader.lang;
+        if (typeof readRawTextAloud === 'function') {
+            readRawTextAloud(text_reader.text, lang);
+        }
     }
 
     /** Start and stop the reading feature. */
@@ -188,5 +205,18 @@
     function annotationModeChanged(mode) {
         console.log(mode);
         // 2.9.0: seems to be a debug function, candidate to deletion
+    }
+
+    // Initialize TTS when Vite bundle is ready
+    if (window.LWT_VITE_LOADED) {
+        initTTS();
+    } else {
+        const checkViteTTS = setInterval(function() {
+            if (window.LWT_VITE_LOADED) {
+                clearInterval(checkViteTTS);
+                initTTS();
+            }
+        }, 10);
+        setTimeout(function() { clearInterval(checkViteTTS); }, 5000);
     }
 </script>

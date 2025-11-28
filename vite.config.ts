@@ -21,14 +21,7 @@ export default defineConfig({
         entryFileNames: 'js/vite/[name].[hash].js',
         chunkFileNames: 'js/vite/chunks/[name].[hash].js',
         assetFileNames: 'css/vite/[name].[hash][extname]',
-        // Use global jQuery instead of bundling it
-        globals: {
-          jquery: 'jQuery',
-          'jquery-ui-dist/jquery-ui': 'jQuery'
-        }
       },
-      // Externalize jQuery - it's loaded separately for inline script compatibility
-      external: ['jquery', 'jquery-ui-dist/jquery-ui']
     }
   },
 
@@ -53,6 +46,9 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src/frontend/js'),
       '@css': resolve(__dirname, 'src/frontend/css'),
+      // Map jQuery imports to our shims that use global jQuery
+      'jquery': resolve(__dirname, 'src/frontend/js/shims/jquery-shim.ts'),
+      'jquery-ui-dist/jquery-ui': resolve(__dirname, 'src/frontend/js/shims/jquery-ui-shim.ts'),
     }
   }
 });
