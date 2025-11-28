@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -35,17 +36,17 @@ class SimtermsTest extends TestCase
         }
 
         // Ensure we have a test database set up
-        $result = do_mysqli_query("SHOW TABLES LIKE 'words'");
+        $result = Connection::query("SHOW TABLES LIKE 'words'");
         $res = mysqli_fetch_assoc($result);
 
         if ($res) {
             // Truncate words table for clean test data
-            do_mysqli_query("TRUNCATE TABLE " . $GLOBALS['tbpref'] . "words");
-            do_mysqli_query("TRUNCATE TABLE " . $GLOBALS['tbpref'] . "languages");
+            Connection::query("TRUNCATE TABLE " . $GLOBALS['tbpref'] . "words");
+            Connection::query("TRUNCATE TABLE " . $GLOBALS['tbpref'] . "languages");
         }
 
         // Insert a test language
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO " . $GLOBALS['tbpref'] . "languages (LgID, LgName, LgDict1URI, LgGoogleTranslateURI)
             VALUES (1, 'English', 'http://example.com/dict', 'http://translate.google.com')"
         );
@@ -69,7 +70,7 @@ class SimtermsTest extends TestCase
             $woTranslation = convert_string_to_sqlsyntax($word[1]);
             $woRomanization = convert_string_to_sqlsyntax($word[2]);
 
-            do_mysqli_query(
+            Connection::query(
                 "INSERT INTO " . $GLOBALS['tbpref'] . "words
                 (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
                 VALUES (" . ($i + 1) . ", 1, $woText, $woTextLC, 1, $woTranslation, $woRomanization)"
@@ -80,8 +81,8 @@ class SimtermsTest extends TestCase
     public static function tearDownAfterClass(): void
     {
         // Clean up test data
-        do_mysqli_query("TRUNCATE TABLE " . $GLOBALS['tbpref'] . "words");
-        do_mysqli_query("TRUNCATE TABLE " . $GLOBALS['tbpref'] . "languages");
+        Connection::query("TRUNCATE TABLE " . $GLOBALS['tbpref'] . "words");
+        Connection::query("TRUNCATE TABLE " . $GLOBALS['tbpref'] . "languages");
     }
 
     // ========== LETTER PAIRS FUNCTION ==========
@@ -286,14 +287,14 @@ class SimtermsTest extends TestCase
         $this->assertStringNotContainsString('[cat]', $output);
 
         // Test with wildcard translation (*)
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO " . $GLOBALS['tbpref'] . "words
             (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
             VALUES (100, 1, 'testword', 'testword', 1, '*', '')"
         );
         $output = format_term(100, 'test');
         $this->assertStringContainsString('???', $output);
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "words WHERE WoID = 100");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "words WHERE WoID = 100");
 
         // Test with non-existent term ID
         $output = format_term(9999, 'test');
@@ -379,12 +380,12 @@ class SimtermsTest extends TestCase
     public function testUTF8Support(): void
     {
         // Insert UTF-8 words
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO " . $GLOBALS['tbpref'] . "words
             (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
             VALUES (200, 1, '日本語', '日本語', 1, 'Japanese language', 'nihongo')"
         );
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO " . $GLOBALS['tbpref'] . "words
             (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
             VALUES (201, 1, '日本', '日本', 1, 'Japan', 'nihon')"
@@ -411,7 +412,7 @@ class SimtermsTest extends TestCase
         $this->assertStringContainsString('Japanese language', $output);
 
         // Clean up
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "words WHERE WoID IN (200, 201)");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "words WHERE WoID IN (200, 201)");
     }
 
     public function testSimilarityRankingEdgeCases(): void

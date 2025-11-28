@@ -56,8 +56,8 @@ class ConnectionTest extends TestCase
 
         // Clean up test data after each test
         $tbpref = self::$tbpref;
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_conn_%'");
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_conn_%'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_conn_%'");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_conn_%'");
     }
 
     // ===== getInstance() tests =====
@@ -127,7 +127,7 @@ class ConnectionTest extends TestCase
         $this->assertTrue($result);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_conn_tag'");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_conn_tag'");
     }
 
     public function testQueryWithInvalidSqlThrowsException(): void
@@ -189,7 +189,7 @@ class ConnectionTest extends TestCase
         $this->assertEmpty($rows);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_conn_fetchall'");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_conn_fetchall'");
     }
 
     // ===== fetchOne() tests =====
@@ -211,7 +211,7 @@ class ConnectionTest extends TestCase
         $this->assertEquals('value1', $row['StValue']);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_one'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_one'");
     }
 
     public function testFetchOneReturnsNullWhenNoResults(): void
@@ -268,7 +268,7 @@ class ConnectionTest extends TestCase
         $this->assertEquals('myvalue', $value);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_value'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_value'");
     }
 
     public function testFetchValueWithCustomColumn(): void
@@ -285,7 +285,7 @@ class ConnectionTest extends TestCase
         $this->assertEquals('customvalue', $value);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_custom'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_custom'");
     }
 
     public function testFetchValueReturnsNullWhenNoResults(): void
@@ -342,7 +342,7 @@ class ConnectionTest extends TestCase
         $this->assertEquals(1, $affected);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_update'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_update'");
     }
 
     // ===== lastInsertId() tests =====
@@ -361,7 +361,7 @@ class ConnectionTest extends TestCase
         $this->assertGreaterThan(0, $lastId);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgID = $lastId");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgID = $lastId");
     }
 
     // ===== escape() tests =====
@@ -519,7 +519,7 @@ class ConnectionTest extends TestCase
         $this->assertEquals($testValue, $retrieved);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_escape'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_escape'");
     }
 
     public function testQueryChaining(): void

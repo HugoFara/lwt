@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 use Lwt\Controllers\BaseController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -82,7 +83,7 @@ class BaseControllerTest extends TestCase
         // Clean up test data
         if (self::$dbConnected) {
             $tbpref = Globals::getTablePrefix();
-            do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_ctrl_%'");
+            Connection::query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_ctrl_%'");
         }
         
         parent::tearDown();
@@ -274,7 +275,7 @@ class BaseControllerTest extends TestCase
         $this->assertStringContainsString('1', $result);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_ctrl_exec'");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_ctrl_exec'");
     }
 
     // ===== getValue() tests =====
@@ -288,7 +289,7 @@ class BaseControllerTest extends TestCase
         $tbpref = Globals::getTablePrefix();
         
         // Insert test data
-        do_mysqli_query("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_ctrl_value')");
+        Connection::query("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_ctrl_value')");
         
         $value = $this->controller->testGetValue(
             "SELECT TgText as value FROM {$tbpref}tags WHERE TgText = 'test_ctrl_value'"
@@ -297,7 +298,7 @@ class BaseControllerTest extends TestCase
         $this->assertEquals('test_ctrl_value', $value);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_ctrl_value'");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_ctrl_value'");
     }
 
     // ===== getMarkedIds() tests =====
@@ -385,7 +386,7 @@ class BaseControllerTest extends TestCase
         
         // Clean up
         $tbpref = Globals::getTablePrefix();
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_key'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_key'");
     }
 }
 

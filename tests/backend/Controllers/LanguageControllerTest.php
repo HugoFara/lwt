@@ -10,6 +10,7 @@ use Lwt\Controllers\LanguageController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Services\LanguageService;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -84,8 +85,8 @@ class LanguageControllerTest extends TestCase
 
         // Clean up test languages
         $tbpref = self::$tbpref;
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'Test_%'");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'TestLang%'");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'Test_%'");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'TestLang%'");
     }
 
     /**
@@ -98,7 +99,7 @@ class LanguageControllerTest extends TestCase
     private function createTestLanguage(string $name): int
     {
         $tbpref = self::$tbpref;
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}languages (
                 LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
                 LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters,

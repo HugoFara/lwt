@@ -10,6 +10,7 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -56,7 +57,7 @@ class SettingsTest extends TestCase
 
         // Clean up test settings after each test
         $tbpref = self::$tbpref;
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_%'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_%'");
     }
 
     // ===== getZeroOrOne() tests =====
@@ -165,8 +166,8 @@ class SettingsTest extends TestCase
 
         // Directly insert value with whitespace to test trimming
         $tbpref = self::$tbpref;
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_whitespace'");
-        do_mysqli_query("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_whitespace', '  value  ')");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_whitespace'");
+        Connection::query("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_whitespace', '  value  ')");
 
         $result = Settings::get('test_whitespace');
         $this->assertEquals('value', $result, 'Value should be trimmed');
@@ -181,14 +182,14 @@ class SettingsTest extends TestCase
         $tbpref = self::$tbpref;
         // Clean up any previously saved SQL injection key
         $injectionKey = "key'; DROP TABLE settings; --";
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
         // The SQL injection key should return empty (not found)
         $result = Settings::get($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, the settings table should still exist (not dropped)
-        $tableExists = mysqli_num_rows(do_mysqli_query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
+        $tableExists = mysqli_num_rows(Connection::query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
     }
 
@@ -249,13 +250,13 @@ class SettingsTest extends TestCase
         $tbpref = self::$tbpref;
         // Use a different injection key that wasn't previously saved
         $injectionKey = "newkey'; DROP TABLE settings; --";
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
         $result = Settings::getWithDefault($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, the settings table should still exist (not dropped)
-        $tableExists = mysqli_num_rows(do_mysqli_query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
+        $tableExists = mysqli_num_rows(Connection::query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
     }
 
@@ -439,7 +440,7 @@ class SettingsTest extends TestCase
         $this->assertEquals('test_lwt_value', $result);
 
         // Clean up
-        do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey = 'test_lwt_key'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey = 'test_lwt_key'");
     }
 
     public function testLwtTableSetUpdate(): void
@@ -454,7 +455,7 @@ class SettingsTest extends TestCase
         $this->assertEquals('value2', $result);
 
         // Clean up
-        do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey = 'test_lwt_update'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey = 'test_lwt_update'");
     }
 
     public function testLwtTableGetNonExistent(): void
@@ -479,7 +480,7 @@ class SettingsTest extends TestCase
         $this->assertIsString($result);
 
         // Clean up
-        do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey LIKE '%DROP%'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey LIKE '%DROP%'");
     }
 
     public function testLwtTableSetSqlInjectionInValue(): void
@@ -494,7 +495,7 @@ class SettingsTest extends TestCase
         $this->assertStringContainsString('DROP', $result, 'SQL injection in value should be stored as-is (escaped)');
 
         // Clean up
-        do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey = 'test_safe_lwt'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey = 'test_safe_lwt'");
     }
 
     public function testLwtTableMultipleKeys(): void
@@ -516,7 +517,7 @@ class SettingsTest extends TestCase
         $this->assertEquals('value_3', $result3);
 
         // Clean up
-        do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey LIKE 'test_multi_%'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey LIKE 'test_multi_%'");
     }
 
     public function testLwtTableSetEmptyValue(): void
@@ -531,7 +532,7 @@ class SettingsTest extends TestCase
         $this->assertIsString($result);
 
         // Clean up
-        do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey = 'test_empty_val'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey = 'test_empty_val'");
     }
 
     public function testLwtTableUnicodeValue(): void
@@ -545,6 +546,6 @@ class SettingsTest extends TestCase
         $this->assertEquals('日本語テスト', $result);
 
         // Clean up
-        do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey = 'test_unicode'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey = 'test_unicode'");
     }
 }

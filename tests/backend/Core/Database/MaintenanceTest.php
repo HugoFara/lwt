@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Maintenance;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -57,19 +58,19 @@ class MaintenanceTest extends TestCase
         $tbpref = self::$tbpref;
 
         // Clean up any existing test language first
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoLgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgName = 'Test Maintenance Language')");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName = 'Test Maintenance Language'");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgName = 'Test Maintenance Language')");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'Test Maintenance Language'");
         // Also clean up Japanese test languages to avoid MeCab issues
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoLgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgName = 'Test Japanese')");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName = 'Test Japanese'");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgName = 'Test Japanese')");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'Test Japanese'");
         // Clean up any MECAB languages that could trigger the MeCab requirement
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoLgID IN (SELECT LgID FROM {$tbpref}languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB')");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB'");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID IN (SELECT LgID FROM {$tbpref}languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB')");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB'");
         // Clean up split-each-char languages (Chinese) to avoid bug with initWordCount
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoLgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgSplitEachChar = 1)");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgSplitEachChar = 1");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgSplitEachChar = 1)");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgSplitEachChar = 1");
         // Clean up any words with WoWordCount=0 from languages that don't exist (orphaned words)
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoWordCount = 0 AND WoLgID NOT IN (SELECT LgID FROM {$tbpref}languages)");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoWordCount = 0 AND WoLgID NOT IN (SELECT LgID FROM {$tbpref}languages)");
 
         // Create test language
         $sql = "INSERT INTO {$tbpref}languages (
@@ -83,7 +84,7 @@ class MaintenanceTest extends TestCase
             'https://translate.google.com/?text=###',
             100, '', '.!?', '', 'a-zA-Z', 0, 0, 0
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         self::$testLanguageId = mysqli_insert_id(Globals::getDbConnection());
     }
 
@@ -97,8 +98,8 @@ class MaintenanceTest extends TestCase
 
         // Clean up test language and associated data
         if (self::$testLanguageId) {
-            do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLanguageId);
-            do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLanguageId);
         }
     }
 
@@ -189,7 +190,7 @@ class MaintenanceTest extends TestCase
 
         // Create a temporary empty table
         $tbpref = self::$tbpref;
-        do_mysqli_query("CREATE TEMPORARY TABLE {$tbpref}test_empty (
+        Connection::query("CREATE TEMPORARY TABLE {$tbpref}test_empty (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(50)
         )");
@@ -275,7 +276,7 @@ class MaintenanceTest extends TestCase
             1,
             0
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         $wordId = mysqli_insert_id(Globals::getDbConnection());
 
         // Run initWordCount
@@ -290,7 +291,7 @@ class MaintenanceTest extends TestCase
         $this->assertEquals('1', $count, 'Word count should be updated from 0 to 1');
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
     }
 
     public function testInitWordCountMultiwordExpression(): void
@@ -311,7 +312,7 @@ class MaintenanceTest extends TestCase
             1,
             0
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         $wordId = mysqli_insert_id(Globals::getDbConnection());
 
         // Run initWordCount
@@ -326,7 +327,7 @@ class MaintenanceTest extends TestCase
         $this->assertEquals('3', $count, 'Multi-word expression count should be 3');
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
     }
 
     public function testInitWordCountPreservesExistingCounts(): void
@@ -347,7 +348,7 @@ class MaintenanceTest extends TestCase
             1,
             5
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         $wordId = mysqli_insert_id(Globals::getDbConnection());
 
         // Run initWordCount
@@ -361,7 +362,7 @@ class MaintenanceTest extends TestCase
         $this->assertEquals('5', $count, 'Existing word count should be preserved');
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
     }
 
     // ===== updateJapaneseWordCount() tests =====
@@ -393,7 +394,7 @@ class MaintenanceTest extends TestCase
             'https://translate.google.com/?text=###',
             100, '', '。！？', '', 'MECAB', 0, 0, 0
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         $japLangId = mysqli_insert_id(Globals::getDbConnection());
 
         // With MeCab installed, this should work
@@ -401,7 +402,7 @@ class MaintenanceTest extends TestCase
         $this->assertTrue(true, 'updateJapaneseWordCount should work with MeCab');
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $japLangId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $japLangId");
     }
 
     // ===== Edge cases and robustness tests =====
@@ -441,7 +442,7 @@ class MaintenanceTest extends TestCase
                 1,
                 0
             )";
-            do_mysqli_query($sql);
+            Connection::query($sql);
             $wordIds[] = mysqli_insert_id(Globals::getDbConnection());
         }
 
@@ -457,7 +458,7 @@ class MaintenanceTest extends TestCase
         }
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoID IN (" . implode(',', $wordIds) . ")");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoID IN (" . implode(',', $wordIds) . ")");
     }
 
     public function testInitWordCountUnicodeWords(): void
@@ -480,7 +481,7 @@ class MaintenanceTest extends TestCase
             'https://translate.google.com/?text=###',
             100, '', '.!?', '', 'a-zA-ZàâäéèêëïîôùûüœæçÀÂÄÉÈÊËÏÎÔÙÛÜŒÆÇ', 0, 0, 0
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         $frLangId = mysqli_insert_id(Globals::getDbConnection());
 
         // Insert a French word with accents
@@ -493,7 +494,7 @@ class MaintenanceTest extends TestCase
             1,
             0
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         $wordId = mysqli_insert_id(Globals::getDbConnection());
 
         // Run initWordCount
@@ -506,8 +507,8 @@ class MaintenanceTest extends TestCase
         $this->assertEquals('1', $count, 'Unicode word count should be updated');
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $frLangId");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $frLangId");
     }
 
     public function testInitWordCountSplitEachChar(): void
@@ -530,7 +531,7 @@ class MaintenanceTest extends TestCase
             'https://translate.google.com/?text=###',
             100, '', '。！？', '', '一-龥', 1, 1, 0
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         $chLangId = mysqli_insert_id(Globals::getDbConnection());
 
         // Insert a Chinese word with WoWordCount = 0
@@ -543,7 +544,7 @@ class MaintenanceTest extends TestCase
             1,
             0
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         $wordId = mysqli_insert_id(Globals::getDbConnection());
 
         // Run initWordCount - this should NOT cause SQL syntax error anymore
@@ -556,7 +557,7 @@ class MaintenanceTest extends TestCase
         $this->assertGreaterThanOrEqual(1, (int)$count, 'Split-each-char word count should be at least 1');
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $chLangId");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoID = $wordId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $chLangId");
     }
 }

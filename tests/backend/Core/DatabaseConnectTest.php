@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/Text/text_parsing.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/word_scoring.php';
 
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 
@@ -540,13 +541,13 @@ class DatabaseConnectTest extends TestCase
         // SQL injection in key - first clean up any previously saved value
         $tbpref = Globals::getTablePrefix();
         $injectionKey = "key'; DROP TABLE settings; --";
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
         $result = getSetting($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, verify the table still exists (injection didn't work)
-        $tableExists = mysqli_num_rows(do_mysqli_query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
+        $tableExists = mysqli_num_rows(Connection::query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
 
         // Test special key 'currentlanguage' (triggers validateLang)
@@ -591,13 +592,13 @@ class DatabaseConnectTest extends TestCase
         // SQL injection attempt - first clean up any previously saved value
         $tbpref = Globals::getTablePrefix();
         $injectionKey = "injectkey'; DROP TABLE settings; --";
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
         $result = getSettingWithDefault($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, verify the table still exists (injection didn't work)
-        $tableExists = mysqli_num_rows(do_mysqli_query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
+        $tableExists = mysqli_num_rows(Connection::query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
 
         // Empty key
@@ -658,9 +659,9 @@ class DatabaseConnectTest extends TestCase
         $this->assertStringContainsString('OK:', $result, 'Valid numeric value should save');
 
         // Clean up test keys (including SQL injection test keys)
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey LIKE 'test_%'");
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey LIKE 'key%'");
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey = 'safe_key'");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey LIKE 'test_%'");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey LIKE 'key%'");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey = 'safe_key'");
     }
 
     /**
@@ -698,7 +699,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals(1, $result, 'Non-existent setting should return default');
 
         // Clean up
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey LIKE 'test_bool_%'");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey LIKE 'test_bool_%'");
     }
 
     /**
@@ -751,8 +752,8 @@ class DatabaseConnectTest extends TestCase
         // This is actually correct behavior - keys should be required
 
         // Clean up test keys
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "_lwtgeneral WHERE LWTKey LIKE 'test_%'");
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "_lwtgeneral WHERE LWTKey LIKE 'safe_%'");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "_lwtgeneral WHERE LWTKey LIKE 'test_%'");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "_lwtgeneral WHERE LWTKey LIKE 'safe_%'");
     }
 
     /**
@@ -839,7 +840,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertStringContainsString('Error:', $result);
 
         // Clean up
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='test_runsql_1'");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='test_runsql_1'");
     }
 
     /**
@@ -929,7 +930,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertTrue($result >= 0);
 
         // Clean up
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='test_first_value'");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='test_first_value'");
     }
 
     /**
@@ -1033,7 +1034,7 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Valid SELECT query
-        $result = do_mysqli_query("SELECT 1 as test");
+        $result = Connection::query("SELECT 1 as test");
         $this->assertNotFalse($result, 'Valid query should return result');
         $this->assertTrue(
             $result instanceof mysqli_result || $result === true,
@@ -1045,7 +1046,7 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Valid INSERT query
-        $result = do_mysqli_query(
+        $result = Connection::query(
             "INSERT INTO " . $GLOBALS['tbpref'] . "settings (StKey, StValue)
              VALUES ('test_mysqli_query', 'test')
              ON DUPLICATE KEY UPDATE StValue='test'"
@@ -1053,7 +1054,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertNotFalse($result, 'Valid INSERT should return true');
 
         // Clean up
-        do_mysqli_query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='test_mysqli_query'");
+        Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='test_mysqli_query'");
     }
 
     /**
@@ -1235,7 +1236,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals('value_2', $result2);
 
         // Clean up
-        do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey LIKE 'test_key%'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey LIKE 'test_key%'");
     }
 
     /**
@@ -1495,7 +1496,7 @@ class DatabaseConnectTest extends TestCase
         );
 
         // Check database charset (should be utf8, utf8mb3, or utf8mb4)
-        $result = do_mysqli_query("SHOW VARIABLES LIKE 'character_set_database'");
+        $result = Connection::query("SHOW VARIABLES LIKE 'character_set_database'");
         $row = mysqli_fetch_assoc($result);
         $this->assertContains(
             $row['Value'],
@@ -1523,7 +1524,7 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Check if table uses MyISAM (which doesn't support transactions)
-        $engine_result = do_mysqli_query("SHOW TABLE STATUS LIKE '{$tbpref}settings'");
+        $engine_result = Connection::query("SHOW TABLE STATUS LIKE '{$tbpref}settings'");
         $engine_row = mysqli_fetch_assoc($engine_result);
         $is_myisam = ($engine_row['Engine'] === 'MyISAM');
 
@@ -1531,7 +1532,7 @@ class DatabaseConnectTest extends TestCase
         mysqli_begin_transaction(Globals::getDbConnection());
 
         // Insert test data
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}settings (StKey, StValue)
              VALUES ('test_transaction', 'value1')"
         );
@@ -1550,11 +1551,11 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Clean up first insert if it exists
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey='test_transaction'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey='test_transaction'");
 
         // Test commit
         mysqli_begin_transaction(Globals::getDbConnection());
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}settings (StKey, StValue)
              VALUES ('test_transaction', 'value2')"
         );
@@ -1565,7 +1566,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals('value2', $result);
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey='test_transaction'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey='test_transaction'");
     }
 
 }

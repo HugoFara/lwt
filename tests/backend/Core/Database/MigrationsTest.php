@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Migrations;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -228,13 +229,13 @@ class MigrationsTest extends TestCase
 
         // Clean up any texts that reference non-existent languages
         // to avoid "Language data not found" errors
-        do_mysqli_query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID IN (
+        Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID IN (
             SELECT TxID FROM {$tbpref}texts WHERE TxLgID NOT IN (SELECT LgID FROM {$tbpref}languages)
         )");
-        do_mysqli_query("DELETE FROM {$tbpref}sentences WHERE SeTxID IN (
+        Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID IN (
             SELECT TxID FROM {$tbpref}texts WHERE TxLgID NOT IN (SELECT LgID FROM {$tbpref}languages)
         )");
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxLgID NOT IN (SELECT LgID FROM {$tbpref}languages)");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxLgID NOT IN (SELECT LgID FROM {$tbpref}languages)");
 
         // This function truncates and rebuilds text data
         // Should run without error on empty/minimal database
@@ -287,7 +288,7 @@ class MigrationsTest extends TestCase
         ];
 
         foreach ($tables as $table) {
-            $result = do_mysqli_query("SHOW TABLES LIKE '{$tbpref}{$table}'");
+            $result = Connection::query("SHOW TABLES LIKE '{$tbpref}{$table}'");
             $exists = mysqli_num_rows($result) > 0;
             mysqli_free_result($result);
             $this->assertTrue($exists, "Table {$tbpref}{$table} should exist after checkAndUpdate");
@@ -303,7 +304,7 @@ class MigrationsTest extends TestCase
         Migrations::checkAndUpdate();
 
         // Verify _migrations table exists (without prefix)
-        $result = do_mysqli_query("SHOW TABLES LIKE '_migrations'");
+        $result = Connection::query("SHOW TABLES LIKE '_migrations'");
         $exists = mysqli_num_rows($result) > 0;
         mysqli_free_result($result);
         $this->assertTrue($exists, "_migrations table should exist");
@@ -366,7 +367,7 @@ class MigrationsTest extends TestCase
         $tbpref = self::$tbpref;
 
         // Clear lastscorecalc to force recalculation
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'lastscorecalc'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'lastscorecalc'");
 
         Migrations::checkAndUpdate();
 

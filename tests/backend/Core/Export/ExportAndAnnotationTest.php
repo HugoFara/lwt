@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -59,8 +60,8 @@ class ExportAndAnnotationTest extends TestCase
 
         // Clean up test data
         $tbpref = self::$tbpref;
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxTitle LIKE 'test_export_%'");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'test_export_%'");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxTitle LIKE 'test_export_%'");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'test_export_%'");
     }
 
     // ===== create_ann() tests =====
@@ -74,12 +75,12 @@ class ExportAndAnnotationTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Create test language
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_lang', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
         // Create test text
-        do_mysqli_query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
+        Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_text', 'Test content', $lgId)");
         $textId = get_last_key();
         
@@ -89,8 +90,8 @@ class ExportAndAnnotationTest extends TestCase
         // Even with no textitems2, should return some annotation structure
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testCreateAnnWithNonExistentText(): void
@@ -116,12 +117,12 @@ class ExportAndAnnotationTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Create test language
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_recreate', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
         // Create test text
-        do_mysqli_query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
+        Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_recreate_text', 'Test content', $lgId)");
         $textId = get_last_key();
         
@@ -131,8 +132,8 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsString($newAnn);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testRecreateSaveAnnWithEmptyOldAnn(): void
@@ -144,12 +145,12 @@ class ExportAndAnnotationTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Create test language
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_empty', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
         // Create test text
-        do_mysqli_query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
+        Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_empty_text', 'Test content', $lgId)");
         $textId = get_last_key();
         
@@ -158,8 +159,8 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsString($newAnn);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testRecreateSaveAnnUpdatesDatabase(): void
@@ -171,12 +172,12 @@ class ExportAndAnnotationTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Create test language
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_update', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
         // Create test text
-        do_mysqli_query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID, TxAnnotatedText) 
+        Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID, TxAnnotatedText) 
                          VALUES ('test_export_update_text', 'Test content', $lgId, '')");
         $textId = get_last_key();
         
@@ -188,8 +189,8 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertNotNull($saved);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     // ===== Helper function tests =====
@@ -230,12 +231,12 @@ class ExportAndAnnotationTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Create test language
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_struct', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
         // Create test text
-        do_mysqli_query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
+        Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_struct_text', 'Test content', $lgId)");
         $textId = get_last_key();
         
@@ -246,8 +247,8 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsArray($lines);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testAnnotationWithTabSeparatedValues(): void
@@ -277,12 +278,12 @@ class ExportAndAnnotationTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Create test language
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_workflow', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
         // Create test text
-        do_mysqli_query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
+        Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_workflow_text', 'Test content for workflow', $lgId)");
         $textId = get_last_key();
         
@@ -300,8 +301,8 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsString($saved);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testAnnotationPreservesTranslations(): void
@@ -313,12 +314,12 @@ class ExportAndAnnotationTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Create test language
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_preserve', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
         // Create test text
-        do_mysqli_query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
+        Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_preserve_text', 'Test', $lgId)");
         $textId = get_last_key();
         
@@ -330,8 +331,8 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsString($newAnn);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     // ===== Additional utility tests =====
@@ -388,7 +389,7 @@ class ExportAndAnnotationTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Insert test data
-        do_mysqli_query("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_export_firstval')");
+        Connection::query("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_export_firstval')");
         $id = get_last_key();
         
         $value = get_first_value("SELECT TgText AS value FROM {$tbpref}tags WHERE TgID = $id");
@@ -396,7 +397,7 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertEquals('test_export_firstval', $value);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgID = $id");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgID = $id");
     }
 
     public function testGetFirstValueReturnsNullForNoResults(): void
@@ -429,6 +430,6 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertStringContainsString('1', $result);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_export_runsql'");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_export_runsql'");
     }
 }

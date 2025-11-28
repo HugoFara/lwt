@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Validation;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -60,13 +61,13 @@ class ValidationTest extends TestCase
         $tbpref = self::$tbpref;
 
         // Clean up any existing test data first
-        do_mysqli_query("DELETE FROM {$tbpref}texttags WHERE TtTxID IN (SELECT TxID FROM {$tbpref}texts WHERE TxTitle = 'Test Validation Text')");
-        do_mysqli_query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID IN (SELECT TxID FROM {$tbpref}texts WHERE TxTitle = 'Test Validation Text')");
-        do_mysqli_query("DELETE FROM {$tbpref}sentences WHERE SeTxID IN (SELECT TxID FROM {$tbpref}texts WHERE TxTitle = 'Test Validation Text')");
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxTitle = 'Test Validation Text'");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName = 'Test Validation Language'");
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_validation_tag'");
-        do_mysqli_query("DELETE FROM {$tbpref}tags2 WHERE T2Text = 'test_validation_tag2'");
+        Connection::query("DELETE FROM {$tbpref}texttags WHERE TtTxID IN (SELECT TxID FROM {$tbpref}texts WHERE TxTitle = 'Test Validation Text')");
+        Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID IN (SELECT TxID FROM {$tbpref}texts WHERE TxTitle = 'Test Validation Text')");
+        Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID IN (SELECT TxID FROM {$tbpref}texts WHERE TxTitle = 'Test Validation Text')");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxTitle = 'Test Validation Text'");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'Test Validation Language'");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_validation_tag'");
+        Connection::query("DELETE FROM {$tbpref}tags2 WHERE T2Text = 'test_validation_tag2'");
 
         // Create test language
         $sql = "INSERT INTO {$tbpref}languages (
@@ -80,7 +81,7 @@ class ValidationTest extends TestCase
             'https://translate.google.com/?text=###',
             100, '', '.!?', '', 'a-zA-Z', 0, 0, 0
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         self::$testLanguageId = mysqli_insert_id(Globals::getDbConnection());
 
         // Create test text
@@ -92,17 +93,17 @@ class ValidationTest extends TestCase
             'This is a test text.',
             ''
         )";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         self::$testTextId = mysqli_insert_id(Globals::getDbConnection());
 
         // Create test tag (for words)
         $sql = "INSERT INTO {$tbpref}tags (TgText, TgComment) VALUES ('test_validation_tag', 'Test tag')";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         self::$testTagId = mysqli_insert_id(Globals::getDbConnection());
 
         // Create test tag2 (for texts)
         $sql = "INSERT INTO {$tbpref}tags2 (T2Text, T2Comment) VALUES ('test_validation_tag2', 'Test tag2')";
-        do_mysqli_query($sql);
+        Connection::query($sql);
         self::$testTag2Id = mysqli_insert_id(Globals::getDbConnection());
     }
 
@@ -116,16 +117,16 @@ class ValidationTest extends TestCase
 
         // Clean up test data in reverse order
         if (self::$testTag2Id) {
-            do_mysqli_query("DELETE FROM {$tbpref}tags2 WHERE T2ID = " . self::$testTag2Id);
+            Connection::query("DELETE FROM {$tbpref}tags2 WHERE T2ID = " . self::$testTag2Id);
         }
         if (self::$testTagId) {
-            do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgID = " . self::$testTagId);
+            Connection::query("DELETE FROM {$tbpref}tags WHERE TgID = " . self::$testTagId);
         }
         if (self::$testTextId) {
-            do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxID = " . self::$testTextId);
+            Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = " . self::$testTextId);
         }
         if (self::$testLanguageId) {
-            do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLanguageId);
         }
     }
 

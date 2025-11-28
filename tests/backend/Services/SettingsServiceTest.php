@@ -10,6 +10,7 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Services\SettingsService;
 use Lwt\Database\Settings;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -63,9 +64,9 @@ class SettingsServiceTest extends TestCase
 
         // Clean up test settings after each test
         $tbpref = self::$tbpref;
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_%'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_%'");
         // Reset known settings to defaults
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'set-texts-per-page'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'set-texts-per-page'");
     }
 
     // ===== get() tests =====

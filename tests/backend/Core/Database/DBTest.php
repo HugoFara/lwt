@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\DB;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -56,8 +57,8 @@ class DBTest extends TestCase
 
         // Clean up test data
         $tbpref = self::$tbpref;
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_db_%'");
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_db_%'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_db_%'");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_db_%'");
     }
 
     // ===== table() tests =====
@@ -110,7 +111,7 @@ class DBTest extends TestCase
         $this->assertTrue($result);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_db_query'");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_db_query'");
     }
 
     // ===== fetchAll() tests =====
@@ -158,7 +159,7 @@ class DBTest extends TestCase
         $this->assertEquals('test_db_one', $row['StKey']);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_one'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_one'");
     }
 
     public function testFetchOneReturnsNull(): void
@@ -189,7 +190,7 @@ class DBTest extends TestCase
         $this->assertEquals('myvalue', $value);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_value'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_value'");
     }
 
     public function testFetchValueWithCustomColumn(): void
@@ -206,7 +207,7 @@ class DBTest extends TestCase
         $this->assertEquals('test_db_custom', $value);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_custom'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_custom'");
     }
 
     // ===== execute() tests =====
@@ -243,7 +244,7 @@ class DBTest extends TestCase
         $this->assertEquals('new', $value);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_update'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_update'");
     }
 
     // ===== lastInsertId() tests =====
@@ -262,7 +263,7 @@ class DBTest extends TestCase
         $this->assertGreaterThan(0, $lastId);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgID = $lastId");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgID = $lastId");
     }
 
     // ===== escape() tests =====
@@ -377,7 +378,7 @@ class DBTest extends TestCase
         $this->assertIsArray($row);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_db_commit'");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_db_commit'");
     }
 
     public function testRollbackTransaction(): void

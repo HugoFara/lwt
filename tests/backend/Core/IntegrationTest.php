@@ -23,6 +23,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Test/test_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Language/language_utilities.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/word_status.php';
 
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -53,7 +54,7 @@ class IntegrationTest extends TestCase
         Globals::setDatabaseName($testDbname);
 
         // Ensure we have a test database set up
-        $result = do_mysqli_query("SHOW TABLES LIKE 'texts'");
+        $result = Connection::query("SHOW TABLES LIKE 'texts'");
         $res = mysqli_fetch_assoc($result);
 
         if ($res) {
@@ -71,7 +72,7 @@ class IntegrationTest extends TestCase
     public function testInstallDemoDB(): void
     {
         // Truncate the database if not empty
-        $result = do_mysqli_query("SHOW TABLES LIKE 'texts'");
+        $result = Connection::query("SHOW TABLES LIKE 'texts'");
         $res = mysqli_fetch_assoc($result);
 
         if ($res) {
@@ -382,7 +383,7 @@ class IntegrationTest extends TestCase
     public function testReturnTextWordCount()
     {
         // Get first text from demo DB
-        $text_res = do_mysqli_query("SELECT TxID FROM texts LIMIT 1");
+        $text_res = Connection::query("SELECT TxID FROM texts LIMIT 1");
         if ($text_row = mysqli_fetch_assoc($text_res)) {
             $text_id = (int)$text_row['TxID'];
             $counts = return_textwordcount($text_id);
@@ -403,7 +404,7 @@ class IntegrationTest extends TestCase
      */
     public function testTodoWordsCount()
     {
-        $text_res = do_mysqli_query("SELECT TxID FROM texts LIMIT 1");
+        $text_res = Connection::query("SELECT TxID FROM texts LIMIT 1");
         if ($text_row = mysqli_fetch_assoc($text_res)) {
             $text_id = (int)$text_row['TxID'];
             $count = todo_words_count($text_id);
@@ -458,7 +459,7 @@ class IntegrationTest extends TestCase
     public function testGetScriptDirectionTag()
     {
         // Test with a language from demo DB
-        $lang_res = do_mysqli_query("SELECT LgID FROM languages LIMIT 1");
+        $lang_res = Connection::query("SELECT LgID FROM languages LIMIT 1");
         if ($lang_row = mysqli_fetch_assoc($lang_res)) {
             $lang_id = (int)$lang_row['LgID'];
             $dir_tag = getScriptDirectionTag($lang_id);
@@ -480,7 +481,7 @@ class IntegrationTest extends TestCase
     {
         // Insert a test record and get its ID
         $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}tags (TgText) VALUES ('test_tag_" . time() . "')"
         );
 
@@ -489,7 +490,7 @@ class IntegrationTest extends TestCase
         $this->assertGreaterThan(0, $last_id);
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgID = $last_id");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgID = $last_id");
     }
 
     public function testTrimValue(): void
@@ -546,24 +547,24 @@ class IntegrationTest extends TestCase
         $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
         // Create a test word with tags
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
              VALUES ('Test Lang', 'http://test', 'http://test')"
         );
         $lang_id = get_last_key();
 
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}words (WoText, WoTextLC, WoStatus, WoLgID)
              VALUES ('testword', 'testword', 1, $lang_id)"
         );
         $word_id = get_last_key();
 
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}tags (TgText) VALUES ('testtag1')"
         );
         $tag_id = get_last_key();
 
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}wordtags (WtWoID, WtTgID) VALUES ($word_id, $tag_id)"
         );
 
@@ -572,10 +573,10 @@ class IntegrationTest extends TestCase
         $this->assertStringContainsString('testtag1', $tag_list);
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}wordtags WHERE WtWoID = $word_id");
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoID = $word_id");
-        do_mysqli_query("DELETE FROM {$tbpref}tags WHERE TgID = $tag_id");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lang_id");
+        Connection::query("DELETE FROM {$tbpref}wordtags WHERE WtWoID = $word_id");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoID = $word_id");
+        Connection::query("DELETE FROM {$tbpref}tags WHERE TgID = $tag_id");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lang_id");
     }
 
     // ========== ADDITIONAL HELPER FUNCTIONS TESTS ==========
@@ -658,7 +659,7 @@ class IntegrationTest extends TestCase
         $tbpref = \Lwt\Core\Globals::getTablePrefix();
         unset($_REQUEST['test_db_param']);
         unset($_REQUEST['test_db_string']);
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey IN ('db_key', 'db_str_key', 'db_none_key')");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey IN ('db_key', 'db_str_key', 'db_none_key')");
     }
 
     public function testGetPrefixesExtended(): void
@@ -712,25 +713,25 @@ class IntegrationTest extends TestCase
         $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
         // Create test texts
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
              VALUES ('Test Lang', 'http://test', 'http://test')"
         );
         $lang_id = get_last_key();
 
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID)
              VALUES ('Text 1', 'Content 1', $lang_id)"
         );
         $text1_id = get_last_key();
 
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID)
              VALUES ('Text 2', 'Content 2', $lang_id)"
         );
         $text2_id = get_last_key();
 
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID)
              VALUES ('Text 3', 'Content 3', $lang_id)"
         );
@@ -751,8 +752,8 @@ class IntegrationTest extends TestCase
         $this->assertIsString($result);
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxLgID = $lang_id");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lang_id");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxLgID = $lang_id");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lang_id");
     }
 
 
@@ -801,7 +802,7 @@ class IntegrationTest extends TestCase
 
         // Clean up - fclose is automatic for tmpfile when it goes out of scope
         // Don't call fclose() as the resource may already be closed by restore_file
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey IN ('test_restore', 'test_restore2')");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey IN ('test_restore', 'test_restore2')");
 
         // Assertions (may vary based on restore success)
         $this->assertTrue(
@@ -818,7 +819,7 @@ class IntegrationTest extends TestCase
         $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
         // Insert test data
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_truncate', 'value1')"
         );
 
@@ -833,7 +834,7 @@ class IntegrationTest extends TestCase
         $this->assertTrue(function_exists('truncateUserDatabase'));
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}settings WHERE StKey='test_truncate'");
+        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey='test_truncate'");
     }
 
     /**

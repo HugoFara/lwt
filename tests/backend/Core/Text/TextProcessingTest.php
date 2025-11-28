@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -59,7 +60,7 @@ class TextProcessingTest extends TestCase
 
         // Clean up test data
         $tbpref = self::$tbpref;
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'test_proc_%'");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'test_proc_%'");
     }
 
     // ===== get_languages() tests =====
@@ -83,7 +84,7 @@ class TextProcessingTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Insert test language
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_proc_lang', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
@@ -93,7 +94,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals($lgId, $languages['test_proc_lang']);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testGetLanguagesExcludesEmptyNames(): void
@@ -105,7 +106,7 @@ class TextProcessingTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Insert language with empty name
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
@@ -115,7 +116,7 @@ class TextProcessingTest extends TestCase
         $this->assertNotContains($lgId, $languages);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     // ===== getLanguage() tests =====
@@ -129,7 +130,7 @@ class TextProcessingTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Insert test language
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_proc_getlang', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
@@ -138,7 +139,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals('test_proc_getlang', $name);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testGetLanguageWithStringId(): void
@@ -150,7 +151,7 @@ class TextProcessingTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Insert test language
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_proc_string', 'http://test', 'http://test')");
         $lgId = get_last_key();
         
@@ -159,7 +160,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals('test_proc_string', $name);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testGetLanguageWithInvalidId(): void
@@ -203,7 +204,7 @@ class TextProcessingTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Insert test language (LTR)
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
                          VALUES ('test_proc_ltr', 'http://test', 'http://test', 0)");
         $lgId = get_last_key();
         
@@ -212,7 +213,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals('', $tag);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testGetScriptDirectionTagWithRTLLanguage(): void
@@ -224,7 +225,7 @@ class TextProcessingTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Insert test language (RTL)
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
                          VALUES ('test_proc_rtl', 'http://test', 'http://test', 1)");
         $lgId = get_last_key();
         
@@ -233,7 +234,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals(' dir="rtl" ', $tag);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testGetScriptDirectionTagWithStringId(): void
@@ -245,7 +246,7 @@ class TextProcessingTest extends TestCase
         $tbpref = self::$tbpref;
         
         // Insert test language (RTL)
-        do_mysqli_query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
                          VALUES ('test_proc_rtl_str', 'http://test', 'http://test', 1)");
         $lgId = get_last_key();
         
@@ -254,7 +255,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals(' dir="rtl" ', $tag);
         
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
     public function testGetScriptDirectionTagWithNull(): void

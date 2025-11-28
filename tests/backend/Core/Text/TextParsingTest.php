@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Text/text_parsing.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -87,7 +88,7 @@ class TextParsingTest extends TestCase
             0
         )";
 
-        do_mysqli_query($sql);
+        Connection::query($sql);
         self::$testLanguageId = mysqli_insert_id(self::$dbConnection);
     }
 
@@ -99,7 +100,7 @@ class TextParsingTest extends TestCase
         $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
         if (self::$testLanguageId) {
-            do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLanguageId);
         }
     }
 
@@ -168,7 +169,7 @@ class TextParsingTest extends TestCase
             0, 0, 0
         )";
 
-        do_mysqli_query($sql);
+        Connection::query($sql);
         $germanLangId = mysqli_insert_id(Globals::getDbConnection());
 
         // Test text with German characters
@@ -182,7 +183,7 @@ class TextParsingTest extends TestCase
         $this->assertNotEmpty($result, 'Should parse German text');
 
         // Clean up
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgID = $germanLangId");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $germanLangId");
     }
 
     /**

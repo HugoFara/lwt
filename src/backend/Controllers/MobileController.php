@@ -193,6 +193,7 @@ class MobileController extends BaseController
      * @return void
      *
      * @psalm-suppress UnusedVariable - Variables are used in the included view
+     * @psalm-suppress UnusedParam - Parameter is used via assignment to $action
      */
     private function showTermsList(int $actionCode): void
     {
@@ -248,6 +249,8 @@ class MobileController extends BaseController
      * Display the table set selection page.
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable - Variables are used in the included view
      */
     private function showTableSetPage(): void
     {

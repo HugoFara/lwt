@@ -67,8 +67,8 @@ class LanguageServiceTest extends TestCase
 
         // Clean up test languages after each test
         $tbpref = self::$tbpref;
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'Test_%'");
-        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'TestLang%'");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'Test_%'");
+        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'TestLang%'");
         self::$testLanguageIds = [];
     }
 
@@ -82,7 +82,7 @@ class LanguageServiceTest extends TestCase
     private function createTestLanguage(string $name): int
     {
         $tbpref = self::$tbpref;
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}languages (
                 LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
                 LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters,
@@ -133,7 +133,7 @@ class LanguageServiceTest extends TestCase
 
         $tbpref = self::$tbpref;
         // Insert language with empty name (placeholder)
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters)
              VALUES ('', 'https://test.com', 100, '.!?', 'a-z')"
         );
@@ -454,7 +454,7 @@ class LanguageServiceTest extends TestCase
         $tbpref = self::$tbpref;
 
         // Add a related text
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAudioURI)
              VALUES ($id, 'Test Text', 'Test content', '')"
         );
@@ -465,7 +465,7 @@ class LanguageServiceTest extends TestCase
         $this->assertTrue($this->service->exists($id));
 
         // Cleanup
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
     }
 
     public function testDeleteFailsWithRelatedWords(): void
@@ -478,7 +478,7 @@ class LanguageServiceTest extends TestCase
         $tbpref = self::$tbpref;
 
         // Add a related word
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged)
              VALUES ($id, 'test', 'test', 1, 1, NOW())"
         );
@@ -489,7 +489,7 @@ class LanguageServiceTest extends TestCase
         $this->assertTrue($this->service->exists($id));
 
         // Cleanup
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoLgID = $id");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = $id");
     }
 
     // ===== getRelatedDataCounts() tests =====
@@ -520,13 +520,13 @@ class LanguageServiceTest extends TestCase
         $tbpref = self::$tbpref;
 
         // Add texts
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAudioURI)
              VALUES ($id, 'Text 1', 'Content 1', ''), ($id, 'Text 2', 'Content 2', '')"
         );
 
         // Add a word
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged)
              VALUES ($id, 'word', 'word', 1, 1, NOW())"
         );
@@ -539,8 +539,8 @@ class LanguageServiceTest extends TestCase
         $this->assertEquals(0, $result['feeds']);
 
         // Cleanup
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
-        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoLgID = $id");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = $id");
     }
 
     // ===== canDelete() tests =====
@@ -568,7 +568,7 @@ class LanguageServiceTest extends TestCase
         $tbpref = self::$tbpref;
 
         // Add a related text
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAudioURI)
              VALUES ($id, 'Test', 'Content', '')"
         );
@@ -578,7 +578,7 @@ class LanguageServiceTest extends TestCase
         $this->assertFalse($result);
 
         // Cleanup
-        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
     }
 
     // ===== isDuplicateName() tests =====
@@ -676,7 +676,7 @@ class LanguageServiceTest extends TestCase
         $this->createTestLanguage('TestLang_StatsNotEmpty');
 
         // Insert language with empty name
-        do_mysqli_query(
+        Connection::query(
             "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters)
              VALUES ('', 'https://test.com', 100, '.!?', 'a-z')"
         );

@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
+use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -360,7 +361,7 @@ class ConfigurationTest extends TestCase
         $connection = Globals::getDbConnection();
 
         // Clear any existing prefix
-        do_mysqli_query("DELETE FROM _lwtgeneral WHERE LWTKey = 'current_table_prefix'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey = 'current_table_prefix'");
 
         // Get prefix with null (will read from _lwtgeneral)
         $result = Configuration::getPrefix($connection, null);
