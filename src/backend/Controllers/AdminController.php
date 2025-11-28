@@ -16,6 +16,29 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Services\BackupService;
+use Lwt\Services\DemoService;
+use Lwt\Services\ServerDataService;
+use Lwt\Services\SettingsService;
+use Lwt\Services\StatisticsService;
+use Lwt\Services\TableSetService;
+use Lwt\Services\TtsService;
+
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../Core/Http/param_helpers.php';
+require_once __DIR__ . '/../Core/Text/text_helpers.php';
+require_once __DIR__ . '/../Core/Media/media_helpers.php';
+require_once __DIR__ . '/../Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Core/Language/langdefs.php';
+require_once __DIR__ . '/../Services/BackupService.php';
+require_once __DIR__ . '/../Services/DemoService.php';
+require_once __DIR__ . '/../Services/ServerDataService.php';
+require_once __DIR__ . '/../Services/SettingsService.php';
+require_once __DIR__ . '/../Services/StatisticsService.php';
+require_once __DIR__ . '/../Services/TableSetService.php';
+require_once __DIR__ . '/../Services/TtsService.php';
+
 /**
  * Controller for administrative functions.
  *
@@ -39,110 +62,295 @@ namespace Lwt\Controllers;
 class AdminController extends BaseController
 {
     /**
-     * Backup and restore page (replaces admin_backup.php)
+     * Backup and restore page
      *
-     * @param array $params Route parameters
+     * Handles:
+     * - restore=xxx: Restore from uploaded file
+     * - backup=xxx: Download backup
+     * - orig_backup=xxx: Download official format backup
+     * - empty=xxx: Empty the database
+     *
+     * @param array<string, string> $params Route parameters
      *
      * @return void
      */
     public function backup(array $params): void
     {
-        include __DIR__ . '/../Legacy/admin_backup.php';
+        $backupService = new BackupService();
+        $message = '';
+
+        // Handle operations
+        if ($this->param('restore') !== null) {
+            $message = $backupService->restoreFromUpload($_FILES);
+        } elseif ($this->param('backup') !== null) {
+            $backupService->downloadBackup();
+            // downloadBackup exits, so we never reach here
+        } elseif ($this->param('orig_backup') !== null) {
+            $backupService->downloadOfficialBackup();
+            // downloadOfficialBackup exits, so we never reach here
+        } elseif ($this->param('empty') !== null) {
+            $message = $backupService->emptyDatabase();
+        }
+
+        // Get view data (used by included view)
+        /** @psalm-suppress UnusedVariable */
+        $prefinfo = $backupService->getPrefixInfo();
+        /** @psalm-suppress UnusedVariable */
+        $dbname = $backupService->getDatabaseName();
+
+        // Render page
+        $this->render('Backup/Restore/Empty Database', true);
+        $this->message($message, true);
+
+        include __DIR__ . '/../Views/Admin/backup.php';
+
+        $this->endRender();
     }
 
     /**
-     * Database wizard page (replaces admin_wizard.php)
+     * Database wizard page
      *
-     * @param array $params Route parameters
+     * The wizard is a standalone page that can run without database connection.
+     * It uses its own self-contained HTML output.
+     *
+     * Handles:
+     * - op=Autocomplete: Auto-detect connection settings
+     * - op=Check: Test connection with provided settings
+     * - op=Change: Save new connection settings
+     *
+     * @param array<string, string> $params Route parameters
      *
      * @return void
      */
     public function wizard(array $params): void
     {
+        // The wizard is a standalone file that handles its own rendering
+        // because it needs to work without database connection
         include __DIR__ . '/../Legacy/admin_wizard.php';
     }
 
     /**
-     * Statistics page (replaces admin_statistics.php)
+     * Statistics page
      *
-     * @param array $params Route parameters
+     * @param array<string, string> $params Route parameters
      *
      * @return void
      */
     public function statistics(array $params): void
     {
-        include __DIR__ . '/../Legacy/admin_statistics.php';
+        $statisticsService = new StatisticsService();
+        /** @psalm-suppress UnusedVariable - Used by included view */
+        $intensityStats = $statisticsService->getIntensityStatistics();
+        /** @psalm-suppress UnusedVariable - Used by included view */
+        $frequencyStats = $statisticsService->getFrequencyStatistics();
+
+        // Render page
+        $this->render('My Statistics', true);
+
+        include __DIR__ . '/../Views/Admin/statistics.php';
+
+        $this->endRender();
     }
 
     /**
-     * Settings page (replaces admin_settings.php)
+     * Settings page
      *
-     * @param array $params Route parameters
+     * Handles:
+     * - op=Save: Save all settings
+     * - op=Reset: Reset to defaults
+     *
+     * @param array<string, string> $params Route parameters
      *
      * @return void
      */
     public function settings(array $params): void
     {
-        include __DIR__ . '/../Legacy/admin_settings.php';
+        $settingsService = new SettingsService();
+        $message = '';
+
+        // Handle form submission
+        $op = $this->param('op');
+        if ($op !== null) {
+            if ($op == 'Save') {
+                $message = $settingsService->saveAll($_REQUEST);
+            } else {
+                $message = $settingsService->resetAll();
+            }
+        }
+
+        // Load current settings for the form (used by included view)
+        /** @psalm-suppress UnusedVariable */
+        $settings = $settingsService->getAll();
+
+        // Render page
+        $this->render('Settings/Preferences', true);
+        $this->message($message, true);
+
+        include __DIR__ . '/../Views/Admin/settings_form.php';
+
+        $this->endRender();
     }
 
     /**
-     * Hover settings page (replaces settings_hover.php)
+     * Hover settings page (helper frame for word status)
      *
-     * @param array $params Route parameters
+     * @param array<string, string> $params Route parameters
      *
      * @return void
      */
     public function settingsHover(array $params): void
     {
+        // This is a helper frame, not a true admin page
+        // Keep using the legacy file for now as it has complex JS interaction
         include __DIR__ . '/../Legacy/settings_hover.php';
     }
 
     /**
-     * TTS settings page (replaces admin_tts_settings.php)
+     * TTS settings page
      *
-     * @param array $params Route parameters
+     * Handles:
+     * - op=Save: Save TTS settings
+     *
+     * @param array<string, string> $params Route parameters
      *
      * @return void
      */
     public function settingsTts(array $params): void
     {
-        include __DIR__ . '/../Legacy/admin_tts_settings.php';
+        $ttsService = new TtsService();
+        $message = '';
+
+        // Handle save request
+        if ($this->param('op') == 'Save') {
+            $ttsService->saveSettings($_REQUEST);
+            $message = "Settings saved!";
+        }
+
+        // Get view data (used by included view)
+        /** @psalm-suppress UnusedVariable */
+        $languageOptions = $ttsService->getLanguageOptions(LWT_LANGUAGES_ARRAY);
+        /** @psalm-suppress UnusedVariable */
+        $currentLanguageCode = json_encode(
+            $ttsService->getCurrentLanguageCode(LWT_LANGUAGES_ARRAY)
+        );
+
+        // Render page
+        $this->render('Text-to-Speech Settings', true);
+
+        if ($message != '') {
+            $this->message($message, false);
+        }
+
+        include __DIR__ . '/../Views/Admin/tts_settings.php';
+
+        $this->endRender();
     }
 
     /**
-     * Install demo page (replaces admin_install_demo.php)
+     * Install demo page
      *
-     * @param array $params Route parameters
+     * Handles:
+     * - install=xxx: Install the demo database
+     *
+     * @param array<string, string> $params Route parameters
      *
      * @return void
      */
     public function installDemo(array $params): void
     {
-        include __DIR__ . '/../Legacy/admin_install_demo.php';
+        $demoService = new DemoService();
+        $message = '';
+
+        // Handle install request
+        if ($this->param('install') !== null) {
+            $message = $demoService->installDemo();
+        }
+
+        // Get view data (used by included view)
+        /** @psalm-suppress UnusedVariable */
+        $prefinfo = $demoService->getPrefixInfo();
+        /** @psalm-suppress UnusedVariable */
+        $dbname = $demoService->getDatabaseName();
+        /** @psalm-suppress UnusedVariable */
+        $langcnt = $demoService->getLanguageCount();
+
+        // Render page
+        $this->render('Install LWT Demo Database', true);
+        $this->message($message, true);
+
+        include __DIR__ . '/../Views/Admin/install_demo.php';
+
+        $this->endRender();
     }
 
     /**
-     * Table management page (replaces admin_table_management.php)
+     * Table management page
      *
-     * @param array $params Route parameters
+     * Handles:
+     * - delpref=xxx: Delete a table set
+     * - newpref=xxx: Create a new table set
+     * - prefix=xxx: Select a table set
+     *
+     * @param array<string, string> $params Route parameters
      *
      * @return void
      */
     public function tables(array $params): void
     {
-        include __DIR__ . '/../Legacy/admin_table_management.php';
+        $tableSetService = new TableSetService();
+        $message = "";
+
+        // Handle operations
+        if ($this->param('delpref') !== null) {
+            $message = $tableSetService->deleteTableSet($this->param('delpref'));
+        } elseif ($this->param('newpref') !== null) {
+            $result = $tableSetService->createTableSet($this->param('newpref'));
+            if ($result['redirect']) {
+                $this->redirect('/');
+            }
+            $message = $result['message'];
+        } elseif ($this->param('prefix') !== null) {
+            $result = $tableSetService->selectTableSet($this->param('prefix'));
+            if ($result['redirect']) {
+                $this->redirect('/');
+            }
+        }
+
+        // Get view data (used by included view)
+        /** @psalm-suppress UnusedVariable */
+        $fixedTbpref = $tableSetService->isFixedPrefix();
+        /** @psalm-suppress UnusedVariable */
+        $tbpref = $tableSetService->getCurrentPrefix();
+        /** @psalm-suppress UnusedVariable */
+        $prefixes = $tableSetService->getPrefixes();
+
+        // Render page
+        $this->render('Select, Create or Delete a Table Set', false);
+        $this->message($message, false);
+
+        include __DIR__ . '/../Views/Admin/table_management.php';
+
+        $this->endRender();
     }
 
     /**
-     * Server data page (replaces admin_server_data.php)
+     * Server data page
      *
-     * @param array $params Route parameters
+     * @param array<string, string> $params Route parameters
      *
      * @return void
      */
     public function serverData(array $params): void
     {
-        include __DIR__ . '/../Legacy/admin_server_data.php';
+        $serverDataService = new ServerDataService();
+        /** @psalm-suppress UnusedVariable - Used by included view */
+        $data = $serverDataService->getServerData();
+
+        // Render page
+        $this->render("Server Data", true);
+
+        include __DIR__ . '/../Views/Admin/server_data.php';
+
+        $this->endRender();
     }
 }
