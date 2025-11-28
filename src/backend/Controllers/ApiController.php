@@ -16,12 +16,14 @@
 
 namespace Lwt\Controllers;
 
+require_once __DIR__ . '/TranslationController.php';
+
 /**
  * Controller for REST API endpoints.
  *
  * Handles:
  * - Main REST API (v1)
- * - Translation APIs (Google, Glosbe)
+ * - Translation APIs (delegated to TranslationController)
  *
  * @category Lwt
  * @package  Lwt
@@ -32,6 +34,26 @@ namespace Lwt\Controllers;
  */
 class ApiController extends BaseController
 {
+    /**
+     * Translation controller for handling translation endpoints
+     *
+     * @var TranslationController|null
+     */
+    protected ?TranslationController $translationController = null;
+
+    /**
+     * Get or create the translation controller.
+     *
+     * @return TranslationController
+     */
+    protected function getTranslationController(): TranslationController
+    {
+        if ($this->translationController === null) {
+            $this->translationController = new TranslationController();
+        }
+        return $this->translationController;
+    }
+
     /**
      * Main API v1 endpoint (replaces api_v1.php)
      *
@@ -47,17 +69,21 @@ class ApiController extends BaseController
     /**
      * Translation endpoint (replaces api_translate.php)
      *
+     * Delegates to TranslationController for proper MVC handling.
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function translate(array $params): void
     {
-        include __DIR__ . '/../Legacy/api_translate.php';
+        $this->getTranslationController()->translate($params);
     }
 
     /**
      * Google translate endpoint (replaces api_google.php)
+     *
+     * Delegates to TranslationController for proper MVC handling.
      *
      * @param array $params Route parameters
      *
@@ -65,11 +91,13 @@ class ApiController extends BaseController
      */
     public function google(array $params): void
     {
-        include __DIR__ . '/../Legacy/api_google.php';
+        $this->getTranslationController()->google($params);
     }
 
     /**
      * Glosbe API endpoint (replaces api_glosbe.php)
+     *
+     * Delegates to TranslationController for proper MVC handling.
      *
      * @param array $params Route parameters
      *
@@ -77,6 +105,6 @@ class ApiController extends BaseController
      */
     public function glosbe(array $params): void
     {
-        include __DIR__ . '/../Legacy/api_glosbe.php';
+        $this->getTranslationController()->glosbe($params);
     }
 }

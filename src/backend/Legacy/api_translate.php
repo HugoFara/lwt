@@ -17,74 +17,18 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/trans.html
  * @since    1.0.3
+ *
+ * @deprecated 3.0.0 Use TranslationController::translate() instead
+ * @see \Lwt\Controllers\TranslationController::translate()
  */
 
-namespace Lwt;
+namespace Lwt\Legacy;
 
-require_once 'Core/Bootstrap/db_bootstrap.php';
-require_once 'Core/UI/ui_helpers.php';
-require_once 'Core/Text/text_helpers.php';
-require_once 'Core/Http/param_helpers.php';
-require_once 'Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../Controllers/TranslationController.php';
 
-use Lwt\Database\Connection;
+use Lwt\Controllers\TranslationController;
 
-
-/**
- * @return null|string
- */
-function translator_url(int $term, int $order)
-{
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $sql = "SELECT SeText, LgGoogleTranslateURI
-    FROM {$tbpref}languages, {$tbpref}sentences, {$tbpref}textitems2
-    WHERE Ti2SeID = SeID AND Ti2LgID = LgID AND Ti2TxID = $term AND Ti2Order = $order";
-    $res = Connection::query($sql);
-    $record = mysqli_fetch_assoc($res);
-    if ($record) {
-        $record['SeText'];
-        $trans = isset($record['LgGoogleTranslateURI']) ?
-        (string) $record['LgGoogleTranslateURI'] : "";
-        if (substr($trans, 0, 1) == '*') {
-            $trans = substr($trans, 1);
-        }
-    } else {
-        my_die("No results: $sql");
-    }
-    mysqli_free_result($res);
-    if ($trans != '') {
-        $parsed_url = parse_url($trans, PHP_URL_PATH);
-        if (
-            substr($trans, 0, 7) == 'ggl.php'
-            || $parsed_url && str_ends_with($parsed_url, 'ggl.php')
-        ) {
-            $trans = str_replace('?', '?sent=1&', $trans);
-        }
-        return createTheDictLink($trans, $satz);
-    }
-}
-
-
-/**
- * @return void
- */
-function display_page(int $type, int $term, int $order)
-{
-    // Translate sentence
-    if ($type == 1) {
-        $url = translator_url($order, $term);
-        if ($url != '') {
-            header("Location: " . $url);
-        }
-        exit();
-    }
-    // Translate text
-    if ($type == 2) {
-        header("Location: " . createTheDictLink($term, $order));
-        exit();
-    }
-}
-
-if (isset($_REQUEST["x"]) && is_numeric($_REQUEST["x"])) {
-    display_page((int)$_REQUEST["x"], (int)$_REQUEST["i"], (int)$_REQUEST["t"]);
-}
+// Delegate to the controller
+$controller = new TranslationController();
+$controller->translate([]);
