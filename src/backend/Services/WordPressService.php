@@ -237,7 +237,13 @@ class WordPressService
             setcookie(session_name(), '', 0, '/');
         }
 
-        session_regenerate_id(true);
+        // Regenerate session ID only if a session can be started
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
     }
 
     /**

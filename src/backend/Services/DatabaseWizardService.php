@@ -253,7 +253,7 @@ class DatabaseWizardService
 
         try {
             if ($conn->socket != "") {
-                $success = mysqli_real_connect(
+                $success = @mysqli_real_connect(
                     $mysqli,
                     $conn->server,
                     $conn->userid,
@@ -262,7 +262,7 @@ class DatabaseWizardService
                     socket: $conn->socket
                 );
             } else {
-                $success = mysqli_real_connect(
+                $success = @mysqli_real_connect(
                     $mysqli,
                     $conn->server,
                     $conn->userid,

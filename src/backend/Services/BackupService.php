@@ -128,7 +128,7 @@ class BackupService
             return "Error: No Restore file specified";
         }
 
-        $handle = gzopen($fileData["thefile"]["tmp_name"], "r");
+        $handle = @gzopen($fileData["thefile"]["tmp_name"], "r");
         if ($handle === false) {
             return "Error: Restore file could not be opened";
         }
