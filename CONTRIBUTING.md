@@ -104,23 +104,19 @@ The PHP codebase structure:
 
 It is highly advised to test your code. Tests should be wrote under ``tests/``. We use PHP Unit for testing.
 
-To run all tests:
-
- ``composer test``
-
-Alternatively:
-
- ``./vendor/bin/phpunit``
-
-#### Code Coverage Report
-
-To generate a code coverage report (requires Xdebug):
+To run all tests with coverage (requires Xdebug):
 
 ```bash
-XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text
+composer test
 ```
 
-This will generate an HTML report in `coverage-report/index.html` and display a text summary in the terminal. Open the HTML report in your browser for detailed line-by-line coverage analysis.
+To run tests without coverage (faster):
+
+```bash
+composer test:no-coverage
+```
+
+Coverage reports are generated in `coverage-report/index.html`.
 
 ### Security Check
 

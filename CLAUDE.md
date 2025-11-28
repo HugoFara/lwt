@@ -47,8 +47,8 @@ The `.env` file contains:
 ### Testing
 
 ```bash
-composer test                    # Run PHPUnit tests
-./vendor/bin/phpunit             # Alternative test command
+composer test                    # Run PHPUnit tests with coverage
+composer test:no-coverage        # Run PHPUnit tests without coverage (faster)
 npm test                         # Test REST API (requires Node.js)
 npm run e2e                      # Run Cypress E2E tests (requires server on localhost:8000)
 ```

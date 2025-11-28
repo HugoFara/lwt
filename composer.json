@@ -27,7 +27,8 @@
         "squizlabs/php_codesniffer": "Following code style standards is a good thing"
     },
     "scripts": {
-        "test": "vendor/bin/phpunit",
+        "test": "XDEBUG_MODE=coverage vendor/bin/phpunit",
+        "test:no-coverage": "vendor/bin/phpunit --no-coverage",
         "info.html": "@php docs/info.php > docs/info.html",
         "doc": [
             "@info.html",
@@ -42,7 +43,8 @@
         ]
     },
     "scripts-descriptions": {
-        "test": "Run all tests!",
+        "test": "Run all tests with coverage!",
+        "test:no-coverage": "Run all tests without coverage",
         "info.html": "Regenerate one-file documentation",
         "doc": "Regenerate all documentation",
         "build": "Build frontend assets (Vite + themes)",
