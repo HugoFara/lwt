@@ -18,6 +18,11 @@ namespace Lwt\Controllers;
 
 use Lwt\Services\HomeService;
 
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../Core/Tag/tags.php';
+require_once __DIR__ . '/../Core/Text/text_helpers.php';
+require_once __DIR__ . '/../Core/Language/language_utilities.php';
 require_once __DIR__ . '/../Services/HomeService.php';
 
 /**
@@ -57,7 +62,28 @@ class HomeController extends BaseController
      */
     public function index(array $params): void
     {
-        include __DIR__ . '/../Legacy/home.php';
+        /** @psalm-suppress UnusedVariable - Used by included view */
+        $dashboardData = $this->homeService->getDashboardData();
+        /** @psalm-suppress UnusedVariable - Used by included view */
+        $homeService = $this->homeService;
+
+        $debug = $dashboardData['is_debug'];
+
+        \pagestart_nobody(
+            "Home",
+            "
+            body {
+                max-width: 1920px;
+                margin: 20px;
+            }"
+        );
+        \echo_lwt_logo();
+        echo '<h1>Learning With Texts (LWT)</h1>
+        <h2>Home' . ($debug ? ' <span class="red">DEBUG</span>' : '') . '</h2>';
+
+        include __DIR__ . '/../Views/Home/index.php';
+
+        \pageend();
     }
 
     /**

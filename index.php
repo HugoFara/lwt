@@ -66,7 +66,33 @@ if (!file_exists(LWT_BASE_PATH . '/.env')) {
     $requestUri = $_SERVER['REQUEST_URI'] ?? '';
     if (str_contains($requestUri, 'database_wizard') || str_contains($requestUri, 'admin/wizard')) {
         // Allow wizard to run without database connection
-        include LWT_BASE_PATH . '/src/backend/Legacy/admin_wizard.php';
+        // Use the service and view directly (without loading AdminController which requires db_bootstrap)
+        require_once LWT_BASE_PATH . '/src/backend/Services/DatabaseWizardService.php';
+        $wizardService = new Lwt\Services\DatabaseWizardService();
+
+        $conn = null;
+        $errorMessage = null;
+
+        $op = $_REQUEST['op'] ?? '';
+        if ($op != '') {
+            if ($op == "Autocomplete") {
+                $conn = $wizardService->autocompleteConnection();
+            } elseif ($op == "Check") {
+                $conn = $wizardService->createConnectionFromForm($_REQUEST);
+                $errorMessage = $wizardService->testConnection($conn);
+            } elseif ($op == "Change") {
+                $conn = $wizardService->createConnectionFromForm($_REQUEST);
+                $wizardService->saveConnection($conn);
+                header("Location: /");
+                exit;
+            }
+        } elseif ($wizardService->envFileExists()) {
+            $conn = $wizardService->loadConnection();
+        } else {
+            $conn = $wizardService->createEmptyConnection();
+        }
+
+        include LWT_BASE_PATH . '/src/backend/Views/Admin/wizard.php';
         exit;
     }
 

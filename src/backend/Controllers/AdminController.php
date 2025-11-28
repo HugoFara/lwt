@@ -128,9 +128,38 @@ class AdminController extends BaseController
      */
     public function wizard(array $params): void
     {
-        // The wizard is a standalone file that handles its own rendering
-        // because it needs to work without database connection
-        include __DIR__ . '/../Legacy/admin_wizard.php';
+        // Load service (no database required)
+        require_once __DIR__ . '/../Services/DatabaseWizardService.php';
+        $wizardService = new \Lwt\Services\DatabaseWizardService();
+
+        /** @psalm-suppress UnusedVariable - Used by included view */
+        $conn = null;
+
+        /** @psalm-suppress UnusedVariable - Used by included view */
+        $errorMessage = null;
+
+        // Handle operations
+        $op = $_REQUEST['op'] ?? '';
+        if ($op != '') {
+            if ($op == "Autocomplete") {
+                $conn = $wizardService->autocompleteConnection();
+            } elseif ($op == "Check") {
+                $conn = $wizardService->createConnectionFromForm($_REQUEST);
+                $errorMessage = $wizardService->testConnection($conn);
+            } elseif ($op == "Change") {
+                $conn = $wizardService->createConnectionFromForm($_REQUEST);
+                $wizardService->saveConnection($conn);
+                // Redirect to home after saving
+                $this->redirect('/');
+            }
+        } elseif ($wizardService->envFileExists()) {
+            $conn = $wizardService->loadConnection();
+        } else {
+            $conn = $wizardService->createEmptyConnection();
+        }
+
+        // The wizard view is standalone (includes its own HTML structure)
+        include __DIR__ . '/../Views/Admin/wizard.php';
     }
 
     /**
