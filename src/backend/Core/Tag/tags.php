@@ -5,7 +5,9 @@ require_once __DIR__ . '/../Database/Connection.php';
 require_once __DIR__ . '/../Database/Escaping.php';
 require_once __DIR__ . '/../Utils/string_utilities.php';
 require_once __DIR__ . '/../Http/url_utilities.php';
+require_once __DIR__ . '/../Http/InputValidator.php';
 
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 
@@ -252,19 +254,18 @@ function saveWordTags(int $wid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     Connection::execute("DELETE from " . $tbpref . "wordtags WHERE WtWoID =" . $wid);
-    if (
-        !isset($_REQUEST['TermTags'])
-        || !is_array($_REQUEST['TermTags'])
-        || !isset($_REQUEST['TermTags']['TagList'])
-        || !is_array($_REQUEST['TermTags']['TagList'])
-    ) {
-         return;
+
+    $termTags = InputValidator::getArray('TermTags');
+    if (empty($termTags) || !isset($termTags['TagList']) || !is_array($termTags['TagList'])) {
+        return;
     }
-    $cnt = count($_REQUEST['TermTags']['TagList']);
+
+    $tagList = $termTags['TagList'];
+    $cnt = count($tagList);
     getWordTags(1);
 
     for ($i = 0; $i < $cnt; $i++) {
-        $tag = $_REQUEST['TermTags']['TagList'][$i];
+        $tag = (string) $tagList[$i];
         if (!in_array($tag, $_SESSION['TAGS'])) {
             Connection::execute(
                 "INSERT INTO {$tbpref}tags (TgText)
@@ -295,19 +296,18 @@ function saveTextTags(int $tid): void
     Connection::execute(
         "DELETE FROM " . $tbpref . "texttags WHERE TtTxID =" . $tid
     );
-    if (
-        !isset($_REQUEST['TextTags'])
-        || !is_array($_REQUEST['TextTags'])
-        || !isset($_REQUEST['TextTags']['TagList'])
-        || !is_array($_REQUEST['TextTags']['TagList'])
-    ) {
+
+    $textTags = InputValidator::getArray('TextTags');
+    if (empty($textTags) || !isset($textTags['TagList']) || !is_array($textTags['TagList'])) {
         return;
     }
-    $cnt = count($_REQUEST['TextTags']['TagList']);
+
+    $tagList = $textTags['TagList'];
+    $cnt = count($tagList);
     get_texttags(1);
 
     for ($i = 0; $i < $cnt; $i++) {
-        $tag = $_REQUEST['TextTags']['TagList'][$i];
+        $tag = (string) $tagList[$i];
         if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
             Connection::execute(
                 "INSERT INTO {$tbpref}tags2 (T2Text)
@@ -337,18 +337,18 @@ function saveArchivedTextTags(int $tid): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     Connection::execute("DELETE from " . $tbpref . "archtexttags WHERE AgAtID =" . $tid);
-    if (
-        !isset($_REQUEST['TextTags'])
-        || !is_array($_REQUEST['TextTags'])
-        || !isset($_REQUEST['TextTags']['TagList'])
-        || !is_array($_REQUEST['TextTags']['TagList'])
-    ) {
+
+    $textTags = InputValidator::getArray('TextTags');
+    if (empty($textTags) || !isset($textTags['TagList']) || !is_array($textTags['TagList'])) {
         return;
     }
-    $cnt = count($_REQUEST['TextTags']['TagList']);
+
+    $tagList = $textTags['TagList'];
+    $cnt = count($tagList);
     get_texttags(1);
+
     for ($i = 0; $i < $cnt; $i++) {
-        $tag = $_REQUEST['TextTags']['TagList'][$i];
+        $tag = (string) $tagList[$i];
         if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
             Connection::execute(
                 "INSERT INTO {$tbpref}tags2 (T2Text)

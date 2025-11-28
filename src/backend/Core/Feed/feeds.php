@@ -6,7 +6,9 @@ require_once __DIR__ . '/../Database/Escaping.php';
 require_once __DIR__ . '/../Database/Maintenance.php';
 require_once __DIR__ . '/../Database/TextParsing.php';
 require_once __DIR__ . '/../Tag/tags.php';
+require_once __DIR__ . '/../Http/InputValidator.php';
 
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Maintenance;
@@ -20,7 +22,7 @@ function load_feeds(int $currentfeed): void
     $cnt = 0;
     $ajax = $feeds = array();
     echo '<script type="text/javascript">';
-    if (isset($_REQUEST['check_autoupdate'])) {
+    if (InputValidator::has('check_autoupdate')) {
         $result = Connection::query(
             "SELECT * FROM " . $tbpref . "newsfeeds
             where `NfOptions` like '%autoupdate=%'"

@@ -18,8 +18,9 @@
 namespace SaveSetting;
 
 require_once __DIR__ . '/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/Http/param_helpers.php';
+require_once __DIR__ . '/Http/InputValidator.php';
 
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Settings;
 
 /**
@@ -31,9 +32,9 @@ use Lwt\Database\Settings;
  */
 function get_parameters(): array
 {
-    $k = getreq('k');
-    $v = getreq('v');
-    $url = getreq('u');
+    $k = InputValidator::getString('k');
+    $v = InputValidator::getString('v');
+    $url = InputValidator::getString('u');
     return array($k, $v, $url);
 }
 
