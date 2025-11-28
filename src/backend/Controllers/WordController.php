@@ -17,6 +17,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\Services\WordService;
+use Lwt\Services\WordUploadService;
 
 /**
  * Controller for vocabulary/term management.
@@ -42,12 +43,30 @@ class WordController extends BaseController
     protected WordService $wordService;
 
     /**
+     * @var WordUploadService|null Word upload service instance
+     */
+    protected ?WordUploadService $uploadService = null;
+
+    /**
      * Initialize controller with WordService.
      */
     public function __construct()
     {
         parent::__construct();
         $this->wordService = new WordService();
+    }
+
+    /**
+     * Get or create WordUploadService instance.
+     *
+     * @return WordUploadService
+     */
+    protected function getUploadService(): WordUploadService
+    {
+        if ($this->uploadService === null) {
+            $this->uploadService = new WordUploadService();
+        }
+        return $this->uploadService;
     }
 
     /**
@@ -1119,12 +1138,208 @@ class WordController extends BaseController
     /**
      * Upload words (replaces word_upload.php)
      *
+     * Handles:
+     * - GET: Display the upload form
+     * - POST with op=Import: Process the import
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function upload(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_upload.php';
+        \pagestart('Import Terms', true);
+
+        if (isset($_REQUEST['op']) && $_REQUEST['op'] === 'Import') {
+            $this->handleUploadImport();
+        } else {
+            $this->displayUploadForm();
+        }
+
+        \pageend();
+    }
+
+    /**
+     * Display the word upload form.
+     *
+     * @return void
+     */
+    private function displayUploadForm(): void
+    {
+        $currentLanguage = \Lwt\Database\Settings::get('currentlanguage');
+        include __DIR__ . '/../Views/Word/upload_form.php';
+    }
+
+    /**
+     * Handle the word import operation.
+     *
+     * @return void
+     */
+    private function handleUploadImport(): void
+    {
+        $uploadService = $this->getUploadService();
+        $tabType = $_REQUEST["Tab"] ?? 'c';
+        $langId = (int) ($_REQUEST["LgID"] ?? 0);
+
+        if ($langId === 0) {
+            echo \error_message_with_hide('Error: No language selected', false);
+            return;
+        }
+
+        $langData = $uploadService->getLanguageData($langId);
+        if ($langData === null) {
+            echo \error_message_with_hide('Error: Invalid language', false);
+            return;
+        }
+
+        $removeSpaces = (bool) $langData['LgRemoveSpaces'];
+
+        // Parse column mapping
+        $columns = [
+            1 => is_string($_REQUEST["Col1"] ?? '') ? $_REQUEST["Col1"] : '',
+            2 => is_string($_REQUEST["Col2"] ?? '') ? $_REQUEST["Col2"] : '',
+            3 => is_string($_REQUEST["Col3"] ?? '') ? $_REQUEST["Col3"] : '',
+            4 => is_string($_REQUEST["Col4"] ?? '') ? $_REQUEST["Col4"] : '',
+            5 => is_string($_REQUEST["Col5"] ?? '') ? $_REQUEST["Col5"] : '',
+        ];
+        $columns = array_unique($columns);
+
+        $parsed = $uploadService->parseColumnMapping($columns, $removeSpaces);
+        $col = $parsed['columns'];
+        $fields = $parsed['fields'];
+
+        // Check for file upload vs text input
+        $fileUpl = (
+            isset($_FILES["thefile"]) &&
+            $_FILES["thefile"]["tmp_name"] != "" &&
+            $_FILES["thefile"]["error"] == 0
+        );
+
+        // Get or create the input file
+        if ($fileUpl) {
+            $fileName = $_FILES["thefile"]["tmp_name"];
+        } else {
+            if (empty($_REQUEST["Upload"])) {
+                echo \error_message_with_hide('Error: No data to import', false);
+                return;
+            }
+            $fileName = $uploadService->createTempFile($_REQUEST["Upload"]);
+        }
+
+        $ignoreFirst = ($_REQUEST["IgnFirstLine"] ?? '0') === '1';
+        $overwrite = (int) ($_REQUEST["Over"] ?? 0);
+        $status = (int) ($_REQUEST["WoStatus"] ?? 1);
+        $translDelim = $_REQUEST["transl_delim"] ?? '';
+
+        // Get last update timestamp before import
+        $lastUpdate = $uploadService->getLastWordUpdate() ?? '';
+
+        if ($fields["txt"] > 0) {
+            // Import terms
+            $this->importTerms(
+                $uploadService,
+                $langId,
+                $fields,
+                $col,
+                $tabType,
+                $fileName,
+                $status,
+                $overwrite,
+                $ignoreFirst,
+                $translDelim,
+                $lastUpdate
+            );
+
+            // Display results
+            $rtl = $uploadService->isRightToLeft($langId) ? 1 : 0;
+            $recno = $uploadService->countImportedTerms($lastUpdate);
+            include __DIR__ . '/../Views/Word/upload_result.php';
+        } elseif ($fields["tl"] > 0) {
+            // Import tags only
+            $uploadService->importTagsOnly($fields, $tabType, $fileName, $ignoreFirst);
+            echo '<p>Tags imported successfully.</p>';
+        } else {
+            echo \error_message_with_hide('Error: No term column specified', false);
+        }
+
+        // Clean up temp file if we created it
+        if (!$fileUpl && file_exists($fileName)) {
+            unlink($fileName);
+        }
+    }
+
+    /**
+     * Import terms from the uploaded file.
+     *
+     * @param WordUploadService $uploadService  The upload service
+     * @param int               $langId         Language ID
+     * @param array             $fields         Field indexes
+     * @param array             $col            Column mapping
+     * @param string            $tabType        Tab type (c, t, h)
+     * @param string            $fileName       Path to input file
+     * @param int               $status         Word status
+     * @param int               $overwrite      Overwrite mode
+     * @param bool              $ignoreFirst    Ignore first line
+     * @param string            $translDelim    Translation delimiter
+     * @param string            $lastUpdate     Last update timestamp
+     *
+     * @return void
+     */
+    private function importTerms(
+        WordUploadService $uploadService,
+        int $langId,
+        array $fields,
+        array $col,
+        string $tabType,
+        string $fileName,
+        int $status,
+        int $overwrite,
+        bool $ignoreFirst,
+        string $translDelim,
+        string $lastUpdate
+    ): void {
+        $columnsClause = '(' . rtrim(implode(',', $col), ',') . ')';
+        $delimiter = $uploadService->getSqlDelimiter($tabType);
+
+        // Use simple import for no tags and no overwrite, complete import otherwise
+        if ($fields["tl"] == 0 && $overwrite == 0) {
+            $uploadService->importSimple(
+                $langId,
+                $fields,
+                $columnsClause,
+                $delimiter,
+                $fileName,
+                $status,
+                $ignoreFirst
+            );
+        } else {
+            $uploadService->importComplete(
+                $langId,
+                $fields,
+                $columnsClause,
+                $delimiter,
+                $fileName,
+                $status,
+                $overwrite,
+                $ignoreFirst,
+                $translDelim,
+                $tabType
+            );
+        }
+
+        // Post-import processing
+        \Lwt\Database\Maintenance::initWordCount();
+        $uploadService->linkWordsToTextItems();
+        $uploadService->handleMultiwords($langId, $lastUpdate);
+    }
+
+    /**
+     * Get the upload service instance for testing.
+     *
+     * @return WordUploadService
+     */
+    public function getUploadServiceForTest(): WordUploadService
+    {
+        return $this->getUploadService();
     }
 }

@@ -37,14 +37,17 @@ Static assets have been consolidated into the `assets/` directory:
 
 #### PHP Source Reorganization
 
-All PHP source files have been moved to `src/php/`:
+All PHP source files have been moved to `src/backend/`:
 
 | Old Location | New Location |
 |-------------|--------------|
-| `inc/` | `src/php/inc/` |
-| Root PHP files (`do_text.php`, etc.) | `src/php/Legacy/` |
-| (new) | `src/php/Controllers/` |
-| (new) | `src/php/Router/` |
+| `inc/` | `src/backend/Core/` |
+| Root PHP files (`do_text.php`, etc.) | `src/backend/Legacy/` |
+| (new) | `src/backend/Controllers/` |
+| (new) | `src/backend/Router/` |
+| (new) | `src/backend/Services/` |
+| (new) | `src/backend/Views/` |
+| (new) | `src/backend/Api/` |
 
 #### Frontend Source Reorganization
 
@@ -58,9 +61,9 @@ Frontend source files moved from `src/` to `src/frontend/`:
 
 ### 3. Routing System
 
-A new routing system has been implemented in `src/php/Router/`:
+A new routing system has been implemented in `src/backend/Router/`:
 
-#### Router (`src/php/Router/Router.php`)
+#### Router (`src/backend/Router/Router.php`)
 
 The `Router` class provides:
 
@@ -71,7 +74,7 @@ The `Router` class provides:
 - **HTTP method routing:** Different handlers for GET, POST, etc.
 - **404/500 error handling:** Built-in error pages
 
-#### Routes Configuration (`src/php/Router/routes.php`)
+#### Routes Configuration (`src/backend/Router/routes.php`)
 
 All application routes are defined in this file, organized by feature:
 
@@ -89,13 +92,14 @@ All application routes are defined in this file, organized by feature:
 
 ### 4. MVC Controllers
 
-New controller classes in `src/php/Controllers/`:
+Controller classes in `src/backend/Controllers/`:
 
 | Controller | Purpose |
 |-----------|---------|
 | `BaseController.php` | Abstract base class with common functionality |
 | `HomeController.php` | Home page |
 | `TextController.php` | Text reading and management |
+| `TextPrintController.php` | Text printing (plain and annotated) |
 | `WordController.php` | Word/term management |
 | `TestController.php` | Testing/review interface |
 | `LanguageController.php` | Language configuration |
@@ -104,6 +108,7 @@ New controller classes in `src/php/Controllers/`:
 | `AdminController.php` | Admin functions (backup, settings, etc.) |
 | `MobileController.php` | Mobile interface |
 | `ApiController.php` | REST API endpoints |
+| `TranslationController.php` | Translation API integration |
 | `WordPressController.php` | WordPress integration |
 
 #### BaseController Features
@@ -120,9 +125,58 @@ The `BaseController` provides helper methods for all controllers:
 - `json()` - JSON response output
 - `sessionParam()` / `dbParam()` - Session/settings parameter handling
 
-### 5. Legacy File Migration
+### 5. Services Layer
 
-All 59 root-level PHP page files have been moved to `src/php/Legacy/` with renamed, more descriptive filenames:
+Version 3 introduces a Services layer that extracts business logic from controllers:
+
+| Service | Purpose |
+|---------|---------|
+| `BackupService.php` | Database backup and restore operations |
+| `DatabaseWizardService.php` | Database setup and configuration |
+| `DemoService.php` | Demo data installation |
+| `FeedService.php` | RSS feed management logic |
+| `HomeService.php` | Home page data and statistics |
+| `LanguageService.php` | Language CRUD operations |
+| `MobileService.php` | Mobile interface logic |
+| `ServerDataService.php` | Server information gathering |
+| `SettingsService.php` | Application settings management |
+| `StatisticsService.php` | Usage statistics calculation |
+| `TableSetService.php` | Table set management |
+| `TagService.php` | Tag management operations |
+| `TestService.php` | Test/review session logic |
+| `TextDisplayService.php` | Annotated text display |
+| `TextPrintService.php` | Text printing and export |
+| `TextService.php` | Text CRUD and processing |
+| `TranslationService.php` | Translation API integration |
+| `TtsService.php` | Text-to-speech configuration |
+| `WordPressService.php` | WordPress integration logic |
+| `WordService.php` | Word/term management operations |
+
+Services are located in `src/backend/Services/` and follow the pattern of extracting complex business logic from controllers for better testability and maintainability.
+
+### 6. Views Architecture
+
+Version 3 introduces a proper Views directory structure in `src/backend/Views/`:
+
+| Directory | Purpose |
+|-----------|---------|
+| `Admin/` | Admin interface templates |
+| `Feed/` | Feed management templates |
+| `Home/` | Home page templates |
+| `Language/` | Language configuration templates |
+| `Mobile/` | Mobile interface templates |
+| `Tags/` | Tag management templates |
+| `Text/` | Text reading/editing templates |
+| `TextPrint/` | Text printing templates |
+| `Word/` | Word/term templates |
+
+Additional helper classes:
+- `View/Helper/` - View helper functions
+- `TestViews.php` - Test interface view logic
+
+### 7. Legacy File Migration
+
+All 59 root-level PHP page files have been moved to `src/backend/Legacy/` with renamed, more descriptive filenames:
 
 | Old Filename | New Filename |
 |-------------|-------------|
@@ -161,7 +215,7 @@ All 59 root-level PHP page files have been moved to `src/php/Legacy/` with renam
 | `select_lang_pair.php` | `language_select_pair.php` |
 | `edit_tags.php` | `tags_edit.php` |
 | `edit_texttags.php` | `tags_text_edit.php` |
-| `do_feeds.php` | `feeds_index.php` |
+| `do_feeds.php` | Fully migrated to `FeedsController` |
 | `edit_feeds.php` | `feeds_edit.php` |
 | `feed_wizard.php` | `feeds_wizard.php` |
 | `backup_restore.php` | `admin_backup.php` |
@@ -183,7 +237,7 @@ All 59 root-level PHP page files have been moved to `src/php/Legacy/` with renam
 | `wp_lwt_stop.php` | `wordpress_stop.php` |
 | `index.php` (old) | `home.php` |
 
-### 6. Apache Configuration (`.htaccess`)
+### 8. Apache Configuration (`.htaccess`)
 
 New `.htaccess` file provides:
 
@@ -193,12 +247,12 @@ New `.htaccess` file provides:
 - **Performance:** GZIP compression and cache headers for static assets
 - **Static file handling:** Direct serving of CSS, JS, images, and fonts
 
-### 7. Test Suite
+### 9. Test Suite
 
-New test files added for the routing system:
+Test files for the routing system:
 
-- `tests/src/php/Router/RouterTest.php` - Unit tests for the Router class
-- `tests/src/php/Router/RoutesTest.php` - Integration tests for all routes
+- `tests/src/backend/Router/RouterTest.php` - Unit tests for the Router class
+- `tests/src/backend/Router/RoutesTest.php` - Integration tests for all routes
 
 Test coverage includes:
 
@@ -242,19 +296,19 @@ If extending LWT with custom code:
 include 'inc/session_utility.php';
 
 // New way (from root or with include_path set)
-include 'src/php/inc/session_utility.php';
+include 'src/backend/Core/session_utility.php';
 ```
 
 ### Creating New Controllers
 
 To add new functionality:
 
-1. Create a controller in `src/php/Controllers/`
+1. Create a controller in `src/backend/Controllers/`
 2. Extend `BaseController`
-3. Add routes in `src/php/Router/routes.php`
+3. Add routes in `src/backend/Router/routes.php`
 
 ```php
-// src/php/Controllers/MyController.php
+// src/backend/Controllers/MyController.php
 namespace Lwt\Controllers;
 
 class MyController extends BaseController
@@ -270,17 +324,45 @@ class MyController extends BaseController
 $router->register('/my/route', 'MyController@myAction');
 ```
 
+### Creating New Services
+
+To extract business logic:
+
+1. Create a service in `src/backend/Services/`
+2. Inject dependencies via constructor
+3. Use from controllers
+
+```php
+// src/backend/Services/MyService.php
+namespace Lwt\Services;
+
+class MyService
+{
+    public function doSomething(): array
+    {
+        // Business logic here
+        return [];
+    }
+}
+
+// In controller
+$service = new MyService();
+$data = $service->doSomething();
+```
+
 ## Statistics
 
 | Metric | Before | After |
 |--------|--------|-------|
 | PHP files in root | 60+ | 1 (`index.php`) |
 | Root directories | 10+ | 6 (assets, db, docs, media, src, tests) |
-| Controllers | 0 | 12 |
+| Controllers | 0 | 14 |
+| Services | 0 | 20 |
+| View directories | 0 | 10 |
 | Route definitions | 0 | 80+ |
 | Test files for routing | 0 | 2 (1000+ lines) |
 
-### 8. Global Variables Refactoring
+### 10. Global Variables Refactoring
 
 Version 3 introduces the `Globals` class to clearly identify and manage global state throughout the application.
 
@@ -401,7 +483,7 @@ To update your code:
    if (Globals::isDebug()) { ... }
    ```
 
-### 9. Environment-Based Configuration (.env)
+### 11. Environment-Based Configuration (.env)
 
 Version 3 introduces `.env` file support for database configuration, replacing the legacy `connect.inc.php` approach.
 
@@ -514,7 +596,7 @@ DB_TABLE_PREFIX=lwt_
 
 #### EnvLoader Class
 
-A new `Lwt\Core\EnvLoader` class (`src/backend/Core/EnvLoader.php`) provides the parsing functionality:
+The `Lwt\Core\EnvLoader` class (`src/backend/Core/Bootstrap/EnvLoader.php`) provides the parsing functionality:
 
 ```php
 use Lwt\Core\EnvLoader;
@@ -581,13 +663,13 @@ To migrate from `connect.inc.php` to `.env`:
 
 4. Optionally, remove `connect.inc.php` (LWT will use `.env` exclusively)
 
-### 10. AJAX Files Consolidation
+### 12. AJAX Files Consolidation
 
-Version 3 consolidates all legacy AJAX files into the REST API (`api_v1.php`), eliminating 15 separate entry points.
+Version 3 consolidates all legacy AJAX files into a structured API with dedicated handlers.
 
 #### The Problem with Scattered AJAX Files
 
-Previously, LWT had 15 separate `ajax_*.php` files in `src/backend/Core/`:
+Previously, LWT had 15 separate `ajax_*.php` files:
 
 ```text
 ajax_add_term_transl.php     ajax_save_impr_text.php
@@ -606,37 +688,46 @@ This pattern had several issues:
 - **Inconsistent response formats** - Some returned HTML, some JSON, some JavaScript
 - **No HTTP status codes** - Always returned 200 OK, even on errors
 - **No input validation** - Mixed usage of `$_GET`, `$_POST`, `$_REQUEST`
-- **Fragile `chdir('..')` calls** - Many files changed directory assuming they were in `/Core/`
 
-#### The New Consolidated API
+#### The New API Structure
 
-All AJAX functionality has been moved into `src/backend/Legacy/api_v1.php`:
+All AJAX functionality has been consolidated into `src/backend/Api/V1/`:
 
-| Deleted File | New REST Endpoint | HTTP Method |
-|-------------|-------------------|-------------|
-| `ajax_add_term_transl.php` | `/api.php/v1/terms/new` | POST |
-| `ajax_chg_term_status.php` | `/api.php/v1/terms/{id}/status/up` or `/down` | POST |
-| `ajax_check_regexp.php` | (removed - no active usage) | - |
-| `ajax_edit_impr_text.php` | Functions in `Lwt\Ajax\Improved_Text` namespace | - |
-| `ajax_get_phonetic.php` | `/api.php/v1/phonetic-reading` | GET |
-| `ajax_get_theme.php` | `/api.php/v1/settings/theme-path` | GET |
-| `ajax_load_feed.php` | `/api.php/v1/feeds/{id}/load` | POST |
-| `ajax_save_impr_text.php` | `/api.php/v1/texts/{id}/annotation` | POST |
-| `ajax_save_setting.php` | `/api.php/v1/settings` | POST |
-| `ajax_save_text_position.php` | `/api.php/v1/texts/{id}/reading-position` | POST |
-| `ajax_show_imported_terms.php` | `/api.php/v1/terms/imported` | GET |
-| `ajax_show_sentences.php` | `/api.php/v1/sentences-with-term` | GET |
-| `ajax_show_similar_terms.php` | `/api.php/v1/similar-terms` | GET |
-| `ajax_update_media_select.php` | `/api.php/v1/media-files` | GET |
-| `ajax_word_counts.php` | `/api.php/v1/texts/statistics` | GET |
+```text
+src/backend/Api/V1/
+├── ApiV1.php           # Main API router
+├── Endpoints.php       # Endpoint definitions
+└── Handlers/
+    ├── FeedHandler.php
+    ├── ImportHandler.php
+    ├── ImprovedTextHandler.php
+    ├── LanguageHandler.php
+    ├── MediaHandler.php
+    ├── ReviewHandler.php
+    ├── SettingsHandler.php
+    ├── StatisticsHandler.php
+    ├── TermHandler.php
+    ├── TextHandler.php
+    └── Response.php
+```
 
-#### Namespace Organization
+#### REST Endpoint Mapping
 
-Functions are organized into namespaces within `api_v1.php`:
-
-- `Lwt\Ajax` - Main namespace with term, status, position, and settings functions
-- `Lwt\Ajax\Improved_Text` - Functions for annotated text editing (`make_trans`, `edit_term_form`, etc.)
-- `Lwt\Ajax\Feed` - Feed loading functions (`load_feed`, `get_feeds_list`, etc.)
+| Old File | New REST Endpoint | Handler |
+|----------|-------------------|---------|
+| `ajax_add_term_transl.php` | `/api.php/v1/terms/new` | TermHandler |
+| `ajax_chg_term_status.php` | `/api.php/v1/terms/{id}/status/up` or `/down` | TermHandler |
+| `ajax_get_phonetic.php` | `/api.php/v1/phonetic-reading` | LanguageHandler |
+| `ajax_get_theme.php` | `/api.php/v1/settings/theme-path` | SettingsHandler |
+| `ajax_load_feed.php` | `/api.php/v1/feeds/{id}/load` | FeedHandler |
+| `ajax_save_impr_text.php` | `/api.php/v1/texts/{id}/annotation` | TextHandler |
+| `ajax_save_setting.php` | `/api.php/v1/settings` | SettingsHandler |
+| `ajax_save_text_position.php` | `/api.php/v1/texts/{id}/reading-position` | TextHandler |
+| `ajax_show_imported_terms.php` | `/api.php/v1/terms/imported` | ImportHandler |
+| `ajax_show_sentences.php` | `/api.php/v1/sentences-with-term` | TermHandler |
+| `ajax_show_similar_terms.php` | `/api.php/v1/similar-terms` | TermHandler |
+| `ajax_update_media_select.php` | `/api.php/v1/media-files` | MediaHandler |
+| `ajax_word_counts.php` | `/api.php/v1/texts/statistics` | StatisticsHandler |
 
 #### Benefits
 
@@ -646,7 +737,8 @@ Functions are organized into namespaces within `api_v1.php`:
 | Response format | HTML/JSON/JS (mixed) | JSON (consistent) |
 | HTTP status codes | Always 200 | 200/400/404/405 |
 | Error handling | Minimal/none | Structured JSON errors |
-| Maintainability | Hard to track | Single file to maintain |
+| Code organization | Flat files | Handler classes |
+| Maintainability | Hard to track | Single namespace |
 
 #### Migration for Custom Code
 
@@ -675,6 +767,29 @@ $.post('api.php/v1/feeds/' + feedId + '/load', {
 ## Code Monolith Splitting
 
 Version 3 breaks up the large monolithic PHP files into smaller, focused modules for better maintainability.
+
+### Core Directory Organization
+
+The `src/backend/Core/` directory is organized into subdirectories by concern:
+
+| Directory | Purpose |
+|-----------|---------|
+| `Bootstrap/` | Application initialization (EnvLoader, db_bootstrap, start_session) |
+| `Database/` | Database classes (Connection, DB, Escaping, Settings) |
+| `Entity/` | Entity classes (Language, Term, Text) |
+| `Export/` | Export functionality (Anki, TSV) |
+| `Feed/` | RSS feed handling |
+| `Http/` | HTTP utilities |
+| `Integration/` | External integrations |
+| `Language/` | Language processing |
+| `Media/` | Media file handling |
+| `Mobile/` | Mobile interface logic |
+| `Tag/` | Tag management |
+| `Test/` | Test/review logic |
+| `Text/` | Text processing |
+| `UI/` | UI helper functions |
+| `Utils/` | General utilities |
+| `Word/` | Word/term processing |
 
 ### database_connect.php Split
 
@@ -779,16 +894,17 @@ define('LWT_LANGUAGES_ARRAY', loadLanguageDefinitions());
 This refactoring enables:
 
 1. **Gradual migration:** Legacy files can be incrementally converted to proper MVC
-2. **Better testing:** Controllers are easier to unit test
+2. **Better testing:** Controllers and Services are easier to unit test
 3. **Cleaner URLs:** SEO-friendly URLs without `.php` extensions
 4. **Modular architecture:** Clear separation of concerns
 5. **Namespace support:** PHP autoloading with PSR-4 style namespaces
 6. **Explicit dependencies:** The `Globals` class makes global state visible and trackable
 7. **Modern configuration:** `.env` files work with Docker, CI/CD, and modern deployment workflows
+8. **API versioning:** Structured API handlers allow for future API versions
 
 ## Commit History
 
-The v3 branch includes the following commits (in chronological order):
+The v3 branch includes the following key commits (in chronological order):
 
 1. `125edc4e` - Initial refactor: moves PHP files to src folder with router for backward compatibility
 2. `e53b8387` - Moves `inc/` to `src/php/inc`
@@ -797,3 +913,5 @@ The v3 branch includes the following commits (in chronological order):
 5. `4369a1c0` - Implements MVC structure, fixes static assets paths
 6. `48e84eac` - Moves files and static assets to unclutter the root folder
 7. `f2ab173a` - Clearly separates front-end files from PHP backend
+8. `15a1b011` - Renames `src/php/` to `src/backend/`, moves inc to Core
+9. Recent commits - Ongoing MVC migration (feeds, word edit, admin, home controllers)
