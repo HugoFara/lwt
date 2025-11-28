@@ -988,12 +988,10 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test get_database_prefixes function
+     * Test Configuration::getPrefix function
      */
     public function testGetDatabasePrefixes(): void
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
@@ -1003,16 +1001,14 @@ class DatabaseConnectTest extends TestCase
             Globals::setDbConnection($connection);
         }
 
-        // Get prefixes - returns 0 or 1 indicating if prefix is fixed
-        // Also modifies $tbpref by reference
-        $fixed = get_database_prefixes($tbpref);
+        // Get prefixes - returns array of [prefix, is_fixed]
+        list($tbpref, $fixed) = Configuration::getPrefix(Globals::getDbConnection());
 
-        // Should return 0 or 1
-        $this->assertIsInt($fixed);
-        $this->assertTrue($fixed === 0 || $fixed === 1);
+        // $fixed should be a boolean
+        $this->assertIsBool($fixed);
 
         // $tbpref should be set to a string
-        $this->assertTrue(is_string($tbpref));
+        $this->assertIsString($tbpref);
     }
 
     /**
@@ -1299,29 +1295,6 @@ class DatabaseConnectTest extends TestCase
         $this->assertStringContainsString('SELECT 3', $queries[2]);
 
         unlink($temp_file);
-    }
-
-    /**
-     * Test get_database_prefixes function (deprecated wrapper)
-     */
-    public function testGetDatabasePrefixesDeprecated(): void
-    {
-        
-        // Ensure DB connection exists
-        if (!Globals::getDbConnection()) {
-            list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
-            );
-            Globals::setDbConnection($connection);
-        }
-
-        $tbpref = '';
-        $fixed = get_database_prefixes($tbpref);
-
-        // Should return 0 or 1
-        $this->assertTrue($fixed === 0 || $fixed === 1);
-        $this->assertIsString($tbpref);
     }
 
     /**

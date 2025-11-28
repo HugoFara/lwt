@@ -772,49 +772,6 @@ function get_last_key()
 }
 
 /**
- * Return all different database prefixes that are in use.
- *
- * @return string[] A list of prefixes.
- *
- * @psalm-return list<string>
- */
-function getprefixes(): array
-{
-    $prefix = array();
-    $res = do_mysqli_query(
-        str_replace(
-            '_',
-            "\\_",
-            "SHOW TABLES LIKE " . convert_string_to_sqlsyntax_nonull('%_settings')
-        )
-    );
-    while ($row = mysqli_fetch_row($res)) {
-        $prefix[] = substr((string) $row[0], 0, -9);
-    }
-    mysqli_free_result($res);
-    return $prefix;
-}
-
-/**
- * Get the prefixes for the database.
- *
- * Is $tbpref set in .env? Take it and $fixed_tbpref=1.
- * If not: $fixed_tbpref=0. Is it set in table "_lwtgeneral"? Take it.
- * If not: Use $tbpref = '' (no prefix, old/standard behaviour).
- *
- * @param string|null $tbpref Temporary database table prefix
- *
- * @return 0|1 Table Prefix is fixed, no changes possible.
- *
- * @deprecated Since 2.10.0-fork, use getDatabasePrefix instead
- */
-function get_database_prefixes(&$tbpref)
-{
-    list($tbpref, $fixed_tbpref) = getDatabasePrefix(Globals::getDbConnection());
-    return (int) $fixed_tbpref;
-}
-
-/**
  * Check a text and display statistics about it.
  *
  * @param string $sql

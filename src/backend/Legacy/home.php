@@ -55,6 +55,7 @@ require_once 'Core/Language/language_utilities.php';
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
+use Lwt\Services\TableSetService;
 
 /**
  * Prepare the different SPAN opening tags
@@ -82,7 +83,7 @@ function get_span_groups(): array
         $span3 = '<span>';
     } else {
         $span1 = '<span title="Manage Table Sets" onclick="location.href=\'/admin/tables\';" class="click">';
-        if (count(getprefixes()) > 0) {
+        if (count(TableSetService::getAllPrefixes()) > 0) {
             $span3 = '<span title="Select Table Set" onclick="location.href=\'/mobile/start\';" class="click">';
         } else {
             $span3 = '<span>';

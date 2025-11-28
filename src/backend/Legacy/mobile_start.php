@@ -21,6 +21,7 @@ require_once 'Core/Bootstrap/db_bootstrap.php';
 require_once 'Core/UI/ui_helpers.php';
 
 use Lwt\Database\Settings;
+use Lwt\Services\TableSetService;
 
 /**
  * Save a database prefix.
@@ -47,7 +48,7 @@ function start_do_page()
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $fixed_tbpref = \Lwt\Core\Globals::isTablePrefixFixed();
-    $prefix = getprefixes();
+    $prefix = TableSetService::getAllPrefixes();
 
     pagestart('Select Table Set', false);
 

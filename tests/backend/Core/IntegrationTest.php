@@ -22,10 +22,12 @@ require_once __DIR__ . '/../../../src/backend/Core/Word/dictionary_links.php';
 require_once __DIR__ . '/../../../src/backend/Core/Test/test_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Language/language_utilities.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/word_status.php';
+require_once __DIR__ . '/../../../src/backend/Services/TableSetService.php';
 
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+use Lwt\Services\TableSetService;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -666,9 +668,9 @@ class IntegrationTest extends TestCase
 
     public function testGetPrefixesExtended(): void
     {
-        $prefixes = getprefixes();
+        $prefixes = TableSetService::getAllPrefixes();
         $this->assertIsArray($prefixes);
-        // getprefixes() returns table prefixes by looking for *_settings tables
+        // TableSetService::getAllPrefixes() returns table prefixes by looking for *_settings tables
         // In a test environment, there may be 0 or more prefixes depending on setup
         // Just verify it returns an array
     }

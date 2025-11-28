@@ -17,6 +17,7 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 /**
@@ -90,10 +91,39 @@ class TableSetService
      * Get all available table set prefixes.
      *
      * @return string[] List of prefixes
+     *
+     * @psalm-return list<string>
      */
     public function getPrefixes(): array
     {
-        return getprefixes();
+        return self::getAllPrefixes();
+    }
+
+    /**
+     * Get all different database prefixes that are in use.
+     *
+     * This static method scans for all tables ending with '_settings'
+     * to find available table set prefixes.
+     *
+     * @return string[] A list of prefixes
+     *
+     * @psalm-return list<string>
+     */
+    public static function getAllPrefixes(): array
+    {
+        $prefix = [];
+        $res = Connection::query(
+            str_replace(
+                '_',
+                "\\_",
+                "SHOW TABLES LIKE " . Escaping::toSqlSyntax('%_settings')
+            )
+        );
+        while ($row = \mysqli_fetch_row($res)) {
+            $prefix[] = substr((string) $row[0], 0, -9);
+        }
+        \mysqli_free_result($res);
+        return $prefix;
     }
 
     /**

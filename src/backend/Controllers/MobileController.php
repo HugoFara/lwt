@@ -22,6 +22,7 @@ require_once __DIR__ . '/../Services/MobileService.php';
 
 use Lwt\Database\Settings;
 use Lwt\Services\MobileService;
+use Lwt\Services\TableSetService;
 
 /**
  * Controller for mobile interface.
@@ -257,7 +258,7 @@ class MobileController extends BaseController
     {
         $currentPrefix = \Lwt\Core\Globals::getTablePrefix();
         $isFixed = \Lwt\Core\Globals::isTablePrefixFixed();
-        $prefixes = \getprefixes();
+        $prefixes = TableSetService::getAllPrefixes();
 
         \pagestart('Select Table Set', false);
 
