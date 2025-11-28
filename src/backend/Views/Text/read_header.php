@@ -135,7 +135,7 @@
     <div><button id="readTextButton">Read in browser</button></div>
 </div>
 
-<?php makeMediaPlayer($media, (int) $audioPosition); ?>
+<?php \makeMediaPlayer($media, (int) $audioPosition); ?>
 
 <script type="text/javascript">
     // Store PHP values for later use after Vite loads

@@ -340,7 +340,9 @@ Current files in `src/backend/Core/` that may need migration:
   - `langdefs.php` → `Services/LanguageDefinitions.php` (static class for language definitions)
   - `language_utilities.php` → `Services/LanguageService.php` (methods: `getAllLanguages()`, `getLanguageName()`, `getLanguageCode()`, `getScriptDirectionTag()`)
   - `phonetic_reading.php` → `Services/LanguageService.php` (methods: `getPhoneticReadingById()`, `getPhoneticReadingByCode()`)
-- `Media/*.php` - Extract to MediaService
+- ~~`Media/*.php`~~ - **COMPLETED**: Migrated to `MediaService`
+  - `media_helpers.php` → `Services/MediaService.php` (methods: `searchMediaPaths()`, `getMediaPaths()`, `getMediaPathOptions()`, `getMediaPathSelector()`)
+  - `media_players.php` → `Services/MediaService.php` (methods: `renderMediaPlayer()`, `renderVideoPlayer()`, `renderAudioPlayer()`, `renderHtml5AudioPlayer()`, `renderLegacyAudioPlayer()`)
 - `Export/*.php` - Extract to ExportService
 - `Test/*.php` - Extract to TestService
 - `UI/*.php` - Keep as helpers or move to Views

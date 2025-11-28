@@ -26,7 +26,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Http/param_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageDefinitions.php';
 require_once __DIR__ . '/../../../src/backend/Core/Mobile/mobile_interactions.php';
-require_once __DIR__ . '/../../../src/backend/Core/Media/media_helpers.php';
+require_once __DIR__ . '/../../../src/backend/Services/MediaService.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/TextController.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextService.php';

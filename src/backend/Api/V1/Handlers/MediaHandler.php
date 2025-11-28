@@ -2,6 +2,8 @@
 
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Services\MediaService;
+
 /**
  * Handler for media-related API operations.
  *
@@ -9,14 +11,21 @@ namespace Lwt\Api\V1\Handlers;
  */
 class MediaHandler
 {
+    private MediaService $mediaService;
+
+    public function __construct()
+    {
+        $this->mediaService = new MediaService();
+    }
+
     /**
      * List the audio and video files in the media folder.
      *
-     * @return string[] Path of media files
+     * @return array{base_path: string, paths?: string[], folders?: string[], error?: string}
      */
     public function getMediaFiles(): array
     {
-        return \get_media_paths();
+        return $this->mediaService->getMediaPaths();
     }
 
     // =========================================================================
@@ -26,7 +35,7 @@ class MediaHandler
     /**
      * Format response for media files list.
      *
-     * @return string[] Path of media files
+     * @return array{base_path: string, paths?: string[], folders?: string[], error?: string}
      */
     public function formatMediaFiles(): array
     {

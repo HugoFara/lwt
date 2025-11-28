@@ -90,5 +90,5 @@
     </div>
 </div>
 <?php
-makeMediaPlayer($audio);
+\makeMediaPlayer($audio);
 ?>

@@ -83,7 +83,7 @@ namespace Lwt\Views\Text;
             <td class="td1 right">Audio-URI:</td>
             <td class="td1">
                 <input type="text" class="checkoutsidebmp" data_info="Audio-URI" name="AtAudioURI" value="<?php echo tohtml($record['AtAudioURI']); ?>" maxlength="200" size="60" />
-                <span id="mediaselect"><?php echo selectmediapath('AtAudioURI'); ?></span>
+                <span id="mediaselect"><?php echo \selectmediapath('AtAudioURI'); ?></span>
             </td>
         </tr>
         <tr>

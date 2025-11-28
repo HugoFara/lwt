@@ -53,7 +53,7 @@ require_once __DIR__ . '/../../Services/ExpressionService.php';
 require_once __DIR__ . '/../database_operations.php';
 
 // Media players (audio, video)
-require_once __DIR__ . '/../Media/media_players.php';
+require_once __DIR__ . '/../../Services/MediaService.php';
 
 // Language services (utilities, phonetic reading, definitions)
 require_once __DIR__ . '/../../Services/LanguageService.php';

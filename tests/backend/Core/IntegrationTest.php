@@ -14,7 +14,7 @@ require_once __DIR__ . '/../../../src/backend/Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Text/text_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Export/export_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Http/param_helpers.php';
-require_once __DIR__ . '/../../../src/backend/Core/Media/media_helpers.php';
+require_once __DIR__ . '/../../../src/backend/Services/MediaService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Text/text_navigation.php';
 require_once __DIR__ . '/../../../src/backend/Services/DictionaryService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Test/test_helpers.php';

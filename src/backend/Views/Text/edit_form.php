@@ -154,7 +154,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
                 data_info="Audio-URI" name="TxAudioURI" maxlength="2048"
                 value="<?php echo tohtml($text->media_uri); ?>"  />
                 <span id="mediaselect">
-                    <?php echo selectmediapath('TxAudioURI'); ?>
+                    <?php echo \selectmediapath('TxAudioURI'); ?>
                 </span>
             </td>
         </tr>

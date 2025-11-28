@@ -90,7 +90,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Text/text_display.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Core/Mobile/mobile_interactions.php';
-        require_once __DIR__ . '/../Core/Media/media_helpers.php';
+        require_once __DIR__ . '/../Services/MediaService.php';
         require_once __DIR__ . '/../Services/WordStatusService.php';
         require_once __DIR__ . '/../Core/Export/export_helpers.php';
 
@@ -225,7 +225,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
-        require_once __DIR__ . '/../Core/Media/media_helpers.php';
+        require_once __DIR__ . '/../Services/MediaService.php';
                 require_once __DIR__ . '/../Services/WordStatusService.php';
         require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
         require_once __DIR__ . '/../Core/Integration/text_from_yt.php';
@@ -576,7 +576,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
-                require_once __DIR__ . '/../Core/Media/media_helpers.php';
+                require_once __DIR__ . '/../Services/MediaService.php';
 
         $textId = (int) \getreq('text');
 

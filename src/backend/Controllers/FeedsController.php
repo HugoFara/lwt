@@ -20,7 +20,7 @@ require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../Core/Text/text_helpers.php';
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
-require_once __DIR__ . '/../Core/Media/media_helpers.php';
+require_once __DIR__ . '/../Services/MediaService.php';
 require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 
