@@ -831,4 +831,98 @@ class WordControllerTest extends TestCase
 
         $this->assertEmpty($output);
     }
+
+    // ===== Bulk translate tests =====
+
+    public function testBulkTranslateMethodExists(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+
+        $this->assertTrue(method_exists($controller, 'bulkTranslate'));
+    }
+
+    public function testBulkSaveTermsThroughController(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        $terms = [
+            ['lg' => self::$testLangId, 'text' => 'ctrl_test_bulk1', 'status' => 1, 'trans' => 'bulk1'],
+            ['lg' => self::$testLangId, 'text' => 'ctrl_test_bulk2', 'status' => 2, 'trans' => 'bulk2'],
+        ];
+
+        $maxWoId = $service->bulkSaveTerms($terms);
+
+        // Verify words were created
+        $word1 = $service->findByText('ctrl_test_bulk1', self::$testLangId);
+        $word2 = $service->findByText('ctrl_test_bulk2', self::$testLangId);
+
+        $this->assertNotNull($word1);
+        $this->assertNotNull($word2);
+        $this->assertGreaterThan($maxWoId, $word1);
+        $this->assertGreaterThan($maxWoId, $word2);
+    }
+
+    public function testGetLanguageDictionariesThroughController(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Test with non-existent text (returns empty values)
+        $result = $service->getLanguageDictionaries(999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('name', $result);
+        $this->assertArrayHasKey('dict1', $result);
+        $this->assertArrayHasKey('dict2', $result);
+        $this->assertArrayHasKey('translate', $result);
+    }
+
+    public function testGetNewWordsAfterThroughController(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new WordController();
+        $service = $controller->getWordService();
+
+        // Get max before
+        $maxBefore = $service->bulkSaveTerms([]);
+
+        // Create a word
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_newafter',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+        ];
+        $service->create($data);
+
+        // Get new words
+        $res = $service->getNewWordsAfter($maxBefore);
+
+        $found = false;
+        while ($record = mysqli_fetch_assoc($res)) {
+            if ($record['WoTextLC'] === 'ctrl_test_newafter') {
+                $found = true;
+                break;
+            }
+        }
+        mysqli_free_result($res);
+
+        $this->assertTrue($found);
+    }
 }

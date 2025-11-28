@@ -1181,4 +1181,135 @@ class WordService
 
         return array($count, $javascript);
     }
+
+    // ===== Bulk translate methods =====
+
+    /**
+     * Save multiple terms in bulk.
+     *
+     * Used by the bulk translate feature to save multiple words at once.
+     *
+     * @param array $terms Array of term data, each with keys: lg, text, status, trans
+     *
+     * @return int The max word ID before insertion (for finding new words)
+     */
+    public function bulkSaveTerms(array $terms): int
+    {
+        $max = (int) Connection::fetchValue(
+            "SELECT COALESCE(MAX(WoID), 0) AS value FROM {$this->tbpref}words"
+        );
+
+        $sqlarr = [];
+        foreach ($terms as $row) {
+            $trans = (!isset($row['trans']) || $row['trans'] == '') ? '"*"' :
+                Escaping::toSqlSyntax($row['trans']);
+
+            $sqlarr[] = '(' .
+                Escaping::toSqlSyntax($row['lg']) . ',' .
+                Escaping::toSqlSyntax(mb_strtolower($row['text'], 'UTF-8')) . ',' .
+                Escaping::toSqlSyntax($row['text']) . ',' .
+                Escaping::toSqlSyntax($row['status']) . ',' .
+                $trans . ',
+                "",
+                "",
+                NOW(), ' .
+                \make_score_random_insert_update('id') .
+            ')';
+        }
+
+        if (empty($sqlarr)) {
+            return $max;
+        }
+
+        $sqltext = "INSERT INTO {$this->tbpref}words (
+            WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
+            WoRomanization, WoStatusChanged," .
+            \make_score_random_insert_update('iv') . "
+        ) VALUES " . rtrim(implode(',', $sqlarr), ',');
+
+        Connection::execute($sqltext, '');
+
+        return $max;
+    }
+
+    /**
+     * Get newly created words after bulk insert.
+     *
+     * @param int $maxWoId The max word ID before insertion
+     *
+     * @return \mysqli_result|bool Query result with WoID, WoTextLC, WoStatus, WoTranslation
+     */
+    public function getNewWordsAfter(int $maxWoId): \mysqli_result|bool
+    {
+        return Connection::query(
+            "SELECT WoID, WoTextLC, WoStatus, WoTranslation
+            FROM {$this->tbpref}words
+            WHERE WoID > $maxWoId"
+        );
+    }
+
+    /**
+     * Link newly created words to text items.
+     *
+     * @param int $maxWoId The max word ID before insertion
+     *
+     * @return void
+     */
+    public function linkNewWordsToTextItems(int $maxWoId): void
+    {
+        Connection::query(
+            "UPDATE {$this->tbpref}textitems2
+            JOIN {$this->tbpref}words
+            ON LOWER(Ti2Text) = WoTextLC AND Ti2WordCount = 1 AND Ti2LgID = WoLgID AND WoID > $maxWoId
+            SET Ti2WoID = WoID"
+        );
+    }
+
+    /**
+     * Get language dictionary URIs for a text.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{name: string, dict1: string, dict2: string, translate: string}
+     */
+    public function getLanguageDictionaries(int $textId): array
+    {
+        $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI
+                FROM {$this->tbpref}languages, {$this->tbpref}texts
+                WHERE LgID = TxLgID AND TxID = $textId";
+        $res = Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+
+        return [
+            'name' => $record['LgName'] ?? '',
+            'dict1' => $record['LgDict1URI'] ?? '',
+            'dict2' => $record['LgDict2URI'] ?? '',
+            'translate' => $record['LgGoogleTranslateURI'] ?? '',
+        ];
+    }
+
+    /**
+     * Get unknown words for bulk translation with pagination.
+     *
+     * @param int $textId Text ID
+     * @param int $offset Starting position
+     * @param int $limit  Number of words to return
+     *
+     * @return \mysqli_result|bool Query result with word, Ti2LgID, pos columns
+     */
+    public function getUnknownWordsForBulkTranslate(
+        int $textId,
+        int $offset,
+        int $limit
+    ): \mysqli_result|bool {
+        return Connection::query(
+            "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos
+            FROM {$this->tbpref}textitems2
+            WHERE Ti2WoID = 0 AND Ti2TxID = $textId AND Ti2WordCount = 1
+            GROUP BY LOWER(Ti2Text)
+            ORDER BY pos
+            LIMIT $offset, $limit"
+        );
+    }
 }

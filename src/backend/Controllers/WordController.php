@@ -745,13 +745,110 @@ class WordController extends BaseController
     /**
      * Bulk translate words (replaces word_bulk_translate.php)
      *
+     * Call: ?tid=[textid]&sl=[sourcelg]&tl=[targetlg]&offset=[pos]
+     *       POST: term[n][text], term[n][lg], term[n][status], term[n][trans]
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function bulkTranslate(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_bulk_translate.php';
+        $tid = (int) ($_REQUEST['tid'] ?? 0);
+        $pos = isset($_REQUEST['offset']) ? (int) $_REQUEST['offset'] : null;
+
+        // Handle form submission (save terms)
+        if (isset($_REQUEST['term'])) {
+            $terms = $_REQUEST['term'];
+            $cnt = count($terms);
+
+            if ($pos !== null) {
+                $pos -= $cnt;
+            }
+
+            \pagestart($cnt . ' New Word' . ($cnt == 1 ? '' : 's') . ' Saved', false);
+            $this->handleBulkSave($terms, $tid, $pos === null);
+        } else {
+            \pagestart_nobody('Translate New Words');
+        }
+
+        // Show next page of terms if there are more
+        if ($pos !== null) {
+            $sl = $_REQUEST['sl'] ?? null;
+            $tl = $_REQUEST['tl'] ?? null;
+            $this->displayBulkTranslateForm($tid, $sl, $tl, $pos);
+        }
+
+        \pageend();
+    }
+
+    /**
+     * Handle saving bulk translated terms.
+     *
+     * @param array $terms   Array of term data
+     * @param int   $tid     Text ID
+     * @param bool  $cleanUp Whether to clean up right frames after save
+     *
+     * @return void
+     */
+    private function handleBulkSave(array $terms, int $tid, bool $cleanUp): void
+    {
+        $maxWoId = $this->wordService->bulkSaveTerms($terms);
+
+        $tooltipMode = \Lwt\Database\Settings::getWithDefault('set-tooltip-mode');
+        $res = $this->wordService->getNewWordsAfter($maxWoId);
+
+        $this->wordService->linkNewWordsToTextItems($maxWoId);
+
+        // Prepare data for view
+        $newWords = [];
+        while ($record = mysqli_fetch_assoc($res)) {
+            $record['hex'] = \strToClassName(
+                \Lwt\Database\Escaping::prepareTextdata($record['WoTextLC'])
+            );
+            $record['translation'] = $record['WoTranslation'];
+            $newWords[] = $record;
+        }
+        mysqli_free_result($res);
+
+        include __DIR__ . '/../Views/Word/bulk_save_result.php';
+    }
+
+    /**
+     * Display the bulk translate form.
+     *
+     * @param int         $tid Text ID
+     * @param string|null $sl  Source language code
+     * @param string|null $tl  Target language code
+     * @param int         $pos Offset position
+     *
+     * @return void
+     */
+    private function displayBulkTranslateForm(int $tid, ?string $sl, ?string $tl, int $pos): void
+    {
+        $limit = (int) \Lwt\Database\Settings::getWithDefault('set-ggl-translation-per-page') + 1;
+        $dictionaries = $this->wordService->getLanguageDictionaries($tid);
+
+        $res = $this->wordService->getUnknownWordsForBulkTranslate($tid, $pos, $limit);
+
+        // Collect terms and check if there are more
+        $terms = [];
+        $hasMore = false;
+        $cnt = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $cnt++;
+            if ($cnt < $limit) {
+                $terms[] = $record;
+            } else {
+                $hasMore = true;
+            }
+        }
+        mysqli_free_result($res);
+
+        // Calculate next offset if there are more terms
+        $nextOffset = $hasMore ? $pos + $limit - 1 : null;
+
+        include __DIR__ . '/../Views/Word/bulk_translate_form.php';
     }
 
     /**

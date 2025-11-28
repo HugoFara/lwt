@@ -941,4 +941,110 @@ class WordServiceTest extends TestCase
         $result = $this->service->getTextLanguageId(999999);
         $this->assertNull($result);
     }
+
+    // ===== bulkSaveTerms() tests =====
+
+    public function testBulkSaveTermsCreatesMultipleWords(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $terms = [
+            ['lg' => self::$testLangId, 'text' => 'testbulk1', 'status' => 1, 'trans' => 'bulk trans 1'],
+            ['lg' => self::$testLangId, 'text' => 'testbulk2', 'status' => 2, 'trans' => 'bulk trans 2'],
+            ['lg' => self::$testLangId, 'text' => 'testbulk3', 'status' => 3, 'trans' => ''],
+        ];
+
+        $maxWoId = $this->service->bulkSaveTerms($terms);
+
+        // Verify all words were created
+        $word1 = $this->service->findByText('testbulk1', self::$testLangId);
+        $word2 = $this->service->findByText('testbulk2', self::$testLangId);
+        $word3 = $this->service->findByText('testbulk3', self::$testLangId);
+
+        $this->assertNotNull($word1);
+        $this->assertNotNull($word2);
+        $this->assertNotNull($word3);
+
+        // Verify all IDs are greater than maxWoId
+        $this->assertGreaterThan($maxWoId, $word1);
+        $this->assertGreaterThan($maxWoId, $word2);
+        $this->assertGreaterThan($maxWoId, $word3);
+
+        // Verify statuses
+        $wordData1 = $this->service->findById($word1);
+        $wordData2 = $this->service->findById($word2);
+        $wordData3 = $this->service->findById($word3);
+
+        $this->assertEquals('1', $wordData1['WoStatus']);
+        $this->assertEquals('2', $wordData2['WoStatus']);
+        $this->assertEquals('3', $wordData3['WoStatus']);
+
+        // Verify empty translation becomes '*'
+        $this->assertEquals('*', $wordData3['WoTranslation']);
+    }
+
+    public function testBulkSaveTermsWithEmptyArrayReturnsMaxId(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $maxWoId = $this->service->bulkSaveTerms([]);
+
+        // Should return a non-negative value (the current max ID)
+        $this->assertGreaterThanOrEqual(0, $maxWoId);
+    }
+
+    // ===== getNewWordsAfter() tests =====
+
+    public function testGetNewWordsAfterReturnsNewWords(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Get current max ID
+        $maxBefore = $this->service->bulkSaveTerms([]);
+
+        // Create a word
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testnewafter',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+        ];
+        $this->service->create($data);
+
+        // Get new words
+        $res = $this->service->getNewWordsAfter($maxBefore);
+
+        $found = false;
+        while ($record = mysqli_fetch_assoc($res)) {
+            if ($record['WoTextLC'] === 'testnewafter') {
+                $found = true;
+                break;
+            }
+        }
+        mysqli_free_result($res);
+
+        $this->assertTrue($found);
+    }
+
+    // ===== getLanguageDictionaries() tests =====
+
+    public function testGetLanguageDictionariesReturnsEmptyForNonExistentText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->getLanguageDictionaries(999999);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('dict1', $result);
+        $this->assertArrayHasKey('dict2', $result);
+        $this->assertArrayHasKey('translate', $result);
+    }
 }

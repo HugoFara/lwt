@@ -152,7 +152,7 @@ All 59 root-level PHP page files have been moved to `src/php/Legacy/` with renam
 | `show_word.php` | `word_show.php` |
 | `upload_words.php` | `word_upload.php` |
 | `all_words_wellknown.php` | `words_all.php` |
-| `bulk_translate_words.php` | `word_bulk_translate.php` |
+| `bulk_translate_words.php` | Fully migrated to `WordController@bulkTranslate` |
 | `inline_edit.php` | `word_inline_edit.php` |
 | `insert_word_wellknown.php` | `word_insert_wellknown.php` |
 | `insert_word_ignore.php` | `word_insert_ignore.php` |
@@ -751,7 +751,7 @@ The `langdefs.php` file now loads the JSON and converts it to the legacy indexed
 define('LWT_LANGUAGES_ARRAY', loadLanguageDefinitions());
 ```
 
-#### Benefits
+#### Benefits of this change
 
 | Aspect | Before | After |
 |--------|--------|-------|
