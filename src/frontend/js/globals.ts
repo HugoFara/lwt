@@ -17,6 +17,7 @@ import { setLang, resetAll } from './core/language_settings';
 import { markClick, confirmDelete, showAllwordsClick } from './core/ui_utilities';
 import { selectToggle, multiActionGo, allActionGo } from './forms/bulk_actions';
 import { updateTermTranslation, addTermTranslation, changeTableTestStatus, do_ajax_edit_impr_text } from './terms/term_operations';
+import { lwt_audio_controller, setupAudioPlayer, getAudioPlayer } from './media/html5_audio_player';
 
 // Declare global window interface extensions
 declare global {
@@ -66,6 +67,11 @@ declare global {
     cClick: typeof cClick;
     nd: typeof nd;
     setCurrentEvent: typeof setCurrentEvent;
+
+    // Audio player (HTML5 replacement for jPlayer)
+    lwt_audio_controller: typeof lwt_audio_controller;
+    setupAudioPlayer: typeof setupAudioPlayer;
+    getAudioPlayer: typeof getAudioPlayer;
   }
 }
 
@@ -106,3 +112,7 @@ window.overlib = overlib;
 window.cClick = cClick;
 window.nd = nd;
 window.setCurrentEvent = setCurrentEvent;
+
+window.lwt_audio_controller = lwt_audio_controller;
+window.setupAudioPlayer = setupAudioPlayer;
+window.getAudioPlayer = getAudioPlayer;

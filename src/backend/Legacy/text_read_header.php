@@ -283,18 +283,27 @@ function save_audio_position($textid): void
      * Save text status, for instance audio position
      */
     function saveTextStatus() {
-        // Save audio if present
-        if ($("#jquery_jplayer_1") === null || $("#jquery_jplayer_1").length == 0) {
-            return;
-        }
-        const pos = $("#jquery_jplayer_1").data("jPlayer").status.currentTime;
         const text_id = <?php echo $textid_int; ?>;
-        saveAudioPosition(text_id, pos);
+        // Check for HTML5 audio player first (Vite mode)
+        if (typeof getAudioPlayer === 'function') {
+            const player = getAudioPlayer();
+            if (player) {
+                saveAudioPosition(text_id, player.getCurrentTime());
+                return;
+            }
+        }
+        // Fall back to jPlayer (legacy mode)
+        if (typeof $ !== 'undefined' && $("#jquery_jplayer_1").length > 0) {
+            const jPlayerData = $("#jquery_jplayer_1").data("jPlayer");
+            if (jPlayerData && jPlayerData.status) {
+                saveAudioPosition(text_id, jPlayerData.status.currentTime);
+            }
+        }
     }
 
     $(window).on('beforeunload', saveTextStatus);
 
-    // We need to capture the text-to-speach event manually for Chrome
+    // We need to capture the text-to-speech event manually for Chrome
     $(document).ready(function() {
         $('#readTextButton').on('click', toggle_reading)
     });

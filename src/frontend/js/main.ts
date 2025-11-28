@@ -10,6 +10,7 @@ import '../css/base/styles.css';
 import '../css/base/jquery-ui.css';
 import '../css/base/jquery.tagit.css';
 import '../css/base/feed_wizard.css';
+import '../css/base/html5_audio_player.css';
 
 // jQuery is loaded externally (synchronously) for inline script compatibility
 // In production, we use the global jQuery; in dev mode, we may import it
@@ -50,6 +51,7 @@ import './testing/test_mode';
 
 // Media
 import './media/media_selection';
+import './media/html5_audio_player';
 
 // Feeds
 import './feeds/jq_feedwizard';

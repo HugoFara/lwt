@@ -1,0 +1,227 @@
+/**
+ * HTML5 Audio Player Styles
+ * Native replacement for jPlayer CSS
+ *
+ * @license unlicense
+ * @since 3.0.0
+ */
+
+/* Player container */
+.lwt-audio-player {
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 13px;
+  color: #666;
+  background-color: #eee;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 400px;
+  margin: 5px auto;
+}
+
+/* Hide the native audio element */
+.lwt-audio-player audio {
+  display: none;
+}
+
+/* Control buttons */
+.lwt-audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lwt-audio-controls button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background-color: #0d88c1;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.lwt-audio-controls button:hover {
+  background-color: #0a6a9a;
+}
+
+.lwt-audio-controls button.hide {
+  display: none;
+}
+
+/* Play/Pause icons using CSS */
+.lwt-audio-play::before {
+  content: '';
+  border-style: solid;
+  border-width: 6px 0 6px 10px;
+  border-color: transparent transparent transparent white;
+  margin-left: 2px;
+}
+
+.lwt-audio-pause::before {
+  content: '';
+  width: 3px;
+  height: 12px;
+  background: white;
+  box-shadow: 5px 0 0 white;
+}
+
+.lwt-audio-stop::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: white;
+}
+
+/* Progress section */
+.lwt-audio-progress-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lwt-audio-progress-container {
+  width: 100%;
+  height: 12px;
+  background-color: #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.lwt-audio-progress-bar {
+  height: 100%;
+  background: linear-gradient(to bottom, #4db8e8 0%, #0d88c1 100%);
+  width: 0%;
+  transition: width 0.1s linear;
+  border-radius: 6px;
+}
+
+.lwt-audio-time {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #888;
+}
+
+/* Volume section */
+.lwt-audio-volume-section {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lwt-audio-volume-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.lwt-audio-volume-btn img {
+  width: 16px;
+  height: 16px;
+}
+
+.lwt-audio-volume-btn.hide {
+  display: none;
+}
+
+.lwt-audio-volume-container {
+  width: 60px;
+  height: 8px;
+  background-color: #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.lwt-audio-volume-bar {
+  height: 100%;
+  background: linear-gradient(to bottom, #4db8e8 0%, #0d88c1 100%);
+  width: 100%;
+  border-radius: 4px;
+}
+
+/* Audio player wrapper table (for compatibility with existing layout) */
+.lwt-audio-wrapper {
+  margin: 5px auto;
+}
+
+.lwt-audio-wrapper td {
+  vertical-align: middle;
+}
+
+.lwt-audio-wrapper .borderleft {
+  padding-left: 10px;
+}
+
+.lwt-audio-wrapper .borderright {
+  padding-right: 10px;
+}
+
+.lwt-audio-wrapper .bordermiddle {
+  padding: 0 5px;
+}
+
+/* Repeat button styling */
+.lwt-audio-wrapper #do-single,
+.lwt-audio-wrapper #do-repeat {
+  cursor: pointer;
+}
+
+.lwt-audio-wrapper #do-single img,
+.lwt-audio-wrapper #do-repeat img {
+  width: 24px;
+  height: 24px;
+}
+
+/* Playback controls */
+.lwt-audio-wrapper #backbutt,
+.lwt-audio-wrapper #forwbutt {
+  cursor: pointer;
+  color: #666;
+  font-weight: bold;
+}
+
+.lwt-audio-wrapper #backbutt:hover,
+.lwt-audio-wrapper #forwbutt:hover {
+  color: #0d88c1;
+}
+
+.lwt-audio-wrapper #slower,
+.lwt-audio-wrapper #faster,
+.lwt-audio-wrapper #stdspeed {
+  cursor: pointer;
+}
+
+.lwt-audio-wrapper select {
+  padding: 2px 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: white;
+}
+
+/* Native audio element styling (fallback/alternative) */
+.lwt-native-audio {
+  width: 100%;
+  max-width: 400px;
+  margin: 5px auto;
+  display: block;
+}
+
+/* Hide class */
+.hide {
+  display: none !important;
+}

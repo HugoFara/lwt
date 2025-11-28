@@ -1,13 +1,17 @@
 /**
- * All the function to make an audio controller in do_text_header.php
+ * Legacy audio controller for jPlayer (non-Vite mode).
+ *
+ * For Vite mode, use the HTML5 audio player from media/html5_audio_player.ts instead.
+ * This file is kept for backward compatibility with legacy (non-Vite) mode.
  *
  * @license Unlicense
+ * @deprecated Use html5_audio_player.ts for new code
  */
 
 // Declare external functions that are defined elsewhere
 declare function do_ajax_save_setting(key: string, value: string): void;
 
-// jPlayer type definitions
+// jPlayer type definitions (legacy)
 interface JPlayerStatus {
   paused: boolean;
 }
@@ -20,7 +24,7 @@ interface JPlayerData {
   jPlayer: JPlayerInstance;
 }
 
-// Extend JQuery interface for jPlayer plugin
+// Extend JQuery interface for jPlayer plugin (legacy)
 declare global {
   interface JQuery {
     jPlayer(method: string, ...args: unknown[]): JQuery;
@@ -37,7 +41,9 @@ declare global {
 }
 
 /**
- * An audio controller.
+ * Legacy jPlayer audio controller.
+ *
+ * @deprecated Use lwt_audio_controller from html5_audio_player.ts for Vite mode
  */
 export const lwt_audio_controller = {
   /**

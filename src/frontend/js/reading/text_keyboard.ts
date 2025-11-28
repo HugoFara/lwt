@@ -53,17 +53,14 @@ declare global {
   }
 }
 
-// Audio controller type for frames
-interface AudioController {
-  newPosition: (p: number) => void;
-}
-
-interface LwtFrameH extends Window {
-  lwt_audio_controller: AudioController;
-}
-
+// Audio controller type for frame access
+// We only need the newPosition method for seeking audio
 interface FramesWithH {
-  h: LwtFrameH;
+  h: Window & {
+    lwt_audio_controller: {
+      newPosition: (p: number) => void;
+    };
+  };
 }
 
 /**
