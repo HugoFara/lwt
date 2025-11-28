@@ -192,7 +192,7 @@ class TestController extends BaseController
      *
      * @return void
      */
-    public function table(array $params): void
+    public function tableTest(array $params): void
     {
         $langId = $this->param('lang') !== null ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== null ? (int) $this->param('text') : null;
@@ -324,7 +324,7 @@ class TestController extends BaseController
         echo '<div id="frame-l">';
 
         if ($this->param('type') === 'table') {
-            $this->table([]);
+            $this->tableTest([]);
         } else {
             $this->renderTestContent();
         }
@@ -364,7 +364,7 @@ class TestController extends BaseController
         echo '<div id="frame-l">';
 
         if ($this->param('type') === 'table') {
-            $this->table([]);
+            $this->tableTest([]);
         } else {
             $this->renderTestContent();
         }
