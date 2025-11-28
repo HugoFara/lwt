@@ -1,0 +1,113 @@
+<?php
+/**
+ * Word list table view
+ *
+ * Variables expected:
+ * - $recno: Total record count
+ * - $currentlang: Current language filter
+ * - $currentpage: Current page number
+ * - $currentsort: Current sort option
+ * - $pages: Total pages
+ * - $words: Array of word records from query result
+ *
+ * PHP version 8.1
+ */
+?>
+<?php if ($recno == 0) { ?>
+<p>No terms found.</p>
+<?php } else { ?>
+<form name="form2" action="/words/edit" method="post">
+<input type="hidden" name="data" value="" />
+<table class="tab2" cellspacing="0" cellpadding="5">
+<tr><th class="th1 center" colspan="2">
+Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
+</th></tr>
+<tr><td class="td1 center" colspan="2">
+<b>ALL</b> <?php echo ($recno == 1 ? '1 Term' : $recno . ' Terms'); ?>:&nbsp;
+<select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);">
+    <?php echo get_allwordsactions_selectoptions(); ?>
+</select>
+</td></tr>
+<tr><td class="td1 center">
+<input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
+<input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
+</td>
+<td class="td1 center">Marked Terms:&nbsp;
+<select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);">
+    <?php echo get_multiplewordsactions_selectoptions(); ?>
+</select>
+</td></tr></table>
+
+<table class="sortable tab2" cellspacing="0" cellpadding="5">
+<tr>
+<th class="th1 sorttable_nosort">Mark</th>
+<th class="th1 sorttable_nosort">Act.</th>
+<?php if ($currentlang == '') { echo '<th class="th1 clickable">Lang.</th>'; } ?>
+<th class="th1 clickable">Term /<br />Romanization</th>
+<th class="th1 clickable">Translation [Tags]<br /><span id="waitinfo">Please <img src="<?php print_file_path('icn/waiting2.gif'); ?>" /> wait ...</span></th>
+<th class="th1 sorttable_nosort">Se.<br />?</th>
+<th class="th1 sorttable_numeric clickable">Stat./<br />Days</th>
+<th class="th1 sorttable_numeric clickable">Score<br />%</th>
+<?php if ($currentsort == 7) { ?>
+<th class="th1 sorttable_numeric clickable" title="Word Count in Active Texts">WCnt<br />Txts</th>
+<?php } ?>
+</tr>
+
+<?php
+foreach ($words as $record) {
+    $days = $record['Days'];
+    if ($record['WoStatus'] > 5) {
+        $days = "-";
+    }
+    $score = $record['Score'];
+    if ($score < 0) {
+        $score = '<span class="scorered">0 <img src="/assets/icons/status-busy.png" title="Test today!" alt="Test today!" /></span>';
+    } else {
+        $score = '<span class="scoregreen">' . floor((int)$score) . ($record['Score2'] < 0 ? ' <img src="/assets/icons/status-away.png" title="Test tomorrow!" alt="Test tomorrow!" />' : ' <img src="/assets/icons/status.png" title="-" alt="-" />') . '</span>';
+    }
+    ?>
+<tr>
+    <td class="td1 center"><a name="rec<?php echo $record['WoID']; ?>"><input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $record['WoID']; ?>" <?php echo checkTest($record['WoID'], 'marked'); ?> /></a></td>
+    <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/words/edit?chg=<?php echo $record['WoID']; ?>"><img src="/assets/icons/sticky-note--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/words/edit?del=<?php echo $record['WoID']; ?>"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
+<?php if ($currentlang == '') { ?>
+    <td class="td1 center"><?php echo tohtml($record['LgName']); ?></td>
+<?php } ?>
+    <td class="td1"><span<?php
+    if (!empty($record['LgGoogleTranslateURI']) && strpos((string) $record['LgGoogleTranslateURI'], '&sl=') !== false) {
+        echo ' class="tts_' . preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']) . '"';
+    }
+    echo ($record['LgRightToLeft'] ? ' dir="rtl" ' : '');
+    ?>><?php echo tohtml($record['WoText']); ?></span><?php
+    echo ($record['WoRomanization'] != '' ? (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">' . tohtml(repl_tab_nl($record['WoRomanization'])) . '</span>') : (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">*</span>'));
+    ?></td>
+    <td class="td1"><span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo tohtml(repl_tab_nl($record['WoTranslation'])); ?></span> <span class="smallgray2"><?php echo tohtml($record['taglist']); ?></span></td>
+    <td class="td1 center"><b><?php echo ($record['SentOK'] != 0 ? '<img src="/assets/icons/status.png" title="' . tohtml($record['WoSentence']) . '" alt="Yes" />' : '<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />'); ?></b></td>
+    <td class="td1 center" title="<?php echo tohtml(get_status_name($record['WoStatus'])); ?>"><?php echo tohtml(get_status_abbr($record['WoStatus'])); ?><?php echo ($record['WoStatus'] < 98 ? '/' . $days : ''); ?></td>
+    <td class="td1 center" nowrap="nowrap"><?php echo $score; ?></td>
+<?php if ($currentsort == 7) { ?>
+    <td class="td1 center" nowrap="nowrap"><?php echo $record['textswordcount'] ?? 0; ?></td>
+<?php } ?>
+</tr>
+<?php } ?>
+</table>
+
+<script type="text/javascript">
+//<![CDATA[
+    $('#waitinfo').addClass('hide');
+//]]>
+</script>
+
+<?php if ($pages > 1) { ?>
+<table class="tab2" cellspacing="0" cellpadding="5">
+    <tr>
+        <th class="th1" nowrap="nowrap">
+            <?php echo $recno; ?> Term<?php echo ($recno == 1 ? '' : 's'); ?>
+        </th>
+        <th class="th1" nowrap="nowrap">
+            <?php makePager($currentpage, $pages, '/words/edit', 'form2'); ?>
+        </th>
+    </tr>
+</table>
+</form>
+<?php } ?>
+<?php } ?>

@@ -151,6 +151,8 @@ Version 3 introduces a Services layer that extracts business logic from controll
 | `TtsService.php` | Text-to-speech configuration |
 | `WordPressService.php` | WordPress integration logic |
 | `WordService.php` | Word/term management operations |
+| `WordListService.php` | Word list filtering, pagination, and bulk operations |
+| `WordUploadService.php` | Word import/upload operations |
 
 Services are located in `src/backend/Services/` and follow the pattern of extracting complex business logic from controllers for better testability and maintainability.
 
@@ -171,71 +173,73 @@ Version 3 introduces a proper Views directory structure in `src/backend/Views/`:
 | `Word/` | Word/term templates |
 
 Additional helper classes:
-- `View/Helper/` - View helper functions
+
 - `TestViews.php` - Test interface view logic
 
 ### 7. Legacy File Migration
 
-All 59 root-level PHP page files have been moved to `src/backend/Legacy/` with renamed, more descriptive filenames:
+All 59 root-level PHP page files have been fully migrated to the MVC pattern with Controllers, Services, and Views. The `src/backend/Legacy/` directory now only contains static template files (e.g., `export_template.html`).
 
-| Old Filename | New Filename |
-|-------------|-------------|
-| `do_text.php` | `text_read.php` |
-| `do_text_header.php` | `text_read_header.php` |
-| `do_text_text.php` | `text_read_text.php` |
-| `edit_texts.php` | `text_edit.php` |
-| `display_impr_text.php` | `text_display.php` |
-| `print_impr_text.php` | `text_print.php` |
-| `print_text.php` | `text_print_plain.php` |
-| `check_text.php` | `text_check.php` |
-| `edit_archivedtexts.php` | `text_archived.php` |
-| `long_text_import.php` | `text_import_long.php` |
-| `set_text_mode.php` | `text_set_mode.php` |
-| `do_test.php` | `test_index.php` |
-| `do_test_header.php` | `test_header.php` |
-| `do_test_table.php` | `test_table.php` |
-| `do_test_test.php` | `test_test.php` |
-| `set_test_status.php` | `test_set_status.php` |
-| `edit_word.php` | `word_edit.php` |
-| `edit_words.php` | `words_edit.php` |
+The following table shows the migration status of all original files:
+
+| Old Filename | Migration Status |
+|-------------|------------------|
+| `do_text.php` | Fully migrated to `TextController` |
+| `do_text_header.php` | Fully migrated to `TextController` |
+| `do_text_text.php` | Fully migrated to `TextController` |
+| `edit_texts.php` | Fully migrated to `TextController` |
+| `display_impr_text.php` | Fully migrated to `TextController` |
+| `print_impr_text.php` | Fully migrated to `TextPrintController` |
+| `print_text.php` | Fully migrated to `TextPrintController` |
+| `check_text.php` | Fully migrated to `TextController` |
+| `edit_archivedtexts.php` | Fully migrated to `TextController` |
+| `long_text_import.php` | Fully migrated to `TextController` |
+| `set_text_mode.php` | Fully migrated to `TextController` |
+| `do_test.php` | Fully migrated to `TestController` |
+| `do_test_header.php` | Fully migrated to `TestController` |
+| `do_test_table.php` | Fully migrated to `TestController` |
+| `do_test_test.php` | Fully migrated to `TestController` |
+| `set_test_status.php` | Fully migrated to `TestController` |
+| `edit_word.php` | Fully migrated to `WordController` |
+| `edit_words.php` | Fully migrated to `WordController@list` |
 | `edit_mword.php` | Fully migrated to `WordController@editMulti` |
-| `edit_tword.php` | `word_edit_term.php` |
-| `delete_word.php` | `word_delete.php` |
-| `delete_mword.php` | `word_delete_multi.php` |
-| `new_word.php` | `word_new.php` |
-| `show_word.php` | `word_show.php` |
+| `edit_tword.php` | Fully migrated to `WordController` |
+| `delete_word.php` | Fully migrated to `WordController` |
+| `delete_mword.php` | Fully migrated to `WordController` |
+| `new_word.php` | Fully migrated to `WordController` |
+| `show_word.php` | Fully migrated to `WordController` |
 | `upload_words.php` | Fully migrated to `WordController@upload` |
-| `all_words_wellknown.php` | `words_all.php` |
+| `all_words_wellknown.php` | Fully migrated to `WordController` |
 | `bulk_translate_words.php` | Fully migrated to `WordController@bulkTranslate` |
-| `inline_edit.php` | `word_inline_edit.php` |
-| `insert_word_wellknown.php` | `word_insert_wellknown.php` |
-| `insert_word_ignore.php` | `word_insert_ignore.php` |
-| `set_word_status.php` | `word_set_status.php` |
-| `edit_languages.php` | `language_edit.php` |
-| `select_lang_pair.php` | `language_select_pair.php` |
-| `edit_tags.php` | `tags_edit.php` |
-| `edit_texttags.php` | `tags_text_edit.php` |
+| `inline_edit.php` | Fully migrated to `WordController` |
+| `insert_word_wellknown.php` | Fully migrated to `WordController` |
+| `insert_word_ignore.php` | Fully migrated to `WordController` |
+| `set_word_status.php` | Fully migrated to `WordController` |
+| `edit_languages.php` | Fully migrated to `LanguageController` |
+| `select_lang_pair.php` | Fully migrated to `LanguageController` |
+| `edit_tags.php` | Fully migrated to `TagsController` |
+| `edit_texttags.php` | Fully migrated to `TagsController` |
 | `do_feeds.php` | Fully migrated to `FeedsController` |
-| `edit_feeds.php` | `feeds_edit.php` |
-| `feed_wizard.php` | `feeds_wizard.php` |
-| `backup_restore.php` | `admin_backup.php` |
-| `database_wizard.php` | `admin_wizard.php` |
-| `statistics.php` | `admin_statistics.php` |
-| `install_demo.php` | `admin_install_demo.php` |
-| `settings.php` | `admin_settings.php` |
-| `set_word_on_hover.php` | `settings_hover.php` |
-| `text_to_speech_settings.php` | `admin_tts_settings.php` |
-| `table_set_management.php` | `admin_table_management.php` |
-| `server_data.php` | `admin_server_data.php` |
-| `mobile.php` | `mobile_index.php` |
-| `start.php` | `mobile_start.php` |
-| `api.php` | `api_v1.php` |
-| `trans.php` | `api_translate.php` |
-| `ggl.php` | `api_google.php` |
-| `glosbe_api.php` | `api_glosbe.php` |
-| `wp_lwt_start.php` | `wordpress_start.php` |
-| `wp_lwt_stop.php` | `wordpress_stop.php` |
-| `index.php` (old) | `home.php` |
+| `edit_feeds.php` | Fully migrated to `FeedsController` |
+| `feed_wizard.php` | Fully migrated to `FeedsController` |
+| `backup_restore.php` | Fully migrated to `AdminController` |
+| `database_wizard.php` | Fully migrated to `AdminController` |
+| `statistics.php` | Fully migrated to `AdminController` |
+| `install_demo.php` | Fully migrated to `AdminController` |
+| `settings.php` | Fully migrated to `AdminController` |
+| `set_word_on_hover.php` | Fully migrated to `AdminController` |
+| `text_to_speech_settings.php` | Fully migrated to `AdminController` |
+| `table_set_management.php` | Fully migrated to `AdminController` |
+| `server_data.php` | Fully migrated to `AdminController` |
+| `mobile.php` | Fully migrated to `MobileController` |
+| `start.php` | Fully migrated to `MobileController` |
+| `api.php` | Fully migrated to `ApiController` |
+| `trans.php` | Fully migrated to `TranslationController` |
+| `ggl.php` | Fully migrated to `TranslationController` |
+| `glosbe_api.php` | Fully migrated to `TranslationController` |
+| `wp_lwt_start.php` | Fully migrated to `WordPressController` |
+| `wp_lwt_stop.php` | Fully migrated to `WordPressController` |
+| `index.php` (old) | Fully migrated to `HomeController` |
 
 ### 8. Apache Configuration (`.htaccess`)
 
@@ -357,8 +361,9 @@ $data = $service->doSomething();
 | PHP files in root | 60+ | 1 (`index.php`) |
 | Root directories | 10+ | 6 (assets, db, docs, media, src, tests) |
 | Controllers | 0 | 14 |
-| Services | 0 | 20 |
-| View directories | 0 | 10 |
+| Services | 0 | 22 |
+| View directories | 0 | 9 |
+| Legacy PHP files remaining | 60+ | 0 |
 | Route definitions | 0 | 80+ |
 | Test files for routing | 0 | 2 (1000+ lines) |
 

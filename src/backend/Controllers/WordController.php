@@ -17,6 +17,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\Services\WordService;
+use Lwt\Services\WordListService;
 use Lwt\Services\WordUploadService;
 
 /**
@@ -43,6 +44,11 @@ class WordController extends BaseController
     protected WordService $wordService;
 
     /**
+     * @var WordListService|null Word list service instance
+     */
+    protected ?WordListService $listService = null;
+
+    /**
      * @var WordUploadService|null Word upload service instance
      */
     protected ?WordUploadService $uploadService = null;
@@ -54,6 +60,19 @@ class WordController extends BaseController
     {
         parent::__construct();
         $this->wordService = new WordService();
+    }
+
+    /**
+     * Get or create WordListService instance.
+     *
+     * @return WordListService
+     */
+    protected function getListService(): WordListService
+    {
+        if ($this->listService === null) {
+            $this->listService = new WordListService();
+        }
+        return $this->listService;
     }
 
     /**
@@ -431,13 +450,570 @@ class WordController extends BaseController
     /**
      * Edit words list (replaces words_edit.php)
      *
+     * Handles:
+     * - markaction=[opcode] ... do actions on marked terms
+     * - allaction=[opcode] ... do actions on all terms
+     * - del=[wordid] ... do delete
+     * - op=Save ... do insert new
+     * - op=Change ... do update
+     * - new=1&lang=[langid] ... display new term screen
+     * - chg=[wordid] ... display edit screen
+     * - filterlang=[langid] ... language filter
+     * - sort=[sortcode] ... sort
+     * - page=[pageno] ... page
+     * - query=[termtextfilter] ... term text filter
+     * - status=[statuscode] ... status filter
+     * - text=[textid] ... text filter
+     * - tag1=[tagid] ... tag filter 1
+     * - tag2=[tagid] ... tag filter 2
+     * - tag12=0/1 ... tag1-tag2 OR=0, AND=1
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function listEdit(array $params): void
     {
-        include __DIR__ . '/../Legacy/words_edit.php';
+        $listService = $this->getListService();
+
+        // Process filter parameters
+        $currentlang = \Lwt\Database\Validation::language(
+            (string) \processDBParam("filterlang", 'currentlanguage', '', false)
+        );
+        $currentsort = (int) \processDBParam("sort", 'currentwordsort', '1', true);
+        $currentpage = (int) \processSessParam("page", "currentwordpage", '1', true);
+        $currentquery = (string) \processSessParam("query", "currentwordquery", '', false);
+        $currentquerymode = (string) \processSessParam(
+            "query_mode",
+            "currentwordquerymode",
+            'term,rom,transl',
+            false
+        );
+        $currentregexmode = \Lwt\Database\Settings::getWithDefault("set-regex-mode");
+        $currentstatus = (string) \processSessParam("status", "currentwordstatus", '', false);
+        $currenttext = \Lwt\Database\Validation::text(
+            (string) \processSessParam("text", "currentwordtext", '', false)
+        );
+        $currenttexttag = (string) \processSessParam("texttag", "currentwordtexttag", '', false);
+        $currenttextmode = (string) \processSessParam("text_mode", "currentwordtextmode", 0, false);
+        $currenttag1 = \Lwt\Database\Validation::tag(
+            (string) \processSessParam("tag1", "currentwordtag1", '', false),
+            $currentlang
+        );
+        $currenttag2 = \Lwt\Database\Validation::tag(
+            (string) \processSessParam("tag2", "currentwordtag2", '', false),
+            $currentlang
+        );
+        $currenttag12 = (string) \processSessParam("tag12", "currentwordtag12", '', false);
+
+        // Build filter conditions
+        $whLang = $listService->buildLangCondition($currentlang);
+        $whStat = $listService->buildStatusCondition($currentstatus);
+        $whQuery = $listService->buildQueryCondition($currentquery, $currentquerymode, $currentregexmode);
+
+        // Validate regex pattern
+        if ($currentquery !== '' && $currentregexmode !== '') {
+            if (!$listService->validateRegexPattern($currentquery)) {
+                $currentquery = '';
+                $whQuery = '';
+                unset($_SESSION['currentwordquery']);
+                if (isset($_REQUEST['query'])) {
+                    echo '<p id="hide3" style="color:red;text-align:center;">+++ Warning: Invalid Search +++</p>';
+                }
+            }
+        }
+
+        $whTag = $listService->buildTagCondition($currenttag1, $currenttag2, $currenttag12);
+
+        // Check if we should skip page start for exports/tests
+        $noPagestart = $this->isExportOrTestAction();
+
+        if (!$noPagestart) {
+            \pagestart(
+                'My ' . \getLanguage($currentlang) . ' Terms (Words and Expressions)',
+                true
+            );
+        }
+
+        $message = '';
+
+        // Handle mark actions
+        if (isset($_REQUEST['markaction'])) {
+            $message = $this->handleMarkAction(
+                $listService,
+                $currenttext,
+                $whLang,
+                $whStat,
+                $whQuery,
+                $whTag
+            );
+        }
+
+        // Handle all actions
+        if (isset($_REQUEST['allaction'])) {
+            $message = $this->handleAllAction(
+                $listService,
+                $currenttext,
+                $whLang,
+                $whStat,
+                $whQuery,
+                $whTag
+            );
+            if ($message === null) {
+                return; // Exit on redirect
+            }
+        }
+
+        // Handle single delete
+        if (isset($_REQUEST['del'])) {
+            $message = $listService->deleteSingleWord((int) $_REQUEST['del']);
+        }
+
+        // Handle save/update
+        if (isset($_REQUEST['op'])) {
+            $wid = $this->handleListSaveUpdate($listService);
+        }
+
+        // Display appropriate view
+        if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
+            $this->displayListNewForm($listService, (int) $_REQUEST['lang']);
+        } elseif (isset($_REQUEST['chg'])) {
+            $this->displayListEditForm($listService, (int) $_REQUEST['chg']);
+        } else {
+            $this->displayWordList(
+                $listService,
+                $message,
+                $currentlang,
+                $currenttext,
+                $currenttexttag,
+                $currenttextmode,
+                $currentstatus,
+                $currentquery,
+                $currentquerymode,
+                $currentregexmode,
+                $currenttag1,
+                $currenttag2,
+                $currenttag12,
+                $currentsort,
+                $currentpage,
+                $whLang,
+                $whStat,
+                $whQuery,
+                $whTag
+            );
+        }
+
+        \pageend();
+    }
+
+    /**
+     * Check if current action is export or test (skip page start).
+     *
+     * @return bool
+     */
+    private function isExportOrTestAction(): bool
+    {
+        $markAction = \getreq('markaction');
+        $allAction = \getreq('allaction');
+
+        return in_array($markAction, ['exp', 'exp2', 'exp3', 'test', 'deltag']) ||
+               in_array($allAction, ['expall', 'expall2', 'expall3', 'testall', 'deltagall']);
+    }
+
+    /**
+     * Handle mark actions for selected words.
+     *
+     * @param WordListService $listService Service instance
+     * @param string          $textId      Current text filter
+     * @param string          $whLang      Language condition
+     * @param string          $whStat      Status condition
+     * @param string          $whQuery     Query condition
+     * @param string          $whTag       Tag condition
+     *
+     * @return string Result message
+     */
+    private function handleMarkAction(
+        WordListService $listService,
+        string $textId,
+        string $whLang,
+        string $whStat,
+        string $whQuery,
+        string $whTag
+    ): string {
+        $markaction = $_REQUEST['markaction'];
+        $actiondata = \getreq('data');
+        $message = "Multiple Actions: 0";
+
+        if (!isset($_REQUEST['marked']) || !is_array($_REQUEST['marked']) || count($_REQUEST['marked']) == 0) {
+            return $message;
+        }
+
+        $idList = "(" . implode(",", array_map('intval', $_REQUEST['marked'])) . ")";
+
+        switch ($markaction) {
+            case 'del':
+                $message = $listService->deleteByIdList($idList);
+                break;
+            case 'addtag':
+                $message = \addtaglist($actiondata, $idList);
+                break;
+            case 'deltag':
+                \removetaglist($actiondata, $idList);
+                header("Location: /words/edit");
+                exit();
+            case 'spl1':
+                $message = $listService->updateStatusByIdList($idList, 1, true, 'spl1');
+                break;
+            case 'smi1':
+                $message = $listService->updateStatusByIdList($idList, -1, true, 'smi1');
+                break;
+            case 's5':
+                $message = $listService->updateStatusByIdList($idList, 5, false, 's5');
+                break;
+            case 's1':
+                $message = $listService->updateStatusByIdList($idList, 1, false, 's1');
+                break;
+            case 's99':
+                $message = $listService->updateStatusByIdList($idList, 99, false, 's99');
+                break;
+            case 's98':
+                $message = $listService->updateStatusByIdList($idList, 98, false, 's98');
+                break;
+            case 'today':
+                $message = $listService->updateStatusDateByIdList($idList);
+                break;
+            case 'delsent':
+                $message = $listService->deleteSentencesByIdList($idList);
+                break;
+            case 'lower':
+                $message = $listService->toLowercaseByIdList($idList);
+                break;
+            case 'cap':
+                $message = $listService->capitalizeByIdList($idList);
+                break;
+            case 'exp':
+                \anki_export($listService->getAnkiExportSql($idList, '', '', '', '', ''));
+                break;
+            case 'exp2':
+                \tsv_export($listService->getTsvExportSql($idList, '', '', '', '', ''));
+                break;
+            case 'exp3':
+                \flexible_export($listService->getFlexibleExportSql($idList, '', '', '', '', ''));
+                break;
+            case 'test':
+                $_SESSION['testsql'] = $idList;
+                header("Location: /test?selection=2");
+                exit();
+        }
+
+        return $message;
+    }
+
+    /**
+     * Handle all actions for filtered words.
+     *
+     * @param WordListService $listService Service instance
+     * @param string          $textId      Current text filter
+     * @param string          $whLang      Language condition
+     * @param string          $whStat      Status condition
+     * @param string          $whQuery     Query condition
+     * @param string          $whTag       Tag condition
+     *
+     * @return string|null Result message or null on redirect
+     */
+    private function handleAllAction(
+        WordListService $listService,
+        string $textId,
+        string $whLang,
+        string $whStat,
+        string $whQuery,
+        string $whTag
+    ): ?string {
+        $allaction = (string) $_REQUEST['allaction'];
+        $actiondata = \getreq('data');
+
+        // Get word IDs matching filter
+        $wordIds = $listService->getFilteredWordIds($textId, $whLang, $whStat, $whQuery, $whTag);
+
+        // Actions that process IDs one by one
+        if (in_array($allaction, ['delall', 'spl1all', 'smi1all', 's5all', 's1all', 's99all', 's98all', 'todayall', 'addtagall', 'deltagall', 'delsentall', 'lowerall', 'capall'])) {
+            $cnt = 0;
+            foreach ($wordIds as $id) {
+                switch ($allaction) {
+                    case 'delall':
+                        $listService->deleteSingleWord($id);
+                        $cnt++;
+                        break;
+                    case 'addtagall':
+                        \addtaglist($actiondata, '(' . $id . ')');
+                        $cnt++;
+                        break;
+                    case 'deltagall':
+                        \removetaglist($actiondata, '(' . $id . ')');
+                        $cnt++;
+                        break;
+                    case 'spl1all':
+                        $cnt += (int) $listService->updateStatusByIdList('(' . $id . ')', 1, true, 'spl1');
+                        break;
+                    case 'smi1all':
+                        $cnt += (int) $listService->updateStatusByIdList('(' . $id . ')', -1, true, 'smi1');
+                        break;
+                    case 's5all':
+                        $cnt += (int) $listService->updateStatusByIdList('(' . $id . ')', 5, false, 's5');
+                        break;
+                    case 's1all':
+                        $cnt += (int) $listService->updateStatusByIdList('(' . $id . ')', 1, false, 's1');
+                        break;
+                    case 's99all':
+                        $cnt += (int) $listService->updateStatusByIdList('(' . $id . ')', 99, false, 's99');
+                        break;
+                    case 's98all':
+                        $cnt += (int) $listService->updateStatusByIdList('(' . $id . ')', 98, false, 's98');
+                        break;
+                    case 'todayall':
+                        $cnt += (int) $listService->updateStatusDateByIdList('(' . $id . ')');
+                        break;
+                    case 'delsentall':
+                        $cnt += (int) $listService->deleteSentencesByIdList('(' . $id . ')');
+                        break;
+                    case 'lowerall':
+                        $cnt += (int) $listService->toLowercaseByIdList('(' . $id . ')');
+                        break;
+                    case 'capall':
+                        $cnt += (int) $listService->capitalizeByIdList('(' . $id . ')');
+                        break;
+                }
+            }
+
+            if ($allaction == 'deltagall') {
+                header("Location: /words/edit");
+                return null;
+            }
+            if ($allaction == 'addtagall') {
+                return "Tag added in $cnt Terms";
+            }
+            if ($allaction == 'delall') {
+                \Lwt\Database\Maintenance::adjustAutoIncrement('words', 'WoID');
+                return "Deleted: $cnt Terms";
+            }
+            return "$cnt Terms changed";
+        }
+
+        // Export actions
+        if ($allaction == 'expall') {
+            \anki_export($listService->getAnkiExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            return '';
+        }
+        if ($allaction == 'expall2') {
+            \tsv_export($listService->getTsvExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            return '';
+        }
+        if ($allaction == 'expall3') {
+            \flexible_export($listService->getFlexibleExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            return '';
+        }
+
+        // Test action
+        if ($allaction == 'testall') {
+            $sql = $listService->getTestWordIdsSql('', $textId, $whLang, $whStat, $whQuery, $whTag);
+            $idList = [];
+            $res = \Lwt\Database\Connection::query($sql);
+            while ($record = mysqli_fetch_assoc($res)) {
+                $idList[] = $record['WoID'];
+            }
+            mysqli_free_result($res);
+            $_SESSION['testsql'] = "(" . implode(",", $idList) . ")";
+            header("Location: /test?selection=2");
+            return null;
+        }
+
+        return '';
+    }
+
+    /**
+     * Handle save/update operation for word list.
+     *
+     * @param WordListService $listService Service instance
+     *
+     * @return int|null Word ID or null on error
+     */
+    private function handleListSaveUpdate(WordListService $listService): ?int
+    {
+        $translationRaw = \repl_tab_nl(\getreq("WoTranslation"));
+        $translation = ($translationRaw == '') ? '*' : $translationRaw;
+
+        if ($_REQUEST['op'] == 'Save') {
+            $message = $listService->saveNewWord($_REQUEST);
+            $wid = \get_last_key();
+            \saveWordTags($wid);
+            return $wid;
+        } else {
+            $message = $listService->updateWord($_REQUEST);
+            $wid = (int) $_REQUEST["WoID"];
+            \saveWordTags($wid);
+            return $wid;
+        }
+    }
+
+    /**
+     * Display new word form for word list.
+     *
+     * @param WordListService $listService Service instance
+     * @param int             $lgid        Language ID
+     *
+     * @return void
+     */
+    private function displayListNewForm(WordListService $listService, int $lgid): void
+    {
+        $formData = $listService->getNewTermFormData($lgid);
+        $scrdir = $formData['scrdir'];
+        $showRoman = $formData['showRoman'];
+
+        include __DIR__ . '/../Views/Word/list_new_form.php';
+    }
+
+    /**
+     * Display edit word form for word list.
+     *
+     * @param WordListService $listService Service instance
+     * @param int             $wordId      Word ID
+     *
+     * @return void
+     */
+    private function displayListEditForm(WordListService $listService, int $wordId): void
+    {
+        $word = $listService->getEditFormData($wordId);
+        if ($word === null) {
+            echo '<p>Word not found.</p>';
+            return;
+        }
+
+        $scrdir = $word['scrdir'];
+        $showRoman = $word['LgShowRomanization'];
+        $transl = $word['WoTranslation'];
+
+        include __DIR__ . '/../Views/Word/list_edit_form.php';
+    }
+
+    /**
+     * Display the word list.
+     *
+     * @param WordListService $listService     Service instance
+     * @param string          $message         Status message
+     * @param string          $currentlang     Language filter
+     * @param string          $currenttext     Text filter
+     * @param string          $currenttexttag  Text tag filter
+     * @param string          $currenttextmode Text/tag mode
+     * @param string          $currentstatus   Status filter
+     * @param string          $currentquery    Search query
+     * @param string          $currentquerymode Query mode
+     * @param string          $currentregexmode Regex mode
+     * @param string          $currenttag1     First tag filter
+     * @param string          $currenttag2     Second tag filter
+     * @param string          $currenttag12    Tag logic
+     * @param int             $currentsort     Sort option
+     * @param int             $currentpage     Page number
+     * @param string          $whLang          Language condition
+     * @param string          $whStat          Status condition
+     * @param string          $whQuery         Query condition
+     * @param string          $whTag           Tag condition
+     *
+     * @return void
+     */
+    private function displayWordList(
+        WordListService $listService,
+        string $message,
+        string $currentlang,
+        string $currenttext,
+        string $currenttexttag,
+        string $currenttextmode,
+        string $currentstatus,
+        string $currentquery,
+        string $currentquerymode,
+        string $currentregexmode,
+        string $currenttag1,
+        string $currenttag2,
+        string $currenttag12,
+        int $currentsort,
+        int $currentpage,
+        string $whLang,
+        string $whStat,
+        string $whQuery,
+        string $whTag
+    ): void {
+        // Handle duplicate entry error message
+        if (
+            substr($message, 0, 24) == "Error: Duplicate entry '"
+            && substr($message, -24) == "' for key 'WoLgIDTextLC'"
+        ) {
+            $lgID = $_REQUEST["WoLgID"] . "-";
+            $msg = substr($message, 24 + strlen($lgID));
+            $msg = substr($msg, 0, strlen($msg) - 24);
+            $message = "Error: Term '" . $msg . "' already exists. Please go back and correct this!";
+        }
+
+        echo \error_message_with_hide($message, false);
+
+        // Count records
+        $recno = $listService->countWords($currenttext, $whLang, $whStat, $whQuery, $whTag);
+
+        // Calculate pagination
+        $maxperpage = (int) \Lwt\Database\Settings::getWithDefault('set-terms-per-page');
+        $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
+
+        if ($currentpage < 1) {
+            $currentpage = 1;
+        }
+        if ($currentpage > $pages) {
+            $currentpage = $pages;
+        }
+
+        // Validate sort
+        if ($currentsort < 1) {
+            $currentsort = 1;
+        }
+        if ($currentsort > 7) {
+            $currentsort = 7;
+        }
+
+        // Show new term link
+        if ($currentlang != '') {
+            ?>
+<p><a href="/words/edit?new=1&amp;lang=<?php echo $currentlang; ?>"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New <?php echo \tohtml(\getLanguage($currentlang)); ?> Term ...</a></p>
+            <?php
+        } else {
+            ?>
+<p><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Term? - Set Language Filter first ...</p>
+            <?php
+        }
+
+        // Include filter view
+        include __DIR__ . '/../Views/Word/list_filter.php';
+
+        if ($recno == 0) {
+            echo '<p>No terms found.</p>';
+            return;
+        }
+
+        // Get words data
+        $filters = [
+            'whLang' => $whLang,
+            'whStat' => $whStat,
+            'whQuery' => $whQuery,
+            'whTag' => $whTag,
+            'textId' => $currenttext
+        ];
+
+        $res = $listService->getWordsList($filters, $currentsort, $currentpage, $maxperpage);
+
+        $words = [];
+        while ($record = mysqli_fetch_assoc($res)) {
+            $words[] = $record;
+        }
+        mysqli_free_result($res);
+
+        // Include table view
+        include __DIR__ . '/../Views/Word/list_table.php';
     }
 
     /**
