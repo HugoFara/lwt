@@ -27,6 +27,18 @@ import {
   initTextEditForm,
   initWordEditForm
 } from './forms/form_initialization';
+import {
+  doHideTranslations,
+  doShowTranslations,
+  doHideAnnotations,
+  doShowAnnotations,
+  closeWindow as closeDisplayWindow
+} from './reading/annotation_toggle';
+import {
+  autoTranslate,
+  autoRomanization,
+  initWordFormAuto
+} from './forms/word_form_auto';
 
 // Declare global window interface extensions
 declare global {
@@ -96,6 +108,22 @@ declare global {
     clearRightFrameOnUnload: typeof clearRightFrameOnUnload;
     initTextEditForm: typeof initTextEditForm;
     initWordEditForm: typeof initWordEditForm;
+
+    // Annotation toggles (legacy function names)
+    do_hide_t: typeof doHideTranslations;
+    do_show_t: typeof doShowTranslations;
+    do_hide_a: typeof doHideAnnotations;
+    do_show_a: typeof doShowAnnotations;
+    doHideTranslations: typeof doHideTranslations;
+    doShowTranslations: typeof doShowTranslations;
+    doHideAnnotations: typeof doHideAnnotations;
+    doShowAnnotations: typeof doShowAnnotations;
+    closeDisplayWindow: typeof closeDisplayWindow;
+
+    // Word form auto functions
+    autoTranslate: typeof autoTranslate;
+    autoRomanization: typeof autoRomanization;
+    initWordFormAuto: typeof initWordFormAuto;
   }
 }
 
@@ -154,3 +182,19 @@ window.changeTextboxesLanguage = changeTextboxesLanguage;
 window.clearRightFrameOnUnload = clearRightFrameOnUnload;
 window.initTextEditForm = initTextEditForm;
 window.initWordEditForm = initWordEditForm;
+
+// Annotation toggles (legacy function names for backward compatibility)
+window.do_hide_t = doHideTranslations;
+window.do_show_t = doShowTranslations;
+window.do_hide_a = doHideAnnotations;
+window.do_show_a = doShowAnnotations;
+window.doHideTranslations = doHideTranslations;
+window.doShowTranslations = doShowTranslations;
+window.doHideAnnotations = doHideAnnotations;
+window.doShowAnnotations = doShowAnnotations;
+window.closeDisplayWindow = closeDisplayWindow;
+
+// Word form auto functions
+window.autoTranslate = autoTranslate;
+window.autoRomanization = autoRomanization;
+window.initWordFormAuto = initWordFormAuto;

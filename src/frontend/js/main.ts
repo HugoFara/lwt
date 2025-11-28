@@ -38,12 +38,14 @@ import './reading/audio_controller';
 import './reading/text_events';
 import './reading/text_display';
 import './reading/frame_management';
+import './reading/annotation_toggle';
 
 // Forms
 import './forms/bulk_actions';
 import './forms/unloadformcheck';
 import './forms/form_validation';
 import './forms/form_initialization';
+import './forms/word_form_auto';
 
 // Testing
 import './testing/test_mode';

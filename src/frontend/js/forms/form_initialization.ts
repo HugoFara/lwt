@@ -102,7 +102,22 @@ export function autoInitializeForms(): void {
     initTextEditForm();
   }
 
-  // Auto-init forms with validate class that need exit confirmation
+  // Auto-init forms with data-lwt-form-check attribute
+  const formsWithCheck = document.querySelectorAll('form[data-lwt-form-check="true"]');
+  formsWithCheck.forEach((form) => {
+    if (!form.hasAttribute('data-lwt-form-init')) {
+      form.setAttribute('data-lwt-form-init', 'true');
+      lwtFormCheck.askBeforeExit();
+    }
+  });
+
+  // Auto-init forms with data-lwt-clear-frame attribute
+  const formsWithClearFrame = document.querySelectorAll('form[data-lwt-clear-frame="true"]');
+  if (formsWithClearFrame.length > 0) {
+    clearRightFrameOnUnload();
+  }
+
+  // Auto-init forms with validate class that need exit confirmation (legacy support)
   // This handles forms that have class="validate" but don't have specific init
   const validateForms = document.querySelectorAll('form.validate');
   if (validateForms.length > 0) {
