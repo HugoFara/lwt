@@ -26,7 +26,7 @@ class FeedsTest extends TestCase
         if (!Globals::getDbConnection()) {
             $config = EnvLoader::getDatabaseConfig();
             $test_dbname = "test_" . $config['dbname'];
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $config['server'], $config['userid'], $config['passwd'], $test_dbname, $config['socket']
             );
             Globals::setDbConnection($connection);

@@ -10,6 +10,7 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Services\SettingsService;
 use Lwt\Database\Settings;
+use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
@@ -38,7 +39,7 @@ class SettingsServiceTest extends TestCase
         $testDbname = "test_" . $config['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $config['server'],
                 $config['userid'],
                 $config['passwd'],

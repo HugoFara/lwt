@@ -14,7 +14,9 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/Text/text_parsing.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/word_scoring.php';
 
+use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
+use Lwt\Database\Settings;
 use PHPUnit\Framework\TestCase;
 
 
@@ -55,7 +57,7 @@ class DatabaseConnectTest extends TestCase
         list($userid, $passwd, $server, $dbname) = user_logging();
 
         // Connect to the database
-        $connection = connect_to_database(
+        $connection = Configuration::connect(
             $server, $userid, $passwd, $dbname, $socket ?? ""
         );
         Globals::setDbConnection($connection);
@@ -82,7 +84,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -137,7 +139,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -174,7 +176,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -202,7 +204,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -231,7 +233,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -273,7 +275,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -336,7 +338,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -395,7 +397,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -439,7 +441,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -476,7 +478,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -524,18 +526,18 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
         }
 
         // Non-existent key should return empty string
-        $result = getSetting('nonexistent_key_xyz');
+        $result = Settings::get('nonexistent_key_xyz');
         $this->assertEquals('', $result, 'Non-existent key should return empty string');
 
         // Empty key should return empty
-        $result = getSetting('');
+        $result = Settings::get('');
         $this->assertEquals('', $result, 'Empty key should return empty string');
 
         // SQL injection in key - first clean up any previously saved value
@@ -543,7 +545,7 @@ class DatabaseConnectTest extends TestCase
         $injectionKey = "key'; DROP TABLE settings; --";
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
-        $result = getSetting($injectionKey);
+        $result = Settings::get($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, verify the table still exists (injection didn't work)
@@ -551,17 +553,17 @@ class DatabaseConnectTest extends TestCase
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
 
         // Test special key 'currentlanguage' (triggers validateLang)
-        $result = getSetting('currentlanguage');
+        $result = Settings::get('currentlanguage');
         // Should return empty or valid language ID
         $this->assertTrue(is_string($result), 'Should return a string');
 
         // Test special key 'currenttext' (triggers validateText)
-        $result = getSetting('currenttext');
+        $result = Settings::get('currenttext');
         // Should return empty or valid text ID
         $this->assertTrue(is_string($result), 'Should return a string');
 
         // Key with whitespace
-        $result = getSetting('  key_with_spaces  ');
+        $result = Settings::get('  key_with_spaces  ');
         $this->assertTrue(is_string($result), 'Should handle whitespace in key');
     }
 
@@ -574,7 +576,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -615,7 +617,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -626,7 +628,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertStringContainsString('OK:', $result, 'Valid save should return OK message');
 
         // Verify it was saved
-        $value = getSetting('test_key_123');
+        $value = Settings::get('test_key_123');
         $this->assertEquals('test_value_123', $value, 'Saved value should be retrievable');
 
         // Test NULL value (should error)
@@ -641,7 +643,7 @@ class DatabaseConnectTest extends TestCase
         saveSetting('test_key_update', 'value1');
         $result = saveSetting('test_key_update', 'value2');
         $this->assertStringContainsString('OK:', $result, 'Update should succeed');
-        $value = getSetting('test_key_update');
+        $value = Settings::get('test_key_update');
         $this->assertEquals('value2', $value, 'Updated value should be saved');
 
         // Test SQL injection in key
@@ -673,7 +675,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -711,7 +713,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -765,7 +767,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -807,7 +809,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -852,7 +854,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -878,7 +880,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -899,7 +901,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -941,7 +943,7 @@ class DatabaseConnectTest extends TestCase
                 list($userid, $passwd, $server, $dbname) = user_logging();
 
         // Valid connection
-        $connection = connect_to_database(
+        $connection = Configuration::connect(
             $server, $userid, $passwd, $dbname, $socket ?? ""
         );
         $this->assertInstanceOf(mysqli::class, $connection);
@@ -963,7 +965,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -999,7 +1001,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -1027,7 +1029,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -1088,7 +1090,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -1117,7 +1119,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -1202,7 +1204,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -1248,7 +1250,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -1312,7 +1314,7 @@ class DatabaseConnectTest extends TestCase
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -1481,7 +1483,7 @@ class DatabaseConnectTest extends TestCase
         
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -1517,7 +1519,7 @@ class DatabaseConnectTest extends TestCase
 
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $server, $userid, $passwd, $dbname, $socket ?? ""
             );
             Globals::setDbConnection($connection);
@@ -1541,7 +1543,7 @@ class DatabaseConnectTest extends TestCase
         mysqli_rollback(Globals::getDbConnection());
 
         // Verify behavior (MyISAM will commit regardless of rollback)
-        $result = getSetting('test_transaction');
+        $result = Settings::get('test_transaction');
         if ($is_myisam) {
             // MyISAM doesn't support transactions, data will be there
             $this->assertTrue($result === 'value1' || $result === '');
@@ -1562,7 +1564,7 @@ class DatabaseConnectTest extends TestCase
         mysqli_commit(Globals::getDbConnection());
 
         // Verify data was committed (works for both MyISAM and InnoDB)
-        $result = getSetting('test_transaction');
+        $result = Settings::get('test_transaction');
         $this->assertEquals('value2', $result);
 
         // Clean up

@@ -10,7 +10,9 @@ require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 use Lwt\Controllers\BaseController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
+use Lwt\Database\Settings;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -41,7 +43,7 @@ class BaseControllerTest extends TestCase
         $testDbname = "test_" . $config['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $config['server'],
                 $config['userid'],
                 $config['passwd'],
@@ -381,7 +383,7 @@ class BaseControllerTest extends TestCase
         $this->assertEquals(123, $value);
         
         // Verify saved to database
-        $saved = getSetting('test_db_key');
+        $saved = Settings::get('test_db_key');
         $this->assertEquals('123', $saved);
         
         // Clean up

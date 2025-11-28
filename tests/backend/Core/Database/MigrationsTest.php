@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Migrations;
+use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
 
@@ -35,7 +36,7 @@ class MigrationsTest extends TestCase
         $testDbname = "test_" . $config['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $config['server'],
                 $config['userid'],
                 $config['passwd'],

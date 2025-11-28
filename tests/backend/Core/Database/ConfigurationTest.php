@@ -37,7 +37,7 @@ class ConfigurationTest extends TestCase
         $testDbname = "test_" . self::$dbConfig['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 self::$dbConfig['server'],
                 self::$dbConfig['userid'],
                 self::$dbConfig['passwd'],

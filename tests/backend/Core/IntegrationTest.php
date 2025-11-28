@@ -23,7 +23,9 @@ require_once __DIR__ . '/../../../src/backend/Core/Test/test_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Language/language_utilities.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/word_status.php';
 
+use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
+use Lwt\Database\Settings;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -41,7 +43,7 @@ class IntegrationTest extends TestCase
         $testDbname = "test_" . $config['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $config['server'],
                 $config['userid'],
                 $config['passwd'],
@@ -643,7 +645,7 @@ class IntegrationTest extends TestCase
         $this->assertEquals(123, $result);
 
         // Verify it was saved to settings
-        $saved = getSetting('db_key');
+        $saved = Settings::get('db_key');
         $this->assertEquals('123', $saved);
 
         // Test with string parameter
@@ -797,8 +799,8 @@ class IntegrationTest extends TestCase
         $this->assertIsString($result);
 
         // Verify data was restored
-        $value1 = getSetting('test_restore');
-        getSetting('test_restore2');
+        $value1 = Settings::get('test_restore');
+        Settings::get('test_restore2');
 
         // Clean up - fclose is automatic for tmpfile when it goes out of scope
         // Don't call fclose() as the resource may already be closed by restore_file

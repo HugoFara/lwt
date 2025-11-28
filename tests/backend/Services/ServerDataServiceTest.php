@@ -36,7 +36,7 @@ class ServerDataServiceTest extends TestCase
         $testDbname = "test_" . $config['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $config['server'],
                 $config['userid'],
                 $config['passwd'],

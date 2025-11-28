@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 use Lwt\Classes\Language;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Services\LanguageService;
 use PHPUnit\Framework\TestCase;
@@ -41,7 +42,7 @@ class LanguageServiceTest extends TestCase
         $testDbname = "test_" . $config['dbname'];
 
         if (!Globals::getDbConnection()) {
-            $connection = connect_to_database(
+            $connection = Configuration::connect(
                 $config['server'],
                 $config['userid'],
                 $config['passwd'],
