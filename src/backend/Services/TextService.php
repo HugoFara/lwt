@@ -1382,4 +1382,185 @@ class TextService
         );
         return $result !== null ? (int) $result : null;
     }
+
+    // ===========================
+    // TEXT EDIT PAGE METHODS
+    // ===========================
+
+    /**
+     * Set term sentences from texts.
+     *
+     * Sets WoSentence for all words in the specified texts that don't already
+     * have a sentence containing the word.
+     *
+     * @param array $textIds       Array of text IDs
+     * @param bool  $activeOnly    Only set for active terms (status != 98, 99)
+     *
+     * @return string Result message
+     */
+    public function setTermSentences(array $textIds, bool $activeOnly = false): string
+    {
+        if (empty($textIds)) {
+            return "Multiple Actions: 0";
+        }
+
+        $list = "(" . implode(",", array_map('intval', $textIds)) . ")";
+        $count = 0;
+
+        $statusFilter = $activeOnly
+            ? " AND WoStatus != 98 AND WoStatus != 99"
+            : "";
+
+        $sql = "SELECT WoID, WoTextLC, MIN(Ti2SeID) AS SeID
+            FROM {$this->tbpref}words, {$this->tbpref}textitems2
+            WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN {$list}
+            {$statusFilter}
+            AND IFNULL(WoSentence,'') NOT LIKE CONCAT('%{',WoText,'}%')
+            GROUP BY WoID
+            ORDER BY WoID, MIN(Ti2SeID)";
+
+        $res = Connection::query($sql);
+        $sentenceCount = (int) Settings::getWithDefault('set-term-sentence-count');
+
+        while ($record = mysqli_fetch_assoc($res)) {
+            $sent = \getSentence(
+                $record['SeID'],
+                $record['WoTextLC'],
+                $sentenceCount
+            );
+            $count += (int) Connection::execute(
+                "UPDATE {$this->tbpref}words
+                SET WoSentence = " . Escaping::toSqlSyntax(\repl_tab_nl($sent[1])) . "
+                WHERE WoID = " . $record['WoID']
+            );
+        }
+        mysqli_free_result($res);
+
+        return "Term Sentences set from Text(s): {$count}";
+    }
+
+    /**
+     * Get data for the text edit form.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array|null Text data or null if not found
+     */
+    public function getTextForEdit(int $textId): ?array
+    {
+        $sql = "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
+            TxAnnotatedText <> '' AS annot_exists
+            FROM {$this->tbpref}texts
+            WHERE TxID = {$textId}";
+        $res = Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+        return $record ?: null;
+    }
+
+    /**
+     * Get language translation URIs for form language selection.
+     *
+     * @return array<int, string> Mapping of language ID to language code
+     */
+    public function getLanguageDataForForm(): array
+    {
+        $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$this->tbpref}languages
+                WHERE LgGoogleTranslateURI <> ''";
+        $res = Connection::query($sql);
+        $result = [];
+        while ($record = mysqli_fetch_assoc($res)) {
+            $result[$record['LgID']] = \langFromDict($record['LgGoogleTranslateURI']);
+        }
+        mysqli_free_result($res);
+        return $result;
+    }
+
+    /**
+     * Save text and reparse it.
+     *
+     * @param int    $textId    Text ID (0 for new text)
+     * @param int    $lgId      Language ID
+     * @param string $title     Title
+     * @param string $text      Text content
+     * @param string $audioUri  Audio URI
+     * @param string $sourceUri Source URI
+     *
+     * @return array{message: string, textId: int, redirect: bool}
+     */
+    public function saveTextAndReparse(
+        int $textId,
+        int $lgId,
+        string $title,
+        string $text,
+        string $audioUri,
+        string $sourceUri
+    ): array {
+        $cleanText = $this->removeSoftHyphens($text);
+
+        if ($textId === 0) {
+            // New text
+            Connection::execute(
+                "INSERT INTO {$this->tbpref}texts (
+                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
+                ) VALUES (
+                    {$lgId},
+                    " . Escaping::toSqlSyntax($title) . ",
+                    " . Escaping::toSqlSyntax($cleanText) . ",
+                    '',
+                    " . Escaping::toSqlSyntaxNoNull($audioUri) . ",
+                    " . Escaping::toSqlSyntax($sourceUri) . "
+                )"
+            );
+            $textId = Connection::lastInsertId();
+        } else {
+            // Update existing text
+            Connection::execute(
+                "UPDATE {$this->tbpref}texts SET
+                    TxLgID = {$lgId},
+                    TxTitle = " . Escaping::toSqlSyntax($title) . ",
+                    TxText = " . Escaping::toSqlSyntax($cleanText) . ",
+                    TxAudioURI = " . Escaping::toSqlSyntaxNoNull($audioUri) . ",
+                    TxSourceURI = " . Escaping::toSqlSyntax($sourceUri) . "
+                WHERE TxID = {$textId}"
+            );
+        }
+
+        // Save tags
+        \saveTextTags($textId);
+
+        // Delete old parsed data
+        $sentencesDeleted = Connection::execute(
+            "DELETE FROM {$this->tbpref}sentences WHERE SeTxID = {$textId}"
+        );
+        $textitemsDeleted = Connection::execute(
+            "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}"
+        );
+        Maintenance::adjustAutoIncrement('sentences', 'SeID');
+
+        // Reparse
+        TextParsing::splitCheck(
+            Connection::fetchValue(
+                "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = {$textId}"
+            ),
+            $lgId,
+            $textId
+        );
+
+        // Get statistics
+        $sentenceCount = Connection::fetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = {$textId}"
+        );
+        $itemCount = Connection::fetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}"
+        );
+
+        $message = "Sentences deleted: {$sentencesDeleted} / Textitems deleted: {$textitemsDeleted} / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
+
+        return [
+            'message' => $message,
+            'textId' => $textId,
+            'redirect' => false
+        ];
+    }
 }

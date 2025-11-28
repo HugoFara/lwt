@@ -203,10 +203,349 @@ class TextController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
     public function edit(array $params): void
     {
-        include __DIR__ . '/../Legacy/text_edit.php';
+        require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+        require_once __DIR__ . '/../Core/Tag/tags.php';
+        require_once __DIR__ . '/../Core/Text/text_helpers.php';
+        require_once __DIR__ . '/../Core/Http/param_helpers.php';
+        require_once __DIR__ . '/../Core/Media/media_helpers.php';
+        require_once __DIR__ . '/../Core/Language/language_utilities.php';
+        require_once __DIR__ . '/../Core/Word/word_status.php';
+        require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
+        require_once __DIR__ . '/../Core/Integration/text_from_yt.php';
+        require_once __DIR__ . '/../Core/Entity/Text.php';
+
+        // Get filter parameters
+        $currentLang = Validation::language(
+            (string) \processDBParam("filterlang", 'currentlanguage', '', false)
+        );
+
+        // Check for actions that skip page start
+        $noPagestart = (\getreq('markaction') == 'test' ||
+            \getreq('markaction') == 'deltag' ||
+            substr(\getreq('op'), -8) == 'and Open');
+
+        if (!$noPagestart) {
+            \pagestart('My ' . \getLanguage($currentLang) . ' Texts', true);
+        }
+
+        $message = '';
+
+        // Handle mark actions
+        if (isset($_REQUEST['markaction'])) {
+            $message = $this->handleMarkAction(
+                $_REQUEST['markaction'],
+                $_REQUEST['marked'] ?? [],
+                \getreq('data')
+            );
+        }
+
+        // Handle single item actions
+        if (isset($_REQUEST['del'])) {
+            $message = $this->textService->deleteText((int) $_REQUEST['del']);
+        } elseif (isset($_REQUEST['arch'])) {
+            $message = $this->textService->archiveText((int) $_REQUEST['arch']);
+        } elseif (isset($_REQUEST['op'])) {
+            $result = $this->handleTextOperation(
+                $_REQUEST['op'],
+                $noPagestart,
+                $currentLang
+            );
+            $message .= ($message ? " / " : "") . $result['message'];
+            if ($result['redirect']) {
+                return;
+            }
+        }
+
+        // Display appropriate page
+        if (isset($_REQUEST['new'])) {
+            $this->showNewTextForm((int) $currentLang);
+        } elseif (isset($_REQUEST['chg'])) {
+            $this->showEditTextForm((int) $_REQUEST['chg']);
+        } else {
+            $this->showTextsList($currentLang, $message);
+        }
+
+        \pageend();
+    }
+
+    /**
+     * Handle mark actions for multiple texts.
+     *
+     * @param string $markAction Action to perform
+     * @param array  $marked     Array of marked text IDs
+     * @param string $actionData Additional data for the action
+     *
+     * @return string Result message
+     */
+    private function handleMarkAction(
+        string $markAction,
+        array $marked,
+        string $actionData
+    ): string {
+        $message = "Multiple Actions: 0";
+
+        if (count($marked) === 0) {
+            return $message;
+        }
+
+        $list = "(" . implode(",", array_map('intval', $marked)) . ")";
+
+        switch ($markAction) {
+            case 'del':
+                $message = $this->textService->deleteTexts($marked);
+                break;
+
+            case 'arch':
+                $message = $this->textService->archiveTexts($marked);
+                break;
+
+            case 'addtag':
+                $message = \addtexttaglist($actionData, $list);
+                break;
+
+            case 'deltag':
+                \removetexttaglist($actionData, $list);
+                header("Location: /texts");
+                exit();
+
+            case 'setsent':
+                $message = $this->textService->setTermSentences($marked, false);
+                break;
+
+            case 'setactsent':
+                $message = $this->textService->setTermSentences($marked, true);
+                break;
+
+            case 'rebuild':
+                $message = $this->textService->rebuildTexts($marked);
+                break;
+
+            case 'test':
+                $_SESSION['testsql'] = $list;
+                header("Location: /test?selection=3");
+                exit();
+        }
+
+        return $message;
+    }
+
+    /**
+     * Handle text save/update operations.
+     *
+     * @param string     $op          Operation name
+     * @param bool       $noPagestart Whether to skip page start
+     * @param string|int $currentLang Current language ID
+     *
+     * @return array{message: string, redirect: bool}
+     */
+    private function handleTextOperation(
+        string $op,
+        bool $noPagestart,
+        string|int $currentLang
+    ): array {
+        // Validate text length
+        if (!$this->textService->validateTextLength($_REQUEST['TxText'])) {
+            $message = "Error: Text too long, must be below 65000 Bytes";
+            if ($noPagestart) {
+                \pagestart('My ' . \getLanguage($currentLang) . ' Texts', true);
+            }
+            return ['message' => $message, 'redirect' => false];
+        }
+
+        if ($op == 'Check') {
+            // Check text only
+            echo '<p><input type="button" value="&lt;&lt; Back" onclick="history.back();" /></p>';
+            $this->textService->checkText(
+                \remove_soft_hyphens($_REQUEST['TxText']),
+                (int) $_REQUEST['TxLgID']
+            );
+            echo '<p><input type="button" value="&lt;&lt; Back" onclick="history.back();" /></p>';
+            \pageend();
+            exit();
+        }
+
+        $textId = isset($_REQUEST['TxID']) ? (int) $_REQUEST['TxID'] : 0;
+        $isNew = str_starts_with($op, 'Save');
+
+        $result = $this->textService->saveTextAndReparse(
+            $isNew ? 0 : $textId,
+            (int) $_REQUEST['TxLgID'],
+            $_REQUEST['TxTitle'],
+            $_REQUEST['TxText'],
+            $_REQUEST['TxAudioURI'] ?? '',
+            $_REQUEST['TxSourceURI'] ?? ''
+        );
+
+        // Redirect if "and Open" was requested
+        if (str_ends_with($op, "and Open")) {
+            header('Location: /text/read?start=' . $result['textId']);
+            exit();
+        }
+
+        return ['message' => $result['message'], 'redirect' => false];
+    }
+
+    /**
+     * Show the new text form.
+     *
+     * @param int $langId Language ID
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    private function showNewTextForm(int $langId): void
+    {
+        $text = new \Lwt\Classes\Text();
+        $text->id = 0;
+        $text->lgid = $langId;
+        $text->title = '';
+        $text->text = '';
+        $text->source = '';
+        $text->media_uri = '';
+
+        $textId = 0;
+        $annotated = false;
+        $isNew = true;
+        $languageData = $this->textService->getLanguageDataForForm();
+
+        include __DIR__ . '/../Views/Text/edit_form.php';
+        \Lwt\Text_From_Youtube\do_js();
+    }
+
+    /**
+     * Show the edit text form.
+     *
+     * @param int $txid Text ID
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    private function showEditTextForm(int $txid): void
+    {
+        $record = $this->textService->getTextForEdit($txid);
+
+        if ($record === null) {
+            echo '<p>Text not found.</p>';
+            return;
+        }
+
+        $text = new \Lwt\Classes\Text();
+        $text->id = $record['TxID'];
+        $text->lgid = $record['TxLgID'];
+        $text->title = $record['TxTitle'];
+        $text->text = $record['TxText'];
+        $text->source = $record['TxSourceURI'] ?? '';
+        $text->media_uri = $record['TxAudioURI'] ?? '';
+
+        $textId = (int) $record['TxID'];
+        $annotated = (bool) $record['annot_exists'];
+        $isNew = false;
+        $languageData = $this->textService->getLanguageDataForForm();
+
+        include __DIR__ . '/../Views/Text/edit_form.php';
+    }
+
+    /**
+     * Show the texts list.
+     *
+     * @param string|int $currentLang Current language filter
+     * @param string     $message     Message to display
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     * @psalm-suppress UnusedParam $message is used in included view file
+     */
+    private function showTextsList(string|int $currentLang, string $message): void
+    {
+        $currentSort = (int) \processDBParam("sort", 'currenttextsort', '1', true);
+        $currentPage = (int) \processSessParam("page", "currenttextpage", '1', true);
+        $currentQuery = (string) \processSessParam("query", "currenttextquery", '', false);
+        $currentQueryMode = (string) \processSessParam(
+            "query_mode",
+            "currenttextquerymode",
+            'title,text',
+            false
+        );
+        $currentRegexMode = Settings::getWithDefault("set-regex-mode");
+        // Cast to string for Validation::textTag
+        $langForTag = (string) $currentLang;
+        $currentTag1 = Validation::textTag(
+            (string) \processSessParam("tag1", "currenttexttag1", '', false),
+            $langForTag
+        );
+        $currentTag2 = Validation::textTag(
+            (string) \processSessParam("tag2", "currenttexttag2", '', false),
+            $langForTag
+        );
+        $currentTag12 = (string) \processSessParam("tag12", "currenttexttag12", '', false);
+
+        // Build WHERE clauses
+        $whLang = ($currentLang != '') ? (' and TxLgID=' . $currentLang) : '';
+
+        // Build query WHERE clause
+        $whQuery = $this->textService->buildTextQueryWhereClause(
+            $currentQuery,
+            $currentQueryMode,
+            $currentRegexMode
+        );
+
+        // Validate regex query
+        if ($currentQuery !== '' && $currentRegexMode !== '') {
+            if (!$this->textService->validateRegexQuery($currentQuery, $currentRegexMode)) {
+                $whQuery = '';
+                unset($_SESSION['currentwordquery']);
+                if (isset($_REQUEST['query'])) {
+                    echo '<p id="hide3" style="color:red;text-align:center;">' .
+                        '+++ Warning: Invalid Search +++</p>';
+                }
+            }
+        }
+
+        // Build tag HAVING clause
+        $whTag = $this->textService->buildTextTagHavingClause(
+            $currentTag1,
+            $currentTag2,
+            $currentTag12
+        );
+
+        // Get texts count and list
+        $totalCount = $this->textService->getTextCount($whLang, $whQuery, $whTag);
+        $perPage = $this->textService->getTextsPerPage();
+        $pagination = $this->textService->getPagination($totalCount, $currentPage, $perPage);
+
+        $texts = [];
+        if ($totalCount > 0) {
+            $texts = $this->textService->getTextsList(
+                $whLang,
+                $whQuery,
+                $whTag,
+                $currentSort,
+                $pagination['currentPage'],
+                $perPage
+            );
+        }
+
+        // Get word statuses for chart display
+        $statuses = \get_statuses();
+        $statuses[0]["name"] = 'Unknown';
+        $statuses[0]["abbr"] = 'Ukn';
+
+        // Get word count display settings
+        $showCounts = Settings::getWithDefault('set-show-text-word-counts');
+        if (strlen($showCounts) != 5) {
+            $showCounts = "11111";
+        }
+
+        include __DIR__ . '/../Views/Text/edit_list.php';
     }
 
     /**
