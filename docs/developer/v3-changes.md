@@ -178,7 +178,7 @@ Additional helper classes:
 
 ### 7. Legacy File Migration
 
-All 59 root-level PHP page files have been fully migrated to the MVC pattern with Controllers, Services, and Views. The `src/backend/Legacy/` directory now only contains static template files (e.g., `export_template.html`).
+All 59 root-level PHP page files have been fully migrated to the MVC pattern with Controllers, Services, and Views. The `src/backend/Legacy/` directory has been removed as all files have been migrated.
 
 The following table shows the migration status of all original files:
 

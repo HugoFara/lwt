@@ -9,6 +9,7 @@
 
 // Import functions that need to be globally accessible
 import { getLangFromDict, createTheDictUrl, createTheDictLink, owin, oewin } from './terms/dictionary';
+import { showExportTemplateHelp, openModal, closeModal } from './ui/modal';
 import { prepareTextInteractions } from './reading/text_events';
 import { goToLastPosition, saveReadingPosition, saveAudioPosition, quickMenuRedirection } from './core/user_interactions';
 import { showRightFrames, hideRightFrames } from './reading/frame_management';
@@ -72,6 +73,11 @@ declare global {
     lwt_audio_controller: typeof lwt_audio_controller;
     setupAudioPlayer: typeof setupAudioPlayer;
     getAudioPlayer: typeof getAudioPlayer;
+
+    // Modal dialogs
+    showExportTemplateHelp: typeof showExportTemplateHelp;
+    openModal: typeof openModal;
+    closeModal: typeof closeModal;
   }
 }
 
@@ -116,3 +122,7 @@ window.setCurrentEvent = setCurrentEvent;
 window.lwt_audio_controller = lwt_audio_controller;
 window.setupAudioPlayer = setupAudioPlayer;
 window.getAudioPlayer = getAudioPlayer;
+
+window.showExportTemplateHelp = showExportTemplateHelp;
+window.openModal = openModal;
+window.closeModal = closeModal;

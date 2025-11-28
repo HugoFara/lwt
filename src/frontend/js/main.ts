@@ -54,6 +54,9 @@ import './media/html5_audio_player';
 // Feeds
 import './feeds/jq_feedwizard';
 
+// UI Components
+import './ui/modal';
+
 // Global exports for inline PHP scripts
 import './globals';
 

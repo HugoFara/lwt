@@ -532,7 +532,7 @@ namespace Lwt\Views\Language;
         <td class="td1 right">
             Export Template
             <img class="click" src="/assets/icons/question-frame.png" title="Help" alt="Help"
-            onclick="oewin('export_template.html');" /> :
+            onclick="showExportTemplateHelp();" /> :
         </td>
         <td class="td1">
             <input type="text" class="checkoutsidebmp" data_info="Export Template"
