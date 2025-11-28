@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Display an improved annotated text (frame set)
+ * Display an improved annotated text
  *
  * Call: /text/display?text=[textid]
  *
@@ -22,7 +22,6 @@ require_once 'Core/UI/ui_helpers.php';
 require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Http/param_helpers.php';
 require_once 'Core/Language/language_utilities.php';
-require_once 'Core/Mobile/mobile_interactions.php';
 require_once 'text_display_header.php';
 require_once 'text_display_text.php';
 
@@ -31,39 +30,15 @@ use Lwt\Services\TextDisplayService;
 require_once __DIR__ . '/../Services/TextDisplayService.php';
 
 /**
- * Make the page content to display printed texts on mobile.
+ * Make the main page content to display printed texts.
  *
- * @param int    $textId Text ID
- * @param string $audio  Media URI
- *
- * @return     void
- * @deprecated
- * @since      2.2.0 This function should not longer be used, and should cause issues. Use
- * do_desktop_display_impr_text instead.
- */
-function do_mobile_display_impr_text($textId, $audio)
-{
-    do_frameset_mobile_css();
-    do_frameset_mobile_js($audio);
-    do_frameset_mobile_page_content(
-        "display_impr_text_header.php?text=" . $textId,
-        "display_impr_text_text.php?text=" . $textId,
-        false
-    );
-}
-
-/**
- * Make the main page content to display printed texts for desktop.
- *
- * @param int         $textId Text ID
- * @param string|null $audio  Media URI (unused, kept for compatibility)
+ * @param int $textId Text ID
  *
  * @return void
  *
- * @psalm-suppress UnusedParam Parameters kept for compatibility
  * @psalm-suppress UnusedVariable $textId is used in included view file
  */
-function do_desktop_display_impr_text($textId, $audio)
+function do_display_impr_text_content($textId)
 {
     // $textId is used in the included view
     include __DIR__ . '/../Views/Text/display_main.php';
@@ -78,17 +53,8 @@ function do_desktop_display_impr_text($textId, $audio)
  */
 function do_display_impr_text_page($textId)
 {
-    $service = new TextDisplayService();
-    $audio = $service->getAudioUri($textId);
-
     pagestart_nobody('Display');
-
-    if (is_mobile()) {
-        do_mobile_display_impr_text($textId, $audio);
-    } else {
-        do_desktop_display_impr_text($textId, $audio);
-    }
-
+    do_display_impr_text_content($textId);
     pageend();
 }
 

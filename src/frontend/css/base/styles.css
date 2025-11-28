@@ -679,6 +679,47 @@ footer
 }
 
 /**************************************************************
+Inline Edit Component
+***************************************************************/
+
+.inline-edit-wrapper
+{
+  display: inline-block;
+}
+
+.inline-edit-textarea
+{
+  font: 85% "Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu;
+  border: 1px solid #C6C6C6;
+  padding: 3px;
+  resize: vertical;
+}
+
+.inline-edit-buttons
+{
+  margin-top: 4px;
+  display: flex;
+  gap: 4px;
+}
+
+.inline-edit-buttons button
+{
+  font-size: 85%;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.inline-edit-buttons img
+{
+  vertical-align: middle;
+}
+
+.inline-edit-active
+{
+  background: transparent !important;
+}
+
+/**************************************************************
 Additional styles for printing
 ***************************************************************/
 

@@ -12,11 +12,11 @@ import { check, containsCharacterOutsideBasicMultilingualPlane } from '../forms/
 import { changeImprAnnText, changeImprAnnRadio, do_ajax_show_similar_terms } from '../terms/term_operations';
 import { readRawTextAloud } from './user_interactions';
 import { do_ajax_save_setting } from './ajax_utilities';
+import { initInlineEdit } from '../ui/inline_edit';
 
 // Extend jQuery with custom methods
 declare global {
   interface JQuery {
-    editable(url: string, options: EditableOptions): JQuery;
     tooltip(options?: TooltipOptions): JQuery;
     resizable(options?: ResizableOptions): JQuery;
     tagit(options?: TagitOptions): JQuery;
@@ -24,16 +24,6 @@ declare global {
     tooltip_wsty_content(): string;
     tooltip_wsty_init(): JQuery;
   }
-}
-
-interface EditableOptions {
-  type: string;
-  indicator: string;
-  tooltip: string;
-  submit: string;
-  cancel: string;
-  rows?: number;
-  cols?: number;
 }
 
 interface TooltipOptions {
