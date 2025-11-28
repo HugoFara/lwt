@@ -754,4 +754,136 @@ class WordService
 
         return '';
     }
+
+    /**
+     * Update status for a single word.
+     *
+     * @param int $wordId Word ID
+     * @param int $status New status (1-5, 98, 99)
+     *
+     * @return string Result message
+     */
+    public function setStatus(int $wordId, int $status): string
+    {
+        return (string) Connection::execute(
+            sprintf(
+                "UPDATE %swords SET WoStatus = %d, WoStatusChanged = NOW(), %s WHERE WoID = %d",
+                $this->tbpref,
+                $status,
+                \make_score_random_insert_update('u'),
+                $wordId
+            ),
+            'Status changed'
+        );
+    }
+
+    /**
+     * Get word data including translation and romanization.
+     *
+     * @param int $wordId Word ID
+     *
+     * @return array{text: string, translation: string, romanization: string}|null
+     */
+    public function getWordData(int $wordId): ?array
+    {
+        $res = Connection::query(
+            "SELECT WoText, WoTranslation, WoRomanization
+             FROM {$this->tbpref}words WHERE WoID = $wordId"
+        );
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+
+        if (!$record) {
+            return null;
+        }
+
+        return [
+            'text' => (string) $record['WoText'],
+            'translation' => \repl_tab_nl($record['WoTranslation']),
+            'romanization' => (string) $record['WoRomanization']
+        ];
+    }
+
+    /**
+     * Get word text at a specific position in a text.
+     *
+     * @param int $textId Text ID
+     * @param int $ord    Word order position
+     *
+     * @return string|null Word text or null if not found
+     */
+    public function getWordAtPosition(int $textId, int $ord): ?string
+    {
+        $word = Connection::fetchValue(
+            "SELECT Ti2Text AS value
+             FROM {$this->tbpref}textitems2
+             WHERE Ti2WordCount = 1 AND Ti2TxID = $textId AND Ti2Order = $ord"
+        );
+        return $word !== null ? (string) $word : null;
+    }
+
+    /**
+     * Insert a word with a specific status and link to text items.
+     *
+     * Used for quick insert operations (mark as known/ignored).
+     *
+     * @param int    $textId Text ID (to get language)
+     * @param string $term   Word text
+     * @param int    $status Status (98=ignored, 99=well-known)
+     *
+     * @return array{id: int, term: string, termlc: string, hex: string}
+     */
+    public function insertWordWithStatus(int $textId, string $term, int $status): array
+    {
+        $termlc = mb_strtolower($term, 'UTF-8');
+        $langId = $this->getTextLanguageId($textId);
+
+        if ($langId === null) {
+            throw new \RuntimeException("Text ID $textId not found");
+        }
+
+        Connection::execute(
+            "INSERT INTO {$this->tbpref}words (
+                WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged, " .
+            \make_score_random_insert_update('iv') . "
+            ) VALUES (
+                $langId, " .
+            Escaping::toSqlSyntax($term) . ", " .
+            Escaping::toSqlSyntax($termlc) . ", $status, 1, NOW(), " .
+            \make_score_random_insert_update('id') . "
+            )",
+            'Term added'
+        );
+
+        $wid = (int) Connection::lastInsertId();
+
+        // Link to text items
+        Connection::query(
+            "UPDATE {$this->tbpref}textitems2
+             SET Ti2WoID = $wid
+             WHERE Ti2LgID = $langId AND LOWER(Ti2Text) = " . Escaping::toSqlSyntax($termlc)
+        );
+
+        return [
+            'id' => $wid,
+            'term' => $term,
+            'termlc' => $termlc,
+            'hex' => \strToClassName($termlc)
+        ];
+    }
+
+    /**
+     * Get a single word's text by ID.
+     *
+     * @param int $wordId Word ID
+     *
+     * @return string|null Word text or null if not found
+     */
+    public function getWordText(int $wordId): ?string
+    {
+        $term = Connection::fetchValue(
+            "SELECT WoText AS value FROM {$this->tbpref}words WHERE WoID = $wordId"
+        );
+        return $term !== null ? (string) $term : null;
+    }
 }

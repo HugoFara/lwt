@@ -98,13 +98,34 @@ class WordController extends BaseController
     /**
      * Delete word (replaces word_delete.php)
      *
+     * Call: ?tid=[textid]&wid=[wordid]
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function delete(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_delete.php';
+        $textId = isset($_REQUEST['tid']) ? (int) $_REQUEST['tid'] : 0;
+        $wordId = isset($_REQUEST['wid']) ? (int) $_REQUEST['wid'] : 0;
+
+        if ($textId === 0 || $wordId === 0) {
+            return;
+        }
+
+        $term = $this->wordService->getWordText($wordId);
+        if ($term === null) {
+            return;
+        }
+
+        $message = $this->wordService->delete($wordId);
+
+        \pagestart("Term: " . $term, false);
+
+        $wid = $wordId;
+        include __DIR__ . '/../Views/Word/delete_result.php';
+
+        \pageend();
     }
 
     /**
@@ -158,17 +179,42 @@ class WordController extends BaseController
     /**
      * Insert well-known word (replaces word_insert_wellknown.php)
      *
+     * Call: ?tid=[textid]&ord=[textpos]
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function insertWellknown(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_insert_wellknown.php';
+        $textId = isset($_REQUEST['tid']) ? (int) $_REQUEST['tid'] : 0;
+        $ord = isset($_REQUEST['ord']) ? (int) $_REQUEST['ord'] : 0;
+
+        if ($textId === 0 || $ord === 0) {
+            return;
+        }
+
+        $word = $this->wordService->getWordAtPosition($textId, $ord);
+        if ($word === null) {
+            return;
+        }
+
+        $result = $this->wordService->insertWordWithStatus($textId, $word, 99);
+
+        \pagestart("Term: " . $word, false);
+
+        $term = $result['term'];
+        $wid = $result['id'];
+        $hex = $result['hex'];
+        include __DIR__ . '/../Views/Word/insert_wellknown_result.php';
+
+        \pageend();
     }
 
     /**
      * Insert ignored word (replaces word_insert_ignore.php)
+     *
+     * Call: ?tid=[textid]&ord=[textpos]
      *
      * @param array $params Route parameters
      *
@@ -176,7 +222,28 @@ class WordController extends BaseController
      */
     public function insertIgnore(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_insert_ignore.php';
+        $textId = isset($_REQUEST['tid']) ? (int) $_REQUEST['tid'] : 0;
+        $ord = isset($_REQUEST['ord']) ? (int) $_REQUEST['ord'] : 0;
+
+        if ($textId === 0 || $ord === 0) {
+            return;
+        }
+
+        $word = $this->wordService->getWordAtPosition($textId, $ord);
+        if ($word === null) {
+            return;
+        }
+
+        $result = $this->wordService->insertWordWithStatus($textId, $word, 98);
+
+        \pagestart("Term: " . $word, false);
+
+        $term = $result['term'];
+        $wid = $result['id'];
+        $hex = $result['hex'];
+        include __DIR__ . '/../Views/Word/insert_ignore_result.php';
+
+        \pageend();
     }
 
     /**
@@ -206,13 +273,38 @@ class WordController extends BaseController
     /**
      * Set word status (replaces word_set_status.php)
      *
+     * Call: ?tid=[textid]&wid=[wordid]&status=1..5/98/99
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function setStatus(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_set_status.php';
+        $textId = isset($_REQUEST['tid']) ? (int) $_REQUEST['tid'] : 0;
+        $wordId = isset($_REQUEST['wid']) ? (int) $_REQUEST['wid'] : 0;
+        $status = isset($_REQUEST['status']) ? (int) $_REQUEST['status'] : 0;
+
+        if ($textId === 0 || $wordId === 0 || $status === 0) {
+            return;
+        }
+
+        $wordData = $this->wordService->getWordData($wordId);
+        if ($wordData === null) {
+            \my_die("Word not found");
+            return;
+        }
+
+        $term = $wordData['text'];
+        $translation = $wordData['translation'] . \getWordTagList($wordId, ' ', 1, 0);
+        $romanization = $wordData['romanization'];
+        $wid = $wordId;
+
+        \pagestart("Term: $term", false);
+
+        include __DIR__ . '/../Views/Word/status_result.php';
+
+        \pageend();
     }
 
     /**

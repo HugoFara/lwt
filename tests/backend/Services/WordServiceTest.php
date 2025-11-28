@@ -477,4 +477,468 @@ class WordServiceTest extends TestCase
         $foundId = $this->service->findByText('testroundtrip', self::$testLangId);
         $this->assertEquals($wordId, $foundId);
     }
+
+    // ===== delete() tests =====
+
+    public function testDeleteWord(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a word
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testdelete',
+            'WoStatus' => 1,
+            'WoTranslation' => 'to be deleted',
+        ];
+        $createResult = $this->service->create($data);
+        $wordId = $createResult['id'];
+
+        // Verify it exists
+        $word = $this->service->findById($wordId);
+        $this->assertNotNull($word);
+
+        // Delete it
+        $result = $this->service->delete($wordId);
+        $this->assertEquals('Deleted', $result);
+
+        // Verify it's gone
+        $deletedWord = $this->service->findById($wordId);
+        $this->assertNull($deletedWord);
+    }
+
+    // ===== deleteMultiple() tests =====
+
+    public function testDeleteMultipleWords(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create multiple words
+        $ids = [];
+        for ($i = 1; $i <= 3; $i++) {
+            $data = [
+                'WoLgID' => self::$testLangId,
+                'WoText' => "testdelmulti$i",
+                'WoStatus' => 1,
+                'WoTranslation' => "translation $i",
+            ];
+            $result = $this->service->create($data);
+            $ids[] = $result['id'];
+        }
+
+        // Delete them all
+        $count = $this->service->deleteMultiple($ids);
+        $this->assertEquals(3, $count);
+
+        // Verify they're all gone
+        foreach ($ids as $id) {
+            $this->assertNull($this->service->findById($id));
+        }
+    }
+
+    public function testDeleteMultipleWithEmptyArray(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->deleteMultiple([]);
+        $this->assertEquals(0, $result);
+    }
+
+    // ===== setStatus() tests =====
+
+    public function testSetStatus(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a word
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testsetstatus',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+        ];
+        $createResult = $this->service->create($data);
+        $wordId = $createResult['id'];
+
+        // Set status to 5
+        $result = $this->service->setStatus($wordId, 5);
+        $this->assertNotEmpty($result);
+
+        // Verify status changed
+        $word = $this->service->findById($wordId);
+        $this->assertEquals('5', $word['WoStatus']);
+    }
+
+    public function testSetStatusToWellKnown(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testwellknown',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+        ];
+        $createResult = $this->service->create($data);
+        $wordId = $createResult['id'];
+
+        $this->service->setStatus($wordId, 99);
+
+        $word = $this->service->findById($wordId);
+        $this->assertEquals('99', $word['WoStatus']);
+    }
+
+    public function testSetStatusToIgnored(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testignored',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+        ];
+        $createResult = $this->service->create($data);
+        $wordId = $createResult['id'];
+
+        $this->service->setStatus($wordId, 98);
+
+        $word = $this->service->findById($wordId);
+        $this->assertEquals('98', $word['WoStatus']);
+    }
+
+    // ===== updateStatusMultiple() tests =====
+
+    public function testUpdateStatusMultipleAbsolute(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create multiple words
+        $ids = [];
+        for ($i = 1; $i <= 3; $i++) {
+            $data = [
+                'WoLgID' => self::$testLangId,
+                'WoText' => "teststatmulti$i",
+                'WoStatus' => 1,
+                'WoTranslation' => "translation $i",
+            ];
+            $result = $this->service->create($data);
+            $ids[] = $result['id'];
+        }
+
+        // Update all to status 5
+        $count = $this->service->updateStatusMultiple($ids, 5);
+        $this->assertEquals(3, $count);
+
+        // Verify
+        foreach ($ids as $id) {
+            $word = $this->service->findById($id);
+            $this->assertEquals('5', $word['WoStatus']);
+        }
+    }
+
+    public function testUpdateStatusMultipleIncrement(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a word with status 2
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testincrement',
+            'WoStatus' => 2,
+            'WoTranslation' => 'translation',
+        ];
+        $createResult = $this->service->create($data);
+        $wordId = $createResult['id'];
+
+        // Increment status
+        $this->service->updateStatusMultiple([$wordId], 1, true);
+
+        // Verify status is now 3
+        $word = $this->service->findById($wordId);
+        $this->assertEquals('3', $word['WoStatus']);
+    }
+
+    public function testUpdateStatusMultipleDecrement(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a word with status 4
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testdecrement',
+            'WoStatus' => 4,
+            'WoTranslation' => 'translation',
+        ];
+        $createResult = $this->service->create($data);
+        $wordId = $createResult['id'];
+
+        // Decrement status
+        $this->service->updateStatusMultiple([$wordId], -1, true);
+
+        // Verify status is now 3
+        $word = $this->service->findById($wordId);
+        $this->assertEquals('3', $word['WoStatus']);
+    }
+
+    public function testUpdateStatusMultipleWithEmptyArray(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->updateStatusMultiple([], 5);
+        $this->assertEquals(0, $result);
+    }
+
+    // ===== getWordData() tests =====
+
+    public function testGetWordData(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a word
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testgetdata',
+            'WoStatus' => 1,
+            'WoTranslation' => 'my translation',
+            'WoRomanization' => 'my romanization',
+        ];
+        $createResult = $this->service->create($data);
+        $wordId = $createResult['id'];
+
+        // Get word data
+        $wordData = $this->service->getWordData($wordId);
+
+        $this->assertIsArray($wordData);
+        $this->assertEquals('testgetdata', $wordData['text']);
+        $this->assertEquals('my translation', $wordData['translation']);
+        $this->assertEquals('my romanization', $wordData['romanization']);
+    }
+
+    public function testGetWordDataReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->getWordData(999999);
+        $this->assertNull($result);
+    }
+
+    // ===== getWordText() tests =====
+
+    public function testGetWordText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testgettext',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+        ];
+        $createResult = $this->service->create($data);
+
+        $text = $this->service->getWordText($createResult['id']);
+        $this->assertEquals('testgettext', $text);
+    }
+
+    public function testGetWordTextReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->getWordText(999999);
+        $this->assertNull($result);
+    }
+
+    // ===== deleteSentencesMultiple() tests =====
+
+    public function testDeleteSentencesMultiple(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a word with a sentence
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testdelsent',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+            'WoSentence' => 'This is a {testdelsent} sentence.',
+        ];
+        $createResult = $this->service->create($data);
+        $wordId = $createResult['id'];
+
+        // Delete sentences
+        $count = $this->service->deleteSentencesMultiple([$wordId]);
+        $this->assertEquals(1, $count);
+
+        // Verify sentence is null
+        $word = $this->service->findById($wordId);
+        $this->assertNull($word['WoSentence']);
+    }
+
+    // ===== toLowercaseMultiple() tests =====
+
+    public function testToLowercaseMultiple(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a word with mixed case
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'TestLower',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+        ];
+        $createResult = $this->service->create($data);
+        $wordId = $createResult['id'];
+
+        // Convert to lowercase
+        $count = $this->service->toLowercaseMultiple([$wordId]);
+        $this->assertEquals(1, $count);
+
+        // Verify text is lowercase
+        $word = $this->service->findById($wordId);
+        $this->assertEquals('testlower', $word['WoText']);
+    }
+
+    // ===== capitalizeMultiple() tests =====
+
+    public function testCapitalizeMultiple(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a lowercase word
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testcapital',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+        ];
+        $createResult = $this->service->create($data);
+        $wordId = $createResult['id'];
+
+        // Capitalize
+        $count = $this->service->capitalizeMultiple([$wordId]);
+        $this->assertEquals(1, $count);
+
+        // Verify text is capitalized
+        $word = $this->service->findById($wordId);
+        $this->assertEquals('Testcapital', $word['WoText']);
+    }
+
+    // ===== createWithStatus() tests =====
+
+    public function testCreateWithStatusWellKnown(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->createWithStatus(
+            self::$testLangId,
+            'testcreatewk',
+            'testcreatewk',
+            99
+        );
+
+        $this->assertGreaterThan(0, $result['id']);
+        $this->assertEquals(1, $result['rows']);
+
+        // Verify status
+        $word = $this->service->findById($result['id']);
+        $this->assertEquals('99', $word['WoStatus']);
+    }
+
+    public function testCreateWithStatusIgnored(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->createWithStatus(
+            self::$testLangId,
+            'testcreateig',
+            'testcreateig',
+            98
+        );
+
+        $this->assertGreaterThan(0, $result['id']);
+        $this->assertEquals(1, $result['rows']);
+
+        $word = $this->service->findById($result['id']);
+        $this->assertEquals('98', $word['WoStatus']);
+    }
+
+    public function testCreateWithStatusExistingWord(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a word first
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'testexisting',
+            'WoStatus' => 1,
+            'WoTranslation' => 'translation',
+        ];
+        $createResult = $this->service->create($data);
+        $existingId = $createResult['id'];
+
+        // Try to create with status - should return existing ID
+        $result = $this->service->createWithStatus(
+            self::$testLangId,
+            'testexisting',
+            'testexisting',
+            99
+        );
+
+        $this->assertEquals($existingId, $result['id']);
+        $this->assertEquals(0, $result['rows']); // No new rows inserted
+    }
+
+    // ===== getTextLanguageId() tests =====
+
+    public function testGetTextLanguageIdReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->getTextLanguageId(999999);
+        $this->assertNull($result);
+    }
 }
