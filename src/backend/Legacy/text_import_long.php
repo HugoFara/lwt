@@ -208,7 +208,7 @@ function long_text_save(): void
                 ')',
                 ''
             );
-            $id = get_last_key();
+            $id = Connection::lastInsertId();
             saveTextTags($id);
             TextParsing::splitCheck($texts[$i], $langid, $id);
         }

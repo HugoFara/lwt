@@ -9,6 +9,7 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
+use Lwt\Database\TextParsing;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -22,7 +23,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
  * Comprehensive tests for text parsing functions
  *
  * Tests the core text processing pipeline including:
- * - prepare_text_parsing() - entry point for text parsing
+ * - TextParsing::prepare() - entry point for text parsing
  * - Character substitutions
  * - Language-specific processing
  * - Brace replacement
@@ -118,7 +119,7 @@ class TextParsingTest extends TestCase
     private function callPrepareTextParsing(string $text, int $id, int|string $lid): array|null
     {
         ob_start();
-        $result = prepare_text_parsing($text, $id, $lid);
+        $result = TextParsing::prepare($text, $id, $lid);
         ob_end_clean();
         return $result;
     }
@@ -398,7 +399,7 @@ class TextParsingTest extends TestCase
 
         // Capture the HTML output - call prepare_text_parsing directly to get output
         ob_start();
-        $result = prepare_text_parsing($text, -1, self::$testLanguageId);
+        $result = TextParsing::prepare($text, -1, self::$testLanguageId);
         $output = ob_get_clean();
 
         $this->assertNull($result, 'Check mode (-1) should return null');

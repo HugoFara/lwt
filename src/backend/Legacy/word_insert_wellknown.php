@@ -78,7 +78,7 @@ function insert_word_wellknown_to_database($textid, $word)
         )',
         'Term added'
     );
-    $wid = get_last_key();
+    $wid = Connection::lastInsertId();
     Connection::query(
         "UPDATE  " . $tbpref . "textitems2
         SET Ti2WoID  = " . $wid . "

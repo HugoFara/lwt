@@ -17,6 +17,7 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\Settings;
 
 /**
  * Service class for managing table sets (prefixes).
@@ -116,7 +117,7 @@ class TableSetService
 
         // If we deleted the current table set, switch to default
         if ($prefix == substr($this->tbpref, 0, -1)) {
-            LWTTableSet("current_table_prefix", "");
+            Settings::lwtTableSet("current_table_prefix", "");
         }
 
         return $message;
@@ -141,7 +142,7 @@ class TableSetService
             ];
         }
 
-        LWTTableSet("current_table_prefix", $prefix);
+        Settings::lwtTableSet("current_table_prefix", $prefix);
 
         return [
             'success' => true,
@@ -163,7 +164,7 @@ class TableSetService
             return ['success' => false, 'redirect' => false];
         }
 
-        LWTTableSet("current_table_prefix", $prefix);
+        Settings::lwtTableSet("current_table_prefix", $prefix);
 
         return ['success' => true, 'redirect' => true];
     }

@@ -268,13 +268,11 @@ class BaseControllerTest extends TestCase
 
         $tbpref = Globals::getTablePrefix();
         $result = $this->controller->testExecute(
-            "INSERT INTO {$tbpref}tags (TgText) VALUES ('test_ctrl_exec')",
-            "Test insert"
+            "INSERT INTO {$tbpref}tags (TgText) VALUES ('test_ctrl_exec')"
         );
-        
-        // runsql returns message with row count, e.g. "Test insert: 1"
-        $this->assertStringContainsString('Test insert', $result);
-        $this->assertStringContainsString('1', $result);
+
+        // execute returns number of affected rows
+        $this->assertEquals(1, $result);
         
         // Clean up
         Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_ctrl_exec'");
@@ -454,9 +452,9 @@ class TestableController extends BaseController
         return $this->query($sql);
     }
 
-    public function testExecute(string $sql, string $message = '', bool $errDie = true): string
+    public function testExecute(string $sql): int
     {
-        return $this->execute($sql, $message, $errDie);
+        return $this->execute($sql);
     }
 
     public function testGetValue(string $sql): mixed

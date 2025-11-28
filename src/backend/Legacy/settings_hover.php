@@ -53,7 +53,7 @@ Connection::execute(
         )',
     "Term saved"
 );
-$wid = get_last_key();
+$wid = Connection::lastInsertId();
 Connection::query(
     "UPDATE {$tbpref}textitems2 SET Ti2WoID = $wid
     WHERE Ti2LgID = $langid AND LOWER(Ti2Text) = $wordlc"

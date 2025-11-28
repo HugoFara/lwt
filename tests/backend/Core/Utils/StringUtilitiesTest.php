@@ -5,6 +5,7 @@ namespace Lwt\Tests\Core\Utils;
 require_once __DIR__ . '/../../../../src/backend/Core/settings.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Utils/string_utilities.php';
 
+use Lwt\Database\Escaping;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -66,20 +67,20 @@ final class StringUtilitiesTest extends TestCase
     public function testPrepareTextdata(): void
     {
         // Windows line endings to Unix
-        $this->assertEquals("line1\nline2", prepare_textdata("line1\r\nline2"));
-        $this->assertEquals("a\nb\nc", prepare_textdata("a\r\nb\r\nc"));
+        $this->assertEquals("line1\nline2", Escaping::prepareTextdata("line1\r\nline2"));
+        $this->assertEquals("a\nb\nc", Escaping::prepareTextdata("a\r\nb\r\nc"));
 
         // Unix line endings should remain unchanged
-        $this->assertEquals("line1\nline2", prepare_textdata("line1\nline2"));
+        $this->assertEquals("line1\nline2", Escaping::prepareTextdata("line1\nline2"));
 
         // Mac line endings should remain unchanged
-        $this->assertEquals("line1\rline2", prepare_textdata("line1\rline2"));
+        $this->assertEquals("line1\rline2", Escaping::prepareTextdata("line1\rline2"));
 
         // Empty string
-        $this->assertEquals('', prepare_textdata(''));
+        $this->assertEquals('', Escaping::prepareTextdata(''));
 
         // No line endings
-        $this->assertEquals('single line', prepare_textdata('single line'));
+        $this->assertEquals('single line', Escaping::prepareTextdata('single line'));
     }
 
     /**

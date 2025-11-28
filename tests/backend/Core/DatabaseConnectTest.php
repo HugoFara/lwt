@@ -16,7 +16,12 @@ require_once __DIR__ . '/../../../src/backend/Core/Word/word_scoring.php';
 
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
+use Lwt\Database\DB;
+use Lwt\Database\Maintenance;
+use Lwt\Database\Migrations;
 use Lwt\Database\Settings;
+use Lwt\Database\TextParsing;
+use Lwt\Database\Validation;
 use PHPUnit\Framework\TestCase;
 
 
@@ -69,9 +74,9 @@ class DatabaseConnectTest extends TestCase
 
     public function testPrefixSQLQuery(): void
     {
-        $value = prefixSQLQuery("CREATE TABLE `languages` test;", "prefix");
+        $value = Migrations::prefixQuery("CREATE TABLE `languages` test;", "prefix");
         $this->assertEquals("CREATE TABLE `prefixlanguages` test;", $value);
-        $value = prefixSQLQuery("ALTER TABLE languages test;", "prefix");
+        $value = Migrations::prefixQuery("ALTER TABLE languages test;", "prefix");
         $this->assertEquals("ALTER TABLE prefixlanguages test;", $value);
     }
 
@@ -91,42 +96,42 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Basic string
-        $result = convert_string_to_sqlsyntax('test');
+        $result = Escaping::toSqlSyntax('test');
         $this->assertEquals("'test'", $result);
 
         // String with single quote (SQL injection attempt)
-        $result = convert_string_to_sqlsyntax("test'OR'1'='1");
+        $result = Escaping::toSqlSyntax("test'OR'1'='1");
         $this->assertStringContainsString("\\'", $result);
         $this->assertStringStartsWith("'", $result);
         $this->assertStringEndsWith("'", $result);
 
         // String with double quote
-        $result = convert_string_to_sqlsyntax('test"value');
+        $result = Escaping::toSqlSyntax('test"value');
         $this->assertStringStartsWith("'", $result);
         $this->assertStringEndsWith("'", $result);
 
         // Empty string should return NULL
-        $result = convert_string_to_sqlsyntax('');
+        $result = Escaping::toSqlSyntax('');
         $this->assertEquals('NULL', $result);
 
         // String with only whitespace should return NULL
-        $result = convert_string_to_sqlsyntax('   ');
+        $result = Escaping::toSqlSyntax('   ');
         $this->assertEquals('NULL', $result);
 
         // String with line endings (should be normalized - the \n is escaped as \\n in the result)
-        $result = convert_string_to_sqlsyntax("line1\r\nline2");
+        $result = Escaping::toSqlSyntax("line1\r\nline2");
         $this->assertStringContainsString("line1\\nline2", $result);
 
         // String with backslash
-        $result = convert_string_to_sqlsyntax('test\\value');
+        $result = Escaping::toSqlSyntax('test\\value');
         $this->assertStringContainsString("\\\\", $result);
 
         // Unicode characters
-        $result = convert_string_to_sqlsyntax('日本語');
+        $result = Escaping::toSqlSyntax('日本語');
         $this->assertStringContainsString('日本語', $result);
 
         // SQL comment attempt
-        $result = convert_string_to_sqlsyntax("test'; DROP TABLE users; --");
+        $result = Escaping::toSqlSyntax("test'; DROP TABLE users; --");
         $this->assertStringContainsString("\\'", $result);
     }
 
@@ -146,24 +151,24 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Basic string
-        $result = convert_string_to_sqlsyntax_nonull('test');
+        $result = Escaping::toSqlSyntaxNoNull('test');
         $this->assertEquals("'test'", $result);
 
         // Empty string should return empty quoted string, NOT NULL
-        $result = convert_string_to_sqlsyntax_nonull('');
+        $result = Escaping::toSqlSyntaxNoNull('');
         $this->assertEquals("''", $result);
         $this->assertNotEquals('NULL', $result);
 
         // Whitespace should be trimmed but still quoted
-        $result = convert_string_to_sqlsyntax_nonull('   ');
+        $result = Escaping::toSqlSyntaxNoNull('   ');
         $this->assertEquals("''", $result);
 
         // String with quotes
-        $result = convert_string_to_sqlsyntax_nonull("test'value");
+        $result = Escaping::toSqlSyntaxNoNull("test'value");
         $this->assertStringContainsString("\\'", $result);
 
         // String with line endings (the \n is escaped as \\n in the result)
-        $result = convert_string_to_sqlsyntax_nonull("line1\r\nline2");
+        $result = Escaping::toSqlSyntaxNoNull("line1\r\nline2");
         $this->assertStringContainsString("line1\\nline2", $result);
     }
 
@@ -183,15 +188,15 @@ class DatabaseConnectTest extends TestCase
         }
 
         // String with leading/trailing spaces should preserve them
-        $result = convert_string_to_sqlsyntax_notrim_nonull('  test  ');
+        $result = Escaping::toSqlSyntaxNoTrimNoNull('  test  ');
         $this->assertStringContainsString('  test  ', $result);
 
         // Empty string
-        $result = convert_string_to_sqlsyntax_notrim_nonull('');
+        $result = Escaping::toSqlSyntaxNoTrimNoNull('');
         $this->assertEquals("''", $result);
 
         // Line endings should still be normalized (the \n is escaped as \\n in the result)
-        $result = convert_string_to_sqlsyntax_notrim_nonull("line1\r\nline2");
+        $result = Escaping::toSqlSyntaxNoTrimNoNull("line1\r\nline2");
         $this->assertStringContainsString("line1\\nline2", $result);
     }
 
@@ -211,16 +216,16 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Basic regex pattern
-        $result = convert_regexp_to_sqlsyntax('[a-z]+');
+        $result = Escaping::regexpToSqlSyntax('[a-z]+');
         $this->assertStringStartsWith("'", $result);
         $this->assertStringEndsWith("'", $result);
 
         // Hex escape sequences (e.g., \x{1234})
-        $result = convert_regexp_to_sqlsyntax('\\x{41}'); // 'A' in hex
+        $result = Escaping::regexpToSqlSyntax('\\x{41}'); // 'A' in hex
         $this->assertStringContainsString('A', $result);
 
         // Character class with dash
-        $result = convert_regexp_to_sqlsyntax('[a-z]');
+        $result = Escaping::regexpToSqlSyntax('[a-z]');
         $this->assertStringContainsString('[a-z]', $result);
     }
 
@@ -240,28 +245,28 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Empty string should return empty
-        $result = validateLang('');
+        $result = Validation::language('');
         $this->assertEquals('', $result);
 
         // Test with a language that doesn't exist (should return empty)
-        $result = validateLang('99999');
+        $result = Validation::language('99999');
         $this->assertEquals('', $result);
 
         // Test SQL injection attempts - these should be safely rejected
-        $result = validateLang("1 OR 1=1");
+        $result = Validation::language("1 OR 1=1");
         $this->assertEquals('', $result, 'SQL injection attempt should be rejected');
 
-        $result = validateLang("invalid");
+        $result = Validation::language("invalid");
         $this->assertEquals('', $result, 'Non-numeric input should be rejected');
 
-        $result = validateLang("1; DROP TABLE languages; --");
+        $result = Validation::language("1; DROP TABLE languages; --");
         $this->assertEquals('', $result, 'SQL injection with DROP TABLE should be rejected');
 
-        $result = validateLang("1' OR '1'='1");
+        $result = Validation::language("1' OR '1'='1");
         $this->assertEquals('', $result, 'SQL injection with quotes should be rejected');
 
         // Valid numeric strings should work (if language exists)
-        $result = validateLang('1');
+        $result = Validation::language('1');
         // Result depends on if language ID 1 exists, but shouldn't crash
         $this->assertTrue($result === '' || $result === '1', 'Valid numeric ID should return empty or the ID');
     }
@@ -282,28 +287,28 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Empty string should return empty
-        $result = validateText('');
+        $result = Validation::text('');
         $this->assertEquals('', $result);
 
         // Test with a text that doesn't exist (should return empty)
-        $result = validateText('99999');
+        $result = Validation::text('99999');
         $this->assertEquals('', $result);
 
         // Test SQL injection attempts - these should be safely rejected
-        $result = validateText("1 OR 1=1");
+        $result = Validation::text("1 OR 1=1");
         $this->assertEquals('', $result, 'SQL injection attempt should be rejected');
 
-        $result = validateText("invalid");
+        $result = Validation::text("invalid");
         $this->assertEquals('', $result, 'Non-numeric input should be rejected');
 
-        $result = validateText("1; DROP TABLE texts; --");
+        $result = Validation::text("1; DROP TABLE texts; --");
         $this->assertEquals('', $result, 'SQL injection with DROP TABLE should be rejected');
 
-        $result = validateText("1' UNION SELECT * FROM users --");
+        $result = Validation::text("1' UNION SELECT * FROM users --");
         $this->assertEquals('', $result, 'SQL injection with UNION should be rejected');
 
         // Valid numeric strings should work (if text exists)
-        $result = validateText('1');
+        $result = Validation::text('1');
         // Result depends on if text ID 1 exists, but shouldn't crash
         $this->assertTrue($result === '' || $result === '1', 'Valid numeric ID should return empty or the ID');
     }
@@ -314,19 +319,19 @@ class DatabaseConnectTest extends TestCase
     public function testPrepareTextdata(): void
     {
         // Windows line endings to Unix
-        $this->assertEquals("line1\nline2", prepare_textdata("line1\r\nline2"));
+        $this->assertEquals("line1\nline2", Escaping::prepareTextdata("line1\r\nline2"));
 
         // Multiple line endings
-        $this->assertEquals("a\nb\nc", prepare_textdata("a\r\nb\r\nc"));
+        $this->assertEquals("a\nb\nc", Escaping::prepareTextdata("a\r\nb\r\nc"));
 
         // Unix line endings unchanged
-        $this->assertEquals("line1\nline2", prepare_textdata("line1\nline2"));
+        $this->assertEquals("line1\nline2", Escaping::prepareTextdata("line1\nline2"));
 
         // Empty string
-        $this->assertEquals('', prepare_textdata(''));
+        $this->assertEquals('', Escaping::prepareTextdata(''));
 
         // No line endings
-        $this->assertEquals('single line', prepare_textdata('single line'));
+        $this->assertEquals('single line', Escaping::prepareTextdata('single line'));
     }
 
     /**
@@ -345,45 +350,45 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Empty tag should return empty
-        $result = validateTag('', '1');
+        $result = Validation::tag('', '1');
         $this->assertEquals('', $result, 'Empty tag should return empty string');
 
         // Special value -1 should pass through (means "no tag")
-        $result = validateTag('-1', '1');
+        $result = Validation::tag('-1', '1');
         $this->assertEquals('-1', $result, 'Special value -1 should pass through');
 
         // Non-numeric tag should be rejected
-        $result = validateTag('abc', '1');
+        $result = Validation::tag('abc', '1');
         $this->assertEquals('', $result, 'Non-numeric tag should be rejected');
 
         // SQL injection in tag ID
-        $result = validateTag("1 OR 1=1", '1');
+        $result = Validation::tag("1 OR 1=1", '1');
         $this->assertEquals('', $result, 'SQL injection in tag should be rejected');
 
-        $result = validateTag("1; DROP TABLE tags; --", '1');
+        $result = Validation::tag("1; DROP TABLE tags; --", '1');
         $this->assertEquals('', $result, 'SQL injection with DROP should be rejected');
 
-        $result = validateTag("1' OR '1'='1", '1');
+        $result = Validation::tag("1' OR '1'='1", '1');
         $this->assertEquals('', $result, 'SQL injection with quotes should be rejected');
 
         // SQL injection in language ID
-        $result = validateTag('1', "1; DROP TABLE languages; --");
+        $result = Validation::tag('1', "1; DROP TABLE languages; --");
         $this->assertEquals('', $result, 'SQL injection in language ID should be rejected');
 
-        $result = validateTag('1', "1' UNION SELECT * FROM users --");
+        $result = Validation::tag('1', "1' UNION SELECT * FROM users --");
         $this->assertEquals('', $result, 'SQL injection with UNION should be rejected');
 
         // Non-existent tag should return empty
-        $result = validateTag('99999', '1');
+        $result = Validation::tag('99999', '1');
         $this->assertEquals('', $result, 'Non-existent tag should return empty');
 
         // Valid tag with empty language
-        $result = validateTag('1', '');
+        $result = Validation::tag('1', '');
         // Should handle gracefully (result depends on DB state)
         $this->assertTrue(is_string($result), 'Should return a string');
 
         // Float as tag (numeric, is_numeric returns true for floats)
-        $result = validateTag('1.5', '1');
+        $result = Validation::tag('1.5', '1');
         // is_numeric('1.5') returns true, so it gets cast to (int) which becomes 1
         $this->assertTrue(is_string($result) || $result === false, 'Float gets cast to int');
     }
@@ -404,30 +409,30 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Empty tag should return empty
-        $result = validateArchTextTag('', '1');
+        $result = Validation::archTextTag('', '1');
         $this->assertEquals('', $result, 'Empty tag should return empty string');
 
         // Special value -1 should pass through
-        $result = validateArchTextTag('-1', '1');
+        $result = Validation::archTextTag('-1', '1');
         $this->assertEquals('-1', $result, 'Special value -1 should pass through');
 
         // Non-numeric tag should be rejected
-        $result = validateArchTextTag('invalid', '1');
+        $result = Validation::archTextTag('invalid', '1');
         $this->assertEquals('', $result, 'Non-numeric tag should be rejected');
 
         // SQL injection attempts in tag
-        $result = validateArchTextTag("1 OR 1=1", '1');
+        $result = Validation::archTextTag("1 OR 1=1", '1');
         $this->assertEquals('', $result, 'SQL injection in tag should be rejected');
 
-        $result = validateArchTextTag("1'; DROP TABLE tags2; --", '1');
+        $result = Validation::archTextTag("1'; DROP TABLE tags2; --", '1');
         $this->assertEquals('', $result, 'SQL injection with DROP should be rejected');
 
         // SQL injection attempts in language
-        $result = validateArchTextTag('1', "1 OR 1=1");
+        $result = Validation::archTextTag('1', "1 OR 1=1");
         $this->assertEquals('', $result, 'SQL injection in language should be rejected');
 
         // Non-existent tag
-        $result = validateArchTextTag('99999', '1');
+        $result = Validation::archTextTag('99999', '1');
         $this->assertEquals('', $result, 'Non-existent tag should return empty');
     }
 
@@ -448,24 +453,24 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Empty tag should return empty
-        $result = validateTextTag('', '1');
+        $result = Validation::textTag('', '1');
         $this->assertEquals('', $result, 'Empty tag should return empty string');
 
         // Special value -1 should pass through
-        $result = validateTextTag('-1', '1');
+        $result = Validation::textTag('-1', '1');
         $this->assertEquals('-1', $result, 'Special value -1 should pass through');
 
         // WARNING: validateTextTag does NOT validate numeric inputs properly
         // These tests document the current (unsafe) behavior
-        // The function should be fixed to add is_numeric() checks like validateTag()
+        // The function should be fixed to add is_numeric() checks like Validation::tag()
 
         // Non-existent tag (safe because no malicious intent)
-        $result = validateTextTag('99999', '1');
+        $result = Validation::textTag('99999', '1');
         $this->assertEquals('', $result, 'Non-existent tag should return empty');
 
         // Note: SQL injection tests are commented out because this function
         // is vulnerable and would fail. Fix the function first, then uncomment:
-        // $result = validateTextTag("1 OR 1=1", '1');
+        // $result = Validation::textTag("1 OR 1=1", '1');
         // $this->assertEquals('', $result, 'SQL injection should be rejected');
     }
 
@@ -485,35 +490,35 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Multiple hex escapes
-        $result = convert_regexp_to_sqlsyntax('\\x{41}\\x{42}\\x{43}');
+        $result = Escaping::regexpToSqlSyntax('\\x{41}\\x{42}\\x{43}');
         $this->assertStringContainsString('ABC', $result, 'Multiple hex escapes should be converted');
 
         // Unicode emoji (high codepoint)
-        $result = convert_regexp_to_sqlsyntax('\\x{1F600}'); // 😀
+        $result = Escaping::regexpToSqlSyntax('\\x{1F600}'); // 😀
         $this->assertStringStartsWith("'", $result);
         $this->assertStringEndsWith("'", $result);
 
         // Character class ranges
-        $result = convert_regexp_to_sqlsyntax('[a-zA-Z0-9]');
+        $result = Escaping::regexpToSqlSyntax('[a-zA-Z0-9]');
         $this->assertStringContainsString('[a-zA-Z0-9]', $result);
 
         // Special regex characters
-        $result = convert_regexp_to_sqlsyntax('\\d+');
+        $result = Escaping::regexpToSqlSyntax('\\d+');
         $this->assertStringContainsString('d+', $result); // Backslash removed
 
-        $result = convert_regexp_to_sqlsyntax('\\s*');
+        $result = Escaping::regexpToSqlSyntax('\\s*');
         $this->assertStringContainsString('s*', $result);
 
         // Mixed hex and regular characters
-        $result = convert_regexp_to_sqlsyntax('test\\x{41}value');
+        $result = Escaping::regexpToSqlSyntax('test\\x{41}value');
         $this->assertStringContainsString('testAvalue', $result);
 
         // Empty pattern
-        $result = convert_regexp_to_sqlsyntax('');
+        $result = Escaping::regexpToSqlSyntax('');
         $this->assertEquals("''", $result, 'Empty pattern should return empty quoted string');
 
         // Pattern with quotes (SQL injection attempt)
-        $result = convert_regexp_to_sqlsyntax("test' OR '1'='1");
+        $result = Escaping::regexpToSqlSyntax("test' OR '1'='1");
         $this->assertStringContainsString("\\'", $result, 'Quotes should be escaped');
     }
 
@@ -583,12 +588,12 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Known setting with default: 'set-texts-per-page' defaults to '10'
-        $result = getSettingWithDefault('set-texts-per-page');
+        $result = Settings::getWithDefault('set-texts-per-page');
         $this->assertTrue(is_string($result), 'Should return a string');
         $this->assertTrue($result !== '', 'Should return non-empty (default or saved value)');
 
         // Non-existent setting without default should return empty
-        $result = getSettingWithDefault('nonexistent_setting_xyz123');
+        $result = Settings::getWithDefault('nonexistent_setting_xyz123');
         $this->assertEquals('', $result, 'Non-existent setting without default should return empty');
 
         // SQL injection attempt - first clean up any previously saved value
@@ -596,7 +601,7 @@ class DatabaseConnectTest extends TestCase
         $injectionKey = "injectkey'; DROP TABLE settings; --";
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
-        $result = getSettingWithDefault($injectionKey);
+        $result = Settings::getWithDefault($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, verify the table still exists (injection didn't work)
@@ -604,7 +609,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
 
         // Empty key
-        $result = getSettingWithDefault('');
+        $result = Settings::getWithDefault('');
         $this->assertEquals('', $result, 'Empty key should return empty');
     }
 
@@ -624,7 +629,7 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Test saving valid setting
-        $result = saveSetting('test_key_123', 'test_value_123');
+        $result = Settings::save('test_key_123', 'test_value_123');
         $this->assertStringContainsString('OK:', $result, 'Valid save should return OK message');
 
         // Verify it was saved
@@ -632,32 +637,32 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals('test_value_123', $value, 'Saved value should be retrievable');
 
         // Test NULL value (should error)
-        $result = saveSetting('test_key', null);
+        $result = Settings::save('test_key', null);
         $this->assertStringContainsString('Value is not set!', $result, 'NULL value should be rejected');
 
         // Test empty string value (should error)
-        $result = saveSetting('test_key', '');
+        $result = Settings::save('test_key', '');
         $this->assertStringContainsString('Value is an empty string!', $result, 'Empty string should be rejected');
 
         // Test updating existing setting
-        saveSetting('test_key_update', 'value1');
-        $result = saveSetting('test_key_update', 'value2');
+        Settings::save('test_key_update', 'value1');
+        $result = Settings::save('test_key_update', 'value2');
         $this->assertStringContainsString('OK:', $result, 'Update should succeed');
         $value = Settings::get('test_key_update');
         $this->assertEquals('value2', $value, 'Updated value should be saved');
 
         // Test SQL injection in key
-        $result = saveSetting("key'; DROP TABLE settings; --", 'value');
+        $result = Settings::save("key'; DROP TABLE settings; --", 'value');
         // Should either safely escape or reject
         $this->assertTrue(is_string($result), 'Should handle SQL injection safely');
 
         // Test SQL injection in value
-        $result = saveSetting('safe_key', "value'; DROP TABLE settings; --");
+        $result = Settings::save('safe_key', "value'; DROP TABLE settings; --");
         $this->assertStringContainsString('OK:', $result, 'Should save with escaped value');
 
         // Test numeric setting within bounds (if applicable)
         // 'set-texts-per-page' has min=10, max=9999
-        $result = saveSetting('set-texts-per-page', '50');
+        $result = Settings::save('set-texts-per-page', '50');
         $this->assertStringContainsString('OK:', $result, 'Valid numeric value should save');
 
         // Clean up test keys (including SQL injection test keys)
@@ -682,22 +687,22 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Save a setting with value '1'
-        saveSetting('test_bool_1', '1');
-        $result = getSettingZeroOrOne('test_bool_1', 0);
+        Settings::save('test_bool_1', '1');
+        $result = Settings::getZeroOrOne('test_bool_1', 0);
         $this->assertEquals(1, $result, 'Non-zero value should return 1');
 
         // Save a setting with value '0'
-        saveSetting('test_bool_0', '0');
-        $result = getSettingZeroOrOne('test_bool_0', 1);
+        Settings::save('test_bool_0', '0');
+        $result = Settings::getZeroOrOne('test_bool_0', 1);
         $this->assertEquals(0, $result, 'Zero value should return 0');
 
         // Save a setting with non-zero numeric value
-        saveSetting('test_bool_5', '5');
-        $result = getSettingZeroOrOne('test_bool_5', 0);
+        Settings::save('test_bool_5', '5');
+        $result = Settings::getZeroOrOne('test_bool_5', 0);
         $this->assertEquals(1, $result, 'Non-zero value (5) should return 1');
 
         // Non-existent setting should return default
-        $result = getSettingZeroOrOne('nonexistent_bool', 1);
+        $result = Settings::getZeroOrOne('nonexistent_bool', 1);
         $this->assertEquals(1, $result, 'Non-existent setting should return default');
 
         // Clean up
@@ -720,33 +725,33 @@ class DatabaseConnectTest extends TestCase
         }
 
         // LWTTableCheck ensures _lwtgeneral table exists
-        LWTTableCheck();
+        Settings::lwtTableCheck();
         // If it doesn't die, the table exists or was created
         $this->assertTrue(true, 'LWTTableCheck should complete without error');
 
         // LWTTableSet - insert new key
-        LWTTableSet('test_key_1', 'test_value_1');
-        $result = LWTTableGet('test_key_1');
+        Settings::lwtTableSet('test_key_1', 'test_value_1');
+        $result = Settings::lwtTableGet('test_key_1');
         $this->assertEquals('test_value_1', $result, 'Should retrieve inserted value');
 
         // LWTTableSet - update existing key
-        LWTTableSet('test_key_1', 'updated_value');
-        $result = LWTTableGet('test_key_1');
+        Settings::lwtTableSet('test_key_1', 'updated_value');
+        $result = Settings::lwtTableGet('test_key_1');
         $this->assertEquals('updated_value', $result, 'Should retrieve updated value');
 
         // LWTTableGet - non-existent key
-        $result = LWTTableGet('nonexistent_key_xyz');
+        $result = Settings::lwtTableGet('nonexistent_key_xyz');
         $this->assertEquals('', $result, 'Non-existent key should return empty string');
 
         // Test SQL injection in key
-        LWTTableSet("key'; DROP TABLE _lwtgeneral; --", 'value');
-        $result = LWTTableGet("key'; DROP TABLE _lwtgeneral; --");
+        Settings::lwtTableSet("key'; DROP TABLE _lwtgeneral; --", 'value');
+        $result = Settings::lwtTableGet("key'; DROP TABLE _lwtgeneral; --");
         // Should handle safely (either escaped or rejected)
         $this->assertTrue(is_string($result), 'Should handle SQL injection in key safely');
 
         // Test SQL injection in value
-        LWTTableSet('safe_key_2', "value'; DROP TABLE _lwtgeneral; --");
-        $result = LWTTableGet('safe_key_2');
+        Settings::lwtTableSet('safe_key_2', "value'; DROP TABLE _lwtgeneral; --");
+        $result = Settings::lwtTableGet('safe_key_2');
         // Should retrieve the escaped value
         $this->assertStringContainsString('DROP', $result, 'SQL injection in value should be stored as-is (escaped)');
 
@@ -774,28 +779,28 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Basic string should be single-quoted and JS-escaped
-        $result = prepare_textdata_js('test');
+        $result = Escaping::prepareTextdataJs('test');
         $this->assertEquals("\\'test\\'", $result);
 
         // Empty string should return empty single-quoted string
-        $result = prepare_textdata_js('');
+        $result = Escaping::prepareTextdataJs('');
         $this->assertEquals("''", $result);
 
         // String with whitespace only should return empty single-quoted string
-        $result = prepare_textdata_js('   ');
+        $result = Escaping::prepareTextdataJs('   ');
         $this->assertEquals("''", $result);
 
         // String with single quotes should be JS-escaped
-        $result = prepare_textdata_js("test'value");
+        $result = Escaping::prepareTextdataJs("test'value");
         $this->assertStringContainsString("\\'", $result);
 
         // String with line endings should be normalized
-        $result = prepare_textdata_js("line1\r\nline2");
+        $result = Escaping::prepareTextdataJs("line1\r\nline2");
         $this->assertStringContainsString("line1", $result);
         $this->assertStringContainsString("line2", $result);
 
         // SQL special characters should be escaped for JS
-        $result = prepare_textdata_js("test\"value");
+        $result = Escaping::prepareTextdataJs("test\"value");
         $this->assertStringStartsWith("\\'", $result);
         $this->assertStringEndsWith("\\'", $result);
     }
@@ -815,31 +820,22 @@ class DatabaseConnectTest extends TestCase
             Globals::setDbConnection($connection);
         }
 
-        // Valid query with success message
-        $result = runsql(
+        // Valid INSERT query - returns affected rows
+        $result = DB::execute(
             "INSERT INTO " . $GLOBALS['tbpref'] . "settings (StKey, StValue)
              VALUES ('test_runsql_1', 'value1')
-             ON DUPLICATE KEY UPDATE StValue='value1'",
-            "Inserted"
+             ON DUPLICATE KEY UPDATE StValue='value1'"
         );
-        $this->assertStringContainsString('Inserted:', $result);
-        $this->assertMatchesRegularExpression('/\d+/', $result); // Should contain a number
+        $this->assertIsInt($result);
+        $this->assertGreaterThanOrEqual(0, $result);
 
-        // Query with empty success message should just return the count
-        $result = runsql(
+        // UPDATE query - returns affected rows
+        $result = DB::execute(
             "UPDATE " . $GLOBALS['tbpref'] . "settings
-             SET StValue='value2' WHERE StKey='test_runsql_1'",
-            ""
+             SET StValue='value2' WHERE StKey='test_runsql_1'"
         );
-        $this->assertMatchesRegularExpression('/^\d+$/', $result); // Should be just a number
-
-        // Test error handling with sqlerrdie=false
-        $result = runsql(
-            "SELECT * FROM nonexistent_table_xyz",
-            "Test",
-            false
-        );
-        $this->assertStringContainsString('Error:', $result);
+        $this->assertIsInt($result);
+        $this->assertEquals(1, $result);
 
         // Clean up
         Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='test_runsql_1'");
@@ -863,11 +859,11 @@ class DatabaseConnectTest extends TestCase
         // This function adjusts AUTO_INCREMENT values
         // We'll test with the settings table (though it doesn't have auto-increment, it should not crash)
         // The function should execute without errors
-        adjust_autoincr('settings', 'StKey');
+        Maintenance::adjustAutoIncrement('settings', 'StKey');
         $this->assertTrue(true, 'adjust_autoincr should complete without error');
 
         // Test with a table that has auto-increment (languages table has LgID)
-        adjust_autoincr('languages', 'LgID');
+        Maintenance::adjustAutoIncrement('languages', 'LgID');
         $this->assertTrue(true, 'adjust_autoincr should work with auto-increment column');
     }
 
@@ -888,7 +884,7 @@ class DatabaseConnectTest extends TestCase
 
         // This function optimizes all tables
         // It should execute without errors
-        optimizedb();
+        Maintenance::optimizeDatabase();
         $this->assertTrue(true, 'optimizedb should complete without error');
     }
 
@@ -908,7 +904,7 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Insert a test setting
-        saveSetting('test_first_value', '42');
+        Settings::save('test_first_value', '42');
 
         // Query that returns a value
         $result = Connection::fetchValue(
@@ -972,7 +968,7 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Get the prefix for the current database
-        $result = getDatabasePrefix(Globals::getDbConnection());
+        $result = Configuration::getPrefix(Globals::getDbConnection());
 
         // The function returns an array with [$tbpref, $fixed_tbpref]
         $this->assertIsArray($result);
@@ -1065,19 +1061,19 @@ class DatabaseConnectTest extends TestCase
     public function testPrefixSQLQueryAdvanced(): void
     {
         // CREATE TABLE with backticks
-        $result = prefixSQLQuery("CREATE TABLE `users` (id INT);", "test_");
+        $result = Migrations::prefixQuery("CREATE TABLE `users` (id INT);", "test_");
         $this->assertEquals("CREATE TABLE `test_users` (id INT);", $result);
 
         // ALTER TABLE
-        $result = prefixSQLQuery("ALTER TABLE users ADD COLUMN name VARCHAR(255);", "pre_");
+        $result = Migrations::prefixQuery("ALTER TABLE users ADD COLUMN name VARCHAR(255);", "pre_");
         $this->assertEquals("ALTER TABLE pre_users ADD COLUMN name VARCHAR(255);", $result);
 
         // CREATE TABLE with IF NOT EXISTS
-        $result = prefixSQLQuery("CREATE TABLE IF NOT EXISTS languages (id INT);", "lwt_");
+        $result = Migrations::prefixQuery("CREATE TABLE IF NOT EXISTS languages (id INT);", "lwt_");
         $this->assertEquals("CREATE TABLE IF NOT EXISTS lwt_languages (id INT);", $result);
 
         // Empty prefix should not change the query
-        $result = prefixSQLQuery("CREATE TABLE users (id INT);", "");
+        $result = Migrations::prefixQuery("CREATE TABLE users (id INT);", "");
         $this->assertEquals("CREATE TABLE users (id INT);", $result);
     }
 
@@ -1099,13 +1095,13 @@ class DatabaseConnectTest extends TestCase
         // Test with non-existent language (returns null when language doesn't exist)
         // check_text_valid outputs HTML, so we need to capture it
         ob_start();
-        $result = check_text_valid(99999);
+        $result = TextParsing::checkValid(99999);
         ob_end_clean();
         $this->assertNull($result, 'Non-existent language should return null');
 
         // Test with empty language
         ob_start();
-        $result = check_text_valid(0);
+        $result = TextParsing::checkValid(0);
         ob_end_clean();
         $this->assertTrue($result === null || $result === false, 'Empty language ID should return null or false');
     }
@@ -1154,41 +1150,41 @@ class DatabaseConnectTest extends TestCase
     public function testPrepareTextdataJsExtended(): void
     {
         // Basic string with space - should be quoted
-        $result = prepare_textdata_js('hello world');
+        $result = Escaping::prepareTextdataJs('hello world');
         $this->assertEquals("\\'hello world\\'", $result);
 
         // String with single quotes - should be escaped
-        $result = prepare_textdata_js("it's working");
+        $result = Escaping::prepareTextdataJs("it's working");
         $this->assertStringContainsString("\\'", $result, 'Single quotes should be escaped');
 
         // String with double quotes - should be escaped
-        $result = prepare_textdata_js('He said "hello"');
+        $result = Escaping::prepareTextdataJs('He said "hello"');
         $this->assertStringContainsString('\\"', $result, 'Double quotes should be escaped');
 
         // String with backslashes - should be escaped
-        $result = prepare_textdata_js('path\\to\\file');
+        $result = Escaping::prepareTextdataJs('path\\to\\file');
         $this->assertStringContainsString('\\\\', $result, 'Backslashes should be escaped');
 
         // String with newlines - should be converted to \n
-        $result = prepare_textdata_js("line1\nline2");
+        $result = Escaping::prepareTextdataJs("line1\nline2");
         $this->assertStringContainsString('\\n', $result, 'Newlines should be escaped');
 
         // String with Windows line endings
-        $result = prepare_textdata_js("line1\r\nline2");
+        $result = Escaping::prepareTextdataJs("line1\r\nline2");
         $this->assertStringContainsString('\\n', $result, 'Windows line endings should be converted');
         $this->assertStringNotContainsString("\r", $result, 'Carriage returns should be removed');
 
         // Empty string - should return '' (two single quotes)
-        $result = prepare_textdata_js('');
+        $result = Escaping::prepareTextdataJs('');
         $this->assertEquals("''", $result);
 
         // UTF-8 characters should pass through (but still be quoted)
-        $result = prepare_textdata_js('日本語');
+        $result = Escaping::prepareTextdataJs('日本語');
         $this->assertStringContainsString('日本語', $result);
         $this->assertStringStartsWith("\\'", $result);
 
         // Combined special characters
-        $result = prepare_textdata_js("It's a \"test\"\nwith\\backslash");
+        $result = Escaping::prepareTextdataJs("It's a \"test\"\nwith\\backslash");
         $this->assertStringContainsString("\\'", $result);
         $this->assertStringContainsString('\\"', $result);
         $this->assertStringContainsString('\\n', $result);
@@ -1211,29 +1207,29 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Ensure table exists
-        LWTTableCheck();
+        Settings::lwtTableCheck();
 
         // Set a value
-        LWTTableSet('test_key_lwt', 'test_value_lwt');
+        Settings::lwtTableSet('test_key_lwt', 'test_value_lwt');
 
         // Get the value back
-        $result = LWTTableGet('test_key_lwt');
+        $result = Settings::lwtTableGet('test_key_lwt');
         $this->assertEquals('test_value_lwt', $result);
 
         // Update existing value
-        LWTTableSet('test_key_lwt', 'updated_value');
-        $result = LWTTableGet('test_key_lwt');
+        Settings::lwtTableSet('test_key_lwt', 'updated_value');
+        $result = Settings::lwtTableGet('test_key_lwt');
         $this->assertEquals('updated_value', $result);
 
         // Get non-existent key should return empty string
-        $result = LWTTableGet('nonexistent_lwt_key');
+        $result = Settings::lwtTableGet('nonexistent_lwt_key');
         $this->assertEquals('', $result);
 
         // Set multiple values
-        LWTTableSet('test_key_1', 'value_1');
-        LWTTableSet('test_key_2', 'value_2');
-        $result1 = LWTTableGet('test_key_1');
-        $result2 = LWTTableGet('test_key_2');
+        Settings::lwtTableSet('test_key_1', 'value_1');
+        Settings::lwtTableSet('test_key_2', 'value_2');
+        $result1 = Settings::lwtTableGet('test_key_1');
+        $result2 = Settings::lwtTableGet('test_key_2');
         $this->assertEquals('value_1', $result1);
         $this->assertEquals('value_2', $result2);
 
@@ -1259,28 +1255,28 @@ class DatabaseConnectTest extends TestCase
         // Test convert_string_to_sqlsyntax with various edge cases
         // Very long string
         $long_string = str_repeat('test ', 1000);
-        $result = convert_string_to_sqlsyntax($long_string);
+        $result = Escaping::toSqlSyntax($long_string);
         $this->assertStringStartsWith("'", $result);
         $this->assertStringEndsWith("'", $result);
 
         // String with null byte (should be handled safely)
-        $result = convert_string_to_sqlsyntax("test\0value");
+        $result = Escaping::toSqlSyntax("test\0value");
         $this->assertStringStartsWith("'", $result);
 
         // String with only special characters
-        $result = convert_string_to_sqlsyntax("'\"\\");
+        $result = Escaping::toSqlSyntax("'\"\\");
         $this->assertStringContainsString("\\'", $result);
         $this->assertStringContainsString('\\"', $result);
         $this->assertStringContainsString("\\\\", $result);
 
         // prepare_textdata with mixed line endings
         // Note: prepare_textdata only converts \r\n to \n, not standalone \r
-        $result = prepare_textdata("line1\r\nline2\nline3\rline4");
+        $result = Escaping::prepareTextdata("line1\r\nline2\nline3\rline4");
         $this->assertStringContainsString("line1\n", $result);
         $this->assertStringContainsString("line2\n", $result);
 
         // prepare_textdata_js with control characters
-        $result = prepare_textdata_js("test\ttab\bbackspace");
+        $result = Escaping::prepareTextdataJs("test\ttab\bbackspace");
         $this->assertIsString($result);
     }
 

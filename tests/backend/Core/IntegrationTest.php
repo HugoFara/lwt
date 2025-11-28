@@ -529,7 +529,7 @@ class IntegrationTest extends TestCase
 
     public function testGetThemesSelectOptions(): void
     {
-        $current_theme = getSettingWithDefault('set-theme-dir');
+        $current_theme = Settings::getWithDefault('set-theme-dir');
         $options = get_themes_selectoptions($current_theme);
         $this->assertStringContainsString('<option', $options);
     }

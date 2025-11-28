@@ -10,6 +10,8 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
+use Lwt\Database\DB;
+use Lwt\Database\Escaping;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -344,7 +346,7 @@ class ExportAndAnnotationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $escaped = convert_string_to_sqlsyntax("test's value");
+        $escaped = Escaping::toSqlSyntax("test's value");
         $this->assertStringStartsWith("'", $escaped);
         $this->assertStringEndsWith("'", $escaped);
         $this->assertStringContainsString("\\'", $escaped);
@@ -356,7 +358,7 @@ class ExportAndAnnotationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $escaped = convert_string_to_sqlsyntax("");
+        $escaped = Escaping::toSqlSyntax("");
         $this->assertEquals('NULL', $escaped);
     }
 
@@ -366,7 +368,7 @@ class ExportAndAnnotationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $escaped = convert_string_to_sqlsyntax_nonull("test's value");
+        $escaped = Escaping::toSqlSyntaxNoNull("test's value");
         $this->assertStringStartsWith("'", $escaped);
         $this->assertStringEndsWith("'", $escaped);
     }
@@ -377,7 +379,7 @@ class ExportAndAnnotationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $escaped = convert_string_to_sqlsyntax_nonull("");
+        $escaped = Escaping::toSqlSyntaxNoNull("");
         $this->assertEquals("''", $escaped);
     }
 
@@ -421,14 +423,12 @@ class ExportAndAnnotationTest extends TestCase
 
         $tbpref = self::$tbpref;
         
-        $result = runsql(
-            "INSERT INTO {$tbpref}tags (TgText) VALUES ('test_export_runsql')",
-            "Test insert"
+        $result = DB::execute(
+            "INSERT INTO {$tbpref}tags (TgText) VALUES ('test_export_runsql')"
         );
-        
-        // runsql returns message with row count, e.g. "Test insert: 1"
-        $this->assertStringContainsString('Test insert', $result);
-        $this->assertStringContainsString('1', $result);
+
+        // DB::execute returns number of affected rows
+        $this->assertEquals(1, $result);
         
         // Clean up
         Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_export_runsql'");

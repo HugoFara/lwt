@@ -20,6 +20,8 @@
 require_once 'Core/Bootstrap/db_bootstrap.php';
 require_once 'Core/UI/ui_helpers.php';
 
+use Lwt\Database\Settings;
+
 /**
  * Save a database prefix.
  *
@@ -30,7 +32,7 @@ require_once 'Core/UI/ui_helpers.php';
 function start_save_prefix($pref)
 {
     $tbpref = $pref;
-    LWTTableSet("current_table_prefix", $tbpref);
+    Settings::lwtTableSet("current_table_prefix", $tbpref);
 }
 
 /**

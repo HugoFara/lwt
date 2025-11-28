@@ -8,6 +8,8 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -66,10 +68,10 @@ class SimtermsTest extends TestCase
         ];
 
         foreach ($test_words as $i => $word) {
-            $woText = convert_string_to_sqlsyntax($word[0]);
-            $woTextLC = convert_string_to_sqlsyntax(mb_strtolower($word[0], 'UTF-8'));
-            $woTranslation = convert_string_to_sqlsyntax($word[1]);
-            $woRomanization = convert_string_to_sqlsyntax($word[2]);
+            $woText = Escaping::toSqlSyntax($word[0]);
+            $woTextLC = Escaping::toSqlSyntax(mb_strtolower($word[0], 'UTF-8'));
+            $woTranslation = Escaping::toSqlSyntax($word[1]);
+            $woRomanization = Escaping::toSqlSyntax($word[2]);
 
             Connection::query(
                 "INSERT INTO " . $GLOBALS['tbpref'] . "words
@@ -307,7 +309,7 @@ class SimtermsTest extends TestCase
     public function testPrintSimilarTerms(): void
     {
         // Set the similar terms count setting
-        saveSetting('set-similar-terms-count', '5');
+        Settings::save('set-similar-terms-count', '5');
 
         // Test with valid term
         $output = print_similar_terms(1, 'hello');
@@ -332,17 +334,17 @@ class SimtermsTest extends TestCase
         $this->assertEquals('(none)', $output);
 
         // Test when feature is disabled (count = 0)
-        saveSetting('set-similar-terms-count', '0');
+        Settings::save('set-similar-terms-count', '0');
         $output = print_similar_terms(1, 'hello');
         $this->assertEquals('', $output);
 
         // Test when feature is disabled (count = -1)
-        saveSetting('set-similar-terms-count', '-1');
+        Settings::save('set-similar-terms-count', '-1');
         $output = print_similar_terms(1, 'hello');
         $this->assertEquals('', $output);
 
         // Re-enable for other tests
-        saveSetting('set-similar-terms-count', '5');
+        Settings::save('set-similar-terms-count', '5');
     }
 
     // ========== PRINT SIMILAR TERMS TABROW FUNCTION ==========
@@ -350,7 +352,7 @@ class SimtermsTest extends TestCase
     public function testPrintSimilarTermsTabrow(): void
     {
         // Enable feature
-        saveSetting('set-similar-terms-count', '5');
+        Settings::save('set-similar-terms-count', '5');
 
         // Capture output
         ob_start();
@@ -365,7 +367,7 @@ class SimtermsTest extends TestCase
         $this->assertStringContainsString('id="simwords"', $output);
 
         // Disable feature
-        saveSetting('set-similar-terms-count', '0');
+        Settings::save('set-similar-terms-count', '0');
 
         // Capture output
         ob_start();

@@ -98,7 +98,7 @@ function restore_file($handle, $title): string
                 if (!str_starts_with($query, '-- ')) {
                     $res = mysqli_query(
                         \Lwt\Core\Globals::getDbConnection(),
-                        prefixSQLQuery($query, $tbpref)
+                        Migrations::prefixQuery($query, $tbpref)
                     );
                     $install_status["queries"]++;
                     if ($res == false) {

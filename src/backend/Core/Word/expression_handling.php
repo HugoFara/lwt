@@ -43,7 +43,7 @@ function findMecabExpression($text, $lid): array
     $mecab = get_mecab_path($mecab_args);
     $sql = "SELECT SeID, SeTxID, SeFirstPos, SeText FROM {$tbpref}sentences
     WHERE SeLgID = $lid AND
-    SeText LIKE " . convert_string_to_sqlsyntax_notrim_nonull("%$text%");
+    SeText LIKE " . Escaping::toSqlSyntaxNoTrimNoNull("%$text%");
     $res = Connection::query($sql);
 
     $parsed_text = '';
@@ -158,7 +158,7 @@ function insert_expression_from_mecab($text, $lid, $wid, $len): array
             [
             $wid, $lid, $txId, $occ["SeID"],
             $occ["position"], $len,
-            convert_string_to_sqlsyntax_notrim_nonull($occ["term"])
+            Escaping::toSqlSyntaxNoTrimNoNull($occ["term"])
             ]
         ) . ")";
     }
@@ -223,13 +223,13 @@ function findStandardExpression($textlc, $lid): array
         JOIN {$tbpref}sentences
         ON SeID=Ti2SeID AND SeLgID = Ti2LgID
         WHERE Ti2LgID = $lid
-        AND SeText LIKE " . convert_string_to_sqlsyntax_notrim_nonull("%$textlc%") . "
+        AND SeText LIKE " . Escaping::toSqlSyntaxNoTrimNoNull("%$textlc%") . "
         AND Ti2WordCount < 2
         GROUP BY SeID";
     } else {
         $sql = "SELECT * FROM {$tbpref}sentences
         WHERE SeLgID = $lid AND SeText LIKE " .
-        convert_string_to_sqlsyntax_notrim_nonull("%$textlc%");
+        Escaping::toSqlSyntaxNoTrimNoNull("%$textlc%");
     }
 
     if ($splitEachChar) {
@@ -346,7 +346,7 @@ function insert_standard_expression($textlc, $lid, $wid, $len, $mode): array
             [
             $wid, $lid, $txId, $occ["SeID"],
             $occ["position"], $len,
-            convert_string_to_sqlsyntax_notrim_nonull($occ["term"])
+            Escaping::toSqlSyntaxNoTrimNoNull($occ["term"])
             ]
         ) . ")";
     }
@@ -584,7 +584,7 @@ function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mo
                 [
                 $wid, $lid, $txId, $occ["SeID"],
                 $occ["position"], $len,
-                convert_string_to_sqlsyntax_notrim_nonull($occ["term"])
+                Escaping::toSqlSyntaxNoTrimNoNull($occ["term"])
                 ]
             ) . ")";
         }

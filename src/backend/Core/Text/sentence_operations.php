@@ -77,14 +77,14 @@ function sentences_containing_word_lc_query($wordlc, $lid): string
         ) val
          FROM {$tbpref}sentences, {$tbpref}textitems2
          WHERE lower(SeText)
-         LIKE " . convert_string_to_sqlsyntax("%$wordlc%") . "
+         LIKE " . Escaping::toSqlSyntax("%$wordlc%") . "
          AND SeID = Ti2SeID AND SeLgID = $lid AND Ti2WordCount<2
          GROUP BY SeID HAVING val
-         LIKE " . convert_string_to_sqlsyntax_notrim_nonull("%$mecab_str%") . "
+         LIKE " . Escaping::toSqlSyntaxNoTrimNoNull("%$mecab_str%") . "
          ORDER BY CHAR_LENGTH(SeText), SeText";
     } else {
         if ($removeSpaces == 1) {
-            $pattern = convert_string_to_sqlsyntax($wordlc);
+            $pattern = Escaping::toSqlSyntax($wordlc);
         } else {
             $pattern = Escaping::regexpToSqlSyntax(
                 '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
@@ -120,7 +120,7 @@ function sentences_from_word($wid, $wordlc, $lid, $limit = -1): \mysqli_result|f
     if (empty($wid)) {
         $sql = "SELECT DISTINCT SeID, SeText
         FROM {$tbpref}sentences, {$tbpref}textitems2
-        WHERE LOWER(Ti2Text) = " . convert_string_to_sqlsyntax($wordlc) . "
+        WHERE LOWER(Ti2Text) = " . Escaping::toSqlSyntax($wordlc) . "
         AND Ti2WoID = 0 AND SeID = Ti2SeID AND SeLgID = $lid
         ORDER BY CHAR_LENGTH(SeText), SeText";
     } elseif ($wid == -1) {

@@ -178,7 +178,7 @@ function edit_mword_do_insert($term): int|string
     );
     Maintenance::initWordCount();
     // strToClassName($textlc);
-    $term->id = get_last_key();
+    $term->id = Connection::lastInsertId();
     saveWordTags($term->id);
     insertExpressions($term->textlc, $term->lgid, $term->id, $term->wordcount, 0);
     return $message;

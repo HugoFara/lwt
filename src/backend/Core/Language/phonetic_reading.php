@@ -18,6 +18,7 @@
  */
 
 use Lwt\Database\Connection;
+use Lwt\Database\Escaping;
 
 /**
  * Parses text be read by an automatic audio player.
@@ -134,7 +135,7 @@ function refreshText(string $word, int $tid): string
     }
     $sql =
     'SELECT distinct TiSeID FROM ' . $tbpref . 'textitems
-    WHERE TiIsNotWord = 0 AND TiTextLC = ' . convert_string_to_sqlsyntax($wordlc) . '
+    WHERE TiIsNotWord = 0 AND TiTextLC = ' . Escaping::toSqlSyntax($wordlc) . '
     AND TiTxID = ' . $tid . '
     ORDER BY TiSeID';
     $res = Connection::query($sql);

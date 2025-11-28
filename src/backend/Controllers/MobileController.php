@@ -20,6 +20,7 @@ require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../Services/MobileService.php';
 
+use Lwt\Database\Settings;
 use Lwt\Services\MobileService;
 
 /**
@@ -242,7 +243,7 @@ class MobileController extends BaseController
      */
     private function savePrefix(string $prefix): void
     {
-        \LWTTableSet("current_table_prefix", $prefix);
+        Settings::lwtTableSet("current_table_prefix", $prefix);
     }
 
     /**

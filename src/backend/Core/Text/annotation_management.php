@@ -18,6 +18,8 @@
  */
 
 use Lwt\Database\Connection;
+use Lwt\Database\DB;
+use Lwt\Database\Escaping;
 
 /**
  * Uses provided annotations, and annotations from database to update annotations.
@@ -63,9 +65,9 @@ function recreate_save_ann($textid, $oldann): string
         }
         $ann .= $item . "\n";
     }
-    runsql(
+    DB::execute(
         "UPDATE {$tbpref}texts
-        SET TxAnnotatedText = " . convert_string_to_sqlsyntax($ann) . "
+        SET TxAnnotatedText = " . Escaping::toSqlSyntax($ann) . "
         WHERE TxID = $textid",
         ""
     );
@@ -152,9 +154,9 @@ function create_save_ann($textid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $ann = create_ann($textid);
-    runsql(
+    DB::execute(
         'update ' . $tbpref . 'texts set ' .
-        'TxAnnotatedText = ' . convert_string_to_sqlsyntax($ann) . '
+        'TxAnnotatedText = ' . Escaping::toSqlSyntax($ann) . '
         where TxID = ' . $textid,
         ""
     );

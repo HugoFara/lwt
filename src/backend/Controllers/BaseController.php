@@ -17,6 +17,8 @@
 namespace Lwt\Controllers;
 
 use Lwt\Database\Connection;
+use Lwt\Database\DB;
+use Lwt\Database\Escaping;
 
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
 
@@ -183,17 +185,15 @@ abstract class BaseController
     }
 
     /**
-     * Execute an INSERT/UPDATE/DELETE query with message.
+     * Execute an INSERT/UPDATE/DELETE query.
      *
-     * @param string $sql     SQL query
-     * @param string $message Success message
-     * @param bool   $errDie  Whether to die on error (default: true)
+     * @param string $sql SQL query
      *
-     * @return string Result message with affected row count
+     * @return int Number of affected rows
      */
-    protected function execute(string $sql, string $message = '', bool $errDie = true): string
+    protected function execute(string $sql): int
     {
-        return \runsql($sql, $message, $errDie);
+        return DB::execute($sql);
     }
 
     /**
@@ -229,7 +229,7 @@ abstract class BaseController
      */
     protected function escape(string $value): string
     {
-        return \convert_string_to_sqlsyntax($value);
+        return Escaping::toSqlSyntax($value);
     }
 
     /**
@@ -241,7 +241,7 @@ abstract class BaseController
      */
     protected function escapeNonNull(string $value): string
     {
-        return \convert_string_to_sqlsyntax_nonull($value);
+        return Escaping::toSqlSyntaxNoNull($value);
     }
 
     /**

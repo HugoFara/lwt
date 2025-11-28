@@ -231,7 +231,7 @@ function edit_texts_mark_action($markaction, $marked, $actiondata): array
                 from ' . $tbpref . 'texts where TxID = ' . $id,
                 ""
             );
-            $aid = get_last_key();
+            $aid = Connection::lastInsertId();
             Connection::execute(
                 'insert into ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
                 select ' . $aid . ', TtT2ID
@@ -414,7 +414,7 @@ function edit_texts_archive($txid): string
         WHERE TxID = $txid",
         "Archived Texts saved"
     );
-    $id = get_last_key();
+    $id = Connection::lastInsertId();
     Connection::execute(
         "INSERT INTO {$tbpref}archtexttags (AgAtID, AgT2ID)
         SELECT $id, TtT2ID
@@ -502,7 +502,7 @@ function edit_texts_do_operation($op, $message1, $no_pagestart): string
             Escaping::toSqlSyntax($_REQUEST["TxSourceURI"]) . ')',
             "Saved"
         );
-        $id = get_last_key();
+        $id = Connection::lastInsertId();
     } elseif (str_starts_with($op, 'Change')) {
         // UPDATE
         Connection::execute(

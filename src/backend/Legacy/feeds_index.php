@@ -201,7 +201,7 @@ function dummy_function_1(): array
                         Escaping::toSqlSyntax($text['TxSourceURI']) . '
                     )'
                 );
-                $id = get_last_key();
+                $id = Connection::lastInsertId();
                 TextParsing::splitCheck(
                     Connection::fetchValue(
                         'select TxText as value from ' . $tbpref . 'texts
@@ -266,7 +266,7 @@ function dummy_function_1(): array
                         if (is_numeric($temp)) {
                             $message4 += (int) $temp;
                         }
-                        $id = get_last_key();
+                        $id = Connection::lastInsertId();
                         Connection::execute(
                             'INSERT INTO ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
                             SELECT ' . $id . ', TtT2ID
