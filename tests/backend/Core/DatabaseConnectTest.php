@@ -12,7 +12,7 @@ $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/Text/text_parsing.php';
-require_once __DIR__ . '/../../../src/backend/Core/Word/word_scoring.php';
+require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
 
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
@@ -22,6 +22,7 @@ use Lwt\Database\Migrations;
 use Lwt\Database\Settings;
 use Lwt\Database\TextParsing;
 use Lwt\Database\Validation;
+use Lwt\Services\WordStatusService;
 use PHPUnit\Framework\TestCase;
 
 
@@ -1347,28 +1348,28 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test make_score_random_insert_update function
+     * Test WordStatusService::makeScoreRandomInsertUpdate static method
      */
     public function testMakeScoreRandomInsertUpdate(): void
     {
         // Test insert variable mode (column names)
-        $result = make_score_random_insert_update('iv');
+        $result = WordStatusService::makeScoreRandomInsertUpdate('iv');
         $this->assertIsString($result);
         $this->assertStringContainsString('WoTodayScore', $result);
         $this->assertStringContainsString('WoRandom', $result);
 
         // Test insert data mode (values)
-        $result = make_score_random_insert_update('id');
+        $result = WordStatusService::makeScoreRandomInsertUpdate('id');
         $this->assertIsString($result);
         $this->assertStringContainsString('RAND()', $result);
 
         // Test update mode
-        $result = make_score_random_insert_update('u');
+        $result = WordStatusService::makeScoreRandomInsertUpdate('u');
         $this->assertIsString($result);
         $this->assertStringContainsString('WoTodayScore', $result);
 
         // Test with invalid mode (should return empty string)
-        $result = make_score_random_insert_update('x');
+        $result = WordStatusService::makeScoreRandomInsertUpdate('x');
         $this->assertIsString($result);
         $this->assertEquals('', $result);
     }

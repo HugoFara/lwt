@@ -16,15 +16,16 @@ require_once __DIR__ . '/../../../src/backend/Core/Export/export_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Http/param_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Media/media_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Text/text_navigation.php';
-require_once __DIR__ . '/../../../src/backend/Core/Word/dictionary_links.php';
+require_once __DIR__ . '/../../../src/backend/Services/DictionaryService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Test/test_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
-require_once __DIR__ . '/../../../src/backend/Core/Word/word_status.php';
+require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TableSetService.php';
 
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+use Lwt\Services\DictionaryService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\TableSetService;
 use Lwt\Services\TagService;
@@ -905,13 +906,14 @@ class IntegrationTest extends TestCase
      */
     public function testCreateDictLinksInEditWin(): void
     {
-        // Function signature: createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst)
+        // Function signature: DictionaryService::createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst)
         $lang = 1;
         $word = "test";
         $sentctljs = "javascript:void(0)";
         $openfirst = true;
 
-        $result = createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst);
+        $service = new DictionaryService();
+        $result = $service->createDictLinksInEditWin($lang, $word, $sentctljs, $openfirst);
         $this->assertIsString($result);
     }
 }

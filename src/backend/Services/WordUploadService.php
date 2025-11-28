@@ -23,8 +23,8 @@ use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../Core/Word/word_status.php';
-require_once __DIR__ . '/../Core/Word/expression_handling.php';
+require_once __DIR__ . '/WordStatusService.php';
+require_once __DIR__ . '/ExpressionService.php';
 
 /**
  * Service class for importing words/terms from files or text input.
@@ -273,7 +273,7 @@ class WordUploadService
                 'WoTextLC = LOWER(REPLACE(@wotext," ","")), WoText = REPLACE(@wotext, " ", "")' :
                 'WoTextLC = LOWER(WoText)') . ",
             WoStatus = $status, WoStatusChanged = NOW(), " .
-            \make_score_random_insert_update('u');
+            WordStatusService::makeScoreRandomInsertUpdate('u');
 
         Connection::execute($sql);
     }
@@ -349,7 +349,7 @@ class WordUploadService
                 $row,
                 [
                     (string)$langId, (string)$status, "NOW()",
-                    SCORE_FORMULA_TODAY, SCORE_FORMULA_TOMORROW, "RAND()"
+                    WordStatusService::SCORE_FORMULA_TODAY, WordStatusService::SCORE_FORMULA_TOMORROW, "RAND()"
                 ]
             );
             $values[] = "(" . implode(",", $row) . ")";
@@ -725,9 +725,9 @@ class WordUploadService
                 " INTO {$this->tbpref}words (
                     WoTextLC, WoText, WoTranslation, WoRomanization, WoSentence,
                     WoStatus, WoStatusChanged, WoLgID,
-                    " . \make_score_random_insert_update('iv') . "
+                    " . WordStatusService::makeScoreRandomInsertUpdate('iv') . "
                 )
-                SELECT *, $langId as LgID, " . \make_score_random_insert_update('id') . "
+                SELECT *, $langId as LgID, " . WordStatusService::makeScoreRandomInsertUpdate('id') . "
                 FROM (
                     SELECT WoTextLC, WoText, WoTranslation, WoRomanization,
                     WoSentence, $status AS WoStatus,
@@ -977,7 +977,8 @@ class WordUploadService
                 $len = (int) $record['WoWordCount'];
                 $wid = (int) $record['WoID'];
                 $textlc = (string) $record['WoTextLC'];
-                $sqlarr[] = \insertExpressions($textlc, $langId, $wid, $len, 2);
+                $expressionService = new ExpressionService();
+                $sqlarr[] = $expressionService->insertExpressions($textlc, $langId, $wid, $len, 2);
             }
             mysqli_free_result($res);
             $sqlarr = array_filter($sqlarr);

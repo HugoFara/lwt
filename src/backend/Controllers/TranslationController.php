@@ -22,7 +22,7 @@ use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-require_once __DIR__ . '/../Core/Word/dictionary_links.php';
+require_once __DIR__ . '/../Services/DictionaryService.php';
 require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
 require_once __DIR__ . '/../Services/TranslationService.php';
 

@@ -331,7 +331,11 @@ Current files in `src/backend/Core/` that may need migration:
 ### Feature-Specific (Candidates for Service extraction)
 
 - `Text/*.php` - Extract to TextService
-- `Word/*.php` - Extract to WordService
+- ~~`Word/*.php`~~ - **COMPLETED**: Migrated to `WordStatusService`, `DictionaryService`, and `ExpressionService`
+  - `word_status.php` → `Services/WordStatusService.php` (static methods: `getStatuses()`, `getStatusName()`, `getStatusAbbr()`, `isValidStatus()`)
+  - `word_scoring.php` → `Services/WordStatusService.php` (constants: `SCORE_FORMULA_TODAY`, `SCORE_FORMULA_TOMORROW`; static method: `makeScoreRandomInsertUpdate()`)
+  - `dictionary_links.php` → `Services/DictionaryService.php` (methods: `createTheDictLink()`, `createDictLinksInEditWin()`, `makeOpenDictStr()`, `makeDictLinks()`, etc.)
+  - `expression_handling.php` → `Services/ExpressionService.php` (methods: `findMecabExpression()`, `findStandardExpression()`, `insertExpressions()`, `newMultiWordInteractable()`)
 - ~~`Language/*.php`~~ - **COMPLETED**: Migrated to `LanguageService` and `LanguageDefinitions`
   - `langdefs.php` → `Services/LanguageDefinitions.php` (static class for language definitions)
   - `language_utilities.php` → `Services/LanguageService.php` (methods: `getAllLanguages()`, `getLanguageName()`, `getLanguageCode()`, `getScriptDirectionTag()`)
@@ -363,8 +367,6 @@ After migration, verify:
 
 ## Notes
 
-- **Preserve backwards compatibility**: Legacy URLs should redirect to new routes
 - **Use InputValidator**: For all request parameter handling
 - **Use Globals class**: Instead of `global $tbpref` etc.
 - **Use Database classes**: `Connection::query()`, `Escaping::toSqlSyntax()`, etc.
-- **Minimal changes**: Don't refactor unrelated code during migration

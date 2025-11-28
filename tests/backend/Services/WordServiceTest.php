@@ -20,8 +20,8 @@ $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/Export/export_helpers.php';
-require_once __DIR__ . '/../../../src/backend/Core/Word/word_scoring.php';
-require_once __DIR__ . '/../../../src/backend/Core/Word/expression_handling.php';
+require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
+require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordService.php';
 
 /**

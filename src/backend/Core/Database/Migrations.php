@@ -16,9 +16,10 @@
 
 namespace Lwt\Database;
 
-require_once __DIR__ . '/../Word/word_scoring.php';
+require_once __DIR__ . '/../../Services/WordStatusService.php';
 
 use Lwt\Core\Globals;
+use Lwt\Services\WordStatusService;
 
 /**
  * Database migrations and initialization utilities.
@@ -261,7 +262,7 @@ class Migrations
             }
             Connection::execute(
                 "UPDATE {$tbpref}words
-                SET " . \make_score_random_insert_update('u') . "
+                SET " . WordStatusService::makeScoreRandomInsertUpdate('u') . "
                 WHERE WoTodayScore>=-100 AND WoStatus<98"
             );
             Connection::execute(

@@ -20,6 +20,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 require_once __DIR__ . '/../Core/Test/test_helpers.php';
+require_once __DIR__ . '/WordStatusService.php';
 
 /**
  * Service class for managing word tests/reviews.
@@ -382,7 +383,7 @@ class TestService
         Connection::execute(
             "UPDATE {$this->tbpref}words
             SET WoStatus = $newStatus, WoStatusChanged = NOW(), " .
-            \make_score_random_insert_update('u') . "
+            WordStatusService::makeScoreRandomInsertUpdate('u') . "
             WHERE WoID = $wordId"
         );
 

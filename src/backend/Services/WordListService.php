@@ -22,6 +22,8 @@ use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 
 require_once __DIR__ . '/LanguageService.php';
+require_once __DIR__ . '/WordStatusService.php';
+require_once __DIR__ . '/ExpressionService.php';
 
 /**
  * Service class for managing word list operations.
@@ -426,7 +428,7 @@ class WordListService
      */
     public function updateStatusByIdList(string $idList, int $newStatus, bool $relative, string $actionType): string
     {
-        $scoreUpdate = \make_score_random_insert_update('u');
+        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
 
         if ($relative && $newStatus > 0) {
             // Status +1
@@ -466,7 +468,7 @@ class WordListService
     {
         return Connection::execute(
             'update ' . $this->tbpref . 'words
-            set WoStatusChanged = NOW(),' . \make_score_random_insert_update('u') . '
+            set WoStatusChanged = NOW(),' . WordStatusService::makeScoreRandomInsertUpdate('u') . '
             where WoID in ' . $idList,
             "Updated Status Date (= Now)"
         );
@@ -929,7 +931,7 @@ class WordListService
         $message = Connection::execute(
             'insert into ' . $this->tbpref . 'words (WoLgID, WoTextLC, WoText, ' .
             'WoStatus, WoTranslation, WoSentence, WoRomanization, WoStatusChanged,' .
-            \make_score_random_insert_update('iv') . ') values( ' .
+            WordStatusService::makeScoreRandomInsertUpdate('iv') . ') values( ' .
             $data["WoLgID"] . ', ' .
             Escaping::toSqlSyntax(mb_strtolower($data["WoText"], 'UTF-8')) . ', ' .
             Escaping::toSqlSyntax($data["WoText"]) . ', ' .
@@ -937,7 +939,7 @@ class WordListService
             Escaping::toSqlSyntax($translation) . ', ' .
             Escaping::toSqlSyntax(\repl_tab_nl($data["WoSentence"] ?? '')) . ', ' .
             Escaping::toSqlSyntax($data["WoRomanization"] ?? '') . ', NOW(), ' .
-            \make_score_random_insert_update('id') . ')',
+            WordStatusService::makeScoreRandomInsertUpdate('id') . ')',
             "Saved",
             false
         );
@@ -951,7 +953,7 @@ class WordListService
             );
             $textlc = mb_strtolower($data["WoText"], 'UTF-8');
             if ($len > 1) {
-                \insertExpressions($textlc, $data["WoLgID"], $wid, $len, 1);
+                (new ExpressionService())->insertExpressions($textlc, $data["WoLgID"], $wid, $len, 1);
             } else {
                 Connection::query(
                     'UPDATE ' . $this->tbpref . 'textitems2
@@ -996,7 +998,7 @@ class WordListService
             Escaping::toSqlSyntax(\repl_tab_nl($data["WoSentence"] ?? '')) .
             ', WoRomanization = ' .
             Escaping::toSqlSyntax($data["WoRomanization"] ?? '') . $xx . ',' .
-            \make_score_random_insert_update('u') .
+            WordStatusService::makeScoreRandomInsertUpdate('u') .
             ' where WoID = ' . $data["WoID"],
             "Updated",
             false

@@ -17,6 +17,8 @@ namespace Lwt\Services;
 
 require_once __DIR__ . '/../Core/Text/sentence_operations.php';
 require_once __DIR__ . '/../Core/Export/export_helpers.php';
+require_once __DIR__ . '/WordStatusService.php';
+require_once __DIR__ . '/ExpressionService.php';
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
@@ -68,7 +70,7 @@ class WordService
                 'INSERT INTO ' . $this->tbpref . 'words (
                     WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
                     WoSentence, WoRomanization, WoStatusChanged, ' .
-                    \make_score_random_insert_update('iv') . '
+                    WordStatusService::makeScoreRandomInsertUpdate('iv') . '
                 ) VALUES (
                     ' . (int)$data['WoLgID'] . ', ' .
                     Escaping::toSqlSyntax($textlc) . ', ' .
@@ -77,7 +79,7 @@ class WordService
                     Escaping::toSqlSyntax($translation) . ', ' .
                     Escaping::toSqlSyntax(\repl_tab_nl($data['WoSentence'] ?? '')) . ', ' .
                     Escaping::toSqlSyntax($data['WoRomanization'] ?? '') . ', NOW(), ' .
-                    \make_score_random_insert_update('id') .
+                    WordStatusService::makeScoreRandomInsertUpdate('id') .
                 ')'
             );
 
@@ -134,7 +136,7 @@ class WordService
                 WoSentence = ' . Escaping::toSqlSyntax(\repl_tab_nl($data['WoSentence'] ?? '')) . ',
                 WoRomanization = ' . Escaping::toSqlSyntax($data['WoRomanization'] ?? '') .
                 $statusUpdate . ',' .
-                \make_score_random_insert_update('u') . '
+                WordStatusService::makeScoreRandomInsertUpdate('u') . '
             WHERE WoID = ' . $wordId
         );
 
@@ -406,7 +408,7 @@ class WordService
                 return (int) Connection::execute(
                     'UPDATE ' . $this->tbpref . 'words
                      SET WoStatus = WoStatus + 1, WoStatusChanged = NOW(), ' .
-                    \make_score_random_insert_update('u') . '
+                    WordStatusService::makeScoreRandomInsertUpdate('u') . '
                      WHERE WoStatus IN (1,2,3,4) AND WoID IN ' . $list
                 );
             } else {
@@ -414,7 +416,7 @@ class WordService
                 return (int) Connection::execute(
                     'UPDATE ' . $this->tbpref . 'words
                      SET WoStatus = WoStatus - 1, WoStatusChanged = NOW(), ' .
-                    \make_score_random_insert_update('u') . '
+                    WordStatusService::makeScoreRandomInsertUpdate('u') . '
                      WHERE WoStatus IN (2,3,4,5) AND WoID IN ' . $list
                 );
             }
@@ -424,7 +426,7 @@ class WordService
         return (int) Connection::execute(
             'UPDATE ' . $this->tbpref . 'words
              SET WoStatus = ' . $status . ', WoStatusChanged = NOW(), ' .
-            \make_score_random_insert_update('u') . '
+            WordStatusService::makeScoreRandomInsertUpdate('u') . '
              WHERE WoID IN ' . $list
         );
     }
@@ -447,7 +449,7 @@ class WordService
         return (int) Connection::execute(
             'UPDATE ' . $this->tbpref . 'words
              SET WoStatusChanged = NOW(), ' .
-            \make_score_random_insert_update('u') . '
+            WordStatusService::makeScoreRandomInsertUpdate('u') . '
              WHERE WoID IN ' . $list
         );
     }
@@ -574,12 +576,12 @@ class WordService
         Connection::execute(
             "INSERT INTO {$this->tbpref}words (
                 WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, " .
-            \make_score_random_insert_update('iv') . ")
+            WordStatusService::makeScoreRandomInsertUpdate('iv') . ")
             VALUES (
                 $langId, " .
             Escaping::toSqlSyntax($term) . ", " .
             Escaping::toSqlSyntax($termlc) . ", $status, NOW(), " .
-            \make_score_random_insert_update('id') . ")"
+            WordStatusService::makeScoreRandomInsertUpdate('id') . ")"
         );
 
         $wid = (int)Connection::lastInsertId();
@@ -773,7 +775,7 @@ class WordService
                 "UPDATE %swords SET WoStatus = %d, WoStatusChanged = NOW(), %s WHERE WoID = %d",
                 $this->tbpref,
                 $status,
-                \make_score_random_insert_update('u'),
+                WordStatusService::makeScoreRandomInsertUpdate('u'),
                 $wordId
             ),
             'Status changed'
@@ -848,12 +850,12 @@ class WordService
         Connection::execute(
             "INSERT INTO {$this->tbpref}words (
                 WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged, " .
-            \make_score_random_insert_update('iv') . "
+            WordStatusService::makeScoreRandomInsertUpdate('iv') . "
             ) VALUES (
                 $langId, " .
             Escaping::toSqlSyntax($term) . ", " .
             Escaping::toSqlSyntax($termlc) . ", $status, 1, NOW(), " .
-            \make_score_random_insert_update('id') . "
+            WordStatusService::makeScoreRandomInsertUpdate('id') . "
             )",
             'Term added'
         );
@@ -1042,13 +1044,13 @@ class WordService
             $message = Connection::execute(
                 "INSERT INTO {$this->tbpref}words (
                     WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged,"
-                    . \make_score_random_insert_update('iv') .
+                    . WordStatusService::makeScoreRandomInsertUpdate('iv') .
                 ")
                 VALUES(
                     $langId, " .
                     Escaping::toSqlSyntax($term) . ", " .
                     Escaping::toSqlSyntax($termlc) . ", $status, NOW(), " .
-                    \make_score_random_insert_update('id') .
+                    WordStatusService::makeScoreRandomInsertUpdate('id') .
                 ")",
                 ''
             );
@@ -1114,10 +1116,10 @@ class WordService
             "INSERT INTO {$this->tbpref}words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
                 WoRomanization, WoStatusChanged," .
-                \make_score_random_insert_update('iv') . ") values(
+                WordStatusService::makeScoreRandomInsertUpdate('iv') . ") values(
                     $langId, $wordlc, $word, $status, " .
                     Escaping::toSqlSyntax($translation) . ', "", "", NOW(), ' .
-                    \make_score_random_insert_update('id') . '
+                    WordStatusService::makeScoreRandomInsertUpdate('id') . '
                 )',
             "Term saved"
         );
@@ -1216,7 +1218,7 @@ class WordService
                 "",
                 "",
                 NOW(), ' .
-                \make_score_random_insert_update('id') .
+                WordStatusService::makeScoreRandomInsertUpdate('id') .
             ')';
         }
 
@@ -1227,7 +1229,7 @@ class WordService
         $sqltext = "INSERT INTO {$this->tbpref}words (
             WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
             WoRomanization, WoStatusChanged," .
-            \make_score_random_insert_update('iv') . "
+            WordStatusService::makeScoreRandomInsertUpdate('iv') . "
         ) VALUES " . rtrim(implode(',', $sqlarr), ',');
 
         Connection::execute($sqltext, '');
@@ -1339,7 +1341,7 @@ class WordService
             "INSERT INTO {$this->tbpref}words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
                 WoRomanization, WoWordCount, WoStatusChanged," .
-                \make_score_random_insert_update('iv') . '
+                WordStatusService::makeScoreRandomInsertUpdate('iv') . '
             ) VALUES( ' .
                 (int) $data['lgid'] . ', ' .
                 Escaping::toSqlSyntax($data['textlc']) . ', ' .
@@ -1350,7 +1352,7 @@ class WordService
                 Escaping::toSqlSyntax($data['roman']) . ', ' .
                 (int) $data['wordcount'] . ',
                 NOW(), ' .
-                \make_score_random_insert_update('id') .
+                WordStatusService::makeScoreRandomInsertUpdate('id') .
             ')',
             "Term saved"
         );
@@ -1360,7 +1362,7 @@ class WordService
 
         \Lwt\Database\Maintenance::initWordCount();
         TagService::saveWordTags($wid);
-        \insertExpressions($data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
+        (new ExpressionService())->insertExpressions($data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
 
         return [
             'id' => $wid,
@@ -1392,7 +1394,7 @@ class WordService
             WoSentence = ' . Escaping::toSqlSyntax(\repl_tab_nl($data['sentence'])) . ',
             WoRomanization = ' . Escaping::toSqlSyntax($data['roman']) .
             $statusChange . ',' .
-            \make_score_random_insert_update('u') . '
+            WordStatusService::makeScoreRandomInsertUpdate('u') . '
             WHERE WoID = ' . $wordId,
             "Updated"
         );

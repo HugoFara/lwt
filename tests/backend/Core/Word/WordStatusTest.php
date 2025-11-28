@@ -3,12 +3,13 @@
 namespace Lwt\Tests\Core\Word;
 
 require_once __DIR__ . '/../../../../src/backend/Core/settings.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Word/word_status.php';
+require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php';
 
+use Lwt\Services\WordStatusService;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for word_status.php functions
+ * Tests for WordStatusService
  */
 final class WordStatusTest extends TestCase
 {
@@ -17,7 +18,7 @@ final class WordStatusTest extends TestCase
      */
     public function testGetStatuses(): void
     {
-        $statuses = get_statuses();
+        $statuses = WordStatusService::getStatuses();
 
         // Test structure
         $this->assertIsArray($statuses);
@@ -47,11 +48,11 @@ final class WordStatusTest extends TestCase
     }
 
     /**
-     * Test get_statuses structure and values
+     * Test getStatuses structure and values
      */
     public function testGetStatusesStructure(): void
     {
-        $statuses = get_statuses();
+        $statuses = WordStatusService::getStatuses();
 
         // Each status should have 'name' and 'abbr' keys
         foreach ($statuses as $status => $data) {

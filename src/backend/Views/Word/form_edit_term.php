@@ -73,7 +73,7 @@ namespace Lwt\Views\Word;
     </tr>
     <tr>
         <td class="td1 right" colspan="2">
-            <?php echo createDictLinksInEditWin($lang, $term, 'document.forms[0].WoSentence', true); ?>
+            <?php echo (new \Lwt\Services\DictionaryService())->createDictLinksInEditWin($lang, $term, 'document.forms[0].WoSentence', true); ?>
             &nbsp; &nbsp; &nbsp;
             <input type="submit" name="op" value="Change" />
         </td>

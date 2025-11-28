@@ -95,7 +95,7 @@ use Lwt\Core\Http\InputValidator;
     </tr>
     <tr>
         <td class="td1 right" colspan="2">
-            <?php echo createDictLinksInEditWin(
+            <?php echo (new \Lwt\Services\DictionaryService())->createDictLinksInEditWin(
                 $term->lgid,
                 $term->text,
                 'document.forms[0].WoSentence',

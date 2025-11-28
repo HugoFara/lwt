@@ -24,6 +24,8 @@ require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 use Lwt\Services\WordService;
 use Lwt\Services\WordListService;
 use Lwt\Services\WordUploadService;
+use Lwt\Services\WordStatusService;
+use Lwt\Services\ExpressionService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
@@ -374,7 +376,7 @@ class WordController extends BaseController
                 \Lwt\Database\Escaping::toSqlSyntax(\repl_tab_nl($_REQUEST["WoSentence"])) .
                 ', WoRomanization = ' .
                 \Lwt\Database\Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . $xx .
-                ',' . \make_score_random_insert_update('u') .
+                ',' . WordStatusService::makeScoreRandomInsertUpdate('u') .
                 ' where WoID = ' . $_REQUEST["WoID"],
                 "Updated"
             );
@@ -1406,7 +1408,7 @@ class WordController extends BaseController
 
                 $len = $this->wordService->getWordCount($wid);
                 if ($len > 1) {
-                    \insertExpressions($result['textlc'], (int) $_REQUEST["WoLgID"], $wid, $len, 0);
+                    (new ExpressionService())->insertExpressions($result['textlc'], (int) $_REQUEST["WoLgID"], $wid, $len, 0);
                 } elseif ($len == 1) {
                     $this->wordService->linkToTextItems($wid, (int) $_REQUEST["WoLgID"], $result['textlc']);
 

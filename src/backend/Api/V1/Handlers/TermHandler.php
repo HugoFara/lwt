@@ -4,6 +4,7 @@ namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Services\WordStatusService;
 
 /**
  * Handler for term/word-related API operations.
@@ -29,7 +30,7 @@ class TermHandler
             "INSERT INTO {$tbpref}words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
                 WoSentence, WoRomanization, WoStatusChanged,
-                " . \make_score_random_insert_update('iv') . '
+                " . WordStatusService::makeScoreRandomInsertUpdate('iv') . '
             ) VALUES( ' .
             $lang . ', ' .
             Escaping::toSqlSyntax($textlc) . ', ' .
@@ -37,7 +38,7 @@ class TermHandler
             Escaping::toSqlSyntax($data) . ', ' .
             Escaping::toSqlSyntax('') . ', ' .
             Escaping::toSqlSyntax('') . ', NOW(), ' .
-            \make_score_random_insert_update('id') . ')',
+            WordStatusService::makeScoreRandomInsertUpdate('id') . ')',
             ""
         );
         if (!is_numeric($dummy)) {
@@ -139,7 +140,7 @@ class TermHandler
         $m1 = Connection::execute(
             "UPDATE {$tbpref}words
             SET WoStatus = $status, WoStatusChanged = NOW()," .
-            \make_score_random_insert_update('u') . "
+            WordStatusService::makeScoreRandomInsertUpdate('u') . "
             WHERE WoID = $wid",
             ''
         );

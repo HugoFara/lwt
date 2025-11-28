@@ -110,7 +110,7 @@ use Lwt\Core\Http\InputValidator;
                    'document.forms[0].WoText'
                );
            } else {
-               echo createDictLinksInEditWin(
+               echo (new \Lwt\Services\DictionaryService())->createDictLinksInEditWin(
                    $lang,
                    $term,
                    'document.forms[0].WoSentence',

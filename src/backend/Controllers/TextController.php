@@ -91,7 +91,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Core/Mobile/mobile_interactions.php';
         require_once __DIR__ . '/../Core/Media/media_helpers.php';
-        require_once __DIR__ . '/../Core/Word/word_status.php';
+        require_once __DIR__ . '/../Services/WordStatusService.php';
         require_once __DIR__ . '/../Core/Export/export_helpers.php';
 
         // Get text ID from request
@@ -226,7 +226,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Core/Media/media_helpers.php';
-                require_once __DIR__ . '/../Core/Word/word_status.php';
+                require_once __DIR__ . '/../Services/WordStatusService.php';
         require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
         require_once __DIR__ . '/../Core/Integration/text_from_yt.php';
         require_once __DIR__ . '/../Core/Entity/Text.php';
@@ -548,7 +548,7 @@ class TextController extends BaseController
         }
 
         // Get word statuses for chart display
-        $statuses = \get_statuses();
+        $statuses = \Lwt\Services\WordStatusService::getStatuses();
         $statuses[0]["name"] = 'Unknown';
         $statuses[0]["abbr"] = 'Ukn';
 

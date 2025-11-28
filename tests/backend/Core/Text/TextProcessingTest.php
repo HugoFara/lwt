@@ -22,7 +22,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Text/text_helpers.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Export/export_helpers.php';
 require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Word/word_status.php';
+require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php';
 
 use Lwt\Services\LanguageService;
 

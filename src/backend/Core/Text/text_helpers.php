@@ -35,7 +35,7 @@ require_once __DIR__ . '/text_statistics.php';
 require_once __DIR__ . '/sentence_operations.php';
 
 // Expression handling (multi-words, MeCab)
-require_once __DIR__ . '/../Word/expression_handling.php';
+require_once __DIR__ . '/../../Services/ExpressionService.php';
 
 // Annotation management (create, save, update annotations)
 require_once __DIR__ . '/annotation_management.php';

@@ -33,7 +33,7 @@ use Lwt\View\Helper\StatusHelper;
 
 require_once __DIR__ . '/vite_helper.php';
 require_once __DIR__ . '/../Http/url_utilities.php';
-require_once __DIR__ . '/../Word/word_status.php';
+require_once __DIR__ . '/../../Services/WordStatusService.php';
 require_once __DIR__ . '/../../View/Helper/FormHelper.php';
 require_once __DIR__ . '/../../View/Helper/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../../View/Helper/PageLayoutHelper.php';
@@ -101,7 +101,7 @@ function pagestart_kernel_nobody($title, $addcss = ''): void
     <!-- TBPREF  : "<?php echo tohtml($tbpref);  ?>" -->
     <script type="text/javascript">
         //<![CDATA[
-        var STATUSES = <?php echo json_encode(get_statuses()); ?>;
+        var STATUSES = <?php echo json_encode(\Lwt\Services\WordStatusService::getStatuses()); ?>;
         //]]>
     </script>
 
@@ -327,7 +327,7 @@ function get_wordstatus_radiooptions(int|string|null $v): string
         $v = 1;
     }
     $r = "";
-    $statuses = get_statuses();
+    $statuses = \Lwt\Services\WordStatusService::getStatuses();
     foreach ($statuses as $n => $status) {
         $r .= '<span class="status' . $n . '" title="' . tohtml($status["name"]) . '">';
         $r .= '&nbsp;<input type="radio" name="WoStatus" value="' . $n . '"';
@@ -359,7 +359,7 @@ function get_wordstatus_selectoptions(
         $r .= "<option value=\"\"" . get_selected($v, '');
         $r .= ">[Filter off]</option>";
     }
-    $statuses = get_statuses();
+    $statuses = \Lwt\Services\WordStatusService::getStatuses();
     foreach ($statuses as $n => $status) {
         if ($not9899 && ($n == 98 || $n == 99)) {
             continue;
@@ -514,7 +514,7 @@ function get_set_status_option(int $n, string $suffix = ""): string
 
 function get_status_name(int $n): string
 {
-    $statuses = get_statuses();
+    $statuses = \Lwt\Services\WordStatusService::getStatuses();
     return $statuses[$n]["name"];
 }
 
@@ -522,7 +522,7 @@ function get_status_name(int $n): string
 
 function get_status_abbr(int $n): string
 {
-    $statuses = get_statuses();
+    $statuses = \Lwt\Services\WordStatusService::getStatuses();
     return $statuses[$n]["abbr"];
 }
 
@@ -911,7 +911,7 @@ function pagestart_nobody($title, $addcss = ''): void
     <!-- TBPREF  : "<?php echo tohtml($tbpref);  ?>" -->
     <script type="text/javascript">
         //<![CDATA[
-        var STATUSES = <?php echo json_encode(get_statuses()); ?>;
+        var STATUSES = <?php echo json_encode(\Lwt\Services\WordStatusService::getStatuses()); ?>;
         var TAGS = <?php echo json_encode(TagService::getAllTermTags()); ?>;
         var TEXTTAGS = <?php echo json_encode(TagService::getAllTextTags()); ?>;
         //]]>
