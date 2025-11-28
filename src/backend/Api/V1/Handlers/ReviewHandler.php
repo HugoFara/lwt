@@ -2,6 +2,10 @@
 
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Services\TestService;
+
+require_once __DIR__ . '/../../../Services/TestService.php';
+
 /**
  * Handler for review/test-related API operations.
  *
@@ -9,6 +13,13 @@ namespace Lwt\Api\V1\Handlers;
  */
 class ReviewHandler
 {
+    private TestService $testService;
+
+    public function __construct()
+    {
+        $this->testService = new TestService();
+    }
+
     /**
      * Get the next word to test as structured data.
      *
@@ -71,7 +82,7 @@ class ReviewHandler
      */
     public function wordTestAjax(array $params): array
     {
-        $testSql = \do_test_test_get_projection(
+        $testSql = $this->testService->getTestSql(
             $params['test_key'],
             $params['selection']
         );
@@ -93,7 +104,7 @@ class ReviewHandler
      */
     public function tomorrowTestCount(array $params): array
     {
-        $testSql = \do_test_test_get_projection(
+        $testSql = $this->testService->getTestSql(
             $params['test_key'],
             $params['selection']
         );

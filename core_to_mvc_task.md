@@ -345,7 +345,8 @@ Current files in `src/backend/Core/` that may need migration:
   - `media_players.php` → `Services/MediaService.php` (methods: `renderMediaPlayer()`, `renderVideoPlayer()`, `renderAudioPlayer()`, `renderHtml5AudioPlayer()`, `renderLegacyAudioPlayer()`)
 - ~~`Export/*.php`~~ - **COMPLETED**: Migrated to `ExportService`
   - `export_helpers.php` → `Services/ExportService.php` (methods: `exportAnki()`, `exportTsv()`, `exportFlexible()`, `replaceTabNewline()`, `maskTermInSentence()`, `maskTermInSentenceV2()`)
-- `Test/*.php` - Extract to TestService
+- ~~`Test/*.php`~~ - **COMPLETED**: Migrated to `TestService`
+  - `test_helpers.php` → `Services/TestService.php` (methods: `getTestSql()`, `buildSelectionTestSql()`, inlined SQL projection logic)
 - `UI/*.php` - Keep as helpers or move to Views
 
 ### Root Files (Evaluate)

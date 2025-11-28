@@ -23,7 +23,6 @@ namespace Lwt\Api\V1;
 require_once __DIR__ . '/../../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../../Core/Text/text_helpers.php';
-require_once __DIR__ . '/../../Core/Test/test_helpers.php';
 require_once __DIR__ . '/../../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../../Services/WordStatusService.php';
 require_once __DIR__ . '/../../Services/DictionaryService.php';

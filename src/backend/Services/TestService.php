@@ -19,8 +19,8 @@ use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
-require_once __DIR__ . '/../Core/Test/test_helpers.php';
 require_once __DIR__ . '/WordStatusService.php';
+require_once __DIR__ . '/../Core/Utils/error_handling.php';
 
 /**
  * Service class for managing word tests/reviews.
@@ -96,7 +96,48 @@ class TestService
      */
     public function getTestSql(string $selector, int|array $selection): ?string
     {
-        return \do_test_test_get_projection($selector, $selection);
+        $testsql = null;
+        switch ($selector) {
+            case 'words':
+                // Test words in a list of words ID
+                $idString = implode(",", $selection);
+                $testsql = " {$this->tbpref}words WHERE WoID IN ($idString) ";
+                $cntlang = Connection::fetchValue(
+                    "SELECT COUNT(DISTINCT WoLgID) AS value FROM $testsql"
+                );
+                if ($cntlang > 1) {
+                    echo "<p>Sorry - The selected terms are in $cntlang languages," .
+                        " but tests are only possible in one language at a time.</p>";
+                    exit();
+                }
+                break;
+            case 'texts':
+                // Test text items from a list of texts ID
+                $idString = implode(",", $selection);
+                $testsql = " {$this->tbpref}words, {$this->tbpref}textitems2
+                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($idString) ";
+                $cntlang = Connection::fetchValue(
+                    "SELECT COUNT(DISTINCT WoLgID) AS value FROM $testsql"
+                );
+                if ($cntlang > 1) {
+                    echo "<p>Sorry - The selected terms are in $cntlang languages," .
+                        " but tests are only possible in one language at a time.</p>";
+                    exit();
+                }
+                break;
+            case 'lang':
+                // Test words from a specific language
+                $testsql = " {$this->tbpref}words WHERE WoLgID = $selection ";
+                break;
+            case 'text':
+                // Test text items from a specific text ID
+                $testsql = " {$this->tbpref}words, {$this->tbpref}textitems2
+                WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $selection ";
+                break;
+            default:
+                \my_die("TestService::getTestSql called with wrong parameters");
+        }
+        return $testsql;
     }
 
     /**
@@ -189,7 +230,27 @@ class TestService
      */
     public function buildSelectionTestSql(int $selectionType, string $selectionData): ?string
     {
-        return \do_test_test_from_selection($selectionType, $selectionData);
+        $dataStringArray = explode(",", trim($selectionData, "()"));
+        $dataIntArray = array_map('intval', $dataStringArray);
+        switch ($selectionType) {
+            case 2:
+                $testSql = $this->getTestSql('words', $dataIntArray);
+                break;
+            case 3:
+                $testSql = $this->getTestSql('texts', $dataIntArray);
+                break;
+            default:
+                $testSql = $selectionData;
+                $cntlang = Connection::fetchValue(
+                    "SELECT COUNT(DISTINCT WoLgID) AS value FROM $testSql"
+                );
+                if ($cntlang > 1) {
+                    echo "<p>Sorry - The selected terms are in $cntlang languages," .
+                        " but tests are only possible in one language at a time.</p>";
+                    exit();
+                }
+        }
+        return $testSql;
     }
 
     /**
