@@ -560,4 +560,349 @@ class FeedsControllerTest extends TestCase
         $count = $service->countFeedLinks((string)$feedId);
         $this->assertEquals(5, $count);
     }
+
+    // ===== Controller getFeedService tests =====
+
+    public function testControllerHasGetFeedServiceMethod(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new FeedsController();
+
+        $this->assertTrue(method_exists($controller, 'getFeedService'));
+    }
+
+    public function testGetFeedServiceReturnsFeedService(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new FeedsController();
+        $service = $controller->getFeedService();
+
+        $this->assertInstanceOf(FeedService::class, $service);
+    }
+
+    public function testGetFeedServiceReturnsConsistentInstance(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $controller = new FeedsController();
+        $service1 = $controller->getFeedService();
+        $service2 = $controller->getFeedService();
+
+        $this->assertSame($service1, $service2);
+    }
+
+    // ===== FeedService getFeeds tests =====
+
+    public function testGetFeedsReturnsArrayForLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+
+        // Create a feed for testing
+        $service->createFeed([
+            'NfLgID' => self::$testLangId,
+            'NfName' => 'Ctrl Test Feed GetFeeds',
+            'NfSourceURI' => 'https://example.com/getfeeds',
+            'NfArticleSectionTags' => 'article',
+            'NfFilterTags' => '',
+            'NfOptions' => '',
+        ]);
+
+        $feeds = $service->getFeeds(self::$testLangId);
+
+        $this->assertIsArray($feeds);
+        $this->assertNotEmpty($feeds);
+
+        // Verify our feed is in the list
+        $found = false;
+        foreach ($feeds as $feed) {
+            if ($feed['NfName'] === 'Ctrl Test Feed GetFeeds') {
+                $found = true;
+                break;
+            }
+        }
+        $this->assertTrue($found);
+    }
+
+    public function testGetFeedsReturnsEmptyArrayForNonExistentLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+        $feeds = $service->getFeeds(99999);
+
+        $this->assertIsArray($feeds);
+        $this->assertEmpty($feeds);
+    }
+
+    public function testGetFeedsReturnsAllFeedsWhenLanguageIsNull(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+
+        // Create a feed for testing
+        $service->createFeed([
+            'NfLgID' => self::$testLangId,
+            'NfName' => 'Ctrl Test Feed AllFeeds',
+            'NfSourceURI' => 'https://example.com/allfeeds',
+            'NfArticleSectionTags' => 'article',
+            'NfFilterTags' => '',
+            'NfOptions' => '',
+        ]);
+
+        $feeds = $service->getFeeds(null);
+
+        $this->assertIsArray($feeds);
+
+        // Should contain our test feed
+        $found = false;
+        foreach ($feeds as $feed) {
+            if ($feed['NfName'] === 'Ctrl Test Feed AllFeeds') {
+                $found = true;
+                break;
+            }
+        }
+        $this->assertTrue($found);
+    }
+
+    // ===== FeedService getFeedLinks tests =====
+
+    public function testGetFeedLinksReturnsArticles(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+        $tbpref = self::$tbpref;
+
+        $feedId = $service->createFeed([
+            'NfLgID' => self::$testLangId,
+            'NfName' => 'Ctrl Test Feed GetLinks',
+            'NfSourceURI' => 'https://example.com/getlinks',
+            'NfArticleSectionTags' => 'article',
+            'NfFilterTags' => '',
+            'NfOptions' => '',
+        ]);
+
+        // Add articles
+        Connection::execute(
+            "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlText)
+             VALUES ($feedId, 'Link Article 1', 'https://example.com/link1', 'Description 1', " . time() . ", 'Text content')"
+        );
+
+        $links = $service->getFeedLinks((string)$feedId);
+
+        $this->assertIsArray($links);
+        $this->assertCount(1, $links);
+        $this->assertEquals('Link Article 1', $links[0]['FlTitle']);
+    }
+
+    public function testGetFeedLinksWithPagination(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+        $tbpref = self::$tbpref;
+
+        $feedId = $service->createFeed([
+            'NfLgID' => self::$testLangId,
+            'NfName' => 'Ctrl Test Feed Pagination',
+            'NfSourceURI' => 'https://example.com/pagination',
+            'NfArticleSectionTags' => 'article',
+            'NfFilterTags' => '',
+            'NfOptions' => '',
+        ]);
+
+        // Add 10 articles
+        for ($i = 1; $i <= 10; $i++) {
+            Connection::execute(
+                "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+                 VALUES ($feedId, 'Page Article $i', 'https://example.com/page$i', 'Desc $i', " . (time() + $i) . ")"
+            );
+        }
+
+        // Test limit
+        $links = $service->getFeedLinks((string)$feedId, '', 'FlDate DESC', 0, 5);
+        $this->assertCount(5, $links);
+
+        // Test offset
+        $links = $service->getFeedLinks((string)$feedId, '', 'FlDate DESC', 5, 5);
+        $this->assertCount(5, $links);
+    }
+
+    // ===== FeedService getMarkedFeedLinks tests =====
+
+    public function testGetMarkedFeedLinksReturnsCorrectData(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+        $tbpref = self::$tbpref;
+
+        $feedId = $service->createFeed([
+            'NfLgID' => self::$testLangId,
+            'NfName' => 'Ctrl Test Feed Marked',
+            'NfSourceURI' => 'https://example.com/marked',
+            'NfArticleSectionTags' => 'article',
+            'NfFilterTags' => '',
+            'NfOptions' => 'edit_text=1',
+        ]);
+
+        Connection::execute(
+            "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlText)
+             VALUES ($feedId, 'Marked Article', 'https://example.com/marked-art', 'Desc', " . time() . ", 'Text content')"
+        );
+
+        $linkId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
+
+        $links = $service->getMarkedFeedLinks((string)$linkId);
+
+        $this->assertIsArray($links);
+        $this->assertCount(1, $links);
+        $this->assertEquals('Marked Article', $links[0]['FlTitle']);
+        $this->assertEquals('Ctrl Test Feed Marked', $links[0]['NfName']);
+        $this->assertEquals('edit_text=1', $links[0]['NfOptions']);
+    }
+
+    // ===== FeedService getNfOption tests =====
+
+    public function testGetNfOptionReturnsCorrectValue(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+
+        $optionsStr = 'edit_text=1,max_texts=10,tag=News';
+
+        $this->assertEquals('1', $service->getNfOption($optionsStr, 'edit_text'));
+        $this->assertEquals('10', $service->getNfOption($optionsStr, 'max_texts'));
+        $this->assertEquals('News', $service->getNfOption($optionsStr, 'tag'));
+        $this->assertNull($service->getNfOption($optionsStr, 'nonexistent'));
+    }
+
+    public function testGetNfOptionReturnsAllOptionsWhenKeyIsAll(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+
+        $optionsStr = 'edit_text=1,max_texts=10';
+        $result = $service->getNfOption($optionsStr, 'all');
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('edit_text', $result);
+        $this->assertArrayHasKey('max_texts', $result);
+    }
+
+    public function testGetNfOptionReturnsNullForEmptyKey(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+
+        $optionsStr = 'edit_text=1,max_texts=10';
+        $result = $service->getNfOption($optionsStr, '');
+
+        $this->assertNull($result);
+    }
+
+    // ===== FeedService markLinkAsError tests =====
+
+    public function testMarkLinkAsErrorPrependsSpace(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+        $tbpref = self::$tbpref;
+
+        $feedId = $service->createFeed([
+            'NfLgID' => self::$testLangId,
+            'NfName' => 'Ctrl Test Feed ErrorMark',
+            'NfSourceURI' => 'https://example.com/errormark',
+            'NfArticleSectionTags' => 'article',
+            'NfFilterTags' => '',
+            'NfOptions' => '',
+        ]);
+
+        $linkUrl = 'https://example.com/error-link';
+        Connection::execute(
+            "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+             VALUES ($feedId, 'Error Article', '$linkUrl', 'Desc', " . time() . ")"
+        );
+
+        $service->markLinkAsError($linkUrl);
+
+        $result = Connection::fetchValue(
+            "SELECT FlLink AS value FROM {$tbpref}feedlinks WHERE FlNfID = $feedId"
+        );
+
+        $this->assertStringStartsWith(' ', $result);
+        $this->assertEquals(' ' . $linkUrl, $result);
+    }
+
+    // ===== FeedService resetUnloadableArticles tests =====
+
+    public function testResetUnloadableArticlesTrimsSpace(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new FeedService();
+        $tbpref = self::$tbpref;
+
+        $feedId = $service->createFeed([
+            'NfLgID' => self::$testLangId,
+            'NfName' => 'Ctrl Test Feed Reset',
+            'NfSourceURI' => 'https://example.com/reset',
+            'NfArticleSectionTags' => 'article',
+            'NfFilterTags' => '',
+            'NfOptions' => '',
+        ]);
+
+        // Insert article with leading space (error state)
+        Connection::execute(
+            "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+             VALUES ($feedId, 'Reset Article', ' https://example.com/reset-link', 'Desc', " . time() . ")"
+        );
+
+        $count = $service->resetUnloadableArticles((string)$feedId);
+
+        $this->assertGreaterThanOrEqual(0, $count);
+
+        $result = Connection::fetchValue(
+            "SELECT FlLink AS value FROM {$tbpref}feedlinks WHERE FlNfID = $feedId"
+        );
+
+        $this->assertEquals('https://example.com/reset-link', $result);
+    }
 }

@@ -18,8 +18,11 @@ namespace Lwt\Controllers;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../Core/Tag/tags.php';
 require_once __DIR__ . '/../Core/Feed/feeds.php';
+require_once __DIR__ . '/../Core/Text/text_helpers.php';
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
+require_once __DIR__ . '/../Core/Media/media_helpers.php';
 require_once __DIR__ . '/../Core/Language/language_utilities.php';
 
 use Lwt\Database\Connection;
@@ -60,6 +63,16 @@ class FeedsController extends BaseController
     }
 
     /**
+     * Get the FeedService instance for testing.
+     *
+     * @return FeedService
+     */
+    public function getFeedService(): FeedService
+    {
+        return $this->feedService;
+    }
+
+    /**
      * Feeds index page (replaces feeds_index.php)
      *
      * @param array $params Route parameters
@@ -68,8 +81,293 @@ class FeedsController extends BaseController
      */
     public function index(array $params): void
     {
-        require_once __DIR__ . '/../Legacy/feeds_index.php';
-        \Lwt\Interface\Do_Feeds\do_page($this->feedService);
+        session_start();
+
+        $currentLang = Validation::language(
+            (string)\processDBParam("filterlang", 'currentlanguage', '', false)
+        );
+        \pagestart('My ' . \getLanguage($currentLang) . ' Feeds', true);
+
+        $currentFeed = (string)\processSessParam(
+            "selected_feed",
+            "currentrssfeed",
+            '',
+            false
+        );
+
+        $editText = 0;
+        $message = '';
+
+        // Handle marked items submission
+        if (isset($_REQUEST['marked_items']) && is_array($_REQUEST['marked_items'])) {
+            $result = $this->processMarkedItems();
+            $editText = $result['editText'];
+            $message = $result['message'];
+        }
+
+        // Display messages
+        $this->displayFeedMessages($message);
+
+        // Route based on action
+        if (
+            isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
+            || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
+        ) {
+            \load_feeds((int)$currentFeed);
+        } elseif (empty($editText)) {
+            $this->renderFeedsIndex((int)$currentLang, (int)$currentFeed);
+        }
+
+        \pageend();
+    }
+
+    /**
+     * Process marked feed items and create texts from them.
+     *
+     * @return array{editText: int, message: string}
+     */
+    private function processMarkedItems(): array
+    {
+        $editText = 0;
+        $message = '';
+
+        if (!isset($_REQUEST['marked_items']) || !is_array($_REQUEST['marked_items'])) {
+            return ['editText' => $editText, 'message' => $message];
+        }
+
+        $markedItems = implode(',', array_filter($_REQUEST['marked_items'], 'is_scalar'));
+        $feedLinks = $this->feedService->getMarkedFeedLinks($markedItems);
+
+        $stats = ['archived' => 0, 'sentences' => 0, 'textitems' => 0, 'texts' => 0];
+        $count = 0;
+        $languages = null;
+
+        foreach ($feedLinks as $row) {
+            $requiresEdit = $this->feedService->getNfOption($row['NfOptions'], 'edit_text') == 1;
+
+            if ($requiresEdit) {
+                if ($editText == 1) {
+                    $count++;
+                } else {
+                    echo '<form class="validate" action="/feeds" method="post">';
+                    $editText = 1;
+                    $languages = $this->feedService->getLanguages();
+                }
+            }
+
+            $doc = [[
+                'link' => empty($row['FlLink']) ? ('#' . $row['FlID']) : $row['FlLink'],
+                'title' => $row['FlTitle'],
+                'audio' => $row['FlAudio'],
+                'text' => $row['FlText']
+            ]];
+
+            $nfName = (string)$row['NfName'];
+            $nfId = (int)$row['NfID'];
+            $nfOptions = $row['NfOptions'];
+
+            $tagName = $this->feedService->getNfOption($nfOptions, 'tag');
+            if (!$tagName) {
+                $tagName = mb_substr($nfName, 0, 20, "utf-8");
+            }
+
+            $maxTexts = (int)$this->feedService->getNfOption($nfOptions, 'max_texts');
+            if (!$maxTexts) {
+                $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
+            }
+
+            $texts = \get_text_from_rsslink(
+                $doc,
+                $row['NfArticleSectionTags'],
+                $row['NfFilterTags'],
+                $this->feedService->getNfOption($nfOptions, 'charset')
+            );
+
+            if (isset($texts['error'])) {
+                echo $texts['error']['message'];
+                foreach ($texts['error']['link'] as $errLink) {
+                    $this->feedService->markLinkAsError($errLink);
+                }
+                unset($texts['error']);
+            }
+
+            if ($requiresEdit) {
+                // Include edit form view
+                include __DIR__ . '/../Views/Feed/edit_text_form.php';
+            } else {
+                $result = $this->createTextsFromFeed($texts, $row, $tagName, $maxTexts);
+                $stats['archived'] += $result['archived'];
+                $stats['sentences'] += $result['sentences'];
+                $stats['textitems'] += $result['textitems'];
+            }
+        }
+
+        if ($stats['archived'] > 0 || $stats['texts'] > 0) {
+            $message = "Texts archived: {$stats['archived']} / Sentences deleted: {$stats['sentences']}" .
+                       " / Text items deleted: {$stats['textitems']}";
+        }
+
+        if ($editText == 1) {
+            include __DIR__ . '/../Views/Feed/edit_text_footer.php';
+        }
+
+        ?>
+<script type="text/javascript">
+$(".hide_message").delay(2500).slideUp(1000);
+</script>
+        <?php
+
+        return ['editText' => $editText, 'message' => $message];
+    }
+
+    /**
+     * Create texts from feed data without edit form.
+     *
+     * @param array  $texts    Parsed text data
+     * @param array  $row      Feed data
+     * @param string $tagName  Tag name
+     * @param int    $maxTexts Maximum texts to keep
+     *
+     * @return array{archived: int, sentences: int, textitems: int}
+     */
+    private function createTextsFromFeed(array $texts, array $row, string $tagName, int $maxTexts): array
+    {
+        foreach ($texts as $text) {
+            echo '<div class="msgblue">
+            <p class="hide_message">+++ "' . $text['TxTitle'] . '" added! +++</p>
+            </div>';
+
+            $this->feedService->createTextFromFeed([
+                'TxLgID' => $row['NfLgID'],
+                'TxTitle' => $text['TxTitle'],
+                'TxText' => $text['TxText'],
+                'TxAudioURI' => $text['TxAudioURI'] ?? '',
+                'TxSourceURI' => $text['TxSourceURI'] ?? ''
+            ], $tagName);
+        }
+
+        \get_texttags(1);
+
+        return $this->feedService->archiveOldTexts($tagName, $maxTexts);
+    }
+
+    /**
+     * Display errors and messages for feed operations.
+     *
+     * @param string $message Message to display
+     *
+     * @return void
+     */
+    private function displayFeedMessages(string $message): void
+    {
+        if (isset($_REQUEST['checked_feeds_save'])) {
+            $message = \write_rss_to_db($_REQUEST['feed']);
+            ?>
+    <script type="text/javascript">
+    $(".hide_message").delay(2500).slideUp(1000);
+    </script>
+            <?php
+        }
+
+        if (isset($_SESSION['feed_loaded'])) {
+            foreach ($_SESSION['feed_loaded'] as $lf) {
+                if (substr($lf, 0, 5) == "Error") {
+                    echo "\n<div class=\"red\"><p>";
+                } else {
+                    echo "\n<div class=\"msgblue\"><p class=\"hide_message\">";
+                }
+                echo "+++ ", $lf, " +++</p></div>";
+            }
+            ?>
+    <script type="text/javascript">
+    $(".hide_message").delay(2500).slideUp(1000);
+    </script>
+            <?php
+            unset($_SESSION['feed_loaded']);
+        }
+
+        echo \error_message_with_hide($message, false);
+    }
+
+    /**
+     * Render the main feeds index page.
+     *
+     * @param int $currentLang Current language filter
+     * @param int $currentFeed Current feed filter
+     *
+     * @return void
+     */
+    private function renderFeedsIndex(int $currentLang, int $currentFeed): void
+    {
+        $debug = \Lwt\Core\Globals::isDebug();
+
+        $currentQuery = (string)\processSessParam("query", "currentrssquery", '', false);
+        $currentQueryMode = (string)\processSessParam("query_mode", "currentrssquerymode", 'title,desc,text', false);
+        $currentRegexMode = Settings::getWithDefault("set-regex-mode");
+
+        $whQuery = $this->feedService->buildQueryFilter($currentQuery, $currentQueryMode, $currentRegexMode);
+
+        if (!empty($currentQuery) && !empty($currentRegexMode)) {
+            if (!$this->feedService->validateRegexPattern($currentQuery)) {
+                $currentQuery = '';
+                $whQuery = '';
+                unset($_SESSION['currentwordquery']);
+                if (isset($_REQUEST['query'])) {
+                    echo '<p id="hide3" style="color:red;text-align:center;">+++ Warning: Invalid Search +++</p>';
+                }
+            }
+        }
+
+        $currentPage = (int)\processSessParam("page", "currentrsspage", '1', true);
+        $currentSort = (int)\processDBParam("sort", 'currentrsssort', '2', true);
+
+        $feeds = $this->feedService->getFeeds($currentLang ?: null);
+
+        // Determine current feed
+        $feedTime = null;
+        if ($currentFeed == 0 || empty($feeds)) {
+            if (!empty($feeds)) {
+                $currentFeed = (int)$feeds[0]['NfID'];
+            }
+        } else {
+            // Get feed time for the selected feed
+            foreach ($feeds as $f) {
+                if ((int)$f['NfID'] === $currentFeed) {
+                    $feedTime = $f['NfUpdate'];
+                    break;
+                }
+            }
+        }
+
+        $feedIds = (string)$currentFeed;
+        $recno = $currentFeed ? $this->feedService->countFeedLinks($feedIds, $whQuery) : 0;
+
+        if ($debug) {
+            echo "Feed IDs: $feedIds, Count: $recno";
+        }
+
+        // Pagination
+        $maxPerPage = (int)Settings::getWithDefault('set-articles-per-page');
+        $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxPerPage) + 1);
+
+        if ($currentPage < 1) {
+            $currentPage = 1;
+        }
+        if ($currentPage > $pages) {
+            $currentPage = $pages;
+        }
+
+        $offset = ($currentPage - 1) * $maxPerPage;
+        $sortColumn = $this->feedService->getSortColumn($currentSort);
+
+        // Get articles if there are any
+        $articles = [];
+        if ($recno > 0) {
+            $articles = $this->feedService->getFeedLinks($feedIds, $whQuery, $sortColumn, $offset, $maxPerPage);
+        }
+
+        // Include browse view
+        include __DIR__ . '/../Views/Feed/browse.php';
     }
 
     /**
