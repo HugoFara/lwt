@@ -39,6 +39,10 @@ import {
   autoRomanization,
   initWordFormAuto
 } from './forms/word_form_auto';
+import {
+  languageWizard,
+  initLanguageWizard
+} from './languages/language_wizard';
 
 // Declare global window interface extensions
 declare global {
@@ -124,6 +128,11 @@ declare global {
     autoTranslate: typeof autoTranslate;
     autoRomanization: typeof autoRomanization;
     initWordFormAuto: typeof initWordFormAuto;
+
+    // Language wizard
+    language_wizard: typeof languageWizard;
+    languageWizard: typeof languageWizard;
+    initLanguageWizard: typeof initLanguageWizard;
   }
 }
 
@@ -198,3 +207,8 @@ window.closeDisplayWindow = closeDisplayWindow;
 window.autoTranslate = autoTranslate;
 window.autoRomanization = autoRomanization;
 window.initWordFormAuto = initWordFormAuto;
+
+// Language wizard (legacy name and new name)
+window.language_wizard = languageWizard;
+window.languageWizard = languageWizard;
+window.initLanguageWizard = initLanguageWizard;

@@ -57,6 +57,9 @@ import './media/html5_audio_player';
 // Feeds
 import './feeds/jq_feedwizard';
 
+// Languages
+import './languages/language_wizard';
+
 // UI Components
 import './ui/modal';
 
