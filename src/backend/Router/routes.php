@@ -77,7 +77,10 @@ return function (Router $router) {
     // Edit word
     $router->register('/word/edit', 'WordController@edit');
     $router->registerLegacy('edit_word.php', '/word/edit');
-    $router->registerLegacy('edit_tword.php', '/word/edit');
+
+    // Edit term while testing
+    $router->register('/word/edit-term', 'WordController@editTerm');
+    $router->registerLegacy('edit_tword.php', '/word/edit-term');
 
     // Edit words (list)
     $router->register('/words/edit', 'WordController@listEdit');

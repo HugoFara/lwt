@@ -388,7 +388,7 @@ class RoutesTest extends TestCase
     {
         return [
             'edit_word.php' => ['/edit_word.php', '/word/edit'],
-            'edit_tword.php' => ['/edit_tword.php', '/word/edit'],
+            'edit_tword.php' => ['/edit_tword.php', '/word/edit-term'],
             'edit_words.php' => ['/edit_words.php', '/words/edit'],
             'edit_mword.php' => ['/edit_mword.php', '/word/edit-multi'],
             'delete_word.php' => ['/delete_word.php', '/word/delete'],

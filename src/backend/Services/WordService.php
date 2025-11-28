@@ -996,4 +996,124 @@ class WordService
             'status' => (int) $record['WoStatus']
         ];
     }
+
+    /**
+     * Get all unknown words in a text (words without a WoID).
+     *
+     * @param int $textId Text ID
+     *
+     * @return \mysqli_result|false Query result with Ti2Text and Ti2TextLC columns
+     */
+    public function getAllUnknownWordsInText(int $textId): \mysqli_result|false
+    {
+        $sql = "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
+        FROM (
+            {$this->tbpref}textitems2
+            LEFT JOIN {$this->tbpref}words
+            ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
+        )
+        WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = $textId
+        ORDER BY Ti2Order";
+        return Connection::query($sql);
+    }
+
+    /**
+     * Process a single word for the "mark all as well-known" operation.
+     *
+     * @param int    $status New word status
+     * @param string $term   Word text
+     * @param string $termlc Lowercase word text
+     * @param int    $langId Language ID
+     *
+     * @return array{int, string} Rows modified and JavaScript code
+     */
+    public function processWordForWellKnown(int $status, string $term, string $termlc, int $langId): array
+    {
+        $wid = Connection::fetchValue(
+            "SELECT WoID AS value FROM {$this->tbpref}words
+            WHERE WoTextLC = " . Escaping::toSqlSyntax($termlc)
+        );
+        if ($wid !== null) {
+            $rows = 0;
+        } else {
+            $message = Connection::execute(
+                "INSERT INTO {$this->tbpref}words (
+                    WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged,"
+                    . \make_score_random_insert_update('iv') .
+                ")
+                VALUES(
+                    $langId, " .
+                    Escaping::toSqlSyntax($term) . ", " .
+                    Escaping::toSqlSyntax($termlc) . ", $status, NOW(), " .
+                    \make_score_random_insert_update('id') .
+                ")",
+                ''
+            );
+            if (!is_numeric($message)) {
+                \my_die("ERROR: Could not modify words! Message: $message");
+            }
+            if ((int)$message == 0) {
+                \error_message_with_hide(
+                    "WARNING: No rows modified! Message: $message",
+                    false
+                );
+            }
+            $rows = (int) $message;
+            $wid = \get_last_key();
+        }
+        $javascript = '';
+        if (Settings::getWithDefault('set-tooltip-mode') == 1 && $rows > 0) {
+            $javascript .= "title = make_tooltip(" .
+            Escaping::prepareTextdataJs($term) . ", '*', '', '$status');";
+        }
+        $javascript .= "$('.TERM" . \strToClassName($termlc) . "', context)
+        .removeClass('status0')
+        .addClass('status$status word$wid')
+        .attr('data_status', '$status')
+        .attr('data_wid', '$wid')
+        .attr('title', title);";
+        return array($rows, $javascript);
+    }
+
+    /**
+     * Mark all unknown words in a text with a specific status.
+     *
+     * @param int $textId Text ID
+     * @param int $status Status to apply (98=ignored, 99=well-known)
+     *
+     * @return array{int, string} Total count and JavaScript code
+     */
+    public function markAllWordsWithStatus(int $textId, int $status): array
+    {
+        $langId = Connection::fetchValue(
+            "SELECT TxLgID AS value
+            FROM {$this->tbpref}texts
+            WHERE TxID = $textId"
+        );
+        $javascript = "let title='';";
+        $count = 0;
+        $res = $this->getAllUnknownWordsInText($textId);
+        while ($record = mysqli_fetch_assoc($res)) {
+            list($modified_rows, $new_js) = $this->processWordForWellKnown(
+                $status,
+                $record['Ti2Text'],
+                $record['Ti2TextLC'],
+                (int) $langId
+            );
+            $javascript .= $new_js;
+            $count += $modified_rows;
+        }
+        mysqli_free_result($res);
+
+        // Associate existing textitems.
+        Connection::execute(
+            "UPDATE {$this->tbpref}words
+            JOIN {$this->tbpref}textitems2
+            ON Ti2WoID = 0 AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
+            SET Ti2WoID = WoID",
+            ''
+        );
+
+        return array($count, $javascript);
+    }
 }

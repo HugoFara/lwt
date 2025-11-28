@@ -62,13 +62,351 @@ class WordController extends BaseController
     /**
      * Edit single word (replaces word_edit.php)
      *
+     * Call: ?tid=[textid]&ord=[textpos]&wid= - new word
+     *       ?tid=[textid]&ord=[textpos]&wid=[wordid] - edit existing
+     *       ?op=Save - save new word
+     *       ?op=Change - update existing word
+     *       ?fromAnn=recno&tid=[textid]&ord=[textpos] - from annotation editing
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function edit(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_edit.php';
+        // Check for valid entry point
+        if (
+            \getreq("wid") == ""
+            && \getreq("tid") . \getreq("ord") == ""
+            && !array_key_exists("op", $_REQUEST)
+        ) {
+            return;
+        }
+
+        $fromAnn = \getreq("fromAnn");
+
+        if (isset($_REQUEST['op'])) {
+            $this->handleEditOperation($fromAnn);
+        } else {
+            $wid = (array_key_exists("wid", $_REQUEST) && is_integer(\getreq('wid')))
+                ? (int)\getreq('wid')
+                : -1;
+            $textId = (int)\getreq("tid");
+            $ord = (int)\getreq("ord");
+            $this->displayEditForm($wid, $textId, $ord, $fromAnn);
+        }
+
+        \pageend();
+    }
+
+    /**
+     * Handle save/update operation for word edit.
+     *
+     * @param string $fromAnn From annotation flag
+     *
+     * @return void
+     */
+    private function handleEditOperation(string $fromAnn): void
+    {
+        $textlc = trim(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
+        $text = trim(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoText"]));
+
+        // Validate lowercase matches
+        if (mb_strtolower($text, 'UTF-8') != $textlc) {
+            $titletext = "New/Edit Term: " . \tohtml($textlc);
+            \pagestart_nobody($titletext);
+            echo '<h1>' . $titletext . '</h1>';
+            $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
+                '", please go back and correct this!';
+            echo \error_message_with_hide($message, false);
+            \pageend();
+            exit();
+        }
+
+        $translation = \repl_tab_nl(\getreq("WoTranslation"));
+        if ($translation == '') {
+            $translation = '*';
+        }
+
+        if ($_REQUEST['op'] == 'Save') {
+            // Insert new term
+            $result = $this->wordService->create($_REQUEST);
+            $isNew = true;
+            $hex = $this->wordService->textToClassName($_REQUEST["WoTextLC"]);
+            $oldStatus = 0;
+            $titletext = "New Term: " . \tohtml($textlc);
+        } else {
+            // Update existing term
+            $result = $this->wordService->update((int)$_REQUEST["WoID"], $_REQUEST);
+            $isNew = false;
+            $hex = null;
+            $oldStatus = $_REQUEST['WoOldStatus'];
+            $titletext = "Edit Term: " . \tohtml($textlc);
+        }
+
+        \pagestart_nobody($titletext);
+        echo '<h1>' . $titletext . '</h1>';
+
+        $wid = $result['id'];
+        $message = $result['message'];
+
+        \saveWordTags($wid);
+
+        // Prepare view variables
+        $textId = (int)$_REQUEST['tid'];
+        $status = $_REQUEST["WoStatus"];
+        $romanization = $_REQUEST["WoRomanization"];
+
+        include __DIR__ . '/../Views/Word/edit_result.php';
+    }
+
+    /**
+     * Display the word edit form (new or existing).
+     *
+     * @param int    $wid     Word ID (-1 for new)
+     * @param int    $textId  Text ID
+     * @param int    $ord     Word order position
+     * @param string $fromAnn From annotation flag
+     *
+     * @return void
+     */
+    private function displayEditForm(int $wid, int $textId, int $ord, string $fromAnn): void
+    {
+        if ($wid == -1) {
+            // Get the term from text items
+            $termData = $this->wordService->getTermFromTextItem($textId, $ord);
+            if ($termData === null) {
+                \my_die("Cannot access Term and Language in edit_word.php");
+            }
+            $term = (string) $termData['Ti2Text'];
+            $lang = (int) $termData['Ti2LgID'];
+            $termlc = mb_strtolower($term, 'UTF-8');
+
+            // Check if word already exists
+            $existingId = $this->wordService->findByText($termlc, $lang);
+            if ($existingId !== null) {
+                $new = false;
+                $wid = $existingId;
+            } else {
+                $new = true;
+            }
+        } else {
+            // Get existing word data
+            $wordData = $this->wordService->findById($wid);
+            if (!$wordData) {
+                \my_die("Cannot access Term and Language in edit_word.php");
+            }
+            $term = (string) $wordData['WoText'];
+            $lang = (int) $wordData['WoLgID'];
+            $termlc = mb_strtolower($term, 'UTF-8');
+            $new = false;
+        }
+
+        $titletext = ($new ? "New Term" : "Edit Term") . ": " . \tohtml($term);
+        \pagestart_nobody($titletext);
+
+        $scrdir = \getScriptDirectionTag($lang);
+        $langData = $this->wordService->getLanguageData($lang);
+        $showRoman = $langData['showRoman'];
+
+        if ($new) {
+            // New word form
+            $sentence = $this->wordService->getSentenceForTerm($textId, $ord, $termlc);
+            $transUri = $langData['translateUri'];
+            $lgname = $langData['name'];
+            $langShort = array_key_exists($lgname, \LWT_LANGUAGES_ARRAY) ?
+                \LWT_LANGUAGES_ARRAY[$lgname][1] : '';
+
+            include __DIR__ . '/../Views/Word/form_edit_new.php';
+        } else {
+            // Edit existing word form
+            $wordData = $this->wordService->findById($wid);
+            if (!$wordData) {
+                \my_die("Cannot access word data");
+            }
+
+            $status = $wordData['WoStatus'];
+            if ($fromAnn == '' && $status >= 98) {
+                $status = 1;
+            }
+
+            $sentence = \repl_tab_nl($wordData['WoSentence']);
+            if ($sentence == '' && $textId !== 0 && $ord !== 0) {
+                $sentence = $this->wordService->getSentenceForTerm($textId, $ord, $termlc);
+            }
+
+            $transl = \repl_tab_nl($wordData['WoTranslation']);
+            if ($transl == '*') {
+                $transl = '';
+            }
+
+            // Get showRoman from language joined with text
+            $tbpref = \Lwt\Core\Globals::getTablePrefix();
+            $showRoman = (bool) \Lwt\Database\Connection::fetchValue(
+                "SELECT LgShowRomanization AS value
+                FROM {$tbpref}languages JOIN {$tbpref}texts
+                ON TxLgID = LgID
+                WHERE TxID = $textId"
+            );
+
+            include __DIR__ . '/../Views/Word/form_edit_existing.php';
+        }
+    }
+
+    /**
+     * Edit term while testing (replaces word_edit_term.php)
+     *
+     * Call: ?wid=[wordid] - display edit form
+     *       ?op=Change - update the term
+     *
+     * @param array $params Route parameters
+     *
+     * @return void
+     */
+    public function editTerm(array $params): void
+    {
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+
+        $translation_raw = \repl_tab_nl(\getreq("WoTranslation"));
+        $translation = ($translation_raw == '') ? '*' : $translation_raw;
+
+        if (isset($_REQUEST['op'])) {
+            $this->handleEditTermOperation($tbpref, $translation);
+        } else {
+            $this->displayEditTermForm($tbpref);
+        }
+
+        \pageend();
+    }
+
+    /**
+     * Handle update operation for edit term.
+     *
+     * @param string $tbpref      Table prefix
+     * @param string $translation Translation value
+     *
+     * @return void
+     */
+    private function handleEditTermOperation(string $tbpref, string $translation): void
+    {
+        $textlc = trim(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
+        $text = trim(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoText"]));
+
+        if (mb_strtolower($text, 'UTF-8') != $textlc) {
+            $titletext = "New/Edit Term: " . \tohtml(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
+            \pagestart_nobody($titletext);
+            echo '<h1>' . $titletext . '</h1>';
+            $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
+                '", please go back and correct this!';
+            echo \error_message_with_hide($message, false);
+            \pageend();
+            exit();
+        }
+
+        if ($_REQUEST['op'] == 'Change') {
+            $titletext = "Edit Term: " . \tohtml(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
+            \pagestart_nobody($titletext);
+            echo '<h1>' . $titletext . '</h1>';
+
+            $oldstatus = $_REQUEST["WoOldStatus"];
+            $newstatus = $_REQUEST["WoStatus"];
+            $xx = '';
+            if ($oldstatus != $newstatus) {
+                $xx = ', WoStatus = ' . $newstatus . ', WoStatusChanged = NOW()';
+            }
+
+            \Lwt\Database\Connection::execute(
+                'update ' . $tbpref . 'words set WoText = ' .
+                \Lwt\Database\Escaping::toSqlSyntax($_REQUEST["WoText"]) . ', WoTranslation = ' .
+                \Lwt\Database\Escaping::toSqlSyntax($translation) . ', WoSentence = ' .
+                \Lwt\Database\Escaping::toSqlSyntax(\repl_tab_nl($_REQUEST["WoSentence"])) .
+                ', WoRomanization = ' .
+                \Lwt\Database\Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . $xx .
+                ',' . \make_score_random_insert_update('u') .
+                ' where WoID = ' . $_REQUEST["WoID"],
+                "Updated"
+            );
+            $wid = (int)$_REQUEST["WoID"];
+            \saveWordTags($wid);
+
+            $message = 'Updated';
+
+            $lang = \Lwt\Database\Connection::fetchValue(
+                'select WoLgID as value from ' . $tbpref . 'words where WoID = ' . $wid
+            );
+            if (!isset($lang)) {
+                \my_die('Cannot retrieve language in edit_tword.php');
+            }
+            $regexword = \Lwt\Database\Connection::fetchValue(
+                'select LgRegexpWordCharacters as value from ' . $tbpref . 'languages where LgID = ' . $lang
+            );
+            if (!isset($regexword)) {
+                \my_die('Cannot retrieve language data in edit_tword.php');
+            }
+            $sent = \tohtml(\repl_tab_nl($_REQUEST["WoSentence"]));
+            $sent1 = str_replace(
+                "{",
+                ' <b>[',
+                str_replace(
+                    "}",
+                    ']</b> ',
+                    \mask_term_in_sentence($sent, $regexword)
+                )
+            );
+
+            $status = $_REQUEST["WoStatus"];
+            $romanization = $_REQUEST["WoRomanization"];
+            $text = $_REQUEST["WoText"];
+
+            include __DIR__ . '/../Views/Word/edit_term_result.php';
+        }
+    }
+
+    /**
+     * Display the edit term form.
+     *
+     * @param string $tbpref Table prefix
+     *
+     * @return void
+     */
+    private function displayEditTermForm(string $tbpref): void
+    {
+        $wid = \getreq('wid');
+
+        if ($wid == '') {
+            \my_die("Term ID missing in edit_tword.php");
+        }
+
+        $sql = 'select WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus from ' .
+            $tbpref . 'words where WoID = ' . $wid;
+        $res = \Lwt\Database\Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        if ($record) {
+            $term = (string) $record['WoText'];
+            $lang = (int) $record['WoLgID'];
+            $transl = \repl_tab_nl($record['WoTranslation']);
+            if ($transl == '*') {
+                $transl = '';
+            }
+            $sentence = \repl_tab_nl($record['WoSentence']);
+            $rom = $record['WoRomanization'];
+            $status = $record['WoStatus'];
+            $showRoman = (bool) \Lwt\Database\Connection::fetchValue(
+                "SELECT LgShowRomanization AS value
+                FROM {$tbpref}languages
+                WHERE LgID = $lang"
+            );
+        } else {
+            \my_die("Term data not found in edit_tword.php");
+        }
+        mysqli_free_result($res);
+
+        $termlc = mb_strtolower($term, 'UTF-8');
+        $titletext = "Edit Term: " . \tohtml($term);
+        \pagestart_nobody($titletext);
+        $scrdir = \getScriptDirectionTag($lang);
+
+        include __DIR__ . '/../Views/Word/form_edit_term.php';
     }
 
     /**
@@ -161,7 +499,10 @@ class WordController extends BaseController
     }
 
     /**
-     * All words list (replaces words_all.php)
+     * Mark all words as well-known or ignored (replaces words_all.php)
+     *
+     * Call: ?text=[textid] - mark all as well-known (99)
+     *       ?text=[textid]&stat=[status] - mark with specific status (98 or 99)
      *
      * @param array $params Route parameters
      *
@@ -169,7 +510,24 @@ class WordController extends BaseController
      */
     public function all(array $params): void
     {
-        include __DIR__ . '/../Legacy/words_all.php';
+        if (!isset($_REQUEST['text'])) {
+            return;
+        }
+
+        $textId = (int) $_REQUEST['text'];
+        $status = isset($_REQUEST['stat']) ? (int) $_REQUEST['stat'] : 99;
+
+        if ($status == 98) {
+            \pagestart("Setting all blue words to Ignore", false);
+        } else {
+            \pagestart("Setting all blue words to Well-known", false);
+        }
+
+        list($count, $javascript) = $this->wordService->markAllWordsWithStatus($textId, $status);
+
+        include __DIR__ . '/../Views/Word/all_wellknown_result.php';
+
+        \pageend();
     }
 
     /**
