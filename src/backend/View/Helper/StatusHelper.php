@@ -1,0 +1,232 @@
+<?php
+
+/**
+ * \file
+ * \brief Helper for word status display and filtering.
+ *
+ * PHP version 8.1
+ *
+ * @category View
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/src-backend-View-Helper-StatusHelper.html
+ * @since    3.0.0
+ */
+
+namespace Lwt\View\Helper;
+
+/**
+ * Helper class for word status-related display logic.
+ *
+ * Provides methods for building status-related SQL conditions,
+ * CSS class filters, and HTML display elements.
+ *
+ * @since 3.0.0
+ */
+class StatusHelper
+{
+    /**
+     * Build a SQL condition for filtering by status range.
+     *
+     * Status ranges:
+     * - 1-5, 98, 99: Single status values
+     * - 12-15: Status 1 to X (e.g., 14 = status 1-4)
+     * - 23-25: Status 2 to X
+     * - 34-35: Status 3 to X
+     * - 45: Status 4-5
+     * - 599: Status 5 or 99 (all known)
+     *
+     * @param string $fieldName   Database field name to filter on
+     * @param int    $statusRange Status range code
+     *
+     * @return string SQL condition string
+     */
+    public static function makeCondition(string $fieldName, int $statusRange): string
+    {
+        if ($statusRange >= 12 && $statusRange <= 15) {
+            return '(' . $fieldName . ' between 1 and ' . ($statusRange % 10) . ')';
+        }
+        if ($statusRange >= 23 && $statusRange <= 25) {
+            return '(' . $fieldName . ' between 2 and ' . ($statusRange % 10) . ')';
+        }
+        if ($statusRange >= 34 && $statusRange <= 35) {
+            return '(' . $fieldName . ' between 3 and ' . ($statusRange % 10) . ')';
+        }
+        if ($statusRange == 45) {
+            return '(' . $fieldName . ' between 4 and 5)';
+        }
+        if ($statusRange == 599) {
+            return $fieldName . ' in (5,99)';
+        }
+        return $fieldName . ' = ' . $statusRange;
+    }
+
+    /**
+     * Check if a status value is within a status range.
+     *
+     * @param int $currentStatus Current status value
+     * @param int $statusRange   Status range to check against
+     *
+     * @return bool True if status is within range
+     */
+    public static function checkRange(int $currentStatus, int $statusRange): bool
+    {
+        if ($statusRange >= 12 && $statusRange <= 15) {
+            return ($currentStatus >= 1 && $currentStatus <= ($statusRange % 10));
+        }
+        if ($statusRange >= 23 && $statusRange <= 25) {
+            return ($currentStatus >= 2 && $currentStatus <= ($statusRange % 10));
+        }
+        if ($statusRange >= 34 && $statusRange <= 35) {
+            return ($currentStatus >= 3 && $currentStatus <= ($statusRange % 10));
+        }
+        if ($statusRange == 45) {
+            return ($currentStatus == 4 || $currentStatus == 5);
+        }
+        if ($statusRange == 599) {
+            return ($currentStatus == 5 || $currentStatus == 99);
+        }
+        return ($currentStatus == $statusRange);
+    }
+
+    /**
+     * Build CSS class filter to exclude certain statuses.
+     *
+     * Returns a CSS selector string that excludes elements
+     * NOT matching the given status filter.
+     *
+     * @param int|string $status Status filter value (0 returns empty string)
+     *
+     * @return string CSS :not() selector chain
+     */
+    public static function makeClassFilter(int|string $status): string
+    {
+        if ($status == 0) {
+            return '';
+        }
+
+        $allStatuses = [1, 2, 3, 4, 5, 98, 99];
+        $includedStatuses = self::getIncludedStatuses($status);
+
+        // Build :not() selectors for statuses NOT in the filter
+        $result = '';
+        foreach ($allStatuses as $s) {
+            if (!in_array($s, $includedStatuses)) {
+                $result .= ':not(.status' . $s . ')';
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get the list of statuses included in a status range.
+     *
+     * @param int|string $statusRange Status range code
+     *
+     * @return int[] Array of included status values
+     */
+    public static function getIncludedStatuses(int|string $statusRange): array
+    {
+        $statusRange = (int)$statusRange;
+
+        if ($statusRange == 599) {
+            return [5, 99];
+        }
+
+        if ($statusRange < 6 || $statusRange > 97) {
+            return [$statusRange];
+        }
+
+        // Range like 12, 23, 34, etc.
+        $from = (int)($statusRange / 10);
+        $to = $statusRange % 10;
+        return range($from, $to);
+    }
+
+    /**
+     * Build a colored status message HTML.
+     *
+     * @param int      $status   Status value
+     * @param string   $name     Status display name
+     * @param string   $abbr     Status abbreviation
+     *
+     * @return string HTML span with status styling
+     */
+    public static function buildColoredMessage(int $status, string $name, string $abbr): string
+    {
+        $escapedName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+        $escapedAbbr = htmlspecialchars($abbr, ENT_QUOTES, 'UTF-8');
+        return '<span class="status' . $status . '">&nbsp;' . $escapedName
+            . '&nbsp;[' . $escapedAbbr . ']&nbsp;</span>';
+    }
+
+    /**
+     * Build a "set status to" option for multiple word actions.
+     *
+     * @param int    $status Status value
+     * @param string $name   Status display name
+     * @param string $abbr   Status abbreviation
+     * @param string $suffix Optional suffix for the option value
+     *
+     * @return string HTML option element
+     */
+    public static function buildSetStatusOption(
+        int $status,
+        string $name,
+        string $abbr,
+        string $suffix = ''
+    ): string {
+        $escapedName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+        $escapedAbbr = htmlspecialchars($abbr, ENT_QUOTES, 'UTF-8');
+        return '<option value="s' . $status . $suffix . '">Set Status to '
+            . $escapedName . ' [' . $escapedAbbr . ']</option>';
+    }
+
+    /**
+     * Build status controls (plus/minus buttons) for test table.
+     *
+     * @param int    $score       Score associated with the word
+     * @param int    $status      Current status value
+     * @param int    $wordId      Word ID for JavaScript callback
+     * @param string $statusAbbr  Status abbreviation text
+     * @param string $placeholder Path to placeholder image
+     *
+     * @return string HTML controls string
+     */
+    public static function buildTestTableControls(
+        int $score,
+        int $status,
+        int $wordId,
+        string $statusAbbr,
+        string $placeholder = '/assets/icons/placeholder.png'
+    ): string {
+        // Format the score text
+        if ($score < 0) {
+            $scoreText = '<span class="red2">' . htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8') . '</span>';
+        } else {
+            $scoreText = htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8');
+        }
+
+        // Build plus button
+        if ($status <= 5 || $status == 98) {
+            $plus = '<img src="/assets/icons/plus.png" class="click" title="+" alt="+" '
+                . 'onclick="changeTableTestStatus(' . $wordId . ',true);" />';
+        } else {
+            $plus = '<img src="' . htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8')
+                . '" title="" alt="" />';
+        }
+
+        // Build minus button
+        if ($status >= 1) {
+            $minus = '<img src="/assets/icons/minus.png" class="click" title="-" alt="-" '
+                . 'onclick="changeTableTestStatus(' . $wordId . ',false);" />';
+        } else {
+            $minus = '<img src="' . htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8')
+                . '" title="" alt="" />';
+        }
+
+        return ($status == 98 ? '' : $minus . ' ') . $scoreText . ($status == 99 ? '' : ' ' . $plus);
+    }
+}

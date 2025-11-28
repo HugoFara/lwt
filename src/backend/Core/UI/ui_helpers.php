@@ -7,6 +7,13 @@
  * This file contains functions for generating HTML select options,
  * form elements, page headers, and other UI components.
  *
+ * Most functions in this file are deprecated and delegate to the new
+ * View Helper classes. New code should use the helper classes directly:
+ * - \Lwt\View\Helper\FormHelper
+ * - \Lwt\View\Helper\SelectOptionsBuilder
+ * - \Lwt\View\Helper\PageLayoutHelper
+ * - \Lwt\View\Helper\StatusHelper
+ *
  * PHP version 8.1
  *
  * @category Lwt
@@ -18,45 +25,28 @@
  */
 
 use Lwt\Database\Connection;
+use Lwt\View\Helper\FormHelper;
+use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\StatusHelper;
 
 require_once __DIR__ . '/vite_helper.php';
 require_once __DIR__ . '/../Http/url_utilities.php';
 require_once __DIR__ . '/../Tag/tags.php';
 require_once __DIR__ . '/../Word/word_status.php';
+require_once __DIR__ . '/../../View/Helper/FormHelper.php';
+require_once __DIR__ . '/../../View/Helper/SelectOptionsBuilder.php';
+require_once __DIR__ . '/../../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../View/Helper/StatusHelper.php';
 
 /**
- * Display the main menu of navigation as a dropdown
+ * Display the main menu of navigation as a dropdown.
+ *
+ * @deprecated 3.0.0 Use PageLayoutHelper::buildQuickMenu() instead
  */
 function quickMenu(): void
 {
-    ?>
-
-<select id="quickmenu" onchange="quickMenuRedirection(value)">
-    <option value="" selected="selected">[Menu]</option>
-    <option value="index">Home</option>
-    <optgroup label="Texts">
-        <option value="edit_texts">Texts</option>
-        <option value="edit_archivedtexts">Text Archive</option>
-        <option value="edit_texttags">Text Tags</option>
-        <option value="check_text">Text Check</option>
-        <option value="long_text_import">Long Text Import</option>
-    </optgroup>
-    <option value="edit_languages">Languages</option>
-    <optgroup label="Terms">
-        <option value="edit_words">Terms</option>
-        <option value="edit_tags">Term Tags</option>
-        <option value="upload_words">Term Import</option>
-    </optgroup>
-    <option value="statistics">Statistics</option>
-    <option value="rss_import">Newsfeed Import</option>
-    <optgroup label="Other">
-        <option value="backup_restore">Backup/Restore</option>
-        <option value="settings">Settings</option>
-        <option value="text_to_speech_settings">Text-to-Speech Settings</option>
-        <option value="INFO">Help</option>
-    </optgroup>
-</select>
-    <?php
+    echo PageLayoutHelper::buildQuickMenu();
 }
 
 /**
@@ -155,114 +145,86 @@ function echo_lwt_logo(): void
 
 // -------------------------------------------------------------
 
+/**
+ * Build seconds selection options (1-10 seconds).
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forSeconds() instead
+ */
 function get_seconds_selectoptions(int|string|null $v): string
 {
-    if (!isset($v)) {
-        $v = 5;
-    }
-    $r = '';
-    for ($i = 1; $i <= 10; $i++) {
-        $r .= "<option value=\"" . $i . "\"" . get_selected($v, $i);
-        $r .= ">" . $i . " sec</option>";
-    }
-    return $r;
+    return SelectOptionsBuilder::forSeconds($v);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Build playback rate selection options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forPlaybackRate() instead
+ */
 function get_playbackrate_selectoptions(int|string|null $v): string
 {
-    if (!isset($v)) {
-        $v = '10';
-    }
-    $r = '';
-    for ($i = 5; $i <= 15; $i++) {
-        $text = ($i < 10 ? (' 0.' . $i . ' x ') : (' 1.' . ($i - 10) . ' x ') );
-        $r .= "<option value=\"" . $i . "\"" . get_selected($v, $i);
-        $r .= ">&nbsp;" . $text . "&nbsp;</option>";
-    }
-    return $r;
+    return SelectOptionsBuilder::forPlaybackRate($v);
 }
 
 /**
  * Prepare options for mobile.
  *
  * @param "0"|"1"|"2" $v Current mobile type
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forMobileDisplayMode() instead
  */
 function get_mobile_display_mode_selectoptions($v): string
 {
-    if (!isset($v)) {
-        $v = "0";
-    }
-    $r  = "<option value=\"0\"" . get_selected($v, "0");
-    $r .= ">Auto</option>";
-    $r .= "<option value=\"1\"" . get_selected($v, "1");
-    $r .= ">Force Non-Mobile</option>";
-    $r .= "<option value=\"2\"" . get_selected($v, "2");
-    $r .= ">Force Mobile</option>";
-    return $r;
+    return SelectOptionsBuilder::forMobileDisplayMode($v);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Build sentence count selection options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forSentenceCount() instead
+ */
 function get_sentence_count_selectoptions(int|string|null $v): string
 {
-    if (!isset($v)) {
-        $v = 1;
-    }
-    $r  = "<option value=\"1\"" . get_selected($v, 1);
-    $r .= ">Just ONE</option>";
-    $r .= "<option value=\"2\"" . get_selected($v, 2);
-    $r .= ">TWO (+previous)</option>";
-    $r .= "<option value=\"3\"" . get_selected($v, 3);
-    $r .= ">THREE (+previous,+next)</option>";
-    return $r;
+    return SelectOptionsBuilder::forSentenceCount($v);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Build "words to do" button options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forWordsToDoButtons() instead
+ */
 function get_words_to_do_buttons_selectoptions(int|string|null $v): string
 {
-    if (!isset($v)) {
-        $v = "1";
-    }
-    $r  = "<option value=\"0\"" . get_selected($v, "0");
-    $r .= ">I Know All &amp; Ignore All</option>";
-    $r .= "<option value=\"1\"" . get_selected($v, "1");
-    $r .= ">I Know All</option>";
-    $r .= "<option value=\"2\"" . get_selected($v, "2");
-    $r .= ">Ignore All</option>";
-    return $r;
+    return SelectOptionsBuilder::forWordsToDoButtons($v);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Build regex mode selection options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forRegexMode() instead
+ */
 function get_regex_selectoptions(string|null $v): string
 {
-    if (!isset($v)) {
-        $v = "";
-    }
-    $r  = "<option value=\"\"" . get_selected($v, "");
-    $r .= ">Default</option>";
-    $r .= "<option value=\"r\"" . get_selected($v, "r");
-    $r .= ">RegEx</option>";
-    $r .= "<option value=\"COLLATE 'utf8_bin' r\"" . get_selected($v, "COLLATE 'utf8_bin' r");
-    $r .= ">RegEx CaseSensitive</option>";
-    return $r;
+    return SelectOptionsBuilder::forRegexMode($v);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Build tooltip type selection options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forTooltipType() instead
+ */
 function get_tooltip_selectoptions(int|string|null $v): string
 {
-    if (!isset($v)) {
-        $v = 1;
-    }
-    $r  = "<option value=\"1\"" . get_selected($v, 1);
-    $r .= ">Native</option>";
-    $r .= "<option value=\"2\"" . get_selected($v, 2);
-    $r .= ">JqueryUI</option>";
-    return $r;
+    return SelectOptionsBuilder::forTooltipType($v);
 }
 
 // -------------------------------------------------------------
@@ -288,16 +250,12 @@ function get_themes_selectoptions(string|null $v): string
  * @return string ' checked="checked" ' if value is true, '' otherwise
  *
  * @psalm-return ' checked="checked" '|''
+ *
+ * @deprecated 3.0.0 Use FormHelper::getChecked() instead
  */
 function get_checked($value): string
 {
-    if (!isset($value)) {
-        return '';
-    }
-    if ($value) {
-        return ' checked="checked" ';
-    }
-    return '';
+    return FormHelper::getChecked($value);
 }
 
 /**
@@ -306,16 +264,12 @@ function get_checked($value): string
  * @return string ''|' selected="selected" ' Depending if inputs are equal
  *
  * @psalm-return ' selected="selected" '|''
+ *
+ * @deprecated 3.0.0 Use FormHelper::getSelected() instead
  */
 function get_selected(int|string|null $value, int|string $selval): string
 {
-    if (!isset($value)) {
-        return '';
-    }
-    if ($value == $selval) {
-        return ' selected="selected" ';
-    }
-    return '';
+    return FormHelper::getSelected($value, $selval);
 }
 
 /**
@@ -349,20 +303,14 @@ function get_languages_selectoptions($v, $dt): string
 
 // -------------------------------------------------------------
 
+/**
+ * Build language size selection options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forLanguageSize() instead
+ */
 function get_languagessize_selectoptions(int|string|null $v): string
 {
-    if (!isset($v)) {
-        $v = 100;
-    }
-    $r = "<option value=\"100\"" . get_selected($v, 100);
-    $r .= ">100 %</option>";
-    $r .= "<option value=\"150\"" . get_selected($v, 150);
-    $r .= ">150 %</option>";
-    $r .= "<option value=\"200\"" . get_selected($v, 200);
-    $r .= ">200 %</option>";
-    $r .= "<option value=\"250\"" . get_selected($v, 250);
-    $r .= ">250 %</option>";
-    return $r;
+    return SelectOptionsBuilder::forLanguageSize($v);
 }
 
 // -------------------------------------------------------------
@@ -465,130 +413,86 @@ function get_wordstatus_selectoptions(
 
 // -------------------------------------------------------------
 
+/**
+ * Build annotation position selection options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forAnnotationPosition() instead
+ */
 function get_annotation_position_selectoptions(int|string|null $v): string
 {
-    if (! isset($v)) {
-        $v = 1;
-    }
-    $r = "<option value=\"1\"" . get_selected($v, 1);
-    $r .= ">Behind</option>";
-    $r .= "<option value=\"3\"" . get_selected($v, 3);
-    $r .= ">In Front Of</option>";
-    $r .= "<option value=\"2\"" . get_selected($v, 2);
-    $r .= ">Below</option>";
-    $r .= "<option value=\"4\"" . get_selected($v, 4);
-    $r .= ">Above</option>";
-    return $r;
+    return SelectOptionsBuilder::forAnnotationPosition($v);
 }
+
 // -------------------------------------------------------------
 
+/**
+ * Build hover/click translation settings options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forHoverTranslation() instead
+ */
 function get_hts_selectoptions(int|string|null $current_setting): string
 {
-    if (!isset($current_setting)) {
-        $current_setting = 1;
-    }
-    $options = array(
-        1 => "Never",
-        2 => "On Click",
-        3 => "On Hover"
-    );
-    $r = "";
-    foreach ($options as $key => $value) {
-        $r .= sprintf(
-            '<option value="%d"%s>%s</option>',
-            $key,
-            get_selected($current_setting, $key),
-            $value
-        );
-    }
-    return $r;
+    return SelectOptionsBuilder::forHoverTranslation($current_setting);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Build pagination options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forPagination() instead
+ */
 function get_paging_selectoptions(int $currentpage, int $pages): string
 {
-    $r = "";
-    for ($i = 1; $i <= $pages; $i++) {
-        $r .= "<option value=\"" . $i . "\"" . get_selected($i, $currentpage);
-        $r .= ">$i</option>";
-    }
-    return $r;
+    return SelectOptionsBuilder::forPagination($currentpage, $pages);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Build word sorting options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forWordSort() instead
+ */
 function get_wordssort_selectoptions(int|string|null $v): string
 {
-    if (! isset($v)) {
-        $v = 1;
-    }
-    $r  = "<option value=\"1\"" . get_selected($v, 1);
-    $r .= ">Term A-Z</option>";
-    $r .= "<option value=\"2\"" . get_selected($v, 2);
-    $r .= ">Translation A-Z</option>";
-    $r .= "<option value=\"3\"" . get_selected($v, 3);
-    $r .= ">Newest first</option>";
-    $r .= "<option value=\"7\"" . get_selected($v, 7);
-    $r .= ">Oldest first</option>";
-    $r .= "<option value=\"4\"" . get_selected($v, 4);
-    $r .= ">Oldest first</option>";
-    $r .= "<option value=\"5\"" . get_selected($v, 5);
-    $r .= ">Status</option>";
-    $r .= "<option value=\"6\"" . get_selected($v, 6);
-    $r .= ">Score Value (%)</option>";
-    $r .= "<option value=\"7\"" . get_selected($v, 7);
-    $r .= ">Word Count Active Texts</option>";
-    return $r;
+    return SelectOptionsBuilder::forWordSort($v);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Build tag sorting options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forTagSort() instead
+ */
 function get_tagsort_selectoptions(int|string|null $v): string
 {
-    if (! isset($v)) {
-        $v = 1;
-    }
-    $r  = "<option value=\"1\"" . get_selected($v, 1);
-    $r .= ">Tag Text A-Z</option>";
-    $r .= "<option value=\"2\"" . get_selected($v, 2);
-    $r .= ">Tag Comment A-Z</option>";
-    $r .= "<option value=\"3\"" . get_selected($v, 3);
-    $r .= ">Newest first</option>";
-    $r .= "<option value=\"4\"" . get_selected($v, 4);
-    $r .= ">Oldest first</option>";
-    return $r;
+    return SelectOptionsBuilder::forTagSort($v);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Build text sorting options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forTextSort() instead
+ */
 function get_textssort_selectoptions(int|string|null $v): string
 {
-    if (!isset($v)) {
-        $v = 1;
-    }
-    $r  = "<option value=\"1\"" . get_selected($v, 1);
-    $r .= ">Title A-Z</option>";
-    $r .= "<option value=\"2\"" . get_selected($v, 2);
-    $r .= ">Newest first</option>";
-    $r .= "<option value=\"3\"" . get_selected($v, 3);
-    $r .= ">Oldest first</option>";
-    return $r;
+    return SelectOptionsBuilder::forTextSort($v);
 }
-
 
 // -------------------------------------------------------------
 
+/**
+ * Build AND/OR logical operator options.
+ *
+ * @deprecated 3.0.0 Use SelectOptionsBuilder::forAndOr() instead
+ */
 function get_andor_selectoptions(int|string|null $v): string
 {
-    if (!isset($v)) {
-        $v = 0;
-    }
-    $r  = "<option value=\"0\"" . get_selected($v, 0);
-    $r .= ">... OR ...</option>";
-    $r .= "<option value=\"1\"" . get_selected($v, 1);
-    $r .= ">... AND ...</option>";
-    return $r;
+    return SelectOptionsBuilder::forAndOr($v);
 }
 
 // -------------------------------------------------------------
@@ -618,10 +522,14 @@ function get_status_abbr(int $n): string
 
 // -------------------------------------------------------------
 
+/**
+ * Build a colored status message HTML.
+ *
+ * @deprecated 3.0.0 Use StatusHelper::buildColoredMessage() instead
+ */
 function get_colored_status_msg(int $n): string
 {
-    return '<span class="status' . $n . '">&nbsp;' . tohtml(get_status_name($n)) .
-    '&nbsp;[' . tohtml(get_status_abbr($n)) . ']&nbsp;</span>';
+    return StatusHelper::buildColoredMessage($n, get_status_name($n), get_status_abbr($n));
 }
 
 // -------------------------------------------------------------
@@ -786,83 +694,36 @@ function get_texts_selectoptions(int|string|null $lang, int|string|null $v): str
  * Makes HTML content for a text of style "Page 1 of 3".
  *
  * @return void
+ *
+ * @deprecated 3.0.0 Use PageLayoutHelper::buildPager() instead
  */
 function makePager(int $currentpage, int $pages, string $script, string $formname): void
 {
-    $marger = 'style="margin-left: 4px; margin-right: 4px;"';
-    if ($currentpage > 1) {
-        ?>
-<a href="<?php echo $script; ?>?page=1" <?php echo $marger; ?>>
-    <img src="/assets/icons/control-stop-180.png" title="First Page" alt="First Page" />
-</a>
-<a href="<?php echo $script; ?>?page=<?php echo $currentpage - 1; ?>" <?php echo $marger; ?>>
-    <img src="/assets/icons/control-180.png" title="Previous Page" alt="Previous Page" />
-</a>
-        <?php
-    }
-    ?>
-Page
-    <?php
-    if ($pages == 1) {
-        echo '1';
-    } else {
-        ?>
-<select name="page" onchange="{val=document.<?php echo $formname; ?>.page.options[document.<?php echo $formname; ?>.page.selectedIndex].value; location.href='<?php echo $script; ?>?page=' + val;}">
-        <?php echo get_paging_selectoptions($currentpage, $pages); ?>
-</select>
-        <?php
-    }
-    echo ' of ' . $pages . ' ';
-    if ($currentpage < $pages) {
-        ?>
-<a href="<?php echo $script; ?>?page=<?php echo $currentpage + 1; ?>" <?php echo $marger; ?>>
-    <img src="/assets/icons/control.png" title="Next Page" alt="Next Page" />
-</a>
-<a href="<?php echo $script; ?>?page=<?php echo $pages; ?>" <?php echo $marger; ?>>
-    <img src="/assets/icons/control-stop.png" title="Last Page" alt="Last Page" />
-</a>
-        <?php
-    }
+    echo PageLayoutHelper::buildPager($currentpage, $pages, $script, $formname);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Build a SQL condition for filtering by status range.
+ *
+ * @deprecated 3.0.0 Use StatusHelper::makeCondition() instead
+ */
 function makeStatusCondition(string $fieldname, int $statusrange): string
 {
-    if ($statusrange >= 12 && $statusrange <= 15) {
-        return '(' . $fieldname . ' between 1 and ' . ($statusrange % 10) . ')';
-    } elseif ($statusrange >= 23 && $statusrange <= 25) {
-        return '(' . $fieldname . ' between 2 and ' . ($statusrange % 10) . ')';
-    } elseif ($statusrange >= 34 && $statusrange <= 35) {
-        return '(' . $fieldname . ' between 3 and ' . ($statusrange % 10) . ')';
-    } elseif ($statusrange == 45) {
-        return '(' . $fieldname . ' between 4 and 5)';
-    } elseif ($statusrange == 599) {
-        return $fieldname . ' in (5,99)';
-    } else {
-        return $fieldname . ' = ' . $statusrange;
-    }
+    return StatusHelper::makeCondition($fieldname, $statusrange);
 }
 
 // -------------------------------------------------------------
 
+/**
+ * Check if a status value is within a status range.
+ *
+ * @deprecated 3.0.0 Use StatusHelper::checkRange() instead
+ */
 function checkStatusRange(int $currstatus, int $statusrange): bool
 {
-    if ($statusrange >= 12 && $statusrange <= 15) {
-        return ($currstatus >= 1 && $currstatus <= ($statusrange % 10));
-    }
-    if ($statusrange >= 23 && $statusrange <= 25) {
-        return ($currstatus >= 2 && $currstatus <= ($statusrange % 10));
-    }
-    if ($statusrange >= 34 && $statusrange <= 35) {
-        return ($currstatus >= 3 && $currstatus <= ($statusrange % 10));
-    }
-    if ($statusrange == 45) {
-        return ($currstatus == 4 || $currstatus == 5);
-    } if ($statusrange == 599) {
-        return ($currstatus == 5 || $currstatus == 99);
-    }
-    return ($currstatus == $statusrange);
+    return StatusHelper::checkRange($currstatus, $statusrange);
 }
 
 /**
@@ -873,33 +734,12 @@ function checkStatusRange(int $currstatus, int $statusrange): bool
  *                                     combining 5 and 99 statuses.
  *                                     0 return an empty string
  * @return string CSS class filter to exclude $status
+ *
+ * @deprecated 3.0.0 Use StatusHelper::makeClassFilter() instead
  */
 function makeStatusClassFilter($status)
 {
-    if ($status == 0) {
-        return '';
-    }
-    $liste = array(1,2,3,4,5,98,99);
-    if ($status == 599) {
-        makeStatusClassFilterHelper(5, $liste);
-        makeStatusClassFilterHelper(99, $liste);
-    } elseif ($status < 6 || $status > 97) {
-        makeStatusClassFilterHelper($status, $liste);
-    } else {
-        $from = (int) ($status / 10);
-        $to = $status - ($from * 10);
-        for ($i = $from; $i <= $to; $i++) {
-            makeStatusClassFilterHelper($i, $liste);
-        }
-    }
-    // Set all statuses that are not -1
-    $r = '';
-    foreach ($liste as $v) {
-        if ($v != -1) {
-            $r .= ':not(.status' . $v . ')';
-        }
-    }
-    return $r;
+    return StatusHelper::makeClassFilter($status);
 }
 
 /**
@@ -907,6 +747,8 @@ function makeStatusClassFilter($status)
  *
  * @param int   $status A value in $array
  * @param int[] $array  Any array of values
+ *
+ * @deprecated 3.0.0 This is an internal helper, no longer needed
  */
 function makeStatusClassFilterHelper($status, &$array): void
 {
@@ -925,19 +767,12 @@ function makeStatusClassFilterHelper($status, &$array): void
  * @return string ' ' of ' checked="checked" ' if the qttribute should be checked.
  *
  * @psalm-return ' '|' checked="checked" '
+ *
+ * @deprecated 3.0.0 Use FormHelper::checkInRequest() instead
  */
 function checkTest($val, $name): string
 {
-    if (!isset($_REQUEST[$name])) {
-        return ' ';
-    }
-    if (!is_array($_REQUEST[$name])) {
-        return ' ';
-    }
-    if (in_array($val, $_REQUEST[$name])) {
-        return ' checked="checked" ';
-    }
-    return ' ';
+    return FormHelper::checkInRequest($val, $name);
 }
 
 /**
@@ -948,26 +783,19 @@ function checkTest($val, $name): string
  * @param int $wordid Word ID
  *
  * @return string the HTML-formatted string to use
+ *
+ * @deprecated 3.0.0 Use StatusHelper::buildTestTableControls() instead
  */
 function make_status_controls_test_table($score, $status, $wordid): string
 {
-    if ($score < 0) {
-        $scoret = '<span class="red2">' . get_status_abbr($status) . '</span>';
-    } else {
-        $scoret = get_status_abbr($status);
-    }
-
-    if ($status <= 5 || $status == 98) {
-        $plus = '<img src="/assets/icons/plus.png" class="click" title="+" alt="+" onclick="changeTableTestStatus(' . $wordid . ',true);" />';
-    } else {
-        $plus = '<img src="' . get_file_path('assets/icons/placeholder.png') . '" title="" alt="" />';
-    }
-    if ($status >= 1) {
-        $minus = '<img src="/assets/icons/minus.png" class="click" title="-" alt="-" onclick="changeTableTestStatus(' . $wordid . ',false);" />';
-    } else {
-        $minus = '<img src="' . get_file_path('assets/icons/placeholder.png') . '" title="" alt="" />';
-    }
-    return ($status == 98 ? '' : $minus . ' ') . $scoret . ($status == 99 ? '' : ' ' . $plus);
+    $placeholder = get_file_path('assets/icons/placeholder.png');
+    return StatusHelper::buildTestTableControls(
+        $score,
+        $status,
+        $wordid,
+        get_status_abbr($status),
+        $placeholder
+    );
 }
 
 /**

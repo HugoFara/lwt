@@ -1,0 +1,216 @@
+<?php
+
+/**
+ * \file
+ * \brief Helper for page layout generation (headers, footers, navigation).
+ *
+ * PHP version 8.1
+ *
+ * @category View
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/files/src-backend-View-Helper-PageLayoutHelper.html
+ * @since    3.0.0
+ */
+
+namespace Lwt\View\Helper;
+
+/**
+ * Helper class for generating page layout elements.
+ *
+ * Provides methods for generating page headers, footers,
+ * navigation menus, and other layout components.
+ *
+ * @since 3.0.0
+ */
+class PageLayoutHelper
+{
+    /**
+     * Generate the quick menu dropdown HTML.
+     *
+     * @return string HTML select element for quick navigation
+     */
+    public static function buildQuickMenu(): string
+    {
+        return <<<'HTML'
+<select id="quickmenu" onchange="quickMenuRedirection(value)">
+    <option value="" selected="selected">[Menu]</option>
+    <option value="index">Home</option>
+    <optgroup label="Texts">
+        <option value="edit_texts">Texts</option>
+        <option value="edit_archivedtexts">Text Archive</option>
+        <option value="edit_texttags">Text Tags</option>
+        <option value="check_text">Text Check</option>
+        <option value="long_text_import">Long Text Import</option>
+    </optgroup>
+    <option value="edit_languages">Languages</option>
+    <optgroup label="Terms">
+        <option value="edit_words">Terms</option>
+        <option value="edit_tags">Term Tags</option>
+        <option value="upload_words">Term Import</option>
+    </optgroup>
+    <option value="statistics">Statistics</option>
+    <option value="rss_import">Newsfeed Import</option>
+    <optgroup label="Other">
+        <option value="backup_restore">Backup/Restore</option>
+        <option value="settings">Settings</option>
+        <option value="text_to_speech_settings">Text-to-Speech Settings</option>
+        <option value="INFO">Help</option>
+    </optgroup>
+</select>
+HTML;
+    }
+
+    /**
+     * Generate the LWT logo HTML.
+     *
+     * @param string $imagePath Path to the logo image
+     *
+     * @return string HTML img element for the logo
+     */
+    public static function buildLogo(string $imagePath = 'assets/images/lwt_icon.png'): string
+    {
+        $path = function_exists('get_file_path') ? get_file_path($imagePath) : '/' . $imagePath;
+        return '<img class="lwtlogo" src="' . htmlspecialchars($path, ENT_QUOTES, 'UTF-8')
+            . '" title="LWT" alt="LWT logo" />';
+    }
+
+    /**
+     * Generate pagination controls HTML.
+     *
+     * @param int    $currentPage Current page number
+     * @param int    $totalPages  Total number of pages
+     * @param string $scriptUrl   Base URL for pagination links
+     * @param string $formName    Form name for JavaScript reference
+     *
+     * @return string HTML pagination controls
+     */
+    public static function buildPager(
+        int $currentPage,
+        int $totalPages,
+        string $scriptUrl,
+        string $formName
+    ): string {
+        $result = '';
+        $margerStyle = 'style="margin-left: 4px; margin-right: 4px;"';
+        $scriptUrl = htmlspecialchars($scriptUrl, ENT_QUOTES, 'UTF-8');
+        $formName = htmlspecialchars($formName, ENT_QUOTES, 'UTF-8');
+
+        // Previous page controls
+        if ($currentPage > 1) {
+            $result .= '<a href="' . $scriptUrl . '?page=1" ' . $margerStyle . '>';
+            $result .= '<img src="/assets/icons/control-stop-180.png" title="First Page" alt="First Page" />';
+            $result .= '</a>';
+            $result .= '<a href="' . $scriptUrl . '?page=' . ($currentPage - 1) . '" ' . $margerStyle . '>';
+            $result .= '<img src="/assets/icons/control-180.png" title="Previous Page" alt="Previous Page" />';
+            $result .= '</a>';
+        }
+
+        // Page indicator
+        $result .= 'Page ';
+        if ($totalPages == 1) {
+            $result .= '1';
+        } else {
+            $result .= '<select name="page" onchange="{val=document.' . $formName
+                . '.page.options[document.' . $formName . '.page.selectedIndex].value; '
+                . 'location.href=\'' . $scriptUrl . '?page=\' + val;}">';
+            $result .= SelectOptionsBuilder::forPagination($currentPage, $totalPages);
+            $result .= '</select>';
+        }
+        $result .= ' of ' . $totalPages . ' ';
+
+        // Next page controls
+        if ($currentPage < $totalPages) {
+            $result .= '<a href="' . $scriptUrl . '?page=' . ($currentPage + 1) . '" ' . $margerStyle . '>';
+            $result .= '<img src="/assets/icons/control.png" title="Next Page" alt="Next Page" />';
+            $result .= '</a>';
+            $result .= '<a href="' . $scriptUrl . '?page=' . $totalPages . '" ' . $margerStyle . '>';
+            $result .= '<img src="/assets/icons/control-stop.png" title="Last Page" alt="Last Page" />';
+            $result .= '</a>';
+        }
+
+        return $result;
+    }
+
+    /**
+     * Generate HTTP cache prevention headers.
+     *
+     * @return void
+     */
+    public static function sendNoCacheHeaders(): void
+    {
+        @header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+        @header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        @header('Cache-Control: no-cache, must-revalidate, max-age=0');
+        @header('Pragma: no-cache');
+    }
+
+    /**
+     * Build the HTML head meta tags.
+     *
+     * @return string HTML meta tags
+     */
+    public static function buildMetaTags(): string
+    {
+        return <<<'HTML'
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon-57x57.png" />
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/apple-touch-icon-72x72.png" />
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/apple-touch-icon-114x114.png" />
+<link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+HTML;
+    }
+
+    /**
+     * Build the page title HTML element.
+     *
+     * @param string $title   Page title
+     * @param bool   $isDebug Whether to show debug indicator
+     *
+     * @return string HTML h1 element with title
+     */
+    public static function buildPageTitle(string $title, bool $isDebug = false): string
+    {
+        $escapedTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+        $debugSpan = $isDebug ? ' <span class="red">DEBUG</span>' : '';
+        return '<h1>' . $escapedTitle . $debugSpan . '</h1>';
+    }
+
+    /**
+     * Build the document title tag content.
+     *
+     * @param string $title Page title
+     *
+     * @return string HTML title element
+     */
+    public static function buildDocumentTitle(string $title): string
+    {
+        return '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
+    }
+
+    /**
+     * Build the execution time display.
+     *
+     * @param float $executionTime Execution time in seconds
+     *
+     * @return string HTML paragraph with execution time
+     */
+    public static function buildExecutionTime(float $executionTime): string
+    {
+        return '<p class="smallgray2">' . round($executionTime, 5) . ' secs</p>';
+    }
+
+    /**
+     * Build the overlib div used for tooltips.
+     *
+     * @return string HTML div element
+     */
+    public static function buildOverlibDiv(): string
+    {
+        return '<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>';
+    }
+}
