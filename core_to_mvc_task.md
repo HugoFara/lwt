@@ -330,7 +330,15 @@ Current files in `src/backend/Core/` that may need migration:
 
 ### Feature-Specific (Candidates for Service extraction)
 
-- `Text/*.php` - Extract to TextService
+- ~~`Text/*.php`~~ - **COMPLETED**: Migrated to multiple Services
+  - `text_helpers.php` → Combined into multiple services (was a shim file)
+  - `text_navigation.php` → `Services/TextNavigationService.php`
+  - `text_display.php` → `Services/TextReadingService.php`
+  - `text_statistics.php` → `Services/TextStatisticsService.php`
+  - `sentence_operations.php` → `Services/SentenceService.php`
+  - `annotation_management.php` → `Services/AnnotationService.php`
+  - `simterms.php` → `Services/SimilarTermsService.php`
+  - `text_parsing.php` → `Services/TextParsingService.php`
 - ~~`Word/*.php`~~ - **COMPLETED**: Migrated to `WordStatusService`, `DictionaryService`, and `ExpressionService`
   - `word_status.php` → `Services/WordStatusService.php` (static methods: `getStatuses()`, `getStatusName()`, `getStatusAbbr()`, `isValidStatus()`)
   - `word_scoring.php` → `Services/WordStatusService.php` (constants: `SCORE_FORMULA_TODAY`, `SCORE_FORMULA_TOMORROW`; static method: `makeScoreRandomInsertUpdate()`)

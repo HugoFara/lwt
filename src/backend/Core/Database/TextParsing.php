@@ -16,7 +16,7 @@
 
 namespace Lwt\Database;
 
-require_once __DIR__ . '/../Text/text_parsing.php';
+require_once __DIR__ . '/../../Services/TextParsingService.php';
 
 use Lwt\Core\Globals;
 

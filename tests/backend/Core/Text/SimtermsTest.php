@@ -17,7 +17,7 @@ EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
-require_once __DIR__ . '/../../../../src/backend/Core/Text/simterms.php';
+require_once __DIR__ . '/../../../../src/backend/Services/SimilarTermsService.php';
 
 class SimtermsTest extends TestCase
 {

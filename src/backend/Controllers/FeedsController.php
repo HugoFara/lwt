@@ -18,7 +18,14 @@ namespace Lwt\Controllers;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-require_once __DIR__ . '/../Core/Text/text_helpers.php';
+require_once __DIR__ . '/../Services/TextStatisticsService.php';
+require_once __DIR__ . '/../Services/SentenceService.php';
+require_once __DIR__ . '/../Services/AnnotationService.php';
+require_once __DIR__ . '/../Services/SimilarTermsService.php';
+require_once __DIR__ . '/../Services/TextNavigationService.php';
+require_once __DIR__ . '/../Services/TextParsingService.php';
+require_once __DIR__ . '/../Services/ExpressionService.php';
+require_once __DIR__ . '/../Core/database_operations.php';
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Services/MediaService.php';
 require_once __DIR__ . '/../Services/TagService.php';

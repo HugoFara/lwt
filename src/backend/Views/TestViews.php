@@ -17,7 +17,7 @@ namespace Lwt\Views;
 
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../Services/WordStatusService.php';
-require_once __DIR__ . '/../Core/Text/text_navigation.php';
+require_once __DIR__ . '/../Services/TextNavigationService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 

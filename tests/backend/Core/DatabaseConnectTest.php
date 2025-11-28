@@ -11,7 +11,7 @@ $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Core/Text/text_parsing.php';
+require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
 
 use Lwt\Database\Configuration;

@@ -3,7 +3,7 @@
 namespace Lwt\Tests\Core\Text;
 
 require_once __DIR__ . '/../../../../src/backend/Core/settings.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Text/annotation_management.php';
+require_once __DIR__ . '/../../../../src/backend/Services/AnnotationService.php';
 
 use PHPUnit\Framework\TestCase;
 

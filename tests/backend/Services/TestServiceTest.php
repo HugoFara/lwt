@@ -21,7 +21,14 @@ $GLOBALS['dbname'] = "test_" . $config['dbname'];
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
-require_once __DIR__ . '/../../../src/backend/Core/Text/text_helpers.php';
+require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
+require_once __DIR__ . '/../../../src/backend/Services/SentenceService.php';
+require_once __DIR__ . '/../../../src/backend/Services/AnnotationService.php';
+require_once __DIR__ . '/../../../src/backend/Services/SimilarTermsService.php';
+require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
+require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
+require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
+require_once __DIR__ . '/../../../src/backend/Core/database_operations.php';
 require_once __DIR__ . '/../../../src/backend/Services/TestService.php';
 
 /**

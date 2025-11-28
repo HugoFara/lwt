@@ -3,7 +3,7 @@
 namespace Lwt\Tests\Core\Text;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Text/text_parsing.php';
+require_once __DIR__ . '/../../../../src/backend/Services/TextParsingService.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
