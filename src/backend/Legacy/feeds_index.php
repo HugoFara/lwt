@@ -13,18 +13,19 @@
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    1.6.0-fork
  * @since    2.7.1-fork Functional refactoring
+ * @since    3.0.0 MVC refactoring
  */
 
 namespace Lwt\Interface\Do_Feeds;
 
-require_once 'Core/Bootstrap/db_bootstrap.php';
-require_once 'Core/UI/ui_helpers.php';
-require_once 'Core/Tag/tags.php';
-require_once 'Core/Feed/feeds.php';
-require_once 'Core/Text/text_helpers.php';
-require_once 'Core/Http/param_helpers.php';
-require_once 'Core/Media/media_helpers.php';
-require_once 'Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../Core/Tag/tags.php';
+require_once __DIR__ . '/../Core/Feed/feeds.php';
+require_once __DIR__ . '/../Core/Text/text_helpers.php';
+require_once __DIR__ . '/../Core/Http/param_helpers.php';
+require_once __DIR__ . '/../Core/Media/media_helpers.php';
+require_once __DIR__ . '/../Core/Language/language_utilities.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
@@ -32,79 +33,124 @@ use Lwt\Database\Validation;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
-
+use Lwt\Services\FeedService;
 
 /**
- * @return (int|string)[]
+ * Process marked feed items and create texts from them.
  *
- * @psalm-return list{0|1, string}
+ * @param FeedService $service Feed service instance
+ *
+ * @return array{editText: int, message: string}
  */
-function dummy_function_1(): array
+function processMarkedItems(FeedService $service): array
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $edit_text = 0;
+    $editText = 0;
     $message = '';
-    if (is_array($_REQUEST['marked_items'])) {
-        $marked_items = implode(',', array_filter($_REQUEST['marked_items'], 'is_scalar'));
-    } else {
-        $marked_items = $_REQUEST['marked_items'];
+
+    if (!isset($_REQUEST['marked_items']) || !is_array($_REQUEST['marked_items'])) {
+        return ['editText' => $editText, 'message' => $message];
     }
-    $res = Connection::query(
-        "SELECT * FROM (
-            SELECT * FROM {$tbpref}feedlinks
-            WHERE FlID IN ($marked_items)
-            ORDER BY FlNfID
-        ) A
-        left join {$tbpref}newsfeeds ON NfID=FlNfID"
-    );
-    $count = $message1 = $message2 = $message3 = $message4 = 0;
-    while ($row = mysqli_fetch_assoc($res)) {
-        if (get_nf_option($row['NfOptions'], 'edit_text') == 1) {
-            if ($edit_text == 1) {
+
+    $markedItems = implode(',', array_filter($_REQUEST['marked_items'], 'is_scalar'));
+    $feedLinks = $service->getMarkedFeedLinks($markedItems);
+
+    $stats = ['archived' => 0, 'sentences' => 0, 'textitems' => 0, 'texts' => 0];
+    $count = 0;
+
+    foreach ($feedLinks as $row) {
+        $requiresEdit = $service->getNfOption($row['NfOptions'], 'edit_text') == 1;
+
+        if ($requiresEdit) {
+            if ($editText == 1) {
                 $count++;
             } else {
                 echo '<form class="validate" action="/feeds" method="post">';
-                $edit_text = 1;
+                $editText = 1;
             }
         }
-        $doc = array();
-        $doc[0] = array(
+
+        $doc = [[
             'link' => empty($row['FlLink']) ? ('#' . $row['FlID']) : $row['FlLink'],
             'title' => $row['FlTitle'],
             'audio' => $row['FlAudio'],
             'text' => $row['FlText']
-        );
-        $NfName = (string) $row['NfName'];
-        $nf_id = (int) $row['NfID'];
-        $nf_options = $row['NfOptions'];
-        if (!$nf_tag_name = get_nf_option($nf_options, 'tag')) {
-            $nf_tag_name = mb_substr($NfName, 0, 20, "utf-8");
+        ]];
+
+        $nfName = (string)$row['NfName'];
+        $nfId = (int)$row['NfID'];
+        $nfOptions = $row['NfOptions'];
+
+        $tagName = $service->getNfOption($nfOptions, 'tag');
+        if (!$tagName) {
+            $tagName = mb_substr($nfName, 0, 20, "utf-8");
         }
-        if (!$nf_max_texts = (int)get_nf_option($nf_options, 'max_texts')) {
-            $nf_max_texts = (int)Settings::getWithDefault('set-max-texts-per-feed');
+
+        $maxTexts = (int)$service->getNfOption($nfOptions, 'max_texts');
+        if (!$maxTexts) {
+            $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
         }
+
         $texts = get_text_from_rsslink(
             $doc,
             $row['NfArticleSectionTags'],
             $row['NfFilterTags'],
-            get_nf_option($nf_options, 'charset')
+            $service->getNfOption($nfOptions, 'charset')
         );
+
         if (isset($texts['error'])) {
             echo $texts['error']['message'];
-            foreach ($texts['error']['link'] as $err_links) {
-                Connection::execute(
-                    'UPDATE ' . $tbpref . 'feedlinks
-                    SET FlLink=CONCAT(" ",FlLink)
-                    where FlLink in (' . Escaping::toSqlSyntax($err_links) . ')',
-                    ""
-                );
+            foreach ($texts['error']['link'] as $errLink) {
+                $service->markLinkAsError($errLink);
             }
             unset($texts['error']);
         }
 
-        if (get_nf_option($nf_options, 'edit_text') == 1) {
-            foreach ($texts as $text) {
-                ?>
+        if ($requiresEdit) {
+            renderEditTextForm($texts, $row, $count, $tagName, $nfId, $maxTexts);
+        } else {
+            $result = createTextsFromFeed($service, $texts, $row, $tagName, $maxTexts);
+            $stats['archived'] += $result['archived'];
+            $stats['sentences'] += $result['sentences'];
+            $stats['textitems'] += $result['textitems'];
+        }
+    }
+
+    if ($stats['archived'] > 0 || $stats['texts'] > 0) {
+        $message = "Texts archived: {$stats['archived']} / Sentences deleted: {$stats['sentences']}" .
+                   " / Text items deleted: {$stats['textitems']}";
+    }
+
+    if ($editText == 1) {
+        renderEditFormFooter();
+    }
+
+    ?>
+<script type="text/javascript">
+$(".hide_message").delay(2500).slideUp(1000);
+</script>
+    <?php
+
+    return ['editText' => $editText, 'message' => $message];
+}
+
+/**
+ * Render the edit text form for a single feed item.
+ *
+ * @param array  $texts    Parsed text data
+ * @param array  $row      Feed link and feed data
+ * @param int    $count    Form item counter
+ * @param string $tagName  Tag name for the text
+ * @param int    $nfId     Feed ID
+ * @param int    $maxTexts Maximum texts setting
+ *
+ * @return void
+ */
+function renderEditTextForm(array $texts, array $row, int &$count, string $tagName, int $nfId, int $maxTexts): void
+{
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+
+    foreach ($texts as $text) {
+        ?>
 <table class="tab3" cellspacing="0" cellpadding="5">
     <tr>
         <td class="td1 right">
@@ -122,15 +168,15 @@ function dummy_function_1(): array
             <select name="feed[<?php echo $count; ?>][TxLgID]" class="notempty setfocus">
                 <?php
                 $result = Connection::query(
-                    "SELECT LgName,LgID FROM " . $tbpref . "languages
-                    where LgName<>'' ORDER BY LgName"
+                    "SELECT LgName, LgID FROM {$tbpref}languages
+                    WHERE LgName <> '' ORDER BY LgName"
                 );
-                while ($row_l = mysqli_fetch_assoc($result)) {
-                    echo '<option value="' . $row_l['LgID'] . '"';
-                    if ($row['NfLgID'] === $row_l['LgID']) {
+                while ($rowLang = mysqli_fetch_assoc($result)) {
+                    echo '<option value="' . $rowLang['LgID'] . '"';
+                    if ($row['NfLgID'] === $rowLang['LgID']) {
                         echo ' selected="selected"';
                     }
-                    echo '>' . $row_l['LgName'] . '</option>';
+                    echo '>' . $rowLang['LgName'] . '</option>';
                 }
                 mysqli_free_result($result);
                 ?>
@@ -141,7 +187,7 @@ function dummy_function_1(): array
         <td class="td1 right">Text:</td>
         <td class="td1">
             <textarea
-                <?php echo getScriptDirectionTag((int) $row['NfLgID']); ?>
+                <?php echo getScriptDirectionTag((int)$row['NfLgID']); ?>
             name="feed[<?php echo $count; ?>][TxText]" class="notempty checkbytes"
             cols="60" rows="20"
             ><?php echo tohtml($text['TxText']); ?></textarea>
@@ -164,11 +210,11 @@ function dummy_function_1(): array
             <ul name="feed[<?php echo $count; ?>][TagList][]"
             style="width:340px;margin-top:0px;margin-bottom:0px;margin-left:2px;">
                 <li>
-                    <?php echo $nf_tag_name; ?>
+                    <?php echo $tagName; ?>
                 </li>
             </ul>
-            <input type="hidden" name="feed[<?php echo $count; ?>][Nf_ID]" value="<?php echo $nf_id; ?>" />
-            <input type="hidden" name="feed[<?php echo $count; ?>][Nf_Max_Texts]" value="<?php echo $nf_max_texts; ?>" />
+            <input type="hidden" name="feed[<?php echo $count; ?>][Nf_ID]" value="<?php echo $nfId; ?>" />
+            <input type="hidden" name="feed[<?php echo $count; ?>][Nf_Max_Texts]" value="<?php echo $maxTexts; ?>" />
         </td>
     </tr>
     <tr>
@@ -178,134 +224,19 @@ function dummy_function_1(): array
         </td>
     </tr>
 </table>
-                <?php
-            }
-        } else {
-            Connection::query(
-                'insert ignore into ' . $tbpref . 'tags2 (T2Text)
-                values("' . $nf_tag_name . '")'
-            );
-            foreach ($texts as $text) {
-                echo '<div class="msgblue">
-                <p class="hide_message">+++ "' . $text['TxTitle'] . '" added! +++</p>
-                </div>';
-                Connection::query(
-                    'INSERT INTO ' . $tbpref . 'texts (
-                        TxLgID,TxTitle,TxText,TxAudioURI,TxSourceURI
-                    )
-                    VALUES (
-                        ' . $row['NfLgID'] . ',' .
-                        Escaping::toSqlSyntax($text['TxTitle']) . ',' .
-                        Escaping::toSqlSyntax($text['TxText']) . ',' .
-                        Escaping::toSqlSyntax($text['TxAudioURI']) . ',' .
-                        Escaping::toSqlSyntax($text['TxSourceURI']) . '
-                    )'
-                );
-                $id = Connection::lastInsertId();
-                TextParsing::splitCheck(
-                    Connection::fetchValue(
-                        'select TxText as value from ' . $tbpref . 'texts
-                        where TxID = ' . $id
-                    ),
-                    Connection::fetchValue(
-                        'select TxLgID as value from ' . $tbpref . 'texts
-                        where TxID = ' . $id
-                    ),
-                    $id
-                );
-                Connection::execute(
-                    'insert into ' . $tbpref . 'texttags (TtTxID, TtT2ID)
-                    select ' . $id . ', T2ID
-                    from ' . $tbpref . 'tags2
-                    where T2Text = "' . $nf_tag_name . '"',
-                    ""
-                );
-            }
-            get_texttags(1);
-            $result = Connection::query(
-                "SELECT TtTxID FROM " . $tbpref . "texttags
-                join " . $tbpref . "tags2 on TtT2ID=T2ID
-                WHERE T2Text='" . $nf_tag_name . "'"
-            );
-            $text_count = 0;
-            $text_item = array();
-            while ($row = mysqli_fetch_assoc($result)) {
-                $text_item[$text_count++] = $row['TtTxID'];
-            }
-            mysqli_free_result($result);
-            if (!empty($text_item)) {
-                sort($text_item, SORT_NUMERIC);
-                if ($text_count > $nf_max_texts) {
-                    $text_item = array_slice($text_item, 0, $text_count - $nf_max_texts);
-                    foreach ($text_item as $text_ID) {
-                        $temp = Connection::execute(
-                            'delete from ' . $tbpref . 'textitems2 where Ti2TxID = ' . $text_ID,
-                            ""
-                        );
-                        if (is_numeric($temp)) {
-                            $message3 += (int) $temp;
-                        }
-                        $temp = Connection::execute(
-                            'delete from ' . $tbpref . 'sentences where SeTxID = ' . $text_ID,
-                            ""
-                        );
-                        if (is_numeric($temp)) {
-                            $message2 += (int) $temp;
-                        }
-                        $temp = Connection::execute(
-                            'INSERT INTO ' . $tbpref . 'archivedtexts (
-                                AtLgID, AtTitle, AtText,
-                                AtAnnotatedText, AtAudioURI, AtSourceURI
-                            )
-                            SELECT TxLgID, TxTitle, TxText,
-                            TxAnnotatedText, TxAudioURI, TxSourceURI
-                            FROM ' . $tbpref . 'texts
-                            WHERE TxID = ' . $text_ID,
-                            ""
-                        );
-                        if (is_numeric($temp)) {
-                            $message4 += (int) $temp;
-                        }
-                        $id = Connection::lastInsertId();
-                        Connection::execute(
-                            'INSERT INTO ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
-                            SELECT ' . $id . ', TtT2ID
-                            FROM ' . $tbpref . 'texttags
-                            WHERE TtTxID = ' . $text_ID,
-                            ""
-                        );
-                        $temp = Connection::execute(
-                            'DELETE FROM ' . $tbpref . 'texts
-                            WHERE TxID = ' . $text_ID,
-                            ""
-                        );
-                        if (is_numeric($temp)) {
-                            $message1 += (int) $temp;
-                        }
-                        Maintenance::adjustAutoIncrement('texts', 'TxID');
-                        Maintenance::adjustAutoIncrement('sentences', 'SeID');
-                        Connection::execute(
-                            "DELETE " . $tbpref . "texttags
-                            FROM ("
-                                . $tbpref . "texttags
-                                LEFT JOIN " . $tbpref . "texts
-                                ON TtTxID = TxID
-                            )
-                            WHERE TxID IS NULL",
-                            ''
-                        );
-                    }
-                }
-            }
-        }
+        <?php
+        $count++;
     }
-    mysqli_free_result($res);
-    if ($message4 > 0 || $message1 > 0) {
-        $message = "Texts archived: $message1 / Sentences deleted: $message2" .
-        " / Text items deleted: $message3";
-    }
-    if ($edit_text == 1) {
-        ?>
+}
+
+/**
+ * Render the edit form footer with submit button and JavaScript.
+ *
+ * @return void
+ */
+function renderEditFormFooter(): void
+{
+    ?>
    <input id="markaction" type="submit" value="Save" />
    <input type="button" value="Cancel" onclick="location.href='/feeds';" />
    <input type="hidden" name="checked_feeds_save" value="1" />
@@ -343,22 +274,50 @@ function dummy_function_1(): array
         fieldName: tagrepl
     });});
    </script>
-        <?php
-    }
-    if ($edit_text == 1) {
-        echo '</form>';
-    }
-    ?>
-<script type="text/javascript">
-$(".hide_message").delay(2500).slideUp(1000);
-</script>
     <?php
-    return array($edit_text, $message);
 }
 
-function check_errors(string $message): void
+/**
+ * Create texts from feed data without edit form.
+ *
+ * @param FeedService $service  Feed service instance
+ * @param array       $texts    Parsed text data
+ * @param array       $row      Feed data
+ * @param string      $tagName  Tag name
+ * @param int         $maxTexts Maximum texts to keep
+ *
+ * @return array{archived: int, sentences: int, textitems: int}
+ */
+function createTextsFromFeed(FeedService $service, array $texts, array $row, string $tagName, int $maxTexts): array
 {
+    foreach ($texts as $text) {
+        echo '<div class="msgblue">
+        <p class="hide_message">+++ "' . $text['TxTitle'] . '" added! +++</p>
+        </div>';
 
+        $service->createTextFromFeed([
+            'TxLgID' => $row['NfLgID'],
+            'TxTitle' => $text['TxTitle'],
+            'TxText' => $text['TxText'],
+            'TxAudioURI' => $text['TxAudioURI'] ?? '',
+            'TxSourceURI' => $text['TxSourceURI'] ?? ''
+        ], $tagName);
+    }
+
+    get_texttags(1);
+
+    return $service->archiveOldTexts($tagName, $maxTexts);
+}
+
+/**
+ * Display errors and messages.
+ *
+ * @param string $message Message to display
+ *
+ * @return void
+ */
+function displayMessages(string $message): void
+{
     if (isset($_REQUEST['checked_feeds_save'])) {
         $message = write_rss_to_db($_REQUEST['feed']);
         ?>
@@ -367,6 +326,7 @@ function check_errors(string $message): void
     </script>
         <?php
     }
+
     if (isset($_SESSION['feed_loaded'])) {
         foreach ($_SESSION['feed_loaded'] as $lf) {
             if (substr($lf, 0, 5) == "Error") {
@@ -374,7 +334,7 @@ function check_errors(string $message): void
             } else {
                 echo "\n<div class=\"msgblue\"><p class=\"hide_message\">";
             }
-            echo "+++ ",$lf," +++</p></div>";
+            echo "+++ ", $lf, " +++</p></div>";
         }
         ?>
     <script type="text/javascript">
@@ -383,53 +343,85 @@ function check_errors(string $message): void
         <?php
         unset($_SESSION['feed_loaded']);
     }
+
     echo error_message_with_hide($message, false);
 }
 
-function dummy_function_2(int $currentlang, int $currentfeed): void
+/**
+ * Render the main feeds index page.
+ *
+ * @param FeedService $service      Feed service instance
+ * @param int         $currentLang  Current language filter
+ * @param int         $currentFeed  Current feed filter
+ *
+ * @return void
+ */
+function renderFeedsIndex(FeedService $service, int $currentLang, int $currentFeed): void
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $debug = \Lwt\Core\Globals::isDebug();
-    $currentquery = (string) processSessParam("query", "currentrssquery", '', false);
-    $currentquerymode = (string) processSessParam(
-        "query_mode",
-        "currentrssquerymode",
-        'title,desc,text',
-        false
-    );
-    $currentregexmode = Settings::getWithDefault("set-regex-mode");
-    $wh_query = $currentregexmode . 'like ' .  Escaping::toSqlSyntax(
-        ($currentregexmode == '') ?
-        str_replace("*", "%", mb_strtolower($currentquery, 'UTF-8')) :
-        $currentquery
-    );
-    switch ($currentquerymode) {
-        case 'title,desc,text':
-            $wh_query = ' and (FlTitle ' . $wh_query . ' or FlDescription ' . $wh_query . ' or FlText ' . $wh_query . ')';
-            break;
-        case 'title':
-            $wh_query = ' and (FlTitle ' . $wh_query . ')';
-            break;
-    }
 
-    if ($currentquery !== '') {
-        if ($currentregexmode !== '') {
-            if (@mysqli_query($GLOBALS["DBCONNECTION"], 'select "test" rlike ' . Escaping::toSqlSyntax($currentquery)) === false) {
-                $currentquery = '';
-                $wh_query = '';
-                unset($_SESSION['currentwordquery']);
-                if (isset($_REQUEST['query'])) {
-                    echo '<p id="hide3" style="color:red;text-align:center;">+++ Warning: Invalid Search +++</p>';
-                }
+    $currentQuery = (string)processSessParam("query", "currentrssquery", '', false);
+    $currentQueryMode = (string)processSessParam("query_mode", "currentrssquerymode", 'title,desc,text', false);
+    $currentRegexMode = Settings::getWithDefault("set-regex-mode");
+
+    $whQuery = $service->buildQueryFilter($currentQuery, $currentQueryMode, $currentRegexMode);
+
+    if (!empty($currentQuery) && !empty($currentRegexMode)) {
+        if (!$service->validateRegexPattern($currentQuery)) {
+            $currentQuery = '';
+            $whQuery = '';
+            unset($_SESSION['currentwordquery']);
+            if (isset($_REQUEST['query'])) {
+                echo '<p id="hide3" style="color:red;text-align:center;">+++ Warning: Invalid Search +++</p>';
             }
         }
-    } else {
-        $wh_query = '';
     }
-    $currentpage = (int) processSessParam("page", "currentrsspage", '1', true);
-    $currentsort = (int) processDBParam("sort", 'currentrsssort', '2', true);
-    ?>
 
+    $currentPage = (int)processSessParam("page", "currentrsspage", '1', true);
+    $currentSort = (int)processDBParam("sort", 'currentrsssort', '2', true);
+
+    renderFeedsHeader();
+    renderFilterForm($currentLang, $currentQuery, $currentQueryMode, $currentRegexMode);
+
+    $feeds = $service->getFeeds($currentLang ?: null);
+
+    if (empty($feeds)) {
+        echo ' no feed available</td><td class="td1"></td></tr></table></form>';
+        return;
+    }
+
+    renderFeedSelector($feeds, $currentFeed);
+
+    if ($currentFeed == 0 || !in_array($currentFeed, array_column($feeds, 'NfID'))) {
+        $currentFeed = $feeds[0]['NfID'];
+        $feedIds = (string)$currentFeed;
+    } else {
+        $feedIds = (string)$currentFeed;
+    }
+
+    $recno = $service->countFeedLinks($feedIds, $whQuery);
+
+    if ($debug) {
+        echo "Feed IDs: $feedIds, Count: $recno";
+    }
+
+    if ($recno > 0) {
+        renderFeedArticles($service, $feedIds, $whQuery, $currentPage, $currentSort, $recno);
+    } else {
+        echo '</table></form>';
+    }
+
+    renderNotFoundScript();
+}
+
+/**
+ * Render the feeds page header with navigation.
+ *
+ * @return void
+ */
+function renderFeedsHeader(): void
+{
+    ?>
 <div class="flex-spaced">
     <div title="Import of a single text, max. 65,000 bytes long, with optional audio">
         <a href="/feeds/edit?new_feed=1">
@@ -456,6 +448,22 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
         </a>
     </div>
 </div>
+    <?php
+}
+
+/**
+ * Render the filter form.
+ *
+ * @param int    $currentLang      Current language filter
+ * @param string $currentQuery     Current search query
+ * @param string $currentQueryMode Current query mode
+ * @param string $currentRegexMode Current regex mode
+ *
+ * @return void
+ */
+function renderFilterForm(int $currentLang, string $currentQuery, string $currentQueryMode, string $currentRegexMode): void
+{
+    ?>
 <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab2" cellspacing="0" cellpadding="5"><tr>
     <th class="th1" colspan="4">
@@ -467,122 +475,129 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
         <td class="td1 center" style="width:30%;">
             Language:&nbsp;
             <select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds?page=1%26selected_feed=0');}">
-                <?php echo get_languages_selectoptions($currentlang, '[Filter off]'); ?>
+                <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
             </select>
         </td>
         <td class="td1 center" colspan="3">
             <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/feeds?page=1&amp;query=' + val + '&amp;query_mode=' + mode;return false;}">
                 <option value="title,desc,text"<?php
-                if ($currentquerymode == "title,desc,text") {
+                if ($currentQueryMode == "title,desc,text") {
                     echo ' selected="selected"';
                 } ?>>Title, Desc., Text</option>
                 <option disabled="disabled">------------</option>
                 <option value="title"<?php
-                if ($currentquerymode == "title") {
+                if ($currentQueryMode == "title") {
                     echo ' selected="selected"';
                 } ?>>Title</option>
             </select>
             <span style="vertical-align: middle">
             <?php
-            if ($currentregexmode == '') {
+            if ($currentRegexMode == '') {
                 echo ' (Wildc.=*):';
-            } elseif ($currentregexmode == 'r') {
+            } elseif ($currentRegexMode == 'r') {
                 echo 'RegEx Mode:';
             } else {
                 echo 'RegEx(CS) Mode:';
             }
             ?>
             </span>
-            <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
+            <input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
             <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val); location.href='/feeds?page=1&amp;query=' + val;return false;}" />&nbsp;
             <input type="button" value="Clear" onclick="{location.href='/feeds?page=1&amp;query=';return false;}" />
         </td>
     </tr>
     <tr>
-        <td class="td1 center" colspan="2" style="width:70%;"><?php
-        if (!empty($currentlang)) {
-            $result = Connection::query(
-                "SELECT NfName, NfID, NfUpdate FROM {$tbpref}newsfeeds
-        WHERE NfLgID=$currentlang ORDER BY NfUpdate DESC"
-            );
-        } else {
-            $result = Connection::query(
-                "SELECT NfName, NfID, NfUpdate FROM {$tbpref}newsfeeds
-        ORDER BY NfUpdate DESC"
-            );
-        }
-        if (!mysqli_data_seek($result, 0)) {
-            echo ' no feed available</td><td class="td1"></td></tr></table></form>';
-        }
-        if (mysqli_data_seek($result, 0)) {
-            ?>Newsfeed:
+        <td class="td1 center" colspan="2" style="width:70%;">
+    <?php
+}
+
+/**
+ * Render the feed selector dropdown.
+ *
+ * @param array $feeds       Array of feed records
+ * @param int   $currentFeed Current feed ID (passed by reference)
+ *
+ * @return void
+ */
+function renderFeedSelector(array $feeds, int &$currentFeed): void
+{
+    $time = '';
+    $feedsList = '';
+
+    ?>Newsfeed:
     <select name="selected_feed" onchange="{val=document.form1.selected_feed.value;location.href='/feeds?page=1&amp;selected_feed=' + val;return false;}">
         <option value="0">[Filter off]</option>
-                <?php
-                $feeds_list = '';
-                $time = '';
-                while ($row = mysqli_fetch_assoc($result)) {
-                    echo '<option value="' . $row['NfID'] . '"';
-                    if ($currentfeed === $row['NfID']) {
-                        echo ' selected="selected"';
-                        $time = $row['NfUpdate'];
-                    }
-                    echo '>' . tohtml($row['NfName']) . '</option>';
-                    $feeds_list .= ',' . $row['NfID'];
-                }
-                mysqli_free_result($result);
-                echo '</select>
+    <?php
+    foreach ($feeds as $row) {
+        echo '<option value="' . $row['NfID'] . '"';
+        if ($currentFeed === (int)$row['NfID']) {
+            echo ' selected="selected"';
+            $time = $row['NfUpdate'];
+        }
+        echo '>' . tohtml($row['NfName']) . '</option>';
+        $feedsList .= ',' . $row['NfID'];
+    }
+    ?>
+    </select>
     </td>
-    <td class="td1 center" colspan="2">';
-                if ($currentfeed == 0 || $currentfeed == '' || strpos($feeds_list, (string)$currentfeed) === false) {
-                    $currentfeed = substr($feeds_list, 1);
-                    // explode(',', $feeds_list)[0] may work as well (2.8.0)
-                }
+    <td class="td1 center" colspan="2">
+    <?php
 
-                if (strpos((string)$currentfeed, ',') === false) {
-                    echo '<a href="' . $_SERVER['PHP_SELF'] . '?page=1&amp;load_feed=1&amp;selected_feed=' . $currentfeed . '">
+    if ($currentFeed == 0 || $currentFeed == '' || strpos($feedsList, (string)$currentFeed) === false) {
+        $currentFeed = (int)$feeds[0]['NfID'];
+    }
+
+    if (count($feeds) == 1 || $currentFeed > 0) {
+        echo '<a href="' . $_SERVER['PHP_SELF'] . '?page=1&amp;load_feed=1&amp;selected_feed=' . $currentFeed . '">
         <span title="update feed"><img src="/assets/icons/arrow-circle-135.png" alt="-" /></span></a>';
-                } else {
-                    echo '<a href="/feeds/edit?multi_load_feed=1&amp;selected_feed=' . $currentfeed . '">
+    } else {
+        echo '<a href="/feeds/edit?multi_load_feed=1&amp;selected_feed=' . implode(',', array_column($feeds, 'NfID')) . '">
         update multiple feeds</a>';
-                }
-                if ($time) {
-                    $diff = time() - (int) $time;
-                    print_last_feed_update($diff);
-                }
-                echo '</td></tr>';
-                $sql = "SELECT count(*) AS value FROM {$tbpref}feedlinks
-    WHERE FlNfID in ($currentfeed)$wh_query";
-                $recno = (int)Connection::fetchValue($sql);
-                if ($debug) {
-                    echo $sql . ' ===&gt; ' . $recno;
-                }
-                if ($recno) {
-                    $maxperpage = (int)Settings::getWithDefault('set-articles-per-page');
-                    $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
-                    if ($currentpage < 1) {
-                        $currentpage = 1;
-                    }
-                    if ($currentpage > $pages) {
-                        $currentpage = $pages;
-                    }
-                    $limit = 'LIMIT ' . (($currentpage - 1) * $maxperpage) . ',' . $maxperpage;
-                    $sorts = array('FlTitle','FlDate DESC','FlDate ASC');
-                    $lsorts = count($sorts);
-                    if ($currentsort < 1) {
-                        $currentsort = 1;
-                    }
-                    if ($currentsort > $lsorts) {
-                        $currentsort = $lsorts;
-                    }
-                    echo '<tr><th class="th1" style="width:30%;"> ' . $total = $recno . ' articles ';///
-                    echo '</th><th class="th1">';
-                    makePager($currentpage, $pages, '/feeds', 'form1');
-                    ?>
+    }
+
+    if ($time) {
+        $diff = time() - (int)$time;
+        print_last_feed_update($diff);
+    }
+
+    echo '</td></tr>';
+}
+
+/**
+ * Render the feed articles table.
+ *
+ * @param FeedService $service     Feed service instance
+ * @param string      $feedIds     Comma-separated feed IDs
+ * @param string      $whQuery     WHERE clause for filtering
+ * @param int         $currentPage Current page number
+ * @param int         $currentSort Current sort index
+ * @param int         $recno       Total record count
+ *
+ * @return void
+ */
+function renderFeedArticles(FeedService $service, string $feedIds, string $whQuery, int $currentPage, int $currentSort, int $recno): void
+{
+    $maxPerPage = (int)Settings::getWithDefault('set-articles-per-page');
+    $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxPerPage) + 1);
+
+    if ($currentPage < 1) {
+        $currentPage = 1;
+    }
+    if ($currentPage > $pages) {
+        $currentPage = $pages;
+    }
+
+    $offset = ($currentPage - 1) * $maxPerPage;
+    $sortColumn = $service->getSortColumn($currentSort);
+
+    echo '<tr><th class="th1" style="width:30%;"> ' . $recno . ' articles ';
+    echo '</th><th class="th1">';
+    makePager($currentPage, $pages, '/feeds', 'form1');
+    ?>
   </th>
   <th class="th1" colspan="2" nowrap="nowrap">
   Sort Order:
-  <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/feeds?page=1&amp;sort=' + val;return false;}"><?php echo get_textssort_selectoptions($currentsort); ?></select>
+  <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/feeds?page=1&amp;sort=' + val;return false;}"><?php echo get_textssort_selectoptions($currentSort); ?></select>
   </th>
   </tr>
   </table></form>
@@ -603,76 +618,74 @@ function dummy_function_2(int $currentlang, int $currentfeed): void
   <th class="th1 sorttable_nosort">Link</th>
   <th class="th1 clickable" style="min-width:90px;">Date</th>
   </tr>
-                    <?php
-                        $result = Connection::query(
-                            "SELECT FlID, FlTitle, FlLink, FlDescription, FlDate,
-                            FlAudio,TxID, AtID
-                            FROM " . $tbpref . "feedlinks
-                            left join " . $tbpref . "texts
-                            on TxSourceURI=trim(FlLink)
-                            left join " . $tbpref . "archivedtexts
-                            on AtSourceURI=trim(FlLink)
-                            WHERE FlNfID in ($currentfeed) " . $wh_query . "
-                            ORDER BY " . $sorts[$currentsort - 1] . " " . $limit
-                        );
-                    while ($row = mysqli_fetch_assoc($result)) {
-                        echo '<tr>';
-                        if ($row['TxID']) {
-                            echo '<td class="td1 center"><a href="/text/read?start=' .
-                            $row['TxID'] . '" >
-                            <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="-" /></a>';
-                        } elseif ($row['AtID']) {
-                            echo '<td class="td1 center"><span title="archived"><img src="/assets/icons/status-busy.png" alt="-" /></span>';
-                        } elseif (!empty($row['FlLink']) && str_starts_with((string) $row['FlLink'], ' ')) {
-                            echo '<td class="td1 center">
-                            <img class="not_found" name="' .
-                            $row['FlID'] .
-                            '" title="download error" src="/assets/icons/exclamation-button.png" alt="-" />';
-                        } else {
-                            echo '<td class="td1 center"><input type="checkbox" class="markcheck" name="marked_items[]" value="' .
-                            $row['FlID'] . '" />';
-                        }
-                        echo '</td>
+    <?php
+
+    $articles = $service->getFeedLinks($feedIds, $whQuery, $sortColumn, $offset, $maxPerPage);
+
+    foreach ($articles as $row) {
+        echo '<tr>';
+        if ($row['TxID']) {
+            echo '<td class="td1 center"><a href="/text/read?start=' .
+            $row['TxID'] . '" >
+            <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="-" /></a>';
+        } elseif ($row['AtID']) {
+            echo '<td class="td1 center"><span title="archived"><img src="/assets/icons/status-busy.png" alt="-" /></span>';
+        } elseif (!empty($row['FlLink']) && str_starts_with((string)$row['FlLink'], ' ')) {
+            echo '<td class="td1 center">
+            <img class="not_found" name="' .
+            $row['FlID'] .
+            '" title="download error" src="/assets/icons/exclamation-button.png" alt="-" />';
+        } else {
+            echo '<td class="td1 center"><input type="checkbox" class="markcheck" name="marked_items[]" value="' .
+            $row['FlID'] . '" />';
+        }
+        echo '</td>
             <td class="td1 center">
-            <span title="' . htmlentities((string) $row['FlDescription'], ENT_QUOTES, 'UTF-8', false) . '"><b>' .
-                        $row['FlTitle'] . '</b></span>';
-                        if ($row['FlAudio']) {
-                            echo '<a href="' . $row['FlAudio'] .
-                            '" onclick="window.open(this.href, \'child\', \'scrollbars,width=650,height=600\'); return false;">
-                            <img src="';
-                            print_file_path('icn/speaker-volume.png');
-                            echo '" alt="-" /></a>';
-                        }
-                        echo '</td>
+            <span title="' . htmlentities((string)$row['FlDescription'], ENT_QUOTES, 'UTF-8', false) . '"><b>' .
+            $row['FlTitle'] . '</b></span>';
+        if ($row['FlAudio']) {
+            echo '<a href="' . $row['FlAudio'] .
+            '" onclick="window.open(this.href, \'child\', \'scrollbars,width=650,height=600\'); return false;">
+            <img src="';
+            print_file_path('icn/speaker-volume.png');
+            echo '" alt="-" /></a>';
+        }
+        echo '</td>
             <td class="td1 center" style="vertical-align: middle">';
-                        if (
-                            !empty($row['FlLink'])
-                            && !str_starts_with(trim((string) $row['FlLink']), '#')
-                        ) {
-                            echo '<a href="' . trim((string) $row['FlLink']) . '"  title="' .
-                            trim((string) $row['FlLink']) . '" onclick="window.open(\'' .
-                            $row['FlLink'] . '\');return false;">
-                            <img src="/assets/icons/external.png" alt="-" /></a>';
-                        }
-                        echo  '</td><td class="td1 center">' . $row['FlDate'] . '</td></tr>';
-                    }
-                    mysqli_free_result($result);
-                    echo '</table>';
-                    echo '</form>';
-                    if ($pages > 1) {
-                        echo '<form name="form3" method="get" action ="">
+        if (
+            !empty($row['FlLink'])
+            && !str_starts_with(trim((string)$row['FlLink']), '#')
+        ) {
+            echo '<a href="' . trim((string)$row['FlLink']) . '"  title="' .
+            trim((string)$row['FlLink']) . '" onclick="window.open(\'' .
+            $row['FlLink'] . '\');return false;">
+            <img src="/assets/icons/external.png" alt="-" /></a>';
+        }
+        echo '</td><td class="td1 center">' . $row['FlDate'] . '</td></tr>';
+    }
+
+    echo '</table>';
+    echo '</form>';
+
+    if ($pages > 1) {
+        echo '<form name="form3" method="get" action ="">
             <table class="tab2" cellspacing="0" cellpadding="5">
             <tr><th class="th1" style="width:30%;">';
-                        echo $total;
-                        echo '</th><th class="th1">';
-                        makePager($currentpage, $pages, '/feeds', 'form3');
-                        echo '</th></tr></table></form>';
-                    }
-                } else {
-                    echo '</table></form>';
-                }
-        }
-        ?>
+        echo $recno;
+        echo '</th><th class="th1">';
+        makePager($currentPage, $pages, '/feeds', 'form3');
+        echo '</th></tr></table></form>';
+    }
+}
+
+/**
+ * Render the JavaScript for handling not found articles.
+ *
+ * @return void
+ */
+function renderNotFoundScript(): void
+{
+    ?>
 <script type="text/javascript">
 $('img.not_found').on('click', function () {
     var id = $(this).attr('name');
@@ -688,38 +701,48 @@ $('img.not_found').on('click', function () {
     <?php
 }
 
-function do_page(): void
+/**
+ * Main page function.
+ *
+ * @param FeedService $service Feed service instance
+ *
+ * @return void
+ */
+function do_page(FeedService $service): void
 {
     session_start();
-    $currentlang = Validation::language(
-        (string) processDBParam("filterlang", 'currentlanguage', '', false)
+
+    $currentLang = Validation::language(
+        (string)processDBParam("filterlang", 'currentlanguage', '', false)
     );
-    pagestart('My ' . getLanguage($currentlang) . ' Feeds', true);
-    $currentfeed = (string) processSessParam(
+    pagestart('My ' . getLanguage($currentLang) . ' Feeds', true);
+
+    $currentFeed = (string)processSessParam(
         "selected_feed",
         "currentrssfeed",
         '',
         false
     );
 
-    $edit_text = 0;
+    $editText = 0;
     $message = '';
+
     if (isset($_REQUEST['marked_items']) && is_array($_REQUEST['marked_items'])) {
-        list($edit_text, $message) = dummy_function_1();
+        $result = processMarkedItems($service);
+        $editText = $result['editText'];
+        $message = $result['message'];
     }
-    check_errors($message);
+
+    displayMessages($message);
 
     if (
         isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
         || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
     ) {
-        load_feeds($currentfeed);
-    } elseif (empty($edit_text)) {
-        dummy_function_2((int)$currentlang, (int)$currentfeed);
+        load_feeds((int)$currentFeed);
+    } elseif (empty($editText)) {
+        renderFeedsIndex($service, (int)$currentLang, (int)$currentFeed);
     }
 
     pageend();
 }
-
-do_page();
-?>

@@ -1,76 +1,133 @@
 <?php
 
+/**
+ * \file
+ * \brief Editing and Managing RSS feeds.
+ *
+ * PHP version 8.1
+ *
+ * @category User_Interface
+ * @package  Lwt
+ * @author   andreask7 <andreask7@users.noreply.github.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    1.6.0-fork
+ * @since    3.0.0 MVC refactoring
+ */
+
 namespace Lwt\Interface\Edit_Feeds;
 
-require_once 'Core/Bootstrap/db_bootstrap.php';
-require_once 'Core/UI/ui_helpers.php';
-require_once 'Core/Feed/feeds.php';
-require_once 'Core/Http/param_helpers.php';
-require_once 'Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../Core/Feed/feeds.php';
+require_once __DIR__ . '/../Core/Http/param_helpers.php';
+require_once __DIR__ . '/../Core/Language/language_utilities.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
+use Lwt\Services\FeedService;
 
-$currentlang = Validation::language((string) processDBParam("filterlang", 'currentlanguage', '', false));
-$currentsort = (int) processDBParam("sort", 'currentmanagefeedssort', '2', true);
-$currentquery = (string) processSessParam("query", "currentmanagefeedsquery", '', false);
-$currentpage = (int) processSessParam("page", "currentmanagefeedspage", '1', true);
-$currentfeed = (string) processSessParam("selected_feed", "currentmanagefeedsfeed", '', false);
-$wh_query = Escaping::toSqlSyntax(str_replace("*", "%", $currentquery));
-$wh_query = ($currentquery != '') ? (' and (NfName like ' . $wh_query . ')') : '';
-
-pagestart('Manage ' . getLanguage($currentlang) . ' Feeds', true);
-
-if (isset($_SESSION['wizard'])) {
-    unset($_SESSION['wizard']);
-}
-
-
-if (isset($_REQUEST['markaction'])) {
-    if ($_REQUEST['markaction'] == 'del') {
-        $message = Connection::execute(
-            'delete from ' . $tbpref . 'feedlinks
-            where FlNfID in(' . $currentfeed . ')',
-            "Article item(s) deleted"
-        );
-        $message .= Connection::execute(
-            'delete from ' . $tbpref . 'newsfeeds
-            where NfID in(' . $currentfeed . ')',
-            " / Newsfeed(s) deleted"
-        );
-        echo error_message_with_hide($message, false);
-        unset($message);
+/**
+ * Handle delete actions and return status message.
+ *
+ * @param FeedService $service     Feed service instance
+ * @param string      $currentFeed Current selected feed(s)
+ *
+ * @return string Status message
+ */
+function handleMarkAction(FeedService $service, string $currentFeed): string
+{
+    if (!isset($_REQUEST['markaction']) || empty($currentFeed)) {
+        return '';
     }
 
-    if ($_REQUEST['markaction'] == 'del_art') {
-        $message = Connection::execute(
-            'delete from ' . $tbpref . 'feedlinks
-            where FlNfID in(' . $currentfeed . ')',
-            "Article item(s) deleted"
-        );
-        echo error_message_with_hide($message, false);
-        unset($message);
-        Connection::query(
-            'UPDATE ' . $tbpref . 'newsfeeds SET NfUpdate="' . time() . '"
-            where NfID in(' . $currentfeed . ')'
-        );
-    }
+    $action = $_REQUEST['markaction'];
 
-    if ($_REQUEST['markaction'] == 'res_art') {
-        $message = Connection::execute(
-            'UPDATE ' . $tbpref . 'feedlinks SET FlLink=TRIM(FlLink)
-            where FlNfID in (' . $currentfeed . ')',
-            "Article(s) reset"
-        );
-        echo error_message_with_hide($message, false);
-        unset($message);
+    switch ($action) {
+        case 'del':
+            $service->deleteFeeds($currentFeed);
+            return "Article item(s) deleted / Newsfeed(s) deleted";
+
+        case 'del_art':
+            $service->deleteArticles($currentFeed);
+            return "Article item(s) deleted";
+
+        case 'res_art':
+            $service->resetUnloadableArticles($currentFeed);
+            return "Article(s) reset";
+
+        default:
+            return '';
     }
 }
-if (isset($_SESSION['feed_loaded'])) {
+
+/**
+ * Handle update feed submission.
+ *
+ * @param FeedService $service Feed service instance
+ *
+ * @return void
+ */
+function handleUpdateFeed(FeedService $service): void
+{
+    if (!isset($_REQUEST['update_feed'])) {
+        return;
+    }
+
+    $feedId = (int)$_REQUEST['NfID'];
+
+    $data = [
+        'NfLgID' => $_REQUEST['NfLgID'] ?? '',
+        'NfName' => $_REQUEST['NfName'] ?? '',
+        'NfSourceURI' => $_REQUEST['NfSourceURI'] ?? '',
+        'NfArticleSectionTags' => $_REQUEST['NfArticleSectionTags'] ?? '',
+        'NfFilterTags' => $_REQUEST['NfFilterTags'] ?? '',
+        'NfOptions' => rtrim($_REQUEST['NfOptions'] ?? '', ','),
+    ];
+
+    $service->updateFeed($feedId, $data);
+}
+
+/**
+ * Handle save new feed submission.
+ *
+ * @param FeedService $service Feed service instance
+ *
+ * @return void
+ */
+function handleSaveFeed(FeedService $service): void
+{
+    if (!isset($_REQUEST['save_feed'])) {
+        return;
+    }
+
+    $data = [
+        'NfLgID' => $_REQUEST['NfLgID'] ?? '',
+        'NfName' => $_REQUEST['NfName'] ?? '',
+        'NfSourceURI' => $_REQUEST['NfSourceURI'] ?? '',
+        'NfArticleSectionTags' => $_REQUEST['NfArticleSectionTags'] ?? '',
+        'NfFilterTags' => $_REQUEST['NfFilterTags'] ?? '',
+        'NfOptions' => rtrim($_REQUEST['NfOptions'] ?? '', ','),
+    ];
+
+    $service->createFeed($data);
+}
+
+/**
+ * Display session messages for feed loading.
+ *
+ * @return void
+ */
+function displaySessionMessages(): void
+{
+    if (!isset($_SESSION['feed_loaded'])) {
+        return;
+    }
+
     foreach ($_SESSION['feed_loaded'] as $lf) {
-        echo "\n<div class=\"msgblue\"><p class=\"hide_message\">+++ ",$lf," +++</p></div>";
+        echo "\n<div class=\"msgblue\"><p class=\"hide_message\">+++ ", $lf, " +++</p></div>";
     }
     ?>
 <script type="text/javascript">
@@ -80,44 +137,19 @@ $(".hide_message").delay(2500).slideUp(1000);
     unset($_SESSION['feed_loaded']);
 }
 
-if (isset($_REQUEST['update_feed'])) {
-    $currentfeed = $_REQUEST['NfID'];
-    Connection::execute(
-        'UPDATE ' . $tbpref . 'newsfeeds SET
-        NfLgID=' . Escaping::toSqlSyntax($_REQUEST['NfLgID']) . ',
-        NfName=' . Escaping::toSqlSyntax($_REQUEST['NfName']) . ',
-        NfSourceURI=' . Escaping::toSqlSyntax($_REQUEST['NfSourceURI']) . ',
-        NfArticleSectionTags=' . Escaping::toSqlSyntax($_REQUEST['NfArticleSectionTags']) . ',
-        NfFilterTags=' . Escaping::toSqlSyntaxNoNull($_REQUEST['NfFilterTags']) . ',
-        NfOptions=' . Escaping::toSqlSyntaxNoNull(rtrim($_REQUEST['NfOptions'], ',')) . '
-        where NfID=' . $_REQUEST['NfID'],
-        ""
-    );
-}
-
-if (isset($_REQUEST['save_feed'])) {
-    Connection::execute(
-        'insert into ' . $tbpref . 'newsfeeds (
-            NfLgID, NfName, NfSourceURI, NfArticleSectionTags, NfFilterTags, NfOptions
-        )
-        VALUES (' . Escaping::toSqlSyntax($_REQUEST['NfLgID']) . ',' .
-        Escaping::toSqlSyntax($_REQUEST['NfName']) . ',' .
-        Escaping::toSqlSyntax($_REQUEST['NfSourceURI']) . ',' .
-        Escaping::toSqlSyntax($_REQUEST['NfArticleSectionTags']) . ',' .
-        Escaping::toSqlSyntaxNoNull($_REQUEST['NfFilterTags']) . ',' .
-        Escaping::toSqlSyntaxNoNull(rtrim($_REQUEST['NfOptions'], ',')) .
-        ')',
-        ""
-    );
-}
-
-
-function display_new_feed(int $currentlang): void
+/**
+ * Display the new feed form.
+ *
+ * @param int $currentLang Current language filter
+ *
+ * @return void
+ */
+function displayNewFeed(int $currentLang): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $result = Connection::query(
-        "SELECT LgName,LgID FROM " . $tbpref . "languages
-        where LgName<>'' ORDER BY LgName"
+        "SELECT LgName, LgID FROM {$tbpref}languages
+        WHERE LgName <> '' ORDER BY LgName"
     );
     ?>
 <h2>New Feed</h2>
@@ -134,13 +166,14 @@ function display_new_feed(int $currentlang): void
     <?php
     while ($row_l = mysqli_fetch_assoc($result)) {
         echo '<option value="' . $row_l['LgID'] . '"';
-        if ($currentlang === $row_l['LgID']) {
+        if ($currentLang === (int)$row_l['LgID']) {
             echo ' selected="selected"';
         }
         echo '>' . $row_l['LgName'] . '</option>';
     }
     mysqli_free_result($result);
-    ?>    </select></td></tr>
+    ?>
+</select></td></tr>
 <tr><td class="td1">
 Name: </td><td class="td1">
     <input class="notempty" style="width:95%" type="text" name="NfName" />
@@ -172,7 +205,7 @@ Name: </td><td class="td1">
     <input type="text" data_info="Charset" size="20" name="charset" disabled /> </td></tr>
 <tr><td>
     <input type="checkbox" name="c_max_texts" /> Max. Texts:
-    <input class="posintnumber maxint_30" data_info="Max. Texts" ttype="number" min="0" max="30" size="4" name="max_texts" disabled /></td>
+    <input class="posintnumber maxint_30" data_info="Max. Texts" type="number" min="0" max="30" size="4" name="max_texts" disabled /></td>
     <td>
         <input type="checkbox" name="c_tag" /> Tag:
         <input type="text" data_info="Tag" size="20" name="tag" disabled />
@@ -214,17 +247,36 @@ $('[type="submit"]').on('click', function(){
     <?php
 }
 
-function edit_feed(int $currentfeed): void
+/**
+ * Display the edit feed form.
+ *
+ * @param FeedService $service     Feed service instance
+ * @param int         $currentFeed Feed ID to edit
+ *
+ * @return void
+ */
+function editFeed(FeedService $service, int $currentFeed): void
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $row = $service->getFeedById($currentFeed);
+
+    if (!$row) {
+        echo '<p class="red">Feed not found.</p>';
+        return;
+    }
+
     $result = Connection::query(
-        "SELECT * FROM " . $tbpref . "newsfeeds WHERE NfID=$currentfeed"
+        "SELECT LgName, LgID FROM {$tbpref}languages
+        WHERE LgName <> '' ORDER BY LgName"
     );
-    $row = mysqli_fetch_assoc($result);
-    $result = Connection::query(
-        "SELECT LgName,LgID FROM " . $tbpref . "languages
-        where LgName<>'' ORDER BY LgName"
-    );
+
+    $autoUpdI = $service->getNfOption($row['NfOptions'], 'autoupdate');
+    if ($autoUpdI == null) {
+        $autoUpdV = null;
+    } else {
+        $autoUpdV = substr($autoUpdI, -1);
+        $autoUpdI = substr($autoUpdI, 0, -1);
+    }
     ?>
 <h2>
     Edit Feed
@@ -234,7 +286,7 @@ function edit_feed(int $currentfeed): void
 </h2>
 <a href="/feeds?page=1"> My Feeds</a>
 <span class="nowrap"></span>
-<a href="/feeds/wizard?step=2&amp;edit_feed=<?php echo $currentfeed;?>">
+<a href="/feeds/wizard?step=2&amp;edit_feed=<?php echo $currentFeed;?>">
 <img src="/assets/icons/wizard.png" title="feed_wizard" alt="feed_wizard" />Feed Wizard</a>
 <form class="validate" action="/feeds/edit" method="post">
 <table class="tab2" cellspacing="0" cellpadding="5">
@@ -251,13 +303,6 @@ function edit_feed(int $currentfeed): void
         echo '>' . $row_l['LgName'] . '</option>';
     }
     mysqli_free_result($result);
-    $auto_upd_i = get_nf_option($row['NfOptions'], 'autoupdate');
-    if ($auto_upd_i == null) {
-        $auto_upd_v = null;
-    } else {
-        $auto_upd_v = substr($auto_upd_i, -1);
-        $auto_upd_i = substr($auto_upd_i, 0, -1);
-    }
     ?>
         </select>
     </td>
@@ -300,34 +345,34 @@ function edit_feed(int $currentfeed): void
         <tr>
             <td style="width:35%">
             <input type="checkbox" name="edit_text"<?php
-            if (get_nf_option($row['NfOptions'], 'edit_text') !== null) {
+            if ($service->getNfOption($row['NfOptions'], 'edit_text') !== null) {
                 echo ' checked="checked"';
             } ?> />
             Edit Text
         </td>
 <td>
-    <input type="checkbox" name="c_autoupdate"<?php if ($auto_upd_i !== null) {
+    <input type="checkbox" name="c_autoupdate"<?php if ($autoUpdI !== null) {
         echo ' checked="checked"';
                                               } ?> />
-Auto Update Interval: <input class="posintnumber<?php if (get_nf_option($row['NfOptions'], 'autoupdate') !== null) {
+Auto Update Interval: <input class="posintnumber<?php if ($service->getNfOption($row['NfOptions'], 'autoupdate') !== null) {
     echo ' notempty';
-                                                } ?>" data_info="Auto Update Interval" type="number" min="0" size="4" name="autoupdate" value="<?php echo $auto_upd_i; ?>"
+                                                } ?>" data_info="Auto Update Interval" type="number" min="0" size="4" name="autoupdate" value="<?php echo $autoUpdI; ?>"
     <?php
-    if ($auto_upd_i == null) {
+    if ($autoUpdI == null) {
         echo ' disabled';
     } ?> />
 <select name="autoupdate" value="<?php
-    echo $auto_upd_v . '"';
-if ($auto_upd_v == null) {
+    echo $autoUpdV . '"';
+if ($autoUpdV == null) {
     echo ' disabled';
 } ?>>
-<option value="h" <?php if ($auto_upd_v == 'h') {
+<option value="h" <?php if ($autoUpdV == 'h') {
     echo ' selected="selected"';
                   }?>>Hour(s)</option>
-<option value="d"<?php if ($auto_upd_v == 'd') {
+<option value="d"<?php if ($autoUpdV == 'd') {
     echo ' selected="selected"';
                  }?>>Day(s)</option>
-<option value="w"<?php if ($auto_upd_v == 'w') {
+<option value="w"<?php if ($autoUpdV == 'w') {
     echo ' selected="selected"';
                  }?>>Week(s)</option>
 </select>
@@ -335,65 +380,65 @@ if ($auto_upd_v == null) {
 </tr>
 <tr>
     <td>
-        <input type="checkbox" name="c_max_links"<?php if (get_nf_option($row['NfOptions'], 'max_links') !== null) {
+        <input type="checkbox" name="c_max_links"<?php if ($service->getNfOption($row['NfOptions'], 'max_links') !== null) {
             echo ' checked="checked"';
                                                  } ?> />
 Max. Links: <input class="<?php
-if (get_nf_option($row['NfOptions'], 'max_links') !== null) {
+if ($service->getNfOption($row['NfOptions'], 'max_links') !== null) {
     echo 'notempty ';
-} ?>posintnumber maxint_300" data_info="Max. Links" type="number" min="0" max="300" size="4" name="max_links" value="<?php echo get_nf_option($row['NfOptions'], 'max_links') . '"';
-if (get_nf_option($row['NfOptions'], 'max_links') == null) {
+} ?>posintnumber maxint_300" data_info="Max. Links" type="number" min="0" max="300" size="4" name="max_links" value="<?php echo $service->getNfOption($row['NfOptions'], 'max_links') . '"';
+if ($service->getNfOption($row['NfOptions'], 'max_links') == null) {
     echo ' disabled';
 } ?> />
 </td>
 <td>
     <input type="checkbox" name="c_charset"<?php
-    if (get_nf_option($row['NfOptions'], 'charset') !== null) {
+    if ($service->getNfOption($row['NfOptions'], 'charset') !== null) {
         echo ' checked="checked"';
     } ?> />
-Charset: <input <?php if (get_nf_option($row['NfOptions'], 'charset') !== null) {
+Charset: <input <?php if ($service->getNfOption($row['NfOptions'], 'charset') !== null) {
     echo 'class="notempty" ';
-                } ?>type="text" data_info="Charset" size="20" name="charset" value="<?php echo get_nf_option($row['NfOptions'], 'charset') . '"';
-if (get_nf_option($row['NfOptions'], 'charset') == null) {
+                } ?>type="text" data_info="Charset" size="20" name="charset" value="<?php echo $service->getNfOption($row['NfOptions'], 'charset') . '"';
+if ($service->getNfOption($row['NfOptions'], 'charset') == null) {
     echo ' disabled';
 } ?> />
 </td>
 </tr>
 <tr>
     <td>
-        <input type="checkbox" name="c_max_texts"<?php if (get_nf_option($row['NfOptions'], 'max_texts') !== null) {
+        <input type="checkbox" name="c_max_texts"<?php if ($service->getNfOption($row['NfOptions'], 'max_texts') !== null) {
             echo ' checked="checked"';
                                                  } ?> />
 Max. Texts:
-<input class="<?php if (get_nf_option($row['NfOptions'], 'max_texts') !== null) {
+<input class="<?php if ($service->getNfOption($row['NfOptions'], 'max_texts') !== null) {
     echo 'notempty ';
               } ?>posintnumber maxint_30" data_info="Max. Texts" type="number" min="0" max="30"
 size="4" name="max_texts"
-value="<?php echo get_nf_option($row['NfOptions'], 'max_texts') . '"';if (get_nf_option($row['NfOptions'], 'max_texts') == null) {
+value="<?php echo $service->getNfOption($row['NfOptions'], 'max_texts') . '"';if ($service->getNfOption($row['NfOptions'], 'max_texts') == null) {
     echo ' disabled';
        } ?> />
 </td>
 <td>
-    <input type="checkbox" name="c_tag"<?php if (get_nf_option($row['NfOptions'], 'tag') !== null) {
+    <input type="checkbox" name="c_tag"<?php if ($service->getNfOption($row['NfOptions'], 'tag') !== null) {
         echo ' checked="checked"';
                                        } ?> />
-       Tag: <input <?php if (get_nf_option($row['NfOptions'], 'tag') !== null) {
+       Tag: <input <?php if ($service->getNfOption($row['NfOptions'], 'tag') !== null) {
             echo 'class="notempty" ';
-                   } ?>type="text" data_info="Tag" size="20" name="tag" value="<?php echo get_nf_option($row['NfOptions'], 'tag') . '"';
-if (get_nf_option($row['NfOptions'], 'tag') == null) {
+                   } ?>type="text" data_info="Tag" size="20" name="tag" value="<?php echo $service->getNfOption($row['NfOptions'], 'tag') . '"';
+if ($service->getNfOption($row['NfOptions'], 'tag') == null) {
     echo ' disabled';
 } ?> />
 </td>
 </tr>
 <tr>
     <td colspan="2">
-    <input type="checkbox" name="c_article_source"<?php if (get_nf_option($row['NfOptions'], 'article_source') !== null) {
+    <input type="checkbox" name="c_article_source"<?php if ($service->getNfOption($row['NfOptions'], 'article_source') !== null) {
         echo ' checked="checked"';
                                                   } ?> />
-Article Source: <input class="<?php if (get_nf_option($row['NfOptions'], 'article_source') !== null) {
+Article Source: <input class="<?php if ($service->getNfOption($row['NfOptions'], 'article_source') !== null) {
     echo 'notempty ';
-                              } ?>" data_info="Article Source" type="text" size="20" name="article_source" value="<?php echo get_nf_option($row['NfOptions'], 'article_source') . '"';
-if (get_nf_option($row['NfOptions'], 'article_source') == null) {
+                              } ?>" data_info="Article Source" type="text" size="20" name="article_source" value="<?php echo $service->getNfOption($row['NfOptions'], 'article_source') . '"';
+if ($service->getNfOption($row['NfOptions'], 'article_source') == null) {
     echo ' disabled';
 } ?> />
 </td>
@@ -434,27 +479,24 @@ $('[type="submit"]').on('click', function(){
     <?php
 }
 
-function multi_load_feed(int $currentlang): void
+/**
+ * Display multi-load feed form.
+ *
+ * @param FeedService $service     Feed service instance
+ * @param int         $currentLang Current language filter
+ *
+ * @return void
+ */
+function multiLoadFeed(FeedService $service, int $currentLang): void
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    if (!empty($currentlang)) {
-        $result = Connection::query(
-            "SELECT NfName,NfID,NfUpdate FROM " . $tbpref . "newsfeeds
-            WHERE NfLgID=$currentlang ORDER BY NfUpdate DESC"
-        );
-    } else {
-        $result = Connection::query(
-            "SELECT NfName,NfID,NfUpdate FROM " . $tbpref . "newsfeeds
-            ORDER BY NfUpdate DESC"
-        );
-    }
+    $feeds = $service->getFeeds($currentLang ?: null);
     ?>
-<form name="form1" action="do_feeds.php" onsubmit="document.form1.querybutton.click(); return false;">
-<table class="tab3"  style="border-left: none;border-top: none; background-color:inherit" cellspacing="0" cellpadding="5">
+<form name="form1" action="/feeds" onsubmit="document.form1.querybutton.click(); return false;">
+<table class="tab3" style="border-left: none;border-top: none; background-color:inherit" cellspacing="0" cellpadding="5">
 <tr>
 <th class="th1 borderleft" colspan="2">Language:<select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds/edit?multi_load_feed=1%26page=1');}">
     <?php
-    echo get_languages_selectoptions($currentlang, '[Filter off]');
+    echo get_languages_selectoptions($currentLang, '[Filter off]');
     ?>
 </select>
 </th>
@@ -471,19 +513,18 @@ function multi_load_feed(int $currentlang): void
 </tr>
     <?php
     $time = time();
-    while ($row = mysqli_fetch_assoc($result)) {
-        $diff = $time - (int) $row['NfUpdate'];
+    foreach ($feeds as $row) {
+        $diff = $time - (int)$row['NfUpdate'];
         echo '<tr><td class="td1 center">
         <input class="markcheck" type="checkbox" name="selected_feed[]" value="' . $row['NfID'] . '" checked="checked" />
         </td>
-        <td class="td1 center" colspan="2">' . $row['NfName'] . '</td>
+        <td class="td1 center" colspan="2">' . tohtml($row['NfName']) . '</td>
         <td class="td1 center" sorttable_customkey="' . $diff . '">';
         if ($row['NfUpdate']) {
             print_last_feed_update($diff);
         }
         echo '</td></tr>';
     }
-    mysqli_free_result($result);
     ?>
 </table>
 </td>
@@ -503,17 +544,29 @@ $( "button" ).on('click', function() {
         return $(this).val();
     }).get().join(", ") );
 });
-
 </script>
     <?php
 }
 
-function display_main_page(
-    int $currentlang,
-    string $currentquery,
-    int $currentpage,
-    int $currentsort,
-    string $wh_query
+/**
+ * Display the main feeds management page.
+ *
+ * @param FeedService $service      Feed service instance
+ * @param int         $currentLang  Current language filter
+ * @param string      $currentQuery Current search query
+ * @param int         $currentPage  Current page number
+ * @param int         $currentSort  Current sort index
+ * @param string      $whQuery      WHERE clause for query filter
+ *
+ * @return void
+ */
+function displayMainPage(
+    FeedService $service,
+    int $currentLang,
+    string $currentQuery,
+    int $currentPage,
+    int $currentSort,
+    string $whQuery
 ): void {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $debug = \Lwt\Core\Globals::isDebug();
@@ -537,13 +590,13 @@ function display_main_page(
     <td class="td1 center" colspan="2" style="width:30%;">
     Language:&nbsp;<select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds/edit?manage_feeds=1');}">
     <?php
-    echo get_languages_selectoptions($currentlang, '[Filter off]');
+    echo get_languages_selectoptions($currentLang, '[Filter off]');
     ?>
 </select>
 </td>
 <td class="td1 center" colspan="4">
     Feed Name (Wildc.=*):
-    <input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
+    <input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
     <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='/feeds/edit?page=1&amp;query=' + val;}" />&nbsp;
     <input type="button" value="Clear" onclick="{location.href='/feeds/edit?page=1&amp;query=';}" />
 </td>
@@ -573,54 +626,51 @@ function display_main_page(
     <option value="del">Delete</option>
 </select></td></tr>
     <?php
-        $sql = 'select count(*) as value from ' . $tbpref . 'newsfeeds where ';
-    if ($currentlang > 0) {
-        $sql .= 'NfLgID =' . $currentlang . $wh_query;
-    } else {
-        $sql .= '1=1' . $wh_query;
-    }
-        $recno = (int) Connection::fetchValue($sql);
+
+    $recno = $service->countFeeds($currentLang ?: null, $whQuery);
+
     if ($debug) {
-        echo $sql . ' ===&gt; ' . $recno;
+        echo "Count: $recno";
     }
+
     if ($recno) {
-        $maxperpage = (int) Settings::getWithDefault('set-feeds-per-page');
-        $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
-        if ($currentpage < 1) {
-            $currentpage = 1;
+        $maxPerPage = (int)Settings::getWithDefault('set-feeds-per-page');
+        $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxPerPage) + 1);
+        if ($currentPage < 1) {
+            $currentPage = 1;
         }
-        if ($currentpage > $pages) {
-            $currentpage = $pages;
+        if ($currentPage > $pages) {
+            $currentPage = $pages;
         }
 
-        $sorts = array('NfName','NfUpdate DESC','NfUpdate ASC');
+        $sorts = ['NfName', 'NfUpdate DESC', 'NfUpdate ASC'];
         $lsorts = count($sorts);
-        if ($currentsort < 1) {
-            $currentsort = 1;
+        if ($currentSort < 1) {
+            $currentSort = 1;
         }
-        if ($currentsort > $lsorts) {
-            $currentsort = $lsorts;
+        if ($currentSort > $lsorts) {
+            $currentSort = $lsorts;
         }
-            echo '<tr><th class="th1" style="width:30%;"> ' . $total = $recno . ' newsfeeds ';///
+
+        $total = $recno;
+        echo '<tr><th class="th1" style="width:30%;"> ' . $total . ' newsfeeds ';
         echo '</th><th class="th1">';
-        makePager($currentpage, $pages, '/feeds/edit', 'form1');
-        if (!empty($currentlang)) {
-            $result = Connection::query(
-                "SELECT * FROM " . $tbpref . "newsfeeds
-                    WHERE NfLgID=$currentlang $wh_query
-                    ORDER BY " . $sorts[$currentsort - 1]
-            );
+        makePager($currentPage, $pages, '/feeds/edit', 'form1');
+
+        $sql = "SELECT * FROM {$tbpref}newsfeeds WHERE ";
+        if (!empty($currentLang)) {
+            $sql .= "NfLgID = $currentLang $whQuery";
         } else {
-            $result = Connection::query(
-                "SELECT * FROM " . $tbpref . "newsfeeds WHERE (1=1) $wh_query
-                    ORDER BY " . $sorts[$currentsort - 1]
-            );
+            $sql .= "(1=1) $whQuery";
         }
+        $sql .= " ORDER BY " . $sorts[$currentSort - 1];
+
+        $result = Connection::query($sql);
         ?>
         </th>
         <th class="th1" colspan="1" nowrap="nowrap">
         Sort Order:
-        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/feeds/edit?page=1&amp;sort=' + val;}"><?php echo get_textssort_selectoptions($currentsort); ?></select>
+        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/feeds/edit?page=1&amp;sort=' + val;}"><?php echo get_textssort_selectoptions($currentSort); ?></select>
 </th>
 </table>
 </form>
@@ -636,7 +686,7 @@ function display_main_page(
             <?php
             $time = time();
             while ($row = mysqli_fetch_assoc($result)) {
-                $diff = $time - (int) $row['NfUpdate'];
+                $diff = $time - (int)$row['NfUpdate'];
                 echo '<tr>
                 <td class="td1 center">
                 <input type="checkbox" name="marked[]" class="markcheck" value="' . $row['NfID'] . '" /></td>
@@ -650,7 +700,7 @@ function display_main_page(
                 <img src="/assets/icons/external.png" title="Show Feed" alt="Link" /></a>&nbsp;
                 <span class="click" onclick="if (confirm (\'Are you sure?\')) location.href=\'' . $_SERVER['PHP_SELF'] . '?markaction=del&amp;selected_feed=' . $row['NfID'] . '\';">
                 <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></span></td>
-                <td class="td1 center">' . $row['NfName'] . '</td>
+                <td class="td1 center">' . tohtml($row['NfName']) . '</td>
                 <td class="td1 center">' . str_replace(',', ', ', $row['NfOptions']) . '</td>
                 <td class="td1 center" sorttable_customkey="' . $diff . '">';
                 if ($row['NfUpdate']) {
@@ -667,34 +717,71 @@ function display_main_page(
             echo '<form name="form3" method="get" action ="">
             <table class="tab2" cellspacing="0" cellpadding="5">
             <tr><th class="th1" style="width:30%;">';
-            echo $total ;
+            echo $total;
             echo '</th><th class="th1">';
-            makePager($currentpage, $pages, '/feeds', 'form3');
+            makePager($currentPage, $pages, '/feeds', 'form3');
             echo '</th></tr></table></form>';
         }
     }
 }
 
-if (
-    isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
-    || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
-) {
-    load_feeds($currentfeed);
-} elseif (isset($_REQUEST['new_feed'])) {
-    display_new_feed((int)$currentlang);
-} elseif (isset($_REQUEST['edit_feed'])) {
-    edit_feed((int)$currentfeed);
-} elseif (isset($_REQUEST['multi_load_feed'])) {
-    multi_load_feed((int)$currentlang);
-} else {
-    display_main_page(
-        (int)$currentlang,
-        $currentquery,
-        $currentpage,
-        $currentsort,
-        $wh_query
-    );
-}
-pageend();
+/**
+ * Main page function.
+ *
+ * @param FeedService $service Feed service instance
+ *
+ * @return void
+ */
+function doPage(FeedService $service): void
+{
 
-?>
+    $currentLang = Validation::language((string)processDBParam("filterlang", 'currentlanguage', '', false));
+    $currentSort = (int)processDBParam("sort", 'currentmanagefeedssort', '2', true);
+    $currentQuery = (string)processSessParam("query", "currentmanagefeedsquery", '', false);
+    $currentPage = (int)processSessParam("page", "currentmanagefeedspage", '1', true);
+    $currentFeed = (string)processSessParam("selected_feed", "currentmanagefeedsfeed", '', false);
+
+    $whQuery = Escaping::toSqlSyntax(str_replace("*", "%", $currentQuery));
+    $whQuery = ($currentQuery != '') ? (' and (NfName like ' . $whQuery . ')') : '';
+
+    pagestart('Manage ' . getLanguage($currentLang) . ' Feeds', true);
+
+    if (isset($_SESSION['wizard'])) {
+        unset($_SESSION['wizard']);
+    }
+
+    // Handle mark actions
+    $message = handleMarkAction($service, $currentFeed);
+    if (!empty($message)) {
+        echo error_message_with_hide($message, false);
+    }
+
+    displaySessionMessages();
+    handleUpdateFeed($service);
+    handleSaveFeed($service);
+
+    // Route to appropriate view
+    if (
+        isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
+        || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
+    ) {
+        load_feeds((int)$currentFeed);
+    } elseif (isset($_REQUEST['new_feed'])) {
+        displayNewFeed((int)$currentLang);
+    } elseif (isset($_REQUEST['edit_feed'])) {
+        editFeed($service, (int)$currentFeed);
+    } elseif (isset($_REQUEST['multi_load_feed'])) {
+        multiLoadFeed($service, (int)$currentLang);
+    } else {
+        displayMainPage(
+            $service,
+            (int)$currentLang,
+            $currentQuery,
+            $currentPage,
+            $currentSort,
+            $whQuery
+        );
+    }
+
+    pageend();
+}

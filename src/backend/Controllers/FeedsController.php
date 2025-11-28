@@ -16,6 +16,8 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Services\FeedService;
+
 /**
  * Controller for RSS feed management.
  *
@@ -34,6 +36,19 @@ namespace Lwt\Controllers;
 class FeedsController extends BaseController
 {
     /**
+     * @var FeedService Feed service instance
+     */
+    private FeedService $feedService;
+
+    /**
+     * Constructor - initialize feed service.
+     */
+    public function __construct()
+    {
+        $this->feedService = new FeedService();
+    }
+
+    /**
      * Feeds index page (replaces feeds_index.php)
      *
      * @param array $params Route parameters
@@ -42,7 +57,8 @@ class FeedsController extends BaseController
      */
     public function index(array $params): void
     {
-        include __DIR__ . '/../Legacy/feeds_index.php';
+        require_once __DIR__ . '/../Legacy/feeds_index.php';
+        \Lwt\Interface\Do_Feeds\do_page($this->feedService);
     }
 
     /**
@@ -54,7 +70,8 @@ class FeedsController extends BaseController
      */
     public function edit(array $params): void
     {
-        include __DIR__ . '/../Legacy/feeds_edit.php';
+        require_once __DIR__ . '/../Legacy/feeds_edit.php';
+        \Lwt\Interface\Edit_Feeds\doPage($this->feedService);
     }
 
     /**
@@ -66,6 +83,7 @@ class FeedsController extends BaseController
      */
     public function wizard(array $params): void
     {
-        include __DIR__ . '/../Legacy/feeds_wizard.php';
+        require_once __DIR__ . '/../Legacy/feeds_wizard.php';
+        \Lwt\Interface\Feed_Wizard\doPage($this->feedService);
     }
 }
