@@ -31,9 +31,10 @@ require_once 'Core/Word/word_status.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
-require_once __DIR__ . '/api_v1.php';
 
-use function Lwt\Ajax\Improved_Text\edit_term_form;
+require_once __DIR__ . '/../Api/V1/Handlers/ImprovedTextHandler.php';
+
+use Lwt\Api\V1\Handlers\ImprovedTextHandler;
 
 function edit_mode_display(int $textid, bool $ann_exists): void
 {
@@ -58,9 +59,10 @@ function edit_mode_display(int $textid, bool $ann_exists): void
         echo '<p>No annotated text found, and creation seems not possible.</p>';
     } else {
         // Annotations exist, set up for editing.
+        $handler = new ImprovedTextHandler();
         ?>
     <div data_id="<?php echo $textid; ?>" id="editimprtextdata">
-        <?php echo edit_term_form($textid); ?>
+        <?php echo $handler->editTermForm($textid); ?>
     </div>
     <script type="text/javascript">
         $(document).ready(function() {

@@ -6,11 +6,34 @@
  * This file provides a cleaner structure for the API while maintaining
  * backward compatibility with the original api_v1.php.
  *
- * Usage: Include this file instead of api_v1.php, or call ApiV1::handle()
+ * Usage: Include this file instead of api_v1.php, or call ApiV1::handleRequest()
  * after setting up the bootstrap.
+ *
+ * @category Lwt
+ * @package  Lwt\Api\V1
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
 
 namespace Lwt\Api\V1;
+
+// Load required dependencies for API handlers
+require_once __DIR__ . '/../../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../../Core/Tag/tags.php';
+require_once __DIR__ . '/../../Core/Text/text_helpers.php';
+require_once __DIR__ . '/../../Core/Test/test_helpers.php';
+require_once __DIR__ . '/../../Core/Http/param_helpers.php';
+require_once __DIR__ . '/../../Core/Language/language_utilities.php';
+require_once __DIR__ . '/../../Core/Word/word_status.php';
+require_once __DIR__ . '/../../Core/Word/dictionary_links.php';
+require_once __DIR__ . '/../../Core/Media/media_helpers.php';
+require_once __DIR__ . '/../../Core/Text/simterms.php';
+require_once __DIR__ . '/../../Legacy/test_test.php';
+require_once __DIR__ . '/../../Core/Language/langdefs.php';
+require_once __DIR__ . '/../../Core/Feed/feeds.php';
 
 use Lwt\Api\V1\Handlers\FeedHandler;
 use Lwt\Api\V1\Handlers\ImportHandler;

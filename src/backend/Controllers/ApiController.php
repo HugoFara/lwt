@@ -17,6 +17,21 @@
 namespace Lwt\Controllers;
 
 require_once __DIR__ . '/TranslationController.php';
+require_once __DIR__ . '/../Api/V1/Response.php';
+require_once __DIR__ . '/../Api/V1/Endpoints.php';
+require_once __DIR__ . '/../Api/V1/ApiV1.php';
+require_once __DIR__ . '/../Api/V1/Handlers/FeedHandler.php';
+require_once __DIR__ . '/../Api/V1/Handlers/ImportHandler.php';
+require_once __DIR__ . '/../Api/V1/Handlers/ImprovedTextHandler.php';
+require_once __DIR__ . '/../Api/V1/Handlers/LanguageHandler.php';
+require_once __DIR__ . '/../Api/V1/Handlers/MediaHandler.php';
+require_once __DIR__ . '/../Api/V1/Handlers/ReviewHandler.php';
+require_once __DIR__ . '/../Api/V1/Handlers/SettingsHandler.php';
+require_once __DIR__ . '/../Api/V1/Handlers/StatisticsHandler.php';
+require_once __DIR__ . '/../Api/V1/Handlers/TermHandler.php';
+require_once __DIR__ . '/../Api/V1/Handlers/TextHandler.php';
+
+use Lwt\Api\V1\ApiV1;
 
 /**
  * Controller for REST API endpoints.
@@ -55,7 +70,9 @@ class ApiController extends BaseController
     }
 
     /**
-     * Main API v1 endpoint (replaces api_v1.php)
+     * Main API v1 endpoint.
+     *
+     * Uses the new ApiV1 handler class for clean separation of concerns.
      *
      * @param array $params Route parameters
      *
@@ -63,7 +80,7 @@ class ApiController extends BaseController
      */
     public function v1(array $params): void
     {
-        include __DIR__ . '/../Legacy/api_v1.php';
+        ApiV1::handleRequest();
     }
 
     /**
