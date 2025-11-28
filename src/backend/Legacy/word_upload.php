@@ -800,21 +800,6 @@ onsubmit="showImportedTerms('<?php echo $last_update; ?>', <?php echo $rtl; ?>, 
         '<?php echo $last_update; ?>', '<?php echo $rtl; ?>',
         <?php echo $recno; ?>, '1'
     );
-
-    $(document).ready(function() {
-        $('.edit_area').editable(
-            'inline_edit.php',
-            {
-                type      : 'textarea',
-                indicator : '<img src="/assets/icons/indicator.gif">',
-                tooltip   : 'Click to edit...',
-                submit    : 'Save',
-                cancel    : 'Cancel',
-                rows      : 3,
-                cols      : 35
-            }
-        );
-    });
 </script>
     <?php
 }

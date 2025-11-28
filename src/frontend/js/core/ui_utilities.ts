@@ -206,17 +206,16 @@ export function wrapRadioButtons(): void {
  * Do a lot of different DOM manipulations
  */
 export function prepareMainAreas(): void {
-  $('.edit_area').editable('inline_edit.php',
-    {
-      type: 'textarea',
-      indicator: '<img src="icn/indicator.gif">',
-      tooltip: 'Click to edit...',
-      submit: 'Save',
-      cancel: 'Cancel',
-      rows: 3,
-      cols: 35
-    }
-  );
+  // Initialize inline editing for editable areas
+  initInlineEdit('.edit_area', {
+    url: 'inline_edit.php',
+    tooltip: 'Click to edit...',
+    submitText: 'Save',
+    cancelText: 'Cancel',
+    rows: 3,
+    cols: 35,
+    indicator: '<img src="/assets/icons/indicator.gif" alt="Saving...">'
+  });
   $('select').wrap("<label class='wrap_select'></label>");
   $('form').attr('autocomplete', 'off');
   $('input[type="file"]').each(function () {

@@ -59,8 +59,13 @@ class FeedsControllerTest extends TestCase
         self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            // Create a test language if it doesn't exist
             $tbpref = self::$tbpref;
+
+            // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
+            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
+            Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+
+            // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
                 "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'FeedsControllerTestLang' LIMIT 1"
             );
@@ -93,6 +98,10 @@ class FeedsControllerTest extends TestCase
         Connection::query("DELETE FROM {$tbpref}feedlinks WHERE FlNfID IN (SELECT NfID FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%')");
         Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%'");
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'FeedsControllerTestLang'");
+
+        // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
+        Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
     }
 
     protected function setUp(): void

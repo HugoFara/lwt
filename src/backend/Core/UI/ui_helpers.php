@@ -84,7 +84,6 @@ function pagestart_kernel_nobody($title, $addcss = ''): void
     <!-- Vite assets -->
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
         <?php echo vite_assets('js/main.ts'); ?>
     <?php else : ?>
@@ -95,7 +94,6 @@ function pagestart_kernel_nobody($title, $addcss = ''): void
     <link rel="stylesheet" type="text/css" href="/assets/css/feed_wizard.css" />
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
-    <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
     <!-- Legacy only: overlib (Vite uses jQuery UI dialogs) -->
     <script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>
@@ -899,7 +897,6 @@ function pagestart_nobody($title, $addcss = ''): void
     <!-- Load jQuery synchronously for inline scripts compatibility -->
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
         <?php echo vite_assets('js/main.ts'); ?>
     <?php else : ?>
@@ -910,7 +907,6 @@ function pagestart_nobody($title, $addcss = ''): void
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/feed_wizard.css');?>" />
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
-    <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
     <!-- Legacy only: overlib (Vite uses jQuery UI dialogs) -->
     <script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>

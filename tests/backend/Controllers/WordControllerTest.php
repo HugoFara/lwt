@@ -61,8 +61,13 @@ class WordControllerTest extends TestCase
         self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            // Create a test language if it doesn't exist
             $tbpref = self::$tbpref;
+
+            // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
+            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
+            Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+
+            // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
                 "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'WordControllerTestLang' LIMIT 1"
             );
@@ -94,6 +99,10 @@ class WordControllerTest extends TestCase
         // Clean up test words and language
         Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId);
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'WordControllerTestLang'");
+
+        // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
+        Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
     }
 
     protected function setUp(): void

@@ -55,6 +55,13 @@ class LanguageControllerTest extends TestCase
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
         self::$tbpref = Globals::getTablePrefix();
+
+        if (self::$dbConnected) {
+            // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
+            $tbpref = self::$tbpref;
+            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
+            Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+        }
     }
 
     protected function setUp(): void
@@ -88,6 +95,10 @@ class LanguageControllerTest extends TestCase
         $tbpref = self::$tbpref;
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'Test_%'");
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'TestLang%'");
+
+        // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
+        Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
     }
 
     /**
