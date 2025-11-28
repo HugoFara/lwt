@@ -12,6 +12,7 @@ import { getLangFromDict, createTheDictUrl, createTheDictLink, owin, oewin } fro
 import { prepareTextInteractions } from './reading/text_events';
 import { goToLastPosition, saveReadingPosition, saveAudioPosition, quickMenuRedirection } from './core/user_interactions';
 import { showRightFrames, hideRightFrames } from './reading/frame_management';
+import { overlib, cClick, nd, setCurrentEvent } from './ui/word_popup';
 import { setLang, resetAll } from './core/language_settings';
 import { markClick, confirmDelete, showAllwordsClick } from './core/ui_utilities';
 import { selectToggle, multiActionGo, allActionGo } from './forms/bulk_actions';
@@ -59,6 +60,12 @@ declare global {
     addTermTranslation: typeof addTermTranslation;
     changeTableTestStatus: typeof changeTableTestStatus;
     do_ajax_edit_impr_text: typeof do_ajax_edit_impr_text;
+
+    // Popup functions (overlib replacement)
+    overlib: typeof overlib;
+    cClick: typeof cClick;
+    nd: typeof nd;
+    setCurrentEvent: typeof setCurrentEvent;
   }
 }
 
@@ -94,3 +101,8 @@ window.updateTermTranslation = updateTermTranslation;
 window.addTermTranslation = addTermTranslation;
 window.changeTableTestStatus = changeTableTestStatus;
 window.do_ajax_edit_impr_text = do_ajax_edit_impr_text;
+
+window.overlib = overlib;
+window.cClick = cClick;
+window.nd = nd;
+window.setCurrentEvent = setCurrentEvent;

@@ -99,8 +99,9 @@ function pagestart_kernel_nobody($title, $addcss = ''): void
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
-    <?php endif; ?>
+    <!-- Legacy only: overlib (Vite uses jQuery UI dialogs) -->
     <script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>
+    <?php endif; ?>
     <style type="text/css">
         <?php echo $addcss . "\n"; ?>
     </style>
@@ -116,8 +117,11 @@ function pagestart_kernel_nobody($title, $addcss = ''): void
 </head>
     <?php
     echo '<body>';
+    // Legacy overlib container (not needed for Vite mode)
+    if (!should_use_vite()) :
     ?>
 <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
+    <?php endif; ?>
     <?php
     flush();
     if ($debug) {
@@ -912,8 +916,10 @@ function pagestart_nobody($title, $addcss = ''): void
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
-    <?php endif; ?>
+    <!-- Legacy only: overlib (Vite uses jQuery UI dialogs) -->
     <script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>
+    <?php endif; ?>
     <style type="text/css">
         <?php echo $addcss . "\n"; ?>
     </style>
@@ -926,16 +932,16 @@ function pagestart_nobody($title, $addcss = ''): void
         var TEXTTAGS = <?php echo json_encode(get_texttags()); ?>;
         //]]>
     </script>
-    <?php if (!should_use_vite()) : ?>
-    <script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>
-    <?php endif; ?>
 
     <title>LWT :: <?php echo tohtml($title); ?></title>
 </head>
     <?php
     echo '<body>';
+    // Legacy overlib container (not needed for Vite mode)
+    if (!should_use_vite()) :
     ?>
 <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>
+    <?php endif; ?>
     <?php
     flush();
     if ($debug) {

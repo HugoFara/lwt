@@ -207,10 +207,15 @@ HTML;
     /**
      * Build the overlib div used for tooltips.
      *
-     * @return string HTML div element
+     * Only needed for legacy mode (non-Vite). Vite mode uses jQuery UI dialogs.
+     *
+     * @return string HTML div element, or empty string for Vite mode
      */
     public static function buildOverlibDiv(): string
     {
+        if (function_exists('should_use_vite') && should_use_vite()) {
+            return '';
+        }
         return '<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>';
     }
 }

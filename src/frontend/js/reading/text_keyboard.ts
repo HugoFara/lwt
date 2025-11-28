@@ -8,11 +8,11 @@
 import { getLangFromDict, createTheDictUrl } from '../terms/dictionary';
 import { speechDispatcher } from '../core/user_interactions';
 import { getAttr } from './text_annotations';
+import { cClick } from '../ui/word_popup';
 
 // Declare external functions
 declare function showRightFrames(url1?: string, url2?: string): void;
 declare function owin(url: string): Window | null;
-declare function cClick(): void;
 declare function get_position_from_id(id: string): number;
 
 // Type definitions

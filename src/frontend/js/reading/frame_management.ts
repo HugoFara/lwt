@@ -7,6 +7,7 @@
  */
 
 import $ from 'jquery';
+import { cClick } from '../ui/word_popup';
 
 /**
  * Show the right frames if found, and can load an URL in those frames
@@ -56,8 +57,8 @@ export function cleanupRightFrames(): void {
   window.parent.setTimeout(mytimeout, 800);
 
   window.parent.document.getElementById('frame-l')?.focus();
-  const parentCClick = (window.parent as unknown as { cClick: () => void }).cClick;
-  window.parent.setTimeout(parentCClick, 100);
+  // Use imported cClick directly since it's available in the module
+  window.parent.setTimeout(cClick, 100);
 }
 
 /**

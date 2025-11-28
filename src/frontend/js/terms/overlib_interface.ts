@@ -1,6 +1,9 @@
 /**
  * LWT Javascript functions
  *
+ * Word popup interface - provides popup dialogs for word interactions.
+ * Originally used overlib library, now uses jQuery UI dialogs.
+ *
  * @author  HugoFara <HugoFara@users.noreply.github.com>
  * @license Unlicense <http://unlicense.org/>
  */
@@ -9,9 +12,11 @@ import { escape_html_chars, escape_html_chars_2 } from '../core/html_utils';
 import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
 import { createTheDictLink, createSentLookupLink } from './dictionary';
 
-// Declare external functions from overlib library
-declare function overlib(content: string, ...args: unknown[]): boolean;
-declare const CAPTION: unknown;
+// Import the new popup system (replaces overlib)
+import { overlib, CAPTION } from '../ui/word_popup';
+
+// Re-export for backward compatibility
+export { overlib, CAPTION, cClick, nd } from '../ui/word_popup';
 
 // The following imports/declares are used only in string templates (onclick handlers)
 // and not called directly in TypeScript code:
@@ -38,26 +43,7 @@ interface LwtDataGlobal {
 declare const LWT_DATA: LwtDataGlobal;
 
 /**************************************************************
-Global variables for OVERLIB
-***************************************************************/
-
-/**
- * OVERLIB text font
- */
-export const ol_textfont = '"Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu';
-export const ol_textsize = 3;
-export const ol_sticky = 1;
-export const ol_captionfont = '"Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu';
-export const ol_captionsize = 3;
-export const ol_width = 260;
-export const ol_close = 'Close';
-export const ol_offsety = 30;
-export const ol_offsetx = 3;
-export const ol_fgcolor = '#FFFFE8';
-export const ol_closecolor = '#FFFFFF';
-
-/**************************************************************
- * Helper functions for overlib
+ * Helper functions for word popups
  ***************************************************************/
 
 /**
