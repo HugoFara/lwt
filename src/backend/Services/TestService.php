@@ -20,7 +20,6 @@ use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 require_once __DIR__ . '/../Core/Test/test_helpers.php';
-require_once __DIR__ . '/../Core/Tag/tags.php';
 
 /**
  * Service class for managing word tests/reviews.
@@ -682,7 +681,7 @@ class TestService
 
         if ($baseType == 1) {
             $trans = \repl_tab_nl($wordData['WoTranslation']) .
-                \getWordTagList($wordData['WoID'], ' ', 1, 0);
+                TagService::getWordTagListFormatted($wordData['WoID'], ' ', true, false);
             return $wordMode ? $trans : "[$trans]";
         }
 

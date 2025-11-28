@@ -44,7 +44,7 @@ if(window.parent.location.href.includes('type=table')) {
     // Normal Test
     var wotext = <?php echo Escaping::prepareTextdataJs($text); ?>;
     var status = <?php echo Escaping::prepareTextdataJs($status); ?>;
-    var trans = <?php echo Escaping::prepareTextdataJs($translation . getWordTagList($wid, ' ', 1, 0)); ?>;
+    var trans = <?php echo Escaping::prepareTextdataJs($translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false)); ?>;
     var roman = <?php echo Escaping::prepareTextdataJs($romanization); ?>;
     $('.word' + woid, context).attr('data_text',wotext).attr('data_trans',trans).attr('data_rom',roman).attr('data_status',status);
 }

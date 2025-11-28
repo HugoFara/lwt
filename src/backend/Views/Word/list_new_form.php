@@ -37,7 +37,7 @@
 <tr>
 <td class="td1 right">Tags:</td>
 <td class="td1">
-<?php echo getWordTags(0); ?>
+<?php echo \Lwt\Services\TagService::getWordTagsHtml(0); ?>
 </td>
 </tr>
 <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">

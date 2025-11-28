@@ -53,7 +53,7 @@ namespace Lwt\Views\Word;
     <tr>
         <td class="td1 right">Tags:</td>
         <td class="td1">
-            <?php echo getWordTags($wid); ?>
+            <?php echo \Lwt\Services\TagService::getWordTagsHtml($wid); ?>
         </td>
     </tr>
     <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">

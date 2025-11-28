@@ -18,11 +18,13 @@ namespace Lwt\Controllers;
 
 use Lwt\Services\TextService;
 use Lwt\Services\TextDisplayService;
+use Lwt\Services\TagService;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 
 require_once __DIR__ . '/../Services/TextService.php';
 require_once __DIR__ . '/../Services/TextDisplayService.php';
+require_once __DIR__ . '/../Services/TagService.php';
 
 /**
  * Controller for text management and reading interface.
@@ -77,7 +79,6 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Core/Language/language_utilities.php';
         require_once __DIR__ . '/../Core/Mobile/mobile_interactions.php';
-        require_once __DIR__ . '/../Core/Tag/tags.php';
         require_once __DIR__ . '/../Core/Media/media_helpers.php';
         require_once __DIR__ . '/../Core/Language/langdefs.php';
         require_once __DIR__ . '/../Core/Word/word_status.php';
@@ -212,7 +213,6 @@ class TextController extends BaseController
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-        require_once __DIR__ . '/../Core/Tag/tags.php';
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Core/Media/media_helpers.php';
@@ -308,11 +308,11 @@ class TextController extends BaseController
                 break;
 
             case 'addtag':
-                $message = \addtexttaglist($actionData, $list);
+                $message = TagService::addTagToTexts($actionData, $list);
                 break;
 
             case 'deltag':
-                \removetexttaglist($actionData, $list);
+                TagService::removeTagFromTexts($actionData, $list);
                 header("Location: /texts");
                 exit();
 
@@ -662,7 +662,6 @@ class TextController extends BaseController
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-        require_once __DIR__ . '/../Core/Tag/tags.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Core/Language/language_utilities.php';
 
@@ -886,7 +885,6 @@ class TextController extends BaseController
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-        require_once __DIR__ . '/../Core/Tag/tags.php';
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Core/Language/language_utilities.php';
@@ -982,7 +980,7 @@ class TextController extends BaseController
                 (string) $_REQUEST['AtAudioURI'],
                 (string) $_REQUEST['AtSourceURI']
             );
-            \saveArchivedTextTags((int) $_REQUEST['AtID']);
+            TagService::saveArchivedTextTags((int) $_REQUEST['AtID']);
         }
 
         // Display edit form or list
@@ -1043,12 +1041,12 @@ class TextController extends BaseController
 
             case 'addtag':
                 $list = "(" . implode(",", array_map('intval', $marked)) . ")";
-                $message = \addarchtexttaglist($actionData, $list);
+                $message = TagService::addTagToArchivedTexts($actionData, $list);
                 break;
 
             case 'deltag':
                 $list = "(" . implode(",", array_map('intval', $marked)) . ")";
-                \removearchtexttaglist($actionData, $list);
+                TagService::removeTagFromArchivedTexts($actionData, $list);
                 header("Location: /text/archived");
                 exit();
 

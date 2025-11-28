@@ -1359,7 +1359,7 @@ class WordService
         $wid = (int) Connection::lastInsertId();
 
         \Lwt\Database\Maintenance::initWordCount();
-        \saveWordTags($wid);
+        TagService::saveWordTags($wid);
         \insertExpressions($data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
 
         return [
@@ -1397,7 +1397,7 @@ class WordService
             "Updated"
         );
 
-        \saveWordTags($wordId);
+        TagService::saveWordTags($wordId);
 
         return [
             'id' => $wordId,

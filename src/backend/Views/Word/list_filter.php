@@ -41,7 +41,7 @@ Language:
 <option value="1"<?php if ($currenttextmode == "1") echo ' selected="selected"'; ?>>Text Tag:</option>
 </select>
 <select name="text" onchange="{val=document.form1.text.options[document.form1.text.selectedIndex].value; location.href='/words/edit?page=1&amp;text=' + val;}">
-    <?php echo ($currenttextmode != 1) ? (get_texts_selectoptions($currentlang, $currenttext)) : (get_txtag_selectoptions($currentlang, $currenttexttag)); ?>
+    <?php echo ($currenttextmode != 1) ? (get_texts_selectoptions($currentlang, $currenttext)) : (\Lwt\Services\TagService::getTextTagSelectOptionsWithTextIds($currentlang, $currenttexttag)); ?>
 </select>
 </td>
 </tr>
@@ -82,7 +82,7 @@ if ($currentregexmode == '') {
 <td class="td1 center" colspan="2" nowrap="nowrap">
 Tag #1:
 <select name="tag1" onchange="{val=document.form1.tag1.options[document.form1.tag1.selectedIndex].value; location.href='/words/edit?page=1&amp;tag1=' + val;}">
-    <?php echo get_tag_selectoptions($currenttag1, $currentlang); ?>
+    <?php echo \Lwt\Services\TagService::getTermTagSelectOptions($currenttag1, $currentlang); ?>
 </select>
 </td>
 <td class="td1 center" nowrap="nowrap">
@@ -93,7 +93,7 @@ Tag #1 .. <select name="tag12" onchange="{val=document.form1.tag12.options[docum
 <td class="td1 center" nowrap="nowrap">
 Tag #2:
 <select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='/words/edit?page=1&amp;tag2=' + val;}">
-    <?php echo get_tag_selectoptions($currenttag2, $currentlang); ?>
+    <?php echo \Lwt\Services\TagService::getTermTagSelectOptions($currenttag2, $currentlang); ?>
 </select>
 </td>
 </tr>

@@ -20,6 +20,7 @@ namespace Lwt\Services;
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+use Lwt\Services\TagService;
 
 /**
  * Service class for managing text printing operations.
@@ -297,7 +298,7 @@ class TextPrintService
      */
     public function getWordTags(int $wordId): string
     {
-        return \getWordTagList($wordId, '', 1, 0);
+        return TagService::getWordTagListFormatted($wordId, '', true, false);
     }
 
     // ===========================

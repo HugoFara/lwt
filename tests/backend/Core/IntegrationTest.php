@@ -11,7 +11,6 @@ $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/UI/ui_helpers.php';
-require_once __DIR__ . '/../../../src/backend/Core/Tag/tags.php';
 require_once __DIR__ . '/../../../src/backend/Core/Feed/feeds.php';
 require_once __DIR__ . '/../../../src/backend/Core/Text/text_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Export/export_helpers.php';
@@ -28,6 +27,7 @@ use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 use Lwt\Services\TableSetService;
+use Lwt\Services\TagService;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -573,7 +573,7 @@ class IntegrationTest extends TestCase
         );
 
         // Test getting tag list
-        $tag_list = getWordTagList($word_id);
+        $tag_list = TagService::getWordTagListFormatted($word_id);
         $this->assertStringContainsString('testtag1', $tag_list);
 
         // Clean up

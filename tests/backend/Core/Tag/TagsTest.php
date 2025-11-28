@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Services\TagService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -14,10 +15,9 @@ $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Tag/tags.php';
 
 /**
- * Comprehensive tests for tag management functions
+ * Comprehensive tests for TagService
  *
  * Tests tag creation, retrieval, assignment to words/texts, and list manipulation
  */
@@ -44,9 +44,9 @@ class TagsTest extends TestCase
     }
 
     /**
-     * Test addtaglist function - adds tag to word list
+     * Test addTagToWords - adds tag to word list
      */
-    public function testAddTagList(): void
+    public function testAddTagToWords(): void
     {
         \Lwt\Core\Globals::getTablePrefix();
 
@@ -56,255 +56,255 @@ class TagsTest extends TestCase
 
         // This function adds tags to words but needs words to exist
         // We'll test the basic function structure
-        $result = addtaglist('TestTag', '(1,2,3)');
+        $result = TagService::addTagToWords('TestTag', '(1,2,3)');
 
         $this->assertIsString($result, 'Should return a string message');
         $this->assertStringContainsString('Tag added', $result, 'Should indicate tag was processed');
     }
 
     /**
-     * Test addtaglist with special characters
+     * Test addTagToWords with special characters
      */
-    public function testAddTagListWithSpecialCharacters(): void
+    public function testAddTagToWordsWithSpecialCharacters(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // Test with special characters in tag name
-        $result = addtaglist('Tag-With-Dashes', '(1)');
+        $result = TagService::addTagToWords('Tag-With-Dashes', '(1)');
         $this->assertIsString($result);
 
-        $result = addtaglist('Tag_With_Underscores', '(1)');
+        $result = TagService::addTagToWords('Tag_With_Underscores', '(1)');
         $this->assertIsString($result);
 
         // Test with spaces
-        $result = addtaglist('Tag With Spaces', '(1)');
+        $result = TagService::addTagToWords('Tag With Spaces', '(1)');
         $this->assertIsString($result);
     }
 
     /**
-     * Test addtaglist with SQL injection attempt
+     * Test addTagToWords with SQL injection attempt
      *
      * Note: The function escapes the tag name, so SQL injection in tag names
      * won't execute malicious code, but may create tags with escaped content
      */
-    public function testAddTagListSQLInjection(): void
+    public function testAddTagToWordsSQLInjection(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // Should handle SQL injection safely by escaping
         // The tag name will be stored as escaped string, not executed
-        $result = addtaglist("SafeTag_NoInjection", '(1)');
+        $result = TagService::addTagToWords("SafeTag_NoInjection", '(1)');
         $this->assertIsString($result, 'Should handle tag creation safely');
     }
 
     /**
-     * Test addtaglist with whitespace tag name
+     * Test addTagToWords with whitespace tag name
      *
      * Note: Empty strings become NULL which violates database constraint
      * This tests the actual behavior - whitespace tags work
      */
-    public function testAddTagListWhitespaceTag(): void
+    public function testAddTagToWordsWhitespaceTag(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // Single space should work (gets trimmed and becomes non-empty in DB)
-        $result = addtaglist(' Trimmed Tag ', '(1)');
+        $result = TagService::addTagToWords(' Trimmed Tag ', '(1)');
         $this->assertIsString($result, 'Should handle whitespace-padded tag name');
     }
 
     /**
-     * Test addtaglist with empty list
+     * Test addTagToWords with empty list
      */
-    public function testAddTagListEmptyList(): void
+    public function testAddTagToWordsEmptyList(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = addtaglist('TestTag', '()');
+        $result = TagService::addTagToWords('TestTag', '()');
         $this->assertIsString($result);
         $this->assertStringContainsString('0', $result, 'Should indicate 0 items affected');
     }
 
     /**
-     * Test addarchtexttaglist function
+     * Test addTagToArchivedTexts function
      */
-    public function testAddArchTextTagList(): void
+    public function testAddTagToArchivedTexts(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = addarchtexttaglist('ArchiveTag', '(1)');
+        $result = TagService::addTagToArchivedTexts('ArchiveTag', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('Tag added', $result);
     }
 
     /**
-     * Test addarchtexttaglist with special characters
+     * Test addTagToArchivedTexts with special characters
      */
-    public function testAddArchTextTagListSpecialChars(): void
+    public function testAddTagToArchivedTextsSpecialChars(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = addarchtexttaglist('Archive-Tag_2023', '(1)');
+        $result = TagService::addTagToArchivedTexts('Archive-Tag_2023', '(1)');
         $this->assertIsString($result);
     }
 
     /**
-     * Test addtexttaglist function
+     * Test addTagToTexts function
      */
-    public function testAddTextTagList(): void
+    public function testAddTagToTexts(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = addtexttaglist('TextTag', '(1)');
+        $result = TagService::addTagToTexts('TextTag', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('Tag added', $result);
     }
 
     /**
-     * Test removetaglist function
+     * Test removeTagFromWords function
      */
-    public function testRemoveTagList(): void
+    public function testRemoveTagFromWords(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // First add a tag to ensure it exists
-        addtaglist('RemoveTestTag', '(1)');
+        TagService::addTagToWords('RemoveTestTag', '(1)');
 
         // Now remove it
-        $result = removetaglist('RemoveTestTag', '(1,2,3)');
+        $result = TagService::removeTagFromWords('RemoveTestTag', '(1,2,3)');
         $this->assertIsString($result);
         $this->assertStringContainsString('Tag removed', $result);
     }
 
     /**
-     * Test removetaglist with non-existent tag
+     * Test removeTagFromWords with non-existent tag
      */
-    public function testRemoveTagListNonExistent(): void
+    public function testRemoveTagFromWordsNonExistent(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // Non-existent tag ID
-        $result = removetaglist('99999', '(1)');
+        $result = TagService::removeTagFromWords('99999', '(1)');
         $this->assertIsString($result);
     }
 
     /**
-     * Test removearchtexttaglist function
+     * Test removeTagFromArchivedTexts function
      */
-    public function testRemoveArchTextTagList(): void
+    public function testRemoveTagFromArchivedTexts(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // First add a tag to ensure it exists
-        addarchtexttaglist('RemoveArchTestTag', '(1)');
+        TagService::addTagToArchivedTexts('RemoveArchTestTag', '(1)');
 
         // Now remove it
-        $result = removearchtexttaglist('RemoveArchTestTag', '(1)');
+        $result = TagService::removeTagFromArchivedTexts('RemoveArchTestTag', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('Tag removed', $result);
     }
 
     /**
-     * Test removetexttaglist function
+     * Test removeTagFromTexts function
      */
-    public function testRemoveTextTagList(): void
+    public function testRemoveTagFromTexts(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // First add a tag to ensure it exists
-        addtexttaglist('RemoveTextTestTag', '(1)');
+        TagService::addTagToTexts('RemoveTextTestTag', '(1)');
 
         // Now remove it
-        $result = removetexttaglist('RemoveTextTestTag', '(1)');
+        $result = TagService::removeTagFromTexts('RemoveTextTestTag', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('Tag removed', $result);
     }
 
     /**
-     * Test get_tags function - returns cached tags
+     * Test getAllTermTags function - returns cached tags
      */
-    public function testGetTags(): void
+    public function testGetAllTermTags(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $tags = get_tags();
+        $tags = TagService::getAllTermTags();
         $this->assertIsArray($tags, 'Should return array of tags');
     }
 
     /**
-     * Test get_tags with refresh
+     * Test getAllTermTags with refresh
      */
-    public function testGetTagsRefresh(): void
+    public function testGetAllTermTagsRefresh(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $tags = get_tags(1);
+        $tags = TagService::getAllTermTags(true);
         $this->assertIsArray($tags, 'Should return array of tags after refresh');
     }
 
     /**
-     * Test get_texttags function
+     * Test getAllTextTags function
      */
-    public function testGetTextTags(): void
+    public function testGetAllTextTags(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $tags = get_texttags();
+        $tags = TagService::getAllTextTags();
         $this->assertIsArray($tags, 'Should return array of text tags');
     }
 
     /**
-     * Test get_texttags with refresh
+     * Test getAllTextTags with refresh
      */
-    public function testGetTextTagsRefresh(): void
+    public function testGetAllTextTagsRefresh(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $tags = get_texttags(1);
+        $tags = TagService::getAllTextTags(true);
         $this->assertIsArray($tags, 'Should return array after refresh');
     }
 
@@ -313,19 +313,19 @@ class TagsTest extends TestCase
      */
     public function testTagFunctionsWithUnicode(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // Test with Unicode tag names
-        $result = addtaglist('日本語タグ', '(1)');
+        $result = TagService::addTagToWords('日本語タグ', '(1)');
         $this->assertIsString($result, 'Should handle Unicode in tag names');
 
-        $result = addtaglist('العربية', '(1)');
+        $result = TagService::addTagToWords('العربية', '(1)');
         $this->assertIsString($result, 'Should handle Arabic in tag names');
 
-        $result = addtaglist('Ελληνικά', '(1)');
+        $result = TagService::addTagToWords('Ελληνικά', '(1)');
         $this->assertIsString($result, 'Should handle Greek in tag names');
     }
 
@@ -334,14 +334,14 @@ class TagsTest extends TestCase
      */
     public function testTagFunctionsWithLongNames(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // Use a unique long tag name to avoid duplicate key errors
         $longTag = 'LongTag_' . time() . '_' . str_repeat('X', 20);
-        $result = addtaglist($longTag, '(1)');
+        $result = TagService::addTagToWords($longTag, '(1)');
         $this->assertIsString($result, 'Should handle long tag names');
     }
 
@@ -350,17 +350,17 @@ class TagsTest extends TestCase
      */
     public function testSequentialTagOperations(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // Add tag
-        $result = addtaglist('SequentialTag', '(1)');
+        $result = TagService::addTagToWords('SequentialTag', '(1)');
         $this->assertIsString($result);
 
         // Get tags
-        $tags = get_tags(1);
+        $tags = TagService::getAllTermTags(true);
         $this->assertIsArray($tags);
 
         // Remove tag (would need actual tag ID from database)
@@ -368,39 +368,11 @@ class TagsTest extends TestCase
     }
 
     /**
-     * Test getTextTitle function
+     * Test getTermTagSelectOptions with language filter
      */
-    public function testGetTextTitle(): void
+    public function testGetTermTagSelectOptions(): void
     {
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
 
-        // Test with non-existent ID
-        $title = getTextTitle(99999);
-        $this->assertIsString($title, 'Should return string even for non-existent text');
-    }
-
-    /**
-     * Test getTextTitle with zero and negative IDs
-     */
-    public function testGetTextTitleEdgeCases(): void
-    {
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
-        // Test with zero ID
-        $title = getTextTitle(0);
-        $this->assertIsString($title, 'Should handle zero ID safely');
-    }
-
-    /**
-     * Test get_tag_selectoptions with language filter
-     */
-    public function testGetTagSelectOptions(): void
-    {
-        
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
@@ -410,18 +382,18 @@ class TagsTest extends TestCase
         }
 
         // Test with no language filter
-        $result = get_tag_selectoptions('', '');
+        $result = TagService::getTermTagSelectOptions('', '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('[Filter off]', $result);
     }
 
     /**
-     * Test get_tag_selectoptions with language ID
+     * Test getTermTagSelectOptions with language ID
      */
-    public function testGetTagSelectOptionsWithLanguage(): void
+    public function testGetTermTagSelectOptionsWithLanguage(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
@@ -431,17 +403,17 @@ class TagsTest extends TestCase
         }
 
         // Test with language filter
-        $result = get_tag_selectoptions('', 1);
+        $result = TagService::getTermTagSelectOptions('', 1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }
 
     /**
-     * Test get_tag_selectoptions with selected value
+     * Test getTermTagSelectOptions with selected value
      */
-    public function testGetTagSelectOptionsWithSelected(): void
+    public function testGetTermTagSelectOptionsWithSelected(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
@@ -451,17 +423,17 @@ class TagsTest extends TestCase
         }
 
         // Test with selected value
-        $result = get_tag_selectoptions('1', '');
+        $result = TagService::getTermTagSelectOptions('1', '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }
 
     /**
-     * Test get_texttag_selectoptions function
+     * Test getTextTagSelectOptions function
      */
     public function testGetTextTagSelectOptions(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
@@ -470,18 +442,18 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = get_texttag_selectoptions('', '');
+        $result = TagService::getTextTagSelectOptions('', '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('[Filter off]', $result);
     }
 
     /**
-     * Test get_texttag_selectoptions with language
+     * Test getTextTagSelectOptions with language
      */
     public function testGetTextTagSelectOptionsWithLanguage(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
@@ -490,17 +462,17 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = get_texttag_selectoptions('', 1);
+        $result = TagService::getTextTagSelectOptions('', 1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }
 
     /**
-     * Test get_txtag_selectoptions function
+     * Test getTextTagSelectOptionsWithTextIds function
      */
-    public function testGetTxTagSelectOptions(): void
+    public function testGetTextTagSelectOptionsWithTextIds(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
@@ -509,18 +481,18 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = get_txtag_selectoptions('', '');
+        $result = TagService::getTextTagSelectOptionsWithTextIds('', '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('[Filter off]', $result);
     }
 
     /**
-     * Test get_txtag_selectoptions with language
+     * Test getTextTagSelectOptionsWithTextIds with language
      */
-    public function testGetTxTagSelectOptionsWithLanguage(): void
+    public function testGetTextTagSelectOptionsWithTextIdsWithLanguage(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
@@ -529,17 +501,17 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = get_txtag_selectoptions(1, '');
+        $result = TagService::getTextTagSelectOptionsWithTextIds(1, '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }
 
     /**
-     * Test get_archivedtexttag_selectoptions function
+     * Test getArchivedTextTagSelectOptions function
      */
     public function testGetArchivedTextTagSelectOptions(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
@@ -548,18 +520,18 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = get_archivedtexttag_selectoptions('', '');
+        $result = TagService::getArchivedTextTagSelectOptions('', '');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('[Filter off]', $result);
     }
 
     /**
-     * Test get_archivedtexttag_selectoptions with language
+     * Test getArchivedTextTagSelectOptions with language
      */
     public function testGetArchivedTextTagSelectOptionsWithLanguage(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
@@ -568,22 +540,22 @@ class TagsTest extends TestCase
             $this->markTestSkipped('get_selected function not available (requires session_utility.php)');
         }
 
-        $result = get_archivedtexttag_selectoptions('', 1);
+        $result = TagService::getArchivedTextTagSelectOptions('', 1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }
 
     /**
-     * Test getWordTags with valid word ID
+     * Test getWordTagsHtml with valid word ID
      */
-    public function testGetWordTags(): void
+    public function testGetWordTagsHtml(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = getWordTags(1);
+        $result = TagService::getWordTagsHtml(1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
         $this->assertStringContainsString('id="termtags"', $result);
@@ -591,47 +563,47 @@ class TagsTest extends TestCase
     }
 
     /**
-     * Test getWordTags with zero ID
+     * Test getWordTagsHtml with zero ID
      */
-    public function testGetWordTagsWithZeroId(): void
+    public function testGetWordTagsHtmlWithZeroId(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = getWordTags(0);
+        $result = TagService::getWordTagsHtml(0);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
         $this->assertStringContainsString('</ul>', $result);
     }
 
     /**
-     * Test getWordTags with negative ID
+     * Test getWordTagsHtml with negative ID
      */
-    public function testGetWordTagsWithNegativeId(): void
+    public function testGetWordTagsHtmlWithNegativeId(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = getWordTags(-1);
+        $result = TagService::getWordTagsHtml(-1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
     }
 
     /**
-     * Test getTextTags with valid text ID
+     * Test getTextTagsHtml with valid text ID
      */
-    public function testGetTextTagsFunction(): void
+    public function testGetTextTagsHtml(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = getTextTags(1);
+        $result = TagService::getTextTagsHtml(1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
         $this->assertStringContainsString('id="texttags"', $result);
@@ -639,32 +611,32 @@ class TagsTest extends TestCase
     }
 
     /**
-     * Test getTextTags with zero ID
+     * Test getTextTagsHtml with zero ID
      */
-    public function testGetTextTagsWithZeroId(): void
+    public function testGetTextTagsHtmlWithZeroId(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = getTextTags(0);
+        $result = TagService::getTextTagsHtml(0);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
         $this->assertStringContainsString('</ul>', $result);
     }
 
     /**
-     * Test getArchivedTextTags function
+     * Test getArchivedTextTagsHtml function
      */
-    public function testGetArchivedTextTagsFunction(): void
+    public function testGetArchivedTextTagsHtml(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = getArchivedTextTags(1);
+        $result = TagService::getArchivedTextTagsHtml(1);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
         $this->assertStringContainsString('id="texttags"', $result);
@@ -672,16 +644,16 @@ class TagsTest extends TestCase
     }
 
     /**
-     * Test getArchivedTextTags with zero ID
+     * Test getArchivedTextTagsHtml with zero ID
      */
-    public function testGetArchivedTextTagsWithZeroId(): void
+    public function testGetArchivedTextTagsHtmlWithZeroId(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = getArchivedTextTags(0);
+        $result = TagService::getArchivedTextTagsHtml(0);
         $this->assertIsString($result);
         $this->assertStringContainsString('<ul', $result);
     }
@@ -696,8 +668,8 @@ class TagsTest extends TestCase
         }
 
         // Test with a non-existent ID - should handle gracefully
-        saveWordTags(999999);
-        saveWordTags(0);
+        TagService::saveWordTags(999999);
+        TagService::saveWordTags(0);
 
         // Should complete without errors
         $this->assertTrue(true);
@@ -713,8 +685,8 @@ class TagsTest extends TestCase
         }
 
         // Test with a non-existent ID - should handle gracefully
-        saveTextTags(999999);
-        saveTextTags(0);
+        TagService::saveTextTags(999999);
+        TagService::saveTextTags(0);
 
         // Should complete without errors
         $this->assertTrue(true);
@@ -730,81 +702,55 @@ class TagsTest extends TestCase
         }
 
         // Test with a non-existent ID - should handle gracefully
-        saveArchivedTextTags(999999);
-        saveArchivedTextTags(0);
+        TagService::saveArchivedTextTags(999999);
+        TagService::saveArchivedTextTags(0);
 
         // Should complete without errors
         $this->assertTrue(true);
     }
 
     /**
-     * Test removetaglist with empty tag name
+     * Test removeTagFromWords with empty tag name
      */
-    public function testRemoveTagListEmptyTag(): void
+    public function testRemoveTagFromWordsEmptyTag(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = removetaglist('', '(1)');
+        $result = TagService::removeTagFromWords('', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('not found', $result);
     }
 
     /**
-     * Test removetexttaglist with empty tag name
+     * Test removeTagFromTexts with empty tag name
      */
-    public function testRemoveTextTagListEmptyTag(): void
+    public function testRemoveTagFromTextsEmptyTag(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = removetexttaglist('', '(1)');
+        $result = TagService::removeTagFromTexts('', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('not found', $result);
     }
 
     /**
-     * Test removearchtexttaglist with empty tag name
+     * Test removeTagFromArchivedTexts with empty tag name
      */
-    public function testRemoveArchTextTagListEmptyTag(): void
+    public function testRemoveTagFromArchivedTextsEmptyTag(): void
     {
-        
+
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
-        $result = removearchtexttaglist('', '(1)');
+        $result = TagService::removeTagFromArchivedTexts('', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('not found', $result);
-    }
-
-    /**
-     * Test getTextTitle with zero ID
-     */
-    public function testGetTextTitleZeroId(): void
-    {
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
-        $title = getTextTitle(0);
-        $this->assertIsString($title);
-    }
-
-    /**
-     * Test getTextTitle with negative ID
-     */
-    public function testGetTextTitleNegativeId(): void
-    {
-        if (!Globals::getDbConnection()) {
-            $this->markTestSkipped('Database connection not available');
-        }
-
-        $title = getTextTitle(-1);
-        $this->assertIsString($title);
     }
 }

@@ -149,7 +149,7 @@
     <tr>
         <td class="td1 right">Tags:</td>
         <td class="td1">
-            <?php echo getTextTags(0); ?>
+            <?php echo \Lwt\Services\TagService::getTextTagsHtml(0); ?>
         </td>
     </tr>
     <tr>

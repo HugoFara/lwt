@@ -25,7 +25,6 @@ use Lwt\Database\TextParsing;
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/Word/word_status.php';
 require_once __DIR__ . '/../Core/Word/expression_handling.php';
-require_once __DIR__ . '/../Core/Tag/tags.php';
 require_once __DIR__ . '/../Core/Language/language_utilities.php';
 
 /**
@@ -833,7 +832,7 @@ class WordUploadService
             ) A, {$this->tbpref}tags, {$this->tbpref}words
             WHERE name=TgText AND A.WoTextLC={$this->tbpref}words.WoTextLC AND WoLgID=$langId");
 
-        \get_tags(1);
+        TagService::getAllTermTags(true);
     }
 
     /**
@@ -931,7 +930,7 @@ class WordUploadService
                 ORDER BY WoTextLC, n) A");
 
         $this->cleanupTempTables();
-        \get_tags(1);
+        TagService::getAllTermTags(true);
     }
 
     /**

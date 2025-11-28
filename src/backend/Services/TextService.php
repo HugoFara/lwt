@@ -24,6 +24,7 @@ use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
 use Lwt\Database\Validation;
+use Lwt\Services\TagService;
 
 /**
  * Service class for managing texts (active and archived).
@@ -1279,7 +1280,7 @@ class TextService
                 ')'
             );
             $id = Connection::lastInsertId();
-            \saveTextTags($id);
+            TagService::saveTextTags($id);
             TextParsing::splitCheck($texts[$i], $langId, $id);
         }
 
@@ -1526,7 +1527,7 @@ class TextService
         }
 
         // Save tags
-        \saveTextTags($textId);
+        TagService::saveTextTags($textId);
 
         // Delete old parsed data
         $sentencesDeleted = Connection::execute(

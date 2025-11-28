@@ -19,7 +19,6 @@
 require_once __DIR__ . '/../Globals.php';
 require_once __DIR__ . '/../Database/Connection.php';
 require_once __DIR__ . '/../UI/ui_helpers.php';
-require_once __DIR__ . '/../Tag/tags.php';
 
 use Lwt\Database\Connection;
 

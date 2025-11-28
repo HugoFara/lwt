@@ -80,7 +80,6 @@ class TextPrintController extends BaseController
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-        require_once __DIR__ . '/../Core/Tag/tags.php';
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
         require_once __DIR__ . '/../Core/Text/text_navigation.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
@@ -136,7 +135,6 @@ class TextPrintController extends BaseController
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-        require_once __DIR__ . '/../Core/Tag/tags.php';
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
         require_once __DIR__ . '/../Core/Text/text_navigation.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';

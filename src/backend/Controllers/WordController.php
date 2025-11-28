@@ -18,10 +18,12 @@ namespace Lwt\Controllers;
 
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Services/TagService.php';
 
 use Lwt\Services\WordService;
 use Lwt\Services\WordListService;
 use Lwt\Services\WordUploadService;
+use Lwt\Services\TagService;
 
 /**
  * Controller for vocabulary/term management.
@@ -191,7 +193,7 @@ class WordController extends BaseController
         $wid = $result['id'];
         $message = $result['message'];
 
-        \saveWordTags($wid);
+        TagService::saveWordTags($wid);
 
         // Prepare view variables
         $textId = (int)$_REQUEST['tid'];
@@ -368,7 +370,7 @@ class WordController extends BaseController
                 "Updated"
             );
             $wid = (int)$_REQUEST["WoID"];
-            \saveWordTags($wid);
+            TagService::saveWordTags($wid);
 
             $message = 'Updated';
 
@@ -658,10 +660,10 @@ class WordController extends BaseController
                 $message = $listService->deleteByIdList($idList);
                 break;
             case 'addtag':
-                $message = \addtaglist($actiondata, $idList);
+                $message = TagService::addTagToWords($actiondata, $idList);
                 break;
             case 'deltag':
-                \removetaglist($actiondata, $idList);
+                TagService::removeTagFromWords($actiondata, $idList);
                 header("Location: /words/edit");
                 exit();
             case 'spl1':
@@ -748,11 +750,11 @@ class WordController extends BaseController
                         $cnt++;
                         break;
                     case 'addtagall':
-                        \addtaglist($actiondata, '(' . $id . ')');
+                        TagService::addTagToWords($actiondata, '(' . $id . ')');
                         $cnt++;
                         break;
                     case 'deltagall':
-                        \removetaglist($actiondata, '(' . $id . ')');
+                        TagService::removeTagFromWords($actiondata, '(' . $id . ')');
                         $cnt++;
                         break;
                     case 'spl1all':
@@ -848,12 +850,12 @@ class WordController extends BaseController
         if ($_REQUEST['op'] == 'Save') {
             $message = $listService->saveNewWord($_REQUEST);
             $wid = \get_last_key();
-            \saveWordTags($wid);
+            TagService::saveWordTags($wid);
             return $wid;
         } else {
             $message = $listService->updateWord($_REQUEST);
             $wid = (int) $_REQUEST["WoID"];
-            \saveWordTags($wid);
+            TagService::saveWordTags($wid);
             return $wid;
         }
     }
@@ -1105,7 +1107,7 @@ class WordController extends BaseController
                 $wid,
                 $data['text'],
                 $data['roman'],
-                $translation . \getWordTagList($wid, ' ', 1, 0),
+                $translation . TagService::getWordTagListFormatted($wid, ' ', true, false),
                 $newStatus
             );
             $oldStatusValue = $oldStatus;
@@ -1387,7 +1389,7 @@ class WordController extends BaseController
                 echo '<p>' . $message . '</p>';
             } else {
                 $wid = $result['id'];
-                \saveWordTags($wid);
+                TagService::saveWordTags($wid);
                 \Lwt\Database\Maintenance::initWordCount();
 
                 echo '<p>' . $result['message'] . '</p>';
@@ -1458,7 +1460,7 @@ class WordController extends BaseController
             return;
         }
 
-        $tags = \getWordTagList($wid, '', 0, 0);
+        $tags = TagService::getWordTagListFormatted($wid, '', false, false);
         $scrdir = \getScriptDirectionTag($word['langId']);
 
         include __DIR__ . '/../Views/Word/show.php';
@@ -1703,7 +1705,7 @@ class WordController extends BaseController
         }
 
         $term = $wordData['text'];
-        $translation = $wordData['translation'] . \getWordTagList($wordId, ' ', 1, 0);
+        $translation = $wordData['translation'] . TagService::getWordTagListFormatted($wordId, ' ', true, false);
         $romanization = $wordData['romanization'];
         $wid = $wordId;
 

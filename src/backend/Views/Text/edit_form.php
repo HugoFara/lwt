@@ -154,7 +154,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
         <tr>
             <td class="td1 right">Tags:</td>
             <td class="td1">
-                <?php echo getTextTags($textId); ?>
+                <?php echo \Lwt\Services\TagService::getTextTagsHtml($textId); ?>
             </td>
         </tr>
         <tr>

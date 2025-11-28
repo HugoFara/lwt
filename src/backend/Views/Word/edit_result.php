@@ -39,7 +39,7 @@ use Lwt\Database\Escaping;
     const contexth = window.parent.document.getElementById('frame-h');
     const woid = <?php echo Escaping::prepareTextdataJs($wid); ?>;
     const status = <?php echo Escaping::prepareTextdataJs($status); ?>;
-    const trans = <?php echo Escaping::prepareTextdataJs($translation . getWordTagList($wid, ' ', 1, 0)); ?>;
+    const trans = <?php echo Escaping::prepareTextdataJs($translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false)); ?>;
     const roman = <?php echo Escaping::prepareTextdataJs($romanization); ?>;
     let title;
     if (window.parent.LWT_DATA.settings.jQuery_tooltip) {

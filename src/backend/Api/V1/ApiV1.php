@@ -22,7 +22,6 @@ namespace Lwt\Api\V1;
 // Load required dependencies for API handlers
 require_once __DIR__ . '/../../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../Core/UI/ui_helpers.php';
-require_once __DIR__ . '/../../Core/Tag/tags.php';
 require_once __DIR__ . '/../../Core/Text/text_helpers.php';
 require_once __DIR__ . '/../../Core/Test/test_helpers.php';
 require_once __DIR__ . '/../../Core/Http/param_helpers.php';

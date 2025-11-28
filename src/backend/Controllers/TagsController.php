@@ -18,6 +18,9 @@ namespace Lwt\Controllers;
 
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
+use Lwt\Services\TagService;
+
+require_once __DIR__ . '/../Services/TagService.php';
 
 /**
  * Controller for managing tags (both term tags and text tags).
@@ -345,7 +348,7 @@ class TagsController extends BaseController
         }
         $this->message($message, false);
 
-        \get_tags(1);   // refresh tags cache
+        TagService::getAllTermTags(true);   // refresh tags cache
 
         $sql = 'select count(TgID) as value from ' . $this->table('tags') . ' where (1=1) ' . $wh_query;
         $recno = (int) $this->getValue($sql);
@@ -715,7 +718,7 @@ class TagsController extends BaseController
         }
         $this->message($message, false);
 
-        \get_texttags(1);   // refresh tags cache
+        TagService::getAllTextTags(true);   // refresh tags cache
 
         $sql = 'select count(T2ID) as value from ' . $this->table('tags2') . ' where (1=1) ' . $wh_query;
         $recno = (int) $this->getValue($sql);

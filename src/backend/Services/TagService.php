@@ -18,6 +18,7 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Globals;
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
@@ -498,5 +499,875 @@ class TagService
                 ''
             );
         }
+    }
+
+    // =========================================================================
+    // Cache methods (migrated from tags.php)
+    // =========================================================================
+
+    /**
+     * Get all term tags, with session caching.
+     *
+     * @param bool $refresh If true, refresh the cache
+     *
+     * @return array<string> All term tag texts
+     */
+    public static function getAllTermTags(bool $refresh = false): array
+    {
+        $tbpref = Globals::getTablePrefix();
+        $cacheKey = $tbpref . self::getUrlBase();
+
+        if (
+            !$refresh
+            && isset($_SESSION['TAGS'])
+            && is_array($_SESSION['TAGS'])
+            && isset($_SESSION['TBPREF_TAGS'])
+            && $_SESSION['TBPREF_TAGS'] === $cacheKey
+        ) {
+            return $_SESSION['TAGS'];
+        }
+
+        $tags = [];
+        $sql = 'SELECT TgText FROM ' . $tbpref . 'tags ORDER BY TgText';
+        $res = Connection::query($sql);
+        while ($record = mysqli_fetch_assoc($res)) {
+            $tags[] = (string) $record['TgText'];
+        }
+        mysqli_free_result($res);
+
+        $_SESSION['TAGS'] = $tags;
+        $_SESSION['TBPREF_TAGS'] = $cacheKey;
+
+        return $tags;
+    }
+
+    /**
+     * Get all text tags, with session caching.
+     *
+     * @param bool $refresh If true, refresh the cache
+     *
+     * @return array<string> All text tag texts
+     */
+    public static function getAllTextTags(bool $refresh = false): array
+    {
+        $tbpref = Globals::getTablePrefix();
+        $cacheKey = $tbpref . self::getUrlBase();
+
+        if (
+            !$refresh
+            && isset($_SESSION['TEXTTAGS'])
+            && is_array($_SESSION['TEXTTAGS'])
+            && isset($_SESSION['TBPREF_TEXTTAGS'])
+            && $_SESSION['TBPREF_TEXTTAGS'] === $cacheKey
+        ) {
+            return $_SESSION['TEXTTAGS'];
+        }
+
+        $tags = [];
+        $sql = 'SELECT T2Text FROM ' . $tbpref . 'tags2 ORDER BY T2Text';
+        $res = Connection::query($sql);
+        while ($record = mysqli_fetch_assoc($res)) {
+            $tags[] = (string) $record['T2Text'];
+        }
+        mysqli_free_result($res);
+
+        $_SESSION['TEXTTAGS'] = $tags;
+        $_SESSION['TBPREF_TEXTTAGS'] = $cacheKey;
+
+        return $tags;
+    }
+
+    /**
+     * Get the URL base for cache key generation.
+     *
+     * @return string URL base
+     */
+    private static function getUrlBase(): string
+    {
+        return function_exists('url_base') ? \url_base() : '';
+    }
+
+    // =========================================================================
+    // Save tag associations (migrated from tags.php)
+    // =========================================================================
+
+    /**
+     * Save tags for a word from form input.
+     *
+     * @param int $wordId Word ID
+     *
+     * @return void
+     */
+    public static function saveWordTags(int $wordId): void
+    {
+        $tbpref = Globals::getTablePrefix();
+        Connection::execute(
+            "DELETE FROM " . $tbpref . "wordtags WHERE WtWoID = " . $wordId
+        );
+
+        $termTags = InputValidator::getArray('TermTags');
+        if (
+            empty($termTags)
+            || !isset($termTags['TagList'])
+            || !is_array($termTags['TagList'])
+        ) {
+            return;
+        }
+
+        $tagList = $termTags['TagList'];
+        self::getAllTermTags(true); // Refresh cache
+
+        foreach ($tagList as $tag) {
+            $tag = (string) $tag;
+            if (!in_array($tag, $_SESSION['TAGS'])) {
+                Connection::execute(
+                    "INSERT INTO {$tbpref}tags (TgText)
+                    VALUES(" . Escaping::toSqlSyntax($tag) . ")"
+                );
+            }
+            Connection::execute(
+                "INSERT INTO {$tbpref}wordtags (WtWoID, WtTgID)
+                SELECT {$wordId}, TgID
+                FROM {$tbpref}tags
+                WHERE TgText = " . Escaping::toSqlSyntax($tag)
+            );
+        }
+
+        self::getAllTermTags(true); // Refresh cache
+    }
+
+    /**
+     * Save tags for a text from form input.
+     *
+     * @param int $textId Text ID
+     *
+     * @return void
+     */
+    public static function saveTextTags(int $textId): void
+    {
+        $tbpref = Globals::getTablePrefix();
+        Connection::execute(
+            "DELETE FROM " . $tbpref . "texttags WHERE TtTxID = " . $textId
+        );
+
+        $textTags = InputValidator::getArray('TextTags');
+        if (
+            empty($textTags)
+            || !isset($textTags['TagList'])
+            || !is_array($textTags['TagList'])
+        ) {
+            return;
+        }
+
+        $tagList = $textTags['TagList'];
+        self::getAllTextTags(true); // Refresh cache
+
+        foreach ($tagList as $tag) {
+            $tag = (string) $tag;
+            if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
+                Connection::execute(
+                    "INSERT INTO {$tbpref}tags2 (T2Text)
+                    VALUES(" . Escaping::toSqlSyntax($tag) . ")"
+                );
+            }
+            Connection::execute(
+                "INSERT INTO {$tbpref}texttags (TtTxID, TtT2ID)
+                SELECT {$textId}, T2ID
+                FROM {$tbpref}tags2
+                WHERE T2Text = " . Escaping::toSqlSyntax($tag)
+            );
+        }
+
+        self::getAllTextTags(true); // Refresh cache
+    }
+
+    /**
+     * Save tags for an archived text from form input.
+     *
+     * @param int $textId Archived text ID
+     *
+     * @return void
+     */
+    public static function saveArchivedTextTags(int $textId): void
+    {
+        $tbpref = Globals::getTablePrefix();
+        Connection::execute(
+            "DELETE FROM " . $tbpref . "archtexttags WHERE AgAtID = " . $textId
+        );
+
+        $textTags = InputValidator::getArray('TextTags');
+        if (
+            empty($textTags)
+            || !isset($textTags['TagList'])
+            || !is_array($textTags['TagList'])
+        ) {
+            return;
+        }
+
+        $tagList = $textTags['TagList'];
+        self::getAllTextTags(true); // Refresh cache
+
+        foreach ($tagList as $tag) {
+            $tag = (string) $tag;
+            if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
+                Connection::execute(
+                    "INSERT INTO {$tbpref}tags2 (T2Text)
+                    VALUES(" . Escaping::toSqlSyntax($tag) . ")"
+                );
+            }
+            Connection::execute(
+                "INSERT INTO {$tbpref}archtexttags (AgAtID, AgT2ID)
+                SELECT {$textId}, T2ID
+                FROM {$tbpref}tags2
+                WHERE T2Text = " . Escaping::toSqlSyntax($tag)
+            );
+        }
+
+        self::getAllTextTags(true); // Refresh cache
+    }
+
+    // =========================================================================
+    // Get tag display HTML (migrated from tags.php)
+    // =========================================================================
+
+    /**
+     * Get HTML list of tags for a word.
+     *
+     * @param int $wordId Word ID (0 for empty list)
+     *
+     * @return string HTML UL element with tags
+     */
+    public static function getWordTagsHtml(int $wordId): string
+    {
+        $tbpref = Globals::getTablePrefix();
+        $html = '<ul id="termtags">';
+
+        if ($wordId > 0) {
+            $sql = 'SELECT TgText
+                FROM ' . $tbpref . 'wordtags, ' . $tbpref . 'tags
+                WHERE TgID = WtTgID AND WtWoID = ' . $wordId . '
+                ORDER BY TgText';
+            $res = Connection::query($sql);
+            while ($record = mysqli_fetch_assoc($res)) {
+                $html .= '<li>' . \tohtml($record['TgText']) . '</li>';
+            }
+            mysqli_free_result($res);
+        }
+
+        return $html . '</ul>';
+    }
+
+    /**
+     * Get HTML list of tags for a text.
+     *
+     * @param int $textId Text ID (0 for empty list)
+     *
+     * @return string HTML UL element with tags
+     */
+    public static function getTextTagsHtml(int $textId): string
+    {
+        $tbpref = Globals::getTablePrefix();
+        $html = '<ul id="texttags" class="respinput">';
+
+        if ($textId > 0) {
+            $sql = "SELECT T2Text
+                FROM {$tbpref}texttags, {$tbpref}tags2
+                WHERE T2ID = TtT2ID AND TtTxID = {$textId}
+                ORDER BY T2Text";
+            $res = Connection::query($sql);
+            while ($record = mysqli_fetch_assoc($res)) {
+                $html .= '<li>' . \tohtml($record['T2Text']) . '</li>';
+            }
+            mysqli_free_result($res);
+        }
+
+        return $html . '</ul>';
+    }
+
+    /**
+     * Get HTML list of tags for an archived text.
+     *
+     * @param int $textId Archived text ID (0 for empty list)
+     *
+     * @return string HTML UL element with tags
+     */
+    public static function getArchivedTextTagsHtml(int $textId): string
+    {
+        $tbpref = Globals::getTablePrefix();
+        $html = '<ul id="texttags">';
+
+        if ($textId > 0) {
+            $sql = 'SELECT T2Text
+                FROM ' . $tbpref . 'archtexttags, ' . $tbpref . 'tags2
+                WHERE T2ID = AgT2ID AND AgAtID = ' . $textId . '
+                ORDER BY T2Text';
+            $res = Connection::query($sql);
+            while ($record = mysqli_fetch_assoc($res)) {
+                $html .= '<li>' . \tohtml($record['T2Text']) . '</li>';
+            }
+            mysqli_free_result($res);
+        }
+
+        return $html . '</ul>';
+    }
+
+    /**
+     * Get formatted tag list string for a word.
+     *
+     * @param int    $wordId Word ID
+     * @param string $before String to prepend if tags exist
+     * @param bool   $brackets Wrap tags in brackets
+     * @param bool   $escapeHtml Convert to HTML entities
+     *
+     * @return string Formatted tag list
+     */
+    public static function getWordTagListFormatted(
+        int $wordId,
+        string $before = ' ',
+        bool $brackets = true,
+        bool $escapeHtml = true
+    ): string {
+        $tbpref = Globals::getTablePrefix();
+        $lbrack = $brackets ? '[' : '';
+        $rbrack = $brackets ? ']' : '';
+
+        $result = Connection::fetchValue(
+            "SELECT IFNULL(
+                GROUP_CONCAT(DISTINCT TgText ORDER BY TgText SEPARATOR ', '),
+                ''
+            ) AS value
+            FROM (
+                (
+                    {$tbpref}words
+                    LEFT JOIN {$tbpref}wordtags ON WoID = WtWoID
+                )
+                LEFT JOIN {$tbpref}tags ON TgID = WtTgID
+            )
+            WHERE WoID = {$wordId}"
+        );
+
+        if ($result != '') {
+            $result = $before . $lbrack . $result . $rbrack;
+        }
+
+        if ($escapeHtml) {
+            $result = \tohtml($result);
+        }
+
+        return $result;
+    }
+
+    // =========================================================================
+    // Batch operations (migrated from tags.php)
+    // =========================================================================
+
+    /**
+     * Add a tag to multiple words.
+     *
+     * @param string $tagText Tag text to add
+     * @param string $idList  SQL list of word IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function addTagToWords(string $tagText, string $idList): string
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        if ($idList === '()') {
+            return "Tag added in 0 Terms";
+        }
+
+        $tagId = self::getOrCreateTermTag($tagText);
+        if ($tagId === null) {
+            return "Failed to create tag";
+        }
+
+        $sql = 'SELECT WoID
+            FROM ' . $tbpref . 'words
+            LEFT JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID AND WtTgID = ' . $tagId . '
+            WHERE WtTgID IS NULL AND WoID IN ' . $idList;
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count += (int) Connection::execute(
+                'INSERT IGNORE INTO ' . $tbpref . 'wordtags (WtWoID, WtTgID)
+                VALUES(' . $record['WoID'] . ', ' . $tagId . ')'
+            );
+        }
+        mysqli_free_result($res);
+
+        self::getAllTermTags(true);
+
+        return "Tag added in {$count} Terms";
+    }
+
+    /**
+     * Remove a tag from multiple words.
+     *
+     * @param string $tagText Tag text to remove
+     * @param string $idList  SQL list of word IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function removeTagFromWords(string $tagText, string $idList): string
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        if ($idList === '()') {
+            return "Tag removed in 0 Terms";
+        }
+
+        $tagId = Connection::fetchValue(
+            'SELECT TgID AS value FROM ' . $tbpref . 'tags
+            WHERE TgText = ' . Escaping::toSqlSyntax($tagText)
+        );
+
+        if (!isset($tagId)) {
+            return "Tag " . $tagText . " not found";
+        }
+
+        $sql = 'SELECT WoID FROM ' . $tbpref . 'words WHERE WoID IN ' . $idList;
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count++;
+            Connection::execute(
+                'DELETE FROM ' . $tbpref . 'wordtags
+                WHERE WtWoID = ' . $record['WoID'] . ' AND WtTgID = ' . $tagId
+            );
+        }
+        mysqli_free_result($res);
+
+        return "Tag removed in {$count} Terms";
+    }
+
+    /**
+     * Add a tag to multiple texts.
+     *
+     * @param string $tagText Tag text to add
+     * @param string $idList  SQL list of text IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function addTagToTexts(string $tagText, string $idList): string
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        if ($idList === '()') {
+            return "Tag added in 0 Texts";
+        }
+
+        $tagId = self::getOrCreateTextTag($tagText);
+        if ($tagId === null) {
+            return "Failed to create tag";
+        }
+
+        $sql = 'SELECT TxID FROM ' . $tbpref . 'texts
+            LEFT JOIN ' . $tbpref . 'texttags ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
+            WHERE TtT2ID IS NULL AND TxID IN ' . $idList;
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count += (int) Connection::execute(
+                'INSERT IGNORE INTO ' . $tbpref . 'texttags (TtTxID, TtT2ID)
+                VALUES(' . $record['TxID'] . ', ' . $tagId . ')'
+            );
+        }
+        mysqli_free_result($res);
+
+        self::getAllTextTags(true);
+
+        return "Tag added in {$count} Texts";
+    }
+
+    /**
+     * Remove a tag from multiple texts.
+     *
+     * @param string $tagText Tag text to remove
+     * @param string $idList  SQL list of text IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function removeTagFromTexts(string $tagText, string $idList): string
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        if ($idList === '()') {
+            return "Tag removed in 0 Texts";
+        }
+
+        $tagId = Connection::fetchValue(
+            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2
+            WHERE T2Text = ' . Escaping::toSqlSyntax($tagText)
+        );
+
+        if (!isset($tagId)) {
+            return "Tag " . $tagText . " not found";
+        }
+
+        $sql = 'SELECT TxID FROM ' . $tbpref . 'texts WHERE TxID IN ' . $idList;
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count++;
+            Connection::execute(
+                'DELETE FROM ' . $tbpref . 'texttags
+                WHERE TtTxID = ' . $record['TxID'] . ' AND TtT2ID = ' . $tagId
+            );
+        }
+        mysqli_free_result($res);
+
+        return "Tag removed in {$count} Texts";
+    }
+
+    /**
+     * Add a tag to multiple archived texts.
+     *
+     * @param string $tagText Tag text to add
+     * @param string $idList  SQL list of archived text IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function addTagToArchivedTexts(string $tagText, string $idList): string
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        if ($idList === '()') {
+            return "Tag added in 0 Texts";
+        }
+
+        $tagId = self::getOrCreateTextTag($tagText);
+        if ($tagId === null) {
+            return "Failed to create tag";
+        }
+
+        $sql = 'SELECT AtID FROM ' . $tbpref . 'archivedtexts
+            LEFT JOIN ' . $tbpref . 'archtexttags ON AtID = AgAtID AND AgT2ID = ' . $tagId . '
+            WHERE AgT2ID IS NULL AND AtID IN ' . $idList;
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count += (int) Connection::execute(
+                'INSERT IGNORE INTO ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
+                VALUES(' . $record['AtID'] . ', ' . $tagId . ')'
+            );
+        }
+        mysqli_free_result($res);
+
+        self::getAllTextTags(true);
+
+        return "Tag added in {$count} Texts";
+    }
+
+    /**
+     * Remove a tag from multiple archived texts.
+     *
+     * @param string $tagText Tag text to remove
+     * @param string $idList  SQL list of archived text IDs, e.g. "(1,2,3)"
+     *
+     * @return string Result message
+     */
+    public static function removeTagFromArchivedTexts(
+        string $tagText,
+        string $idList
+    ): string {
+        $tbpref = Globals::getTablePrefix();
+
+        if ($idList === '()') {
+            return "Tag removed in 0 Texts";
+        }
+
+        $tagId = Connection::fetchValue(
+            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2
+            WHERE T2Text = ' . Escaping::toSqlSyntax($tagText)
+        );
+
+        if (!isset($tagId)) {
+            return "Tag " . $tagText . " not found";
+        }
+
+        $sql = 'SELECT AtID FROM ' . $tbpref . 'archivedtexts WHERE AtID IN ' . $idList;
+        $res = Connection::query($sql);
+
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count++;
+            Connection::execute(
+                'DELETE FROM ' . $tbpref . 'archtexttags
+                WHERE AgAtID = ' . $record['AtID'] . ' AND AgT2ID = ' . $tagId
+            );
+        }
+        mysqli_free_result($res);
+
+        return "Tag removed in {$count} Texts";
+    }
+
+    // =========================================================================
+    // Select options HTML (migrated from tags.php)
+    // =========================================================================
+
+    /**
+     * Get term tag select options HTML for filtering.
+     *
+     * @param int|string|null $selected Currently selected value
+     * @param int|string      $langId   Language ID filter ('' for all)
+     *
+     * @return string HTML options
+     */
+    public static function getTermTagSelectOptions(
+        int|string|null $selected,
+        int|string $langId
+    ): string {
+        $tbpref = Globals::getTablePrefix();
+        $selected = $selected ?? '';
+
+        $html = '<option value=""' . \get_selected($selected, '') . '>';
+        $html .= '[Filter off]</option>';
+
+        if ($langId === '') {
+            $sql = "SELECT TgID, TgText
+                FROM {$tbpref}words, {$tbpref}tags, {$tbpref}wordtags
+                WHERE TgID = WtTgID AND WtWoID = WoID
+                GROUP BY TgID
+                ORDER BY UPPER(TgText)";
+        } else {
+            $sql = "SELECT TgID, TgText
+                FROM {$tbpref}words, {$tbpref}tags, {$tbpref}wordtags
+                WHERE TgID = WtTgID AND WtWoID = WoID AND WoLgID = {$langId}
+                GROUP BY TgID
+                ORDER BY UPPER(TgText)";
+        }
+
+        $res = Connection::query($sql);
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count++;
+            $html .= '<option value="' . $record['TgID'] . '"' .
+                \get_selected($selected, (int) $record['TgID']) . '>' .
+                \tohtml($record['TgText']) . '</option>';
+        }
+        mysqli_free_result($res);
+
+        if ($count > 0) {
+            $html .= '<option disabled="disabled">--------</option>';
+            $html .= '<option value="-1"' . \get_selected($selected, -1) . '>UNTAGGED</option>';
+        }
+
+        return $html;
+    }
+
+    /**
+     * Get text tag select options HTML for filtering.
+     *
+     * @param int|string|null $selected Currently selected value
+     * @param int|string      $langId   Language ID filter ('' for all)
+     *
+     * @return string HTML options
+     */
+    public static function getTextTagSelectOptions(
+        int|string|null $selected,
+        int|string $langId
+    ): string {
+        $tbpref = Globals::getTablePrefix();
+        $selected = $selected ?? '';
+
+        $html = '<option value=""' . \get_selected($selected, '') . '>';
+        $html .= '[Filter off]</option>';
+
+        if ($langId === '') {
+            $sql = "SELECT T2ID, T2Text
+                FROM {$tbpref}texts, {$tbpref}tags2, {$tbpref}texttags
+                WHERE T2ID = TtT2ID AND TtTxID = TxID
+                GROUP BY T2ID
+                ORDER BY UPPER(T2Text)";
+        } else {
+            $sql = "SELECT T2ID, T2Text
+                FROM {$tbpref}texts, {$tbpref}tags2, {$tbpref}texttags
+                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxLgID = {$langId}
+                GROUP BY T2ID
+                ORDER BY UPPER(T2Text)";
+        }
+
+        $res = Connection::query($sql);
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count++;
+            $html .= '<option value="' . $record['T2ID'] . '"' .
+                \get_selected($selected, (int) $record['T2ID']) . '>' .
+                \tohtml($record['T2Text']) . '</option>';
+        }
+        mysqli_free_result($res);
+
+        if ($count > 0) {
+            $html .= '<option disabled="disabled">--------</option>';
+            $html .= '<option value="-1"' . \get_selected($selected, -1) . '>UNTAGGED</option>';
+        }
+
+        return $html;
+    }
+
+    /**
+     * Get text tag select options with text IDs for word list filtering.
+     *
+     * @param int|string      $langId   Language ID filter
+     * @param int|string|null $selected Currently selected value
+     *
+     * @return string HTML options
+     */
+    public static function getTextTagSelectOptionsWithTextIds(
+        int|string $langId,
+        int|string|null $selected
+    ): string {
+        $tbpref = Globals::getTablePrefix();
+        $selected = $selected ?? '';
+        $untaggedOption = '';
+
+        $html = '<option value="&amp;texttag"' . \get_selected($selected, '') . '>';
+        $html .= '[Filter off]</option>';
+
+        $sql = 'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
+            GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
+            FROM ' . $tbpref . 'texts
+            LEFT JOIN ' . $tbpref . 'texttags ON TxID = TtTxID
+            LEFT JOIN ' . $tbpref . 'tags2 ON TtT2ID = T2ID';
+        if ($langId) {
+            $sql .= ' WHERE TxLgID=' . $langId;
+        }
+        $sql .= ' GROUP BY UPPER(TagName)';
+
+        $res = Connection::query($sql);
+        while ($record = mysqli_fetch_assoc($res)) {
+            if ($record['TagName'] == 1) {
+                $untaggedOption = '<option disabled="disabled">--------</option>' .
+                    '<option value="' . $record['TextID'] . '&amp;texttag=-1"' .
+                    \get_selected($selected, "-1") . '>UNTAGGED</option>';
+            } else {
+                $html .= '<option value="' . $record['TextID'] . '&amp;texttag=' .
+                    $record['TagID'] . '"' . \get_selected($selected, (int) $record['TagID']) .
+                    '>' . $record['TagName'] . '</option>';
+            }
+        }
+        mysqli_free_result($res);
+
+        return $html . $untaggedOption;
+    }
+
+    /**
+     * Get archived text tag select options HTML for filtering.
+     *
+     * @param int|string|null $selected Currently selected value
+     * @param int|string      $langId   Language ID filter ('' for all)
+     *
+     * @return string HTML options
+     */
+    public static function getArchivedTextTagSelectOptions(
+        int|string|null $selected,
+        int|string $langId
+    ): string {
+        $tbpref = Globals::getTablePrefix();
+        $selected = $selected ?? '';
+
+        $html = '<option value=""' . \get_selected($selected, '') . '>';
+        $html .= '[Filter off]</option>';
+
+        if ($langId === '') {
+            $sql = "SELECT T2ID, T2Text
+                FROM {$tbpref}archivedtexts, {$tbpref}tags2, {$tbpref}archtexttags
+                WHERE T2ID = AgT2ID AND AgAtID = AtID
+                GROUP BY T2ID
+                ORDER BY UPPER(T2Text)";
+        } else {
+            $sql = "SELECT T2ID, T2Text
+                FROM {$tbpref}archivedtexts, {$tbpref}tags2, {$tbpref}archtexttags
+                WHERE T2ID = AgT2ID AND AgAtID = AtID AND AtLgID = {$langId}
+                GROUP BY T2ID
+                ORDER BY UPPER(T2Text)";
+        }
+
+        $res = Connection::query($sql);
+        $count = 0;
+        while ($record = mysqli_fetch_assoc($res)) {
+            $count++;
+            $html .= '<option value="' . $record['T2ID'] . '"' .
+                \get_selected($selected, (int) $record['T2ID']) . '>' .
+                \tohtml($record['T2Text']) . '</option>';
+        }
+        mysqli_free_result($res);
+
+        if ($count > 0) {
+            $html .= '<option disabled="disabled">--------</option>';
+            $html .= '<option value="-1"' . \get_selected($selected, -1) . '>UNTAGGED</option>';
+        }
+
+        return $html;
+    }
+
+    // =========================================================================
+    // Helper methods
+    // =========================================================================
+
+    /**
+     * Get or create a term tag, returning its ID.
+     *
+     * @param string $tagText Tag text
+     *
+     * @return int|null Tag ID or null on failure
+     */
+    private static function getOrCreateTermTag(string $tagText): ?int
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        $tagId = Connection::fetchValue(
+            'SELECT TgID AS value FROM ' . $tbpref . 'tags
+            WHERE TgText = ' . Escaping::toSqlSyntax($tagText)
+        );
+
+        if (!isset($tagId)) {
+            Connection::execute(
+                'INSERT INTO ' . $tbpref . 'tags (TgText)
+                VALUES(' . Escaping::toSqlSyntax($tagText) . ')'
+            );
+            $tagId = Connection::fetchValue(
+                'SELECT TgID AS value FROM ' . $tbpref . 'tags
+                WHERE TgText = ' . Escaping::toSqlSyntax($tagText)
+            );
+        }
+
+        return isset($tagId) ? (int) $tagId : null;
+    }
+
+    /**
+     * Get or create a text tag, returning its ID.
+     *
+     * @param string $tagText Tag text
+     *
+     * @return int|null Tag ID or null on failure
+     */
+    private static function getOrCreateTextTag(string $tagText): ?int
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        $tagId = Connection::fetchValue(
+            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2
+            WHERE T2Text = ' . Escaping::toSqlSyntax($tagText)
+        );
+
+        if (!isset($tagId)) {
+            Connection::execute(
+                'INSERT INTO ' . $tbpref . 'tags2 (T2Text)
+                VALUES(' . Escaping::toSqlSyntax($tagText) . ')'
+            );
+            $tagId = Connection::fetchValue(
+                'SELECT T2ID AS value FROM ' . $tbpref . 'tags2
+                WHERE T2Text = ' . Escaping::toSqlSyntax($tagText)
+            );
+        }
+
+        return isset($tagId) ? (int) $tagId : null;
     }
 }

@@ -21,7 +21,6 @@ require_once __DIR__ . '/../Database/Connection.php';
 require_once __DIR__ . '/../Database/Escaping.php';
 require_once __DIR__ . '/../Database/Validation.php';
 require_once __DIR__ . '/../Database/Settings.php';
-require_once __DIR__ . '/../Tag/tags.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;

@@ -119,7 +119,7 @@ namespace Lwt\Views\Text;
         <td class="td1 center" colspan="2">
             Tag #1:
             <select name="tag1" onchange="{val=document.form1.tag1.options[document.form1.tag1.selectedIndex].value; location.href='/texts?page=1&amp;tag1=' + val;}">
-                <?php echo get_texttag_selectoptions($currentTag1, $currentLang); ?>
+                <?php echo \Lwt\Services\TagService::getTextTagSelectOptions($currentTag1, $currentLang); ?>
             </select>
         </td>
         <td class="td1 center">
@@ -131,7 +131,7 @@ namespace Lwt\Views\Text;
         <td class="td1 center">
             Tag #2:
             <select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='/texts?page=1&amp;tag2=' + val;}">
-                <?php echo get_texttag_selectoptions($currentTag2, $currentLang); ?>
+                <?php echo \Lwt\Services\TagService::getTextTagSelectOptions($currentTag2, $currentLang); ?>
             </select>
         </td>
     </tr>
