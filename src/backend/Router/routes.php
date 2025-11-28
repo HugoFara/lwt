@@ -49,11 +49,11 @@ return function (Router $router) {
     $router->registerLegacy('display_impr_text_header.php', '/text/display');
     $router->registerLegacy('display_impr_text_text.php', '/text/display');
 
-    // Print text
-    $router->register('/text/print', 'TextController@printText');
+    // Print text (TextPrintController)
+    $router->register('/text/print', 'TextPrintController@printAnnotated');
     $router->registerLegacy('print_impr_text.php', '/text/print');
 
-    $router->register('/text/print-plain', 'TextController@printPlain');
+    $router->register('/text/print-plain', 'TextPrintController@printPlain');
     $router->registerLegacy('print_text.php', '/text/print-plain');
 
     // Import long text
