@@ -82,6 +82,7 @@ class TextPrintController extends BaseController
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Core/Tag/tags.php';
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
+        require_once __DIR__ . '/../Core/Text/text_navigation.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Core/Language/language_utilities.php';
         require_once __DIR__ . '/../Core/Word/word_status.php';
@@ -137,6 +138,7 @@ class TextPrintController extends BaseController
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Core/Tag/tags.php';
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
+        require_once __DIR__ . '/../Core/Text/text_navigation.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Core/Language/language_utilities.php';
         require_once __DIR__ . '/../Core/Word/dictionary_links.php';
