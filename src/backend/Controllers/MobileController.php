@@ -74,14 +74,12 @@ class MobileController extends BaseController
      */
     public function index(array $params): void
     {
-        $action = $this->param('action');
+        $action = $this->paramInt('action');
 
         if ($action === null) {
             $this->showMainPage();
             return;
         }
-
-        $action = (int) $action;
 
         switch ($action) {
             case 1:
@@ -126,7 +124,7 @@ class MobileController extends BaseController
      */
     private function showLanguageMenu(): void
     {
-        $langId = (int) $this->param('lang', 0);
+        $langId = $this->paramInt('lang', 0) ?? 0;
         $langName = $this->service->getLanguageName($langId);
 
         if ($langName === null) {
@@ -148,7 +146,7 @@ class MobileController extends BaseController
      */
     private function showTextsList(): void
     {
-        $langId = (int) $this->param('lang', 0);
+        $langId = $this->paramInt('lang', 0) ?? 0;
         $langName = $this->service->getLanguageName($langId);
 
         if ($langName === null) {
@@ -171,8 +169,8 @@ class MobileController extends BaseController
      */
     private function showSentencesList(): void
     {
-        $langId = (int) $this->param('lang', 0);
-        $textId = (int) $this->param('text', 0);
+        $langId = $this->paramInt('lang', 0) ?? 0;
+        $textId = $this->paramInt('text', 0) ?? 0;
 
         $text = $this->service->getTextById($textId);
 
@@ -199,9 +197,9 @@ class MobileController extends BaseController
      */
     private function showTermsList(int $actionCode): void
     {
-        $langId = (int) $this->param('lang', 0);
-        $textId = (int) $this->param('text', 0);
-        $sentId = (int) $this->param('sent', 0);
+        $langId = $this->paramInt('lang', 0) ?? 0;
+        $textId = $this->paramInt('text', 0) ?? 0;
+        $sentId = $this->paramInt('sent', 0) ?? 0;
 
         $sentence = $this->service->getSentenceById($sentId);
 
@@ -227,8 +225,9 @@ class MobileController extends BaseController
     public function start(array $params): void
     {
         // Handle form submission
-        if ($this->isPost() && isset($_REQUEST['prefix']) && $_REQUEST['prefix'] !== '-') {
-            $this->savePrefix(\getreq('prefix'));
+        $prefix = $this->param('prefix');
+        if ($this->isPost() && $prefix !== '' && $prefix !== '-') {
+            $this->savePrefix($prefix);
             $this->redirect('/');
         }
 

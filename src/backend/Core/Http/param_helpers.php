@@ -17,7 +17,9 @@
  */
 
 require_once __DIR__ . '/../Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/InputValidator.php';
 
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Settings;
 
 /**
@@ -32,8 +34,8 @@ use Lwt\Database\Settings;
  */
 function processSessParam($reqkey, $sesskey, $default, $isnum)
 {
-    if (isset($_REQUEST[$reqkey])) {
-        $reqdata = trim($_REQUEST[$reqkey]);
+    if (InputValidator::has($reqkey)) {
+        $reqdata = InputValidator::getString($reqkey);
         $_SESSION[$sesskey] = $reqdata;
         $result = $reqdata;
     } elseif (isset($_SESSION[$sesskey])) {
@@ -60,8 +62,8 @@ function processSessParam($reqkey, $sesskey, $default, $isnum)
 function processDBParam($reqkey, $dbkey, $default, $isnum)
 {
     $dbdata = Settings::get($dbkey);
-    if (isset($_REQUEST[$reqkey])) {
-        $reqdata = trim($_REQUEST[$reqkey]);
+    if (InputValidator::has($reqkey)) {
+        $reqdata = InputValidator::getString($reqkey);
         Settings::save($dbkey, $reqdata);
         $result = $reqdata;
     } elseif ($dbdata != '') {
@@ -80,13 +82,12 @@ function processDBParam($reqkey, $dbkey, $default, $isnum)
  *
  * @param  string $s Request key
  * @return string Trimmed request or empty string
+ *
+ * @deprecated Use InputValidator::getString() instead
  */
 function getreq($s)
 {
-    if (isset($_REQUEST[$s])) {
-        return trim($_REQUEST[$s]);
-    }
-    return '';
+    return InputValidator::getString($s);
 }
 
 /**

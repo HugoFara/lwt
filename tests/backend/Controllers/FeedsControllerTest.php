@@ -65,6 +65,10 @@ class FeedsControllerTest extends TestCase
             $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
             Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
 
+            // Reset auto_increment for newsfeeds table (NfID is tinyint max 255)
+            $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM {$tbpref}newsfeeds");
+            Connection::query("ALTER TABLE {$tbpref}newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
+
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
                 "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'FeedsControllerTestLang' LIMIT 1"
@@ -102,6 +106,10 @@ class FeedsControllerTest extends TestCase
         // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
         $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
         Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+
+        // Reset auto_increment for newsfeeds table
+        $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM {$tbpref}newsfeeds");
+        Connection::query("ALTER TABLE {$tbpref}newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
     }
 
     protected function setUp(): void
@@ -135,6 +143,10 @@ class FeedsControllerTest extends TestCase
         $tbpref = self::$tbpref;
         Connection::query("DELETE FROM {$tbpref}feedlinks WHERE FlNfID IN (SELECT NfID FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%')");
         Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%'");
+
+        // Reset auto_increment for newsfeeds table to prevent overflow
+        $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM {$tbpref}newsfeeds");
+        Connection::query("ALTER TABLE {$tbpref}newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
     }
 
     // ===== Constructor tests =====

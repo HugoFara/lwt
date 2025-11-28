@@ -232,7 +232,7 @@ class LanguageControllerTest extends TestCase
 
         $service = new LanguageService();
 
-        $data = [
+        $_REQUEST = [
             'LgName' => 'TestLang_ControllerCreate',
             'LgDict1URI' => 'https://dict.test/lwt_term',
             'LgDict2URI' => '',
@@ -246,7 +246,7 @@ class LanguageControllerTest extends TestCase
             'LgTTSVoiceAPI' => '',
         ];
 
-        $result = $service->create($data);
+        $result = $service->create();
 
         $this->assertStringContainsString('Saved', $result);
         $this->assertArrayHasKey('TestLang_ControllerCreate', $service->getAllLanguages());
@@ -261,7 +261,7 @@ class LanguageControllerTest extends TestCase
         $id = $this->createTestLanguage('TestLang_ControllerUpdate');
         $service = new LanguageService();
 
-        $data = [
+        $_REQUEST = [
             'LgName' => 'TestLang_ControllerUpdated',
             'LgDict1URI' => 'https://newdict.test/lwt_term',
             'LgDict2URI' => '',
@@ -275,7 +275,7 @@ class LanguageControllerTest extends TestCase
             'LgTTSVoiceAPI' => '',
         ];
 
-        $result = $service->update($id, $data);
+        $result = $service->update($id);
 
         $this->assertStringContainsString('Updated', $result);
         $lang = $service->getById($id);
@@ -382,7 +382,7 @@ class LanguageControllerTest extends TestCase
         $service = new LanguageService();
 
         // Empty name should throw an exception (database constraint)
-        $data = [
+        $_REQUEST = [
             'LgName' => '',
             'LgDict1URI' => 'https://dict.test/lwt_term',
             'LgDict2URI' => '',
@@ -397,7 +397,7 @@ class LanguageControllerTest extends TestCase
         ];
 
         $this->expectException(\RuntimeException::class);
-        $service->create($data);
+        $service->create();
     }
 
     public function testServiceHandlesSpecialCharactersInName(): void
@@ -408,7 +408,7 @@ class LanguageControllerTest extends TestCase
 
         $service = new LanguageService();
 
-        $data = [
+        $_REQUEST = [
             'LgName' => "TestLang_Special'Chars\"",
             'LgDict1URI' => 'https://dict.test/lwt_term',
             'LgDict2URI' => '',
@@ -422,7 +422,7 @@ class LanguageControllerTest extends TestCase
             'LgTTSVoiceAPI' => '',
         ];
 
-        $result = $service->create($data);
+        $result = $service->create();
 
         $this->assertStringContainsString('Saved', $result);
     }
@@ -435,7 +435,7 @@ class LanguageControllerTest extends TestCase
 
         $service = new LanguageService();
 
-        $data = [
+        $_REQUEST = [
             'LgName' => 'TestLang_日本語',
             'LgDict1URI' => 'https://dict.test/lwt_term',
             'LgDict2URI' => '',
@@ -449,7 +449,7 @@ class LanguageControllerTest extends TestCase
             'LgTTSVoiceAPI' => '',
         ];
 
-        $result = $service->create($data);
+        $result = $service->create();
 
         $this->assertStringContainsString('Saved', $result);
 

@@ -93,11 +93,11 @@ class ApiControllerTest extends TestCase
      *
      * @param ApiController $controller The controller instance
      * @param string        $name       Parameter name
-     * @param mixed         $default    Default value
+     * @param string        $default    Default value
      *
-     * @return mixed Parameter value
+     * @return string Parameter value
      */
-    private function invokeParam(ApiController $controller, string $name, $default = null)
+    private function invokeParam(ApiController $controller, string $name, string $default = ''): string
     {
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('param');

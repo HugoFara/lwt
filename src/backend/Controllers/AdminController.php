@@ -17,6 +17,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\Classes\GoogleTranslate;
+use Lwt\Core\Http\InputValidator;
 use Lwt\Services\BackupService;
 use Lwt\Services\DemoService;
 use Lwt\Services\ServerDataService;
@@ -84,15 +85,15 @@ class AdminController extends BaseController
         $message = '';
 
         // Handle operations
-        if ($this->param('restore') !== null) {
+        if ($this->hasParam('restore')) {
             $message = $backupService->restoreFromUpload($_FILES);
-        } elseif ($this->param('backup') !== null) {
+        } elseif ($this->hasParam('backup')) {
             $backupService->downloadBackup();
             // downloadBackup exits, so we never reach here
-        } elseif ($this->param('orig_backup') !== null) {
+        } elseif ($this->hasParam('orig_backup')) {
             $backupService->downloadOfficialBackup();
             // downloadOfficialBackup exits, so we never reach here
-        } elseif ($this->param('empty') !== null) {
+        } elseif ($this->hasParam('empty')) {
             $message = $backupService->emptyDatabase();
         }
 
@@ -139,15 +140,29 @@ class AdminController extends BaseController
         $errorMessage = null;
 
         // Handle operations
-        $op = $_REQUEST['op'] ?? '';
-        if ($op != '') {
-            if ($op == "Autocomplete") {
+        $op = $this->param('op');
+        if ($op !== '') {
+            if ($op === "Autocomplete") {
                 $conn = $wizardService->autocompleteConnection();
-            } elseif ($op == "Check") {
-                $conn = $wizardService->createConnectionFromForm($_REQUEST);
+            } elseif ($op === "Check") {
+                $formData = InputValidator::getMany([
+                    'hostname' => 'string',
+                    'login' => 'string',
+                    'password' => 'string',
+                    'dbname' => 'string',
+                    'tbpref' => 'string',
+                ]);
+                $conn = $wizardService->createConnectionFromForm($formData);
                 $errorMessage = $wizardService->testConnection($conn);
-            } elseif ($op == "Change") {
-                $conn = $wizardService->createConnectionFromForm($_REQUEST);
+            } elseif ($op === "Change") {
+                $formData = InputValidator::getMany([
+                    'hostname' => 'string',
+                    'login' => 'string',
+                    'password' => 'string',
+                    'dbname' => 'string',
+                    'tbpref' => 'string',
+                ]);
+                $conn = $wizardService->createConnectionFromForm($formData);
                 $wizardService->saveConnection($conn);
                 // Redirect to home after saving
                 $this->redirect('/');
@@ -203,9 +218,10 @@ class AdminController extends BaseController
 
         // Handle form submission
         $op = $this->param('op');
-        if ($op !== null) {
-            if ($op == 'Save') {
-                $message = $settingsService->saveAll($_REQUEST);
+        if ($op !== '') {
+            if ($op === 'Save') {
+                // Settings are saved via $settingsService which reads from $_REQUEST
+                $message = $settingsService->saveAll();
             } else {
                 $message = $settingsService->resetAll();
             }
@@ -247,22 +263,22 @@ class AdminController extends BaseController
     {
         $wordService = new WordService();
 
-        $text = $_REQUEST['text'];
-        $textId = (int) $_REQUEST['tid'];
-        $status = (int) $_REQUEST['status'];
+        $text = $this->param('text');
+        $textId = $this->paramInt('tid', 0) ?? 0;
+        $status = $this->paramInt('status', 1) ?? 1;
 
         // Get translation if status is 1 (new word)
         $translation = '*';
-        if ($status == 1) {
-            $tl = $_GET["tl"] ?? '';
-            $sl = $_GET["sl"] ?? '';
+        if ($status === 1) {
+            $tl = $this->get('tl');
+            $sl = $this->get('sl');
 
             if ($tl !== '' && $sl !== '') {
                 $tl_array = GoogleTranslate::staticTranslate($text, $sl, $tl);
                 if ($tl_array) {
                     $translation = $tl_array[0];
                 }
-                if ($translation == $text) {
+                if ($translation === $text) {
                     $translation = '*';
                 }
             }
@@ -314,8 +330,9 @@ class AdminController extends BaseController
         $message = '';
 
         // Handle save request
-        if ($this->param('op') == 'Save') {
-            $ttsService->saveSettings($_REQUEST);
+        if ($this->param('op') === 'Save') {
+            // TTS settings service reads from InputValidator
+            $ttsService->saveSettings();
             $message = "Settings saved!";
         }
 
@@ -355,7 +372,7 @@ class AdminController extends BaseController
         $message = '';
 
         // Handle install request
-        if ($this->param('install') !== null) {
+        if ($this->hasParam('install')) {
             $message = $demoService->installDemo();
         }
 
@@ -394,15 +411,15 @@ class AdminController extends BaseController
         $message = "";
 
         // Handle operations
-        if ($this->param('delpref') !== null) {
+        if ($this->hasParam('delpref')) {
             $message = $tableSetService->deleteTableSet($this->param('delpref'));
-        } elseif ($this->param('newpref') !== null) {
+        } elseif ($this->hasParam('newpref')) {
             $result = $tableSetService->createTableSet($this->param('newpref'));
             if ($result['redirect']) {
                 $this->redirect('/');
             }
             $message = $result['message'];
-        } elseif ($this->param('prefix') !== null) {
+        } elseif ($this->hasParam('prefix')) {
             $result = $tableSetService->selectTableSet($this->param('prefix'));
             if ($result['redirect']) {
                 $this->redirect('/');

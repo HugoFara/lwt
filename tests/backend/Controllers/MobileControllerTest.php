@@ -98,7 +98,7 @@ class MobileControllerTest extends TestCase
      *
      * @return mixed Parameter value
      */
-    private function invokeParam(MobileController $controller, string $name, $default = null)
+    private function invokeParam(MobileController $controller, string $name, string $default = ''): string
     {
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('param');
@@ -280,7 +280,7 @@ class MobileControllerTest extends TestCase
 
     // ===== Action parameter tests =====
 
-    public function testActionNullShowsMainPage(): void
+    public function testActionEmptyShowsMainPage(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -288,8 +288,8 @@ class MobileControllerTest extends TestCase
 
         $controller = new MobileController();
 
-        // No action set should show main page
-        $this->assertNull($this->invokeParam($controller, 'action'));
+        // No action set should show main page (returns empty string)
+        $this->assertSame('', $this->invokeParam($controller, 'action'));
     }
 
     public function testAction1ShowsLanguageMenu(): void
@@ -519,7 +519,7 @@ class MobileControllerTest extends TestCase
         }
 
         $controller = new MobileController();
-        $langId = (int) $this->invokeParam($controller, 'lang', 0);
+        $langId = (int) $this->invokeParam($controller, 'lang', '0');
 
         $this->assertEquals(0, $langId);
     }
@@ -531,7 +531,7 @@ class MobileControllerTest extends TestCase
         }
 
         $controller = new MobileController();
-        $textId = (int) $this->invokeParam($controller, 'text', 0);
+        $textId = (int) $this->invokeParam($controller, 'text', '0');
 
         $this->assertEquals(0, $textId);
     }
@@ -543,7 +543,7 @@ class MobileControllerTest extends TestCase
         }
 
         $controller = new MobileController();
-        $sentId = (int) $this->invokeParam($controller, 'sent', 0);
+        $sentId = (int) $this->invokeParam($controller, 'sent', '0');
 
         $this->assertEquals(0, $sentId);
     }

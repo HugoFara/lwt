@@ -648,6 +648,30 @@ class InputValidator
     }
 
     /**
+     * Check if a parameter exists in GET.
+     *
+     * @param string $key Parameter name
+     *
+     * @return bool True if the parameter exists in GET
+     */
+    public static function hasFromGet(string $key): bool
+    {
+        return isset($_GET[$key]);
+    }
+
+    /**
+     * Check if a parameter exists in POST.
+     *
+     * @param string $key Parameter name
+     *
+     * @return bool True if the parameter exists in POST
+     */
+    public static function hasFromPost(string $key): bool
+    {
+        return isset($_POST[$key]);
+    }
+
+    /**
      * Check if a parameter exists and is not empty.
      *
      * @param string $key Parameter name

@@ -16,6 +16,7 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Core\Http\InputValidator;
 use Lwt\Services\TranslationService;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
@@ -85,26 +86,26 @@ class TranslationController extends BaseController
      */
     public function google(array $params): void
     {
-        $text = $this->get('text', '');
-
-        if (!isset($_GET['text'])) {
+        if (!InputValidator::hasFromGet('text')) {
             return;
         }
+
+        $text = $this->get('text');
 
         header('Pragma: no-cache');
         header('Expires: 0');
 
         \pagestart_nobody('Google Translate');
 
-        if (trim($text) === '') {
+        if ($text === '') {
             echo '<p class="msgblue">Term is not set!</p>';
             \pageend();
             return;
         }
 
-        $srcLang = $this->get('sl', '');
-        $tgtLang = $this->get('tl', '');
-        $sentenceMode = isset($_GET['sent']);
+        $srcLang = $this->get('sl');
+        $tgtLang = $this->get('tl');
+        $sentenceMode = InputValidator::hasFromGet('sent');
 
         $this->renderGoogleTranslation($text, $srcLang, $tgtLang, $sentenceMode);
 
@@ -350,13 +351,13 @@ class TranslationController extends BaseController
      */
     public function translate(array $params): void
     {
-        if (!isset($_REQUEST['x']) || !is_numeric($_REQUEST['x'])) {
+        $type = $this->paramInt('x');
+        if ($type === null) {
             return;
         }
 
-        $type = (int)$this->param('x');
-        $t = (int)$this->param('t', 0);
-        $i = (int)$this->param('i', 0);
+        $t = $this->paramInt('t', 0) ?? 0;
+        $i = $this->paramInt('i', 0) ?? 0;
 
         $this->processTranslationRequest($type, $t, $i);
     }

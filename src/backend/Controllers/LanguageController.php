@@ -78,28 +78,29 @@ class LanguageController extends BaseController
         $message = '';
 
         // Handle actions
-        if (isset($_REQUEST['refresh'])) {
-            $message = $this->languageService->refresh((int) $_REQUEST['refresh']);
+        $refreshId = $this->paramInt('refresh');
+        if ($refreshId !== null) {
+            $message = $this->languageService->refresh($refreshId);
         }
 
-        if (isset($_REQUEST['del'])) {
-            $message = $this->languageService->delete((int) $_REQUEST['del']);
-        } elseif (isset($_REQUEST['op'])) {
-            if ($_REQUEST['op'] === 'Save') {
-                $message = $this->languageService->create($_REQUEST);
-            } elseif ($_REQUEST['op'] === 'Change') {
-                $message = $this->languageService->update(
-                    (int) $_REQUEST["LgID"],
-                    $_REQUEST
-                );
+        $delId = $this->paramInt('del');
+        $op = $this->param('op');
+        if ($delId !== null) {
+            $message = $this->languageService->delete($delId);
+        } elseif ($op !== '') {
+            if ($op === 'Save') {
+                $message = $this->languageService->create();
+            } elseif ($op === 'Change') {
+                $lgId = $this->paramInt('LgID', 0) ?? 0;
+                $message = $this->languageService->update($lgId);
             }
         }
 
         // Display appropriate view
-        if (isset($_REQUEST['new'])) {
+        if ($this->hasParam('new')) {
             $this->showNewForm();
-        } elseif (isset($_REQUEST['chg'])) {
-            $this->showEditForm((int) $_REQUEST['chg']);
+        } elseif ($this->hasParam('chg')) {
+            $this->showEditForm($this->paramInt('chg', 0) ?? 0);
         } else {
             $this->showList($message);
         }

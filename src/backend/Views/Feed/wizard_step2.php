@@ -20,6 +20,8 @@
 
 namespace Lwt\Views\Feed;
 
+use Lwt\Core\Http\InputValidator;
+
 ?>
 <script type="text/javascript" src="/assets/js/jquery.xpath.min.js" charset="utf-8"></script>
 <script type="text/javascript">
@@ -146,10 +148,10 @@ namespace Lwt\Views\Feed;
         </h1>
         <ol id="lwt_sel" style="margin-left:77px">
             <?php
-            if (isset($_REQUEST['html'])) {
-                echo $_REQUEST['html'];
+            if (InputValidator::has('html')) {
+                echo InputValidator::getString('html', '', false);
             }
-            if (isset($_REQUEST['article_tags']) || isset($_REQUEST['edit_feed'])) {
+            if (InputValidator::has('article_tags') || InputValidator::has('edit_feed')) {
                 echo $wizardData['article_tags'];
             } ?>
         </ol>

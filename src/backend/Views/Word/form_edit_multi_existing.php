@@ -27,6 +27,8 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Core\Http\InputValidator;
+
 ?>
 <script type="text/javascript">
     $(document).ready(lwtFormCheck.askBeforeExit);
@@ -97,7 +99,7 @@ namespace Lwt\Views\Word;
                 $term->lgid,
                 $term->text,
                 'document.forms[0].WoSentence',
-                !isset($_GET['nodict'])
+                !InputValidator::hasFromGet('nodict')
             ); ?>
             &nbsp; &nbsp; &nbsp;
             <input type="submit" name="op" value="Change" />

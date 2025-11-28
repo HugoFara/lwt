@@ -66,6 +66,10 @@ class FeedsControllerWizardTest extends TestCase
             $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
             Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
 
+            // Reset auto_increment for newsfeeds table (NfID is tinyint max 255)
+            $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM {$tbpref}newsfeeds");
+            Connection::query("ALTER TABLE {$tbpref}newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
+
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
                 "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'FeedsWizardTestLang' LIMIT 1"

@@ -36,6 +36,9 @@ class LanguageServiceTest extends TestCase
     private LanguageService $service;
     private static array $testLanguageIds = [];
 
+    /** @var array<string, mixed> Original $_REQUEST for cleanup */
+    private array $originalRequest;
+
     public static function setUpBeforeClass(): void
     {
         $config = EnvLoader::getDatabaseConfig();
@@ -57,11 +60,15 @@ class LanguageServiceTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->originalRequest = $_REQUEST;
+        $_REQUEST = [];
         $this->service = new LanguageService();
     }
 
     protected function tearDown(): void
     {
+        $_REQUEST = $this->originalRequest;
+
         if (!self::$dbConnected) {
             return;
         }
@@ -71,6 +78,16 @@ class LanguageServiceTest extends TestCase
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'Test_%'");
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'TestLang%'");
         self::$testLanguageIds = [];
+    }
+
+    /**
+     * Set language data in $_REQUEST for testing create/update.
+     *
+     * @param array<string, mixed> $data Language data
+     */
+    private function setLanguageRequestData(array $data): void
+    {
+        $_REQUEST = $data;
     }
 
     /**
@@ -283,7 +300,7 @@ class LanguageServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $data = [
+        $this->setLanguageRequestData([
             'LgName' => 'TestLang_Create',
             'LgDict1URI' => 'https://dict.test/lwt_term',
             'LgDict2URI' => '',
@@ -295,9 +312,9 @@ class LanguageServiceTest extends TestCase
             'LgExceptionsSplitSentences' => '',
             'LgRegexpWordCharacters' => 'a-zA-Z',
             'LgTTSVoiceAPI' => '',
-        ];
+        ]);
 
-        $result = $this->service->create($data);
+        $result = $this->service->create();
 
         $this->assertStringContainsString('Saved', $result);
 
@@ -312,7 +329,7 @@ class LanguageServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $data = [
+        $this->setLanguageRequestData([
             'LgName' => 'TestLang_Checkboxes',
             'LgDict1URI' => 'https://dict.test/lwt_term',
             'LgDict2URI' => '',
@@ -328,9 +345,9 @@ class LanguageServiceTest extends TestCase
             'LgSplitEachChar' => '1',
             'LgRightToLeft' => '1',
             'LgShowRomanization' => '1',
-        ];
+        ]);
 
-        $this->service->create($data);
+        $this->service->create();
 
         $languages = $this->service->getAllLanguages();
         $id = $languages['TestLang_Checkboxes'];
@@ -352,7 +369,7 @@ class LanguageServiceTest extends TestCase
 
         $id = $this->createTestLanguage('TestLang_Update');
 
-        $data = [
+        $this->setLanguageRequestData([
             'LgName' => 'TestLang_Updated',
             'LgDict1URI' => 'https://newdict.test/lwt_term',
             'LgDict2URI' => 'https://dict2.test/lwt_term',
@@ -364,9 +381,9 @@ class LanguageServiceTest extends TestCase
             'LgExceptionsSplitSentences' => 'Mr.',
             'LgRegexpWordCharacters' => 'a-zA-Z0-9',
             'LgTTSVoiceAPI' => '{"input": "lwt_term"}',
-        ];
+        ]);
 
-        $result = $this->service->update($id, $data);
+        $result = $this->service->update($id);
 
         $this->assertStringContainsString('Updated', $result);
 
@@ -382,7 +399,7 @@ class LanguageServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $data = [
+        $this->setLanguageRequestData([
             'LgName' => 'TestLang_NotFound',
             'LgDict1URI' => '',
             'LgDict2URI' => '',
@@ -394,9 +411,9 @@ class LanguageServiceTest extends TestCase
             'LgExceptionsSplitSentences' => '',
             'LgRegexpWordCharacters' => 'a-z',
             'LgTTSVoiceAPI' => '',
-        ];
+        ]);
 
-        $result = $this->service->update(999999, $data);
+        $result = $this->service->update(999999);
 
         $this->assertStringContainsString('Cannot access language data', $result);
     }
@@ -410,7 +427,7 @@ class LanguageServiceTest extends TestCase
         $id = $this->createTestLanguage('TestLang_NoReparse');
 
         // Update only non-parsing-related fields
-        $data = [
+        $this->setLanguageRequestData([
             'LgName' => 'TestLang_NoReparse_Updated',
             'LgDict1URI' => 'https://newdict.test/lwt_term',
             'LgDict2URI' => '',
@@ -422,11 +439,12 @@ class LanguageServiceTest extends TestCase
             'LgExceptionsSplitSentences' => '',
             'LgRegexpWordCharacters' => 'a-zA-Z',
             'LgTTSVoiceAPI' => '',
-        ];
+        ]);
 
-        $result = $this->service->update($id, $data);
+        $result = $this->service->update($id);
 
-        $this->assertStringContainsString('Reparsing not needed', $result);
+        // When no parsing-related fields change, it says "Reparsed texts: 0"
+        $this->assertStringContainsString('Reparsed texts: 0', $result);
     }
 
     // ===== delete() tests =====

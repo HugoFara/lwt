@@ -33,6 +33,9 @@ class SettingsServiceTest extends TestCase
     private static string $tbpref = '';
     private SettingsService $service;
 
+    /** @var array<string, mixed> Original $_REQUEST for cleanup */
+    private array $originalRequest;
+
     public static function setUpBeforeClass(): void
     {
         $config = EnvLoader::getDatabaseConfig();
@@ -54,11 +57,15 @@ class SettingsServiceTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->originalRequest = $_REQUEST;
+        $_REQUEST = [];
         $this->service = new SettingsService();
     }
 
     protected function tearDown(): void
     {
+        $_REQUEST = $this->originalRequest;
+
         if (!self::$dbConnected) {
             return;
         }
@@ -150,12 +157,10 @@ class SettingsServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $requestData = [
-            'set-texts-per-page' => '25',
-            'set-terms-per-page' => '50',
-        ];
+        $_REQUEST['set-texts-per-page'] = '25';
+        $_REQUEST['set-terms-per-page'] = '50';
 
-        $message = $this->service->saveAll($requestData);
+        $message = $this->service->saveAll();
 
         $this->assertEquals('Settings saved', $message);
         $this->assertEquals('25', Settings::get('set-texts-per-page'));
@@ -169,13 +174,13 @@ class SettingsServiceTest extends TestCase
         }
 
         // Checkbox checked (value = 1)
-        $requestData = ['set-tts' => '1'];
-        $this->service->saveAll($requestData);
+        $_REQUEST['set-tts'] = '1';
+        $this->service->saveAll();
         $this->assertEquals('1', Settings::get('set-tts'));
 
         // Checkbox unchecked (key not present)
-        $requestData = [];
-        $this->service->saveAll($requestData);
+        $_REQUEST = [];
+        $this->service->saveAll();
         $this->assertEquals('0', Settings::get('set-tts'));
     }
 
@@ -185,13 +190,11 @@ class SettingsServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $requestData = [
-            'unknown-key' => 'value',
-            'another-unknown' => 'value2',
-            'set-texts-per-page' => '30',
-        ];
+        $_REQUEST['unknown-key'] = 'value';
+        $_REQUEST['another-unknown'] = 'value2';
+        $_REQUEST['set-texts-per-page'] = '30';
 
-        $message = $this->service->saveAll($requestData);
+        $message = $this->service->saveAll();
 
         $this->assertEquals('Settings saved', $message);
         // Unknown keys should not cause errors
@@ -204,7 +207,8 @@ class SettingsServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $message = $this->service->saveAll(['set-texts-per-page' => '20']);
+        $_REQUEST['set-texts-per-page'] = '20';
+        $message = $this->service->saveAll();
         $this->assertEquals('Settings saved', $message);
     }
 
@@ -251,13 +255,11 @@ class SettingsServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $requestData = [
-            'set-texts-per-page' => '15',
-            'set-terms-per-page' => '25',
-            'set-tooltip-mode' => '1',
-        ];
+        $_REQUEST['set-texts-per-page'] = '15';
+        $_REQUEST['set-terms-per-page'] = '25';
+        $_REQUEST['set-tooltip-mode'] = '1';
 
-        $this->service->saveAll($requestData);
+        $this->service->saveAll();
 
         $allSettings = $this->service->getAll();
 
@@ -273,7 +275,8 @@ class SettingsServiceTest extends TestCase
         }
 
         // Save custom values
-        $this->service->saveAll(['set-texts-per-page' => '99']);
+        $_REQUEST['set-texts-per-page'] = '99';
+        $this->service->saveAll();
 
         // Reset
         $this->service->resetAll();

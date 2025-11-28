@@ -94,11 +94,11 @@ class TestControllerTest extends TestCase
      *
      * @param TestController $controller The controller instance
      * @param string         $name       Parameter name
-     * @param mixed          $default    Default value
+     * @param string         $default    Default value
      *
-     * @return mixed Parameter value
+     * @return string Parameter value
      */
-    private function invokeParam(TestController $controller, string $name, $default = null)
+    private function invokeParam(TestController $controller, string $name, string $default = ''): string
     {
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('param');

@@ -16,6 +16,10 @@
 
 namespace Lwt\View\Helper;
 
+use Lwt\Core\Http\InputValidator;
+
+require_once __DIR__ . '/../../Core/Http/InputValidator.php';
+
 /**
  * Helper class for generating HTML form attributes.
  *
@@ -109,13 +113,11 @@ class FormHelper
      */
     public static function checkInRequest(mixed $val, string $name): string
     {
-        if (!isset($_REQUEST[$name])) {
+        $arr = InputValidator::getArray($name);
+        if (empty($arr)) {
             return ' ';
         }
-        if (!is_array($_REQUEST[$name])) {
-            return ' ';
-        }
-        if (in_array($val, $_REQUEST[$name])) {
+        if (in_array($val, $arr)) {
             return ' checked="checked" ';
         }
         return ' ';

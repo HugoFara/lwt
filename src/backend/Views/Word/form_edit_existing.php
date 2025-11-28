@@ -30,6 +30,8 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Core\Http\InputValidator;
+
 ?>
 <script type="text/javascript">
     $(document).ready(lwtFormCheck.askBeforeExit);
@@ -44,8 +46,8 @@ namespace Lwt\Views\Word;
 <input type="hidden" name="WoID" value="<?php echo $wid; ?>" />
 <input type="hidden" name="WoOldStatus" value="<?php echo $wordData['WoStatus']; ?>" />
 <input type="hidden" name="WoTextLC" value="<?php echo tohtml($termlc); ?>" />
-<input type="hidden" name="tid" value="<?php echo getreq('tid'); ?>" />
-<input type="hidden" name="ord" value="<?php echo getreq('ord'); ?>" />
+<input type="hidden" name="tid" value="<?php echo InputValidator::getString('tid'); ?>" />
+<input type="hidden" name="ord" value="<?php echo InputValidator::getString('ord'); ?>" />
 <table class="tab2" cellspacing="0" cellpadding="5">
    <tr title="Only change uppercase/lowercase!">
        <td class="td1 right"><b>Edit Term:</b></td>
@@ -112,7 +114,7 @@ namespace Lwt\Views\Word;
                    $lang,
                    $term,
                    'document.forms[0].WoSentence',
-                   !isset($_GET['nodict'])
+                   !InputValidator::hasFromGet('nodict')
                );
            }
            ?>

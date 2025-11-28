@@ -183,7 +183,7 @@ class TagsControllerTest extends TestCase
 
     // ===== Param helper tests =====
 
-    public function testParamMethodReturnsNullWhenNotSet(): void
+    public function testParamMethodReturnsEmptyStringWhenNotSet(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -196,7 +196,7 @@ class TagsControllerTest extends TestCase
         $method = $reflection->getMethod('param');
         $method->setAccessible(true);
 
-        $this->assertNull($method->invoke($controller, 'nonexistent'));
+        $this->assertSame('', $method->invoke($controller, 'nonexistent'));
     }
 
     public function testParamMethodReturnsDefaultWhenNotSet(): void

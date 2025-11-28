@@ -16,9 +16,12 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Globals;
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
+
+require_once __DIR__ . '/../Core/Http/InputValidator.php';
 
 /**
  * Service class for Text-to-Speech settings.
@@ -120,13 +123,11 @@ class TtsService
     /**
      * Save TTS settings as cookies.
      *
-     * @param array $formData Form input data
-     *
      * @return void
      */
-    public function saveSettings(array $formData): void
+    public function saveSettings(): void
     {
-        $lgname = $formData['LgName'];
+        $lgname = InputValidator::getString('LgName');
         $prefix = 'tts[' . $lgname;
 
         $cookie_options = array(
@@ -135,9 +136,9 @@ class TtsService
             'samesite' => 'Strict'
         );
 
-        setcookie($prefix . 'Voice]', $formData['LgVoice'], $cookie_options);
-        setcookie($prefix . 'Rate]', $formData['LgTTSRate'], $cookie_options);
-        setcookie($prefix . 'Pitch]', $formData['LgPitch'], $cookie_options);
+        setcookie($prefix . 'Voice]', InputValidator::getString('LgVoice'), $cookie_options);
+        setcookie($prefix . 'Rate]', InputValidator::getString('LgTTSRate'), $cookie_options);
+        setcookie($prefix . 'Pitch]', InputValidator::getString('LgPitch'), $cookie_options);
     }
 
     /**

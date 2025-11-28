@@ -124,10 +124,10 @@ class BaseControllerTest extends TestCase
         $this->assertEquals('default_value', $value);
     }
 
-    public function testParamReturnsNullByDefault(): void
+    public function testParamReturnsEmptyStringByDefault(): void
     {
         $value = $this->controller->testParam('nonexistent');
-        $this->assertNull($value);
+        $this->assertSame('', $value);
     }
 
     // ===== get() tests =====
@@ -407,17 +407,17 @@ class TestableController extends BaseController
         return $this->db;
     }
 
-    public function testParam(string $key, mixed $default = null): mixed
+    public function testParam(string $key, string $default = ''): string
     {
         return $this->param($key, $default);
     }
 
-    public function testGet(string $key, mixed $default = null): mixed
+    public function testGet(string $key, string $default = ''): string
     {
         return $this->get($key, $default);
     }
 
-    public function testPost(string $key, mixed $default = null): mixed
+    public function testPost(string $key, string $default = ''): string
     {
         return $this->post($key, $default);
     }

@@ -16,8 +16,11 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Globals;
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+
+require_once __DIR__ . '/../Core/Http/InputValidator.php';
 
 /**
  * Service class for managing application settings.
@@ -77,21 +80,16 @@ class SettingsService
     /**
      * Save all settings from request data.
      *
-     * @param array $requestData The $_REQUEST data
-     *
      * @return string Success message
      */
-    public function saveAll(array $requestData): string
+    public function saveAll(): string
     {
         foreach (self::SETTING_KEYS as $key) {
             if ($key === 'set-tts') {
                 // Handle checkbox - convert to 0/1
-                $value = (string)(
-                    array_key_exists('set-tts', $requestData) &&
-                    (int)$requestData['set-tts'] ? 1 : 0
-                );
-            } elseif (array_key_exists($key, $requestData)) {
-                $value = $requestData[$key];
+                $value = InputValidator::getBool($key, false) ? '1' : '0';
+            } elseif (InputValidator::has($key)) {
+                $value = InputValidator::getString($key);
             } else {
                 continue;
             }

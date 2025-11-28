@@ -22,6 +22,8 @@
 
 namespace Lwt\Views\Feed;
 
+use Lwt\Core\Http\InputValidator;
+
 ?>
 <form class="validate" action="/feeds/edit" method="post">
     <table class="tab2" cellspacing="0" cellpadding="5">
@@ -71,7 +73,7 @@ namespace Lwt\Views\Feed;
             <td class="td1">Filter Tags: </td>
             <td class="td1">
                 <input type="text" style="width:95%" name="NfFilterTags"
-                value="<?php echo htmlspecialchars(preg_replace('/[ ]+/', ' ', trim($_REQUEST['html'] ?? ''))); ?>" />
+                value="<?php echo htmlspecialchars(preg_replace('/[ ]+/', ' ', InputValidator::getString('html'))); ?>" />
             </td>
         </tr>
         <tr>

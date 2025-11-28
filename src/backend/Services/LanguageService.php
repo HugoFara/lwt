@@ -17,10 +17,13 @@ namespace Lwt\Services;
 
 use Lwt\Classes\Language;
 use Lwt\Core\Globals;
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
+
+require_once __DIR__ . '/../Core/Http/InputValidator.php';
 
 /**
  * Service class for managing languages.
@@ -155,13 +158,12 @@ class LanguageService
     /**
      * Save a new language to the database.
      *
-     * @param array $data Language data from request
-     *
      * @return string Result message
      */
-    public function create(array $data): string
+    public function create(): string
     {
         $tbpref = Globals::getTablePrefix();
+        $data = $this->getLanguageDataFromRequest();
 
         // Check if there's an empty language record to reuse
         $val = Connection::fetchValue(
@@ -172,6 +174,32 @@ class LanguageService
 
         $affected = Connection::execute($sql);
         return "Saved: " . $affected;
+    }
+
+    /**
+     * Get language data from request using InputValidator.
+     *
+     * @return array<string, string|int|bool>
+     */
+    private function getLanguageDataFromRequest(): array
+    {
+        return [
+            'LgName' => InputValidator::getString('LgName'),
+            'LgDict1URI' => InputValidator::getString('LgDict1URI'),
+            'LgDict2URI' => InputValidator::getString('LgDict2URI'),
+            'LgGoogleTranslateURI' => InputValidator::getString('LgGoogleTranslateURI'),
+            'LgExportTemplate' => InputValidator::getString('LgExportTemplate'),
+            'LgTextSize' => InputValidator::getString('LgTextSize', '100'),
+            'LgCharacterSubstitutions' => InputValidator::getString('LgCharacterSubstitutions', '', false),
+            'LgRegexpSplitSentences' => InputValidator::getString('LgRegexpSplitSentences'),
+            'LgExceptionsSplitSentences' => InputValidator::getString('LgExceptionsSplitSentences', '', false),
+            'LgRegexpWordCharacters' => InputValidator::getString('LgRegexpWordCharacters'),
+            'LgRemoveSpaces' => InputValidator::has('LgRemoveSpaces'),
+            'LgSplitEachChar' => InputValidator::has('LgSplitEachChar'),
+            'LgRightToLeft' => InputValidator::has('LgRightToLeft'),
+            'LgTTSVoiceAPI' => InputValidator::getString('LgTTSVoiceAPI'),
+            'LgShowRomanization' => InputValidator::has('LgShowRomanization'),
+        ];
     }
 
     /**
@@ -222,14 +250,14 @@ class LanguageService
     /**
      * Update an existing language.
      *
-     * @param int   $lid  Language ID
-     * @param array $data Language data from request
+     * @param int $lid Language ID
      *
      * @return string Result message
      */
-    public function update(int $lid, array $data): string
+    public function update(int $lid): string
     {
         $tbpref = Globals::getTablePrefix();
+        $data = $this->getLanguageDataFromRequest();
 
         // Get old values for comparison
         $sql = "SELECT * FROM {$tbpref}languages where LgID = $lid";

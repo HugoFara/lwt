@@ -16,11 +16,13 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
 
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
+require_once __DIR__ . '/../Core/Http/InputValidator.php';
 
 /**
  * Abstract base controller providing common functionality for all controllers.
@@ -100,42 +102,98 @@ abstract class BaseController
     }
 
     /**
-     * Get a request parameter (GET, POST, or REQUEST).
+     * Get a string request parameter (GET, POST, or REQUEST).
      *
      * @param string $key     Parameter name
-     * @param mixed  $default Default value if not set
+     * @param string $default Default value if not set
      *
-     * @return mixed Parameter value or default
+     * @return string Parameter value or default
      */
-    protected function param(string $key, mixed $default = null): mixed
+    protected function param(string $key, string $default = ''): string
     {
-        return $_REQUEST[$key] ?? $default;
+        return InputValidator::getString($key, $default);
     }
 
     /**
-     * Get a GET parameter.
+     * Check if a parameter exists in the request.
      *
-     * @param string $key     Parameter name
-     * @param mixed  $default Default value if not set
+     * @param string $key Parameter name
      *
-     * @return mixed Parameter value or default
+     * @return bool True if the parameter exists
      */
-    protected function get(string $key, mixed $default = null): mixed
+    protected function hasParam(string $key): bool
     {
-        return $_GET[$key] ?? $default;
+        return InputValidator::has($key);
     }
 
     /**
-     * Get a POST parameter.
+     * Get a string GET parameter.
      *
      * @param string $key     Parameter name
-     * @param mixed  $default Default value if not set
+     * @param string $default Default value if not set
      *
-     * @return mixed Parameter value or default
+     * @return string Parameter value or default
      */
-    protected function post(string $key, mixed $default = null): mixed
+    protected function get(string $key, string $default = ''): string
     {
-        return $_POST[$key] ?? $default;
+        return InputValidator::getStringFromGet($key, $default);
+    }
+
+    /**
+     * Get a string POST parameter.
+     *
+     * @param string $key     Parameter name
+     * @param string $default Default value if not set
+     *
+     * @return string Parameter value or default
+     */
+    protected function post(string $key, string $default = ''): string
+    {
+        return InputValidator::getStringFromPost($key, $default);
+    }
+
+    /**
+     * Get an integer request parameter.
+     *
+     * @param string   $key     Parameter name
+     * @param int|null $default Default value if not set
+     * @param int|null $min     Minimum allowed value
+     * @param int|null $max     Maximum allowed value
+     *
+     * @return int|null Parameter value or default
+     */
+    protected function paramInt(string $key, ?int $default = null, ?int $min = null, ?int $max = null): ?int
+    {
+        return InputValidator::getInt($key, $default, $min, $max);
+    }
+
+    /**
+     * Get a required integer request parameter.
+     *
+     * @param string   $key Parameter name
+     * @param int|null $min Minimum allowed value
+     * @param int|null $max Maximum allowed value
+     *
+     * @return int Parameter value
+     *
+     * @throws \InvalidArgumentException If parameter is missing or invalid
+     */
+    protected function requireInt(string $key, ?int $min = null, ?int $max = null): int
+    {
+        return InputValidator::requireInt($key, $min, $max);
+    }
+
+    /**
+     * Get an array request parameter.
+     *
+     * @param string $key     Parameter name
+     * @param array  $default Default value if not set
+     *
+     * @return array Parameter value or default
+     */
+    protected function paramArray(string $key, array $default = []): array
+    {
+        return InputValidator::getArray($key, $default);
     }
 
     /**
@@ -145,7 +203,7 @@ abstract class BaseController
      */
     protected function isPost(): bool
     {
-        return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
+        return InputValidator::isPost();
     }
 
     /**
@@ -155,7 +213,7 @@ abstract class BaseController
      */
     protected function isGet(): bool
     {
-        return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET';
+        return InputValidator::isGet();
     }
 
     /**
