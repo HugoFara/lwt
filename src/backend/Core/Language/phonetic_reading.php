@@ -17,6 +17,8 @@
  * @since   3.0.0 Split from text_helpers.php
  */
 
+use Lwt\Database\Connection;
+
 /**
  * Parses text be read by an automatic audio player.
  *
@@ -30,7 +32,7 @@
 function phoneticReading($text, $lgid)
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $sentence_split = get_first_value(
+    $sentence_split = Connection::fetchValue(
         "SELECT LgRegexpWordCharacters AS value FROM {$tbpref}languages
         WHERE LgID = $lgid"
     );
@@ -135,7 +137,7 @@ function refreshText(string $word, int $tid): string
     WHERE TiIsNotWord = 0 AND TiTextLC = ' . convert_string_to_sqlsyntax($wordlc) . '
     AND TiTxID = ' . $tid . '
     ORDER BY TiSeID';
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $inlist = '(';
     while ($record = mysqli_fetch_assoc($res)) {
         if ($inlist == '(') {
@@ -157,7 +159,7 @@ function refreshText(string $word, int $tid): string
     ) ' . $inlist . '
     ORDER BY TiOrder asc, TiWordCount desc';
 
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
 
     $hideuntil = -1;
     $hidetag = "removeClass('hide');";

@@ -373,7 +373,7 @@ class MigrationsTest extends TestCase
         Migrations::checkAndUpdate();
 
         // Verify lastscorecalc was set
-        $result = get_first_value(
+        $result = Connection::fetchValue(
             "SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'lastscorecalc'"
         );
 
@@ -410,7 +410,7 @@ class MigrationsTest extends TestCase
         Migrations::update();
 
         // Verify dbversion is set
-        $result = get_first_value(
+        $result = Connection::fetchValue(
             "SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'dbversion'"
         );
 

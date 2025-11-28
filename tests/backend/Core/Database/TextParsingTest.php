@@ -364,13 +364,13 @@ class TextParsingTest extends TestCase
         TextParsing::registerSentencesTextItems($textId, self::$testLanguageId, false);
 
         // Check that sentences were created
-        $sentenceCount = get_first_value(
+        $sentenceCount = Connection::fetchValue(
             "SELECT COUNT(*) as value FROM {$tbpref}sentences WHERE SeTxID = $textId"
         );
         $this->assertGreaterThan(0, (int)$sentenceCount, 'Should create sentences');
 
         // Check that text items were created
-        $itemCount = get_first_value(
+        $itemCount = Connection::fetchValue(
             "SELECT COUNT(*) as value FROM {$tbpref}textitems2 WHERE Ti2TxID = $textId"
         );
         $this->assertGreaterThan(0, (int)$itemCount, 'Should create text items');

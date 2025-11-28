@@ -17,6 +17,8 @@
  * @since   3.0.0 Split from text_helpers.php
  */
 
+use Lwt\Database\Connection;
+
 /**
  * Return a dictionary of languages name - id
  *
@@ -26,7 +28,7 @@ function get_languages(): array
 {
     $langs = array();
     $sql = "SELECT LgID, LgName FROM " . \Lwt\Core\Globals::table('languages') . " WHERE LgName<>''";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         $langs[(string)$record['LgName']] = (int)$record['LgID'];
     }
@@ -52,7 +54,7 @@ function getLanguage($lid)
     } else {
         return '';
     }
-    $r = get_first_value(
+    $r = Connection::fetchValue(
         "SELECT LgName AS value
         FROM {$tbpref}languages
         WHERE LgID = $lg_id"
@@ -81,7 +83,7 @@ function getLanguageCode($lg_id, $languages_table)
     FROM {$tbpref}languages
     WHERE LgID = $lg_id";
 
-    $res = do_mysqli_query($query);
+    $res = Connection::query($query);
     $record = mysqli_fetch_assoc($res);
     mysqli_free_result($res);
     $lg_name = (string) $record["LgName"];
@@ -123,7 +125,7 @@ function getScriptDirectionTag($lid): string
     } else {
         $lg_id = $lid;
     }
-    $r = get_first_value(
+    $r = Connection::fetchValue(
         "SELECT LgRightToLeft as value
         from {$tbpref}languages
         where LgID = $lg_id"

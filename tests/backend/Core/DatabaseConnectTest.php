@@ -911,21 +911,21 @@ class DatabaseConnectTest extends TestCase
         saveSetting('test_first_value', '42');
 
         // Query that returns a value
-        $result = get_first_value(
+        $result = Connection::fetchValue(
             "SELECT StValue as value FROM " . $GLOBALS['tbpref'] .
             "settings WHERE StKey='test_first_value'"
         );
         $this->assertEquals('42', $result);
 
         // Query that returns nothing should return null
-        $result = get_first_value(
+        $result = Connection::fetchValue(
             "SELECT StValue as value FROM " . $GLOBALS['tbpref'] .
             "settings WHERE StKey='nonexistent_key_xyz123'"
         );
         $this->assertNull($result);
 
         // Query with numeric result
-        $result = get_first_value(
+        $result = Connection::fetchValue(
             "SELECT COUNT(*) as value FROM " . $GLOBALS['tbpref'] . "settings"
         );
         $this->assertIsNumeric($result);
@@ -1126,25 +1126,25 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Test with a simple SELECT query (must use 'value' as column alias)
-        $result = get_first_value("SELECT 'test_value' as value");
+        $result = Connection::fetchValue("SELECT 'test_value' as value");
         $this->assertEquals('test_value', $result);
 
         // Test with NULL result
-        $result = get_first_value("SELECT NULL as value");
+        $result = Connection::fetchValue("SELECT NULL as value");
         $this->assertNull($result, 'NULL should return null');
 
         // Test with numeric result
-        $result = get_first_value("SELECT 42 as value");
+        $result = Connection::fetchValue("SELECT 42 as value");
         $this->assertEquals('42', $result);
 
         // Test with empty result set
-        $result = get_first_value(
+        $result = Connection::fetchValue(
             "SELECT 'value' FROM " . $GLOBALS['tbpref'] . "settings WHERE StKey='nonexistent_key_xyz123'"
         );
         $this->assertEquals('', $result, 'Empty result set should return empty string');
 
         // Test with COUNT query (needs 'value' alias)
-        $result = get_first_value("SELECT COUNT(*) as value FROM " . $GLOBALS['tbpref'] . "settings");
+        $result = Connection::fetchValue("SELECT COUNT(*) as value FROM " . $GLOBALS['tbpref'] . "settings");
         $this->assertTrue(is_numeric($result) || $result === null, 'COUNT should return numeric value or null');
     }
 

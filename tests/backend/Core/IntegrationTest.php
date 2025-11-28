@@ -826,7 +826,7 @@ class IntegrationTest extends TestCase
         );
 
         // Get initial count
-        $count_before = (int)get_first_value(
+        $count_before = (int)Connection::fetchValue(
             "SELECT COUNT(*) as value FROM {$tbpref}settings WHERE StKey = 'test_truncate'"
         );
         $this->assertEquals(1, $count_before);

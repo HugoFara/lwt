@@ -370,7 +370,7 @@ class ConfigurationTest extends TestCase
 
         // The function should set the prefix in _lwtgeneral if not fixed
         if (!$fixed) {
-            $storedPrefix = get_first_value(
+            $storedPrefix = Connection::fetchValue(
                 "SELECT LWTValue as value FROM _lwtgeneral WHERE LWTKey = 'current_table_prefix'"
             );
             // The stored prefix doesn't include the trailing underscore

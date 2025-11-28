@@ -17,6 +17,8 @@
  * @since    3.0.0 Split from session_utility.php
  */
 
+use Lwt\Database\Connection;
+
 // -------------------------------------------------------------
 
 /**
@@ -29,7 +31,7 @@
 function anki_export(string $sql)
 {
     // WoID, LgRightToLeft, LgRegexpWordCharacters, LgName, WoText, WoTranslation, WoRomanization, WoSentence, taglist
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     if (!($res instanceof \mysqli_result)) {
         header('Content-type: text/plain; charset=utf-8');
         header("Content-disposition: attachment; filename=lwt_anki_export_" . date('Y-m-d-H-i-s') . ".txt");
@@ -87,7 +89,7 @@ function anki_export(string $sql)
 function tsv_export(string $sql)
 {
     // WoID, LgName, WoText, WoTranslation, WoRomanization, WoSentence, WoStatus, taglist
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     if (!($res instanceof \mysqli_result)) {
         header('Content-type: text/plain; charset=utf-8');
         header(
@@ -129,7 +131,7 @@ function tsv_export(string $sql)
 function flexible_export(string $sql)
 {
     // WoID, LgName, LgExportTemplate, LgRightToLeft, WoText, WoTextLC, WoTranslation, WoRomanization, WoSentence, WoStatus, taglist
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     if (!($res instanceof \mysqli_result)) {
         header('Content-type: text/plain; charset=utf-8');
         header(

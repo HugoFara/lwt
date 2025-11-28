@@ -208,7 +208,7 @@ class SimtermsTest extends TestCase
         // Should not include 'hello' itself (it's excluded by SQL query)
         foreach ($similar as $termid) {
             $sql = "SELECT WoTextLC FROM " . $GLOBALS['tbpref'] . "words WHERE WoID = $termid";
-            $result = get_first_value($sql);
+            $result = Connection::fetchValue($sql);
             $this->assertNotEquals('hello', $result);
         }
 

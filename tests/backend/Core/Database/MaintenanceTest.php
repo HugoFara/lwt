@@ -224,7 +224,7 @@ class MaintenanceTest extends TestCase
 
         // Get current auto_increment value for languages
         $tbpref = self::$tbpref;
-        $before = get_first_value(
+        $before = Connection::fetchValue(
             "SELECT AUTO_INCREMENT as value
              FROM information_schema.tables
              WHERE table_schema = DATABASE()
@@ -234,7 +234,7 @@ class MaintenanceTest extends TestCase
         Maintenance::optimizeDatabase();
 
         // After optimization, auto_increment should be adjusted
-        $after = get_first_value(
+        $after = Connection::fetchValue(
             "SELECT AUTO_INCREMENT as value
              FROM information_schema.tables
              WHERE table_schema = DATABASE()
@@ -284,7 +284,7 @@ class MaintenanceTest extends TestCase
         Maintenance::initWordCount();
 
         // Check that word count was updated
-        $count = get_first_value(
+        $count = Connection::fetchValue(
             "SELECT WoWordCount as value FROM {$tbpref}words WHERE WoID = $wordId"
         );
 
@@ -320,7 +320,7 @@ class MaintenanceTest extends TestCase
         Maintenance::initWordCount();
 
         // Check that word count was updated
-        $count = get_first_value(
+        $count = Connection::fetchValue(
             "SELECT WoWordCount as value FROM {$tbpref}words WHERE WoID = $wordId"
         );
 
@@ -356,7 +356,7 @@ class MaintenanceTest extends TestCase
         Maintenance::initWordCount();
 
         // Check that word count was NOT changed (only updates WoWordCount = 0)
-        $count = get_first_value(
+        $count = Connection::fetchValue(
             "SELECT WoWordCount as value FROM {$tbpref}words WHERE WoID = $wordId"
         );
 
@@ -452,7 +452,7 @@ class MaintenanceTest extends TestCase
 
         // Check all words were updated
         foreach ($wordIds as $wordId) {
-            $count = get_first_value(
+            $count = Connection::fetchValue(
                 "SELECT WoWordCount as value FROM {$tbpref}words WHERE WoID = $wordId"
             );
             $this->assertEquals('1', $count, "Word $wordId should have count updated");
@@ -502,7 +502,7 @@ class MaintenanceTest extends TestCase
         Maintenance::initWordCount();
 
         // Check word count was updated
-        $count = get_first_value(
+        $count = Connection::fetchValue(
             "SELECT WoWordCount as value FROM {$tbpref}words WHERE WoID = $wordId"
         );
         $this->assertEquals('1', $count, 'Unicode word count should be updated');
@@ -552,7 +552,7 @@ class MaintenanceTest extends TestCase
         Maintenance::initWordCount();
 
         // Check that word count was updated (should be at least 1)
-        $count = get_first_value(
+        $count = Connection::fetchValue(
             "SELECT WoWordCount as value FROM {$tbpref}words WHERE WoID = $wordId"
         );
         $this->assertGreaterThanOrEqual(1, (int)$count, 'Split-each-char word count should be at least 1');

@@ -17,6 +17,7 @@
  * @since    3.0.0 Split from text_helpers.php
  */
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
@@ -43,7 +44,7 @@ function findMecabExpression($text, $lid): array
     $sql = "SELECT SeID, SeTxID, SeFirstPos, SeText FROM {$tbpref}sentences
     WHERE SeLgID = $lid AND
     SeText LIKE " . convert_string_to_sqlsyntax_notrim_nonull("%$text%");
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
 
     $parsed_text = '';
     $fp = fopen($db_to_mecab, 'w');
@@ -208,7 +209,7 @@ function findStandardExpression($textlc, $lid): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $occurences = array();
-    $res = do_mysqli_query("SELECT * FROM {$tbpref}languages WHERE LgID=$lid");
+    $res = Connection::query("SELECT * FROM {$tbpref}languages WHERE LgID=$lid");
     $record = mysqli_fetch_assoc($res);
     $removeSpaces = $record["LgRemoveSpaces"] == 1;
     $splitEachChar = $record['LgSplitEachChar'] != 0;
@@ -235,7 +236,7 @@ function findStandardExpression($textlc, $lid): array
         $textlc = (string) preg_replace('/([^\s])/u', "$1 ", $textlc);
     }
     $wis = $textlc;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $notermchar = "/[^$termchar]($textlc)[^$termchar]/ui";
     // For each sentence in the language containing the query
     $matches = null;
@@ -408,7 +409,7 @@ function new_expression_interactable2($hex, $appendtext, $wid, $len): void
     $showType = $showAll ? "m" : "";
 
     $sql = "SELECT * FROM {$tbpref}words WHERE WoID=$wid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
 
     $record = mysqli_fetch_assoc($res);
 
@@ -476,7 +477,7 @@ function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
     $showType = $showAll ? "m" : "";
 
     $sql = "SELECT * FROM {$tbpref}words WHERE WoID=$wid";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
 
     $record = mysqli_fetch_assoc($res);
 
@@ -542,7 +543,7 @@ function newMultiWordInteractable($hex, $multiwords, $wid, $len): void
 function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mode): string|null
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $regexp = (string)get_first_value(
+    $regexp = (string)Connection::fetchValue(
         "SELECT LgRegexpWordCharacters AS value
         FROM {$tbpref}languages WHERE LgID=$lid"
     );
@@ -602,7 +603,7 @@ function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mo
         return $sqltext;
     }
     if (isset($sqltext)) {
-        do_mysqli_query($sqltext);
+        Connection::query($sqltext);
     }
     return null;
 }

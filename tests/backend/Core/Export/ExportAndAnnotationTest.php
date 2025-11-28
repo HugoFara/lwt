@@ -186,7 +186,7 @@ class ExportAndAnnotationTest extends TestCase
         recreate_save_ann($textId, $oldAnn);
         
         // Verify database was updated
-        $saved = get_first_value("SELECT TxAnnotatedText AS value FROM {$tbpref}texts WHERE TxID = $textId");
+        $saved = Connection::fetchValue("SELECT TxAnnotatedText AS value FROM {$tbpref}texts WHERE TxID = $textId");
         $this->assertNotNull($saved);
         
         // Clean up
@@ -297,7 +297,7 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsString($ann2);
         
         // Step 3: Verify annotation was saved
-        $saved = get_first_value("SELECT TxAnnotatedText AS value FROM {$tbpref}texts WHERE TxID = $textId");
+        $saved = Connection::fetchValue("SELECT TxAnnotatedText AS value FROM {$tbpref}texts WHERE TxID = $textId");
         $this->assertNotNull($saved);
         $this->assertIsString($saved);
         
@@ -393,7 +393,7 @@ class ExportAndAnnotationTest extends TestCase
         Connection::query("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_export_firstval')");
         $id = get_last_key();
         
-        $value = get_first_value("SELECT TgText AS value FROM {$tbpref}tags WHERE TgID = $id");
+        $value = Connection::fetchValue("SELECT TgText AS value FROM {$tbpref}tags WHERE TgID = $id");
         
         $this->assertEquals('test_export_firstval', $value);
         
@@ -408,7 +408,7 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         $tbpref = self::$tbpref;
-        $value = get_first_value("SELECT TgText AS value FROM {$tbpref}tags WHERE TgID = 999999");
+        $value = Connection::fetchValue("SELECT TgText AS value FROM {$tbpref}tags WHERE TgID = 999999");
         
         $this->assertNull($value);
     }

@@ -17,6 +17,8 @@
  * @since   3.0.0 Split from session_utility.php
  */
 
+use Lwt\Database\Connection;
+
 require_once __DIR__ . '/vite_helper.php';
 require_once __DIR__ . '/../Http/url_utilities.php';
 require_once __DIR__ . '/../Tag/tags.php';
@@ -327,7 +329,7 @@ function get_languages_selectoptions($v, $dt): string
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $sql = "SELECT LgID, LgName FROM {$tbpref}languages
     WHERE LgName<>'' ORDER BY LgName";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     $r = '<option value="" ';
     if (!isset($v) || trim((string) $v) == '') {
         $r .= 'selected="selected"';
@@ -766,7 +768,7 @@ function get_texts_selectoptions(int|string|null $lang, int|string|null $v): str
     from " . $tbpref . "languages, " . $tbpref . "texts
     where LgID = TxLgID " . $l . "
     order by LgName, TxTitle";
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     while ($record = mysqli_fetch_assoc($res)) {
         $d = (string) $record["TxTitle"];
         if (mb_strlen($d, 'UTF-8') > 30) {

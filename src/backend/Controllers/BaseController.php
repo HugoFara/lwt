@@ -16,6 +16,8 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Database\Connection;
+
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
 
 /**
@@ -177,7 +179,7 @@ abstract class BaseController
      */
     protected function query(string $sql): \mysqli_result|bool
     {
-        return \do_mysqli_query($sql);
+        return Connection::query($sql);
     }
 
     /**
@@ -203,7 +205,7 @@ abstract class BaseController
      */
     protected function getValue(string $sql): mixed
     {
-        return \get_first_value($sql);
+        return Connection::fetchValue($sql);
     }
 
     /**

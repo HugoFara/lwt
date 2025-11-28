@@ -17,6 +17,7 @@
  * @since   3.0.0 Split from text_helpers.php
  */
 
+use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
@@ -32,7 +33,7 @@ function sentences_containing_word_lc_query($wordlc, $lid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $mecab_str = null;
-    $res = do_mysqli_query(
+    $res = Connection::query(
         "SELECT LgRegexpWordCharacters, LgRemoveSpaces
         FROM {$tbpref}languages
         WHERE LgID = $lid"
@@ -134,7 +135,7 @@ function sentences_from_word($wid, $wordlc, $lid, $limit = -1): \mysqli_result|f
     if ($limit) {
         $sql .= " LIMIT 0,$limit";
     }
-    return do_mysqli_query($sql);
+    return Connection::query($sql);
 }
 
 /**
@@ -155,7 +156,7 @@ function sentences_from_word($wid, $wordlc, $lid, $limit = -1): \mysqli_result|f
 function getSentence($seid, $wordlc, $mode): array
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $res = do_mysqli_query(
+    $res = Connection::query(
         "SELECT
         CONCAT(
             '​', group_concat(Ti2Text ORDER BY Ti2Order asc SEPARATOR '​'), '​'
@@ -189,7 +190,7 @@ function getSentence($seid, $wordlc, $mode): array
     $sejs = str_replace('​', '', preg_replace($pattern, '{$0}', $text));
     if ($mode > 1) {
         if ($removeSpaces && !$splitEachChar) {
-            $prevseSent = get_first_value(
+            $prevseSent = Connection::fetchValue(
                 "SELECT concat(
                     '​',
                     group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
@@ -202,7 +203,7 @@ function getSentence($seid, $wordlc, $mode): array
                 order by SeID desc"
             );
         } else {
-            $prevseSent = get_first_value(
+            $prevseSent = Connection::fetchValue(
                 "SELECT SeText as value from {$tbpref}sentences
                 where SeID < $seid and SeTxID = $txtid
                 and trim(SeText) not in ('¶', '')
@@ -216,7 +217,7 @@ function getSentence($seid, $wordlc, $mode): array
     }
     if ($mode > 2) {
         if ($removeSpaces && !$splitEachChar) {
-            $nextSent = get_first_value(
+            $nextSent = Connection::fetchValue(
                 "SELECT concat(
                     '​',
                     group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
@@ -229,7 +230,7 @@ function getSentence($seid, $wordlc, $mode): array
                 order by SeID asc"
             );
         } else {
-            $nextSent = get_first_value(
+            $nextSent = Connection::fetchValue(
                 "SELECT SeText as value
                 FROM {$tbpref}sentences
                 where SeID > $seid AND SeTxID = $txtid

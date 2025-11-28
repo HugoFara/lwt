@@ -17,6 +17,8 @@
  * @since    3.0.0 Split from text_helpers.php
  */
 
+use Lwt\Database\Connection;
+
 /**
  * Uses provided annotations, and annotations from database to update annotations.
  *
@@ -67,7 +69,7 @@ function recreate_save_ann($textid, $oldann): string
         WHERE TxID = $textid",
         ""
     );
-    return (string)get_first_value(
+    return (string)Connection::fetchValue(
         "SELECT TxAnnotatedText AS value
         FROM {$tbpref}texts
         where TxID = $textid"
@@ -103,7 +105,7 @@ function create_ann($textid): string
     WHERE Ti2TxID = $textid
     ORDER BY Ti2Order ASC, Ti2WordCount DESC";
     $until = 0;
-    $res = do_mysqli_query($sql);
+    $res = Connection::query($sql);
     // For each term (includes blanks)
     while ($record = mysqli_fetch_assoc($res)) {
         $actcode = (int)$record['Code'];
@@ -156,7 +158,7 @@ function create_save_ann($textid): string
         where TxID = ' . $textid,
         ""
     );
-    return (string)get_first_value(
+    return (string)Connection::fetchValue(
         "select TxAnnotatedText as value
         from " . $tbpref . "texts
         where TxID = " . $textid
@@ -217,7 +219,7 @@ function get_first_translation($trans): string
 function get_annotation_link($textid): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    if (get_first_value('select length(TxAnnotatedText) as value from ' . $tbpref . 'texts where TxID=' . $textid) > 0) {
+    if (Connection::fetchValue('select length(TxAnnotatedText) as value from ' . $tbpref . 'texts where TxID=' . $textid) > 0) {
         return ' &nbsp;<a href="print_impr_text.php?text=' . $textid .
         '" target="_top"><img src="/assets/icons/tick.png" title="Annotated Text" alt="Annotated Text" /></a>';
     } else {

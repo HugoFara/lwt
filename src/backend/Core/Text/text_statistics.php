@@ -17,6 +17,7 @@
  * @since   3.0.0 Split from text_helpers.php
  */
 
+use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 /**
@@ -51,7 +52,7 @@ function return_textwordcount($texts_id): array
         'expru' => array(),
         'statu' => array()
     );
-    $res = do_mysqli_query(
+    $res = Connection::query(
         "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS value,
         COUNT(LOWER(Ti2Text)) AS total
 		FROM {$tbpref}textitems2
@@ -63,7 +64,7 @@ function return_textwordcount($texts_id): array
         $r["totalu"][$record['text']] = $record['value'];
     }
     mysqli_free_result($res);
-    $res = do_mysqli_query(
+    $res = Connection::query(
         "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
         COUNT(Ti2WoID) AS total
 		FROM {$tbpref}textitems2
@@ -75,7 +76,7 @@ function return_textwordcount($texts_id): array
         $r["expru"][$record['text']] = $record['value'];
     }
     mysqli_free_result($res);
-    $res = do_mysqli_query(
+    $res = Connection::query(
         "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
         COUNT(Ti2WoID) AS total, WoStatus AS status
 		FROM {$tbpref}textitems2, {$tbpref}words
@@ -121,7 +122,7 @@ function textwordcount($textID): void
  */
 function todo_words_count($textid): int
 {
-    $count = get_first_value(
+    $count = Connection::fetchValue(
         "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS value
         FROM " . \Lwt\Core\Globals::table('textitems2') . "
         WHERE Ti2WordCount=1 AND Ti2WoID=0 AND Ti2TxID=$textid"
@@ -153,7 +154,7 @@ function todo_words_content($textid): string
         'style="padding: 0 5px; margin: 0 5px;">' . $c . '</span>';
     }
 
-    $dict = (string) get_first_value(
+    $dict = (string) Connection::fetchValue(
         "SELECT LgGoogleTranslateURI AS value
         FROM {$tbpref}languages, {$tbpref}texts
         WHERE LgID = TxLgID and TxID = $textid"
