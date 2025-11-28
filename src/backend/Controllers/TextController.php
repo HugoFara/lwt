@@ -187,10 +187,140 @@ class TextController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
     public function importLong(array $params): void
     {
-        include __DIR__ . '/../Legacy/text_import_long.php';
+        require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+        require_once __DIR__ . '/../Core/Tag/tags.php';
+        require_once __DIR__ . '/../Core/Http/param_helpers.php';
+        require_once __DIR__ . '/../Core/Language/language_utilities.php';
+
+        \pagestart('Long Text Import', true);
+
+        $maxInputVars = ini_get('max_input_vars');
+        if ($maxInputVars === false || $maxInputVars == '') {
+            $maxInputVars = 1000;
+        }
+        $maxInputVars = (int) $maxInputVars;
+
+        $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
+
+        if (substr($op, 0, 5) == 'NEXT ') {
+            $this->importLongCheck($maxInputVars);
+        } elseif (substr($op, 0, 5) == 'Creat') {
+            $this->importLongSave();
+        } else {
+            $this->importLongForm($maxInputVars);
+        }
+
+        \pageend();
+    }
+
+    /**
+     * Display the long text import form.
+     *
+     * @param int $maxInputVars Maximum input variables
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    private function importLongForm(int $maxInputVars): void
+    {
+        $translateUris = $this->textService->getLanguageTranslateUris();
+        $languageData = [];
+        foreach ($translateUris as $lgId => $uri) {
+            $languageData[$lgId] = \langFromDict($uri);
+        }
+
+        $languagesOption = \get_languages_selectoptions(
+            Settings::get('currentlanguage'),
+            '[Choose...]'
+        );
+
+        include __DIR__ . '/../Views/Text/import_long_form.php';
+    }
+
+    /**
+     * Check/preview long text import.
+     *
+     * @param int $maxInputVars Maximum input variables
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    private function importLongCheck(int $maxInputVars): void
+    {
+        $langId = (int) $_REQUEST["LgID"];
+        $title = (string) $_REQUEST["TxTitle"];
+        $paragraphHandling = (int) $_REQUEST["paragraph_handling"];
+        $maxSent = (int) $_REQUEST["maxsent"];
+        $sourceUri = (string) $_REQUEST["TxSourceURI"];
+        $textTags = null;
+        if (isset($_REQUEST["TextTags"])) {
+            $textTags = json_encode($_REQUEST["TextTags"]);
+        }
+
+        $data = $this->textService->prepareLongTextData(
+            $_FILES,
+            (string) ($_REQUEST["Upload"] ?? ''),
+            $paragraphHandling
+        );
+
+        if ($data == "") {
+            $message = "Error: No text specified!";
+            echo \error_message_with_hide($message, false);
+            return;
+        }
+
+        $texts = $this->textService->splitLongText($data, $langId, $maxSent);
+        $textCount = count($texts);
+
+        if ($textCount > $maxInputVars - 20) {
+            $message = "Error: Too many texts (" . $textCount . " > " .
+                ($maxInputVars - 20) .
+                "). You must increase 'Maximum Sentences per Text'!";
+            echo \error_message_with_hide($message, false);
+            return;
+        }
+
+        include __DIR__ . '/../Views/Text/import_long_check.php';
+    }
+
+    /**
+     * Save long text import.
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    private function importLongSave(): void
+    {
+        $langId = (int) $_REQUEST["LgID"];
+        $title = $_REQUEST["TxTitle"];
+        $sourceUri = $_REQUEST["TxSourceURI"];
+
+        if (isset($_REQUEST["TextTags"])) {
+            $_REQUEST["TextTags"] = json_decode($_REQUEST["TextTags"], true);
+        }
+
+        $textCount = (int) $_REQUEST["TextCount"];
+        $texts = $_REQUEST["text"];
+
+        $result = $this->textService->saveLongTextImport(
+            $langId,
+            $title,
+            $sourceUri,
+            $texts,
+            $textCount
+        );
+
+        $message = $result['message'];
+        include __DIR__ . '/../Views/Text/import_long_result.php';
     }
 
     /**
