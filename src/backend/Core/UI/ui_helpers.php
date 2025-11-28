@@ -25,6 +25,7 @@
  */
 
 use Lwt\Database\Connection;
+use Lwt\Services\TagService;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\PageLayoutHelper;
@@ -911,8 +912,8 @@ function pagestart_nobody($title, $addcss = ''): void
     <script type="text/javascript">
         //<![CDATA[
         var STATUSES = <?php echo json_encode(get_statuses()); ?>;
-        var TAGS = <?php echo json_encode(get_tags()); ?>;
-        var TEXTTAGS = <?php echo json_encode(get_texttags()); ?>;
+        var TAGS = <?php echo json_encode(TagService::getAllTermTags()); ?>;
+        var TEXTTAGS = <?php echo json_encode(TagService::getAllTextTags()); ?>;
         //]]>
     </script>
 

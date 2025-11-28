@@ -125,7 +125,7 @@ while ($row = mysqli_fetch_assoc($feeds)):
     <td class="td1 center"><?php echo tohtml($row['NfName']); ?></td>
     <td class="td1 center"><?php echo str_replace(',', ', ', $row['NfOptions']); ?></td>
     <td class="td1 center" sorttable_customkey="<?php echo $diff; ?>">
-        <?php if ($row['NfUpdate']) { print_last_feed_update($diff); } ?>
+        <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
     </td>
 </tr>
 <?php endwhile; ?>

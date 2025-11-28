@@ -20,6 +20,7 @@
 use Lwt\Database\Connection;
 use Lwt\Database\Maintenance;
 use Lwt\Database\Migrations;
+use Lwt\Services\TagService;
 
 /**
  * Restore the database from a file.
@@ -122,8 +123,8 @@ function restore_file($handle, $title): string
         Migrations::checkAndUpdate();
         Migrations::reparseAllTexts();
         Maintenance::optimizeDatabase();
-        get_tags(1);
-        get_texttags(1);
+        TagService::getAllTermTags(true);
+        TagService::getAllTextTags(true);
         $message = "Success: $title restored";
     } elseif ($message == "") {
         $message = "Error: $title NOT restored";
@@ -166,6 +167,6 @@ function truncateUserDatabase(): void
     Connection::execute("TRUNCATE {$tbpref}wordtags");
     Connection::execute("DELETE FROM {$tbpref}settings where StKey = 'currenttext'");
     Maintenance::optimizeDatabase();
-    get_tags(1);
-    get_texttags(1);
+    TagService::getAllTermTags(true);
+    TagService::getAllTextTags(true);
 }

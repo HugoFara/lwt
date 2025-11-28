@@ -6,6 +6,7 @@
  * Variables expected:
  * - $feeds: array of feed data
  * - $currentLang: int current language filter
+ * - $feedService: FeedService instance for utility methods
  *
  * PHP version 8.1
  *
@@ -49,7 +50,7 @@ namespace Lwt\Views\Feed;
         </td>
         <td class="td1 center" colspan="2"><?php echo tohtml($row['NfName']); ?></td>
         <td class="td1 center" sorttable_customkey="<?php echo $diff; ?>">
-            <?php if ($row['NfUpdate']) { print_last_feed_update($diff); } ?>
+            <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
         </td>
     </tr>
     <?php endforeach; ?>

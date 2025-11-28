@@ -18,18 +18,18 @@ namespace Lwt\Controllers;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-require_once __DIR__ . '/../Core/Tag/tags.php';
-require_once __DIR__ . '/../Core/Feed/feeds.php';
 require_once __DIR__ . '/../Core/Text/text_helpers.php';
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Core/Media/media_helpers.php';
 require_once __DIR__ . '/../Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Services/TagService.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 use Lwt\Services\FeedService;
+use Lwt\Services\TagService;
 
 /**
  * Controller for RSS feed management.
@@ -113,7 +113,11 @@ class FeedsController extends BaseController
             isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
             || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
         ) {
-            \load_feeds((int)$currentFeed);
+            $this->feedService->renderFeedLoadInterface(
+                (int)$currentFeed,
+                isset($_REQUEST['check_autoupdate']),
+                $_SERVER['PHP_SELF'] ?? '/'
+            );
         } elseif (empty($editText)) {
             $this->renderFeedsIndex((int)$currentLang, (int)$currentFeed);
         }
@@ -176,7 +180,7 @@ class FeedsController extends BaseController
                 $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
             }
 
-            $texts = \get_text_from_rsslink(
+            $texts = $this->feedService->extractTextFromArticle(
                 $doc,
                 $row['NfArticleSectionTags'],
                 $row['NfFilterTags'],
@@ -246,7 +250,7 @@ $(".hide_message").delay(2500).slideUp(1000);
             ], $tagName);
         }
 
-        \get_texttags(1);
+        TagService::getAllTextTags(true);
 
         return $this->feedService->archiveOldTexts($tagName, $maxTexts);
     }
@@ -261,7 +265,7 @@ $(".hide_message").delay(2500).slideUp(1000);
     private function displayFeedMessages(string $message): void
     {
         if (isset($_REQUEST['checked_feeds_save'])) {
-            $message = \write_rss_to_db($_REQUEST['feed']);
+            $message = $this->feedService->saveTextsFromFeed($_REQUEST['feed']);
             ?>
     <script type="text/javascript">
     $(".hide_message").delay(2500).slideUp(1000);
@@ -366,6 +370,16 @@ $(".hide_message").delay(2500).slideUp(1000);
             $articles = $this->feedService->getFeedLinks($feedIds, $whQuery, $sortColumn, $offset, $maxPerPage);
         }
 
+        // Format last update for view
+        $lastUpdateFormatted = null;
+        if ($feedTime) {
+            $diff = time() - (int)$feedTime;
+            $lastUpdateFormatted = $this->feedService->formatLastUpdate($diff);
+        }
+
+        // Pass service to view for utility methods
+        $feedService = $this->feedService;
+
         // Include browse view
         include __DIR__ . '/../Views/Feed/browse.php';
     }
@@ -430,7 +444,11 @@ $(".hide_message").delay(2500).slideUp(1000);
             isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
             || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
         ) {
-            \load_feeds((int)$currentFeed);
+            $this->feedService->renderFeedLoadInterface(
+                (int)$currentFeed,
+                isset($_REQUEST['check_autoupdate']),
+                $_SERVER['PHP_SELF'] ?? '/'
+            );
         } elseif (isset($_REQUEST['new_feed'])) {
             $this->showNewForm((int)$currentLang);
         } elseif (isset($_REQUEST['edit_feed'])) {
@@ -615,6 +633,9 @@ $(".hide_message").delay(2500).slideUp(1000);
     {
         $feeds = $this->feedService->getFeeds($currentLang ?: null);
 
+        // Pass service to view for utility methods
+        $feedService = $this->feedService;
+
         include __DIR__ . '/../Views/Feed/multi_load.php';
     }
 
@@ -673,6 +694,9 @@ $(".hide_message").delay(2500).slideUp(1000);
             $pages = 0;
             $maxPerPage = 0;
         }
+
+        // Pass service to view for utility methods
+        $feedService = $this->feedService;
 
         include __DIR__ . '/../Views/Feed/index.php';
     }
@@ -883,7 +907,7 @@ $(".hide_message").delay(2500).slideUp(1000);
             }
         }
 
-        $_SESSION['wizard']['feed'] = \get_links_from_new_feed($row['NfSourceURI']);
+        $_SESSION['wizard']['feed'] = $this->feedService->detectAndParseFeed($row['NfSourceURI']);
         if (empty($_SESSION['wizard']['feed'])) {
             unset($_SESSION['wizard']['feed']);
             header("Location: /feeds/wizard?step=1&err=1");
@@ -932,7 +956,7 @@ $(".hide_message").delay(2500).slideUp(1000);
             \my_die("Your session seems to have an issue, please reload the page.");
         }
 
-        $_SESSION['wizard']['feed'] = \get_links_from_new_feed($rssUrl);
+        $_SESSION['wizard']['feed'] = $this->feedService->detectAndParseFeed($rssUrl);
         $_SESSION['wizard']['rss_url'] = $rssUrl;
 
         if (empty($_SESSION['wizard']['feed'])) {
@@ -1109,7 +1133,7 @@ $(".hide_message").delay(2500).slideUp(1000);
 
         if (!isset($_SESSION['wizard']['feed'][$i]['html'])) {
             $aFeed[0] = $_SESSION['wizard']['feed'][$i];
-            $_SESSION['wizard']['feed'][$i]['html'] = \get_text_from_rsslink(
+            $_SESSION['wizard']['feed'][$i]['html'] = $this->feedService->extractTextFromArticle(
                 $aFeed,
                 $_SESSION['wizard']['redirect'] . 'new',
                 'iframe!?!script!?!noscript!?!head!?!meta!?!link!?!style',
@@ -1131,7 +1155,7 @@ $(".hide_message").delay(2500).slideUp(1000);
 
         if (!isset($_SESSION['wizard']['feed'][$i]['html'])) {
             $aFeed[0] = $_SESSION['wizard']['feed'][$i];
-            $_SESSION['wizard']['feed'][$i]['html'] = \get_text_from_rsslink(
+            $_SESSION['wizard']['feed'][$i]['html'] = $this->feedService->extractTextFromArticle(
                 $aFeed,
                 $_SESSION['wizard']['redirect'] . 'new',
                 'iframe!?!script!?!noscript!?!head!?!meta!?!link!?!style',

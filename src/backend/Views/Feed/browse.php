@@ -127,9 +127,8 @@ Newsfeed:
         update multiple feeds</a>';
     endif;
 
-    if ($feedTime):
-        $diff = time() - (int)$feedTime;
-        print_last_feed_update($diff);
+    if ($lastUpdateFormatted):
+        echo ' ' . $lastUpdateFormatted;
     endif;
     ?>
     </td>

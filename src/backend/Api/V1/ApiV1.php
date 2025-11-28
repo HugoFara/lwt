@@ -31,7 +31,6 @@ require_once __DIR__ . '/../../Core/Word/dictionary_links.php';
 require_once __DIR__ . '/../../Core/Media/media_helpers.php';
 require_once __DIR__ . '/../../Core/Text/simterms.php';
 require_once __DIR__ . '/../../Core/Language/langdefs.php';
-require_once __DIR__ . '/../../Core/Feed/feeds.php';
 
 use Lwt\Api\V1\Handlers\FeedHandler;
 use Lwt\Api\V1\Handlers\ImportHandler;

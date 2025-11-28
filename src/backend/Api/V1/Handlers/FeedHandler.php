@@ -5,6 +5,7 @@ namespace Lwt\Api\V1\Handlers;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
+use Lwt\Services\FeedService;
 
 /**
  * Handler for RSS feed-related API operations.
@@ -13,6 +14,12 @@ use Lwt\Database\Settings;
  */
 class FeedHandler
 {
+    private FeedService $feedService;
+
+    public function __construct()
+    {
+        $this->feedService = new FeedService();
+    }
     /**
      * Get the list of feeds and insert them into the database.
      *
@@ -63,9 +70,9 @@ class FeedHandler
             SET NfUpdate="' . time() . '"
             WHERE NfID=' . $nfid
         );
-        $nfMaxLinks = \get_nf_option($nfoptions, 'max_links');
+        $nfMaxLinks = $this->feedService->getNfOption($nfoptions, 'max_links');
         if (!$nfMaxLinks) {
-            if (\get_nf_option($nfoptions, 'article_source')) {
+            if ($this->feedService->getNfOption($nfoptions, 'article_source')) {
                 $nfMaxLinks = Settings::getWithDefault('set-max-articles-with-text');
             } else {
                 $nfMaxLinks = Settings::getWithDefault('set-max-articles-without-text');
@@ -118,7 +125,8 @@ class FeedHandler
      */
     public function loadFeed(string $nfname, int $nfid, string $nfsourceuri, string $nfoptions): array
     {
-        $feed = \get_links_from_rss($nfsourceuri, \get_nf_option($nfoptions, 'article_source'));
+        $articleSource = $this->feedService->getNfOption($nfoptions, 'article_source');
+        $feed = $this->feedService->parseRssFeed($nfsourceuri, $articleSource ?? '');
         if (empty($feed)) {
             return [
                 "error" => 'Could not load "' . $nfname . '"'

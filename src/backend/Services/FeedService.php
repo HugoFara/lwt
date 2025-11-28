@@ -15,12 +15,9 @@
 
 namespace Lwt\Services;
 
-require_once __DIR__ . '/../Core/Feed/feeds.php';
-
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
-use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
 
@@ -325,14 +322,49 @@ class FeedService
     /**
      * Get a specific option from the feed options string.
      *
+     * Parses comma-separated key=value pairs. For 'all' returns full array,
+     * otherwise returns specific option value or null if not found.
+     *
+     * Note: When searching for a specific option, returns first match.
+     * For 'all', later duplicates overwrite earlier ones.
+     *
      * @param string $optionsStr Options string (comma-separated key=value pairs)
-     * @param string $option     Option name to retrieve
+     * @param string $option     Option name to retrieve ('all' for full array)
      *
      * @return string|array|null Option value, all options array, or null
      */
-    public function getNfOption(string $optionsStr, string $option)
+    public function getNfOption(string $optionsStr, string $option): string|array|null
     {
-        return \get_nf_option($optionsStr, $option);
+        $optionsStr = trim($optionsStr);
+        if (empty($optionsStr)) {
+            return ($option === 'all') ? [] : null;
+        }
+
+        $optionList = explode(',', $optionsStr);
+        $result = [];
+
+        foreach ($optionList as $opt) {
+            // Note: Original used explode without limit, so key=value=extra
+            // splits into ['key','value','extra'] and takes index 1 ('value')
+            $parts = explode('=', $opt);
+            $key = trim($parts[0] ?? '');
+            $value = trim($parts[1] ?? '');
+
+            if (!empty($key)) {
+                // For 'all' mode, store all (later duplicates overwrite)
+                // For specific option, return first match immediately
+                if ($option !== 'all' && $key === $option) {
+                    return $value;
+                }
+                $result[$key] = $value;
+            }
+        }
+
+        if ($option === 'all') {
+            return $result;
+        }
+
+        return null;
     }
 
     /**
@@ -654,5 +686,962 @@ class FeedService
         }
 
         return $cols[$sortIndex] ?? $cols[2];
+    }
+
+    // =========================================================================
+    // RSS Feed Parsing Methods (migrated from Core/Feed/feeds.php)
+    // =========================================================================
+
+    /**
+     * Extract text content from RSS feed article links.
+     *
+     * Handles various scenarios:
+     * - Inline text from feed (description, content, encoded)
+     * - Fetching full article from webpage
+     * - Redirect handling for intermediate pages
+     * - Charset detection and conversion
+     * - XPath-based content extraction
+     *
+     * @param array       $feedData         Array of feed items with link, title, etc.
+     * @param string      $articleSection   XPath selector(s) for article content
+     * @param string      $filterTags       XPath selector(s) for elements to remove
+     * @param string|null $charset          Override charset (null for auto-detect)
+     *
+     * @return array|string|null Extracted text data or error info
+     */
+    public function extractTextFromArticle(
+        array $feedData,
+        string $articleSection,
+        string $filterTags,
+        ?string $charset = null
+    ): array|string|null {
+        $data = null;
+
+        foreach ($feedData as $key => $val) {
+            // Handle redirect article sections
+            if (strncmp($articleSection, 'redirect:', 9) == 0) {
+                $feedData[$key]['link'] = $this->handleRedirectArticle(
+                    $feedData[$key]['link'],
+                    $articleSection,
+                    $articleSection
+                );
+            }
+
+            $data[$key]['TxTitle'] = $feedData[$key]['title'];
+            $data[$key]['TxAudioURI'] = $feedData[$key]['audio'] ?? null;
+            $data[$key]['TxText'] = "";
+
+            // Check if feed has inline text
+            if (isset($feedData[$key]['text']) && $feedData[$key]['text'] === "") {
+                unset($feedData[$key]['text']);
+            }
+
+            // Get HTML content - either from inline text or fetched from URL
+            if (isset($feedData[$key]['text'])) {
+                $link = trim($feedData[$key]['link']);
+                if (substr($link, 0, 1) == '#') {
+                    Connection::execute(
+                        "UPDATE {$this->tbpref}feedlinks
+                        SET FlLink=" . Escaping::toSqlSyntax($link) . "
+                        WHERE FlID = " . substr($link, 1)
+                    );
+                }
+                $data[$key]['TxSourceURI'] = $link;
+                $htmlString = str_replace(
+                    ['>', '<'],
+                    ['> ', ' <'],
+                    $feedData[$key]['text']
+                );
+            } else {
+                $data[$key]['TxSourceURI'] = $feedData[$key]['link'];
+                $htmlString = $this->fetchArticleContent(
+                    $data[$key]['TxSourceURI'],
+                    $charset
+                );
+            }
+
+            // Convert line breaks
+            $htmlString = str_replace(
+                ['<br />', '<br>', '</br>', '</h', '</p'],
+                ["\n", "\n", "", "\n</h", "\n</p"],
+                $htmlString
+            );
+
+            // Parse and extract text
+            $dom = new \DOMDocument();
+            $previousValue = libxml_use_internal_errors(true);
+            $dom->loadHTML('<?xml encoding="UTF-8">' . $htmlString);
+
+            // Remove XML processing instruction hack
+            foreach ($dom->childNodes as $item) {
+                if ($item->nodeType == XML_PI_NODE) {
+                    $dom->removeChild($item);
+                }
+            }
+            $dom->encoding = 'UTF-8';
+
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousValue);
+
+            // Build filter tags list
+            $filterTagsList = explode(
+                "!?!",
+                rtrim(
+                    "//img | //script | //meta | //noscript | //link | //iframe!?!" . $filterTags,
+                    "!?!"
+                )
+            );
+
+            // Check for 'new' article tag (return full HTML)
+            foreach (explode("!?!", $articleSection) as $articleTag) {
+                if ($articleTag == 'new') {
+                    return $this->extractNewArticleHtml($dom, $filterTagsList);
+                }
+            }
+
+            // Standard extraction with XPath
+            $selector = new \DOMXPath($dom);
+
+            // Remove filtered elements
+            foreach ($filterTagsList as $filterTag) {
+                foreach ($selector->query($filterTag) as $node) {
+                    $node->parentNode->removeChild($node);
+                }
+            }
+
+            // Extract text from article sections
+            if (isset($feedData[$key]['text'])) {
+                foreach ($selector->query($articleSection) as $textTemp) {
+                    if ($textTemp->nodeValue != '') {
+                        $data[$key]['TxText'] .= mb_convert_encoding(
+                            $textTemp->nodeValue,
+                            "HTML-ENTITIES",
+                            "UTF-8"
+                        );
+                    }
+                }
+                $data[$key]['TxText'] = html_entity_decode(
+                    $data[$key]['TxText'],
+                    ENT_NOQUOTES,
+                    "UTF-8"
+                );
+            } else {
+                $articleTags = explode("!?!", $articleSection);
+                if (strncmp($articleSection, 'redirect:', 9) == 0) {
+                    unset($articleTags[0]);
+                }
+                foreach ($articleTags as $articleTag) {
+                    $queryResult = @$selector->query($articleTag);
+                    if ($queryResult !== false) {
+                        foreach ($queryResult as $textTemp) {
+                            if ($textTemp->nodeValue != '') {
+                                $data[$key]['TxText'] .= $textTemp->nodeValue;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Handle empty text
+            if ($data[$key]['TxText'] == "") {
+                unset($data[$key]);
+                if (!isset($data['error']['message'])) {
+                    $data['error']['message'] = '';
+                }
+                $data['error']['message'] .= '"<a href=' . $feedData[$key]['link'] .
+                    ' onclick="window.open(this.href, \'child\'); return false">' .
+                    $feedData[$key]['title'] . '</a>" has no text section!<br />';
+                $data['error']['link'][] = $feedData[$key]['link'];
+            } else {
+                // Clean up whitespace
+                $data[$key]['TxText'] = trim(preg_replace(
+                    ['/[\r\t]+/', '/(\n)[\s^\n]*\n[\s]*/', '/\ \ +/'],
+                    [' ', '$1$1', ' '],
+                    $data[$key]['TxText']
+                ));
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Handle redirect article section to find actual article URL.
+     *
+     * @param string $link           Original link
+     * @param string $articleSection Full article section string
+     * @param string &$newSection    Output: updated article section
+     *
+     * @return string Updated link
+     */
+    private function handleRedirectArticle(
+        string $link,
+        string $articleSection,
+        string &$newSection
+    ): string {
+        $dom = new \DOMDocument();
+        $htmlString = @file_get_contents(trim($link));
+        if ($htmlString === false) {
+            return $link;
+        }
+
+        $dom->loadHTML($htmlString);
+        $xPath = new \DOMXPath($dom);
+
+        $redirect = explode(" | ", $articleSection, 2);
+        $newSection = $redirect[1] ?? '';
+        $redirect = substr($redirect[0], 9);
+        $feedHost = parse_url(trim($link));
+
+        foreach ($xPath->query($redirect) as $node) {
+            if (
+                empty(trim($node->localName))
+                || $node->nodeType == XML_TEXT_NODE
+                || !$node->hasAttributes()
+            ) {
+                continue;
+            }
+
+            foreach ($node->attributes as $attr) {
+                if ($attr->name == 'href') {
+                    $link = $attr->value;
+                    if (strncmp($link, '..', 2) == 0) {
+                        $link = 'http://' . ($feedHost['host'] ?? 'localhost') .
+                            substr($link, 2);
+                    }
+                }
+            }
+        }
+
+        return $link;
+    }
+
+    /**
+     * Fetch article content from URL with charset detection.
+     *
+     * @param string      $url     Article URL
+     * @param string|null $charset Override charset (null for auto-detect)
+     *
+     * @return string HTML content
+     */
+    private function fetchArticleContent(string $url, ?string $charset): string
+    {
+        $context = stream_context_create(['http' => ['follow_location' => true]]);
+        $htmlString = @file_get_contents(trim($url), false, $context);
+
+        if (empty($htmlString)) {
+            return '';
+        }
+
+        $encoding = $this->detectCharset($url, $htmlString, $charset);
+
+        // Apply charset conversion
+        $convertedCharset = $this->mapWindowsCharset($encoding);
+
+        $htmlString = '<meta http-equiv="Content-Type" content="text/html; charset=' .
+            $convertedCharset . '">' . $htmlString;
+
+        if ($encoding != $convertedCharset) {
+            $htmlString = iconv($encoding, 'utf-8', $htmlString);
+        } else {
+            $htmlString = mb_convert_encoding($htmlString, 'HTML-ENTITIES', $encoding);
+        }
+
+        return $htmlString;
+    }
+
+    /**
+     * Detect charset from HTTP headers, meta tags, or content.
+     *
+     * @param string      $url        URL being fetched
+     * @param string      $htmlString HTML content
+     * @param string|null $override   Override charset
+     *
+     * @return string Detected charset
+     */
+    private function detectCharset(string $url, string $htmlString, ?string $override): string
+    {
+        if (!empty($override) && $override != 'meta') {
+            return $override;
+        }
+
+        // Try HTTP headers first
+        $header = @get_headers(trim($url), true);
+        if ($header) {
+            foreach ($header as $k => $v) {
+                if (strtolower($k) == 'content-type') {
+                    $contentType = is_array($v) ? $v[count($v) - 1] : $v;
+                    $pos = strpos($contentType, 'charset=');
+                    if ($pos !== false && strpos($contentType, 'text/html;') !== false) {
+                        return substr($contentType, $pos + 8);
+                    }
+                }
+            }
+        }
+
+        // Try meta tags
+        $doc = new \DOMDocument();
+        $previousValue = libxml_use_internal_errors(true);
+        $doc->loadHTML($htmlString);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previousValue);
+
+        $nodes = $doc->getElementsByTagName('meta');
+
+        // Check content-type meta
+        foreach ($nodes as $node) {
+            $len = $node->attributes->length;
+            for ($i = 0; $i < $len; $i++) {
+                if ($node->attributes->item($i)->name == 'content') {
+                    $pos = strpos($node->attributes->item($i)->value, 'charset=');
+                    if ($pos) {
+                        return substr($node->attributes->item($i)->value, $pos + 8);
+                    }
+                }
+            }
+        }
+
+        // Check charset meta
+        foreach ($nodes as $node) {
+            $len = $node->attributes->length;
+            if ($len == 1 && $node->attributes->item(0)->name == 'charset') {
+                return $node->attributes->item(0)->value;
+            }
+        }
+
+        // Fallback to detection
+        mb_detect_order("ASCII,UTF-8,ISO-8859-1,windows-1252,iso-8859-15");
+        return mb_detect_encoding($htmlString) ?: 'UTF-8';
+    }
+
+    /**
+     * Map Windows charset to UTF-8 locale equivalent.
+     *
+     * @param string $charset Input charset
+     *
+     * @return string Mapped charset
+     */
+    private function mapWindowsCharset(string $charset): string
+    {
+        $mapping = [
+            'windows-1253' => 'el_GR.utf8',
+            'windows-1254' => 'tr_TR.utf8',
+            'windows-1255' => 'he.utf8',
+            'windows-1256' => 'ar_AE.utf8',
+            'windows-1258' => 'vi_VI.utf8',
+            'windows-874' => 'th_TH.utf8',
+        ];
+
+        return $mapping[$charset] ?? $charset;
+    }
+
+    /**
+     * Extract full HTML for 'new' article mode.
+     *
+     * @param \DOMDocument $dom        DOM document
+     * @param array        $filterTags Tags to filter out
+     *
+     * @return string Cleaned HTML
+     */
+    private function extractNewArticleHtml(\DOMDocument $dom, array $filterTags): string
+    {
+        foreach ($filterTags as $filterTag) {
+            $nodes = $dom->getElementsByTagName($filterTag);
+            $domElemsToRemove = [];
+            foreach ($nodes as $domElement) {
+                $domElemsToRemove[] = $domElement;
+            }
+            foreach ($domElemsToRemove as $node) {
+                $node->parentNode->removeChild($node);
+            }
+        }
+
+        $nodes = $dom->getElementsByTagName('*');
+        foreach ($nodes as $node) {
+            $node->removeAttribute('onclick');
+        }
+
+        $str = $dom->saveHTML($dom);
+
+        return preg_replace(
+            ['/\<html[^\>]*\>/', '/\<body\>/'],
+            ['', ''],
+            $str
+        );
+    }
+
+    /**
+     * Parse RSS/Atom feed and return article links with metadata.
+     *
+     * Supports both RSS 2.0 and Atom feed formats. Extracts:
+     * - Title, description, link, publication date
+     * - Audio enclosures (podcast support)
+     * - Inline text content (if article section specified)
+     *
+     * @param string $sourceUri      Feed URL
+     * @param string $articleSection Tag name for inline text extraction
+     *
+     * @return array|false Array of feed items or false on error
+     */
+    public function parseRssFeed(string $sourceUri, string $articleSection): array|false
+    {
+        $rss = new \DOMDocument('1.0', 'utf-8');
+        if (!$rss->load($sourceUri, LIBXML_NOCDATA | ENT_NOQUOTES)) {
+            return false;
+        }
+
+        $rssData = [];
+        $feedTags = $this->getFeedTagMapping($rss);
+
+        if ($feedTags === null) {
+            return false;
+        }
+
+        foreach ($rss->getElementsByTagName($feedTags['item']) as $node) {
+            $item = [
+                'title' => preg_replace(
+                    ['/\s\s+/', '/\ \&\ /'],
+                    [' ', ' &amp; '],
+                    trim($node->getElementsByTagName($feedTags['title'])->item(0)->nodeValue)
+                ),
+                'desc' => isset($node->getElementsByTagName($feedTags['description'])->item(0)->nodeValue)
+                    ? preg_replace(
+                        ['/\ \&\ /', '/<br(\s+)?\/?>/i', '/<br [^>]*?>/i', '/\<[^\>]*\>/', '/(\n)[\s^\n]*\n[\s]*/'],
+                        [' &amp; ', "\n", "\n", '', '$1$1'],
+                        trim($node->getElementsByTagName($feedTags['description'])->item(0)->nodeValue)
+                    )
+                    : '',
+                'link' => trim(
+                    ($feedTags['item'] == 'entry')
+                        ? $node->getElementsByTagName($feedTags['link'])->item(0)->getAttribute('href')
+                        : $node->getElementsByTagName($feedTags['link'])->item(0)->nodeValue
+                ),
+                'date' => $node->getElementsByTagName($feedTags['pubDate'])->item(0)->nodeValue ?? null,
+            ];
+
+            // Parse date
+            $item['date'] = $this->parseFeedDate($item['date'], count($rssData));
+
+            // Truncate description
+            if (strlen($item['desc']) > 1000) {
+                $item['desc'] = mb_substr($item['desc'], 0, 995, "utf-8") . '...';
+            }
+
+            // Extract inline text if article section specified
+            if ($articleSection) {
+                foreach ($node->getElementsByTagName($articleSection) as $txtNode) {
+                    if ($txtNode->parentNode === $node) {
+                        $item['text'] = $txtNode->ownerDocument->saveHTML($txtNode);
+                        $item['text'] = mb_convert_encoding(
+                            html_entity_decode($item['text'], ENT_NOQUOTES, "UTF-8"),
+                            "HTML-ENTITIES",
+                            "UTF-8"
+                        );
+                    }
+                }
+            }
+
+            // Extract audio enclosure
+            $item['audio'] = "";
+            foreach ($node->getElementsByTagName($feedTags['enclosure']) as $enc) {
+                $type = $enc->getAttribute('type');
+                if ($type == "audio/mpeg") {
+                    $item['audio'] = $enc->getAttribute($feedTags['url']);
+                }
+            }
+
+            // Add valid items
+            if ($item['title'] != "" && ($item['link'] != "" || ($articleSection != "" && !empty($item['text'])))) {
+                $rssData[] = $item;
+            }
+        }
+
+        return $rssData;
+    }
+
+    /**
+     * Detect and parse feed, determining best text source.
+     *
+     * Analyzes feed to determine whether to use:
+     * - content (Atom)
+     * - description (RSS)
+     * - encoded (RSS with content:encoded)
+     * - webpage link (external fetch)
+     *
+     * @param string $sourceUri Feed URL
+     *
+     * @return array|false Feed data with feed_text indicator or false on error
+     */
+    public function detectAndParseFeed(string $sourceUri): array|false
+    {
+        $rss = new \DOMDocument('1.0', 'utf-8');
+        if (!$rss->load($sourceUri, LIBXML_NOCDATA | ENT_NOQUOTES)) {
+            return false;
+        }
+
+        $rssData = [];
+        $descCount = 0;
+        $descNocount = 0;
+        $encCount = 0;
+        $encNocount = 0;
+
+        $feedTags = $this->getFeedTagMapping($rss);
+        if ($feedTags === null) {
+            return false;
+        }
+
+        foreach ($rss->getElementsByTagName($feedTags['item']) as $node) {
+            $item = [
+                'title' => preg_replace(
+                    ['/\s\s+/', '/\ \&\ /', '/\"/'],
+                    [' ', ' &amp; ', '\"'],
+                    trim($node->getElementsByTagName($feedTags['title'])->item(0)->nodeValue)
+                ),
+                'desc' => preg_replace(
+                    ['/\s\s+/', '/\ \&\ /', '/\<[^\>]*\>/', '/\"/'],
+                    [' ', ' &amp; ', '', '\"'],
+                    trim($node->getElementsByTagName($feedTags['description'])->item(0)->nodeValue)
+                ),
+                'link' => trim(
+                    ($feedTags['item'] == 'entry')
+                        ? $node->getElementsByTagName($feedTags['link'])->item(0)->getAttribute('href')
+                        : $node->getElementsByTagName($feedTags['link'])->item(0)->nodeValue
+                ),
+            ];
+
+            // Handle RSS items
+            if ($feedTags['item'] == 'item') {
+                foreach ($node->getElementsByTagName('encoded') as $txtNode) {
+                    if ($txtNode->parentNode === $node) {
+                        $item['encoded'] = $txtNode->ownerDocument->saveHTML($txtNode);
+                        $item['encoded'] = mb_convert_encoding(
+                            html_entity_decode($item['encoded'], ENT_NOQUOTES, "UTF-8"),
+                            "HTML-ENTITIES",
+                            "UTF-8"
+                        );
+                    }
+                }
+                foreach ($node->getElementsByTagName('description') as $txtNode) {
+                    if ($txtNode->parentNode === $node) {
+                        $item['description'] = $txtNode->ownerDocument->saveHTML($txtNode);
+                        $item['description'] = mb_convert_encoding(
+                            html_entity_decode($item['description'], ENT_NOQUOTES, "UTF-8"),
+                            "HTML-ENTITIES",
+                            "UTF-8"
+                        );
+                    }
+                }
+
+                if (isset($item['desc'])) {
+                    if (mb_strlen($item['desc'], "UTF-8") > 900) {
+                        $descCount++;
+                    } else {
+                        $descNocount++;
+                    }
+                }
+                if (isset($item['encoded'])) {
+                    if (mb_strlen($item['encoded'], "UTF-8") > 900) {
+                        $encCount++;
+                    } else {
+                        $encNocount++;
+                    }
+                }
+            }
+
+            // Handle Atom entries
+            if ($feedTags['item'] == 'entry') {
+                foreach ($node->getElementsByTagName('content') as $txtNode) {
+                    if ($txtNode->parentNode === $node) {
+                        $item['content'] = $txtNode->ownerDocument->saveHTML($txtNode);
+                        $item['content'] = mb_convert_encoding(
+                            html_entity_decode($item['content'], ENT_NOQUOTES, "UTF-8"),
+                            "HTML-ENTITIES",
+                            "UTF-8"
+                        );
+                    }
+                }
+                if (isset($item['content'])) {
+                    if (mb_strlen($item['content'], "UTF-8") > 900) {
+                        $descCount++;
+                    } else {
+                        $descNocount++;
+                    }
+                }
+            }
+
+            if ($item['title'] != "" && $item['link'] != "") {
+                $rssData[] = $item;
+            }
+        }
+
+        // Determine best text source
+        if ($descCount > $descNocount) {
+            $source = ($feedTags['item'] == 'entry') ? 'content' : 'description';
+            $rssData['feed_text'] = $source;
+            foreach ($rssData as $i => $val) {
+                if (is_array($val)) {
+                    $rssData[$i]['text'] = $val[$source] ?? '';
+                }
+            }
+        } elseif ($encCount > $encNocount) {
+            $rssData['feed_text'] = 'encoded';
+            foreach ($rssData as $i => $val) {
+                if (is_array($val)) {
+                    $rssData[$i]['text'] = $val['encoded'] ?? '';
+                }
+            }
+        } else {
+            $rssData['feed_text'] = '';
+        }
+
+        $rssData['feed_title'] = $rss->getElementsByTagName('title')->item(0)->nodeValue;
+
+        return $rssData;
+    }
+
+    /**
+     * Get tag mapping for RSS/Atom feed format.
+     *
+     * @param \DOMDocument $rss Feed document
+     *
+     * @return array|null Tag mapping or null if unknown format
+     */
+    private function getFeedTagMapping(\DOMDocument $rss): ?array
+    {
+        if ($rss->getElementsByTagName('rss')->length !== 0) {
+            return [
+                'item' => 'item',
+                'title' => 'title',
+                'description' => 'description',
+                'link' => 'link',
+                'pubDate' => 'pubDate',
+                'enclosure' => 'enclosure',
+                'url' => 'url'
+            ];
+        } elseif ($rss->getElementsByTagName('feed')->length !== 0) {
+            return [
+                'item' => 'entry',
+                'title' => 'title',
+                'description' => 'summary',
+                'link' => 'link',
+                'pubDate' => 'published',
+                'enclosure' => 'link',
+                'url' => 'href'
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Parse feed date string to MySQL datetime format.
+     *
+     * @param string|null $dateStr   Date string from feed
+     * @param int         $fallback  Fallback offset for ordering
+     *
+     * @return string MySQL datetime string
+     */
+    private function parseFeedDate(?string $dateStr, int $fallback): string
+    {
+        if ($dateStr === null) {
+            return date("Y-m-d H:i:s", time() - $fallback);
+        }
+
+        $pubDate = date_parse_from_format('D, d M Y H:i:s T', $dateStr);
+        if ($pubDate['error_count'] > 0) {
+            return date("Y-m-d H:i:s", time() - $fallback);
+        }
+
+        return date(
+            "Y-m-d H:i:s",
+            mktime(
+                $pubDate['hour'],
+                $pubDate['minute'],
+                $pubDate['second'],
+                $pubDate['month'],
+                $pubDate['day'],
+                $pubDate['year']
+            )
+        );
+    }
+
+    /**
+     * Save texts from RSS feed to database with automatic archival.
+     *
+     * Creates texts from parsed feed data, applies tags, and archives
+     * old texts if max_texts limit is exceeded.
+     *
+     * @param array $texts Array of text data from extractTextFromArticle()
+     *
+     * @return string Status message
+     */
+    public function saveTextsFromFeed(array $texts): string
+    {
+        $texts = array_reverse($texts);
+        $message1 = $message2 = $message3 = $message4 = 0;
+        $NfID = null;
+
+        foreach ($texts as $text) {
+            $NfID[] = $text['Nf_ID'];
+        }
+        $NfID = array_unique($NfID);
+
+        $NfTag = '';
+        $textItem = null;
+        $nfMaxTexts = null;
+
+        foreach ($NfID as $feedID) {
+            foreach ($texts as $text) {
+                if ($feedID == $text['Nf_ID']) {
+                    if ($NfTag != '"' . implode('","', $text['TagList']) . '"') {
+                        $NfTag = '"' . implode('","', $text['TagList']) . '"';
+
+                        // Ensure tags exist
+                        foreach ($text['TagList'] as $tag) {
+                            if (!in_array($tag, $_SESSION['TEXTTAGS'] ?? [])) {
+                                Connection::query(
+                                    'INSERT INTO ' . $this->tbpref . 'tags2 (T2Text)
+                                    VALUES (' . Escaping::toSqlSyntax($tag) . ')'
+                                );
+                            }
+                        }
+                        $nfMaxTexts = $text['Nf_Max_Texts'];
+                    }
+
+                    // Create the text
+                    Connection::query(
+                        'INSERT INTO ' . $this->tbpref . 'texts (
+                            TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI
+                        ) VALUES (
+                            ' . $text['TxLgID'] . ',
+                            ' . Escaping::toSqlSyntax($text['TxTitle']) . ',
+                            ' . Escaping::toSqlSyntax($text['TxText']) . ',
+                            ' . Escaping::toSqlSyntax($text['TxAudioURI']) . ',
+                            ' . Escaping::toSqlSyntax($text['TxSourceURI']) . ')'
+                    );
+
+                    $id = (int)Connection::lastInsertId();
+
+                    // Parse the text
+                    TextParsing::splitCheck(
+                        Connection::fetchValue(
+                            'SELECT TxText AS value FROM ' . $this->tbpref . 'texts
+                            WHERE TxID = ' . $id
+                        ),
+                        Connection::fetchValue(
+                            'SELECT TxLgID AS value FROM ' . $this->tbpref . 'texts
+                            WHERE TxID = ' . $id
+                        ),
+                        $id
+                    );
+
+                    // Apply tags
+                    Connection::query(
+                        'INSERT INTO ' . $this->tbpref . 'texttags (TtTxID, TtT2ID)
+                        SELECT ' . $id . ', T2ID FROM ' . $this->tbpref . 'tags2
+                        WHERE T2Text IN (' . $NfTag . ')'
+                    );
+                }
+            }
+
+            // Refresh text tags
+            TagService::getAllTextTags(true);
+
+            // Get all texts with this tag
+            $result = Connection::query(
+                "SELECT TtTxID FROM " . $this->tbpref . "texttags
+                JOIN " . $this->tbpref . "tags2 ON TtT2ID=T2ID
+                WHERE T2Text IN (" . $NfTag . ")"
+            );
+
+            $textCount = 0;
+            while ($row = mysqli_fetch_assoc($result)) {
+                $textItem[$textCount++] = $row['TtTxID'];
+            }
+            mysqli_free_result($result);
+
+            // Archive excess texts
+            if ($textCount > $nfMaxTexts) {
+                sort($textItem, SORT_NUMERIC);
+                $textItem = array_slice($textItem, 0, $textCount - $nfMaxTexts);
+
+                foreach ($textItem as $textID) {
+                    $message3 += (int)Connection::execute(
+                        'DELETE FROM ' . $this->tbpref . 'textitems2
+                        WHERE Ti2TxID = ' . $textID
+                    );
+                    $message2 += (int)Connection::execute(
+                        'DELETE FROM ' . $this->tbpref . 'sentences
+                        WHERE SeTxID = ' . $textID
+                    );
+                    $message4 += (int)Connection::execute(
+                        'INSERT INTO ' . $this->tbpref . 'archivedtexts (
+                            AtLgID, AtTitle, AtText, AtAnnotatedText,
+                            AtAudioURI, AtSourceURI
+                        ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText,
+                        TxAudioURI, TxSourceURI
+                        FROM ' . $this->tbpref . 'texts
+                        WHERE TxID = ' . $textID
+                    );
+
+                    $archiveId = (int)Connection::lastInsertId();
+                    Connection::execute(
+                        'INSERT INTO ' . $this->tbpref . 'archtexttags (AgAtID, AgT2ID)
+                        SELECT ' . $archiveId . ', TtT2ID FROM ' . $this->tbpref . 'texttags
+                        WHERE TtTxID = ' . $textID
+                    );
+
+                    $message1 += (int)Connection::execute(
+                        'DELETE FROM ' . $this->tbpref . 'texts
+                        WHERE TxID = ' . $textID
+                    );
+
+                    Maintenance::adjustAutoIncrement('texts', 'TxID');
+                    Maintenance::adjustAutoIncrement('sentences', 'SeID');
+
+                    Connection::execute(
+                        "DELETE " . $this->tbpref . "texttags
+                        FROM (" . $this->tbpref . "texttags
+                            LEFT JOIN " . $this->tbpref . "texts ON TtTxID = TxID
+                        ) WHERE TxID IS NULL"
+                    );
+                }
+            }
+        }
+
+        if ($message4 > 0 || $message1 > 0) {
+            return "Texts archived: " . $message1 .
+                " / Sentences deleted: " . $message2 .
+                " / Text items deleted: " . $message3;
+        }
+
+        return '';
+    }
+
+    /**
+     * Generate JavaScript for loading feeds via AJAX.
+     *
+     * Used for auto-update and manual feed refresh operations.
+     *
+     * @param int  $currentFeed     Feed ID to load (0 for auto-update check)
+     * @param bool $checkAutoupdate Whether to check for auto-update feeds
+     *
+     * @return array{ajax: array, feeds: array, count: int}
+     */
+    public function prepareFeedLoadData(int $currentFeed, bool $checkAutoupdate): array
+    {
+        $cnt = 0;
+        $ajax = [];
+        $feeds = [];
+
+        if ($checkAutoupdate) {
+            $result = Connection::query(
+                "SELECT * FROM " . $this->tbpref . "newsfeeds
+                WHERE `NfOptions` LIKE '%autoupdate=%'"
+            );
+
+            while ($row = mysqli_fetch_assoc($result)) {
+                $autoupdate = $this->getNfOption((string)$row['NfOptions'], 'autoupdate');
+                if (!$autoupdate) {
+                    continue;
+                }
+
+                $interval = $this->parseAutoUpdateInterval($autoupdate);
+                if ($interval === null) {
+                    continue;
+                }
+
+                if (time() > ($interval + (int)$row['NfUpdate'])) {
+                    $ajax[$cnt] = $this->buildFeedAjaxCall($row);
+                    $cnt++;
+                    $feeds[$row['NfID']] = $row['NfName'];
+                }
+            }
+            mysqli_free_result($result);
+        } else {
+            $sql = "SELECT * FROM " . $this->tbpref . "newsfeeds WHERE NfID IN ($currentFeed)";
+            $result = Connection::query($sql);
+
+            while ($row = mysqli_fetch_assoc($result)) {
+                $ajax[$cnt] = $this->buildFeedAjaxCall($row);
+                $cnt++;
+                $feeds[$row['NfID']] = $row['NfName'];
+            }
+            mysqli_free_result($result);
+        }
+
+        return [
+            'ajax' => $ajax,
+            'feeds' => $feeds,
+            'count' => $cnt
+        ];
+    }
+
+    /**
+     * Build AJAX call string for loading a feed.
+     *
+     * @param array $row Feed database row
+     *
+     * @return string JavaScript AJAX call
+     */
+    private function buildFeedAjaxCall(array $row): string
+    {
+        $feedId = $row['NfID'] ?? '';
+        $feedName = addslashes((string)($row['NfName'] ?? ''));
+        $sourceUri = $row['NfSourceURI'] ?? '';
+        $options = $row['NfOptions'] ?? '';
+
+        return "$.ajax({type: 'POST',beforeSend: function(){ $('#feed_{$feedId}').replaceWith( " .
+            "'<div id=\"feed_{$feedId}\" class=\"msgblue\"><p>{$feedName}: loading</p></div>' );}," .
+            "url:'api.php/v1/feeds/{$feedId}/load', data: { name: '{$feedName}', source_uri: '{$sourceUri}', " .
+            "options: '{$options}' },success:function (data) {feedcnt+=1;\$('#feedcount').text(feedcnt);" .
+            "var msg = data.error ? '<div class=\"red\"><p>' + data.error + '</p></div>' : " .
+            "'<div class=\"msgblue\"><p>' + data.message + '</p></div>';\$('#feed_{$feedId}').replaceWith( msg );}})";
+    }
+
+    /**
+     * Render feed loading interface with JavaScript.
+     *
+     * @param int    $currentFeed     Feed ID to load
+     * @param bool   $checkAutoupdate Whether checking auto-update
+     * @param string $redirectUrl     URL to redirect after completion
+     *
+     * @return void
+     */
+    public function renderFeedLoadInterface(
+        int $currentFeed,
+        bool $checkAutoupdate,
+        string $redirectUrl
+    ): void {
+        $data = $this->prepareFeedLoadData($currentFeed, $checkAutoupdate);
+
+        echo '<script type="text/javascript">';
+
+        if (!empty($data['ajax'])) {
+            $vars = [];
+            for ($i = 1; $i <= $data['count']; $i++) {
+                $vars[] = 'a' . $i;
+            }
+            echo "feedcnt=0;\n";
+            echo '$(document).ready(function(){ $.when(' .
+                implode(',', $data['ajax']) .
+                ").then(function(" . implode(',', $vars) .
+                "){window.location.replace(\"{$redirectUrl}\");});});";
+        } else {
+            echo "window.location.replace(\"{$redirectUrl}\");";
+        }
+
+        echo "\n</script>\n";
+
+        if ($data['count'] != 1) {
+            echo "<div class=\"msgblue\"><p>UPDATING <span id=\"feedcount\">0</span>/" .
+                $data['count'] . " FEEDS</p></div>";
+        }
+
+        foreach ($data['feeds'] as $k => $v) {
+            echo "<div id='feed_$k' class=\"msgblue\"><p>" . ($v ?? 'Feed') . ": waiting</p></div>";
+        }
+
+        echo "<div class=\"center\"><button onclick='window.location.replace(\"{$redirectUrl}\");'>Continue</button></div>";
     }
 }
