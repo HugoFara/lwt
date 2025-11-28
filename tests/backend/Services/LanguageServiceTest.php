@@ -1,0 +1,711 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Lwt\Tests\Services;
+
+require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
+
+use Lwt\Classes\Language;
+use Lwt\Core\EnvLoader;
+use Lwt\Core\Globals;
+use Lwt\Database\Connection;
+use Lwt\Services\LanguageService;
+use PHPUnit\Framework\TestCase;
+
+// Load config from .env and use test database
+EnvLoader::load(__DIR__ . '/../../../.env');
+$config = EnvLoader::getDatabaseConfig();
+$GLOBALS['dbname'] = "test_" . $config['dbname'];
+
+require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../src/backend/Core/Entity/Language.php';
+require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
+
+/**
+ * Unit tests for the LanguageService class.
+ *
+ * Tests language CRUD operations, text reparsing,
+ * and related data count functionality.
+ */
+class LanguageServiceTest extends TestCase
+{
+    private static bool $dbConnected = false;
+    private static string $tbpref = '';
+    private LanguageService $service;
+    private static array $testLanguageIds = [];
+
+    public static function setUpBeforeClass(): void
+    {
+        $config = EnvLoader::getDatabaseConfig();
+        $testDbname = "test_" . $config['dbname'];
+
+        if (!Globals::getDbConnection()) {
+            $connection = connect_to_database(
+                $config['server'],
+                $config['userid'],
+                $config['passwd'],
+                $testDbname,
+                $config['socket'] ?? ''
+            );
+            Globals::setDbConnection($connection);
+        }
+        self::$dbConnected = (Globals::getDbConnection() !== null);
+        self::$tbpref = Globals::getTablePrefix();
+    }
+
+    protected function setUp(): void
+    {
+        $this->service = new LanguageService();
+    }
+
+    protected function tearDown(): void
+    {
+        if (!self::$dbConnected) {
+            return;
+        }
+
+        // Clean up test languages after each test
+        $tbpref = self::$tbpref;
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'Test_%'");
+        do_mysqli_query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'TestLang%'");
+        self::$testLanguageIds = [];
+    }
+
+    /**
+     * Helper to create a test language directly in the database.
+     *
+     * @param string $name Language name
+     *
+     * @return int The created language ID
+     */
+    private function createTestLanguage(string $name): int
+    {
+        $tbpref = self::$tbpref;
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}languages (
+                LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
+                LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters,
+                LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization
+            ) VALUES (
+                '$name', 'https://dict.test/lwt_term', '', 'https://translate.test/lwt_term',
+                100, '.!?', 'a-zA-Z',
+                0, 0, 0, 1
+            )"
+        );
+        $id = (int) mysqli_insert_id(Globals::getDbConnection());
+        self::$testLanguageIds[] = $id;
+        return $id;
+    }
+
+    // ===== getAllLanguages() tests =====
+
+    public function testGetAllLanguagesReturnsArray(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->getAllLanguages();
+        $this->assertIsArray($result);
+    }
+
+    public function testGetAllLanguagesReturnsNameToIdMapping(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Create a test language
+        $this->createTestLanguage('TestLang_GetAll');
+
+        $result = $this->service->getAllLanguages();
+
+        $this->assertArrayHasKey('TestLang_GetAll', $result);
+        $this->assertIsInt($result['TestLang_GetAll']);
+    }
+
+    public function testGetAllLanguagesExcludesEmptyNames(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+        // Insert language with empty name (placeholder)
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters)
+             VALUES ('', 'https://test.com', 100, '.!?', 'a-z')"
+        );
+
+        $result = $this->service->getAllLanguages();
+
+        $this->assertArrayNotHasKey('', $result);
+    }
+
+    // ===== getById() tests =====
+
+    public function testGetByIdReturnsLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_GetById');
+
+        $result = $this->service->getById($id);
+
+        $this->assertInstanceOf(Language::class, $result);
+        $this->assertEquals($id, $result->id);
+        $this->assertEquals('TestLang_GetById', $result->name);
+    }
+
+    public function testGetByIdReturnsNullForNonExistent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->getById(999999);
+
+        $this->assertNull($result);
+    }
+
+    public function testGetByIdReturnsEmptyLanguageForZero(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->getById(0);
+
+        $this->assertInstanceOf(Language::class, $result);
+        $this->assertEquals(0, $result->id);
+        $this->assertEquals('', $result->name);
+    }
+
+    public function testGetByIdReturnsEmptyLanguageForNegative(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->getById(-1);
+
+        $this->assertInstanceOf(Language::class, $result);
+        $this->assertEquals(0, $result->id);
+    }
+
+    public function testGetByIdPopulatesAllFields(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_AllFields');
+
+        $result = $this->service->getById($id);
+
+        $this->assertEquals('https://dict.test/lwt_term', $result->dict1uri);
+        $this->assertEquals('', $result->dict2uri);
+        $this->assertEquals('https://translate.test/lwt_term', $result->translator);
+        $this->assertEquals(100, $result->textsize);
+        $this->assertEquals('.!?', $result->regexpsplitsent);
+        $this->assertEquals('a-zA-Z', $result->regexpwordchar);
+        $this->assertFalse($result->removespaces);
+        $this->assertFalse($result->spliteachchar);
+        $this->assertFalse($result->rightoleft);
+        $this->assertTrue($result->showromanization);
+    }
+
+    // ===== createEmptyLanguage() tests =====
+
+    public function testCreateEmptyLanguageReturnsLanguageObject(): void
+    {
+        $result = $this->service->createEmptyLanguage();
+
+        $this->assertInstanceOf(Language::class, $result);
+    }
+
+    public function testCreateEmptyLanguageHasDefaultValues(): void
+    {
+        $result = $this->service->createEmptyLanguage();
+
+        $this->assertEquals(0, $result->id);
+        $this->assertEquals('', $result->name);
+        $this->assertEquals('', $result->dict1uri);
+        $this->assertEquals('', $result->dict2uri);
+        $this->assertEquals('', $result->translator);
+        $this->assertEquals(100, $result->textsize);
+        $this->assertEquals('', $result->charactersubst);
+        $this->assertEquals('', $result->regexpsplitsent);
+        $this->assertEquals('', $result->exceptionsplitsent);
+        $this->assertEquals('', $result->regexpwordchar);
+        $this->assertFalse($result->removespaces);
+        $this->assertFalse($result->spliteachchar);
+        $this->assertFalse($result->rightoleft);
+        $this->assertEquals('', $result->ttsvoiceapi);
+        $this->assertTrue($result->showromanization);
+    }
+
+    // ===== exists() tests =====
+
+    public function testExistsReturnsTrueForExistingLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_Exists');
+
+        $result = $this->service->exists($id);
+
+        $this->assertTrue($result);
+    }
+
+    public function testExistsReturnsFalseForNonExistentLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->exists(999999);
+
+        $this->assertFalse($result);
+    }
+
+    // ===== create() tests =====
+
+    public function testCreateSavesLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $data = [
+            'LgName' => 'TestLang_Create',
+            'LgDict1URI' => 'https://dict.test/lwt_term',
+            'LgDict2URI' => '',
+            'LgGoogleTranslateURI' => 'https://translate.test/lwt_term',
+            'LgExportTemplate' => '',
+            'LgTextSize' => '150',
+            'LgCharacterSubstitutions' => '',
+            'LgRegexpSplitSentences' => '.!?',
+            'LgExceptionsSplitSentences' => '',
+            'LgRegexpWordCharacters' => 'a-zA-Z',
+            'LgTTSVoiceAPI' => '',
+        ];
+
+        $result = $this->service->create($data);
+
+        $this->assertStringContainsString('Saved', $result);
+
+        // Verify language was created
+        $languages = $this->service->getAllLanguages();
+        $this->assertArrayHasKey('TestLang_Create', $languages);
+    }
+
+    public function testCreateWithCheckboxOptions(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $data = [
+            'LgName' => 'TestLang_Checkboxes',
+            'LgDict1URI' => 'https://dict.test/lwt_term',
+            'LgDict2URI' => '',
+            'LgGoogleTranslateURI' => '',
+            'LgExportTemplate' => '',
+            'LgTextSize' => '100',
+            'LgCharacterSubstitutions' => '',
+            'LgRegexpSplitSentences' => '.!?',
+            'LgExceptionsSplitSentences' => '',
+            'LgRegexpWordCharacters' => 'a-zA-Z',
+            'LgTTSVoiceAPI' => '',
+            'LgRemoveSpaces' => '1',
+            'LgSplitEachChar' => '1',
+            'LgRightToLeft' => '1',
+            'LgShowRomanization' => '1',
+        ];
+
+        $this->service->create($data);
+
+        $languages = $this->service->getAllLanguages();
+        $id = $languages['TestLang_Checkboxes'];
+        $lang = $this->service->getById($id);
+
+        $this->assertTrue($lang->removespaces);
+        $this->assertTrue($lang->spliteachchar);
+        $this->assertTrue($lang->rightoleft);
+        $this->assertTrue($lang->showromanization);
+    }
+
+    // ===== update() tests =====
+
+    public function testUpdateModifiesLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_Update');
+
+        $data = [
+            'LgName' => 'TestLang_Updated',
+            'LgDict1URI' => 'https://newdict.test/lwt_term',
+            'LgDict2URI' => 'https://dict2.test/lwt_term',
+            'LgGoogleTranslateURI' => 'https://newtranslate.test/lwt_term',
+            'LgExportTemplate' => 'template',
+            'LgTextSize' => '200',
+            'LgCharacterSubstitutions' => 'a=b',
+            'LgRegexpSplitSentences' => '.!?:',
+            'LgExceptionsSplitSentences' => 'Mr.',
+            'LgRegexpWordCharacters' => 'a-zA-Z0-9',
+            'LgTTSVoiceAPI' => '{"input": "lwt_term"}',
+        ];
+
+        $result = $this->service->update($id, $data);
+
+        $this->assertStringContainsString('Updated', $result);
+
+        $lang = $this->service->getById($id);
+        $this->assertEquals('TestLang_Updated', $lang->name);
+        $this->assertEquals('https://newdict.test/lwt_term', $lang->dict1uri);
+        $this->assertEquals(200, $lang->textsize);
+    }
+
+    public function testUpdateReturnsErrorForNonExistentLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $data = [
+            'LgName' => 'TestLang_NotFound',
+            'LgDict1URI' => '',
+            'LgDict2URI' => '',
+            'LgGoogleTranslateURI' => '',
+            'LgExportTemplate' => '',
+            'LgTextSize' => '100',
+            'LgCharacterSubstitutions' => '',
+            'LgRegexpSplitSentences' => '.!?',
+            'LgExceptionsSplitSentences' => '',
+            'LgRegexpWordCharacters' => 'a-z',
+            'LgTTSVoiceAPI' => '',
+        ];
+
+        $result = $this->service->update(999999, $data);
+
+        $this->assertStringContainsString('Cannot access language data', $result);
+    }
+
+    public function testUpdateIndicatesReparsingNotNeeded(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_NoReparse');
+
+        // Update only non-parsing-related fields
+        $data = [
+            'LgName' => 'TestLang_NoReparse_Updated',
+            'LgDict1URI' => 'https://newdict.test/lwt_term',
+            'LgDict2URI' => '',
+            'LgGoogleTranslateURI' => '',
+            'LgExportTemplate' => '',
+            'LgTextSize' => '150',
+            'LgCharacterSubstitutions' => '',
+            'LgRegexpSplitSentences' => '.!?',
+            'LgExceptionsSplitSentences' => '',
+            'LgRegexpWordCharacters' => 'a-zA-Z',
+            'LgTTSVoiceAPI' => '',
+        ];
+
+        $result = $this->service->update($id, $data);
+
+        $this->assertStringContainsString('Reparsing not needed', $result);
+    }
+
+    // ===== delete() tests =====
+
+    public function testDeleteRemovesLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_Delete');
+
+        $result = $this->service->delete($id);
+
+        $this->assertStringContainsString('Deleted', $result);
+        $this->assertFalse($this->service->exists($id));
+    }
+
+    public function testDeleteFailsWithRelatedTexts(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_WithTexts');
+        $tbpref = self::$tbpref;
+
+        // Add a related text
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAudioURI)
+             VALUES ($id, 'Test Text', 'Test content', '')"
+        );
+
+        $result = $this->service->delete($id);
+
+        $this->assertStringContainsString('must first delete', $result);
+        $this->assertTrue($this->service->exists($id));
+
+        // Cleanup
+        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
+    }
+
+    public function testDeleteFailsWithRelatedWords(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_WithWords');
+        $tbpref = self::$tbpref;
+
+        // Add a related word
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged)
+             VALUES ($id, 'test', 'test', 1, 1, NOW())"
+        );
+
+        $result = $this->service->delete($id);
+
+        $this->assertStringContainsString('must first delete', $result);
+        $this->assertTrue($this->service->exists($id));
+
+        // Cleanup
+        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoLgID = $id");
+    }
+
+    // ===== getRelatedDataCounts() tests =====
+
+    public function testGetRelatedDataCountsReturnsZerosForNewLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_NoCounts');
+
+        $result = $this->service->getRelatedDataCounts($id);
+
+        $this->assertEquals(0, $result['texts']);
+        $this->assertEquals(0, $result['archivedTexts']);
+        $this->assertEquals(0, $result['words']);
+        $this->assertEquals(0, $result['feeds']);
+    }
+
+    public function testGetRelatedDataCountsReturnsCorrectCounts(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_WithData');
+        $tbpref = self::$tbpref;
+
+        // Add texts
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAudioURI)
+             VALUES ($id, 'Text 1', 'Content 1', ''), ($id, 'Text 2', 'Content 2', '')"
+        );
+
+        // Add a word
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged)
+             VALUES ($id, 'word', 'word', 1, 1, NOW())"
+        );
+
+        $result = $this->service->getRelatedDataCounts($id);
+
+        $this->assertEquals(2, $result['texts']);
+        $this->assertEquals(1, $result['words']);
+        $this->assertEquals(0, $result['archivedTexts']);
+        $this->assertEquals(0, $result['feeds']);
+
+        // Cleanup
+        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
+        do_mysqli_query("DELETE FROM {$tbpref}words WHERE WoLgID = $id");
+    }
+
+    // ===== canDelete() tests =====
+
+    public function testCanDeleteReturnsTrueForNewLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_CanDelete');
+
+        $result = $this->service->canDelete($id);
+
+        $this->assertTrue($result);
+    }
+
+    public function testCanDeleteReturnsFalseWithRelatedData(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_CannotDelete');
+        $tbpref = self::$tbpref;
+
+        // Add a related text
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAudioURI)
+             VALUES ($id, 'Test', 'Content', '')"
+        );
+
+        $result = $this->service->canDelete($id);
+
+        $this->assertFalse($result);
+
+        // Cleanup
+        do_mysqli_query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
+    }
+
+    // ===== isDuplicateName() tests =====
+
+    public function testIsDuplicateNameReturnsTrueForDuplicate(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $this->createTestLanguage('TestLang_Duplicate');
+
+        $result = $this->service->isDuplicateName('TestLang_Duplicate');
+
+        $this->assertTrue($result);
+    }
+
+    public function testIsDuplicateNameReturnsFalseForUnique(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->isDuplicateName('NonExistentLanguage123');
+
+        $this->assertFalse($result);
+    }
+
+    public function testIsDuplicateNameExcludesCurrentLanguage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_SameName');
+
+        // Should not be duplicate when excluding its own ID
+        $result = $this->service->isDuplicateName('TestLang_SameName', $id);
+
+        $this->assertFalse($result);
+    }
+
+    // ===== getLanguagesWithStats() tests =====
+
+    public function testGetLanguagesWithStatsReturnsArray(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = $this->service->getLanguagesWithStats();
+
+        $this->assertIsArray($result);
+    }
+
+    public function testGetLanguagesWithStatsIncludesExpectedFields(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $this->createTestLanguage('TestLang_Stats');
+
+        $result = $this->service->getLanguagesWithStats();
+
+        // Find our test language
+        $testLang = null;
+        foreach ($result as $lang) {
+            if ($lang['name'] === 'TestLang_Stats') {
+                $testLang = $lang;
+                break;
+            }
+        }
+
+        $this->assertNotNull($testLang);
+        $this->assertArrayHasKey('id', $testLang);
+        $this->assertArrayHasKey('name', $testLang);
+        $this->assertArrayHasKey('hasExportTemplate', $testLang);
+        $this->assertArrayHasKey('textCount', $testLang);
+        $this->assertArrayHasKey('archivedTextCount', $testLang);
+        $this->assertArrayHasKey('wordCount', $testLang);
+        $this->assertArrayHasKey('feedCount', $testLang);
+        $this->assertArrayHasKey('articleCount', $testLang);
+    }
+
+    public function testGetLanguagesWithStatsExcludesEmptyNames(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $tbpref = self::$tbpref;
+
+        // First create a valid test language to ensure we have at least one result
+        $this->createTestLanguage('TestLang_StatsNotEmpty');
+
+        // Insert language with empty name
+        do_mysqli_query(
+            "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters)
+             VALUES ('', 'https://test.com', 100, '.!?', 'a-z')"
+        );
+
+        $result = $this->service->getLanguagesWithStats();
+
+        // Ensure we have results to check
+        $this->assertNotEmpty($result);
+
+        foreach ($result as $lang) {
+            $this->assertNotEquals('', $lang['name']);
+        }
+    }
+
+    // ===== refresh() tests =====
+
+    public function testRefreshReturnsMessage(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $id = $this->createTestLanguage('TestLang_Refresh');
+
+        $result = $this->service->refresh($id);
+
+        $this->assertStringContainsString('Sentences deleted', $result);
+        $this->assertStringContainsString('Text items deleted', $result);
+        $this->assertStringContainsString('Sentences added', $result);
+        $this->assertStringContainsString('Text items added', $result);
+    }
+}

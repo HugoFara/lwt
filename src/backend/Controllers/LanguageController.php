@@ -16,11 +16,25 @@
 
 namespace Lwt\Controllers;
 
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../Core/Http/param_helpers.php';
+require_once __DIR__ . '/../Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Core/Language/langdefs.php';
+require_once __DIR__ . '/../Core/Entity/Language.php';
+require_once __DIR__ . '/../Services/LanguageService.php';
+
+use Lwt\Database\Settings;
+use Lwt\Services\LanguageService;
+
 /**
  * Controller for language configuration.
  *
  * Handles:
  * - Language listing and management
+ * - Language creation and editing
+ * - Language deletion
+ * - Text reparsing
  * - Language pair selection
  *
  * @category Lwt
@@ -32,8 +46,25 @@ namespace Lwt\Controllers;
  */
 class LanguageController extends BaseController
 {
+    private LanguageService $languageService;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->languageService = new LanguageService();
+    }
+
     /**
-     * Languages index page (replaces language_edit.php)
+     * Languages index page - handles all language operations.
+     *
+     * Routes based on request parameters:
+     * - new=1: Show new language form
+     * - chg=[id]: Show edit form for language
+     * - del=[id]: Delete language
+     * - refresh=[id]: Reparse texts for language
+     * - op=Save: Create new language
+     * - op=Change: Update existing language
+     * - (default): Show language list
      *
      * @param array $params Route parameters
      *
@@ -41,7 +72,236 @@ class LanguageController extends BaseController
      */
     public function index(array $params): void
     {
-        include __DIR__ . '/../Legacy/language_edit.php';
+        \pagestart('My Languages', true);
+        $this->outputDuplicateAlertScript();
+
+        $message = '';
+
+        // Handle actions
+        if (isset($_REQUEST['refresh'])) {
+            $message = $this->languageService->refresh((int) $_REQUEST['refresh']);
+        }
+
+        if (isset($_REQUEST['del'])) {
+            $message = $this->languageService->delete((int) $_REQUEST['del']);
+        } elseif (isset($_REQUEST['op'])) {
+            if ($_REQUEST['op'] === 'Save') {
+                $message = $this->languageService->create($_REQUEST);
+            } elseif ($_REQUEST['op'] === 'Change') {
+                $message = $this->languageService->update(
+                    (int) $_REQUEST["LgID"],
+                    $_REQUEST
+                );
+            }
+        }
+
+        // Display appropriate view
+        if (isset($_REQUEST['new'])) {
+            $this->showNewForm();
+        } elseif (isset($_REQUEST['chg'])) {
+            $this->showEditForm((int) $_REQUEST['chg']);
+        } else {
+            $this->showList($message);
+        }
+
+        \pageend();
+    }
+
+    /**
+     * Output JavaScript for duplicate name checking.
+     *
+     * @return void
+     */
+    private function outputDuplicateAlertScript(): void
+    {
+        ?>
+<script type="text/javascript">
+    //<![CDATA[
+    var LANGUAGES = <?php echo json_encode($this->languageService->getAllLanguages()); ?>;
+
+    function check_dupl_lang(curr) {
+        const l = $('#LgName').val();
+        if (l in LANGUAGES) {
+            if (curr != LANGUAGES[l]) {
+                alert('Language "' + l +
+                '" already exists. Please change the language name!');
+                $('#LgName').focus();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //]]>
+</script>
+        <?php
+    }
+
+    /**
+     * Show the list of languages.
+     *
+     * @param string $message Optional message to display
+     *
+     * @return void
+     */
+    private function showList(string $message): void
+    {
+        echo \error_message_with_hide($message, false);
+
+        $currentLanguageId = (int) Settings::get('currentlanguage');
+        $languages = $this->languageService->getLanguagesWithStats();
+
+        include __DIR__ . '/../Views/Language/index.php';
+    }
+
+    /**
+     * Show the new language form.
+     *
+     * @return void
+     */
+    private function showNewForm(): void
+    {
+        $currentNativeLanguage = Settings::get('currentnativelanguage');
+        $languageOptions = $this->getWizardSelectOptions($currentNativeLanguage);
+        $languageOptionsEmpty = $this->getWizardSelectOptions('');
+
+        ?>
+        <h2>
+            New Language
+            <a target="_blank" href="docs/info.html#howtolang">
+                <img src="/assets/icons/question-frame.png" title="Help" alt="Help" />
+            </a>
+        </h2>
+        <?php
+
+        include __DIR__ . '/../Views/Language/wizard.php';
+
+        $language = $this->languageService->createEmptyLanguage();
+        $sourceLg = '';
+        $targetLg = '';
+        $isNew = true;
+
+        $this->prepareLanguageCodes($language, $currentNativeLanguage, $sourceLg, $targetLg);
+
+        include __DIR__ . '/../Views/Language/form.php';
+
+        ?>
+        <p class="smallgray">
+            <b>Important:</b>
+            <br />
+            The placeholders "••" for the from/sl and dest/tl language codes in the
+            URIs must be <b>replaced</b> by the actual source and target language
+            codes!<br />
+            <a href="docs/info.html#howtolang" target="_blank">Please read the documentation</a>.
+            Languages with a <b>non-Latin alphabet need special attention</b>,
+            <a href="docs/info.html#langsetup" target="_blank">see also here</a>.
+        </p>
+        <?php
+
+        include __DIR__ . '/../Views/Language/voice_api_help.php';
+    }
+
+    /**
+     * Show the edit language form.
+     *
+     * @param int $lid Language ID
+     *
+     * @return void
+     */
+    private function showEditForm(int $lid): void
+    {
+        $language = $this->languageService->getById($lid);
+
+        if ($language === null) {
+            echo '<p class="red">Language not found.</p>';
+            return;
+        }
+
+        $currentNativeLanguage = Settings::get('currentnativelanguage');
+        $sourceLg = '';
+        $targetLg = '';
+        $isNew = false;
+
+        $this->prepareLanguageCodes($language, $currentNativeLanguage, $sourceLg, $targetLg);
+
+        ?>
+    <script type="text/javascript" charset="utf-8">
+        const LANGDEFS = <?php echo json_encode(LWT_LANGUAGES_ARRAY); ?>;
+
+        $(document).ready(lwtFormCheck.askBeforeExit);
+    </script>
+    <h2>Edit Language
+        <a target="_blank" href="docs/info.html#howtolang">
+            <img src="/assets/icons/question-frame.png" title="Help" alt="Help" />
+        </a>
+    </h2>
+        <?php
+
+        include __DIR__ . '/../Views/Language/form.php';
+
+        ?>
+    <p class="smallgray">
+        <b>Warning:</b> Changing certain language settings
+        (e.g. RegExp Word Characters, etc.)<wbr />
+        may cause partial or complete loss of improved annotated texts!
+    </p>
+        <?php
+
+        include __DIR__ . '/../Views/Language/voice_api_help.php';
+    }
+
+    /**
+     * Prepare source and target language codes for the form.
+     *
+     * @param \Lwt\Classes\Language $language              Language object
+     * @param string                $currentNativeLanguage Current native language
+     * @param string                &$sourceLg             Output source language code
+     * @param string                &$targetLg             Output target language code
+     *
+     * @return void
+     */
+    private function prepareLanguageCodes(
+        \Lwt\Classes\Language $language,
+        string $currentNativeLanguage,
+        string &$sourceLg,
+        string &$targetLg
+    ): void {
+        if (array_key_exists($currentNativeLanguage, LWT_LANGUAGES_ARRAY)) {
+            $targetLg = LWT_LANGUAGES_ARRAY[$currentNativeLanguage][1];
+        }
+
+        if ($language->name) {
+            if (array_key_exists($language->name, LWT_LANGUAGES_ARRAY)) {
+                $sourceLg = LWT_LANGUAGES_ARRAY[$language->name][1];
+            }
+            $lgFromDict = \langFromDict($language->translator);
+            if ($lgFromDict != '' && $lgFromDict != $sourceLg) {
+                $sourceLg = $lgFromDict;
+            }
+
+            $targetFromDict = \targetLangFromDict($language->translator);
+            if ($targetFromDict != '' && $targetFromDict != $targetLg) {
+                $targetLg = $targetFromDict;
+            }
+        }
+    }
+
+    /**
+     * Generate wizard select options HTML.
+     *
+     * @param string $selected Currently selected value
+     *
+     * @return string HTML options
+     */
+    private function getWizardSelectOptions(string $selected): string
+    {
+        $r = '<option value=""' . \get_selected($selected, '') . '>[Choose...]</option>';
+        $keys = array_keys(LWT_LANGUAGES_ARRAY);
+        foreach ($keys as $item) {
+            $r .= '<option value="' . $item . '"' .
+                \get_selected($selected, $item) . '>' . $item . '</option>';
+        }
+        return $r;
     }
 
     /**
