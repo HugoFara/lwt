@@ -52,73 +52,48 @@ require_once 'Core/Tag/tags.php';
 require_once 'Core/Text/text_helpers.php';
 require_once 'Core/Language/language_utilities.php';
 
-use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
-use Lwt\Database\Settings;
-use Lwt\Services\TableSetService;
+use Lwt\Services\HomeService;
+
+require_once __DIR__ . '/../Services/HomeService.php';
 
 /**
  * Prepare the different SPAN opening tags
  *
  * @return string[]
  *
- * @global string $tbpref       Database table prefix
- * @global string $fixed_tbpref Fixed database table prefix
+ * @deprecated Use HomeService::getTableSetSpanGroups() instead
  *
  * @psalm-return list{'<span title="Manage Table Sets" onclick="location.href='/admin/tables';" class="click">'|'<span>', string, '<span title="Select Table Set" onclick="location.href='/mobile/start';" class="click">'|'<span>'}
  */
 function get_span_groups(): array
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $fixed_tbpref = \Lwt\Core\Globals::isTablePrefixFixed();
-
-    if ($tbpref == '') {
-        $span2 = "<i>Default</i> Table Set</span>";
-    } else {
-        $span2 = "Table Set: <i>" . tohtml(substr($tbpref, 0, -1)) . "</i></span>";
-    }
-
-    if ($fixed_tbpref) {
-        $span1 = '<span>';
-        $span3 = '<span>';
-    } else {
-        $span1 = '<span title="Manage Table Sets" onclick="location.href=\'/admin/tables\';" class="click">';
-        if (count(TableSetService::getAllPrefixes()) > 0) {
-            $span3 = '<span title="Select Table Set" onclick="location.href=\'/mobile/start\';" class="click">';
-        } else {
-            $span3 = '<span>';
-        }
-    }
-    return array($span1, $span2, $span3);
+    $homeService = new HomeService();
+    $groups = $homeService->getTableSetSpanGroups();
+    return array($groups['span1'], $groups['span2'], $groups['span3']);
 }
 
 /**
  * Display the current text options.
  *
- * @return void
+ * @param int              $textid      Text ID
+ * @param HomeService|null $homeService Optional HomeService instance for dependency injection
  *
- * @global string $tbpref Database table prefix
+ * @return void
  */
-function do_current_text_info(int $textid)
+function do_current_text_info(int $textid, ?HomeService $homeService = null): void
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $txttit = Connection::fetchValue(
-        'SELECT TxTitle AS value
-        FROM ' . $tbpref . 'texts
-        WHERE TxID=' . $textid
-    );
-    if (!isset($txttit)) {
+    if ($homeService === null) {
+        $homeService = new HomeService();
+    }
+
+    $textInfo = $homeService->getCurrentTextInfo($textid);
+    if ($textInfo === null) {
         return;
     }
-    $txtlng = Connection::fetchValue(
-        'SELECT TxLgID AS value FROM ' . $tbpref . 'texts WHERE TxID=' . $textid
-    );
-    $lngname = getLanguage($txtlng);
-    $annotated = (int)Connection::fetchValue(
-        "SELECT LENGTH(TxAnnotatedText) AS value
-        FROM " . $tbpref . "texts
-        WHERE TxID = " . $textid
-    ) > 0;
+
+    $lngname = $textInfo['language_name'];
+    $txttit = $textInfo['title'];
+    $annotated = $textInfo['annotated'];
     ?>
 
  <div style="height: 85px;">
@@ -193,43 +168,21 @@ function wordpress_logout_link()
  * Table prefix, database size, server software, apache version, PHP version, MySQL
  * version
  *
- * @deprecated Use get_server_data_table, will be removed in 3.0.0.
+ * @deprecated Use ServerDataService::getServerData() instead, will be removed in 3.0.0.
  *
  * @psalm-return list{string, float, non-empty-list<string>, string, false|string, string}
- * @global       string $tbpref Database table prefix
- * @global       string $dbname Database name
  */
 function get_server_data(): array
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $dbname = \Lwt\Core\Globals::getDatabaseName();
-    $dbaccess_format = Escaping::toSqlSyntax($dbname);
-    $data_table = array();
-    $data_table["prefix"] = Escaping::toSqlSyntaxNoNull($tbpref);
-    $data_table["db_size"] = (float)Connection::fetchValue(
-        "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
-        FROM information_schema.TABLES
-        WHERE table_schema = $dbaccess_format
-        AND table_name IN (
-            '{$tbpref}archivedtexts', '{$tbpref}archtexttags', '{$tbpref}feedlinks', '{$tbpref}languages',
-            '{$tbpref}newsfeeds', '{$tbpref}sentences', '{$tbpref}settings', '{$tbpref}tags', '{$tbpref}tags2',
-            '{$tbpref}textitems2', '{$tbpref}texts', '{$tbpref}texttags', '{$tbpref}words', '{$tbpref}wordtags'
-        )"
-    );
-    if (!isset($data_table["db_size"])) {
-        $data_table["db_size"] = 0.0;
-    }
-
-    $data_table["serversoft"] = explode(' ', $_SERVER['SERVER_SOFTWARE']);
-    $data_table["apache"] = "Apache/?";
-    if (substr($data_table["serversoft"][0], 0, 7) == "Apache/") {
-        $data_table["apache"] = $data_table["serversoft"][0];
-    }
-    $data_table["php"] = phpversion();
-    $data_table["mysql"] = (string)Connection::fetchValue("SELECT VERSION() as value");
+    $homeService = new HomeService();
+    $data = $homeService->getServerData();
     return array(
-        $data_table["prefix"], $data_table["db_size"], $data_table["serversoft"],
-        $data_table["apache"], $data_table["php"], $data_table["mysql"]
+        $data['prefix'],
+        $data['db_size'],
+        $data['server_software'],
+        $data['apache'],
+        $data['php'],
+        $data['mysql']
     );
 }
 
@@ -308,27 +261,22 @@ function index_load_warnings()
 /**
  * Display the main body of the page.
  *
- * @return void
+ * @param HomeService|null $homeService Optional HomeService instance for dependency injection
  *
- * @global string $tbpref Database table prefix
- * @global int    $debug  Debug mode enabled
+ * @return void
  */
-function index_do_main_page()
+function index_do_main_page(?HomeService $homeService = null): void
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $debug = \Lwt\Core\Globals::isDebug();
-
-    $currentlang = null;
-    if (is_numeric(Settings::get('currentlanguage'))) {
-        $currentlang = (int) Settings::get('currentlanguage');
+    if ($homeService === null) {
+        $homeService = new HomeService();
     }
 
-    $currenttext = null;
-    if (is_numeric(Settings::get('currenttext'))) {
-        $currenttext = (int) Settings::get('currenttext');
-    }
-
-    $langcnt = (int) Connection::fetchValue("SELECT COUNT(*) AS value FROM {$tbpref}languages");
+    $dashboardData = $homeService->getDashboardData();
+    $tbpref = $dashboardData['table_prefix'];
+    $debug = $dashboardData['is_debug'];
+    $currentlang = $dashboardData['current_language_id'];
+    $currenttext = $dashboardData['current_text_id'];
+    $langcnt = $dashboardData['language_count'];
 
     pagestart_nobody(
         "Home",
@@ -361,7 +309,7 @@ function index_do_main_page()
         } elseif ($langcnt > 0) {
             do_language_selectable($currentlang);
             if ($currenttext !== null) {
-                do_current_text_info($currenttext);
+                do_current_text_info($currenttext, $homeService);
             }
         }
         ?>

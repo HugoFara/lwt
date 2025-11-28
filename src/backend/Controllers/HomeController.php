@@ -16,6 +16,10 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Services\HomeService;
+
+require_once __DIR__ . '/../Services/HomeService.php';
+
 /**
  * Controller for home/dashboard page.
  *
@@ -29,6 +33,22 @@ namespace Lwt\Controllers;
 class HomeController extends BaseController
 {
     /**
+     * Home service instance.
+     *
+     * @var HomeService
+     */
+    private HomeService $homeService;
+
+    /**
+     * Initialize controller with HomeService.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->homeService = new HomeService();
+    }
+
+    /**
      * Home page (replaces home.php)
      *
      * @param array $params Route parameters
@@ -38,5 +58,15 @@ class HomeController extends BaseController
     public function index(array $params): void
     {
         include __DIR__ . '/../Legacy/home.php';
+    }
+
+    /**
+     * Get the HomeService instance.
+     *
+     * @return HomeService
+     */
+    public function getHomeService(): HomeService
+    {
+        return $this->homeService;
     }
 }
