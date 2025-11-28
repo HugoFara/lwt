@@ -1,0 +1,74 @@
+<?php
+
+/**
+ * Multi-Load Feeds View
+ *
+ * Variables expected:
+ * - $feeds: array of feed data
+ * - $currentLang: int current language filter
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Views
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Views\Feed;
+
+?>
+<form name="form1" action="/feeds" onsubmit="document.form1.querybutton.click(); return false;">
+<table class="tab3" style="border-left: none;border-top: none; background-color:inherit" cellspacing="0" cellpadding="5">
+<tr>
+<th class="th1 borderleft" colspan="2">Language:<select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds/edit?multi_load_feed=1%26page=1');}">
+    <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
+</select>
+</th>
+<th class="th1 borderright" colspan="2">
+<input type="button" value="Mark All" onclick="selectToggle(true,'form1');return false;" />
+<input type="button" value="Mark None" onclick="selectToggle(false,'form1');return false;" /></th>
+</tr>
+<tr>
+<td colspan="4" style="padding-left: 0px;padding-right: 0px;border-bottom: none;width: 100%;border-left: none;background-color: transparent;"><table class="sortable tab2" cellspacing="0" cellpadding="5">
+<tr>
+<th class="th1 sorttable_nosort">Mark</th>
+<th class="th1 clickable" colspan="2">Newsfeeds</th>
+<th class="th1 sorttable_numeric clickable">Last Update</th>
+</tr>
+    <?php
+    $time = time();
+    foreach ($feeds as $row):
+        $diff = $time - (int)$row['NfUpdate'];
+    ?>
+    <tr>
+        <td class="td1 center">
+            <input class="markcheck" type="checkbox" name="selected_feed[]" value="<?php echo $row['NfID']; ?>" checked="checked" />
+        </td>
+        <td class="td1 center" colspan="2"><?php echo tohtml($row['NfName']); ?></td>
+        <td class="td1 center" sorttable_customkey="<?php echo $diff; ?>">
+            <?php if ($row['NfUpdate']) { print_last_feed_update($diff); } ?>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+</td>
+</tr>
+<tr>
+<th class="th1 borderleft" colspan="3"><input id="map" type="hidden" name="selected_feed" value="" />
+<input type="hidden" name="load_feed" value="1" />
+<button id="markaction">Update Marked Newsfeeds</button></th>
+<th class="th1 borderright">
+    <input type="button" value="Cancel" onclick="location.href='/feeds?selected_feed=0'; return false;" /></th></tr>
+</table>
+</form>
+
+<script type="text/javascript">
+$( "button" ).on('click', function() {
+    $("#map").val( $('input[type="checkbox"]:checked').map(function(){
+        return $(this).val();
+    }).get().join(", ") );
+});
+</script>
