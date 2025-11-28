@@ -2,12 +2,15 @@
 
 /**
  * \file
- * \brief Show test frame
+ * \brief Show test frame - Legacy wrapper
  *
  * Call: do_test_test.php?type=[testtype]&lang=[langid]
  * Call: do_test_test.php?type=[testtype]&text=[textid]
  * Call: do_test_test.php?type=[testtype]&selection=1
  *          (SQL via $_SESSION['testsql'])
+ *
+ * This file provides backward-compatible functions while delegating
+ * main functionality to TestService and TestViews.
  *
  * PHP version 8.1
  *
@@ -17,18 +20,20 @@
  * @license Unlicense <http://unlicense.org/>
  * @link    https://hugofara.github.io/lwt/docs/php/files/do-test-test.html
  * @since   1.0.3
+ *
+ * @deprecated 3.0.0 Use TestController and TestService instead
  */
 
-require_once 'Core/Bootstrap/db_bootstrap.php';
-require_once 'Core/UI/ui_helpers.php';
-require_once 'Core/Tag/tags.php';
-require_once 'Core/Test/test_helpers.php';
-require_once 'Core/Text/text_helpers.php';
-require_once 'Core/Http/param_helpers.php';
-require_once 'Core/Word/dictionary_links.php';
-require_once 'Core/Language/language_utilities.php';
-require_once 'Core/Word/word_status.php';
-require_once 'Core/Language/langdefs.php';
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../Core/Tag/tags.php';
+require_once __DIR__ . '/../Core/Test/test_helpers.php';
+require_once __DIR__ . '/../Core/Text/text_helpers.php';
+require_once __DIR__ . '/../Core/Http/param_helpers.php';
+require_once __DIR__ . '/../Core/Word/dictionary_links.php';
+require_once __DIR__ . '/../Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Core/Word/word_status.php';
+require_once __DIR__ . '/../Core/Language/langdefs.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;

@@ -2,11 +2,14 @@
 
 /**
  * \file
- * \brief Show test frame with vocab table
+ * \brief Show test frame with vocab table - Legacy wrapper
  *
  * Call: do_test_table.php?lang=[langid]
  * Call: do_test_test.php?text=[textid]
  * Call: do_test_test.php?&selection=1 (SQL via $_SESSION['testsql'])
+ *
+ * This file provides backward-compatible functions while delegating
+ * main functionality to TestService and TestViews.
  *
  * PHP version 8.1
  *
@@ -16,26 +19,32 @@
  * @license Unlicense <http://unlicense.org/>
  * @link    https://hugofara.github.io/lwt/docs/php/files/do-test-table.html
  * @since   1.5.4
+ *
+ * @deprecated 3.0.0 Use TestController and TestService instead
  */
 
-require_once 'Core/Bootstrap/db_bootstrap.php';
-require_once 'Core/UI/ui_helpers.php';
-require_once 'Core/Tag/tags.php';
-require_once 'Core/Test/test_helpers.php';
-require_once 'Core/Http/param_helpers.php';
-require_once 'Core/Language/language_utilities.php';
-require_once 'Core/Word/word_status.php';
-require_once 'Core/Word/dictionary_links.php';
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../Core/Tag/tags.php';
+require_once __DIR__ . '/../Core/Test/test_helpers.php';
+require_once __DIR__ . '/../Core/Http/param_helpers.php';
+require_once __DIR__ . '/../Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Core/Word/word_status.php';
+require_once __DIR__ . '/../Core/Word/dictionary_links.php';
+require_once __DIR__ . '/../Services/TestService.php';
+require_once __DIR__ . '/../Views/TestViews.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+use Lwt\Services\TestService;
+use Lwt\Views\TestViews;
 
 /**
  * Set sql request for the word test.
  *
  * @return string SQL request string
  *
- * @global string $tbpref Table prefix
+ * @deprecated 3.0.0 Use TestService::getTestIdentifier instead
  */
 function get_test_table_sql()
 {
@@ -63,7 +72,7 @@ function get_test_table_sql()
 /**
  * @return (float|int|null|string)[]|false|null
  *
- * @psalm-return array<string, float|int|null|string>|false|null
+ * @deprecated 3.0.0 Use TestService::getLanguageSettings instead
  */
 function do_test_table_language_settings(string $testsql)
 {
@@ -89,260 +98,112 @@ function do_test_table_language_settings(string $testsql)
 /**
  * @return int[]
  *
- * @psalm-return list{0|1, 0|1, 0|1, 0|1, 0|1, 0|1}
+ * @deprecated 3.0.0 Use TestService::getTableTestSettings instead
  */
 function get_test_table_settings(): array
 {
-    $currenttabletestsetting1 = Settings::getZeroOrOne('currenttabletestsetting1', 1);
-    $currenttabletestsetting2 = Settings::getZeroOrOne('currenttabletestsetting2', 1);
-    $currenttabletestsetting3 = Settings::getZeroOrOne('currenttabletestsetting3', 0);
-    $currenttabletestsetting4 = Settings::getZeroOrOne('currenttabletestsetting4', 1);
-    $currenttabletestsetting5 = Settings::getZeroOrOne('currenttabletestsetting5', 0);
-    $currenttabletestsetting6 = Settings::getZeroOrOne('currenttabletestsetting6', 1);
-    return array(
-        $currenttabletestsetting1, $currenttabletestsetting2, $currenttabletestsetting3,
-        $currenttabletestsetting4, $currenttabletestsetting5, $currenttabletestsetting6
-    );
+    $service = new TestService();
+    $settings = $service->getTableTestSettings();
+    return [
+        $settings['edit'],
+        $settings['status'],
+        $settings['term'],
+        $settings['trans'],
+        $settings['rom'],
+        $settings['sentence']
+    ];
 }
 
+/**
+ * @deprecated 3.0.0 Use TestViews::renderTableTestJs instead
+ */
 function do_test_table_javascript(): void
 {
-    ?>
-<script type="text/javascript">
-//<![CDATA[
-    $(document).ready( function() {
-        $('#cbEdit').change(function() {
-            if($('#cbEdit').is(':checked')) {
-                $('td:nth-child(1),th:nth-child(1)').show();
-                do_ajax_save_setting('currenttabletestsetting1','1');
-            } else {
-                $('td:nth-child(1),th:nth-child(1)').hide();
-                do_ajax_save_setting('currenttabletestsetting1','0');
-            }
-            $('th,td').css('border-top-left-radius','').css('border-bottom-left-radius','');
-            $('th:visible').eq(0).css('border-top-left-radius','inherit')
-            .css('border-bottom-left-radius','0px');
-            $('tr:last-child>td:visible').eq(0).css('border-bottom-left-radius','inherit');
-        });
-
-        $('#cbStatus').change(function() {
-            if($('#cbStatus').is(':checked')) {
-                $('td:nth-child(2),th:nth-child(2)').show();
-                do_ajax_save_setting('currenttabletestsetting2','1');
-            } else {
-                $('td:nth-child(2),th:nth-child(2)').hide();
-                do_ajax_save_setting('currenttabletestsetting2','0');
-            }
-            $('th,td').css('border-top-left-radius','')
-            .css('border-bottom-left-radius','');
-            $('th:visible').eq(0).css('border-top-left-radius','inherit')
-            .css('border-bottom-left-radius','0px');
-            $('tr:last-child>td:visible').eq(0)
-            .css('border-bottom-left-radius','inherit');
-        });
-
-        $('#cbTerm').change(function() {
-            if($('#cbTerm').is(':checked')) {
-                $('td:nth-child(3)').css('color', 'black').css('cursor', 'auto');
-                do_ajax_save_setting('currenttabletestsetting3','1');
-            } else {
-                $('td:nth-child(3)').css('color', 'white').css('cursor', 'pointer');
-                do_ajax_save_setting('currenttabletestsetting3','0');
-            }
-        });
-
-        $('#cbTrans').change(function() {
-            if($('#cbTrans').is(':checked')) {
-                $('td:nth-child(4)').css('color', 'black').css('cursor', 'auto');
-                do_ajax_save_setting('currenttabletestsetting4','1');
-            } else {
-                $('td:nth-child(4)').css('color', 'white').css('cursor', 'pointer');
-                do_ajax_save_setting('currenttabletestsetting4','0');
-            }
-        });
-
-        $('#cbRom').change(function() {
-            if ($('#cbRom').is(':checked')) {
-                $('td:nth-child(5),th:nth-child(5)').show();
-                do_ajax_save_setting('currenttabletestsetting5','1');
-            } else {
-                $('td:nth-child(5),th:nth-child(5)').hide();
-                do_ajax_save_setting('currenttabletestsetting5','0');
-            }
-            $('th,td').css('border-top-right-radius','')
-            .css('border-bottom-right-radius','');
-            $('th:visible:last').css('border-top-right-radius','inherit');
-            $('tr:last-child>td:visible:last')
-            .css('border-bottom-right-radius','inherit');
-        });
-
-        $('#cbSentence').change(function() {
-            if($('#cbSentence').is(':checked')) {
-                $('td:nth-child(6),th:nth-child(6)').show();
-                do_ajax_save_setting('currenttabletestsetting6','1');
-            } else {
-                $('td:nth-child(6),th:nth-child(6)').hide();
-                do_ajax_save_setting('currenttabletestsetting6','0');
-            }
-            $('th,td').css('border-top-right-radius','')
-            .css('border-bottom-right-radius','');
-            $('th:visible:last').css('border-top-right-radius','inherit');
-            $('tr:last-child>td:visible:last')
-            .css('border-bottom-right-radius','inherit');
-        });
-
-        $('td').on('click', function() {
-            $(this).css('color', 'black').css('cursor', 'auto');
-        });
-
-        $('td').css('background-color', 'white');
-
-        $('#cbEdit').change();
-        $('#cbStatus').change();
-        $('#cbTerm').change();
-        $('#cbTrans').change();
-        $('#cbRom').change();
-        $('#cbSentence').change();
-
-    });
-//]]>
-</script>
-    <?php
+    $views = new TestViews();
+    $views->renderTableTestJs();
 }
 
 
+/**
+ * @deprecated 3.0.0 Use TestViews::renderTableTestSettings instead
+ */
 function do_test_table_settings(array $settings): void
 {
-    ?>
-<p>
-    <input type="checkbox" id="cbEdit" <?php echo get_checked($settings[0]); ?> />
-    Edit
-    <input type="checkbox" id="cbStatus" <?php echo get_checked($settings[1]); ?> />
-    Status
-    <input type="checkbox" id="cbTerm" <?php echo get_checked($settings[2]); ?> />
-    Term
-    <input type="checkbox" id="cbTrans" <?php echo get_checked($settings[3]); ?> />
-    Translation
-    <input type="checkbox" id="cbRom" <?php echo get_checked($settings[4]); ?> />
-    Romanization
-    <input type="checkbox" id="cbSentence" <?php echo get_checked($settings[5]); ?> />
-    Sentence
-</p>
-    <?php
+    $views = new TestViews();
+    $views->renderTableTestSettings([
+        'edit' => $settings[0],
+        'status' => $settings[1],
+        'term' => $settings[2],
+        'trans' => $settings[3],
+        'rom' => $settings[4],
+        'sentence' => $settings[5]
+    ]);
 }
 
 
+/**
+ * @deprecated 3.0.0 Use TestViews::renderTableTestHeader instead
+ */
 function do_test_table_header(): void
 {
-    ?>
-    <tr>
-        <th class="th1">Ed</th>
-        <th class="th1 clickable">Status</th>
-        <th class="th1 clickable">Term</th>
-        <th class="th1 clickable">Translation</th>
-        <th class="th1 clickable">Romanization</th>
-        <th class="th1 clickable">Sentence</th>
-    </tr>
-    <?php
+    $views = new TestViews();
+    $views->renderTableTestHeader();
 }
 
+/**
+ * @deprecated 3.0.0 Use TestService::getTableTestWords and TestViews::renderTableTestRow instead
+ */
 function do_test_table_table_content(array $lang_record, string $testsql): void
 {
+    $service = new TestService();
+    $views = new TestViews();
 
     $textsize = round(((int)$lang_record['LgTextSize'] - 100) / 2, 0) + 100;
-
     $regexword = $lang_record['LgRegexpWordCharacters'];
-    $rtlScript = $lang_record['LgRightToLeft'];
-    $span1 = ($rtlScript ? '<span dir="rtl">' : '');
-    $span2 = ($rtlScript ? '</span>' : '');
+    $rtlScript = (bool)$lang_record['LgRightToLeft'];
 
-    $sql = 'SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization,
-    WoSentence, WoStatus, WoTodayScore As Score
-    FROM ' . $testsql . ' AND WoStatus BETWEEN 1 AND 5
-    AND WoTranslation != \'\' AND WoTranslation != \'*\'
-    ORDER BY WoTodayScore, WoRandom*RAND()';
-
-    if (\Lwt\Core\Globals::isDebug()) {
-        echo $sql;
+    $words = $service->getTableTestWords($testsql);
+    while ($record = mysqli_fetch_assoc($words)) {
+        $views->renderTableTestRow($record, $regexword, (int)$textsize, $rtlScript);
     }
-    $res = Connection::query($sql);
-    while ($record = mysqli_fetch_assoc($res)) {
-        do_test_table_row($record, $regexword, (int)$textsize, $span1, $span2);
-    }
-    mysqli_free_result($res);
+    mysqli_free_result($words);
 }
 
+/**
+ * @deprecated 3.0.0 Use TestViews::renderTableTestRow instead
+ */
 function do_test_table_row(array $record, string $regexword, int $textsize, string $span1, string $span2): void
 {
-    $sent = tohtml(repl_tab_nl($record["WoSentence"]));
-    $sent1 = str_replace(
-        "{",
-        ' <b>[',
-        str_replace(
-            "}",
-            ']</b> ',
-            mask_term_in_sentence($sent, $regexword)
-        )
-    );
-    ?>
-<tr>
-    <td class="td1 center" nowrap="nowrap">
-        <a
-            href="edit_tword.php?wid=<?php echo $record['WoID']; ?>" target="ro"
-            onclick="showRightFrames();"
-        >
-            <img src="/assets/icons/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
-        </a>
-    </td>
-    <td class="td1 center" nowrap="nowrap">
-        <span id="STAT<?php echo $record['WoID']; ?>">
-            <?php
-            echo make_status_controls_test_table(
-                $record['Score'],
-                $record['WoStatus'],
-                $record['WoID']
-            );
-            ?>
-        </span>
-    </td>
-    <td class="td1 center" style="font-size:<?php echo $textsize; ?>%;">
-        <?php echo $span1; ?>
-        <span id="TERM<?php echo $record['WoID']; ?>">
-            <?php echo tohtml($record['WoText']); ?>
-        </span>
-        <?php echo $span2; ?>
-    </td>
-    <td class="td1 center">
-        <span id="TRAN<?php echo $record['WoID']; ?>">
-            <?php echo tohtml($record['WoTranslation']); ?>
-        </span>
-    </td>
-    <td class="td1 center">
-        <span id="ROMA<?php echo $record['WoID']; ?>">
-            <?php echo tohtml($record['WoRomanization']); ?>
-        </span>
-    </td>
-    <td class="td1 center" style="color:#000;">
-        <?php echo $span1; ?>
-        <span id="SENT<?php echo $record['WoID']; ?>">
-        <?php echo $sent1; ?></span><?php echo $span2; ?>
-    </td>
-</tr>
-    <?php
+    $views = new TestViews();
+    $rtl = ($span1 !== '');
+    $views->renderTableTestRow($record, $regexword, $textsize, $rtl);
 }
 
+/**
+ * @deprecated 3.0.0 Use TestController::table instead
+ */
 function do_test_table(): void
 {
+    $service = new TestService();
+    $views = new TestViews();
+
     $testsql = get_test_table_sql();
     $lang_record = do_test_table_language_settings($testsql);
     $settings = get_test_table_settings();
-    do_test_table_javascript();
-    do_test_table_settings($settings);
+
+    $views->renderTableTestJs();
+    $views->renderTableTestSettings([
+        'edit' => $settings[0],
+        'status' => $settings[1],
+        'term' => $settings[2],
+        'trans' => $settings[3],
+        'rom' => $settings[4],
+        'sentence' => $settings[5]
+    ]);
 
     echo '<table class="sortable tab2" style="width:auto;" cellspacing="0" cellpadding="5">';
 
-    do_test_table_header();
+    $views->renderTableTestHeader();
     do_test_table_table_content($lang_record, $testsql);
     echo '</table>';
 }
-?>

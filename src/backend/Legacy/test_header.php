@@ -2,12 +2,15 @@
 
 /**
  * \file
- * \brief Show test header frame
+ * \brief Show test header frame - Legacy wrapper
  *
  * Call: do_test_header.php?lang=[langid]
  * Call: do_test_header.php?text=[textid]
  * Call: do_test_header.php?selection=1
  *      (SQL via $_SESSION['testsql'])
+ *
+ * This file provides backward-compatible functions while delegating
+ * main functionality to TestService and TestViews.
  *
  * PHP version 8.1
  *
@@ -17,17 +20,23 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/do-test-header.html
  * @since    1.0.3
+ *
+ * @deprecated 3.0.0 Use TestController and TestService instead
  */
 
-require_once 'Core/Bootstrap/db_bootstrap.php';
-require_once 'Core/UI/ui_helpers.php';
-require_once 'Core/Tag/tags.php';
-require_once 'Core/Test/test_helpers.php';
-require_once 'Core/Http/param_helpers.php';
-require_once 'Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../Core/Tag/tags.php';
+require_once __DIR__ . '/../Core/Test/test_helpers.php';
+require_once __DIR__ . '/../Core/Http/param_helpers.php';
+require_once __DIR__ . '/../Core/Language/language_utilities.php';
+require_once __DIR__ . '/../Services/TestService.php';
+require_once __DIR__ . '/../Views/TestViews.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+use Lwt\Services\TestService;
+use Lwt\Views\TestViews;
 
 /**
  * Set useful data for the test using SQL query.
@@ -37,20 +46,24 @@ use Lwt\Database\Settings;
  *
  * @return string SQL query to use
  *
- * @global string $tbpref Database table prefix
+ * @deprecated 3.0.0 Use TestService::getTestDataFromParams instead
  */
 function get_sql_test_data(&$title, &$p)
 {
+    $service = new TestService();
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
     $p = "selection=" . $_REQUEST['selection'];
+
     $testsql = do_test_test_from_selection(
         $_REQUEST['selection'],
         $_SESSION['testsql']
     );
+
     $totalcount = Connection::fetchValue(
         "SELECT count(distinct WoID) AS value FROM $testsql"
     );
     $title = 'Selected ' . $totalcount . ' Term' . ($totalcount < 2 ? '' : 's');
+
     $cntlang = Connection::fetchValue(
         'SELECT count(distinct WoLgID) AS value FROM ' . $testsql
     );
@@ -76,7 +89,7 @@ function get_sql_test_data(&$title, &$p)
  *
  * @return string SQL query to use
  *
- * @global string $tbpref Database table prefix
+ * @deprecated 3.0.0 Use TestService::getTestDataFromParams instead
  */
 function get_lang_test_data(&$title, &$p): string
 {
@@ -98,7 +111,7 @@ function get_lang_test_data(&$title, &$p): string
  *
  * @return string SQL query to use
  *
- * @global string $tbpref Database table prefix
+ * @deprecated 3.0.0 Use TestService::getTestDataFromParams instead
  */
 function get_text_test_data(&$title, &$p): string
 {
@@ -121,123 +134,43 @@ function get_text_test_data(&$title, &$p): string
  * @param string $testsql SQL query for this test.
  *
  * @return array{0: string, 1: string} Total words due and total words learning
+ *
+ * @deprecated 3.0.0 Use TestService::getTestCounts instead
  */
 function get_test_counts($testsql)
 {
-    $totalcountdue = Connection::fetchValue(
-        "SELECT count(distinct WoID) AS value
-        FROM " . $testsql . " AND WoStatus BETWEEN 1 AND 5
-        AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0"
-    );
-    $totalcount = Connection::fetchValue(
-        "SELECT count(distinct WoID) AS value
-        FROM " . $testsql . " AND WoStatus BETWEEN 1 AND 5 AND WoTranslation != ''
-        AND WoTranslation != '*'"
-    );
-    return array($totalcountdue, $totalcount);
+    $service = new TestService();
+    $counts = $service->getTestCounts($testsql);
+    return array($counts['due'], $counts['total']);
 }
-
 
 /**
  * Make the header row for tests.
  *
- * @param mixed $_p URL property to use (unnused), will be removed in LWT 3.0.0
+ * @param mixed $_p URL property to use (unused)
  *
  * @return void
+ *
+ * @deprecated 3.0.0 Use TestViews::renderHeaderRow instead
  */
 function do_test_header_row($_p)
 {
-    ?>
-<div class="flex-header">
-    <div>
-        <a href="/texts" target="_top">
-            <?php echo_lwt_logo(); ?>
-        </a>
-    </div>
-    <?php
-    // This part only works if $textid is set
-    if (is_numeric(getreq('text'))) {
-        $textid = (int) getreq('text');
-        echo '<div>' . getPreviousAndNextTextLinks(
-            $textid,
-            '/test?text=',
-            false,
-            ''
-        ) . '</div>';
-
-        ?>
-    <div>
-        <a href="/text/read?start=<?php echo $textid; ?>" target="_top">
-            <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" />
-        </a>
-        <a href="/text/print-plain?text=<?php echo $textid; ?>" target="_top">
-            <img src="/assets/icons/printer.png" title="Print" alt="Print" />
-        </a>
-        <?php echo get_annotation_link($textid); ?>
-    </div>
-        <?php
-    }
-    ?>
-    <div>
-        <?php quickMenu(); ?>
-    </div>
-</div>
-    <?php
+    $textId = is_numeric(getreq('text')) ? (int) getreq('text') : null;
+    $views = new TestViews();
+    $views->renderHeaderRow($textId);
 }
 
 /**
  * Prepare JavaScript content for the header.
  *
  * @return void
+ *
+ * @deprecated 3.0.0 Use TestViews::renderHeaderJs instead
  */
 function do_test_header_js()
 {
-    ?>
-<script type="text/javascript">
-
-    function setUtteranceSetting () {
-        const utterancechecked = JSON.parse(
-            localStorage.getItem('review-utterance-allowed')
-        );
-        const utterancecheckbox = document.getElementById('utterance-allowed');
-
-        utterancecheckbox.checked = utterancechecked;
-        utterancecheckbox.addEventListener('change', function () {
-            localStorage.setItem(
-                'review-utterance-allowed',
-                utterancecheckbox.checked
-            );
-        });
-    }
-
-
-    /**
-     * Reset frames location
-     */
-    function resetFrames() {
-        parent.frames['ro'].location.href = 'empty.html';
-        parent.frames['ru'].location.href = 'empty.html';
-    }
-
-    /**
-     * Prepare frames for testing words
-     */
-    function startWordTest(type, property) {
-        resetFrames();
-        window.location.href = '/test?type=' + type + '&' + property;
-    }
-
-    /**
-     * Prepare frames for test table.
-     */
-    function startTestTable(property) {
-        resetFrames();
-        window.location.href = '/test?type=table&' + property;
-    }
-
-    $(setUtteranceSetting)
-    </script>
-    <?php
+    $views = new TestViews();
+    $views->renderHeaderJs();
 }
 
 /**
@@ -250,43 +183,13 @@ function do_test_header_js()
  * @param string $language      L2 language name
  *
  * @return void
+ *
+ * @deprecated 3.0.0 Use TestViews::renderHeaderContent instead
  */
 function do_test_header_content($title, $p, $totalcountdue, $totalcount, $language)
 {
-    ?>
-<h1>TEST ▶ <?php echo tohtml($title) ?></h1>
-<div style="margin: 5px;">
-    Word<?php echo intval($totalcount) > 1 ? 's' : ''; ?> due today:
-    <?php echo htmlspecialchars($totalcount); ?>,
-    <span class="todosty" id="not-tested-header"><?php
-    echo htmlspecialchars($totalcountdue);
-    ?></span> remaining.
-</div>
-<div class="flex-spaced">
-    <div>
-        <input type="button" value="..[<?php echo $language; ?>].."
-        onclick="startWordTest(1, '<?php echo $p; ?>')" />
-        <input type="button" value="..[L1].."
-        onclick="startWordTest(2, '<?php echo $p; ?>')" />
-        <input type="button" value="..[••].."
-        onclick="startWordTest(3, '<?php echo $p; ?>')" />
-    </div>
-    <div>
-        <input type="button" value="[<?php echo $language; ?>]"
-        onclick="startWordTest(4, '<?php echo $p; ?>')" />
-        <input type="button" value="[L1]"
-        onclick="startWordTest(5, '<?php echo $p; ?>')" />
-    </div>
-    <div>
-        <input type="button" value="Table"
-        onclick="startTestTable('<?php echo $p; ?>')" />
-    </div>
-    <div>
-        <input type="checkbox" id="utterance-allowed" />
-        <label for="utterance-allowed">Read words aloud</label>
-    </div>
-</div>
-    <?php
+    $views = new TestViews();
+    $views->renderHeaderContent($title, $p, (int)$totalcountdue, (int)$totalcount, $language);
 }
 
 /**
@@ -296,6 +199,8 @@ function do_test_header_content($title, $p, $totalcountdue, $totalcount, $langua
  * @param string $p     Property URL to be overwritten
  *
  * @return array{0: string, 1: string} Total words due and total words learning
+ *
+ * @deprecated 3.0.0 Use TestService::getTestDataFromParams instead
  */
 function get_test_data(&$title, &$p)
 {
@@ -325,21 +230,21 @@ function get_test_data(&$title, &$p)
  * @param string $language      L2 Language name
  *
  * @return void
+ *
+ * @deprecated 3.0.0 Use TestController::header instead
  */
 function do_test_header_page($title, $p, $totalcountdue, $totalcount, $language)
 {
-    do_test_header_js();
+    $service = new TestService();
+    $views = new TestViews();
 
-    $_SESSION['teststart'] = time() + 2;
-    $_SESSION['testcorrect'] = 0;
-    $_SESSION['testwrong'] = 0;
-    $_SESSION['testtotal'] = $totalcountdue;
+    $views->renderHeaderJs();
 
+    $service->initializeTestSession((int)$totalcountdue);
 
-    do_test_header_row(null);
-    do_test_header_content($title, $p, $totalcountdue, $totalcount, $language);
+    $views->renderHeaderRow(is_numeric(getreq('text')) ? (int)getreq('text') : null);
+    $views->renderHeaderContent($title, $p, (int)$totalcountdue, (int)$totalcount, $language);
 }
-
 
 /**
  * Use requests passed to the page to start it.
@@ -347,6 +252,8 @@ function do_test_header_page($title, $p, $totalcountdue, $totalcount, $language)
  * @param string $language L2 language name
  *
  * @return void
+ *
+ * @deprecated 3.0.0 Use TestController::header instead
  */
 function start_test_header_page($language = 'L2')
 {
@@ -354,5 +261,3 @@ function start_test_header_page($language = 'L2')
     list($totalcountdue, $totalcount) = get_test_data($title, $p);
     do_test_header_page($title, $p, $totalcountdue, $totalcount, $language);
 }
-
-?>
