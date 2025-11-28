@@ -72,6 +72,9 @@ class TtsService
     {
         $trimmed = substr($code, 0, 2);
         foreach (get_languages() as $language => $language_id) {
+            if (!isset($langArray[$language])) {
+                continue;
+            }
             $elem = $langArray[$language];
             if ($elem[0] == $trimmed) {
                 return $language_id;

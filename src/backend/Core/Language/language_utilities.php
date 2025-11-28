@@ -86,6 +86,11 @@ function getLanguageCode($lg_id, $languages_table)
     $res = Connection::query($query);
     $record = mysqli_fetch_assoc($res);
     mysqli_free_result($res);
+
+    if ($record === null) {
+        return '';
+    }
+
     $lg_name = (string) $record["LgName"];
     $translator_uri = (string) $record["LgGoogleTranslateURI"];
 

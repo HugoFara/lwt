@@ -278,6 +278,14 @@ class LanguageControllerTest extends TestCase
         }
 
         $id = $this->createTestLanguage('TestLang_ControllerDelete');
+
+        // Clean up any related data that might exist for this language
+        $tbpref = self::$tbpref;
+        Connection::query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
+        Connection::query("DELETE FROM {$tbpref}archivedtexts WHERE AtLgID = $id");
+        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = $id");
+        Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfLgID = $id");
+
         $service = new LanguageService();
 
         $result = $service->delete($id);
