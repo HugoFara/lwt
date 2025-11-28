@@ -1290,4 +1290,96 @@ class TextService
             'imported' => $imported
         ];
     }
+
+    // ===========================
+    // TEXT READING METHODS
+    // ===========================
+
+    /**
+     * Get text data for reading interface.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array|null Text and language data or null
+     */
+    public function getTextForReading(int $textId): ?array
+    {
+        $sql = "SELECT LgName, TxLgID, TxText, TxTitle, TxAudioURI, TxSourceURI, TxAudioPosition
+                FROM {$this->tbpref}texts
+                JOIN {$this->tbpref}languages ON TxLgID = LgID
+                WHERE TxID = {$textId}";
+        $res = Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+        return $record ?: null;
+    }
+
+    /**
+     * Get text data for text content display.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array|null Text data or null
+     */
+    public function getTextDataForContent(int $textId): ?array
+    {
+        $sql = "SELECT TxLgID, TxTitle, TxAnnotatedText, TxPosition
+                FROM {$this->tbpref}texts
+                WHERE TxID = {$textId}";
+        $res = Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+        return $record ?: null;
+    }
+
+    /**
+     * Get language settings for text display.
+     *
+     * @param int $langId Language ID
+     *
+     * @return array|null Language settings or null
+     */
+    public function getLanguageSettingsForReading(int $langId): ?array
+    {
+        $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
+                LgTextSize, LgRegexpWordCharacters, LgRemoveSpaces, LgRightToLeft
+                FROM {$this->tbpref}languages
+                WHERE LgID = {$langId}";
+        $res = Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+        return $record ?: null;
+    }
+
+    /**
+     * Get TTS voice API for a language.
+     *
+     * @param int $langId Language ID
+     *
+     * @return string|null Voice API setting or null
+     */
+    public function getTtsVoiceApi(int $langId): ?string
+    {
+        return Connection::fetchValue(
+            "SELECT LgTTSVoiceAPI AS value FROM {$this->tbpref}languages
+            WHERE LgID = {$langId}"
+        );
+    }
+
+    /**
+     * Get language ID by name.
+     *
+     * @param string $langName Language name
+     *
+     * @return int|null Language ID or null
+     */
+    public function getLanguageIdByName(string $langName): ?int
+    {
+        $result = Connection::fetchValue(
+            "SELECT LgID as value
+            FROM {$this->tbpref}languages
+            WHERE LgName = " . Escaping::toSqlSyntax($langName)
+        );
+        return $result !== null ? (int) $result : null;
+    }
 }

@@ -64,10 +64,137 @@ class TextController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
     public function read(array $params): void
     {
-        include __DIR__ . '/../Legacy/text_read.php';
+        require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+        require_once __DIR__ . '/../Core/Text/text_helpers.php';
+        require_once __DIR__ . '/../Core/Http/param_helpers.php';
+        require_once __DIR__ . '/../Core/Language/language_utilities.php';
+        require_once __DIR__ . '/../Core/Mobile/mobile_interactions.php';
+        require_once __DIR__ . '/../Core/Tag/tags.php';
+        require_once __DIR__ . '/../Core/Media/media_helpers.php';
+        require_once __DIR__ . '/../Core/Language/langdefs.php';
+        require_once __DIR__ . '/../Core/Word/word_status.php';
+        require_once __DIR__ . '/../Core/Export/export_helpers.php';
+
+        // Get text ID from request
+        $textId = $this->getTextIdFromRequest();
+
+        if ($textId === null) {
+            header("Location: /text/edit");
+            exit();
+        }
+
+        // Render the reading page
+        $this->renderReadPage($textId);
+    }
+
+    /**
+     * Get text ID from request parameters.
+     *
+     * @return int|null Text ID or null
+     */
+    private function getTextIdFromRequest(): ?int
+    {
+        if (isset($_REQUEST['text']) && is_numeric($_REQUEST['text'])) {
+            return (int)$_REQUEST['text'];
+        }
+        if (isset($_REQUEST['start']) && is_numeric($_REQUEST['start'])) {
+            return (int)$_REQUEST['start'];
+        }
+        return null;
+    }
+
+    /**
+     * Render the text reading page.
+     *
+     * @param int $textId Text ID
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    private function renderReadPage(int $textId): void
+    {
+        // Prepare header data
+        $headerData = $this->textService->getTextForReading($textId);
+        if ($headerData === null) {
+            header("Location: /text/edit");
+            exit();
+        }
+
+        $title = (string) $headerData['TxTitle'];
+        $langId = (int) $headerData['TxLgID'];
+        $media = isset($headerData['TxAudioURI']) ? trim((string) $headerData['TxAudioURI']) : '';
+        $audioPosition = (int) ($headerData['TxAudioPosition'] ?? 0);
+        $sourceUri = (string) ($headerData['TxSourceURI'] ?? '');
+        $text = (string) $headerData['TxText'];
+        $languageName = (string) $headerData['LgName'];
+
+        // Save current text
+        Settings::save('currenttext', $textId);
+
+        // User settings for header
+        $showAll = Settings::getZeroOrOne('showallwords', 1);
+        $showLearning = Settings::getZeroOrOne('showlearningtranslations', 1);
+
+        // Get language code and phonetic text for TTS
+        $languageCode = \getLanguageCode($langId, LWT_LANGUAGES_ARRAY);
+        $phoneticText = \phoneticReading($text, $langId);
+        $voiceApi = $this->textService->getTtsVoiceApi($langId);
+
+        // Prepare text content data
+        $textData = $this->textService->getTextDataForContent($textId);
+        $annotatedText = (string) ($textData['TxAnnotatedText'] ?? '');
+        $textPosition = (int) ($textData['TxPosition'] ?? 0);
+
+        // Language settings for text display
+        $langSettings = $this->textService->getLanguageSettingsForReading($langId);
+        $dictLink1 = $langSettings['LgDict1URI'] ?? '';
+        $dictLink2 = $langSettings['LgDict2URI'] ?? '';
+        $translatorLink = $langSettings['LgGoogleTranslateURI'] ?? '';
+        $textSize = (int) $langSettings['LgTextSize'];
+        $regexpWordChars = $langSettings['LgRegexpWordCharacters'] ?? '';
+        $removeSpaces = (int) $langSettings['LgRemoveSpaces'];
+        $rtlScript = (bool) $langSettings['LgRightToLeft'];
+
+        // Additional settings for text view
+        $modeTrans = (int) Settings::getWithDefault('set-text-frame-annotation-position');
+        $visitStatus = Settings::getWithDefault('set-text-visit-statuses-via-key');
+        if ($visitStatus == '') {
+            $visitStatus = '0';
+        }
+        $termDelimiter = Settings::getWithDefault('set-term-translation-delimiters');
+        $tooltipMode = (int) Settings::getWithDefault('set-tooltip-mode');
+        $hts = Settings::getWithDefault('set-hts');
+
+        // For text content view, reassign the title
+        $textTitle = $title;
+
+        // Desktop frame width
+        $frameLWidth = (int) Settings::getWithDefault('set-text-l-framewidth-percent');
+
+        // Start page
+        \pagestart_nobody(
+            'Read',
+            "body {
+                margin: 20px;
+                max-width: 100%;
+            }"
+        );
+
+        // Render appropriate layout
+        if (\is_mobile()) {
+            include __DIR__ . '/../Views/Text/read_mobile.php';
+        } else {
+            include __DIR__ . '/../Views/Text/read_desktop.php';
+        }
+
+        \pageend();
     }
 
     /**
