@@ -680,13 +680,465 @@ $(".hide_message").delay(2500).slideUp(1000);
     /**
      * Feed wizard page (replaces feeds_wizard.php)
      *
+     * Routes based on step parameter:
+     * - step=1: Insert Feed URI
+     * - step=2: Select Article Text
+     * - step=3: Filter Text
+     * - step=4: Edit Options
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function wizard(array $params): void
     {
-        require_once __DIR__ . '/../Legacy/feeds_wizard.php';
-        \Lwt\Interface\Feed_Wizard\doPage($this->feedService);
+        session_start();
+
+        $step = isset($_REQUEST['step']) ? (int)$_REQUEST['step'] : 1;
+
+        switch ($step) {
+            case 2:
+                $this->wizardStep2();
+                break;
+            case 3:
+                $this->wizardStep3();
+                break;
+            case 4:
+                $this->wizardStep4();
+                break;
+            case 1:
+            default:
+                $this->wizardStep1();
+                break;
+        }
+    }
+
+    /**
+     * Wizard Step 1: Insert Feed URI.
+     *
+     * @return void
+     */
+    private function wizardStep1(): void
+    {
+        $this->initWizardSession();
+
+        \pagestart('Feed Wizard', false);
+
+        $errorMessage = isset($_REQUEST['err']) ? true : null;
+        $rssUrl = $_SESSION['wizard']['rss_url'] ?? null;
+
+        include __DIR__ . '/../Views/Feed/wizard_step1.php';
+
+        \pageend();
+    }
+
+    /**
+     * Wizard Step 2: Select Article Text.
+     *
+     * @return void
+     */
+    private function wizardStep2(): void
+    {
+        // Handle edit mode - load existing feed
+        if (isset($_REQUEST['edit_feed']) && !isset($_SESSION['wizard'])) {
+            $this->loadExistingFeedForEdit((int)$_REQUEST['edit_feed']);
+        } elseif (isset($_REQUEST['rss_url'])) {
+            $this->loadNewFeedFromUrl($_REQUEST['rss_url']);
+        }
+
+        // Process session parameters
+        $this->processStep2SessionParams();
+
+        $feedLen = count(array_filter(array_keys($_SESSION['wizard']['feed']), 'is_numeric'));
+
+        // Handle article section change
+        if (
+            isset($_REQUEST['NfArticleSection']) &&
+            ($_REQUEST['NfArticleSection'] != $_SESSION['wizard']['feed']['feed_text'])
+        ) {
+            $this->updateFeedArticleSource($_REQUEST['NfArticleSection'], $feedLen);
+        }
+
+        \pagestart_nobody('Feed Wizard');
+
+        $wizardData = &$_SESSION['wizard'];
+        $feedHtml = $this->getStep2FeedHtml();
+
+        include __DIR__ . '/../Views/Feed/wizard_step2.php';
+
+        \pageend();
+    }
+
+    /**
+     * Wizard Step 3: Filter Text.
+     *
+     * @return void
+     */
+    private function wizardStep3(): void
+    {
+        $this->processStep3SessionParams();
+
+        $feedLen = count(array_filter(array_keys($_SESSION['wizard']['feed']), 'is_numeric'));
+
+        \pagestart_nobody("Feed Wizard");
+
+        $wizardData = &$_SESSION['wizard'];
+        $feedHtml = $this->getStep3FeedHtml();
+
+        include __DIR__ . '/../Views/Feed/wizard_step3.php';
+
+        \pageend();
+    }
+
+    /**
+     * Wizard Step 4: Edit Options.
+     *
+     * @return void
+     */
+    private function wizardStep4(): void
+    {
+        \pagestart('Feed Wizard', false);
+
+        if (isset($_REQUEST['filter_tags'])) {
+            $_SESSION['wizard']['filter_tags'] = $_REQUEST['filter_tags'];
+        }
+
+        $autoUpdI = $this->feedService->getNfOption($_SESSION['wizard']['options'], 'autoupdate');
+        if ($autoUpdI == null) {
+            $autoUpdV = null;
+        } else {
+            $autoUpdV = substr($autoUpdI, -1);
+            $autoUpdI = substr($autoUpdI, 0, -1);
+        }
+
+        $wizardData = &$_SESSION['wizard'];
+        $languages = $this->feedService->getLanguages();
+        $service = $this->feedService;
+
+        include __DIR__ . '/../Views/Feed/wizard_step4.php';
+
+        // Clear wizard session after step 4
+        unset($_SESSION['wizard']);
+
+        \pageend();
+    }
+
+    /**
+     * Initialize wizard session data.
+     *
+     * @return void
+     */
+    private function initWizardSession(): void
+    {
+        if (isset($_REQUEST['select_mode'])) {
+            $_SESSION['wizard']['select_mode'] = $_REQUEST['select_mode'];
+        }
+        if (isset($_REQUEST['hide_images'])) {
+            $_SESSION['wizard']['hide_images'] = $_REQUEST['hide_images'];
+        }
+    }
+
+    /**
+     * Load existing feed data for editing.
+     *
+     * @param int $feedId Feed ID
+     *
+     * @return void
+     */
+    private function loadExistingFeedForEdit(int $feedId): void
+    {
+        $row = $this->feedService->getFeedById($feedId);
+
+        if (!$row) {
+            header("Location: /feeds/wizard?step=1&err=1");
+            exit();
+        }
+
+        $_SESSION['wizard']['edit_feed'] = $feedId;
+        $_SESSION['wizard']['rss_url'] = $row['NfSourceURI'];
+
+        // Parse article tags
+        $articleTags = explode('|', str_replace('!?!', '|', $row['NfArticleSectionTags']));
+        $_SESSION['wizard']['article_tags'] = '';
+        foreach ($articleTags as $tag) {
+            if (substr_compare(trim($tag), "redirect", 0, 8) == 0) {
+                $_SESSION['wizard']['redirect'] = trim($tag) . ' | ';
+            } else {
+                $_SESSION['wizard']['article_tags'] .= '<li style="text-align: left">
+                <img class="delete_selection" src="/assets/icons/cross.png" title="Delete Selection" alt="-" />'
+                . $tag .
+                '</li>';
+            }
+        }
+
+        // Parse filter tags
+        $filterTags = explode('|', str_replace('!?!', '|', $row['NfFilterTags']));
+        $_SESSION['wizard']['filter_tags'] = '';
+        foreach ($filterTags as $tag) {
+            if (trim($tag) != '') {
+                $_SESSION['wizard']['filter_tags'] .= '<li style="text-align: left">
+                <img class="delete_selection" src="/assets/icons/cross.png" title="Delete Selection" alt="-" />'
+                . $tag .
+                '</li>';
+            }
+        }
+
+        $_SESSION['wizard']['feed'] = \get_links_from_new_feed($row['NfSourceURI']);
+        if (empty($_SESSION['wizard']['feed'])) {
+            unset($_SESSION['wizard']['feed']);
+            header("Location: /feeds/wizard?step=1&err=1");
+            exit();
+        }
+
+        $_SESSION['wizard']['feed']['feed_title'] = $row['NfName'];
+        $_SESSION['wizard']['options'] = $row['NfOptions'];
+
+        if (empty($_SESSION['wizard']['feed']['feed_text'])) {
+            $_SESSION['wizard']['feed']['feed_text'] = '';
+            $_SESSION['wizard']['detected_feed'] = 'Detected: «Webpage Link»';
+        } else {
+            $_SESSION['wizard']['detected_feed'] = 'Detected: «' . $_SESSION['wizard']['feed']['feed_text'] . '»';
+        }
+
+        $_SESSION['wizard']['lang'] = $row['NfLgID'];
+
+        // Handle custom article source
+        if (
+            $_SESSION['wizard']['feed']['feed_text'] != $this->feedService->getNfOption($_SESSION['wizard']['options'], 'article_source')
+        ) {
+            $source = $this->feedService->getNfOption($_SESSION['wizard']['options'], 'article_source');
+            $_SESSION['wizard']['feed']['feed_text'] = $source;
+            $feedLen = count(array_filter(array_keys($_SESSION['wizard']['feed']), 'is_numeric'));
+            for ($i = 0; $i < $feedLen; $i++) {
+                $_SESSION['wizard']['feed'][$i]['text'] = $_SESSION['wizard']['feed'][$i][$source];
+            }
+        }
+    }
+
+    /**
+     * Load new feed from URL.
+     *
+     * @param string $rssUrl Feed URL
+     *
+     * @return void
+     */
+    private function loadNewFeedFromUrl(string $rssUrl): void
+    {
+        if (
+            isset($_SESSION['wizard']) && !empty($_SESSION['wizard']['feed']) &&
+            $rssUrl === $_SESSION['wizard']['rss_url']
+        ) {
+            session_destroy();
+            \my_die("Your session seems to have an issue, please reload the page.");
+        }
+
+        $_SESSION['wizard']['feed'] = \get_links_from_new_feed($rssUrl);
+        $_SESSION['wizard']['rss_url'] = $rssUrl;
+
+        if (empty($_SESSION['wizard']['feed'])) {
+            unset($_SESSION['wizard']['feed']);
+            header("Location: /feeds/wizard?step=1&err=1");
+            exit();
+        }
+
+        if (!isset($_SESSION['wizard']['article_tags'])) {
+            $_SESSION['wizard']['article_tags'] = '';
+        }
+        if (!isset($_SESSION['wizard']['filter_tags'])) {
+            $_SESSION['wizard']['filter_tags'] = '';
+        }
+        if (!isset($_SESSION['wizard']['options'])) {
+            $_SESSION['wizard']['options'] = 'edit_text=1';
+        }
+        if (!isset($_SESSION['wizard']['lang'])) {
+            $_SESSION['wizard']['lang'] = '';
+        }
+
+        if ($_SESSION['wizard']['feed']['feed_text'] != '') {
+            $_SESSION['wizard']['detected_feed'] = 'Detected: «' .
+            $_SESSION['wizard']['feed']['feed_text'] . '»';
+        } else {
+            $_SESSION['wizard']['detected_feed'] = 'Detected: «Webpage Link»';
+        }
+    }
+
+    /**
+     * Process step 2 session parameters.
+     *
+     * @return void
+     */
+    private function processStep2SessionParams(): void
+    {
+        if (isset($_REQUEST['filter_tags'])) {
+            $_SESSION['wizard']['filter_tags'] = $_REQUEST['filter_tags'];
+        }
+        if (isset($_REQUEST['selected_feed'])) {
+            $_SESSION['wizard']['selected_feed'] = $_REQUEST['selected_feed'];
+        }
+        if (isset($_REQUEST['maxim'])) {
+            $_SESSION['wizard']['maxim'] = $_REQUEST['maxim'];
+        }
+        if (!isset($_SESSION['wizard']['maxim'])) {
+            $_SESSION['wizard']['maxim'] = 1;
+        }
+        if (isset($_REQUEST['select_mode'])) {
+            $_SESSION['wizard']['select_mode'] = $_REQUEST['select_mode'];
+        }
+        if (!isset($_SESSION['wizard']['select_mode'])) {
+            $_SESSION['wizard']['select_mode'] = '0';
+        }
+        if (isset($_REQUEST['hide_images'])) {
+            $_SESSION['wizard']['hide_images'] = $_REQUEST['hide_images'];
+        }
+        if (!isset($_SESSION['wizard']['hide_images'])) {
+            $_SESSION['wizard']['hide_images'] = 'yes';
+        }
+        if (!isset($_SESSION['wizard']['redirect'])) {
+            $_SESSION['wizard']['redirect'] = '';
+        }
+        if (!isset($_SESSION['wizard']['selected_feed'])) {
+            $_SESSION['wizard']['selected_feed'] = 0;
+        }
+        if (!isset($_SESSION['wizard']['host'])) {
+            $_SESSION['wizard']['host'] = array();
+        }
+        if (isset($_REQUEST['host_status']) && isset($_REQUEST['host_name'])) {
+            $hostName = $_REQUEST['host_name'];
+            $_SESSION['wizard']['host'][$hostName] = $_REQUEST['host_status'];
+        }
+        if (isset($_REQUEST['NfName'])) {
+            $_SESSION['wizard']['feed']['feed_title'] = $_REQUEST['NfName'];
+        }
+    }
+
+    /**
+     * Process step 3 session parameters.
+     *
+     * @return void
+     */
+    private function processStep3SessionParams(): void
+    {
+        if (isset($_REQUEST['NfName'])) {
+            $_SESSION['wizard']['feed']['feed_title'] = $_REQUEST['NfName'];
+        }
+        if (isset($_REQUEST['NfArticleSection'])) {
+            $_SESSION['wizard']['article_section'] = $_REQUEST['NfArticleSection'];
+        }
+        if (isset($_REQUEST['article_selector'])) {
+            $_SESSION['wizard']['article_selector'] = $_REQUEST['article_selector'];
+        }
+        if (isset($_REQUEST['selected_feed'])) {
+            $_SESSION['wizard']['selected_feed'] = $_REQUEST['selected_feed'];
+        }
+        if (isset($_REQUEST['article_tags'])) {
+            $_SESSION['wizard']['article_tags'] = $_REQUEST['article_tags'];
+        }
+        if (isset($_REQUEST['html'])) {
+            $_SESSION['wizard']['filter_tags'] = $_REQUEST['html'];
+        }
+        if (isset($_REQUEST['NfOptions'])) {
+            $_SESSION['wizard']['options'] = $_REQUEST['NfOptions'];
+        }
+        if (isset($_REQUEST['NfLgID'])) {
+            $_SESSION['wizard']['lang'] = $_REQUEST['NfLgID'];
+        }
+        if (!isset($_SESSION['wizard']['article_tags'])) {
+            $_SESSION['wizard']['article_tags'] = '';
+        }
+        if (isset($_REQUEST['maxim'])) {
+            $_SESSION['wizard']['maxim'] = $_REQUEST['maxim'];
+        }
+        if (isset($_REQUEST['select_mode'])) {
+            $_SESSION['wizard']['select_mode'] = $_REQUEST['select_mode'];
+        }
+        if (isset($_REQUEST['hide_images'])) {
+            $_SESSION['wizard']['hide_images'] = $_REQUEST['hide_images'];
+        }
+        if (!isset($_SESSION['wizard']['select_mode'])) {
+            $_SESSION['wizard']['select_mode'] = '';
+        }
+        if (!isset($_SESSION['wizard']['maxim'])) {
+            $_SESSION['wizard']['maxim'] = 1;
+        }
+        if (!isset($_SESSION['wizard']['selected_feed'])) {
+            $_SESSION['wizard']['selected_feed'] = 0;
+        }
+        if (!isset($_SESSION['wizard']['host2'])) {
+            $_SESSION['wizard']['host2'] = array();
+        }
+        if (isset($_REQUEST['host_status']) && isset($_REQUEST['host_name'])) {
+            $_SESSION['wizard']['host'][$_REQUEST['host_name']] = $_REQUEST['host_status'];
+        }
+        if (isset($_REQUEST['host_status2']) && isset($_REQUEST['host_name'])) {
+            $_SESSION['wizard']['host2'][$_REQUEST['host_name']] = $_REQUEST['host_status2'];
+        }
+    }
+
+    /**
+     * Update feed article source.
+     *
+     * @param string $articleSection New article section
+     * @param int    $feedLen        Number of feed items
+     *
+     * @return void
+     */
+    private function updateFeedArticleSource(string $articleSection, int $feedLen): void
+    {
+        $_SESSION['wizard']['feed']['feed_text'] = $articleSection;
+        $source = $_SESSION['wizard']['feed']['feed_text'];
+
+        for ($i = 0; $i < $feedLen; $i++) {
+            if ($_SESSION['wizard']['feed']['feed_text'] != '') {
+                $_SESSION['wizard']['feed'][$i]['text'] = $_SESSION['wizard']['feed'][$i][$source];
+            } else {
+                unset($_SESSION['wizard']['feed'][$i]['text']);
+            }
+            unset($_SESSION['wizard']['feed'][$i]['html']);
+        }
+        $_SESSION['wizard']['host'] = array();
+    }
+
+    /**
+     * Get HTML content for step 2 feed preview.
+     *
+     * @return string HTML content
+     */
+    private function getStep2FeedHtml(): string
+    {
+        $i = $_SESSION['wizard']['selected_feed'];
+
+        if (!isset($_SESSION['wizard']['feed'][$i]['html'])) {
+            $aFeed[0] = $_SESSION['wizard']['feed'][$i];
+            $_SESSION['wizard']['feed'][$i]['html'] = \get_text_from_rsslink(
+                $aFeed,
+                $_SESSION['wizard']['redirect'] . 'new',
+                'iframe!?!script!?!noscript!?!head!?!meta!?!link!?!style',
+                $this->feedService->getNfOption($_SESSION['wizard']['options'], 'charset')
+            );
+        }
+
+        return $_SESSION['wizard']['feed'][$i]['html'];
+    }
+
+    /**
+     * Get HTML content for step 3 feed preview.
+     *
+     * @return string HTML content
+     */
+    private function getStep3FeedHtml(): string
+    {
+        $i = $_SESSION['wizard']['selected_feed'];
+
+        if (!isset($_SESSION['wizard']['feed'][$i]['html'])) {
+            $aFeed[0] = $_SESSION['wizard']['feed'][$i];
+            $_SESSION['wizard']['feed'][$i]['html'] = \get_text_from_rsslink(
+                $aFeed,
+                $_SESSION['wizard']['redirect'] . 'new',
+                'iframe!?!script!?!noscript!?!head!?!meta!?!link!?!style',
+                $this->feedService->getNfOption($_SESSION['wizard']['options'], 'charset')
+            );
+        }
+
+        return $_SESSION['wizard']['feed'][$i]['html'];
     }
 }
