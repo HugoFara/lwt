@@ -813,9 +813,6 @@ function do_text_text_content($textid, $only_body = true): void
         // Start the page with a HEAD and opens a BODY tag
         pagestart_nobody($title);
     }
-    ?>
-    <script type="text/javascript" src="/assets/js/jquery.hoverIntent.js" charset="utf-8"></script>
-    <?php
     $visit_status = Settings::getWithDefault('set-text-visit-statuses-via-key');
     if ($visit_status == '') {
         $visit_status = '0';

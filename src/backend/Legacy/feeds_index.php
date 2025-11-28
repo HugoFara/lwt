@@ -244,7 +244,10 @@ function renderEditFormFooter(): void
 
    <script type="text/javascript">
     $(document).ready(function() {
-        $(document).scrollTo($('table').eq(0));
+        const firstTable = document.querySelector('table');
+        if (firstTable) {
+            firstTable.scrollIntoView({ behavior: 'instant', block: 'start' });
+        }
     });
     $('input[type="checkbox"]').change(function(){
         var feed = '[name^=feed\\['+ $(this).val() +'\\]';

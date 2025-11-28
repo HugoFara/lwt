@@ -1,9 +1,9 @@
 # Frontend Modernization Plan
 
 **Project:** Learning with Texts (LWT)
-**Document Version:** 4.0
+**Document Version:** 5.0
 **Last Updated:** November 28, 2025
-**Status:** Phase 2 Complete - Legacy Libraries Removed (overlib, jPlayer)
+**Status:** Phase 2 Complete - Build Pipeline Integrated, Legacy Libraries Removed (overlib, jPlayer)
 
 ---
 
@@ -48,22 +48,27 @@ This document outlines a comprehensive plan to modernize the Learning with Texts
 **JavaScript:**
 
 - **Total Lines:** ~3,500 lines across 7 main files
-- **Module System:** None (global scope)
-- **Framework:** jQuery 1.x/2.x era
-- **State Management:** Scattered global objects
-- **Build Process:** Composer-based minification
+- **Module System:** ES6 modules (TypeScript)
+- **Framework:** jQuery 1.12.4 (from npm)
+- **State Management:** Scattered global objects (legacy)
+- **Build Process:** Vite with TypeScript
 
 **Key Files:**
 
-```test
+```text
 src/frontend/js/
-├── pgm.js                    (663 lines) - Core utilities
-├── jq_pgm.js                 (1,435 lines) - jQuery functions
-├── text_events.js            (699 lines) - Text reading interactions
-├── audio_controller.js       (125 lines) - Audio playback
-├── translation_api.js        (183 lines) - Translation APIs
-├── user_interactions.js      (385 lines) - UI interactions
-├── overlib_interface.js      - Popup library (deprecated)
+├── main.ts                   - Vite entry point
+├── pgm.ts                    (663 lines) - Core utilities
+├── jq_pgm.ts                 (1,435 lines) - jQuery functions
+├── text_events.ts            (699 lines) - Text reading interactions
+├── audio_controller.ts       (125 lines) - Audio playback
+├── translation_api.ts        (183 lines) - Translation APIs
+├── user_interactions.ts      (385 lines) - UI interactions
+├── overlib_interface.ts      - Popup library interface (jQuery UI tooltips)
+├── unloadformcheck.ts        - Form change tracking
+├── jq_feedwizard.ts          - Feed wizard functionality
+├── types/
+│   └── globals.d.ts          - TypeScript type declarations
 └── third_party/
     ├── countuptimer.js
     └── sorttable.js
@@ -77,7 +82,7 @@ src/frontend/css/
 ├── css_charts.css            - Chart visualizations
 ├── feed_wizard.css           - Feed wizard UI
 ├── gallery.css               - Gallery styles
-├── jplayer.css               - Audio player
+├── audio-player.css          - HTML5 audio player
 ├── jquery-ui.css             - jQuery UI widgets
 └── jquery.tagit.css          - Tag input widget
 
@@ -90,36 +95,36 @@ src/frontend/themes/
 └── White_Night/
 ```
 
-**Dependencies:**
+**Dependencies (from npm):**
 
-- jQuery 1.x/2.x (~85KB minified)
-- jQuery UI (~250KB with CSS)
-- jPlayer (audio player)
+- jQuery 1.12.4 (~85KB minified)
+- jQuery UI 1.12.1 (~250KB with CSS)
 - jQuery plugins: jeditable, tagit, scrollTo, hoverIntent, xpath
-- Overlib (20+ year old popup library)
+- ~~jPlayer~~ (removed - replaced with HTML5 `<audio>`)
+- ~~Overlib~~ (removed - replaced with jQuery UI tooltips)
 
 ### JavaScript Library Inventory (November 2025)
 
 #### External Libraries (in `assets/js/`)
 
-| Library | File | Size | Purpose | Replacement Strategy |
-|---------|------|------|---------|---------------------|
-| **jQuery** | `jquery.js` | 97KB | DOM manipulation, AJAX | Keep for now (too many inline `$()` calls) |
-| **jQuery UI** | `jquery-ui.min.js` | 240KB | UI widgets (dialogs, tooltips, draggable) | Keep (provides tooltip, dialog, resizable) |
-| **jQuery scrollTo** | `jquery.scrollTo.min.js` | 2KB | Smooth scrolling | Replace with native `scrollIntoView()` |
-| **jQuery jeditable** | `jquery.jeditable.mini.js` | 8KB | In-place editing | Replace with custom or contenteditable |
-| **jQuery hoverIntent** | `jquery.hoverIntent.js` | 2KB | Delayed hover events | Replace with CSS or native JS |
-| **jQuery jPlayer** | `jquery.jplayer.min.js` | 61KB | Audio/video player | Replace with HTML5 `<audio>` element |
-| **jQuery XPath** | `jquery.xpath.min.js` | 80KB | XPath selector (feed wizard) | Evaluate if needed, else remove |
-| **tag-it** | `tag-it.js` | 10KB | Tag input widget | Replace with modern tag library |
-| **overlib** | `overlib/overlib_mini.js` + plugins | ~75KB | Popup/tooltip library | **REMOVE** - replace with jQuery UI tooltips |
+| Library | File | Size | Purpose | Status |
+|---------|------|------|---------|--------|
+| **jQuery** | `jquery.js` | 97KB | DOM manipulation, AJAX | ✅ Kept (from npm) |
+| **jQuery UI** | `jquery-ui.min.js` | 240KB | UI widgets (dialogs, tooltips, draggable) | ✅ Kept (provides tooltip, dialog, resizable) |
+| **jQuery scrollTo** | `jquery.scrollTo.min.js` | 2KB | Smooth scrolling | Future: Replace with native `scrollIntoView()` |
+| **jQuery jeditable** | `jquery.jeditable.mini.js` | 8KB | In-place editing | Future: Replace with custom or contenteditable |
+| **jQuery hoverIntent** | `jquery.hoverIntent.js` | 2KB | Delayed hover events | Future: Replace with CSS or native JS |
+| ~~**jQuery jPlayer**~~ | ~~`jquery.jplayer.min.js`~~ | ~~61KB~~ | ~~Audio/video player~~ | ✅ **REMOVED** - replaced with HTML5 `<audio>` |
+| **jQuery XPath** | `jquery.xpath.min.js` | 80KB | XPath selector (feed wizard) | Future: Evaluate if needed, else remove |
+| **tag-it** | `tag-it.js` | 10KB | Tag input widget | Future: Replace with modern tag library |
+| ~~**overlib**~~ | ~~`overlib/overlib_mini.js` + plugins~~ | ~~~75KB~~ | ~~Popup/tooltip library~~ | ✅ **REMOVED** - replaced with jQuery UI tooltips |
 
-**Total legacy JS size:** ~575KB (uncompressed)
+**Current JS size:** ~439KB (uncompressed) - reduced from ~575KB
 
-#### Priority Removal Order
+#### Priority Removal Order (Future)
 
-1. **overlib** (75KB) - Unmaintained since 2005, replace with jQuery UI tooltips
-2. **jPlayer** (61KB) - HTML5 audio is well-supported now
+1. ~~**overlib** (75KB)~~ - ✅ **REMOVED** - replaced with jQuery UI tooltips
+2. ~~**jPlayer** (61KB)~~ - ✅ **REMOVED** - replaced with HTML5 `<audio>`
 3. **jquery.xpath** (80KB) - Only used in feed wizard, may not be needed
 4. **jquery.hoverIntent** (2KB) - Easy to replace with CSS/native
 5. **jquery.scrollTo** (2KB) - Native `scrollIntoView()` works well
@@ -166,9 +171,9 @@ onclick="updateTermTranslation(<?php echo $wid; ?>, '#tx<?php echo $i; ?>');"
 
 #### 5. Legacy Libraries
 
-- **Overlib:** Unmaintained since 2005
-- **jQuery UI:** Last major update 2016
-- **jPlayer:** Better alternatives exist
+- ~~**Overlib:** Unmaintained since 2005~~ - ✅ REMOVED
+- **jQuery UI:** Last major update 2016 (still in use)
+- ~~**jPlayer:** Better alternatives exist~~ - ✅ REMOVED (replaced with HTML5 `<audio>`)
 
 #### 6. Poor Separation of Concerns
 
@@ -187,14 +192,14 @@ function do_ajax_edit_impr_text(pagepos, word, term_id) {
 
 ### Technical Debt Metrics
 
-| Metric | Value | Target | Notes |
-|--------|-------|--------|-------|
-| Bundle Size (JS) | ~600KB | <200KB | With jQuery and plugins |
-| Initial Load Time | ~2.5s | <1s | On 3G connection |
-| Dependencies Outdated | 8/10 | 0/10 | Security risk |
-| Code Duplication | ~30% | <10% | Similar patterns repeated |
-| Test Coverage | 0% | >70% | Frontend untested |
-| Accessibility Score | 65/100 | >90/100 | Using Lighthouse |
+| Metric | Previous | Current | Target | Notes |
+|--------|----------|---------|--------|-------|
+| Bundle Size (JS) | ~600KB | ~440KB | <200KB | Removed jPlayer, overlib |
+| Initial Load Time | ~2.5s | TBD | <1s | On 3G connection |
+| Dependencies Outdated | 8/10 | 6/10 | 0/10 | Security risk reduced |
+| Code Duplication | ~30% | ~30% | <10% | Similar patterns repeated |
+| Test Coverage | 0% | 0% | >70% | Frontend untested |
+| Accessibility Score | 65/100 | TBD | >90/100 | Using Lighthouse |
 
 ---
 
@@ -647,21 +652,6 @@ declare global {
 4. Import in `main.ts`
 5. Test that existing functionality works
 6. Run `npm run typecheck` to verify
-
-**Phase 1 Deliverables:**
-
-- [ ] Core utility files converted to TypeScript
-- [ ] Type safety for LWT_DATA and global state
-- [ ] `npm run typecheck` passes with no errors
-- [ ] Legacy PHP templates still work (globals exposed)
-
-**Success Criteria:**
-
-- [ ] `npm run dev` starts dev server with HMR
-- [ ] `npm run build` produces optimized bundles
-- [ ] `npm run typecheck` passes
-- [ ] All existing functionality still works
-- [ ] No console errors on any page
 
 ---
 
@@ -1155,24 +1145,6 @@ export function setupFormValidation() {
   });
 }
 ```
-
-**Phase 2 Deliverables:**
-
-- ✅ jQuery completely removed
-- ✅ All AJAX calls using Fetch API
-- ✅ Event handling modernized
-- ✅ Form validation rewritten
-- ✅ Bundle size reduced by 85KB
-
-**Success Criteria:**
-
-- [ ] Zero jQuery references in code
-- [ ] All features still functional
-- [ ] Performance improved (measured with Lighthouse)
-- [ ] No console errors
-- [ ] Bundle size <250KB
-
----
 
 ### Phase 3: Component Architecture (Weeks 8-11) 🏗️
 
@@ -2416,55 +2388,59 @@ window.addEventListener('error', (event) => {
 gantt
     title Frontend Modernization Timeline
     dateFormat YYYY-MM-DD
-    
-    section Phase 0
-    Preparation           :p0, 2025-11-27, 1w
-    
-    section Phase 1
-    Foundation            :p1, after p0, 2w
-    Vite Setup            :p1a, after p0, 1w
-    ES6 Modules           :p1b, after p1a, 1w
-    
-    section Phase 2
-    jQuery Removal        :p2, after p1, 4w
-    Utilities             :p2a, after p1, 1w
-    Core Functions        :p2b, after p2a, 2w
-    Testing               :p2c, after p2b, 1w
-    
-    section Phase 3
-    Components            :p3, after p2, 4w
-    Alpine.js             :p3a, after p2, 1w
-    Text Reader           :p3b, after p3a, 2w
-    Other Components      :p3c, after p3b, 1w
-    
-    section Phase 4
-    Polish                :p4, after p3, 3w
-    CSS Modernization     :p4a, after p3, 1w
-    Optimization          :p4b, after p4a, 1w
-    Testing               :p4c, after p4b, 1w
-    
-    section Phase 5
-    Documentation         :p5, after p4, 2w
+
+    section Phase 0-2 (Complete)
+    Preparation           :done, p0, 2025-11-27, 1d
+    Foundation (Vite/TS)  :done, p1, after p0, 1d
+    Build Pipeline        :done, p2, after p1, 1d
+
+    section Phase 3 (Future)
+    jQuery Removal        :p3, after p2, 4w
+    Utilities             :p3a, after p2, 1w
+    Core Functions        :p3b, after p3a, 2w
+    Testing               :p3c, after p3b, 1w
+
+    section Phase 4 (Future)
+    Components            :p4, after p3, 4w
+    Alpine.js             :p4a, after p3, 1w
+    Text Reader           :p4b, after p4a, 2w
+    Other Components      :p4c, after p4b, 1w
+
+    section Phase 5 (Future)
+    Polish                :p5, after p4, 3w
+    CSS Modernization     :p5a, after p4, 1w
+    Optimization          :p5b, after p5a, 1w
+    Testing               :p5c, after p5b, 1w
+
+    section Phase 6 (Future)
+    Documentation         :p6, after p5, 2w
 ```
 
 ### Detailed Milestones
 
-**Week 1: Preparation** ✅
+**Phase 0: Preparation** ✅ **COMPLETE**
 
 - Set up development environment
 - Install dependencies
 - Create migration branch
 - **Milestone:** Dev environment ready
 
-**Weeks 2-3: Foundation** 🔨
+**Phase 1: Foundation** ✅ **COMPLETE**
 
 - Configure Vite
-- Convert to ES6 modules
-- Remove Overlib
-- Add CSS variables
+- Convert to ES6 modules (TypeScript)
+- Remove Overlib (replaced with jQuery UI tooltips)
+- Remove jPlayer (replaced with HTML5 `<audio>`)
 - **Milestone:** New build system operational
 
-**Weeks 4-7: jQuery Removal** 🎯
+**Phase 2: Build Pipeline** ✅ **COMPLETE**
+
+- Created Node.js theme builder
+- Removed PHP minification
+- Updated npm scripts
+- **Milestone:** Build pipeline fully integrated
+
+**Phase 3 (Future): jQuery Removal** 🎯 **DEFERRED**
 
 - Create utility functions
 - Migrate DOM manipulation
@@ -2472,7 +2448,7 @@ gantt
 - Update event handlers
 - **Milestone:** jQuery completely removed
 
-**Weeks 8-11: Component Architecture** 🏗️
+**Phase 4 (Future): Component Architecture** 🏗️
 
 - Install Alpine.js
 - Create main components
@@ -2480,7 +2456,7 @@ gantt
 - Migrate complex interactions
 - **Milestone:** Component-based architecture established
 
-**Weeks 12-14: Polish & Optimization** ✨
+**Phase 5 (Future): Polish & Optimization** ✨
 
 - Modernize CSS
 - Optimize performance
@@ -2488,7 +2464,7 @@ gantt
 - Add comprehensive tests
 - **Milestone:** Production-ready code
 
-**Weeks 15-16: Documentation & Cleanup** 📚
+**Phase 6 (Future): Documentation & Cleanup** 📚
 
 - Write documentation
 - Remove legacy code
@@ -2498,33 +2474,34 @@ gantt
 
 ### Go/No-Go Decision Points
 
-**After Phase 1:**
+**After Phase 0-2:** ✅ **PASSED**
 
-- ✅ Build system working
+- ✅ Build system working (Vite + TypeScript)
 - ✅ No broken pages
-- ✅ Team comfortable with workflow
-- **Decision:** Continue to Phase 2
+- ✅ Legacy libraries removed (overlib, jPlayer)
+- ✅ Build pipeline integrated
+- **Decision:** Foundation complete, future phases optional
 
-**After Phase 2:**
+**Before jQuery Removal (Phase 3):**
 
-- ✅ jQuery removed
-- ✅ All features functional
-- ✅ Performance not degraded
-- **Decision:** Continue to Phase 3
+- [ ] All features functional with current setup
+- [ ] Performance acceptable
+- [ ] Resources available for significant refactoring
+- **Decision:** Proceed with jQuery removal
 
-**After Phase 3:**
+**Before Component Architecture (Phase 4):**
 
-- ✅ Components working
-- ✅ Code quality improved
-- ✅ Tests passing
-- **Decision:** Continue to Phase 4
+- [ ] jQuery removed
+- [ ] Code quality metrics improved
+- [ ] Team comfortable with new patterns
+- **Decision:** Proceed with Alpine.js migration
 
-**Before Production:**
+**Before Production (Phase 6):**
 
-- ✅ All tests passing
-- ✅ Lighthouse score >90
-- ✅ Accessibility score >95
-- ✅ Stakeholder approval
+- [ ] All tests passing
+- [ ] Lighthouse score >90
+- [ ] Accessibility score >95
+- [ ] Stakeholder approval
 - **Decision:** Deploy to production
 
 ---
@@ -2724,6 +2701,7 @@ export default {
 | 4.0 | 2025-11-26 | Claude Code | Phase 2 complete: Build pipeline integrated, composer.json updated, documentation updated |
 | 4.1 | 2025-11-26 | Claude Code | Removed legacy PHP minification, simplified to Vite-only build |
 | 4.2 | 2025-11-26 | Claude Code | Moved theme building to npm, removed matthiasmullie/minify dependency |
+| 5.0 | 2025-11-28 | Claude Code | Document cleanup: Updated file listings to reflect TypeScript migration, marked removed libraries, updated metrics and milestones to reflect current state |
 
 ---
 

@@ -7,6 +7,7 @@
 
 import { make_tooltip } from '../terms/word_status';
 import { speechDispatcher } from '../core/user_interactions';
+import { hoverIntent } from '../core/hover_intent';
 import {
   getAttr,
   word_each_do_text_text,
@@ -80,21 +81,6 @@ interface LwtDataGlobal {
 }
 
 declare const LWT_DATA: LwtDataGlobal;
-
-// Extend JQuery for hoverIntent plugin
-interface HoverIntentOptions {
-  over: (this: HTMLElement) => void;
-  out: (this: HTMLElement) => void;
-  sensitivity?: number;
-  interval?: number;
-  selector?: string;
-}
-
-declare global {
-  interface JQuery {
-    hoverIntent(options: HoverIntentOptions): JQuery;
-  }
-}
 
 // Audio controller type for frame access
 // We only need the newPosition method for seeking audio
@@ -276,13 +262,14 @@ export function prepareTextInteractions(): void {
   $('.word').on('dblclick', word_dblclick_event_do_text_text);
   $('#thetext').on('dblclick', '.mword', word_dblclick_event_do_text_text);
   $(document).on('keydown', keydown_event_do_text_text);
-  $('#thetext').hoverIntent(
-    {
+  const thetext = document.getElementById('thetext');
+  if (thetext) {
+    hoverIntent(thetext, {
       over: word_hover_over,
       out: word_hover_out,
       interval: 150,
       selector: '.wsty,.mwsty'
-    }
-  );
+    });
+  }
 }
 

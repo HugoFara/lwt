@@ -83,7 +83,6 @@ function pagestart_kernel_nobody($title, $addcss = ''): void
     <?php if (should_use_vite()) : ?>
     <!-- Vite assets -->
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
-    <script type="text/javascript" src="/assets/js/jquery.scrollTo.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
@@ -95,7 +94,6 @@ function pagestart_kernel_nobody($title, $addcss = ''): void
     <link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/feed_wizard.css" />
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
-    <script type="text/javascript" src="/assets/js/jquery.scrollTo.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
@@ -900,7 +898,6 @@ function pagestart_nobody($title, $addcss = ''): void
     <!-- Vite assets -->
     <!-- Load jQuery synchronously for inline scripts compatibility -->
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
-    <script type="text/javascript" src="/assets/js/jquery.scrollTo.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
@@ -912,7 +909,6 @@ function pagestart_nobody($title, $addcss = ''): void
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/styles.css');?>" />
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/feed_wizard.css');?>" />
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
-    <script type="text/javascript" src="/assets/js/jquery.scrollTo.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>

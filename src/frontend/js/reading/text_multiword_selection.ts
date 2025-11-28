@@ -6,6 +6,7 @@
  */
 
 import { getAttr } from './text_annotations';
+import { hoverIntent } from '../core/hover_intent';
 
 // Declare external functions
 declare function showRightFrames(url1?: string, url2?: string): void;
@@ -38,21 +39,6 @@ interface LwtDataGlobal {
 }
 
 declare const LWT_DATA: LwtDataGlobal;
-
-// Extend JQuery for hoverIntent plugin
-interface HoverIntentOptions {
-  over: (this: HTMLElement) => void;
-  out: (this: HTMLElement) => void;
-  sensitivity?: number;
-  interval?: number;
-  selector?: string;
-}
-
-declare global {
-  interface JQuery {
-    hoverIntent(options: HoverIntentOptions): JQuery;
-  }
-}
 
 interface MwordDragNDropState {
   event: JQuery.TriggeredEvent | undefined;
@@ -263,12 +249,15 @@ export const mwordDragNDrop: MwordDragNDropState = {
     $(context).one('mouseover', '.tword', mwordDragNDrop.twordMouseOver);
 
     // Prepare a hover intent interaction
-    $(context).hoverIntent({
-      over: mwordDragNDrop.sentenceOver,
-      out: function () {},
-      sensitivity: 18,
-      selector: '.tword'
-    });
+    const contextElement = context[0];
+    if (contextElement) {
+      hoverIntent(contextElement, {
+        over: mwordDragNDrop.sentenceOver,
+        out: function () {},
+        sensitivity: 18,
+        selector: '.tword'
+      });
+    }
   },
 
   /**

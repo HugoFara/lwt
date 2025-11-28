@@ -9,6 +9,7 @@
 import $ from 'jquery';
 import { escape_html_chars } from '../core/html_utils';
 import { isInt } from '../forms/form_validation';
+import { scrollTo } from '../core/hover_intent';
 
 // Interface for lwtFormCheck
 interface LwtFormCheck {
@@ -16,13 +17,6 @@ interface LwtFormCheck {
 }
 
 declare const lwtFormCheck: LwtFormCheck;
-
-// Extend jQuery with scrollTo
-declare global {
-  interface JQueryStatic {
-    scrollTo(position: number): void;
-  }
-}
 
 /**
  * Helper to safely get an HTML attribute value as a string.
@@ -357,7 +351,7 @@ export function do_ajax_edit_impr_text(pagepos: number, word: string, term_id: n
         alert(data.error);
       } else {
         edit_term_ann_translations(data, textid);
-        $.scrollTo(pagepos);
+        scrollTo(pagepos);
         $('input.impr-ann-text').on('change', changeImprAnnText);
         $('input.impr-ann-radio').on('change', changeImprAnnRadio);
       }

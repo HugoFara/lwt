@@ -8,6 +8,7 @@
 
 import { getCookie } from '../core/cookies';
 import { overlib, cClick } from '../ui/word_popup';
+import { scrollTo } from '../core/hover_intent';
 
 // Type for LWT_DATA global
 interface LwtLanguage {
@@ -164,18 +165,27 @@ export function newExpressionInteractable(
 export function goToLastPosition(): void {
   // Last registered position to go to
   const lookPos = LWT_DATA.text.reading_position;
-  // Position to scroll to
-  let pos: JQuery | number = 0;
+  // Element to scroll to
+  let targetElement: HTMLElement | null = null;
   if (lookPos > 0) {
     const posObj = $('.wsty[data_pos=' + lookPos + ']').not('.hide').eq(0);
     if (posObj.attr('data_pos') === undefined) {
-      pos = $('.wsty').not('.hide').filter(function () {
+      const found = $('.wsty').not('.hide').filter(function () {
         const dataPosAttr = $(this).attr('data_pos');
         return parseInt(typeof dataPosAttr === 'string' ? dataPosAttr : '0', 10) <= lookPos;
       }).eq(-1);
+      if (found.length > 0) {
+        targetElement = found[0] as HTMLElement;
+      }
+    } else if (posObj.length > 0) {
+      targetElement = posObj[0] as HTMLElement;
     }
   }
-  ($ as JQueryStatic & { scrollTo: (target: JQuery | number) => void })(document).scrollTo(pos);
+  if (targetElement) {
+    scrollTo(targetElement);
+  } else {
+    scrollTo(0);
+  }
   focus();
   setTimeout(overlib, 10);
   setTimeout(cClick, 100);
