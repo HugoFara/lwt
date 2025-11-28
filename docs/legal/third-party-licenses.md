@@ -8,7 +8,6 @@ The following software packages, bundled within the LWT software, have different
 * CountUp - Copyright © Praveen Lobo, [http://PraveenLobo.com/techblog/javascript-countup-timer/](http://PraveenLobo.com/techblog/javascript-countup-timer/) (../js/third\_party/countuptimer.js)
 * mobiledetect - Copyright © Șerban Ghiță & Victor Stanciu, [http://mobiledetect.net](http://mobiledetect.net/) (vendor/mobiledetect/mobiledetectlib/Mobile\_Detect.php)
 * iUI - Copyright © iUI, [http://www.iui-js.org/](http://www.iui-js.org/) (iui)
-* Query.Xpath - Copyright © Sergey Ilinsky, [https://github.com/ilinsky/jquery-xpath](https://github.com/ilinsky/jquery-xpath) (../js/jquery.xpath.js)
 
 The icons in the "icn" subdirectory are Copyright © [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/). All rights reserved. Licensed under a [Creative Commons Attribution 3.0 license](http://creativecommons.org/licenses/by/3.0/). The wizard icon "wizard.png" is the "Free Wizard Icon", free for commercial use, from [icojam.com](http://www.icojam.com/blog/?p=159) (Author: [IcoJam / Andrew Zhebrakov](http://www.icojam.com)).  
 

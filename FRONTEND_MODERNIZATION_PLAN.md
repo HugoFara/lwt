@@ -99,7 +99,7 @@ src/frontend/themes/
 
 - jQuery 1.12.4 (~85KB minified)
 - jQuery UI 1.12.1 (~250KB with CSS)
-- jQuery plugins: xpath
+- ~~jQuery plugins: xpath~~ (removed - replaced with native `document.evaluate()`)
 - ~~jQuery plugins: jeditable, scrollTo, hoverIntent~~ (removed - replaced with native implementations)
 - Tagify (tag input - replacement for tag-it)
 - ~~jPlayer~~ (removed - replaced with HTML5 `<audio>`)
@@ -117,17 +117,17 @@ src/frontend/themes/
 | ~~**jQuery jeditable**~~ | ~~`jquery.jeditable.mini.js`~~ | ~~8KB~~ | ~~In-place editing~~ | ✅ **REMOVED** - was unused |
 | ~~**jQuery hoverIntent**~~ | ~~`jquery.hoverIntent.js`~~ | ~~2KB~~ | ~~Delayed hover events~~ | ✅ **REMOVED** - replaced with native `hoverIntent()` in `hover_intent.ts` |
 | ~~**jQuery jPlayer**~~ | ~~`jquery.jplayer.min.js`~~ | ~~61KB~~ | ~~Audio/video player~~ | ✅ **REMOVED** - replaced with HTML5 `<audio>` |
-| **jQuery XPath** | `jquery.xpath.min.js` | 80KB | XPath selector (feed wizard) | Future: Evaluate if needed, else remove |
+| ~~**jQuery XPath**~~ | ~~`jquery.xpath.min.js`~~ | ~~80KB~~ | ~~XPath selector (feed wizard)~~ | ✅ **REMOVED** - replaced with native `document.evaluate()` |
 | ~~**tag-it**~~ | ~~`tag-it.js`~~ | ~~10KB~~ | ~~Tag input widget~~ | ✅ **REMOVED** - replaced with Tagify |
 | ~~**overlib**~~ | ~~`overlib/overlib_mini.js` + plugins~~ | ~~75KB~~ | ~~Popup/tooltip library~~ | ✅ **REMOVED** - replaced with jQuery UI tooltips |
 
-**Current JS size:** ~427KB (uncompressed) - reduced from ~575KB
+**Current JS size:** ~347KB (uncompressed) - reduced from ~575KB
 
 #### Priority Removal Order (Future)
 
 1. ~~**overlib** (75KB)~~ - ✅ **REMOVED** - replaced with jQuery UI tooltips
 2. ~~**jPlayer** (61KB)~~ - ✅ **REMOVED** - replaced with HTML5 `<audio>`
-3. **jquery.xpath** (80KB) - Only used in feed wizard, may not be needed
+3. ~~**jquery.xpath** (80KB)~~ - ✅ **REMOVED** - replaced with native `document.evaluate()`
 4. ~~**jquery.hoverIntent** (2KB)~~ - ✅ **REMOVED** - replaced with native `hoverIntent()` in `hover_intent.ts`
 5. ~~**jquery.scrollTo** (2KB)~~ - ✅ **REMOVED** - replaced with native `scrollTo()` in `hover_intent.ts`
 6. ~~**jquery.jeditable** (8KB)~~ - ✅ **REMOVED** - was unused

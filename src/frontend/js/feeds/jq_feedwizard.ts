@@ -6,13 +6,71 @@
  * @since   1.6.16-fork
  */
 
-// Extend JQuery interface for xpath plugin
+// Extend JQuery interface for get_adv_xpath
 declare global {
   interface JQuery {
-    xpath(expression: string): JQuery;
     get_adv_xpath(): void;
   }
 }
+
+/**
+ * Execute an XPath expression and return matching elements as a jQuery object.
+ * Supports pipe-separated multiple expressions (e.g., "//div | //span").
+ *
+ * @param expression - XPath expression to evaluate
+ * @param context - Context node for evaluation (defaults to document)
+ * @returns jQuery object containing matched elements
+ */
+function xpathQuery(expression: string, context: Node = document): JQuery<HTMLElement> {
+  const results: HTMLElement[] = [];
+
+  // Handle pipe-separated expressions (e.g., "//div[@id='x'] | //p[@class='y']")
+  const expressions = expression.split(/\s*\|\s*/).filter(e => e.trim());
+
+  for (const expr of expressions) {
+    try {
+      const xpathResult = document.evaluate(
+        expr,
+        context,
+        null,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        null
+      );
+      for (let i = 0; i < xpathResult.snapshotLength; i++) {
+        const node = xpathResult.snapshotItem(i);
+        if (node instanceof HTMLElement && !results.includes(node)) {
+          results.push(node);
+        }
+      }
+    } catch {
+      // Invalid XPath - skip this expression
+    }
+  }
+
+  return $(results);
+}
+
+/**
+ * Validate an XPath expression without executing it fully.
+ *
+ * @param expression - XPath expression to validate
+ * @returns true if expression is valid, false otherwise
+ */
+function isValidXPath(expression: string): boolean {
+  if (!expression || expression.trim() === '') {
+    return false;
+  }
+  try {
+    document.evaluate(expression, document, null, XPathResult.ANY_TYPE, null);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Export functions to window for use in PHP views
+(window as any).xpathQuery = xpathQuery;
+(window as any).isValidXPath = isValidXPath;
 
 // Declare global filter_Array that may be set externally
 declare const filter_Array: HTMLElement[];
@@ -36,7 +94,7 @@ export function extend_adv_xpath(this: JQuery): void {
           'custom: ' +
           '<input type="text" id="custom_xpath" name="custom_xpath" ' +
           'style="width:70%" ' +
-          'onkeyup="try{val=$(\'#custom_xpath\').val();valid=$(document).xpath(val);}catch(err){val=\'\';valid=0;}if(valid==0){$(this).parent().find(\'.xpath\').val(\'\');if($(this).parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', true);$(\'#custom_img\').attr(\'src\',\'icn/exclamation-red.png\');}else {$(this).parent().find(\'.xpath\').val(val);if($(this).parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', false);$(\'#custom_img\').attr(\'src\',\'icn/tick.png\');}return false;" onpaste="setTimeout(function() {try{val=$(\'#custom_xpath\').val();valid=$(document).xpath(val);}catch(err){val=\'\';valid=0;}if(valid==0){$(this).parent().find(\'.xpath\').val(\'\');if($(\'#custom_xpath\').parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', true);$(\'#custom_img\').attr(\'src\',\'icn/exclamation-red.png\');}else {$(\'#custom_xpath\').parent().find(\'.xpath\').val(val);if($(\'#custom_xpath\').parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', false);$(\'#custom_img\').attr(\'src\',\'icn/tick.png\');}}, 0);" value=\'\'>' +
+          'onkeyup="var val=$(\'#custom_xpath\').val();var valid=isValidXPath(val)&&xpathQuery(val).length>0;if(!valid){$(this).parent().find(\'.xpath\').val(\'\');if($(this).parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', true);$(\'#custom_img\').attr(\'src\',\'icn/exclamation-red.png\');}else{$(this).parent().find(\'.xpath\').val(val);if($(this).parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', false);$(\'#custom_img\').attr(\'src\',\'icn/tick.png\');}return false;" onpaste="setTimeout(function(){var val=$(\'#custom_xpath\').val();var valid=isValidXPath(val)&&xpathQuery(val).length>0;if(!valid){$(\'#custom_xpath\').parent().find(\'.xpath\').val(\'\');if($(\'#custom_xpath\').parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', true);$(\'#custom_img\').attr(\'src\',\'icn/exclamation-red.png\');}else{$(\'#custom_xpath\').parent().find(\'.xpath\').val(val);if($(\'#custom_xpath\').parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', false);$(\'#custom_img\').attr(\'src\',\'icn/tick.png\');}}, 0);" value=\'\'>' +
           '</input>' +
         '<img id="custom_img" src="icn/exclamation-red.png" alt="-" />' +
         '</input>' +
@@ -284,7 +342,7 @@ export const lwt_feed_wiz_opt_inter = {
             $('#lwt_sel li').each(function () {
               $('*').removeClass('lwt_highlighted_text');
               $(this).addClass('lwt_highlighted_text');
-              $(document).xpath($(this).text()).addClass('lwt_highlighted_text');
+              xpathQuery($(this).text()).addClass('lwt_highlighted_text');
               if ($(el).hasClass('lwt_highlighted_text')) {
                 return false;
               }
@@ -310,7 +368,7 @@ export const lwt_feed_wiz_opt_inter = {
     let sel_array = '';
     $('#lwt_sel li').each(function () {
       if ($(this).hasClass('lwt_highlighted_text')) {
-        $(document).xpath($(this).text())
+        xpathQuery($(this).text())
           .not($('#lwt_header').find('*').addBack())
           .addClass('lwt_highlighted_text').find('*').addBack()
           .addClass('lwt_selected_text');
@@ -319,7 +377,7 @@ export const lwt_feed_wiz_opt_inter = {
       }
     });
     if (sel_array !== '') {
-      $(document).xpath(sel_array.replace(/ \| $/, '')).find('*')
+      xpathQuery(sel_array.replace(/ \| $/, '')).find('*')
         .addBack().not($('#lwt_header').find('*').addBack())
         .addClass('lwt_selected_text');
     }
@@ -363,7 +421,7 @@ export const lwt_feed_wizard = {
     let sel_array = '';
     $('#lwt_sel li').each(function () {
       if ($(this).hasClass('lwt_highlighted_text')) {
-        $(document).xpath($(this).text()).not($('#lwt_header').find('*')
+        xpathQuery($(this).text()).not($('#lwt_header').find('*')
           .addBack()).addClass('lwt_highlighted_text').find('*').addBack()
           .addClass('lwt_selected_text');
       } else {
@@ -371,7 +429,7 @@ export const lwt_feed_wizard = {
       }
     });
     if (sel_array !== '') {
-      $(document).xpath(sel_array.replace(/ \| $/, '')).find('*')
+      xpathQuery(sel_array.replace(/ \| $/, '')).find('*')
         .addBack().not($('#lwt_header').find('*').addBack())
         .addClass('lwt_selected_text');
     }
@@ -412,7 +470,7 @@ export const lwt_feed_wizard = {
         $('#adv :radio:checked').val() +
         '</li>'
       );
-      $(document).xpath($('#adv :radio:checked').val() as string).find('*')
+      xpathQuery($('#adv :radio:checked').val() as string).find('*')
         .addBack().not($('#lwt_header').find('*').addBack())
         .addClass('lwt_selected_text');
       $('#next').prop('disabled', false);
@@ -439,7 +497,7 @@ export const lwt_feed_wizard = {
       $('*[class=\'\']').removeAttr('class');
       $(this).addClass('lwt_highlighted_text');
 
-      $(document).xpath($(this).text()).not($('#lwt_header').find('*').addBack())
+      xpathQuery($(this).text()).not($('#lwt_header').find('*').addBack())
         .addClass('lwt_highlighted_text').find('*').addBack()
         .addClass('lwt_selected_text');
 
