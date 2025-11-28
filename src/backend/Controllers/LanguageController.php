@@ -19,12 +19,13 @@ namespace Lwt\Controllers;
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
-require_once __DIR__ . '/../Core/Language/language_utilities.php';
-require_once __DIR__ . '/../Core/Language/langdefs.php';
+require_once __DIR__ . '/../Core/Http/url_utilities.php';
 require_once __DIR__ . '/../Core/Entity/Language.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
+require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 
 use Lwt\Database\Settings;
+use Lwt\Services\LanguageDefinitions;
 use Lwt\Services\LanguageService;
 
 /**
@@ -165,6 +166,7 @@ class LanguageController extends BaseController
         $currentNativeLanguage = Settings::get('currentnativelanguage');
         $languageOptions = $this->getWizardSelectOptions($currentNativeLanguage);
         $languageOptionsEmpty = $this->getWizardSelectOptions('');
+        $languageDefsJson = json_encode(LanguageDefinitions::getAll());
 
         ?>
         <h2>
@@ -227,7 +229,7 @@ class LanguageController extends BaseController
 
         ?>
     <script type="text/javascript" charset="utf-8">
-        const LANGDEFS = <?php echo json_encode(LWT_LANGUAGES_ARRAY); ?>;
+        const LANGDEFS = <?php echo json_encode(LanguageDefinitions::getAll()); ?>;
 
         $(document).ready(lwtFormCheck.askBeforeExit);
     </script>
@@ -267,13 +269,13 @@ class LanguageController extends BaseController
         string &$sourceLg,
         string &$targetLg
     ): void {
-        if (array_key_exists($currentNativeLanguage, LWT_LANGUAGES_ARRAY)) {
-            $targetLg = LWT_LANGUAGES_ARRAY[$currentNativeLanguage][1];
+        if (array_key_exists($currentNativeLanguage, LanguageDefinitions::getAll())) {
+            $targetLg = LanguageDefinitions::getAll()[$currentNativeLanguage][1];
         }
 
         if ($language->name) {
-            if (array_key_exists($language->name, LWT_LANGUAGES_ARRAY)) {
-                $sourceLg = LWT_LANGUAGES_ARRAY[$language->name][1];
+            if (array_key_exists($language->name, LanguageDefinitions::getAll())) {
+                $sourceLg = LanguageDefinitions::getAll()[$language->name][1];
             }
             $lgFromDict = \langFromDict($language->translator);
             if ($lgFromDict != '' && $lgFromDict != $sourceLg) {
@@ -297,7 +299,7 @@ class LanguageController extends BaseController
     private function getWizardSelectOptions(string $selected): string
     {
         $r = '<option value=""' . \get_selected($selected, '') . '>[Choose...]</option>';
-        $keys = array_keys(LWT_LANGUAGES_ARRAY);
+        $keys = array_keys(LanguageDefinitions::getAll());
         foreach ($keys as $item) {
             $r .= '<option value="' . $item . '"' .
                 \get_selected($selected, $item) . '>' . $item . '</option>';
@@ -324,7 +326,7 @@ class LanguageController extends BaseController
         $currentnativelanguage = Settings::get('currentnativelanguage');
         $languageOptions = $this->getWizardSelectOptions($currentnativelanguage);
         $languageOptionsEmpty = $this->getWizardSelectOptions('');
-        $languagesJson = json_encode(LWT_LANGUAGES_ARRAY);
+        $languagesJson = json_encode(LanguageDefinitions::getAll());
 
         include __DIR__ . '/../Views/Language/select_pair.php';
 

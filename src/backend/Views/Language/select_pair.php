@@ -7,7 +7,7 @@
  * - $currentnativelanguage: string current native language setting
  * - $languageOptions: string HTML options for native language (L1) select
  * - $languageOptionsEmpty: string HTML options for target language (L2) select
- * - $languagesJson: string JSON-encoded LWT_LANGUAGES_ARRAY
+ * - $languagesJson: string JSON-encoded language definitions from LanguageDefinitions::getAll()
  *
  * PHP version 8.1
  *

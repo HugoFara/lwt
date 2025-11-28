@@ -6,6 +6,7 @@
  * Variables expected:
  * - $currentNativeLanguage: string current native language setting
  * - $languageOptions: string HTML options for language select
+ * - $languageDefsJson: string JSON-encoded language definitions
  *
  * PHP version 8.1
  *
@@ -22,7 +23,7 @@ namespace Lwt\Views\Language;
 ?>
 <script type="text/javascript" charset="utf-8">
 
-    const LANGDEFS = <?php echo json_encode(LWT_LANGUAGES_ARRAY); ?>;
+    const LANGDEFS = <?php echo $languageDefsJson; ?>;
 
     const language_wizard = {
 

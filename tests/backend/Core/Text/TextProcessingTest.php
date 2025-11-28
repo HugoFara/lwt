@@ -21,8 +21,10 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
 require_once __DIR__ . '/../../../../src/backend/Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Text/text_helpers.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Export/export_helpers.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Language/language_utilities.php';
+require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Word/word_status.php';
+
+use Lwt\Services\LanguageService;
 
 /**
  * Unit tests for text processing functions.
@@ -33,6 +35,7 @@ class TextProcessingTest extends TestCase
 {
     private static bool $dbConnected = false;
     private static string $tbpref = '';
+    private static ?LanguageService $languageService = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -51,6 +54,7 @@ class TextProcessingTest extends TestCase
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
         self::$tbpref = Globals::getTablePrefix();
+        self::$languageService = new LanguageService();
     }
 
     protected function tearDown(): void
@@ -64,7 +68,7 @@ class TextProcessingTest extends TestCase
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'test_proc_%'");
     }
 
-    // ===== get_languages() tests =====
+    // ===== getAllLanguages() tests =====
 
     public function testGetLanguagesReturnsArray(): void
     {
@@ -72,7 +76,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $languages = get_languages();
+        $languages = self::$languageService->getAllLanguages();
         $this->assertIsArray($languages);
     }
 
@@ -83,17 +87,17 @@ class TextProcessingTest extends TestCase
         }
 
         $tbpref = self::$tbpref;
-        
+
         // Insert test language
-        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_proc_lang', 'http://test', 'http://test')");
         $lgId = get_last_key();
-        
-        $languages = get_languages();
-        
+
+        $languages = self::$languageService->getAllLanguages();
+
         $this->assertArrayHasKey('test_proc_lang', $languages);
         $this->assertEquals($lgId, $languages['test_proc_lang']);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
@@ -105,22 +109,22 @@ class TextProcessingTest extends TestCase
         }
 
         $tbpref = self::$tbpref;
-        
+
         // Insert language with empty name
-        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('', 'http://test', 'http://test')");
         $lgId = get_last_key();
-        
-        $languages = get_languages();
-        
+
+        $languages = self::$languageService->getAllLanguages();
+
         // Empty name should not be in array
         $this->assertNotContains($lgId, $languages);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
 
-    // ===== getLanguage() tests =====
+    // ===== getLanguageName() tests =====
 
     public function testGetLanguageWithIntId(): void
     {
@@ -129,16 +133,16 @@ class TextProcessingTest extends TestCase
         }
 
         $tbpref = self::$tbpref;
-        
+
         // Insert test language
-        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_proc_getlang', 'http://test', 'http://test')");
         $lgId = get_last_key();
-        
-        $name = getLanguage($lgId);
-        
+
+        $name = self::$languageService->getLanguageName($lgId);
+
         $this->assertEquals('test_proc_getlang', $name);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
@@ -150,16 +154,16 @@ class TextProcessingTest extends TestCase
         }
 
         $tbpref = self::$tbpref;
-        
+
         // Insert test language
-        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_proc_string', 'http://test', 'http://test')");
         $lgId = get_last_key();
-        
-        $name = getLanguage((string)$lgId);
-        
+
+        $name = self::$languageService->getLanguageName((string)$lgId);
+
         $this->assertEquals('test_proc_string', $name);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
@@ -170,7 +174,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $name = getLanguage(999999);
+        $name = self::$languageService->getLanguageName(999999);
         $this->assertEquals('', $name);
     }
 
@@ -180,7 +184,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $name = getLanguage('');
+        $name = self::$languageService->getLanguageName('');
         $this->assertEquals('', $name);
     }
 
@@ -190,7 +194,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $name = getLanguage('invalid');
+        $name = self::$languageService->getLanguageName('invalid');
         $this->assertEquals('', $name);
     }
 
@@ -203,16 +207,16 @@ class TextProcessingTest extends TestCase
         }
 
         $tbpref = self::$tbpref;
-        
+
         // Insert test language (LTR)
-        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
                          VALUES ('test_proc_ltr', 'http://test', 'http://test', 0)");
         $lgId = get_last_key();
-        
-        $tag = getScriptDirectionTag($lgId);
-        
+
+        $tag = self::$languageService->getScriptDirectionTag($lgId);
+
         $this->assertEquals('', $tag);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
@@ -224,16 +228,16 @@ class TextProcessingTest extends TestCase
         }
 
         $tbpref = self::$tbpref;
-        
+
         // Insert test language (RTL)
-        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
                          VALUES ('test_proc_rtl', 'http://test', 'http://test', 1)");
         $lgId = get_last_key();
-        
-        $tag = getScriptDirectionTag($lgId);
-        
+
+        $tag = self::$languageService->getScriptDirectionTag($lgId);
+
         $this->assertEquals(' dir="rtl" ', $tag);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
@@ -245,16 +249,16 @@ class TextProcessingTest extends TestCase
         }
 
         $tbpref = self::$tbpref;
-        
+
         // Insert test language (RTL)
-        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft) 
+        Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
                          VALUES ('test_proc_rtl_str', 'http://test', 'http://test', 1)");
         $lgId = get_last_key();
-        
-        $tag = getScriptDirectionTag((string)$lgId);
-        
+
+        $tag = self::$languageService->getScriptDirectionTag((string)$lgId);
+
         $this->assertEquals(' dir="rtl" ', $tag);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $lgId");
     }
@@ -265,7 +269,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tag = getScriptDirectionTag(null);
+        $tag = self::$languageService->getScriptDirectionTag(null);
         $this->assertEquals('', $tag);
     }
 
@@ -275,7 +279,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tag = getScriptDirectionTag('');
+        $tag = self::$languageService->getScriptDirectionTag('');
         $this->assertEquals('', $tag);
     }
 
@@ -285,7 +289,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tag = getScriptDirectionTag('invalid');
+        $tag = self::$languageService->getScriptDirectionTag('invalid');
         $this->assertEquals('', $tag);
     }
 

@@ -19,12 +19,16 @@ namespace Lwt\Controllers;
 use Lwt\Services\TextService;
 use Lwt\Services\TextDisplayService;
 use Lwt\Services\TagService;
+use Lwt\Services\LanguageService;
+use Lwt\Services\LanguageDefinitions;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 
 require_once __DIR__ . '/../Services/TextService.php';
 require_once __DIR__ . '/../Services/TextDisplayService.php';
 require_once __DIR__ . '/../Services/TagService.php';
+require_once __DIR__ . '/../Services/LanguageService.php';
+require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 
 /**
  * Controller for text management and reading interface.
@@ -52,12 +56,20 @@ class TextController extends BaseController
     private TextService $textService;
 
     /**
+     * Language service for language operations.
+     *
+     * @var LanguageService
+     */
+    private LanguageService $languageService;
+
+    /**
      * Constructor - initialize services.
      */
     public function __construct()
     {
         parent::__construct();
         $this->textService = new TextService();
+        $this->languageService = new LanguageService();
     }
 
     /**
@@ -77,10 +89,8 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Text/text_navigation.php';
         require_once __DIR__ . '/../Core/Text/text_display.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
-        require_once __DIR__ . '/../Core/Language/language_utilities.php';
         require_once __DIR__ . '/../Core/Mobile/mobile_interactions.php';
         require_once __DIR__ . '/../Core/Media/media_helpers.php';
-        require_once __DIR__ . '/../Core/Language/langdefs.php';
         require_once __DIR__ . '/../Core/Word/word_status.php';
         require_once __DIR__ . '/../Core/Export/export_helpers.php';
 
@@ -146,8 +156,8 @@ class TextController extends BaseController
         $showLearning = Settings::getZeroOrOne('showlearningtranslations', 1);
 
         // Get language code and phonetic text for TTS
-        $languageCode = \getLanguageCode($langId, LWT_LANGUAGES_ARRAY);
-        $phoneticText = \phoneticReading($text, $langId);
+        $languageCode = $this->languageService->getLanguageCode($langId, LanguageDefinitions::getAll());
+        $phoneticText = $this->languageService->getPhoneticReadingById($text, $langId);
         $voiceApi = $this->textService->getTtsVoiceApi($langId);
 
         // Prepare text content data
@@ -216,8 +226,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Core/Media/media_helpers.php';
-        require_once __DIR__ . '/../Core/Language/language_utilities.php';
-        require_once __DIR__ . '/../Core/Word/word_status.php';
+                require_once __DIR__ . '/../Core/Word/word_status.php';
         require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
         require_once __DIR__ . '/../Core/Integration/text_from_yt.php';
         require_once __DIR__ . '/../Core/Entity/Text.php';
@@ -233,7 +242,7 @@ class TextController extends BaseController
             substr(\getreq('op'), -8) == 'and Open');
 
         if (!$noPagestart) {
-            \pagestart('My ' . \getLanguage($currentLang) . ' Texts', true);
+            \pagestart('My ' . $this->languageService->getLanguageName($currentLang) . ' Texts', true);
         }
 
         $message = '';
@@ -355,7 +364,7 @@ class TextController extends BaseController
         if (!$this->textService->validateTextLength($_REQUEST['TxText'])) {
             $message = "Error: Text too long, must be below 65000 Bytes";
             if ($noPagestart) {
-                \pagestart('My ' . \getLanguage($currentLang) . ' Texts', true);
+                \pagestart('My ' . $this->languageService->getLanguageName($currentLang) . ' Texts', true);
             }
             return ['message' => $message, 'redirect' => false];
         }
@@ -416,6 +425,7 @@ class TextController extends BaseController
         $annotated = false;
         $isNew = true;
         $languageData = $this->textService->getLanguageDataForForm();
+        $scrdir = $this->languageService->getScriptDirectionTag($text->lgid);
 
         include __DIR__ . '/../Views/Text/edit_form.php';
         \Lwt\Text_From_Youtube\do_js();
@@ -451,6 +461,7 @@ class TextController extends BaseController
         $annotated = (bool) $record['annot_exists'];
         $isNew = false;
         $languageData = $this->textService->getLanguageDataForForm();
+        $scrdir = $this->languageService->getScriptDirectionTag($text->lgid);
 
         include __DIR__ . '/../Views/Text/edit_form.php';
     }
@@ -565,8 +576,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
-        require_once __DIR__ . '/../Core/Language/language_utilities.php';
-        require_once __DIR__ . '/../Core/Media/media_helpers.php';
+                require_once __DIR__ . '/../Core/Media/media_helpers.php';
 
         $textId = (int) \getreq('text');
 
@@ -663,8 +673,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
-        require_once __DIR__ . '/../Core/Language/language_utilities.php';
-
+        
         \pagestart('Long Text Import', true);
 
         $maxInputVars = ini_get('max_input_vars');
@@ -755,6 +764,7 @@ class TextController extends BaseController
             return;
         }
 
+        $scrdir = $this->languageService->getScriptDirectionTag($langId);
         include __DIR__ . '/../Views/Text/import_long_check.php';
     }
 
@@ -842,8 +852,7 @@ class TextController extends BaseController
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-        require_once __DIR__ . '/../Core/Language/language_utilities.php';
-
+        
         \pagestart('Check a Text', true);
 
         if (isset($_REQUEST['op']) && $_REQUEST['op'] === 'Check') {
@@ -887,8 +896,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Core/Text/text_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
-        require_once __DIR__ . '/../Core/Language/language_utilities.php';
-
+        
         // Get filter parameters
         $currentLang = Validation::language(
             (string) \processDBParam("filterlang", 'currentlanguage', '', false)
@@ -951,7 +959,7 @@ class TextController extends BaseController
         // Handle mark actions that skip pagestart
         $noPagestart = (\getreq('markaction') == 'deltag');
         if (!$noPagestart) {
-            \pagestart('My ' . \getLanguage($currentLang) . ' Text Archive', true);
+            \pagestart('My ' . $this->languageService->getLanguageName($currentLang) . ' Text Archive', true);
         }
 
         $message = '';

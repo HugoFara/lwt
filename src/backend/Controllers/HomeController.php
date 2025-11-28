@@ -21,7 +21,6 @@ use Lwt\Services\HomeService;
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../Core/Text/text_helpers.php';
-require_once __DIR__ . '/../Core/Language/language_utilities.php';
 require_once __DIR__ . '/../Services/HomeService.php';
 
 /**

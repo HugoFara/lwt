@@ -25,7 +25,6 @@ use Lwt\Database\TextParsing;
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/Word/word_status.php';
 require_once __DIR__ . '/../Core/Word/expression_handling.php';
-require_once __DIR__ . '/../Core/Language/language_utilities.php';
 
 /**
  * Service class for importing words/terms from files or text input.

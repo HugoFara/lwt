@@ -116,7 +116,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
                 Text:<br /><br />(max.<br />65,000<br />bytes)
             </td>
             <td class="td1">
-            <textarea <?php echo getScriptDirectionTag($text->lgid); ?>
+            <textarea <?php echo $scrdir; ?>
             name="TxText" id="TxText"
             class="notempty checkbytes checkoutsidebmp respinput"
             data_maxlength="65000" data_info="Text" rows="20"

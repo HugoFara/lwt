@@ -18,9 +18,12 @@ $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/Http/url_utilities.php';
-require_once __DIR__ . '/../../../src/backend/Core/Language/language_utilities.php';
-require_once __DIR__ . '/../../../src/backend/Core/Language/langdefs.php';
+require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
+require_once __DIR__ . '/../../../src/backend/Services/LanguageDefinitions.php';
 require_once __DIR__ . '/../../../src/backend/Services/TtsService.php';
+
+use Lwt\Services\LanguageService;
+use Lwt\Services\LanguageDefinitions;
 
 /**
  * Unit tests for the TtsService class.
@@ -32,6 +35,7 @@ class TtsServiceTest extends TestCase
     private static bool $dbConnected = false;
     private static string $tbpref = '';
     private TtsService $service;
+    private static ?LanguageService $languageService = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -50,6 +54,7 @@ class TtsServiceTest extends TestCase
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
         self::$tbpref = Globals::getTablePrefix();
+        self::$languageService = new LanguageService();
     }
 
     protected function setUp(): void
@@ -65,7 +70,7 @@ class TtsServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getLanguageOptions(LWT_LANGUAGES_ARRAY);
+        $result = $this->service->getLanguageOptions(LanguageDefinitions::getAll());
         $this->assertIsString($result);
     }
 
@@ -76,12 +81,12 @@ class TtsServiceTest extends TestCase
         }
 
         // Only test if there are languages defined
-        $languages = get_languages();
+        $languages = self::$languageService->getAllLanguages();
         if (empty($languages)) {
             $this->markTestSkipped('No languages defined');
         }
 
-        $result = $this->service->getLanguageOptions(LWT_LANGUAGES_ARRAY);
+        $result = $this->service->getLanguageOptions(LanguageDefinitions::getAll());
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('</option>', $result);
     }
@@ -92,12 +97,12 @@ class TtsServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $languages = get_languages();
+        $languages = self::$languageService->getAllLanguages();
         if (empty($languages)) {
             $this->markTestSkipped('No languages defined');
         }
 
-        $result = $this->service->getLanguageOptions(LWT_LANGUAGES_ARRAY);
+        $result = $this->service->getLanguageOptions(LanguageDefinitions::getAll());
         $this->assertStringContainsString('value="', $result);
     }
 
@@ -109,7 +114,7 @@ class TtsServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getCurrentLanguageCode(LWT_LANGUAGES_ARRAY);
+        $result = $this->service->getCurrentLanguageCode(LanguageDefinitions::getAll());
         $this->assertIsString($result);
     }
 
@@ -121,7 +126,7 @@ class TtsServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getLanguageIdFromCode('en', LWT_LANGUAGES_ARRAY);
+        $result = $this->service->getLanguageIdFromCode('en', LanguageDefinitions::getAll());
         $this->assertIsInt($result);
     }
 
@@ -132,7 +137,7 @@ class TtsServiceTest extends TestCase
         }
 
         // Use a code that's unlikely to exist
-        $result = $this->service->getLanguageIdFromCode('xx', LWT_LANGUAGES_ARRAY);
+        $result = $this->service->getLanguageIdFromCode('xx', LanguageDefinitions::getAll());
         // Either finds it or returns -1
         $this->assertIsInt($result);
     }
@@ -171,7 +176,7 @@ class TtsServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getLanguageCode(1, LWT_LANGUAGES_ARRAY);
+        $result = $this->service->getLanguageCode(1, LanguageDefinitions::getAll());
         $this->assertIsString($result);
     }
 }

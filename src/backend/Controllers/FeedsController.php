@@ -21,8 +21,8 @@ require_once __DIR__ . '/../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../Core/Text/text_helpers.php';
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Core/Media/media_helpers.php';
-require_once __DIR__ . '/../Core/Language/language_utilities.php';
 require_once __DIR__ . '/../Services/TagService.php';
+require_once __DIR__ . '/../Services/LanguageService.php';
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
@@ -30,6 +30,7 @@ use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 use Lwt\Services\FeedService;
 use Lwt\Services\TagService;
+use Lwt\Services\LanguageService;
 
 /**
  * Controller for RSS feed management.
@@ -54,12 +55,18 @@ class FeedsController extends BaseController
     private FeedService $feedService;
 
     /**
+     * @var LanguageService Language service instance
+     */
+    private LanguageService $languageService;
+
+    /**
      * Constructor - initialize feed service.
      */
     public function __construct()
     {
         parent::__construct();
         $this->feedService = new FeedService();
+        $this->languageService = new LanguageService();
     }
 
     /**
@@ -86,7 +93,7 @@ class FeedsController extends BaseController
         $currentLang = Validation::language(
             (string)\processDBParam("filterlang", 'currentlanguage', '', false)
         );
-        \pagestart('My ' . \getLanguage($currentLang) . ' Feeds', true);
+        \pagestart('My ' . $this->languageService->getLanguageName($currentLang) . ' Feeds', true);
 
         $currentFeed = (string)\processSessParam(
             "selected_feed",
@@ -197,6 +204,7 @@ class FeedsController extends BaseController
 
             if ($requiresEdit) {
                 // Include edit form view
+                $scrdir = $this->languageService->getScriptDirectionTag((int)$row['NfLgID']);
                 include __DIR__ . '/../Views/Feed/edit_text_form.php';
             } else {
                 $result = $this->createTextsFromFeed($texts, $row, $tagName, $maxTexts);
@@ -419,7 +427,7 @@ $(".hide_message").delay(2500).slideUp(1000);
         $whQuery = Escaping::toSqlSyntax(str_replace("*", "%", $currentQuery));
         $whQuery = ($currentQuery != '') ? (' and (NfName like ' . $whQuery . ')') : '';
 
-        \pagestart('Manage ' . \getLanguage($currentLang) . ' Feeds', true);
+        \pagestart('Manage ' . $this->languageService->getLanguageName($currentLang) . ' Feeds', true);
 
         // Clear wizard session if exists
         if (isset($_SESSION['wizard'])) {

@@ -26,15 +26,15 @@ use Lwt\Services\StatisticsService;
 use Lwt\Services\TableSetService;
 use Lwt\Services\TtsService;
 use Lwt\Services\WordService;
+use Lwt\Services\LanguageDefinitions;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Core/Text/text_helpers.php';
 require_once __DIR__ . '/../Core/Media/media_helpers.php';
-require_once __DIR__ . '/../Core/Language/language_utilities.php';
-require_once __DIR__ . '/../Core/Language/langdefs.php';
 require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
+require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 require_once __DIR__ . '/../Services/BackupService.php';
 require_once __DIR__ . '/../Services/DemoService.php';
 require_once __DIR__ . '/../Services/ServerDataService.php';
@@ -338,10 +338,10 @@ class AdminController extends BaseController
 
         // Get view data (used by included view)
         /** @psalm-suppress UnusedVariable */
-        $languageOptions = $ttsService->getLanguageOptions(LWT_LANGUAGES_ARRAY);
+        $languageOptions = $ttsService->getLanguageOptions(LanguageDefinitions::getAll());
         /** @psalm-suppress UnusedVariable */
         $currentLanguageCode = json_encode(
-            $ttsService->getCurrentLanguageCode(LWT_LANGUAGES_ARRAY)
+            $ttsService->getCurrentLanguageCode(LanguageDefinitions::getAll())
         );
 
         // Render page

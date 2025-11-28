@@ -16,7 +16,7 @@ $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/backend/Core/UI/ui_helpers.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Language/language_utilities.php';
+require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
 
 /**
  * Tests for FeedService RSS feed operations.

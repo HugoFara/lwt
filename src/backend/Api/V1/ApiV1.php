@@ -25,12 +25,12 @@ require_once __DIR__ . '/../../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../../Core/Text/text_helpers.php';
 require_once __DIR__ . '/../../Core/Test/test_helpers.php';
 require_once __DIR__ . '/../../Core/Http/param_helpers.php';
-require_once __DIR__ . '/../../Core/Language/language_utilities.php';
 require_once __DIR__ . '/../../Core/Word/word_status.php';
 require_once __DIR__ . '/../../Core/Word/dictionary_links.php';
 require_once __DIR__ . '/../../Core/Media/media_helpers.php';
 require_once __DIR__ . '/../../Core/Text/simterms.php';
-require_once __DIR__ . '/../../Core/Language/langdefs.php';
+require_once __DIR__ . '/../../Services/LanguageService.php';
+require_once __DIR__ . '/../../Services/LanguageDefinitions.php';
 
 use Lwt\Api\V1\Handlers\FeedHandler;
 use Lwt\Api\V1\Handlers\ImportHandler;

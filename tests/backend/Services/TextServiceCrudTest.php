@@ -22,7 +22,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
 require_once __DIR__ . '/../../../src/backend/Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Text/text_helpers.php';
-require_once __DIR__ . '/../../../src/backend/Core/Language/language_utilities.php';
+require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 
 /**
  * CRUD tests for the TextService class.

@@ -22,7 +22,7 @@ $GLOBALS['dbname'] = "test_" . $config['dbname'];
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Export/export_helpers.php';
-require_once __DIR__ . '/../../../src/backend/Core/Language/language_utilities.php';
+require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/word_scoring.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/expression_handling.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordService.php';

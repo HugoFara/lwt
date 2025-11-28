@@ -17,8 +17,12 @@ namespace Lwt\Views;
 
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
 require_once __DIR__ . '/../Core/Word/word_status.php';
-require_once __DIR__ . '/../Core/Language/language_utilities.php';
 require_once __DIR__ . '/../Core/Text/text_navigation.php';
+require_once __DIR__ . '/../Services/LanguageService.php';
+require_once __DIR__ . '/../Services/LanguageDefinitions.php';
+
+use Lwt\Services\LanguageService;
+use Lwt\Services\LanguageDefinitions;
 
 /**
  * View class for rendering test/review UI components.
@@ -616,7 +620,8 @@ $(document).ready(function() {
         string $translateUri,
         int $langId
     ): void {
-        $langCode = \getLanguageCode($langId, LWT_LANGUAGES_ARRAY);
+        $languageService = new LanguageService();
+        $langCode = $languageService->getLanguageCode($langId, LanguageDefinitions::getAll());
         ?>
 <script type="text/javascript">
     LWT_DATA.language.id = <?php echo json_encode($langId); ?>;

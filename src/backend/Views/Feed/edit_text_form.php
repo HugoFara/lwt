@@ -13,6 +13,7 @@
  * - $nfId: int feed ID
  * - $maxTexts: int maximum texts setting
  * - $languages: array of language records
+ * - $scrdir: string script direction HTML attribute
  *
  * PHP version 8.1
  *
@@ -57,7 +58,7 @@ foreach ($texts as $text):
         <td class="td1 right">Text:</td>
         <td class="td1">
             <textarea
-                <?php echo getScriptDirectionTag((int)$row['NfLgID']); ?>
+                <?php echo $scrdir; ?>
             name="feed[<?php echo $count; ?>][TxText]" class="notempty checkbytes"
             cols="60" rows="20"
             ><?php echo tohtml($text['TxText']); ?></textarea>

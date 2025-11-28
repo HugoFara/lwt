@@ -17,13 +17,16 @@
 namespace Lwt\Controllers;
 
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-require_once __DIR__ . '/../Core/Language/language_utilities.php';
 require_once __DIR__ . '/../Services/TagService.php';
+require_once __DIR__ . '/../Services/LanguageService.php';
+require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 
 use Lwt\Services\WordService;
 use Lwt\Services\WordListService;
 use Lwt\Services\WordUploadService;
 use Lwt\Services\TagService;
+use Lwt\Services\LanguageService;
+use Lwt\Services\LanguageDefinitions;
 
 /**
  * Controller for vocabulary/term management.
@@ -59,12 +62,18 @@ class WordController extends BaseController
     protected ?WordUploadService $uploadService = null;
 
     /**
+     * @var LanguageService Language service instance
+     */
+    protected LanguageService $languageService;
+
+    /**
      * Initialize controller with WordService.
      */
     public function __construct()
     {
         parent::__construct();
         $this->wordService = new WordService();
+        $this->languageService = new LanguageService();
     }
 
     /**
@@ -248,7 +257,7 @@ class WordController extends BaseController
         $titletext = ($new ? "New Term" : "Edit Term") . ": " . \tohtml($term);
         \pagestart_nobody($titletext);
 
-        $scrdir = \getScriptDirectionTag($lang);
+        $scrdir = $this->languageService->getScriptDirectionTag($lang);
         $langData = $this->wordService->getLanguageData($lang);
         $showRoman = $langData['showRoman'];
 
@@ -257,8 +266,8 @@ class WordController extends BaseController
             $sentence = $this->wordService->getSentenceForTerm($textId, $ord, $termlc);
             $transUri = $langData['translateUri'];
             $lgname = $langData['name'];
-            $langShort = array_key_exists($lgname, \LWT_LANGUAGES_ARRAY) ?
-                \LWT_LANGUAGES_ARRAY[$lgname][1] : '';
+            $langShort = array_key_exists($lgname, LanguageDefinitions::getAll()) ?
+                LanguageDefinitions::getAll()[$lgname][1] : '';
 
             include __DIR__ . '/../Views/Word/form_edit_new.php';
         } else {
@@ -447,7 +456,7 @@ class WordController extends BaseController
         $termlc = mb_strtolower($term, 'UTF-8');
         $titletext = "Edit Term: " . \tohtml($term);
         \pagestart_nobody($titletext);
-        $scrdir = \getScriptDirectionTag($lang);
+        $scrdir = $this->languageService->getScriptDirectionTag($lang);
 
         include __DIR__ . '/../Views/Word/form_edit_term.php';
     }
@@ -535,7 +544,7 @@ class WordController extends BaseController
 
         if (!$noPagestart) {
             \pagestart(
-                'My ' . \getLanguage($currentlang) . ' Terms (Words and Expressions)',
+                'My ' . $this->languageService->getLanguageName($currentlang) . ' Terms (Words and Expressions)',
                 true
             );
         }
@@ -873,6 +882,7 @@ class WordController extends BaseController
         $formData = $listService->getNewTermFormData($lgid);
         $scrdir = $formData['scrdir'];
         $showRoman = $formData['showRoman'];
+        $languageName = $this->languageService->getLanguageName($lgid);
 
         include __DIR__ . '/../Views/Word/list_new_form.php';
     }
@@ -984,7 +994,7 @@ class WordController extends BaseController
         // Show new term link
         if ($currentlang != '') {
             ?>
-<p><a href="/words/edit?new=1&amp;lang=<?php echo $currentlang; ?>"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New <?php echo \tohtml(\getLanguage($currentlang)); ?> Term ...</a></p>
+<p><a href="/words/edit?new=1&amp;lang=<?php echo $currentlang; ?>"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New <?php echo \tohtml($this->languageService->getLanguageName($currentlang)); ?> Term ...</a></p>
             <?php
         } else {
             ?>
@@ -1187,7 +1197,7 @@ class WordController extends BaseController
             }
         }
 
-        $scrdir = \getScriptDirectionTag((int) $lgid);
+        $scrdir = $this->languageService->getScriptDirectionTag((int) $lgid);
         $seid = $this->wordService->getSentenceIdAtPosition($tid, $ord);
         $sent = \getSentence(
             $seid,
@@ -1224,7 +1234,7 @@ class WordController extends BaseController
         $termText = $wordData['text'];
         $textlc = mb_strtolower($termText, 'UTF-8');
 
-        $scrdir = \getScriptDirectionTag($lgid);
+        $scrdir = $this->languageService->getScriptDirectionTag($lgid);
         $showRoman = $this->wordService->shouldShowRomanization($tid);
 
         $status = $wordData['status'];
@@ -1420,7 +1430,7 @@ class WordController extends BaseController
             // Display the new word form
             $lang = (int)\getreq('lang');
             $textId = (int)\getreq('text');
-            $scrdir = \getScriptDirectionTag($lang);
+            $scrdir = $this->languageService->getScriptDirectionTag($lang);
 
             $langData = $this->wordService->getLanguageData($lang);
             $showRoman = $langData['showRoman'];
@@ -1461,7 +1471,7 @@ class WordController extends BaseController
         }
 
         $tags = TagService::getWordTagListFormatted($wid, '', false, false);
-        $scrdir = \getScriptDirectionTag($word['langId']);
+        $scrdir = $this->languageService->getScriptDirectionTag($word['langId']);
 
         include __DIR__ . '/../Views/Word/show.php';
 

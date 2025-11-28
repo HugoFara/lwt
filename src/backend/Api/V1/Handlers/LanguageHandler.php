@@ -3,6 +3,8 @@
 namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Database\Connection;
+use Lwt\Services\LanguageService;
+use Lwt\Services\LanguageDefinitions;
 
 /**
  * Handler for language-related API operations.
@@ -11,6 +13,19 @@ use Lwt\Database\Connection;
  */
 class LanguageHandler
 {
+    /**
+     * @var LanguageService Language service instance
+     */
+    private LanguageService $languageService;
+
+    /**
+     * Constructor - initialize language service.
+     */
+    public function __construct()
+    {
+        $this->languageService = new LanguageService();
+    }
+
     /**
      * Get the reading configuration for a language.
      *
@@ -26,7 +41,7 @@ class LanguageHandler
             WHERE LgID = " . $langId
         );
         $record = mysqli_fetch_assoc($req);
-        $abbr = \getLanguageCode($langId, LWT_LANGUAGES_ARRAY);
+        $abbr = $this->languageService->getLanguageCode($langId, LanguageDefinitions::getAll());
 
         if ($record["LgTTSVoiceAPI"] != '') {
             $readingMode = "external";
@@ -57,9 +72,9 @@ class LanguageHandler
     public function getPhoneticReading(string $text, ?int $langId = null, ?string $langCode = null): array
     {
         if ($langId !== null) {
-            $data = \phoneticReading($text, $langId);
+            $data = $this->languageService->getPhoneticReadingById($text, $langId);
         } else {
-            $data = \phonetic_reading($text, $langCode);
+            $data = $this->languageService->getPhoneticReadingByCode($text, $langCode ?? '');
         }
         return ["phonetic_reading" => $data];
     }

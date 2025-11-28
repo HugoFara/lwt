@@ -64,7 +64,7 @@ $shorter = ($textCount == 1 ? ' ' : ' shorter ');
         </td>
         <td class="td1">
             <textarea readonly="readonly"
-                <?php echo getScriptDirectionTag($langId); ?>
+                <?php echo $scrdir; ?>
             name="text[<?php echo $textNo; ?>]" cols="60" rows="10"><?php echo $textString; ?></textarea>
         </td>
     </tr>

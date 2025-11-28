@@ -22,6 +22,7 @@ use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
+require_once __DIR__ . '/LanguageService.php';
 
 /**
  * Service class for Text-to-Speech settings.
@@ -43,11 +44,19 @@ class TtsService
     private string $tbpref;
 
     /**
+     * Language service instance.
+     *
+     * @var LanguageService
+     */
+    private LanguageService $languageService;
+
+    /**
      * Constructor - initialize table prefix.
      */
     public function __construct()
     {
         $this->tbpref = Globals::getTablePrefix();
+        $this->languageService = new LanguageService();
     }
 
     /**
@@ -60,7 +69,7 @@ class TtsService
      */
     public function getLanguageCode(int $lgId, array $langArray): string
     {
-        return getLanguageCode($lgId, $langArray);
+        return $this->languageService->getLanguageCode($lgId, $langArray);
     }
 
     /**
@@ -74,7 +83,7 @@ class TtsService
     public function getLanguageIdFromCode(string $code, array $langArray): int
     {
         $trimmed = substr($code, 0, 2);
-        foreach (get_languages() as $language => $language_id) {
+        foreach ($this->languageService->getAllLanguages() as $language => $language_id) {
             if (!isset($langArray[$language])) {
                 continue;
             }
@@ -96,8 +105,8 @@ class TtsService
     public function getLanguageOptions(array $langArray): string
     {
         $output = '';
-        foreach (get_languages() as $language => $language_id) {
-            $languageCode = getLanguageCode($language_id, $langArray);
+        foreach ($this->languageService->getAllLanguages() as $language => $language_id) {
+            $languageCode = $this->languageService->getLanguageCode($language_id, $langArray);
             $output .= sprintf(
                 '<option value="%s">%s</option>',
                 $languageCode,
@@ -117,7 +126,7 @@ class TtsService
     public function getCurrentLanguageCode(array $langArray): string
     {
         $lid = (int)Settings::get('currentlanguage');
-        return getLanguageCode($lid, $langArray);
+        return $this->languageService->getLanguageCode($lid, $langArray);
     }
 
     /**
@@ -158,6 +167,6 @@ class TtsService
             FROM {$this->tbpref}languages
             WHERE LgName = " . Escaping::toSqlSyntax($language)
         );
-        return getLanguageCode($lg_id, $langArray);
+        return $this->languageService->getLanguageCode($lg_id, $langArray);
     }
 }

@@ -34,9 +34,6 @@ require_once __DIR__ . '/text_statistics.php';
 // Sentence operations (find, format, display sentences)
 require_once __DIR__ . '/sentence_operations.php';
 
-// Language utilities (get language info, codes, direction)
-require_once __DIR__ . '/../Language/language_utilities.php';
-
 // Expression handling (multi-words, MeCab)
 require_once __DIR__ . '/../Word/expression_handling.php';
 
@@ -49,5 +46,6 @@ require_once __DIR__ . '/../database_operations.php';
 // Media players (audio, video)
 require_once __DIR__ . '/../Media/media_players.php';
 
-// Phonetic reading (Japanese/MeCab)
-require_once __DIR__ . '/../Language/phonetic_reading.php';
+// Language services (utilities, phonetic reading, definitions)
+require_once __DIR__ . '/../../Services/LanguageService.php';
+require_once __DIR__ . '/../../Services/LanguageDefinitions.php';

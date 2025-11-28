@@ -21,6 +21,8 @@ use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 
+require_once __DIR__ . '/LanguageService.php';
+
 /**
  * Service class for managing word list operations.
  *
@@ -862,9 +864,10 @@ class WordListService
                 WHERE LgID = $langId";
         $showRoman = (bool) Connection::fetchValue($sql);
 
+        $languageService = new LanguageService();
         return [
             'showRoman' => $showRoman,
-            'scrdir' => \getScriptDirectionTag($langId),
+            'scrdir' => $languageService->getScriptDirectionTag($langId),
         ];
     }
 

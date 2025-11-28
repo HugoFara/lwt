@@ -24,6 +24,7 @@ use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
+require_once __DIR__ . '/../Core/Http/url_utilities.php';
 
 /**
  * Service class for managing languages.
@@ -557,5 +558,189 @@ class LanguageService
                $stats['archivedTexts'] === 0 &&
                $stats['words'] === 0 &&
                $stats['feeds'] === 0;
+    }
+
+    // =========================================================================
+    // Methods migrated from Core/Language/language_utilities.php
+    // =========================================================================
+
+    /**
+     * Get language name from its ID.
+     *
+     * @param string|int $lid Language ID
+     *
+     * @return string Language name, empty string if not found
+     */
+    public function getLanguageName($lid): string
+    {
+        $tbpref = Globals::getTablePrefix();
+        if (is_int($lid)) {
+            $lg_id = $lid;
+        } elseif (isset($lid) && trim($lid) != '' && ctype_digit($lid)) {
+            $lg_id = (int) $lid;
+        } else {
+            return '';
+        }
+        $r = Connection::fetchValue(
+            "SELECT LgName AS value
+            FROM {$tbpref}languages
+            WHERE LgID = $lg_id"
+        );
+        if (isset($r)) {
+            return (string)$r;
+        }
+        return '';
+    }
+
+    /**
+     * Try to get language code from its ID.
+     *
+     * @param int   $lgId           Language ID
+     * @param array $languagesTable Table of languages, usually from LanguageDefinitions::getAll()
+     *
+     * @return string Two-letter code (e.g., BCP 47) or empty string
+     */
+    public function getLanguageCode(int $lgId, array $languagesTable): string
+    {
+        $tbpref = Globals::getTablePrefix();
+        $query = "SELECT LgName, LgGoogleTranslateURI
+        FROM {$tbpref}languages
+        WHERE LgID = $lgId";
+
+        $res = Connection::query($query);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+
+        if ($record === null) {
+            return '';
+        }
+
+        $lgName = (string) $record["LgName"];
+        $translatorUri = (string) $record["LgGoogleTranslateURI"];
+
+        // If we are using a standard language name, use it
+        if (array_key_exists($lgName, $languagesTable)) {
+            return $languagesTable[$lgName][1];
+        }
+
+        // Otherwise, use the translator URL
+        $lgFromDict = \langFromDict($translatorUri);
+        if ($lgFromDict != '') {
+            return $lgFromDict;
+        }
+        return '';
+    }
+
+    /**
+     * Return a right-to-left direction indication in HTML if language is RTL.
+     *
+     * @param string|int|null $lid Language ID
+     *
+     * @return string ' dir="rtl" ' or empty string
+     *
+     * @psalm-return ' dir="rtl" '|''
+     */
+    public function getScriptDirectionTag($lid): string
+    {
+        $tbpref = Globals::getTablePrefix();
+        if (!isset($lid)) {
+            return '';
+        }
+        if (is_string($lid)) {
+            if (trim($lid) == '' || !is_numeric($lid)) {
+                return '';
+            }
+            $lg_id = (int) $lid;
+        } else {
+            $lg_id = $lid;
+        }
+        $r = Connection::fetchValue(
+            "SELECT LgRightToLeft as value
+            from {$tbpref}languages
+            where LgID = $lg_id"
+        );
+        if (isset($r) && $r) {
+            return ' dir="rtl" ';
+        }
+        return '';
+    }
+
+    // =========================================================================
+    // Methods migrated from Core/Language/phonetic_reading.php
+    // =========================================================================
+
+    /**
+     * Convert text to phonetic representation using MeCab (for Japanese).
+     *
+     * @param string $text  Text to be converted
+     * @param int    $lgId  Language ID
+     *
+     * @return string Parsed text in phonetic format
+     */
+    public function getPhoneticReadingById(string $text, int $lgId): string
+    {
+        $tbpref = Globals::getTablePrefix();
+        $sentenceSplit = Connection::fetchValue(
+            "SELECT LgRegexpWordCharacters AS value FROM {$tbpref}languages
+            WHERE LgID = $lgId"
+        );
+
+        // For now we only support phonetic text with MeCab
+        if ($sentenceSplit != "mecab") {
+            return $text;
+        }
+
+        return $this->processMecabPhonetic($text, $tbpref);
+    }
+
+    /**
+     * Convert text to phonetic representation by language code.
+     *
+     * @param string $text Text to be converted
+     * @param string $lang Language code (usually BCP 47 or ISO 639-1)
+     *
+     * @return string Parsed text in phonetic format
+     */
+    public function getPhoneticReadingByCode(string $text, string $lang): string
+    {
+        $tbpref = Globals::getTablePrefix();
+        // Many languages are already phonetic
+        if (!str_starts_with($lang, "ja") && !str_starts_with($lang, "jp")) {
+            return $text;
+        }
+
+        return $this->processMecabPhonetic($text, $tbpref);
+    }
+
+    /**
+     * Process text through MeCab for phonetic reading.
+     *
+     * @param string $text   Text to process
+     * @param string $tbpref Table prefix
+     *
+     * @return string Phonetic reading from MeCab
+     */
+    private function processMecabPhonetic(string $text, string $tbpref): string
+    {
+        $mecab_file = sys_get_temp_dir() . "/" . $tbpref . "mecab_to_db.txt";
+        $mecab_args = ' -O yomi ';
+        if (file_exists($mecab_file)) {
+            unlink($mecab_file);
+        }
+        $fp = fopen($mecab_file, 'w');
+        fwrite($fp, $text . "\n");
+        fclose($fp);
+        $mecab = \get_mecab_path($mecab_args);
+        $handle = popen($mecab . $mecab_file, "r");
+        $mecab_str = '';
+        while (($line = fgets($handle, 4096)) !== false) {
+            $mecab_str .= $line;
+        }
+        if (!feof($handle)) {
+            echo "Error: unexpected fgets() fail\n";
+        }
+        pclose($handle);
+        unlink($mecab_file);
+        return $mecab_str;
     }
 }

@@ -18,13 +18,14 @@ require_once __DIR__ . '/../../../src/backend/Core/Media/media_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Core/Text/text_navigation.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/dictionary_links.php';
 require_once __DIR__ . '/../../../src/backend/Core/Test/test_helpers.php';
-require_once __DIR__ . '/../../../src/backend/Core/Language/language_utilities.php';
+require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Word/word_status.php';
 require_once __DIR__ . '/../../../src/backend/Services/TableSetService.php';
 
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+use Lwt\Services\LanguageService;
 use Lwt\Services\TableSetService;
 use Lwt\Services\TagService;
 use PHPUnit\Framework\TestCase;
@@ -37,6 +38,8 @@ use PHPUnit\Framework\TestCase;
  */
 class IntegrationTest extends TestCase
 {
+    private static ?LanguageService $languageService = null;
+
     public static function setUpBeforeClass(): void
     {
         // Ensure database connection is established
@@ -70,6 +73,8 @@ class IntegrationTest extends TestCase
             $handle = fopen($filename, "r");
             restore_file($handle, "Demo Database");
         }
+
+        self::$languageService = new LanguageService();
     }
 
     public function testInstallDemoDB(): void
@@ -446,7 +451,7 @@ class IntegrationTest extends TestCase
 
     public function testGetLanguages(): void
     {
-        $languages = get_languages();
+        $languages = self::$languageService->getAllLanguages();
         $this->assertIsArray($languages);
 
         // Returns array of language_name => language_id pairs
@@ -465,13 +470,14 @@ class IntegrationTest extends TestCase
         $lang_res = Connection::query("SELECT LgID FROM languages LIMIT 1");
         if ($lang_row = mysqli_fetch_assoc($lang_res)) {
             $lang_id = (int)$lang_row['LgID'];
-            $dir_tag = getScriptDirectionTag($lang_id);
+            $dir_tag = self::$languageService->getScriptDirectionTag($lang_id);
 
             $this->assertIsString($dir_tag);
             $this->assertTrue(
                 $dir_tag === 'direction:ltr;' ||
                 $dir_tag === 'direction:rtl;' ||
-                $dir_tag === ''
+                $dir_tag === '' ||
+                $dir_tag === ' dir="rtl" '
             );
         } else {
             $this->markTestSkipped('No languages in database');
