@@ -1076,6 +1076,71 @@ class WordService
     }
 
     /**
+     * Create a word on hover with optional Google Translate.
+     *
+     * Used when user hovers and clicks to set a word status directly from the text.
+     *
+     * @param int    $textId      Text ID
+     * @param string $text        Word text
+     * @param int    $status      Word status (1-5)
+     * @param string $translation Optional translation
+     *
+     * @return array{
+     *     wid: int,
+     *     word: string,
+     *     wordRaw: string,
+     *     translation: string,
+     *     status: int,
+     *     hex: string
+     * }
+     */
+    public function createOnHover(
+        int $textId,
+        string $text,
+        int $status,
+        string $translation = '*'
+    ): array {
+        $word = Escaping::toSqlSyntax($text);
+        $wordlc = Escaping::toSqlSyntax(mb_strtolower($text, 'UTF-8'));
+
+        $langId = (int) Connection::fetchValue(
+            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = $textId"
+        );
+
+        Connection::execute(
+            "INSERT INTO {$this->tbpref}words (
+                WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
+                WoRomanization, WoStatusChanged," .
+                \make_score_random_insert_update('iv') . ") values(
+                    $langId, $wordlc, $word, $status, " .
+                    Escaping::toSqlSyntax($translation) . ', "", "", NOW(), ' .
+                    \make_score_random_insert_update('id') . '
+                )',
+            "Term saved"
+        );
+
+        $wid = (int) Connection::lastInsertId();
+
+        Connection::query(
+            "UPDATE {$this->tbpref}textitems2 SET Ti2WoID = $wid
+            WHERE Ti2LgID = $langId AND LOWER(Ti2Text) = $wordlc"
+        );
+
+        $hex = \strToClassName(
+            Escaping::prepareTextdata(mb_strtolower($text, 'UTF-8'))
+        );
+
+        return [
+            'wid' => $wid,
+            'word' => $word,
+            'wordRaw' => $text,
+            'translation' => $translation,
+            'status' => $status,
+            'hex' => $hex
+        ];
+    }
+
+    /**
      * Mark all unknown words in a text with a specific status.
      *
      * @param int $textId Text ID

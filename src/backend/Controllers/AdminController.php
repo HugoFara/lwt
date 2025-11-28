@@ -16,6 +16,7 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Classes\GoogleTranslate;
 use Lwt\Services\BackupService;
 use Lwt\Services\DemoService;
 use Lwt\Services\ServerDataService;
@@ -23,6 +24,7 @@ use Lwt\Services\SettingsService;
 use Lwt\Services\StatisticsService;
 use Lwt\Services\TableSetService;
 use Lwt\Services\TtsService;
+use Lwt\Services\WordService;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/UI/ui_helpers.php';
@@ -31,6 +33,7 @@ require_once __DIR__ . '/../Core/Text/text_helpers.php';
 require_once __DIR__ . '/../Core/Media/media_helpers.php';
 require_once __DIR__ . '/../Core/Language/language_utilities.php';
 require_once __DIR__ . '/../Core/Language/langdefs.php';
+require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
 require_once __DIR__ . '/../Services/BackupService.php';
 require_once __DIR__ . '/../Services/DemoService.php';
 require_once __DIR__ . '/../Services/ServerDataService.php';
@@ -38,6 +41,7 @@ require_once __DIR__ . '/../Services/SettingsService.php';
 require_once __DIR__ . '/../Services/StatisticsService.php';
 require_once __DIR__ . '/../Services/TableSetService.php';
 require_once __DIR__ . '/../Services/TtsService.php';
+require_once __DIR__ . '/../Services/WordService.php';
 
 /**
  * Controller for administrative functions.
@@ -192,7 +196,19 @@ class AdminController extends BaseController
     }
 
     /**
-     * Hover settings page (helper frame for word status)
+     * Hover settings page - creates a word with status from text reading hover action.
+     *
+     * This is a helper frame that creates a word when user clicks a status
+     * from the hover menu while reading a text.
+     *
+     * Required GET parameters:
+     * - text: Word text
+     * - tid: Text ID
+     * - status: Word status (1-5)
+     *
+     * Optional GET parameters (for translation):
+     * - tl: Target language code
+     * - sl: Source language code
      *
      * @param array<string, string> $params Route parameters
      *
@@ -200,9 +216,57 @@ class AdminController extends BaseController
      */
     public function settingsHover(array $params): void
     {
-        // This is a helper frame, not a true admin page
-        // Keep using the legacy file for now as it has complex JS interaction
-        include __DIR__ . '/../Legacy/settings_hover.php';
+        $wordService = new WordService();
+
+        $text = $_REQUEST['text'];
+        $textId = (int) $_REQUEST['tid'];
+        $status = (int) $_REQUEST['status'];
+
+        // Get translation if status is 1 (new word)
+        $translation = '*';
+        if ($status == 1) {
+            $tl = $_GET["tl"] ?? '';
+            $sl = $_GET["sl"] ?? '';
+
+            if ($tl !== '' && $sl !== '') {
+                $tl_array = GoogleTranslate::staticTranslate($text, $sl, $tl);
+                if ($tl_array) {
+                    $translation = $tl_array[0];
+                }
+                if ($translation == $text) {
+                    $translation = '*';
+                }
+            }
+
+            header('Pragma: no-cache');
+            header('Expires: 0');
+        }
+
+        // Create the word
+        $result = $wordService->createOnHover($textId, $text, $status, $translation);
+
+        // Render page
+        \pagestart("New Term: " . $result['word'], false);
+
+        // Prepare view variables (used by included view)
+        /** @psalm-suppress UnusedVariable */
+        $word = $result['word'];
+        /** @psalm-suppress UnusedVariable */
+        $wordRaw = $result['wordRaw'];
+        /** @psalm-suppress UnusedVariable */
+        $wid = $result['wid'];
+        /** @psalm-suppress UnusedVariable */
+        $hex = $result['hex'];
+        /** @psalm-suppress UnusedVariable */
+        $translation = $result['translation'];
+        /** @psalm-suppress UnusedVariable */
+        $textId = $textId;
+        /** @psalm-suppress UnusedVariable */
+        $status = $status;
+
+        include __DIR__ . '/../Views/Word/hover_save_result.php';
+
+        \pageend();
     }
 
     /**
