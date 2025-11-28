@@ -18,9 +18,11 @@ namespace Lwt\Controllers;
 
 use Lwt\Services\TextPrintService;
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
+use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Services/TextPrintService.php';
 require_once __DIR__ . '/../Api/V1/Handlers/ImprovedTextHandler.php';
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 
 /**
  * Controller for text printing functionality.
@@ -79,7 +81,6 @@ class TextPrintController extends BaseController
     public function printPlain(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Services/TextStatisticsService.php';
         require_once __DIR__ . '/../Services/SentenceService.php';
         require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -120,11 +121,11 @@ class TextPrintController extends BaseController
         $textItems = $this->printService->getTextItems($textId);
 
         // Render the view
-        \pagestart_nobody('Print');
+        PageLayoutHelper::renderPageStartNobody('Print');
 
         include __DIR__ . '/../Views/TextPrint/plain_print.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -139,7 +140,6 @@ class TextPrintController extends BaseController
     public function printAnnotated(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Services/TextStatisticsService.php';
         require_once __DIR__ . '/../Services/SentenceService.php';
         require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -186,7 +186,7 @@ class TextPrintController extends BaseController
         $this->printService->setCurrentText($textId);
 
         // Render the view
-        \pagestart_nobody('Annotated Text', 'input[type="radio"]{display:inline;}');
+        PageLayoutHelper::renderPageStartNobody('Annotated Text', 'input[type="radio"]{display:inline;}');
 
         if ($editMode) {
             $this->renderEditMode($textId, $annExists, $viewData);
@@ -194,7 +194,7 @@ class TextPrintController extends BaseController
             $this->renderDisplayMode($textId, $viewData, $ann ?? '');
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**

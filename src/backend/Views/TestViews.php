@@ -15,14 +15,19 @@
 
 namespace Lwt\Views;
 
-require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+use Lwt\Services\LanguageService;
+use Lwt\Services\LanguageDefinitions;
+use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\StatusHelper;
+use Lwt\View\Helper\FormHelper;
+
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../View/Helper/StatusHelper.php';
+require_once __DIR__ . '/../View/Helper/FormHelper.php';
 require_once __DIR__ . '/../Services/WordStatusService.php';
 require_once __DIR__ . '/../Services/TextNavigationService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Services/LanguageDefinitions.php';
-
-use Lwt\Services\LanguageService;
-use Lwt\Services\LanguageDefinitions;
 
 /**
  * View class for rendering test/review UI components.
@@ -52,7 +57,7 @@ class TestViews
 <div class="flex-header">
     <div>
         <a href="/texts" target="_top">
-            <?php \echo_lwt_logo(); ?>
+            <?php echo PageLayoutHelper::buildLogo(); ?>
         </a>
     </div>
     <?php
@@ -77,7 +82,7 @@ class TestViews
         }
         ?>
     <div>
-        <?php \quickMenu(); ?>
+        <?php echo PageLayoutHelper::buildQuickMenu(); ?>
     </div>
 </div>
         <?php
@@ -203,15 +208,15 @@ class TestViews
     </span>
     <span style="margin-left: 15px; margin-right: 15px;">
         <img id="not-tested-box" class="borderl"
-            src="<?php \print_file_path('icn/test_notyet.png'); ?>"
+            src="<?php echo \get_file_path('icn/test_notyet.png'); ?>"
             title="Not yet tested" alt="Not yet tested" height="10"
             width="<?php echo $lRemaining; ?>" /><img
             id="wrong-tests-box" class="bordermiddle"
-            src="<?php \print_file_path('icn/test_wrong.png'); ?>"
+            src="<?php echo \get_file_path('icn/test_wrong.png'); ?>"
             title="Wrong" alt="Wrong" height="10"
             width="<?php echo $lWrong; ?>" /><img
             id="correct-tests-box" class="borderr"
-            src="<?php \print_file_path('icn/test_correct.png'); ?>"
+            src="<?php echo \get_file_path('icn/test_correct.png'); ?>"
             title="Correct" alt="Correct" height="10"
             width="<?php echo $lCorrect; ?>" />
     </span>
@@ -276,13 +281,13 @@ class TestViews
         int $oldScore,
         int $newScore
     ): void {
-        \pagestart("Term: " . $wordText, false);
+        PageLayoutHelper::renderPageStart("Term: " . $wordText, false);
 
         if ($oldStatus == $newStatus) {
-            echo '<p>Status ' . \get_colored_status_msg($newStatus) . ' not changed.</p>';
+            echo '<p>Status ' . StatusHelper::buildColoredMessage($newStatus, StatusHelper::getName($newStatus), StatusHelper::getAbbr($newStatus)) . ' not changed.</p>';
         } else {
-            echo '<p>Status changed from ' . \get_colored_status_msg($oldStatus) .
-                ' to ' . \get_colored_status_msg($newStatus) . '.</p>';
+            echo '<p>Status changed from ' . StatusHelper::buildColoredMessage($oldStatus, StatusHelper::getName($oldStatus), StatusHelper::getAbbr($oldStatus)) .
+                ' to ' . StatusHelper::buildColoredMessage($newStatus, StatusHelper::getName($newStatus), StatusHelper::getAbbr($newStatus)) . '.</p>';
         }
 
         echo "<p>Old score was $oldScore, new score is now $newScore.</p>";
@@ -372,17 +377,17 @@ class TestViews
     {
         ?>
 <p>
-    <input type="checkbox" id="cbEdit" <?php echo \get_checked($settings['edit']); ?> />
+    <input type="checkbox" id="cbEdit" <?php echo FormHelper::getChecked($settings['edit']); ?> />
     Edit
-    <input type="checkbox" id="cbStatus" <?php echo \get_checked($settings['status']); ?> />
+    <input type="checkbox" id="cbStatus" <?php echo FormHelper::getChecked($settings['status']); ?> />
     Status
-    <input type="checkbox" id="cbTerm" <?php echo \get_checked($settings['term']); ?> />
+    <input type="checkbox" id="cbTerm" <?php echo FormHelper::getChecked($settings['term']); ?> />
     Term
-    <input type="checkbox" id="cbTrans" <?php echo \get_checked($settings['trans']); ?> />
+    <input type="checkbox" id="cbTrans" <?php echo FormHelper::getChecked($settings['trans']); ?> />
     Translation
-    <input type="checkbox" id="cbRom" <?php echo \get_checked($settings['rom']); ?> />
+    <input type="checkbox" id="cbRom" <?php echo FormHelper::getChecked($settings['rom']); ?> />
     Romanization
-    <input type="checkbox" id="cbSentence" <?php echo \get_checked($settings['sentence']); ?> />
+    <input type="checkbox" id="cbSentence" <?php echo FormHelper::getChecked($settings['sentence']); ?> />
     Sentence
 </p>
         <?php
@@ -549,10 +554,12 @@ $(document).ready(function() {
     </td>
     <td class="td1 center" nowrap="nowrap">
         <span id="STAT<?php echo $word['WoID']; ?>">
-            <?php echo \make_status_controls_test_table(
+            <?php echo StatusHelper::buildTestTableControls(
                 $word['Score'],
                 $word['WoStatus'],
-                $word['WoID']
+                $word['WoID'],
+                StatusHelper::getAbbr($word['WoStatus']),
+                \get_file_path('assets/icons/placeholder.png')
             ); ?>
         </span>
     </td>

@@ -16,13 +16,14 @@
 
 namespace Lwt\Controllers;
 
-require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-require_once __DIR__ . '/../Services/MobileService.php';
-
 use Lwt\Database\Settings;
 use Lwt\Services\MobileService;
 use Lwt\Services\TableSetService;
+use Lwt\View\Helper\PageLayoutHelper;
+
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../Services/MobileService.php';
 
 /**
  * Controller for mobile interface.
@@ -259,10 +260,10 @@ class MobileController extends BaseController
         $isFixed = \Lwt\Core\Globals::isTablePrefixFixed();
         $prefixes = TableSetService::getAllPrefixes();
 
-        \pagestart('Select Table Set', false);
+        PageLayoutHelper::renderPageStart('Select Table Set', false);
 
         include __DIR__ . '/../Views/Mobile/table_set.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 }

@@ -16,8 +16,10 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\View\Helper\PageLayoutHelper;
+
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../Services/TextStatisticsService.php';
 require_once __DIR__ . '/../Services/SentenceService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -100,7 +102,7 @@ class FeedsController extends BaseController
         $currentLang = Validation::language(
             (string)\processDBParam("filterlang", 'currentlanguage', '', false)
         );
-        \pagestart('My ' . $this->languageService->getLanguageName($currentLang) . ' Feeds', true);
+        PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Feeds', true);
 
         $currentFeed = (string)\processSessParam(
             "selected_feed",
@@ -136,7 +138,7 @@ class FeedsController extends BaseController
             $this->renderFeedsIndex((int)$currentLang, (int)$currentFeed);
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -434,7 +436,7 @@ $(".hide_message").delay(2500).slideUp(1000);
         $whQuery = Escaping::toSqlSyntax(str_replace("*", "%", $currentQuery));
         $whQuery = ($currentQuery != '') ? (' and (NfName like ' . $whQuery . ')') : '';
 
-        \pagestart('Manage ' . $this->languageService->getLanguageName($currentLang) . ' Feeds', true);
+        PageLayoutHelper::renderPageStart('Manage ' . $this->languageService->getLanguageName($currentLang) . ' Feeds', true);
 
         // Clear wizard session if exists
         if (isset($_SESSION['wizard'])) {
@@ -480,7 +482,7 @@ $(".hide_message").delay(2500).slideUp(1000);
             );
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -761,14 +763,14 @@ $(".hide_message").delay(2500).slideUp(1000);
     {
         $this->initWizardSession();
 
-        \pagestart('Feed Wizard', false);
+        PageLayoutHelper::renderPageStart('Feed Wizard', false);
 
         $errorMessage = isset($_REQUEST['err']) ? true : null;
         $rssUrl = $_SESSION['wizard']['rss_url'] ?? null;
 
         include __DIR__ . '/../Views/Feed/wizard_step1.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -798,14 +800,14 @@ $(".hide_message").delay(2500).slideUp(1000);
             $this->updateFeedArticleSource($_REQUEST['NfArticleSection'], $feedLen);
         }
 
-        \pagestart_nobody('Feed Wizard');
+        PageLayoutHelper::renderPageStartNobody('Feed Wizard');
 
         $wizardData = &$_SESSION['wizard'];
         $feedHtml = $this->getStep2FeedHtml();
 
         include __DIR__ . '/../Views/Feed/wizard_step2.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -819,14 +821,14 @@ $(".hide_message").delay(2500).slideUp(1000);
 
         $feedLen = count(array_filter(array_keys($_SESSION['wizard']['feed']), 'is_numeric'));
 
-        \pagestart_nobody("Feed Wizard");
+        PageLayoutHelper::renderPageStartNobody("Feed Wizard");
 
         $wizardData = &$_SESSION['wizard'];
         $feedHtml = $this->getStep3FeedHtml();
 
         include __DIR__ . '/../Views/Feed/wizard_step3.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -836,7 +838,7 @@ $(".hide_message").delay(2500).slideUp(1000);
      */
     private function wizardStep4(): void
     {
-        \pagestart('Feed Wizard', false);
+        PageLayoutHelper::renderPageStart('Feed Wizard', false);
 
         if (isset($_REQUEST['filter_tags'])) {
             $_SESSION['wizard']['filter_tags'] = $_REQUEST['filter_tags'];
@@ -859,7 +861,7 @@ $(".hide_message").delay(2500).slideUp(1000);
         // Clear wizard session after step 4
         unset($_SESSION['wizard']);
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**

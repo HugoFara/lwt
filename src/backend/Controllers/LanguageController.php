@@ -16,8 +16,12 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\FormHelper;
+
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../View/Helper/FormHelper.php';
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Core/Http/url_utilities.php';
 require_once __DIR__ . '/../Core/Entity/Language.php';
@@ -73,7 +77,7 @@ class LanguageController extends BaseController
      */
     public function index(array $params): void
     {
-        \pagestart('My Languages', true);
+        PageLayoutHelper::renderPageStart('My Languages', true);
         $this->outputDuplicateAlertScript();
 
         $message = '';
@@ -106,7 +110,7 @@ class LanguageController extends BaseController
             $this->showList($message);
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -298,11 +302,11 @@ class LanguageController extends BaseController
      */
     private function getWizardSelectOptions(string $selected): string
     {
-        $r = '<option value=""' . \get_selected($selected, '') . '>[Choose...]</option>';
+        $r = '<option value=""' . FormHelper::getSelected($selected, '') . '>[Choose...]</option>';
         $keys = array_keys(LanguageDefinitions::getAll());
         foreach ($keys as $item) {
             $r .= '<option value="' . $item . '"' .
-                \get_selected($selected, $item) . '>' . $item . '</option>';
+                FormHelper::getSelected($selected, $item) . '>' . $item . '</option>';
         }
         return $r;
     }
@@ -318,7 +322,7 @@ class LanguageController extends BaseController
      */
     public function selectPair(array $params): void
     {
-        \pagestart_nobody(
+        PageLayoutHelper::renderPageStartNobody(
             'Language Settings Wizard',
             'html{background-color: rgba(0, 0, 0, 0);}'
         );
@@ -330,6 +334,6 @@ class LanguageController extends BaseController
 
         include __DIR__ . '/../Views/Language/select_pair.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 }

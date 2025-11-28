@@ -16,7 +16,11 @@
 
 namespace Lwt\Controllers;
 
-require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\SelectOptionsBuilder;
+
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Services/LanguageDefinitions.php';
@@ -150,7 +154,7 @@ class WordController extends BaseController
             $this->displayEditForm($wid, $textId, $ord, $fromAnn);
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -168,12 +172,12 @@ class WordController extends BaseController
         // Validate lowercase matches
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
             $titletext = "New/Edit Term: " . \tohtml($textlc);
-            \pagestart_nobody($titletext);
+            PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
                 '", please go back and correct this!';
             echo \error_message_with_hide($message, false);
-            \pageend();
+            PageLayoutHelper::renderPageEnd();
             exit();
         }
 
@@ -198,7 +202,7 @@ class WordController extends BaseController
             $titletext = "Edit Term: " . \tohtml($textlc);
         }
 
-        \pagestart_nobody($titletext);
+        PageLayoutHelper::renderPageStartNobody($titletext);
         echo '<h1>' . $titletext . '</h1>';
 
         $wid = $result['id'];
@@ -257,7 +261,7 @@ class WordController extends BaseController
         }
 
         $titletext = ($new ? "New Term" : "Edit Term") . ": " . \tohtml($term);
-        \pagestart_nobody($titletext);
+        PageLayoutHelper::renderPageStartNobody($titletext);
 
         $scrdir = $this->languageService->getScriptDirectionTag($lang);
         $langData = $this->wordService->getLanguageData($lang);
@@ -330,7 +334,7 @@ class WordController extends BaseController
             $this->displayEditTermForm($tbpref);
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -348,18 +352,18 @@ class WordController extends BaseController
 
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
             $titletext = "New/Edit Term: " . \tohtml(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
-            \pagestart_nobody($titletext);
+            PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
                 '", please go back and correct this!';
             echo \error_message_with_hide($message, false);
-            \pageend();
+            PageLayoutHelper::renderPageEnd();
             exit();
         }
 
         if ($_REQUEST['op'] == 'Change') {
             $titletext = "Edit Term: " . \tohtml(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
-            \pagestart_nobody($titletext);
+            PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
             $oldstatus = $_REQUEST["WoOldStatus"];
@@ -457,7 +461,7 @@ class WordController extends BaseController
 
         $termlc = mb_strtolower($term, 'UTF-8');
         $titletext = "Edit Term: " . \tohtml($term);
-        \pagestart_nobody($titletext);
+        PageLayoutHelper::renderPageStartNobody($titletext);
         $scrdir = $this->languageService->getScriptDirectionTag($lang);
 
         include __DIR__ . '/../Views/Word/form_edit_term.php';
@@ -545,7 +549,7 @@ class WordController extends BaseController
         $noPagestart = $this->isExportOrTestAction();
 
         if (!$noPagestart) {
-            \pagestart(
+            PageLayoutHelper::renderPageStart(
                 'My ' . $this->languageService->getLanguageName($currentlang) . ' Terms (Words and Expressions)',
                 true
             );
@@ -619,7 +623,7 @@ class WordController extends BaseController
             );
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1055,7 +1059,7 @@ class WordController extends BaseController
             $this->displayMultiWordForm();
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1071,7 +1075,7 @@ class WordController extends BaseController
         // Validate lowercase matches
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
             $titletext = "New/Edit Term: " . \tohtml($textlc);
-            \pagestart_nobody($titletext);
+            PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
                 '", please go back and correct this!';
@@ -1097,7 +1101,7 @@ class WordController extends BaseController
             $data['wordcount'] = (int) ($_REQUEST["len"] ?? 0);
 
             $titletext = "New Term: " . \tohtml($data['textlc']);
-            \pagestart_nobody($titletext);
+            PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
             $result = $this->wordService->createMultiWord($data);
@@ -1109,7 +1113,7 @@ class WordController extends BaseController
             $newStatus = (int) $_REQUEST["WoStatus"];
 
             $titletext = "Edit Term: " . \tohtml($data['textlc']);
-            \pagestart_nobody($titletext);
+            PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
             $result = $this->wordService->updateMultiWord($wid, $data, $oldStatus, $newStatus);
@@ -1159,7 +1163,7 @@ class WordController extends BaseController
             // New multi-word
             $txtParam = \getreq('txt');
             $len = (int) \getreq('len');
-            \pagestart_nobody("New Term: " . $txtParam);
+            PageLayoutHelper::renderPageStartNobody("New Term: " . $txtParam);
             $this->displayNewMultiWordForm($txtParam, $tid, $ord, $len);
         } else {
             // Edit existing multi-word
@@ -1168,7 +1172,7 @@ class WordController extends BaseController
             if ($wordData === null) {
                 \my_die("Cannot access Term and Language in edit_mword.php");
             }
-            \pagestart_nobody("Edit Term: " . $wordData['text']);
+            PageLayoutHelper::renderPageStartNobody("Edit Term: " . $wordData['text']);
             $this->displayEditMultiWordForm($wid, $wordData, $tid, $ord);
         }
     }
@@ -1298,12 +1302,12 @@ class WordController extends BaseController
 
         $message = $this->wordService->delete($wordId);
 
-        \pagestart("Term: " . $term, false);
+        PageLayoutHelper::renderPageStart("Term: " . $term, false);
 
         $wid = $wordId;
         include __DIR__ . '/../Views/Word/delete_result.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1326,7 +1330,7 @@ class WordController extends BaseController
             return;
         }
 
-        \pagestart("Term: " . $term, false);
+        PageLayoutHelper::renderPageStart("Term: " . $term, false);
 
         $rowsAffected = $this->wordService->deleteMultiWord($wordId);
 
@@ -1335,7 +1339,7 @@ class WordController extends BaseController
 
         include __DIR__ . '/../Views/Word/delete_multi_result.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1358,16 +1362,16 @@ class WordController extends BaseController
         $status = isset($_REQUEST['stat']) ? (int) $_REQUEST['stat'] : 99;
 
         if ($status == 98) {
-            \pagestart("Setting all blue words to Ignore", false);
+            PageLayoutHelper::renderPageStart("Setting all blue words to Ignore", false);
         } else {
-            \pagestart("Setting all blue words to Well-known", false);
+            PageLayoutHelper::renderPageStart("Setting all blue words to Well-known", false);
         }
 
         list($count, $javascript) = $this->wordService->markAllWordsWithStatus($textId, $status);
 
         include __DIR__ . '/../Views/Word/all_wellknown_result.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1387,7 +1391,7 @@ class WordController extends BaseController
             $result = $this->wordService->create($_REQUEST);
 
             $titletext = "New Term: " . \tohtml($result['textlc']);
-            \pagestart_nobody($titletext);
+            PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
             if (!$result['success']) {
@@ -1437,12 +1441,12 @@ class WordController extends BaseController
             $langData = $this->wordService->getLanguageData($lang);
             $showRoman = $langData['showRoman'];
 
-            \pagestart_nobody('');
+            PageLayoutHelper::renderPageStartNobody('');
 
             include __DIR__ . '/../Views/Word/form_new.php';
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1456,7 +1460,7 @@ class WordController extends BaseController
      */
     public function show(array $params): void
     {
-        \pagestart_nobody('Term');
+        PageLayoutHelper::renderPageStartNobody('Term');
 
         $wid = \getreq('wid');
         $ann = isset($_REQUEST['ann']) ? $_REQUEST['ann'] : '';
@@ -1477,7 +1481,7 @@ class WordController extends BaseController
 
         include __DIR__ . '/../Views/Word/show.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1505,14 +1509,14 @@ class WordController extends BaseController
 
         $result = $this->wordService->insertWordWithStatus($textId, $word, 99);
 
-        \pagestart("Term: " . $word, false);
+        PageLayoutHelper::renderPageStart("Term: " . $word, false);
 
         $term = $result['term'];
         $wid = $result['id'];
         $hex = $result['hex'];
         include __DIR__ . '/../Views/Word/insert_wellknown_result.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1540,14 +1544,14 @@ class WordController extends BaseController
 
         $result = $this->wordService->insertWordWithStatus($textId, $word, 98);
 
-        \pagestart("Term: " . $word, false);
+        PageLayoutHelper::renderPageStart("Term: " . $word, false);
 
         $term = $result['term'];
         $wid = $result['id'];
         $hex = $result['hex'];
         include __DIR__ . '/../Views/Word/insert_ignore_result.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1606,10 +1610,10 @@ class WordController extends BaseController
                 $pos -= $cnt;
             }
 
-            \pagestart($cnt . ' New Word' . ($cnt == 1 ? '' : 's') . ' Saved', false);
+            PageLayoutHelper::renderPageStart($cnt . ' New Word' . ($cnt == 1 ? '' : 's') . ' Saved', false);
             $this->handleBulkSave($terms, $tid, $pos === null);
         } else {
-            \pagestart_nobody('Translate New Words');
+            PageLayoutHelper::renderPageStartNobody('Translate New Words');
         }
 
         // Show next page of terms if there are more
@@ -1619,7 +1623,7 @@ class WordController extends BaseController
             $this->displayBulkTranslateForm($tid, $sl, $tl, $pos);
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1721,11 +1725,11 @@ class WordController extends BaseController
         $romanization = $wordData['romanization'];
         $wid = $wordId;
 
-        \pagestart("Term: $term", false);
+        PageLayoutHelper::renderPageStart("Term: $term", false);
 
         include __DIR__ . '/../Views/Word/status_result.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -1741,7 +1745,7 @@ class WordController extends BaseController
      */
     public function upload(array $params): void
     {
-        \pagestart('Import Terms', true);
+        PageLayoutHelper::renderPageStart('Import Terms', true);
 
         if (isset($_REQUEST['op']) && $_REQUEST['op'] === 'Import') {
             $this->handleUploadImport();
@@ -1749,7 +1753,7 @@ class WordController extends BaseController
             $this->displayUploadForm();
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**

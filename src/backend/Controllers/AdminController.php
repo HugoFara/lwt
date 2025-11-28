@@ -28,8 +28,10 @@ use Lwt\Services\TtsService;
 use Lwt\Services\WordService;
 use Lwt\Services\LanguageDefinitions;
 
+use Lwt\View\Helper\PageLayoutHelper;
+
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Services/TextStatisticsService.php';
 require_once __DIR__ . '/../Services/SentenceService.php';
@@ -299,7 +301,7 @@ class AdminController extends BaseController
         $result = $wordService->createOnHover($textId, $text, $status, $translation);
 
         // Render page
-        \pagestart("New Term: " . $result['word'], false);
+        PageLayoutHelper::renderPageStart("New Term: " . $result['word'], false);
 
         // Prepare view variables (used by included view)
         /** @psalm-suppress UnusedVariable */
@@ -319,7 +321,7 @@ class AdminController extends BaseController
 
         include __DIR__ . '/../Views/Word/hover_save_result.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**

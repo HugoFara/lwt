@@ -20,8 +20,9 @@ use Lwt\Core\Http\InputValidator;
 use Lwt\Services\TranslationService;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
+use Lwt\View\Helper\PageLayoutHelper;
 
-require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../Services/DictionaryService.php';
 require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
 require_once __DIR__ . '/../Services/TranslationService.php';
@@ -95,11 +96,11 @@ class TranslationController extends BaseController
         header('Pragma: no-cache');
         header('Expires: 0');
 
-        \pagestart_nobody('Google Translate');
+        PageLayoutHelper::renderPageStartNobody('Google Translate');
 
         if ($text === '') {
             echo '<p class="msgblue">Term is not set!</p>';
-            \pageend();
+            PageLayoutHelper::renderPageEnd();
             return;
         }
 
@@ -109,7 +110,7 @@ class TranslationController extends BaseController
 
         $this->renderGoogleTranslation($text, $srcLang, $tgtLang, $sentenceMode);
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -265,7 +266,7 @@ class TranslationController extends BaseController
         $destOrig = $dest;
         $phrase = mb_strtolower(trim($this->param('phrase', '')), 'UTF-8');
 
-        \pagestart_nobody('');
+        PageLayoutHelper::renderPageStartNobody('');
 
         $glosbeUrl = $this->translationService->buildGlosbeUrl($phrase, $from, $dest);
         $titleText = '<a href="' . $glosbeUrl . '">Glosbe Dictionary (' .
@@ -289,7 +290,7 @@ class TranslationController extends BaseController
             <input type="submit" value="Translate via Glosbe">
             </form>';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**

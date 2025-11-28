@@ -23,8 +23,12 @@ use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
+use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\SelectOptionsBuilder;
 
 require_once __DIR__ . '/../Services/TextService.php';
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../Services/TextDisplayService.php';
 require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
@@ -84,7 +88,6 @@ class TextController extends BaseController
     public function read(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Services/TextStatisticsService.php';
         require_once __DIR__ . '/../Services/SentenceService.php';
         require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -198,7 +201,7 @@ class TextController extends BaseController
         $frameLWidth = (int) Settings::getWithDefault('set-text-l-framewidth-percent');
 
         // Start page
-        \pagestart_nobody(
+        PageLayoutHelper::renderPageStartNobody(
             'Read',
             "body {
                 margin: 20px;
@@ -213,7 +216,7 @@ class TextController extends BaseController
             include __DIR__ . '/../Views/Text/read_desktop.php';
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -228,7 +231,6 @@ class TextController extends BaseController
     public function edit(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Services/TextStatisticsService.php';
         require_once __DIR__ . '/../Services/SentenceService.php';
         require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -255,7 +257,7 @@ class TextController extends BaseController
             substr(\getreq('op'), -8) == 'and Open');
 
         if (!$noPagestart) {
-            \pagestart('My ' . $this->languageService->getLanguageName($currentLang) . ' Texts', true);
+            PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Texts', true);
         }
 
         $message = '';
@@ -295,7 +297,7 @@ class TextController extends BaseController
             $this->showTextsList($currentLang, $message);
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -377,7 +379,7 @@ class TextController extends BaseController
         if (!$this->textService->validateTextLength($_REQUEST['TxText'])) {
             $message = "Error: Text too long, must be below 65000 Bytes";
             if ($noPagestart) {
-                \pagestart('My ' . $this->languageService->getLanguageName($currentLang) . ' Texts', true);
+                PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Texts', true);
             }
             return ['message' => $message, 'redirect' => false];
         }
@@ -390,7 +392,7 @@ class TextController extends BaseController
                 (int) $_REQUEST['TxLgID']
             );
             echo '<p><input type="button" value="&lt;&lt; Back" onclick="history.back();" /></p>';
-            \pageend();
+            PageLayoutHelper::renderPageEnd();
             exit();
         }
 
@@ -586,7 +588,6 @@ class TextController extends BaseController
     public function display(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Services/TextStatisticsService.php';
         require_once __DIR__ . '/../Services/SentenceService.php';
         require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -650,9 +651,9 @@ class TextController extends BaseController
         $displayService->saveCurrentText($textId);
 
         // Render page
-        \pagestart_nobody('Display');
+        PageLayoutHelper::renderPageStartNobody('Display');
         include __DIR__ . '/../Views/Text/display_main.php';
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -691,10 +692,9 @@ class TextController extends BaseController
     public function importLong(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
-        
-        \pagestart('Long Text Import', true);
+
+        PageLayoutHelper::renderPageStart('Long Text Import', true);
 
         $maxInputVars = ini_get('max_input_vars');
         if ($maxInputVars === false || $maxInputVars == '') {
@@ -712,7 +712,7 @@ class TextController extends BaseController
             $this->importLongForm($maxInputVars);
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -732,7 +732,9 @@ class TextController extends BaseController
             $languageData[$lgId] = \langFromDict($uri);
         }
 
-        $languagesOption = \get_languages_selectoptions(
+        $languages = $this->languageService->getLanguagesForSelect();
+        $languagesOption = SelectOptionsBuilder::forLanguages(
+            $languages,
             Settings::get('currentlanguage'),
             '[Choose...]'
         );
@@ -832,7 +834,6 @@ class TextController extends BaseController
     public function setMode(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
 
         $textId = \getreq('text');
@@ -849,14 +850,14 @@ class TextController extends BaseController
         Settings::save('showlearningtranslations', $showLearning);
 
         // Display result page
-        \pagestart("Text Display Mode changed", false);
+        PageLayoutHelper::renderPageStart("Text Display Mode changed", false);
 
         $waitingIconPath = \get_file_path('assets/icons/waiting.gif');
         flush();
 
         include __DIR__ . '/../Views/Text/set_mode_result.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -871,9 +872,8 @@ class TextController extends BaseController
     public function check(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
-        
-        \pagestart('Check a Text', true);
+
+        PageLayoutHelper::renderPageStart('Check a Text', true);
 
         if (isset($_REQUEST['op']) && $_REQUEST['op'] === 'Check') {
             // Do the check operation
@@ -890,7 +890,9 @@ class TextController extends BaseController
             foreach ($translateUris as $lgId => $uri) {
                 $languageData[$lgId] = \langFromDict($uri);
             }
-            $languagesOption = \get_languages_selectoptions(
+            $languages = $this->languageService->getLanguagesForSelect();
+            $languagesOption = SelectOptionsBuilder::forLanguages(
+                $languages,
                 \Lwt\Database\Settings::get('currentlanguage'),
                 '[Choose...]'
             );
@@ -898,7 +900,7 @@ class TextController extends BaseController
             include __DIR__ . '/../Views/Text/check_form.php';
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -913,7 +915,6 @@ class TextController extends BaseController
     public function archived(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/UI/ui_helpers.php';
         require_once __DIR__ . '/../Services/TextStatisticsService.php';
         require_once __DIR__ . '/../Services/SentenceService.php';
         require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -986,7 +987,7 @@ class TextController extends BaseController
         // Handle mark actions that skip pagestart
         $noPagestart = (\getreq('markaction') == 'deltag');
         if (!$noPagestart) {
-            \pagestart('My ' . $this->languageService->getLanguageName($currentLang) . ' Text Archive', true);
+            PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Text Archive', true);
         }
 
         $message = '';
@@ -1046,7 +1047,7 @@ class TextController extends BaseController
             include __DIR__ . '/../Views/Text/archived_list.php';
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**

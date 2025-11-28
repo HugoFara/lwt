@@ -18,10 +18,11 @@ namespace Lwt\Controllers;
 
 use Lwt\Services\TestService;
 use Lwt\Views\TestViews;
+use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Services/TestService.php';
 require_once __DIR__ . '/../Views/TestViews.php';
-require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../Core/Mobile/mobile_interactions.php';
 require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
 
@@ -133,7 +134,7 @@ class TestController extends BaseController
             $this->testService->getWaitingTime()
         );
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -158,7 +159,7 @@ class TestController extends BaseController
         );
 
         if ($testData === null) {
-            \pagestart('Request Error!', true);
+            PageLayoutHelper::renderPageStart('Request Error!', true);
             \my_die("do_test_header.php called with wrong parameters");
             return;
         }
@@ -225,7 +226,7 @@ class TestController extends BaseController
         $langIdFromSql = $this->testService->getLanguageIdFromTestSql($testsql);
         if ($langIdFromSql === null) {
             $this->testViews->renderNoTerms();
-            \pageend();
+            PageLayoutHelper::renderPageEnd();
             exit();
         }
 
@@ -280,7 +281,7 @@ class TestController extends BaseController
      */
     private function renderTestPage(): void
     {
-        \pagestart_nobody(
+        PageLayoutHelper::renderPageStartNobody(
             'Test',
             "body {
                 margin: 20px;
@@ -294,7 +295,7 @@ class TestController extends BaseController
             $this->renderDesktopTestPage();
         }
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**

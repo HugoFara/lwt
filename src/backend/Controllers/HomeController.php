@@ -17,9 +17,10 @@
 namespace Lwt\Controllers;
 
 use Lwt\Services\HomeService;
+use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../Services/TextStatisticsService.php';
 require_once __DIR__ . '/../Services/SentenceService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -77,7 +78,7 @@ class HomeController extends BaseController
 
         $debug = $dashboardData['is_debug'];
 
-        \pagestart_nobody(
+        PageLayoutHelper::renderPageStartNobody(
             "Home",
             "
             body {
@@ -85,13 +86,13 @@ class HomeController extends BaseController
                 margin: 20px;
             }"
         );
-        \echo_lwt_logo();
+        echo PageLayoutHelper::buildLogo();
         echo '<h1>Learning With Texts (LWT)</h1>
         <h2>Home' . ($debug ? ' <span class="red">DEBUG</span>' : '') . '</h2>';
 
         include __DIR__ . '/../Views/Home/index.php';
 
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**
