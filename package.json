@@ -45,6 +45,7 @@
   },
   "homepage": "https://github.com/HugoFara/lwt#readme",
   "dependencies": {
+    "@yaireo/tagify": "^4.35.6",
     "jquery": "1.12.4",
     "jquery-ui-dist": "1.12.1"
   },
@@ -54,6 +55,7 @@
     "@eslint/markdown": "^7.5.1",
     "@types/jquery": "^3.5.33",
     "@types/node": "^24.10.1",
+    "@types/yaireo__tagify": "^4.27.0",
     "@typescript-eslint/eslint-plugin": "^8.48.0",
     "@typescript-eslint/parser": "^8.48.0",
     "@vitejs/plugin-legacy": "^6.0.0",

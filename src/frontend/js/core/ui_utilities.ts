@@ -8,18 +8,18 @@
 
 import $ from 'jquery';
 import { LWT_DATA } from './lwt_state';
-import { check, containsCharacterOutsideBasicMultilingualPlane } from '../forms/form_validation';
+import { check } from '../forms/form_validation';
 import { changeImprAnnText, changeImprAnnRadio, do_ajax_show_similar_terms } from '../terms/term_operations';
 import { readRawTextAloud } from './user_interactions';
 import { do_ajax_save_setting } from './ajax_utilities';
 import { initInlineEdit } from '../ui/inline_edit';
+import { initTermTags, initTextTags } from '../ui/tagify_tags';
 
 // Extend jQuery with custom methods
 declare global {
   interface JQuery {
     tooltip(options?: TooltipOptions): JQuery;
     resizable(options?: ResizableOptions): JQuery;
-    tagit(options?: TagitOptions): JQuery;
     serializeObject(): Record<string, unknown>;
     tooltip_wsty_content(): string;
     tooltip_wsty_init(): JQuery;
@@ -38,14 +38,8 @@ interface ResizableOptions {
   stop?: (event: unknown, ui: { position: { left: number } }) => void;
 }
 
-interface TagitOptions {
-  beforeTagAdded?: (event: unknown, ui: { tag: JQuery }) => boolean;
-  availableTags?: Record<string, string>;
-  fieldName?: string;
-}
-
-declare let TAGS: Record<string, string>;
-declare let TEXTTAGS: Record<string, string>;
+declare let TAGS: string[];
+declare let TEXTTAGS: string[];
 
 /**
  * Helper to safely get an HTML attribute value as a string.
@@ -299,24 +293,14 @@ export function prepareMainAreas(): void {
       );
     }
   });
-  $('#termtags').tagit(
-    {
-      beforeTagAdded: function (_event, ui) {
-        return !containsCharacterOutsideBasicMultilingualPlane(ui.tag.text());
-      },
-      availableTags: TAGS,
-      fieldName: 'TermTags[TagList][]'
-    }
-  );
-  $('#texttags').tagit(
-    {
-      beforeTagAdded: function (_event, ui) {
-        return !containsCharacterOutsideBasicMultilingualPlane(ui.tag.text());
-      },
-      availableTags: TEXTTAGS,
-      fieldName: 'TextTags[TagList][]'
-    }
-  );
+  // Initialize Tagify for term and text tags
+  // TAGS and TEXTTAGS are global variables set by PHP
+  if (typeof TAGS !== 'undefined') {
+    initTermTags(TAGS);
+  }
+  if (typeof TEXTTAGS !== 'undefined') {
+    initTextTags(TEXTTAGS);
+  }
   markClick();
   setTheFocus();
   if (

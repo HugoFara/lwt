@@ -9,23 +9,7 @@
  * @since   2.10.0-fork This file was refactored in a single object, use it instead
  */
 
-// Type for tagit UI object
-interface TagItUI {
-  duringInitialization?: boolean;
-}
-
-// Type for tagit options
-interface TagItOptions {
-  afterTagAdded?: (event: unknown, ui: TagItUI) => boolean;
-  afterTagRemoved?: (event: unknown, ui: TagItUI) => boolean;
-}
-
-// Extend JQuery interface for tagit plugin
-declare global {
-  interface JQuery {
-    tagit(options: TagItOptions): JQuery;
-  }
-}
+import { setupTagChangeTracking } from '../ui/tagify_tags';
 
 /**
  * Keeps track of a modified form.
@@ -61,17 +45,14 @@ export const lwtFormCheck = {
   },
 
   /**
-   * Set DIRTY to 1 if tag object changed.
+   * Called when a tag is changed (added or removed).
    *
-   * @param _  An event, unused
-   * @param ui UI object
-   * @returns Always return true
+   * @param duringInit - Whether this change happened during initialization
    */
-  tagChanged: function (_: unknown, ui: TagItUI): boolean {
-    if (!ui.duringInitialization) {
+  tagChanged: function (duringInit: boolean): void {
+    if (!duringInit) {
       lwtFormCheck.dirty = true;
     }
-    return true;
   },
 
   /**
@@ -79,18 +60,12 @@ export const lwtFormCheck = {
    * before exiting the form.
    */
   askBeforeExit: function (): void {
-    $('#termtags').tagit({
-      afterTagAdded: lwtFormCheck.tagChanged,
-      afterTagRemoved: lwtFormCheck.tagChanged
-    });
-    $('#texttags').tagit({
-      afterTagAdded: lwtFormCheck.tagChanged,
-      afterTagRemoved: lwtFormCheck.tagChanged
-    });
+    // Set up tag change tracking with Tagify
+    setupTagChangeTracking(lwtFormCheck.tagChanged);
+
     $('input,checkbox,textarea,radio,select')
       .not('#quickmenu').on('change', lwtFormCheck.makeDirty);
     $(':reset,:submit').on('click', lwtFormCheck.resetDirty);
     $(window).on('beforeunload', lwtFormCheck.isDirtyMessage);
   }
 };
-
