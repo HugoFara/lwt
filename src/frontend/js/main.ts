@@ -8,7 +8,6 @@
 // Import CSS from base directory
 import '../css/base/styles.css';
 import '../css/base/jquery-ui.css';
-import '../css/base/jquery.tagit.css';
 import '../css/base/feed_wizard.css';
 import '../css/base/html5_audio_player.css';
 

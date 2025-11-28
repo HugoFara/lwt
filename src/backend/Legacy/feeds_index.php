@@ -248,34 +248,73 @@ function renderEditFormFooter(): void
         if (firstTable) {
             firstTable.scrollIntoView({ behavior: 'instant', block: 'start' });
         }
+
+        // Initialize Tagify on feed tag inputs
+        document.querySelectorAll('ul[name^="feed"]').forEach(function(ulElement) {
+            const fieldName = ulElement.getAttribute('name');
+
+            // Extract existing tags from LI elements
+            const existingTags = [];
+            ulElement.querySelectorAll('li').forEach(function(li) {
+                const text = li.textContent?.trim();
+                if (text) {
+                    existingTags.push(text);
+                }
+            });
+
+            // Create input element to replace the UL
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = fieldName;
+            input.className = 'tagify-feed-input';
+            input.value = existingTags.join(', ');
+            input.dataset.feedIndex = fieldName.match(/feed\[(\d+)\]/)?.[1] || '';
+
+            // Replace UL with input
+            ulElement.replaceWith(input);
+
+            // Initialize Tagify
+            const tagify = new Tagify(input, {
+                whitelist: TEXTTAGS || [],
+                dropdown: {
+                    enabled: 1,
+                    maxItems: 20,
+                    closeOnSelect: true,
+                    highlightFirst: true
+                },
+                duplicates: false
+            });
+
+            // Add existing tags
+            if (existingTags.length > 0) {
+                tagify.addTags(existingTags);
+            }
+
+            // Store tagify instance on the input for later access
+            input._tagify = tagify;
+        });
+
+        // Handle checkbox changes for enabling/disabling feed forms
+        $('input[type="checkbox"]').change(function(){
+            const feedIndex = $(this).val();
+            const feed = '[name^=feed\\['+ feedIndex +'\\]';
+            const tagifyInput = document.querySelector('.tagify-feed-input[data-feed-index="' + feedIndex + '"]');
+            const tagify = tagifyInput?._tagify;
+
+            if(this.checked){
+                $(feed+']').prop('disabled', false);
+                $(feed+'\\[TxTitle\\]],'+feed+'\\[TxText\\]]').addClass("notempty");
+                if (tagify) {
+                    tagify.setDisabled(false);
+                }
+            } else {
+                $(feed+']').prop('disabled', true).removeClass("notempty");
+                if (tagify) {
+                    tagify.setDisabled(true);
+                }
+            }
+        });
     });
-    $('input[type="checkbox"]').change(function(){
-        var feed = '[name^=feed\\['+ $(this).val() +'\\]';
-        if(this.checked){
-            $(feed+']').prop('disabled', false);
-            $(feed+'\\[TxTitle\\]],'+feed+'\\[TxText\\]]').addClass("notempty");
-            $('ul'+feed+']').css("background","");
-            $('ul'+feed+'] li.tagit-new input').prop('disabled', false)
-            .addClass("ui-widget-content");
-            $('ul'+feed+'] a').css("display", "");
-            $('ul'+feed+'] li').css("color", "").css("background", "");
-        } else {
-            $(feed+']').prop('disabled', true).removeClass("notempty");
-            var bg=$('textarea'+feed+']').css("background");
-            $('ul'+feed+']').css("background",bg);
-            $('ul'+feed+'] li.tagit-new input').prop('disabled', true)
-            .removeClass("ui-widget-content");
-            $('ul'+feed+'] a').css("display", "none");
-            $('ul'+feed+'] li').css("color", $('textarea'+feed+']')
-            .css("color")).css("background", "transparent");
-        }
-    });
-    $('ul[name^="feed"]').each(function() {
-        var tagrepl=$(this).attr('name');
-        $(this).tagit({
-        availableTags : TEXTTAGS,
-        fieldName: tagrepl
-    });});
    </script>
     <?php
 }

@@ -83,8 +83,7 @@ src/frontend/css/
 ├── feed_wizard.css           - Feed wizard UI
 ├── gallery.css               - Gallery styles
 ├── audio-player.css          - HTML5 audio player
-├── jquery-ui.css             - jQuery UI widgets
-└── jquery.tagit.css          - Tag input widget
+└── jquery-ui.css             - jQuery UI widgets
 
 src/frontend/themes/
 ├── chaosarium_light/
@@ -99,7 +98,8 @@ src/frontend/themes/
 
 - jQuery 1.12.4 (~85KB minified)
 - jQuery UI 1.12.1 (~250KB with CSS)
-- jQuery plugins: jeditable, tagit, scrollTo, hoverIntent, xpath
+- jQuery plugins: jeditable, scrollTo, hoverIntent, xpath
+- Tagify (tag input - replacement for tag-it)
 - ~~jPlayer~~ (removed - replaced with HTML5 `<audio>`)
 - ~~Overlib~~ (removed - replaced with jQuery UI tooltips)
 
@@ -116,7 +116,7 @@ src/frontend/themes/
 | **jQuery hoverIntent** | `jquery.hoverIntent.js` | 2KB | Delayed hover events | Future: Replace with CSS or native JS |
 | ~~**jQuery jPlayer**~~ | ~~`jquery.jplayer.min.js`~~ | ~~61KB~~ | ~~Audio/video player~~ | ✅ **REMOVED** - replaced with HTML5 `<audio>` |
 | **jQuery XPath** | `jquery.xpath.min.js` | 80KB | XPath selector (feed wizard) | Future: Evaluate if needed, else remove |
-| **tag-it** | `tag-it.js` | 10KB | Tag input widget | Future: Replace with modern tag library |
+| ~~**tag-it**~~ | ~~`tag-it.js`~~ | ~~10KB~~ | ~~Tag input widget~~ | ✅ **REMOVED** - replaced with Tagify |
 | ~~**overlib**~~ | ~~`overlib/overlib_mini.js` + plugins~~ | ~~~75KB~~ | ~~Popup/tooltip library~~ | ✅ **REMOVED** - replaced with jQuery UI tooltips |
 
 **Current JS size:** ~439KB (uncompressed) - reduced from ~575KB
@@ -129,7 +129,7 @@ src/frontend/themes/
 4. **jquery.hoverIntent** (2KB) - Easy to replace with CSS/native
 5. **jquery.scrollTo** (2KB) - Native `scrollIntoView()` works well
 6. **jquery.jeditable** (8KB) - Can use `contenteditable` or custom
-7. **tag-it** (10KB) - Many modern alternatives exist
+7. ~~**tag-it** (10KB)~~ - ✅ **REMOVED** - replaced with Tagify
 8. **jQuery + jQuery UI** (337KB) - Last, requires significant refactoring
 
 ### Critical Issues
@@ -562,7 +562,6 @@ The entry point imports migrated modules and exposes globals for legacy code:
 // src/frontend/js/main.ts (current implementation)
 import '../css/styles.css';
 import '../css/jquery-ui.css';
-import '../css/jquery.tagit.css';
 import '../css/feed_wizard.css';
 
 import $ from 'jquery';
