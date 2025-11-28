@@ -43,6 +43,7 @@ import './reading/frame_management';
 import './forms/bulk_actions';
 import './forms/unloadformcheck';
 import './forms/form_validation';
+import './forms/form_initialization';
 
 // Testing
 import './testing/test_mode';

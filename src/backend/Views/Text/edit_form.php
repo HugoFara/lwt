@@ -39,20 +39,8 @@ use Lwt\Classes\Text;
         <img src="/assets/icons/question-frame.png" title="Help" alt="Help" />
     </a>
 </h2>
-<script type="text/javascript" charset="utf-8">
-    /**
-     * Change the language of inputs for text and title based on selected
-     * language.
-     */
-    function change_textboxes_language() {
-        const lid = document.getElementById("TxLgID").value;
-        const language_data = <?php echo json_encode($languageData); ?>;
-        $('#TxTitle').attr('lang', language_data[lid]);
-        $('#TxText').attr('lang', language_data[lid]);
-    }
-
-    $(document).ready(lwtFormCheck.askBeforeExit);
-    $(document).ready(change_textboxes_language);
+<script type="application/json" id="text-edit-config">
+<?php echo json_encode(['languageData' => $languageData]); ?>
 </script>
 <div class="flex-spaced">
     <div style="<?php echo $isNew ? "display: none" : ''; ?>">
@@ -94,7 +82,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             <td class="td1 right">Language:</td>
             <td class="td1">
                 <select name="TxLgID" id="TxLgID" class="notempty setfocus"
-                onchange="change_textboxes_language();">
+                data-action="change-language">
                 <?php echo get_languages_selectoptions($text->lgid, "[Choose...]"); ?>
                 </select>
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty"

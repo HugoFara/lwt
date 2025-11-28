@@ -20,6 +20,13 @@ import { selectToggle, multiActionGo, allActionGo } from './forms/bulk_actions';
 import { updateTermTranslation, addTermTranslation, changeTableTestStatus, do_ajax_edit_impr_text } from './terms/term_operations';
 import { lwt_audio_controller, setupAudioPlayer, getAudioPlayer } from './media/html5_audio_player';
 import { LWT_DATA, LwtDataInterface } from './core/lwt_state';
+import { lwtFormCheck } from './forms/unloadformcheck';
+import {
+  changeTextboxesLanguage,
+  clearRightFrameOnUnload,
+  initTextEditForm,
+  initWordEditForm
+} from './forms/form_initialization';
 
 // Declare global window interface extensions
 declare global {
@@ -82,6 +89,13 @@ declare global {
 
     // Global state object
     LWT_DATA: LwtDataInterface;
+
+    // Form utilities
+    lwtFormCheck: typeof lwtFormCheck;
+    changeTextboxesLanguage: typeof changeTextboxesLanguage;
+    clearRightFrameOnUnload: typeof clearRightFrameOnUnload;
+    initTextEditForm: typeof initTextEditForm;
+    initWordEditForm: typeof initWordEditForm;
   }
 }
 
@@ -133,3 +147,10 @@ window.closeModal = closeModal;
 
 // Global state object
 window.LWT_DATA = LWT_DATA;
+
+// Form utilities
+window.lwtFormCheck = lwtFormCheck;
+window.changeTextboxesLanguage = changeTextboxesLanguage;
+window.clearRightFrameOnUnload = clearRightFrameOnUnload;
+window.initTextEditForm = initTextEditForm;
+window.initWordEditForm = initWordEditForm;

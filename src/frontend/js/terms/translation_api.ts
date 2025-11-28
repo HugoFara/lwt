@@ -7,10 +7,8 @@
  */
 
 // Type for the frame with form check
+// Uses the global lwtFormCheck type from globals.ts
 interface LwtFrame extends Window {
-  lwtFormCheck: {
-    makeDirty: () => void;
-  };
   document: Document;
 }
 
