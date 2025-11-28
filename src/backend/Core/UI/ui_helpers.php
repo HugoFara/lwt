@@ -89,7 +89,6 @@ function pagestart_kernel_nobody($title, $addcss = ''): void
     <!-- Legacy assets -->
     <link rel="stylesheet" type="text/css" href="/assets/css/jquery-ui.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />
-    <link rel="stylesheet" type="text/css" href="/assets/css/feed_wizard.css" />
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
     <!-- Legacy only: overlib (Vite uses jQuery UI dialogs) -->
@@ -899,7 +898,6 @@ function pagestart_nobody($title, $addcss = ''): void
     <!-- Legacy assets -->
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/jquery-ui.css');?>" />
     <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/styles.css');?>" />
-    <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/feed_wizard.css');?>" />
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
     <!-- Legacy only: overlib (Vite uses jQuery UI dialogs) -->

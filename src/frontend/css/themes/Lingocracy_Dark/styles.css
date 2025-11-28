@@ -903,6 +903,22 @@ th.sorttable,th.sorttable_nosort,th.sorttable_numeric,th.clickable {
 
 
 /**************************************************************
+Feed Wizard UI (RSS feed import interface) - Dark theme overrides
+***************************************************************/
+
+#lwt_header
+{
+  color: #FFFFFF;
+  background: #000000;
+}
+
+#settings,
+#adv
+{
+  background: #111111;
+}
+
+/**************************************************************
 Additional styles for printing
 ***************************************************************/
 

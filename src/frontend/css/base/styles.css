@@ -720,6 +720,107 @@ Inline Edit Component
 }
 
 /**************************************************************
+Feed Wizard UI (RSS feed import interface)
+***************************************************************/
+
+#lwt_header
+{
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  background: #fcfcfc;
+  overflow: auto;
+  text-align: center;
+  padding: 10px;
+}
+
+#lwt_header img[title=Settings],
+#lwt_header li
+{
+  cursor: pointer;
+}
+
+#lwt_container
+{
+  max-height: 150px;
+  overflow: auto;
+}
+
+#settings
+{
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  height: 180px;
+  background: #fcfcfc;
+  overflow: auto;
+  text-align: center;
+  padding: 10px;
+  z-index: 100;
+}
+
+#adv
+{
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  height: 180px;
+  background: #fcfcfc;
+  overflow: auto;
+  text-align: center;
+  padding: 10px;
+  z-index: 200;
+}
+
+/* Feed wizard text selection styles */
+.lwt_selected_text
+{
+  background-color: #FFFFFF;
+  color: #FFAAAA !important;
+}
+
+.lwt_marked_text
+{
+  background-color: rgb(111, 111, 111) !important;
+  color: rgb(170, 170, 170) !important;
+}
+
+.lwt_highlighted_text
+{
+  border-style: dashed !important;
+}
+
+.delete_selection
+{
+  cursor: crosshair;
+}
+
+#lwt_last ~ *
+{
+  color: #000000;
+  position: static !important;
+  cursor: pointer;
+  background-color: grey;
+}
+
+#lwt_last ~ * *
+{
+  color: #000000;
+  position: static !important;
+  cursor: pointer;
+}
+
+.lwt_filtered_text
+{
+  background-color: #FFFFFF !important;
+  color: #DDDDDD !important;
+  cursor: default !important;
+}
+
+/**************************************************************
 Additional styles for printing
 ***************************************************************/
 
