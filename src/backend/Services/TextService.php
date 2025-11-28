@@ -1274,10 +1274,9 @@ class TextService
                     $langId . ', ' .
                     Escaping::toSqlSyntax($thisTitle) . ', ' .
                     Escaping::toSqlSyntax($texts[$i]) . ", '',
-                    NULL, " .
+                    '', " .
                     Escaping::toSqlSyntax($sourceUri) .
-                ')',
-                ''
+                ')'
             );
             $id = Connection::lastInsertId();
             \saveTextTags($id);

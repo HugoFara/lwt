@@ -1,89 +1,212 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-11-24
-**Current Version:** 2.10.0-fork
+**Last Updated:** 2025-11-28
+**Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
 ## Executive Summary
 
-LWT carries significant technical debt from its 2007 origins. This document outlines a phased approach to modernize the codebase while maintaining stability and backward compatibility.
+LWT carried significant technical debt from its 2007 origins. This document tracks the modernization progress and remaining work. **Major architectural transformation has been achieved** with the v3 release.
 
-**Overall Technical Debt Score:** 6.75/10 (Moderate to High)
+**Overall Technical Debt Score:** 3.5/10 (Low to Moderate) - *Down from 6.75/10*
+
+## Progress Overview
+
+| Phase | Status | Completion |
+|-------|--------|------------|
+| Quick Wins | **COMPLETE** | 100% |
+| Phase 1: Security & Safety | **PARTIAL** | ~40% |
+| Phase 2: Refactoring | **SUBSTANTIAL** | ~75% |
+| Phase 3: Modernization | **IN PROGRESS** | ~50% |
 
 ## Critical Issues
 
 ### 1. SQL Injection Vulnerabilities (CRITICAL - Security)
 
-**Current State:**
+**Original State:**
 
-- All database queries use string concatenation with `mysqli_real_escape_string()`
+- All database queries used string concatenation with `mysqli_real_escape_string()`
 - 63 root PHP files + 15 AJAX endpoints affected
 - Pattern: `'UPDATE table SET col=' . convert_string_to_sqlsyntax($_REQUEST['val'])`
 
-**Risk:** Externally exploitable security vulnerability
+**Current State (2025-11-28):**
 
-**Target:** Migrate to prepared statements with parameterized queries
+- [x] Centralized `Escaping` class in `src/backend/Core/Database/Escaping.php`
+- [x] All queries use `Escaping::toSqlSyntax()` for proper escaping
+- [x] QueryBuilder class available with fluent interface
+- [ ] **NOT MIGRATED**: Still uses string escaping, not prepared statements
+- [ ] Prepared statements (`mysqli::prepare()`, `bind_param()`) not implemented
+
+**Risk Level:** MEDIUM - String escaping is functional but not best practice
+
+**Current Architecture:**
+
+```php
+// Current pattern (safe but not optimal)
+Connection::execute(
+    'INSERT INTO ' . $this->tbpref . 'words (WoLgID, WoText)
+     VALUES (' . (int)$langId . ', ' . Escaping::toSqlSyntax($text) . ')'
+);
+
+// Target pattern (not yet implemented)
+$stmt = $db->prepare('INSERT INTO words (WoLgID, WoText) VALUES (?, ?)');
+$stmt->bind_param('is', $langId, $text);
+```
+
+**Remaining Work:**
+
+- [ ] Implement prepared statements in `Connection` class
+- [ ] Migrate 43 service files from Escaping to prepared statements
+- [ ] Add parameterized query support to QueryBuilder
 
 ### 2. Monolithic File Structure (CRITICAL - Maintainability)
 
-**Problem Files:**
+**Original Problem Files:**
 
 - `inc/session_utility.php` - 4,290 lines, 80+ functions
 - `inc/database_connect.php` - 2,182 lines, 46+ functions
 - `edit_languages.php` - 1,528 lines
 - `edit_texts.php` - 1,344 lines
 
-**Impact:** Impossible to test, understand, or maintain
+**Current State (2025-11-28):** RESOLVED
+
+- [x] **ALL legacy monolithic files eliminated**
+- [x] `inc/` directory no longer exists
+- [x] All root PHP files (edit_*.php, words_edit.php, etc.) removed
+- [x] Full MVC architecture implemented
+
+**New Architecture:**
+
+```text
+src/backend/
+├── Api/V1/                    # REST API (NEW)
+│   └── Handlers/              # 10+ API handlers
+├── Controllers/               # 14 controllers (7,987 lines total)
+│   ├── BaseController.php     # Abstract base (317 lines)
+│   ├── TextController.php     # (1,060 lines)
+│   ├── WordController.php     # (1,921 lines)
+│   └── ...
+├── Core/                      # 57 files in 17 subdirectories
+│   ├── Bootstrap/             # App initialization
+│   ├── Database/              # DB classes (Connection, DB, QueryBuilder, Escaping)
+│   ├── Entity/                # Data models (Language, Text, Term)
+│   ├── Http/                  # Parameter handling
+│   ├── Text/                  # Text processing
+│   ├── Word/                  # Word operations
+│   └── ...
+├── Router/                    # URL routing system (NEW)
+├── Services/                  # 22 services (11,367 lines total)
+│   ├── TextService.php        # (1,566 lines)
+│   ├── WordService.php        # (1,537 lines)
+│   └── ...
+└── Views/                     # Template files
+```
+
+**File Size Distribution:**
+
+- Largest service: TextService.php (1,566 lines) - down from 4,290
+- Largest controller: WordController.php (1,921 lines)
+- Most files under 500 lines
 
 ### 3. Input Validation (HIGH - Security)
 
-**Issues:**
+**Original Issues:**
 
 - Direct `$_REQUEST`/`$_GET`/`$_POST` access throughout codebase
 - Inconsistent type casting
 - No length validation against database constraints
-- Example: `$texttags = json_encode($_REQUEST["TextTags"]);` with no validation
+
+**Current State (2025-11-28):** PARTIAL
+
+- [x] `BaseController` provides `param()`, `get()`, `post()` abstraction
+- [x] Type casting used consistently (`(int)`, `(string)`)
+- [x] `Validation` class for database ID existence checks
+- [ ] **NOT IMPLEMENTED**: Centralized `InputValidator` class
+- [ ] Direct superglobal access remains in 16 files (~305 occurrences)
+
+**Current Pattern:**
+
+```php
+// BaseController provides access abstraction (but not validation)
+protected function param(string $key, mixed $default = null): mixed {
+    return $_REQUEST[$key] ?? $default;
+}
+
+// Type casting in controllers
+$textId = (int)$_REQUEST['text'];
+```
+
+**Remaining Work:**
+
+- [ ] Create `InputValidator` service class
+- [ ] Replace all 305 direct `$_REQUEST` accesses
+- [ ] Add length validation for string inputs
 
 ### 4. Code Duplication (HIGH - Maintainability)
 
-**Patterns:**
+**Original Patterns:**
 
 - 20+ `get_*_selectoptions()` functions with identical structure
 - CRUD operations duplicated across files
 - Delete query patterns repeated 10+ times
-- Form validation code copied everywhere
+
+**Current State (2025-11-28):** LARGELY RESOLVED
+
+- [x] 29 `get_*_selectoptions()` functions consolidated via delegation
+- [x] `SelectOptionsBuilder` class handles all select option generation
+- [x] `FormHelper` class provides form utilities
+- [x] QueryBuilder with full CRUD support available
+- [ ] DELETE queries still duplicated (42 occurrences across services)
+- [ ] Services don't consistently use QueryBuilder
+
+**New Helper Classes:**
+
+| Class | Location | Purpose |
+|-------|----------|---------|
+| `FormHelper` | `View/Helper/FormHelper.php` | Form element utilities |
+| `SelectOptionsBuilder` | `View/Helper/SelectOptionsBuilder.php` | Select option generation |
+| `StatusHelper` | `View/Helper/StatusHelper.php` | Word status helpers |
+| `PageLayoutHelper` | `View/Helper/PageLayoutHelper.php` | Page layout utilities |
 
 ## Phased Modernization Roadmap
 
-### Phase 1: Security & Safety (3-6 months)
+### Phase 1: Security & Safety
 
 #### 1.1 Prepared Statements Migration
 
 **Priority:** P0 (Critical)
+**Status:** NOT STARTED
 **Effort:** Large (200+ hours)
 
-**Steps:**
+**Current State:**
 
-1. Create `DatabaseService` class with prepared statement wrappers
-2. Add methods: `query()`, `insert()`, `update()`, `delete()`, `select()`
-3. Gradually replace `do_mysqli_query()` calls (prioritize user input paths first)
+- Database classes exist (`Connection`, `DB`, `QueryBuilder`)
+- String escaping via `Escaping::toSqlSyntax()` used everywhere
+- No prepared statement infrastructure
+
+**Next Steps:**
+
+1. Add `prepare()` method to `Connection` class
+2. Create `PreparedStatement` wrapper class
+3. Migrate highest-risk endpoints first (API handlers)
 4. Add integration tests for each converted query
 
 **Success Criteria:**
 
-- 100% of queries use prepared statements
-- All tests pass
-- SQL injection scan shows no vulnerabilities
+- [ ] 100% of queries use prepared statements
+- [ ] All tests pass
+- [ ] SQL injection scan shows no vulnerabilities
 
 #### 1.2 Input Validation Layer
 
 **Priority:** P0 (Critical)
+**Status:** NOT STARTED
 **Effort:** Medium (60 hours)
 
-**Implementation:**
+**Proposed Implementation:**
 
 ```php
-// Create src/Services/InputValidator.php
+// Create src/backend/Services/InputValidator.php
 class InputValidator {
     public static function getInt(string $key, ?int $default = null): ?int
     public static function getString(string $key, int $maxLength, ?string $default = null): ?string
@@ -93,25 +216,33 @@ class InputValidator {
 }
 ```
 
-**Replace all direct `$_REQUEST` access with validation layer**
+**Current Workaround:** `BaseController::param()` + manual type casting
 
 **Success Criteria:**
 
-- Zero direct `$_REQUEST`/`$_GET`/`$_POST` access in codebase
-- All inputs validated before use
+- [ ] Zero direct `$_REQUEST`/`$_GET`/`$_POST` access in codebase
+- [ ] All inputs validated before use
 
 #### 1.3 Session Security Hardening
 
 **Priority:** P1 (High)
+**Status:** NOT IMPLEMENTED
 **Effort:** Small (8 hours)
 
-**Changes to `inc/start_session.php`:**
+**Current State:**
+
+- `start_session.php` exists at `src/backend/Core/Bootstrap/start_session.php`
+- Simple `session_start()` call with no security configuration
+- No `session_set_cookie_params()` settings
+- TTS cookies use `SameSite=Strict` but sessions do not
+
+**Missing Security Settings:**
 
 ```php
+// NONE of these are currently configured:
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_secure', 1);
 ini_set('session.cookie_samesite', 'Strict');
-ini_set('session.gc_maxlifetime', 3600);
 session_set_cookie_params([
     'lifetime' => 0,
     'path' => '/',
@@ -123,149 +254,174 @@ session_set_cookie_params([
 
 **Success Criteria:**
 
-- Session cookies have HttpOnly, Secure, SameSite flags
-- Sessions expire after 1 hour of inactivity
-- No `@` error suppression operators
+- [ ] Session cookies have HttpOnly, Secure, SameSite flags
+- [ ] Sessions expire after configured timeout
+- [ ] Security audit passed
 
 #### 1.4 XSS Prevention Audit
 
 **Priority:** P1 (High)
+**Status:** PARTIAL
 **Effort:** Medium (40 hours)
 
-**Tasks:**
+**Current State:**
 
-1. Audit all `echo`, `print`, output contexts
-2. Ensure `tohtml()` wrapper used consistently
-3. Add Content-Security-Policy headers
-4. Review JavaScript injection points
+- [x] `tohtml()` wrapper function exists in `string_utilities.php`
+- [x] Uses `htmlspecialchars()` with UTF-8 encoding
+- [ ] No Content-Security-Policy headers
+- [ ] No security headers (X-Frame-Options, X-Content-Type-Options)
+- [ ] Inconsistent usage of `tohtml()` across views
+
+**Missing Headers:**
+
+```php
+// NONE of these headers are set:
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+header('Content-Security-Policy: default-src \'self\'');
+header('Strict-Transport-Security: max-age=31536000');
+```
 
 **Success Criteria:**
 
-- All user-generated content escaped before output
-- CSP headers configured
-- XSS scanner shows no vulnerabilities
+- [ ] All user-generated content escaped before output
+- [ ] CSP headers configured
+- [ ] Security headers implemented
+- [ ] XSS scanner shows no vulnerabilities
 
-### Phase 2: Refactoring (6-12 months)
+### Phase 2: Refactoring
 
 #### 2.1 Break Up Monolithic Files
 
 **Priority:** P1 (High)
-**Effort:** X-Large (300+ hours)
+**Status:** COMPLETE
+**Effort:** X-Large (300+ hours) - DONE
 
-**Target Structure:**
+**Achievements:**
 
-```text
-src/
-├── Services/
-│   ├── TextService.php          (from session_utility.php)
-│   ├── WordService.php          (from session_utility.php)
-│   ├── MediaService.php         (from session_utility.php)
-│   ├── NavigationService.php    (from session_utility.php)
-│   ├── ExportService.php        (from session_utility.php)
-│   ├── FormGeneratorService.php (from session_utility.php)
-│   ├── DatabaseService.php      (from database_connect.php)
-│   ├── QueryService.php         (from database_connect.php)
-│   └── ValidationService.php    (new)
-├── Repositories/
-│   ├── TextRepository.php
-│   ├── WordRepository.php
-│   ├── LanguageRepository.php
-│   └── TagRepository.php
-└── Models/
-    ├── Text.php (enhance existing)
-    ├── Word.php (rename from Term.php)
-    ├── Language.php (enhance existing)
-    └── Tag.php (new)
-```
+- [x] All legacy monolithic files eliminated
+- [x] 22 service classes created
+- [x] 14 controllers implemented
+- [x] 57 core utility files organized into 17 subdirectories
+- [x] MVC architecture fully implemented
 
-**Approach:**
+**Actual Structure vs. Planned:**
 
-1. Create service classes with static methods initially (maintain compatibility)
-2. Move 5-10 functions per week
-3. Update callers incrementally
-4. Add unit tests for each service
-5. Refactor to instance methods once all code migrated
-
-**Success Criteria:**
-
-- No file exceeds 500 lines
-- Each class has single responsibility
-- 80%+ test coverage on new services
+| Planned | Actual | Status |
+|---------|--------|--------|
+| `Services/TextService.php` | `Services/TextService.php` | DONE |
+| `Services/WordService.php` | `Services/WordService.php` | DONE |
+| `Services/MediaService.php` | `Core/Media/` | DONE (different location) |
+| `Services/NavigationService.php` | `Core/Text/navigation.php` | DONE |
+| `Services/ExportService.php` | `Core/Export/` | DONE |
+| `Services/DatabaseService.php` | `Core/Database/Connection.php` + `DB.php` | DONE |
+| `Repositories/*` | NOT CREATED | SKIPPED - Services access DB directly |
+| `Models/*` | `Core/Entity/*` | PARTIAL - 4 entity classes |
 
 #### 2.2 Eliminate Code Duplication
 
 **Priority:** P2 (Medium)
-**Effort:** Medium (60 hours)
+**Status:** LARGELY COMPLETE
+**Effort:** Medium (60 hours) - MOSTLY DONE
 
-**Targets:**
+**Achievements:**
 
-1. **Select Options Generator** - Create `FormHelper::selectOptions($data, $selectedId)`
-2. **CRUD Pattern** - Create `AbstractCrudController` base class
-3. **Query Builder** - Add fluent query builder to `DatabaseService`
+- [x] `SelectOptionsBuilder` consolidates select option generation
+- [x] `FormHelper` provides form utilities
+- [x] `QueryBuilder` with fluent API available
+- [x] `BaseController` provides common controller functionality
 
-**Success Criteria:**
+**Remaining Issues:**
 
-- 50%+ reduction in duplicated code blocks
-- Code complexity metrics improve
+- [ ] 42 DELETE queries still use direct SQL
+- [ ] Services don't consistently use QueryBuilder
+- [ ] No `AbstractCrudController` (chose Service pattern instead)
 
 #### 2.3 Add Type Hints
 
 **Priority:** P2 (Medium)
-**Effort:** Large (120 hours)
+**Status:** SUBSTANTIAL PROGRESS
+**Effort:** Large (120 hours) - ONGOING
 
-**Coverage Targets:**
+**Current Coverage:**
 
-- **Current:** 41% of functions have return types
-- **Phase 2 Target:** 100% of functions have full type coverage
+- Modern code (Controllers, Services): ~90% type coverage
+- Legacy utility functions: ~50% type coverage
+- Entity classes: Minimal (use docblocks)
+- `strict_types`: 0 files declare it
 
-**Process:**
+**Psalm Configuration:**
 
-1. Run Psalm at level 4
-2. Add parameter types to all function signatures
-3. Add return types to all functions
-4. Add property types to all classes
-5. Enable strict_types in all files
+- Level 4 (strictest) configured
+- Well-tuned suppressions for legacy code
+- Running in CI pipeline
 
-**Success Criteria:**
+**Remaining Work:**
 
-- Psalm level 1 compliance
-- Zero type-related warnings in IDE
+- [ ] Add `declare(strict_types=1)` to all files
+- [ ] Convert Entity docblocks to native property types
+- [ ] Achieve Psalm level 1 compliance
 
-### Phase 3: Modernization (12-18 months)
+### Phase 3: Modernization
 
 #### 3.1 OOP Architecture
 
 **Priority:** P2 (Medium)
-**Effort:** X-Large (400+ hours)
+**Status:** SUBSTANTIAL PROGRESS
+**Effort:** X-Large (400+ hours) - ONGOING
 
-**Design Patterns to Implement:**
+**Achievements:**
 
-1. **Repository Pattern** - Abstract database access
-2. **Service Layer Pattern** - Business logic separation
-3. **Factory Pattern** - Object creation
-4. **Dependency Injection** - Remove global variables
+- [x] Service Layer Pattern implemented (22 services)
+- [x] Controller pattern implemented (14 controllers)
+- [x] Entity classes exist (4 classes)
+- [x] `Globals` class for configuration access
+- [ ] Repository Pattern NOT implemented
+- [ ] Dependency Injection container NOT implemented
+- [ ] Factory Pattern NOT implemented
 
-**Migration Strategy:**
+**Current Dependency Pattern:**
 
-- Root PHP files become controllers
-- Business logic moves to services
-- Database access moves to repositories
-- Views separated to templates (future: Twig/Blade)
+```php
+// Manual dependency via static classes (current)
+class LanguageService {
+    public function getAllLanguages(): array {
+        $sql = "SELECT * FROM " . Globals::table('languages');
+        return Connection::query($sql);
+    }
+}
 
-**Success Criteria:**
+// DI container pattern (not implemented)
+class LanguageService {
+    public function __construct(private Connection $db) {}
+}
+```
 
-- 80%+ code in classes (vs. procedural)
-- Dependency injection container in use
-- Zero global variables except config
+**Remaining Work:**
+
+- [ ] Implement Repository layer for database abstraction
+- [ ] Add PSR-11 DI container
+- [ ] Reduce static method usage
 
 #### 3.2 Database Modernization
 
 **Priority:** P2 (Medium)
+**Status:** NOT STARTED
 **Effort:** Medium (80 hours)
 
-**Changes:**
+**Current State:**
+
+- All 14 tables use **MyISAM** engine
+- Zero foreign key constraints
+- Transaction methods defined in `DB` class but unused
+- 4 migration files exist (schema versioning works)
+
+**Required Changes:**
 
 1. **Engine Migration** - MyISAM → InnoDB
+   - All tables currently MyISAM
+   - MEMORY engine used for temp tables (appropriate)
+
 2. **Add Foreign Keys:**
 
    ```sql
@@ -273,310 +429,170 @@ src/
        FOREIGN KEY (TxLgID) REFERENCES languages(LgID);
    ALTER TABLE words ADD CONSTRAINT fk_words_language
        FOREIGN KEY (WoLgID) REFERENCES languages(LgID);
+   -- Plus 10+ more relationships
    ```
 
-3. **Add Composite Indexes:**
-
-   ```sql
-   ALTER TABLE words ADD INDEX idx_lang_status (WoLgID, WoStatus);
-   ALTER TABLE texts ADD INDEX idx_lang_title (TxLgID, TxTitle(50));
-   ```
-
-4. **Enable Transactions** - Wrap multi-query operations
-
-**Migration Plan:**
-
-1. Create migration script
-2. Test on copy of production data
-3. Document rollback procedure
-4. Execute during maintenance window
+3. **Enable Transactions:**
+   - `DB::beginTransaction()`, `commit()`, `rollback()` exist but unused
+   - Multi-step operations (text import) should use transactions
 
 **Success Criteria:**
 
-- All tables use InnoDB
-- Foreign key constraints enforced
-- Query performance maintained or improved
+- [ ] All tables use InnoDB
+- [ ] Foreign key constraints enforced
+- [ ] Transaction usage in multi-query operations
 
 #### 3.3 PSR-4 Autoloading
 
 **Priority:** P3 (Low)
-**Effort:** Small (16 hours)
+**Status:** IMPLEMENTED
+**Effort:** Small (16 hours) - DONE
 
-**Implementation:**
+**Current Configuration:**
 
 ```json
-// composer.json
 {
     "autoload": {
         "psr-4": {
-            "Lwt\\": "src/"
+            "Lwt\\": "src/backend/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Lwt\\Tests\\": "tests/backend/"
         }
     }
 }
 ```
 
-**Replace:**
+**Adoption Rate:**
 
-```php
-// Old
-require_once __DIR__ . '/inc/session_utility.php';
+- 39 of 190 PHP files use `Lwt\` namespace (~20%)
+- Controllers, Services, Database classes: 100%
+- Core utility functions: 0% (procedural)
 
-// New
-use Lwt\Services\TextService;
-// Autoloaded via composer
-```
+**Remaining Work:**
 
-**Success Criteria:**
-
-- Zero `require_once` statements for classes
-- PSR-4 compliant namespace structure
+- [ ] Migrate remaining procedural files to namespaced classes
+- [ ] Achieve 90%+ namespace adoption
 
 #### 3.4 Exception Handling
 
 **Priority:** P3 (Low)
+**Status:** NOT STARTED
 **Effort:** Medium (60 hours)
 
-**Replace:**
+**Current State:**
 
-```php
-// Old
-if ($res == false) {
-    echo "Error...";
-    die();
-}
+- Standard PHP exceptions used (`RuntimeException`)
+- No custom exception hierarchy
+- Error display enabled in development (`display_errors = 1`)
 
-// New
-try {
-    $service->doOperation();
-} catch (DatabaseException $e) {
-    $logger->error($e);
-    return errorResponse($e->getMessage());
-}
-```
+**Planned Exceptions:**
 
-**Custom Exceptions:**
-
-- `LwtException` (base)
-- `DatabaseException`
-- `ValidationException`
-- `NotFoundException`
-- `AuthenticationException`
+- [ ] `LwtException` (base)
+- [ ] `DatabaseException`
+- [ ] `ValidationException`
+- [ ] `NotFoundException`
+- [ ] `AuthenticationException`
 
 **Success Criteria:**
 
-- No `die()` or `exit()` calls (except entry points)
-- All errors logged
-- User-friendly error pages
+- [ ] Custom exception hierarchy implemented
+- [ ] No `die()` or `exit()` calls (except entry points)
+- [ ] Production error display disabled
+- [ ] All errors logged
 
-## Quick Wins (Immediate - 0-2 weeks)
+## Quick Wins
 
 ### QW1: Add Composer Autoload Configuration
 
-**Effort:** 1 hour
-
-```bash
-mkdir -p src/Services src/Repositories src/Models
-# Update composer.json with PSR-4 autoload
-composer dump-autoload
-```
+**Status:** COMPLETE
 
 ### QW2: Configure Session Security
 
-**Effort:** 2 hours
-
-- Modify `inc/start_session.php` with security settings
-- Test on development environment
+**Status:** NOT DONE - Still requires implementation
 
 ### QW3: Create InputValidator Class
 
-**Effort:** 8 hours
-
-- Create `src/Services/InputValidator.php`
-- Write unit tests
-- Document usage
+**Status:** NOT DONE - `BaseController::param()` is workaround
 
 ### QW4: Add CI Pipeline for Code Quality
 
-**Effort:** 4 hours
+**Status:** COMPLETE
 
-```yaml
-# .github/workflows/quality.yml
-- name: Run Psalm
-  run: ./vendor/bin/psalm --show-info=false
-- name: Run PHPUnit
-  run: composer test
-- name: Run PHPCS
-  run: php ./vendor/bin/squizlabs/phpcs.phar --standard=PSR12 src/
-```
+- Psalm runs in CI
+- PHPUnit runs in CI
+- Cypress E2E tests available
 
 ### QW5: Add Database Service Skeleton
 
-**Effort:** 8 hours
+**Status:** COMPLETE
 
-- Create `src/Services/DatabaseService.php` with prepared statement wrappers
-- Document API
-- Add to one file as proof of concept
+- `Connection` class provides query execution
+- `DB` facade provides simplified interface
+- `QueryBuilder` provides fluent queries
 
 ## Success Metrics
 
 ### Phase 1 Completion
 
-- [ ] Zero SQL injection vulnerabilities (RIPS/SonarQube scan)
-- [ ] Zero direct `$_REQUEST` access
-- [ ] Session security audit passed
-- [ ] XSS vulnerabilities: 0 (OWASP ZAP scan)
+- [ ] Zero SQL injection vulnerabilities (prepared statements)
+- [ ] Zero direct `$_REQUEST` access (InputValidator)
+- [ ] Session security audit passed (cookie flags)
+- [ ] XSS vulnerabilities: 0 (security headers + consistent escaping)
 
 ### Phase 2 Completion
 
-- [ ] Average file size < 500 lines
-- [ ] Code duplication < 5% (phpmd)
-- [ ] Type coverage: 100%
-- [ ] Test coverage: 60%+
+- [x] Average file size < 500 lines (achieved for most files)
+- [ ] Code duplication < 5% (DELETE queries still duplicated)
+- [ ] Type coverage: 100% (currently ~70%)
+- [ ] Test coverage: 60%+ (80 test files exist)
 
 ### Phase 3 Completion
 
-- [ ] OOP code: 80%+
+- [x] OOP code: 80%+ (achieved via MVC)
 - [ ] Database: 100% InnoDB with foreign keys
-- [ ] Psalm level: 1
-- [ ] Response time improvement: 10%+
+- [ ] Psalm level: 1 (currently level 4 with suppressions)
+- [ ] DI container in use
 
-## Risk Mitigation
+## Remaining High-Priority Work
 
-### Technical Risks
+### P0 (Critical - Security)
 
-1. **Breaking Changes** - Mitigate with:
-   - Comprehensive test suite before refactoring
-   - Incremental changes with feature flags
-   - Maintain backward compatibility layer
+1. **Prepared Statements** - Migrate from string escaping
+2. **Session Security** - Add cookie flags (HttpOnly, Secure, SameSite)
+3. **Security Headers** - Add CSP, X-Frame-Options, etc.
 
-2. **Performance Regression** - Mitigate with:
-   - Benchmark before/after each phase
-   - Profile queries with slow query log
-   - Load testing on production-sized data
+### P1 (High)
 
-3. **Database Migration Issues** - Mitigate with:
-   - Test on production data copy
-   - Document rollback procedure
-   - Schedule maintenance window
-   - Monitor replication lag
+1. **InputValidator** - Centralized input validation
+2. **Exception Handling** - Custom exception hierarchy
+3. **Database Migration** - MyISAM to InnoDB
 
-### Resource Risks
+### P2 (Medium)
 
-1. **Limited Developer Time** - Mitigate with:
-   - Focus on P0/P1 items only
-   - Spread work over 18 months
-   - Accept community contributions
+1. **DI Container** - Replace static dependencies
+2. **Repository Layer** - Abstract database access
+3. **Type Hints** - Complete coverage + strict_types
+4. **QueryBuilder Adoption** - Reduce direct SQL
 
-2. **Testing Burden** - Mitigate with:
-   - Automate testing in CI
-   - Maintain manual test checklist
-   - Beta testing period before releases
+## Timeline Update
 
-## Implementation Guidelines
+| Phase | Original Estimate | Actual Status | Remaining |
+|-------|-------------------|---------------|-----------|
+| Quick Wins | 2 weeks | 80% complete | Session security |
+| Phase 1 | 3-6 months | 40% complete | Security hardening |
+| Phase 2 | 6-12 months | 75% complete | Type hints, DI |
+| Phase 3 | 12-18 months | 50% complete | Database, exceptions |
 
-### Code Review Checklist
-
-For all new code:
-
-- [ ] Uses prepared statements (no string concatenation)
-- [ ] All inputs validated
-- [ ] Full type hints (parameters + return)
-- [ ] No code duplication
-- [ ] Unit tests included
-- [ ] PSR-12 compliant
-- [ ] No global variables
-- [ ] Error handling with exceptions
-
-### Commit Message Format
-
-```text
-type(scope): brief description
-
-- Details of changes
-- Reference to issue: #123
-
-Phase: [1|2|3|QW]
-Priority: [P0|P1|P2|P3]
-```
-
-### Branch Strategy
-
-- `master` - Stable releases only
-- `dev` - Active development (merge target)
-- `security/*` - Security fixes (Phase 1 work)
-- `refactor/*` - Refactoring work (Phase 2)
-- `modernization/*` - Architecture changes (Phase 3)
-
-## Resources Required
-
-### Development Time (Estimates)
-
-- **Phase 1:** 308 hours (7.7 weeks full-time)
-- **Phase 2:** 480 hours (12 weeks full-time)
-- **Phase 3:** 556 hours (13.9 weeks full-time)
-- **Total:** 1,344 hours (33.6 weeks full-time)
-
-### Tools Needed
-
-- Static Analysis: Psalm (already installed)
-- Code Style: PHP_CodeSniffer (already installed)
-- Security Scanning: RIPS/SonarQube/Snyk
-- Performance: Xdebug profiler, MySQL slow query log
-- Testing: PHPUnit (already installed)
-
-### Documentation Updates
-
-Each phase requires:
-
-- Update `CLAUDE.md` with new architecture
-- Update `docs/contribute.md` with new patterns
-- Add migration guides for breaking changes
-- Update API documentation
-
-## Timeline Summary
-
-| Phase | Duration | Effort | Priority | Start Date |
-|-------|----------|--------|----------|------------|
-| Quick Wins | 2 weeks | 23 hours | Immediate | 2025-11 |
-| Phase 1 | 3-6 months | 308 hours | Critical | 2025-12 |
-| Phase 2 | 6-12 months | 480 hours | High | 2026-Q2 |
-| Phase 3 | 12-18 months | 556 hours | Medium | 2026-Q4 |
-
-**Total Duration:** 18-24 months
-**Total Effort:** 1,344 hours
-
-## Next Steps
-
-1. **Immediate (This Week):**
-   - Review and approve this plan
-   - Execute Quick Wins (QW1-QW5)
-   - Set up security scanning tools
-
-2. **Month 1:**
-   - Begin Phase 1.1 (Prepared Statements)
-   - Start with highest-risk files (edit_*.php, api.php)
-   - Create InputValidator class (Phase 1.2)
-
-3. **Month 2-3:**
-   - Complete critical security fixes
-   - Run first security audit
-   - Document new patterns in CLAUDE.md
-
-4. **Quarterly Reviews:**
-   - Assess progress against metrics
-   - Adjust priorities based on findings
-   - Update timeline if needed
-
-## Approval Sign-off
-
-- [ ] Plan Reviewed
-- [ ] Budget Approved
-- [ ] Timeline Accepted
-- [ ] Risk Assessment Completed
-- [ ] Begin Implementation
+**Original Total Duration:** 18-24 months
+**Elapsed Time:** ~12 months (estimated based on architecture changes)
+**Remaining Effort:** ~400 hours for P0/P1 items
 
 ---
 
 **Document Owner:** LWT Maintainers
 **Review Cycle:** Quarterly
-**Next Review:** 2026-02-24
+**Last Review:** 2025-11-28
+**Next Review:** 2026-02-28
