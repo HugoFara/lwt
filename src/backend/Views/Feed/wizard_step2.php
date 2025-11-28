@@ -23,7 +23,6 @@ namespace Lwt\Views\Feed;
 use Lwt\Core\Http\InputValidator;
 
 ?>
-<script type="text/javascript" src="/assets/js/jquery.xpath.min.js" charset="utf-8"></script>
 <script type="text/javascript">
     // Extend jQuery
     $(function() {

@@ -21,7 +21,6 @@
 namespace Lwt\Views\Feed;
 
 ?>
-<script type="text/javascript" src="/assets/js/jquery.xpath.min.js" charset="utf-8"></script>
 <script type="text/javascript">
     filter_Array = [];
     const lwt_wizard_filter = {
@@ -35,7 +34,7 @@ namespace Lwt\Views\Feed;
                 .nextAll()
                 .find('*')
                 .addBack()
-                .not($(document).xpath(articleSection).find('*').addBack())
+                .not(xpathQuery(articleSection).find('*').addBack())
                 .not($('#lwt_header').find('*').addBack())
                 .each(function() {
                     $(this).addClass('lwt_filtered_text');
