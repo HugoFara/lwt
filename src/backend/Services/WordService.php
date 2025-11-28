@@ -306,4 +306,452 @@ class WordService
     {
         return \strToClassName(Escaping::prepareTextdata($text));
     }
+
+    /**
+     * Delete a word by ID.
+     *
+     * @param int $wordId Word ID to delete
+     *
+     * @return string Result message
+     */
+    public function delete(int $wordId): string
+    {
+        Connection::execute(
+            'DELETE FROM ' . $this->tbpref . 'words WHERE WoID = ' . $wordId
+        );
+
+        // Update text items to unlink the word
+        Connection::query(
+            'UPDATE ' . $this->tbpref . 'textitems2 SET Ti2WoID = 0
+             WHERE Ti2WordCount = 1 AND Ti2WoID = ' . $wordId
+        );
+
+        // Delete multi-word text items
+        Connection::query(
+            'DELETE FROM ' . $this->tbpref . 'textitems2 WHERE Ti2WoID = ' . $wordId
+        );
+
+        // Clean up orphaned word tags
+        Connection::execute(
+            'DELETE ' . $this->tbpref . 'wordtags FROM (' .
+            $this->tbpref . 'wordtags LEFT JOIN ' . $this->tbpref . 'words ON WtWoID = WoID) ' .
+            'WHERE WoID IS NULL'
+        );
+
+        return 'Deleted';
+    }
+
+    /**
+     * Delete multiple words by IDs.
+     *
+     * @param int[] $wordIds Array of word IDs to delete
+     *
+     * @return int Number of deleted words
+     */
+    public function deleteMultiple(array $wordIds): int
+    {
+        if (empty($wordIds)) {
+            return 0;
+        }
+
+        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+
+        $count = (int) Connection::execute(
+            'DELETE FROM ' . $this->tbpref . 'words WHERE WoID IN ' . $list
+        );
+
+        // Update text items
+        Connection::query(
+            'UPDATE ' . $this->tbpref . 'textitems2 SET Ti2WoID = 0
+             WHERE Ti2WordCount = 1 AND Ti2WoID IN ' . $list
+        );
+
+        Connection::query(
+            'DELETE FROM ' . $this->tbpref . 'textitems2 WHERE Ti2WoID IN ' . $list
+        );
+
+        // Clean up orphaned word tags
+        Connection::execute(
+            'DELETE ' . $this->tbpref . 'wordtags FROM (' .
+            $this->tbpref . 'wordtags LEFT JOIN ' . $this->tbpref . 'words ON WtWoID = WoID) ' .
+            'WHERE WoID IS NULL'
+        );
+
+        return $count;
+    }
+
+    /**
+     * Update status for multiple words.
+     *
+     * @param int[] $wordIds  Array of word IDs
+     * @param int   $status   New status value (1-5, 98, 99)
+     * @param bool  $relative If true, change status by +1 or -1
+     *
+     * @return int Number of updated words
+     */
+    public function updateStatusMultiple(array $wordIds, int $status, bool $relative = false): int
+    {
+        if (empty($wordIds)) {
+            return 0;
+        }
+
+        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+
+        if ($relative) {
+            if ($status > 0) {
+                // Increment status
+                return (int) Connection::execute(
+                    'UPDATE ' . $this->tbpref . 'words
+                     SET WoStatus = WoStatus + 1, WoStatusChanged = NOW(), ' .
+                    \make_score_random_insert_update('u') . '
+                     WHERE WoStatus IN (1,2,3,4) AND WoID IN ' . $list
+                );
+            } else {
+                // Decrement status
+                return (int) Connection::execute(
+                    'UPDATE ' . $this->tbpref . 'words
+                     SET WoStatus = WoStatus - 1, WoStatusChanged = NOW(), ' .
+                    \make_score_random_insert_update('u') . '
+                     WHERE WoStatus IN (2,3,4,5) AND WoID IN ' . $list
+                );
+            }
+        }
+
+        // Absolute status
+        return (int) Connection::execute(
+            'UPDATE ' . $this->tbpref . 'words
+             SET WoStatus = ' . $status . ', WoStatusChanged = NOW(), ' .
+            \make_score_random_insert_update('u') . '
+             WHERE WoID IN ' . $list
+        );
+    }
+
+    /**
+     * Update status changed date for multiple words.
+     *
+     * @param int[] $wordIds Array of word IDs
+     *
+     * @return int Number of updated words
+     */
+    public function updateStatusDateMultiple(array $wordIds): int
+    {
+        if (empty($wordIds)) {
+            return 0;
+        }
+
+        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+
+        return (int) Connection::execute(
+            'UPDATE ' . $this->tbpref . 'words
+             SET WoStatusChanged = NOW(), ' .
+            \make_score_random_insert_update('u') . '
+             WHERE WoID IN ' . $list
+        );
+    }
+
+    /**
+     * Delete sentences for multiple words.
+     *
+     * @param int[] $wordIds Array of word IDs
+     *
+     * @return int Number of updated words
+     */
+    public function deleteSentencesMultiple(array $wordIds): int
+    {
+        if (empty($wordIds)) {
+            return 0;
+        }
+
+        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+
+        return (int) Connection::execute(
+            'UPDATE ' . $this->tbpref . 'words SET WoSentence = NULL WHERE WoID IN ' . $list
+        );
+    }
+
+    /**
+     * Convert words to lowercase.
+     *
+     * @param int[] $wordIds Array of word IDs
+     *
+     * @return int Number of updated words
+     */
+    public function toLowercaseMultiple(array $wordIds): int
+    {
+        if (empty($wordIds)) {
+            return 0;
+        }
+
+        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+
+        return (int) Connection::execute(
+            'UPDATE ' . $this->tbpref . 'words SET WoText = WoTextLC WHERE WoID IN ' . $list
+        );
+    }
+
+    /**
+     * Capitalize words.
+     *
+     * @param int[] $wordIds Array of word IDs
+     *
+     * @return int Number of updated words
+     */
+    public function capitalizeMultiple(array $wordIds): int
+    {
+        if (empty($wordIds)) {
+            return 0;
+        }
+
+        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+
+        return (int) Connection::execute(
+            'UPDATE ' . $this->tbpref . 'words
+             SET WoText = CONCAT(UPPER(LEFT(WoTextLC, 1)), SUBSTRING(WoTextLC, 2))
+             WHERE WoID IN ' . $list
+        );
+    }
+
+    /**
+     * Get unknown words in a text (words without a WoID).
+     *
+     * @param int $textId Text ID
+     *
+     * @return \mysqli_result|false Query result with Ti2Text and Ti2TextLC columns
+     */
+    public function getUnknownWordsInText(int $textId): \mysqli_result|false
+    {
+        $sql = "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
+                FROM (
+                    {$this->tbpref}textitems2
+                    LEFT JOIN {$this->tbpref}words
+                    ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
+                )
+                WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = $textId
+                ORDER BY Ti2Order";
+        return Connection::query($sql);
+    }
+
+    /**
+     * Get the language ID for a text.
+     *
+     * @param int $textId Text ID
+     *
+     * @return int|null Language ID or null if not found
+     */
+    public function getTextLanguageId(int $textId): ?int
+    {
+        $langId = Connection::fetchValue(
+            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = $textId"
+        );
+        return $langId !== null ? (int)$langId : null;
+    }
+
+    /**
+     * Create a word with a specific status (for bulk operations like "mark all as known").
+     *
+     * @param int    $langId Language ID
+     * @param string $term   The term text
+     * @param string $termlc Lowercase version of the term
+     * @param int    $status Status to set (98=ignored, 99=well-known)
+     *
+     * @return array{id: int, rows: int} Word ID and number of inserted rows
+     */
+    public function createWithStatus(int $langId, string $term, string $termlc, int $status): array
+    {
+        // Check if already exists
+        $existingId = Connection::fetchValue(
+            "SELECT WoID AS value FROM {$this->tbpref}words WHERE WoTextLC = " .
+            Escaping::toSqlSyntax($termlc)
+        );
+
+        if ($existingId !== null) {
+            return ['id' => (int)$existingId, 'rows' => 0];
+        }
+
+        Connection::execute(
+            "INSERT INTO {$this->tbpref}words (
+                WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, " .
+            \make_score_random_insert_update('iv') . ")
+            VALUES (
+                $langId, " .
+            Escaping::toSqlSyntax($term) . ", " .
+            Escaping::toSqlSyntax($termlc) . ", $status, NOW(), " .
+            \make_score_random_insert_update('id') . ")"
+        );
+
+        $wid = (int)Connection::lastInsertId();
+        return ['id' => $wid, 'rows' => 1];
+    }
+
+    /**
+     * Link all unlinked text items to their corresponding words.
+     *
+     * Used after bulk word creation to update Ti2WoID references.
+     *
+     * @return void
+     */
+    public function linkAllTextItems(): void
+    {
+        Connection::execute(
+            "UPDATE {$this->tbpref}words
+             JOIN {$this->tbpref}textitems2
+             ON Ti2WoID = 0 AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
+             SET Ti2WoID = WoID"
+        );
+    }
+
+    /**
+     * Get word IDs based on filter criteria.
+     *
+     * @param array $filters Filter criteria:
+     *                       - langId: Language ID filter
+     *                       - textId: Text ID filter (words appearing in text)
+     *                       - status: Status filter
+     *                       - query: Search query
+     *                       - queryMode: Query mode (term, rom, transl, etc.)
+     *                       - regexMode: Regex mode
+     *                       - tag1: Tag 1 filter
+     *                       - tag2: Tag 2 filter
+     *                       - tag12: Tag logic (0=OR, 1=AND)
+     *
+     * @return int[] Array of word IDs
+     */
+    public function getFilteredWordIds(array $filters): array
+    {
+        $whLang = '';
+        $whStat = '';
+        $whQuery = '';
+        $whTag = '';
+
+        // Language filter
+        if (!empty($filters['langId'])) {
+            $whLang = ' AND WoLgID = ' . (int)$filters['langId'];
+        }
+
+        // Status filter
+        if (!empty($filters['status'])) {
+            $whStat = ' AND ' . \makeStatusCondition('WoStatus', (int)$filters['status']);
+        }
+
+        // Query filter
+        if (!empty($filters['query'])) {
+            $regexMode = $filters['regexMode'] ?? '';
+            $queryMode = $filters['queryMode'] ?? 'term,rom,transl';
+            $queryPattern = $regexMode . 'LIKE ' . Escaping::toSqlSyntax(
+                ($regexMode == '') ?
+                str_replace("*", "%", mb_strtolower($filters['query'], 'UTF-8')) :
+                $filters['query']
+            );
+
+            $whQuery = $this->buildQueryCondition($queryMode, $queryPattern);
+        }
+
+        // Tag filter
+        if (!empty($filters['tag1']) || !empty($filters['tag2'])) {
+            $whTag = $this->buildTagCondition(
+                $filters['tag1'] ?? '',
+                $filters['tag2'] ?? '',
+                $filters['tag12'] ?? ''
+            );
+        }
+
+        // Build SQL
+        if (empty($filters['textId'])) {
+            $sql = "SELECT DISTINCT WoID FROM (
+                {$this->tbpref}words
+                LEFT JOIN {$this->tbpref}wordtags ON WoID = WtWoID
+            ) WHERE (1=1) $whLang $whStat $whQuery
+            GROUP BY WoID $whTag";
+        } else {
+            $textId = (int)$filters['textId'];
+            $sql = "SELECT DISTINCT WoID FROM (
+                {$this->tbpref}words
+                LEFT JOIN {$this->tbpref}wordtags ON WoID = WtWoID
+            ), {$this->tbpref}textitems2
+            WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId
+            $whLang $whStat $whQuery
+            GROUP BY WoID $whTag";
+        }
+
+        $ids = [];
+        $res = Connection::query($sql);
+        while ($record = mysqli_fetch_assoc($res)) {
+            $ids[] = (int)$record['WoID'];
+        }
+        mysqli_free_result($res);
+
+        return $ids;
+    }
+
+    /**
+     * Build the query condition for word search.
+     *
+     * @param string $queryMode    Query mode
+     * @param string $queryPattern Query pattern
+     *
+     * @return string SQL condition
+     */
+    private function buildQueryCondition(string $queryMode, string $queryPattern): string
+    {
+        switch ($queryMode) {
+            case 'term,rom,transl':
+                return " AND (WoText $queryPattern OR IFNULL(WoRomanization,'*') $queryPattern OR WoTranslation $queryPattern)";
+            case 'term,rom':
+                return " AND (WoText $queryPattern OR IFNULL(WoRomanization,'*') $queryPattern)";
+            case 'rom,transl':
+                return " AND (IFNULL(WoRomanization,'*') $queryPattern OR WoTranslation $queryPattern)";
+            case 'term,transl':
+                return " AND (WoText $queryPattern OR WoTranslation $queryPattern)";
+            case 'term':
+                return " AND (WoText $queryPattern)";
+            case 'rom':
+                return " AND (IFNULL(WoRomanization,'*') $queryPattern)";
+            case 'transl':
+                return " AND (WoTranslation $queryPattern)";
+            default:
+                return " AND (WoText $queryPattern OR IFNULL(WoRomanization,'*') $queryPattern OR WoTranslation $queryPattern)";
+        }
+    }
+
+    /**
+     * Build the tag condition for word filter.
+     *
+     * @param string $tag1  Tag 1 filter
+     * @param string $tag2  Tag 2 filter
+     * @param string $tag12 Tag logic (0=OR, 1=AND)
+     *
+     * @return string SQL HAVING clause
+     */
+    private function buildTagCondition(string $tag1, string $tag2, string $tag12): string
+    {
+        $whTag1 = null;
+        $whTag2 = null;
+
+        if ($tag1 != '') {
+            if ($tag1 == '-1') {
+                $whTag1 = "GROUP_CONCAT(WtTgID) IS NULL";
+            } else {
+                $whTag1 = "CONCAT('/',GROUP_CONCAT(WtTgID SEPARATOR '/'),'/') LIKE '%/" . (int)$tag1 . "/%'";
+            }
+        }
+
+        if ($tag2 != '') {
+            if ($tag2 == '-1') {
+                $whTag2 = "GROUP_CONCAT(WtTgID) IS NULL";
+            } else {
+                $whTag2 = "CONCAT('/',GROUP_CONCAT(WtTgID SEPARATOR '/'),'/') LIKE '%/" . (int)$tag2 . "/%'";
+            }
+        }
+
+        if ($whTag1 !== null && $whTag2 === null) {
+            return " HAVING ($whTag1)";
+        } elseif ($whTag2 !== null && $whTag1 === null) {
+            return " HAVING ($whTag2)";
+        } elseif ($whTag1 !== null && $whTag2 !== null) {
+            $op = $tag12 ? ' AND ' : ' OR ';
+            return " HAVING (($whTag1)$op($whTag2))";
+        }
+
+        return '';
+    }
 }

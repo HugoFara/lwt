@@ -16,12 +16,14 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Services\WordPressService;
+
 /**
  * Controller for WordPress integration.
  *
  * Handles:
- * - WordPress start
- * - WordPress stop
+ * - WordPress start (login flow)
+ * - WordPress stop (logout flow)
  *
  * @category Lwt
  * @package  Lwt
@@ -33,7 +35,38 @@ namespace Lwt\Controllers;
 class WordPressController extends BaseController
 {
     /**
-     * WordPress start (replaces wordpress_start.php)
+     * @var WordPressService WordPress service instance
+     */
+    protected WordPressService $wordPressService;
+
+    /**
+     * Initialize controller with WordPressService.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->wordPressService = new WordPressService();
+    }
+
+    /**
+     * Get the WordPress service instance.
+     *
+     * @return WordPressService
+     */
+    public function getWordPressService(): WordPressService
+    {
+        return $this->wordPressService;
+    }
+
+    /**
+     * WordPress start - handle login flow (replaces wordpress_start.php)
+     *
+     * To start LWT with WordPress login, use this URL:
+     * http://...path-to-wp-blog.../lwt/wp_lwt_start.php
+     *
+     * Cookies must be enabled. A session cookie will be set.
+     * The LWT installation must be in sub directory "lwt" under
+     * the WordPress main directory.
      *
      * @param array $params Route parameters
      *
@@ -41,11 +74,23 @@ class WordPressController extends BaseController
      */
     public function start(array $params): void
     {
-        include __DIR__ . '/../Legacy/wordpress_start.php';
+        $redirectUrl = $this->param('rd');
+
+        $result = $this->wordPressService->handleStart($redirectUrl);
+
+        if (!$result['success'] && $result['error'] !== null) {
+            require_once __DIR__ . '/../Core/Utils/error_handling.php';
+            \my_die($result['error']);
+        }
+
+        $this->redirect($result['redirect']);
     }
 
     /**
-     * WordPress stop (replaces wordpress_stop.php)
+     * WordPress stop - handle logout flow (replaces wordpress_stop.php)
+     *
+     * To properly log out from both WordPress and LWT, use:
+     * http://...path-to-wp-blog.../lwt/wp_lwt_stop.php
      *
      * @param array $params Route parameters
      *
@@ -53,6 +98,8 @@ class WordPressController extends BaseController
      */
     public function stop(array $params): void
     {
-        include __DIR__ . '/../Legacy/wordpress_stop.php';
+        $result = $this->wordPressService->handleStop();
+
+        $this->redirect($result['redirect']);
     }
 }

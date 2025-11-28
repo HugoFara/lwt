@@ -16,6 +16,8 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Services\WordService;
+
 /**
  * Controller for vocabulary/term management.
  *
@@ -34,6 +36,29 @@ namespace Lwt\Controllers;
  */
 class WordController extends BaseController
 {
+    /**
+     * @var WordService Word service instance
+     */
+    protected WordService $wordService;
+
+    /**
+     * Initialize controller with WordService.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->wordService = new WordService();
+    }
+
+    /**
+     * Get the word service instance.
+     *
+     * @return WordService
+     */
+    public function getWordService(): WordService
+    {
+        return $this->wordService;
+    }
     /**
      * Edit single word (replaces word_edit.php)
      *
