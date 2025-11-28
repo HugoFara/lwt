@@ -80,20 +80,30 @@ function pagestart_kernel_nobody($title, $addcss = ''): void
     <link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
 
+    <?php if (should_use_vite()) : ?>
+    <!-- Vite assets -->
+    <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery.scrollTo.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
+        <?php echo vite_assets('js/main.ts'); ?>
+    <?php else : ?>
+    <!-- Legacy assets -->
     <link rel="stylesheet" type="text/css" href="/assets/css/jquery-ui.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/jquery.tagit.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/feed_wizard.css" />
-    <style type="text/css">
-        <?php echo $addcss . "\n"; ?>
-    </style>
-
     <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery.scrollTo.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery-ui.min.js"  charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
     <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
+    <?php endif; ?>
     <script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>
+    <style type="text/css">
+        <?php echo $addcss . "\n"; ?>
+    </style>
     <!-- URLBASE : "<?php echo tohtml(url_base()); ?>" -->
     <!-- TBPREF  : "<?php echo tohtml($tbpref);  ?>" -->
     <script type="text/javascript">
@@ -884,6 +894,12 @@ function pagestart_nobody($title, $addcss = ''): void
 
     <?php if (should_use_vite()) : ?>
     <!-- Vite assets -->
+    <!-- Load jQuery synchronously for inline scripts compatibility -->
+    <script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery.scrollTo.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/jquery.jeditable.mini.js" charset="utf-8"></script>
+    <script type="text/javascript" src="/assets/js/tag-it.js" charset="utf-8"></script>
         <?php echo vite_assets('js/main.ts'); ?>
     <?php else : ?>
     <!-- Legacy assets -->

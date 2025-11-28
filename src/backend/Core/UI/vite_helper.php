@@ -48,7 +48,7 @@ function get_vite_manifest(): ?array
     static $manifest = null;
 
     if ($manifest === null) {
-        $path = __DIR__ . '/../../../assets/.vite/manifest.json';
+        $path = __DIR__ . '/../../../../assets/.vite/manifest.json';
         if (file_exists($path)) {
             $content = file_get_contents($path);
             if ($content !== false) {

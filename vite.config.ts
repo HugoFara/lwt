@@ -20,8 +20,15 @@ export default defineConfig({
       output: {
         entryFileNames: 'js/vite/[name].[hash].js',
         chunkFileNames: 'js/vite/chunks/[name].[hash].js',
-        assetFileNames: 'css/vite/[name].[hash][extname]'
-      }
+        assetFileNames: 'css/vite/[name].[hash][extname]',
+        // Use global jQuery instead of bundling it
+        globals: {
+          jquery: 'jQuery',
+          'jquery-ui-dist/jquery-ui': 'jQuery'
+        }
+      },
+      // Externalize jQuery - it's loaded separately for inline script compatibility
+      external: ['jquery', 'jquery-ui-dist/jquery-ui']
     }
   },
 

@@ -10,7 +10,12 @@
 // Import functions that need to be globally accessible
 import { getLangFromDict, createTheDictUrl, createTheDictLink, owin, oewin } from './terms/dictionary';
 import { prepareTextInteractions } from './reading/text_events';
-import { goToLastPosition, saveReadingPosition, saveAudioPosition } from './core/user_interactions';
+import { goToLastPosition, saveReadingPosition, saveAudioPosition, quickMenuRedirection } from './core/user_interactions';
+import { showRightFrames, hideRightFrames } from './reading/frame_management';
+import { setLang, resetAll } from './core/language_settings';
+import { markClick, confirmDelete, showAllwordsClick } from './core/ui_utilities';
+import { selectToggle, multiActionGo, allActionGo } from './forms/bulk_actions';
+import { updateTermTranslation, addTermTranslation, changeTableTestStatus, do_ajax_edit_impr_text } from './terms/term_operations';
 
 // Declare global window interface extensions
 declare global {
@@ -27,6 +32,33 @@ declare global {
     goToLastPosition: typeof goToLastPosition;
     saveReadingPosition: typeof saveReadingPosition;
     saveAudioPosition: typeof saveAudioPosition;
+
+    // Navigation/menu functions
+    quickMenuRedirection: typeof quickMenuRedirection;
+
+    // Frame management
+    showRightFrames: typeof showRightFrames;
+    hideRightFrames: typeof hideRightFrames;
+
+    // Language settings
+    setLang: typeof setLang;
+    resetAll: typeof resetAll;
+
+    // UI utilities
+    markClick: typeof markClick;
+    confirmDelete: typeof confirmDelete;
+    showAllwordsClick: typeof showAllwordsClick;
+
+    // Bulk actions
+    selectToggle: typeof selectToggle;
+    multiActionGo: typeof multiActionGo;
+    allActionGo: typeof allActionGo;
+
+    // Term operations
+    updateTermTranslation: typeof updateTermTranslation;
+    addTermTranslation: typeof addTermTranslation;
+    changeTableTestStatus: typeof changeTableTestStatus;
+    do_ajax_edit_impr_text: typeof do_ajax_edit_impr_text;
   }
 }
 
@@ -41,3 +73,24 @@ window.prepareTextInteractions = prepareTextInteractions;
 window.goToLastPosition = goToLastPosition;
 window.saveReadingPosition = saveReadingPosition;
 window.saveAudioPosition = saveAudioPosition;
+
+window.quickMenuRedirection = quickMenuRedirection;
+
+window.showRightFrames = showRightFrames;
+window.hideRightFrames = hideRightFrames;
+
+window.setLang = setLang;
+window.resetAll = resetAll;
+
+window.markClick = markClick;
+window.confirmDelete = confirmDelete;
+window.showAllwordsClick = showAllwordsClick;
+
+window.selectToggle = selectToggle;
+window.multiActionGo = multiActionGo;
+window.allActionGo = allActionGo;
+
+window.updateTermTranslation = updateTermTranslation;
+window.addTermTranslation = addTermTranslation;
+window.changeTableTestStatus = changeTableTestStatus;
+window.do_ajax_edit_impr_text = do_ajax_edit_impr_text;

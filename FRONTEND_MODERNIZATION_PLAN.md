@@ -98,6 +98,35 @@ src/frontend/themes/
 - jQuery plugins: jeditable, tagit, scrollTo, hoverIntent, xpath
 - Overlib (20+ year old popup library)
 
+### JavaScript Library Inventory (November 2025)
+
+#### External Libraries (in `assets/js/`)
+
+| Library | File | Size | Purpose | Replacement Strategy |
+|---------|------|------|---------|---------------------|
+| **jQuery** | `jquery.js` | 97KB | DOM manipulation, AJAX | Keep for now (too many inline `$()` calls) |
+| **jQuery UI** | `jquery-ui.min.js` | 240KB | UI widgets (dialogs, tooltips, draggable) | Keep (provides tooltip, dialog, resizable) |
+| **jQuery scrollTo** | `jquery.scrollTo.min.js` | 2KB | Smooth scrolling | Replace with native `scrollIntoView()` |
+| **jQuery jeditable** | `jquery.jeditable.mini.js` | 8KB | In-place editing | Replace with custom or contenteditable |
+| **jQuery hoverIntent** | `jquery.hoverIntent.js` | 2KB | Delayed hover events | Replace with CSS or native JS |
+| **jQuery jPlayer** | `jquery.jplayer.min.js` | 61KB | Audio/video player | Replace with HTML5 `<audio>` element |
+| **jQuery XPath** | `jquery.xpath.min.js` | 80KB | XPath selector (feed wizard) | Evaluate if needed, else remove |
+| **tag-it** | `tag-it.js` | 10KB | Tag input widget | Replace with modern tag library |
+| **overlib** | `overlib/overlib_mini.js` + plugins | ~75KB | Popup/tooltip library | **REMOVE** - replace with jQuery UI tooltips |
+
+**Total legacy JS size:** ~575KB (uncompressed)
+
+#### Priority Removal Order
+
+1. **overlib** (75KB) - Unmaintained since 2005, replace with jQuery UI tooltips
+2. **jPlayer** (61KB) - HTML5 audio is well-supported now
+3. **jquery.xpath** (80KB) - Only used in feed wizard, may not be needed
+4. **jquery.hoverIntent** (2KB) - Easy to replace with CSS/native
+5. **jquery.scrollTo** (2KB) - Native `scrollIntoView()` works well
+6. **jquery.jeditable** (8KB) - Can use `contenteditable` or custom
+7. **tag-it** (10KB) - Many modern alternatives exist
+8. **jQuery + jQuery UI** (337KB) - Last, requires significant refactoring
+
 ### Critical Issues
 
 #### 1. Global Namespace Pollution

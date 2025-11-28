@@ -11,7 +11,8 @@ import '../css/base/jquery-ui.css';
 import '../css/base/jquery.tagit.css';
 import '../css/base/feed_wizard.css';
 
-// Import jQuery from npm and expose globally for plugins
+// jQuery is loaded externally (synchronously) for inline script compatibility
+// In production, we use the global jQuery; in dev mode, we may import it
 import $ from 'jquery';
 import 'jquery-ui-dist/jquery-ui';
 
