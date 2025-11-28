@@ -8,8 +8,7 @@
  * @deprecated Use html5_audio_player.ts for new code
  */
 
-// Declare external functions that are defined elsewhere
-declare function do_ajax_save_setting(key: string, value: string): void;
+import { do_ajax_save_setting } from '../core/ajax_utilities';
 
 // jPlayer type definitions (legacy)
 interface JPlayerStatus {

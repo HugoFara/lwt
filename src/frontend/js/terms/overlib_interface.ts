@@ -18,18 +18,9 @@ import { overlib, CAPTION } from '../ui/word_popup';
 // Re-export for backward compatibility
 export { overlib, CAPTION, cClick, nd } from '../ui/word_popup';
 
-// The following imports/declares are used only in string templates (onclick handlers)
-// and not called directly in TypeScript code:
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { speechDispatcher } from '../core/user_interactions';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare function showRightFrames(url?: string): void;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare function confirmDelete(): boolean;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare function successSound(): void;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare function failureSound(): void;
+// Note: The following functions are used in HTML string templates (onclick handlers)
+// and accessed via window at runtime: showRightFrames, confirmDelete, successSound, failureSound
+// They are exported to window in globals.ts
 
 // Type for LWT_DATA global
 interface LwtLanguage {

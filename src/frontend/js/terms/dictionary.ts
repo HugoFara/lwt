@@ -9,9 +9,7 @@
  */
 
 import { escape_apostrophes } from '../core/html_utils';
-
-// Declare external functions that are defined elsewhere
-declare function showRightFrames(url1?: string, url2?: string): void;
+import { showRightFrames } from '../reading/frame_management';
 
 /**
  * Open a window.

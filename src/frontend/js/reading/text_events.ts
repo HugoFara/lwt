@@ -15,6 +15,14 @@ import {
 } from './text_annotations';
 import { keydown_event_do_text_text } from './text_keyboard';
 import { mword_drag_n_drop_select } from './text_multiword_selection';
+import { showRightFrames } from './frame_management';
+import {
+  run_overlib_status_unknown,
+  run_overlib_status_99,
+  run_overlib_status_98,
+  run_overlib_status_1_to_5,
+  run_overlib_multiword
+} from '../terms/overlib_interface';
 
 // Re-export from submodules
 export {
@@ -27,29 +35,6 @@ export {
   mwordDragNDrop,
   mword_drag_n_drop_select
 } from './text_multiword_selection';
-
-// Declare external functions
-declare function run_overlib_status_unknown(
-  dict1: string, dict2: string, translator: string, hints: string,
-  textId: number, order: string, text: string, multiWords: (string | undefined)[], rtl: boolean
-): void;
-declare function run_overlib_status_99(
-  dict1: string, dict2: string, translator: string, hints: string,
-  textId: number, order: string, text: string, wid: string, multiWords: (string | undefined)[], rtl: boolean, ann: string
-): void;
-declare function run_overlib_status_98(
-  dict1: string, dict2: string, translator: string, hints: string,
-  textId: number, order: string, text: string, wid: string, multiWords: (string | undefined)[], rtl: boolean, ann: string
-): void;
-declare function run_overlib_status_1_to_5(
-  dict1: string, dict2: string, translator: string, hints: string,
-  textId: number, order: string, text: string, wid: string, status: string, multiWords: (string | undefined)[], rtl: boolean, ann: string
-): void;
-declare function run_overlib_multiword(
-  dict1: string, dict2: string, translator: string, hints: string,
-  textId: number, order: string, text: string, wid: string, status: string, code: string, ann: string
-): void;
-declare function showRightFrames(url1?: string, url2?: string): void;
 
 // Type definitions
 interface LwtLanguage {

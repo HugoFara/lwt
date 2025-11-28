@@ -7,9 +7,7 @@
 
 import { getAttr } from './text_annotations';
 import { hoverIntent } from '../core/hover_intent';
-
-// Declare external functions
-declare function showRightFrames(url1?: string, url2?: string): void;
+import { showRightFrames } from './frame_management';
 
 // Type definitions
 interface LwtSettings {

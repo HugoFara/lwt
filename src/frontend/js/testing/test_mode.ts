@@ -8,15 +8,8 @@
 
 import $ from 'jquery';
 import { LWT_DATA } from '../core/lwt_state';
-
-// Declare external functions
-declare function run_overlib_test(
-  dict1: string, dict2: string, translator: string,
-  wid: string, text: string, trans: string, rom: string, status: string, sent: string, todo: string
-): void;
-
-declare function showRightFrames(url1?: string, url2?: string): void;
-declare function cleanupRightFrames(): void;
+import { run_overlib_test } from '../terms/overlib_interface';
+import { showRightFrames, cleanupRightFrames } from '../reading/frame_management';
 
 /**
  * Helper to safely get an HTML attribute value as a string.
@@ -41,7 +34,8 @@ export function word_click_event_do_test_test(this: HTMLElement): boolean {
     getAttr($this, 'data_rom'),
     getAttr($this, 'data_status'),
     getAttr($this, 'data_sent'),
-    getAttr($this, 'data_todo')
+    parseInt(getAttr($this, 'data_todo'), 10),
+    null // oldstat - unused legacy parameter
   );
   $('.todo').text(LWT_DATA.test.solution);
   return false;

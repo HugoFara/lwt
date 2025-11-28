@@ -8,8 +8,7 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
-// Declare external functions that are defined elsewhere
-declare function markClick(): void;
+import { markClick } from '../core/ui_utilities';
 
 export function selectToggle(toggle: boolean, form: string): void {
   const myForm = document.forms[form as unknown as number] as HTMLFormElement;

@@ -6,8 +6,7 @@
  * @since   2.10.0-fork Extracted from legacy/pgm.ts
  */
 
-// Declare external functions that are defined elsewhere
-declare function showRightFrames(url1?: string, url2?: string): void;
+import { showRightFrames } from '../reading/frame_management';
 
 /**
  * Set the current language.
