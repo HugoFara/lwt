@@ -886,4 +886,114 @@ class WordService
         );
         return $term !== null ? (string) $term : null;
     }
+
+    /**
+     * Update translation for a word (inline edit).
+     *
+     * @param int    $wordId Word ID
+     * @param string $value  New translation value
+     *
+     * @return string Updated translation value
+     */
+    public function updateTranslation(int $wordId, string $value): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            $value = '*';
+        }
+
+        Connection::execute(
+            'UPDATE ' . $this->tbpref . 'words SET WoTranslation = ' .
+            Escaping::toSqlSyntax(\repl_tab_nl($value)) . ' WHERE WoID = ' . $wordId
+        );
+
+        return (string) Connection::fetchValue(
+            "SELECT WoTranslation AS value FROM {$this->tbpref}words WHERE WoID = " . $wordId
+        );
+    }
+
+    /**
+     * Update romanization for a word (inline edit).
+     *
+     * @param int    $wordId Word ID
+     * @param string $value  New romanization value
+     *
+     * @return string Updated romanization value (returns '*' if empty for display)
+     */
+    public function updateRomanization(int $wordId, string $value): string
+    {
+        $value = trim($value);
+        if ($value === '*') {
+            $value = '';
+        }
+
+        Connection::execute(
+            'UPDATE ' . $this->tbpref . 'words SET WoRomanization = ' .
+            Escaping::toSqlSyntax(\repl_tab_nl($value)) . ' WHERE WoID = ' . $wordId
+        );
+
+        $result = Connection::fetchValue(
+            "SELECT WoRomanization AS value FROM {$this->tbpref}words WHERE WoID = " . $wordId
+        );
+
+        return ($result === '' || $result === null) ? '*' : (string) $result;
+    }
+
+    /**
+     * Delete a multi-word expression by ID.
+     *
+     * Deletes the word and its associated text items with word count > 1.
+     *
+     * @param int $wordId Word ID to delete
+     *
+     * @return int Number of affected rows
+     */
+    public function deleteMultiWord(int $wordId): int
+    {
+        $result = Connection::execute(
+            'DELETE FROM ' . $this->tbpref . 'words WHERE WoID = ' . $wordId
+        );
+
+        \Lwt\Database\Maintenance::adjustAutoIncrement('words', 'WoID');
+
+        Connection::execute(
+            'DELETE FROM ' . $this->tbpref . 'textitems2 WHERE Ti2WordCount > 1 AND Ti2WoID = ' . $wordId
+        );
+
+        return (int) $result;
+    }
+
+    /**
+     * Get full word details for display.
+     *
+     * @param int $wordId Word ID
+     *
+     * @return array|null Word details or null if not found
+     */
+    public function getWordDetails(int $wordId): ?array
+    {
+        $sql = 'SELECT WoLgID, WoText, WoTranslation, WoSentence, WoRomanization, WoStatus
+                FROM ' . $this->tbpref . 'words WHERE WoID = ' . $wordId;
+        $res = Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+
+        if (!$record) {
+            return null;
+        }
+
+        $translation = \repl_tab_nl($record['WoTranslation']);
+        if ($translation === '*') {
+            $translation = '';
+        }
+
+        return [
+            'langId' => (int) $record['WoLgID'],
+            'text' => (string) $record['WoText'],
+            'translation' => $translation,
+            'sentence' => (string) $record['WoSentence'],
+            'romanization' => (string) $record['WoRomanization'],
+            'status' => (int) $record['WoStatus']
+        ];
+    }
 }

@@ -129,7 +129,9 @@ class WordController extends BaseController
     }
 
     /**
-     * Delete multi-word (replaces word_delete_multi.php)
+     * Delete multi-word expression (replaces word_delete_multi.php)
+     *
+     * Call: ?wid=[wordid]&tid=[textid]
      *
      * @param array $params Route parameters
      *
@@ -137,7 +139,25 @@ class WordController extends BaseController
      */
     public function deleteMulti(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_delete_multi.php';
+        $textId = isset($_REQUEST['tid']) ? (int) $_REQUEST['tid'] : 0;
+        $wordId = isset($_REQUEST['wid']) ? (int) $_REQUEST['wid'] : 0;
+
+        $term = $this->wordService->getWordText($wordId);
+        if ($term === null) {
+            \my_die('Word not found');
+            return;
+        }
+
+        \pagestart("Term: " . $term, false);
+
+        $rowsAffected = $this->wordService->deleteMultiWord($wordId);
+
+        $showAll = \Lwt\Database\Settings::getZeroOrOne('showallwords', 1);
+        $wid = $wordId;
+
+        include __DIR__ . '/../Views/Word/delete_multi_result.php';
+
+        \pageend();
     }
 
     /**
@@ -155,17 +175,82 @@ class WordController extends BaseController
     /**
      * New word form (replaces word_new.php)
      *
+     * Call: ?text=[textid]&lang=[langid] - display new term form
+     *       ?op=Save - save the new term
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function create(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_new.php';
+        // Handle save operation
+        if (isset($_REQUEST['op']) && $_REQUEST['op'] === 'Save') {
+            $result = $this->wordService->create($_REQUEST);
+
+            $titletext = "New Term: " . \tohtml($result['textlc']);
+            \pagestart_nobody($titletext);
+            echo '<h1>' . $titletext . '</h1>';
+
+            if (!$result['success']) {
+                // Handle duplicate entry error
+                if (strpos($result['message'], 'Duplicate entry') !== false) {
+                    $message = 'Error: <b>Duplicate entry for <i>' . $result['textlc'] .
+                        '</i></b><br /><br /><input type="button" value="&lt;&lt; Back" onclick="history.back();" />';
+                } else {
+                    $message = $result['message'];
+                }
+                echo '<p>' . $message . '</p>';
+            } else {
+                $wid = $result['id'];
+                \saveWordTags($wid);
+                \Lwt\Database\Maintenance::initWordCount();
+
+                echo '<p>' . $result['message'] . '</p>';
+
+                $len = $this->wordService->getWordCount($wid);
+                if ($len > 1) {
+                    \insertExpressions($result['textlc'], (int) $_REQUEST["WoLgID"], $wid, $len, 0);
+                } elseif ($len == 1) {
+                    $this->wordService->linkToTextItems($wid, (int) $_REQUEST["WoLgID"], $result['textlc']);
+
+                    // Prepare view variables
+                    $hex = $this->wordService->textToClassName($result['textlc']);
+                    $translation = \repl_tab_nl(\getreq("WoTranslation"));
+                    if ($translation === '') {
+                        $translation = '*';
+                    }
+                    $status = $_REQUEST["WoStatus"];
+                    $romanization = $_REQUEST["WoRomanization"];
+                    $text = $result['text'];
+                    $textId = (int)$_REQUEST['tid'];
+                    $success = true;
+                    $message = $result['message'];
+
+                    include __DIR__ . '/../Views/Word/save_result.php';
+                }
+            }
+        } else {
+            // Display the new word form
+            $lang = (int)\getreq('lang');
+            $textId = (int)\getreq('text');
+            $scrdir = \getScriptDirectionTag($lang);
+
+            $langData = $this->wordService->getLanguageData($lang);
+            $showRoman = $langData['showRoman'];
+
+            \pagestart_nobody('');
+
+            include __DIR__ . '/../Views/Word/form_new.php';
+        }
+
+        \pageend();
     }
 
     /**
      * Show word details (replaces word_show.php)
+     *
+     * Call: ?wid=[wordid]&ann=[annotation]
      *
      * @param array $params Route parameters
      *
@@ -173,7 +258,28 @@ class WordController extends BaseController
      */
     public function show(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_show.php';
+        \pagestart_nobody('Term');
+
+        $wid = \getreq('wid');
+        $ann = isset($_REQUEST['ann']) ? $_REQUEST['ann'] : '';
+
+        if ($wid === '') {
+            \my_die('Word not found in show_word.php');
+            return;
+        }
+
+        $word = $this->wordService->getWordDetails((int) $wid);
+        if ($word === null) {
+            \my_die('Word not found');
+            return;
+        }
+
+        $tags = \getWordTagList($wid, '', 0, 0);
+        $scrdir = \getScriptDirectionTag($word['langId']);
+
+        include __DIR__ . '/../Views/Word/show.php';
+
+        \pageend();
     }
 
     /**
@@ -249,13 +355,33 @@ class WordController extends BaseController
     /**
      * Inline edit word (replaces word_inline_edit.php)
      *
+     * Handles AJAX inline editing of translation or romanization fields.
+     * POST parameters:
+     * - id: string - Field identifier (e.g., "trans123" or "roman123" where 123 is word ID)
+     * - value: string - New value for the field
+     *
      * @param array $params Route parameters
      *
      * @return void
      */
     public function inlineEdit(array $params): void
     {
-        include __DIR__ . '/../Legacy/word_inline_edit.php';
+        $value = isset($_POST['value']) ? $_POST['value'] : '';
+        $id = isset($_POST['id']) ? $_POST['id'] : '';
+
+        if (substr($id, 0, 5) === 'trans') {
+            $wordId = (int) substr($id, 5);
+            echo $this->wordService->updateTranslation($wordId, $value);
+            return;
+        }
+
+        if (substr($id, 0, 5) === 'roman') {
+            $wordId = (int) substr($id, 5);
+            echo $this->wordService->updateRomanization($wordId, $value);
+            return;
+        }
+
+        echo 'ERROR - please refresh page!';
     }
 
     /**
