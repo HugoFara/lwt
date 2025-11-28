@@ -7,15 +7,14 @@
  * This file serves as the main entry point for text processing functionality.
  * It includes all the specialized modules for different aspects of text handling.
  *
- * The functionality has been split into the following focused modules:
- * - text_statistics.php: Word count and text statistics functions
- * - sentence_operations.php: Sentence retrieval and formatting
- * - language_utilities.php: Language information and configuration
- * - expression_handling.php: Multi-word expressions and MeCab integration
- * - annotation_management.php: Text annotations for print view
- * - database_operations.php: Backup and restore functionality
- * - media_players.php: Audio and video player generation
- * - phonetic_reading.php: Phonetic text conversion (Japanese/MeCab)
+ * The functionality has been migrated to Service classes:
+ * - TextStatisticsService: Word count and text statistics functions
+ * - SentenceService: Sentence retrieval and formatting
+ * - AnnotationService: Text annotations for print view
+ * - SimilarTermsService: Similar terms calculation
+ * - TextNavigationService: Navigation between texts
+ * - TextParsingService: Text parsing utilities
+ * - TextReadingService: Reading view display functions
  *
  * PHP version 8.1
  *
@@ -26,19 +25,29 @@
  * @link    https://hugofara.github.io/lwt/docs/php/files/inc-session-utility.html
  * @since   3.0.0 Split from session_utility.php
  * @since   3.0.0 Refactored into smaller focused modules
+ * @since   3.0.0 Migrated to Service classes
  */
 
-// Text statistics (word counts, todo words)
-require_once __DIR__ . '/text_statistics.php';
+// Text Statistics Service (word counts, todo words)
+require_once __DIR__ . '/../../Services/TextStatisticsService.php';
 
-// Sentence operations (find, format, display sentences)
-require_once __DIR__ . '/sentence_operations.php';
+// Sentence Service (find, format, display sentences)
+require_once __DIR__ . '/../../Services/SentenceService.php';
+
+// Annotation Service (create, save, update annotations)
+require_once __DIR__ . '/../../Services/AnnotationService.php';
+
+// Similar Terms Service
+require_once __DIR__ . '/../../Services/SimilarTermsService.php';
+
+// Text Navigation Service
+require_once __DIR__ . '/../../Services/TextNavigationService.php';
+
+// Text Parsing Service
+require_once __DIR__ . '/../../Services/TextParsingService.php';
 
 // Expression handling (multi-words, MeCab)
 require_once __DIR__ . '/../../Services/ExpressionService.php';
-
-// Annotation management (create, save, update annotations)
-require_once __DIR__ . '/annotation_management.php';
 
 // Database operations (backup, restore, truncate)
 require_once __DIR__ . '/../database_operations.php';
