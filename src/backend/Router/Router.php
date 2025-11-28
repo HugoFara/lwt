@@ -103,6 +103,24 @@ class Router
             return $staticResult;
         }
 
+        // Handle /index.php/* paths - strip index.php and route the rest
+        // e.g., /index.php/admin/install-demo -> /admin/install-demo
+        if (preg_match('/^\/index\.php(\/.*)?$/', $path, $matches)) {
+            $pathInfo = $matches[1] ?? '';
+            if (!empty($pathInfo)) {
+                // Has path info after index.php - redirect to that path
+                $queryString = $_SERVER['QUERY_STRING'] ?? '';
+                $redirectUrl = $pathInfo . ($queryString ? '?' . $queryString : '');
+
+                return [
+                    'type' => 'redirect',
+                    'url' => $redirectUrl,
+                    'code' => 301  // Permanent redirect
+                ];
+            }
+            // No path info - /index.php alone will be handled by exact match below
+        }
+
         // Check for legacy file access (e.g., /do_text.php or /api.php/v1/endpoint)
         // First try basename for simple cases like /do_text.php
         $filename = basename($path);
@@ -137,7 +155,12 @@ class Router
                     $pathInfo = preg_replace('/^\/v\d+/', '', $pathInfo);
                 }
 
-                $redirectUrl = $newPath . $pathInfo . ($queryString ? '?' . $queryString : '');
+                // Handle root path to avoid double slashes
+                if ($newPath === '/' && !empty($pathInfo)) {
+                    $redirectUrl = $pathInfo . ($queryString ? '?' . $queryString : '');
+                } else {
+                    $redirectUrl = $newPath . $pathInfo . ($queryString ? '?' . $queryString : '');
+                }
 
                 return [
                     'type' => 'redirect',

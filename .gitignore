@@ -54,3 +54,6 @@ coverage.xml
 
 # Vitest coverage report
 coverage/
+
+# Cypress coverage
+cypress/

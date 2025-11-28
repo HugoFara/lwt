@@ -101,6 +101,29 @@ class RoutesTest extends TestCase
         $this->assertEquals('HomeController@index', $result['handler']);
     }
 
+    /**
+     * @dataProvider indexPhpWithPathInfoProvider
+     */
+    public function testIndexPhpWithPathInfoRedirect(string $path, string $expectedRedirect): void
+    {
+        $result = $this->simulateRequest($path);
+        $this->assertEquals('redirect', $result['type'], "Route {$path} should be a redirect");
+        $this->assertEquals($expectedRedirect, $result['url']);
+        $this->assertEquals(301, $result['code']);
+    }
+
+    public static function indexPhpWithPathInfoProvider(): array
+    {
+        return [
+            ['/index.php/admin/install-demo', '/admin/install-demo'],
+            ['/index.php/feeds', '/feeds'],
+            ['/index.php/feeds/edit', '/feeds/edit'],
+            ['/index.php/admin/statistics', '/admin/statistics'],
+            ['/index.php/mobile', '/mobile'],
+            ['/index.php/text/read', '/text/read'],
+        ];
+    }
+
     // ==================== TEXT ROUTES TESTS ====================
 
     /**
