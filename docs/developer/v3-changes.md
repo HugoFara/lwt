@@ -204,7 +204,7 @@ All 59 root-level PHP page files have been moved to `src/backend/Legacy/` with r
 | `delete_mword.php` | `word_delete_multi.php` |
 | `new_word.php` | `word_new.php` |
 | `show_word.php` | `word_show.php` |
-| `upload_words.php` | `word_upload.php` |
+| `upload_words.php` | Fully migrated to `WordController@upload` |
 | `all_words_wellknown.php` | `words_all.php` |
 | `bulk_translate_words.php` | Fully migrated to `WordController@bulkTranslate` |
 | `inline_edit.php` | `word_inline_edit.php` |

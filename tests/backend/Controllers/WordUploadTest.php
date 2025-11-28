@@ -670,4 +670,533 @@ class WordUploadTest extends TestCase
         );
         $this->assertEquals('3', $status);
     }
+
+    // ===== ImportComplete tests =====
+
+    public function testImportCompleteWithOverwriteZero(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Create a temp file with CSV content
+        $content = "importcomplete1,translation1\nimportcomplete2,translation2";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 1, 'tr' => 2, 'ro' => 0, 'se' => 0, 'tl' => 0];
+        $columnsClause = '(WoText,WoTranslation)';
+
+        $service->importComplete(
+            self::$testLangId,
+            $fields,
+            $columnsClause,
+            ',',
+            $fileName,
+            1,      // status
+            0,      // overwrite = 0 (ignore existing)
+            false,  // ignoreFirst
+            '',     // translDelim
+            'c'     // tabType
+        );
+
+        unlink($fileName);
+
+        // Verify words were imported
+        $word1 = Connection::fetchValue(
+            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'importcomplete1' AND WoLgID = " . self::$testLangId
+        );
+        $word2 = Connection::fetchValue(
+            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'importcomplete2' AND WoLgID = " . self::$testLangId
+        );
+
+        $this->assertEquals('translation1', $word1);
+        $this->assertEquals('translation2', $word2);
+    }
+
+    public function testImportCompleteWithOverwriteOne(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // First, create a word
+        Connection::query(
+            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
+            "VALUES (" . self::$testLangId . ", 'overwrite1', 'overwrite1', 1, 'original', NOW())"
+        );
+
+        // Create a temp file that will overwrite
+        $content = "overwrite1,updated";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 1, 'tr' => 2, 'ro' => 0, 'se' => 0, 'tl' => 0];
+        $columnsClause = '(WoText,WoTranslation)';
+
+        $service->importComplete(
+            self::$testLangId,
+            $fields,
+            $columnsClause,
+            ',',
+            $fileName,
+            2,      // new status
+            1,      // overwrite = 1 (replace all fields)
+            false,
+            '',
+            'c'
+        );
+
+        unlink($fileName);
+
+        // Verify word was updated
+        $translation = Connection::fetchValue(
+            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'overwrite1' AND WoLgID = " . self::$testLangId
+        );
+        $status = Connection::fetchValue(
+            "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoTextLC = 'overwrite1' AND WoLgID = " . self::$testLangId
+        );
+
+        $this->assertEquals('updated', $translation);
+        $this->assertEquals('2', $status);
+    }
+
+    public function testImportCompleteWithOverwriteTwo(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Create a word with * translation (empty)
+        Connection::query(
+            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
+            "VALUES (" . self::$testLangId . ", 'fillgap1', 'fillgap1', 1, '*', NOW())"
+        );
+
+        // Create a temp file that will fill empty fields
+        $content = "fillgap1,filled translation";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 1, 'tr' => 2, 'ro' => 0, 'se' => 0, 'tl' => 0];
+        $columnsClause = '(WoText,WoTranslation)';
+
+        $service->importComplete(
+            self::$testLangId,
+            $fields,
+            $columnsClause,
+            ',',
+            $fileName,
+            2,
+            2,      // overwrite = 2 (update empty fields only)
+            false,
+            '',
+            'c'
+        );
+
+        unlink($fileName);
+
+        // Verify translation was filled
+        $translation = Connection::fetchValue(
+            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'fillgap1' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertEquals('filled translation', $translation);
+    }
+
+    public function testImportCompleteWithOverwriteThree(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Create existing word
+        Connection::query(
+            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
+            "VALUES (" . self::$testLangId . ", 'noNewWord1', 'nonewword1', 1, 'original', NOW())"
+        );
+
+        // Create a temp file with existing and new word
+        $content = "noNewWord1,updatedTrans\nbrandNewWord,shouldNotBeImported";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 1, 'tr' => 2, 'ro' => 0, 'se' => 0, 'tl' => 0];
+        $columnsClause = '(WoText,WoTranslation)';
+
+        $service->importComplete(
+            self::$testLangId,
+            $fields,
+            $columnsClause,
+            ',',
+            $fileName,
+            2,
+            3,      // overwrite = 3 (no new terms, only update existing)
+            false,
+            '',
+            'c'
+        );
+
+        unlink($fileName);
+
+        // Verify existing word was updated
+        $translation = Connection::fetchValue(
+            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'nonewword1' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertEquals('updatedTrans', $translation);
+
+        // Verify new word was NOT imported
+        $newWord = Connection::fetchValue(
+            "SELECT WoID AS value FROM {$tbpref}words WHERE WoTextLC = 'brandnewword' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertNull($newWord);
+    }
+
+    public function testImportCompleteWithTags(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Create a temp file with tags column
+        $content = "taggedword1,translation,tag1 tag2";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 1, 'tr' => 2, 'ro' => 0, 'se' => 0, 'tl' => 3];
+        $columnsClause = '(WoText,WoTranslation,@taglist)';
+
+        $service->importComplete(
+            self::$testLangId,
+            $fields,
+            $columnsClause,
+            ',',
+            $fileName,
+            1,
+            0,      // overwrite = 0
+            false,
+            '',
+            'c'
+        );
+
+        unlink($fileName);
+
+        // Verify word was imported
+        $wordId = Connection::fetchValue(
+            "SELECT WoID AS value FROM {$tbpref}words WHERE WoTextLC = 'taggedword1' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertNotNull($wordId);
+
+        // Verify tags were created
+        $tag1 = Connection::fetchValue(
+            "SELECT TgID AS value FROM {$tbpref}tags WHERE TgText = 'tag1'"
+        );
+        $tag2 = Connection::fetchValue(
+            "SELECT TgID AS value FROM {$tbpref}tags WHERE TgText = 'tag2'"
+        );
+        $this->assertNotNull($tag1);
+        $this->assertNotNull($tag2);
+    }
+
+    // ===== ImportTagsOnly tests =====
+
+    public function testImportTagsOnly(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Create a temp file with tags only
+        $content = "onlytag1 onlytag2\nonlytag3";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 0, 'tr' => 0, 'ro' => 0, 'se' => 0, 'tl' => 1];
+
+        $service->importTagsOnly($fields, 'h', $fileName, false);
+
+        unlink($fileName);
+
+        // Verify tags were created
+        $tag1 = Connection::fetchValue(
+            "SELECT TgID AS value FROM {$tbpref}tags WHERE TgText = 'onlytag1'"
+        );
+        $tag3 = Connection::fetchValue(
+            "SELECT TgID AS value FROM {$tbpref}tags WHERE TgText = 'onlytag3'"
+        );
+        $this->assertNotNull($tag1);
+        $this->assertNotNull($tag3);
+    }
+
+    // ===== LinkWordsToTextItems tests =====
+
+    public function testLinkWordsToTextItems(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Insert a test word
+        Connection::query(
+            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoWordCount, WoStatusChanged) " .
+            "VALUES (" . self::$testLangId . ", 'linktest', 'linktest', 1, 'link translation', 1, NOW())"
+        );
+
+        // Call linkWordsToTextItems - this should execute without errors
+        $service->linkWordsToTextItems();
+
+        // Just verify no exception was thrown
+        $this->assertTrue(true);
+    }
+
+    // ===== IsLocalInfileEnabled tests =====
+
+    public function testIsLocalInfileEnabledReturnsBool(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $result = $service->isLocalInfileEnabled();
+
+        $this->assertIsBool($result);
+    }
+
+    // ===== Additional edge case tests =====
+
+    public function testImportWithTabDelimiter(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Create a temp file with TAB-delimited content
+        $content = "tabword1\ttabtrans1\ntabword2\ttabtrans2";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 1, 'tr' => 2, 'ro' => 0, 'se' => 0, 'tl' => 0];
+        $columnsClause = '(WoText,WoTranslation)';
+
+        $service->importSimple(
+            self::$testLangId,
+            $fields,
+            $columnsClause,
+            "\t",
+            $fileName,
+            1,
+            false
+        );
+
+        unlink($fileName);
+
+        // Verify words were imported
+        $word1 = Connection::fetchValue(
+            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'tabword1' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertEquals('tabtrans1', $word1);
+    }
+
+    public function testImportWithRomanizationColumn(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Create a temp file with romanization
+        $content = "romanword,translation,romanization";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 1, 'tr' => 2, 'ro' => 3, 'se' => 0, 'tl' => 0];
+        $columnsClause = '(WoText,WoTranslation,WoRomanization)';
+
+        $service->importSimple(
+            self::$testLangId,
+            $fields,
+            $columnsClause,
+            ',',
+            $fileName,
+            1,
+            false
+        );
+
+        unlink($fileName);
+
+        // Verify word was imported with romanization
+        $roman = Connection::fetchValue(
+            "SELECT WoRomanization AS value FROM {$tbpref}words WHERE WoTextLC = 'romanword' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertEquals('romanization', $roman);
+    }
+
+    public function testImportWithSentenceColumn(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Create a temp file with sentence
+        $content = "sentword,translation,This is a {sentword} sentence.";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 1, 'tr' => 2, 'ro' => 0, 'se' => 3, 'tl' => 0];
+        $columnsClause = '(WoText,WoTranslation,WoSentence)';
+
+        $service->importSimple(
+            self::$testLangId,
+            $fields,
+            $columnsClause,
+            ',',
+            $fileName,
+            1,
+            false
+        );
+
+        unlink($fileName);
+
+        // Verify word was imported with sentence
+        $sentence = Connection::fetchValue(
+            "SELECT WoSentence AS value FROM {$tbpref}words WHERE WoTextLC = 'sentword' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertEquals('This is a {sentword} sentence.', $sentence);
+    }
+
+    public function testImportCompleteWithAllColumns(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Create a temp file with all columns
+        $content = "fullword,fulltrans,fullroman,This is a {fullword} sentence.,fulltag1 fulltag2";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 1, 'tr' => 2, 'ro' => 3, 'se' => 4, 'tl' => 5];
+        $columnsClause = '(WoText,WoTranslation,WoRomanization,WoSentence,@taglist)';
+
+        $service->importComplete(
+            self::$testLangId,
+            $fields,
+            $columnsClause,
+            ',',
+            $fileName,
+            1,
+            0,
+            false,
+            '',
+            'c'
+        );
+
+        unlink($fileName);
+
+        // Verify word was imported with all fields
+        $word = Connection::fetchValue(
+            "SELECT WoID AS value FROM {$tbpref}words WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertNotNull($word);
+
+        $trans = Connection::fetchValue(
+            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertEquals('fulltrans', $trans);
+
+        $roman = Connection::fetchValue(
+            "SELECT WoRomanization AS value FROM {$tbpref}words WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertEquals('fullroman', $roman);
+
+        $sentence = Connection::fetchValue(
+            "SELECT WoSentence AS value FROM {$tbpref}words WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
+        );
+        $this->assertEquals('This is a {fullword} sentence.', $sentence);
+    }
+
+    public function testParseColumnMappingWithDuplicateColumns(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+
+        // When there are duplicate column values, array_unique removes them
+        $columns = [
+            1 => 'w',
+            2 => 'w',  // duplicate
+            3 => 't',
+        ];
+
+        $result = $service->parseColumnMapping($columns, false);
+
+        // Only unique columns should remain
+        $this->assertArrayHasKey('columns', $result);
+        // After array_unique, column 2 should be @dummy because it was removed
+        $this->assertEquals('@dummy', $result['columns'][2]);
+    }
+
+    public function testImportPreservesCaseInText(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $service = new WordUploadService();
+        $tbpref = self::$tbpref;
+
+        // Create a temp file with mixed case
+        $content = "MixedCaseWord,translation";
+        $fileName = $service->createTempFile($content);
+
+        $fields = ['txt' => 1, 'tr' => 2, 'ro' => 0, 'se' => 0, 'tl' => 0];
+        $columnsClause = '(WoText,WoTranslation)';
+
+        $service->importSimple(
+            self::$testLangId,
+            $fields,
+            $columnsClause,
+            ',',
+            $fileName,
+            1,
+            false
+        );
+
+        unlink($fileName);
+
+        // Verify WoText preserves case but WoTextLC is lowercase
+        $text = Connection::fetchValue(
+            "SELECT WoText AS value FROM {$tbpref}words WHERE WoTextLC = 'mixedcaseword' AND WoLgID = " . self::$testLangId
+        );
+        $textlc = Connection::fetchValue(
+            "SELECT WoTextLC AS value FROM {$tbpref}words WHERE WoTextLC = 'mixedcaseword' AND WoLgID = " . self::$testLangId
+        );
+
+        $this->assertEquals('MixedCaseWord', $text);
+        $this->assertEquals('mixedcaseword', $textlc);
+    }
 }

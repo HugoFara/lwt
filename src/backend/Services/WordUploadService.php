@@ -448,7 +448,13 @@ class WordUploadService
      */
     private function initTempTables(): void
     {
-        Connection::execute('SET GLOBAL max_heap_table_size = 1024 * 1024 * 1024 * 2');
+        // Try to increase heap table size for better performance
+        // This requires SUPER privileges, so we gracefully handle failures
+        try {
+            Connection::execute('SET GLOBAL max_heap_table_size = 1024 * 1024 * 1024 * 2');
+        } catch (\Exception $e) {
+            // Ignore - this is an optimization, not a requirement
+        }
         Connection::execute(
             "CREATE TEMPORARY TABLE IF NOT EXISTS {$this->tbpref}numbers(
                 n tinyint(3) unsigned NOT NULL
