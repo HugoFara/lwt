@@ -22,65 +22,8 @@
 namespace Lwt\Views\Language;
 
 ?>
-<script type="text/javascript">
-    //<![CDATA[
-
-    const LANGDEFS = <?php echo $languagesJson; ?>;
-
-    /// Execute the wizard
-    function wizard_go() {
-        const l1 = $('#l1').val();
-        const l2 = $('#l2').val();
-        if (l1 == '') {
-            alert ('Please choose your native language (L1)!');
-            return;
-        }
-        if (l2 == '') {
-            alert ('Please choose your language you want to read/study (L2)!');
-            return;
-        }
-        if (l2 == l1) {
-            alert ('L1 L2 Languages must not be equal!');
-            return;
-        }
-        var w = window.opener;
-        if (typeof w == 'undefined') {
-                alert ('Language setting cannot be set. Please try again.');
-                wizard_exit();
-            }
-        var context = w.document;
-        $('input[name="LgName"]',context).val(l2);
-        $('input[name="LgDict1URI"]',context).val(
-            'https://de.glosbe.com/' + LANGDEFS[l2][0] + '/' +
-            LANGDEFS[l1][0] + '/lwt_term'
-        );
-        $('input[name="LgDict1PopUp"]', context).attr('checked', true);
-        $('input[name="LgGoogleTranslateURI"]',context).val(
-            'http://translate.google.com/?ie=UTF-8&sl=' +
-            LANGDEFS[l2][1] + '&tl=' + LANGDEFS[l1][1] + '&text=lwt_term'
-        );
-        $('input[name="LgGoogleTranslatePopUp"]', context).attr('checked', true);
-        $('input[name="LgTextSize"]',context).val(LANGDEFS[l2][2] ? 200 : 150);
-        $('input[name="LgRegexpSplitSentences"]',context).val(LANGDEFS[l2][4]);
-        $('input[name="LgRegexpWordCharacters"]',context).val(LANGDEFS[l2][3]);
-        $('select[name="LgSplitEachChar"]',context).val(LANGDEFS[l2][5] ? 1 : 0);
-        $('select[name="LgRemoveSpaces"]',context).val(LANGDEFS[l2][6] ? 1 : 0);
-        $('select[name="LgRightToLeft"]',context).val(LANGDEFS[l2][7] ? 1 : 0);
-        wizard_exit();
-    }
-
-    /// Closes the wizard
-    function wizard_exit() {
-        window.close();
-    }
-
-    $(function(){
-        $('.center').addClass('backlightyellow');
-        const bg = $('.center').css('background-color');
-        $('body').css('background-color',bg);
-        $('.center').removeClass('backlightyellow');
-    });
-    //]]>
+<script type="application/json" id="language-wizard-popup-config">
+{"languageDefs": <?php echo $languagesJson; ?>}
 </script>
 
 <div class="center">
@@ -95,7 +38,7 @@ namespace Lwt\Views\Language;
         <b>My Native language is:</b>
         <br />
         L1:
-        <select name="l1" id="l1" onchange="{do_ajax_save_setting('currentnativelanguage',($('#l1').val()));}">
+        <select name="l1" id="l1">
             <?php echo $languageOptions; ?>
         </select>
     </p>
@@ -108,10 +51,11 @@ namespace Lwt\Views\Language;
         </select>
     </p>
     <p class="wizard">
-        <input type="button" style="font-size:1.1em;" value="Set Language Settings" onclick="wizard_go();" />
+        <input type="button" style="font-size:1.1em;" value="Set Language Settings"
+            data-action="wizard-popup-go" />
     </p>
 
     <p class="wizard">
-        <input type="button" value="Cancel" onclick="wizard_exit();" />
+        <input type="button" value="Cancel" data-action="wizard-popup-cancel" />
     </p>
 </div>

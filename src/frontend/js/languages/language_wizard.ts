@@ -1,11 +1,15 @@
 /**
  * Language Wizard - Helper for setting up new languages.
  *
- * Extracted from Views/Language/wizard.php
+ * Extracted from Views/Language/wizard.php and Views/Language/select_pair.php
  * Provides UI for selecting native (L1) and study (L2) languages,
  * then auto-populates language form fields.
  *
- * @license unlicense
+ * Supports two modes:
+ * - Inline wizard: embedded in the language form page
+ * - Popup wizard: separate popup window that modifies opener's form
+ *
+ * @license Unlicense
  * @since 3.0.0
  */
 
@@ -171,6 +175,112 @@ export const languageWizard = {
 };
 
 /**
+ * Popup language wizard object.
+ * Handles the popup wizard that modifies the opener window's form.
+ * Used by Views/Language/select_pair.php
+ */
+export const languageWizardPopup = {
+  /** Language definitions loaded from config */
+  langDefs: {} as Record<string, LanguageDefinition>,
+
+  /**
+   * Initialize the popup wizard with language definitions.
+   */
+  init(config: LanguageWizardConfig): void {
+    this.langDefs = config.languageDefs;
+  },
+
+  /**
+   * Execute the popup wizard - validate and apply language settings to opener window.
+   */
+  go(): void {
+    const l1 = ($('#l1').val() as string) || '';
+    const l2 = ($('#l2').val() as string) || '';
+
+    if (l1 === '') {
+      alert('Please choose your native language (L1)!');
+      return;
+    }
+    if (l2 === '') {
+      alert('Please choose your language you want to read/study (L2)!');
+      return;
+    }
+    if (l2 === l1) {
+      alert('L1 L2 Languages must not be equal!');
+      return;
+    }
+
+    const w = window.opener;
+    if (typeof w === 'undefined' || w === null) {
+      alert('Language setting cannot be set. Please try again.');
+      this.exit();
+      return;
+    }
+
+    this.applyToOpener(w.document, this.langDefs[l2], this.langDefs[l1], l2);
+    this.exit();
+  },
+
+  /**
+   * Apply language settings to the opener window's form.
+   *
+   * @param context - The opener window's document
+   * @param learningLg - Language definition for the study language (L2)
+   * @param knownLg - Language definition for the native language (L1)
+   * @param learningLgName - Name of the learning language
+   */
+  applyToOpener(
+    context: Document,
+    learningLg: LanguageDefinition,
+    knownLg: LanguageDefinition,
+    learningLgName: string
+  ): void {
+    // Set language name
+    $('input[name="LgName"]', context).val(learningLgName);
+
+    // Set dictionary URL (Glosbe)
+    $('input[name="LgDict1URI"]', context).val(
+      'https://de.glosbe.com/' + learningLg[0] + '/' +
+      knownLg[0] + '/lwt_term'
+    );
+    $('input[name="LgDict1PopUp"]', context).attr('checked', 'checked');
+
+    // Set Google Translate URL
+    $('input[name="LgGoogleTranslateURI"]', context).val(
+      'http://translate.google.com/?ie=UTF-8&sl=' +
+      learningLg[1] + '&tl=' + knownLg[1] + '&text=lwt_term'
+    );
+    $('input[name="LgGoogleTranslatePopUp"]', context).attr('checked', 'checked');
+
+    // Set text size based on language needs
+    $('input[name="LgTextSize"]', context).val(learningLg[2] ? 200 : 150);
+
+    // Set language parsing rules
+    $('input[name="LgRegexpSplitSentences"]', context).val(learningLg[4]);
+    $('input[name="LgRegexpWordCharacters"]', context).val(learningLg[3]);
+    $('select[name="LgSplitEachChar"]', context).val(learningLg[5] ? 1 : 0);
+    $('select[name="LgRemoveSpaces"]', context).val(learningLg[6] ? 1 : 0);
+    $('select[name="LgRightToLeft"]', context).val(learningLg[7] ? 1 : 0);
+  },
+
+  /**
+   * Close the popup wizard window.
+   */
+  exit(): void {
+    window.close();
+  },
+
+  /**
+   * Save the native language preference.
+   *
+   * @param value - The selected native language
+   */
+  changeNative(value: string): void {
+    do_ajax_save_setting('currentnativelanguage', value);
+  }
+};
+
+/**
  * Initialize language wizard from JSON config element.
  */
 export function initLanguageWizard(): void {
@@ -209,9 +319,55 @@ export function initLanguageWizard(): void {
   lwtFormCheck.askBeforeExit();
 }
 
+/**
+ * Initialize popup language wizard from JSON config element.
+ * Used for the popup wizard window (select_pair.php).
+ */
+export function initLanguageWizardPopup(): void {
+  const configEl = document.getElementById('language-wizard-popup-config');
+  if (!configEl) return;
+
+  let config: LanguageWizardConfig;
+  try {
+    config = JSON.parse(configEl.textContent || '{}');
+  } catch (e) {
+    console.error('Failed to parse language-wizard-popup-config:', e);
+    return;
+  }
+
+  languageWizardPopup.init(config);
+
+  // Set up event listeners
+  const l1Select = document.getElementById('l1');
+  if (l1Select) {
+    l1Select.addEventListener('change', function (this: HTMLSelectElement) {
+      languageWizardPopup.changeNative(this.value);
+    });
+  }
+
+  const goButton = document.querySelector('[data-action="wizard-popup-go"]');
+  if (goButton) {
+    goButton.addEventListener('click', () => languageWizardPopup.go());
+  }
+
+  const cancelButton = document.querySelector('[data-action="wizard-popup-cancel"]');
+  if (cancelButton) {
+    cancelButton.addEventListener('click', () => languageWizardPopup.exit());
+  }
+
+  // Apply background color styling
+  $('.center').addClass('backlightyellow');
+  const bg = $('.center').css('background-color');
+  $('body').css('background-color', bg);
+  $('.center').removeClass('backlightyellow');
+}
+
 // Auto-initialize on DOM ready if config element is present
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('language-wizard-config')) {
     initLanguageWizard();
+  }
+  if (document.getElementById('language-wizard-popup-config')) {
+    initLanguageWizardPopup();
   }
 });

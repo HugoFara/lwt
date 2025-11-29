@@ -81,6 +81,7 @@ import './languages/language_wizard';
 
 // Admin
 import './admin/server_data';
+import './admin/tts_settings';
 
 // UI Components
 import './ui/modal';

@@ -41,8 +41,15 @@ import {
 } from './forms/word_form_auto';
 import {
   languageWizard,
-  initLanguageWizard
+  languageWizardPopup,
+  initLanguageWizard,
+  initLanguageWizardPopup
 } from './languages/language_wizard';
+import {
+  ttsSettings,
+  initTTSSettings
+} from './admin/tts_settings';
+import { readTextAloud } from './core/user_interactions';
 import {
   goBack,
   navigateTo,
@@ -152,7 +159,17 @@ declare global {
     // Language wizard
     language_wizard: typeof languageWizard;
     languageWizard: typeof languageWizard;
+    languageWizardPopup: typeof languageWizardPopup;
     initLanguageWizard: typeof initLanguageWizard;
+    initLanguageWizardPopup: typeof initLanguageWizardPopup;
+
+    // TTS Settings
+    tts_settings: typeof ttsSettings;
+    ttsSettings: typeof ttsSettings;
+    initTTSSettings: typeof initTTSSettings;
+
+    // Text-to-speech
+    readTextAloud: typeof readTextAloud;
 
     // Simple interactions (navigation, confirmation)
     goBack: typeof goBack;
@@ -254,7 +271,17 @@ window.initWordFormAuto = initWordFormAuto;
 // Language wizard (legacy name and new name)
 window.language_wizard = languageWizard;
 window.languageWizard = languageWizard;
+window.languageWizardPopup = languageWizardPopup;
 window.initLanguageWizard = initLanguageWizard;
+window.initLanguageWizardPopup = initLanguageWizardPopup;
+
+// TTS Settings (legacy name and new name)
+window.tts_settings = ttsSettings;
+window.ttsSettings = ttsSettings;
+window.initTTSSettings = initTTSSettings;
+
+// Text-to-speech
+window.readTextAloud = readTextAloud;
 
 // Simple interactions (navigation, confirmation)
 window.goBack = goBack;

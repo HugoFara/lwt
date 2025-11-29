@@ -22,15 +22,14 @@
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  */
 
-namespace Lwt\Views\Text;
-
-use Lwt\Classes\Text;
-
 /** @var int $textId */
-/** @var Text $text */
+/** @var \Lwt\Classes\Text $text */
 /** @var bool $annotated */
 /** @var array $languageData */
+/** @var array $languages */
 /** @var bool $isNew */
+
+use Lwt\View\Helper\SelectOptionsBuilder;
 
 ?>
 <h2>
@@ -83,7 +82,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             <td class="td1">
                 <select name="TxLgID" id="TxLgID" class="notempty setfocus"
                 data-action="change-language">
-                <?php echo get_languages_selectoptions($text->lgid, "[Choose...]"); ?>
+                <?php echo SelectOptionsBuilder::forLanguages($languages, $text->lgid, "[Choose...]"); ?>
                 </select>
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty"
                 alt="Field must not be empty" />

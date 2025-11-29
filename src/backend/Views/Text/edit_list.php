@@ -31,7 +31,9 @@
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  */
 
-namespace Lwt\Views\Text;
+use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\FormHelper;
 
 /** @var string $message */
 /** @var array $texts */
@@ -91,7 +93,7 @@ namespace Lwt\Views\Text;
         <td class="td1 center" colspan="2">
             Language:
             <select name="filterlang" data-action="filter-language">
-                <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
+                <?php echo SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
             </select>
         </td>
         <td class="td1 center" colspan="2">
@@ -125,7 +127,7 @@ namespace Lwt\Views\Text;
         <td class="td1 center">
             Tag #1 ..
             <select name="tag12" data-action="filter-tag-operator">
-                <?php echo get_andor_selectoptions($currentTag12); ?>
+                <?php echo SelectOptionsBuilder::forAndOr($currentTag12); ?>
             </select> .. Tag #2
         </td>
         <td class="td1 center">
@@ -141,12 +143,12 @@ namespace Lwt\Views\Text;
             <?php echo $totalCount; ?> Text<?php echo $totalCount == 1 ? '' : 's'; ?>
         </th>
         <th class="th1" colspan="1">
-            <?php makePager($pagination['currentPage'], $pagination['pages'], '/texts', 'form1'); ?>
+            <?php PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], '/texts', 'form1'); ?>
         </th>
         <th class="th1" colspan="1">
             Sort Order:
             <select name="sort" data-action="sort">
-                <?php echo get_textssort_selectoptions($currentSort); ?>
+                <?php echo SelectOptionsBuilder::forTextSort($currentSort); ?>
             </select>
         </th>
     </tr>
@@ -174,7 +176,7 @@ namespace Lwt\Views\Text;
         <td class="td1 center">
             Marked Texts:&nbsp;
             <select name="markaction" id="markaction" disabled="disabled" data-action="multi-action">
-                <?php echo get_multipletextactions_selectoptions(); ?>
+                <?php echo SelectOptionsBuilder::forMultipleTextsActions(); ?>
             </select>
         </td>
     </tr>
@@ -236,7 +238,7 @@ namespace Lwt\Views\Text;
     <tr>
         <td class="td1 center">
             <a name="rec<?php echo $txid; ?>">
-                <input name="marked[]" class="markcheck" type="checkbox" value="<?php echo $txid; ?>" <?php echo checkTest($txid, 'marked'); ?> />
+                <input name="marked[]" class="markcheck" type="checkbox" value="<?php echo $txid; ?>" <?php echo FormHelper::checkInRequest($txid, 'marked'); ?> />
             </a>
         </td>
         <td class="td1 center">
@@ -323,7 +325,7 @@ namespace Lwt\Views\Text;
             <?php echo $totalCount; ?> Text<?php echo $totalCount == 1 ? '' : 's'; ?>
         </th>
         <th class="th1">
-            <?php makePager($pagination['currentPage'], $pagination['pages'], '/texts', 'form2'); ?>
+            <?php PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], '/texts', 'form2'); ?>
         </th>
     </tr>
 </table>
