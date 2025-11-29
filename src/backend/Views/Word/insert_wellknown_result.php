@@ -25,18 +25,6 @@ namespace Lwt\Views\Word;
 <p>OK, you know this term well!</p>
 
 <script type="text/javascript">
-//<![CDATA[
-var context = window.parent.document.getElementById('frame-l');
-var contexth = window.parent.document.getElementById('frame-h');
-var title = make_tooltip(<?php echo json_encode($term); ?>,'*','','99');
-$('.TERM<?php echo $hex; ?>', context)
-.removeClass('status0')
-.addClass('status99 word<?php echo $wid; ?>')
-.attr('data_status','99')
-.attr('data_wid','<?php echo $wid; ?>')
-.attr('title',title);
-$('#learnstatus', contexth).html('<?php echo addslashes(todo_words_content((int) $textId)); ?>');
-
-cleanupRightFrames();
-//]]>
+    markWordWellKnownInDOM(<?php echo $wid; ?>, <?php echo json_encode($hex); ?>, <?php echo json_encode($term); ?>);
+    completeWordOperation(<?php echo json_encode(todo_words_content((int) $textId)); ?>);
 </script>

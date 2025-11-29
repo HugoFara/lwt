@@ -72,7 +72,7 @@
         </a>
     </div>
     <div>
-        <?php quickMenu(); ?>
+        <?php echo \Lwt\View\Helper\PageLayoutHelper::buildQuickMenu(); ?>
     </div>
 </div>
 
@@ -98,7 +98,7 @@
     title="[Show All] = ON: ALL terms are shown, and all multi-word terms are shown as superscripts before the first word. The superscript indicates the number of words in the multi-word term.
 [Show All] = OFF: Multi-word terms now hide single words and shorter or overlapping multi-word terms.">
         <label for="showallwords">Show All</label>&nbsp;
-        <input type="checkbox" id="showallwords" <?php echo get_checked($showAll); ?>
+        <input type="checkbox" id="showallwords" <?php echo \Lwt\View\Helper\FormHelper::getChecked($showAll); ?>
         onclick="showAllwordsClick();" />
 </div>
     <div
@@ -106,7 +106,7 @@
 [Learning Translations] = OFF: No translations are shown in the reading mode.">
         <label for="showlearningtranslations">Translations</label>&nbsp;
         <input type="checkbox" id="showlearningtranslations"
-        <?php echo get_checked($showLearning); ?> onclick="showAllwordsClick();" />
+        <?php echo \Lwt\View\Helper\FormHelper::getChecked($showLearning); ?> onclick="showAllwordsClick();" />
 </div>
     <div id="thetextid" class="hide"><?php echo $textId; ?></div>
     <div><button id="readTextButton">Read in browser</button></div>

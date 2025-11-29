@@ -26,24 +26,6 @@ namespace Lwt\Views\Word;
 <p>OK, term deleted (<?php echo $rowsAffected; ?>).</p>
 
 <script type="text/javascript">
-//<![CDATA[
-let context = window.parent.document;
-$('.word<?php echo $wid; ?>', context).each(
-    function() {
-        sid = $(this).parent();
-        $(this).remove();
-        if (<?php echo json_encode(!$showAll); ?>) {
-            $('*', sid).removeClass('hide');
-            $('.mword', sid).each(function() {
-                if ($(this).not('.hide').length){
-                    u = parseInt($(this).attr('data_code')) * 2 + parseInt($(this).attr('data_order')) -1;
-                    $(this).nextUntil('[id^="ID-' + u + '-"]',sid).addClass('hide');
-                }
-            });
-        }
-    }
-);
-$('#learnstatus', context).html(<?php echo json_encode(todo_words_content((int) $textId)); ?>);
-cleanupRightFrames();
-//]]>
+    deleteMultiWordFromDOM(<?php echo $wid; ?>, <?php echo json_encode($showAll); ?>);
+    completeWordOperation(<?php echo json_encode(todo_words_content((int) $textId)); ?>);
 </script>

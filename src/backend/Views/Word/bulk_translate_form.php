@@ -53,173 +53,26 @@ namespace Lwt\Views\Word;
         opacity: 1;
     }
 </style>
+<script type="application/json" id="bulk-translate-config">
+<?php echo json_encode([
+    'dictionaries' => $dictionaries,
+    'sourceLanguage' => $sl,
+    'targetLanguage' => $tl
+]); ?>
+</script>
 <script type="text/javascript">
-    LWT_DATA.language.dict_link1 = '<?php echo $dictionaries['dict1']; ?>';
-    LWT_DATA.language.dict_link2 = '<?php echo $dictionaries['dict2']; ?>';
-    LWT_DATA.language.translator_link = '<?php echo $dictionaries['translate']; ?>';
-    $('h3,h4,title').addClass('notranslate');
+    // Initialize bulk translate with configuration from JSON
+    (function() {
+        const config = JSON.parse(document.getElementById('bulk-translate-config').textContent);
+        initBulkTranslate(config.dictionaries);
 
-    function clickDictionary() {
-        if ($(this).hasClass( "dict1" ))
-            WBLINK = LWT_DATA.language.dict_link1;
-        if ($(this).hasClass( "dict2" ))
-            WBLINK = LWT_DATA.language.dict_link2;
-        if ($(this).hasClass( "dict3" ))
-            WBLINK = LWT_DATA.language.translator_link;
-        let dict_link = WBLINK;
-        let popup;
-        if (dict_link.startsWith('*')) {
-            popup = true;
-            dict_link = dict_link.substring(1);
-        }
-        try {
-            let final_url = new URL(dict_link);
-            popup = popup || final_url.searchParams.has("lwt_popup");
-        } catch (err) {
-            if (!(err instanceof TypeError)) {
-                throw err;
-            }
-        }
-        if (popup) {
-            owin(createTheDictUrl(
-                dict_link, $(this).parent().prev().text()
-                ));
-        } else {
-            window.parent.frames['ru'].location.href = createTheDictUrl(
-                dict_link, $(this).parent().prev().text()
-            );
-        }
-        $('[name="WoTranslation"]')
-        .attr('name',$('[name="WoTranslation"]')
-        .attr('data_name'));
-        const el = $(this).parent().parent().next().children();
-        el.attr('data_name', el.attr('name'));
-        el.attr('name','WoTranslation');
-    }
-
-    const bulk_interactions = function() {
-        $('[name="form1"]').submit(function() {
-            $('[name="WoTranslation"]').attr('name',$('[name="WoTranslation"]')
-            .attr('data_name'));
-            window.parent.frames['ru'].location.href = 'empty.html';
-            return true;
-        });
-
-        $('td').on(
-            'click',
-            'span.dict1, span.dict2, span.dict3',
-            clickDictionary
-        ).on(
-            'click',
-            '.del_trans',
-            function() { $(this).prev().val('').focus(); }
-        );
-
-        const displayTranslations = setInterval(function() {
-            if ($(".trans>font").length == $(".trans").length) {
-                $('.trans').each(function() {
-                    const txt = $(this).text();
-                    const cnt = $(this).attr('id').replace('Trans_', '');
-                    $(this).addClass('notranslate')
-                    .html(
-                        '<input type="text" name="term[' + cnt + '][trans]" value="'
-                        + txt + '" maxlength="100" class="respinput"></input>' +
-                        '<div class="del_trans"></div>'
-                    );
-                });
-                $('.term').each(function() {
-                    $(this).parent().css('position', 'relative');
-                    $(this).after(
-                        '<div class="dict">' +
-                        (LWT_DATA.language.dict_link1 ? '<span class="dict1">D1</span>' : '') +
-                        (LWT_DATA.language.dict_link2 ? '<span class="dict2">D2</span>' : '') +
-                        (LWT_DATA.language.translator_link ? '<span class="dict3">Tr</span>' : '') +
-                        '</div>'
-                    );
-                });
-                $('iframe,#google_translate_element').remove();
-                selectToggle(true, 'form1');
-                $('[name^=term]').prop('disabled', false);
-                clearInterval(displayTranslations);
-            }
-        }, 300);
-    }
-
-    const bulk_checkbox = function() {
-        window.parent.frames['ru'].location.href = 'empty.html';
-        $('input[type="checkbox"]').change(function(){
-            let v = parseInt($(this).val());
-            const e = '[name=term\\[' + v + '\\]\\[text\\]],[name=term\\[' + v +
-            '\\]\\[lg\\]],[name=term\\[' + v + '\\]\\[status\\]]';
-            $(e).prop('disabled', !this.checked);
-            $('#Trans_'+v+' input').prop('disabled', !this.checked);
-            if ($('input[type="checkbox"]:checked').length) {
-                let operation_option;
-                if (this.checked) {
-                    operation_option = 'Save';
-                } else if ($('input[name="offset"]').length) {
-                    operation_option = 'Next';
-                } else {
-                    operation_option = 'End';
-                }
-                $('input[type="submit"]').val(operation_option);
-            }
-        });
-    }
-
-    $(window).load(bulk_interactions);
-
-    $(document).ready(bulk_checkbox);
-
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({
-            pageLanguage: '<?php echo $sl; ?>',
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-            includedLanguages: '<?php echo $tl; ?>',
-            autoDisplay: false
-            }, 'google_translate_element');
-    }
+        // Set up Google Translate callback
+        window.googleTranslateElementInit = function() {
+            googleTranslateElementInit(config.sourceLanguage, config.targetLanguage);
+        };
+    })();
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-<script type="text/javascript">
-    function markAll() {
-        $('input[type^=submit]').val('Save');
-        selectToggle(true, 'form1');
-        $('[name^=term]').prop('disabled', false);
-    }
-
-    function markNone() {
-        const v = (!$('input[name^=offset]').length) ? 'End' : 'Next';
-        $('input[type^=submit]').val(v);
-        selectToggle(false,'form1');
-        $('[name^=term]').prop('disabled', true);
-    }
-
-    function changeTermToggles (elem) {
-        const v = elem.val();
-        if (v==6) {
-            $('.markcheck:checked').each(function() {
-                e=$('#Term_' + elem.val()).children('.term');
-                e.text(e.text().toLowerCase());
-                $('#Text_' + elem.val()).val(e.text().toLowerCase());
-            });
-            elem.prop('selectedIndex',0);
-            return false;
-        }
-        if (v==7) {
-            $('.markcheck:checked').each(function() {
-                $('#Trans_' + elem.val() + ' input').val('*');
-            });
-            elem.prop('selectedIndex',0);
-            return false;
-        }
-        $('.markcheck:checked').each(function() {
-            $('#Stat_' + elem.val()).val(v);
-        });
-        elem.prop('selectedIndex', 0);
-        return false;
-    }
-</script>
     <form name="form1" action="/word/bulk-translate" method="post">
     <span class="notranslate">
         <div id="google_translate_element"></div>

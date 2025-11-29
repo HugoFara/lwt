@@ -46,6 +46,13 @@ import {
   initLanguageWizardPopup
 } from './languages/language_wizard';
 import {
+  languageForm,
+  checkTranslatorChanged,
+  checkLanguageForm,
+  checkDuplicateLanguage,
+  initLanguageForm
+} from './languages/language_form';
+import {
   ttsSettings,
   initTTSSettings
 } from './admin/tts_settings';
@@ -70,6 +77,36 @@ import {
   initTextReadingHeader
 } from './reading/text_reading_init';
 import { readRawTextAloud } from './core/user_interactions';
+import { make_tooltip } from './terms/word_status';
+import { cleanupRightFrames } from './reading/frame_management';
+import {
+  updateNewWordInDOM,
+  updateExistingWordInDOM,
+  updateWordStatusInDOM,
+  deleteWordFromDOM,
+  markWordWellKnownInDOM,
+  markWordIgnoredInDOM,
+  updateMultiWordInDOM,
+  deleteMultiWordFromDOM,
+  updateBulkWordInDOM,
+  updateHoverSaveInDOM,
+  updateTestWordInDOM,
+  updateLearnStatus,
+  completeWordOperation,
+  type WordUpdateParams,
+  type BulkWordUpdateParams
+} from './words/word_dom_updates';
+import {
+  initBulkTranslate,
+  markAll as bulkMarkAll,
+  markNone as bulkMarkNone,
+  changeTermToggles,
+  googleTranslateElementInit
+} from './words/bulk_translate';
+import {
+  initWordStatusChange,
+  type WordStatusUpdateData
+} from './words/word_status_ajax';
 
 // Declare global window interface extensions
 declare global {
@@ -163,6 +200,28 @@ declare global {
     initLanguageWizard: typeof initLanguageWizard;
     initLanguageWizardPopup: typeof initLanguageWizardPopup;
 
+    // Language form
+    edit_languages_js: typeof languageForm;
+    languageForm: typeof languageForm;
+    checkTranslatorChanged: typeof checkTranslatorChanged;
+    checkLanguageForm: typeof checkLanguageForm;
+    check_dupl_lang: typeof checkDuplicateLanguage;
+    checkDuplicateLanguage: typeof checkDuplicateLanguage;
+    initLanguageForm: typeof initLanguageForm;
+    reloadDictURLs: (sourceLg: string, targetLg: string) => void;
+    checkLanguageChanged: (value: string) => void;
+    multiWordsTranslateChange: (value: string) => void;
+    checkTranslatorStatus: (url: string) => void;
+    checkLibreTranslateStatus: (url: URL, key: string) => void;
+    changeLanguageTextSize: (value: string | number) => void;
+    wordCharChange: (value: string) => void;
+    addPopUpOption: (url: string, checked: boolean) => string;
+    changePopUpState: (elem: HTMLInputElement) => void;
+    checkDictionaryChanged: (inputBox: HTMLInputElement) => void;
+    checkTranslatorType: (url: string, typeSelect: HTMLSelectElement) => void;
+    checkWordChar: (method: string) => void;
+    checkVoiceAPI: (apiValue: string) => boolean;
+
     // TTS Settings
     tts_settings: typeof ttsSettings;
     ttsSettings: typeof ttsSettings;
@@ -193,6 +252,33 @@ declare global {
     initTextReading: typeof initTextReading;
     initTextReadingHeader: typeof initTextReadingHeader;
     readRawTextAloud: typeof readRawTextAloud;
+
+    // Word DOM updates (for result views)
+    make_tooltip: typeof make_tooltip;
+    cleanupRightFrames: typeof cleanupRightFrames;
+    updateNewWordInDOM: typeof updateNewWordInDOM;
+    updateExistingWordInDOM: typeof updateExistingWordInDOM;
+    updateWordStatusInDOM: typeof updateWordStatusInDOM;
+    deleteWordFromDOM: typeof deleteWordFromDOM;
+    markWordWellKnownInDOM: typeof markWordWellKnownInDOM;
+    markWordIgnoredInDOM: typeof markWordIgnoredInDOM;
+    updateMultiWordInDOM: typeof updateMultiWordInDOM;
+    deleteMultiWordFromDOM: typeof deleteMultiWordFromDOM;
+    updateBulkWordInDOM: typeof updateBulkWordInDOM;
+    updateHoverSaveInDOM: typeof updateHoverSaveInDOM;
+    updateTestWordInDOM: typeof updateTestWordInDOM;
+    updateLearnStatus: typeof updateLearnStatus;
+    completeWordOperation: typeof completeWordOperation;
+
+    // Bulk translate functions
+    initBulkTranslate: typeof initBulkTranslate;
+    markAll: typeof bulkMarkAll;
+    markNone: typeof bulkMarkNone;
+    changeTermToggles: typeof changeTermToggles;
+    googleTranslateElementInit: typeof googleTranslateElementInit;
+
+    // Word status AJAX
+    initWordStatusChange: typeof initWordStatusChange;
   }
 }
 
@@ -275,6 +361,28 @@ window.languageWizardPopup = languageWizardPopup;
 window.initLanguageWizard = initLanguageWizard;
 window.initLanguageWizardPopup = initLanguageWizardPopup;
 
+// Language form (legacy name and new name)
+window.edit_languages_js = languageForm;
+window.languageForm = languageForm;
+window.checkTranslatorChanged = checkTranslatorChanged;
+window.checkLanguageForm = checkLanguageForm;
+window.check_dupl_lang = checkDuplicateLanguage;
+window.checkDuplicateLanguage = checkDuplicateLanguage;
+window.initLanguageForm = initLanguageForm;
+window.reloadDictURLs = (s, t) => languageForm.reloadDictURLs(s, t);
+window.checkLanguageChanged = (v) => languageForm.checkLanguageChanged(v);
+window.multiWordsTranslateChange = (v) => languageForm.multiWordsTranslateChange(v);
+window.checkTranslatorStatus = (url) => languageForm.checkTranslatorStatus(url);
+window.checkLibreTranslateStatus = (url, key) => languageForm.checkLibreTranslateStatus(url, key);
+window.changeLanguageTextSize = (v) => languageForm.changeLanguageTextSize(v);
+window.wordCharChange = (v) => languageForm.wordCharChange(v);
+window.addPopUpOption = (url, checked) => languageForm.addPopUpOption(url, checked);
+window.changePopUpState = (elem) => languageForm.changePopUpState(elem);
+window.checkDictionaryChanged = (inputBox) => languageForm.checkDictionaryChanged(inputBox);
+window.checkTranslatorType = (url, typeSelect) => languageForm.checkTranslatorType(url, typeSelect);
+window.checkWordChar = (method) => languageForm.checkWordChar(method);
+window.checkVoiceAPI = (apiValue) => languageForm.checkVoiceAPI(apiValue);
+
 // TTS Settings (legacy name and new name)
 window.tts_settings = ttsSettings;
 window.ttsSettings = ttsSettings;
@@ -305,3 +413,30 @@ window.saveTextStatus = saveTextStatus;
 window.initTextReading = initTextReading;
 window.initTextReadingHeader = initTextReadingHeader;
 window.readRawTextAloud = readRawTextAloud;
+
+// Word DOM updates (for result views)
+window.make_tooltip = make_tooltip;
+window.cleanupRightFrames = cleanupRightFrames;
+window.updateNewWordInDOM = updateNewWordInDOM;
+window.updateExistingWordInDOM = updateExistingWordInDOM;
+window.updateWordStatusInDOM = updateWordStatusInDOM;
+window.deleteWordFromDOM = deleteWordFromDOM;
+window.markWordWellKnownInDOM = markWordWellKnownInDOM;
+window.markWordIgnoredInDOM = markWordIgnoredInDOM;
+window.updateMultiWordInDOM = updateMultiWordInDOM;
+window.deleteMultiWordFromDOM = deleteMultiWordFromDOM;
+window.updateBulkWordInDOM = updateBulkWordInDOM;
+window.updateHoverSaveInDOM = updateHoverSaveInDOM;
+window.updateTestWordInDOM = updateTestWordInDOM;
+window.updateLearnStatus = updateLearnStatus;
+window.completeWordOperation = completeWordOperation;
+
+// Bulk translate functions
+window.initBulkTranslate = initBulkTranslate;
+window.markAll = bulkMarkAll;
+window.markNone = bulkMarkNone;
+window.changeTermToggles = changeTermToggles;
+window.googleTranslateElementInit = googleTranslateElementInit;
+
+// Word status AJAX
+window.initWordStatusChange = initWordStatusChange;

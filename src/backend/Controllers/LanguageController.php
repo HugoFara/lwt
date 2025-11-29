@@ -190,6 +190,8 @@ class LanguageController extends BaseController
 
         $this->prepareLanguageCodes($language, $currentNativeLanguage, $sourceLg, $targetLg);
 
+        $allLanguages = $this->languageService->getAllLanguages();
+
         include __DIR__ . '/../Views/Language/form.php';
 
         ?>
@@ -231,12 +233,9 @@ class LanguageController extends BaseController
 
         $this->prepareLanguageCodes($language, $currentNativeLanguage, $sourceLg, $targetLg);
 
-        ?>
-    <script type="text/javascript" charset="utf-8">
-        const LANGDEFS = <?php echo json_encode(LanguageDefinitions::getAll()); ?>;
+        $allLanguages = $this->languageService->getAllLanguages();
 
-        $(document).ready(lwtFormCheck.askBeforeExit);
-    </script>
+        ?>
     <h2>Edit Language
         <a target="_blank" href="docs/info.html#howtolang">
             <img src="/assets/icons/question-frame.png" title="Help" alt="Help" />

@@ -68,7 +68,7 @@ $varArray = [
         'settings' => [
             'jQuery_tooltip'     => ($tooltipMode == 2 ? 1 : 0),
             'hts'                => $hts,
-            'word_status_filter' => makeStatusClassFilter((int)$visitStatus),
+            'word_status_filter' => \Lwt\View\Helper\StatusHelper::makeClassFilter((int)$visitStatus),
             'annotations_mode'   => $modeTrans
         ],
     ]

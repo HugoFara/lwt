@@ -21,24 +21,15 @@ namespace Lwt\Views\Word;
 
 ?>
 <script type="text/javascript">
-    function update_mword(mword, oldstatus) {
-        const context = window.parent.document;
-        let title = '';
-        if (window.parent.LWT_DATA.settings.jQuery_tooltip)
-            title = make_tooltip(
-                mword.text, mword.translation, mword.romanization, mword.status
-            );
-        $('.word' + mword.woid, context)
-        .attr('data_trans', mword.translation)
-        .attr('data_rom', mword.romanization)
-        .attr('title', title)
-        .removeClass('status' + oldstatus)
-        .addClass('status' + mword.status)
-        .attr('data_status', mword.status);
-    }
-
-    update_mword(
-        <?php echo $termJson; ?>,
-        <?php echo $oldStatusValue; ?>
-    );
+    (function() {
+        const mword = <?php echo $termJson; ?>;
+        updateMultiWordInDOM(
+            mword.woid,
+            mword.text,
+            mword.translation,
+            mword.romanization,
+            mword.status,
+            <?php echo $oldStatusValue; ?>
+        );
+    })();
 </script>

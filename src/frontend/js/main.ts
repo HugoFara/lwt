@@ -72,12 +72,16 @@ import './texts/text_list';
 // Words
 import './words/word_list_filter';
 import './words/word_list_table';
+import './words/word_dom_updates';
+import './words/bulk_translate';
+import './words/word_status_ajax';
 
 // Tags
 import './tags/tag_list';
 
 // Languages
 import './languages/language_wizard';
+import './languages/language_form';
 
 // Admin
 import './admin/server_data';

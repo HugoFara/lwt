@@ -25,18 +25,6 @@ namespace Lwt\Views\Word;
 <p>OK, this term will be ignored!</p>
 
 <script type="text/javascript">
-//<![CDATA[
-var context = window.parent.document.getElementById('frame-l');
-var contexth = window.parent.document.getElementById('frame-h');
-var title = make_tooltip(<?php echo json_encode($term); ?>,'*','','98');
-$('.TERM<?php echo $hex; ?>', context)
-.removeClass('status0')
-.addClass('status98 word<?php echo $wid; ?>')
-.attr('data_status','98')
-.attr('data_wid','<?php echo $wid; ?>')
-.attr('title',title);
-$('#learnstatus', contexth).html('<?php echo addslashes(todo_words_content((int) $textId)); ?>');
-
-cleanupRightFrames();
-//]]>
+    markWordIgnoredInDOM(<?php echo $wid; ?>, <?php echo json_encode($hex); ?>, <?php echo json_encode($term); ?>);
+    completeWordOperation(<?php echo json_encode(todo_words_content((int) $textId)); ?>);
 </script>

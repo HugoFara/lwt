@@ -33,41 +33,19 @@ use Lwt\Database\Escaping;
     <img src="/assets/icons/waiting2.gif" /> Updating Texts
 </p>
 <script type="text/javascript">
-    const context = window.parent.document;
-    const tooltip = <?php echo json_encode($tooltipMode == 1); ?>;
+    (function() {
+        const useTooltip = <?php echo json_encode($tooltipMode == 1); ?>;
+        const words = <?php echo json_encode(array_values($newWords)); ?>;
 
-    function change_term(term) {
-        $(".TERM" + term.hex, context)
-        .removeClass("status0")
-        .addClass("status" + term.WoStatus)
-        .addClass("word" + term.WoID)
-        .attr("data_wid", term.WoID)
-        .attr("data_status", term.WoStatus)
-        .attr("data_trans", term.translation);
-        if (tooltip) {
-            $(".TERM" + term.hex, context).each(
-                function() {
-                    this.title = make_tooltip(
-                        $(this).text(), $(this).attr('data_trans'),
-                        $(this).attr('data_rom'), $(this).attr('data_status')
-                    );
-                }
-            );
-        } else {
-            $(".TERM" + term.hex, context).attr('title', '');
+        words.forEach(function(term) {
+            updateBulkWordInDOM(term, useTooltip);
+        });
+
+        updateLearnStatus(<?php echo json_encode(todo_words_content($tid)); ?>);
+        document.getElementById('displ_message')?.remove();
+
+        if (<?php echo json_encode($cleanUp); ?>) {
+            cleanupRightFrames();
         }
-
-    }
-    <?php
-    foreach ($newWords as $word) {
-        echo "change_term(" . json_encode($word) . ");";
-    }
-    ?>
-
-    $('#learnstatus', context)
-    .html('<?php echo addslashes(todo_words_content($tid)); ?>');
-    $('#displ_message').remove();
-    if (<?php echo json_encode($cleanUp); ?>) {
-        cleanupRightFrames();
-    }
+    })();
 </script>

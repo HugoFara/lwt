@@ -64,7 +64,5 @@ namespace Lwt\Views\Word;
 </table>
 
 <script type="text/javascript">
-    //<![CDATA[
     cleanupRightFrames();
-    //]]>
 </script>
