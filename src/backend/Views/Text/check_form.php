@@ -24,27 +24,17 @@ namespace Lwt\Views\Text;
 /** @var string $languagesOption */
 /** @var array $languageData */
 
-?>
-<script type="text/javascript" charset="utf-8">
-    /**
-     * Change the language of inputs for text based on selected language.
-     */
-    function change_textboxes_language() {
-        const lid = document.getElementById("TxLgID").value;
-        const language_data = <?php echo json_encode($languageData); ?>;
-        $('#TxText').attr('lang', language_data[lid]);
-    }
+// JavaScript moved to forms/form_initialization.ts (auto-detects form.validate and language-data-config)
 
-    $(document).ready(lwtFormCheck.askBeforeExit);
-    $(document).ready(change_textboxes_language);
-</script>
+?>
+<script type="application/json" id="language-data-config"><?php echo json_encode($languageData); ?></script>
 
 <form class="validate" action="/text/check" method="post">
     <table class="tab3" cellspacing="0" cellpadding="5">
         <tr>
             <td class="td1 right">Language:</td>
             <td class="td1">
-                <select name="TxLgID" id="TxLgID" class="notempty setfocus" onchange="change_textboxes_language();">
+                <select name="TxLgID" id="TxLgID" class="notempty setfocus">
                     <?php echo $languagesOption; ?>
                 </select>
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />

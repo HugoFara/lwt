@@ -108,6 +108,10 @@ export function autoInitializeForms(): void {
     if (!form.hasAttribute('data-lwt-form-init')) {
       form.setAttribute('data-lwt-form-init', 'true');
       lwtFormCheck.askBeforeExit();
+      // If form is marked as dirty, set dirty state
+      if (form.hasAttribute('data-lwt-dirty')) {
+        lwtFormCheck.makeDirty();
+      }
     }
   });
 
@@ -117,17 +121,39 @@ export function autoInitializeForms(): void {
     clearRightFrameOnUnload();
   }
 
-  // Auto-init forms with validate class that need exit confirmation (legacy support)
-  // This handles forms that have class="validate" but don't have specific init
+  // Auto-init forms with validate class that need exit confirmation
+  // This handles forms that have class="validate"
   const validateForms = document.querySelectorAll('form.validate');
   if (validateForms.length > 0) {
-    // Check if askBeforeExit was already set up
-    // We use a data attribute to track this
+    let needsFormCheck = false;
     validateForms.forEach((form) => {
       if (!form.hasAttribute('data-lwt-form-init')) {
         form.setAttribute('data-lwt-form-init', 'true');
+        needsFormCheck = true;
       }
     });
+    if (needsFormCheck) {
+      lwtFormCheck.askBeforeExit();
+    }
+  }
+
+  // Auto-init language selector with data-language-data attribute
+  const langConfigEl = document.getElementById('language-data-config');
+  if (langConfigEl) {
+    try {
+      const languageData = JSON.parse(langConfigEl.textContent || '{}') as Record<string, string>;
+      const langSelect = document.getElementById('TxLgID');
+      if (langSelect) {
+        // Apply initial language
+        changeTextboxesLanguage(languageData);
+        // Set up change handler
+        langSelect.addEventListener('change', () => {
+          changeTextboxesLanguage(languageData);
+        });
+      }
+    } catch (e) {
+      console.error('Failed to parse language-data-config:', e);
+    }
   }
 }
 

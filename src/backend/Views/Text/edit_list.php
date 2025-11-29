@@ -330,9 +330,5 @@ namespace Lwt\Views\Text;
 <?php endif; ?>
 </form>
 
-<script type="text/javascript">
-    var WORDCOUNTS = '', SUW = SHOWUNIQUE = <?php echo intval($showCounts, 2); ?>;
-    $(document).ready(lwt.prepare_word_count_click);
-    $(window).on('beforeunload', lwt.save_text_word_count_settings);
-</script>
+<script type="application/json" id="text-list-config"><?php echo json_encode(['showCounts' => intval($showCounts, 2)]); ?></script>
 <?php endif; ?>

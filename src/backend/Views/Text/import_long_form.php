@@ -16,24 +16,10 @@
  * @since    3.0.0
  */
 
-?>
-<script type="text/javascript" charset="utf-8">
-    /**
-     * Change the language of inputs for text and title based on selected
-     * language.
-     *
-     * @returns undefined
-     */
-    function change_textboxes_language() {
-        const lid = document.getElementById("TxLgID").value;
-        const language_data = <?php echo json_encode($languageData); ?>;
-        $('#TxTitle').attr('lang', language_data[lid]);
-        $('#TxText').attr('lang', language_data[lid]);
-    }
+// JavaScript moved to forms/form_initialization.ts (auto-detects form.validate and language-data-config)
 
-    $(document).ready(lwtFormCheck.askBeforeExit);
-    $(document).ready(change_textboxes_language);
-</script>
+?>
+<script type="application/json" id="language-data-config"><?php echo json_encode($languageData); ?></script>
 
 <div class="flex-spaced">
     <div title="Import of a single text, max. 65,000 bytes long, with optional audio">
@@ -67,7 +53,7 @@
     <tr>
         <td class="td1 right">Language:</td>
         <td class="td1">
-            <select name="LgID" id="TxLgID" class="notempty setfocus" onchange="change_textboxes_language();">
+            <select name="LgID" id="TxLgID" class="notempty setfocus">
                 <?php echo $languagesOption; ?>
             </select>
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />

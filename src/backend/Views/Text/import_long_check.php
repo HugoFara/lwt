@@ -19,18 +19,12 @@
  * @since    3.0.0
  */
 
+// JavaScript moved to forms/form_initialization.ts (uses data-lwt-form-check and data-lwt-dirty)
+
 $plural = ($textCount == 1 ? '' : 's');
 $shorter = ($textCount == 1 ? ' ' : ' shorter ');
 ?>
-<script type="text/javascript">
-//<![CDATA[
-    $(document).ready(function() {
-        lwtFormCheck.askBeforeExit();
-        lwtFormCheck.makeDirty();
-    });
-//]]>
-</script>
-<form enctype="multipart/form-data" action="/text/import-long" method="post">
+<form enctype="multipart/form-data" action="/text/import-long" method="post" data-lwt-form-check="true" data-lwt-dirty>
 <input type="hidden" name="LgID" value="<?php echo $langId; ?>" />
 <input type="hidden" name="TxTitle" value="<?php echo tohtml($title); ?>" />
 <input type="hidden" name="TxSourceURI" value="<?php echo tohtml($sourceUri); ?>" />

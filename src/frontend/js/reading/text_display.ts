@@ -177,3 +177,42 @@ export const lwt = {
   }
 };
 
+// Export lwt to window for inline PHP scripts
+declare global {
+  interface Window {
+    lwt: typeof lwt;
+    WORDCOUNTS: typeof WORDCOUNTS;
+    SUW: number;
+    SHOWUNIQUE: number;
+  }
+}
+
+window.lwt = lwt;
+
+/**
+ * Auto-initialize text list word counts if config element is present.
+ */
+function autoInitTextList(): void {
+  const configEl = document.getElementById('text-list-config');
+  if (!configEl) return;
+
+  try {
+    const config = JSON.parse(configEl.textContent || '{}');
+    // Set up globals
+    (window as unknown as { WORDCOUNTS: string }).WORDCOUNTS = '';
+    (window as unknown as { SUW: number }).SUW = config.showCounts || 0;
+    (window as unknown as { SHOWUNIQUE: number }).SHOWUNIQUE = config.showCounts || 0;
+
+    // Initialize word count click handlers
+    lwt.prepare_word_count_click();
+
+    // Set up beforeunload handler
+    $(window).on('beforeunload', lwt.save_text_word_count_settings);
+  } catch (e) {
+    console.error('Failed to parse text-list-config:', e);
+  }
+}
+
+// Auto-initialize on DOM ready
+$(document).ready(autoInitTextList);
+

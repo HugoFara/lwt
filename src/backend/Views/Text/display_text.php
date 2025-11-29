@@ -22,42 +22,9 @@
 
 // Variables injected from text_display_text.php:
 // $annotations, $textSize, $rtlScript
+// JavaScript moved to reading/annotation_interactions.ts
 
 ?>
-<script type="text/javascript">
-    //<![CDATA[
-
-    /** When user clicks an annotation. */
-    function click_ann() {
-        const attr = $(this).attr('style');
-        if(attr !== undefined && attr !== false && attr !== '') {
-            $(this).removeAttr('style');
-        }
-        else {
-            $(this).css('color', '#C8DCF0');
-            $(this).css('background-color', '#C8DCF0');
-        }
-    }
-
-    /** When user clicks the text. */
-    function click_text() {
-        const bc = $('body').css('color');
-        if ($(this).css('color') != bc) {
-            $(this).css('color', 'inherit');
-            $(this).css('background-color', '');
-        } else {
-            $(this).css('color','#E5E4E2');
-            $(this).css('background-color', '#E5E4E2');
-        }
-    }
-
-    $(document).ready(function(){
-        $('.anntransruby2').on('click', click_ann);
-        $('.anntermruby').on('click', click_text);
-    });
-    //]]>
-</script>
-
 <div id="print"<?php echo ($rtlScript ? ' dir="rtl"' : ''); ?>>
 <p style="font-size:<?php echo $textSize; ?>%;line-height: 1.35; margin-bottom: 10px; ">
 <?php

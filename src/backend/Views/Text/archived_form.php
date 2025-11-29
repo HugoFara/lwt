@@ -24,11 +24,9 @@ namespace Lwt\Views\Text;
 /** @var int $textId */
 /** @var array $record */
 
-?>
-<script type="text/javascript" charset="utf-8">
-    $(document).ready(lwtFormCheck.askBeforeExit);
-</script>
+// JavaScript moved to forms/form_initialization.ts (auto-detects form.validate)
 
+?>
 <h2>Edit Archived Text</h2>
 
 <form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>#rec<?php echo $textId; ?>" method="post">
