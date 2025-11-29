@@ -358,10 +358,12 @@ Current files in `src/backend/Core/` that may need migration:
   - `test_helpers.php` → `Services/TestService.php` (methods: `getTestSql()`, `buildSelectionTestSql()`, inlined SQL projection logic)
 - ~~`Mobile/*.php`~~ - **COMPLETED**: Migrated to `MobileService`
   - `mobile_interactions.php` → `Services/MobileService.php` (method: `isMobile()` for mobile device detection)
-- `UI/*.php` - Backward-compatibility shim (delegates to View Helpers)
-  - `ui_helpers.php` - Shim file providing deprecated global functions
-  - All functions delegate to View Helper classes (`PageLayoutHelper`, `SelectOptionsBuilder`, `StatusHelper`, `ViteHelper`)
-  - Keep for now - remove incrementally as views are updated to use View Helpers directly
+- ~~`UI/*.php`~~ - **COMPLETED**: Migrated to View Helper classes
+  - `ui_helpers.php` - **REMOVED**: All callers updated to use View Helper classes directly
+  - View Helper classes: `PageLayoutHelper`, `SelectOptionsBuilder`, `StatusHelper`, `ViteHelper`, `FormHelper`
+  - `BaseController::render()` now uses `PageLayoutHelper::renderPageStart()` directly
+  - `AdminController::settings()` loads themes via `ThemeService` and passes to view
+  - Views use `SelectOptionsBuilder::for*()` methods directly via `use` statements
 
 ### Root Files (Evaluate)
 

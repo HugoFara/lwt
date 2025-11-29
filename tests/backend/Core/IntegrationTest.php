@@ -10,7 +10,9 @@ $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../../../src/backend/View/Helper/FormHelper.php';
+require_once __DIR__ . '/../../../src/backend/View/Helper/SelectOptionsBuilder.php';
+require_once __DIR__ . '/../../../src/backend/View/Helper/StatusHelper.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../src/backend/Services/SentenceService.php';
 require_once __DIR__ . '/../../../src/backend/Services/AnnotationService.php';
@@ -35,6 +37,9 @@ use Lwt\Services\DictionaryService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\TableSetService;
 use Lwt\Services\TagService;
+use Lwt\View\Helper\FormHelper;
+use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\StatusHelper;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -198,22 +203,22 @@ class IntegrationTest extends TestCase
 
     public function testGetChecked(): void
     {
-        $this->assertEquals(' checked="checked" ', get_checked(true));
-        $this->assertEquals(' checked="checked" ', get_checked(1));
-        $this->assertEquals(' checked="checked" ', get_checked('yes'));
-        $this->assertEquals('', get_checked(false));
-        $this->assertEquals('', get_checked(0));
-        $this->assertEquals('', get_checked(''));
-        $this->assertEquals('', get_checked(null));
+        $this->assertEquals(' checked="checked" ', FormHelper::getChecked(true));
+        $this->assertEquals(' checked="checked" ', FormHelper::getChecked(1));
+        $this->assertEquals(' checked="checked" ', FormHelper::getChecked('yes'));
+        $this->assertEquals('', FormHelper::getChecked(false));
+        $this->assertEquals('', FormHelper::getChecked(0));
+        $this->assertEquals('', FormHelper::getChecked(''));
+        $this->assertEquals('', FormHelper::getChecked(null));
     }
 
     public function testGetSelected(): void
     {
-        $this->assertEquals(' selected="selected" ', get_selected('apple', 'apple'));
-        $this->assertEquals(' selected="selected" ', get_selected(5, 5));
-        $this->assertEquals('', get_selected('apple', 'orange'));
-        $this->assertEquals('', get_selected(5, 10));
-        $this->assertEquals(' selected="selected" ', get_selected('0', 0));
+        $this->assertEquals(' selected="selected" ', FormHelper::getSelected('apple', 'apple'));
+        $this->assertEquals(' selected="selected" ', FormHelper::getSelected(5, 5));
+        $this->assertEquals('', FormHelper::getSelected('apple', 'orange'));
+        $this->assertEquals('', FormHelper::getSelected(5, 10));
+        $this->assertEquals(' selected="selected" ', FormHelper::getSelected('0', 0));
     }
 
     public function testStrToHex(): void
@@ -257,30 +262,30 @@ class IntegrationTest extends TestCase
     {
         // Status range works with special codes (not simple "1-5")
         // Range 12-15 means status 1 to (range % 10)
-        $this->assertTrue(checkStatusRange(1, 15));  // 1 <= 5
-        $this->assertTrue(checkStatusRange(3, 15));  // 3 <= 5
-        $this->assertTrue(checkStatusRange(5, 15));  // 5 <= 5
-        $this->assertFalse(checkStatusRange(1, 23)); // 1 < 2
+        $this->assertTrue(StatusHelper::checkRange(1, 15));  // 1 <= 5
+        $this->assertTrue(StatusHelper::checkRange(3, 15));  // 3 <= 5
+        $this->assertTrue(StatusHelper::checkRange(5, 15));  // 5 <= 5
+        $this->assertFalse(StatusHelper::checkRange(1, 23)); // 1 < 2
 
         // Status 599 means 5 or 99
-        $this->assertTrue(checkStatusRange(5, 599));
-        $this->assertTrue(checkStatusRange(99, 599));
-        $this->assertFalse(checkStatusRange(4, 599));
+        $this->assertTrue(StatusHelper::checkRange(5, 599));
+        $this->assertTrue(StatusHelper::checkRange(99, 599));
+        $this->assertFalse(StatusHelper::checkRange(4, 599));
 
         // Invalid range
-        $this->assertFalse(checkStatusRange(1, 0));
+        $this->assertFalse(StatusHelper::checkRange(1, 0));
     }
 
     public function testGetStatusName(): void
     {
-        $this->assertEquals('Learning', get_status_name(1));
-        $this->assertEquals('Learned', get_status_name(5));
-        $this->assertEquals('Ignored', get_status_name(98));
-        $this->assertEquals('Well Known', get_status_name(99));
+        $this->assertEquals('Learning', StatusHelper::getName(1));
+        $this->assertEquals('Learned', StatusHelper::getName(5));
+        $this->assertEquals('Ignored', StatusHelper::getName(98));
+        $this->assertEquals('Well Known', StatusHelper::getName(99));
 
         // Test all statuses 1-5
         for ($i = 1; $i <= 5; $i++) {
-            $name = get_status_name($i);
+            $name = StatusHelper::getName($i);
             $this->assertIsString($name);
             $this->assertNotEmpty($name);
         }
@@ -289,24 +294,24 @@ class IntegrationTest extends TestCase
     public function testGetStatusAbbr(): void
     {
         // Abbreviations are just numbers for 1-5, special for 98/99
-        $this->assertEquals('1', get_status_abbr(1));
-        $this->assertEquals('2', get_status_abbr(2));
-        $this->assertEquals('5', get_status_abbr(5));
-        $this->assertEquals('Ign', get_status_abbr(98));
-        $this->assertEquals('WKn', get_status_abbr(99));
+        $this->assertEquals('1', StatusHelper::getAbbr(1));
+        $this->assertEquals('2', StatusHelper::getAbbr(2));
+        $this->assertEquals('5', StatusHelper::getAbbr(5));
+        $this->assertEquals('Ign', StatusHelper::getAbbr(98));
+        $this->assertEquals('WKn', StatusHelper::getAbbr(99));
     }
 
     public function testGetColoredStatusMsg(): void
     {
         // Should return HTML with status color
-        $msg1 = get_colored_status_msg(1);
+        $msg1 = StatusHelper::buildColoredMessage(1, StatusHelper::getName(1), StatusHelper::getAbbr(1));
         $this->assertStringContainsString('Learning', $msg1);
         $this->assertStringContainsString('status', $msg1);
 
-        $msg5 = get_colored_status_msg(5);
+        $msg5 = StatusHelper::buildColoredMessage(5, StatusHelper::getName(5), StatusHelper::getAbbr(5));
         $this->assertStringContainsString('Learned', $msg5);
 
-        $msg98 = get_colored_status_msg(98);
+        $msg98 = StatusHelper::buildColoredMessage(98, StatusHelper::getName(98), StatusHelper::getAbbr(98));
         $this->assertStringContainsString('Ignored', $msg98);
     }
 
@@ -314,7 +319,7 @@ class IntegrationTest extends TestCase
 
     public function testGetSecondsSelectOptions(): void
     {
-        $options = get_seconds_selectoptions(3);
+        $options = SelectOptionsBuilder::forSeconds(3);
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('selected', $options);
         $this->assertStringContainsString('3', $options);
@@ -323,28 +328,28 @@ class IntegrationTest extends TestCase
     public function testGetPlaybackRateSelectOptions(): void
     {
         // Playback rates are 0.5-1.5 (values 5-15)
-        $options = get_playbackrate_selectoptions(10); // 1.0x
+        $options = SelectOptionsBuilder::forPlaybackRate(10); // 1.0x
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('1.0', $options);
     }
 
     public function testGetMobileDisplayModeSelectOptions(): void
     {
-        $options = get_mobile_display_mode_selectoptions(0);
+        $options = SelectOptionsBuilder::forMobileDisplayMode('0');
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('selected', $options);
     }
 
     public function testGetSentenceCountSelectOptions(): void
     {
-        $options = get_sentence_count_selectoptions(1);
+        $options = SelectOptionsBuilder::forSentenceCount(1);
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('value="1"', $options);
     }
 
     public function testGetRegexSelectOptions(): void
     {
-        $options = get_regex_selectoptions('0');
+        $options = SelectOptionsBuilder::forRegexMode('0');
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('Default', $options);
         $this->assertStringContainsString('RegEx', $options);
@@ -352,14 +357,14 @@ class IntegrationTest extends TestCase
 
     public function testGetTooltipSelectOptions(): void
     {
-        $options = get_tooltip_selectoptions(1);
+        $options = SelectOptionsBuilder::forTooltipType(1);
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('selected', $options);
     }
 
     public function testGetWordStatusRadioOptions(): void
     {
-        $options = get_wordstatus_radiooptions(1);
+        $options = SelectOptionsBuilder::forWordStatusRadio(1);
         $this->assertStringContainsString('type="radio"', $options);
         $this->assertStringContainsString('checked', $options);
         $this->assertStringContainsString('status1', $options);
@@ -368,23 +373,23 @@ class IntegrationTest extends TestCase
     public function testGetWordStatusSelectOptions(): void
     {
         // Test basic select
-        $options = get_wordstatus_selectoptions(1, false, false);
+        $options = SelectOptionsBuilder::forWordStatus(1, false, false);
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('selected', $options);
 
         // Test with "all" option
-        $options_all = get_wordstatus_selectoptions(1, true, false);
+        $options_all = SelectOptionsBuilder::forWordStatus(1, true, false);
         $this->assertStringContainsString('All', $options_all);
 
         // Test without 98/99
-        $options_no_9899 = get_wordstatus_selectoptions(1, false, true);
+        $options_no_9899 = SelectOptionsBuilder::forWordStatus(1, false, true);
         $this->assertStringContainsString('<option', $options_no_9899);
     }
 
     public function testGetAndOrSelectOptions(): void
     {
         // Takes numeric value: 0=OR, 1=AND
-        $options = get_andor_selectoptions(1);
+        $options = SelectOptionsBuilder::forAndOr(1);
         $this->assertStringContainsString('<option', $options);
         $this->assertStringContainsString('AND', $options);
         $this->assertStringContainsString('OR', $options);
@@ -544,7 +549,9 @@ class IntegrationTest extends TestCase
     public function testGetThemesSelectOptions(): void
     {
         $current_theme = Settings::getWithDefault('set-theme-dir');
-        $options = get_themes_selectoptions($current_theme);
+        $themeService = new \Lwt\Services\ThemeService();
+        $themes = $themeService->getAvailableThemes();
+        $options = SelectOptionsBuilder::forThemes($themes, $current_theme);
         $this->assertStringContainsString('<option', $options);
     }
 
@@ -552,7 +559,7 @@ class IntegrationTest extends TestCase
 
     public function testCheckTest(): void
     {
-        $result = checkTest('value', 'fieldname');
+        $result = FormHelper::checkInRequest('value', 'fieldname');
         $this->assertIsString($result);
     }
 
@@ -600,7 +607,7 @@ class IntegrationTest extends TestCase
     public function testGetWordsToDoButtonsSelectOptions(): void
     {
         // Test with value 0 (I Know All & Ignore All)
-        $result = get_words_to_do_buttons_selectoptions(0);
+        $result = SelectOptionsBuilder::forWordsToDoButtons(0);
 
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
@@ -609,13 +616,13 @@ class IntegrationTest extends TestCase
         $this->assertStringContainsString('selected', $result);
 
         // Test with value 1 (I Know All)
-        $result = get_words_to_do_buttons_selectoptions(1);
+        $result = SelectOptionsBuilder::forWordsToDoButtons(1);
         $this->assertStringContainsString('value="1"', $result);
         $this->assertStringContainsString('I Know All</option>', $result);
         $this->assertStringContainsString('selected', $result);
 
         // Test with value 2 (Ignore All)
-        $result = get_words_to_do_buttons_selectoptions(2);
+        $result = SelectOptionsBuilder::forWordsToDoButtons(2);
         $this->assertStringContainsString('value="2"', $result);
         $this->assertStringContainsString('Ignore All', $result);
     }
@@ -715,9 +722,7 @@ class IntegrationTest extends TestCase
     public function testEchoLwtLogoExtended(): void
     {
         // Test that it outputs the logo HTML
-        ob_start();
-        echo_lwt_logo();
-        $output = ob_get_clean();
+        $output = \Lwt\View\Helper\PageLayoutHelper::buildLogo();
 
         $this->assertIsString($output);
         // Should contain logo image
@@ -854,37 +859,37 @@ class IntegrationTest extends TestCase
     }
 
     /**
-     * Test makeStatusClassFilter function
+     * Test StatusHelper::makeClassFilter function
      */
     public function testMakeStatusClassFilter(): void
     {
         // Test with status filter "15" (statuses 1-5)
-        $result = makeStatusClassFilter('15');
+        $result = StatusHelper::makeClassFilter('15');
         $this->assertIsString($result);
         $this->assertStringContainsString('status', $result);
 
         // Test with "599" (status 5 or 99)
-        $result = makeStatusClassFilter('599');
+        $result = StatusHelper::makeClassFilter('599');
         $this->assertIsString($result);
 
         // Test with empty filter
-        $result = makeStatusClassFilter('');
+        $result = StatusHelper::makeClassFilter('');
         $this->assertIsString($result);
     }
 
     /**
-     * Test get_annotation_position_selectoptions function
+     * Test SelectOptionsBuilder::forAnnotationPosition function
      */
     public function testGetAnnotationPositionSelectOptions(): void
     {
         // Test with value 1 (should have selected)
-        $result = get_annotation_position_selectoptions(1);
+        $result = SelectOptionsBuilder::forAnnotationPosition(1);
         $this->assertStringContainsString('<option', $result);
         // The function returns options but selected is only on matching value
         $this->assertStringContainsString('value="1"', $result);
 
         // Test with value 2
-        $result = get_annotation_position_selectoptions(2);
+        $result = SelectOptionsBuilder::forAnnotationPosition(2);
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('value="2"', $result);
     }

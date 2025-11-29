@@ -18,7 +18,8 @@ $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../../src/backend/Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../../../../src/backend/View/Helper/FormHelper.php';
+require_once __DIR__ . '/../../../../src/backend/View/Helper/StatusHelper.php';
 require_once __DIR__ . '/../../../../src/backend/Services/TextStatisticsService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/SentenceService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/AnnotationService.php';
@@ -32,6 +33,8 @@ require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php';
 
 use Lwt\Services\LanguageService;
+use Lwt\View\Helper\FormHelper;
+use Lwt\View\Helper\StatusHelper;
 
 /**
  * Unit tests for text processing functions.
@@ -389,15 +392,15 @@ class TextProcessingTest extends TestCase
     {
         // Test all valid statuses
         for ($i = 1; $i <= 5; $i++) {
-            $name = get_status_name($i);
+            $name = StatusHelper::getName($i);
             $this->assertIsString($name);
             $this->assertNotEmpty($name);
         }
-        
-        $ignored = get_status_name(98);
+
+        $ignored = StatusHelper::getName(98);
         $this->assertEquals('Ignored', $ignored);
-        
-        $wellKnown = get_status_name(99);
+
+        $wellKnown = StatusHelper::getName(99);
         $this->assertEquals('Well Known', $wellKnown);
     }
 
@@ -405,44 +408,44 @@ class TextProcessingTest extends TestCase
     {
         // Test all valid statuses
         for ($i = 1; $i <= 5; $i++) {
-            $abbr = get_status_abbr($i);
+            $abbr = StatusHelper::getAbbr($i);
             $this->assertIsString($abbr);
             $this->assertNotEmpty($abbr);
         }
-        
-        $ignored = get_status_abbr(98);
+
+        $ignored = StatusHelper::getAbbr(98);
         $this->assertEquals('Ign', $ignored);
-        
-        $wellKnown = get_status_abbr(99);
+
+        $wellKnown = StatusHelper::getAbbr(99);
         $this->assertEquals('WKn', $wellKnown);
     }
 
     public function testCheckStatusRangeWithValidRanges(): void
     {
         // Status 1 within range 15 (1-5)
-        $this->assertTrue(checkStatusRange(1, 15));
-        $this->assertTrue(checkStatusRange(3, 15));
-        $this->assertTrue(checkStatusRange(5, 15));
-        
+        $this->assertTrue(StatusHelper::checkRange(1, 15));
+        $this->assertTrue(StatusHelper::checkRange(3, 15));
+        $this->assertTrue(StatusHelper::checkRange(5, 15));
+
         // Status 5 or 99 within range 599
-        $this->assertTrue(checkStatusRange(5, 599));
-        $this->assertTrue(checkStatusRange(99, 599));
+        $this->assertTrue(StatusHelper::checkRange(5, 599));
+        $this->assertTrue(StatusHelper::checkRange(99, 599));
     }
 
     public function testCheckStatusRangeWithInvalidRanges(): void
     {
-        $this->assertFalse(checkStatusRange(1, 23)); // 1 < 2
-        $this->assertFalse(checkStatusRange(4, 599)); // 4 != 5 and 4 != 99
-        $this->assertFalse(checkStatusRange(1, 0)); // Invalid range
+        $this->assertFalse(StatusHelper::checkRange(1, 23)); // 1 < 2
+        $this->assertFalse(StatusHelper::checkRange(4, 599)); // 4 != 5 and 4 != 99
+        $this->assertFalse(StatusHelper::checkRange(1, 0)); // Invalid range
     }
 
     public function testGetColoredStatusMsgReturnsHTML(): void
     {
-        $msg = get_colored_status_msg(1);
+        $msg = StatusHelper::buildColoredMessage(1, StatusHelper::getName(1), StatusHelper::getAbbr(1));
         $this->assertStringContainsString('Learning', $msg);
         $this->assertStringContainsString('status', $msg);
-        
-        $msg = get_colored_status_msg(98);
+
+        $msg = StatusHelper::buildColoredMessage(98, StatusHelper::getName(98), StatusHelper::getAbbr(98));
         $this->assertStringContainsString('Ignored', $msg);
     }
 
@@ -494,22 +497,22 @@ class TextProcessingTest extends TestCase
 
     public function testGetChecked(): void
     {
-        $this->assertEquals(' checked="checked" ', get_checked(true));
-        $this->assertEquals(' checked="checked" ', get_checked(1));
-        $this->assertEquals(' checked="checked" ', get_checked('yes'));
-        $this->assertEquals('', get_checked(false));
-        $this->assertEquals('', get_checked(0));
-        $this->assertEquals('', get_checked(''));
-        $this->assertEquals('', get_checked(null));
+        $this->assertEquals(' checked="checked" ', FormHelper::getChecked(true));
+        $this->assertEquals(' checked="checked" ', FormHelper::getChecked(1));
+        $this->assertEquals(' checked="checked" ', FormHelper::getChecked('yes'));
+        $this->assertEquals('', FormHelper::getChecked(false));
+        $this->assertEquals('', FormHelper::getChecked(0));
+        $this->assertEquals('', FormHelper::getChecked(''));
+        $this->assertEquals('', FormHelper::getChecked(null));
     }
 
     public function testGetSelected(): void
     {
-        $this->assertEquals(' selected="selected" ', get_selected('apple', 'apple'));
-        $this->assertEquals(' selected="selected" ', get_selected(5, 5));
-        $this->assertEquals('', get_selected('apple', 'orange'));
-        $this->assertEquals('', get_selected(5, 10));
-        $this->assertEquals(' selected="selected" ', get_selected('0', 0));
+        $this->assertEquals(' selected="selected" ', FormHelper::getSelected('apple', 'apple'));
+        $this->assertEquals(' selected="selected" ', FormHelper::getSelected(5, 5));
+        $this->assertEquals('', FormHelper::getSelected('apple', 'orange'));
+        $this->assertEquals('', FormHelper::getSelected(5, 10));
+        $this->assertEquals(' selected="selected" ', FormHelper::getSelected('0', 0));
     }
 
     public function testStrToHex(): void

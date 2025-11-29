@@ -5,27 +5,25 @@ namespace Lwt\Tests\Core\UI;
 require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Utils/string_utilities.php';
 require_once __DIR__ . '/../../../../src/backend/Core/version.php';
-require_once __DIR__ . '/../../../../src/backend/Core/UI/ui_helpers.php';
+require_once __DIR__ . '/../../../../src/backend/View/Helper/PageLayoutHelper.php';
 
 use Lwt\Core\Globals;
+use Lwt\View\Helper\PageLayoutHelper;
 use PHPUnit\Framework\TestCase;
 
 Globals::initialize();
 
 /**
- * Tests for ui_helpers.php functions
+ * Tests for PageLayoutHelper (migrated from ui_helpers.php)
  */
 final class UiHelpersTest extends TestCase
 {
     /**
-     * Test quickMenu function
+     * Test PageLayoutHelper::buildQuickMenu() function
      */
     public function testQuickMenu(): void
     {
-        // Capture output
-        ob_start();
-        quickMenu();
-        $output = ob_get_clean();
+        $output = PageLayoutHelper::buildQuickMenu();
 
         // Should output a select element
         $this->assertStringContainsString('<select', $output);
@@ -40,13 +38,13 @@ final class UiHelpersTest extends TestCase
     }
 
     /**
-     * Test pagestart_kernel_nobody function
+     * Test PageLayoutHelper::renderPageStartKernelNobody() function
      */
     public function testPagestartKernelNobody(): void
     {
         // Capture output
         ob_start();
-        pagestart_kernel_nobody('Test Page', 'body { color: red; }');
+        PageLayoutHelper::renderPageStartKernelNobody('Test Page', 'body { color: red; }');
         $output = ob_get_clean();
 
         // Should output HTML document structure
@@ -64,13 +62,13 @@ final class UiHelpersTest extends TestCase
     }
 
     /**
-     * Test pageend function
+     * Test PageLayoutHelper::renderPageEnd() function
      */
     public function testPageend(): void
     {
         // Capture output
         ob_start();
-        pageend();
+        PageLayoutHelper::renderPageEnd();
         $output = ob_get_clean();
 
         // Should close body and html tags

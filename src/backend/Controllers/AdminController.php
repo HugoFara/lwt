@@ -241,6 +241,11 @@ class AdminController extends BaseController
         /** @psalm-suppress UnusedVariable */
         $settings = $settingsService->getAll();
 
+        // Get available themes for the dropdown (used by included view)
+        $themeService = new \Lwt\Services\ThemeService();
+        /** @psalm-suppress UnusedVariable */
+        $themes = $themeService->getAvailableThemes();
+
         // Render page
         $this->render('Settings/Preferences', true);
         $this->message($message, true);

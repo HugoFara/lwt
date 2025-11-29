@@ -20,10 +20,12 @@ use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
+use Lwt\View\Helper\StatusHelper;
 
 require_once __DIR__ . '/LanguageService.php';
 require_once __DIR__ . '/WordStatusService.php';
 require_once __DIR__ . '/ExpressionService.php';
+require_once __DIR__ . '/../View/Helper/StatusHelper.php';
 
 /**
  * Service class for managing word list operations.
@@ -70,7 +72,7 @@ class WordListService
         if ($status == '') {
             return '';
         }
-        return ' and ' . \makeStatusCondition('WoStatus', (int)$status);
+        return ' and ' . StatusHelper::makeCondition('WoStatus', (int)$status);
     }
 
     /**

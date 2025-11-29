@@ -20,9 +20,11 @@ use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
+use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
+require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 
 /**
  * Abstract base controller providing common functionality for all controllers.
@@ -75,7 +77,7 @@ abstract class BaseController
      */
     protected function render(string $title, bool $showMenu = true): void
     {
-        \pagestart($title, $showMenu);
+        PageLayoutHelper::renderPageStart($title, $showMenu);
     }
 
     /**
@@ -85,7 +87,7 @@ abstract class BaseController
      */
     protected function endRender(): void
     {
-        \pageend();
+        PageLayoutHelper::renderPageEnd();
     }
 
     /**

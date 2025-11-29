@@ -5,6 +5,7 @@
  *
  * Variables expected:
  * - $settings: array of current settings values
+ * - $themes: array of available themes (from ThemeService)
  *
  * PHP version 8.1
  *
@@ -18,8 +19,7 @@
 
 namespace Lwt\Views\Admin;
 
-// These functions should be available from ui_helpers.php
-// get_themes_selectoptions, get_words_to_do_buttons_selectoptions, etc.
+use Lwt\View\Helper\SelectOptionsBuilder;
 
 ?>
 <script type="text/javascript" charset="utf-8">
@@ -39,7 +39,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">Theme</td>
         <td class="td1 center">
             <select name="set-theme-dir" class="notempty respinput">
-                <?php echo get_themes_selectoptions($settings['set-theme-dir']); ?>
+                <?php echo SelectOptionsBuilder::forThemes($themes, $settings['set-theme-dir']); ?>
             </select>
         </td>
         <td class="td1 center">
@@ -115,9 +115,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">Button(s) for "words to do"</td>
         <td class="td1 center">
             <select name="set-words-to-do-buttons" class="notempty respinput">
-            <?php
-            echo get_words_to_do_buttons_selectoptions($settings['set-words-to-do-buttons']);
-            ?>
+            <?php echo SelectOptionsBuilder::forWordsToDoButtons($settings['set-words-to-do-buttons']); ?>
             </select>
         </td>
         <td class="td1 center">
@@ -129,7 +127,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">Tooltips</td>
         <td class="td1 center">
             <select name="set-tooltip-mode" class="notempty respinput">
-        <?php echo get_tooltip_selectoptions($settings['set-tooltip-mode']); ?>
+            <?php echo SelectOptionsBuilder::forTooltipType($settings['set-tooltip-mode']); ?>
             </select>
         </td>
         <td class="td1 center">
@@ -241,7 +239,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">Select how frame sets are<br />displayed on different devices</td>
         <td class="td1 center">
             <select name="set-mobile-display-mode" class="respinput">
-            <?php echo get_mobile_display_mode_selectoptions($settings['set-mobile-display-mode']); ?>
+            <?php echo SelectOptionsBuilder::forMobileDisplayMode($settings['set-mobile-display-mode']); ?>
             </select>
         </td>
         <td class="td1 center">
@@ -259,7 +257,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">
             <select name="set-text-visit-statuses-via-key" class="respinput">
             <?php
-            echo get_wordstatus_selectoptions(
+            echo SelectOptionsBuilder::forWordStatus(
                 $settings['set-text-visit-statuses-via-key'],
                 true,
                 true,
@@ -279,7 +277,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">
             <select name="set-display-text-frame-term-translation" class="respinput">
             <?php
-            echo get_wordstatus_selectoptions(
+            echo SelectOptionsBuilder::forWordStatus(
                 $settings['set-display-text-frame-term-translation'],
                 true,
                 true,
@@ -298,7 +296,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">Position of translations</td>
         <td class="td1 center">
             <select name="set-text-frame-annotation-position" class="notempty respinput">
-            <?php echo get_annotation_position_selectoptions($settings['set-text-frame-annotation-position']); ?>
+            <?php echo SelectOptionsBuilder::forAnnotationPosition($settings['set-text-frame-annotation-position']); ?>
             </select>
         </td>
         <td class="td1 center">
@@ -311,7 +309,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">Number of sentences <br />displayed from text, if available</td>
         <td class="td1 center">
             <select name="set-test-sentence-count" class="notempty respinput">
-            <?php echo get_sentence_count_selectoptions($settings['set-test-sentence-count']); ?>
+            <?php echo SelectOptionsBuilder::forSentenceCount($settings['set-test-sentence-count']); ?>
             </select>
         </td>
         <td class="td1 center">
@@ -324,7 +322,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">Number of sentences <br />generated from text, if available</td>
         <td class="td1 center">
             <select name="set-term-sentence-count" class="notempty respinput">
-            <?php echo get_sentence_count_selectoptions($settings['set-term-sentence-count']); ?>
+            <?php echo SelectOptionsBuilder::forSentenceCount($settings['set-term-sentence-count']); ?>
             </select>
         </td>
         <td class="td1 center">
@@ -383,7 +381,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">Read word aloud</td>
         <td class="td1 center">
             <select name="set-hts" class="notempty respinput">
-            <?php echo get_hts_selectoptions($settings['set-hts']); ?>
+            <?php echo SelectOptionsBuilder::forHoverTranslation($settings['set-hts']); ?>
             </select>
         </td>
         <td class="td1 center">
@@ -475,7 +473,7 @@ namespace Lwt\Views\Admin;
         <td class="td1 center">Query Mode</td>
         <td class="td1 center">
             <select name="set-regex-mode" class="respinput">
-            <?php echo get_regex_selectoptions($settings['set-regex-mode']); ?>
+            <?php echo SelectOptionsBuilder::forRegexMode($settings['set-regex-mode']); ?>
             </select>
         </td>
         <td class="td1 center">
