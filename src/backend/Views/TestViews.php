@@ -17,6 +17,7 @@ namespace Lwt\Views;
 
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
+use Lwt\Services\ExportService;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\View\Helper\FormHelper;
@@ -541,7 +542,7 @@ $(document).ready(function() {
             str_replace(
                 "}",
                 ']</b> ',
-                \mask_term_in_sentence($sent, $regexWord)
+                ExportService::maskTermInSentence($sent, $regexWord)
             )
         );
         ?>

@@ -31,6 +31,7 @@ use Lwt\Services\WordListService;
 use Lwt\Services\WordUploadService;
 use Lwt\Services\WordStatusService;
 use Lwt\Services\ExpressionService;
+use Lwt\Services\ExportService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
@@ -177,12 +178,12 @@ class WordController extends BaseController
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
                 '", please go back and correct this!';
-            echo \error_message_with_hide($message, false);
+            $this->message($message, false);
             PageLayoutHelper::renderPageEnd();
             exit();
         }
 
-        $translation = \repl_tab_nl($this->param("WoTranslation"));
+        $translation = ExportService::replaceTabNewline($this->param("WoTranslation"));
         if ($translation == '') {
             $translation = '*';
         }
@@ -289,12 +290,12 @@ class WordController extends BaseController
                 $status = 1;
             }
 
-            $sentence = \repl_tab_nl($wordData['WoSentence']);
+            $sentence = ExportService::replaceTabNewline($wordData['WoSentence']);
             if ($sentence == '' && $textId !== 0 && $ord !== 0) {
                 $sentence = $this->wordService->getSentenceForTerm($textId, $ord, $termlc);
             }
 
-            $transl = \repl_tab_nl($wordData['WoTranslation']);
+            $transl = ExportService::replaceTabNewline($wordData['WoTranslation']);
             if ($transl == '*') {
                 $transl = '';
             }
@@ -326,7 +327,7 @@ class WordController extends BaseController
     {
         $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
-        $translation_raw = \repl_tab_nl($this->param("WoTranslation"));
+        $translation_raw = ExportService::replaceTabNewline($this->param("WoTranslation"));
         $translation = ($translation_raw == '') ? '*' : $translation_raw;
 
         if (isset($_REQUEST['op'])) {
@@ -357,7 +358,7 @@ class WordController extends BaseController
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
                 '", please go back and correct this!';
-            echo \error_message_with_hide($message, false);
+            $this->message($message, false);
             PageLayoutHelper::renderPageEnd();
             exit();
         }
@@ -378,7 +379,7 @@ class WordController extends BaseController
                 'update ' . $tbpref . 'words set WoText = ' .
                 \Lwt\Database\Escaping::toSqlSyntax($_REQUEST["WoText"]) . ', WoTranslation = ' .
                 \Lwt\Database\Escaping::toSqlSyntax($translation) . ', WoSentence = ' .
-                \Lwt\Database\Escaping::toSqlSyntax(\repl_tab_nl($_REQUEST["WoSentence"])) .
+                \Lwt\Database\Escaping::toSqlSyntax(ExportService::replaceTabNewline($_REQUEST["WoSentence"])) .
                 ', WoRomanization = ' .
                 \Lwt\Database\Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . $xx .
                 ',' . WordStatusService::makeScoreRandomInsertUpdate('u') .
@@ -402,14 +403,14 @@ class WordController extends BaseController
             if (!isset($regexword)) {
                 \my_die('Cannot retrieve language data in edit_tword.php');
             }
-            $sent = \tohtml(\repl_tab_nl($_REQUEST["WoSentence"]));
+            $sent = \tohtml(ExportService::replaceTabNewline($_REQUEST["WoSentence"]));
             $sent1 = str_replace(
                 "{",
                 ' <b>[',
                 str_replace(
                     "}",
                     ']</b> ',
-                    \mask_term_in_sentence($sent, $regexword)
+                    ExportService::maskTermInSentence($sent, $regexword)
                 )
             );
 
@@ -443,11 +444,11 @@ class WordController extends BaseController
         if ($record) {
             $term = (string) $record['WoText'];
             $lang = (int) $record['WoLgID'];
-            $transl = \repl_tab_nl($record['WoTranslation']);
+            $transl = ExportService::replaceTabNewline($record['WoTranslation']);
             if ($transl == '*') {
                 $transl = '';
             }
-            $sentence = \repl_tab_nl($record['WoSentence']);
+            $sentence = ExportService::replaceTabNewline($record['WoSentence']);
             $rom = $record['WoRomanization'];
             $status = $record['WoStatus'];
             $showRoman = (bool) \Lwt\Database\Connection::fetchValue(
@@ -860,7 +861,7 @@ class WordController extends BaseController
      */
     private function handleListSaveUpdate(WordListService $listService): ?int
     {
-        $translationRaw = \repl_tab_nl($this->param("WoTranslation"));
+        $translationRaw = ExportService::replaceTabNewline($this->param("WoTranslation"));
         $translation = ($translationRaw == '') ? '*' : $translationRaw;
 
         if ($_REQUEST['op'] == 'Save') {
@@ -974,7 +975,7 @@ class WordController extends BaseController
             $message = "Error: Term '" . $msg . "' already exists. Please go back and correct this!";
         }
 
-        echo \error_message_with_hide($message, false);
+        $this->message($message, false);
 
         // Count records
         $recno = $listService->countWords($currenttext, $whLang, $whStat, $whQuery, $whTag);
@@ -1080,11 +1081,11 @@ class WordController extends BaseController
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
                 '", please go back and correct this!';
-            echo \error_message_with_hide($message, false);
+            $this->message($message, false);
             return;
         }
 
-        $translationRaw = \repl_tab_nl($this->param("WoTranslation"));
+        $translationRaw = ExportService::replaceTabNewline($this->param("WoTranslation"));
         $translation = ($translationRaw == '') ? '*' : $translationRaw;
 
         $data = [
@@ -1220,7 +1221,7 @@ class WordController extends BaseController
             'textlc' => $textlc,
             'id' => $existingWid
         ];
-        $sentence = \repl_tab_nl($sent[1] ?? '');
+        $sentence = ExportService::replaceTabNewline($sent[1] ?? '');
 
         include __DIR__ . '/../Views/Word/form_edit_multi_new.php';
     }
@@ -1257,7 +1258,7 @@ class WordController extends BaseController
                 $textlc,
                 (int) \Lwt\Database\Settings::getWithDefault('set-term-sentence-count')
             );
-            $sentence = \repl_tab_nl($sent[1] ?? '');
+            $sentence = ExportService::replaceTabNewline($sent[1] ?? '');
         }
 
         $transl = $wordData['translation'];
@@ -1419,7 +1420,7 @@ class WordController extends BaseController
 
                     // Prepare view variables
                     $hex = $this->wordService->textToClassName($result['textlc']);
-                    $translation = \repl_tab_nl($this->param("WoTranslation"));
+                    $translation = ExportService::replaceTabNewline($this->param("WoTranslation"));
                     if ($translation === '') {
                         $translation = '*';
                     }
@@ -1780,13 +1781,13 @@ class WordController extends BaseController
         $langId = (int) ($_REQUEST["LgID"] ?? 0);
 
         if ($langId === 0) {
-            echo \error_message_with_hide('Error: No language selected', false);
+            $this->message('Error: No language selected', false);
             return;
         }
 
         $langData = $uploadService->getLanguageData($langId);
         if ($langData === null) {
-            echo \error_message_with_hide('Error: Invalid language', false);
+            $this->message('Error: Invalid language', false);
             return;
         }
 
@@ -1818,7 +1819,7 @@ class WordController extends BaseController
             $fileName = $_FILES["thefile"]["tmp_name"];
         } else {
             if (empty($_REQUEST["Upload"])) {
-                echo \error_message_with_hide('Error: No data to import', false);
+                $this->message('Error: No data to import', false);
                 return;
             }
             $fileName = $uploadService->createTempFile($_REQUEST["Upload"]);
@@ -1857,7 +1858,7 @@ class WordController extends BaseController
             $uploadService->importTagsOnly($fields, $tabType, $fileName, $ignoreFirst);
             echo '<p>Tags imported successfully.</p>';
         } else {
-            echo \error_message_with_hide('Error: No term column specified', false);
+            $this->message('Error: No term column specified', false);
         }
 
         // Clean up temp file if we created it

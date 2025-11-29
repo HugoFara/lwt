@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-11-29
+**Last Updated:** 2025-11-29 (Quick wins migration complete)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -590,27 +590,27 @@ class LanguageService {
 
 ### Remaining Deprecated Functions
 
-| Function | Calls | Files | Suggested Replacement |
-|----------|-------|-------|----------------------|
-| `tohtml()` | 330 | 67 | `htmlspecialchars()` or `Escaping::html()` |
-| `processDBParam()`/`processSessParam()` | 51 | 7 | Request/Session parameter class |
-| `repl_tab_nl()` | 50 | 12 | `StringUtils::replaceTabNewline()` |
-| `getreq()` | 45 | 4 | `$_REQUEST['key']` or Request class |
-| `error_message_with_hide()` | 26 | 13 | `ErrorHandler::displayMessage()` |
-| `strToClassName()` | 14 | 6 | `StringUtils::toClassName()` |
-| `encodeURI()` | 12 | 4 | `rawurlencode()` |
-| `getsess()` | 9 | 2 | `$_SESSION['key']` or Session class |
-| `get_sepas()` | 8 | 6 | `LanguageConfig::getSeparators()` |
-| `mask_term_in_sentence()` | 4 | 4 | `ExportService::maskTerm()` |
+| Function | Calls | Files | Suggested Replacement | Status |
+|----------|-------|-------|----------------------|--------|
+| `tohtml()` | 330 | 67 | `htmlspecialchars()` or `Escaping::html()` | Pending |
+| `processDBParam()`/`processSessParam()` | 51 | 7 | Request/Session parameter class | Pending |
+| `repl_tab_nl()` | 50 | 12 | `StringUtils::replaceTabNewline()` | Pending |
+| `getreq()` | 0 | 0 | `InputValidator::getString()` or `$this->param()` | **DONE** |
+| `error_message_with_hide()` | 26 | 13 | `ErrorHandler::displayMessage()` | Pending |
+| `strToClassName()` | 14 | 6 | `StringUtils::toClassName()` | Pending |
+| `encodeURI()` | 1 | 1 | Keep as-is (matches JS `encodeURI()` behavior) | **Reviewed** |
+| `getsess()` | 0 | 0 | Direct `$_SESSION` access | **DONE** |
+| `get_sepas()` | 8 | 6 | `LanguageConfig::getSeparators()` | Pending |
+| `mask_term_in_sentence()` | 0 | 0 | `ExportService::maskTermInSentence()` | **DONE** |
 
-**Total:** ~550 calls across ~80 files
+**Total:** ~480 calls across ~80 files (down from ~550)
 
 ### Migration Priority
 
 1. **Quick wins** (low call count, simple replacement):
-   - `getreq()`/`getsess()` → direct superglobal access
-   - `encodeURI()` → `rawurlencode()`
-   - `mask_term_in_sentence()` → move to ExportService
+   - ~~`getreq()`/`getsess()` → direct superglobal access~~ **DONE** (2025-11-29)
+   - ~~`encodeURI()` → `rawurlencode()`~~ **Reviewed** - kept as-is, different behavior from `rawurlencode()`
+   - ~~`mask_term_in_sentence()` → move to ExportService~~ **DONE** (2025-11-29)
 
 2. **Medium effort** (utility consolidation):
    - `strToClassName()` → `StringUtils` class
