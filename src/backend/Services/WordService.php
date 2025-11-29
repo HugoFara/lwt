@@ -77,7 +77,7 @@ class WordService
                     Escaping::toSqlSyntax($text) . ', ' .
                     (int)$data['WoStatus'] . ', ' .
                     Escaping::toSqlSyntax($translation) . ', ' .
-                    Escaping::toSqlSyntax(\repl_tab_nl($data['WoSentence'] ?? '')) . ', ' .
+                    Escaping::toSqlSyntax(ExportService::replaceTabNewline($data['WoSentence'] ?? '')) . ', ' .
                     Escaping::toSqlSyntax($data['WoRomanization'] ?? '') . ', NOW(), ' .
                     WordStatusService::makeScoreRandomInsertUpdate('id') .
                 ')'
@@ -133,7 +133,7 @@ class WordService
             'UPDATE ' . $this->tbpref . 'words SET
                 WoText = ' . Escaping::toSqlSyntax($text) . ',
                 WoTranslation = ' . Escaping::toSqlSyntax($translation) . ',
-                WoSentence = ' . Escaping::toSqlSyntax(\repl_tab_nl($data['WoSentence'] ?? '')) . ',
+                WoSentence = ' . Escaping::toSqlSyntax(ExportService::replaceTabNewline($data['WoSentence'] ?? '')) . ',
                 WoRomanization = ' . Escaping::toSqlSyntax($data['WoRomanization'] ?? '') .
                 $statusUpdate . ',' .
                 WordStatusService::makeScoreRandomInsertUpdate('u') . '
@@ -270,7 +270,7 @@ class WordService
             (int) Settings::getWithDefault('set-term-sentence-count')
         );
 
-        return \repl_tab_nl($sent[1] ?? '');
+        return ExportService::replaceTabNewline($sent[1] ?? '');
     }
 
     /**
@@ -282,7 +282,7 @@ class WordService
      */
     private function normalizeTranslation(string $translation): string
     {
-        $translation = trim(\repl_tab_nl($translation));
+        $translation = trim(ExportService::replaceTabNewline($translation));
         return $translation === '' ? '*' : $translation;
     }
 
@@ -804,7 +804,7 @@ class WordService
 
         return [
             'text' => (string) $record['WoText'],
-            'translation' => \repl_tab_nl($record['WoTranslation']),
+            'translation' => ExportService::replaceTabNewline($record['WoTranslation']),
             'romanization' => (string) $record['WoRomanization']
         ];
     }
@@ -909,7 +909,7 @@ class WordService
 
         Connection::execute(
             'UPDATE ' . $this->tbpref . 'words SET WoTranslation = ' .
-            Escaping::toSqlSyntax(\repl_tab_nl($value)) . ' WHERE WoID = ' . $wordId
+            Escaping::toSqlSyntax(ExportService::replaceTabNewline($value)) . ' WHERE WoID = ' . $wordId
         );
 
         return (string) Connection::fetchValue(
@@ -934,7 +934,7 @@ class WordService
 
         Connection::execute(
             'UPDATE ' . $this->tbpref . 'words SET WoRomanization = ' .
-            Escaping::toSqlSyntax(\repl_tab_nl($value)) . ' WHERE WoID = ' . $wordId
+            Escaping::toSqlSyntax(ExportService::replaceTabNewline($value)) . ' WHERE WoID = ' . $wordId
         );
 
         $result = Connection::fetchValue(
@@ -987,7 +987,7 @@ class WordService
             return null;
         }
 
-        $translation = \repl_tab_nl($record['WoTranslation']);
+        $translation = ExportService::replaceTabNewline($record['WoTranslation']);
         if ($translation === '*') {
             $translation = '';
         }
@@ -1058,7 +1058,7 @@ class WordService
                 \my_die("ERROR: Could not modify words! Message: $message");
             }
             if ((int)$message == 0) {
-                \error_message_with_hide(
+                \Lwt\View\Helper\PageLayoutHelper::renderMessage(
                     "WARNING: No rows modified! Message: $message",
                     false
                 );
@@ -1348,7 +1348,7 @@ class WordService
                 Escaping::toSqlSyntax($data['text']) . ', ' .
                 (int) $data['status'] . ', ' .
                 Escaping::toSqlSyntax($data['translation']) . ', ' .
-                Escaping::toSqlSyntax(\repl_tab_nl($data['sentence'])) . ', ' .
+                Escaping::toSqlSyntax(ExportService::replaceTabNewline($data['sentence'])) . ', ' .
                 Escaping::toSqlSyntax($data['roman']) . ', ' .
                 (int) $data['wordcount'] . ',
                 NOW(), ' .
@@ -1391,7 +1391,7 @@ class WordService
             'UPDATE ' . $this->tbpref . 'words SET
             WoText = ' . Escaping::toSqlSyntax($data['text']) . ',
             WoTranslation = ' . Escaping::toSqlSyntax($data['translation']) . ',
-            WoSentence = ' . Escaping::toSqlSyntax(\repl_tab_nl($data['sentence'])) . ',
+            WoSentence = ' . Escaping::toSqlSyntax(ExportService::replaceTabNewline($data['sentence'])) . ',
             WoRomanization = ' . Escaping::toSqlSyntax($data['roman']) .
             $statusChange . ',' .
             WordStatusService::makeScoreRandomInsertUpdate('u') . '
@@ -1430,8 +1430,8 @@ class WordService
         return [
             'text' => (string) $record['WoText'],
             'lgid' => (int) $record['WoLgID'],
-            'translation' => \repl_tab_nl($record['WoTranslation']),
-            'sentence' => \repl_tab_nl($record['WoSentence']),
+            'translation' => ExportService::replaceTabNewline($record['WoTranslation']),
+            'sentence' => ExportService::replaceTabNewline($record['WoSentence']),
             'romanization' => (string) $record['WoRomanization'],
             'status' => (int) $record['WoStatus']
         ];

@@ -535,7 +535,7 @@ $(document).ready(function() {
         $span1 = $rtl ? '<span dir="rtl">' : '';
         $span2 = $rtl ? '</span>' : '';
 
-        $sent = \tohtml(\repl_tab_nl($word['WoSentence'] ?? ''));
+        $sent = \tohtml(ExportService::replaceTabNewline($word['WoSentence'] ?? ''));
         $sent1 = str_replace(
             "{",
             ' <b>[',
@@ -776,7 +776,7 @@ $(document).ready(function() {
      */
     public function renderError(string $message): void
     {
-        echo \error_message_with_hide($message, true);
+        \Lwt\View\Helper\PageLayoutHelper::renderMessage($message, true);
     }
 
     /**

@@ -742,7 +742,7 @@ class TestService
         $baseType = $this->getBaseTestType($testType);
 
         if ($baseType == 1) {
-            $trans = \repl_tab_nl($wordData['WoTranslation']) .
+            $trans = ExportService::replaceTabNewline($wordData['WoTranslation']) .
                 TagService::getWordTagListFormatted($wordData['WoID'], ' ', true, false);
             return $wordMode ? $trans : "[$trans]";
         }

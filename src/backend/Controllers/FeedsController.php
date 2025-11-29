@@ -307,7 +307,7 @@ $(".hide_message").delay(2500).slideUp(1000);
             unset($_SESSION['feed_loaded']);
         }
 
-        echo \error_message_with_hide($message, false);
+        $this->message($message, false);
     }
 
     /**
@@ -446,7 +446,7 @@ $(".hide_message").delay(2500).slideUp(1000);
         // Handle mark actions (delete, delete articles, reset articles)
         $message = $this->handleMarkAction($currentFeed);
         if (!empty($message)) {
-            echo \error_message_with_hide($message, false);
+            $this->message($message, false);
         }
 
         // Display session messages from feed loading

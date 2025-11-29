@@ -78,9 +78,9 @@ foreach ($words as $record) {
     }
     echo ($record['LgRightToLeft'] ? ' dir="rtl" ' : '');
     ?>><?php echo tohtml($record['WoText']); ?></span><?php
-    echo ($record['WoRomanization'] != '' ? (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">' . tohtml(repl_tab_nl($record['WoRomanization'])) . '</span>') : (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">*</span>'));
+    echo ($record['WoRomanization'] != '' ? (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">' . tohtml(\Lwt\Services\ExportService::replaceTabNewline($record['WoRomanization'])) . '</span>') : (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">*</span>'));
     ?></td>
-    <td class="td1"><span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo tohtml(repl_tab_nl($record['WoTranslation'])); ?></span> <span class="smallgray2"><?php echo tohtml($record['taglist']); ?></span></td>
+    <td class="td1"><span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo tohtml(\Lwt\Services\ExportService::replaceTabNewline($record['WoTranslation'])); ?></span> <span class="smallgray2"><?php echo tohtml($record['taglist']); ?></span></td>
     <td class="td1 center"><b><?php echo ($record['SentOK'] != 0 ? '<img src="/assets/icons/status.png" title="' . tohtml($record['WoSentence']) . '" alt="Yes" />' : '<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />'); ?></b></td>
     <td class="td1 center" title="<?php echo tohtml(get_status_name($record['WoStatus'])); ?>"><?php echo tohtml(get_status_abbr($record['WoStatus'])); ?><?php echo ($record['WoStatus'] < 98 ? '/' . $days : ''); ?></td>
     <td class="td1 center" nowrap="nowrap"><?php echo $score; ?></td>

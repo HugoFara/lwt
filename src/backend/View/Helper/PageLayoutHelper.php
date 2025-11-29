@@ -436,4 +436,32 @@ HTML;
         echo '<title>LWT :: ' . tohtml($title) . '</title>';
         echo '</head>';
     }
+
+    /**
+     * Display a message (success/error) to the user.
+     *
+     * Renders a message with appropriate styling. Error messages
+     * (starting with "Error") are shown in red with a back button.
+     * Success messages are shown in blue and auto-hide.
+     *
+     * @param string $message  The message to display
+     * @param bool   $autoHide Whether to auto-hide the message (default: true)
+     *
+     * @return void
+     */
+    public static function renderMessage(string $message, bool $autoHide = true): void
+    {
+        if (trim($message) == '') {
+            return;
+        }
+        if (substr($message, 0, 5) == "Error") {
+            echo '<p class="red">*** ' . \tohtml($message) . ' ***' .
+                ($autoHide ?
+                '' :
+                '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" onclick="history.back();" />' ) .
+                '</p>';
+        } else {
+            echo '<p id="hide3" class="msgblue">+++ ' . \tohtml($message) . ' +++</p>';
+        }
+    }
 }

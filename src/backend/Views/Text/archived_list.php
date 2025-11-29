@@ -44,7 +44,7 @@ namespace Lwt\Views\Text;
 /** @var string|int $currentTag2 */
 /** @var string $currentTag12 */
 
-echo error_message_with_hide($message, false);
+\Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false);
 
 ?>
 <div class="flex-spaced">

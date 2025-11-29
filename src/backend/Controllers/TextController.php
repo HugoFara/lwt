@@ -780,7 +780,7 @@ class TextController extends BaseController
 
         if ($data == "") {
             $message = "Error: No text specified!";
-            echo \error_message_with_hide($message, false);
+            $this->message($message, false);
             return;
         }
 
@@ -791,7 +791,7 @@ class TextController extends BaseController
             $message = "Error: Too many texts (" . $textCount . " > " .
                 ($maxInputVars - 20) .
                 "). You must increase 'Maximum Sentences per Text'!";
-            echo \error_message_with_hide($message, false);
+            $this->message($message, false);
             return;
         }
 

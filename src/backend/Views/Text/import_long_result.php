@@ -15,5 +15,5 @@
  */
 
 ?>
-<?php echo error_message_with_hide($message, false); ?>
+<?php \Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false); ?>
 <p>&nbsp;<br /><input type="button" value="Show Texts" onclick="location.href='/texts';" /></p>

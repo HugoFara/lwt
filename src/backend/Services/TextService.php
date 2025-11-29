@@ -25,6 +25,7 @@ use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
 use Lwt\Database\Validation;
 use Lwt\Services\TagService;
+use Lwt\Services\ExportService;
 
 /**
  * Service class for managing texts (active and archived).
@@ -1430,7 +1431,7 @@ class TextService
             );
             $count += (int) Connection::execute(
                 "UPDATE {$this->tbpref}words
-                SET WoSentence = " . Escaping::toSqlSyntax(\repl_tab_nl($sent[1])) . "
+                SET WoSentence = " . Escaping::toSqlSyntax(ExportService::replaceTabNewline($sent[1])) . "
                 WHERE WoID = " . $record['WoID']
             );
         }

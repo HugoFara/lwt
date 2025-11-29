@@ -19,6 +19,7 @@ namespace Lwt\Services {
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Services\ExportService;
 
 /**
  * Service class for text reading display.
@@ -92,7 +93,7 @@ class TextReadingService
                     'data_order' => $record['Ti2Order'],
                     'data_wid' => $record['WoID'],
                     'data_trans' => tohtml(
-                        repl_tab_nl($record['WoTranslation']) .
+                        ExportService::replaceTabNewline($record['WoTranslation']) .
                         getWordTagList($record['WoID'], ' ', 1, 0)
                     ),
                     'data_rom' => tohtml($record['WoRomanization']),
@@ -131,7 +132,7 @@ class TextReadingService
                     'data_order' => $record['Ti2Order'],
                     'data_wid' => $record['WoID'],
                     'data_trans' => tohtml(
-                        repl_tab_nl($record['WoTranslation']) .
+                        ExportService::replaceTabNewline($record['WoTranslation']) .
                         getWordTagList($record['WoID'], ' ', 1, 0)
                     ),
                     'data_rom' => tohtml($record['WoRomanization']),

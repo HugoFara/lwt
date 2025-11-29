@@ -21,6 +21,7 @@ use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\View\Helper\StatusHelper;
+use Lwt\Services\ExportService;
 
 require_once __DIR__ . '/LanguageService.php';
 require_once __DIR__ . '/WordStatusService.php';
@@ -895,7 +896,7 @@ class WordListService
             return null;
         }
 
-        $transl = \repl_tab_nl($record['WoTranslation']);
+        $transl = ExportService::replaceTabNewline($record['WoTranslation']);
         if ($transl == '*') {
             $transl = '';
         }
@@ -907,7 +908,7 @@ class WordListService
             'WoTextLC' => $record['WoTextLC'],
             'WoTranslation' => $transl,
             'WoRomanization' => $record['WoRomanization'],
-            'WoSentence' => \repl_tab_nl($record['WoSentence'] ?? ''),
+            'WoSentence' => ExportService::replaceTabNewline($record['WoSentence'] ?? ''),
             'WoStatus' => $record['WoStatus'],
             'LgName' => $record['LgName'],
             'LgRightToLeft' => $record['LgRightToLeft'],
@@ -925,7 +926,7 @@ class WordListService
      */
     public function saveNewWord(array $data): string
     {
-        $translation = \repl_tab_nl($data['WoTranslation'] ?? '');
+        $translation = ExportService::replaceTabNewline($data['WoTranslation'] ?? '');
         if ($translation == '') {
             $translation = '*';
         }
@@ -939,7 +940,7 @@ class WordListService
             Escaping::toSqlSyntax($data["WoText"]) . ', ' .
             $data["WoStatus"] . ', ' .
             Escaping::toSqlSyntax($translation) . ', ' .
-            Escaping::toSqlSyntax(\repl_tab_nl($data["WoSentence"] ?? '')) . ', ' .
+            Escaping::toSqlSyntax(ExportService::replaceTabNewline($data["WoSentence"] ?? '')) . ', ' .
             Escaping::toSqlSyntax($data["WoRomanization"] ?? '') . ', NOW(), ' .
             WordStatusService::makeScoreRandomInsertUpdate('id') . ')',
             "Saved",
@@ -979,7 +980,7 @@ class WordListService
      */
     public function updateWord(array $data): string
     {
-        $translation = \repl_tab_nl($data['WoTranslation'] ?? '');
+        $translation = ExportService::replaceTabNewline($data['WoTranslation'] ?? '');
         if ($translation == '') {
             $translation = '*';
         }
@@ -997,7 +998,7 @@ class WordListService
             Escaping::toSqlSyntax(mb_strtolower($data["WoText"], 'UTF-8')) .
             ', WoTranslation = ' .
             Escaping::toSqlSyntax($translation) . ', WoSentence = ' .
-            Escaping::toSqlSyntax(\repl_tab_nl($data["WoSentence"] ?? '')) .
+            Escaping::toSqlSyntax(ExportService::replaceTabNewline($data["WoSentence"] ?? '')) .
             ', WoRomanization = ' .
             Escaping::toSqlSyntax($data["WoRomanization"] ?? '') . $xx . ',' .
             WordStatusService::makeScoreRandomInsertUpdate('u') .

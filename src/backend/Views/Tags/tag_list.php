@@ -40,7 +40,7 @@ $baseUrl = $service->getBaseUrl();
 $tagTypeLabel = $service->getTagTypeLabel();
 $sortOptions = $service->getSortOptions();
 
-echo error_message_with_hide($message, false);
+\Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false);
 
 ?>
 <p><a href="<?php echo $baseUrl; ?>?new=1"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New <?php echo $tagTypeLabel; ?> Tag ...</a></p>

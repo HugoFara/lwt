@@ -152,7 +152,7 @@ class LanguageController extends BaseController
      */
     private function showList(string $message): void
     {
-        echo \error_message_with_hide($message, false);
+        $this->message($message, false);
 
         $currentLanguageId = (int) Settings::get('currentlanguage');
         $languages = $this->languageService->getLanguagesWithStats();

@@ -51,7 +51,7 @@ namespace Lwt\Views\Text;
 ?>
 <link rel="stylesheet" type="text/css" href="<?php print_file_path('css/css_charts.css');?>" />
 
-<?php echo error_message_with_hide($message, false); ?>
+<?php \Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false); ?>
 
 <div class="flex-spaced">
     <div>

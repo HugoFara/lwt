@@ -100,7 +100,18 @@ abstract class BaseController
      */
     protected function message(string $message, bool $autoHide = true): void
     {
-        echo \error_message_with_hide($message, $autoHide);
+        if (trim($message) == '') {
+            return;
+        }
+        if (substr($message, 0, 5) == "Error") {
+            echo '<p class="red">*** ' . \tohtml($message) . ' ***' .
+                ($autoHide ?
+                '' :
+                '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" onclick="history.back();" />' ) .
+                '</p>';
+        } else {
+            echo '<p id="hide3" class="msgblue">+++ ' . \tohtml($message) . ' +++</p>';
+        }
     }
 
     /**
