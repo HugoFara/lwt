@@ -129,7 +129,7 @@ class FeedsController extends BaseController
             isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
             || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
         ) {
-            $this->feedService->renderFeedLoadInterface(
+            $this->feedService->renderFeedLoadInterfaceModern(
                 (int)$currentFeed,
                 isset($_REQUEST['check_autoupdate']),
                 $_SERVER['PHP_SELF'] ?? '/'
@@ -461,7 +461,7 @@ $(".hide_message").delay(2500).slideUp(1000);
             isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
             || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
         ) {
-            $this->feedService->renderFeedLoadInterface(
+            $this->feedService->renderFeedLoadInterfaceModern(
                 (int)$currentFeed,
                 isset($_REQUEST['check_autoupdate']),
                 $_SERVER['PHP_SELF'] ?? '/'

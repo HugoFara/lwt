@@ -56,6 +56,8 @@ import './media/html5_audio_player';
 
 // Feeds
 import './feeds/jq_feedwizard';
+import './feeds/feed_browse';
+import './feeds/feed_loader';
 
 // Languages
 import './languages/language_wizard';

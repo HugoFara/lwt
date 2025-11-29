@@ -1519,7 +1519,72 @@ class FeedService
     }
 
     /**
+     * Get feed data for loading via JavaScript.
+     *
+     * Returns an array of feed configuration objects that can be encoded as JSON
+     * and passed to the frontend TypeScript feed loader.
+     *
+     * @param int  $currentFeed     Feed ID to load (0 for auto-update check)
+     * @param bool $checkAutoupdate Whether to check for auto-update feeds
+     *
+     * @return array{feeds: array<array{id: int, name: string, sourceUri: string, options: string}>, count: int}
+     */
+    public function getFeedLoadConfig(int $currentFeed, bool $checkAutoupdate): array
+    {
+        $feeds = [];
+
+        if ($checkAutoupdate) {
+            $result = Connection::query(
+                "SELECT * FROM " . $this->tbpref . "newsfeeds
+                WHERE `NfOptions` LIKE '%autoupdate=%'"
+            );
+
+            while ($row = mysqli_fetch_assoc($result)) {
+                $autoupdate = $this->getNfOption((string)$row['NfOptions'], 'autoupdate');
+                if (!$autoupdate) {
+                    continue;
+                }
+
+                $interval = $this->parseAutoUpdateInterval($autoupdate);
+                if ($interval === null) {
+                    continue;
+                }
+
+                if (time() > ($interval + (int)$row['NfUpdate'])) {
+                    $feeds[] = [
+                        'id' => (int)$row['NfID'],
+                        'name' => (string)$row['NfName'],
+                        'sourceUri' => (string)($row['NfSourceURI'] ?? ''),
+                        'options' => (string)($row['NfOptions'] ?? '')
+                    ];
+                }
+            }
+            mysqli_free_result($result);
+        } else {
+            $sql = "SELECT * FROM " . $this->tbpref . "newsfeeds WHERE NfID IN ($currentFeed)";
+            $result = Connection::query($sql);
+
+            while ($row = mysqli_fetch_assoc($result)) {
+                $feeds[] = [
+                    'id' => (int)$row['NfID'],
+                    'name' => (string)$row['NfName'],
+                    'sourceUri' => (string)($row['NfSourceURI'] ?? ''),
+                    'options' => (string)($row['NfOptions'] ?? '')
+                ];
+            }
+            mysqli_free_result($result);
+        }
+
+        return [
+            'feeds' => $feeds,
+            'count' => count($feeds)
+        ];
+    }
+
+    /**
      * Generate JavaScript for loading feeds via AJAX.
+     *
+     * @deprecated Use getFeedLoadConfig() with the TypeScript feed_loader module instead.
      *
      * Used for auto-update and manual feed refresh operations.
      *
@@ -1643,5 +1708,49 @@ class FeedService
         }
 
         echo "<div class=\"center\"><button onclick='window.location.replace(\"{$redirectUrl}\");'>Continue</button></div>";
+    }
+
+    /**
+     * Render feed loading interface using the modern TypeScript loader.
+     *
+     * This method outputs JSON configuration that is consumed by the
+     * feed_loader.ts TypeScript module instead of inline JavaScript.
+     *
+     * @param int    $currentFeed     Feed ID to load
+     * @param bool   $checkAutoupdate Whether checking auto-update
+     * @param string $redirectUrl     URL to redirect after completion
+     *
+     * @return void
+     */
+    public function renderFeedLoadInterfaceModern(
+        int $currentFeed,
+        bool $checkAutoupdate,
+        string $redirectUrl
+    ): void {
+        $config = $this->getFeedLoadConfig($currentFeed, $checkAutoupdate);
+
+        // Output JSON config for TypeScript
+        echo '<script type="application/json" id="feed-loader-config">';
+        echo json_encode([
+            'feeds' => $config['feeds'],
+            'redirectUrl' => $redirectUrl
+        ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        echo '</script>';
+
+        // Show progress UI
+        if ($config['count'] != 1) {
+            echo "<div class=\"msgblue\"><p>UPDATING <span id=\"feedcount\">0</span>/" .
+                $config['count'] . " FEEDS</p></div>";
+        }
+
+        // Create placeholder divs for each feed
+        foreach ($config['feeds'] as $feed) {
+            echo "<div id='feed_{$feed['id']}' class=\"msgblue\"><p>" .
+                htmlspecialchars($feed['name']) . ": waiting</p></div>";
+        }
+
+        // Continue button (no inline onclick - handled by event delegation)
+        echo "<div class=\"center\"><button data-action=\"feed-continue\" data-url=\"" .
+            htmlspecialchars($redirectUrl) . "\">Continue</button></div>";
     }
 }

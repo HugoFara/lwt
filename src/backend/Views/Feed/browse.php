@@ -58,22 +58,22 @@ namespace Lwt\Views\Feed;
     </div>
 </div>
 
-<form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
+<form name="form1" action="#" data-lwt-feed-browse="true">
 <table class="tab2" cellspacing="0" cellpadding="5"><tr>
     <th class="th1" colspan="4">
         Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
-        <input type="button" value="Reset All" onclick="resetAll('/feeds');" />
+        <input type="button" value="Reset All" data-action="reset-all" data-url="/feeds" />
     </th>
     </tr>
     <tr>
         <td class="td1 center" style="width:30%;">
             Language:&nbsp;
-            <select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds?page=1%26selected_feed=0');}">
+            <select name="filterlang" data-action="filter-language" data-url="/feeds?page=1&amp;selected_feed=0">
                 <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
             </select>
         </td>
         <td class="td1 center" colspan="3">
-            <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/feeds?page=1&amp;query=' + val + '&amp;query_mode=' + mode;return false;}">
+            <select name="query_mode" data-action="query-mode">
                 <option value="title,desc,text"<?php
                 if ($currentQueryMode == "title,desc,text") {
                     echo ' selected="selected"';
@@ -96,8 +96,8 @@ namespace Lwt\Views\Feed;
             ?>
             </span>
             <input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
-            <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val); location.href='/feeds?page=1&amp;query=' + val;return false;}" />&nbsp;
-            <input type="button" value="Clear" onclick="{location.href='/feeds?page=1&amp;query=';return false;}" />
+            <input type="button" name="querybutton" value="Filter" data-action="filter-query" />&nbsp;
+            <input type="button" value="Clear" data-action="clear-query" />
         </td>
     </tr>
     <tr>
@@ -106,7 +106,7 @@ namespace Lwt\Views\Feed;
          no feed available</td><td class="td1"></td></tr></table></form>
 <?php return; endif; ?>
 Newsfeed:
-    <select name="selected_feed" onchange="{val=document.form1.selected_feed.value;location.href='/feeds?page=1&amp;selected_feed=' + val;return false;}">
+    <select name="selected_feed" data-action="filter-feed">
         <option value="0">[Filter off]</option>
     <?php foreach ($feeds as $row): ?>
         <option value="<?php echo $row['NfID']; ?>"<?php
@@ -139,7 +139,7 @@ Newsfeed:
   </th>
   <th class="th1" colspan="2" nowrap="nowrap">
   Sort Order:
-  <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/feeds?page=1&amp;sort=' + val;return false;}"><?php echo get_textssort_selectoptions($currentSort); ?></select>
+  <select name="sort" data-action="sort"><?php echo get_textssort_selectoptions($currentSort); ?></select>
   </th>
   </tr>
   </table></form>
@@ -203,15 +203,3 @@ Newsfeed:
 </table></form>
 <?php endif; ?>
 
-<script type="text/javascript">
-$('img.not_found').on('click', function () {
-    var id = $(this).attr('name');
-    $(this).after('<label class="wrap_checkbox" for="'+id+'"><span></span></label>');
-    $(this).replaceWith(
-        '<input type="checkbox" class="markcheck" onchange="markClick()" id=' + id +
-        ' value=' + id +' name="marked_items[]" />'
-    );
-    $(":input,.wrap_checkbox span,a:not([name^=rec]),select")
-    .each(function (i) { $(this).attr('tabindex', i + 1); });
-});
-</script>

@@ -59,15 +59,27 @@ This document outlines a comprehensive plan to modernize the Learning with Texts
 ```text
 src/frontend/js/
 ├── main.ts                   - Vite entry point
-├── pgm.ts                    (663 lines) - Core utilities
-├── jq_pgm.ts                 (1,435 lines) - jQuery functions
-├── text_events.ts            (699 lines) - Text reading interactions
-├── audio_controller.ts       (125 lines) - Audio playback
-├── translation_api.ts        (183 lines) - Translation APIs
-├── user_interactions.ts      (385 lines) - UI interactions
-├── overlib_interface.ts      - Popup library interface (jQuery UI tooltips)
-├── unloadformcheck.ts        - Form change tracking
-├── jq_feedwizard.ts          - Feed wizard functionality
+├── globals.ts                - Global exports for inline PHP scripts
+├── core/
+│   ├── language_settings.ts  - Language filter utilities
+│   ├── user_interactions.ts  - UI interactions
+│   └── ...                   - Other core utilities
+├── feeds/
+│   ├── jq_feedwizard.ts      - Feed wizard functionality
+│   ├── feed_browse.ts        - Feed browse page (NEW - Nov 2025)
+│   └── feed_loader.ts        - Feed loading AJAX (NEW - Nov 2025)
+├── forms/
+│   ├── word_form_auto.ts     - Word form auto-translate/romanize
+│   ├── unloadformcheck.ts    - Form change tracking
+│   └── ...                   - Other form utilities
+├── reading/
+│   ├── text_events.ts        - Text reading interactions
+│   ├── audio_controller.ts   - Audio playback
+│   └── ...                   - Other reading utilities
+├── terms/
+│   ├── translation_api.ts    - Translation APIs
+│   ├── overlib_interface.ts  - Popup library interface (jQuery UI tooltips)
+│   └── ...                   - Other term utilities
 ├── types/
 │   └── globals.d.ts          - TypeScript type declarations
 └── third_party/
@@ -993,9 +1005,17 @@ async function loadSingleFeed(feed: FeedConfig): Promise<void> {
 
 **High Priority (do first):**
 
-- [ ] `Views/Feed/browse.php` - Replace all onclick/onchange handlers
-- [ ] `Views/Word/form_edit_new.php` - Extract auto-translate logic
-- [ ] `Core/Feed/feeds.php` - Refactor `load_feeds()` to return data
+- [x] `Views/Feed/browse.php` - Replace all onclick/onchange handlers ✅ **DONE** (Nov 2025)
+  - Created `src/frontend/js/feeds/feed_browse.ts` with event delegation
+  - Replaced inline handlers with data attributes
+  - Removed inline `<script>` block
+- [x] `Views/Word/form_edit_new.php` - Extract auto-translate logic ✅ **ALREADY DONE**
+  - Uses JSON config pattern (`word-form-config`)
+  - TypeScript module in `src/frontend/js/forms/word_form_auto.ts`
+- [x] `Services/FeedService.php` - Refactor `load_feeds()` to return data ✅ **DONE** (Nov 2025)
+  - Added `getFeedLoadConfig()` method returning JSON-friendly data
+  - Added `renderFeedLoadInterfaceModern()` using JSON + TypeScript
+  - Created `src/frontend/js/feeds/feed_loader.ts` for AJAX loading
 
 **Medium Priority:**
 
