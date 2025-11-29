@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
  * Unit tests for the Router class
  *
  * Tests route registration, resolution, pattern matching,
- * legacy URL handling, and HTTP method routing.
+ * and HTTP method routing.
  */
 class RouterTest extends TestCase
 {
@@ -102,45 +102,6 @@ class RouterTest extends TestCase
 
         $postResult = $this->simulateRequest('/test', 'POST');
         $this->assertEquals('wildcard_handler.php', $postResult['handler']);
-    }
-
-    // ==================== LEGACY ROUTE TESTS ====================
-
-    public function testRegisterLegacyRoute(): void
-    {
-        $this->router->registerLegacy('old_page.php', '/new/path');
-
-        $result = $this->simulateRequest('/old_page.php');
-
-        $this->assertEquals('redirect', $result['type']);
-        $this->assertEquals('/new/path', $result['url']);
-        $this->assertEquals(301, $result['code']);
-    }
-
-    public function testLegacyRoutePreservesQueryString(): void
-    {
-        $this->router->registerLegacy('old_page.php', '/new/path');
-
-        // Set query string BEFORE simulateRequest, then call with matching params
-        $_SERVER['REQUEST_URI'] = '/old_page.php';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-        $_SERVER['QUERY_STRING'] = 'id=123&action=view';
-        $_GET = ['id' => '123', 'action' => 'view'];
-
-        $result = $this->router->resolve();
-
-        $this->assertEquals('redirect', $result['type']);
-        $this->assertEquals('/new/path?id=123&action=view', $result['url']);
-    }
-
-    public function testLegacyRouteWithEmptyQueryString(): void
-    {
-        $this->router->registerLegacy('old_page.php', '/new/path');
-
-        $_SERVER['QUERY_STRING'] = '';
-        $result = $this->simulateRequest('/old_page.php');
-
-        $this->assertEquals('/new/path', $result['url']);
     }
 
     // ==================== PATH NORMALIZATION TESTS ====================
@@ -330,24 +291,9 @@ class RouterTest extends TestCase
         $this->assertEquals('handler', $result['type']);
     }
 
-    public function testMultipleLegacyRoutesToSameDestination(): void
+    public function testPhpFileReturnsNotFound(): void
     {
-        $this->router->registerLegacy('old1.php', '/new/path');
-        $this->router->registerLegacy('old2.php', '/new/path');
-        $this->router->registerLegacy('old3.php', '/new/path');
-
-        $result1 = $this->simulateRequest('/old1.php');
-        $result2 = $this->simulateRequest('/old2.php');
-        $result3 = $this->simulateRequest('/old3.php');
-
-        $this->assertEquals('/new/path', $result1['url']);
-        $this->assertEquals('/new/path', $result2['url']);
-        $this->assertEquals('/new/path', $result3['url']);
-    }
-
-    public function testLegacyPhpFileNotInMap(): void
-    {
-        // A .php file that's NOT registered as legacy should return not_found
+        // A .php file should return not_found (no legacy route support)
         $result = $this->simulateRequest('/unregistered.php');
 
         $this->assertEquals('not_found', $result['type']);

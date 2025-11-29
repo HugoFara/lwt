@@ -18,8 +18,7 @@ namespace Lwt\Router;
 /**
  * Simple Router for LWT Front Controller
  *
- * Handles routing from old URLs to new controller-based structure
- * while maintaining backward compatibility
+ * Handles routing URLs to controller-based handlers
  *
  * @category Lwt
  * @package  Lwt\Router
@@ -31,7 +30,6 @@ namespace Lwt\Router;
 class Router
 {
     private array $routes = [];
-    private array $legacyMap = [];
     private array $prefixRoutes = [];
 
     /**
@@ -63,19 +61,6 @@ class Router
         string $method = '*'
     ): void {
         $this->prefixRoutes[$prefix][$method] = $handler;
-    }
-
-    /**
-     * Register a legacy file mapping for backward compatibility
-     *
-     * @param string $legacyFile Old filename (e.g., 'do_text.php')
-     * @param string $newPath    New route path (e.g., '/text/read')
-     *
-     * @return void
-     */
-    public function registerLegacy(string $legacyFile, string $newPath): void
-    {
-        $this->legacyMap[$legacyFile] = $newPath;
     }
 
     /**
@@ -119,55 +104,6 @@ class Router
                 ];
             }
             // No path info - /index.php alone will be handled by exact match below
-        }
-
-        // Check for legacy file access (e.g., /do_text.php or /api.php/v1/endpoint)
-        // First try basename for simple cases like /do_text.php
-        $filename = basename($path);
-        if (str_ends_with($filename, '.php') && isset($this->legacyMap[$filename])) {
-            // Legacy file accessed - redirect to new route
-            $newPath = $this->legacyMap[$filename];
-            $queryString = $_SERVER['QUERY_STRING'] ?? '';
-            $redirectUrl = $newPath . ($queryString ? '?' . $queryString : '');
-
-            return [
-                'type' => 'redirect',
-                'url' => $redirectUrl,
-                'code' => 301  // Permanent redirect
-            ];
-        }
-
-        // Handle legacy paths with path info after .php (e.g., /api.php/v1/version)
-        if (preg_match('/^\/([^\/]+\.php)(\/.*)?$/', $path, $matches)) {
-            $phpFile = $matches[1];
-            $pathInfo = $matches[2] ?? '';
-
-            if (isset($this->legacyMap[$phpFile])) {
-                $newPath = $this->legacyMap[$phpFile];
-                $queryString = $_SERVER['QUERY_STRING'] ?? '';
-
-                // For API routes, the path info contains the version prefix we need to strip
-                // e.g., /api.php/v1/version -> /api/v1/version (not /api/v1/v1/version)
-                // The pathInfo is /v1/version, but newPath is already /api/v1
-                // So we need to remove the /v1 prefix from pathInfo if it matches newPath's suffix
-                if (!empty($pathInfo) && str_ends_with($newPath, '/v1')) {
-                    // Strip /v1 or /vX prefix from pathInfo if present
-                    $pathInfo = preg_replace('/^\/v\d+/', '', $pathInfo);
-                }
-
-                // Handle root path to avoid double slashes
-                if ($newPath === '/' && !empty($pathInfo)) {
-                    $redirectUrl = $pathInfo . ($queryString ? '?' . $queryString : '');
-                } else {
-                    $redirectUrl = $newPath . $pathInfo . ($queryString ? '?' . $queryString : '');
-                }
-
-                return [
-                    'type' => 'redirect',
-                    'url' => $redirectUrl,
-                    'code' => 301  // Permanent redirect
-                ];
-            }
         }
 
         // Try exact match first
