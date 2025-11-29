@@ -61,6 +61,9 @@ import './feeds/feed_loader';
 import './feeds/feed_multi_load';
 import './feeds/feed_index';
 
+// Words
+import './words/word_list_filter';
+
 // Languages
 import './languages/language_wizard';
 
