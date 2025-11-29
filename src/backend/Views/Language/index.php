@@ -58,7 +58,7 @@ namespace Lwt\Views\Language;
         </td>
         <?php else: ?>
         <td class="td1 center">
-            <a href="inc/save_setting_redirect.php?k=currentlanguage&amp;v=<?php echo $lang['id']; ?>&amp;u=/languages">
+            <a href="/admin/save-setting?k=currentlanguage&amp;v=<?php echo $lang['id']; ?>&amp;u=/languages">
                 <img src="/assets/icons/tick-button.png" title="Set as Current Language" alt="Set as Current Language" />
             </a>
         </td>

@@ -15,7 +15,7 @@ import { showRightFrames } from '../reading/frame_management';
  * @param url URL to redirect to
  */
 export function setLang(ctl: HTMLSelectElement, url: string): void {
-  location.href = 'inc/save_setting_redirect.php?k=currentlanguage&v=' +
+  location.href = '/admin/save-setting?k=currentlanguage&v=' +
     ctl.options[ctl.selectedIndex].value +
     '&u=' + url;
 }
@@ -26,7 +26,7 @@ export function setLang(ctl: HTMLSelectElement, url: string): void {
  * @param url URL to redirect to
  */
 export function resetAll(url: string): void {
-  location.href = 'inc/save_setting_redirect.php?k=currentlanguage&v=&u=' + url;
+  location.href = '/admin/save-setting?k=currentlanguage&v=&u=' + url;
 }
 
 /**

@@ -216,6 +216,12 @@ return function (Router $router) {
     $router->register('/admin/server-data', 'AdminController@serverData');
     $router->registerLegacy('server_data.php', '/admin/server-data');
 
+    // Save setting and redirect
+    $router->register('/admin/save-setting', 'AdminController@saveSetting');
+    $router->registerLegacy('save_setting_redirect.php', '/admin/save-setting');
+    // Legacy path used by some views (inc/save_setting_redirect.php)
+    $router->registerLegacy('inc/save_setting_redirect.php', '/admin/save-setting');
+
     // ==================== MOBILE ROUTES ====================
 
     $router->register('/mobile', 'MobileController@index');

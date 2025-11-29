@@ -41,6 +41,7 @@ require_once __DIR__ . '/../Database/Validation.php';
 require_once __DIR__ . '/../Database/Maintenance.php';
 require_once __DIR__ . '/../Database/TextParsing.php';
 require_once __DIR__ . '/../Database/Migrations.php';
+require_once __DIR__ . '/../Database/Restore.php';
 
 // Deprecated functions (needed by TextParsing and other classes during bootstrap)
 require_once __DIR__ . '/../Database/deprecated_functions.php';

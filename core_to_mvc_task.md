@@ -313,6 +313,7 @@ Current files in `src/backend/Core/` that may need migration:
 - `Database/Configuration.php`
 - `Database/QueryBuilder.php`
 - `Database/TextParsing.php`
+- `Database/Restore.php` - **NEW** (migrated from `database_operations.php`)
 
 ### Entity (Keep - Domain models)
 
@@ -366,9 +367,18 @@ Current files in `src/backend/Core/` that may need migration:
 
 - `Globals.php` - Keep (core infrastructure)
 - `version.php` - Keep (version info)
-- `settings.php` - Evaluate for SettingsService
-- `save_setting_redirect.php` - Move to AdminController
-- `database_operations.php` - Evaluate for Database namespace
+- ~~`settings.php`~~ - **COMPLETED**: Logic migrated to `SettingsService`
+  - `get_setting_data()` → `SettingsService::getDefinitions()` (setting defaults and validation rules)
+  - File kept as backward-compatibility shim
+- ~~`save_setting_redirect.php`~~ - **COMPLETED**: Migrated to `AdminController`
+  - Route: `/admin/save-setting` (replaces `inc/save_setting_redirect.php`)
+  - Method: `AdminController::saveSetting()`
+  - Logic: `SettingsService::saveAndClearSession()`
+  - File kept as backward-compatibility shim (redirects to new route)
+- ~~`database_operations.php`~~ - **COMPLETED**: Migrated to `Database\Restore`
+  - `restore_file()` → `Restore::restoreFile()` (database restore from backup)
+  - `truncateUserDatabase()` → `Restore::truncateUserDatabase()` (clear all user data)
+  - File kept as backward-compatibility shim
 
 ## Verification Checklist
 

@@ -473,4 +473,46 @@ class AdminController extends BaseController
 
         $this->endRender();
     }
+
+    /**
+     * Save a setting and redirect to a URL.
+     *
+     * This endpoint replaces the legacy save_setting_redirect.php file.
+     *
+     * GET parameters:
+     * - k: Setting key
+     * - v: Setting value
+     * - u: Redirect URL (optional)
+     *
+     * @param array<string, string> $params Route parameters
+     *
+     * @return void
+     */
+    public function saveSetting(array $params): void
+    {
+        $settingsService = new SettingsService();
+
+        $key = $this->param('k');
+        $value = $this->param('v');
+        $url = $this->param('u');
+
+        // Save the setting if key is provided
+        if ($key !== '') {
+            $settingsService->saveAndClearSession($key, $value);
+        }
+
+        // Redirect if URL is provided
+        if ($url !== '') {
+            // Check if it's an absolute or relative URL
+            $parsedUrl = parse_url($url);
+            if (isset($parsedUrl['host'])) {
+                // Absolute URL
+                header("Location: " . $url);
+            } else {
+                // Relative URL - redirect to root-relative path
+                header("Location: " . $url);
+            }
+            exit();
+        }
+    }
 }
