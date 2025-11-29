@@ -76,7 +76,7 @@ namespace Lwt\Views\Language;
             </a>
             <?php if ($canDelete): ?>
             &nbsp;
-            <span class="click" onclick="if (confirmDelete()) location.href='/languages?del=<?php echo $lang['id']; ?>';">
+            <span class="click" data-action="confirm-delete" data-url="/languages?del=<?php echo $lang['id']; ?>">
                 <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" />
             </span>
             <?php else: ?>

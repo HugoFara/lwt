@@ -24,8 +24,10 @@ $shorter = ($textCount == 1 ? ' ' : ' shorter ');
 ?>
 <script type="text/javascript">
 //<![CDATA[
-    $(document).ready(lwtFormCheck.askBeforeExit);
-    lwtFormCheck.makeDirty();
+    $(document).ready(function() {
+        lwtFormCheck.askBeforeExit();
+        lwtFormCheck.makeDirty();
+    });
 //]]>
 </script>
 <form enctype="multipart/form-data" action="/text/import-long" method="post">
@@ -42,9 +44,9 @@ $shorter = ($textCount == 1 ? ' ' : ' shorter ');
     </tr>
     <tr>
         <td class="td1 right" colspan="2">
-            <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='index.php';}" />
+            <input type="button" value="Cancel" data-action="cancel-navigate" data-url="index.php" />
             <span class="nowrap"></span>
-            <input type="button" value="Go Back" onclick="{lwtFormCheck.resetDirty(); history.back();}" />
+            <input type="button" value="Go Back" data-action="cancel-back" />
             <span class="nowrap"></span>
             <input type="submit" name="op" value="Create <?php echo $textCount; ?> text<?php echo $plural; ?>" />
         </td>

@@ -124,23 +124,4 @@ namespace Lwt\Views\Admin;
         </tr>
     </tbody>
 </table>
-<script type="text/javascript">
-    function handle_api_version_answer(data) {
-        if ("error" in data) {
-            $("#rest-api-version").text(
-                "Error while getting data from the REST API!" +
-                "\nMessage: " + data.error
-            );
-            $("#rest-api-release-date").empty();
-        } else {
-            $("#rest-api-version").text(data.version);
-            $("#rest-api-release-date").text(data.release_date);
-        }
-    }
-
-    $.getJSON(
-        "api.php/v1/version",
-        {},
-        handle_api_version_answer
-    );
-</script>
+<!-- API version is fetched by admin/server_data.ts module -->

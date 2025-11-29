@@ -31,7 +31,7 @@ final class ErrorHandlingTest extends TestCase
         $result = error_message_with_hide('Error: Something went wrong', false);
         $this->assertStringContainsString('Error: Something went wrong', $result);
         $this->assertStringContainsString('class="red"', $result);
-        $this->assertStringContainsString('onclick="history.back();"', $result);
+        $this->assertStringContainsString('data-action="back"', $result);
 
         // Test with Error prefix and noback=true (no back button)
         $result = error_message_with_hide('Error: Another problem', true);

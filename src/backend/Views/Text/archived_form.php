@@ -88,7 +88,7 @@ namespace Lwt\Views\Text;
         </tr>
         <tr>
             <td class="td1 right" colspan="2">
-                <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/text/archived#rec<?php echo $textId; ?>';}" />
+                <input type="button" value="Cancel" data-action="cancel-navigate" data-url="/text/archived#rec<?php echo $textId; ?>" />
                 <input type="submit" name="op" value="Change" />
             </td>
         </tr>

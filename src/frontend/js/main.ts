@@ -25,6 +25,7 @@ import './core/ajax_utilities';
 import './core/ui_utilities';
 import './core/user_interactions';
 import './core/language_settings';
+import './core/simple_interactions';
 
 // Terms/vocabulary management
 import './terms/word_status';
@@ -39,6 +40,7 @@ import './reading/text_events';
 import './reading/text_display';
 import './reading/frame_management';
 import './reading/annotation_toggle';
+import './reading/set_mode_result';
 
 // Forms
 import './forms/bulk_actions';
@@ -70,6 +72,9 @@ import './tags/tag_list';
 
 // Languages
 import './languages/language_wizard';
+
+// Admin
+import './admin/server_data';
 
 // UI Components
 import './ui/modal';

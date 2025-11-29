@@ -43,6 +43,18 @@ import {
   languageWizard,
   initLanguageWizard
 } from './languages/language_wizard';
+import {
+  goBack,
+  navigateTo,
+  cancelAndNavigate,
+  cancelAndGoBack,
+  confirmSubmit
+} from './core/simple_interactions';
+import {
+  hideAnnotations as setModeHideAnnotations,
+  showAnnotations as setModeShowAnnotations
+} from './reading/set_mode_result';
+import { fetchApiVersion } from './admin/server_data';
 
 // Declare global window interface extensions
 declare global {
@@ -133,6 +145,20 @@ declare global {
     language_wizard: typeof languageWizard;
     languageWizard: typeof languageWizard;
     initLanguageWizard: typeof initLanguageWizard;
+
+    // Simple interactions (navigation, confirmation)
+    goBack: typeof goBack;
+    navigateTo: typeof navigateTo;
+    cancelAndNavigate: typeof cancelAndNavigate;
+    cancelAndGoBack: typeof cancelAndGoBack;
+    confirmSubmit: typeof confirmSubmit;
+
+    // Set mode result (annotation toggling)
+    hideAnnotations: typeof setModeHideAnnotations;
+    showAnnotations: typeof setModeShowAnnotations;
+
+    // Admin utilities
+    fetchApiVersion: typeof fetchApiVersion;
   }
 }
 
@@ -212,3 +238,17 @@ window.initWordFormAuto = initWordFormAuto;
 window.language_wizard = languageWizard;
 window.languageWizard = languageWizard;
 window.initLanguageWizard = initLanguageWizard;
+
+// Simple interactions (navigation, confirmation)
+window.goBack = goBack;
+window.navigateTo = navigateTo;
+window.cancelAndNavigate = cancelAndNavigate;
+window.cancelAndGoBack = cancelAndGoBack;
+window.confirmSubmit = confirmSubmit;
+
+// Set mode result (annotation toggling)
+window.hideAnnotations = setModeHideAnnotations;
+window.showAnnotations = setModeShowAnnotations;
+
+// Admin utilities
+window.fetchApiVersion = fetchApiVersion;

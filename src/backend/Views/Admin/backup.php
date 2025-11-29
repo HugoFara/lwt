@@ -22,7 +22,7 @@ namespace Lwt\Views\Admin;
 
 ?>
 <form enctype="multipart/form-data" action="<?php echo $_SERVER['PHP_SELF']; ?>"
-method="post" onsubmit="return confirm('Are you sure?');">
+method="post" data-confirm-submit="Are you sure?">
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr>
         <th class="th1 center">Backup</th>
@@ -87,7 +87,7 @@ method="post" onsubmit="return confirm('Are you sure?');">
             <p class="right">
                 &nbsp;<br />
                 <input type="button" value="Install LWT Demo Database"
-                onclick="location.href='/admin/install-demo';" />
+                data-action="navigate" data-url="/admin/install-demo" />
             </p>
         </td>
     </tr>
@@ -111,7 +111,7 @@ method="post" onsubmit="return confirm('Are you sure?');">
     <tr>
         <td class="td1 right" colspan="2">
             <input type="button" value="&lt;&lt; Back"
-            onclick="location.href='index.php';" />
+            data-action="navigate" data-url="index.php" />
         </td>
     </tr>
 </table>

@@ -18,52 +18,13 @@
  */
 
 ?>
-<p><span id="waiting"><img src="<?php echo $waitingIconPath; ?>" alt="Please wait" title="Please wait" />&nbsp;&nbsp;Please wait ...</span>
-
-<script type="text/javascript">
-//<![CDATA[
-/** @var {boolean} showLearningChanged hide all translations status has changed */
-const showLearningChanged = <?php echo json_encode($showLearning != $oldShowLearning); ?>;
-const showLearning = <?php echo json_encode($showLearning); ?>;
-
-/**
- * Hide translations for words being learned.
- *
- * @param {object} context Window containing words
- */
-function hideAnnotations(context) {
-    $('.mword',context)
-    .removeClass('wsty')
-    .addClass('mwsty')
-    .each(function(){
-        const c = '&nbsp;' + $(this).attr('data_code') + '&nbsp;';
-        $(this).html(c);
-    });
-    $('span',context).not('#totalcharcount').removeClass('hide');
-}
-
-/**
- * Hide translations for all words.
- *
- * @param {object} context Window containing words
- */
-function showAnnotations(context) {
-    $('.mword',context)
-    .removeClass('mwsty')
-    .addClass('wsty')
-    .each(function(){
-        const c = $(this).attr('data_text');
-        $(this).text(c);
-        if($(this).not('.hide').length){
-            let u = parseInt($(this).attr('data_code')) *2 + parseInt($(this).attr('data_order')) -1;
-            $(this).nextUntil('[id^="ID-' + u + '-"]',context).addClass('hide');
-        }
-    });
-}
-
-$('#waiting').html('<b>OK -- </b>');
-//]]>
+<script type="application/json" id="set-mode-config">
+<?php echo json_encode([
+    'showLearningChanged' => $showLearning != $oldShowLearning,
+    'showLearning' => (bool)$showLearning
+]); ?>
 </script>
+<p><span id="waiting"><img src="<?php echo $waitingIconPath; ?>" alt="Please wait" title="Please wait" />&nbsp;&nbsp;Please wait ...</span>
 
 <?php if ($showAll == 1): ?>
 <b><i>Show All</i></b> is set to <b>ON</b>.
