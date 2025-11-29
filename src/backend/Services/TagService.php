@@ -23,6 +23,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
+use Lwt\View\Helper\FormHelper;
 
 /**
  * Service class for managing term tags and text tags.
@@ -1126,7 +1127,7 @@ class TagService
         $tbpref = Globals::getTablePrefix();
         $selected = $selected ?? '';
 
-        $html = '<option value=""' . \get_selected($selected, '') . '>';
+        $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
         $html .= '[Filter off]</option>';
 
         if ($langId === '') {
@@ -1148,14 +1149,14 @@ class TagService
         while ($record = mysqli_fetch_assoc($res)) {
             $count++;
             $html .= '<option value="' . $record['TgID'] . '"' .
-                \get_selected($selected, (int) $record['TgID']) . '>' .
+                FormHelper::getSelected($selected, (int) $record['TgID']) . '>' .
                 \tohtml($record['TgText']) . '</option>';
         }
         mysqli_free_result($res);
 
         if ($count > 0) {
             $html .= '<option disabled="disabled">--------</option>';
-            $html .= '<option value="-1"' . \get_selected($selected, -1) . '>UNTAGGED</option>';
+            $html .= '<option value="-1"' . FormHelper::getSelected($selected, -1) . '>UNTAGGED</option>';
         }
 
         return $html;
@@ -1176,7 +1177,7 @@ class TagService
         $tbpref = Globals::getTablePrefix();
         $selected = $selected ?? '';
 
-        $html = '<option value=""' . \get_selected($selected, '') . '>';
+        $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
         $html .= '[Filter off]</option>';
 
         if ($langId === '') {
@@ -1198,14 +1199,14 @@ class TagService
         while ($record = mysqli_fetch_assoc($res)) {
             $count++;
             $html .= '<option value="' . $record['T2ID'] . '"' .
-                \get_selected($selected, (int) $record['T2ID']) . '>' .
+                FormHelper::getSelected($selected, (int) $record['T2ID']) . '>' .
                 \tohtml($record['T2Text']) . '</option>';
         }
         mysqli_free_result($res);
 
         if ($count > 0) {
             $html .= '<option disabled="disabled">--------</option>';
-            $html .= '<option value="-1"' . \get_selected($selected, -1) . '>UNTAGGED</option>';
+            $html .= '<option value="-1"' . FormHelper::getSelected($selected, -1) . '>UNTAGGED</option>';
         }
 
         return $html;
@@ -1227,7 +1228,7 @@ class TagService
         $selected = $selected ?? '';
         $untaggedOption = '';
 
-        $html = '<option value="&amp;texttag"' . \get_selected($selected, '') . '>';
+        $html = '<option value="&amp;texttag"' . FormHelper::getSelected($selected, '') . '>';
         $html .= '[Filter off]</option>';
 
         $sql = 'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
@@ -1245,10 +1246,10 @@ class TagService
             if ($record['TagName'] == 1) {
                 $untaggedOption = '<option disabled="disabled">--------</option>' .
                     '<option value="' . $record['TextID'] . '&amp;texttag=-1"' .
-                    \get_selected($selected, "-1") . '>UNTAGGED</option>';
+                    FormHelper::getSelected($selected, "-1") . '>UNTAGGED</option>';
             } else {
                 $html .= '<option value="' . $record['TextID'] . '&amp;texttag=' .
-                    $record['TagID'] . '"' . \get_selected($selected, (int) $record['TagID']) .
+                    $record['TagID'] . '"' . FormHelper::getSelected($selected, (int) $record['TagID']) .
                     '>' . $record['TagName'] . '</option>';
             }
         }
@@ -1272,7 +1273,7 @@ class TagService
         $tbpref = Globals::getTablePrefix();
         $selected = $selected ?? '';
 
-        $html = '<option value=""' . \get_selected($selected, '') . '>';
+        $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
         $html .= '[Filter off]</option>';
 
         if ($langId === '') {
@@ -1294,14 +1295,14 @@ class TagService
         while ($record = mysqli_fetch_assoc($res)) {
             $count++;
             $html .= '<option value="' . $record['T2ID'] . '"' .
-                \get_selected($selected, (int) $record['T2ID']) . '>' .
+                FormHelper::getSelected($selected, (int) $record['T2ID']) . '>' .
                 \tohtml($record['T2Text']) . '</option>';
         }
         mysqli_free_result($res);
 
         if ($count > 0) {
             $html .= '<option disabled="disabled">--------</option>';
-            $html .= '<option value="-1"' . \get_selected($selected, -1) . '>UNTAGGED</option>';
+            $html .= '<option value="-1"' . FormHelper::getSelected($selected, -1) . '>UNTAGGED</option>';
         }
 
         return $html;

@@ -449,6 +449,7 @@ class TextController extends BaseController
         $annotated = false;
         $isNew = true;
         $languageData = $this->textService->getLanguageDataForForm();
+        $languages = $this->languageService->getLanguagesForSelect();
         $scrdir = $this->languageService->getScriptDirectionTag($text->lgid);
 
         include __DIR__ . '/../Views/Text/edit_form.php';
@@ -485,6 +486,7 @@ class TextController extends BaseController
         $annotated = (bool) $record['annot_exists'];
         $isNew = false;
         $languageData = $this->textService->getLanguageDataForForm();
+        $languages = $this->languageService->getLanguagesForSelect();
         $scrdir = $this->languageService->getScriptDirectionTag($text->lgid);
 
         include __DIR__ . '/../Views/Text/edit_form.php';
@@ -581,6 +583,9 @@ class TextController extends BaseController
         if (strlen($showCounts) != 5) {
             $showCounts = "11111";
         }
+
+        // Get languages for filter dropdown
+        $languages = $this->languageService->getLanguagesForSelect();
 
         include __DIR__ . '/../Views/Text/edit_list.php';
     }
