@@ -316,7 +316,7 @@ describe('feed_loader.ts', () => {
       expect(window.location.replace).toHaveBeenCalledWith('/feeds');
     });
 
-    it('handles invalid JSON gracefully', () => {
+    it('handles invalid JSON gracefully', async () => {
       document.body.innerHTML = `
         <script id="feed-loader-config" type="application/json">
           {invalid json}
@@ -325,17 +325,24 @@ describe('feed_loader.ts', () => {
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      expect(() => initFeedLoader()).not.toThrow();
+      initFeedLoader();
+
+      await new Promise(r => setTimeout(r, 10));
+
       expect(consoleSpy).toHaveBeenCalled();
     });
 
-    it('handles empty config element', () => {
+    it('handles empty config element gracefully', async () => {
       document.body.innerHTML = `
-        <script id="feed-loader-config" type="application/json"></script>
+        <script id="feed-loader-config" type="application/json">{"feeds": [], "redirectUrl": "/done"}</script>
       `;
 
-      // Should not throw - empty string becomes {}
-      expect(() => initFeedLoader()).not.toThrow();
+      // With valid but empty feeds array, should redirect immediately
+      initFeedLoader();
+
+      await new Promise(r => setTimeout(r, 10));
+
+      expect(window.location.replace).toHaveBeenCalledWith('/done');
     });
   });
 

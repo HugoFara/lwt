@@ -9,6 +9,10 @@ import {
   allActionGo
 } from '../../../src/frontend/js/forms/bulk_actions';
 
+// Make jQuery available globally (required by the module)
+(global as any).$ = $;
+(global as any).jQuery = $;
+
 // Mock ui_utilities
 vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
   markClick: vi.fn()
