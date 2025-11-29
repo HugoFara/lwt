@@ -135,23 +135,23 @@ class WordController extends BaseController
     {
         // Check for valid entry point
         if (
-            \getreq("wid") == ""
-            && \getreq("tid") . \getreq("ord") == ""
+            $this->param("wid") == ""
+            && $this->param("tid") . $this->param("ord") == ""
             && !array_key_exists("op", $_REQUEST)
         ) {
             return;
         }
 
-        $fromAnn = \getreq("fromAnn");
+        $fromAnn = $this->param("fromAnn");
 
         if (isset($_REQUEST['op'])) {
             $this->handleEditOperation($fromAnn);
         } else {
-            $wid = (array_key_exists("wid", $_REQUEST) && is_integer(\getreq('wid')))
-                ? (int)\getreq('wid')
+            $wid = (array_key_exists("wid", $_REQUEST) && is_numeric($this->param('wid')))
+                ? $this->paramInt('wid', -1)
                 : -1;
-            $textId = (int)\getreq("tid");
-            $ord = (int)\getreq("ord");
+            $textId = $this->paramInt("tid", 0);
+            $ord = $this->paramInt("ord", 0);
             $this->displayEditForm($wid, $textId, $ord, $fromAnn);
         }
 
@@ -182,7 +182,7 @@ class WordController extends BaseController
             exit();
         }
 
-        $translation = \repl_tab_nl(\getreq("WoTranslation"));
+        $translation = \repl_tab_nl($this->param("WoTranslation"));
         if ($translation == '') {
             $translation = '*';
         }
@@ -326,7 +326,7 @@ class WordController extends BaseController
     {
         $tbpref = \Lwt\Core\Globals::getTablePrefix();
 
-        $translation_raw = \repl_tab_nl(\getreq("WoTranslation"));
+        $translation_raw = \repl_tab_nl($this->param("WoTranslation"));
         $translation = ($translation_raw == '') ? '*' : $translation_raw;
 
         if (isset($_REQUEST['op'])) {
@@ -430,7 +430,7 @@ class WordController extends BaseController
      */
     private function displayEditTermForm(string $tbpref): void
     {
-        $wid = \getreq('wid');
+        $wid = $this->param('wid');
 
         if ($wid == '') {
             \my_die("Term ID missing in edit_tword.php");
@@ -634,8 +634,8 @@ class WordController extends BaseController
      */
     private function isExportOrTestAction(): bool
     {
-        $markAction = \getreq('markaction');
-        $allAction = \getreq('allaction');
+        $markAction = $this->param('markaction');
+        $allAction = $this->param('allaction');
 
         return in_array($markAction, ['exp', 'exp2', 'exp3', 'test', 'deltag']) ||
                in_array($allAction, ['expall', 'expall2', 'expall3', 'testall', 'deltagall']);
@@ -662,7 +662,7 @@ class WordController extends BaseController
         string $whTag
     ): string {
         $markaction = $_REQUEST['markaction'];
-        $actiondata = \getreq('data');
+        $actiondata = $this->param('data');
         $message = "Multiple Actions: 0";
 
         if (!isset($_REQUEST['marked']) || !is_array($_REQUEST['marked']) || count($_REQUEST['marked']) == 0) {
@@ -751,7 +751,7 @@ class WordController extends BaseController
         string $whTag
     ): ?string {
         $allaction = (string) $_REQUEST['allaction'];
-        $actiondata = \getreq('data');
+        $actiondata = $this->param('data');
 
         // Get word IDs matching filter
         $wordIds = $listService->getFilteredWordIds($textId, $whLang, $whStat, $whQuery, $whTag);
@@ -860,7 +860,7 @@ class WordController extends BaseController
      */
     private function handleListSaveUpdate(WordListService $listService): ?int
     {
-        $translationRaw = \repl_tab_nl(\getreq("WoTranslation"));
+        $translationRaw = \repl_tab_nl($this->param("WoTranslation"));
         $translation = ($translationRaw == '') ? '*' : $translationRaw;
 
         if ($_REQUEST['op'] == 'Save') {
@@ -1070,8 +1070,8 @@ class WordController extends BaseController
      */
     private function handleMultiWordOperation(): void
     {
-        $textlc = trim(\getreq("WoTextLC"));
-        $text = trim(\getreq("WoText"));
+        $textlc = trim($this->param("WoTextLC"));
+        $text = trim($this->param("WoText"));
 
         // Validate lowercase matches
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
@@ -1084,7 +1084,7 @@ class WordController extends BaseController
             return;
         }
 
-        $translationRaw = \repl_tab_nl(\getreq("WoTranslation"));
+        $translationRaw = \repl_tab_nl($this->param("WoTranslation"));
         $translation = ($translationRaw == '') ? '*' : $translationRaw;
 
         $data = [
@@ -1143,15 +1143,15 @@ class WordController extends BaseController
      */
     private function displayMultiWordForm(): void
     {
-        $tid = (int) \getreq('tid');
-        $ord = (int) \getreq('ord');
-        $strWid = \getreq('wid');
+        $tid = $this->paramInt('tid', 0);
+        $ord = $this->paramInt('ord', 0);
+        $strWid = $this->param('wid');
 
         // Determine if we're editing an existing word or creating new
         if ($strWid == "" || !is_numeric($strWid)) {
             // No ID provided: check if text exists in database
             $lgid = $this->wordService->getLanguageIdFromText($tid);
-            $txtParam = \getreq('txt');
+            $txtParam = $this->param('txt');
             $textlc = mb_strtolower(
                 \Lwt\Database\Escaping::prepareTextdata($txtParam),
                 'UTF-8'
@@ -1162,8 +1162,8 @@ class WordController extends BaseController
 
         if ($strWid === null) {
             // New multi-word
-            $txtParam = \getreq('txt');
-            $len = (int) \getreq('len');
+            $txtParam = $this->param('txt');
+            $len = $this->paramInt('len', 0);
             PageLayoutHelper::renderPageStartNobody("New Term: " . $txtParam);
             $this->displayNewMultiWordForm($txtParam, $tid, $ord, $len);
         } else {
@@ -1419,7 +1419,7 @@ class WordController extends BaseController
 
                     // Prepare view variables
                     $hex = $this->wordService->textToClassName($result['textlc']);
-                    $translation = \repl_tab_nl(\getreq("WoTranslation"));
+                    $translation = \repl_tab_nl($this->param("WoTranslation"));
                     if ($translation === '') {
                         $translation = '*';
                     }
@@ -1435,8 +1435,8 @@ class WordController extends BaseController
             }
         } else {
             // Display the new word form
-            $lang = (int)\getreq('lang');
-            $textId = (int)\getreq('text');
+            $lang = $this->paramInt('lang', 0);
+            $textId = $this->paramInt('text', 0);
             $scrdir = $this->languageService->getScriptDirectionTag($lang);
 
             $langData = $this->wordService->getLanguageData($lang);
@@ -1463,7 +1463,7 @@ class WordController extends BaseController
     {
         PageLayoutHelper::renderPageStartNobody('Term');
 
-        $wid = \getreq('wid');
+        $wid = $this->param('wid');
         $ann = isset($_REQUEST['ann']) ? $_REQUEST['ann'] : '';
 
         if ($wid === '') {

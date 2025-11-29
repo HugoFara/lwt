@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-11-28
+**Last Updated:** 2025-11-29
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -576,6 +576,51 @@ class LanguageService {
 2. **Repository Layer** - Abstract database access
 3. **Type Hints** - Complete coverage + strict_types
 4. **QueryBuilder Adoption** - Reduce direct SQL
+5. **Deprecated Function Migration** - See section below
+
+## Deprecated Global Functions
+
+**Status (2025-11-29):** Database deprecated functions removed, utility functions remain.
+
+### Recently Completed
+
+- [x] **`deprecated_functions.php` removed** - All 45 database wrapper functions eliminated
+- [x] All code migrated to use class-based API (`Connection`, `Escaping`, `Settings`, etc.)
+- [x] Psalm stubs updated to remove deprecated function signatures
+
+### Remaining Deprecated Functions
+
+| Function | Calls | Files | Suggested Replacement |
+|----------|-------|-------|----------------------|
+| `tohtml()` | 330 | 67 | `htmlspecialchars()` or `Escaping::html()` |
+| `processDBParam()`/`processSessParam()` | 51 | 7 | Request/Session parameter class |
+| `repl_tab_nl()` | 50 | 12 | `StringUtils::replaceTabNewline()` |
+| `getreq()` | 45 | 4 | `$_REQUEST['key']` or Request class |
+| `error_message_with_hide()` | 26 | 13 | `ErrorHandler::displayMessage()` |
+| `strToClassName()` | 14 | 6 | `StringUtils::toClassName()` |
+| `encodeURI()` | 12 | 4 | `rawurlencode()` |
+| `getsess()` | 9 | 2 | `$_SESSION['key']` or Session class |
+| `get_sepas()` | 8 | 6 | `LanguageConfig::getSeparators()` |
+| `mask_term_in_sentence()` | 4 | 4 | `ExportService::maskTerm()` |
+
+**Total:** ~550 calls across ~80 files
+
+### Migration Priority
+
+1. **Quick wins** (low call count, simple replacement):
+   - `getreq()`/`getsess()` → direct superglobal access
+   - `encodeURI()` → `rawurlencode()`
+   - `mask_term_in_sentence()` → move to ExportService
+
+2. **Medium effort** (utility consolidation):
+   - `strToClassName()` → `StringUtils` class
+   - `repl_tab_nl()` → `StringUtils` class
+   - `get_sepas()` → configuration class
+   - `error_message_with_hide()` → `ErrorHandler` class
+
+3. **Large effort** (widespread usage):
+   - `tohtml()` → Keep as-is or create `Html::escape()` wrapper
+   - `processDBParam()`/`processSessParam()` → Parameter handling refactor
 
 ## Timeline Update
 

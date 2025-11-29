@@ -261,9 +261,9 @@ class TextController extends BaseController
         );
 
         // Check for actions that skip page start
-        $noPagestart = (\getreq('markaction') == 'test' ||
-            \getreq('markaction') == 'deltag' ||
-            substr(\getreq('op'), -8) == 'and Open');
+        $noPagestart = ($this->param('markaction') == 'test' ||
+            $this->param('markaction') == 'deltag' ||
+            substr($this->param('op'), -8) == 'and Open');
 
         if (!$noPagestart) {
             PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Texts', true);
@@ -276,7 +276,7 @@ class TextController extends BaseController
             $message = $this->handleMarkAction(
                 $_REQUEST['markaction'],
                 $_REQUEST['marked'] ?? [],
-                \getreq('data')
+                $this->param('data')
             );
         }
 
@@ -608,7 +608,7 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Services/MediaService.php';
 
-        $textId = (int) \getreq('text');
+        $textId = $this->paramInt('text', 0);
 
         if ($textId === 0) {
             header("Location: /text/edit");
@@ -845,13 +845,13 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
 
-        $textId = \getreq('text');
+        $textId = $this->param('text');
         if ($textId === '') {
             return;
         }
 
-        $showAll = (int) \getreq('mode');
-        $showLearning = (int) \getreq('showLearning');
+        $showAll = $this->paramInt('mode', 0);
+        $showLearning = $this->paramInt('showLearning', 0);
 
         // Save settings and get the old value
         Settings::save('showallwords', $showAll);
@@ -994,7 +994,7 @@ class TextController extends BaseController
         );
 
         // Handle mark actions that skip pagestart
-        $noPagestart = (\getreq('markaction') == 'deltag');
+        $noPagestart = ($this->param('markaction') == 'deltag');
         if (!$noPagestart) {
             PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Text Archive', true);
         }
@@ -1006,7 +1006,7 @@ class TextController extends BaseController
             $message = $this->handleArchivedMarkAction(
                 $_REQUEST['markaction'],
                 $_REQUEST['marked'] ?? [],
-                \getreq('data')
+                $this->param('data')
             );
         }
 
