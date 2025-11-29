@@ -6,47 +6,14 @@
  * @since   1.6.16-fork
  */
 
-// Type definitions
-export interface LwtLanguage {
-  id: number;
-  dict_link1: string;
-  dict_link2: string;
-  translator_link: string;
-  delimiter: string;
-  word_parsing: string;
-  rtl: boolean;
-  ttsVoiceApi: string;
-}
+// Import types from globals.d.ts to ensure consistency
+import type { LwtData, LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings } from '../types/globals.d';
 
-export interface LwtText {
-  id: number;
-  reading_position: number;
-  annotations: Record<string, unknown>;
-}
+// Re-export types for backward compatibility
+export type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings };
 
-export interface LwtWord {
-  id: number;
-}
-
-export interface LwtTest {
-  solution: string;
-  answer_opened: boolean;
-}
-
-export interface LwtSettings {
-  jQuery_tooltip: boolean;
-  hts: number;
-  word_status_filter: string;
-  annotations_mode?: number;
-}
-
-export interface LwtDataInterface {
-  language: LwtLanguage;
-  text: LwtText;
-  word: LwtWord;
-  test: LwtTest;
-  settings: LwtSettings;
-}
+// LwtDataInterface is now an alias to LwtData for consistency
+export type LwtDataInterface = LwtData;
 
 // Global LWT_DATA object initialization
 export const LWT_DATA: LwtDataInterface = {
@@ -72,7 +39,8 @@ export const LWT_DATA: LwtDataInterface = {
   text: {
     id: 0,
     reading_position: -1,
-    annotations: {}
+    // annotations can be either a number or a Record
+    annotations: 0
   },
   word: {
     id: 0
