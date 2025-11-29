@@ -74,22 +74,22 @@ namespace Lwt\Views\Text;
     </div>
 </div>
 
-<form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
+<form name="form1" action="#" data-base-url="/text/archived">
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr>
         <th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
-            <input type="button" value="Reset All" onclick="resetAll('/text/archived');" />
+            <input type="button" value="Reset All" data-action="reset-all" />
         </th>
     </tr>
     <tr>
         <td class="td1 center" colspan="2">
             Language:
-            <select name="filterlang" onchange="{setLang(document.form1.filterlang,'/text/archived');}">
+            <select name="filterlang" data-action="filter-language">
                 <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
             </select>
         </td>
         <td class="td1 center" colspan="2">
-            <select name="query_mode" onchange="{val=document.form1.query.value;mode=document.form1.query_mode.value; location.href='/text/archived?page=1&amp;query=' + val + '&amp;query_mode=' + mode;}">
+            <select name="query_mode" data-action="filter-query-mode">
                 <option value="title,text"<?php echo $currentQueryMode == "title,text" ? ' selected="selected"' : ''; ?>>Title &amp; Text</option>
                 <option disabled="disabled">------------</option>
                 <option value="title"<?php echo $currentQueryMode == "title" ? ' selected="selected"' : ''; ?>>Title</option>
@@ -105,26 +105,26 @@ namespace Lwt\Views\Text;
             }
             ?>
             <input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
-            <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value;val=encodeURIComponent(val); location.href='/text/archived?page=1&amp;query=' + val;}" />&nbsp;
-            <input type="button" value="Clear" onclick="{location.href='/text/archived?page=1&amp;query=';}" />
+            <input type="button" name="querybutton" value="Filter" data-action="filter" />&nbsp;
+            <input type="button" value="Clear" data-action="clear-filter" />
         </td>
     </tr>
     <tr>
         <td class="td1 center" colspan="2" nowrap="nowrap">
             Tag #1:
-            <select name="tag1" onchange="{val=document.form1.tag1.options[document.form1.tag1.selectedIndex].value; location.href='/text/archived?page=1&amp;tag1=' + val;}">
+            <select name="tag1" data-action="filter-tag" data-tag-num="1">
                 <?php echo get_archivedtexttag_selectoptions($currentTag1, $currentLang); ?>
             </select>
         </td>
         <td class="td1 center" nowrap="nowrap">
             Tag #1 ..
-            <select name="tag12" onchange="{val=document.form1.tag12.options[document.form1.tag12.selectedIndex].value; location.href='/text/archived?page=1&amp;tag12=' + val;}">
+            <select name="tag12" data-action="filter-tag-operator">
                 <?php echo get_andor_selectoptions($currentTag12); ?>
             </select> .. Tag #2
         </td>
         <td class="td1 center" nowrap="nowrap">
             Tag #2:
-            <select name="tag2" onchange="{val=document.form1.tag2.options[document.form1.tag2.selectedIndex].value; location.href='/text/archived?page=1&amp;tag2=' + val;}">
+            <select name="tag2" data-action="filter-tag" data-tag-num="2">
                 <?php echo get_archivedtexttag_selectoptions($currentTag2, $currentLang); ?>
             </select>
         </td>
@@ -139,7 +139,7 @@ namespace Lwt\Views\Text;
         </th>
         <th class="th1" nowrap="nowrap">
             Sort Order:
-            <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/text/archived?page=1&amp;sort=' + val;}">
+            <select name="sort" data-action="sort">
                 <?php echo get_textssort_selectoptions($currentSort); ?>
             </select>
         </th>
@@ -162,12 +162,12 @@ namespace Lwt\Views\Text;
     </tr>
     <tr>
         <td class="td1 center">
-            <input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
-            <input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
+            <input type="button" value="Mark All" data-action="mark-toggle" data-mark-all="true" />
+            <input type="button" value="Mark None" data-action="mark-toggle" data-mark-all="false" />
         </td>
         <td class="td1 center">
             Marked Texts:&nbsp;
-            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);">
+            <select name="markaction" id="markaction" disabled="disabled" data-action="multi-action">
                 <?php echo get_multiplearchivedtextactions_selectoptions(); ?>
             </select>
         </td>
@@ -202,7 +202,7 @@ namespace Lwt\Views\Text;
             <a href="<?php echo $_SERVER['PHP_SELF']; ?>?chg=<?php echo $record['AtID']; ?>">
                 <img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" />
             </a>&nbsp;
-            <span class="click" onclick="if (confirmDelete()) location.href='<?php echo $_SERVER['PHP_SELF']; ?>?del=<?php echo $record['AtID']; ?>';">
+            <span class="click" data-action="confirm-delete" data-url="<?php echo $_SERVER['PHP_SELF']; ?>?del=<?php echo $record['AtID']; ?>">
                 <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" />
             </span>&nbsp;
         </td>

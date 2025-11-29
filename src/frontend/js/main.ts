@@ -64,6 +64,10 @@ import './feeds/feed_browse';
 import './feeds/feed_loader';
 import './feeds/feed_multi_load';
 import './feeds/feed_index';
+import './feeds/feed_form';
+
+// Texts
+import './texts/text_list';
 
 // Words
 import './words/word_list_filter';

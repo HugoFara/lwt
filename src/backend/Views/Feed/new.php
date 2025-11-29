@@ -79,29 +79,6 @@ Name: </td><td class="td1">
 </table><input type="submit" value="Save" />
 <input type="hidden" name="NfOptions" value="" />
 <input type="hidden" name="save_feed" value="1" />
-<input type="button" value="Cancel" onclick="location.href='/feeds/edit';" />
+<input type="button" value="Cancel" data-action="navigate" data-url="/feeds/edit" />
 </form>
-<script type="text/javascript">
-$('[name^="c_"]').change(function(){
-    if(this.checked){
-        $(this).parent().children('input[type="text"]')
-        .removeAttr('disabled').addClass("notempty");
-        $(this).parent().find('select').removeAttr('disabled');
-    } else {
-        $(this).parent().children('input[type="text"]')
-        .attr('disabled','disabled').removeClass("notempty");
-        $(this).parent().find('select').attr('disabled','disabled');
-    }
-});
-$('[type="submit"]').on('click', function(){
-    var str;
-    str=$('[name="edit_text"]:checked').length > 0?"edit_text=1,":"";
-    $('[name^="c_"]').each(function(){
-        str+=this.checked ? $(this).parent().children('input[type="text"]')
-        .attr('name') + '='
-        + $(this).parent().children('input[type="text"]').val()
-        + ($(this).attr('name')=='c_autoupdate' ? $(this).parent().find('select').val() + ',' : ','): '';
-    });
-    $('input[name="NfOptions"]').val(str);
-});
-</script>
+<!-- Feed form interactions handled by feeds/feed_form.ts -->
