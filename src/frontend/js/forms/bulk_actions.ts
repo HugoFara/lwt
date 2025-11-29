@@ -24,10 +24,10 @@ export function selectToggle(toggle: boolean, form: string): void {
 }
 
 interface FormWithData extends HTMLFormElement {
-  data: HTMLInputElement;
+  data?: HTMLInputElement;
 }
 
-export function multiActionGo(f: FormWithData | undefined, sel: HTMLSelectElement | undefined): void {
+export function multiActionGo(f: HTMLFormElement | FormWithData | undefined, sel: HTMLSelectElement | undefined): void {
   if (f !== undefined && sel !== undefined) {
     const v = sel.value;
     const t = sel.options[sel.selectedIndex].text;
@@ -54,7 +54,10 @@ export function multiActionGo(f: FormWithData | undefined, sel: HTMLSelectElemen
           }
         }
         if (answer !== '') {
-          f.data.value = answer;
+          const formWithData = f as FormWithData;
+          if (formWithData.data) {
+            formWithData.data.value = answer;
+          }
           f.submit();
         }
       } else if (
@@ -77,7 +80,7 @@ export function multiActionGo(f: FormWithData | undefined, sel: HTMLSelectElemen
   }
 }
 
-export function allActionGo(f: FormWithData | undefined, sel: HTMLSelectElement | undefined, n: number): void {
+export function allActionGo(f: HTMLFormElement | FormWithData | undefined, sel: HTMLSelectElement | undefined, n: number): void {
   if (typeof f !== 'undefined' && typeof sel !== 'undefined') {
     const v = sel.value;
     const t = sel.options[sel.selectedIndex].text;
@@ -104,7 +107,10 @@ export function allActionGo(f: FormWithData | undefined, sel: HTMLSelectElement 
           }
         }
         if (answer !== '') {
-          f.data.value = answer;
+          const formWithData = f as FormWithData;
+          if (formWithData.data) {
+            formWithData.data.value = answer;
+          }
           f.submit();
         }
       } else if (

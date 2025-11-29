@@ -58,6 +58,8 @@ import './media/html5_audio_player';
 import './feeds/jq_feedwizard';
 import './feeds/feed_browse';
 import './feeds/feed_loader';
+import './feeds/feed_multi_load';
+import './feeds/feed_index';
 
 // Languages
 import './languages/language_wizard';

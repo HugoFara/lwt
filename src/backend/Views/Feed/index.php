@@ -35,22 +35,22 @@ namespace Lwt\Views\Feed;
         </a>
     </div>
 </div>
-<form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
+<form name="form1" action="#">
 <table class="tab2" cellspacing="0" cellpadding="5"><tr>
 <th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
-<input type="button" value="Reset All" onclick="resetAll('/feeds/edit');" /></th>
+<input type="button" value="Reset All" data-action="reset-all" data-url="/feeds/edit" /></th>
 </tr>
 <tr>
     <td class="td1 center" colspan="2" style="width:30%;">
-    Language:&nbsp;<select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds/edit?manage_feeds=1');}">
+    Language:&nbsp;<select name="filterlang" data-action="filter-language" data-url="/feeds/edit?manage_feeds=1">
     <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
 </select>
 </td>
 <td class="td1 center" colspan="4">
     Feed Name (Wildc.=*):
     <input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
-    <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='/feeds/edit?page=1&amp;query=' + val;}" />&nbsp;
-    <input type="button" value="Clear" onclick="{location.href='/feeds/edit?page=1&amp;query=';}" />
+    <input type="button" name="querybutton" value="Filter" data-action="filter-query" />&nbsp;
+    <input type="button" value="Clear" data-action="clear-query" />
 </td>
 </tr>
 </table>
@@ -63,10 +63,10 @@ namespace Lwt\Views\Feed;
     </th>
 </tr>
 <tr><td class="td1 center" style="width:30%;">
-<input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
-<input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
+<input type="button" value="Mark All" data-action="mark-all" />
+<input type="button" value="Mark None" data-action="mark-none" />
 </td><td class="td1 center" colspan="2">Marked Newsfeeds:&nbsp;
-<select name="markaction" id="markaction" disabled="disabled" onchange="$('#map').val($('input:checked').map(function(){return $(this).val();}).get().join(', '));multiActionGo(document.form1, document.form1.markaction);return false;">
+<select name="markaction" id="markaction" disabled="disabled" data-action="mark-action">
     <option value="">[Choose...]</option>
     <option disabled="disabled">------------</option>
     <option value="update">Update</option>
@@ -84,7 +84,7 @@ namespace Lwt\Views\Feed;
 </th>
 <th class="th1" colspan="1" nowrap="nowrap">
 Sort Order:
-<select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/feeds/edit?page=1&amp;sort=' + val;}">
+<select name="sort" data-action="sort">
 <?php echo get_textssort_selectoptions($currentSort); ?>
 </select>
 </th>
@@ -118,7 +118,7 @@ while ($row = mysqli_fetch_assoc($feeds)):
         <a href="<?php echo $row['NfSourceURI']; ?>" onclick="window.open(this.href); return false">
             <img src="/assets/icons/external.png" title="Show Feed" alt="Link" />
         </a>&nbsp;
-        <span class="click" onclick="if (confirm ('Are you sure?')) location.href='/feeds/edit?markaction=del&amp;selected_feed=<?php echo $row['NfID']; ?>';">
+        <span class="click" data-action="delete-feed" data-feed-id="<?php echo $row['NfID']; ?>">
             <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" />
         </span>
     </td>

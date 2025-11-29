@@ -67,7 +67,9 @@ src/frontend/js/
 ├── feeds/
 │   ├── jq_feedwizard.ts      - Feed wizard functionality
 │   ├── feed_browse.ts        - Feed browse page (NEW - Nov 2025)
-│   └── feed_loader.ts        - Feed loading AJAX (NEW - Nov 2025)
+│   ├── feed_loader.ts        - Feed loading AJAX (NEW - Nov 2025)
+│   ├── feed_multi_load.ts    - Multi-feed load page (NEW - Nov 2025)
+│   └── feed_index.ts         - Feed management page (NEW - Nov 2025)
 ├── forms/
 │   ├── word_form_auto.ts     - Word form auto-translate/romanize
 │   ├── unloadformcheck.ts    - Form change tracking
@@ -1019,10 +1021,21 @@ async function loadSingleFeed(feed: FeedConfig): Promise<void> {
 
 **Medium Priority:**
 
-- [ ] `Views/Text/edit_form.php` - Extract language switching logic
-- [ ] `Core/Word/dictionary_links.php` - Refactor dictionary link generation
-- [ ] `Views/Feed/index.php` - Replace inline handlers
-- [ ] `Views/Feed/multi_load.php` - Extract feed loading logic
+- [x] `Views/Text/edit_form.php` - Extract language switching logic ✅ **DONE** (Nov 2025)
+  - Already uses JSON config pattern (`text-edit-config`)
+  - TypeScript module in `src/frontend/js/forms/form_initialization.ts`
+  - Uses `data-action="change-language"` attribute
+- [x] `Core/Word/dictionary_links.php` - Refactor dictionary link generation ✅ **DONE**
+  - No longer exists as separate file - refactored into `DictionaryService.php`
+  - TypeScript module in `src/frontend/js/terms/dictionary.ts`
+- [x] `Views/Feed/index.php` - Replace inline handlers ✅ **DONE** (Nov 2025)
+  - Created `src/frontend/js/feeds/feed_index.ts`
+  - Replaced all inline onclick/onchange handlers with data attributes
+  - Handles language filter, query filter, sort, mark all/none, multi-action, delete
+- [x] `Views/Feed/multi_load.php` - Extract feed loading logic ✅ **DONE** (Nov 2025)
+  - Created `src/frontend/js/feeds/feed_multi_load.ts`
+  - Replaced inline `<script>` block with TypeScript module
+  - Replaced inline handlers with data attributes
 
 **Low Priority (after jQuery removal):**
 

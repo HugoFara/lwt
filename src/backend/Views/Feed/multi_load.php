@@ -24,7 +24,9 @@ namespace Lwt\Views\Feed;
 <form name="form1" action="/feeds" onsubmit="document.form1.querybutton.click(); return false;">
 <table class="tab3" style="border-left: none;border-top: none; background-color:inherit" cellspacing="0" cellpadding="5">
 <tr>
-<th class="th1 borderleft" colspan="2">Language:<select name="filterlang" onchange="{setLang(document.form1.filterlang,'/feeds/edit?multi_load_feed=1%26page=1');}">
+<th class="th1 borderleft" colspan="2">Language:<select name="filterlang"
+data-action="filter-language"
+data-url="/feeds/edit?multi_load_feed=1&amp;page=1">
     <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
 </select>
 </th>
@@ -62,14 +64,6 @@ namespace Lwt\Views\Feed;
 <input type="hidden" name="load_feed" value="1" />
 <button id="markaction">Update Marked Newsfeeds</button></th>
 <th class="th1 borderright">
-    <input type="button" value="Cancel" onclick="location.href='/feeds?selected_feed=0'; return false;" /></th></tr>
+    <input type="button" value="Cancel" data-action="cancel" data-url="/feeds?selected_feed=0" /></th></tr>
 </table>
 </form>
-
-<script type="text/javascript">
-$( "button" ).on('click', function() {
-    $("#map").val( $('input[type="checkbox"]:checked').map(function(){
-        return $(this).val();
-    }).get().join(", ") );
-});
-</script>
