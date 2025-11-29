@@ -2,23 +2,20 @@
 
 namespace Lwt\Tests\Core\Utils;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Utils/sql_file_parser.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Database/SqlFileParser.php';
 
-use Lwt\Core\Globals;
+use Lwt\Database\SqlFileParser;
 use PHPUnit\Framework\TestCase;
 
-Globals::initialize();
-
 /**
- * Tests for sql_file_parser.php functions
+ * Tests for SqlFileParser class
  */
 final class SqlFileParserTest extends TestCase
 {
     /**
-     * Test parseSQLFile function
+     * Test parseFile method
      */
-    public function testParseSQLFile(): void
+    public function testParseFile(): void
     {
         // Create a temporary SQL file
         $sqlContent = "-- Test SQL file\n" .
@@ -31,7 +28,7 @@ final class SqlFileParserTest extends TestCase
         file_put_contents($tempFile, $sqlContent);
 
         // Parse the file
-        $queries = parseSQLFile($tempFile);
+        $queries = SqlFileParser::parseFile($tempFile);
 
         // Should return an array of queries
         $this->assertIsArray($queries);
@@ -45,13 +42,14 @@ final class SqlFileParserTest extends TestCase
     }
 
     /**
-     * Test parseSQLFile with non-existent file
+     * Test parseFile with non-existent file
      */
-    public function testParseSQLFileNonexistent(): void
+    public function testParseFileNonexistent(): void
     {
-        $result = parseSQLFile('/nonexistent/file.sql');
+        $result = SqlFileParser::parseFile('/nonexistent/file.sql');
 
-        // Should return empty array or handle gracefully
-        $this->assertTrue($result === false || (is_array($result) && empty($result)));
+        // Should return empty array
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
     }
 }

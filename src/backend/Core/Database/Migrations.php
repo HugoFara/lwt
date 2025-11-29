@@ -148,7 +148,7 @@ class Migrations
 
             $migrations = Connection::fetchAll("SELECT filename FROM _migrations");
             foreach ($migrations as $record) {
-                $queries = \parseSQLFile(
+                $queries = SqlFileParser::parseFile(
                     __DIR__ . '/../../../../db/migrations/' . $record["filename"]
                 );
                 foreach ($queries as $sql_query) {
@@ -204,7 +204,7 @@ class Migrations
         $count = 0;
 
         // Rebuild in missing table
-        $queries = \parseSQLFile(__DIR__ . "/../../../../db/schema/baseline.sql");
+        $queries = SqlFileParser::parseFile(__DIR__ . "/../../../../db/schema/baseline.sql");
         foreach ($queries as $query) {
             if (str_contains($query, "_migrations")) {
                 // Do not prefix meta tables

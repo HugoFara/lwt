@@ -1279,7 +1279,7 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test parseSQLFile function (parses SQL migration files)
+     * Test SqlFileParser::parseFile method (parses SQL migration files)
      */
     public function testParseSQLFile(): void
     {
@@ -1289,7 +1289,7 @@ class DatabaseConnectTest extends TestCase
             $temp_file, "-- Comment\nSELECT 1;\n\nSELECT 2;\n-- Another comment\nSELECT 3;"
         );
 
-        $queries = parseSQLFile($temp_file);
+        $queries = \Lwt\Database\SqlFileParser::parseFile($temp_file);
         $this->assertIsArray($queries);
         $this->assertCount(3, $queries);
         $this->assertStringContainsString('SELECT 1', $queries[0]);

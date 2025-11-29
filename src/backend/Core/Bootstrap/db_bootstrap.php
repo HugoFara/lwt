@@ -31,7 +31,6 @@ use Lwt\Core\Globals;
 Globals::initialize();
 require_once __DIR__ . '/../Utils/string_utilities.php';
 require_once __DIR__ . '/../Utils/debug_utilities.php';
-require_once __DIR__ . '/../Utils/sql_file_parser.php';
 require_once __DIR__ . '/../Utils/error_handling.php';
 
 // Database classes
@@ -45,6 +44,7 @@ require_once __DIR__ . '/../Database/Settings.php';
 require_once __DIR__ . '/../Database/Validation.php';
 require_once __DIR__ . '/../Database/Maintenance.php';
 require_once __DIR__ . '/../Database/TextParsing.php';
+require_once __DIR__ . '/../Database/SqlFileParser.php';
 require_once __DIR__ . '/../Database/Migrations.php';
 require_once __DIR__ . '/../Database/Restore.php';
 
