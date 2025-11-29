@@ -78,28 +78,19 @@ describe('unloadformcheck.ts', () => {
     describe('tagChanged', () => {
       it('sets dirty to true when not during initialization', () => {
         lwtFormCheck.dirty = false;
-        const result = lwtFormCheck.tagChanged({}, { duringInitialization: false });
+        lwtFormCheck.tagChanged(false);
         expect(lwtFormCheck.dirty).toBe(true);
-        expect(result).toBe(true);
       });
 
       it('does not change dirty during initialization', () => {
         lwtFormCheck.dirty = false;
-        const result = lwtFormCheck.tagChanged({}, { duringInitialization: true });
+        lwtFormCheck.tagChanged(true);
         expect(lwtFormCheck.dirty).toBe(false);
-        expect(result).toBe(true);
       });
 
-      it('always returns true', () => {
-        expect(lwtFormCheck.tagChanged({}, {})).toBe(true);
-        expect(lwtFormCheck.tagChanged({}, { duringInitialization: true })).toBe(true);
-        expect(lwtFormCheck.tagChanged({}, { duringInitialization: false })).toBe(true);
-      });
-
-      it('handles undefined duringInitialization', () => {
-        lwtFormCheck.dirty = false;
-        lwtFormCheck.tagChanged({}, {});
-        expect(lwtFormCheck.dirty).toBe(true);
+      it('returns void', () => {
+        const result = lwtFormCheck.tagChanged(false);
+        expect(result).toBeUndefined();
       });
     });
   });
@@ -127,11 +118,11 @@ describe('unloadformcheck.ts', () => {
       lwtFormCheck.dirty = false;
 
       // Simulate tag initialization (should not make dirty)
-      lwtFormCheck.tagChanged({}, { duringInitialization: true });
+      lwtFormCheck.tagChanged(true);
       expect(lwtFormCheck.dirty).toBe(false);
 
       // Simulate user adding a tag (should make dirty)
-      lwtFormCheck.tagChanged({}, { duringInitialization: false });
+      lwtFormCheck.tagChanged(false);
       expect(lwtFormCheck.dirty).toBe(true);
 
       // Reset
@@ -139,7 +130,7 @@ describe('unloadformcheck.ts', () => {
       expect(lwtFormCheck.dirty).toBe(false);
 
       // Simulate user removing a tag (should make dirty)
-      lwtFormCheck.tagChanged({}, {});
+      lwtFormCheck.tagChanged(false);
       expect(lwtFormCheck.dirty).toBe(true);
     });
   });
@@ -165,11 +156,11 @@ describe('unloadformcheck.ts', () => {
       expect(lwtFormCheck.dirty).toBe(false);
     });
 
-    it('tagChanged handles null ui object gracefully', () => {
+    it('tagChanged handles false duringInit', () => {
       lwtFormCheck.dirty = false;
-      // The function should handle null gracefully without throwing
-      // Based on actual implementation behavior
-      expect(() => lwtFormCheck.tagChanged({}, null as unknown as { duringInitialization?: boolean })).toThrow();
+      // When duringInit is false, it should make the form dirty
+      lwtFormCheck.tagChanged(false);
+      expect(lwtFormCheck.dirty).toBe(true);
     });
 
     it('isDirtyMessage returns consistent message', () => {
@@ -209,9 +200,9 @@ describe('unloadformcheck.ts', () => {
       expect(result).toBeUndefined();
     });
 
-    it('tagChanged returns boolean', () => {
-      const result = lwtFormCheck.tagChanged({}, {});
-      expect(typeof result).toBe('boolean');
+    it('tagChanged returns void', () => {
+      const result = lwtFormCheck.tagChanged(false);
+      expect(result).toBeUndefined();
     });
   });
 });

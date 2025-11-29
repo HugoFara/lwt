@@ -4,12 +4,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   LWT_DATA,
-  WID,
-  TID,
-  WBLINK1,
-  WBLINK2,
-  WBLINK3,
-  RTL,
   type LwtLanguage,
   type LwtText,
   type LwtWord,
@@ -104,7 +98,8 @@ describe('lwt_state.ts', () => {
     it('has correct initial values', () => {
       expect(LWT_DATA.text.id).toBe(0);
       expect(LWT_DATA.text.reading_position).toBe(-1);
-      expect(LWT_DATA.text.annotations).toEqual({});
+      // annotations can be either a number (0) or a Record, starts as 0
+      expect(LWT_DATA.text.annotations).toBe(0);
     });
 
     it('allows modification of text id', () => {
@@ -122,7 +117,9 @@ describe('lwt_state.ts', () => {
     });
 
     it('allows adding annotations', () => {
-      const original = { ...LWT_DATA.text.annotations };
+      const original = LWT_DATA.text.annotations;
+      // Set annotations to a Record
+      LWT_DATA.text.annotations = {};
       LWT_DATA.text.annotations['1'] = { term: 'test', translation: 'prueba' };
       expect(LWT_DATA.text.annotations['1']).toEqual({ term: 'test', translation: 'prueba' });
       LWT_DATA.text.annotations = original;
@@ -222,35 +219,6 @@ describe('lwt_state.ts', () => {
     });
   });
 
-  // ===========================================================================
-  // Legacy Global Variables Tests
-  // ===========================================================================
-
-  describe('Legacy global variables', () => {
-    it('WID is exported and initialized to 0', () => {
-      expect(WID).toBe(0);
-    });
-
-    it('TID is exported and initialized to 0', () => {
-      expect(TID).toBe(0);
-    });
-
-    it('WBLINK1 is exported and initialized to empty string', () => {
-      expect(WBLINK1).toBe('');
-    });
-
-    it('WBLINK2 is exported and initialized to empty string', () => {
-      expect(WBLINK2).toBe('');
-    });
-
-    it('WBLINK3 is exported and initialized to empty string', () => {
-      expect(WBLINK3).toBe('');
-    });
-
-    it('RTL is exported and initialized to 0', () => {
-      expect(RTL).toBe(0);
-    });
-  });
 
   // ===========================================================================
   // Type Interface Tests
@@ -276,7 +244,7 @@ describe('lwt_state.ts', () => {
       const text: LwtText = {
         id: 1,
         reading_position: 100,
-        annotations: { '1': { data: 'test' } }
+        annotations: { '1': ['order1', 'wid1', 'translation1'] }
       };
       expect(text.id).toBe(1);
       expect(text.reading_position).toBe(100);
@@ -378,9 +346,9 @@ describe('lwt_state.ts', () => {
     });
 
     it('LWT_DATA annotations can store word-to-translation mappings', () => {
-      const originalAnnotations = { ...LWT_DATA.text.annotations };
+      const originalAnnotations = LWT_DATA.text.annotations;
 
-      // Add some annotations
+      // Add some annotations (annotations is Record<string, [unknown, string, string]> | number)
       LWT_DATA.text.annotations = {
         '1': ['order1', 'wid1', 'translation1'],
         '2': ['order2', 'wid2', 'translation2'],
