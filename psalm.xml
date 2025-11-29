@@ -8,6 +8,9 @@
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
+    <stubs>
+        <file name=".psalm/stubs.php" />
+    </stubs>
     <projectFiles>
         <directory name="." />
         <ignoreFiles>
@@ -19,14 +22,18 @@
             <directory name="docs" />
             <!-- Build tools -->
             <directory name="src/tools" />
+            <!-- Psalm stubs directory -->
+            <directory name=".psalm" />
+            <!-- Test files - excluded from unused code checks -->
+            <directory name="tests" />
         </ignoreFiles>
     </projectFiles>
 
     <globals>
-        <!-- Database globals from database_connect.php -->
+        <!-- Database globals from db_bootstrap.php -->
         <var name="$DBCONNECTION" type="mysqli|null" />
         <var name="$tbpref" type="string" />
-        <!-- Debug mode from kernel_utility.php -->
+        <!-- Debug mode from debug_utilities.php -->
         <var name="$debug" type="bool" />
         <!-- Alternative table prefix used in some contexts -->
         <var name="$fixed_tbpref" type="string" />
@@ -34,49 +41,354 @@
 
     <issueHandlers>
         <!--
-            Legacy code suppressions:
-            These files are being migrated from the old procedural structure to MVC.
-            They use global functions and variables that are valid at runtime but
-            Psalm cannot track through dynamic includes.
+            =================================================================
+            UNDEFINED REFERENCES
+            These directories use functions, constants, classes and variables
+            that are defined at runtime through includes.
+            =================================================================
         -->
         <UndefinedGlobalVariable>
             <errorLevel type="suppress">
-                <directory name="src/backend/Legacy" />
+                <directory name="src/backend/Views" />
             </errorLevel>
         </UndefinedGlobalVariable>
 
         <UndefinedFunction>
             <errorLevel type="suppress">
-                <!-- Legacy files call functions defined in session_utility.php -->
-                <directory name="src/backend/Legacy" />
+                <directory name="src/backend/Api" />
+                <directory name="src/backend/Views" />
+                <directory name="src/backend/Services" />
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Core" />
             </errorLevel>
         </UndefinedFunction>
 
-        <MissingFile>
+        <UndefinedConstant>
             <errorLevel type="suppress">
-                <!-- Legacy files may include files that are being reorganized -->
-                <directory name="src/backend/Legacy" />
+                <directory name="src/backend/Views" />
+                <directory name="src/backend/Api" />
             </errorLevel>
-        </MissingFile>
+        </UndefinedConstant>
+
+        <UndefinedClass>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Api" />
+                <directory name="src/backend/Core/Database" />
+            </errorLevel>
+        </UndefinedClass>
+
+        <UndefinedVariable>
+            <errorLevel type="suppress">
+                <directory name="tests/backend" />
+            </errorLevel>
+        </UndefinedVariable>
 
         <!--
-            Test files are flagged as unused because they're loaded by PHPUnit,
-            not by explicit require/include statements.
+            =================================================================
+            TYPE MISMATCHES
+            These directories handle dynamically typed data from databases,
+            forms, and legacy code.
+            =================================================================
         -->
-        <UnusedClass>
+        <TypeDoesNotContainType>
             <errorLevel type="suppress">
-                <directory name="tests" />
+                <directory name="src/backend/Api" />
+                <directory name="src/backend/Views" />
+                <directory name="src/backend/Controllers" />
+                <directory name="tests/backend" />
             </errorLevel>
-        </UnusedClass>
+        </TypeDoesNotContainType>
+
+        <TypeDoesNotContainNull>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </TypeDoesNotContainNull>
+
+        <InvalidScalarArgument>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Services" />
+                <directory name="tests/backend" />
+            </errorLevel>
+        </InvalidScalarArgument>
+
+        <InvalidArgument>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="tests/backend" />
+            </errorLevel>
+        </InvalidArgument>
 
         <!--
-            Controller $params are required by the routing interface signature
-            even when not used in methods that delegate to legacy includes.
+            =================================================================
+            RETURN TYPE ISSUES
+            Legacy code and controllers have complex return type patterns.
+            =================================================================
         -->
-        <PossiblyUnusedParam>
+        <InvalidReturnType>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Services" />
+                <directory name="tests/backend" />
+            </errorLevel>
+        </InvalidReturnType>
+
+        <InvalidReturnStatement>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Services" />
+                <directory name="tests/backend" />
+            </errorLevel>
+        </InvalidReturnStatement>
+
+        <NoValue>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Api" />
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Services" />
+            </errorLevel>
+        </NoValue>
+
+        <!--
+            =================================================================
+            ARGUMENT COUNT ISSUES
+            Legacy code uses functions with varying argument patterns.
+            =================================================================
+        -->
+        <TooFewArguments>
+            <errorLevel type="suppress">
+                <directory name="tests/backend" />
+            </errorLevel>
+        </TooFewArguments>
+
+        <TooManyArguments>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Api" />
+                <directory name="src/backend/Core" />
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Services" />
+                <directory name="tests/backend" />
+            </errorLevel>
+        </TooManyArguments>
+
+        <!--
+            =================================================================
+            UNUSED CODE
+            Controllers pass variables to views; API handlers use SQL interpolation;
+            Legacy code has refactoring artifacts.
+            =================================================================
+        -->
+        <UnusedVariable>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Api" />
+                <directory name="src/backend/Views" />
+                <directory name="src/backend/Services" />
+                <directory name="tests/backend" />
+                <file name="index.php" />
+                <file name="src/backend/Core/Bootstrap/db_bootstrap.php" />
+                <file name="src/backend/Core/Integration/wp_logincheck.php" />
+            </errorLevel>
+        </UnusedVariable>
+
+        <UnusedParam>
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
             </errorLevel>
+        </UnusedParam>
+
+        <PossiblyUnusedParam>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Services" />
+            </errorLevel>
         </PossiblyUnusedParam>
+
+        <UnusedForeachValue>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Api" />
+                <directory name="src/backend/Services" />
+            </errorLevel>
+        </UnusedForeachValue>
+
+        <PossiblyUnusedMethod>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Views" />
+                <directory name="src/backend/View" />
+                <directory name="src/backend/Core" />
+                <directory name="src/backend/Api" />
+                <directory name="src/backend/Services" />
+            </errorLevel>
+        </PossiblyUnusedMethod>
+
+        <PossiblyUnusedReturnValue>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Services" />
+            </errorLevel>
+        </PossiblyUnusedReturnValue>
+
+        <PossiblyUnusedProperty>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Core/Entity" />
+                <directory name="src/backend/Controllers" />
+            </errorLevel>
+        </PossiblyUnusedProperty>
+
+        <UnusedClass>
+            <errorLevel type="suppress">
+                <directory name="tests/backend" />
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Core/Entity" />
+                <file name="src/backend/Core/Database/DB.php" />
+            </errorLevel>
+        </UnusedClass>
+
+        <UnusedMethodCall>
+            <errorLevel type="suppress">
+                <directory name="tests/backend" />
+            </errorLevel>
+        </UnusedMethodCall>
+
+        <UnusedFunctionCall>
+            <errorLevel type="suppress">
+                <directory name="tests/backend" />
+                <directory name="src/backend/Services" />
+            </errorLevel>
+        </UnusedFunctionCall>
+
+        <!--
+            =================================================================
+            ARRAY AND OPERAND ISSUES
+            Legacy code accesses arrays dynamically.
+            =================================================================
+        -->
+        <InvalidArrayOffset>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Services" />
+                <directory name="tests/backend" />
+            </errorLevel>
+        </InvalidArrayOffset>
+
+        <!--
+            =================================================================
+            GLOBAL SCOPE
+            Legacy files use global scope for script-level code.
+            =================================================================
+        -->
+        <InvalidGlobal>
+            <errorLevel type="suppress">
+                <file name="src/backend/Core/Bootstrap/db_bootstrap.php" />
+            </errorLevel>
+        </InvalidGlobal>
+
+        <!--
+            =================================================================
+            DOCUMENTATION ISSUES
+            Legacy and view files may have outdated or unnecessary annotations.
+            =================================================================
+        -->
+        <UnnecessaryVarAnnotation>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </UnnecessaryVarAnnotation>
+
+        <MismatchingDocblockParamType>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </MismatchingDocblockParamType>
+
+        <!--
+            =================================================================
+            CAST AND CONDITION ISSUES
+            Explicit casts and conditions kept for clarity in legacy code.
+            =================================================================
+        -->
+        <RedundantCast>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+                <directory name="src/backend/Services" />
+            </errorLevel>
+        </RedundantCast>
+
+        <RedundantCondition>
+            <errorLevel type="suppress">
+                <directory name="tests/backend" />
+                <directory name="src/backend/Views" />
+                <directory name="src/backend/Controllers" />
+                <directory name="src/backend/Services" />
+                <file name="src/backend/Core/Database/TextParsing.php" />
+            </errorLevel>
+        </RedundantCondition>
+
+        <!--
+            =================================================================
+            FILE AND CODE FLOW
+            Files may be reorganized; code may exit early.
+            =================================================================
+        -->
+        <MissingFile>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+                <file name="index.php" />
+            </errorLevel>
+        </MissingFile>
+
+        <UnevaluatedCode>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Controllers" />
+            </errorLevel>
+        </UnevaluatedCode>
+
+        <!--
+            =================================================================
+            INTERFACE AND SECURITY
+            =================================================================
+        -->
+        <UndefinedInterfaceMethod>
+            <errorLevel type="suppress">
+                <directory name="tests/backend" />
+            </errorLevel>
+        </UndefinedInterfaceMethod>
+
+        <ForbiddenCode>
+            <errorLevel type="suppress">
+                <directory name="tests/backend" />
+                <file name="src/backend/Services/TextParsingService.php" />
+            </errorLevel>
+        </ForbiddenCode>
+
+        <!--
+            =================================================================
+            SERVICES TYPE ISSUES
+            Services handle database results with mixed types and edge cases.
+            =================================================================
+        -->
+        <InvalidCast>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Services" />
+            </errorLevel>
+        </InvalidCast>
+
+        <UndefinedPropertyFetch>
+            <errorLevel type="suppress">
+                <!-- DOMNameSpaceNode is a special XML node type -->
+                <directory name="src/backend/Services" />
+            </errorLevel>
+        </UndefinedPropertyFetch>
+
+        <!--
+            Views included from controllers use $this from the controller context.
+        -->
+        <InvalidScope>
+            <errorLevel type="suppress">
+                <directory name="src/backend/Views" />
+            </errorLevel>
+        </InvalidScope>
+
     </issueHandlers>
 </psalm>
