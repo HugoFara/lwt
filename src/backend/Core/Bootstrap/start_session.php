@@ -15,10 +15,13 @@
  */
 
 // Core utilities (replaces kernel_utility.php)
-require_once __DIR__ . '/../settings.php';
+require_once __DIR__ . '/../Globals.php';
 require_once __DIR__ . '/../Utils/error_handling.php';
 
 use Lwt\Core\Globals;
+
+// Initialize globals (this was previously done in settings.php)
+Globals::initialize();
 
 /**
  * Starts or not the error reporting.

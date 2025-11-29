@@ -2,10 +2,13 @@
 
 namespace Lwt\Tests\Core\Http;
 
-require_once __DIR__ . '/../../../../src/backend/Core/settings.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Http/url_utilities.php';
 
+use Lwt\Core\Globals;
 use PHPUnit\Framework\TestCase;
+
+Globals::initialize();
 
 /**
  * Tests for url_utilities.php functions

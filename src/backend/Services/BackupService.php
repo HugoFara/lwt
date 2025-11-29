@@ -18,6 +18,7 @@ namespace Lwt\Services;
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Database\Restore;
 
 /**
  * Service class for database backup and restore operations.
@@ -133,7 +134,7 @@ class BackupService
             return "Error: Restore file could not be opened";
         }
 
-        return restore_file($handle, "Database");
+        return Restore::restoreFile($handle, "Database");
     }
 
     /**
@@ -261,7 +262,7 @@ class BackupService
      */
     public function emptyDatabase(): string
     {
-        truncateUserDatabase();
+        Restore::truncateUserDatabase();
         return "Database content has been deleted (but settings have been kept)";
     }
 

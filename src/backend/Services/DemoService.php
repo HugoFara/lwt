@@ -17,6 +17,7 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\Restore;
 
 /**
  * Service class for installing demo database.
@@ -105,6 +106,6 @@ class DemoService
             return "Error: File ' . $file . ' could not be opened";
         }
 
-        return restore_file($handle, "Demo Database");
+        return Restore::restoreFile($handle, "Demo Database");
     }
 }

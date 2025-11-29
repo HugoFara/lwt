@@ -22,8 +22,13 @@
  */
 
 // Core utilities
-require_once __DIR__ . '/../settings.php';
+require_once __DIR__ . '/../Globals.php';
 require_once __DIR__ . '/../version.php';
+
+use Lwt\Core\Globals;
+
+// Initialize globals (this was previously done in settings.php)
+Globals::initialize();
 require_once __DIR__ . '/../Utils/string_utilities.php';
 require_once __DIR__ . '/../Utils/debug_utilities.php';
 require_once __DIR__ . '/../Utils/sql_file_parser.php';
@@ -46,7 +51,6 @@ require_once __DIR__ . '/../Database/Restore.php';
 // Deprecated functions (needed by TextParsing and other classes during bootstrap)
 require_once __DIR__ . '/../Database/deprecated_functions.php';
 
-use Lwt\Core\Globals;
 use Lwt\Core\EnvLoader;
 use Lwt\Database\Configuration;
 

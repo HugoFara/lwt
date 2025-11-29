@@ -2,10 +2,13 @@
 
 namespace Lwt\Tests\Core;
 
-require_once __DIR__ . '/../../../src/backend/Core/settings.php';
+require_once __DIR__ . '/../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../src/backend/Core/version.php';
 
+use Lwt\Core\Globals;
 use PHPUnit\Framework\TestCase;
+
+Globals::initialize();
 
 /**
  * Tests for version.php functions

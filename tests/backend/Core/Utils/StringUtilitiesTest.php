@@ -2,11 +2,14 @@
 
 namespace Lwt\Tests\Core\Utils;
 
-require_once __DIR__ . '/../../../../src/backend/Core/settings.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Utils/string_utilities.php';
 
+use Lwt\Core\Globals;
 use Lwt\Database\Escaping;
 use PHPUnit\Framework\TestCase;
+
+Globals::initialize();
 
 /**
  * Tests for string_utilities.php functions

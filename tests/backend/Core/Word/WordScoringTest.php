@@ -2,11 +2,14 @@
 
 namespace Lwt\Tests\Core\Word;
 
-require_once __DIR__ . '/../../../../src/backend/Core/settings.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php';
 
+use Lwt\Core\Globals;
 use Lwt\Services\WordStatusService;
 use PHPUnit\Framework\TestCase;
+
+Globals::initialize();
 
 /**
  * Tests for WordStatusService scoring functions

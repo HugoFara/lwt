@@ -28,7 +28,7 @@ require_once __DIR__ . '/../../Services/SimilarTermsService.php';
 require_once __DIR__ . '/../../Services/TextNavigationService.php';
 require_once __DIR__ . '/../../Services/TextParsingService.php';
 require_once __DIR__ . '/../../Services/ExpressionService.php';
-require_once __DIR__ . '/../../Core/database_operations.php';
+require_once __DIR__ . '/../../Core/Database/Restore.php';
 require_once __DIR__ . '/../../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../../Services/WordStatusService.php';
 require_once __DIR__ . '/../../Services/DictionaryService.php';

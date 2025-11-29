@@ -18,7 +18,7 @@ require_once __DIR__ . '/../../../src/backend/Services/SimilarTermsService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../src/backend/Core/database_operations.php';
+require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
 require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Http/param_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Services/MediaService.php';
@@ -29,6 +29,7 @@ require_once __DIR__ . '/../../../src/backend/Services/TableSetService.php';
 
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
+use Lwt\Database\Restore;
 use Lwt\Database\Settings;
 use Lwt\Services\DictionaryService;
 use Lwt\Services\LanguageService;
@@ -70,14 +71,14 @@ class IntegrationTest extends TestCase
         $res = mysqli_fetch_assoc($result);
 
         if ($res) {
-            truncateUserDatabase();
+            Restore::truncateUserDatabase();
         }
 
         // Install the demo DB
         $filename = getcwd() . '/db/seeds/demo.sql';
         if (file_exists($filename) && is_readable($filename)) {
             $handle = fopen($filename, "r");
-            restore_file($handle, "Demo Database");
+            Restore::restoreFile($handle, "Demo Database");
         }
 
         self::$languageService = new LanguageService();
@@ -90,7 +91,7 @@ class IntegrationTest extends TestCase
         $res = mysqli_fetch_assoc($result);
 
         if ($res) {
-            truncateUserDatabase();
+            Restore::truncateUserDatabase();
         }
 
         // Install the demo DB
@@ -98,7 +99,7 @@ class IntegrationTest extends TestCase
         $this->assertFileExists($filename);
         $this->assertFileIsReadable($filename);
         $handle = fopen($filename, "r");
-        $message = restore_file($handle, "Demo Database");
+        $message = Restore::restoreFile($handle, "Demo Database");
         $this->assertStringStartsNotWith("Error: ", $message);
     }
 
@@ -806,7 +807,7 @@ class IntegrationTest extends TestCase
         rewind($temp_file);
 
         // Test restore
-        $result = restore_file($temp_file, "Test Backup");
+        $result = Restore::restoreFile($temp_file, "Test Backup");
 
         // Check result message
         $this->assertIsString($result);
@@ -845,8 +846,8 @@ class IntegrationTest extends TestCase
         $this->assertEquals(1, $count_before);
 
         // Don't actually truncate in test as it would destroy demo DB
-        // Just verify function exists
-        $this->assertTrue(function_exists('truncateUserDatabase'));
+        // Just verify method exists
+        $this->assertTrue(method_exists(Restore::class, 'truncateUserDatabase'));
 
         // Clean up
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey='test_truncate'");

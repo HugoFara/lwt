@@ -16,7 +16,10 @@
 
 namespace Lwt\Database;
 
+require_once __DIR__ . '/../../Services/SettingsService.php';
+
 use Lwt\Core\Globals;
+use Lwt\Services\SettingsService;
 
 /**
  * Application settings management.
@@ -85,7 +88,7 @@ class Settings
     public static function getWithDefault(string $key): string
     {
         $tbpref = Globals::getTablePrefix();
-        $dft = get_setting_data();
+        $dft = SettingsService::getDefinitions();
         $val = (string) Connection::fetchValue(
             'SELECT StValue AS value
              FROM ' . $tbpref . 'settings
@@ -113,7 +116,7 @@ class Settings
     public static function save(string $k, mixed $v): string
     {
         $tbpref = Globals::getTablePrefix();
-        $dft = get_setting_data();
+        $dft = SettingsService::getDefinitions();
         if (!isset($v)) {
             return 'Value is not set!';
         }

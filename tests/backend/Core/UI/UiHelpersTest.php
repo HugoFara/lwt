@@ -2,12 +2,15 @@
 
 namespace Lwt\Tests\Core\UI;
 
-require_once __DIR__ . '/../../../../src/backend/Core/settings.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Utils/string_utilities.php';
 require_once __DIR__ . '/../../../../src/backend/Core/version.php';
 require_once __DIR__ . '/../../../../src/backend/Core/UI/ui_helpers.php';
 
+use Lwt\Core\Globals;
 use PHPUnit\Framework\TestCase;
+
+Globals::initialize();
 
 /**
  * Tests for ui_helpers.php functions

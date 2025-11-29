@@ -26,7 +26,7 @@ require_once __DIR__ . '/../../../../src/backend/Services/SimilarTermsService.ph
 require_once __DIR__ . '/../../../../src/backend/Services/TextNavigationService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/ExpressionService.php';
-require_once __DIR__ . '/../../../../src/backend/Core/database_operations.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Database/Restore.php';
 require_once __DIR__ . '/../../../../src/backend/Services/ExportService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php';

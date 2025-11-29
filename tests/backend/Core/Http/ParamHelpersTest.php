@@ -2,10 +2,15 @@
 
 namespace Lwt\Tests\Core\Http;
 
-require_once __DIR__ . '/../../../../src/backend/Core/settings.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Http/param_helpers.php';
+require_once __DIR__ . '/../../../../src/backend/Services/SettingsService.php';
 
+use Lwt\Core\Globals;
+use Lwt\Services\SettingsService;
 use PHPUnit\Framework\TestCase;
+
+Globals::initialize();
 
 /**
  * Tests for param_helpers.php functions
@@ -128,11 +133,11 @@ final class ParamHelpersTest extends TestCase
     }
 
     /**
-     * Test get_setting_data function
+     * Test SettingsService::getDefinitions() function (formerly get_setting_data)
      */
     public function testGetSettingData(): void
     {
-        $settings = get_setting_data();
+        $settings = SettingsService::getDefinitions();
 
         // Should return an array
         $this->assertIsArray($settings);

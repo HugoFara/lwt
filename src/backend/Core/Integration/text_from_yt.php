@@ -14,8 +14,6 @@
 
 namespace Lwt\Text_From_Youtube;
 
-require_once __DIR__ . '/../settings.php';
-
 /**
  * @var string|null YT_API_KEY Text from YouTube API key
  *
