@@ -8,6 +8,7 @@
  * - $textId: int - Text ID
  * - $scrdir: string - Script direction tag
  * - $showRoman: bool - Show romanization field
+ * - $dictService: DictionaryService - Dictionary service instance
  *
  * PHP version 8.1
  *
@@ -19,7 +20,8 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Views\Word;
+use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\Services\TagService;
 
 ?>
 <script type="text/javascript">
@@ -51,7 +53,7 @@ namespace Lwt\Views\Word;
         <tr>
             <td class="td1 right">Tags:</td>
             <td class="td1">
-            <?php echo \Lwt\Services\TagService::getWordTagsHtml(0); ?>
+            <?php echo TagService::getWordTagsHtml(0); ?>
         </td>
         </tr>
         <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
@@ -69,12 +71,12 @@ namespace Lwt\Views\Word;
         <tr>
             <td class="td1 right">Status:</td>
             <td class="td1">
-                <?php echo get_wordstatus_radiooptions(1); ?>
+                <?php echo SelectOptionsBuilder::forWordStatusRadio(1); ?>
             </td>
         </tr>
         <tr>
             <td class="td1 right" colspan="2">  &nbsp;
-                <?php echo createDictLinksInEditWin3($lang, 'document.forms[\'newword\'].WoSentence', 'document.forms[\'newword\'].WoText'); ?>
+                <?php echo $dictService->createDictLinksInEditWin3($lang, 'document.forms[\'newword\'].WoSentence', 'document.forms[\'newword\'].WoText'); ?>
                 &nbsp; &nbsp;
                 <input type="submit" name="op" value="Save" />
             </td>

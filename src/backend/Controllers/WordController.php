@@ -25,6 +25,7 @@ require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Services/LanguageDefinitions.php';
+require_once __DIR__ . '/../Services/SimilarTermsService.php';
 
 use Lwt\Core\StringUtils;
 use Lwt\Services\WordService;
@@ -1443,6 +1444,7 @@ class WordController extends BaseController
 
             $langData = $this->wordService->getLanguageData($lang);
             $showRoman = $langData['showRoman'];
+            $dictService = new \Lwt\Services\DictionaryService();
 
             PageLayoutHelper::renderPageStartNobody('');
 

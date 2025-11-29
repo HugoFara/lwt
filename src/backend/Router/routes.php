@@ -77,8 +77,8 @@ return function (Router $router) {
     // Delete multi-word
     $router->register('/word/delete-multi', 'WordController@deleteMulti');
 
-    // All words
-    $router->register('/words', 'WordController@all');
+    // All words (list view)
+    $router->register('/words', 'WordController@listEdit');
 
     // New word
     $router->register('/word/new', 'WordController@create');
@@ -98,6 +98,9 @@ return function (Router $router) {
 
     // Set word status
     $router->register('/word/set-status', 'WordController@setStatus');
+
+    // Set all words status (wellknown/ignore)
+    $router->register('/word/set-all-status', 'WordController@all');
 
     // Upload words
     $router->register('/word/upload', 'WordController@upload');

@@ -19,8 +19,12 @@ namespace Lwt\Controllers;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\Services\TagService;
+use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\FormHelper;
 
 require_once __DIR__ . '/../Services/TagService.php';
+require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
 
 /**
  * Controller for managing tags (both term tags and text tags).
@@ -398,10 +402,10 @@ class TagsController extends BaseController
         <th class="th1" colspan="1" nowrap="nowrap">
             <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
         </th><th class="th1" colspan="2" nowrap="nowrap">
-            <?php \makePager($currentpage, $pages, '/tags', 'form1'); ?>
+            <?php echo PageLayoutHelper::buildPager($currentpage, $pages, '/tags', 'form1'); ?>
         </th><th class="th1" nowrap="nowrap">
         Sort Order:
-        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags?page=1&amp;sort=' + val;}"><?php echo \get_tagsort_selectoptions($currentsort); ?></select>
+        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags?page=1&amp;sort=' + val;}"><?php echo SelectOptionsBuilder::forTagSort($currentsort); ?></select>
         </th></tr>
         <?php } ?>
         </table>
@@ -422,14 +426,14 @@ class TagsController extends BaseController
             </th></tr>
             <tr><td class="td1 center" colspan="2">
             <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
-            <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo \get_alltagsactions_selectoptions(); ?></select>
+            <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo SelectOptionsBuilder::forAllTagsActions(); ?></select>
             </td></tr>
             <tr><td class="td1 center">
             <input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
             <input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
             </td>
             <td class="td1 center">Marked Tags:&nbsp;
-            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo \get_multipletagsactions_selectoptions(); ?></select>
+            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo SelectOptionsBuilder::forMultipleTagsActions(); ?></select>
             </td></tr></table>
 
             <table class="sortable tab2" cellspacing="0" cellpadding="5">
@@ -453,7 +457,7 @@ class TagsController extends BaseController
                 echo '<tr>
                     <td class="td1 center">
                         <a name="rec' . $record['TgID'] . '">
-                        <input name="marked[]" type="checkbox" class="markcheck" value="' . $record['TgID'] . '" ' . \checkTest($record['TgID'], 'marked') . ' />
+                        <input name="marked[]" type="checkbox" class="markcheck" value="' . $record['TgID'] . '" ' . FormHelper::checkInRequest($record['TgID'], 'marked') . ' />
                         </a></td>
                     <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags?chg=' . $record['TgID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags?del=' . $record['TgID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
                     <td class="td1 center">' . \tohtml($record['TgText']) . '</td>
@@ -472,7 +476,7 @@ class TagsController extends BaseController
                         <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
                     </th>
                     <th class="th1" nowrap="nowrap">
-                        <?php \makePager($currentpage, $pages, '/tags', 'form2'); ?>
+                        <?php echo PageLayoutHelper::buildPager($currentpage, $pages, '/tags', 'form2'); ?>
                     </th>
                 </tr>
             </table>
@@ -769,10 +773,10 @@ class TagsController extends BaseController
         <th class="th1" colspan="1" nowrap="nowrap">
             <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
         </th><th class="th1" colspan="2" nowrap="nowrap">
-            <?php \makePager($currentpage, $pages, '/tags/text', 'form1'); ?>
+            <?php echo PageLayoutHelper::buildPager($currentpage, $pages, '/tags/text', 'form1'); ?>
         </th><th class="th1" nowrap="nowrap">
         Sort Order:
-        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags/text?page=1&amp;sort=' + val;}"><?php echo \get_tagsort_selectoptions($currentsort); ?></select>
+        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags/text?page=1&amp;sort=' + val;}"><?php echo SelectOptionsBuilder::forTagSort($currentsort); ?></select>
         </th></tr>
         <?php } ?>
         </table>
@@ -793,14 +797,14 @@ class TagsController extends BaseController
             </th></tr>
             <tr><td class="td1 center" colspan="2">
             <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
-            <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo \get_alltagsactions_selectoptions(); ?></select>
+            <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo SelectOptionsBuilder::forAllTagsActions(); ?></select>
             </td></tr>
             <tr><td class="td1 center">
             <input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
             <input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
             </td>
             <td class="td1 center">Marked Tags:&nbsp;
-            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo \get_multipletagsactions_selectoptions(); ?></select>
+            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo SelectOptionsBuilder::forMultipleTagsActions(); ?></select>
             </td></tr></table>
 
             <table class="sortable tab2" cellspacing="0" cellpadding="5">
@@ -824,7 +828,7 @@ class TagsController extends BaseController
                 $c = $this->getValue('select count(*) as value from ' . $this->table('texttags') . ' where TtT2ID=' . $record['T2ID']);
                 $ca = $this->getValue('select count(*) as value from ' . $this->table('archtexttags') . ' where AgT2ID=' . $record['T2ID']);
                 echo '<tr>';
-                echo '<td class="td1 center"><a name="rec' . $record['T2ID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['T2ID'] . '" ' . \checkTest($record['T2ID'], 'marked') . ' /></a></td>';
+                echo '<td class="td1 center"><a name="rec' . $record['T2ID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['T2ID'] . '" ' . FormHelper::checkInRequest($record['T2ID'], 'marked') . ' /></a></td>';
                 echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags/text?chg=' . $record['T2ID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags/text?del=' . $record['T2ID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';
                 echo '<td class="td1 center">' . \tohtml($record['T2Text']) . '</td>';
                 echo '<td class="td1 center">' . \tohtml($record['T2Comment']) . '</td>';
@@ -842,7 +846,7 @@ class TagsController extends BaseController
             <th class="th1" nowrap="nowrap">
                 <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
             </th><th class="th1" nowrap="nowrap">
-                <?php \makePager($currentpage, $pages, '/tags/text', 'form2'); ?>
+                <?php echo PageLayoutHelper::buildPager($currentpage, $pages, '/tags/text', 'form2'); ?>
             </th></tr></table></form>
             <?php }
         }

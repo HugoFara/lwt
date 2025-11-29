@@ -16,6 +16,8 @@
 
 namespace Lwt\View\Helper;
 
+require_once __DIR__ . '/../../Core/Http/url_utilities.php';
+
 /**
  * Helper class for generating page layout elements.
  *
@@ -272,7 +274,7 @@ HTML;
         }
 
         echo '<style type="text/css">' . $addCss . "\n" . '</style>';
-        echo '<!-- URLBASE : "' . tohtml(url_base()) . '" -->';
+        echo '<!-- URLBASE : "' . tohtml(\url_base()) . '" -->';
         echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
         echo '<script type="text/javascript">';
         echo '//<![CDATA[';
@@ -344,7 +346,7 @@ HTML;
         }
 
         echo '<style type="text/css">' . $addCss . "\n" . '</style>';
-        echo '<!-- URLBASE : "' . tohtml(url_base()) . '" -->';
+        echo '<!-- URLBASE : "' . tohtml(\url_base()) . '" -->';
         echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
         echo '<script type="text/javascript">';
         echo '//<![CDATA[';

@@ -211,6 +211,24 @@ namespace {
 // =============================================================================
 
 use Lwt\Services\TextNavigationService;
+use Lwt\Database\Connection;
+
+/**
+ * Get the title of a text by its ID.
+ *
+ * @param int $textId Text ID
+ *
+ * @return string Text title, or empty string if not found
+ */
+function getTextTitle(int $textId): string
+{
+    $tbpref = \Lwt\Core\Globals::getTablePrefix();
+    $sql = "SELECT TxTitle AS value FROM {$tbpref}texts WHERE TxID = " . (int) $textId;
+    $res = Connection::query($sql);
+    $record = mysqli_fetch_assoc($res);
+    mysqli_free_result($res);
+    return $record ? (string) $record['value'] : '';
+}
 
 /**
  * Return navigation arrows to previous and next texts.
