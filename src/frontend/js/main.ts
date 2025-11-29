@@ -41,6 +41,7 @@ import './reading/text_display';
 import './reading/frame_management';
 import './reading/annotation_toggle';
 import './reading/set_mode_result';
+import './reading/text_reading_init';
 
 // Forms
 import './forms/bulk_actions';

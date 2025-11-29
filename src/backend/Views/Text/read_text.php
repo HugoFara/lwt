@@ -42,7 +42,7 @@ $statArr = [1, 2, 3, 4, 5, 98, 99];
 $displayStatTrans = (int)Settings::getWithDefault('set-display-text-frame-term-translation');
 $annTextsize = [100 => 50, 150 => 50, 200 => 40, 250 => 25];
 
-// Build variable array for JavaScript
+// Build variable array for JavaScript - will be merged into LWT_DATA by TypeScript
 $varArray = [
     'LWT_DATA' => [
         'language' => [
@@ -75,91 +75,8 @@ $varArray = [
 ];
 ?>
 <script type="text/javascript">
-    //<![CDATA[
-
-    /// Map global variables as a JSON object
-    const new_globals = <?php echo json_encode($varArray); ?>;
-
-    /**
-     * Initialize the text reading interface.
-     * Called after LWT Vite bundle is loaded or immediately if not using Vite.
-     */
-    function initTextReading() {
-        // Set global variables - merge PHP values into existing LWT_DATA
-        for (let key in new_globals) {
-            if (typeof window[key] === 'undefined') {
-                window[key] = new_globals[key];
-            } else if (typeof new_globals[key] === 'object' && new_globals[key] !== null) {
-                for (let subkey1 in new_globals[key]) {
-                    if (typeof window[key][subkey1] === 'undefined') {
-                        window[key][subkey1] = new_globals[key][subkey1];
-                    } else if (typeof new_globals[key][subkey1] === 'object' && new_globals[key][subkey1] !== null) {
-                        for (let subkey2 in new_globals[key][subkey1]) {
-                            window[key][subkey1][subkey2] = new_globals[key][subkey1][subkey2];
-                        }
-                    } else {
-                        window[key][subkey1] = new_globals[key][subkey1];
-                    }
-                }
-            } else {
-                window[key] = new_globals[key];
-            }
-        }
-        LANG = getLangFromDict(LWT_DATA.language.translator_link);
-        LWT_DATA.text.reading_position = -1;
-        // Note from 2.10.0: is the next line necessary on text?
-        LWT_DATA.test.answer_opened = false;
-        // Change the language of the current frame
-        if (LANG && LANG != LWT_DATA.language.translator_link) {
-            $("html").attr('lang', LANG);
-        }
-
-        if (LWT_DATA.settings.jQuery_tooltip) {
-            $(function () {
-                $('#overDiv').tooltip();
-                $('#thetext').tooltip_wsty_init();
-            });
-        }
-
-        /**
-         * Save the current reading position.
-         * @global {string} LWT_DATA.text.id Text ID
-         *
-         * @since 2.0.3-fork
-         */
-        function saveCurrentPosition() {
-            let pos = 0;
-            // First position from the top
-            const top_pos = $(window).scrollTop() - $('.wsty').not('.hide').eq(0).height();
-            $('.wsty').not('.hide').each(function() {
-                if ($(this).offset().top >= top_pos) {
-                    pos = $(this).attr('data_pos');
-                    return;
-                }
-            });
-            saveReadingPosition(LWT_DATA.text.id, pos);
-        }
-
-        $(document).ready(prepareTextInteractions);
-        $(document).ready(goToLastPosition);
-        $(window).on('beforeunload', saveCurrentPosition);
-    }
-
-    // Wait for Vite bundle to load before initializing
-    if (window.LWT_VITE_LOADED) {
-        initTextReading();
-    } else {
-        // Poll for Vite bundle to load (ES modules are deferred)
-        const checkVite = setInterval(function() {
-            if (window.LWT_VITE_LOADED) {
-                clearInterval(checkVite);
-                initTextReading();
-            }
-        }, 10);
-        // Timeout after 5 seconds
-        setTimeout(function() { clearInterval(checkVite); }, 5000);
-    }
-    //]]>
+    // Store PHP values for TypeScript module
+    window.new_globals = <?php echo json_encode($varArray); ?>;
 </script>
 
 <style>

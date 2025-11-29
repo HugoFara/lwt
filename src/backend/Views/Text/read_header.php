@@ -28,34 +28,11 @@
 
 ?>
 <script type="text/javascript">
-    /**
-     * Save text status, for instance audio position
-     */
-    function saveTextStatus() {
-        const text_id = <?php echo (int) $textId; ?>;
-        // Check for HTML5 audio player first (Vite mode)
-        if (typeof getAudioPlayer === 'function') {
-            const player = getAudioPlayer();
-            if (player) {
-                saveAudioPosition(text_id, player.getCurrentTime());
-                return;
-            }
-        }
-        // Fall back to jPlayer (legacy mode)
-        if (typeof $ !== 'undefined' && $("#jquery_jplayer_1").length > 0) {
-            const jPlayerData = $("#jquery_jplayer_1").data("jPlayer");
-            if (jPlayerData && jPlayerData.status) {
-                saveAudioPosition(text_id, jPlayerData.status.currentTime);
-            }
-        }
-    }
-
-    $(window).on('beforeunload', saveTextStatus);
-
-    // We need to capture the text-to-speech event manually for Chrome
-    $(document).ready(function() {
-        $('#readTextButton').on('click', toggle_reading)
-    });
+    // Store PHP values for TypeScript module
+    window._lwtTextId = <?php echo (int) $textId; ?>;
+    window._lwtPhoneticText = <?php echo json_encode($phoneticText); ?>;
+    window._lwtLanguageCode = <?php echo json_encode($languageCode); ?>;
+    window._lwtVoiceApi = <?php echo json_encode($voiceApi); ?>;
 </script>
 
 <div class="flex-header">
@@ -136,87 +113,3 @@
 </div>
 
 <?php \makeMediaPlayer($media, (int) $audioPosition); ?>
-
-<script type="text/javascript">
-    // Store PHP values for later use after Vite loads
-    const _lwtPhoneticText = <?php echo json_encode($phoneticText); ?>;
-    const _lwtLanguageCode = <?php echo json_encode($languageCode); ?>;
-    const _lwtVoiceApi = <?php echo json_encode($voiceApi); ?>;
-
-    /// Main object for text-to-speech interaction with SpeechSynthesisUtterance
-    let text_reader = null;
-
-    /**
-     * Initialize TTS after Vite bundle is loaded.
-     */
-    function initTTS() {
-        text_reader = {
-            /// The text to read
-            text: _lwtPhoneticText,
-
-            /// {string} ISO code for the language
-            lang: (typeof getLangFromDict === 'function' ? getLangFromDict(LWT_DATA.language.translator_link) : '') || _lwtLanguageCode,
-
-            /// {string} Rate at which the speech is done, deprecated since 2.10.0
-            rate: 0.8
-        };
-
-        if (typeof LWT_DATA !== 'undefined' && LWT_DATA.language) {
-            LWT_DATA.language.ttsVoiceApi = _lwtVoiceApi;
-        }
-    }
-
-    /**
-     * Check browser compatibility before reading
-     */
-    function init_reading() {
-        if (!('speechSynthesis' in window)) {
-            alert('Your browser does not support speechSynthesis!');
-            return;
-        }
-        if (!text_reader) {
-            initTTS();
-        }
-        const lang = (typeof getLangFromDict === 'function' ? getLangFromDict(LWT_DATA.language.translator_link) : '') || text_reader.lang;
-        if (typeof readRawTextAloud === 'function') {
-            readRawTextAloud(text_reader.text, lang);
-        }
-    }
-
-    /** Start and stop the reading feature. */
-    function toggle_reading() {
-        const synth = window.speechSynthesis;
-        if (synth === undefined) {
-            alert('Your browser does not support speechSynthesis!');
-            return;
-        }
-        if (synth.speaking) {
-            synth.cancel();
-        } else {
-            init_reading();
-        }
-    }
-
-    /**
-     * Change the annotations display mode
-     *
-     * @param {string} mode The new annotation mode
-     */
-    function annotationModeChanged(mode) {
-        console.log(mode);
-        // 2.9.0: seems to be a debug function, candidate to deletion
-    }
-
-    // Initialize TTS when Vite bundle is ready
-    if (window.LWT_VITE_LOADED) {
-        initTTS();
-    } else {
-        const checkViteTTS = setInterval(function() {
-            if (window.LWT_VITE_LOADED) {
-                clearInterval(checkViteTTS);
-                initTTS();
-            }
-        }, 10);
-        setTimeout(function() { clearInterval(checkViteTTS); }, 5000);
-    }
-</script>

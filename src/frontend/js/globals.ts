@@ -55,6 +55,14 @@ import {
   showAnnotations as setModeShowAnnotations
 } from './reading/set_mode_result';
 import { fetchApiVersion } from './admin/server_data';
+import {
+  initTTS,
+  toggleReading,
+  saveTextStatus,
+  initTextReading,
+  initTextReadingHeader
+} from './reading/text_reading_init';
+import { readRawTextAloud } from './core/user_interactions';
 
 // Declare global window interface extensions
 declare global {
@@ -159,6 +167,15 @@ declare global {
 
     // Admin utilities
     fetchApiVersion: typeof fetchApiVersion;
+
+    // Text reading initialization
+    initTTS: typeof initTTS;
+    toggleReading: typeof toggleReading;
+    toggle_reading: typeof toggleReading;
+    saveTextStatus: typeof saveTextStatus;
+    initTextReading: typeof initTextReading;
+    initTextReadingHeader: typeof initTextReadingHeader;
+    readRawTextAloud: typeof readRawTextAloud;
   }
 }
 
@@ -252,3 +269,12 @@ window.showAnnotations = setModeShowAnnotations;
 
 // Admin utilities
 window.fetchApiVersion = fetchApiVersion;
+
+// Text reading initialization
+window.initTTS = initTTS;
+window.toggleReading = toggleReading;
+window.toggle_reading = toggleReading;
+window.saveTextStatus = saveTextStatus;
+window.initTextReading = initTextReading;
+window.initTextReadingHeader = initTextReadingHeader;
+window.readRawTextAloud = readRawTextAloud;
