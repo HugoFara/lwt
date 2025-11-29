@@ -29,7 +29,7 @@ $hasAnnotation = $viewData['hasAnnotation'];
 <div class="noprint">
 <div class="flex-header">
     <div>
-        <?php echo_lwt_logo(); ?>
+        <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
     </div>
     <div>
         <?php echo getPreviousAndNextTextLinks($textId, '/text/print-plain?text=', false, ''); ?>

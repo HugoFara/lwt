@@ -6,6 +6,7 @@
  * Variables expected:
  * - $dashboardData: array Dashboard data from HomeService
  * - $homeService: HomeService instance
+ * - $languages: array Languages data for select dropdown
  *
  * PHP version 8.1
  *
@@ -18,6 +19,8 @@
  */
 
 namespace Lwt\Views\Home;
+
+use Lwt\View\Helper\SelectOptionsBuilder;
 
 /**
  * Display the current text options.
@@ -65,16 +68,17 @@ function renderCurrentTextInfo(int $textid, ?array $textInfo): void
 /**
  * Echo a select element to switch between languages.
  *
- * @param int $langid Current language ID
+ * @param int   $langid    Current language ID
+ * @param array $languages Languages data from LanguageService
  *
  * @return void
  */
-function renderLanguageSelector(int $langid): void
+function renderLanguageSelector(int $langid, array $languages): void
 {
     ?>
 <div for="filterlang">Language:
     <select id="filterlang" onchange="{setLang(document.getElementById('filterlang'),'/');}">
-        <?php echo get_languages_selectoptions($langid, '[Select...]'); ?>
+        <?php echo SelectOptionsBuilder::forLanguages($languages, $langid, '[Select...]'); ?>
     </select>
 </div>
     <?php
@@ -195,7 +199,7 @@ $currentTextInfo = $dashboardData['current_text_info'];
         <a href="/admin/install-demo">Install the LWT demo database</a>
         <a href="/languages?new=1">Define the first language you want to learn</a>
         <?php elseif ($langcnt > 0): ?>
-        <?php renderLanguageSelector($currentlang); ?>
+        <?php renderLanguageSelector($currentlang, $languages); ?>
         <?php
         if ($currenttext !== null) {
             renderCurrentTextInfo($currenttext, $currentTextInfo);

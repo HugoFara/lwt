@@ -155,7 +155,7 @@ namespace Lwt\Views\Feed;
     <button style="position:relative;left:150px;" onclick="$('#settings').hide();return false;">OK</button>
     </div>
     <div id="lwt_container">
-        <?php echo_lwt_logo();?>
+        <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
         <h1>Feed Wizard | Step 3 - Filter Text
         <a href="docs/info.html#feed_wizard" target="_blank">
             <img alt="Help" title="Help" src="/assets/icons/question-frame.png"></img>

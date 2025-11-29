@@ -17,10 +17,13 @@
 namespace Lwt\Controllers;
 
 use Lwt\Services\HomeService;
+use Lwt\Services\LanguageService;
 use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\SelectOptionsBuilder;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../Services/TextStatisticsService.php';
 require_once __DIR__ . '/../Services/SentenceService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
@@ -54,12 +57,20 @@ class HomeController extends BaseController
     private HomeService $homeService;
 
     /**
+     * Language service instance.
+     *
+     * @var LanguageService
+     */
+    private LanguageService $languageService;
+
+    /**
      * Initialize controller with HomeService.
      */
     public function __construct()
     {
         parent::__construct();
         $this->homeService = new HomeService();
+        $this->languageService = new LanguageService();
     }
 
     /**
@@ -75,6 +86,8 @@ class HomeController extends BaseController
         $dashboardData = $this->homeService->getDashboardData();
         /** @psalm-suppress UnusedVariable - Used by included view */
         $homeService = $this->homeService;
+        /** @psalm-suppress UnusedVariable - Used by included view */
+        $languages = $this->languageService->getLanguagesForSelect();
 
         $debug = $dashboardData['is_debug'];
 

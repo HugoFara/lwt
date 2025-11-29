@@ -61,7 +61,7 @@
 <div class="flex-header">
     <div>
     <a href="/texts" target="_top">
-        <?php echo_lwt_logo(); ?>
+        <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
     </a>
     </div>
     <div>
