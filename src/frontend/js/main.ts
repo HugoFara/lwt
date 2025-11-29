@@ -63,6 +63,10 @@ import './feeds/feed_index';
 
 // Words
 import './words/word_list_filter';
+import './words/word_list_table';
+
+// Tags
+import './tags/tag_list';
 
 // Languages
 import './languages/language_wizard';

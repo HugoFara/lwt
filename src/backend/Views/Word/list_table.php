@@ -24,16 +24,16 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 </th></tr>
 <tr><td class="td1 center" colspan="2">
 <b>ALL</b> <?php echo ($recno == 1 ? '1 Term' : $recno . ' Terms'); ?>:&nbsp;
-<select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);">
+<select name="allaction" data-action="all-action" data-recno="<?php echo $recno; ?>">
     <?php echo get_allwordsactions_selectoptions(); ?>
 </select>
 </td></tr>
 <tr><td class="td1 center">
-<input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
-<input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
+<input type="button" value="Mark All" data-action="mark-all" />
+<input type="button" value="Mark None" data-action="mark-none" />
 </td>
 <td class="td1 center">Marked Terms:&nbsp;
-<select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);">
+<select name="markaction" id="markaction" disabled="disabled" data-action="mark-action">
     <?php echo get_multiplewordsactions_selectoptions(); ?>
 </select>
 </td></tr></table>
@@ -90,12 +90,6 @@ foreach ($words as $record) {
 </tr>
 <?php } ?>
 </table>
-
-<script type="text/javascript">
-//<![CDATA[
-    $('#waitinfo').addClass('hide');
-//]]>
-</script>
 
 <?php if ($pages > 1) { ?>
 <table class="tab2" cellspacing="0" cellpadding="5">

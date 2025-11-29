@@ -45,18 +45,18 @@ echo error_message_with_hide($message, false);
 ?>
 <p><a href="<?php echo $baseUrl; ?>?new=1"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New <?php echo $tagTypeLabel; ?> Tag ...</a></p>
 
-<form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
+<form name="form1" action="#">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
 <th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
-<input type="button" value="Reset All" onclick="{location.href='<?php echo $baseUrl; ?>?page=1&amp;query=';}" /></th>
+<input type="button" value="Reset All" data-action="reset-all" data-base-url="<?php echo $baseUrl; ?>" /></th>
 </tr>
 <tr>
 <td class="td1 center" colspan="4">
 Tag Text or Comment:
 <input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
-<input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='<?php echo $baseUrl; ?>?page=1&amp;query=' + val;}" />&nbsp;
-<input type="button" value="Clear" onclick="{location.href='<?php echo $baseUrl; ?>?page=1&amp;query=';}" />
+<input type="button" name="querybutton" value="Filter" data-action="filter-query" />&nbsp;
+<input type="button" value="Clear" data-action="clear-query" />
 </td>
 </tr>
 <?php if ($totalCount > 0): ?>
@@ -67,7 +67,7 @@ Tag Text or Comment:
     <?php makePager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form1'); ?>
 </th><th class="th1" nowrap="nowrap">
 Sort Order:
-<select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='<?php echo $baseUrl; ?>?page=1&amp;sort=' + val;}">
+<select name="sort" data-action="sort">
 <?php foreach ($sortOptions as $option): ?>
 <option value="<?php echo $option['value']; ?>"<?php echo $currentSort == $option['value'] ? ' selected="selected"' : ''; ?>><?php echo $option['text']; ?></option>
 <?php endforeach; ?>
@@ -88,14 +88,14 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 </th></tr>
 <tr><td class="td1 center" colspan="2">
 <b>ALL</b> <?php echo ($totalCount == 1 ? '1 Tag' : $totalCount . ' Tags'); ?>:&nbsp;
-<select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $totalCount; ?>);"><?php echo get_alltagsactions_selectoptions(); ?></select>
+<select name="allaction" data-action="all-action" data-recno="<?php echo $totalCount; ?>"><?php echo get_alltagsactions_selectoptions(); ?></select>
 </td></tr>
 <tr><td class="td1 center">
-<input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
-<input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
+<input type="button" value="Mark All" data-action="mark-all" />
+<input type="button" value="Mark None" data-action="mark-none" />
 </td>
 <td class="td1 center">Marked Tags:&nbsp;
-<select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo get_multipletagsactions_selectoptions(); ?></select>
+<select name="markaction" id="markaction" disabled="disabled" data-action="mark-action"><?php echo get_multipletagsactions_selectoptions(); ?></select>
 </td></tr></table>
 
 <table class="sortable tab2" cellspacing="0" cellpadding="5">
