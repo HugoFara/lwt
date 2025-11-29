@@ -506,7 +506,7 @@ class IntegrationTest extends TestCase
             "INSERT INTO {$tbpref}tags (TgText) VALUES ('test_tag_" . time() . "')"
         );
 
-        $last_id = get_last_key();
+        $last_id = (int)Connection::lastInsertId();
         $this->assertIsInt($last_id);
         $this->assertGreaterThan(0, $last_id);
 
@@ -574,18 +574,18 @@ class IntegrationTest extends TestCase
             "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
              VALUES ('Test Lang', 'http://test', 'http://test')"
         );
-        $lang_id = get_last_key();
+        $lang_id = (int)Connection::lastInsertId();
 
         Connection::query(
             "INSERT INTO {$tbpref}words (WoText, WoTextLC, WoStatus, WoLgID)
              VALUES ('testword', 'testword', 1, $lang_id)"
         );
-        $word_id = get_last_key();
+        $word_id = (int)Connection::lastInsertId();
 
         Connection::query(
             "INSERT INTO {$tbpref}tags (TgText) VALUES ('testtag1')"
         );
-        $tag_id = get_last_key();
+        $tag_id = (int)Connection::lastInsertId();
 
         Connection::query(
             "INSERT INTO {$tbpref}wordtags (WtWoID, WtTgID) VALUES ($word_id, $tag_id)"
@@ -738,25 +738,25 @@ class IntegrationTest extends TestCase
             "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
              VALUES ('Test Lang', 'http://test', 'http://test')"
         );
-        $lang_id = get_last_key();
+        $lang_id = (int)Connection::lastInsertId();
 
         Connection::query(
             "INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID)
              VALUES ('Text 1', 'Content 1', $lang_id)"
         );
-        $text1_id = get_last_key();
+        $text1_id = (int)Connection::lastInsertId();
 
         Connection::query(
             "INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID)
              VALUES ('Text 2', 'Content 2', $lang_id)"
         );
-        $text2_id = get_last_key();
+        $text2_id = (int)Connection::lastInsertId();
 
         Connection::query(
             "INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID)
              VALUES ('Text 3', 'Content 3', $lang_id)"
         );
-        $text3_id = get_last_key();
+        $text3_id = (int)Connection::lastInsertId();
 
         // Test getting navigation for middle text
         $result = getPreviousAndNextTextLinks($text2_id, 'do_text.php', 0, '');

@@ -101,7 +101,7 @@ class TextProcessingTest extends TestCase
         // Insert test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_proc_lang', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
 
         $languages = self::$languageService->getAllLanguages();
 
@@ -123,7 +123,7 @@ class TextProcessingTest extends TestCase
         // Insert language with empty name
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
 
         $languages = self::$languageService->getAllLanguages();
 
@@ -147,7 +147,7 @@ class TextProcessingTest extends TestCase
         // Insert test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_proc_getlang', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
 
         $name = self::$languageService->getLanguageName($lgId);
 
@@ -168,7 +168,7 @@ class TextProcessingTest extends TestCase
         // Insert test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_proc_string', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
 
         $name = self::$languageService->getLanguageName((string)$lgId);
 
@@ -221,7 +221,7 @@ class TextProcessingTest extends TestCase
         // Insert test language (LTR)
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
                          VALUES ('test_proc_ltr', 'http://test', 'http://test', 0)");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
 
         $tag = self::$languageService->getScriptDirectionTag($lgId);
 
@@ -242,7 +242,7 @@ class TextProcessingTest extends TestCase
         // Insert test language (RTL)
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
                          VALUES ('test_proc_rtl', 'http://test', 'http://test', 1)");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
 
         $tag = self::$languageService->getScriptDirectionTag($lgId);
 
@@ -263,7 +263,7 @@ class TextProcessingTest extends TestCase
         // Insert test language (RTL)
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
                          VALUES ('test_proc_rtl_str', 'http://test', 'http://test', 1)");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
 
         $tag = self::$languageService->getScriptDirectionTag((string)$lgId);
 

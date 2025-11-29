@@ -48,9 +48,6 @@ require_once __DIR__ . '/../Database/SqlFileParser.php';
 require_once __DIR__ . '/../Database/Migrations.php';
 require_once __DIR__ . '/../Database/Restore.php';
 
-// Deprecated functions (needed by TextParsing and other classes during bootstrap)
-require_once __DIR__ . '/../Database/deprecated_functions.php';
-
 use Lwt\Core\EnvLoader;
 use Lwt\Database\Configuration;
 

@@ -85,12 +85,12 @@ class ExportAndAnnotationTest extends TestCase
         // Create test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_lang', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
         
         // Create test text
         Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_text', 'Test content', $lgId)");
-        $textId = get_last_key();
+        $textId = (int)Connection::lastInsertId();
         
         $ann = create_ann($textId);
         
@@ -127,12 +127,12 @@ class ExportAndAnnotationTest extends TestCase
         // Create test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_recreate', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
         
         // Create test text
         Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_recreate_text', 'Test content', $lgId)");
-        $textId = get_last_key();
+        $textId = (int)Connection::lastInsertId();
         
         $oldAnn = "1\tword\t0\ttranslation\n";
         $newAnn = recreate_save_ann($textId, $oldAnn);
@@ -155,12 +155,12 @@ class ExportAndAnnotationTest extends TestCase
         // Create test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_empty', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
         
         // Create test text
         Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_empty_text', 'Test content', $lgId)");
-        $textId = get_last_key();
+        $textId = (int)Connection::lastInsertId();
         
         $newAnn = recreate_save_ann($textId, '');
         
@@ -182,12 +182,12 @@ class ExportAndAnnotationTest extends TestCase
         // Create test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_update', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
         
         // Create test text
         Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID, TxAnnotatedText) 
                          VALUES ('test_export_update_text', 'Test content', $lgId, '')");
-        $textId = get_last_key();
+        $textId = (int)Connection::lastInsertId();
         
         $oldAnn = "1\tword\t0\ttranslation\n";
         recreate_save_ann($textId, $oldAnn);
@@ -241,12 +241,12 @@ class ExportAndAnnotationTest extends TestCase
         // Create test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_struct', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
         
         // Create test text
         Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_struct_text', 'Test content', $lgId)");
-        $textId = get_last_key();
+        $textId = (int)Connection::lastInsertId();
         
         $ann = create_ann($textId);
         
@@ -288,12 +288,12 @@ class ExportAndAnnotationTest extends TestCase
         // Create test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_workflow', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
         
         // Create test text
         Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_workflow_text', 'Test content for workflow', $lgId)");
-        $textId = get_last_key();
+        $textId = (int)Connection::lastInsertId();
         
         // Step 1: Create initial annotation
         $ann1 = create_ann($textId);
@@ -324,12 +324,12 @@ class ExportAndAnnotationTest extends TestCase
         // Create test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI) 
                          VALUES ('test_export_preserve', 'http://test', 'http://test')");
-        $lgId = get_last_key();
+        $lgId = (int)Connection::lastInsertId();
         
         // Create test text
         Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_preserve_text', 'Test', $lgId)");
-        $textId = get_last_key();
+        $textId = (int)Connection::lastInsertId();
         
         // Create annotation with translation
         $oldAnn = "1\tword\t5\tmy_translation\n";
@@ -398,7 +398,7 @@ class ExportAndAnnotationTest extends TestCase
         
         // Insert test data
         Connection::query("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_export_firstval')");
-        $id = get_last_key();
+        $id = (int)Connection::lastInsertId();
         
         $value = Connection::fetchValue("SELECT TgText AS value FROM {$tbpref}tags WHERE TgID = $id");
         
