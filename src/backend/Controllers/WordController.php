@@ -16,6 +16,7 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Database\Connection;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 
@@ -864,7 +865,7 @@ class WordController extends BaseController
 
         if ($_REQUEST['op'] == 'Save') {
             $message = $listService->saveNewWord($_REQUEST);
-            $wid = \get_last_key();
+            $wid = (int)Connection::lastInsertId();
             TagService::saveWordTags($wid);
             return $wid;
         } else {

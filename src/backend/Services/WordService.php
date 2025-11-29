@@ -1064,7 +1064,7 @@ class WordService
                 );
             }
             $rows = (int) $message;
-            $wid = \get_last_key();
+            $wid = (int)Connection::lastInsertId();
         }
         $javascript = '';
         if (Settings::getWithDefault('set-tooltip-mode') == 1 && $rows > 0) {

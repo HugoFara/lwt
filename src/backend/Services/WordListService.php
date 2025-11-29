@@ -947,7 +947,7 @@ class WordListService
         );
 
         if (is_numeric($message)) {
-            $wid = \get_last_key();
+            $wid = (int)Connection::lastInsertId();
             Maintenance::initWordCount();
             $len = Connection::fetchValue(
                 'select WoWordCount as value
