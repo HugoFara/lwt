@@ -17,13 +17,14 @@
 namespace Lwt\Controllers;
 
 use Lwt\Services\TestService;
+use Lwt\Services\MobileService;
 use Lwt\Views\TestViews;
 use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Services/TestService.php';
+require_once __DIR__ . '/../Services/MobileService.php';
 require_once __DIR__ . '/../Views/TestViews.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
-require_once __DIR__ . '/../Core/Mobile/mobile_interactions.php';
 require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
 
 /**
@@ -46,12 +47,14 @@ class TestController extends BaseController
 {
     private TestService $testService;
     private TestViews $testViews;
+    private MobileService $mobileService;
 
     public function __construct()
     {
         parent::__construct();
         $this->testService = new TestService();
         $this->testViews = new TestViews();
+        $this->mobileService = new MobileService();
     }
 
     /**
@@ -289,7 +292,7 @@ class TestController extends BaseController
             }"
         );
 
-        if (\is_mobile()) {
+        if ($this->mobileService->isMobile()) {
             $this->renderMobileTestPage();
         } else {
             $this->renderDesktopTestPage();

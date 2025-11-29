@@ -355,7 +355,12 @@ Current files in `src/backend/Core/` that may need migration:
   - `export_helpers.php` → `Services/ExportService.php` (methods: `exportAnki()`, `exportTsv()`, `exportFlexible()`, `replaceTabNewline()`, `maskTermInSentence()`, `maskTermInSentenceV2()`)
 - ~~`Test/*.php`~~ - **COMPLETED**: Migrated to `TestService`
   - `test_helpers.php` → `Services/TestService.php` (methods: `getTestSql()`, `buildSelectionTestSql()`, inlined SQL projection logic)
-- `UI/*.php` - Keep as helpers or move to Views
+- ~~`Mobile/*.php`~~ - **COMPLETED**: Migrated to `MobileService`
+  - `mobile_interactions.php` → `Services/MobileService.php` (method: `isMobile()` for mobile device detection)
+- `UI/*.php` - Backward-compatibility shim (delegates to View Helpers)
+  - `ui_helpers.php` - Shim file providing deprecated global functions
+  - All functions delegate to View Helper classes (`PageLayoutHelper`, `SelectOptionsBuilder`, `StatusHelper`, `ViteHelper`)
+  - Keep for now - remove incrementally as views are updated to use View Helpers directly
 
 ### Root Files (Evaluate)
 

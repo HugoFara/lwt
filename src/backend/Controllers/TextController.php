@@ -21,6 +21,7 @@ use Lwt\Services\TextDisplayService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
+use Lwt\Services\MobileService;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 use Lwt\View\Helper\PageLayoutHelper;
@@ -33,6 +34,7 @@ require_once __DIR__ . '/../Services/TextDisplayService.php';
 require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Services/LanguageDefinitions.php';
+require_once __DIR__ . '/../Services/MobileService.php';
 
 /**
  * Controller for text management and reading interface.
@@ -67,6 +69,13 @@ class TextController extends BaseController
     private LanguageService $languageService;
 
     /**
+     * Mobile service for mobile detection.
+     *
+     * @var MobileService
+     */
+    private MobileService $mobileService;
+
+    /**
      * Constructor - initialize services.
      */
     public function __construct()
@@ -74,6 +83,7 @@ class TextController extends BaseController
         parent::__construct();
         $this->textService = new TextService();
         $this->languageService = new LanguageService();
+        $this->mobileService = new MobileService();
     }
 
     /**
@@ -98,7 +108,6 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/database_operations.php';
         require_once __DIR__ . '/../Services/TextReadingService.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
-        require_once __DIR__ . '/../Core/Mobile/mobile_interactions.php';
         require_once __DIR__ . '/../Services/MediaService.php';
         require_once __DIR__ . '/../Services/WordStatusService.php';
         require_once __DIR__ . '/../Services/ExportService.php';
@@ -210,7 +219,7 @@ class TextController extends BaseController
         );
 
         // Render appropriate layout
-        if (\is_mobile()) {
+        if ($this->mobileService->isMobile()) {
             include __DIR__ . '/../Views/Text/read_mobile.php';
         } else {
             include __DIR__ . '/../Views/Text/read_desktop.php';

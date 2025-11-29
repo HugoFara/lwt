@@ -19,6 +19,7 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\Settings;
 
 /**
  * Service class for mobile interface functionality.
@@ -48,6 +49,40 @@ class MobileService
     public function __construct()
     {
         $this->tbpref = Globals::getTablePrefix();
+    }
+
+    /**
+     * Detect if the current request is from a mobile device.
+     *
+     * Checks the mobile display mode setting:
+     * - Mode 0 (Auto): Detect based on user agent
+     * - Mode 1 (Desktop): Always return false
+     * - Mode 2 (Mobile): Always return true
+     *
+     * @return bool True if mobile mode should be activated
+     *
+     * @since 3.0.0 Migrated from mobile_interactions.php
+     */
+    public function isMobile(): bool
+    {
+        $mobileDisplayMode = (int)Settings::getWithDefault('set-mobile-display-mode');
+
+        // Mode 2: Force mobile
+        if ($mobileDisplayMode === 2) {
+            return true;
+        }
+
+        // Mode 1: Force desktop (default if not 0 or 2)
+        if ($mobileDisplayMode !== 0) {
+            return false;
+        }
+
+        // Mode 0: Auto-detect based on user agent
+        $userAgent = $_SERVER["HTTP_USER_AGENT"] ?? '';
+        $mobilePattern = "/(android|avantgo|blackberry|bolt|boost|cricket|docomo|fone|hiptop|mini" .
+            "|mobi|palm|phone|pie|tablet|up\.browser|up\.link|webos|wos)/i";
+
+        return (bool)preg_match($mobilePattern, $userAgent);
     }
 
     /**
