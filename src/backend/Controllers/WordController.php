@@ -26,6 +26,7 @@ require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 require_once __DIR__ . '/../Services/SimilarTermsService.php';
+require_once __DIR__ . '/../Services/TextService.php';
 
 use Lwt\Core\StringUtils;
 use Lwt\Services\WordService;
@@ -37,6 +38,7 @@ use Lwt\Services\ExportService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
+use Lwt\Services\TextService;
 
 /**
  * Controller for vocabulary/term management.
@@ -1011,6 +1013,12 @@ class WordController extends BaseController
 <p><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Term? - Set Language Filter first ...</p>
             <?php
         }
+
+        // Get data for filter dropdowns
+        $languages = $this->languageService->getLanguagesForSelect();
+        $textService = new TextService();
+        $langId = $currentlang !== '' ? (int)$currentlang : null;
+        $texts = $textService->getTextsForSelect($langId);
 
         // Include filter view
         include __DIR__ . '/../Views/Word/list_filter.php';

@@ -1,162 +1,127 @@
 /// <reference types="cypress" />
 
 describe('Legacy URL Redirects', () => {
-  // Test that legacy URLs redirect to new routes
-  // These should return 301 redirects
+  // Legacy .php URLs were removed in v3 (commit 48825c07)
+  // These tests now verify that legacy URLs return 404
+  // to confirm the cleanup was successful
 
-  it('should redirect /do_text.php to /text/read', () => {
+  it('should return 404 for removed /do_text.php', () => {
     cy.request({
       url: '/do_text.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/text/read');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /edit_texts.php to /text/edit', () => {
+  it('should return 404 for removed /edit_texts.php', () => {
     cy.request({
       url: '/edit_texts.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/text/edit');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /edit_words.php to /words/edit', () => {
+  it('should return 404 for removed /edit_words.php', () => {
     cy.request({
       url: '/edit_words.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/words/edit');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /edit_languages.php to /languages', () => {
+  it('should return 404 for removed /edit_languages.php', () => {
     cy.request({
       url: '/edit_languages.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/languages');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /edit_tags.php to /tags', () => {
+  it('should return 404 for removed /edit_tags.php', () => {
     cy.request({
       url: '/edit_tags.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/tags');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /all_words_wellknown.php to /words', () => {
+  it('should return 404 for removed /all_words_wellknown.php', () => {
     cy.request({
       url: '/all_words_wellknown.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/words');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /do_test.php to /test', () => {
+  it('should return 404 for removed /do_test.php', () => {
     cy.request({
       url: '/do_test.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/test');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /statistics.php to /admin/statistics', () => {
+  it('should return 404 for removed /statistics.php', () => {
     cy.request({
       url: '/statistics.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/admin/statistics');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /settings.php to /admin/settings', () => {
+  it('should return 404 for removed /settings.php', () => {
     cy.request({
       url: '/settings.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/admin/settings');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /backup_restore.php to /admin/backup', () => {
+  it('should return 404 for removed /backup_restore.php', () => {
     cy.request({
       url: '/backup_restore.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/admin/backup');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /edit_archivedtexts.php to /text/archived', () => {
+  it('should return 404 for removed /edit_archivedtexts.php', () => {
     cy.request({
       url: '/edit_archivedtexts.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/text/archived');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 
-  it('should redirect /long_text_import.php to /text/import-long', () => {
+  it('should return 404 for removed /long_text_import.php', () => {
     cy.request({
       url: '/long_text_import.php',
       followRedirect: false,
       failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.be.oneOf([301, 302, 200]);
-      if (response.status === 301 || response.status === 302) {
-        expect(response.headers.location).to.include('/text/import-long');
-      }
+      expect(response.status).to.eq(404);
     });
   });
 });

@@ -3,6 +3,8 @@
  * Word list filter form view
  *
  * Variables expected:
+ * - $languages: Array of languages for filter dropdown
+ * - $texts: Array of texts for filter dropdown
  * - $currentlang: Current language filter
  * - $currenttext: Current text filter
  * - $currenttexttag: Current text tag filter
@@ -21,6 +23,10 @@
  *
  * PHP version 8.1
  */
+
+use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\PageLayoutHelper;
+
 ?>
 <form name="form1" action="#">
 <table class="tab2" cellspacing="0" cellpadding="5">
@@ -32,7 +38,7 @@
 <td class="td1 center" colspan="2">
 Language:
 <select name="filterlang" data-action="filter-language">
-    <?php echo get_languages_selectoptions($currentlang, '[Filter off]'); ?>
+    <?php echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Filter off]'); ?>
 </select>
 </td>
 <td class="td1 center" colspan="2">
@@ -41,7 +47,7 @@ Language:
 <option value="1"<?php if ($currenttextmode == "1") echo ' selected="selected"'; ?>>Text Tag:</option>
 </select>
 <select name="text" data-action="filter-text">
-    <?php echo ($currenttextmode != 1) ? (get_texts_selectoptions($currentlang, $currenttext)) : (\Lwt\Services\TagService::getTextTagSelectOptionsWithTextIds($currentlang, $currenttexttag)); ?>
+    <?php echo ($currenttextmode != 1) ? (SelectOptionsBuilder::forTexts($texts, $currenttext, false)) : (\Lwt\Services\TagService::getTextTagSelectOptionsWithTextIds($currentlang, $currenttexttag)); ?>
 </select>
 </td>
 </tr>
@@ -49,7 +55,7 @@ Language:
 <td class="td1 center" colspan="2" nowrap="nowrap">
 Status:
 <select name="status" data-action="filter-status">
-    <?php echo get_wordstatus_selectoptions($currentstatus, true, false); ?>
+    <?php echo SelectOptionsBuilder::forWordStatus($currentstatus, true, false); ?>
 </select>
 </td>
 <td class="td1 center" colspan="2" nowrap="nowrap">
@@ -87,7 +93,7 @@ Tag #1:
 </td>
 <td class="td1 center" nowrap="nowrap">
 Tag #1 .. <select name="tag12" data-action="filter-tag12">
-    <?php echo get_andor_selectoptions($currenttag12); ?>
+    <?php echo SelectOptionsBuilder::forAndOr($currenttag12); ?>
 </select> .. Tag #2
 </td>
 <td class="td1 center" nowrap="nowrap">
@@ -103,12 +109,12 @@ Tag #2:
     <?php echo $recno; ?> Term<?php echo ($recno == 1 ? '' : 's'); ?>
 </th>
 <th class="th1" colspan="1" nowrap="nowrap">
-    <?php makePager($currentpage, $pages, '/words/edit', 'form1'); ?>
+    <?php PageLayoutHelper::buildPager($currentpage, $pages, '/words/edit', 'form1'); ?>
 </th>
 <th class="th1" nowrap="nowrap">
 Sort Order:
 <select name="sort" data-action="sort">
-    <?php echo get_wordssort_selectoptions($currentsort); ?>
+    <?php echo SelectOptionsBuilder::forWordSort($currentsort); ?>
 </select>
 </th></tr>
 <?php } ?>
