@@ -21,8 +21,6 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Database\Escaping;
-
 ?>
 <p>OK, term deleted, now unknown (<?php echo tohtml($message); ?>).</p>
 
@@ -65,7 +63,7 @@ function delete_word(wid, term, todoContent) {
 
 delete_word(
     <?php echo $wid; ?>,
-    <?php echo Escaping::prepareTextdataJs($term); ?>,
+    <?php echo json_encode($term); ?>,
     <?php echo json_encode(todo_words_content($textId)); ?>
 );
 //]]>

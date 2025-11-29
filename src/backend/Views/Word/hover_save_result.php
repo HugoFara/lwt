@@ -24,8 +24,6 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Database\Escaping;
-
 ?>
 <p>Status: <?php echo get_colored_status_msg($status); ?></p><br />
 <?php if ($translation != '*'): ?>
@@ -37,8 +35,8 @@ use Lwt\Database\Escaping;
     let title = '';
     if (window.parent.LWT_DATA.settings.jQuery_tooltip)
         title = make_tooltip(
-            <?php echo Escaping::prepareTextdataJs($wordRaw); ?>,
-            <?php echo Escaping::prepareTextdataJs($translation); ?>,
+            <?php echo json_encode($wordRaw); ?>,
+            <?php echo json_encode($translation); ?>,
             '',
             '<?php echo $status; ?>'
         );

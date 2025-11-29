@@ -46,6 +46,9 @@ class Escaping
      * @param string $s Input string
      *
      * @return string JS-safe escaped string
+     *
+     * @deprecated 3.0.0 Use json_encode() instead for JavaScript output.
+     *                   This function incorrectly mixes SQL and JS escaping.
      */
     public static function prepareTextdataJs(string $s): string
     {

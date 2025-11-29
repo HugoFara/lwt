@@ -2,6 +2,7 @@
 
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Services\WordStatusService;
@@ -74,7 +75,7 @@ class TermHandler
             WHERE WoID = $wid"
         );
 
-        $oldtransarr = preg_split('/[' . \get_sepas() . ']/u', $oldtrans);
+        $oldtransarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $oldtrans);
         if ($oldtransarr === false) {
             return (string)Connection::fetchValue(
                 "SELECT WoTextLC AS value

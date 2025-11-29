@@ -28,8 +28,6 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Database\Escaping;
-
 ?>
 <p>OK: <?php echo tohtml($message); ?></p>
 
@@ -37,16 +35,16 @@ use Lwt\Database\Escaping;
 <script type="text/javascript">
     const context = window.parent.document.getElementById('frame-l');
     const contexth = window.parent.document.getElementById('frame-h');
-    const woid = <?php echo Escaping::prepareTextdataJs($wid); ?>;
-    const status = <?php echo Escaping::prepareTextdataJs($status); ?>;
-    const trans = <?php echo Escaping::prepareTextdataJs($translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false)); ?>;
-    const roman = <?php echo Escaping::prepareTextdataJs($romanization); ?>;
+    const woid = <?php echo json_encode($wid); ?>;
+    const status = <?php echo json_encode($status); ?>;
+    const trans = <?php echo json_encode($translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false)); ?>;
+    const roman = <?php echo json_encode($romanization); ?>;
     let title;
     if (window.parent.LWT_DATA.settings.jQuery_tooltip) {
         title = '';
     } else {
         title = make_tooltip(
-            <?php echo Escaping::prepareTextdataJs($text); ?>,
+            <?php echo json_encode($text); ?>,
             trans, roman, status
         );
     }
@@ -77,7 +75,7 @@ use Lwt\Database\Escaping;
 <script type="text/javascript">
     window.opener.do_ajax_edit_impr_text(
         <?php echo $fromAnn; ?>,
-        <?php echo Escaping::prepareTextdataJs($textlc ?? ''); ?>,
+        <?php echo json_encode($textlc ?? ''); ?>,
         <?php echo $wid; ?>
     );
 </script>

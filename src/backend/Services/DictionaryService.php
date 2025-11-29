@@ -19,7 +19,6 @@ require_once __DIR__ . '/../Core/Utils/string_utilities.php';
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 
 /**
  * Service class for dictionary link operations.
@@ -162,7 +161,7 @@ class DictionaryService
         }
         if ($popup) {
             $r = ' <span class="click" onclick="owin(' .
-            Escaping::prepareTextdataJs($url) . ');">' .
+            json_encode($url) . ');">' .
             \tohtml($txt) .
             '</span> ';
         } else {
@@ -195,9 +194,9 @@ class DictionaryService
                 $popup = $popup || array_key_exists('lwt_popup', $url_query);
             }
             if ($popup) {
-                $r = "owin(" . Escaping::prepareTextdataJs($url) . ");\n";
+                $r = "owin(" . json_encode($url) . ");\n";
             } else {
-                $r = "top.frames['ru'].location.href=" . Escaping::prepareTextdataJs($url) . ";\n";
+                $r = "top.frames['ru'].location.href=" . json_encode($url) . ";\n";
             }
         }
         return $r;
@@ -243,7 +242,7 @@ class DictionaryService
             $url = str_replace('?', '?sent=1&', $url);
         }
         return '<span class="click" onclick="translateSentence' . ($popup ? '2' : '') . '(' .
-        Escaping::prepareTextdataJs($url) . ',' . $sentctljs . ');">' .
+        json_encode($url) . ',' . $sentctljs . ');">' .
         \tohtml($txt) . '</span>';
     }
 
@@ -278,19 +277,19 @@ class DictionaryService
         mysqli_free_result($res);
 
         $r = 'Lookup Term:
-        <span class="click" onclick="translateWord2(' . Escaping::prepareTextdataJs($wb1) .
+        <span class="click" onclick="translateWord2(' . json_encode($wb1) .
         ',' . $wordctljs . ');">Dict1</span> ';
         if ($wb2 != "") {
             $r .= '<span class="click" onclick="translateWord2(' .
-            Escaping::prepareTextdataJs($wb2) . ',' . $wordctljs . ');">Dict2</span> ';
+            json_encode($wb2) . ',' . $wordctljs . ');">Dict2</span> ';
         }
         if ($wb3 != "") {
             $sent_mode = substr($wb3, 0, 7) == 'ggl.php' ||
             str_ends_with(parse_url($wb3, PHP_URL_PATH), '/ggl.php');
             $r .= '<span class="click" onclick="translateWord2(' .
-            Escaping::prepareTextdataJs($wb3) . ',' . $wordctljs . ');">Translator</span>
+            json_encode($wb3) . ',' . $wordctljs . ');">Translator</span>
              | <span class="click" onclick="translateSentence2(' .
-            Escaping::prepareTextdataJs(
+            json_encode(
                 $sent_mode ?
                 str_replace('?', '?sent=1&', $wb3) : $wb3
             ) . ',' . $sentctljs .
@@ -329,14 +328,14 @@ class DictionaryService
         mysqli_free_result($res);
         $r = '<span class="smaller">';
         $r .= '<span class="click" onclick="translateWord3(' .
-        Escaping::prepareTextdataJs($wb1) . ',' . $wordctljs . ');">[1]</span> ';
+        json_encode($wb1) . ',' . $wordctljs . ');">[1]</span> ';
         if ($wb2 != "") {
             $r .= '<span class="click" onclick="translateWord3(' .
-            Escaping::prepareTextdataJs($wb2) . ',' . $wordctljs . ');">[2]</span> ';
+            json_encode($wb2) . ',' . $wordctljs . ');">[2]</span> ';
         }
         if ($wb3 != "") {
             $r .= '<span class="click" onclick="translateWord3(' .
-            Escaping::prepareTextdataJs($wb3) . ',' . $wordctljs . ');">[G]</span>';
+            json_encode($wb3) . ',' . $wordctljs . ');">[G]</span>';
         }
         $r .= '</span>';
         return $r;
@@ -366,9 +365,9 @@ class DictionaryService
         }
         $popup = $popup || str_contains($wb1, "lwt_popup=");
         if ($popup) {
-            $f1 = 'translateWord2(' . Escaping::prepareTextdataJs($wb1);
+            $f1 = 'translateWord2(' . json_encode($wb1);
         } else {
-            $f1 = 'translateWord(' . Escaping::prepareTextdataJs($wb1);
+            $f1 = 'translateWord(' . json_encode($wb1);
         }
 
         $wb2 = isset($record['LgDict2URI']) ? (string) $record['LgDict2URI'] : "";
@@ -379,9 +378,9 @@ class DictionaryService
         }
         $popup = $popup || str_contains($wb2, "lwt_popup=");
         if ($popup) {
-            $f2 = 'translateWord2(' . Escaping::prepareTextdataJs($wb2);
+            $f2 = 'translateWord2(' . json_encode($wb2);
         } else {
-            $f2 = 'translateWord(' . Escaping::prepareTextdataJs($wb2);
+            $f2 = 'translateWord(' . json_encode($wb2);
         }
 
         $wb3 = isset($record['LgGoogleTranslateURI']) ?
@@ -401,11 +400,11 @@ class DictionaryService
             $popup = $popup || array_key_exists('lwt_popup', $url_query);
         }
         if ($popup) {
-            $f3 = 'translateWord2(' . Escaping::prepareTextdataJs($wb3);
-            $f4 = 'translateSentence2(' . Escaping::prepareTextdataJs($wb3);
+            $f3 = 'translateWord2(' . json_encode($wb3);
+            $f4 = 'translateSentence2(' . json_encode($wb3);
         } else {
-            $f3 = 'translateWord(' . Escaping::prepareTextdataJs($wb3);
-            $f4 = 'translateSentence(' . Escaping::prepareTextdataJs(
+            $f3 = 'translateWord(' . json_encode($wb3);
+            $f4 = 'translateSentence(' . json_encode(
                 (str_ends_with($parsed_url['path'] ?? '', "/ggl.php")) ?
                 str_replace('?', '?sent=1&', $wb3) : $wb3
             );

@@ -21,6 +21,7 @@ require_once __DIR__ . '/WordStatusService.php';
 require_once __DIR__ . '/ExpressionService.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
@@ -309,7 +310,7 @@ class WordService
      */
     public function textToClassName(string $text): string
     {
-        return \strToClassName(Escaping::prepareTextdata($text));
+        return StringUtils::toClassName(Escaping::prepareTextdata($text));
     }
 
     /**
@@ -873,7 +874,7 @@ class WordService
             'id' => $wid,
             'term' => $term,
             'termlc' => $termlc,
-            'hex' => \strToClassName($termlc)
+            'hex' => StringUtils::toClassName($termlc)
         ];
     }
 
@@ -1069,9 +1070,9 @@ class WordService
         $javascript = '';
         if (Settings::getWithDefault('set-tooltip-mode') == 1 && $rows > 0) {
             $javascript .= "title = make_tooltip(" .
-            Escaping::prepareTextdataJs($term) . ", '*', '', '$status');";
+            json_encode($term) . ", '*', '', '$status');";
         }
-        $javascript .= "$('.TERM" . \strToClassName($termlc) . "', context)
+        $javascript .= "$('.TERM" . StringUtils::toClassName($termlc) . "', context)
         .removeClass('status0')
         .addClass('status$status word$wid')
         .attr('data_status', '$status')
@@ -1131,7 +1132,7 @@ class WordService
             WHERE Ti2LgID = $langId AND LOWER(Ti2Text) = $wordlc"
         );
 
-        $hex = \strToClassName(
+        $hex = StringUtils::toClassName(
             Escaping::prepareTextdata(mb_strtolower($text, 'UTF-8'))
         );
 

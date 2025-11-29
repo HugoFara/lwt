@@ -24,28 +24,26 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Database\Escaping;
-
 ?>
 <p>OK: <?php echo tohtml($message); ?></p>
 
 <script type="text/javascript">
 //<![CDATA[
 var context = window.parent.document;
-var woid = <?php echo Escaping::prepareTextdataJs($wid); ?>;
+var woid = <?php echo json_encode($wid); ?>;
 if(window.parent.location.href.includes('type=table')) {
     // Table Test
-    $('#STAT' + woid, context).html(<?php echo Escaping::prepareTextdataJs(make_status_controls_test_table(1, (int) $status, $wid)); ?>);
-    $('#TERM' + woid, context).html(<?php echo Escaping::prepareTextdataJs(tohtml($text)); ?>);
-    $('#TRAN' + woid, context).html(<?php echo Escaping::prepareTextdataJs(tohtml($translation)); ?>);
-    $('#ROMA' + woid, context).html(<?php echo Escaping::prepareTextdataJs(tohtml($romanization)); ?>);
-    $('#SENT' + woid, context).html(<?php echo Escaping::prepareTextdataJs($sent1); ?>);
+    $('#STAT' + woid, context).html(<?php echo json_encode(make_status_controls_test_table(1, (int) $status, $wid)); ?>);
+    $('#TERM' + woid, context).html(<?php echo json_encode(tohtml($text)); ?>);
+    $('#TRAN' + woid, context).html(<?php echo json_encode(tohtml($translation)); ?>);
+    $('#ROMA' + woid, context).html(<?php echo json_encode(tohtml($romanization)); ?>);
+    $('#SENT' + woid, context).html(<?php echo json_encode($sent1); ?>);
 } else {
     // Normal Test
-    var wotext = <?php echo Escaping::prepareTextdataJs($text); ?>;
-    var status = <?php echo Escaping::prepareTextdataJs($status); ?>;
-    var trans = <?php echo Escaping::prepareTextdataJs($translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false)); ?>;
-    var roman = <?php echo Escaping::prepareTextdataJs($romanization); ?>;
+    var wotext = <?php echo json_encode($text); ?>;
+    var status = <?php echo json_encode($status); ?>;
+    var trans = <?php echo json_encode($translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false)); ?>;
+    var roman = <?php echo json_encode($romanization); ?>;
     $('.word' + woid, context).attr('data_text',wotext).attr('data_trans',trans).attr('data_rom',roman).attr('data_status',status);
 }
 cleanupRightFrames();

@@ -21,8 +21,6 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Database\Escaping;
-
 ?>
 <p>OK, you know this term well!</p>
 
@@ -30,7 +28,7 @@ use Lwt\Database\Escaping;
 //<![CDATA[
 var context = window.parent.document.getElementById('frame-l');
 var contexth = window.parent.document.getElementById('frame-h');
-var title = make_tooltip(<?php echo Escaping::prepareTextdataJs($term); ?>,'*','','99');
+var title = make_tooltip(<?php echo json_encode($term); ?>,'*','','99');
 $('.TERM<?php echo $hex; ?>', context)
 .removeClass('status0')
 .addClass('status99 word<?php echo $wid; ?>')

@@ -18,7 +18,6 @@ namespace Lwt\Controllers;
 
 use Lwt\Core\Http\InputValidator;
 use Lwt\Services\TranslationService;
-use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\PageLayoutHelper;
 
@@ -224,7 +223,7 @@ class TranslationController extends BaseController
         <?php
         foreach ($translations as $word) {
             echo '<span class="click" onclick="addTranslation(' .
-                Escaping::prepareTextdataJs($word) . ');">' .
+                json_encode($word) . ');">' .
                 '<img src="/assets/icons/tick-button.png" title="Copy" alt="Copy" /> &nbsp; ' .
                 \tohtml($word) . '</span><br />';
         }

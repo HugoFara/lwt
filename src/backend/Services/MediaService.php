@@ -20,7 +20,6 @@
 
 namespace Lwt\Services {
 
-use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 /**
@@ -456,7 +455,7 @@ style="width: 100%; height: 300px; display: block; margin-left: auto; margin-rig
         // Initialize the HTML5 audio player
         setupAudioPlayer(
             'lwt-audio-player',
-            <?php echo Escaping::prepareTextdataJs(encodeURI($audio)); ?>,
+            <?php echo json_encode(encodeURI($audio)); ?>,
             <?php echo $offset; ?>,
             <?php echo json_encode($repeatMode); ?>
         );

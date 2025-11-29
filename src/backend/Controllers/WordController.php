@@ -26,6 +26,7 @@ require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 
+use Lwt\Core\StringUtils;
 use Lwt\Services\WordService;
 use Lwt\Services\WordListService;
 use Lwt\Services\WordUploadService;
@@ -1649,7 +1650,7 @@ class WordController extends BaseController
         // Prepare data for view
         $newWords = [];
         while ($record = mysqli_fetch_assoc($res)) {
-            $record['hex'] = \strToClassName(
+            $record['hex'] = StringUtils::toClassName(
                 \Lwt\Database\Escaping::prepareTextdata($record['WoTextLC'])
             );
             $record['translation'] = $record['WoTranslation'];

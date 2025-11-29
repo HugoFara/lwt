@@ -16,6 +16,7 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Globals;
+use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
@@ -268,7 +269,7 @@ class ExpressionService
                     }
                 }
             }
-            $hex = \strToClassName(Escaping::prepareTextdata($textlc));
+            $hex = StringUtils::toClassName(Escaping::prepareTextdata($textlc));
             $this->newMultiWordInteractable($hex, $appendtext, $wid, $len);
         }
         $sqltext = null;

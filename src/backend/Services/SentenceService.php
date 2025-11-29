@@ -333,7 +333,7 @@ class SentenceService
         $sentences = $this->getSentencesWithWord($lang, $wordlc, $wid, $mode);
         foreach ($sentences as $sentence) {
             $r .= '<span class="click" onclick="{' . $jsctlname . '.value=' .
-                Escaping::prepareTextdataJs($sentence[1]) . '; lwtFormCheck.makeDirty();}">
+                json_encode($sentence[1]) . '; lwtFormCheck.makeDirty();}">
             <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
             </span> &nbsp;' . $sentence[0] . '<br />';
         }
@@ -359,7 +359,7 @@ class SentenceService
     <!-- Interactable text -->
     <div id="exsent-interactable">
         <span class="click" onclick="do_ajax_show_sentences(
-            <?php echo $lang; ?>, <?php echo Escaping::prepareTextdataJs($termlc); ?>,
+            <?php echo $lang; ?>, <?php echo json_encode($termlc); ?>,
             <?php echo htmlentities(json_encode($selector)); ?>, <?php echo $wid; ?>);">
             <img src="/assets/icons/sticky-notes-stack.png" title="Show Sentences" alt="Show Sentences" />
             Show Sentences

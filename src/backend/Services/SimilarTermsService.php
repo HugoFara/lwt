@@ -186,8 +186,8 @@ class SimilarTermsService
                 $rom = "";
                 $romd = "";
             }
-            $js_event = "setTransRoman(" . Escaping::prepareTextdataJs($tra) . ',' .
-            Escaping::prepareTextdataJs($rom) . ')';
+            $js_event = "setTransRoman(" . json_encode($tra) . ',' .
+            json_encode($rom) . ')';
             $output = '<img class="clickedit" src="/assets/icons/tick-button-small.png" ' .
             'title="Copy → Translation &amp; Romanization Field(s)" ' .
             'onclick="' . tohtml($js_event) . '" /> ' .

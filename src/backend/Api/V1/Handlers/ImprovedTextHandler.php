@@ -2,8 +2,8 @@
 
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 /**
@@ -37,7 +37,7 @@ class ImprovedTextHandler
                 "SELECT WoTranslation AS value FROM {$tbpref}words
                 WHERE WoID = $wid"
             );
-            $transarr = preg_split('/[' . \get_sepas() . ']/u', $alltrans);
+            $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
             $set = false;
             foreach ($transarr as $t) {
                 $tt = trim($t);
@@ -82,7 +82,7 @@ class ImprovedTextHandler
             '<img class="click" src="/assets/icons/plus-button.png"
             title="Save translation to new term"
             alt="Save translation to new term"
-            onclick="addTermTranslation(\'#tx' . $i . '\',' . Escaping::prepareTextdataJs($word) . ',' . $lang . ');" />';
+            onclick="addTermTranslation(\'#tx' . $i . '\',' . json_encode($word) . ',' . $lang . ');" />';
         }
         $r .= '&nbsp;&nbsp;
         <span id="wait' . $i . '">
@@ -107,7 +107,7 @@ class ImprovedTextHandler
             "SELECT WoTranslation AS value FROM {$tbpref}words
             WHERE WoID = $wordId"
         );
-        $transarr = preg_split('/[' . \get_sepas() . ']/u', $alltrans);
+        $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
         foreach ($transarr as $t) {
             $tt = trim($t);
             if ($tt == '*' || $tt == '') {
@@ -298,7 +298,7 @@ class ImprovedTextHandler
                         '</span>
                     </td>
                     <td class="td1 center" nowrap="nowrap">' .
-                        \makeDictLinks($langid, Escaping::prepareTextdataJs($vals[1])) .
+                        \makeDictLinks($langid, json_encode($vals[1])) .
                     '</td>
                     <td class="td1 center">
                         <span id="editlink' . $i . '">' . $wordLink . '</span>

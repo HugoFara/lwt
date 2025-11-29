@@ -18,6 +18,7 @@
 namespace Lwt\Services {
 
 use Lwt\Core\Globals;
+use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Services\ExportService;
 
@@ -86,7 +87,7 @@ class TextReadingService
                             $hidetag, "click", "mword", ($showAll ? 'mwsty' : 'wsty'),
                             "order" . $record['Ti2Order'],
                             'word' . $record['WoID'], 'status' . $record['WoStatus'],
-                            'TERM' . strToClassName($record['TiTextLC'])
+                            'TERM' . StringUtils::toClassName($record['TiTextLC'])
                         ]
                     ),
                     'data_pos' => $currcharcount,
@@ -125,7 +126,7 @@ class TextReadingService
                         [
                             $hidetag, "click", "word", "wsty", "word" . $record['WoID'],
                             'status' . $record['WoStatus'],
-                            'TERM' . strToClassName($record['TiTextLC'])
+                            'TERM' . StringUtils::toClassName($record['TiTextLC'])
                         ]
                     ),
                     'data_pos' => $currcharcount,
@@ -146,7 +147,7 @@ class TextReadingService
                         " ",
                         [
                             $hidetag, "click", "word", "wsty", "status0",
-                            "TERM" . strToClassName($record['TiTextLC'])
+                            "TERM" . StringUtils::toClassName($record['TiTextLC'])
                         ]
                     ),
                     'data_pos' => $currcharcount,

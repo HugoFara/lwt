@@ -19,6 +19,7 @@
 namespace Lwt\Services {
 
 use Lwt\Core\Globals;
+use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
@@ -229,7 +230,7 @@ class AnnotationService
      */
     public function getFirstTranslation(string $trans): string
     {
-        $arr = preg_split('/[' . get_sepas() . ']/u', $trans);
+        $arr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $trans);
         if (count($arr) < 1) {
             return '';
         }

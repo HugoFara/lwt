@@ -133,67 +133,56 @@ function get_file_path($filename): string
     return '/' . $normalizedPath;
 }
 
+/**
+ * Get separator characters for translations (preg_quote'd).
+ *
+ * @deprecated Use \Lwt\Core\StringUtils::getSeparators() instead
+ *
+ * @return string Preg-quoted separator characters
+ */
 function get_sepas()
 {
-    static $sepa;
-    if (!$sepa) {
-        $sepa = preg_quote(Settings::getWithDefault('set-term-translation-delimiters'), '/');
-    }
-    return $sepa;
+    return \Lwt\Core\StringUtils::getSeparators();
 }
 
+/**
+ * Get the first separator character.
+ *
+ * @deprecated Use \Lwt\Core\StringUtils::getFirstSeparator() instead
+ *
+ * @return string First separator character
+ */
 function get_first_sepa()
 {
-    static $sepa;
-    if (!$sepa) {
-        $sepa = mb_substr(
-            Settings::getWithDefault('set-term-translation-delimiters'),
-            0,
-            1,
-            'UTF-8'
-        );
-    }
-    return $sepa;
+    return \Lwt\Core\StringUtils::getFirstSeparator();
 }
 
+/**
+ * Convert string to hexadecimal.
+ *
+ * @deprecated Use \Lwt\Core\StringUtils::toHex() instead
+ *
+ * @param string $string String to convert
+ *
+ * @return string Uppercase hex string
+ */
 function strToHex(string $string): string
 {
-    $hex = '';
-    for ($i = 0; $i < strlen($string); $i++) {
-        $h = dechex(ord($string[$i]));
-        if (strlen($h) == 1) {
-            $hex .= "0" . $h;
-        } else {
-            $hex .= $h;
-        }
-    }
-    return strtoupper($hex);
+    return \Lwt\Core\StringUtils::toHex($string);
 }
 
 /**
  * Escapes everything to "¤xx" but not 0-9, a-z, A-Z, and unicode >= (hex 00A5, dec 165)
  *
+ * @deprecated Use \Lwt\Core\StringUtils::toClassName() instead
+ *
  * @param string $string String to escape
+ *
+ * @return string CSS-safe class name
  */
 function strToClassName($string): string
 {
-    $length = mb_strlen($string, 'UTF-8');
-    $r = '';
-    for ($i = 0; $i < $length; $i++) {
-        $c = mb_substr($string, $i, 1, 'UTF-8');
-        $o = ord($c);
-        if (
-            ($o < 48)
-            || ($o > 57 && $o < 65)
-            || ($o > 90 && $o < 97)
-            || ($o > 122 && $o < 165)
-        ) {
-            $r .= '¤' . strToHex($c);
-        } else {
-            $r .= $c;
-        }
-    }
-    return $r;
+    return \Lwt\Core\StringUtils::toClassName($string);
 }
 
 /**

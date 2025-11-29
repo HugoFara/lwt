@@ -27,22 +27,20 @@
 
 namespace Lwt\Views\Word;
 
-use Lwt\Database\Escaping;
-
 ?>
 <p><?php echo $message; ?></p>
 
 <?php if ($success && $len == 1): ?>
 <script type="text/javascript">
     var context = window.parent.document;
-    var woid = <?php echo Escaping::prepareTextdataJs($wid); ?>;
-    var status = <?php echo Escaping::prepareTextdataJs($status); ?>;
-    var trans = <?php echo Escaping::prepareTextdataJs($translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false)); ?>;
-    var roman = <?php echo Escaping::prepareTextdataJs($romanization); ?>;
+    var woid = <?php echo json_encode($wid); ?>;
+    var status = <?php echo json_encode($status); ?>;
+    var trans = <?php echo json_encode($translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false)); ?>;
+    var roman = <?php echo json_encode($romanization); ?>;
     var title = '';
     if (window.parent.LWT_DATA.settings.jQuery_tooltip) {
         title = make_tooltip(
-                <?php echo Escaping::prepareTextdataJs($text); ?>,
+                <?php echo json_encode($text); ?>,
             trans, roman, status
         );
     }
