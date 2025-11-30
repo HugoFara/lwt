@@ -53,7 +53,7 @@ $hasAnnotation = $viewData['hasAnnotation'];
     </div>
 </div>
 <h1>PRINT &#9654; <?php
-echo tohtml($title);
+echo htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8');
 if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
     echo ' <a href="' . $sourceUri . '" target="_blank">' .
          '<img src="' . get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" /></a>';
@@ -92,7 +92,7 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
 </div>
 <!-- noprint -->
 <div id="print" <?php echo ($rtlScript ? 'dir="rtl"' : ''); ?>>
-<h2><?php echo tohtml($title); ?></h2>
+<h2><?php echo htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h2>
 <p style="font-size: <?php echo $textSize; ?>%; line-height: 1.35; margin-bottom: 10px; ">
 <?php
 // Process and output text items
@@ -135,7 +135,7 @@ foreach ($textItems as $record) {
         echo str_replace(
             "¶",
             '</p><p style="font-size:' . $textSize . '%;line-height: 1.3; margin-bottom: 10px;">',
-            tohtml($record['TiText'])
+            htmlspecialchars($record['TiText'] ?? '', ENT_QUOTES, 'UTF-8')
         );
     } else {
         // Word item

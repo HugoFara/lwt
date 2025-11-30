@@ -20,7 +20,7 @@ $textSize = $viewData['textSize'];
 $rtlScript = $viewData['rtlScript'];
 $ttsClass = $viewData['ttsClass'] ?? '';
 ?>
-<h1>ANN.TEXT &#9654; <?php echo tohtml($title);
+<h1>ANN.TEXT &#9654; <?php echo htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8');
 if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
     echo ' <a href="' . $sourceUri . '" target="_blank">' .
          '<img src="' . get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" /></a>';
@@ -39,7 +39,7 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
 <!-- noprint -->
 <div id="print"<?php echo ($rtlScript ? ' dir="rtl"' : ''); ?>>
     <p style="font-size:<?php echo $textSize; ?>%;line-height: 1.35; margin-bottom: 10px; ">
-        <?php echo tohtml($title); ?>
+        <?php echo htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?>
         <br /><br />
     <?php
     $items = preg_split('/[\n]/u', $ann);
@@ -58,18 +58,18 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
             echo ' <ruby>
                 <rb>
                     <span class="' . $ttsClass . 'anntermruby">' .
-                        tohtml($vals[1]) .
+                        htmlspecialchars($vals[1] ?? '', ENT_QUOTES, 'UTF-8') .
                     '</span>
                 </rb>
                 <rt>
-                    <span class="anntransruby2">' . tohtml($trans) . '</span>
+                    <span class="anntransruby2">' . htmlspecialchars($trans ?? '', ENT_QUOTES, 'UTF-8') . '</span>
                 </rt>
             </ruby> ';
         } elseif (count($vals) >= 2) {
             echo str_replace(
                 "¶",
                 '</p><p style="font-size:' . $textSize . '%;line-height: 1.3; margin-bottom: 10px;">',
-                " " . tohtml($vals[1]) . " "
+                " " . htmlspecialchars($vals[1] ?? '', ENT_QUOTES, 'UTF-8') . " "
             );
         }
     }

@@ -37,8 +37,8 @@ namespace Lwt\Views\Mobile;
                         Default Table Set
                     </option>
                     <?php foreach ($prefixes as $prefix): ?>
-                    <option value="<?php echo tohtml($prefix); ?>" <?php echo (substr($currentPrefix, 0, -1) === $prefix ? 'selected="selected"' : ''); ?>>
-                        <?php echo tohtml($prefix); ?>
+                    <option value="<?php echo htmlspecialchars($prefix ?? '', ENT_QUOTES, 'UTF-8'); ?>" <?php echo (substr($currentPrefix, 0, -1) === $prefix ? 'selected="selected"' : ''); ?>>
+                        <?php echo htmlspecialchars($prefix ?? '', ENT_QUOTES, 'UTF-8'); ?>
                     </option>
                     <?php endforeach; ?>
                 </select>

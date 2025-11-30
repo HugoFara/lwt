@@ -33,16 +33,16 @@ namespace Lwt\Views\Mobile;
 
 // Action 4 includes the opening ul tag; action 5 is for AJAX replacement
 if ($action == 4): ?>
-<ul id="<?php echo $action . '-' . $sentence['id']; ?>" title="<?php echo tohtml($sentence['text']); ?>">
+<ul id="<?php echo $action . '-' . $sentence['id']; ?>" title="<?php echo htmlspecialchars($sentence['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
 <?php endif; ?>
     <li class="group">Sentence</li>
-    <li><?php echo tohtml($sentence['text']); ?></li>
+    <li><?php echo htmlspecialchars($sentence['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></li>
     <li class="group">Terms</li>
 <?php foreach ($terms as $term): ?>
     <?php if ($term['type'] === 'nonword'): ?>
-    <li><?php echo tohtml($term['text']); ?></li>
+    <li><?php echo htmlspecialchars($term['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></li>
     <?php else: ?>
-    <li><span class="status<?php echo $term['status']; ?>"><?php echo tohtml($term['text']); ?></span><?php echo tohtml($term['description']); ?></li>
+    <li><span class="status<?php echo $term['status']; ?>"><?php echo htmlspecialchars($term['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span><?php echo htmlspecialchars($term['description'] ?? '', ENT_QUOTES, 'UTF-8'); ?></li>
     <?php endif; ?>
 <?php endforeach; ?>
 <?php if ($nextSentenceId !== null): ?>

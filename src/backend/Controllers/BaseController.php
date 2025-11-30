@@ -104,13 +104,13 @@ abstract class BaseController
             return;
         }
         if (substr($message, 0, 5) == "Error") {
-            echo '<p class="red">*** ' . \tohtml($message) . ' ***' .
+            echo '<p class="red">*** ' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . ' ***' .
                 ($autoHide ?
                 '' :
                 '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="history-back" />' ) .
                 '</p>';
         } else {
-            echo '<p id="hide3" class="msgblue">+++ ' . \tohtml($message) . ' +++</p>';
+            echo '<p id="hide3" class="msgblue">+++ ' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . ' +++</p>';
         }
     }
 

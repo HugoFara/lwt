@@ -53,7 +53,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <input class="notempty posintnumber right setfocus respinput"
             type="number" min="0"
             name="set-text-h-frameheight-no-audio" data_info="Height of left top frame without audioplayer"
-            value="<?php echo tohtml($settings['set-text-h-frameheight-no-audio']); ?>" maxlength="3"
+            value="<?php echo htmlspecialchars($settings['set-text-h-frameheight-no-audio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="3"
             size="3" /><br />Pixel </td>
         <td class="td1 center">
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
@@ -69,7 +69,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             min="0"
             name="set-text-h-frameheight-with-audio"
             data_info="Height of left top frame with audioplayer"
-            value="<?php echo tohtml($settings['set-text-h-frameheight-with-audio']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-text-h-frameheight-with-audio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="3" size="3" /><br />
             Pixel
         </td>
@@ -84,7 +84,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-text-l-framewidth-percent" data_info="Width of left frames"
-            value="<?php echo tohtml($settings['set-text-l-framewidth-percent']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-text-l-framewidth-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="2" size="2" />
             <br />Percent
         </td>
@@ -99,7 +99,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-text-r-frameheight-percent"  data_info="Height of right top frame"
-            value="<?php echo tohtml($settings['set-text-r-frameheight-percent']); ?>" maxlength="2" size="2" />
+            value="<?php echo htmlspecialchars($settings['set-text-r-frameheight-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="2" size="2" />
             <br />Percent
         </td>
         <td class="td1 center">
@@ -138,7 +138,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-ggl-translation-per-page"  data_info="New Term Translations per Page"
-            value="<?php echo tohtml($settings['set-ggl-translation-per-page']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-ggl-translation-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -154,7 +154,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-test-h-frameheight" data_info="Height of left top frame"
-            value="<?php echo tohtml($settings['set-test-h-frameheight']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-test-h-frameheight'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="3" size="3" />
             <br />Pixel
         </td>
@@ -169,7 +169,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-test-l-framewidth-percent"  data_info="Width of left frames"
-            value="<?php echo tohtml($settings['set-test-l-framewidth-percent']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-test-l-framewidth-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="2" size="2" />
             <br />Percent
         </td>
@@ -184,7 +184,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <input class="notempty posintnumber right respinput" type="number"
             min="0"
             name="set-test-r-frameheight-percent"  data_info="Height of right top frame"
-            value="<?php echo tohtml($settings['set-test-r-frameheight-percent']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-test-r-frameheight-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="2" size="2" /><br />
             Percent
         </td>
@@ -202,7 +202,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             type="number" min="0"
             name="set-test-main-frame-waiting-time"
             data_info="Waiting time after assessment to display next test"
-            value="<?php echo tohtml($settings['set-test-main-frame-waiting-time']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-test-main-frame-waiting-time'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="4" size="4" /><br />
             Milliseconds
         </td>
@@ -220,7 +220,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             type="number" min="0"
             name="set-test-edit-frame-waiting-time"
             data_info="Waiting Time to clear the message/edit frame"
-            value="<?php echo tohtml($settings['set-test-edit-frame-waiting-time']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-test-edit-frame-waiting-time'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="8" size="8" /><br />
             Milliseconds
         </td>
@@ -336,7 +336,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             type="number" min="0"
             name="set-similar-terms-count"
             data_info="Similar terms to be displayed while adding/editing a term"
-            value="<?php echo tohtml($settings['set-similar-terms-count']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-similar-terms-count'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="1" size="1" />
         </td>
         <td class="td1 center">
@@ -353,7 +353,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
         <td class="td1 center">
             <input class="notempty center respinput" type="text"
             name="set-term-translation-delimiters"
-            value="<?php echo tohtml($settings['set-term-translation-delimiters']); ?>" maxlength="8" size="8" />
+            value="<?php echo htmlspecialchars($settings['set-term-translation-delimiters'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="8" size="8" />
         </td>
         <td class="td1 center">
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
@@ -391,7 +391,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-texts-per-page" data_info="Texts per Page"
-            value="<?php echo tohtml($settings['set-texts-per-page']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-texts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -406,7 +406,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-archivedtexts-per-page"
             data_info="Archived Texts per Page"
-            value="<?php echo tohtml($settings['set-archivedtexts-per-page']); ?>" maxlength="4" size="4" />
+            value="<?php echo htmlspecialchars($settings['set-archivedtexts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="4" size="4" />
         </td>
         <td class="td1 center">
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
@@ -418,7 +418,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-terms-per-page" data_info="Terms per Page"
-            value="<?php echo tohtml($settings['set-terms-per-page']); ?>" maxlength="4" size="4" />
+            value="<?php echo htmlspecialchars($settings['set-terms-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="4" size="4" />
         </td>
         <td class="td1 center">
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
@@ -430,7 +430,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-tags-per-page" data_info="Tags per Page"
-            value="<?php echo tohtml($settings['set-tags-per-page']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-tags-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -443,7 +443,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-articles-per-page" data_info="Feed Articles per Page"
-            value="<?php echo tohtml($settings['set-articles-per-page']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-articles-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -456,7 +456,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-feeds-per-page" data_info="Feeds per Page"
-            value="<?php echo tohtml($settings['set-feeds-per-page']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-feeds-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -485,7 +485,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-max-articles-with-text"
             data_info="Max Articles per Feed with cached text"
-            value="<?php echo tohtml($settings['set-max-articles-with-text']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-max-articles-with-text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -502,7 +502,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-max-articles-without-text"
             data_info="Max Articles per Feed without cached text"
-            value="<?php echo tohtml($settings['set-max-articles-without-text']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-max-articles-without-text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
@@ -517,7 +517,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
         <td class="td1 center">
             <input class="notempty posintnumber right respinput" type="number"
             min="0" name="set-max-texts-per-feed" data_info="Max Texts per Feed"
-            value="<?php echo tohtml($settings['set-max-texts-per-feed']); ?>"
+            value="<?php echo htmlspecialchars($settings['set-max-texts-per-feed'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">

@@ -21,6 +21,7 @@ use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Http\UrlUtilities;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\View\Helper\FormHelper;
@@ -602,9 +603,9 @@ class TagService
     public static function saveWordTags(int $wordId): void
     {
         $tbpref = Globals::getTablePrefix();
-        Connection::execute(
-            "DELETE FROM " . $tbpref . "wordtags WHERE WtWoID = " . $wordId
-        );
+        QueryBuilder::table('wordtags')
+            ->where('WtWoID', '=', $wordId)
+            ->delete();
 
         $termTags = InputValidator::getArray('TermTags');
         if (
@@ -647,9 +648,9 @@ class TagService
     public static function saveTextTags(int $textId): void
     {
         $tbpref = Globals::getTablePrefix();
-        Connection::execute(
-            "DELETE FROM " . $tbpref . "texttags WHERE TtTxID = " . $textId
-        );
+        QueryBuilder::table('texttags')
+            ->where('TtTxID', '=', $textId)
+            ->delete();
 
         $textTags = InputValidator::getArray('TextTags');
         if (
@@ -692,9 +693,9 @@ class TagService
     public static function saveArchivedTextTags(int $textId): void
     {
         $tbpref = Globals::getTablePrefix();
-        Connection::execute(
-            "DELETE FROM " . $tbpref . "archtexttags WHERE AgAtID = " . $textId
-        );
+        QueryBuilder::table('archtexttags')
+            ->where('AgAtID', '=', $textId)
+            ->delete();
 
         $textTags = InputValidator::getArray('TextTags');
         if (
@@ -750,7 +751,7 @@ class TagService
                 ORDER BY TgText';
             $res = Connection::query($sql);
             while ($record = mysqli_fetch_assoc($res)) {
-                $html .= '<li>' . \tohtml($record['TgText']) . '</li>';
+                $html .= '<li>' . htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8') . '</li>';
             }
             mysqli_free_result($res);
         }
@@ -777,7 +778,7 @@ class TagService
                 ORDER BY T2Text";
             $res = Connection::query($sql);
             while ($record = mysqli_fetch_assoc($res)) {
-                $html .= '<li>' . \tohtml($record['T2Text']) . '</li>';
+                $html .= '<li>' . htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</li>';
             }
             mysqli_free_result($res);
         }
@@ -804,7 +805,7 @@ class TagService
                 ORDER BY T2Text';
             $res = Connection::query($sql);
             while ($record = mysqli_fetch_assoc($res)) {
-                $html .= '<li>' . \tohtml($record['T2Text']) . '</li>';
+                $html .= '<li>' . htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</li>';
             }
             mysqli_free_result($res);
         }
@@ -852,7 +853,7 @@ class TagService
         }
 
         if ($escapeHtml) {
-            $result = \tohtml($result);
+            $result = htmlspecialchars($result ?? '', ENT_QUOTES, 'UTF-8');
         }
 
         return $result;
@@ -934,10 +935,10 @@ class TagService
         $count = 0;
         while ($record = mysqli_fetch_assoc($res)) {
             $count++;
-            Connection::execute(
-                'DELETE FROM ' . $tbpref . 'wordtags
-                WHERE WtWoID = ' . $record['WoID'] . ' AND WtTgID = ' . $tagId
-            );
+            QueryBuilder::table('wordtags')
+                ->where('WtWoID', '=', (int)$record['WoID'])
+                ->where('WtTgID', '=', (int)$tagId)
+                ->delete();
         }
         mysqli_free_result($res);
 
@@ -1015,10 +1016,10 @@ class TagService
         $count = 0;
         while ($record = mysqli_fetch_assoc($res)) {
             $count++;
-            Connection::execute(
-                'DELETE FROM ' . $tbpref . 'texttags
-                WHERE TtTxID = ' . $record['TxID'] . ' AND TtT2ID = ' . $tagId
-            );
+            QueryBuilder::table('texttags')
+                ->where('TtTxID', '=', (int)$record['TxID'])
+                ->where('TtT2ID', '=', (int)$tagId)
+                ->delete();
         }
         mysqli_free_result($res);
 
@@ -1098,10 +1099,10 @@ class TagService
         $count = 0;
         while ($record = mysqli_fetch_assoc($res)) {
             $count++;
-            Connection::execute(
-                'DELETE FROM ' . $tbpref . 'archtexttags
-                WHERE AgAtID = ' . $record['AtID'] . ' AND AgT2ID = ' . $tagId
-            );
+            QueryBuilder::table('archtexttags')
+                ->where('AgAtID', '=', (int)$record['AtID'])
+                ->where('AgT2ID', '=', (int)$tagId)
+                ->delete();
         }
         mysqli_free_result($res);
 
@@ -1150,7 +1151,7 @@ class TagService
             $count++;
             $html .= '<option value="' . $record['TgID'] . '"' .
                 FormHelper::getSelected($selected, (int) $record['TgID']) . '>' .
-                \tohtml($record['TgText']) . '</option>';
+                htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
         }
         mysqli_free_result($res);
 
@@ -1200,7 +1201,7 @@ class TagService
             $count++;
             $html .= '<option value="' . $record['T2ID'] . '"' .
                 FormHelper::getSelected($selected, (int) $record['T2ID']) . '>' .
-                \tohtml($record['T2Text']) . '</option>';
+                htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
         }
         mysqli_free_result($res);
 
@@ -1296,7 +1297,7 @@ class TagService
             $count++;
             $html .= '<option value="' . $record['T2ID'] . '"' .
                 FormHelper::getSelected($selected, (int) $record['T2ID']) . '>' .
-                \tohtml($record['T2Text']) . '</option>';
+                htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
         }
         mysqli_free_result($res);
 

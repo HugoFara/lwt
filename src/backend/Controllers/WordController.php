@@ -143,17 +143,17 @@ class WordController extends BaseController
         if (
             $this->param("wid") == ""
             && $this->param("tid") . $this->param("ord") == ""
-            && !array_key_exists("op", $_REQUEST)
+            && !$this->hasParam("op")
         ) {
             return;
         }
 
         $fromAnn = $this->param("fromAnn");
 
-        if (isset($_REQUEST['op'])) {
+        if ($this->hasParam('op')) {
             $this->handleEditOperation($fromAnn);
         } else {
-            $wid = (array_key_exists("wid", $_REQUEST) && is_numeric($this->param('wid')))
+            $wid = ($this->hasParam("wid") && is_numeric($this->param('wid')))
                 ? $this->paramInt('wid', -1)
                 : -1;
             $textId = $this->paramInt("tid", 0);
@@ -173,12 +173,12 @@ class WordController extends BaseController
      */
     private function handleEditOperation(string $fromAnn): void
     {
-        $textlc = trim(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
-        $text = trim(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoText"]));
+        $textlc = trim(\Lwt\Database\Escaping::prepareTextdata($this->param("WoTextLC")));
+        $text = trim(\Lwt\Database\Escaping::prepareTextdata($this->param("WoText")));
 
         // Validate lowercase matches
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
-            $titletext = "New/Edit Term: " . \tohtml($textlc);
+            $titletext = "New/Edit Term: " . htmlspecialchars($textlc ?? '', ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
@@ -193,20 +193,22 @@ class WordController extends BaseController
             $translation = '*';
         }
 
-        if ($_REQUEST['op'] == 'Save') {
+        $op = $this->param('op');
+        $requestData = $this->getWordFormData();
+        if ($op == 'Save') {
             // Insert new term
-            $result = $this->wordService->create($_REQUEST);
+            $result = $this->wordService->create($requestData);
             $isNew = true;
-            $hex = $this->wordService->textToClassName($_REQUEST["WoTextLC"]);
+            $hex = $this->wordService->textToClassName($this->param("WoTextLC"));
             $oldStatus = 0;
-            $titletext = "New Term: " . \tohtml($textlc);
+            $titletext = "New Term: " . htmlspecialchars($textlc ?? '', ENT_QUOTES, 'UTF-8');
         } else {
             // Update existing term
-            $result = $this->wordService->update((int)$_REQUEST["WoID"], $_REQUEST);
+            $result = $this->wordService->update($this->paramInt("WoID", 0) ?? 0, $requestData);
             $isNew = false;
             $hex = null;
-            $oldStatus = $_REQUEST['WoOldStatus'];
-            $titletext = "Edit Term: " . \tohtml($textlc);
+            $oldStatus = $this->param('WoOldStatus');
+            $titletext = "Edit Term: " . htmlspecialchars($textlc ?? '', ENT_QUOTES, 'UTF-8');
         }
 
         PageLayoutHelper::renderPageStartNobody($titletext);
@@ -218,9 +220,9 @@ class WordController extends BaseController
         TagService::saveWordTags($wid);
 
         // Prepare view variables
-        $textId = (int)$_REQUEST['tid'];
-        $status = $_REQUEST["WoStatus"];
-        $romanization = $_REQUEST["WoRomanization"];
+        $textId = $this->paramInt('tid', 0) ?? 0;
+        $status = $this->param("WoStatus");
+        $romanization = $this->param("WoRomanization");
 
         include __DIR__ . '/../Views/Word/edit_result.php';
     }
@@ -267,7 +269,7 @@ class WordController extends BaseController
             $new = false;
         }
 
-        $titletext = ($new ? "New Term" : "Edit Term") . ": " . \tohtml($term);
+        $titletext = ($new ? "New Term" : "Edit Term") . ": " . htmlspecialchars($term, ENT_QUOTES, 'UTF-8');
         PageLayoutHelper::renderPageStartNobody($titletext);
 
         $scrdir = $this->languageService->getScriptDirectionTag($lang);
@@ -335,7 +337,7 @@ class WordController extends BaseController
         $translation_raw = ExportService::replaceTabNewline($this->param("WoTranslation"));
         $translation = ($translation_raw == '') ? '*' : $translation_raw;
 
-        if (isset($_REQUEST['op'])) {
+        if ($this->hasParam('op')) {
             $this->handleEditTermOperation($tbpref, $translation);
         } else {
             $this->displayEditTermForm($tbpref);
@@ -354,11 +356,13 @@ class WordController extends BaseController
      */
     private function handleEditTermOperation(string $tbpref, string $translation): void
     {
-        $textlc = trim(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
-        $text = trim(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoText"]));
+        $woTextLC = $this->param("WoTextLC");
+        $woText = $this->param("WoText");
+        $textlc = trim(\Lwt\Database\Escaping::prepareTextdata($woTextLC));
+        $text = trim(\Lwt\Database\Escaping::prepareTextdata($woText));
 
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
-            $titletext = "New/Edit Term: " . \tohtml(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
+            $titletext = "New/Edit Term: " . htmlspecialchars(\Lwt\Database\Escaping::prepareTextdata($woTextLC, ENT_QUOTES, 'UTF-8'));
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
@@ -368,13 +372,17 @@ class WordController extends BaseController
             exit();
         }
 
-        if ($_REQUEST['op'] == 'Change') {
-            $titletext = "Edit Term: " . \tohtml(\Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoTextLC"]));
+        $op = $this->param('op');
+        if ($op == 'Change') {
+            $titletext = "Edit Term: " . htmlspecialchars(\Lwt\Database\Escaping::prepareTextdata($woTextLC, ENT_QUOTES, 'UTF-8'));
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
-            $oldstatus = $_REQUEST["WoOldStatus"];
-            $newstatus = $_REQUEST["WoStatus"];
+            $oldstatus = $this->param("WoOldStatus");
+            $newstatus = $this->param("WoStatus");
+            $woId = $this->paramInt("WoID", 0) ?? 0;
+            $woSentence = $this->param("WoSentence");
+            $woRomanization = $this->param("WoRomanization");
             $xx = '';
             if ($oldstatus != $newstatus) {
                 $xx = ', WoStatus = ' . $newstatus . ', WoStatusChanged = NOW()';
@@ -382,16 +390,16 @@ class WordController extends BaseController
 
             \Lwt\Database\Connection::execute(
                 'update ' . $tbpref . 'words set WoText = ' .
-                \Lwt\Database\Escaping::toSqlSyntax($_REQUEST["WoText"]) . ', WoTranslation = ' .
+                \Lwt\Database\Escaping::toSqlSyntax($woText) . ', WoTranslation = ' .
                 \Lwt\Database\Escaping::toSqlSyntax($translation) . ', WoSentence = ' .
-                \Lwt\Database\Escaping::toSqlSyntax(ExportService::replaceTabNewline($_REQUEST["WoSentence"])) .
+                \Lwt\Database\Escaping::toSqlSyntax(ExportService::replaceTabNewline($woSentence)) .
                 ', WoRomanization = ' .
-                \Lwt\Database\Escaping::toSqlSyntax($_REQUEST["WoRomanization"]) . $xx .
+                \Lwt\Database\Escaping::toSqlSyntax($woRomanization) . $xx .
                 ',' . WordStatusService::makeScoreRandomInsertUpdate('u') .
-                ' where WoID = ' . $_REQUEST["WoID"],
+                ' where WoID = ' . $woId,
                 "Updated"
             );
-            $wid = (int)$_REQUEST["WoID"];
+            $wid = $woId;
             TagService::saveWordTags($wid);
 
             $message = 'Updated';
@@ -408,7 +416,7 @@ class WordController extends BaseController
             if (!isset($regexword)) {
                 ErrorHandler::die('Cannot retrieve language data in edit_tword.php');
             }
-            $sent = \tohtml(ExportService::replaceTabNewline($_REQUEST["WoSentence"]));
+            $sent = htmlspecialchars(ExportService::replaceTabNewline($woSentence, ENT_QUOTES, 'UTF-8'));
             $sent1 = str_replace(
                 "{",
                 ' <b>[',
@@ -419,9 +427,9 @@ class WordController extends BaseController
                 )
             );
 
-            $status = $_REQUEST["WoStatus"];
-            $romanization = $_REQUEST["WoRomanization"];
-            $text = $_REQUEST["WoText"];
+            $status = $newstatus;
+            $romanization = $woRomanization;
+            $text = $woText;
 
             include __DIR__ . '/../Views/Word/edit_term_result.php';
         }
@@ -436,11 +444,12 @@ class WordController extends BaseController
      */
     private function displayEditTermForm(string $tbpref): void
     {
-        $wid = $this->param('wid');
+        $widParam = $this->param('wid');
 
-        if ($wid == '') {
+        if ($widParam == '') {
             ErrorHandler::die("Term ID missing in edit_tword.php");
         }
+        $wid = (int) $widParam;
 
         $sql = 'select WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus from ' .
             $tbpref . 'words where WoID = ' . $wid;
@@ -467,7 +476,7 @@ class WordController extends BaseController
         mysqli_free_result($res);
 
         $termlc = mb_strtolower($term, 'UTF-8');
-        $titletext = "Edit Term: " . \tohtml($term);
+        $titletext = "Edit Term: " . htmlspecialchars($term, ENT_QUOTES, 'UTF-8');
         PageLayoutHelper::renderPageStartNobody($titletext);
         $scrdir = $this->languageService->getScriptDirectionTag($lang);
 
@@ -544,7 +553,7 @@ class WordController extends BaseController
                 $currentquery = '';
                 $whQuery = '';
                 unset($_SESSION['currentwordquery']);
-                if (isset($_REQUEST['query'])) {
+                if ($this->hasParam('query')) {
                     echo '<p id="hide3" class="warning-message">+++ Warning: Invalid Search +++</p>';
                 }
             }
@@ -565,7 +574,7 @@ class WordController extends BaseController
         $message = '';
 
         // Handle mark actions
-        if (isset($_REQUEST['markaction'])) {
+        if ($this->hasParam('markaction')) {
             $message = $this->handleMarkAction(
                 $listService,
                 $currenttext,
@@ -577,7 +586,7 @@ class WordController extends BaseController
         }
 
         // Handle all actions
-        if (isset($_REQUEST['allaction'])) {
+        if ($this->hasParam('allaction')) {
             $message = $this->handleAllAction(
                 $listService,
                 $currenttext,
@@ -592,20 +601,22 @@ class WordController extends BaseController
         }
 
         // Handle single delete
-        if (isset($_REQUEST['del'])) {
-            $message = $listService->deleteSingleWord((int) $_REQUEST['del']);
+        $delId = $this->paramInt('del');
+        if ($delId !== null) {
+            $message = $listService->deleteSingleWord($delId);
         }
 
         // Handle save/update
-        if (isset($_REQUEST['op'])) {
+        if ($this->hasParam('op')) {
             $wid = $this->handleListSaveUpdate($listService);
         }
 
         // Display appropriate view
-        if (isset($_REQUEST['new']) && isset($_REQUEST['lang'])) {
-            $this->displayListNewForm($listService, (int) $_REQUEST['lang']);
-        } elseif (isset($_REQUEST['chg'])) {
-            $this->displayListEditForm($listService, (int) $_REQUEST['chg']);
+        $langId = $this->paramInt('lang');
+        if ($this->hasParam('new') && $langId !== null) {
+            $this->displayListNewForm($listService, $langId);
+        } elseif ($this->hasParam('chg')) {
+            $this->displayListEditForm($listService, $this->paramInt('chg', 0) ?? 0);
         } else {
             $this->displayWordList(
                 $listService,
@@ -667,15 +678,16 @@ class WordController extends BaseController
         string $whQuery,
         string $whTag
     ): string {
-        $markaction = $_REQUEST['markaction'];
+        $markaction = $this->param('markaction');
         $actiondata = $this->param('data');
         $message = "Multiple Actions: 0";
 
-        if (!isset($_REQUEST['marked']) || !is_array($_REQUEST['marked']) || count($_REQUEST['marked']) == 0) {
+        $markedArray = $this->paramArray('marked');
+        if (empty($markedArray)) {
             return $message;
         }
 
-        $idList = "(" . implode(",", array_map('intval', $_REQUEST['marked'])) . ")";
+        $idList = "(" . implode(",", array_map('intval', $markedArray)) . ")";
 
         switch ($markaction) {
             case 'del':
@@ -756,7 +768,7 @@ class WordController extends BaseController
         string $whQuery,
         string $whTag
     ): ?string {
-        $allaction = (string) $_REQUEST['allaction'];
+        $allaction = $this->param('allaction');
         $actiondata = $this->param('data');
 
         // Get word IDs matching filter
@@ -869,14 +881,16 @@ class WordController extends BaseController
         $translationRaw = ExportService::replaceTabNewline($this->param("WoTranslation"));
         $translation = ($translationRaw == '') ? '*' : $translationRaw;
 
-        if ($_REQUEST['op'] == 'Save') {
-            $message = $listService->saveNewWord($_REQUEST);
+        $requestData = $this->getWordFormData();
+        $op = $this->param('op');
+        if ($op == 'Save') {
+            $message = $listService->saveNewWord($requestData);
             $wid = (int)Connection::lastInsertId();
             TagService::saveWordTags($wid);
             return $wid;
         } else {
-            $message = $listService->updateWord($_REQUEST);
-            $wid = (int) $_REQUEST["WoID"];
+            $message = $listService->updateWord($requestData);
+            $wid = $this->paramInt("WoID", 0) ?? 0;
             TagService::saveWordTags($wid);
             return $wid;
         }
@@ -974,7 +988,7 @@ class WordController extends BaseController
             substr($message, 0, 24) == "Error: Duplicate entry '"
             && substr($message, -24) == "' for key 'WoLgIDTextLC'"
         ) {
-            $lgID = $_REQUEST["WoLgID"] . "-";
+            $lgID = $this->param("WoLgID") . "-";
             $msg = substr($message, 24 + strlen($lgID));
             $msg = substr($msg, 0, strlen($msg) - 24);
             $message = "Error: Term '" . $msg . "' already exists. Please go back and correct this!";
@@ -1007,7 +1021,7 @@ class WordController extends BaseController
         // Show new term link
         if ($currentlang != '') {
             ?>
-<p><a href="/words/edit?new=1&amp;lang=<?php echo $currentlang; ?>"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New <?php echo \tohtml($this->languageService->getLanguageName($currentlang)); ?> Term ...</a></p>
+<p><a href="/words/edit?new=1&amp;lang=<?php echo $currentlang; ?>"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New <?php echo htmlspecialchars($this->languageService->getLanguageName($currentlang), ENT_QUOTES, 'UTF-8'); ?> Term ...</a></p>
             <?php
         } else {
             ?>
@@ -1064,7 +1078,7 @@ class WordController extends BaseController
      */
     public function editMulti(array $params): void
     {
-        if (isset($_REQUEST['op'])) {
+        if ($this->hasParam('op')) {
             // Handle save/update operation
             $this->handleMultiWordOperation();
         } else {
@@ -1087,7 +1101,7 @@ class WordController extends BaseController
 
         // Validate lowercase matches
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
-            $titletext = "New/Edit Term: " . \tohtml($textlc);
+            $titletext = "New/Edit Term: " . htmlspecialchars($textlc ?? '', ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
@@ -1099,21 +1113,26 @@ class WordController extends BaseController
         $translationRaw = ExportService::replaceTabNewline($this->param("WoTranslation"));
         $translation = ($translationRaw == '') ? '*' : $translationRaw;
 
+        $woText = $this->param("WoText");
+        $woRomanization = $this->param("WoRomanization");
+        $woSentence = $this->param("WoSentence");
+        $woStatus = $this->paramInt("WoStatus", 0) ?? 0;
         $data = [
-            'text' => \Lwt\Database\Escaping::prepareTextdata($_REQUEST["WoText"]),
+            'text' => \Lwt\Database\Escaping::prepareTextdata($woText),
             'textlc' => \Lwt\Database\Escaping::prepareTextdata($textlc),
             'translation' => $translation,
-            'roman' => $_REQUEST["WoRomanization"] ?? '',
-            'sentence' => $_REQUEST["WoSentence"] ?? '',
+            'roman' => $woRomanization,
+            'sentence' => $woSentence,
         ];
 
-        if ($_REQUEST['op'] == 'Save') {
+        $op = $this->param('op');
+        if ($op == 'Save') {
             // Insert new multi-word
-            $data['status'] = (int) $_REQUEST["WoStatus"];
-            $data['lgid'] = (int) $_REQUEST["WoLgID"];
-            $data['wordcount'] = (int) ($_REQUEST["len"] ?? 0);
+            $data['status'] = $woStatus;
+            $data['lgid'] = $this->paramInt("WoLgID", 0) ?? 0;
+            $data['wordcount'] = $this->paramInt("len", 0) ?? 0;
 
-            $titletext = "New Term: " . \tohtml($data['textlc']);
+            $titletext = "New Term: " . htmlspecialchars($data['textlc'] ?? '', ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
@@ -1121,11 +1140,11 @@ class WordController extends BaseController
             $wid = $result['id'];
         } else {
             // Update existing multi-word
-            $wid = (int) $_REQUEST["WoID"];
-            $oldStatus = (int) $_REQUEST["WoOldStatus"];
-            $newStatus = (int) $_REQUEST["WoStatus"];
+            $wid = $this->paramInt("WoID", 0) ?? 0;
+            $oldStatus = $this->paramInt("WoOldStatus", 0) ?? 0;
+            $newStatus = $woStatus;
 
-            $titletext = "Edit Term: " . \tohtml($data['textlc']);
+            $titletext = "Edit Term: " . htmlspecialchars($data['textlc'] ?? '', ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
@@ -1298,8 +1317,8 @@ class WordController extends BaseController
      */
     public function delete(array $params): void
     {
-        $textId = isset($_REQUEST['tid']) ? (int) $_REQUEST['tid'] : 0;
-        $wordId = isset($_REQUEST['wid']) ? (int) $_REQUEST['wid'] : 0;
+        $textId = $this->paramInt('tid', 0) ?? 0;
+        $wordId = $this->paramInt('wid', 0) ?? 0;
 
         if ($textId === 0 || $wordId === 0) {
             return;
@@ -1331,8 +1350,8 @@ class WordController extends BaseController
      */
     public function deleteMulti(array $params): void
     {
-        $textId = isset($_REQUEST['tid']) ? (int) $_REQUEST['tid'] : 0;
-        $wordId = isset($_REQUEST['wid']) ? (int) $_REQUEST['wid'] : 0;
+        $textId = $this->paramInt('tid', 0) ?? 0;
+        $wordId = $this->paramInt('wid', 0) ?? 0;
 
         $term = $this->wordService->getWordText($wordId);
         if ($term === null) {
@@ -1364,12 +1383,12 @@ class WordController extends BaseController
      */
     public function all(array $params): void
     {
-        if (!isset($_REQUEST['text'])) {
+        $textId = $this->paramInt('text');
+        if ($textId === null) {
             return;
         }
 
-        $textId = (int) $_REQUEST['text'];
-        $status = isset($_REQUEST['stat']) ? (int) $_REQUEST['stat'] : 99;
+        $status = $this->paramInt('stat', 99) ?? 99;
 
         if ($status == 98) {
             PageLayoutHelper::renderPageStart("Setting all blue words to Ignore", false);
@@ -1397,11 +1416,13 @@ class WordController extends BaseController
      */
     public function create(array $params): void
     {
+        $op = $this->param('op');
         // Handle save operation
-        if (isset($_REQUEST['op']) && $_REQUEST['op'] === 'Save') {
-            $result = $this->wordService->create($_REQUEST);
+        if ($op === 'Save') {
+            $requestData = $this->getWordFormData();
+            $result = $this->wordService->create($requestData);
 
-            $titletext = "New Term: " . \tohtml($result['textlc']);
+            $titletext = "New Term: " . htmlspecialchars($result['textlc'] ?? '', ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
@@ -1421,11 +1442,12 @@ class WordController extends BaseController
 
                 echo '<p>' . $result['message'] . '</p>';
 
+                $woLgId = $this->paramInt("WoLgID", 0) ?? 0;
                 $len = $this->wordService->getWordCount($wid);
                 if ($len > 1) {
-                    (new ExpressionService())->insertExpressions($result['textlc'], (int) $_REQUEST["WoLgID"], $wid, $len, 0);
+                    (new ExpressionService())->insertExpressions($result['textlc'], $woLgId, $wid, $len, 0);
                 } elseif ($len == 1) {
-                    $this->wordService->linkToTextItems($wid, (int) $_REQUEST["WoLgID"], $result['textlc']);
+                    $this->wordService->linkToTextItems($wid, $woLgId, $result['textlc']);
 
                     // Prepare view variables
                     $hex = $this->wordService->textToClassName($result['textlc']);
@@ -1433,10 +1455,10 @@ class WordController extends BaseController
                     if ($translation === '') {
                         $translation = '*';
                     }
-                    $status = $_REQUEST["WoStatus"];
-                    $romanization = $_REQUEST["WoRomanization"];
+                    $status = $this->param("WoStatus");
+                    $romanization = $this->param("WoRomanization");
                     $text = $result['text'];
-                    $textId = (int)$_REQUEST['tid'];
+                    $textId = $this->paramInt('tid', 0) ?? 0;
                     $success = true;
                     $message = $result['message'];
 
@@ -1475,7 +1497,7 @@ class WordController extends BaseController
         PageLayoutHelper::renderPageStartNobody('Term');
 
         $wid = $this->param('wid');
-        $ann = isset($_REQUEST['ann']) ? $_REQUEST['ann'] : '';
+        $ann = $this->param('ann');
 
         if ($wid === '') {
             ErrorHandler::die('Word not found in show_word.php');
@@ -1507,8 +1529,8 @@ class WordController extends BaseController
      */
     public function insertWellknown(array $params): void
     {
-        $textId = isset($_REQUEST['tid']) ? (int) $_REQUEST['tid'] : 0;
-        $ord = isset($_REQUEST['ord']) ? (int) $_REQUEST['ord'] : 0;
+        $textId = $this->paramInt('tid', 0) ?? 0;
+        $ord = $this->paramInt('ord', 0) ?? 0;
 
         if ($textId === 0 || $ord === 0) {
             return;
@@ -1542,8 +1564,8 @@ class WordController extends BaseController
      */
     public function insertIgnore(array $params): void
     {
-        $textId = isset($_REQUEST['tid']) ? (int) $_REQUEST['tid'] : 0;
-        $ord = isset($_REQUEST['ord']) ? (int) $_REQUEST['ord'] : 0;
+        $textId = $this->paramInt('tid', 0) ?? 0;
+        $ord = $this->paramInt('ord', 0) ?? 0;
 
         if ($textId === 0 || $ord === 0) {
             return;
@@ -1610,12 +1632,13 @@ class WordController extends BaseController
      */
     public function bulkTranslate(array $params): void
     {
-        $tid = (int) ($_REQUEST['tid'] ?? 0);
-        $pos = isset($_REQUEST['offset']) ? (int) $_REQUEST['offset'] : null;
+        $tid = $this->paramInt('tid', 0) ?? 0;
+        $pos = $this->paramInt('offset');
 
         // Handle form submission (save terms)
-        if (isset($_REQUEST['term'])) {
-            $terms = $_REQUEST['term'];
+        $termsArray = $this->paramArray('term');
+        if (!empty($termsArray)) {
+            $terms = $termsArray;
             $cnt = count($terms);
 
             if ($pos !== null) {
@@ -1630,9 +1653,9 @@ class WordController extends BaseController
 
         // Show next page of terms if there are more
         if ($pos !== null) {
-            $sl = $_REQUEST['sl'] ?? null;
-            $tl = $_REQUEST['tl'] ?? null;
-            $this->displayBulkTranslateForm($tid, $sl, $tl, $pos);
+            $sl = $this->param('sl');
+            $tl = $this->param('tl');
+            $this->displayBulkTranslateForm($tid, $sl !== '' ? $sl : null, $tl !== '' ? $tl : null, $pos);
         }
 
         PageLayoutHelper::renderPageEnd();
@@ -1718,9 +1741,9 @@ class WordController extends BaseController
      */
     public function setStatus(array $params): void
     {
-        $textId = isset($_REQUEST['tid']) ? (int) $_REQUEST['tid'] : 0;
-        $wordId = isset($_REQUEST['wid']) ? (int) $_REQUEST['wid'] : 0;
-        $status = isset($_REQUEST['status']) ? (int) $_REQUEST['status'] : 0;
+        $textId = $this->paramInt('tid', 0) ?? 0;
+        $wordId = $this->paramInt('wid', 0) ?? 0;
+        $status = $this->paramInt('status', 0) ?? 0;
 
         if ($textId === 0 || $wordId === 0 || $status === 0) {
             return;
@@ -1759,7 +1782,8 @@ class WordController extends BaseController
     {
         PageLayoutHelper::renderPageStart('Import Terms', true);
 
-        if (isset($_REQUEST['op']) && $_REQUEST['op'] === 'Import') {
+        $op = $this->param('op');
+        if ($op === 'Import') {
             $this->handleUploadImport();
         } else {
             $this->displayUploadForm();
@@ -1787,8 +1811,11 @@ class WordController extends BaseController
     private function handleUploadImport(): void
     {
         $uploadService = $this->getUploadService();
-        $tabType = $_REQUEST["Tab"] ?? 'c';
-        $langId = (int) ($_REQUEST["LgID"] ?? 0);
+        $tabType = $this->param("Tab", 'c');
+        if ($tabType === '') {
+            $tabType = 'c';
+        }
+        $langId = $this->paramInt("LgID", 0) ?? 0;
 
         if ($langId === 0) {
             $this->message('Error: No language selected', false);
@@ -1805,11 +1832,11 @@ class WordController extends BaseController
 
         // Parse column mapping
         $columns = [
-            1 => is_string($_REQUEST["Col1"] ?? '') ? $_REQUEST["Col1"] : '',
-            2 => is_string($_REQUEST["Col2"] ?? '') ? $_REQUEST["Col2"] : '',
-            3 => is_string($_REQUEST["Col3"] ?? '') ? $_REQUEST["Col3"] : '',
-            4 => is_string($_REQUEST["Col4"] ?? '') ? $_REQUEST["Col4"] : '',
-            5 => is_string($_REQUEST["Col5"] ?? '') ? $_REQUEST["Col5"] : '',
+            1 => $this->param("Col1"),
+            2 => $this->param("Col2"),
+            3 => $this->param("Col3"),
+            4 => $this->param("Col4"),
+            5 => $this->param("Col5"),
         ];
         $columns = array_unique($columns);
 
@@ -1825,20 +1852,21 @@ class WordController extends BaseController
         );
 
         // Get or create the input file
+        $uploadText = $this->param("Upload");
         if ($fileUpl) {
             $fileName = $_FILES["thefile"]["tmp_name"];
         } else {
-            if (empty($_REQUEST["Upload"])) {
+            if ($uploadText === '') {
                 $this->message('Error: No data to import', false);
                 return;
             }
-            $fileName = $uploadService->createTempFile($_REQUEST["Upload"]);
+            $fileName = $uploadService->createTempFile($uploadText);
         }
 
-        $ignoreFirst = ($_REQUEST["IgnFirstLine"] ?? '0') === '1';
-        $overwrite = (int) ($_REQUEST["Over"] ?? 0);
-        $status = (int) ($_REQUEST["WoStatus"] ?? 1);
-        $translDelim = $_REQUEST["transl_delim"] ?? '';
+        $ignoreFirst = $this->param("IgnFirstLine") === '1';
+        $overwrite = $this->paramInt("Over", 0) ?? 0;
+        $status = $this->paramInt("WoStatus", 1) ?? 1;
+        $translDelim = $this->param("transl_delim");
 
         // Get last update timestamp before import
         $lastUpdate = $uploadService->getLastWordUpdate() ?? '';
@@ -1950,5 +1978,30 @@ class WordController extends BaseController
     public function getUploadServiceForTest(): WordUploadService
     {
         return $this->getUploadService();
+    }
+
+    /**
+     * Get word form data from request parameters.
+     *
+     * Collects all word-related form fields into an array for service methods.
+     *
+     * @return array<string, mixed> Form data array
+     */
+    private function getWordFormData(): array
+    {
+        return [
+            'WoID' => $this->paramInt('WoID'),
+            'WoLgID' => $this->paramInt('WoLgID', 0) ?? 0,
+            'WoText' => $this->param('WoText'),
+            'WoTextLC' => $this->param('WoTextLC'),
+            'WoStatus' => $this->param('WoStatus'),
+            'WoOldStatus' => $this->param('WoOldStatus'),
+            'WoTranslation' => $this->param('WoTranslation'),
+            'WoRomanization' => $this->param('WoRomanization'),
+            'WoSentence' => $this->param('WoSentence'),
+            'tid' => $this->paramInt('tid'),
+            'ord' => $this->paramInt('ord'),
+            'len' => $this->paramInt('len'),
+        ];
     }
 }

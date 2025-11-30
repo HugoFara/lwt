@@ -26,7 +26,7 @@ namespace Lwt\Views\Admin;
         <th class="th1 center">Install Demo</th>
         <td class="td1">
             <p class="smallgray2">
-                The database <i><?php echo tohtml($dbname); ?></i>
+                The database <i><?php echo htmlspecialchars($dbname ?? '', ENT_QUOTES, 'UTF-8'); ?></i>
                 <?php echo $prefinfo; ?> will be <b>replaced</b> by the LWT
                 demo database.
                 <?php if ($langcnt > 0): ?>

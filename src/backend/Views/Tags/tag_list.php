@@ -53,7 +53,7 @@ $sortOptions = $service->getSortOptions();
 <tr>
 <td class="td1 center" colspan="4">
 Tag Text or Comment:
-<input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
+<input type="text" name="query" value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
 <input type="button" name="querybutton" value="Filter" data-action="filter-query" />&nbsp;
 <input type="button" value="Clear" data-action="clear-query" />
 </td>
@@ -120,8 +120,8 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
         &nbsp;<a href="<?php echo $_SERVER['PHP_SELF']; ?>?chg=<?php echo $tag['id']; ?>"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp;
         <a class="confirmdelete" href="<?php echo $_SERVER['PHP_SELF']; ?>?del=<?php echo $tag['id']; ?>"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;
     </td>
-    <td class="td1 center"><?php echo tohtml($tag['text']); ?></td>
-    <td class="td1 center"><?php echo tohtml($tag['comment']); ?></td>
+    <td class="td1 center"><?php echo htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+    <td class="td1 center"><?php echo htmlspecialchars($tag['comment'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
     <td class="td1 center">
         <?php if ($tag['usageCount'] > 0): ?>
         <a href="<?php echo $service->getItemsUrl($tag['id']); ?>"><?php echo $tag['usageCount']; ?></a>

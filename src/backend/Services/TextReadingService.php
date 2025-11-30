@@ -92,14 +92,16 @@ class TextReadingService
                     'data_pos' => $currcharcount,
                     'data_order' => $record['Ti2Order'],
                     'data_wid' => $record['WoID'],
-                    'data_trans' => tohtml(
-                        ExportService::replaceTabNewline($record['WoTranslation']) .
-                        getWordTagList($record['WoID'], ' ', 1, 0)
+                    'data_trans' => htmlspecialchars(
+                        ExportService::replaceTabNewline($record['WoTranslation'] ?? '') .
+                        getWordTagList((int)$record['WoID'], ' ', 1, 0),
+                        ENT_QUOTES,
+                        'UTF-8'
                     ),
-                    'data_rom' => tohtml($record['WoRomanization']),
+                    'data_rom' => htmlspecialchars($record['WoRomanization'] ?? '', ENT_QUOTES, 'UTF-8'),
                     'data_status' => $record['WoStatus'],
                     'data_code' => $actcode,
-                    'data_text' => tohtml($record['TiText'])
+                    'data_text' => htmlspecialchars($record['TiText'] ?? '', ENT_QUOTES, 'UTF-8')
                 );
                 $span = '<span';
                 foreach ($attributes as $attr_name => $val) {
@@ -109,7 +111,7 @@ class TextReadingService
                 if ($showAll) {
                     $span .= $actcode;
                 } else {
-                    $span .= tohtml($record['TiText']);
+                    $span .= htmlspecialchars($record['TiText'] ?? '', ENT_QUOTES, 'UTF-8');
                 }
                 $span .= '</span>';
                 echo $span;
@@ -131,11 +133,13 @@ class TextReadingService
                     'data_pos' => $currcharcount,
                     'data_order' => $record['Ti2Order'],
                     'data_wid' => $record['WoID'],
-                    'data_trans' => tohtml(
-                        ExportService::replaceTabNewline($record['WoTranslation']) .
-                        getWordTagList($record['WoID'], ' ', 1, 0)
+                    'data_trans' => htmlspecialchars(
+                        ExportService::replaceTabNewline($record['WoTranslation'] ?? '') .
+                        getWordTagList((int)$record['WoID'], ' ', 1, 0),
+                        ENT_QUOTES,
+                        'UTF-8'
                     ),
-                    'data_rom' => tohtml($record['WoRomanization']),
+                    'data_rom' => htmlspecialchars($record['WoRomanization'] ?? '', ENT_QUOTES, 'UTF-8'),
                     'data_status' => $record['WoStatus']
                 );
             } else {
@@ -158,13 +162,13 @@ class TextReadingService
                 );
             }
             foreach ($exprs as $expr) {
-                $attributes['data_mw' . $expr[0]] = tohtml($expr[1]);
+                $attributes['data_mw' . $expr[0]] = htmlspecialchars($expr[1] ?? '', ENT_QUOTES, 'UTF-8');
             }
             $span = '<span';
             foreach ($attributes as $attr_name => $val) {
                 $span .= ' ' . $attr_name . '="' . $val . '"';
             }
-            $span .= '>' . tohtml($record['TiText']) . '</span>';
+            $span .= '>' . htmlspecialchars($record['TiText'] ?? '', ENT_QUOTES, 'UTF-8') . '</span>';
             echo $span;
             for ($i = sizeof($exprs) - 1; $i >= 0; $i--) {
                 $exprs[$i][2]--;
@@ -224,7 +228,7 @@ class TextReadingService
         if ($record['TiIsNotWord'] != 0) {
             // The current item is not a term (likely punctuation)
             echo "<span id=\"$spanid\" class=\"$hidetag\">" .
-            str_replace("¶", '<br />', tohtml($record['TiText'])) . '</span>';
+            str_replace("¶", '<br />', htmlspecialchars($record['TiText'] ?? '', ENT_QUOTES, 'UTF-8')) . '</span>';
         } else {
             // A term (word or multi-word)
             $this->echoTerm(

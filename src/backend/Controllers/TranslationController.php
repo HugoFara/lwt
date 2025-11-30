@@ -174,10 +174,10 @@ class TranslationController extends BaseController
         ?>
         <h2>Sentence Translation</h2>
         <span title="Translated via Google Translate">
-            <?php echo \tohtml($translation); ?>
+            <?php echo htmlspecialchars($translation, ENT_QUOTES, 'UTF-8'); ?>
         </span>
         <p>Original sentence: </p>
-        <blockquote><?php echo \tohtml($text); ?></blockquote>
+        <blockquote><?php echo htmlspecialchars($text, ENT_QUOTES, 'UTF-8'); ?></blockquote>
         <?php
     }
 
@@ -201,7 +201,7 @@ class TranslationController extends BaseController
         $hasParentFrame = true; // Will be checked client-side
         ?>
         <h2 title="Translate with Google Translate">
-            Word translation: <?php echo \tohtml($text) ?>
+            Word translation: <?php echo htmlspecialchars($text, ENT_QUOTES, 'UTF-8') ?>
             <img id="textToSpeech" class="click" title="Click to read!"
             src="<?php \print_file_path('icn/speaker-volume.png'); ?>"></img>
 
@@ -222,7 +222,7 @@ class TranslationController extends BaseController
             echo '<span class="click" data-action="add-translation" data-word="' .
                 htmlspecialchars($word, ENT_QUOTES, 'UTF-8') . '">' .
                 '<img src="/assets/icons/tick-button.png" title="Copy" alt="Copy" /> &nbsp; ' .
-                \tohtml($word) . '</span><br />';
+                htmlspecialchars($word, ENT_QUOTES, 'UTF-8') . '</span><br />';
         }
         ?>
         <p>
@@ -233,9 +233,9 @@ class TranslationController extends BaseController
         <form action="ggl.php" method="get">
             Unhappy?<br/>Change term:
             <input type="text" name="text" maxlength="250" size="15"
-            value="<?php echo \tohtml($text); ?>">
-            <input type="hidden" name="sl" value="<?php echo \tohtml($srcLang); ?>">
-            <input type="hidden" name="tl" value="<?php echo \tohtml($tgtLang); ?>">
+            value="<?php echo htmlspecialchars($text, ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="sl" value="<?php echo htmlspecialchars($srcLang, ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="tl" value="<?php echo htmlspecialchars($tgtLang, ENT_QUOTES, 'UTF-8'); ?>">
             <input type="submit" value="Translate via Google Translate">
         </form>
         <?php
@@ -266,8 +266,8 @@ class TranslationController extends BaseController
 
         $glosbeUrl = $this->translationService->buildGlosbeUrl($phrase, $from, $dest);
         $titleText = '<a href="' . $glosbeUrl . '">Glosbe Dictionary (' .
-            \tohtml($from) . "-" . \tohtml($dest) . "):  &nbsp; " .
-            '<span class="red2">' . \tohtml($phrase) . "</span></a>";
+            htmlspecialchars($from, ENT_QUOTES, 'UTF-8') . "-" . htmlspecialchars($dest, ENT_QUOTES, 'UTF-8') . "):  &nbsp; " .
+            '<span class="red2">' . htmlspecialchars($phrase, ENT_QUOTES, 'UTF-8') . "</span></a>";
 
         echo '<h3>' . $titleText .
             ' <img id="del_translation" src="/assets/icons/broom.png" title="Empty Translation Field" ' .
@@ -280,9 +280,9 @@ class TranslationController extends BaseController
         echo '<p id="translations"></p>';
 
         echo '&nbsp;<form action="glosbe_api.php" method="get">Unhappy?<br/>Change term:
-            <input type="text" name="phrase" maxlength="250" size="15" value="' . \tohtml($phrase) . '">
-            <input type="hidden" name="from" value="' . \tohtml($from) . '">
-            <input type="hidden" name="dest" value="' . \tohtml($destOrig) . '">
+            <input type="text" name="phrase" maxlength="250" size="15" value="' . htmlspecialchars($phrase, ENT_QUOTES, 'UTF-8') . '">
+            <input type="hidden" name="from" value="' . htmlspecialchars($from, ENT_QUOTES, 'UTF-8') . '">
+            <input type="hidden" name="dest" value="' . htmlspecialchars($destOrig, ENT_QUOTES, 'UTF-8') . '">
             <input type="submit" value="Translate via Glosbe">
             </form>';
 

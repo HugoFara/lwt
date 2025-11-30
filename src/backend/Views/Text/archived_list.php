@@ -103,7 +103,7 @@ namespace Lwt\Views\Text;
                 echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
             }
             ?>
-            <input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
+            <input type="text" name="query" value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
             <input type="button" name="querybutton" value="Filter" data-action="filter" />&nbsp;
             <input type="button" value="Clear" data-action="clear-filter" />
         </td>
@@ -206,11 +206,11 @@ namespace Lwt\Views\Text;
             </span>&nbsp;
         </td>
         <?php if ($currentLang == ''): ?>
-        <td class="td1 center"><?php echo tohtml($record['LgName']); ?></td>
+        <td class="td1 center"><?php echo htmlspecialchars($record['LgName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
         <?php endif; ?>
         <td class="td1 center">
-            <?php echo tohtml($record['AtTitle']); ?>
-            <span class="smallgray2"><?php echo tohtml($record['taglist']); ?></span> &nbsp;
+            <?php echo htmlspecialchars($record['AtTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+            <span class="smallgray2"><?php echo htmlspecialchars($record['taglist'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span> &nbsp;
             <?php if (isset($record['AtAudioURI']) && $record['AtAudioURI']): ?>
             <img src="<?php echo get_file_path('assets/icons/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />
             <?php endif; ?>

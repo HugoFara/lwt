@@ -24,7 +24,7 @@
 namespace Lwt\Views\Word;
 
 ?>
-<p>OK: <?php echo tohtml($message); ?></p>
+<p>OK: <?php echo htmlspecialchars($message ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
 
 <script type="application/json" data-lwt-edit-term-result-config>
 <?php echo json_encode([

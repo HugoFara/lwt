@@ -26,7 +26,7 @@ namespace Lwt\Views\Word;
 ?>
 <p>Status: <?php echo get_colored_status_msg($status); ?></p><br />
 <?php if ($translation != '*'): ?>
-<p>Translation: <b><?php echo tohtml($translation); ?></b></p>
+<p>Translation: <b><?php echo htmlspecialchars($translation ?? '', ENT_QUOTES, 'UTF-8'); ?></b></p>
 <?php endif; ?>
 
 <script type="application/json" data-lwt-hover-save-result-config>

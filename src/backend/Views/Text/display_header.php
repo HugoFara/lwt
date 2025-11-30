@@ -27,7 +27,7 @@ namespace Lwt\Views\Text;
 // $title, $audio, $sourceUri, $textLinks
 
 ?>
-<h1><?php echo \tohtml($title); ?></h1>
+<h1><?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
 <div class="flex-spaced">
     <div>
         <img id="hidet" class="click" src="/assets/icons/light-bulb-T.png"

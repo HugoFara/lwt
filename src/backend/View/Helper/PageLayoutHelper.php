@@ -20,7 +20,6 @@ require_once __DIR__ . '/../../Core/Http/url_utilities.php';
 use Lwt\Core\Http\UrlUtilities;
 use function Lwt\Core\Utils\showRequest;
 use function Lwt\Core\Utils\get_execution_time;
-use function Lwt\Core\Utils\tohtml;
 use function Lwt\Core\Utils\get_file_path;
 
 /**
@@ -274,9 +273,9 @@ HTML;
             echo '<script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>';
         }
 
-        echo '<!-- URLBASE : "' . tohtml(UrlUtilities::urlBase()) . '" -->';
-        echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
-        echo '<title>LWT :: ' . tohtml($title) . '</title>';
+        echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
+        echo '<!-- TBPREF  : "' . htmlspecialchars($tbpref, ENT_QUOTES, 'UTF-8') . '" -->';
+        echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
         echo '<body>';
 
@@ -342,11 +341,11 @@ HTML;
             echo '<script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>';
         }
 
-        echo '<!-- URLBASE : "' . tohtml(UrlUtilities::urlBase()) . '" -->';
-        echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
-        echo '<title>LWT :: ' . tohtml($title) . '</title>';
+        echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
+        echo '<!-- TBPREF  : "' . htmlspecialchars($tbpref, ENT_QUOTES, 'UTF-8') . '" -->';
+        echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
-        echo '<body' . ($bodyClass !== '' ? ' class="' . tohtml($bodyClass) . '"' : '') . '>';
+        echo '<body' . ($bodyClass !== '' ? ' class="' . htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8') . '"' : '') . '>';
 
         if (!ViteHelper::shouldUse()) {
             echo '<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>';
@@ -424,7 +423,7 @@ HTML;
         echo '<!--' . "\n";
         echo file_get_contents("UNLICENSE.md");
         echo '-->';
-        echo '<title>LWT :: ' . tohtml($title) . '</title>';
+        echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
     }
 
@@ -446,13 +445,13 @@ HTML;
             return;
         }
         if (substr($message, 0, 5) == "Error") {
-            echo '<p class="red">*** ' . \tohtml($message) . ' ***' .
+            echo '<p class="red">*** ' . \htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . ' ***' .
                 ($autoHide ?
                 '' :
                 '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="go-back" />' ) .
                 '</p>';
         } else {
-            echo '<p id="hide3" class="msgblue">+++ ' . \tohtml($message) . ' +++</p>';
+            echo '<p id="hide3" class="msgblue">+++ ' . \htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . ' +++</p>';
         }
     }
 }

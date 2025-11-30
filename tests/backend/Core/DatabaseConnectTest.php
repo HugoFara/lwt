@@ -1403,24 +1403,27 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test tohtml function (HTML entity encoding)
+     * Test htmlspecialchars with ENT_QUOTES (HTML entity encoding)
      */
-    public function testTohtml(): void
+    public function testHtmlEscaping(): void
     {
+        // Helper lambda to match production code pattern
+        $escapeHtml = fn(?string $s): string => htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8');
+
         // Basic HTML escaping
-        $this->assertEquals('&lt;script&gt;', tohtml('<script>'));
-        $this->assertEquals('&quot;test&quot;', tohtml('"test"'));
-        $this->assertEquals('hello &amp; world', tohtml('hello & world'));
+        $this->assertEquals('&lt;script&gt;', $escapeHtml('<script>'));
+        $this->assertEquals('&quot;test&quot;', $escapeHtml('"test"'));
+        $this->assertEquals('hello &amp; world', $escapeHtml('hello & world'));
 
         // Test with empty string
-        $this->assertEquals('', tohtml(''));
+        $this->assertEquals('', $escapeHtml(''));
 
         // Test with already encoded entities (should double-encode)
-        $result = tohtml('&lt;');
+        $result = $escapeHtml('&lt;');
         $this->assertStringContainsString('&', $result);
 
         // Test with UTF-8 characters
-        $result = tohtml('日本語');
+        $result = $escapeHtml('日本語');
         $this->assertStringContainsString('日本語', $result);
     }
 

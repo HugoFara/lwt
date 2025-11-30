@@ -51,12 +51,14 @@ $varArray = [
             'dict_link1'      => $dictLink1,
             'dict_link2'      => $dictLink2,
             'translator_link' => $translatorLink,
-            'delimiter'       => \tohtml(
+            'delimiter'       => htmlspecialchars(
                 str_replace(
                     ['\\',']','-','^'],
                     ['\\\\','\\]','\\-','\\^'],
                     $termDelimiter
-                )
+                ) ?? '',
+                ENT_QUOTES,
+                'UTF-8'
             ),
             'word_parsing'    => $regexpWordChars,
             'rtl'             => $rtlScript

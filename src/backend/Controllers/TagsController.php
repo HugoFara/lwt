@@ -290,7 +290,7 @@ class TagsController extends BaseController
                     <td class="td1 right">Tag:</td>
                     <td class="td1">
                         <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
-                        type="text" name="TgText" value="<?php echo \tohtml($record['TgText']); ?>" maxlength="20" size="20" />
+                        type="text" name="TgText" value="<?php echo htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="20" size="20" />
                         <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
                     </td>
                 </tr>
@@ -298,7 +298,7 @@ class TagsController extends BaseController
                     <td class="td1 right">Comment:</td>
                     <td class="td1">
                         <textarea class="textarea-noreturn checklength checkoutsidebmp respinput"
-                        data_maxlength="200" data_info="Comment" name="TgComment" rows="3"><?php echo \tohtml($record['TgComment']); ?></textarea>
+                        data_maxlength="200" data_info="Comment" name="TgComment" rows="3"><?php echo htmlspecialchars($record['TgComment'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -385,7 +385,7 @@ class TagsController extends BaseController
         <tr>
         <td class="td1 center" colspan="4">
         Tag Text or Comment:
-        <input type="text" name="query" value="<?php echo \tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
+        <input type="text" name="query" value="<?php echo htmlspecialchars($currentquery, ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
         <button type="button" name="querybutton" data-action="filter-query">Filter</button>&nbsp;
         <button type="button" data-action="clear-query">Clear</button>
         </td>
@@ -453,8 +453,8 @@ class TagsController extends BaseController
                         <input name="marked[]" type="checkbox" class="markcheck" value="' . $record['TgID'] . '" ' . FormHelper::checkInRequest($record['TgID'], 'marked') . ' />
                         </a></td>
                     <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags?chg=' . $record['TgID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags?del=' . $record['TgID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
-                    <td class="td1 center">' . \tohtml($record['TgText']) . '</td>
-                    <td class="td1 center">' . \tohtml($record['TgComment']) . '</td>
+                    <td class="td1 center">' . htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>
+                    <td class="td1 center">' . htmlspecialchars($record['TgComment'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>
                     <td class="td1 center">' . ($c > 0 ? '<a href="/words/edit?page=1&amp;query=&amp;text=&amp;status=&amp;filterlang=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['TgID'] . '">' . $c . '</a>' : '0') . '</td>
                 </tr>';
             }
@@ -656,14 +656,14 @@ class TagsController extends BaseController
                 <td class="td1 right">Tag:</td>
                 <td class="td1">
                     <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
-                    type="text" name="T2Text" value="<?php echo \tohtml($record['T2Text']); ?>" maxlength="20" />
+                    type="text" name="T2Text" value="<?php echo htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="20" />
                     <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
                 </tr>
                 <tr>
                     <td class="td1 right">Comment:</td>
                     <td class="td1">
                         <textarea class="textarea-noreturn checklength checkoutsidebmp respinput"
-                        data_maxlength="200" data_info="Comment" name="T2Comment" rows="3"><?php echo \tohtml($record['T2Comment']); ?></textarea>
+                        data_maxlength="200" data_info="Comment" name="T2Comment" rows="3"><?php echo htmlspecialchars($record['T2Comment'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -750,7 +750,7 @@ class TagsController extends BaseController
         <tr>
         <td class="td1 center" colspan="4">
             Tag Text or Comment:
-            <input type="text" name="query" value="<?php echo \tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
+            <input type="text" name="query" value="<?php echo htmlspecialchars($currentquery, ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
             <button type="button" name="querybutton" data-action="filter-query">Filter</button>&nbsp;
             <button type="button" data-action="clear-query">Clear</button>
         </td>
@@ -817,8 +817,8 @@ class TagsController extends BaseController
                 echo '<tr>';
                 echo '<td class="td1 center"><a name="rec' . $record['T2ID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['T2ID'] . '" ' . FormHelper::checkInRequest($record['T2ID'], 'marked') . ' /></a></td>';
                 echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags/text?chg=' . $record['T2ID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags/text?del=' . $record['T2ID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';
-                echo '<td class="td1 center">' . \tohtml($record['T2Text']) . '</td>';
-                echo '<td class="td1 center">' . \tohtml($record['T2Comment']) . '</td>';
+                echo '<td class="td1 center">' . htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
+                echo '<td class="td1 center">' . htmlspecialchars($record['T2Comment'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td class="td1 center">' . ($c > 0 ? '<a href="/text/edit?page=1&amp;query=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['T2ID'] . '">' . $c . '</a>' : '0') . '</td>';
                 echo '<td class="td1 center">' . ($ca > 0 ? '<a href="/text/archived?page=1&amp;query=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['T2ID'] . '">' . $ca . '</a>' : '0') . '</td>';
                 echo '</tr>';

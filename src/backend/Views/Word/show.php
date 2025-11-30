@@ -24,37 +24,37 @@ namespace Lwt\Views\Word;
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
     <td class="td1 right word-show-label">Term:</td>
-    <td class="td1 word-show-term" <?php echo $scrdir; ?>><b><?php echo tohtml($word['text']); ?></b></td>
+    <td class="td1 word-show-term" <?php echo $scrdir; ?>><b><?php echo htmlspecialchars($word['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></b></td>
 </tr>
 <tr>
     <td class="td1 right">Translation:</td>
     <td class="td1 word-show-value"><b><?php
     if (!empty($ann)) {
         echo str_replace_first(
-            tohtml($ann),
-            '<span class="word-show-highlight">' . tohtml($ann) . '</span>',
-            tohtml($word['translation'])
+            htmlspecialchars($ann ?? '', ENT_QUOTES, 'UTF-8'),
+            '<span class="word-show-highlight">' . htmlspecialchars($ann ?? '', ENT_QUOTES, 'UTF-8') . '</span>',
+            htmlspecialchars($word['translation'] ?? '', ENT_QUOTES, 'UTF-8')
         );
     } else {
-        echo tohtml($word['translation']);
+        echo htmlspecialchars($word['translation'] ?? '', ENT_QUOTES, 'UTF-8');
     }
     ?></b></td>
 </tr>
 <?php if ($tags !== '') : ?>
 <tr>
     <td class="td1 right">Tags:</td>
-    <td class="td1 word-show-value"><b><?php echo tohtml($tags); ?></b></td>
+    <td class="td1 word-show-value"><b><?php echo htmlspecialchars($tags ?? '', ENT_QUOTES, 'UTF-8'); ?></b></td>
 </tr>
 <?php endif; ?>
 <?php if ($word['romanization'] !== '') : ?>
 <tr>
     <td class="td1 right">Romaniz.:</td>
-    <td class="td1 word-show-value"><b><?php echo tohtml($word['romanization']); ?></b></td>
+    <td class="td1 word-show-value"><b><?php echo htmlspecialchars($word['romanization'] ?? '', ENT_QUOTES, 'UTF-8'); ?></b></td>
 </tr>
 <?php endif; ?>
 <tr>
     <td class="td1 right">Sentence<br />Term in {...}:</td>
-    <td class="td1" <?php echo $scrdir; ?>><?php echo tohtml($word['sentence']); ?></td>
+    <td class="td1" <?php echo $scrdir; ?>><?php echo htmlspecialchars($word['sentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 </tr>
 <tr>
     <td class="td1 right">Status:</td>

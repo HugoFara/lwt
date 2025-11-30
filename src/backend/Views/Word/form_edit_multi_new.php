@@ -29,7 +29,7 @@ use Lwt\Core\Http\InputValidator;
 <form name="newword" class="validate" action="/word/edit-multi" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $term->lgid; ?>" />
-<input type="hidden" name="WoTextLC" value="<?php echo tohtml($term->textlc); ?>" />
+<input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($term->textlc ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="hidden" name="tid" value="<?php echo $tid; ?>" />
 <input type="hidden" name="ord" value="<?php echo $ord; ?>" />
 <input type="hidden" name="len" value="<?php echo $len; ?>" />
@@ -37,7 +37,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr title="Only change uppercase/lowercase!">
         <td class="td1 right"><b>New Term:</b></td>
         <td class="td1">
-            <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="New Term" type="text" name="WoText" id="wordfield" value="<?php echo tohtml($term->text); ?>" maxlength="250" size="35" />
+            <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="New Term" type="text" name="WoText" id="wordfield" value="<?php echo htmlspecialchars($term->text ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
@@ -63,7 +63,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr>
         <td class="td1 right">Sentence<br />Term in {...}:</td>
         <td class="td1">
-            <textarea <?php echo $scrdir; ?> name="WoSentence" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" cols="35" rows="3"><?php echo tohtml($sentence); ?></textarea>
+            <textarea <?php echo $scrdir; ?> name="WoSentence" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" cols="35" rows="3"><?php echo htmlspecialchars($sentence ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
         </td>
     </tr>
     <tr>

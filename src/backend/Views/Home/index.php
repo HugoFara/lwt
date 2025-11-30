@@ -43,8 +43,8 @@ function renderCurrentTextInfo(int $textid, ?array $textInfo): void
     $annotated = $textInfo['annotated'];
     ?>
 <div class="home-last-text">
-    Last Text (<?php echo tohtml($lngname); ?>):<br />
-    <i><?php echo tohtml($txttit); ?></i>
+    Last Text (<?php echo htmlspecialchars($lngname ?? '', ENT_QUOTES, 'UTF-8'); ?>):<br />
+    <i><?php echo htmlspecialchars($txttit ?? '', ENT_QUOTES, 'UTF-8'); ?></i>
     <br />
     <a href="/text/read?start=<?php echo $textid; ?>">
         <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" />&nbsp;Read

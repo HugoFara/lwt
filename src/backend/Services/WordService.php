@@ -24,6 +24,7 @@ use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 
 /**
@@ -322,9 +323,9 @@ class WordService
      */
     public function delete(int $wordId): string
     {
-        Connection::execute(
-            'DELETE FROM ' . $this->tbpref . 'words WHERE WoID = ' . $wordId
-        );
+        QueryBuilder::table('words')
+            ->where('WoID', '=', $wordId)
+            ->delete();
 
         // Update text items to unlink the word
         Connection::query(
@@ -333,11 +334,11 @@ class WordService
         );
 
         // Delete multi-word text items
-        Connection::query(
-            'DELETE FROM ' . $this->tbpref . 'textitems2 WHERE Ti2WoID = ' . $wordId
-        );
+        QueryBuilder::table('textitems2')
+            ->where('Ti2WoID', '=', $wordId)
+            ->delete();
 
-        // Clean up orphaned word tags
+        // Clean up orphaned word tags (complex DELETE with JOIN - keep as-is)
         Connection::execute(
             'DELETE ' . $this->tbpref . 'wordtags FROM (' .
             $this->tbpref . 'wordtags LEFT JOIN ' . $this->tbpref . 'words ON WtWoID = WoID) ' .
@@ -360,23 +361,23 @@ class WordService
             return 0;
         }
 
-        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+        $ids = array_map('intval', $wordIds);
 
-        $count = (int) Connection::execute(
-            'DELETE FROM ' . $this->tbpref . 'words WHERE WoID IN ' . $list
-        );
+        $count = QueryBuilder::table('words')
+            ->whereIn('WoID', $ids)
+            ->delete();
 
         // Update text items
         Connection::query(
             'UPDATE ' . $this->tbpref . 'textitems2 SET Ti2WoID = 0
-             WHERE Ti2WordCount = 1 AND Ti2WoID IN ' . $list
+             WHERE Ti2WordCount = 1 AND Ti2WoID IN (' . implode(',', $ids) . ')'
         );
 
-        Connection::query(
-            'DELETE FROM ' . $this->tbpref . 'textitems2 WHERE Ti2WoID IN ' . $list
-        );
+        QueryBuilder::table('textitems2')
+            ->whereIn('Ti2WoID', $ids)
+            ->delete();
 
-        // Clean up orphaned word tags
+        // Clean up orphaned word tags (complex DELETE with JOIN - keep as-is)
         Connection::execute(
             'DELETE ' . $this->tbpref . 'wordtags FROM (' .
             $this->tbpref . 'wordtags LEFT JOIN ' . $this->tbpref . 'words ON WtWoID = WoID) ' .
@@ -956,17 +957,18 @@ class WordService
      */
     public function deleteMultiWord(int $wordId): int
     {
-        $result = Connection::execute(
-            'DELETE FROM ' . $this->tbpref . 'words WHERE WoID = ' . $wordId
-        );
+        $result = QueryBuilder::table('words')
+            ->where('WoID', '=', $wordId)
+            ->delete();
 
         \Lwt\Database\Maintenance::adjustAutoIncrement('words', 'WoID');
 
-        Connection::execute(
-            'DELETE FROM ' . $this->tbpref . 'textitems2 WHERE Ti2WordCount > 1 AND Ti2WoID = ' . $wordId
-        );
+        QueryBuilder::table('textitems2')
+            ->where('Ti2WordCount', '>', 1)
+            ->where('Ti2WoID', '=', $wordId)
+            ->delete();
 
-        return (int) $result;
+        return $result;
     }
 
     /**

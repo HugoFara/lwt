@@ -182,13 +182,13 @@ class TextNavigationService
         for ($i = 1; $i < $listlen - 1; $i++) {
             if ($list[$i] == $textId) {
                 if ($list[$i - 1] !== 0) {
-                    $title = tohtml(getTextTitle($list[$i - 1]));
+                    $title = htmlspecialchars(getTextTitle($list[$i - 1]), ENT_QUOTES, 'UTF-8');
                     $prev = '<a href="' . $url . $list[$i - 1] . '" target="_top"><img src="/assets/icons/navigation-180-button.png" title="Previous Text: ' . $title . '" alt="Previous Text: ' . $title . '" /></a>';
                 } else {
                     $prev = '<img src="/assets/icons/navigation-180-button-light.png" title="No Previous Text" alt="No Previous Text" />';
                 }
                 if ($list[$i + 1] !== 0) {
-                    $title = tohtml(getTextTitle($list[$i + 1]));
+                    $title = htmlspecialchars(getTextTitle($list[$i + 1]), ENT_QUOTES, 'UTF-8');
                     $next = '<a href="' . $url . $list[$i + 1] .
                     '" target="_top"><img src="/assets/icons/navigation-000-button.png" title="Next Text: ' . $title . '" alt="Next Text: ' . $title . '" /></a>';
                 } else {

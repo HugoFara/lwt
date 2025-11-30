@@ -17,6 +17,7 @@
 
 namespace Lwt;
 
+use Lwt\Core\Http\InputValidator;
 use Lwt\Router\Router;
 use Lwt\Services\DatabaseWizardService;
 
@@ -195,15 +196,17 @@ class Application
         $conn = null;
         $errorMessage = null;
 
-        $op = $_REQUEST['op'] ?? '';
+        $op = InputValidator::getString('op');
         if ($op != '') {
             if ($op == "Autocomplete") {
                 $conn = $wizardService->autocompleteConnection();
             } elseif ($op == "Check") {
-                $conn = $wizardService->createConnectionFromForm($_REQUEST);
+                $formData = $this->getWizardFormData();
+                $conn = $wizardService->createConnectionFromForm($formData);
                 $errorMessage = $wizardService->testConnection($conn);
             } elseif ($op == "Change") {
-                $conn = $wizardService->createConnectionFromForm($_REQUEST);
+                $formData = $this->getWizardFormData();
+                $conn = $wizardService->createConnectionFromForm($formData);
                 $wizardService->saveConnection($conn);
                 header("Location: /");
                 exit;
@@ -270,5 +273,22 @@ class Application
         </html>
         <?php
         exit;
+    }
+
+    /**
+     * Get database wizard form data from request parameters.
+     *
+     * @return array<string, string> Form data array
+     */
+    private function getWizardFormData(): array
+    {
+        return [
+            'db_hostname' => InputValidator::getString('db_hostname'),
+            'db_socket' => InputValidator::getString('db_socket'),
+            'db_user' => InputValidator::getString('db_user'),
+            'db_password' => InputValidator::getString('db_password'),
+            'db_name' => InputValidator::getString('db_name'),
+            'db_prefix' => InputValidator::getString('db_prefix'),
+        ];
     }
 }

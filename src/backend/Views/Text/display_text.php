@@ -35,12 +35,12 @@ foreach ($annotations as $item) {
         echo ' <ruby>
             <rb>
                 <span class="click anntermruby" style="color:black;"' .
-                ($item['rom'] === '' ? '' : (' title="' . \tohtml($item['rom']) . '"')) . '>' .
-                    \tohtml($item['text']) .
+                ($item['rom'] === '' ? '' : (' title="' . \htmlspecialchars($item['rom'] ?? '', ENT_QUOTES, 'UTF-8') . '"')) . '>' .
+                    \htmlspecialchars($item['text'] ?? '', ENT_QUOTES, 'UTF-8') .
                 '</span>
             </rb>
             <rt>
-                <span class="click anntransruby2">' . \tohtml($item['trans']) . '</span>
+                <span class="click anntransruby2">' . \htmlspecialchars($item['trans'] ?? '', ENT_QUOTES, 'UTF-8') . '</span>
             </rt>
         </ruby> ';
     } else {
@@ -50,7 +50,7 @@ foreach ($annotations as $item) {
             '</p>
             <p style="font-size:' . $textSize .
             '%;line-height: 1.3; margin-bottom: 10px;">',
-            " " . \tohtml($item['text'])
+            " " . \htmlspecialchars($item['text'] ?? '', ENT_QUOTES, 'UTF-8')
         );
     }
 }

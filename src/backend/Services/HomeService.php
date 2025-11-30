@@ -77,7 +77,7 @@ class HomeService
         if ($this->tbpref == '') {
             $span2 = "<i>Default</i> Table Set</span>";
         } else {
-            $span2 = "Table Set: <i>" . tohtml(substr($this->tbpref, 0, -1)) . "</i></span>";
+            $span2 = "Table Set: <i>" . htmlspecialchars(substr($this->tbpref, 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i></span>";
         }
 
         if ($this->fixedTbpref) {

@@ -35,7 +35,7 @@ namespace Lwt\Views\Feed;
             <td class="td1">
                 <input class="notempty" style="width:90%" type="text" name="rss_url" <?php
                 if (!empty($rssUrl)) {
-                    echo 'value="' . tohtml($rssUrl) . '" ';
+                    echo 'value="' . htmlspecialchars($rssUrl ?? '', ENT_QUOTES, 'UTF-8') . '" ';
                 }?>
                 />
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />

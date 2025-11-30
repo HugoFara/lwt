@@ -22,7 +22,7 @@
 namespace Lwt\Views\Test;
 
 ?>
-<h1>TEST - <?php echo \tohtml($title); ?></h1>
+<h1>TEST - <?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
 <div class="test-word-count">
     Word<?php echo $totalCount > 1 ? 's' : ''; ?> due today:
     <?php echo $totalCount; ?>,
@@ -30,28 +30,28 @@ namespace Lwt\Views\Test;
 </div>
 <div class="flex-spaced">
     <div>
-        <input type="button" value="..[<?php echo \tohtml($languageName); ?>].."
+        <input type="button" value="..[<?php echo \htmlspecialchars($languageName ?? '', ENT_QUOTES, 'UTF-8'); ?>].."
             data-action="start-word-test" data-test-type="1"
-            data-property="<?php echo \tohtml($property); ?>" />
+            data-property="<?php echo \htmlspecialchars($property ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
         <input type="button" value="..[L1].."
             data-action="start-word-test" data-test-type="2"
-            data-property="<?php echo \tohtml($property); ?>" />
+            data-property="<?php echo \htmlspecialchars($property ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
         <input type="button" value="..[-].."
             data-action="start-word-test" data-test-type="3"
-            data-property="<?php echo \tohtml($property); ?>" />
+            data-property="<?php echo \htmlspecialchars($property ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
     </div>
     <div>
-        <input type="button" value="[<?php echo \tohtml($languageName); ?>]"
+        <input type="button" value="[<?php echo \htmlspecialchars($languageName ?? '', ENT_QUOTES, 'UTF-8'); ?>]"
             data-action="start-word-test" data-test-type="4"
-            data-property="<?php echo \tohtml($property); ?>" />
+            data-property="<?php echo \htmlspecialchars($property ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
         <input type="button" value="[L1]"
             data-action="start-word-test" data-test-type="5"
-            data-property="<?php echo \tohtml($property); ?>" />
+            data-property="<?php echo \htmlspecialchars($property ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
     </div>
     <div>
         <input type="button" value="Table"
             data-action="start-test-table"
-            data-property="<?php echo \tohtml($property); ?>" />
+            data-property="<?php echo \htmlspecialchars($property ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
     </div>
     <div>
         <input type="checkbox" id="utterance-allowed" />

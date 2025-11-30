@@ -38,7 +38,7 @@ namespace Lwt\Views\Admin;
 </tr>
 <?php foreach ($intensityStats['languages'] as $lang): ?>
 <tr>
-    <td class="td1"><?php echo tohtml($lang['name']); ?></td>
+    <td class="td1"><?php echo htmlspecialchars($lang['name'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
     <td class="td1 center"><a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=<?php echo $lang['id']; ?>&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1="><b><?php echo $lang['all']; ?></b></a></td>
     <td class="td1 center"><a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=<?php echo $lang['id']; ?>&amp;status=15&amp;tag12=0&amp;tag2=&amp;tag1="><b><?php echo $lang['s15']; ?></b></a></td>
     <td class="td1 center"><a href="/words/edit?page=1&amp;text=&amp;query=&amp;filterlang=<?php echo $lang['id']; ?>&amp;status=14&amp;tag12=0&amp;tag2=&amp;tag1="><b><?php echo $lang['s14']; ?></b></a></td>
@@ -102,7 +102,7 @@ namespace Lwt\Views\Admin;
 </tr>
 <?php foreach ($frequencyStats['languages'] as $lang): ?>
 <tr>
-    <td class="td1"><?php echo tohtml($lang['name']); ?></td>
+    <td class="td1"><?php echo htmlspecialchars($lang['name'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 
     <td class="td1 center"><span class="status1">&nbsp;<?php echo $lang['ct']; ?>&nbsp;</span></td>
     <td class="td1 center"><span class="status3">&nbsp;<?php echo $lang['at']; ?>&nbsp;</span></td>

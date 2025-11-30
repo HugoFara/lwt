@@ -72,19 +72,19 @@ foreach ($words as $record) {
     <td class="td1 center"><a name="rec<?php echo $record['WoID']; ?>"><input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $record['WoID']; ?>" <?php echo checkTest($record['WoID'], 'marked'); ?> /></a></td>
     <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/words/edit?chg=<?php echo $record['WoID']; ?>"><img src="/assets/icons/sticky-note--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/words/edit?del=<?php echo $record['WoID']; ?>"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
 <?php if ($currentlang == '') { ?>
-    <td class="td1 center"><?php echo tohtml($record['LgName']); ?></td>
+    <td class="td1 center"><?php echo htmlspecialchars($record['LgName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 <?php } ?>
     <td class="td1"><span<?php
     if (!empty($record['LgGoogleTranslateURI']) && strpos((string) $record['LgGoogleTranslateURI'], '&sl=') !== false) {
         echo ' class="tts_' . preg_replace('/.*[?&]sl=([a-zA-Z\-]*)(&.*)*$/', '$1', $record['LgGoogleTranslateURI']) . '"';
     }
     echo ($record['LgRightToLeft'] ? ' dir="rtl" ' : '');
-    ?>><?php echo tohtml($record['WoText']); ?></span><?php
-    echo ($record['WoRomanization'] != '' ? (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">' . tohtml(\Lwt\Services\ExportService::replaceTabNewline($record['WoRomanization'])) . '</span>') : (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">*</span>'));
+    ?>><?php echo htmlspecialchars($record['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span><?php
+    echo ($record['WoRomanization'] != '' ? (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">' . htmlspecialchars(\Lwt\Services\ExportService::replaceTabNewline($record['WoRomanization']) ?? '', ENT_QUOTES, 'UTF-8') . '</span>') : (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">*</span>'));
     ?></td>
-    <td class="td1"><span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo tohtml(\Lwt\Services\ExportService::replaceTabNewline($record['WoTranslation'])); ?></span> <span class="smallgray2"><?php echo tohtml($record['taglist']); ?></span></td>
-    <td class="td1 center"><b><?php echo ($record['SentOK'] != 0 ? '<img src="/assets/icons/status.png" title="' . tohtml($record['WoSentence']) . '" alt="Yes" />' : '<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />'); ?></b></td>
-    <td class="td1 center" title="<?php echo tohtml(get_status_name($record['WoStatus'])); ?>"><?php echo tohtml(get_status_abbr($record['WoStatus'])); ?><?php echo ($record['WoStatus'] < 98 ? '/' . $days : ''); ?></td>
+    <td class="td1"><span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(\Lwt\Services\ExportService::replaceTabNewline($record['WoTranslation']) ?? '', ENT_QUOTES, 'UTF-8'); ?></span> <span class="smallgray2"><?php echo htmlspecialchars($record['taglist'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span></td>
+    <td class="td1 center"><b><?php echo ($record['SentOK'] != 0 ? '<img src="/assets/icons/status.png" title="' . htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8') . '" alt="Yes" />' : '<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />'); ?></b></td>
+    <td class="td1 center" title="<?php echo htmlspecialchars(get_status_name($record['WoStatus']) ?? '', ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(get_status_abbr($record['WoStatus']) ?? '', ENT_QUOTES, 'UTF-8'); ?><?php echo ($record['WoStatus'] < 98 ? '/' . $days : ''); ?></td>
     <td class="td1 center" nowrap="nowrap"><?php echo $score; ?></td>
 <?php if ($currentsort == 7) { ?>
     <td class="td1 center" nowrap="nowrap"><?php echo $record['textswordcount'] ?? 0; ?></td>

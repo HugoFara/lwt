@@ -627,6 +627,8 @@ class QueryBuilder
     /**
      * Delete matching rows.
      *
+     * Supports WHERE, ORDER BY, and LIMIT clauses for MySQL.
+     *
      * @return int Number of deleted rows
      */
     public function delete(): int
@@ -635,6 +637,20 @@ class QueryBuilder
 
         if (!empty($this->wheres)) {
             $sql .= ' WHERE ' . $this->compileWheres();
+        }
+
+        // Add ORDER BY for DELETE (MySQL supports this)
+        if (!empty($this->orders)) {
+            $orderClauses = array_map(
+                fn($order) => $order['column'] . ' ' . $order['direction'],
+                $this->orders
+            );
+            $sql .= ' ORDER BY ' . implode(', ', $orderClauses);
+        }
+
+        // Add LIMIT for DELETE (MySQL supports this)
+        if ($this->limitValue !== null) {
+            $sql .= ' LIMIT ' . $this->limitValue;
         }
 
         return (int) Connection::execute($sql);

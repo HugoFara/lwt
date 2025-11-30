@@ -115,7 +115,6 @@ class Settings
      */
     public static function save(string $k, mixed $v): string
     {
-        $tbpref = Globals::getTablePrefix();
         $dft = SettingsService::getDefinitions();
         if (!isset($v)) {
             return 'Value is not set!';
@@ -123,10 +122,9 @@ class Settings
         if ($v === '') {
             return 'Value is an empty string!';
         }
-        Connection::execute(
-            "DELETE FROM {$tbpref}settings
-            WHERE StKey = " . Escaping::toSqlSyntax($k)
-        );
+        QueryBuilder::table('settings')
+            ->where('StKey', '=', $k)
+            ->delete();
         if (isset($dft[$k]) && $dft[$k]['num']) {
             $v = (int)$v;
             if ($v < $dft[$k]['min']) {
@@ -136,6 +134,7 @@ class Settings
                 $v = $dft[$k]['dft'];
             }
         }
+        $tbpref = Globals::getTablePrefix();
         $dum = Connection::execute(
             "INSERT INTO {$tbpref}settings (StKey, StValue) VALUES(" .
             Escaping::toSqlSyntax($k) . ', ' .

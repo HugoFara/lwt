@@ -88,7 +88,7 @@ use Lwt\Core\Utils\ErrorHandler;
             <tr>
                 <td class="td1 left">Newsfeed url: </td>
                 <td class="td1 left">
-                    <?php echo tohtml($wizardData['rss_url']); ?>
+                    <?php echo htmlspecialchars($wizardData['rss_url'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
                 </td>
             </tr>
             <tr>
@@ -132,7 +132,7 @@ use Lwt\Core\Utils\ErrorHandler;
         <tr>
             <td>
                 <input type="hidden" name="rss_url"
-                value="<?php echo tohtml($wizardData['rss_url']); ?>" />
+                value="<?php echo htmlspecialchars($wizardData['rss_url'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                 <input type="button" value="Cancel"
                 data-action="wizard-delete-cancel" />
             </td>
@@ -155,7 +155,7 @@ use Lwt\Core\Utils\ErrorHandler;
                             if (!isset($wizardData['host'][$feed_host])) {
                                 $wizardData['host'][$feed_host] = '-';
                             }
-                            echo '<option value="' . $i . '" title="' . tohtml($wizardData['feed'][$i]['title']) . '"';
+                            echo '<option value="' . $i . '" title="' . htmlspecialchars($wizardData['feed'][$i]['title'] ?? '', ENT_QUOTES, 'UTF-8') . '"';
                             if ($i == $wizardData['selected_feed']) {
                                 echo ' selected="selected"';
                                 $current_host = $feed_host;

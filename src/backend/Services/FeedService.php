@@ -18,6 +18,7 @@ use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Maintenance;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\TextParsing;
 
 /**
@@ -212,13 +213,15 @@ class FeedService
      */
     public function deleteFeeds(string $feedIds): array
     {
-        $articles = (int)Connection::execute(
-            "DELETE FROM {$this->tbpref}feedlinks WHERE FlNfID IN ($feedIds)"
-        );
+        $ids = array_map('intval', explode(',', $feedIds));
 
-        $feeds = (int)Connection::execute(
-            "DELETE FROM {$this->tbpref}newsfeeds WHERE NfID IN ($feedIds)"
-        );
+        $articles = QueryBuilder::table('feedlinks')
+            ->whereIn('FlNfID', $ids)
+            ->delete();
+
+        $feeds = QueryBuilder::table('newsfeeds')
+            ->whereIn('NfID', $ids)
+            ->delete();
 
         return ['feeds' => $feeds, 'articles' => $articles];
     }
@@ -232,14 +235,16 @@ class FeedService
      */
     public function deleteArticles(string $feedIds): int
     {
-        $count = (int)Connection::execute(
-            "DELETE FROM {$this->tbpref}feedlinks WHERE FlNfID IN ($feedIds)"
-        );
+        $ids = array_map('intval', explode(',', $feedIds));
+
+        $count = QueryBuilder::table('feedlinks')
+            ->whereIn('FlNfID', $ids)
+            ->delete();
 
         // Update the feed timestamp
         Connection::query(
             "UPDATE {$this->tbpref}newsfeeds SET NfUpdate = " . time() . "
-             WHERE NfID IN ($feedIds)"
+             WHERE NfID IN (" . implode(',', $ids) . ")"
         );
 
         return $count;
@@ -565,13 +570,13 @@ class FeedService
         $textsToArchive = array_slice($textIds, 0, count($textIds) - $maxTexts);
 
         foreach ($textsToArchive as $textId) {
-            $stats['textitems'] += (int)Connection::execute(
-                "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID = $textId"
-            );
+            $stats['textitems'] += QueryBuilder::table('textitems2')
+                ->where('Ti2TxID', '=', $textId)
+                ->delete();
 
-            $stats['sentences'] += (int)Connection::execute(
-                "DELETE FROM {$this->tbpref}sentences WHERE SeTxID = $textId"
-            );
+            $stats['sentences'] += QueryBuilder::table('sentences')
+                ->where('SeTxID', '=', $textId)
+                ->delete();
 
             // Archive the text
             Connection::execute(
@@ -592,14 +597,14 @@ class FeedService
             );
 
             // Delete original text
-            $stats['archived'] += (int)Connection::execute(
-                "DELETE FROM {$this->tbpref}texts WHERE TxID = $textId"
-            );
+            $stats['archived'] += QueryBuilder::table('texts')
+                ->where('TxID', '=', $textId)
+                ->delete();
 
             Maintenance::adjustAutoIncrement('texts', 'TxID');
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-            // Clean orphaned text tags
+            // Clean orphaned text tags (complex DELETE with JOIN - keep as-is)
             Connection::execute(
                 "DELETE {$this->tbpref}texttags FROM (
                     {$this->tbpref}texttags LEFT JOIN {$this->tbpref}texts ON TtTxID = TxID
@@ -1465,14 +1470,12 @@ class FeedService
                 $textItem = array_slice($textItem, 0, $textCount - $nfMaxTexts);
 
                 foreach ($textItem as $textID) {
-                    $message3 += (int)Connection::execute(
-                        'DELETE FROM ' . $this->tbpref . 'textitems2
-                        WHERE Ti2TxID = ' . $textID
-                    );
-                    $message2 += (int)Connection::execute(
-                        'DELETE FROM ' . $this->tbpref . 'sentences
-                        WHERE SeTxID = ' . $textID
-                    );
+                    $message3 += QueryBuilder::table('textitems2')
+                        ->where('Ti2TxID', '=', $textID)
+                        ->delete();
+                    $message2 += QueryBuilder::table('sentences')
+                        ->where('SeTxID', '=', $textID)
+                        ->delete();
                     $message4 += (int)Connection::execute(
                         'INSERT INTO ' . $this->tbpref . 'archivedtexts (
                             AtLgID, AtTitle, AtText, AtAnnotatedText,
@@ -1490,14 +1493,14 @@ class FeedService
                         WHERE TtTxID = ' . $textID
                     );
 
-                    $message1 += (int)Connection::execute(
-                        'DELETE FROM ' . $this->tbpref . 'texts
-                        WHERE TxID = ' . $textID
-                    );
+                    $message1 += QueryBuilder::table('texts')
+                        ->where('TxID', '=', $textID)
+                        ->delete();
 
                     Maintenance::adjustAutoIncrement('texts', 'TxID');
                     Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
+                    // Clean orphaned text tags (complex DELETE with JOIN - keep as-is)
                     Connection::execute(
                         "DELETE " . $this->tbpref . "texttags
                         FROM (" . $this->tbpref . "texttags

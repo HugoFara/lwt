@@ -84,7 +84,7 @@ namespace Lwt\Views\Language;
             <?php endif; ?>
         </td>
 
-        <td class="td1 center<?php echo $currentClass; ?>"><?php echo tohtml($lang['name']); ?></td>
+        <td class="td1 center<?php echo $currentClass; ?>"><?php echo htmlspecialchars($lang['name'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 
         <td class="td1 center<?php echo $currentClass; ?>">
             <?php if ($lang['textCount'] > 0): ?>

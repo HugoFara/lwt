@@ -47,7 +47,7 @@ namespace Lwt\Views\Feed;
 </td>
 <td class="td1 center" colspan="4">
     Feed Name (Wildc.=*):
-    <input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
+    <input type="text" name="query" value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
     <input type="button" name="querybutton" value="Filter" data-action="filter-query" />&nbsp;
     <input type="button" value="Clear" data-action="clear-query" />
 </td>
@@ -121,7 +121,7 @@ while ($row = mysqli_fetch_assoc($feeds)):
             <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" />
         </span>
     </td>
-    <td class="td1 center"><?php echo tohtml($row['NfName']); ?></td>
+    <td class="td1 center"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
     <td class="td1 center"><?php echo str_replace(',', ', ', $row['NfOptions']); ?></td>
     <td class="td1 center" sorttable_customkey="<?php echo $diff; ?>">
         <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>

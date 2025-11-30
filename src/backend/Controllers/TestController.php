@@ -94,7 +94,7 @@ class TestController extends BaseController
         $wid = (int) $this->param('wid');
         $status = $this->param('status');
         $stchange = $this->param('stchange');
-        $useAjax = isset($_REQUEST['ajax']);
+        $useAjax = $this->hasParam('ajax');
 
         if (!is_numeric($status) && !is_numeric($stchange)) {
             ErrorHandler::die('status or stchange should be specified!');
@@ -268,14 +268,17 @@ class TestController extends BaseController
      */
     private function getTestProperty(): string
     {
-        if (isset($_REQUEST['selection']) && isset($_SESSION['testsql'])) {
-            return "selection=" . $_REQUEST['selection'];
+        $selection = $this->param('selection');
+        if ($selection !== '' && isset($_SESSION['testsql'])) {
+            return "selection=" . $selection;
         }
-        if (isset($_REQUEST['lang'])) {
-            return "lang=" . $_REQUEST['lang'];
+        $lang = $this->param('lang');
+        if ($lang !== '') {
+            return "lang=" . $lang;
         }
-        if (isset($_REQUEST['text'])) {
-            return "text=" . $_REQUEST['text'];
+        $text = $this->param('text');
+        if ($text !== '') {
+            return "text=" . $text;
         }
         return '';
     }

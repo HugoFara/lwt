@@ -173,7 +173,9 @@ class Restore
         Connection::execute("TRUNCATE {$tbpref}texttags");
         Connection::execute("TRUNCATE {$tbpref}words");
         Connection::execute("TRUNCATE {$tbpref}wordtags");
-        Connection::execute("DELETE FROM {$tbpref}settings where StKey = 'currenttext'");
+        QueryBuilder::table('settings')
+            ->where('StKey', '=', 'currenttext')
+            ->delete();
         Maintenance::optimizeDatabase();
         TagService::getAllTermTags(true);
         TagService::getAllTextTags(true);

@@ -81,7 +81,7 @@ if ($currentregexmode == '') {
     echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
 }
 ?>
-<input type="text" name="query" value="<?php echo tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
+<input type="text" name="query" value="<?php echo htmlspecialchars($currentquery ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
 <input type="button" name="querybutton" value="Filter" data-action="filter-query" />&nbsp;
 <input type="button" value="Clear" data-action="clear-query" />
 </td>

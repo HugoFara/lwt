@@ -217,12 +217,15 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertEquals('normal text', repl_tab_nl('normal text'));
     }
 
-    public function testTohtml(): void
+    public function testHtmlEscaping(): void
     {
-        // tohtml is used to escape HTML entities
-        $this->assertEquals('&lt;b&gt;test&lt;/b&gt;', tohtml('<b>test</b>'));
-        $this->assertEquals('test &amp; example', tohtml('test & example'));
-        $this->assertEquals('&quot;quoted&quot;', tohtml('"quoted"'));
+        // Helper lambda to match production code pattern
+        $escapeHtml = fn(?string $s): string => htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8');
+
+        // htmlspecialchars with ENT_QUOTES is used to escape HTML entities
+        $this->assertEquals('&lt;b&gt;test&lt;/b&gt;', $escapeHtml('<b>test</b>'));
+        $this->assertEquals('test &amp; example', $escapeHtml('test & example'));
+        $this->assertEquals('&quot;quoted&quot;', $escapeHtml('"quoted"'));
     }
 
     // ===== Annotation structure tests =====

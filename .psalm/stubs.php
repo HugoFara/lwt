@@ -98,12 +98,6 @@ namespace Lwt\Core\Utils {
     function strToClassName($string): string {}
 
     /**
-     * @param mixed $s
-     * @return string
-     */
-    function tohtml($s): string {}
-
-    /**
      * @param string $s
      * @param mixed $remove
      * @return string
@@ -152,13 +146,6 @@ define('LWT_BASE_PATH', __DIR__ . '/..');
 // ---------------------------------------------------------------------------
 // From string_utilities.php (global namespace section)
 // ---------------------------------------------------------------------------
-
-/**
- * @param mixed $s
- * @return string
- * @see \Lwt\Core\Utils\tohtml()
- */
-function tohtml($s): string {}
 
 /**
  * @param string $s

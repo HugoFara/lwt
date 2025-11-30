@@ -21,7 +21,7 @@
 namespace Lwt\Views\Word;
 
 ?>
-<p>OK, term deleted, now unknown (<?php echo tohtml($message); ?>).</p>
+<p>OK, term deleted, now unknown (<?php echo htmlspecialchars($message ?? '', ENT_QUOTES, 'UTF-8'); ?>).</p>
 
 <script type="application/json" data-lwt-delete-result-config>
 <?php echo json_encode([

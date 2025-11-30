@@ -47,7 +47,7 @@ if ($fixedTbpref):
 <option value="-" selected="selected">[Choose...]</option>
 <option value="">Default Table Set</option>
 <?php foreach ($prefixes as $value): ?>
-<option value="<?php echo tohtml($value); ?>"><?php echo tohtml($value); ?></option>
+<option value="<?php echo htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8'); ?></option>
 <?php endforeach; ?>
 </select>
 </p>
@@ -77,7 +77,7 @@ if ($fixedTbpref):
 <option value="-" selected="selected">[Choose...]</option>
 <?php foreach ($prefixes as $value): ?>
 <?php if ($value != ''): ?>
-   <option value="<?php echo tohtml($value); ?>"><?php echo tohtml($value); ?></option>
+   <option value="<?php echo htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8'); ?></option>
 <?php endif; ?>
 <?php endforeach; ?>
 </select>

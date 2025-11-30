@@ -43,14 +43,14 @@ namespace Lwt\Views\Text;
         <tr>
             <td class="td1 right">Title:</td>
             <td class="td1">
-                <input type="text" class="notempty checkoutsidebmp" data_info="Title" name="AtTitle" value="<?php echo tohtml($record['AtTitle']); ?>" maxlength="200" size="60" />
+                <input type="text" class="notempty checkoutsidebmp" data_info="Title" name="AtTitle" value="<?php echo htmlspecialchars($record['AtTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200" size="60" />
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
         <tr>
             <td class="td1 right">Text:</td>
             <td class="td1">
-                <textarea name="AtText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"><?php echo tohtml($record['AtText']); ?></textarea>
+                <textarea name="AtText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"><?php echo htmlspecialchars($record['AtText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
         </tr>
@@ -67,7 +67,7 @@ namespace Lwt\Views\Text;
         <tr>
             <td class="td1 right">Source URI:</td>
             <td class="td1">
-                <input type="text" class="checkurl checkoutsidebmp" data_info="Source URI" name="AtSourceURI" value="<?php echo tohtml($record['AtSourceURI']); ?>" maxlength="1000" size="60" />
+                <input type="text" class="checkurl checkoutsidebmp" data_info="Source URI" name="AtSourceURI" value="<?php echo htmlspecialchars($record['AtSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="1000" size="60" />
             </td>
         </tr>
         <tr>
@@ -79,7 +79,7 @@ namespace Lwt\Views\Text;
         <tr>
             <td class="td1 right">Audio-URI:</td>
             <td class="td1">
-                <input type="text" class="checkoutsidebmp" data_info="Audio-URI" name="AtAudioURI" value="<?php echo tohtml($record['AtAudioURI']); ?>" maxlength="200" size="60" />
+                <input type="text" class="checkoutsidebmp" data_info="Audio-URI" name="AtAudioURI" value="<?php echo htmlspecialchars($record['AtAudioURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200" size="60" />
                 <span id="mediaselect"><?php echo \selectmediapath('AtAudioURI'); ?></span>
             </td>
         </tr>

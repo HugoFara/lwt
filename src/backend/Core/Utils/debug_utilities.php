@@ -60,7 +60,7 @@ function get_execution_time()
 function echodebug($var, $text): void
 {
     if (\Lwt\Core\Globals::isDebug()) {
-        echo "<pre> **DEBUGGING** " . tohtml($text) . ' = [[[';
+        echo "<pre> **DEBUGGING** " . htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8') . ' = [[[';
         print_r($var);
         echo "]]]\n--------------</pre>";
     }

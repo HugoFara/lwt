@@ -48,7 +48,7 @@ namespace Lwt\Views\Feed;
     <td class="td1">Name: </td>
     <td class="td1">
         <input class="notempty feed-form-input" type="text" name="NfName"
-        value="<?php echo tohtml($feed['NfName']); ?>" />
+        value="<?php echo htmlspecialchars($feed['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
         <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
 </tr>
@@ -56,7 +56,7 @@ namespace Lwt\Views\Feed;
     <td class="td1">Newsfeed url: </td>
     <td class="td1">
         <input class="notempty feed-form-input" type="text" name="NfSourceURI"
-        value="<?php echo tohtml($feed['NfSourceURI']); ?>" />
+        value="<?php echo htmlspecialchars($feed['NfSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
         <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
 </tr>
@@ -64,7 +64,7 @@ namespace Lwt\Views\Feed;
     <td class="td1">Article Section: </td>
     <td class="td1">
         <input class="notempty feed-form-input" type="text"
-        name="NfArticleSectionTags" value="<?php echo tohtml($feed['NfArticleSectionTags']); ?>" />
+        name="NfArticleSectionTags" value="<?php echo htmlspecialchars($feed['NfArticleSectionTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
         <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
 </tr>
@@ -72,7 +72,7 @@ namespace Lwt\Views\Feed;
     <td class="td1">Filter Tags: </td>
     <td class="td1">
         <input type="text" class="feed-form-input" name="NfFilterTags"
-        value="<?php echo tohtml($feed['NfFilterTags']); ?>" />
+        value="<?php echo htmlspecialchars($feed['NfFilterTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
     </td>
 </tr>
 <tr>
@@ -130,7 +130,7 @@ Article Source: <input class="<?php if (isset($options['article_source'])) echo 
 </tr>
 </table>
 <input type="submit" value="Update" />
-<input type="hidden" name="NfID" value="<?php echo tohtml($feed['NfID']); ?>" />
+<input type="hidden" name="NfID" value="<?php echo htmlspecialchars($feed['NfID'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="button" value="Cancel" data-action="navigate" data-url="/feeds/edit" />
 <input type="hidden" name="NfOptions" value="" />
 <input type="hidden" name="update_feed" value="1" />

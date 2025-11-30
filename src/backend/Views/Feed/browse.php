@@ -94,7 +94,7 @@ namespace Lwt\Views\Feed;
             }
             ?>
             </span>
-            <input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
+            <input type="text" name="query" value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
             <input type="button" name="querybutton" value="Filter" data-action="filter-query" />&nbsp;
             <input type="button" value="Clear" data-action="clear-query" />
         </td>
@@ -112,7 +112,7 @@ Newsfeed:
         if ($currentFeed === (int)$row['NfID']) {
             echo ' selected="selected"';
         }
-        ?>><?php echo tohtml($row['NfName']); ?></option>
+        ?>><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></option>
     <?php endforeach; ?>
     </select>
     </td>

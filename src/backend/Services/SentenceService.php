@@ -325,7 +325,7 @@ class SentenceService
      */
     public function get20Sentences(int $lang, string $wordlc, ?int $wid, string $targetCtlId, int $mode): string
     {
-        $r = '<p><b>Sentences in active texts with <i>' . tohtml($wordlc) . '</i></b></p>
+        $r = '<p><b>Sentences in active texts with <i>' . htmlspecialchars($wordlc, ENT_QUOTES, 'UTF-8') . '</i></b></p>
         <p>(Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
         to copy sentence into above term)</p>';
         $sentences = $this->getSentencesWithWord($lang, $wordlc, $wid, $mode);
@@ -370,7 +370,7 @@ class SentenceService
     <img id="exsent-waiting" src="/assets/icons/waiting2.gif" alt="Loading..." />
     <!-- Displayed output -->
     <div id="exsent-sentences">
-        <p><b>Sentences in active texts with <i><?php echo tohtml($termlc) ?></i></b></p>
+        <p><b>Sentences in active texts with <i><?php echo htmlspecialchars($termlc, ENT_QUOTES, 'UTF-8') ?></i></b></p>
         <p>
             (Click on
             <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />

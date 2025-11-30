@@ -163,12 +163,12 @@ class DictionaryService
         if ($popup) {
             $r = ' <span class="click" data-action="dict-popup" data-url="' .
             htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">' .
-            \tohtml($txt) .
+            htmlspecialchars($txt, ENT_QUOTES, 'UTF-8') .
             '</span> ';
         } else {
             $r = ' <a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') .
             '" target="ru" data-action="dict-frame">' .
-            \tohtml($txt) . '</a> ';
+            htmlspecialchars($txt, ENT_QUOTES, 'UTF-8') . '</a> ';
         }
         return $r;
     }
@@ -246,7 +246,7 @@ class DictionaryService
         return '<span class="click" data-action="' . $action . '" ' .
         'data-url="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" ' .
         'data-sentctl="' . htmlspecialchars($sentctlid, ENT_QUOTES, 'UTF-8') . '">' .
-        \tohtml($txt) . '</span>';
+        htmlspecialchars($txt, ENT_QUOTES, 'UTF-8') . '</span>';
     }
 
     /**

@@ -164,7 +164,7 @@ class SimilarTermsService
         FROM {$this->tbpref}words WHERE WoID = $termId";
         $res = Connection::query($sql);
         if ($record = mysqli_fetch_assoc($res)) {
-            $term = tohtml($record["WoText"]);
+            $term = htmlspecialchars($record["WoText"] ?? '', ENT_QUOTES, 'UTF-8');
             if (stripos($compare, $term) !== false) {
                 $term = '<span class="red3">' . $term . '</span>';
             } else {
@@ -188,9 +188,9 @@ class SimilarTermsService
             $output = '<img class="clickedit" src="/assets/icons/tick-button-small.png" ' .
             'title="Copy → Translation &amp; Romanization Field(s)" ' .
             'data-action="set-trans-roman" ' .
-            'data-translation="' . tohtml($tra) . '" ' .
-            'data-romanization="' . tohtml($rom) . '" /> ' .
-            $term . tohtml($romd) . ' — ' . tohtml($tra) .
+            'data-translation="' . htmlspecialchars($tra, ENT_QUOTES, 'UTF-8') . '" ' .
+            'data-romanization="' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . '" /> ' .
+            $term . htmlspecialchars($romd, ENT_QUOTES, 'UTF-8') . ' — ' . htmlspecialchars($tra, ENT_QUOTES, 'UTF-8') .
             '<br />';
             mysqli_free_result($res);
             return $output;
@@ -217,7 +217,7 @@ class SimilarTermsService
         if (trim($comparedTerm) == '') {
             return '&nbsp;';
         }
-        $compare = tohtml($comparedTerm);
+        $compare = htmlspecialchars($comparedTerm, ENT_QUOTES, 'UTF-8');
         $termarr = $this->getSimilarTerms($langId, $comparedTerm, $maxCount, 0.33);
         $rarr = array();
         foreach ($termarr as $termid) {

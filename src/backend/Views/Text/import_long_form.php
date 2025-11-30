@@ -91,7 +91,7 @@ namespace Lwt\Views\Text;
                 <b>upload_max_filesize</b>:
                 <?php echo ini_get('upload_max_filesize'); ?>
                 <br />
-                If needed, increase in <wbr />"<?php echo \tohtml(php_ini_loaded_file()); ?>" <wbr />
+                If needed, increase in <wbr />"<?php echo htmlspecialchars(php_ini_loaded_file() ?? '', ENT_QUOTES, 'UTF-8'); ?>" <wbr />
                 and restart the server.
             </p>
         </td>

@@ -21,18 +21,18 @@ namespace Lwt\Views\Word;
 <table class="tab1" cellspacing="0" cellpadding="5">
 <tr>
    <td class="td1 right">Language:</td>
-   <td class="td1"><?php echo tohtml($word['LgName']); ?></td>
+   <td class="td1"><?php echo htmlspecialchars($word['LgName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 </tr>
 <tr title="Normally only change uppercase/lowercase here!">
    <td class="td1 right">Term:</td>
-   <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="WoText" value="<?php echo tohtml($word['WoText']); ?>" maxlength="250" size="40" /> <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+   <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="WoText" value="<?php echo htmlspecialchars($word['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="40" /> <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
    </td>
 </tr>
 <?php print_similar_terms_tabrow(); ?>
 <tr>
    <td class="td1 right">Translation:</td>
    <td class="td1">
-       <textarea class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="500" data_info="Translation" name="WoTranslation" cols="40" rows="3"><?php echo tohtml($transl); ?></textarea>
+       <textarea class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="500" data_info="Translation" name="WoTranslation" cols="40" rows="3"><?php echo htmlspecialchars($transl ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
    </td>
 </tr>
 <tr>
@@ -45,12 +45,12 @@ namespace Lwt\Views\Word;
    <td class="td1 right">Romaniz.:</td>
    <td class="td1">
        <input type="text" class="checkoutsidebmp" data_info="Romanization" name="WoRomanization" maxlength="100" size="40"
-       value="<?php echo tohtml($word['WoRomanization']); ?>" />
+       value="<?php echo htmlspecialchars($word['WoRomanization'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
    </td>
 </tr>
 <tr>
    <td class="td1 right">Sentence<br />Term in {...}:</td>
-   <td class="td1"><textarea <?php echo $scrdir; ?> class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" name="WoSentence" id="WoSentence" cols="40" rows="3"><?php echo tohtml($word['WoSentence']); ?></textarea></td>
+   <td class="td1"><textarea <?php echo $scrdir; ?> class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" name="WoSentence" id="WoSentence" cols="40" rows="3"><?php echo htmlspecialchars($word['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea></td>
 </tr>
 <tr>
    <td class="td1 right">Status:</td>

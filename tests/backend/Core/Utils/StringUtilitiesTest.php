@@ -17,51 +17,59 @@ Globals::initialize();
 final class StringUtilitiesTest extends TestCase
 {
     /**
-     * Test HTML escaping with various inputs
+     * Helper function using same signature as production code
      */
-    public function testTohtml(): void
+    private function escapeHtml(?string $s): string
     {
-        // Basic HTML escaping
-        $this->assertEquals('&lt;script&gt;', tohtml('<script>'));
-        $this->assertEquals('&lt;div&gt;Test&lt;/div&gt;', tohtml('<div>Test</div>'));
-
-        // Special characters
-        $this->assertEquals('&amp;', tohtml('&'));
-        $this->assertEquals('&quot;', tohtml('"'));
-        // Single quotes are not escaped by htmlspecialchars with ENT_COMPAT
-        $this->assertEquals("'", tohtml("'"));
-
-        // Empty and null values
-        $this->assertEquals('', tohtml(null));
-        $this->assertEquals('', tohtml(''));
-
-        // Normal text should pass through
-        $this->assertEquals('Hello World', tohtml('Hello World'));
-
-        // UTF-8 characters should be preserved
-        $this->assertEquals('日本語', tohtml('日本語'));
-        $this->assertEquals('Ελληνικά', tohtml('Ελληνικά'));
+        return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8');
     }
 
     /**
-     * Test tohtml with various edge cases
+     * Test HTML escaping with various inputs
      */
-    public function testTohtmlEdgeCases(): void
+    public function testHtmlEscaping(): void
+    {
+        // Basic HTML escaping
+        $this->assertEquals('&lt;script&gt;', $this->escapeHtml('<script>'));
+        $this->assertEquals('&lt;div&gt;Test&lt;/div&gt;', $this->escapeHtml('<div>Test</div>'));
+
+        // Special characters
+        $this->assertEquals('&amp;', $this->escapeHtml('&'));
+        $this->assertEquals('&quot;', $this->escapeHtml('"'));
+        // Single quotes are escaped by htmlspecialchars with ENT_QUOTES
+        $this->assertEquals('&#039;', $this->escapeHtml("'"));
+
+        // Empty and null values
+        $this->assertEquals('', $this->escapeHtml(null));
+        $this->assertEquals('', $this->escapeHtml(''));
+
+        // Normal text should pass through
+        $this->assertEquals('Hello World', $this->escapeHtml('Hello World'));
+
+        // UTF-8 characters should be preserved
+        $this->assertEquals('日本語', $this->escapeHtml('日本語'));
+        $this->assertEquals('Ελληνικά', $this->escapeHtml('Ελληνικά'));
+    }
+
+    /**
+     * Test HTML escaping with various edge cases
+     */
+    public function testHtmlEscapingEdgeCases(): void
     {
         // Already escaped HTML
-        $this->assertEquals('&amp;lt;script&amp;gt;', tohtml('&lt;script&gt;'));
+        $this->assertEquals('&amp;lt;script&amp;gt;', $this->escapeHtml('&lt;script&gt;'));
 
         // Multiple special characters
-        $this->assertEquals('&lt;&amp;&gt;&quot;', tohtml('<&>"'));
+        $this->assertEquals('&lt;&amp;&gt;&quot;', $this->escapeHtml('<&>"'));
 
         // Long string with special characters
         $longString = str_repeat('<div>&amp;</div>', 100);
-        $result = tohtml($longString);
+        $result = $this->escapeHtml($longString);
         $this->assertStringContainsString('&lt;div&gt;', $result);
         $this->assertStringNotContainsString('<div>', $result);
 
         // Newlines and tabs should be preserved
-        $this->assertEquals("line1\nline2\tindented", tohtml("line1\nline2\tindented"));
+        $this->assertEquals("line1\nline2\tindented", $this->escapeHtml("line1\nline2\tindented"));
     }
 
     /**

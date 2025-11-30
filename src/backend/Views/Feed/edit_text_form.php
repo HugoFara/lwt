@@ -35,7 +35,7 @@ foreach ($texts as $text):
             &nbsp; &nbsp; &nbsp; Title:
         </td>
         <td class="td1">
-            <input type="text" class="notempty" name="feed[<?php echo $count; ?>][TxTitle]" value="<?php echo tohtml($text['TxTitle']); ?>" maxlength="200" size="60" />
+            <input type="text" class="notempty" name="feed[<?php echo $count; ?>][TxTitle]" value="<?php echo htmlspecialchars($text['TxTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200" size="60" />
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
@@ -60,7 +60,7 @@ foreach ($texts as $text):
                 <?php echo $scrdir; ?>
             name="feed[<?php echo $count; ?>][TxText]" class="notempty checkbytes"
             cols="60" rows="20"
-            ><?php echo tohtml($text['TxText']); ?></textarea>
+            ><?php echo htmlspecialchars($text['TxText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>

@@ -3,6 +3,7 @@ namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Services\FeedService;
 
@@ -101,12 +102,11 @@ class FeedHandler
         $row = mysqli_fetch_assoc($result);
         $to = ($row['total'] - $nfMaxLinks);
         if ($to > 0) {
-            Connection::query(
-                "DELETE FROM " . $tbpref . "feedlinks
-                WHERE FlNfID in (" . $nfid . ")
-                ORDER BY FlDate
-                LIMIT $to"
-            );
+            QueryBuilder::table('feedlinks')
+                ->whereIn('FlNfID', [$nfid])
+                ->orderBy('FlDate', 'ASC')
+                ->limit($to)
+                ->delete();
             $msg .= ", $to old article(s) deleted";
         }
         return $msg;

@@ -47,8 +47,8 @@ class ImprovedTextHandler
                 $r .= '<span class="nowrap">
                     <input class="impr-ann-radio" ' .
                     ($tt == $trans ? 'checked="checked" ' : '') . 'type="radio" name="rg' .
-                    $i . '" value="' . \tohtml($tt) . '" />
-                    &nbsp;' . \tohtml($tt) . '
+                    $i . '" value="' . htmlspecialchars($tt ?? '', ENT_QUOTES, 'UTF-8') . '" />
+                    &nbsp;' . htmlspecialchars($tt ?? '', ENT_QUOTES, 'UTF-8') . '
                 </span>
                 <br />';
             }
@@ -59,7 +59,7 @@ class ImprovedTextHandler
         ($set ? 'checked="checked" ' : '') . 'value="" />
         &nbsp;
         <input class="impr-ann-text" type="text" name="tx' . $i .
-        '" id="tx' . $i . '" value="' . ($set ? \tohtml($trans) : '') .
+        '" id="tx' . $i . '" value="' . ($set ? htmlspecialchars($trans ?? '', ENT_QUOTES, 'UTF-8') : '') .
         '" maxlength="50" size="40" />
          &nbsp;
         <img class="click" src="/assets/icons/eraser.png" title="Erase Text Field"
@@ -81,7 +81,7 @@ class ImprovedTextHandler
             '<img class="click" src="/assets/icons/plus-button.png"
             title="Save translation to new term"
             alt="Save translation to new term"
-            data-action="add-term-translation" data-target="#tx' . $i . '" data-word="' . \tohtml($word) . '" data-lang="' . $lang . '" />';
+            data-action="add-term-translation" data-target="#tx' . $i . '" data-word="' . htmlspecialchars($word, ENT_QUOTES, 'UTF-8') . '" data-lang="' . $lang . '" />';
         }
         $r .= '&nbsp;&nbsp;
         <span id="wait' . $i . '">
@@ -238,7 +238,7 @@ class ImprovedTextHandler
                     <th class="th1 center">Edit<br />Term</th>
                     <th class="th1 center">
                         Term Translations (Delim.: ' .
-                        \tohtml(Settings::getWithDefault('set-term-translation-delimiters')) . ')
+                        htmlspecialchars(Settings::getWithDefault('set-term-translation-delimiters'), ENT_QUOTES, 'UTF-8') . ')
                         <br />
                         <input type="button" value="Reload" data-action="reload-impr-text" />
                     </th>
@@ -292,7 +292,7 @@ class ImprovedTextHandler
                 $r .= '<tr>
                     <td class="td1 center" style="font-size:' . $textsize . '%;"' .
                     ($rtlScript ? ' dir="rtl"' : '') . '>
-                        <span id="term' . $i . '">' . \tohtml($vals[1]) .
+                        <span id="term' . $i . '">' . htmlspecialchars($vals[1] ?? '', ENT_QUOTES, 'UTF-8') .
                         '</span>
                     </td>
                     <td class="td1 center" nowrap="nowrap">' .
@@ -311,7 +311,7 @@ class ImprovedTextHandler
                 $nontermbuffer .= str_replace(
                     "¶",
                     '<img src="/assets/icons/new_line.png" title="New Line" alt="New Line" />',
-                    \tohtml(trim($vals[1]))
+                    htmlspecialchars(trim($vals[1] ?? '') ?? '', ENT_QUOTES, 'UTF-8')
                 );
             }
         }
@@ -331,7 +331,7 @@ class ImprovedTextHandler
                     <th class="th1 center">Edit<br />Term</th>
                     <th class="th1 center">
                         Term Translations (Delim.: ' .
-                        \tohtml(Settings::getWithDefault('set-term-translation-delimiters')) . ')
+                        htmlspecialchars(Settings::getWithDefault('set-term-translation-delimiters'), ENT_QUOTES, 'UTF-8') . ')
                         <br />
                         <input type="button" value="Reload" data-action="reload-impr-text" />
                         <a name="bottom"></a>

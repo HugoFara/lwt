@@ -63,7 +63,7 @@ class DemoService
         if ($this->tbpref == '') {
             return "(Default Table Set)";
         }
-        return "(Table Set: <i>" . tohtml(substr($this->tbpref, 0, -1)) . "</i>)";
+        return "(Table Set: <i>" . htmlspecialchars(substr($this->tbpref, 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i>)";
     }
 
     /**

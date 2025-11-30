@@ -27,7 +27,7 @@ method="post" data-confirm-submit="Are you sure?">
         <th class="th1 center">Backup</th>
         <td class="td1">
         <p class="smallgray2">
-            The database <i><?php echo tohtml($dbname); ?></i>
+            The database <i><?php echo htmlspecialchars($dbname ?? '', ENT_QUOTES, 'UTF-8'); ?></i>
             <?php echo $prefinfo; ?> will be exported to a gzipped SQL file.<br />
             Please keep this file in a safe place.<br />If necessary, you can
             recreate the database via the Restore function below.<br />
@@ -48,7 +48,7 @@ method="post" data-confirm-submit="Are you sure?">
         <th class="th1 center">Restore</th>
         <td class="td1">
             <p class="smallgray2">
-                The database <i><?php echo tohtml($dbname); ?></i>
+                The database <i><?php echo htmlspecialchars($dbname ?? '', ENT_QUOTES, 'UTF-8'); ?></i>
                 <?php echo $prefinfo; ?> will be <b>replaced</b> by the data in the
                 specified backup file<br />
                 (gzipped or normal SQL file, created above).<br /><br />
@@ -60,7 +60,7 @@ method="post" data-confirm-submit="Are you sure?">
                     upload_max_filesize =
                     <?php echo ini_get('upload_max_filesize'); ?></b><br />
                     If needed, increase in
-                    "<?php echo tohtml(php_ini_loaded_file()); ?>" and restart
+                    "<?php echo htmlspecialchars(php_ini_loaded_file() ?? '', ENT_QUOTES, 'UTF-8'); ?>" and restart
                     server.<br />&nbsp;
                 </span>
             </p>
@@ -79,7 +79,7 @@ method="post" data-confirm-submit="Are you sure?">
         <th class="th1 center">Install<br />LWT<br />Demo</th>
         <td class="td1">
             <p class="smallgray2">
-                The database <i><?php echo tohtml($dbname); ?></i>
+                The database <i><?php echo htmlspecialchars($dbname ?? '', ENT_QUOTES, 'UTF-8'); ?></i>
                 <?php echo $prefinfo; ?> will be <b>replaced</b> by the LWT demo
                 database.
             </p>
@@ -95,7 +95,7 @@ method="post" data-confirm-submit="Are you sure?">
         <td class="td1">
             <p class="smallgray2">
                 Empty (= <b>delete</b> the contents of) all tables - except the
-                Settings - of your database <i><?php echo tohtml($dbname); ?></i>
+                Settings - of your database <i><?php echo htmlspecialchars($dbname ?? '', ENT_QUOTES, 'UTF-8'); ?></i>
                 <?php echo $prefinfo; ?>.
             </p>
             <p class="right">

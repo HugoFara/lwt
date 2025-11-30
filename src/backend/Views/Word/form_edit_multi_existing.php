@@ -35,7 +35,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="WoID" value="<?php echo $term->id; ?>" />
 <input type="hidden" name="WoOldStatus" value="<?php echo $originalStatus; ?>" />
 <input type="hidden" name="WoStatus" value="<?php echo $status; ?>" />
-<input type="hidden" name="WoTextLC" value="<?php echo tohtml($term->textlc); ?>" />
+<input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($term->textlc ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="hidden" name="tid" value="<?php echo $tid; ?>" />
 <input type="hidden" name="ord" value="<?php echo $ord; ?>" />
 <table class="tab2" cellspacing="0" cellpadding="5">
@@ -44,7 +44,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1">
             <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp"
             data_info="Term" type="text" name="WoText" id="wordfield"
-            value="<?php echo tohtml($term->text); ?>" maxlength="250" size="35" />
+            value="<?php echo htmlspecialchars($term->text ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>
     </tr>
@@ -53,7 +53,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1 right">Translation:</td>
         <td class="td1">
             <textarea name="WoTranslation" class="setfocus textarea-noreturn checklength checkoutsidebmp"
-            data_maxlength="500" data_info="Translation" cols="35" rows="3"><?php echo tohtml($transl); ?></textarea>
+            data_maxlength="500" data_info="Translation" cols="35" rows="3"><?php echo htmlspecialchars($transl ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
         </td>
     </tr>
     <tr>
@@ -67,7 +67,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1">
             <input type="text" class="checkoutsidebmp" data_info="Romanization"
             name="WoRomanization" maxlength="100" size="35"
-            value="<?php echo tohtml($romanization); ?>" />
+            value="<?php echo htmlspecialchars($romanization ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
         </td>
     </tr>
     <tr>
@@ -75,7 +75,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1">
             <textarea <?php echo $scrdir; ?> name="WoSentence"
             class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000"
-            data_info="Sentence" cols="35" rows="3"><?php echo tohtml($sentence); ?></textarea>
+            data_info="Sentence" cols="35" rows="3"><?php echo htmlspecialchars($sentence ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
         </td>
     </tr>
     <tr>

@@ -53,7 +53,7 @@ namespace Lwt\Views\Mobile;
 <ul id="home" title="Mobile LWT" selected="true">
     <li class="group">Languages</li>
     <?php foreach ($languages as $language): ?>
-    <li><a href="/mobile?action=2&amp;lang=<?php echo $language['id']; ?>"><?php echo tohtml($language['name']); ?></a></li>
+    <li><a href="/mobile?action=2&amp;lang=<?php echo $language['id']; ?>"><?php echo htmlspecialchars($language['name'] ?? '', ENT_QUOTES, 'UTF-8'); ?></a></li>
     <?php endforeach; ?>
     <li class="group">Other</li>
     <li><a href="#about">About</a></li>

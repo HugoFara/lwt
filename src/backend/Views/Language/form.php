@@ -40,7 +40,7 @@ namespace Lwt\Views\Language;
         <td class="td1">
             <input type="text" class="notempty setfocus checkoutsidebmp respinput"
             data_info="Study Language" name="LgName" id="LgName"
-            value="<?php echo tohtml($language->name); ?>" maxlength="40" />
+            value="<?php echo htmlspecialchars($language->name ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="40" />
             <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
         </td>
@@ -50,7 +50,7 @@ namespace Lwt\Views\Language;
         <td class="td1">
             <input type="url" class="notempty checkdicturl checkoutsidebmp respinput"
             name="LgDict1URI"
-            value="<?php echo tohtml($language->dict1uri); ?>"
+            value="<?php echo htmlspecialchars($language->dict1uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="200" data_info="Dictionary 1 URI" />
 
             <br />
@@ -69,7 +69,7 @@ namespace Lwt\Views\Language;
         <td class="td1">
             <input type="url" class="checkdicturl checkoutsidebmp respinput"
             name="LgDict2URI"
-            value="<?php echo tohtml($language->dict2uri); ?>" maxlength="200"
+            value="<?php echo htmlspecialchars($language->dict2uri ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200"
             data_info="Dictionary 2 URI" />
 
             <br />
@@ -96,7 +96,7 @@ namespace Lwt\Views\Language;
             </select>
             <input type="url" class="checkdicturl checkoutsidebmp respinput"
             name="LgGoogleTranslateURI"
-            value="<?php echo tohtml($language->translator); ?>"
+            value="<?php echo htmlspecialchars($language->translator ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="200" data_info="GoogleTranslate URI" />
 
             <div id="LgTranslatorKeyWrapper" class="language-form-hidden">
@@ -130,7 +130,7 @@ namespace Lwt\Views\Language;
         <td class="td1">
             <input type="text" class="checkoutsidebmp respinput"
             data_info="Character Substitutions" name="LgCharacterSubstitutions"
-            value="<?php echo tohtml($language->charactersubst); ?>"
+            value="<?php echo htmlspecialchars($language->charactersubst ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="500" />
         </td>
     </tr>
@@ -139,7 +139,7 @@ namespace Lwt\Views\Language;
         <td class="td1">
             <input type="text" class="notempty checkoutsidebmp respinput"
             name="LgRegexpSplitSentences"
-            value="<?php echo tohtml($language->regexpsplitsent); ?>"
+            value="<?php echo htmlspecialchars($language->regexpsplitsent ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="500"
             data_info="RegExp Split Sentences" />
             <img src="/assets/icons/status-busy.png" title="Field must not be empty"
@@ -152,7 +152,7 @@ namespace Lwt\Views\Language;
         <input type="text" class="checkoutsidebmp respinput"
         data_info="Exceptions Split Sentences"
         name="LgExceptionsSplitSentences"
-        value="<?php echo tohtml($language->exceptionsplitsent); ?>"
+        value="<?php echo htmlspecialchars($language->exceptionsplitsent ?? '', ENT_QUOTES, 'UTF-8'); ?>"
         maxlength="500" />
     </td>
     </tr>
@@ -165,7 +165,7 @@ namespace Lwt\Views\Language;
             </select>
             <input type="text" class="notempty checkoutsidebmp respinput"
             data_info="RegExp Word Characters" name="LgRegexpWordCharacters"
-            value="<?php echo tohtml($language->regexpwordchar); ?>"
+            value="<?php echo htmlspecialchars($language->regexpwordchar ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="500" />
             <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
@@ -222,7 +222,7 @@ namespace Lwt\Views\Language;
         <td class="td1">
             <input type="text" class="checkoutsidebmp respinput" data_info="Export Template"
             name="LgExportTemplate"
-            value="<?php echo tohtml($language->exporttemplate); ?>"
+            value="<?php echo htmlspecialchars($language->exporttemplate ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="1000" />
         </td>
     </tr>
@@ -237,7 +237,7 @@ namespace Lwt\Views\Language;
             data_info="Third-Party Text-to-Speech API"
             name="LgTTSVoiceAPI"
             maxlength="2048" rows="10"
-            ><?php echo tohtml($language->ttsvoiceapi); ?></textarea>
+            ><?php echo htmlspecialchars($language->ttsvoiceapi ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             <hr class="language-form-separator" />
 
             <input type="button" data-action="check-voice-api"

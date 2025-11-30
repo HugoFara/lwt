@@ -38,8 +38,8 @@ $cancelUrl = $isEdit && $tag !== null ?
     $service->getBaseUrl();
 $submitValue = $isEdit ? 'Change' : 'Save';
 
-$tagText = $isEdit && $tag !== null ? tohtml($tag['text']) : '';
-$tagComment = $isEdit && $tag !== null ? tohtml($tag['comment']) : '';
+$tagText = $isEdit && $tag !== null ? htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8') : '';
+$tagComment = $isEdit && $tag !== null ? htmlspecialchars($tag['comment'] ?? '', ENT_QUOTES, 'UTF-8') : '';
 
 ?>
 <h2><?php echo $pageTitle; ?></h2>

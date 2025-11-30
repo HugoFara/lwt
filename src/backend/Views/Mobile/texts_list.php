@@ -28,8 +28,8 @@ namespace Lwt\Views\Mobile;
 /** @var array $texts */
 
 ?>
-<ul id="<?php echo $action . '-' . $langId; ?>" title="All <?php echo tohtml($langName); ?> Texts">
+<ul id="<?php echo $action . '-' . $langId; ?>" title="All <?php echo htmlspecialchars($langName ?? '', ENT_QUOTES, 'UTF-8'); ?> Texts">
 <?php foreach ($texts as $text): ?>
-    <li><a href="/mobile?action=3&amp;lang=<?php echo $langId; ?>&amp;text=<?php echo $text['id']; ?>"><?php echo tohtml($text['title']); ?></a></li>
+    <li><a href="/mobile?action=3&amp;lang=<?php echo $langId; ?>&amp;text=<?php echo $text['id']; ?>"><?php echo htmlspecialchars($text['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></a></li>
 <?php endforeach; ?>
 </ul>

@@ -17,6 +17,7 @@ namespace Lwt\Services;
 use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
@@ -220,8 +221,9 @@ class SettingsService
      */
     public function resetAll(): string
     {
-        $tbpref = Globals::getTablePrefix();
-        Connection::execute("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'set-%'");
+        QueryBuilder::table('settings')
+            ->where('StKey', 'LIKE', 'set-%')
+            ->delete();
         return 'All Settings reset to default values';
     }
 

@@ -331,17 +331,17 @@ class TextPrintController extends BaseController
         if ($showRom || $showTrans) {
             $output .= ' ';
             if ($showTrans) {
-                $output .= '<span class="anntrans">' . \tohtml($trans) . '</span> ';
+                $output .= '<span class="anntrans">' . htmlspecialchars($trans, ENT_QUOTES, 'UTF-8') . '</span> ';
             }
             if ($showRom && !$showTrans) {
-                $output .= '<span class="annrom">' . \tohtml($rom) . '</span> ';
+                $output .= '<span class="annrom">' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . '</span> ';
             }
             if ($showRom && $showTrans) {
-                $output .= '<span class="annrom" dir="ltr">[' . \tohtml($rom) . ']</span> ';
+                $output .= '<span class="annrom" dir="ltr">[' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . ']</span> ';
             }
             $output .= ' <span class="annterm">';
         }
-        $output .= \tohtml($term);
+        $output .= htmlspecialchars($term, ENT_QUOTES, 'UTF-8');
         if ($showRom || $showTrans) {
             $output .= '</span> ';
         }
@@ -367,20 +367,20 @@ class TextPrintController extends BaseController
         bool $showTrans
     ): string {
         if ($showRom || $showTrans) {
-            $output = ' <ruby><rb><span class="anntermruby">' . \tohtml($term) . '</span></rb><rt> ';
+            $output = ' <ruby><rb><span class="anntermruby">' . htmlspecialchars($term, ENT_QUOTES, 'UTF-8') . '</span></rb><rt> ';
             if ($showTrans) {
-                $output .= '<span class="anntransruby">' . \tohtml($trans) . '</span> ';
+                $output .= '<span class="anntransruby">' . htmlspecialchars($trans, ENT_QUOTES, 'UTF-8') . '</span> ';
             }
             if ($showRom && !$showTrans) {
-                $output .= '<span class="annromrubysolo">' . \tohtml($rom) . '</span> ';
+                $output .= '<span class="annromrubysolo">' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . '</span> ';
             }
             if ($showRom && $showTrans) {
-                $output .= '<span class="annromruby" dir="ltr">[' . \tohtml($rom) . ']</span> ';
+                $output .= '<span class="annromruby" dir="ltr">[' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . ']</span> ';
             }
             $output .= '</rt></ruby> ';
             return $output;
         }
-        return \tohtml($term);
+        return htmlspecialchars($term, ENT_QUOTES, 'UTF-8');
     }
 
     /**
@@ -405,17 +405,17 @@ class TextPrintController extends BaseController
         if ($showRom || $showTrans) {
             $output .= ' <span class="annterm">';
         }
-        $output .= \tohtml($term);
+        $output .= htmlspecialchars($term, ENT_QUOTES, 'UTF-8');
         if ($showRom || $showTrans) {
             $output .= '</span> ';
             if ($showRom && !$showTrans) {
-                $output .= '<span class="annrom">' . \tohtml($rom) . '</span>';
+                $output .= '<span class="annrom">' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . '</span>';
             }
             if ($showRom && $showTrans) {
-                $output .= '<span class="annrom" dir="ltr">[' . \tohtml($rom) . ']</span> ';
+                $output .= '<span class="annrom" dir="ltr">[' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . ']</span> ';
             }
             if ($showTrans) {
-                $output .= '<span class="anntrans">' . \tohtml($trans) . '</span>';
+                $output .= '<span class="anntrans">' . htmlspecialchars($trans, ENT_QUOTES, 'UTF-8') . '</span>';
             }
             $output .= ' ';
         }

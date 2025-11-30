@@ -135,9 +135,9 @@ class MediaService
         $options = $this->searchMediaPaths($dir);
         foreach ($options["paths"] as $op) {
             if (in_array($op, $options["folders"])) {
-                $r .= '<option disabled="disabled">-- Directory: ' . tohtml($op) . '--</option>';
+                $r .= '<option disabled="disabled">-- Directory: ' . htmlspecialchars($op ?? '', ENT_QUOTES, 'UTF-8') . '--</option>';
             } else {
-                $r .= '<option value="' . tohtml($op) . '">' . tohtml($op) . '</option>';
+                $r .= '<option value="' . htmlspecialchars($op ?? '', ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($op ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
             }
         }
         return $r;

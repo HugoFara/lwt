@@ -20,6 +20,7 @@ use Lwt\Core\Globals;
 use Lwt\Core\Http\UrlUtilities;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
@@ -161,10 +162,10 @@ class TextService
      */
     public function deleteArchivedText(int $textId): string
     {
-        $message = Connection::execute(
-            "DELETE FROM {$this->tbpref}archivedtexts WHERE AtID = {$textId}",
-            "Archived Texts deleted"
-        );
+        $deleted = QueryBuilder::table('archivedtexts')
+            ->where('AtID', '=', $textId)
+            ->delete();
+        $message = "Archived Texts deleted: $deleted";
         Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
         $this->cleanupArchivedTextTags();
         return $message;
@@ -183,10 +184,9 @@ class TextService
             return "Multiple Actions: 0";
         }
 
-        $list = "(" . implode(",", array_map('intval', $textIds)) . ")";
-        $affectedRows = Connection::execute(
-            "DELETE FROM {$this->tbpref}archivedtexts WHERE AtID IN {$list}"
-        );
+        $affectedRows = QueryBuilder::table('archivedtexts')
+            ->whereIn('AtID', array_map('intval', $textIds))
+            ->delete();
         Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
         $this->cleanupArchivedTextTags();
         return "Archived Texts deleted: $affectedRows";
@@ -239,10 +239,10 @@ class TextService
         TextParsing::splitCheck($textContent, (int) $lgId, $textId);
 
         // Delete from archived
-        $deleted = Connection::execute(
-            "DELETE FROM {$this->tbpref}archivedtexts WHERE AtID = {$archivedId}",
-            "Archived Texts deleted"
-        );
+        $deleted = QueryBuilder::table('archivedtexts')
+            ->where('AtID', '=', $archivedId)
+            ->delete();
+        $deleted = "Archived Texts deleted: $deleted";
 
         Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
         $this->cleanupArchivedTextTags();
@@ -306,10 +306,9 @@ class TextService
             );
             TextParsing::splitCheck($textContent, $record['AtLgID'], $id);
 
-            Connection::execute(
-                "DELETE FROM {$this->tbpref}archivedtexts WHERE AtID = {$ida}",
-                ""
-            );
+            QueryBuilder::table('archivedtexts')
+                ->where('AtID', '=', $ida)
+                ->delete();
         }
         mysqli_free_result($res);
 
@@ -580,24 +579,21 @@ class TextService
      */
     public function deleteText(int $textId): string
     {
-        $msg3 = Connection::execute(
-            "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}",
-            "Text items deleted"
-        );
-        $msg2 = Connection::execute(
-            "DELETE FROM {$this->tbpref}sentences WHERE SeTxID = {$textId}",
-            "Sentences deleted"
-        );
-        $msg1 = Connection::execute(
-            "DELETE FROM {$this->tbpref}texts WHERE TxID = {$textId}",
-            "Texts deleted"
-        );
+        $count3 = QueryBuilder::table('textitems2')
+            ->where('Ti2TxID', '=', $textId)
+            ->delete();
+        $count2 = QueryBuilder::table('sentences')
+            ->where('SeTxID', '=', $textId)
+            ->delete();
+        $count1 = QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->delete();
 
         Maintenance::adjustAutoIncrement('texts', 'TxID');
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         $this->cleanupTextTags();
 
-        return "{$msg1} / {$msg2} / {$msg3}";
+        return "Texts deleted: $count1 / Sentences deleted: $count2 / Text items deleted: $count3";
     }
 
     /**
@@ -610,14 +606,12 @@ class TextService
     public function archiveText(int $textId): string
     {
         // Delete parsed data
-        $msg3 = Connection::execute(
-            "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}",
-            "Text items deleted"
-        );
-        $msg2 = Connection::execute(
-            "DELETE FROM {$this->tbpref}sentences WHERE SeTxID = {$textId}",
-            "Sentences deleted"
-        );
+        $count3 = QueryBuilder::table('textitems2')
+            ->where('Ti2TxID', '=', $textId)
+            ->delete();
+        $count2 = QueryBuilder::table('sentences')
+            ->where('SeTxID', '=', $textId)
+            ->delete();
 
         // Insert into archived
         $msg4 = Connection::execute(
@@ -641,16 +635,15 @@ class TextService
         );
 
         // Delete from active
-        $msg1 = Connection::execute(
-            "DELETE FROM {$this->tbpref}texts WHERE TxID = {$textId}",
-            "Texts deleted"
-        );
+        $count1 = QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->delete();
 
         Maintenance::adjustAutoIncrement('texts', 'TxID');
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         $this->cleanupTextTags();
 
-        return "{$msg4} / {$msg1} / {$msg2} / {$msg3}";
+        return "{$msg4} / Texts deleted: $count1 / Sentences deleted: $count2 / Text items deleted: $count3";
     }
 
     /**
@@ -922,14 +915,12 @@ class TextService
         );
 
         // Re-parse the text
-        $msg1 = Connection::execute(
-            "DELETE FROM {$this->tbpref}sentences WHERE SeTxID = {$textId}",
-            "Sentences deleted"
-        );
-        $msg2 = Connection::execute(
-            "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}",
-            "Text items deleted"
-        );
+        $count1 = QueryBuilder::table('sentences')
+            ->where('SeTxID', '=', $textId)
+            ->delete();
+        $count2 = QueryBuilder::table('textitems2')
+            ->where('Ti2TxID', '=', $textId)
+            ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
         TextParsing::splitCheck($cleanText, $lgId, $textId);
@@ -942,7 +933,7 @@ class TextService
             "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}"
         );
 
-        return "{$msg1} / {$msg2} / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
+        return "Sentences deleted: $count1 / Text items deleted: $count2 / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
     }
 
     /**
@@ -958,17 +949,17 @@ class TextService
             return "Multiple Actions: 0";
         }
 
-        $list = "(" . implode(",", array_map('intval', $textIds)) . ")";
+        $ids = array_map('intval', $textIds);
 
-        $count3 = Connection::execute(
-            "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID IN {$list}"
-        );
-        $count2 = Connection::execute(
-            "DELETE FROM {$this->tbpref}sentences WHERE SeTxID IN {$list}"
-        );
-        $count1 = Connection::execute(
-            "DELETE FROM {$this->tbpref}texts WHERE TxID IN {$list}"
-        );
+        $count3 = QueryBuilder::table('textitems2')
+            ->whereIn('Ti2TxID', $ids)
+            ->delete();
+        $count2 = QueryBuilder::table('sentences')
+            ->whereIn('SeTxID', $ids)
+            ->delete();
+        $count1 = QueryBuilder::table('texts')
+            ->whereIn('TxID', $ids)
+            ->delete();
 
         Maintenance::adjustAutoIncrement('texts', 'TxID');
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
@@ -990,20 +981,18 @@ class TextService
             return "Multiple Actions: 0";
         }
 
-        $list = "(" . implode(",", array_map('intval', $textIds)) . ")";
+        $ids = array_map('intval', $textIds);
 
         // Delete parsed data
-        Connection::execute(
-            "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID IN {$list}",
-            ""
-        );
-        Connection::execute(
-            "DELETE FROM {$this->tbpref}sentences WHERE SeTxID IN {$list}",
-            ""
-        );
+        QueryBuilder::table('textitems2')
+            ->whereIn('Ti2TxID', $ids)
+            ->delete();
+        QueryBuilder::table('sentences')
+            ->whereIn('SeTxID', $ids)
+            ->delete();
 
         $count = 0;
-        $sql = "SELECT TxID FROM {$this->tbpref}texts WHERE TxID IN {$list}";
+        $sql = "SELECT TxID FROM {$this->tbpref}texts WHERE TxID IN (" . implode(',', $ids) . ")";
         $res = Connection::query($sql);
 
         while ($record = mysqli_fetch_assoc($res)) {
@@ -1025,10 +1014,9 @@ class TextService
         }
         mysqli_free_result($res);
 
-        Connection::execute(
-            "DELETE FROM {$this->tbpref}texts WHERE TxID IN {$list}",
-            ""
-        );
+        QueryBuilder::table('texts')
+            ->whereIn('TxID', $ids)
+            ->delete();
         $this->cleanupTextTags();
         Maintenance::adjustAutoIncrement('texts', 'TxID');
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
@@ -1050,21 +1038,19 @@ class TextService
         }
 
         $count = 0;
-        $list = "(" . implode(",", array_map('intval', $textIds)) . ")";
+        $ids = array_map('intval', $textIds);
 
-        $sql = "SELECT TxID, TxLgID FROM {$this->tbpref}texts WHERE TxID IN {$list}";
+        $sql = "SELECT TxID, TxLgID FROM {$this->tbpref}texts WHERE TxID IN (" . implode(',', $ids) . ")";
         $res = Connection::query($sql);
 
         while ($record = mysqli_fetch_assoc($res)) {
             $id = (int) $record['TxID'];
-            Connection::execute(
-                "DELETE FROM {$this->tbpref}sentences WHERE SeTxID = {$id}",
-                ""
-            );
-            Connection::execute(
-                "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$id}",
-                ""
-            );
+            QueryBuilder::table('sentences')
+                ->where('SeTxID', '=', $id)
+                ->delete();
+            QueryBuilder::table('textitems2')
+                ->where('Ti2TxID', '=', $id)
+                ->delete();
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
             $textContent = Connection::fetchValue(
@@ -1527,12 +1513,12 @@ class TextService
         TagService::saveTextTags($textId);
 
         // Delete old parsed data
-        $sentencesDeleted = Connection::execute(
-            "DELETE FROM {$this->tbpref}sentences WHERE SeTxID = {$textId}"
-        );
-        $textitemsDeleted = Connection::execute(
-            "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}"
-        );
+        $sentencesDeleted = QueryBuilder::table('sentences')
+            ->where('SeTxID', '=', $textId)
+            ->delete();
+        $textitemsDeleted = QueryBuilder::table('textitems2')
+            ->where('Ti2TxID', '=', $textId)
+            ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
         // Reparse

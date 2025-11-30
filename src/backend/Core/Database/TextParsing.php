@@ -49,7 +49,7 @@ class TextParsing
         if ($id == -1) {
             echo '<div id="check_text" style="margin-right:50px;">
             <h2>Text</h2>
-            <p>' . str_replace("\n", "<br /><br />", \tohtml($text)) . '</p>';
+            <p>' . str_replace("\n", "<br /><br />", \htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8')) . '</p>';
         } elseif ($id == -2) {
             $text = preg_replace("/[\n]+/u", "\n¶", $text);
             return explode("\n", $text);
@@ -326,7 +326,7 @@ class TextParsing
             echo "<div id=\"check_text\" style=\"margin-right:50px;\">
             <h4>Text</h4>
             <p " . ($rtlScript ? 'dir="rtl"' : '') . ">" .
-            str_replace("¶", "<br /><br />", \tohtml($text)) .
+            str_replace("¶", "<br /><br />", \htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8')) .
             "</p>";
         }
         // "\r" => Sentence delimiter, "\t" and "\n" => Word delimiter
@@ -494,7 +494,7 @@ class TextParsing
         );
         echo '<h4>Sentences</h4><ol>';
         foreach ($sentences as $record) {
-            echo "<li>" . \tohtml($record['Sent']) . "</li>";
+            echo "<li>" . \htmlspecialchars($record['Sent'] ?? '', ENT_QUOTES, 'UTF-8') . "</li>";
         }
         echo '</ol>';
         $rows = Connection::fetchAll(
@@ -507,14 +507,14 @@ class TextParsing
         foreach ($rows as $record) {
             if ($record['len'] == 1) {
                 $wo[] = array(
-                    \tohtml($record['word']),
+                    \htmlspecialchars($record['word'] ?? '', ENT_QUOTES, 'UTF-8'),
                     $record['cnt'],
-                    \tohtml($record['WoTranslation'])
+                    \htmlspecialchars($record['WoTranslation'] ?? '', ENT_QUOTES, 'UTF-8')
                 );
             } else {
                 $nw[] = array(
-                    \tohtml((string)$record['word']),
-                    \tohtml((string)$record['cnt'])
+                    htmlspecialchars((string)$record['word'] ?? '', ENT_QUOTES, 'UTF-8'),
+                    htmlspecialchars((string)$record['cnt'] ?? '', ENT_QUOTES, 'UTF-8')
                 );
             }
         }
@@ -604,9 +604,9 @@ class TextParsing
             );
             foreach ($rows as $record) {
                 $mw[] = array(
-                    \tohtml((string)$record['word']),
+                    htmlspecialchars((string)$record['word'] ?? '', ENT_QUOTES, 'UTF-8'),
                     $record['cnt'],
-                    \tohtml((string)$record['WoTranslation'])
+                    htmlspecialchars((string)$record['WoTranslation'] ?? '', ENT_QUOTES, 'UTF-8')
                 );
             }
         }

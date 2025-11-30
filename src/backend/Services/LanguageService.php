@@ -21,6 +21,7 @@ use Lwt\Core\Http\UrlUtilities;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Maintenance;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\TextParsing;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
@@ -323,11 +324,14 @@ class LanguageService
      */
     private function reparseTexts(int $lid): int
     {
-        $tbpref = Globals::getTablePrefix();
-
-        Connection::execute("DELETE FROM {$tbpref}sentences where SeLgID = $lid");
-        Connection::execute("DELETE FROM {$tbpref}textitems2 where Ti2LgID = $lid");
+        QueryBuilder::table('sentences')
+            ->where('SeLgID', '=', $lid)
+            ->delete();
+        QueryBuilder::table('textitems2')
+            ->where('Ti2LgID', '=', $lid)
+            ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
+        $tbpref = Globals::getTablePrefix();
         Connection::execute("UPDATE {$tbpref}words SET WoWordCount = 0 WHERE WoLgID = $lid");
         Maintenance::initWordCount();
 
@@ -355,8 +359,6 @@ class LanguageService
      */
     public function delete(int $lid): string
     {
-        $tbpref = Globals::getTablePrefix();
-
         // Check for related data
         $stats = $this->getRelatedDataCounts($lid);
 
@@ -365,9 +367,9 @@ class LanguageService
             return 'You must first delete texts, archived texts, newsfeeds and words with this language!';
         }
 
-        $affected = Connection::execute(
-            "DELETE FROM {$tbpref}languages WHERE LgID = $lid"
-        );
+        $affected = QueryBuilder::table('languages')
+            ->where('LgID', '=', $lid)
+            ->delete();
         return "Deleted: " . $affected;
     }
 
@@ -407,16 +409,15 @@ class LanguageService
      */
     public function refresh(int $lid): string
     {
-        $tbpref = Globals::getTablePrefix();
-
-        $sentencesDeleted = Connection::execute(
-            "DELETE FROM {$tbpref}sentences where SeLgID = $lid"
-        );
-        $textItemsDeleted = Connection::execute(
-            "DELETE FROM {$tbpref}textitems2 where Ti2LgID = $lid"
-        );
+        $sentencesDeleted = QueryBuilder::table('sentences')
+            ->where('SeLgID', '=', $lid)
+            ->delete();
+        $textItemsDeleted = QueryBuilder::table('textitems2')
+            ->where('Ti2LgID', '=', $lid)
+            ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
+        $tbpref = Globals::getTablePrefix();
         $sql = "select TxID, TxText from {$tbpref}texts
         where TxLgID = $lid
         order by TxID";

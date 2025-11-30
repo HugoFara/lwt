@@ -213,21 +213,6 @@ namespace Lwt\Core\Utils {
     }
 
     /**
-     * Escape special HTML characters.
-     *
-     * @param string|null $s String to escape.
-     *
-     * @return string htmlspecialchars($s, ENT_COMPAT, "UTF-8");
-     */
-    function tohtml($s)
-    {
-        if (!isset($s)) {
-            return '';
-        }
-        return \htmlspecialchars($s, ENT_COMPAT, "UTF-8");
-    }
-
-    /**
      * Remove all spaces from a string.
      *
      * @param string      $s      Input string
@@ -368,16 +353,6 @@ namespace {
         function strToClassName($string): string
         {
             return \Lwt\Core\Utils\strToClassName($string);
-        }
-    }
-
-    if (!\function_exists('tohtml')) {
-        /**
-         * @deprecated Use \Lwt\Core\Utils\tohtml() instead
-         */
-        function tohtml($s)
-        {
-            return \Lwt\Core\Utils\tohtml($s);
         }
     }
 

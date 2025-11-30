@@ -17,6 +17,7 @@ namespace Lwt\Services;
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
@@ -948,11 +949,12 @@ class WordUploadService
 
         if ($mwords > 40) {
             // Bulk update: delete and recreate all text items
-            Connection::execute("DELETE FROM {$this->tbpref}sentences WHERE SeLgID = $langId"
-            );
-            Connection::execute(
-                "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2LgID = $langId"
-            );
+            QueryBuilder::table('sentences')
+                ->where('SeLgID', '=', $langId)
+                ->delete();
+            QueryBuilder::table('textitems2')
+                ->where('Ti2LgID', '=', $langId)
+                ->delete();
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
             $sql = "SELECT TxID, TxText FROM {$this->tbpref}texts

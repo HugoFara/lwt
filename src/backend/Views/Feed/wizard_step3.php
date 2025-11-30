@@ -75,13 +75,13 @@ namespace Lwt\Views\Feed;
             <tr>
                 <td class="td1 left">Newsfeed url: </td>
                 <td class="td1 left">
-                    <?php echo tohtml($wizardData['rss_url']); ?>
+                    <?php echo htmlspecialchars($wizardData['rss_url'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
                 </td>
             </tr>
             <tr>
                 <td class="td1 left">Article Section: </td>
                 <td class="td1 left">
-                    <?php echo tohtml($wizardData['article_section'] ?? ''); ?>
+                    <?php echo htmlspecialchars($wizardData['article_section'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
                 </td>
             </tr>
             <tr>
@@ -118,7 +118,7 @@ namespace Lwt\Views\Feed;
                             if (!isset($wizardData['host2'][$feed_host])) {
                                 $wizardData['host2'][$feed_host] = '-';
                             }
-                            echo "<option value=" . $i . " title=" . tohtml($wizardData['feed'][$i]['title']);
+                            echo "<option value=" . $i . " title=" . htmlspecialchars($wizardData['feed'][$i]['title'] ?? '', ENT_QUOTES, 'UTF-8');
                             if ($i == $wizardData['selected_feed']) {
                                 echo ' selected="selected"';
                                 $current_host = $feed_host;

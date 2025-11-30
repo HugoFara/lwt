@@ -190,7 +190,7 @@ class ExportService
         $lpar = ($rtlScript ? ']' : '[');
         $rpar = ($rtlScript ? '[' : ']');
 
-        $sent = \tohtml(self::replaceTabNewline((string)$record["WoSentence"]));
+        $sent = htmlspecialchars(self::replaceTabNewline((string)$record["WoSentence"]), ENT_QUOTES, 'UTF-8');
         $sent1 = str_replace(
             "{",
             '<span style="font-weight:600; color:#0000ff;">' . $lpar,
@@ -206,14 +206,14 @@ class ExportService
             str_replace("}", '</span>', $sent)
         );
 
-        return $span1 . \tohtml(self::replaceTabNewline((string)$record["WoText"])) . $span2 . "\t" .
-            \tohtml(self::replaceTabNewline((string)$record["WoTranslation"])) . "\t" .
-            \tohtml(self::replaceTabNewline((string)$record["WoRomanization"])) . "\t" .
+        return $span1 . htmlspecialchars(self::replaceTabNewline((string)$record["WoText"]), ENT_QUOTES, 'UTF-8') . $span2 . "\t" .
+            htmlspecialchars(self::replaceTabNewline((string)$record["WoTranslation"]), ENT_QUOTES, 'UTF-8') . "\t" .
+            htmlspecialchars(self::replaceTabNewline((string)$record["WoRomanization"]), ENT_QUOTES, 'UTF-8') . "\t" .
             $span1 . $sent1 . $span2 . "\t" .
             $span1 . $sent2 . $span2 . "\t" .
-            \tohtml(self::replaceTabNewline((string)$record["LgName"])) . "\t" .
-            \tohtml($record["WoID"]) . "\t" .
-            \tohtml($record["taglist"]) .
+            htmlspecialchars(self::replaceTabNewline((string)$record["LgName"]), ENT_QUOTES, 'UTF-8') . "\t" .
+            htmlspecialchars((string)$record["WoID"], ENT_QUOTES, 'UTF-8') . "\t" .
+            htmlspecialchars((string)$record["taglist"], ENT_QUOTES, 'UTF-8') .
             "\r\n";
     }
 
@@ -288,17 +288,17 @@ class ExportService
         $output = str_replace('%%', '%', $output);
 
         // Replace HTML-escaped placeholders
-        $output = str_replace('$w', $span1 . \tohtml($term) . $span2, $output);
-        $output = str_replace('$t', \tohtml($transl), $output);
-        $output = str_replace('$s', $span1 . \tohtml($sent) . $span2, $output);
-        $output = str_replace('$c', $span1 . \tohtml($sent_c) . $span2, $output);
-        $output = str_replace('$d', $span1 . \tohtml($sent_d) . $span2, $output);
-        $output = str_replace('$x', $span1 . \tohtml($sent_x) . $span2, $output);
-        $output = str_replace('$y', $span1 . \tohtml($sent_y) . $span2, $output);
-        $output = str_replace('$r', \tohtml($rom), $output);
-        $output = str_replace('$k', $span1 . \tohtml($term_lc) . $span2, $output);
-        $output = str_replace('$z', \tohtml($taglist), $output);
-        $output = str_replace('$l', \tohtml($langname), $output);
+        $output = str_replace('$w', $span1 . htmlspecialchars($term, ENT_QUOTES, 'UTF-8') . $span2, $output);
+        $output = str_replace('$t', htmlspecialchars($transl, ENT_QUOTES, 'UTF-8'), $output);
+        $output = str_replace('$s', $span1 . htmlspecialchars($sent, ENT_QUOTES, 'UTF-8') . $span2, $output);
+        $output = str_replace('$c', $span1 . htmlspecialchars($sent_c, ENT_QUOTES, 'UTF-8') . $span2, $output);
+        $output = str_replace('$d', $span1 . htmlspecialchars($sent_d, ENT_QUOTES, 'UTF-8') . $span2, $output);
+        $output = str_replace('$x', $span1 . htmlspecialchars($sent_x, ENT_QUOTES, 'UTF-8') . $span2, $output);
+        $output = str_replace('$y', $span1 . htmlspecialchars($sent_y, ENT_QUOTES, 'UTF-8') . $span2, $output);
+        $output = str_replace('$r', htmlspecialchars($rom, ENT_QUOTES, 'UTF-8'), $output);
+        $output = str_replace('$k', $span1 . htmlspecialchars($term_lc, ENT_QUOTES, 'UTF-8') . $span2, $output);
+        $output = str_replace('$z', htmlspecialchars($taglist, ENT_QUOTES, 'UTF-8'), $output);
+        $output = str_replace('$l', htmlspecialchars($langname, ENT_QUOTES, 'UTF-8'), $output);
         $output = str_replace('$$', '$', $output);
 
         // Replace escape sequences

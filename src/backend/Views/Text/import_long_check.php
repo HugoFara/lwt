@@ -27,9 +27,9 @@ $shorter = ($textCount == 1 ? ' ' : ' shorter ');
 ?>
 <form enctype="multipart/form-data" action="/text/import-long" method="post" data-lwt-form-check="true" data-lwt-dirty>
 <input type="hidden" name="LgID" value="<?php echo $langId; ?>" />
-<input type="hidden" name="TxTitle" value="<?php echo \tohtml($title); ?>" />
-<input type="hidden" name="TxSourceURI" value="<?php echo \tohtml($sourceUri); ?>" />
-<input type="hidden" name="TextTags" value="<?php echo \tohtml($textTags); ?>" />
+<input type="hidden" name="TxTitle" value="<?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+<input type="hidden" name="TxSourceURI" value="<?php echo \htmlspecialchars($sourceUri ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+<input type="hidden" name="TextTags" value="<?php echo \htmlspecialchars($textTags ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="hidden" name="TextCount" value="<?php echo $textCount; ?>" />
 <table class="tab1" cellspacing="0" cellpadding="5">
     <tr>

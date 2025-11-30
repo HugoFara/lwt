@@ -78,7 +78,7 @@ namespace Lwt\Views\Text;
 
 <h1>READ &#x25B6;
     <?php
-    echo \tohtml($title);
+    echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8');
     if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')) {
         ?>
     <a href="<?php echo $sourceUri ?>" target="_blank">

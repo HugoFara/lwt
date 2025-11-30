@@ -94,7 +94,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             <td class="td1">
                 <input type="text" class="notempty checkoutsidebmp respinput"
                 data_info="Title" name="TxTitle" id="TxTitle"
-                value="<?php echo \tohtml($text->title); ?>" maxlength="200" />
+                value="<?php echo \htmlspecialchars($text->title ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200" />
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty"
                 alt="Field must not be empty" />
             </td>
@@ -108,7 +108,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             name="TxText" id="TxText"
             class="notempty checkbytes checkoutsidebmp respinput"
             data_maxlength="65000" data_info="Text" rows="20"
-            ><?php echo \tohtml($text->text); ?></textarea>
+            ><?php echo \htmlspecialchars($text->text ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
             </td>
@@ -135,7 +135,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             <td class="td1">
                 <input type="url" class="checkurl checkoutsidebmp respinput"
                 data_info="Source URI" name="TxSourceURI"
-                value="<?php echo \tohtml($text->source); ?>"
+                value="<?php echo \htmlspecialchars($text->source ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                 maxlength="1000" />
             </td>
         </tr>
@@ -152,7 +152,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             <td class="td1">
                 <input type="text" class="checkoutsidebmp respinput"
                 data_info="Audio-URI" name="TxAudioURI" maxlength="2048"
-                value="<?php echo \tohtml($text->media_uri); ?>"  />
+                value="<?php echo \htmlspecialchars($text->media_uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"  />
                 <span id="mediaselect">
                     <?php echo \selectmediapath('TxAudioURI'); ?>
                 </span>

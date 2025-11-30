@@ -18,7 +18,7 @@ use Lwt\Api\V1\Handlers\ImprovedTextHandler;
 $title = $viewData['title'];
 $sourceUri = $viewData['sourceUri'];
 ?>
-<h1>ANN.TEXT &#9654; <?php echo tohtml($title);
+<h1>ANN.TEXT &#9654; <?php echo htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8');
 if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
     echo ' <a href="' . $sourceUri . '" target="_blank">' .
          '<img src="' . get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" /></a>';

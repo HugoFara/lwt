@@ -50,7 +50,7 @@ class ErrorHandler
         // In production, output HTML error and die (legacy behavior)
         echo '</select></p></div><div style="padding: 1em; color:red; font-size:120%; background-color:#CEECF5;">' .
         '<p><b>Fatal Error:</b> ' .
-        tohtml($text) .
+        htmlspecialchars($text, ENT_QUOTES, 'UTF-8') .
         "</p></div><hr /><pre>Backtrace:\n\n";
         debug_print_backtrace();
         echo '</pre><hr />
@@ -74,12 +74,12 @@ class ErrorHandler
             return '';
         }
         if (substr($msg, 0, 5) == "Error") {
-            return '<p class="red">*** ' . tohtml($msg) . ' ***' .
+            return '<p class="red">*** ' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . ' ***' .
             ($noback ?
             '' :
             '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="back" />' ) .
             '</p>';
         }
-        return '<p id="hide3" class="msgblue">+++ ' . tohtml($msg) . ' +++</p>';
+        return '<p id="hide3" class="msgblue">+++ ' . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . ' +++</p>';
     }
 }

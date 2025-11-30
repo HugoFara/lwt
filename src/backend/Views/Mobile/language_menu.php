@@ -26,11 +26,11 @@ namespace Lwt\Views\Mobile;
 /** @var string $langName */
 
 ?>
-<ul id="<?php echo $action . '-' . $langId; ?>" title="<?php echo tohtml($langName); ?>">
-    <li class="group"><?php echo tohtml($langName); ?> Texts</li>
-    <li><a href="/mobile?action=2&amp;lang=<?php echo $langId; ?>">All <?php echo tohtml($langName); ?> Texts</a></li>
+<ul id="<?php echo $action . '-' . $langId; ?>" title="<?php echo htmlspecialchars($langName ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+    <li class="group"><?php echo htmlspecialchars($langName ?? '', ENT_QUOTES, 'UTF-8'); ?> Texts</li>
+    <li><a href="/mobile?action=2&amp;lang=<?php echo $langId; ?>">All <?php echo htmlspecialchars($langName ?? '', ENT_QUOTES, 'UTF-8'); ?> Texts</a></li>
     <li><a href="/mobile#notyetimpl">Text Tags</a></li>
-    <li class="group"><?php echo tohtml($langName); ?> Terms</li>
-    <li><a href="/mobile#notyetimpl">All <?php echo tohtml($langName); ?> Terms</a></li>
+    <li class="group"><?php echo htmlspecialchars($langName ?? '', ENT_QUOTES, 'UTF-8'); ?> Terms</li>
+    <li><a href="/mobile#notyetimpl">All <?php echo htmlspecialchars($langName ?? '', ENT_QUOTES, 'UTF-8'); ?> Terms</a></li>
     <li><a href="/mobile#notyetimpl">Term Tags</a></li>
 </ul>

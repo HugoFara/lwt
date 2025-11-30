@@ -19,7 +19,7 @@ namespace Lwt\Views\Word;
 <table class="tab1" cellspacing="0" cellpadding="5">
 <tr>
 <td class="td1 right">Language:</td>
-<td class="td1"><?php echo tohtml($languageName); ?></td>
+<td class="td1"><?php echo htmlspecialchars($languageName ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 </tr>
 <tr>
 <td class="td1 right">Term:</td>

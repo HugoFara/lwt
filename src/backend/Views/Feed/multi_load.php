@@ -49,7 +49,7 @@ data-url="/feeds/edit?multi_load_feed=1&amp;page=1">
         <td class="td1 center">
             <input class="markcheck" type="checkbox" name="selected_feed[]" value="<?php echo $row['NfID']; ?>" checked="checked" />
         </td>
-        <td class="td1 center" colspan="2"><?php echo tohtml($row['NfName']); ?></td>
+        <td class="td1 center" colspan="2"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
         <td class="td1 center" sorttable_customkey="<?php echo $diff; ?>">
             <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
         </td>

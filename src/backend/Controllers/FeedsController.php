@@ -116,7 +116,8 @@ class FeedsController extends BaseController
         $message = '';
 
         // Handle marked items submission
-        if (isset($_REQUEST['marked_items']) && is_array($_REQUEST['marked_items'])) {
+        $markedItemsArray = $this->paramArray('marked_items');
+        if (!empty($markedItemsArray)) {
             $result = $this->processMarkedItems();
             $editText = $result['editText'];
             $message = $result['message'];
@@ -126,13 +127,14 @@ class FeedsController extends BaseController
         $this->displayFeedMessages($message);
 
         // Route based on action
+        $markAction = $this->param('markaction');
         if (
-            isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
-            || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
+            $this->hasParam('load_feed') || $this->hasParam('check_autoupdate')
+            || ($markAction == 'update')
         ) {
             $this->feedService->renderFeedLoadInterfaceModern(
                 (int)$currentFeed,
-                isset($_REQUEST['check_autoupdate']),
+                $this->hasParam('check_autoupdate'),
                 $_SERVER['PHP_SELF'] ?? '/'
             );
         } elseif (empty($editText)) {
@@ -152,11 +154,12 @@ class FeedsController extends BaseController
         $editText = 0;
         $message = '';
 
-        if (!isset($_REQUEST['marked_items']) || !is_array($_REQUEST['marked_items'])) {
+        $markedItemsArray = $this->paramArray('marked_items');
+        if (empty($markedItemsArray)) {
             return ['editText' => $editText, 'message' => $message];
         }
 
-        $markedItems = implode(',', array_filter($_REQUEST['marked_items'], 'is_scalar'));
+        $markedItems = implode(',', array_filter($markedItemsArray, 'is_scalar'));
         $feedLinks = $this->feedService->getMarkedFeedLinks($markedItems);
 
         $stats = ['archived' => 0, 'sentences' => 0, 'textitems' => 0, 'texts' => 0];
@@ -276,8 +279,8 @@ class FeedsController extends BaseController
      */
     private function displayFeedMessages(string $message): void
     {
-        if (isset($_REQUEST['checked_feeds_save'])) {
-            $message = $this->feedService->saveTextsFromFeed($_REQUEST['feed']);
+        if ($this->hasParam('checked_feeds_save')) {
+            $message = $this->feedService->saveTextsFromFeed($this->paramArray('feed'));
         }
 
         if (isset($_SESSION['feed_loaded'])) {
@@ -318,7 +321,7 @@ class FeedsController extends BaseController
                 $currentQuery = '';
                 $whQuery = '';
                 unset($_SESSION['currentwordquery']);
-                if (isset($_REQUEST['query'])) {
+                if ($this->hasParam('query')) {
                     echo '<p id="hide3" class="warning-message">+++ Warning: Invalid Search +++</p>';
                 }
             }
@@ -442,20 +445,21 @@ class FeedsController extends BaseController
         $this->handleSaveFeed();
 
         // Route to appropriate view
+        $markAction = $this->param('markaction');
         if (
-            isset($_REQUEST['load_feed']) || isset($_REQUEST['check_autoupdate'])
-            || (isset($_REQUEST['markaction']) && $_REQUEST['markaction'] == 'update')
+            $this->hasParam('load_feed') || $this->hasParam('check_autoupdate')
+            || ($markAction == 'update')
         ) {
             $this->feedService->renderFeedLoadInterfaceModern(
                 (int)$currentFeed,
-                isset($_REQUEST['check_autoupdate']),
+                $this->hasParam('check_autoupdate'),
                 $_SERVER['PHP_SELF'] ?? '/'
             );
-        } elseif (isset($_REQUEST['new_feed'])) {
+        } elseif ($this->hasParam('new_feed')) {
             $this->showNewForm((int)$currentLang);
-        } elseif (isset($_REQUEST['edit_feed'])) {
+        } elseif ($this->hasParam('edit_feed')) {
             $this->showEditForm((int)$currentFeed);
-        } elseif (isset($_REQUEST['multi_load_feed'])) {
+        } elseif ($this->hasParam('multi_load_feed')) {
             $this->showMultiLoadForm((int)$currentLang);
         } else {
             $this->showList(
@@ -479,11 +483,10 @@ class FeedsController extends BaseController
      */
     private function handleMarkAction(string $currentFeed): string
     {
-        if (!isset($_REQUEST['markaction']) || empty($currentFeed)) {
+        $action = $this->param('markaction');
+        if ($action === '' || empty($currentFeed)) {
             return '';
         }
-
-        $action = $_REQUEST['markaction'];
 
         switch ($action) {
             case 'del':
@@ -510,19 +513,19 @@ class FeedsController extends BaseController
      */
     private function handleUpdateFeed(): void
     {
-        if (!isset($_REQUEST['update_feed'])) {
+        if (!$this->hasParam('update_feed')) {
             return;
         }
 
-        $feedId = (int)$_REQUEST['NfID'];
+        $feedId = $this->paramInt('NfID', 0) ?? 0;
 
         $data = [
-            'NfLgID' => $_REQUEST['NfLgID'] ?? '',
-            'NfName' => $_REQUEST['NfName'] ?? '',
-            'NfSourceURI' => $_REQUEST['NfSourceURI'] ?? '',
-            'NfArticleSectionTags' => $_REQUEST['NfArticleSectionTags'] ?? '',
-            'NfFilterTags' => $_REQUEST['NfFilterTags'] ?? '',
-            'NfOptions' => rtrim($_REQUEST['NfOptions'] ?? '', ','),
+            'NfLgID' => $this->param('NfLgID'),
+            'NfName' => $this->param('NfName'),
+            'NfSourceURI' => $this->param('NfSourceURI'),
+            'NfArticleSectionTags' => $this->param('NfArticleSectionTags'),
+            'NfFilterTags' => $this->param('NfFilterTags'),
+            'NfOptions' => rtrim($this->param('NfOptions'), ','),
         ];
 
         $this->feedService->updateFeed($feedId, $data);
@@ -535,17 +538,17 @@ class FeedsController extends BaseController
      */
     private function handleSaveFeed(): void
     {
-        if (!isset($_REQUEST['save_feed'])) {
+        if (!$this->hasParam('save_feed')) {
             return;
         }
 
         $data = [
-            'NfLgID' => $_REQUEST['NfLgID'] ?? '',
-            'NfName' => $_REQUEST['NfName'] ?? '',
-            'NfSourceURI' => $_REQUEST['NfSourceURI'] ?? '',
-            'NfArticleSectionTags' => $_REQUEST['NfArticleSectionTags'] ?? '',
-            'NfFilterTags' => $_REQUEST['NfFilterTags'] ?? '',
-            'NfOptions' => rtrim($_REQUEST['NfOptions'] ?? '', ','),
+            'NfLgID' => $this->param('NfLgID'),
+            'NfName' => $this->param('NfName'),
+            'NfSourceURI' => $this->param('NfSourceURI'),
+            'NfArticleSectionTags' => $this->param('NfArticleSectionTags'),
+            'NfFilterTags' => $this->param('NfFilterTags'),
+            'NfOptions' => rtrim($this->param('NfOptions'), ','),
         ];
 
         $this->feedService->createFeed($data);
@@ -715,7 +718,7 @@ class FeedsController extends BaseController
     {
         session_start();
 
-        $step = isset($_REQUEST['step']) ? (int)$_REQUEST['step'] : 1;
+        $step = $this->paramInt('step', 1) ?? 1;
 
         switch ($step) {
             case 2:
@@ -745,7 +748,7 @@ class FeedsController extends BaseController
 
         PageLayoutHelper::renderPageStart('Feed Wizard', false);
 
-        $errorMessage = isset($_REQUEST['err']) ? true : null;
+        $errorMessage = $this->hasParam('err') ? true : null;
         $rssUrl = $_SESSION['wizard']['rss_url'] ?? null;
 
         include __DIR__ . '/../Views/Feed/wizard_step1.php';
@@ -761,10 +764,12 @@ class FeedsController extends BaseController
     private function wizardStep2(): void
     {
         // Handle edit mode - load existing feed
-        if (isset($_REQUEST['edit_feed']) && !isset($_SESSION['wizard'])) {
-            $this->loadExistingFeedForEdit((int)$_REQUEST['edit_feed']);
-        } elseif (isset($_REQUEST['rss_url'])) {
-            $this->loadNewFeedFromUrl($_REQUEST['rss_url']);
+        $editFeedId = $this->paramInt('edit_feed');
+        $rssUrl = $this->param('rss_url');
+        if ($editFeedId !== null && !isset($_SESSION['wizard'])) {
+            $this->loadExistingFeedForEdit($editFeedId);
+        } elseif ($rssUrl !== '') {
+            $this->loadNewFeedFromUrl($rssUrl);
         }
 
         // Process session parameters
@@ -773,11 +778,12 @@ class FeedsController extends BaseController
         $feedLen = count(array_filter(array_keys($_SESSION['wizard']['feed']), 'is_numeric'));
 
         // Handle article section change
+        $nfArticleSection = $this->param('NfArticleSection');
         if (
-            isset($_REQUEST['NfArticleSection']) &&
-            ($_REQUEST['NfArticleSection'] != $_SESSION['wizard']['feed']['feed_text'])
+            $nfArticleSection !== '' &&
+            ($nfArticleSection != $_SESSION['wizard']['feed']['feed_text'])
         ) {
-            $this->updateFeedArticleSource($_REQUEST['NfArticleSection'], $feedLen);
+            $this->updateFeedArticleSource($nfArticleSection, $feedLen);
         }
 
         PageLayoutHelper::renderPageStartNobody('Feed Wizard');
@@ -820,8 +826,9 @@ class FeedsController extends BaseController
     {
         PageLayoutHelper::renderPageStart('Feed Wizard', false);
 
-        if (isset($_REQUEST['filter_tags'])) {
-            $_SESSION['wizard']['filter_tags'] = $_REQUEST['filter_tags'];
+        $filterTags = $this->param('filter_tags');
+        if ($filterTags !== '') {
+            $_SESSION['wizard']['filter_tags'] = $filterTags;
         }
 
         $autoUpdI = $this->feedService->getNfOption($_SESSION['wizard']['options'], 'autoupdate');
@@ -851,11 +858,13 @@ class FeedsController extends BaseController
      */
     private function initWizardSession(): void
     {
-        if (isset($_REQUEST['select_mode'])) {
-            $_SESSION['wizard']['select_mode'] = $_REQUEST['select_mode'];
+        $selectMode = $this->param('select_mode');
+        if ($selectMode !== '') {
+            $_SESSION['wizard']['select_mode'] = $selectMode;
         }
-        if (isset($_REQUEST['hide_images'])) {
-            $_SESSION['wizard']['hide_images'] = $_REQUEST['hide_images'];
+        $hideImages = $this->param('hide_images');
+        if ($hideImages !== '') {
+            $_SESSION['wizard']['hide_images'] = $hideImages;
         }
     }
 
@@ -990,26 +999,31 @@ class FeedsController extends BaseController
      */
     private function processStep2SessionParams(): void
     {
-        if (isset($_REQUEST['filter_tags'])) {
-            $_SESSION['wizard']['filter_tags'] = $_REQUEST['filter_tags'];
+        $filterTags = $this->param('filter_tags');
+        if ($filterTags !== '') {
+            $_SESSION['wizard']['filter_tags'] = $filterTags;
         }
-        if (isset($_REQUEST['selected_feed'])) {
-            $_SESSION['wizard']['selected_feed'] = $_REQUEST['selected_feed'];
+        $selectedFeed = $this->param('selected_feed');
+        if ($selectedFeed !== '') {
+            $_SESSION['wizard']['selected_feed'] = $selectedFeed;
         }
-        if (isset($_REQUEST['maxim'])) {
-            $_SESSION['wizard']['maxim'] = $_REQUEST['maxim'];
+        $maxim = $this->param('maxim');
+        if ($maxim !== '') {
+            $_SESSION['wizard']['maxim'] = $maxim;
         }
         if (!isset($_SESSION['wizard']['maxim'])) {
             $_SESSION['wizard']['maxim'] = 1;
         }
-        if (isset($_REQUEST['select_mode'])) {
-            $_SESSION['wizard']['select_mode'] = $_REQUEST['select_mode'];
+        $selectMode = $this->param('select_mode');
+        if ($selectMode !== '') {
+            $_SESSION['wizard']['select_mode'] = $selectMode;
         }
         if (!isset($_SESSION['wizard']['select_mode'])) {
             $_SESSION['wizard']['select_mode'] = '0';
         }
-        if (isset($_REQUEST['hide_images'])) {
-            $_SESSION['wizard']['hide_images'] = $_REQUEST['hide_images'];
+        $hideImages = $this->param('hide_images');
+        if ($hideImages !== '') {
+            $_SESSION['wizard']['hide_images'] = $hideImages;
         }
         if (!isset($_SESSION['wizard']['hide_images'])) {
             $_SESSION['wizard']['hide_images'] = 'yes';
@@ -1023,12 +1037,14 @@ class FeedsController extends BaseController
         if (!isset($_SESSION['wizard']['host'])) {
             $_SESSION['wizard']['host'] = array();
         }
-        if (isset($_REQUEST['host_status']) && isset($_REQUEST['host_name'])) {
-            $hostName = $_REQUEST['host_name'];
-            $_SESSION['wizard']['host'][$hostName] = $_REQUEST['host_status'];
+        $hostName = $this->param('host_name');
+        $hostStatus = $this->param('host_status');
+        if ($hostStatus !== '' && $hostName !== '') {
+            $_SESSION['wizard']['host'][$hostName] = $hostStatus;
         }
-        if (isset($_REQUEST['NfName'])) {
-            $_SESSION['wizard']['feed']['feed_title'] = $_REQUEST['NfName'];
+        $nfName = $this->param('NfName');
+        if ($nfName !== '') {
+            $_SESSION['wizard']['feed']['feed_title'] = $nfName;
         }
     }
 
@@ -1039,41 +1055,52 @@ class FeedsController extends BaseController
      */
     private function processStep3SessionParams(): void
     {
-        if (isset($_REQUEST['NfName'])) {
-            $_SESSION['wizard']['feed']['feed_title'] = $_REQUEST['NfName'];
+        $nfName = $this->param('NfName');
+        if ($nfName !== '') {
+            $_SESSION['wizard']['feed']['feed_title'] = $nfName;
         }
-        if (isset($_REQUEST['NfArticleSection'])) {
-            $_SESSION['wizard']['article_section'] = $_REQUEST['NfArticleSection'];
+        $nfArticleSection = $this->param('NfArticleSection');
+        if ($nfArticleSection !== '') {
+            $_SESSION['wizard']['article_section'] = $nfArticleSection;
         }
-        if (isset($_REQUEST['article_selector'])) {
-            $_SESSION['wizard']['article_selector'] = $_REQUEST['article_selector'];
+        $articleSelector = $this->param('article_selector');
+        if ($articleSelector !== '') {
+            $_SESSION['wizard']['article_selector'] = $articleSelector;
         }
-        if (isset($_REQUEST['selected_feed'])) {
-            $_SESSION['wizard']['selected_feed'] = $_REQUEST['selected_feed'];
+        $selectedFeed = $this->param('selected_feed');
+        if ($selectedFeed !== '') {
+            $_SESSION['wizard']['selected_feed'] = $selectedFeed;
         }
-        if (isset($_REQUEST['article_tags'])) {
-            $_SESSION['wizard']['article_tags'] = $_REQUEST['article_tags'];
+        $articleTags = $this->param('article_tags');
+        if ($articleTags !== '') {
+            $_SESSION['wizard']['article_tags'] = $articleTags;
         }
-        if (isset($_REQUEST['html'])) {
-            $_SESSION['wizard']['filter_tags'] = $_REQUEST['html'];
+        $html = $this->param('html');
+        if ($html !== '') {
+            $_SESSION['wizard']['filter_tags'] = $html;
         }
-        if (isset($_REQUEST['NfOptions'])) {
-            $_SESSION['wizard']['options'] = $_REQUEST['NfOptions'];
+        $nfOptions = $this->param('NfOptions');
+        if ($nfOptions !== '') {
+            $_SESSION['wizard']['options'] = $nfOptions;
         }
-        if (isset($_REQUEST['NfLgID'])) {
-            $_SESSION['wizard']['lang'] = $_REQUEST['NfLgID'];
+        $nfLgId = $this->param('NfLgID');
+        if ($nfLgId !== '') {
+            $_SESSION['wizard']['lang'] = $nfLgId;
         }
         if (!isset($_SESSION['wizard']['article_tags'])) {
             $_SESSION['wizard']['article_tags'] = '';
         }
-        if (isset($_REQUEST['maxim'])) {
-            $_SESSION['wizard']['maxim'] = $_REQUEST['maxim'];
+        $maxim = $this->param('maxim');
+        if ($maxim !== '') {
+            $_SESSION['wizard']['maxim'] = $maxim;
         }
-        if (isset($_REQUEST['select_mode'])) {
-            $_SESSION['wizard']['select_mode'] = $_REQUEST['select_mode'];
+        $selectMode = $this->param('select_mode');
+        if ($selectMode !== '') {
+            $_SESSION['wizard']['select_mode'] = $selectMode;
         }
-        if (isset($_REQUEST['hide_images'])) {
-            $_SESSION['wizard']['hide_images'] = $_REQUEST['hide_images'];
+        $hideImages = $this->param('hide_images');
+        if ($hideImages !== '') {
+            $_SESSION['wizard']['hide_images'] = $hideImages;
         }
         if (!isset($_SESSION['wizard']['select_mode'])) {
             $_SESSION['wizard']['select_mode'] = '';
@@ -1087,11 +1114,14 @@ class FeedsController extends BaseController
         if (!isset($_SESSION['wizard']['host2'])) {
             $_SESSION['wizard']['host2'] = array();
         }
-        if (isset($_REQUEST['host_status']) && isset($_REQUEST['host_name'])) {
-            $_SESSION['wizard']['host'][$_REQUEST['host_name']] = $_REQUEST['host_status'];
+        $hostName = $this->param('host_name');
+        $hostStatus = $this->param('host_status');
+        $hostStatus2 = $this->param('host_status2');
+        if ($hostStatus !== '' && $hostName !== '') {
+            $_SESSION['wizard']['host'][$hostName] = $hostStatus;
         }
-        if (isset($_REQUEST['host_status2']) && isset($_REQUEST['host_name'])) {
-            $_SESSION['wizard']['host2'][$_REQUEST['host_name']] = $_REQUEST['host_status2'];
+        if ($hostStatus2 !== '' && $hostName !== '') {
+            $_SESSION['wizard']['host2'][$hostName] = $hostStatus2;
         }
     }
 

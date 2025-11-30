@@ -80,7 +80,7 @@ namespace Lwt\Views\Word;
     $cnt = 0;
     foreach ($terms as $record) {
         $cnt++;
-        $value = \tohtml($record['word']);
+        $value = \htmlspecialchars($record['word'] ?? '', ENT_QUOTES, 'UTF-8');
         ?>
         <tr>
         <td class="td1 center notranslate">
@@ -103,7 +103,7 @@ namespace Lwt\Views\Word;
                 <option value="98">[Ign]</option>
             </select>
             <input type="hidden" id="Text_<?php echo $cnt ?>" name="term[<?php echo $cnt ?>][text]" value="<?php echo $value ?>" />
-            <input type="hidden" name="term[<?php echo $cnt ?>][lg]" value="<?php echo \tohtml($record['Ti2LgID']) ?>" />
+            <input type="hidden" name="term[<?php echo $cnt ?>][lg]" value="<?php echo \htmlspecialchars($record['Ti2LgID'] ?? '', ENT_QUOTES, 'UTF-8') ?>" />
         </td>
         </tr>
         <?php
