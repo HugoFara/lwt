@@ -129,7 +129,7 @@ describe('text_multiword_selection.ts', () => {
       mwordDragNDrop.finish(event);
 
       expect(showRightFrames).toHaveBeenCalledWith(
-        expect.stringContaining('edit_word.php?')
+        expect.stringContaining('/word/edit?')
       );
       expect(showRightFrames).toHaveBeenCalledWith(
         expect.stringContaining('tid=42')

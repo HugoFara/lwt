@@ -275,6 +275,39 @@ The PHP backend contains significant JavaScript code embedded in Views and Core 
 - Difficult to test
 - Violates separation of concerns
 
+#### 8. Backend-Embedded CSS (NEW)
+
+PHP files also contain inline CSS that should be migrated to proper CSS files.
+
+**`<style>` tag blocks (5 files):**
+
+| File | Lines | Description | Priority |
+|------|-------|-------------|----------|
+| `Views/Text/read_text.php` | 82-120+ | Dynamic annotation styling (::after, ::before), ruby text, word status | Complex |
+| `Views/Admin/wizard.php` | 32-42 | Database wizard form styling | High |
+| `Views/Word/bulk_translate_form.php` | 28-55 | Bulk translate form, dictionary links | High |
+| `index.php` | 117-128 | Error page styling (when .env missing) | High |
+| `Views/Mobile/index.php` | 42-59 | Mobile iUI imports, status colors | Medium |
+
+**Echoed inline styles (8+ files):**
+
+| File | Styles |
+|------|--------|
+| `Controllers/TestController.php` | Dynamic frame widths, fixed positioning |
+| `Controllers/TextController.php` | Error message styling (red text) |
+| `Controllers/WordController.php` | Error message styling |
+| `Controllers/FeedsController.php` | Invalid search warning |
+| `Core/Utils/error_handling.php` | Fatal error message styling |
+| `Core/Database/TextParsing.php` | Text check container margins |
+| `Views/Text/archived_list.php`, `edit_list.php` | Filter mode labels (vertical-align) |
+| `Views/Word/list_filter.php` | Filter mode labels |
+
+**Migration approach:**
+
+- **Simple/standalone CSS**: Move directly to CSS files
+- **Dynamic CSS** (e.g., `read_text.php`): Use CSS custom properties set via JS/data attributes
+- **Inline styles**: Replace with CSS classes where possible
+
 ### Technical Debt Metrics
 
 | Metric | Previous | Current | Target | Notes |

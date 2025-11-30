@@ -622,6 +622,42 @@ class LanguageService {
    - `tohtml()` → Keep as-is or create `Html::escape()` wrapper
    - `processDBParam()`/`processSessParam()` → Parameter handling refactor
 
+## Inline JavaScript Migration
+
+**Status (2025-11-30):** ~37 PHP files contain inline `<script>` blocks that should be migrated to TypeScript modules.
+
+### Files with Inline JS
+
+**Views/Word/** (21 files):
+
+- `form_edit_existing.php`, `form_new.php`, `show.php`, `bulk_save_result.php`
+- `delete_multi_result.php`, `edit_multi_update_result.php`, `insert_ignore_result.php`
+- `insert_wellknown_result.php`, `delete_result.php`, `status_result.php`
+- `bulk_translate_form.php`, `hover_save_result.php`, `edit_term_result.php`
+- `save_result.php`, `edit_result.php`, `form_edit_multi_existing.php`
+- `form_edit_multi_new.php`, `form_edit_term.php`, `upload_form.php`
+- `upload_result.php`, `all_wellknown_result.php`
+
+**Views/Text/** (2 files): `read_text.php`, `read_header.php`
+
+**Views/Feed/** (5 files): `wizard_step1-4.php`, `edit_text_footer.php`
+
+**Views/TextPrint/** (1 file): `annotated_edit.php`
+
+**Controllers/** (3 files): `LanguageController.php`, `TranslationController.php`, `FeedsController.php`
+
+**Services/** (2 files): `ExpressionService.php`, `MediaService.php`
+
+**Core/** (2 files): `Integration/text_from_yt.php`, `Database/TextParsing.php`
+
+**Other** (1 file): `Views/TestViews.php`
+
+### Migration Strategy
+
+1. Extract JS to TypeScript modules in `src/frontend/js/`
+2. Use Vite bundling and expose functions via `window` or custom events
+3. Replace inline `<script>` blocks with data attributes + event listeners
+
 ## Timeline Update
 
 | Phase | Original Estimate | Actual Status | Remaining |

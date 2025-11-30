@@ -373,7 +373,7 @@ describe('overlib_interface.ts', () => {
     it('creates link to learn a new word', () => {
       const result = make_overlib_link_new_word(1, '5', 100);
 
-      expect(result).toContain('edit_word.php');
+      expect(result).toContain('/word/edit');
       expect(result).toContain('tid=1');
       expect(result).toContain('ord=5');
       expect(result).toContain('wid=100');
@@ -450,7 +450,7 @@ describe('overlib_interface.ts', () => {
     it('creates link to edit a word', () => {
       const result = make_overlib_link_edit_word(1, '5', 100);
 
-      expect(result).toContain('edit_word.php');
+      expect(result).toContain('/word/edit');
       expect(result).toContain('tid=1');
       expect(result).toContain('ord=5');
       expect(result).toContain('wid=100');
@@ -467,7 +467,7 @@ describe('overlib_interface.ts', () => {
       const result = make_overlib_link_edit_word_title('TestWord', 1, '5', 100);
 
       expect(result).toContain('style="color:yellow"');
-      expect(result).toContain('edit_word.php');
+      expect(result).toContain('/word/edit');
       expect(result).toContain('TestWord');
     });
   });

@@ -497,7 +497,7 @@ describe('text_keyboard.ts', () => {
       const event = $.Event('keydown', { which: 69 }) as JQuery.KeyDownEvent;
       const result = keydown_event_do_text_text(event);
 
-      expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('edit_word.php'));
+      expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('/word/edit'));
       expect(result).toBe(false);
     });
 
@@ -519,13 +519,13 @@ describe('text_keyboard.ts', () => {
     it('opens new word form for unknown words (via hover)', () => {
       // Note: status0 words are not in knownwordlist, so they can only be
       // accessed via hover (which doesn't work in jsdom). This test is skipped.
-      // The actual behavior for unknown words via hover opens edit_word.php?wid=&tid=...
+      // The actual behavior for unknown words via hover opens /word/edit?wid=&tid=...
       // We skip this test since :hover doesn't work in jsdom environment
     });
 
     it.skip('opens new word form for unknown words - requires hover', () => {
       // This test would verify that pressing E on a hovered status0 word
-      // opens edit_word.php?wid=&tid=... but jsdom doesn't support :hover
+      // opens /word/edit?wid=&tid=... but jsdom doesn't support :hover
       document.body.innerHTML = `
         <span id="w1" class="word status0"
               data_wid="" data_order="5" data_status="0">unknown</span>

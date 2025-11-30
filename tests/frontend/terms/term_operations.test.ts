@@ -262,7 +262,7 @@ describe('term_operations.ts', () => {
       expect(img?.title).toBe('Choose');
     });
 
-    it('creates clickable span with onclick handler', () => {
+    it('creates clickable span with data attributes', () => {
       const sentences: [string, string][] = [
         ['Test sentence', 'Test']
       ];
@@ -271,8 +271,9 @@ describe('term_operations.ts', () => {
       const clickable = result.querySelector('span.click');
 
       expect(clickable).not.toBeNull();
-      expect(clickable?.getAttribute('onclick')).toContain('myField');
-      expect(clickable?.getAttribute('onclick')).toContain('Test');
+      expect(clickable?.getAttribute('data-action')).toBe('copy-sentence');
+      expect(clickable?.getAttribute('data-target')).toBe('myField');
+      expect(clickable?.getAttribute('data-sentence')).toBe('Test');
     });
 
     it('includes sentence display text', () => {
@@ -285,7 +286,7 @@ describe('term_operations.ts', () => {
       expect(result.innerHTML).toContain('<b>Hello</b> world');
     });
 
-    it('escapes single quotes in onclick value', () => {
+    it('stores sentence with special characters in data attribute', () => {
       const sentences: [string, string][] = [
         ['Test', "it's a test"]
       ];
@@ -293,10 +294,10 @@ describe('term_operations.ts', () => {
       const result = display_example_sentences(sentences, 'target');
       const clickable = result.querySelector('span.click');
 
-      expect(clickable?.getAttribute('onclick')).toContain("\\'");
+      expect(clickable?.getAttribute('data-sentence')).toBe("it's a test");
     });
 
-    it('includes lwtFormCheck.makeDirty() in onclick', () => {
+    it('uses data-action copy-sentence for event delegation', () => {
       const sentences: [string, string][] = [
         ['Test', 'value']
       ];
@@ -304,7 +305,8 @@ describe('term_operations.ts', () => {
       const result = display_example_sentences(sentences, 'target');
       const clickable = result.querySelector('span.click');
 
-      expect(clickable?.getAttribute('onclick')).toContain('lwtFormCheck.makeDirty()');
+      expect(clickable?.getAttribute('data-action')).toBe('copy-sentence');
+      expect(clickable?.getAttribute('data-target')).toBe('target');
     });
 
     it('handles multiple sentences correctly', () => {
