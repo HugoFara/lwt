@@ -33,7 +33,8 @@ vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
   readTextAloud: vi.fn(),
   deepFindValue: vi.fn(),
   readTextWithExternal: vi.fn(),
-  readRawTextAloud: vi.fn()
+  readRawTextAloud: vi.fn(),
+  speechDispatcher: {}
 }));
 
 vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
@@ -200,6 +201,63 @@ vi.mock('../../../src/frontend/js/words/bulk_translate', () => ({
 
 vi.mock('../../../src/frontend/js/words/word_status_ajax', () => ({
   initWordStatusChange: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/feeds/jq_feedwizard', () => ({
+  extend_adv_xpath: vi.fn(),
+  lwt_feed_wizard: {
+    deleteSelection: vi.fn(),
+    changeXPath: vi.fn(),
+    clickAdvGetButton: vi.fn(),
+    clickSelectLi: vi.fn(),
+    changeMarkAction: vi.fn(),
+    clickGetOrFilter: vi.fn(),
+    clickNextButton: vi.fn(),
+    changeHostStatus: vi.fn()
+  }
+}));
+
+vi.mock('../../../src/frontend/js/feeds/feed_wizard_step2', () => ({
+  lwt_wiz_select_test: {},
+  initWizardStep2: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/words/word_upload', () => ({
+  updateImportMode: vi.fn(),
+  showImportedTerms: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/testing/test_header', () => ({
+  setUtteranceSetting: vi.fn(),
+  resetTestFrames: vi.fn(),
+  startWordTest: vi.fn(),
+  startTestTable: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/testing/test_table', () => ({
+  initTableTest: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/testing/test_ajax', () => ({
+  getNewWord: vi.fn(),
+  prepareTestFrames: vi.fn(),
+  updateTestsCount: vi.fn(),
+  handleStatusChangeResult: vi.fn(),
+  initAjaxTest: vi.fn(),
+  queryNextTerm: vi.fn(),
+  doTestFinished: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/testing/test_mode', () => ({
+  word_click_event_do_test_test: vi.fn(),
+  keydown_event_do_test_test: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/terms/translation_api', () => ({
+  deleteTranslation: vi.fn(),
+  addTranslation: vi.fn(),
+  getGlosbeTranslation: vi.fn(),
+  getTranslationFromGlosbeApi: vi.fn()
 }));
 
 describe('globals.ts', () => {
