@@ -20,6 +20,7 @@
 namespace Lwt\Services {
 
 use Lwt\Database\Settings;
+use Lwt\View\Helper\SelectOptionsBuilder;
 
 /**
  * Service class for media file handling and player generation.
@@ -409,7 +410,7 @@ allowfullscreen type="text/html">
         <td class="center bordermiddle">&nbsp;</td>
         <td class="center bordermiddle">
             <select id="backtime" name="backtime">
-                <?php echo get_seconds_selectoptions($currentplayerseconds); ?>
+                <?php echo SelectOptionsBuilder::forSeconds($currentplayerseconds); ?>
             </select>
             <br />
             <span id="backbutt" class="click">
@@ -423,7 +424,7 @@ allowfullscreen type="text/html">
         <td class="center bordermiddle">&nbsp;</td>
         <td class="center borderright">
             <select id="playbackrate" name="playbackrate">
-                <?php echo get_playbackrate_selectoptions($currentplaybackrate); ?>
+                <?php echo SelectOptionsBuilder::forPlaybackRate($currentplaybackrate); ?>
             </select>
             <br />
             <span id="slower" class="click">

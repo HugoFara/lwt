@@ -4,6 +4,12 @@
  * Word popup interface - provides popup dialogs for word interactions.
  * Originally used overlib library, now uses jQuery UI dialogs.
  *
+ * This module provides two approaches for word operations:
+ * 1. Legacy frame-based approach (make_overlib_link_* functions)
+ * 2. Modern API-based approach (create*Button functions)
+ *
+ * The API-based approach uses the TermsApi/ReviewApi instead of frame navigation.
+ *
  * @author  HugoFara <HugoFara@users.noreply.github.com>
  * @license Unlicense <http://unlicense.org/>
  */
@@ -13,7 +19,17 @@ import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
 import { createTheDictLink, createSentLookupLink } from './dictionary';
 
 // Import the new popup system (replaces overlib)
-import { overlib, CAPTION } from '../ui/word_popup';
+import { overlib, CAPTION, cClick } from '../ui/word_popup';
+
+// Import API-based word actions
+import {
+  changeWordStatus,
+  deleteWord,
+  markWellKnown,
+  markIgnored,
+  incrementWordStatus,
+  type WordActionContext
+} from '../reading/word_actions';
 
 // Re-export for backward compatibility
 export { overlib, CAPTION, cClick, nd } from '../ui/word_popup';
@@ -32,6 +48,358 @@ interface LwtDataGlobal {
 }
 
 declare const LWT_DATA: LwtDataGlobal;
+
+/**************************************************************
+ * Modern API-based popup content generators
+ *
+ * These functions create DOM elements with event handlers
+ * that use the API instead of frame navigation.
+ ***************************************************************/
+
+/**
+ * Create a status change button that uses API call.
+ *
+ * @param context Word action context
+ * @param newStatus The status to change to
+ * @param options Button options
+ * @returns HTMLButtonElement with click handler
+ */
+export function createStatusChangeButton(
+  context: WordActionContext,
+  newStatus: number,
+  options: { showAbbr?: boolean; className?: string } = {}
+): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = options.className || 'lwt-status-btn';
+  btn.title = getStatusName(newStatus);
+
+  if (context.status === newStatus) {
+    btn.textContent = '◆';
+    btn.disabled = true;
+    btn.classList.add('lwt-status-btn--current');
+  } else {
+    btn.textContent = options.showAbbr !== false ? `[${getStatusAbbr(newStatus)}]` : getStatusAbbr(newStatus);
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      btn.disabled = true;
+      await changeWordStatus(context, newStatus);
+    });
+  }
+
+  return btn;
+}
+
+/**
+ * Create all status change buttons (1-5, 99, 98).
+ *
+ * @param context Word action context
+ * @returns DocumentFragment with all status buttons
+ */
+export function createStatusButtonsAll(context: WordActionContext): DocumentFragment {
+  const fragment = document.createDocumentFragment();
+
+  const label = document.createElement('span');
+  label.textContent = 'St: ';
+  fragment.appendChild(label);
+
+  // Status 1-5
+  for (let s = 1; s <= 5; s++) {
+    fragment.appendChild(createStatusChangeButton(context, s));
+    fragment.appendChild(document.createTextNode(' '));
+  }
+
+  // Status 99 (well-known) and 98 (ignored)
+  fragment.appendChild(createStatusChangeButton(context, 99));
+  fragment.appendChild(document.createTextNode(' '));
+  fragment.appendChild(createStatusChangeButton(context, 98));
+
+  return fragment;
+}
+
+/**
+ * Create a delete term button that uses API call.
+ *
+ * @param context Word action context
+ * @param confirm Whether to show confirmation dialog
+ * @returns HTMLButtonElement with click handler
+ */
+export function createDeleteButton(
+  context: WordActionContext,
+  confirm: boolean = true
+): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'lwt-action-btn lwt-action-btn--delete';
+  btn.textContent = 'Delete term';
+
+  btn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (confirm && !window.confirm('Are you sure you want to delete this term?')) {
+      return;
+    }
+
+    btn.disabled = true;
+    await deleteWord(context);
+  });
+
+  return btn;
+}
+
+/**
+ * Create a "mark as well-known" button that uses API call.
+ *
+ * @param context Word action context
+ * @returns HTMLButtonElement with click handler
+ */
+export function createWellKnownButton(context: WordActionContext): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'lwt-action-btn lwt-action-btn--wellknown';
+  btn.textContent = 'I know this term well';
+
+  btn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    btn.disabled = true;
+    await markWellKnown(context);
+  });
+
+  return btn;
+}
+
+/**
+ * Create an "ignore term" button that uses API call.
+ *
+ * @param context Word action context
+ * @returns HTMLButtonElement with click handler
+ */
+export function createIgnoreButton(context: WordActionContext): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'lwt-action-btn lwt-action-btn--ignore';
+  btn.textContent = 'Ignore this term';
+
+  btn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    btn.disabled = true;
+    await markIgnored(context);
+  });
+
+  return btn;
+}
+
+/**
+ * Create test mode status change buttons (Got it / Oops).
+ *
+ * @param context Word action context
+ * @returns DocumentFragment with test buttons
+ */
+export function createTestStatusButtons(context: WordActionContext): DocumentFragment {
+  const fragment = document.createDocumentFragment();
+  const s = context.status || 1;
+
+  // Only show if status is 1-5
+  if (s >= 1 && s <= 5) {
+    const nextUp = Math.min(s + 1, 5);
+    const nextDown = Math.max(s - 1, 1);
+
+    // "Got it" button
+    const gotItBtn = document.createElement('button');
+    gotItBtn.type = 'button';
+    gotItBtn.className = 'lwt-test-btn lwt-test-btn--success';
+    gotItBtn.innerHTML = `<img src="icn/thumb-up.png" alt="Got it!" /> Got it! [${s} ▶ ${nextUp}]`;
+
+    gotItBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      gotItBtn.disabled = true;
+      await incrementWordStatus(context, 'up');
+    });
+
+    fragment.appendChild(gotItBtn);
+    fragment.appendChild(document.createElement('hr'));
+
+    // "Oops" button
+    const oopsBtn = document.createElement('button');
+    oopsBtn.type = 'button';
+    oopsBtn.className = 'lwt-test-btn lwt-test-btn--failure';
+    oopsBtn.innerHTML = `<img src="icn/thumb.png" alt="Oops!" /> Oops! [${s} ▶ ${nextDown}]`;
+
+    oopsBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      oopsBtn.disabled = true;
+      await incrementWordStatus(context, 'down');
+    });
+
+    fragment.appendChild(oopsBtn);
+    fragment.appendChild(document.createElement('hr'));
+  }
+
+  return fragment;
+}
+
+/**
+ * Build complete popup content for a known word (status 1-5) using API-based buttons.
+ *
+ * @param context Word action context
+ * @param dictLinks Dictionary link URLs
+ * @param multiWords Multi-word expressions containing this word
+ * @param rtl Right-to-left indicator
+ * @returns HTMLElement containing popup content
+ */
+export function buildKnownWordPopupContent(
+  context: WordActionContext,
+  dictLinks: { dict1: string; dict2: string; translator: string },
+  multiWords: (string | undefined)[],
+  rtl: boolean
+): HTMLElement {
+  const container = document.createElement('div');
+  container.className = 'lwt-word-popup-content';
+
+  // Audio button
+  container.appendChild(createAudioElement(context.text));
+
+  // Status buttons
+  const statusRow = document.createElement('div');
+  statusRow.className = 'lwt-popup-row';
+  statusRow.appendChild(createStatusButtonsAll(context));
+  container.appendChild(statusRow);
+
+  // Action buttons row
+  const actionsRow = document.createElement('div');
+  actionsRow.className = 'lwt-popup-row';
+
+  // Edit link (still uses frame for complex form)
+  const editLink = document.createElement('a');
+  editLink.href = `/word/edit?tid=${context.textId}&ord=${context.position}&wid=${context.wordId}`;
+  editLink.target = 'ro';
+  editLink.textContent = 'Edit term';
+  editLink.onclick = () => { window.showRightFrames?.(); };
+  actionsRow.appendChild(editLink);
+
+  actionsRow.appendChild(document.createTextNode(' | '));
+  actionsRow.appendChild(createDeleteButton(context));
+
+  container.appendChild(actionsRow);
+
+  // Multi-word expressions
+  if (multiWords.some(mw => mw)) {
+    const mwRow = document.createElement('div');
+    mwRow.className = 'lwt-popup-row';
+    mwRow.innerHTML = make_overlib_link_new_multiword(
+      context.textId,
+      context.position,
+      multiWords,
+      rtl
+    );
+    container.appendChild(mwRow);
+  }
+
+  // Dictionary links
+  const dictRow = document.createElement('div');
+  dictRow.className = 'lwt-popup-row';
+  dictRow.innerHTML = make_overlib_link_wb(
+    dictLinks.dict1,
+    dictLinks.dict2,
+    dictLinks.translator,
+    context.text,
+    context.textId,
+    context.position
+  );
+  container.appendChild(dictRow);
+
+  return container;
+}
+
+/**
+ * Build complete popup content for an unknown word using API-based buttons.
+ *
+ * @param context Word action context
+ * @param dictLinks Dictionary link URLs
+ * @param multiWords Multi-word expressions
+ * @param rtl Right-to-left indicator
+ * @returns HTMLElement containing popup content
+ */
+export function buildUnknownWordPopupContent(
+  context: WordActionContext,
+  dictLinks: { dict1: string; dict2: string; translator: string },
+  multiWords: (string | undefined)[],
+  rtl: boolean
+): HTMLElement {
+  const container = document.createElement('div');
+  container.className = 'lwt-word-popup-content';
+
+  // Audio button
+  container.appendChild(createAudioElement(context.text));
+
+  // Well-known button
+  const wkRow = document.createElement('div');
+  wkRow.className = 'lwt-popup-row';
+  wkRow.appendChild(createWellKnownButton(context));
+  container.appendChild(wkRow);
+
+  // Ignore button
+  const ignoreRow = document.createElement('div');
+  ignoreRow.className = 'lwt-popup-row';
+  ignoreRow.appendChild(createIgnoreButton(context));
+  container.appendChild(ignoreRow);
+
+  // Multi-word expressions
+  if (multiWords.some(mw => mw)) {
+    const mwRow = document.createElement('div');
+    mwRow.className = 'lwt-popup-row';
+    mwRow.innerHTML = make_overlib_link_new_multiword(
+      context.textId,
+      context.position,
+      multiWords,
+      rtl
+    );
+    container.appendChild(mwRow);
+  }
+
+  // Dictionary links
+  const dictRow = document.createElement('div');
+  dictRow.className = 'lwt-popup-row';
+  dictRow.innerHTML = make_overlib_link_wb(
+    dictLinks.dict1,
+    dictLinks.dict2,
+    dictLinks.translator,
+    context.text,
+    context.textId,
+    context.position
+  );
+  container.appendChild(dictRow);
+
+  return container;
+}
+
+/**
+ * Create an audio play element.
+ *
+ * @param text Text to read aloud
+ * @returns HTMLElement with audio button
+ */
+function createAudioElement(text: string): HTMLElement {
+  const container = document.createElement('div');
+  container.className = 'lwt-popup-row lwt-popup-audio';
+
+  const img = document.createElement('img');
+  img.title = 'Click to read!';
+  img.src = 'icn/speaker-volume.png';
+  img.style.cursor = 'pointer';
+  img.addEventListener('click', () => {
+    window.speechDispatcher?.(text, LWT_DATA.language.id);
+  });
+
+  container.appendChild(img);
+  return container;
+}
 
 /**************************************************************
  * Helper functions for word popups

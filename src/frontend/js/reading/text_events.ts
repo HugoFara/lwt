@@ -2,6 +2,13 @@
  * Interactions and user events on text reading only.
  * Main module that coordinates text reading functionality.
  *
+ * This module supports two modes of operation:
+ * 1. Legacy frame-based mode (default) - uses iframe navigation for word operations
+ * 2. API-based mode - uses REST API calls with in-page updates
+ *
+ * The mode can be switched using setUseApiMode() or by setting
+ * LWT_DATA.settings.use_api_mode = true.
+ *
  * @license Unlicense <http://unlicense.org/>
  */
 
@@ -21,8 +28,13 @@ import {
   run_overlib_status_99,
   run_overlib_status_98,
   run_overlib_status_1_to_5,
-  run_overlib_multiword
+  run_overlib_multiword,
+  buildKnownWordPopupContent,
+  buildUnknownWordPopupContent,
+  overlib,
+  CAPTION
 } from '../terms/overlib_interface';
+import { getContextFromElement, type WordActionContext } from './word_actions';
 
 // Re-export from submodules
 export {
@@ -35,6 +47,19 @@ export {
   mwordDragNDrop,
   mword_drag_n_drop_select
 } from './text_multiword_selection';
+
+// Re-export word actions for external use
+export {
+  changeWordStatus,
+  deleteWord,
+  markWellKnown,
+  markIgnored,
+  incrementWordStatus,
+  getContextFromElement,
+  buildContext,
+  type WordActionContext,
+  type WordActionResult
+} from './word_actions';
 
 // Type definitions
 interface LwtLanguage {
@@ -57,6 +82,8 @@ interface LwtSettings {
   hts: number;
   word_status_filter: string;
   annotations_mode: number;
+  /** If true, use API-based word operations instead of frame navigation */
+  use_api_mode?: boolean;
 }
 
 interface LwtDataGlobal {
@@ -66,6 +93,30 @@ interface LwtDataGlobal {
 }
 
 declare const LWT_DATA: LwtDataGlobal;
+
+// Module-level flag for API mode (can be overridden at runtime)
+let useApiMode = false;
+
+/**
+ * Enable or disable API-based mode for word operations.
+ *
+ * When enabled, word status changes, deletions, and quick marks
+ * will use the REST API instead of frame navigation.
+ *
+ * @param enabled Whether to enable API mode
+ */
+export function setUseApiMode(enabled: boolean): void {
+  useApiMode = enabled;
+}
+
+/**
+ * Check if API-based mode is currently enabled.
+ *
+ * Checks both the module flag and LWT_DATA.settings.use_api_mode.
+ */
+export function isApiModeEnabled(): boolean {
+  return useApiMode || (typeof LWT_DATA !== 'undefined' && LWT_DATA.settings?.use_api_mode === true);
+}
 
 // Audio controller type for frame access
 // We only need the newPosition method for seeking audio
@@ -128,6 +179,34 @@ export function word_click_event_do_text_text(this: HTMLElement): boolean {
   const order = getAttr($this, 'data_order');
   const wid = getAttr($this, 'data_wid');
 
+  // Check if we should use API-based mode
+  if (isApiModeEnabled()) {
+    word_click_event_api_mode(this, statusNum, multi_words);
+  } else {
+    word_click_event_frame_mode(
+      $this, statusNum, order, wid, hints, multi_words, ann
+    );
+  }
+
+  if (LWT_DATA.settings.hts === 2) {
+    speechDispatcher($this.text(), LWT_DATA.language.id);
+  }
+  return false;
+}
+
+/**
+ * Handle word click in legacy frame mode.
+ * Uses iframe navigation for word operations.
+ */
+function word_click_event_frame_mode(
+  $this: JQuery<HTMLElement>,
+  statusNum: number,
+  order: string,
+  wid: string,
+  hints: string,
+  multi_words: (string | undefined)[],
+  ann: string
+): void {
   if (statusNum < 1) {
     run_overlib_status_unknown(
       LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
@@ -152,13 +231,71 @@ export function word_click_event_do_text_text(this: HTMLElement): boolean {
     run_overlib_status_1_to_5(
       LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
       LWT_DATA.text.id, order,
-      $this.text(), wid, status, multi_words, LWT_DATA.language.rtl, ann
+      $this.text(), wid, String(statusNum), multi_words, LWT_DATA.language.rtl, ann
     );
   }
-  if (LWT_DATA.settings.hts === 2) {
-    speechDispatcher($this.text(), LWT_DATA.language.id);
+}
+
+/**
+ * Handle word click in API-based mode.
+ * Uses REST API calls with in-page DOM updates.
+ */
+function word_click_event_api_mode(
+  element: HTMLElement,
+  statusNum: number,
+  multi_words: (string | undefined)[]
+): void {
+  // Build context from element
+  const context = getContextFromElement(element);
+
+  // Add text ID from global state
+  context.textId = LWT_DATA.text.id;
+
+  const dictLinks = {
+    dict1: LWT_DATA.language.dict_link1,
+    dict2: LWT_DATA.language.dict_link2,
+    translator: LWT_DATA.language.translator_link
+  };
+
+  let content: HTMLElement | string;
+
+  if (statusNum < 1) {
+    // Unknown word - show well-known/ignore options
+    content = buildUnknownWordPopupContent(
+      context,
+      dictLinks,
+      multi_words,
+      LWT_DATA.language.rtl
+    );
+
+    // Also open the edit form in the right frame for unknown words
+    showRightFrames(
+      '/word/edit?tid=' + LWT_DATA.text.id + '&ord=' + context.position + '&wid='
+    );
+  } else if (statusNum === 99 || statusNum === 98) {
+    // Well-known or ignored - show edit/delete options
+    content = buildKnownWordPopupContent(
+      context,
+      dictLinks,
+      multi_words,
+      LWT_DATA.language.rtl
+    );
+  } else {
+    // Learning word (1-5) - show status change options
+    content = buildKnownWordPopupContent(
+      context,
+      dictLinks,
+      multi_words,
+      LWT_DATA.language.rtl
+    );
   }
-  return false;
+
+  // Show popup with API-based content
+  if (typeof content === 'string') {
+    overlib(content, CAPTION, 'Word');
+  } else {
+    overlib(content.outerHTML, CAPTION, 'Word');
+  }
 }
 
 /**

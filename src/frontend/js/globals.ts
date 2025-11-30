@@ -10,7 +10,36 @@
 // Import functions that need to be globally accessible
 import { getLangFromDict, createTheDictUrl, createTheDictLink, owin, oewin } from './terms/dictionary';
 import { showExportTemplateHelp, openModal, closeModal } from './ui/modal';
-import { prepareTextInteractions } from './reading/text_events';
+import {
+  prepareTextInteractions,
+  setUseApiMode,
+  isApiModeEnabled,
+  changeWordStatus,
+  deleteWord,
+  markWellKnown,
+  markIgnored,
+  incrementWordStatus,
+  getContextFromElement,
+  buildContext
+} from './reading/text_events';
+import {
+  showResultPanel,
+  hideResultPanel,
+  showErrorInPanel,
+  showSuccessInPanel,
+  showWordDetails,
+  showLoadingInPanel
+} from './ui/result_panel';
+import {
+  createStatusChangeButton,
+  createStatusButtonsAll,
+  createDeleteButton,
+  createWellKnownButton,
+  createIgnoreButton,
+  createTestStatusButtons,
+  buildKnownWordPopupContent,
+  buildUnknownWordPopupContent
+} from './terms/overlib_interface';
 import { goToLastPosition, saveReadingPosition, saveAudioPosition, quickMenuRedirection } from './core/user_interactions';
 import { showRightFrames, hideRightFrames } from './reading/frame_management';
 import { overlib, cClick, nd, setCurrentEvent } from './ui/word_popup';
@@ -158,6 +187,35 @@ declare global {
     goToLastPosition: typeof goToLastPosition;
     saveReadingPosition: typeof saveReadingPosition;
     saveAudioPosition: typeof saveAudioPosition;
+
+    // API-based word actions (Phase 4)
+    setUseApiMode: typeof setUseApiMode;
+    isApiModeEnabled: typeof isApiModeEnabled;
+    changeWordStatus: typeof changeWordStatus;
+    deleteWord: typeof deleteWord;
+    markWellKnown: typeof markWellKnown;
+    markIgnored: typeof markIgnored;
+    incrementWordStatus: typeof incrementWordStatus;
+    getContextFromElement: typeof getContextFromElement;
+    buildContext: typeof buildContext;
+
+    // Result panel
+    showResultPanel: typeof showResultPanel;
+    hideResultPanel: typeof hideResultPanel;
+    showErrorInPanel: typeof showErrorInPanel;
+    showSuccessInPanel: typeof showSuccessInPanel;
+    showWordDetails: typeof showWordDetails;
+    showLoadingInPanel: typeof showLoadingInPanel;
+
+    // API-based popup builders
+    createStatusChangeButton: typeof createStatusChangeButton;
+    createStatusButtonsAll: typeof createStatusButtonsAll;
+    createDeleteButton: typeof createDeleteButton;
+    createWellKnownButton: typeof createWellKnownButton;
+    createIgnoreButton: typeof createIgnoreButton;
+    createTestStatusButtons: typeof createTestStatusButtons;
+    buildKnownWordPopupContent: typeof buildKnownWordPopupContent;
+    buildUnknownWordPopupContent: typeof buildUnknownWordPopupContent;
 
     // Navigation/menu functions
     quickMenuRedirection: typeof quickMenuRedirection;
@@ -371,6 +429,35 @@ window.prepareTextInteractions = prepareTextInteractions;
 window.goToLastPosition = goToLastPosition;
 window.saveReadingPosition = saveReadingPosition;
 window.saveAudioPosition = saveAudioPosition;
+
+// API-based word actions (Phase 4)
+window.setUseApiMode = setUseApiMode;
+window.isApiModeEnabled = isApiModeEnabled;
+window.changeWordStatus = changeWordStatus;
+window.deleteWord = deleteWord;
+window.markWellKnown = markWellKnown;
+window.markIgnored = markIgnored;
+window.incrementWordStatus = incrementWordStatus;
+window.getContextFromElement = getContextFromElement;
+window.buildContext = buildContext;
+
+// Result panel
+window.showResultPanel = showResultPanel;
+window.hideResultPanel = hideResultPanel;
+window.showErrorInPanel = showErrorInPanel;
+window.showSuccessInPanel = showSuccessInPanel;
+window.showWordDetails = showWordDetails;
+window.showLoadingInPanel = showLoadingInPanel;
+
+// API-based popup builders
+window.createStatusChangeButton = createStatusChangeButton;
+window.createStatusButtonsAll = createStatusButtonsAll;
+window.createDeleteButton = createDeleteButton;
+window.createWellKnownButton = createWellKnownButton;
+window.createIgnoreButton = createIgnoreButton;
+window.createTestStatusButtons = createTestStatusButtons;
+window.buildKnownWordPopupContent = buildKnownWordPopupContent;
+window.buildUnknownWordPopupContent = buildUnknownWordPopupContent;
 
 window.quickMenuRedirection = quickMenuRedirection;
 

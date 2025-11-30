@@ -702,10 +702,10 @@ Phase 1.2  Create domain API modules               [Foundation] ✓ DONE
         Phase 3.4  Migrate test_ajax.ts            [Moderate] ✓ DONE
         Phase 3.5  Migrate term_operations.ts      [Moderate] ✓ DONE
             │
-            └── Phase 4.1  Create word_actions.ts  [Major]
-                Phase 4.2  Event delegation        [Major]
-                Phase 4.3  Refactor overlib        [Major]
-                Phase 4.4  Result panel            [Major]
+            └── Phase 4.1  Create word_actions.ts  [Major] ✓ DONE
+                Phase 4.2  Result panel            [Major] ✓ DONE
+                Phase 4.3  Refactor overlib        [Major] ✓ DONE
+                Phase 4.4  Event delegation        [Major] ✓ DONE
                     │
                     └── Phase 5  Testing           [Validation]
 ```
@@ -739,28 +739,33 @@ Phase 1.2  Create domain API modules               [Foundation] ✓ DONE
 
 ## Files to Modify Summary
 
-### New Files to Create
+### New Files Created
 
-- `src/frontend/js/core/api_client.ts`
-- `src/frontend/js/api/terms.ts`
-- `src/frontend/js/api/texts.ts`
-- `src/frontend/js/api/review.ts`
-- `src/frontend/js/api/settings.ts`
-- `src/frontend/js/reading/word_actions.ts`
-- `src/frontend/js/components/result_panel.ts`
+- `src/frontend/js/core/api_client.ts` ✓
+- `src/frontend/js/api/terms.ts` ✓
+- `src/frontend/js/api/texts.ts` ✓
+- `src/frontend/js/api/review.ts` ✓
+- `src/frontend/js/api/settings.ts` ✓
+- `src/frontend/js/reading/word_actions.ts` ✓ (Phase 4)
+- `src/frontend/js/ui/result_panel.ts` ✓ (Phase 4)
 
-### Files to Modify
+### Files Modified
 
-- `src/frontend/js/core/ajax_utilities.ts` - Replace jQuery
-- `src/frontend/js/words/word_status_ajax.ts` - Replace jQuery
-- `src/frontend/js/reading/text_display.ts` - Replace jQuery
-- `src/frontend/js/testing/test_ajax.ts` - Replace jQuery
-- `src/frontend/js/terms/term_operations.ts` - Replace jQuery
-- `src/frontend/js/terms/overlib_interface.ts` - Major refactor
-- `src/frontend/js/reading/text_keyboard.ts` - Remove frame navigation
-- `src/backend/Api/V1/Endpoints.php` - Add new routes
-- `src/backend/Api/V1/Handlers/TermHandler.php` - Add methods
-- `src/backend/Api/V1/Handlers/ReviewHandler.php` - Add methods
+- `src/frontend/js/core/ajax_utilities.ts` - Replace jQuery ✓
+- `src/frontend/js/words/word_status_ajax.ts` - Replace jQuery ✓
+- `src/frontend/js/reading/text_display.ts` - Replace jQuery ✓
+- `src/frontend/js/testing/test_ajax.ts` - Replace jQuery ✓
+- `src/frontend/js/terms/term_operations.ts` - Replace jQuery ✓
+- `src/frontend/js/terms/overlib_interface.ts` - Major refactor ✓ (Phase 4)
+- `src/frontend/js/reading/text_events.ts` - API mode support ✓ (Phase 4)
+- `src/frontend/js/globals.ts` - Export new functions ✓ (Phase 4)
+- `src/backend/Api/V1/Endpoints.php` - Add new routes ✓
+- `src/backend/Api/V1/Handlers/TermHandler.php` - Add methods ✓
+- `src/backend/Api/V1/Handlers/ReviewHandler.php` - Add methods ✓
+
+### Files Pending (Phase 4 Optional Cleanup)
+
+- `src/frontend/js/reading/text_keyboard.ts` - Can be updated to use API mode (currently uses frame navigation)
 
 ### Files to Eventually Deprecate
 

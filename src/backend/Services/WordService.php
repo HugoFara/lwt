@@ -267,7 +267,7 @@ class WordService
         }
 
         $sent = \getSentence(
-            $seid,
+            (int) $seid,
             $termlc,
             (int) Settings::getWithDefault('set-term-sentence-count')
         );

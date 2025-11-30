@@ -20,6 +20,7 @@ use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Services\ExportService;
+use Lwt\Services\TagService;
 
 /**
  * Service class for text reading display.
@@ -94,7 +95,7 @@ class TextReadingService
                     'data_wid' => $record['WoID'],
                     'data_trans' => htmlspecialchars(
                         ExportService::replaceTabNewline($record['WoTranslation'] ?? '') .
-                        getWordTagList((int)$record['WoID'], ' ', 1, 0),
+                        TagService::getWordTagListFormatted((int)$record['WoID'], ' ', true, false),
                         ENT_QUOTES,
                         'UTF-8'
                     ),
@@ -135,7 +136,7 @@ class TextReadingService
                     'data_wid' => $record['WoID'],
                     'data_trans' => htmlspecialchars(
                         ExportService::replaceTabNewline($record['WoTranslation'] ?? '') .
-                        getWordTagList((int)$record['WoID'], ' ', 1, 0),
+                        TagService::getWordTagListFormatted((int)$record['WoID'], ' ', true, false),
                         ENT_QUOTES,
                         'UTF-8'
                     ),
@@ -279,7 +280,7 @@ class TextReadingService
 
         // Loop over words and punctuation
         while ($record = mysqli_fetch_assoc($res)) {
-            $sid = $this->parseSentence($sid, $record['Ti2SeID']);
+            $sid = $this->parseSentence($sid, (int) $record['Ti2SeID']);
             if ($cnt < $record['Ti2Order']) {
                 echo '<span id="ID-' . $cnt++ . '-1"></span>';
             }
