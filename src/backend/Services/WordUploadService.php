@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Word Upload Service - Business logic for importing terms from files or text
  *

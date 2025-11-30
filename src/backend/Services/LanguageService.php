@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Language Service - Business logic for language management
  *
@@ -172,7 +171,7 @@ class LanguageService
             "SELECT MIN(LgID) AS value FROM {$tbpref}languages WHERE LgName=''"
         );
 
-        $sql = $this->buildLanguageSql($data, $val);
+        $sql = $this->buildLanguageSql($data, $val !== null ? (int)$val : null);
 
         $affected = Connection::execute($sql);
         return "Saved: " . $affected;

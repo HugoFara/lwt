@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Edit Term Result View - Shows result after updating a word during testing
  *

@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Text Display Service - Business logic for displaying annotated texts
  *

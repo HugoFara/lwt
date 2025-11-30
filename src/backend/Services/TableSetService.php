@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Table Set Service - Business logic for table set management
  *
@@ -140,7 +139,7 @@ class TableSetService
         }
 
         foreach (self::TABLE_SET_TABLES as $table) {
-            Connection::execute("DROP TABLE {$prefix}_{$table}", '');
+            Connection::execute("DROP TABLE {$prefix}_{$table}");
         }
 
         $message = 'Table Set "' . $prefix . '" deleted';

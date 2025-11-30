@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Core\StringUtils;
@@ -142,8 +141,7 @@ class TermHandler
             "UPDATE {$tbpref}words
             SET WoStatus = $status, WoStatusChanged = NOW()," .
             WordStatusService::makeScoreRandomInsertUpdate('u') . "
-            WHERE WoID = $wid",
-            ''
+            WHERE WoID = $wid"
         );
         return $m1;
     }

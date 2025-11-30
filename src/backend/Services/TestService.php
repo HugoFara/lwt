@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Test Service - Business logic for word testing/review operations
  *

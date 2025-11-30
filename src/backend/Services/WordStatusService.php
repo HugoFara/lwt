@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Word Status Service - Word status definitions and scoring
  *

@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Media Service - Business logic for media file handling and player generation
  *

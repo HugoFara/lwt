@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Language Pair Selection View - Wizard popup for selecting language pairs
  *

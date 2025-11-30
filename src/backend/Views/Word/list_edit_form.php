@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Edit word form for the words list page
  *

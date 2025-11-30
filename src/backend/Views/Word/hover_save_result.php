@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Hover Save Result View - Shows result after saving a word via hover
  *

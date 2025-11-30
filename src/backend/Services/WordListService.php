@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Word List Service - Business logic for word list/edit operations
  *
@@ -950,13 +949,13 @@ class WordListService
         if (is_numeric($message)) {
             $wid = (int)Connection::lastInsertId();
             Maintenance::initWordCount();
-            $len = Connection::fetchValue(
+            $len = (int)Connection::fetchValue(
                 'select WoWordCount as value
                 from ' . $this->tbpref . 'words where WoID = ' . $wid
             );
             $textlc = mb_strtolower($data["WoText"], 'UTF-8');
             if ($len > 1) {
-                (new ExpressionService())->insertExpressions($textlc, $data["WoLgID"], $wid, $len, 1);
+                (new ExpressionService())->insertExpressions($textlc, (int)$data["WoLgID"], $wid, $len, 1);
             } else {
                 Connection::query(
                     'UPDATE ' . $this->tbpref . 'textitems2

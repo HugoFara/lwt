@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Text Service - Business logic for text management
  *
@@ -185,13 +184,12 @@ class TextService
         }
 
         $list = "(" . implode(",", array_map('intval', $textIds)) . ")";
-        $message = Connection::execute(
-            "DELETE FROM {$this->tbpref}archivedtexts WHERE AtID IN {$list}",
-            "Archived Texts deleted"
+        $affectedRows = Connection::execute(
+            "DELETE FROM {$this->tbpref}archivedtexts WHERE AtID IN {$list}"
         );
         Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
         $this->cleanupArchivedTextTags();
-        return $message;
+        return "Archived Texts deleted: $affectedRows";
     }
 
     /**
@@ -962,24 +960,21 @@ class TextService
 
         $list = "(" . implode(",", array_map('intval', $textIds)) . ")";
 
-        $msg3 = Connection::execute(
-            "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID IN {$list}",
-            "Text items deleted"
+        $count3 = Connection::execute(
+            "DELETE FROM {$this->tbpref}textitems2 WHERE Ti2TxID IN {$list}"
         );
-        $msg2 = Connection::execute(
-            "DELETE FROM {$this->tbpref}sentences WHERE SeTxID IN {$list}",
-            "Sentences deleted"
+        $count2 = Connection::execute(
+            "DELETE FROM {$this->tbpref}sentences WHERE SeTxID IN {$list}"
         );
-        $msg1 = Connection::execute(
-            "DELETE FROM {$this->tbpref}texts WHERE TxID IN {$list}",
-            "Texts deleted"
+        $count1 = Connection::execute(
+            "DELETE FROM {$this->tbpref}texts WHERE TxID IN {$list}"
         );
 
         Maintenance::adjustAutoIncrement('texts', 'TxID');
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         $this->cleanupTextTags();
 
-        return "{$msg1} / {$msg2} / {$msg3}";
+        return "Texts deleted: $count1 / Sentences deleted: $count2 / Text items deleted: $count3";
     }
 
     /**

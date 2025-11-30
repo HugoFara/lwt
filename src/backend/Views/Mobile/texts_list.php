@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Mobile Texts List View - List of texts for a language
  *

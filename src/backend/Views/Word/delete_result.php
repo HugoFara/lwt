@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Word Delete Result View - Shows result after deleting a word
  *

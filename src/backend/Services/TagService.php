@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Tag Service - Business logic for tag management
  *
@@ -279,7 +278,7 @@ class TagService
         $tags = [];
 
         while ($record = mysqli_fetch_assoc($res)) {
-            $tagId = $record[$this->colPrefix . 'ID'];
+            $tagId = (int)$record[$this->colPrefix . 'ID'];
             $tag = [
                 'id' => $tagId,
                 'text' => $record[$this->colPrefix . 'Text'],

@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Status Change Config View - JavaScript config for status change page
  *

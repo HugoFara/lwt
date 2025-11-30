@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Text Edit Form View - Display form for creating/editing texts
  *

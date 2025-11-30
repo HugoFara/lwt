@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Bulk Translate Form View - Form for bulk translating unknown words
  *

@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Mobile Language Menu View - Language selection submenu
  *

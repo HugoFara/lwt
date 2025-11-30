@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Table Test Header Row View - Column headers for test table
  *

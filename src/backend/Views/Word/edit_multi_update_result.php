@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Multi-Word Update Result View - JavaScript to update UI after multi-word edit
  *

@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Text Statistics Service - Word count and statistics functions.
  *

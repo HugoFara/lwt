@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Word Insert Well-known Result View - Shows result after marking word as well-known
  *

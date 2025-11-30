@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Word Status Change Result View - Shows result after changing word status
  *

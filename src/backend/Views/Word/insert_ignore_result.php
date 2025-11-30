@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Word Insert Ignore Result View - Shows result after marking word as ignored
  *

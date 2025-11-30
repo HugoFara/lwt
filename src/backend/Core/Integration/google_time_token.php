@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Lwt\Includes;
 
 require_once __DIR__ . '/../Database/Connection.php';

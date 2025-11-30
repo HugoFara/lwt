@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Sentence Service - Sentence operations and retrieval functions.
  *

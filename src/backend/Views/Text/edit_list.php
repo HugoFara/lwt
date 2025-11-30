@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Active Text List View - Display list of active texts with filtering
  *

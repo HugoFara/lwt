@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Word Delete Multi Result View - Shows result after deleting a multi-word expression
  *

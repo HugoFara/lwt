@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * \file
  * \brief Helper for page layout generation (headers, footers, navigation).

@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Multi-Word Edit Form View - Form for editing an existing multi-word expression
  *

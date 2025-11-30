@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Test Term Area View - Container for AJAX-based word tests
  *

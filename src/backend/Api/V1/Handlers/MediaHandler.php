@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Services\MediaService;

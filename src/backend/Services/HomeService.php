@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Home Service - Business logic for the home/dashboard page
  *

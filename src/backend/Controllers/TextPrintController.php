@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * \file
  * \brief Text Print Controller - Text printing functionality

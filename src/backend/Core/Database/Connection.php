@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * \file
  * \brief Database connection wrapper class.
@@ -161,18 +160,25 @@ class Connection
     }
 
     /**
-     * Execute an INSERT/UPDATE/DELETE query and return affected rows.
+     * Execute an INSERT/UPDATE/DELETE query and return affected rows or a message.
      *
-     * @param string $sql The SQL query to execute
+     * @param string      $sql     The SQL query to execute
+     * @param string|null $message Optional message to return instead of affected rows count
      *
-     * @return int|numeric-string Number of affected rows
+     * @return int|string Number of affected rows, or the message string if provided
      *
-     * @psalm-return int<-1, max>|numeric-string
+     * @psalm-return int<-1, max>|string
      */
-    public static function execute(string $sql): int|string
+    public static function execute(string $sql, ?string $message = null): int|string
     {
         self::query($sql);
-        return mysqli_affected_rows(self::getInstance());
+        $affectedRows = mysqli_affected_rows(self::getInstance());
+
+        if ($message !== null) {
+            return $message;
+        }
+
+        return $affectedRows;
     }
 
     /**

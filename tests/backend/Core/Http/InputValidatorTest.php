@@ -1,7 +1,4 @@
-<?php
-
-declare(strict_types=1);
-
+<?php declare(strict_types=1);
 namespace Lwt\Tests\Core\Http;
 
 use Lwt\Core\Http\InputValidator;

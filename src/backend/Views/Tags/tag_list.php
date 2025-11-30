@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Tag List View - Display list of tags with filtering and pagination
  *

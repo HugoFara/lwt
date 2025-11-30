@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Mobile Sentences List View - List of sentences for a text
  *

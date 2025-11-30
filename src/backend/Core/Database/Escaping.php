@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * \file
  * \brief SQL string escaping and text preparation utilities.
@@ -62,14 +61,14 @@ class Escaping
     /**
      * Prepares a string to be properly recognized as a string by SQL.
      *
-     * @param string $data Input string
+     * @param string|int|float $data Input data
      *
      * @return string Properly escaped and trimmed string. "NULL" if the input string is empty.
      */
-    public static function toSqlSyntax(string $data): string
+    public static function toSqlSyntax(string|int|float $data): string
     {
         $result = "NULL";
-        $data = trim(self::prepareTextdata($data));
+        $data = trim(self::prepareTextdata((string)$data));
         if ($data != "") {
             $result = "'" . mysqli_real_escape_string(
                 Globals::getDbConnection(),

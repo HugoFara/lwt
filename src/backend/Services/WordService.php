@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Word Service - Business logic for word/term operations
  *
@@ -1232,7 +1231,7 @@ class WordService
             WordStatusService::makeScoreRandomInsertUpdate('iv') . "
         ) VALUES " . rtrim(implode(',', $sqlarr), ',');
 
-        Connection::execute($sqltext, '');
+        Connection::execute($sqltext);
 
         return $max;
     }

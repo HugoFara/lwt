@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 /**
  * Text Navigation Service - Navigation utilities for previous/next texts.
  *
