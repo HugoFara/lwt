@@ -1031,7 +1031,7 @@ class WordService
      * @param string $termlc Lowercase word text
      * @param int    $langId Language ID
      *
-     * @return array{int, string} Rows modified and JavaScript code
+     * @return array{int, array{wid: int, hex: string, term: string, status: int}|null} Rows modified and word data
      */
     public function processWordForWellKnown(int $status, string $term, string $termlc, int $langId): array
     {
@@ -1041,6 +1041,7 @@ class WordService
         );
         if ($wid !== null) {
             $rows = 0;
+            $wordData = null;
         } else {
             $message = Connection::execute(
                 "INSERT INTO {$this->tbpref}words (
@@ -1066,19 +1067,14 @@ class WordService
             }
             $rows = (int) $message;
             $wid = (int)Connection::lastInsertId();
+            $wordData = [
+                'wid' => $wid,
+                'hex' => StringUtils::toClassName($termlc),
+                'term' => $term,
+                'status' => $status
+            ];
         }
-        $javascript = '';
-        if (Settings::getWithDefault('set-tooltip-mode') == 1 && $rows > 0) {
-            $javascript .= "title = make_tooltip(" .
-            json_encode($term) . ", '*', '', '$status');";
-        }
-        $javascript .= "$('.TERM" . StringUtils::toClassName($termlc) . "', context)
-        .removeClass('status0')
-        .addClass('status$status word$wid')
-        .attr('data_status', '$status')
-        .attr('data_wid', '$wid')
-        .attr('title', title);";
-        return array($rows, $javascript);
+        return array($rows, $wordData);
     }
 
     /**
@@ -1152,7 +1148,7 @@ class WordService
      * @param int $textId Text ID
      * @param int $status Status to apply (98=ignored, 99=well-known)
      *
-     * @return array{int, string} Total count and JavaScript code
+     * @return array{int, array<array{wid: int, hex: string, term: string, status: int}>} Total count and words data
      */
     public function markAllWordsWithStatus(int $textId, int $status): array
     {
@@ -1161,17 +1157,19 @@ class WordService
             FROM {$this->tbpref}texts
             WHERE TxID = $textId"
         );
-        $javascript = "let title='';";
+        $wordsData = [];
         $count = 0;
         $res = $this->getAllUnknownWordsInText($textId);
         while ($record = mysqli_fetch_assoc($res)) {
-            list($modified_rows, $new_js) = $this->processWordForWellKnown(
+            list($modified_rows, $wordData) = $this->processWordForWellKnown(
                 $status,
                 $record['Ti2Text'],
                 $record['Ti2TextLC'],
                 (int) $langId
             );
-            $javascript .= $new_js;
+            if ($wordData !== null) {
+                $wordsData[] = $wordData;
+            }
             $count += $modified_rows;
         }
         mysqli_free_result($res);
@@ -1185,7 +1183,7 @@ class WordService
             ''
         );
 
-        return array($count, $javascript);
+        return array($count, $wordsData);
     }
 
     // ===== Bulk translate methods =====

@@ -518,7 +518,75 @@ function initSentenceEventDelegation(): void {
   });
 }
 
+/**
+ * Initialize event delegation for improved text annotation actions.
+ *
+ * Handles elements with data-action attributes for annotation operations.
+ */
+function initImprovedTextEventDelegation(): void {
+  // Handle erase-field: clear a text input and trigger change event
+  $(document).on('click', '[data-action="erase-field"]', function (this: HTMLElement) {
+    const target = this.dataset.target;
+    if (target) {
+      $(target).val('').trigger('change');
+    }
+  });
+
+  // Handle set-star: set text input to '*' and trigger change event
+  $(document).on('click', '[data-action="set-star"]', function (this: HTMLElement) {
+    const target = this.dataset.target;
+    if (target) {
+      $(target).val('*').trigger('change');
+    }
+  });
+
+  // Handle update-term-translation: update translation for existing term
+  $(document).on('click', '[data-action="update-term-translation"]', function (this: HTMLElement) {
+    const wid = parseInt(this.dataset.wid || '0', 10);
+    const target = this.dataset.target || '';
+    if (wid && target) {
+      updateTermTranslation(wid, target);
+    }
+  });
+
+  // Handle add-term-translation: add translation for new term
+  $(document).on('click', '[data-action="add-term-translation"]', function (this: HTMLElement) {
+    const target = this.dataset.target || '';
+    const word = this.dataset.word || '';
+    const lang = parseInt(this.dataset.lang || '0', 10);
+    if (target && word && lang) {
+      addTermTranslation(target, word, lang);
+    }
+  });
+
+  // Handle reload-impr-text: reload the improved text annotations form
+  $(document).on('click', '[data-action="reload-impr-text"]', function () {
+    do_ajax_edit_impr_text(0, '', 0);
+  });
+
+  // Handle back-to-print-mode: navigate to print/display mode
+  $(document).on('click', '[data-action="back-to-print-mode"]', function (this: HTMLElement) {
+    const textid = this.dataset.textid || '';
+    if (textid) {
+      location.href = 'print_impr_text.php?text=' + textid;
+    }
+  });
+
+  // Handle edit-term-popup: open term editor in popup window
+  $(document).on('click', '[data-action="edit-term-popup"]', function (this: HTMLElement) {
+    const wid = this.dataset.wid || '';
+    const textid = this.dataset.textid || '';
+    const ord = this.dataset.ord || '';
+    const scrollPos = $(document).scrollTop() || 0;
+    if (wid && textid) {
+      const url = '/word/edit?fromAnn=' + scrollPos + '&wid=' + wid + '&tid=' + textid + '&ord=' + ord;
+      window.oewin(url);
+    }
+  });
+}
+
 // Auto-initialize when DOM is ready
 $(document).ready(function () {
   initSentenceEventDelegation();
+  initImprovedTextEventDelegation();
 });

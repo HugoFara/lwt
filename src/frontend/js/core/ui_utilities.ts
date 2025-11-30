@@ -97,6 +97,14 @@ export function noShowAfter3Secs(): void {
 }
 
 /**
+ * Auto-dismiss messages with the 'hide_message' class.
+ * Messages fade out after 2.5 seconds with a 1 second animation.
+ */
+export function initHideMessages(): void {
+  $('.hide_message').delay(2500).slideUp(1000);
+}
+
+/**
  * Set the focus on an element with the "focus" class.
  */
 export function setTheFocus(): void {
@@ -311,6 +319,8 @@ export function prepareMainAreas(): void {
     do_ajax_show_similar_terms();
   }
   window.setTimeout(noShowAfter3Secs, 3000);
+  // Auto-dismiss messages with hide_message class
+  initHideMessages();
 }
 
 $(window).on('load', wrapRadioButtons);

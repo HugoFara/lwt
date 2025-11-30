@@ -30,24 +30,13 @@ namespace Lwt\Views\Word;
 <p>Translation: <b><?php echo tohtml($translation); ?></b></p>
 <?php endif; ?>
 
-<script type="text/javascript">
-    const context = window.parent.document;
-    let title = '';
-    if (window.parent.LWT_DATA.settings.jQuery_tooltip)
-        title = make_tooltip(
-            <?php echo json_encode($wordRaw); ?>,
-            <?php echo json_encode($translation); ?>,
-            '',
-            '<?php echo $status; ?>'
-        );
-    $('.TERM<?php echo $hex; ?>', context)
-    .removeClass('status0')
-    .addClass('status<?php echo $status; ?> word<?php echo $wid; ?>')
-    .attr('data_status', '<?php echo $status; ?>')
-    .attr('data_wid', '<?php echo $wid; ?>')
-    .attr('title', title)
-    .attr('data_trans','<?php echo tohtml($translation); ?>');
-    $('#learnstatus', context)
-    .html('<?php echo addslashes(todo_words_content($textId)); ?>');
-    cleanupRightFrames();
+<script type="application/json" data-lwt-hover-save-result-config>
+<?php echo json_encode([
+    'wid' => $wid,
+    'hex' => $hex,
+    'status' => $status,
+    'translation' => $translation,
+    'wordRaw' => $wordRaw,
+    'todoContent' => todo_words_content($textId)
+]); ?>
 </script>

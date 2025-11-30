@@ -25,17 +25,13 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
 }
 ?></h1>
 
-<div id="printoptions">
+<div id="printoptions" data-text-id="<?php echo $textId; ?>">
     <h2>Improved Annotated Text (Display/Print Mode)</h2>
     <div class="flex-spaced">
-        <input type="button" value="Edit"
-        onclick="location.href='/text/print?edit=1&amp;text=<?php echo $textId; ?>';" />
-        <input type="button" value="Delete"
-        onclick="if (confirm ('Are you sure?')) location.href='/text/print?del=1&amp;text=<?php echo $textId; ?>';" />
-        <input type="button" value="Print" onclick="window.print();" />
-        <input type="button"
-        value="Display <?php echo (($audioUri !== '') ? ' with Audio Player' : ''); ?> in new Window"
-        onclick="window.open('/text/display?text=<?php echo $textId; ?>');" />
+        <button type="button" data-action="navigate" data-url="/text/print?edit=1&amp;text=<?php echo $textId; ?>">Edit</button>
+        <button type="button" data-action="confirm-navigate" data-url="/text/print?del=1&amp;text=<?php echo $textId; ?>" data-confirm="Are you sure?">Delete</button>
+        <button type="button" data-action="print">Print</button>
+        <button type="button" data-action="open-window" data-url="/text/display?text=<?php echo $textId; ?>">Display <?php echo (($audioUri !== '') ? ' with Audio Player' : ''); ?> in new Window</button>
     </div>
 </div>
 <!-- noprint -->

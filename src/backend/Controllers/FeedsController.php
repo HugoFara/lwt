@@ -232,12 +232,6 @@ class FeedsController extends BaseController
             include __DIR__ . '/../Views/Feed/edit_text_footer.php';
         }
 
-        ?>
-<script type="text/javascript">
-$(".hide_message").delay(2500).slideUp(1000);
-</script>
-        <?php
-
         return ['editText' => $editText, 'message' => $message];
     }
 
@@ -283,11 +277,6 @@ $(".hide_message").delay(2500).slideUp(1000);
     {
         if (isset($_REQUEST['checked_feeds_save'])) {
             $message = $this->feedService->saveTextsFromFeed($_REQUEST['feed']);
-            ?>
-    <script type="text/javascript">
-    $(".hide_message").delay(2500).slideUp(1000);
-    </script>
-            <?php
         }
 
         if (isset($_SESSION['feed_loaded'])) {
@@ -299,11 +288,6 @@ $(".hide_message").delay(2500).slideUp(1000);
                 }
                 echo "+++ ", $lf, " +++</p></div>";
             }
-            ?>
-    <script type="text/javascript">
-    $(".hide_message").delay(2500).slideUp(1000);
-    </script>
-            <?php
             unset($_SESSION['feed_loaded']);
         }
 
@@ -580,11 +564,6 @@ $(".hide_message").delay(2500).slideUp(1000);
         foreach ($_SESSION['feed_loaded'] as $lf) {
             echo "\n<div class=\"msgblue\"><p class=\"hide_message\">+++ ", $lf, " +++</p></div>";
         }
-        ?>
-<script type="text/javascript">
-$(".hide_message").delay(2500).slideUp(1000);
-</script>
-        <?php
         unset($_SESSION['feed_loaded']);
     }
 

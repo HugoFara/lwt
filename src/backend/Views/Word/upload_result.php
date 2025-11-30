@@ -20,10 +20,10 @@
  */
 ?>
 <form name="form1" action="#"
+data-action="upload-result-form"
 data-last-update="<?php echo htmlspecialchars($lastUpdate); ?>"
 data-rtl="<?php echo $rtl ? 'true' : 'false'; ?>"
-data-recno="<?php echo $recno; ?>"
-onsubmit="showImportedTerms(this.dataset.lastUpdate, this.dataset.rtl, this.dataset.recno, document.form1.page.options[document.form1.page.selectedIndex].value); return false;">
+data-recno="<?php echo $recno; ?>">
 <div id="res_data">
     <table id="res_data-navigation" class="tab2" cellspacing="0" cellpadding="2">
     <tr>
@@ -78,17 +78,10 @@ onsubmit="showImportedTerms(this.dataset.lastUpdate, this.dataset.rtl, this.data
     </p>
 </div>
 </form>
-<script type="text/javascript">
-    // Initialize imported terms display when DOM is ready
-    document.addEventListener('DOMContentLoaded', function() {
-        var form = document.forms.namedItem('form1');
-        if (form) {
-            showImportedTerms(
-                form.dataset.lastUpdate,
-                form.dataset.rtl,
-                parseInt(form.dataset.recno, 10),
-                1
-            );
-        }
-    });
+<script type="application/json" data-lwt-upload-result-config>
+<?php echo json_encode([
+    'lastUpdate' => $lastUpdate,
+    'rtl' => $rtl,
+    'recno' => $recno
+]); ?>
 </script>

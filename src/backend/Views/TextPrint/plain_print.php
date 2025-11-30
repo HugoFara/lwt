@@ -57,13 +57,13 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
          '<img src="' . get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" /></a>';
 }
 ?></h1>
-<p id="printoptions">
+<p id="printoptions" data-text-id="<?php echo $textId; ?>">
     Terms with <b>status(es)</b>
-    <select id="status" onchange="{val=document.getElementById('status').options[document.getElementById('status').selectedIndex].value;location.href='/text/print-plain?text=<?php echo $textId; ?>&amp;status=' + val;}">
+    <select id="status" data-action="filter-status">
         <?php echo get_wordstatus_selectoptions($statusRange, true, true, false); ?>
     </select> ...<br />
     will be <b>annotated</b> with
-    <select id="ann" onchange="{val=document.getElementById('ann').options[document.getElementById('ann').selectedIndex].value;location.href='/text/print-plain?text=<?php echo $textId; ?>&amp;ann=' + val;}">
+    <select id="ann" data-action="filter-annotation">
         <option value="0"<?php echo get_selected(0, $ann); ?>>Nothing</option>
         <option value="1"<?php echo get_selected(1, $ann); ?>>Translation</option>
         <option value="5"<?php echo get_selected(5, $ann); ?>>Translation &amp; Tags</option>
@@ -71,21 +71,19 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
         <option value="3"<?php echo get_selected(3, $ann); ?>>Romanization &amp; Translation</option>
         <option value="7"<?php echo get_selected(7, $ann); ?>>Romanization, Translation &amp; Tags</option>
     </select>
-    <select id="annplcmnt" onchange="{val=document.getElementById('annplcmnt').options[document.getElementById('annplcmnt').selectedIndex].value;location.href='/text/print-plain?text=<?php echo $textId; ?>&amp;annplcmnt=' + val;}">
+    <select id="annplcmnt" data-action="filter-placement">
         <option value="0"<?php echo get_selected(0, $annPlacement); ?>>behind</option>
         <option value="1"<?php echo get_selected(1, $annPlacement); ?>>in front of</option>
         <option value="2"<?php echo get_selected(2, $annPlacement); ?>>above (ruby)</option>
     </select> the term.<br />
-    <input type="button" value="Print it!" onclick="window.print();" />
+    <button type="button" data-action="print">Print it!</button>
     (only the text below the line)
     <span class="nowrap"></span>
     <?php if ($hasAnnotation): ?>
-        Or <input type="button" value="Print/Edit/Delete"
-        onclick="location.href='/text/print?text=<?php echo $textId; ?>';" /> your
+        Or <button type="button" data-action="navigate" data-url="/text/print?text=<?php echo $textId; ?>">Print/Edit/Delete</button> your
         <b>Improved Annotated Text</b> <?php echo get_annotation_link($textId); ?>.
     <?php else: ?>
-        <input type="button" value="Create"
-        onclick="location.href='/text/print?edit=1&amp;text=<?php echo $textId; ?>';" /> an
+        <button type="button" data-action="navigate" data-url="/text/print?edit=1&amp;text=<?php echo $textId; ?>">Create</button> an
         <b>Improved Annotated Text</b> [<img src="/assets/icons/tick.png" title="Annotated Text" alt="Annotated Text" />].
     <?php endif; ?>
 </p>

@@ -242,10 +242,7 @@ class TagsController extends BaseController
     {
         ?>
         <h2>New Tag</h2>
-        <script type="text/javascript" charset="utf-8">
-            $(document).ready(lwtFormCheck.askBeforeExit);
-        </script>
-        <form name="newtag" class="validate" action="/tags" method="post">
+        <form name="newtag" class="validate lwt-form-check" action="/tags" method="post">
         <table class="tab1" cellspacing="0" cellpadding="5">
             <tr>
                 <td class="td1 right">Tag:</td>
@@ -264,7 +261,7 @@ class TagsController extends BaseController
             </tr>
             <tr>
                 <td class="td1 right" colspan="2">
-                    <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/tags';}" />
+                    <button type="button" data-action="cancel" data-url="/tags">Cancel</button>
                     <input type="submit" name="op" value="Save" />
                 </td>
             </tr>
@@ -287,10 +284,7 @@ class TagsController extends BaseController
         if (($record = mysqli_fetch_assoc($res)) !== false) {
             ?>
             <h2>Edit Tag</h2>
-            <script type="text/javascript" charset="utf-8">
-                $(document).ready(lwtFormCheck.askBeforeExit);
-            </script>
-            <form name="edittag" class="validate" action="/tags#rec<?php echo $tagId; ?>" method="post">
+            <form name="edittag" class="validate lwt-form-check" action="/tags#rec<?php echo $tagId; ?>" method="post">
             <input type="hidden" name="TgID" value="<?php echo $record['TgID']; ?>" />
             <table class="tab1" cellspacing="0" cellpadding="5">
                 <tr>
@@ -310,7 +304,7 @@ class TagsController extends BaseController
                 </tr>
                 <tr>
                     <td class="td1 right" colspan="2">
-                        <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/tags#rec<?php echo $tagId; ?>';}" />
+                        <button type="button" data-action="cancel" data-url="/tags#rec<?php echo $tagId; ?>">Cancel</button>
                         <input type="submit" name="op" value="Change" />
                     </td>
                 </tr>
@@ -383,18 +377,18 @@ class TagsController extends BaseController
         ?>
         <p><a href="/tags?new=1"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Term Tag ...</a></p>
 
-        <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
+        <form name="form1" action="#">
         <table class="tab2" cellspacing="0" cellpadding="5">
         <tr>
         <th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
-        <input type="button" value="Reset All" onclick="{location.href='/tags?page=1&amp;query=';}" /></th>
+        <button type="button" data-action="reset-all" data-base-url="/tags">Reset All</button></th>
         </tr>
         <tr>
         <td class="td1 center" colspan="4">
         Tag Text or Comment:
         <input type="text" name="query" value="<?php echo \tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
-        <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='/tags?page=1&amp;query=' + val;}" />&nbsp;
-        <input type="button" value="Clear" onclick="{location.href='/tags?page=1&amp;query=';}" />
+        <button type="button" name="querybutton" data-action="filter-query">Filter</button>&nbsp;
+        <button type="button" data-action="clear-query">Clear</button>
         </td>
         </tr>
         <?php if ($recno > 0) { ?>
@@ -405,7 +399,7 @@ class TagsController extends BaseController
             <?php echo PageLayoutHelper::buildPager($currentpage, $pages, '/tags', 'form1'); ?>
         </th><th class="th1" nowrap="nowrap">
         Sort Order:
-        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags?page=1&amp;sort=' + val;}"><?php echo SelectOptionsBuilder::forTagSort($currentsort); ?></select>
+        <select name="sort" data-action="sort"><?php echo SelectOptionsBuilder::forTagSort($currentsort); ?></select>
         </th></tr>
         <?php } ?>
         </table>
@@ -426,14 +420,14 @@ class TagsController extends BaseController
             </th></tr>
             <tr><td class="td1 center" colspan="2">
             <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
-            <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo SelectOptionsBuilder::forAllTagsActions(); ?></select>
+            <select name="allaction" data-action="all-action" data-recno="<?php echo $recno; ?>"><?php echo SelectOptionsBuilder::forAllTagsActions(); ?></select>
             </td></tr>
             <tr><td class="td1 center">
-            <input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
-            <input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
+            <button type="button" data-action="mark-all">Mark All</button>
+            <button type="button" data-action="mark-none">Mark None</button>
             </td>
             <td class="td1 center">Marked Tags:&nbsp;
-            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo SelectOptionsBuilder::forMultipleTagsActions(); ?></select>
+            <select name="markaction" id="markaction" disabled="disabled" data-action="mark-action"><?php echo SelectOptionsBuilder::forMultipleTagsActions(); ?></select>
             </td></tr></table>
 
             <table class="sortable tab2" cellspacing="0" cellpadding="5">
@@ -615,10 +609,7 @@ class TagsController extends BaseController
     {
         ?>
         <h2>New Tag</h2>
-        <script type="text/javascript" charset="utf-8">
-            $(document).ready(lwtFormCheck.askBeforeExit);
-        </script>
-        <form name="newtag" class="validate" action="/tags/text" method="post">
+        <form name="newtag" class="validate lwt-form-check" action="/tags/text" method="post">
         <table class="tab1" cellspacing="0" cellpadding="5">
         <tr>
             <td class="td1 right">Tag:</td>
@@ -637,7 +628,7 @@ class TagsController extends BaseController
         </tr>
         <tr>
             <td class="td1 right" colspan="2">
-            <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/tags/text';}" />
+            <button type="button" data-action="cancel" data-url="/tags/text">Cancel</button>
             <input type="submit" name="op" value="Save" /></td>
         </tr>
         </table>
@@ -659,10 +650,7 @@ class TagsController extends BaseController
         if (($record = mysqli_fetch_assoc($res)) !== false) {
             ?>
             <h2>Edit Tag</h2>
-            <script type="text/javascript" charset="utf-8">
-                $(document).ready(lwtFormCheck.askBeforeExit);
-            </script>
-            <form name="edittag" class="validate" action="/tags/text#rec<?php echo $tagId; ?>" method="post">
+            <form name="edittag" class="validate lwt-form-check" action="/tags/text#rec<?php echo $tagId; ?>" method="post">
                 <input type="hidden" name="T2ID" value="<?php echo $record['T2ID']; ?>" />
                 <table class="tab1" cellspacing="0" cellpadding="5">
                 <tr>
@@ -681,7 +669,7 @@ class TagsController extends BaseController
                 </tr>
                 <tr>
                 <td class="td1 right" colspan="2">
-                <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/tags/text#rec<?php echo $tagId; ?>';};" />
+                <button type="button" data-action="cancel" data-url="/tags/text#rec<?php echo $tagId; ?>">Cancel</button>
                 <input type="submit" name="op" value="Change" /></td>
                 </tr>
                 </table>
@@ -753,19 +741,19 @@ class TagsController extends BaseController
         ?>
         <p><a href="/tags/text?new=1"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Text Tag ...</a></p>
 
-        <form name="form1" action="#" onsubmit="document.form1.querybutton.click(); return false;">
+        <form name="form1" action="#">
         <table class="tab1" cellspacing="0" cellpadding="5">
         <tr>
             <th class="th1" colspan="4">
                 Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
-            <input type="button" value="Reset All" onclick="{location.href='/tags/text?page=1&amp;query=';}" /></th>
+            <button type="button" data-action="reset-all" data-base-url="/tags/text">Reset All</button></th>
         </tr>
         <tr>
         <td class="td1 center" colspan="4">
             Tag Text or Comment:
             <input type="text" name="query" value="<?php echo \tohtml($currentquery); ?>" maxlength="50" size="15" />&nbsp;
-            <input type="button" name="querybutton" value="Filter" onclick="{val=document.form1.query.value; location.href='/tags/text?page=1&amp;query=' + val;}" />&nbsp;
-            <input type="button" value="Clear" onclick="{location.href='/tags/text?page=1&amp;query=';}" />
+            <button type="button" name="querybutton" data-action="filter-query">Filter</button>&nbsp;
+            <button type="button" data-action="clear-query">Clear</button>
         </td>
         </tr>
         <?php if ($recno > 0) { ?>
@@ -776,7 +764,7 @@ class TagsController extends BaseController
             <?php echo PageLayoutHelper::buildPager($currentpage, $pages, '/tags/text', 'form1'); ?>
         </th><th class="th1" nowrap="nowrap">
         Sort Order:
-        <select name="sort" onchange="{val=document.form1.sort.options[document.form1.sort.selectedIndex].value; location.href='/tags/text?page=1&amp;sort=' + val;}"><?php echo SelectOptionsBuilder::forTagSort($currentsort); ?></select>
+        <select name="sort" data-action="sort"><?php echo SelectOptionsBuilder::forTagSort($currentsort); ?></select>
         </th></tr>
         <?php } ?>
         </table>
@@ -797,14 +785,14 @@ class TagsController extends BaseController
             </th></tr>
             <tr><td class="td1 center" colspan="2">
             <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
-            <select name="allaction" onchange="allActionGo(document.form2, document.form2.allaction,<?php echo $recno; ?>);"><?php echo SelectOptionsBuilder::forAllTagsActions(); ?></select>
+            <select name="allaction" data-action="all-action" data-recno="<?php echo $recno; ?>"><?php echo SelectOptionsBuilder::forAllTagsActions(); ?></select>
             </td></tr>
             <tr><td class="td1 center">
-            <input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
-            <input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
+            <button type="button" data-action="mark-all">Mark All</button>
+            <button type="button" data-action="mark-none">Mark None</button>
             </td>
             <td class="td1 center">Marked Tags:&nbsp;
-            <select name="markaction" id="markaction" disabled="disabled" onchange="multiActionGo(document.form2, document.form2.markaction);"><?php echo SelectOptionsBuilder::forMultipleTagsActions(); ?></select>
+            <select name="markaction" id="markaction" disabled="disabled" data-action="mark-action"><?php echo SelectOptionsBuilder::forMultipleTagsActions(); ?></select>
             </td></tr></table>
 
             <table class="sortable tab2" cellspacing="0" cellpadding="5">

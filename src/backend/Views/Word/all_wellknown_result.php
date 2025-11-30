@@ -7,7 +7,8 @@
  * - $status: int - Status applied (98=ignored, 99=well-known)
  * - $count: int - Number of words modified
  * - $textId: int - Text ID
- * - $javascript: string - JavaScript code to update the UI
+ * - $wordsData: array - Array of word data for DOM updates
+ * - $useTooltips: bool - Whether tooltips are enabled
  *
  * PHP version 8.1
  *
@@ -44,11 +45,10 @@ if ($status == 98) {
 ?>
 </p>
 
-<script type="text/javascript">
-    //<![CDATA[
-    const context = window.parent.document;
-    <?php echo $javascript; ?>
-    $('#learnstatus', context).html('<?php echo addslashes(todo_words_content($textId)); ?>');
-    window.parent.setTimeout(window.parent.cClick, 1000);
-    //]]>
+<script type="application/json" data-lwt-all-wellknown-config>
+<?php echo json_encode([
+    'words' => $wordsData,
+    'useTooltips' => $useTooltips,
+    'todoContent' => todo_words_content($textId)
+]); ?>
 </script>

@@ -32,7 +32,7 @@ if ($fixedTbpref):
     Then try again.</p>
     <p class="right">
         &nbsp;<br />
-        <input type="button" value="&lt;&lt; Back" onclick="history.back();" />
+        <button type="button" data-action="go-back">&lt;&lt; Back</button>
     </p>
 </td>
 </tr>
@@ -61,7 +61,7 @@ if ($fixedTbpref):
 <tr>
 <th class="th1 center">Create</th>
 <td class="td1">
-<form name="f2" class="inline" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="return check_table_prefix(document.f2.newpref.value);">
+<form name="f2" class="inline table-create-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 <p>New Table Set: <input type="text" name="newpref" value="" maxlength="20" size="20" />
 </p>
 <p class="right">&nbsp;<br /><input type="submit" name="op" value="Create New Table Set &amp; Start LWT" />
@@ -73,7 +73,7 @@ if ($fixedTbpref):
 <tr>
 <th class="th1 center">Delete</th>
 <td class="td1">
-<form name="f3" class="inline" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="if (document.f3.delpref.selectedIndex > 0) { return confirm('\n*** DELETING TABLE SET: ' + document.f3.delpref.options[document.f3.delpref.selectedIndex].text + ' ***\n\n*** ALL DATA IN THIS TABLE SET WILL BE LOST! ***\n\n*** ARE YOU SURE ?? ***'); } else { return true; }">
+<form name="f3" class="inline table-delete-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 <p>Table Set: <select name="delpref">
 <option value="-" selected="selected">[Choose...]</option>
 <?php foreach ($prefixes as $value): ?>
@@ -93,7 +93,7 @@ if ($fixedTbpref):
 
 <tr>
 <td class="td1 right" colspan="2">
-<input type="button" value="&lt;&lt; Back" onclick="location.href='index.php';" /></td>
+<button type="button" data-action="navigate" data-url="index.php">&lt;&lt; Back</button></td>
 </tr>
 
 </table>

@@ -220,6 +220,22 @@ export function showImportedTerms(
 }
 
 /**
+ * Configuration for upload result view.
+ */
+interface UploadResultConfig {
+  lastUpdate: string;
+  rtl: boolean;
+  recno: number;
+}
+
+/**
+ * Initialize the upload result display from JSON config.
+ */
+function initUploadResult(config: UploadResultConfig): void {
+  showImportedTerms(config.lastUpdate, config.rtl, config.recno, 1);
+}
+
+/**
  * Initialize event delegation for the upload form.
  */
 function initUploadFormEvents(): void {
@@ -227,9 +243,37 @@ function initUploadFormEvents(): void {
   $(document).on('change', '[data-action="update-import-mode"]', function (this: HTMLSelectElement) {
     updateImportMode(this.value);
   });
+
+  // Handle upload result form submission
+  $(document).on('submit', 'form[data-action="upload-result-form"]', function (e) {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const lastUpdate = form.dataset.lastUpdate || '';
+    const rtl = form.dataset.rtl === 'true';
+    const recno = parseInt(form.dataset.recno || '0', 10);
+    const pageSelect = form.elements.namedItem('page') as HTMLSelectElement | null;
+    const page = pageSelect ? parseInt(pageSelect.value, 10) : 1;
+    showImportedTerms(lastUpdate, rtl, recno, page);
+  });
+}
+
+/**
+ * Auto-initialize upload result from JSON config element.
+ */
+function autoInitUploadResult(): void {
+  const configEl = document.querySelector<HTMLScriptElement>('script[data-lwt-upload-result-config]');
+  if (configEl) {
+    try {
+      const config = JSON.parse(configEl.textContent || '{}') as UploadResultConfig;
+      initUploadResult(config);
+    } catch (e) {
+      console.error('Failed to parse upload result config:', e);
+    }
+  }
 }
 
 // Auto-initialize when DOM is ready
 $(document).ready(function () {
   initUploadFormEvents();
+  autoInitUploadResult();
 });

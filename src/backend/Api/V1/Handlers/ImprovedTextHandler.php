@@ -65,24 +65,24 @@ class ImprovedTextHandler
          &nbsp;
         <img class="click" src="/assets/icons/eraser.png" title="Erase Text Field"
         alt="Erase Text Field"
-        onclick="$(\'#tx' . $i . '\').val(\'\').trigger(\'change\');" />
+        data-action="erase-field" data-target="#tx' . $i . '" />
          &nbsp;
         <img class="click" src="/assets/icons/star.png" title="* (Set to Term)"
         alt="* (Set to Term)"
-        onclick="$(\'#tx' . $i . '\').val(\'*\').trigger(\'change\');" />
+        data-action="set-star" data-target="#tx' . $i . '" />
         &nbsp;';
         if ($widset) {
             $r .=
             '<img class="click" src="/assets/icons/plus-button.png"
             title="Save another translation to existent term"
             alt="Save another translation to existent term"
-            onclick="updateTermTranslation(' . $wid . ', \'#tx' . $i . '\');" />';
+            data-action="update-term-translation" data-wid="' . $wid . '" data-target="#tx' . $i . '" />';
         } else {
             $r .=
             '<img class="click" src="/assets/icons/plus-button.png"
             title="Save translation to new term"
             alt="Save translation to new term"
-            onclick="addTermTranslation(\'#tx' . $i . '\',' . json_encode($word) . ',' . $lang . ');" />';
+            data-action="add-term-translation" data-target="#tx' . $i . '" data-word="' . \tohtml($word) . '" data-lang="' . $lang . '" />';
         }
         $r .= '&nbsp;&nbsp;
         <span id="wait' . $i . '">
@@ -241,7 +241,7 @@ class ImprovedTextHandler
                         Term Translations (Delim.: ' .
                         \tohtml(Settings::getWithDefault('set-term-translation-delimiters')) . ')
                         <br />
-                        <input type="button" value="Reload" onclick="do_ajax_edit_impr_text(0,\'\');" />
+                        <input type="button" value="Reload" data-action="reload-impr-text" />
                     </th>
                 </tr>';
         $items = preg_split('/[\n]/u', $ann);
@@ -255,7 +255,7 @@ class ImprovedTextHandler
                             $nontermbuffer .
                         '</td>
                         <td class="td1 right" colspan="3">
-                        <img class="click" src="/assets/icons/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" onclick="location.href=\'print_impr_text.php?text=' . $textid . '\';" />
+                        <img class="click" src="/assets/icons/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" data-action="back-to-print-mode" data-textid="' . $textid . '" />
                         </td>
                     </tr>';
                     $nontermbuffer = '';
@@ -286,8 +286,7 @@ class ImprovedTextHandler
                 if ($wid !== null) {
                     $wordLink = '<a name="rec' . $i . '"></a>
                     <span class="click"
-                    onclick="oewin(\'/word/edit?fromAnn=\' + $(document).scrollTop() + \'&amp;wid=' .
-                    $wid . '&amp;tid=' . $textid . '&amp;ord=' . (int)$vals[0] . '\');">
+                    data-action="edit-term-popup" data-wid="' . $wid . '" data-textid="' . $textid . '" data-ord="' . (int)$vals[0] . '">
                         <img src="/assets/icons/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
                     </span>';
                 }
@@ -323,7 +322,7 @@ class ImprovedTextHandler
                 $nontermbuffer .
                 '</td>
                 <td class="td1 right" colspan="3">
-                    <img class="click" src="/assets/icons/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" onclick="location.href=\'print_impr_text.php?text=' . $textid . '\';" />
+                    <img class="click" src="/assets/icons/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" data-action="back-to-print-mode" data-textid="' . $textid . '" />
                 </td>
             </tr>';
         }
@@ -335,7 +334,7 @@ class ImprovedTextHandler
                         Term Translations (Delim.: ' .
                         \tohtml(Settings::getWithDefault('set-term-translation-delimiters')) . ')
                         <br />
-                        <input type="button" value="Reload" onclick="do_ajax_edit_impr_text(1e6,\'\');" />
+                        <input type="button" value="Reload" data-action="reload-impr-text" />
                         <a name="bottom"></a>
                     </th>
                 </tr>

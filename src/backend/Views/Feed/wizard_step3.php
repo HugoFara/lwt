@@ -21,117 +21,42 @@
 namespace Lwt\Views\Feed;
 
 ?>
+<div id="wizard-step3-config"
+    data-article-selector="<?php echo htmlspecialchars((string)($wizardData['article_selector'] ?? ''), ENT_QUOTES); ?>"
+    data-hide-images="<?php echo $wizardData['hide_images'] == 'yes' ? 'true' : 'false'; ?>"
+    data-is-minimized="<?php echo $wizardData['maxim'] == 0 ? 'true' : 'false'; ?>"
+    style="display: none;"></div>
 <script type="text/javascript">
-    filter_Array = [];
-    const lwt_wizard_filter = {
-        updateFilterArray: function() {
-            articleSection = <?php echo json_encode((string)($wizardData['article_selector'] ?? '')); ?>;
-            articleSection.trim();
-            if (articleSection == '') {
-                alert("Article section is empty!")
-            }
-            $('#lwt_header')
-                .nextAll()
-                .find('*')
-                .addBack()
-                .not(xpathQuery(articleSection).find('*').addBack())
-                .not($('#lwt_header').find('*').addBack())
-                .each(function() {
-                    $(this).addClass('lwt_filtered_text');
-                    filter_Array.push(this);
-                });
-        },
+(function() {
+    function init() {
+        var configEl = document.getElementById('wizard-step3-config');
+        if (!configEl || typeof window.initWizardStep3 !== 'function') return;
 
-        hideImages: function() {
-            $("img").not($("#lwt_header").find("*")).css("display", "none");
-        },
-
-        clickCancel: function() {
-            $('#adv').hide();
-            $('#lwt_last').css('margin-top', $('#lwt_header').height());
-            return false;
-        },
-
-        changeSelectMode: function() {
-            $('*').removeClass('lwt_marked_text');
-            $('*[class=\'\']').removeAttr('class');
-            $('#get_button').prop('disabled', true);
-            $('#mark_action').empty();
-            $('<option/>').val('').text('[Click On Text]').appendTo('#mark_action');
-            return false;
-        },
-
-        changeHideImages: function() {
-            if ($(this).val() == 'no')
-                $('img').not($('#lwt_header').find('*')).css('display', '');
-            else
-                $('img').not($('#lwt_header').find('*')).css('display', 'none');
-            return false;
-        },
-
-        changeSelectedFeed: function() {
-            const html = $('#lwt_sel').html();
-            $('input[name=\'html\']').val(html);
-            document.lwt_form1.submit();
-        },
-
-        clickBack: function() {
-            location.href = '/feeds/wizard?step=2&amp;article_tags=1&amp;maxim=' +
-                $('#maxim').val() + '&amp;filter_tags=' +
-                encodeURIComponent($('#lwt_sel').html()) + '&amp;select_mode=' +
-                encodeURIComponent($('select[name=\'select_mode\']').val()) +
-                '&amp;hide_images=' +
-                encodeURIComponent($('select[name=\'hide_images\']').val());
-            return false;
-        },
-
-        clickMinMax: function() {
-            $('#lwt_container').toggle();
-            if ($('#lwt_container').css('display') == 'none') {
-                $('input[name=\'maxim\']').val(0);
-            } else {
-                $('input[name=\'maxim\']').val(1);
-            }
-            $('#lwt_last').css('margin-top', $('#lwt_header').height());
-            return false;
-        },
-
-        setMaxim: function() {
-            $('#lwt_container').hide();
-            $('#lwt_last').css('margin-top', $('#lwt_header').height());
-            if ($('#lwt_container').css('display') == 'none') {
-                $('input[name=\'maxim\']').val(0);
-            } else {
-                $('input[name=\'maxim\']').val(1);
-            }
-        }
+        window.initWizardStep3({
+            articleSelector: configEl.dataset.articleSelector || '',
+            hideImages: configEl.dataset.hideImages === 'true',
+            isMinimized: configEl.dataset.isMinimized === 'true'
+        });
     }
 
-    // Extend jQuery
-    $(function() {
-        jQuery.fn.get_adv_xpath = extend_adv_xpath
-    });
-
-    // Prepare the page
-    $(lwt_feed_wizard.prepareInteractions);
-
-    if (<?php echo json_encode($wizardData['hide_images'] == 'yes'); ?>) {
-        $(lwt_wizard_filter.hideImages);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
     }
-
-    $(lwt_wizard_filter.updateFilterArray);
+})();
 </script>
 <div id="lwt_header">
     <form name="lwt_form1" class="validate" action="/feeds/wizard" method="post">
     <div id="adv" style="display: none;">
-    <button onclick="lwt_wizard_filter.clickCancel()">Cancel</button>
+    <button data-action="wizard-step3-cancel">Cancel</button>
     <button id="adv_get_button">Get</button>
 </div>
 <div id="settings" style="display: none;">
     <p><b>Feed Wizard | Settings</b></p>
     <div style="margin-left:150px;text-align:left">
         Selection Mode:
-        <select name="select_mode" onchange="lwt_wizard_filter.changeSelectMode()">
+        <select name="select_mode" data-action="wizard-step3-select-mode">
             <option value="0"<?php if ($wizardData['select_mode'] == '0') {
                 echo ' selected';
                              }?>>Smart Selection</option>
@@ -143,7 +68,7 @@ namespace Lwt\Views\Feed;
                                }?>>Advanced Selection</option>
         </select><br />
         Hide Images:
-        <select name="hide_images" onchange="lwt_wizard_filter.changeHideImage()">
+        <select name="hide_images" data-action="wizard-step3-hide-images">
             <option value="yes"<?php if ($wizardData['hide_images'] == 'yes') {
                 echo ' selected';
                                }?>>Yes</option>
@@ -152,7 +77,7 @@ namespace Lwt\Views\Feed;
                               }?>>No</option>
         </select>
     </div>
-    <button style="position:relative;left:150px;" onclick="$('#settings').hide();return false;">OK</button>
+    <button style="position:relative;left:150px;" data-action="wizard-settings-close">OK</button>
     </div>
     <div id="lwt_container">
         <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
@@ -199,12 +124,12 @@ namespace Lwt\Views\Feed;
     <table style="width:100%;">
         <tr>
             <td>
-                <input type="button" value="Cancel" onclick="location.href='/feeds/edit?del_wiz=1';return false;" />
+                <input type="button" value="Cancel" data-action="wizard-cancel" data-url="/feeds/edit?del_wiz=1" />
             </td>
             <td>
                 <span>
                     <select name="selected_feed" style="width:250px;max-width:200px;"
-                    onchange="lwt_wizard_filter.changeSelectedFeed()">
+                    data-action="wizard-step3-selected-feed">
                         <?php
                         $current_host = '';
                         $current_status = '';
@@ -258,12 +183,12 @@ namespace Lwt\Views\Feed;
                 </select>
                 <button id="filter_button" name="button" disabled>Filter</button>
                 <img src="/assets/icons/wrench-screwdriver.png" title="Settings" alt="-"
-                onclick="$('#settings').show();return false;" />
+                data-action="wizard-settings-open" style="cursor:pointer;" />
             </td>
             <td>
                 <span>
                     <input type="button" value="Back"
-                    onclick="lwt_wizard_filter.clickBack()" />
+                    data-action="wizard-step3-back" />
                     <button id="next">Next</button>
                 </span>
             </td>
@@ -271,7 +196,7 @@ namespace Lwt\Views\Feed;
         </tr>
     </table>
     <button style="position:absolute;right:10px;top:10px"
-    onclick="lwt_wizard_filter.clickMinMax()">
+    data-action="wizard-step3-minmax">
         min/max
     </button>
     <input type="hidden" id="filter_tags" name="filter_tags" disabled />
@@ -282,8 +207,3 @@ namespace Lwt\Views\Feed;
 </div>
 <br /><p id="lwt_last"></p>
 <?php echo $feedHtml; ?>
-<script type="text/javascript">
-    if (<?php echo json_encode($wizardData['maxim'] == 0); ?>) {
-        $(lwt_wizard_filter.setMaxim);
-    }
-</script>

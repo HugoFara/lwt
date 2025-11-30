@@ -72,11 +72,14 @@ import './feeds/feed_form';
 import './feeds/feed_text_edit';
 import './feeds/feed_wizard_common';
 import './feeds/feed_wizard_step2';
+import './feeds/feed_wizard_step3';
+import './feeds/feed_wizard_step4';
 
 // Texts
 import './texts/text_list';
 import './texts/youtube_import';
 import './texts/text_check_display';
+import './texts/text_print';
 
 // Words
 import './words/word_list_filter';
@@ -98,6 +101,7 @@ import './languages/language_form';
 // Admin
 import './admin/server_data';
 import './admin/tts_settings';
+import './admin/table_management';
 
 // Home
 import './home/home_warnings';

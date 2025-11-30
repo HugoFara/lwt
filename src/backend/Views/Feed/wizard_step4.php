@@ -25,6 +25,28 @@ namespace Lwt\Views\Feed;
 use Lwt\Core\Http\InputValidator;
 
 ?>
+<div id="wizard-step4-config"
+    data-edit-feed-id="<?php echo isset($wizardData['edit_feed']) ? (int)$wizardData['edit_feed'] : ''; ?>"
+    style="display: none;"></div>
+<script type="text/javascript">
+(function() {
+    function init() {
+        var configEl = document.getElementById('wizard-step4-config');
+        if (!configEl || typeof window.initWizardStep4 !== 'function') return;
+
+        var editFeedId = configEl.dataset.editFeedId;
+        window.initWizardStep4({
+            editFeedId: editFeedId ? parseInt(editFeedId, 10) : null
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
 <form class="validate" action="/feeds/edit" method="post">
     <table class="tab2" cellspacing="0" cellpadding="5">
         <tr>
@@ -182,57 +204,11 @@ if ($service->getNfOption($wizardData['options'], 'charset') == null) {
     <?php if (isset($wizardData['edit_feed'])) {
         echo '<input type="hidden" name="NfID" value="' . $wizardData['edit_feed'] . '" />';
     }?>
-    <input type="button" value="Cancel" onclick="location.href='/feeds/edit?del_wiz=1';" />
+    <input type="button" value="Cancel" data-action="wizard-step4-cancel" />
     <input type="hidden" name="NfOptions" value="" />
     <input type="hidden" name="article_source"
     value="<?php echo htmlspecialchars($wizardData['feed']['feed_text']); ?>" />
     <input type="hidden" name="save_feed" value="1" />
-    <input type="button" value="Back" onclick="str=$('[name=\'edit_text\']:checked').length > 0?'edit_text=1,':'';$('[name^=\'c_\']').each(function(){str+=this.checked ? $(this).parent().children('input[type=\'text\']').attr('name') + '='+ $(this).parent().children('input[type=\'text\']').val() + ($(this).attr('name')=='c_autoupdate' ? $(this).parent().find('select').val() + ',' : ','): '';});location.href='/feeds/wizard?step=3&amp;NfOptions='+str+'&amp;NfLgID='+$('select[name=\'NfLgID\']').val()+'&amp;NfName='+$('input[name=\'NfName\']').val();return false;" />
-    <input type="submit" value="Save" />
+    <input type="button" value="Back" data-action="wizard-step4-back" />
+    <input type="submit" value="Save" data-action="wizard-step4-submit" />
 </form>
-<script type="text/javascript">
-    if(<?php if (isset($wizardData['edit_feed'])) {
-        echo $wizardData['edit_feed'];
-       } else {
-           echo '0';
-       } ?>) {
-        $('input[name="save_feed"]').attr('name','update_feed');
-        $('input[type="submit"]').val('Update');
-    }
-    $('h1')
-    .eq(-1)
-    .html(
-        'Feed Wizard | Step 4 - Edit Options ' +
-        '<a href="docs/info.html#feed_wizard" target="_blank">' +
-        '<img alt="Help" title="Help" src="/assets/icons/question-frame.png"></img></a>'
-    )
-    .css('text-align','center');
-    $('[name^="c_"]').change(function(){
-        if(this.checked){
-            $(this).parent().children('input[type="text"]')
-            .removeAttr('disabled').addClass("notempty");
-            $(this).parent().find('select').removeAttr('disabled');
-        } else{
-            $(this).parent().children('input[type="text"]')
-            .attr('disabled','disabled').removeClass("notempty");
-            $(this).parent().find('select').attr('disabled','disabled');
-        }
-    });
-    $('[type="submit"]').on('click', function(){
-        var str;
-        str=$('[name="edit_text"]:checked').length > 0?"edit_text=1,":"";
-        $('[name^="c_"]').each(function(){
-            str+=this.checked ? $(this).parent()
-            .children('input[type="text"]').attr('name') + '='
-            + $(this).parent().children('input[type="text"]').val()
-            + (
-                $(this).attr('name')=='c_autoupdate' ?
-                $(this).parent().find('select').val() + ',' :
-                ','
-            ) : '';
-        });
-        if($('input[name="article_source"]').val()!='')
-            str=str+'article_source='+ $('input[name="article_source"]').val();
-        $('input[name="NfOptions"]').val(str);
-    });
-</script>

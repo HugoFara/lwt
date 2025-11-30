@@ -3,7 +3,7 @@
  *
  * Handles event delegation for the tag list filter and table,
  * replacing inline onclick/onchange handlers with data attributes.
- * Works for both term tags (/tags/term) and text tags (/tags/text).
+ * Works for both term tags (/tags) and text tags (/tags/text).
  *
  * @author  HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
@@ -11,6 +11,7 @@
  */
 
 import { selectToggle, multiActionGo, allActionGo } from '../forms/bulk_actions';
+import { lwtFormCheck } from '../forms/unloadformcheck';
 
 /**
  * Get the base URL from a data attribute or default.
@@ -128,11 +129,36 @@ function initTagListTable(): void {
 }
 
 /**
+ * Initialize tag form event handlers (new/edit forms).
+ */
+function initTagForm(): void {
+  // Initialize form check for forms with lwt-form-check class
+  const formCheckForms = document.querySelectorAll<HTMLFormElement>('form.lwt-form-check');
+  formCheckForms.forEach((form) => {
+    lwtFormCheck.askBeforeExit();
+  });
+
+  // Cancel buttons with data-action="cancel"
+  const cancelButtons = document.querySelectorAll<HTMLButtonElement>('[data-action="cancel"]');
+  cancelButtons.forEach((button) => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = button.dataset.url;
+      if (url) {
+        lwtFormCheck.resetDirty();
+        location.href = url;
+      }
+    });
+  });
+}
+
+/**
  * Initialize all tag list event handlers.
  */
 export function initTagList(): void {
   initTagListFilter();
   initTagListTable();
+  initTagForm();
 }
 
 /**
@@ -140,17 +166,28 @@ export function initTagList(): void {
  */
 function isTagListPage(): boolean {
   const form1 = document.forms.namedItem('form1');
-  if (!form1) return false;
 
-  // Check for characteristic elements of the tag list
-  const hasResetButton = form1.querySelector('[data-action="reset-all"]') !== null;
-  const hasSortSelect = form1.querySelector('[data-action="sort"]') !== null;
+  // Check for tag list page (has filter form)
+  if (form1) {
+    const hasResetButton = form1.querySelector('[data-action="reset-all"]') !== null;
+    const hasSortSelect = form1.querySelector('[data-action="sort"]') !== null;
 
-  // Also check for form2 with mark actions (table part)
-  const form2 = document.forms.namedItem('form2');
-  const hasMarkAction = form2?.querySelector('[data-action="mark-action"]') !== null;
+    // Also check for form2 with mark actions (table part)
+    const form2 = document.forms.namedItem('form2');
+    const hasMarkAction = form2?.querySelector('[data-action="mark-action"]') !== null;
 
-  return hasResetButton && (hasSortSelect || hasMarkAction);
+    if (hasResetButton && (hasSortSelect || hasMarkAction)) {
+      return true;
+    }
+  }
+
+  // Check for tag form page (new/edit forms)
+  const tagForm = document.querySelector('form.lwt-form-check[name="newtag"], form.lwt-form-check[name="edittag"]');
+  if (tagForm) {
+    return true;
+  }
+
+  return false;
 }
 
 // Auto-initialize on DOM ready if on tag list page

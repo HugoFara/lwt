@@ -1379,7 +1379,8 @@ class WordController extends BaseController
             PageLayoutHelper::renderPageStart("Setting all blue words to Well-known", false);
         }
 
-        list($count, $javascript) = $this->wordService->markAllWordsWithStatus($textId, $status);
+        list($count, $wordsData) = $this->wordService->markAllWordsWithStatus($textId, $status);
+        $useTooltips = \Lwt\Database\Settings::getWithDefault('set-tooltip-mode') == 1;
 
         include __DIR__ . '/../Views/Word/all_wellknown_result.php';
 
