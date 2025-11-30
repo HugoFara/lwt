@@ -265,7 +265,7 @@ The PHP backend contains significant JavaScript code embedded in Views and Core 
 | `Core/Feed/feeds.php` | 24-93 | Generated AJAX | High |
 | `Core/Word/dictionary_links.php` | 87-277 | Generated HTML+JS | Medium |
 | `Core/Text/simterms.php` | 175-182 | Generated handlers | Low |
-| `Core/UI/ui_helpers.php` | 102-106, 912-918 | JSON data | Keep |
+| ~~`Core/UI/ui_helpers.php`~~ | - | Migrated to MVC View Helpers | Done |
 
 **Impact:**
 
@@ -506,7 +506,7 @@ PHP files also contain inline CSS that should be migrated to proper CSS files.
 3. ✅ Create TypeScript configuration
 4. ✅ Create type declarations for PHP-injected globals
 5. ✅ Create PHP helper for Vite asset loading
-6. ✅ Modify `ui_helpers.php` for conditional asset loading
+6. ✅ Modify View Helpers for conditional asset loading (migrated from `ui_helpers.php`)
 
 **Files Created/Modified:**
 
@@ -517,7 +517,7 @@ vite.config.ts            # NEW - Vite build configuration
 src/frontend/js/main.ts   # NEW - Vite entry point
 src/frontend/js/types/globals.d.ts  # NEW - Type declarations for LWT_DATA, STATUSES, etc.
 src/backend/Core/vite_helper.php    # NEW - PHP helper functions
-src/backend/Core/ui_helpers.php     # Modified - conditional Vite/legacy loading
+src/backend/View/Helper/PageLayoutHelper.php  # Migrated from ui_helpers.php
 ```
 
 **Key Implementation Details:**
@@ -1073,13 +1073,13 @@ async function loadSingleFeed(feed: FeedConfig): Promise<void> {
 **Low Priority (after jQuery removal):**
 
 - [ ] `Core/Text/simterms.php` - Refactor similar terms display
-- [ ] `Core/UI/ui_helpers.php` - Keep JSON patterns, remove any inline JS
+- [x] ~~`Core/UI/ui_helpers.php`~~ - Migrated to MVC View Helpers
 - [ ] Remaining Views with minor inline handlers
 
 **Files to keep unchanged:**
 
 - Any file using only `json_encode()` for data passing (correct pattern)
-- `ui_helpers.php` STATUSES/TAGS injection (needed for global config)
+- View Helper classes for STATUSES/TAGS injection (needed for global config)
 
 #### Task 2.5.6: Update Frontend Entry Point
 

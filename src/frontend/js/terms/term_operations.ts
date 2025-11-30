@@ -509,6 +509,13 @@ function initSentenceEventDelegation(): void {
       do_ajax_show_sentences(lang, termlc, targetId, wid);
     }
   });
+
+  // Handle set-trans-roman: copy translation and romanization from similar terms
+  $(document).on('click', '[data-action="set-trans-roman"]', function (this: HTMLElement) {
+    const translation = this.dataset.translation || '';
+    const romanization = this.dataset.romanization || '';
+    setTransRoman(translation, romanization);
+  });
 }
 
 // Auto-initialize when DOM is ready

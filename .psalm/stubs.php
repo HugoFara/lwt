@@ -157,7 +157,7 @@ function targetLangFromDict($url): string {}
  */
 function parseSQLFile($filename): array {}
 
-// From ui_helpers.php
+// Migrated from ui_helpers.php to View Helper classes
 
 /**
  * @return void

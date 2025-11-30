@@ -809,19 +809,23 @@ The original `database_connect.php` was split into focused modules:
 
 ### session_utility.php Split
 
-The original `session_utility.php` (4300+ lines) was split into 4 files:
+The original `session_utility.php` (4300+ lines) was split into multiple files:
 
 | New File | Lines | Purpose |
 |----------|-------|---------|
 | `session_utility.php` | ~1,000 | Core session functions, navigation, media handling, string utilities |
-| `ui_helpers.php` | ~960 | HTML/UI generation (logos, selects, pagers, page headers, status indicators) |
 | `export_helpers.php` | ~240 | Export functions (Anki, TSV, flexible format exports) |
 | `text_helpers.php` | ~2,100 | Text/sentence processing, MeCab integration, annotations, expression handling |
 
-All functions remain in the global namespace for backward compatibility. The `session_utility.php` file requires all helper files automatically:
+UI helper functions previously in `ui_helpers.php` have been migrated to proper MVC View Helper classes:
+
+- `PageLayoutHelper` - Page headers, footers, logos
+- `StatusHelper` - Status indicators and conditions
+- `SelectOptionsBuilder` - Select/dropdown option generation
+
+All functions remain in the global namespace for backward compatibility. The `session_utility.php` file requires the helper files automatically:
 
 ```php
-require_once __DIR__ . '/ui_helpers.php';
 require_once __DIR__ . '/export_helpers.php';
 require_once __DIR__ . '/text_helpers.php';
 ```

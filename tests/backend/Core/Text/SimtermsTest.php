@@ -268,9 +268,10 @@ class SimtermsTest extends TestCase
         $this->assertStringContainsString('<img', $output);
         $this->assertStringContainsString('tick-button-small.png', $output);
 
-        // Should contain onclick event
-        $this->assertStringContainsString('onclick', $output);
-        $this->assertStringContainsString('setTransRoman', $output);
+        // Should contain data attributes for JS event delegation
+        $this->assertStringContainsString('data-action="set-trans-roman"', $output);
+        $this->assertStringContainsString('data-translation="greeting"', $output);
+        $this->assertStringContainsString('data-romanization="heh-lo"', $output);
 
         // Test with term that has matching compare string
         $output = format_term(1, 'hello');
