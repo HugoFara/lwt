@@ -28,25 +28,6 @@ use Lwt\Core\Http\InputValidator;
 <div id="wizard-step4-config"
     data-edit-feed-id="<?php echo isset($wizardData['edit_feed']) ? (int)$wizardData['edit_feed'] : ''; ?>"
     style="display: none;"></div>
-<script type="text/javascript">
-(function() {
-    function init() {
-        var configEl = document.getElementById('wizard-step4-config');
-        if (!configEl || typeof window.initWizardStep4 !== 'function') return;
-
-        var editFeedId = configEl.dataset.editFeedId;
-        window.initWizardStep4({
-            editFeedId: editFeedId ? parseInt(editFeedId, 10) : null
-        });
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-})();
-</script>
 <form class="validate" action="/feeds/edit" method="post">
     <table class="tab2" cellspacing="0" cellpadding="5">
         <tr>

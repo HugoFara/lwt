@@ -26,26 +26,6 @@ namespace Lwt\Views\Feed;
     data-hide-images="<?php echo $wizardData['hide_images'] == 'yes' ? 'true' : 'false'; ?>"
     data-is-minimized="<?php echo $wizardData['maxim'] == 0 ? 'true' : 'false'; ?>"
     style="display: none;"></div>
-<script type="text/javascript">
-(function() {
-    function init() {
-        var configEl = document.getElementById('wizard-step3-config');
-        if (!configEl || typeof window.initWizardStep3 !== 'function') return;
-
-        window.initWizardStep3({
-            articleSelector: configEl.dataset.articleSelector || '',
-            hideImages: configEl.dataset.hideImages === 'true',
-            isMinimized: configEl.dataset.isMinimized === 'true'
-        });
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-})();
-</script>
 <div id="lwt_header">
     <form name="lwt_form1" class="validate" action="/feeds/wizard" method="post">
     <div id="adv" style="display: none;">

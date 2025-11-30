@@ -24,14 +24,9 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\Services\TagService;
 
 ?>
-<script type="text/javascript">
-    $(document).ready(lwtFormCheck.askBeforeExit);
-    $(window).on('beforeunload', function() {
-        setTimeout(function() {window.parent.frames['ru'].location.href = 'empty.html';}, 0);
-    });
-</script>
 
-<form name="newword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+<form name="newword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"
+data-lwt-clear-frame="true">
     <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />
     <input type="hidden" name="tid" value="<?php echo $textId; ?>" />
     <table class="tab2" cellspacing="0" cellpadding="5">

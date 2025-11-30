@@ -229,15 +229,3 @@ data-action="wizard-minmax">
 </div>
 <br /><p id="lwt_last"></p>
 <?php echo $feedHtml; ?>
-<script type="text/javascript">
-    // Initialize wizard step 2 with configuration from data attributes
-    $(document).ready(function() {
-        var header = document.getElementById('lwt_header');
-        if (header) {
-            initWizardStep2(
-                header.dataset.hideImages === 'true',
-                header.dataset.isMinimized === 'true'
-            );
-        }
-    });
-</script>

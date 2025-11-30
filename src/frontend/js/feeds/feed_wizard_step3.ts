@@ -226,9 +226,27 @@ function initWizardStep3Events(): void {
   });
 }
 
-// Auto-initialize event handlers
+/**
+ * Auto-initialize wizard step 3 from config element.
+ * Detects the wizard-step3-config element's data attributes and initializes.
+ */
+function autoInitWizardStep3(): void {
+  const configEl = document.getElementById('wizard-step3-config');
+  if (!configEl || typeof configEl.dataset.hideImages === 'undefined') {
+    return;
+  }
+
+  initWizardStep3({
+    articleSelector: configEl.dataset.articleSelector || '',
+    hideImages: configEl.dataset.hideImages === 'true',
+    isMinimized: configEl.dataset.isMinimized === 'true'
+  });
+}
+
+// Auto-initialize event handlers and step 3
 $(document).ready(function () {
   initWizardStep3Events();
+  autoInitWizardStep3();
 });
 
 // Expose to window for backward compatibility

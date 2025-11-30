@@ -175,9 +175,26 @@ function initWizardStep4Events(): void {
   });
 }
 
-// Auto-initialize event handlers
+/**
+ * Auto-initialize wizard step 4 from config element.
+ * Detects the wizard-step4-config element's data attributes and initializes.
+ */
+function autoInitWizardStep4(): void {
+  const configEl = document.getElementById('wizard-step4-config');
+  if (!configEl) {
+    return;
+  }
+
+  const editFeedId = configEl.dataset.editFeedId;
+  initWizardStep4({
+    editFeedId: editFeedId ? parseInt(editFeedId, 10) : null
+  });
+}
+
+// Auto-initialize event handlers and step 4
 $(document).ready(function () {
   initWizardStep4Events();
+  autoInitWizardStep4();
 });
 
 // Expose to window for backward compatibility

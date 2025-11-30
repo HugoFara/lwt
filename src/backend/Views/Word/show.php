@@ -63,6 +63,4 @@ namespace Lwt\Views\Word;
 </tr>
 </table>
 
-<script type="text/javascript">
-    cleanupRightFrames();
-</script>
+<div data-lwt-cleanup-frames="true" hidden></div>

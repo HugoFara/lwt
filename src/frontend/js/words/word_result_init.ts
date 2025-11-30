@@ -265,6 +265,11 @@ function initEditResult(config: EditResultConfig): void {
  * Auto-initialize word result views from JSON config elements.
  */
 export function autoInitWordResults(): void {
+  // Cleanup frames (for show.php and similar views)
+  if (document.querySelector('[data-lwt-cleanup-frames="true"]')) {
+    cleanupRightFrames();
+  }
+
   // All well-known result
   const wellKnownConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-all-wellknown-config]');
   if (wellKnownConfigEl) {

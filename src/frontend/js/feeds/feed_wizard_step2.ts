@@ -181,9 +181,26 @@ function initWizardStep2Events(): void {
   });
 }
 
-// Auto-initialize event handlers
+/**
+ * Auto-initialize wizard step 2 from config element.
+ * Detects the lwt_header element's data attributes and initializes.
+ */
+function autoInitWizardStep2(): void {
+  const header = document.getElementById('lwt_header');
+  if (!header || !header.dataset.hideImages) {
+    return;
+  }
+
+  initWizardStep2(
+    header.dataset.hideImages === 'true',
+    header.dataset.isMinimized === 'true'
+  );
+}
+
+// Auto-initialize event handlers and step 2
 $(document).ready(function () {
   initWizardStep2Events();
+  autoInitWizardStep2();
 });
 
 // Expose to window for backward compatibility
