@@ -678,22 +678,171 @@ footer
 * Main page (index.php) navigation menu style
 */
 .menu {
-  display: flex; 
-  flex-direction: column; 
+  display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
   margin-bottom: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  min-width: 340px;
+  max-width: 500px;
+}
+
+/**
+* Main page (index.php) navigation menu section header
+*/
+.menu-header {
+  font-size: 1.35em;
+  font-weight: 700;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid currentColor;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+
+.menu-header:hover {
+  opacity: 0.8;
+}
+
+.menu-header::after {
+  content: '▼';
+  font-size: 0.6em;
+  transition: transform 0.3s ease;
+}
+
+.menu.collapsed .menu-header::after {
+  transform: rotate(-90deg);
+}
+
+.menu-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  max-height: 500px;
+  opacity: 1;
+}
+
+.menu.collapsed .menu-content {
+  max-height: 0;
+  opacity: 0;
 }
 
 /**
 * Main page (index.php) navigation menu style elements
 */
-.menu > * {
-  width: 400px;
-  height: 30px;
-  margin: 5px;
+.menu-content > a,
+.menu-content > div:not(.home-last-text) {
+  width: 100%;
+  min-height: 30px;
+  margin: 4px 0;
   text-align: center;
-  background-color: #8883;
-  padding-top: 15px;
+  background-color: #fff;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.menu-content > a:hover {
+  background-color: #4a90d9;
+  color: #fff;
+  border-color: #4a90d9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 217, 0.3);
+}
+
+.menu-content > a:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(74, 144, 217, 0.2);
+}
+
+/**
+* Color-coded menu categories
+*/
+
+/* Languages menu - blue accent */
+.menu-languages {
+  border-top-color: #4a90d9;
+}
+.menu-languages .menu-header {
+  color: #4a90d9;
+}
+
+/* Texts menu - green accent */
+.menu-texts {
+  border-top-color: #28a745;
+}
+.menu-texts .menu-header {
+  color: #28a745;
+}
+.menu-texts .menu-content > a:hover {
+  background-color: #28a745;
+  border-color: #28a745;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Terms menu - purple accent */
+.menu-terms {
+  border-top-color: #6f42c1;
+}
+.menu-terms .menu-header {
+  color: #6f42c1;
+}
+.menu-terms .menu-content > a:hover {
+  background-color: #6f42c1;
+  border-color: #6f42c1;
+  box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+}
+
+/* Feeds menu - orange accent */
+.menu-feeds {
+  border-top-color: #fd7e14;
+}
+.menu-feeds .menu-header {
+  color: #fd7e14;
+}
+.menu-feeds .menu-content > a:hover {
+  background-color: #fd7e14;
+  border-color: #fd7e14;
+  box-shadow: 0 4px 12px rgba(253, 126, 20, 0.3);
+}
+
+/* Admin menu - teal accent */
+.menu-admin {
+  border-top-color: #17a2b8;
+}
+.menu-admin .menu-header {
+  color: #17a2b8;
+}
+.menu-admin .menu-content > a:hover {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+/* Settings menu - gray accent */
+.menu-settings {
+  border-top-color: #6c757d;
+}
+.menu-settings .menu-header {
+  color: #6c757d;
+}
+.menu-settings .menu-content > a:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
 }
 
 /**************************************************************
@@ -1074,8 +1223,44 @@ Home page styles
 .home-menu-container
 {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+/* Mobile-first responsive design for home menu */
+@media (max-width: 768px) {
+  .home-menu-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+  }
+
+  .menu {
+    width: 95%;
+    max-width: none;
+    min-width: auto;
+  }
+
+  .menu-content > a,
+  .menu-content > div:not(.home-last-text) {
+    padding: 14px 15px;
+    font-size: 1.05em;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .home-menu-container {
+    gap: 15px;
+  }
+
+  .menu {
+    min-width: 300px;
+    max-width: 400px;
+  }
 }
 
 /* WordPress logout text */

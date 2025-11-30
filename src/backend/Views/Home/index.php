@@ -143,51 +143,69 @@ $currentTextInfo = $dashboardData['current_text_info'];
 <p class="center">Welcome to your language learning app!</p>
 
 <div class="home-menu-container">
-    <div class="menu">
-        <?php if ($langcnt == 0): ?>
-        <div><p>Hint: The database seems to be empty.</p></div>
-        <a href="/admin/install-demo">Install the LWT demo database</a>
-        <a href="/languages?new=1">Define the first language you want to learn</a>
-        <?php elseif ($langcnt > 0): ?>
-        <?php renderLanguageSelector($currentlang, $languages); ?>
-        <?php
-        if ($currenttext !== null) {
-            renderCurrentTextInfo($currenttext, $currentTextInfo);
-        }
-        ?>
-        <?php endif; ?>
-        <a href="/languages">Languages</a>
+    <div class="menu menu-languages" data-menu-id="languages">
+        <div class="menu-header">Languages</div>
+        <div class="menu-content">
+            <?php if ($langcnt == 0): ?>
+            <div><p>Hint: The database seems to be empty.</p></div>
+            <a href="/admin/install-demo">Install the LWT demo database</a>
+            <a href="/languages?new=1">Define the first language you want to learn</a>
+            <?php elseif ($langcnt > 0): ?>
+            <?php renderLanguageSelector($currentlang, $languages); ?>
+            <?php
+            if ($currenttext !== null) {
+                renderCurrentTextInfo($currenttext, $currentTextInfo);
+            }
+            ?>
+            <?php endif; ?>
+            <a href="/languages">Manage Languages</a>
+        </div>
     </div>
 
-    <div class="menu">
-        <a href="/texts">Texts</a>
-        <a href="/text/archived">Text Archive</a>
-        <a href="/tags/text">Text Tags</a>
-        <a href="/text/check">Check Text</a>
-        <a href="/text/import-long">Import Long Text</a>
+    <div class="menu menu-texts" data-menu-id="texts">
+        <div class="menu-header">Texts</div>
+        <div class="menu-content">
+            <a href="/texts">My Texts</a>
+            <a href="/text/archived">Text Archive</a>
+            <a href="/tags/text">Text Tags</a>
+            <a href="/text/check">Check Text</a>
+            <a href="/text/import-long">Import Long Text</a>
+        </div>
     </div>
 
-    <div class="menu">
-        <a href="/words/edit" title="View and edit saved words and expressions">Terms</a>
-        <a href="/tags">Term Tags</a>
-        <a href="/word/upload">Import Terms</a>
+    <div class="menu menu-terms" data-menu-id="terms">
+        <div class="menu-header">Vocabulary</div>
+        <div class="menu-content">
+            <a href="/words/edit" title="View and edit saved words and expressions">My Terms</a>
+            <a href="/tags">Term Tags</a>
+            <a href="/word/upload">Import Terms</a>
+        </div>
     </div>
 
-    <div class="menu">
-        <a href="/feeds?check_autoupdate=1">Newsfeeds</a>
-        <a href="/admin/backup" title="Backup, restore or empty database">Database</a>
+    <div class="menu menu-feeds" data-menu-id="feeds">
+        <div class="menu-header">Content</div>
+        <div class="menu-content">
+            <a href="/feeds?check_autoupdate=1">Newsfeeds</a>
+            <a href="/admin/backup" title="Backup, restore or empty database">Database</a>
+        </div>
     </div>
 
-    <div class="menu">
-        <a href="/admin/statistics" title="Text statistics">Statistics</a>
-        <a href="docs/info.html">Help</a>
-        <a href="/admin/server-data" title="Various data useful for debug">Server Data</a>
+    <div class="menu menu-admin" data-menu-id="admin">
+        <div class="menu-header">Information</div>
+        <div class="menu-content">
+            <a href="/admin/statistics" title="Text statistics">Statistics</a>
+            <a href="docs/info.html">Help</a>
+            <a href="/admin/server-data" title="Various data useful for debug">Server Data</a>
+        </div>
     </div>
 
-    <div class="menu">
-        <a href="/admin/settings">Settings</a>
-        <a href="/admin/settings/tts" title="Text-to-Speech settings">Text-to-Speech</a>
-        <a href="/mobile" title="Mobile LWT is a legacy function">Mobile LWT (Deprecated)</a>
+    <div class="menu menu-settings" data-menu-id="settings">
+        <div class="menu-header">Settings</div>
+        <div class="menu-content">
+            <a href="/admin/settings">General Settings</a>
+            <a href="/admin/settings/tts" title="Text-to-Speech settings">Text-to-Speech</a>
+            <a href="/mobile" title="Mobile LWT is a legacy function">Mobile LWT (Deprecated)</a>
+        </div>
     </div>
 
     <?php renderWordPressLogout($isWordPress); ?>

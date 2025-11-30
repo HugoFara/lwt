@@ -115,6 +115,7 @@ import './admin/statistics_charts';
 
 // Home
 import './home/home_warnings';
+import './home/home_menu';
 
 // UI Components
 import './ui/modal';
