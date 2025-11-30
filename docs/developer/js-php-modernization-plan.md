@@ -37,6 +37,7 @@ This document outlines a phased approach to modernize the JavaScript-to-PHP comm
 ### Existing REST API (api.php/v1/)
 
 Located in `src/backend/Api/V1/`:
+
 - `languages` - GET
 - `media-files` - GET
 - `phonetic-reading` - GET
@@ -198,6 +199,7 @@ export async function apiDelete<T>(endpoint: string): Promise<ApiResponse<T>> {
 Create type-safe wrappers for each domain:
 
 **`src/frontend/js/api/terms.ts`:**
+
 ```typescript
 import { apiGet, apiPost, apiPut, apiDelete, ApiResponse } from '../core/api_client';
 
@@ -262,6 +264,7 @@ export const TermsApi = {
 ```
 
 **Files to create:**
+
 - `src/frontend/js/api/terms.ts` - Term/word operations
 - `src/frontend/js/api/texts.ts` - Text operations
 - `src/frontend/js/api/review.ts` - Test/review operations
@@ -404,6 +407,7 @@ public function updateReviewStatus(int $wordId, ?int $status, ?int $change): arr
 #### 3.2 Example Migration: ajax_utilities.ts
 
 **Before:**
+
 ```typescript
 import $ from 'jquery';
 
@@ -413,6 +417,7 @@ export function do_ajax_save_setting(k: string, v: string): void {
 ```
 
 **After:**
+
 ```typescript
 import { SettingsApi } from '../api/settings';
 
@@ -424,6 +429,7 @@ export async function do_ajax_save_setting(k: string, v: string): Promise<void> 
 #### 3.3 Example Migration: word_status_ajax.ts
 
 **Before:**
+
 ```typescript
 $.post(`api.php/v1/terms/${wid}/status/${status}`, {}, (data) => {
   // handle response
@@ -431,6 +437,7 @@ $.post(`api.php/v1/terms/${wid}/status/${status}`, {}, (data) => {
 ```
 
 **After:**
+
 ```typescript
 const response = await TermsApi.setStatus(wid, status);
 if (response.error) {
@@ -451,10 +458,12 @@ This is the most significant change, affecting the reading interface.
 #### 4.1 Current Frame Architecture
 
 The reading interface uses frames:
+
 - Main frame: Text display (`do_text.php`)
 - Right frame (`target="ro"`): Word details, status changes
 
 When a user clicks a word:
+
 1. `overlib_interface.ts` generates HTML with `onclick` handlers
 2. Handlers navigate the right frame to PHP endpoints
 3. PHP returns full HTML page
@@ -463,6 +472,7 @@ When a user clicks a word:
 #### 4.2 Target Architecture
 
 Replace frames with:
+
 1. **Event delegation** on word elements
 2. **API calls** returning JSON
 3. **DOM updates** to show results in-place or in a panel
@@ -679,12 +689,12 @@ header('X-Deprecated: Use /api/v1/terms/{id}/status instead');
 ## Implementation Order
 
 ```
-Phase 1.1  Create api_client.ts                    [Foundation]
-Phase 1.2  Create domain API modules               [Foundation]
+Phase 1.1  Create api_client.ts                    [Foundation] ✓ DONE
+Phase 1.2  Create domain API modules               [Foundation] ✓ DONE
     │
-    ├── Phase 2.1  Add missing REST endpoints      [Backend]
-    │   Phase 2.2  Extend TermHandler              [Backend]
-    │   Phase 2.3  Extend ReviewHandler            [Backend]
+    ├── Phase 2.1  Add missing REST endpoints      [Backend] ✓ DONE
+    │   Phase 2.2  Extend TermHandler              [Backend] ✓ DONE
+    │   Phase 2.3  Extend ReviewHandler            [Backend] ✓ DONE
     │
     └── Phase 3.1  Migrate ajax_utilities.ts       [Quick win]
         Phase 3.2  Migrate word_status_ajax.ts     [Quick win]
@@ -730,6 +740,7 @@ Phase 1.2  Create domain API modules               [Foundation]
 ## Files to Modify Summary
 
 ### New Files to Create
+
 - `src/frontend/js/core/api_client.ts`
 - `src/frontend/js/api/terms.ts`
 - `src/frontend/js/api/texts.ts`
@@ -739,6 +750,7 @@ Phase 1.2  Create domain API modules               [Foundation]
 - `src/frontend/js/components/result_panel.ts`
 
 ### Files to Modify
+
 - `src/frontend/js/core/ajax_utilities.ts` - Replace jQuery
 - `src/frontend/js/words/word_status_ajax.ts` - Replace jQuery
 - `src/frontend/js/reading/text_display.ts` - Replace jQuery
@@ -751,6 +763,7 @@ Phase 1.2  Create domain API modules               [Foundation]
 - `src/backend/Api/V1/Handlers/ReviewHandler.php` - Add methods
 
 ### Files to Eventually Deprecate
+
 - `set_word_status.php`
 - `set_test_status.php`
 - `delete_word.php`
