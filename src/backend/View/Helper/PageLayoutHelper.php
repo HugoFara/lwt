@@ -21,6 +21,8 @@ require_once __DIR__ . '/../../Core/Http/url_utilities.php';
 use Lwt\Core\Http\UrlUtilities;
 use function Lwt\Core\Utils\showRequest;
 use function Lwt\Core\Utils\get_execution_time;
+use function Lwt\Core\Utils\tohtml;
+use function Lwt\Core\Utils\get_file_path;
 
 /**
  * Helper class for generating page layout elements.

@@ -49,7 +49,7 @@ $hasAnnotation = $viewData['hasAnnotation'];
         </a>
     </div>
     <div>
-        <?php quickMenu(); ?>
+        <?php echo \Lwt\View\Helper\PageLayoutHelper::buildQuickMenu(); ?>
     </div>
 </div>
 <h1>PRINT &#9654; <?php

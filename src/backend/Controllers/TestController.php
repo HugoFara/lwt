@@ -18,14 +18,18 @@ namespace Lwt\Controllers;
 
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\TestService;
+use Lwt\Services\LanguageService;
+use Lwt\Services\LanguageDefinitions;
 use Lwt\Services\MobileService;
-use Lwt\Views\TestViews;
 use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Services/TestService.php';
 require_once __DIR__ . '/../Services/MobileService.php';
-require_once __DIR__ . '/../Views/TestViews.php';
+require_once __DIR__ . '/../Services/LanguageService.php';
+require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../View/Helper/StatusHelper.php';
+require_once __DIR__ . '/../View/Helper/FormHelper.php';
 require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
 
 /**
@@ -47,14 +51,12 @@ require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
 class TestController extends BaseController
 {
     private TestService $testService;
-    private TestViews $testViews;
     private MobileService $mobileService;
 
     public function __construct()
     {
         parent::__construct();
         $this->testService = new TestService();
-        $this->testViews = new TestViews();
         $this->mobileService = new MobileService();
     }
 
@@ -85,6 +87,8 @@ class TestController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
     public function setStatus(array $params): void
     {
@@ -120,23 +124,20 @@ class TestController extends BaseController
         // Update session progress
         $testStatus = $this->testService->updateSessionProgress($statusChange);
 
-        // Render result
-        $this->testViews->renderStatusChangeResult(
-            $wordText,
-            $result['oldStatus'],
-            $result['newStatus'],
-            $result['oldScore'],
-            $result['newScore']
-        );
+        // Render result - prepare variables for views
+        $oldStatus = $result['oldStatus'];
+        $newStatus = $result['newStatus'];
+        $oldScore = $result['oldScore'];
+        $newScore = $result['newScore'];
 
-        $this->testViews->renderStatusChangeJs(
-            $wid,
-            $result['newStatus'],
-            $statusChange,
-            $testStatus,
-            $useAjax,
-            $this->testService->getWaitingTime()
-        );
+        include __DIR__ . '/../Views/Test/status_change_result.php';
+
+        // Render status change config
+        $wordId = $wid;
+        $ajax = $useAjax;
+        $waitTime = $this->testService->getWaitingTime();
+
+        include __DIR__ . '/../Views/Test/status_change_config.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -147,12 +148,14 @@ class TestController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
     public function header(array $params): void
     {
-        $langId = $this->param('lang') !== null ? (int) $this->param('lang') : null;
-        $textId = $this->param('text') !== null ? (int) $this->param('text') : null;
-        $selection = $this->param('selection') !== null ? (int) $this->param('selection') : null;
+        $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
+        $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
+        $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
         $sessTestsql = $_SESSION['testsql'] ?? null;
 
         $testData = $this->testService->getTestDataFromParams(
@@ -178,16 +181,16 @@ class TestController extends BaseController
         // Initialize session
         $this->testService->initializeTestSession($testData['counts']['due']);
 
-        // Render header
-        $this->testViews->renderHeaderJs();
-        $this->testViews->renderHeaderRow($textId);
-        $this->testViews->renderHeaderContent(
-            $testData['title'],
-            $testData['property'],
-            $testData['counts']['due'],
-            $testData['counts']['total'],
-            $languageName
-        );
+        // Render header views
+        include __DIR__ . '/../Views/Test/header.php';
+
+        // Prepare variables for header content
+        $title = $testData['title'];
+        $property = $testData['property'];
+        $totalDue = $testData['counts']['due'];
+        $totalCount = $testData['counts']['total'];
+
+        include __DIR__ . '/../Views/Test/header_content.php';
     }
 
     /**
@@ -196,12 +199,14 @@ class TestController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
     public function tableTest(array $params): void
     {
-        $langId = $this->param('lang') !== null ? (int) $this->param('lang') : null;
-        $textId = $this->param('text') !== null ? (int) $this->param('text') : null;
-        $selection = $this->param('selection') !== null ? (int) $this->param('selection') : null;
+        $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
+        $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
+        $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
         $sessTestsql = $_SESSION['testsql'] ?? null;
 
         // Get test SQL
@@ -229,7 +234,7 @@ class TestController extends BaseController
         // Get language settings
         $langIdFromSql = $this->testService->getLanguageIdFromTestSql($testsql);
         if ($langIdFromSql === null) {
-            $this->testViews->renderNoTerms();
+            include __DIR__ . '/../Views/Test/no_terms.php';
             PageLayoutHelper::renderPageEnd();
             exit();
         }
@@ -237,22 +242,20 @@ class TestController extends BaseController
         $langSettings = $this->testService->getLanguageSettings($langIdFromSql);
         $textSize = round((($langSettings['textSize'] ?? 100) - 100) / 2, 0) + 100;
 
-        // Render table
+        // Render table settings
         $settings = $this->testService->getTableTestSettings();
-        $this->testViews->renderTableTestJs();
-        $this->testViews->renderTableTestSettings($settings);
+        include __DIR__ . '/../Views/Test/table_test_settings.php';
 
         echo '<table class="sortable tab2 table-test" cellspacing="0" cellpadding="5">';
-        $this->testViews->renderTableTestHeader();
+        include __DIR__ . '/../Views/Test/table_test_header.php';
 
+        // Render table rows
         $words = $this->testService->getTableTestWords($testsql);
+        $regexWord = $langSettings['regexWord'] ?? '';
+        $rtl = $langSettings['rtl'] ?? false;
+
         while ($word = mysqli_fetch_assoc($words)) {
-            $this->testViews->renderTableTestRow(
-                $word,
-                $langSettings['regexWord'] ?? '',
-                (int) $textSize,
-                $langSettings['rtl'] ?? false
-            );
+            include __DIR__ . '/../Views/Test/table_test_row.php';
         }
         mysqli_free_result($words);
 
@@ -303,9 +306,9 @@ class TestController extends BaseController
      */
     private function renderMobileTestPage(): void
     {
-        $langId = $this->param('lang') !== null ? (int) $this->param('lang') : null;
-        $textId = $this->param('text') !== null ? (int) $this->param('text') : null;
-        $selection = $this->param('selection') !== null ? (int) $this->param('selection') : null;
+        $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
+        $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
+        $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
         $sessTestsql = $_SESSION['testsql'] ?? null;
 
         $language = $this->testService->getL2LanguageName(
@@ -343,9 +346,9 @@ class TestController extends BaseController
     private function renderDesktopTestPage(): void
     {
         $frameWidth = (int) \Lwt\Database\Settings::getWithDefault('set-text-l-framewidth-percent');
-        $langId = $this->param('lang') !== null ? (int) $this->param('lang') : null;
-        $textId = $this->param('text') !== null ? (int) $this->param('text') : null;
-        $selection = $this->param('selection') !== null ? (int) $this->param('selection') : null;
+        $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
+        $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
+        $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
         $sessTestsql = $_SESSION['testsql'] ?? null;
 
         $language = $this->testService->getL2LanguageName(
@@ -388,12 +391,14 @@ class TestController extends BaseController
      * Render test content (AJAX-based word tests).
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
     private function renderTestContent(): void
     {
-        $langId = $this->param('lang') !== null ? (int) $this->param('lang') : null;
-        $textId = $this->param('text') !== null ? (int) $this->param('text') : null;
-        $selection = $this->param('selection') !== null ? (int) $this->param('selection') : null;
+        $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
+        $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
+        $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
         $sessTestsql = $_SESSION['testsql'] ?? null;
 
         $identifier = $this->testService->getTestIdentifier(
@@ -409,7 +414,7 @@ class TestController extends BaseController
         }
 
         $testsql = $this->testService->getTestSql($identifier[0], $identifier[1]);
-        $testType = $this->testService->clampTestType((int) $this->param('type', 1));
+        $testType = $this->testService->clampTestType((int) $this->param('type', '1'));
         $wordMode = $this->testService->isWordMode($testType);
         $baseType = $this->testService->getBaseTestType($testType);
 
@@ -420,7 +425,7 @@ class TestController extends BaseController
         // Get language settings
         $langIdFromSql = $this->testService->getLanguageIdFromTestSql($testsql);
         if ($langIdFromSql === null) {
-            $this->testViews->renderNoTerms();
+            include __DIR__ . '/../Views/Test/no_terms.php';
             return;
         }
 
@@ -428,30 +433,35 @@ class TestController extends BaseController
 
         // Render footer first
         $sessionData = $this->testService->getTestSessionData();
-        $this->testViews->renderFooter(
-            $remaining,
-            $sessionData['wrong'],
-            $sessionData['correct']
-        );
+        $wrong = $sessionData['wrong'];
+        $correct = $sessionData['correct'];
+
+        include __DIR__ . '/../Views/Test/footer.php';
 
         // Render test term area
-        $this->testViews->renderTestTermArea($langSettings);
+        include __DIR__ . '/../Views/Test/test_term_area.php';
 
         // Render finished message (hidden for AJAX)
         $tomorrowCount = $this->testService->getTomorrowTestCount($testsql);
-        $this->testViews->renderTestFinished($counts['due'], $tomorrowCount, true);
+        $totalTests = $counts['due'];
+        $tomorrowTests = $tomorrowCount;
+        $hidden = true;
+
+        include __DIR__ . '/../Views/Test/test_finished.php';
 
         echo '</div>';
 
         // Render interaction globals
-        $this->testViews->renderTestInteractionGlobals(
-            $langSettings['dict1Uri'],
-            $langSettings['dict2Uri'],
-            $langSettings['translateUri'],
-            $langIdFromSql
-        );
+        $languageService = new LanguageService();
+        $langCode = $languageService->getLanguageCode($langIdFromSql, LanguageDefinitions::getAll());
+        $dict1Uri = $langSettings['dict1Uri'];
+        $dict2Uri = $langSettings['dict2Uri'];
+        $translateUri = $langSettings['translateUri'];
+        $langId = $langIdFromSql;
 
-        // Render AJAX test JavaScript
+        include __DIR__ . '/../Views/Test/test_interaction_globals.php';
+
+        // Render AJAX test JavaScript config
         $reviewData = [
             'total_tests' => $remaining,
             'test_key' => $identifier[0],
@@ -461,12 +471,10 @@ class TestController extends BaseController
             'word_regex' => $langSettings['regexWord'],
             'type' => $baseType
         ];
+        $waitTime = $this->testService->getEditFrameWaitingTime();
+        $startTime = $sessionData['start'];
 
-        $this->testViews->renderAjaxTestJs(
-            $reviewData,
-            $this->testService->getEditFrameWaitingTime(),
-            $sessionData['start']
-        );
+        include __DIR__ . '/../Views/Test/ajax_test_config.php';
     }
 
     /**

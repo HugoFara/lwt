@@ -1,29 +1,25 @@
 <?php
 
 /**
- * Psalm stub file for global functions.
+ * Psalm stub file for runtime-defined constants and global function wrappers.
  *
- * This file provides type information for functions that are defined in
- * files that Psalm cannot trace through dynamic includes.
+ * This file provides type information for:
+ * 1. Constants defined at runtime (e.g., LWT_BASE_PATH in index.php)
+ * 2. Global function wrappers that call namespaced implementations
+ * 3. Namespaced functions that Psalm cannot trace through dynamic includes
+ *
+ * The namespaced implementations exist in the codebase and Psalm can trace them.
+ * These stubs are for the global-namespace backward-compatibility wrappers.
  *
  * @psalm-suppress UnusedClass
  * @psalm-suppress UnusedMethod
  */
 
-// From version.php (namespaced as Lwt\Core)
-namespace Lwt\Core {
-    /**
-     * @return string
-     */
-    function get_version(): string {}
+// =============================================================================
+// NAMESPACED FUNCTIONS
+// These are defined in files that Psalm cannot trace through dynamic includes
+// =============================================================================
 
-    /**
-     * @return string
-     */
-    function get_version_number(): string {}
-}
-
-// From debug_utilities.php and string_utilities.php (namespaced as Lwt\Core\Utils)
 namespace Lwt\Core\Utils {
     /**
      * @return void
@@ -41,8 +37,6 @@ namespace Lwt\Core\Utils {
      * @return void
      */
     function echodebug($var, $text): void {}
-
-    // From string_utilities.php
 
     /**
      * @param string $str
@@ -125,15 +119,44 @@ namespace Lwt\Core\Utils {
     function str_replace_first($needle, $replace, $haystack): string {}
 }
 
+namespace Lwt\Core {
+    /**
+     * @return string
+     */
+    function get_version(): string {}
+
+    /**
+     * @return string
+     */
+    function get_version_number(): string {}
+}
+
+// =============================================================================
+// GLOBAL NAMESPACE
+// =============================================================================
+
 namespace {
-// Constants defined in index.php
+
+// =============================================================================
+// CONSTANTS (defined at runtime in index.php)
+// =============================================================================
+
 define('LWT_BASE_PATH', __DIR__ . '/..');
 
-// From kernel_utility.php
+// =============================================================================
+// GLOBAL FUNCTION WRAPPERS
+// These are backward-compatibility wrappers defined in various files.
+// They delegate to namespaced implementations.
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// From string_utilities.php (global namespace section)
+// ---------------------------------------------------------------------------
 
 /**
  * @param mixed $s
  * @return string
+ * @see \Lwt\Core\Utils\tohtml()
  */
 function tohtml($s): string {}
 
@@ -141,273 +164,88 @@ function tohtml($s): string {}
  * @param string $s
  * @param mixed $remove Value used in boolean context
  * @return string
+ * @see \Lwt\Core\Utils\remove_spaces()
  */
 function remove_spaces($s, $remove): string {}
-
-/**
- * @param string $mecab_args
- * @return string
- */
-function get_mecab_path($mecab_args = ''): string {}
-
-// my_die() - removed, use Lwt\Core\Utils\ErrorHandler::die() instead
-
-/**
- * @return void
- */
-function quickMenu(): void {}
-
-/**
- * @param string $title
- * @return void
- */
-function pagestart_kernel_nobody($title): void {}
-
-/**
- * @return void
- */
-function pageend(): void {}
-
-/**
- * @return array<int, array{name: string, abbr: string}>
- */
-function get_statuses(): array {}
 
 /**
  * @param string $needle
  * @param string $replace
  * @param string $haystack
  * @return string
+ * @see \Lwt\Core\Utils\str_replace_first()
  */
 function str_replace_first($needle, $replace, $haystack): string {}
 
 /**
- * @param string $ann
- * @return string|false
- */
-function annotation_to_json($ann): string|false {}
-
-// getreq() - removed, use Lwt\Core\Http\ParamHelpers::getreq() instead
-// getsess() - removed, use Lwt\Core\Http\ParamHelpers::getsess() instead
-// url_base() - removed, use Lwt\Core\Http\UrlUtilities::urlBase() instead
-
-/**
- * @param string $type
+ * @param string $string
  * @return string
+ * @see \Lwt\Core\StringUtils::toClassName()
  */
-function make_score_random_insert_update($type): string {}
-
-/**
- * @param int $method
- * @return string
- */
-function getsqlscoreformula($method): string {}
-
-// error_message_with_hide() - removed, use Lwt\Core\Utils\ErrorHandler::messageWithHide() instead
-
-// langFromDict() - removed, use Lwt\Core\Http\UrlUtilities::langFromDict() instead
-// targetLangFromDict() - removed, use Lwt\Core\Http\UrlUtilities::targetLangFromDict() instead
+function strToClassName($string): string {}
 
 /**
  * @param string $filename
- * @return array<int, string>
+ * @return string
+ * @see \Lwt\Core\Utils\get_file_path()
  */
-function parseSQLFile($filename): array {}
-
-// Migrated from ui_helpers.php to View Helper classes
+function get_file_path($filename): string {}
 
 /**
+ * @param string $filename
  * @return void
+ * @see \Lwt\Core\Utils\print_file_path()
  */
-function echo_lwt_logo(): void {}
+function print_file_path($filename): void {}
 
 /**
- * @param mixed $v
+ * @param string $url
  * @return string
+ * @see \Lwt\Core\Utils\encodeURI()
  */
-function get_seconds_selectoptions($v): string {}
-
-/**
- * @param mixed $v
- * @return string
- */
-function get_playbackrate_selectoptions($v): string {}
-
-/**
- * @param mixed $value
- * @return string
- */
-function get_checked($value): string {}
-
-/**
- * @param mixed $value
- * @param mixed $selval
- * @return string
- */
-function get_selected($value, $selval): string {}
-
-/**
- * @param string|int|null $v
- * @param string $dt
- * @return string
- */
-function get_languages_selectoptions($v, $dt): string {}
-
-/**
- * @param mixed $v
- * @return string
- */
-function get_wordstatus_selectoptions($v, $all, $not9899, $off = true): string {}
-
-/**
- * @param int $currentpage
- * @param int $pages
- * @param string $script
- * @param string $formname
- * @return void
- */
-function makePager($currentpage, $pages, $script, $formname): void {}
-
-/**
- * @param string $fieldname
- * @param int $statusrange
- * @return string
- */
-function makeStatusCondition($fieldname, $statusrange): string {}
-
-/**
- * @param int $currstatus
- * @param int $statusrange
- * @return bool
- */
-function checkStatusRange($currstatus, $statusrange): bool {}
-
-/**
- * @param mixed $val
- * @param string $name
- * @return string
- */
-function checkTest($val, $name): string {}
-
-/**
- * @param string $title
- * @return void
- */
-function framesetheader($title): void {}
-
-/**
- * @param string $title
- * @param bool $close
- * @return void
- */
-function pagestart($title, $close): void {}
-
-/**
- * @param string $title
- * @return void
- */
-function pagestart_nobody($title): void {}
-
-// From tags.php
-
-/**
- * @param int $refresh
- * @return array<int, string>
- */
-function get_tags($refresh = 0): array {}
-
-/**
- * @param int $refresh
- * @return array<int, string>
- */
-function get_texttags($refresh = 0): array {}
+function encodeURI($url): string {}
 
 /**
  * @return string
+ * @see \Lwt\Core\Utils\get_sepas()
  */
-function get_tagsort_selectoptions($v): string {}
+function get_sepas(): string {}
 
 /**
  * @return string
+ * @see \Lwt\Core\Utils\get_first_sepa()
  */
-function get_multipletagsactions_selectoptions(): string {}
+function get_first_sepa(): string {}
 
 /**
+ * @param string $string
  * @return string
+ * @see \Lwt\Core\Utils\strToHex()
  */
-function get_alltagsactions_selectoptions(): string {}
+function strToHex(string $string): string {}
 
-// From export_helpers.php
+// ---------------------------------------------------------------------------
+// From TextParsingService.php (global namespace section)
+// ---------------------------------------------------------------------------
 
 /**
- * @param string $path
+ * @param string $mecab_args
  * @return string
+ * @see \Lwt\Services\TextParsingService::getMecabPath()
  */
-function get_file_path($path): string {}
-
-/**
- * @param string $path
- * @return void
- */
-function print_file_path($path): void {}
-
-/**
- * @param int $wid
- * @param string $before
- * @param int $brack
- * @param int $tohtml
- * @return string
- */
-function getWordTagList(int $wid, string $before = ' ', int $brack = 1, int $tohtml = 1): string {}
-
-/**
- * @param string $s
- * @param string $regexword
- * @return string
- */
-function mask_term_in_sentence($s, $regexword): string {}
-
-/**
- * @param string $s
- * @return string
- */
-function repl_tab_nl($s): string {}
-
-// From session_utility.php
-// processDBParam() - removed, use Lwt\Core\Http\ParamHelpers::processDBParam() instead
-// processSessParam() - removed, use Lwt\Core\Http\ParamHelpers::processSessParam() instead
-
-// From text_helpers.php (split from session_utility)
-
-/**
- * @param string $className
- * @return string
- */
-function strToClassName($className): string {}
-
-// Additional functions from kernel_utility.php
+function get_mecab_path($mecab_args = ''): string {}
 
 /**
  * @param array $matches
  * @param string $noSentenceEnd
  * @return string
+ * @see \Lwt\Services\TextParsingService::findLatinSentenceEnd()
  */
 function find_latin_sentence_end($matches, $noSentenceEnd): string {}
 
-// Additional functions from session_utility.php
-
-/**
- * @return string
- */
-function get_sepas(): string {}
-
-/**
- * @param string $url
- * @return string
- */
-function encodeURI($url): string {}
-
-// From MediaService.php - legacy global functions
+// ---------------------------------------------------------------------------
+// From MediaService.php (global namespace section)
+// ---------------------------------------------------------------------------
 
 /**
  * @param string $dir
@@ -469,27 +307,188 @@ function makeHtml5AudioPlayer(
     int $currentplaybackrate
 ): void {}
 
-/**
- * @param string $audio
- * @param int $offset
- * @param bool $repeatMode
- * @param int $currentplayerseconds
- * @param int $currentplaybackrate
- * @return void
- */
-function makeLegacyAudioPlayer(
-    string $audio,
-    int $offset,
-    bool $repeatMode,
-    int $currentplayerseconds,
-    int $currentplaybackrate
-): void {}
+// ---------------------------------------------------------------------------
+// From ExportService.php / export_helpers.php
+// ---------------------------------------------------------------------------
 
+/**
+ * @param int $wid
+ * @param string $before
+ * @param int $brack
+ * @param int $tohtml
+ * @return string
+ */
+function getWordTagList(int $wid, string $before = ' ', int $brack = 1, int $tohtml = 1): string {}
+
+/**
+ * @param string $s
+ * @param string $regexword
+ * @return string
+ */
+function mask_term_in_sentence($s, $regexword): string {}
+
+/**
+ * @param string $s
+ * @return string
+ */
+function repl_tab_nl($s): string {}
+
+/**
+ * @param string $ann
+ * @return string|false
+ */
+function annotation_to_json($ann): string|false {}
+
+// ---------------------------------------------------------------------------
 // From vite_helper.php
+// ---------------------------------------------------------------------------
 
 /**
  * @return bool
  */
 function should_use_vite(): bool {}
 
-} // end namespace
+// ---------------------------------------------------------------------------
+// From text_navigation.php / TextNavigationService.php
+// ---------------------------------------------------------------------------
+
+/**
+ * @param int $textId
+ * @param string $urlPath
+ * @param bool $showTitle
+ * @param string $addParam
+ * @return string
+ */
+function getPreviousAndNextTextLinks(int $textId, string $urlPath, bool $showTitle, string $addParam): string {}
+
+/**
+ * @param int $textId
+ * @return string
+ */
+function get_annotation_link(int $textId): string {}
+
+// ---------------------------------------------------------------------------
+// From SelectOptionsBuilder / UI helpers
+// These are called from Views without full namespace qualification
+// ---------------------------------------------------------------------------
+
+/**
+ * @param mixed $v
+ * @return string
+ */
+function get_seconds_selectoptions($v): string {}
+
+/**
+ * @param mixed $v
+ * @return string
+ */
+function get_playbackrate_selectoptions($v): string {}
+
+/**
+ * @param mixed $value
+ * @return string
+ */
+function get_checked($value): string {}
+
+/**
+ * @param mixed $value
+ * @param mixed $selval
+ * @return string
+ */
+function get_selected($value, $selval): string {}
+
+/**
+ * @param string|int|null $v
+ * @param string $dt
+ * @return string
+ */
+function get_languages_selectoptions($v, $dt): string {}
+
+/**
+ * @param mixed $v
+ * @param bool $all
+ * @param bool $not9899
+ * @param bool $off
+ * @return string
+ */
+function get_wordstatus_selectoptions($v, $all, $not9899, $off = true): string {}
+
+/**
+ * @param mixed $v
+ * @return string
+ */
+function get_tagsort_selectoptions($v): string {}
+
+/**
+ * @return string
+ */
+function get_multipletagsactions_selectoptions(): string {}
+
+/**
+ * @return string
+ */
+function get_alltagsactions_selectoptions(): string {}
+
+// ---------------------------------------------------------------------------
+// From TagService / tags.php
+// ---------------------------------------------------------------------------
+
+/**
+ * @param int $refresh
+ * @return array<int, string>
+ */
+function get_tags($refresh = 0): array {}
+
+/**
+ * @param int $refresh
+ * @return array<int, string>
+ */
+function get_texttags($refresh = 0): array {}
+
+// ---------------------------------------------------------------------------
+// From status/scoring utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * @return array<int, array{name: string, abbr: string}>
+ */
+function get_statuses(): array {}
+
+/**
+ * @param string $fieldname
+ * @param int $statusrange
+ * @return string
+ */
+function makeStatusCondition($fieldname, $statusrange): string {}
+
+/**
+ * @param int $currstatus
+ * @param int $statusrange
+ * @return bool
+ */
+function checkStatusRange($currstatus, $statusrange): bool {}
+
+/**
+ * @param string $type
+ * @return string
+ */
+function make_score_random_insert_update($type): string {}
+
+/**
+ * @param int $method
+ * @return string
+ */
+function getsqlscoreformula($method): string {}
+
+// ---------------------------------------------------------------------------
+// From test utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * @param mixed $val
+ * @param string $name
+ * @return string
+ */
+function checkTest($val, $name): string {}
+
+} // end global namespace
