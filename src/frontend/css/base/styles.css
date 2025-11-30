@@ -821,6 +821,45 @@ Feed Wizard UI (RSS feed import interface)
 }
 
 /**************************************************************
+Bulk Translate Form
+***************************************************************/
+
+.dict
+{
+  cursor: pointer;
+}
+
+.dict1:hover,
+.dict2:hover,
+.dict3:hover
+{
+  opacity: 1;
+  color: red;
+}
+
+input[name="WoTranslation"]
+{
+  border: 1px solid red;
+}
+
+.del_trans
+{
+  cursor: pointer;
+  float: right;
+}
+
+.del_trans:after
+{
+  content: url(/assets/icons/broom.png);
+  opacity: 0.2;
+}
+
+.del_trans:hover:after
+{
+  opacity: 1;
+}
+
+/**************************************************************
 Additional styles for printing
 ***************************************************************/
 

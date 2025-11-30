@@ -25,34 +25,6 @@
 namespace Lwt\Views\Word;
 
 ?>
-<style>
-    .dict {
-        cursor: pointer;
-    }
-
-    .dict1:hover, .dict2:hover, .dict3:hover {
-        opacity:1;
-        color:red;
-    }
-
-    input[name="WoTranslation"] {
-        border: 1px solid red;
-    }
-
-    .del_trans{
-        cursor: pointer;
-        float: right;
-    }
-
-    .del_trans:after{
-        content: url(icn/broom.png);
-        opacity: 0.2;
-    }
-
-    .del_trans:hover:after{
-        opacity: 1;
-    }
-</style>
 <script type="application/json" id="bulk-translate-config">
 <?php echo json_encode([
     'dictionaries' => $dictionaries,
