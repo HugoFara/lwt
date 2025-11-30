@@ -134,7 +134,7 @@ export function word_click_event_do_text_text(this: HTMLElement): boolean {
       LWT_DATA.text.id, order, $this.text(), multi_words, LWT_DATA.language.rtl
     );
     showRightFrames(
-      'edit_word.php?tid=' + LWT_DATA.text.id + '&ord=' + order + '&wid='
+      '/word/edit?tid=' + LWT_DATA.text.id + '&ord=' + order + '&wid='
     );
   } else if (statusNum === 99) {
     run_overlib_status_99(

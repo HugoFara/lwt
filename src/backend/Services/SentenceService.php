@@ -314,26 +314,26 @@ class SentenceService
     /**
      * Show 20 sentences containing $wordlc.
      *
-     * @param int      $lang      Language ID
-     * @param string   $wordlc    Term in lower case.
-     * @param int|null $wid       Word ID
-     * @param string   $jsctlname Path for the textarea of the sentence of the word being
-     *                            edited.
-     * @param int      $mode      * Up to 1: return only the current sentence
-     *                            * Above 1: return previous and current sentence
-     *                            * Above 2: return previous, current and next sentence
+     * @param int      $lang       Language ID
+     * @param string   $wordlc     Term in lower case.
+     * @param int|null $wid        Word ID
+     * @param string   $targetCtlId ID of the target textarea element
+     * @param int      $mode       * Up to 1: return only the current sentence
+     *                             * Above 1: return previous and current sentence
+     *                             * Above 2: return previous, current and next sentence
      *
      * @return string HTML-formatted string of which elements are candidate sentences to use.
      */
-    public function get20Sentences(int $lang, string $wordlc, ?int $wid, string $jsctlname, int $mode): string
+    public function get20Sentences(int $lang, string $wordlc, ?int $wid, string $targetCtlId, int $mode): string
     {
         $r = '<p><b>Sentences in active texts with <i>' . tohtml($wordlc) . '</i></b></p>
         <p>(Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
         to copy sentence into above term)</p>';
         $sentences = $this->getSentencesWithWord($lang, $wordlc, $wid, $mode);
         foreach ($sentences as $sentence) {
-            $r .= '<span class="click" onclick="{' . $jsctlname . '.value=' .
-                json_encode($sentence[1]) . '; lwtFormCheck.makeDirty();}">
+            $r .= '<span class="click" data-action="copy-sentence" ' .
+                'data-target="' . htmlspecialchars($targetCtlId, ENT_QUOTES, 'UTF-8') . '" ' .
+                'data-sentence="' . htmlspecialchars($sentence[1], ENT_QUOTES, 'UTF-8') . '">
             <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
             </span> &nbsp;' . $sentence[0] . '<br />';
         }
@@ -344,23 +344,25 @@ class SentenceService
     /**
      * Render the area for example sentences of a word.
      *
-     * @param int    $lang     Language ID
-     * @param string $termlc   Term text in lowercase
-     * @param string $selector JS selector for target textarea
-     * @param int    $wid      Word ID
+     * @param int    $lang        Language ID
+     * @param string $termlc      Term text in lowercase
+     * @param string $targetCtlId ID of the target textarea element
+     * @param int    $wid         Word ID
      *
      * @return string HTML output
      */
-    public function renderExampleSentencesArea(int $lang, string $termlc, string $selector, int $wid): string
+    public function renderExampleSentencesArea(int $lang, string $termlc, string $targetCtlId, int $wid): string
     {
         ob_start();
         ?>
 <div id="exsent">
     <!-- Interactable text -->
     <div id="exsent-interactable">
-        <span class="click" onclick="do_ajax_show_sentences(
-            <?php echo $lang; ?>, <?php echo json_encode($termlc); ?>,
-            <?php echo htmlentities(json_encode($selector)); ?>, <?php echo $wid; ?>);">
+        <span class="click" data-action="show-sentences"
+            data-lang="<?php echo $lang; ?>"
+            data-termlc="<?php echo htmlspecialchars($termlc, ENT_QUOTES, 'UTF-8'); ?>"
+            data-target="<?php echo htmlspecialchars($targetCtlId, ENT_QUOTES, 'UTF-8'); ?>"
+            data-wid="<?php echo $wid; ?>">
             <img src="/assets/icons/sticky-notes-stack.png" title="Show Sentences" alt="Show Sentences" />
             Show Sentences
         </span>

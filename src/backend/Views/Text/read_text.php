@@ -82,7 +82,7 @@ $varArray = [
 <style>
 <?php if ($showLearning): ?>
     <?php foreach ($statArr as $value): ?>
-        <?php if (checkStatusRange($value, $displayStatTrans)): ?>
+        <?php if (\Lwt\View\Helper\StatusHelper::checkRange($value, $displayStatTrans)): ?>
 .wsty.status<?php echo $value; ?>:<?php echo $pseudoElement; ?>,.tword.content<?php echo $value; ?>:<?php echo $pseudoElement; ?>{content: attr(<?php echo $dataTrans; ?>);}
 .tword.content<?php echo $value; ?>:<?php echo $pseudoElement; ?>{color:rgba(0,0,0,0)}
         <?php endif; ?>
