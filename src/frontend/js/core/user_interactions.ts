@@ -67,6 +67,29 @@ interface FetchRequest {
 }
 
 /**
+ * Map of quick menu values to their clean URL routes.
+ * Used by quickMenuRedirection to navigate to the correct page.
+ */
+const quickMenuRoutes: Record<string, string> = {
+  index: '/',
+  edit_texts: '/texts',
+  edit_archivedtexts: '/text/archived',
+  edit_texttags: '/tags/text',
+  check_text: '/text/check',
+  long_text_import: '/text/import-long',
+  edit_languages: '/languages',
+  edit_words: '/words',
+  edit_tags: '/tags',
+  upload_words: '/word/upload',
+  statistics: '/admin/statistics',
+  rss_import: '/feeds',
+  backup_restore: '/admin/backup',
+  settings: '/admin/settings',
+  text_to_speech_settings: '/admin/settings/tts',
+  INFO: '/docs/info.html'
+};
+
+/**
  * Redirect the user to a specific page depending on the value
  */
 export function quickMenuRedirection(value: string): void {
@@ -75,11 +98,13 @@ export function quickMenuRedirection(value: string): void {
     qm.selectedIndex = 0;
   }
   if (value === '') { return; }
-  if (value === 'INFO') {
-    top!.location.href = 'docs/info.html';
-  } else if (value === 'rss_import') {
-    top!.location.href = 'do_feeds.php?check_autoupdate=1';
+
+  const route = quickMenuRoutes[value];
+  if (route) {
+    top!.location.href = route;
   } else {
+    // Fallback for any unmapped values
+    console.warn('Quick menu: unknown value "' + value + '", falling back to legacy URL');
     top!.location.href = value + '.php';
   }
 }

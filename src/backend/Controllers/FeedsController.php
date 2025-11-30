@@ -384,6 +384,7 @@ class FeedsController extends BaseController
 
         // Pass service to view for utility methods
         $feedService = $this->feedService;
+        $languages = $this->languageService->getLanguagesForSelect();
 
         // Include browse view
         include __DIR__ . '/../Views/Feed/browse.php';
@@ -635,6 +636,7 @@ class FeedsController extends BaseController
 
         // Pass service to view for utility methods
         $feedService = $this->feedService;
+        $languages = $this->languageService->getLanguagesForSelect();
 
         include __DIR__ . '/../Views/Feed/multi_load.php';
     }
@@ -697,6 +699,7 @@ class FeedsController extends BaseController
 
         // Pass service to view for utility methods
         $feedService = $this->feedService;
+        $languages = $this->languageService->getLanguagesForSelect();
 
         include __DIR__ . '/../Views/Feed/index.php';
     }

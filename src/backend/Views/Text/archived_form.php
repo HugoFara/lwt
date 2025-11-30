@@ -35,7 +35,7 @@ namespace Lwt\Views\Text;
             <td class="td1 right">Language:</td>
             <td class="td1">
                 <select name="AtLgID" class="notempty setfocus">
-                    <?php echo get_languages_selectoptions($record['AtLgID'], "[Choose...]"); ?>
+                    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $record['AtLgID'], '[Choose...]'); ?>
                 </select>
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>

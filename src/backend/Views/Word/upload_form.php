@@ -6,6 +6,7 @@
  *
  * Expected variables:
  * - $currentLanguage: Current language setting (from settings)
+ * - $languages: array - Array of languages for select dropdown
  *
  * PHP version 8.1
  *
@@ -20,6 +21,10 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Database\Settings;
+use Lwt\View\Helper\SelectOptionsBuilder;
+
+/** @var string|null $currentLanguage */
+/** @var array $languages */
 ?>
 <p>
     <b>Important:</b><br />
@@ -35,7 +40,7 @@ use Lwt\Database\Settings;
             <select name="LgID" class="notempty setfocus">
                 <?php
                 $langToUse = isset($currentLanguage) ? $currentLanguage : Settings::get('currentlanguage');
-                echo get_languages_selectoptions($langToUse, '[Choose...]');
+                echo SelectOptionsBuilder::forLanguages($languages, $langToUse, '[Choose...]');
                 ?>
             </select>
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
@@ -180,7 +185,7 @@ use Lwt\Database\Settings;
         <td class="td1 center"><b>Status</b> for all uploaded terms:</td>
         <td class="td1">
             <select class="notempty respinput" name="WoStatus">
-                <?php echo get_wordstatus_selectoptions(null, false, false); ?>
+                <?php echo SelectOptionsBuilder::forWordStatus(null, false, false); ?>
             </select>
             <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
         </td>

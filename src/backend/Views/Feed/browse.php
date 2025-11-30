@@ -68,7 +68,7 @@ namespace Lwt\Views\Feed;
         <td class="td1 center feeds-filter-cell">
             Language:&nbsp;
             <select name="filterlang" data-action="filter-language" data-url="/feeds?page=1&amp;selected_feed=0">
-                <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
+                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
             </select>
         </td>
         <td class="td1 center" colspan="3">
@@ -134,11 +134,11 @@ Newsfeed:
 </tr>
 <?php if ($recno > 0): ?>
 <tr><th class="th1 feeds-filter-cell"> <?php echo $recno; ?> articles </th><th class="th1">
-<?php makePager($currentPage, $pages, '/feeds', 'form1'); ?>
+<?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form1'); ?>
   </th>
   <th class="th1" colspan="2" nowrap="nowrap">
   Sort Order:
-  <select name="sort" data-action="sort"><?php echo get_textssort_selectoptions($currentSort); ?></select>
+  <select name="sort" data-action="sort"><?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?></select>
   </th>
   </tr>
   </table></form>
@@ -195,7 +195,7 @@ Newsfeed:
     <form name="form3" method="get" action ="">
         <table class="tab2" cellspacing="0" cellpadding="5">
         <tr><th class="th1 feeds-filter-cell"><?php echo $recno; ?></th><th class="th1">
-    <?php makePager($currentPage, $pages, '/feeds', 'form3'); ?>
+    <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3'); ?>
         </th></tr></table></form>
 <?php endif; ?>
 <?php else: ?>

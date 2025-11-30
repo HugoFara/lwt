@@ -385,13 +385,6 @@ function get_checked($value): string {}
 function get_selected($value, $selval): string {}
 
 /**
- * @param string|int|null $v
- * @param string $dt
- * @return string
- */
-function get_languages_selectoptions($v, $dt): string {}
-
-/**
  * @param mixed $v
  * @param bool $all
  * @param bool $not9899
@@ -405,16 +398,6 @@ function get_wordstatus_selectoptions($v, $all, $not9899, $off = true): string {
  * @return string
  */
 function get_tagsort_selectoptions($v): string {}
-
-/**
- * @return string
- */
-function get_multipletagsactions_selectoptions(): string {}
-
-/**
- * @return string
- */
-function get_alltagsactions_selectoptions(): string {}
 
 // ---------------------------------------------------------------------------
 // From TagService / tags.php
@@ -466,16 +449,5 @@ function make_score_random_insert_update($type): string {}
  * @return string
  */
 function getsqlscoreformula($method): string {}
-
-// ---------------------------------------------------------------------------
-// From test utilities
-// ---------------------------------------------------------------------------
-
-/**
- * @param mixed $val
- * @param string $name
- * @return string
- */
-function checkTest($val, $name): string {}
 
 } // end global namespace

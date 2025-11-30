@@ -26,7 +26,7 @@ namespace Lwt\Views\Feed;
 <th class="th1 borderleft" colspan="2">Language:<select name="filterlang"
 data-action="filter-language"
 data-url="/feeds/edit?multi_load_feed=1&amp;page=1">
-    <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
+    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
 </select>
 </th>
 <th class="th1 borderright" colspan="2">

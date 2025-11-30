@@ -1800,6 +1800,8 @@ class WordController extends BaseController
     private function displayUploadForm(): void
     {
         $currentLanguage = \Lwt\Database\Settings::get('currentlanguage');
+        $languageService = new \Lwt\Services\LanguageService();
+        $languages = $languageService->getLanguagesForSelect();
         include __DIR__ . '/../Views/Word/upload_form.php';
     }
 

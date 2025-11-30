@@ -129,7 +129,7 @@ class StatisticsService
         $languageStats = [];
 
         foreach ($languages as $language) {
-            $lgId = $language['LgID'];
+            $lgId = (int)$language['LgID'];
 
             $stats = $this->calculateFrequencyForLanguage(
                 $lgId,

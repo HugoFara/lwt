@@ -27,7 +27,7 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 <tr><td class="td1 center" colspan="2">
 <b>ALL</b> <?php echo ($recno == 1 ? '1 Term' : $recno . ' Terms'); ?>:&nbsp;
 <select name="allaction" data-action="all-action" data-recno="<?php echo $recno; ?>">
-    <?php echo get_allwordsactions_selectoptions(); ?>
+    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forAllWordsActions(); ?>
 </select>
 </td></tr>
 <tr><td class="td1 center">
@@ -36,7 +36,7 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 </td>
 <td class="td1 center">Marked Terms:&nbsp;
 <select name="markaction" id="markaction" disabled="disabled" data-action="mark-action">
-    <?php echo get_multiplewordsactions_selectoptions(); ?>
+    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forMultipleWordsActions(); ?>
 </select>
 </td></tr></table>
 
@@ -69,7 +69,7 @@ foreach ($words as $record) {
     }
     ?>
 <tr>
-    <td class="td1 center"><a name="rec<?php echo $record['WoID']; ?>"><input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $record['WoID']; ?>" <?php echo checkTest($record['WoID'], 'marked'); ?> /></a></td>
+    <td class="td1 center"><a name="rec<?php echo $record['WoID']; ?>"><input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $record['WoID']; ?>" <?php echo \Lwt\View\Helper\FormHelper::checkInRequest($record['WoID'], 'marked'); ?> /></a></td>
     <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/words/edit?chg=<?php echo $record['WoID']; ?>"><img src="/assets/icons/sticky-note--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/words/edit?del=<?php echo $record['WoID']; ?>"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
 <?php if ($currentlang == '') { ?>
     <td class="td1 center"><?php echo htmlspecialchars($record['LgName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
@@ -84,7 +84,7 @@ foreach ($words as $record) {
     ?></td>
     <td class="td1"><span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(\Lwt\Services\ExportService::replaceTabNewline($record['WoTranslation']) ?? '', ENT_QUOTES, 'UTF-8'); ?></span> <span class="smallgray2"><?php echo htmlspecialchars($record['taglist'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span></td>
     <td class="td1 center"><b><?php echo ($record['SentOK'] != 0 ? '<img src="/assets/icons/status.png" title="' . htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8') . '" alt="Yes" />' : '<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />'); ?></b></td>
-    <td class="td1 center" title="<?php echo htmlspecialchars(get_status_name($record['WoStatus']) ?? '', ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(get_status_abbr($record['WoStatus']) ?? '', ENT_QUOTES, 'UTF-8'); ?><?php echo ($record['WoStatus'] < 98 ? '/' . $days : ''); ?></td>
+    <td class="td1 center" title="<?php echo htmlspecialchars(\Lwt\View\Helper\StatusHelper::getName((int)$record['WoStatus']) ?? '', ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(\Lwt\View\Helper\StatusHelper::getAbbr((int)$record['WoStatus']) ?? '', ENT_QUOTES, 'UTF-8'); ?><?php echo ($record['WoStatus'] < 98 ? '/' . $days : ''); ?></td>
     <td class="td1 center" nowrap="nowrap"><?php echo $score; ?></td>
 <?php if ($currentsort == 7) { ?>
     <td class="td1 center" nowrap="nowrap"><?php echo $record['textswordcount'] ?? 0; ?></td>
@@ -100,7 +100,7 @@ foreach ($words as $record) {
             <?php echo $recno; ?> Term<?php echo ($recno == 1 ? '' : 's'); ?>
         </th>
         <th class="th1" nowrap="nowrap">
-            <?php makePager($currentpage, $pages, '/words/edit', 'form2'); ?>
+            <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentpage, $pages, '/words/edit', 'form2'); ?>
         </th>
     </tr>
 </table>

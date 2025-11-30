@@ -42,7 +42,7 @@ namespace Lwt\Views\Feed;
 <tr>
     <td class="td1 center feeds-filter-cell" colspan="2">
     Language:&nbsp;<select name="filterlang" data-action="filter-language" data-url="/feeds/edit?manage_feeds=1">
-    <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
+    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
 </select>
 </td>
 <td class="td1 center" colspan="4">
@@ -79,12 +79,12 @@ namespace Lwt\Views\Feed;
 <?php if ($totalFeeds > 0): ?>
 <tr><th class="th1 feeds-filter-cell"> <?php echo $totalFeeds; ?> newsfeeds </th>
 <th class="th1">
-<?php makePager($currentPage, $pages, '/feeds/edit', 'form1'); ?>
+<?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form1'); ?>
 </th>
 <th class="th1" colspan="1" nowrap="nowrap">
 Sort Order:
 <select name="sort" data-action="sort">
-<?php echo get_textssort_selectoptions($currentSort); ?>
+<?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
 </select>
 </th>
 </table>
@@ -134,7 +134,7 @@ while ($row = mysqli_fetch_assoc($feeds)):
 <form name="form3" method="get" action="">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr><th class="th1 feeds-filter-cell"><?php echo $totalFeeds; ?></th>
-<th class="th1"><?php makePager($currentPage, $pages, '/feeds', 'form3'); ?></th>
+<th class="th1"><?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form3'); ?></th>
 </tr></table>
 </form>
 <?php endif; ?>

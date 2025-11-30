@@ -63,7 +63,7 @@ Tag Text or Comment:
 <th class="th1" colspan="1" nowrap="nowrap">
     <?php echo $totalCount; ?> Tag<?php echo ($totalCount == 1 ? '' : 's'); ?>
 </th><th class="th1" colspan="2" nowrap="nowrap">
-    <?php makePager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form1'); ?>
+    <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form1'); ?>
 </th><th class="th1" nowrap="nowrap">
 Sort Order:
 <select name="sort" data-action="sort">
@@ -87,14 +87,14 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 </th></tr>
 <tr><td class="td1 center" colspan="2">
 <b>ALL</b> <?php echo ($totalCount == 1 ? '1 Tag' : $totalCount . ' Tags'); ?>:&nbsp;
-<select name="allaction" data-action="all-action" data-recno="<?php echo $totalCount; ?>"><?php echo get_alltagsactions_selectoptions(); ?></select>
+<select name="allaction" data-action="all-action" data-recno="<?php echo $totalCount; ?>"><?php echo \Lwt\View\Helper\SelectOptionsBuilder::forAllTagsActions(); ?></select>
 </td></tr>
 <tr><td class="td1 center">
 <input type="button" value="Mark All" data-action="mark-all" />
 <input type="button" value="Mark None" data-action="mark-none" />
 </td>
 <td class="td1 center">Marked Tags:&nbsp;
-<select name="markaction" id="markaction" disabled="disabled" data-action="mark-action"><?php echo get_multipletagsactions_selectoptions(); ?></select>
+<select name="markaction" id="markaction" disabled="disabled" data-action="mark-action"><?php echo \Lwt\View\Helper\SelectOptionsBuilder::forMultipleTagsActions(); ?></select>
 </td></tr></table>
 
 <table class="sortable tab2" cellspacing="0" cellpadding="5">
@@ -113,7 +113,7 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 <tr>
     <td class="td1 center">
         <a name="rec<?php echo $tag['id']; ?>">
-        <input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $tag['id']; ?>" <?php echo checkTest($tag['id'], 'marked'); ?> />
+        <input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $tag['id']; ?>" <?php echo \Lwt\View\Helper\FormHelper::checkInRequest($tag['id'], 'marked'); ?> />
         </a>
     </td>
     <td class="td1 center" nowrap="nowrap">
@@ -149,7 +149,7 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
             <?php echo $totalCount; ?> Tag<?php echo ($totalCount == 1 ? '' : 's'); ?>
         </th>
         <th class="th1" nowrap="nowrap">
-            <?php makePager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form2'); ?>
+            <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form2'); ?>
         </th>
     </tr>
 </table>

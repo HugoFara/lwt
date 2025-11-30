@@ -7,6 +7,7 @@
  * - $texts: array - Array of archived text records
  * - $totalCount: int - Total number of archived texts matching filter
  * - $pagination: array - Array with 'pages', 'currentPage', 'limit'
+ * - $languages: array - Array of languages for select dropdown
  * - $currentLang: string - Current language filter
  * - $currentQuery: string - Current filter query
  * - $currentQueryMode: string - Current query mode
@@ -84,7 +85,7 @@ namespace Lwt\Views\Text;
         <td class="td1 center" colspan="2">
             Language:
             <select name="filterlang" data-action="filter-language">
-                <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
+                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
             </select>
         </td>
         <td class="td1 center" colspan="2">
@@ -112,19 +113,19 @@ namespace Lwt\Views\Text;
         <td class="td1 center" colspan="2" nowrap="nowrap">
             Tag #1:
             <select name="tag1" data-action="filter-tag" data-tag-num="1">
-                <?php echo get_archivedtexttag_selectoptions($currentTag1, $currentLang); ?>
+                <?php echo \Lwt\Services\TagService::getArchivedTextTagSelectOptions($currentTag1, $currentLang); ?>
             </select>
         </td>
         <td class="td1 center" nowrap="nowrap">
             Tag #1 ..
             <select name="tag12" data-action="filter-tag-operator">
-                <?php echo get_andor_selectoptions($currentTag12); ?>
+                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forAndOr($currentTag12); ?>
             </select> .. Tag #2
         </td>
         <td class="td1 center" nowrap="nowrap">
             Tag #2:
             <select name="tag2" data-action="filter-tag" data-tag-num="2">
-                <?php echo get_archivedtexttag_selectoptions($currentTag2, $currentLang); ?>
+                <?php echo \Lwt\Services\TagService::getArchivedTextTagSelectOptions($currentTag2, $currentLang); ?>
             </select>
         </td>
     </tr>
@@ -134,12 +135,12 @@ namespace Lwt\Views\Text;
             <?php echo $totalCount; ?> Text<?php echo $totalCount == 1 ? '' : 's'; ?>
         </th>
         <th class="th1" colspan="1" nowrap="nowrap">
-            <?php makePager($pagination['currentPage'], $pagination['pages'], '/text/archived', 'form1'); ?>
+            <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], '/text/archived', 'form1'); ?>
         </th>
         <th class="th1" nowrap="nowrap">
             Sort Order:
             <select name="sort" data-action="sort">
-                <?php echo get_textssort_selectoptions($currentSort); ?>
+                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
             </select>
         </th>
     </tr>
@@ -167,7 +168,7 @@ namespace Lwt\Views\Text;
         <td class="td1 center">
             Marked Texts:&nbsp;
             <select name="markaction" id="markaction" disabled="disabled" data-action="multi-action">
-                <?php echo get_multiplearchivedtextactions_selectoptions(); ?>
+                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forMultipleArchivedTextsActions(); ?>
             </select>
         </td>
     </tr>
@@ -191,7 +192,7 @@ namespace Lwt\Views\Text;
     <tr>
         <td class="td1 center">
             <a name="rec<?php echo $record['AtID']; ?>">
-            <input name="marked[]" class="markcheck" type="checkbox" value="<?php echo $record['AtID']; ?>" <?php echo checkTest($record['AtID'], 'marked'); ?> />
+            <input name="marked[]" class="markcheck" type="checkbox" value="<?php echo $record['AtID']; ?>" <?php echo \Lwt\View\Helper\FormHelper::checkInRequest($record['AtID'], 'marked'); ?> />
             </a>
         </td>
         <td nowrap="nowrap" class="td1 center">&nbsp;
@@ -234,7 +235,7 @@ namespace Lwt\Views\Text;
             <?php echo $totalCount; ?> Text<?php echo $totalCount == 1 ? '' : 's'; ?>
         </th>
         <th class="th1" nowrap="nowrap">
-            <?php makePager($pagination['currentPage'], $pagination['pages'], '/text/archived', 'form2'); ?>
+            <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], '/text/archived', 'form2'); ?>
         </th>
     </tr>
 </table>

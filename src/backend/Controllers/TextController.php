@@ -1055,6 +1055,7 @@ class TextController extends BaseController
             $textId = $chgId;
             $record = $this->textService->getArchivedTextById($textId);
             if ($record) {
+                $languages = $this->languageService->getLanguagesForSelect();
                 include __DIR__ . '/../Views/Text/archived_form.php';
             }
         } else {
@@ -1075,6 +1076,7 @@ class TextController extends BaseController
                 );
             }
 
+            $languages = $this->languageService->getLanguagesForSelect();
             include __DIR__ . '/../Views/Text/archived_list.php';
         }
 

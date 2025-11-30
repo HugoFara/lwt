@@ -79,17 +79,37 @@ describe('user_interactions.ts', () => {
 
     it('redirects to info.html for INFO value', () => {
       quickMenuRedirection('INFO');
-      expect(window.top!.location.href).toBe('docs/info.html');
+      expect(window.top!.location.href).toBe('/docs/info.html');
     });
 
     it('redirects to feeds page for rss_import value', () => {
       quickMenuRedirection('rss_import');
-      expect(window.top!.location.href).toBe('do_feeds.php?check_autoupdate=1');
+      expect(window.top!.location.href).toBe('/feeds');
     });
 
-    it('redirects to .php page for other values', () => {
+    it('redirects to clean URL for edit_texts value', () => {
       quickMenuRedirection('edit_texts');
-      expect(window.top!.location.href).toBe('edit_texts.php');
+      expect(window.top!.location.href).toBe('/texts');
+    });
+
+    it('redirects to clean URL for edit_words value', () => {
+      quickMenuRedirection('edit_words');
+      expect(window.top!.location.href).toBe('/words');
+    });
+
+    it('redirects to clean URL for settings value', () => {
+      quickMenuRedirection('settings');
+      expect(window.top!.location.href).toBe('/admin/settings');
+    });
+
+    it('redirects to home for index value', () => {
+      quickMenuRedirection('index');
+      expect(window.top!.location.href).toBe('/');
+    });
+
+    it('falls back to .php for unknown values', () => {
+      quickMenuRedirection('unknown_page');
+      expect(window.top!.location.href).toBe('unknown_page.php');
     });
 
     it('resets quickmenu selectedIndex to 0', () => {
@@ -466,11 +486,18 @@ describe('user_interactions.ts', () => {
 
   describe('goToLastPosition', () => {
     beforeEach(() => {
+      // Use fake timers to prevent setTimeout callbacks from firing
+      // (overlib and cClick are called via setTimeout and would cause errors)
+      vi.useFakeTimers();
       // Mock LWT_DATA
       (window as unknown as Record<string, unknown>).LWT_DATA = {
         text: { reading_position: 0 },
       };
       vi.spyOn(window, 'focus').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
     });
 
     it('scrolls to position 0 when reading_position is 0', () => {
