@@ -2,11 +2,18 @@
 namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Database\Connection;
+use Lwt\Database\Settings;
 use Lwt\Services\TestService;
+use Lwt\Services\SentenceService;
 use Lwt\Services\WordStatusService;
+use Lwt\Services\ExportService;
+use Lwt\Services\TagService;
 
 require_once __DIR__ . '/../../../Services/TestService.php';
+require_once __DIR__ . '/../../../Services/SentenceService.php';
 require_once __DIR__ . '/../../../Services/WordStatusService.php';
+require_once __DIR__ . '/../../../Services/ExportService.php';
+require_once __DIR__ . '/../../../Services/TagService.php';
 
 /**
  * Handler for review/test-related API operations.
@@ -16,10 +23,12 @@ require_once __DIR__ . '/../../../Services/WordStatusService.php';
 class ReviewHandler
 {
     private TestService $testService;
+    private SentenceService $sentenceService;
 
     public function __construct()
     {
         $this->testService = new TestService();
+        $this->sentenceService = new SentenceService();
     }
 
     /**
@@ -35,7 +44,7 @@ class ReviewHandler
      */
     public function getWordTestData(string $testsql, bool $wordMode, int $lgid, string $wordregex, int $testtype): array
     {
-        $wordRecord = \do_test_get_word($testsql);
+        $wordRecord = $this->testService->getNextWord($testsql);
         if (empty($wordRecord)) {
             return [
                 "word_id" => 0,
@@ -43,26 +52,34 @@ class ReviewHandler
                 "group" => ''
             ];
         }
+
+        // Get sentence context
         if ($wordMode) {
             $sent = "{" . $wordRecord['WoText'] . "}";
         } else {
-            list($sent, ) = \do_test_test_sentence(
-                $wordRecord['WoID'],
-                $lgid,
+            $sentenceData = $this->testService->getSentenceForWord(
+                (int)$wordRecord['WoID'],
                 $wordRecord['WoTextLC']
             );
-            if ($sent === null) {
-                $sent = "{" . $wordRecord['WoText'] . "}";
-            }
+            $sent = $sentenceData['sentence'] ?? "{" . $wordRecord['WoText'] . "}";
         }
-        list($htmlSentence, $save) = \do_test_get_term_test(
+
+        // Format term for test display
+        list($htmlSentence, $save) = $this->formatTermForTest(
             $wordRecord,
             $sent,
             $testtype,
             $wordMode,
             $wordregex
         );
-        $solution = \get_test_solution($testtype, $wordRecord, $wordMode, $save);
+
+        // Get solution
+        $solution = $this->testService->getTestSolution(
+            $testtype,
+            $wordRecord,
+            $wordMode,
+            $save
+        );
 
         return [
             "word_id" => $wordRecord['WoID'],
@@ -70,6 +87,58 @@ class ReviewHandler
             "word_text" => $save,
             "group" => $htmlSentence
         ];
+    }
+
+    /**
+     * Format term for test display.
+     *
+     * @param array  $wordRecord Word database record
+     * @param string $sentence   Sentence containing the word (word marked with {})
+     * @param int    $testType   Test type (1-5)
+     * @param bool   $wordMode   Whether in word mode (no sentence context)
+     * @param string $wordRegex  Word character regex from language settings
+     *
+     * @return array{0: string, 1: string} [HTML display, plain word text]
+     */
+    private function formatTermForTest(
+        array $wordRecord,
+        string $sentence,
+        int $testType,
+        bool $wordMode,
+        string $wordRegex
+    ): array {
+        $baseType = $this->testService->getBaseTestType($testType);
+        $wordText = $wordRecord['WoText'];
+
+        // Extract the word from sentence (marked with {})
+        if (preg_match('/\{([^}]+)\}/', $sentence, $matches)) {
+            $markedWord = $matches[1];
+        } else {
+            $markedWord = $wordText;
+        }
+
+        // Build display HTML based on test type
+        if ($baseType == 1) {
+            // Type 1: Show term, guess translation
+            $displayHtml = str_replace(
+                '{' . $markedWord . '}',
+                '<span class="word-test">' . htmlspecialchars($markedWord, ENT_QUOTES, 'UTF-8') . '</span>',
+                $sentence
+            );
+        } elseif ($baseType == 2) {
+            // Type 2: Show translation, guess term (hide term)
+            $hiddenSpan = '<span class="word-test-hidden">[...]</span>';
+            $displayHtml = str_replace('{' . $markedWord . '}', $hiddenSpan, $sentence);
+        } else {
+            // Type 3: Show sentence with hidden term
+            $hiddenSpan = '<span class="word-test-hidden">[...]</span>';
+            $displayHtml = str_replace('{' . $markedWord . '}', $hiddenSpan, $sentence);
+        }
+
+        // Clean up any remaining braces
+        $displayHtml = str_replace(['{', '}'], '', $displayHtml);
+
+        return [$displayHtml, $markedWord];
     }
 
     /**
@@ -86,7 +155,7 @@ class ReviewHandler
     {
         $testSql = $this->testService->getTestSql(
             $params['test_key'],
-            $params['selection']
+            $this->parseSelection($params['test_key'], $params['selection'])
         );
         return $this->getWordTestData(
             $testSql,
@@ -108,11 +177,32 @@ class ReviewHandler
     {
         $testSql = $this->testService->getTestSql(
             $params['test_key'],
-            $params['selection']
+            $this->parseSelection($params['test_key'], $params['selection'])
         );
         return [
-            "count" => \do_test_get_tomorrow_tests_count($testSql)
+            "count" => $this->testService->getTomorrowTestCount($testSql)
         ];
+    }
+
+    /**
+     * Parse selection parameter based on test key type.
+     *
+     * For 'words' and 'texts' keys, selection should be an array of IDs.
+     * For 'lang' and 'text' keys, selection should be a single integer.
+     *
+     * @param string $testKey   The test key type
+     * @param string $selection The selection value (comma-separated IDs or single ID)
+     *
+     * @return int|int[] Parsed selection value
+     */
+    private function parseSelection(string $testKey, string $selection): int|array
+    {
+        if ($testKey === 'words' || $testKey === 'texts') {
+            // These expect an array of IDs
+            return array_map('intval', explode(',', $selection));
+        }
+        // 'lang' and 'text' expect a single integer
+        return (int)$selection;
     }
 
     // =========================================================================

@@ -20,6 +20,8 @@ use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 require_once __DIR__ . '/WordStatusService.php';
+require_once __DIR__ . '/ExportService.php';
+require_once __DIR__ . '/TagService.php';
 require_once __DIR__ . '/../Core/Utils/error_handling.php';
 
 /**
@@ -365,7 +367,7 @@ class TestService
             return ['sentence' => null, 'found' => false];
         }
 
-        $seid = $record['SeID'];
+        $seid = (int) $record['SeID'];
         $sentenceCount = (int) Settings::getWithDefault('set-test-sentence-count');
         list($_, $sentence) = \getSentence($seid, $wordlc, $sentenceCount);
 
@@ -743,7 +745,7 @@ class TestService
 
         if ($baseType == 1) {
             $trans = ExportService::replaceTabNewline($wordData['WoTranslation']) .
-                TagService::getWordTagListFormatted($wordData['WoID'], ' ', true, false);
+                TagService::getWordTagListFormatted((int) $wordData['WoID'], ' ', true, false);
             return $wordMode ? $trans : "[$trans]";
         }
 

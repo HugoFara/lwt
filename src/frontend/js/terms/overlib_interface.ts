@@ -674,7 +674,7 @@ export function run_overlib_test(
   }
   overlib_string += '<b>' + escape_html_chars(make_tooltip(txt, trans, roman, String(stat))) +
     '</b><br />' +
-    ' <a href="edit_tword.php?wid=' + wid +
+    ' <a href="/word/edit-term?wid=' + wid +
     '" target="ro" onclick="showRightFrames();">Edit term</a><br />' +
     createTheDictLink(wblink1, txt, 'Dict1', 'Lookup Term: ') +
     createTheDictLink(wblink2, txt, 'Dict2', '') +

@@ -47,10 +47,10 @@ $sent1 = str_replace(
     <td class="td1 center" nowrap="nowrap">
         <span id="STAT<?php echo $word['WoID']; ?>">
             <?php echo StatusHelper::buildTestTableControls(
-                $word['Score'],
-                $word['WoStatus'],
-                $word['WoID'],
-                StatusHelper::getAbbr($word['WoStatus']),
+                (int) $word['Score'],
+                (int) $word['WoStatus'],
+                (int) $word['WoID'],
+                StatusHelper::getAbbr((int) $word['WoStatus']),
                 \get_file_path('assets/icons/placeholder.png')
             ); ?>
         </span>

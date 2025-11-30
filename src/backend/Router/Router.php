@@ -189,6 +189,7 @@ class Router
             '/icn/' => '/assets/icons/',
             '/img/' => '/assets/images/',
             '/js/' => '/assets/js/',
+            '/sounds/' => '/assets/sounds/',
         ];
 
         // Check if it's a legacy path that needs mapping

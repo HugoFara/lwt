@@ -37,6 +37,7 @@ function registerRoutes(Router $router): void
     $router->register('/text/read', 'TextController@read');
 
     // Empty iframe placeholder (used in text read, test, and word pages)
+    $router->register('/empty.html', 'src/backend/Core/empty.html');
     $router->register('/text/empty.html', 'src/backend/Core/empty.html');
     $router->register('/test/empty.html', 'src/backend/Core/empty.html');
     $router->register('/word/empty.html', 'src/backend/Core/empty.html');
@@ -188,7 +189,9 @@ function registerRoutes(Router $router): void
     // ==================== API ROUTES ====================
 
     // Main API - use prefix to catch all sub-paths
+    // Support both /api/v1 (new) and /api.php/v1 (legacy) paths
     $router->registerPrefix('/api/v1', 'ApiController@v1');
+    $router->registerPrefix('/api.php/v1', 'ApiController@v1');
 
     // Translation APIs
     $router->register('/api/translate', 'ApiController@translate');

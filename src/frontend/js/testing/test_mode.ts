@@ -76,7 +76,7 @@ export function keydown_event_do_test_test(e: JQuery.KeyDownEvent): boolean {
   }
   if (e.key === 'E' || e.which === 69) {
     // E : edit
-    showRightFrames('edit_tword.php?wid=' + LWT_DATA.word.id);
+    showRightFrames('/word/edit-term?wid=' + LWT_DATA.word.id);
     return false;
   }
   // The next interactions should only be available with displayed solution

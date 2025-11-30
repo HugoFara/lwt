@@ -128,6 +128,7 @@ namespace Lwt\Core\Utils {
             'icn/' => 'assets/icons/',
             'img/' => 'assets/images/',
             'js/' => 'assets/js/',
+            'sounds/' => 'assets/sounds/',
         ];
 
         // Normalize the path (remove leading slash if present)
