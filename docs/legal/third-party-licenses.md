@@ -5,7 +5,6 @@ The following software packages, bundled within the LWT software, have different
 * jQuery, jQueryUI - Copyright © John Resig et.al., [http://jquery.org/license](http://jquery.org/license) (../js/jquery.js, ../js/jquery-ui.min.js)
 * Tagify - Copyright © Yair Even Or, [https://github.com/yairEO/tagify](https://github.com/yairEO/tagify) (via npm @yaireo/tagify)
 * sorttable - Copyright © Stuart Langridge, [http://www.kryogenix.org/code/browser/sorttable/](http://www.kryogenix.org/code/browser/sorttable/) (../js/sorttable/...)
-* CountUp - Copyright © Praveen Lobo, [http://PraveenLobo.com/techblog/javascript-countup-timer/](http://PraveenLobo.com/techblog/javascript-countup-timer/) (../js/third\_party/countuptimer.js)
 * mobiledetect - Copyright © Șerban Ghiță & Victor Stanciu, [http://mobiledetect.net](http://mobiledetect.net/) (vendor/mobiledetect/mobiledetectlib/Mobile\_Detect.php)
 * iUI - Copyright © iUI, [http://www.iui-js.org/](http://www.iui-js.org/) (iui)
 

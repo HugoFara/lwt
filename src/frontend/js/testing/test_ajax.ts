@@ -11,11 +11,7 @@ import { LWT_DATA } from '../core/lwt_state';
 import { cClick } from '../ui/word_popup';
 import { speechDispatcher } from '../core/user_interactions';
 import { word_click_event_do_test_test, keydown_event_do_test_test } from './test_mode';
-
-// Declare CountUp as it's loaded from third-party script
-declare class CountUp {
-  constructor(serverNow: number, serverStart: number, id: string, dontRun: number);
-}
+import { startElapsedTimer } from './elapsed_timer';
 
 // Interface for review data
 interface ReviewData {
@@ -198,8 +194,8 @@ export function prepareTestFrames(timeData: TimeData): void {
     }, timeData.wait_time);
   }
 
-  // Initialize the CountUp timer
-  new CountUp(
+  // Initialize the elapsed timer
+  startElapsedTimer(
     timeData.time, timeData.start_time, 'timer', timeData.show_timer
   );
 }
