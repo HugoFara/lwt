@@ -111,6 +111,37 @@ import {
   updateImportMode,
   showImportedTerms
 } from './words/word_upload';
+import {
+  setUtteranceSetting,
+  resetTestFrames,
+  startWordTest,
+  startTestTable
+} from './testing/test_header';
+import { initTableTest } from './testing/test_table';
+import {
+  getNewWord,
+  prepareTestFrames,
+  updateTestsCount,
+  handleStatusChangeResult,
+  initAjaxTest,
+  queryNextTerm,
+  doTestFinished
+} from './testing/test_ajax';
+import {
+  word_click_event_do_test_test,
+  keydown_event_do_test_test
+} from './testing/test_mode';
+import {
+  deleteTranslation,
+  addTranslation,
+  getGlosbeTranslation,
+  getTranslationFromGlosbeApi
+} from './terms/translation_api';
+import { speechDispatcher } from './core/user_interactions';
+import {
+  lwt_wiz_select_test,
+  initWizardStep2
+} from './feeds/feed_wizard_step2';
 
 // Declare global window interface extensions
 declare global {
@@ -287,6 +318,45 @@ declare global {
     // Word upload
     updateImportMode: typeof updateImportMode;
     showImportedTerms: typeof showImportedTerms;
+
+    // Test header
+    setUtteranceSetting: typeof setUtteranceSetting;
+    resetTestFrames: typeof resetTestFrames;
+    resetFrames: typeof resetTestFrames; // Legacy alias
+    startWordTest: typeof startWordTest;
+    startTestTable: typeof startTestTable;
+
+    // Test table
+    initTableTest: typeof initTableTest;
+
+    // Test AJAX
+    get_new_word: typeof getNewWord;
+    getNewWord: typeof getNewWord;
+    prepare_test_frames: typeof prepareTestFrames;
+    prepareTestFrames: typeof prepareTestFrames;
+    update_tests_count: typeof updateTestsCount;
+    updateTestsCount: typeof updateTestsCount;
+    handleStatusChangeResult: typeof handleStatusChangeResult;
+    initAjaxTest: typeof initAjaxTest;
+    query_next_term: typeof queryNextTerm;
+    queryNextTerm: typeof queryNextTerm;
+    do_test_finished: typeof doTestFinished;
+    doTestFinished: typeof doTestFinished;
+
+    // Test mode
+    word_click_event_do_test_test: typeof word_click_event_do_test_test;
+    keydown_event_do_test_test: typeof keydown_event_do_test_test;
+
+    // Translation API
+    deleteTranslation: typeof deleteTranslation;
+    addTranslation: typeof addTranslation;
+    getGlosbeTranslation: typeof getGlosbeTranslation;
+    getTranslationFromGlosbeApi: typeof getTranslationFromGlosbeApi;
+    speechDispatcher: typeof speechDispatcher;
+
+    // Feed wizard step 2
+    lwt_wiz_select_test: typeof lwt_wiz_select_test;
+    initWizardStep2: typeof initWizardStep2;
   }
 }
 
@@ -452,3 +522,42 @@ window.initWordStatusChange = initWordStatusChange;
 // Word upload
 window.updateImportMode = updateImportMode;
 window.showImportedTerms = showImportedTerms;
+
+// Test header
+window.setUtteranceSetting = setUtteranceSetting;
+window.resetTestFrames = resetTestFrames;
+window.resetFrames = resetTestFrames; // Legacy alias
+window.startWordTest = startWordTest;
+window.startTestTable = startTestTable;
+
+// Test table
+window.initTableTest = initTableTest;
+
+// Test AJAX
+window.get_new_word = getNewWord;
+window.getNewWord = getNewWord;
+window.prepare_test_frames = prepareTestFrames;
+window.prepareTestFrames = prepareTestFrames;
+window.update_tests_count = updateTestsCount;
+window.updateTestsCount = updateTestsCount;
+window.handleStatusChangeResult = handleStatusChangeResult;
+window.initAjaxTest = initAjaxTest;
+window.query_next_term = queryNextTerm;
+window.queryNextTerm = queryNextTerm;
+window.do_test_finished = doTestFinished;
+window.doTestFinished = doTestFinished;
+
+// Test mode
+window.word_click_event_do_test_test = word_click_event_do_test_test;
+window.keydown_event_do_test_test = keydown_event_do_test_test;
+
+// Translation API
+window.deleteTranslation = deleteTranslation;
+window.addTranslation = addTranslation;
+window.getGlosbeTranslation = getGlosbeTranslation;
+window.getTranslationFromGlosbeApi = getTranslationFromGlosbeApi;
+window.speechDispatcher = speechDispatcher;
+
+// Feed wizard step 2
+window.lwt_wiz_select_test = lwt_wiz_select_test;
+window.initWizardStep2 = initWizardStep2;

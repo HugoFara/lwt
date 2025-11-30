@@ -39,24 +39,8 @@ namespace Lwt\Views\Mobile;
 <meta name="apple-touch-fullscreen" content="YES" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-<style type="text/css" media="screen">
-@import "/assets/vendor/iui/iui.css";
-span.status1 {
-    background-color: #F5B8A9;
-}
-span.status2 {
-    background-color: #F5CCA9;
-}
-span.status3 {
-    background-color: #F5E1A9;
-}
-span.status4 {
-    background-color: #F5F3A9;
-}
-span.status5 {
-    background-color: #DDFFDD;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="/assets/vendor/iui/iui.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/assets/css/mobile.css" media="screen" />
 <script type="text/javascript" src="/assets/vendor/iui/iui.js" charset="utf-8"></script>
 </head>
 <body>

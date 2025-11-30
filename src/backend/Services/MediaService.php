@@ -170,10 +170,7 @@ class MediaService
             <img src="/assets/icons/arrow-circle-135.png" title="Refresh Media Selection" alt="Refresh Media Selection" />
             Refresh
         </span>
-        <script type="text/javascript">
-            // Populate fields with data
-            media_select_receive_data(' . json_encode($media) . ');
-        </script>';
+        <script type="application/json" data-lwt-media-select-config>' . json_encode($media) . '</script>';
         return $r;
     }
 
@@ -448,41 +445,14 @@ style="width: 100%; height: 300px; display: block; margin-left: auto; margin-rig
         </td>
     </tr>
 </table>
-<!-- HTML5 Audio initialization -->
-<script type="text/javascript">
-    //<![CDATA[
-    $(document).ready(function() {
-        // Initialize the HTML5 audio player
-        setupAudioPlayer(
-            'lwt-audio-player',
-            <?php echo json_encode(encodeURI($audio)); ?>,
-            <?php echo $offset; ?>,
-            <?php echo json_encode($repeatMode); ?>
-        );
-
-        // Setup play/pause/stop button handlers
-        $('.lwt-audio-play').on('click', function() {
-            const player = getAudioPlayer();
-            if (player) player.play();
-        });
-        $('.lwt-audio-pause').on('click', function() {
-            const player = getAudioPlayer();
-            if (player) player.pause();
-        });
-        $('.lwt-audio-stop').on('click', function() {
-            const player = getAudioPlayer();
-            if (player) player.stop();
-        });
-        $('.lwt-audio-mute').on('click', function() {
-            const player = getAudioPlayer();
-            if (player) player.mute();
-        });
-        $('.lwt-audio-unmute').on('click', function() {
-            const player = getAudioPlayer();
-            if (player) player.unmute();
-        });
-    });
-    //]]>
+<!-- HTML5 Audio initialization config -->
+<script type="application/json" data-lwt-audio-player-config>
+<?php echo json_encode([
+    'containerId' => 'lwt-audio-player',
+    'mediaUrl' => encodeURI($audio),
+    'offset' => $offset,
+    'repeatMode' => $repeatMode
+]); ?>
 </script>
         <?php
     }

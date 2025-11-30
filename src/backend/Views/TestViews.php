@@ -93,44 +93,14 @@ class TestViews
      * Render JavaScript for test header.
      *
      * @return void
+     *
+     * @deprecated 3.0.0 JavaScript is now bundled in the Vite build.
+     *             This method is kept for backward compatibility but does nothing.
      */
     public function renderHeaderJs(): void
     {
-        ?>
-<script type="text/javascript">
-    function setUtteranceSetting() {
-        const utterancechecked = JSON.parse(
-            localStorage.getItem('review-utterance-allowed')
-        );
-        const utterancecheckbox = document.getElementById('utterance-allowed');
-
-        utterancecheckbox.checked = utterancechecked;
-        utterancecheckbox.addEventListener('change', function() {
-            localStorage.setItem(
-                'review-utterance-allowed',
-                utterancecheckbox.checked
-            );
-        });
-    }
-
-    function resetFrames() {
-        parent.frames['ro'].location.href = 'empty.html';
-        parent.frames['ru'].location.href = 'empty.html';
-    }
-
-    function startWordTest(type, property) {
-        resetFrames();
-        window.location.href = '/test?type=' + type + '&' + property;
-    }
-
-    function startTestTable(property) {
-        resetFrames();
-        window.location.href = '/test?type=table&' + property;
-    }
-
-    $(setUtteranceSetting)
-</script>
-        <?php
+        // JavaScript is now in src/frontend/js/testing/test_header.ts
+        // and auto-initializes via event delegation
     }
 
     /**
@@ -161,21 +131,27 @@ class TestViews
 <div class="flex-spaced">
     <div>
         <input type="button" value="..[<?php echo \tohtml($languageName); ?>].."
-            onclick="startWordTest(1, '<?php echo $property; ?>')" />
+            data-action="start-word-test" data-test-type="1"
+            data-property="<?php echo \tohtml($property); ?>" />
         <input type="button" value="..[L1].."
-            onclick="startWordTest(2, '<?php echo $property; ?>')" />
+            data-action="start-word-test" data-test-type="2"
+            data-property="<?php echo \tohtml($property); ?>" />
         <input type="button" value="..[-].."
-            onclick="startWordTest(3, '<?php echo $property; ?>')" />
+            data-action="start-word-test" data-test-type="3"
+            data-property="<?php echo \tohtml($property); ?>" />
     </div>
     <div>
         <input type="button" value="[<?php echo \tohtml($languageName); ?>]"
-            onclick="startWordTest(4, '<?php echo $property; ?>')" />
+            data-action="start-word-test" data-test-type="4"
+            data-property="<?php echo \tohtml($property); ?>" />
         <input type="button" value="[L1]"
-            onclick="startWordTest(5, '<?php echo $property; ?>')" />
+            data-action="start-word-test" data-test-type="5"
+            data-property="<?php echo \tohtml($property); ?>" />
     </div>
     <div>
         <input type="button" value="Table"
-            onclick="startTestTable('<?php echo $property; ?>')" />
+            data-action="start-test-table"
+            data-property="<?php echo \tohtml($property); ?>" />
     </div>
     <div>
         <input type="checkbox" id="utterance-allowed" />
@@ -316,53 +292,15 @@ class TestViews
     ): void {
         ?>
 <script type="text/javascript">
-    const context = window.parent;
-    $('.word<?php echo $wordId; ?>', context.document)
-        .removeClass('todo todosty')
-        .addClass('done<?php echo ($statusChange >= 0 ? 'ok' : 'wrong'); ?>sty')
-        .attr('data_status', '<?php echo $newStatus; ?>')
-        .attr('data_todo', '0');
-
-    const waittime = <?php echo json_encode($waitTime); ?> + 500;
-
-    function page_reloader(waittime, target) {
-        if (waittime <= 0) {
-            target.location.reload();
-        } else {
-            setTimeout(window.location.reload.bind(target.location), waittime);
-        }
-    }
-
-    function update_tests_count(tests_status, cont_document) {
-        let width_divisor = .01;
-        if (tests_status["total"] > 0) {
-            width_divisor = tests_status["total"] / 100;
-        }
-
-        $("#not-tested-box", cont_document).width(tests_status["remaining"] / width_divisor);
-        $("#wrong-tests-box", cont_document).width(tests_status["wrong"] / width_divisor);
-        $("#correct-tests-box", cont_document).width(tests_status["correct"] / width_divisor);
-
-        $("#not-tested-header", cont_document).text(tests_status["remaining"]);
-        $("#not-tested", cont_document).text(tests_status["remaining"]);
-        $("#wrong-tests", cont_document).text(tests_status["wrong"]);
-        $("#correct-tests", cont_document).text(tests_status["correct"]);
-    }
-
-    function ajax_reloader(waittime, target, tests_status) {
-        if (waittime <= 0) {
-            context.get_new_word();
-        } else {
-            setTimeout(target.get_new_word, waittime);
-        }
-    }
-
-    if (<?php echo json_encode($ajax); ?>) {
-        update_tests_count(<?php echo json_encode($testStatus); ?>, context.document);
-        ajax_reloader(waittime, context);
-    } else {
-        page_reloader(waittime, context);
-    }
+    // Call the bundled handleStatusChangeResult function
+    handleStatusChangeResult(
+        <?php echo json_encode($wordId); ?>,
+        <?php echo json_encode($newStatus); ?>,
+        <?php echo json_encode($statusChange); ?>,
+        <?php echo json_encode($testStatus); ?>,
+        <?php echo json_encode($ajax); ?>,
+        <?php echo json_encode($waitTime); ?>
+    );
 </script>
         <?php
     }
@@ -398,103 +336,14 @@ class TestViews
      * Render table test JavaScript.
      *
      * @return void
+     *
+     * @deprecated 3.0.0 JavaScript is now bundled in the Vite build.
+     *             This method is kept for backward compatibility but does nothing.
      */
     public function renderTableTestJs(): void
     {
-        ?>
-<script type="text/javascript">
-//<![CDATA[
-$(document).ready(function() {
-    $('#cbEdit').change(function() {
-        if ($('#cbEdit').is(':checked')) {
-            $('td:nth-child(1),th:nth-child(1)').show();
-            do_ajax_save_setting('currenttabletestsetting1', '1');
-        } else {
-            $('td:nth-child(1),th:nth-child(1)').hide();
-            do_ajax_save_setting('currenttabletestsetting1', '0');
-        }
-        $('th,td').css('border-top-left-radius', '').css('border-bottom-left-radius', '');
-        $('th:visible').eq(0).css('border-top-left-radius', 'inherit')
-            .css('border-bottom-left-radius', '0px');
-        $('tr:last-child>td:visible').eq(0).css('border-bottom-left-radius', 'inherit');
-    });
-
-    $('#cbStatus').change(function() {
-        if ($('#cbStatus').is(':checked')) {
-            $('td:nth-child(2),th:nth-child(2)').show();
-            do_ajax_save_setting('currenttabletestsetting2', '1');
-        } else {
-            $('td:nth-child(2),th:nth-child(2)').hide();
-            do_ajax_save_setting('currenttabletestsetting2', '0');
-        }
-        $('th,td').css('border-top-left-radius', '').css('border-bottom-left-radius', '');
-        $('th:visible').eq(0).css('border-top-left-radius', 'inherit')
-            .css('border-bottom-left-radius', '0px');
-        $('tr:last-child>td:visible').eq(0).css('border-bottom-left-radius', 'inherit');
-    });
-
-    $('#cbTerm').change(function() {
-        if ($('#cbTerm').is(':checked')) {
-            $('td:nth-child(3)').css('color', 'black').css('cursor', 'auto');
-            do_ajax_save_setting('currenttabletestsetting3', '1');
-        } else {
-            $('td:nth-child(3)').css('color', 'white').css('cursor', 'pointer');
-            do_ajax_save_setting('currenttabletestsetting3', '0');
-        }
-    });
-
-    $('#cbTrans').change(function() {
-        if ($('#cbTrans').is(':checked')) {
-            $('td:nth-child(4)').css('color', 'black').css('cursor', 'auto');
-            do_ajax_save_setting('currenttabletestsetting4', '1');
-        } else {
-            $('td:nth-child(4)').css('color', 'white').css('cursor', 'pointer');
-            do_ajax_save_setting('currenttabletestsetting4', '0');
-        }
-    });
-
-    $('#cbRom').change(function() {
-        if ($('#cbRom').is(':checked')) {
-            $('td:nth-child(5),th:nth-child(5)').show();
-            do_ajax_save_setting('currenttabletestsetting5', '1');
-        } else {
-            $('td:nth-child(5),th:nth-child(5)').hide();
-            do_ajax_save_setting('currenttabletestsetting5', '0');
-        }
-        $('th,td').css('border-top-right-radius', '').css('border-bottom-right-radius', '');
-        $('th:visible:last').css('border-top-right-radius', 'inherit');
-        $('tr:last-child>td:visible:last').css('border-bottom-right-radius', 'inherit');
-    });
-
-    $('#cbSentence').change(function() {
-        if ($('#cbSentence').is(':checked')) {
-            $('td:nth-child(6),th:nth-child(6)').show();
-            do_ajax_save_setting('currenttabletestsetting6', '1');
-        } else {
-            $('td:nth-child(6),th:nth-child(6)').hide();
-            do_ajax_save_setting('currenttabletestsetting6', '0');
-        }
-        $('th,td').css('border-top-right-radius', '').css('border-bottom-right-radius', '');
-        $('th:visible:last').css('border-top-right-radius', 'inherit');
-        $('tr:last-child>td:visible:last').css('border-bottom-right-radius', 'inherit');
-    });
-
-    $('td').on('click', function() {
-        $(this).css('color', 'black').css('cursor', 'auto');
-    });
-
-    $('td').css('background-color', 'white');
-
-    $('#cbEdit').change();
-    $('#cbStatus').change();
-    $('#cbTerm').change();
-    $('#cbTrans').change();
-    $('#cbRom').change();
-    $('#cbSentence').change();
-});
-//]]>
-</script>
-        <?php
+        // JavaScript is now in src/frontend/js/testing/test_table.ts
+        // and auto-initializes when checkboxes exist
     }
 
     /**
@@ -664,105 +513,13 @@ $(document).ready(function() {
         ];
         ?>
 <script type="text/javascript">
-    function get_new_word(review_data) {
-        query_next_term(review_data);
-        cClick();
-    }
-
-    $(function() {
-        get_new_word(<?php echo json_encode($reviewData); ?>)
+    // Initialize AJAX test using bundled functions
+    $(document).ready(function() {
+        initAjaxTest(
+            <?php echo json_encode($reviewData); ?>,
+            <?php echo json_encode($timeData); ?>
+        );
     });
-
-    function prepare_test_frames() {
-        const time_data = <?php echo json_encode($timeData); ?>;
-
-        window.parent.frames['ru'].location.href = 'empty.html';
-        if (time_data.wait_time <= 0) {
-            window.parent.frames['ro'].location.href = 'empty.html';
-        } else {
-            setTimeout(
-                'window.parent.frames["ro"].location.href="empty.html";',
-                time_data.wait_time
-            );
-        }
-        new CountUp(
-            time_data.time, time_data.start_time, 'timer', time_data.show_timer
-        );
-    }
-
-    function prepareWordReading(term_text, lang_id) {
-        $('.word').on('click', function() {
-            speechDispatcher(term_text, lang_id)
-        });
-    }
-
-    function insert_new_word(word_id, solution, group) {
-        LWT_DATA.test.solution = solution;
-        LWT_DATA.word.id = word_id;
-
-        $('#term-test').html(group);
-
-        $(document).on('keydown', keydown_event_do_test_test);
-        $('.word').on('click', word_click_event_do_test_test);
-    }
-
-    function test_query_handler(current_test, total_tests, test_key, selection) {
-        if (current_test['word_id'] == 0) {
-            do_test_finished(total_tests);
-            $.getJSON(
-                'api.php/v1/review/tomorrow-count',
-                { test_key: test_key, selection: selection },
-                function(tomorrow_test) {
-                    if (tomorrow_test.count) {
-                        $('#tests-tomorrow').css("display", "inherit");
-                        $('#tests-tomorrow').text(
-                            "Tomorrow you'll find here " + tomorrow_test.count +
-                            ' test' + (tomorrow_test.count < 2 ? '' : 's') + "!"
-                        );
-                    }
-                }
-            );
-        } else {
-            insert_new_word(
-                current_test.word_id,
-                current_test.solution,
-                current_test.group
-            );
-            if ($('#utterance-allowed').prop('checked')) {
-                prepareWordReading(current_test.word_text, LWT_DATA.language.id);
-            };
-        }
-    }
-
-    function query_next_term(review_data) {
-        $.getJSON(
-            'api.php/v1/review/next-word',
-            {
-                test_key: review_data.test_key,
-                selection: review_data.selection,
-                word_mode: review_data.word_mode,
-                lg_id: review_data.lg_id,
-                word_regex: review_data.word_regex,
-                type: review_data.type
-            }
-        )
-        .done(function(data) {
-            test_query_handler(
-                data, review_data.count, review_data.test_key, review_data.selection
-            );
-        });
-    }
-
-    function do_test_finished(total_tests) {
-        $('#term-test').css("display", "none");
-        $('#test-finished-area').css("display", "inherit");
-        $('#tests-done-today').text(
-            "Nothing " + (total_tests > 0 ? 'more ' : '') + "to test here!"
-        );
-        $('#tests-tomorrow').css("display", "none");
-    }
-
-    $(document).ready(prepare_test_frames);
 </script>
         <?php
     }

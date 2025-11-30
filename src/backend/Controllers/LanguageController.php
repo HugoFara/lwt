@@ -78,7 +78,6 @@ class LanguageController extends BaseController
     public function index(array $params): void
     {
         PageLayoutHelper::renderPageStart('My Languages', true);
-        $this->outputDuplicateAlertScript();
 
         $message = '';
 
@@ -111,36 +110,6 @@ class LanguageController extends BaseController
         }
 
         PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Output JavaScript for duplicate name checking.
-     *
-     * @return void
-     */
-    private function outputDuplicateAlertScript(): void
-    {
-        ?>
-<script type="text/javascript">
-    //<![CDATA[
-    var LANGUAGES = <?php echo json_encode($this->languageService->getAllLanguages()); ?>;
-
-    function check_dupl_lang(curr) {
-        const l = $('#LgName').val();
-        if (l in LANGUAGES) {
-            if (curr != LANGUAGES[l]) {
-                alert('Language "' + l +
-                '" already exists. Please change the language name!');
-                $('#LgName').focus();
-                return false;
-            }
-        }
-        return true;
-    }
-
-    //]]>
-</script>
-        <?php
     }
 
     /**

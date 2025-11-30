@@ -7,6 +7,8 @@
  * - $errorMessage: string|null error message to display
  * - $rssUrl: string|null previously entered RSS URL
  *
+ * JavaScript moved to src/frontend/js/feeds/feed_wizard_common.ts
+ *
  * PHP version 8.1
  *
  * @category Lwt
@@ -20,6 +22,8 @@
 namespace Lwt\Views\Feed;
 
 ?>
+<script type="application/json" id="wizard-step1-config"><?php echo json_encode(['step' => 1]); ?></script>
+
 <?php if (!empty($errorMessage)): ?>
 <div class="red">
     <p>+++ ERROR: PLEASE CHECK YOUR NEWSFEED URI!!! +++</p>
@@ -42,16 +46,6 @@ namespace Lwt\Views\Feed;
     <input type="hidden" name="step" value="2" />
     <input type="hidden" name="selected_feed" value="0" />
     <input type="hidden" name="article_tags" value="1" />
-    <input type="button" value="Cancel" onclick="location.href='/feeds/edit?del_wiz=1';return false;" />
+    <input type="button" value="Cancel" data-action="wizard-cancel" data-url="/feeds/edit?del_wiz=1" />
     <button>Next</button>
 </form>
-<script type="text/javascript">
-    $('h1')
-    .eq(-1)
-    .html(
-        'Feed Wizard | Step 1 - Insert Newsfeed URI ' +
-        '<a href="docs/info.html#feed_wizard" target="_blank">' +
-        '<img alt="Help" title="Help" src="/assets/icons/question-frame.png"></img></a>'
-    )
-    .css('text-align','center');
-</script>

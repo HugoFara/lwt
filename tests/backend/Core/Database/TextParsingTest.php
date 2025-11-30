@@ -383,7 +383,7 @@ class TextParsingTest extends TestCase
 
     // ===== displayStatistics() tests =====
 
-    public function testDisplayStatisticsOutputsJavascript(): void
+    public function testDisplayStatisticsOutputsJson(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
@@ -393,9 +393,10 @@ class TextParsingTest extends TestCase
         TextParsing::displayStatistics(self::$testLanguageId, false, false);
         $output = ob_get_clean();
 
-        $this->assertStringContainsString('<script', $output);
-        $this->assertStringContainsString('MWORDS', $output);
-        $this->assertStringContainsString('displayStatistics', $output);
+        $this->assertStringContainsString('<script type="application/json"', $output);
+        $this->assertStringContainsString('text-check-config', $output);
+        $this->assertStringContainsString('multiWords', $output);
+        $this->assertStringContainsString('rtlScript', $output);
     }
 
     public function testDisplayStatisticsWithRtl(): void
@@ -408,7 +409,8 @@ class TextParsingTest extends TestCase
         TextParsing::displayStatistics(self::$testLanguageId, true, false);
         $output = ob_get_clean();
 
-        $this->assertStringContainsString('dir', $output, 'RTL script should add dir attribute');
+        // RTL setting is now passed as JSON data for TypeScript to handle
+        $this->assertStringContainsString('"rtlScript":true', $output, 'RTL script flag should be true in JSON');
     }
 
     // ===== checkExpressions() tests =====

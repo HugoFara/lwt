@@ -31,6 +31,7 @@ import './core/simple_interactions';
 import './terms/word_status';
 import './terms/dictionary';
 import './terms/translation_api';
+import './terms/translation_page';
 import './terms/overlib_interface';
 import './terms/term_operations';
 
@@ -53,6 +54,9 @@ import './forms/word_form_auto';
 
 // Testing
 import './testing/test_mode';
+import './testing/test_header';
+import './testing/test_table';
+import './testing/test_ajax';
 
 // Media
 import './media/media_selection';
@@ -66,9 +70,13 @@ import './feeds/feed_multi_load';
 import './feeds/feed_index';
 import './feeds/feed_form';
 import './feeds/feed_text_edit';
+import './feeds/feed_wizard_common';
+import './feeds/feed_wizard_step2';
 
 // Texts
 import './texts/text_list';
+import './texts/youtube_import';
+import './texts/text_check_display';
 
 // Words
 import './words/word_list_filter';
@@ -77,6 +85,8 @@ import './words/word_dom_updates';
 import './words/bulk_translate';
 import './words/word_status_ajax';
 import './words/word_upload';
+import './words/expression_interactable';
+import './words/word_result_init';
 
 // Tags
 import './tags/tag_list';

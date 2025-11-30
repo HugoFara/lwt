@@ -518,10 +518,10 @@ class TextParsing
                 );
             }
         }
-        echo '<script type="text/javascript">
-        WORDS = ', json_encode($wo), ';
-        NOWORDS = ', json_encode($nw), ';
-        </script>';
+        // JavaScript moved to src/frontend/js/texts/text_check_display.ts
+        echo '<script type="application/json" id="text-check-words-config">';
+        echo json_encode(['words' => $wo, 'nonWords' => $nw]);
+        echo '</script>';
     }
 
 
@@ -610,43 +610,15 @@ class TextParsing
                 );
             }
         }
-        ?>
-<script type="text/javascript">
-    MWORDS = <?php echo json_encode($mw) ?>;
-    if (<?php echo json_encode($rtlScript); ?>) {
-        $(function() {
-            $("li").attr("dir", "rtl");
-        });
-    }
-    function displayStatistics() {
-        let h = '<h4>Word List <span class="red2">(red = already saved)</span></h4>' +
-        '<ul class="wordlist">';
-        $.each(
-            WORDS,
-            function (k,v) {
-                h += '<li><span' + (v[2]==""?"":'class="red2"') + '>[' + v[0] + '] — '
-                + v[1] + (v[2]==""?"":' — ' + v[2]) + '</span></li>';
-            }
-        );
-        h += '</ul><p>TOTAL: ' + WORDS.length
-        + '</p><h4>Expression List</span></h4><ul class="expressionlist">';
-        $.each(MWORDS, function (k,v) {
-            h+= '<li><span>[' + v[0] + '] — ' + v[1] +
-            (v[2]==""?"":'— ' + v[2]) + '</span></li>';
-        });
-        h += '</ul><p>TOTAL: ' + MWORDS.length +
-        '</p><h4>Non-Word List</span></h4><ul class="nonwordlist">';
-        $.each(NOWORDS, function(k,v) {
-            h+= '<li>[' + v[0] + '] — ' + v[1] + '</li>';
-        });
-        h += '</ul><p>TOTAL: ' + NOWORDS.length + '</p>'
-        $('#check_text').append(h);
-    }
-
-    displayStatistics();
-</script>
-
-        <?php
+        // JavaScript moved to src/frontend/js/texts/text_check_display.ts
+        echo '<script type="application/json" id="text-check-config">';
+        echo json_encode([
+            'words' => [], // Will be populated from text-check-words-config
+            'multiWords' => $mw,
+            'nonWords' => [], // Will be populated from text-check-words-config
+            'rtlScript' => (bool)$rtlScript
+        ]);
+        echo '</script>';
     }
 
     /**

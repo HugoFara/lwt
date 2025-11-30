@@ -31,36 +31,16 @@ namespace Lwt\Views\Word;
 <p><?php echo $message; ?></p>
 
 <?php if ($success && $len == 1): ?>
-<script type="text/javascript">
-    var context = window.parent.document;
-    var woid = <?php echo json_encode($wid); ?>;
-    var status = <?php echo json_encode($status); ?>;
-    var trans = <?php echo json_encode($translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false)); ?>;
-    var roman = <?php echo json_encode($romanization); ?>;
-    var title = '';
-    if (window.parent.LWT_DATA.settings.jQuery_tooltip) {
-        title = make_tooltip(
-                <?php echo json_encode($text); ?>,
-            trans, roman, status
-        );
-    }
-
-    if($('.TERM<?php echo $hex; ?>', context).length){
-        $('.TERM<?php echo $hex; ?>', context)
-        .removeClass('status0')
-        .addClass('word' + woid + ' ' + 'status' + status)
-        .attr('data_trans',trans)
-        .attr('data_rom',roman)
-        .attr('data_status',status)
-        .attr('data_wid',woid)
-        .attr('title',title);
-        $('#learnstatus', context).html('<?php echo addslashes(todo_words_content($textId)); ?>');
-    }
-</script>
-<?php endif; ?>
-
-<?php if ($success): ?>
-<script type="text/javascript">
-    cleanupRightFrames();
+<script type="application/json" data-lwt-save-result-config>
+<?php echo json_encode([
+    'wid' => $wid,
+    'status' => $status,
+    'translation' => $translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false),
+    'romanization' => $romanization,
+    'text' => $text,
+    'hex' => $hex,
+    'textId' => $textId,
+    'todoContent' => todo_words_content($textId)
+]); ?>
 </script>
 <?php endif; ?>

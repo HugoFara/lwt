@@ -23,98 +23,19 @@ namespace Lwt\Views\Feed;
 use Lwt\Core\Http\InputValidator;
 
 ?>
-<script type="text/javascript">
-    // Extend jQuery
-    $(function() {
-        jQuery.fn.get_adv_xpath = extend_adv_xpath
-    });
-
-    filter_Array = [];
-    // Prepare the page
-    $(lwt_feed_wizard.prepareInteractions);
-
-    if (<?php echo json_encode($wizardData['hide_images'] == 'yes'); ?>) {
-        $(function () {
-            $("img").not($("#lwt_header").find("*")).css("display","none");
-        });
-    }
-    const lwt_wiz_select_test = {
-        clickCancel: function() {
-            $('#adv').hide();
-            $('#lwt_last').css('margin-top', $('#lwt_header').height());
-            return false;
-        },
-
-        changeSelectMode: function() {
-            $('*').removeClass('lwt_marked_text');
-            $('*[class=\'\']').removeAttr('class');
-            $('#get_button').prop('disabled', true);
-            $('#mark_action').empty();
-            $('<option/>').val('').text('[Click On Text]').appendTo('#mark_action');
-            return false;
-        },
-
-        changeHideImage: function() {
-            if ($(this).val() == 'no')
-                $('img').not($('#lwt_header').find('*')).css('display', '');
-            else
-                $('img').not($('#lwt_header').find('*')).css('display', 'none');
-            return false;
-        },
-
-        clickBack: function() {
-            location.href = '/feeds/wizard?step=1&amp;select_mode=' +
-                encodeURIComponent($('select[name=\'select_mode\']').val()) +
-                '&amp;hide_images=' +
-                encodeURIComponent($('select[name=\'hide_images\']').val());
-            return false;
-        },
-
-        clickMinMax: function() {
-            $('#lwt_container').toggle();
-            if ($('#lwt_container').css('display') == 'none') {
-                $('input[name=\'maxim\']').val(0);
-            } else {
-                $('input[name=\'maxim\']').val(1);
-            }
-            $('#lwt_last').css('margin-top', $('#lwt_header').height());
-            return false;
-        },
-
-        changeSelectedFeed: function() {
-            var html = $('#lwt_sel').html();
-            $('input[name=\'html\']').val(html);
-            document.lwt_form1.submit();
-        },
-
-        changeArticleSection: function() {
-            var html = $('#lwt_sel').html();
-            $('input[name=\'html\']').val(html);
-            document.lwt_form1.submit();
-        },
-
-        setMaxim: function() {
-            $('#lwt_container').hide();
-            $('#lwt_last').css('margin-top', $('#lwt_header').height());
-            if ($('#lwt_container').css('display') == 'none') {
-                $('input[name=\'maxim\']').val(0);
-            } else {
-                $('input[name=\'maxim\']').val(1);
-            }
-        }
-    }
-</script>
-<div id="lwt_header">
+<div id="lwt_header"
+     data-hide-images="<?php echo $wizardData['hide_images'] == 'yes' ? 'true' : 'false'; ?>"
+     data-is-minimized="<?php echo $wizardData['maxim'] == 0 ? 'true' : 'false'; ?>">
     <form name="lwt_form1" class="validate" action="/feeds/wizard" method="post">
         <div id="adv" style="display: none;">
-        <button onclick="lwt_wiz_select_test.clickCancel()">Cancel</button>
+        <button data-action="wizard-cancel">Cancel</button>
         <button id="adv_get_button">Get</button>
     </div>
     <div id="settings" style="display: none;">
         <p><b>Feed Wizard | Settings</b></p>
         <div style="margin-left:150px;text-align:left">
             Selection Mode:
-            <select name="select_mode" onchange="lwt_wiz_select_test.changeSelectMode()">
+            <select name="select_mode" data-action="wizard-select-mode">
                 <option value="0"<?php if ($wizardData['select_mode'] == '0') {
                     echo ' selected';
                                  }?>>Smart Selection</option>
@@ -125,7 +46,7 @@ use Lwt\Core\Http\InputValidator;
                     echo ' selected';
                                    }?>>Advanced Selection</option>
                 </select><br />
-                Hide Images: <select name="hide_images" onchange="lwt_wiz_select_test.changeHideImage()">
+                Hide Images: <select name="hide_images" data-action="wizard-hide-images">
                 <option value="yes"<?php if ($wizardData['hide_images'] == 'yes') {
                     echo ' selected';
                                    }?>>Yes</option>
@@ -174,7 +95,7 @@ use Lwt\Core\Http\InputValidator;
                 <td class="td1" style="text-align:left">Article Source: </td>
                 <td class="td1" style="text-align:left">
                     <select name="NfArticleSection"
-                    onchange="lwt_wiz_select_test.changeArticleSection()">
+                    data-action="wizard-article-section">
                         <option value="" <?php
                         if (
                             !array_key_exists('feed_text', $wizardData['feed']) ||
@@ -219,7 +140,7 @@ use Lwt\Core\Http\InputValidator;
                 <span>
                     <select name="selected_feed"
                     style="width:250px;max-width:200px;"
-                    onchange="lwt_wiz_select_test.changeSelectedFeed()">
+                    data-action="wizard-selected-feed">
                         <?php
                         $current_host = '';
                         $current_status = '';
@@ -289,7 +210,7 @@ use Lwt\Core\Http\InputValidator;
         <td>
             <span>
                 <input type="button" value="Back"
-                onclick="lwt_wiz_select_test.clickBack()" />
+                data-action="wizard-back" />
                 <button id="next">Next</button>
             </span>
         </td>
@@ -297,7 +218,7 @@ use Lwt\Core\Http\InputValidator;
     </tr>
 </table>
 <button style="position:absolute;right:10px;top:10px"
-onclick="lwt_wiz_select_test.clickMinMax()">
+data-action="wizard-minmax">
     min/max
 </button>
 <input type="hidden" name="step" value="2" />
@@ -309,7 +230,14 @@ onclick="lwt_wiz_select_test.clickMinMax()">
 <br /><p id="lwt_last"></p>
 <?php echo $feedHtml; ?>
 <script type="text/javascript">
-    if (<?php echo json_encode($wizardData['maxim'] == 0); ?>) {
-        $(lwt_wiz_select_test.setMaxim);
-    }
+    // Initialize wizard step 2 with configuration from data attributes
+    $(document).ready(function() {
+        var header = document.getElementById('lwt_header');
+        if (header) {
+            initWizardStep2(
+                header.dataset.hideImages === 'true',
+                header.dataset.isMinimized === 'true'
+            );
+        }
+    });
 </script>

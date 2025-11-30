@@ -92,6 +92,24 @@ export function do_ajax_update_media_select(): void {
   );
 }
 
+/**
+ * Auto-initialize media selection from JSON config element.
+ */
+export function autoInitMediaSelect(): void {
+  const configEl = document.querySelector<HTMLScriptElement>('script[data-lwt-media-select-config]');
+  if (configEl) {
+    try {
+      const config = JSON.parse(configEl.textContent || '{}') as MediaSelectResponse;
+      media_select_receive_data(config);
+    } catch (e) {
+      console.error('Failed to parse media select config:', e);
+    }
+  }
+}
+
+// Auto-initialize on DOM ready
+document.addEventListener('DOMContentLoaded', autoInitMediaSelect);
+
 // Expose globally for backward compatibility with PHP templates
 if (typeof window !== 'undefined') {
   const w = window as unknown as Record<string, unknown>;

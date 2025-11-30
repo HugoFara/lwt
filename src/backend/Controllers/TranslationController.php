@@ -198,6 +198,7 @@ class TranslationController extends BaseController
         string $tgtLang
     ): void {
         $lgId = Settings::get('currentlangage');
+        $hasParentFrame = true; // Will be checked client-side
         ?>
         <h2 title="Translate with Google Translate">
             Word translation: <?php echo \tohtml($text) ?>
@@ -205,20 +206,16 @@ class TranslationController extends BaseController
             src="<?php \print_file_path('icn/speaker-volume.png'); ?>"></img>
 
             <img id="del_translation" style="cursor: pointer;"
-            title="Empty Translation Field" onclick="deleteTranslation ();"
+            title="Empty Translation Field" onclick="deleteTranslation();"
             src="<?php \print_file_path('icn/broom.png'); ?>"></img>
         </h2>
 
-        <script type="text/javascript">
-            $('#textToSpeech').on('click', function () {
-                const txt = <?php echo json_encode($text); ?>;
-                speechDispatcher(txt, <?php echo json_encode($lgId); ?>);
-            });
-
-            $(document).ready(function() {
-                if (window.parent.frames['ro'] === undefined && window.opener === undefined)
-                    $('#del_translation').remove();
-            });
+        <script type="application/json" data-lwt-google-translate-config>
+        <?php echo json_encode([
+            'text' => $text,
+            'langId' => $lgId,
+            'hasParentFrame' => $hasParentFrame
+        ]); ?>
         </script>
         <?php
         foreach ($translations as $word) {
@@ -303,34 +300,26 @@ class TranslationController extends BaseController
      */
     protected function renderGlosbeScript(string $from, string $dest, string $phrase): void
     {
-        ?>
-        <script type="text/javascript">
-            //<![CDATA[
-            $(document).ready( function() {
-            <?php
-            $validation = $this->translationService->validateGlosbeParams($from, $dest, $phrase);
+        $validation = $this->translationService->validateGlosbeParams($from, $dest, $phrase);
 
-            if (!$validation['valid']) {
-                if ($phrase === '') {
-                    echo '$("body").html("<p class=\"msgblue\">Term is not set!</p>");';
-                } else {
-                    echo '$("body").html("<p class=\"red\">There seems to be something wrong ' .
-                        'with the Glosbe API!</p><p class=\"red\">Please check the dictionaries ' .
-                        'in the Language Settings!</p>"); ';
-                }
+        $config = [
+            'phrase' => urlencode($phrase),
+            'from' => $from,
+            'dest' => $dest,
+            'hasParentFrame' => true // Will be checked client-side
+        ];
+
+        if (!$validation['valid']) {
+            if ($phrase === '') {
+                $config['error'] = 'empty_term';
             } else {
-                ?>
-                var w = window.parent.frames['ro'];
-                if (typeof w == 'undefined') w = window.opener;
-                if (typeof w == 'undefined')$('#del_translation').remove();
-                getGlosbeTranslation(<?php
-                    echo "'" . urlencode($phrase) . "','" . $from . "','" . $dest . "'";
-                ?>);
-                <?php
+                $config['error'] = 'api_error';
             }
-            ?>
-            });
-            //]]>
+        }
+
+        ?>
+        <script type="application/json" data-lwt-glosbe-config>
+        <?php echo json_encode($config); ?>
         </script>
         <?php
     }

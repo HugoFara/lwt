@@ -338,32 +338,14 @@ class ExpressionService
         mysqli_free_result($res);
 
         ?>
-<script type="text/javascript">
-    (function () {
-        let term = <?php echo json_encode($attrs); ?>;
-
-        const multiWords = <?php echo json_encode($multiwords); ?>;
-
-        let title = '';
-        if (window.parent.LWT_DATA.settings.jQuery_tooltip) {
-            title = make_tooltip(
-                multiWords[window.parent.LWT_DATA.text.id][0], term.data_trans,
-                term.data_rom, parseInt(term.data_status, 10)
-            );
-        }
-        term['title'] = title;
-        let attrs = "";
-        Object.entries(term).forEach(([k, v]) => attrs += " " + k + '="' + v + '"');
-
-        newExpressionInteractable(
-            multiWords[window.parent.LWT_DATA.text.id],
-            attrs,
-            term.data_code,
-            <?php echo json_encode($hex); ?>,
-            <?php echo json_encode($showAll); ?>
-        );
-    })()
- </script>
+<script type="application/json" data-lwt-multiword-config>
+<?php echo json_encode([
+    'attrs' => $attrs,
+    'multiWords' => $multiwords,
+    'hex' => $hex,
+    'showAll' => $showAll
+]); ?>
+</script>
         <?php
         flush();
     }
@@ -402,28 +384,16 @@ class ExpressionService
         $term = array_values($appendtext)[0];
 
         ?>
-<script type="text/javascript">
-    let term = <?php echo json_encode($attrs); ?>;
-
-    let title = '';
-    if (window.parent.LWT_DATA.settings.jQuery_tooltip) {
-        title = make_tooltip(
-            <?php echo json_encode($term); ?>, term.data_trans, term.data_rom,
-            parseInt(term.data_status, 10)
-        );
-    }
-    term['title'] = title;
-    let attrs = "";
-    Object.entries(term).forEach(([k, v]) => attrs += " " + k + '="' + v + '"');
-
-    newExpressionInteractable(
-        <?php echo json_encode($appendtext); ?>,
-        attrs,
-        <?php echo json_encode($len); ?>,
-        <?php echo json_encode($hex); ?>,
-        <?php echo json_encode($showAll); ?>
-    );
- </script>
+<script type="application/json" data-lwt-expression-config>
+<?php echo json_encode([
+    'attrs' => $attrs,
+    'appendText' => $appendtext,
+    'term' => $term,
+    'len' => $len,
+    'hex' => $hex,
+    'showAll' => $showAll
+]); ?>
+</script>
         <?php
         flush();
     }
