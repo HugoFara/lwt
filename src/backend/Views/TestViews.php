@@ -123,7 +123,7 @@ class TestViews
     ): void {
         ?>
 <h1>TEST - <?php echo \tohtml($title); ?></h1>
-<div style="margin: 5px;">
+<div class="test-word-count">
     Word<?php echo $totalCount > 1 ? 's' : ''; ?> due today:
     <?php echo $totalCount; ?>,
     <span class="todosty" id="not-tested-header"><?php echo $totalDue; ?></span> remaining.
@@ -179,11 +179,11 @@ class TestViews
         $lCorrect = round($correct / $divisor, 0);
         ?>
 <footer id="footer">
-    <span style="margin-left: 15px; margin-right: 15px;">
+    <span class="test-footer-stat">
         <img src="/assets/icons/clock.png" title="Elapsed Time" alt="Elapsed Time" />
         <span id="timer" title="Elapsed Time"></span>
     </span>
-    <span style="margin-left: 15px; margin-right: 15px;">
+    <span class="test-footer-stat">
         <img id="not-tested-box" class="borderl"
             src="<?php echo \get_file_path('icn/test_notyet.png'); ?>"
             title="Not yet tested" alt="Not yet tested" height="10"
@@ -197,7 +197,7 @@ class TestViews
             title="Correct" alt="Correct" height="10"
             width="<?php echo $lCorrect; ?>" />
     </span>
-    <span style="margin-left: 15px; margin-right: 15px;">
+    <span class="test-footer-stat">
         <span title="Total number of tests" id="total_tests"><?php echo $total; ?></span>
         =
         <span class="todosty" title="Not yet tested" id="not-tested"><?php echo $remaining; ?></span>
@@ -429,7 +429,7 @@ class TestViews
             <?php echo \tohtml($word['WoRomanization'] ?? ''); ?>
         </span>
     </td>
-    <td class="td1 center" style="color:#000;">
+    <td class="td1 center test-sentence-cell">
         <?php echo $span1; ?>
         <span id="SENT<?php echo $word['WoID']; ?>"><?php echo $sent1; ?></span>
         <?php echo $span2; ?>

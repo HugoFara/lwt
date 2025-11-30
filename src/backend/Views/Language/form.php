@@ -91,7 +91,7 @@ namespace Lwt\Views\Language;
                 <option value="ggl">
                     GoogleTranslate API
                 </option>
-                <option value="glosbe" style="display: none;">
+                <option value="glosbe" class="language-option-hidden">
                     Glosbe API
                 </option>
             </select>
@@ -100,7 +100,7 @@ namespace Lwt\Views\Language;
             value="<?php echo tohtml($language->translator); ?>"
             maxlength="200" data_info="GoogleTranslate URI" />
 
-            <div id="LgTranslatorKeyWrapper" style="display: none;">
+            <div id="LgTranslatorKeyWrapper" class="language-form-hidden">
                 <label for="LgTranslatorKey">Key :</label>
                 <input type="text" id="LgTranslatorKey" name="LgTranslatorKey"/>
             </div>
@@ -160,8 +160,7 @@ namespace Lwt\Views\Language;
     <tr>
         <td class="td1 right">RegExp Word Characters:</td>
         <td class="td1">
-            <select style="display: none;"
-            name="LgRegexpAlt">
+            <select class="language-form-hidden" name="LgRegexpAlt">
                 <option value="regexp">Regular Expressions (demo)</option>
                 <option value="mecab">MeCab (recommended)</option>
             </select>
@@ -171,7 +170,7 @@ namespace Lwt\Views\Language;
             maxlength="500" />
             <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
-            <div style="display: none;" class="red" id="mecab_not_installed">
+            <div class="red language-form-hidden" id="mecab_not_installed">
                 <a href="https://en.wikipedia.org/wiki/MeCab">MeCab</a> does
                 not seem to be installed on your server.
                 Please read the <a href="">MeCab installation guide</a>.
@@ -240,7 +239,7 @@ namespace Lwt\Views\Language;
             name="LgTTSVoiceAPI"
             maxlength="2048" rows="10"
             ><?php echo tohtml($language->ttsvoiceapi); ?></textarea>
-            <hr style="color: transparent;" />
+            <hr class="language-form-separator" />
 
             <input type="button" data-action="check-voice-api"
             value="Check Voice API Errors"/>

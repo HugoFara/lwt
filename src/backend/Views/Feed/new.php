@@ -24,7 +24,7 @@ namespace Lwt\Views\Feed;
 <a href="/feeds?page=1">My Feeds</a>
 <span class="nowrap"></span>
 <a href="/feeds/wizard?step=1">
-    <img src="/assets/icons/wizard.png" title="new_feed_wizard" alt="new_feed_wizard" style="height: 20px;"/>
+    <img src="/assets/icons/wizard.png" title="new_feed_wizard" alt="new_feed_wizard" class="icon-small"/>
     New Feed Wizard
 </a>
 <br></br>
@@ -37,22 +37,22 @@ namespace Lwt\Views\Feed;
 </select></td></tr>
 <tr><td class="td1">
 Name: </td><td class="td1">
-    <input class="notempty" style="width:95%" type="text" name="NfName" />
+    <input class="notempty feed-form-input" type="text" name="NfName" />
 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
 </td></tr>
 <tr><td class="td1">Newsfeed url: </td>
-<td class="td1"><input class="notempty" style="width:95%" type="text" name="NfSourceURI" />
+<td class="td1"><input class="notempty feed-form-input" type="text" name="NfSourceURI" />
 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
 </td></tr>
 <tr><td class="td1">Article Section: </td>
-<td class="td1"><input class="notempty" style="width:95%" type="text" name="NfArticleSectionTags" />
+<td class="td1"><input class="notempty feed-form-input" type="text" name="NfArticleSectionTags" />
 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
 </td></tr>
 <tr><td class="td1">Filter Tags: </td>
-<td class="td1"><input type="text" style="width:95%" name="NfFilterTags" /></td></tr>
+<td class="td1"><input type="text" class="feed-form-input" name="NfFilterTags" /></td></tr>
 <tr><td class="td1">Options: </td>
-<td class="td1"><table style="width:100%">
-<tr><td style="width:35%"><input type="checkbox" name="edit_text" checked="checked" /> Edit Text </td>
+<td class="td1"><table class="feed-options-table">
+<tr><td class="option-label"><input type="checkbox" name="edit_text" checked="checked" /> Edit Text </td>
 <td>
     <input type="checkbox" name="c_autoupdate" /> Auto Update Interval:
     <input class="posintnumber" data_info="Auto Update Interval" type="number" min="0" size="4" name="autoupdate" disabled />

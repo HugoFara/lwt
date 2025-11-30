@@ -7,6 +7,14 @@ import {
   setTransRoman,
   translation_radio,
   display_example_sentences,
+  do_ajax_save_impr_text,
+  updateTermTranslation,
+  addTermTranslation,
+  changeTableTestStatus,
+  do_ajax_req_sim_terms,
+  do_ajax_show_similar_terms,
+  change_example_sentences_zone,
+  do_ajax_show_sentences,
   type TransData,
 } from '../../../src/frontend/js/terms/term_operations';
 
@@ -387,6 +395,462 @@ describe('term_operations.ts', () => {
       };
 
       expect(data.translations).toHaveLength(0);
+    });
+  });
+
+  // ===========================================================================
+  // do_ajax_save_impr_text Tests
+  // ===========================================================================
+
+  describe('do_ajax_save_impr_text', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <span id="wait1"><img src="icn/empty.gif" /></span>
+        <div id="editimprtextdata" data_id="123"></div>
+      `;
+    });
+
+    it('shows waiting indicator and makes POST request', () => {
+      const postSpy = vi.spyOn($, 'post').mockImplementation(
+        (_url, _data, callback) => {
+          if (typeof callback === 'function') {
+            callback({});
+          }
+          return {} as JQuery.jqXHR;
+        }
+      );
+
+      do_ajax_save_impr_text(123, 'rg1', '{"rg1":"test"}');
+
+      expect(postSpy).toHaveBeenCalledWith(
+        'api.php/v1/texts/123/annotation',
+        expect.objectContaining({
+          elem: 'rg1',
+          data: '{"rg1":"test"}',
+        }),
+        expect.any(Function),
+        'json'
+      );
+    });
+
+    it('alerts on error response', () => {
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+        if (typeof callback === 'function') {
+          callback({ error: 'Test error message' });
+        }
+        return {} as JQuery.jqXHR;
+      });
+
+      do_ajax_save_impr_text(123, 'rg1', '{}');
+
+      expect(alertSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Test error message')
+      );
+    });
+  });
+
+  // ===========================================================================
+  // updateTermTranslation Tests
+  // ===========================================================================
+
+  describe('updateTermTranslation', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <input id="trans-field" value="new translation" />
+        <div id="editimprtextdata" data_id="1"></div>
+      `;
+    });
+
+    it('alerts when translation is empty', () => {
+      document.body.innerHTML = '<input id="trans-field" value="" />';
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+      updateTermTranslation(1, '#trans-field');
+
+      expect(alertSpy).toHaveBeenCalledWith(
+        expect.stringContaining('empty')
+      );
+    });
+
+    it('alerts when translation is asterisk', () => {
+      document.body.innerHTML = '<input id="trans-field" value="*" />';
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+      updateTermTranslation(1, '#trans-field');
+
+      expect(alertSpy).toHaveBeenCalledWith(
+        expect.stringContaining("'*'")
+      );
+    });
+
+    it('makes POST request with trimmed translation', () => {
+      document.body.innerHTML = '<input id="trans-field" value="  trimmed  " />';
+      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+
+      updateTermTranslation(42, '#trans-field');
+
+      expect(postSpy).toHaveBeenCalledWith(
+        'api.php/v1/terms/42/translations',
+        expect.objectContaining({ translation: 'trimmed' }),
+        expect.any(Function),
+        'json'
+      );
+    });
+
+    it('alerts on empty response', () => {
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+        if (typeof callback === 'function') {
+          callback('');
+        }
+        return {} as JQuery.jqXHR;
+      });
+
+      updateTermTranslation(1, '#trans-field');
+
+      expect(alertSpy).toHaveBeenCalledWith(
+        expect.stringContaining('failed')
+      );
+    });
+
+    it('alerts on error response', () => {
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+        if (typeof callback === 'function') {
+          callback({ error: 'DB error' });
+        }
+        return {} as JQuery.jqXHR;
+      });
+
+      updateTermTranslation(1, '#trans-field');
+
+      expect(alertSpy).toHaveBeenCalledWith(
+        expect.stringContaining('DB error')
+      );
+    });
+  });
+
+  // ===========================================================================
+  // addTermTranslation Tests
+  // ===========================================================================
+
+  describe('addTermTranslation', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <input id="trans-field" value="new translation" />
+        <div id="editimprtextdata" data_id="1"></div>
+      `;
+    });
+
+    it('alerts when translation is empty', () => {
+      document.body.innerHTML = '<input id="trans-field" value="" />';
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+      addTermTranslation('#trans-field', 'word', 1);
+
+      expect(alertSpy).toHaveBeenCalledWith(
+        expect.stringContaining('empty')
+      );
+    });
+
+    it('makes POST request with correct parameters', () => {
+      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+
+      addTermTranslation('#trans-field', 'testword', 5);
+
+      expect(postSpy).toHaveBeenCalledWith(
+        'api.php/v1/terms/new',
+        expect.objectContaining({
+          translation: 'new translation',
+          term_text: 'testword',
+          lg_id: 5,
+        }),
+        expect.any(Function),
+        'json'
+      );
+    });
+
+    it('alerts on error response', () => {
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+        if (typeof callback === 'function') {
+          callback({ error: 'Creation failed' });
+        }
+        return {} as JQuery.jqXHR;
+      });
+
+      addTermTranslation('#trans-field', 'word', 1);
+
+      expect(alertSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Creation failed')
+      );
+    });
+  });
+
+  // ===========================================================================
+  // changeTableTestStatus Tests
+  // ===========================================================================
+
+  describe('changeTableTestStatus', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '<span id="STAT123">Current Status</span>';
+    });
+
+    it('makes POST request for status up', () => {
+      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+
+      changeTableTestStatus('123', true);
+
+      expect(postSpy).toHaveBeenCalledWith(
+        'api.php/v1/terms/123/status/up',
+        {},
+        expect.any(Function),
+        'json'
+      );
+    });
+
+    it('makes POST request for status down', () => {
+      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+
+      changeTableTestStatus('123', false);
+
+      expect(postSpy).toHaveBeenCalledWith(
+        'api.php/v1/terms/123/status/down',
+        {},
+        expect.any(Function),
+        'json'
+      );
+    });
+
+    it('updates DOM on successful response', () => {
+      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+        if (typeof callback === 'function') {
+          callback({ increment: '<span class="status5">5</span>' });
+        }
+        return {} as JQuery.jqXHR;
+      });
+
+      changeTableTestStatus('123', true);
+
+      expect($('#STAT123').html()).toContain('status5');
+    });
+
+    it('does nothing on empty response', () => {
+      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+        if (typeof callback === 'function') {
+          callback('');
+        }
+        return {} as JQuery.jqXHR;
+      });
+
+      changeTableTestStatus('123', true);
+
+      expect($('#STAT123').html()).toBe('Current Status');
+    });
+
+    it('does nothing on error response', () => {
+      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+        if (typeof callback === 'function') {
+          callback({ error: 'Status change failed' });
+        }
+        return {} as JQuery.jqXHR;
+      });
+
+      changeTableTestStatus('123', true);
+
+      expect($('#STAT123').html()).toBe('Current Status');
+    });
+  });
+
+  // ===========================================================================
+  // do_ajax_req_sim_terms Tests
+  // ===========================================================================
+
+  describe('do_ajax_req_sim_terms', () => {
+    it('makes GET request with correct parameters', () => {
+      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+        () => ({} as JQuery.jqXHR<{ similar_terms: string }>)
+      );
+
+      do_ajax_req_sim_terms(5, 'hello');
+
+      expect(getJSONSpy).toHaveBeenCalledWith(
+        'api.php/v1/similar-terms',
+        { lg_id: 5, term: 'hello' }
+      );
+    });
+
+    it('returns jQuery jqXHR object', () => {
+      const mockJqXHR = { done: vi.fn(), fail: vi.fn() } as unknown as JQuery.jqXHR<{
+        similar_terms: string;
+      }>;
+      vi.spyOn($, 'getJSON').mockReturnValue(mockJqXHR);
+
+      const result = do_ajax_req_sim_terms(1, 'test');
+
+      expect(result).toBe(mockJqXHR);
+    });
+  });
+
+  // ===========================================================================
+  // do_ajax_show_similar_terms Tests
+  // ===========================================================================
+
+  describe('do_ajax_show_similar_terms', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <div id="simwords"></div>
+        <input id="langfield" value="5" />
+        <input id="wordfield" value="hello" />
+      `;
+    });
+
+    it('shows loading indicator', () => {
+      vi.spyOn($, 'getJSON').mockReturnValue({
+        done: () => ({ fail: vi.fn() }),
+        fail: vi.fn(),
+      } as unknown as JQuery.jqXHR<{ similar_terms: string }>);
+
+      do_ajax_show_similar_terms();
+
+      expect($('#simwords').html()).toContain('waiting2.gif');
+    });
+
+    it('updates simwords on success', () => {
+      vi.spyOn($, 'getJSON').mockReturnValue({
+        done: vi.fn().mockImplementation(function (this: unknown, callback: (data: { similar_terms: string }) => void) {
+          callback({ similar_terms: '<div>Similar words here</div>' });
+          return { fail: vi.fn() };
+        }),
+        fail: vi.fn(),
+      } as unknown as JQuery.jqXHR<{ similar_terms: string }>);
+
+      do_ajax_show_similar_terms();
+
+      expect($('#simwords').html()).toBe('<div>Similar words here</div>');
+    });
+  });
+
+  // ===========================================================================
+  // change_example_sentences_zone Tests
+  // ===========================================================================
+
+  describe('change_example_sentences_zone', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <div id="exsent-waiting" style="display: block;"></div>
+        <div id="exsent-sentences" style="display: none;"></div>
+      `;
+    });
+
+    it('hides waiting indicator and shows sentences zone', () => {
+      change_example_sentences_zone([], 'target');
+
+      expect($('#exsent-waiting').css('display')).toBe('none');
+      expect($('#exsent-sentences').css('display')).not.toBe('none');
+    });
+
+    it('appends sentences to the zone', () => {
+      const sentences: [string, string][] = [
+        ['Test sentence', 'Test'],
+      ];
+
+      change_example_sentences_zone(sentences, 'target');
+
+      expect($('#exsent-sentences').html()).toContain('Test sentence');
+    });
+  });
+
+  // ===========================================================================
+  // do_ajax_show_sentences Tests
+  // ===========================================================================
+
+  describe('do_ajax_show_sentences', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <div id="exsent-interactable" style="display: block;"></div>
+        <div id="exsent-waiting" style="display: none;"></div>
+        <div id="exsent-sentences" style="display: none;"></div>
+      `;
+    });
+
+    it('shows waiting indicator and hides interactable', () => {
+      vi.spyOn($, 'getJSON').mockImplementation(() => ({} as JQuery.jqXHR));
+
+      do_ajax_show_sentences(1, 'word', 'target', 5);
+
+      expect($('#exsent-interactable').css('display')).toBe('none');
+      expect($('#exsent-waiting').css('display')).not.toBe('none');
+    });
+
+    it('calls API with term ID when wid is a valid number', () => {
+      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+        () => ({} as JQuery.jqXHR)
+      );
+
+      do_ajax_show_sentences(1, 'word', 'target', 42);
+
+      expect(getJSONSpy).toHaveBeenCalledWith(
+        'api.php/v1/sentences-with-term/42',
+        expect.objectContaining({ lg_id: 1, word_lc: 'word' }),
+        expect.any(Function)
+      );
+    });
+
+    it('calls API without term ID when wid is -1 (advanced search)', () => {
+      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+        () => ({} as JQuery.jqXHR)
+      );
+
+      do_ajax_show_sentences(1, 'word', 'target', -1);
+
+      expect(getJSONSpy).toHaveBeenCalledWith(
+        'api.php/v1/sentences-with-term',
+        expect.objectContaining({
+          lg_id: 1,
+          word_lc: 'word',
+          advanced_search: true,
+        }),
+        expect.any(Function)
+      );
+    });
+
+    it('calls API without term ID for non-integer wid', () => {
+      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+        () => ({} as JQuery.jqXHR)
+      );
+
+      do_ajax_show_sentences(1, 'word', 'target', 'invalid');
+
+      expect(getJSONSpy).toHaveBeenCalledWith(
+        'api.php/v1/sentences-with-term',
+        expect.objectContaining({ lg_id: 1, word_lc: 'word' }),
+        expect.any(Function)
+      );
+    });
+  });
+
+  // ===========================================================================
+  // changeImprAnnText Tests
+  // ===========================================================================
+
+  describe('changeImprAnnText', () => {
+    // Note: These tests are skipped because they require the serializeObject plugin
+    // which is loaded separately via jQuery extensions
+    it.skip('checks previous radio button and triggers save', () => {
+      // This would need $.fn.serializeObject to be available
+    });
+  });
+
+  // ===========================================================================
+  // changeImprAnnRadio Tests
+  // ===========================================================================
+
+  describe('changeImprAnnRadio', () => {
+    // Note: These tests are skipped because they require the serializeObject plugin
+    it.skip('triggers save when radio changes', () => {
+      // This would need $.fn.serializeObject to be available
     });
   });
 

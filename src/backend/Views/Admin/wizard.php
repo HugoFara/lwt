@@ -29,17 +29,7 @@ namespace Lwt\Views\Admin;
     <meta name="viewport" content="width=900" />
     <title>LWT - Database Connection Wizard</title>
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-        .container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1 { color: #333; border-bottom: 2px solid #1976d2; padding-bottom: 10px; }
-        label { display: block; margin-top: 15px; font-weight: bold; }
-        input[type="text"], input[type="password"] { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 3px; }
-        input[type="submit"] { margin-top: 20px; padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 3px; cursor: pointer; }
-        input[type="submit"]:hover { background: #1565c0; }
-        .error { color: #d32f2f; background: #ffebee; padding: 10px; border-radius: 3px; margin-bottom: 20px; }
-        .success { color: #388e3c; background: #e8f5e9; padding: 10px; border-radius: 3px; margin-bottom: 20px; }
-    </style>
+    <link rel="stylesheet" href="/assets/css/standalone.css" type="text/css"/>
 </head>
 <body>
 <div class="container">

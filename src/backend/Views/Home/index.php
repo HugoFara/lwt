@@ -40,7 +40,7 @@ function renderCurrentTextInfo(int $textid, ?array $textInfo): void
     $txttit = $textInfo['title'];
     $annotated = $textInfo['annotated'];
     ?>
-<div style="height: 85px;">
+<div class="home-last-text">
     Last Text (<?php echo tohtml($lngname); ?>):<br />
     <i><?php echo tohtml($txttit); ?></i>
     <br />
@@ -97,7 +97,7 @@ function renderWordPressLogout(bool $isWordPress): void
         ?>
 <div class="menu">
     <a href="/wordpress/stop">
-        <span style="font-size:115%; font-weight:bold; color:red;">LOGOUT</span> (from WordPress and LWT)
+        <span class="logout-text">LOGOUT</span> (from WordPress and LWT)
     </a>
 </div>
         <?php
@@ -138,9 +138,9 @@ $currentTextInfo = $dashboardData['current_text_info'];
 <div class="red"><p id="cookies_disabled"></p></div>
 <div class="msgblue"><p id="lwt_new_version"></p></div>
 
-<p style="text-align: center;">Welcome to your language learning app!</p>
+<p class="center">Welcome to your language learning app!</p>
 
-<div style="display: flex; justify-content: space-evenly; flex-wrap: wrap;">
+<div class="home-menu-container">
     <div class="menu">
         <?php if ($langcnt == 0): ?>
         <div><p>Hint: The database seems to be empty.</p></div>
@@ -198,8 +198,8 @@ $currentTextInfo = $dashboardData['current_text_info'];
 <br style="clear: both;" />
 <footer>
     <p class="small">
-        <a target="_blank" href="http://unlicense.org/" style="vertical-align: top;">
-            <img alt="Public Domain" title="Public Domain" src="/assets/images/public_domain.png" style="display: inline;" />
+        <a target="_blank" href="http://unlicense.org/" class="footer-license-link">
+            <img alt="Public Domain" title="Public Domain" src="/assets/images/public_domain.png" class="footer-license-icon" />
         </a>
         <a href="https://sourceforge.net/projects/learning-with-texts/" target="_blank">"Learning with Texts" (LWT)</a> is free
         and unencumbered software released into the

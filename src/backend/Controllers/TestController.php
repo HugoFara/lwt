@@ -284,13 +284,7 @@ class TestController extends BaseController
      */
     private function renderTestPage(): void
     {
-        PageLayoutHelper::renderPageStartNobody(
-            'Test',
-            "body {
-                margin: 20px;
-                max-width: 100%;
-            }"
-        );
+        PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
 
         if ($this->mobileService->isMobile()) {
             $this->renderMobileTestPage();

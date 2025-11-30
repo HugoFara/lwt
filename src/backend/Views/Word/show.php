@@ -24,16 +24,16 @@ namespace Lwt\Views\Word;
 ?>
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
-    <td class="td1 right" style="width:30px;">Term:</td>
-    <td class="td1" style="font-size:120%; border-top-right-radius:inherit;" <?php echo $scrdir; ?>><b><?php echo tohtml($word['text']); ?></b></td>
+    <td class="td1 right word-show-label">Term:</td>
+    <td class="td1 word-show-term" <?php echo $scrdir; ?>><b><?php echo tohtml($word['text']); ?></b></td>
 </tr>
 <tr>
     <td class="td1 right">Translation:</td>
-    <td class="td1" style="font-size:120%;"><b><?php
+    <td class="td1 word-show-value"><b><?php
     if (!empty($ann)) {
         echo str_replace_first(
             tohtml($ann),
-            '<span style="color:red">' . tohtml($ann) . '</span>',
+            '<span class="word-show-highlight">' . tohtml($ann) . '</span>',
             tohtml($word['translation'])
         );
     } else {
@@ -44,13 +44,13 @@ namespace Lwt\Views\Word;
 <?php if ($tags !== '') : ?>
 <tr>
     <td class="td1 right">Tags:</td>
-    <td class="td1" style="font-size:120%;"><b><?php echo tohtml($tags); ?></b></td>
+    <td class="td1 word-show-value"><b><?php echo tohtml($tags); ?></b></td>
 </tr>
 <?php endif; ?>
 <?php if ($word['romanization'] !== '') : ?>
 <tr>
     <td class="td1 right">Romaniz.:</td>
-    <td class="td1" style="font-size:120%;"><b><?php echo tohtml($word['romanization']); ?></b></td>
+    <td class="td1 word-show-value"><b><?php echo tohtml($word['romanization']); ?></b></td>
 </tr>
 <?php endif; ?>
 <tr>

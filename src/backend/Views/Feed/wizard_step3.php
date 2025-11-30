@@ -24,17 +24,16 @@ namespace Lwt\Views\Feed;
 <div id="wizard-step3-config"
     data-article-selector="<?php echo htmlspecialchars((string)($wizardData['article_selector'] ?? ''), ENT_QUOTES); ?>"
     data-hide-images="<?php echo $wizardData['hide_images'] == 'yes' ? 'true' : 'false'; ?>"
-    data-is-minimized="<?php echo $wizardData['maxim'] == 0 ? 'true' : 'false'; ?>"
-    style="display: none;"></div>
+    data-is-minimized="<?php echo $wizardData['maxim'] == 0 ? 'true' : 'false'; ?>"></div>
 <div id="lwt_header">
     <form name="lwt_form1" class="validate" action="/feeds/wizard" method="post">
-    <div id="adv" style="display: none;">
+    <div id="adv">
     <button data-action="wizard-step3-cancel">Cancel</button>
     <button id="adv_get_button">Get</button>
 </div>
-<div id="settings" style="display: none;">
+<div id="settings">
     <p><b>Feed Wizard | Settings</b></p>
-    <div style="margin-left:150px;text-align:left">
+    <div class="settings-content">
         Selection Mode:
         <select name="select_mode" data-action="wizard-step3-select-mode">
             <option value="0"<?php if ($wizardData['select_mode'] == '0') {
@@ -57,7 +56,7 @@ namespace Lwt\Views\Feed;
                               }?>>No</option>
         </select>
     </div>
-    <button style="position:relative;left:150px;" data-action="wizard-settings-close">OK</button>
+    <button class="settings-ok" data-action="wizard-settings-close">OK</button>
     </div>
     <div id="lwt_container">
         <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
@@ -66,29 +65,29 @@ namespace Lwt\Views\Feed;
             <img alt="Help" title="Help" src="/assets/icons/question-frame.png"></img>
         </a>
         </h1>
-        <ol id="lwt_sel" style="margin-left:77px">
+        <ol id="lwt_sel">
             <?php echo $wizardData['filter_tags']; ?>
         </ol>
-        <table class="tab2" style="margin-left:77px" cellspacing="0" cellpadding="5">
+        <table class="tab2" cellspacing="0" cellpadding="5">
             <tr>
-                <td class="td1" style="text-align:left">Name: </td>
-                <td class="td1" style="text-align:left">
+                <td class="td1 left">Name: </td>
+                <td class="td1 left">
                     <?php echo htmlspecialchars($wizardData['feed']['feed_title'], ENT_COMPAT); ?></td></tr>
             <tr>
-                <td class="td1" style="text-align:left">Newsfeed url: </td>
-                <td class="td1" style="text-align:left">
+                <td class="td1 left">Newsfeed url: </td>
+                <td class="td1 left">
                     <?php echo tohtml($wizardData['rss_url']); ?>
                 </td>
             </tr>
             <tr>
-                <td class="td1" style="text-align:left">Article Section: </td>
-                <td class="td1" style="text-align:left">
+                <td class="td1 left">Article Section: </td>
+                <td class="td1 left">
                     <?php echo tohtml($wizardData['article_section'] ?? ''); ?>
                 </td>
             </tr>
             <tr>
-                <td class="td1" style="text-align:left">Article Source: </td>
-                <td class="td1" style="text-align:left">
+                <td class="td1 left">Article Source: </td>
+                <td class="td1 left">
                     <?php
                     if (array_key_exists('feed_text', $wizardData['feed'])) {
                         echo $wizardData['feed']['feed_text'];
@@ -101,14 +100,14 @@ namespace Lwt\Views\Feed;
         </table>
     </div>
     <?php // Step 3 Controls ?>
-    <table style="width:100%;">
+    <table class="wizard-controls">
         <tr>
             <td>
                 <input type="button" value="Cancel" data-action="wizard-cancel" data-url="/feeds/edit?del_wiz=1" />
             </td>
             <td>
                 <span>
-                    <select name="selected_feed" style="width:250px;max-width:200px;"
+                    <select name="selected_feed" class="feed-selector"
                     data-action="wizard-step3-selected-feed">
                         <?php
                         $current_host = '';
@@ -157,13 +156,13 @@ namespace Lwt\Views\Feed;
                     } ?>
                 </span>
             </td>
-            <td style="width:280px;text-align: right;">
+            <td class="actions-cell">
                 <select name="mark_action" id="mark_action" >
                     <option value="">[Click On Text]</option>
                 </select>
                 <button id="filter_button" name="button" disabled>Filter</button>
                 <img src="/assets/icons/wrench-screwdriver.png" title="Settings" alt="-"
-                data-action="wizard-settings-open" style="cursor:pointer;" />
+                data-action="wizard-settings-open" />
             </td>
             <td>
                 <span>
@@ -172,10 +171,10 @@ namespace Lwt\Views\Feed;
                     <button id="next">Next</button>
                 </span>
             </td>
-            <td style="width:63px"></td>
+            <td class="spacer-cell"></td>
         </tr>
     </table>
-    <button style="position:absolute;right:10px;top:10px"
+    <button class="wizard-minmax"
     data-action="wizard-step3-minmax">
         min/max
     </button>

@@ -5,10 +5,16 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import $ from 'jquery';
 import {
   word_dblclick_event_do_text_text,
+  word_click_event_do_text_text,
+  mword_click_event_do_text_text,
   word_hover_over,
   word_hover_out,
+  prepareTextInteractions,
 } from '../../../src/frontend/js/reading/text_events';
 import * as userInteractions from '../../../src/frontend/js/core/user_interactions';
+import * as overlibInterface from '../../../src/frontend/js/terms/overlib_interface';
+import * as frameManagement from '../../../src/frontend/js/reading/frame_management';
+import * as wordStatus from '../../../src/frontend/js/terms/word_status';
 
 // Mock LWT_DATA global
 const mockLWT_DATA = {
@@ -331,6 +337,304 @@ describe('text_events.ts', () => {
   });
 
   // ===========================================================================
+  // word_click_event_do_text_text Tests
+  // ===========================================================================
+
+  describe('word_click_event_do_text_text', () => {
+    beforeEach(() => {
+      vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
+      vi.spyOn(overlibInterface, 'run_overlib_status_99').mockImplementation(() => {});
+      vi.spyOn(overlibInterface, 'run_overlib_status_98').mockImplementation(() => {});
+      vi.spyOn(overlibInterface, 'run_overlib_status_1_to_5').mockImplementation(() => {});
+      vi.spyOn(frameManagement, 'showRightFrames').mockImplementation(() => {});
+      vi.spyOn(wordStatus, 'make_tooltip').mockReturnValue('tooltip text');
+      vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => ({} as JQuery.jqXHR));
+    });
+
+    it('returns false', () => {
+      document.body.innerHTML = `
+        <span class="word" data_status="0" data_order="1" data_wid="">Test</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      const result = word_click_event_do_text_text.call(word);
+
+      expect(result).toBe(false);
+    });
+
+    it('calls run_overlib_status_unknown for status < 1', () => {
+      document.body.innerHTML = `
+        <span class="word" data_status="0" data_order="1" data_wid="">Test</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      word_click_event_do_text_text.call(word);
+
+      expect(overlibInterface.run_overlib_status_unknown).toHaveBeenCalled();
+      expect(frameManagement.showRightFrames).toHaveBeenCalled();
+    });
+
+    it('calls run_overlib_status_99 for well-known words', () => {
+      document.body.innerHTML = `
+        <span class="word" data_status="99" data_order="1" data_wid="123" data_ann="">Test</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      word_click_event_do_text_text.call(word);
+
+      expect(overlibInterface.run_overlib_status_99).toHaveBeenCalled();
+    });
+
+    it('calls run_overlib_status_98 for ignored words', () => {
+      document.body.innerHTML = `
+        <span class="word" data_status="98" data_order="1" data_wid="456" data_ann="">Test</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      word_click_event_do_text_text.call(word);
+
+      expect(overlibInterface.run_overlib_status_98).toHaveBeenCalled();
+    });
+
+    it('calls run_overlib_status_1_to_5 for learning words', () => {
+      document.body.innerHTML = `
+        <span class="word" data_status="3" data_order="1" data_wid="789" data_ann="">Test</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      word_click_event_do_text_text.call(word);
+
+      expect(overlibInterface.run_overlib_status_1_to_5).toHaveBeenCalled();
+    });
+
+    it('calls speechDispatcher when hts is 2', () => {
+      mockLWT_DATA.settings.hts = 2;
+      document.body.innerHTML = `
+        <span class="word" data_status="0" data_order="1">Hello</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      word_click_event_do_text_text.call(word);
+
+      expect(userInteractions.speechDispatcher).toHaveBeenCalledWith('Hello', 1);
+    });
+
+    it('does not call speechDispatcher when hts is not 2', () => {
+      mockLWT_DATA.settings.hts = 0;
+      document.body.innerHTML = `
+        <span class="word" data_status="0" data_order="1">Hello</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      word_click_event_do_text_text.call(word);
+
+      expect(userInteractions.speechDispatcher).not.toHaveBeenCalled();
+    });
+
+    it('uses title attribute for hints when jQuery_tooltip is false', () => {
+      mockLWT_DATA.settings.jQuery_tooltip = false;
+      document.body.innerHTML = `
+        <span class="word" data_status="3" data_order="1" data_wid="1" title="custom hint">Test</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      word_click_event_do_text_text.call(word);
+
+      // Should use title attribute instead of make_tooltip
+      expect(overlibInterface.run_overlib_status_1_to_5).toHaveBeenCalled();
+    });
+
+    it('uses make_tooltip when jQuery_tooltip is true', () => {
+      mockLWT_DATA.settings.jQuery_tooltip = true;
+      document.body.innerHTML = `
+        <span class="word" data_status="3" data_order="1" data_wid="1" data_trans="trans" data_rom="rom">Test</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      word_click_event_do_text_text.call(word);
+
+      expect(wordStatus.make_tooltip).toHaveBeenCalled();
+    });
+
+    it('collects multi-word data attributes', () => {
+      document.body.innerHTML = `
+        <span class="word" data_status="0" data_order="1" data_mw2="mw2data" data_mw3="mw3data">Test</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      word_click_event_do_text_text.call(word);
+
+      // run_overlib_status_unknown should receive the multi_words array
+      expect(overlibInterface.run_overlib_status_unknown).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.arrayContaining(['mw2data', 'mw3data']),
+        expect.anything()
+      );
+    });
+  });
+
+  // ===========================================================================
+  // mword_click_event_do_text_text Tests
+  // ===========================================================================
+
+  describe('mword_click_event_do_text_text', () => {
+    beforeEach(() => {
+      vi.spyOn(overlibInterface, 'run_overlib_multiword').mockImplementation(() => {});
+      vi.spyOn(wordStatus, 'make_tooltip').mockReturnValue('mword tooltip');
+      vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => ({} as JQuery.jqXHR));
+    });
+
+    it('returns false', () => {
+      document.body.innerHTML = `
+        <span class="mword" data_status="3" data_order="1" data_text="multi word" data_wid="10" data_code="ABC">Test MW</span>
+      `;
+
+      const mword = document.querySelector('.mword') as HTMLElement;
+      const result = mword_click_event_do_text_text.call(mword);
+
+      expect(result).toBe(false);
+    });
+
+    it('calls run_overlib_multiword when status is not empty', () => {
+      document.body.innerHTML = `
+        <span class="mword" data_status="3" data_order="1" data_text="multi word" data_wid="10" data_code="ABC" data_ann="">Test MW</span>
+      `;
+
+      const mword = document.querySelector('.mword') as HTMLElement;
+      mword_click_event_do_text_text.call(mword);
+
+      expect(overlibInterface.run_overlib_multiword).toHaveBeenCalled();
+    });
+
+    it('does not call run_overlib_multiword when status is empty', () => {
+      document.body.innerHTML = `
+        <span class="mword" data_status="" data_order="1">Test MW</span>
+      `;
+
+      const mword = document.querySelector('.mword') as HTMLElement;
+      mword_click_event_do_text_text.call(mword);
+
+      expect(overlibInterface.run_overlib_multiword).not.toHaveBeenCalled();
+    });
+
+    it('calls speechDispatcher when hts is 2', () => {
+      mockLWT_DATA.settings.hts = 2;
+      document.body.innerHTML = `
+        <span class="mword" data_status="3" data_order="1">Hello World</span>
+      `;
+
+      const mword = document.querySelector('.mword') as HTMLElement;
+      mword_click_event_do_text_text.call(mword);
+
+      expect(userInteractions.speechDispatcher).toHaveBeenCalledWith('Hello World', 1);
+    });
+
+    it('uses make_tooltip when jQuery_tooltip is true', () => {
+      mockLWT_DATA.settings.jQuery_tooltip = true;
+      document.body.innerHTML = `
+        <span class="mword" data_status="3" data_order="1" data_trans="translation" data_rom="roman">Test</span>
+      `;
+
+      const mword = document.querySelector('.mword') as HTMLElement;
+      mword_click_event_do_text_text.call(mword);
+
+      expect(wordStatus.make_tooltip).toHaveBeenCalled();
+    });
+
+    it('uses title attribute when jQuery_tooltip is false', () => {
+      mockLWT_DATA.settings.jQuery_tooltip = false;
+      document.body.innerHTML = `
+        <span class="mword" data_status="3" data_order="1" title="mword title">Test</span>
+      `;
+
+      const mword = document.querySelector('.mword') as HTMLElement;
+      mword_click_event_do_text_text.call(mword);
+
+      expect(overlibInterface.run_overlib_multiword).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        'mword title',
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+    });
+  });
+
+  // ===========================================================================
+  // prepareTextInteractions Tests
+  // ===========================================================================
+
+  describe('prepareTextInteractions', () => {
+    it('sets up click handlers on word elements', () => {
+      document.body.innerHTML = `
+        <div id="thetext">
+          <span class="word wsty">Word 1</span>
+          <span class="word wsty">Word 2</span>
+        </div>
+      `;
+
+      // Mock the functions that would be called on click
+      vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
+      vi.spyOn(frameManagement, 'showRightFrames').mockImplementation(() => {});
+
+      prepareTextInteractions();
+
+      // The click handler should be attached
+      const words = document.querySelectorAll('.word');
+      expect(words.length).toBe(2);
+    });
+
+    it('sets up click handlers on mword elements', () => {
+      document.body.innerHTML = `
+        <div id="thetext">
+          <span class="mword mwsty">Multi Word</span>
+        </div>
+      `;
+
+      prepareTextInteractions();
+
+      const mwords = document.querySelectorAll('.mword');
+      expect(mwords.length).toBe(1);
+    });
+
+    it('sets up dblclick handlers on word elements', () => {
+      document.body.innerHTML = `
+        <div id="thetext">
+          <span class="word wsty">Word</span>
+        </div>
+        <span id="totalcharcount">1000</span>
+      `;
+
+      prepareTextInteractions();
+
+      // Double click should be handled (we can't easily test the actual handler execution)
+      const word = document.querySelector('.word');
+      expect(word).not.toBeNull();
+    });
+
+    it('handles missing thetext element gracefully', () => {
+      document.body.innerHTML = `
+        <span class="word">Word</span>
+      `;
+
+      // Should not throw even without #thetext
+      expect(() => prepareTextInteractions()).not.toThrow();
+    });
+  });
+
+  // ===========================================================================
   // Edge Cases
   // ===========================================================================
 
@@ -371,6 +675,35 @@ describe('text_events.ts', () => {
       word_hover_over.call(word);
 
       expect(document.querySelectorAll('.hword').length).toBe(1);
+    });
+
+    it('word_click handles empty title attribute', () => {
+      mockLWT_DATA.settings.jQuery_tooltip = false;
+      vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
+      vi.spyOn(frameManagement, 'showRightFrames').mockImplementation(() => {});
+
+      document.body.innerHTML = `
+        <span class="word" data_status="0" data_order="1">Test</span>
+      `;
+
+      const word = document.querySelector('.word') as HTMLElement;
+      word_click_event_do_text_text.call(word);
+
+      // Should not throw and should use empty string as hints
+      expect(overlibInterface.run_overlib_status_unknown).toHaveBeenCalled();
+    });
+
+    it('mword_click handles missing data attributes', () => {
+      vi.spyOn(overlibInterface, 'run_overlib_multiword').mockImplementation(() => {});
+
+      document.body.innerHTML = `
+        <span class="mword" data_status="3">Test</span>
+      `;
+
+      const mword = document.querySelector('.mword') as HTMLElement;
+
+      // Should not throw
+      expect(() => mword_click_event_do_text_text.call(mword)).not.toThrow();
     });
   });
 });

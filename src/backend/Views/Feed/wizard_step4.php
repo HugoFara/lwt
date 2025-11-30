@@ -26,8 +26,7 @@ use Lwt\Core\Http\InputValidator;
 
 ?>
 <div id="wizard-step4-config"
-    data-edit-feed-id="<?php echo isset($wizardData['edit_feed']) ? (int)$wizardData['edit_feed'] : ''; ?>"
-    style="display: none;"></div>
+    data-edit-feed-id="<?php echo isset($wizardData['edit_feed']) ? (int)$wizardData['edit_feed'] : ''; ?>"></div>
 <form class="validate" action="/feeds/edit" method="post">
     <table class="tab2" cellspacing="0" cellpadding="5">
         <tr>
@@ -51,7 +50,7 @@ use Lwt\Core\Http\InputValidator;
         <tr>
             <td class="td1">Name: </td>
             <td class="td1">
-                <input class="notempty" style="width:95%" type="text" name="NfName"
+                <input class="notempty feed-form-input" type="text" name="NfName"
                 value="<?php echo htmlspecialchars($wizardData['feed']['feed_title'], ENT_COMPAT); ?>" />
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
@@ -59,7 +58,7 @@ use Lwt\Core\Http\InputValidator;
         <tr>
             <td class="td1">Newsfeed url: </td>
             <td class="td1">
-                <input class="notempty" style="width:95%" type="text" name="NfSourceURI"
+                <input class="notempty feed-form-input" type="text" name="NfSourceURI"
                 value="<?php echo htmlspecialchars($wizardData['rss_url']); ?>" />
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
@@ -67,7 +66,7 @@ use Lwt\Core\Http\InputValidator;
         <tr>
             <td class="td1">Article Section: </td>
             <td class="td1">
-                <input class="notempty" style="width:95%" type="text" name="NfArticleSectionTags"
+                <input class="notempty feed-form-input" type="text" name="NfArticleSectionTags"
                 value="<?php echo htmlspecialchars(preg_replace('/[ ]+/', ' ', trim($wizardData['redirect'] . ($wizardData['article_section'] ?? '')))); ?>" />
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
             </td>
@@ -75,7 +74,7 @@ use Lwt\Core\Http\InputValidator;
         <tr>
             <td class="td1">Filter Tags: </td>
             <td class="td1">
-                <input type="text" style="width:95%" name="NfFilterTags"
+                <input type="text" class="feed-form-input" name="NfFilterTags"
                 value="<?php echo htmlspecialchars(preg_replace('/[ ]+/', ' ', InputValidator::getString('html'))); ?>" />
             </td>
         </tr>
@@ -83,9 +82,9 @@ use Lwt\Core\Http\InputValidator;
             <td class="td1">Options: </td>
             <td class="td1">
                 <?php // Options table ?>
-<table style="width:100%">
+<table class="feed-options-table">
     <tr>
-        <td style="width:35%">
+        <td class="option-label">
             <input type="checkbox" name="edit_text"<?php
             if ($service->getNfOption($wizardData['options'], 'edit_text') !== null) {
                 echo ' checked="checked"';

@@ -28,7 +28,7 @@ final class UiHelpersTest extends TestCase
         // Should output a select element
         $this->assertStringContainsString('<select', $output);
         $this->assertStringContainsString('id="quickmenu"', $output);
-        $this->assertStringContainsString('onchange=', $output);
+        $this->assertStringContainsString('data-action="quick-menu-redirect"', $output);
 
         // Should contain various menu options
         $this->assertStringContainsString('value="index"', $output);
@@ -44,7 +44,7 @@ final class UiHelpersTest extends TestCase
     {
         // Capture output
         ob_start();
-        PageLayoutHelper::renderPageStartKernelNobody('Test Page', 'body { color: red; }');
+        PageLayoutHelper::renderPageStartKernelNobody('Test Page');
         $output = ob_get_clean();
 
         // Should output HTML document structure
@@ -52,9 +52,6 @@ final class UiHelpersTest extends TestCase
         $this->assertStringContainsString('<html lang="en">', $output);
         $this->assertStringContainsString('<head>', $output);
         $this->assertStringContainsString('<title>LWT :: Test Page</title>', $output);
-
-        // Should include custom CSS
-        $this->assertStringContainsString('body { color: red; }', $output);
 
         // Should have meta tags
         $this->assertStringContainsString('charset=utf-8', $output);

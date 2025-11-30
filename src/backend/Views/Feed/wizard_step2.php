@@ -27,13 +27,13 @@ use Lwt\Core\Http\InputValidator;
      data-hide-images="<?php echo $wizardData['hide_images'] == 'yes' ? 'true' : 'false'; ?>"
      data-is-minimized="<?php echo $wizardData['maxim'] == 0 ? 'true' : 'false'; ?>">
     <form name="lwt_form1" class="validate" action="/feeds/wizard" method="post">
-        <div id="adv" style="display: none;">
+        <div id="adv">
         <button data-action="wizard-cancel">Cancel</button>
         <button id="adv_get_button">Get</button>
     </div>
-    <div id="settings" style="display: none;">
+    <div id="settings">
         <p><b>Feed Wizard | Settings</b></p>
-        <div style="margin-left:150px;text-align:left">
+        <div class="settings-content">
             Selection Mode:
             <select name="select_mode" data-action="wizard-select-mode">
                 <option value="0"<?php if ($wizardData['select_mode'] == '0') {
@@ -55,7 +55,7 @@ use Lwt\Core\Http\InputValidator;
                                   }?>>No</option>
             </select>
         </div>
-        <button style="position:relative;left:150px;" data-action="wizard-settings-close">
+        <button class="settings-ok" data-action="wizard-settings-close">
             OK
         </button>
     </div>
@@ -66,7 +66,7 @@ use Lwt\Core\Http\InputValidator;
             <img alt="Help" title="Help" src="/assets/icons/question-frame.png"></img>
         </a>
         </h1>
-        <ol id="lwt_sel" style="margin-left:77px">
+        <ol id="lwt_sel">
             <?php
             if (InputValidator::has('html')) {
                 echo InputValidator::getString('html', '', false);
@@ -75,9 +75,9 @@ use Lwt\Core\Http\InputValidator;
                 echo $wizardData['article_tags'];
             } ?>
         </ol>
-        <table class="tab2" style="margin-left:77px" cellspacing="0" cellpadding="5">
+        <table class="tab2" cellspacing="0" cellpadding="5">
             <tr>
-                <td class="td1" style="text-align:left">Name: </td>
+                <td class="td1 left">Name: </td>
                 <td class="td1">
                     <input class="notempty" size="50" type="text" name="NfName"
                     value="<?php echo htmlspecialchars($wizardData['feed']['feed_title'], ENT_COMPAT); ?>" />
@@ -86,14 +86,14 @@ use Lwt\Core\Http\InputValidator;
                 </td>
             </tr>
             <tr>
-                <td class="td1" style="text-align:left">Newsfeed url: </td>
-                <td class="td1" style="text-align:left">
+                <td class="td1 left">Newsfeed url: </td>
+                <td class="td1 left">
                     <?php echo tohtml($wizardData['rss_url']); ?>
                 </td>
             </tr>
             <tr>
-                <td class="td1" style="text-align:left">Article Source: </td>
-                <td class="td1" style="text-align:left">
+                <td class="td1 left">Article Source: </td>
+                <td class="td1 left">
                     <select name="NfArticleSection"
                     data-action="wizard-article-section">
                         <option value="" <?php
@@ -128,7 +128,7 @@ use Lwt\Core\Http\InputValidator;
                 </table>
             </div>
             <?php // Step 2 Controls ?>
-    <table style="width:100%;">
+    <table class="wizard-controls">
         <tr>
             <td>
                 <input type="hidden" name="rss_url"
@@ -139,7 +139,7 @@ use Lwt\Core\Http\InputValidator;
             <td>
                 <span>
                     <select name="selected_feed"
-                    style="width:250px;max-width:200px;"
+                    class="feed-selector"
                     data-action="wizard-selected-feed">
                         <?php
                         $current_host = '';
@@ -199,7 +199,7 @@ use Lwt\Core\Http\InputValidator;
                     ?>
             </span>
         </td>
-        <td style="width:270px;text-align: right;">
+        <td class="actions-cell">
             <select name="mark_action" id="mark_action">
                 <option value="">[Click On Text]</option>
             </select>
@@ -214,10 +214,10 @@ use Lwt\Core\Http\InputValidator;
                 <button id="next">Next</button>
             </span>
         </td>
-        <td style="width:63px"></td>
+        <td class="spacer-cell"></td>
     </tr>
 </table>
-<button style="position:absolute;right:10px;top:10px"
+<button class="wizard-minmax"
 data-action="wizard-minmax">
     min/max
 </button>

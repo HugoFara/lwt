@@ -160,12 +160,12 @@ class MediaService
             <br />
             (only mp3, mp4, ogg, wav, webm files shown):
         </p>
-        <p style="display: none;" id="mediaSelectErrorMessage"></p>
-        <img style="float: right; display: none;" id="mediaSelectLoadingImg" src="/assets/icons/waiting2.gif" />
-        <select name="Dir" style="display: none; width: 200px;"
-        data-action="media-dir-select" data-target-field="' . htmlspecialchars($fieldName, ENT_QUOTES, 'UTF-8') . '">
+        <p id="mediaSelectErrorMessage"></p>
+        <img id="mediaSelectLoadingImg" src="/assets/icons/waiting2.gif" alt="Loading..." />
+        <select name="Dir" data-action="media-dir-select"
+        data-target-field="' . htmlspecialchars($fieldName, ENT_QUOTES, 'UTF-8') . '">
         </select>
-        <span class="click" data-action="refresh-media-select" style="margin-left: 16px;">
+        <span class="click" data-action="refresh-media-select">
             <img src="/assets/icons/arrow-circle-135.png" title="Refresh Media Selection" alt="Refresh Media Selection" />
             Refresh
         </span>
@@ -274,7 +274,7 @@ class MediaService
     private function renderOnlineVideoPlayer(string $url): void
     {
         ?>
-<iframe style="width: 100%; height: 30%;"
+<iframe class="lwt-video-iframe"
 src="<?php echo $url ?>"
 title="Video player"
 frameborder="0"
@@ -296,8 +296,7 @@ allowfullscreen type="text/html">
         $type = "video/" . pathinfo($path, PATHINFO_EXTENSION);
         $title = pathinfo($path, PATHINFO_FILENAME);
         ?>
-<video preload="auto" controls title="<?php echo $title ?>"
-style="width: 100%; height: 300px; display: block; margin-left: auto; margin-right: auto;">
+<video class="lwt-local-video" preload="auto" controls title="<?php echo $title ?>">
     <source src="<?php echo $path; ?>" type="<?php echo $type; ?>">
     <p>Your browser does not support video tags.</p>
 </video>
@@ -357,16 +356,14 @@ style="width: 100%; height: 300px; display: block; margin-left: auto; margin-rig
         int $currentplaybackrate
     ): void {
         ?>
-<table class="lwt-audio-wrapper" style="margin-top: 5px; margin-left: auto; margin-right: auto;" cellspacing="0" cellpadding="0">
+<table class="lwt-audio-wrapper" cellspacing="0" cellpadding="0">
     <tr>
-        <td class="center borderleft" style="padding-left:10px;">
-            <span id="do-single" class="click<?php echo ($repeatMode ? '' : ' hide'); ?>"
-                style="color:#09F;font-weight: bold;" title="Toggle Repeat (Now ON)">
-                <img src="/assets/icons/arrow-repeat.png" alt="Toggle Repeat (Now ON)" title="Toggle Repeat (Now ON)" style="width:24px;height:24px;">
+        <td class="center borderleft">
+            <span id="do-single" class="click<?php echo ($repeatMode ? '' : ' hide'); ?>" title="Toggle Repeat (Now ON)">
+                <img src="/assets/icons/arrow-repeat.png" alt="Toggle Repeat (Now ON)" title="Toggle Repeat (Now ON)">
             </span>
-            <span id="do-repeat" class="click<?php echo ($repeatMode ? ' hide' : ''); ?>"
-                style="color:grey;font-weight: bold;" title="Toggle Repeat (Now OFF)">
-                <img src="/assets/icons/arrow-norepeat.png" alt="Toggle Repeat (Now OFF)" title="Toggle Repeat (Now OFF)" style="width:24px;height:24px;">
+            <span id="do-repeat" class="click<?php echo ($repeatMode ? ' hide' : ''); ?>" title="Toggle Repeat (Now OFF)">
+                <img src="/assets/icons/arrow-norepeat.png" alt="Toggle Repeat (Now OFF)" title="Toggle Repeat (Now OFF)">
             </span>
         </td>
         <td class="center bordermiddle">&nbsp;</td>
@@ -425,21 +422,21 @@ style="width: 100%; height: 300px; display: block; margin-left: auto; margin-rig
             <span id="playTime" class="hide"></span>
         </td>
         <td class="center bordermiddle">&nbsp;</td>
-        <td class="center borderright" style="padding-right:10px;">
+        <td class="center borderright">
             <select id="playbackrate" name="playbackrate">
                 <?php echo get_playbackrate_selectoptions($currentplaybackrate); ?>
             </select>
             <br />
             <span id="slower" class="click">
-                <img src="/assets/icons/minus.png" alt="Slower" title="Slower" style="margin-top:3px" />
+                <img src="/assets/icons/minus.png" alt="Slower" title="Slower" />
             </span>
             &nbsp;
             <span id="stdspeed" class="click">
-                <img src="/assets/icons/status-away.png" alt="Normal" title="Normal" style="margin-top:3px" />
+                <img src="/assets/icons/status-away.png" alt="Normal" title="Normal" />
             </span>
             &nbsp;
             <span id="faster" class="click">
-                <img src="/assets/icons/plus.png" alt="Faster" title="Faster" style="margin-top:3px" />
+                <img src="/assets/icons/plus.png" alt="Faster" title="Faster" />
             </span>
         </td>
     </tr>

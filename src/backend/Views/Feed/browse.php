@@ -66,7 +66,7 @@ namespace Lwt\Views\Feed;
     </th>
     </tr>
     <tr>
-        <td class="td1 center" style="width:30%;">
+        <td class="td1 center feeds-filter-cell">
             Language:&nbsp;
             <select name="filterlang" data-action="filter-language" data-url="/feeds?page=1&amp;selected_feed=0">
                 <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
@@ -84,7 +84,7 @@ namespace Lwt\Views\Feed;
                     echo ' selected="selected"';
                 } ?>>Title</option>
             </select>
-            <span style="vertical-align: middle">
+            <span class="valign-middle">
             <?php
             if ($currentRegexMode == '') {
                 echo ' (Wildc.=*):';
@@ -101,7 +101,7 @@ namespace Lwt\Views\Feed;
         </td>
     </tr>
     <tr>
-        <td class="td1 center" colspan="2" style="width:70%;">
+        <td class="td1 center feeds-filter-cell-wide" colspan="2">
 <?php if (empty($feeds)): ?>
          no feed available</td><td class="td1"></td></tr></table></form>
 <?php return; endif; ?>
@@ -134,7 +134,7 @@ Newsfeed:
     </td>
 </tr>
 <?php if ($recno > 0): ?>
-<tr><th class="th1" style="width:30%;"> <?php echo $recno; ?> articles </th><th class="th1">
+<tr><th class="th1 feeds-filter-cell"> <?php echo $recno; ?> articles </th><th class="th1">
 <?php makePager($currentPage, $pages, '/feeds', 'form1'); ?>
   </th>
   <th class="th1" colspan="2" nowrap="nowrap">
@@ -146,7 +146,7 @@ Newsfeed:
   <form name="form2" action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
   <table class="tab2" cellspacing="0" cellpadding="5">
   <tr><th class="th1" colspan="2">Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" /></th></tr>
-  <tr><td class="td1 center" style="width:30%;">
+  <tr><td class="td1 center feeds-filter-cell">
   <input type="button" value="Mark All" data-action="mark-all" data-form="form2" />
   <input type="button" value="Mark None" data-action="mark-none" data-form="form2" />
   </td><td class="td1 center">
@@ -158,7 +158,7 @@ Newsfeed:
   <th class="th1 sorttable_nosort">Mark</th>
   <th class="th1 clickable">Articles</th>
   <th class="th1 sorttable_nosort">Link</th>
-  <th class="th1 clickable" style="min-width:90px;">Date</th>
+  <th class="th1 clickable feeds-date-col">Date</th>
   </tr>
     <?php foreach ($articles as $row): ?>
         <tr>
@@ -181,7 +181,7 @@ Newsfeed:
             <img src="<?php print_file_path('icn/speaker-volume.png'); ?>" alt="-" /></a>
         <?php endif; ?>
         </td>
-            <td class="td1 center" style="vertical-align: middle">
+            <td class="td1 center valign-middle">
         <?php if (!empty($row['FlLink']) && !str_starts_with(trim((string)$row['FlLink']), '#')): ?>
             <a href="<?php echo trim((string)$row['FlLink']); ?>" title="<?php echo trim((string)$row['FlLink']); ?>" data-action="popup-external" target="_blank" rel="noopener">
             <img src="/assets/icons/external.png" alt="-" /></a>
@@ -195,7 +195,7 @@ Newsfeed:
 <?php if ($pages > 1): ?>
     <form name="form3" method="get" action ="">
         <table class="tab2" cellspacing="0" cellpadding="5">
-        <tr><th class="th1" style="width:30%;"><?php echo $recno; ?></th><th class="th1">
+        <tr><th class="th1 feeds-filter-cell"><?php echo $recno; ?></th><th class="th1">
     <?php makePager($currentPage, $pages, '/feeds', 'form3'); ?>
         </th></tr></table></form>
 <?php endif; ?>

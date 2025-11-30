@@ -186,7 +186,7 @@ class TextPrintController extends BaseController
         $this->printService->setCurrentText($textId);
 
         // Render the view
-        PageLayoutHelper::renderPageStartNobody('Annotated Text', 'input[type="radio"]{display:inline;}');
+        PageLayoutHelper::renderPageStartNobody('Annotated Text');
 
         if ($editMode) {
             $this->renderEditMode($textId, $annExists, $viewData);

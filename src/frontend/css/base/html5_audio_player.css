@@ -225,3 +225,87 @@
 .hide {
   display: none !important;
 }
+
+/* =============================================================================
+   Media Selection Styles
+   ============================================================================= */
+
+/* Media select error message */
+#mediaSelectErrorMessage {
+  display: none;
+}
+
+/* Media select loading indicator */
+#mediaSelectLoadingImg {
+  float: right;
+  display: none;
+}
+
+/* Media directory select dropdown */
+select[data-action="media-dir-select"] {
+  display: none;
+  width: 200px;
+}
+
+/* Refresh media selection button */
+[data-action="refresh-media-select"] {
+  margin-left: 16px;
+}
+
+/* =============================================================================
+   Video Player Styles
+   ============================================================================= */
+
+/* Online video iframe (YouTube, Vimeo, Dailymotion) */
+.lwt-video-iframe {
+  width: 100%;
+  height: 30%;
+}
+
+/* Local video player */
+.lwt-local-video {
+  width: 100%;
+  height: 300px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* =============================================================================
+   Audio Player Additional Styles
+   ============================================================================= */
+
+/* Repeat button colors */
+.lwt-audio-wrapper #do-single {
+  color: #09F;
+  font-weight: bold;
+}
+
+.lwt-audio-wrapper #do-repeat {
+  color: grey;
+  font-weight: bold;
+}
+
+/* Repeat button icons */
+.lwt-audio-wrapper #do-single img,
+.lwt-audio-wrapper #do-repeat img {
+  width: 24px;
+  height: 24px;
+}
+
+/* Speed control button margins */
+.lwt-audio-wrapper #slower img,
+.lwt-audio-wrapper #stdspeed img,
+.lwt-audio-wrapper #faster img {
+  margin-top: 3px;
+}
+
+/* Left padding for first cell */
+.lwt-audio-wrapper .borderleft {
+  padding-left: 10px;
+}
+
+/* Right padding for last cell */
+.lwt-audio-wrapper .borderright {
+  padding-right: 10px;
+}

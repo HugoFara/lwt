@@ -1,0 +1,110 @@
+/**
+ * Standalone Pages CSS
+ *
+ * Styles for standalone pages that don't use the main LWT layout:
+ * - Database wizard
+ * - 404 error page
+ * - 500 error page
+ *
+ * @since 3.0.0
+ */
+
+/* Base body styles for standalone pages */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f5f5f5;
+}
+
+/* Wizard container */
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.container h1 {
+    color: #333;
+    border-bottom: 2px solid #1976d2;
+    padding-bottom: 10px;
+}
+
+/* Form styles */
+.container label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.container input[type="text"],
+.container input[type="password"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.container input[type="submit"] {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.container input[type="submit"]:hover {
+    background: #1565c0;
+}
+
+/* Message styles */
+.error {
+    color: #721c24;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 3px;
+    margin-bottom: 20px;
+}
+
+.success {
+    color: #388e3c;
+    background: #e8f5e9;
+    padding: 10px;
+    border-radius: 3px;
+    margin-bottom: 20px;
+}
+
+/* Error page specific styles */
+.error h1 {
+    color: #721c24;
+    margin-top: 0;
+}
+
+.error a {
+    color: #004085;
+}
+
+.error .message {
+    font-family: monospace;
+    background: #fff;
+    padding: 10px;
+}
+
+/* Error page body variant (no background) */
+body.error-page {
+    margin: 50px;
+    background: white;
+}
+
+.error-page .error {
+    padding: 20px;
+    border-radius: 5px;
+}

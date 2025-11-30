@@ -461,14 +461,9 @@ class Router
         <head>
             <meta charset="UTF-8">
             <title>404 - Page Not Found</title>
-            <style>
-                body { font-family: Arial, sans-serif; margin: 50px; }
-                .error { background: #f8d7da; border: 1px solid #f5c6cb; padding: 20px; border-radius: 5px; }
-                h1 { color: #721c24; }
-                a { color: #004085; }
-            </style>
+            <link rel="stylesheet" href="/assets/css/standalone.css" type="text/css"/>
         </head>
-        <body>
+        <body class="error-page">
             <div class="error">
                 <h1>404 - Page Not Found</h1>
                 <p>The requested page <code><?php echo htmlspecialchars($path); ?></code> was not found.</p>
@@ -496,14 +491,9 @@ class Router
         <head>
             <meta charset="UTF-8">
             <title>500 - Internal Server Error</title>
-            <style>
-                body { font-family: Arial, sans-serif; margin: 50px; }
-                .error { background: #f8d7da; border: 1px solid #f5c6cb; padding: 20px; border-radius: 5px; }
-                h1 { color: #721c24; }
-                .message { font-family: monospace; background: #fff; padding: 10px; }
-            </style>
+            <link rel="stylesheet" href="/assets/css/standalone.css" type="text/css"/>
         </head>
-        <body>
+        <body class="error-page">
             <div class="error">
                 <h1>500 - Internal Server Error</h1>
                 <div class="message"><?php echo htmlspecialchars($message); ?></div>

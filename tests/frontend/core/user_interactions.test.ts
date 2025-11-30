@@ -2,12 +2,22 @@
  * Tests for user_interactions.ts - User interaction functions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import $ from 'jquery';
 import {
   quickMenuRedirection,
+  newExpressionInteractable,
+  goToLastPosition,
+  saveReadingPosition,
+  saveAudioPosition,
+  getPhoneticTextAsync,
   deepReplace,
   deepFindValue,
+  readTextWithExternal,
   cookieTTSSettings,
   readRawTextAloud,
+  readTextAloud,
+  handleReadingConfiguration,
+  speechDispatcher,
 } from '../../../src/frontend/js/core/user_interactions';
 import * as cookies from '../../../src/frontend/js/core/cookies';
 
@@ -25,6 +35,11 @@ class MockSpeechSynthesisUtterance {
   MockSpeechSynthesisUtterance;
 
 describe('user_interactions.ts', () => {
+  beforeEach(() => {
+    // Make jQuery global for tests that need it
+    (globalThis as unknown as Record<string, unknown>).$ = $;
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -383,6 +398,359 @@ describe('user_interactions.ts', () => {
 
       expect(result).toBeDefined();
       expect(result.text).toBe('Test');
+    });
+  });
+
+  // ===========================================================================
+  // newExpressionInteractable Tests
+  // ===========================================================================
+
+  describe('newExpressionInteractable', () => {
+    beforeEach(() => {
+      // Set up parent document
+      Object.defineProperty(window, 'parent', {
+        value: { document: document },
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it('creates multi-word element', () => {
+      document.body.innerHTML = `
+        <span id="ID-1-1" data_pos="10">Word1</span>
+        <span id="ID-3-1" data_pos="20">Word2</span>
+      `;
+
+      const text = { '1': 'multi word' };
+      const attrs = ' class="mword status3"';
+
+      newExpressionInteractable(text, attrs, 2, 'abc123', false);
+
+      const mword = document.getElementById('ID-1-2');
+      expect(mword).not.toBeNull();
+      expect(mword?.classList.contains('mword')).toBe(true);
+    });
+
+    it('removes existing multi-word of same length', () => {
+      document.body.innerHTML = `
+        <span id="ID-1-2" class="mword">Old MW</span>
+        <span id="ID-1-1" data_pos="10">Word1</span>
+        <span id="ID-3-1" data_pos="20">Word2</span>
+      `;
+
+      const text = { '1': 'new multi word' };
+      newExpressionInteractable(text, ' class="mword"', 2, 'def456', false);
+
+      const mwords = document.querySelectorAll('#ID-1-2');
+      expect(mwords.length).toBe(1);
+      expect(mwords[0].textContent).toBe('new multi word');
+    });
+
+    it('sets data_order and order class on multi-word', () => {
+      document.body.innerHTML = `
+        <span id="ID-5-1" data_pos="50">Word</span>
+      `;
+
+      const text = { '5': 'test' };
+      newExpressionInteractable(text, ' class="mword"', 2, 'ghi789', true);
+
+      const mword = document.getElementById('ID-5-2');
+      expect(mword?.getAttribute('data_order')).toBe('5');
+      expect(mword?.classList.contains('order5')).toBe(true);
+    });
+  });
+
+  // ===========================================================================
+  // goToLastPosition Tests
+  // ===========================================================================
+
+  describe('goToLastPosition', () => {
+    beforeEach(() => {
+      // Mock LWT_DATA
+      (window as unknown as Record<string, unknown>).LWT_DATA = {
+        text: { reading_position: 0 },
+      };
+      vi.spyOn(window, 'focus').mockImplementation(() => {});
+    });
+
+    it('scrolls to position 0 when reading_position is 0', () => {
+      document.body.innerHTML = `
+        <span class="wsty" data_pos="100">Word</span>
+      `;
+      (window as unknown as { LWT_DATA: { text: { reading_position: number } } }).LWT_DATA.text.reading_position = 0;
+
+      // Should not throw
+      expect(() => goToLastPosition()).not.toThrow();
+    });
+
+    it('finds element at exact reading position', () => {
+      document.body.innerHTML = `
+        <span class="wsty" data_pos="50">First</span>
+        <span class="wsty" data_pos="100">Target</span>
+        <span class="wsty" data_pos="150">Last</span>
+      `;
+      (window as unknown as { LWT_DATA: { text: { reading_position: number } } }).LWT_DATA.text.reading_position = 100;
+
+      expect(() => goToLastPosition()).not.toThrow();
+    });
+
+    it('finds closest element when exact position not found', () => {
+      document.body.innerHTML = `
+        <span class="wsty" data_pos="50">First</span>
+        <span class="wsty" data_pos="150">Last</span>
+      `;
+      (window as unknown as { LWT_DATA: { text: { reading_position: number } } }).LWT_DATA.text.reading_position = 100;
+
+      expect(() => goToLastPosition()).not.toThrow();
+    });
+
+    it('handles no wsty elements', () => {
+      document.body.innerHTML = '<div>No words</div>';
+      (window as unknown as { LWT_DATA: { text: { reading_position: number } } }).LWT_DATA.text.reading_position = 100;
+
+      expect(() => goToLastPosition()).not.toThrow();
+    });
+  });
+
+  // ===========================================================================
+  // saveReadingPosition Tests
+  // ===========================================================================
+
+  describe('saveReadingPosition', () => {
+    it('makes POST request to save position', () => {
+      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+
+      saveReadingPosition(42, 100);
+
+      expect(postSpy).toHaveBeenCalledWith(
+        'api.php/v1/texts/42/reading-position',
+        { position: 100 }
+      );
+    });
+  });
+
+  // ===========================================================================
+  // saveAudioPosition Tests
+  // ===========================================================================
+
+  describe('saveAudioPosition', () => {
+    it('makes POST request to save audio position', () => {
+      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+
+      saveAudioPosition(42, 50.5);
+
+      expect(postSpy).toHaveBeenCalledWith(
+        'api.php/v1/texts/42/audio-position',
+        { position: 50.5 }
+      );
+    });
+  });
+
+  // ===========================================================================
+  // getPhoneticTextAsync Tests
+  // ===========================================================================
+
+  describe('getPhoneticTextAsync', () => {
+    it('makes GET request with language string', () => {
+      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+        () => ({} as JQuery.jqXHR<{ phonetic_reading: string }>)
+      );
+
+      getPhoneticTextAsync('hello', 'en-US');
+
+      expect(getJSONSpy).toHaveBeenCalledWith(
+        'api.php/v1/phonetic-reading',
+        { text: 'hello', lang: 'en-US' }
+      );
+    });
+
+    it('makes GET request with language ID number', () => {
+      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+        () => ({} as JQuery.jqXHR<{ phonetic_reading: string }>)
+      );
+
+      getPhoneticTextAsync('hello', 5);
+
+      expect(getJSONSpy).toHaveBeenCalledWith(
+        'api.php/v1/phonetic-reading',
+        { text: 'hello', lang_id: 5 }
+      );
+    });
+  });
+
+  // ===========================================================================
+  // readTextWithExternal Tests
+  // ===========================================================================
+
+  describe('readTextWithExternal', () => {
+    it('makes fetch request with replaced placeholders', async () => {
+      const mockAudio = { play: vi.fn() };
+      vi.spyOn(globalThis, 'Audio').mockImplementation(() => mockAudio as unknown as HTMLAudioElement);
+
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ audio: 'data:audio/mp3;base64,test' }),
+      } as Response);
+
+      const voiceApi = JSON.stringify({
+        input: 'http://tts.example.com/speak',
+        options: {
+          method: 'POST',
+          body: { text: 'lwt_term', language: 'lwt_lang' },
+        },
+      });
+
+      readTextWithExternal('hello', voiceApi, 'en');
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      expect(fetchSpy).toHaveBeenCalled();
+    });
+
+    it('logs error on fetch failure', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
+
+      const voiceApi = JSON.stringify({
+        input: 'http://tts.example.com/speak',
+        options: { method: 'POST', body: {} },
+      });
+
+      readTextWithExternal('hello', voiceApi, 'en');
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      expect(consoleSpy).toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // readTextAloud Tests
+  // ===========================================================================
+
+  describe('readTextAloud', () => {
+    let mockSpeak: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      mockSpeak = vi.fn();
+      Object.defineProperty(window, 'speechSynthesis', {
+        value: {
+          speak: mockSpeak,
+          getVoices: vi.fn().mockReturnValue([]),
+        },
+        writable: true,
+      });
+      vi.spyOn(cookies, 'getCookie').mockReturnValue(null);
+    });
+
+    it('reads text directly when convert_to_phonetic is false', () => {
+      readTextAloud('hello', 'en-US', 1.0, 1.0, undefined, false);
+
+      expect(mockSpeak).toHaveBeenCalled();
+    });
+
+    it('fetches phonetic text when convert_to_phonetic is true', () => {
+      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(() => {
+        return {
+          then: vi.fn().mockReturnThis(),
+        } as unknown as JQuery.jqXHR<{ phonetic_reading: string }>;
+      });
+
+      readTextAloud('hello', 'en-US', 1.0, 1.0, undefined, true);
+
+      expect(getJSONSpy).toHaveBeenCalledWith(
+        'api.php/v1/phonetic-reading',
+        expect.any(Object)
+      );
+    });
+  });
+
+  // ===========================================================================
+  // handleReadingConfiguration Tests
+  // ===========================================================================
+
+  describe('handleReadingConfiguration', () => {
+    let mockSpeak: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      mockSpeak = vi.fn();
+      Object.defineProperty(window, 'speechSynthesis', {
+        value: {
+          speak: mockSpeak,
+          getVoices: vi.fn().mockReturnValue([]),
+        },
+        writable: true,
+      });
+      vi.spyOn(cookies, 'getCookie').mockReturnValue(null);
+    });
+
+    it('reads directly for direct mode', () => {
+      const config = {
+        reading_mode: 'direct' as const,
+        name: 'English',
+        abbreviation: 'en-US',
+      };
+
+      handleReadingConfiguration(config, 'hello', 1);
+
+      expect(mockSpeak).toHaveBeenCalled();
+    });
+
+    it('fetches phonetic for internal mode', () => {
+      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(() => ({
+        then: vi.fn().mockReturnThis(),
+      } as unknown as JQuery.jqXHR<{ phonetic_reading: string }>));
+
+      const config = {
+        reading_mode: 'internal' as const,
+        name: 'Chinese',
+        abbreviation: 'zh-CN',
+      };
+
+      handleReadingConfiguration(config, '你好', 2);
+
+      expect(getJSONSpy).toHaveBeenCalled();
+    });
+
+    it('uses external API for external mode', async () => {
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ audio: 'data:audio/mp3;base64,test' }),
+      } as Response);
+
+      const config = {
+        reading_mode: 'external' as const,
+        name: 'Japanese',
+        abbreviation: 'ja-JP',
+        voiceapi: JSON.stringify({
+          input: 'http://api.example.com',
+          options: { method: 'POST', body: {} },
+        }),
+      };
+
+      handleReadingConfiguration(config, 'こんにちは', 3);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      expect(fetchSpy).toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // speechDispatcher Tests
+  // ===========================================================================
+
+  describe('speechDispatcher', () => {
+    it('makes GET request for reading configuration', () => {
+      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+        () => ({} as JQuery.jqXHR)
+      );
+
+      speechDispatcher('hello', 5);
+
+      expect(getJSONSpy).toHaveBeenCalledWith(
+        'api.php/v1/languages/5/reading-configuration',
+        { lang_id: 5 },
+        expect.any(Function)
+      );
     });
   });
 

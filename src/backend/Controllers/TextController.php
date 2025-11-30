@@ -210,13 +210,7 @@ class TextController extends BaseController
         $frameLWidth = (int) Settings::getWithDefault('set-text-l-framewidth-percent');
 
         // Start page
-        PageLayoutHelper::renderPageStartNobody(
-            'Read',
-            "body {
-                margin: 20px;
-                max-width: 100%;
-            }"
-        );
+        PageLayoutHelper::renderPageStartNobody('Read', 'full-width');
 
         // Render appropriate layout
         if ($this->mobileService->isMobile()) {

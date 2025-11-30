@@ -15,11 +15,22 @@ body
   margin-right: auto;
 }
 
+/* Full-width body for test and read pages */
+body.full-width
+{
+  max-width: 100%;
+}
+
 input[type=text]
 {
   font: 85% "Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu;
   border: 1px solid #C6C6C6;
   padding: 3px;
+}
+
+input[type=radio]
+{
+  display: inline;
 }
 
 p
@@ -749,6 +760,7 @@ Feed Wizard UI (RSS feed import interface)
 
 #settings
 {
+  display: none;
   position: fixed;
   top: 0px;
   left: 0px;
@@ -761,8 +773,21 @@ Feed Wizard UI (RSS feed import interface)
   z-index: 100;
 }
 
+#settings .settings-content
+{
+  margin-left: 150px;
+  text-align: left;
+}
+
+#settings .settings-ok
+{
+  position: relative;
+  left: 150px;
+}
+
 #adv
 {
+  display: none;
   position: fixed;
   top: 0px;
   left: 0px;
@@ -773,6 +798,100 @@ Feed Wizard UI (RSS feed import interface)
   text-align: center;
   padding: 10px;
   z-index: 200;
+}
+
+/* Feed wizard step 3 config (hidden data element) */
+#wizard-step3-config
+{
+  display: none;
+}
+
+/* Feed wizard selection list and table */
+#lwt_sel,
+#lwt_container .tab2
+{
+  margin-left: 77px;
+}
+
+/* Feed wizard controls table */
+.wizard-controls
+{
+  width: 100%;
+}
+
+.wizard-controls .feed-selector
+{
+  width: 250px;
+  max-width: 200px;
+}
+
+.wizard-controls .actions-cell
+{
+  width: 270px;
+  text-align: right;
+}
+
+.wizard-controls .spacer-cell
+{
+  width: 63px;
+}
+
+/* Feed wizard min/max button */
+.wizard-minmax
+{
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+/* Feed wizard step 4 config (hidden data element) */
+#wizard-step4-config
+{
+  display: none;
+}
+
+/* Feed form input fields */
+.feed-form-input
+{
+  width: 95%;
+}
+
+/* Feed form options table */
+.feed-options-table
+{
+  width: 100%;
+}
+
+.feed-options-table .option-label
+{
+  width: 35%;
+}
+
+/* Feed browse page styles */
+.feeds-filter-cell
+{
+  width: 30%;
+}
+
+.feeds-filter-cell-wide
+{
+  width: 70%;
+}
+
+.feeds-date-col
+{
+  min-width: 90px;
+}
+
+.valign-middle
+{
+  vertical-align: middle;
+}
+
+/* Small icon sizing */
+.icon-small
+{
+  height: 20px;
 }
 
 /* Feed wizard text selection styles */
@@ -857,6 +976,118 @@ input[name="WoTranslation"]
 .del_trans:hover:after
 {
   opacity: 1;
+}
+
+/**************************************************************
+Test page styles
+***************************************************************/
+
+/* Test header word count */
+.test-word-count
+{
+  margin: 5px;
+}
+
+/* Test footer stats spans */
+.test-footer-stat
+{
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+/* Table test sentence cell color */
+.test-sentence-cell
+{
+  color: #000;
+}
+
+/**************************************************************
+Home page styles
+***************************************************************/
+
+/* Last text info box */
+.home-last-text
+{
+  height: 85px;
+}
+
+/* Home menu container */
+.home-menu-container
+{
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+
+/* WordPress logout text */
+.logout-text
+{
+  font-size: 115%;
+  font-weight: bold;
+  color: red;
+}
+
+/* Footer license image inline */
+.footer-license-icon
+{
+  display: inline;
+}
+
+/* Footer license link */
+.footer-license-link
+{
+  vertical-align: top;
+}
+
+/**************************************************************
+Word Show View Styles
+***************************************************************/
+
+/* Term label column width */
+.word-show-label
+{
+  width: 30px;
+}
+
+/* Word show value cells with larger text */
+.word-show-value
+{
+  font-size: 120%;
+}
+
+/* Term cell top-right corner radius inheritance */
+.word-show-term
+{
+  font-size: 120%;
+  border-top-right-radius: inherit;
+}
+
+/* Annotation highlight color */
+.word-show-highlight
+{
+  color: red;
+}
+
+/**************************************************************
+Language Form View Styles
+***************************************************************/
+
+/* Hidden option for future use */
+.language-option-hidden
+{
+  display: none;
+}
+
+/* Hidden form wrapper sections */
+.language-form-hidden
+{
+  display: none;
+}
+
+/* Transparent horizontal rule separator */
+.language-form-separator
+{
+  color: transparent;
 }
 
 /**************************************************************

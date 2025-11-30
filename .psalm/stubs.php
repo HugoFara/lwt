@@ -67,10 +67,9 @@ function quickMenu(): void {}
 
 /**
  * @param string $title
- * @param string $addcss
  * @return void
  */
-function pagestart_kernel_nobody($title, $addcss = ''): void {}
+function pagestart_kernel_nobody($title): void {}
 
 /**
  * @return void
@@ -247,11 +246,9 @@ function pagestart($title, $close): void {}
 
 /**
  * @param string $title
- * @param string $addcss
  * @return void
- * @psalm-suppress UnusedParam
  */
-function pagestart_nobody($title, $addcss = ''): void {}
+function pagestart_nobody($title): void {}
 
 // From tags.php
 

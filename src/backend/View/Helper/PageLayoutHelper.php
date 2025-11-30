@@ -228,12 +228,11 @@ HTML;
      * Outputs directly to browser. Sets cache control headers,
      * renders HTML5 doctype, head, and opening body.
      *
-     * @param string $title  Page title
-     * @param string $addCss Optional additional inline CSS
+     * @param string $title Page title
      *
      * @return void
      */
-    public static function renderPageStartKernelNobody(string $title, string $addCss = ''): void
+    public static function renderPageStartKernelNobody(string $title): void
     {
         $tbpref = \Lwt\Core\Globals::getTablePrefix();
         $debug = \Lwt\Core\Globals::isDebug();
@@ -270,7 +269,6 @@ HTML;
             echo '<script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>';
         }
 
-        echo '<style type="text/css">' . $addCss . "\n" . '</style>';
         echo '<!-- URLBASE : "' . tohtml(\url_base()) . '" -->';
         echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
         echo '<title>LWT :: ' . tohtml($title) . '</title>';
@@ -293,13 +291,15 @@ HTML;
      * Outputs directly to browser. Sets cache control headers,
      * renders HTML5 doctype, full head with assets, and opening body.
      *
-     * @param string $title  Page title
-     * @param string $addCss Optional additional inline CSS
+     * @param string $title     Page title
+     * @param string $bodyClass Optional CSS class for body element
      *
      * @return void
      */
-    public static function renderPageStartNobody(string $title, string $addCss = ''): void
-    {
+    public static function renderPageStartNobody(
+        string $title,
+        string $bodyClass = ''
+    ): void {
         $tbpref = \Lwt\Core\Globals::getTablePrefix();
         $debug = \Lwt\Core\Globals::isDebug();
 
@@ -337,12 +337,11 @@ HTML;
             echo '<script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>';
         }
 
-        echo '<style type="text/css">' . $addCss . "\n" . '</style>';
         echo '<!-- URLBASE : "' . tohtml(\url_base()) . '" -->';
         echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
         echo '<title>LWT :: ' . tohtml($title) . '</title>';
         echo '</head>';
-        echo '<body>';
+        echo '<body' . ($bodyClass !== '' ? ' class="' . tohtml($bodyClass) . '"' : '') . '>';
 
         if (!ViteHelper::shouldUse()) {
             echo '<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>';
