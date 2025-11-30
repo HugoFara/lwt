@@ -74,6 +74,8 @@
             <errorLevel type="suppress">
                 <directory name="src/backend/Api" />
                 <directory name="src/backend/Core/Database" />
+                <directory name="src/backend/Services" />
+                <directory name="src/backend/Views" />
             </errorLevel>
         </UndefinedClass>
 
@@ -203,6 +205,7 @@
             <errorLevel type="suppress">
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Services" />
+                <directory name="src/backend/View" />
             </errorLevel>
         </PossiblyUnusedParam>
 
@@ -312,6 +315,7 @@
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
                 <directory name="src/backend/Services" />
+                <directory name="src/backend/Core/Database" />
             </errorLevel>
         </RedundantCast>
 

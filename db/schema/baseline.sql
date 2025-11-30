@@ -12,7 +12,8 @@ INSERT INTO _migrations VALUES
 ('19700101_000001_lwt_original.sql'),
 ('19700102_000001_lwt_fork.sql'),
 ('20231224_131202_missing_auto_increment.sql'),
-('20240103_120316_2.10.0-fork.sql');
+('20240103_120316_2.10.0-fork.sql'),
+('20251130_120000_myisam_to_innodb.sql');
 
 -- Database definition
 
@@ -28,7 +29,7 @@ CREATE TABLE IF NOT EXISTS archivedtexts (
     KEY AtLgID (AtLgID),
     KEY AtLgIDSourceURI (AtSourceURI(20),AtLgID)
 )
-ENGINE=MyISAM DEFAULT CHARSET=utf8;
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS languages (
     LgID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
@@ -48,7 +49,7 @@ CREATE TABLE IF NOT EXISTS languages (
     PRIMARY KEY (LgID),
     UNIQUE KEY LgName (LgName)
 )
-ENGINE=MyISAM DEFAULT CHARSET=utf8;
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS sentences (
     SeID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
@@ -62,14 +63,14 @@ CREATE TABLE IF NOT EXISTS sentences (
     KEY SeTxID (SeTxID),
     KEY SeOrder (SeOrder)
 )
-ENGINE=MyISAM DEFAULT CHARSET=utf8;
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS settings (
     StKey varchar(40) NOT NULL,
     StValue varchar(40) DEFAULT NULL,
     PRIMARY KEY (StKey)
 )
-ENGINE=MyISAM DEFAULT CHARSET=utf8;
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS textitems2 (
     Ti2WoID mediumint(8) unsigned NOT NULL,
@@ -81,7 +82,7 @@ CREATE TABLE IF NOT EXISTS textitems2 (
     Ti2Text varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
     PRIMARY KEY (Ti2TxID,Ti2Order,Ti2WordCount), KEY Ti2WoID (Ti2WoID)
 )
-ENGINE=MyISAM DEFAULT CHARSET=utf8;
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS temptextitems (
     TiCount smallint(5) unsigned NOT NULL,
@@ -114,7 +115,7 @@ CREATE TABLE IF NOT EXISTS texts (
     PRIMARY KEY (TxID),
     KEY TxLgID (TxLgID),
     KEY TxLgIDSourceURI (TxSourceURI(20),TxLgID)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS words (
     WoID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
@@ -143,7 +144,7 @@ CREATE TABLE IF NOT EXISTS words (
     KEY WoTomorrowScore (WoTomorrowScore),
     KEY WoRandom (WoRandom)
 )
-ENGINE=MyISAM DEFAULT CHARSET=utf8;
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS tags (
     TgID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
@@ -151,7 +152,7 @@ CREATE TABLE IF NOT EXISTS tags (
     TgComment varchar(200) NOT NULL DEFAULT '',
     PRIMARY KEY (TgID),
     UNIQUE KEY TgText (TgText)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE IF NOT EXISTS wordtags (
@@ -159,7 +160,7 @@ CREATE TABLE IF NOT EXISTS wordtags (
     WtTgID smallint(5) unsigned NOT NULL,
     PRIMARY KEY (WtWoID,WtTgID),
     KEY WtTgID (WtTgID)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS tags2 (
     T2ID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
@@ -167,13 +168,13 @@ CREATE TABLE IF NOT EXISTS tags2 (
     T2Comment varchar(200) NOT NULL DEFAULT '',
     PRIMARY KEY (T2ID),
     UNIQUE KEY T2Text (T2Text)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS texttags (
     TtTxID smallint(5) unsigned NOT NULL,
     TtT2ID smallint(5) unsigned NOT NULL,
     PRIMARY KEY (TtTxID,TtT2ID), KEY TtT2ID (TtT2ID)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS newsfeeds (
     NfID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
@@ -187,7 +188,7 @@ CREATE TABLE IF NOT EXISTS newsfeeds (
     PRIMARY KEY (NfID),
     KEY NfLgID (NfLgID),
     KEY NfUpdate (NfUpdate)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS feedlinks (
     FlID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
@@ -202,11 +203,11 @@ CREATE TABLE IF NOT EXISTS feedlinks (
     KEY FlLink (FlLink),
     KEY FlDate (FlDate),
     UNIQUE KEY FlTitle (FlNfID,FlTitle)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS archtexttags (
     AgAtID smallint(5) unsigned NOT NULL,
     AgT2ID smallint(5) unsigned NOT NULL,
     PRIMARY KEY (AgAtID,AgT2ID),
     KEY AgT2ID (AgT2ID)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

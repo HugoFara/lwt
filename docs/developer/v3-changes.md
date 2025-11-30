@@ -898,6 +898,33 @@ define('LWT_LANGUAGES_ARRAY', loadLanguageDefinitions());
 | 6 | `removeSpaces` | Remove spaces between words (CJK) |
 | 7 | `rightToLeft` | Right-to-left text direction |
 
+### 13. Database Engine Migration (MyISAM → InnoDB)
+
+Version 3 migrates all database tables from MyISAM to InnoDB engine.
+
+#### Changes
+
+- All 14 permanent tables converted from MyISAM to InnoDB
+- Temporary tables (`temptextitems`, `tempwords`) remain MEMORY engine
+- Migration file: `db/migrations/20251130_120000_myisam_to_innodb.sql`
+
+#### Benefits of moving to InnoDB
+
+| Feature | MyISAM | InnoDB |
+|---------|--------|--------|
+| Transactions | No | Yes (ACID) |
+| Locking | Table-level | Row-level |
+| Foreign keys | No | Yes |
+| Crash recovery | Limited | Full |
+
+#### Migration Notes
+
+- Existing installations: Tables are converted automatically when running database updates
+- New installations: Tables are created directly with InnoDB engine
+- No code changes required - queries work identically
+
+This change prepares LWT for future improvements including foreign key constraints and transaction support for multi-step operations.
+
 ## Future Improvements
 
 This refactoring enables:
