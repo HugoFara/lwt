@@ -12,6 +12,7 @@
 
 import $ from 'jquery';
 import Tagify from '@yaireo/tagify';
+import { fetchTextTags, getTextTagsSync } from '../core/app_data';
 
 // Extend HTMLInputElement to include the _tagify property
 declare global {
@@ -19,9 +20,6 @@ declare global {
     _tagify?: Tagify;
   }
 }
-
-// TEXTTAGS is a global variable set by PHP
-declare const TEXTTAGS: string[] | undefined;
 
 /**
  * Initialize Tagify on a single UL element, converting it to a Tagify input.
@@ -55,9 +53,9 @@ function initTagifyOnFeedInput(ulElement: HTMLUListElement): void {
   // Replace UL with input
   ulElement.replaceWith(input);
 
-  // Initialize Tagify
+  // Initialize Tagify with currently cached text tags
   const tagify = new Tagify(input, {
-    whitelist: TEXTTAGS || [],
+    whitelist: getTextTagsSync(),
     dropdown: {
       enabled: 1,
       maxItems: 20,
@@ -105,12 +103,15 @@ function handleFeedCheckboxChange(this: HTMLInputElement): void {
  * Initialize the feed text edit form.
  * Should only be called on pages with the bulk feed text import form.
  */
-export function initFeedTextEditForm(): void {
+export async function initFeedTextEditForm(): Promise<void> {
   // Scroll to the first table
   const firstTable = document.querySelector('table');
   if (firstTable) {
     firstTable.scrollIntoView({ behavior: 'instant', block: 'start' });
   }
+
+  // Prefetch text tags before initializing Tagify inputs
+  await fetchTextTags();
 
   // Initialize Tagify on all feed tag UL elements
   document.querySelectorAll<HTMLUListElement>('ul[name^="feed"]').forEach(initTagifyOnFeedInput);

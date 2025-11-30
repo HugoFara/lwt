@@ -21,7 +21,7 @@
 namespace Lwt\Views\Admin;
 
 ?>
-<form enctype="multipart/form-data" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="return confirm('Are you sure?');">
+<form enctype="multipart/form-data" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" data-action="confirm-submit" data-confirm-message="Are you sure?">
 <table class="tab3" cellspacing="0" cellpadding="5">
     <tr>
         <th class="th1 center">Install Demo</th>
@@ -43,7 +43,7 @@ namespace Lwt\Views\Admin;
     </tr>
     <tr>
         <td class="td1 right" colspan="2">
-            <input type="button" value="&lt;&lt; Back to LWT Main Menu" onclick="location.href='index.php';" />
+            <input type="button" value="&lt;&lt; Back to LWT Main Menu" data-action="navigate" data-url="index.php" />
         </td>
     </tr>
 </table>

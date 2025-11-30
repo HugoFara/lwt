@@ -8,8 +8,8 @@
 export interface WordStatus {
   name: string;
   abbr: string;
-  score: number;
-  color: string;
+  score?: number;
+  color?: string;
 }
 
 export interface LwtLanguage {

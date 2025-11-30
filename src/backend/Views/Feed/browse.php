@@ -147,8 +147,8 @@ Newsfeed:
   <table class="tab2" cellspacing="0" cellpadding="5">
   <tr><th class="th1" colspan="2">Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" /></th></tr>
   <tr><td class="td1 center" style="width:30%;">
-  <input type="button" value="Mark All" onclick="selectToggle(true,'form2');" />
-  <input type="button" value="Mark None" onclick="selectToggle(false,'form2');" />
+  <input type="button" value="Mark All" data-action="mark-all" data-form="form2" />
+  <input type="button" value="Mark None" data-action="mark-none" data-form="form2" />
   </td><td class="td1 center">
   Marked Texts:&nbsp;
   <input id="markaction" type="submit" value="Get Marked Texts" />&nbsp;&nbsp;
@@ -177,13 +177,13 @@ Newsfeed:
             <td class="td1 center">
             <span title="<?php echo htmlentities((string)$row['FlDescription'], ENT_QUOTES, 'UTF-8', false); ?>"><b><?php echo $row['FlTitle']; ?></b></span>
         <?php if ($row['FlAudio']): ?>
-            <a href="<?php echo $row['FlAudio']; ?>" onclick="window.open(this.href, 'child', 'scrollbars,width=650,height=600'); return false;">
+            <a href="<?php echo $row['FlAudio']; ?>" data-action="popup-audio" target="_blank" rel="noopener">
             <img src="<?php print_file_path('icn/speaker-volume.png'); ?>" alt="-" /></a>
         <?php endif; ?>
         </td>
             <td class="td1 center" style="vertical-align: middle">
         <?php if (!empty($row['FlLink']) && !str_starts_with(trim((string)$row['FlLink']), '#')): ?>
-            <a href="<?php echo trim((string)$row['FlLink']); ?>" title="<?php echo trim((string)$row['FlLink']); ?>" onclick="window.open('<?php echo $row['FlLink']; ?>');return false;">
+            <a href="<?php echo trim((string)$row['FlLink']); ?>" title="<?php echo trim((string)$row['FlLink']); ?>" data-action="popup-external" target="_blank" rel="noopener">
             <img src="/assets/icons/external.png" alt="-" /></a>
         <?php endif; ?>
         </td><td class="td1 center"><?php echo $row['FlDate']; ?></td></tr>

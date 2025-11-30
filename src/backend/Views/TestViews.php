@@ -397,7 +397,7 @@ class TestViews
 <tr>
     <td class="td1 center" nowrap="nowrap">
         <a href="edit_tword.php?wid=<?php echo $word['WoID']; ?>" target="ro"
-            onclick="showRightFrames();">
+            data-action="show-right-frames">
             <img src="/assets/icons/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
         </a>
     </td>

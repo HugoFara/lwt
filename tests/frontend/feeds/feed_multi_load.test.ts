@@ -2,16 +2,21 @@
  * Tests for feed_multi_load.ts - Feed multi-load page functionality
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  collectCheckedValues,
-  initFeedMultiLoad
-} from '../../../src/frontend/js/feeds/feed_multi_load';
 
 // Mock the language_settings module
 vi.mock('../../../src/frontend/js/core/language_settings', () => ({
   setLang: vi.fn()
 }));
 
+// Mock ui_utilities to prevent jQuery UI initialization issues
+vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
+  markClick: vi.fn()
+}));
+
+import {
+  collectCheckedValues,
+  initFeedMultiLoad
+} from '../../../src/frontend/js/feeds/feed_multi_load';
 import { setLang } from '../../../src/frontend/js/core/language_settings';
 
 describe('feed_multi_load.ts', () => {

@@ -115,7 +115,7 @@ while ($row = mysqli_fetch_assoc($feeds)):
         &nbsp; <a href="/feeds/edit?manage_feeds=1&amp;load_feed=1&amp;selected_feed=<?php echo $row['NfID']; ?>">
             <span title="Update Feed"><img src="/assets/icons/arrow-circle-135.png" alt="-" /></span>
         </a>&nbsp;
-        <a href="<?php echo $row['NfSourceURI']; ?>" onclick="window.open(this.href); return false">
+        <a href="<?php echo $row['NfSourceURI']; ?>" data-action="open-window">
             <img src="/assets/icons/external.png" title="Show Feed" alt="Link" />
         </a>&nbsp;
         <span class="click" data-action="delete-feed" data-feed-id="<?php echo $row['NfID']; ?>">

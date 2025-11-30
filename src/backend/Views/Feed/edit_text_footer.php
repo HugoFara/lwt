@@ -19,6 +19,6 @@ namespace Lwt\Views\Feed;
 
 ?>
    <input id="markaction" type="submit" value="Save" />
-   <input type="button" value="Cancel" onclick="location.href='/feeds';" />
+   <input type="button" value="Cancel" data-action="navigate" data-url="/feeds" />
    <input type="hidden" name="checked_feeds_save" value="1" />
    </form>

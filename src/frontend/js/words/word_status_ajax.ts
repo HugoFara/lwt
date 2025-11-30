@@ -81,3 +81,24 @@ export function updateWordStatusAjax(data: WordStatusUpdateData): void {
 export function initWordStatusChange(config: WordStatusUpdateData): void {
   updateWordStatusAjax(config);
 }
+
+/**
+ * Auto-initialize word status change from JSON config element.
+ * Reads configuration from #word-status-config and triggers the update.
+ */
+function autoInitWordStatusChange(): void {
+  const configEl = document.getElementById('word-status-config');
+  if (!configEl) {
+    return;
+  }
+
+  try {
+    const config: WordStatusUpdateData = JSON.parse(configEl.textContent || '{}');
+    initWordStatusChange(config);
+  } catch {
+    // Config parse failed, page may not be status result
+  }
+}
+
+// Auto-initialize on document ready
+$(document).ready(autoInitWordStatusChange);

@@ -6,6 +6,8 @@
  * - Navigation buttons (cancel, back, redirect)
  * - Confirmation dialogs (form submission)
  * - Form dirty state management
+ * - Translation actions (add/delete translation)
+ * - Text word actions (know all, ignore all)
  *
  * @license unlicense
  * @since   3.0.0
@@ -15,6 +17,10 @@ import $ from 'jquery';
 import { lwtFormCheck } from '../forms/unloadformcheck';
 import { showRightFrames, hideRightFrames } from '../reading/frame_management';
 import { showAllwordsClick } from './ui_utilities';
+import { quickMenuRedirection } from './user_interactions';
+import { deleteTranslation, addTranslation } from '../terms/translation_api';
+import { changeTableTestStatus } from '../terms/term_operations';
+import { showExportTemplateHelp } from '../ui/modal';
 
 /**
  * Navigate back in browser history.
@@ -150,6 +156,89 @@ export function initSimpleInteractions(): void {
       // Toggle "Show All" or "Learning Translations" mode
       showAllwordsClick();
       break;
+
+    case 'delete-translation':
+      // Clear the translation field
+      e.preventDefault();
+      deleteTranslation();
+      break;
+
+    case 'add-translation':
+      // Add a translation word to the field
+      e.preventDefault();
+      {
+        const word = $el.data('word') as string;
+        if (word) {
+          addTranslation(word);
+        }
+      }
+      break;
+
+    case 'open-window':
+      // Open URL in new window (optionally named via data-window-name)
+      e.preventDefault();
+      {
+        const windowName = $el.data('window-name') as string | undefined;
+        const targetUrl = url || ($el.is('a') ? $el.attr('href') : undefined);
+        if (targetUrl) {
+          window.open(targetUrl, windowName || '_blank');
+        }
+      }
+      break;
+
+    case 'know-all':
+      // Mark all unknown words as well-known
+      e.preventDefault();
+      {
+        const textId = $el.data('text-id');
+        if (textId && confirm('Are you sure?')) {
+          showRightFrames('all_words_wellknown.php?text=' + textId);
+        }
+      }
+      break;
+
+    case 'ignore-all':
+      // Mark all unknown words as ignored
+      e.preventDefault();
+      {
+        const textId = $el.data('text-id');
+        if (textId && confirm('Are you sure?')) {
+          showRightFrames('all_words_wellknown.php?text=' + textId + '&stat=98');
+        }
+      }
+      break;
+
+    case 'bulk-translate':
+      // Open bulk translate in right frames
+      e.preventDefault();
+      if (url) {
+        showRightFrames(url);
+      }
+      break;
+
+    case 'change-test-status':
+      // Change word status in test table (plus/minus buttons)
+      e.preventDefault();
+      {
+        const wordId = $el.data('word-id') as string;
+        const direction = $el.data('direction') as string;
+        if (wordId) {
+          changeTableTestStatus(wordId, direction === 'up');
+        }
+      }
+      break;
+
+    case 'go-back':
+      // Navigate back in browser history
+      e.preventDefault();
+      history.back();
+      break;
+
+    case 'show-export-template-help':
+      // Show export template help modal
+      e.preventDefault();
+      showExportTemplateHelp();
+      break;
     }
   });
 
@@ -163,6 +252,11 @@ export function initSimpleInteractions(): void {
     }
   });
 
+  // Handle quick menu navigation (select dropdown)
+  $(document).on('change', 'select[data-action="quick-menu-redirect"]', function () {
+    quickMenuRedirection($(this).val() as string);
+  });
+
   // Handle form submission confirmation
   $(document).on('submit', 'form[data-confirm-submit]', function (e) {
     const message = $(this).data('confirm-submit') as string || 'Are you sure?';
@@ -170,6 +264,18 @@ export function initSimpleInteractions(): void {
       e.preventDefault();
       return false;
     }
+  });
+
+  // Handle forms that auto-submit by clicking a button
+  // (replaces onsubmit="document.form1.buttonname.click(); return false;")
+  $(document).on('submit', 'form[data-auto-submit-button]', function (e) {
+    e.preventDefault();
+    const buttonName = $(this).data('auto-submit-button') as string;
+    const button = this.querySelector(`[name="${buttonName}"]`) as HTMLElement | null;
+    if (button) {
+      button.click();
+    }
+    return false;
   });
 }
 

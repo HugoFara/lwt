@@ -12,9 +12,6 @@
  */
 ?>
 <h2>Edit Term</h2>
-<script type="text/javascript" charset="utf-8">
-    $(document).ready(lwtFormCheck.askBeforeExit);
-</script>
 <form name="editword" class="validate" action="/words/edit#rec<?php echo $word['WoID']; ?>" method="post">
 <input type="hidden" name="WoID" value="<?php echo $word['WoID']; ?>" />
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $word['WoLgID']; ?>" />

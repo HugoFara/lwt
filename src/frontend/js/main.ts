@@ -21,6 +21,7 @@ import 'jquery-ui-dist/jquery-ui';
 import './core/html_utils';
 import './core/cookies';
 import './core/lwt_state';
+import './core/app_data';
 import './core/ajax_utilities';
 import './core/ui_utilities';
 import './core/user_interactions';
@@ -102,6 +103,7 @@ import './languages/language_form';
 import './admin/server_data';
 import './admin/tts_settings';
 import './admin/table_management';
+import './admin/settings_form';
 
 // Home
 import './home/home_warnings';

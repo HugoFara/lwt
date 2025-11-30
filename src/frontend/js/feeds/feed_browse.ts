@@ -10,6 +10,7 @@
  */
 
 import { setLang, resetAll } from '../core/language_settings';
+import { selectToggle } from '../forms/bulk_actions';
 
 /**
  * Initialize feed browse page event handlers.
@@ -89,6 +90,49 @@ export function initFeedBrowse(): void {
 }
 
 /**
+ * Initialize mark all/none buttons for form2.
+ * Uses event delegation for buttons with data-action="mark-all" or "mark-none".
+ */
+export function initMarkButtons(): void {
+  document.addEventListener('click', (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+
+    if (target.matches('[data-action="mark-all"]')) {
+      e.preventDefault();
+      const formName = target.dataset.form || 'form2';
+      selectToggle(true, formName);
+    } else if (target.matches('[data-action="mark-none"]')) {
+      e.preventDefault();
+      const formName = target.dataset.form || 'form2';
+      selectToggle(false, formName);
+    }
+  });
+}
+
+/**
+ * Initialize popup link handlers for audio and external links.
+ * Opens links in popup windows instead of navigating.
+ */
+export function initPopupLinks(): void {
+  document.addEventListener('click', (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const link = target.closest<HTMLAnchorElement>('[data-action="popup-audio"], [data-action="popup-external"]');
+
+    if (link) {
+      e.preventDefault();
+      const action = link.dataset.action;
+      const url = link.href;
+
+      if (action === 'popup-audio') {
+        window.open(url, 'child', 'scrollbars,width=650,height=600');
+      } else {
+        window.open(url);
+      }
+    }
+  });
+}
+
+/**
  * Initialize the "not found" image click handler.
  * Replaces error images with checkboxes when clicked.
  */
@@ -131,6 +175,8 @@ export function initNotFoundImages(): void {
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   initFeedBrowse();
+  initMarkButtons();
+  initPopupLinks();
   initNotFoundImages();
 });
 
@@ -138,9 +184,13 @@ document.addEventListener('DOMContentLoaded', () => {
 declare global {
   interface Window {
     initFeedBrowse: typeof initFeedBrowse;
+    initMarkButtons: typeof initMarkButtons;
+    initPopupLinks: typeof initPopupLinks;
     initNotFoundImages: typeof initNotFoundImages;
   }
 }
 
 window.initFeedBrowse = initFeedBrowse;
+window.initMarkButtons = initMarkButtons;
+window.initPopupLinks = initPopupLinks;
 window.initNotFoundImages = initNotFoundImages;

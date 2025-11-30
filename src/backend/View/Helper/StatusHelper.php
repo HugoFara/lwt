@@ -212,7 +212,7 @@ class StatusHelper
         // Build plus button
         if ($status <= 5 || $status == 98) {
             $plus = '<img src="/assets/icons/plus.png" class="click" title="+" alt="+" '
-                . 'onclick="changeTableTestStatus(' . $wordId . ',true);" />';
+                . 'data-action="change-test-status" data-word-id="' . $wordId . '" data-direction="up" />';
         } else {
             $plus = '<img src="' . htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8')
                 . '" title="" alt="" />';
@@ -221,7 +221,7 @@ class StatusHelper
         // Build minus button
         if ($status >= 1) {
             $minus = '<img src="/assets/icons/minus.png" class="click" title="-" alt="-" '
-                . 'onclick="changeTableTestStatus(' . $wordId . ',false);" />';
+                . 'data-action="change-test-status" data-word-id="' . $wordId . '" data-direction="down" />';
         } else {
             $minus = '<img src="' . htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8')
                 . '" title="" alt="" />';

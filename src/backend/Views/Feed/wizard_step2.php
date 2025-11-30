@@ -55,7 +55,7 @@ use Lwt\Core\Http\InputValidator;
                                   }?>>No</option>
             </select>
         </div>
-        <button style="position:relative;left:150px;" onclick="$('#settings').hide();return false;">
+        <button style="position:relative;left:150px;" data-action="wizard-settings-close">
             OK
         </button>
     </div>
@@ -134,7 +134,7 @@ use Lwt\Core\Http\InputValidator;
                 <input type="hidden" name="rss_url"
                 value="<?php echo tohtml($wizardData['rss_url']); ?>" />
                 <input type="button" value="Cancel"
-                onclick="location.href='/feeds/edit?del_wiz=1';return false;" />
+                data-action="wizard-delete-cancel" />
             </td>
             <td>
                 <span>
@@ -205,7 +205,7 @@ use Lwt\Core\Http\InputValidator;
             </select>
             <button id="get_button" name="button" disabled>Get</button>
             <img src="/assets/icons/wrench-screwdriver.png" title="Settings" alt="-"
-            onclick="$('#settings').show();return false;" />
+            data-action="wizard-settings-open" />
         </td>
         <td>
             <span>

@@ -32,18 +32,6 @@ namespace Lwt\Views\Word;
     'targetLanguage' => $tl
 ]); ?>
 </script>
-<script type="text/javascript">
-    // Initialize bulk translate with configuration from JSON
-    (function() {
-        const config = JSON.parse(document.getElementById('bulk-translate-config').textContent);
-        initBulkTranslate(config.dictionaries);
-
-        // Set up Google Translate callback
-        window.googleTranslateElementInit = function() {
-            googleTranslateElementInit(config.sourceLanguage, config.targetLanguage);
-        };
-    })();
-</script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <form name="form1" action="/word/bulk-translate" method="post">
     <span class="notranslate">
@@ -51,15 +39,15 @@ namespace Lwt\Views\Word;
         <table class="tab3" cellspacing="0">
             <tr class="notranslate">
                 <th class="th1 center" colspan="3">
-                    <input type="button" value="Mark All" onclick="markAll()" />
-                    <input type="button" value="Mark None" onclick="markNone()" />
+                    <input type="button" value="Mark All" data-action="bulk-mark-all" />
+                    <input type="button" value="Mark None" data-action="bulk-mark-none" />
                     <br />
                 </th>
             </tr>
             <tr class="notranslate">
                 <td class="td1">Marked Terms: </td>
                 <td class="td1">
-                    <select onchange="changeTermToggles($(this));">
+                    <select data-action="bulk-term-toggles">
                         <option value="0" selected="selected">
                             [Choose...]
                         </option>

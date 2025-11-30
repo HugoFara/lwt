@@ -179,6 +179,24 @@ function initWizardStep2Events(): void {
   $(document).on('change', '[data-action="wizard-article-section"]', function () {
     lwt_wiz_select_test.changeArticleSection();
   });
+
+  // Settings open button
+  $(document).on('click', '[data-action="wizard-settings-open"]', function (e) {
+    e.preventDefault();
+    $('#settings').show();
+  });
+
+  // Settings close button
+  $(document).on('click', '[data-action="wizard-settings-close"]', function (e) {
+    e.preventDefault();
+    $('#settings').hide();
+  });
+
+  // Cancel wizard button (delete wizard and redirect)
+  $(document).on('click', '[data-action="wizard-delete-cancel"]', function (e) {
+    e.preventDefault();
+    location.href = '/feeds/edit?del_wiz=1';
+  });
 }
 
 /**

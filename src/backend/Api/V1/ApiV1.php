@@ -35,6 +35,7 @@ require_once __DIR__ . '/../../Services/DictionaryService.php';
 require_once __DIR__ . '/../../Services/MediaService.php';
 require_once __DIR__ . '/../../Services/LanguageService.php';
 require_once __DIR__ . '/../../Services/LanguageDefinitions.php';
+require_once __DIR__ . '/../../Services/TagService.php';
 
 use Lwt\Api\V1\Handlers\FeedHandler;
 use Lwt\Api\V1\Handlers\ImportHandler;
@@ -144,6 +145,14 @@ class ApiV1
                 ));
                 break;
 
+            case 'statuses':
+                Response::success(\Lwt\Services\WordStatusService::getStatuses());
+                break;
+
+            case 'tags':
+                $this->handleTagsGet($fragments);
+                break;
+
             case 'settings':
                 $this->handleSettingsGet($fragments, $params);
                 break;
@@ -249,6 +258,24 @@ class ApiV1
             Response::success($this->settingsHandler->formatThemePath($params['path']));
         } else {
             Response::error('Endpoint Not Found: ' . ($fragments[1] ?? ''), 404);
+        }
+    }
+
+    private function handleTagsGet(array $fragments): void
+    {
+        switch ($fragments[1] ?? '') {
+            case 'term':
+                Response::success(\Lwt\Services\TagService::getAllTermTags());
+                break;
+            case 'text':
+                Response::success(\Lwt\Services\TagService::getAllTextTags());
+                break;
+            default:
+                // Return both tag types
+                Response::success([
+                    'term' => \Lwt\Services\TagService::getAllTermTags(),
+                    'text' => \Lwt\Services\TagService::getAllTextTags()
+                ]);
         }
     }
 

@@ -206,7 +206,7 @@ class TranslationController extends BaseController
             src="<?php \print_file_path('icn/speaker-volume.png'); ?>"></img>
 
             <img id="del_translation" style="cursor: pointer;"
-            title="Empty Translation Field" onclick="deleteTranslation();"
+            title="Empty Translation Field" data-action="delete-translation"
             src="<?php \print_file_path('icn/broom.png'); ?>"></img>
         </h2>
 
@@ -219,8 +219,8 @@ class TranslationController extends BaseController
         </script>
         <?php
         foreach ($translations as $word) {
-            echo '<span class="click" onclick="addTranslation(' .
-                json_encode($word) . ');">' .
+            echo '<span class="click" data-action="add-translation" data-word="' .
+                htmlspecialchars($word, ENT_QUOTES, 'UTF-8') . '">' .
                 '<img src="/assets/icons/tick-button.png" title="Copy" alt="Copy" /> &nbsp; ' .
                 \tohtml($word) . '</span><br />';
         }
@@ -271,7 +271,7 @@ class TranslationController extends BaseController
 
         echo '<h3>' . $titleText .
             ' <img id="del_translation" src="/assets/icons/broom.png" title="Empty Translation Field" ' .
-            'style="cursor:pointer" onclick="deleteTranslation ();"></img></h3>';
+            'style="cursor:pointer" data-action="delete-translation"></img></h3>';
         echo '<p>(Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" /> ' .
             'to copy word(s) into above term)<br />&nbsp;</p>';
 

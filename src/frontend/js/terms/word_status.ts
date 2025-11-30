@@ -8,7 +8,7 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
-import type { WordStatus } from '../types/globals';
+import { STATUSES } from '../core/app_data';
 
 /**
  * Return the name of a given status.
@@ -17,8 +17,8 @@ import type { WordStatus } from '../types/globals';
  * @returns Status name
  */
 export function getStatusName(status: number | string): string {
-  const statuses: Record<string, WordStatus> = window.STATUSES || {};
-  return statuses[status] ? statuses[status].name : 'Unknown';
+  const key = typeof status === 'string' ? parseInt(status, 10) : status;
+  return STATUSES[key] ? STATUSES[key].name : 'Unknown';
 }
 
 /**
@@ -28,8 +28,8 @@ export function getStatusName(status: number | string): string {
  * @returns Abbreviation
  */
 export function getStatusAbbr(status: number | string): string {
-  const statuses: Record<string, WordStatus> = window.STATUSES || {};
-  return statuses[status] ? statuses[status].abbr : '?';
+  const key = typeof status === 'string' ? parseInt(status, 10) : status;
+  return STATUSES[key] ? STATUSES[key].abbr : '?';
 }
 
 /**

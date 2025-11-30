@@ -186,12 +186,12 @@ use Lwt\Database\Settings;
     <tr>
         <td class="td1 center" colspan="2">
             <span class="red2">
-                A DATABASE <input type="button" value="BACKUP" onclick="location.href='/admin/backup';" />
+                A DATABASE <input type="button" value="BACKUP" data-action="navigate" data-url="/admin/backup" />
                 MAY BE ADVISABLE!<br />
                 PLEASE DOUBLE-CHECK EVERYTHING!
             </span>
             <br />
-            <input type="button" value="&lt;&lt; Back" onclick="location.href='/';" />
+            <input type="button" value="&lt;&lt; Back" data-action="navigate" data-url="/" />
             <span class="nowrap"></span>
             <input type="submit" name="op" value="Import" />
         </td>
@@ -202,5 +202,5 @@ use Lwt\Database\Settings;
 <p>
     Sentences should contain the term in curly brackets "... {term} ...".<br />
     If not, such sentences can be automatically created later with the <br />
-    "Set Term Sentences" action in the <input type="button" value="My Texts" onclick="location.href='/texts?query=&amp;page=1';" /> screen.
+    "Set Term Sentences" action in the <input type="button" value="My Texts" data-action="navigate" data-url="/texts?query=&amp;page=1" /> screen.
 </p>

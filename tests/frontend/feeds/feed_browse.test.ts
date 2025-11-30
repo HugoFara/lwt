@@ -2,7 +2,6 @@
  * Tests for feed_browse.ts - Feed browse page interactions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initFeedBrowse, initNotFoundImages } from '../../../src/frontend/js/feeds/feed_browse';
 
 // Mock the language_settings module
 vi.mock('../../../src/frontend/js/core/language_settings', () => ({
@@ -10,6 +9,12 @@ vi.mock('../../../src/frontend/js/core/language_settings', () => ({
   resetAll: vi.fn()
 }));
 
+// Mock ui_utilities to prevent jQuery UI initialization issues
+vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
+  markClick: vi.fn()
+}));
+
+import { initFeedBrowse, initNotFoundImages } from '../../../src/frontend/js/feeds/feed_browse';
 import { setLang, resetAll } from '../../../src/frontend/js/core/language_settings';
 
 describe('feed_browse.ts', () => {

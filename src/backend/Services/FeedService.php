@@ -848,9 +848,9 @@ class FeedService
                 if (!isset($data['error']['message'])) {
                     $data['error']['message'] = '';
                 }
-                $data['error']['message'] .= '"<a href=' . $feedData[$key]['link'] .
-                    ' onclick="window.open(this.href, \'child\'); return false">' .
-                    $feedData[$key]['title'] . '</a>" has no text section!<br />';
+                $data['error']['message'] .= '"<a href="' . htmlspecialchars($feedData[$key]['link'], ENT_QUOTES, 'UTF-8') .
+                    '" data-action="open-window" data-window-name="child">' .
+                    htmlspecialchars($feedData[$key]['title'], ENT_QUOTES, 'UTF-8') . '</a>" has no text section!<br />';
                 $data['error']['link'][] = $feedData[$key]['link'];
             } else {
                 // Clean up whitespace

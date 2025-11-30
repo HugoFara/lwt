@@ -481,7 +481,7 @@ class TestController extends BaseController
      */
     private function renderRightFrames(): void
     {
-        echo '<div id="frames-r" style="position: fixed; top: 0; right: -100%; width: 100%; height: 100%;" onclick="hideRightFrames();">';
+        echo '<div id="frames-r" style="position: fixed; top: 0; right: -100%; width: 100%; height: 100%;" data-action="hide-right-frames">';
         echo '<div style="margin-left: 50%; height: 99%;">';
         echo '<iframe src="empty.html" scrolling="auto" name="ro" style="height: 50%; width: 100%;">';
         echo 'Your browser doesn\'t support iFrames, update it!';

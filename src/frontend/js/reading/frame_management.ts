@@ -83,3 +83,18 @@ export function failureSound(): Promise<void> {
   return (document.getElementById('failure_sound') as HTMLAudioElement)?.play();
 }
 
+/**
+ * Initialize event delegation for hide-right-frames action.
+ * Handles clicks on elements with data-action="hide-right-frames".
+ */
+export function initHideRightFramesHandler(): void {
+  $(document).on('click', '[data-action="hide-right-frames"]', function (e) {
+    // Only hide if clicking directly on the container, not on child iframes
+    if (e.target === this) {
+      hideRightFrames();
+    }
+  });
+}
+
+// Auto-initialize when DOM is ready
+$(document).ready(initHideRightFramesHandler);

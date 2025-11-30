@@ -30,21 +30,10 @@ import {
   check_table_prefix,
 } from '../../../src/frontend/js/core/language_settings';
 
-// Mock window.STATUSES
-const mockStatuses = {
-  '1': { name: 'Learning', abbr: '1' },
-  '2': { name: 'Known', abbr: '2' },
-  '3': { name: 'Well Known', abbr: '3' },
-  '4': { name: 'Almost Known', abbr: '4' },
-  '5': { name: 'Learned', abbr: '5' },
-  '98': { name: 'Ignored', abbr: 'Ign' },
-  '99': { name: 'Well Known', abbr: 'WKn' },
-};
-
+// Note: STATUSES is now hardcoded in app_data.ts, no need to mock
 describe('pgm.ts', () => {
   beforeEach(() => {
-    // Setup window.STATUSES mock
-    (window as unknown as Record<string, unknown>).STATUSES = mockStatuses;
+    // No mocking needed - STATUSES is now directly imported from app_data.ts
   });
 
   afterEach(() => {
@@ -57,8 +46,10 @@ describe('pgm.ts', () => {
 
   describe('getStatusName', () => {
     it('returns correct status name for valid status', () => {
+      // Statuses 1-4 are "Learning", 5 is "Learned"
       expect(getStatusName(1)).toBe('Learning');
       expect(getStatusName('1')).toBe('Learning');
+      expect(getStatusName(5)).toBe('Learned');
       expect(getStatusName(98)).toBe('Ignored');
       expect(getStatusName(99)).toBe('Well Known');
     });
@@ -69,7 +60,7 @@ describe('pgm.ts', () => {
     });
 
     it('handles string status numbers', () => {
-      expect(getStatusName('2')).toBe('Known');
+      expect(getStatusName('2')).toBe('Learning');
       expect(getStatusName('98')).toBe('Ignored');
     });
   });

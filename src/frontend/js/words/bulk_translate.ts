@@ -281,6 +281,16 @@ export function changeTermToggles($elem: JQuery<HTMLSelectElement>): boolean {
   return false;
 }
 
+interface BulkTranslateConfig {
+  dictionaries: {
+    dict1: string;
+    dict2: string;
+    translate: string;
+  };
+  sourceLanguage: string;
+  targetLanguage: string;
+}
+
 /**
  * Initialize bulk translate page.
  * Sets up all event handlers for the bulk translate form.
@@ -306,3 +316,54 @@ export function initBulkTranslate(dictionaries: {
   // Set up checkbox handlers when DOM is ready
   $(document).ready(bulkCheckbox);
 }
+
+/**
+ * Auto-initialize bulk translate from JSON config element.
+ * Reads configuration from #bulk-translate-config and sets up handlers.
+ */
+function autoInitBulkTranslate(): void {
+  const configEl = document.getElementById('bulk-translate-config');
+  if (!configEl) {
+    return;
+  }
+
+  try {
+    const config: BulkTranslateConfig = JSON.parse(configEl.textContent || '{}');
+    initBulkTranslate(config.dictionaries);
+
+    // Set up Google Translate callback
+    window.googleTranslateElementInit = function() {
+      googleTranslateElementInit(config.sourceLanguage, config.targetLanguage);
+    };
+  } catch {
+    // Config parse failed, page may not be bulk translate form
+  }
+}
+
+/**
+ * Initialize event delegation for bulk translate form controls.
+ */
+function initBulkTranslateEvents(): void {
+  // Mark All button
+  $(document).on('click', '[data-action="bulk-mark-all"]', function (e) {
+    e.preventDefault();
+    markAll();
+  });
+
+  // Mark None button
+  $(document).on('click', '[data-action="bulk-mark-none"]', function (e) {
+    e.preventDefault();
+    markNone();
+  });
+
+  // Term toggles select (status changes, lowercase, delete translation)
+  $(document).on('change', '[data-action="bulk-term-toggles"]', function (this: HTMLSelectElement) {
+    changeTermToggles($(this));
+  });
+}
+
+// Auto-initialize on document ready
+$(document).ready(function () {
+  autoInitBulkTranslate();
+  initBulkTranslateEvents();
+});

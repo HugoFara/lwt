@@ -36,7 +36,7 @@ class PageLayoutHelper
     public static function buildQuickMenu(): string
     {
         return <<<'HTML'
-<select id="quickmenu" onchange="quickMenuRedirection(value)">
+<select id="quickmenu" data-action="quick-menu-redirect">
     <option value="" selected="selected">[Menu]</option>
     <option value="index">Home</option>
     <optgroup label="Texts">
@@ -273,11 +273,6 @@ HTML;
         echo '<style type="text/css">' . $addCss . "\n" . '</style>';
         echo '<!-- URLBASE : "' . tohtml(\url_base()) . '" -->';
         echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
-        echo '<script type="text/javascript">';
-        echo '//<![CDATA[';
-        echo 'var STATUSES = ' . json_encode(\Lwt\Services\WordStatusService::getStatuses()) . ';';
-        echo '//]]>';
-        echo '</script>';
         echo '<title>LWT :: ' . tohtml($title) . '</title>';
         echo '</head>';
         echo '<body>';
@@ -345,13 +340,6 @@ HTML;
         echo '<style type="text/css">' . $addCss . "\n" . '</style>';
         echo '<!-- URLBASE : "' . tohtml(\url_base()) . '" -->';
         echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
-        echo '<script type="text/javascript">';
-        echo '//<![CDATA[';
-        echo 'var STATUSES = ' . json_encode(\Lwt\Services\WordStatusService::getStatuses()) . ';';
-        echo 'var TAGS = ' . json_encode(\Lwt\Services\TagService::getAllTermTags()) . ';';
-        echo 'var TEXTTAGS = ' . json_encode(\Lwt\Services\TagService::getAllTextTags()) . ';';
-        echo '//]]>';
-        echo '</script>';
         echo '<title>LWT :: ' . tohtml($title) . '</title>';
         echo '</head>';
         echo '<body>';
@@ -457,7 +445,7 @@ HTML;
             echo '<p class="red">*** ' . \tohtml($message) . ' ***' .
                 ($autoHide ?
                 '' :
-                '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" onclick="history.back();" />' ) .
+                '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="go-back" />' ) .
                 '</p>';
         } else {
             echo '<p id="hide3" class="msgblue">+++ ' . \tohtml($message) . ' +++</p>';

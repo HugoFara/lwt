@@ -14,6 +14,7 @@ import { readRawTextAloud } from './user_interactions';
 import { do_ajax_save_setting } from './ajax_utilities';
 import { initInlineEdit } from '../ui/inline_edit';
 import { initTermTags, initTextTags } from '../ui/tagify_tags';
+import { fetchTermTags, fetchTextTags } from './app_data';
 
 // Extend jQuery with custom methods
 declare global {
@@ -38,8 +39,6 @@ interface ResizableOptions {
   stop?: (event: unknown, ui: { position: { left: number } }) => void;
 }
 
-declare let TAGS: string[];
-declare let TEXTTAGS: string[];
 
 /**
  * Helper to safely get an HTML attribute value as a string.
@@ -302,12 +301,20 @@ export function prepareMainAreas(): void {
     }
   });
   // Initialize Tagify for term and text tags
-  // TAGS and TEXTTAGS are global variables set by PHP
-  if (typeof TAGS !== 'undefined') {
-    initTermTags(TAGS);
+  // Tags are fetched from API asynchronously
+  if ($('#termtags').length > 0) {
+    fetchTermTags().then(tags => {
+      if (tags.length > 0) {
+        initTermTags(tags);
+      }
+    });
   }
-  if (typeof TEXTTAGS !== 'undefined') {
-    initTextTags(TEXTTAGS);
+  if ($('#texttags').length > 0) {
+    fetchTextTags().then(tags => {
+      if (tags.length > 0) {
+        initTextTags(tags);
+      }
+    });
   }
   markClick();
   setTheFocus();

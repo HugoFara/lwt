@@ -44,9 +44,6 @@ $tagComment = $isEdit && $tag !== null ? tohtml($tag['comment']) : '';
 
 ?>
 <h2><?php echo $pageTitle; ?></h2>
-<script type="text/javascript" charset="utf-8">
-    $(document).ready(lwtFormCheck.askBeforeExit);
-</script>
 <form name="<?php echo $formName; ?>" class="validate" action="<?php echo $actionUrl; ?>" method="post">
 <?php if ($isEdit && $tag !== null): ?>
 <input type="hidden" name="<?php echo $formFieldPrefix; ?>ID" value="<?php echo $tag['id']; ?>" />
@@ -72,7 +69,7 @@ $tagComment = $isEdit && $tag !== null ? tohtml($tag['comment']) : '';
     <tr>
         <td class="td1 right" colspan="2">
             <input type="button" value="Cancel"
-                onclick="{lwtFormCheck.resetDirty(); location.href='<?php echo $cancelUrl; ?>';}" />
+                data-action="cancel-navigate" data-url="<?php echo htmlspecialchars($cancelUrl, ENT_QUOTES, 'UTF-8'); ?>" />
             <input type="submit" name="op" value="<?php echo $submitValue; ?>" />
         </td>
     </tr>

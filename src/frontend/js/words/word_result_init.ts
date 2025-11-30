@@ -368,6 +368,7 @@ function initEditMultiUpdateResult(config: EditMultiUpdateResultConfig): void {
     config.status,
     config.oldStatus
   );
+  cleanupRightFrames();
 }
 
 /**

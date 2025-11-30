@@ -107,8 +107,58 @@ export function autoInitMediaSelect(): void {
   }
 }
 
+/**
+ * Handle media directory selection change.
+ * Copies selected path to the target field.
+ *
+ * @param selectEl - The directory select element
+ * @param targetFieldName - Name of the form field to update
+ */
+export function handleMediaDirChange(selectEl: HTMLSelectElement, targetFieldName: string): void {
+  const val = selectEl.value;
+  if (val !== '') {
+    const form = selectEl.form;
+    if (form) {
+      const targetField = form.elements.namedItem(targetFieldName) as HTMLInputElement | null;
+      if (targetField) {
+        targetField.value = val;
+      }
+    }
+    selectEl.value = '';
+  }
+}
+
+/**
+ * Initialize media selection event handlers.
+ */
+function initMediaSelectionEvents(): void {
+  // Refresh media selection button
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const refreshBtn = target.closest('[data-action="refresh-media-select"]');
+    if (refreshBtn) {
+      e.preventDefault();
+      do_ajax_update_media_select();
+    }
+  });
+
+  // Media directory select change
+  document.addEventListener('change', (e) => {
+    const target = e.target as HTMLElement;
+    if (target instanceof HTMLSelectElement && target.dataset.action === 'media-dir-select') {
+      const targetField = target.dataset.targetField;
+      if (targetField) {
+        handleMediaDirChange(target, targetField);
+      }
+    }
+  });
+}
+
 // Auto-initialize on DOM ready
-document.addEventListener('DOMContentLoaded', autoInitMediaSelect);
+document.addEventListener('DOMContentLoaded', () => {
+  autoInitMediaSelect();
+  initMediaSelectionEvents();
+});
 
 // Expose globally for backward compatibility with PHP templates
 if (typeof window !== 'undefined') {
@@ -116,4 +166,5 @@ if (typeof window !== 'undefined') {
   w.select_media_path = select_media_path;
   w.media_select_receive_data = media_select_receive_data;
   w.do_ajax_update_media_select = do_ajax_update_media_select;
+  w.handleMediaDirChange = handleMediaDirChange;
 }

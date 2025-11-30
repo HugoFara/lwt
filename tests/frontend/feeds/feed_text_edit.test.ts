@@ -15,8 +15,11 @@ vi.mock('@yaireo/tagify', () => {
   };
 });
 
-// Mock TEXTTAGS global
-(globalThis as unknown as Record<string, unknown>).TEXTTAGS = ['tag1', 'tag2', 'tag3'];
+// Mock app_data to provide text tags
+vi.mock('../../../src/frontend/js/core/app_data', () => ({
+  fetchTextTags: vi.fn().mockResolvedValue(['tag1', 'tag2', 'tag3']),
+  getTextTagsSync: vi.fn().mockReturnValue(['tag1', 'tag2', 'tag3'])
+}));
 
 describe('feed_text_edit.ts', () => {
   beforeEach(() => {
@@ -34,7 +37,7 @@ describe('feed_text_edit.ts', () => {
   // ===========================================================================
 
   describe('initFeedTextEditForm', () => {
-    it('scrolls to first table when present', () => {
+    it('scrolls to first table when present', async () => {
       document.body.innerHTML = `
         <div style="height: 2000px;">Spacer</div>
         <table id="firstTable">
@@ -46,25 +49,25 @@ describe('feed_text_edit.ts', () => {
       const table = document.querySelector('table')!;
       table.scrollIntoView = scrollIntoViewMock;
 
-      initFeedTextEditForm();
+      await initFeedTextEditForm();
 
       expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: 'instant', block: 'start' });
     });
 
-    it('does not throw when no table present', () => {
+    it('does not throw when no table present', async () => {
       document.body.innerHTML = '<div>No table here</div>';
 
-      expect(() => initFeedTextEditForm()).not.toThrow();
+      await expect(initFeedTextEditForm()).resolves.not.toThrow();
     });
 
-    it('handles checkbox change to enable form fields', () => {
+    it('handles checkbox change to enable form fields', async () => {
       document.body.innerHTML = `
         <input type="checkbox" value="0" checked>
         <input type="text" name="feed[0][TxTitle]" disabled>
         <input type="text" name="feed[0][TxText]" disabled>
       `;
 
-      initFeedTextEditForm();
+      await initFeedTextEditForm();
 
       const checkbox = document.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
       checkbox.checked = true;
@@ -75,14 +78,14 @@ describe('feed_text_edit.ts', () => {
       expect(titleInput.disabled).toBe(false);
     });
 
-    it('handles checkbox change to disable form fields', () => {
+    it('handles checkbox change to disable form fields', async () => {
       document.body.innerHTML = `
         <input type="checkbox" value="0">
         <input type="text" name="feed[0][TxTitle]">
         <input type="text" name="feed[0][TxText]">
       `;
 
-      initFeedTextEditForm();
+      await initFeedTextEditForm();
 
       const checkbox = document.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
       checkbox.checked = false;
@@ -102,7 +105,7 @@ describe('feed_text_edit.ts', () => {
       `;
 
       // Trigger the function
-      initFeedTextEditForm();
+      await initFeedTextEditForm();
 
       // UL should be replaced with input
       const input = document.querySelector<HTMLInputElement>('.tagify-feed-input');
@@ -111,7 +114,7 @@ describe('feed_text_edit.ts', () => {
       expect(input?.dataset.feedIndex).toBe('0');
     });
 
-    it('extracts existing tags from LI elements', () => {
+    it('extracts existing tags from LI elements', async () => {
       document.body.innerHTML = `
         <ul name="feed[1][TxTags]">
           <li>first tag</li>
@@ -120,32 +123,32 @@ describe('feed_text_edit.ts', () => {
         </ul>
       `;
 
-      initFeedTextEditForm();
+      await initFeedTextEditForm();
 
       const input = document.querySelector<HTMLInputElement>('.tagify-feed-input');
       expect(input?.value).toBe('first tag, second tag, third tag');
     });
 
-    it('handles empty UL elements', () => {
+    it('handles empty UL elements', async () => {
       document.body.innerHTML = `
         <ul name="feed[2][TxTags]"></ul>
       `;
 
-      initFeedTextEditForm();
+      await initFeedTextEditForm();
 
       const input = document.querySelector<HTMLInputElement>('.tagify-feed-input');
       expect(input).toBeTruthy();
       expect(input?.value).toBe('');
     });
 
-    it('ignores UL without name attribute', () => {
+    it('ignores UL without name attribute', async () => {
       document.body.innerHTML = `
         <ul>
           <li>ignored</li>
         </ul>
       `;
 
-      initFeedTextEditForm();
+      await initFeedTextEditForm();
 
       // UL should still be there
       expect(document.querySelector('ul')).toBeTruthy();
@@ -191,7 +194,7 @@ describe('feed_text_edit.ts', () => {
   // ===========================================================================
 
   describe('edge cases', () => {
-    it('handles multiple checkboxes for different feeds', () => {
+    it('handles multiple checkboxes for different feeds', async () => {
       document.body.innerHTML = `
         <input type="checkbox" value="0" checked>
         <input type="checkbox" value="1">
@@ -199,7 +202,7 @@ describe('feed_text_edit.ts', () => {
         <input type="text" name="feed[1][TxTitle]" disabled>
       `;
 
-      initFeedTextEditForm();
+      await initFeedTextEditForm();
 
       // Toggle first checkbox
       const checkbox0 = document.querySelector<HTMLInputElement>('input[value="0"]')!;
@@ -216,20 +219,20 @@ describe('feed_text_edit.ts', () => {
       expect(document.querySelector<HTMLInputElement>('[name="feed[1][TxTitle]"]')?.disabled).toBe(false);
     });
 
-    it('handles feed index extraction from various name formats', () => {
+    it('handles feed index extraction from various name formats', async () => {
       document.body.innerHTML = `
         <ul name="feed[123][TxTags]">
           <li>test</li>
         </ul>
       `;
 
-      initFeedTextEditForm();
+      await initFeedTextEditForm();
 
       const input = document.querySelector<HTMLInputElement>('.tagify-feed-input');
       expect(input?.dataset.feedIndex).toBe('123');
     });
 
-    it('handles whitespace in tag text', () => {
+    it('handles whitespace in tag text', async () => {
       document.body.innerHTML = `
         <ul name="feed[0][TxTags]">
           <li>  spaced tag  </li>
@@ -237,7 +240,7 @@ describe('feed_text_edit.ts', () => {
         </ul>
       `;
 
-      initFeedTextEditForm();
+      await initFeedTextEditForm();
 
       const input = document.querySelector<HTMLInputElement>('.tagify-feed-input');
       expect(input?.value).toContain('spaced tag');

@@ -26,9 +26,9 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
 <div id="printoptions">
     <h2>Improved Annotated Text (Edit Mode)
         <img src="/assets/icons/question-frame.png" title="Help" alt="Help" class="click"
-        onclick="window.open('docs/info.html#il');" />
+        data-action="open-window" data-url="docs/info.html#il" />
     </h2>
-    <input type="button" value="Display/Print Mode" onclick="location.href='/text/print?text=<?php echo $textId; ?>';" />
+    <input type="button" value="Display/Print Mode" data-action="navigate" data-url="/text/print?text=<?php echo $textId; ?>" />
 </div>
 <!-- noprint -->
 
@@ -46,5 +46,5 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
 
 <div class="noprint">
     <input type="button" value="Display/Print Mode"
-    onclick="location.href='/text/print?text=<?php echo $textId; ?>';" />
+    data-action="navigate" data-url="/text/print?text=<?php echo $textId; ?>" />
 </div>

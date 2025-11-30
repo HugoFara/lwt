@@ -22,10 +22,7 @@ namespace Lwt\Views\Admin;
 use Lwt\View\Helper\SelectOptionsBuilder;
 
 ?>
-<script type="text/javascript" charset="utf-8">
-    $(document).ready(lwtFormCheck.askBeforeExit);
-</script>
-<form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+<form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" data-lwt-settings-form>
 <table class="tab1" cellspacing="0" cellpadding="5">
     <!-- ******************************************************* -->
     <tr>
@@ -533,10 +530,10 @@ use Lwt\View\Helper\SelectOptionsBuilder;
     <tr>
         <td class="td1 right" colspan="4">
             <input type="button" value="&lt;&lt; Back"
-            onclick="{lwtFormCheck.resetDirty(); location.href='index.php';}" />
+            data-action="settings-navigate" data-url="index.php" />
             <span class="nowrap"></span>
             <input type="button" value="Reset all settings to default"
-            onclick="{lwtFormCheck.resetDirty(); location.href='/admin/settings?op=reset';}" />
+            data-action="settings-navigate" data-url="/admin/settings?op=reset" />
             <span class="nowrap"></span>
             <input type="submit" name="op" value="Save" />
         </td>

@@ -163,10 +163,9 @@ class MediaService
         <p style="display: none;" id="mediaSelectErrorMessage"></p>
         <img style="float: right; display: none;" id="mediaSelectLoadingImg" src="/assets/icons/waiting2.gif" />
         <select name="Dir" style="display: none; width: 200px;"
-        onchange="{val=this.form.Dir.options[this.form.Dir.selectedIndex].value; if (val != \'\') this.form.'
-            . $fieldName . '.value = val; this.form.Dir.value=\'\';}">
+        data-action="media-dir-select" data-target-field="' . htmlspecialchars($fieldName, ENT_QUOTES, 'UTF-8') . '">
         </select>
-        <span class="click" onclick="do_ajax_update_media_select();" style="margin-left: 16px;">
+        <span class="click" data-action="refresh-media-select" style="margin-left: 16px;">
             <img src="/assets/icons/arrow-circle-135.png" title="Refresh Media Selection" alt="Refresh Media Selection" />
             Refresh
         </span>

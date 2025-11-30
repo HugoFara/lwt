@@ -8,12 +8,8 @@
 
 import $ from 'jquery';
 import { escape_html_chars } from '../core/html_utils';
-
-// Interface for word status (matches PHP STATUSES global)
-interface WordStatus {
-  name: string;
-  abbr: string;
-}
+import { STATUSES } from '../core/app_data';
+import type { WordStatus } from '../types/globals';
 
 // Interface for imported term record
 interface ImportedTerm {
@@ -131,12 +127,11 @@ function formatImportedTermsNavigation(
  * @returns HTML-formatted rows to display
  */
 function formatImportedTerms(data: ImportedTerm[], rtl: boolean): string {
-  const statuses: Record<string, WordStatus> = window.STATUSES || {};
   let output = '';
 
   for (let i = 0; i < data.length; i++) {
     const record = data[i];
-    const statusInfo = statuses[record.WoStatus] || { name: 'Unknown', abbr: '?' };
+    const statusInfo = STATUSES[record.WoStatus] || { name: 'Unknown', abbr: '?' };
 
     const row = `<tr>
       <td class="td1">

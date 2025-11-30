@@ -1142,9 +1142,6 @@ class WordController extends BaseController
 
             include __DIR__ . '/../Views/Word/edit_multi_update_result.php';
         }
-
-        // Output cleanup script
-        echo '<script type="text/javascript">cleanupRightFrames();</script>';
     }
 
     /**
@@ -1411,7 +1408,7 @@ class WordController extends BaseController
                 // Handle duplicate entry error
                 if (strpos($result['message'], 'Duplicate entry') !== false) {
                     $message = 'Error: <b>Duplicate entry for <i>' . $result['textlc'] .
-                        '</i></b><br /><br /><input type="button" value="&lt;&lt; Back" onclick="history.back();" />';
+                        '</i></b><br /><br /><input type="button" value="&lt;&lt; Back" data-action="back" />';
                 } else {
                     $message = $result['message'];
                 }

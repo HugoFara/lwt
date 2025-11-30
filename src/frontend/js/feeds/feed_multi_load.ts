@@ -10,6 +10,7 @@
  */
 
 import { setLang } from '../core/language_settings';
+import { selectToggle } from '../forms/bulk_actions';
 
 /**
  * Collect all checked checkboxes and join their values into a hidden field.
@@ -65,6 +66,24 @@ export function initFeedMultiLoad(): void {
       e.preventDefault();
       const url = cancelButton.dataset.url || '/feeds?selected_feed=0';
       location.href = url;
+    });
+  }
+
+  // Mark All button
+  const markAllButton = form1.querySelector<HTMLButtonElement>('[data-action="mark-all"]');
+  if (markAllButton) {
+    markAllButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      selectToggle(true, 'form1');
+    });
+  }
+
+  // Mark None button
+  const markNoneButton = form1.querySelector<HTMLButtonElement>('[data-action="mark-none"]');
+  if (markNoneButton) {
+    markNoneButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      selectToggle(false, 'form1');
     });
   }
 }

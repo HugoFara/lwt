@@ -107,7 +107,7 @@ abstract class BaseController
             echo '<p class="red">*** ' . \tohtml($message) . ' ***' .
                 ($autoHide ?
                 '' :
-                '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" onclick="history.back();" />' ) .
+                '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="history-back" />' ) .
                 '</p>';
         } else {
             echo '<p id="hide3" class="msgblue">+++ ' . \tohtml($message) . ' +++</p>';

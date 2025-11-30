@@ -159,5 +159,5 @@ namespace Lwt\Views\Admin;
 </tr>
 </table>
 <p>
-    <input type="button" value="&lt;&lt; Back" onclick="location.href='/';" />
+    <input type="button" value="&lt;&lt; Back" data-action="navigate" data-url="/" />
 </p>

@@ -37,9 +37,3 @@ $todoContent = todo_words_content((int) $textId);
     'todoContent' => $todoContent
 ]); ?>
 </script>
-<script type="text/javascript">
-    (function() {
-        const config = JSON.parse(document.getElementById('word-status-config').textContent);
-        initWordStatusChange(config);
-    })();
-</script>

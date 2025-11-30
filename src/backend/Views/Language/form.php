@@ -219,7 +219,7 @@ namespace Lwt\Views\Language;
         <td class="td1 right">
             Export Template
             <img class="click" src="/assets/icons/question-frame.png" title="Help" alt="Help"
-            onclick="showExportTemplateHelp();" /> :
+            data-action="show-export-template-help" /> :
         </td>
         <td class="td1">
             <input type="text" class="checkoutsidebmp respinput" data_info="Export Template"

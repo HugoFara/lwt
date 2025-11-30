@@ -395,12 +395,12 @@ class TextController extends BaseController
 
         if ($op == 'Check') {
             // Check text only
-            echo '<p><input type="button" value="&lt;&lt; Back" onclick="history.back();" /></p>';
+            echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             $this->textService->checkText(
                 \remove_soft_hyphens($_REQUEST['TxText']),
                 (int) $_REQUEST['TxLgID']
             );
-            echo '<p><input type="button" value="&lt;&lt; Back" onclick="history.back();" /></p>';
+            echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             PageLayoutHelper::renderPageEnd();
             exit();
         }
@@ -891,12 +891,12 @@ class TextController extends BaseController
 
         if (isset($_REQUEST['op']) && $_REQUEST['op'] === 'Check') {
             // Do the check operation
-            echo '<p><input type="button" value="&lt;&lt; Back" onclick="history.back();" /></p>';
+            echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             $this->textService->checkText(
                 (string) $_REQUEST['TxText'],
                 (int) $_REQUEST['TxLgID']
             );
-            echo '<p><input type="button" value="&lt;&lt; Back" onclick="history.back();" /></p>';
+            echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
         } else {
             // Display the form
             $languageData = [];
