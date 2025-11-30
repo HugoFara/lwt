@@ -153,6 +153,16 @@ export function initSimpleInteractions(): void {
     }
   });
 
+  // Handle pager navigation (select dropdown)
+  $(document).on('change', 'select[data-action="pager-navigate"]', function () {
+    const $el = $(this);
+    const baseUrl = $el.data('base-url') as string;
+    const selectedValue = $el.val() as string;
+    if (baseUrl && selectedValue) {
+      location.href = baseUrl + '?page=' + selectedValue;
+    }
+  });
+
   // Handle form submission confirmation
   $(document).on('submit', 'form[data-confirm-submit]', function (e) {
     const message = $(this).data('confirm-submit') as string || 'Are you sure?';

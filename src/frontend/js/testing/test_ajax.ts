@@ -311,3 +311,82 @@ export function initAjaxTest(reviewData: ReviewData, timeData: TimeData): void {
   // Get the first word
   getNewWord(reviewData);
 }
+
+/**
+ * Initialize test interaction globals (language settings).
+ *
+ * @param config Configuration from PHP
+ */
+export function initTestInteractionGlobals(config: {
+  langId: number;
+  dict1Uri: string;
+  dict2Uri: string;
+  translateUri: string;
+  langCode: string;
+}): void {
+  LWT_DATA.language.id = config.langId;
+  LWT_DATA.language.dict_link1 = config.dict1Uri;
+  LWT_DATA.language.dict_link2 = config.dict2Uri;
+  LWT_DATA.language.translator_link = config.translateUri;
+
+  // Set html lang attribute if we have a valid language code
+  if (config.langCode && config.langCode !== config.translateUri) {
+    $('html').attr('lang', config.langCode);
+  }
+
+  LWT_DATA.test.answer_opened = false;
+}
+
+/**
+ * Auto-initialize test views from JSON config elements.
+ */
+export function autoInitTestViews(): void {
+  // Status change result
+  const statusChangeConfigEl = document.querySelector<HTMLScriptElement>(
+    'script[data-lwt-status-change-result-config]'
+  );
+  if (statusChangeConfigEl) {
+    try {
+      const config = JSON.parse(statusChangeConfigEl.textContent || '{}');
+      handleStatusChangeResult(
+        config.wordId,
+        config.newStatus,
+        config.statusChange,
+        config.testStatus,
+        config.ajax,
+        config.waitTime
+      );
+    } catch (e) {
+      console.error('Failed to parse status change result config:', e);
+    }
+  }
+
+  // Test interaction globals
+  const testGlobalsConfigEl = document.querySelector<HTMLScriptElement>(
+    'script[data-lwt-test-interaction-globals-config]'
+  );
+  if (testGlobalsConfigEl) {
+    try {
+      const config = JSON.parse(testGlobalsConfigEl.textContent || '{}');
+      initTestInteractionGlobals(config);
+    } catch (e) {
+      console.error('Failed to parse test interaction globals config:', e);
+    }
+  }
+
+  // AJAX test initialization
+  const ajaxTestConfigEl = document.querySelector<HTMLScriptElement>(
+    'script[data-lwt-ajax-test-config]'
+  );
+  if (ajaxTestConfigEl) {
+    try {
+      const config = JSON.parse(ajaxTestConfigEl.textContent || '{}');
+      initAjaxTest(config.reviewData, config.timeData);
+    } catch (e) {
+      console.error('Failed to parse ajax test config:', e);
+    }
+  }
+}
+
+// Auto-initialize on DOM ready
+$(document).ready(autoInitTestViews);

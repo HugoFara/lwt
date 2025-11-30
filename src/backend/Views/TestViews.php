@@ -291,16 +291,15 @@ class TestViews
         int $waitTime
     ): void {
         ?>
-<script type="text/javascript">
-    // Call the bundled handleStatusChangeResult function
-    handleStatusChangeResult(
-        <?php echo json_encode($wordId); ?>,
-        <?php echo json_encode($newStatus); ?>,
-        <?php echo json_encode($statusChange); ?>,
-        <?php echo json_encode($testStatus); ?>,
-        <?php echo json_encode($ajax); ?>,
-        <?php echo json_encode($waitTime); ?>
-    );
+<script type="application/json" data-lwt-status-change-result-config>
+<?php echo json_encode([
+    'wordId' => $wordId,
+    'newStatus' => $newStatus,
+    'statusChange' => $statusChange,
+    'testStatus' => $testStatus,
+    'ajax' => $ajax,
+    'waitTime' => $waitTime
+]); ?>
 </script>
         <?php
     }
@@ -480,16 +479,14 @@ class TestViews
         $languageService = new LanguageService();
         $langCode = $languageService->getLanguageCode($langId, LanguageDefinitions::getAll());
         ?>
-<script type="text/javascript">
-    LWT_DATA.language.id = <?php echo json_encode($langId); ?>;
-    LWT_DATA.language.dict_link1 = <?php echo json_encode($dict1Uri); ?>;
-    LWT_DATA.language.dict_link2 = <?php echo json_encode($dict2Uri); ?>;
-    LWT_DATA.language.translator_link = <?php echo json_encode($translateUri); ?>;
-    LANG = <?php echo json_encode($langCode); ?>;
-    if (LANG && LANG != LWT_DATA.language.translator_link) {
-        $("html").attr('lang', LANG);
-    }
-    LWT_DATA.test.answer_opened = false;
+<script type="application/json" data-lwt-test-interaction-globals-config>
+<?php echo json_encode([
+    'langId' => $langId,
+    'dict1Uri' => $dict1Uri,
+    'dict2Uri' => $dict2Uri,
+    'translateUri' => $translateUri,
+    'langCode' => $langCode
+]); ?>
 </script>
         <?php
     }
@@ -512,14 +509,11 @@ class TestViews
             'show_timer' => $reviewData['total_tests'] > 0 ? 0 : 1
         ];
         ?>
-<script type="text/javascript">
-    // Initialize AJAX test using bundled functions
-    $(document).ready(function() {
-        initAjaxTest(
-            <?php echo json_encode($reviewData); ?>,
-            <?php echo json_encode($timeData); ?>
-        );
-    });
+<script type="application/json" data-lwt-ajax-test-config>
+<?php echo json_encode([
+    'reviewData' => $reviewData,
+    'timeData' => $timeData
+]); ?>
 </script>
         <?php
     }

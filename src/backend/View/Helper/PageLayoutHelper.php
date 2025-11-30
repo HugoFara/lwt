@@ -84,7 +84,7 @@ HTML;
      * @param int    $currentPage Current page number
      * @param int    $totalPages  Total number of pages
      * @param string $scriptUrl   Base URL for pagination links
-     * @param string $formName    Form name for JavaScript reference
+     * @param string $formName    Form name for JavaScript reference (unused, kept for BC)
      *
      * @return string HTML pagination controls
      */
@@ -97,7 +97,6 @@ HTML;
         $result = '';
         $margerStyle = 'style="margin-left: 4px; margin-right: 4px;"';
         $scriptUrl = htmlspecialchars($scriptUrl, ENT_QUOTES, 'UTF-8');
-        $formName = htmlspecialchars($formName, ENT_QUOTES, 'UTF-8');
 
         // Previous page controls
         if ($currentPage > 1) {
@@ -114,9 +113,7 @@ HTML;
         if ($totalPages == 1) {
             $result .= '1';
         } else {
-            $result .= '<select name="page" onchange="{val=document.' . $formName
-                . '.page.options[document.' . $formName . '.page.selectedIndex].value; '
-                . 'location.href=\'' . $scriptUrl . '?page=\' + val;}">';
+            $result .= '<select name="page" data-action="pager-navigate" data-base-url="' . $scriptUrl . '">';
             $result .= SelectOptionsBuilder::forPagination($currentPage, $totalPages);
             $result .= '</select>';
         }
