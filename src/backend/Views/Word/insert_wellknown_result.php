@@ -24,7 +24,11 @@ namespace Lwt\Views\Word;
 ?>
 <p>OK, you know this term well!</p>
 
-<script type="text/javascript">
-    markWordWellKnownInDOM(<?php echo $wid; ?>, <?php echo json_encode($hex); ?>, <?php echo json_encode($term); ?>);
-    completeWordOperation(<?php echo json_encode(todo_words_content((int) $textId)); ?>);
+<script type="application/json" data-lwt-insert-wellknown-result-config>
+<?php echo json_encode([
+    'wid' => (int) $wid,
+    'hex' => $hex,
+    'term' => $term,
+    'todoContent' => todo_words_content((int) $textId)
+]); ?>
 </script>

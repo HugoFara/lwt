@@ -25,7 +25,10 @@ namespace Lwt\Views\Word;
 ?>
 <p>OK, term deleted (<?php echo $rowsAffected; ?>).</p>
 
-<script type="text/javascript">
-    deleteMultiWordFromDOM(<?php echo $wid; ?>, <?php echo json_encode($showAll); ?>);
-    completeWordOperation(<?php echo json_encode(todo_words_content((int) $textId)); ?>);
+<script type="application/json" data-lwt-delete-multi-result-config>
+<?php echo json_encode([
+    'wid' => (int) $wid,
+    'showAll' => $showAll,
+    'todoContent' => todo_words_content((int) $textId)
+]); ?>
 </script>

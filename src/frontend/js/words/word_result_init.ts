@@ -17,7 +17,14 @@ import {
   completeWordOperation,
   getParentContext,
   updateLearnStatus,
-  updateTestWordInDOM
+  updateTestWordInDOM,
+  deleteWordFromDOM,
+  markWordWellKnownInDOM,
+  markWordIgnoredInDOM,
+  updateMultiWordInDOM,
+  deleteMultiWordFromDOM,
+  updateBulkWordInDOM,
+  type BulkWordUpdateParams
 } from './word_dom_updates';
 import { make_tooltip } from '../terms/word_status';
 import { cleanupRightFrames } from '../reading/frame_management';
@@ -98,6 +105,66 @@ interface HoverSaveResultConfig {
   status: number;
   translation: string;
   wordRaw: string;
+  todoContent: string;
+}
+
+/**
+ * Configuration for delete_result view (word deleted).
+ */
+interface DeleteResultConfig {
+  wid: number;
+  term: string;
+  todoContent: string;
+}
+
+/**
+ * Configuration for insert_wellknown_result view (word marked as well-known).
+ */
+interface InsertWellKnownResultConfig {
+  wid: number;
+  hex: string;
+  term: string;
+  todoContent: string;
+}
+
+/**
+ * Configuration for insert_ignore_result view (word marked as ignored).
+ */
+interface InsertIgnoreResultConfig {
+  wid: number;
+  hex: string;
+  term: string;
+  todoContent: string;
+}
+
+/**
+ * Configuration for edit_multi_update_result view (multi-word expression updated).
+ */
+interface EditMultiUpdateResultConfig {
+  wid: number;
+  text: string;
+  translation: string;
+  romanization: string;
+  status: number;
+  oldStatus: number;
+}
+
+/**
+ * Configuration for delete_multi_result view (multi-word expression deleted).
+ */
+interface DeleteMultiResultConfig {
+  wid: number;
+  showAll: boolean;
+  todoContent: string;
+}
+
+/**
+ * Configuration for bulk_save_result view (bulk translated words saved).
+ */
+interface BulkSaveResultConfig {
+  words: BulkWordUpdateParams[];
+  useTooltip: boolean;
+  cleanUp: boolean;
   todoContent: string;
 }
 
@@ -262,6 +329,76 @@ function initEditResult(config: EditResultConfig): void {
 }
 
 /**
+ * Initialize delete_result view.
+ * Updates the DOM after a word is deleted (reset to unknown state).
+ */
+function initDeleteResult(config: DeleteResultConfig): void {
+  deleteWordFromDOM(config.wid, config.term);
+  completeWordOperation(config.todoContent);
+}
+
+/**
+ * Initialize insert_wellknown_result view.
+ * Updates the DOM after marking a word as well-known (status 99).
+ */
+function initInsertWellKnownResult(config: InsertWellKnownResultConfig): void {
+  markWordWellKnownInDOM(config.wid, config.hex, config.term);
+  completeWordOperation(config.todoContent);
+}
+
+/**
+ * Initialize insert_ignore_result view.
+ * Updates the DOM after marking a word as ignored (status 98).
+ */
+function initInsertIgnoreResult(config: InsertIgnoreResultConfig): void {
+  markWordIgnoredInDOM(config.wid, config.hex, config.term);
+  completeWordOperation(config.todoContent);
+}
+
+/**
+ * Initialize edit_multi_update_result view.
+ * Updates the DOM after a multi-word expression is updated.
+ */
+function initEditMultiUpdateResult(config: EditMultiUpdateResultConfig): void {
+  updateMultiWordInDOM(
+    config.wid,
+    config.text,
+    config.translation,
+    config.romanization,
+    config.status,
+    config.oldStatus
+  );
+}
+
+/**
+ * Initialize delete_multi_result view.
+ * Updates the DOM after a multi-word expression is deleted.
+ */
+function initDeleteMultiResult(config: DeleteMultiResultConfig): void {
+  deleteMultiWordFromDOM(config.wid, config.showAll);
+  completeWordOperation(config.todoContent);
+}
+
+/**
+ * Initialize bulk_save_result view.
+ * Updates the DOM after bulk translated words are saved.
+ */
+function initBulkSaveResult(config: BulkSaveResultConfig): void {
+  config.words.forEach((term) => {
+    updateBulkWordInDOM(term, config.useTooltip);
+  });
+
+  updateLearnStatus(config.todoContent);
+
+  // Remove the "Updating Texts" message
+  document.getElementById('displ_message')?.remove();
+
+  if (config.cleanUp) {
+    cleanupRightFrames();
+  }
+}
+
+/**
  * Auto-initialize word result views from JSON config elements.
  */
 export function autoInitWordResults(): void {
@@ -322,6 +459,72 @@ export function autoInitWordResults(): void {
       initEditResult(config);
     } catch (e) {
       console.error('Failed to parse edit result config:', e);
+    }
+  }
+
+  // Delete result
+  const deleteConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-delete-result-config]');
+  if (deleteConfigEl) {
+    try {
+      const config = JSON.parse(deleteConfigEl.textContent || '{}') as DeleteResultConfig;
+      initDeleteResult(config);
+    } catch (e) {
+      console.error('Failed to parse delete result config:', e);
+    }
+  }
+
+  // Insert well-known result
+  const insertWellKnownConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-insert-wellknown-result-config]');
+  if (insertWellKnownConfigEl) {
+    try {
+      const config = JSON.parse(insertWellKnownConfigEl.textContent || '{}') as InsertWellKnownResultConfig;
+      initInsertWellKnownResult(config);
+    } catch (e) {
+      console.error('Failed to parse insert wellknown result config:', e);
+    }
+  }
+
+  // Insert ignore result
+  const insertIgnoreConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-insert-ignore-result-config]');
+  if (insertIgnoreConfigEl) {
+    try {
+      const config = JSON.parse(insertIgnoreConfigEl.textContent || '{}') as InsertIgnoreResultConfig;
+      initInsertIgnoreResult(config);
+    } catch (e) {
+      console.error('Failed to parse insert ignore result config:', e);
+    }
+  }
+
+  // Edit multi-word update result
+  const editMultiUpdateConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-edit-multi-update-result-config]');
+  if (editMultiUpdateConfigEl) {
+    try {
+      const config = JSON.parse(editMultiUpdateConfigEl.textContent || '{}') as EditMultiUpdateResultConfig;
+      initEditMultiUpdateResult(config);
+    } catch (e) {
+      console.error('Failed to parse edit multi update result config:', e);
+    }
+  }
+
+  // Delete multi-word result
+  const deleteMultiConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-delete-multi-result-config]');
+  if (deleteMultiConfigEl) {
+    try {
+      const config = JSON.parse(deleteMultiConfigEl.textContent || '{}') as DeleteMultiResultConfig;
+      initDeleteMultiResult(config);
+    } catch (e) {
+      console.error('Failed to parse delete multi result config:', e);
+    }
+  }
+
+  // Bulk save result
+  const bulkSaveConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-bulk-save-result-config]');
+  if (bulkSaveConfigEl) {
+    try {
+      const config = JSON.parse(bulkSaveConfigEl.textContent || '{}') as BulkSaveResultConfig;
+      initBulkSaveResult(config);
+    } catch (e) {
+      console.error('Failed to parse bulk save result config:', e);
     }
   }
 }

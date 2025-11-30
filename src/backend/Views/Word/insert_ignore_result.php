@@ -24,7 +24,11 @@ namespace Lwt\Views\Word;
 ?>
 <p>OK, this term will be ignored!</p>
 
-<script type="text/javascript">
-    markWordIgnoredInDOM(<?php echo $wid; ?>, <?php echo json_encode($hex); ?>, <?php echo json_encode($term); ?>);
-    completeWordOperation(<?php echo json_encode(todo_words_content((int) $textId)); ?>);
+<script type="application/json" data-lwt-insert-ignore-result-config>
+<?php echo json_encode([
+    'wid' => (int) $wid,
+    'hex' => $hex,
+    'term' => $term,
+    'todoContent' => todo_words_content((int) $textId)
+]); ?>
 </script>

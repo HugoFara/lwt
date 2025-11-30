@@ -32,20 +32,12 @@ use Lwt\Database\Escaping;
 <p id="displ_message">
     <img src="/assets/icons/waiting2.gif" /> Updating Texts
 </p>
-<script type="text/javascript">
-    (function() {
-        const useTooltip = <?php echo json_encode($tooltipMode == 1); ?>;
-        const words = <?php echo json_encode(array_values($newWords)); ?>;
 
-        words.forEach(function(term) {
-            updateBulkWordInDOM(term, useTooltip);
-        });
-
-        updateLearnStatus(<?php echo json_encode(todo_words_content($tid)); ?>);
-        document.getElementById('displ_message')?.remove();
-
-        if (<?php echo json_encode($cleanUp); ?>) {
-            cleanupRightFrames();
-        }
-    })();
+<script type="application/json" data-lwt-bulk-save-result-config>
+<?php echo json_encode([
+    'words' => $newWords,
+    'useTooltip' => ($tooltipMode == 1),
+    'cleanUp' => $cleanUp,
+    'todoContent' => todo_words_content($tid)
+]); ?>
 </script>

@@ -24,7 +24,10 @@ namespace Lwt\Views\Word;
 ?>
 <p>OK, term deleted, now unknown (<?php echo tohtml($message); ?>).</p>
 
-<script type="text/javascript">
-    deleteWordFromDOM(<?php echo $wid; ?>, <?php echo json_encode($term); ?>);
-    completeWordOperation(<?php echo json_encode(todo_words_content($textId)); ?>);
+<script type="application/json" data-lwt-delete-result-config>
+<?php echo json_encode([
+    'wid' => (int) $wid,
+    'term' => $term,
+    'todoContent' => todo_words_content($textId)
+]); ?>
 </script>

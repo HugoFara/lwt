@@ -19,17 +19,16 @@
 
 namespace Lwt\Views\Word;
 
+// Decode the term JSON to include in our config
+$termData = json_decode($termJson, true);
 ?>
-<script type="text/javascript">
-    (function() {
-        const mword = <?php echo $termJson; ?>;
-        updateMultiWordInDOM(
-            mword.woid,
-            mword.text,
-            mword.translation,
-            mword.romanization,
-            mword.status,
-            <?php echo $oldStatusValue; ?>
-        );
-    })();
+<script type="application/json" data-lwt-edit-multi-update-result-config>
+<?php echo json_encode([
+    'wid' => (int) $termData['woid'],
+    'text' => $termData['text'],
+    'translation' => $termData['translation'],
+    'romanization' => $termData['romanization'],
+    'status' => (int) $termData['status'],
+    'oldStatus' => (int) $oldStatusValue
+]); ?>
 </script>
