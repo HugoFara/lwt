@@ -19,7 +19,10 @@ namespace Lwt\Database;
 require_once __DIR__ . '/../../Services/WordStatusService.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\WordStatusService;
+
+use function Lwt\Core\get_version_number;
 
 /**
  * Database migrations and initialization utilities.
@@ -99,7 +102,7 @@ class Migrations
         $dbname = Globals::getDatabaseName();
 
         // DB Version
-        $currversion = \get_version_number();
+        $currversion = get_version_number();
 
         try {
             $dbversion = Connection::fetchValue(
@@ -111,7 +114,7 @@ class Migrations
                 $dbversion = 'v001000000';
             }
         } catch (\RuntimeException $e) {
-            \my_die(
+            ErrorHandler::die(
                 'There is something wrong with your database ' . $dbname .
                 '. Please reinstall.'
             );

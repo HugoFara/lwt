@@ -22,6 +22,9 @@ namespace Lwt\Views\Home;
 
 use Lwt\View\Helper\SelectOptionsBuilder;
 
+use const Lwt\Core\LWT_APP_VERSION;
+use function Lwt\Core\get_version;
+
 /**
  * Display the current text options.
  *

@@ -16,9 +16,17 @@
  * @since    3.0.0 All routes now use controller methods
  */
 
-use Lwt\Router\Router;
+namespace Lwt\Router;
 
-return function (Router $router) {
+/**
+ * Register all application routes.
+ *
+ * @param Router $router The router instance to register routes with
+ *
+ * @return void
+ */
+function registerRoutes(Router $router): void
+{
     // ==================== HOME PAGE ====================
 
     $router->register('/', 'HomeController@index');
@@ -187,4 +195,24 @@ return function (Router $router) {
     $router->register('/api/translate', 'ApiController@translate');
     $router->register('/api/google', 'ApiController@google');
     $router->register('/api/glosbe', 'ApiController@glosbe');
-};
+}
+
+/**
+ * Get the route registration closure.
+ *
+ * This function returns a closure for backward compatibility with code
+ * that expects `require routes.php` to return a callable.
+ *
+ * @return \Closure
+ *
+ * @deprecated 3.0.0 Use \Lwt\Router\registerRoutes() directly instead
+ */
+function getRouteRegistrar(): \Closure
+{
+    return function (Router $router): void {
+        registerRoutes($router);
+    };
+}
+
+// Return closure for backward compatibility
+return getRouteRegistrar();

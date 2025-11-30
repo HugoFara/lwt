@@ -21,6 +21,7 @@
 namespace Lwt\Views\Feed;
 
 use Lwt\Core\Http\InputValidator;
+use Lwt\Core\Utils\ErrorHandler;
 
 ?>
 <div id="lwt_header"
@@ -150,7 +151,7 @@ use Lwt\Core\Http\InputValidator;
                                 PHP_URL_HOST
                             );
                             if (gettype($feed_host) != 'string') {
-                                my_die('$feed_host is of type ' . gettype($feed_host));
+                                ErrorHandler::die('$feed_host is of type ' . gettype($feed_host));
                             }
                             if (!isset($wizardData['host'][$feed_host])) {
                                 $wizardData['host'][$feed_host] = '-';

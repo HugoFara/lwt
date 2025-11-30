@@ -14,18 +14,22 @@
  * PHP version 8.1
  *
  * @category Database
- * @package  Lwt
+ * @package  Lwt\Core\Bootstrap
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-database-bootstrap.html
  * @since    3.0.0
  */
 
+namespace Lwt\Core\Bootstrap;
+
 // Core utilities
 require_once __DIR__ . '/../Globals.php';
 require_once __DIR__ . '/../version.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\EnvLoader;
+use Lwt\Database\Configuration;
 
 // Initialize globals (this was previously done in settings.php)
 Globals::initialize();
@@ -47,9 +51,6 @@ require_once __DIR__ . '/../Database/TextParsing.php';
 require_once __DIR__ . '/../Database/SqlFileParser.php';
 require_once __DIR__ . '/../Database/Migrations.php';
 require_once __DIR__ . '/../Database/Restore.php';
-
-use Lwt\Core\EnvLoader;
-use Lwt\Database\Configuration;
 
 /**
  * Load database configuration from .env file.
@@ -139,7 +140,7 @@ function bootstrapDatabase(): void
 
     // Start timer if needed
     if (Globals::shouldDisplayTime()) {
-        get_execution_time();
+        \Lwt\Core\Utils\get_execution_time();
     }
 
     // Run database migrations

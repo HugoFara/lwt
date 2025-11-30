@@ -17,6 +17,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\Core\Http\InputValidator;
+use Lwt\Core\Http\ParamHelpers;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
@@ -364,7 +365,7 @@ abstract class BaseController
         mixed $default,
         bool $isNumeric = false
     ): mixed {
-        return \processSessParam($reqKey, $sessKey, $default, $isNumeric);
+        return ParamHelpers::processSessParam($reqKey, $sessKey, $default, $isNumeric);
     }
 
     /**
@@ -383,6 +384,6 @@ abstract class BaseController
         mixed $default,
         bool $isNumeric = false
     ): mixed {
-        return \processDBParam($reqKey, $dbKey, $default, $isNumeric);
+        return ParamHelpers::processDBParam($reqKey, $dbKey, $default, $isNumeric);
     }
 }

@@ -7,6 +7,9 @@ require_once __DIR__ . '/../../../../src/backend/Core/Utils/debug_utilities.php'
 
 use Lwt\Core\Globals;
 use PHPUnit\Framework\TestCase;
+use function Lwt\Core\Utils\showRequest;
+use function Lwt\Core\Utils\get_execution_time;
+use function Lwt\Core\Utils\echodebug;
 
 Globals::initialize();
 

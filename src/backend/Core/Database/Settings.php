@@ -19,6 +19,7 @@ namespace Lwt\Database;
 require_once __DIR__ . '/../../Services/SettingsService.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\SettingsService;
 
 /**
@@ -162,7 +163,7 @@ class Settings
             );
             $tables2 = Connection::fetchAll("SHOW TABLES LIKE '\\_lwtgeneral'");
             if (empty($tables2)) {
-                \my_die("Unable to create table '_lwtgeneral'!");
+                ErrorHandler::die("Unable to create table '_lwtgeneral'!");
             }
         }
     }

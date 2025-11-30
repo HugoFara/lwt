@@ -5,6 +5,8 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Database\Escaping;
 
+use function Lwt\Core\get_version_number;
+
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
@@ -14,6 +16,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
 
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
@@ -1421,12 +1424,13 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test my_die function behavior
-     * Note: Can't fully test as it calls die(), but we can test it's defined
+     * Test ErrorHandler::die method behavior
+     * Note: Can't fully test as it throws RuntimeException in tests
      */
-    public function testMyDieExists(): void
+    public function testErrorHandlerDieExists(): void
     {
-        $this->assertTrue(function_exists('my_die'));
+        $this->assertTrue(class_exists(ErrorHandler::class));
+        $this->assertTrue(method_exists(ErrorHandler::class, 'die'));
     }
 
     /**

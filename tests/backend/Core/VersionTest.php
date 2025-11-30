@@ -8,6 +8,9 @@ require_once __DIR__ . '/../../../src/backend/Core/version.php';
 use Lwt\Core\Globals;
 use PHPUnit\Framework\TestCase;
 
+use function Lwt\Core\get_version;
+use function Lwt\Core\get_version_number;
+
 Globals::initialize();
 
 /**

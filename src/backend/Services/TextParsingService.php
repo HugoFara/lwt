@@ -18,6 +18,8 @@
 
 namespace Lwt\Services {
 
+use Lwt\Core\Utils\ErrorHandler;
+
 /**
  * Service class for text parsing operations.
  *
@@ -49,7 +51,7 @@ class TextParsingService
             if (shell_exec("command -v mecab")) {
                 return 'mecab' . $mecabArgs;
             }
-            my_die(
+            ErrorHandler::die(
                 "MeCab not detected! " .
                 "Please install it or add it to your PATH (see documentation)."
             );
@@ -64,12 +66,12 @@ class TextParsingService
             if (shell_exec('where mecab.exe')) {
                 return 'mecab.exe' . $mecabArgs;
             }
-            my_die(
+            ErrorHandler::die(
                 "MeCab not detected! " .
                 "Install it or add it to the PATH (see documentation)."
             );
         }
-        my_die("Your OS '$os' cannot use MeCab with this version of LWT!");
+        ErrorHandler::die("Your OS '$os' cannot use MeCab with this version of LWT!");
     }
 
     /**

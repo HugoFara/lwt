@@ -16,6 +16,7 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Globals;
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
@@ -135,7 +136,7 @@ class TestService
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $selection ";
                 break;
             default:
-                \my_die("TestService::getTestSql called with wrong parameters");
+                ErrorHandler::die("TestService::getTestSql called with wrong parameters");
         }
         return $testsql;
     }

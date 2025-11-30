@@ -9,12 +9,14 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt
+ * @package  Lwt\Core\Utils
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-debug-utilities.html
  * @since    3.0.0 Split from kernel_utility.php
  */
+
+namespace Lwt\Core\Utils;
 
 /**
  * Echo debugging informations.
@@ -26,7 +28,7 @@ function showRequest(): void
     echo '$GLOBALS...';
     print_r($GLOBALS);
     echo 'get_version_number()...';
-    echo get_version_number() . "\n";
+    echo \Lwt\Core\get_version_number() . "\n";
     echo 'get_magic_quotes_gpc()...';
     echo "NOT EXISTS (FALSE)\n";
     echo "********************************** DEBUGGING **</pre>";

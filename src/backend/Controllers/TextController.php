@@ -26,6 +26,8 @@ use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\Core\Http\ParamHelpers;
+use Lwt\Core\Http\UrlUtilities;
 
 require_once __DIR__ . '/../Services/TextService.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
@@ -251,7 +253,7 @@ class TextController extends BaseController
 
         // Get filter parameters
         $currentLang = Validation::language(
-            (string) \processDBParam("filterlang", 'currentlanguage', '', false)
+            (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
         );
 
         // Check for actions that skip page start
@@ -499,10 +501,10 @@ class TextController extends BaseController
      */
     private function showTextsList(string|int $currentLang, string $message): void
     {
-        $currentSort = (int) \processDBParam("sort", 'currenttextsort', '1', true);
-        $currentPage = (int) \processSessParam("page", "currenttextpage", '1', true);
-        $currentQuery = (string) \processSessParam("query", "currenttextquery", '', false);
-        $currentQueryMode = (string) \processSessParam(
+        $currentSort = (int) ParamHelpers::processDBParam("sort", 'currenttextsort', '1', true);
+        $currentPage = (int) ParamHelpers::processSessParam("page", "currenttextpage", '1', true);
+        $currentQuery = (string) ParamHelpers::processSessParam("query", "currenttextquery", '', false);
+        $currentQueryMode = (string) ParamHelpers::processSessParam(
             "query_mode",
             "currenttextquerymode",
             'title,text',
@@ -512,14 +514,14 @@ class TextController extends BaseController
         // Cast to string for Validation::textTag
         $langForTag = (string) $currentLang;
         $currentTag1 = Validation::textTag(
-            (string) \processSessParam("tag1", "currenttexttag1", '', false),
+            (string) ParamHelpers::processSessParam("tag1", "currenttexttag1", '', false),
             $langForTag
         );
         $currentTag2 = Validation::textTag(
-            (string) \processSessParam("tag2", "currenttexttag2", '', false),
+            (string) ParamHelpers::processSessParam("tag2", "currenttexttag2", '', false),
             $langForTag
         );
-        $currentTag12 = (string) \processSessParam("tag12", "currenttexttag12", '', false);
+        $currentTag12 = (string) ParamHelpers::processSessParam("tag12", "currenttexttag12", '', false);
 
         // Build WHERE clauses
         $whLang = ($currentLang != '') ? (' and TxLgID=' . $currentLang) : '';
@@ -737,7 +739,7 @@ class TextController extends BaseController
         $translateUris = $this->textService->getLanguageTranslateUris();
         $languageData = [];
         foreach ($translateUris as $lgId => $uri) {
-            $languageData[$lgId] = \langFromDict($uri);
+            $languageData[$lgId] = UrlUtilities::langFromDict($uri);
         }
 
         $languages = $this->languageService->getLanguagesForSelect();
@@ -896,7 +898,7 @@ class TextController extends BaseController
             $languageData = [];
             $translateUris = $this->textService->getLanguageTranslateUris();
             foreach ($translateUris as $lgId => $uri) {
-                $languageData[$lgId] = \langFromDict($uri);
+                $languageData[$lgId] = UrlUtilities::langFromDict($uri);
             }
             $languages = $this->languageService->getLanguagesForSelect();
             $languagesOption = SelectOptionsBuilder::forLanguages(
@@ -935,12 +937,12 @@ class TextController extends BaseController
 
         // Get filter parameters
         $currentLang = Validation::language(
-            (string) \processDBParam("filterlang", 'currentlanguage', '', false)
+            (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
         );
-        $currentSort = (int) \processDBParam("sort", 'currentarchivesort', '1', true);
-        $currentPage = (int) \processSessParam("page", "currentarchivepage", '1', true);
-        $currentQuery = (string) \processSessParam("query", "currentarchivequery", '', false);
-        $currentQueryMode = (string) \processSessParam(
+        $currentSort = (int) ParamHelpers::processDBParam("sort", 'currentarchivesort', '1', true);
+        $currentPage = (int) ParamHelpers::processSessParam("page", "currentarchivepage", '1', true);
+        $currentQuery = (string) ParamHelpers::processSessParam("query", "currentarchivequery", '', false);
+        $currentQueryMode = (string) ParamHelpers::processSessParam(
             "query_mode",
             "currentarchivequerymode",
             'title,text',
@@ -948,14 +950,14 @@ class TextController extends BaseController
         );
         $currentRegexMode = Settings::getWithDefault("set-regex-mode");
         $currentTag1 = Validation::archTextTag(
-            (string) \processSessParam("tag1", "currentarchivetexttag1", '', false),
+            (string) ParamHelpers::processSessParam("tag1", "currentarchivetexttag1", '', false),
             $currentLang
         );
         $currentTag2 = Validation::archTextTag(
-            (string) \processSessParam("tag2", "currentarchivetexttag2", '', false),
+            (string) ParamHelpers::processSessParam("tag2", "currentarchivetexttag2", '', false),
             $currentLang
         );
-        $currentTag12 = (string) \processSessParam(
+        $currentTag12 = (string) ParamHelpers::processSessParam(
             "tag12",
             "currentarchivetexttag12",
             '',

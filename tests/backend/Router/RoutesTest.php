@@ -33,8 +33,8 @@ class RoutesTest extends TestCase
         $this->basePath = dirname(__DIR__, 3); // Go up to project root
 
         // Load routes
-        $registerRoutes = require $this->basePath . '/src/backend/Router/routes.php';
-        $registerRoutes($this->router);
+        require_once $this->basePath . '/src/backend/Router/routes.php';
+        \Lwt\Router\registerRoutes($this->router);
 
         // Save original superglobals
         $this->originalServer = $_SERVER;

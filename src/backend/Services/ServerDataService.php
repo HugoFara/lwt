@@ -19,6 +19,8 @@ use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 
+use function Lwt\Core\get_version_number;
+
 /**
  * Service class for retrieving server and database information.
  *

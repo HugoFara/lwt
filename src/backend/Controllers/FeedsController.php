@@ -33,6 +33,7 @@ require_once __DIR__ . '/../Services/MediaService.php';
 require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
@@ -40,6 +41,7 @@ use Lwt\Database\Validation;
 use Lwt\Services\FeedService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
+use Lwt\Core\Http\ParamHelpers;
 
 /**
  * Controller for RSS feed management.
@@ -100,11 +102,11 @@ class FeedsController extends BaseController
         session_start();
 
         $currentLang = Validation::language(
-            (string)\processDBParam("filterlang", 'currentlanguage', '', false)
+            (string)ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
         );
         PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Feeds', true);
 
-        $currentFeed = (string)\processSessParam(
+        $currentFeed = (string)ParamHelpers::processSessParam(
             "selected_feed",
             "currentrssfeed",
             '',
@@ -306,8 +308,8 @@ class FeedsController extends BaseController
     {
         $debug = \Lwt\Core\Globals::isDebug();
 
-        $currentQuery = (string)\processSessParam("query", "currentrssquery", '', false);
-        $currentQueryMode = (string)\processSessParam("query_mode", "currentrssquerymode", 'title,desc,text', false);
+        $currentQuery = (string)ParamHelpers::processSessParam("query", "currentrssquery", '', false);
+        $currentQueryMode = (string)ParamHelpers::processSessParam("query_mode", "currentrssquerymode", 'title,desc,text', false);
         $currentRegexMode = Settings::getWithDefault("set-regex-mode");
 
         $whQuery = $this->feedService->buildQueryFilter($currentQuery, $currentQueryMode, $currentRegexMode);
@@ -323,8 +325,8 @@ class FeedsController extends BaseController
             }
         }
 
-        $currentPage = (int)\processSessParam("page", "currentrsspage", '1', true);
-        $currentSort = (int)\processDBParam("sort", 'currentrsssort', '2', true);
+        $currentPage = (int)ParamHelpers::processSessParam("page", "currentrsspage", '1', true);
+        $currentSort = (int)ParamHelpers::processDBParam("sort", 'currentrsssort', '2', true);
 
         $feeds = $this->feedService->getFeeds($currentLang ?: null);
 
@@ -949,7 +951,7 @@ class FeedsController extends BaseController
             $rssUrl === $_SESSION['wizard']['rss_url']
         ) {
             session_destroy();
-            \my_die("Your session seems to have an issue, please reload the page.");
+            ErrorHandler::die("Your session seems to have an issue, please reload the page.");
         }
 
         $_SESSION['wizard']['feed'] = $this->feedService->detectAndParseFeed($rssUrl);

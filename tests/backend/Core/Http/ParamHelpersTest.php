@@ -7,13 +7,14 @@ require_once __DIR__ . '/../../../../src/backend/Core/Http/param_helpers.php';
 require_once __DIR__ . '/../../../../src/backend/Services/SettingsService.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\Http\ParamHelpers;
 use Lwt\Services\SettingsService;
 use PHPUnit\Framework\TestCase;
 
 Globals::initialize();
 
 /**
- * Tests for param_helpers.php functions
+ * Tests for ParamHelpers class
  */
 final class ParamHelpersTest extends TestCase
 {
@@ -27,13 +28,13 @@ final class ParamHelpersTest extends TestCase
         $_REQUEST['empty'] = '';
 
         // Should trim values
-        $this->assertEquals('test_value', getreq('test_key'));
+        $this->assertEquals('test_value', ParamHelpers::getreq('test_key'));
 
         // Should return empty string for empty values
-        $this->assertEquals('', getreq('empty'));
+        $this->assertEquals('', ParamHelpers::getreq('empty'));
 
         // Should return empty string for non-existent keys
-        $this->assertEquals('', getreq('nonexistent'));
+        $this->assertEquals('', ParamHelpers::getreq('nonexistent'));
 
         // Clean up
         unset($_REQUEST['test_key']);
@@ -47,17 +48,17 @@ final class ParamHelpersTest extends TestCase
     {
         // HTML in request
         $_REQUEST['html_test'] = '<script>alert("XSS")</script>';
-        $result = getreq('html_test');
+        $result = ParamHelpers::getreq('html_test');
         $this->assertEquals('<script>alert("XSS")</script>', $result);
         $this->assertStringNotContainsString('&lt;', $result);
 
         // Unicode with whitespace
         $_REQUEST['unicode_test'] = '  日本語  ';
-        $this->assertEquals('日本語', getreq('unicode_test'));
+        $this->assertEquals('日本語', ParamHelpers::getreq('unicode_test'));
 
         // Newlines and tabs in value
         $_REQUEST['whitespace_test'] = "  value\twith\nnewlines  ";
-        $result = getreq('whitespace_test');
+        $result = ParamHelpers::getreq('whitespace_test');
         // trim() only removes leading/trailing whitespace, not internal
         $this->assertEquals("value\twith\nnewlines", $result);
 
@@ -83,16 +84,16 @@ final class ParamHelpersTest extends TestCase
         $_SESSION['null_value'] = null;
 
         // Should trim values
-        $this->assertEquals('test_value', getsess('test_key'));
+        $this->assertEquals('test_value', ParamHelpers::getsess('test_key'));
 
         // Should return empty string for empty values
-        $this->assertEquals('', getsess('empty'));
+        $this->assertEquals('', ParamHelpers::getsess('empty'));
 
         // Should return empty string for null values
-        $this->assertEquals('', getsess('null_value'));
+        $this->assertEquals('', ParamHelpers::getsess('null_value'));
 
         // Should return empty string for non-existent keys
-        $this->assertEquals('', getsess('nonexistent'));
+        $this->assertEquals('', ParamHelpers::getsess('nonexistent'));
 
         // Clean up
         unset($_SESSION['test_key']);
@@ -111,19 +112,19 @@ final class ParamHelpersTest extends TestCase
 
         // Integer value
         $_SESSION['int_value'] = 42;
-        $result = getsess('int_value');
+        $result = ParamHelpers::getsess('int_value');
         $this->assertEquals('42', $result); // Should be converted to string
 
         // Array value (should be converted to string)
         $_SESSION['array_value'] = ['test'];
-        $result = getsess('array_value');
+        $result = ParamHelpers::getsess('array_value');
         $this->assertIsString($result);
 
         // Boolean values
         $_SESSION['bool_true'] = true;
         $_SESSION['bool_false'] = false;
-        $this->assertEquals('1', getsess('bool_true'));
-        $this->assertEquals('', getsess('bool_false'));
+        $this->assertEquals('1', ParamHelpers::getsess('bool_true'));
+        $this->assertEquals('', ParamHelpers::getsess('bool_false'));
 
         // Clean up
         unset($_SESSION['int_value']);

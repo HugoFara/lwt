@@ -16,54 +16,71 @@
  * @since    3.0.0 Split from kernel_utility.php
  */
 
-/**
- * Make the script crash and prints an error message
- *
- * @param string $text Error text to output
- *
- * @return never
- *
- * @since 2.5.3-fork Add a link to the Discord community
- */
-function my_die($text)
-{
-    // In testing environment (PHPUnit), throw exception instead of dying
-    if (class_exists('PHPUnit\Framework\TestCase', false)) {
-        throw new \RuntimeException("Fatal Error: " . $text);
-    }
-
-    // In production, output HTML error and die (legacy behavior)
-    echo '</select></p></div><div style="padding: 1em; color:red; font-size:120%; background-color:#CEECF5;">' .
-    '<p><b>Fatal Error:</b> ' .
-    tohtml($text) .
-    "</p></div><hr /><pre>Backtrace:\n\n";
-    debug_print_backtrace();
-    echo '</pre><hr />
-    <p>Signal this issue on
-    <a href="https://github.com/HugoFara/lwt/issues/new/choose">GitHub</a> or
-    <a href="https://discord.gg/xrkRZR2jtt">Discord</a>.</p>';
-    die('</body></html>');
-}
+namespace Lwt\Core\Utils;
 
 /**
- * Display a error message vanishing after a few seconds.
+ * Error handling utilities.
  *
- * @param string $msg    Message to display.
- * @param bool   $noback If true, don't display a button to go back
+ * Provides methods for displaying errors and handling fatal conditions.
  *
- * @return string HTML-formatted string for an automating vanishing message.
+ * @category Lwt
+ * @package  Lwt
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
  */
-function error_message_with_hide($msg, $noback): string
+class ErrorHandler
 {
-    if (trim($msg) == '') {
-        return '';
+    /**
+     * Make the script crash and prints an error message
+     *
+     * @param string $text Error text to output
+     *
+     * @return never
+     *
+     * @since 2.5.3-fork Add a link to the Discord community
+     */
+    public static function die(string $text): never
+    {
+        // In testing environment (PHPUnit), throw exception instead of dying
+        if (class_exists('PHPUnit\Framework\TestCase', false)) {
+            throw new \RuntimeException("Fatal Error: " . $text);
+        }
+
+        // In production, output HTML error and die (legacy behavior)
+        echo '</select></p></div><div style="padding: 1em; color:red; font-size:120%; background-color:#CEECF5;">' .
+        '<p><b>Fatal Error:</b> ' .
+        tohtml($text) .
+        "</p></div><hr /><pre>Backtrace:\n\n";
+        debug_print_backtrace();
+        echo '</pre><hr />
+        <p>Signal this issue on
+        <a href="https://github.com/HugoFara/lwt/issues/new/choose">GitHub</a> or
+        <a href="https://discord.gg/xrkRZR2jtt">Discord</a>.</p>';
+        exit('</body></html>');
     }
-    if (substr($msg, 0, 5) == "Error") {
-        return '<p class="red">*** ' . tohtml($msg) . ' ***' .
-        ($noback ?
-        '' :
-        '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="back" />' ) .
-        '</p>';
+
+    /**
+     * Display an error message vanishing after a few seconds.
+     *
+     * @param string $msg    Message to display.
+     * @param bool   $noback If true, don't display a button to go back
+     *
+     * @return string HTML-formatted string for an automating vanishing message.
+     */
+    public static function messageWithHide(string $msg, bool $noback): string
+    {
+        if (trim($msg) == '') {
+            return '';
+        }
+        if (substr($msg, 0, 5) == "Error") {
+            return '<p class="red">*** ' . tohtml($msg) . ' ***' .
+            ($noback ?
+            '' :
+            '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="back" />' ) .
+            '</p>';
+        }
+        return '<p id="hide3" class="msgblue">+++ ' . tohtml($msg) . ' +++</p>';
     }
-    return '<p id="hide3" class="msgblue">+++ ' . tohtml($msg) . ' +++</p>';
 }

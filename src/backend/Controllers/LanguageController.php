@@ -31,6 +31,7 @@ require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 use Lwt\Database\Settings;
 use Lwt\Services\LanguageDefinitions;
 use Lwt\Services\LanguageService;
+use Lwt\Core\Http\UrlUtilities;
 
 /**
  * Controller for language configuration.
@@ -249,12 +250,12 @@ class LanguageController extends BaseController
             if (array_key_exists($language->name, LanguageDefinitions::getAll())) {
                 $sourceLg = LanguageDefinitions::getAll()[$language->name][1];
             }
-            $lgFromDict = \langFromDict($language->translator);
+            $lgFromDict = UrlUtilities::langFromDict($language->translator);
             if ($lgFromDict != '' && $lgFromDict != $sourceLg) {
                 $sourceLg = $lgFromDict;
             }
 
-            $targetFromDict = \targetLangFromDict($language->translator);
+            $targetFromDict = UrlUtilities::targetLangFromDict($language->translator);
             if ($targetFromDict != '' && $targetFromDict != $targetLg) {
                 $targetLg = $targetFromDict;
             }

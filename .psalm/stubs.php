@@ -10,36 +10,132 @@
  * @psalm-suppress UnusedMethod
  */
 
+// From version.php (namespaced as Lwt\Core)
+namespace Lwt\Core {
+    /**
+     * @return string
+     */
+    function get_version(): string {}
+
+    /**
+     * @return string
+     */
+    function get_version_number(): string {}
+}
+
+// From debug_utilities.php and string_utilities.php (namespaced as Lwt\Core\Utils)
+namespace Lwt\Core\Utils {
+    /**
+     * @return void
+     */
+    function showRequest(): void {}
+
+    /**
+     * @return float
+     */
+    function get_execution_time(): float {}
+
+    /**
+     * @param mixed $var
+     * @param string $text
+     * @return void
+     */
+    function echodebug($var, $text): void {}
+
+    // From string_utilities.php
+
+    /**
+     * @param string $str
+     * @return array|string
+     */
+    function remove_soft_hyphens(string $str): array|string {}
+
+    /**
+     * @param string $s
+     * @return array|string|null
+     */
+    function replace_supp_unicode_planes_char(string $s): array|string|null {}
+
+    /**
+     * @param int $max
+     * @param int $num
+     * @return string
+     */
+    function makeCounterWithTotal(int $max, int $num): string {}
+
+    /**
+     * @param string $url
+     * @return string
+     */
+    function encodeURI(string $url): string {}
+
+    /**
+     * @param string $filename
+     * @return void
+     */
+    function print_file_path($filename): void {}
+
+    /**
+     * @param string $filename
+     * @return string
+     */
+    function get_file_path($filename): string {}
+
+    /**
+     * @return string
+     */
+    function get_sepas(): string {}
+
+    /**
+     * @return string
+     */
+    function get_first_sepa(): string {}
+
+    /**
+     * @param string $string
+     * @return string
+     */
+    function strToHex(string $string): string {}
+
+    /**
+     * @param string $string
+     * @return string
+     */
+    function strToClassName($string): string {}
+
+    /**
+     * @param mixed $s
+     * @return string
+     */
+    function tohtml($s): string {}
+
+    /**
+     * @param string $s
+     * @param mixed $remove
+     * @return string
+     */
+    function remove_spaces($s, $remove): string {}
+
+    /**
+     * @param string $needle
+     * @param string $replace
+     * @param string $haystack
+     * @return string
+     */
+    function str_replace_first($needle, $replace, $haystack): string {}
+}
+
+namespace {
 // Constants defined in index.php
 define('LWT_BASE_PATH', __DIR__ . '/..');
 
 // From kernel_utility.php
 
 /**
- * @return string
- */
-function get_version(): string {}
-
-/**
- * @return string
- */
-function get_version_number(): string {}
-
-/**
  * @param mixed $s
  * @return string
  */
 function tohtml($s): string {}
-
-/**
- * @return void
- */
-function showRequest(): void {}
-
-/**
- * @return float
- */
-function get_execution_time(): float {}
 
 /**
  * @param string $s
@@ -54,11 +150,7 @@ function remove_spaces($s, $remove): string {}
  */
 function get_mecab_path($mecab_args = ''): string {}
 
-/**
- * @param string $text
- * @return never
- */
-function my_die($text): never {}
+// my_die() - removed, use Lwt\Core\Utils\ErrorHandler::die() instead
 
 /**
  * @return void
@@ -75,13 +167,6 @@ function pagestart_kernel_nobody($title): void {}
  * @return void
  */
 function pageend(): void {}
-
-/**
- * @param mixed $var
- * @param string $text
- * @return void
- */
-function echodebug($var, $text): void {}
 
 /**
  * @return array<int, array{name: string, abbr: string}>
@@ -102,22 +187,9 @@ function str_replace_first($needle, $replace, $haystack): string {}
  */
 function annotation_to_json($ann): string|false {}
 
-/**
- * @param string $s
- * @return mixed
- */
-function getreq($s): mixed {}
-
-/**
- * @param string $s
- * @return mixed
- */
-function getsess($s): mixed {}
-
-/**
- * @return string
- */
-function url_base(): string {}
+// getreq() - removed, use Lwt\Core\Http\ParamHelpers::getreq() instead
+// getsess() - removed, use Lwt\Core\Http\ParamHelpers::getsess() instead
+// url_base() - removed, use Lwt\Core\Http\UrlUtilities::urlBase() instead
 
 /**
  * @param string $type
@@ -131,24 +203,10 @@ function make_score_random_insert_update($type): string {}
  */
 function getsqlscoreformula($method): string {}
 
-/**
- * @param string $msg
- * @param bool $noback
- * @return string
- */
-function error_message_with_hide($msg, $noback): string {}
+// error_message_with_hide() - removed, use Lwt\Core\Utils\ErrorHandler::messageWithHide() instead
 
-/**
- * @param string $url
- * @return string
- */
-function langFromDict($url): string {}
-
-/**
- * @param string $url
- * @return string
- */
-function targetLangFromDict($url): string {}
+// langFromDict() - removed, use Lwt\Core\Http\UrlUtilities::langFromDict() instead
+// targetLangFromDict() - removed, use Lwt\Core\Http\UrlUtilities::targetLangFromDict() instead
 
 /**
  * @param string $filename
@@ -316,24 +374,8 @@ function mask_term_in_sentence($s, $regexword): string {}
 function repl_tab_nl($s): string {}
 
 // From session_utility.php
-
-/**
- * @param string $req
- * @param string $sess
- * @param mixed $default
- * @param bool $store
- * @return mixed
- */
-function processDBParam($req, $sess, $default, $store): mixed {}
-
-/**
- * @param string $req
- * @param string $sess
- * @param mixed $default
- * @param bool $store
- * @return mixed
- */
-function processSessParam($req, $sess, $default, $store): mixed {}
+// processDBParam() - removed, use Lwt\Core\Http\ParamHelpers::processDBParam() instead
+// processSessParam() - removed, use Lwt\Core\Http\ParamHelpers::processSessParam() instead
 
 // From text_helpers.php (split from session_utility)
 
@@ -449,3 +491,5 @@ function makeLegacyAudioPlayer(
  * @return bool
  */
 function should_use_vite(): bool {}
+
+} // end namespace

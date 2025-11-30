@@ -6,12 +6,13 @@ require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Http/url_utilities.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\Http\UrlUtilities;
 use PHPUnit\Framework\TestCase;
 
 Globals::initialize();
 
 /**
- * Tests for url_utilities.php functions
+ * Tests for UrlUtilities class
  */
 final class UrlUtilitiesTest extends TestCase
 {
@@ -27,7 +28,7 @@ final class UrlUtilitiesTest extends TestCase
             'ggl.php?sl=ar&tl=en&text=###'
         ];
         foreach ($urls as $url) {
-            $this->assertSame("ar", langFromDict($url));
+            $this->assertSame("ar", UrlUtilities::langFromDict($url));
         }
     }
 
@@ -37,23 +38,23 @@ final class UrlUtilitiesTest extends TestCase
     public function testLangFromDictEdgeCases(): void
     {
         // URL without language parameter
-        $this->assertEquals('', langFromDict('http://example.com/page.php'));
+        $this->assertEquals('', UrlUtilities::langFromDict('http://example.com/page.php'));
 
         // Malformed URL
-        $this->assertEquals('', langFromDict('not-a-url'));
+        $this->assertEquals('', UrlUtilities::langFromDict('not-a-url'));
 
         // Multiple sl parameters (parse_str uses the last one)
         $url = 'http://example.com/?sl=en&sl=fr';
-        $result = langFromDict($url);
+        $result = UrlUtilities::langFromDict($url);
         // parse_str uses the last value when there are duplicates
         $this->assertEquals('fr', $result);
 
         // URL with fragment
-        $this->assertEquals('de', langFromDict('http://example.com/?sl=de#fragment'));
+        $this->assertEquals('de', UrlUtilities::langFromDict('http://example.com/?sl=de#fragment'));
 
         // Case sensitivity - query parameters are case-sensitive
         // 'SL' is different from 'sl', so this should return empty
-        $this->assertEquals('', langFromDict('http://example.com/?SL=en'));
+        $this->assertEquals('', UrlUtilities::langFromDict('http://example.com/?SL=en'));
     }
 
     /**
@@ -65,14 +66,14 @@ final class UrlUtilitiesTest extends TestCase
         $_SERVER['HTTP_HOST'] = 'localhost';
         $_SERVER['REQUEST_URI'] = '/lwt/index.php';
 
-        $base = url_base();
+        $base = UrlUtilities::urlBase();
         $this->assertStringStartsWith('http://', $base);
         $this->assertStringEndsWith('/', $base);
         $this->assertStringContainsString('localhost', $base);
     }
 
     /**
-     * Test url_base with different server configurations
+     * Test urlBase with different server configurations
      */
     public function testUrlBaseVariousConfigurations(): void
     {
@@ -86,7 +87,7 @@ final class UrlUtilitiesTest extends TestCase
         $_SERVER['HTTP_HOST'] = 'secure.example.com';
         $_SERVER['REQUEST_URI'] = '/lwt/page.php';
 
-        $base = url_base();
+        $base = UrlUtilities::urlBase();
         $this->assertStringStartsWith('https://', $base);
         $this->assertStringContainsString('secure.example.com', $base);
 
@@ -95,7 +96,7 @@ final class UrlUtilitiesTest extends TestCase
         $_SERVER['HTTP_HOST'] = 'example.com';
         $_SERVER['REQUEST_URI'] = '/test/index.php';
 
-        $base = url_base();
+        $base = UrlUtilities::urlBase();
         $this->assertStringStartsWith('http://', $base);
         $this->assertStringContainsString('example.com', $base);
 
@@ -103,7 +104,7 @@ final class UrlUtilitiesTest extends TestCase
         $_SERVER['HTTP_HOST'] = 'localhost:8080';
         $_SERVER['REQUEST_URI'] = '/lwt/index.php';
 
-        $base = url_base();
+        $base = UrlUtilities::urlBase();
         $this->assertStringContainsString('localhost:8080', $base);
 
         // Restore original values
@@ -124,14 +125,14 @@ final class UrlUtilitiesTest extends TestCase
     public function testTargetLangFromDict(): void
     {
         // Google Translate URLs
-        $this->assertEquals('en', targetLangFromDict('http://translate.google.com/?sl=ar&tl=en&text=test'));
-        $this->assertEquals('fr', targetLangFromDict('http://localhost/ggl.php?sl=ar&tl=fr&text='));
+        $this->assertEquals('en', UrlUtilities::targetLangFromDict('http://translate.google.com/?sl=ar&tl=en&text=test'));
+        $this->assertEquals('fr', UrlUtilities::targetLangFromDict('http://localhost/ggl.php?sl=ar&tl=fr&text='));
 
         // LibreTranslate URLs
-        $this->assertEquals('en', targetLangFromDict('http://localhost:5000/?lwt_translator=libretranslate&source=ar&target=en&q=test'));
+        $this->assertEquals('en', UrlUtilities::targetLangFromDict('http://localhost:5000/?lwt_translator=libretranslate&source=ar&target=en&q=test'));
 
         // Empty URL
-        $this->assertEquals('', targetLangFromDict(''));
+        $this->assertEquals('', UrlUtilities::targetLangFromDict(''));
     }
 
     /**
@@ -140,18 +141,18 @@ final class UrlUtilitiesTest extends TestCase
     public function testTargetLangFromDictEdgeCases(): void
     {
         // URL without target parameter
-        $this->assertEquals('', targetLangFromDict('http://example.com/page.php'));
+        $this->assertEquals('', UrlUtilities::targetLangFromDict('http://example.com/page.php'));
 
         // Malformed URL
-        $this->assertEquals('', targetLangFromDict('not-a-url'));
+        $this->assertEquals('', UrlUtilities::targetLangFromDict('not-a-url'));
 
         // URL with only source language
-        $this->assertEquals('', targetLangFromDict('http://example.com/?sl=en'));
+        $this->assertEquals('', UrlUtilities::targetLangFromDict('http://example.com/?sl=en'));
 
         // LibreTranslate without target
-        $this->assertEquals('', targetLangFromDict('http://localhost:5000/?source=en'));
+        $this->assertEquals('', UrlUtilities::targetLangFromDict('http://localhost:5000/?source=en'));
 
         // URL with fragment
-        $this->assertEquals('es', targetLangFromDict('http://example.com/?tl=es#fragment'));
+        $this->assertEquals('es', UrlUtilities::targetLangFromDict('http://example.com/?tl=es#fragment'));
     }
 }

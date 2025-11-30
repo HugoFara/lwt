@@ -21,6 +21,8 @@ use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
+use function Lwt\Core\get_version;
+
 /**
  * Service class for mobile interface functionality.
  *

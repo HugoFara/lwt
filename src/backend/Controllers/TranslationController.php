@@ -17,6 +17,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\Core\Http\InputValidator;
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\TranslationService;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\PageLayoutHelper;
@@ -140,7 +141,7 @@ class TranslationController extends BaseController
         );
 
         if (!$result['success']) {
-            \my_die($result['error'] ?? 'Unable to get translation from Google!');
+            ErrorHandler::die($result['error'] ?? 'Unable to get translation from Google!');
         }
 
         // Build Google Translate link

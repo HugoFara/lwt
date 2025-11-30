@@ -22,6 +22,7 @@ require_once __DIR__ . '/ExpressionService.php';
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
@@ -1057,7 +1058,7 @@ class WordService
                 ''
             );
             if (!is_numeric($message)) {
-                \my_die("ERROR: Could not modify words! Message: $message");
+                ErrorHandler::die("ERROR: Could not modify words! Message: $message");
             }
             if ((int)$message == 0) {
                 \Lwt\View\Helper\PageLayoutHelper::renderMessage(

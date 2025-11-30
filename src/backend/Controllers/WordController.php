@@ -29,6 +29,7 @@ require_once __DIR__ . '/../Services/SimilarTermsService.php';
 require_once __DIR__ . '/../Services/TextService.php';
 
 use Lwt\Core\StringUtils;
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\WordService;
 use Lwt\Services\WordListService;
 use Lwt\Services\WordUploadService;
@@ -39,6 +40,7 @@ use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
 use Lwt\Services\TextService;
+use Lwt\Core\Http\ParamHelpers;
 
 /**
  * Controller for vocabulary/term management.
@@ -240,7 +242,7 @@ class WordController extends BaseController
             // Get the term from text items
             $termData = $this->wordService->getTermFromTextItem($textId, $ord);
             if ($termData === null) {
-                \my_die("Cannot access Term and Language in edit_word.php");
+                ErrorHandler::die("Cannot access Term and Language in edit_word.php");
             }
             $term = (string) $termData['Ti2Text'];
             $lang = (int) $termData['Ti2LgID'];
@@ -258,7 +260,7 @@ class WordController extends BaseController
             // Get existing word data
             $wordData = $this->wordService->findById($wid);
             if (!$wordData) {
-                \my_die("Cannot access Term and Language in edit_word.php");
+                ErrorHandler::die("Cannot access Term and Language in edit_word.php");
             }
             $term = (string) $wordData['WoText'];
             $lang = (int) $wordData['WoLgID'];
@@ -286,7 +288,7 @@ class WordController extends BaseController
             // Edit existing word form
             $wordData = $this->wordService->findById($wid);
             if (!$wordData) {
-                \my_die("Cannot access word data");
+                ErrorHandler::die("Cannot access word data");
             }
 
             $status = $wordData['WoStatus'];
@@ -399,13 +401,13 @@ class WordController extends BaseController
                 'select WoLgID as value from ' . $tbpref . 'words where WoID = ' . $wid
             );
             if (!isset($lang)) {
-                \my_die('Cannot retrieve language in edit_tword.php');
+                ErrorHandler::die('Cannot retrieve language in edit_tword.php');
             }
             $regexword = \Lwt\Database\Connection::fetchValue(
                 'select LgRegexpWordCharacters as value from ' . $tbpref . 'languages where LgID = ' . $lang
             );
             if (!isset($regexword)) {
-                \my_die('Cannot retrieve language data in edit_tword.php');
+                ErrorHandler::die('Cannot retrieve language data in edit_tword.php');
             }
             $sent = \tohtml(ExportService::replaceTabNewline($_REQUEST["WoSentence"]));
             $sent1 = str_replace(
@@ -438,7 +440,7 @@ class WordController extends BaseController
         $wid = $this->param('wid');
 
         if ($wid == '') {
-            \my_die("Term ID missing in edit_tword.php");
+            ErrorHandler::die("Term ID missing in edit_tword.php");
         }
 
         $sql = 'select WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus from ' .
@@ -461,7 +463,7 @@ class WordController extends BaseController
                 WHERE LgID = $lang"
             );
         } else {
-            \my_die("Term data not found in edit_tword.php");
+            ErrorHandler::die("Term data not found in edit_tword.php");
         }
         mysqli_free_result($res);
 
@@ -504,33 +506,33 @@ class WordController extends BaseController
 
         // Process filter parameters
         $currentlang = \Lwt\Database\Validation::language(
-            (string) \processDBParam("filterlang", 'currentlanguage', '', false)
+            (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
         );
-        $currentsort = (int) \processDBParam("sort", 'currentwordsort', '1', true);
-        $currentpage = (int) \processSessParam("page", "currentwordpage", '1', true);
-        $currentquery = (string) \processSessParam("query", "currentwordquery", '', false);
-        $currentquerymode = (string) \processSessParam(
+        $currentsort = (int) ParamHelpers::processDBParam("sort", 'currentwordsort', '1', true);
+        $currentpage = (int) ParamHelpers::processSessParam("page", "currentwordpage", '1', true);
+        $currentquery = (string) ParamHelpers::processSessParam("query", "currentwordquery", '', false);
+        $currentquerymode = (string) ParamHelpers::processSessParam(
             "query_mode",
             "currentwordquerymode",
             'term,rom,transl',
             false
         );
         $currentregexmode = \Lwt\Database\Settings::getWithDefault("set-regex-mode");
-        $currentstatus = (string) \processSessParam("status", "currentwordstatus", '', false);
+        $currentstatus = (string) ParamHelpers::processSessParam("status", "currentwordstatus", '', false);
         $currenttext = \Lwt\Database\Validation::text(
-            (string) \processSessParam("text", "currentwordtext", '', false)
+            (string) ParamHelpers::processSessParam("text", "currentwordtext", '', false)
         );
-        $currenttexttag = (string) \processSessParam("texttag", "currentwordtexttag", '', false);
-        $currenttextmode = (string) \processSessParam("text_mode", "currentwordtextmode", 0, false);
+        $currenttexttag = (string) ParamHelpers::processSessParam("texttag", "currentwordtexttag", '', false);
+        $currenttextmode = (string) ParamHelpers::processSessParam("text_mode", "currentwordtextmode", 0, false);
         $currenttag1 = \Lwt\Database\Validation::tag(
-            (string) \processSessParam("tag1", "currentwordtag1", '', false),
+            (string) ParamHelpers::processSessParam("tag1", "currentwordtag1", '', false),
             $currentlang
         );
         $currenttag2 = \Lwt\Database\Validation::tag(
-            (string) \processSessParam("tag2", "currentwordtag2", '', false),
+            (string) ParamHelpers::processSessParam("tag2", "currentwordtag2", '', false),
             $currentlang
         );
-        $currenttag12 = (string) \processSessParam("tag12", "currentwordtag12", '', false);
+        $currenttag12 = (string) ParamHelpers::processSessParam("tag12", "currentwordtag12", '', false);
 
         // Build filter conditions
         $whLang = $listService->buildLangCondition($currentlang);
@@ -1179,7 +1181,7 @@ class WordController extends BaseController
             $wid = (int) $strWid;
             $wordData = $this->wordService->getMultiWordData($wid);
             if ($wordData === null) {
-                \my_die("Cannot access Term and Language in edit_mword.php");
+                ErrorHandler::die("Cannot access Term and Language in edit_mword.php");
             }
             PageLayoutHelper::renderPageStartNobody("Edit Term: " . $wordData['text']);
             $this->displayEditMultiWordForm($wid, $wordData, $tid, $ord);
@@ -1335,7 +1337,7 @@ class WordController extends BaseController
 
         $term = $this->wordService->getWordText($wordId);
         if ($term === null) {
-            \my_die('Word not found');
+            ErrorHandler::die('Word not found');
             return;
         }
 
@@ -1477,13 +1479,13 @@ class WordController extends BaseController
         $ann = isset($_REQUEST['ann']) ? $_REQUEST['ann'] : '';
 
         if ($wid === '') {
-            \my_die('Word not found in show_word.php');
+            ErrorHandler::die('Word not found in show_word.php');
             return;
         }
 
         $word = $this->wordService->getWordDetails((int) $wid);
         if ($word === null) {
-            \my_die('Word not found');
+            ErrorHandler::die('Word not found');
             return;
         }
 
@@ -1727,7 +1729,7 @@ class WordController extends BaseController
 
         $wordData = $this->wordService->getWordData($wordId);
         if ($wordData === null) {
-            \my_die("Word not found");
+            ErrorHandler::die("Word not found");
             return;
         }
 

@@ -29,6 +29,7 @@ require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TableSetService.php';
 
+use Lwt\Core\Http\ParamHelpers;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Restore;
@@ -41,6 +42,7 @@ use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
 use PHPUnit\Framework\TestCase;
+use function Lwt\Core\Utils\get_execution_time;
 
 /**
  * Integration tests for core functionality.
@@ -635,17 +637,17 @@ class IntegrationTest extends TestCase
         $_REQUEST['test_param'] = '42';
 
         // Test with numeric parameter
-        $result = processSessParam('test_param', 'sess_key', '0', 1);
+        $result = ParamHelpers::processSessParam('test_param', 'sess_key', '0', 1);
         $this->assertEquals(42, $result);
         $this->assertEquals(42, $_SESSION['sess_key']);
 
         // Test with string parameter
         $_REQUEST['test_string'] = 'hello';
-        $result = processSessParam('test_string', 'sess_str', 'default', 0);
+        $result = ParamHelpers::processSessParam('test_string', 'sess_str', 'default', 0);
         $this->assertEquals('hello', $result);
 
         // Test with missing parameter (should return default)
-        $result = processSessParam('nonexistent', 'sess_none', 'default_val', 0);
+        $result = ParamHelpers::processSessParam('nonexistent', 'sess_none', 'default_val', 0);
         $this->assertEquals('default_val', $result);
 
         // Clean up
@@ -662,7 +664,7 @@ class IntegrationTest extends TestCase
         $_REQUEST['test_db_param'] = '123';
 
         // Test with numeric parameter
-        $result = processDBParam('test_db_param', 'db_key', '0', 1);
+        $result = ParamHelpers::processDBParam('test_db_param', 'db_key', '0', 1);
         $this->assertEquals(123, $result);
 
         // Verify it was saved to settings
@@ -671,11 +673,11 @@ class IntegrationTest extends TestCase
 
         // Test with string parameter
         $_REQUEST['test_db_string'] = 'test_value';
-        $result = processDBParam('test_db_string', 'db_str_key', 'default', 0);
+        $result = ParamHelpers::processDBParam('test_db_string', 'db_str_key', 'default', 0);
         $this->assertEquals('test_value', $result);
 
         // Test with missing parameter (should return default)
-        $result = processDBParam('nonexistent_db', 'db_none_key', 'default_val', 0);
+        $result = ParamHelpers::processDBParam('nonexistent_db', 'db_none_key', 'default_val', 0);
         $this->assertEquals('default_val', $result);
 
         // Clean up

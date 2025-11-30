@@ -19,6 +19,7 @@ namespace Lwt\Database;
 require_once __DIR__ . '/../../Services/TextParsingService.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\Utils\ErrorHandler;
 
 /**
  * Text parsing and processing utilities.
@@ -754,7 +755,7 @@ class TextParsing
         $record = Connection::fetchOne($sql);
         // Just checking if LgID exists with ID should be enough
         if ($record === null) {
-            \my_die("Language data not found: $sql");
+            ErrorHandler::die("Language data not found: $sql");
         }
         $rtlScript = $record['LgRightToLeft'];
 

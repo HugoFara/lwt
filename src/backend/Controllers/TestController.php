@@ -16,6 +16,7 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\TestService;
 use Lwt\Services\MobileService;
 use Lwt\Views\TestViews;
@@ -93,7 +94,7 @@ class TestController extends BaseController
         $useAjax = isset($_REQUEST['ajax']);
 
         if (!is_numeric($status) && !is_numeric($stchange)) {
-            \my_die('status or stchange should be specified!');
+            ErrorHandler::die('status or stchange should be specified!');
         }
 
         // Get old status
@@ -163,7 +164,7 @@ class TestController extends BaseController
 
         if ($testData === null) {
             PageLayoutHelper::renderPageStart('Request Error!', true);
-            \my_die("do_test_header.php called with wrong parameters");
+            ErrorHandler::die("do_test_header.php called with wrong parameters");
             return;
         }
 
@@ -212,7 +213,7 @@ class TestController extends BaseController
         );
 
         if ($identifier[0] === '') {
-            \my_die("do_test_table.php called with wrong parameters");
+            ErrorHandler::die("do_test_table.php called with wrong parameters");
             return;
         }
 
@@ -403,7 +404,7 @@ class TestController extends BaseController
         );
 
         if ($identifier[0] === '') {
-            \my_die("do_test_test.php called with wrong parameters");
+            ErrorHandler::die("do_test_test.php called with wrong parameters");
             return;
         }
 

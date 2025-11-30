@@ -7,44 +7,45 @@ require_once __DIR__ . '/../../../../src/backend/Core/Utils/string_utilities.php
 require_once __DIR__ . '/../../../../src/backend/Core/Utils/error_handling.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\Utils\ErrorHandler;
 use PHPUnit\Framework\TestCase;
 
 Globals::initialize();
 
 /**
- * Tests for error_handling.php functions
+ * Tests for ErrorHandler class
  */
 final class ErrorHandlingTest extends TestCase
 {
     /**
-     * Test error_message_with_hide function
+     * Test ErrorHandler::messageWithHide method
      */
     public function testErrorMessageWithHide(): void
     {
         // Test with non-error message (noback=true - no back button)
-        $result = error_message_with_hide('Test message', true);
+        $result = ErrorHandler::messageWithHide('Test message', true);
         $this->assertStringContainsString('Test message', $result);
         $this->assertStringContainsString('msgblue', $result);
         $this->assertStringNotContainsString('onclick="history.back();"', $result);
 
         // Test with Error prefix (should show red error with back button when noback=false)
-        $result = error_message_with_hide('Error: Something went wrong', false);
+        $result = ErrorHandler::messageWithHide('Error: Something went wrong', false);
         $this->assertStringContainsString('Error: Something went wrong', $result);
         $this->assertStringContainsString('class="red"', $result);
         $this->assertStringContainsString('data-action="back"', $result);
 
         // Test with Error prefix and noback=true (no back button)
-        $result = error_message_with_hide('Error: Another problem', true);
+        $result = ErrorHandler::messageWithHide('Error: Another problem', true);
         $this->assertStringContainsString('Error: Another problem', $result);
         $this->assertStringContainsString('class="red"', $result);
         $this->assertStringNotContainsString('onclick="history.back()"', $result);
 
         // Test empty message (should return empty string)
-        $result = error_message_with_hide('', true);
+        $result = ErrorHandler::messageWithHide('', true);
         $this->assertEquals('', $result);
 
         // Test whitespace-only message (should return empty string)
-        $result = error_message_with_hide('   ', false);
+        $result = ErrorHandler::messageWithHide('   ', false);
         $this->assertEquals('', $result);
     }
 }

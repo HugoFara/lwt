@@ -20,6 +20,7 @@ namespace Lwt\Services {
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
@@ -280,7 +281,7 @@ class AnnotationService
         }
         $json_data = json_encode($arr);
         if ($json_data === false) {
-            my_die("Unable to format to JSON");
+            ErrorHandler::die("Unable to format to JSON");
         }
         return $json_data;
     }

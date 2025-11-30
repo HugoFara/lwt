@@ -161,8 +161,8 @@ use Lwt\Router\Router;
 $router = new Router();
 
 // Load route configuration
-$registerRoutes = require LWT_BASE_PATH . '/src/backend/Router/routes.php';
-$registerRoutes($router);
+require_once LWT_BASE_PATH . '/src/backend/Router/routes.php';
+\Lwt\Router\registerRoutes($router);
 
 // Resolve and execute the request
 $resolution = $router->resolve();

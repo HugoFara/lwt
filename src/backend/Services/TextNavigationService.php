@@ -16,6 +16,7 @@
 namespace Lwt\Services {
 
 use Lwt\Core\Globals;
+use Lwt\Core\Http\ParamHelpers;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Validation;
@@ -61,15 +62,15 @@ class TextNavigationService
     public function getPreviousAndNextTextLinks(int $textId, string $url, bool $onlyAnn, string $add): string
     {
         $currentlang = Validation::language(
-            (string) processDBParam("filterlang", 'currentlanguage', '', false)
+            (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
         );
         $wh_lang = '';
         if ($currentlang != '') {
             $wh_lang = ' AND TxLgID=' . $currentlang;
         }
 
-        $currentquery = (string) processSessParam("query", "currenttextquery", '', false);
-        $currentquerymode = (string) processSessParam(
+        $currentquery = (string) ParamHelpers::processSessParam("query", "currenttextquery", '', false);
+        $currentquerymode = (string) ParamHelpers::processSessParam(
             "query_mode",
             "currenttextquerymode",
             'title,text',
@@ -100,14 +101,14 @@ class TextNavigationService
         }
 
         $currenttag1 = Validation::textTag(
-            (string) processSessParam("tag1", "currenttexttag1", '', false),
+            (string) ParamHelpers::processSessParam("tag1", "currenttexttag1", '', false),
             $currentlang
         );
         $currenttag2 = Validation::textTag(
-            (string) processSessParam("tag2", "currenttexttag2", '', false),
+            (string) ParamHelpers::processSessParam("tag2", "currenttexttag2", '', false),
             $currentlang
         );
-        $currenttag12 = (string) processSessParam("tag12", "currenttexttag12", '', false);
+        $currenttag12 = (string) ParamHelpers::processSessParam("tag12", "currenttexttag12", '', false);
         $wh_tag1 = null;
         $wh_tag2 = null;
         if ($currenttag1 == '' && $currenttag2 == '') {
@@ -136,7 +137,7 @@ class TextNavigationService
             }
         }
 
-        $currentsort = (int) processDBParam("sort", 'currenttextsort', '1', true);
+        $currentsort = (int) ParamHelpers::processDBParam("sort", 'currenttextsort', '1', true);
         $sorts = array('TxTitle','TxID desc','TxID asc');
         $lsorts = count($sorts);
         if ($currentsort < 1) {

@@ -18,6 +18,7 @@
 namespace Lwt\Services;
 
 use Lwt\Core\Globals;
+use Lwt\Core\Http\UrlUtilities;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
@@ -1471,7 +1472,7 @@ class TextService
         $res = Connection::query($sql);
         $result = [];
         while ($record = mysqli_fetch_assoc($res)) {
-            $result[$record['LgID']] = \langFromDict($record['LgGoogleTranslateURI']);
+            $result[$record['LgID']] = UrlUtilities::langFromDict($record['LgGoogleTranslateURI']);
         }
         mysqli_free_result($res);
         return $result;

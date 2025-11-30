@@ -19,6 +19,7 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
+use Lwt\Core\Http\UrlUtilities;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
@@ -585,7 +586,7 @@ class TagService
      */
     private static function getUrlBase(): string
     {
-        return function_exists('url_base') ? \url_base() : '';
+        return UrlUtilities::urlBase();
     }
 
     // =========================================================================

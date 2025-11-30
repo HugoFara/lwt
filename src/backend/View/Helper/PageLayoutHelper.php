@@ -18,6 +18,10 @@ namespace Lwt\View\Helper;
 
 require_once __DIR__ . '/../../Core/Http/url_utilities.php';
 
+use Lwt\Core\Http\UrlUtilities;
+use function Lwt\Core\Utils\showRequest;
+use function Lwt\Core\Utils\get_execution_time;
+
 /**
  * Helper class for generating page layout elements.
  *
@@ -269,7 +273,7 @@ HTML;
             echo '<script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>';
         }
 
-        echo '<!-- URLBASE : "' . tohtml(\url_base()) . '" -->';
+        echo '<!-- URLBASE : "' . tohtml(UrlUtilities::urlBase()) . '" -->';
         echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
         echo '<title>LWT :: ' . tohtml($title) . '</title>';
         echo '</head>';
@@ -337,7 +341,7 @@ HTML;
             echo '<script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>';
         }
 
-        echo '<!-- URLBASE : "' . tohtml(\url_base()) . '" -->';
+        echo '<!-- URLBASE : "' . tohtml(UrlUtilities::urlBase()) . '" -->';
         echo '<!-- TBPREF  : "' . tohtml($tbpref) . '" -->';
         echo '<title>LWT :: ' . tohtml($title) . '</title>';
         echo '</head>';

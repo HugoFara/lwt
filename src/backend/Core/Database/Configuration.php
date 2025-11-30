@@ -18,6 +18,7 @@ namespace Lwt\Database;
 
 use Lwt\Core\Globals;
 use Lwt\Core\EnvLoader;
+use Lwt\Core\Utils\ErrorHandler;
 
 /**
  * Database configuration and connection utilities.
@@ -82,7 +83,7 @@ class Configuration
         $dbconnection = mysqli_init();
 
         if ($dbconnection === false) {
-            my_die(
+            ErrorHandler::die(
                 'Database connection error. Is MySQL running?
                 You can refer to the documentation:
                 https://hugofara.github.io/lwt/docs/install.html
@@ -122,7 +123,7 @@ class Configuration
             );
 
             if (!$success) {
-                my_die(
+                ErrorHandler::die(
                     'DB connect error, connection parameters may be wrong,
                     please check your ".env" file.
                     You can refer to the documentation:
@@ -137,7 +138,7 @@ class Configuration
                 DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci"
             );
             if (!$result) {
-                my_die("Failed to create database!");
+                ErrorHandler::die("Failed to create database!");
             }
             mysqli_close($dbconnection);
             $success = @mysqli_real_connect(
@@ -150,7 +151,7 @@ class Configuration
         }
 
         if (!$success) {
-            my_die(
+            ErrorHandler::die(
                 'DB connect error, connection parameters may be wrong,
                 please check your ".env" file.
                 You can refer to the documentation:
@@ -207,7 +208,7 @@ class Configuration
         $len_tbpref = strlen($tbpref);
         if ($len_tbpref > 0) {
             if ($len_tbpref > 20) {
-                my_die(
+                ErrorHandler::die(
                     'Table prefix/set "' . $tbpref .
                     '" longer than 20 digits or characters.' .
                     ' Please fix DB_TABLE_PREFIX in ".env".'
@@ -220,7 +221,7 @@ class Configuration
                         substr($tbpref, $i, 1)
                     ) === false
                 ) {
-                    my_die(
+                    ErrorHandler::die(
                         'Table prefix/set "' . $tbpref .
                         '" contains characters or digits other than 0-9, a-z, A-Z ' .
                         'or _. Please fix DB_TABLE_PREFIX in ".env".'

@@ -16,6 +16,7 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\WordPressService;
 
 /**
@@ -80,7 +81,7 @@ class WordPressController extends BaseController
 
         if (!$result['success'] && $result['error'] !== null) {
             require_once __DIR__ . '/../Core/Utils/error_handling.php';
-            \my_die($result['error']);
+            ErrorHandler::die($result['error']);
         }
 
         $this->redirect($result['redirect']);
