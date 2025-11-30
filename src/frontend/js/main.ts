@@ -108,6 +108,7 @@ import './home/home_warnings';
 
 // UI Components
 import './ui/modal';
+import './ui/sorttable';
 
 // Global exports for inline PHP scripts
 import './globals';
