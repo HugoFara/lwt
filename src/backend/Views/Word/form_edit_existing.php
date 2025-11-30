@@ -33,14 +33,8 @@ namespace Lwt\Views\Word;
 use Lwt\Core\Http\InputValidator;
 
 ?>
-<script type="text/javascript">
-    $(document).ready(lwtFormCheck.askBeforeExit);
-    $(window).on('beforeunload',function() {
-        setTimeout(function() {window.parent.frames['ru'].location.href = 'empty.html';}, 0);
-    });
-</script>
-
-<form name="editword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+<form name="editword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"
+data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />
 <input type="hidden" name="fromAnn" value="<?php echo $fromAnn; ?>" />
 <input type="hidden" name="WoID" value="<?php echo $wid; ?>" />

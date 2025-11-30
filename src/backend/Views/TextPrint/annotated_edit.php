@@ -42,12 +42,6 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
     <div data_id="<?php echo $textId; ?>" id="editimprtextdata">
         <?php echo $handler->editTermForm($textId); ?>
     </div>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $('input.impr-ann-text').on('change', changeImprAnnText);
-            $('input.impr-ann-radio').on('change', changeImprAnnRadio);
-        });
-    </script>
 <?php endif; ?>
 
 <div class="noprint">

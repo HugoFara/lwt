@@ -49,7 +49,7 @@ namespace Lwt\Views\Text;
         </tr>
         <tr>
             <td class="td1 right" colspan="2">
-                <input type="button" value="&lt;&lt; Back" onclick="location.href='/';" />
+                <input type="button" value="&lt;&lt; Back" data-action="navigate" data-url="/" />
                 <input type="submit" name="op" value="Check" />
             </td>
         </tr>

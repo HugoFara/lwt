@@ -74,10 +74,7 @@ $varArray = [
     ]
 ];
 ?>
-<script type="text/javascript">
-    // Store PHP values for TypeScript module
-    window.new_globals = <?php echo json_encode($varArray); ?>;
-</script>
+<script type="application/json" id="text-reading-config"><?php echo json_encode($varArray); ?></script>
 
 <style>
 <?php if ($showLearning): ?>

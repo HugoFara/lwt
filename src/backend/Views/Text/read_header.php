@@ -27,13 +27,12 @@
  */
 
 ?>
-<script type="text/javascript">
-    // Store PHP values for TypeScript module
-    window._lwtTextId = <?php echo (int) $textId; ?>;
-    window._lwtPhoneticText = <?php echo json_encode($phoneticText); ?>;
-    window._lwtLanguageCode = <?php echo json_encode($languageCode); ?>;
-    window._lwtVoiceApi = <?php echo json_encode($voiceApi); ?>;
-</script>
+<script type="application/json" id="text-header-config"><?php echo json_encode([
+    'textId' => (int) $textId,
+    'phoneticText' => $phoneticText,
+    'languageCode' => $languageCode,
+    'voiceApi' => $voiceApi
+]); ?></script>
 
 <div class="flex-header">
     <div>
@@ -66,7 +65,7 @@
     <div>
         <a
             href="/word/new?text=<?php echo $textId; ?>&amp;lang=<?php echo $langId; ?>"
-            target="ro" onclick="showRightFrames();"
+            target="ro" data-action="show-right-frames"
         >
             <img src="/assets/icons/sticky-note--plus.png" title="New Term" alt="New Term" />
         </a>
@@ -99,14 +98,14 @@
 [Show All] = OFF: Multi-word terms now hide single words and shorter or overlapping multi-word terms.">
         <label for="showallwords">Show All</label>&nbsp;
         <input type="checkbox" id="showallwords" <?php echo \Lwt\View\Helper\FormHelper::getChecked($showAll); ?>
-        onclick="showAllwordsClick();" />
+        data-action="toggle-show-all" />
 </div>
     <div
     title="[Learning Translations] = ON: Terms with Learning Level&nbsp;1 display their translations under the term.
 [Learning Translations] = OFF: No translations are shown in the reading mode.">
         <label for="showlearningtranslations">Translations</label>&nbsp;
         <input type="checkbox" id="showlearningtranslations"
-        <?php echo \Lwt\View\Helper\FormHelper::getChecked($showLearning); ?> onclick="showAllwordsClick();" />
+        <?php echo \Lwt\View\Helper\FormHelper::getChecked($showLearning); ?> data-action="toggle-show-all" />
 </div>
     <div id="thetextid" class="hide"><?php echo $textId; ?></div>
     <div><button id="readTextButton">Read in browser</button></div>

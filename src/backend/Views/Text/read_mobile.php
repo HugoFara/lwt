@@ -26,7 +26,7 @@
 </div>
 <div id="frames-r"
 style="position: fixed; top: 0; right: -100%; width: 100%; height: 100%;"
-onclick="hideRightFrames();">
+data-action="hide-right-frames">
     <!-- iFrames wrapper for events -->
     <div style="margin-left: 50%; height: 99%;">
         <iframe src="empty.html" scrolling="auto" name="ro"

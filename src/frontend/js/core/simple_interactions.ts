@@ -13,6 +13,8 @@
 
 import $ from 'jquery';
 import { lwtFormCheck } from '../forms/unloadformcheck';
+import { showRightFrames, hideRightFrames } from '../reading/frame_management';
+import { showAllwordsClick } from './ui_utilities';
 
 /**
  * Navigate back in browser history.
@@ -123,6 +125,30 @@ export function initSimpleInteractions(): void {
         e.preventDefault();
         navigateTo(url);
       }
+      break;
+
+    case 'cancel-form':
+      // Cancel and navigate (same as cancel-navigate but more semantic)
+      if (url) {
+        e.preventDefault();
+        cancelAndNavigate(url);
+      }
+      break;
+
+    case 'show-right-frames':
+      // Show the right frames panel (for mobile layout)
+      showRightFrames();
+      break;
+
+    case 'hide-right-frames':
+      // Hide the right frames panel (for mobile layout)
+      e.preventDefault();
+      hideRightFrames();
+      break;
+
+    case 'toggle-show-all':
+      // Toggle "Show All" or "Learning Translations" mode
+      showAllwordsClick();
       break;
     }
   });

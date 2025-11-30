@@ -119,12 +119,12 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
                 if ($annotated) {
                     echo '<img src="/assets/icons/tick.png" title="With Improved Annotation" alt="With Improved Annotation" /> ' .
                     'Exists - May be partially or fully lost if you change the text!<br />' .
-                    '<input type="button" value="Print/Edit..." onclick="location.href=\'/text/print?text=' .
-                    $textId . '\';" />';
+                    '<input type="button" value="Print/Edit..." data-action="navigate" data-url="/text/print?text=' .
+                    $textId . '" />';
                 } else {
                     echo '<img src="/assets/icons/cross.png" title="No Improved Annotation" alt="No Improved Annotation" /> ' .
-                    '- None | <input type="button" value="Create/Print..." onclick="location.href=\'print_impr_text.php?edit=1&amp;text=' .
-                    $textId . '\';" />';
+                    '- None | <input type="button" value="Create/Print..." data-action="navigate" data-url="print_impr_text.php?edit=1&amp;text=' .
+                    $textId . '" />';
                 }
                 ?>
             </td>
@@ -163,7 +163,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
         <tr>
             <td class="td1 right" colspan="2">
                 <input type="button" value="Cancel"
-                onclick="{lwtFormCheck.resetDirty(); location.href='/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>';}" />
+                data-action="cancel-form" data-url="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" />
                 <input type="submit" name="op" value="Check" />
                 <input type="submit" name="op"
                 value="<?php echo $isNew ? 'Save' : 'Change'; ?>" />

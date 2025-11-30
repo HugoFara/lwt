@@ -65,6 +65,7 @@ import './feeds/feed_loader';
 import './feeds/feed_multi_load';
 import './feeds/feed_index';
 import './feeds/feed_form';
+import './feeds/feed_text_edit';
 
 // Texts
 import './texts/text_list';
@@ -75,6 +76,7 @@ import './words/word_list_table';
 import './words/word_dom_updates';
 import './words/bulk_translate';
 import './words/word_status_ajax';
+import './words/word_upload';
 
 // Tags
 import './tags/tag_list';

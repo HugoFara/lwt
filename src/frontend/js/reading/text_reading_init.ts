@@ -25,22 +25,37 @@ interface TextReader {
   rate: number;
 }
 
+/**
+ * Configuration from text-header-config JSON element.
+ */
+interface TextHeaderConfig {
+  textId: number;
+  phoneticText: string;
+  languageCode: string;
+  voiceApi: string | null;
+}
+
+/**
+ * Configuration from text-reading-config JSON element.
+ */
+interface TextReadingConfig {
+  LWT_DATA?: {
+    language?: Record<string, unknown>;
+    text?: Record<string, unknown>;
+    settings?: Record<string, unknown>;
+  };
+}
+
 // Declare the global variables that PHP will set
 declare global {
   interface Window {
-    // Header view data
+    // Legacy header view data (for backwards compatibility)
     _lwtPhoneticText?: string;
     _lwtLanguageCode?: string;
     _lwtVoiceApi?: string | null;
     _lwtTextId?: number;
-    // Content view data
-    new_globals?: {
-      LWT_DATA?: {
-        language?: Record<string, unknown>;
-        text?: Record<string, unknown>;
-        settings?: Record<string, unknown>;
-      };
-    };
+    // Legacy content view data (for backwards compatibility)
+    new_globals?: TextReadingConfig;
     // LANG global variable
     LANG?: string;
   }
@@ -50,11 +65,39 @@ declare global {
 let text_reader: TextReader | null = null;
 
 /**
+ * Load header configuration from JSON element or legacy window variables.
+ */
+function loadHeaderConfig(): TextHeaderConfig | null {
+  // Try new JSON config first
+  const configEl = document.getElementById('text-header-config');
+  if (configEl) {
+    try {
+      return JSON.parse(configEl.textContent || '{}') as TextHeaderConfig;
+    } catch (e) {
+      console.error('Failed to parse text-header-config:', e);
+    }
+  }
+
+  // Fall back to legacy window variables
+  if (typeof window._lwtPhoneticText !== 'undefined') {
+    return {
+      textId: window._lwtTextId || 0,
+      phoneticText: window._lwtPhoneticText || '',
+      languageCode: window._lwtLanguageCode || '',
+      voiceApi: window._lwtVoiceApi || null
+    };
+  }
+
+  return null;
+}
+
+/**
  * Initialize TTS (Text-to-Speech) after Vite bundle is loaded.
  * Sets up the text_reader object with phonetic text and language settings.
  */
 export function initTTS(): void {
-  if (typeof window._lwtPhoneticText === 'undefined') {
+  const config = loadHeaderConfig();
+  if (!config) {
     return;
   }
 
@@ -63,14 +106,17 @@ export function initTTS(): void {
     : '';
 
   text_reader = {
-    text: window._lwtPhoneticText || '',
-    lang: langFromDict || window._lwtLanguageCode || '',
+    text: config.phoneticText || '',
+    lang: langFromDict || config.languageCode || '',
     rate: 0.8
   };
 
   if (typeof LWT_DATA !== 'undefined' && LWT_DATA.language) {
-    LWT_DATA.language.ttsVoiceApi = window._lwtVoiceApi || '';
+    LWT_DATA.language.ttsVoiceApi = config.voiceApi || '';
   }
+
+  // Store textId for later use
+  window._lwtTextId = config.textId;
 }
 
 /**
@@ -194,13 +240,36 @@ function saveCurrentPosition(): void {
 }
 
 /**
+ * Load text reading configuration from JSON element or legacy window variable.
+ */
+function loadTextReadingConfig(): TextReadingConfig | null {
+  // Try new JSON config first
+  const configEl = document.getElementById('text-reading-config');
+  if (configEl) {
+    try {
+      return JSON.parse(configEl.textContent || '{}') as TextReadingConfig;
+    } catch (e) {
+      console.error('Failed to parse text-reading-config:', e);
+    }
+  }
+
+  // Fall back to legacy window variable
+  if (window.new_globals) {
+    return window.new_globals;
+  }
+
+  return null;
+}
+
+/**
  * Initialize the text reading interface.
  * Called after LWT Vite bundle is loaded.
  */
 export function initTextReading(): void {
-  // Merge PHP globals into LWT_DATA
-  if (window.new_globals) {
-    mergeGlobals(window.new_globals);
+  // Load and merge config into LWT_DATA
+  const config = loadTextReadingConfig();
+  if (config) {
+    mergeGlobals(config as unknown as Record<string, unknown>);
   }
 
   // Set LANG global
@@ -262,13 +331,15 @@ export function initTextReadingHeader(): void {
  * Detects which page we're on and initializes accordingly.
  */
 export function autoInit(): void {
-  // Check if we're on the text reading page
-  if ($('#thetext').length > 0 && window.new_globals) {
+  // Check if we're on the text reading page (detect by config or legacy globals)
+  const hasTextReadingConfig = document.getElementById('text-reading-config') !== null;
+  if ($('#thetext').length > 0 && (hasTextReadingConfig || window.new_globals)) {
     initTextReading();
   }
 
-  // Check if we have header TTS data
-  if (typeof window._lwtPhoneticText !== 'undefined') {
+  // Check if we have header TTS data (detect by config or legacy globals)
+  const hasHeaderConfig = document.getElementById('text-header-config') !== null;
+  if (hasHeaderConfig || typeof window._lwtPhoneticText !== 'undefined') {
     initTextReadingHeader();
   }
 }

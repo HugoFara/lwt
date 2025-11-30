@@ -19,20 +19,6 @@
 
 use Lwt\Database\Settings;
 ?>
-<script type="text/javascript">
-    /**
-     * Show a supplementary field depending on long text import mode.
-     */
-    function updateImportMode(value) {
-        if (parseInt(value, 10) > 3) {
-            $('#imp_transl_delim').removeClass('hide');
-            $('#imp_transl_delim input').addClass('notempty');
-        } else {
-            $('#imp_transl_delim input').removeClass('notempty');
-            $('#imp_transl_delim').addClass('hide');
-        }
-    }
-</script>
 <p>
     <b>Important:</b><br />
     You must specify the term.
@@ -160,7 +146,7 @@ use Lwt\Database\Settings;
     <tr>
         <td class="td1"><b>Import Mode</b>:</td>
         <td class="td1">
-            <select name="Over" onchange="updateImportMode(this.value)" class="respinput">
+            <select name="Over" data-action="update-import-mode" class="respinput">
                 <option value="0" title="- don't overwrite existent terms&#x000A;- import new terms" selected="selected">
                     Import only new terms
                 </option>

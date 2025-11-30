@@ -107,6 +107,10 @@ import {
   initWordStatusChange,
   type WordStatusUpdateData
 } from './words/word_status_ajax';
+import {
+  updateImportMode,
+  showImportedTerms
+} from './words/word_upload';
 
 // Declare global window interface extensions
 declare global {
@@ -279,6 +283,10 @@ declare global {
 
     // Word status AJAX
     initWordStatusChange: typeof initWordStatusChange;
+
+    // Word upload
+    updateImportMode: typeof updateImportMode;
+    showImportedTerms: typeof showImportedTerms;
   }
 }
 
@@ -440,3 +448,7 @@ window.googleTranslateElementInit = googleTranslateElementInit;
 
 // Word status AJAX
 window.initWordStatusChange = initWordStatusChange;
+
+// Word upload
+window.updateImportMode = updateImportMode;
+window.showImportedTerms = showImportedTerms;

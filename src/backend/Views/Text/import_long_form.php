@@ -140,7 +140,7 @@
     </tr>
     <tr>
         <td class="td1 right" colspan="2">
-            <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='index.php';}" />
+            <input type="button" value="Cancel" data-action="cancel-form" data-url="index.php" />
             <input type="submit" name="op" value="NEXT STEP: Check the Texts" />
         </td>
     </tr>
