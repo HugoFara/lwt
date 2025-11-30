@@ -263,7 +263,7 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
     });
     edit_word_link = `<a name="rec${trans_data.ann_index}"></a>
     <span class="click"
-    onclick="oewin('edit_word.php?` + escape_html_chars(req_arg) + `');">
+    onclick="oewin('/word/edit?` + escape_html_chars(req_arg) + `');">
           <img src="icn/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
       </span>`;
   } else {
@@ -399,12 +399,12 @@ export function do_ajax_show_similar_terms(): void {
  * Prepare am HTML element that formats the sentences
  *
  * @param sentences    A list of sentences to display.
- * @param click_target The selector for the element that should change value on click
+ * @param targetCtlId The ID of the element that should change value on click
  * @returns A formatted group of sentences
  */
 export function display_example_sentences(
   sentences: [string, string][],
-  click_target: string
+  targetCtlId: string
 ): HTMLDivElement {
   let img: HTMLImageElement, clickable: HTMLSpanElement, parentDiv: HTMLDivElement;
   const outElement = document.createElement('div');
@@ -416,12 +416,9 @@ export function display_example_sentences(
     // Clickable element
     clickable = document.createElement('span');
     clickable.classList.add('click');
-    // Doesn't feel the right way to do it
-    clickable.setAttribute(
-      'onclick',
-      '{' + click_target + ".value = '" + sentences[i][1].replace(/'/g, "\\'") +
-      "';lwtFormCheck.makeDirty();}"
-    );
+    clickable.dataset.action = 'copy-sentence';
+    clickable.dataset.target = targetCtlId;
+    clickable.dataset.sentence = sentences[i][1];
     clickable.appendChild(img);
     // Create parent
     parentDiv = document.createElement('div');
@@ -483,3 +480,38 @@ export function do_ajax_show_sentences(lang: number, word: string, ctl: string, 
   }
 }
 
+/**
+ * Initialize event delegation for sentence-related actions.
+ *
+ * Handles elements with data-action attributes for sentence operations.
+ */
+function initSentenceEventDelegation(): void {
+  // Handle copy-sentence: copy sentence to textarea
+  $(document).on('click', '[data-action="copy-sentence"]', function (this: HTMLElement) {
+    const targetId = this.dataset.target;
+    const sentence = this.dataset.sentence;
+    if (targetId && sentence !== undefined) {
+      const target = document.getElementById(targetId) as HTMLTextAreaElement | null;
+      if (target) {
+        target.value = sentence;
+        lwtFormCheck.makeDirty();
+      }
+    }
+  });
+
+  // Handle show-sentences: load and display example sentences
+  $(document).on('click', '[data-action="show-sentences"]', function (this: HTMLElement) {
+    const lang = parseInt(this.dataset.lang || '0', 10);
+    const termlc = this.dataset.termlc || '';
+    const targetId = this.dataset.target || '';
+    const wid = parseInt(this.dataset.wid || '0', 10);
+    if (lang && termlc) {
+      do_ajax_show_sentences(lang, termlc, targetId, wid);
+    }
+  });
+}
+
+// Auto-initialize when DOM is ready
+$(document).ready(function () {
+  initSentenceEventDelegation();
+});

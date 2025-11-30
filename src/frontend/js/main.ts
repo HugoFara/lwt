@@ -87,6 +87,9 @@ import './languages/language_form';
 import './admin/server_data';
 import './admin/tts_settings';
 
+// Home
+import './home/home_warnings';
+
 // UI Components
 import './ui/modal';
 

@@ -23,7 +23,7 @@
 <td class="td1 right">Term:</td>
 <td class="td1">
     <input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp"
-    data_info="Term" type="text" name="WoText" id="wordfield" value="" maxlength="250" />
+    data_info="Term" type="text" name="WoText" id="WoText" value="" maxlength="250" />
     <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
 </tr>
 <?php print_similar_terms_tabrow(); ?>
@@ -44,7 +44,7 @@
 </tr>
 <tr>
 <td class="td1 right">Sentence<br />Term in {...}:</td>
-<td class="td1"><textarea <?php echo $scrdir; ?> name="WoSentence" cols="40" rows="3" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence"></textarea></td>
+<td class="td1"><textarea <?php echo $scrdir; ?> name="WoSentence" id="WoSentence" cols="40" rows="3" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence"></textarea></td>
 </tr>
 <tr>
 <td class="td1 right">Status:</td>
@@ -56,11 +56,11 @@
 <td class="td1 right" colspan="2">  &nbsp;
 <?php echo createDictLinksInEditWin2(
     $lgid,
-    'document.forms[\'newword\'].WoSentence',
-    'document.forms[\'newword\'].WoText'
+    'WoSentence',
+    'WoText'
 ); ?>
     &nbsp; &nbsp;
-<input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/words/edit';}" />
+<input type="button" value="Cancel" data-action="cancel-navigate" data-url="/words/edit" />
 <input type="submit" name="op" value="Save" /></td>
 </tr>
 </table>

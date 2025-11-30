@@ -312,9 +312,9 @@ export function keydown_event_do_text_text(e: JQuery.KeyDownEvent): boolean {
       url = 'edit_mword.php?wid=' + wid + '&len=' + getAttr(curr, 'data_code') +
         '&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;
     } else if (stat === '0') {
-      url = 'edit_word.php?wid=&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;
+      url = '/word/edit?wid=&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;
     } else {
-      url = 'edit_word.php?wid=' + wid + '&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;
+      url = '/word/edit?wid=' + wid + '&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;
     }
     showRightFrames(url);
     return false;

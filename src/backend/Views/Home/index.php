@@ -77,7 +77,7 @@ function renderLanguageSelector(int $langid, array $languages): void
 {
     ?>
 <div for="filterlang">Language:
-    <select id="filterlang" onchange="{setLang(document.getElementById('filterlang'),'/');}">
+    <select id="filterlang" data-action="set-lang" data-redirect="/">
         <?php echo SelectOptionsBuilder::forLanguages($languages, $langid, '[Select...]'); ?>
     </select>
 </div>
@@ -107,71 +107,19 @@ function renderWordPressLogout(bool $isWordPress): void
 /**
  * Load the content of warnings for visual display.
  *
+ * Outputs a JSON config element that is read by home_warnings.ts.
+ *
  * @return void
  */
 function renderWarningsScript(): void
 {
+    $config = [
+        'phpVersion' => phpversion(),
+        'lwtVersion' => LWT_APP_VERSION,
+    ];
     ?>
-<script type="text/javascript">
-    //<![CDATA[
-    const loadWarnings = {
-        cookiesDisabled: function () {
-            if (!areCookiesEnabled()) {
-                $('#cookies_disabled')
-                .html('*** Cookies are not enabled! Please enable them! ***');
-            }
-        },
-
-        shouldUpdate: function (from_version, to_version) {
-            const regex = /^(\d+)\.(\d+)\.(\d+)(?:-[\w.-]+)?/;
-            const match1 = from_version.match(regex);
-            const match2 = to_version.match(regex);
-            let level1, level2;
-
-            for (let i = 1; i < 4; i++) {
-                level1 = parseInt(match1[i], 10);
-                level2 = parseInt(match2[i], 10);
-                if (level1 < level2) {
-                    return true;
-                } else if (level1 > level2) {
-                    return false;
-                }
-            }
-
-            return null;
-        },
-
-        outdatedPHP: function (php_version) {
-            const php_min_version = '8.0.0';
-            if (loadWarnings.shouldUpdate(php_version, php_min_version)) {
-                $('#php_update_required').html(
-                    '*** Your PHP version is ' + php_version + ', but version ' +
-                    php_min_version + ' is required. Please update it. ***'
-                )
-            }
-        },
-
-        updateLWT: function(lwt_version) {
-            $.getJSON(
-                'https://api.github.com/repos/hugofara/lwt/releases/latest'
-            ).done(function (data) {
-                const latest_version = data.tag_name;
-                if (loadWarnings.shouldUpdate(lwt_version, latest_version)) {
-                    $('#lwt_new_version').html(
-                        '*** An update for LWT is available: ' +
-                        latest_version +', your version is ' + lwt_version +
-                        '. <a href="https://github.com/HugoFara/lwt/releases/tag/' +
-                        latest_version + '">Download</a>.***'
-                    );
-                }
-            });
-        }
-    }
-
-    loadWarnings.cookiesDisabled();
-    loadWarnings.outdatedPHP(<?php echo json_encode(phpversion()); ?>);
-    loadWarnings.updateLWT(<?php echo json_encode(LWT_APP_VERSION); ?>);
-    //]]>
+<script type="application/json" id="home-warnings-config">
+<?php echo json_encode($config, JSON_UNESCAPED_SLASHES); ?>
 </script>
     <?php
 }

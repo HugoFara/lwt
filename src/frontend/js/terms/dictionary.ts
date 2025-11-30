@@ -8,6 +8,7 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
+import $ from 'jquery';
 import { escape_apostrophes } from '../core/html_utils';
 import { showRightFrames } from '../reading/frame_management';
 
@@ -269,3 +270,96 @@ export function translateWord2(url: string, wordctl: HTMLInputElement | undefine
 export function translateWord3(url: string, word: string): void {
   owin(createTheDictUrl(url, word));
 }
+
+/**
+ * Initialize event delegation for dictionary action elements.
+ *
+ * Handles elements with data-action attributes for dictionary operations.
+ */
+function initDictionaryEventDelegation(): void {
+  // Handle dict-popup: open dictionary in popup window
+  $(document).on('click', '[data-action="dict-popup"]', function (this: HTMLElement) {
+    const url = this.dataset.url;
+    if (url) {
+      owin(url);
+    }
+  });
+
+  // Handle dict-frame: open dictionary in right frame
+  $(document).on('click', '[data-action="dict-frame"]', function () {
+    showRightFrames();
+  });
+
+  // Handle dict-auto-popup: auto-open dictionary in popup on page load
+  $('[data-action="dict-auto-popup"]').each(function (this: HTMLElement) {
+    const url = this.dataset.url;
+    if (url) {
+      owin(url);
+    }
+  });
+
+  // Handle dict-auto-frame: auto-open dictionary in frame on page load
+  $('[data-action="dict-auto-frame"]').each(function (this: HTMLElement) {
+    const url = this.dataset.url;
+    if (url && top?.frames) {
+      const ruFrame = top.frames['ru' as unknown as number] as Window | undefined;
+      if (ruFrame) {
+        ruFrame.location.href = url;
+      }
+    }
+  });
+
+  // Handle translate-word: translate word in iframe
+  $(document).on('click', '[data-action="translate-word"]', function (this: HTMLElement) {
+    const url = this.dataset.url;
+    const wordctlId = this.dataset.wordctl;
+    if (url && wordctlId) {
+      const wordctl = document.getElementById(wordctlId) as HTMLInputElement | null;
+      translateWord(url, wordctl ?? undefined);
+    }
+  });
+
+  // Handle translate-word-popup: translate word in popup
+  $(document).on('click', '[data-action="translate-word-popup"]', function (this: HTMLElement) {
+    const url = this.dataset.url;
+    const wordctlId = this.dataset.wordctl;
+    if (url && wordctlId) {
+      const wordctl = document.getElementById(wordctlId) as HTMLInputElement | null;
+      translateWord2(url, wordctl ?? undefined);
+    }
+  });
+
+  // Handle translate-word-direct: translate word directly (word in data attribute)
+  $(document).on('click', '[data-action="translate-word-direct"]', function (this: HTMLElement) {
+    const url = this.dataset.url;
+    const word = this.dataset.word;
+    if (url && word) {
+      translateWord3(url, word);
+    }
+  });
+
+  // Handle translate-sentence: translate sentence in iframe
+  $(document).on('click', '[data-action="translate-sentence"]', function (this: HTMLElement) {
+    const url = this.dataset.url;
+    const sentctlId = this.dataset.sentctl;
+    if (url && sentctlId) {
+      const sentctl = document.getElementById(sentctlId) as HTMLTextAreaElement | null;
+      translateSentence(url, sentctl ?? undefined);
+    }
+  });
+
+  // Handle translate-sentence-popup: translate sentence in popup
+  $(document).on('click', '[data-action="translate-sentence-popup"]', function (this: HTMLElement) {
+    const url = this.dataset.url;
+    const sentctlId = this.dataset.sentctl;
+    if (url && sentctlId) {
+      const sentctl = document.getElementById(sentctlId) as HTMLTextAreaElement | null;
+      translateSentence2(url, sentctl ?? undefined);
+    }
+  });
+}
+
+// Auto-initialize when DOM is ready
+$(document).ready(function () {
+  initDictionaryEventDelegation();
+});

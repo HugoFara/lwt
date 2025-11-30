@@ -54,7 +54,7 @@ use Lwt\Core\Http\InputValidator;
        <td class="td1">
            <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp"
            data_info="Term" type="text"
-           name="WoText" id="wordfield"
+           name="WoText" id="WoText"
            value="<?php echo tohtml($term); ?>" maxlength="250" size="35" />
            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
            alt="Field must not be empty" />
@@ -88,7 +88,7 @@ use Lwt\Core\Http\InputValidator;
    <tr>
        <td class="td1 right">Sentence<br />Term in {...}:</td>
        <td class="td1">
-           <textarea <?php echo $scrdir; ?> name="WoSentence"
+           <textarea <?php echo $scrdir; ?> name="WoSentence" id="WoSentence"
            class="textarea-noreturn checklength checkoutsidebmp"
            data_maxlength="1000" data_info="Sentence" cols="35"
            rows="3"><?php echo tohtml($sentence); ?></textarea>
@@ -106,14 +106,14 @@ use Lwt\Core\Http\InputValidator;
            if ($fromAnn !== '') {
                echo createDictLinksInEditWin2(
                    $lang,
-                   'document.forms[0].WoSentence',
-                   'document.forms[0].WoText'
+                   'WoSentence',
+                   'WoText'
                );
            } else {
                echo (new \Lwt\Services\DictionaryService())->createDictLinksInEditWin(
                    $lang,
                    $term,
-                   'document.forms[0].WoSentence',
+                   'WoSentence',
                    !InputValidator::hasFromGet('nodict')
                );
            }
@@ -129,7 +129,7 @@ use Lwt\Core\Http\InputValidator;
 example_sentences_area(
     $lang,
     $termlc,
-    'document.forms.editword.WoSentence',
+    'WoSentence',
     $wid
 );
 ?>

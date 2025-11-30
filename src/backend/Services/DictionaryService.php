@@ -94,12 +94,12 @@ class DictionaryService
      *
      * @param int    $lang      Language ID
      * @param string $word      Word to look up
-     * @param string $sentctljs JavaScript for sentence translation
+     * @param string $sentctlid ID of the sentence textarea element
      * @param bool   $openfirst True if we should open right frames with translation first
      *
      * @return string HTML-formatted interface
      */
-    public function createDictLinksInEditWin(int $lang, string $word, string $sentctljs, bool $openfirst): string
+    public function createDictLinksInEditWin(int $lang, string $word, string $sentctlid, bool $openfirst): string
     {
         $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
         FROM ' . $this->tbpref . 'languages
@@ -112,21 +112,23 @@ class DictionaryService
         (string) $record['LgGoogleTranslateURI'] : "";
         mysqli_free_result($res);
         $r = '';
+        $dictUrl = self::createTheDictLink($wb1, $word);
         if ($openfirst) {
-            $r .= '<script type="text/javascript">';
-            $r .= "\n//<![CDATA[\n";
-            $r .= $this->makeOpenDictStrJS(self::createTheDictLink($wb1, $word));
-            $r .= "//]]>\n</script>\n";
+            // Use data attribute for auto-init instead of inline script
+            $popup = str_starts_with($wb1, '*') || str_contains($wb1, 'lwt_popup=');
+            $action = $popup ? 'dict-auto-popup' : 'dict-auto-frame';
+            $r .= '<span data-action="' . $action . '" data-url="' .
+            htmlspecialchars($dictUrl, ENT_QUOTES, 'UTF-8') . '" style="display:none;"></span>';
         }
         $r .= 'Lookup Term: ';
-        $r .= $this->makeOpenDictStr(self::createTheDictLink($wb1, $word), "Dict1");
+        $r .= $this->makeOpenDictStr($dictUrl, "Dict1");
         if ($wb2 != "") {
             $r .= $this->makeOpenDictStr(self::createTheDictLink($wb2, $word), "Dict2");
         }
         if ($wb3 != "") {
             $r .= $this->makeOpenDictStr(self::createTheDictLink($wb3, $word), "Translator") .
             ' | ' .
-            $this->makeOpenDictStrDynSent($wb3, $sentctljs, "Translate sentence");
+            $this->makeOpenDictStrDynSent($wb3, $sentctlid, "Translate sentence");
         }
         return $r;
     }
@@ -160,13 +162,13 @@ class DictionaryService
             }
         }
         if ($popup) {
-            $r = ' <span class="click" onclick="owin(' .
-            json_encode($url) . ');">' .
+            $r = ' <span class="click" data-action="dict-popup" data-url="' .
+            htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">' .
             \tohtml($txt) .
             '</span> ';
         } else {
-            $r = ' <a href="' . $url .
-            '" target="ru" onclick="showRightFrames();">' .
+            $r = ' <a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') .
+            '" target="ru" data-action="dict-frame">' .
             \tohtml($txt) . '</a> ';
         }
         return $r;
@@ -209,7 +211,7 @@ class DictionaryService
      *                          * If it contains the query "lwt_popup", open in Popup
      *                          * Starts with a '*': open in pop-up window (deprecated)
      *                          * Otherwise open in iframe
-     * @param string $sentctljs Clickable text to display
+     * @param string $sentctlid ID of the textarea element containing the sentence
      * @param string $txt       Clickable text to display
      *
      * @return string HTML-formatted string
@@ -217,7 +219,7 @@ class DictionaryService
      * @since 2.7.0-fork Supports LibreTranslate, using other string that proper URL is
      *                   deprecated.
      */
-    public function makeOpenDictStrDynSent(string $url, string $sentctljs, string $txt): string
+    public function makeOpenDictStrDynSent(string $url, string $sentctlid, string $txt): string
     {
         $r = '';
         if ($url == '') {
@@ -241,8 +243,10 @@ class DictionaryService
         ) {
             $url = str_replace('?', '?sent=1&', $url);
         }
-        return '<span class="click" onclick="translateSentence' . ($popup ? '2' : '') . '(' .
-        json_encode($url) . ',' . $sentctljs . ');">' .
+        $action = $popup ? 'translate-sentence-popup' : 'translate-sentence';
+        return '<span class="click" data-action="' . $action . '" ' .
+        'data-url="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" ' .
+        'data-sentctl="' . htmlspecialchars($sentctlid, ENT_QUOTES, 'UTF-8') . '">' .
         \tohtml($txt) . '</span>';
     }
 
@@ -250,12 +254,12 @@ class DictionaryService
      * Returns dictionary links formatted as HTML (alternate version).
      *
      * @param int    $lang      Language ID
-     * @param string $sentctljs JavaScript for sentence
-     * @param string $wordctljs JavaScript for word
+     * @param string $sentctlid ID of the sentence textarea element
+     * @param string $wordctlid ID of the word input element
      *
      * @return string HTML formatted interface
      */
-    public function createDictLinksInEditWin2(int $lang, string $sentctljs, string $wordctljs): string
+    public function createDictLinksInEditWin2(int $lang, string $sentctlid, string $wordctlid): string
     {
         $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
         FROM " . $this->tbpref . "languages WHERE LgID = $lang";
@@ -277,23 +281,24 @@ class DictionaryService
         mysqli_free_result($res);
 
         $r = 'Lookup Term:
-        <span class="click" onclick="translateWord2(' . json_encode($wb1) .
-        ',' . $wordctljs . ');">Dict1</span> ';
+        <span class="click" data-action="translate-word-popup" ' .
+        'data-url="' . htmlspecialchars($wb1, ENT_QUOTES, 'UTF-8') . '" ' .
+        'data-wordctl="' . htmlspecialchars($wordctlid, ENT_QUOTES, 'UTF-8') . '">Dict1</span> ';
         if ($wb2 != "") {
-            $r .= '<span class="click" onclick="translateWord2(' .
-            json_encode($wb2) . ',' . $wordctljs . ');">Dict2</span> ';
+            $r .= '<span class="click" data-action="translate-word-popup" ' .
+            'data-url="' . htmlspecialchars($wb2, ENT_QUOTES, 'UTF-8') . '" ' .
+            'data-wordctl="' . htmlspecialchars($wordctlid, ENT_QUOTES, 'UTF-8') . '">Dict2</span> ';
         }
         if ($wb3 != "") {
             $sent_mode = substr($wb3, 0, 7) == 'ggl.php' ||
-            str_ends_with(parse_url($wb3, PHP_URL_PATH), '/ggl.php');
-            $r .= '<span class="click" onclick="translateWord2(' .
-            json_encode($wb3) . ',' . $wordctljs . ');">Translator</span>
-             | <span class="click" onclick="translateSentence2(' .
-            json_encode(
-                $sent_mode ?
-                str_replace('?', '?sent=1&', $wb3) : $wb3
-            ) . ',' . $sentctljs .
-             ');">Translate sentence</span>';
+            str_ends_with(parse_url($wb3, PHP_URL_PATH) ?? '', '/ggl.php');
+            $sentUrl = $sent_mode ? str_replace('?', '?sent=1&', $wb3) : $wb3;
+            $r .= '<span class="click" data-action="translate-word-popup" ' .
+            'data-url="' . htmlspecialchars($wb3, ENT_QUOTES, 'UTF-8') . '" ' .
+            'data-wordctl="' . htmlspecialchars($wordctlid, ENT_QUOTES, 'UTF-8') . '">Translator</span>
+             | <span class="click" data-action="translate-sentence-popup" ' .
+            'data-url="' . htmlspecialchars($sentUrl, ENT_QUOTES, 'UTF-8') . '" ' .
+            'data-sentctl="' . htmlspecialchars($sentctlid, ENT_QUOTES, 'UTF-8') . '">Translate sentence</span>';
         }
         return $r;
     }
@@ -301,12 +306,12 @@ class DictionaryService
     /**
      * Make dictionary links HTML.
      *
-     * @param int    $lang      Language ID
-     * @param string $wordctljs JavaScript for word control
+     * @param int    $lang Language ID
+     * @param string $word The word to translate
      *
      * @return string HTML formatted links
      */
-    public function makeDictLinks(int $lang, string $wordctljs): string
+    public function makeDictLinks(int $lang, string $word): string
     {
         $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
         FROM ' . $this->tbpref . 'languages WHERE LgID = ' . $lang;
@@ -326,16 +331,20 @@ class DictionaryService
             $wb3 = substr($wb3, 1);
         }
         mysqli_free_result($res);
+        $escapedWord = htmlspecialchars($word, ENT_QUOTES, 'UTF-8');
         $r = '<span class="smaller">';
-        $r .= '<span class="click" onclick="translateWord3(' .
-        json_encode($wb1) . ',' . $wordctljs . ');">[1]</span> ';
+        $r .= '<span class="click" data-action="translate-word-direct" ' .
+        'data-url="' . htmlspecialchars($wb1, ENT_QUOTES, 'UTF-8') . '" ' .
+        'data-word="' . $escapedWord . '">[1]</span> ';
         if ($wb2 != "") {
-            $r .= '<span class="click" onclick="translateWord3(' .
-            json_encode($wb2) . ',' . $wordctljs . ');">[2]</span> ';
+            $r .= '<span class="click" data-action="translate-word-direct" ' .
+            'data-url="' . htmlspecialchars($wb2, ENT_QUOTES, 'UTF-8') . '" ' .
+            'data-word="' . $escapedWord . '">[2]</span> ';
         }
         if ($wb3 != "") {
-            $r .= '<span class="click" onclick="translateWord3(' .
-            json_encode($wb3) . ',' . $wordctljs . ');">[G]</span>';
+            $r .= '<span class="click" data-action="translate-word-direct" ' .
+            'data-url="' . htmlspecialchars($wb3, ENT_QUOTES, 'UTF-8') . '" ' .
+            'data-word="' . $escapedWord . '">[G]</span>';
         }
         $r .= '</span>';
         return $r;
@@ -345,12 +354,12 @@ class DictionaryService
      * Create dictionary links for edit window (version 3).
      *
      * @param int    $lang      Language ID
-     * @param string $sentctljs JavaScript for sentence
-     * @param string $wordctljs JavaScript for word
+     * @param string $sentctlid ID of the sentence textarea element
+     * @param string $wordctlid ID of the word input element
      *
      * @return string HTML formatted interface
      */
-    public function createDictLinksInEditWin3(int $lang, string $sentctljs, string $wordctljs): string
+    public function createDictLinksInEditWin3(int $lang, string $sentctlid, string $wordctlid): string
     {
         $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
         FROM " . $this->tbpref . "languages WHERE LgID = $lang";
@@ -358,71 +367,65 @@ class DictionaryService
         $record = mysqli_fetch_assoc($res);
 
         $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
-        $popup = false;
+        $popup1 = false;
         if (substr($wb1, 0, 1) == '*') {
-            $wb1 = substr($wb1, 0, 1);
-            $popup = true;
+            $wb1 = substr($wb1, 1);
+            $popup1 = true;
         }
-        $popup = $popup || str_contains($wb1, "lwt_popup=");
-        if ($popup) {
-            $f1 = 'translateWord2(' . json_encode($wb1);
-        } else {
-            $f1 = 'translateWord(' . json_encode($wb1);
-        }
+        $popup1 = $popup1 || str_contains($wb1, "lwt_popup=");
 
         $wb2 = isset($record['LgDict2URI']) ? (string) $record['LgDict2URI'] : "";
-        $popup = false;
+        $popup2 = false;
         if (substr($wb2, 0, 1) == '*') {
-            $wb2 = substr($wb2, 0, 1);
-            $popup = true;
+            $wb2 = substr($wb2, 1);
+            $popup2 = true;
         }
-        $popup = $popup || str_contains($wb2, "lwt_popup=");
-        if ($popup) {
-            $f2 = 'translateWord2(' . json_encode($wb2);
-        } else {
-            $f2 = 'translateWord(' . json_encode($wb2);
-        }
+        $popup2 = $popup2 || str_contains($wb2, "lwt_popup=");
 
         $wb3 = isset($record['LgGoogleTranslateURI']) ?
         (string) $record['LgGoogleTranslateURI'] : "";
-        $popup = false;
+        $popup3 = false;
         if (substr($wb3, 0, 1) == '*') {
-            $wb3 = substr($wb3, 0, 1);
-            $popup = true;
+            $wb3 = substr($wb3, 1);
+            $popup3 = true;
         }
         $parsed_url = parse_url($wb3);
         if ($wb3 != '' && $parsed_url === false) {
             $prefix = 'http://';
             $parsed_url = parse_url($prefix . $wb3);
         }
-        if (array_key_exists('query', $parsed_url)) {
+        if (is_array($parsed_url) && array_key_exists('query', $parsed_url)) {
             parse_str($parsed_url['query'], $url_query);
-            $popup = $popup || array_key_exists('lwt_popup', $url_query);
+            $popup3 = $popup3 || array_key_exists('lwt_popup', $url_query);
         }
-        if ($popup) {
-            $f3 = 'translateWord2(' . json_encode($wb3);
-            $f4 = 'translateSentence2(' . json_encode($wb3);
-        } else {
-            $f3 = 'translateWord(' . json_encode($wb3);
-            $f4 = 'translateSentence(' . json_encode(
-                (str_ends_with($parsed_url['path'] ?? '', "/ggl.php")) ?
-                str_replace('?', '?sent=1&', $wb3) : $wb3
-            );
-        }
+        $sentUrl = (str_ends_with($parsed_url['path'] ?? '', "/ggl.php")) ?
+            str_replace('?', '?sent=1&', $wb3) : $wb3;
 
         mysqli_free_result($res);
         $r = '';
         $r .= 'Lookup Term: ';
-        $r .= '<span class="click" onclick="' . $f1 . ',' . $wordctljs . ');">
+        $action1 = $popup1 ? 'translate-word-popup' : 'translate-word';
+        $r .= '<span class="click" data-action="' . $action1 . '" ' .
+        'data-url="' . htmlspecialchars($wb1, ENT_QUOTES, 'UTF-8') . '" ' .
+        'data-wordctl="' . htmlspecialchars($wordctlid, ENT_QUOTES, 'UTF-8') . '">
         Dict1</span> ';
         if ($wb2 != "") {
-            $r .= '<span class="click" onclick="' . $f2 . ',' . $wordctljs . ');">
+            $action2 = $popup2 ? 'translate-word-popup' : 'translate-word';
+            $r .= '<span class="click" data-action="' . $action2 . '" ' .
+            'data-url="' . htmlspecialchars($wb2, ENT_QUOTES, 'UTF-8') . '" ' .
+            'data-wordctl="' . htmlspecialchars($wordctlid, ENT_QUOTES, 'UTF-8') . '">
             Dict2</span> ';
         }
         if ($wb3 != "") {
-            $r .= '<span class="click" onclick="' . $f3 . ',' . $wordctljs . ');">
+            $action3 = $popup3 ? 'translate-word-popup' : 'translate-word';
+            $action4 = $popup3 ? 'translate-sentence-popup' : 'translate-sentence';
+            $r .= '<span class="click" data-action="' . $action3 . '" ' .
+            'data-url="' . htmlspecialchars($wb3, ENT_QUOTES, 'UTF-8') . '" ' .
+            'data-wordctl="' . htmlspecialchars($wordctlid, ENT_QUOTES, 'UTF-8') . '">
             Translator</span> |
-            <span class="click" onclick="' . $f4 . ',' . $sentctljs . ');">
+            <span class="click" data-action="' . $action4 . '" ' .
+            'data-url="' . htmlspecialchars($sentUrl, ENT_QUOTES, 'UTF-8') . '" ' .
+            'data-sentctl="' . htmlspecialchars($sentctlid, ENT_QUOTES, 'UTF-8') . '">
             Translate sentence</span>';
         }
         return $r;

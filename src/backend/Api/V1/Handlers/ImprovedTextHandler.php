@@ -286,7 +286,7 @@ class ImprovedTextHandler
                 if ($wid !== null) {
                     $wordLink = '<a name="rec' . $i . '"></a>
                     <span class="click"
-                    onclick="oewin(\'edit_word.php?fromAnn=\' + $(document).scrollTop() + \'&amp;wid=' .
+                    onclick="oewin(\'/word/edit?fromAnn=\' + $(document).scrollTop() + \'&amp;wid=' .
                     $wid . '&amp;tid=' . $textid . '&amp;ord=' . (int)$vals[0] . '\');">
                         <img src="/assets/icons/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
                     </span>';
@@ -298,7 +298,7 @@ class ImprovedTextHandler
                         '</span>
                     </td>
                     <td class="td1 center" nowrap="nowrap">' .
-                        \makeDictLinks($langid, json_encode($vals[1])) .
+                        \makeDictLinks($langid, $vals[1]) .
                     '</td>
                     <td class="td1 center">
                         <span id="editlink' . $i . '">' . $wordLink . '</span>

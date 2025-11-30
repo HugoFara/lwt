@@ -88,7 +88,7 @@ export const mwordDragNDrop: MwordDragNDropState = {
         } else {
           // Create only a normal word
           showRightFrames(
-            'edit_word.php?' + $.param({
+            '/word/edit?' + $.param({
               tid: LWT_DATA.text.id,
               ord: word_ord,
               txt: $('#ID-' + word_ord + '-1').text()

@@ -573,7 +573,7 @@ export function make_overlib_link_new_word(
   torder: string | number,
   wid: string | number
 ): string {
-  return ' <a href="edit_word.php?tid=' + txid +
+  return ' <a href="/word/edit?tid=' + txid +
     '&amp;ord=' + torder +
     '&amp;wid=' + wid + '" target="ro" onclick="showRightFrames();">Learn term</a> ';
 }
@@ -674,7 +674,7 @@ export function make_overlib_link_edit_word(
   torder: string | number,
   wid: string | number
 ): string {
-  const url = 'edit_word.php?tid=' + txid +
+  const url = '/word/edit?tid=' + txid +
     '&amp;ord=' + torder +
     '&amp;wid=' + wid;
   return ' <a href="' + url +
@@ -696,7 +696,7 @@ export function make_overlib_link_edit_word_title(
   torder: string | number,
   wid: string | number
 ): string {
-  return '<a style="color:yellow" href="edit_word.php?tid=' +
+  return '<a style="color:yellow" href="/word/edit?tid=' +
     txid + '&amp;ord=' + torder +
     '&amp;wid=' + wid + '" target="ro" onclick="showRightFrames();">' +
     text + '</a>';

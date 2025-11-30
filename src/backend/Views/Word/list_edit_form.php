@@ -26,7 +26,7 @@
 </tr>
 <tr title="Normally only change uppercase/lowercase here!">
    <td class="td1 right">Term:</td>
-   <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="wordfield" value="<?php echo tohtml($word['WoText']); ?>" maxlength="250" size="40" /> <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+   <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="WoText" value="<?php echo tohtml($word['WoText']); ?>" maxlength="250" size="40" /> <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
    </td>
 </tr>
 <?php print_similar_terms_tabrow(); ?>
@@ -51,7 +51,7 @@
 </tr>
 <tr>
    <td class="td1 right">Sentence<br />Term in {...}:</td>
-   <td class="td1"><textarea <?php echo $scrdir; ?> class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" name="WoSentence" cols="40" rows="3"><?php echo tohtml($word['WoSentence']); ?></textarea></td>
+   <td class="td1"><textarea <?php echo $scrdir; ?> class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" name="WoSentence" id="WoSentence" cols="40" rows="3"><?php echo tohtml($word['WoSentence']); ?></textarea></td>
 </tr>
 <tr>
    <td class="td1 right">Status:</td>
@@ -61,9 +61,9 @@
 </tr>
 <tr>
    <td class="td1 right" colspan="2">  &nbsp;
-       <?php echo createDictLinksInEditWin2($word['WoLgID'], 'document.forms[\'editword\'].WoSentence', 'document.forms[\'editword\'].WoText'); ?>
+       <?php echo createDictLinksInEditWin2($word['WoLgID'], 'WoSentence', 'WoText'); ?>
        &nbsp; &nbsp;
-       <input type="button" value="Cancel" onclick="{lwtFormCheck.resetDirty(); location.href='/words/edit#rec<?php echo $word['WoID']; ?>';}" />
+       <input type="button" value="Cancel" data-action="cancel-navigate" data-url="/words/edit#rec<?php echo $word['WoID']; ?>" />
        <input type="submit" name="op" value="Change" />
    </td>
 </tr>
@@ -71,5 +71,5 @@
 </form>
 <?php
 // Display example sentence button
-example_sentences_area($word['WoLgID'], $word['WoTextLC'], "document.forms['editword'].WoSentence", $word['WoID']);
+example_sentences_area($word['WoLgID'], $word['WoTextLC'], "WoSentence", $word['WoID']);
 ?>
