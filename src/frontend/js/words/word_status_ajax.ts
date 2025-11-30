@@ -7,8 +7,8 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
-import { updateWordStatusInDOM, updateLearnStatus } from './word_dom_updates';
+import { TermsApi } from '../api/terms';
+import { updateWordStatusInDOM } from './word_dom_updates';
 import { cleanupRightFrames } from '../reading/frame_management';
 
 export interface WordStatusUpdateData {
@@ -24,7 +24,10 @@ export interface WordStatusUpdateData {
  * Display error message for failed word status update.
  */
 export function wordUpdateError(): void {
-  $('#status_change_log').text('Word status update failed!');
+  const logEl = document.getElementById('status_change_log');
+  if (logEl) {
+    logEl.textContent = 'Word status update failed!';
+  }
   cleanupRightFrames();
 }
 
@@ -34,7 +37,10 @@ export function wordUpdateError(): void {
  * @param data Word status update data
  */
 export function applyWordUpdate(data: WordStatusUpdateData): void {
-  $('#status_change_log').text(`Term status changed to ${data.status}`);
+  const logEl = document.getElementById('status_change_log');
+  if (logEl) {
+    logEl.textContent = `Term status changed to ${data.status}`;
+  }
 
   updateWordStatusInDOM(
     data.wid,
@@ -46,7 +52,10 @@ export function applyWordUpdate(data: WordStatusUpdateData): void {
 
   const frameH = window.parent?.document?.getElementById('frame-h');
   if (frameH) {
-    $('#learnstatus', frameH).html(data.todoContent);
+    const learnStatus = frameH.querySelector('#learnstatus');
+    if (learnStatus) {
+      learnStatus.innerHTML = data.todoContent;
+    }
   }
 
   cleanupRightFrames();
@@ -57,19 +66,14 @@ export function applyWordUpdate(data: WordStatusUpdateData): void {
  *
  * @param data Word status update data
  */
-export function updateWordStatusAjax(data: WordStatusUpdateData): void {
-  $.post(
-    `api.php/v1/terms/${data.wid}/status/${data.status}`,
-    {},
-    function (response: '' | { error?: string }) {
-      if (response === '' || (typeof response === 'object' && 'error' in response)) {
-        wordUpdateError();
-      } else {
-        applyWordUpdate(data);
-      }
-    },
-    'json'
-  );
+export async function updateWordStatusAjax(data: WordStatusUpdateData): Promise<void> {
+  const response = await TermsApi.setStatus(data.wid, data.status);
+
+  if (response.error) {
+    wordUpdateError();
+  } else {
+    applyWordUpdate(data);
+  }
 }
 
 /**
@@ -100,5 +104,9 @@ function autoInitWordStatusChange(): void {
   }
 }
 
-// Auto-initialize on document ready
-$(document).ready(autoInitWordStatusChange);
+// Auto-initialize on DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', autoInitWordStatusChange);
+} else {
+  autoInitWordStatusChange();
+}

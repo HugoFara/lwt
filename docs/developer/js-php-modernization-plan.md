@@ -696,11 +696,11 @@ Phase 1.2  Create domain API modules               [Foundation] ✓ DONE
     │   Phase 2.2  Extend TermHandler              [Backend] ✓ DONE
     │   Phase 2.3  Extend ReviewHandler            [Backend] ✓ DONE
     │
-    └── Phase 3.1  Migrate ajax_utilities.ts       [Quick win]
-        Phase 3.2  Migrate word_status_ajax.ts     [Quick win]
-        Phase 3.3  Migrate text_display.ts         [Quick win]
-        Phase 3.4  Migrate test_ajax.ts            [Moderate]
-        Phase 3.5  Migrate term_operations.ts      [Moderate]
+    └── Phase 3.1  Migrate ajax_utilities.ts       [Quick win] ✓ DONE
+        Phase 3.2  Migrate word_status_ajax.ts     [Quick win] ✓ DONE
+        Phase 3.3  Migrate text_display.ts         [Quick win] ✓ DONE
+        Phase 3.4  Migrate test_ajax.ts            [Moderate] ✓ DONE
+        Phase 3.5  Migrate term_operations.ts      [Moderate] ✓ DONE
             │
             └── Phase 4.1  Create word_actions.ts  [Major]
                 Phase 4.2  Event delegation        [Major]

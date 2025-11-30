@@ -10,6 +10,8 @@ import $ from 'jquery';
 import { escape_html_chars } from '../core/html_utils';
 import { isInt } from '../forms/form_validation';
 import { scrollTo } from '../core/hover_intent';
+import { apiPost, apiGet } from '../core/api_client';
+import { TermsApi } from '../api/terms';
 
 // Interface for lwtFormCheck
 interface LwtFormCheck {
@@ -65,27 +67,22 @@ export function setTransRoman(tra: string, rom: string): void {
  * @param elem_name Name of the element of which to change annotation (e. g.: "rg1")
  * @param form_data All the data from the form (e. g. {"rg0": "foo", "rg1": "bar"})
  */
-export function do_ajax_save_impr_text(textid: number, elem_name: string, form_data: string): void {
+export async function do_ajax_save_impr_text(textid: number, elem_name: string, form_data: string): Promise<void> {
   const idwait = '#wait' + elem_name.substring(2);
   $(idwait).html('<img src="icn/waiting2.gif" />');
-  // elem: "rg2", form_data: {"rg2": "translation"}
-  $.post(
-    'api.php/v1/texts/' + textid + '/annotation',
-    {
-      elem: elem_name,
-      data: form_data
-    },
-    function (data: { error?: string }) {
-      $(idwait).html('<img src="icn/empty.gif" />');
-      if ('error' in data) {
-        alert(
-          'Saving your changes failed, please reload the page and try again! ' +
-          'Error message: "' + data.error + '".'
-        );
-      }
-    },
-    'json'
+
+  const response = await apiPost<{ error?: string }>(
+    `/texts/${textid}/annotation`,
+    { elem: elem_name, data: form_data }
   );
+
+  $(idwait).html('<img src="icn/empty.gif" />');
+  if (response.error || response.data?.error) {
+    alert(
+      'Saving your changes failed, please reload the page and try again! ' +
+      'Error message: "' + (response.error || response.data?.error) + '".'
+    );
+  }
 }
 
 // Extend jQuery with serializeObject
@@ -122,36 +119,25 @@ export function changeImprAnnRadio(this: HTMLElement): void {
  * @param wordid Word ID
  * @param txid   Text HTML ID or unique HTML selector
  */
-export function updateTermTranslation(wordid: number, txid: string): void {
+export async function updateTermTranslation(wordid: number, txid: string): Promise<void> {
   const translation = ($(txid).val() as string).trim();
   const pagepos = $(document).scrollTop() || 0;
   if (translation === '' || translation === '*') {
     alert('Text Field is empty or = \'*\'!');
     return;
   }
-  const request = {
-    translation
-  };
   const failure = 'Updating translation of term failed!' +
   'Please reload page and try again.';
-  $.post(
-    'api.php/v1/terms/' + wordid + '/translations',
-    request,
-    function (d: { error?: string; update?: string } | '') {
-      if (d === '') {
-        alert(failure);
-        return;
-      }
-      if (typeof d === 'object' && 'error' in d) {
-        alert(failure + '\n' + d.error);
-        return;
-      }
-      if (typeof d === 'object' && d.update) {
-        do_ajax_edit_impr_text(pagepos, d.update, wordid);
-      }
-    },
-    'json'
-  );
+
+  const response = await TermsApi.updateTranslation(wordid, translation);
+
+  if (response.error) {
+    alert(failure + '\n' + response.error);
+    return;
+  }
+  if (response.data?.update) {
+    do_ajax_edit_impr_text(pagepos, response.data.update, wordid);
+  }
 }
 
 /**
@@ -161,7 +147,7 @@ export function updateTermTranslation(wordid: number, txid: string): void {
  * @param word   Word text
  * @param lang   Language ID
  */
-export function addTermTranslation(txid: string, word: string, lang: number): void {
+export async function addTermTranslation(txid: string, word: string, lang: number): Promise<void> {
   const translation = ($(txid).val() as string).trim();
   const pagepos = $(document).scrollTop() || 0;
   if (translation === '' || translation === '*') {
@@ -170,28 +156,16 @@ export function addTermTranslation(txid: string, word: string, lang: number): vo
   }
   const failure = 'Adding translation to term failed!' +
   'Please reload page and try again.';
-  $.post(
-    'api.php/v1/terms/new',
-    {
-      translation,
-      term_text: word,
-      lg_id: lang
-    },
-    function (d: { error?: string; add?: string; term_id?: number } | '') {
-      if (d === '') {
-        alert(failure);
-        return;
-      }
-      if (typeof d === 'object' && 'error' in d) {
-        alert(failure + '\n' + d.error);
-        return;
-      }
-      if (typeof d === 'object' && d.add && d.term_id !== undefined) {
-        do_ajax_edit_impr_text(pagepos, d.add, d.term_id);
-      }
-    },
-    'json'
-  );
+
+  const response = await TermsApi.addWithTranslation(word, lang, translation);
+
+  if (response.error) {
+    alert(failure + '\n' + response.error);
+    return;
+  }
+  if (response.data?.add && response.data?.term_id !== undefined) {
+    do_ajax_edit_impr_text(pagepos, response.data.add, response.data.term_id);
+  }
 }
 
 /**
@@ -200,22 +174,16 @@ export function addTermTranslation(txid: string, word: string, lang: number): vo
  * @param wordid Word ID
  * @param up     true if status should be increased, false otherwise
  */
-export function changeTableTestStatus(wordid: string, up: boolean): void {
-  const status_change = up ? 'up' : 'down';
+export async function changeTableTestStatus(wordid: string, up: boolean): Promise<void> {
   const wid = parseInt(wordid, 10);
-  $.post(
-    'api.php/v1/terms/' + wid + '/status/' + status_change,
-    {},
-    function (data: { increment?: string; error?: string } | '') {
-      if (data === '' || (typeof data === 'object' && 'error' in data)) {
-        return;
-      }
-      if (typeof data === 'object' && data.increment) {
-        $('#STAT' + wordid).html(data.increment);
-      }
-    },
-    'json'
-  );
+  const response = await TermsApi.incrementStatus(wid, up ? 'up' : 'down');
+
+  if (response.error) {
+    return;
+  }
+  if (response.data?.increment) {
+    $('#STAT' + wordid).html(response.data.increment);
+  }
 }
 
 /**
@@ -331,7 +299,7 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
  *
  * @since 2.9.0 The new parameter $wid is now necessary
  */
-export function do_ajax_edit_impr_text(pagepos: number, word: string, term_id: number): void {
+export async function do_ajax_edit_impr_text(pagepos: number, word: string, term_id: number): Promise<void> {
   // Special case, on empty word reload the main annotations form
   if (word === '') {
     $('#editimprtextdata').html('<img src="icn/waiting2.gif" />');
@@ -340,23 +308,20 @@ export function do_ajax_edit_impr_text(pagepos: number, word: string, term_id: n
   }
   // Load the possible translations for a word
   const textid = parseInt(getAttr($('#editimprtextdata'), 'data_id') || '0', 10);
-  $.getJSON(
-    'api.php/v1/terms/' + term_id + '/translations',
-    {
-      text_id: textid,
-      term_lc: word
-    },
-    function (data: TransData & { error?: string }) {
-      if ('error' in data) {
-        alert(data.error);
-      } else {
-        edit_term_ann_translations(data, textid);
-        scrollTo(pagepos);
-        $('input.impr-ann-text').on('change', changeImprAnnText);
-        $('input.impr-ann-radio').on('change', changeImprAnnRadio);
-      }
-    }
+
+  const response = await apiGet<TransData & { error?: string }>(
+    `/terms/${term_id}/translations`,
+    { text_id: textid, term_lc: word }
   );
+
+  if (response.error || response.data?.error) {
+    alert(response.error || response.data?.error);
+  } else if (response.data) {
+    edit_term_ann_translations(response.data, textid);
+    scrollTo(pagepos);
+    $('input.impr-ann-text').on('change', changeImprAnnText);
+    $('input.impr-ann-radio').on('change', changeImprAnnRadio);
+  }
 }
 
 /**
@@ -364,35 +329,32 @@ export function do_ajax_edit_impr_text(pagepos: number, word: string, term_id: n
  *
  * @param lg_id Language ID
  * @param word_text Text to match
- * @returns Request used
+ * @returns Promise with similar terms data
  */
-export function do_ajax_req_sim_terms(lg_id: number, word_text: string): JQuery.jqXHR<{ similar_terms: string }> {
-  return $.getJSON(
-    'api.php/v1/similar-terms',
-    {
-      lg_id: lg_id,
-      term: word_text
-    }
+export async function do_ajax_req_sim_terms(lg_id: number, word_text: string): Promise<{ similar_terms: string } | null> {
+  const response = await apiGet<{ similar_terms: string }>(
+    '/similar-terms',
+    { lg_id, term: word_text }
   );
+  return response.data || null;
 }
 
 /**
  * Display the terms similar to a specific term with AJAX.
  */
-export function do_ajax_show_similar_terms(): void {
+export async function do_ajax_show_similar_terms(): Promise<void> {
   $('#simwords').html('<img src="icn/waiting2.gif" />');
-  do_ajax_req_sim_terms(
-    parseInt($('#langfield').val() as string, 10), $('#wordfield').val() as string
-  )
-    .done(
-      function (data: { similar_terms: string }) {
-        $('#simwords').html(data.similar_terms);
-      }
-    ).fail(
-      function (data: unknown) {
-        console.log(data);
-      }
-    );
+
+  const data = await do_ajax_req_sim_terms(
+    parseInt($('#langfield').val() as string, 10),
+    $('#wordfield').val() as string
+  );
+
+  if (data) {
+    $('#simwords').html(data.similar_terms);
+  } else {
+    console.log('Failed to load similar terms');
+  }
 }
 
 /**
@@ -451,32 +413,29 @@ export function change_example_sentences_zone(sentences: [string, string][], ctl
  * @param ctl  Selector for the element to edit on click
  * @param woid Term id (word or multi-word)
  */
-export function do_ajax_show_sentences(lang: number, word: string, ctl: string, woid: number | string): void {
+export async function do_ajax_show_sentences(lang: number, word: string, ctl: string, woid: number | string): Promise<void> {
   $('#exsent-interactable').css('display', 'none');
   $('#exsent-waiting').css('display', 'inherit');
 
+  let response;
   if (isInt(String(woid)) && woid !== -1) {
-    $.getJSON(
-      'api.php/v1/sentences-with-term/' + woid,
-      {
-        lg_id: lang,
-        word_lc: word
-      },
-      (data: [string, string][]) => change_example_sentences_zone(data, ctl)
+    response = await apiGet<[string, string][]>(
+      `/sentences-with-term/${woid}`,
+      { lg_id: lang, word_lc: word }
     );
   } else {
-    const query: { lg_id: number; word_lc: string; advanced_search?: boolean } = {
+    const params: { lg_id: number; word_lc: string; advanced_search?: boolean } = {
       lg_id: lang,
       word_lc: word
     };
     if (parseInt(String(woid), 10) === -1) {
-      query.advanced_search = true;
+      params.advanced_search = true;
     }
-    $.getJSON(
-      'api.php/v1/sentences-with-term',
-      query,
-      (data: [string, string][]) => change_example_sentences_zone(data, ctl)
-    );
+    response = await apiGet<[string, string][]>('/sentences-with-term', params);
+  }
+
+  if (response.data) {
+    change_example_sentences_zone(response.data, ctl);
   }
 }
 

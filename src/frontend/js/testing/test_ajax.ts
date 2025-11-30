@@ -12,6 +12,7 @@ import { cClick } from '../ui/word_popup';
 import { speechDispatcher } from '../core/user_interactions';
 import { word_click_event_do_test_test, keydown_event_do_test_test } from './test_mode';
 import { startElapsedTimer } from './elapsed_timer';
+import { ReviewApi } from '../api/review';
 
 // Interface for review data
 interface ReviewData {
@@ -100,34 +101,32 @@ export function doTestFinished(totalTests: number): void {
  * @param testKey Test session key
  * @param selection Test selection criteria
  */
-export function testQueryHandler(
+export async function testQueryHandler(
   currentTest: CurrentTest,
   totalTests: number,
   testKey: string,
   selection: string
-): void {
+): Promise<void> {
   if (currentTest.word_id === 0) {
     doTestFinished(totalTests);
-    $.getJSON(
-      'api.php/v1/review/tomorrow-count',
-      { test_key: testKey, selection: selection },
-      function (tomorrowTest: { count?: number }) {
-        if (tomorrowTest.count) {
-          $('#tests-tomorrow').css('display', 'inherit');
-          $('#tests-tomorrow').text(
-            "Tomorrow you'll find here " + tomorrowTest.count +
-            ' test' + (tomorrowTest.count < 2 ? '' : 's') + '!'
-          );
-        }
+    const response = await ReviewApi.getTomorrowCount(testKey, selection);
+    if (response.data?.count) {
+      const testsTomorrowEl = document.getElementById('tests-tomorrow');
+      if (testsTomorrowEl) {
+        testsTomorrowEl.style.display = 'inherit';
+        testsTomorrowEl.textContent =
+          "Tomorrow you'll find here " + response.data.count +
+          ' test' + (response.data.count < 2 ? '' : 's') + '!';
       }
-    );
+    }
   } else {
     insertNewWord(
       currentTest.word_id,
       currentTest.solution,
       currentTest.group
     );
-    if ($('#utterance-allowed').prop('checked')) {
+    const utteranceCheckbox = document.getElementById('utterance-allowed') as HTMLInputElement | null;
+    if (utteranceCheckbox?.checked) {
       prepareWordReading(currentTest.word_text, LWT_DATA.language.id);
     }
   }
@@ -138,23 +137,29 @@ export function testQueryHandler(
  *
  * @param reviewData Review session data
  */
-export function queryNextTerm(reviewData: ReviewData): void {
-  $.getJSON(
-    'api.php/v1/review/next-word',
-    {
-      test_key: reviewData.test_key,
-      selection: reviewData.selection,
-      word_mode: reviewData.word_mode,
-      lg_id: reviewData.lg_id,
-      word_regex: reviewData.word_regex,
-      type: reviewData.type
-    }
-  )
-    .done(function (data: CurrentTest) {
-      testQueryHandler(
-        data, reviewData.count, reviewData.test_key, reviewData.selection
-      );
-    });
+export async function queryNextTerm(reviewData: ReviewData): Promise<void> {
+  const response = await ReviewApi.getNextWord({
+    testKey: reviewData.test_key,
+    selection: reviewData.selection,
+    wordMode: reviewData.word_mode === 1,
+    lgId: reviewData.lg_id,
+    wordRegex: reviewData.word_regex,
+    type: reviewData.type
+  });
+
+  if (response.data) {
+    const data: CurrentTest = {
+      word_id: typeof response.data.word_id === 'string'
+        ? parseInt(response.data.word_id, 10)
+        : response.data.word_id,
+      solution: response.data.solution || '',
+      group: response.data.group,
+      word_text: response.data.word_text
+    };
+    await testQueryHandler(
+      data, reviewData.count, reviewData.test_key, reviewData.selection
+    );
+  }
 }
 
 /**

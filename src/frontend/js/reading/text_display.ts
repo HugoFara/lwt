@@ -8,6 +8,7 @@
 
 import $ from 'jquery';
 import { do_ajax_save_setting } from '../core/ajax_utilities';
+import { apiGet } from '../core/api_client';
 
 // Word counts globals
 declare let WORDCOUNTS: {
@@ -30,24 +31,32 @@ function getAttr($el: JQuery, attr: string): string {
 }
 
 /**
+ * Helper to get element attribute using native DOM.
+ */
+function getElementAttr(el: Element, attr: string): string {
+  return el.getAttribute(attr) || '';
+}
+
+/**
  * Update WORDCOUNTS in with an AJAX request.
  */
-export function do_ajax_word_counts(): void {
-  const t = $('.markcheck').map(function () {
-    return $(this).val();
-  })
-    .get().join(',');
-  $.getJSON(
-    'api.php/v1/texts/statistics',
-    {
-      texts_id: t
-    },
-    function (data: typeof WORDCOUNTS) {
-      (window as unknown as { WORDCOUNTS: typeof WORDCOUNTS }).WORDCOUNTS = data;
-      word_count_click();
-      $('.barchart').removeClass('hide');
-    }
-  );
+export async function do_ajax_word_counts(): Promise<void> {
+  const checkboxes = document.querySelectorAll<HTMLInputElement>('.markcheck');
+  const textIds = Array.from(checkboxes)
+    .map(cb => cb.value)
+    .join(',');
+
+  const response = await apiGet<typeof WORDCOUNTS>('/texts/statistics', {
+    texts_id: textIds
+  });
+
+  if (response.data) {
+    (window as unknown as { WORDCOUNTS: typeof WORDCOUNTS }).WORDCOUNTS = response.data;
+    word_count_click();
+    document.querySelectorAll('.barchart').forEach(el => {
+      el.classList.remove('hide');
+    });
+  }
 }
 
 /**

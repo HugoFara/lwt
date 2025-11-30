@@ -6,7 +6,7 @@
  * @since   1.6.16-fork
  */
 
-import $ from 'jquery';
+import { SettingsApi } from '../api/settings';
 
 /**
  * Save a setting to the database.
@@ -15,13 +15,7 @@ import $ from 'jquery';
  * @param v Setting value
  */
 export function do_ajax_save_setting(k: string, v: string): void {
-  $.post(
-    'api.php/v1/settings',
-    {
-      key: k,
-      value: v
-    }
-  );
+  SettingsApi.save(k, v);
 }
 
 /**

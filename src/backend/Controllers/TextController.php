@@ -132,11 +132,13 @@ class TextController extends BaseController
      */
     private function getTextIdFromRequest(): ?int
     {
-        if (isset($_REQUEST['text']) && is_numeric($_REQUEST['text'])) {
-            return (int)$_REQUEST['text'];
+        $textId = $this->paramInt('text');
+        if ($textId !== null) {
+            return $textId;
         }
-        if (isset($_REQUEST['start']) && is_numeric($_REQUEST['start'])) {
-            return (int)$_REQUEST['start'];
+        $startId = $this->paramInt('start');
+        if ($startId !== null) {
+            return $startId;
         }
         return null;
     }
@@ -267,22 +269,26 @@ class TextController extends BaseController
         $message = '';
 
         // Handle mark actions
-        if (isset($_REQUEST['markaction'])) {
+        $markAction = $this->param('markaction');
+        if ($markAction !== '') {
             $message = $this->handleMarkAction(
-                $_REQUEST['markaction'],
-                $_REQUEST['marked'] ?? [],
+                $markAction,
+                $this->paramArray('marked'),
                 $this->param('data')
             );
         }
 
         // Handle single item actions
-        if (isset($_REQUEST['del'])) {
-            $message = $this->textService->deleteText((int) $_REQUEST['del']);
-        } elseif (isset($_REQUEST['arch'])) {
-            $message = $this->textService->archiveText((int) $_REQUEST['arch']);
-        } elseif (isset($_REQUEST['op'])) {
+        $delId = $this->paramInt('del');
+        $archId = $this->paramInt('arch');
+        $op = $this->param('op');
+        if ($delId !== null) {
+            $message = $this->textService->deleteText($delId);
+        } elseif ($archId !== null) {
+            $message = $this->textService->archiveText($archId);
+        } elseif ($op !== '') {
             $result = $this->handleTextOperation(
-                $_REQUEST['op'],
+                $op,
                 $noPagestart,
                 $currentLang
             );
@@ -293,10 +299,10 @@ class TextController extends BaseController
         }
 
         // Display appropriate page
-        if (isset($_REQUEST['new'])) {
+        if ($this->hasParam('new')) {
             $this->showNewTextForm((int) $currentLang);
-        } elseif (isset($_REQUEST['chg'])) {
-            $this->showEditTextForm((int) $_REQUEST['chg']);
+        } elseif ($this->hasParam('chg')) {
+            $this->showEditTextForm($this->paramInt('chg', 0) ?? 0);
         } else {
             $this->showTextsList($currentLang, $message);
         }
@@ -379,8 +385,14 @@ class TextController extends BaseController
         bool $noPagestart,
         string|int $currentLang
     ): array {
+        $txText = $this->param('TxText');
+        $txLgId = $this->paramInt('TxLgID', 0) ?? 0;
+        $txTitle = $this->param('TxTitle');
+        $txAudioUri = $this->param('TxAudioURI');
+        $txSourceUri = $this->param('TxSourceURI');
+
         // Validate text length
-        if (!$this->textService->validateTextLength($_REQUEST['TxText'])) {
+        if (!$this->textService->validateTextLength($txText)) {
             $message = "Error: Text too long, must be below 65000 Bytes";
             if ($noPagestart) {
                 PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Texts', true);
@@ -392,24 +404,24 @@ class TextController extends BaseController
             // Check text only
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             $this->textService->checkText(
-                \remove_soft_hyphens($_REQUEST['TxText']),
-                (int) $_REQUEST['TxLgID']
+                \remove_soft_hyphens($txText),
+                $txLgId
             );
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             PageLayoutHelper::renderPageEnd();
             exit();
         }
 
-        $textId = isset($_REQUEST['TxID']) ? (int) $_REQUEST['TxID'] : 0;
+        $textId = $this->paramInt('TxID', 0) ?? 0;
         $isNew = str_starts_with($op, 'Save');
 
         $result = $this->textService->saveTextAndReparse(
             $isNew ? 0 : $textId,
-            (int) $_REQUEST['TxLgID'],
-            $_REQUEST['TxTitle'],
-            $_REQUEST['TxText'],
-            $_REQUEST['TxAudioURI'] ?? '',
-            $_REQUEST['TxSourceURI'] ?? ''
+            $txLgId,
+            $txTitle,
+            $txText,
+            $txAudioUri,
+            $txSourceUri
         );
 
         // Redirect if "and Open" was requested
@@ -537,7 +549,7 @@ class TextController extends BaseController
             if (!$this->textService->validateRegexQuery($currentQuery, $currentRegexMode)) {
                 $whQuery = '';
                 unset($_SESSION['currentwordquery']);
-                if (isset($_REQUEST['query'])) {
+                if ($this->hasParam('query')) {
                     echo '<p id="hide3" class="warning-message">' .
                         '+++ Warning: Invalid Search +++</p>';
                 }
@@ -711,7 +723,7 @@ class TextController extends BaseController
         }
         $maxInputVars = (int) $maxInputVars;
 
-        $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
+        $op = $this->param('op');
 
         if (substr($op, 0, 5) == 'NEXT ') {
             $this->importLongCheck($maxInputVars);
@@ -762,19 +774,20 @@ class TextController extends BaseController
      */
     private function importLongCheck(int $maxInputVars): void
     {
-        $langId = (int) $_REQUEST["LgID"];
-        $title = (string) $_REQUEST["TxTitle"];
-        $paragraphHandling = (int) $_REQUEST["paragraph_handling"];
-        $maxSent = (int) $_REQUEST["maxsent"];
-        $sourceUri = (string) $_REQUEST["TxSourceURI"];
+        $langId = $this->paramInt('LgID', 0) ?? 0;
+        $title = $this->param('TxTitle');
+        $paragraphHandling = $this->paramInt('paragraph_handling', 0) ?? 0;
+        $maxSent = $this->paramInt('maxsent', 0) ?? 0;
+        $sourceUri = $this->param('TxSourceURI');
         $textTags = null;
-        if (isset($_REQUEST["TextTags"])) {
-            $textTags = json_encode($_REQUEST["TextTags"]);
+        $textTagsArray = $this->paramArray('TextTags');
+        if (!empty($textTagsArray)) {
+            $textTags = json_encode($textTagsArray);
         }
 
         $data = $this->textService->prepareLongTextData(
             $_FILES,
-            (string) ($_REQUEST["Upload"] ?? ''),
+            $this->param('Upload'),
             $paragraphHandling
         );
 
@@ -808,16 +821,18 @@ class TextController extends BaseController
      */
     private function importLongSave(): void
     {
-        $langId = (int) $_REQUEST["LgID"];
-        $title = $_REQUEST["TxTitle"];
-        $sourceUri = $_REQUEST["TxSourceURI"];
+        $langId = $this->paramInt('LgID', 0) ?? 0;
+        $title = $this->param('TxTitle');
+        $sourceUri = $this->param('TxSourceURI');
 
-        if (isset($_REQUEST["TextTags"])) {
-            $_REQUEST["TextTags"] = json_decode($_REQUEST["TextTags"], true);
+        // TextTags comes as JSON-encoded string from hidden field
+        $textTagsJson = $this->param('TextTags');
+        if ($textTagsJson !== '') {
+            $_REQUEST["TextTags"] = json_decode($textTagsJson, true);
         }
 
-        $textCount = (int) $_REQUEST["TextCount"];
-        $texts = $_REQUEST["text"];
+        $textCount = $this->paramInt('TextCount', 0) ?? 0;
+        $texts = $this->paramArray('text');
 
         $result = $this->textService->saveLongTextImport(
             $langId,
@@ -884,12 +899,13 @@ class TextController extends BaseController
 
         PageLayoutHelper::renderPageStart('Check a Text', true);
 
-        if (isset($_REQUEST['op']) && $_REQUEST['op'] === 'Check') {
+        $op = $this->param('op');
+        if ($op === 'Check') {
             // Do the check operation
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             $this->textService->checkText(
-                (string) $_REQUEST['TxText'],
-                (int) $_REQUEST['TxLgID']
+                $this->param('TxText'),
+                $this->paramInt('TxLgID', 0) ?? 0
             );
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
         } else {
@@ -979,7 +995,7 @@ class TextController extends BaseController
                 $currentQuery = '';
                 $whQuery = '';
                 unset($_SESSION['currentwordquery']);
-                if (isset($_REQUEST['query'])) {
+                if ($this->hasParam('query')) {
                     echo '<p id="hide3" class="warning-message">' .
                         '+++ Warning: Invalid Search +++</p>';
                 }
@@ -994,7 +1010,8 @@ class TextController extends BaseController
         );
 
         // Handle mark actions that skip pagestart
-        $noPagestart = ($this->param('markaction') == 'deltag');
+        $markAction = $this->param('markaction');
+        $noPagestart = ($markAction == 'deltag');
         if (!$noPagestart) {
             PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Text Archive', true);
         }
@@ -1002,35 +1019,40 @@ class TextController extends BaseController
         $message = '';
 
         // Handle mark actions
-        if (isset($_REQUEST['markaction'])) {
+        if ($markAction !== '') {
             $message = $this->handleArchivedMarkAction(
-                $_REQUEST['markaction'],
-                $_REQUEST['marked'] ?? [],
+                $markAction,
+                $this->paramArray('marked'),
                 $this->param('data')
             );
         }
 
         // Handle single item actions
-        if (isset($_REQUEST['del'])) {
-            $message = $this->textService->deleteArchivedText((int) $_REQUEST['del']);
-        } elseif (isset($_REQUEST['unarch'])) {
-            $result = $this->textService->unarchiveText((int) $_REQUEST['unarch']);
+        $delId = $this->paramInt('del');
+        $unarchId = $this->paramInt('unarch');
+        $op = $this->param('op');
+        if ($delId !== null) {
+            $message = $this->textService->deleteArchivedText($delId);
+        } elseif ($unarchId !== null) {
+            $result = $this->textService->unarchiveText($unarchId);
             $message = $result['message'];
-        } elseif (isset($_REQUEST['op']) && $_REQUEST['op'] == 'Change') {
+        } elseif ($op == 'Change') {
+            $atId = $this->paramInt('AtID', 0) ?? 0;
             $message = $this->textService->updateArchivedText(
-                (int) $_REQUEST['AtID'],
-                (int) $_REQUEST['AtLgID'],
-                (string) $_REQUEST['AtTitle'],
-                (string) $_REQUEST['AtText'],
-                (string) $_REQUEST['AtAudioURI'],
-                (string) $_REQUEST['AtSourceURI']
+                $atId,
+                $this->paramInt('AtLgID', 0) ?? 0,
+                $this->param('AtTitle'),
+                $this->param('AtText'),
+                $this->param('AtAudioURI'),
+                $this->param('AtSourceURI')
             );
-            TagService::saveArchivedTextTags((int) $_REQUEST['AtID']);
+            TagService::saveArchivedTextTags($atId);
         }
 
         // Display edit form or list
-        if (isset($_REQUEST['chg'])) {
-            $textId = (int) $_REQUEST['chg'];
+        $chgId = $this->paramInt('chg');
+        if ($chgId !== null) {
+            $textId = $chgId;
             $record = $this->textService->getArchivedTextById($textId);
             if ($record) {
                 include __DIR__ . '/../Views/Text/archived_form.php';
