@@ -18,3 +18,15 @@ use Lwt\Core\EnvLoader;
 
 // Load the .env configuration
 EnvLoader::load(__DIR__ . '/../.env');
+
+// Register shutdown function to close database connections
+// This prevents zombie connections from holding locks after test interruptions
+register_shutdown_function(function () {
+    // Close the global database connection if it exists
+    if (class_exists('Lwt\Core\Globals', false)) {
+        $conn = \Lwt\Core\Globals::getDbConnection();
+        if ($conn instanceof \mysqli) {
+            @mysqli_close($conn);
+        }
+    }
+});

@@ -37,8 +37,15 @@
         "squizlabs/php_codesniffer": "Following code style standards is a good thing"
     },
     "scripts": {
-        "test": "XDEBUG_MODE=coverage vendor/bin/phpunit",
-        "test:no-coverage": "vendor/bin/phpunit --no-coverage",
+        "test:cleanup-db": "@php tests/cleanup_db_connections.php",
+        "test": [
+            "@test:cleanup-db",
+            "XDEBUG_MODE=coverage vendor/bin/phpunit"
+        ],
+        "test:no-coverage": [
+            "@test:cleanup-db",
+            "vendor/bin/phpunit --no-coverage"
+        ],
         "info.html": "@php docs/info.php > docs/info.html",
         "doc": [
             "@info.html",
@@ -53,8 +60,9 @@
         ]
     },
     "scripts-descriptions": {
-        "test": "Run all tests with coverage!",
-        "test:no-coverage": "Run all tests without coverage",
+        "test:cleanup-db": "Kill stale test database connections",
+        "test": "Run all tests with coverage (cleans up stale DB connections first)",
+        "test:no-coverage": "Run all tests without coverage (cleans up stale DB connections first)",
         "info.html": "Regenerate one-file documentation",
         "doc": "Regenerate all documentation",
         "build": "Build frontend assets (Vite + themes)",

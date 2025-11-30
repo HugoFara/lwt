@@ -273,8 +273,8 @@ class TranslationControllerTest extends TestCase
         $controller->glosbe([]);
         $output = ob_get_clean();
 
-        // Should show error about Glosbe API
-        $this->assertStringContainsString('Glosbe API', $output);
+        // Should contain error state in JSON config for JavaScript handling
+        $this->assertStringContainsString('"error":"api_error"', $output);
     }
 
     public function testGlosbeActionWithEmptyPhraseShowsMessage(): void
@@ -295,8 +295,8 @@ class TranslationControllerTest extends TestCase
         $controller->glosbe([]);
         $output = ob_get_clean();
 
-        // Should show "Term is not set!" message
-        $this->assertStringContainsString('Term is not set!', $output);
+        // Should contain error state in JSON config for JavaScript handling
+        $this->assertStringContainsString('"error":"empty_term"', $output);
     }
 
     public function testGlosbeActionWithMissingParams(): void

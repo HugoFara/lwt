@@ -173,7 +173,7 @@ class RoutesTest extends TestCase
             'word edit-multi' => ['/word/edit-multi', 'WordController@editMulti'],
             'word delete' => ['/word/delete', 'WordController@delete'],
             'word delete-multi' => ['/word/delete-multi', 'WordController@deleteMulti'],
-            'words list' => ['/words', 'WordController@all'],
+            'words list' => ['/words', 'WordController@listEdit'],
             'word new' => ['/word/new', 'WordController@create'],
             'word show' => ['/word/show', 'WordController@show'],
             'word insert-wellknown' => ['/word/insert-wellknown', 'WordController@insertWellknown'],
