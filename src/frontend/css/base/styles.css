@@ -1233,6 +1233,45 @@ Dictionary and Sentence Lookup Styles
 }
 
 /**************************************************************
+Statistics Page Styles
+***************************************************************/
+
+/* Alternating row colors for statistics tables */
+.stats-table tbody tr:nth-child(even)
+{
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.stats-table tbody tr:hover
+{
+  background-color: rgba(0, 0, 0, 0.07);
+}
+
+/* Today column highlight in frequency table */
+.today-col
+{
+  background-color: rgba(255, 235, 59, 0.15) !important;
+}
+
+/* Chart container styling */
+.stats-chart-container
+{
+  max-width: 900px;
+  margin: 20px 0;
+  padding: 15px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.stats-chart-container h3
+{
+  margin-top: 0;
+  color: #333;
+  font-size: 1.1em;
+}
+
+/**************************************************************
 Additional styles for printing
 ***************************************************************/
 

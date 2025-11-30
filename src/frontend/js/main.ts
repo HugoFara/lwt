@@ -111,6 +111,7 @@ import './admin/server_data';
 import './admin/tts_settings';
 import './admin/table_management';
 import './admin/settings_form';
+import './admin/statistics_charts';
 
 // Home
 import './home/home_warnings';
