@@ -318,7 +318,7 @@ class FeedsController extends BaseController
                 $whQuery = '';
                 unset($_SESSION['currentwordquery']);
                 if (isset($_REQUEST['query'])) {
-                    echo '<p id="hide3" style="color:red;text-align:center;">+++ Warning: Invalid Search +++</p>';
+                    echo '<p id="hide3" class="warning-message">+++ Warning: Invalid Search +++</p>';
                 }
             }
         }
@@ -884,7 +884,7 @@ class FeedsController extends BaseController
             if (substr_compare(trim($tag), "redirect", 0, 8) == 0) {
                 $_SESSION['wizard']['redirect'] = trim($tag) . ' | ';
             } else {
-                $_SESSION['wizard']['article_tags'] .= '<li style="text-align: left">
+                $_SESSION['wizard']['article_tags'] .= '<li class="left">
                 <img class="delete_selection" src="/assets/icons/cross.png" title="Delete Selection" alt="-" />'
                 . $tag .
                 '</li>';
@@ -896,7 +896,7 @@ class FeedsController extends BaseController
         $_SESSION['wizard']['filter_tags'] = '';
         foreach ($filterTags as $tag) {
             if (trim($tag) != '') {
-                $_SESSION['wizard']['filter_tags'] .= '<li style="text-align: left">
+                $_SESSION['wizard']['filter_tags'] .= '<li class="left">
                 <img class="delete_selection" src="/assets/icons/cross.png" title="Delete Selection" alt="-" />'
                 . $tag .
                 '</li>';

@@ -21,9 +21,7 @@ namespace Lwt\Views\Language;
     You can customize the voice API using an external service.
     You have to use the following JSON format.
 </p>
-<pre
-style="background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc;"
-><code lang="json"
+<pre class="voice-api-code"><code lang="json"
 >{
     "input": ...,
     "options": ...

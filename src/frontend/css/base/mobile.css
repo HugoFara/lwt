@@ -28,3 +28,28 @@ span.status4 {
 span.status5 {
     background-color: #DDFFDD;
 }
+
+/* Mobile text reading layout */
+.mobile-read-container {
+    width: 95%;
+    height: 100%;
+}
+
+/* Right frames panel - slides in from right */
+.mobile-frames-right {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    height: 100%;
+}
+
+.mobile-frames-right-inner {
+    margin-left: 50%;
+    height: 99%;
+}
+
+.mobile-frames-right-inner iframe {
+    height: 50%;
+    width: 100%;
+}

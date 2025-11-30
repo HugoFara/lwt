@@ -147,8 +147,8 @@ class TextStatisticsService
     {
         $c = $this->getTodoWordsCount($textId);
         if ($c <= 0) {
-            return '<span title="No unknown word remaining" class="status0" ' .
-            'style="padding: 0 5px; margin: 0 5px;">' . $c . '</span>';
+            return '<span title="No unknown word remaining" class="status0 word-count-badge">' .
+            $c . '</span>';
         }
 
         $dict = (string) Connection::fetchValue(
@@ -183,12 +183,11 @@ class TextStatisticsService
 
         $bulkTranslateUrl = 'bulk_translate_words.php?tid=' . $textId .
             '&offset=0&sl=' . $sl . '&tl=' . $tl;
-        $res = '<span title="Number of unknown words" class="status0" ' .
-        'style="padding: 0 5px; margin: 0 5px;">' . $c . '</span>' .
-        '<img src="/assets/icons/script-import.png" ' .
+        $res = '<span title="Number of unknown words" class="status0 word-count-badge">' .
+        $c . '</span>' .
+        '<img src="/assets/icons/script-import.png" class="bulk-translate-icon" ' .
         'data-action="bulk-translate" data-url="' . htmlspecialchars($bulkTranslateUrl, ENT_QUOTES, 'UTF-8') . '" ' .
-        'style="cursor: pointer; vertical-align:middle" title="Lookup New Words" ' .
-        'alt="Lookup New Words" />';
+        'title="Lookup New Words" alt="Lookup New Words" />';
 
         $show_buttons = (int) Settings::getWithDefault('set-words-to-do-buttons');
         if ($show_buttons != 2) {

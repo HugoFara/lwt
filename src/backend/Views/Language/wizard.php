@@ -25,7 +25,7 @@ namespace Lwt\Views\Language;
 <?php echo json_encode(['languageDefs' => json_decode($languageDefsJson, true)]); ?>
 </script>
 <div class="td1 center">
-    <div class="center" style="border: 1px solid black;">
+    <div class="center wizard-zone-border">
         <h3 class="clickedit" data-action="wizard-toggle">
             Language Settings Wizard
         </h3>
@@ -52,7 +52,7 @@ namespace Lwt\Views\Language;
                     </div>
                 </div>
             </div>
-            <input type="button" style="margin: 5px;" value="Set Language Settings"
+            <input type="button" class="wizard-btn" value="Set Language Settings"
             data-action="wizard-go" />
             <p class="smallgray">
                 Select your native (L1) and study (L2) languages, and let the

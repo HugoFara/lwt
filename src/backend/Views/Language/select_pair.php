@@ -51,7 +51,7 @@ namespace Lwt\Views\Language;
         </select>
     </p>
     <p class="wizard">
-        <input type="button" style="font-size:1.1em;" value="Set Language Settings"
+        <input type="button" class="wizard-popup-btn" value="Set Language Settings"
             data-action="wizard-popup-go" />
     </p>
 

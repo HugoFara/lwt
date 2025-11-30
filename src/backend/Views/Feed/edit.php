@@ -48,7 +48,7 @@ namespace Lwt\Views\Feed;
 <tr>
     <td class="td1">Name: </td>
     <td class="td1">
-        <input class="notempty" style="width:95%" type="text" name="NfName"
+        <input class="notempty feed-form-input" type="text" name="NfName"
         value="<?php echo tohtml($feed['NfName']); ?>" />
         <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
@@ -56,7 +56,7 @@ namespace Lwt\Views\Feed;
 <tr>
     <td class="td1">Newsfeed url: </td>
     <td class="td1">
-        <input class="notempty" style="width:95%" type="text" name="NfSourceURI"
+        <input class="notempty feed-form-input" type="text" name="NfSourceURI"
         value="<?php echo tohtml($feed['NfSourceURI']); ?>" />
         <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
@@ -64,7 +64,7 @@ namespace Lwt\Views\Feed;
 <tr>
     <td class="td1">Article Section: </td>
     <td class="td1">
-        <input class="notempty" style="width:95%" type="text"
+        <input class="notempty feed-form-input" type="text"
         name="NfArticleSectionTags" value="<?php echo tohtml($feed['NfArticleSectionTags']); ?>" />
         <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
     </td>
@@ -72,16 +72,16 @@ namespace Lwt\Views\Feed;
 <tr>
     <td class="td1">Filter Tags: </td>
     <td class="td1">
-        <input type="text" style="width:95%" name="NfFilterTags"
+        <input type="text" class="feed-form-input" name="NfFilterTags"
         value="<?php echo tohtml($feed['NfFilterTags']); ?>" />
     </td>
 </tr>
 <tr>
     <td class="td1">Options: </td>
     <td class="td1">
-        <table style="width:100%">
+        <table class="feed-options-table">
         <tr>
-            <td style="width:35%">
+            <td class="option-label">
             <input type="checkbox" name="edit_text"<?php
             if (isset($options['edit_text'])) echo ' checked="checked"';
             ?> />

@@ -202,10 +202,10 @@ class TranslationController extends BaseController
         ?>
         <h2 title="Translate with Google Translate">
             Word translation: <?php echo \tohtml($text) ?>
-            <img id="textToSpeech" style="cursor: pointer;" title="Click to read!"
+            <img id="textToSpeech" class="click" title="Click to read!"
             src="<?php \print_file_path('icn/speaker-volume.png'); ?>"></img>
 
-            <img id="del_translation" style="cursor: pointer;"
+            <img id="del_translation" class="click"
             title="Empty Translation Field" data-action="delete-translation"
             src="<?php \print_file_path('icn/broom.png'); ?>"></img>
         </h2>
@@ -271,7 +271,7 @@ class TranslationController extends BaseController
 
         echo '<h3>' . $titleText .
             ' <img id="del_translation" src="/assets/icons/broom.png" title="Empty Translation Field" ' .
-            'style="cursor:pointer" data-action="delete-translation"></img></h3>';
+            'class="click" data-action="delete-translation"></img></h3>';
         echo '<p>(Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" /> ' .
             'to copy word(s) into above term)<br />&nbsp;</p>';
 

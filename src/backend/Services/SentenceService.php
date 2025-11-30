@@ -368,9 +368,9 @@ class SentenceService
         </span>
     </div>
     <!-- Loading icon -->
-    <img id="exsent-waiting" style="display: none;" src="/assets/icons/waiting2.gif" />
+    <img id="exsent-waiting" src="/assets/icons/waiting2.gif" alt="Loading..." />
     <!-- Displayed output -->
-    <div id="exsent-sentences" style="display: none;">
+    <div id="exsent-sentences">
         <p><b>Sentences in active texts with <i><?php echo tohtml($termlc) ?></i></b></p>
         <p>
             (Click on

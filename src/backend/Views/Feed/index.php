@@ -41,7 +41,7 @@ namespace Lwt\Views\Feed;
 <input type="button" value="Reset All" data-action="reset-all" data-url="/feeds/edit" /></th>
 </tr>
 <tr>
-    <td class="td1 center" colspan="2" style="width:30%;">
+    <td class="td1 center feeds-filter-cell" colspan="2">
     Language:&nbsp;<select name="filterlang" data-action="filter-language" data-url="/feeds/edit?manage_feeds=1">
     <?php echo get_languages_selectoptions($currentLang, '[Filter off]'); ?>
 </select>
@@ -62,7 +62,7 @@ namespace Lwt\Views\Feed;
         Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
     </th>
 </tr>
-<tr><td class="td1 center" style="width:30%;">
+<tr><td class="td1 center feeds-filter-cell">
 <input type="button" value="Mark All" data-action="mark-all" />
 <input type="button" value="Mark None" data-action="mark-none" />
 </td><td class="td1 center" colspan="2">Marked Newsfeeds:&nbsp;
@@ -78,7 +78,7 @@ namespace Lwt\Views\Feed;
     <option value="del">Delete</option>
 </select></td></tr>
 <?php if ($totalFeeds > 0): ?>
-<tr><th class="th1" style="width:30%;"> <?php echo $totalFeeds; ?> newsfeeds </th>
+<tr><th class="th1 feeds-filter-cell"> <?php echo $totalFeeds; ?> newsfeeds </th>
 <th class="th1">
 <?php makePager($currentPage, $pages, '/feeds/edit', 'form1'); ?>
 </th>
@@ -108,7 +108,7 @@ while ($row = mysqli_fetch_assoc($feeds)):
     <td class="td1 center">
         <input type="checkbox" name="marked[]" class="markcheck" value="<?php echo $row['NfID']; ?>" />
     </td>
-    <td style="white-space: nowrap" class="td1 center">
+    <td class="td1 center nowrap">
         <a href="/feeds/edit?edit_feed=1&amp;selected_feed=<?php echo $row['NfID']; ?>">
             <img src="/assets/icons/feed--pencil.png" title="Edit" alt="Edit" />
         </a>
@@ -134,7 +134,7 @@ while ($row = mysqli_fetch_assoc($feeds)):
 <?php if ($pages > 1): ?>
 <form name="form3" method="get" action="">
 <table class="tab2" cellspacing="0" cellpadding="5">
-<tr><th class="th1" style="width:30%;"><?php echo $totalFeeds; ?></th>
+<tr><th class="th1 feeds-filter-cell"><?php echo $totalFeeds; ?></th>
 <th class="th1"><?php makePager($currentPage, $pages, '/feeds', 'form3'); ?></th>
 </tr></table>
 </form>

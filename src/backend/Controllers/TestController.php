@@ -241,7 +241,7 @@ class TestController extends BaseController
         $this->testViews->renderTableTestJs();
         $this->testViews->renderTableTestSettings($settings);
 
-        echo '<table class="sortable tab2" style="width:auto;" cellspacing="0" cellpadding="5">';
+        echo '<table class="sortable tab2 table-test" cellspacing="0" cellpadding="5">';
         $this->testViews->renderTableTestHeader();
 
         $words = $this->testService->getTableTestWords($testsql);
@@ -314,7 +314,7 @@ class TestController extends BaseController
             $sessTestsql
         );
 
-        echo '<div style="width: 95%; height: 100%;">';
+        echo '<div class="test-container">';
         echo '<div id="frame-h">';
         $this->header([]);
         echo '</div>';
@@ -354,7 +354,7 @@ class TestController extends BaseController
             $sessTestsql
         );
 
-        echo '<div id="frames-l" style="width: ' . $frameWidth . '%;">';
+        echo '<div id="frames-l" style="width:' . $frameWidth . '%">';
         echo '<div id="frame-h">';
         $this->header([]);
         echo '</div>';
@@ -370,12 +370,12 @@ class TestController extends BaseController
         echo '</div>';
         echo '</div>';
 
-        echo '<div id="frames-r" style="position: fixed; top: 2%; right: 0; height: 90%; width: ' .
-            (97 - $frameWidth) . '%;">';
-        echo '<iframe src="empty.html" scrolling="auto" name="ro" style="height: 50%; width: 100%;">';
+        echo '<div id="frames-r" class="test-frames-right" style="width:' .
+            (97 - $frameWidth) . '%">';
+        echo '<iframe src="empty.html" scrolling="auto" name="ro" class="test-iframe">';
         echo 'Your browser doesn\'t support iFrames, update it!';
         echo '</iframe>';
-        echo '<iframe src="empty.html" scrolling="auto" name="ru" style="height: 50%; width: 100%;">';
+        echo '<iframe src="empty.html" scrolling="auto" name="ru" class="test-iframe">';
         echo 'Your browser doesn\'t support iFrames, update it!';
         echo '</iframe>';
         echo '</div>';
@@ -475,12 +475,12 @@ class TestController extends BaseController
      */
     private function renderRightFrames(): void
     {
-        echo '<div id="frames-r" style="position: fixed; top: 0; right: -100%; width: 100%; height: 100%;" data-action="hide-right-frames">';
-        echo '<div style="margin-left: 50%; height: 99%;">';
-        echo '<iframe src="empty.html" scrolling="auto" name="ro" style="height: 50%; width: 100%;">';
+        echo '<div id="frames-r" class="test-frames-right-mobile" data-action="hide-right-frames">';
+        echo '<div class="test-frames-mobile-inner">';
+        echo '<iframe src="empty.html" scrolling="auto" name="ro" class="test-iframe">';
         echo 'Your browser doesn\'t support iFrames, update it!';
         echo '</iframe>';
-        echo '<iframe src="empty.html" scrolling="auto" name="ru" style="height: 50%; width: 100%;">';
+        echo '<iframe src="empty.html" scrolling="auto" name="ru" class="test-iframe">';
         echo 'Your browser doesn\'t support iFrames, update it!';
         echo '</iframe>';
         echo '</div>';

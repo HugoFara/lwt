@@ -117,8 +117,8 @@ class DictionaryService
             // Use data attribute for auto-init instead of inline script
             $popup = str_starts_with($wb1, '*') || str_contains($wb1, 'lwt_popup=');
             $action = $popup ? 'dict-auto-popup' : 'dict-auto-frame';
-            $r .= '<span data-action="' . $action . '" data-url="' .
-            htmlspecialchars($dictUrl, ENT_QUOTES, 'UTF-8') . '" style="display:none;"></span>';
+            $r .= '<span class="dict-auto-init" data-action="' . $action . '" data-url="' .
+            htmlspecialchars($dictUrl, ENT_QUOTES, 'UTF-8') . '"></span>';
         }
         $r .= 'Lookup Term: ';
         $r .= $this->makeOpenDictStr($dictUrl, "Dict1");

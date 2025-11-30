@@ -15,7 +15,7 @@
  */
 
 ?>
-<div style="width: 95%; height: 100%;">
+<div class="mobile-read-container">
     <div id="frame-h">
         <?php include __DIR__ . '/read_header.php'; ?>
     </div>
@@ -24,17 +24,13 @@
         <?php include __DIR__ . '/read_text.php'; ?>
     </div>
 </div>
-<div id="frames-r"
-style="position: fixed; top: 0; right: -100%; width: 100%; height: 100%;"
-data-action="hide-right-frames">
+<div id="frames-r" class="mobile-frames-right" data-action="hide-right-frames">
     <!-- iFrames wrapper for events -->
-    <div style="margin-left: 50%; height: 99%;">
-        <iframe src="empty.html" scrolling="auto" name="ro"
-        style="height: 50%; width: 100%;">
+    <div class="mobile-frames-right-inner">
+        <iframe src="empty.html" scrolling="auto" name="ro">
             Your browser doesn't support iFrames, update it!
         </iframe>
-        <iframe src="empty.html" scrolling="auto" name="ru"
-        style="height: 50%; width: 100%;">
+        <iframe src="empty.html" scrolling="auto" name="ru">
             Your browser doesn't support iFrames, update it!
         </iframe>
     </div>

@@ -289,6 +289,13 @@ img
   color: #FF0000;
 }
 
+/* Warning message for invalid search */
+.warning-message
+{
+  color: red;
+  text-align: center;
+}
+
 .scorered
 {
   font-weight: bold;
@@ -982,6 +989,58 @@ input[name="WoTranslation"]
 Test page styles
 ***************************************************************/
 
+/* Test container wrapper */
+.test-container
+{
+  width: 95%;
+  height: 100%;
+}
+
+/* Test left frames column (dynamic width set via JS) */
+#frames-l
+{
+  /* Width set dynamically based on user setting */
+}
+
+/* Test right frames panel - desktop */
+.test-frames-right
+{
+  position: fixed;
+  top: 2%;
+  right: 0;
+  height: 90%;
+}
+
+/* Test right frames panel - mobile (hidden off-screen) */
+.test-frames-right-mobile
+{
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  height: 100%;
+}
+
+/* Mobile frames inner container */
+.test-frames-mobile-inner
+{
+  margin-left: 50%;
+  height: 99%;
+}
+
+/* Test iframes half height */
+.test-iframe
+{
+  height: 50%;
+  width: 100%;
+}
+
+/* Table test auto width */
+.table-test
+{
+  width: auto;
+}
+
 /* Test header word count */
 .test-word-count
 {
@@ -1069,6 +1128,49 @@ Word Show View Styles
 }
 
 /**************************************************************
+Language View Styles
+***************************************************************/
+
+/* Voice API help code block */
+.voice-api-code
+{
+  background-color: #f0f0f0;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+/* Wizard zone border */
+.wizard-zone-border
+{
+  border: 1px solid black;
+}
+
+/* Wizard button margin */
+.wizard-btn
+{
+  margin: 5px;
+}
+
+/* Wizard popup button larger text */
+.wizard-popup-btn
+{
+  font-size: 1.1em;
+}
+
+/* Current language row highlight */
+.language-current-row
+{
+  background-color: #8884;
+  font-weight: bold;
+}
+
+/* Last column in language table (remove top-right radius) */
+.language-last-col
+{
+  border-top-right-radius: 0;
+}
+
+/**************************************************************
 Language Form View Styles
 ***************************************************************/
 
@@ -1088,6 +1190,46 @@ Language Form View Styles
 .language-form-separator
 {
   color: transparent;
+}
+
+/**************************************************************
+Text Statistics Styles
+***************************************************************/
+
+/* Word count badge with padding */
+.word-count-badge
+{
+  padding: 0 5px;
+  margin: 0 5px;
+}
+
+/* Clickable icon for bulk translate */
+.bulk-translate-icon
+{
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+/**************************************************************
+Dictionary and Sentence Lookup Styles
+***************************************************************/
+
+/* Hidden element for auto-initialization */
+.dict-auto-init
+{
+  display: none;
+}
+
+/* Example sentences loading indicator */
+#exsent-waiting
+{
+  display: none;
+}
+
+/* Example sentences container (initially hidden) */
+#exsent-sentences
+{
+  display: none;
 }
 
 /**************************************************************

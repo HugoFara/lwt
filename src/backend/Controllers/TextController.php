@@ -537,7 +537,7 @@ class TextController extends BaseController
                 $whQuery = '';
                 unset($_SESSION['currentwordquery']);
                 if (isset($_REQUEST['query'])) {
-                    echo '<p id="hide3" style="color:red;text-align:center;">' .
+                    echo '<p id="hide3" class="warning-message">' .
                         '+++ Warning: Invalid Search +++</p>';
                 }
             }
@@ -979,7 +979,7 @@ class TextController extends BaseController
                 $whQuery = '';
                 unset($_SESSION['currentwordquery']);
                 if (isset($_REQUEST['query'])) {
-                    echo '<p id="hide3" style="color:red;text-align:center;">' .
+                    echo '<p id="hide3" class="warning-message">' .
                         '+++ Warning: Invalid Search +++</p>';
                 }
             }

@@ -49,11 +49,11 @@ namespace Lwt\Views\Language;
         $isCurrent = ($currentLanguageId == $lang['id']);
         $canDelete = ($lang['textCount'] == 0 && $lang['archivedTextCount'] == 0 &&
                       $lang['wordCount'] == 0 && $lang['feedCount'] == 0);
-        $style = $isCurrent ? ' style="background-color: #8884; font-weight: bold;"' : '';
+        $currentClass = $isCurrent ? ' language-current-row' : '';
     ?>
     <tr>
         <?php if ($isCurrent): ?>
-        <td<?php echo $style; ?> class="td1 center">
+        <td class="td1 center<?php echo $currentClass; ?>">
             <img src="/assets/icons/exclamation-red.png" title="Current Language" alt="Current Language" />
         </td>
         <?php else: ?>
@@ -64,13 +64,13 @@ namespace Lwt\Views\Language;
         </td>
         <?php endif; ?>
 
-        <td<?php echo $style; ?> class="td1 center">
+        <td class="td1 center<?php echo $currentClass; ?>">
             <a href="do_test.php?lang=<?php echo $lang['id']; ?>">
                 <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />
             </a>
         </td>
 
-        <td<?php echo $style; ?> class="td1 center">
+        <td class="td1 center<?php echo $currentClass; ?>">
             <a href="/languages?chg=<?php echo $lang['id']; ?>">
                 <img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" />
             </a>
@@ -85,9 +85,9 @@ namespace Lwt\Views\Language;
             <?php endif; ?>
         </td>
 
-        <td<?php echo $style; ?> class="td1 center"><?php echo tohtml($lang['name']); ?></td>
+        <td class="td1 center<?php echo $currentClass; ?>"><?php echo tohtml($lang['name']); ?></td>
 
-        <td<?php echo $style; ?> class="td1 center">
+        <td class="td1 center<?php echo $currentClass; ?>">
             <?php if ($lang['textCount'] > 0): ?>
             <a href="edit_texts.php?page=1&amp;query=&amp;filterlang=<?php echo $lang['id']; ?>"><?php echo $lang['textCount']; ?></a>
             <a href="/languages?refresh=<?php echo $lang['id']; ?>">
@@ -98,7 +98,7 @@ namespace Lwt\Views\Language;
             <?php endif; ?>
         </td>
 
-        <td<?php echo $style; ?> class="td1 center">
+        <td class="td1 center<?php echo $currentClass; ?>">
             <?php if ($lang['archivedTextCount'] > 0): ?>
             <a href="edit_archivedtexts.php?page=1&amp;query=&amp;filterlang=<?php echo $lang['id']; ?>"><?php echo $lang['archivedTextCount']; ?></a>
             <?php else: ?>
@@ -106,7 +106,7 @@ namespace Lwt\Views\Language;
             <?php endif; ?>
         </td>
 
-        <td<?php echo $style; ?> class="td1 center">
+        <td class="td1 center<?php echo $currentClass; ?>">
             <?php if ($lang['feedCount'] > 0): ?>
             <a href="do_feeds.php?query=&amp;selected_feed=&amp;check_autoupdate=1&amp;filterlang=<?php echo $lang['id']; ?>"><?php echo $lang['feedCount']; ?> (<?php echo $lang['articleCount']; ?>)</a>
             <?php else: ?>
@@ -114,7 +114,7 @@ namespace Lwt\Views\Language;
             <?php endif; ?>
         </td>
 
-        <td<?php echo $style; ?> class="td1 center">
+        <td class="td1 center<?php echo $currentClass; ?>">
             <?php if ($lang['wordCount'] > 0): ?>
             <a href="edit_words.php?page=1&amp;query=&amp;text=&amp;status=&amp;filterlang=<?php echo $lang['id']; ?>&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1="><?php echo $lang['wordCount']; ?></a>
             <?php else: ?>
@@ -122,7 +122,7 @@ namespace Lwt\Views\Language;
             <?php endif; ?>
         </td>
 
-        <td<?php echo $style; ?> class="td1 center" style="border-top-right-radius:0;">
+        <td class="td1 center language-last-col<?php echo $currentClass; ?>">
             <?php if ($lang['hasExportTemplate']): ?>
             <img src="/assets/icons/status.png" title="Yes" alt="Yes" />
             <?php else: ?>
