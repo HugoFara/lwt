@@ -20,8 +20,12 @@ use Lwt\Api\V1\Handlers\ImprovedTextHandler;
 use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Services/TextPrintService.php';
+require_once __DIR__ . '/../Services/TextNavigationService.php';
+require_once __DIR__ . '/../Services/AnnotationService.php';
 require_once __DIR__ . '/../Api/V1/Handlers/ImprovedTextHandler.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
+require_once __DIR__ . '/../View/Helper/FormHelper.php';
 
 /**
  * Controller for text printing functionality.
@@ -91,7 +95,7 @@ class TextPrintController extends BaseController
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Services/WordStatusService.php';
 
-        $textId = (int) $this->param('text', 0);
+        $textId = (int) $this->param('text', '0');
 
         if ($textId === 0) {
             $this->redirect('/text/edit');
@@ -151,9 +155,9 @@ class TextPrintController extends BaseController
         require_once __DIR__ . '/../Services/DictionaryService.php';
         require_once __DIR__ . '/../Services/WordStatusService.php';
 
-        $textId = (int) $this->param('text', 0);
-        $editMode = (int) $this->param('edit', 0);
-        $deleteMode = (int) $this->param('del', 0);
+        $textId = (int) $this->param('text', '0');
+        $editMode = (int) $this->param('edit', '0');
+        $deleteMode = (int) $this->param('del', '0');
 
         if ($textId === 0) {
             $this->redirect('/text/edit');

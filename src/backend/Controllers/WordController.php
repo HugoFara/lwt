@@ -1314,6 +1314,10 @@ class WordController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @deprecated 3.0.0 Use DELETE /api/v1/terms/{id} instead.
+     *             This endpoint is kept for backward compatibility with frame-based mode.
+     *             The frontend now uses API mode by default (see setUseApiMode in text_events.ts).
      */
     public function delete(array $params): void
     {
@@ -1347,6 +1351,10 @@ class WordController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @deprecated 3.0.0 Use DELETE /api/v1/terms/{id} instead.
+     *             This endpoint is kept for backward compatibility with frame-based mode.
+     *             The frontend now uses API mode by default (see setUseApiMode in text_events.ts).
      */
     public function deleteMulti(array $params): void
     {
@@ -1526,6 +1534,10 @@ class WordController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @deprecated 3.0.0 Use POST /api/v1/terms/quick with status=99 instead.
+     *             This endpoint is kept for backward compatibility with frame-based mode.
+     *             The frontend now uses API mode by default (see setUseApiMode in text_events.ts).
      */
     public function insertWellknown(array $params): void
     {
@@ -1561,6 +1573,10 @@ class WordController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @deprecated 3.0.0 Use POST /api/v1/terms/quick with status=98 instead.
+     *             This endpoint is kept for backward compatibility with frame-based mode.
+     *             The frontend now uses API mode by default (see setUseApiMode in text_events.ts).
      */
     public function insertIgnore(array $params): void
     {
@@ -1738,6 +1754,10 @@ class WordController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @deprecated 3.0.0 Use PUT /api/v1/terms/{id}/status/{status} instead.
+     *             This endpoint is kept for backward compatibility with frame-based mode.
+     *             The frontend now uses API mode by default (see setUseApiMode in text_events.ts).
      */
     public function setStatus(array $params): void
     {

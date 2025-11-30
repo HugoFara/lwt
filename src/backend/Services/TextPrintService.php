@@ -16,6 +16,8 @@
 
 namespace Lwt\Services;
 
+require_once __DIR__ . '/../View/Helper/StatusHelper.php';
+
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
@@ -368,7 +370,7 @@ class TextPrintService
      */
     public function checkStatusInRange(int $status, int $statusRange): bool
     {
-        return \checkStatusRange($status, $statusRange);
+        return \Lwt\View\Helper\StatusHelper::checkRange($status, $statusRange);
     }
 
     // ===========================

@@ -17,6 +17,8 @@
 
 namespace Lwt\Core\Utils {
 
+    require_once __DIR__ . '/../Database/Settings.php';
+
     use Lwt\Database\Settings;
 
     /**

@@ -22,6 +22,7 @@ use Lwt\Database\DB;
 use Lwt\Database\Escaping;
 use Lwt\View\Helper\PageLayoutHelper;
 
+require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';

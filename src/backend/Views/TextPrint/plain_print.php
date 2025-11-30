@@ -21,6 +21,8 @@
 namespace Lwt\Views\TextPrint;
 
 use Lwt\Services\TextPrintService;
+use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\FormHelper;
 
 $title = $viewData['title'];
 $sourceUri = $viewData['sourceUri'];
@@ -62,21 +64,21 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
 <p id="printoptions" data-text-id="<?php echo $textId; ?>">
     Terms with <b>status(es)</b>
     <select id="status" data-action="filter-status">
-        <?php echo get_wordstatus_selectoptions($statusRange, true, true, false); ?>
+        <?php echo SelectOptionsBuilder::forWordStatus($statusRange, true, true, false); ?>
     </select> ...<br />
     will be <b>annotated</b> with
     <select id="ann" data-action="filter-annotation">
-        <option value="0"<?php echo get_selected(0, $ann); ?>>Nothing</option>
-        <option value="1"<?php echo get_selected(1, $ann); ?>>Translation</option>
-        <option value="5"<?php echo get_selected(5, $ann); ?>>Translation &amp; Tags</option>
-        <option value="2"<?php echo get_selected(2, $ann); ?>>Romanization</option>
-        <option value="3"<?php echo get_selected(3, $ann); ?>>Romanization &amp; Translation</option>
-        <option value="7"<?php echo get_selected(7, $ann); ?>>Romanization, Translation &amp; Tags</option>
+        <option value="0"<?php echo FormHelper::getSelected(0, $ann); ?>>Nothing</option>
+        <option value="1"<?php echo FormHelper::getSelected(1, $ann); ?>>Translation</option>
+        <option value="5"<?php echo FormHelper::getSelected(5, $ann); ?>>Translation &amp; Tags</option>
+        <option value="2"<?php echo FormHelper::getSelected(2, $ann); ?>>Romanization</option>
+        <option value="3"<?php echo FormHelper::getSelected(3, $ann); ?>>Romanization &amp; Translation</option>
+        <option value="7"<?php echo FormHelper::getSelected(7, $ann); ?>>Romanization, Translation &amp; Tags</option>
     </select>
     <select id="annplcmnt" data-action="filter-placement">
-        <option value="0"<?php echo get_selected(0, $annPlacement); ?>>behind</option>
-        <option value="1"<?php echo get_selected(1, $annPlacement); ?>>in front of</option>
-        <option value="2"<?php echo get_selected(2, $annPlacement); ?>>above (ruby)</option>
+        <option value="0"<?php echo FormHelper::getSelected(0, $annPlacement); ?>>behind</option>
+        <option value="1"<?php echo FormHelper::getSelected(1, $annPlacement); ?>>in front of</option>
+        <option value="2"<?php echo FormHelper::getSelected(2, $annPlacement); ?>>above (ruby)</option>
     </select> the term.<br />
     <button type="button" data-action="print">Print it!</button>
     (only the text below the line)

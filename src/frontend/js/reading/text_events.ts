@@ -82,8 +82,10 @@ interface LwtSettings {
   hts: number;
   word_status_filter: string;
   annotations_mode: number;
-  /** If true, use API-based word operations instead of frame navigation */
+  /** @deprecated Use use_frame_mode instead. API mode is now default. */
   use_api_mode?: boolean;
+  /** If true, use legacy frame-based navigation instead of API mode */
+  use_frame_mode?: boolean;
 }
 
 interface LwtDataGlobal {
@@ -94,14 +96,19 @@ interface LwtDataGlobal {
 
 declare const LWT_DATA: LwtDataGlobal;
 
-// Module-level flag for API mode (can be overridden at runtime)
-let useApiMode = false;
+// Module-level flag for API mode (default: true since v3.0.0)
+// Can be disabled for backward compatibility with legacy frame-based mode
+let useApiMode = true;
 
 /**
  * Enable or disable API-based mode for word operations.
  *
+ * API mode is enabled by default since v3.0.0.
  * When enabled, word status changes, deletions, and quick marks
  * will use the REST API instead of frame navigation.
+ *
+ * To use legacy frame-based mode, call setUseApiMode(false) or
+ * set LWT_DATA.settings.use_frame_mode = true.
  *
  * @param enabled Whether to enable API mode
  */
@@ -112,10 +119,16 @@ export function setUseApiMode(enabled: boolean): void {
 /**
  * Check if API-based mode is currently enabled.
  *
- * Checks both the module flag and LWT_DATA.settings.use_api_mode.
+ * API mode is the default since v3.0.0.
+ * Returns false only if explicitly disabled via setUseApiMode(false)
+ * or LWT_DATA.settings.use_frame_mode = true.
  */
 export function isApiModeEnabled(): boolean {
-  return useApiMode || (typeof LWT_DATA !== 'undefined' && LWT_DATA.settings?.use_api_mode === true);
+  // Check if frame mode is explicitly requested (opt-out)
+  if (typeof LWT_DATA !== 'undefined' && LWT_DATA.settings?.use_frame_mode === true) {
+    return false;
+  }
+  return useApiMode;
 }
 
 // Audio controller type for frame access

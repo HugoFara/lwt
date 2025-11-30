@@ -16,6 +16,7 @@
 namespace Lwt\View\Helper;
 
 require_once __DIR__ . '/../../Core/Http/url_utilities.php';
+require_once __DIR__ . '/../../Core/Utils/string_utilities.php';
 
 use Lwt\Core\Http\UrlUtilities;
 use function Lwt\Core\Utils\showRequest;

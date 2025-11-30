@@ -26,6 +26,8 @@ require_once __DIR__ . '/../Services/TestService.php';
 require_once __DIR__ . '/../Services/MobileService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Services/LanguageDefinitions.php';
+require_once __DIR__ . '/../Services/TextNavigationService.php';
+require_once __DIR__ . '/../Services/AnnotationService.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../View/Helper/StatusHelper.php';
 require_once __DIR__ . '/../View/Helper/FormHelper.php';
@@ -88,6 +90,10 @@ class TestController extends BaseController
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
+     *
+     * @deprecated 3.0.0 Use PUT /api/v1/review/status instead.
+     *             This endpoint is kept for backward compatibility with frame-based mode.
+     *             The frontend now uses API mode by default (see setUseApiMode in text_events.ts).
      */
     public function setStatus(array $params): void
     {

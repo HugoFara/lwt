@@ -706,9 +706,53 @@ Phase 1.2  Create domain API modules               [Foundation] ✓ DONE
                 Phase 4.2  Result panel            [Major] ✓ DONE
                 Phase 4.3  Refactor overlib        [Major] ✓ DONE
                 Phase 4.4  Event delegation        [Major] ✓ DONE
+                Phase 4.5  API mode as default     [Major] ✓ DONE
                     │
                     └── Phase 5  Testing           [Validation]
 ```
+
+---
+
+## API Mode Configuration
+
+Since v3.0.0, the frontend uses **API mode by default** for word operations. This provides:
+- Faster status changes (no iframe reload)
+- Better mobile experience
+- Reduced server load
+- In-page result panels instead of frame navigation
+
+### Opt-out to Legacy Frame Mode
+
+If you need to use the legacy frame-based mode for backward compatibility:
+
+**JavaScript:**
+```javascript
+// Disable API mode globally
+window.setUseApiMode(false);
+
+// Or set in LWT_DATA before page initialization
+LWT_DATA.settings.use_frame_mode = true;
+```
+
+**PHP (in template):**
+```php
+<script>
+LWT_DATA.settings.use_frame_mode = true;
+</script>
+```
+
+### Deprecated Endpoints
+
+The following controller methods are deprecated and will be removed in a future version:
+
+| Deprecated Endpoint | Replacement API |
+|---------------------|-----------------|
+| `WordController::delete()` | `DELETE /api/v1/terms/{id}` |
+| `WordController::deleteMulti()` | `DELETE /api/v1/terms/{id}` |
+| `WordController::insertWellknown()` | `POST /api/v1/terms/quick` (status=99) |
+| `WordController::insertIgnore()` | `POST /api/v1/terms/quick` (status=98) |
+| `WordController::setStatus()` | `PUT /api/v1/terms/{id}/status/{status}` |
+| `TestController::setStatus()` | `PUT /api/v1/review/status` |
 
 ---
 
