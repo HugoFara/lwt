@@ -22,11 +22,18 @@ import './core/html_utils';
 import './core/cookies';
 import './core/lwt_state';
 import './core/app_data';
+import './core/api_client';
 import './core/ajax_utilities';
 import './core/ui_utilities';
 import './core/user_interactions';
 import './core/language_settings';
 import './core/simple_interactions';
+
+// API modules (Phase 1 - centralized API client)
+import './api/terms';
+import './api/texts';
+import './api/review';
+import './api/settings';
 
 // Terms/vocabulary management
 import './terms/word_status';

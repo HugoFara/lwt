@@ -85,7 +85,7 @@ class ApiV1
      *
      * @param string     $method   HTTP method
      * @param string     $uri      Request URI
-     * @param array|null $postData POST data
+     * @param array|null $postData POST data (also used for PUT/DELETE with JSON body)
      *
      * @return void
      */
@@ -98,6 +98,10 @@ class ApiV1
             $this->handleGet($fragments, $this->parseQueryParams($uri));
         } elseif ($method === 'POST') {
             $this->handlePost($fragments, $postData ?? []);
+        } elseif ($method === 'PUT') {
+            $this->handlePut($fragments, $postData ?? []);
+        } elseif ($method === 'DELETE') {
+            $this->handleDelete($fragments, $this->parseQueryParams($uri));
         }
     }
 
@@ -287,13 +291,17 @@ class ApiV1
                 (int)$params["count"]
             ));
         } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
+            $termId = (int)$fragments[1];
             if (($fragments[2] ?? '') === 'translations') {
                 Response::success($this->improvedTextHandler->formatTermTranslations(
                     (string)$params["term_lc"],
                     (int)$params["text_id"]
                 ));
+            } elseif (!isset($fragments[2])) {
+                // GET /terms/{id} - get term by ID
+                Response::success($this->termHandler->formatGetTerm($termId));
             } else {
-                Response::error('Expected "translations"', 404);
+                Response::error('Expected "translations" or no sub-path', 404);
             }
         } else {
             Response::error('Endpoint Not Found: ' . ($fragments[1] ?? ''), 404);
@@ -369,8 +377,15 @@ class ApiV1
                 (int)$params['lg_id'],
                 $params['translation']
             ));
+        } elseif (($fragments[1] ?? '') === 'quick') {
+            // POST /terms/quick - quick create term with status (98 or 99)
+            Response::success($this->termHandler->formatQuickCreate(
+                (int)$params['textId'],
+                (int)$params['position'],
+                (int)$params['status']
+            ));
         } else {
-            Response::error('Term ID (Integer) or "new" Expected', 404);
+            Response::error('Term ID (Integer), "new", or "quick" Expected', 404);
         }
     }
 
@@ -414,6 +429,129 @@ class ApiV1
     }
 
     // =========================================================================
+    // PUT Request Handlers
+    // =========================================================================
+
+    /**
+     * Handle PUT requests.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Request body parameters
+     */
+    private function handlePut(array $fragments, array $params): void
+    {
+        switch ($fragments[0]) {
+            case 'review':
+                $this->handleReviewPut($fragments, $params);
+                break;
+
+            case 'terms':
+                $this->handleTermsPut($fragments, $params);
+                break;
+
+            case 'texts':
+                $this->handleTextsPut($fragments, $params);
+                break;
+
+            default:
+                Response::error('Endpoint Not Found On PUT: ' . $fragments[0], 404);
+        }
+    }
+
+    private function handleReviewPut(array $fragments, array $params): void
+    {
+        if (($fragments[1] ?? '') === 'status') {
+            // PUT /review/status - update word status during review
+            Response::success($this->reviewHandler->formatUpdateStatus($params));
+        } else {
+            Response::error('Expected "status"', 404);
+        }
+    }
+
+    private function handleTermsPut(array $fragments, array $params): void
+    {
+        if (($fragments[1] ?? '') === 'bulk-status') {
+            // PUT /terms/bulk-status - bulk update term statuses
+            $termIds = $params['term_ids'] ?? [];
+            $status = (int)($params['status'] ?? 0);
+            Response::success($this->termHandler->formatBulkStatus($termIds, $status));
+        } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
+            $termId = (int)$fragments[1];
+            if (($fragments[2] ?? '') === 'translation') {
+                // PUT /terms/{id}/translation - update translation
+                Response::success($this->termHandler->formatUpdateTranslation(
+                    $termId,
+                    $params['translation'] ?? ''
+                ));
+            } else {
+                Response::error('Expected "translation"', 404);
+            }
+        } else {
+            Response::error('Term ID (Integer) or "bulk-status" Expected', 404);
+        }
+    }
+
+    private function handleTextsPut(array $fragments, array $params): void
+    {
+        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+            Response::error('Text ID (Integer) Expected', 404);
+        }
+
+        $textId = (int)$fragments[1];
+
+        switch ($fragments[2] ?? '') {
+            case 'display-mode':
+                // PUT /texts/{id}/display-mode - set display mode settings
+                Response::success($this->textHandler->formatSetDisplayMode($textId, $params));
+                break;
+            case 'mark-all-wellknown':
+                // PUT /texts/{id}/mark-all-wellknown - mark all unknown as well-known
+                Response::success($this->textHandler->formatMarkAllWellKnown($textId));
+                break;
+            case 'mark-all-ignored':
+                // PUT /texts/{id}/mark-all-ignored - mark all unknown as ignored
+                Response::success($this->textHandler->formatMarkAllIgnored($textId));
+                break;
+            default:
+                Response::error('Expected "display-mode", "mark-all-wellknown", or "mark-all-ignored"', 404);
+        }
+    }
+
+    // =========================================================================
+    // DELETE Request Handlers
+    // =========================================================================
+
+    /**
+     * Handle DELETE requests.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Query parameters (reserved for future use)
+     *
+     * @psalm-suppress UnusedParam
+     */
+    private function handleDelete(array $fragments, array $params): void
+    {
+        switch ($fragments[0]) {
+            case 'terms':
+                $this->handleTermsDelete($fragments);
+                break;
+
+            default:
+                Response::error('Endpoint Not Found On DELETE: ' . $fragments[0], 404);
+        }
+    }
+
+    private function handleTermsDelete(array $fragments): void
+    {
+        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+            Response::error('Term ID (Integer) Expected', 404);
+        }
+
+        $termId = (int)$fragments[1];
+        Response::success($this->termHandler->formatDeleteTerm($termId));
+    }
+
+    // =========================================================================
     // Helper Methods
     // =========================================================================
 
@@ -428,21 +566,42 @@ class ApiV1
     }
 
     /**
+     * Parse JSON body for PUT/DELETE requests.
+     *
+     * @return array Parsed body data
+     */
+    private static function parseJsonBody(): array
+    {
+        $input = file_get_contents('php://input');
+        if (empty($input)) {
+            return [];
+        }
+        $data = json_decode($input, true);
+        return is_array($data) ? $data : [];
+    }
+
+    /**
      * Static entry point for handling requests.
      *
      * @return void
      */
     public static function handleRequest(): void
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'GET' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $method = $_SERVER['REQUEST_METHOD'];
+
+        if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE'])) {
             Response::error('Method Not Allowed', 405);
         }
 
+        // Get body data based on method
+        $bodyData = [];
+        if ($method === 'POST') {
+            $bodyData = !empty($_POST) ? $_POST : self::parseJsonBody();
+        } elseif (in_array($method, ['PUT', 'DELETE'])) {
+            $bodyData = self::parseJsonBody();
+        }
+
         $api = new self();
-        $api->handle(
-            $_SERVER['REQUEST_METHOD'],
-            $_SERVER['REQUEST_URI'],
-            $_POST
-        );
+        $api->handle($method, $_SERVER['REQUEST_URI'], $bodyData);
     }
 }

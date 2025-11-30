@@ -1,9 +1,12 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Database\Connection;
 use Lwt\Services\TestService;
+use Lwt\Services\WordStatusService;
 
 require_once __DIR__ . '/../../../Services/TestService.php';
+require_once __DIR__ . '/../../../Services/WordStatusService.php';
 
 /**
  * Handler for review/test-related API operations.
@@ -138,5 +141,107 @@ class ReviewHandler
     public function formatTomorrowCount(array $params): array
     {
         return $this->tomorrowTestCount($params);
+    }
+
+    // =========================================================================
+    // New Phase 2 Methods
+    // =========================================================================
+
+    /**
+     * Update word status during review/test mode.
+     *
+     * Supports both explicit status setting and relative changes (+1/-1).
+     *
+     * @param int      $wordId Word ID
+     * @param int|null $status Explicit status (1-5, 98, 99), null if using change
+     * @param int|null $change Status change amount (+1 or -1), null if using explicit status
+     *
+     * @return array{status?: int, controls?: string, error?: string}
+     */
+    public function updateReviewStatus(int $wordId, ?int $status, ?int $change): array
+    {
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+
+        // Get current status
+        $currentStatus = Connection::fetchValue(
+            "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoID = $wordId"
+        );
+
+        if ($currentStatus === null) {
+            return ['error' => 'Word not found'];
+        }
+
+        $currentStatus = (int)$currentStatus;
+        $newStatus = $currentStatus;
+
+        if ($status !== null) {
+            // Explicit status - validate it
+            if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+                return ['error' => 'Invalid status value'];
+            }
+            $newStatus = $status;
+        } elseif ($change !== null) {
+            // Relative change
+            if ($change > 0) {
+                // Increment
+                $newStatus = $currentStatus + 1;
+                if ($newStatus == 6) {
+                    $newStatus = 99;  // 5 -> 99 (well-known)
+                } elseif ($newStatus == 100) {
+                    $newStatus = 1;   // 99 -> 1 (wrap around)
+                }
+            } else {
+                // Decrement
+                $newStatus = $currentStatus - 1;
+                if ($newStatus == 0) {
+                    $newStatus = 98;  // 1 -> 98 (ignored)
+                } elseif ($newStatus == 97) {
+                    $newStatus = 5;   // 98 -> 5 (wrap around)
+                }
+            }
+        } else {
+            return ['error' => 'Must provide either status or change'];
+        }
+
+        // Update the status
+        $result = Connection::execute(
+            "UPDATE {$tbpref}words
+             SET WoStatus = $newStatus, WoStatusChanged = NOW(), " .
+            WordStatusService::makeScoreRandomInsertUpdate('u') . "
+             WHERE WoID = $wordId",
+            ''
+        );
+
+        if (!is_numeric($result) || (int)$result !== 1) {
+            return ['error' => 'Failed to update status'];
+        }
+
+        // Return the new status and controls HTML
+        $controls = \make_status_controls_test_table(1, $newStatus, $wordId);
+
+        return [
+            'status' => $newStatus,
+            'controls' => $controls
+        ];
+    }
+
+    /**
+     * Format response for updating review status.
+     *
+     * @param array $params Request parameters with word_id, and either status or change
+     *
+     * @return array{status?: int, controls?: string, error?: string}
+     */
+    public function formatUpdateStatus(array $params): array
+    {
+        $wordId = (int)($params['word_id'] ?? 0);
+        if ($wordId === 0) {
+            return ['error' => 'word_id is required'];
+        }
+
+        $status = isset($params['status']) ? (int)$params['status'] : null;
+        $change = isset($params['change']) ? (int)$params['change'] : null;
+
+        return $this->updateReviewStatus($wordId, $status, $change);
     }
 }

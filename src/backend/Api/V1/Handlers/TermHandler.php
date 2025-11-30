@@ -4,7 +4,10 @@ namespace Lwt\Api\V1\Handlers;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Services\WordService;
 use Lwt\Services\WordStatusService;
+
+require_once __DIR__ . '/../../../Services/WordService.php';
 
 /**
  * Handler for term/word-related API operations.
@@ -13,6 +16,12 @@ use Lwt\Services\WordStatusService;
  */
 class TermHandler
 {
+    private WordService $wordService;
+
+    public function __construct()
+    {
+        $this->wordService = new WordService();
+    }
     /**
      * Add the translation for a new term.
      *
@@ -307,5 +316,183 @@ class TermHandler
             return ["set" => (int)$result];
         }
         return ["error" => $result];
+    }
+
+    // =========================================================================
+    // New Phase 2 Methods
+    // =========================================================================
+
+    /**
+     * Delete a term by ID.
+     *
+     * @param int $termId Term ID to delete
+     *
+     * @return array{deleted: bool, error?: string}
+     */
+    public function deleteTerm(int $termId): array
+    {
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+
+        // Check if term exists
+        $exists = Connection::fetchValue(
+            "SELECT COUNT(WoID) AS value FROM {$tbpref}words WHERE WoID = $termId"
+        );
+
+        if ((int)$exists === 0) {
+            return ['deleted' => false, 'error' => 'Term not found'];
+        }
+
+        // Get word count to determine if multi-word
+        $wordCount = (int)Connection::fetchValue(
+            "SELECT WoWordCount AS value FROM {$tbpref}words WHERE WoID = $termId"
+        );
+
+        if ($wordCount > 1) {
+            $this->wordService->deleteMultiWord($termId);
+        } else {
+            $this->wordService->delete($termId);
+        }
+
+        return ['deleted' => true];
+    }
+
+    /**
+     * Create a term quickly with wellknown (99) or ignored (98) status.
+     *
+     * @param int $textId   Text ID containing the word
+     * @param int $ord      Word position (order) in text
+     * @param int $status   Status to set (98 for ignored, 99 for well-known)
+     *
+     * @return array{term_id?: int, term?: string, term_lc?: string, hex?: string, error?: string}
+     */
+    public function createQuickTerm(int $textId, int $ord, int $status): array
+    {
+        // Validate status
+        if ($status !== 98 && $status !== 99) {
+            return ['error' => 'Status must be 98 (ignored) or 99 (well-known)'];
+        }
+
+        // Get the word at the position
+        $term = $this->wordService->getWordAtPosition($textId, $ord);
+        if ($term === null) {
+            return ['error' => 'Word not found at position'];
+        }
+
+        try {
+            $result = $this->wordService->insertWordWithStatus($textId, $term, $status);
+            return [
+                'term_id' => $result['id'],
+                'term' => $result['term'],
+                'term_lc' => $result['termlc'],
+                'hex' => $result['hex']
+            ];
+        } catch (\RuntimeException $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Update status for multiple terms.
+     *
+     * @param int[] $termIds Array of term IDs
+     * @param int   $status  New status (1-5, 98, 99)
+     *
+     * @return array{count: int, error?: string}
+     */
+    public function bulkUpdateStatus(array $termIds, int $status): array
+    {
+        // Validate status
+        if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+            return ['count' => 0, 'error' => 'Invalid status value'];
+        }
+
+        $count = $this->wordService->updateStatusMultiple($termIds, $status);
+        return ['count' => $count];
+    }
+
+    /**
+     * Get a term by ID.
+     *
+     * @param int $termId Term ID
+     *
+     * @return array{id: int, text: string, textLc: string, translation: string, romanization: string, status: int, langId: int}|array{error: string}
+     */
+    public function getTerm(int $termId): array
+    {
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+
+        $record = Connection::fetchOne(
+            "SELECT WoID, WoText, WoTextLC, WoTranslation, WoRomanization, WoStatus, WoLgID
+             FROM {$tbpref}words WHERE WoID = $termId"
+        );
+
+        if ($record === null) {
+            return ['error' => 'Term not found'];
+        }
+
+        return [
+            'id' => (int)$record['WoID'],
+            'text' => (string)$record['WoText'],
+            'textLc' => (string)$record['WoTextLC'],
+            'translation' => (string)$record['WoTranslation'],
+            'romanization' => (string)$record['WoRomanization'],
+            'status' => (int)$record['WoStatus'],
+            'langId' => (int)$record['WoLgID']
+        ];
+    }
+
+    // =========================================================================
+    // New API Response Formatters
+    // =========================================================================
+
+    /**
+     * Format response for deleting a term.
+     *
+     * @param int $termId Term ID
+     *
+     * @return array{deleted: bool, error?: string}
+     */
+    public function formatDeleteTerm(int $termId): array
+    {
+        return $this->deleteTerm($termId);
+    }
+
+    /**
+     * Format response for quick term creation.
+     *
+     * @param int $textId   Text ID
+     * @param int $position Word position in text
+     * @param int $status   Status (98 or 99)
+     *
+     * @return array{term_id?: int, term?: string, term_lc?: string, hex?: string, error?: string}
+     */
+    public function formatQuickCreate(int $textId, int $position, int $status): array
+    {
+        return $this->createQuickTerm($textId, $position, $status);
+    }
+
+    /**
+     * Format response for bulk status update.
+     *
+     * @param int[] $termIds Term IDs
+     * @param int   $status  New status
+     *
+     * @return array{count: int, error?: string}
+     */
+    public function formatBulkStatus(array $termIds, int $status): array
+    {
+        return $this->bulkUpdateStatus($termIds, $status);
+    }
+
+    /**
+     * Format response for getting a term.
+     *
+     * @param int $termId Term ID
+     *
+     * @return array
+     */
+    public function formatGetTerm(int $termId): array
+    {
+        return $this->getTerm($termId);
     }
 }

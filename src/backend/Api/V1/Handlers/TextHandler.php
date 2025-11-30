@@ -3,6 +3,10 @@ namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Database\Settings;
+use Lwt\Services\WordService;
+
+require_once __DIR__ . '/../../../Services/WordService.php';
 
 /**
  * Handler for text-related API operations.
@@ -11,6 +15,12 @@ use Lwt\Database\Escaping;
  */
 class TextHandler
 {
+    private WordService $wordService;
+
+    public function __construct()
+    {
+        $this->wordService = new WordService();
+    }
     /**
      * Save the reading position of the text.
      *
@@ -160,5 +170,124 @@ class TextHandler
             return ["error" => $result["error"]];
         }
         return ["save_impr_text" => $result["success"]];
+    }
+
+    // =========================================================================
+    // New Phase 2 Methods
+    // =========================================================================
+
+    /**
+     * Set display mode settings for a text.
+     *
+     * @param int        $textId      Text ID
+     * @param int|null   $annotations Annotation mode (0=none, 1=translations, 2=romanization, 3=both)
+     * @param bool|null  $romanization Whether to show romanization
+     * @param bool|null  $translation  Whether to show translation
+     *
+     * @return array{updated: bool, error?: string}
+     */
+    public function setDisplayMode(int $textId, ?int $annotations, ?bool $romanization, ?bool $translation): array
+    {
+        // Validate text exists
+        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $exists = Connection::fetchValue(
+            "SELECT COUNT(TxID) AS value FROM {$tbpref}texts WHERE TxID = $textId"
+        );
+
+        if ((int)$exists === 0) {
+            return ['updated' => false, 'error' => 'Text not found'];
+        }
+
+        // Save settings
+        if ($annotations !== null) {
+            Settings::save('set-text-h-annotations', (string)$annotations);
+        }
+
+        if ($romanization !== null) {
+            Settings::save('set-display-romanization', $romanization ? '1' : '0');
+        }
+
+        if ($translation !== null) {
+            Settings::save('set-display-translation', $translation ? '1' : '0');
+        }
+
+        return ['updated' => true];
+    }
+
+    /**
+     * Mark all unknown words in a text as well-known.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{count: int, words?: array}
+     */
+    public function markAllWellKnown(int $textId): array
+    {
+        list($count, $wordsData) = $this->wordService->markAllWordsWithStatus($textId, 99);
+        return [
+            'count' => $count,
+            'words' => $wordsData
+        ];
+    }
+
+    /**
+     * Mark all unknown words in a text as ignored.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{count: int, words?: array}
+     */
+    public function markAllIgnored(int $textId): array
+    {
+        list($count, $wordsData) = $this->wordService->markAllWordsWithStatus($textId, 98);
+        return [
+            'count' => $count,
+            'words' => $wordsData
+        ];
+    }
+
+    // =========================================================================
+    // New API Response Formatters
+    // =========================================================================
+
+    /**
+     * Format response for setting display mode.
+     *
+     * @param int   $textId Text ID
+     * @param array $params Display mode parameters
+     *
+     * @return array{updated: bool, error?: string}
+     */
+    public function formatSetDisplayMode(int $textId, array $params): array
+    {
+        $annotations = isset($params['annotations']) ? (int)$params['annotations'] : null;
+        $romanization = isset($params['romanization']) ? filter_var($params['romanization'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : null;
+        $translation = isset($params['translation']) ? filter_var($params['translation'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : null;
+
+        return $this->setDisplayMode($textId, $annotations, $romanization, $translation);
+    }
+
+    /**
+     * Format response for marking all words as well-known.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{count: int, words?: array}
+     */
+    public function formatMarkAllWellKnown(int $textId): array
+    {
+        return $this->markAllWellKnown($textId);
+    }
+
+    /**
+     * Format response for marking all words as ignored.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{count: int, words?: array}
+     */
+    public function formatMarkAllIgnored(int $textId): array
+    {
+        return $this->markAllIgnored($textId);
     }
 }
