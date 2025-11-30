@@ -10,6 +10,8 @@
  *
  * PHP version 8.1
  */
+
+namespace Lwt\Views\Word;
 ?>
 <h2>New Term</h2>
 <form name="newword" class="validate" action="/words/edit" method="post" data-lwt-form-check="true">

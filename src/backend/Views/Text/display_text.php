@@ -20,6 +20,8 @@
  * @psalm-suppress UndefinedGlobalVariable Variables are injected by including file
  */
 
+namespace Lwt\Views\Text;
+
 // Variables injected from text_display_text.php:
 // $annotations, $textSize, $rtlScript
 // JavaScript moved to reading/annotation_interactions.ts
@@ -34,12 +36,12 @@ foreach ($annotations as $item) {
         echo ' <ruby>
             <rb>
                 <span class="click anntermruby" style="color:black;"' .
-                ($item['rom'] === '' ? '' : (' title="' . tohtml($item['rom']) . '"')) . '>' .
-                    tohtml($item['text']) .
+                ($item['rom'] === '' ? '' : (' title="' . \tohtml($item['rom']) . '"')) . '>' .
+                    \tohtml($item['text']) .
                 '</span>
             </rb>
             <rt>
-                <span class="click anntransruby2">' . tohtml($item['trans']) . '</span>
+                <span class="click anntransruby2">' . \tohtml($item['trans']) . '</span>
             </rt>
         </ruby> ';
     } else {
@@ -49,7 +51,7 @@ foreach ($annotations as $item) {
             '</p>
             <p style="font-size:' . $textSize .
             '%;line-height: 1.3; margin-bottom: 10px;">',
-            " " . tohtml($item['text'])
+            " " . \tohtml($item['text'])
         );
     }
 }

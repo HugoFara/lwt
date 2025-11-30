@@ -1,8 +1,26 @@
 <?php declare(strict_types=1);
 
+namespace Lwt\Tests\Core;
+
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
+
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Core\Http\ParamHelpers;
+use Lwt\Database\Configuration;
+use Lwt\Database\Connection;
+use Lwt\Database\Restore;
+use Lwt\Database\Settings;
+use Lwt\Services\DictionaryService;
+use Lwt\Services\LanguageService;
+use Lwt\Services\TableSetService;
+use Lwt\Services\TagService;
+use Lwt\View\Helper\FormHelper;
+use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\StatusHelper;
+use PHPUnit\Framework\TestCase;
+
+use function Lwt\Core\Utils\get_execution_time;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
@@ -28,21 +46,6 @@ require_once __DIR__ . '/../../../src/backend/Services/DictionaryService.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
 require_once __DIR__ . '/../../../src/backend/Services/TableSetService.php';
-
-use Lwt\Core\Http\ParamHelpers;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\Restore;
-use Lwt\Database\Settings;
-use Lwt\Services\DictionaryService;
-use Lwt\Services\LanguageService;
-use Lwt\Services\TableSetService;
-use Lwt\Services\TagService;
-use Lwt\View\Helper\FormHelper;
-use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\View\Helper\StatusHelper;
-use PHPUnit\Framework\TestCase;
-use function Lwt\Core\Utils\get_execution_time;
 
 /**
  * Integration tests for core functionality.
@@ -75,7 +78,7 @@ class IntegrationTest extends TestCase
 
         // Ensure we have a test database set up
         $result = Connection::query("SHOW TABLES LIKE 'texts'");
-        $res = mysqli_fetch_assoc($result);
+        $res = \mysqli_fetch_assoc($result);
 
         if ($res) {
             Restore::truncateUserDatabase();
@@ -95,7 +98,7 @@ class IntegrationTest extends TestCase
     {
         // Truncate the database if not empty
         $result = Connection::query("SHOW TABLES LIKE 'texts'");
-        $res = mysqli_fetch_assoc($result);
+        $res = \mysqli_fetch_assoc($result);
 
         if ($res) {
             Restore::truncateUserDatabase();
@@ -406,7 +409,7 @@ class IntegrationTest extends TestCase
     {
         // Get first text from demo DB
         $text_res = Connection::query("SELECT TxID FROM texts LIMIT 1");
-        if ($text_row = mysqli_fetch_assoc($text_res)) {
+        if ($text_row = \mysqli_fetch_assoc($text_res)) {
             $text_id = (int)$text_row['TxID'];
             $counts = return_textwordcount($text_id);
 
@@ -427,7 +430,7 @@ class IntegrationTest extends TestCase
     public function testTodoWordsCount()
     {
         $text_res = Connection::query("SELECT TxID FROM texts LIMIT 1");
-        if ($text_row = mysqli_fetch_assoc($text_res)) {
+        if ($text_row = \mysqli_fetch_assoc($text_res)) {
             $text_id = (int)$text_row['TxID'];
             $count = todo_words_count($text_id);
 
@@ -482,7 +485,7 @@ class IntegrationTest extends TestCase
     {
         // Test with a language from demo DB
         $lang_res = Connection::query("SELECT LgID FROM languages LIMIT 1");
-        if ($lang_row = mysqli_fetch_assoc($lang_res)) {
+        if ($lang_row = \mysqli_fetch_assoc($lang_res)) {
             $lang_id = (int)$lang_row['LgID'];
             $dir_tag = self::$languageService->getScriptDirectionTag($lang_id);
 

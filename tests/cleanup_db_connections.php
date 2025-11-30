@@ -10,7 +10,7 @@
  * PHP version 8.1
  *
  * @category Testing
- * @package  Lwt
+ * @package  Lwt\Tests
  * @author   Claude <noreply@anthropic.com>
  * @license  Unlicense <http://unlicense.org/>
  * @since    3.0.0
@@ -18,10 +18,12 @@
 
 declare(strict_types=1);
 
-// Load environment configuration
-require_once __DIR__ . '/../src/backend/Core/Bootstrap/EnvLoader.php';
+namespace Lwt\Tests;
 
 use Lwt\Core\EnvLoader;
+
+// Load environment configuration
+require_once __DIR__ . '/../src/backend/Core/Bootstrap/EnvLoader.php';
 
 EnvLoader::load(__DIR__ . '/../.env');
 $config = EnvLoader::getDatabaseConfig();

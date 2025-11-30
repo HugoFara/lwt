@@ -1,9 +1,24 @@
 <?php declare(strict_types=1);
 
+namespace Lwt\Tests\Core;
+
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
+
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Core\Utils\ErrorHandler;
+use Lwt\Database\Configuration;
+use Lwt\Database\Connection;
+use Lwt\Database\DB;
 use Lwt\Database\Escaping;
+use Lwt\Database\Maintenance;
+use Lwt\Database\Migrations;
+use Lwt\Database\Settings;
+use Lwt\Database\TextParsing;
+use Lwt\Database\Validation;
+use Lwt\Services\SettingsService;
+use Lwt\Services\WordStatusService;
+use PHPUnit\Framework\TestCase;
 
 use function Lwt\Core\get_version_number;
 
@@ -15,20 +30,6 @@ $GLOBALS['dbname'] = "test_" . $config['dbname'];
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
-
-use Lwt\Core\Utils\ErrorHandler;
-use Lwt\Database\Configuration;
-use Lwt\Database\Connection;
-use Lwt\Database\DB;
-use Lwt\Database\Maintenance;
-use Lwt\Database\Migrations;
-use Lwt\Database\Settings;
-use Lwt\Database\TextParsing;
-use Lwt\Database\Validation;
-use Lwt\Services\SettingsService;
-use Lwt\Services\WordStatusService;
-use PHPUnit\Framework\TestCase;
-
 
 /**
  * @return string[]
@@ -72,8 +73,8 @@ class DatabaseConnectTest extends TestCase
         );
         Globals::setDbConnection($connection);
         $this->assertTrue(
-            mysqli_connect_errno() === 0,
-            'Could not connect to the database: ' . mysqli_connect_error()
+            \mysqli_connect_errno() === 0,
+            'Could not connect to the database: ' . \mysqli_connect_error()
         );
     }
 
@@ -559,7 +560,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, verify the table still exists (injection didn't work)
-        $tableExists = mysqli_num_rows(Connection::query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
+        $tableExists = \mysqli_num_rows(Connection::query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
 
         // Test special key 'currentlanguage' (triggers validateLang)
@@ -610,7 +611,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, verify the table still exists (injection didn't work)
-        $tableExists = mysqli_num_rows(Connection::query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
+        $tableExists = \mysqli_num_rows(Connection::query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
 
         // Empty key
@@ -947,8 +948,8 @@ class DatabaseConnectTest extends TestCase
         $connection = Configuration::connect(
             $server, $userid, $passwd, $dbname, $socket ?? ""
         );
-        $this->assertInstanceOf(mysqli::class, $connection);
-        $this->assertEquals(0, mysqli_connect_errno(), 'Should connect successfully');
+        $this->assertInstanceOf(\mysqli::class, $connection);
+        $this->assertEquals(0, \mysqli_connect_errno(), 'Should connect successfully');
 
         // Note: Testing with invalid database name would trigger my_die()
         // so we skip that test to avoid test failure
@@ -1036,12 +1037,12 @@ class DatabaseConnectTest extends TestCase
         $result = Connection::query("SELECT 1 as test");
         $this->assertNotFalse($result, 'Valid query should return result');
         $this->assertTrue(
-            $result instanceof mysqli_result || $result === true,
+            $result instanceof \mysqli_result || $result === true,
             'Result should be mysqli_result or true'
         );
 
-        if ($result instanceof mysqli_result) {
-            mysqli_free_result($result);
+        if ($result instanceof \mysqli_result) {
+            \mysqli_free_result($result);
         }
 
         // Valid INSERT query
@@ -1465,7 +1466,7 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Check connection charset (should be utf8, utf8mb3, or utf8mb4)
-        $charset = mysqli_character_set_name(Globals::getDbConnection());
+        $charset = \mysqli_character_set_name(Globals::getDbConnection());
         $this->assertContains(
             $charset,
             ['utf8', 'utf8mb3', 'utf8mb4'],
@@ -1474,13 +1475,13 @@ class DatabaseConnectTest extends TestCase
 
         // Check database charset (should be utf8, utf8mb3, or utf8mb4)
         $result = Connection::query("SHOW VARIABLES LIKE 'character_set_database'");
-        $row = mysqli_fetch_assoc($result);
+        $row = \mysqli_fetch_assoc($result);
         $this->assertContains(
             $row['Value'],
             ['utf8', 'utf8mb3', 'utf8mb4'],
             'Database should use UTF-8 encoding (utf8, utf8mb3, or utf8mb4)'
         );
-        mysqli_free_result($result);
+        \mysqli_free_result($result);
     }
 
     /**
@@ -1502,11 +1503,11 @@ class DatabaseConnectTest extends TestCase
 
         // Check if table uses MyISAM (which doesn't support transactions)
         $engine_result = Connection::query("SHOW TABLE STATUS LIKE '{$tbpref}settings'");
-        $engine_row = mysqli_fetch_assoc($engine_result);
+        $engine_row = \mysqli_fetch_assoc($engine_result);
         $is_myisam = ($engine_row['Engine'] === 'MyISAM');
 
         // Start transaction
-        mysqli_begin_transaction(Globals::getDbConnection());
+        \mysqli_begin_transaction(Globals::getDbConnection());
 
         // Insert test data
         Connection::query(
@@ -1515,7 +1516,7 @@ class DatabaseConnectTest extends TestCase
         );
 
         // Rollback
-        mysqli_rollback(Globals::getDbConnection());
+        \mysqli_rollback(Globals::getDbConnection());
 
         // Verify behavior (MyISAM will commit regardless of rollback)
         $result = Settings::get('test_transaction');
@@ -1531,12 +1532,12 @@ class DatabaseConnectTest extends TestCase
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey='test_transaction'");
 
         // Test commit
-        mysqli_begin_transaction(Globals::getDbConnection());
+        \mysqli_begin_transaction(Globals::getDbConnection());
         Connection::query(
             "INSERT INTO {$tbpref}settings (StKey, StValue)
              VALUES ('test_transaction', 'value2')"
         );
-        mysqli_commit(Globals::getDbConnection());
+        \mysqli_commit(Globals::getDbConnection());
 
         // Verify data was committed (works for both MyISAM and InnoDB)
         $result = Settings::get('test_transaction');

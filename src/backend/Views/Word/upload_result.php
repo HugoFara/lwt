@@ -18,6 +18,8 @@
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
  */
+
+namespace Lwt\Views\Word;
 ?>
 <form name="form1" action="#"
 data-action="upload-result-form"

@@ -24,6 +24,8 @@
  * PHP version 8.1
  */
 
+namespace Lwt\Views\Word;
+
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\PageLayoutHelper;
 

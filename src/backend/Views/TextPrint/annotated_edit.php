@@ -11,6 +11,8 @@
  * @package  Lwt
  */
 
+namespace Lwt\Views\TextPrint;
+
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
 
 $title = $viewData['title'];

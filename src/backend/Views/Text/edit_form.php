@@ -22,6 +22,8 @@
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  */
 
+namespace Lwt\Views\Text;
+
 /** @var int $textId */
 /** @var \Lwt\Classes\Text $text */
 /** @var bool $annotated */
@@ -93,7 +95,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             <td class="td1">
                 <input type="text" class="notempty checkoutsidebmp respinput"
                 data_info="Title" name="TxTitle" id="TxTitle"
-                value="<?php echo tohtml($text->title); ?>" maxlength="200" />
+                value="<?php echo \tohtml($text->title); ?>" maxlength="200" />
                 <img src="/assets/icons/status-busy.png" title="Field must not be empty"
                 alt="Field must not be empty" />
             </td>
@@ -107,7 +109,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             name="TxText" id="TxText"
             class="notempty checkbytes checkoutsidebmp respinput"
             data_maxlength="65000" data_info="Text" rows="20"
-            ><?php echo tohtml($text->text); ?></textarea>
+            ><?php echo \tohtml($text->text); ?></textarea>
             <img src="/assets/icons/status-busy.png" title="Field must not be empty"
             alt="Field must not be empty" />
             </td>
@@ -134,7 +136,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             <td class="td1">
                 <input type="url" class="checkurl checkoutsidebmp respinput"
                 data_info="Source URI" name="TxSourceURI"
-                value="<?php echo tohtml($text->source); ?>"
+                value="<?php echo \tohtml($text->source); ?>"
                 maxlength="1000" />
             </td>
         </tr>
@@ -151,7 +153,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             <td class="td1">
                 <input type="text" class="checkoutsidebmp respinput"
                 data_info="Audio-URI" name="TxAudioURI" maxlength="2048"
-                value="<?php echo tohtml($text->media_uri); ?>"  />
+                value="<?php echo \tohtml($text->media_uri); ?>"  />
                 <span id="mediaselect">
                     <?php echo \selectmediapath('TxAudioURI'); ?>
                 </span>

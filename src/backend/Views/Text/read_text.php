@@ -32,6 +32,8 @@
  * @since    3.0.0
  */
 
+namespace Lwt\Views\Text;
+
 use Lwt\Database\Settings;
 
 // Determine annotation style
@@ -50,7 +52,7 @@ $varArray = [
             'dict_link1'      => $dictLink1,
             'dict_link2'      => $dictLink2,
             'translator_link' => $translatorLink,
-            'delimiter'       => tohtml(
+            'delimiter'       => \tohtml(
                 str_replace(
                     ['\\',']','-','^'],
                     ['\\\\','\\]','\\-','\\^'],
@@ -63,7 +65,7 @@ $varArray = [
         'text' => [
             'id'               => $textId,
             'reading_position' => $textPosition,
-            'annotations'      => json_decode(annotation_to_json($annotatedText))
+            'annotations'      => json_decode(\annotation_to_json($annotatedText))
         ],
         'settings' => [
             'jQuery_tooltip'     => ($tooltipMode == 2 ? 1 : 0),
@@ -127,7 +129,7 @@ $varArray = [
         line-height: <?php echo $ruby ? '1' : '1.4'; ?>;"
     >
         <!-- Start displaying words -->
-        <?php main_word_loop($textId, $showAll); ?></span>
+        <?php \main_word_loop($textId, $showAll); ?></span>
     </p>
     <p style="font-size:<?php echo $textSize; ?>%;line-height: 1.4; margin-bottom: 300px;">&nbsp;</p>
 </div>

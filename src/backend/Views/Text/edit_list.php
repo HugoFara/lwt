@@ -31,6 +31,8 @@
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
  */
 
+namespace Lwt\Views\Text;
+
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\FormHelper;
@@ -51,7 +53,7 @@ use Lwt\View\Helper\FormHelper;
 /** @var array $statuses */
 
 ?>
-<link rel="stylesheet" type="text/css" href="<?php print_file_path('css/css_charts.css');?>" />
+<link rel="stylesheet" type="text/css" href="<?php \print_file_path('css/css_charts.css');?>" />
 
 <?php \Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false); ?>
 
@@ -112,7 +114,7 @@ use Lwt\View\Helper\FormHelper;
                 echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
             }
             ?>
-            <input type="text" name="query" value="<?php echo tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
+            <input type="text" name="query" value="<?php echo \tohtml($currentQuery); ?>" maxlength="50" size="15" />&nbsp;
             <input type="button" name="querybutton" value="Filter" data-action="filter" />&nbsp;
             <input type="button" value="Clear" data-action="clear-filter" />
         </td>
@@ -192,9 +194,9 @@ use Lwt\View\Helper\FormHelper;
         <?php endif; ?>
         <th class="th1 clickable">
             Title [Tags] / Audio:&nbsp;
-            <img src="<?php print_file_path('icn/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />,
+            <img src="<?php \print_file_path('icn/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />,
             Src.Link:&nbsp;
-            <img src="<?php print_file_path('icn/chain.png'); ?>" title="Source Link available" alt="Source Link available" />,
+            <img src="<?php \print_file_path('icn/chain.png'); ?>" title="Source Link available" alt="Source Link available" />,
             Ann.Text:&nbsp;
             <img src="/assets/icons/tick.png" title="Annotated Text available" alt="Annotated Text available" />
         </th>
@@ -264,17 +266,17 @@ use Lwt\View\Helper\FormHelper;
             </span>
         </td>
         <?php if ($currentLang == ''): ?>
-        <td class="td1 center"><?php echo tohtml($record['LgName']); ?></td>
+        <td class="td1 center"><?php echo \tohtml($record['LgName']); ?></td>
         <?php endif; ?>
         <td class="td1 center">
-            <?php echo tohtml($record['TxTitle']); ?>
-            <span class="smallgray2"><?php echo tohtml($record['taglist']); ?></span> &nbsp;
+            <?php echo \tohtml($record['TxTitle']); ?>
+            <span class="smallgray2"><?php echo \tohtml($record['taglist']); ?></span> &nbsp;
             <?php if ($audio != ''): ?>
-            <img src="<?php echo get_file_path('assets/icons/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />
+            <img src="<?php echo \get_file_path('assets/icons/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />
             <?php endif; ?>
             <?php if (isset($record['TxSourceURI']) && substr(trim($record['TxSourceURI']), 0, 1) != '#'): ?>
             <a href="<?php echo $record['TxSourceURI']; ?>" target="_blank">
-                <img src="<?php echo get_file_path('assets/icons/chain.png'); ?>" title="Link to Text Source" alt="Link to Text Source" />
+                <img src="<?php echo \get_file_path('assets/icons/chain.png'); ?>" title="Link to Text Source" alt="Link to Text Source" />
             </a>
             <?php endif; ?>
             <?php if ($record['annotlen']): ?>

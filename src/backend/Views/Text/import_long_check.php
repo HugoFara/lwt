@@ -19,6 +19,8 @@
  * @since    3.0.0
  */
 
+namespace Lwt\Views\Text;
+
 // JavaScript moved to forms/form_initialization.ts (uses data-lwt-form-check and data-lwt-dirty)
 
 $plural = ($textCount == 1 ? '' : 's');
@@ -26,9 +28,9 @@ $shorter = ($textCount == 1 ? ' ' : ' shorter ');
 ?>
 <form enctype="multipart/form-data" action="/text/import-long" method="post" data-lwt-form-check="true" data-lwt-dirty>
 <input type="hidden" name="LgID" value="<?php echo $langId; ?>" />
-<input type="hidden" name="TxTitle" value="<?php echo tohtml($title); ?>" />
-<input type="hidden" name="TxSourceURI" value="<?php echo tohtml($sourceUri); ?>" />
-<input type="hidden" name="TextTags" value="<?php echo tohtml($textTags); ?>" />
+<input type="hidden" name="TxTitle" value="<?php echo \tohtml($title); ?>" />
+<input type="hidden" name="TxSourceURI" value="<?php echo \tohtml($sourceUri); ?>" />
+<input type="hidden" name="TextTags" value="<?php echo \tohtml($textTags); ?>" />
 <input type="hidden" name="TextCount" value="<?php echo $textCount; ?>" />
 <table class="tab1" cellspacing="0" cellpadding="5">
     <tr>

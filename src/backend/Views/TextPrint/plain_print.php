@@ -18,6 +18,8 @@
  * @package  Lwt
  */
 
+namespace Lwt\Views\TextPrint;
+
 use Lwt\Services\TextPrintService;
 
 $title = $viewData['title'];

@@ -26,6 +26,8 @@
  * @since    3.0.0
  */
 
+namespace Lwt\Views\Text;
+
 ?>
 <script type="application/json" id="text-header-config"><?php echo json_encode([
     'textId' => (int) $textId,
@@ -42,7 +44,7 @@
     </div>
     <div>
         <?php
-        echo getPreviousAndNextTextLinks(
+        echo \getPreviousAndNextTextLinks(
             $textId,
             '/text/read?start=',
             false,
@@ -57,7 +59,7 @@
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
             <img src="/assets/icons/printer.png" title="Print" alt="Print" />
         </a>
-        <?php echo get_annotation_link($textId); ?>
+        <?php echo \get_annotation_link($textId); ?>
         <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
             <img src="/assets/icons/document--pencil.png" title="Edit Text" alt="Edit Text" />
         </a>
@@ -77,11 +79,11 @@
 
 <h1>READ &#x25B6;
     <?php
-    echo tohtml($title);
+    echo \tohtml($title);
     if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')) {
         ?>
     <a href="<?php echo $sourceUri ?>" target="_blank">
-        <img src="<?php echo get_file_path('assets/icons/chain.png') ?>" title="Text Source" alt="Text Source" />
+        <img src="<?php echo \get_file_path('assets/icons/chain.png') ?>" title="Text Source" alt="Text Source" />
     </a>
         <?php
     }
@@ -91,7 +93,7 @@
 <div class="flex-spaced">
     <div>
         Unknown words:
-        <span id="learnstatus"><?php echo todo_words_content((int) $textId); ?></span>
+        <span id="learnstatus"><?php echo \todo_words_content((int) $textId); ?></span>
     </div>
     <div
     title="[Show All] = ON: ALL terms are shown, and all multi-word terms are shown as superscripts before the first word. The superscript indicates the number of words in the multi-word term.

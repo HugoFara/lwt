@@ -11,6 +11,8 @@
  * @package  Lwt
  */
 
+namespace Lwt\Views\TextPrint;
+
 $title = $viewData['title'];
 $sourceUri = $viewData['sourceUri'];
 $audioUri = $viewData['audioUri'];

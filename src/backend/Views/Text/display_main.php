@@ -25,6 +25,8 @@
  * @psalm-suppress UndefinedGlobalVariable Variables are injected by including file
  */
 
+namespace Lwt\Views\Text;
+
 ?>
 <div style="width: 95%; height: 100%;">
     <div id="frame-h">

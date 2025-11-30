@@ -16,6 +16,8 @@
  * @since    3.0.0
  */
 
+namespace Lwt\Views\Text;
+
 // JavaScript moved to forms/form_initialization.ts (auto-detects form.validate and language-data-config)
 
 ?>
@@ -90,7 +92,7 @@
                 <b>upload_max_filesize</b>:
                 <?php echo ini_get('upload_max_filesize'); ?>
                 <br />
-                If needed, increase in <wbr />"<?php echo tohtml(php_ini_loaded_file()); ?>" <wbr />
+                If needed, increase in <wbr />"<?php echo \tohtml(php_ini_loaded_file()); ?>" <wbr />
                 and restart the server.
             </p>
         </td>

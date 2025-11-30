@@ -17,6 +17,8 @@
  * @since    3.0.0
  */
 
+namespace Lwt\Views\Word;
+
 use Lwt\Database\Settings;
 ?>
 <p>

@@ -10,6 +10,8 @@
  *
  * PHP version 8.1
  */
+
+namespace Lwt\Views\Word;
 ?>
 <h2>Edit Term</h2>
 <form name="editword" class="validate" action="/words/edit#rec<?php echo $word['WoID']; ?>" method="post">

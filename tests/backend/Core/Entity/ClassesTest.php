@@ -1,15 +1,17 @@
 <?php declare(strict_types=1);
 
+namespace Lwt\Tests\Core\Entity;
+
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/Language.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/Term.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/Text.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/GoogleTranslate.php';
 
-use PHPUnit\Framework\TestCase;
 use Lwt\Classes\GoogleTranslate;
 use Lwt\Classes\Language;
 use Lwt\Classes\Term;
 use Lwt\Classes\Text;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Comprehensive tests for PHP classes: Language, Term, Text, GoogleTranslate

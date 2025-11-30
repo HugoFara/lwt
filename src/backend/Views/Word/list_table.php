@@ -12,6 +12,8 @@
  *
  * PHP version 8.1
  */
+
+namespace Lwt\Views\Word;
 ?>
 <?php if ($recno == 0) { ?>
 <p>No terms found.</p>

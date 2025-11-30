@@ -1,8 +1,12 @@
 <?php declare(strict_types=1);
 
+namespace Lwt\Tests\Tools;
+
 require_once __DIR__ . '/../../src/tools/markdown_converter.php';
 
 use PHPUnit\Framework\TestCase;
+
+use function Lwt\Tools\markdown_converter;
 
 final class MarkdownConverterTest extends TestCase
 {

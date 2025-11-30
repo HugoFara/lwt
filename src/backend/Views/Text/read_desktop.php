@@ -15,6 +15,8 @@
  * @since    3.0.0
  */
 
+namespace Lwt\Views\Text;
+
 ?>
 <div style="width: <?php echo $frameLWidth; ?>%;" id="frames-l">
     <div id="frame-h">

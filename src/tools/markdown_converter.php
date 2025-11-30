@@ -14,6 +14,8 @@
  * @since   2.0.3-fork
  */
 
+namespace Lwt\Tools;
+
 require __DIR__ . '/../../vendor/autoload.php';
 
 use League\CommonMark\GithubFlavoredMarkdownConverter;

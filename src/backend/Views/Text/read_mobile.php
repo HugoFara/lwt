@@ -14,6 +14,8 @@
  * @since    3.0.0
  */
 
+namespace Lwt\Views\Text;
+
 ?>
 <div class="mobile-read-container">
     <div id="frame-h">

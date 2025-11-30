@@ -22,11 +22,13 @@
  * @psalm-suppress UndefinedGlobalVariable Variables are injected by including file
  */
 
+namespace Lwt\Views\Text;
+
 // Variables injected from text_display_header.php:
 // $title, $audio, $sourceUri, $textLinks
 
 ?>
-<h1><?php echo tohtml($title); ?></h1>
+<h1><?php echo \tohtml($title); ?></h1>
 <div class="flex-spaced">
     <div>
         <img id="hidet" class="click" src="/assets/icons/light-bulb-T.png"
@@ -46,7 +48,7 @@
         <?php
         if ($sourceUri !== null && $sourceUri !== '') {
             echo ' <a href="' . $sourceUri . '" target="_blank">
-                <img src="' . get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" />
+                <img src="' . \get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" />
             </a>';
         }
         echo $textLinks;

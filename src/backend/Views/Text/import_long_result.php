@@ -14,6 +14,8 @@
  * @since    3.0.0
  */
 
+namespace Lwt\Views\Text;
+
 ?>
 <?php \Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false); ?>
 <p>&nbsp;<br /><input type="button" value="Show Texts" data-action="navigate" data-url="/texts" /></p>

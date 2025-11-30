@@ -11,6 +11,8 @@
  * @category User_Interface
  * @package  Lwt
  */
+
+namespace Lwt\Views\TextPrint;
 ?>
 <div class="noprint">
     <div class="flex-header">

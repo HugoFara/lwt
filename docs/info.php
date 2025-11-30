@@ -17,6 +17,7 @@ require __DIR__ . '/../src/backend/Core/version.php';
 require_once __DIR__ . '/../src/tools/markdown_converter.php';
 
 use function Lwt\Core\get_version;
+use function Lwt\Tools\markdown_integration;
 
 ?>
 <!DOCTYPE html>

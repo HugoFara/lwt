@@ -17,6 +17,8 @@
  * @since    3.0.0
  */
 
+namespace Lwt\Views\Text;
+
 ?>
 <script type="application/json" id="set-mode-config">
 <?php echo json_encode([
