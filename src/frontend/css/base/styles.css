@@ -1125,7 +1125,7 @@ input[name="WoTranslation"]
 
 .del_trans:after
 {
-  content: url(/assets/icons/broom.png);
+  content: url(../../../../assets/icons/broom.png);
   opacity: 0.2;
 }
 

@@ -21,8 +21,13 @@ export default defineConfig({
         entryFileNames: 'js/vite/[name].[hash].js',
         chunkFileNames: 'js/vite/chunks/[name].[hash].js',
         assetFileNames: 'css/vite/[name].[hash][extname]',
+        manualChunks: {
+          'chart': ['chart.js'],
+          'tagify': ['@yaireo/tagify'],
+        },
       },
-    }
+    },
+    chunkSizeWarningLimit: 400,
   },
 
   plugins: [
