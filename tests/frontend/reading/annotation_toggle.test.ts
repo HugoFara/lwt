@@ -50,9 +50,10 @@ describe('annotation_toggle.ts', () => {
 
       doHideTranslations();
 
-      $('.anntermruby').each(function() {
-        expect($(this).css('color')).toBe('rgb(229, 228, 226)');  // #E5E4E2
-        expect($(this).css('background-color')).toBe('rgb(229, 228, 226)');
+      document.querySelectorAll('.anntermruby').forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        expect(htmlEl.style.color).toBe('rgb(229, 228, 226)');  // #E5E4E2
+        expect(htmlEl.style.backgroundColor).toBe('rgb(229, 228, 226)');
       });
     });
   });
@@ -119,9 +120,10 @@ describe('annotation_toggle.ts', () => {
 
       doHideAnnotations();
 
-      $('.anntransruby2').each(function() {
-        expect($(this).css('color')).toBe('rgb(200, 220, 240)');  // #C8DCF0
-        expect($(this).css('background-color')).toBe('rgb(200, 220, 240)');
+      document.querySelectorAll('.anntransruby2').forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        expect(htmlEl.style.color).toBe('rgb(200, 220, 240)');  // #C8DCF0
+        expect(htmlEl.style.backgroundColor).toBe('rgb(200, 220, 240)');
       });
     });
   });

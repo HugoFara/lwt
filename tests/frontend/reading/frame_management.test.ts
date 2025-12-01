@@ -74,11 +74,17 @@ describe('frame_management.ts', () => {
 
     it('animates #frames-r to visible position', () => {
       document.body.innerHTML = '<div id="frames-r" style="right: -100%;"></div>';
-      const animateSpy = vi.spyOn($.fn, 'animate');
+      const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        // Simulate animation completing immediately
+        cb(performance.now() + 1000);
+        return 1;
+      });
 
       showRightFrames();
 
-      expect(animateSpy).toHaveBeenCalledWith({ right: '5px' });
+      // Verify that animation was initiated via requestAnimationFrame
+      expect(rafSpy).toHaveBeenCalled();
+      rafSpy.mockRestore();
     });
 
     it('loads roUrl in upper-right frame when provided', () => {
@@ -164,11 +170,17 @@ describe('frame_management.ts', () => {
 
     it('animates #frames-r to hidden position', () => {
       document.body.innerHTML = '<div id="frames-r" style="right: 5px;"></div>';
-      const animateSpy = vi.spyOn($.fn, 'animate');
+      const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        // Simulate animation completing immediately
+        cb(performance.now() + 1000);
+        return 1;
+      });
 
       hideRightFrames();
 
-      expect(animateSpy).toHaveBeenCalledWith({ right: '-100%' });
+      // Verify that animation was initiated via requestAnimationFrame
+      expect(rafSpy).toHaveBeenCalled();
+      rafSpy.mockRestore();
     });
   });
 

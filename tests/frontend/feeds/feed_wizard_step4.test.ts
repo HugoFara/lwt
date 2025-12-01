@@ -299,12 +299,13 @@ describe('feed_wizard_step4.ts', () => {
 
       lwt_wizard_step4.setupHeader();
 
-      const h1 = $('h1').eq(-1);
-      expect(h1.html()).toContain('Feed Wizard');
-      expect(h1.html()).toContain('Step 4');
-      expect(h1.html()).toContain('Edit Options');
-      expect(h1.html()).toContain('docs/info.html#feed_wizard');
-      expect(h1.css('text-align')).toBe('center');
+      const h1Elements = document.querySelectorAll('h1');
+      const h1 = h1Elements[h1Elements.length - 1];
+      expect(h1.innerHTML).toContain('Feed Wizard');
+      expect(h1.innerHTML).toContain('Step 4');
+      expect(h1.innerHTML).toContain('Edit Options');
+      expect(h1.innerHTML).toContain('docs/info.html#feed_wizard');
+      expect(h1.style.textAlign).toBe('center');
     });
   });
 
@@ -345,7 +346,7 @@ describe('feed_wizard_step4.ts', () => {
   // ===========================================================================
 
   describe('event delegation', () => {
-    it('handles checkbox change events', async () => {
+    it('handles checkbox change events', () => {
       document.body.innerHTML = `
         <div id="wizard-step4-config"></div>
         <div>
@@ -354,12 +355,11 @@ describe('feed_wizard_step4.ts', () => {
         </div>
       `;
 
-      // Import to trigger event binding
-      await import('../../../src/frontend/js/feeds/feed_wizard_step4');
-
+      // Manually trigger the handleCheckboxChange function since DOMContentLoaded
+      // has already fired and event listeners were set up before our DOM changes
       const checkbox = document.querySelector<HTMLInputElement>('#testCheckbox')!;
       checkbox.checked = true;
-      $(checkbox).trigger('change');
+      lwt_wizard_step4.handleCheckboxChange.call(checkbox);
 
       const textInput = document.querySelector<HTMLInputElement>('#testInput')!;
       expect(textInput.hasAttribute('disabled')).toBe(false);

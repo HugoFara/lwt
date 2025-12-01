@@ -185,48 +185,46 @@ describe('home_warnings.ts', () => {
     it('displays update notification when newer version available', async () => {
       document.body.innerHTML = '<div id="lwt_new_version"></div>';
 
-      // Mock jQuery getJSON
-      const mockGetJSON = vi.fn().mockReturnValue({
-        done: vi.fn((callback: (data: { tag_name: string }) => void) => {
-          callback({ tag_name: '3.0.0' });
-          return { fail: vi.fn() };
-        })
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ tag_name: '3.0.0' })
+      } as Response);
 
       checkLWTUpdate('2.5.0');
 
-      expect(mockGetJSON).toHaveBeenCalledWith(
+      expect(fetchSpy).toHaveBeenCalledWith(
         'https://api.github.com/repos/hugofara/lwt/releases/latest'
       );
+
+      // Wait for async update
+      await vi.waitFor(() => {
+        expect(document.getElementById('lwt_new_version')?.innerHTML).toContain('3.0.0');
+      });
+
+      fetchSpy.mockRestore();
     });
 
     it('does not display notification when version is current', async () => {
       document.body.innerHTML = '<div id="lwt_new_version">Original</div>';
 
-      const mockGetJSON = vi.fn().mockReturnValue({
-        done: vi.fn((callback: (data: { tag_name: string }) => void) => {
-          callback({ tag_name: '2.5.0' });
-          return { fail: vi.fn() };
-        })
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ tag_name: '2.5.0' })
+      } as Response);
 
       checkLWTUpdate('2.5.0');
 
-      // The callback won't update since versions are equal
-      expect($('#lwt_new_version').html()).toBe('Original');
+      // Wait for promise to complete
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // The content shouldn't change since versions are equal
+      expect(document.getElementById('lwt_new_version')?.innerHTML).toBe('Original');
+
+      fetchSpy.mockRestore();
     });
 
-    it('handles API errors gracefully', () => {
+    it('handles API errors gracefully', async () => {
       document.body.innerHTML = '<div id="lwt_new_version"></div>';
 
-      const mockGetJSON = vi.fn().mockReturnValue({
-        done: vi.fn().mockReturnValue({
-          fail: vi.fn()
-        })
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      const fetchSpy = vi.spyOn(global, 'fetch').mockRejectedValue(new Error('Network error'));
 
       expect(() => checkLWTUpdate('2.5.0')).not.toThrow();
     });
@@ -246,10 +244,9 @@ describe('home_warnings.ts', () => {
 
       vi.mocked(areCookiesEnabled).mockReturnValue(true);
 
-      const mockGetJSON = vi.fn().mockReturnValue({
-        done: vi.fn().mockReturnValue({ fail: vi.fn() })
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ tag_name: '2.5.0' })
+      } as Response);
 
       initHomeWarnings({
         phpVersion: '8.1.0',
@@ -257,7 +254,9 @@ describe('home_warnings.ts', () => {
       });
 
       expect(areCookiesEnabled).toHaveBeenCalled();
-      expect(mockGetJSON).toHaveBeenCalled();
+      expect(fetchSpy).toHaveBeenCalled();
+
+      fetchSpy.mockRestore();
     });
   });
 

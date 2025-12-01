@@ -254,9 +254,9 @@ describe('text_display.ts', () => {
 
       word_count_click();
 
-      const children = $('.wc_cont').children();
-      children.each(function() {
-        const text = $(this).html();
+      const children = document.querySelectorAll('.wc_cont > span');
+      children.forEach((child) => {
+        const text = child.innerHTML;
         expect(['u', 't']).toContain(text);
       });
     });

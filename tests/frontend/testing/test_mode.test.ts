@@ -2,7 +2,6 @@
  * Tests for test_mode.ts - Event handlers for vocabulary testing
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   word_click_event_do_test_test,
   keydown_event_do_test_test
@@ -106,7 +105,7 @@ describe('test_mode.ts', () => {
       const wordEl = document.querySelector('.word')!;
       word_click_event_do_test_test.call(wordEl as HTMLElement);
 
-      expect($('.todo').text()).toBe('Test Solution');
+      expect(document.querySelector('.todo')?.textContent).toBe('Test Solution');
     });
 
     it('returns false', () => {
@@ -168,11 +167,26 @@ describe('test_mode.ts', () => {
       `;
     });
 
+    /**
+     * Helper to create native KeyboardEvent with deprecated keyCode/which support.
+     */
+    function createKeyEvent(key: string, keyCode: number): KeyboardEvent {
+      const event = new KeyboardEvent('keydown', {
+        key,
+        keyCode,
+        which: keyCode,
+        bubbles: true
+      } as KeyboardEventInit);
+      // TypeScript doesn't allow `which` in KeyboardEventInit, but JSDOM supports it
+      Object.defineProperty(event, 'which', { value: keyCode });
+      return event;
+    }
+
     describe('Space key', () => {
       it('shows solution when answer not opened', () => {
         LWT_DATA.test.answer_opened = false;
 
-        const event = $.Event('keydown', { key: 'Space', which: 32 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent(' ', 32);
         const result = keydown_event_do_test_test(event);
 
         expect(cleanupRightFrames).toHaveBeenCalled();
@@ -184,7 +198,7 @@ describe('test_mode.ts', () => {
       it('does nothing when answer already opened', () => {
         LWT_DATA.test.answer_opened = true;
 
-        const event = $.Event('keydown', { key: 'Space', which: 32 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent(' ', 32);
         const result = keydown_event_do_test_test(event);
 
         expect(cleanupRightFrames).not.toHaveBeenCalled();
@@ -194,7 +208,7 @@ describe('test_mode.ts', () => {
 
     describe('Escape key', () => {
       it('skips term without changing status', () => {
-        const event = $.Event('keydown', { key: 'Escape', which: 27 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent('Escape', 27);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).toHaveBeenCalledWith(
@@ -206,7 +220,7 @@ describe('test_mode.ts', () => {
 
     describe('I key', () => {
       it('sets status to ignored (98)', () => {
-        const event = $.Event('keydown', { key: 'I', which: 73 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent('I', 73);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).toHaveBeenCalledWith('set_test_status.php?wid=123&status=98');
@@ -216,7 +230,7 @@ describe('test_mode.ts', () => {
 
     describe('W key', () => {
       it('sets status to well-known (99)', () => {
-        const event = $.Event('keydown', { key: 'W', which: 87 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent('W', 87);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).toHaveBeenCalledWith('set_test_status.php?wid=123&status=99');
@@ -226,10 +240,10 @@ describe('test_mode.ts', () => {
 
     describe('E key', () => {
       it('opens edit word form', () => {
-        const event = $.Event('keydown', { key: 'E', which: 69 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent('E', 69);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).toHaveBeenCalledWith('edit_tword.php?wid=123');
+        expect(showRightFrames).toHaveBeenCalledWith('/word/edit-term?wid=123');
         expect(result).toBe(false);
       });
     });
@@ -238,7 +252,7 @@ describe('test_mode.ts', () => {
       it('does nothing when answer not opened', () => {
         LWT_DATA.test.answer_opened = false;
 
-        const event = $.Event('keydown', { key: 'ArrowUp', which: 38 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent('ArrowUp', 38);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).not.toHaveBeenCalled();
@@ -248,7 +262,7 @@ describe('test_mode.ts', () => {
       it('increases status when answer opened', () => {
         LWT_DATA.test.answer_opened = true;
 
-        const event = $.Event('keydown', { key: 'ArrowUp', which: 38 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent('ArrowUp', 38);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).toHaveBeenCalledWith('set_test_status.php?wid=123&stchange=1');
@@ -260,7 +274,7 @@ describe('test_mode.ts', () => {
       it('does nothing when answer not opened', () => {
         LWT_DATA.test.answer_opened = false;
 
-        const event = $.Event('keydown', { key: 'ArrowDown', which: 40 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent('ArrowDown', 40);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).not.toHaveBeenCalled();
@@ -270,7 +284,7 @@ describe('test_mode.ts', () => {
       it('decreases status when answer opened', () => {
         LWT_DATA.test.answer_opened = true;
 
-        const event = $.Event('keydown', { key: 'ArrowDown', which: 40 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent('ArrowDown', 40);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).toHaveBeenCalledWith('set_test_status.php?wid=123&stchange=-1');
@@ -280,15 +294,15 @@ describe('test_mode.ts', () => {
 
     describe('Number keys 1-5 (requires answer opened)', () => {
       it.each([
-        [1, 49, 1],
-        [2, 50, 2],
-        [3, 51, 3],
-        [4, 52, 4],
-        [5, 53, 5]
-      ])('sets status to %i when %i key pressed', (_num, keyCode, expectedStatus) => {
+        ['1', 49, 1],
+        ['2', 50, 2],
+        ['3', 51, 3],
+        ['4', 52, 4],
+        ['5', 53, 5]
+      ])('sets status to %i when %i key pressed', (key, keyCode, expectedStatus) => {
         LWT_DATA.test.answer_opened = true;
 
-        const event = $.Event('keydown', { which: keyCode }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent(key, keyCode);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).toHaveBeenCalledWith(`set_test_status.php?wid=123&status=${expectedStatus}`);
@@ -298,7 +312,7 @@ describe('test_mode.ts', () => {
       it('does nothing when answer not opened', () => {
         LWT_DATA.test.answer_opened = false;
 
-        const event = $.Event('keydown', { which: 49 }) as JQuery.KeyDownEvent;  // 1 key
+        const event = createKeyEvent('1', 49);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).not.toHaveBeenCalled();
@@ -306,15 +320,15 @@ describe('test_mode.ts', () => {
       });
 
       it.each([
-        [1, 97, 1],  // numpad 1
-        [2, 98, 2],  // numpad 2
-        [3, 99, 3],  // numpad 3
-        [4, 100, 4], // numpad 4
-        [5, 101, 5]  // numpad 5
-      ])('handles numpad key %i (keyCode %i)', (_num, keyCode, expectedStatus) => {
+        ['1', 97, 1],  // numpad 1
+        ['2', 98, 2],  // numpad 2
+        ['3', 99, 3],  // numpad 3
+        ['4', 100, 4], // numpad 4
+        ['5', 101, 5]  // numpad 5
+      ])('handles numpad key %s (keyCode %i)', (key, keyCode, expectedStatus) => {
         LWT_DATA.test.answer_opened = true;
 
-        const event = $.Event('keydown', { which: keyCode }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent(key, keyCode);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).toHaveBeenCalledWith(`set_test_status.php?wid=123&status=${expectedStatus}`);
@@ -324,7 +338,7 @@ describe('test_mode.ts', () => {
 
     describe('Unhandled keys', () => {
       it('returns true for unhandled keys', () => {
-        const event = $.Event('keydown', { key: 'A', which: 65 }) as JQuery.KeyDownEvent;
+        const event = createKeyEvent('A', 65);
         const result = keydown_event_do_test_test(event);
 
         expect(showRightFrames).not.toHaveBeenCalled();

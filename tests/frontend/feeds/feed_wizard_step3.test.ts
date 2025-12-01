@@ -16,8 +16,8 @@ vi.mock('../../../src/frontend/js/feeds/jq_feedwizard', () => ({
   }
 }));
 
-// Mock xpathQuery global function
-const mockXpathQuery = vi.fn(() => $());
+// Mock xpathQuery global function - returns HTMLElement[] not jQuery
+const mockXpathQuery = vi.fn(() => [] as HTMLElement[]);
 (window as unknown as Record<string, unknown>).xpathQuery = mockXpathQuery;
 
 describe('feed_wizard_step3.ts', () => {
@@ -147,7 +147,12 @@ describe('feed_wizard_step3.ts', () => {
     });
 
     it('shows images when value is "no"', () => {
-      $('img').not($('#lwt_header').find('*')).css('display', 'none');
+      // Hide all images except those in #lwt_header
+      document.querySelectorAll<HTMLImageElement>('img').forEach(img => {
+        if (!img.closest('#lwt_header')) {
+          img.style.display = 'none';
+        }
+      });
 
       const select = document.querySelector<HTMLSelectElement>('#hideSelect')!;
       select.value = 'no';
@@ -155,7 +160,8 @@ describe('feed_wizard_step3.ts', () => {
       lwt_wizard_filter.changeHideImages.call(select);
 
       // JSDOM normalizes empty display to computed value
-      expect($('.content-img').css('display')).not.toBe('none');
+      const contentImg = document.querySelector<HTMLImageElement>('.content-img');
+      expect(contentImg?.style.display).not.toBe('none');
     });
 
     it('hides images when value is not "no"', () => {
@@ -281,8 +287,9 @@ describe('feed_wizard_step3.ts', () => {
         </div>
       `;
 
-      // Mock xpathQuery to return an empty jQuery set (no matches)
-      mockXpathQuery.mockReturnValue($('#para1'));
+      // Mock xpathQuery to return array with matching element
+      const para1 = document.getElementById('para1') as HTMLElement;
+      mockXpathQuery.mockReturnValue([para1]);
 
       lwt_wizard_filter.updateFilterArray('//p[@id="para1"]');
 

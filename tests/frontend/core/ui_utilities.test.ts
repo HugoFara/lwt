@@ -29,7 +29,7 @@ const mockLWT_DATA = {
   text: { id: 1, reading_position: 0, annotations: {} },
   word: { id: 0 },
   test: { solution: '', answer_opened: false },
-  settings: { jQuery_tooltip: false, hts: 0, word_status_filter: '' }
+  settings: { hts: 0, word_status_filter: '' }
 };
 
 // Set up globals before import
@@ -217,9 +217,10 @@ describe('ui_utilities.ts', () => {
 
       wrapRadioButtons();
 
-      // Simulate space key press
-      const event = $.Event('keydown', { keyCode: 32 });
-      $('.wrap_radio span').trigger(event);
+      // Simulate space key press using native KeyboardEvent
+      const span = document.querySelector('.wrap_radio span') as HTMLElement;
+      const event = new KeyboardEvent('keydown', { keyCode: 32, bubbles: true });
+      span.dispatchEvent(event);
     });
   });
 
@@ -295,54 +296,55 @@ describe('ui_utilities.ts', () => {
   });
 
   // ===========================================================================
-  // jQuery Extensions Tests
+  // serializeFormToObject Tests
   // ===========================================================================
 
-  describe('jQuery extensions', () => {
-    describe('$.fn.serializeObject', () => {
-      it('serializes form to object', () => {
-        document.body.innerHTML = `
-          <form id="testform">
-            <input type="text" name="field1" value="value1" />
-            <input type="text" name="field2" value="value2" />
-          </form>
-        `;
+  describe('serializeFormToObject', () => {
+    const { serializeFormToObject } = ui_utilities;
 
-        // Import to ensure extension is registered
-        const result = $('#testform').serializeObject();
+    it('serializes form to object', () => {
+      document.body.innerHTML = `
+        <form id="testform">
+          <input type="text" name="field1" value="value1" />
+          <input type="text" name="field2" value="value2" />
+        </form>
+      `;
 
-        expect(result.field1).toBe('value1');
-        expect(result.field2).toBe('value2');
-      });
+      const form = document.getElementById('testform') as HTMLFormElement;
+      const result = serializeFormToObject(form);
 
-      it('handles multiple values with same name as array', () => {
-        document.body.innerHTML = `
-          <form id="testform">
-            <input type="checkbox" name="items" value="a" checked />
-            <input type="checkbox" name="items" value="b" checked />
-            <input type="checkbox" name="items" value="c" checked />
-          </form>
-        `;
-
-        const result = $('#testform').serializeObject();
-
-        expect(Array.isArray(result.items)).toBe(true);
-        expect(result.items).toEqual(['a', 'b', 'c']);
-      });
-
-      it('handles empty values', () => {
-        document.body.innerHTML = `
-          <form id="testform">
-            <input type="text" name="empty" value="" />
-          </form>
-        `;
-
-        const result = $('#testform').serializeObject();
-
-        expect(result.empty).toBe('');
-      });
+      expect(result.field1).toBe('value1');
+      expect(result.field2).toBe('value2');
     });
 
+    it('handles multiple values with same name as array', () => {
+      document.body.innerHTML = `
+        <form id="testform">
+          <input type="checkbox" name="items" value="a" checked />
+          <input type="checkbox" name="items" value="b" checked />
+          <input type="checkbox" name="items" value="c" checked />
+        </form>
+      `;
+
+      const form = document.getElementById('testform') as HTMLFormElement;
+      const result = serializeFormToObject(form);
+
+      expect(Array.isArray(result.items)).toBe(true);
+      expect(result.items).toEqual(['a', 'b', 'c']);
+    });
+
+    it('handles empty values', () => {
+      document.body.innerHTML = `
+        <form id="testform">
+          <input type="text" name="empty" value="" />
+        </form>
+      `;
+
+      const form = document.getElementById('testform') as HTMLFormElement;
+      const result = serializeFormToObject(form);
+
+      expect(result.empty).toBe('');
+    });
   });
 
   // ===========================================================================

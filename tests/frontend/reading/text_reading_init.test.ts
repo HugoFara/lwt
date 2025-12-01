@@ -271,11 +271,12 @@ describe('text_reading_init.ts', () => {
 
   describe('initTextReadingHeader', () => {
     it('sets up beforeunload handler', () => {
-      const onSpy = vi.spyOn($.fn, 'on');
+      const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
 
       initTextReadingHeader();
 
-      expect(onSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+      expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+      addEventListenerSpy.mockRestore();
     });
 
     it('initializes TTS', () => {
@@ -291,17 +292,14 @@ describe('text_reading_init.ts', () => {
     it('binds click handler for readTextButton', () => {
       document.body.innerHTML = '<button id="readTextButton">Read</button>';
 
-      // Spy on the on method before calling initTextReadingHeader
-      const onSpy = vi.spyOn($.fn, 'on');
+      const readTextButton = document.getElementById('readTextButton')!;
+      const addEventListenerSpy = vi.spyOn(readTextButton, 'addEventListener');
 
       initTextReadingHeader();
 
-      // Trigger document ready synchronously
-      $(() => {});
-
-      // Check if click handler was bound (it's bound in a document.ready callback)
-      // The exact binding happens after document.ready, so we just verify the function runs
-      expect(onSpy).toHaveBeenCalled();
+      // Check if click handler was bound to the button
+      expect(addEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+      addEventListenerSpy.mockRestore();
     });
   });
 

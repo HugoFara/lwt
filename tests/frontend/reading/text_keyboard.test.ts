@@ -2,11 +2,6 @@
  * Tests for text_keyboard.ts - Keyboard navigation and shortcuts for text reading
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
-
-// Make jQuery available globally before importing the module
-(global as Record<string, unknown>).$ = $;
-(global as Record<string, unknown>).jQuery = $;
 
 // Use vi.hoisted to define mock functions that will be available during vi.mock hoisting
 const { mockShowRightFrames, mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo } = vi.hoisted(() => ({
