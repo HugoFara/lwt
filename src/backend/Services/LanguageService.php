@@ -92,24 +92,12 @@ class LanguageService
      */
     public function createEmptyLanguage(): Language
     {
-        $language = new Language();
-        $language->id = 0;
-        $language->name = "";
-        $language->dict1uri = "";
-        $language->dict2uri = "";
-        $language->translator = "";
-        $language->exporttemplate = "";
-        $language->textsize = 100;
-        $language->charactersubst = "";
-        $language->regexpsplitsent = "";
-        $language->exceptionsplitsent = "";
-        $language->regexpwordchar = "";
-        $language->removespaces = false;
-        $language->spliteachchar = false;
-        $language->rightoleft = false;
-        $language->ttsvoiceapi = "";
-        $language->showromanization = true;
-        return $language;
+        return Language::create(
+            'New Language',
+            '',
+            '.!?',
+            'a-zA-Z'
+        );
     }
 
     /**
@@ -121,24 +109,24 @@ class LanguageService
      */
     private function mapRecordToLanguage(array $record): Language
     {
-        $language = new Language();
-        $language->id = (int) $record["LgID"];
-        $language->name = $record["LgName"];
-        $language->dict1uri = $record["LgDict1URI"];
-        $language->dict2uri = $record["LgDict2URI"];
-        $language->translator = $record["LgGoogleTranslateURI"];
-        $language->exporttemplate = $record["LgExportTemplate"];
-        $language->textsize = (int) $record["LgTextSize"];
-        $language->charactersubst = $record["LgCharacterSubstitutions"];
-        $language->regexpsplitsent = $record["LgRegexpSplitSentences"];
-        $language->exceptionsplitsent = $record["LgExceptionsSplitSentences"];
-        $language->regexpwordchar = $record["LgRegexpWordCharacters"];
-        $language->removespaces = (bool) $record["LgRemoveSpaces"];
-        $language->spliteachchar = (bool) $record["LgSplitEachChar"];
-        $language->rightoleft = (bool) $record["LgRightToLeft"];
-        $language->ttsvoiceapi = $record["LgTTSVoiceAPI"];
-        $language->showromanization = (bool) $record["LgShowRomanization"];
-        return $language;
+        return Language::reconstitute(
+            (int) $record["LgID"],
+            (string) $record["LgName"],
+            (string) $record["LgDict1URI"],
+            (string) ($record["LgDict2URI"] ?? ''),
+            (string) ($record["LgGoogleTranslateURI"] ?? ''),
+            (string) ($record["LgExportTemplate"] ?? ''),
+            (int) ($record["LgTextSize"] ?? 100),
+            (string) ($record["LgCharacterSubstitutions"] ?? ''),
+            (string) $record["LgRegexpSplitSentences"],
+            (string) ($record["LgExceptionsSplitSentences"] ?? ''),
+            (string) $record["LgRegexpWordCharacters"],
+            (bool) ($record["LgRemoveSpaces"] ?? false),
+            (bool) ($record["LgSplitEachChar"] ?? false),
+            (bool) ($record["LgRightToLeft"] ?? false),
+            (string) ($record["LgTTSVoiceAPI"] ?? ''),
+            (bool) ($record["LgShowRomanization"] ?? true)
+        );
     }
 
     /**

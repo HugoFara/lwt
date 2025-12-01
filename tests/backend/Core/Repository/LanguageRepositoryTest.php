@@ -17,6 +17,7 @@ $config = EnvLoader::getDatabaseConfig();
 $GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/LanguageId.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/Language.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Database/PreparedStatement.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Repository/RepositoryInterface.php';
@@ -74,11 +75,12 @@ class LanguageRepositoryTest extends TestCase
      */
     private function createTestLanguageEntity(string $name): Language
     {
-        $language = $this->repository->createEmpty();
-        $language->name = $name;
-        $language->dict1uri = 'https://dict.test/lwt_term';
-        $language->regexpsplitsent = '.!?';
-        $language->regexpwordchar = 'a-zA-Z';
+        $language = Language::create(
+            $name,
+            'https://dict.test/lwt_term',
+            '.!?',
+            'a-zA-Z'
+        );
         return $language;
     }
 
@@ -117,8 +119,8 @@ class LanguageRepositoryTest extends TestCase
         $result = $this->repository->find($id);
 
         $this->assertInstanceOf(Language::class, $result);
-        $this->assertEquals($id, $result->id);
-        $this->assertEquals('RepoTest_Find', $result->name);
+        $this->assertEquals($id, $result->id()->toInt());
+        $this->assertEquals('RepoTest_Find', $result->name());
     }
 
     public function testFindReturnsNullForNonExistent(): void
@@ -156,7 +158,7 @@ class LanguageRepositoryTest extends TestCase
 
         $result = $this->repository->findAll();
 
-        $names = array_map(fn($lang) => $lang->name, $result);
+        $names = array_map(fn($lang) => $lang->name(), $result);
         $this->assertContains('RepoTest_FindAll1', $names);
         $this->assertContains('RepoTest_FindAll2', $names);
     }
@@ -174,7 +176,7 @@ class LanguageRepositoryTest extends TestCase
         $result = $this->repository->findBy(['name' => 'RepoTest_FindBy']);
 
         $this->assertCount(1, $result);
-        $this->assertEquals($id, $result[0]->id);
+        $this->assertEquals($id, $result[0]->id()->toInt());
     }
 
     public function testFindByWithLimit(): void
@@ -208,7 +210,7 @@ class LanguageRepositoryTest extends TestCase
         );
 
         // Find positions in result
-        $names = array_map(fn($l) => $l->name, $result);
+        $names = array_map(fn($l) => $l->name(), $result);
         $posA = array_search('RepoTest_OrderA', $names);
         $posZ = array_search('RepoTest_OrderZ', $names);
 
@@ -231,7 +233,7 @@ class LanguageRepositoryTest extends TestCase
         $result = $this->repository->findOneBy(['name' => 'RepoTest_FindOneBy']);
 
         $this->assertInstanceOf(Language::class, $result);
-        $this->assertEquals($id, $result->id);
+        $this->assertEquals($id, $result->id()->toInt());
     }
 
     public function testFindOneByReturnsNullWhenNoMatch(): void
@@ -258,12 +260,12 @@ class LanguageRepositoryTest extends TestCase
         $id = $this->repository->save($language);
 
         $this->assertGreaterThan(0, $id);
-        $this->assertEquals($id, $language->id);
+        $this->assertEquals($id, $language->id()->toInt());
 
         // Verify in database
         $found = $this->repository->find($id);
         $this->assertNotNull($found);
-        $this->assertEquals('RepoTest_Insert', $found->name);
+        $this->assertEquals('RepoTest_Insert', $found->name());
 
         self::$testLanguageIds[] = $id;
     }
@@ -277,14 +279,14 @@ class LanguageRepositoryTest extends TestCase
         $id = $this->createTestLanguageInDb('RepoTest_Update');
         $language = $this->repository->find($id);
 
-        $language->name = 'RepoTest_Updated';
-        $language->textsize = 150;
+        $language->rename('RepoTest_Updated');
+        $language->setTextSize(150);
 
         $this->repository->save($language);
 
         $updated = $this->repository->find($id);
-        $this->assertEquals('RepoTest_Updated', $updated->name);
-        $this->assertEquals(150, $updated->textsize);
+        $this->assertEquals('RepoTest_Updated', $updated->name());
+        $this->assertEquals(150, $updated->textSize());
     }
 
     // ===== delete() tests =====
@@ -405,7 +407,7 @@ class LanguageRepositoryTest extends TestCase
 
         $result = $this->repository->findAllActive();
 
-        $names = array_map(fn($l) => $l->name, $result);
+        $names = array_map(fn($l) => $l->name(), $result);
         $this->assertNotContains('', $names);
         $this->assertContains('RepoTest_Active', $names);
     }
@@ -421,7 +423,7 @@ class LanguageRepositoryTest extends TestCase
         $result = $this->repository->findByName('RepoTest_ByName');
 
         $this->assertInstanceOf(Language::class, $result);
-        $this->assertEquals($id, $result->id);
+        $this->assertEquals($id, $result->id()->toInt());
     }
 
     public function testNameExists(): void
@@ -516,10 +518,10 @@ class LanguageRepositoryTest extends TestCase
         $result = $this->repository->createEmpty();
 
         $this->assertInstanceOf(Language::class, $result);
-        $this->assertEquals(0, $result->id);
-        $this->assertEquals('', $result->name);
-        $this->assertEquals(100, $result->textsize);
-        $this->assertTrue($result->showromanization);
+        $this->assertTrue($result->id()->isNew());
+        $this->assertEquals('New Language', $result->name());
+        $this->assertEquals(100, $result->textSize());
+        $this->assertTrue($result->showRomanization());
     }
 
     public function testIsRightToLeft(): void

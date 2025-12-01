@@ -276,7 +276,7 @@ class LanguageControllerTest extends TestCase
 
         $this->assertStringContainsString('Updated', $result);
         $lang = $service->getById($id);
-        $this->assertEquals('TestLang_ControllerUpdated', $lang->name);
+        $this->assertEquals('TestLang_ControllerUpdated', $lang->name());
     }
 
     public function testServiceDeleteMethodIsCalled(): void
@@ -335,8 +335,8 @@ class LanguageControllerTest extends TestCase
 
         $lang = $service->getById($id);
 
-        $this->assertEquals('TestLang_ControllerGetById', $lang->name);
-        $this->assertEquals($id, $lang->id);
+        $this->assertEquals('TestLang_ControllerGetById', $lang->name());
+        $this->assertEquals($id, $lang->id()->toInt());
     }
 
     public function testControllerServiceGetLanguagesWithStatsWorks(): void

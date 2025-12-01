@@ -171,8 +171,8 @@ class LanguageServiceTest extends TestCase
         $result = $this->service->getById($id);
 
         $this->assertInstanceOf(Language::class, $result);
-        $this->assertEquals($id, $result->id);
-        $this->assertEquals('TestLang_GetById', $result->name);
+        $this->assertEquals($id, $result->id()->toInt());
+        $this->assertEquals('TestLang_GetById', $result->name());
     }
 
     public function testGetByIdReturnsNullForNonExistent(): void
@@ -195,8 +195,8 @@ class LanguageServiceTest extends TestCase
         $result = $this->service->getById(0);
 
         $this->assertInstanceOf(Language::class, $result);
-        $this->assertEquals(0, $result->id);
-        $this->assertEquals('', $result->name);
+        $this->assertTrue($result->id()->isNew());
+        $this->assertEquals('New Language', $result->name());
     }
 
     public function testGetByIdReturnsEmptyLanguageForNegative(): void
@@ -208,7 +208,7 @@ class LanguageServiceTest extends TestCase
         $result = $this->service->getById(-1);
 
         $this->assertInstanceOf(Language::class, $result);
-        $this->assertEquals(0, $result->id);
+        $this->assertTrue($result->id()->isNew());
     }
 
     public function testGetByIdPopulatesAllFields(): void
@@ -221,16 +221,16 @@ class LanguageServiceTest extends TestCase
 
         $result = $this->service->getById($id);
 
-        $this->assertEquals('https://dict.test/lwt_term', $result->dict1uri);
-        $this->assertEquals('', $result->dict2uri);
-        $this->assertEquals('https://translate.test/lwt_term', $result->translator);
-        $this->assertEquals(100, $result->textsize);
-        $this->assertEquals('.!?', $result->regexpsplitsent);
-        $this->assertEquals('a-zA-Z', $result->regexpwordchar);
-        $this->assertFalse($result->removespaces);
-        $this->assertFalse($result->spliteachchar);
-        $this->assertFalse($result->rightoleft);
-        $this->assertTrue($result->showromanization);
+        $this->assertEquals('https://dict.test/lwt_term', $result->dict1Uri());
+        $this->assertEquals('', $result->dict2Uri());
+        $this->assertEquals('https://translate.test/lwt_term', $result->translatorUri());
+        $this->assertEquals(100, $result->textSize());
+        $this->assertEquals('.!?', $result->regexpSplitSentences());
+        $this->assertEquals('a-zA-Z', $result->regexpWordCharacters());
+        $this->assertFalse($result->removeSpaces());
+        $this->assertFalse($result->splitEachChar());
+        $this->assertFalse($result->rightToLeft());
+        $this->assertTrue($result->showRomanization());
     }
 
     // ===== createEmptyLanguage() tests =====
@@ -246,21 +246,21 @@ class LanguageServiceTest extends TestCase
     {
         $result = $this->service->createEmptyLanguage();
 
-        $this->assertEquals(0, $result->id);
-        $this->assertEquals('', $result->name);
-        $this->assertEquals('', $result->dict1uri);
-        $this->assertEquals('', $result->dict2uri);
-        $this->assertEquals('', $result->translator);
-        $this->assertEquals(100, $result->textsize);
-        $this->assertEquals('', $result->charactersubst);
-        $this->assertEquals('', $result->regexpsplitsent);
-        $this->assertEquals('', $result->exceptionsplitsent);
-        $this->assertEquals('', $result->regexpwordchar);
-        $this->assertFalse($result->removespaces);
-        $this->assertFalse($result->spliteachchar);
-        $this->assertFalse($result->rightoleft);
-        $this->assertEquals('', $result->ttsvoiceapi);
-        $this->assertTrue($result->showromanization);
+        $this->assertTrue($result->id()->isNew());
+        $this->assertEquals('New Language', $result->name());
+        $this->assertEquals('', $result->dict1Uri());
+        $this->assertEquals('', $result->dict2Uri());
+        $this->assertEquals('', $result->translatorUri());
+        $this->assertEquals(100, $result->textSize());
+        $this->assertEquals('', $result->characterSubstitutions());
+        $this->assertEquals('.!?', $result->regexpSplitSentences());
+        $this->assertEquals('', $result->exceptionsSplitSentences());
+        $this->assertEquals('a-zA-Z', $result->regexpWordCharacters());
+        $this->assertFalse($result->removeSpaces());
+        $this->assertFalse($result->splitEachChar());
+        $this->assertFalse($result->rightToLeft());
+        $this->assertEquals('', $result->ttsVoiceApi());
+        $this->assertTrue($result->showRomanization());
     }
 
     // ===== exists() tests =====
@@ -350,10 +350,10 @@ class LanguageServiceTest extends TestCase
         $id = $languages['TestLang_Checkboxes'];
         $lang = $this->service->getById($id);
 
-        $this->assertTrue($lang->removespaces);
-        $this->assertTrue($lang->spliteachchar);
-        $this->assertTrue($lang->rightoleft);
-        $this->assertTrue($lang->showromanization);
+        $this->assertTrue($lang->removeSpaces());
+        $this->assertTrue($lang->splitEachChar());
+        $this->assertTrue($lang->rightToLeft());
+        $this->assertTrue($lang->showRomanization());
     }
 
     // ===== update() tests =====
@@ -385,9 +385,9 @@ class LanguageServiceTest extends TestCase
         $this->assertStringContainsString('Updated', $result);
 
         $lang = $this->service->getById($id);
-        $this->assertEquals('TestLang_Updated', $lang->name);
-        $this->assertEquals('https://newdict.test/lwt_term', $lang->dict1uri);
-        $this->assertEquals(200, $lang->textsize);
+        $this->assertEquals('TestLang_Updated', $lang->name());
+        $this->assertEquals('https://newdict.test/lwt_term', $lang->dict1Uri());
+        $this->assertEquals(200, $lang->textSize());
     }
 
     public function testUpdateReturnsErrorForNonExistentLanguage(): void

@@ -68,24 +68,27 @@ class WordService
         $translation = $this->normalizeTranslation($data['WoTranslation'] ?? '');
 
         try {
-            Connection::execute(
-                'INSERT INTO ' . $this->tbpref . 'words (
-                    WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
-                    WoSentence, WoRomanization, WoStatusChanged, ' .
-                    WordStatusService::makeScoreRandomInsertUpdate('iv') . '
-                ) VALUES (
-                    ' . (int)$data['WoLgID'] . ', ' .
-                    Escaping::toSqlSyntax($textlc) . ', ' .
-                    Escaping::toSqlSyntax($text) . ', ' .
-                    (int)$data['WoStatus'] . ', ' .
-                    Escaping::toSqlSyntax($translation) . ', ' .
-                    Escaping::toSqlSyntax(ExportService::replaceTabNewline($data['WoSentence'] ?? '')) . ', ' .
-                    Escaping::toSqlSyntax($data['WoRomanization'] ?? '') . ', NOW(), ' .
-                    WordStatusService::makeScoreRandomInsertUpdate('id') .
-                ')'
-            );
+            $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
+            $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-            $wid = (int)Connection::lastInsertId();
+            $sql = "INSERT INTO {$this->tbpref}words (
+                    WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
+                    WoSentence, WoRomanization, WoStatusChanged, {$scoreColumns}
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})";
+
+            $stmt = Connection::prepare($sql);
+            $stmt->bind(
+                'ississs',
+                $data['WoLgID'],
+                $textlc,
+                $text,
+                $data['WoStatus'],
+                $translation,
+                ExportService::replaceTabNewline($data['WoSentence'] ?? ''),
+                $data['WoRomanization'] ?? ''
+            );
+            $stmt->execute();
+            $wid = (int) $stmt->insertId();
 
             return [
                 'id' => $wid,
@@ -125,22 +128,25 @@ class WordService
         $text = trim(Escaping::prepareTextdata($data['WoText']));
         $textlc = mb_strtolower($text, 'UTF-8');
         $translation = $this->normalizeTranslation($data['WoTranslation'] ?? '');
+        $sentence = ExportService::replaceTabNewline($data['WoSentence'] ?? '');
+        $roman = $data['WoRomanization'] ?? '';
 
-        $statusUpdate = '';
+        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+
         if (isset($data['WoOldStatus']) && $data['WoOldStatus'] != $data['WoStatus']) {
-            $statusUpdate = ', WoStatus = ' . (int)$data['WoStatus'] . ', WoStatusChanged = NOW()';
+            // Status changed - update status and timestamp
+            $sql = "UPDATE {$this->tbpref}words SET
+                WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
+                WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
+                WHERE WoID = ?";
+            Connection::preparedExecute($sql, [$text, $translation, $sentence, $roman, $data['WoStatus'], $wordId]);
+        } else {
+            // Status unchanged
+            $sql = "UPDATE {$this->tbpref}words SET
+                WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?, {$scoreUpdate}
+                WHERE WoID = ?";
+            Connection::preparedExecute($sql, [$text, $translation, $sentence, $roman, $wordId]);
         }
-
-        Connection::execute(
-            'UPDATE ' . $this->tbpref . 'words SET
-                WoText = ' . Escaping::toSqlSyntax($text) . ',
-                WoTranslation = ' . Escaping::toSqlSyntax($translation) . ',
-                WoSentence = ' . Escaping::toSqlSyntax(ExportService::replaceTabNewline($data['WoSentence'] ?? '')) . ',
-                WoRomanization = ' . Escaping::toSqlSyntax($data['WoRomanization'] ?? '') .
-                $statusUpdate . ',' .
-                WordStatusService::makeScoreRandomInsertUpdate('u') . '
-            WHERE WoID = ' . $wordId
-        );
 
         return [
             'id' => $wordId,
@@ -160,11 +166,10 @@ class WordService
      */
     public function findById(int $wordId): ?array
     {
-        $sql = "SELECT * FROM {$this->tbpref}words WHERE WoID = $wordId";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+        return Connection::preparedFetchOne(
+            "SELECT * FROM {$this->tbpref}words WHERE WoID = ?",
+            [$wordId]
+        );
     }
 
     /**
@@ -177,9 +182,9 @@ class WordService
      */
     public function findByText(string $textlc, int $langId): ?int
     {
-        $id = Connection::fetchValue(
-            "SELECT WoID AS value FROM {$this->tbpref}words
-            WHERE WoLgID = $langId AND WoTextLC = " . Escaping::toSqlSyntax($textlc)
+        $id = Connection::preparedFetchValue(
+            "SELECT WoID AS value FROM {$this->tbpref}words WHERE WoLgID = ? AND WoTextLC = ?",
+            [$langId, $textlc]
         );
         return $id !== null ? (int)$id : null;
     }
@@ -194,12 +199,11 @@ class WordService
      */
     public function getTermFromTextItem(int $textId, int $ord): ?array
     {
-        $sql = "SELECT Ti2Text, Ti2LgID FROM {$this->tbpref}textitems2
-                WHERE Ti2TxID = $textId AND Ti2WordCount = 1 AND Ti2Order = $ord";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+        return Connection::preparedFetchOne(
+            "SELECT Ti2Text, Ti2LgID FROM {$this->tbpref}textitems2
+             WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
+            [$textId, $ord]
+        );
     }
 
     /**
@@ -213,10 +217,10 @@ class WordService
      */
     public function linkToTextItems(int $wordId, int $langId, string $textlc): void
     {
-        Connection::query(
-            'UPDATE ' . $this->tbpref . 'textitems2 SET Ti2WoID = ' . $wordId . '
-            WHERE Ti2LgID = ' . $langId . ' AND LOWER(Ti2Text) = ' .
-            Escaping::toSqlSyntaxNoTrimNoNull($textlc)
+        Connection::preparedExecute(
+            "UPDATE {$this->tbpref}textitems2 SET Ti2WoID = ?
+             WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
+            [$wordId, $langId, $textlc]
         );
     }
 
@@ -229,21 +233,18 @@ class WordService
      */
     public function getLanguageData(int $langId): array
     {
-        $data = [];
-
-        $data['showRoman'] = (bool) Connection::fetchValue(
-            "SELECT LgShowRomanization AS value FROM {$this->tbpref}languages WHERE LgID = $langId"
+        // Single query instead of three
+        $row = Connection::preparedFetchOne(
+            "SELECT LgShowRomanization, LgGoogleTranslateURI, LgName
+             FROM {$this->tbpref}languages WHERE LgID = ?",
+            [$langId]
         );
 
-        $data['translateUri'] = (string) Connection::fetchValue(
-            "SELECT LgGoogleTranslateURI AS value FROM {$this->tbpref}languages WHERE LgID = $langId"
-        );
-
-        $data['name'] = (string) Connection::fetchValue(
-            "SELECT LgName AS value FROM {$this->tbpref}languages WHERE LgID = $langId"
-        );
-
-        return $data;
+        return [
+            'showRoman' => (bool) ($row['LgShowRomanization'] ?? false),
+            'translateUri' => (string) ($row['LgGoogleTranslateURI'] ?? ''),
+            'name' => (string) ($row['LgName'] ?? '')
+        ];
     }
 
     /**
@@ -257,9 +258,10 @@ class WordService
      */
     public function getSentenceForTerm(int $textId, int $ord, string $termlc): string
     {
-        $seid = Connection::fetchValue(
+        $seid = Connection::preparedFetchValue(
             "SELECT Ti2SeID AS value FROM {$this->tbpref}textitems2
-            WHERE Ti2TxID = $textId AND Ti2WordCount = 1 AND Ti2Order = $ord"
+             WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
+            [$textId, $ord]
         );
 
         if ($seid === null) {
@@ -297,8 +299,9 @@ class WordService
      */
     public function getWordCount(int $wordId): int
     {
-        return (int) Connection::fetchValue(
-            "SELECT WoWordCount AS value FROM {$this->tbpref}words WHERE WoID = $wordId"
+        return (int) Connection::preparedFetchValue(
+            "SELECT WoWordCount AS value FROM {$this->tbpref}words WHERE WoID = ?",
+            [$wordId]
         );
     }
 
@@ -325,18 +328,19 @@ class WordService
     {
         QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
-            ->delete();
+            ->deletePrepared();
 
         // Update text items to unlink the word
-        Connection::query(
-            'UPDATE ' . $this->tbpref . 'textitems2 SET Ti2WoID = 0
-             WHERE Ti2WordCount = 1 AND Ti2WoID = ' . $wordId
+        Connection::preparedExecute(
+            "UPDATE {$this->tbpref}textitems2 SET Ti2WoID = 0
+             WHERE Ti2WordCount = 1 AND Ti2WoID = ?",
+            [$wordId]
         );
 
         // Delete multi-word text items
         QueryBuilder::table('textitems2')
             ->where('Ti2WoID', '=', $wordId)
-            ->delete();
+            ->deletePrepared();
 
         // Clean up orphaned word tags (complex DELETE with JOIN - keep as-is)
         Connection::execute(
@@ -365,17 +369,17 @@ class WordService
 
         $count = QueryBuilder::table('words')
             ->whereIn('WoID', $ids)
-            ->delete();
+            ->deletePrepared();
 
         // Update text items
-        Connection::query(
-            'UPDATE ' . $this->tbpref . 'textitems2 SET Ti2WoID = 0
-             WHERE Ti2WordCount = 1 AND Ti2WoID IN (' . implode(',', $ids) . ')'
-        );
+        QueryBuilder::table('textitems2')
+            ->where('Ti2WordCount', '=', 1)
+            ->whereIn('Ti2WoID', $ids)
+            ->updatePrepared(['Ti2WoID' => 0]);
 
         QueryBuilder::table('textitems2')
             ->whereIn('Ti2WoID', $ids)
-            ->delete();
+            ->deletePrepared();
 
         // Clean up orphaned word tags (complex DELETE with JOIN - keep as-is)
         Connection::execute(
@@ -402,35 +406,32 @@ class WordService
             return 0;
         }
 
-        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+        $ids = array_map('intval', $wordIds);
+        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         if ($relative) {
             if ($status > 0) {
                 // Increment status
-                return (int) Connection::execute(
-                    'UPDATE ' . $this->tbpref . 'words
-                     SET WoStatus = WoStatus + 1, WoStatusChanged = NOW(), ' .
-                    WordStatusService::makeScoreRandomInsertUpdate('u') . '
-                     WHERE WoStatus IN (1,2,3,4) AND WoID IN ' . $list
-                );
+                $sql = "UPDATE {$this->tbpref}words
+                        SET WoStatus = WoStatus + 1, WoStatusChanged = NOW(), {$scoreUpdate}
+                        WHERE WoStatus IN (1,2,3,4) AND WoID IN ({$placeholders})";
+                return Connection::preparedExecute($sql, $ids);
             } else {
                 // Decrement status
-                return (int) Connection::execute(
-                    'UPDATE ' . $this->tbpref . 'words
-                     SET WoStatus = WoStatus - 1, WoStatusChanged = NOW(), ' .
-                    WordStatusService::makeScoreRandomInsertUpdate('u') . '
-                     WHERE WoStatus IN (2,3,4,5) AND WoID IN ' . $list
-                );
+                $sql = "UPDATE {$this->tbpref}words
+                        SET WoStatus = WoStatus - 1, WoStatusChanged = NOW(), {$scoreUpdate}
+                        WHERE WoStatus IN (2,3,4,5) AND WoID IN ({$placeholders})";
+                return Connection::preparedExecute($sql, $ids);
             }
         }
 
         // Absolute status
-        return (int) Connection::execute(
-            'UPDATE ' . $this->tbpref . 'words
-             SET WoStatus = ' . $status . ', WoStatusChanged = NOW(), ' .
-            WordStatusService::makeScoreRandomInsertUpdate('u') . '
-             WHERE WoID IN ' . $list
-        );
+        $sql = "UPDATE {$this->tbpref}words
+                SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
+                WHERE WoID IN ({$placeholders})";
+
+        return Connection::preparedExecute($sql, array_merge([$status], $ids));
     }
 
     /**
@@ -446,14 +447,15 @@ class WordService
             return 0;
         }
 
-        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+        $ids = array_map('intval', $wordIds);
+        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        return (int) Connection::execute(
-            'UPDATE ' . $this->tbpref . 'words
-             SET WoStatusChanged = NOW(), ' .
-            WordStatusService::makeScoreRandomInsertUpdate('u') . '
-             WHERE WoID IN ' . $list
-        );
+        $sql = "UPDATE {$this->tbpref}words
+                SET WoStatusChanged = NOW(), {$scoreUpdate}
+                WHERE WoID IN ({$placeholders})";
+
+        return Connection::preparedExecute($sql, $ids);
     }
 
     /**
@@ -469,10 +471,12 @@ class WordService
             return 0;
         }
 
-        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+        $ids = array_map('intval', $wordIds);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        return (int) Connection::execute(
-            'UPDATE ' . $this->tbpref . 'words SET WoSentence = NULL WHERE WoID IN ' . $list
+        return Connection::preparedExecute(
+            "UPDATE {$this->tbpref}words SET WoSentence = NULL WHERE WoID IN ({$placeholders})",
+            $ids
         );
     }
 
@@ -489,10 +493,12 @@ class WordService
             return 0;
         }
 
-        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+        $ids = array_map('intval', $wordIds);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        return (int) Connection::execute(
-            'UPDATE ' . $this->tbpref . 'words SET WoText = WoTextLC WHERE WoID IN ' . $list
+        return Connection::preparedExecute(
+            "UPDATE {$this->tbpref}words SET WoText = WoTextLC WHERE WoID IN ({$placeholders})",
+            $ids
         );
     }
 
@@ -509,12 +515,14 @@ class WordService
             return 0;
         }
 
-        $list = '(' . implode(',', array_map('intval', $wordIds)) . ')';
+        $ids = array_map('intval', $wordIds);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        return (int) Connection::execute(
-            'UPDATE ' . $this->tbpref . 'words
+        return Connection::preparedExecute(
+            "UPDATE {$this->tbpref}words
              SET WoText = CONCAT(UPPER(LEFT(WoTextLC, 1)), SUBSTRING(WoTextLC, 2))
-             WHERE WoID IN ' . $list
+             WHERE WoID IN ({$placeholders})",
+            $ids
         );
     }
 
@@ -523,19 +531,21 @@ class WordService
      *
      * @param int $textId Text ID
      *
-     * @return \mysqli_result|false Query result with Ti2Text and Ti2TextLC columns
+     * @return array<int, array<string, mixed>> Array of rows with Ti2Text and Ti2TextLC columns
      */
-    public function getUnknownWordsInText(int $textId): \mysqli_result|false
+    public function getUnknownWordsInText(int $textId): array
     {
-        $sql = "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-                FROM (
-                    {$this->tbpref}textitems2
-                    LEFT JOIN {$this->tbpref}words
-                    ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
-                )
-                WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = $textId
-                ORDER BY Ti2Order";
-        return Connection::query($sql);
+        return Connection::preparedFetchAll(
+            "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
+             FROM (
+                 {$this->tbpref}textitems2
+                 LEFT JOIN {$this->tbpref}words
+                 ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
+             )
+             WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
+             ORDER BY Ti2Order",
+            [$textId]
+        );
     }
 
     /**
@@ -547,8 +557,9 @@ class WordService
      */
     public function getTextLanguageId(int $textId): ?int
     {
-        $langId = Connection::fetchValue(
-            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = $textId"
+        $langId = Connection::preparedFetchValue(
+            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+            [$textId]
         );
         return $langId !== null ? (int)$langId : null;
     }
@@ -566,28 +577,24 @@ class WordService
     public function createWithStatus(int $langId, string $term, string $termlc, int $status): array
     {
         // Check if already exists
-        $existingId = Connection::fetchValue(
-            "SELECT WoID AS value FROM {$this->tbpref}words WHERE WoTextLC = " .
-            Escaping::toSqlSyntax($termlc)
+        $existingId = Connection::preparedFetchValue(
+            "SELECT WoID AS value FROM {$this->tbpref}words WHERE WoTextLC = ?",
+            [$termlc]
         );
 
         if ($existingId !== null) {
             return ['id' => (int)$existingId, 'rows' => 0];
         }
 
-        Connection::execute(
-            "INSERT INTO {$this->tbpref}words (
-                WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, " .
-            WordStatusService::makeScoreRandomInsertUpdate('iv') . ")
-            VALUES (
-                $langId, " .
-            Escaping::toSqlSyntax($term) . ", " .
-            Escaping::toSqlSyntax($termlc) . ", $status, NOW(), " .
-            WordStatusService::makeScoreRandomInsertUpdate('id') . ")"
-        );
+        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-        $wid = (int)Connection::lastInsertId();
-        return ['id' => $wid, 'rows' => 1];
+        $sql = "INSERT INTO {$this->tbpref}words (
+                WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}
+            ) VALUES (?, ?, ?, ?, NOW(), {$scoreValues})";
+
+        $wid = Connection::preparedInsert($sql, [$langId, $term, $termlc, $status]);
+        return ['id' => (int)$wid, 'rows' => 1];
     }
 
     /**
@@ -625,35 +632,34 @@ class WordService
      */
     public function getFilteredWordIds(array $filters): array
     {
-        $whLang = '';
-        $whStat = '';
-        $whQuery = '';
-        $whTag = '';
+        $conditions = ['1=1'];
+        $params = [];
 
         // Language filter
         if (!empty($filters['langId'])) {
-            $whLang = ' AND WoLgID = ' . (int)$filters['langId'];
+            $conditions[] = 'WoLgID = ?';
+            $params[] = (int)$filters['langId'];
         }
 
         // Status filter
         if (!empty($filters['status'])) {
-            $whStat = ' AND ' . \makeStatusCondition('WoStatus', (int)$filters['status']);
+            $conditions[] = \makeStatusCondition('WoStatus', (int)$filters['status']);
         }
 
-        // Query filter
+        // Query filter - builds LIKE/REGEXP condition with placeholders
         if (!empty($filters['query'])) {
             $regexMode = $filters['regexMode'] ?? '';
             $queryMode = $filters['queryMode'] ?? 'term,rom,transl';
-            $queryPattern = $regexMode . 'LIKE ' . Escaping::toSqlSyntax(
-                ($regexMode == '') ?
+            $queryValue = ($regexMode == '') ?
                 str_replace("*", "%", mb_strtolower($filters['query'], 'UTF-8')) :
-                $filters['query']
-            );
+                $filters['query'];
 
-            $whQuery = $this->buildQueryCondition($queryMode, $queryPattern);
+            $queryCondition = $this->buildQueryConditionWithPlaceholders($queryMode, $regexMode, $params, $queryValue);
+            $conditions[] = $queryCondition;
         }
 
-        // Tag filter
+        // Tag filter (uses integer values, already safe via cast)
+        $whTag = '';
         if (!empty($filters['tag1']) || !empty($filters['tag2'])) {
             $whTag = $this->buildTagCondition(
                 $filters['tag1'] ?? '',
@@ -662,62 +668,73 @@ class WordService
             );
         }
 
+        $whereClause = implode(' AND ', $conditions);
+
         // Build SQL
         if (empty($filters['textId'])) {
             $sql = "SELECT DISTINCT WoID FROM (
                 {$this->tbpref}words
                 LEFT JOIN {$this->tbpref}wordtags ON WoID = WtWoID
-            ) WHERE (1=1) $whLang $whStat $whQuery
-            GROUP BY WoID $whTag";
+            ) WHERE {$whereClause}
+            GROUP BY WoID {$whTag}";
         } else {
-            $textId = (int)$filters['textId'];
+            $params[] = (int)$filters['textId'];
             $sql = "SELECT DISTINCT WoID FROM (
                 {$this->tbpref}words
                 LEFT JOIN {$this->tbpref}wordtags ON WoID = WtWoID
             ), {$this->tbpref}textitems2
-            WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId
-            $whLang $whStat $whQuery
-            GROUP BY WoID $whTag";
+            WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ?
+            AND {$whereClause}
+            GROUP BY WoID {$whTag}";
         }
 
+        $results = Connection::preparedFetchAll($sql, $params);
         $ids = [];
-        $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($results as $record) {
             $ids[] = (int)$record['WoID'];
         }
-        mysqli_free_result($res);
 
         return $ids;
     }
 
     /**
-     * Build the query condition for word search.
+     * Build the query condition for word search with placeholders.
      *
-     * @param string $queryMode    Query mode
-     * @param string $queryPattern Query pattern
+     * @param string   $queryMode  Query mode
+     * @param string   $regexMode  Regex mode (empty for LIKE, 'REGEXP' for regex)
+     * @param array    &$params    Reference to params array to add values
+     * @param string   $queryValue The query value to search for
      *
-     * @return string SQL condition
+     * @return string SQL condition with placeholders
      */
-    private function buildQueryCondition(string $queryMode, string $queryPattern): string
-    {
-        switch ($queryMode) {
-            case 'term,rom,transl':
-                return " AND (WoText $queryPattern OR IFNULL(WoRomanization,'*') $queryPattern OR WoTranslation $queryPattern)";
-            case 'term,rom':
-                return " AND (WoText $queryPattern OR IFNULL(WoRomanization,'*') $queryPattern)";
-            case 'rom,transl':
-                return " AND (IFNULL(WoRomanization,'*') $queryPattern OR WoTranslation $queryPattern)";
-            case 'term,transl':
-                return " AND (WoText $queryPattern OR WoTranslation $queryPattern)";
-            case 'term':
-                return " AND (WoText $queryPattern)";
-            case 'rom':
-                return " AND (IFNULL(WoRomanization,'*') $queryPattern)";
-            case 'transl':
-                return " AND (WoTranslation $queryPattern)";
-            default:
-                return " AND (WoText $queryPattern OR IFNULL(WoRomanization,'*') $queryPattern OR WoTranslation $queryPattern)";
+    private function buildQueryConditionWithPlaceholders(
+        string $queryMode,
+        string $regexMode,
+        array &$params,
+        string $queryValue
+    ): string {
+        $op = $regexMode === '' ? 'LIKE' : $regexMode . 'LIKE';
+
+        // Map of query modes to fields
+        $fieldSets = [
+            'term,rom,transl' => ['WoText', "IFNULL(WoRomanization,'*')", 'WoTranslation'],
+            'term,rom' => ['WoText', "IFNULL(WoRomanization,'*')"],
+            'rom,transl' => ["IFNULL(WoRomanization,'*')", 'WoTranslation'],
+            'term,transl' => ['WoText', 'WoTranslation'],
+            'term' => ['WoText'],
+            'rom' => ["IFNULL(WoRomanization,'*')"],
+            'transl' => ['WoTranslation'],
+        ];
+
+        $fields = $fieldSets[$queryMode] ?? $fieldSets['term,rom,transl'];
+
+        $conditions = [];
+        foreach ($fields as $field) {
+            $conditions[] = "{$field} {$op} ?";
+            $params[] = $queryValue;
         }
+
+        return '(' . implode(' OR ', $conditions) . ')';
     }
 
     /**
@@ -772,16 +789,12 @@ class WordService
      */
     public function setStatus(int $wordId, int $status): string
     {
-        return (string) Connection::execute(
-            sprintf(
-                "UPDATE %swords SET WoStatus = %d, WoStatusChanged = NOW(), %s WHERE WoID = %d",
-                $this->tbpref,
-                $status,
-                WordStatusService::makeScoreRandomInsertUpdate('u'),
-                $wordId
-            ),
-            'Status changed'
+        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        Connection::preparedExecute(
+            "UPDATE {$this->tbpref}words SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate} WHERE WoID = ?",
+            [$status, $wordId]
         );
+        return 'Status changed';
     }
 
     /**
@@ -793,12 +806,11 @@ class WordService
      */
     public function getWordData(int $wordId): ?array
     {
-        $res = Connection::query(
+        $record = Connection::preparedFetchOne(
             "SELECT WoText, WoTranslation, WoRomanization
-             FROM {$this->tbpref}words WHERE WoID = $wordId"
+             FROM {$this->tbpref}words WHERE WoID = ?",
+            [$wordId]
         );
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
 
         if (!$record) {
             return null;
@@ -821,10 +833,11 @@ class WordService
      */
     public function getWordAtPosition(int $textId, int $ord): ?string
     {
-        $word = Connection::fetchValue(
+        $word = Connection::preparedFetchValue(
             "SELECT Ti2Text AS value
              FROM {$this->tbpref}textitems2
-             WHERE Ti2WordCount = 1 AND Ti2TxID = $textId AND Ti2Order = $ord"
+             WHERE Ti2WordCount = 1 AND Ti2TxID = ? AND Ti2Order = ?",
+            [$textId, $ord]
         );
         return $word !== null ? (string) $word : null;
     }
@@ -849,26 +862,20 @@ class WordService
             throw new \RuntimeException("Text ID $textId not found");
         }
 
-        Connection::execute(
-            "INSERT INTO {$this->tbpref}words (
-                WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged, " .
-            WordStatusService::makeScoreRandomInsertUpdate('iv') . "
-            ) VALUES (
-                $langId, " .
-            Escaping::toSqlSyntax($term) . ", " .
-            Escaping::toSqlSyntax($termlc) . ", $status, 1, NOW(), " .
-            WordStatusService::makeScoreRandomInsertUpdate('id') . "
-            )",
-            'Term added'
-        );
+        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-        $wid = (int) Connection::lastInsertId();
+        $sql = "INSERT INTO {$this->tbpref}words (
+                WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged, {$scoreColumns}
+            ) VALUES (?, ?, ?, ?, 1, NOW(), {$scoreValues})";
+
+        $wid = (int) Connection::preparedInsert($sql, [$langId, $term, $termlc, $status]);
 
         // Link to text items
-        Connection::query(
-            "UPDATE {$this->tbpref}textitems2
-             SET Ti2WoID = $wid
-             WHERE Ti2LgID = $langId AND LOWER(Ti2Text) = " . Escaping::toSqlSyntax($termlc)
+        Connection::preparedExecute(
+            "UPDATE {$this->tbpref}textitems2 SET Ti2WoID = ?
+             WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
+            [$wid, $langId, $termlc]
         );
 
         return [
@@ -888,8 +895,9 @@ class WordService
      */
     public function getWordText(int $wordId): ?string
     {
-        $term = Connection::fetchValue(
-            "SELECT WoText AS value FROM {$this->tbpref}words WHERE WoID = $wordId"
+        $term = Connection::preparedFetchValue(
+            "SELECT WoText AS value FROM {$this->tbpref}words WHERE WoID = ?",
+            [$wordId]
         );
         return $term !== null ? (string) $term : null;
     }
@@ -909,13 +917,14 @@ class WordService
             $value = '*';
         }
 
-        Connection::execute(
-            'UPDATE ' . $this->tbpref . 'words SET WoTranslation = ' .
-            Escaping::toSqlSyntax(ExportService::replaceTabNewline($value)) . ' WHERE WoID = ' . $wordId
+        Connection::preparedExecute(
+            "UPDATE {$this->tbpref}words SET WoTranslation = ? WHERE WoID = ?",
+            [ExportService::replaceTabNewline($value), $wordId]
         );
 
-        return (string) Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$this->tbpref}words WHERE WoID = " . $wordId
+        return (string) Connection::preparedFetchValue(
+            "SELECT WoTranslation AS value FROM {$this->tbpref}words WHERE WoID = ?",
+            [$wordId]
         );
     }
 
@@ -934,13 +943,14 @@ class WordService
             $value = '';
         }
 
-        Connection::execute(
-            'UPDATE ' . $this->tbpref . 'words SET WoRomanization = ' .
-            Escaping::toSqlSyntax(ExportService::replaceTabNewline($value)) . ' WHERE WoID = ' . $wordId
+        Connection::preparedExecute(
+            "UPDATE {$this->tbpref}words SET WoRomanization = ? WHERE WoID = ?",
+            [ExportService::replaceTabNewline($value), $wordId]
         );
 
-        $result = Connection::fetchValue(
-            "SELECT WoRomanization AS value FROM {$this->tbpref}words WHERE WoID = " . $wordId
+        $result = Connection::preparedFetchValue(
+            "SELECT WoRomanization AS value FROM {$this->tbpref}words WHERE WoID = ?",
+            [$wordId]
         );
 
         return ($result === '' || $result === null) ? '*' : (string) $result;
@@ -980,11 +990,11 @@ class WordService
      */
     public function getWordDetails(int $wordId): ?array
     {
-        $sql = 'SELECT WoLgID, WoText, WoTranslation, WoSentence, WoRomanization, WoStatus
-                FROM ' . $this->tbpref . 'words WHERE WoID = ' . $wordId;
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = Connection::preparedFetchOne(
+            "SELECT WoLgID, WoText, WoTranslation, WoSentence, WoRomanization, WoStatus
+             FROM {$this->tbpref}words WHERE WoID = ?",
+            [$wordId]
+        );
 
         if (!$record) {
             return null;
@@ -1010,19 +1020,21 @@ class WordService
      *
      * @param int $textId Text ID
      *
-     * @return \mysqli_result|false Query result with Ti2Text and Ti2TextLC columns
+     * @return array<int, array<string, mixed>> Array of rows with Ti2Text and Ti2TextLC columns
      */
-    public function getAllUnknownWordsInText(int $textId): \mysqli_result|false
+    public function getAllUnknownWordsInText(int $textId): array
     {
-        $sql = "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-        FROM (
-            {$this->tbpref}textitems2
-            LEFT JOIN {$this->tbpref}words
-            ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
-        )
-        WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = $textId
-        ORDER BY Ti2Order";
-        return Connection::query($sql);
+        return Connection::preparedFetchAll(
+            "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
+             FROM (
+                 {$this->tbpref}textitems2
+                 LEFT JOIN {$this->tbpref}words
+                 ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
+             )
+             WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
+             ORDER BY Ti2Order",
+            [$textId]
+        );
     }
 
     /**
@@ -1037,46 +1049,46 @@ class WordService
      */
     public function processWordForWellKnown(int $status, string $term, string $termlc, int $langId): array
     {
-        $wid = Connection::fetchValue(
-            "SELECT WoID AS value FROM {$this->tbpref}words
-            WHERE WoTextLC = " . Escaping::toSqlSyntax($termlc)
+        $wid = Connection::preparedFetchValue(
+            "SELECT WoID AS value FROM {$this->tbpref}words WHERE WoTextLC = ?",
+            [$termlc]
         );
+
         if ($wid !== null) {
-            $rows = 0;
-            $wordData = null;
-        } else {
-            $message = Connection::execute(
-                "INSERT INTO {$this->tbpref}words (
-                    WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged,"
-                    . WordStatusService::makeScoreRandomInsertUpdate('iv') .
-                ")
-                VALUES(
-                    $langId, " .
-                    Escaping::toSqlSyntax($term) . ", " .
-                    Escaping::toSqlSyntax($termlc) . ", $status, NOW(), " .
-                    WordStatusService::makeScoreRandomInsertUpdate('id') .
-                ")",
-                ''
-            );
-            if (!is_numeric($message)) {
-                ErrorHandler::die("ERROR: Could not modify words! Message: $message");
-            }
-            if ((int)$message == 0) {
+            return [0, null];
+        }
+
+        try {
+            $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
+            $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+
+            $sql = "INSERT INTO {$this->tbpref}words (
+                    WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}
+                ) VALUES (?, ?, ?, ?, NOW(), {$scoreValues})";
+
+            $stmt = Connection::prepare($sql);
+            $stmt->bindValues([$langId, $term, $termlc, $status]);
+            $rows = $stmt->execute();
+            $wid = (int) $stmt->insertId();
+
+            if ($rows == 0) {
                 \Lwt\View\Helper\PageLayoutHelper::renderMessage(
-                    "WARNING: No rows modified! Message: $message",
+                    "WARNING: No rows modified!",
                     false
                 );
             }
-            $rows = (int) $message;
-            $wid = (int)Connection::lastInsertId();
+
             $wordData = [
                 'wid' => $wid,
                 'hex' => StringUtils::toClassName($termlc),
                 'term' => $term,
                 'status' => $status
             ];
+
+            return [$rows, $wordData];
+        } catch (\RuntimeException $e) {
+            ErrorHandler::die("ERROR: Could not modify words! Message: " . $e->getMessage());
         }
-        return array($rows, $wordData);
     }
 
     /**
@@ -1104,39 +1116,36 @@ class WordService
         int $status,
         string $translation = '*'
     ): array {
-        $word = Escaping::toSqlSyntax($text);
-        $wordlc = Escaping::toSqlSyntax(mb_strtolower($text, 'UTF-8'));
+        $wordlc = mb_strtolower($text, 'UTF-8');
 
-        $langId = (int) Connection::fetchValue(
-            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = $textId"
+        $langId = (int) Connection::preparedFetchValue(
+            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+            [$textId]
         );
 
-        Connection::execute(
-            "INSERT INTO {$this->tbpref}words (
+        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+
+        $sql = "INSERT INTO {$this->tbpref}words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
-                WoRomanization, WoStatusChanged," .
-                WordStatusService::makeScoreRandomInsertUpdate('iv') . ") values(
-                    $langId, $wordlc, $word, $status, " .
-                    Escaping::toSqlSyntax($translation) . ', "", "", NOW(), ' .
-                    WordStatusService::makeScoreRandomInsertUpdate('id') . '
-                )',
-            "Term saved"
-        );
+                WoRomanization, WoStatusChanged, {$scoreColumns}
+            ) VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues})";
 
-        $wid = (int) Connection::lastInsertId();
+        $wid = (int) Connection::preparedInsert($sql, [$langId, $wordlc, $text, $status, $translation]);
 
-        Connection::query(
-            "UPDATE {$this->tbpref}textitems2 SET Ti2WoID = $wid
-            WHERE Ti2LgID = $langId AND LOWER(Ti2Text) = $wordlc"
+        Connection::preparedExecute(
+            "UPDATE {$this->tbpref}textitems2 SET Ti2WoID = ?
+             WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
+            [$wid, $langId, $wordlc]
         );
 
         $hex = StringUtils::toClassName(
-            Escaping::prepareTextdata(mb_strtolower($text, 'UTF-8'))
+            Escaping::prepareTextdata($wordlc)
         );
 
         return [
             'wid' => $wid,
-            'word' => $word,
+            'word' => $text,
             'wordRaw' => $text,
             'translation' => $translation,
             'status' => $status,
@@ -1154,15 +1163,14 @@ class WordService
      */
     public function markAllWordsWithStatus(int $textId, int $status): array
     {
-        $langId = Connection::fetchValue(
-            "SELECT TxLgID AS value
-            FROM {$this->tbpref}texts
-            WHERE TxID = $textId"
+        $langId = Connection::preparedFetchValue(
+            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+            [$textId]
         );
         $wordsData = [];
         $count = 0;
-        $res = $this->getAllUnknownWordsInText($textId);
-        while ($record = mysqli_fetch_assoc($res)) {
+        $records = $this->getAllUnknownWordsInText($textId);
+        foreach ($records as $record) {
             list($modified_rows, $wordData) = $this->processWordForWellKnown(
                 $status,
                 $record['Ti2Text'],
@@ -1174,7 +1182,6 @@ class WordService
             }
             $count += $modified_rows;
         }
-        mysqli_free_result($res);
 
         // Associate existing textitems.
         Connection::execute(
@@ -1205,35 +1212,25 @@ class WordService
             "SELECT COALESCE(MAX(WoID), 0) AS value FROM {$this->tbpref}words"
         );
 
-        $sqlarr = [];
-        foreach ($terms as $row) {
-            $trans = (!isset($row['trans']) || $row['trans'] == '') ? '"*"' :
-                Escaping::toSqlSyntax($row['trans']);
-
-            $sqlarr[] = '(' .
-                Escaping::toSqlSyntax($row['lg']) . ',' .
-                Escaping::toSqlSyntax(mb_strtolower($row['text'], 'UTF-8')) . ',' .
-                Escaping::toSqlSyntax($row['text']) . ',' .
-                Escaping::toSqlSyntax($row['status']) . ',' .
-                $trans . ',
-                "",
-                "",
-                NOW(), ' .
-                WordStatusService::makeScoreRandomInsertUpdate('id') .
-            ')';
-        }
-
-        if (empty($sqlarr)) {
+        if (empty($terms)) {
             return $max;
         }
 
-        $sqltext = "INSERT INTO {$this->tbpref}words (
-            WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
-            WoRomanization, WoStatusChanged," .
-            WordStatusService::makeScoreRandomInsertUpdate('iv') . "
-        ) VALUES " . rtrim(implode(',', $sqlarr), ',');
+        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-        Connection::execute($sqltext);
+        // Insert each term using prepared statements for safety
+        foreach ($terms as $row) {
+            $trans = (!isset($row['trans']) || $row['trans'] == '') ? '*' : $row['trans'];
+            $textlc = mb_strtolower($row['text'], 'UTF-8');
+
+            $sql = "INSERT INTO {$this->tbpref}words (
+                    WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
+                    WoRomanization, WoStatusChanged, {$scoreColumns}
+                ) VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues})";
+
+            Connection::preparedExecute($sql, [$row['lg'], $textlc, $row['text'], $row['status'], $trans]);
+        }
 
         return $max;
     }
@@ -1243,14 +1240,15 @@ class WordService
      *
      * @param int $maxWoId The max word ID before insertion
      *
-     * @return \mysqli_result|bool Query result with WoID, WoTextLC, WoStatus, WoTranslation
+     * @return array<int, array<string, mixed>> Array of rows with WoID, WoTextLC, WoStatus, WoTranslation
      */
-    public function getNewWordsAfter(int $maxWoId): \mysqli_result|bool
+    public function getNewWordsAfter(int $maxWoId): array
     {
-        return Connection::query(
+        return Connection::preparedFetchAll(
             "SELECT WoID, WoTextLC, WoStatus, WoTranslation
-            FROM {$this->tbpref}words
-            WHERE WoID > $maxWoId"
+             FROM {$this->tbpref}words
+             WHERE WoID > ?",
+            [$maxWoId]
         );
     }
 
@@ -1263,11 +1261,12 @@ class WordService
      */
     public function linkNewWordsToTextItems(int $maxWoId): void
     {
-        Connection::query(
+        Connection::preparedExecute(
             "UPDATE {$this->tbpref}textitems2
-            JOIN {$this->tbpref}words
-            ON LOWER(Ti2Text) = WoTextLC AND Ti2WordCount = 1 AND Ti2LgID = WoLgID AND WoID > $maxWoId
-            SET Ti2WoID = WoID"
+             JOIN {$this->tbpref}words
+             ON LOWER(Ti2Text) = WoTextLC AND Ti2WordCount = 1 AND Ti2LgID = WoLgID AND WoID > ?
+             SET Ti2WoID = WoID",
+            [$maxWoId]
         );
     }
 
@@ -1280,12 +1279,12 @@ class WordService
      */
     public function getLanguageDictionaries(int $textId): array
     {
-        $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-                FROM {$this->tbpref}languages, {$this->tbpref}texts
-                WHERE LgID = TxLgID AND TxID = $textId";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = Connection::preparedFetchOne(
+            "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI
+             FROM {$this->tbpref}languages, {$this->tbpref}texts
+             WHERE LgID = TxLgID AND TxID = ?",
+            [$textId]
+        );
 
         return [
             'name' => $record['LgName'] ?? '',
@@ -1302,20 +1301,21 @@ class WordService
      * @param int $offset Starting position
      * @param int $limit  Number of words to return
      *
-     * @return \mysqli_result|bool Query result with word, Ti2LgID, pos columns
+     * @return array<int, array<string, mixed>> Array of rows with word, Ti2LgID, pos columns
      */
     public function getUnknownWordsForBulkTranslate(
         int $textId,
         int $offset,
         int $limit
-    ): \mysqli_result|bool {
-        return Connection::query(
+    ): array {
+        return Connection::preparedFetchAll(
             "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos
-            FROM {$this->tbpref}textitems2
-            WHERE Ti2WoID = 0 AND Ti2TxID = $textId AND Ti2WordCount = 1
-            GROUP BY LOWER(Ti2Text)
-            ORDER BY pos
-            LIMIT $offset, $limit"
+             FROM {$this->tbpref}textitems2
+             WHERE Ti2WoID = 0 AND Ti2TxID = ? AND Ti2WordCount = 1
+             GROUP BY LOWER(Ti2Text)
+             ORDER BY pos
+             LIMIT ?, ?",
+            [$textId, $offset, $limit]
         );
     }
 
@@ -1338,28 +1338,26 @@ class WordService
      */
     public function createMultiWord(array $data): array
     {
-        $message = Connection::execute(
-            "INSERT INTO {$this->tbpref}words (
-                WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
-                WoRomanization, WoWordCount, WoStatusChanged," .
-                WordStatusService::makeScoreRandomInsertUpdate('iv') . '
-            ) VALUES( ' .
-                (int) $data['lgid'] . ', ' .
-                Escaping::toSqlSyntax($data['textlc']) . ', ' .
-                Escaping::toSqlSyntax($data['text']) . ', ' .
-                (int) $data['status'] . ', ' .
-                Escaping::toSqlSyntax($data['translation']) . ', ' .
-                Escaping::toSqlSyntax(ExportService::replaceTabNewline($data['sentence'])) . ', ' .
-                Escaping::toSqlSyntax($data['roman']) . ', ' .
-                (int) $data['wordcount'] . ',
-                NOW(), ' .
-                WordStatusService::makeScoreRandomInsertUpdate('id') .
-            ')',
-            "Term saved"
-        );
+        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-        // Get insert ID BEFORE any other queries (initWordCount runs queries)
-        $wid = (int) Connection::lastInsertId();
+        $sql = "INSERT INTO {$this->tbpref}words (
+                WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
+                WoRomanization, WoWordCount, WoStatusChanged, {$scoreColumns}
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})";
+
+        $sentence = ExportService::replaceTabNewline($data['sentence']);
+
+        $wid = (int) Connection::preparedInsert($sql, [
+            (int) $data['lgid'],
+            $data['textlc'],
+            $data['text'],
+            (int) $data['status'],
+            $data['translation'],
+            $sentence,
+            $data['roman'],
+            (int) $data['wordcount']
+        ]);
 
         \Lwt\Database\Maintenance::initWordCount();
         TagService::saveWordTags($wid);
@@ -1367,7 +1365,7 @@ class WordService
 
         return [
             'id' => $wid,
-            'message' => is_numeric($message) ? 'Term saved' : (string) $message
+            'message' => 'Term saved'
         ];
     }
 
@@ -1383,28 +1381,42 @@ class WordService
      */
     public function updateMultiWord(int $wordId, array $data, int $oldStatus, int $newStatus): array
     {
-        $statusChange = '';
-        if ($oldStatus != $newStatus) {
-            $statusChange = ', WoStatus = ' . $newStatus . ', WoStatusChanged = NOW()';
-        }
+        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $sentence = ExportService::replaceTabNewline($data['sentence']);
 
-        $message = Connection::execute(
-            'UPDATE ' . $this->tbpref . 'words SET
-            WoText = ' . Escaping::toSqlSyntax($data['text']) . ',
-            WoTranslation = ' . Escaping::toSqlSyntax($data['translation']) . ',
-            WoSentence = ' . Escaping::toSqlSyntax(ExportService::replaceTabNewline($data['sentence'])) . ',
-            WoRomanization = ' . Escaping::toSqlSyntax($data['roman']) .
-            $statusChange . ',' .
-            WordStatusService::makeScoreRandomInsertUpdate('u') . '
-            WHERE WoID = ' . $wordId,
-            "Updated"
-        );
+        if ($oldStatus != $newStatus) {
+            // Status changed - update status and timestamp
+            $sql = "UPDATE {$this->tbpref}words SET
+                    WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
+                    WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
+                    WHERE WoID = ?";
+            Connection::preparedExecute($sql, [
+                $data['text'],
+                $data['translation'],
+                $sentence,
+                $data['roman'],
+                $newStatus,
+                $wordId
+            ]);
+        } else {
+            // Status unchanged
+            $sql = "UPDATE {$this->tbpref}words SET
+                    WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?, {$scoreUpdate}
+                    WHERE WoID = ?";
+            Connection::preparedExecute($sql, [
+                $data['text'],
+                $data['translation'],
+                $sentence,
+                $data['roman'],
+                $wordId
+            ]);
+        }
 
         TagService::saveWordTags($wordId);
 
         return [
             'id' => $wordId,
-            'message' => is_numeric($message) ? 'Updated' : (string) $message,
+            'message' => 'Updated',
             'status' => $newStatus
         ];
     }
@@ -1418,11 +1430,11 @@ class WordService
      */
     public function getMultiWordData(int $wordId): ?array
     {
-        $sql = "SELECT WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus
-                FROM {$this->tbpref}words WHERE WoID = $wordId";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = Connection::preparedFetchOne(
+            "SELECT WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus
+             FROM {$this->tbpref}words WHERE WoID = ?",
+            [$wordId]
+        );
 
         if (!$record) {
             return null;
@@ -1447,8 +1459,9 @@ class WordService
      */
     public function getLanguageIdFromText(int $textId): ?int
     {
-        $lgid = Connection::fetchValue(
-            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = $textId"
+        $lgid = Connection::preparedFetchValue(
+            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+            [$textId]
         );
         return $lgid !== null ? (int) $lgid : null;
     }
@@ -1463,10 +1476,11 @@ class WordService
      */
     public function getSentenceIdAtPosition(int $textId, int $ord): ?int
     {
-        $seid = Connection::fetchValue(
+        $seid = Connection::preparedFetchValue(
             "SELECT Ti2SeID AS value
-            FROM {$this->tbpref}textitems2
-            WHERE Ti2TxID = $textId AND Ti2Order = $ord"
+             FROM {$this->tbpref}textitems2
+             WHERE Ti2TxID = ? AND Ti2Order = ?",
+            [$textId, $ord]
         );
         return $seid !== null ? (int) $seid : null;
     }
@@ -1480,11 +1494,12 @@ class WordService
      */
     public function shouldShowRomanization(int $textId): bool
     {
-        return (bool) Connection::fetchValue(
+        return (bool) Connection::preparedFetchValue(
             "SELECT LgShowRomanization AS value
-            FROM {$this->tbpref}languages JOIN {$this->tbpref}texts
-            ON TxLgID = LgID
-            WHERE TxID = $textId"
+             FROM {$this->tbpref}languages JOIN {$this->tbpref}texts
+             ON TxLgID = LgID
+             WHERE TxID = ?",
+            [$textId]
         );
     }
 
@@ -1498,9 +1513,10 @@ class WordService
      */
     public function findMultiWordByText(string $textlc, int $langId): ?int
     {
-        $wid = Connection::fetchValue(
+        $wid = Connection::preparedFetchValue(
             "SELECT WoID AS value FROM {$this->tbpref}words
-            WHERE WoLgID = $langId AND WoTextLC = " . Escaping::toSqlSyntax($textlc)
+             WHERE WoLgID = ? AND WoTextLC = ?",
+            [$langId, $textlc]
         );
         return $wid !== null ? (int) $wid : null;
     }

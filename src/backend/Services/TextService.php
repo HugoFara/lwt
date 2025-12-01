@@ -339,29 +339,26 @@ class TextService
         string $sourceUri
     ): string {
         // Check if text content changed
-        $oldText = Connection::fetchValue(
-            "SELECT AtText AS value FROM {$this->tbpref}archivedtexts WHERE AtID = {$textId}"
+        $oldText = Connection::preparedFetchValue(
+            "SELECT AtText AS value FROM {$this->tbpref}archivedtexts WHERE AtID = ?",
+            [$textId]
         );
-        $textsdiffer = Escaping::toSqlSyntax($text) !== Escaping::toSqlSyntax($oldText);
+        $textsdiffer = $text !== $oldText;
 
-        $message = Connection::execute(
+        $affected = Connection::preparedExecute(
             "UPDATE {$this->tbpref}archivedtexts SET
-                AtLgID = {$lgId},
-                AtTitle = " . Escaping::toSqlSyntax($title) . ",
-                AtText = " . Escaping::toSqlSyntax($text) . ",
-                AtAudioURI = " . Escaping::toSqlSyntax($audioUri) . ",
-                AtSourceURI = " . Escaping::toSqlSyntax($sourceUri) . "
-            WHERE AtID = {$textId}",
-            "Updated"
+                AtLgID = ?, AtTitle = ?, AtText = ?, AtAudioURI = ?, AtSourceURI = ?
+             WHERE AtID = ?",
+            [$lgId, $title, $text, $audioUri, $sourceUri, $textId]
         );
+
+        $message = $affected > 0 ? "Updated: {$affected}" : "Updated: 0";
 
         // Clear annotation if text changed
-        if ($message === 'Updated: 1' && $textsdiffer) {
-            Connection::execute(
-                "UPDATE {$this->tbpref}archivedtexts
-                SET AtAnnotatedText = ''
-                WHERE AtID = {$textId}",
-                ""
+        if ($affected > 0 && $textsdiffer) {
+            Connection::preparedExecute(
+                "UPDATE {$this->tbpref}archivedtexts SET AtAnnotatedText = '' WHERE AtID = ?",
+                [$textId]
             );
         }
 
@@ -392,6 +389,10 @@ class TextService
 
     /**
      * Build WHERE clause for query filtering (archived texts).
+     *
+     * Note: This method builds dynamic SQL with escaped values for use in
+     * complex queries that combine multiple WHERE clauses. The values are
+     * properly escaped using mysqli_real_escape_string.
      *
      * @param string $query     Query string
      * @param string $queryMode Query mode ('title,text', 'title', 'text')
@@ -848,31 +849,27 @@ class TextService
         // Remove soft hyphens
         $cleanText = $this->removeSoftHyphens($text);
 
-        Connection::execute(
+        // Handle null audio URI (use NULL in database if empty)
+        $audioValue = $audioUri === '' ? null : $audioUri;
+
+        $textId = (int) Connection::preparedInsert(
             "INSERT INTO {$this->tbpref}texts (
                 TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-            ) VALUES (
-                {$lgId},
-                " . Escaping::toSqlSyntax($title) . ",
-                " . Escaping::toSqlSyntax($cleanText) . ",
-                '',
-                " . Escaping::toSqlSyntaxNoNull($audioUri) . ",
-                " . Escaping::toSqlSyntax($sourceUri) . "
-            )",
-            "Saved"
+            ) VALUES (?, ?, ?, '', ?, ?)",
+            [$lgId, $title, $cleanText, $audioValue, $sourceUri]
         );
-
-        $textId = Connection::lastInsertId();
 
         // Parse the text
         TextParsing::splitCheck($cleanText, $lgId, $textId);
 
         // Get statistics
-        $sentenceCount = Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = {$textId}"
+        $sentenceCount = Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = ?",
+            [$textId]
         );
-        $itemCount = Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}"
+        $itemCount = Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = ?",
+            [$textId]
         );
 
         $message = "Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
@@ -903,15 +900,14 @@ class TextService
         // Remove soft hyphens
         $cleanText = $this->removeSoftHyphens($text);
 
-        Connection::execute(
+        // Handle null audio URI (use NULL in database if empty)
+        $audioValue = $audioUri === '' ? null : $audioUri;
+
+        Connection::preparedExecute(
             "UPDATE {$this->tbpref}texts SET
-                TxLgID = {$lgId},
-                TxTitle = " . Escaping::toSqlSyntax($title) . ",
-                TxText = " . Escaping::toSqlSyntax($cleanText) . ",
-                TxAudioURI = " . Escaping::toSqlSyntaxNoNull($audioUri) . ",
-                TxSourceURI = " . Escaping::toSqlSyntax($sourceUri) . "
-            WHERE TxID = {$textId}",
-            "Updated"
+                TxLgID = ?, TxTitle = ?, TxText = ?, TxAudioURI = ?, TxSourceURI = ?
+             WHERE TxID = ?",
+            [$lgId, $title, $cleanText, $audioValue, $sourceUri, $textId]
         );
 
         // Re-parse the text
@@ -926,11 +922,13 @@ class TextService
         TextParsing::splitCheck($cleanText, $lgId, $textId);
 
         // Get statistics
-        $sentenceCount = Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = {$textId}"
+        $sentenceCount = Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = ?",
+            [$textId]
         );
-        $itemCount = Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}"
+        $itemCount = Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = ?",
+            [$textId]
         );
 
         return "Sentences deleted: $count1 / Text items deleted: $count2 / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
@@ -1250,18 +1248,13 @@ class TextService
             $counter = \makeCounterWithTotal($textCount, $i + 1);
             $thisTitle = $title . ($counter == '' ? '' : (' (' . $counter . ')'));
 
-            $imported += (int) Connection::execute(
-                'INSERT INTO ' . $this->tbpref . 'texts (
-                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
-                    TxSourceURI
-                ) VALUES ( ' .
-                    $langId . ', ' .
-                    Escaping::toSqlSyntax($thisTitle) . ', ' .
-                    Escaping::toSqlSyntax($texts[$i]) . ", '',
-                    '', " .
-                    Escaping::toSqlSyntax($sourceUri) .
-                ')'
+            $affected = Connection::preparedExecute(
+                "INSERT INTO {$this->tbpref}texts (
+                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
+                ) VALUES (?, ?, ?, '', '', ?)",
+                [$langId, $thisTitle, $texts[$i], $sourceUri]
             );
+            $imported += $affected;
             $id = Connection::lastInsertId();
             TagService::saveTextTags($id);
             TextParsing::splitCheck($texts[$i], $langId, $id);
@@ -1358,10 +1351,9 @@ class TextService
      */
     public function getLanguageIdByName(string $langName): ?int
     {
-        $result = Connection::fetchValue(
-            "SELECT LgID as value
-            FROM {$this->tbpref}languages
-            WHERE LgName = " . Escaping::toSqlSyntax($langName)
+        $result = Connection::preparedFetchValue(
+            "SELECT LgID as value FROM {$this->tbpref}languages WHERE LgName = ?",
+            [$langName]
         );
         return $result !== null ? (int) $result : null;
     }
@@ -1387,7 +1379,8 @@ class TextService
             return "Multiple Actions: 0";
         }
 
-        $list = "(" . implode(",", array_map('intval', $textIds)) . ")";
+        $ids = array_map('intval', $textIds);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $count = 0;
 
         $statusFilter = $activeOnly
@@ -1396,28 +1389,26 @@ class TextService
 
         $sql = "SELECT WoID, WoTextLC, MIN(Ti2SeID) AS SeID
             FROM {$this->tbpref}words, {$this->tbpref}textitems2
-            WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN {$list}
+            WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ({$placeholders})
             {$statusFilter}
             AND IFNULL(WoSentence,'') NOT LIKE CONCAT('%{',WoText,'}%')
             GROUP BY WoID
             ORDER BY WoID, MIN(Ti2SeID)";
 
-        $res = Connection::query($sql);
+        $records = Connection::preparedFetchAll($sql, $ids);
         $sentenceCount = (int) Settings::getWithDefault('set-term-sentence-count');
 
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $sent = \getSentence(
                 $record['SeID'],
                 $record['WoTextLC'],
                 $sentenceCount
             );
-            $count += (int) Connection::execute(
-                "UPDATE {$this->tbpref}words
-                SET WoSentence = " . Escaping::toSqlSyntax(ExportService::replaceTabNewline($sent[1])) . "
-                WHERE WoID = " . $record['WoID']
+            $count += Connection::preparedExecute(
+                "UPDATE {$this->tbpref}words SET WoSentence = ? WHERE WoID = ?",
+                [ExportService::replaceTabNewline($sent[1]), $record['WoID']]
             );
         }
-        mysqli_free_result($res);
 
         return "Term Sentences set from Text(s): {$count}";
     }
@@ -1481,31 +1472,24 @@ class TextService
     ): array {
         $cleanText = $this->removeSoftHyphens($text);
 
+        // Handle null audio URI (use NULL in database if empty)
+        $audioValue = $audioUri === '' ? null : $audioUri;
+
         if ($textId === 0) {
             // New text
-            Connection::execute(
+            $textId = (int) Connection::preparedInsert(
                 "INSERT INTO {$this->tbpref}texts (
                     TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                ) VALUES (
-                    {$lgId},
-                    " . Escaping::toSqlSyntax($title) . ",
-                    " . Escaping::toSqlSyntax($cleanText) . ",
-                    '',
-                    " . Escaping::toSqlSyntaxNoNull($audioUri) . ",
-                    " . Escaping::toSqlSyntax($sourceUri) . "
-                )"
+                ) VALUES (?, ?, ?, '', ?, ?)",
+                [$lgId, $title, $cleanText, $audioValue, $sourceUri]
             );
-            $textId = Connection::lastInsertId();
         } else {
             // Update existing text
-            Connection::execute(
+            Connection::preparedExecute(
                 "UPDATE {$this->tbpref}texts SET
-                    TxLgID = {$lgId},
-                    TxTitle = " . Escaping::toSqlSyntax($title) . ",
-                    TxText = " . Escaping::toSqlSyntax($cleanText) . ",
-                    TxAudioURI = " . Escaping::toSqlSyntaxNoNull($audioUri) . ",
-                    TxSourceURI = " . Escaping::toSqlSyntax($sourceUri) . "
-                WHERE TxID = {$textId}"
+                    TxLgID = ?, TxTitle = ?, TxText = ?, TxAudioURI = ?, TxSourceURI = ?
+                 WHERE TxID = ?",
+                [$lgId, $title, $cleanText, $audioValue, $sourceUri, $textId]
             );
         }
 
@@ -1523,19 +1507,22 @@ class TextService
 
         // Reparse
         TextParsing::splitCheck(
-            Connection::fetchValue(
-                "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = {$textId}"
+            Connection::preparedFetchValue(
+                "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+                [$textId]
             ),
             $lgId,
             $textId
         );
 
         // Get statistics
-        $sentenceCount = Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = {$textId}"
+        $sentenceCount = Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = ?",
+            [$textId]
         );
-        $itemCount = Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}"
+        $itemCount = Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = ?",
+            [$textId]
         );
 
         $message = "Sentences deleted: {$sentencesDeleted} / Textitems deleted: {$textitemsDeleted} / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";

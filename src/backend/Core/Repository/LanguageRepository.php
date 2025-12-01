@@ -15,6 +15,7 @@
 namespace Lwt\Core\Repository;
 
 use Lwt\Classes\Language;
+use Lwt\Entity\ValueObject\LanguageId;
 
 /**
  * Repository for Language entities.
@@ -64,25 +65,24 @@ class LanguageRepository extends AbstractRepository
      */
     protected function mapToEntity(array $row): Language
     {
-        $language = new Language();
-        $language->id = (int) $row['LgID'];
-        $language->name = (string) $row['LgName'];
-        $language->dict1uri = (string) $row['LgDict1URI'];
-        $language->dict2uri = (string) $row['LgDict2URI'];
-        $language->translator = (string) $row['LgGoogleTranslateURI'];
-        $language->exporttemplate = (string) $row['LgExportTemplate'];
-        $language->textsize = (int) $row['LgTextSize'];
-        $language->charactersubst = (string) $row['LgCharacterSubstitutions'];
-        $language->regexpsplitsent = (string) $row['LgRegexpSplitSentences'];
-        $language->exceptionsplitsent = (string) $row['LgExceptionsSplitSentences'];
-        $language->regexpwordchar = (string) $row['LgRegexpWordCharacters'];
-        $language->removespaces = (bool) $row['LgRemoveSpaces'];
-        $language->spliteachchar = (bool) $row['LgSplitEachChar'];
-        $language->rightoleft = (bool) $row['LgRightToLeft'];
-        $language->ttsvoiceapi = (string) $row['LgTTSVoiceAPI'];
-        $language->showromanization = (bool) $row['LgShowRomanization'];
-
-        return $language;
+        return Language::reconstitute(
+            (int) $row['LgID'],
+            (string) $row['LgName'],
+            (string) $row['LgDict1URI'],
+            (string) ($row['LgDict2URI'] ?? ''),
+            (string) ($row['LgGoogleTranslateURI'] ?? ''),
+            (string) ($row['LgExportTemplate'] ?? ''),
+            (int) ($row['LgTextSize'] ?? 100),
+            (string) ($row['LgCharacterSubstitutions'] ?? ''),
+            (string) $row['LgRegexpSplitSentences'],
+            (string) ($row['LgExceptionsSplitSentences'] ?? ''),
+            (string) $row['LgRegexpWordCharacters'],
+            (bool) ($row['LgRemoveSpaces'] ?? false),
+            (bool) ($row['LgSplitEachChar'] ?? false),
+            (bool) ($row['LgRightToLeft'] ?? false),
+            (string) ($row['LgTTSVoiceAPI'] ?? ''),
+            (bool) ($row['LgShowRomanization'] ?? true)
+        );
     }
 
     /**
@@ -95,22 +95,22 @@ class LanguageRepository extends AbstractRepository
     protected function mapToRow(object $entity): array
     {
         return [
-            'LgID' => $entity->id,
-            'LgName' => $entity->name,
-            'LgDict1URI' => $entity->dict1uri,
-            'LgDict2URI' => $entity->dict2uri,
-            'LgGoogleTranslateURI' => $entity->translator,
-            'LgExportTemplate' => $entity->exporttemplate,
-            'LgTextSize' => $entity->textsize,
-            'LgCharacterSubstitutions' => $entity->charactersubst,
-            'LgRegexpSplitSentences' => $entity->regexpsplitsent,
-            'LgExceptionsSplitSentences' => $entity->exceptionsplitsent,
-            'LgRegexpWordCharacters' => $entity->regexpwordchar,
-            'LgRemoveSpaces' => (int) $entity->removespaces,
-            'LgSplitEachChar' => (int) $entity->spliteachchar,
-            'LgRightToLeft' => (int) $entity->rightoleft,
-            'LgTTSVoiceAPI' => $entity->ttsvoiceapi,
-            'LgShowRomanization' => (int) $entity->showromanization,
+            'LgID' => $entity->id()->toInt(),
+            'LgName' => $entity->name(),
+            'LgDict1URI' => $entity->dict1Uri(),
+            'LgDict2URI' => $entity->dict2Uri(),
+            'LgGoogleTranslateURI' => $entity->translatorUri(),
+            'LgExportTemplate' => $entity->exportTemplate(),
+            'LgTextSize' => $entity->textSize(),
+            'LgCharacterSubstitutions' => $entity->characterSubstitutions(),
+            'LgRegexpSplitSentences' => $entity->regexpSplitSentences(),
+            'LgExceptionsSplitSentences' => $entity->exceptionsSplitSentences(),
+            'LgRegexpWordCharacters' => $entity->regexpWordCharacters(),
+            'LgRemoveSpaces' => (int) $entity->removeSpaces(),
+            'LgSplitEachChar' => (int) $entity->splitEachChar(),
+            'LgRightToLeft' => (int) $entity->rightToLeft(),
+            'LgTTSVoiceAPI' => $entity->ttsVoiceApi(),
+            'LgShowRomanization' => (int) $entity->showRomanization(),
         ];
     }
 
@@ -121,7 +121,7 @@ class LanguageRepository extends AbstractRepository
      */
     protected function getEntityId(object $entity): int
     {
-        return $entity->id ?? 0;
+        return $entity->id()->toInt();
     }
 
     /**
@@ -131,7 +131,7 @@ class LanguageRepository extends AbstractRepository
      */
     protected function setEntityId(object $entity, int $id): void
     {
-        $entity->id = $id;
+        $entity->setId(LanguageId::fromInt($id));
     }
 
     /**
@@ -288,30 +288,17 @@ class LanguageRepository extends AbstractRepository
     }
 
     /**
-     * Create a new empty language entity.
+     * Create a new empty language entity with default values.
      *
      * @return Language
      */
     public function createEmpty(): Language
     {
-        $language = new Language();
-        $language->id = 0;
-        $language->name = '';
-        $language->dict1uri = '';
-        $language->dict2uri = '';
-        $language->translator = '';
-        $language->exporttemplate = '';
-        $language->textsize = 100;
-        $language->charactersubst = '';
-        $language->regexpsplitsent = '';
-        $language->exceptionsplitsent = '';
-        $language->regexpwordchar = '';
-        $language->removespaces = false;
-        $language->spliteachchar = false;
-        $language->rightoleft = false;
-        $language->ttsvoiceapi = '';
-        $language->showromanization = true;
-
-        return $language;
+        return Language::create(
+            'New Language',
+            '',
+            '.!?',
+            'a-zA-Z'
+        );
     }
 }
