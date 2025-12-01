@@ -208,21 +208,6 @@ HTML;
         return '<p class="smallgray2">' . round($executionTime, 5) . ' secs</p>';
     }
 
-    /**
-     * Build the overlib div used for tooltips.
-     *
-     * Only needed for legacy mode (non-Vite). Vite mode uses jQuery UI dialogs.
-     *
-     * @return string HTML div element, or empty string for Vite mode
-     */
-    public static function buildOverlibDiv(): string
-    {
-        if (ViteHelper::shouldUse()) {
-            return '';
-        }
-        return '<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>';
-    }
-
     // =========================================================================
     // Methods migrated from Core/UI/ui_helpers.php
     // =========================================================================
@@ -261,14 +246,10 @@ HTML;
 
         if (ViteHelper::shouldUse()) {
             echo '<!-- Vite assets -->';
-            echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
             echo '<link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />';
-            echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
-            echo '<!-- Legacy only: overlib (Vite uses native dialogs) -->';
-            echo '<script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>';
         }
 
         echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
@@ -276,10 +257,6 @@ HTML;
         echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
         echo '<body>';
-
-        if (!ViteHelper::shouldUse()) {
-            echo '<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>';
-        }
 
         flush();
         if ($debug) {
@@ -324,15 +301,10 @@ HTML;
 
         if (ViteHelper::shouldUse()) {
             echo '<!-- Vite assets -->';
-            echo '<!-- Load jQuery synchronously for inline scripts compatibility -->';
-            echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
             echo '<link rel="stylesheet" type="text/css" href="' . get_file_path('css/styles.css') . '" />';
-            echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
-            echo '<!-- Legacy only: overlib (Vite uses native dialogs) -->';
-            echo '<script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>';
             echo '<script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>';
         }
 
@@ -341,10 +313,6 @@ HTML;
         echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
         echo '<body' . ($bodyClass !== '' ? ' class="' . htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8') . '"' : '') . '>';
-
-        if (!ViteHelper::shouldUse()) {
-            echo '<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>';
-        }
 
         flush();
         if ($debug) {

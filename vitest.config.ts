@@ -37,6 +37,9 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src/frontend/js'),
       '@css': resolve(__dirname, 'src/frontend/css'),
+      // jQuery has been removed from the project. This stub is for tests that
+      // haven't been fully migrated yet.
+      'jquery': resolve(__dirname, 'tests/mocks/jquery-stub.ts'),
     }
   }
 });

@@ -2,7 +2,6 @@
  * Tests for ajax_utilities.ts - AJAX utilities for LWT
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   do_ajax_save_setting,
   scrollToAnchor,
@@ -10,9 +9,14 @@ import {
   quick_select_to_input
 } from '../../../src/frontend/js/core/ajax_utilities';
 
-// Make jQuery available globally
-(global as any).$ = $;
-(global as any).jQuery = $;
+// Mock the SettingsApi module
+vi.mock('../../../src/frontend/js/api/settings', () => ({
+  SettingsApi: {
+    save: vi.fn().mockResolvedValue({ ok: true, data: {} })
+  }
+}));
+
+import { SettingsApi } from '../../../src/frontend/js/api/settings';
 
 describe('ajax_utilities.ts', () => {
   beforeEach(() => {
@@ -30,60 +34,28 @@ describe('ajax_utilities.ts', () => {
   // ===========================================================================
 
   describe('do_ajax_save_setting', () => {
-    it('makes POST request to settings API', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as any));
-
+    it('calls SettingsApi.save with key and value', () => {
       do_ajax_save_setting('theme', 'dark');
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'api.php/v1/settings',
-        {
-          key: 'theme',
-          value: 'dark'
-        }
-      );
+      expect(SettingsApi.save).toHaveBeenCalledWith('theme', 'dark');
     });
 
     it('sends correct key-value pair', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as any));
-
       do_ajax_save_setting('language_id', '5');
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'api.php/v1/settings',
-        expect.objectContaining({
-          key: 'language_id',
-          value: '5'
-        })
-      );
+      expect(SettingsApi.save).toHaveBeenCalledWith('language_id', '5');
     });
 
     it('handles empty values', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as any));
-
       do_ajax_save_setting('filter', '');
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'api.php/v1/settings',
-        expect.objectContaining({
-          key: 'filter',
-          value: ''
-        })
-      );
+      expect(SettingsApi.save).toHaveBeenCalledWith('filter', '');
     });
 
     it('handles special characters in values', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as any));
-
       do_ajax_save_setting('query', 'test&value=something');
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'api.php/v1/settings',
-        expect.objectContaining({
-          key: 'query',
-          value: 'test&value=something'
-        })
-      );
+      expect(SettingsApi.save).toHaveBeenCalledWith('query', 'test&value=something');
     });
   });
 
@@ -314,17 +286,9 @@ describe('ajax_utilities.ts', () => {
 
   describe('Edge Cases', () => {
     it('do_ajax_save_setting handles Unicode keys and values', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as any));
-
       do_ajax_save_setting('설정', '한국어');
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'api.php/v1/settings',
-        expect.objectContaining({
-          key: '설정',
-          value: '한국어'
-        })
-      );
+      expect(SettingsApi.save).toHaveBeenCalledWith('설정', '한국어');
     });
 
     it('get_position_from_id handles single hyphen', () => {

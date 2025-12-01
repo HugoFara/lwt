@@ -9,10 +9,6 @@
 import '../css/base/styles.css';
 import '../css/base/html5_audio_player.css';
 
-// jQuery is loaded externally (synchronously) for inline script compatibility
-// In production, we use the global jQuery; in dev mode, we may import it
-import $ from 'jquery';
-
 // Import TypeScript modules
 
 // Core utilities
@@ -42,7 +38,6 @@ import './terms/overlib_interface';
 import './terms/term_operations';
 
 // Reading interface
-import './reading/audio_controller';
 import './reading/text_events';
 import './reading/text_display';
 import './reading/frame_management';
@@ -122,17 +117,12 @@ import './ui/sorttable';
 // Global exports for inline PHP scripts
 import './globals';
 
-// Expose jQuery globally for plugins
 declare global {
   interface Window {
-    $: typeof $;
-    jQuery: typeof $;
     LWT_VITE_LOADED: boolean;
   }
 }
 
-window.$ = $;
-window.jQuery = $;
 window.LWT_VITE_LOADED = true;
 
 // Log to console in development

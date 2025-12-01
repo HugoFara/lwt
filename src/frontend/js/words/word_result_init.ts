@@ -217,14 +217,8 @@ function initEditTermResult(config: EditTermResultConfig): void {
 function initHoverSaveResult(config: HoverSaveResultConfig): void {
   const context = getParentContext();
 
-  let title = '';
-  try {
-    if (window.parent?.LWT_DATA?.settings?.jQuery_tooltip) {
-      title = make_tooltip(config.wordRaw, config.translation, '', String(config.status));
-    }
-  } catch {
-    // Parent access blocked
-  }
+  // Always generate tooltips (jQuery UI tooltips removed, now using native)
+  const title = make_tooltip(config.wordRaw, config.translation, '', String(config.status));
 
   context.querySelectorAll<HTMLElement>(`.TERM${config.hex}`).forEach(el => {
     el.classList.remove('status0');

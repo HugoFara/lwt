@@ -420,26 +420,6 @@ input[type="radio"]:checked + .wrap_radio>span {
     background:url(check_radio_sheet2.png) -51px 1px no-repeat;
 }
 
-#overDiv table[bgcolor="#333399"]{
-	background-color: rgba(40,40,69,.9) ! important;
-	padding: 0px 2px 1px 2px;
-	/*box-shadow:0px 0px 4px 1px #666 ! important;*/
-}
-#overDiv table[bgcolor="#FFFFE8"]{
-	background-color: rgba(30,30,10,.4) ! important;
-
-	border-top-left-radius: 0;
-	border-top-right-radius: 0;
-}
-
-#overDiv td[valign="TOP"] font{
-	color: #EEE ! important;
-}
-#overDiv a font[color="#FFFFFF"]{
-	background-color: #C11 ! important;
-	padding: 1px 3px;
-	border-radius: 6px ! important;
-}
 .bgdis {
 	background-color: #2B2B30 ! important;
 	border-radius: 3px ! important;

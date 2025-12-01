@@ -200,31 +200,13 @@ describe('text_reading_init.ts', () => {
       expect(saveAudioPosition).toHaveBeenCalledWith(123, 45.5);
     });
 
-    it('falls back to jPlayer when HTML5 player not available', () => {
+    it('does nothing when HTML5 player not available', () => {
       (window as any)._lwtTextId = 456;
       (getAudioPlayer as any).mockReturnValue(null);
 
-      document.body.innerHTML = '<div id="jquery_jplayer_1"></div>';
-
-      $.fn.data = vi.fn().mockReturnValue({
-        status: { currentTime: 30.0 }
-      });
-
       saveTextStatus();
 
-      expect(saveAudioPosition).toHaveBeenCalledWith(456, 30.0);
-    });
-
-    it('handles missing jPlayer data gracefully', () => {
-      (window as any)._lwtTextId = 789;
-      (getAudioPlayer as any).mockReturnValue(null);
-
-      document.body.innerHTML = '<div id="jquery_jplayer_1"></div>';
-
-      $.fn.data = vi.fn().mockReturnValue(null);
-
-      // Should not throw
-      expect(() => saveTextStatus()).not.toThrow();
+      expect(saveAudioPosition).not.toHaveBeenCalled();
     });
   });
 

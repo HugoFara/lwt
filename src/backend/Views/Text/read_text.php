@@ -20,7 +20,7 @@
  * - $modeTrans: int - Annotation position (1-4)
  * - $visitStatus: string - Visit status filter
  * - $termDelimiter: string - Term translation delimiter
- * - $tooltipMode: int - Tooltip mode (jQuery or native)
+ * - $tooltipMode: int - Tooltip mode (native only, jQuery removed)
  * - $hts: string - HTS setting
  *
  * PHP version 8.1
@@ -69,7 +69,6 @@ $varArray = [
             'annotations'      => json_decode(\annotation_to_json($annotatedText))
         ],
         'settings' => [
-            'jQuery_tooltip'     => ($tooltipMode == 2 ? 1 : 0),
             'hts'                => $hts,
             'word_status_filter' => \Lwt\View\Helper\StatusHelper::makeClassFilter((int)$visitStatus),
             'annotations_mode'   => $modeTrans

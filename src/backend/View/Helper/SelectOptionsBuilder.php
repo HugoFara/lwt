@@ -136,6 +136,9 @@ class SelectOptionsBuilder
     /**
      * Build tooltip type selection options.
      *
+     * Note: JqueryUI option was removed when jQuery was removed from the codebase.
+     * Only native tooltips are now supported.
+     *
      * @param int|string|null $selected Currently selected value (default: 1)
      *
      * @return string HTML options string
@@ -144,8 +147,7 @@ class SelectOptionsBuilder
     {
         $selected = $selected ?? 1;
         $options = [
-            1 => 'Native',
-            2 => 'JqueryUI'
+            1 => 'Native'
         ];
         return self::buildFromArray($options, $selected);
     }

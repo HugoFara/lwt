@@ -186,22 +186,13 @@ describe('lwt_state.ts', () => {
   describe('LWT_DATA.settings', () => {
     it('has correct initial structure', () => {
       const settings = LWT_DATA.settings;
-      expect(settings).toHaveProperty('jQuery_tooltip');
       expect(settings).toHaveProperty('hts');
       expect(settings).toHaveProperty('word_status_filter');
     });
 
     it('has correct initial values', () => {
-      expect(LWT_DATA.settings.jQuery_tooltip).toBe(false);
       expect(LWT_DATA.settings.hts).toBe(0);
       expect(LWT_DATA.settings.word_status_filter).toBe('');
-    });
-
-    it('allows modification of jQuery_tooltip', () => {
-      const original = LWT_DATA.settings.jQuery_tooltip;
-      LWT_DATA.settings.jQuery_tooltip = true;
-      expect(LWT_DATA.settings.jQuery_tooltip).toBe(true);
-      LWT_DATA.settings.jQuery_tooltip = original;
     });
 
     it('allows modification of hts (hover text-to-speech)', () => {
@@ -268,12 +259,10 @@ describe('lwt_state.ts', () => {
 
     it('LwtSettings type is correctly structured', () => {
       const settings: LwtSettings = {
-        jQuery_tooltip: true,
         hts: 2,
         word_status_filter: '1,2,3',
         annotations_mode: 1
       };
-      expect(settings.jQuery_tooltip).toBe(true);
       expect(settings.hts).toBe(2);
       expect(settings.annotations_mode).toBe(1);
     });
@@ -303,7 +292,6 @@ describe('lwt_state.ts', () => {
           answer_opened: false
         },
         settings: {
-          jQuery_tooltip: false,
           hts: 0,
           word_status_filter: ''
         }
@@ -331,7 +319,6 @@ describe('lwt_state.ts', () => {
       LWT_DATA.language.rtl = false;
       LWT_DATA.text.id = 42;
       LWT_DATA.text.reading_position = 0;
-      LWT_DATA.settings.jQuery_tooltip = true;
       LWT_DATA.settings.hts = 2;
 
       // Verify configuration

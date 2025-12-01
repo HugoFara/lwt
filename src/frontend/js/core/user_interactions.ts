@@ -28,7 +28,6 @@ interface LwtDataGlobal {
   language: LwtLanguage;
   text: LwtText;
   settings: {
-    jQuery_tooltip: boolean;
     hts: number;
   };
 }

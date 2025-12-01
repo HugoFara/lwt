@@ -382,15 +382,6 @@ input[type="radio"] + .wrap_radio>span {
 input[type="radio"]:checked + .wrap_radio>span {
     background:url(check_radio_sheet2.png) -51px 1px no-repeat;
 }
-#overDiv [bgcolor="#333399"]{
-	background-color: #242441 ! important;
-}
-#overDiv [bgcolor="#FFFFE8"]{
-	background-color: #1D1D24 ! important;
-}
-#overDiv [valign="TOP"] font{
-	color: #EEE ! important;
-}
 .bgdis {
 	background-color: #2B2B30 ! important;
 	border-radius: 3px ! important;

@@ -244,13 +244,13 @@ declare global {
     changeTableTestStatus: typeof changeTableTestStatus;
     do_ajax_edit_impr_text: typeof do_ajax_edit_impr_text;
 
-    // Popup functions (overlib replacement)
+    // Popup functions
     overlib: typeof overlib;
     cClick: typeof cClick;
     nd: typeof nd;
     setCurrentEvent: typeof setCurrentEvent;
 
-    // Audio player (HTML5 replacement for jPlayer)
+    // Audio player
     lwt_audio_controller: typeof lwt_audio_controller;
     setupAudioPlayer: typeof setupAudioPlayer;
     getAudioPlayer: typeof getAudioPlayer;

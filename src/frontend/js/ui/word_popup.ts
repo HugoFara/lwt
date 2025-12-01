@@ -1,14 +1,14 @@
 /**
- * Word Popup - Native dialog implementation for overlib replacement
+ * Word Popup - Native dialog implementation for word interactions
  *
  * This module provides popup dialogs for word interactions,
- * using the native HTML <dialog> element instead of jQuery UI.
+ * using the native HTML <dialog> element.
  *
  * @license unlicense
  * @since 3.0.0
  */
 
-// Configuration matching old overlib settings
+// Popup configuration
 const POPUP_CONFIG = {
   width: 280,
   fgColor: '#FFFFE8',
@@ -138,10 +138,8 @@ export function nd(): boolean {
 /**
  * Show a popup dialog with content and caption
  *
- * This is the main replacement for the overlib() function.
- *
  * @param content HTML content for the popup body
- * @param _caption Ignored for compatibility (was CAPTION constant)
+ * @param _caption Ignored (legacy parameter)
  * @param title Title for the popup header
  * @returns true for compatibility
  */
@@ -172,8 +170,8 @@ export function overlib(content: string, _caption?: unknown, title?: string): bo
 }
 
 /**
- * Store the current event for positioning
- * Call this before overlib() to position the popup near the click
+ * Store the current event for positioning.
+ * Call this before showing the popup to position it near the click.
  */
 export function setCurrentEvent(event: Event): void {
   currentEvent = event;

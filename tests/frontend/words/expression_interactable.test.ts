@@ -29,7 +29,7 @@ describe('expression_interactable.ts', () => {
       value: {
         LWT_DATA: {
           text: { id: 1 },
-          settings: { jQuery_tooltip: true }
+          settings: {}
         }
       }
     });
@@ -142,17 +142,8 @@ describe('expression_interactable.ts', () => {
       );
     });
 
-    it('does not create tooltip when jQuery_tooltip is false', () => {
-      Object.defineProperty(window, 'parent', {
-        writable: true,
-        value: {
-          LWT_DATA: {
-            text: { id: 1 },
-            settings: { jQuery_tooltip: false }
-          }
-        }
-      });
-
+    it('always creates native tooltip regardless of settings', () => {
+      // Native tooltips are always created (jQuery UI tooltips were removed)
       document.body.innerHTML = `
         <script data-lwt-multiword-config type="application/json">
           {
@@ -166,7 +157,7 @@ describe('expression_interactable.ts', () => {
 
       autoInitExpressionInteractables();
 
-      expect(make_tooltip).not.toHaveBeenCalled();
+      expect(make_tooltip).toHaveBeenCalled();
     });
   });
 

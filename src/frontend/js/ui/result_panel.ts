@@ -443,7 +443,7 @@ const styles = `
   }
 }
 
-/* Popup button styles (for overlib_interface API-based buttons) */
+/* Popup button styles (for word popup API-based buttons) */
 .lwt-status-btn {
   background: none;
   border: none;

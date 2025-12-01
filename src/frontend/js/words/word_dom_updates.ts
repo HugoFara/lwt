@@ -36,14 +36,14 @@ export function getFrameElement(frameId: string): HTMLElement | null {
 }
 
 /**
- * Check if jQuery tooltips are enabled in settings.
+ * Check if native tooltips are enabled.
+ * Always returns true now that jQuery UI tooltips have been removed.
+ *
+ * @deprecated This function is kept for backward compatibility but always returns true.
  */
 export function isJQueryTooltipEnabled(): boolean {
-  try {
-    return window.parent?.LWT_DATA?.settings?.jQuery_tooltip ?? false;
-  } catch {
-    return LWT_DATA?.settings?.jQuery_tooltip ?? false;
-  }
+  // jQuery UI tooltips removed - always use native tooltips
+  return true;
 }
 
 /**

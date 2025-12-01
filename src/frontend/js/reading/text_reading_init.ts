@@ -167,22 +167,12 @@ export function saveTextStatus(): void {
     return;
   }
 
-  // Check for HTML5 audio player first (Vite mode)
+  // Use HTML5 audio player
   if (typeof getAudioPlayer === 'function') {
     const player = getAudioPlayer();
     if (player) {
       saveAudioPosition(textId, player.getCurrentTime());
-      return;
     }
-  }
-  // Fall back to jPlayer (legacy mode) - check if jPlayer element exists
-  const jPlayerEl = document.getElementById('jquery_jplayer_1') as HTMLElement & {
-    jPlayer?: { data: (key: string) => { status?: { currentTime: number } } };
-  } | null;
-  if (jPlayerEl && typeof (jPlayerEl as unknown as { jQuery?: unknown }).jQuery !== 'undefined') {
-    // jPlayer stores data on the element via jQuery - this is a legacy fallback
-    // In modern mode, we use the HTML5 audio player above
-    console.warn('jPlayer fallback not available without jQuery');
   }
 }
 
@@ -297,12 +287,10 @@ export function initTextReading(): void {
     document.documentElement.setAttribute('lang', window.LANG);
   }
 
-  // Initialize native tooltips if enabled
-  if (LWT_DATA.settings?.jQuery_tooltip) {
-    const thetext = document.getElementById('thetext');
-    if (thetext) {
-      initNativeTooltips(thetext);
-    }
+  // Initialize native tooltips (always enabled now that jQuery UI tooltips are removed)
+  const thetext = document.getElementById('thetext');
+  if (thetext) {
+    initNativeTooltips(thetext);
   }
 
   // Set up event handlers (DOM should already be ready at this point)

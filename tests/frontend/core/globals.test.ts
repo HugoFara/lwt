@@ -21,8 +21,37 @@ vi.mock('../../../src/frontend/js/ui/modal', () => ({
   closeModal: vi.fn()
 }));
 
+vi.mock('../../../src/frontend/js/ui/result_panel', () => ({
+  showResultPanel: vi.fn(),
+  hideResultPanel: vi.fn(),
+  showErrorInPanel: vi.fn(),
+  showSuccessInPanel: vi.fn(),
+  showWordDetails: vi.fn(),
+  showLoadingInPanel: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/terms/overlib_interface', () => ({
+  createStatusChangeButton: vi.fn(),
+  createStatusButtonsAll: vi.fn(),
+  createDeleteButton: vi.fn(),
+  createWellKnownButton: vi.fn(),
+  createIgnoreButton: vi.fn(),
+  createTestStatusButtons: vi.fn(),
+  buildKnownWordPopupContent: vi.fn(),
+  buildUnknownWordPopupContent: vi.fn()
+}));
+
 vi.mock('../../../src/frontend/js/reading/text_events', () => ({
-  prepareTextInteractions: vi.fn()
+  prepareTextInteractions: vi.fn(),
+  setUseApiMode: vi.fn(),
+  isApiModeEnabled: vi.fn(),
+  changeWordStatus: vi.fn(),
+  deleteWord: vi.fn(),
+  markWellKnown: vi.fn(),
+  markIgnored: vi.fn(),
+  incrementWordStatus: vi.fn(),
+  getContextFromElement: vi.fn(),
+  buildContext: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/core/user_interactions', () => ({

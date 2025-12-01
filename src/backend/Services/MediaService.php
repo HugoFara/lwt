@@ -327,7 +327,6 @@ allowfullscreen type="text/html">
             $currentplaybackrate = 10;
         }
 
-        // Always use HTML5 audio player (jPlayer removed)
         $this->renderHtml5AudioPlayer(
             $audio,
             $offset,

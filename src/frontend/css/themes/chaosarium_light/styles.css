@@ -492,10 +492,6 @@ dt {
 
 /* new */
 
-#overDiv table table:nth-of-type(1) {
-  background-color: none;
-}
-
 .tword:after,
 .word:after {
   max-width: 15em;
@@ -505,53 +501,6 @@ dt {
 .bc98 {
   background: rgb(170, 133, 187) !important;
 }
-
-/* change overlay colour */
-/* the whole overlay */
-/*#overDiv {
-  border: solid black 1px;
-}*/
-
-/* the top ribbon */
-#overDiv table[bgcolor="#333399"] {
-  background-color: rgba(255, 255, 255, 0.541) !important;
-  padding: 0px 2px 1px 2px;
-  box-shadow: 0px 0px 0px 1px #666 !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-/* the main area */
-#overDiv table[bgcolor="#FFFFE8"] {
-  background-color: transparent !important;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  /* backdrop-filter: blur(10px) */
-}
-
-/* normal text */
-/*
-#overDiv td[valign="TOP"] font {
-  color: blue !important;
-}
-*/
-
-/* the word text */
-#overDiv b font[color="#FFFFFF"] a[style="color:yellow"] {
-  color: #c00000 !important;
-  padding: 1px 3px;
-  border-radius: 6px !important;
-}
-
-/* the close text */
-#overDiv a font[color="#FFFFFF"],
-#overDiv b font[color="#FFFFFF"] {
-  /* background-color: purple ! important; */
-  color: black;
-  padding: 1px 3px;
-  border-radius: 6px !important;
-}
-
 
 /**
 * Formats a header with flexbox.

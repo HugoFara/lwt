@@ -59,17 +59,14 @@ function initMultiWordInteractable(config: MultiWordConfig): void {
     return;
   }
 
-  let title = '';
-  if (window.parent?.LWT_DATA?.settings?.jQuery_tooltip) {
-    const multiWordText = config.multiWords[textId]?.[0] || '';
-    title = make_tooltip(
-      multiWordText,
-      term.data_trans,
-      term.data_rom,
-      parseInt(term.data_status, 10)
-    );
-  }
-  term.title = title;
+  // Always generate tooltips (jQuery UI tooltips removed, now using native)
+  const multiWordText = config.multiWords[textId]?.[0] || '';
+  term.title = make_tooltip(
+    multiWordText,
+    term.data_trans,
+    term.data_rom,
+    parseInt(term.data_status, 10)
+  );
 
   let attrs = '';
   Object.entries(term).forEach(([k, v]) => {
@@ -92,16 +89,13 @@ function initMultiWordInteractable(config: MultiWordConfig): void {
 function initExpressionInteractable2(config: ExpressionConfig): void {
   const term = config.attrs;
 
-  let title = '';
-  if (window.parent?.LWT_DATA?.settings?.jQuery_tooltip) {
-    title = make_tooltip(
-      config.term,
-      term.data_trans,
-      term.data_rom,
-      parseInt(term.data_status, 10)
-    );
-  }
-  term.title = title;
+  // Always generate tooltips (jQuery UI tooltips removed, now using native)
+  term.title = make_tooltip(
+    config.term,
+    term.data_trans,
+    term.data_rom,
+    parseInt(term.data_status, 10)
+  );
 
   let attrs = '';
   Object.entries(term).forEach(([k, v]) => {

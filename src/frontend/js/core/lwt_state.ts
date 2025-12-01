@@ -50,7 +50,6 @@ export const LWT_DATA: LwtDataInterface = {
     answer_opened: false
   },
   settings: {
-    jQuery_tooltip: false,
     hts: 0,
     word_status_filter: ''
   }

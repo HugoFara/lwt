@@ -2,10 +2,9 @@
  * LWT Javascript functions
  *
  * Word popup interface - provides popup dialogs for word interactions.
- * Originally used overlib library, now uses jQuery UI dialogs.
  *
  * This module provides two approaches for word operations:
- * 1. Legacy frame-based approach (make_overlib_link_* functions)
+ * 1. Legacy frame-based approach (make_popup_link_* functions)
  * 2. Modern API-based approach (create*Button functions)
  *
  * The API-based approach uses the TermsApi/ReviewApi instead of frame navigation.
@@ -18,7 +17,7 @@ import { escape_html_chars, escape_html_chars_2 } from '../core/html_utils';
 import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
 import { createTheDictLink, createSentLookupLink } from './dictionary';
 
-// Import the new popup system (replaces overlib)
+// Import the popup system
 import { overlib, CAPTION, cClick } from '../ui/word_popup';
 
 // Import API-based word actions

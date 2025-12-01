@@ -43,7 +43,6 @@ export interface LwtTest {
 }
 
 export interface LwtSettings {
-  jQuery_tooltip: boolean;
   hts: number;
   word_status_filter: string;
   annotations_mode?: number;

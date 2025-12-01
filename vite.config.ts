@@ -51,8 +51,6 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src/frontend/js'),
       '@css': resolve(__dirname, 'src/frontend/css'),
-      // Map jQuery imports to our shim that uses global jQuery
-      'jquery': resolve(__dirname, 'src/frontend/js/shims/jquery-shim.ts'),
     }
   }
 });

@@ -2,18 +2,11 @@
 namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Database\Connection;
-use Lwt\Database\Settings;
 use Lwt\Services\TestService;
-use Lwt\Services\SentenceService;
 use Lwt\Services\WordStatusService;
-use Lwt\Services\ExportService;
-use Lwt\Services\TagService;
 
 require_once __DIR__ . '/../../../Services/TestService.php';
-require_once __DIR__ . '/../../../Services/SentenceService.php';
 require_once __DIR__ . '/../../../Services/WordStatusService.php';
-require_once __DIR__ . '/../../../Services/ExportService.php';
-require_once __DIR__ . '/../../../Services/TagService.php';
 
 /**
  * Handler for review/test-related API operations.
@@ -23,26 +16,22 @@ require_once __DIR__ . '/../../../Services/TagService.php';
 class ReviewHandler
 {
     private TestService $testService;
-    private SentenceService $sentenceService;
 
     public function __construct()
     {
         $this->testService = new TestService();
-        $this->sentenceService = new SentenceService();
     }
 
     /**
      * Get the next word to test as structured data.
      *
-     * @param string $testsql   SQL projection query
-     * @param bool   $wordMode  Test is in word mode
-     * @param int    $lgid      Language ID
-     * @param string $wordregex Word selection regular expression
-     * @param int    $testtype  Test type
+     * @param string $testsql  SQL projection query
+     * @param bool   $wordMode Test is in word mode
+     * @param int    $testtype Test type
      *
      * @return array{word_id: int|string, solution?: string, word_text: string, group: string}
      */
-    public function getWordTestData(string $testsql, bool $wordMode, int $lgid, string $wordregex, int $testtype): array
+    public function getWordTestData(string $testsql, bool $wordMode, int $testtype): array
     {
         $wordRecord = $this->testService->getNextWord($testsql);
         if (empty($wordRecord)) {
@@ -68,9 +57,7 @@ class ReviewHandler
         list($htmlSentence, $save) = $this->formatTermForTest(
             $wordRecord,
             $sent,
-            $testtype,
-            $wordMode,
-            $wordregex
+            $testtype
         );
 
         // Get solution
@@ -95,17 +82,13 @@ class ReviewHandler
      * @param array  $wordRecord Word database record
      * @param string $sentence   Sentence containing the word (word marked with {})
      * @param int    $testType   Test type (1-5)
-     * @param bool   $wordMode   Whether in word mode (no sentence context)
-     * @param string $wordRegex  Word character regex from language settings
      *
      * @return array{0: string, 1: string} [HTML display, plain word text]
      */
     private function formatTermForTest(
         array $wordRecord,
         string $sentence,
-        int $testType,
-        bool $wordMode,
-        string $wordRegex
+        int $testType
     ): array {
         $baseType = $this->testService->getBaseTestType($testType);
         $wordText = $wordRecord['WoText'];
@@ -146,7 +129,7 @@ class ReviewHandler
      *
      * @param array $params Array with the fields {
      *                      test_key: string, selection: string, word_mode: bool,
-     *                      lg_id: int, word_regex: string, type: int
+     *                      type: int
      *                      }
      *
      * @return array{word_id: int|string, solution?: string, word_text: string, group: string}
@@ -160,8 +143,6 @@ class ReviewHandler
         return $this->getWordTestData(
             $testSql,
             filter_var($params['word_mode'], FILTER_VALIDATE_BOOLEAN),
-            (int)$params['lg_id'],
-            $params['word_regex'],
             (int)$params['type']
         );
     }
