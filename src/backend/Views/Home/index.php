@@ -204,7 +204,6 @@ $currentTextInfo = $dashboardData['current_text_info'];
         <div class="menu-content">
             <a href="/admin/settings">General Settings</a>
             <a href="/admin/settings/tts" title="Text-to-Speech settings">Text-to-Speech</a>
-            <a href="/mobile" title="Mobile LWT is a legacy function">Mobile LWT (Deprecated)</a>
         </div>
     </div>
 
@@ -213,7 +212,7 @@ $currentTextInfo = $dashboardData['current_text_info'];
 </div>
 <p>
     This is LWT Version <?php echo get_version(); ?>,
-    <a href="/mobile/start"><?php echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"'); ?></a>.
+    <?php echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"'); ?>.
 </p>
 <br style="clear: both;" />
 <footer>

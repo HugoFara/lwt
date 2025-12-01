@@ -143,12 +143,12 @@ export function initSimpleInteractions(): void {
       break;
 
     case 'show-right-frames':
-      // Show the right frames panel (for mobile layout)
+      // Show the right frames panel
       showRightFrames();
       break;
 
     case 'hide-right-frames':
-      // Hide the right frames panel (for mobile layout)
+      // Hide the right frames panel
       e.preventDefault();
       hideRightFrames();
       break;

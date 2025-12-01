@@ -141,9 +141,6 @@ class SettingsService
         'set-term-translation-delimiters' => [
             "dft" => '/;|', "num" => 0
         ],
-        'set-mobile-display-mode' => [
-            "dft" => '0', "num" => 0
-        ],
         'set-similar-terms-count' => [
             "dft" => '0', "num" => 1, "min" => 0, "max" => 9
         ],
@@ -189,7 +186,6 @@ class SettingsService
         'set-display-text-frame-term-translation',
         'set-text-frame-annotation-position',
         'set-term-translation-delimiters',
-        'set-mobile-display-mode',
         'set-similar-terms-count',
     ];
 

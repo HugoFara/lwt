@@ -86,7 +86,7 @@ class HomeService
         } else {
             $span1 = '<span title="Manage Table Sets" data-action="navigate" data-url="/admin/tables" class="click">';
             if (count(TableSetService::getAllPrefixes()) > 0) {
-                $span3 = '<span title="Select Table Set" data-action="navigate" data-url="/mobile/start" class="click">';
+                $span3 = '<span title="Select Table Set" data-action="navigate" data-url="/admin/tables" class="click">';
             } else {
                 $span3 = '<span>';
             }

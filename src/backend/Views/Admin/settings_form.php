@@ -231,20 +231,6 @@ use Lwt\View\Helper\SelectOptionsBuilder;
     </tr>
     <!-- ******************************************************* -->
     <tr>
-        <th class="th1 center">Frame Set<br />Display Mode</th>
-        <td class="td1 center">Select how frame sets are<br />displayed on different devices</td>
-        <td class="td1 center">
-            <select name="set-mobile-display-mode" class="respinput">
-            <?php echo SelectOptionsBuilder::forMobileDisplayMode($settings['set-mobile-display-mode']); ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
         <th class="th1 center" rowspan="3">Reading</th>
         <td class="td1 center">
             Visit only saved terms with status(es)...<br />

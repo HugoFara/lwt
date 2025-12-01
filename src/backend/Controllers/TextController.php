@@ -20,7 +20,6 @@ use Lwt\Services\TextDisplayService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
-use Lwt\Services\MobileService;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 use Lwt\View\Helper\PageLayoutHelper;
@@ -35,7 +34,6 @@ require_once __DIR__ . '/../Services/TextDisplayService.php';
 require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Services/LanguageDefinitions.php';
-require_once __DIR__ . '/../Services/MobileService.php';
 
 /**
  * Controller for text management and reading interface.
@@ -70,13 +68,6 @@ class TextController extends BaseController
     private LanguageService $languageService;
 
     /**
-     * Mobile service for mobile detection.
-     *
-     * @var MobileService
-     */
-    private MobileService $mobileService;
-
-    /**
      * Constructor - initialize services.
      */
     public function __construct()
@@ -84,7 +75,6 @@ class TextController extends BaseController
         parent::__construct();
         $this->textService = new TextService();
         $this->languageService = new LanguageService();
-        $this->mobileService = new MobileService();
     }
 
     /**
@@ -215,12 +205,8 @@ class TextController extends BaseController
         // Start page
         PageLayoutHelper::renderPageStartNobody('Read', 'full-width');
 
-        // Render appropriate layout
-        if ($this->mobileService->isMobile()) {
-            include __DIR__ . '/../Views/Text/read_mobile.php';
-        } else {
-            include __DIR__ . '/../Views/Text/read_desktop.php';
-        }
+        // Render desktop layout
+        include __DIR__ . '/../Views/Text/read_desktop.php';
 
         PageLayoutHelper::renderPageEnd();
     }

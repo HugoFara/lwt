@@ -387,9 +387,6 @@ VALUES
   );
 INSERT INTO settings
 VALUES
-  ('set-mobile-display-mode', '0');
-INSERT INTO settings
-VALUES
   ('set-similar-terms-count', '0');
 INSERT INTO settings
 VALUES

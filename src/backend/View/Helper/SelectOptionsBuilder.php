@@ -62,24 +62,6 @@ class SelectOptionsBuilder
     }
 
     /**
-     * Build mobile display mode options.
-     *
-     * @param string|null $selected Current mobile type ("0", "1", or "2")
-     *
-     * @return string HTML options string
-     */
-    public static function forMobileDisplayMode(?string $selected = null): string
-    {
-        $selected = $selected ?? '0';
-        $options = [
-            '0' => 'Auto',
-            '1' => 'Force Non-Mobile',
-            '2' => 'Force Mobile'
-        ];
-        return self::buildFromArray($options, $selected);
-    }
-
-    /**
      * Build sentence count selection options.
      *
      * @param int|string|null $selected Currently selected value (default: 1)

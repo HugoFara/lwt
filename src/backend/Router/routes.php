@@ -176,11 +176,6 @@ function registerRoutes(Router $router): void
     // Save setting and redirect
     $router->register('/admin/save-setting', 'AdminController@saveSetting');
 
-    // ==================== MOBILE ROUTES ====================
-
-    $router->register('/mobile', 'MobileController@index');
-    $router->register('/mobile/start', 'MobileController@start');
-
     // ==================== WORDPRESS INTEGRATION ====================
 
     $router->register('/wordpress/start', 'WordPressController@start');

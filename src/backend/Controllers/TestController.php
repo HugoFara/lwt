@@ -19,11 +19,9 @@ use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\TestService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
-use Lwt\Services\MobileService;
 use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Services/TestService.php';
-require_once __DIR__ . '/../Services/MobileService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Services/LanguageDefinitions.php';
 require_once __DIR__ . '/../Services/TextNavigationService.php';
@@ -52,13 +50,11 @@ require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
 class TestController extends BaseController
 {
     private TestService $testService;
-    private MobileService $mobileService;
 
     public function __construct()
     {
         parent::__construct();
         $this->testService = new TestService();
-        $this->mobileService = new MobileService();
     }
 
     /**
@@ -298,52 +294,9 @@ class TestController extends BaseController
     {
         PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
 
-        if ($this->mobileService->isMobile()) {
-            $this->renderMobileTestPage();
-        } else {
-            $this->renderDesktopTestPage();
-        }
+        $this->renderDesktopTestPage();
 
         PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Render mobile test page.
-     *
-     * @return void
-     */
-    private function renderMobileTestPage(): void
-    {
-        $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
-        $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
-        $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-        $sessTestsql = $_SESSION['testsql'] ?? null;
-
-        $language = $this->testService->getL2LanguageName(
-            $langId,
-            $textId,
-            $selection,
-            $sessTestsql
-        );
-
-        echo '<div class="test-container">';
-        echo '<div id="frame-h">';
-        $this->header([]);
-        echo '</div>';
-        echo '<hr />';
-        echo '<div id="frame-l">';
-
-        if ($this->param('type') === 'table') {
-            $this->tableTest([]);
-        } else {
-            $this->renderTestContent();
-        }
-
-        echo '</div>';
-        echo '</div>';
-
-        $this->renderRightFrames();
-        $this->renderAudioElements();
     }
 
     /**
@@ -483,25 +436,6 @@ class TestController extends BaseController
         $startTime = $sessionData['start'];
 
         include __DIR__ . '/../Views/Test/ajax_test_config.php';
-    }
-
-    /**
-     * Render right frames for mobile.
-     *
-     * @return void
-     */
-    private function renderRightFrames(): void
-    {
-        echo '<div id="frames-r" class="test-frames-right-mobile" data-action="hide-right-frames">';
-        echo '<div class="test-frames-mobile-inner">';
-        echo '<iframe src="empty.html" scrolling="auto" name="ro" class="test-iframe">';
-        echo 'Your browser doesn\'t support iFrames, update it!';
-        echo '</iframe>';
-        echo '<iframe src="empty.html" scrolling="auto" name="ru" class="test-iframe">';
-        echo 'Your browser doesn\'t support iFrames, update it!';
-        echo '</iframe>';
-        echo '</div>';
-        echo '</div>';
     }
 
     /**

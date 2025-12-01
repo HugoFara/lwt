@@ -338,13 +338,6 @@ class IntegrationTest extends TestCase
         $this->assertStringContainsString('1.0', $options);
     }
 
-    public function testGetMobileDisplayModeSelectOptions(): void
-    {
-        $options = SelectOptionsBuilder::forMobileDisplayMode('0');
-        $this->assertStringContainsString('<option', $options);
-        $this->assertStringContainsString('selected', $options);
-    }
-
     public function testGetSentenceCountSelectOptions(): void
     {
         $options = SelectOptionsBuilder::forSentenceCount(1);

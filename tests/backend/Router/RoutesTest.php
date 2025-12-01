@@ -115,7 +115,6 @@ class RoutesTest extends TestCase
             ['/index.php/feeds', '/feeds'],
             ['/index.php/feeds/edit', '/feeds/edit'],
             ['/index.php/admin/statistics', '/admin/statistics'],
-            ['/index.php/mobile', '/mobile'],
             ['/index.php/text/read', '/text/read'],
         ];
     }
@@ -292,27 +291,6 @@ class RoutesTest extends TestCase
             'admin settings tts' => ['/admin/settings/tts', 'AdminController@settingsTts'],
             'admin tables' => ['/admin/tables', 'AdminController@tables'],
             'admin server-data' => ['/admin/server-data', 'AdminController@serverData'],
-        ];
-    }
-
-    // ==================== MOBILE ROUTES TESTS ====================
-
-    /**
-     * @dataProvider mobileRoutesProvider
-     */
-    public function testMobileRoutes(string $path, string $expectedHandler): void
-    {
-        $result = $this->simulateRequest($path);
-        $this->assertEquals('handler', $result['type'], "Route {$path} should resolve to handler");
-        $this->assertEquals($expectedHandler, $result['handler']);
-        $this->assertHandlerFileExists($result['handler']);
-    }
-
-    public static function mobileRoutesProvider(): array
-    {
-        return [
-            'mobile index' => ['/mobile', 'MobileController@index'],
-            'mobile start' => ['/mobile/start', 'MobileController@start'],
         ];
     }
 
