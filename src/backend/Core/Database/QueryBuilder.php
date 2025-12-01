@@ -20,7 +20,9 @@ use Lwt\Core\Globals;
 /**
  * Fluent query builder for constructing SQL queries.
  *
- * Usage:
+ * Supports both traditional escaped queries and parameterized prepared statements.
+ *
+ * Usage (Traditional - escaped):
  * ```php
  * // SELECT query
  * $users = QueryBuilder::table('words')
@@ -33,16 +35,31 @@ use Lwt\Core\Globals;
  * // INSERT query
  * $id = QueryBuilder::table('words')
  *     ->insert(['WoText' => 'hello', 'WoLgID' => 1]);
+ * ```
  *
- * // UPDATE query
+ * Usage (Prepared Statements - recommended):
+ * ```php
+ * // SELECT with prepared statement
+ * $users = QueryBuilder::table('words')
+ *     ->select(['WoID', 'WoText'])
+ *     ->where('WoLgID', '=', 1)
+ *     ->orderBy('WoText')
+ *     ->limit(10)
+ *     ->getPrepared();
+ *
+ * // INSERT with prepared statement
+ * $id = QueryBuilder::table('words')
+ *     ->insertPrepared(['WoText' => 'hello', 'WoLgID' => 1]);
+ *
+ * // UPDATE with prepared statement
  * QueryBuilder::table('words')
  *     ->where('WoID', '=', 5)
- *     ->update(['WoStatus' => 2]);
+ *     ->updatePrepared(['WoStatus' => 2]);
  *
- * // DELETE query
+ * // DELETE with prepared statement
  * QueryBuilder::table('words')
  *     ->where('WoID', '=', 5)
- *     ->delete();
+ *     ->deletePrepared();
  * ```
  *
  * @since 3.0.0
@@ -93,6 +110,11 @@ class QueryBuilder
      * @var bool Whether to use DISTINCT
      */
     private bool $distinct = false;
+
+    /**
+     * @var array<int, mixed> Parameters for prepared statements
+     */
+    private array $bindings = [];
 
     /**
      * Create a new query builder instance for a table.
@@ -664,5 +686,304 @@ class QueryBuilder
     public function truncate(): void
     {
         Connection::execute('TRUNCATE TABLE ' . $this->table);
+    }
+
+    // =========================================================================
+    // PREPARED STATEMENT METHODS
+    // =========================================================================
+
+    /**
+     * Get the bindings for prepared statements.
+     *
+     * @return array<int, mixed> The parameter bindings
+     */
+    public function getBindings(): array
+    {
+        return $this->bindings;
+    }
+
+    /**
+     * Reset bindings array.
+     *
+     * @return void
+     */
+    private function resetBindings(): void
+    {
+        $this->bindings = [];
+    }
+
+    /**
+     * Build the SELECT SQL query with placeholders for prepared statements.
+     *
+     * @return string The SQL query with ? placeholders
+     */
+    public function toSqlPrepared(): string
+    {
+        $this->resetBindings();
+
+        $sql = 'SELECT ';
+
+        if ($this->distinct) {
+            $sql .= 'DISTINCT ';
+        }
+
+        $sql .= implode(', ', $this->columns);
+        $sql .= ' FROM ' . $this->table;
+
+        // Add JOINs
+        foreach ($this->joins as $join) {
+            $sql .= ' ' . $join['type'] . ' JOIN ' . $join['table'];
+            $sql .= ' ON ' . $join['first'] . ' ' . $join['operator'] . ' ' . $join['second'];
+        }
+
+        // Add WHERE clauses
+        if (!empty($this->wheres)) {
+            $sql .= ' WHERE ' . $this->compileWheresPrepared();
+        }
+
+        // Add GROUP BY
+        if (!empty($this->groups)) {
+            $sql .= ' GROUP BY ' . implode(', ', $this->groups);
+        }
+
+        // Add ORDER BY
+        if (!empty($this->orders)) {
+            $orderClauses = array_map(
+                fn($order) => $order['column'] . ' ' . $order['direction'],
+                $this->orders
+            );
+            $sql .= ' ORDER BY ' . implode(', ', $orderClauses);
+        }
+
+        // Add LIMIT
+        if ($this->limitValue !== null) {
+            $sql .= ' LIMIT ' . $this->limitValue;
+        }
+
+        // Add OFFSET
+        if ($this->offsetValue !== null) {
+            $sql .= ' OFFSET ' . $this->offsetValue;
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Compile WHERE clauses into SQL with placeholders.
+     *
+     * @return string The WHERE clause SQL with ? placeholders
+     */
+    private function compileWheresPrepared(): string
+    {
+        $sql = '';
+
+        foreach ($this->wheres as $index => $where) {
+            // Add boolean connector (skip for first condition)
+            if ($index > 0) {
+                $sql .= ' ' . $where['boolean'] . ' ';
+            }
+
+            if ($where['operator'] === 'RAW') {
+                $sql .= $where['value'];
+                continue;
+            }
+
+            if (in_array($where['operator'], ['IS NULL', 'IS NOT NULL'])) {
+                $sql .= $where['column'] . ' ' . $where['operator'];
+                continue;
+            }
+
+            if (in_array($where['operator'], ['IN', 'NOT IN'])) {
+                $placeholders = array_fill(0, count($where['value']), '?');
+                $sql .= $where['column'] . ' ' . $where['operator'] . ' (' . implode(', ', $placeholders) . ')';
+                foreach ($where['value'] as $v) {
+                    $this->bindings[] = $v;
+                }
+                continue;
+            }
+
+            $sql .= $where['column'] . ' ' . $where['operator'] . ' ?';
+            $this->bindings[] = $where['value'];
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Execute the query using prepared statements and return all results.
+     *
+     * @return array<int, array<string, mixed>> Array of rows
+     */
+    public function getPrepared(): array
+    {
+        $sql = $this->toSqlPrepared();
+        return Connection::preparedFetchAll($sql, $this->bindings);
+    }
+
+    /**
+     * Execute the query using prepared statements and return the first result.
+     *
+     * @return array<string, mixed>|null The first row or null
+     */
+    public function firstPrepared(): ?array
+    {
+        $this->limit(1);
+        $sql = $this->toSqlPrepared();
+        return Connection::preparedFetchOne($sql, $this->bindings);
+    }
+
+    /**
+     * Execute the query using prepared statements and return a single column value.
+     *
+     * @param string $column The column to retrieve
+     *
+     * @return mixed The value or null
+     */
+    public function valuePrepared(string $column): mixed
+    {
+        $this->select($column);
+        $row = $this->firstPrepared();
+
+        return $row[$column] ?? null;
+    }
+
+    /**
+     * Get the count of matching rows using prepared statements.
+     *
+     * @param string $column The column to count (default: *)
+     *
+     * @return int The count
+     */
+    public function countPrepared(string $column = '*'): int
+    {
+        $this->columns = ["COUNT($column) AS cnt"];
+        $sql = $this->toSqlPrepared();
+        $row = Connection::preparedFetchOne($sql, $this->bindings);
+
+        return (int) ($row['cnt'] ?? 0);
+    }
+
+    /**
+     * Check if any rows exist using prepared statements.
+     *
+     * @return bool True if rows exist
+     */
+    public function existsPrepared(): bool
+    {
+        return $this->countPrepared() > 0;
+    }
+
+    /**
+     * Insert a new row using prepared statement.
+     *
+     * @param array<string, mixed> $data Column => value pairs to insert
+     *
+     * @return int|string The last insert ID
+     */
+    public function insertPrepared(array $data): int|string
+    {
+        $columns = array_keys($data);
+        $placeholders = array_fill(0, count($data), '?');
+        $values = array_values($data);
+
+        $sql = 'INSERT INTO ' . $this->table;
+        $sql .= ' (' . implode(', ', $columns) . ')';
+        $sql .= ' VALUES (' . implode(', ', $placeholders) . ')';
+
+        return Connection::preparedInsert($sql, $values);
+    }
+
+    /**
+     * Insert multiple rows using prepared statement.
+     *
+     * @param array<int, array<string, mixed>> $rows Array of column => value pairs
+     *
+     * @return int Number of inserted rows
+     */
+    public function insertManyPrepared(array $rows): int
+    {
+        if (empty($rows)) {
+            return 0;
+        }
+
+        $columns = array_keys($rows[0]);
+        $placeholderRow = '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
+        $placeholderGroups = array_fill(0, count($rows), $placeholderRow);
+
+        $sql = 'INSERT INTO ' . $this->table;
+        $sql .= ' (' . implode(', ', $columns) . ')';
+        $sql .= ' VALUES ' . implode(', ', $placeholderGroups);
+
+        $params = [];
+        foreach ($rows as $row) {
+            foreach (array_values($row) as $value) {
+                $params[] = $value;
+            }
+        }
+
+        return Connection::preparedExecute($sql, $params);
+    }
+
+    /**
+     * Update matching rows using prepared statement.
+     *
+     * @param array<string, mixed> $data Column => value pairs to update
+     *
+     * @return int Number of affected rows
+     */
+    public function updatePrepared(array $data): int
+    {
+        $this->resetBindings();
+
+        $setClauses = [];
+        $setParams = [];
+        foreach ($data as $column => $value) {
+            $setClauses[] = $column . ' = ?';
+            $setParams[] = $value;
+        }
+
+        $sql = 'UPDATE ' . $this->table;
+        $sql .= ' SET ' . implode(', ', $setClauses);
+
+        if (!empty($this->wheres)) {
+            $sql .= ' WHERE ' . $this->compileWheresPrepared();
+        }
+
+        // Merge SET params with WHERE params
+        $params = array_merge($setParams, $this->bindings);
+
+        return Connection::preparedExecute($sql, $params);
+    }
+
+    /**
+     * Delete matching rows using prepared statement.
+     *
+     * @return int Number of deleted rows
+     */
+    public function deletePrepared(): int
+    {
+        $this->resetBindings();
+
+        $sql = 'DELETE FROM ' . $this->table;
+
+        if (!empty($this->wheres)) {
+            $sql .= ' WHERE ' . $this->compileWheresPrepared();
+        }
+
+        // Add ORDER BY for DELETE (MySQL supports this)
+        if (!empty($this->orders)) {
+            $orderClauses = array_map(
+                fn($order) => $order['column'] . ' ' . $order['direction'],
+                $this->orders
+            );
+            $sql .= ' ORDER BY ' . implode(', ', $orderClauses);
+        }
+
+        // Add LIMIT for DELETE (MySQL supports this)
+        if ($this->limitValue !== null) {
+            $sql .= ' LIMIT ' . $this->limitValue;
+        }
+
+        return Connection::preparedExecute($sql, $this->bindings);
     }
 }

@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-11-30 (strict_types complete, InputValidator implemented)
+**Last Updated:** 2025-12-01 (DI Container and Repository Layer implemented)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -391,7 +391,7 @@ header('Strict-Transport-Security: max-age=31536000');
 **Status:** SUBSTANTIAL PROGRESS
 **Effort:** X-Large (400+ hours) - ONGOING
 
-**Achievements (2025-11-30):**
+**Achievements (2025-12-01):**
 
 - [x] Service Layer Pattern implemented (36 services, 18,571 lines)
 - [x] Controller pattern implemented (14 controllers, 8,223 lines)
@@ -400,32 +400,64 @@ header('Strict-Transport-Security: max-age=31536000');
 - [x] `Globals` class for configuration access
 - [x] `StringUtils` class for string utilities
 - [x] `InputValidator` class for input handling
-- [ ] Repository Pattern NOT implemented
-- [ ] Dependency Injection container NOT implemented
+- [x] **Repository Pattern IMPLEMENTED** (2025-12-01)
+- [x] **Dependency Injection Container IMPLEMENTED** (2025-12-01)
 - [ ] Factory Pattern NOT implemented
 
-**Current Dependency Pattern:**
+**New Architecture Components (2025-12-01):**
+
+```text
+src/backend/Core/
+├── Container/                    # DI Container (NEW)
+│   ├── Container.php             # PSR-11 compliant DI container
+│   ├── ContainerInterface.php    # PSR-11 interface
+│   ├── ContainerException.php    # Container exceptions
+│   ├── NotFoundException.php     # Service not found exception
+│   ├── ServiceProviderInterface.php  # Service provider interface
+│   └── RepositoryServiceProvider.php # Repository registration
+└── Repository/                   # Repository Layer (NEW)
+    ├── RepositoryInterface.php   # Base repository interface
+    ├── AbstractRepository.php    # Base repository with CRUD
+    └── LanguageRepository.php    # Example implementation
+```
+
+**DI Container Features:**
+
+- PSR-11 compliant interface
+- Singleton and factory bindings
+- Auto-wiring via reflection
+- Service aliases
+- Circular dependency detection
+- Service providers for organizing registrations
+
+**Repository Pattern Features:**
+
+- Generic CRUD operations via `RepositoryInterface`
+- Uses prepared statements for security
+- Column mapping for entity <-> database
+- Transaction support
+
+**Usage Example:**
 
 ```php
-// Manual dependency via static classes (current)
-class LanguageService {
-    public function getAllLanguages(): array {
-        $sql = "SELECT * FROM " . Globals::table('languages');
-        return Connection::query($sql);
-    }
-}
+// DI Container
+$container = Container::getInstance();
+$container->singleton(LanguageRepository::class, fn() => new LanguageRepository());
+$repo = $container->get(LanguageRepository::class);
 
-// DI container pattern (not implemented)
-class LanguageService {
-    public function __construct(private Connection $db) {}
-}
+// Repository Pattern
+$repo = new LanguageRepository();
+$language = $repo->find(1);                    // Find by ID
+$languages = $repo->findBy(['name' => 'English']); // Find by criteria
+$repo->save($language);                        // Insert or update
+$repo->delete($language);                      // Delete
 ```
 
 **Remaining Work:**
 
-- [ ] Implement Repository layer for database abstraction
-- [ ] Add PSR-11 DI container
-- [ ] Reduce static method usage
+- [ ] Migrate services to use DI container
+- [ ] Create repositories for other entities (Text, Word, etc.)
+- [ ] Reduce static method usage in existing services
 
 #### 3.2 Database Modernization
 
@@ -583,7 +615,7 @@ class LanguageService {
 - [x] OOP code: 80%+ (achieved via MVC)
 - [ ] Database: 100% InnoDB with foreign keys
 - [ ] Psalm level: 1 (currently level 4 with suppressions)
-- [ ] DI container in use
+- [x] DI container in use (implemented 2025-12-01)
 
 ## Remaining High-Priority Work
 
@@ -595,17 +627,18 @@ class LanguageService {
 
 ### P1 (High)
 
-1. **InputValidator** - Centralized input validation
+1. ~~**InputValidator** - Centralized input validation~~ **DONE**
 2. **Exception Handling** - Custom exception hierarchy
 3. **Database Migration** - MyISAM to InnoDB
 
 ### P2 (Medium)
 
-1. **DI Container** - Replace static dependencies
-2. **Repository Layer** - Abstract database access
+1. ~~**DI Container** - Replace static dependencies~~ **DONE** (2025-12-01)
+2. ~~**Repository Layer** - Abstract database access~~ **DONE** (2025-12-01)
 3. **Type Hints** - Complete coverage + strict_types
 4. **QueryBuilder Adoption** - Reduce direct SQL
 5. **Deprecated Function Migration** - See section below
+6. **Migrate Services to DI** - Wire existing services into container
 
 ## Deprecated Global Functions
 

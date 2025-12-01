@@ -327,6 +327,48 @@ input:required + .icon {
 }
 
 /* ==========================================================================
+   Test Progress Bar (replaces stretched PNG icons)
+   ========================================================================== */
+
+/**
+ * Container for the test progress bar segments.
+ */
+.test-progress-bar {
+  display: inline-flex;
+  height: 10px;
+  border: 1px solid #000;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+/**
+ * Not yet tested segment - yellow.
+ */
+.test-progress-notyet {
+  display: inline-block;
+  height: 10px;
+  background-color: #F5E1A9;
+}
+
+/**
+ * Wrong answers segment - red/pink.
+ */
+.test-progress-wrong {
+  display: inline-block;
+  height: 10px;
+  background-color: #F5B8A9;
+}
+
+/**
+ * Correct answers segment - green.
+ */
+.test-progress-correct {
+  display: inline-block;
+  height: 10px;
+  background-color: #A9F5A9;
+}
+
+/* ==========================================================================
    Print Styles
    ========================================================================== */
 

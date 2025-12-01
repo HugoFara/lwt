@@ -16,6 +16,7 @@
 namespace Lwt\Database;
 
 use Lwt\Core\Globals;
+use Lwt\Database\PreparedStatement;
 
 /**
  * Database connection wrapper providing a clean interface for database operations.
@@ -240,5 +241,108 @@ class Connection
     public static function reset(): void
     {
         self::$instance = null;
+    }
+
+    /**
+     * Create a prepared statement.
+     *
+     * @param string $sql The SQL query with ? placeholders
+     *
+     * @return PreparedStatement The prepared statement wrapper
+     *
+     * @throws \RuntimeException If preparation fails
+     */
+    public static function prepare(string $sql): PreparedStatement
+    {
+        return new PreparedStatement(self::getInstance(), $sql);
+    }
+
+    /**
+     * Execute a parameterized query and return all rows.
+     *
+     * This is a convenience method combining prepare(), bind(), and fetchAll().
+     *
+     * @param string             $sql    The SQL query with ? placeholders
+     * @param array<int, mixed>  $params Parameters to bind (indexed array)
+     *
+     * @return array<int, array<string, mixed>> Array of rows
+     */
+    public static function preparedFetchAll(string $sql, array $params = []): array
+    {
+        $stmt = self::prepare($sql);
+        if (!empty($params)) {
+            $stmt->bindValues($params);
+        }
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Execute a parameterized query and return the first row.
+     *
+     * @param string             $sql    The SQL query with ? placeholders
+     * @param array<int, mixed>  $params Parameters to bind
+     *
+     * @return array<string, mixed>|null The first row or null
+     */
+    public static function preparedFetchOne(string $sql, array $params = []): ?array
+    {
+        $stmt = self::prepare($sql);
+        if (!empty($params)) {
+            $stmt->bindValues($params);
+        }
+        return $stmt->fetchOne();
+    }
+
+    /**
+     * Execute a parameterized query and return a single value.
+     *
+     * @param string             $sql    The SQL query with ? placeholders
+     * @param array<int, mixed>  $params Parameters to bind
+     * @param string             $column Column name to retrieve (default: 'value')
+     *
+     * @return mixed The value or null
+     */
+    public static function preparedFetchValue(string $sql, array $params = [], string $column = 'value'): mixed
+    {
+        $stmt = self::prepare($sql);
+        if (!empty($params)) {
+            $stmt->bindValues($params);
+        }
+        return $stmt->fetchValue($column);
+    }
+
+    /**
+     * Execute a parameterized INSERT/UPDATE/DELETE query.
+     *
+     * @param string             $sql    The SQL query with ? placeholders
+     * @param array<int, mixed>  $params Parameters to bind
+     *
+     * @return int Number of affected rows
+     */
+    public static function preparedExecute(string $sql, array $params = []): int
+    {
+        $stmt = self::prepare($sql);
+        if (!empty($params)) {
+            $stmt->bindValues($params);
+        }
+        return $stmt->execute();
+    }
+
+    /**
+     * Execute a parameterized INSERT and return the insert ID.
+     *
+     * @param string             $sql    The SQL query with ? placeholders
+     * @param array<int, mixed>  $params Parameters to bind
+     *
+     * @return int|string The last insert ID
+     */
+    public static function preparedInsert(string $sql, array $params = []): int|string
+    {
+        $stmt = self::prepare($sql);
+        if (!empty($params)) {
+            $stmt->bindValues($params);
+        }
+        $stmt->execute();
+        return $stmt->insertId();
     }
 }

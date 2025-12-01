@@ -6,7 +6,7 @@
  * - $showAll: int - Whether all words should be shown (0/1)
  * - $showLearning: int - Whether to show translations for learning words (0/1)
  * - $oldShowLearning: int - Previous value of showLearning (0/1)
- * - $waitingIconPath: string - Path to the waiting icon
+ * - $waitingIconPath: string|null - Deprecated, no longer used
  *
  * PHP version 8.1
  *
@@ -18,6 +18,8 @@
 
 namespace Lwt\Views\Text;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <script type="application/json" id="set-mode-config">
 <?php echo json_encode([
@@ -25,7 +27,7 @@ namespace Lwt\Views\Text;
     'showLearning' => (bool)$showLearning
 ]); ?>
 </script>
-<p><span id="waiting"><img src="<?php echo $waitingIconPath; ?>" alt="Please wait" title="Please wait" />&nbsp;&nbsp;Please wait ...</span>
+<p><span id="waiting"><?php echo IconHelper::render('waiting', ['title' => 'Please wait', 'alt' => 'Please wait']); ?>&nbsp;&nbsp;Please wait ...</span>
 
 <?php if ($showAll == 1): ?>
 <b><i>Show All</i></b> is set to <b>ON</b>.

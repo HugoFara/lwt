@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Core\Globals;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Services\FeedService;
@@ -30,25 +30,40 @@ class FeedHandler
      */
     public function getFeedsList(array $feed, int $nfid): array
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        $valuesArr = array();
-        foreach ($feed as $data) {
-            $dTitle = Escaping::toSqlSyntax($data['title']);
-            $dLink = Escaping::toSqlSyntax($data['link']);
-            $dText = Escaping::toSqlSyntax($data['text'] ?? null);
-            $dDesc = Escaping::toSqlSyntax($data['desc']);
-            $dDate = Escaping::toSqlSyntax($data['date']);
-            $dAudio = Escaping::toSqlSyntax($data['audio']);
-            $dFeed = Escaping::toSqlSyntax((string)$nfid);
-            $valuesArr[] = "($dTitle,$dLink,$dText,$dDesc,$dDate,$dAudio,$dFeed)";
+        $tbpref = Globals::getTablePrefix();
+
+        if (empty($feed)) {
+            return [0, 0];
         }
-        $sql = 'INSERT IGNORE INTO ' . $tbpref . 'feedlinks (FlTitle,FlLink,FlText,FlDescription,FlDate,FlAudio,FlNfID)
-        VALUES ' . implode(',', $valuesArr);
-        Connection::query($sql);
-        $importedFeed = mysqli_affected_rows($GLOBALS["DBCONNECTION"]);
-        $nif = count($valuesArr) - $importedFeed;
-        unset($valuesArr);
-        return array($importedFeed, $nif);
+
+        // Build parameterized query with placeholders
+        $placeholderRow = '(?, ?, ?, ?, ?, ?, ?)';
+        $placeholders = array_fill(0, count($feed), $placeholderRow);
+
+        $sql = 'INSERT IGNORE INTO ' . $tbpref . 'feedlinks
+                (FlTitle, FlLink, FlText, FlDescription, FlDate, FlAudio, FlNfID)
+                VALUES ' . implode(', ', $placeholders);
+
+        // Collect all parameters
+        $params = [];
+        foreach ($feed as $data) {
+            $params[] = $data['title'] ?? '';
+            $params[] = $data['link'] ?? '';
+            $params[] = $data['text'] ?? null;
+            $params[] = $data['desc'] ?? '';
+            $params[] = $data['date'] ?? '';
+            $params[] = $data['audio'] ?? '';
+            $params[] = $nfid;
+        }
+
+        $stmt = Connection::prepare($sql);
+        $stmt->bindValues($params);
+        $stmt->execute();
+
+        $importedFeed = $stmt->affectedRows();
+        $nif = count($feed) - $importedFeed;
+
+        return [$importedFeed, $nif];
     }
 
     /**
@@ -64,12 +79,14 @@ class FeedHandler
      */
     public function getFeedResult(int $importedFeed, int $nif, string $nfname, int $nfid, string $nfoptions): string
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        Connection::query(
-            'UPDATE ' . $tbpref . 'newsfeeds
-            SET NfUpdate="' . time() . '"
-            WHERE NfID=' . $nfid
+        $tbpref = Globals::getTablePrefix();
+
+        // Update feed timestamp using prepared statement
+        Connection::preparedExecute(
+            "UPDATE {$tbpref}newsfeeds SET NfUpdate = ? WHERE NfID = ?",
+            [time(), $nfid]
         );
+
         $nfMaxLinks = $this->feedService->getNfOption($nfoptions, 'max_links');
         if (!$nfMaxLinks) {
             if ($this->feedService->getNfOption($nfoptions, 'article_source')) {
@@ -78,6 +95,7 @@ class FeedHandler
                 $nfMaxLinks = Settings::getWithDefault('set-max-articles-without-text');
             }
         }
+
         $msg = $nfname . ": ";
         if (!$importedFeed) {
             $msg .= "no";
@@ -94,19 +112,20 @@ class FeedHandler
         } elseif ($nif == 1) {
             $msg .= ", $nif dublicated article";
         }
-        $result = Connection::query(
-            "SELECT COUNT(*) AS total
-            FROM " . $tbpref . "feedlinks
-            WHERE FlNfID IN (" . $nfid . ")"
+
+        // Count total feedlinks using prepared statement
+        $row = Connection::preparedFetchOne(
+            "SELECT COUNT(*) AS total FROM {$tbpref}feedlinks WHERE FlNfID = ?",
+            [$nfid]
         );
-        $row = mysqli_fetch_assoc($result);
-        $to = ($row['total'] - $nfMaxLinks);
+
+        $to = ((int)$row['total'] - $nfMaxLinks);
         if ($to > 0) {
             QueryBuilder::table('feedlinks')
                 ->whereIn('FlNfID', [$nfid])
                 ->orderBy('FlDate', 'ASC')
                 ->limit($to)
-                ->delete();
+                ->deletePrepared();
             $msg .= ", $to old article(s) deleted";
         }
         return $msg;

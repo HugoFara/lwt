@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Services\TestService;
 use Lwt\Services\WordStatusService;
@@ -231,11 +232,12 @@ class ReviewHandler
      */
     public function updateReviewStatus(int $wordId, ?int $status, ?int $change): array
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
 
-        // Get current status
-        $currentStatus = Connection::fetchValue(
-            "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoID = $wordId"
+        // Get current status using prepared statement
+        $currentStatus = Connection::preparedFetchValue(
+            "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoID = ?",
+            [$wordId]
         );
 
         if ($currentStatus === null) {
@@ -274,16 +276,16 @@ class ReviewHandler
             return ['error' => 'Must provide either status or change'];
         }
 
-        // Update the status
-        $result = Connection::execute(
+        // Update the status using prepared statement
+        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $result = Connection::preparedExecute(
             "UPDATE {$tbpref}words
-             SET WoStatus = $newStatus, WoStatusChanged = NOW(), " .
-            WordStatusService::makeScoreRandomInsertUpdate('u') . "
-             WHERE WoID = $wordId",
-            ''
+             SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
+             WHERE WoID = ?",
+            [$newStatus, $wordId]
         );
 
-        if (!is_numeric($result) || (int)$result !== 1) {
+        if ($result !== 1) {
             return ['error' => 'Failed to update status'];
         }
 

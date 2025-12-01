@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
@@ -29,40 +30,41 @@ class TermHandler
      * @param int    $lang Language ID
      * @param string $data Translation
      *
-     * @return array{0: int, 1: string}|string [new word ID, lowercase $text] if success, error message otherwise
+     * @return array{0: int|string, 1: string}|string [new word ID, lowercase $text] if success, error message otherwise
      */
     public function addNewTermTranslation(string $text, int $lang, string $data): array|string
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
         $textlc = mb_strtolower($text, 'UTF-8');
-        $dummy = Connection::execute(
-            "INSERT INTO {$tbpref}words (
+
+        // Insert new word using prepared statement
+        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+
+        $sql = "INSERT INTO {$tbpref}words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
                 WoSentence, WoRomanization, WoStatusChanged,
-                " . WordStatusService::makeScoreRandomInsertUpdate('iv') . '
-            ) VALUES( ' .
-            $lang . ', ' .
-            Escaping::toSqlSyntax($textlc) . ', ' .
-            Escaping::toSqlSyntax($text) . ', 1, ' .
-            Escaping::toSqlSyntax($data) . ', ' .
-            Escaping::toSqlSyntax('') . ', ' .
-            Escaping::toSqlSyntax('') . ', NOW(), ' .
-            WordStatusService::makeScoreRandomInsertUpdate('id') . ')',
-            ""
-        );
-        if (!is_numeric($dummy)) {
-            return $dummy;
+                {$scoreColumns}
+            ) VALUES(?, ?, ?, 1, ?, ?, ?, NOW(), {$scoreValues})";
+
+        $stmt = Connection::prepare($sql);
+        $stmt->bind('isssss', $lang, $textlc, $text, $data, '', '');
+        $affected = $stmt->execute();
+
+        if ($affected != 1) {
+            return "Error: $affected rows affected, expected 1!";
         }
-        if ((int)$dummy != 1) {
-            return "Error: $dummy rows affected, expected 1!";
-        }
-        $wid = Connection::lastInsertId();
-        Connection::query(
+
+        $wid = $stmt->insertId();
+
+        // Update text items using prepared statement
+        Connection::preparedExecute(
             "UPDATE {$tbpref}textitems2
-            SET Ti2WoID = $wid
-            WHERE Ti2LgID = $lang AND LOWER(Ti2Text) = " .
-            Escaping::toSqlSyntaxNoTrimNoNull($textlc)
+            SET Ti2WoID = ?
+            WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
+            [$wid, $lang, $textlc]
         );
+
         return array($wid, $textlc);
     }
 
@@ -76,19 +78,18 @@ class TermHandler
      */
     public function editTermTranslation(int $wid, string $newTrans): string
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        $oldtrans = (string) Connection::fetchValue(
-            "SELECT WoTranslation AS value
-            FROM {$tbpref}words
-            WHERE WoID = $wid"
+        $tbpref = Globals::getTablePrefix();
+
+        $oldtrans = (string) Connection::preparedFetchValue(
+            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoID = ?",
+            [$wid]
         );
 
         $oldtransarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $oldtrans);
         if ($oldtransarr === false) {
-            return (string)Connection::fetchValue(
-                "SELECT WoTextLC AS value
-                FROM {$tbpref}words
-                WHERE WoID = $wid"
+            return (string) Connection::preparedFetchValue(
+                "SELECT WoTextLC AS value FROM {$tbpref}words WHERE WoID = ?",
+                [$wid]
             );
         }
         array_walk($oldtransarr, '\trim_value');
@@ -99,17 +100,15 @@ class TermHandler
             } else {
                 $oldtrans .= ' ' . \get_first_sepa() . ' ' . $newTrans;
             }
-            Connection::execute(
-                "UPDATE {$tbpref}words
-                SET WoTranslation = " . Escaping::toSqlSyntax($oldtrans) .
-                " WHERE WoID = $wid",
-                ""
+            Connection::preparedExecute(
+                "UPDATE {$tbpref}words SET WoTranslation = ? WHERE WoID = ?",
+                [$oldtrans, $wid]
             );
         }
-        return (string)Connection::fetchValue(
-            "SELECT WoTextLC AS value
-            FROM {$tbpref}words
-            WHERE WoID = $wid"
+
+        return (string) Connection::preparedFetchValue(
+            "SELECT WoTextLC AS value FROM {$tbpref}words WHERE WoID = ?",
+            [$wid]
         );
     }
 
@@ -123,12 +122,13 @@ class TermHandler
      */
     public function checkUpdateTranslation(int $wid, string $newTrans): string
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        $cntWords = (int)Connection::fetchValue(
-            "SELECT COUNT(WoID) AS value
-            FROM {$tbpref}words
-            WHERE WoID = $wid"
+        $tbpref = Globals::getTablePrefix();
+
+        $cntWords = (int) Connection::preparedFetchValue(
+            "SELECT COUNT(WoID) AS value FROM {$tbpref}words WHERE WoID = ?",
+            [$wid]
         );
+
         if ($cntWords == 1) {
             return $this->editTermTranslation($wid, $newTrans);
         }
@@ -141,18 +141,19 @@ class TermHandler
      * @param int $wid    ID of the word to edit
      * @param int $status New status to set
      *
-     * @return int|string Number of affected rows or error message
+     * @return int Number of affected rows
      */
-    public function setWordStatus(int $wid, int $status): int|string
+    public function setWordStatus(int $wid, int $status): int
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        $m1 = Connection::execute(
+        $tbpref = Globals::getTablePrefix();
+        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+
+        return Connection::preparedExecute(
             "UPDATE {$tbpref}words
-            SET WoStatus = $status, WoStatusChanged = NOW()," .
-            WordStatusService::makeScoreRandomInsertUpdate('u') . "
-            WHERE WoID = $wid"
+            SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
+            WHERE WoID = ?",
+            [$status, $wid]
         );
-        return $m1;
     }
 
     /**
@@ -194,12 +195,14 @@ class TermHandler
      */
     public function updateWordStatus(int $wid, int $currstatus): ?string
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
+
         if (($currstatus >= 1 && $currstatus <= 5) || $currstatus == 99 || $currstatus == 98) {
-            $m1 = (int)$this->setWordStatus($wid, $currstatus);
+            $m1 = $this->setWordStatus($wid, $currstatus);
             if ($m1 == 1) {
-                $currstatus = Connection::fetchValue(
-                    "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoID = $wid"
+                $currstatus = Connection::preparedFetchValue(
+                    "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoID = ?",
+                    [$wid]
                 );
                 if (!isset($currstatus)) {
                     return null;
@@ -220,18 +223,20 @@ class TermHandler
      */
     public function incrementTermStatus(int $wid, bool $up): string
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
 
-        $tempstatus = Connection::fetchValue(
-            "SELECT WoStatus as value
-            FROM {$tbpref}words
-            WHERE WoID = $wid"
+        $tempstatus = Connection::preparedFetchValue(
+            "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoID = ?",
+            [$wid]
         );
+
         if (!isset($tempstatus)) {
             return '';
         }
+
         $currstatus = $this->getNewStatus((int)$tempstatus, $up);
         $formatted = $this->updateWordStatus($wid, $currstatus);
+
         if ($formatted === null) {
             return '';
         }
@@ -266,7 +271,7 @@ class TermHandler
      * @param int    $lgId        Language ID
      * @param string $translation Translation
      *
-     * @return array{error?: string, add?: string, term_id?: int, term_lc?: string}
+     * @return array{error?: string, add?: string, term_id?: int|string, term_lc?: string}
      */
     public function formatAddTranslation(string $termText, int $lgId, string $translation): array
     {
@@ -307,15 +312,12 @@ class TermHandler
      * @param int $termId Term ID
      * @param int $status New status
      *
-     * @return array{error?: string, set?: int}
+     * @return array{set: int}
      */
     public function formatSetStatus(int $termId, int $status): array
     {
         $result = $this->setWordStatus($termId, $status);
-        if (is_numeric($result)) {
-            return ["set" => (int)$result];
-        }
-        return ["error" => $result];
+        return ["set" => $result];
     }
 
     // =========================================================================
@@ -331,11 +333,12 @@ class TermHandler
      */
     public function deleteTerm(int $termId): array
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
 
         // Check if term exists
-        $exists = Connection::fetchValue(
-            "SELECT COUNT(WoID) AS value FROM {$tbpref}words WHERE WoID = $termId"
+        $exists = Connection::preparedFetchValue(
+            "SELECT COUNT(WoID) AS value FROM {$tbpref}words WHERE WoID = ?",
+            [$termId]
         );
 
         if ((int)$exists === 0) {
@@ -343,8 +346,9 @@ class TermHandler
         }
 
         // Get word count to determine if multi-word
-        $wordCount = (int)Connection::fetchValue(
-            "SELECT WoWordCount AS value FROM {$tbpref}words WHERE WoID = $termId"
+        $wordCount = (int) Connection::preparedFetchValue(
+            "SELECT WoWordCount AS value FROM {$tbpref}words WHERE WoID = ?",
+            [$termId]
         );
 
         if ($wordCount > 1) {
@@ -419,11 +423,12 @@ class TermHandler
      */
     public function getTerm(int $termId): array
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $tbpref = Globals::getTablePrefix();
 
-        $record = Connection::fetchOne(
+        $record = Connection::preparedFetchOne(
             "SELECT WoID, WoText, WoTextLC, WoTranslation, WoRomanization, WoStatus, WoLgID
-             FROM {$tbpref}words WHERE WoID = $termId"
+             FROM {$tbpref}words WHERE WoID = ?",
+            [$termId]
         );
 
         if ($record === null) {

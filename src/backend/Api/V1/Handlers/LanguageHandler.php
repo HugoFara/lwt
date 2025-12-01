@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
@@ -34,12 +35,14 @@ class LanguageHandler
      */
     public function getReadingConfiguration(int $langId): array
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        $req = Connection::query(
-            "SELECT LgName, LgTTSVoiceAPI, LgRegexpWordCharacters FROM {$tbpref}languages
-            WHERE LgID = " . $langId
+        $tbpref = Globals::getTablePrefix();
+
+        $record = Connection::preparedFetchOne(
+            "SELECT LgName, LgTTSVoiceAPI, LgRegexpWordCharacters
+             FROM {$tbpref}languages WHERE LgID = ?",
+            [$langId]
         );
-        $record = mysqli_fetch_assoc($req);
+
         $abbr = $this->languageService->getLanguageCode($langId, LanguageDefinitions::getAll());
 
         if ($record["LgTTSVoiceAPI"] != '') {

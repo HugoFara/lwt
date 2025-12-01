@@ -38,6 +38,7 @@ require_once __DIR__ . '/../Utils/error_handling.php';
 
 // Database classes
 require_once __DIR__ . '/EnvLoader.php';
+require_once __DIR__ . '/../Database/PreparedStatement.php';
 require_once __DIR__ . '/../Database/Connection.php';
 require_once __DIR__ . '/../Database/QueryBuilder.php';
 require_once __DIR__ . '/../Database/DB.php';

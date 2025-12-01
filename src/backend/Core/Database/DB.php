@@ -15,6 +15,8 @@
 
 namespace Lwt\Database;
 
+use Lwt\Database\PreparedStatement;
+
 /**
  * Database facade providing a simplified interface for common operations.
  *
@@ -209,5 +211,83 @@ class DB
     public static function rollback(): bool
     {
         return mysqli_rollback(Connection::getInstance());
+    }
+
+    /**
+     * Create a prepared statement.
+     *
+     * @param string $sql The SQL query with ? placeholders
+     *
+     * @return PreparedStatement The prepared statement wrapper
+     */
+    public static function prepare(string $sql): PreparedStatement
+    {
+        return Connection::prepare($sql);
+    }
+
+    /**
+     * Execute a parameterized query and return all rows.
+     *
+     * @param string             $sql    The SQL query with ? placeholders
+     * @param array<int, mixed>  $params Parameters to bind
+     *
+     * @return array<int, array<string, mixed>> Array of rows
+     */
+    public static function preparedFetchAll(string $sql, array $params = []): array
+    {
+        return Connection::preparedFetchAll($sql, $params);
+    }
+
+    /**
+     * Execute a parameterized query and return the first row.
+     *
+     * @param string             $sql    The SQL query with ? placeholders
+     * @param array<int, mixed>  $params Parameters to bind
+     *
+     * @return array<string, mixed>|null The first row or null
+     */
+    public static function preparedFetchOne(string $sql, array $params = []): ?array
+    {
+        return Connection::preparedFetchOne($sql, $params);
+    }
+
+    /**
+     * Execute a parameterized query and return a single value.
+     *
+     * @param string             $sql    The SQL query with ? placeholders
+     * @param array<int, mixed>  $params Parameters to bind
+     * @param string             $column Column name to retrieve
+     *
+     * @return mixed The value or null
+     */
+    public static function preparedFetchValue(string $sql, array $params = [], string $column = 'value'): mixed
+    {
+        return Connection::preparedFetchValue($sql, $params, $column);
+    }
+
+    /**
+     * Execute a parameterized INSERT/UPDATE/DELETE query.
+     *
+     * @param string             $sql    The SQL query with ? placeholders
+     * @param array<int, mixed>  $params Parameters to bind
+     *
+     * @return int Number of affected rows
+     */
+    public static function preparedExecute(string $sql, array $params = []): int
+    {
+        return Connection::preparedExecute($sql, $params);
+    }
+
+    /**
+     * Execute a parameterized INSERT and return the insert ID.
+     *
+     * @param string             $sql    The SQL query with ? placeholders
+     * @param array<int, mixed>  $params Parameters to bind
+     *
+     * @return int|string The last insert ID
+     */
+    public static function preparedInsert(string $sql, array $params = []): int|string
+    {
+        return Connection::preparedInsert($sql, $params);
     }
 }

@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Core\Globals;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Services\WordService;
 
@@ -31,12 +31,10 @@ class TextHandler
      */
     public function saveTextPosition(int $textid, int $position): void
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        Connection::execute(
-            "UPDATE {$tbpref}texts
-            SET TxPosition = $position
-            WHERE TxID = $textid",
-            ""
+        $tbpref = Globals::getTablePrefix();
+        Connection::preparedExecute(
+            "UPDATE {$tbpref}texts SET TxPosition = ? WHERE TxID = ?",
+            [$position, $textid]
         );
     }
 
@@ -50,12 +48,10 @@ class TextHandler
      */
     public function saveAudioPosition(int $textid, int $audioposition): void
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        Connection::execute(
-            "UPDATE {$tbpref}texts
-            SET TxAudioPosition = $audioposition
-            WHERE TxID = $textid",
-            ""
+        $tbpref = Globals::getTablePrefix();
+        Connection::preparedExecute(
+            "UPDATE {$tbpref}texts SET TxAudioPosition = ? WHERE TxID = ?",
+            [$audioposition, $textid]
         );
     }
 
@@ -70,17 +66,19 @@ class TextHandler
      */
     public function saveImprTextData(int $textid, int $line, string $val): string
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        $ann = (string) Connection::fetchValue(
-            "SELECT TxAnnotatedText AS value
-            FROM {$tbpref}texts
-            WHERE TxID = $textid"
+        $tbpref = Globals::getTablePrefix();
+
+        $ann = (string) Connection::preparedFetchValue(
+            "SELECT TxAnnotatedText AS value FROM {$tbpref}texts WHERE TxID = ?",
+            [$textid]
         );
+
         $items = preg_split('/[\n]/u', $ann);
         if (count($items) <= $line) {
             return "Unreachable translation: line request is $line, but only " .
             count($items) . " translations were found";
         }
+
         $vals = preg_split('/[\t]/u', $items[$line]);
         if ((int)$vals[0] <= -1) {
             return "Term is punctation! Term position is {$vals[0]}";
@@ -88,14 +86,14 @@ class TextHandler
         if (count($vals) < 4) {
             return "Not enough columns: " . count($vals);
         }
+
         $items[$line] = implode("\t", array($vals[0], $vals[1], $vals[2], $val));
-        Connection::execute(
-            "UPDATE {$tbpref}texts
-            SET TxAnnotatedText = " .
-            Escaping::toSqlSyntax(implode("\n", $items)) . "
-            WHERE TxID = $textid",
-            ""
+
+        Connection::preparedExecute(
+            "UPDATE {$tbpref}texts SET TxAnnotatedText = ? WHERE TxID = ?",
+            [implode("\n", $items), $textid]
         );
+
         return "OK";
     }
 
@@ -188,10 +186,12 @@ class TextHandler
      */
     public function setDisplayMode(int $textId, ?int $annotations, ?bool $romanization, ?bool $translation): array
     {
+        $tbpref = Globals::getTablePrefix();
+
         // Validate text exists
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        $exists = Connection::fetchValue(
-            "SELECT COUNT(TxID) AS value FROM {$tbpref}texts WHERE TxID = $textId"
+        $exists = Connection::preparedFetchValue(
+            "SELECT COUNT(TxID) AS value FROM {$tbpref}texts WHERE TxID = ?",
+            [$textId]
         );
 
         if ((int)$exists === 0) {

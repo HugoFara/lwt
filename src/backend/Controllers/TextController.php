@@ -862,7 +862,7 @@ class TextController extends BaseController
         // Display result page
         PageLayoutHelper::renderPageStart("Text Display Mode changed", false);
 
-        $waitingIconPath = \get_file_path('assets/icons/waiting.gif');
+        $waitingIconPath = null; // Using Lucide icon instead
         flush();
 
         include __DIR__ . '/../Views/Text/set_mode_result.php';

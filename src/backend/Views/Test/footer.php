@@ -32,19 +32,16 @@ $lCorrect = round($correct / $divisor, 0);
         <?php echo IconHelper::render('clock', ['title' => 'Elapsed Time', 'alt' => 'Elapsed Time']); ?>
         <span id="timer" title="Elapsed Time"></span>
     </span>
-    <span class="test-footer-stat">
-        <img id="not-tested-box" class="borderl"
-            src="<?php echo \get_file_path('icn/test_notyet.png'); ?>"
-            title="Not yet tested" alt="Not yet tested" height="10"
-            width="<?php echo $lRemaining; ?>" /><img
-            id="wrong-tests-box" class="bordermiddle"
-            src="<?php echo \get_file_path('icn/test_wrong.png'); ?>"
-            title="Wrong" alt="Wrong" height="10"
-            width="<?php echo $lWrong; ?>" /><img
-            id="correct-tests-box" class="borderr"
-            src="<?php echo \get_file_path('icn/test_correct.png'); ?>"
-            title="Correct" alt="Correct" height="10"
-            width="<?php echo $lCorrect; ?>" />
+    <span class="test-footer-stat test-progress-bar">
+        <span id="not-tested-box" class="test-progress-notyet"
+            title="Not yet tested"
+            style="width:<?php echo $lRemaining; ?>px"></span><span
+            id="wrong-tests-box" class="test-progress-wrong"
+            title="Wrong"
+            style="width:<?php echo $lWrong; ?>px"></span><span
+            id="correct-tests-box" class="test-progress-correct"
+            title="Correct"
+            style="width:<?php echo $lCorrect; ?>px"></span>
     </span>
     <span class="test-footer-stat">
         <span title="Total number of tests" id="total_tests"><?php echo $total; ?></span>
