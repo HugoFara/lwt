@@ -6,22 +6,15 @@
  * @since   1.6.16-fork
  */
 
-// Extend JQuery interface for get_adv_xpath
-declare global {
-  interface JQuery {
-    get_adv_xpath(): void;
-  }
-}
-
 /**
- * Execute an XPath expression and return matching elements as a jQuery object.
+ * Execute an XPath expression and return matching elements as an array.
  * Supports pipe-separated multiple expressions (e.g., "//div | //span").
  *
  * @param expression - XPath expression to evaluate
  * @param context - Context node for evaluation (defaults to document)
- * @returns jQuery object containing matched elements
+ * @returns Array of matched HTMLElements
  */
-function xpathQuery(expression: string, context: Node = document): JQuery<HTMLElement> {
+function xpathQuery(expression: string, context: Node = document): HTMLElement[] {
   const results: HTMLElement[] = [];
 
   // Handle pipe-separated expressions (e.g., "//div[@id='x'] | //p[@class='y']")
@@ -47,7 +40,7 @@ function xpathQuery(expression: string, context: Node = document): JQuery<HTMLEl
     }
   }
 
-  return $(results);
+  return results;
 }
 
 /**
@@ -69,8 +62,8 @@ function isValidXPath(expression: string): boolean {
 }
 
 // Export functions to window for use in PHP views
-(window as any).xpathQuery = xpathQuery;
-(window as any).isValidXPath = isValidXPath;
+(window as unknown as { xpathQuery: typeof xpathQuery }).xpathQuery = xpathQuery;
+(window as unknown as { isValidXPath: typeof isValidXPath }).isValidXPath = isValidXPath;
 
 // Declare global filter_Array that may be set externally
 declare const filter_Array: HTMLElement[];
@@ -83,236 +76,492 @@ interface LwtForm1 extends HTMLFormElement {
 declare const lwt_form1: LwtForm1;
 
 /**
- * To be added to jQuery $.fn.get_adv_xpath, makes various unknown things.
+ * Helper: Add class to element
  */
-export function extend_adv_xpath(this: JQuery): void {
-  $('#adv')
-    .prepend(
-      '<p style="text-align: left;">' +
-        '<input style="vertical-align: middle; margin: 2px;" class="xpath" ' +
-        'type="radio" name="xpath" value=\'\'>' +
-          'custom: ' +
-          '<input type="text" id="custom_xpath" name="custom_xpath" ' +
-          'style="width:70%" ' +
-          'onkeyup="var val=$(\'#custom_xpath\').val();var valid=isValidXPath(val)&&xpathQuery(val).length>0;if(!valid){$(this).parent().find(\'.xpath\').val(\'\');if($(this).parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', true);$(\'#custom_img\').attr(\'src\',\'icn/exclamation-red.png\');}else{$(this).parent().find(\'.xpath\').val(val);if($(this).parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', false);$(\'#custom_img\').attr(\'src\',\'icn/tick.png\');}return false;" onpaste="setTimeout(function(){var val=$(\'#custom_xpath\').val();var valid=isValidXPath(val)&&xpathQuery(val).length>0;if(!valid){$(\'#custom_xpath\').parent().find(\'.xpath\').val(\'\');if($(\'#custom_xpath\').parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', true);$(\'#custom_img\').attr(\'src\',\'icn/exclamation-red.png\');}else{$(\'#custom_xpath\').parent().find(\'.xpath\').val(val);if($(\'#custom_xpath\').parent().find(\':radio\').is(\':checked\'))$(\'#adv_get_button\').prop(\'disabled\', false);$(\'#custom_img\').attr(\'src\',\'icn/tick.png\');}}, 0);" value=\'\'>' +
-          '</input>' +
-        '<img id="custom_img" src="icn/exclamation-red.png" alt="-" />' +
+function addClass(el: Element, className: string): void {
+  el.classList.add(className);
+}
+
+/**
+ * Helper: Remove class from element
+ */
+function removeClass(el: Element, className: string): void {
+  el.classList.remove(className);
+}
+
+/**
+ * Helper: Check if element has class
+ */
+function hasClass(el: Element, className: string): boolean {
+  return el.classList.contains(className);
+}
+
+/**
+ * Helper: Remove class from all elements matching selector
+ */
+function removeClassAll(selector: string, className: string): void {
+  document.querySelectorAll(selector).forEach(el => removeClass(el, className));
+}
+
+/**
+ * Helper: Add class to all elements matching selector
+ */
+function addClassAll(selector: string, className: string): void {
+  document.querySelectorAll(selector).forEach(el => addClass(el, className));
+}
+
+/**
+ * Helper: Remove empty class attributes
+ */
+function removeEmptyClassAttrs(): void {
+  document.querySelectorAll('[class=""]').forEach(el => el.removeAttribute('class'));
+}
+
+/**
+ * Helper: Remove empty style attributes
+ */
+function removeEmptyStyleAttrs(): void {
+  document.querySelectorAll('[style=""]').forEach(el => el.removeAttribute('style'));
+}
+
+/**
+ * Helper: Get element by ID
+ */
+function getById(id: string): HTMLElement | null {
+  return document.getElementById(id);
+}
+
+/**
+ * Helper: Query selector
+ */
+function qs<T extends Element = Element>(selector: string, context: Element | Document = document): T | null {
+  return context.querySelector(selector) as T | null;
+}
+
+/**
+ * Helper: Query selector all
+ */
+function qsa<T extends Element = Element>(selector: string, context: Element | Document = document): NodeListOf<T> {
+  return context.querySelectorAll(selector) as NodeListOf<T>;
+}
+
+/**
+ * Helper: Set disabled property on element
+ */
+function setDisabled(el: HTMLButtonElement | HTMLInputElement | null, disabled: boolean): void {
+  if (el) el.disabled = disabled;
+}
+
+/**
+ * Helper: Get input value
+ */
+function getInputValue(selector: string): string {
+  const el = qs<HTMLInputElement | HTMLSelectElement>(selector);
+  return el?.value ?? '';
+}
+
+/**
+ * Helper: Set input value
+ */
+function setInputValue(selector: string, value: string): void {
+  const el = qs<HTMLInputElement | HTMLSelectElement>(selector);
+  if (el) el.value = value;
+}
+
+/**
+ * Helper: Get all parent elements (excluding html and body)
+ */
+function getParents(el: Element): HTMLElement[] {
+  const parents: HTMLElement[] = [];
+  let current = el.parentElement;
+  while (current && current !== document.body && current !== document.documentElement) {
+    parents.push(current);
+    current = current.parentElement;
+  }
+  return parents;
+}
+
+/**
+ * Helper: Get all ancestors and self
+ */
+function getAncestorsAndSelf(el: Element): HTMLElement[] {
+  const result: HTMLElement[] = [];
+  if (el instanceof HTMLElement) result.push(el);
+  let current = el.parentElement;
+  while (current && current !== document.body && current !== document.documentElement) {
+    result.push(current);
+    current = current.parentElement;
+  }
+  return result;
+}
+
+/**
+ * Helper: Prepend HTML to element
+ */
+function prependHtml(el: Element | null, html: string): void {
+  if (el) el.insertAdjacentHTML('afterbegin', html);
+}
+
+/**
+ * Helper: Append HTML to element
+ */
+function appendHtml(el: Element | null, html: string): void {
+  if (el) el.insertAdjacentHTML('beforeend', html);
+}
+
+/**
+ * Helper: Get all descendants and self
+ */
+function getDescendantsAndSelf(el: Element): HTMLElement[] {
+  const result: HTMLElement[] = [];
+  if (el instanceof HTMLElement) result.push(el);
+  el.querySelectorAll('*').forEach(child => {
+    if (child instanceof HTMLElement) result.push(child);
+  });
+  return result;
+}
+
+/**
+ * Helper: Filter elements not matching selector or not in a set
+ */
+function filterNot(elements: HTMLElement[], excludeSelector: string): HTMLElement[] {
+  return elements.filter(el => !el.matches(excludeSelector));
+}
+
+/**
+ * Helper: Get elements excluding those within a container
+ */
+function excludeWithinContainer(elements: HTMLElement[], container: Element | null): HTMLElement[] {
+  if (!container) return elements;
+  const containerDescendants = new Set(getDescendantsAndSelf(container));
+  return elements.filter(el => !containerDescendants.has(el));
+}
+
+/**
+ * To be added to extend advanced xpath functionality.
+ * Creates radio button options for XPath selection.
+ */
+export function extend_adv_xpath(el: HTMLElement): void {
+  const advEl = getById('adv');
+  if (!advEl) return;
+
+  // Prepend custom XPath input
+  prependHtml(advEl,
+    '<p style="text-align: left;">' +
+      '<input style="vertical-align: middle; margin: 2px;" class="xpath" ' +
+      'type="radio" name="xpath" value=\'\'>' +
+        'custom: ' +
+        '<input type="text" id="custom_xpath" name="custom_xpath" ' +
+        'style="width:70%" value=\'\'>' +
         '</input>' +
-      '</p>'
-    );
-  $('#adv').show();
-  $('*').removeClass('lwt_marked_text');
-  $('*[class=\'\']').removeAttr('class');
-  const el = this[0];
-  const selectedData = $('#mark_action :selected').data() as { tagName?: string } | undefined;
-  const val1 = selectedData?.tagName?.toLowerCase() ?? '';
+      '<img id="custom_img" src="icn/exclamation-red.png" alt="-" />' +
+      '</input>' +
+    '</p>'
+  );
+
+  // Add event listeners for custom xpath input
+  const customXpathInput = getById('custom_xpath') as HTMLInputElement | null;
+  if (customXpathInput) {
+    const validateCustomXpath = (): void => {
+      const val = customXpathInput.value;
+      const valid = isValidXPath(val) && xpathQuery(val).length > 0;
+      const parentP = customXpathInput.closest('p');
+      const xpathRadio = parentP?.querySelector<HTMLInputElement>('.xpath');
+      const advGetButton = getById('adv_get_button') as HTMLButtonElement | null;
+      const customImg = getById('custom_img') as HTMLImageElement | null;
+
+      if (!valid) {
+        if (xpathRadio) xpathRadio.value = '';
+        if (parentP?.querySelector<HTMLInputElement>(':checked')) {
+          setDisabled(advGetButton, true);
+        }
+        if (customImg) customImg.src = 'icn/exclamation-red.png';
+      } else {
+        if (xpathRadio) xpathRadio.value = val;
+        if (parentP?.querySelector<HTMLInputElement>(':checked')) {
+          setDisabled(advGetButton, false);
+        }
+        if (customImg) customImg.src = 'icn/tick.png';
+      }
+    };
+
+    customXpathInput.addEventListener('keyup', validateCustomXpath);
+    customXpathInput.addEventListener('paste', () => setTimeout(validateCustomXpath, 0));
+  }
+
+  advEl.style.display = '';
+  removeClassAll('*', 'lwt_marked_text');
+  removeEmptyClassAttrs();
+
+  const markActionSelect = getById('mark_action') as HTMLSelectElement | null;
+  const selectedOption = markActionSelect?.selectedOptions[0];
+  const val1 = (selectedOption?.dataset?.tagName || '').toLowerCase();
+
   let node_count = 0;
   let attr_v = '';
   let attr_p = '';
   let val_p = '';
   const attrs = el.attributes;
-  for (let i = 0, l = attrs.length; i < l; i++) {
-    if (attrs.item(i)!.nodeName === 'id') {
-      const id_cont = attrs.item(i)!.nodeValue!.split(' ');
-      for (let z = 0; z < id_cont.length; z++) {
-        const val = '//*[@id[contains(concat(" ",normalize-space(.)," ")," ' + id_cont[z] + ' ")]]';
-        $('#adv')
-          .prepend(
-            '<p style="text-align: left;">' +
-              '<input style="vertical-align: middle; margin: 2px;" ' +
-              'class="xpath" type="radio" name="xpath" value=\'' + val + '\'>' +
-                'contains id: «' + id_cont[z] + '»' +
-              '</input>' +
-            '</p>'
-          );
+
+  // Process element's own attributes
+  for (let i = 0; i < attrs.length; i++) {
+    const attrItem = attrs.item(i)!;
+    if (attrItem.nodeName === 'id') {
+      const id_cont = attrItem.nodeValue!.split(' ');
+      for (const idPart of id_cont) {
+        const val = '//*[@id[contains(concat(" ",normalize-space(.)," ")," ' + idPart + ' ")]]';
+        prependHtml(advEl,
+          '<p style="text-align: left;">' +
+            '<input style="vertical-align: middle; margin: 2px;" ' +
+            'class="xpath" type="radio" name="xpath" value=\'' + val + '\'>' +
+              'contains id: «' + idPart + '»' +
+            '</input>' +
+          '</p>'
+        );
       }
     }
-    if (attrs.item(i)!.nodeName === 'class') {
-      const cl_cont = attrs.item(i)!.nodeValue!.split(' ');
-      for (let z = 0; z < cl_cont.length; z++) {
-        const val = '//*[@class[contains(concat(" ",normalize-space(.)," ")," ' + cl_cont[z] + ' ")]]';
-        $('#adv')
-          .prepend(
-            '<p style="text-align: left;">' +
-              '<input style="vertical-align: middle; margin: 2px;" ' +
-              'class="xpath" type="radio" name="xpath" value=\'' + val + '\'>' +
-                'contains class: «' + cl_cont[z] + '»' +
-              '</input>' +
-            '</p>'
-          );
+    if (attrItem.nodeName === 'class') {
+      const cl_cont = attrItem.nodeValue!.split(' ');
+      for (const clPart of cl_cont) {
+        const val = '//*[@class[contains(concat(" ",normalize-space(.)," ")," ' + clPart + ' ")]]';
+        prependHtml(advEl,
+          '<p style="text-align: left;">' +
+            '<input style="vertical-align: middle; margin: 2px;" ' +
+            'class="xpath" type="radio" name="xpath" value=\'' + val + '\'>' +
+              'contains class: «' + clPart + '»' +
+            '</input>' +
+          '</p>'
+        );
       }
     }
     if (i > 0) attr_v += ' and ';
     if (i === 0) attr_v += '[';
-    attr_v += '@' + attrs.item(i)!.nodeName;
-    attr_v += '="' + attrs.item(i)!.nodeValue + '"';
-    if (i === (attrs.length - 1)) attr_v += ']';
+    attr_v += '@' + attrItem.nodeName;
+    attr_v += '="' + attrItem.nodeValue + '"';
+    if (i === attrs.length - 1) attr_v += ']';
   }
-  this.parents().each(function () {
-    const pa = $(this).get(0) as HTMLElement;
+
+  // Process parent elements
+  const parents = getParents(el);
+  for (const pa of parents) {
     const paAttrs = pa.attributes;
-    for (let i = 0, l = paAttrs.length; i < l; i++) {
+    for (let i = 0; i < paAttrs.length; i++) {
+      const paAttrItem = paAttrs.item(i)!;
       if (node_count === 0) {
-        if (paAttrs.item(i)!.nodeName === 'id') {
-          const id_cont = paAttrs.item(i)!.nodeValue!.split(' ');
-          for (let z = 0; z < id_cont.length; z++) {
-            const val = '//*[@id[contains(concat(" ",normalize-space(.)," ")," ' + id_cont[z] + ' ")]]';
-            $('#adv')
-              .prepend(
+        if (paAttrItem.nodeName === 'id') {
+          const id_cont = paAttrItem.nodeValue!.split(' ');
+          for (const idPart of id_cont) {
+            const val = '//*[@id[contains(concat(" ",normalize-space(.)," ")," ' + idPart + ' ")]]';
+            prependHtml(advEl,
+              '<p style="text-align: left;">' +
+                '<input style="vertical-align: middle; margin: 2px;" ' +
+                'class="xpath" type="radio" name="xpath" value=\'' + val + '/' + val1 + '\'>' +
+                  'parent contains id: «' + idPart + '»' +
+                '</input>' +
+              '</p>'
+            );
+          }
+        }
+        if (paAttrItem.nodeName === 'class') {
+          const cl_cont = paAttrItem.nodeValue!.split(' ');
+          for (const clPart of cl_cont) {
+            if (clPart !== 'lwt_filtered_text') {
+              const val = '//*[@class[contains(concat(" ",normalize-space(.)," ")," ' + clPart + ' ")]]';
+              prependHtml(advEl,
                 '<p style="text-align: left;">' +
                   '<input style="vertical-align: middle; margin: 2px;" ' +
                   'class="xpath" type="radio" name="xpath" value=\'' + val + '/' + val1 + '\'>' +
-                    'parent contains id: «' + id_cont[z] + '»' +
+                    'parent contains class: «' + clPart + '»' +
                   '</input>' +
                 '</p>'
               );
-          }
-        }
-        if (paAttrs.item(i)!.nodeName === 'class') {
-          const cl_cont = paAttrs.item(i)!.nodeValue!.split(' ');
-          for (let z = 0; z < cl_cont.length; z++) {
-            if (cl_cont[z] !== 'lwt_filtered_text') {
-              const val = '//*[@class[contains(concat(" ",normalize-space(.)," ")," ' + cl_cont[z] + ' ")]]';
-              $('#adv').prepend('<p style="text-align: left;"><input style="vertical-align: middle; margin: 2px;" class="xpath" type="radio" name="xpath" value=\'' + val + '/' + val1 + '\'>parent contains class: «' + cl_cont[z] + '»</input></p>');
             }
           }
         }
       }
-      if (paAttrs.length > 1 || paAttrs.item(i)!.nodeValue !== 'lwt_filtered_text') {
-        if (i > 0 && paAttrs.item(i)!.nodeValue !== 'lwt_filtered_text') attr_p += ' and ';
+      if (paAttrs.length > 1 || paAttrItem.nodeValue !== 'lwt_filtered_text') {
+        if (i > 0 && paAttrItem.nodeValue !== 'lwt_filtered_text') attr_p += ' and ';
         if (i === 0) attr_p += '[';
-        if (paAttrs.item(i)!.nodeValue !== 'lwt_filtered_text') attr_p += '@' + paAttrs.item(i)!.nodeName;
-        if (paAttrs.item(i)!.nodeValue !== 'lwt_filtered_text') attr_p += '="' + paAttrs.item(i)!.nodeValue!.replace('lwt_filtered_text', '').trim() + '"';
-        if (i === (paAttrs.length - 1)) attr_p += ']';
+        if (paAttrItem.nodeValue !== 'lwt_filtered_text') {
+          attr_p += '@' + paAttrItem.nodeName;
+          attr_p += '="' + paAttrItem.nodeValue!.replace('lwt_filtered_text', '').trim() + '"';
+        }
+        if (i === paAttrs.length - 1) attr_p += ']';
       }
     }
     val_p = pa.tagName.toLowerCase() + attr_p + '/' + val_p;
     attr_p = '';
     node_count++;
-  });
-  $('#adv').prepend('<p style="text-align: left;"><input style="vertical-align: middle; margin: 2px;" class="xpath" type="radio" name="xpath" value=\'/' + val_p + val1 + attr_v + '\'>all: « /' + val_p.replace('=""', '') + val1 + attr_v.replace('=""', '') + ' »</input></p>');
-  $('#adv input[type="radio"]').each(function (z) {
-    if (typeof z === 'undefined') z = 1;
-    if (typeof $(this).attr('id') === 'undefined') {
-      $(this).attr('id', 'rb_' + z++);
+  }
+
+  // Prepend the "all" option
+  prependHtml(advEl,
+    '<p style="text-align: left;">' +
+      '<input style="vertical-align: middle; margin: 2px;" class="xpath" type="radio" name="xpath" ' +
+      'value=\'/' + val_p + val1 + attr_v + '\'>' +
+        'all: « /' + val_p.replace('=""', '') + val1 + attr_v.replace('=""', '') + ' »' +
+      '</input>' +
+    '</p>'
+  );
+
+  // Add labels to radio buttons
+  let z = 0;
+  qsa<HTMLInputElement>('#adv input[type="radio"]').forEach(radio => {
+    if (!radio.id) {
+      radio.id = 'rb_' + z++;
     }
-    $(this).after('<label class="wrap_radio" for="' + $(this).attr('id') + '"><span></span></label>');
+    radio.insertAdjacentHTML('afterend',
+      '<label class="wrap_radio" for="' + radio.id + '"><span></span></label>'
+    );
   });
 }
 
 export const lwt_feed_wiz_opt_inter = {
-  clickHeader: function (event: JQuery.ClickEvent): boolean {
-    if (!($(event.target).hasClass('lwt_selected_text'))) {
-      if (!($(event.target).hasClass('lwt_filtered_text'))) {
-        if ($(event.target).hasClass('lwt_marked_text')) {
-          $('#mark_action').empty();
-          $('*').removeClass('lwt_marked_text');
-          $('*[class=\'\']').removeAttr('class');
-          $('button[name="button"]').prop('disabled', true);
-          $('<option/>').val('').text('[Click On Text]')
-            .appendTo('#mark_action');
+  clickHeader: function (event: MouseEvent): boolean {
+    const target = event.target as HTMLElement;
+
+    if (!hasClass(target, 'lwt_selected_text')) {
+      if (!hasClass(target, 'lwt_filtered_text')) {
+        if (hasClass(target, 'lwt_marked_text')) {
+          const markAction = getById('mark_action');
+          if (markAction) markAction.innerHTML = '';
+          removeClassAll('*', 'lwt_marked_text');
+          removeEmptyClassAttrs();
+          setDisabled(qs<HTMLButtonElement>('button[name="button"]'), true);
+          appendHtml(markAction, '<option value="">[Click On Text]</option>');
           return false;
         } else {
-          $('*').removeClass('lwt_marked_text');
-          $('#mark_action').empty();
+          removeClassAll('*', 'lwt_marked_text');
+          const markAction = getById('mark_action');
+          if (markAction) markAction.innerHTML = '';
+
           let filter_array: HTMLElement[] = [];
-          $(event.target).parents(':not(html,body)').addBack()
-            .each(function () {
-              if (!($(this).hasClass('lwt_filtered_text'))) {
-                filter_array = [];
-                $(this).parents('.lwt_filtered_text').each(function () {
-                  $(this).removeClass('lwt_filtered_text');
-                  filter_array.push(this);
-                });
-                $('*[class=\'\']').removeAttr('class');
-                const el = this as HTMLElement;
-                const styleAttr = $(this).attr('style') as unknown as string | undefined;
-                if (!styleAttr || styleAttr === '') $(this).removeAttr('style');
-                const val1 = (el.tagName || '').toLowerCase();
-                let attr = '';
-                let attr_v = '';
-                let attr_p = '';
-                let attr_mode: number | string = '';
-                let val_p = '';
-                if ($('select[name="select_mode"]').val() !== '0') {
-                  attr_mode = 5;
-                } else if ($(this).attr('id')) {
-                  attr_mode = 1;
-                } else if ($(this).parent().attr('id')) {
-                  attr_mode = 2;
-                } else if ($(this).attr('class')) {
-                  attr_mode = 3;
-                } else if ($(this).parent().attr('class')) {
-                  attr_mode = 4;
-                } else {
-                  attr_mode = 5;
+          const ancestors = getAncestorsAndSelf(target);
+
+          for (const current of ancestors) {
+            if (!hasClass(current, 'lwt_filtered_text')) {
+              filter_array = [];
+              // Remove lwt_filtered_text from parents temporarily
+              getParents(current).forEach(p => {
+                if (hasClass(p, 'lwt_filtered_text')) {
+                  removeClass(p, 'lwt_filtered_text');
+                  filter_array.push(p);
                 }
-                const attrs = el.attributes;
-                for (let i = 0, l = attrs.length; i < l; i++) {
-                  if (attr_mode === 5 || (attrs.item(i)!.nodeName === 'class' && attr_mode !== 1) || (attrs.item(i)!.nodeName === 'id')) {
-                    attr += attrs.item(i)!.nodeName;
-                    attr += '="' + attrs.item(i)!.nodeValue + '" ';
-                    if (i > 0) attr_v += ' and ';
-                    attr_v += '@' + attrs.item(i)!.nodeName;
-                    attr_v += '="' + attrs.item(i)!.nodeValue + '"';
-                  }
-                }
-                attr = attr.replace('=""', '').trim();
-                if (attr_v) attr_v = '[' + attr_v + ']';
-                if (attr_mode !== 1 && attr_mode !== 3) {
-                  const parentEl = $(this).parent().get(0) as HTMLElement;
-                  const parentAttrs = parentEl.attributes;
-                  for (let i = 0, l = parentAttrs.length; i < l; i++) {
-                    if (attr_mode === 5 || (parentAttrs.item(i)!.nodeName === 'class' && attr_mode !== 2) || (parentAttrs.item(i)!.nodeName === 'id')) {
-                      if (i > 0) attr_p += ' and ';
-                      attr_p += '@' + parentAttrs.item(i)!.nodeName;
-                      attr_p += '="' + parentAttrs.item(i)!.nodeValue + '"';
-                    }
-                  }
-                  if (attr_p) attr_p = '[' + attr_p + ']';
-                  val_p = ($(this).parent().get(0) as HTMLElement).tagName.toLowerCase() + attr_p + '§';
-                }
-                val_p = val_p.replace('body§', '');
-                let attrsplit = attr.substr(0, 20);
-                if (!(attrsplit === attr)) attrsplit = attrsplit + '... ';
-                if (!(attrsplit === '')) attrsplit = ' ' + attrsplit;
-                if (event.target === this) {
-                  $('<option/>').val(
-                    '//' + val_p.replace('=""', '')
-                      .replace('[ and @', '[@') + val1 + attr_v.replace('=""', '')
-                      .replace('[ and @', '[@')
-                  ).text(
-                    '<' + val1.replace('[ and @', '[@') +
-                    attrsplit.replace('[ and @', '[@') + '>'
-                  ).data(el)
-                    .attr('selected', 'selected').prependTo('#mark_action');
-                } else {
-                  $('<option/>').val(
-                    '//' + val_p.replace('=""', '')
-                      .replace('[ and @', '[@') + val1 +
-                    attr_v.replace('=""', '').replace('[ and @', '[@')
-                  ).text(
-                    '<' + val1.replace('[ and @', '[@') +
-                    attrsplit.replace('[ and @', '[@') + '>'
-                  ).data(el).prependTo('#mark_action');
-                }
-                for (const i in filter_array) {
-                  $(filter_array[i]).addClass('lwt_filtered_text');
+              });
+              removeEmptyClassAttrs();
+
+              const styleAttr = current.getAttribute('style');
+              if (!styleAttr || styleAttr === '') current.removeAttribute('style');
+
+              const val1 = current.tagName.toLowerCase();
+              let attr = '';
+              let attr_v = '';
+              let attr_p = '';
+              let attr_mode: number | string = '';
+              let val_p = '';
+
+              const selectModeVal = getInputValue('select[name="select_mode"]');
+              if (selectModeVal !== '0') {
+                attr_mode = 5;
+              } else if (current.getAttribute('id')) {
+                attr_mode = 1;
+              } else if (current.parentElement?.getAttribute('id')) {
+                attr_mode = 2;
+              } else if (current.getAttribute('class')) {
+                attr_mode = 3;
+              } else if (current.parentElement?.getAttribute('class')) {
+                attr_mode = 4;
+              } else {
+                attr_mode = 5;
+              }
+
+              const attrs = current.attributes;
+              for (let i = 0; i < attrs.length; i++) {
+                const attrItem = attrs.item(i)!;
+                if (attr_mode === 5 ||
+                    (attrItem.nodeName === 'class' && attr_mode !== 1) ||
+                    attrItem.nodeName === 'id') {
+                  attr += attrItem.nodeName + '="' + attrItem.nodeValue + '" ';
+                  if (i > 0) attr_v += ' and ';
+                  attr_v += '@' + attrItem.nodeName + '="' + attrItem.nodeValue + '"';
                 }
               }
-            });
-          $('button[name="button"]').prop('disabled', false);
-          let attr = $('#mark_action').val() as string;
+              attr = attr.replace('=""', '').trim();
+              if (attr_v) attr_v = '[' + attr_v + ']';
+
+              if (attr_mode !== 1 && attr_mode !== 3 && current.parentElement) {
+                const parentAttrs = current.parentElement.attributes;
+                for (let i = 0; i < parentAttrs.length; i++) {
+                  const pAttrItem = parentAttrs.item(i)!;
+                  if (attr_mode === 5 ||
+                      (pAttrItem.nodeName === 'class' && attr_mode !== 2) ||
+                      pAttrItem.nodeName === 'id') {
+                    if (i > 0) attr_p += ' and ';
+                    attr_p += '@' + pAttrItem.nodeName + '="' + pAttrItem.nodeValue + '"';
+                  }
+                }
+                if (attr_p) attr_p = '[' + attr_p + ']';
+                val_p = current.parentElement.tagName.toLowerCase() + attr_p + '§';
+              }
+              val_p = val_p.replace('body§', '');
+
+              let attrsplit = attr.substr(0, 20);
+              if (attrsplit !== attr) attrsplit = attrsplit + '... ';
+              if (attrsplit !== '') attrsplit = ' ' + attrsplit;
+
+              const optionValue = '//' + val_p.replace('=""', '').replace('[ and @', '[@') +
+                val1 + attr_v.replace('=""', '').replace('[ and @', '[@');
+              const optionText = '<' + val1.replace('[ and @', '[@') +
+                attrsplit.replace('[ and @', '[@') + '>';
+
+              const option = document.createElement('option');
+              option.value = optionValue;
+              option.textContent = optionText;
+              option.dataset.tagName = current.tagName;
+
+              if (event.target === current) {
+                option.selected = true;
+                markAction?.insertBefore(option, markAction.firstChild);
+              } else {
+                markAction?.insertBefore(option, markAction.firstChild);
+              }
+
+              // Restore filter_array
+              for (const f of filter_array) {
+                addClass(f, 'lwt_filtered_text');
+              }
+            }
+          }
+
+          setDisabled(qs<HTMLButtonElement>('button[name="button"]'), false);
+
+          let attr = getInputValue('#mark_action');
           attr = attr.replace(/@/g, '').replace('//', '').replace(/ and /g, '][').replace('§', '>');
+
           filter_array = [];
-          $(this).parents('.lwt_filtered_text').each(function () {
-            $(this).removeClass('lwt_filtered_text');
-            filter_array.push(this);
+          getParents(target).forEach(p => {
+            if (hasClass(p, 'lwt_filtered_text')) {
+              removeClass(p, 'lwt_filtered_text');
+              filter_array.push(p);
+            }
           });
-          $(attr + ':not(.lwt_selected_text)').find('*:not(.lwt_selected_text)')
-            .addBack().addClass('lwt_marked_text');
-          for (const i in filter_array) {
-            $(filter_array[i]).addClass('lwt_filtered_text');
+
+          // Mark matching elements
+          try {
+            const matchingEls = document.querySelectorAll(attr + ':not(.lwt_selected_text)');
+            matchingEls.forEach(el => {
+              getDescendantsAndSelf(el).forEach(d => {
+                if (!hasClass(d, 'lwt_selected_text')) {
+                  addClass(d, 'lwt_marked_text');
+                }
+              });
+            });
+          } catch {
+            // Invalid selector
+          }
+
+          for (const f of filter_array) {
+            addClass(f, 'lwt_filtered_text');
           }
           return false;
         }
@@ -322,43 +571,54 @@ export const lwt_feed_wiz_opt_inter = {
     } else {
       const selected_Array: HTMLElement[] = [];
       let filter_array: HTMLElement[] = [];
-      $('.lwt_selected_text').each(function () {
-        selected_Array.push(this);
+
+      qsa('.lwt_selected_text').forEach(el => {
+        if (el instanceof HTMLElement) selected_Array.push(el);
       });
-      $(event.target).parents('*').addBack().each(function () {
-        if (!($(this).parent().hasClass('lwt_selected_text')) && $(this).hasClass('lwt_selected_text')) {
-          if ($(this).hasClass('lwt_highlighted_text')) {
-            $('*').removeClass('lwt_highlighted_text');
+
+      const ancestors = getAncestorsAndSelf(target);
+      for (const current of ancestors) {
+        const parent = current.parentElement;
+        if (parent && !hasClass(parent, 'lwt_selected_text') && hasClass(current, 'lwt_selected_text')) {
+          if (hasClass(current, 'lwt_highlighted_text')) {
+            removeClassAll('*', 'lwt_highlighted_text');
           } else {
-            // eslint-disable-next-line @typescript-eslint/no-this-alias -- needed for closure scope
-            const el = this;
-            $('*').removeClass('lwt_selected_text');
+            removeClassAll('*', 'lwt_selected_text');
             filter_array = [];
-            $(this).parents('.lwt_filtered_text').each(function () {
-              $(this).removeClass('lwt_filtered_text');
-              filter_array.push(this);
-            });
-            $('*[class=\'\']').removeAttr('class');
-            $('#lwt_sel li').each(function () {
-              $('*').removeClass('lwt_highlighted_text');
-              $(this).addClass('lwt_highlighted_text');
-              xpathQuery($(this).text()).addClass('lwt_highlighted_text');
-              if ($(el).hasClass('lwt_highlighted_text')) {
-                return false;
+
+            getParents(current).forEach(p => {
+              if (hasClass(p, 'lwt_filtered_text')) {
+                removeClass(p, 'lwt_filtered_text');
+                filter_array.push(p);
               }
             });
-            for (const i in selected_Array) {
-              $(selected_Array[i]).addClass('lwt_selected_text');
+            removeEmptyClassAttrs();
+
+            const lwtSelItems = qsa<HTMLElement>('#lwt_sel li');
+            for (const li of lwtSelItems) {
+              removeClassAll('*', 'lwt_highlighted_text');
+              addClass(li, 'lwt_highlighted_text');
+              xpathQuery(li.textContent || '').forEach(el => addClass(el, 'lwt_highlighted_text'));
+              if (hasClass(current, 'lwt_highlighted_text')) {
+                break;
+              }
+            }
+
+            for (const s of selected_Array) {
+              addClass(s, 'lwt_selected_text');
             }
           }
         }
-      });
-      for (const i in filter_array) {
-        $(filter_array[i]).addClass('lwt_filtered_text');
       }
-      $('button[name="button"]').prop('disabled', true);
-      $('#mark_action').empty();
-      $('<option/>').val('').text('[Click On Text]').appendTo('#mark_action');
+
+      for (const f of filter_array) {
+        addClass(f, 'lwt_filtered_text');
+      }
+
+      setDisabled(qs<HTMLButtonElement>('button[name="button"]'), true);
+      const markAction = getById('mark_action');
+      if (markAction) markAction.innerHTML = '';
+      appendHtml(markAction, '<option value="">[Click On Text]</option>');
       return false;
     }
     return true;
@@ -366,20 +626,29 @@ export const lwt_feed_wiz_opt_inter = {
 
   highlightSelection: function (): string {
     let sel_array = '';
-    $('#lwt_sel li').each(function () {
-      if ($(this).hasClass('lwt_highlighted_text')) {
-        xpathQuery($(this).text())
-          .not($('#lwt_header').find('*').addBack())
-          .addClass('lwt_highlighted_text').find('*').addBack()
-          .addClass('lwt_selected_text');
+    const lwtHeader = getById('lwt_header');
+    const headerDescendants = lwtHeader ? new Set(getDescendantsAndSelf(lwtHeader)) : new Set<HTMLElement>();
+
+    qsa<HTMLElement>('#lwt_sel li').forEach(li => {
+      if (hasClass(li, 'lwt_highlighted_text')) {
+        const matched = xpathQuery(li.textContent || '');
+        const filtered = matched.filter(el => !headerDescendants.has(el));
+        filtered.forEach(el => {
+          addClass(el, 'lwt_highlighted_text');
+          getDescendantsAndSelf(el).forEach(d => addClass(d, 'lwt_selected_text'));
+        });
       } else {
-        sel_array += $(this).text() + ' | ';
+        sel_array += (li.textContent || '') + ' | ';
       }
     });
+
     if (sel_array !== '') {
-      xpathQuery(sel_array.replace(/ \| $/, '')).find('*')
-        .addBack().not($('#lwt_header').find('*').addBack())
-        .addClass('lwt_selected_text');
+      const xpath = sel_array.replace(/ \| $/, '');
+      const matched = xpathQuery(xpath);
+      const filtered = matched.filter(el => !headerDescendants.has(el));
+      filtered.forEach(el => {
+        getDescendantsAndSelf(el).forEach(d => addClass(d, 'lwt_selected_text'));
+      });
     }
     return sel_array;
   }
@@ -387,223 +656,371 @@ export const lwt_feed_wiz_opt_inter = {
 
 export const lwt_feed_wizard = {
   prepareInteractions: function (): void {
-    if (
-      $('#lwt_sel').html() === '' &&
-      parseInt($('input[name=\'step\']').val() as string, 10) === 2
-    ) {
-      $('#next').prop('disabled', true);
+    const lwtSel = getById('lwt_sel');
+    const stepInput = qs<HTMLInputElement>('input[name="step"]');
+    const nextBtn = getById('next') as HTMLButtonElement | null;
+
+    if (lwtSel?.innerHTML === '' && parseInt(stepInput?.value || '0', 10) === 2) {
+      setDisabled(nextBtn, true);
     } else {
-      $('#next').prop('disabled', false);
+      setDisabled(nextBtn, false);
     }
-    $('#lwt_last').css('margin-top', $('#lwt_header').height()!);
-    $('#lwt_header').nextAll().on('click', lwt_feed_wiz_opt_inter.clickHeader);
-    $('*').removeClass('lwt_filtered_text');
-    $('*[class=\'\']').removeAttr('class');
+
+    const lwtHeader = getById('lwt_header');
+    const lwtLast = getById('lwt_last');
+    if (lwtLast && lwtHeader) {
+      lwtLast.style.marginTop = lwtHeader.offsetHeight + 'px';
+    }
+
+    // Bind click handler to siblings after lwt_header
+    if (lwtHeader) {
+      let sibling = lwtHeader.nextElementSibling;
+      while (sibling) {
+        sibling.addEventListener('click', (e: Event) => {
+          lwt_feed_wiz_opt_inter.clickHeader(e as MouseEvent);
+        });
+        sibling = sibling.nextElementSibling;
+      }
+    }
+
+    removeClassAll('*', 'lwt_filtered_text');
+    removeEmptyClassAttrs();
     lwt_feed_wiz_opt_inter.highlightSelection();
+
     for (const i in filter_Array) {
-      $(filter_Array[i]).addClass('lwt_filtered_text');
+      addClass(filter_Array[i], 'lwt_filtered_text');
     }
-    $('*[style=\'\']').removeAttr('style');
-    $('#lwt_header select').wrap('<label class=\'wrap_select\'></label>');
+    removeEmptyStyleAttrs();
+
+    // Wrap selects in lwt_header
+    qsa<HTMLSelectElement>('#lwt_header select').forEach(select => {
+      if (!select.parentElement?.classList.contains('wrap_select')) {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'wrap_select';
+        select.parentNode?.insertBefore(wrapper, select);
+        wrapper.appendChild(select);
+      }
+    });
+
     document.addEventListener('mouseup', () => {
-      // Blur form elements on mouseup
       const selectors = [
         'select:not(:active)', 'button', 'input[type=button]',
         '.wrap_radio span', '.wrap_checkbox span'
       ];
-      document.querySelectorAll<HTMLElement>(selectors.join(',')).forEach((el) => {
-        el.blur();
-      });
+      qsa<HTMLElement>(selectors.join(',')).forEach(el => el.blur());
     });
   },
 
   deleteSelection: function (this: HTMLElement): boolean {
-    $('*').removeClass('lwt_selected_text').removeClass('lwt_marked_text');
-    $('*').removeClass('lwt_filtered_text');
-    $('#lwt_header').nextAll().find('*').addBack().removeClass('lwt_highlighted_text');
-    $(this).parent().remove();
+    removeClassAll('*', 'lwt_selected_text');
+    removeClassAll('*', 'lwt_marked_text');
+    removeClassAll('*', 'lwt_filtered_text');
+
+    const lwtHeader = getById('lwt_header');
+    if (lwtHeader) {
+      let sibling = lwtHeader.nextElementSibling;
+      while (sibling) {
+        getDescendantsAndSelf(sibling as HTMLElement).forEach(el => {
+          removeClass(el, 'lwt_highlighted_text');
+        });
+        sibling = sibling.nextElementSibling;
+      }
+    }
+
+    this.parentElement?.remove();
+
     let sel_array = '';
-    $('#lwt_sel li').each(function () {
-      if ($(this).hasClass('lwt_highlighted_text')) {
-        xpathQuery($(this).text()).not($('#lwt_header').find('*')
-          .addBack()).addClass('lwt_highlighted_text').find('*').addBack()
-          .addClass('lwt_selected_text');
+    const headerDescendants = lwtHeader ? new Set(getDescendantsAndSelf(lwtHeader)) : new Set<HTMLElement>();
+
+    qsa<HTMLElement>('#lwt_sel li').forEach(li => {
+      if (hasClass(li, 'lwt_highlighted_text')) {
+        const matched = xpathQuery(li.textContent || '');
+        const filtered = matched.filter(el => !headerDescendants.has(el));
+        filtered.forEach(el => {
+          addClass(el, 'lwt_highlighted_text');
+          getDescendantsAndSelf(el).forEach(d => addClass(d, 'lwt_selected_text'));
+        });
       } else {
-        sel_array += $(this).text() + ' | ';
+        sel_array += (li.textContent || '') + ' | ';
       }
     });
+
     if (sel_array !== '') {
-      xpathQuery(sel_array.replace(/ \| $/, '')).find('*')
-        .addBack().not($('#lwt_header').find('*').addBack())
-        .addClass('lwt_selected_text');
+      const xpath = sel_array.replace(/ \| $/, '');
+      const matched = xpathQuery(xpath);
+      const filtered = matched.filter(el => !headerDescendants.has(el));
+      filtered.forEach(el => {
+        getDescendantsAndSelf(el).forEach(d => addClass(d, 'lwt_selected_text'));
+      });
     }
+
     for (const i in filter_Array) {
-      $(filter_Array[i]).addClass('lwt_filtered_text');
+      addClass(filter_Array[i], 'lwt_filtered_text');
     }
-    $('*[class=\'\']').removeAttr('class');
-    $('*[style=\'\']').removeAttr('style');
-    $('#lwt_last').css('margin-top', $('#lwt_header').height()!);
-    if (
-      $('#lwt_sel').html() === '' &&
-      parseInt($('input[name=\'step\']').val() as string, 10) === 2
-    ) {
-      $('#next').prop('disabled', true);
+    removeEmptyClassAttrs();
+    removeEmptyStyleAttrs();
+
+    const lwtLast = getById('lwt_last');
+    if (lwtLast && lwtHeader) {
+      lwtLast.style.marginTop = lwtHeader.offsetHeight + 'px';
+    }
+
+    const lwtSel = getById('lwt_sel');
+    const stepInput = qs<HTMLInputElement>('input[name="step"]');
+    if (lwtSel?.innerHTML === '' && parseInt(stepInput?.value || '0', 10) === 2) {
+      setDisabled(getById('next') as HTMLButtonElement | null, true);
     }
     return false;
   },
 
   changeXPath: function (this: HTMLElement): boolean {
-    $('#adv_get_button').prop('disabled', false);
-    $(this).parent().find('img').each(function () {
-      const srcAttr = $(this).attr('src') as unknown as string | undefined;
-      if (srcAttr === 'icn/exclamation-red.png') {
-        $('#adv_get_button').prop('disabled', true);
-      }
-    });
+    const advGetButton = getById('adv_get_button') as HTMLButtonElement | null;
+    setDisabled(advGetButton, false);
+
+    const parentP = this.closest('p');
+    if (parentP) {
+      const imgs = parentP.querySelectorAll('img');
+      imgs.forEach(img => {
+        if (img.getAttribute('src') === 'icn/exclamation-red.png') {
+          setDisabled(advGetButton, true);
+        }
+      });
+    }
     return false;
   },
 
   clickAdvGetButton: function (): boolean {
-    $('*').removeClass('lwt_filtered_text');
-    $('*[class=\'\']').removeAttr('class');
-    if (typeof $('#adv :radio:checked').val() !== 'undefined') {
-      $('#lwt_sel').append(
+    removeClassAll('*', 'lwt_filtered_text');
+    removeEmptyClassAttrs();
+
+    const checkedRadio = qs<HTMLInputElement>('#adv :checked');
+    if (checkedRadio?.value) {
+      const lwtSel = getById('lwt_sel');
+      appendHtml(lwtSel,
         '<li style=\'text-align: left\'>' +
         '<img class=\'delete_selection\' src=\'icn/cross.png\' ' +
         'title=\'Delete Selection\' alt=\'\' /> ' +
-        $('#adv :radio:checked').val() +
+        checkedRadio.value +
         '</li>'
       );
-      xpathQuery($('#adv :radio:checked').val() as string).find('*')
-        .addBack().not($('#lwt_header').find('*').addBack())
-        .addClass('lwt_selected_text');
-      $('#next').prop('disabled', false);
+
+      const lwtHeader = getById('lwt_header');
+      const headerDescendants = lwtHeader ? new Set(getDescendantsAndSelf(lwtHeader)) : new Set<HTMLElement>();
+      const matched = xpathQuery(checkedRadio.value);
+      const filtered = matched.filter(el => !headerDescendants.has(el));
+      filtered.forEach(el => {
+        getDescendantsAndSelf(el).forEach(d => addClass(d, 'lwt_selected_text'));
+      });
+
+      setDisabled(getById('next') as HTMLButtonElement | null, false);
     }
-    $('#adv').hide();
-    $('#lwt_last').css('margin-top', $('#lwt_header').height()!);
+
+    const advEl = getById('adv');
+    if (advEl) advEl.style.display = 'none';
+
+    const lwtLast = getById('lwt_last');
+    const lwtHeader = getById('lwt_header');
+    if (lwtLast && lwtHeader) {
+      lwtLast.style.marginTop = lwtHeader.offsetHeight + 'px';
+    }
+
     for (const i in filter_Array) {
-      $(filter_Array[i]).addClass('lwt_filtered_text');
+      addClass(filter_Array[i], 'lwt_filtered_text');
     }
     return false;
   },
 
   clickSelectLi: function (this: HTMLElement): boolean {
-    if ($(this).hasClass('lwt_highlighted_text')) {
-      $('*').removeClass('lwt_highlighted_text');
+    if (hasClass(this, 'lwt_highlighted_text')) {
+      removeClassAll('*', 'lwt_highlighted_text');
     } else {
       const selected_Array: HTMLElement[] = [];
-      $('.lwt_selected_text').each(function () {
-        $(this).removeClass('lwt_selected_text');
-        selected_Array.push(this);
+      qsa('.lwt_selected_text').forEach(el => {
+        if (el instanceof HTMLElement) {
+          removeClass(el, 'lwt_selected_text');
+          selected_Array.push(el);
+        }
       });
-      $('*').removeClass('lwt_filtered_text');
-      $('*').removeClass('lwt_highlighted_text');
-      $('*[class=\'\']').removeAttr('class');
-      $(this).addClass('lwt_highlighted_text');
 
-      xpathQuery($(this).text()).not($('#lwt_header').find('*').addBack())
-        .addClass('lwt_highlighted_text').find('*').addBack()
-        .addClass('lwt_selected_text');
+      removeClassAll('*', 'lwt_filtered_text');
+      removeClassAll('*', 'lwt_highlighted_text');
+      removeEmptyClassAttrs();
+
+      addClass(this, 'lwt_highlighted_text');
+
+      const lwtHeader = getById('lwt_header');
+      const headerDescendants = lwtHeader ? new Set(getDescendantsAndSelf(lwtHeader)) : new Set<HTMLElement>();
+      const matched = xpathQuery(this.textContent || '');
+      const filtered = matched.filter(el => !headerDescendants.has(el));
+      filtered.forEach(el => {
+        addClass(el, 'lwt_highlighted_text');
+        getDescendantsAndSelf(el).forEach(d => addClass(d, 'lwt_selected_text'));
+      });
 
       for (const i in filter_Array) {
-        $(filter_Array[i]).addClass('lwt_filtered_text');
+        addClass(filter_Array[i], 'lwt_filtered_text');
       }
-      for (const i in selected_Array) {
-        $(selected_Array[i]).addClass('lwt_selected_text');
+      for (const s of selected_Array) {
+        addClass(s, 'lwt_selected_text');
       }
     }
     return false;
   },
 
   changeMarkAction: function (): boolean {
-    $('*').removeClass('lwt_marked_text');
-    $('*[class=\'\']').removeAttr('class');
-    let attr = $('#mark_action').val() as string;
-    attr = attr.replace(/@/g, '').replace('//', '').replace(/ and /g, '][')
-      .replace('§', '>');
-    $('*').removeClass('lwt_filtered_text');
-    $(attr).find('*:not(.lwt_selected_text)').addBack().addClass('lwt_marked_text');
+    removeClassAll('*', 'lwt_marked_text');
+    removeEmptyClassAttrs();
+
+    let attr = getInputValue('#mark_action');
+    attr = attr.replace(/@/g, '').replace('//', '').replace(/ and /g, '][').replace('§', '>');
+
+    removeClassAll('*', 'lwt_filtered_text');
+
+    try {
+      qsa(attr).forEach(el => {
+        getDescendantsAndSelf(el as HTMLElement).forEach(d => {
+          if (!hasClass(d, 'lwt_selected_text')) {
+            addClass(d, 'lwt_marked_text');
+          }
+        });
+      });
+    } catch {
+      // Invalid selector
+    }
+
     for (const i in filter_Array) {
-      $(filter_Array[i]).addClass('lwt_filtered_text');
+      addClass(filter_Array[i], 'lwt_filtered_text');
     }
     return false;
   },
 
   clickGetOrFilter: function (this: HTMLElement): boolean {
-    $('*').removeClass('lwt_marked_text');
-    if ($('select[name=\'select_mode\']').val() === 'adv') {
-      $('#adv p').remove();
-      $('*[style=\'\']').removeAttr('style');
-      $('#adv_get_button').prop('disabled', true);
-      const selectedElement = $('#mark_action :selected').data() as { get_adv_xpath?: () => void } | undefined;
-      if (selectedElement?.get_adv_xpath) {
-        selectedElement.get_adv_xpath();
+    removeClassAll('*', 'lwt_marked_text');
+
+    if (getInputValue('select[name="select_mode"]') === 'adv') {
+      qsa('#adv p').forEach(p => p.remove());
+      removeEmptyStyleAttrs();
+      setDisabled(getById('adv_get_button') as HTMLButtonElement | null, true);
+
+      // Get selected option data and call extend_adv_xpath
+      const markAction = getById('mark_action') as HTMLSelectElement | null;
+      const selectedOption = markAction?.selectedOptions[0];
+      if (selectedOption?.dataset?.tagName) {
+        // Find the element that was stored
+        // Since we can't store DOM refs in dataset, we need to find it another way
+        // The option value contains the xpath - we'll use that
+        const xpath = selectedOption.value;
+        if (xpath) {
+          const matchedEls = xpathQuery(xpath);
+          if (matchedEls.length > 0) {
+            extend_adv_xpath(matchedEls[0]);
+          }
+        }
       }
     } else {
-      $('#next').prop('disabled', false);
-      let attr = $('#mark_action').val() as string;
-      attr = attr.replace(/@/g, '').replace('//', '').replace(/ and /g, '][')
-        .replace('§', '>');
+      setDisabled(getById('next') as HTMLButtonElement | null, false);
+
+      let attr = getInputValue('#mark_action');
+      attr = attr.replace(/@/g, '').replace('//', '').replace(/ and /g, '][').replace('§', '>');
+
       const local_filter_Array: HTMLElement[] = [];
-      $('.lwt_filtered_text').each(function () {
-        $(this).removeClass('lwt_filtered_text');
-        local_filter_Array.push(this);
+      qsa('.lwt_filtered_text').forEach(el => {
+        if (el instanceof HTMLElement) {
+          removeClass(el, 'lwt_filtered_text');
+          local_filter_Array.push(el);
+        }
       });
-      $('*').removeClass('lwt_filtered_text');
-      $(attr).find('*').addBack().addClass('lwt_selected_text');
-      for (const i in local_filter_Array) {
-        $(local_filter_Array[i]).addClass('lwt_filtered_text');
+
+      removeClassAll('*', 'lwt_filtered_text');
+
+      try {
+        qsa(attr).forEach(el => {
+          getDescendantsAndSelf(el as HTMLElement).forEach(d => addClass(d, 'lwt_selected_text'));
+        });
+      } catch {
+        // Invalid selector
       }
-      $('#lwt_sel').append(
+
+      for (const f of local_filter_Array) {
+        addClass(f, 'lwt_filtered_text');
+      }
+
+      const markActionVal = getInputValue('#mark_action');
+      appendHtml(getById('lwt_sel'),
         '<li style=\'text-align: left\'>' +
         '<img class=\'delete_selection\' src=\'icn/cross.png\' ' +
-        'title=\'Delete Selection\' alt=\'' +
-        $('#mark_action').val() + '\' /> ' +
-        ($('#mark_action').val() as string).replace('§', '/') +
+        'title=\'Delete Selection\' alt=\'' + markActionVal + '\' /> ' +
+        markActionVal.replace('§', '/') +
         '</li>'
       );
     }
-    $(this).prop('disabled', true);
-    $('#mark_action').empty();
-    $('<option/>').val('').text('[Click On Text]').appendTo('#mark_action');
-    $('#lwt_last').css('margin-top', $('#lwt_header').height()!);
+
+    if (this instanceof HTMLButtonElement) {
+      this.disabled = true;
+    }
+
+    const markAction = getById('mark_action');
+    if (markAction) markAction.innerHTML = '';
+    appendHtml(markAction, '<option value="">[Click On Text]</option>');
+
+    const lwtLast = getById('lwt_last');
+    const lwtHeader = getById('lwt_header');
+    if (lwtLast && lwtHeader) {
+      lwtLast.style.marginTop = lwtHeader.offsetHeight + 'px';
+    }
     return false;
   },
 
   clickNextButton: function (): boolean {
-    $('#article_tags,#filter_tags').val($('#lwt_sel').html()!)
-      .prop('disabled', false);
-    const html = $('#lwt_sel li').map(function () {
-      return $(this).text();
-    }).get().join(' | ');
-    $('input[name=\'html\']').val(html);
-    let val = parseInt($('input[name=\'step\']').val() as string, 10);
+    const lwtSelHtml = getById('lwt_sel')?.innerHTML || '';
+    const articleTags = getById('article_tags') as HTMLInputElement | null;
+    const filterTags = getById('filter_tags') as HTMLInputElement | null;
+
+    if (articleTags) {
+      articleTags.value = lwtSelHtml;
+      articleTags.disabled = false;
+    }
+    if (filterTags) {
+      filterTags.value = lwtSelHtml;
+      filterTags.disabled = false;
+    }
+
+    const htmlParts: string[] = [];
+    qsa<HTMLElement>('#lwt_sel li').forEach(li => {
+      htmlParts.push(li.textContent || '');
+    });
+    const html = htmlParts.join(' | ');
+
+    setInputValue('input[name="html"]', html);
+
+    let val = parseInt(getInputValue('input[name="step"]'), 10);
     if (val === 2) {
-      $('input[name=\'html\']').attr('name', 'article_selector');
-      $('select[name=\'NfArticleSection\'] option').each(function () {
-        const art_sec = $('#lwt_sel li').map(function () {
-          return $(this).text();
-        }).get().join(' | ');
-        $(this).val(art_sec);
+      const htmlInput = qs<HTMLInputElement>('input[name="html"]');
+      if (htmlInput) htmlInput.name = 'article_selector';
+
+      const art_sec = htmlParts.join(' | ');
+      qsa<HTMLOptionElement>('select[name="NfArticleSection"] option').forEach(opt => {
+        opt.value = art_sec;
       });
     }
-    $('input[name=\'step\']').val(++val);
+
+    setInputValue('input[name="step"]', String(++val));
     lwt_form1.submit();
     return false;
   },
 
   changeHostStatus: function (this: HTMLElement): boolean {
-    const host_status = $(this).val() as string;
-    const current_host = $('input[name=\'host_name\']').val() as string;
-    $('select[name=\'selected_feed\'] option').each(function () {
-      const opt_str = $(this).text();
+    const hostStatusEl = this as HTMLSelectElement;
+    const host_status = hostStatusEl.value;
+    const current_host = getInputValue('input[name="host_name"]');
+
+    qsa<HTMLOptionElement>('select[name="selected_feed"] option').forEach(opt => {
+      const opt_str = opt.textContent || '';
       const host_name = opt_str.replace(/[▸-][0-9\s]*[★☆-][\s]*host:/, '');
       if (host_name.trim() === current_host.trim()) {
-        $(this).text(
-          opt_str.replace(
-            /([▸-][0-9\s]*?)\s[★☆-]\s(.*)/,
-            '$1 ' + host_status.trim() + ' $2'
-          )
+        opt.textContent = opt_str.replace(
+          /([▸-][0-9\s]*?)\s[★☆-]\s(.*)/,
+          '$1 ' + host_status.trim() + ' $2'
         );
       }
     });

@@ -13,7 +13,7 @@ declare global {
   // eslint-disable-next-line no-var
   var filter_Array: HTMLElement[];
   interface HTMLElement {
-    get_adv_xpath?: () => void;
+    get_adv_xpath?: (el: HTMLElement) => void;
   }
 }
 
