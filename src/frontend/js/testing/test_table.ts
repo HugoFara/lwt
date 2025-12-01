@@ -6,26 +6,64 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import $ from 'jquery';
 import { do_ajax_save_setting } from '../core/ajax_utilities';
 
 /**
  * Update left border radius for visible columns.
  */
 function updateLeftBorderRadius(): void {
-  $('th,td').css('border-top-left-radius', '').css('border-bottom-left-radius', '');
-  $('th:visible').eq(0).css('border-top-left-radius', 'inherit')
-    .css('border-bottom-left-radius', '0px');
-  $('tr:last-child>td:visible').eq(0).css('border-bottom-left-radius', 'inherit');
+  // Reset all border radii
+  document.querySelectorAll<HTMLElement>('th,td').forEach((el) => {
+    el.style.borderTopLeftRadius = '';
+    el.style.borderBottomLeftRadius = '';
+  });
+
+  // Set top-left radius on first visible th
+  const firstVisibleTh = document.querySelector<HTMLElement>('th:not([style*="display: none"])');
+  if (firstVisibleTh) {
+    firstVisibleTh.style.borderTopLeftRadius = 'inherit';
+    firstVisibleTh.style.borderBottomLeftRadius = '0px';
+  }
+
+  // Set bottom-left radius on first visible td in last row
+  const lastRow = document.querySelector<HTMLTableRowElement>('tr:last-child');
+  if (lastRow) {
+    const firstVisibleTd = Array.from(lastRow.querySelectorAll<HTMLElement>('td'))
+      .find((td) => td.style.display !== 'none');
+    if (firstVisibleTd) {
+      firstVisibleTd.style.borderBottomLeftRadius = 'inherit';
+    }
+  }
 }
 
 /**
  * Update right border radius for visible columns.
  */
 function updateRightBorderRadius(): void {
-  $('th,td').css('border-top-right-radius', '').css('border-bottom-right-radius', '');
-  $('th:visible:last').css('border-top-right-radius', 'inherit');
-  $('tr:last-child>td:visible:last').css('border-bottom-right-radius', 'inherit');
+  // Reset all border radii
+  document.querySelectorAll<HTMLElement>('th,td').forEach((el) => {
+    el.style.borderTopRightRadius = '';
+    el.style.borderBottomRightRadius = '';
+  });
+
+  // Set top-right radius on last visible th
+  const visibleThs = Array.from(document.querySelectorAll<HTMLElement>('th'))
+    .filter((th) => th.style.display !== 'none');
+  const lastVisibleTh = visibleThs[visibleThs.length - 1];
+  if (lastVisibleTh) {
+    lastVisibleTh.style.borderTopRightRadius = 'inherit';
+  }
+
+  // Set bottom-right radius on last visible td in last row
+  const lastRow = document.querySelector<HTMLTableRowElement>('tr:last-child');
+  if (lastRow) {
+    const visibleTds = Array.from(lastRow.querySelectorAll<HTMLElement>('td'))
+      .filter((td) => td.style.display !== 'none');
+    const lastVisibleTd = visibleTds[visibleTds.length - 1];
+    if (lastVisibleTd) {
+      lastVisibleTd.style.borderBottomRightRadius = 'inherit';
+    }
+  }
 }
 
 /**
@@ -43,13 +81,11 @@ function toggleColumnVisibility(
   updateLeft: boolean = true
 ): void {
   const selector = `td:nth-child(${columnIndex}),th:nth-child(${columnIndex})`;
-  if (isVisible) {
-    $(selector).show();
-    do_ajax_save_setting(settingKey, '1');
-  } else {
-    $(selector).hide();
-    do_ajax_save_setting(settingKey, '0');
-  }
+  document.querySelectorAll<HTMLElement>(selector).forEach((el) => {
+    el.style.display = isVisible ? '' : 'none';
+  });
+  do_ajax_save_setting(settingKey, isVisible ? '1' : '0');
+
   if (updateLeft) {
     updateLeftBorderRadius();
   } else {
@@ -70,13 +106,11 @@ function toggleContentVisibility(
   settingKey: string
 ): void {
   const selector = `td:nth-child(${columnIndex})`;
-  if (isVisible) {
-    $(selector).css('color', 'black').css('cursor', 'auto');
-    do_ajax_save_setting(settingKey, '1');
-  } else {
-    $(selector).css('color', 'white').css('cursor', 'pointer');
-    do_ajax_save_setting(settingKey, '0');
-  }
+  document.querySelectorAll<HTMLElement>(selector).forEach((el) => {
+    el.style.color = isVisible ? 'black' : 'white';
+    el.style.cursor = isVisible ? 'auto' : 'pointer';
+  });
+  do_ajax_save_setting(settingKey, isVisible ? '1' : '0');
 }
 
 /**
@@ -87,55 +121,66 @@ function toggleContentVisibility(
  */
 export function initTableTest(): void {
   // Edit column (1)
-  $('#cbEdit').on('change', function () {
-    toggleColumnVisibility(1, $(this).is(':checked'), 'currenttabletestsetting1', true);
+  const cbEdit = document.getElementById('cbEdit') as HTMLInputElement | null;
+  cbEdit?.addEventListener('change', function () {
+    toggleColumnVisibility(1, this.checked, 'currenttabletestsetting1', true);
   });
 
   // Status column (2)
-  $('#cbStatus').on('change', function () {
-    toggleColumnVisibility(2, $(this).is(':checked'), 'currenttabletestsetting2', true);
+  const cbStatus = document.getElementById('cbStatus') as HTMLInputElement | null;
+  cbStatus?.addEventListener('change', function () {
+    toggleColumnVisibility(2, this.checked, 'currenttabletestsetting2', true);
   });
 
   // Term column (3) - content visibility
-  $('#cbTerm').on('change', function () {
-    toggleContentVisibility(3, $(this).is(':checked'), 'currenttabletestsetting3');
+  const cbTerm = document.getElementById('cbTerm') as HTMLInputElement | null;
+  cbTerm?.addEventListener('change', function () {
+    toggleContentVisibility(3, this.checked, 'currenttabletestsetting3');
   });
 
   // Translation column (4) - content visibility
-  $('#cbTrans').on('change', function () {
-    toggleContentVisibility(4, $(this).is(':checked'), 'currenttabletestsetting4');
+  const cbTrans = document.getElementById('cbTrans') as HTMLInputElement | null;
+  cbTrans?.addEventListener('change', function () {
+    toggleContentVisibility(4, this.checked, 'currenttabletestsetting4');
   });
 
   // Romanization column (5)
-  $('#cbRom').on('change', function () {
-    toggleColumnVisibility(5, $(this).is(':checked'), 'currenttabletestsetting5', false);
+  const cbRom = document.getElementById('cbRom') as HTMLInputElement | null;
+  cbRom?.addEventListener('change', function () {
+    toggleColumnVisibility(5, this.checked, 'currenttabletestsetting5', false);
   });
 
   // Sentence column (6)
-  $('#cbSentence').on('change', function () {
-    toggleColumnVisibility(6, $(this).is(':checked'), 'currenttabletestsetting6', false);
+  const cbSentence = document.getElementById('cbSentence') as HTMLInputElement | null;
+  cbSentence?.addEventListener('change', function () {
+    toggleColumnVisibility(6, this.checked, 'currenttabletestsetting6', false);
   });
 
   // Click to reveal hidden text in cells
-  $('td').on('click', function () {
-    $(this).css('color', 'black').css('cursor', 'auto');
+  document.querySelectorAll<HTMLElement>('td').forEach((td) => {
+    td.addEventListener('click', function () {
+      this.style.color = 'black';
+      this.style.cursor = 'auto';
+    });
   });
 
   // Set white background for all cells
-  $('td').css('background-color', 'white');
+  document.querySelectorAll<HTMLElement>('td').forEach((td) => {
+    td.style.backgroundColor = 'white';
+  });
 
   // Trigger initial state from checkboxes
-  $('#cbEdit').trigger('change');
-  $('#cbStatus').trigger('change');
-  $('#cbTerm').trigger('change');
-  $('#cbTrans').trigger('change');
-  $('#cbRom').trigger('change');
-  $('#cbSentence').trigger('change');
+  cbEdit?.dispatchEvent(new Event('change'));
+  cbStatus?.dispatchEvent(new Event('change'));
+  cbTerm?.dispatchEvent(new Event('change'));
+  cbTrans?.dispatchEvent(new Event('change'));
+  cbRom?.dispatchEvent(new Event('change'));
+  cbSentence?.dispatchEvent(new Event('change'));
 }
 
 // Auto-initialize when DOM is ready if table test checkboxes exist
-$(document).ready(function () {
-  if ($('#cbEdit').length > 0) {
+document.addEventListener('DOMContentLoaded', function () {
+  if (document.getElementById('cbEdit')) {
     initTableTest();
   }
 });

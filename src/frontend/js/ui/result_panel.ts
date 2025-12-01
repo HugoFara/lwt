@@ -10,8 +10,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
-
 /**
  * Configuration options for showing the result panel.
  */

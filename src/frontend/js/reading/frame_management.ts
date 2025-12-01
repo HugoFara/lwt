@@ -6,8 +6,41 @@
  * @since   1.6.16-fork
  */
 
-import $ from 'jquery';
 import { cClick } from '../ui/word_popup';
+
+/**
+ * Animate an element's CSS property using requestAnimationFrame.
+ *
+ * @param el Element to animate
+ * @param property CSS property to animate
+ * @param targetValue Target value (e.g., '5px')
+ * @param duration Animation duration in ms
+ */
+function animateStyle(
+  el: HTMLElement,
+  property: 'right' | 'left' | 'top' | 'bottom',
+  targetValue: string,
+  duration: number = 300
+): void {
+  const startValue = parseFloat(getComputedStyle(el)[property]) || 0;
+  const endValue = parseFloat(targetValue);
+  const startTime = performance.now();
+
+  function step(currentTime: number): void {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease out cubic
+    const easeProgress = 1 - Math.pow(1 - progress, 3);
+    const currentValue = startValue + (endValue - startValue) * easeProgress;
+    el.style[property] = currentValue + 'px';
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
 
 /**
  * Show the right frames if found, and can load an URL in those frames
@@ -23,8 +56,9 @@ export function showRightFrames(roUrl?: string, ruUrl?: string): boolean {
   if (ruUrl !== undefined) {
     top!.frames['ru' as unknown as number].location.href = ruUrl;
   }
-  if ($('#frames-r').length) {
-    $('#frames-r').animate({ right: '5px' });
+  const framesR = document.getElementById('frames-r');
+  if (framesR) {
+    animateStyle(framesR, 'right', '5px');
     return true;
   }
   return false;
@@ -36,8 +70,11 @@ export function showRightFrames(roUrl?: string, ruUrl?: string): boolean {
  * @returns true if frames were found, false otherwise
  */
 export function hideRightFrames(): boolean {
-  if ($('#frames-r').length) {
-    $('#frames-r').animate({ right: '-100%' });
+  const framesR = document.getElementById('frames-r');
+  if (framesR) {
+    // Get the parent width to calculate -100%
+    const parentWidth = framesR.parentElement?.offsetWidth || window.innerWidth;
+    animateStyle(framesR, 'right', `-${parentWidth}px`);
     return true;
   }
   return false;
@@ -88,13 +125,18 @@ export function failureSound(): Promise<void> {
  * Handles clicks on elements with data-action="hide-right-frames".
  */
 export function initHideRightFramesHandler(): void {
-  $(document).on('click', '[data-action="hide-right-frames"]', function (e) {
-    // Only hide if clicking directly on the container, not on child iframes
-    if (e.target === this) {
+  document.addEventListener('click', function (e) {
+    const target = e.target as HTMLElement;
+    // Check if click is on an element with the data-action attribute
+    if (target.matches('[data-action="hide-right-frames"]')) {
       hideRightFrames();
     }
   });
 }
 
 // Auto-initialize when DOM is ready
-$(document).ready(initHideRightFramesHandler);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initHideRightFramesHandler);
+} else {
+  initHideRightFramesHandler();
+}

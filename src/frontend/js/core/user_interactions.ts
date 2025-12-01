@@ -134,51 +134,72 @@ export function newExpressionInteractable(
   // From each multi-word group
   for (const key in text) {
     // Remove any previous multi-word of same length + same position
-    $('#ID-' + key + '-' + length, context).remove();
+    const existingEl = context.getElementById('ID-' + key + '-' + length);
+    existingEl?.remove();
 
     // From text, select the first mword smaller than this one, or the first
     // word in this mword
     let next_term_key = '';
     for (let j = length - 1; j > 0; j--) {
       if (j === 1) { next_term_key = '#ID-' + key + '-1'; }
-      if ($('#ID-' + key + '-' + j, context).length) {
+      if (context.getElementById('ID-' + key + '-' + j)) {
         next_term_key = '#ID-' + key + '-' + j;
         break;
       }
     }
     // Add the multi-word marker before
-    $(next_term_key, context)
-      .before(
-        '<span id="ID-' + key + '-' + length + '"' + attrs + '>' + text[key] +
-            '</span>'
-      );
+    const nextTermEl = context.querySelector<HTMLElement>(next_term_key);
+    if (nextTermEl) {
+      const newSpan = document.createElement('span');
+      newSpan.id = 'ID-' + key + '-' + length;
+      // Parse and set attributes from attrs string
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = '<span ' + attrs + '></span>';
+      const tempSpan = tempDiv.firstElementChild;
+      if (tempSpan) {
+        Array.from(tempSpan.attributes).forEach(attr => {
+          newSpan.setAttribute(attr.name, attr.value);
+        });
+      }
+      newSpan.innerHTML = text[key];
+      nextTermEl.parentNode?.insertBefore(newSpan, nextTermEl);
+    }
 
     // Change multi-word properties
-    const multi_word = $('#ID-' + key + '-' + length, context);
-    multi_word.addClass('order' + key).attr('data_order', key);
-    const txt: string = multi_word
-      .nextUntil(
-        $('#ID-' + (parseInt(key) + length * 2 - 1) + '-1', context),
-        '[id$="-1"]'
-      )
-      .map(function () {
-        return $(this).text();
-      })
-      .get().join('');
-    const posAttr = $('#ID-' + key + '-1', context).attr('data_pos');
-    const pos: string = typeof posAttr === 'string' ? posAttr : '';
-    multi_word.attr('data_text', txt).attr('data_pos', pos);
+    const multi_word = context.getElementById('ID-' + key + '-' + length);
+    if (multi_word) {
+      multi_word.classList.add('order' + key);
+      multi_word.setAttribute('data_order', key);
+
+      // Get text from elements between this and the end
+      const endKey = parseInt(key) + length * 2 - 1;
+      const endEl = context.getElementById('ID-' + endKey + '-1');
+      let txt = '';
+      let currentEl: Element | null = multi_word.nextElementSibling;
+      while (currentEl && currentEl !== endEl) {
+        if (currentEl.id?.endsWith('-1')) {
+          txt += currentEl.textContent || '';
+        }
+        currentEl = currentEl.nextElementSibling;
+      }
+
+      const firstWordEl = context.getElementById('ID-' + key + '-1');
+      const pos: string = firstWordEl?.getAttribute('data_pos') || '';
+      multi_word.setAttribute('data_text', txt);
+      multi_word.setAttribute('data_pos', pos);
+    }
 
     // Hide the next words if necessary
     if (showallwords) {
       return;
     }
-    const next_words: string[] = [];
     // TODO: overlapsing multi-words
     for (let i = 0; i < length * 2 - 1; i++) {
-      next_words.push('span[id="ID-' + (parseInt(key) + i) + '-1"]');
+      const wordEl = context.querySelector<HTMLElement>('span[id="ID-' + (parseInt(key) + i) + '-1"]');
+      if (wordEl) {
+        wordEl.style.display = 'none';
+      }
     }
-    $(next_words.join(','), context).hide();
   }
 }
 
@@ -193,17 +214,21 @@ export function goToLastPosition(): void {
   // Element to scroll to
   let targetElement: HTMLElement | null = null;
   if (lookPos > 0) {
-    const posObj = $('.wsty[data_pos=' + lookPos + ']').not('.hide').eq(0);
-    if (posObj.attr('data_pos') === undefined) {
-      const found = $('.wsty').not('.hide').filter(function () {
-        const dataPosAttr = $(this).attr('data_pos');
-        return parseInt(typeof dataPosAttr === 'string' ? dataPosAttr : '0', 10) <= lookPos;
-      }).eq(-1);
-      if (found.length > 0) {
-        targetElement = found[0] as HTMLElement;
+    // Find element with matching data_pos
+    const allWsty = Array.from(document.querySelectorAll<HTMLElement>('.wsty:not(.hide)'));
+    const exactMatch = allWsty.find(el => el.getAttribute('data_pos') === String(lookPos));
+
+    if (!exactMatch) {
+      // Find the last element with data_pos <= lookPos
+      const filtered = allWsty.filter(el => {
+        const dataPosAttr = el.getAttribute('data_pos');
+        return parseInt(dataPosAttr || '0', 10) <= lookPos;
+      });
+      if (filtered.length > 0) {
+        targetElement = filtered[filtered.length - 1];
       }
-    } else if (posObj.length > 0) {
-      targetElement = posObj[0] as HTMLElement;
+    } else {
+      targetElement = exactMatch;
     }
   }
   if (targetElement) {
@@ -225,20 +250,26 @@ export function goToLastPosition(): void {
  * @since 2.9.0-fork
  */
 export function saveReadingPosition(text_id: number, position: number): void {
-  $.post(
-    'api.php/v1/texts/' + text_id + '/reading-position',
-    { position: position }
-  );
+  fetch('api.php/v1/texts/' + text_id + '/reading-position', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: 'position=' + encodeURIComponent(position)
+  });
 }
 
 /**
  * Save audio position
  */
 export function saveAudioPosition(text_id: number, pos: number): void {
-  $.post(
-    'api.php/v1/texts/' + text_id + '/audio-position',
-    { position: pos }
-  );
+  fetch('api.php/v1/texts/' + text_id + '/audio-position', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: 'position=' + encodeURIComponent(pos)
+  });
 }
 
 /**
@@ -250,19 +281,16 @@ export function saveAudioPosition(text_id: number, pos: number): void {
 export function getPhoneticTextAsync(
   text: string,
   lang: string | number
-): JQuery.jqXHR<{ phonetic_reading: string }> {
-  const parameters: { text: string; lang?: string; lang_id?: number } = {
-    text: text
-  };
+): Promise<{ phonetic_reading: string }> {
+  const params = new URLSearchParams();
+  params.append('text', text);
   if (typeof lang === 'number') {
-    parameters.lang_id = lang;
+    params.append('lang_id', String(lang));
   } else {
-    parameters.lang = lang;
+    params.append('lang', lang);
   }
-  return $.getJSON(
-    'api.php/v1/phonetic-reading',
-    parameters
-  );
+  return fetch('api.php/v1/phonetic-reading?' + params.toString())
+    .then(response => response.json());
 }
 
 /**
@@ -504,16 +532,19 @@ export function handleReadingConfiguration(
  *
  * @param term Text to be read aloud
  * @param lang_id Language ID
- * @returns jQuery AJAX promise
+ * @returns Promise resolving when the fetch completes
  */
 export function speechDispatcher(
   term: string,
   lang_id: number
-): JQuery.jqXHR<ReadingConfiguration> {
-  return $.getJSON(
-    'api.php/v1/languages/' + lang_id + '/reading-configuration',
-    { lang_id },
-    (data: ReadingConfiguration) => handleReadingConfiguration(data, term, lang_id)
-  );
-}
+): Promise<ReadingConfiguration> {
+  const params = new URLSearchParams();
+  params.append('lang_id', String(lang_id));
 
+  return fetch('api.php/v1/languages/' + lang_id + '/reading-configuration?' + params.toString())
+    .then(response => response.json())
+    .then((data: ReadingConfiguration) => {
+      handleReadingConfiguration(data, term, lang_id);
+      return data;
+    });
+}

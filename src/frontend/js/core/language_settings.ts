@@ -6,7 +6,6 @@
  * @since   2.10.0-fork Extracted from legacy/pgm.ts
  */
 
-import $ from 'jquery';
 import { showRightFrames } from '../reading/frame_management';
 
 /**
@@ -27,14 +26,18 @@ export function setLang(ctl: HTMLSelectElement, url: string): void {
  * Handles elements with data-action="set-lang".
  */
 function initSetLangEventDelegation(): void {
-  $(document).on('change', '[data-action="set-lang"]', function (this: HTMLSelectElement) {
-    const redirectUrl = this.dataset.redirect || '/';
-    setLang(this, redirectUrl);
+  document.addEventListener('change', function (e) {
+    const target = e.target as HTMLElement;
+    if (target.matches('[data-action="set-lang"]')) {
+      const selectEl = target as HTMLSelectElement;
+      const redirectUrl = selectEl.dataset.redirect || '/';
+      setLang(selectEl, redirectUrl);
+    }
   });
 }
 
 // Auto-initialize when DOM is ready
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
   initSetLangEventDelegation();
 });
 

@@ -9,7 +9,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
 import { make_tooltip } from '../terms/word_status';
 import { cleanupRightFrames } from '../reading/frame_management';
 import { LWT_DATA } from '../core/lwt_state';
@@ -54,9 +53,9 @@ export function isJQueryTooltipEnabled(): boolean {
  */
 export function updateLearnStatus(content: string): void {
   const context = getParentContext();
-  const learnStatus = $('#learnstatus', context);
-  if (learnStatus.length) {
-    learnStatus.html(content);
+  const learnStatus = context.getElementById('learnstatus');
+  if (learnStatus) {
+    learnStatus.innerHTML = content;
   }
 }
 
@@ -103,14 +102,15 @@ export function updateNewWordInDOM(params: WordUpdateParams): void {
   const context = getParentContext();
   const title = generateTooltip(text, translation, romanization, status);
 
-  $(`.TERM${hex}`, context)
-    .removeClass('status0')
-    .addClass(`word${wid} status${status}`)
-    .attr('data_trans', translation)
-    .attr('data_rom', romanization)
-    .attr('data_status', String(status))
-    .attr('data_wid', String(wid))
-    .attr('title', title);
+  context.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
+    el.classList.remove('status0');
+    el.classList.add(`word${wid}`, `status${status}`);
+    el.setAttribute('data_trans', translation);
+    el.setAttribute('data_rom', romanization);
+    el.setAttribute('data_status', String(status));
+    el.setAttribute('data_wid', String(wid));
+    el.title = title;
+  });
 }
 
 /**
@@ -125,13 +125,14 @@ export function updateExistingWordInDOM(params: WordUpdateParams, oldStatus: num
   const context = getParentContext();
   const title = generateTooltip(text, translation, romanization, status);
 
-  $(`.word${wid}`, context)
-    .removeClass(`status${oldStatus}`)
-    .addClass(`status${status}`)
-    .attr('data_trans', translation)
-    .attr('data_rom', romanization)
-    .attr('data_status', String(status))
-    .attr('title', title);
+  context.querySelectorAll<HTMLElement>(`.word${wid}`).forEach(el => {
+    el.classList.remove(`status${oldStatus}`);
+    el.classList.add(`status${status}`);
+    el.setAttribute('data_trans', translation);
+    el.setAttribute('data_rom', romanization);
+    el.setAttribute('data_status', String(status));
+    el.title = title;
+  });
 }
 
 /**
@@ -155,11 +156,12 @@ export function updateWordStatusInDOM(
 
   const title = generateTooltip(word, translation, romanization, status);
 
-  $(`.word${wid}`, frameL)
-    .removeClass('status98 status99 status1 status2 status3 status4 status5')
-    .addClass(`status${status}`)
-    .attr('data_status', String(status))
-    .attr('title', title);
+  frameL.querySelectorAll<HTMLElement>(`.word${wid}`).forEach(el => {
+    el.classList.remove('status98', 'status99', 'status1', 'status2', 'status3', 'status4', 'status5');
+    el.classList.add(`status${status}`);
+    el.setAttribute('data_status', String(status));
+    el.title = title;
+  });
 }
 
 /**
@@ -170,26 +172,26 @@ export function updateWordStatusInDOM(
  */
 export function deleteWordFromDOM(wid: number, term: string): void {
   const context = getParentContext();
-  const elem = $(`.word${wid}`, context);
 
-  let title = '';
-  if (!isJQueryTooltipEnabled()) {
-    const ann = elem.attr('data_ann') ?? '';
-    const trans = elem.attr('data_trans') ?? '';
-    const rom = elem.attr('data_rom') ?? '';
-    const combinedTrans = ann + (ann ? ' / ' : '') + trans;
-    title = make_tooltip(term, combinedTrans, rom, '0');
-  }
+  context.querySelectorAll<HTMLElement>(`.word${wid}`).forEach(elem => {
+    let title = '';
+    if (!isJQueryTooltipEnabled()) {
+      const ann = elem.getAttribute('data_ann') ?? '';
+      const trans = elem.getAttribute('data_trans') ?? '';
+      const rom = elem.getAttribute('data_rom') ?? '';
+      const combinedTrans = ann + (ann ? ' / ' : '') + trans;
+      title = make_tooltip(term, combinedTrans, rom, '0');
+    }
 
-  elem
-    .removeClass('status99 status98 status1 status2 status3 status4 status5 word' + wid)
-    .addClass('status0')
-    .attr('data_status', '0')
-    .attr('data_trans', '')
-    .attr('data_rom', '')
-    .attr('data_wid', '')
-    .attr('title', title)
-    .removeAttr('data_img');
+    elem.classList.remove('status99', 'status98', 'status1', 'status2', 'status3', 'status4', 'status5', `word${wid}`);
+    elem.classList.add('status0');
+    elem.setAttribute('data_status', '0');
+    elem.setAttribute('data_trans', '');
+    elem.setAttribute('data_rom', '');
+    elem.setAttribute('data_wid', '');
+    elem.title = title;
+    elem.removeAttribute('data_img');
+  });
 }
 
 /**
@@ -205,12 +207,13 @@ export function markWordWellKnownInDOM(wid: number, hex: string, term: string): 
 
   const title = make_tooltip(term, '*', '', '99');
 
-  $(`.TERM${hex}`, frameL)
-    .removeClass('status0')
-    .addClass(`status99 word${wid}`)
-    .attr('data_status', '99')
-    .attr('data_wid', String(wid))
-    .attr('title', title);
+  frameL.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
+    el.classList.remove('status0');
+    el.classList.add('status99', `word${wid}`);
+    el.setAttribute('data_status', '99');
+    el.setAttribute('data_wid', String(wid));
+    el.title = title;
+  });
 }
 
 /**
@@ -226,12 +229,13 @@ export function markWordIgnoredInDOM(wid: number, hex: string, term: string): vo
 
   const title = make_tooltip(term, '*', '', '98');
 
-  $(`.TERM${hex}`, frameL)
-    .removeClass('status0')
-    .addClass(`status98 word${wid}`)
-    .attr('data_status', '98')
-    .attr('data_wid', String(wid))
-    .attr('title', title);
+  frameL.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
+    el.classList.remove('status0');
+    el.classList.add('status98', `word${wid}`);
+    el.setAttribute('data_status', '98');
+    el.setAttribute('data_wid', String(wid));
+    el.title = title;
+  });
 }
 
 /**
@@ -255,13 +259,14 @@ export function updateMultiWordInDOM(
   const context = getParentContext();
   const title = generateTooltip(text, translation, romanization, status);
 
-  $(`.word${wid}`, context)
-    .attr('data_trans', translation)
-    .attr('data_rom', romanization)
-    .attr('title', title)
-    .removeClass(`status${oldStatus}`)
-    .addClass(`status${status}`)
-    .attr('data_status', String(status));
+  context.querySelectorAll<HTMLElement>(`.word${wid}`).forEach(el => {
+    el.setAttribute('data_trans', translation);
+    el.setAttribute('data_rom', romanization);
+    el.title = title;
+    el.classList.remove(`status${oldStatus}`);
+    el.classList.add(`status${status}`);
+    el.setAttribute('data_status', String(status));
+  });
 }
 
 /**
@@ -273,18 +278,29 @@ export function updateMultiWordInDOM(
 export function deleteMultiWordFromDOM(wid: number, showAll: boolean): void {
   const context = getParentContext();
 
-  $(`.word${wid}`, context).each(function () {
-    const sid = $(this).parent();
-    $(this).remove();
+  context.querySelectorAll<HTMLElement>(`.word${wid}`).forEach(wordEl => {
+    const sid = wordEl.parentElement;
+    wordEl.remove();
 
-    if (!showAll) {
-      sid.find('*').removeClass('hide');
-      sid.find('.mword').each(function () {
-        if ($(this).not('.hide').length) {
-          const code = parseInt($(this).attr('data_code') ?? '0', 10);
-          const order = parseInt($(this).attr('data_order') ?? '0', 10);
+    if (!showAll && sid) {
+      // Show all hidden elements
+      sid.querySelectorAll<HTMLElement>('*').forEach(el => {
+        el.classList.remove('hide');
+      });
+
+      // Re-hide elements based on multi-word expression rules
+      sid.querySelectorAll<HTMLElement>('.mword').forEach(mword => {
+        if (!mword.classList.contains('hide')) {
+          const code = parseInt(mword.getAttribute('data_code') ?? '0', 10);
+          const order = parseInt(mword.getAttribute('data_order') ?? '0', 10);
           const u = code * 2 + order - 1;
-          $(this).nextUntil(`[id^="ID-${u}-"]`).addClass('hide');
+
+          // Hide all siblings until we find the end marker
+          let sibling = mword.nextElementSibling as HTMLElement | null;
+          while (sibling && !sibling.id?.startsWith(`ID-${u}-`)) {
+            sibling.classList.add('hide');
+            sibling = sibling.nextElementSibling as HTMLElement | null;
+          }
         }
       });
     }
@@ -308,27 +324,24 @@ export interface BulkWordUpdateParams {
 export function updateBulkWordInDOM(term: BulkWordUpdateParams, useTooltip: boolean): void {
   const context = getParentContext();
 
-  $(`.TERM${term.hex}`, context)
-    .removeClass('status0')
-    .addClass(`status${term.WoStatus}`)
-    .addClass(`word${term.WoID}`)
-    .attr('data_wid', String(term.WoID))
-    .attr('data_status', String(term.WoStatus))
-    .attr('data_trans', term.translation);
+  context.querySelectorAll<HTMLElement>(`.TERM${term.hex}`).forEach(el => {
+    el.classList.remove('status0');
+    el.classList.add(`status${term.WoStatus}`, `word${term.WoID}`);
+    el.setAttribute('data_wid', String(term.WoID));
+    el.setAttribute('data_status', String(term.WoStatus));
+    el.setAttribute('data_trans', term.translation);
 
-  if (useTooltip) {
-    $(`.TERM${term.hex}`, context).each(function () {
-      const $el = $(this);
-      this.title = make_tooltip(
-        $el.text(),
-        $el.attr('data_trans') ?? '',
-        $el.attr('data_rom') ?? '',
-        $el.attr('data_status') ?? '0'
+    if (useTooltip) {
+      el.title = make_tooltip(
+        el.textContent || '',
+        el.getAttribute('data_trans') ?? '',
+        el.getAttribute('data_rom') ?? '',
+        el.getAttribute('data_status') ?? '0'
       );
-    });
-  } else {
-    $(`.TERM${term.hex}`, context).attr('title', '');
-  }
+    } else {
+      el.title = '';
+    }
+  });
 }
 
 /**
@@ -354,13 +367,14 @@ export function updateHoverSaveInDOM(
     title = make_tooltip(wordRaw, translation, '', String(status));
   }
 
-  $(`.TERM${hex}`, context)
-    .removeClass('status0')
-    .addClass(`status${status} word${wid}`)
-    .attr('data_status', String(status))
-    .attr('data_wid', String(wid))
-    .attr('title', title)
-    .attr('data_trans', translation);
+  context.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
+    el.classList.remove('status0');
+    el.classList.add(`status${status}`, `word${wid}`);
+    el.setAttribute('data_status', String(status));
+    el.setAttribute('data_wid', String(wid));
+    el.title = title;
+    el.setAttribute('data_trans', translation);
+  });
 }
 
 /**
@@ -381,11 +395,12 @@ export function updateTestWordInDOM(
 ): void {
   const context = getParentContext();
 
-  $(`.word${wid}`, context)
-    .attr('data_text', text)
-    .attr('data_trans', translation)
-    .attr('data_rom', romanization)
-    .attr('data_status', String(status));
+  context.querySelectorAll<HTMLElement>(`.word${wid}`).forEach(el => {
+    el.setAttribute('data_text', text);
+    el.setAttribute('data_trans', translation);
+    el.setAttribute('data_rom', romanization);
+    el.setAttribute('data_status', String(status));
+  });
 }
 
 /**

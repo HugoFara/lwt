@@ -6,8 +6,6 @@
  * @since   1.6.16-fork
  */
 
-import $ from 'jquery';
-import { LWT_DATA } from './lwt_state';
 import { check } from '../forms/form_validation';
 import { changeImprAnnText, changeImprAnnRadio, do_ajax_show_similar_terms } from '../terms/term_operations';
 import { readRawTextAloud } from './user_interactions';
@@ -16,20 +14,11 @@ import { initInlineEdit } from '../ui/inline_edit';
 import { initTermTags, initTextTags } from '../ui/tagify_tags';
 import { fetchTermTags, fetchTextTags } from './app_data';
 
-// Extend jQuery with custom methods
-declare global {
-  interface JQuery {
-    serializeObject(): Record<string, unknown>;
-  }
-}
-
-
-
 /**
  * Helper to safely get an HTML attribute value as a string.
  */
-function getAttr($el: JQuery, attr: string): string {
-  const val = $el.attr(attr);
+function getAttr(el: HTMLElement, attr: string): string {
+  const val = el.getAttribute(attr);
   return typeof val === 'string' ? val : '';
 }
 
@@ -104,10 +93,14 @@ function initFrameResizable(): void {
  * Enables the button if at least one checkbox with class 'markcheck' is checked.
  */
 export function markClick(): void {
-  if ($('input.markcheck:checked').length > 0) {
-    $('#markaction').removeAttr('disabled');
-  } else {
-    $('#markaction').attr('disabled', 'disabled');
+  const checkedCount = document.querySelectorAll('input.markcheck:checked').length;
+  const markAction = document.getElementById('markaction') as HTMLButtonElement | null;
+  if (markAction) {
+    if (checkedCount > 0) {
+      markAction.removeAttribute('disabled');
+    } else {
+      markAction.setAttribute('disabled', 'disabled');
+    }
   }
 }
 
@@ -125,9 +118,13 @@ export function confirmDelete(): boolean {
  * Function called when clicking on "Show All".
  */
 export function showAllwordsClick(): void {
-  const showAll = $('#showallwords').prop('checked') ? '1' : '0';
-  const showLeaning = $('#showlearningtranslations').prop('checked') ? '1' : '0';
-  const text = $('#thetextid').text();
+  const showAllEl = document.getElementById('showallwords') as HTMLInputElement | null;
+  const showLearningEl = document.getElementById('showlearningtranslations') as HTMLInputElement | null;
+  const textEl = document.getElementById('thetextid');
+
+  const showAll = showAllEl?.checked ? '1' : '0';
+  const showLeaning = showLearningEl?.checked ? '1' : '0';
+  const text = textEl?.textContent || '';
   // Timeout necessary because the button is clicked on the left (would hide frames)
   setTimeout(function () {
     (window as unknown as { showRightFrames: (url: string) => void }).showRightFrames(
@@ -205,41 +202,59 @@ export function initHideMessages(): void {
  * Set the focus on an element with the "focus" class.
  */
 export function setTheFocus(): void {
-  $('.setfocus')
-    .trigger('focus')
-    .trigger('select');
+  const focusEl = document.querySelector<HTMLInputElement | HTMLTextAreaElement>('.setfocus');
+  if (focusEl) {
+    focusEl.focus();
+    focusEl.select();
+  }
 }
 
-// Present data in a handy way, for instance in a form
-$.fn.serializeObject = function (this: JQuery): Record<string, unknown> {
+/**
+ * Serialize a form into an object with key-value pairs.
+ * Replaces jQuery's serializeObject plugin.
+ *
+ * @param form The form element to serialize
+ * @returns Object with form field names as keys and values
+ */
+export function serializeFormToObject(form: HTMLFormElement): Record<string, unknown> {
   const o: Record<string, unknown> = {};
-  const a = this.serializeArray();
-  $.each(a, function () {
-    if (o[this.name] !== undefined) {
-      if (!Array.isArray(o[this.name])) {
-        o[this.name] = [o[this.name]];
+  const formData = new FormData(form);
+
+  formData.forEach((value, key) => {
+    if (o[key] !== undefined) {
+      if (!Array.isArray(o[key])) {
+        o[key] = [o[key]];
       }
-      (o[this.name] as unknown[]).push(this.value || '');
+      (o[key] as unknown[]).push(value || '');
     } else {
-      o[this.name] = this.value || '';
+      o[key] = value || '';
     }
   });
+
   return o;
-};
+}
 
 /**
  * Wrap the radio buttons into stylised elements.
  */
 export function wrapRadioButtons(): void {
-  $(
-    ':input,.wrap_checkbox span,.wrap_radio span,a:not([name^=rec]),select,' +
-    '#mediaselect span.click,#forwbutt,#backbutt'
-  ).each(function (i) { $(this).attr('tabindex', i + 1); });
-  $('.wrap_radio span').on('keydown', function (e) {
-    if (e.keyCode === 32) {
-      $(this).parent().parent().find('input[type=radio]').trigger('click');
-      return false;
-    }
+  let tabIndex = 1;
+  const tabElements = document.querySelectorAll<HTMLElement>(
+    ':is(input, .wrap_checkbox span, .wrap_radio span, select, ' +
+    '#mediaselect span.click, #forwbutt, #backbutt), a:not([name^=rec])'
+  );
+  tabElements.forEach((el) => {
+    el.setAttribute('tabindex', String(tabIndex++));
+  });
+
+  document.querySelectorAll<HTMLElement>('.wrap_radio span').forEach((span) => {
+    span.addEventListener('keydown', function (e) {
+      if (e.keyCode === 32) {
+        const radioInput = this.closest('label')?.parentElement?.querySelector('input[type=radio]') as HTMLInputElement | null;
+        radioInput?.click();
+        e.preventDefault();
+      }
+    });
   });
 }
 
@@ -257,109 +272,187 @@ export function prepareMainAreas(): void {
     cols: 35,
     indicator: '<img src="/assets/icons/indicator.gif" alt="Saving...">'
   });
-  $('select').wrap("<label class='wrap_select'></label>");
-  $('form').attr('autocomplete', 'off');
-  $('input[type="file"]').each(function () {
-    if (!$(this).is(':visible')) {
-      $(this).before('<button class="button-file">Choose File</button>')
-        .after('<span style="position:relative" class="fakefile"></span>')
-        .on('change', function () {
-          let txt = (this as HTMLInputElement).value.replace('C:\\fakepath\\', '');
-          if (txt.length > 85) txt = txt.replace(/.*(.{80})$/, ' ... $1');
-          $(this).next().text(txt);
-        })
-        .on('onmouseout', function () {
-          let txt = (this as HTMLInputElement).value.replace('C:\\fakepath\\', '');
-          if (txt.length > 85) txt = txt.replace(/.*(.{80})$/, ' ... $1');
-          $(this).next().text(txt);
-        });
+
+  // Wrap selects
+  document.querySelectorAll<HTMLSelectElement>('select').forEach((select) => {
+    const label = document.createElement('label');
+    label.className = 'wrap_select';
+    select.parentNode?.insertBefore(label, select);
+    label.appendChild(select);
+  });
+
+  // Disable autocomplete on forms
+  document.querySelectorAll<HTMLFormElement>('form').forEach((form) => {
+    form.setAttribute('autocomplete', 'off');
+  });
+
+  // Handle file inputs
+  document.querySelectorAll<HTMLInputElement>('input[type="file"]').forEach((fileInput) => {
+    if (fileInput.offsetParent === null) { // Not visible
+      const button = document.createElement('button');
+      button.className = 'button-file';
+      button.textContent = 'Choose File';
+      button.type = 'button';
+
+      const fakeFile = document.createElement('span');
+      fakeFile.className = 'fakefile';
+      fakeFile.style.position = 'relative';
+
+      fileInput.parentNode?.insertBefore(button, fileInput);
+      fileInput.parentNode?.insertBefore(fakeFile, fileInput.nextSibling);
+
+      const updateText = () => {
+        let txt = fileInput.value.replace('C:\\fakepath\\', '');
+        if (txt.length > 85) txt = txt.replace(/.*(.{80})$/, ' ... $1');
+        fakeFile.textContent = txt;
+      };
+
+      fileInput.addEventListener('change', updateText);
+      fileInput.addEventListener('mouseout', updateText);
     }
   });
+
+  // Handle checkboxes
   let cbIndex = 1;
-  $('input[type="checkbox"]').each(function () {
-    if (typeof $(this).attr('id') === 'undefined') {
-      $(this).attr('id', 'cb_' + cbIndex++);
+  document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach((checkbox) => {
+    if (!checkbox.id) {
+      checkbox.id = 'cb_' + cbIndex++;
     }
-    $(this).after(
-      '<label class="wrap_checkbox" for="' + $(this).attr('id') +
-      '"><span></span></label>'
-    );
+    const label = document.createElement('label');
+    label.className = 'wrap_checkbox';
+    label.setAttribute('for', checkbox.id);
+    label.innerHTML = '<span></span>';
+    checkbox.parentNode?.insertBefore(label, checkbox.nextSibling);
   });
-  $('span[class*="tts_"]').on('click', function () {
-    const classAttr = getAttr($(this), 'class');
-    const lg = classAttr.replace(/.*tts_([a-zA-Z-]+).*/, '$1');
-    const txt = $(this).text();
-    readRawTextAloud(txt, lg);
+
+  // Handle TTS spans
+  document.querySelectorAll<HTMLElement>('span[class*="tts_"]').forEach((span) => {
+    span.addEventListener('click', function () {
+      const classAttr = getAttr(this, 'class');
+      const lg = classAttr.replace(/.*tts_([a-zA-Z-]+).*/, '$1');
+      const txt = this.textContent || '';
+      readRawTextAloud(txt, lg);
+    });
   });
-  $(document).on('mouseup', function () {
-    $('button,input[type=button],.wrap_radio span,.wrap_checkbox span')
-      .trigger('blur');
+
+  // Blur buttons on mouseup
+  document.addEventListener('mouseup', function () {
+    document.querySelectorAll<HTMLElement>(
+      'button, input[type=button], .wrap_radio span, .wrap_checkbox span'
+    ).forEach((el) => {
+      (el as HTMLElement).blur();
+    });
   });
-  $('.wrap_checkbox span').on('keydown', function (e) {
-    if (e.keyCode === 32) {
-      $(this).parent().parent().find('input[type=checkbox]').trigger('click');
-      return false;
-    }
+
+  // Handle checkbox wrapper keyboard interaction
+  document.querySelectorAll<HTMLElement>('.wrap_checkbox span').forEach((span) => {
+    span.addEventListener('keydown', function (e) {
+      if (e.keyCode === 32) {
+        const checkbox = this.closest('label')?.parentElement?.querySelector('input[type=checkbox]') as HTMLInputElement | null;
+        checkbox?.click();
+        e.preventDefault();
+      }
+    });
   });
+
+  // Handle radio buttons
   let rbIndex = 1;
-  $('input[type="radio"]').each(function () {
-    if (typeof $(this).attr('id') === 'undefined') {
-      $(this).attr('id', 'rb_' + rbIndex++);
+  document.querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach((radio) => {
+    if (!radio.id) {
+      radio.id = 'rb_' + rbIndex++;
     }
-    $(this).after(
-      '<label class="wrap_radio" for="' + $(this).attr('id') +
-      '"><span></span></label>'
-    );
+    const label = document.createElement('label');
+    label.className = 'wrap_radio';
+    label.setAttribute('for', radio.id);
+    label.innerHTML = '<span></span>';
+    radio.parentNode?.insertBefore(label, radio.nextSibling);
   });
-  $('.button-file').on('click', function () {
-    $(this).next('input[type="file"]').trigger('click');
-    return false;
-  });
-  $('input.impr-ann-text').on('change', changeImprAnnText);
-  $('input.impr-ann-radio').on('change', changeImprAnnRadio);
-  $('form.validate').on('submit', check);
-  $('input.markcheck').on('click', markClick);
-  $('.confirmdelete').on('click', confirmDelete);
-  $('textarea.textarea-noreturn').on('keydown', function (e) {
-    if (e.keyCode === 13) {
-      if (check()) { $('input:submit').last().trigger('click'); }
+
+  // Handle file button clicks
+  document.querySelectorAll<HTMLButtonElement>('.button-file').forEach((button) => {
+    button.addEventListener('click', function () {
+      const fileInput = this.nextElementSibling as HTMLInputElement | null;
+      if (fileInput?.type === 'file') {
+        fileInput.click();
+      }
       return false;
-    }
-    return true;
+    });
   });
+
+  // Annotation event handlers
+  document.querySelectorAll<HTMLInputElement>('input.impr-ann-text').forEach((input) => {
+    input.addEventListener('change', changeImprAnnText);
+  });
+
+  document.querySelectorAll<HTMLInputElement>('input.impr-ann-radio').forEach((input) => {
+    input.addEventListener('change', changeImprAnnRadio);
+  });
+
+  // Form validation
+  document.querySelectorAll<HTMLFormElement>('form.validate').forEach((form) => {
+    form.addEventListener('submit', check);
+  });
+
+  // Mark checkbox clicks
+  document.querySelectorAll<HTMLInputElement>('input.markcheck').forEach((input) => {
+    input.addEventListener('click', markClick);
+  });
+
+  // Confirm delete buttons
+  document.querySelectorAll<HTMLElement>('.confirmdelete').forEach((el) => {
+    el.addEventListener('click', confirmDelete);
+  });
+
+  // Textarea no-return handling
+  document.querySelectorAll<HTMLTextAreaElement>('textarea.textarea-noreturn').forEach((textarea) => {
+    textarea.addEventListener('keydown', function (e) {
+      if (e.keyCode === 13) {
+        if (check()) {
+          const submitBtn = document.querySelector<HTMLInputElement>('input:submit:last-of-type');
+          submitBtn?.click();
+        }
+        e.preventDefault();
+      }
+    });
+  });
+
   // Resizable from right frames (native implementation)
   initFrameResizable();
+
   // Initialize Tagify for term and text tags
   // Tags are fetched from API asynchronously
-  if ($('#termtags').length > 0) {
+  if (document.getElementById('termtags')) {
     fetchTermTags().then(tags => {
       if (tags.length > 0) {
         initTermTags(tags);
       }
     });
   }
-  if ($('#texttags').length > 0) {
+
+  if (document.getElementById('texttags')) {
     fetchTextTags().then(tags => {
       if (tags.length > 0) {
         initTextTags(tags);
       }
     });
   }
+
   markClick();
   setTheFocus();
-  if (
-    $('#simwords').length > 0 && $('#langfield').length > 0 &&
-    $('#wordfield').length > 0
-  ) {
-    $('#wordfield').on('blur', do_ajax_show_similar_terms);
+
+  const simWords = document.getElementById('simwords');
+  const langField = document.getElementById('langfield');
+  const wordField = document.getElementById('wordfield');
+  if (simWords && langField && wordField) {
+    wordField.addEventListener('blur', do_ajax_show_similar_terms);
     do_ajax_show_similar_terms();
   }
+
   window.setTimeout(noShowAfter3Secs, 3000);
   // Auto-dismiss messages with hide_message class
   initHideMessages();
 }
 
-$(window).on('load', wrapRadioButtons);
+window.addEventListener('load', wrapRadioButtons);
 
-$(document).ready(prepareMainAreas);
-
+document.addEventListener('DOMContentLoaded', prepareMainAreas);

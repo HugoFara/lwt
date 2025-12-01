@@ -6,7 +6,6 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import $ from 'jquery';
 import { escape_html_chars } from '../core/html_utils';
 import { STATUSES } from '../core/app_data';
 import type { WordStatus } from '../types/globals';
@@ -44,12 +43,15 @@ interface ImportedTermsResponse {
  * @param value Import mode value (0-5)
  */
 export function updateImportMode(value: string | number): void {
+  const impTranslDelim = document.getElementById('imp_transl_delim');
+  const impTranslDelimInput = impTranslDelim?.querySelector('input');
+
   if (parseInt(String(value), 10) > 3) {
-    $('#imp_transl_delim').removeClass('hide');
-    $('#imp_transl_delim input').addClass('notempty');
+    impTranslDelim?.classList.remove('hide');
+    impTranslDelimInput?.classList.add('notempty');
   } else {
-    $('#imp_transl_delim input').removeClass('notempty');
-    $('#imp_transl_delim').addClass('hide');
+    impTranslDelimInput?.classList.remove('notempty');
+    impTranslDelim?.classList.add('hide');
   }
 }
 
@@ -67,7 +69,8 @@ function formatImportedTermsNavigation(
 ): void {
   const currentPage = parseInt(String(data.current_page), 10);
   const totalPages = parseInt(String(data.total_pages), 10);
-  const importedTerms = parseInt($('#recno').text(), 10);
+  const recnoEl = document.getElementById('recno');
+  const importedTerms = parseInt(recnoEl?.textContent || '0', 10);
 
   const showOtherPage = function (pageNumber: number) {
     return function () {
@@ -75,48 +78,85 @@ function formatImportedTermsNavigation(
     };
   };
 
-  if (currentPage > 1) {
-    $('#res_data-navigation-prev').css('display', 'initial');
-  } else {
-    $('#res_data-navigation-prev').css('display', 'none');
+  const prevNav = document.getElementById('res_data-navigation-prev');
+  if (prevNav) {
+    prevNav.style.display = currentPage > 1 ? 'initial' : 'none';
   }
-  $('#res_data-navigation-prev-first').off('click').on('click', showOtherPage(1));
-  $('#res_data-navigation-prev-minus').off('click').on('click', showOtherPage(currentPage - 1));
+
+  const prevFirst = document.getElementById('res_data-navigation-prev-first');
+  const prevMinus = document.getElementById('res_data-navigation-prev-minus');
+
+  // Clone and replace to remove old event listeners
+  if (prevFirst) {
+    const newPrevFirst = prevFirst.cloneNode(true) as HTMLElement;
+    prevFirst.parentNode?.replaceChild(newPrevFirst, prevFirst);
+    newPrevFirst.addEventListener('click', showOtherPage(1));
+  }
+
+  if (prevMinus) {
+    const newPrevMinus = prevMinus.cloneNode(true) as HTMLElement;
+    prevMinus.parentNode?.replaceChild(newPrevMinus, prevMinus);
+    newPrevMinus.addEventListener('click', showOtherPage(currentPage - 1));
+  }
+
+  const quickNav = document.getElementById('res_data-navigation-quick_nav') as HTMLSelectElement | null;
+  const noQuickNav = document.getElementById('res_data-navigation-no_quick_nav');
 
   if (totalPages === 1) {
-    $('#res_data-navigation-quick_nav').css('display', 'none');
-    $('#res_data-navigation-no_quick_nav').css('display', 'initial');
+    if (quickNav) quickNav.style.display = 'none';
+    if (noQuickNav) noQuickNav.style.display = 'initial';
   } else {
-    $('#res_data-navigation-quick_nav').css('display', 'initial');
-    $('#res_data-navigation-no_quick_nav').css('display', 'none');
+    if (quickNav) quickNav.style.display = 'initial';
+    if (noQuickNav) noQuickNav.style.display = 'none';
   }
 
-  let options = '';
-  for (let i = 1; i < totalPages + 1; i++) {
-    options += '<option value="' + i + '"' +
-      (i === currentPage ? ' selected="selected"' : '') + '>' + i +
-      '</option>';
-  }
-  $('#res_data-navigation-quick_nav').html(options);
-  $('#res_data-navigation-quick_nav').off('change').on('change', function () {
-    const form = document.forms.namedItem('form1') as HTMLFormElement | null;
-    if (form) {
-      const pageSelect = form.elements.namedItem('page') as HTMLSelectElement | null;
-      if (pageSelect) {
-        showImportedTerms(lastUpdate, rtl, importedTerms, parseInt(pageSelect.value, 10));
-      }
+  if (quickNav) {
+    let options = '';
+    for (let i = 1; i < totalPages + 1; i++) {
+      options += '<option value="' + i + '"' +
+        (i === currentPage ? ' selected="selected"' : '') + '>' + i +
+        '</option>';
     }
-  });
+    quickNav.innerHTML = options;
 
-  $('#res_data-navigation-totalPages').text(totalPages);
-
-  if (currentPage < totalPages) {
-    $('#res_data-navigation-next').css('display', 'initial');
-  } else {
-    $('#res_data-navigation-next').css('display', 'none');
+    // Clone and replace to remove old event listeners
+    const newQuickNav = quickNav.cloneNode(true) as HTMLSelectElement;
+    quickNav.parentNode?.replaceChild(newQuickNav, quickNav);
+    newQuickNav.addEventListener('change', function () {
+      const form = document.forms.namedItem('form1') as HTMLFormElement | null;
+      if (form) {
+        const pageSelect = form.elements.namedItem('page') as HTMLSelectElement | null;
+        if (pageSelect) {
+          showImportedTerms(lastUpdate, rtl, importedTerms, parseInt(pageSelect.value, 10));
+        }
+      }
+    });
   }
-  $('#res_data-navigation-next-plus').off('click').on('click', showOtherPage(currentPage + 1));
-  $('#res_data-navigation-next-last').off('click').on('click', showOtherPage(totalPages));
+
+  const totalPagesEl = document.getElementById('res_data-navigation-totalPages');
+  if (totalPagesEl) {
+    totalPagesEl.textContent = String(totalPages);
+  }
+
+  const nextNav = document.getElementById('res_data-navigation-next');
+  if (nextNav) {
+    nextNav.style.display = currentPage < totalPages ? 'initial' : 'none';
+  }
+
+  const nextPlus = document.getElementById('res_data-navigation-next-plus');
+  const nextLast = document.getElementById('res_data-navigation-next-last');
+
+  if (nextPlus) {
+    const newNextPlus = nextPlus.cloneNode(true) as HTMLElement;
+    nextPlus.parentNode?.replaceChild(newNextPlus, nextPlus);
+    newNextPlus.addEventListener('click', showOtherPage(currentPage + 1));
+  }
+
+  if (nextLast) {
+    const newNextLast = nextLast.cloneNode(true) as HTMLElement;
+    nextLast.parentNode?.replaceChild(newNextLast, nextLast);
+    newNextLast.addEventListener('click', showOtherPage(totalPages));
+  }
 }
 
 /**
@@ -171,8 +211,10 @@ function importedTermsHandleAnswer(
 ): void {
   formatImportedTermsNavigation(data.navigation, lastUpdate, rtl);
   const htmlContent = formatImportedTerms(data.terms, rtl);
-  $('#res_data-res_table-body').empty();
-  $('#res_data-res_table-body').append($(htmlContent));
+  const tableBody = document.getElementById('res_data-res_table-body');
+  if (tableBody) {
+    tableBody.innerHTML = htmlContent;
+  }
 }
 
 /**
@@ -192,25 +234,38 @@ export function showImportedTerms(
   const rtlBool = typeof rtl === 'string' ? rtl === 'true' || rtl === '1' : rtl;
   const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
 
+  const noTermsImported = document.getElementById('res_data-no_terms_imported');
+  const navigation = document.getElementById('res_data-navigation');
+  const resTable = document.getElementById('res_data-res_table');
+
   if (parseInt(String(count), 10) === 0) {
-    $('#res_data-no_terms_imported').css('display', 'inherit');
-    $('#res_data-navigation').css('display', 'none');
-    $('#res_data-res_table').css('display', 'none');
+    if (noTermsImported) noTermsImported.style.display = 'inherit';
+    if (navigation) navigation.style.display = 'none';
+    if (resTable) resTable.style.display = 'none';
   } else {
-    $('#res_data-no_terms_imported').css('display', 'none');
-    $('#res_data-navigation').css('display', '');
-    $('#res_data-res_table').css('display', '');
-    $.getJSON(
-      'api.php/v1/terms/imported',
-      {
-        last_update: lastUpdate,
-        count: count,
-        page: pageNum
-      },
-      function (data: ImportedTermsResponse) {
+    if (noTermsImported) noTermsImported.style.display = 'none';
+    if (navigation) navigation.style.display = '';
+    if (resTable) resTable.style.display = '';
+
+    const params = new URLSearchParams({
+      last_update: lastUpdate,
+      count: String(count),
+      page: String(pageNum)
+    });
+
+    fetch('api.php/v1/terms/imported?' + params.toString())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data: ImportedTermsResponse) => {
         importedTermsHandleAnswer(data, lastUpdate, rtlBool);
-      }
-    );
+      })
+      .catch(error => {
+        console.error('Failed to fetch imported terms:', error);
+      });
   }
 }
 
@@ -235,20 +290,26 @@ function initUploadResult(config: UploadResultConfig): void {
  */
 function initUploadFormEvents(): void {
   // Handle import mode change via event delegation
-  $(document).on('change', '[data-action="update-import-mode"]', function (this: HTMLSelectElement) {
-    updateImportMode(this.value);
+  document.addEventListener('change', function (e) {
+    const target = e.target as HTMLElement;
+    if (target.matches('[data-action="update-import-mode"]')) {
+      updateImportMode((target as HTMLSelectElement).value);
+    }
   });
 
   // Handle upload result form submission
-  $(document).on('submit', 'form[data-action="upload-result-form"]', function (e) {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const lastUpdate = form.dataset.lastUpdate || '';
-    const rtl = form.dataset.rtl === 'true';
-    const recno = parseInt(form.dataset.recno || '0', 10);
-    const pageSelect = form.elements.namedItem('page') as HTMLSelectElement | null;
-    const page = pageSelect ? parseInt(pageSelect.value, 10) : 1;
-    showImportedTerms(lastUpdate, rtl, recno, page);
+  document.addEventListener('submit', function (e) {
+    const target = e.target as HTMLElement;
+    if (target.matches('form[data-action="upload-result-form"]')) {
+      e.preventDefault();
+      const form = target as HTMLFormElement;
+      const lastUpdate = form.dataset.lastUpdate || '';
+      const rtl = form.dataset.rtl === 'true';
+      const recno = parseInt(form.dataset.recno || '0', 10);
+      const pageSelect = form.elements.namedItem('page') as HTMLSelectElement | null;
+      const page = pageSelect ? parseInt(pageSelect.value, 10) : 1;
+      showImportedTerms(lastUpdate, rtl, recno, page);
+    }
   });
 }
 
@@ -268,7 +329,12 @@ function autoInitUploadResult(): void {
 }
 
 // Auto-initialize when DOM is ready
-$(document).ready(function () {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function () {
+    initUploadFormEvents();
+    autoInitUploadResult();
+  });
+} else {
   initUploadFormEvents();
   autoInitUploadResult();
-});
+}

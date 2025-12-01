@@ -10,7 +10,6 @@
  * @since 3.0.0
  */
 
-import $ from 'jquery';
 import {
   updateNewWordInDOM,
   updateExistingWordInDOM,
@@ -186,11 +185,17 @@ function initEditTermResult(config: EditTermResultConfig): void {
 
   if (isTableTest) {
     // Table Test - update table cells
-    $(`#STAT${wid}`, context).html(config.statusControlsHtml);
-    $(`#TERM${wid}`, context).html(escape_html_chars(config.text));
-    $(`#TRAN${wid}`, context).html(escape_html_chars(config.translation));
-    $(`#ROMA${wid}`, context).html(escape_html_chars(config.romanization));
-    $(`#SENT${wid}`, context).html(config.sentence);
+    const statEl = context.getElementById(`STAT${wid}`);
+    const termEl = context.getElementById(`TERM${wid}`);
+    const tranEl = context.getElementById(`TRAN${wid}`);
+    const romaEl = context.getElementById(`ROMA${wid}`);
+    const sentEl = context.getElementById(`SENT${wid}`);
+
+    if (statEl) statEl.innerHTML = config.statusControlsHtml;
+    if (termEl) termEl.innerHTML = escape_html_chars(config.text);
+    if (tranEl) tranEl.innerHTML = escape_html_chars(config.translation);
+    if (romaEl) romaEl.innerHTML = escape_html_chars(config.romanization);
+    if (sentEl) sentEl.innerHTML = config.sentence;
   } else {
     // Normal Test - update word attributes
     updateTestWordInDOM(
@@ -221,13 +226,14 @@ function initHoverSaveResult(config: HoverSaveResultConfig): void {
     // Parent access blocked
   }
 
-  $(`.TERM${config.hex}`, context)
-    .removeClass('status0')
-    .addClass(`status${config.status} word${config.wid}`)
-    .attr('data_status', String(config.status))
-    .attr('data_wid', String(config.wid))
-    .attr('title', title)
-    .attr('data_trans', config.translation);
+  context.querySelectorAll<HTMLElement>(`.TERM${config.hex}`).forEach(el => {
+    el.classList.remove('status0');
+    el.classList.add(`status${config.status}`, `word${config.wid}`);
+    el.setAttribute('data_status', String(config.status));
+    el.setAttribute('data_wid', String(config.wid));
+    el.title = title;
+    el.setAttribute('data_trans', config.translation);
+  });
 
   updateLearnStatus(config.todoContent);
   cleanupRightFrames();
@@ -246,12 +252,13 @@ function initAllWellKnownResult(config: AllWellKnownConfig): void {
       title = make_tooltip(word.term, '*', '', String(word.status));
     }
 
-    $(`.TERM${word.hex}`, context)
-      .removeClass('status0')
-      .addClass(`status${word.status} word${word.wid}`)
-      .attr('data_status', String(word.status))
-      .attr('data_wid', String(word.wid))
-      .attr('title', title);
+    context.querySelectorAll<HTMLElement>(`.TERM${word.hex}`).forEach(el => {
+      el.classList.remove('status0');
+      el.classList.add(`status${word.status}`, `word${word.wid}`);
+      el.setAttribute('data_status', String(word.status));
+      el.setAttribute('data_wid', String(word.wid));
+      el.title = title;
+    });
   });
 
   updateLearnStatus(config.todoContent);
@@ -531,4 +538,8 @@ export function autoInitWordResults(): void {
 }
 
 // Auto-initialize on DOM ready
-$(document).ready(autoInitWordResults);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', autoInitWordResults);
+} else {
+  autoInitWordResults();
+}
