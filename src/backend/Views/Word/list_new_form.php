@@ -12,6 +12,8 @@
  */
 
 namespace Lwt\Views\Word;
+
+use Lwt\View\Helper\SelectOptionsBuilder;
 ?>
 <h2>New Term</h2>
 <form name="newword" class="validate" action="/words/edit" method="post" data-lwt-form-check="true">
@@ -51,7 +53,7 @@ namespace Lwt\Views\Word;
 <tr>
 <td class="td1 right">Status:</td>
 <td class="td1">
-<?php echo get_wordstatus_radiooptions(1); ?>
+<?php echo SelectOptionsBuilder::forWordStatusRadio(1); ?>
 </td>
 </tr>
 <tr>

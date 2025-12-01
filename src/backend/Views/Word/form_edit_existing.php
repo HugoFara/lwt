@@ -30,6 +30,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Core\Http\InputValidator;
+use Lwt\View\Helper\SelectOptionsBuilder;
 
 ?>
 <form name="editword" class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"
@@ -90,7 +91,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
    <tr>
        <td class="td1 right">Status:</td>
        <td class="td1">
-           <?php echo get_wordstatus_radiooptions($status); ?>
+           <?php echo SelectOptionsBuilder::forWordStatusRadio($status); ?>
        </td>
    </tr>
    <tr>

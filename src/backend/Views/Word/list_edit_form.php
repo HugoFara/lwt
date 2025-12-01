@@ -12,6 +12,8 @@
  */
 
 namespace Lwt\Views\Word;
+
+use Lwt\View\Helper\SelectOptionsBuilder;
 ?>
 <h2>Edit Term</h2>
 <form name="editword" class="validate" action="/words/edit#rec<?php echo $word['WoID']; ?>" method="post">
@@ -38,7 +40,7 @@ namespace Lwt\Views\Word;
 <tr>
    <td class="td1 right">Tags:</td>
    <td class="td1">
-       <?php echo \Lwt\Services\TagService::getWordTagsHtml($word['WoID']); ?>
+       <?php echo \Lwt\Services\TagService::getWordTagsHtml((int)$word['WoID']); ?>
    </td>
 </tr>
 <tr class="<?php echo ($showRoman ? '' : 'hide'); ?>">
@@ -55,12 +57,12 @@ namespace Lwt\Views\Word;
 <tr>
    <td class="td1 right">Status:</td>
    <td class="td1">
-       <?php echo get_wordstatus_radiooptions($word['WoStatus']); ?>
+       <?php echo SelectOptionsBuilder::forWordStatusRadio($word['WoStatus']); ?>
    </td>
 </tr>
 <tr>
    <td class="td1 right" colspan="2">  &nbsp;
-       <?php echo createDictLinksInEditWin2($word['WoLgID'], 'WoSentence', 'WoText'); ?>
+       <?php echo (new \Lwt\Services\DictionaryService())->createDictLinksInEditWin2((int)$word['WoLgID'], 'WoSentence', 'WoText'); ?>
        &nbsp; &nbsp;
        <input type="button" value="Cancel" data-action="cancel-navigate" data-url="/words/edit#rec<?php echo $word['WoID']; ?>" />
        <input type="submit" name="op" value="Change" />

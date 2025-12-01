@@ -27,7 +27,7 @@ namespace Lwt\Views\Language;
     'languageName' => $language->name,
     'sourceLg' => $sourceLg,
     'targetLg' => $targetLg,
-    'languageDefs' => \Lwt\Core\LanguageDefinitions::getAll(),
+    'languageDefs' => \Lwt\Services\LanguageDefinitions::getAll(),
     'allLanguages' => $allLanguages ?? []
 ]); ?>
 </script>
