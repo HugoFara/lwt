@@ -2,7 +2,6 @@
  * Tests for annotation_interactions.ts - Annotation click handling.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 
 import {
   clickAnnotation,
@@ -17,8 +16,7 @@ describe('annotation_interactions.ts', () => {
   });
 
   afterEach(() => {
-    $(document).off();
-    $('.anntransruby2, .anntermruby').off();
+    // Cleanup
   });
 
   describe('clickAnnotation', () => {
@@ -148,7 +146,7 @@ describe('annotation_interactions.ts', () => {
       const elements = document.querySelectorAll('.anntransruby2');
       elements.forEach((el) => {
         const htmlEl = el as HTMLElement;
-        $(htmlEl).trigger('click');
+        htmlEl.dispatchEvent(new Event('click', { bubbles: true }));
         expect(htmlEl.style.color).toBe('rgb(200, 220, 240)');
       });
     });
@@ -165,7 +163,7 @@ describe('annotation_interactions.ts', () => {
       const elements = document.querySelectorAll('.anntermruby');
       elements.forEach((el) => {
         const htmlEl = el as HTMLElement;
-        $(htmlEl).trigger('click');
+        htmlEl.dispatchEvent(new Event('click', { bubbles: true }));
         expect(htmlEl.style.color).toBe('rgb(229, 228, 226)');
       });
     });
@@ -182,8 +180,8 @@ describe('annotation_interactions.ts', () => {
       const annotation = document.querySelector('.anntransruby2') as HTMLElement;
       const term = document.querySelector('.anntermruby') as HTMLElement;
 
-      $(annotation).trigger('click');
-      $(term).trigger('click');
+      annotation.dispatchEvent(new Event('click', { bubbles: true }));
+      term.dispatchEvent(new Event('click', { bubbles: true }));
 
       expect(annotation.style.color).toBe('rgb(200, 220, 240)');
       expect(term.style.color).toBe('rgb(229, 228, 226)');

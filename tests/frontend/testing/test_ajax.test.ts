@@ -2,7 +2,6 @@
  * Tests for test_ajax.ts - AJAX-based vocabulary testing functionality
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   prepareWordReading,
   insertNewWord,
@@ -67,7 +66,8 @@ describe('test_ajax.ts', () => {
 
       prepareWordReading('hello', 1);
 
-      $('.word').trigger('click');
+      const wordElement = document.querySelector('.word') as HTMLElement;
+      wordElement.dispatchEvent(new Event('click', { bubbles: true }));
 
       expect(speechDispatcher).toHaveBeenCalledWith('hello', 1);
     });
@@ -80,8 +80,9 @@ describe('test_ajax.ts', () => {
 
       prepareWordReading('test', 2);
 
-      $('.word').eq(0).trigger('click');
-      $('.word').eq(1).trigger('click');
+      const wordElements = document.querySelectorAll('.word');
+      (wordElements[0] as HTMLElement).dispatchEvent(new Event('click', { bubbles: true }));
+      (wordElements[1] as HTMLElement).dispatchEvent(new Event('click', { bubbles: true }));
 
       expect(speechDispatcher).toHaveBeenCalledTimes(2);
     });
@@ -99,7 +100,7 @@ describe('test_ajax.ts', () => {
 
       insertNewWord(123, 'solution text', '<span>Word content</span>');
 
-      expect($('#term-test').html()).toContain('Word content');
+      expect(document.getElementById('term-test')?.innerHTML).toContain('Word content');
     });
   });
 
@@ -120,32 +121,37 @@ describe('test_ajax.ts', () => {
     it('hides term-test area', () => {
       doTestFinished(10);
 
-      expect($('#term-test').css('display')).toBe('none');
+      const termTest = document.getElementById('term-test') as HTMLElement;
+      expect(termTest.style.display).toBe('none');
     });
 
     it('shows test-finished-area', () => {
       doTestFinished(10);
 
+      const finishedArea = document.getElementById('test-finished-area') as HTMLElement;
       // JSDOM normalizes 'inherit' to 'block'
-      expect($('#test-finished-area').css('display')).not.toBe('none');
+      expect(finishedArea.style.display).not.toBe('none');
     });
 
     it('shows "Nothing more to test" when totalTests > 0', () => {
       doTestFinished(5);
 
-      expect($('#tests-done-today').text()).toContain('Nothing more to test here!');
+      const doneToday = document.getElementById('tests-done-today');
+      expect(doneToday?.textContent).toContain('Nothing more to test here!');
     });
 
     it('shows "Nothing to test" when totalTests is 0', () => {
       doTestFinished(0);
 
-      expect($('#tests-done-today').text()).toBe('Nothing to test here!');
+      const doneToday = document.getElementById('tests-done-today');
+      expect(doneToday?.textContent).toBe('Nothing to test here!');
     });
 
     it('hides tests-tomorrow section initially', () => {
       doTestFinished(10);
 
-      expect($('#tests-tomorrow').css('display')).toBe('none');
+      const tomorrow = document.getElementById('tests-tomorrow') as HTMLElement;
+      expect(tomorrow.style.display).toBe('none');
     });
   });
 
@@ -165,9 +171,6 @@ describe('test_ajax.ts', () => {
     });
 
     it('calls doTestFinished when word_id is 0', () => {
-      const mockGetJSON = vi.fn();
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
-
       testQueryHandler(
         { word_id: 0, solution: '', group: '', word_text: '' },
         10,
@@ -175,7 +178,8 @@ describe('test_ajax.ts', () => {
         'selection'
       );
 
-      expect($('#term-test').css('display')).toBe('none');
+      const termTest = document.getElementById('term-test') as HTMLElement;
+      expect(termTest.style.display).toBe('none');
     });
 
     it('inserts new word when word_id is not 0', () => {
@@ -186,11 +190,12 @@ describe('test_ajax.ts', () => {
         'selection'
       );
 
-      expect($('#term-test').html()).toContain('Group');
+      expect(document.getElementById('term-test')?.innerHTML).toContain('Group');
     });
 
     it('prepares word reading when utterance-allowed is checked', () => {
-      $('input#utterance-allowed').prop('checked', true);
+      const checkbox = document.getElementById('utterance-allowed') as HTMLInputElement;
+      checkbox.checked = true;
 
       testQueryHandler(
         { word_id: 123, solution: 'sol', group: '<span class="word">Word</span>', word_text: 'word' },
@@ -200,7 +205,8 @@ describe('test_ajax.ts', () => {
       );
 
       // Click the word to trigger speech
-      $('.word').trigger('click');
+      const wordElement = document.querySelector('.word') as HTMLElement;
+      wordElement.dispatchEvent(new Event('click', { bubbles: true }));
       expect(speechDispatcher).toHaveBeenCalled();
     });
   });
@@ -228,10 +234,10 @@ describe('test_ajax.ts', () => {
         document
       );
 
-      expect($('#not-tested-header').text()).toBe('40');
-      expect($('#not-tested').text()).toBe('40');
-      expect($('#wrong-tests').text()).toBe('25');
-      expect($('#correct-tests').text()).toBe('35');
+      expect(document.getElementById('not-tested-header')?.textContent).toBe('40');
+      expect(document.getElementById('not-tested')?.textContent).toBe('40');
+      expect(document.getElementById('wrong-tests')?.textContent).toBe('25');
+      expect(document.getElementById('correct-tests')?.textContent).toBe('35');
     });
 
     it('handles zero total gracefully', () => {

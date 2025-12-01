@@ -2,7 +2,6 @@
  * Tests for feed_wizard_common.ts - Shared functionality for feed wizard steps
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   setupWizardHeader,
   initWizardStep1,
@@ -35,10 +34,11 @@ describe('feed_wizard_common.ts', () => {
         title: 'Select Article'
       });
 
-      const lastH1 = $('h1').eq(-1);
-      expect(lastH1.html()).toContain('Feed Wizard');
-      expect(lastH1.html()).toContain('Step 2');
-      expect(lastH1.html()).toContain('Select Article');
+      const h1Elements = document.querySelectorAll('h1');
+      const lastH1 = h1Elements[h1Elements.length - 1];
+      expect(lastH1?.innerHTML).toContain('Feed Wizard');
+      expect(lastH1?.innerHTML).toContain('Step 2');
+      expect(lastH1?.innerHTML).toContain('Select Article');
     });
 
     it('includes help link when provided', () => {
@@ -48,9 +48,10 @@ describe('feed_wizard_common.ts', () => {
         helpLink: 'docs/info.html#feed_wizard'
       });
 
-      const lastH1 = $('h1').eq(-1);
-      expect(lastH1.html()).toContain('href="docs/info.html#feed_wizard"');
-      expect(lastH1.html()).toContain('question-frame.png');
+      const h1Elements = document.querySelectorAll('h1');
+      const lastH1 = h1Elements[h1Elements.length - 1];
+      expect(lastH1?.innerHTML).toContain('href="docs/info.html#feed_wizard"');
+      expect(lastH1?.innerHTML).toContain('question-frame.png');
     });
 
     it('does not include help link when not provided', () => {
@@ -59,9 +60,10 @@ describe('feed_wizard_common.ts', () => {
         title: 'Filter Text'
       });
 
-      const lastH1 = $('h1').eq(-1);
-      expect(lastH1.html()).not.toContain('href=');
-      expect(lastH1.html()).not.toContain('question-frame.png');
+      const h1Elements = document.querySelectorAll('h1');
+      const lastH1 = h1Elements[h1Elements.length - 1];
+      expect(lastH1?.innerHTML).not.toContain('href=');
+      expect(lastH1?.innerHTML).not.toContain('question-frame.png');
     });
 
     it('centers the header text', () => {
@@ -70,8 +72,9 @@ describe('feed_wizard_common.ts', () => {
         title: 'Test'
       });
 
-      const lastH1 = $('h1').eq(-1);
-      expect(lastH1.css('text-align')).toBe('center');
+      const h1Elements = document.querySelectorAll('h1');
+      const lastH1 = h1Elements[h1Elements.length - 1] as HTMLElement;
+      expect(lastH1?.style.textAlign).toBe('center');
     });
 
     it('modifies only the last h1 element', () => {
@@ -80,8 +83,9 @@ describe('feed_wizard_common.ts', () => {
         title: 'New Title'
       });
 
-      expect($('h1').eq(0).text()).toBe('Original Title');
-      expect($('h1').eq(1).html()).toContain('Feed Wizard');
+      const h1Elements = document.querySelectorAll('h1');
+      expect(h1Elements[0]?.textContent).toBe('Original Title');
+      expect(h1Elements[1]?.innerHTML).toContain('Feed Wizard');
     });
   });
 
@@ -98,10 +102,11 @@ describe('feed_wizard_common.ts', () => {
 
       initWizardStep1();
 
-      const h1 = $('h1').eq(-1);
-      expect(h1.html()).toContain('Step 1');
-      expect(h1.html()).toContain('Insert Newsfeed URI');
-      expect(h1.html()).toContain('docs/info.html#feed_wizard');
+      const h1Elements = document.querySelectorAll('h1');
+      const h1 = h1Elements[h1Elements.length - 1];
+      expect(h1?.innerHTML).toContain('Step 1');
+      expect(h1?.innerHTML).toContain('Insert Newsfeed URI');
+      expect(h1?.innerHTML).toContain('docs/info.html#feed_wizard');
     });
 
     it('does nothing when config element is missing', () => {
@@ -109,7 +114,7 @@ describe('feed_wizard_common.ts', () => {
 
       initWizardStep1();
 
-      expect($('h1').text()).toBe('Original Title');
+      expect(document.querySelector('h1')?.textContent).toBe('Original Title');
     });
   });
 
@@ -212,7 +217,7 @@ describe('feed_wizard_common.ts', () => {
       initWizardCommon();
       initWizardStep1();
 
-      expect($('h1').html()).toContain('Feed Wizard');
+      expect(document.querySelector('h1')?.innerHTML).toContain('Feed Wizard');
     });
   });
 
@@ -251,10 +256,11 @@ describe('feed_wizard_common.ts', () => {
         title: 'Test'
       });
 
+      const h1Elements = document.querySelectorAll('h1');
       // Only the last h1 should be modified
-      expect($('h1').eq(0).text()).toBe('First H1');
-      expect($('h1').eq(1).text()).toBe('Second H1');
-      expect($('h1').eq(2).html()).toContain('Feed Wizard');
+      expect(h1Elements[0]?.textContent).toBe('First H1');
+      expect(h1Elements[1]?.textContent).toBe('Second H1');
+      expect(h1Elements[2]?.innerHTML).toContain('Feed Wizard');
     });
   });
 
@@ -271,7 +277,7 @@ describe('feed_wizard_common.ts', () => {
         title: 'Test'
       });
 
-      expect($('h1').html()).toContain('Feed Wizard');
+      expect(document.querySelector('h1')?.innerHTML).toContain('Feed Wizard');
     });
 
     it('handles special characters in title', () => {
@@ -284,7 +290,7 @@ describe('feed_wizard_common.ts', () => {
 
       // Note: The function uses .html() which does NOT escape HTML,
       // so & becomes &amp; but <Items> becomes an actual HTML element
-      const html = $('h1').html();
+      const html = document.querySelector('h1')?.innerHTML;
       expect(html).toContain('Test &amp; Filter');
       expect(html).toContain('Feed Wizard');
     });

@@ -2,12 +2,7 @@
  * Tests for feed_form.ts - Feed form interactions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import { initFeedForm } from '../../../src/frontend/js/feeds/feed_form';
-
-// Make jQuery available globally
-(global as any).$ = $;
-(global as any).jQuery = $;
 
 describe('feed_form.ts', () => {
   beforeEach(() => {

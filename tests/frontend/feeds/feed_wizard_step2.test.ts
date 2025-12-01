@@ -2,7 +2,6 @@
  * Tests for feed_wizard_step2.ts - Select Article Text interactions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   lwt_wiz_select_test,
   initWizardStep2
@@ -42,7 +41,7 @@ describe('feed_wizard_step2.ts', () => {
 
       lwt_wiz_select_test.clickCancel();
 
-      expect($('#adv').css('display')).toBe('none');
+      expect(document.getElementById('adv')?.style.display).toBe('none');
     });
 
     it('adjusts margin-top of #lwt_last', () => {
@@ -55,7 +54,7 @@ describe('feed_wizard_step2.ts', () => {
       lwt_wiz_select_test.clickCancel();
 
       // Should set margin-top based on header height
-      expect($('#lwt_last').css('margin-top')).toBeDefined();
+      expect(document.getElementById('lwt_last')?.style.marginTop).toBeDefined();
     });
 
     it('returns false', () => {
@@ -89,20 +88,21 @@ describe('feed_wizard_step2.ts', () => {
     it('removes lwt_marked_text class from all elements', () => {
       lwt_wiz_select_test.changeSelectMode();
 
-      expect($('.lwt_marked_text').length).toBe(0);
+      expect(document.querySelectorAll('.lwt_marked_text').length).toBe(0);
     });
 
     it('disables the get_button', () => {
       lwt_wiz_select_test.changeSelectMode();
 
-      expect($('#get_button').prop('disabled')).toBe(true);
+      expect((document.getElementById('get_button') as HTMLButtonElement)?.disabled).toBe(true);
     });
 
     it('resets mark_action select with default option', () => {
       lwt_wiz_select_test.changeSelectMode();
 
-      expect($('#mark_action option').length).toBe(1);
-      expect($('#mark_action option').text()).toBe('[Click On Text]');
+      const options = document.querySelectorAll('#mark_action option');
+      expect(options.length).toBe(1);
+      expect(options[0]?.textContent).toBe('[Click On Text]');
     });
 
     it('returns false', () => {
@@ -133,7 +133,11 @@ describe('feed_wizard_step2.ts', () => {
 
     it('shows images when value is "no"', () => {
       // First hide them
-      $('img').not($('#lwt_header').find('*')).css('display', 'none');
+      document.querySelectorAll<HTMLImageElement>('img').forEach(img => {
+        if (!img.closest('#lwt_header')) {
+          img.style.display = 'none';
+        }
+      });
 
       const select = document.querySelector<HTMLSelectElement>('#hideSelect')!;
       select.value = 'no';
@@ -214,17 +218,17 @@ describe('feed_wizard_step2.ts', () => {
     it('toggles #lwt_container visibility', () => {
       // First call should hide it
       lwt_wiz_select_test.clickMinMax();
-      expect($('#lwt_container').css('display')).toBe('none');
+      expect(document.getElementById('lwt_container')?.style.display).toBe('none');
 
       // Second call should show it
       lwt_wiz_select_test.clickMinMax();
-      expect($('#lwt_container').css('display')).not.toBe('none');
+      expect(document.getElementById('lwt_container')?.style.display).not.toBe('none');
     });
 
     it('sets maxim to 0 when hidden', () => {
       lwt_wiz_select_test.clickMinMax();
 
-      expect($('input[name="maxim"]').val()).toBe('0');
+      expect((document.querySelector('input[name="maxim"]') as HTMLInputElement)?.value).toBe('0');
     });
 
     it('sets maxim to 1 when visible', () => {
@@ -233,7 +237,7 @@ describe('feed_wizard_step2.ts', () => {
       // Show again
       lwt_wiz_select_test.clickMinMax();
 
-      expect($('input[name="maxim"]').val()).toBe('1');
+      expect((document.querySelector('input[name="maxim"]') as HTMLInputElement)?.value).toBe('1');
     });
 
     it('returns false', () => {
@@ -258,7 +262,7 @@ describe('feed_wizard_step2.ts', () => {
 
       lwt_wiz_select_test.setMaxim();
 
-      expect($('#lwt_container').css('display')).toBe('none');
+      expect(document.getElementById('lwt_container')?.style.display).toBe('none');
     });
 
     it('sets maxim to 0', () => {
@@ -271,7 +275,7 @@ describe('feed_wizard_step2.ts', () => {
 
       lwt_wiz_select_test.setMaxim();
 
-      expect($('input[name="maxim"]').val()).toBe('0');
+      expect((document.querySelector('input[name="maxim"]') as HTMLInputElement)?.value).toBe('0');
     });
   });
 
@@ -317,13 +321,13 @@ describe('feed_wizard_step2.ts', () => {
     it('calls setMaxim when isMinimized is true', () => {
       initWizardStep2(false, true);
 
-      expect($('#lwt_container').css('display')).toBe('none');
+      expect(document.getElementById('lwt_container')?.style.display).toBe('none');
     });
 
     it('does not call setMaxim when isMinimized is false', () => {
       initWizardStep2(false, false);
 
-      expect($('#lwt_container').css('display')).not.toBe('none');
+      expect(document.getElementById('lwt_container')?.style.display).not.toBe('none');
     });
   });
 
@@ -345,7 +349,7 @@ describe('feed_wizard_step2.ts', () => {
       const button = document.querySelector<HTMLButtonElement>('[data-action="wizard-cancel"]')!;
       button.click();
 
-      expect($('#adv').css('display')).toBe('none');
+      expect(document.getElementById('adv')?.style.display).toBe('none');
     });
 
     it('handles wizard-select-mode change', async () => {
@@ -360,9 +364,9 @@ describe('feed_wizard_step2.ts', () => {
       await import('../../../src/frontend/js/feeds/feed_wizard_step2');
 
       const select = document.querySelector<HTMLSelectElement>('[data-action="wizard-select-mode"]')!;
-      $(select).trigger('change');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
 
-      expect($('#get_button').prop('disabled')).toBe(true);
+      expect((document.getElementById('get_button') as HTMLButtonElement)?.disabled).toBe(true);
     });
 
     it('handles wizard-minmax button click', async () => {
@@ -379,7 +383,7 @@ describe('feed_wizard_step2.ts', () => {
       const button = document.querySelector<HTMLButtonElement>('[data-action="wizard-minmax"]')!;
       button.click();
 
-      expect($('#lwt_container').css('display')).toBe('none');
+      expect(document.getElementById('lwt_container')?.style.display).toBe('none');
     });
   });
 

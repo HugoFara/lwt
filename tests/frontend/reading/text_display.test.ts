@@ -2,7 +2,6 @@
  * Tests for text_display.ts - Word counts, barcharts, and text statistics
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   set_barchart_item,
   set_word_counts,
@@ -28,8 +27,6 @@ const createMockWordCounts = () => ({
 
 // Setup global mocks
 beforeEach(() => {
-  (window as unknown as Record<string, unknown>).$ = $;
-  (globalThis as unknown as Record<string, unknown>).$ = $;
   (window as unknown as Record<string, unknown>).WORDCOUNTS = createMockWordCounts();
   (window as unknown as Record<string, unknown>).SUW = 0;
   (window as unknown as Record<string, unknown>).SHOWUNIQUE = 0;
@@ -149,29 +146,31 @@ describe('text_display.ts', () => {
     it('updates total counts in DOM', () => {
       set_word_counts();
 
-      expect($('#total_1').html()).toBe('100');
-      expect($('#total_2').html()).toBe('200');
+      const total1 = document.getElementById('total_1');
+      const total2 = document.getElementById('total_2');
+      expect(total1?.innerHTML).toBe('100');
+      expect(total2?.innerHTML).toBe('200');
     });
 
     it('updates saved counts in DOM', () => {
       set_word_counts();
 
       // saved = known - expr
-      const saved1 = $('#saved_1').html();
+      const saved1 = document.getElementById('saved_1')?.innerHTML || '';
       expect(saved1).toMatch(/\d+\+\d+/); // Format: "X+Y"
     });
 
     it('updates todo counts in DOM', () => {
       set_word_counts();
 
-      const todo1 = $('#todo_1').html();
+      const todo1 = document.getElementById('todo_1')?.innerHTML || '0';
       expect(parseInt(todo1, 10)).toBeGreaterThanOrEqual(0);
     });
 
     it('updates unknown percent in DOM', () => {
       set_word_counts();
 
-      const percent1 = $('#unknownpercent_1').html();
+      const percent1 = document.getElementById('unknownpercent_1')?.innerHTML || '0';
       expect(parseFloat(percent1)).toBeGreaterThanOrEqual(0);
       expect(parseFloat(percent1)).toBeLessThanOrEqual(100);
     });
@@ -181,8 +180,10 @@ describe('text_display.ts', () => {
       set_word_counts();
 
       // With SUW & 1, should use totalu values
-      expect($('#total_1').html()).toBe('80');
-      expect($('#total_2').html()).toBe('150');
+      const total1 = document.getElementById('total_1');
+      const total2 = document.getElementById('total_2');
+      expect(total1?.innerHTML).toBe('80');
+      expect(total2?.innerHTML).toBe('150');
     });
 
     it('handles missing stat data gracefully', () => {
@@ -204,7 +205,8 @@ describe('text_display.ts', () => {
 
       set_word_counts();
 
-      expect($('#saved_1').html()).toBe('0');
+      const saved1 = document.getElementById('saved_1');
+      expect(saved1?.innerHTML).toBe('0');
     });
   });
 
@@ -287,7 +289,8 @@ describe('text_display.ts', () => {
       word_count_click();
 
       // set_word_counts should have updated the DOM with total counts
-      expect($('#total_1').html()).toBe('100');
+      const total1 = document.getElementById('total_1');
+      expect(total1?.innerHTML).toBe('100');
     });
   });
 
@@ -297,16 +300,6 @@ describe('text_display.ts', () => {
 
   describe('lwt object', () => {
     describe('prepare_word_count_click', () => {
-      beforeEach(() => {
-        // Mock $.getJSON
-        vi.spyOn($, 'getJSON').mockImplementation(() => {
-          return {
-            done: vi.fn().mockReturnThis(),
-            fail: vi.fn().mockReturnThis(),
-          } as unknown as JQuery.jqXHR;
-        });
-      });
-
       it('attaches click handlers to word count elements', () => {
         document.body.innerHTML = `
           <span id="total" data_wo_cnt="0"></span>
@@ -320,8 +313,10 @@ describe('text_display.ts', () => {
         lwt.prepare_word_count_click();
 
         // Check that title attribute was set
-        expect($('#total').attr('title')).toContain('Unique');
-        expect($('#total').attr('title')).toContain('Total');
+        const total = document.getElementById('total');
+        const title = total?.getAttribute('title') || '';
+        expect(title).toContain('Unique');
+        expect(title).toContain('Total');
       });
 
       it('sets title attribute on word count elements', () => {
@@ -335,8 +330,10 @@ describe('text_display.ts', () => {
 
         lwt.prepare_word_count_click();
 
-        expect($('#saved').attr('title')).toBeDefined();
-        expect($('#unknown').attr('title')).toBeDefined();
+        const saved = document.getElementById('saved');
+        const unknown = document.getElementById('unknown');
+        expect(saved?.getAttribute('title')).toBeDefined();
+        expect(unknown?.getAttribute('title')).toBeDefined();
       });
     });
 
@@ -431,14 +428,18 @@ describe('text_display.ts', () => {
       word_count_click();
 
       // Verify totals are populated
-      expect($('#total_1').html()).toBe('100');
-      expect($('#total_2').html()).toBe('200');
+      const total1 = document.getElementById('total_1');
+      const total2 = document.getElementById('total_2');
+      expect(total1?.innerHTML).toBe('100');
+      expect(total2?.innerHTML).toBe('200');
 
       // Verify saved counts are populated
-      expect($('#saved_1').html()).toBeTruthy();
+      const saved1 = document.getElementById('saved_1');
+      expect(saved1?.innerHTML).toBeTruthy();
 
       // Verify todo counts are populated
-      expect($('#todo_1').html()).toBeTruthy();
+      const todo1 = document.getElementById('todo_1');
+      expect(todo1?.innerHTML).toBeTruthy();
     });
   });
 
@@ -467,7 +468,8 @@ describe('text_display.ts', () => {
       `;
 
       expect(() => set_word_counts()).not.toThrow();
-      expect($('#total_1').html()).toBe('0');
+      const total1 = document.getElementById('total_1');
+      expect(total1?.innerHTML).toBe('0');
     });
 
     it('handles missing DOM elements gracefully', () => {

@@ -2,17 +2,6 @@
  * Tests for ui_utilities.ts - DOM manipulation, tooltips, and form wrapping
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
-
-// Make jQuery available globally BEFORE any imports that use it
-(global as Record<string, unknown>).$ = $;
-(global as Record<string, unknown>).jQuery = $;
-(window as Record<string, unknown>).$ = $;
-(window as Record<string, unknown>).jQuery = $;
-
-// Mock jQuery UI methods that are called at module load time
-($ as any).fn.resizable = vi.fn().mockReturnThis();
-($ as any).fn.tooltip = vi.fn().mockReturnThis();
 
 // Mock LWT_DATA global (needs to be set before import)
 const mockLWT_DATA = {
@@ -67,7 +56,7 @@ describe('ui_utilities.ts', () => {
 
       markClick();
 
-      expect($('#markaction').attr('disabled')).toBeUndefined();
+      expect(document.getElementById('markaction')?.hasAttribute('disabled')).toBe(false);
     });
 
     it('disables markaction button when no checkboxes are checked', () => {
@@ -78,7 +67,7 @@ describe('ui_utilities.ts', () => {
 
       markClick();
 
-      expect($('#markaction').attr('disabled')).toBe('disabled');
+      expect(document.getElementById('markaction')?.hasAttribute('disabled')).toBe(true);
     });
 
     it('enables button with multiple checkboxes when at least one is checked', () => {
@@ -91,7 +80,7 @@ describe('ui_utilities.ts', () => {
 
       markClick();
 
-      expect($('#markaction').attr('disabled')).toBeUndefined();
+      expect(document.getElementById('markaction')?.hasAttribute('disabled')).toBe(false);
     });
 
     it('handles missing markaction button gracefully', () => {
@@ -138,7 +127,7 @@ describe('ui_utilities.ts', () => {
 
       // slideUp is called - in jsdom it may not fully animate
       // We verify the function doesn't throw
-      expect($('#hide3').length).toBe(1);
+      expect(document.getElementById('hide3')).not.toBeNull();
     });
 
     it('handles missing hide3 element gracefully', () => {
@@ -160,8 +149,8 @@ describe('ui_utilities.ts', () => {
 
       setTheFocus();
 
-      // jQuery trigger('focus') should call focus
-      expect($('.setfocus').length).toBe(1);
+      // Should focus the element
+      expect(document.querySelector('.setfocus')).not.toBeNull();
     });
 
     it('handles missing setfocus element gracefully', () => {
@@ -184,8 +173,8 @@ describe('ui_utilities.ts', () => {
 
       wrapRadioButtons();
 
-      expect($('input[type="text"]').attr('tabindex')).toBeDefined();
-      expect($('input[type="button"]').attr('tabindex')).toBeDefined();
+      expect(document.querySelector('input[type="text"]')?.getAttribute('tabindex')).toBeDefined();
+      expect(document.querySelector('input[type="button"]')?.getAttribute('tabindex')).toBeDefined();
     });
 
     it('adds tabindex to selects', () => {
@@ -193,7 +182,7 @@ describe('ui_utilities.ts', () => {
 
       wrapRadioButtons();
 
-      expect($('select').attr('tabindex')).toBeDefined();
+      expect(document.querySelector('select')?.getAttribute('tabindex')).toBeDefined();
     });
 
     it('adds tabindex to links except those starting with rec', () => {
@@ -204,7 +193,7 @@ describe('ui_utilities.ts', () => {
 
       wrapRadioButtons();
 
-      expect($('a[name="link1"]').attr('tabindex')).toBeDefined();
+      expect(document.querySelector('a[name="link1"]')?.getAttribute('tabindex')).toBeDefined();
     });
 
     it('sets up keydown handler for wrap_radio spans', () => {

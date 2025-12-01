@@ -2,7 +2,6 @@
  * Tests for youtube_import.ts - Fetch text data from YouTube videos
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import { getYtTextData, initYouTubeImport } from '../../../src/frontend/js/texts/youtube_import';
 
 describe('youtube_import.ts', () => {
@@ -30,7 +29,7 @@ describe('youtube_import.ts', () => {
 
         getYtTextData();
 
-        expect($('#ytDataStatus').text()).toBe('Error: Missing YouTube input fields.');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Missing YouTube input fields.');
       });
 
       it('shows error when ytApiKey input is missing', () => {
@@ -41,7 +40,7 @@ describe('youtube_import.ts', () => {
 
         getYtTextData();
 
-        expect($('#ytDataStatus').text()).toBe('Error: Missing YouTube input fields.');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Missing YouTube input fields.');
       });
 
       it('shows error when video ID is empty', () => {
@@ -53,7 +52,7 @@ describe('youtube_import.ts', () => {
 
         getYtTextData();
 
-        expect($('#ytDataStatus').text()).toBe('Please enter a YouTube Video ID.');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Please enter a YouTube Video ID.');
       });
 
       it('shows error when video ID is whitespace only', () => {
@@ -65,7 +64,7 @@ describe('youtube_import.ts', () => {
 
         getYtTextData();
 
-        expect($('#ytDataStatus').text()).toBe('Please enter a YouTube Video ID.');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Please enter a YouTube Video ID.');
       });
 
       it('shows error when API key is empty', () => {
@@ -77,7 +76,7 @@ describe('youtube_import.ts', () => {
 
         getYtTextData();
 
-        expect($('#ytDataStatus').text()).toBe('Error: YouTube API key not configured.');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: YouTube API key not configured.');
       });
     });
 
@@ -98,12 +97,12 @@ describe('youtube_import.ts', () => {
           done: vi.fn().mockReturnThis(),
           fail: vi.fn().mockReturnThis()
         });
-        vi.spyOn($, 'get').mockImplementation(mockGet);
+        global.fetch = vi.fn();
 
         getYtTextData();
 
         // Initial status should be set
-        expect($('#ytDataStatus').text()).toBe('Fetching YouTube data...');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Fetching YouTube data...');
       });
 
       it('populates form fields on successful API response', () => {
@@ -123,14 +122,14 @@ describe('youtube_import.ts', () => {
           }),
           fail: vi.fn().mockReturnThis()
         });
-        vi.spyOn($, 'get').mockImplementation(mockGet);
+        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect($('[name=TxTitle]').val()).toBe('Test Video Title');
-        expect($('[name=TxText]').val()).toBe('Test video description content');
-        expect($('[name=TxSourceURI]').val()).toBe('https://youtube.com/watch?v=dQw4w9WgXcQ');
-        expect($('#ytDataStatus').text()).toBe('Success!');
+        expect((document.querySelector('[name=TxTitle]') as HTMLInputElement).value).toBe('Test Video Title');
+        expect((document.querySelector('[name=TxText]') as HTMLInputElement).value).toBe('Test video description content');
+        expect((document.querySelector('[name=TxSourceURI]') as HTMLInputElement).value).toBe('https://youtube.com/watch?v=dQw4w9WgXcQ');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Success!');
       });
 
       it('handles empty items array', () => {
@@ -145,12 +144,12 @@ describe('youtube_import.ts', () => {
           }),
           fail: vi.fn().mockReturnThis()
         });
-        vi.spyOn($, 'get').mockImplementation(mockGet);
+        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect($('#ytDataStatus').text()).toBe('No videos found.');
-        expect($('[name=TxTitle]').val()).toBe(''); // Unchanged
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('No videos found.');
+        expect((document.querySelector('[name=TxTitle]') as HTMLInputElement).value).toBe(''); // Unchanged
       });
 
       it('constructs correct API URL', () => {
@@ -158,7 +157,7 @@ describe('youtube_import.ts', () => {
           done: vi.fn().mockReturnThis(),
           fail: vi.fn().mockReturnThis()
         });
-        vi.spyOn($, 'get').mockImplementation(mockGet);
+        global.fetch = vi.fn();
 
         getYtTextData();
 
@@ -184,7 +183,7 @@ describe('youtube_import.ts', () => {
           done: vi.fn().mockReturnThis(),
           fail: vi.fn().mockReturnThis()
         });
-        vi.spyOn($, 'get').mockImplementation(mockGet);
+        global.fetch = vi.fn();
 
         getYtTextData();
 
@@ -211,11 +210,11 @@ describe('youtube_import.ts', () => {
             return { done: vi.fn() };
           })
         });
-        vi.spyOn($, 'get').mockImplementation(mockGet);
+        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect($('#ytDataStatus').text()).toBe('Error: Invalid API key or quota exceeded.');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Invalid API key or quota exceeded.');
       });
 
       it('shows error for 400 status (invalid video ID)', () => {
@@ -226,11 +225,11 @@ describe('youtube_import.ts', () => {
             return { done: vi.fn() };
           })
         });
-        vi.spyOn($, 'get').mockImplementation(mockGet);
+        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect($('#ytDataStatus').text()).toBe('Error: Invalid video ID.');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Invalid video ID.');
       });
 
       it('shows generic error for other status codes', () => {
@@ -241,11 +240,11 @@ describe('youtube_import.ts', () => {
             return { done: vi.fn() };
           })
         });
-        vi.spyOn($, 'get').mockImplementation(mockGet);
+        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect($('#ytDataStatus').text()).toBe('Error: Internal Server Error');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Internal Server Error');
       });
 
       it('shows fallback error when statusText is empty', () => {
@@ -256,11 +255,11 @@ describe('youtube_import.ts', () => {
             return { done: vi.fn() };
           })
         });
-        vi.spyOn($, 'get').mockImplementation(mockGet);
+        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect($('#ytDataStatus').text()).toBe('Error: Failed to fetch YouTube data.');
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Failed to fetch YouTube data.');
       });
     });
   });
@@ -284,7 +283,7 @@ describe('youtube_import.ts', () => {
       button.click();
 
       // Should try to fetch and show validation error
-      expect($('#ytDataStatus').text()).toBe('Please enter a YouTube Video ID.');
+      expect(document.getElementById('ytDataStatus')!.textContent).toBe('Please enter a YouTube Video ID.');
     });
 
     it('prevents default button action', () => {
@@ -343,7 +342,7 @@ describe('youtube_import.ts', () => {
       newButton.click();
 
       // Should still work due to event delegation
-      expect($('#ytDataStatus').text()).toBe('Please enter a YouTube Video ID.');
+      expect(document.getElementById('ytDataStatus')!.textContent).toBe('Please enter a YouTube Video ID.');
     });
   });
 
@@ -367,12 +366,12 @@ describe('youtube_import.ts', () => {
         }),
         fail: vi.fn().mockReturnThis()
       });
-      vi.spyOn($, 'get').mockImplementation(mockGet);
+      global.fetch = vi.fn();
 
       getYtTextData();
 
       // URL should use trimmed video ID
-      expect($('[name=TxSourceURI]').val()).toBe('https://youtube.com/watch?v=video-id');
+      expect((document.querySelector('[name=TxSourceURI]') as HTMLInputElement).value).toBe('https://youtube.com/watch?v=video-id');
     });
 
     it('trims API key before use', () => {
@@ -386,7 +385,7 @@ describe('youtube_import.ts', () => {
         done: vi.fn().mockReturnThis(),
         fail: vi.fn().mockReturnThis()
       });
-      vi.spyOn($, 'get').mockImplementation(mockGet);
+      global.fetch = vi.fn();
 
       getYtTextData();
 

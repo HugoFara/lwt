@@ -2,7 +2,6 @@
  * Tests for language_form.ts - Language form configuration
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   languageForm,
   checkTranslatorChanged,
@@ -11,10 +10,6 @@ import {
   initLanguageForm,
   type LanguageFormConfig
 } from '../../../src/frontend/js/languages/language_form';
-
-// Make jQuery available globally
-(global as any).$ = $;
-(global as any).jQuery = $;
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/terms/translation_api', () => ({
@@ -251,8 +246,9 @@ describe('language_form.ts', () => {
 
       const input = document.querySelector('[name="LgGoogleTranslateURI"]') as HTMLInputElement;
       expect(input.value).toContain('localhost:5000');
-      // $.css('display', 'inherit') may be normalized by browser to 'block' or similar
-      expect($('#LgTranslatorKeyWrapper').css('display')).not.toBe('none');
+      // style.display = 'inherit' may be normalized by browser to 'block' or similar
+      const wrapper = document.getElementById('LgTranslatorKeyWrapper') as HTMLElement;
+      expect(wrapper.style.display).not.toBe('none');
     });
 
     it('sets ggl URL for ggl option', () => {
@@ -271,12 +267,13 @@ describe('language_form.ts', () => {
     });
 
     it('hides key wrapper for non-libretranslate options', () => {
-      $('#LgTranslatorKeyWrapper').css('display', 'inherit');
+      const wrapper = document.getElementById('LgTranslatorKeyWrapper') as HTMLElement;
+      wrapper.style.display = 'inherit';
 
       languageForm.reloadDictURLs('en', 'es');
       languageForm.multiWordsTranslateChange('google_translate');
 
-      expect($('#LgTranslatorKeyWrapper').css('display')).toBe('none');
+      expect(wrapper.style.display).toBe('none');
     });
   });
 
@@ -292,7 +289,8 @@ describe('language_form.ts', () => {
 
       languageForm.changeLanguageTextSize(150);
 
-      expect($('#LgTextSizeExample').css('font-size')).toBe('150%');
+      const example = document.getElementById('LgTextSizeExample') as HTMLElement;
+      expect(example.style.fontSize).toBe('150%');
     });
 
     it('handles string values', () => {
@@ -302,7 +300,8 @@ describe('language_form.ts', () => {
 
       languageForm.changeLanguageTextSize('200');
 
-      expect($('#LgTextSizeExample').css('font-size')).toBe('200%');
+      const example = document.getElementById('LgTextSizeExample') as HTMLElement;
+      expect(example.style.fontSize).toBe('200%');
     });
   });
 
@@ -612,21 +611,24 @@ describe('language_form.ts', () => {
       const result = languageForm.checkVoiceAPI('');
 
       expect(result).toBe(true);
-      expect($('#voice-api-message-zone').css('display')).toBe('none');
+      const zone = document.getElementById('voice-api-message-zone') as HTMLElement;
+      expect(zone.style.display).toBe('none');
     });
 
     it('returns false when lwt_term is missing', () => {
       const result = languageForm.checkVoiceAPI('{"url": "http://api.com"}');
 
       expect(result).toBe(false);
-      expect($('#voice-api-message-zone').text()).toContain('lwt_term');
+      const zone = document.getElementById('voice-api-message-zone') as HTMLElement;
+      expect(zone.textContent).toContain('lwt_term');
     });
 
     it('returns false for invalid JSON', () => {
       const result = languageForm.checkVoiceAPI('lwt_term {invalid json}');
 
       expect(result).toBe(false);
-      expect($('#voice-api-message-zone').text()).toContain('JSON');
+      const zone = document.getElementById('voice-api-message-zone') as HTMLElement;
+      expect(zone.textContent).toContain('JSON');
     });
 
     it('returns true for valid JSON with lwt_term', async () => {
@@ -918,8 +920,9 @@ describe('language_form.ts', () => {
 
       languageForm.displayLibreTranslateError('Connection refused');
 
-      expect($('#translator_status').html()).toContain('LibreTranslate');
-      expect($('#translator_status').html()).toContain('Connection refused');
+      const status = document.getElementById('translator_status') as HTMLElement;
+      expect(status.innerHTML).toContain('LibreTranslate');
+      expect(status.innerHTML).toContain('Connection refused');
     });
   });
 });

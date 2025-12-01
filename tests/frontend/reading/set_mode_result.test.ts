@@ -2,7 +2,6 @@
  * Tests for set_mode_result.ts - Annotation visibility toggling.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 
 import {
   hideAnnotations,
@@ -17,7 +16,7 @@ describe('set_mode_result.ts', () => {
   });
 
   afterEach(() => {
-    $(document).off();
+    // Cleanup
   });
 
   describe('hideAnnotations', () => {

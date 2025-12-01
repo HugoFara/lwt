@@ -2,15 +2,10 @@
  * Tests for text_multiword_selection.ts - Multi-word drag-and-drop selection
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   mwordDragNDrop,
   mword_drag_n_drop_select
 } from '../../../src/frontend/js/reading/text_multiword_selection';
-
-// Make jQuery available globally
-(global as any).$ = $;
-(global as any).jQuery = $;
 
 // Mock LWT_DATA global
 const mockLWT_DATA = {
@@ -37,8 +32,8 @@ const mockLWT_DATA = {
 
 // Mock imports
 vi.mock('../../../src/frontend/js/reading/text_annotations', () => ({
-  getAttr: vi.fn(($el: JQuery, attr: string) => {
-    const val = $el.attr(attr);
+  getAttr: vi.fn((el: HTMLElement, attr: string) => {
+    const val = el.getAttribute(attr);
     return typeof val === 'string' ? val : '';
   })
 }));

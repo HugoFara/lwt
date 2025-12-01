@@ -2,7 +2,6 @@
  * Tests for translation_api.ts - Translation API functions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   deleteTranslation,
   addTranslation,
@@ -16,8 +15,6 @@ describe('translation_api.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
-    // Make jQuery global for tests that need it
-    (globalThis as unknown as Record<string, unknown>).$ = $;
   });
 
   afterEach(() => {
@@ -284,7 +281,8 @@ describe('translation_api.ts', () => {
 
   describe('getGlosbeTranslation', () => {
     it('makes JSONP request to Glosbe API', () => {
-      const ajaxSpy = vi.spyOn($, 'ajax').mockImplementation(() => ({} as JQuery.jqXHR));
+      const ajaxSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
+      (globalThis as unknown as Record<string, { ajax: typeof ajaxSpy }>).$ = { ajax: ajaxSpy };
 
       getGlosbeTranslation('hello', 'en', 'fr');
 
@@ -299,7 +297,8 @@ describe('translation_api.ts', () => {
     });
 
     it('includes correct parameters in request URL', () => {
-      const ajaxSpy = vi.spyOn($, 'ajax').mockImplementation(() => ({} as JQuery.jqXHR));
+      const ajaxSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
+      (globalThis as unknown as Record<string, { ajax: typeof ajaxSpy }>).$ = { ajax: ajaxSpy };
 
       getGlosbeTranslation('word', 'de', 'en');
 
@@ -375,7 +374,8 @@ describe('translation_api.ts', () => {
       };
 
       // Mock $.ajax for the recursive call
-      vi.spyOn($, 'ajax').mockImplementation(() => ({} as JQuery.jqXHR));
+      const ajaxSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
+      (globalThis as unknown as Record<string, { ajax: typeof ajaxSpy }>).$ = { ajax: ajaxSpy };
 
       getTranslationFromGlosbeApi(data);
 

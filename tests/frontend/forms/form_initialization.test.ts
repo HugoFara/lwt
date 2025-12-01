@@ -2,7 +2,6 @@
  * Tests for form_initialization.ts - Form initialization module
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   clearRightFrameOnUnload,
   changeTextboxesLanguage,
@@ -29,7 +28,6 @@ describe('form_initialization.ts', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
-    $(window).off('beforeunload');
   });
 
   // ===========================================================================
@@ -42,7 +40,7 @@ describe('form_initialization.ts', () => {
 
       // The function should have set up a handler - we can verify by checking
       // that it doesn't throw when triggered
-      expect(() => $(window).trigger('beforeunload')).not.toThrow();
+      expect(() => window.dispatchEvent(new Event('beforeunload'))).not.toThrow();
     });
 
     it('attempts to clear right frame on beforeunload', async () => {
@@ -63,7 +61,7 @@ describe('form_initialization.ts', () => {
       clearRightFrameOnUnload();
 
       // Trigger beforeunload
-      $(window).trigger('beforeunload');
+      window.dispatchEvent(new Event('beforeunload'));
 
       // Wait for setTimeout
       await new Promise(resolve => setTimeout(resolve, 10));
@@ -82,7 +80,7 @@ describe('form_initialization.ts', () => {
       clearRightFrameOnUnload();
 
       // Should not throw
-      expect(() => $(window).trigger('beforeunload')).not.toThrow();
+      expect(() => window.dispatchEvent(new Event('beforeunload'))).not.toThrow();
     });
   });
 
@@ -111,8 +109,8 @@ describe('form_initialization.ts', () => {
 
       changeTextboxesLanguage(languageData);
 
-      expect($('#TxTitle').attr('lang')).toBe('fr');
-      expect($('#TxText').attr('lang')).toBe('fr');
+      expect(document.getElementById('TxTitle')?.getAttribute('lang')).toBe('fr');
+      expect(document.getElementById('TxText')?.getAttribute('lang')).toBe('fr');
     });
 
     it('handles missing language select element', () => {
@@ -138,8 +136,8 @@ describe('form_initialization.ts', () => {
 
       changeTextboxesLanguage({ '1': 'en' });
 
-      expect($('#TxTitle').attr('lang')).toBe('');
-      expect($('#TxText').attr('lang')).toBe('');
+      expect(document.getElementById('TxTitle')?.getAttribute('lang')).toBe('');
+      expect(document.getElementById('TxText')?.getAttribute('lang')).toBe('');
     });
   });
 
@@ -169,16 +167,16 @@ describe('form_initialization.ts', () => {
       initTextEditForm();
 
       // Initial language should be applied
-      expect($('#TxTitle').attr('lang')).toBe('en');
-      expect($('#TxText').attr('lang')).toBe('en');
+      expect(document.getElementById('TxTitle')?.getAttribute('lang')).toBe('en');
+      expect(document.getElementById('TxText')?.getAttribute('lang')).toBe('en');
 
       // Change language
       const langSelect = document.querySelector('[data-action="change-language"]') as HTMLSelectElement;
       langSelect.value = '2';
       langSelect.dispatchEvent(new Event('change'));
 
-      expect($('#TxTitle').attr('lang')).toBe('fr');
-      expect($('#TxText').attr('lang')).toBe('fr');
+      expect(document.getElementById('TxTitle')?.getAttribute('lang')).toBe('fr');
+      expect(document.getElementById('TxText')?.getAttribute('lang')).toBe('fr');
     });
 
     it('sets up form change tracking', () => {
@@ -229,7 +227,7 @@ describe('form_initialization.ts', () => {
       initWordEditForm();
 
       // Trigger beforeunload and wait
-      $(window).trigger('beforeunload');
+      window.dispatchEvent(new Event('beforeunload'));
     });
   });
 
@@ -296,7 +294,7 @@ describe('form_initialization.ts', () => {
       autoInitializeForms();
 
       // Trigger beforeunload
-      $(window).trigger('beforeunload');
+      window.dispatchEvent(new Event('beforeunload'));
 
       // Wait for setTimeout
       await new Promise(resolve => setTimeout(resolve, 10));

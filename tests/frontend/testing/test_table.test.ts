@@ -2,7 +2,6 @@
  * Tests for test_table.ts - Table test mode with column visibility toggles
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import { initTableTest } from '../../../src/frontend/js/testing/test_table';
 
 // Mock ajax_utilities
@@ -65,8 +64,10 @@ describe('test_table.ts', () => {
         checkbox.checked = false;
         checkbox.dispatchEvent(new Event('change'));
 
-        expect($('th:nth-child(1)').css('display')).toBe('none');
-        expect($('td:nth-child(1)').css('display')).toBe('none');
+        const thElements = document.querySelectorAll('th');
+        const tdElements = document.querySelectorAll('td');
+        expect((thElements[0] as HTMLElement).style.display).toBe('none');
+        expect((tdElements[0] as HTMLElement).style.display).toBe('none');
         expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting1', '0');
       });
 
@@ -82,7 +83,8 @@ describe('test_table.ts', () => {
         checkbox.checked = true;
         checkbox.dispatchEvent(new Event('change'));
 
-        expect($('th:nth-child(1)').css('display')).not.toBe('none');
+        const thElements = document.querySelectorAll('th');
+        expect((thElements[0] as HTMLElement).style.display).not.toBe('none');
         expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting1', '1');
       });
     });
@@ -95,8 +97,10 @@ describe('test_table.ts', () => {
         checkbox.checked = false;
         checkbox.dispatchEvent(new Event('change'));
 
-        expect($('th:nth-child(2)').css('display')).toBe('none');
-        expect($('td:nth-child(2)').css('display')).toBe('none');
+        const thElements = document.querySelectorAll('th');
+        const tdElements = document.querySelectorAll('td');
+        expect((thElements[1] as HTMLElement).style.display).toBe('none');
+        expect((tdElements[1] as HTMLElement).style.display).toBe('none');
         expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting2', '0');
       });
     });
@@ -109,8 +113,10 @@ describe('test_table.ts', () => {
         checkbox.checked = false;
         checkbox.dispatchEvent(new Event('change'));
 
-        expect($('th:nth-child(5)').css('display')).toBe('none');
-        expect($('td:nth-child(5)').css('display')).toBe('none');
+        const thElements = document.querySelectorAll('th');
+        const tdElements = document.querySelectorAll('td');
+        expect((thElements[4] as HTMLElement).style.display).toBe('none');
+        expect((tdElements[4] as HTMLElement).style.display).toBe('none');
         expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting5', '0');
       });
     });
@@ -123,8 +129,10 @@ describe('test_table.ts', () => {
         checkbox.checked = false;
         checkbox.dispatchEvent(new Event('change'));
 
-        expect($('th:nth-child(6)').css('display')).toBe('none');
-        expect($('td:nth-child(6)').css('display')).toBe('none');
+        const thElements = document.querySelectorAll('th');
+        const tdElements = document.querySelectorAll('td');
+        expect((thElements[5] as HTMLElement).style.display).toBe('none');
+        expect((tdElements[5] as HTMLElement).style.display).toBe('none');
         expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting6', '0');
       });
     });
@@ -172,9 +180,11 @@ describe('test_table.ts', () => {
         checkbox.checked = false;
         checkbox.dispatchEvent(new Event('change'));
 
-        const color = $('td:nth-child(3)').css('color');
+        const tdElements = document.querySelectorAll('td');
+        const termCell = tdElements[2] as HTMLElement;
+        const color = window.getComputedStyle(termCell).color;
         expect(['white', 'rgb(255, 255, 255)']).toContain(color);
-        expect($('td:nth-child(3)').css('cursor')).toBe('pointer');
+        expect(termCell.style.cursor).toBe('pointer');
         expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting3', '0');
       });
 
@@ -188,9 +198,11 @@ describe('test_table.ts', () => {
         checkbox.checked = true;
         checkbox.dispatchEvent(new Event('change'));
 
-        const color = $('td:nth-child(3)').css('color');
+        const tdElements = document.querySelectorAll('td');
+        const termCell = tdElements[2] as HTMLElement;
+        const color = window.getComputedStyle(termCell).color;
         expect(['black', 'rgb(0, 0, 0)']).toContain(color);
-        expect($('td:nth-child(3)').css('cursor')).toBe('auto');
+        expect(termCell.style.cursor).toBe('auto');
         expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting3', '1');
       });
     });
@@ -203,7 +215,9 @@ describe('test_table.ts', () => {
         checkbox.checked = false;
         checkbox.dispatchEvent(new Event('change'));
 
-        const color = $('td:nth-child(4)').css('color');
+        const tdElements = document.querySelectorAll('td');
+        const transCell = tdElements[3] as HTMLElement;
+        const color = window.getComputedStyle(transCell).color;
         expect(['white', 'rgb(255, 255, 255)']).toContain(color);
         expect(do_ajax_save_setting).toHaveBeenCalledWith('currenttabletestsetting4', '0');
       });
@@ -253,23 +267,25 @@ describe('test_table.ts', () => {
       checkbox.dispatchEvent(new Event('change'));
 
       // Cell should be hidden (white text)
-      const termCell = $('td:nth-child(3)');
-      const hiddenColor = termCell.css('color');
+      const tdElements = document.querySelectorAll('td');
+      const termCell = tdElements[2] as HTMLElement;
+      const hiddenColor = window.getComputedStyle(termCell).color;
       expect(['white', 'rgb(255, 255, 255)']).toContain(hiddenColor);
 
       // Click on cell to reveal
-      termCell.trigger('click');
+      termCell.dispatchEvent(new Event('click', { bubbles: true }));
 
-      const revealedColor = termCell.css('color');
+      const revealedColor = window.getComputedStyle(termCell).color;
       expect(['black', 'rgb(0, 0, 0)']).toContain(revealedColor);
-      expect(termCell.css('cursor')).toBe('auto');
+      expect(termCell.style.cursor).toBe('auto');
     });
 
     it('sets white background on all cells', () => {
       initTableTest();
 
-      $('td').each(function () {
-        const bgColor = $(this).css('background-color');
+      const tdElements = document.querySelectorAll('td');
+      tdElements.forEach((cell) => {
+        const bgColor = window.getComputedStyle(cell as HTMLElement).backgroundColor;
         // JSDOM normalizes 'white' to 'rgb(255, 255, 255)'
         expect(['white', 'rgb(255, 255, 255)']).toContain(bgColor);
       });
@@ -319,7 +335,8 @@ describe('test_table.ts', () => {
 
       // The first visible column should now have left border radius
       // JSDOM doesn't properly compute :visible pseudo-selector, so just verify no error
-      expect($('th').length).toBeGreaterThan(0);
+      const thElements = document.querySelectorAll('th');
+      expect(thElements.length).toBeGreaterThan(0);
     });
 
     it('updates right border radius when hiding right columns', () => {
@@ -331,7 +348,8 @@ describe('test_table.ts', () => {
 
       // The last visible column should now have right border radius
       // JSDOM doesn't properly compute :visible:last pseudo-selector, so just verify no error
-      expect($('th').length).toBeGreaterThan(0);
+      const thElements = document.querySelectorAll('th');
+      expect(thElements.length).toBeGreaterThan(0);
     });
   });
 
@@ -372,8 +390,9 @@ describe('test_table.ts', () => {
 
       // Unchecked checkboxes should hide content (color set to white)
       // JSDOM normalizes 'white' to 'rgb(255, 255, 255)'
-      const termColor = $('td:nth-child(3)').css('color');
-      const transColor = $('td:nth-child(4)').css('color');
+      const tdElements = document.querySelectorAll('td');
+      const termColor = window.getComputedStyle(tdElements[2] as HTMLElement).color;
+      const transColor = window.getComputedStyle(tdElements[3] as HTMLElement).color;
       expect(['white', 'rgb(255, 255, 255)']).toContain(termColor);
       expect(['white', 'rgb(255, 255, 255)']).toContain(transColor);
 
@@ -475,8 +494,9 @@ describe('test_table.ts', () => {
       checkbox.dispatchEvent(new Event('change'));
 
       // All first columns should be hidden
-      $('td:nth-child(1)').each(function () {
-        expect($(this).css('display')).toBe('none');
+      const firstColumnCells = document.querySelectorAll('td:nth-child(1)');
+      firstColumnCells.forEach((cell) => {
+        expect((cell as HTMLElement).style.display).toBe('none');
       });
     });
 
@@ -497,10 +517,11 @@ describe('test_table.ts', () => {
 
       initTableTest();
 
-      const cellCount = $('td').length;
+      const tdElements = document.querySelectorAll('td');
+      const cellCount = tdElements.length;
       let whiteCells = 0;
-      $('td').each(function () {
-        const bgColor = $(this).css('background-color');
+      tdElements.forEach((cell) => {
+        const bgColor = window.getComputedStyle(cell as HTMLElement).backgroundColor;
         // JSDOM normalizes 'white' to 'rgb(255, 255, 255)' or may not set it
         if (bgColor === 'white' || bgColor === 'rgb(255, 255, 255)' || bgColor === 'rgba(0, 0, 0, 0)') {
           whiteCells++;

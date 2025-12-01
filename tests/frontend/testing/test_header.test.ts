@@ -2,7 +2,6 @@
  * Tests for test_header.ts - Test header initialization and navigation.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 
 import {
   setUtteranceSetting,
@@ -50,7 +49,6 @@ describe('test_header.ts', () => {
 
   afterEach(() => {
     window.location = originalLocation;
-    $(document).off();
   });
 
   describe('setUtteranceSetting', () => {

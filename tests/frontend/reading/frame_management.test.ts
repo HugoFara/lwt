@@ -2,7 +2,6 @@
  * Tests for frame_management.ts - Right frames show/hide/cleanup operations
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   showRightFrames,
   hideRightFrames,
@@ -10,10 +9,6 @@ import {
   successSound,
   failureSound
 } from '../../../src/frontend/js/reading/frame_management';
-
-// Make jQuery available globally
-(global as any).$ = $;
-(global as any).jQuery = $;
 
 // Mock word_popup module
 vi.mock('../../../src/frontend/js/ui/word_popup', () => ({

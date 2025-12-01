@@ -2,7 +2,6 @@
  * Tests for word_upload.ts - Word import form and results display
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   updateImportMode,
   showImportedTerms
@@ -49,65 +48,65 @@ describe('word_upload.ts', () => {
       it('for mode 4', () => {
         updateImportMode(4);
 
-        expect($('#imp_transl_delim').hasClass('hide')).toBe(false);
-        expect($('#imp_transl_delim input').hasClass('notempty')).toBe(true);
+        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(false);
+        expect(document.querySelector('#imp_transl_delim input')!.classList.contains('notempty')).toBe(true);
       });
 
       it('for mode 5', () => {
         updateImportMode(5);
 
-        expect($('#imp_transl_delim').hasClass('hide')).toBe(false);
+        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(false);
       });
 
       it('for string mode "4"', () => {
         updateImportMode('4');
 
-        expect($('#imp_transl_delim').hasClass('hide')).toBe(false);
+        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(false);
       });
 
       it('for string mode "5"', () => {
         updateImportMode('5');
 
-        expect($('#imp_transl_delim').hasClass('hide')).toBe(false);
+        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(false);
       });
     });
 
     describe('hides translation delimiter field', () => {
       beforeEach(() => {
         // First show it
-        $('#imp_transl_delim').removeClass('hide');
-        $('#imp_transl_delim input').addClass('notempty');
+        document.querySelector('#imp_transl_delim')!.classList.remove('hide');
+        document.querySelector('#imp_transl_delim input')!.classList.add('notempty');
       });
 
       it('for mode 0', () => {
         updateImportMode(0);
 
-        expect($('#imp_transl_delim').hasClass('hide')).toBe(true);
-        expect($('#imp_transl_delim input').hasClass('notempty')).toBe(false);
+        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(true);
+        expect(document.querySelector('#imp_transl_delim input')!.classList.contains('notempty')).toBe(false);
       });
 
       it('for mode 1', () => {
         updateImportMode(1);
 
-        expect($('#imp_transl_delim').hasClass('hide')).toBe(true);
+        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(true);
       });
 
       it('for mode 2', () => {
         updateImportMode(2);
 
-        expect($('#imp_transl_delim').hasClass('hide')).toBe(true);
+        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(true);
       });
 
       it('for mode 3', () => {
         updateImportMode(3);
 
-        expect($('#imp_transl_delim').hasClass('hide')).toBe(true);
+        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(true);
       });
 
       it('for string mode "0"', () => {
         updateImportMode('0');
 
-        expect($('#imp_transl_delim').hasClass('hide')).toBe(true);
+        expect(document.querySelector('#imp_transl_delim')!.classList.contains('hide')).toBe(true);
       });
     });
   });
@@ -144,9 +143,9 @@ describe('word_upload.ts', () => {
       showImportedTerms('2024-01-01', false, 0, 1);
 
       // JSDOM normalizes 'inherit' to 'block', so check not 'none'
-      expect($('#res_data-no_terms_imported').css('display')).not.toBe('none');
-      expect($('#res_data-navigation').css('display')).toBe('none');
-      expect($('#res_data-res_table').css('display')).toBe('none');
+      expect(getComputedStyle(document.querySelector('#res_data-no_terms_imported')!).display).not.toBe('none');
+      expect(getComputedStyle(document.querySelector('#res_data-navigation')!).display).toBe('none');
+      expect(getComputedStyle(document.querySelector('#res_data-res_table')!).display).toBe('none');
     });
 
     it('shows results when count is greater than 0', () => {
@@ -160,20 +159,23 @@ describe('word_upload.ts', () => {
 
       const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
         callback(mockResponse);
+        return Promise.resolve(mockResponse);
       });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve(new Response(JSON.stringify(mockResponse), { status: 200 }))
+      ) as any;
 
       showImportedTerms('2024-01-01', false, 10, 1);
 
-      expect($('#res_data-no_terms_imported').css('display')).toBe('none');
-      expect($('#res_data-navigation').css('display')).not.toBe('none');
+      expect(getComputedStyle(document.querySelector('#res_data-no_terms_imported')!).display).toBe('none');
+      expect(getComputedStyle(document.querySelector('#res_data-navigation')!).display).not.toBe('none');
     });
 
     it('handles string count parameter', () => {
       showImportedTerms('2024-01-01', false, 0, 1);
 
       // Should still show no terms message - JSDOM normalizes 'inherit' to 'block'
-      expect($('#res_data-no_terms_imported').css('display')).not.toBe('none');
+      expect(getComputedStyle(document.querySelector('#res_data-no_terms_imported')!).display).not.toBe('none');
     });
 
     it('handles RTL as string "true"', () => {

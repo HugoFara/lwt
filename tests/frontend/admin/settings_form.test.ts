@@ -2,7 +2,6 @@
  * Tests for settings_form.ts - Settings form interactions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   initSettingsForm,
   initConfirmSubmitForms,
@@ -25,17 +24,11 @@ describe('settings_form.ts', () => {
     // Clear the DOM
     document.body.innerHTML = '';
     vi.clearAllMocks();
-    // Make jQuery global
-    (globalThis as unknown as Record<string, unknown>).$ = $;
-    // Remove previous event handlers
-    $(document).off('click submit');
   });
 
   afterEach(() => {
     document.body.innerHTML = '';
     vi.restoreAllMocks();
-    // Remove jQuery event handlers to prevent accumulation
-    $(document).off('click submit');
   });
 
   // ===========================================================================
@@ -77,8 +70,7 @@ describe('settings_form.ts', () => {
       initConfirmSubmitForms();
 
       const form = document.querySelector('form') as HTMLFormElement;
-      // Use jQuery to trigger submit which will properly fire our handler
-      $(form).trigger('submit');
+      form.dispatchEvent(new Event('submit', { bubbles: true }));
 
       expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to proceed?');
     });
@@ -95,7 +87,7 @@ describe('settings_form.ts', () => {
       initConfirmSubmitForms();
 
       const form = document.querySelector('form') as HTMLFormElement;
-      $(form).trigger('submit');
+      form.dispatchEvent(new Event('submit', { bubbles: true }));
 
       expect(confirmSpy).toHaveBeenCalledWith('Are you sure?');
     });

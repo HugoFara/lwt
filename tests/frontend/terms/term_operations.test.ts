@@ -2,7 +2,6 @@
  * Tests for term_operations.ts - Translation updates, term editing, and annotations
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   setTransRoman,
   translation_radio,
@@ -26,7 +25,6 @@ const mockLwtFormCheck = {
 // Setup global mocks
 beforeEach(() => {
   (window as unknown as Record<string, unknown>).lwtFormCheck = mockLwtFormCheck;
-  (globalThis as unknown as Record<string, unknown>).$ = $;
 });
 
 describe('term_operations.ts', () => {
@@ -46,7 +44,7 @@ describe('term_operations.ts', () => {
 
       setTransRoman('hello', '');
 
-      expect($('textarea[name="WoTranslation"]').val()).toBe('hello');
+      expect((document.querySelector('textarea[name="WoTranslation"]') as HTMLTextAreaElement).value).toBe('hello');
     });
 
     it('sets romanization in WoRomanization input', () => {
@@ -54,7 +52,7 @@ describe('term_operations.ts', () => {
 
       setTransRoman('', 'pinyin');
 
-      expect($('input[name="WoRomanization"]').val()).toBe('pinyin');
+      expect((document.querySelector('input[name="WoRomanization"]') as HTMLInputElement).value).toBe('pinyin');
     });
 
     it('sets both translation and romanization', () => {
@@ -65,8 +63,8 @@ describe('term_operations.ts', () => {
 
       setTransRoman('hello', 'hola');
 
-      expect($('textarea[name="WoTranslation"]').val()).toBe('hello');
-      expect($('input[name="WoRomanization"]').val()).toBe('hola');
+      expect((document.querySelector('textarea[name="WoTranslation"]') as HTMLTextAreaElement).value).toBe('hello');
+      expect((document.querySelector('input[name="WoRomanization"]') as HTMLInputElement).value).toBe('hola');
     });
 
     it('calls lwtFormCheck.makeDirty when translation is set', () => {
@@ -101,8 +99,8 @@ describe('term_operations.ts', () => {
 
       setTransRoman('', '');
 
-      expect($('textarea[name="WoTranslation"]').val()).toBe('');
-      expect($('input[name="WoRomanization"]').val()).toBe('');
+      expect((document.querySelector('textarea[name="WoTranslation"]') as HTMLTextAreaElement).value).toBe('');
+      expect((document.querySelector('input[name="WoRomanization"]') as HTMLInputElement).value).toBe('');
     });
 
     it('handles special characters in translation', () => {
@@ -110,7 +108,7 @@ describe('term_operations.ts', () => {
 
       setTransRoman('<script>alert("xss")</script>', '');
 
-      expect($('textarea[name="WoTranslation"]').val()).toBe('<script>alert("xss")</script>');
+      expect((document.querySelector('textarea[name="WoTranslation"]') as HTMLTextAreaElement).value).toBe('<script>alert("xss")</script>');
     });
 
     it('handles unicode characters', () => {
@@ -121,8 +119,8 @@ describe('term_operations.ts', () => {
 
       setTransRoman('日本語', 'にほんご');
 
-      expect($('textarea[name="WoTranslation"]').val()).toBe('日本語');
-      expect($('input[name="WoRomanization"]').val()).toBe('にほんご');
+      expect((document.querySelector('textarea[name="WoTranslation"]') as HTMLTextAreaElement).value).toBe('日本語');
+      expect((document.querySelector('input[name="WoRomanization"]') as HTMLInputElement).value).toBe('にほんご');
     });
   });
 
@@ -411,7 +409,7 @@ describe('term_operations.ts', () => {
     });
 
     it('shows waiting indicator and makes POST request', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(
+      const postSpy = vi.fn().mockImplementation(
         (_url, _data, callback) => {
           if (typeof callback === 'function') {
             callback({});
@@ -419,6 +417,7 @@ describe('term_operations.ts', () => {
           return {} as JQuery.jqXHR;
         }
       );
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       do_ajax_save_impr_text(123, 'rg1', '{"rg1":"test"}');
 
@@ -435,12 +434,13 @@ describe('term_operations.ts', () => {
 
     it('alerts on error response', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
         if (typeof callback === 'function') {
           callback({ error: 'Test error message' });
         }
         return {} as JQuery.jqXHR;
       });
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       do_ajax_save_impr_text(123, 'rg1', '{}');
 
@@ -486,7 +486,8 @@ describe('term_operations.ts', () => {
 
     it('makes POST request with trimmed translation', () => {
       document.body.innerHTML = '<input id="trans-field" value="  trimmed  " />';
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+      const postSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       updateTermTranslation(42, '#trans-field');
 
@@ -500,12 +501,13 @@ describe('term_operations.ts', () => {
 
     it('alerts on empty response', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
         if (typeof callback === 'function') {
           callback('');
         }
         return {} as JQuery.jqXHR;
       });
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       updateTermTranslation(1, '#trans-field');
 
@@ -516,12 +518,13 @@ describe('term_operations.ts', () => {
 
     it('alerts on error response', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
         if (typeof callback === 'function') {
           callback({ error: 'DB error' });
         }
         return {} as JQuery.jqXHR;
       });
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       updateTermTranslation(1, '#trans-field');
 
@@ -555,7 +558,8 @@ describe('term_operations.ts', () => {
     });
 
     it('makes POST request with correct parameters', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+      const postSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       addTermTranslation('#trans-field', 'testword', 5);
 
@@ -573,12 +577,13 @@ describe('term_operations.ts', () => {
 
     it('alerts on error response', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
         if (typeof callback === 'function') {
           callback({ error: 'Creation failed' });
         }
         return {} as JQuery.jqXHR;
       });
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       addTermTranslation('#trans-field', 'word', 1);
 
@@ -598,7 +603,8 @@ describe('term_operations.ts', () => {
     });
 
     it('makes POST request for status up', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+      const postSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       changeTableTestStatus('123', true);
 
@@ -611,7 +617,8 @@ describe('term_operations.ts', () => {
     });
 
     it('makes POST request for status down', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+      const postSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       changeTableTestStatus('123', false);
 
@@ -624,42 +631,45 @@ describe('term_operations.ts', () => {
     });
 
     it('updates DOM on successful response', () => {
-      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
         if (typeof callback === 'function') {
           callback({ increment: '<span class="status5">5</span>' });
         }
         return {} as JQuery.jqXHR;
       });
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       changeTableTestStatus('123', true);
 
-      expect($('#STAT123').html()).toContain('status5');
+      expect(document.getElementById('STAT123')!.innerHTML).toContain('status5');
     });
 
     it('does nothing on empty response', () => {
-      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
         if (typeof callback === 'function') {
           callback('');
         }
         return {} as JQuery.jqXHR;
       });
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       changeTableTestStatus('123', true);
 
-      expect($('#STAT123').html()).toBe('Current Status');
+      expect(document.getElementById('STAT123')!.innerHTML).toBe('Current Status');
     });
 
     it('does nothing on error response', () => {
-      vi.spyOn($, 'post').mockImplementation((_url, _data, callback) => {
+      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
         if (typeof callback === 'function') {
           callback({ error: 'Status change failed' });
         }
         return {} as JQuery.jqXHR;
       });
+      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
 
       changeTableTestStatus('123', true);
 
-      expect($('#STAT123').html()).toBe('Current Status');
+      expect(document.getElementById('STAT123')!.innerHTML).toBe('Current Status');
     });
   });
 
@@ -669,9 +679,10 @@ describe('term_operations.ts', () => {
 
   describe('do_ajax_req_sim_terms', () => {
     it('makes GET request with correct parameters', () => {
-      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+      const getJSONSpy = vi.fn().mockImplementation(
         () => ({} as JQuery.jqXHR<{ similar_terms: string }>)
       );
+      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
 
       do_ajax_req_sim_terms(5, 'hello');
 
@@ -685,7 +696,8 @@ describe('term_operations.ts', () => {
       const mockJqXHR = { done: vi.fn(), fail: vi.fn() } as unknown as JQuery.jqXHR<{
         similar_terms: string;
       }>;
-      vi.spyOn($, 'getJSON').mockReturnValue(mockJqXHR);
+      const getJSONSpy = vi.fn().mockReturnValue(mockJqXHR);
+      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
 
       const result = do_ajax_req_sim_terms(1, 'test');
 
@@ -707,28 +719,30 @@ describe('term_operations.ts', () => {
     });
 
     it('shows loading indicator', () => {
-      vi.spyOn($, 'getJSON').mockReturnValue({
+      const getJSONSpy = vi.fn().mockReturnValue({
         done: () => ({ fail: vi.fn() }),
         fail: vi.fn(),
       } as unknown as JQuery.jqXHR<{ similar_terms: string }>);
+      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
 
       do_ajax_show_similar_terms();
 
-      expect($('#simwords').html()).toContain('waiting2.gif');
+      expect(document.getElementById('simwords')!.innerHTML).toContain('waiting2.gif');
     });
 
     it('updates simwords on success', () => {
-      vi.spyOn($, 'getJSON').mockReturnValue({
+      const getJSONSpy = vi.fn().mockReturnValue({
         done: vi.fn().mockImplementation(function (this: unknown, callback: (data: { similar_terms: string }) => void) {
           callback({ similar_terms: '<div>Similar words here</div>' });
           return { fail: vi.fn() };
         }),
         fail: vi.fn(),
       } as unknown as JQuery.jqXHR<{ similar_terms: string }>);
+      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
 
       do_ajax_show_similar_terms();
 
-      expect($('#simwords').html()).toBe('<div>Similar words here</div>');
+      expect(document.getElementById('simwords')!.innerHTML).toBe('<div>Similar words here</div>');
     });
   });
 
@@ -747,8 +761,8 @@ describe('term_operations.ts', () => {
     it('hides waiting indicator and shows sentences zone', () => {
       change_example_sentences_zone([], 'target');
 
-      expect($('#exsent-waiting').css('display')).toBe('none');
-      expect($('#exsent-sentences').css('display')).not.toBe('none');
+      expect((document.getElementById('exsent-waiting') as HTMLElement).style.display).toBe('none');
+      expect((document.getElementById('exsent-sentences') as HTMLElement).style.display).not.toBe('none');
     });
 
     it('appends sentences to the zone', () => {
@@ -758,7 +772,7 @@ describe('term_operations.ts', () => {
 
       change_example_sentences_zone(sentences, 'target');
 
-      expect($('#exsent-sentences').html()).toContain('Test sentence');
+      expect(document.getElementById('exsent-sentences')!.innerHTML).toContain('Test sentence');
     });
   });
 
@@ -776,18 +790,20 @@ describe('term_operations.ts', () => {
     });
 
     it('shows waiting indicator and hides interactable', () => {
-      vi.spyOn($, 'getJSON').mockImplementation(() => ({} as JQuery.jqXHR));
+      const getJSONSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
+      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
 
       do_ajax_show_sentences(1, 'word', 'target', 5);
 
-      expect($('#exsent-interactable').css('display')).toBe('none');
-      expect($('#exsent-waiting').css('display')).not.toBe('none');
+      expect((document.getElementById('exsent-interactable') as HTMLElement).style.display).toBe('none');
+      expect((document.getElementById('exsent-waiting') as HTMLElement).style.display).not.toBe('none');
     });
 
     it('calls API with term ID when wid is a valid number', () => {
-      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+      const getJSONSpy = vi.fn().mockImplementation(
         () => ({} as JQuery.jqXHR)
       );
+      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
 
       do_ajax_show_sentences(1, 'word', 'target', 42);
 
@@ -799,9 +815,10 @@ describe('term_operations.ts', () => {
     });
 
     it('calls API without term ID when wid is -1 (advanced search)', () => {
-      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+      const getJSONSpy = vi.fn().mockImplementation(
         () => ({} as JQuery.jqXHR)
       );
+      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
 
       do_ajax_show_sentences(1, 'word', 'target', -1);
 
@@ -817,9 +834,10 @@ describe('term_operations.ts', () => {
     });
 
     it('calls API without term ID for non-integer wid', () => {
-      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
+      const getJSONSpy = vi.fn().mockImplementation(
         () => ({} as JQuery.jqXHR)
       );
+      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
 
       do_ajax_show_sentences(1, 'word', 'target', 'invalid');
 
@@ -869,7 +887,7 @@ describe('term_operations.ts', () => {
       setTransRoman('test', '');
 
       // The function checks length === 1, so with 2 textareas it won't set
-      expect($('textarea[name="WoTranslation"]').first().val()).toBe('');
+      expect((document.querySelectorAll('textarea[name="WoTranslation"]')[0] as HTMLTextAreaElement).value).toBe('');
     });
 
     it('translation_radio handles very long translations', () => {

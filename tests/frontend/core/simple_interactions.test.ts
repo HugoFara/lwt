@@ -2,7 +2,6 @@
  * Tests for simple_interactions.ts - Navigation and confirmation utilities.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 
 // Mock the dependencies
 vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
@@ -73,7 +72,6 @@ describe('simple_interactions.ts', () => {
       value: originalHistory,
       writable: true
     });
-    $(document).off();
   });
 
   describe('goBack', () => {
@@ -172,7 +170,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="cancel-navigate" data-url="/cancel/url">Cancel</button>
         `;
 
-        $('[data-action="cancel-navigate"]').trigger('click');
+        const button = document.querySelector('[data-action="cancel-navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
         expect(window.location.href).toBe('/cancel/url');
@@ -183,7 +182,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="cancel-navigate">Cancel</button>
         `;
 
-        $('[data-action="cancel-navigate"]').trigger('click');
+        const button = document.querySelector('[data-action="cancel-navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(lwtFormCheck.resetDirty).not.toHaveBeenCalled();
       });
@@ -195,7 +195,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="cancel-back">Go Back</button>
         `;
 
-        $('[data-action="cancel-back"]').trigger('click');
+        const button = document.querySelector('[data-action="cancel-back"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
         expect(window.history.back).toHaveBeenCalled();
@@ -208,7 +209,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="navigate" data-url="/new/page">Go</button>
         `;
 
-        $('[data-action="navigate"]').trigger('click');
+        const button = document.querySelector('[data-action="navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.location.href).toBe('/new/page');
       });
@@ -219,7 +221,8 @@ describe('simple_interactions.ts', () => {
         `;
         window.location.href = 'http://localhost/original';
 
-        $('[data-action="navigate"]').trigger('click');
+        const button = document.querySelector('[data-action="navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.location.href).toBe('http://localhost/original');
       });
@@ -231,7 +234,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="back">Back</button>
         `;
 
-        $('[data-action="back"]').trigger('click');
+        const button = document.querySelector('[data-action="back"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.history.back).toHaveBeenCalled();
       });
@@ -244,7 +248,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="confirm-delete" data-url="/delete/item">Delete</button>
         `;
 
-        $('[data-action="confirm-delete"]').trigger('click');
+        const button = document.querySelector('[data-action="confirm-delete"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('CONFIRM\n\nAre you sure you want to delete?');
         expect(window.location.href).toBe('/delete/item');
@@ -257,7 +262,8 @@ describe('simple_interactions.ts', () => {
         `;
         window.location.href = 'http://localhost/original';
 
-        $('[data-action="confirm-delete"]').trigger('click');
+        const button = document.querySelector('[data-action="confirm-delete"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalled();
         expect(window.location.href).toBe('http://localhost/original');
@@ -270,7 +276,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="cancel-form" data-url="/form/list">Cancel Form</button>
         `;
 
-        $('[data-action="cancel-form"]').trigger('click');
+        const button = document.querySelector('[data-action="cancel-form"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
         expect(window.location.href).toBe('/form/list');
@@ -283,7 +290,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="show-right-frames">Show Frames</button>
         `;
 
-        $('[data-action="show-right-frames"]').trigger('click');
+        const button = document.querySelector('[data-action="show-right-frames"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(showRightFrames).toHaveBeenCalled();
       });
@@ -295,7 +303,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="hide-right-frames">Hide Frames</button>
         `;
 
-        $('[data-action="hide-right-frames"]').trigger('click');
+        const button = document.querySelector('[data-action="hide-right-frames"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(hideRightFrames).toHaveBeenCalled();
       });
@@ -307,7 +316,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="toggle-show-all">Toggle</button>
         `;
 
-        $('[data-action="toggle-show-all"]').trigger('click');
+        const button = document.querySelector('[data-action="toggle-show-all"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(showAllwordsClick).toHaveBeenCalled();
       });
@@ -320,7 +330,8 @@ describe('simple_interactions.ts', () => {
           <button data-action="navigate" data-url="/page" data-confirm="Are you sure you want to navigate?">Go</button>
         `;
 
-        $('[data-action="navigate"]').trigger('click');
+        const button = document.querySelector('[data-action="navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to navigate?');
         expect(window.location.href).toBe('/page');
@@ -333,7 +344,8 @@ describe('simple_interactions.ts', () => {
         `;
         window.location.href = 'http://localhost/original';
 
-        $('[data-action="navigate"]').trigger('click');
+        const button = document.querySelector('[data-action="navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalled();
         expect(window.location.href).toBe('http://localhost/original');

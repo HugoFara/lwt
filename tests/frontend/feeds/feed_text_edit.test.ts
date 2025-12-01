@@ -2,7 +2,6 @@
  * Tests for feed_text_edit.ts - Bulk feed text import form functionality
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import { initFeedTextEditForm } from '../../../src/frontend/js/feeds/feed_text_edit';
 
 // Mock Tagify - must be a class/constructor function
@@ -71,7 +70,7 @@ describe('feed_text_edit.ts', () => {
 
       const checkbox = document.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
       checkbox.checked = true;
-      $(checkbox).trigger('change');
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
 
       // Fields should be enabled
       const titleInput = document.querySelector<HTMLInputElement>('[name="feed[0][TxTitle]"]')!;
@@ -89,7 +88,7 @@ describe('feed_text_edit.ts', () => {
 
       const checkbox = document.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
       checkbox.checked = false;
-      $(checkbox).trigger('change');
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
 
       // Fields should be disabled
       const titleInput = document.querySelector<HTMLInputElement>('[name="feed[0][TxTitle]"]')!;
@@ -207,14 +206,14 @@ describe('feed_text_edit.ts', () => {
       // Toggle first checkbox
       const checkbox0 = document.querySelector<HTMLInputElement>('input[value="0"]')!;
       checkbox0.checked = false;
-      $(checkbox0).trigger('change');
+      checkbox0.dispatchEvent(new Event('change', { bubbles: true }));
 
       expect(document.querySelector<HTMLInputElement>('[name="feed[0][TxTitle]"]')?.disabled).toBe(true);
 
       // Toggle second checkbox
       const checkbox1 = document.querySelector<HTMLInputElement>('input[value="1"]')!;
       checkbox1.checked = true;
-      $(checkbox1).trigger('change');
+      checkbox1.dispatchEvent(new Event('change', { bubbles: true }));
 
       expect(document.querySelector<HTMLInputElement>('[name="feed[1][TxTitle]"]')?.disabled).toBe(false);
     });

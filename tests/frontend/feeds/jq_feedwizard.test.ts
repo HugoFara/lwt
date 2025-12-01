@@ -2,21 +2,16 @@
  * Tests for jq_feedwizard.ts - Feed wizard interactions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
-
-// Make jQuery available globally BEFORE any imports that use it
-(global as Record<string, unknown>).$ = $;
-(global as Record<string, unknown>).jQuery = $;
-(window as Record<string, unknown>).$ = $;
-(window as Record<string, unknown>).jQuery = $;
 
 // Mock xpathQuery and isValidXPath on window before import
 const mockXpathQuery = vi.fn().mockImplementation((expr: string) => {
-  // Return elements that match a simple selector simulation
+  // Return array of elements that match a simple selector simulation
   if (expr.includes('id')) {
-    return $('<div id="test"></div>');
+    const div = document.createElement('div');
+    div.id = 'test';
+    return [div];
   }
-  return $([]);
+  return [];
 });
 
 const mockIsValidXPath = vi.fn().mockReturnValue(true);
@@ -73,12 +68,13 @@ describe('jq_feedwizard.ts', () => {
         <div id="test-element" class="test-class" data-attr="value">Content</div>
       `;
 
-      const $el = $('#test-element');
-      extend_adv_xpath.call($el);
+      const el = document.querySelector('#test-element') as HTMLElement;
+      extend_adv_xpath.call(el);
 
       // Note: :visible doesn't work correctly in jsdom, so check for style change and content
-      expect($('#adv').css('display')).not.toBe('none');
-      expect($('#adv').find('#custom_xpath').length).toBe(1);
+      const advEl = document.querySelector('#adv') as HTMLElement;
+      expect(advEl.style.display).not.toBe('none');
+      expect(advEl.querySelector('#custom_xpath')).not.toBeNull();
     });
 
     it('creates radio buttons for id attributes', () => {
@@ -88,10 +84,11 @@ describe('jq_feedwizard.ts', () => {
         <div id="my-element">Content</div>
       `;
 
-      const $el = $('#my-element');
-      extend_adv_xpath.call($el);
+      const el = document.querySelector('#my-element') as HTMLElement;
+      extend_adv_xpath.call(el);
 
-      expect($('#adv').html()).toContain('contains id');
+      const advEl = document.querySelector('#adv') as HTMLElement;
+      expect(advEl.innerHTML).toContain('contains id');
     });
 
     it('creates radio buttons for class attributes', () => {
@@ -101,10 +98,11 @@ describe('jq_feedwizard.ts', () => {
         <div class="my-class another-class">Content</div>
       `;
 
-      const $el = $('.my-class');
-      extend_adv_xpath.call($el);
+      const el = document.querySelector('.my-class') as HTMLElement;
+      extend_adv_xpath.call(el);
 
-      expect($('#adv').html()).toContain('contains class');
+      const advEl = document.querySelector('#adv') as HTMLElement;
+      expect(advEl.innerHTML).toContain('contains class');
     });
 
     it('removes lwt_marked_text class from all elements', () => {
@@ -115,10 +113,10 @@ describe('jq_feedwizard.ts', () => {
         <div id="target">Target</div>
       `;
 
-      const $el = $('#target');
-      extend_adv_xpath.call($el);
+      const el = document.querySelector('#target') as HTMLElement;
+      extend_adv_xpath.call(el);
 
-      expect($('.lwt_marked_text').length).toBe(0);
+      expect(document.querySelectorAll('.lwt_marked_text').length).toBe(0);
     });
 
     it('wraps radio buttons with labels', () => {
@@ -128,10 +126,11 @@ describe('jq_feedwizard.ts', () => {
         <div id="test">Content</div>
       `;
 
-      const $el = $('#test');
-      extend_adv_xpath.call($el);
+      const el = document.querySelector('#test') as HTMLElement;
+      extend_adv_xpath.call(el);
 
-      expect($('#adv label.wrap_radio').length).toBeGreaterThan(0);
+      const advEl = document.querySelector('#adv') as HTMLElement;
+      expect(advEl.querySelectorAll('label.wrap_radio').length).toBeGreaterThan(0);
     });
   });
 
@@ -147,15 +146,20 @@ describe('jq_feedwizard.ts', () => {
         <div class="lwt_marked_text">Marked</div>
       `;
 
-      const event = $.Event('click', {
-        target: document.querySelector('.lwt_marked_text')
-      }) as JQuery.ClickEvent;
+      const event = new MouseEvent('click', {
+        bubbles: true
+      });
+      Object.defineProperty(event, 'target', {
+        value: document.querySelector('.lwt_marked_text'),
+        enumerable: true
+      });
 
       const result = lwt_feed_wiz_opt_inter.clickHeader(event);
 
       expect(result).toBe(false);
-      expect($('.lwt_marked_text').length).toBe(0);
-      expect($('#mark_action option').text()).toBe('[Click On Text]');
+      expect(document.querySelectorAll('.lwt_marked_text').length).toBe(0);
+      const markActionOption = document.querySelector('#mark_action option') as HTMLOptionElement;
+      expect(markActionOption.textContent).toBe('[Click On Text]');
     });
 
     it('handles clicks on filtered text', () => {
@@ -163,9 +167,13 @@ describe('jq_feedwizard.ts', () => {
         <div class="lwt_filtered_text">Filtered</div>
       `;
 
-      const event = $.Event('click', {
-        target: document.querySelector('.lwt_filtered_text')
-      }) as JQuery.ClickEvent;
+      const event = new MouseEvent('click', {
+        bubbles: true
+      });
+      Object.defineProperty(event, 'target', {
+        value: document.querySelector('.lwt_filtered_text'),
+        enumerable: true
+      });
 
       const result = lwt_feed_wiz_opt_inter.clickHeader(event);
 
@@ -181,14 +189,19 @@ describe('jq_feedwizard.ts', () => {
         <select id="mark_action"><option value="">Select</option></select>
       `;
 
-      const event = $.Event('click', {
-        target: document.querySelector('.lwt_selected_text')
-      }) as JQuery.ClickEvent;
+      const event = new MouseEvent('click', {
+        bubbles: true
+      });
+      Object.defineProperty(event, 'target', {
+        value: document.querySelector('.lwt_selected_text'),
+        enumerable: true
+      });
 
       const result = lwt_feed_wiz_opt_inter.clickHeader(event);
 
       expect(result).toBe(false);
-      expect($('button[name="button"]').prop('disabled')).toBe(true);
+      const button = document.querySelector('button[name="button"]') as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
     });
 
     it('populates mark_action select for unfiltered elements', () => {
@@ -201,13 +214,18 @@ describe('jq_feedwizard.ts', () => {
         </div>
       `;
 
-      const event = $.Event('click', {
-        target: document.querySelector('#target')
-      }) as JQuery.ClickEvent;
+      const event = new MouseEvent('click', {
+        bubbles: true
+      });
+      Object.defineProperty(event, 'target', {
+        value: document.querySelector('#target'),
+        enumerable: true
+      });
 
       lwt_feed_wiz_opt_inter.clickHeader(event);
 
-      expect($('button[name="button"]').prop('disabled')).toBe(false);
+      const button = document.querySelector('button[name="button"]') as HTMLButtonElement;
+      expect(button.disabled).toBe(false);
     });
   });
 
@@ -225,7 +243,8 @@ describe('jq_feedwizard.ts', () => {
         <div id="test">Content</div>
       `;
 
-      mockXpathQuery.mockImplementation(() => $('#test'));
+      const testEl = document.querySelector('#test') as HTMLElement;
+      mockXpathQuery.mockImplementation(() => [testEl]);
 
       const result = lwt_feed_wiz_opt_inter.highlightSelection();
 
@@ -265,7 +284,8 @@ describe('jq_feedwizard.ts', () => {
 
       lwt_feed_wizard.prepareInteractions();
 
-      expect($('#next').prop('disabled')).toBe(true);
+      const nextButton = document.querySelector('#next') as HTMLButtonElement;
+      expect(nextButton.disabled).toBe(true);
     });
 
     it('enables next button when lwt_sel has content', () => {
@@ -279,7 +299,8 @@ describe('jq_feedwizard.ts', () => {
 
       lwt_feed_wizard.prepareInteractions();
 
-      expect($('#next').prop('disabled')).toBe(false);
+      const nextButton = document.querySelector('#next') as HTMLButtonElement;
+      expect(nextButton.disabled).toBe(false);
     });
 
     it('sets margin-top on lwt_last', () => {
@@ -294,7 +315,8 @@ describe('jq_feedwizard.ts', () => {
       lwt_feed_wizard.prepareInteractions();
 
       // Margin should be set based on header height
-      expect($('#lwt_last').css('margin-top')).toBeDefined();
+      const lwtLast = document.querySelector('#lwt_last') as HTMLElement;
+      expect(lwtLast.style.marginTop).toBeDefined();
     });
 
     it('removes lwt_filtered_text class from all elements', () => {
@@ -309,7 +331,7 @@ describe('jq_feedwizard.ts', () => {
 
       lwt_feed_wizard.prepareInteractions();
 
-      expect($('.lwt_filtered_text').length).toBe(0);
+      expect(document.querySelectorAll('.lwt_filtered_text').length).toBe(0);
     });
 
     it('wraps selects in wrap_select label', () => {
@@ -325,7 +347,8 @@ describe('jq_feedwizard.ts', () => {
 
       lwt_feed_wizard.prepareInteractions();
 
-      expect($('#lwt_header label.wrap_select').length).toBe(1);
+      const headerEl = document.querySelector('#lwt_header') as HTMLElement;
+      expect(headerEl.querySelectorAll('label.wrap_select').length).toBe(1);
     });
   });
 
@@ -349,7 +372,8 @@ describe('jq_feedwizard.ts', () => {
       const deleteButton = document.querySelector('.delete_selection') as HTMLElement;
       lwt_feed_wizard.deleteSelection.call(deleteButton);
 
-      expect($('#lwt_sel li').length).toBe(1);
+      const selList = document.querySelector('#lwt_sel') as HTMLElement;
+      expect(selList.querySelectorAll('li').length).toBe(1);
     });
 
     it('removes selection classes from all elements', () => {
@@ -367,12 +391,12 @@ describe('jq_feedwizard.ts', () => {
       const deleteButton = document.querySelector('.delete_selection') as HTMLElement;
       lwt_feed_wizard.deleteSelection.call(deleteButton);
 
-      expect($('.lwt_selected_text').length).toBe(0);
-      expect($('.lwt_marked_text').length).toBe(0);
+      expect(document.querySelectorAll('.lwt_selected_text').length).toBe(0);
+      expect(document.querySelectorAll('.lwt_marked_text').length).toBe(0);
     });
 
     it('disables next when lwt_sel becomes empty on step 2', () => {
-      // Note: The whitespace in HTML matters - the function checks if html() === ''
+      // Note: The whitespace in HTML matters - the function checks if innerHTML === ''
       document.body.innerHTML = `
         <ul id="lwt_sel"><li><img class="delete_selection" /> xpath</li></ul>
         <input name="step" value="2" />
@@ -385,8 +409,10 @@ describe('jq_feedwizard.ts', () => {
       lwt_feed_wizard.deleteSelection.call(deleteButton);
 
       // After deleting the only item, lwt_sel should be empty
-      expect($('#lwt_sel').html()).toBe('');
-      expect($('#next').prop('disabled')).toBe(true);
+      const selList = document.querySelector('#lwt_sel') as HTMLElement;
+      expect(selList.innerHTML).toBe('');
+      const nextButton = document.querySelector('#next') as HTMLButtonElement;
+      expect(nextButton.disabled).toBe(true);
     });
   });
 
@@ -406,7 +432,8 @@ describe('jq_feedwizard.ts', () => {
       const radio = document.querySelector('.xpath') as HTMLElement;
       const result = lwt_feed_wizard.changeXPath.call(radio);
 
-      expect($('#adv_get_button').prop('disabled')).toBe(false);
+      const advGetButton = document.querySelector('#adv_get_button') as HTMLButtonElement;
+      expect(advGetButton.disabled).toBe(false);
       expect(result).toBe(false);
     });
 
@@ -422,7 +449,8 @@ describe('jq_feedwizard.ts', () => {
       const radio = document.querySelector('.xpath') as HTMLElement;
       lwt_feed_wizard.changeXPath.call(radio);
 
-      expect($('#adv_get_button').prop('disabled')).toBe(true);
+      const advGetButton = document.querySelector('#adv_get_button') as HTMLButtonElement;
+      expect(advGetButton.disabled).toBe(true);
     });
   });
 
@@ -442,12 +470,14 @@ describe('jq_feedwizard.ts', () => {
         <div id="lwt_last"></div>
       `;
 
-      mockXpathQuery.mockImplementation(() => $('<div></div>'));
+      const div = document.createElement('div');
+      mockXpathQuery.mockImplementation(() => [div]);
 
       lwt_feed_wizard.clickAdvGetButton();
 
-      expect($('#lwt_sel li').length).toBe(1);
-      expect($('#lwt_sel').text()).toContain("//div[@id='test']");
+      const selList = document.querySelector('#lwt_sel') as HTMLElement;
+      expect(selList.querySelectorAll('li').length).toBe(1);
+      expect(selList.textContent).toContain("//div[@id='test']");
     });
 
     it('hides #adv after selection', () => {
@@ -463,7 +493,8 @@ describe('jq_feedwizard.ts', () => {
 
       lwt_feed_wizard.clickAdvGetButton();
 
-      expect($('#adv').is(':visible')).toBe(false);
+      const advEl = document.querySelector('#adv') as HTMLElement;
+      expect(advEl.style.display === 'none' || advEl.style.display === '').toBe(true);
     });
 
     it('enables next button after selection', () => {
@@ -479,7 +510,8 @@ describe('jq_feedwizard.ts', () => {
 
       lwt_feed_wizard.clickAdvGetButton();
 
-      expect($('#next').prop('disabled')).toBe(false);
+      const nextButton = document.querySelector('#next') as HTMLButtonElement;
+      expect(nextButton.disabled).toBe(false);
     });
 
     it('does nothing when no radio is checked', () => {
@@ -495,7 +527,8 @@ describe('jq_feedwizard.ts', () => {
 
       lwt_feed_wizard.clickAdvGetButton();
 
-      expect($('#lwt_sel li').length).toBe(0);
+      const selList = document.querySelector('#lwt_sel') as HTMLElement;
+      expect(selList.querySelectorAll('li').length).toBe(0);
     });
   });
 
@@ -515,7 +548,7 @@ describe('jq_feedwizard.ts', () => {
       const li = document.querySelector('#lwt_sel li') as HTMLElement;
       const result = lwt_feed_wizard.clickSelectLi.call(li);
 
-      expect($('.lwt_highlighted_text').length).toBe(0);
+      expect(document.querySelectorAll('.lwt_highlighted_text').length).toBe(0);
       expect(result).toBe(false);
     });
 
@@ -528,12 +561,13 @@ describe('jq_feedwizard.ts', () => {
         <div id="test">Content</div>
       `;
 
-      mockXpathQuery.mockImplementation(() => $('#test'));
+      const testEl = document.querySelector('#test') as HTMLElement;
+      mockXpathQuery.mockImplementation(() => [testEl]);
 
       const li = document.querySelector('#lwt_sel li') as HTMLElement;
       lwt_feed_wizard.clickSelectLi.call(li);
 
-      expect($(li).hasClass('lwt_highlighted_text')).toBe(true);
+      expect(li.classList.contains('lwt_highlighted_text')).toBe(true);
     });
   });
 
@@ -554,7 +588,7 @@ describe('jq_feedwizard.ts', () => {
       lwt_feed_wizard.changeMarkAction();
 
       // Original marked text should have class removed
-      expect($('.lwt_marked_text').length).toBeGreaterThanOrEqual(0);
+      expect(document.querySelectorAll('.lwt_marked_text').length).toBeGreaterThanOrEqual(0);
     });
 
     it('returns false', () => {
@@ -595,9 +629,12 @@ describe('jq_feedwizard.ts', () => {
 
       lwt_feed_wizard.clickNextButton();
 
-      expect($('input[name="step"]').val()).toBe('2');
-      expect($('input[name="html"]').val()).toContain('xpath1');
-      expect($('#article_tags').prop('disabled')).toBe(false);
+      const stepInput = document.querySelector('input[name="step"]') as HTMLInputElement;
+      expect(stepInput.value).toBe('2');
+      const htmlInput = document.querySelector('input[name="html"]') as HTMLInputElement;
+      expect(htmlInput.value).toContain('xpath1');
+      const articleTags = document.querySelector('#article_tags') as HTMLTextAreaElement;
+      expect(articleTags.disabled).toBe(false);
       expect(mockSubmit).toHaveBeenCalled();
     });
 
@@ -618,8 +655,8 @@ describe('jq_feedwizard.ts', () => {
 
       lwt_feed_wizard.clickNextButton();
 
-      expect($('input[name="article_selector"]').length).toBe(1);
-      expect($('input[name="html"]').length).toBe(0);
+      expect(document.querySelectorAll('input[name="article_selector"]').length).toBe(1);
+      expect(document.querySelectorAll('input[name="html"]').length).toBe(0);
     });
   });
 
@@ -645,8 +682,9 @@ describe('jq_feedwizard.ts', () => {
 
       lwt_feed_wizard.changeHostStatus.call(hostStatus);
 
-      const firstOption = $('select[name="selected_feed"] option').first().text();
-      expect(firstOption).toContain('★');
+      const selectedFeed = document.querySelector('select[name="selected_feed"]') as HTMLSelectElement;
+      const firstOption = selectedFeed.options[0];
+      expect(firstOption.textContent).toContain('★');
     });
   });
 
@@ -667,8 +705,9 @@ describe('jq_feedwizard.ts', () => {
       `;
 
       // Trigger document-level click
-      const event = $.Event('click');
-      $('.delete_selection').trigger(event);
+      const event = new MouseEvent('click', { bubbles: true });
+      const deleteButton = document.querySelector('.delete_selection') as HTMLElement;
+      deleteButton.dispatchEvent(event);
     });
 
     it('registers change handler for xpath', () => {
@@ -677,8 +716,9 @@ describe('jq_feedwizard.ts', () => {
         <button id="adv_get_button">Get</button>
       `;
 
-      const event = $.Event('change');
-      $('.xpath').trigger(event);
+      const event = new Event('change', { bubbles: true });
+      const xpathInput = document.querySelector('.xpath') as HTMLElement;
+      xpathInput.dispatchEvent(event);
     });
   });
 

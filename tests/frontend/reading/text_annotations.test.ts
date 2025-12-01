@@ -2,16 +2,11 @@
  * Tests for text_annotations.ts - Annotation processing for text reading
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   getAttr,
   word_each_do_text_text,
   mword_each_do_text_text
 } from '../../../src/frontend/js/reading/text_annotations';
-
-// Make jQuery available globally
-(global as any).$ = $;
-(global as any).jQuery = $;
 
 // Mock word_status module
 vi.mock('../../../src/frontend/js/terms/word_status', () => ({
@@ -67,54 +62,54 @@ describe('text_annotations.ts', () => {
   describe('getAttr', () => {
     it('returns attribute value when it exists', () => {
       document.body.innerHTML = '<span id="test" data-value="hello"></span>';
-      const $el = $('#test');
+      const el = document.getElementById('test') as HTMLElement;
 
-      const result = getAttr($el, 'data-value');
+      const result = getAttr(el, 'data-value');
 
       expect(result).toBe('hello');
     });
 
     it('returns empty string when attribute does not exist', () => {
       document.body.innerHTML = '<span id="test"></span>';
-      const $el = $('#test');
+      const el = document.getElementById('test') as HTMLElement;
 
-      const result = getAttr($el, 'data-missing');
+      const result = getAttr(el, 'data-missing');
 
       expect(result).toBe('');
     });
 
     it('returns empty string for undefined attribute', () => {
       document.body.innerHTML = '<span id="test" data-value></span>';
-      const $el = $('#test');
+      const el = document.getElementById('test') as HTMLElement;
 
-      const result = getAttr($el, 'data-nonexistent');
+      const result = getAttr(el, 'data-nonexistent');
 
       expect(result).toBe('');
     });
 
     it('handles custom data attributes with underscores', () => {
       document.body.innerHTML = '<span id="test" data_order="15"></span>';
-      const $el = $('#test');
+      const el = document.getElementById('test') as HTMLElement;
 
-      const result = getAttr($el, 'data_order');
+      const result = getAttr(el, 'data_order');
 
       expect(result).toBe('15');
     });
 
     it('handles empty attribute value', () => {
       document.body.innerHTML = '<span id="test" data-value=""></span>';
-      const $el = $('#test');
+      const el = document.getElementById('test') as HTMLElement;
 
-      const result = getAttr($el, 'data-value');
+      const result = getAttr(el, 'data-value');
 
       expect(result).toBe('');
     });
 
     it('handles numeric attribute values as strings', () => {
       document.body.innerHTML = '<span id="test" data-count="42"></span>';
-      const $el = $('#test');
+      const el = document.getElementById('test') as HTMLElement;
 
-      const result = getAttr($el, 'data-count');
+      const result = getAttr(el, 'data-count');
 
       expect(result).toBe('42');
       expect(typeof result).toBe('string');
@@ -141,7 +136,7 @@ describe('text_annotations.ts', () => {
       word_each_do_text_text.call(element, 0);
 
       // Should not have set data_ann since wid is empty and doesn't match annotation
-      expect($(element).attr('data_ann')).toBeUndefined();
+      expect(element.getAttribute('data_ann')).toBeNull();
     });
 
     it('adds annotation when wid matches annotation entry', () => {
@@ -157,7 +152,7 @@ describe('text_annotations.ts', () => {
 
       word_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_ann')).toBe('note');
+      expect(element.getAttribute('data_ann')).toBe('note');
     });
 
     it('combines annotation with translation when not duplicate', () => {
@@ -173,7 +168,7 @@ describe('text_annotations.ts', () => {
 
       word_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_trans')).toBe('annotation / translation');
+      expect(element.getAttribute('data_trans')).toBe('annotation / translation');
     });
 
     it('does not duplicate annotation in translation', () => {
@@ -191,7 +186,7 @@ describe('text_annotations.ts', () => {
       word_each_do_text_text.call(element, 0);
 
       // Should not add duplicate
-      expect($(element).attr('data_trans')).toBe('hello');
+      expect(element.getAttribute('data_trans')).toBe('hello');
     });
 
     it('sets tooltip when jQuery_tooltip is disabled', () => {
@@ -259,7 +254,7 @@ describe('text_annotations.ts', () => {
 
       word_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_ann')).toBeUndefined();
+      expect(element.getAttribute('data_ann')).toBeNull();
     });
 
     it('handles annotation with special regex characters', () => {
@@ -275,7 +270,7 @@ describe('text_annotations.ts', () => {
 
       word_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_ann')).toBe('note (test)');
+      expect(element.getAttribute('data_ann')).toBe('note (test)');
     });
   });
 
@@ -303,7 +298,7 @@ describe('text_annotations.ts', () => {
 
       mword_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_ann')).toBeUndefined();
+      expect(element.getAttribute('data_ann')).toBeNull();
     });
 
     it('searches for annotation in even offsets (2, 4, 6...)', () => {
@@ -320,7 +315,7 @@ describe('text_annotations.ts', () => {
 
       mword_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_ann')).toBe('multi annotation');
+      expect(element.getAttribute('data_ann')).toBe('multi annotation');
     });
 
     it('stops searching after finding first matching annotation', () => {
@@ -338,7 +333,7 @@ describe('text_annotations.ts', () => {
       mword_each_do_text_text.call(element, 0);
 
       // Should find first one at offset +2
-      expect($(element).attr('data_ann')).toBe('first annotation');
+      expect(element.getAttribute('data_ann')).toBe('first annotation');
     });
 
     it('combines annotation with translation when not duplicate', () => {
@@ -354,7 +349,7 @@ describe('text_annotations.ts', () => {
 
       mword_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_trans')).toBe('note / original');
+      expect(element.getAttribute('data_trans')).toBe('note / original');
     });
 
     it('does not duplicate annotation in translation', () => {
@@ -371,7 +366,7 @@ describe('text_annotations.ts', () => {
 
       mword_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_trans')).toBe('same');
+      expect(element.getAttribute('data_trans')).toBe('same');
     });
 
     it('sets tooltip when jQuery_tooltip is disabled', () => {
@@ -440,7 +435,7 @@ describe('text_annotations.ts', () => {
 
       mword_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_ann')).toBe('far annotation');
+      expect(element.getAttribute('data_ann')).toBe('far annotation');
     });
 
     it('does not find annotation beyond offset 16', () => {
@@ -457,7 +452,7 @@ describe('text_annotations.ts', () => {
 
       mword_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_ann')).toBeUndefined();
+      expect(element.getAttribute('data_ann')).toBeNull();
     });
 
     it('handles missing data_status by defaulting to 0', () => {
@@ -485,10 +480,8 @@ describe('text_annotations.ts', () => {
   // ===========================================================================
 
   describe('Edge Cases', () => {
-    it('getAttr handles jQuery object with no elements', () => {
-      const $empty = $();
-
-      const result = getAttr($empty, 'data-test');
+    it('getAttr handles null element', () => {
+      const result = getAttr(null as any, 'data-test');
 
       expect(result).toBe('');
     });
@@ -506,7 +499,8 @@ describe('text_annotations.ts', () => {
 
       word_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_trans')).toContain('note [extra]');
+      const trans = element.getAttribute('data_trans');
+      expect(trans).toContain('note [extra]');
     });
 
     it('handles delimiter at start/end of translation', () => {
@@ -524,7 +518,7 @@ describe('text_annotations.ts', () => {
       word_each_do_text_text.call(element, 0);
 
       // The regex should match ann at the start/end with delimiters
-      expect($(element).attr('data_trans')).toBe(',ann,');
+      expect(element.getAttribute('data_trans')).toBe(',ann,');
     });
 
     it('handles data_order with leading zeros', () => {
@@ -541,7 +535,7 @@ describe('text_annotations.ts', () => {
       word_each_do_text_text.call(element, 0);
 
       // '05' !== '5' so annotation won't match - this is expected behavior
-      expect($(element).attr('data_ann')).toBeUndefined();
+      expect(element.getAttribute('data_ann')).toBeNull();
     });
 
     it('mword_each_do_text_text handles zero order value', () => {
@@ -557,7 +551,7 @@ describe('text_annotations.ts', () => {
 
       mword_each_do_text_text.call(element, 0);
 
-      expect($(element).attr('data_ann')).toBe('note');
+      expect(element.getAttribute('data_ann')).toBe('note');
     });
   });
 });

@@ -2,7 +2,6 @@
  * Tests for word_result_init.ts - Auto-initializes word result views
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import { autoInitWordResults } from '../../../src/frontend/js/words/word_result_init';
 
 // Mock dependencies
@@ -501,10 +500,10 @@ describe('word_result_init.ts', () => {
 
       autoInitWordResults();
 
-      expect($('#TERM123').html()).toBe('new term');
-      expect($('#TRAN123').html()).toBe('new trans');
-      expect($('#ROMA123').html()).toBe('new roman');
-      expect($('#SENT123').html()).toBe('new sentence');
+      expect(document.querySelector('#TERM123')!.innerHTML).toBe('new term');
+      expect(document.querySelector('#TRAN123')!.innerHTML).toBe('new trans');
+      expect(document.querySelector('#ROMA123')!.innerHTML).toBe('new roman');
+      expect(document.querySelector('#SENT123')!.innerHTML).toBe('new sentence');
       expect(cleanupRightFrames).toHaveBeenCalled();
     });
   });

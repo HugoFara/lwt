@@ -2,7 +2,6 @@
  * Tests for word_dom_updates.ts - DOM updates for word operations
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   getParentContext,
   getFrameElement,
@@ -24,10 +23,6 @@ import {
   type WordUpdateParams,
   type BulkWordUpdateParams
 } from '../../../src/frontend/js/words/word_dom_updates';
-
-// Make jQuery available globally
-(global as any).$ = $;
-(global as any).jQuery = $;
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/terms/word_status', () => ({
@@ -157,7 +152,7 @@ describe('word_dom_updates.ts', () => {
 
       updateLearnStatus('<span>New content</span>');
 
-      expect($('#learnstatus').html()).toBe('<span>New content</span>');
+      expect(document.querySelector('#learnstatus')!.innerHTML).toBe('<span>New content</span>');
     });
 
     it('does nothing when element does not exist', () => {
@@ -218,12 +213,14 @@ describe('word_dom_updates.ts', () => {
 
       updateNewWordInDOM(params);
 
-      const elements = $('.TERM48454c4c4f');
-      expect(elements.hasClass('status0')).toBe(false);
-      expect(elements.hasClass('status2')).toBe(true);
-      expect(elements.hasClass('word123')).toBe(true);
-      expect(elements.attr('data_trans')).toBe('bonjour');
-      expect(elements.attr('data_wid')).toBe('123');
+      const elements = document.querySelectorAll('.TERM48454c4c4f');
+      elements.forEach(el => {
+        expect(el.classList.contains('status0')).toBe(false);
+        expect(el.classList.contains('status2')).toBe(true);
+        expect(el.classList.contains('word123')).toBe(true);
+        expect(el.getAttribute('data_trans')).toBe('bonjour');
+        expect(el.getAttribute('data_wid')).toBe('123');
+      });
     });
 
     it('does nothing when hex is not provided', () => {
@@ -241,7 +238,7 @@ describe('word_dom_updates.ts', () => {
 
       updateNewWordInDOM(params);
 
-      expect($('.TERM48454c4c4f').hasClass('status0')).toBe(true);
+      expect(document.querySelector('.TERM48454c4c4f')!.classList.contains('status0')).toBe(true);
     });
 
     it('sets title attribute with tooltip', () => {
@@ -260,7 +257,7 @@ describe('word_dom_updates.ts', () => {
 
       updateNewWordInDOM(params);
 
-      expect($('.TERM48454c4c4f').attr('title')).toBe('hello|bonjour|bɔ̃ʒuʁ|2');
+      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBe('hello|bonjour|bɔ̃ʒuʁ|2');
     });
   });
 
@@ -284,12 +281,12 @@ describe('word_dom_updates.ts', () => {
 
       updateExistingWordInDOM(params, 1);
 
-      const element = $('.word123');
-      expect(element.hasClass('status1')).toBe(false);
-      expect(element.hasClass('status3')).toBe(true);
-      expect(element.attr('data_trans')).toBe('updated translation');
-      expect(element.attr('data_rom')).toBe('updated rom');
-      expect(element.attr('data_status')).toBe('3');
+      const element = document.querySelector('.word123')!;
+      expect(element.classList.contains('status1')).toBe(false);
+      expect(element.classList.contains('status3')).toBe(true);
+      expect(element.getAttribute('data_trans')).toBe('updated translation');
+      expect(element.getAttribute('data_rom')).toBe('updated rom');
+      expect(element.getAttribute('data_status')).toBe('3');
     });
   });
 
@@ -307,10 +304,10 @@ describe('word_dom_updates.ts', () => {
 
       updateWordStatusInDOM(456, 4, 'word', 'trans', 'rom');
 
-      const element = $('.word456');
-      expect(element.hasClass('status2')).toBe(false);
-      expect(element.hasClass('status4')).toBe(true);
-      expect(element.attr('data_status')).toBe('4');
+      const element = document.querySelector('.word456')!;
+      expect(element.classList.contains('status2')).toBe(false);
+      expect(element.classList.contains('status4')).toBe(true);
+      expect(element.getAttribute('data_status')).toBe('4');
     });
 
     it('removes all status classes before adding new one', () => {
@@ -322,14 +319,14 @@ describe('word_dom_updates.ts', () => {
 
       updateWordStatusInDOM(456, 3, 'word', 'trans', 'rom');
 
-      const element = $('.word456');
-      expect(element.hasClass('status98')).toBe(false);
-      expect(element.hasClass('status99')).toBe(false);
-      expect(element.hasClass('status1')).toBe(false);
-      expect(element.hasClass('status2')).toBe(false);
-      expect(element.hasClass('status3')).toBe(true);
-      expect(element.hasClass('status4')).toBe(false);
-      expect(element.hasClass('status5')).toBe(false);
+      const element = document.querySelector('.word456')!;
+      expect(element.classList.contains('status98')).toBe(false);
+      expect(element.classList.contains('status99')).toBe(false);
+      expect(element.classList.contains('status1')).toBe(false);
+      expect(element.classList.contains('status2')).toBe(false);
+      expect(element.classList.contains('status3')).toBe(true);
+      expect(element.classList.contains('status4')).toBe(false);
+      expect(element.classList.contains('status5')).toBe(false);
     });
 
     it('does nothing when frame-l does not exist', () => {
@@ -338,7 +335,7 @@ describe('word_dom_updates.ts', () => {
       `;
 
       expect(() => updateWordStatusInDOM(456, 4, 'word', 'trans', 'rom')).not.toThrow();
-      expect($('.word456').hasClass('status2')).toBe(true);
+      expect(document.querySelector('.word456')!.classList.contains('status2')).toBe(true);
     });
   });
 
@@ -354,15 +351,15 @@ describe('word_dom_updates.ts', () => {
 
       deleteWordFromDOM(789, 'word');
 
-      const element = $('span');
-      expect(element.hasClass('word789')).toBe(false);
-      expect(element.hasClass('status3')).toBe(false);
-      expect(element.hasClass('status0')).toBe(true);
-      expect(element.attr('data_status')).toBe('0');
-      expect(element.attr('data_trans')).toBe('');
-      expect(element.attr('data_rom')).toBe('');
-      expect(element.attr('data_wid')).toBe('');
-      expect(element.attr('data_img')).toBeUndefined();
+      const element = document.querySelector('span')!;
+      expect(element.classList.contains('word789')).toBe(false);
+      expect(element.classList.contains('status3')).toBe(false);
+      expect(element.classList.contains('status0')).toBe(true);
+      expect(element.getAttribute('data_status')).toBe('0');
+      expect(element.getAttribute('data_trans')).toBe('');
+      expect(element.getAttribute('data_rom')).toBe('');
+      expect(element.getAttribute('data_wid')).toBe('');
+      expect(element.getAttribute('data_img')).toBeNull();
     });
 
     it('removes all status classes', () => {
@@ -372,15 +369,15 @@ describe('word_dom_updates.ts', () => {
 
       deleteWordFromDOM(789, 'word');
 
-      const element = $('span');
-      expect(element.hasClass('status99')).toBe(false);
-      expect(element.hasClass('status98')).toBe(false);
-      expect(element.hasClass('status1')).toBe(false);
-      expect(element.hasClass('status2')).toBe(false);
-      expect(element.hasClass('status3')).toBe(false);
-      expect(element.hasClass('status4')).toBe(false);
-      expect(element.hasClass('status5')).toBe(false);
-      expect(element.hasClass('status0')).toBe(true);
+      const element = document.querySelector('span')!;
+      expect(element.classList.contains('status99')).toBe(false);
+      expect(element.classList.contains('status98')).toBe(false);
+      expect(element.classList.contains('status1')).toBe(false);
+      expect(element.classList.contains('status2')).toBe(false);
+      expect(element.classList.contains('status3')).toBe(false);
+      expect(element.classList.contains('status4')).toBe(false);
+      expect(element.classList.contains('status5')).toBe(false);
+      expect(element.classList.contains('status0')).toBe(true);
     });
   });
 
@@ -398,12 +395,12 @@ describe('word_dom_updates.ts', () => {
 
       markWordWellKnownInDOM(111, '48454c4c4f', 'hello');
 
-      const element = $('.TERM48454c4c4f');
-      expect(element.hasClass('status0')).toBe(false);
-      expect(element.hasClass('status99')).toBe(true);
-      expect(element.hasClass('word111')).toBe(true);
-      expect(element.attr('data_status')).toBe('99');
-      expect(element.attr('data_wid')).toBe('111');
+      const element = document.querySelector('.TERM48454c4c4f')!;
+      expect(element.classList.contains('status0')).toBe(false);
+      expect(element.classList.contains('status99')).toBe(true);
+      expect(element.classList.contains('word111')).toBe(true);
+      expect(element.getAttribute('data_status')).toBe('99');
+      expect(element.getAttribute('data_wid')).toBe('111');
     });
 
     it('does nothing when frame-l does not exist', () => {
@@ -413,7 +410,7 @@ describe('word_dom_updates.ts', () => {
 
       markWordWellKnownInDOM(111, '48454c4c4f', 'hello');
 
-      expect($('.TERM48454c4c4f').hasClass('status0')).toBe(true);
+      expect(document.querySelector('.TERM48454c4c4f')!.classList.contains('status0')).toBe(true);
     });
   });
 
@@ -431,12 +428,12 @@ describe('word_dom_updates.ts', () => {
 
       markWordIgnoredInDOM(222, '48454c4c4f', 'hello');
 
-      const element = $('.TERM48454c4c4f');
-      expect(element.hasClass('status0')).toBe(false);
-      expect(element.hasClass('status98')).toBe(true);
-      expect(element.hasClass('word222')).toBe(true);
-      expect(element.attr('data_status')).toBe('98');
-      expect(element.attr('data_wid')).toBe('222');
+      const element = document.querySelector('.TERM48454c4c4f')!;
+      expect(element.classList.contains('status0')).toBe(false);
+      expect(element.classList.contains('status98')).toBe(true);
+      expect(element.classList.contains('word222')).toBe(true);
+      expect(element.getAttribute('data_status')).toBe('98');
+      expect(element.getAttribute('data_wid')).toBe('222');
     });
   });
 
@@ -452,12 +449,12 @@ describe('word_dom_updates.ts', () => {
 
       updateMultiWordInDOM(333, 'hello world', 'bonjour monde', 'rom', 4, 2);
 
-      const element = $('.word333');
-      expect(element.hasClass('status2')).toBe(false);
-      expect(element.hasClass('status4')).toBe(true);
-      expect(element.attr('data_trans')).toBe('bonjour monde');
-      expect(element.attr('data_rom')).toBe('rom');
-      expect(element.attr('data_status')).toBe('4');
+      const element = document.querySelector('.word333')!;
+      expect(element.classList.contains('status2')).toBe(false);
+      expect(element.classList.contains('status4')).toBe(true);
+      expect(element.getAttribute('data_trans')).toBe('bonjour monde');
+      expect(element.getAttribute('data_rom')).toBe('rom');
+      expect(element.getAttribute('data_status')).toBe('4');
     });
   });
 
@@ -477,8 +474,8 @@ describe('word_dom_updates.ts', () => {
 
       deleteMultiWordFromDOM(444, false);
 
-      expect($('.word444').length).toBe(0);
-      expect($('.hide').length).toBe(0);
+      expect(document.querySelectorAll('.word444').length).toBe(0);
+      expect(document.querySelectorAll('.hide').length).toBe(0);
     });
 
     it('removes multi-word elements when showAll is true', () => {
@@ -491,9 +488,9 @@ describe('word_dom_updates.ts', () => {
 
       deleteMultiWordFromDOM(444, true);
 
-      expect($('.word444').length).toBe(0);
+      expect(document.querySelectorAll('.word444').length).toBe(0);
       // When showAll is true, hidden elements are not unhidden
-      expect($('.hide').length).toBe(1);
+      expect(document.querySelectorAll('.hide').length).toBe(1);
     });
   });
 
@@ -517,12 +514,12 @@ describe('word_dom_updates.ts', () => {
 
       updateBulkWordInDOM(term, true);
 
-      const element = $('.TERM48454c4c4f');
-      expect(element.hasClass('status0')).toBe(false);
-      expect(element.hasClass('status3')).toBe(true);
-      expect(element.hasClass('word555')).toBe(true);
-      expect(element.attr('data_wid')).toBe('555');
-      expect(element.attr('data_trans')).toBe('bonjour');
+      const element = document.querySelector('.TERM48454c4c4f')!;
+      expect(element.classList.contains('status0')).toBe(false);
+      expect(element.classList.contains('status3')).toBe(true);
+      expect(element.classList.contains('word555')).toBe(true);
+      expect(element.getAttribute('data_wid')).toBe('555');
+      expect(element.getAttribute('data_trans')).toBe('bonjour');
     });
 
     it('sets empty title when useTooltip is false', () => {
@@ -540,7 +537,7 @@ describe('word_dom_updates.ts', () => {
 
       updateBulkWordInDOM(term, false);
 
-      expect($('.TERM48454c4c4f').attr('title')).toBe('');
+      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBe('');
     });
   });
 
@@ -556,12 +553,12 @@ describe('word_dom_updates.ts', () => {
 
       updateHoverSaveInDOM(666, '48454c4c4f', 1, 'quick trans', 'hello');
 
-      const element = $('.TERM48454c4c4f');
-      expect(element.hasClass('status0')).toBe(false);
-      expect(element.hasClass('status1')).toBe(true);
-      expect(element.hasClass('word666')).toBe(true);
-      expect(element.attr('data_trans')).toBe('quick trans');
-      expect(element.attr('data_wid')).toBe('666');
+      const element = document.querySelector('.TERM48454c4c4f')!;
+      expect(element.classList.contains('status0')).toBe(false);
+      expect(element.classList.contains('status1')).toBe(true);
+      expect(element.classList.contains('word666')).toBe(true);
+      expect(element.getAttribute('data_trans')).toBe('quick trans');
+      expect(element.getAttribute('data_wid')).toBe('666');
     });
 
     it('sets title when jQuery tooltip is enabled', () => {
@@ -580,7 +577,7 @@ describe('word_dom_updates.ts', () => {
       updateHoverSaveInDOM(666, '48454c4c4f', 1, 'quick trans', 'hello');
 
       // When jQuery tooltip is enabled, make_tooltip is still called
-      expect($('.TERM48454c4c4f').attr('title')).toBeTruthy();
+      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBeTruthy();
     });
   });
 
@@ -596,11 +593,11 @@ describe('word_dom_updates.ts', () => {
 
       updateTestWordInDOM(777, 'test word', 'new trans', 'new rom', 5);
 
-      const element = $('.word777');
-      expect(element.attr('data_text')).toBe('test word');
-      expect(element.attr('data_trans')).toBe('new trans');
-      expect(element.attr('data_rom')).toBe('new rom');
-      expect(element.attr('data_status')).toBe('5');
+      const element = document.querySelector('.word777')!;
+      expect(element.getAttribute('data_text')).toBe('test word');
+      expect(element.getAttribute('data_trans')).toBe('new trans');
+      expect(element.getAttribute('data_rom')).toBe('new rom');
+      expect(element.getAttribute('data_status')).toBe('5');
     });
   });
 
@@ -616,7 +613,7 @@ describe('word_dom_updates.ts', () => {
 
       completeWordOperation('<span>5 words to learn</span>');
 
-      expect($('#learnstatus').html()).toBe('<span>5 words to learn</span>');
+      expect(document.querySelector('#learnstatus')!.innerHTML).toBe('<span>5 words to learn</span>');
       expect(cleanupRightFrames).toHaveBeenCalled();
     });
 
@@ -651,8 +648,8 @@ describe('word_dom_updates.ts', () => {
 
       updateExistingWordInDOM(params, '1');
 
-      expect($('.word888').hasClass('status99')).toBe(true);
-      expect($('.word888').attr('data_status')).toBe('99');
+      expect(document.querySelector('.word888')!.classList.contains('status99')).toBe(true);
+      expect(document.querySelector('.word888')!.getAttribute('data_status')).toBe('99');
     });
 
     it('handles missing annotation data in deleteWordFromDOM', () => {
@@ -663,8 +660,8 @@ describe('word_dom_updates.ts', () => {
       deleteWordFromDOM(999, 'word');
 
       // Should not throw even without data_ann attribute
-      expect($('.word999').length).toBe(0);
-      expect($('.status0').length).toBe(1);
+      expect(document.querySelectorAll('.word999').length).toBe(0);
+      expect(document.querySelectorAll('.status0').length).toBe(1);
     });
 
     it('handles multiple elements with same word ID', () => {
@@ -684,11 +681,11 @@ describe('word_dom_updates.ts', () => {
 
       updateExistingWordInDOM(params, 2);
 
-      const elements = $('.word100');
+      const elements = document.querySelectorAll('.word100');
       expect(elements.length).toBe(3);
-      elements.each(function () {
-        expect($(this).hasClass('status4')).toBe(true);
-        expect($(this).attr('data_trans')).toBe('updated');
+      elements.forEach(el => {
+        expect(el.classList.contains('status4')).toBe(true);
+        expect(el.getAttribute('data_trans')).toBe('updated');
       });
     });
   });

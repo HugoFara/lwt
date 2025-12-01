@@ -2,7 +2,6 @@
  * Tests for tts_settings.ts - Text-to-Speech settings management
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   ttsSettings,
   initTTSSettings,
@@ -12,10 +11,6 @@ import {
   populateVoiceList,
   type TTSSettingsConfig
 } from '../../../src/frontend/js/admin/tts_settings';
-
-// Make jQuery available globally
-(global as any).$ = $;
-(global as any).jQuery = $;
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/core/cookies', () => ({
@@ -240,10 +235,10 @@ describe('tts_settings.ts', () => {
       ttsSettings.currentLanguage = 'en-US';
       ttsSettings.presetTTSData();
 
-      expect($('#get-language').val()).toBe('en-US');
-      expect($('#voice').val()).toBe('Google US English');
-      expect($('#rate').val()).toBe('1.5');
-      expect($('#pitch').val()).toBe('1.1');
+      expect((document.getElementById('get-language') as HTMLSelectElement).value).toBe('en-US');
+      expect((document.getElementById('voice') as HTMLSelectElement).value).toBe('Google US English');
+      expect((document.getElementById('rate') as HTMLInputElement).value).toBe('1.5');
+      expect((document.getElementById('pitch') as HTMLInputElement).value).toBe('1.1');
     });
 
     it('uses default values when cookies are empty', async () => {
@@ -263,10 +258,10 @@ describe('tts_settings.ts', () => {
       ttsSettings.currentLanguage = 'fr';
       ttsSettings.presetTTSData();
 
-      expect($('#get-language').val()).toBe('fr');
-      expect($('#voice').val()).toBe('');
-      expect($('#rate').val()).toBe('1');
-      expect($('#pitch').val()).toBe('1');
+      expect((document.getElementById('get-language') as HTMLSelectElement).value).toBe('fr');
+      expect((document.getElementById('voice') as HTMLSelectElement).value).toBe('');
+      expect((document.getElementById('rate') as HTMLInputElement).value).toBe('1');
+      expect((document.getElementById('pitch') as HTMLInputElement).value).toBe('1');
     });
   });
 
@@ -299,10 +294,10 @@ describe('tts_settings.ts', () => {
 
       ttsSettings.populateVoiceList();
 
-      const options = $('#voice option');
+      const options = document.querySelectorAll('#voice option');
       expect(options.length).toBe(2);
-      expect(options.eq(0).text()).toBe('Google US English');
-      expect(options.eq(1).text()).toBe('Google UK English');
+      expect(options[0].textContent).toBe('Google US English');
+      expect(options[1].textContent).toBe('Google UK English');
     });
 
     it('marks default voice with label', () => {
@@ -322,8 +317,8 @@ describe('tts_settings.ts', () => {
       ttsSettings.populateVoiceList();
 
       // Default voice is always included regardless of language
-      const options = $('#voice option');
-      expect(options.eq(0).text()).toContain('-- DEFAULT');
+      const options = document.querySelectorAll('#voice option');
+      expect(options[0].textContent).toContain('-- DEFAULT');
     });
 
     it('includes default voice even when language does not match', () => {
@@ -342,10 +337,10 @@ describe('tts_settings.ts', () => {
 
       ttsSettings.populateVoiceList();
 
-      const options = $('#voice option');
+      const options = document.querySelectorAll('#voice option');
       // Only default voice should be included (doesn't match 'de')
       expect(options.length).toBe(1);
-      expect(options.eq(0).text()).toContain('System Default');
+      expect(options[0].textContent).toContain('System Default');
     });
 
     it('sets data attributes on voice options', () => {
@@ -363,9 +358,9 @@ describe('tts_settings.ts', () => {
 
       ttsSettings.populateVoiceList();
 
-      const option = $('#voice option').first();
-      expect(option.attr('data-lang')).toBe('en-US');
-      expect(option.attr('data-name')).toBe('Google US English');
+      const option = document.querySelector('#voice option') as HTMLOptionElement;
+      expect(option.getAttribute('data-lang')).toBe('en-US');
+      expect(option.getAttribute('data-name')).toBe('Google US English');
     });
 
     it('clears existing options before populating', () => {
@@ -385,9 +380,9 @@ describe('tts_settings.ts', () => {
 
       ttsSettings.populateVoiceList();
 
-      const options = $('#voice option');
+      const options = document.querySelectorAll('#voice option');
       expect(options.length).toBe(1);
-      expect(options.first().text()).not.toBe('Old Option');
+      expect(options[0].textContent).not.toBe('Old Option');
     });
   });
 
@@ -531,7 +526,8 @@ describe('tts_settings.ts', () => {
       `;
 
       initTTSSettings();
-      $('[data-action="tts-demo"]').trigger('click');
+      const demoButton = document.querySelector('[data-action="tts-demo"]') as HTMLElement;
+      demoButton.dispatchEvent(new Event('click', { bubbles: true }));
 
       expect(readTextAloud).toHaveBeenCalled();
     });
@@ -557,7 +553,8 @@ describe('tts_settings.ts', () => {
       `;
 
       initTTSSettings();
-      $('[data-action="tts-cancel"]').trigger('click');
+      const cancelButton = document.querySelector('[data-action="tts-cancel"]') as HTMLElement;
+      cancelButton.dispatchEvent(new Event('click', { bubbles: true }));
 
       expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
 
@@ -619,7 +616,7 @@ describe('tts_settings.ts', () => {
       ttsSettings.currentLanguage = 'test';
       presetTTSData();
 
-      expect($('#get-language').val()).toBe('test');
+      expect((document.getElementById('get-language') as HTMLSelectElement).value).toBe('test');
     });
 
     it('populateVoiceList calls ttsSettings.populateVoiceList', () => {

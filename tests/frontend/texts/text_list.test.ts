@@ -2,12 +2,7 @@
  * Tests for text_list.ts - Text list page interactions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import { initTextList } from '../../../src/frontend/js/texts/text_list';
-
-// Make jQuery available globally
-(global as any).$ = $;
-(global as any).jQuery = $;
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/core/language_settings', () => ({

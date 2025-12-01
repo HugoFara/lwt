@@ -2,7 +2,6 @@
  * Tests for feed_index.ts - Feed index/management page functionality
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import { initFeedIndex } from '../../../src/frontend/js/feeds/feed_index';
 
 // Mock the dependencies

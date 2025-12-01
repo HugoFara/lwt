@@ -2,7 +2,6 @@
  * Tests for text_check_display.ts - Display word statistics after text parsing
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   displayStatistics,
   initTextCheckDisplay,
@@ -44,7 +43,7 @@ describe('text_check_display.ts', () => {
 
       displayStatistics(words, [], []);
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('Word List');
       expect(html).toContain('[hello]');
       expect(html).toContain('— 5');
@@ -61,7 +60,7 @@ describe('text_check_display.ts', () => {
 
       displayStatistics(words, [], []);
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('class="red2"');
       expect(html).toContain('translation here');
     });
@@ -74,7 +73,7 @@ describe('text_check_display.ts', () => {
 
       displayStatistics([], multiWords, []);
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('Expression List');
       expect(html).toContain('[good morning]');
       expect(html).toContain('[thank you]');
@@ -89,7 +88,7 @@ describe('text_check_display.ts', () => {
 
       displayStatistics([], [], nonWords);
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('Non-Word List');
       expect(html).toContain('[123]');
       expect(html).toContain('[@#$]');
@@ -103,7 +102,7 @@ describe('text_check_display.ts', () => {
 
       displayStatistics(words, multiWords, nonWords);
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('Word List');
       expect(html).toContain('Expression List');
       expect(html).toContain('Non-Word List');
@@ -112,16 +111,16 @@ describe('text_check_display.ts', () => {
     it('handles empty arrays', () => {
       displayStatistics([], [], []);
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('TOTAL: 0');
     });
 
     it('appends to existing content', () => {
-      $('#check_text').html('<p>Existing content</p>');
+      document.getElementById('check_text')!.innerHTML = '<p>Existing content</p>';
 
       displayStatistics([['word', 1, '']], [], []);
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('Existing content');
       expect(html).toContain('Word List');
     });
@@ -209,7 +208,7 @@ describe('text_check_display.ts', () => {
 
       initTextCheckDisplay();
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('[word1]');
       expect(html).toContain('[expr1]');
       expect(html).toContain('[!!!]');
@@ -235,7 +234,7 @@ describe('text_check_display.ts', () => {
       expect(() => initTextCheckDisplay()).not.toThrow();
 
       // Verify content was created
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('مرحبا');
     });
 
@@ -247,7 +246,7 @@ describe('text_check_display.ts', () => {
 
       initTextCheckDisplay();
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('[global_word]');
       expect(html).toContain('[global_expr]');
       expect(html).toContain('[###]');
@@ -269,7 +268,7 @@ describe('text_check_display.ts', () => {
 
       initTextCheckDisplay();
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('[config_word]');
       expect(html).not.toContain('[global_word]');
     });
@@ -329,7 +328,7 @@ describe('text_check_display.ts', () => {
 
       initTextCheckDisplay();
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       expect(html).toContain('[fallback_word]');
     });
 
@@ -339,7 +338,7 @@ describe('text_check_display.ts', () => {
       initTextCheckDisplay();
 
       // check_text should remain empty
-      expect($('#check_text').html()).toBe('');
+      expect(document.getElementById('check_text')!.innerHTML).toBe('');
     });
   });
 
@@ -430,7 +429,7 @@ describe('text_check_display.ts', () => {
         [['n1', '1'], ['n2', '2'], ['n3', '3']]
       );
 
-      const html = $('#check_text').html();
+      const html = document.getElementById('check_text')!.innerHTML;
       // Check all TOTAL counts appear
       const totalMatches = html.match(/TOTAL: \d+/g) || [];
       expect(totalMatches.length).toBe(3);

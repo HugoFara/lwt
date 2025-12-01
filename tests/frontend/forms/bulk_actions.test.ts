@@ -2,16 +2,11 @@
  * Tests for bulk_actions.ts - Bulk action utilities for LWT
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   selectToggle,
   multiActionGo,
   allActionGo
 } from '../../../src/frontend/js/forms/bulk_actions';
-
-// Make jQuery available globally (required by the module)
-(global as any).$ = $;
-(global as any).jQuery = $;
 
 // Mock ui_utilities
 vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({

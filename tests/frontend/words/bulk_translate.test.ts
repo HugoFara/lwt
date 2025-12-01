@@ -2,7 +2,6 @@
  * Tests for bulk_translate.ts - Functions for the bulk translate word form
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   clickDictionary,
   bulkInteractions,
@@ -149,26 +148,26 @@ describe('bulk_translate.ts', () => {
 
       const checkbox = document.querySelector<HTMLInputElement>('.markcheck')!;
       checkbox.checked = false;
-      $(checkbox).trigger('change');
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
 
-      expect($('[name="term[1][text]"]').prop('disabled')).toBe(true);
-      expect($('[name="term[1][lg]"]').prop('disabled')).toBe(true);
-      expect($('[name="term[1][status]"]').prop('disabled')).toBe(true);
-      expect($('#Trans_1 input').prop('disabled')).toBe(true);
+      expect((document.querySelector('[name="term[1][text]"]') as HTMLInputElement).disabled).toBe(true);
+      expect((document.querySelector('[name="term[1][lg]"]') as HTMLInputElement).disabled).toBe(true);
+      expect((document.querySelector('[name="term[1][status]"]') as HTMLInputElement).disabled).toBe(true);
+      expect((document.querySelector('#Trans_1 input') as HTMLInputElement).disabled).toBe(true);
     });
 
     it('enables term inputs when checkbox is checked', () => {
       // First disable all
-      $('[name^="term"]').prop('disabled', true);
-      $('#Trans_1 input').prop('disabled', true);
+      document.querySelectorAll<HTMLInputElement>('[name^="term"]').forEach(el => el.disabled = true);
+      (document.querySelector('#Trans_1 input') as HTMLInputElement).disabled = true;
 
       bulkCheckbox();
 
       const checkbox = document.querySelector<HTMLInputElement>('.markcheck')!;
       checkbox.checked = true;
-      $(checkbox).trigger('change');
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
 
-      expect($('[name="term[1][text]"]').prop('disabled')).toBe(false);
+      expect((document.querySelector('[name="term[1][text]"]') as HTMLInputElement).disabled).toBe(false);
     });
 
     it('updates submit button text to "Save" when checkbox is checked', () => {
@@ -176,9 +175,9 @@ describe('bulk_translate.ts', () => {
 
       const checkbox = document.querySelector<HTMLInputElement>('.markcheck')!;
       checkbox.checked = true;
-      $(checkbox).trigger('change');
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
 
-      expect($('input[type="submit"]').val()).toBe('Save');
+      expect((document.querySelector('input[type="submit"]') as HTMLInputElement).value).toBe('Save');
     });
 
     it('updates submit button text to "End" when checkbox is unchecked and no offset', () => {
@@ -186,20 +185,24 @@ describe('bulk_translate.ts', () => {
 
       const checkbox = document.querySelector<HTMLInputElement>('.markcheck')!;
       checkbox.checked = false;
-      $(checkbox).trigger('change');
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
 
       // No offset input, so should show "End"
       // But there are no checked boxes, so button stays as is
     });
 
     it('updates submit button text to "Next" when checkbox is unchecked with offset', () => {
-      $('form').append('<input name="offset" value="10">');
+      const form = document.querySelector('form')!;
+      const offsetInput = document.createElement('input');
+      offsetInput.name = 'offset';
+      offsetInput.value = '10';
+      form.appendChild(offsetInput);
 
       bulkCheckbox();
 
       const checkbox = document.querySelector<HTMLInputElement>('.markcheck')!;
       checkbox.checked = false;
-      $(checkbox).trigger('change');
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
     });
   });
 
@@ -221,7 +224,7 @@ describe('bulk_translate.ts', () => {
     it('sets submit button value to "Save"', () => {
       markAll();
 
-      expect($('input[type="submit"]').val()).toBe('Save');
+      expect((document.querySelector('input[type="submit"]') as HTMLInputElement).value).toBe('Save');
     });
 
     it('calls selectToggle with true', () => {
@@ -233,7 +236,7 @@ describe('bulk_translate.ts', () => {
     it('enables all term inputs', () => {
       markAll();
 
-      expect($('[name^="term"]').prop('disabled')).toBe(false);
+      expect((document.querySelector('[name^="term"]') as HTMLInputElement).disabled).toBe(false);
     });
   });
 
@@ -254,15 +257,19 @@ describe('bulk_translate.ts', () => {
     it('sets submit button value to "End" when no offset', () => {
       markNone();
 
-      expect($('input[type="submit"]').val()).toBe('End');
+      expect((document.querySelector('input[type="submit"]') as HTMLInputElement).value).toBe('End');
     });
 
     it('sets submit button value to "Next" when offset exists', () => {
-      $('form').append('<input name="offset" value="10">');
+      const form = document.querySelector('form')!;
+      const offsetInput = document.createElement('input');
+      offsetInput.name = 'offset';
+      offsetInput.value = '10';
+      form.appendChild(offsetInput);
 
       markNone();
 
-      expect($('input[type="submit"]').val()).toBe('Next');
+      expect((document.querySelector('input[type="submit"]') as HTMLInputElement).value).toBe('Next');
     });
 
     it('calls selectToggle with false', () => {
@@ -274,7 +281,7 @@ describe('bulk_translate.ts', () => {
     it('disables all term inputs', () => {
       markNone();
 
-      expect($('[name^="term"]').prop('disabled')).toBe(true);
+      expect((document.querySelector('[name^="term"]') as HTMLInputElement).disabled).toBe(true);
     });
   });
 
@@ -308,39 +315,39 @@ describe('bulk_translate.ts', () => {
       const select = document.querySelector<HTMLSelectElement>('#toggleSelect')!;
       select.value = '6';
 
-      changeTermToggles($(select));
+      changeTermToggles(select);
 
-      expect($('#Term_1 .term').text()).toBe('hello');
-      expect($('#Term_2 .term').text()).toBe('world');
-      expect($('#Text_1').val()).toBe('hello');
-      expect($('#Text_2').val()).toBe('world');
+      expect(document.querySelector('#Term_1 .term')!.textContent).toBe('hello');
+      expect(document.querySelector('#Term_2 .term')!.textContent).toBe('world');
+      expect((document.querySelector('#Text_1') as HTMLInputElement).value).toBe('hello');
+      expect((document.querySelector('#Text_2') as HTMLInputElement).value).toBe('world');
     });
 
     it('sets translation to * when value is 7', () => {
       const select = document.querySelector<HTMLSelectElement>('#toggleSelect')!;
       select.value = '7';
 
-      changeTermToggles($(select));
+      changeTermToggles(select);
 
-      expect($('#Trans_1 input').val()).toBe('*');
-      expect($('#Trans_2 input').val()).toBe('*');
+      expect((document.querySelector('#Trans_1 input') as HTMLInputElement).value).toBe('*');
+      expect((document.querySelector('#Trans_2 input') as HTMLInputElement).value).toBe('*');
     });
 
     it('sets status for all checked terms when value is 1-5', () => {
       const select = document.querySelector<HTMLSelectElement>('#toggleSelect')!;
       select.value = '1';
 
-      changeTermToggles($(select));
+      changeTermToggles(select);
 
-      expect($('#Stat_1').val()).toBe('1');
-      expect($('#Stat_2').val()).toBe('1');
+      expect((document.querySelector('#Stat_1') as HTMLSelectElement).value).toBe('1');
+      expect((document.querySelector('#Stat_2') as HTMLSelectElement).value).toBe('1');
     });
 
     it('resets select to first option after action', () => {
       const select = document.querySelector<HTMLSelectElement>('#toggleSelect')!;
       select.value = '6';
 
-      changeTermToggles($(select));
+      changeTermToggles(select);
 
       expect(select.selectedIndex).toBe(0);
     });
@@ -349,22 +356,22 @@ describe('bulk_translate.ts', () => {
       const select = document.querySelector<HTMLSelectElement>('#toggleSelect')!;
       select.value = '6';
 
-      const result = changeTermToggles($(select));
+      const result = changeTermToggles(select);
 
       expect(result).toBe(false);
     });
 
     it('only affects checked checkboxes', () => {
       // Uncheck second checkbox
-      ($('.markcheck').eq(1) as JQuery<HTMLInputElement>).prop('checked', false);
+      (document.querySelectorAll<HTMLInputElement>('.markcheck')[1]).checked = false;
 
       const select = document.querySelector<HTMLSelectElement>('#toggleSelect')!;
       select.value = '6';
 
-      changeTermToggles($(select));
+      changeTermToggles(select);
 
-      expect($('#Term_1 .term').text()).toBe('hello');
-      expect($('#Term_2 .term').text()).toBe('WORLD'); // Not changed
+      expect(document.querySelector('#Term_1 .term')!.textContent).toBe('hello');
+      expect(document.querySelector('#Term_2 .term')!.textContent).toBe('WORLD'); // Not changed
     });
   });
 
@@ -403,8 +410,8 @@ describe('bulk_translate.ts', () => {
         translate: ''
       });
 
-      expect($('h3').hasClass('notranslate')).toBe(true);
-      expect($('h4').hasClass('notranslate')).toBe(true);
+      expect(document.querySelector('h3')!.classList.contains('notranslate')).toBe(true);
+      expect(document.querySelector('h4')!.classList.contains('notranslate')).toBe(true);
     });
   });
 
@@ -435,9 +442,9 @@ describe('bulk_translate.ts', () => {
     it('sets up form submission handler', () => {
       bulkInteractions();
 
-      const form = $('[name="form1"]');
-      const submitEvent = $.Event('submit');
-      form.trigger(submitEvent);
+      const form = document.querySelector('[name="form1"]') as HTMLFormElement;
+      const submitEvent = new Event('submit', { bubbles: true });
+      form.dispatchEvent(submitEvent);
 
       // Should restore input names
     });
@@ -450,12 +457,12 @@ describe('bulk_translate.ts', () => {
       const td = dictSpan.closest('td')!;
 
       // Trigger click on the td element which contains the dict1 span
-      const clickEvent = $.Event('click');
-      clickEvent.target = dictSpan;
-      $(td).trigger(clickEvent);
+      const clickEvent = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(clickEvent, 'target', { value: dictSpan, writable: false });
+      td.dispatchEvent(clickEvent);
 
       // Since click is delegated, directly clicking span should work
-      $(dictSpan).trigger('click');
+      dictSpan.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
     it('polls for Google Translate results', () => {
@@ -467,12 +474,12 @@ describe('bulk_translate.ts', () => {
 
       // After processing, trans should have notranslate class
       // Note: Only triggers when .trans>font count matches .trans count
-      const transCount = $('.trans').length;
-      const fontCount = $('.trans>font').length;
+      const transCount = document.querySelectorAll('.trans').length;
+      const fontCount = document.querySelectorAll('.trans>font').length;
 
       // If counts match, it should have processed
       if (transCount === fontCount && fontCount > 0) {
-        expect($('.trans').hasClass('notranslate')).toBe(true);
+        expect(document.querySelector('.trans')!.classList.contains('notranslate')).toBe(true);
       }
     });
 
@@ -484,22 +491,24 @@ describe('bulk_translate.ts', () => {
 
       // The condition is that all .trans have a <font> child
       // Our setup has 1 .trans with 1 font, so it should match
-      const transEl = $('#Trans_1');
-      if (transEl.find('font').length === 0) {
+      const transEl = document.querySelector('#Trans_1')!;
+      if (transEl.querySelectorAll('font').length === 0) {
         // Already converted
-        expect(transEl.find('input').length).toBe(1);
+        expect(transEl.querySelectorAll('input').length).toBe(1);
       }
     });
 
     it('removes Google Translate elements after processing', () => {
-      $('body').append('<div id="google_translate_element"></div>');
+      const div = document.createElement('div');
+      div.id = 'google_translate_element';
+      document.body.appendChild(div);
 
       bulkInteractions();
 
       vi.advanceTimersByTime(300);
 
       // Check if google_translate_element was removed after conversion
-      const remaining = $('#google_translate_element').length;
+      const remaining = document.querySelectorAll('#google_translate_element').length;
       expect(remaining).toBeLessThanOrEqual(1); // May or may not be removed depending on font count match
     });
 

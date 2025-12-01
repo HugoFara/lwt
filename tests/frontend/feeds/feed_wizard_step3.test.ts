@@ -2,7 +2,6 @@
  * Tests for feed_wizard_step3.ts - Filter Text interactions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   lwt_wizard_filter,
   initWizardStep3
@@ -72,7 +71,7 @@ describe('feed_wizard_step3.ts', () => {
 
       lwt_wizard_filter.clickCancel();
 
-      expect($('#adv').css('display')).toBe('none');
+      expect(document.getElementById('adv')?.style.display).toBe('none');
     });
 
     it('returns false', () => {
@@ -106,19 +105,20 @@ describe('feed_wizard_step3.ts', () => {
     it('removes lwt_marked_text class', () => {
       lwt_wizard_filter.changeSelectMode();
 
-      expect($('.lwt_marked_text').length).toBe(0);
+      expect(document.querySelectorAll('.lwt_marked_text').length).toBe(0);
     });
 
     it('disables get_button', () => {
       lwt_wizard_filter.changeSelectMode();
 
-      expect($('#get_button').prop('disabled')).toBe(true);
+      expect((document.getElementById('get_button') as HTMLButtonElement)?.disabled).toBe(true);
     });
 
     it('resets mark_action with default option', () => {
       lwt_wizard_filter.changeSelectMode();
 
-      expect($('#mark_action option').text()).toBe('[Click On Text]');
+      const option = document.querySelector('#mark_action option');
+      expect(option?.textContent).toBe('[Click On Text]');
     });
 
     it('returns false', () => {
@@ -170,7 +170,7 @@ describe('feed_wizard_step3.ts', () => {
 
       lwt_wizard_filter.changeHideImages.call(select);
 
-      expect($('.content-img').css('display')).toBe('none');
+      expect((document.querySelector('.content-img') as HTMLElement)?.style.display).toBe('none');
     });
 
     it('returns false', () => {
@@ -216,18 +216,18 @@ describe('feed_wizard_step3.ts', () => {
 
     it('toggles #lwt_container visibility', () => {
       lwt_wizard_filter.clickMinMax();
-      expect($('#lwt_container').css('display')).toBe('none');
+      expect(document.getElementById('lwt_container')?.style.display).toBe('none');
 
       lwt_wizard_filter.clickMinMax();
-      expect($('#lwt_container').css('display')).not.toBe('none');
+      expect(document.getElementById('lwt_container')?.style.display).not.toBe('none');
     });
 
     it('updates maxim value', () => {
       lwt_wizard_filter.clickMinMax();
-      expect($('input[name="maxim"]').val()).toBe('0');
+      expect((document.querySelector('input[name="maxim"]') as HTMLInputElement)?.value).toBe('0');
 
       lwt_wizard_filter.clickMinMax();
-      expect($('input[name="maxim"]').val()).toBe('1');
+      expect((document.querySelector('input[name="maxim"]') as HTMLInputElement)?.value).toBe('1');
     });
 
     it('returns false', () => {
@@ -252,8 +252,8 @@ describe('feed_wizard_step3.ts', () => {
 
       lwt_wizard_filter.setMaxim();
 
-      expect($('#lwt_container').css('display')).toBe('none');
-      expect($('input[name="maxim"]').val()).toBe('0');
+      expect(document.getElementById('lwt_container')?.style.display).toBe('none');
+      expect((document.querySelector('input[name="maxim"]') as HTMLInputElement)?.value).toBe('0');
     });
   });
 
@@ -339,7 +339,7 @@ describe('feed_wizard_step3.ts', () => {
         isMinimized: false
       });
 
-      expect($('.content-img').css('display')).toBe('none');
+      expect((document.querySelector('.content-img') as HTMLElement)?.style.display).toBe('none');
     });
 
     it('calls setMaxim when isMinimized is true', () => {
@@ -351,7 +351,7 @@ describe('feed_wizard_step3.ts', () => {
         isMinimized: true
       });
 
-      expect($('#lwt_container').css('display')).toBe('none');
+      expect(document.getElementById('lwt_container')?.style.display).toBe('none');
     });
   });
 
@@ -373,7 +373,7 @@ describe('feed_wizard_step3.ts', () => {
       const button = document.querySelector<HTMLButtonElement>('[data-action="wizard-step3-cancel"]')!;
       button.click();
 
-      expect($('#adv').css('display')).toBe('none');
+      expect(document.getElementById('adv')?.style.display).toBe('none');
     });
 
     it('handles wizard-step3-minmax button click', async () => {
@@ -390,7 +390,7 @@ describe('feed_wizard_step3.ts', () => {
       const button = document.querySelector<HTMLButtonElement>('[data-action="wizard-step3-minmax"]')!;
       button.click();
 
-      expect($('#lwt_container').css('display')).toBe('none');
+      expect(document.getElementById('lwt_container')?.style.display).toBe('none');
     });
 
     it('handles wizard-settings-open button click', async () => {
@@ -404,7 +404,7 @@ describe('feed_wizard_step3.ts', () => {
       const button = document.querySelector<HTMLButtonElement>('[data-action="wizard-settings-open"]')!;
       button.click();
 
-      expect($('#settings').css('display')).not.toBe('none');
+      expect(document.getElementById('settings')?.style.display).not.toBe('none');
     });
 
     it('handles wizard-settings-close button click', async () => {
@@ -418,7 +418,7 @@ describe('feed_wizard_step3.ts', () => {
       const button = document.querySelector<HTMLButtonElement>('[data-action="wizard-settings-close"]')!;
       button.click();
 
-      expect($('#settings').css('display')).toBe('none');
+      expect(document.getElementById('settings')?.style.display).toBe('none');
     });
   });
 

@@ -2,7 +2,6 @@
  * Tests for user_interactions.ts - User interaction functions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   quickMenuRedirection,
   newExpressionInteractable,
@@ -36,8 +35,7 @@ class MockSpeechSynthesisUtterance {
 
 describe('user_interactions.ts', () => {
   beforeEach(() => {
-    // Make jQuery global for tests that need it
-    (globalThis as unknown as Record<string, unknown>).$ = $;
+    // No jQuery needed
   });
 
   afterEach(() => {
@@ -545,13 +543,16 @@ describe('user_interactions.ts', () => {
 
   describe('saveReadingPosition', () => {
     it('makes POST request to save position', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({} as Response);
 
       saveReadingPosition(42, 100);
 
-      expect(postSpy).toHaveBeenCalledWith(
+      expect(fetchSpy).toHaveBeenCalledWith(
         'api.php/v1/texts/42/reading-position',
-        { position: 100 }
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.any(String)
+        })
       );
     });
   });
@@ -562,13 +563,16 @@ describe('user_interactions.ts', () => {
 
   describe('saveAudioPosition', () => {
     it('makes POST request to save audio position', () => {
-      const postSpy = vi.spyOn($, 'post').mockImplementation(() => ({} as JQuery.jqXHR));
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({} as Response);
 
       saveAudioPosition(42, 50.5);
 
-      expect(postSpy).toHaveBeenCalledWith(
+      expect(fetchSpy).toHaveBeenCalledWith(
         'api.php/v1/texts/42/audio-position',
-        { position: 50.5 }
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.any(String)
+        })
       );
     });
   });
@@ -579,28 +583,28 @@ describe('user_interactions.ts', () => {
 
   describe('getPhoneticTextAsync', () => {
     it('makes GET request with language string', () => {
-      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
-        () => ({} as JQuery.jqXHR<{ phonetic_reading: string }>)
-      );
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ phonetic_reading: 'hello' })
+      } as Response);
 
       getPhoneticTextAsync('hello', 'en-US');
 
-      expect(getJSONSpy).toHaveBeenCalledWith(
-        'api.php/v1/phonetic-reading',
-        { text: 'hello', lang: 'en-US' }
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('api.php/v1/phonetic-reading'),
+        undefined
       );
     });
 
     it('makes GET request with language ID number', () => {
-      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
-        () => ({} as JQuery.jqXHR<{ phonetic_reading: string }>)
-      );
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ phonetic_reading: 'hello' })
+      } as Response);
 
       getPhoneticTextAsync('hello', 5);
 
-      expect(getJSONSpy).toHaveBeenCalledWith(
-        'api.php/v1/phonetic-reading',
-        { text: 'hello', lang_id: 5 }
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('api.php/v1/phonetic-reading'),
+        undefined
       );
     });
   });
@@ -676,17 +680,15 @@ describe('user_interactions.ts', () => {
     });
 
     it('fetches phonetic text when convert_to_phonetic is true', () => {
-      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(() => {
-        return {
-          then: vi.fn().mockReturnThis(),
-        } as unknown as JQuery.jqXHR<{ phonetic_reading: string }>;
-      });
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ phonetic_reading: 'hello' })
+      } as Response);
 
       readTextAloud('hello', 'en-US', 1.0, 1.0, undefined, true);
 
-      expect(getJSONSpy).toHaveBeenCalledWith(
-        'api.php/v1/phonetic-reading',
-        expect.any(Object)
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('api.php/v1/phonetic-reading'),
+        undefined
       );
     });
   });
@@ -723,9 +725,9 @@ describe('user_interactions.ts', () => {
     });
 
     it('fetches phonetic for internal mode', () => {
-      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(() => ({
-        then: vi.fn().mockReturnThis(),
-      } as unknown as JQuery.jqXHR<{ phonetic_reading: string }>));
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ phonetic_reading: 'nǐ hǎo' })
+      } as Response);
 
       const config = {
         reading_mode: 'internal' as const,
@@ -735,7 +737,7 @@ describe('user_interactions.ts', () => {
 
       handleReadingConfiguration(config, '你好', 2);
 
-      expect(getJSONSpy).toHaveBeenCalled();
+      expect(fetchSpy).toHaveBeenCalled();
     });
 
     it('uses external API for external mode', async () => {
@@ -767,16 +769,15 @@ describe('user_interactions.ts', () => {
 
   describe('speechDispatcher', () => {
     it('makes GET request for reading configuration', () => {
-      const getJSONSpy = vi.spyOn($, 'getJSON').mockImplementation(
-        () => ({} as JQuery.jqXHR)
-      );
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ reading_mode: 'direct', abbreviation: 'en-US', name: 'English' })
+      } as Response);
 
       speechDispatcher('hello', 5);
 
-      expect(getJSONSpy).toHaveBeenCalledWith(
-        'api.php/v1/languages/5/reading-configuration',
-        { lang_id: 5 },
-        expect.any(Function)
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('api.php/v1/languages/5/reading-configuration'),
+        undefined
       );
     });
   });

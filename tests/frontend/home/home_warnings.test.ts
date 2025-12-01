@@ -2,7 +2,6 @@
  * Tests for home_warnings.ts - Home page warnings and version checking
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   shouldUpdate,
   checkCookiesDisabled,
@@ -117,7 +116,7 @@ describe('home_warnings.ts', () => {
 
       checkCookiesDisabled();
 
-      expect($('#cookies_disabled').html()).toBe(
+      expect(document.getElementById('cookies_disabled')?.innerHTML).toBe(
         '*** Cookies are not enabled! Please enable them! ***'
       );
     });
@@ -128,7 +127,7 @@ describe('home_warnings.ts', () => {
 
       checkCookiesDisabled();
 
-      expect($('#cookies_disabled').html()).toBe('Original');
+      expect(document.getElementById('cookies_disabled')?.innerHTML).toBe('Original');
     });
 
     it('handles missing element gracefully', () => {
@@ -149,9 +148,10 @@ describe('home_warnings.ts', () => {
 
       checkOutdatedPHP('7.4.0');
 
-      expect($('#php_update_required').html()).toContain('7.4.0');
-      expect($('#php_update_required').html()).toContain('8.0.0');
-      expect($('#php_update_required').html()).toContain('Please update');
+      const element = document.getElementById('php_update_required');
+      expect(element?.innerHTML).toContain('7.4.0');
+      expect(element?.innerHTML).toContain('8.0.0');
+      expect(element?.innerHTML).toContain('Please update');
     });
 
     it('does not display warning for PHP 8.0.0', () => {
@@ -159,7 +159,7 @@ describe('home_warnings.ts', () => {
 
       checkOutdatedPHP('8.0.0');
 
-      expect($('#php_update_required').html()).toBe('Original');
+      expect(document.getElementById('php_update_required')?.innerHTML).toBe('Original');
     });
 
     it('does not display warning for PHP above 8.0.0', () => {
@@ -167,7 +167,7 @@ describe('home_warnings.ts', () => {
 
       checkOutdatedPHP('8.2.0');
 
-      expect($('#php_update_required').html()).toBe('Original');
+      expect(document.getElementById('php_update_required')?.innerHTML).toBe('Original');
     });
 
     it('handles missing element gracefully', () => {
@@ -277,14 +277,15 @@ describe('home_warnings.ts', () => {
 
       vi.mocked(areCookiesEnabled).mockReturnValue(true);
 
-      const mockGetJSON = vi.fn().mockReturnValue({
-        done: vi.fn().mockReturnValue({ fail: vi.fn() })
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ tag_name: '2.5.0' })
+      } as Response);
 
       initHomeWarningsFromConfig();
 
       expect(areCookiesEnabled).toHaveBeenCalled();
+
+      fetchSpy.mockRestore();
     });
 
     it('does nothing when config element is missing', () => {

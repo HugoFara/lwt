@@ -2,7 +2,6 @@
  * Tests for feed_wizard_step4.ts - Edit Options interactions
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   lwt_wizard_step4,
   initWizardStep4
@@ -211,7 +210,7 @@ describe('feed_wizard_step4.ts', () => {
 
       lwt_wizard_step4.handleSubmit();
 
-      const nfOptions = $('input[name="NfOptions"]').val();
+      const nfOptions = (document.querySelector('input[name="NfOptions"]') as HTMLInputElement)?.value;
       expect(nfOptions).toContain('edit_text=1');
       expect(nfOptions).toContain('filter=test');
     });
@@ -270,9 +269,9 @@ describe('feed_wizard_step4.ts', () => {
 
       lwt_wizard_step4.setupEditMode(123);
 
-      expect($('input[name="update_feed"]').length).toBe(1);
-      expect($('input[name="save_feed"]').length).toBe(0);
-      expect($('input[type="submit"]').val()).toBe('Update');
+      expect(document.querySelectorAll('input[name="update_feed"]').length).toBe(1);
+      expect(document.querySelectorAll('input[name="save_feed"]').length).toBe(0);
+      expect((document.querySelector('input[type="submit"]') as HTMLInputElement)?.value).toBe('Update');
     });
 
     it('does not change button for new feed', () => {
@@ -283,9 +282,9 @@ describe('feed_wizard_step4.ts', () => {
 
       lwt_wizard_step4.setupEditMode(null);
 
-      expect($('input[name="save_feed"]').length).toBe(1);
-      expect($('input[name="update_feed"]').length).toBe(0);
-      expect($('input[type="submit"]').val()).toBe('Save');
+      expect(document.querySelectorAll('input[name="save_feed"]').length).toBe(1);
+      expect(document.querySelectorAll('input[name="update_feed"]').length).toBe(0);
+      expect((document.querySelector('input[type="submit"]') as HTMLInputElement)?.value).toBe('Save');
     });
   });
 
@@ -323,8 +322,8 @@ describe('feed_wizard_step4.ts', () => {
 
       initWizardStep4({ editFeedId: null });
 
-      expect($('h1').html()).toContain('Feed Wizard');
-      expect($('input[type="submit"]').val()).toBe('Save');
+      expect(document.querySelector('h1')?.innerHTML).toContain('Feed Wizard');
+      expect((document.querySelector('input[type="submit"]') as HTMLInputElement)?.value).toBe('Save');
     });
 
     it('initializes with existing feed config', () => {
@@ -336,8 +335,8 @@ describe('feed_wizard_step4.ts', () => {
 
       initWizardStep4({ editFeedId: 456 });
 
-      expect($('h1').html()).toContain('Feed Wizard');
-      expect($('input[type="submit"]').val()).toBe('Update');
+      expect(document.querySelector('h1')?.innerHTML).toContain('Feed Wizard');
+      expect((document.querySelector('input[type="submit"]') as HTMLInputElement)?.value).toBe('Update');
     });
   });
 
@@ -404,7 +403,7 @@ describe('feed_wizard_step4.ts', () => {
       button.click();
 
       // NfOptions should be set
-      expect($('input[name="NfOptions"]').val()).toBeDefined();
+      expect((document.querySelector('input[name="NfOptions"]') as HTMLInputElement)?.value).toBeDefined();
     });
   });
 

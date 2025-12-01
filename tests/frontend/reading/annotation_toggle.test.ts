@@ -2,7 +2,6 @@
  * Tests for annotation_toggle.ts - Show/hide translations and annotations
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   doHideTranslations,
   doShowTranslations,
@@ -36,8 +35,10 @@ describe('annotation_toggle.ts', () => {
 
       doHideTranslations();
 
-      expect($('#showt').css('display')).not.toBe('none');
-      expect($('#hidet').css('display')).toBe('none');
+      const showt = document.getElementById('showt') as HTMLElement;
+      const hidet = document.getElementById('hidet') as HTMLElement;
+      expect(showt.style.display).not.toBe('none');
+      expect(hidet.style.display).toBe('none');
     });
 
     it('sets translation ruby text to background color', () => {
@@ -71,8 +72,10 @@ describe('annotation_toggle.ts', () => {
 
       doShowTranslations();
 
-      expect($('#showt').css('display')).toBe('none');
-      expect($('#hidet').css('display')).not.toBe('none');
+      const showt = document.getElementById('showt') as HTMLElement;
+      const hidet = document.getElementById('hidet') as HTMLElement;
+      expect(showt.style.display).toBe('none');
+      expect(hidet.style.display).not.toBe('none');
     });
 
     it('restores translation ruby text to normal visibility', () => {
@@ -84,12 +87,11 @@ describe('annotation_toggle.ts', () => {
 
       doShowTranslations();
 
-      const ruby = $('.anntermruby');
-      // jQuery sets color to 'inherit' which browser may compute differently
+      const ruby = document.querySelector('.anntermruby') as HTMLElement;
       // The key is that it's no longer the hidden color #E5E4E2
-      expect(ruby.css('color')).not.toBe('rgb(229, 228, 226)');
+      expect(ruby.style.color).not.toBe('rgb(229, 228, 226)');
       // Background color is cleared (may be '' or 'rgba(0, 0, 0, 0)' in different environments)
-      expect(['', 'rgba(0, 0, 0, 0)', 'transparent']).toContain(ruby.css('background-color'));
+      expect(['', 'rgba(0, 0, 0, 0)', 'transparent']).toContain(ruby.style.backgroundColor);
     });
   });
 
@@ -106,8 +108,10 @@ describe('annotation_toggle.ts', () => {
 
       doHideAnnotations();
 
-      expect($('#show').css('display')).not.toBe('none');
-      expect($('#hide').css('display')).toBe('none');
+      const show = document.getElementById('show') as HTMLElement;
+      const hide = document.getElementById('hide') as HTMLElement;
+      expect(show.style.display).not.toBe('none');
+      expect(hide.style.display).toBe('none');
     });
 
     it('sets annotation ruby text to background color', () => {
@@ -141,8 +145,10 @@ describe('annotation_toggle.ts', () => {
 
       doShowAnnotations();
 
-      expect($('#show').css('display')).toBe('none');
-      expect($('#hide').css('display')).not.toBe('none');
+      const show = document.getElementById('show') as HTMLElement;
+      const hide = document.getElementById('hide') as HTMLElement;
+      expect(show.style.display).toBe('none');
+      expect(hide.style.display).not.toBe('none');
     });
 
     it('restores annotation ruby text to normal visibility', () => {
@@ -154,12 +160,11 @@ describe('annotation_toggle.ts', () => {
 
       doShowAnnotations();
 
-      const ruby = $('.anntransruby2');
-      // jQuery sets color to '' which browser may compute as black or inherit
+      const ruby = document.querySelector('.anntransruby2') as HTMLElement;
       // The key is that it's no longer the hidden color #C8DCF0
-      expect(ruby.css('color')).not.toBe('rgb(200, 220, 240)');
+      expect(ruby.style.color).not.toBe('rgb(200, 220, 240)');
       // Background color is cleared (may be '' or 'rgba(0, 0, 0, 0)' in different environments)
-      expect(['', 'rgba(0, 0, 0, 0)', 'transparent']).toContain(ruby.css('background-color'));
+      expect(['', 'rgba(0, 0, 0, 0)', 'transparent']).toContain(ruby.style.backgroundColor);
     });
   });
 
@@ -210,7 +215,8 @@ describe('annotation_toggle.ts', () => {
       const button = document.querySelector('[data-action="hide-translations"]')!;
       button.dispatchEvent(new Event('click'));
 
-      expect($('#showt').css('display')).not.toBe('none');
+      const showt = document.getElementById('showt') as HTMLElement;
+      expect(showt.style.display).not.toBe('none');
     });
 
     it('sets up show translations button handler', () => {
@@ -226,7 +232,8 @@ describe('annotation_toggle.ts', () => {
       const button = document.querySelector('[data-action="show-translations"]')!;
       button.dispatchEvent(new Event('click'));
 
-      expect($('#showt').css('display')).toBe('none');
+      const showt = document.getElementById('showt') as HTMLElement;
+      expect(showt.style.display).toBe('none');
     });
 
     it('sets up hide annotations button handler', () => {
@@ -242,7 +249,8 @@ describe('annotation_toggle.ts', () => {
       const button = document.querySelector('[data-action="hide-annotations"]')!;
       button.dispatchEvent(new Event('click'));
 
-      expect($('#show').css('display')).not.toBe('none');
+      const show = document.getElementById('show') as HTMLElement;
+      expect(show.style.display).not.toBe('none');
     });
 
     it('sets up show annotations button handler', () => {
@@ -258,7 +266,8 @@ describe('annotation_toggle.ts', () => {
       const button = document.querySelector('[data-action="show-annotations"]')!;
       button.dispatchEvent(new Event('click'));
 
-      expect($('#show').css('display')).toBe('none');
+      const show = document.getElementById('show') as HTMLElement;
+      expect(show.style.display).toBe('none');
     });
 
     it('sets up close window button handler', () => {

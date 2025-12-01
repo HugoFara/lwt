@@ -2,7 +2,6 @@
  * Tests for text_events.ts - Text reading interaction events
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   word_dblclick_event_do_text_text,
   word_click_event_do_text_text,
@@ -66,8 +65,6 @@ const mockLWT_DATA = {
 beforeEach(() => {
   polyfillDialog();
   (window as unknown as Record<string, unknown>).LWT_DATA = mockLWT_DATA;
-  (window as unknown as Record<string, unknown>).$ = $;
-  (globalThis as unknown as Record<string, unknown>).$ = $;
 });
 
 describe('text_events.ts', () => {
@@ -225,19 +222,16 @@ describe('text_events.ts', () => {
       expect(highlighted.length).toBe(0);
     });
 
-    it('triggers mouseover when jQuery_tooltip is enabled', () => {
+    it('handles jQuery_tooltip enabled mode', () => {
       document.body.innerHTML = `
         <span class="word TERM123">Word</span>
       `;
       mockLWT_DATA.settings.jQuery_tooltip = true;
 
       const word = document.querySelector('.word') as HTMLElement;
-      const triggerSpy = vi.fn();
-      $(word).on('mouseover', triggerSpy);
-
       word_hover_over.call(word);
 
-      // The function triggers mouseover on jQuery tooltip enabled
+      // The function should handle jQuery tooltip mode
       expect(mockLWT_DATA.settings.jQuery_tooltip).toBe(true);
     });
 

@@ -2,7 +2,6 @@
  * Tests for translation_page.ts - Auto-initialization for translation pages
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import { autoInitTranslationPages } from '../../../src/frontend/js/terms/translation_page';
 
 // Mock dependencies
@@ -45,7 +44,7 @@ describe('translation_page.ts', () => {
       autoInitTranslationPages();
 
       const button = document.querySelector('#textToSpeech')!;
-      $(button).trigger('click');
+      button.dispatchEvent(new Event('click', { bubbles: true }));
 
       expect(speechDispatcher).toHaveBeenCalledWith('hello', 1);
     });
@@ -61,7 +60,7 @@ describe('translation_page.ts', () => {
 
       autoInitTranslationPages();
 
-      $('#textToSpeech').trigger('click');
+      document.getElementById('textToSpeech')!.dispatchEvent(new Event('click', { bubbles: true }));
 
       expect(speechDispatcher).toHaveBeenCalledWith('word', 5);
     });
@@ -201,7 +200,7 @@ describe('translation_page.ts', () => {
       autoInitTranslationPages();
 
       // Both should be processed
-      $('#textToSpeech').trigger('click');
+      document.getElementById('textToSpeech')!.dispatchEvent(new Event('click', { bubbles: true }));
       expect(speechDispatcher).toHaveBeenCalled();
       expect(getGlosbeTranslation).toHaveBeenCalled();
     });

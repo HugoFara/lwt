@@ -2,7 +2,6 @@
  * Tests for modal.ts - Modal dialog component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import $ from 'jquery';
 import {
   openModal,
   closeModal,
@@ -15,8 +14,8 @@ describe('modal.ts', () => {
     // Reset DOM
     document.body.innerHTML = '';
     // Remove any existing modal elements
-    $('#lwt-modal-overlay').remove();
-    $('#lwt-modal-styles').remove();
+    document.getElementById('lwt-modal-overlay')?.remove();
+    document.getElementById('lwt-modal-styles')?.remove();
   });
 
   afterEach(() => {
@@ -33,78 +32,78 @@ describe('modal.ts', () => {
     it('creates modal structure in DOM', () => {
       openModal('<p>Test content</p>');
 
-      expect($('#lwt-modal-overlay').length).toBe(1);
-      expect($('#lwt-modal').length).toBe(1);
-      expect($('.lwt-modal-header').length).toBe(1);
-      expect($('.lwt-modal-body').length).toBe(1);
-      expect($('.lwt-modal-close').length).toBe(1);
+      expect(document.getElementById('lwt-modal-overlay') ? 1 : 0).toBe(1);
+      expect(document.getElementById('lwt-modal') ? 1 : 0).toBe(1);
+      expect(document.querySelectorAll('.lwt-modal-header').length).toBe(1);
+      expect(document.querySelectorAll('.lwt-modal-body').length).toBe(1);
+      expect(document.querySelectorAll('.lwt-modal-close').length).toBe(1);
     });
 
     it('sets content in modal body', () => {
       openModal('<p>Test content</p>');
 
-      expect($('.lwt-modal-body').html()).toContain('Test content');
+      expect(document.querySelector('.lwt-modal-body')?.innerHTML).toContain('Test content');
     });
 
     it('sets title when provided', () => {
       openModal('<p>Content</p>', { title: 'Test Title' });
 
-      expect($('.lwt-modal-title').text()).toBe('Test Title');
+      expect(document.querySelector('.lwt-modal-title')?.textContent).toBe('Test Title');
       // Header visibility is controlled by toggle - just check it exists
-      expect($('.lwt-modal-header').length).toBe(1);
+      expect(document.querySelectorAll('.lwt-modal-header').length).toBe(1);
     });
 
     it('hides header when no title provided', () => {
       openModal('<p>Content</p>', { title: '' });
 
       // With empty title, header is hidden via toggle(false)
-      expect($('.lwt-modal-header').length).toBe(1);
+      expect(document.querySelectorAll('.lwt-modal-header').length).toBe(1);
     });
 
     it('applies custom width', () => {
       openModal('<p>Content</p>', { width: '500px' });
 
-      expect($('#lwt-modal').css('width')).toBe('500px');
+      expect((document.getElementById('lwt-modal') as HTMLElement).style.width).toBe('500px');
     });
 
     it('applies custom maxWidth', () => {
       openModal('<p>Content</p>', { maxWidth: '600px' });
 
-      expect($('#lwt-modal').css('max-width')).toBe('600px');
+      expect((document.getElementById('lwt-modal') as HTMLElement).style.maxWidth).toBe('600px');
     });
 
     it('applies custom maxHeight', () => {
       openModal('<p>Content</p>', { maxHeight: '400px' });
 
-      expect($('#lwt-modal').css('max-height')).toBe('400px');
+      expect((document.getElementById('lwt-modal') as HTMLElement).style.maxHeight).toBe('400px');
     });
 
     it('adds modal styles to head', () => {
       openModal('<p>Content</p>');
 
-      expect($('#lwt-modal-styles').length).toBe(1);
+      expect(document.getElementById('lwt-modal-styles') ? 1 : 0).toBe(1);
     });
 
     it('reuses existing modal structure', () => {
       openModal('<p>First content</p>');
       openModal('<p>Second content</p>');
 
-      expect($('#lwt-modal-overlay').length).toBe(1);
-      expect($('.lwt-modal-body').html()).toContain('Second content');
+      expect(document.getElementById('lwt-modal-overlay') ? 1 : 0).toBe(1);
+      expect(document.querySelector('.lwt-modal-body')?.innerHTML).toContain('Second content');
     });
 
     it('prevents body scroll when open', () => {
       openModal('<p>Content</p>');
 
-      expect($('body').css('overflow')).toBe('hidden');
+      expect(document.body.style.overflow).toBe('hidden');
     });
 
     it('sets up escape key handler when closeOnEscape is true', () => {
       openModal('<p>Content</p>', { closeOnEscape: true });
 
       // Trigger escape key
-      const event = $.Event('keydown', { key: 'Escape' });
-      $(document).trigger(event);
+      const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+      document.dispatchEvent(event);
 
       // Modal should be closing (fading out)
       // Note: In jsdom, fadeOut completes immediately
@@ -120,7 +119,7 @@ describe('modal.ts', () => {
       openModal('<p>Content</p>');
       closeModal();
 
-      expect($('body').css('overflow')).toBe('');
+      expect(document.body.style.overflow).toBe('');
     });
 
     it('removes keydown event handler', () => {
@@ -128,8 +127,8 @@ describe('modal.ts', () => {
       closeModal();
 
       // Verify handler is removed by checking no error on escape
-      const event = $.Event('keydown', { key: 'Escape' });
-      $(document).trigger(event);
+      const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+      document.dispatchEvent(event);
     });
 
     it('handles being called when no modal exists', () => {
@@ -144,73 +143,57 @@ describe('modal.ts', () => {
 
   describe('openModalFromUrl', () => {
     it('fetches content from URL and displays in modal', async () => {
-      // Mock $.get
-      const mockGet = vi.fn().mockReturnValue({
-        done: vi.fn().mockImplementation(function(this: any, callback: (html: string) => void) {
-          callback('<html><head><title>Test Page</title></head><body><p>Loaded content</p></body></html>');
-          return { fail: vi.fn() };
-        }),
-        fail: vi.fn()
+      // Mock fetch
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: vi.fn().mockResolvedValue('<html><head><title>Test Page</title></head><body><p>Loaded content</p></body></html>')
       });
-      ($ as any).get = mockGet;
+      global.fetch = mockFetch as any;
 
       openModalFromUrl('/test-url');
 
-      expect(mockGet).toHaveBeenCalledWith('/test-url');
+      expect(mockFetch).toHaveBeenCalledWith('/test-url');
     });
 
     it('extracts body content from full HTML document', () => {
-      const mockGet = vi.fn().mockReturnValue({
-        done: vi.fn().mockImplementation(function(this: any, callback: (html: string) => void) {
-          callback('<html><body><p>Body content</p></body></html>');
-          return { fail: vi.fn() };
-        }),
-        fail: vi.fn()
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: vi.fn().mockResolvedValue('<html><body><p>Body content</p></body></html>')
       });
-      ($ as any).get = mockGet;
+      global.fetch = mockFetch as any;
 
       openModalFromUrl('/test-url');
 
-      // The callback should extract body content
-      const doneCallback = mockGet.mock.results[0].value.done.mock.calls[0][0];
-      expect(typeof doneCallback).toBe('function');
+      // The fetch should be called
+      expect(mockFetch).toHaveBeenCalledWith('/test-url');
     });
 
     it('extracts title from HTML document when not provided', () => {
-      const mockGet = vi.fn().mockReturnValue({
-        done: vi.fn().mockImplementation(function(this: any, callback: (html: string) => void) {
-          callback('<html><head><title>Extracted Title</title></head><body><p>Content</p></body></html>');
-          return { fail: vi.fn() };
-        }),
-        fail: vi.fn()
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: vi.fn().mockResolvedValue('<html><head><title>Extracted Title</title></head><body><p>Content</p></body></html>')
       });
-      ($ as any).get = mockGet;
+      global.fetch = mockFetch as any;
 
       openModalFromUrl('/test-url');
     });
 
     it('uses provided title over extracted title', () => {
-      const mockGet = vi.fn().mockReturnValue({
-        done: vi.fn().mockImplementation(function(this: any, callback: (html: string) => void) {
-          callback('<html><head><title>HTML Title</title></head><body><p>Content</p></body></html>');
-          return { fail: vi.fn() };
-        }),
-        fail: vi.fn()
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: vi.fn().mockResolvedValue('<html><head><title>HTML Title</title></head><body><p>Content</p></body></html>')
       });
-      ($ as any).get = mockGet;
+      global.fetch = mockFetch as any;
 
       openModalFromUrl('/test-url', { title: 'Provided Title' });
     });
 
     it('shows error message on fetch failure', () => {
-      const mockGet = vi.fn().mockReturnValue({
-        done: vi.fn().mockReturnThis(),
-        fail: vi.fn().mockImplementation(function(this: any, callback: () => void) {
-          callback();
-          return this;
-        })
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        text: vi.fn().mockResolvedValue('')
       });
-      ($ as any).get = mockGet;
+      global.fetch = mockFetch as any;
 
       openModalFromUrl('/test-url');
     });
@@ -224,14 +207,14 @@ describe('modal.ts', () => {
     it('opens modal with export template help content', () => {
       showExportTemplateHelp();
 
-      expect($('#lwt-modal-overlay').length).toBe(1);
-      expect($('.lwt-modal-body').html()).toContain('export template');
+      expect(document.getElementById('lwt-modal-overlay') ? 1 : 0).toBe(1);
+      expect(document.querySelector('.lwt-modal-body')?.innerHTML).toContain('export template');
     });
 
     it('displays all placeholder documentation', () => {
       showExportTemplateHelp();
 
-      const content = $('.lwt-modal-body').html();
+      const content = document.querySelector('.lwt-modal-body')?.innerHTML;
 
       // Check for raw text placeholders
       expect(content).toContain('%w');
@@ -251,13 +234,13 @@ describe('modal.ts', () => {
     it('sets appropriate title', () => {
       showExportTemplateHelp();
 
-      expect($('.lwt-modal-title').text()).toContain('Export Templates');
+      expect(document.querySelector('.lwt-modal-title')?.textContent).toContain('Export Templates');
     });
 
     it('sets maxWidth to 900px', () => {
       showExportTemplateHelp();
 
-      expect($('#lwt-modal').css('max-width')).toBe('900px');
+      expect((document.getElementById('lwt-modal') as HTMLElement).style.maxWidth).toBe('900px');
     });
   });
 
@@ -269,30 +252,33 @@ describe('modal.ts', () => {
     it('close button closes modal', () => {
       openModal('<p>Content</p>');
 
-      $('.lwt-modal-close').trigger('click');
+      const closeButton = document.querySelector('.lwt-modal-close');
+      closeButton?.dispatchEvent(new Event('click', { bubbles: true }));
 
       // Modal should be fading out
-      expect($('body').css('overflow')).toBe('');
+      expect(document.body.style.overflow).toBe('');
     });
 
     it('overlay click closes modal when closeOnOverlayClick is true', () => {
       openModal('<p>Content</p>', { closeOnOverlayClick: true });
 
       // Simulate click on overlay (not on modal)
-      const overlay = $('#lwt-modal-overlay')[0];
-      const event = $.Event('click', { target: overlay });
-      $('#lwt-modal-overlay').trigger(event);
+      const overlay = document.getElementById('lwt-modal-overlay');
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: overlay, enumerable: true });
+      overlay?.dispatchEvent(event);
     });
 
     it('overlay click does not close modal when closeOnOverlayClick is false', () => {
       openModal('<p>Content</p>', { closeOnOverlayClick: false });
 
-      const overlay = $('#lwt-modal-overlay')[0];
-      const event = $.Event('click', { target: overlay });
-      $('#lwt-modal-overlay').trigger(event);
+      const overlay = document.getElementById('lwt-modal-overlay');
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: overlay, enumerable: true });
+      overlay?.dispatchEvent(event);
 
       // Modal should still be visible
-      expect($('#lwt-modal-overlay').css('display')).not.toBe('none');
+      expect((document.getElementById('lwt-modal-overlay') as HTMLElement).style.display).not.toBe('none');
     });
   });
 
@@ -304,29 +290,30 @@ describe('modal.ts', () => {
     it('uses default maxWidth of 800px', () => {
       openModal('<p>Content</p>');
 
-      expect($('#lwt-modal').css('max-width')).toBe('800px');
+      expect((document.getElementById('lwt-modal') as HTMLElement).style.maxWidth).toBe('800px');
     });
 
     it('uses default maxHeight of 80vh', () => {
       openModal('<p>Content</p>');
 
-      expect($('#lwt-modal').css('max-height')).toBe('80vh');
+      expect((document.getElementById('lwt-modal') as HTMLElement).style.maxHeight).toBe('80vh');
     });
 
     it('closeOnOverlayClick defaults to true', () => {
       openModal('<p>Content</p>');
 
       // Check that click handler is set up
-      const overlay = $('#lwt-modal-overlay')[0];
-      const event = $.Event('click', { target: overlay });
-      $('#lwt-modal-overlay').trigger(event);
+      const overlay = document.getElementById('lwt-modal-overlay');
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: overlay, enumerable: true });
+      overlay?.dispatchEvent(event);
     });
 
     it('closeOnEscape defaults to true', () => {
       openModal('<p>Content</p>');
 
-      const event = $.Event('keydown', { key: 'Escape' });
-      $(document).trigger(event);
+      const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+      document.dispatchEvent(event);
     });
   });
 });
