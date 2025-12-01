@@ -8,7 +8,7 @@ vi.mock('../../../src/frontend/js/core/language_settings', () => ({
   setLang: vi.fn()
 }));
 
-// Mock ui_utilities to prevent jQuery UI initialization issues
+// Mock ui_utilities module
 vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
   markClick: vi.fn()
 }));

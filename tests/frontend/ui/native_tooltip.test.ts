@@ -225,7 +225,7 @@ describe('native_tooltip.ts', () => {
   // ===========================================================================
 
   describe('removeAllTooltips', () => {
-    it('removes jQuery UI tooltips', async () => {
+    it('removes tooltip elements from DOM', async () => {
       const { removeAllTooltips } = await importNativeTooltip();
 
       document.body.innerHTML = `

@@ -6,8 +6,6 @@
  * @since   1.6.16-fork
  */
 
-import $ from 'jquery';
-
 interface MediaSelectResponse {
   error?: 'not_a_directory' | 'does_not_exist' | string;
   base_path?: string;
@@ -56,7 +54,14 @@ export function select_media_path(
  * @param data Received data as a JSON object
  */
 export function media_select_receive_data(data: MediaSelectResponse): void {
-  $('#mediaSelectLoadingImg').css('display', 'none');
+  const loadingImg = document.getElementById('mediaSelectLoadingImg');
+  const errorEl = document.getElementById('mediaSelectErrorMessage');
+  const selectEl = document.querySelector<HTMLSelectElement>('#mediaselect select');
+
+  if (loadingImg) {
+    loadingImg.style.display = 'none';
+  }
+
   if (data.error !== undefined) {
     let msg: string;
     if (data.error === 'not_a_directory') {
@@ -66,15 +71,19 @@ export function media_select_receive_data(data: MediaSelectResponse): void {
     } else {
       msg = '[Unknown error!]';
     }
-    $('#mediaSelectErrorMessage').text(msg);
-    $('#mediaSelectErrorMessage').css('display', 'inherit');
+    if (errorEl) {
+      errorEl.textContent = msg;
+      errorEl.style.display = 'inherit';
+    }
   } else {
     const options = select_media_path(data.paths || [], data.folders || [], data.base_path || '');
-    $('#mediaselect select').empty();
-    for (let i = 0; i < options.length; i++) {
-      $('#mediaselect select').append(options[i]);
+    if (selectEl) {
+      selectEl.innerHTML = '';
+      for (let i = 0; i < options.length; i++) {
+        selectEl.appendChild(options[i]);
+      }
+      selectEl.style.display = 'inherit';
     }
-    $('#mediaselect select').css('display', 'inherit');
   }
 }
 
@@ -82,14 +91,27 @@ export function media_select_receive_data(data: MediaSelectResponse): void {
  * Perform an AJAX query to retrieve and display the media files path.
  */
 export function do_ajax_update_media_select(): void {
-  $('#mediaSelectErrorMessage').css('display', 'none');
-  $('#mediaselect select').css('display', 'none');
-  $('#mediaSelectLoadingImg').css('display', 'inherit');
-  $.getJSON(
-    'api.php/v1/media-files',
-    {},
-    media_select_receive_data
-  );
+  const loadingImg = document.getElementById('mediaSelectLoadingImg');
+  const errorEl = document.getElementById('mediaSelectErrorMessage');
+  const selectEl = document.querySelector<HTMLSelectElement>('#mediaselect select');
+
+  if (errorEl) {
+    errorEl.style.display = 'none';
+  }
+  if (selectEl) {
+    selectEl.style.display = 'none';
+  }
+  if (loadingImg) {
+    loadingImg.style.display = 'inherit';
+  }
+
+  fetch('api.php/v1/media-files')
+    .then(response => response.json())
+    .then(media_select_receive_data)
+    .catch(error => {
+      console.error('Failed to fetch media files:', error);
+      media_select_receive_data({ error: 'fetch_failed' });
+    });
 }
 
 /**

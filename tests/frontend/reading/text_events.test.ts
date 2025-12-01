@@ -222,7 +222,7 @@ describe('text_events.ts', () => {
       expect(highlighted.length).toBe(0);
     });
 
-    it('handles jQuery_tooltip enabled mode', () => {
+    it('handles tooltip enabled mode', () => {
       document.body.innerHTML = `
         <span class="word TERM123">Word</span>
       `;
@@ -231,7 +231,7 @@ describe('text_events.ts', () => {
       const word = document.querySelector('.word') as HTMLElement;
       word_hover_over.call(word);
 
-      // The function should handle jQuery tooltip mode
+      // The function should handle tooltip mode setting
       expect(mockLWT_DATA.settings.jQuery_tooltip).toBe(true);
     });
 

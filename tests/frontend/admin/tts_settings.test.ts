@@ -501,7 +501,7 @@ describe('tts_settings.ts', () => {
       initTTSSettings();
 
       const populateSpy = vi.spyOn(ttsSettings, 'populateVoiceList');
-      // Use native event since initTTSSettings uses addEventListener, not jQuery
+      // Dispatch native event to trigger the change listener
       const languageSelect = document.getElementById('get-language')!;
       languageSelect.dispatchEvent(new Event('change'));
 

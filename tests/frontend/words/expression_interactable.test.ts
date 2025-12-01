@@ -143,7 +143,7 @@ describe('expression_interactable.ts', () => {
     });
 
     it('always creates native tooltip regardless of settings', () => {
-      // Native tooltips are always created (jQuery UI tooltips were removed)
+      // Native tooltips are always created
       document.body.innerHTML = `
         <script data-lwt-multiword-config type="application/json">
           {

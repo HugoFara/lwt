@@ -562,9 +562,9 @@ describe('overlib_interface.ts', () => {
   // run_overlib_status_* Integration Tests (these call overlib)
   // ===========================================================================
 
-  // Note: These tests are skipped because they require jQuery UI dialog
-  // which is not available in the test environment
-  describe.skip('run_overlib functions (require jQuery UI)', () => {
+  // Note: These tests are skipped because they require the word popup dialog
+  // which is not properly set up in the test environment
+  describe.skip('run_overlib functions (require popup dialog)', () => {
     it('run_overlib_status_98 returns boolean', () => {
       const result = run_overlib_status_98(
         'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',

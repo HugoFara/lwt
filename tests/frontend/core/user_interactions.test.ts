@@ -35,7 +35,7 @@ class MockSpeechSynthesisUtterance {
 
 describe('user_interactions.ts', () => {
   beforeEach(() => {
-    // No jQuery needed
+    // Setup before each test
   });
 
   afterEach(() => {

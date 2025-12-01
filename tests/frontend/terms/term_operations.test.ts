@@ -772,10 +772,9 @@ describe('term_operations.ts', () => {
   // ===========================================================================
 
   describe('changeImprAnnText', () => {
-    // Note: These tests are skipped because they require the serializeObject plugin
-    // which is loaded separately via jQuery extensions
+    // Note: These tests are skipped because they require the serializeObject function
     it.skip('checks previous radio button and triggers save', () => {
-      // This would need $.fn.serializeObject to be available
+      // This would need serializeObject to be available
     });
   });
 
@@ -784,9 +783,9 @@ describe('term_operations.ts', () => {
   // ===========================================================================
 
   describe('changeImprAnnRadio', () => {
-    // Note: These tests are skipped because they require the serializeObject plugin
+    // Note: These tests are skipped because they require the serializeObject function
     it.skip('triggers save when radio changes', () => {
-      // This would need $.fn.serializeObject to be available
+      // This would need serializeObject to be available
     });
   });
 
