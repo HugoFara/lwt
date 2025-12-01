@@ -480,8 +480,11 @@ describe('text_annotations.ts', () => {
   // ===========================================================================
 
   describe('Edge Cases', () => {
-    it('getAttr handles null element', () => {
-      const result = getAttr(null as any, 'data-test');
+    it('getAttr handles element without attribute', () => {
+      document.body.innerHTML = `<span id="test"></span>`;
+      const element = document.getElementById('test') as HTMLElement;
+
+      const result = getAttr(element, 'data-test');
 
       expect(result).toBe('');
     });

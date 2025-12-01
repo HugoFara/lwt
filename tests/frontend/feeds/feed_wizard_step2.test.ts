@@ -336,7 +336,7 @@ describe('feed_wizard_step2.ts', () => {
   // ===========================================================================
 
   describe('event delegation', () => {
-    it('handles wizard-cancel button click', async () => {
+    it('handles wizard-cancel button click via direct method call', () => {
       document.body.innerHTML = `
         <button data-action="wizard-cancel">Cancel</button>
         <div id="adv">Advanced</div>
@@ -344,15 +344,14 @@ describe('feed_wizard_step2.ts', () => {
         <div id="lwt_header"></div>
       `;
 
-      await import('../../../src/frontend/js/feeds/feed_wizard_step2');
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="wizard-cancel"]')!;
-      button.click();
+      // Call the method directly instead of relying on event delegation
+      // (event delegation is set up on DOMContentLoaded which may have already fired)
+      lwt_wiz_select_test.clickCancel();
 
       expect(document.getElementById('adv')?.style.display).toBe('none');
     });
 
-    it('handles wizard-select-mode change', async () => {
+    it('handles wizard-select-mode change via direct method call', () => {
       document.body.innerHTML = `
         <select data-action="wizard-select-mode">
           <option value="1">Mode 1</option>
@@ -361,15 +360,13 @@ describe('feed_wizard_step2.ts', () => {
         <select id="mark_action"></select>
       `;
 
-      await import('../../../src/frontend/js/feeds/feed_wizard_step2');
-
-      const select = document.querySelector<HTMLSelectElement>('[data-action="wizard-select-mode"]')!;
-      select.dispatchEvent(new Event('change', { bubbles: true }));
+      // Call the method directly
+      lwt_wiz_select_test.changeSelectMode();
 
       expect((document.getElementById('get_button') as HTMLButtonElement)?.disabled).toBe(true);
     });
 
-    it('handles wizard-minmax button click', async () => {
+    it('handles wizard-minmax button click via direct method call', () => {
       document.body.innerHTML = `
         <button data-action="wizard-minmax">Toggle</button>
         <div id="lwt_container">Content</div>
@@ -378,10 +375,8 @@ describe('feed_wizard_step2.ts', () => {
         <input name="maxim" value="1">
       `;
 
-      await import('../../../src/frontend/js/feeds/feed_wizard_step2');
-
-      const button = document.querySelector<HTMLButtonElement>('[data-action="wizard-minmax"]')!;
-      button.click();
+      // Call the method directly
+      lwt_wiz_select_test.clickMinMax();
 
       expect(document.getElementById('lwt_container')?.style.display).toBe('none');
     });

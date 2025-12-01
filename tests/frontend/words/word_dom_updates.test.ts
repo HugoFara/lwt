@@ -121,23 +121,25 @@ describe('word_dom_updates.ts', () => {
   // ===========================================================================
 
   describe('isJQueryTooltipEnabled', () => {
-    it('returns false when LWT_DATA.settings.jQuery_tooltip is false', () => {
+    it('always returns true since jQuery UI tooltips were removed', () => {
+      // The function now always returns true to use native tooltips
       const result = isJQueryTooltipEnabled();
 
-      expect(result).toBe(false);
+      expect(result).toBe(true);
     });
 
-    it('returns true when parent LWT_DATA.settings.jQuery_tooltip is true', () => {
+    it('returns true regardless of parent settings', () => {
       (window as any).parent = {
         LWT_DATA: {
           settings: {
-            jQuery_tooltip: true
+            jQuery_tooltip: false
           }
         }
       };
 
       const result = isJQueryTooltipEnabled();
 
+      // Always returns true now
       expect(result).toBe(true);
     });
   });
@@ -167,26 +169,26 @@ describe('word_dom_updates.ts', () => {
   // ===========================================================================
 
   describe('generateTooltip', () => {
-    it('generates tooltip when jQuery tooltip is disabled', async () => {
-      const { make_tooltip } = await import('../../../src/frontend/js/terms/word_status');
-
+    it('always returns empty string since isJQueryTooltipEnabled now returns true', () => {
+      // Since isJQueryTooltipEnabled() always returns true (jQuery UI tooltips removed),
+      // generateTooltip always returns empty string
       const result = generateTooltip('word', 'translation', 'romanization', 1);
 
-      expect(make_tooltip).toHaveBeenCalledWith('word', 'translation', 'romanization', 1);
-      expect(result).toBe('word|translation|romanization|1');
+      expect(result).toBe('');
     });
 
-    it('returns empty string when jQuery tooltip is enabled', () => {
+    it('returns empty string regardless of settings', () => {
       (window as any).parent = {
         LWT_DATA: {
           settings: {
-            jQuery_tooltip: true
+            jQuery_tooltip: false
           }
         }
       };
 
       const result = generateTooltip('word', 'translation', 'romanization', 1);
 
+      // Always empty since isJQueryTooltipEnabled always returns true
       expect(result).toBe('');
     });
   });
@@ -241,7 +243,7 @@ describe('word_dom_updates.ts', () => {
       expect(document.querySelector('.TERM48454c4c4f')!.classList.contains('status0')).toBe(true);
     });
 
-    it('sets title attribute with tooltip', () => {
+    it('does not set title attribute since generateTooltip returns empty', () => {
       document.body.innerHTML = `
         <span class="TERM48454c4c4f status0">hello</span>
       `;
@@ -257,7 +259,9 @@ describe('word_dom_updates.ts', () => {
 
       updateNewWordInDOM(params);
 
-      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBe('hello|bonjour|bɔ̃ʒuʁ|2');
+      // generateTooltip returns empty since isJQueryTooltipEnabled always returns true
+      // so title attribute is not set (or is empty)
+      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBe('');
     });
   });
 

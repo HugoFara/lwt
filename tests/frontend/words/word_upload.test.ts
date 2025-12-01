@@ -157,13 +157,12 @@ describe('word_upload.ts', () => {
         terms: []
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-        return Promise.resolve(mockResponse);
-      });
       global.fetch = vi.fn(() =>
-        Promise.resolve(new Response(JSON.stringify(mockResponse), { status: 200 }))
-      ) as any;
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 10, 1);
 
@@ -178,7 +177,7 @@ describe('word_upload.ts', () => {
       expect(getComputedStyle(document.querySelector('#res_data-no_terms_imported')!).display).not.toBe('none');
     });
 
-    it('handles RTL as string "true"', () => {
+    it('handles RTL as string "true"', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 1 },
         terms: [{
@@ -193,60 +192,63 @@ describe('word_upload.ts', () => {
         }]
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', 'true', 1, 1);
 
-      // Should call API and process RTL
-      expect(mockGetJSON).toHaveBeenCalled();
+      // Should call API
+      expect(global.fetch).toHaveBeenCalled();
     });
 
-    it('handles RTL as string "1"', () => {
+    it('handles RTL as string "1"', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 1 },
         terms: []
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', '1', 1, 1);
 
-      expect(mockGetJSON).toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalled();
     });
 
     it('makes API call with correct parameters', () => {
-      const mockGetJSON = vi.fn();
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as Response));
 
       showImportedTerms('2024-01-15 10:30:00', false, 25, 2);
 
-      expect(mockGetJSON).toHaveBeenCalledWith(
-        'api.php/v1/terms/imported',
-        {
-          last_update: '2024-01-15 10:30:00',
-          count: 25,
-          page: 2
-        },
-        expect.any(Function)
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('api.php/v1/terms/imported')
+      );
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('last_update=2024-01-15+10%3A30%3A00')
+      );
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('count=25')
+      );
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('page=2')
       );
     });
 
     it('handles string page parameter', () => {
-      const mockGetJSON = vi.fn();
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as Response));
 
       showImportedTerms('2024-01-01', false, 10, '3');
 
-      expect(mockGetJSON).toHaveBeenCalledWith(
-        'api.php/v1/terms/imported',
-        expect.objectContaining({ page: 3 }),
-        expect.any(Function)
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('page=3')
       );
     });
   });
@@ -282,121 +284,152 @@ describe('word_upload.ts', () => {
       `;
     });
 
-    it('shows prev buttons on page > 1', () => {
+    it('shows prev buttons on page > 1', async () => {
       const mockResponse = {
         navigation: { current_page: 2, total_pages: 5 },
         terms: []
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 50, 2);
 
-      // JSDOM normalizes 'initial' to 'inline', so check not 'none'
-      expect($('#res_data-navigation-prev').css('display')).not.toBe('none');
+      await vi.waitFor(() => {
+        const prevNav = document.getElementById('res_data-navigation-prev');
+        expect(prevNav?.style.display).not.toBe('none');
+      });
     });
 
-    it('hides prev buttons on page 1', () => {
+    it('hides prev buttons on page 1', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 5 },
         terms: []
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 50, 1);
 
-      expect($('#res_data-navigation-prev').css('display')).toBe('none');
+      await vi.waitFor(() => {
+        const prevNav = document.getElementById('res_data-navigation-prev');
+        expect(prevNav?.style.display).toBe('none');
+      });
     });
 
-    it('shows next buttons when not on last page', () => {
+    it('shows next buttons when not on last page', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 5 },
         terms: []
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 50, 1);
 
-      // JSDOM normalizes 'initial' to 'inline', so check not 'none'
-      expect($('#res_data-navigation-next').css('display')).not.toBe('none');
+      await vi.waitFor(() => {
+        const nextNav = document.getElementById('res_data-navigation-next');
+        expect(nextNav?.style.display).not.toBe('none');
+      });
     });
 
-    it('hides next buttons on last page', () => {
+    it('hides next buttons on last page', async () => {
       const mockResponse = {
         navigation: { current_page: 5, total_pages: 5 },
         terms: []
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 50, 5);
 
-      expect($('#res_data-navigation-next').css('display')).toBe('none');
+      await vi.waitFor(() => {
+        const nextNav = document.getElementById('res_data-navigation-next');
+        expect(nextNav?.style.display).toBe('none');
+      });
     });
 
-    it('creates page select options', () => {
+    it('creates page select options', async () => {
       const mockResponse = {
         navigation: { current_page: 2, total_pages: 3 },
         terms: []
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 50, 2);
 
-      const options = $('#res_data-navigation-quick_nav option');
-      expect(options.length).toBe(3);
+      await vi.waitFor(() => {
+        const options = document.querySelectorAll('#res_data-navigation-quick_nav option');
+        expect(options.length).toBe(3);
+      });
     });
 
-    it('hides quick nav when only 1 page', () => {
+    it('hides quick nav when only 1 page', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 1 },
         terms: []
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 10, 1);
 
-      expect($('#res_data-navigation-quick_nav').css('display')).toBe('none');
-      // JSDOM normalizes 'initial' to 'inline', so check not 'none'
-      expect($('#res_data-navigation-no_quick_nav').css('display')).not.toBe('none');
+      await vi.waitFor(() => {
+        const quickNav = document.getElementById('res_data-navigation-quick_nav');
+        expect(quickNav?.style.display).toBe('none');
+        const noQuickNav = document.getElementById('res_data-navigation-no_quick_nav');
+        expect(noQuickNav?.style.display).not.toBe('none');
+      });
     });
 
-    it('displays total pages', () => {
+    it('displays total pages', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 10 },
         terms: []
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 100, 1);
 
-      expect($('#res_data-navigation-totalPages').text()).toBe('10');
+      await vi.waitFor(() => {
+        expect(document.getElementById('res_data-navigation-totalPages')?.textContent).toBe('10');
+      });
     });
   });
 
@@ -422,7 +455,7 @@ describe('word_upload.ts', () => {
       `;
     });
 
-    it('displays term data in table rows', () => {
+    it('displays term data in table rows', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 1 },
         terms: [{
@@ -437,21 +470,25 @@ describe('word_upload.ts', () => {
         }]
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 1, 1);
 
-      const tbody = $('#res_data-res_table-body');
-      expect(tbody.html()).toContain('hello');
-      expect(tbody.html()).toContain('hola');
-      expect(tbody.html()).toContain('helo');
-      expect(tbody.html()).toContain('tag1, tag2');
+      await vi.waitFor(() => {
+        const tbody = document.getElementById('res_data-res_table-body');
+        expect(tbody?.innerHTML).toContain('hello');
+        expect(tbody?.innerHTML).toContain('hola');
+        expect(tbody?.innerHTML).toContain('helo');
+        expect(tbody?.innerHTML).toContain('tag1, tag2');
+      });
     });
 
-    it('shows valid sentence icon when SentOK is not 0', () => {
+    it('shows valid sentence icon when SentOK is not 0', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 1 },
         terms: [{
@@ -466,17 +503,21 @@ describe('word_upload.ts', () => {
         }]
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 1, 1);
 
-      expect($('#res_data-res_table-body').html()).toContain('status.png');
+      await vi.waitFor(() => {
+        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('status.png');
+      });
     });
 
-    it('shows no sentence icon when SentOK is 0', () => {
+    it('shows no sentence icon when SentOK is 0', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 1 },
         terms: [{
@@ -491,17 +532,21 @@ describe('word_upload.ts', () => {
         }]
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 1, 1);
 
-      expect($('#res_data-res_table-body').html()).toContain('status-busy.png');
+      await vi.waitFor(() => {
+        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('status-busy.png');
+      });
     });
 
-    it('displays status abbreviation', () => {
+    it('displays status abbreviation', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 1 },
         terms: [{
@@ -516,17 +561,21 @@ describe('word_upload.ts', () => {
         }]
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 1, 1);
 
-      expect($('#res_data-res_table-body').html()).toContain('WK');
+      await vi.waitFor(() => {
+        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('WK');
+      });
     });
 
-    it('applies RTL direction when enabled', () => {
+    it('applies RTL direction when enabled', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 1 },
         terms: [{
@@ -541,17 +590,21 @@ describe('word_upload.ts', () => {
         }]
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', true, 1, 1);
 
-      expect($('#res_data-res_table-body').html()).toContain('dir="rtl"');
+      await vi.waitFor(() => {
+        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('dir="rtl"');
+      });
     });
 
-    it('shows asterisk for empty romanization', () => {
+    it('shows asterisk for empty romanization', async () => {
       const mockResponse = {
         navigation: { current_page: 1, total_pages: 1 },
         terms: [{
@@ -566,15 +619,19 @@ describe('word_upload.ts', () => {
         }]
       };
 
-      const mockGetJSON = vi.fn((_url: string, _data: unknown, callback: (data: typeof mockResponse) => void) => {
-        callback(mockResponse);
-      });
-      vi.spyOn($, 'getJSON').mockImplementation(mockGetJSON);
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
+        } as Response)
+      );
 
       showImportedTerms('2024-01-01', false, 1, 1);
 
-      // Should contain * for empty romanization
-      expect($('#res_data-res_table-body').html()).toContain('>*<');
+      await vi.waitFor(() => {
+        // Should contain * for empty romanization
+        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('>*<');
+      });
     });
   });
 
@@ -598,9 +655,9 @@ describe('word_upload.ts', () => {
 
       const select = document.querySelector<HTMLSelectElement>('[data-action="update-import-mode"]')!;
       select.value = '4';
-      $(select).trigger('change');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
 
-      expect($('#imp_transl_delim').hasClass('hide')).toBe(false);
+      expect(document.getElementById('imp_transl_delim')?.classList.contains('hide')).toBe(false);
     });
   });
 });

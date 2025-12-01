@@ -93,11 +93,8 @@ describe('youtube_import.ts', () => {
       });
 
       it('shows fetching status while loading', () => {
-        const mockGet = vi.fn().mockReturnValue({
-          done: vi.fn().mockReturnThis(),
-          fail: vi.fn().mockReturnThis()
-        });
-        global.fetch = vi.fn();
+        // Mock fetch to return a pending promise
+        global.fetch = vi.fn().mockReturnValue(new Promise(() => {}));
 
         getYtTextData();
 
@@ -105,7 +102,7 @@ describe('youtube_import.ts', () => {
         expect(document.getElementById('ytDataStatus')!.textContent).toBe('Fetching YouTube data...');
       });
 
-      it('populates form fields on successful API response', () => {
+      it('populates form fields on successful API response', async () => {
         const mockResponse = {
           items: [{
             snippet: {
@@ -115,59 +112,53 @@ describe('youtube_import.ts', () => {
           }]
         };
 
-        const mockGet = vi.fn().mockReturnValue({
-          done: vi.fn((callback: (data: typeof mockResponse) => void) => {
-            callback(mockResponse);
-            return { fail: vi.fn() };
-          }),
-          fail: vi.fn().mockReturnThis()
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
         });
-        global.fetch = vi.fn();
 
         getYtTextData();
+
+        // Wait for the promise chain to resolve
+        await vi.waitFor(() => {
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Success!');
+        });
 
         expect((document.querySelector('[name=TxTitle]') as HTMLInputElement).value).toBe('Test Video Title');
         expect((document.querySelector('[name=TxText]') as HTMLInputElement).value).toBe('Test video description content');
         expect((document.querySelector('[name=TxSourceURI]') as HTMLInputElement).value).toBe('https://youtube.com/watch?v=dQw4w9WgXcQ');
-        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Success!');
       });
 
-      it('handles empty items array', () => {
+      it('handles empty items array', async () => {
         const mockResponse = {
           items: []
         };
 
-        const mockGet = vi.fn().mockReturnValue({
-          done: vi.fn((callback: (data: typeof mockResponse) => void) => {
-            callback(mockResponse);
-            return { fail: vi.fn() };
-          }),
-          fail: vi.fn().mockReturnThis()
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve(mockResponse)
         });
-        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect(document.getElementById('ytDataStatus')!.textContent).toBe('No videos found.');
+        await vi.waitFor(() => {
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('No videos found.');
+        });
         expect((document.querySelector('[name=TxTitle]') as HTMLInputElement).value).toBe(''); // Unchanged
       });
 
       it('constructs correct API URL', () => {
-        const mockGet = vi.fn().mockReturnValue({
-          done: vi.fn().mockReturnThis(),
-          fail: vi.fn().mockReturnThis()
-        });
-        global.fetch = vi.fn();
+        global.fetch = vi.fn().mockReturnValue(new Promise(() => {}));
 
         getYtTextData();
 
-        expect(mockGet).toHaveBeenCalledWith(
+        expect(global.fetch).toHaveBeenCalledWith(
           expect.stringContaining('https://www.googleapis.com/youtube/v3/videos')
         );
-        expect(mockGet).toHaveBeenCalledWith(
+        expect(global.fetch).toHaveBeenCalledWith(
           expect.stringContaining('id=dQw4w9WgXcQ')
         );
-        expect(mockGet).toHaveBeenCalledWith(
+        expect(global.fetch).toHaveBeenCalledWith(
           expect.stringContaining('key=test-api-key')
         );
       });
@@ -179,15 +170,11 @@ describe('youtube_import.ts', () => {
           <input id="ytApiKey" value="api-key">
         `;
 
-        const mockGet = vi.fn().mockReturnValue({
-          done: vi.fn().mockReturnThis(),
-          fail: vi.fn().mockReturnThis()
-        });
-        global.fetch = vi.fn();
+        global.fetch = vi.fn().mockReturnValue(new Promise(() => {}));
 
         getYtTextData();
 
-        expect(mockGet).toHaveBeenCalledWith(
+        expect(global.fetch).toHaveBeenCalledWith(
           expect.stringContaining(encodeURIComponent('test&video=id'))
         );
       });
@@ -202,64 +189,60 @@ describe('youtube_import.ts', () => {
         `;
       });
 
-      it('shows error for 403 status (invalid API key)', () => {
-        const mockGet = vi.fn().mockReturnValue({
-          done: vi.fn().mockReturnThis(),
-          fail: vi.fn((callback: (jqXHR: { status: number }) => void) => {
-            callback({ status: 403 });
-            return { done: vi.fn() };
-          })
+      it('shows error for 403 status (invalid API key)', async () => {
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: false,
+          status: 403,
+          statusText: 'Forbidden'
         });
-        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Invalid API key or quota exceeded.');
+        await vi.waitFor(() => {
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Invalid API key or quota exceeded.');
+        });
       });
 
-      it('shows error for 400 status (invalid video ID)', () => {
-        const mockGet = vi.fn().mockReturnValue({
-          done: vi.fn().mockReturnThis(),
-          fail: vi.fn((callback: (jqXHR: { status: number }) => void) => {
-            callback({ status: 400 });
-            return { done: vi.fn() };
-          })
+      it('shows error for 400 status (invalid video ID)', async () => {
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: false,
+          status: 400,
+          statusText: 'Bad Request'
         });
-        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Invalid video ID.');
+        await vi.waitFor(() => {
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Invalid video ID.');
+        });
       });
 
-      it('shows generic error for other status codes', () => {
-        const mockGet = vi.fn().mockReturnValue({
-          done: vi.fn().mockReturnThis(),
-          fail: vi.fn((callback: (jqXHR: { status: number; statusText: string }) => void) => {
-            callback({ status: 500, statusText: 'Internal Server Error' });
-            return { done: vi.fn() };
-          })
+      it('shows generic error for other status codes', async () => {
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: false,
+          status: 500,
+          statusText: 'Internal Server Error'
         });
-        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Internal Server Error');
+        await vi.waitFor(() => {
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Internal Server Error');
+        });
       });
 
-      it('shows fallback error when statusText is empty', () => {
-        const mockGet = vi.fn().mockReturnValue({
-          done: vi.fn().mockReturnThis(),
-          fail: vi.fn((callback: (jqXHR: { status: number; statusText: string }) => void) => {
-            callback({ status: 0, statusText: '' });
-            return { done: vi.fn() };
-          })
+      it('shows fallback error when statusText is empty', async () => {
+        global.fetch = vi.fn().mockResolvedValue({
+          ok: false,
+          status: 0,
+          statusText: ''
         });
-        global.fetch = vi.fn();
 
         getYtTextData();
 
-        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Failed to fetch YouTube data.');
+        await vi.waitFor(() => {
+          expect(document.getElementById('ytDataStatus')!.textContent).toBe('Error: Failed to fetch YouTube data.');
+        });
       });
     });
   });
@@ -351,24 +334,26 @@ describe('youtube_import.ts', () => {
   // ===========================================================================
 
   describe('form integration', () => {
-    it('trims video ID before use', () => {
+    it('trims video ID before use', async () => {
       document.body.innerHTML = `
         <div id="ytDataStatus"></div>
         <input id="ytVideoId" value="  video-id  ">
         <input id="ytApiKey" value="api-key">
         <input name="TxSourceURI" value="">
+        <input name="TxTitle" value="">
+        <input name="TxText" value="">
       `;
 
-      const mockGet = vi.fn().mockReturnValue({
-        done: vi.fn((callback: (data: { items: Array<{ snippet: { title: string; description: string } }> }) => void) => {
-          callback({ items: [{ snippet: { title: 'Test', description: 'Desc' } }] });
-          return { fail: vi.fn() };
-        }),
-        fail: vi.fn().mockReturnThis()
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ items: [{ snippet: { title: 'Test', description: 'Desc' } }] })
       });
-      global.fetch = vi.fn();
 
       getYtTextData();
+
+      await vi.waitFor(() => {
+        expect(document.getElementById('ytDataStatus')!.textContent).toBe('Success!');
+      });
 
       // URL should use trimmed video ID
       expect((document.querySelector('[name=TxSourceURI]') as HTMLInputElement).value).toBe('https://youtube.com/watch?v=video-id');
@@ -381,15 +366,11 @@ describe('youtube_import.ts', () => {
         <input id="ytApiKey" value="  api-key  ">
       `;
 
-      const mockGet = vi.fn().mockReturnValue({
-        done: vi.fn().mockReturnThis(),
-        fail: vi.fn().mockReturnThis()
-      });
-      global.fetch = vi.fn();
+      global.fetch = vi.fn().mockReturnValue(new Promise(() => {}));
 
       getYtTextData();
 
-      expect(mockGet).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('key=api-key')
       );
     });

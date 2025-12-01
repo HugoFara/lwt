@@ -73,9 +73,9 @@ describe('bulk_translate.ts', () => {
     });
 
     it('uses dict_link1 for dict1 class', () => {
-      const dictSpan = document.querySelector('.dict1')!;
+      const dictSpan = document.querySelector('.dict1') as HTMLElement;
 
-      clickDictionary.call(dictSpan as HTMLElement);
+      clickDictionary(dictSpan);
 
       expect(createTheDictUrl).toHaveBeenCalledWith(
         LWT_DATA.language.dict_link1,
@@ -84,9 +84,9 @@ describe('bulk_translate.ts', () => {
     });
 
     it('uses dict_link2 for dict2 class', () => {
-      const dictSpan = document.querySelector('.dict2')!;
+      const dictSpan = document.querySelector('.dict2') as HTMLElement;
 
-      clickDictionary.call(dictSpan as HTMLElement);
+      clickDictionary(dictSpan);
 
       expect(createTheDictUrl).toHaveBeenCalledWith(
         LWT_DATA.language.dict_link2,
@@ -95,9 +95,9 @@ describe('bulk_translate.ts', () => {
     });
 
     it('uses translator_link for dict3 class', () => {
-      const dictSpan = document.querySelector('.dict3')!;
+      const dictSpan = document.querySelector('.dict3') as HTMLElement;
 
-      clickDictionary.call(dictSpan as HTMLElement);
+      clickDictionary(dictSpan);
 
       expect(createTheDictUrl).toHaveBeenCalledWith(
         LWT_DATA.language.translator_link,
@@ -109,7 +109,7 @@ describe('bulk_translate.ts', () => {
       const span = document.createElement('span');
       span.className = 'other';
 
-      clickDictionary.call(span);
+      clickDictionary(span);
 
       expect(createTheDictUrl).not.toHaveBeenCalled();
     });
@@ -117,9 +117,9 @@ describe('bulk_translate.ts', () => {
     it('opens popup for URLs starting with *', () => {
       LWT_DATA.language.dict_link1 = '*https://popup.example.com/';
 
-      const dictSpan = document.querySelector('.dict1')!;
+      const dictSpan = document.querySelector('.dict1') as HTMLElement;
 
-      clickDictionary.call(dictSpan as HTMLElement);
+      clickDictionary(dictSpan);
 
       expect(owin).toHaveBeenCalled();
     });
@@ -533,9 +533,9 @@ describe('bulk_translate.ts', () => {
         <td><span class="dict1">D1</span></td>
       `;
 
-      const dictSpan = document.querySelector('.dict1')!;
+      const dictSpan = document.querySelector('.dict1') as HTMLElement;
 
-      expect(() => clickDictionary.call(dictSpan as HTMLElement)).not.toThrow();
+      expect(() => clickDictionary(dictSpan)).not.toThrow();
     });
 
     it('handles missing parent elements', () => {
@@ -543,9 +543,9 @@ describe('bulk_translate.ts', () => {
         <span class="dict1">D1</span>
       `;
 
-      const dictSpan = document.querySelector('.dict1')!;
+      const dictSpan = document.querySelector('.dict1') as HTMLElement;
 
-      expect(() => clickDictionary.call(dictSpan as HTMLElement)).not.toThrow();
+      expect(() => clickDictionary(dictSpan)).not.toThrow();
     });
 
     it('handles URLs with lwt_popup parameter', () => {
@@ -556,9 +556,9 @@ describe('bulk_translate.ts', () => {
         <td><span class="dict1">D1</span></td>
       `;
 
-      const dictSpan = document.querySelector('.dict1')!;
+      const dictSpan = document.querySelector('.dict1') as HTMLElement;
 
-      clickDictionary.call(dictSpan as HTMLElement);
+      clickDictionary(dictSpan);
 
       expect(owin).toHaveBeenCalled();
     });

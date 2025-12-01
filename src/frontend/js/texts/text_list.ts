@@ -130,10 +130,9 @@ function handleResetAll(): void {
 /**
  * Handle delete confirmation with navigation.
  */
-function handleConfirmDelete(e: Event): void {
+function handleConfirmDelete(e: Event, actionEl: HTMLElement): void {
   e.preventDefault();
-  const target = e.currentTarget as HTMLElement;
-  const url = target.dataset.url;
+  const url = actionEl.dataset.url;
 
   if (url && confirmDelete()) {
     location.href = url;
@@ -143,8 +142,8 @@ function handleConfirmDelete(e: Event): void {
 /**
  * Handle mark all/none buttons.
  */
-function handleMarkToggle(e: Event): void {
-  const button = e.currentTarget as HTMLButtonElement;
+function handleMarkToggle(e: Event, actionEl: HTMLElement): void {
+  const button = actionEl as HTMLButtonElement;
   const markAll = button.dataset.markAll === 'true';
   selectToggle(markAll, 'form2');
 }
@@ -223,10 +222,10 @@ export function initTextList(): void {
         handleResetAll();
         break;
       case 'confirm-delete':
-        handleConfirmDelete(e);
+        handleConfirmDelete(e, actionEl);
         break;
       case 'mark-toggle':
-        handleMarkToggle(e);
+        handleMarkToggle(e, actionEl);
         break;
     }
   });

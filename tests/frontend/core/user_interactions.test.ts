@@ -590,8 +590,7 @@ describe('user_interactions.ts', () => {
       getPhoneticTextAsync('hello', 'en-US');
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/phonetic-reading'),
-        undefined
+        expect.stringContaining('api.php/v1/phonetic-reading')
       );
     });
 
@@ -603,8 +602,7 @@ describe('user_interactions.ts', () => {
       getPhoneticTextAsync('hello', 5);
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/phonetic-reading'),
-        undefined
+        expect.stringContaining('api.php/v1/phonetic-reading')
       );
     });
   });
@@ -687,8 +685,7 @@ describe('user_interactions.ts', () => {
       readTextAloud('hello', 'en-US', 1.0, 1.0, undefined, true);
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/phonetic-reading'),
-        undefined
+        expect.stringContaining('api.php/v1/phonetic-reading')
       );
     });
   });
@@ -776,8 +773,7 @@ describe('user_interactions.ts', () => {
       speechDispatcher('hello', 5);
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/languages/5/reading-configuration'),
-        undefined
+        expect.stringContaining('api.php/v1/languages/5/reading-configuration')
       );
     });
   });

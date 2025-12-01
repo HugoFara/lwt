@@ -30,6 +30,13 @@ const mockLWT_DATA = {
   },
 };
 
+// Mock removeAllTooltips using vi.hoisted to ensure it's available before module import
+const mockRemoveAllTooltips = vi.hoisted(() => vi.fn());
+
+vi.mock('../../../src/frontend/js/ui/native_tooltip', () => ({
+  removeAllTooltips: mockRemoveAllTooltips
+}));
+
 // Mock imports
 vi.mock('../../../src/frontend/js/reading/text_annotations', () => ({
   getAttr: vi.fn((el: HTMLElement, attr: string) => {
@@ -52,7 +59,7 @@ import { hoverIntent } from '../../../src/frontend/js/core/hover_intent';
 describe('text_multiword_selection.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
-    (window as any).LWT_DATA = { ...mockLWT_DATA };
+    (window as Record<string, unknown>).LWT_DATA = JSON.parse(JSON.stringify(mockLWT_DATA));
     vi.clearAllMocks();
     vi.useFakeTimers();
 
@@ -76,7 +83,7 @@ describe('text_multiword_selection.ts', () => {
   describe('mwordDragNDrop.finish', () => {
     it('returns early when context is undefined', () => {
       mwordDragNDrop.context = undefined;
-      const event = { handled: false } as JQuery.TriggeredEvent & { handled?: boolean };
+      const event = { handled: false } as MouseEvent & { handled?: boolean };
 
       mwordDragNDrop.finish(event);
 
@@ -89,8 +96,8 @@ describe('text_multiword_selection.ts', () => {
           <span class="lword tword" data_order="10">Test</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
-      const event = { handled: true } as JQuery.TriggeredEvent & { handled?: boolean };
+      mwordDragNDrop.context = document.getElementById('sentence')!;
+      const event = { handled: true } as MouseEvent & { handled?: boolean };
 
       mwordDragNDrop.finish(event);
 
@@ -103,8 +110,8 @@ describe('text_multiword_selection.ts', () => {
           <span class="word">Test</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
-      const event = { handled: false } as JQuery.TriggeredEvent & { handled?: boolean };
+      mwordDragNDrop.context = document.getElementById('sentence')!;
+      const event = { handled: false } as MouseEvent & { handled?: boolean };
 
       mwordDragNDrop.finish(event);
 
@@ -118,8 +125,8 @@ describe('text_multiword_selection.ts', () => {
           <span id="ID-15-1">Hello</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
-      const event = { handled: false } as JQuery.TriggeredEvent & { handled?: boolean };
+      mwordDragNDrop.context = document.getElementById('sentence')!;
+      const event = { handled: false } as MouseEvent & { handled?: boolean };
 
       mwordDragNDrop.finish(event);
 
@@ -142,8 +149,8 @@ describe('text_multiword_selection.ts', () => {
           <span class="lword tword" data_order="11">World</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
-      const event = { handled: false } as JQuery.TriggeredEvent & { handled?: boolean };
+      mwordDragNDrop.context = document.getElementById('sentence')!;
+      const event = { handled: false } as MouseEvent & { handled?: boolean };
 
       mwordDragNDrop.finish(event);
 
@@ -166,8 +173,8 @@ describe('text_multiword_selection.ts', () => {
           <span class="lword tword" data_order="11">extra</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
-      const event = { handled: false } as JQuery.TriggeredEvent & { handled?: boolean };
+      mwordDragNDrop.context = document.getElementById('sentence')!;
+      const event = { handled: false } as MouseEvent & { handled?: boolean };
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
       mwordDragNDrop.finish(event);
@@ -183,13 +190,13 @@ describe('text_multiword_selection.ts', () => {
           <span class="nword" data_order="11"> </span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
-      const event = { handled: false } as JQuery.TriggeredEvent & { handled?: boolean };
+      mwordDragNDrop.context = document.getElementById('sentence')!;
+      const event = { handled: false } as MouseEvent & { handled?: boolean };
 
       mwordDragNDrop.finish(event);
 
-      expect($('.tword').length).toBe(0);
-      expect($('.nword').length).toBe(0);
+      expect(document.querySelectorAll('.tword').length).toBe(0);
+      expect(document.querySelectorAll('.nword').length).toBe(0);
     });
   });
 
@@ -211,7 +218,7 @@ describe('text_multiword_selection.ts', () => {
           <span class="tword" data_order="25">Test</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
       const element = document.querySelector('.tword') as HTMLElement;
 
       mwordDragNDrop.twordMouseOver.call(element);
@@ -226,13 +233,13 @@ describe('text_multiword_selection.ts', () => {
           <span class="tword" data_order="20">Second</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
       const secondElement = document.querySelectorAll('.tword')[1] as HTMLElement;
 
       mwordDragNDrop.twordMouseOver.call(secondElement);
 
-      expect($('.lword').length).toBe(1);
-      expect($(secondElement).hasClass('lword')).toBe(true);
+      expect(document.querySelectorAll('.lword').length).toBe(1);
+      expect(secondElement.classList.contains('lword')).toBe(true);
     });
 
     it('defaults to 0 when data_order is empty', () => {
@@ -241,7 +248,7 @@ describe('text_multiword_selection.ts', () => {
           <span class="tword">Test</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
       const element = document.querySelector('.tword') as HTMLElement;
 
       mwordDragNDrop.twordMouseOver.call(element);
@@ -270,13 +277,13 @@ describe('text_multiword_selection.ts', () => {
           <span class="tword" data_order="12">Third</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
       mwordDragNDrop.pos = 10;
       const thirdElement = document.querySelectorAll('.tword')[2] as HTMLElement;
 
       mwordDragNDrop.sentenceOver.call(thirdElement);
 
-      expect($('.lword').length).toBe(3);
+      expect(document.querySelectorAll('.lword').length).toBe(3);
     });
 
     it('adds lword class to elements between pos and current element (backward)', () => {
@@ -287,13 +294,13 @@ describe('text_multiword_selection.ts', () => {
           <span class="tword" data_order="12">Third</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
       mwordDragNDrop.pos = 12;
       const firstElement = document.querySelectorAll('.tword')[0] as HTMLElement;
 
       mwordDragNDrop.sentenceOver.call(firstElement);
 
-      expect($('.lword').length).toBe(3);
+      expect(document.querySelectorAll('.lword').length).toBe(3);
     });
 
     it('handles nword elements in selection range', () => {
@@ -304,13 +311,13 @@ describe('text_multiword_selection.ts', () => {
           <span class="tword" data_order="12">Third</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
       mwordDragNDrop.pos = 10;
       const thirdElement = document.querySelectorAll('.tword')[1] as HTMLElement;
 
       mwordDragNDrop.sentenceOver.call(thirdElement);
 
-      expect($('.nword.lword').length).toBe(1);
+      expect(document.querySelectorAll('.nword.lword').length).toBe(1);
     });
 
     it('does nothing when pos is undefined', () => {
@@ -319,14 +326,14 @@ describe('text_multiword_selection.ts', () => {
           <span class="tword" data_order="10">First</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
       mwordDragNDrop.pos = undefined;
       const element = document.querySelector('.tword') as HTMLElement;
 
       mwordDragNDrop.sentenceOver.call(element);
 
       // Only the current element gets lword, not range selection
-      expect($('.lword').length).toBe(1);
+      expect(document.querySelectorAll('.lword').length).toBe(1);
     });
   });
 
@@ -347,11 +354,11 @@ describe('text_multiword_selection.ts', () => {
           <span class="wsty" data_code="1" data_order="10">Test</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
 
       mwordDragNDrop.startInteraction();
 
-      expect($('#pe').length).toBe(1);
+      expect(document.getElementById('pe')).not.toBeNull();
     });
 
     it('removes existing #pe element before adding new one', () => {
@@ -361,12 +368,12 @@ describe('text_multiword_selection.ts', () => {
         </div>
         <style id="pe">old style</style>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
 
       mwordDragNDrop.startInteraction();
 
-      expect($('#pe').length).toBe(1);
-      expect($('#pe').text()).not.toBe('old style');
+      expect(document.querySelectorAll('#pe').length).toBe(1);
+      expect(document.getElementById('pe')?.textContent).not.toBe('old style');
     });
 
     it('adds nword class to non-word elements', () => {
@@ -376,12 +383,12 @@ describe('text_multiword_selection.ts', () => {
           <span id="ID-11-1" class="punctuation">.</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
 
       mwordDragNDrop.startInteraction();
 
-      expect($('.nword').length).toBe(2);
-      expect($('#ID-10-1').attr('data_order')).toBe('10');
+      expect(document.querySelectorAll('.nword').length).toBe(2);
+      expect(document.getElementById('ID-10-1')?.getAttribute('data_order')).toBe('10');
     });
 
     it('wraps word elements with tword span', () => {
@@ -390,12 +397,12 @@ describe('text_multiword_selection.ts', () => {
           <span class="word" data_order="15">Hello</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
 
       mwordDragNDrop.startInteraction();
 
-      expect($('.word .tword').length).toBe(1);
-      expect($('.word .tword').attr('data_order')).toBe('15');
+      expect(document.querySelectorAll('.word .tword').length).toBe(1);
+      expect(document.querySelector('.word .tword')?.getAttribute('data_order')).toBe('15');
     });
 
     it('sets up hoverIntent on context element', () => {
@@ -404,7 +411,7 @@ describe('text_multiword_selection.ts', () => {
           <span class="word" data_order="10">Test</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
 
       mwordDragNDrop.startInteraction();
 
@@ -424,14 +431,14 @@ describe('text_multiword_selection.ts', () => {
           <span class="wsty" data_code="1" data_order="10" data_ann="note" data_trans="translation" data_status="2">Test</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
-      mwordDragNDrop.event = { data: { annotation: 1 } } as any;
+      mwordDragNDrop.context = document.getElementById('sentence')!;
+      mwordDragNDrop.event = { data: { annotation: 1 } } as MouseEvent & { data?: { annotation?: number } };
 
       mwordDragNDrop.startInteraction();
 
       // The wsty element should have status classes removed
-      const wsty = $('.wsty');
-      expect(wsty.hasClass('status2')).toBe(false);
+      const wsty = document.querySelector('.wsty');
+      expect(wsty?.classList.contains('status2')).toBe(false);
     });
 
     it('handles annotation mode 3 (left annotation)', () => {
@@ -440,14 +447,14 @@ describe('text_multiword_selection.ts', () => {
           <span class="wsty" data_code="1" data_order="10" data_ann="note" data_trans="translation" data_status="3">Test</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
-      mwordDragNDrop.event = { data: { annotation: 3 } } as any;
+      mwordDragNDrop.context = document.getElementById('sentence')!;
+      mwordDragNDrop.event = { data: { annotation: 3 } } as MouseEvent & { data?: { annotation?: number } };
 
       mwordDragNDrop.startInteraction();
 
       // The wsty element should have status classes removed
-      const wsty = $('.wsty');
-      expect(wsty.hasClass('status3')).toBe(false);
+      const wsty = document.querySelector('.wsty');
+      expect(wsty?.classList.contains('status3')).toBe(false);
     });
 
     it('skips hidden wsty elements', () => {
@@ -457,12 +464,12 @@ describe('text_multiword_selection.ts', () => {
           <span class="word" data_order="20">Visible</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
 
       mwordDragNDrop.startInteraction();
 
       // Visible word element should be processed with tword class
-      expect($('.word .tword').length).toBeGreaterThan(0);
+      expect(document.querySelectorAll('.word .tword').length).toBeGreaterThan(0);
     });
   });
 
@@ -489,9 +496,9 @@ describe('text_multiword_selection.ts', () => {
 
       mwordDragNDrop.stopInteraction();
 
-      expect($('.nword').length).toBe(0);
-      expect($('.tword').length).toBe(0);
-      expect($('.lword').length).toBe(0);
+      expect(document.querySelectorAll('.nword').length).toBe(0);
+      expect(document.querySelectorAll('.tword').length).toBe(0);
+      expect(document.querySelectorAll('.lword').length).toBe(0);
     });
 
     it('removes #pe style element', () => {
@@ -501,7 +508,7 @@ describe('text_multiword_selection.ts', () => {
 
       mwordDragNDrop.stopInteraction();
 
-      expect($('#pe').length).toBe(0);
+      expect(document.getElementById('pe')).toBeNull();
     });
 
     it('resets wsty element styles when context exists', () => {
@@ -510,12 +517,10 @@ describe('text_multiword_selection.ts', () => {
           <span class="wsty" style="background-color: red; border-bottom-color: blue;">Test</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
 
       mwordDragNDrop.stopInteraction();
 
-      // The css() call sets inline styles to empty, which effectively removes them
-      // jQuery's css('') returns empty string when style is cleared
       const wsty = document.querySelector('.wsty') as HTMLElement;
       expect(wsty.style.backgroundColor).toBe('');
       expect(wsty.style.borderBottomColor).toBe('');
@@ -546,13 +551,17 @@ describe('text_multiword_selection.ts', () => {
           <span class="word" data_order="10">Test</span>
         </div>
       `;
-      (window as any).LWT_DATA.settings.jQuery_tooltip = true;
+      (window as Record<string, unknown>).LWT_DATA = {
+        ...mockLWT_DATA,
+        settings: { ...mockLWT_DATA.settings, jQuery_tooltip: true }
+      };
       const element = document.querySelector('.word') as HTMLElement;
-      const event = {} as JQuery.TriggeredEvent;
+      const event = {} as MouseEvent;
 
       mword_drag_n_drop_select.call(element, event);
 
-      expect($('.ui-tooltip').length).toBe(0);
+      // Now using native_tooltip.removeAllTooltips
+      expect(mockRemoveAllTooltips).toHaveBeenCalled();
     });
 
     it('sets context to parent sentence', () => {
@@ -562,12 +571,12 @@ describe('text_multiword_selection.ts', () => {
         </div>
       `;
       const element = document.querySelector('.word') as HTMLElement;
-      const event = {} as JQuery.TriggeredEvent;
+      const event = {} as MouseEvent;
 
       mword_drag_n_drop_select.call(element, event);
 
       expect(mwordDragNDrop.context).toBeDefined();
-      expect(mwordDragNDrop.context?.attr('id')).toBe('sentence');
+      expect(mwordDragNDrop.context?.id).toBe('sentence');
     });
 
     it('stores the event', () => {
@@ -577,7 +586,7 @@ describe('text_multiword_selection.ts', () => {
         </div>
       `;
       const element = document.querySelector('.word') as HTMLElement;
-      const event = { type: 'mousedown' } as JQuery.TriggeredEvent;
+      const event = { type: 'mousedown' } as MouseEvent;
 
       mword_drag_n_drop_select.call(element, event);
 
@@ -591,7 +600,7 @@ describe('text_multiword_selection.ts', () => {
         </div>
       `;
       const element = document.querySelector('.word') as HTMLElement;
-      const event = {} as JQuery.TriggeredEvent;
+      const event = {} as MouseEvent;
       const startInteractionSpy = vi.spyOn(mwordDragNDrop, 'startInteraction');
 
       mword_drag_n_drop_select.call(element, event);
@@ -611,13 +620,14 @@ describe('text_multiword_selection.ts', () => {
         </div>
       `;
       const element = document.querySelector('.word') as HTMLElement;
-      const event = {} as JQuery.TriggeredEvent;
+      const event = {} as MouseEvent;
       const stopInteractionSpy = vi.spyOn(mwordDragNDrop, 'stopInteraction');
 
       mword_drag_n_drop_select.call(element, event);
 
       // Trigger mouseup on sentence
-      $('#sentence').trigger('mouseup');
+      const sentence = document.getElementById('sentence')!;
+      sentence.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
 
       expect(stopInteractionSpy).toHaveBeenCalled();
     });
@@ -629,13 +639,16 @@ describe('text_multiword_selection.ts', () => {
           <span class="word" data_order="10">Test</span>
         </div>
       `;
-      (window as any).LWT_DATA.settings.jQuery_tooltip = false;
+      (window as Record<string, unknown>).LWT_DATA = {
+        ...mockLWT_DATA,
+        settings: { ...mockLWT_DATA.settings, jQuery_tooltip: false }
+      };
       const element = document.querySelector('.word') as HTMLElement;
-      const event = {} as JQuery.TriggeredEvent;
+      const event = {} as MouseEvent;
 
       mword_drag_n_drop_select.call(element, event);
 
-      expect($('.ui-tooltip').length).toBe(1);
+      expect(mockRemoveAllTooltips).not.toHaveBeenCalled();
     });
   });
 
@@ -653,7 +666,7 @@ describe('text_multiword_selection.ts', () => {
         </div>
       `;
       const firstWord = document.querySelector('#ID-10-1') as HTMLElement;
-      const event = {} as JQuery.TriggeredEvent;
+      const event = {} as MouseEvent;
 
       // Start selection
       mword_drag_n_drop_select.call(firstWord, event);
@@ -668,8 +681,8 @@ describe('text_multiword_selection.ts', () => {
       mwordDragNDrop.stopInteraction();
 
       // Classes should be cleaned up
-      expect($('.tword').length).toBe(0);
-      expect($('.nword').length).toBe(0);
+      expect(document.querySelectorAll('.tword').length).toBe(0);
+      expect(document.querySelectorAll('.nword').length).toBe(0);
     });
 
     it('handles mouseout before timeout fires', () => {
@@ -679,13 +692,14 @@ describe('text_multiword_selection.ts', () => {
         </div>
       `;
       const element = document.querySelector('.word') as HTMLElement;
-      const event = {} as JQuery.TriggeredEvent;
+      const event = {} as MouseEvent;
       const stopInteractionSpy = vi.spyOn(mwordDragNDrop, 'stopInteraction');
 
       mword_drag_n_drop_select.call(element, event);
 
       // Trigger mouseout before timeout - this calls stopInteraction
-      $('#sentence').trigger('mouseout');
+      const sentence = document.getElementById('sentence')!;
+      sentence.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }));
 
       // stopInteraction should have been called
       expect(stopInteractionSpy).toHaveBeenCalled();
@@ -701,7 +715,7 @@ describe('text_multiword_selection.ts', () => {
       document.body.innerHTML = `
         <div id="sentence"></div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
 
       expect(() => mwordDragNDrop.startInteraction()).not.toThrow();
     });
@@ -711,7 +725,7 @@ describe('text_multiword_selection.ts', () => {
         <span class="word" data_order="10">Orphan</span>
       `;
       const element = document.querySelector('.word') as HTMLElement;
-      const event = {} as JQuery.TriggeredEvent;
+      const event = {} as MouseEvent;
 
       expect(() => mword_drag_n_drop_select.call(element, event)).not.toThrow();
     });
@@ -724,8 +738,8 @@ describe('text_multiword_selection.ts', () => {
           <span class="lword tword" data_order="11">x</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
-      const event = { handled: false } as JQuery.TriggeredEvent & { handled?: boolean };
+      mwordDragNDrop.context = document.getElementById('sentence')!;
+      const event = { handled: false } as MouseEvent & { handled?: boolean };
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
       mwordDragNDrop.finish(event);
@@ -740,7 +754,7 @@ describe('text_multiword_selection.ts', () => {
           <span class="tword" data_order="abc">Test</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
+      mwordDragNDrop.context = document.getElementById('sentence')!;
       const element = document.querySelector('.tword') as HTMLElement;
 
       mwordDragNDrop.twordMouseOver.call(element);
@@ -756,12 +770,12 @@ describe('text_multiword_selection.ts', () => {
           <span class="lword tword" data_order="12">World</span>
         </div>
       `;
-      mwordDragNDrop.context = $('#sentence');
-      const event = { handled: false } as JQuery.TriggeredEvent & { handled?: boolean };
+      mwordDragNDrop.context = document.getElementById('sentence')!;
+      const event = { handled: false } as MouseEvent & { handled?: boolean };
 
       mwordDragNDrop.finish(event);
 
-      // $.param encodes space as + instead of %20
+      // URLSearchParams encodes space as +
       expect(showRightFrames).toHaveBeenCalledWith(
         expect.stringContaining('txt=Hello+')
       );

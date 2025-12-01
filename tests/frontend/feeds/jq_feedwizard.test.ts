@@ -69,7 +69,7 @@ describe('jq_feedwizard.ts', () => {
       `;
 
       const el = document.querySelector('#test-element') as HTMLElement;
-      extend_adv_xpath.call(el);
+      extend_adv_xpath(el);
 
       // Note: :visible doesn't work correctly in jsdom, so check for style change and content
       const advEl = document.querySelector('#adv') as HTMLElement;
@@ -85,7 +85,7 @@ describe('jq_feedwizard.ts', () => {
       `;
 
       const el = document.querySelector('#my-element') as HTMLElement;
-      extend_adv_xpath.call(el);
+      extend_adv_xpath(el);
 
       const advEl = document.querySelector('#adv') as HTMLElement;
       expect(advEl.innerHTML).toContain('contains id');
@@ -99,7 +99,7 @@ describe('jq_feedwizard.ts', () => {
       `;
 
       const el = document.querySelector('.my-class') as HTMLElement;
-      extend_adv_xpath.call(el);
+      extend_adv_xpath(el);
 
       const advEl = document.querySelector('#adv') as HTMLElement;
       expect(advEl.innerHTML).toContain('contains class');
@@ -114,7 +114,7 @@ describe('jq_feedwizard.ts', () => {
       `;
 
       const el = document.querySelector('#target') as HTMLElement;
-      extend_adv_xpath.call(el);
+      extend_adv_xpath(el);
 
       expect(document.querySelectorAll('.lwt_marked_text').length).toBe(0);
     });
@@ -127,7 +127,7 @@ describe('jq_feedwizard.ts', () => {
       `;
 
       const el = document.querySelector('#test') as HTMLElement;
-      extend_adv_xpath.call(el);
+      extend_adv_xpath(el);
 
       const advEl = document.querySelector('#adv') as HTMLElement;
       expect(advEl.querySelectorAll('label.wrap_radio').length).toBeGreaterThan(0);
@@ -439,10 +439,10 @@ describe('jq_feedwizard.ts', () => {
 
     it('disables adv_get_button when invalid xpath', () => {
       document.body.innerHTML = `
-        <div>
+        <p>
           <input type="radio" class="xpath" checked />
           <img src="icn/exclamation-red.png" />
-        </div>
+        </p>
         <button id="adv_get_button">Get</button>
       `;
 

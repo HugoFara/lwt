@@ -24,9 +24,8 @@ vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
 }));
 
 vi.mock('../../../src/frontend/js/reading/text_annotations', () => ({
-  getAttr: vi.fn((el: JQuery, attr: string) => {
-    const attrVal = el.attr(attr);
-    return typeof attrVal === 'string' ? attrVal : '';
+  getAttrElement: vi.fn((el: HTMLElement, attr: string) => {
+    return el.getAttribute(attr) || '';
   })
 }));
 
@@ -47,6 +46,18 @@ vi.mock('../../../src/frontend/js/core/hover_intent', () => ({
 }));
 
 import { keydown_event_do_text_text } from '../../../src/frontend/js/reading/text_keyboard';
+
+/**
+ * Helper to create a KeyboardEvent
+ */
+function createKeyEvent(keyCode: number): KeyboardEvent {
+  return new KeyboardEvent('keydown', {
+    which: keyCode,
+    keyCode: keyCode,
+    bubbles: true,
+    cancelable: true
+  } as KeyboardEventInit);
+}
 
 // Mock LWT_DATA global
 const mockLWT_DATA = {
@@ -99,7 +110,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 5;
 
-      const event = $.Event('keydown', { which: 27 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(27);
       const result = keydown_event_do_text_text(event);
 
       expect(LWT_DATA.text.reading_position).toBe(-1);
@@ -112,11 +123,11 @@ describe('text_keyboard.ts', () => {
         <span class="word kwordmarked">word2</span>
       `;
 
-      const event = $.Event('keydown', { which: 27 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(27);
       keydown_event_do_text_text(event);
 
-      expect($('.uwordmarked').length).toBe(0);
-      expect($('.kwordmarked').length).toBe(0);
+      expect(document.querySelectorAll('.uwordmarked').length).toBe(0);
+      expect(document.querySelectorAll('.kwordmarked').length).toBe(0);
     });
   });
 
@@ -131,12 +142,12 @@ describe('text_keyboard.ts', () => {
         <span class="word status0">unknown2</span>
       `;
 
-      const event = $.Event('keydown', { which: 13 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(13);
       keydown_event_do_text_text(event);
 
       // RETURN adds uwordmarked to the first unknown word
-      expect($('.uwordmarked').length).toBe(1);
-      expect($('.word:first').hasClass('uwordmarked')).toBe(true);
+      expect(document.querySelectorAll('.uwordmarked').length).toBe(1);
+      expect(document.querySelector('.word.status0')?.classList.contains('uwordmarked')).toBe(true);
     });
 
     it('clicks first unknown word (status0)', () => {
@@ -146,12 +157,12 @@ describe('text_keyboard.ts', () => {
       `;
 
       const clickSpy = vi.fn();
-      $('#w1').on('click', clickSpy);
+      document.getElementById('w1')?.addEventListener('click', clickSpy);
 
-      const event = $.Event('keydown', { which: 13 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(13);
       keydown_event_do_text_text(event);
 
-      expect($('#w1').hasClass('uwordmarked')).toBe(true);
+      expect(document.getElementById('w1')?.classList.contains('uwordmarked')).toBe(true);
     });
 
     it('returns false when unknown words exist', () => {
@@ -159,7 +170,7 @@ describe('text_keyboard.ts', () => {
         <span class="word status0">unknown</span>
       `;
 
-      const event = $.Event('keydown', { which: 13 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(13);
       const result = keydown_event_do_text_text(event);
 
       expect(result).toBe(false);
@@ -170,7 +181,7 @@ describe('text_keyboard.ts', () => {
         <span class="word status1">known</span>
       `;
 
-      const event = $.Event('keydown', { which: 13 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(13);
       const result = keydown_event_do_text_text(event);
 
       expect(result).toBe(false);
@@ -188,7 +199,7 @@ describe('text_keyboard.ts', () => {
         <span id="w2" class="word status2" data_wid="101" data_ann="">second</span>
       `;
 
-      const event = $.Event('keydown', { which: 36 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(36);
       const result = keydown_event_do_text_text(event);
 
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
@@ -202,10 +213,10 @@ describe('text_keyboard.ts', () => {
         <span id="w2" class="word status2" data_wid="101" data_ann="">second</span>
       `;
 
-      const event = $.Event('keydown', { which: 36 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(36);
       keydown_event_do_text_text(event);
 
-      expect($('#w1').hasClass('kwordmarked')).toBe(true);
+      expect(document.getElementById('w1')?.classList.contains('kwordmarked')).toBe(true);
     });
 
     it('returns true when no known words exist', () => {
@@ -213,7 +224,7 @@ describe('text_keyboard.ts', () => {
         <span class="word status0">unknown</span>
       `;
 
-      const event = $.Event('keydown', { which: 36 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(36);
       const result = keydown_event_do_text_text(event);
 
       expect(result).toBe(true);
@@ -231,10 +242,10 @@ describe('text_keyboard.ts', () => {
         <span id="w2" class="word status2" data_wid="101" data_ann="">last</span>
       `;
 
-      const event = $.Event('keydown', { which: 35 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(35);
       keydown_event_do_text_text(event);
 
-      expect($('#w2').hasClass('kwordmarked')).toBe(true);
+      expect(document.getElementById('w2')?.classList.contains('kwordmarked')).toBe(true);
     });
 
     it('sets reading_position to last index', () => {
@@ -244,7 +255,7 @@ describe('text_keyboard.ts', () => {
         <span id="w3" class="word status3" data_wid="102" data_ann="">third</span>
       `;
 
-      const event = $.Event('keydown', { which: 35 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(35);
       keydown_event_do_text_text(event);
 
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
@@ -263,11 +274,11 @@ describe('text_keyboard.ts', () => {
         <span id="w2" class="word status2 kwordmarked" data_wid="101" data_ann="">second</span>
       `;
 
-      const event = $.Event('keydown', { which: 37 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(37);
       keydown_event_do_text_text(event);
 
-      expect($('#w1').hasClass('kwordmarked')).toBe(true);
-      expect($('#w2').hasClass('kwordmarked')).toBe(false);
+      expect(document.getElementById('w1')?.classList.contains('kwordmarked')).toBe(true);
+      expect(document.getElementById('w2')?.classList.contains('kwordmarked')).toBe(false);
     });
 
     it('removes kwordmarked from current word', () => {
@@ -276,10 +287,10 @@ describe('text_keyboard.ts', () => {
         <span id="w2" class="word status2 kwordmarked" data_wid="101" data_ann="">second</span>
       `;
 
-      const event = $.Event('keydown', { which: 37 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(37);
       keydown_event_do_text_text(event);
 
-      expect($('.kwordmarked').length).toBe(1);
+      expect(document.querySelectorAll('.kwordmarked').length).toBe(1);
     });
   });
 
@@ -294,10 +305,10 @@ describe('text_keyboard.ts', () => {
         <span id="w2" class="word status2" data_wid="101" data_ann="">second</span>
       `;
 
-      const event = $.Event('keydown', { which: 39 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(39);
       keydown_event_do_text_text(event);
 
-      expect($('#w2').hasClass('kwordmarked')).toBe(true);
+      expect(document.getElementById('w2')?.classList.contains('kwordmarked')).toBe(true);
     });
   });
 
@@ -312,10 +323,10 @@ describe('text_keyboard.ts', () => {
         <span id="w2" class="word status2" data_wid="101" data_ann="">second</span>
       `;
 
-      const event = $.Event('keydown', { which: 32 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(32);
       keydown_event_do_text_text(event);
 
-      expect($('#w2').hasClass('kwordmarked')).toBe(true);
+      expect(document.getElementById('w2')?.classList.contains('kwordmarked')).toBe(true);
     });
   });
 
@@ -333,7 +344,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 50 }) as JQuery.KeyDownEvent; // key '2'
+      const event = createKeyEvent(50); // key '2'
       keydown_event_do_text_text(event);
 
       expect(mockShowRightFrames).toHaveBeenCalled();
@@ -350,7 +361,7 @@ describe('text_keyboard.ts', () => {
       LWT_DATA.text.reading_position = 0;
 
       // Press number key to change the status of the marked known word
-      const event = $.Event('keydown', { which: 49 }) as JQuery.KeyDownEvent; // key '1'
+      const event = createKeyEvent(49); // key '1'
       keydown_event_do_text_text(event);
 
       // Known word gets set_word_status.php call
@@ -366,7 +377,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 99 }) as JQuery.KeyDownEvent; // numpad '3'
+      const event = createKeyEvent(99); // numpad '3'
       keydown_event_do_text_text(event);
 
       expect(mockShowRightFrames).toHaveBeenCalled();
@@ -387,7 +398,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 73 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(73);
       keydown_event_do_text_text(event);
 
       expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('status=98'));
@@ -408,7 +419,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 87 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(87);
       const result = keydown_event_do_text_text(event);
 
       expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('status=99'));
@@ -430,7 +441,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 80 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(80);
       const result = keydown_event_do_text_text(event);
 
       expect(mockSpeechDispatcher).toHaveBeenCalledWith('hello', LWT_DATA.language.id);
@@ -452,7 +463,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 84 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(84);
       const result = keydown_event_do_text_text(event);
 
       expect(result).toBe(false);
@@ -468,7 +479,7 @@ describe('text_keyboard.ts', () => {
       LWT_DATA.language.translator_link = '*http://translator.com/###';
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 84 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(84);
       keydown_event_do_text_text(event);
 
       expect(mockOwin).toHaveBeenCalled();
@@ -489,7 +500,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 69 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(69);
       const result = keydown_event_do_text_text(event);
 
       expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('/word/edit'));
@@ -505,7 +516,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 69 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(69);
       keydown_event_do_text_text(event);
 
       expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('edit_mword.php'));
@@ -529,7 +540,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = -1;
 
-      const event = $.Event('keydown', { which: 69 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(69);
       keydown_event_do_text_text(event);
 
       expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('edit_word.php?wid=&tid='));
@@ -551,7 +562,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 65 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(65);
       const result = keydown_event_do_text_text(event);
 
       expect(result).toBe(true);
@@ -567,7 +578,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = 0;
 
-      const event = $.Event('keydown', { which: 65 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(65);
       const result = keydown_event_do_text_text(event);
 
       expect(result).toBe(true);
@@ -586,7 +597,7 @@ describe('text_keyboard.ts', () => {
         <span class="word status1" data_wid="100" data_ann="">word</span>
       `;
 
-      const event = $.Event('keydown', { which: 88 }) as JQuery.KeyDownEvent; // 'X' key
+      const event = createKeyEvent(88); // 'X' key
       const result = keydown_event_do_text_text(event);
 
       expect(result).toBe(true);
@@ -595,7 +606,7 @@ describe('text_keyboard.ts', () => {
     it('handles empty word list', () => {
       document.body.innerHTML = '';
 
-      const event = $.Event('keydown', { which: 39 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(39);
       const result = keydown_event_do_text_text(event);
 
       expect(result).toBe(true);
@@ -609,12 +620,12 @@ describe('text_keyboard.ts', () => {
       `;
 
       // Simulate hover
-      $('#w1').addClass('hword');
+      document.getElementById('w1')?.classList.add('hword');
 
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.text.reading_position = -1;
 
-      const event = $.Event('keydown', { which: 80 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(80);
       keydown_event_do_text_text(event);
     });
 
@@ -629,7 +640,7 @@ describe('text_keyboard.ts', () => {
       const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
       LWT_DATA.settings.word_status_filter = ':not(.status2)';
 
-      const event = $.Event('keydown', { which: 36 }) as JQuery.KeyDownEvent;
+      const event = createKeyEvent(36);
       keydown_event_do_text_text(event);
     });
   });

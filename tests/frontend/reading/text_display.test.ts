@@ -2,6 +2,23 @@
  * Tests for text_display.ts - Word counts, barcharts, and text statistics
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// Create the mocks using vi.hoisted so they're available before module import
+const { mockApiGet, mockDoAjaxSaveSetting } = vi.hoisted(() => ({
+  mockApiGet: vi.fn(),
+  mockDoAjaxSaveSetting: vi.fn()
+}));
+
+// Mock the api_client module
+vi.mock('../../../src/frontend/js/core/api_client', () => ({
+  apiGet: mockApiGet
+}));
+
+// Mock the ajax_utilities module
+vi.mock('../../../src/frontend/js/core/ajax_utilities', () => ({
+  do_ajax_save_setting: mockDoAjaxSaveSetting
+}));
+
 import {
   set_barchart_item,
   set_word_counts,
@@ -30,6 +47,9 @@ beforeEach(() => {
   (window as unknown as Record<string, unknown>).WORDCOUNTS = createMockWordCounts();
   (window as unknown as Record<string, unknown>).SUW = 0;
   (window as unknown as Record<string, unknown>).SHOWUNIQUE = 0;
+  // Provide default resolved value for apiGet to prevent unhandled rejections
+  mockApiGet.mockReset();
+  mockApiGet.mockResolvedValue({ data: createMockWordCounts(), error: undefined });
 });
 
 describe('text_display.ts', () => {

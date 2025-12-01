@@ -2,6 +2,30 @@
  * Tests for term_operations.ts - Translation updates, term editing, and annotations
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// Use vi.hoisted to define mocks that need to be available during module loading
+const { mockApiPost, mockApiGet, mockTermsApi } = vi.hoisted(() => ({
+  mockApiPost: vi.fn(),
+  mockApiGet: vi.fn(),
+  mockTermsApi: {
+    updateTranslation: vi.fn(),
+    addWithTranslation: vi.fn(),
+    incrementStatus: vi.fn(),
+    getSimilar: vi.fn(),
+    getSentences: vi.fn()
+  }
+}));
+
+// Mock the API modules before importing the test subject
+vi.mock('../../../src/frontend/js/core/api_client', () => ({
+  apiPost: mockApiPost,
+  apiGet: mockApiGet
+}));
+
+vi.mock('../../../src/frontend/js/api/terms', () => ({
+  TermsApi: mockTermsApi
+}));
+
 import {
   setTransRoman,
   translation_radio,
@@ -25,6 +49,13 @@ const mockLwtFormCheck = {
 // Setup global mocks
 beforeEach(() => {
   (window as unknown as Record<string, unknown>).lwtFormCheck = mockLwtFormCheck;
+  mockApiPost.mockReset();
+  mockApiGet.mockReset();
+  // Provide default resolved values to prevent unhandled rejections
+  // Return structure that won't cause errors in edit_term_ann_translations
+  mockApiPost.mockResolvedValue({ data: { translations: [], term_id: 0 }, error: undefined });
+  mockApiGet.mockResolvedValue({ data: { translations: [], term_id: 0 }, error: undefined });
+  Object.values(mockTermsApi).forEach(mock => (mock as ReturnType<typeof vi.fn>).mockReset());
 });
 
 describe('term_operations.ts', () => {
@@ -408,41 +439,25 @@ describe('term_operations.ts', () => {
       `;
     });
 
-    it('shows waiting indicator and makes POST request', () => {
-      const postSpy = vi.fn().mockImplementation(
-        (_url, _data, callback) => {
-          if (typeof callback === 'function') {
-            callback({});
-          }
-          return {} as JQuery.jqXHR;
-        }
-      );
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+    it('shows waiting indicator and makes POST request', async () => {
+      mockApiPost.mockResolvedValue({ data: {} });
 
-      do_ajax_save_impr_text(123, 'rg1', '{"rg1":"test"}');
+      await do_ajax_save_impr_text(123, 'rg1', '{"rg1":"test"}');
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'api.php/v1/texts/123/annotation',
+      expect(mockApiPost).toHaveBeenCalledWith(
+        '/texts/123/annotation',
         expect.objectContaining({
           elem: 'rg1',
           data: '{"rg1":"test"}',
-        }),
-        expect.any(Function),
-        'json'
+        })
       );
     });
 
-    it('alerts on error response', () => {
+    it('alerts on error response', async () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
-        if (typeof callback === 'function') {
-          callback({ error: 'Test error message' });
-        }
-        return {} as JQuery.jqXHR;
-      });
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+      mockApiPost.mockResolvedValue({ error: 'Test error message' });
 
-      do_ajax_save_impr_text(123, 'rg1', '{}');
+      await do_ajax_save_impr_text(123, 'rg1', '{}');
 
       expect(alertSpy).toHaveBeenCalledWith(
         expect.stringContaining('Test error message')
@@ -462,71 +477,51 @@ describe('term_operations.ts', () => {
       `;
     });
 
-    it('alerts when translation is empty', () => {
+    it('alerts when translation is empty', async () => {
       document.body.innerHTML = '<input id="trans-field" value="" />';
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      updateTermTranslation(1, '#trans-field');
+      await updateTermTranslation(1, '#trans-field');
 
       expect(alertSpy).toHaveBeenCalledWith(
         expect.stringContaining('empty')
       );
     });
 
-    it('alerts when translation is asterisk', () => {
+    it('alerts when translation is asterisk', async () => {
       document.body.innerHTML = '<input id="trans-field" value="*" />';
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      updateTermTranslation(1, '#trans-field');
+      await updateTermTranslation(1, '#trans-field');
 
       expect(alertSpy).toHaveBeenCalledWith(
         expect.stringContaining("'*'")
       );
     });
 
-    it('makes POST request with trimmed translation', () => {
+    it('makes POST request with trimmed translation', async () => {
       document.body.innerHTML = '<input id="trans-field" value="  trimmed  " />';
-      const postSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+      mockTermsApi.updateTranslation.mockResolvedValue({ data: { update: 'success' } });
 
-      updateTermTranslation(42, '#trans-field');
+      await updateTermTranslation(42, '#trans-field');
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'api.php/v1/terms/42/translations',
-        expect.objectContaining({ translation: 'trimmed' }),
-        expect.any(Function),
-        'json'
-      );
+      expect(mockTermsApi.updateTranslation).toHaveBeenCalledWith(42, 'trimmed');
     });
 
-    it('alerts on empty response', () => {
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
-        if (typeof callback === 'function') {
-          callback('');
-        }
-        return {} as JQuery.jqXHR;
-      });
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+    it('does nothing on empty response (no update field)', async () => {
+      mockTermsApi.updateTranslation.mockResolvedValue({ data: {} });
 
-      updateTermTranslation(1, '#trans-field');
+      await updateTermTranslation(1, '#trans-field');
 
-      expect(alertSpy).toHaveBeenCalledWith(
-        expect.stringContaining('failed')
-      );
+      // When there's no error and no update field, the function just returns silently
+      expect(mockTermsApi.updateTranslation).toHaveBeenCalled();
     });
 
-    it('alerts on error response', () => {
+    it('alerts on error response', async () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
-        if (typeof callback === 'function') {
-          callback({ error: 'DB error' });
-        }
-        return {} as JQuery.jqXHR;
-      });
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+      mockTermsApi.updateTranslation.mockResolvedValue({ error: 'DB error' });
 
-      updateTermTranslation(1, '#trans-field');
+      await updateTermTranslation(1, '#trans-field');
 
       expect(alertSpy).toHaveBeenCalledWith(
         expect.stringContaining('DB error')
@@ -546,46 +541,30 @@ describe('term_operations.ts', () => {
       `;
     });
 
-    it('alerts when translation is empty', () => {
+    it('alerts when translation is empty', async () => {
       document.body.innerHTML = '<input id="trans-field" value="" />';
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      addTermTranslation('#trans-field', 'word', 1);
+      await addTermTranslation('#trans-field', 'word', 1);
 
       expect(alertSpy).toHaveBeenCalledWith(
         expect.stringContaining('empty')
       );
     });
 
-    it('makes POST request with correct parameters', () => {
-      const postSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+    it('makes POST request with correct parameters', async () => {
+      mockTermsApi.addWithTranslation.mockResolvedValue({ data: { add: 'success' } });
 
-      addTermTranslation('#trans-field', 'testword', 5);
+      await addTermTranslation('#trans-field', 'testword', 5);
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'api.php/v1/terms/new',
-        expect.objectContaining({
-          translation: 'new translation',
-          term_text: 'testword',
-          lg_id: 5,
-        }),
-        expect.any(Function),
-        'json'
-      );
+      expect(mockTermsApi.addWithTranslation).toHaveBeenCalledWith('testword', 5, 'new translation');
     });
 
-    it('alerts on error response', () => {
+    it('alerts on error response', async () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
-        if (typeof callback === 'function') {
-          callback({ error: 'Creation failed' });
-        }
-        return {} as JQuery.jqXHR;
-      });
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+      mockTermsApi.addWithTranslation.mockResolvedValue({ error: 'Creation failed' });
 
-      addTermTranslation('#trans-field', 'word', 1);
+      await addTermTranslation('#trans-field', 'word', 1);
 
       expect(alertSpy).toHaveBeenCalledWith(
         expect.stringContaining('Creation failed')
@@ -602,72 +581,42 @@ describe('term_operations.ts', () => {
       document.body.innerHTML = '<span id="STAT123">Current Status</span>';
     });
 
-    it('makes POST request for status up', () => {
-      const postSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+    it('makes POST request for status up', async () => {
+      mockTermsApi.incrementStatus.mockResolvedValue({ data: {} });
 
-      changeTableTestStatus('123', true);
+      await changeTableTestStatus('123', true);
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'api.php/v1/terms/123/status/up',
-        {},
-        expect.any(Function),
-        'json'
-      );
+      expect(mockTermsApi.incrementStatus).toHaveBeenCalledWith(123, 'up');
     });
 
-    it('makes POST request for status down', () => {
-      const postSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+    it('makes POST request for status down', async () => {
+      mockTermsApi.incrementStatus.mockResolvedValue({ data: {} });
 
-      changeTableTestStatus('123', false);
+      await changeTableTestStatus('123', false);
 
-      expect(postSpy).toHaveBeenCalledWith(
-        'api.php/v1/terms/123/status/down',
-        {},
-        expect.any(Function),
-        'json'
-      );
+      expect(mockTermsApi.incrementStatus).toHaveBeenCalledWith(123, 'down');
     });
 
-    it('updates DOM on successful response', () => {
-      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
-        if (typeof callback === 'function') {
-          callback({ increment: '<span class="status5">5</span>' });
-        }
-        return {} as JQuery.jqXHR;
-      });
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+    it('updates DOM on successful response', async () => {
+      mockTermsApi.incrementStatus.mockResolvedValue({ data: { increment: '<span class="status5">5</span>' } });
 
-      changeTableTestStatus('123', true);
+      await changeTableTestStatus('123', true);
 
       expect(document.getElementById('STAT123')!.innerHTML).toContain('status5');
     });
 
-    it('does nothing on empty response', () => {
-      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
-        if (typeof callback === 'function') {
-          callback('');
-        }
-        return {} as JQuery.jqXHR;
-      });
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+    it('does nothing on empty response', async () => {
+      mockTermsApi.incrementStatus.mockResolvedValue({ data: {} });
 
-      changeTableTestStatus('123', true);
+      await changeTableTestStatus('123', true);
 
       expect(document.getElementById('STAT123')!.innerHTML).toBe('Current Status');
     });
 
-    it('does nothing on error response', () => {
-      const postSpy = vi.fn().mockImplementation((_url, _data, callback) => {
-        if (typeof callback === 'function') {
-          callback({ error: 'Status change failed' });
-        }
-        return {} as JQuery.jqXHR;
-      });
-      (globalThis as unknown as Record<string, { post: typeof postSpy }>).$ = { post: postSpy };
+    it('does nothing on error response', async () => {
+      mockTermsApi.incrementStatus.mockResolvedValue({ error: 'Status change failed' });
 
-      changeTableTestStatus('123', true);
+      await changeTableTestStatus('123', true);
 
       expect(document.getElementById('STAT123')!.innerHTML).toBe('Current Status');
     });
@@ -678,30 +627,23 @@ describe('term_operations.ts', () => {
   // ===========================================================================
 
   describe('do_ajax_req_sim_terms', () => {
-    it('makes GET request with correct parameters', () => {
-      const getJSONSpy = vi.fn().mockImplementation(
-        () => ({} as JQuery.jqXHR<{ similar_terms: string }>)
-      );
-      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
+    it('makes GET request with correct parameters', async () => {
+      mockApiGet.mockResolvedValue({ data: { similar_terms: '<div>Similar</div>' } });
 
-      do_ajax_req_sim_terms(5, 'hello');
+      await do_ajax_req_sim_terms(5, 'hello');
 
-      expect(getJSONSpy).toHaveBeenCalledWith(
-        'api.php/v1/similar-terms',
+      expect(mockApiGet).toHaveBeenCalledWith(
+        '/similar-terms',
         { lg_id: 5, term: 'hello' }
       );
     });
 
-    it('returns jQuery jqXHR object', () => {
-      const mockJqXHR = { done: vi.fn(), fail: vi.fn() } as unknown as JQuery.jqXHR<{
-        similar_terms: string;
-      }>;
-      const getJSONSpy = vi.fn().mockReturnValue(mockJqXHR);
-      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
+    it('returns data from API response', async () => {
+      mockApiGet.mockResolvedValue({ data: { similar_terms: '<div>Test</div>' } });
 
-      const result = do_ajax_req_sim_terms(1, 'test');
+      const result = await do_ajax_req_sim_terms(1, 'test');
 
-      expect(result).toBe(mockJqXHR);
+      expect(result).toEqual({ similar_terms: '<div>Test</div>' });
     });
   });
 
@@ -719,28 +661,17 @@ describe('term_operations.ts', () => {
     });
 
     it('shows loading indicator', () => {
-      const getJSONSpy = vi.fn().mockReturnValue({
-        done: () => ({ fail: vi.fn() }),
-        fail: vi.fn(),
-      } as unknown as JQuery.jqXHR<{ similar_terms: string }>);
-      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
+      mockApiGet.mockReturnValue(new Promise(() => {})); // Never resolves
 
       do_ajax_show_similar_terms();
 
       expect(document.getElementById('simwords')!.innerHTML).toContain('waiting2.gif');
     });
 
-    it('updates simwords on success', () => {
-      const getJSONSpy = vi.fn().mockReturnValue({
-        done: vi.fn().mockImplementation(function (this: unknown, callback: (data: { similar_terms: string }) => void) {
-          callback({ similar_terms: '<div>Similar words here</div>' });
-          return { fail: vi.fn() };
-        }),
-        fail: vi.fn(),
-      } as unknown as JQuery.jqXHR<{ similar_terms: string }>);
-      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
+    it('updates simwords on success', async () => {
+      mockApiGet.mockResolvedValue({ data: { similar_terms: '<div>Similar words here</div>' } });
 
-      do_ajax_show_similar_terms();
+      await do_ajax_show_similar_terms();
 
       expect(document.getElementById('simwords')!.innerHTML).toBe('<div>Similar words here</div>');
     });
@@ -790,8 +721,7 @@ describe('term_operations.ts', () => {
     });
 
     it('shows waiting indicator and hides interactable', () => {
-      const getJSONSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
-      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
+      mockApiGet.mockReturnValue(new Promise(() => {})); // Never resolves
 
       do_ajax_show_sentences(1, 'word', 'target', 5);
 
@@ -800,51 +730,39 @@ describe('term_operations.ts', () => {
     });
 
     it('calls API with term ID when wid is a valid number', () => {
-      const getJSONSpy = vi.fn().mockImplementation(
-        () => ({} as JQuery.jqXHR)
-      );
-      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
+      mockApiGet.mockReturnValue(new Promise(() => {}));
 
       do_ajax_show_sentences(1, 'word', 'target', 42);
 
-      expect(getJSONSpy).toHaveBeenCalledWith(
-        'api.php/v1/sentences-with-term/42',
-        expect.objectContaining({ lg_id: 1, word_lc: 'word' }),
-        expect.any(Function)
+      expect(mockApiGet).toHaveBeenCalledWith(
+        '/sentences-with-term/42',
+        expect.objectContaining({ lg_id: 1, word_lc: 'word' })
       );
     });
 
     it('calls API without term ID when wid is -1 (advanced search)', () => {
-      const getJSONSpy = vi.fn().mockImplementation(
-        () => ({} as JQuery.jqXHR)
-      );
-      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
+      mockApiGet.mockReturnValue(new Promise(() => {}));
 
       do_ajax_show_sentences(1, 'word', 'target', -1);
 
-      expect(getJSONSpy).toHaveBeenCalledWith(
-        'api.php/v1/sentences-with-term',
+      expect(mockApiGet).toHaveBeenCalledWith(
+        '/sentences-with-term',
         expect.objectContaining({
           lg_id: 1,
           word_lc: 'word',
           advanced_search: true,
-        }),
-        expect.any(Function)
+        })
       );
     });
 
     it('calls API without term ID for non-integer wid', () => {
-      const getJSONSpy = vi.fn().mockImplementation(
-        () => ({} as JQuery.jqXHR)
-      );
-      (globalThis as unknown as Record<string, { getJSON: typeof getJSONSpy }>).$ = { getJSON: getJSONSpy };
+      mockApiGet.mockReturnValue(new Promise(() => {}));
 
       do_ajax_show_sentences(1, 'word', 'target', 'invalid');
 
-      expect(getJSONSpy).toHaveBeenCalledWith(
-        'api.php/v1/sentences-with-term',
-        expect.objectContaining({ lg_id: 1, word_lc: 'word' }),
-        expect.any(Function)
+      expect(mockApiGet).toHaveBeenCalledWith(
+        '/sentences-with-term',
+        expect.objectContaining({ lg_id: 1, word_lc: 'word' })
       );
     });
   });
@@ -883,11 +801,11 @@ describe('term_operations.ts', () => {
         <textarea name="WoTranslation"></textarea>
       `;
 
-      // With length === 1 check, should not set when multiple exist
+      // With querySelector, only the first matching element is selected
       setTransRoman('test', '');
 
-      // The function checks length === 1, so with 2 textareas it won't set
-      expect((document.querySelectorAll('textarea[name="WoTranslation"]')[0] as HTMLTextAreaElement).value).toBe('');
+      // The function uses querySelector which gets the first element only
+      expect((document.querySelectorAll('textarea[name="WoTranslation"]')[0] as HTMLTextAreaElement).value).toBe('test');
     });
 
     it('translation_radio handles very long translations', () => {

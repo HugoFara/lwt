@@ -280,32 +280,27 @@ describe('translation_api.ts', () => {
   // ===========================================================================
 
   describe('getGlosbeTranslation', () => {
-    it('makes JSONP request to Glosbe API', () => {
-      const ajaxSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
-      (globalThis as unknown as Record<string, { ajax: typeof ajaxSpy }>).$ = { ajax: ajaxSpy };
+    it('creates script element for JSONP request to Glosbe API', () => {
+      const appendChildSpy = vi.spyOn(document.head, 'appendChild');
 
       getGlosbeTranslation('hello', 'en', 'fr');
 
-      expect(ajaxSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'GET',
-          dataType: 'jsonp',
-          jsonpCallback: 'getTranslationFromGlosbeApi',
-          async: true,
-        })
-      );
+      expect(appendChildSpy).toHaveBeenCalled();
+      const script = appendChildSpy.mock.calls[0][0] as HTMLScriptElement;
+      expect(script.tagName).toBe('SCRIPT');
+      expect(script.src).toContain('glosbe.com/gapi/translate');
+      expect(script.src).toContain('callback=getTranslationFromGlosbeApi');
     });
 
     it('includes correct parameters in request URL', () => {
-      const ajaxSpy = vi.fn().mockImplementation(() => ({} as JQuery.jqXHR));
-      (globalThis as unknown as Record<string, { ajax: typeof ajaxSpy }>).$ = { ajax: ajaxSpy };
+      const appendChildSpy = vi.spyOn(document.head, 'appendChild');
 
       getGlosbeTranslation('word', 'de', 'en');
 
-      const callArg = ajaxSpy.mock.calls[0][0] as { url: string };
-      expect(callArg.url).toContain('from=de');
-      expect(callArg.url).toContain('dest=en');
-      expect(callArg.url).toContain('phrase=word');
+      const script = appendChildSpy.mock.calls[0][0] as HTMLScriptElement;
+      expect(script.src).toContain('from=de');
+      expect(script.src).toContain('dest=en');
+      expect(script.src).toContain('phrase=word');
     });
   });
 
