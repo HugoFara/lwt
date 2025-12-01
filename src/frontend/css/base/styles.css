@@ -3,6 +3,15 @@
  * \brief Main stylesheet for the default theme.
  */
 
+/* Override Bulma dark mode - force light theme */
+:root {
+  color-scheme: light;
+}
+
+html {
+  background-color: #FFFFFF;
+}
+
 body
 {
   background-color: #FFFFFF;
@@ -15,22 +24,255 @@ body
   margin-right: auto;
 }
 
+/* Override Bulma dark mode variables */
+.hero, .card, .box, .notification, .footer {
+  background-color: inherit;
+  color: inherit;
+}
+
 /* Full-width body for test and read pages */
 body.full-width
 {
   max-width: 100%;
 }
 
-input[type=text]
+/* ==========================================================================
+   Bulma Form Element Integration
+   Apply Bulma-like styling to all form elements automatically
+   ========================================================================== */
+
+/* Text inputs - apply Bulma .input styles */
+input[type=text],
+input[type=password],
+input[type=email],
+input[type=number],
+input[type=search],
+input[type=url],
+input[type=tel]
 {
   font: 85% "Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu;
-  border: 1px solid #C6C6C6;
-  padding: 3px;
+  /* Bulma .input styles */
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  align-items: center;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  box-shadow: inset 0 0.0625em 0.125em rgba(10, 10, 10, 0.05);
+  display: inline-flex;
+  height: 2.5em;
+  justify-content: flex-start;
+  line-height: 1.5;
+  padding: calc(0.5em - 1px) calc(0.75em - 1px);
+  position: relative;
+  vertical-align: top;
+  background-color: white;
+  color: #363636;
+  max-width: 100%;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type=text]:focus,
+input[type=password]:focus,
+input[type=email]:focus,
+input[type=number]:focus,
+input[type=search]:focus,
+input[type=url]:focus,
+input[type=tel]:focus
+{
+  outline: none;
+  border-color: #485fc7;
+  box-shadow: 0 0 0 0.125em rgba(72, 95, 199, 0.25);
+}
+
+input[type=text]:hover,
+input[type=password]:hover,
+input[type=email]:hover,
+input[type=number]:hover,
+input[type=search]:hover,
+input[type=url]:hover,
+input[type=tel]:hover
+{
+  border-color: #b5b5b5;
 }
 
 input[type=radio]
 {
   display: inline;
+}
+
+/* Checkboxes - enhanced styling */
+input[type=checkbox]
+{
+  accent-color: #485fc7;
+  width: 1.1em;
+  height: 1.1em;
+  cursor: pointer;
+}
+
+/* Textarea - apply Bulma .textarea styles */
+textarea
+{
+  font: 85% "Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  box-shadow: inset 0 0.0625em 0.125em rgba(10, 10, 10, 0.05);
+  padding: calc(0.5em - 1px) calc(0.75em - 1px);
+  background-color: white;
+  color: #363636;
+  max-width: 100%;
+  width: 100%;
+  resize: vertical;
+  min-height: 8em;
+  line-height: 1.5;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+textarea:focus
+{
+  outline: none;
+  border-color: #485fc7;
+  box-shadow: 0 0 0 0.125em rgba(72, 95, 199, 0.25);
+}
+
+textarea:hover
+{
+  border-color: #b5b5b5;
+}
+
+/* Select - apply Bulma .select styles */
+select
+{
+  font: 85% "Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  box-shadow: inset 0 0.0625em 0.125em rgba(10, 10, 10, 0.05);
+  padding: calc(0.5em - 1px) calc(2.5em - 1px) calc(0.5em - 1px) calc(0.75em - 1px);
+  background-color: white;
+  color: #363636;
+  cursor: pointer;
+  height: 2.5em;
+  line-height: 1.5;
+  /* Custom dropdown arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23485fc7' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75em center;
+  background-size: 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+select:focus
+{
+  outline: none;
+  border-color: #485fc7;
+  box-shadow: 0 0 0 0.125em rgba(72, 95, 199, 0.25);
+}
+
+select:hover
+{
+  border-color: #b5b5b5;
+}
+
+select:disabled
+{
+  background-color: #f5f5f5;
+  color: #7a7a7a;
+  cursor: not-allowed;
+}
+
+/* Buttons - apply Bulma .button styles */
+button,
+input[type=submit],
+input[type=button],
+input[type=reset]
+{
+  font: 85% "Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  align-items: center;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  box-shadow: none;
+  display: inline-flex;
+  height: 2.5em;
+  justify-content: center;
+  line-height: 1.5;
+  padding: calc(0.5em - 1px) 1em;
+  position: relative;
+  vertical-align: top;
+  background-color: white;
+  color: #363636;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover,
+input[type=button]:hover,
+input[type=reset]:hover
+{
+  border-color: #b5b5b5;
+}
+
+button:focus,
+input[type=button]:focus,
+input[type=reset]:focus
+{
+  outline: none;
+  border-color: #485fc7;
+  box-shadow: 0 0 0 0.125em rgba(72, 95, 199, 0.25);
+}
+
+button:active,
+input[type=button]:active,
+input[type=reset]:active
+{
+  border-color: #4a4a4a;
+}
+
+button:disabled,
+input[type=submit]:disabled,
+input[type=button]:disabled,
+input[type=reset]:disabled
+{
+  background-color: #f5f5f5;
+  border-color: #dbdbdb;
+  color: #7a7a7a;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Submit buttons - Primary style (Bulma .is-primary) */
+input[type=submit]
+{
+  background-color: #485fc7;
+  border-color: transparent;
+  color: white;
+}
+
+input[type=submit]:hover
+{
+  background-color: #3e56c4;
+  border-color: transparent;
+  color: white;
+}
+
+input[type=submit]:focus
+{
+  border-color: transparent;
+  box-shadow: 0 0 0 0.125em rgba(72, 95, 199, 0.25);
+}
+
+input[type=submit]:active
+{
+  background-color: #3a51bb;
+  border-color: transparent;
+  color: white;
 }
 
 p
@@ -142,13 +384,6 @@ span.status5stat
 {
   background-color: #BBFFBB;
   color: #000000;
-}
-
-textarea
-{
-  font: 85% "Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu;
-  border: 1px solid #C6C6C6;
-  padding: 3px;
 }
 
 table.tab1
@@ -455,6 +690,8 @@ img.lwtlogoright
 .respinput {
   width: 90%;
   max-width: 500px;
+  /* Override default full-width for form elements */
+  display: inline-flex;
 }
 
 .annterm
@@ -675,174 +912,109 @@ footer
 }
 
 /**
-* Main page (index.php) navigation menu style
+* Main page (index.php) navigation menu style - Bulma card integration
 */
-.menu {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e9ecef;
-  min-width: 340px;
-  max-width: 500px;
+.menu.card {
+  height: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menu.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 /**
-* Main page (index.php) navigation menu section header
+* Main page (index.php) navigation menu section header - Bulma card-header
 */
-.menu-header {
-  font-size: 1.35em;
-  font-weight: 700;
-  color: #495057;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 14px;
-  padding-bottom: 12px;
-  border-bottom: 3px solid currentColor;
+.menu .menu-header.card-header {
   cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   user-select: none;
+  transition: background-color 0.2s ease;
 }
 
-.menu-header:hover {
-  opacity: 0.8;
+.menu .menu-header.card-header:hover {
+  background-color: rgba(0, 0, 0, 0.02);
 }
 
-.menu-header::after {
-  content: '▼';
-  font-size: 0.6em;
+.menu .card-header-icon .icon i {
   transition: transform 0.3s ease;
 }
 
-.menu.collapsed .menu-header::after {
+.menu.collapsed .card-header-icon .icon i {
   transform: rotate(-90deg);
 }
 
-.menu-content {
-  display: flex;
-  flex-direction: column;
+.menu .menu-content.card-content {
   overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
-  max-height: 500px;
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  max-height: 600px;
   opacity: 1;
 }
 
-.menu.collapsed .menu-content {
+.menu.collapsed .menu-content.card-content {
   max-height: 0;
   opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 /**
-* Main page (index.php) navigation menu style elements
-*/
-.menu-content > a,
-.menu-content > div:not(.home-last-text) {
-  width: 100%;
-  min-height: 30px;
-  margin: 4px 0;
-  text-align: center;
-  background-color: #fff;
-  padding: 12px 15px;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-}
-
-.menu-content > a:hover {
-  background-color: #4a90d9;
-  color: #fff;
-  border-color: #4a90d9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 144, 217, 0.3);
-}
-
-.menu-content > a:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(74, 144, 217, 0.2);
-}
-
-/**
-* Color-coded menu categories
+* Color-coded menu categories - card header backgrounds
 */
 
 /* Languages menu - blue accent */
-.menu-languages {
-  border-top-color: #4a90d9;
+.menu-languages .card-header {
+  background: linear-gradient(135deg, #485fc7 0%, #3e56c4 100%);
 }
-.menu-languages .menu-header {
-  color: #4a90d9;
+.menu-languages .card-header-title,
+.menu-languages .card-header-icon {
+  color: white;
 }
 
 /* Texts menu - green accent */
-.menu-texts {
-  border-top-color: #28a745;
+.menu-texts .card-header {
+  background: linear-gradient(135deg, #48c78e 0%, #3ec487 100%);
 }
-.menu-texts .menu-header {
-  color: #28a745;
-}
-.menu-texts .menu-content > a:hover {
-  background-color: #28a745;
-  border-color: #28a745;
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+.menu-texts .card-header-title,
+.menu-texts .card-header-icon {
+  color: white;
 }
 
 /* Terms menu - purple accent */
-.menu-terms {
-  border-top-color: #6f42c1;
+.menu-terms .card-header {
+  background: linear-gradient(135deg, #b86bff 0%, #a855f7 100%);
 }
-.menu-terms .menu-header {
-  color: #6f42c1;
-}
-.menu-terms .menu-content > a:hover {
-  background-color: #6f42c1;
-  border-color: #6f42c1;
-  box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+.menu-terms .card-header-title,
+.menu-terms .card-header-icon {
+  color: white;
 }
 
 /* Feeds menu - orange accent */
-.menu-feeds {
-  border-top-color: #fd7e14;
+.menu-feeds .card-header {
+  background: linear-gradient(135deg, #ffe08a 0%, #ffdd57 100%);
 }
-.menu-feeds .menu-header {
-  color: #fd7e14;
-}
-.menu-feeds .menu-content > a:hover {
-  background-color: #fd7e14;
-  border-color: #fd7e14;
-  box-shadow: 0 4px 12px rgba(253, 126, 20, 0.3);
+.menu-feeds .card-header-title,
+.menu-feeds .card-header-icon {
+  color: rgba(0, 0, 0, 0.7);
 }
 
-/* Admin menu - teal accent */
-.menu-admin {
-  border-top-color: #17a2b8;
+/* Admin menu - cyan accent */
+.menu-admin .card-header {
+  background: linear-gradient(135deg, #3e8ed0 0%, #3082c5 100%);
 }
-.menu-admin .menu-header {
-  color: #17a2b8;
-}
-.menu-admin .menu-content > a:hover {
-  background-color: #17a2b8;
-  border-color: #17a2b8;
-  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+.menu-admin .card-header-title,
+.menu-admin .card-header-icon {
+  color: white;
 }
 
 /* Settings menu - gray accent */
-.menu-settings {
-  border-top-color: #6c757d;
+.menu-settings .card-header {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
 }
-.menu-settings .menu-header {
-  color: #6c757d;
-}
-.menu-settings .menu-content > a:hover {
-  background-color: #6c757d;
-  border-color: #6c757d;
-  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+.menu-settings .card-header-title,
+.menu-settings .card-header-icon {
+  color: white;
 }
 
 /**************************************************************
@@ -1210,65 +1382,117 @@ Test page styles
 }
 
 /**************************************************************
-Home page styles
+Home page styles - Bulma integration
 ***************************************************************/
 
-/* Last text info box */
+/* Welcome hero section - simple clean styling */
+.hero.is-primary {
+  background: linear-gradient(135deg, #485fc7 0%, #3e56c4 100%) !important;
+  color: white !important;
+}
+
+.hero.is-primary .title {
+  color: white !important;
+}
+
+/* Last text info box - using Bulma box */
 .home-last-text
 {
-  height: 85px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
-/* Home menu container */
-.home-menu-container
-{
-  display: flex;
+.home-last-text .buttons {
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding: 20px 0;
 }
 
-/* Mobile-first responsive design for home menu */
-@media (max-width: 768px) {
-  .home-menu-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    padding: 10px;
-  }
-
-  .menu {
-    width: 95%;
-    max-width: none;
-    min-width: auto;
-  }
-
-  .menu-content > a,
-  .menu-content > div:not(.home-last-text) {
-    padding: 14px 15px;
-    font-size: 1.05em;
-  }
-}
-
-/* Tablet adjustments */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .home-menu-container {
-    gap: 15px;
-  }
-
-  .menu {
-    min-width: 300px;
-    max-width: 400px;
-  }
-}
-
-/* WordPress logout text */
-.logout-text
+/* Home menu container - uses Bulma columns */
+.home-menu-container.columns
 {
-  font-size: 115%;
-  font-weight: bold;
-  color: red;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Ensure cards fill column height */
+.home-menu-container .column {
+  display: flex;
+}
+
+.home-menu-container .card {
+  width: 100%;
+  background-color: white;
+}
+
+/* Button styling within menu cards - fix icon/text alignment */
+.menu-content .button.is-fullwidth {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.menu-content .button .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5em;
+  height: 1.5em;
+  flex-shrink: 0;
+}
+
+.menu-content .button .icon + span {
+  flex: 1;
+}
+
+.menu-content .button .icon img {
+  max-width: 16px;
+  max-height: 16px;
+}
+
+/* Lucide icons in buttons - proper sizing and alignment */
+.menu-content .button .icon svg,
+.menu-content .button .icon i {
+  width: 1em;
+  height: 1em;
+}
+
+/* Override Bulma select wrapper for home page */
+.menu-content .select.is-fullwidth {
+  width: 100%;
+}
+
+.menu-content .select.is-fullwidth select {
+  width: 100%;
+}
+
+/* WordPress logout - styled as Bulma card */
+.menu-logout {
+  width: 100%;
+}
+
+/* Card content needs explicit background */
+.menu .card-content {
+  background-color: white;
+}
+
+/* Fix Bulma notification colors in light mode */
+.notification.is-danger.is-light {
+  background-color: #feecf0;
+  color: #cc0f35;
+}
+
+.notification.is-warning.is-light {
+  background-color: #fffaeb;
+  color: #946c00;
+}
+
+.notification.is-info.is-light {
+  background-color: #eff5fb;
+  color: #296fa8;
+}
+
+/* Footer styling */
+.footer {
+  background-color: #f5f5f5 !important;
+  padding: 1.5rem !important;
 }
 
 /* Footer license image inline */

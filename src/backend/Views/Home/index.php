@@ -42,27 +42,31 @@ function renderCurrentTextInfo(int $textid, ?array $textInfo): void
     $txttit = $textInfo['title'];
     $annotated = $textInfo['annotated'];
     ?>
-<div class="home-last-text">
-    Last Text (<?php echo htmlspecialchars($lngname ?? '', ENT_QUOTES, 'UTF-8'); ?>):<br />
-    <i><?php echo htmlspecialchars($txttit ?? '', ENT_QUOTES, 'UTF-8'); ?></i>
-    <br />
-    <a href="/text/read?start=<?php echo $textid; ?>">
-        <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" />&nbsp;Read
-    </a>
-    &nbsp; &nbsp;
-    <a href="/test?text=<?php echo $textid; ?>">
-        <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />&nbsp;Test
-    </a>
-    &nbsp; &nbsp;
-    <a href="/text/print-plain?text=<?php echo $textid; ?>">
-        <img src="/assets/icons/printer.png" title="Print" alt="Print" />&nbsp;Print
-    </a>
-    <?php if ($annotated): ?>
-    &nbsp; &nbsp;
-    <a href="/text/print?text=<?php echo $textid; ?>">
-        <img src="/assets/icons/tick.png" title="Improved Annotated Text" alt="Improved Annotated Text" />&nbsp;Ann. Text
-    </a>
-    <?php endif; ?>
+<div class="box has-background-light home-last-text">
+    <p class="has-text-weight-medium mb-2">
+        Last Text (<?php echo htmlspecialchars($lngname ?? '', ENT_QUOTES, 'UTF-8'); ?>):
+    </p>
+    <p class="is-italic mb-3"><?php echo htmlspecialchars($txttit ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+    <div class="buttons are-small">
+        <a href="/text/read?start=<?php echo $textid; ?>" class="button is-link is-light">
+            <span class="icon is-small"><img src="/assets/icons/book-open-bookmark.png" alt="Read" /></span>
+            <span>Read</span>
+        </a>
+        <a href="/test?text=<?php echo $textid; ?>" class="button is-info is-light">
+            <span class="icon is-small"><img src="/assets/icons/question-balloon.png" alt="Test" /></span>
+            <span>Test</span>
+        </a>
+        <a href="/text/print-plain?text=<?php echo $textid; ?>" class="button is-light">
+            <span class="icon is-small"><img src="/assets/icons/printer.png" alt="Print" /></span>
+            <span>Print</span>
+        </a>
+        <?php if ($annotated): ?>
+        <a href="/text/print?text=<?php echo $textid; ?>" class="button is-success is-light">
+            <span class="icon is-small"><img src="/assets/icons/tick.png" alt="Annotated" /></span>
+            <span>Ann. Text</span>
+        </a>
+        <?php endif; ?>
+    </div>
 </div>
     <?php
 }
@@ -78,10 +82,15 @@ function renderCurrentTextInfo(int $textid, ?array $textInfo): void
 function renderLanguageSelector(int $langid, array $languages): void
 {
     ?>
-<div for="filterlang">Language:
-    <select id="filterlang" data-action="set-lang" data-redirect="/">
-        <?php echo SelectOptionsBuilder::forLanguages($languages, $langid, '[Select...]'); ?>
-    </select>
+<div class="field">
+    <label class="label" for="filterlang">Language</label>
+    <div class="control">
+        <div class="select is-fullwidth">
+            <select id="filterlang" data-action="set-lang" data-redirect="/">
+                <?php echo SelectOptionsBuilder::forLanguages($languages, $langid, '[Select...]'); ?>
+            </select>
+        </div>
+    </div>
 </div>
     <?php
 }
@@ -97,10 +106,13 @@ function renderWordPressLogout(bool $isWordPress): void
 {
     if ($isWordPress) {
         ?>
-<div class="menu">
-    <a href="/wordpress/stop">
-        <span class="logout-text">LOGOUT</span> (from WordPress and LWT)
-    </a>
+<div class="card menu menu-logout">
+    <div class="card-content has-text-centered">
+        <a href="/wordpress/stop" class="button is-danger is-outlined">
+            <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+            <span><strong>LOGOUT</strong> (from WordPress and LWT)</span>
+        </a>
+    </div>
 </div>
         <?php
     }
@@ -136,94 +148,245 @@ $isWordPress = $dashboardData['is_wordpress'];
 $currentTextInfo = $dashboardData['current_text_info'];
 ?>
 
-<div class="red"><p id="php_update_required"></p></div>
-<div class="red"><p id="cookies_disabled"></p></div>
-<div class="msgblue"><p id="lwt_new_version"></p></div>
+<!-- System notifications -->
+<div class="notification is-danger is-light" id="php_update_required_box" style="display: none;">
+    <p id="php_update_required"></p>
+</div>
+<div class="notification is-warning is-light" id="cookies_disabled_box" style="display: none;">
+    <p id="cookies_disabled"></p>
+</div>
+<div class="notification is-info is-light" id="lwt_new_version_box" style="display: none;">
+    <p id="lwt_new_version"></p>
+</div>
 
-<p class="center">Welcome to your language learning app!</p>
+<!-- Welcome message -->
+<section class="hero is-small is-primary is-bold mb-5">
+    <div class="hero-body py-4">
+        <p class="title is-4 has-text-centered">Welcome to your language learning app!</p>
+    </div>
+</section>
 
-<div class="home-menu-container">
-    <div class="menu menu-languages" data-menu-id="languages">
-        <div class="menu-header">Languages</div>
-        <div class="menu-content">
-            <?php if ($langcnt == 0): ?>
-            <div><p>Hint: The database seems to be empty.</p></div>
-            <a href="/admin/install-demo">Install the LWT demo database</a>
-            <a href="/languages?new=1">Define the first language you want to learn</a>
-            <?php elseif ($langcnt > 0): ?>
-            <?php renderLanguageSelector($currentlang, $languages); ?>
-            <?php
-            if ($currenttext !== null) {
-                renderCurrentTextInfo($currenttext, $currentTextInfo);
-            }
-            ?>
-            <?php endif; ?>
-            <a href="/languages">Manage Languages</a>
+<!-- Main menu grid -->
+<div class="columns is-multiline is-centered home-menu-container">
+    <!-- Languages Card -->
+    <div class="column is-one-third-desktop is-half-tablet">
+        <div class="card menu menu-languages" data-menu-id="languages">
+            <header class="card-header menu-header">
+                <p class="card-header-title">
+                    <span class="icon-text">
+                        <span class="icon"><i data-lucide="languages"></i></span>
+                        <span>Languages</span>
+                    </span>
+                </p>
+                <button class="card-header-icon" aria-label="toggle menu">
+                    <span class="icon"><i data-lucide="chevron-down"></i></span>
+                </button>
+            </header>
+            <div class="card-content menu-content">
+                <?php if ($langcnt == 0): ?>
+                <div class="notification is-warning is-light">
+                    <p>The database seems to be empty.</p>
+                </div>
+                <a href="/admin/install-demo" class="button is-fullwidth is-info is-outlined mb-2">
+                    <span class="icon"><i data-lucide="database"></i></span>
+                    <span>Install Demo Database</span>
+                </a>
+                <a href="/languages?new=1" class="button is-fullwidth is-primary is-outlined mb-2">
+                    <span class="icon"><i data-lucide="plus"></i></span>
+                    <span>Define First Language</span>
+                </a>
+                <?php elseif ($langcnt > 0): ?>
+                <?php renderLanguageSelector($currentlang, $languages); ?>
+                <?php
+                if ($currenttext !== null) {
+                    renderCurrentTextInfo($currenttext, $currentTextInfo);
+                }
+                ?>
+                <?php endif; ?>
+                <a href="/languages" class="button is-fullwidth is-link is-light">
+                    <span class="icon"><i data-lucide="settings"></i></span>
+                    <span>Manage Languages</span>
+                </a>
+            </div>
         </div>
     </div>
 
-    <div class="menu menu-texts" data-menu-id="texts">
-        <div class="menu-header">Texts</div>
-        <div class="menu-content">
-            <a href="/texts">My Texts</a>
-            <a href="/text/archived">Text Archive</a>
-            <a href="/tags/text">Text Tags</a>
-            <a href="/text/check">Check Text</a>
-            <a href="/text/import-long">Import Long Text</a>
+    <!-- Texts Card -->
+    <div class="column is-one-third-desktop is-half-tablet">
+        <div class="card menu menu-texts" data-menu-id="texts">
+            <header class="card-header menu-header">
+                <p class="card-header-title">
+                    <span class="icon-text">
+                        <span class="icon"><i data-lucide="book-open"></i></span>
+                        <span>Texts</span>
+                    </span>
+                </p>
+                <button class="card-header-icon" aria-label="toggle menu">
+                    <span class="icon"><i data-lucide="chevron-down"></i></span>
+                </button>
+            </header>
+            <div class="card-content menu-content">
+                <a href="/texts" class="button is-fullwidth is-success is-light mb-2">
+                    <span class="icon"><i data-lucide="file-text"></i></span>
+                    <span>My Texts</span>
+                </a>
+                <a href="/text/archived" class="button is-fullwidth is-light mb-2">
+                    <span class="icon"><i data-lucide="archive"></i></span>
+                    <span>Text Archive</span>
+                </a>
+                <a href="/tags/text" class="button is-fullwidth is-light mb-2">
+                    <span class="icon"><i data-lucide="tags"></i></span>
+                    <span>Text Tags</span>
+                </a>
+                <a href="/text/check" class="button is-fullwidth is-light mb-2">
+                    <span class="icon"><i data-lucide="check-circle"></i></span>
+                    <span>Check Text</span>
+                </a>
+                <a href="/text/import-long" class="button is-fullwidth is-light">
+                    <span class="icon"><i data-lucide="upload"></i></span>
+                    <span>Import Long Text</span>
+                </a>
+            </div>
         </div>
     </div>
 
-    <div class="menu menu-terms" data-menu-id="terms">
-        <div class="menu-header">Vocabulary</div>
-        <div class="menu-content">
-            <a href="/words/edit" title="View and edit saved words and expressions">My Terms</a>
-            <a href="/tags">Term Tags</a>
-            <a href="/word/upload">Import Terms</a>
+    <!-- Vocabulary Card -->
+    <div class="column is-one-third-desktop is-half-tablet">
+        <div class="card menu menu-terms" data-menu-id="terms">
+            <header class="card-header menu-header">
+                <p class="card-header-title">
+                    <span class="icon-text">
+                        <span class="icon"><i data-lucide="book-marked"></i></span>
+                        <span>Vocabulary</span>
+                    </span>
+                </p>
+                <button class="card-header-icon" aria-label="toggle menu">
+                    <span class="icon"><i data-lucide="chevron-down"></i></span>
+                </button>
+            </header>
+            <div class="card-content menu-content">
+                <a href="/words/edit" class="button is-fullwidth is-link is-light mb-2" title="View and edit saved words and expressions">
+                    <span class="icon"><i data-lucide="list"></i></span>
+                    <span>My Terms</span>
+                </a>
+                <a href="/tags" class="button is-fullwidth is-light mb-2">
+                    <span class="icon"><i data-lucide="tag"></i></span>
+                    <span>Term Tags</span>
+                </a>
+                <a href="/word/upload" class="button is-fullwidth is-light">
+                    <span class="icon"><i data-lucide="upload"></i></span>
+                    <span>Import Terms</span>
+                </a>
+            </div>
         </div>
     </div>
 
-    <div class="menu menu-feeds" data-menu-id="feeds">
-        <div class="menu-header">Content</div>
-        <div class="menu-content">
-            <a href="/feeds?check_autoupdate=1">Newsfeeds</a>
-            <a href="/admin/backup" title="Backup, restore or empty database">Database</a>
+    <!-- Content Card -->
+    <div class="column is-one-third-desktop is-half-tablet">
+        <div class="card menu menu-feeds" data-menu-id="feeds">
+            <header class="card-header menu-header">
+                <p class="card-header-title">
+                    <span class="icon-text">
+                        <span class="icon"><i data-lucide="rss"></i></span>
+                        <span>Content</span>
+                    </span>
+                </p>
+                <button class="card-header-icon" aria-label="toggle menu">
+                    <span class="icon"><i data-lucide="chevron-down"></i></span>
+                </button>
+            </header>
+            <div class="card-content menu-content">
+                <a href="/feeds?check_autoupdate=1" class="button is-fullwidth is-warning is-light mb-2">
+                    <span class="icon"><i data-lucide="newspaper"></i></span>
+                    <span>Newsfeeds</span>
+                </a>
+                <a href="/admin/backup" class="button is-fullwidth is-light" title="Backup, restore or empty database">
+                    <span class="icon"><i data-lucide="database"></i></span>
+                    <span>Database</span>
+                </a>
+            </div>
         </div>
     </div>
 
-    <div class="menu menu-admin" data-menu-id="admin">
-        <div class="menu-header">Information</div>
-        <div class="menu-content">
-            <a href="/admin/statistics" title="Text statistics">Statistics</a>
-            <a href="docs/info.html">Help</a>
-            <a href="/admin/server-data" title="Various data useful for debug">Server Data</a>
+    <!-- Information Card -->
+    <div class="column is-one-third-desktop is-half-tablet">
+        <div class="card menu menu-admin" data-menu-id="admin">
+            <header class="card-header menu-header">
+                <p class="card-header-title">
+                    <span class="icon-text">
+                        <span class="icon"><i data-lucide="info"></i></span>
+                        <span>Information</span>
+                    </span>
+                </p>
+                <button class="card-header-icon" aria-label="toggle menu">
+                    <span class="icon"><i data-lucide="chevron-down"></i></span>
+                </button>
+            </header>
+            <div class="card-content menu-content">
+                <a href="/admin/statistics" class="button is-fullwidth is-info is-light mb-2" title="Text statistics">
+                    <span class="icon"><i data-lucide="bar-chart-2"></i></span>
+                    <span>Statistics</span>
+                </a>
+                <a href="docs/info.html" class="button is-fullwidth is-light mb-2">
+                    <span class="icon"><i data-lucide="help-circle"></i></span>
+                    <span>Help</span>
+                </a>
+                <a href="/admin/server-data" class="button is-fullwidth is-light" title="Various data useful for debug">
+                    <span class="icon"><i data-lucide="server"></i></span>
+                    <span>Server Data</span>
+                </a>
+            </div>
         </div>
     </div>
 
-    <div class="menu menu-settings" data-menu-id="settings">
-        <div class="menu-header">Settings</div>
-        <div class="menu-content">
-            <a href="/admin/settings">General Settings</a>
-            <a href="/admin/settings/tts" title="Text-to-Speech settings">Text-to-Speech</a>
+    <!-- Settings Card -->
+    <div class="column is-one-third-desktop is-half-tablet">
+        <div class="card menu menu-settings" data-menu-id="settings">
+            <header class="card-header menu-header">
+                <p class="card-header-title">
+                    <span class="icon-text">
+                        <span class="icon"><i data-lucide="settings"></i></span>
+                        <span>Settings</span>
+                    </span>
+                </p>
+                <button class="card-header-icon" aria-label="toggle menu">
+                    <span class="icon"><i data-lucide="chevron-down"></i></span>
+                </button>
+            </header>
+            <div class="card-content menu-content">
+                <a href="/admin/settings" class="button is-fullwidth is-light mb-2">
+                    <span class="icon"><i data-lucide="sliders"></i></span>
+                    <span>General Settings</span>
+                </a>
+                <a href="/admin/settings/tts" class="button is-fullwidth is-light" title="Text-to-Speech settings">
+                    <span class="icon"><i data-lucide="volume-2"></i></span>
+                    <span>Text-to-Speech</span>
+                </a>
+            </div>
         </div>
     </div>
 
     <?php renderWordPressLogout($isWordPress); ?>
-
 </div>
-<p>
-    This is LWT Version <?php echo get_version(); ?>,
-    <?php echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"'); ?>.
+
+<!-- Version info -->
+<p class="has-text-centered has-text-grey is-size-7 mt-4">
+    LWT Version <?php echo get_version(); ?> &mdash;
+    <?php echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"'); ?>
 </p>
-<br style="clear: both;" />
-<footer>
-    <p class="small">
-        <a target="_blank" href="http://unlicense.org/" class="footer-license-link">
-            <img alt="Public Domain" title="Public Domain" src="/assets/images/public_domain.png" class="footer-license-icon" />
-        </a>
-        <a href="https://sourceforge.net/projects/learning-with-texts/" target="_blank">"Learning with Texts" (LWT)</a> is free
-        and unencumbered software released into the
-        <a href="https://en.wikipedia.org/wiki/Public_domain_software" target="_blank">PUBLIC DOMAIN</a>.
-        <a href="http://unlicense.org/" target="_blank">More information and detailed Unlicense ...</a>
-    </p>
+
+<!-- Footer -->
+<footer class="footer mt-5 py-4">
+    <div class="content has-text-centered is-size-7">
+        <p>
+            <a target="_blank" href="http://unlicense.org/" class="footer-license-link">
+                <img alt="Public Domain" title="Public Domain" src="/assets/images/public_domain.png" class="footer-license-icon" />
+            </a>
+            <a href="https://sourceforge.net/projects/learning-with-texts/" target="_blank">"Learning with Texts" (LWT)</a> is free
+            and unencumbered software released into the
+            <a href="https://en.wikipedia.org/wiki/Public_domain_software" target="_blank">PUBLIC DOMAIN</a>.
+            <a href="http://unlicense.org/" target="_blank">More information and detailed Unlicense ...</a>
+        </p>
+    </div>
 </footer>
 <?php renderWarningsScript(); ?>

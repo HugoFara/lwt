@@ -39,13 +39,26 @@ export function shouldUpdate(fromVersion: string, toVersion: string): boolean | 
 }
 
 /**
+ * Show a notification box by removing its hidden style.
+ *
+ * @param boxId - The ID of the notification box element
+ */
+function showNotificationBox(boxId: string): void {
+  const box = document.getElementById(boxId);
+  if (box) {
+    box.style.display = '';
+  }
+}
+
+/**
  * Check if cookies are disabled and display a warning.
  */
 export function checkCookiesDisabled(): void {
   if (!areCookiesEnabled()) {
     const el = document.getElementById('cookies_disabled');
     if (el) {
-      el.innerHTML = '*** Cookies are not enabled! Please enable them! ***';
+      el.innerHTML = 'Cookies are not enabled! Please enable them for LWT to work properly.';
+      showNotificationBox('cookies_disabled_box');
     }
   }
 }
@@ -60,8 +73,9 @@ export function checkOutdatedPHP(phpVersion: string): void {
   if (shouldUpdate(phpVersion, phpMinVersion)) {
     const el = document.getElementById('php_update_required');
     if (el) {
-      el.innerHTML = '*** Your PHP version is ' + phpVersion + ', but version ' +
-        phpMinVersion + ' is required. Please update it. ***';
+      el.innerHTML = 'Your PHP version is <strong>' + phpVersion + '</strong>, but version <strong>' +
+        phpMinVersion + '</strong> is required. Please update PHP.';
+      showNotificationBox('php_update_required_box');
     }
   }
 }
@@ -79,10 +93,11 @@ export function checkLWTUpdate(lwtVersion: string): void {
       if (shouldUpdate(lwtVersion, latestVersion)) {
         const el = document.getElementById('lwt_new_version');
         if (el) {
-          el.innerHTML = '*** An update for LWT is available: ' +
-            latestVersion + ', your version is ' + lwtVersion +
-            '. <a href="https://github.com/HugoFara/lwt/releases/tag/' +
-            latestVersion + '">Download</a>.***';
+          el.innerHTML = 'An update for LWT is available: <strong>' +
+            latestVersion + '</strong> (your version: ' + lwtVersion +
+            '). <a href="https://github.com/HugoFara/lwt/releases/tag/' +
+            latestVersion + '" class="button is-small is-info is-outlined ml-2">Download</a>';
+          showNotificationBox('lwt_new_version_box');
         }
       }
     })

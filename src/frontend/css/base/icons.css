@@ -1,0 +1,344 @@
+/**
+ * \file
+ * \brief Lucide icon styling for LWT.
+ *
+ * This file provides styles for Lucide SVG icons used throughout the app,
+ * replacing the legacy Fugue PNG icon set.
+ *
+ * @since 3.0.0
+ */
+
+/* ==========================================================================
+   Base Icon Styles
+   ========================================================================== */
+
+/**
+ * Base icon class applied to all Lucide icons.
+ * Icons inherit text color by default for seamless integration.
+ */
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  flex-shrink: 0;
+}
+
+/**
+ * Clickable icons get pointer cursor and hover effect.
+ */
+.icon.click {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.icon.click:hover {
+  opacity: 0.7;
+}
+
+/**
+ * Muted/disabled icon style.
+ * Used for disabled navigation, placeholders, etc.
+ */
+.icon-muted {
+  opacity: 0.4;
+}
+
+/**
+ * Spinning animation for loading indicators.
+ */
+.icon-spin {
+  animation: icon-spin 1s linear infinite;
+}
+
+@keyframes icon-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/**
+ * Empty spacer to maintain layout when icon is hidden.
+ */
+.icon-spacer {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+}
+
+/* ==========================================================================
+   Icon Sizes
+   ========================================================================== */
+
+.icon-xs {
+  width: 12px;
+  height: 12px;
+}
+
+.icon-sm {
+  width: 14px;
+  height: 14px;
+}
+
+.icon-md {
+  width: 20px;
+  height: 20px;
+}
+
+.icon-lg {
+  width: 24px;
+  height: 24px;
+}
+
+.icon-xl {
+  width: 32px;
+  height: 32px;
+}
+
+/* ==========================================================================
+   Status Icon Colors
+   ========================================================================== */
+
+/**
+ * Success/OK status - green checkmark.
+ */
+.icon-success,
+.icon[data-lucide="circle-check"] {
+  color: #28a745;
+}
+
+/**
+ * Error/required status - red X.
+ */
+.icon-error,
+.icon[data-lucide="circle-x"] {
+  color: #dc3545;
+}
+
+/**
+ * Warning/pending status - yellow/amber dot.
+ */
+.icon-warning,
+.icon[data-lucide="circle-dot"] {
+  color: #ffc107;
+}
+
+/**
+ * Info status - blue.
+ */
+.icon-info,
+.icon[data-lucide="circle-help"] {
+  color: #17a2b8;
+}
+
+/* ==========================================================================
+   Contextual Icon Overrides
+   ========================================================================== */
+
+/**
+ * Icons in table cells should align with text.
+ */
+td .icon,
+th .icon {
+  vertical-align: text-bottom;
+}
+
+/**
+ * Icons in links inherit link color.
+ */
+a .icon {
+  color: inherit;
+}
+
+/**
+ * Icons in buttons should be slightly smaller.
+ */
+button .icon,
+.button .icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+}
+
+/**
+ * Score indicators in word lists.
+ */
+.scorered .icon {
+  color: #dc3545;
+}
+
+.scoregreen .icon {
+  color: #28a745;
+}
+
+/* ==========================================================================
+   Action Icon Groups
+   ========================================================================== */
+
+/**
+ * Group of action icons (edit, delete, etc.) in table rows.
+ */
+.icon-actions {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.icon-actions .icon {
+  cursor: pointer;
+}
+
+.icon-actions .icon:hover {
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   Navigation Icons
+   ========================================================================== */
+
+/**
+ * Pagination navigation icons.
+ */
+.pagination .icon {
+  vertical-align: middle;
+}
+
+.pagination .icon-muted {
+  cursor: default;
+}
+
+/* ==========================================================================
+   Media Player Icons
+   ========================================================================== */
+
+/**
+ * Audio/video player control icons.
+ */
+.media-controls .icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.media-controls .icon:hover {
+  transform: scale(1.1);
+}
+
+.media-controls .icon:active {
+  transform: scale(0.95);
+}
+
+/* ==========================================================================
+   Light Bulb Toggle Icons
+   ========================================================================== */
+
+/**
+ * Translation visibility toggle icons.
+ */
+.icon[data-lucide="lightbulb"] {
+  color: #ffc107;
+}
+
+.icon[data-lucide="lightbulb-off"] {
+  color: #6c757d;
+}
+
+/* ==========================================================================
+   Test Result Icons
+   ========================================================================== */
+
+/**
+ * Correct answer icon - green check.
+ */
+.test-correct .icon,
+img[src*="test_correct"] + .icon {
+  color: #28a745;
+}
+
+/**
+ * Wrong answer icon - red X.
+ */
+.test-wrong .icon,
+img[src*="test_wrong"] + .icon {
+  color: #dc3545;
+}
+
+/**
+ * Not yet answered icon - gray/blue question.
+ */
+.test-notyet .icon,
+img[src*="test_notyet"] + .icon {
+  color: #6c757d;
+}
+
+/* ==========================================================================
+   Form Validation Icons
+   ========================================================================== */
+
+/**
+ * Required field indicator icon.
+ */
+.notempty + .icon,
+input:required + .icon {
+  color: #dc3545;
+  margin-left: 4px;
+}
+
+/* ==========================================================================
+   Tooltip Integration
+   ========================================================================== */
+
+/**
+ * Icons with tooltips.
+ */
+.icon[title] {
+  cursor: help;
+}
+
+.icon[title]:not(.click) {
+  cursor: help;
+}
+
+/* ==========================================================================
+   Dark Theme Support (Future)
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  .icon-success {
+    color: #5cb85c;
+  }
+
+  .icon-error {
+    color: #d9534f;
+  }
+
+  .icon-warning {
+    color: #f0ad4e;
+  }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+  .icon {
+    /* Ensure icons print in grayscale */
+    color: #333 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .icon-spin {
+    animation: none;
+  }
+}

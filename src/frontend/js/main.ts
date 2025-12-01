@@ -5,9 +5,13 @@
  * It imports CSS and all TypeScript modules.
  */
 
+// Import Bulma CSS framework
+import 'bulma/css/bulma.min.css';
+
 // Import CSS from base directory
 import '../css/base/styles.css';
 import '../css/base/html5_audio_player.css';
+import '../css/base/icons.css';
 
 // Import TypeScript modules
 
@@ -113,6 +117,7 @@ import './home/home_menu';
 // UI Components
 import './ui/modal';
 import './ui/sorttable';
+import './ui/lucide_icons';
 
 // Global exports for inline PHP scripts
 import './globals';

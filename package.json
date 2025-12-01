@@ -46,7 +46,9 @@
   "dependencies": {
     "@yaireo/tagify": "^4.35.6",
     "alpinejs": "^3.15.2",
-    "chart.js": "^4.5.1"
+    "bulma": "^1.0.4",
+    "chart.js": "^4.5.1",
+    "lucide": "^0.555.0"
   },
   "devDependencies": {
     "@eslint/css": "^0.14.1",
