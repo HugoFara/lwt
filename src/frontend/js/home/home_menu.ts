@@ -7,8 +7,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
-
 const STORAGE_KEY = 'lwt_collapsed_menus';
 
 /**
@@ -103,6 +101,6 @@ export function initCollapsibleMenus(): void {
 }
 
 // Auto-initialize when DOM is ready
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
   initCollapsibleMenus();
 });

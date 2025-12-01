@@ -343,107 +343,6 @@ describe('ui_utilities.ts', () => {
       });
     });
 
-    describe('$.fn.tooltip_wsty_content', () => {
-      it('generates tooltip content for words', () => {
-        document.body.innerHTML = `
-          <span class="hword"
-                data_text="test"
-                data_rom="roman"
-                data_trans="translation"
-                data_status="3"
-                data_ann="">test</span>
-        `;
-
-        const content = $('.hword').tooltip_wsty_content();
-
-        expect(content).toContain('test');
-        expect(content).toContain('Roman.');
-        expect(content).toContain('roman');
-        expect(content).toContain('Transl.');
-        expect(content).toContain('translation');
-        expect(content).toContain('Status');
-        expect(content).toContain('Learning');
-      });
-
-      it('handles mwsty class for multiwords', () => {
-        document.body.innerHTML = `
-          <span class="hword mwsty"
-                data_text="multi word"
-                data_trans="translation"
-                data_status="3">display</span>
-        `;
-
-        const content = $('.hword').tooltip_wsty_content();
-
-        expect(content).toContain('multi word');
-      });
-
-      it('shows Unknown status for status 0', () => {
-        document.body.innerHTML = `
-          <span class="hword" data_status="0" data_trans="">word</span>
-        `;
-
-        const content = $('.hword').tooltip_wsty_content();
-
-        expect(content).toContain('Unknown');
-      });
-
-      it('shows Learned status for status 5', () => {
-        document.body.innerHTML = `
-          <span class="hword" data_status="5" data_trans="">word</span>
-        `;
-
-        const content = $('.hword').tooltip_wsty_content();
-
-        expect(content).toContain('Learned');
-      });
-
-      it('shows Ignored status for status 98', () => {
-        document.body.innerHTML = `
-          <span class="hword" data_status="98" data_trans="">word</span>
-        `;
-
-        const content = $('.hword').tooltip_wsty_content();
-
-        expect(content).toContain('Ignored');
-      });
-
-      it('shows Well Known status for status 99', () => {
-        document.body.innerHTML = `
-          <span class="hword" data_status="99" data_trans="">word</span>
-        `;
-
-        const content = $('.hword').tooltip_wsty_content();
-
-        expect(content).toContain('Well Known');
-      });
-
-      it('skips translation when empty or asterisk', () => {
-        document.body.innerHTML = `
-          <span class="hword" data_status="3" data_trans="*">word</span>
-        `;
-
-        const content = $('.hword').tooltip_wsty_content();
-
-        expect(content).not.toContain('Transl.');
-      });
-
-      it('includes annotation content in translation', () => {
-        document.body.innerHTML = `
-          <span class="hword"
-                data_status="3"
-                data_trans="definition, meaning"
-                data_ann="definition">word</span>
-        `;
-
-        const content = $('.hword').tooltip_wsty_content();
-
-        // The annotation should be included in the translation output
-        // Note: The red highlighting depends on regex matching which may vary
-        expect(content).toContain('definition');
-        expect(content).toContain('Transl.');
-      });
-    });
   });
 
   // ===========================================================================
@@ -451,14 +350,6 @@ describe('ui_utilities.ts', () => {
   // ===========================================================================
 
   describe('Edge Cases', () => {
-    it('handles elements with undefined attributes', () => {
-      document.body.innerHTML = '<span class="hword">word</span>';
-
-      const content = $('.hword').tooltip_wsty_content();
-
-      expect(content).toBeDefined();
-    });
-
     it('markClick handles empty DOM', () => {
       document.body.innerHTML = '';
 

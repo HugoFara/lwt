@@ -9,28 +9,35 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
-
 /**
  * Handle checkbox change to enable/disable associated input fields.
  * When a checkbox with name starting with "c_" is checked/unchecked,
  * it enables/disables the input fields in the same parent container.
  */
-function handleOptionCheckboxChange(this: HTMLInputElement): void {
-  const $parent = $(this).parent();
+function handleOptionCheckboxChange(checkbox: HTMLInputElement): void {
+  const parent = checkbox.parentElement;
+  if (!parent) return;
 
-  if (this.checked) {
+  if (checkbox.checked) {
     // Enable associated inputs and add required class
-    $parent.children('input[type="text"], input[type="number"]')
-      .removeAttr('disabled')
-      .addClass('notempty');
-    $parent.find('select').removeAttr('disabled');
+    parent.querySelectorAll<HTMLInputElement>(':scope > input[type="text"], :scope > input[type="number"]')
+      .forEach(input => {
+        input.disabled = false;
+        input.classList.add('notempty');
+      });
+    parent.querySelectorAll<HTMLSelectElement>('select').forEach(select => {
+      select.disabled = false;
+    });
   } else {
     // Disable associated inputs and remove required class
-    $parent.children('input[type="text"], input[type="number"]')
-      .attr('disabled', 'disabled')
-      .removeClass('notempty');
-    $parent.find('select').attr('disabled', 'disabled');
+    parent.querySelectorAll<HTMLInputElement>(':scope > input[type="text"], :scope > input[type="number"]')
+      .forEach(input => {
+        input.disabled = true;
+        input.classList.remove('notempty');
+      });
+    parent.querySelectorAll<HTMLSelectElement>('select').forEach(select => {
+      select.disabled = true;
+    });
   }
 }
 
@@ -42,22 +49,25 @@ function serializeFeedOptions(): void {
   let str = '';
 
   // Check if edit_text is checked
-  if ($('[name="edit_text"]:checked').length > 0) {
+  const editTextCheckbox = document.querySelector<HTMLInputElement>('[name="edit_text"]:checked');
+  if (editTextCheckbox) {
     str = 'edit_text=1,';
   }
 
   // Iterate through all option checkboxes (c_*)
-  $('[name^="c_"]').each(function () {
-    const checkbox = this as HTMLInputElement;
+  document.querySelectorAll<HTMLInputElement>('[name^="c_"]').forEach(checkbox => {
     if (checkbox.checked) {
-      const $parent = $(checkbox).parent();
-      const $input = $parent.children('input[type="text"], input[type="number"]');
-      const inputName = $input.attr('name') || '';
-      const inputValue = $input.val() || '';
+      const parent = checkbox.parentElement;
+      if (!parent) return;
+
+      const input = parent.querySelector<HTMLInputElement>(':scope > input[type="text"], :scope > input[type="number"]');
+      const inputName = input?.name || '';
+      const inputValue = input?.value || '';
 
       // For autoupdate, include the select value (h/d/w)
-      if ($(checkbox).attr('name') === 'c_autoupdate') {
-        const selectValue = $parent.find('select').val() || '';
+      if (checkbox.name === 'c_autoupdate') {
+        const select = parent.querySelector<HTMLSelectElement>('select');
+        const selectValue = select?.value || '';
         str += `${inputName}=${inputValue}${selectValue},`;
       } else {
         str += `${inputName}=${inputValue},`;
@@ -66,7 +76,10 @@ function serializeFeedOptions(): void {
   });
 
   // Set the hidden field value
-  $('input[name="NfOptions"]').val(str);
+  const hiddenField = document.querySelector<HTMLInputElement>('input[name="NfOptions"]');
+  if (hiddenField) {
+    hiddenField.value = str;
+  }
 }
 
 /**
@@ -74,19 +87,26 @@ function serializeFeedOptions(): void {
  */
 export function initFeedForm(): void {
   // Only initialize on pages with feed forms
-  if ($('input[name="NfOptions"]').length === 0) {
+  const nfOptionsField = document.querySelector('input[name="NfOptions"]');
+  if (!nfOptionsField) {
     return;
   }
 
   // Bind checkbox change handlers
-  $('[name^="c_"]').on('change', handleOptionCheckboxChange);
+  document.querySelectorAll<HTMLInputElement>('[name^="c_"]').forEach(checkbox => {
+    checkbox.addEventListener('change', () => handleOptionCheckboxChange(checkbox));
+  });
 
   // Bind form submission handler
-  $('[type="submit"]').on('click', serializeFeedOptions);
+  document.querySelectorAll<HTMLButtonElement>('[type="submit"]').forEach(btn => {
+    btn.addEventListener('click', serializeFeedOptions);
+  });
 
   // Also handle form submit event (in case Enter is pressed)
-  $('form.validate').on('submit', serializeFeedOptions);
+  document.querySelectorAll<HTMLFormElement>('form.validate').forEach(form => {
+    form.addEventListener('submit', serializeFeedOptions);
+  });
 }
 
 // Auto-initialize when DOM is ready
-$(document).ready(initFeedForm);
+document.addEventListener('DOMContentLoaded', initFeedForm);

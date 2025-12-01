@@ -63,9 +63,27 @@ export const lwtFormCheck = {
     // Set up tag change tracking with Tagify
     setupTagChangeTracking(lwtFormCheck.tagChanged);
 
-    $('input,checkbox,textarea,radio,select')
-      .not('#quickmenu').on('change', lwtFormCheck.makeDirty);
-    $(':reset,:submit').on('click', lwtFormCheck.resetDirty);
-    $(window).on('beforeunload', lwtFormCheck.isDirtyMessage);
+    // Add change listener to form elements (excluding quickmenu)
+    document.querySelectorAll<HTMLElement>('input, textarea, select')
+      .forEach(el => {
+        if (el.id !== 'quickmenu') {
+          el.addEventListener('change', lwtFormCheck.makeDirty);
+        }
+      });
+
+    // Reset dirty on submit/reset clicks
+    document.querySelectorAll<HTMLElement>('[type="reset"], [type="submit"]')
+      .forEach(el => {
+        el.addEventListener('click', lwtFormCheck.resetDirty);
+      });
+
+    // Warn before unload
+    window.addEventListener('beforeunload', (e) => {
+      const message = lwtFormCheck.isDirtyMessage();
+      if (message) {
+        e.preventDefault();
+        return message;
+      }
+    });
   }
 };

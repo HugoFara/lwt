@@ -299,22 +299,26 @@ function getStatusLabel(status: number): string {
  * @returns WordActionContext with all available data
  */
 export function getContextFromElement(element: HTMLElement): WordActionContext {
-  const $el = $(element);
-
   // Extract hex from class name (e.g., 'TERMabc123' -> 'abc123')
-  const classAttr = $el.attr('class') || '';
+  const classAttr = element.getAttribute('class') || '';
   const hexMatch = classAttr.match(/TERM([a-f0-9]+)/i);
   const hex = hexMatch ? hexMatch[1] : undefined;
 
+  // Get text ID from element or closest ancestor
+  const textIdAttr = element.getAttribute('data-text-id') ||
+    element.closest('[data-text-id]')?.getAttribute('data-text-id') || '0';
+
   return {
-    textId: parseInt($el.attr('data-text-id') || $el.closest('[data-text-id]').attr('data-text-id') || '0', 10),
-    wordId: parseInt($el.attr('data_wid') || '0', 10) || undefined,
-    position: parseInt($el.attr('data_order') || $el.attr('data_pos') || '0', 10),
-    text: $el.hasClass('mwsty') ? ($el.attr('data_text') || $el.text()) : $el.text(),
+    textId: parseInt(textIdAttr, 10),
+    wordId: parseInt(element.getAttribute('data_wid') || '0', 10) || undefined,
+    position: parseInt(element.getAttribute('data_order') || element.getAttribute('data_pos') || '0', 10),
+    text: element.classList.contains('mwsty')
+      ? (element.getAttribute('data_text') || element.textContent || '')
+      : (element.textContent || ''),
     hex,
-    status: parseInt($el.attr('data_status') || '0', 10),
-    translation: $el.attr('data_trans') || '',
-    romanization: $el.attr('data_rom') || ''
+    status: parseInt(element.getAttribute('data_status') || '0', 10),
+    translation: element.getAttribute('data_trans') || '',
+    romanization: element.getAttribute('data_rom') || ''
   };
 }
 

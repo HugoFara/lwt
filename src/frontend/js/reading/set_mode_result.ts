@@ -8,7 +8,21 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
+/**
+ * Get the container element from a context parameter.
+ *
+ * @param context - The DOM context (window, document, or element)
+ * @returns The container element to query within
+ */
+function getContainer(context: Window | Document | HTMLElement): Document | HTMLElement {
+  if (context === window || context instanceof Window) {
+    return document;
+  }
+  if (context instanceof Document) {
+    return context;
+  }
+  return context as HTMLElement;
+}
 
 /**
  * Hide annotations for multi-word terms.
@@ -16,17 +30,19 @@ import $ from 'jquery';
  *
  * @param context - The DOM context (window or element) containing words
  */
-export function hideAnnotations(context: Window | JQuery | HTMLElement = window): void {
-  $('.mword', context as unknown as JQuery.Selector)
-    .removeClass('wsty')
-    .addClass('mwsty')
-    .each(function () {
-      const code = '&nbsp;' + $(this).attr('data_code') + '&nbsp;';
-      $(this).html(code);
-    });
-  $('span', context as unknown as JQuery.Selector)
-    .not('#totalcharcount')
-    .removeClass('hide');
+export function hideAnnotations(context: Window | Document | HTMLElement = window): void {
+  const container = getContainer(context);
+
+  container.querySelectorAll<HTMLElement>('.mword').forEach(el => {
+    el.classList.remove('wsty');
+    el.classList.add('mwsty');
+    const code = '&nbsp;' + el.getAttribute('data_code') + '&nbsp;';
+    el.innerHTML = code;
+  });
+
+  container.querySelectorAll<HTMLElement>('span:not(#totalcharcount)').forEach(el => {
+    el.classList.remove('hide');
+  });
 }
 
 /**
@@ -35,22 +51,33 @@ export function hideAnnotations(context: Window | JQuery | HTMLElement = window)
  *
  * @param context - The DOM context (window or element) containing words
  */
-export function showAnnotations(context: Window | JQuery | HTMLElement = window): void {
-  $('.mword', context as unknown as JQuery.Selector)
-    .removeClass('mwsty')
-    .addClass('wsty')
-    .each(function () {
-      const text = $(this).attr('data_text');
-      $(this).text(text || '');
-      if ($(this).not('.hide').length) {
-        const code = parseInt($(this).attr('data_code') || '0', 10);
-        const order = parseInt($(this).attr('data_order') || '0', 10);
-        const u = code * 2 + order - 1;
-        $(this)
-          .nextUntil('[id^="ID-' + u + '-"]', context as unknown as JQuery.Selector)
-          .addClass('hide');
+export function showAnnotations(context: Window | Document | HTMLElement = window): void {
+  const container = getContainer(context);
+
+  container.querySelectorAll<HTMLElement>('.mword').forEach(el => {
+    el.classList.remove('mwsty');
+    el.classList.add('wsty');
+    const text = el.getAttribute('data_text');
+    el.textContent = text || '';
+
+    if (!el.classList.contains('hide')) {
+      const code = parseInt(el.getAttribute('data_code') || '0', 10);
+      const order = parseInt(el.getAttribute('data_order') || '0', 10);
+      const u = code * 2 + order - 1;
+
+      // Find and hide siblings until the matching ID element
+      let sibling = el.nextElementSibling;
+      while (sibling) {
+        if (sibling.id && sibling.id.startsWith('ID-' + u + '-')) {
+          break;
+        }
+        if (sibling instanceof HTMLElement) {
+          sibling.classList.add('hide');
+        }
+        sibling = sibling.nextElementSibling;
       }
-    });
+    }
+  });
 }
 
 interface SetModeConfig {
@@ -72,7 +99,10 @@ export function initSetModeResult(): void {
     const config: SetModeConfig = JSON.parse(configEl.textContent || '{}');
 
     // Update waiting indicator
-    $('#waiting').html('<b>OK -- </b>');
+    const waitingEl = document.getElementById('waiting');
+    if (waitingEl) {
+      waitingEl.innerHTML = '<b>OK -- </b>';
+    }
 
     // Export functions for potential use by parent frames
     (window as unknown as Record<string, unknown>).hideAnnotations = hideAnnotations;
@@ -89,4 +119,4 @@ export function initSetModeResult(): void {
 }
 
 // Auto-initialize on document ready
-$(document).ready(initSetModeResult);
+document.addEventListener('DOMContentLoaded', initSetModeResult);

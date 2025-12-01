@@ -17,6 +17,7 @@ import { prepareTextInteractions } from './text_events';
 import { goToLastPosition, saveReadingPosition, saveAudioPosition, readRawTextAloud } from '../core/user_interactions';
 import { getAudioPlayer } from '../media/html5_audio_player';
 import { LWT_DATA } from '../core/lwt_state';
+import { initNativeTooltips } from '../ui/native_tooltip';
 
 // Type definitions for text reader
 interface TextReader {
@@ -292,13 +293,12 @@ export function initTextReading(): void {
     $('html').attr('lang', window.LANG);
   }
 
-  // Initialize jQuery tooltip if enabled
+  // Initialize native tooltips if enabled
   if (LWT_DATA.settings?.jQuery_tooltip) {
     $(function () {
-      $('#overDiv').tooltip();
-      const thetext = $('#thetext');
-      if (typeof (thetext as JQuery & { tooltip_wsty_init?: () => void }).tooltip_wsty_init === 'function') {
-        (thetext as JQuery & { tooltip_wsty_init: () => void }).tooltip_wsty_init();
+      const thetext = document.getElementById('thetext');
+      if (thetext) {
+        initNativeTooltips(thetext);
       }
     });
   }

@@ -8,8 +8,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
-
 /**
  * Word entry with text, count, and optional translation.
  * [word, count, translation]
@@ -56,7 +54,7 @@ export function displayStatistics(
   let h = '<h4>Word List <span class="red2">(red = already saved)</span></h4>' +
     '<ul class="wordlist">';
 
-  $.each(words, function (_k, v) {
+  words.forEach((v) => {
     h += '<li><span' + (v[2] === '' ? '' : ' class="red2"') + '>[' + v[0] + '] — ' +
       v[1] + (v[2] === '' ? '' : ' — ' + v[2]) + '</span></li>';
   });
@@ -64,7 +62,7 @@ export function displayStatistics(
   h += '</ul><p>TOTAL: ' + words.length +
     '</p><h4>Expression List</span></h4><ul class="expressionlist">';
 
-  $.each(multiWords, function (_k, v) {
+  multiWords.forEach((v) => {
     h += '<li><span>[' + v[0] + '] — ' + v[1] +
       (v[2] === '' ? '' : ' — ' + v[2]) + '</span></li>';
   });
@@ -72,13 +70,16 @@ export function displayStatistics(
   h += '</ul><p>TOTAL: ' + multiWords.length +
     '</p><h4>Non-Word List</span></h4><ul class="nonwordlist">';
 
-  $.each(nonWords, function (_k, v) {
+  nonWords.forEach((v) => {
     h += '<li>[' + v[0] + '] — ' + v[1] + '</li>';
   });
 
   h += '</ul><p>TOTAL: ' + nonWords.length + '</p>';
 
-  $('#check_text').append(h);
+  const checkTextEl = document.getElementById('check_text');
+  if (checkTextEl) {
+    checkTextEl.insertAdjacentHTML('beforeend', h);
+  }
 }
 
 /**
@@ -88,7 +89,9 @@ export function displayStatistics(
  */
 function applyRtlIfNeeded(rtlScript: boolean): void {
   if (rtlScript) {
-    $('li').attr('dir', 'rtl');
+    document.querySelectorAll('li').forEach(li => {
+      li.setAttribute('dir', 'rtl');
+    });
   }
 }
 
@@ -161,7 +164,7 @@ export function initTextCheckWords(): void {
 }
 
 // Auto-initialize on document ready
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
   // Initialize words data first (from checkValid)
   initTextCheckWords();
 

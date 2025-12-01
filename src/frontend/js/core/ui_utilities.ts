@@ -19,25 +19,10 @@ import { fetchTermTags, fetchTextTags } from './app_data';
 // Extend jQuery with custom methods
 declare global {
   interface JQuery {
-    tooltip(options?: TooltipOptions): JQuery;
-    resizable(options?: ResizableOptions): JQuery;
     serializeObject(): Record<string, unknown>;
-    tooltip_wsty_content(): string;
-    tooltip_wsty_init(): JQuery;
   }
 }
 
-interface TooltipOptions {
-  position?: { my: string; at: string; collision: string };
-  items?: string;
-  show?: { easing: string };
-  content?: () => string;
-}
-
-interface ResizableOptions {
-  handles?: string;
-  stop?: (event: unknown, ui: { position: { left: number } }) => void;
-}
 
 
 /**
@@ -46,6 +31,72 @@ interface ResizableOptions {
 function getAttr($el: JQuery, attr: string): string {
   const val = $el.attr(attr);
   return typeof val === 'string' ? val : '';
+}
+
+/**
+ * Initialize native resizable behavior for the right frames panel.
+ * Replaces jQuery UI resizable with a custom implementation.
+ * Creates a drag handle on the west (left) side of #frames-r.
+ */
+function initFrameResizable(): void {
+  const framesR = document.getElementById('frames-r');
+  const framesL = document.getElementById('frames-l');
+  if (!framesR || !framesL) return;
+
+  // Create the resize handle
+  const handle = document.createElement('div');
+  handle.className = 'resize-handle-w';
+  handle.style.cssText = `
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    cursor: ew-resize;
+    background: transparent;
+    z-index: 100;
+  `;
+  framesR.style.position = 'fixed';
+  framesR.appendChild(handle);
+
+  let isResizing = false;
+  let startX = 0;
+  let startLeft = 0;
+
+  const onMouseDown = (e: MouseEvent): void => {
+    isResizing = true;
+    startX = e.clientX;
+    startLeft = framesR.offsetLeft;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  };
+
+  const onMouseMove = (e: MouseEvent): void => {
+    if (!isResizing) return;
+    const deltaX = e.clientX - startX;
+    const newLeft = startLeft + deltaX;
+    // Apply position change during drag
+    framesR.style.left = newLeft + 'px';
+    framesR.style.width = `calc(100% - ${newLeft}px)`;
+    framesL.style.width = (newLeft - 20) + 'px';
+  };
+
+  const onMouseUp = (): void => {
+    if (!isResizing) return;
+    isResizing = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    // Save the setting when resize stops
+    const leftWidth = framesL.offsetWidth;
+    const windowWidth = window.innerWidth;
+    const percent = Math.round((leftWidth / windowWidth) * 100);
+    do_ajax_save_setting('set-text-l-framewidth-percent', String(percent));
+  };
+
+  handle.addEventListener('mousedown', onMouseDown);
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
 }
 
 /**
@@ -88,11 +139,53 @@ export function showAllwordsClick(): void {
 }
 
 /**
+ * Slide up animation using CSS transitions.
+ * Hides an element by animating its height to 0.
+ *
+ * @param element The element to animate
+ * @param duration Animation duration in milliseconds (default 400)
+ * @param callback Optional callback when animation completes
+ */
+function slideUp(element: HTMLElement, duration = 400, callback?: () => void): void {
+  // Set initial height explicitly for transition
+  element.style.height = element.offsetHeight + 'px';
+  element.style.overflow = 'hidden';
+  element.style.transition = `height ${duration}ms ease-out, padding ${duration}ms ease-out, margin ${duration}ms ease-out`;
+
+  // Force reflow to ensure initial height is applied
+  element.offsetHeight;
+
+  // Animate to 0
+  element.style.height = '0';
+  element.style.paddingTop = '0';
+  element.style.paddingBottom = '0';
+  element.style.marginTop = '0';
+  element.style.marginBottom = '0';
+
+  // Clean up after animation
+  setTimeout(() => {
+    element.style.display = 'none';
+    // Reset inline styles
+    element.style.height = '';
+    element.style.overflow = '';
+    element.style.transition = '';
+    element.style.paddingTop = '';
+    element.style.paddingBottom = '';
+    element.style.marginTop = '';
+    element.style.marginBottom = '';
+    if (callback) callback();
+  }, duration);
+}
+
+/**
  * Hide the 'nodata' message after 3 seconds.
  * Used to automatically dismiss status messages.
  */
 export function noShowAfter3Secs(): void {
-  $('#hide3').slideUp();
+  const element = document.getElementById('hide3');
+  if (element) {
+    slideUp(element);
+  }
 }
 
 /**
@@ -100,7 +193,12 @@ export function noShowAfter3Secs(): void {
  * Messages fade out after 2.5 seconds with a 1 second animation.
  */
 export function initHideMessages(): void {
-  $('.hide_message').delay(2500).slideUp(1000);
+  const elements = document.querySelectorAll<HTMLElement>('.hide_message');
+  elements.forEach(element => {
+    setTimeout(() => {
+      slideUp(element, 1000);
+    }, 2500);
+  });
 }
 
 /**
@@ -111,64 +209,6 @@ export function setTheFocus(): void {
     .trigger('focus')
     .trigger('select');
 }
-
-// Extend jQuery with tooltip_wsty_content
-$.fn.extend({
-  tooltip_wsty_content: function (this: JQuery): string {
-    const re = new RegExp('([' + LWT_DATA.language.delimiter + '])(?! )', 'g');
-    let title = '';
-    const dataText = getAttr($(this), 'data_text');
-    if ($(this).hasClass('mwsty')) {
-      title = "<p><b style='font-size:120%'>" + dataText + '</b></p>';
-    } else {
-      title = "<p><b style='font-size:120%'>" + $(this).text() + '</b></p>';
-    }
-    const roman = getAttr($(this), 'data_rom');
-    const transAttr = getAttr($(this), 'data_trans');
-    let trans = transAttr.replace(re, '$1 ');
-    let statname = '';
-    const status = parseInt(getAttr($(this), 'data_status') || '0', 10);
-    if (status === 0) statname = 'Unknown [?]';
-    else if (status < 5) statname = 'Learning [' + status + ']';
-    if (status === 5) statname = 'Learned [5]';
-    if (status === 98) statname = 'Ignored [Ign]';
-    if (status === 99) statname = 'Well Known [WKn]';
-    if (roman !== '') {
-      title += '<p><b>Roman.</b>: ' + roman + '</p>';
-    }
-    if (trans !== '' && trans !== '*') {
-      const annAttr = getAttr($(this), 'data_ann');
-      if (annAttr) {
-        const ann = annAttr;
-        if (ann !== '' && ann !== '*') {
-          const re2 = new RegExp(
-            '(.*[' + LWT_DATA.language.delimiter + '][ ]{0,1}|^)(' +
-            ann.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + ')($|[ ]{0,1}[' +
-            LWT_DATA.language.delimiter + '].*$| \\[.*$)',
-            ''
-          );
-          trans = trans.replace(re2, '$1<span style="color:red">$2</span>$3');
-        }
-      }
-      title += '<p><b>Transl.</b>: ' + trans + '</p>';
-    }
-    title += '<p><b>Status</b>: <span class="status' + status + '">' + statname +
-    '</span></p>';
-    return title;
-  }
-});
-
-$.fn.extend({
-  tooltip_wsty_init: function (this: JQuery): JQuery {
-    $(this).tooltip({
-      position: { my: 'left top+10', at: 'left bottom', collision: 'flipfit' },
-      items: '.hword',
-      show: { easing: 'easeOutCirc' },
-      content: function () { return $(this).tooltip_wsty_content(); }
-    });
-    return this;
-  }
-});
 
 // Present data in a handy way, for instance in a form
 $.fn.serializeObject = function (this: JQuery): Record<string, unknown> {
@@ -287,19 +327,8 @@ export function prepareMainAreas(): void {
     }
     return true;
   });
-  // Resizable from right frames
-  $('#frames-r').resizable({
-    handles: 'w',
-    stop: function (_event, ui) {
-      // Resize left frames
-      $('#frames-l').css('width', ui.position.left - 20);
-      // Save settings
-      do_ajax_save_setting(
-        'set-text-l-framewidth-percent',
-        String(Math.round($('#frames-l').width()! / $(window).width()! * 100))
-      );
-    }
-  });
+  // Resizable from right frames (native implementation)
+  initFrameResizable();
   // Initialize Tagify for term and text tags
   // Tags are fetched from API asynchronously
   if ($('#termtags').length > 0) {

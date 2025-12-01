@@ -16,8 +16,6 @@ export default defineConfig([
       "coverage-report/**",
       "docs/generated/**",
       "src/frontend/js/third_party/**",
-      // Ignore minified/bundled CSS files that have parsing issues
-      "**/jquery-ui.css",
     ],
   },
 

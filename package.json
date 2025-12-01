@@ -45,9 +45,9 @@
   "homepage": "https://github.com/HugoFara/lwt#readme",
   "dependencies": {
     "@yaireo/tagify": "^4.35.6",
+    "alpinejs": "^3.15.2",
     "chart.js": "^4.5.1",
-    "jquery": "1.12.4",
-    "jquery-ui-dist": "1.12.1"
+    "jquery": "1.12.4"
   },
   "devDependencies": {
     "@eslint/css": "^0.14.1",

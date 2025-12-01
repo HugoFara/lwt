@@ -8,6 +8,7 @@
 import { getAttr } from './text_annotations';
 import { hoverIntent } from '../core/hover_intent';
 import { showRightFrames } from './frame_management';
+import { removeAllTooltips } from '../ui/native_tooltip';
 
 // Type definitions
 interface LwtSettings {
@@ -285,7 +286,7 @@ export const mwordDragNDrop: MwordDragNDropState = {
  * @param event The mousedown event
  */
 export function mword_drag_n_drop_select(this: HTMLElement, event: JQuery.TriggeredEvent): void {
-  if (LWT_DATA.settings.jQuery_tooltip) { $('.ui-tooltip').remove(); }
+  if (LWT_DATA.settings.jQuery_tooltip) { removeAllTooltips(); }
   const sentence = $(this).parent();
   mwordDragNDrop.context = sentence;
   mwordDragNDrop.event = event;

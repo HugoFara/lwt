@@ -6,29 +6,25 @@
  * @since   1.6.16-fork
  */
 
-import $ from 'jquery';
-
 /**
  * Helper to safely get an HTML attribute value as a string.
  *
- * @param $el jQuery element to get attribute from
+ * @param el HTML element to get attribute from
  * @param attr Name of the attribute to retrieve
- * @returns Attribute value as string, or empty string if undefined
+ * @returns Attribute value as string, or empty string if null
  */
-function getAttr($el: JQuery, attr: string): string {
-  const val = $el.attr(attr);
-  return typeof val === 'string' ? val : '';
+function getAttr(el: HTMLElement, attr: string): string {
+  return el.getAttribute(attr) || '';
 }
 
 /**
- * Helper to safely get jQuery element value as a string.
+ * Helper to safely get element value as a string.
  *
- * @param $el jQuery element to get value from
+ * @param el HTML input/textarea element to get value from
  * @returns Element value as string, or empty string if undefined
  */
-function getVal($el: JQuery): string {
-  const val = $el.val();
-  return typeof val === 'string' ? val : '';
+function getVal(el: HTMLInputElement | HTMLTextAreaElement): string {
+  return el.value || '';
 }
 
 /**
@@ -98,67 +94,70 @@ export function isInt(value: string): boolean {
  */
 export function check(): boolean {
   let count = 0;
-  $('.notempty').each(function () {
-    if (($(this).val() as string).trim() === '') count++;
+
+  // Check non-empty fields
+  document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.notempty').forEach(el => {
+    if (el.value.trim() === '') count++;
   });
   if (count > 0) {
     alert('ERROR\n\n' + count + ' field(s) - marked with * - must not be empty!');
     return false;
   }
+
   count = 0;
-  $('input.checkurl').each(function () {
-    if (($(this).val() as string).trim().length > 0) {
-      const val = ($(this).val() as string).trim();
+
+  // Check URL fields
+  document.querySelectorAll<HTMLInputElement>('input.checkurl').forEach(el => {
+    const val = el.value.trim();
+    if (val.length > 0) {
       if ((val.indexOf('http://') !== 0) &&
-      (val.indexOf('https://') !== 0) &&
-      (val.indexOf('#') !== 0)) {
+          (val.indexOf('https://') !== 0) &&
+          (val.indexOf('#') !== 0)) {
         alert(
-          'ERROR\n\nField "' + $(this).attr('data_info') +
+          'ERROR\n\nField "' + el.getAttribute('data_info') +
           '" must start with "http://" or "https://" if not empty.'
         );
         count++;
       }
     }
   });
+
   // Note: as of LWT 2.9.0, no field with "checkregexp" property is found in the code base
-  $('input.checkregexp').each(function () {
-    const regexp = ($(this).val() as string).trim();
+  document.querySelectorAll<HTMLInputElement>('input.checkregexp').forEach(el => {
+    const regexp = el.value.trim();
     if (regexp.length > 0) {
-      $.ajax({
-        type: 'POST',
-        url: 'inc/ajax.php',
-        data: {
-          action: '',
-          action_type: 'check_regexp',
-          regex: regexp
-        },
-        async: false
-      }).always(function (data: string) {
-        if (data !== '') {
-          alert(data);
-          count++;
-        }
-      });
+      // Synchronous XHR (deprecated but preserved for backwards compatibility)
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'inc/ajax.php', false);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.send('action=&action_type=check_regexp&regex=' + encodeURIComponent(regexp));
+      if (xhr.responseText !== '') {
+        alert(xhr.responseText);
+        count++;
+      }
     }
   });
+
   // To enable limits of custom feed texts/articl.
   // change the following «input[class*="max_int_"]» into «input[class*="maxint_"]»
-  $('input[class*="max_int_"]').each(function () {
-    const classAttr = getAttr($(this), 'class');
+  document.querySelectorAll<HTMLInputElement>('input[class*="max_int_"]').forEach(el => {
+    const classAttr = el.getAttribute('class') || '';
     const maxvalue = parseInt(classAttr.replace(/.*maxint_([0-9]+).*/, '$1'), 10);
-    if (($(this).val() as string).trim().length > 0) {
-      if (parseInt($(this).val() as string, 10) > maxvalue) {
+    const val = el.value.trim();
+    if (val.length > 0) {
+      if (parseInt(val, 10) > maxvalue) {
         alert(
-          'ERROR\n\n Max Value of Field "' + $(this).attr('data_info') +
+          'ERROR\n\n Max Value of Field "' + el.getAttribute('data_info') +
           '" is ' + maxvalue
         );
         count++;
       }
     }
   });
+
   // Check that the Google Translate field is of good type
-  $('input.checkdicturl').each(function () {
-    const translate_input = ($(this).val() as string).trim();
+  document.querySelectorAll<HTMLInputElement>('input.checkdicturl').forEach(el => {
+    const translate_input = el.value.trim();
     if (translate_input.length > 0) {
       let refinned = translate_input;
       if (translate_input.startsWith('*')) {
@@ -172,7 +171,7 @@ export function check(): boolean {
       } catch (err) {
         if (err instanceof TypeError) {
           alert(
-            'ERROR\n\nField "' + $(this).attr('data_info') +
+            'ERROR\n\nField "' + el.getAttribute('data_info') +
             '" should be an URL if not empty.'
           );
           count++;
@@ -180,96 +179,115 @@ export function check(): boolean {
       }
     }
   });
-  $('input.posintnumber').each(function () {
-    if (($(this).val() as string).trim().length > 0) {
-      const val = ($(this).val() as string).trim();
+
+  // Check positive integer fields
+  document.querySelectorAll<HTMLInputElement>('input.posintnumber').forEach(el => {
+    const val = el.value.trim();
+    if (val.length > 0) {
       if (!(isInt(val) && (parseInt(val, 10) > 0))) {
         alert(
-          'ERROR\n\nField "' + $(this).attr('data_info') +
+          'ERROR\n\nField "' + el.getAttribute('data_info') +
           '" must be an integer number > 0.'
         );
         count++;
       }
     }
   });
-  $('input.zeroposintnumber').each(function () {
-    if (($(this).val() as string).trim().length > 0) {
-      const val = ($(this).val() as string).trim();
+
+  // Check zero or positive integer fields
+  document.querySelectorAll<HTMLInputElement>('input.zeroposintnumber').forEach(el => {
+    const val = el.value.trim();
+    if (val.length > 0) {
       if (!(isInt(val) && (parseInt(val, 10) >= 0))) {
         alert(
-          'ERROR\n\nField "' + $(this).attr('data_info') +
+          'ERROR\n\nField "' + el.getAttribute('data_info') +
           '" must be an integer number >= 0.'
         );
         count++;
       }
     }
   });
-  $('input.checkoutsidebmp').each(function () {
-    const val = getVal($(this));
+
+  // Check input fields for characters outside BMP
+  document.querySelectorAll<HTMLInputElement>('input.checkoutsidebmp').forEach(el => {
+    const val = getVal(el);
     if (val.trim().length > 0) {
       if (containsCharacterOutsideBasicMultilingualPlane(val)) {
         count += alertFirstCharacterOutsideBasicMultilingualPlane(
-          val, getAttr($(this), 'data_info')
+          val, getAttr(el, 'data_info')
         );
       }
     }
   });
-  $('textarea.checklength').each(function () {
-    const $el = $(this);
-    const maxLength = parseInt(getAttr($el, 'data_maxlength') || '0', 10);
-    const val = getVal($el);
+
+  // Check textarea length
+  document.querySelectorAll<HTMLTextAreaElement>('textarea.checklength').forEach(el => {
+    const maxLength = parseInt(getAttr(el, 'data_maxlength') || '0', 10);
+    const val = getVal(el);
     if (val.trim().length > maxLength) {
       alert(
-        'ERROR\n\nText is too long in field "' + getAttr($el, 'data_info') +
+        'ERROR\n\nText is too long in field "' + getAttr(el, 'data_info') +
         '", please make it shorter! (Maximum length: ' +
-        getAttr($el, 'data_maxlength') + ' char.)'
+        getAttr(el, 'data_maxlength') + ' char.)'
       );
       count++;
     }
   });
-  $('textarea.checkoutsidebmp').each(function () {
-    const val = getVal($(this));
+
+  // Check textarea for characters outside BMP
+  document.querySelectorAll<HTMLTextAreaElement>('textarea.checkoutsidebmp').forEach(el => {
+    const val = getVal(el);
     if (containsCharacterOutsideBasicMultilingualPlane(val)) {
       count += alertFirstCharacterOutsideBasicMultilingualPlane(
-        val, getAttr($(this), 'data_info')
+        val, getAttr(el, 'data_info')
       );
     }
   });
-  $('textarea.checkbytes').each(function () {
-    const $el = $(this);
-    const maxLength = parseInt(getAttr($el, 'data_maxlength') || '0', 10);
-    const val = getVal($el);
+
+  // Check textarea byte length
+  document.querySelectorAll<HTMLTextAreaElement>('textarea.checkbytes').forEach(el => {
+    const maxLength = parseInt(getAttr(el, 'data_maxlength') || '0', 10);
+    const val = getVal(el);
     if (getUTF8Length(val.trim()) > maxLength) {
       alert(
-        'ERROR\n\nText is too long in field "' + getAttr($el, 'data_info') +
+        'ERROR\n\nText is too long in field "' + getAttr(el, 'data_info') +
         '", please make it shorter! (Maximum length: ' +
-        getAttr($el, 'data_maxlength') + ' bytes.)'
+        getAttr(el, 'data_maxlength') + ' bytes.)'
       );
       count++;
     }
   });
-  $('input.noblanksnocomma').each(function () {
-    const val = $(this).val() as string;
+
+  // Check for spaces or commas
+  document.querySelectorAll<HTMLInputElement>('input.noblanksnocomma').forEach(el => {
+    const val = el.value;
     if (val.indexOf(' ') > 0 || val.indexOf(',') > 0) {
       alert(
         'ERROR\n\nNo spaces or commas allowed in field "' +
-        $(this).attr('data_info') + '", please remove!'
+        el.getAttribute('data_info') + '", please remove!'
       );
       count++;
     }
   });
+
   return (count === 0);
 }
 
 /**
  * Handle Enter key press in textareas to trigger form submission.
  *
- * @param event jQuery keyboard event
+ * @param event Keyboard event
  * @returns false to prevent default behavior if Enter was pressed and form is valid, true otherwise
  */
-export function textareaKeydown(event: JQuery.KeyDownEvent): boolean {
-  if (event.keyCode && event.keyCode === 13) {
-    if (check()) { $('input:submit').last().trigger('click'); }
+export function textareaKeydown(event: KeyboardEvent): boolean {
+  if (event.key === 'Enter' || event.keyCode === 13) {
+    if (check()) {
+      const submitButtons = document.querySelectorAll<HTMLInputElement>('input[type="submit"]');
+      const lastSubmit = submitButtons[submitButtons.length - 1];
+      if (lastSubmit) {
+        lastSubmit.click();
+      }
+    }
     return false;
   } else {
     return true;

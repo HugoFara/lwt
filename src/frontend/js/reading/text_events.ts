@@ -23,6 +23,7 @@ import {
 import { keydown_event_do_text_text } from './text_keyboard';
 import { mword_drag_n_drop_select } from './text_multiword_selection';
 import { showRightFrames } from './frame_management';
+import { removeAllTooltips } from '../ui/native_tooltip';
 import {
   run_overlib_status_unknown,
   run_overlib_status_99,
@@ -376,7 +377,7 @@ export function word_hover_over(this: HTMLElement): void {
 export function word_hover_out(): void {
   $('.hword').removeClass('hword');
   if (LWT_DATA.settings.jQuery_tooltip) {
-    $('.ui-helper-hidden-accessible>div[style]').remove();
+    removeAllTooltips();
   }
 }
 
@@ -396,7 +397,11 @@ export function prepareTextInteractions(): void {
   $('#thetext').on('click', '.mword', mword_click_event_do_text_text);
   $('.word').on('dblclick', word_dblclick_event_do_text_text);
   $('#thetext').on('dblclick', '.mword', word_dblclick_event_do_text_text);
-  $(document).on('keydown', keydown_event_do_text_text);
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (!keydown_event_do_text_text(e)) {
+      e.preventDefault();
+    }
+  });
   const thetext = document.getElementById('thetext');
   if (thetext) {
     hoverIntent(thetext, {

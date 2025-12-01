@@ -16,6 +16,28 @@ import * as overlibInterface from '../../../src/frontend/js/terms/overlib_interf
 import * as frameManagement from '../../../src/frontend/js/reading/frame_management';
 import * as wordStatus from '../../../src/frontend/js/terms/word_status';
 
+// Polyfill HTMLDialogElement methods for JSDOM
+function polyfillDialog() {
+  if (typeof HTMLDialogElement !== 'undefined') {
+    if (!HTMLDialogElement.prototype.show) {
+      HTMLDialogElement.prototype.show = function() {
+        this.setAttribute('open', '');
+      };
+    }
+    if (!HTMLDialogElement.prototype.showModal) {
+      HTMLDialogElement.prototype.showModal = function() {
+        this.setAttribute('open', '');
+      };
+    }
+    if (!HTMLDialogElement.prototype.close) {
+      HTMLDialogElement.prototype.close = function() {
+        this.removeAttribute('open');
+        this.dispatchEvent(new Event('close'));
+      };
+    }
+  }
+}
+
 // Mock LWT_DATA global
 const mockLWT_DATA = {
   language: {
@@ -36,11 +58,13 @@ const mockLWT_DATA = {
     hts: 0,
     word_status_filter: '',
     annotations_mode: 0,
+    use_frame_mode: true, // Use frame mode for legacy tests
   },
 };
 
 // Setup global mocks
 beforeEach(() => {
+  polyfillDialog();
   (window as unknown as Record<string, unknown>).LWT_DATA = mockLWT_DATA;
   (window as unknown as Record<string, unknown>).$ = $;
   (globalThis as unknown as Record<string, unknown>).$ = $;
@@ -277,19 +301,18 @@ describe('text_events.ts', () => {
       expect(highlighted.length).toBe(0);
     });
 
-    it('removes jQuery tooltip helper divs when jQuery_tooltip is enabled', () => {
+    it('removes tooltip elements when jQuery_tooltip is enabled', () => {
       document.body.innerHTML = `
-        <div class="ui-helper-hidden-accessible">
-          <div style="position: absolute;">Tooltip content</div>
-        </div>
+        <div class="ui-tooltip">Old jQuery tooltip</div>
         <span class="word hword">Word</span>
       `;
       mockLWT_DATA.settings.jQuery_tooltip = true;
 
       word_hover_out();
 
-      const tooltipDivs = document.querySelectorAll('.ui-helper-hidden-accessible>div[style]');
-      expect(tooltipDivs.length).toBe(0);
+      // jQuery UI tooltips should be removed by removeAllTooltips
+      const jqueryTooltips = document.querySelectorAll('.ui-tooltip');
+      expect(jqueryTooltips.length).toBe(0);
     });
 
     it('does not affect elements without hword class', () => {

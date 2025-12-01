@@ -9,7 +9,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
 import { setLang, resetAll } from '../core/language_settings';
 import { selectToggle, multiActionGo } from '../forms/bulk_actions';
 
@@ -93,9 +92,10 @@ export function initFeedIndex(): void {
       // Collect checked checkbox values into hidden field
       const hiddenField = document.getElementById('map') as HTMLInputElement | null;
       if (hiddenField) {
-        const checkedValues = $('input:checked').map(function() {
-          return $(this).val();
-        }).get().join(', ');
+        const checkedInputs = document.querySelectorAll<HTMLInputElement>('input:checked');
+        const checkedValues = Array.from(checkedInputs)
+          .map(input => input.value)
+          .join(', ');
         hiddenField.value = checkedValues;
       }
       // Trigger multi-action

@@ -35,10 +35,11 @@ export function multiActionGo(f: HTMLFormElement | FormWithData | undefined, sel
       if (v === 'addtag' || v === 'deltag') {
         let notok = true;
         let answer: string | null = '';
+        const checkedCount = document.querySelectorAll('input.markcheck:checked').length;
         while (notok) {
           answer = prompt(
             '*** ' + t + ' ***' +
-            '\n\n*** ' + $('input.markcheck:checked').length +
+            '\n\n*** ' + checkedCount +
             ' Record(s) will be affected ***' +
             '\n\nPlease enter one tag (20 char. max., no spaces, no commas -- ' +
             'or leave empty to cancel:',
@@ -65,8 +66,9 @@ export function multiActionGo(f: HTMLFormElement | FormWithData | undefined, sel
         v === 's98' || v === 's99' || v === 'today' || v === 'delsent' ||
         v === 'lower' || v === 'cap'
       ) {
+        const checkedCount = document.querySelectorAll('input.markcheck:checked').length;
         const answer = confirm(
-          '*** ' + t + ' ***\n\n*** ' + $('input.markcheck:checked').length +
+          '*** ' + t + ' ***\n\n*** ' + checkedCount +
           ' Record(s) will be affected ***\n\nAre you sure?'
         );
         if (answer) {

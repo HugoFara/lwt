@@ -10,7 +10,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
 import Tagify from '@yaireo/tagify';
 import { fetchTextTags, getTextTagsSync } from '../core/app_data';
 
@@ -77,22 +76,32 @@ function initTagifyOnFeedInput(ulElement: HTMLUListElement): void {
 /**
  * Handle checkbox change to enable/disable the associated feed form fields.
  */
-function handleFeedCheckboxChange(this: HTMLInputElement): void {
-  const feedIndex = this.value;
-  const feedSelector = '[name^=feed\\[' + feedIndex + '\\]';
+function handleFeedCheckboxChange(checkbox: HTMLInputElement): void {
+  const feedIndex = checkbox.value;
+  const feedFields = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+    `[name^="feed[${feedIndex}]"]`
+  );
   const tagifyInput = document.querySelector<HTMLInputElement>(
     '.tagify-feed-input[data-feed-index="' + feedIndex + '"]'
   );
   const tagify = tagifyInput?._tagify;
 
-  if (this.checked) {
-    $(feedSelector + ']').prop('disabled', false);
-    $(feedSelector + '\\[TxTitle\\]],' + feedSelector + '\\[TxText\\]]').addClass('notempty');
+  if (checkbox.checked) {
+    feedFields.forEach(el => {
+      el.disabled = false;
+      // Add notempty class to title and text fields
+      if (el.name.includes('[TxTitle]') || el.name.includes('[TxText]')) {
+        el.classList.add('notempty');
+      }
+    });
     if (tagify) {
       tagify.setDisabled(false);
     }
   } else {
-    $(feedSelector + ']').prop('disabled', true).removeClass('notempty');
+    feedFields.forEach(el => {
+      el.disabled = true;
+      el.classList.remove('notempty');
+    });
     if (tagify) {
       tagify.setDisabled(true);
     }
@@ -117,7 +126,10 @@ export async function initFeedTextEditForm(): Promise<void> {
   document.querySelectorAll<HTMLUListElement>('ul[name^="feed"]').forEach(initTagifyOnFeedInput);
 
   // Handle checkbox changes for enabling/disabling feed forms
-  $('input[type="checkbox"]').on('change', handleFeedCheckboxChange);
+  document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+    .forEach(checkbox => {
+      checkbox.addEventListener('change', () => handleFeedCheckboxChange(checkbox));
+    });
 }
 
 /**

@@ -19,6 +19,17 @@ export function getAttr($el: JQuery, attr: string): string {
   return typeof val === 'string' ? val : '';
 }
 
+/**
+ * Helper to safely get an HTML attribute value as a string from a native element.
+ *
+ * @param el HTML element to get attribute from
+ * @param attr Name of the attribute to retrieve
+ * @returns Attribute value as string, or empty string if null
+ */
+export function getAttrElement(el: HTMLElement, attr: string): string {
+  return el.getAttribute(attr) || '';
+}
+
 // Type definitions
 interface LwtLanguage {
   id: number;

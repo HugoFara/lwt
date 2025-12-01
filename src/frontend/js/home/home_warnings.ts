@@ -7,7 +7,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
 import { areCookiesEnabled } from '../core/cookies';
 
 /**
@@ -44,8 +43,10 @@ export function shouldUpdate(fromVersion: string, toVersion: string): boolean | 
  */
 export function checkCookiesDisabled(): void {
   if (!areCookiesEnabled()) {
-    $('#cookies_disabled')
-      .html('*** Cookies are not enabled! Please enable them! ***');
+    const el = document.getElementById('cookies_disabled');
+    if (el) {
+      el.innerHTML = '*** Cookies are not enabled! Please enable them! ***';
+    }
   }
 }
 
@@ -57,10 +58,11 @@ export function checkCookiesDisabled(): void {
 export function checkOutdatedPHP(phpVersion: string): void {
   const phpMinVersion = '8.0.0';
   if (shouldUpdate(phpVersion, phpMinVersion)) {
-    $('#php_update_required').html(
-      '*** Your PHP version is ' + phpVersion + ', but version ' +
-      phpMinVersion + ' is required. Please update it. ***'
-    );
+    const el = document.getElementById('php_update_required');
+    if (el) {
+      el.innerHTML = '*** Your PHP version is ' + phpVersion + ', but version ' +
+        phpMinVersion + ' is required. Please update it. ***';
+    }
   }
 }
 
@@ -70,19 +72,23 @@ export function checkOutdatedPHP(phpVersion: string): void {
  * @param lwtVersion - Current LWT version string
  */
 export function checkLWTUpdate(lwtVersion: string): void {
-  $.getJSON(
-    'https://api.github.com/repos/hugofara/lwt/releases/latest'
-  ).done(function (data: { tag_name: string }) {
-    const latestVersion = data.tag_name;
-    if (shouldUpdate(lwtVersion, latestVersion)) {
-      $('#lwt_new_version').html(
-        '*** An update for LWT is available: ' +
-        latestVersion + ', your version is ' + lwtVersion +
-        '. <a href="https://github.com/HugoFara/lwt/releases/tag/' +
-        latestVersion + '">Download</a>.***'
-      );
-    }
-  });
+  fetch('https://api.github.com/repos/hugofara/lwt/releases/latest')
+    .then(response => response.json())
+    .then((data: { tag_name: string }) => {
+      const latestVersion = data.tag_name;
+      if (shouldUpdate(lwtVersion, latestVersion)) {
+        const el = document.getElementById('lwt_new_version');
+        if (el) {
+          el.innerHTML = '*** An update for LWT is available: ' +
+            latestVersion + ', your version is ' + lwtVersion +
+            '. <a href="https://github.com/HugoFara/lwt/releases/tag/' +
+            latestVersion + '">Download</a>.***';
+        }
+      }
+    })
+    .catch(() => {
+      // Silently fail if GitHub API is unreachable
+    });
 }
 
 /**
@@ -124,7 +130,7 @@ export function initHomeWarningsFromConfig(): void {
 }
 
 // Auto-initialize when DOM is ready
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
   initHomeWarningsFromConfig();
 });
 

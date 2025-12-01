@@ -8,7 +8,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
 import { LWT_DATA } from '../core/lwt_state';
 import { createTheDictUrl, owin } from '../terms/dictionary';
 import { selectToggle } from '../forms/bulk_actions';
@@ -39,15 +38,14 @@ declare global {
  * Handle click on a dictionary link in bulk translate form.
  * Opens the dictionary for the term in the same row.
  */
-export function clickDictionary(this: HTMLElement): void {
-  const $this = $(this);
+export function clickDictionary(element: HTMLElement): void {
   let dictLink: string;
 
-  if ($this.hasClass('dict1')) {
+  if (element.classList.contains('dict1')) {
     dictLink = LWT_DATA.language.dict_link1;
-  } else if ($this.hasClass('dict2')) {
+  } else if (element.classList.contains('dict2')) {
     dictLink = LWT_DATA.language.dict_link2;
-  } else if ($this.hasClass('dict3')) {
+  } else if (element.classList.contains('dict3')) {
     dictLink = LWT_DATA.language.translator_link;
   } else {
     return;
@@ -70,7 +68,9 @@ export function clickDictionary(this: HTMLElement): void {
     }
   }
 
-  const termText = $this.parent().prev().text();
+  const parent = element.parentElement;
+  const prevSibling = parent?.previousElementSibling;
+  const termText = prevSibling?.textContent || '';
   const dictUrl = createTheDictUrl(dictLink, termText);
 
   if (isPopup) {
@@ -85,12 +85,18 @@ export function clickDictionary(this: HTMLElement): void {
   }
 
   // Swap WoTranslation name attributes to track current input
-  const currentTranslation = $('[name="WoTranslation"]');
-  currentTranslation.attr('name', currentTranslation.attr('data_name') ?? '');
+  const currentTranslation = document.querySelector<HTMLElement>('[name="WoTranslation"]');
+  if (currentTranslation) {
+    currentTranslation.setAttribute('name', currentTranslation.getAttribute('data_name') ?? '');
+  }
 
-  const el = $this.parent().parent().next().children();
-  el.attr('data_name', el.attr('name') ?? '');
-  el.attr('name', 'WoTranslation');
+  const grandparent = parent?.parentElement;
+  const nextRow = grandparent?.nextElementSibling;
+  const el = nextRow?.firstElementChild as HTMLElement | null;
+  if (el) {
+    el.setAttribute('data_name', el.getAttribute('name') ?? '');
+    el.setAttribute('name', 'WoTranslation');
+  }
 }
 
 /**
@@ -102,46 +108,70 @@ export function clickDictionary(this: HTMLElement): void {
  */
 export function bulkInteractions(): void {
   // Form submission - restore original input names and clear frame
-  $('[name="form1"]').on('submit', function () {
-    const currentTranslation = $('[name="WoTranslation"]');
-    currentTranslation.attr('name', currentTranslation.attr('data_name') ?? '');
+  const form1 = document.querySelector<HTMLFormElement>('[name="form1"]');
+  if (form1) {
+    form1.addEventListener('submit', () => {
+      const currentTranslation = document.querySelector<HTMLElement>('[name="WoTranslation"]');
+      if (currentTranslation) {
+        currentTranslation.setAttribute('name', currentTranslation.getAttribute('data_name') ?? '');
+      }
 
-    try {
-      window.parent.frames['ru' as unknown as number].location.href = 'empty.html';
-    } catch {
-      // Frame access denied, continue with submission
-    }
+      try {
+        window.parent.frames['ru' as unknown as number].location.href = 'empty.html';
+      } catch {
+        // Frame access denied, continue with submission
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }
 
   // Dictionary and delete handlers using event delegation
-  $('td').on('click', 'span.dict1, span.dict2, span.dict3', clickDictionary)
-    .on('click', '.del_trans', function () {
-      $(this).prev().val('').trigger('focus');
+  document.querySelectorAll('td').forEach(td => {
+    td.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+
+      // Dictionary click
+      const dictSpan = target.closest<HTMLElement>('span.dict1, span.dict2, span.dict3');
+      if (dictSpan) {
+        clickDictionary(dictSpan);
+        return;
+      }
+
+      // Delete translation click
+      if (target.classList.contains('del_trans')) {
+        const prevInput = target.previousElementSibling as HTMLInputElement | null;
+        if (prevInput) {
+          prevInput.value = '';
+          prevInput.focus();
+        }
+      }
     });
+  });
 
   // Wait for Google Translate to populate the .trans elements with <font> tags
-  const displayTranslations = setInterval(function () {
-    if ($('.trans>font').length === $('.trans').length) {
-      // Convert translated text to input fields
-      $('.trans').each(function () {
-        const $trans = $(this);
-        const txt = $trans.text();
-        const cnt = ($trans.attr('id') ?? '').replace('Trans_', '');
+  const displayTranslations = setInterval(() => {
+    const transElements = document.querySelectorAll('.trans');
+    const transFontElements = document.querySelectorAll('.trans>font');
 
-        $trans
-          .addClass('notranslate')
-          .html(
-            `<input type="text" name="term[${cnt}][trans]" value="${txt}" maxlength="100" class="respinput">` +
-            '<div class="del_trans"></div>'
-          );
+    if (transFontElements.length === transElements.length) {
+      // Convert translated text to input fields
+      transElements.forEach(trans => {
+        const txt = trans.textContent || '';
+        const cnt = (trans.id || '').replace('Trans_', '');
+
+        trans.classList.add('notranslate');
+        trans.innerHTML =
+          `<input type="text" name="term[${cnt}][trans]" value="${txt}" maxlength="100" class="respinput">` +
+          '<div class="del_trans"></div>';
       });
 
       // Add dictionary links after each term
-      $('.term').each(function () {
-        const $term = $(this);
-        $term.parent().css('position', 'relative');
+      document.querySelectorAll<HTMLElement>('.term').forEach(term => {
+        const parent = term.parentElement;
+        if (parent) {
+          parent.style.position = 'relative';
+        }
 
         const dictLinks =
           '<div class="dict">' +
@@ -150,15 +180,17 @@ export function bulkInteractions(): void {
           (LWT_DATA.language.translator_link ? '<span class="dict3">Tr</span>' : '') +
           '</div>';
 
-        $term.after(dictLinks);
+        term.insertAdjacentHTML('afterend', dictLinks);
       });
 
       // Clean up Google Translate elements
-      $('iframe,#google_translate_element').remove();
+      document.querySelectorAll('iframe, #google_translate_element').forEach(el => el.remove());
 
       // Enable all checkboxes and inputs
       selectToggle(true, 'form1');
-      $('[name^=term]').prop('disabled', false);
+      document.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[name^=term]').forEach(el => {
+        el.disabled = false;
+      });
 
       clearInterval(displayTranslations);
     }
@@ -177,31 +209,40 @@ export function bulkCheckbox(): void {
     // Frame access denied
   }
 
-  $('input[type="checkbox"]').on('change', function () {
-    const $checkbox = $(this);
-    const v = parseInt($checkbox.val() as string, 10);
+  document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      const v = parseInt(checkbox.value, 10);
 
-    // Selector for all inputs related to this term
-    const inputSelector =
-      `[name=term\\[${v}\\]\\[text\\]],` +
-      `[name=term\\[${v}\\]\\[lg\\]],` +
-      `[name=term\\[${v}\\]\\[status\\]]`;
+      // Select all inputs related to this term
+      const relatedInputs = document.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+        `[name="term[${v}][text]"], [name="term[${v}][lg]"], [name="term[${v}][status]"]`
+      );
+      relatedInputs.forEach(input => {
+        input.disabled = !checkbox.checked;
+      });
 
-    $(inputSelector).prop('disabled', !$checkbox.is(':checked'));
-    $(`#Trans_${v} input`).prop('disabled', !$checkbox.is(':checked'));
-
-    // Update submit button text based on state
-    if ($('input[type="checkbox"]:checked').length) {
-      let operationOption: string;
-      if ($checkbox.is(':checked')) {
-        operationOption = 'Save';
-      } else if ($('input[name="offset"]').length) {
-        operationOption = 'Next';
-      } else {
-        operationOption = 'End';
+      const transInput = document.querySelector<HTMLInputElement>(`#Trans_${v} input`);
+      if (transInput) {
+        transInput.disabled = !checkbox.checked;
       }
-      $('input[type="submit"]').val(operationOption);
-    }
+
+      // Update submit button text based on state
+      const checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+      if (checkedCheckboxes.length) {
+        let operationOption: string;
+        if (checkbox.checked) {
+          operationOption = 'Save';
+        } else if (document.querySelector('input[name="offset"]')) {
+          operationOption = 'Next';
+        } else {
+          operationOption = 'End';
+        }
+        const submitBtn = document.querySelector<HTMLInputElement>('input[type="submit"]');
+        if (submitBtn) {
+          submitBtn.value = operationOption;
+        }
+      }
+    });
   });
 }
 
@@ -226,58 +267,79 @@ export function googleTranslateElementInit(sourceLanguage: string, targetLanguag
  * Mark all terms for saving.
  */
 export function markAll(): void {
-  $('input[type^=submit]').val('Save');
+  const submitBtn = document.querySelector<HTMLInputElement>('input[type="submit"]');
+  if (submitBtn) {
+    submitBtn.value = 'Save';
+  }
   selectToggle(true, 'form1');
-  $('[name^=term]').prop('disabled', false);
+  document.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[name^=term]').forEach(el => {
+    el.disabled = false;
+  });
 }
 
 /**
  * Unmark all terms.
  */
 export function markNone(): void {
-  const submitValue = $('input[name^=offset]').length ? 'Next' : 'End';
-  $('input[type^=submit]').val(submitValue);
+  const submitValue = document.querySelector('input[name^=offset]') ? 'Next' : 'End';
+  const submitBtn = document.querySelector<HTMLInputElement>('input[type="submit"]');
+  if (submitBtn) {
+    submitBtn.value = submitValue;
+  }
   selectToggle(false, 'form1');
-  $('[name^=term]').prop('disabled', true);
+  document.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[name^=term]').forEach(el => {
+    el.disabled = true;
+  });
 }
 
 /**
  * Handle changes to the bulk action select (status changes, lowercase, delete translation).
  *
- * @param $elem jQuery element of the select
+ * @param selectEl The select element
  */
-export function changeTermToggles($elem: JQuery<HTMLSelectElement>): boolean {
-  const v = $elem.val() as string;
+export function changeTermToggles(selectEl: HTMLSelectElement): boolean {
+  const v = selectEl.value;
 
   if (v === '6') {
     // Set to lowercase
-    $('.markcheck:checked').each(function () {
-      const checkboxValue = $(this).val();
-      const $termSpan = $(`#Term_${checkboxValue}`).children('.term');
-      const lowerText = $termSpan.text().toLowerCase();
-      $termSpan.text(lowerText);
-      $(`#Text_${checkboxValue}`).val(lowerText);
+    document.querySelectorAll<HTMLInputElement>('.markcheck:checked').forEach(checkbox => {
+      const checkboxValue = checkbox.value;
+      const termSpan = document.querySelector<HTMLElement>(`#Term_${checkboxValue} .term`);
+      if (termSpan) {
+        const lowerText = (termSpan.textContent || '').toLowerCase();
+        termSpan.textContent = lowerText;
+        const textInput = document.querySelector<HTMLInputElement>(`#Text_${checkboxValue}`);
+        if (textInput) {
+          textInput.value = lowerText;
+        }
+      }
     });
-    $elem.prop('selectedIndex', 0);
+    selectEl.selectedIndex = 0;
     return false;
   }
 
   if (v === '7') {
     // Delete translation (set to *)
-    $('.markcheck:checked').each(function () {
-      const checkboxValue = $(this).val();
-      $(`#Trans_${checkboxValue} input`).val('*');
+    document.querySelectorAll<HTMLInputElement>('.markcheck:checked').forEach(checkbox => {
+      const checkboxValue = checkbox.value;
+      const transInput = document.querySelector<HTMLInputElement>(`#Trans_${checkboxValue} input`);
+      if (transInput) {
+        transInput.value = '*';
+      }
     });
-    $elem.prop('selectedIndex', 0);
+    selectEl.selectedIndex = 0;
     return false;
   }
 
   // Set status for all checked terms
-  $('.markcheck:checked').each(function () {
-    const checkboxValue = $(this).val();
-    $(`#Stat_${checkboxValue}`).val(v);
+  document.querySelectorAll<HTMLInputElement>('.markcheck:checked').forEach(checkbox => {
+    const checkboxValue = checkbox.value;
+    const statSelect = document.querySelector<HTMLSelectElement>(`#Stat_${checkboxValue}`);
+    if (statSelect) {
+      statSelect.value = v;
+    }
   });
-  $elem.prop('selectedIndex', 0);
+  selectEl.selectedIndex = 0;
   return false;
 }
 
@@ -308,13 +370,19 @@ export function initBulkTranslate(dictionaries: {
   LWT_DATA.language.translator_link = dictionaries.translate;
 
   // Mark headers as not translatable
-  $('h3,h4,title').addClass('notranslate');
+  document.querySelectorAll('h3, h4, title').forEach(el => {
+    el.classList.add('notranslate');
+  });
 
   // Set up interactions when page is fully loaded
-  $(window).on('load', bulkInteractions);
+  window.addEventListener('load', bulkInteractions);
 
   // Set up checkbox handlers when DOM is ready
-  $(document).ready(bulkCheckbox);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bulkCheckbox);
+  } else {
+    bulkCheckbox();
+  }
 }
 
 /**
@@ -344,26 +412,35 @@ function autoInitBulkTranslate(): void {
  * Initialize event delegation for bulk translate form controls.
  */
 function initBulkTranslateEvents(): void {
-  // Mark All button
-  $(document).on('click', '[data-action="bulk-mark-all"]', function (e) {
-    e.preventDefault();
-    markAll();
-  });
+  // Event delegation for click events
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
 
-  // Mark None button
-  $(document).on('click', '[data-action="bulk-mark-none"]', function (e) {
-    e.preventDefault();
-    markNone();
+    // Mark All button
+    if (target.closest('[data-action="bulk-mark-all"]')) {
+      e.preventDefault();
+      markAll();
+      return;
+    }
+
+    // Mark None button
+    if (target.closest('[data-action="bulk-mark-none"]')) {
+      e.preventDefault();
+      markNone();
+    }
   });
 
   // Term toggles select (status changes, lowercase, delete translation)
-  $(document).on('change', '[data-action="bulk-term-toggles"]', function (this: HTMLSelectElement) {
-    changeTermToggles($(this));
+  document.addEventListener('change', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.matches('[data-action="bulk-term-toggles"]')) {
+      changeTermToggles(target as HTMLSelectElement);
+    }
   });
 }
 
 // Auto-initialize on document ready
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
   autoInitBulkTranslate();
   initBulkTranslateEvents();
 });

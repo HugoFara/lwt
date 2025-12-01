@@ -6,8 +6,6 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import $ from 'jquery';
-
 /**
  * Initialize the utterance (read aloud) setting from localStorage.
  *
@@ -73,21 +71,25 @@ export function startTestTable(property: string): void {
  */
 function initTestHeaderEvents(): void {
   // Handle word test start via event delegation
-  $(document).on('click', '[data-action="start-word-test"]', function (this: HTMLElement) {
-    const type = parseInt(this.dataset.testType || '1', 10);
-    const property = this.dataset.property || '';
-    startWordTest(type, property);
-  });
+  document.addEventListener('click', (e) => {
+    const target = (e.target as HTMLElement).closest<HTMLElement>('[data-action="start-word-test"]');
+    if (target) {
+      const type = parseInt(target.dataset.testType || '1', 10);
+      const property = target.dataset.property || '';
+      startWordTest(type, property);
+      return;
+    }
 
-  // Handle table test start via event delegation
-  $(document).on('click', '[data-action="start-test-table"]', function (this: HTMLElement) {
-    const property = this.dataset.property || '';
-    startTestTable(property);
+    const tableTarget = (e.target as HTMLElement).closest<HTMLElement>('[data-action="start-test-table"]');
+    if (tableTarget) {
+      const property = tableTarget.dataset.property || '';
+      startTestTable(property);
+    }
   });
 }
 
 // Auto-initialize when DOM is ready
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
   initTestHeaderEvents();
   // Initialize utterance setting if the checkbox exists
   if (document.getElementById('utterance-allowed')) {

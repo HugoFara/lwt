@@ -262,15 +262,12 @@ HTML;
         if (ViteHelper::shouldUse()) {
             echo '<!-- Vite assets -->';
             echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
-            echo '<script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>';
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
-            echo '<link rel="stylesheet" type="text/css" href="/assets/css/jquery-ui.css" />';
             echo '<link rel="stylesheet" type="text/css" href="/assets/css/styles.css" />';
             echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
-            echo '<script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>';
-            echo '<!-- Legacy only: overlib (Vite uses jQuery UI dialogs) -->';
+            echo '<!-- Legacy only: overlib (Vite uses native dialogs) -->';
             echo '<script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>';
         }
 
@@ -329,15 +326,12 @@ HTML;
             echo '<!-- Vite assets -->';
             echo '<!-- Load jQuery synchronously for inline scripts compatibility -->';
             echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
-            echo '<script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>';
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
-            echo '<link rel="stylesheet" type="text/css" href="' . get_file_path('css/jquery-ui.css') . '" />';
             echo '<link rel="stylesheet" type="text/css" href="' . get_file_path('css/styles.css') . '" />';
             echo '<script type="text/javascript" src="/assets/js/jquery.js" charset="utf-8"></script>';
-            echo '<script type="text/javascript" src="/assets/js/jquery-ui.min.js" charset="utf-8"></script>';
-            echo '<!-- Legacy only: overlib (Vite uses jQuery UI dialogs) -->';
+            echo '<!-- Legacy only: overlib (Vite uses native dialogs) -->';
             echo '<script type="text/javascript" src="/assets/js/overlib/overlib_mini.js" charset="utf-8"></script>';
             echo '<script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>';
         }

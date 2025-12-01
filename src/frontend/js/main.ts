@@ -7,13 +7,11 @@
 
 // Import CSS from base directory
 import '../css/base/styles.css';
-import '../css/base/jquery-ui.css';
 import '../css/base/html5_audio_player.css';
 
 // jQuery is loaded externally (synchronously) for inline script compatibility
 // In production, we use the global jQuery; in dev mode, we may import it
 import $ from 'jquery';
-import 'jquery-ui-dist/jquery-ui';
 
 // Import TypeScript modules
 

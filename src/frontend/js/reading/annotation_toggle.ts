@@ -7,16 +7,19 @@
  * @since 3.0.0
  */
 
-import $ from 'jquery';
-
 /**
  * Hide translations (text display).
  * Sets the translation ruby text to match background color.
  */
 export function doHideTranslations(): void {
-  $('#showt').show();
-  $('#hidet').hide();
-  $('.anntermruby').css('color', '#E5E4E2').css('background-color', '#E5E4E2');
+  const showt = document.getElementById('showt');
+  const hidet = document.getElementById('hidet');
+  if (showt) showt.style.display = '';
+  if (hidet) hidet.style.display = 'none';
+  document.querySelectorAll<HTMLElement>('.anntermruby').forEach(el => {
+    el.style.color = '#E5E4E2';
+    el.style.backgroundColor = '#E5E4E2';
+  });
 }
 
 /**
@@ -24,9 +27,14 @@ export function doHideTranslations(): void {
  * Restores the translation ruby text to normal visibility.
  */
 export function doShowTranslations(): void {
-  $('#showt').hide();
-  $('#hidet').show();
-  $('.anntermruby').css('color', 'inherit').css('background-color', '');
+  const showt = document.getElementById('showt');
+  const hidet = document.getElementById('hidet');
+  if (showt) showt.style.display = 'none';
+  if (hidet) hidet.style.display = '';
+  document.querySelectorAll<HTMLElement>('.anntermruby').forEach(el => {
+    el.style.color = 'inherit';
+    el.style.backgroundColor = '';
+  });
 }
 
 /**
@@ -34,9 +42,14 @@ export function doShowTranslations(): void {
  * Sets the annotation ruby text to match background color.
  */
 export function doHideAnnotations(): void {
-  $('#show').show();
-  $('#hide').hide();
-  $('.anntransruby2').css('color', '#C8DCF0').css('background-color', '#C8DCF0');
+  const show = document.getElementById('show');
+  const hide = document.getElementById('hide');
+  if (show) show.style.display = '';
+  if (hide) hide.style.display = 'none';
+  document.querySelectorAll<HTMLElement>('.anntransruby2').forEach(el => {
+    el.style.color = '#C8DCF0';
+    el.style.backgroundColor = '#C8DCF0';
+  });
 }
 
 /**
@@ -44,9 +57,14 @@ export function doHideAnnotations(): void {
  * Restores the annotation ruby text to normal visibility.
  */
 export function doShowAnnotations(): void {
-  $('#show').hide();
-  $('#hide').show();
-  $('.anntransruby2').css('color', '').css('background-color', '');
+  const show = document.getElementById('show');
+  const hide = document.getElementById('hide');
+  if (show) show.style.display = 'none';
+  if (hide) hide.style.display = '';
+  document.querySelectorAll<HTMLElement>('.anntransruby2').forEach(el => {
+    el.style.color = '';
+    el.style.backgroundColor = '';
+  });
 }
 
 /**

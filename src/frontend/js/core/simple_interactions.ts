@@ -13,7 +13,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
 import { lwtFormCheck } from '../forms/unloadformcheck';
 import { showRightFrames, hideRightFrames } from '../reading/frame_management';
 import { showAllwordsClick } from './ui_utilities';
@@ -82,17 +81,19 @@ export function confirmSubmit(message: string = 'Are you sure?'): boolean {
  * - data-confirm-submit="message" - Confirm before form submission
  */
 export function initSimpleInteractions(): void {
-  // Handle click actions
-  $(document).on('click', '[data-action]', function (e) {
-    const $el = $(this);
-    const action = $el.data('action') as string;
-    const url = $el.data('url') as string | undefined;
-    const confirmMsg = $el.data('confirm') as string | undefined;
+  // Handle click actions using event delegation
+  document.addEventListener('click', (e) => {
+    const el = (e.target as HTMLElement).closest<HTMLElement>('[data-action]');
+    if (!el) return;
+
+    const action = el.dataset.action;
+    const url = el.dataset.url;
+    const confirmMsg = el.dataset.confirm;
 
     // Check for confirmation first
     if (confirmMsg && !confirm(confirmMsg)) {
       e.preventDefault();
-      return false;
+      return;
     }
 
     switch (action) {
@@ -124,7 +125,7 @@ export function initSimpleInteractions(): void {
       // Uses the existing confirmDelete function pattern
       if (!confirm('CONFIRM\n\nAre you sure you want to delete?')) {
         e.preventDefault();
-        return false;
+        return;
       }
       // If confirmed and has URL, navigate
       if (url) {
@@ -167,7 +168,7 @@ export function initSimpleInteractions(): void {
       // Add a translation word to the field
       e.preventDefault();
       {
-        const word = $el.data('word') as string;
+        const word = el.dataset.word;
         if (word) {
           addTranslation(word);
         }
@@ -178,8 +179,8 @@ export function initSimpleInteractions(): void {
       // Open URL in new window (optionally named via data-window-name)
       e.preventDefault();
       {
-        const windowName = $el.data('window-name') as string | undefined;
-        const targetUrl = url || ($el.is('a') ? $el.attr('href') : undefined);
+        const windowName = el.dataset.windowName;
+        const targetUrl = url || (el.tagName === 'A' ? (el as HTMLAnchorElement).href : undefined);
         if (targetUrl) {
           window.open(targetUrl, windowName || '_blank');
         }
@@ -190,7 +191,7 @@ export function initSimpleInteractions(): void {
       // Mark all unknown words as well-known
       e.preventDefault();
       {
-        const textId = $el.data('text-id');
+        const textId = el.dataset.textId;
         if (textId && confirm('Are you sure?')) {
           showRightFrames('all_words_wellknown.php?text=' + textId);
         }
@@ -201,7 +202,7 @@ export function initSimpleInteractions(): void {
       // Mark all unknown words as ignored
       e.preventDefault();
       {
-        const textId = $el.data('text-id');
+        const textId = el.dataset.textId;
         if (textId && confirm('Are you sure?')) {
           showRightFrames('all_words_wellknown.php?text=' + textId + '&stat=98');
         }
@@ -220,8 +221,8 @@ export function initSimpleInteractions(): void {
       // Change word status in test table (plus/minus buttons)
       e.preventDefault();
       {
-        const wordId = $el.data('word-id') as string;
-        const direction = $el.data('direction') as string;
+        const wordId = el.dataset.wordId;
+        const direction = el.dataset.direction;
         if (wordId) {
           changeTableTestStatus(wordId, direction === 'up');
         }
@@ -243,41 +244,50 @@ export function initSimpleInteractions(): void {
   });
 
   // Handle pager navigation (select dropdown)
-  $(document).on('change', 'select[data-action="pager-navigate"]', function () {
-    const $el = $(this);
-    const baseUrl = $el.data('base-url') as string;
-    const selectedValue = $el.val() as string;
-    if (baseUrl && selectedValue) {
-      location.href = baseUrl + '?page=' + selectedValue;
+  document.addEventListener('change', (e) => {
+    const target = e.target as HTMLElement;
+
+    // Pager navigation
+    if (target.matches('select[data-action="pager-navigate"]')) {
+      const select = target as HTMLSelectElement;
+      const baseUrl = select.dataset.baseUrl;
+      const selectedValue = select.value;
+      if (baseUrl && selectedValue) {
+        location.href = baseUrl + '?page=' + selectedValue;
+      }
+      return;
+    }
+
+    // Quick menu navigation
+    if (target.matches('select[data-action="quick-menu-redirect"]')) {
+      quickMenuRedirection((target as HTMLSelectElement).value);
     }
   });
 
-  // Handle quick menu navigation (select dropdown)
-  $(document).on('change', 'select[data-action="quick-menu-redirect"]', function () {
-    quickMenuRedirection($(this).val() as string);
-  });
+  // Handle form submission confirmation and auto-submit
+  document.addEventListener('submit', (e) => {
+    const form = e.target as HTMLFormElement;
 
-  // Handle form submission confirmation
-  $(document).on('submit', 'form[data-confirm-submit]', function (e) {
-    const message = $(this).data('confirm-submit') as string || 'Are you sure?';
-    if (!confirm(message)) {
+    // Form submission confirmation
+    if (form.dataset.confirmSubmit !== undefined) {
+      const message = form.dataset.confirmSubmit || 'Are you sure?';
+      if (!confirm(message)) {
+        e.preventDefault();
+        return;
+      }
+    }
+
+    // Forms that auto-submit by clicking a button
+    if (form.dataset.autoSubmitButton) {
       e.preventDefault();
-      return false;
+      const buttonName = form.dataset.autoSubmitButton;
+      const button = form.querySelector<HTMLElement>(`[name="${buttonName}"]`);
+      if (button) {
+        button.click();
+      }
     }
-  });
-
-  // Handle forms that auto-submit by clicking a button
-  // (replaces onsubmit="document.form1.buttonname.click(); return false;")
-  $(document).on('submit', 'form[data-auto-submit-button]', function (e) {
-    e.preventDefault();
-    const buttonName = $(this).data('auto-submit-button') as string;
-    const button = this.querySelector(`[name="${buttonName}"]`) as HTMLElement | null;
-    if (button) {
-      button.click();
-    }
-    return false;
   });
 }
 
 // Initialize on document ready
-$(document).ready(initSimpleInteractions);
+document.addEventListener('DOMContentLoaded', initSimpleInteractions);

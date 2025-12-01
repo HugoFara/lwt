@@ -1,34 +1,12 @@
 /**
- * Word Popup - jQuery UI Dialog replacement for overlib
+ * Word Popup - Native dialog implementation for overlib replacement
  *
  * This module provides popup dialogs for word interactions,
- * replacing the legacy overlib library with jQuery UI dialogs.
+ * using the native HTML <dialog> element instead of jQuery UI.
  *
  * @license unlicense
  * @since 3.0.0
  */
-
-import $ from 'jquery';
-
-// Extend jQuery UI dialog types
-declare global {
-  interface JQuery {
-    dialog(options?: DialogOptions | string): JQuery;
-    dialog(method: string, option: string, value: unknown): JQuery;
-  }
-}
-
-interface DialogOptions {
-  title?: string;
-  width?: number | string;
-  height?: number | string;
-  modal?: boolean;
-  autoOpen?: boolean;
-  position?: { my: string; at: string; of: Event | Element | null };
-  classes?: Record<string, string>;
-  close?: () => void;
-  open?: () => void;
-}
 
 // Configuration matching old overlib settings
 const POPUP_CONFIG = {
@@ -38,46 +16,117 @@ const POPUP_CONFIG = {
   fontFamily: '"Lucida Grande", Arial, sans-serif, STHeiti, "Arial Unicode MS", MingLiu'
 };
 
-// Store the current popup element
-let currentPopup: JQuery | null = null;
+// Store the current popup element and positioning event
+let dialogElement: HTMLDialogElement | null = null;
+let titleElement: HTMLElement | null = null;
+let contentElement: HTMLElement | null = null;
 let currentEvent: Event | null = null;
 
 /**
- * Initialize the popup container in the DOM
+ * Initialize the popup dialog in the DOM
  */
-function ensurePopupContainer(): JQuery {
-  let container = $('#lwt-word-popup');
-  if (container.length === 0) {
-    container = $('<div id="lwt-word-popup"></div>').appendTo('body');
-    container.dialog({
-      autoOpen: false,
-      width: POPUP_CONFIG.width,
-      modal: false,
-      classes: {
-        'ui-dialog': 'lwt-popup-dialog'
-      },
-      close: function () {
-        currentPopup = null;
-        currentEvent = null;
-      }
-    });
+function ensurePopupContainer(): HTMLDialogElement {
+  if (dialogElement) {
+    return dialogElement;
   }
-  return container;
+
+  // Create the dialog element
+  dialogElement = document.createElement('dialog');
+  dialogElement.id = 'lwt-word-popup';
+  dialogElement.className = 'lwt-popup-dialog';
+
+  // Create titlebar
+  const titlebar = document.createElement('div');
+  titlebar.className = 'lwt-popup-titlebar';
+
+  titleElement = document.createElement('span');
+  titleElement.className = 'lwt-popup-title';
+  titleElement.textContent = 'Word';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'lwt-popup-close';
+  closeBtn.textContent = '×';
+  closeBtn.type = 'button';
+  closeBtn.setAttribute('aria-label', POPUP_CONFIG.closeText);
+  closeBtn.addEventListener('click', () => cClick());
+
+  titlebar.appendChild(titleElement);
+  titlebar.appendChild(closeBtn);
+
+  // Create content area
+  contentElement = document.createElement('div');
+  contentElement.className = 'lwt-popup-content';
+
+  dialogElement.appendChild(titlebar);
+  dialogElement.appendChild(contentElement);
+  document.body.appendChild(dialogElement);
+
+  // Close on click outside (backdrop click)
+  dialogElement.addEventListener('click', (e) => {
+    if (e.target === dialogElement) {
+      cClick();
+    }
+  });
+
+  // Close on Escape key (native dialog handles this, but we need to clean up state)
+  dialogElement.addEventListener('close', () => {
+    currentEvent = null;
+  });
+
+  return dialogElement;
+}
+
+/**
+ * Position the dialog near the mouse event
+ */
+function positionDialog(dialog: HTMLDialogElement, event: MouseEvent | null): void {
+  if (event) {
+    // Position near the click with offset
+    const offsetX = 10;
+    const offsetY = 10;
+    let x = event.clientX + offsetX;
+    let y = event.clientY + offsetY;
+
+    // Ensure dialog stays within viewport
+    const dialogRect = dialog.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Adjust if would overflow right edge
+    if (x + POPUP_CONFIG.width > viewportWidth) {
+      x = Math.max(10, viewportWidth - POPUP_CONFIG.width - 10);
+    }
+
+    // Adjust if would overflow bottom edge (estimate height)
+    const estimatedHeight = dialogRect.height || 200;
+    if (y + estimatedHeight > viewportHeight) {
+      y = Math.max(10, event.clientY - estimatedHeight - offsetY);
+    }
+
+    dialog.style.position = 'fixed';
+    dialog.style.left = `${x}px`;
+    dialog.style.top = `${y}px`;
+    dialog.style.margin = '0';
+  } else {
+    // Center in viewport
+    dialog.style.position = 'fixed';
+    dialog.style.left = '50%';
+    dialog.style.top = '50%';
+    dialog.style.transform = 'translate(-50%, -50%)';
+    dialog.style.margin = '0';
+  }
 }
 
 /**
  * Close any open popup
  */
 export function cClick(): void {
-  if (currentPopup) {
-    try {
-      currentPopup.dialog('close');
-    } catch {
-      // Dialog might already be destroyed
-    }
-    currentPopup = null;
-    currentEvent = null;
+  if (dialogElement && dialogElement.open) {
+    dialogElement.close();
+    // Reset transform for next positioning
+    dialogElement.style.transform = '';
   }
+  currentEvent = null;
 }
 
 // Legacy alias
@@ -100,32 +149,24 @@ export function overlib(content: string, _caption?: unknown, title?: string): bo
   // Close any existing popup
   cClick();
 
-  const container = ensurePopupContainer();
+  const dialog = ensurePopupContainer();
 
-  // Set content
-  container.html(content);
-
-  // Configure and open dialog
-  container.dialog('option', 'title', title || 'Word');
-
-  // Position near mouse/click if we have an event
-  if (currentEvent && currentEvent instanceof MouseEvent) {
-    container.dialog('option', 'position', {
-      my: 'left top',
-      at: 'left+' + (currentEvent.clientX + 10) + ' top+' + (currentEvent.clientY + 10),
-      of: window
-    });
-  } else {
-    // Default position
-    container.dialog('option', 'position', {
-      my: 'center',
-      at: 'center',
-      of: window
-    });
+  // Set title
+  if (titleElement) {
+    titleElement.textContent = title || 'Word';
   }
 
-  container.dialog('open');
-  currentPopup = container;
+  // Set content
+  if (contentElement) {
+    contentElement.innerHTML = content;
+  }
+
+  // Show the dialog (non-modal so user can interact with page)
+  dialog.show();
+
+  // Position after showing so we can measure
+  const mouseEvent = currentEvent instanceof MouseEvent ? currentEvent : null;
+  positionDialog(dialog, mouseEvent);
 
   return true;
 }
@@ -158,23 +199,56 @@ const styles = `
 .lwt-popup-dialog {
   font-family: ${POPUP_CONFIG.fontFamily};
   font-size: 13px;
+  width: ${POPUP_CONFIG.width}px;
+  padding: 0;
+  border: 1px solid #5050A0;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: calc(100vw - 20px);
+  max-height: calc(100vh - 20px);
+  overflow: hidden;
 }
-.lwt-popup-dialog .ui-dialog-titlebar {
+.lwt-popup-dialog::backdrop {
+  background: transparent;
+}
+.lwt-popup-titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: #5050A0;
   color: #FFFFFF;
   padding: 5px 10px;
+  cursor: default;
 }
-.lwt-popup-dialog .ui-dialog-titlebar a {
+.lwt-popup-title {
+  font-weight: bold;
+}
+.lwt-popup-titlebar a {
   color: #FFFF00;
 }
-.lwt-popup-dialog .ui-dialog-content {
+.lwt-popup-close {
+  background: transparent;
+  border: none;
+  color: #FFFFFF;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  margin: -2px -4px -2px 8px;
+}
+.lwt-popup-close:hover {
+  color: #FFFF00;
+}
+.lwt-popup-content {
   background: ${POPUP_CONFIG.fgColor};
   padding: 10px;
+  overflow: auto;
+  max-height: calc(100vh - 80px);
 }
-.lwt-popup-dialog .ui-dialog-content a {
+.lwt-popup-content a {
   color: #0000FF;
 }
-.lwt-popup-dialog .ui-dialog-content a:hover {
+.lwt-popup-content a:hover {
   color: #FF0000;
 }
 #lwt-word-popup img {
