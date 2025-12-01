@@ -6,13 +6,27 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import $ from 'jquery';
-
 /**
  * Configuration for wizard step 4.
  */
 export interface WizardStep4Config {
   editFeedId: number | null;
+}
+
+/**
+ * Helper to get input value
+ */
+function getInputValue(selector: string): string {
+  const el = document.querySelector<HTMLInputElement | HTMLSelectElement>(selector);
+  return el?.value || '';
+}
+
+/**
+ * Helper to set input value
+ */
+function setInputValue(selector: string, value: string): void {
+  const el = document.querySelector<HTMLInputElement>(selector);
+  if (el) el.value = value;
 }
 
 /**
@@ -25,27 +39,30 @@ export const lwt_wizard_step4 = {
    * @returns The options string for NfOptions field
    */
   buildOptionsString: function (): string {
-    let str = $('[name="edit_text"]:checked').length > 0 ? 'edit_text=1,' : '';
+    const editTextChecked = document.querySelector<HTMLInputElement>('[name="edit_text"]:checked');
+    let str = editTextChecked ? 'edit_text=1,' : '';
 
-    $('[name^="c_"]').each(function () {
-      const checkbox = this as HTMLInputElement;
+    document.querySelectorAll<HTMLInputElement>('[name^="c_"]').forEach((checkbox) => {
       if (checkbox.checked) {
-        const $parent = $(checkbox).parent();
-        const $textInput = $parent.children('input[type="text"]');
-        const inputName = $textInput.attr('name') || '';
-        const inputValue = $textInput.val() as string || '';
+        const parent = checkbox.parentElement;
+        if (!parent) return;
+
+        const textInput = parent.querySelector<HTMLInputElement>('input[type="text"]');
+        const inputName = textInput?.name || '';
+        const inputValue = textInput?.value || '';
 
         str += inputName + '=' + inputValue;
 
-        if ($(checkbox).attr('name') === 'c_autoupdate') {
-          str += ($parent.find('select').val() as string) + ',';
+        if (checkbox.name === 'c_autoupdate') {
+          const select = parent.querySelector<HTMLSelectElement>('select');
+          str += (select?.value || '') + ',';
         } else {
           str += ',';
         }
       }
     });
 
-    const articleSource = $('input[name="article_source"]').val() as string;
+    const articleSource = getInputValue('input[name="article_source"]');
     if (articleSource !== '') {
       str += 'article_source=' + articleSource;
     }
@@ -57,17 +74,28 @@ export const lwt_wizard_step4 = {
    * Handle checkbox change - toggle associated inputs.
    */
   handleCheckboxChange: function (this: HTMLInputElement): void {
-    const $parent = $(this).parent();
+    const parent = this.parentElement;
+    if (!parent) return;
+
+    const textInput = parent.querySelector<HTMLInputElement>('input[type="text"]');
+    const select = parent.querySelector<HTMLSelectElement>('select');
+
     if (this.checked) {
-      $parent.children('input[type="text"]')
-        .removeAttr('disabled')
-        .addClass('notempty');
-      $parent.find('select').removeAttr('disabled');
+      if (textInput) {
+        textInput.disabled = false;
+        textInput.classList.add('notempty');
+      }
+      if (select) {
+        select.disabled = false;
+      }
     } else {
-      $parent.children('input[type="text"]')
-        .attr('disabled', 'disabled')
-        .removeClass('notempty');
-      $parent.find('select').attr('disabled', 'disabled');
+      if (textInput) {
+        textInput.disabled = true;
+        textInput.classList.remove('notempty');
+      }
+      if (select) {
+        select.disabled = true;
+      }
     }
   },
 
@@ -76,27 +104,30 @@ export const lwt_wizard_step4 = {
    */
   handleSubmit: function (): void {
     const str = lwt_wizard_step4.buildOptionsString();
-    $('input[name="NfOptions"]').val(str);
+    setInputValue('input[name="NfOptions"]', str);
   },
 
   /**
    * Handle back button click - navigate to step 3 with current options.
    */
   clickBack: function (): boolean {
-    let str = $('[name="edit_text"]:checked').length > 0 ? 'edit_text=1,' : '';
+    const editTextChecked = document.querySelector<HTMLInputElement>('[name="edit_text"]:checked');
+    let str = editTextChecked ? 'edit_text=1,' : '';
 
-    $('[name^="c_"]').each(function () {
-      const checkbox = this as HTMLInputElement;
+    document.querySelectorAll<HTMLInputElement>('[name^="c_"]').forEach((checkbox) => {
       if (checkbox.checked) {
-        const $parent = $(checkbox).parent();
-        const $textInput = $parent.children('input[type="text"]');
-        const inputName = $textInput.attr('name') || '';
-        const inputValue = $textInput.val() as string || '';
+        const parent = checkbox.parentElement;
+        if (!parent) return;
+
+        const textInput = parent.querySelector<HTMLInputElement>('input[type="text"]');
+        const inputName = textInput?.name || '';
+        const inputValue = textInput?.value || '';
 
         str += inputName + '=' + inputValue;
 
-        if ($(checkbox).attr('name') === 'c_autoupdate') {
-          str += ($parent.find('select').val() as string) + ',';
+        if (checkbox.name === 'c_autoupdate') {
+          const select = parent.querySelector<HTMLSelectElement>('select');
+          str += (select?.value || '') + ',';
         } else {
           str += ',';
         }
@@ -104,8 +135,8 @@ export const lwt_wizard_step4 = {
     });
 
     location.href = '/feeds/wizard?step=3&NfOptions=' + str +
-      '&NfLgID=' + $('select[name="NfLgID"]').val() +
-      '&NfName=' + $('input[name="NfName"]').val();
+      '&NfLgID=' + getInputValue('select[name="NfLgID"]') +
+      '&NfName=' + getInputValue('input[name="NfName"]');
 
     return false;
   },
@@ -117,8 +148,14 @@ export const lwt_wizard_step4 = {
    */
   setupEditMode: function (editFeedId: number | null): void {
     if (editFeedId) {
-      $('input[name="save_feed"]').attr('name', 'update_feed');
-      $('input[type="submit"]').val('Update');
+      const saveFeedInput = document.querySelector<HTMLInputElement>('input[name="save_feed"]');
+      if (saveFeedInput) {
+        saveFeedInput.name = 'update_feed';
+      }
+      const submitInput = document.querySelector<HTMLInputElement>('input[type="submit"]');
+      if (submitInput) {
+        submitInput.value = 'Update';
+      }
     }
   },
 
@@ -126,14 +163,15 @@ export const lwt_wizard_step4 = {
    * Set up the page header.
    */
   setupHeader: function (): void {
-    $('h1')
-      .eq(-1)
-      .html(
+    const h1Elements = document.querySelectorAll('h1');
+    const lastH1 = h1Elements[h1Elements.length - 1];
+    if (lastH1) {
+      lastH1.innerHTML =
         'Feed Wizard | Step 4 - Edit Options ' +
         '<a href="docs/info.html#feed_wizard" target="_blank">' +
-        '<img alt="Help" title="Help" src="/assets/icons/question-frame.png"></a>'
-      )
-      .css('text-align', 'center');
+        '<img alt="Help" title="Help" src="/assets/icons/question-frame.png"></a>';
+      lastH1.style.textAlign = 'center';
+    }
   }
 };
 
@@ -155,23 +193,35 @@ export function initWizardStep4(config: WizardStep4Config): void {
  */
 function initWizardStep4Events(): void {
   // Handle checkbox changes for option fields
-  $(document).on('change', '[name^="c_"]', function (this: HTMLInputElement) {
-    lwt_wizard_step4.handleCheckboxChange.call(this);
+  document.addEventListener('change', (e) => {
+    const target = e.target as HTMLInputElement;
+    if (target.matches('[name^="c_"]')) {
+      lwt_wizard_step4.handleCheckboxChange.call(target);
+    }
   });
 
   // Handle submit button click
-  $(document).on('click', '[data-action="wizard-step4-submit"]', function () {
-    lwt_wizard_step4.handleSubmit();
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-action="wizard-step4-submit"]')) {
+      lwt_wizard_step4.handleSubmit();
+    }
   });
 
   // Handle back button click
-  $(document).on('click', '[data-action="wizard-step4-back"]', function () {
-    lwt_wizard_step4.clickBack();
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-action="wizard-step4-back"]')) {
+      lwt_wizard_step4.clickBack();
+    }
   });
 
   // Handle cancel button click
-  $(document).on('click', '[data-action="wizard-step4-cancel"]', function () {
-    location.href = '/feeds/edit?del_wiz=1';
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-action="wizard-step4-cancel"]')) {
+      location.href = '/feeds/edit?del_wiz=1';
+    }
   });
 }
 
@@ -192,7 +242,7 @@ function autoInitWizardStep4(): void {
 }
 
 // Auto-initialize event handlers and step 4
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
   initWizardStep4Events();
   autoInitWizardStep4();
 });

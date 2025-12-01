@@ -9,7 +9,6 @@
  * @since 3.0.0
  */
 
-import $ from 'jquery';
 import { speechDispatcher } from '../core/user_interactions';
 import { getGlosbeTranslation } from './translation_api';
 
@@ -59,14 +58,20 @@ function hasParentFrameContext(): boolean {
  */
 function initGoogleTranslatePage(config: GoogleTranslateConfig): void {
   // Set up text-to-speech click handler
-  $('#textToSpeech').on('click', function () {
-    const langId = typeof config.langId === 'string' ? parseInt(config.langId, 10) : config.langId;
-    speechDispatcher(config.text, langId);
-  });
+  const textToSpeechEl = document.getElementById('textToSpeech');
+  if (textToSpeechEl) {
+    textToSpeechEl.addEventListener('click', function () {
+      const langId = typeof config.langId === 'string' ? parseInt(config.langId, 10) : config.langId;
+      speechDispatcher(config.text, langId);
+    });
+  }
 
   // Remove delete button if not in a frame/popup context
   if (!hasParentFrameContext()) {
-    $('#del_translation').remove();
+    const delTranslationEl = document.getElementById('del_translation');
+    if (delTranslationEl) {
+      delTranslationEl.remove();
+    }
   }
 }
 
@@ -77,18 +82,20 @@ function initGoogleTranslatePage(config: GoogleTranslateConfig): void {
 function initGlosbePage(config: GlosbeConfig): void {
   // Remove delete button if not in a frame/popup context
   if (!hasParentFrameContext()) {
-    $('#del_translation').remove();
+    const delTranslationEl = document.getElementById('del_translation');
+    if (delTranslationEl) {
+      delTranslationEl.remove();
+    }
   }
 
   // Handle error state
   if (config.error) {
     if (config.error === 'empty_term') {
-      $('body').html('<p class="msgblue">Term is not set!</p>');
+      document.body.innerHTML = '<p class="msgblue">Term is not set!</p>';
     } else {
-      $('body').html(
+      document.body.innerHTML =
         '<p class="red">There seems to be something wrong with the Glosbe API!</p>' +
-        '<p class="red">Please check the dictionaries in the Language Settings!</p>'
-      );
+        '<p class="red">Please check the dictionaries in the Language Settings!</p>';
     }
     return;
   }
@@ -125,4 +132,8 @@ export function autoInitTranslationPages(): void {
 }
 
 // Auto-initialize on DOM ready
-$(document).ready(autoInitTranslationPages);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', autoInitTranslationPages);
+} else {
+  autoInitTranslationPages();
+}

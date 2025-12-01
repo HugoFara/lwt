@@ -6,7 +6,6 @@
  * @since   1.6.16-fork
  */
 
-import $ from 'jquery';
 import { LWT_DATA } from '../core/lwt_state';
 import { run_overlib_test } from '../terms/overlib_interface';
 import { showRightFrames, cleanupRightFrames } from '../reading/frame_management';
@@ -14,9 +13,8 @@ import { showRightFrames, cleanupRightFrames } from '../reading/frame_management
 /**
  * Helper to safely get an HTML attribute value as a string.
  */
-function getAttr($el: JQuery, attr: string): string {
-  const val = $el.attr(attr);
-  return typeof val === 'string' ? val : '';
+function getAttr(el: HTMLElement, attr: string): string {
+  return el.getAttribute(attr) || '';
 }
 
 /**
@@ -25,19 +23,21 @@ function getAttr($el: JQuery, attr: string): string {
  * @returns false
  */
 export function word_click_event_do_test_test(this: HTMLElement): boolean {
-  const $this = $(this);
   run_overlib_test(
     LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link,
-    getAttr($this, 'data_wid'),
-    getAttr($this, 'data_text'),
-    getAttr($this, 'data_trans'),
-    getAttr($this, 'data_rom'),
-    getAttr($this, 'data_status'),
-    getAttr($this, 'data_sent'),
-    parseInt(getAttr($this, 'data_todo'), 10),
+    getAttr(this, 'data_wid'),
+    getAttr(this, 'data_text'),
+    getAttr(this, 'data_trans'),
+    getAttr(this, 'data_rom'),
+    getAttr(this, 'data_status'),
+    getAttr(this, 'data_sent'),
+    parseInt(getAttr(this, 'data_todo'), 10),
     null // oldstat - unused legacy parameter
   );
-  $('.todo').text(LWT_DATA.test.solution);
+  const todoEl = document.querySelector('.todo');
+  if (todoEl) {
+    todoEl.textContent = LWT_DATA.test.solution;
+  }
   return false;
 }
 
@@ -47,12 +47,14 @@ export function word_click_event_do_test_test(this: HTMLElement): boolean {
  * @param e A keystroke object
  * @returns true if nothing was done, false otherwise
  */
-export function keydown_event_do_test_test(e: JQuery.KeyDownEvent): boolean {
-  if ((e.key === 'Space' || e.which === 32) && !LWT_DATA.test.answer_opened) {
+export function keydown_event_do_test_test(e: KeyboardEvent): boolean {
+  const wordEl = document.querySelector('.word') as HTMLElement | null;
+
+  if ((e.key === ' ' || e.key === 'Space' || e.which === 32) && !LWT_DATA.test.answer_opened) {
     // space : show solution
-    $('.word').trigger('click');
+    wordEl?.click();
     cleanupRightFrames();
-    showRightFrames('show_word.php?wid=' + $('.word').attr('data_wid') + '&ann=');
+    showRightFrames('show_word.php?wid=' + wordEl?.getAttribute('data_wid') + '&ann=');
     LWT_DATA.test.answer_opened = true;
     return false;
   }
@@ -60,21 +62,21 @@ export function keydown_event_do_test_test(e: JQuery.KeyDownEvent): boolean {
     // esc : skip term, don't change status
     showRightFrames(
       'set_test_status.php?wid=' + LWT_DATA.word.id +
-      '&status=' + $('.word').attr('data_status')
+      '&status=' + wordEl?.getAttribute('data_status')
     );
     return false;
   }
-  if (e.key === 'I' || e.which === 73) {
+  if (e.key === 'I' || e.key === 'i' || e.which === 73) {
     // I : ignore, status=98
     showRightFrames('set_test_status.php?wid=' + LWT_DATA.word.id + '&status=98');
     return false;
   }
-  if (e.key === 'W' || e.which === 87) {
+  if (e.key === 'W' || e.key === 'w' || e.which === 87) {
     // W : well known, status=99
     showRightFrames('set_test_status.php?wid=' + LWT_DATA.word.id + '&status=99');
     return false;
   }
-  if (e.key === 'E' || e.which === 69) {
+  if (e.key === 'E' || e.key === 'e' || e.which === 69) {
     // E : edit
     showRightFrames('/word/edit-term?wid=' + LWT_DATA.word.id);
     return false;
@@ -92,7 +94,7 @@ export function keydown_event_do_test_test(e: JQuery.KeyDownEvent): boolean {
     return false;
   }
   for (let i = 0; i < 5; i++) {
-    if (e.which === (49 + i) || e.which === (97 + i)) {
+    if (e.which === (49 + i) || e.which === (97 + i) || e.key === String(i + 1)) {
       // 1,.. : status=i
       showRightFrames(
         'set_test_status.php?wid=' + LWT_DATA.word.id + '&status=' + (i + 1)
@@ -102,4 +104,3 @@ export function keydown_event_do_test_test(e: JQuery.KeyDownEvent): boolean {
   }
   return true;
 }
-

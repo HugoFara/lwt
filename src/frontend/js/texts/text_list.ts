@@ -13,7 +13,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
 import { setLang, resetAll } from '../core/language_settings';
 import { selectToggle, multiActionGo } from '../forms/bulk_actions';
 import { confirmDelete } from '../core/ui_utilities';
@@ -179,39 +178,59 @@ export function initTextList(): void {
     return false;
   });
 
-  // Language filter
-  $(document).on('change', '[data-action="filter-language"]', handleLanguageChange);
+  // Use event delegation on document for dynamically added elements
+  document.addEventListener('change', (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.matches('[data-action]')) return;
 
-  // Query mode filter
-  $(document).on('change', '[data-action="filter-query-mode"]', handleQueryModeChange);
+    const action = target.dataset.action;
+    switch (action) {
+      case 'filter-language':
+        handleLanguageChange(e);
+        break;
+      case 'filter-query-mode':
+        handleQueryModeChange(e);
+        break;
+      case 'filter-tag':
+        handleTagChange(e);
+        break;
+      case 'filter-tag-operator':
+        handleTagOperatorChange(e);
+        break;
+      case 'sort':
+        handleSortChange(e);
+        break;
+      case 'multi-action':
+        handleMultiAction(e);
+        break;
+    }
+  });
 
-  // Filter button
-  $(document).on('click', '[data-action="filter"]', handleFilterClick);
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const actionEl = target.closest('[data-action]') as HTMLElement | null;
+    if (!actionEl) return;
 
-  // Clear button
-  $(document).on('click', '[data-action="clear-filter"]', handleClearClick);
-
-  // Tag filters
-  $(document).on('change', '[data-action="filter-tag"]', handleTagChange);
-
-  // Tag operator (AND/OR)
-  $(document).on('change', '[data-action="filter-tag-operator"]', handleTagOperatorChange);
-
-  // Sort order
-  $(document).on('change', '[data-action="sort"]', handleSortChange);
-
-  // Reset all
-  $(document).on('click', '[data-action="reset-all"]', handleResetAll);
-
-  // Delete confirmation
-  $(document).on('click', '[data-action="confirm-delete"]', handleConfirmDelete);
-
-  // Mark all/none
-  $(document).on('click', '[data-action="mark-toggle"]', handleMarkToggle);
-
-  // Multi-action
-  $(document).on('change', '[data-action="multi-action"]', handleMultiAction);
+    const action = actionEl.dataset.action;
+    switch (action) {
+      case 'filter':
+        handleFilterClick();
+        break;
+      case 'clear-filter':
+        handleClearClick();
+        break;
+      case 'reset-all':
+        handleResetAll();
+        break;
+      case 'confirm-delete':
+        handleConfirmDelete(e);
+        break;
+      case 'mark-toggle':
+        handleMarkToggle(e);
+        break;
+    }
+  });
 }
 
 // Auto-initialize when DOM is ready
-$(document).ready(initTextList);
+document.addEventListener('DOMContentLoaded', initTextList);

@@ -6,7 +6,6 @@
  * @since   1.6.16-fork
  */
 
-import $ from 'jquery';
 import { escape_html_chars } from '../core/html_utils';
 import { isInt } from '../forms/form_validation';
 import { scrollTo } from '../core/hover_intent';
@@ -23,9 +22,22 @@ declare const lwtFormCheck: LwtFormCheck;
 /**
  * Helper to safely get an HTML attribute value as a string.
  */
-function getAttr($el: JQuery, attr: string): string {
-  const val = $el.attr(attr);
-  return typeof val === 'string' ? val : '';
+function getAttr(el: Element | null, attr: string): string {
+  if (!el) return '';
+  const val = el.getAttribute(attr);
+  return val !== null ? val : '';
+}
+
+/**
+ * Serialize a form to an object (replacement for jQuery's serializeObject).
+ */
+function serializeFormToObject(form: HTMLFormElement): Record<string, string> {
+  const result: Record<string, string> = {};
+  const formData = new FormData(form);
+  formData.forEach((value, key) => {
+    result[key] = value.toString();
+  });
+  return result;
 }
 
 // Interface for translation data
@@ -49,12 +61,14 @@ export interface TransData {
  */
 export function setTransRoman(tra: string, rom: string): void {
   let form_changed = false;
-  if ($('textarea[name="WoTranslation"]').length === 1) {
-    $('textarea[name="WoTranslation"]').val(tra);
+  const translationEl = document.querySelector<HTMLTextAreaElement>('textarea[name="WoTranslation"]');
+  if (translationEl) {
+    translationEl.value = tra;
     form_changed = true;
   }
-  if ($('input[name="WoRomanization"]').length === 1) {
-    $('input[name="WoRomanization"]').val(rom);
+  const romanizationEl = document.querySelector<HTMLInputElement>('input[name="WoRomanization"]');
+  if (romanizationEl) {
+    romanizationEl.value = rom;
     form_changed = true;
   }
   if (form_changed) { lwtFormCheck.makeDirty(); }
@@ -68,15 +82,19 @@ export function setTransRoman(tra: string, rom: string): void {
  * @param form_data All the data from the form (e. g. {"rg0": "foo", "rg1": "bar"})
  */
 export async function do_ajax_save_impr_text(textid: number, elem_name: string, form_data: string): Promise<void> {
-  const idwait = '#wait' + elem_name.substring(2);
-  $(idwait).html('<img src="icn/waiting2.gif" />');
+  const waitEl = document.getElementById('wait' + elem_name.substring(2));
+  if (waitEl) {
+    waitEl.innerHTML = '<img src="icn/waiting2.gif" />';
+  }
 
   const response = await apiPost<{ error?: string }>(
     `/texts/${textid}/annotation`,
     { elem: elem_name, data: form_data }
   );
 
-  $(idwait).html('<img src="icn/empty.gif" />');
+  if (waitEl) {
+    waitEl.innerHTML = '<img src="icn/empty.gif" />';
+  }
   if (response.error || response.data?.error) {
     alert(
       'Saving your changes failed, please reload the page and try again! ' +
@@ -85,21 +103,19 @@ export async function do_ajax_save_impr_text(textid: number, elem_name: string, 
   }
 }
 
-// Extend jQuery with serializeObject
-declare global {
-  interface JQuery {
-    serializeObject(): Record<string, unknown>;
-  }
-}
 
 /**
  * Change the annotation for a term by setting its text.
  */
 export function changeImprAnnText(this: HTMLElement): void {
-  $(this).prev('input:radio').attr('checked', 'checked');
-  const textid = parseInt(getAttr($('#editimprtextdata'), 'data_id') || '0', 10);
-  const elem_name = getAttr($(this), 'name');
-  const form_data = JSON.stringify($('form').serializeObject());
+  const prevRadio = this.previousElementSibling as HTMLInputElement | null;
+  if (prevRadio && prevRadio.matches('input[type="radio"]')) {
+    prevRadio.checked = true;
+  }
+  const textid = parseInt(getAttr(document.getElementById('editimprtextdata'), 'data_id') || '0', 10);
+  const elem_name = this.getAttribute('name') || '';
+  const form = document.querySelector('form');
+  const form_data = form ? JSON.stringify(serializeFormToObject(form)) : '{}';
   do_ajax_save_impr_text(textid, elem_name, form_data);
 }
 
@@ -107,9 +123,10 @@ export function changeImprAnnText(this: HTMLElement): void {
  * Change the annotation for a term by setting its text.
  */
 export function changeImprAnnRadio(this: HTMLElement): void {
-  const textid = parseInt(getAttr($('#editimprtextdata'), 'data_id') || '0', 10);
-  const elem_name = getAttr($(this), 'name');
-  const form_data = JSON.stringify($('form').serializeObject());
+  const textid = parseInt(getAttr(document.getElementById('editimprtextdata'), 'data_id') || '0', 10);
+  const elem_name = this.getAttribute('name') || '';
+  const form = document.querySelector('form');
+  const form_data = form ? JSON.stringify(serializeFormToObject(form)) : '{}';
   do_ajax_save_impr_text(textid, elem_name, form_data);
 }
 
@@ -120,8 +137,9 @@ export function changeImprAnnRadio(this: HTMLElement): void {
  * @param txid   Text HTML ID or unique HTML selector
  */
 export async function updateTermTranslation(wordid: number, txid: string): Promise<void> {
-  const translation = ($(txid).val() as string).trim();
-  const pagepos = $(document).scrollTop() || 0;
+  const el = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(txid);
+  const translation = (el?.value || '').trim();
+  const pagepos = window.scrollY || document.documentElement.scrollTop || 0;
   if (translation === '' || translation === '*') {
     alert('Text Field is empty or = \'*\'!');
     return;
@@ -148,8 +166,9 @@ export async function updateTermTranslation(wordid: number, txid: string): Promi
  * @param lang   Language ID
  */
 export async function addTermTranslation(txid: string, word: string, lang: number): Promise<void> {
-  const translation = ($(txid).val() as string).trim();
-  const pagepos = $(document).scrollTop() || 0;
+  const el = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(txid);
+  const translation = (el?.value || '').trim();
+  const pagepos = window.scrollY || document.documentElement.scrollTop || 0;
   if (translation === '' || translation === '*') {
     alert('Text Field is empty or = \'*\'!');
     return;
@@ -182,7 +201,10 @@ export async function changeTableTestStatus(wordid: string, up: boolean): Promis
     return;
   }
   if (response.data?.increment) {
-    $('#STAT' + wordid).html(response.data.increment);
+    const statEl = document.getElementById('STAT' + wordid);
+    if (statEl) {
+      statEl.innerHTML = response.data.increment;
+    }
   }
 }
 
@@ -223,21 +245,24 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
   // First create a link to edit the word in a new window
   let edit_word_link: string;
   if (widset) {
-    const req_arg = $.param({
-      fromAnn: '$(document).scrollTop()',
-      wid: trans_data.wid,
+    const params = new URLSearchParams({
+      fromAnn: String(window.scrollY || document.documentElement.scrollTop || 0),
+      wid: String(trans_data.wid),
       ord: trans_data.term_ord,
-      tid: text_id
+      tid: String(text_id)
     });
     edit_word_link = `<a name="rec${trans_data.ann_index}"></a>
     <span class="click"
-    onclick="oewin('/word/edit?` + escape_html_chars(req_arg) + `');">
+    onclick="oewin('/word/edit?` + escape_html_chars(params.toString()) + `');">
           <img src="icn/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
       </span>`;
   } else {
     edit_word_link = '&nbsp;';
   }
-  $(`#editlink${trans_data.ann_index}`).html(edit_word_link);
+  const editLinkEl = document.getElementById(`editlink${trans_data.ann_index}`);
+  if (editLinkEl) {
+    editLinkEl.innerHTML = edit_word_link;
+  }
   // Now edit translations (if necessary)
   let translations_list = '';
   trans_data.translations.forEach(
@@ -260,11 +285,11 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
    &nbsp;
   <img class="click" src="icn/eraser.png" title="Erase Text Field"
   alt="Erase Text Field"
-  onclick="$('#tx${trans_data.ann_index}').val('').trigger('change');" />
+  data-action="erase-field" data-target="#tx${trans_data.ann_index}" />
     &nbsp;
   <img class="click" src="icn/star.png" title="* (Set to Term)"
   alt="* (Set to Term)"
-  onclick="$('#tx${trans_data.ann_index}').val('*').trigger('change');" />
+  data-action="set-star" data-target="#tx${trans_data.ann_index}" />
   &nbsp;`;
   // Add the "plus button" to add a translation
   if (widset) {
@@ -287,7 +312,10 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
       <img src="icn/empty.gif" />
   </span>
   </span>`;
-  $(`#transsel${trans_data.ann_index}`).html(translations_list);
+  const transselEl = document.getElementById(`transsel${trans_data.ann_index}`);
+  if (transselEl) {
+    transselEl.innerHTML = translations_list;
+  }
 }
 
 /**
@@ -300,14 +328,17 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
  * @since 2.9.0 The new parameter $wid is now necessary
  */
 export async function do_ajax_edit_impr_text(pagepos: number, word: string, term_id: number): Promise<void> {
+  const editImprTextDataEl = document.getElementById('editimprtextdata');
   // Special case, on empty word reload the main annotations form
   if (word === '') {
-    $('#editimprtextdata').html('<img src="icn/waiting2.gif" />');
+    if (editImprTextDataEl) {
+      editImprTextDataEl.innerHTML = '<img src="icn/waiting2.gif" />';
+    }
     location.reload();
     return;
   }
   // Load the possible translations for a word
-  const textid = parseInt(getAttr($('#editimprtextdata'), 'data_id') || '0', 10);
+  const textid = parseInt(getAttr(editImprTextDataEl, 'data_id') || '0', 10);
 
   const response = await apiGet<TransData & { error?: string }>(
     `/terms/${term_id}/translations`,
@@ -319,8 +350,12 @@ export async function do_ajax_edit_impr_text(pagepos: number, word: string, term
   } else if (response.data) {
     edit_term_ann_translations(response.data, textid);
     scrollTo(pagepos);
-    $('input.impr-ann-text').on('change', changeImprAnnText);
-    $('input.impr-ann-radio').on('change', changeImprAnnRadio);
+    document.querySelectorAll<HTMLInputElement>('input.impr-ann-text').forEach(el => {
+      el.addEventListener('change', changeImprAnnText);
+    });
+    document.querySelectorAll<HTMLInputElement>('input.impr-ann-radio').forEach(el => {
+      el.addEventListener('change', changeImprAnnRadio);
+    });
   }
 }
 
@@ -343,15 +378,20 @@ export async function do_ajax_req_sim_terms(lg_id: number, word_text: string): P
  * Display the terms similar to a specific term with AJAX.
  */
 export async function do_ajax_show_similar_terms(): Promise<void> {
-  $('#simwords').html('<img src="icn/waiting2.gif" />');
+  const simwordsEl = document.getElementById('simwords');
+  if (simwordsEl) {
+    simwordsEl.innerHTML = '<img src="icn/waiting2.gif" />';
+  }
 
+  const langfieldEl = document.getElementById('langfield') as HTMLInputElement | HTMLSelectElement | null;
+  const wordfieldEl = document.getElementById('wordfield') as HTMLInputElement | null;
   const data = await do_ajax_req_sim_terms(
-    parseInt($('#langfield').val() as string, 10),
-    $('#wordfield').val() as string
+    parseInt(langfieldEl?.value || '0', 10),
+    wordfieldEl?.value || ''
   );
 
-  if (data) {
-    $('#simwords').html(data.similar_terms);
+  if (data && simwordsEl) {
+    simwordsEl.innerHTML = data.similar_terms;
   } else {
     console.log('Failed to load similar terms');
   }
@@ -399,10 +439,16 @@ export function display_example_sentences(
  * @param ctl The selector for the element that should change value on click
  */
 export function change_example_sentences_zone(sentences: [string, string][], ctl: string): void {
-  $('#exsent-waiting').css('display', 'none');
-  $('#exsent-sentences').css('display', 'inherit');
-  const new_element = display_example_sentences(sentences, ctl);
-  $('#exsent-sentences').append(new_element);
+  const waitingEl = document.getElementById('exsent-waiting');
+  const sentencesEl = document.getElementById('exsent-sentences');
+  if (waitingEl) {
+    waitingEl.style.display = 'none';
+  }
+  if (sentencesEl) {
+    sentencesEl.style.display = 'inherit';
+    const new_element = display_example_sentences(sentences, ctl);
+    sentencesEl.appendChild(new_element);
+  }
 }
 
 /**
@@ -414,8 +460,14 @@ export function change_example_sentences_zone(sentences: [string, string][], ctl
  * @param woid Term id (word or multi-word)
  */
 export async function do_ajax_show_sentences(lang: number, word: string, ctl: string, woid: number | string): Promise<void> {
-  $('#exsent-interactable').css('display', 'none');
-  $('#exsent-waiting').css('display', 'inherit');
+  const interactableEl = document.getElementById('exsent-interactable');
+  const waitingEl = document.getElementById('exsent-waiting');
+  if (interactableEl) {
+    interactableEl.style.display = 'none';
+  }
+  if (waitingEl) {
+    waitingEl.style.display = 'inherit';
+  }
 
   let response;
   if (isInt(String(woid)) && woid !== -1) {
@@ -445,35 +497,43 @@ export async function do_ajax_show_sentences(lang: number, word: string, ctl: st
  * Handles elements with data-action attributes for sentence operations.
  */
 function initSentenceEventDelegation(): void {
-  // Handle copy-sentence: copy sentence to textarea
-  $(document).on('click', '[data-action="copy-sentence"]', function (this: HTMLElement) {
-    const targetId = this.dataset.target;
-    const sentence = this.dataset.sentence;
-    if (targetId && sentence !== undefined) {
-      const target = document.getElementById(targetId) as HTMLTextAreaElement | null;
-      if (target) {
-        target.value = sentence;
-        lwtFormCheck.makeDirty();
+  document.addEventListener('click', function (e) {
+    const target = e.target as HTMLElement;
+    const actionEl = target.closest('[data-action]') as HTMLElement | null;
+    if (!actionEl) return;
+
+    const action = actionEl.dataset.action;
+
+    // Handle copy-sentence: copy sentence to textarea
+    if (action === 'copy-sentence') {
+      const targetId = actionEl.dataset.target;
+      const sentence = actionEl.dataset.sentence;
+      if (targetId && sentence !== undefined) {
+        const targetEl = document.getElementById(targetId) as HTMLTextAreaElement | null;
+        if (targetEl) {
+          targetEl.value = sentence;
+          lwtFormCheck.makeDirty();
+        }
       }
     }
-  });
 
-  // Handle show-sentences: load and display example sentences
-  $(document).on('click', '[data-action="show-sentences"]', function (this: HTMLElement) {
-    const lang = parseInt(this.dataset.lang || '0', 10);
-    const termlc = this.dataset.termlc || '';
-    const targetId = this.dataset.target || '';
-    const wid = parseInt(this.dataset.wid || '0', 10);
-    if (lang && termlc) {
-      do_ajax_show_sentences(lang, termlc, targetId, wid);
+    // Handle show-sentences: load and display example sentences
+    if (action === 'show-sentences') {
+      const lang = parseInt(actionEl.dataset.lang || '0', 10);
+      const termlc = actionEl.dataset.termlc || '';
+      const targetId = actionEl.dataset.target || '';
+      const wid = parseInt(actionEl.dataset.wid || '0', 10);
+      if (lang && termlc) {
+        do_ajax_show_sentences(lang, termlc, targetId, wid);
+      }
     }
-  });
 
-  // Handle set-trans-roman: copy translation and romanization from similar terms
-  $(document).on('click', '[data-action="set-trans-roman"]', function (this: HTMLElement) {
-    const translation = this.dataset.translation || '';
-    const romanization = this.dataset.romanization || '';
-    setTransRoman(translation, romanization);
+    // Handle set-trans-roman: copy translation and romanization from similar terms
+    if (action === 'set-trans-roman') {
+      const translation = actionEl.dataset.translation || '';
+      const romanization = actionEl.dataset.romanization || '';
+      setTransRoman(translation, romanization);
+    }
   });
 }
 
@@ -483,69 +543,90 @@ function initSentenceEventDelegation(): void {
  * Handles elements with data-action attributes for annotation operations.
  */
 function initImprovedTextEventDelegation(): void {
-  // Handle erase-field: clear a text input and trigger change event
-  $(document).on('click', '[data-action="erase-field"]', function (this: HTMLElement) {
-    const target = this.dataset.target;
-    if (target) {
-      $(target).val('').trigger('change');
+  document.addEventListener('click', function (e) {
+    const target = e.target as HTMLElement;
+    const actionEl = target.closest('[data-action]') as HTMLElement | null;
+    if (!actionEl) return;
+
+    const action = actionEl.dataset.action;
+
+    // Handle erase-field: clear a text input and trigger change event
+    if (action === 'erase-field') {
+      const targetSelector = actionEl.dataset.target;
+      if (targetSelector) {
+        const inputEl = document.querySelector<HTMLInputElement>(targetSelector);
+        if (inputEl) {
+          inputEl.value = '';
+          inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
     }
-  });
 
-  // Handle set-star: set text input to '*' and trigger change event
-  $(document).on('click', '[data-action="set-star"]', function (this: HTMLElement) {
-    const target = this.dataset.target;
-    if (target) {
-      $(target).val('*').trigger('change');
+    // Handle set-star: set text input to '*' and trigger change event
+    if (action === 'set-star') {
+      const targetSelector = actionEl.dataset.target;
+      if (targetSelector) {
+        const inputEl = document.querySelector<HTMLInputElement>(targetSelector);
+        if (inputEl) {
+          inputEl.value = '*';
+          inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
     }
-  });
 
-  // Handle update-term-translation: update translation for existing term
-  $(document).on('click', '[data-action="update-term-translation"]', function (this: HTMLElement) {
-    const wid = parseInt(this.dataset.wid || '0', 10);
-    const target = this.dataset.target || '';
-    if (wid && target) {
-      updateTermTranslation(wid, target);
+    // Handle update-term-translation: update translation for existing term
+    if (action === 'update-term-translation') {
+      const wid = parseInt(actionEl.dataset.wid || '0', 10);
+      const targetSelector = actionEl.dataset.target || '';
+      if (wid && targetSelector) {
+        updateTermTranslation(wid, targetSelector);
+      }
     }
-  });
 
-  // Handle add-term-translation: add translation for new term
-  $(document).on('click', '[data-action="add-term-translation"]', function (this: HTMLElement) {
-    const target = this.dataset.target || '';
-    const word = this.dataset.word || '';
-    const lang = parseInt(this.dataset.lang || '0', 10);
-    if (target && word && lang) {
-      addTermTranslation(target, word, lang);
+    // Handle add-term-translation: add translation for new term
+    if (action === 'add-term-translation') {
+      const targetSelector = actionEl.dataset.target || '';
+      const word = actionEl.dataset.word || '';
+      const lang = parseInt(actionEl.dataset.lang || '0', 10);
+      if (targetSelector && word && lang) {
+        addTermTranslation(targetSelector, word, lang);
+      }
     }
-  });
 
-  // Handle reload-impr-text: reload the improved text annotations form
-  $(document).on('click', '[data-action="reload-impr-text"]', function () {
-    do_ajax_edit_impr_text(0, '', 0);
-  });
-
-  // Handle back-to-print-mode: navigate to print/display mode
-  $(document).on('click', '[data-action="back-to-print-mode"]', function (this: HTMLElement) {
-    const textid = this.dataset.textid || '';
-    if (textid) {
-      location.href = 'print_impr_text.php?text=' + textid;
+    // Handle reload-impr-text: reload the improved text annotations form
+    if (action === 'reload-impr-text') {
+      do_ajax_edit_impr_text(0, '', 0);
     }
-  });
 
-  // Handle edit-term-popup: open term editor in popup window
-  $(document).on('click', '[data-action="edit-term-popup"]', function (this: HTMLElement) {
-    const wid = this.dataset.wid || '';
-    const textid = this.dataset.textid || '';
-    const ord = this.dataset.ord || '';
-    const scrollPos = $(document).scrollTop() || 0;
-    if (wid && textid) {
-      const url = '/word/edit?fromAnn=' + scrollPos + '&wid=' + wid + '&tid=' + textid + '&ord=' + ord;
-      window.oewin(url);
+    // Handle back-to-print-mode: navigate to print/display mode
+    if (action === 'back-to-print-mode') {
+      const textid = actionEl.dataset.textid || '';
+      if (textid) {
+        location.href = 'print_impr_text.php?text=' + textid;
+      }
+    }
+
+    // Handle edit-term-popup: open term editor in popup window
+    if (action === 'edit-term-popup') {
+      const wid = actionEl.dataset.wid || '';
+      const textid = actionEl.dataset.textid || '';
+      const ord = actionEl.dataset.ord || '';
+      const scrollPos = window.scrollY || document.documentElement.scrollTop || 0;
+      if (wid && textid) {
+        const url = '/word/edit?fromAnn=' + scrollPos + '&wid=' + wid + '&tid=' + textid + '&ord=' + ord;
+        window.oewin(url);
+      }
     }
   });
 }
 
 // Auto-initialize when DOM is ready
-$(document).ready(function () {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function () {
+    initSentenceEventDelegation();
+    initImprovedTextEventDelegation();
+  });
+} else {
   initSentenceEventDelegation();
   initImprovedTextEventDelegation();
-});
+}

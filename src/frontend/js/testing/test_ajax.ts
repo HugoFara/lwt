@@ -6,7 +6,6 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import $ from 'jquery';
 import { LWT_DATA } from '../core/lwt_state';
 import { cClick } from '../ui/word_popup';
 import { speechDispatcher } from '../core/user_interactions';
@@ -57,8 +56,10 @@ interface TestStatus {
  * @param langId The language ID
  */
 export function prepareWordReading(termText: string, langId: number): void {
-  $('.word').on('click', function () {
-    speechDispatcher(termText, langId);
+  document.querySelectorAll('.word').forEach(el => {
+    el.addEventListener('click', function () {
+      speechDispatcher(termText, langId);
+    });
   });
 }
 
@@ -73,10 +74,15 @@ export function insertNewWord(wordId: number, solution: string, group: string): 
   LWT_DATA.test.solution = solution;
   LWT_DATA.word.id = wordId;
 
-  $('#term-test').html(group);
+  const termTestEl = document.getElementById('term-test');
+  if (termTestEl) {
+    termTestEl.innerHTML = group;
+  }
 
-  $(document).on('keydown', keydown_event_do_test_test);
-  $('.word').on('click', word_click_event_do_test_test);
+  document.addEventListener('keydown', keydown_event_do_test_test);
+  document.querySelectorAll('.word').forEach(el => {
+    el.addEventListener('click', word_click_event_do_test_test);
+  });
 }
 
 /**
@@ -85,12 +91,23 @@ export function insertNewWord(wordId: number, solution: string, group: string): 
  * @param totalTests Total number of tests completed
  */
 export function doTestFinished(totalTests: number): void {
-  $('#term-test').css('display', 'none');
-  $('#test-finished-area').css('display', 'inherit');
-  $('#tests-done-today').text(
-    'Nothing ' + (totalTests > 0 ? 'more ' : '') + 'to test here!'
-  );
-  $('#tests-tomorrow').css('display', 'none');
+  const termTestEl = document.getElementById('term-test');
+  const testFinishedEl = document.getElementById('test-finished-area');
+  const testsDoneTodayEl = document.getElementById('tests-done-today');
+  const testsTomorrowEl = document.getElementById('tests-tomorrow');
+
+  if (termTestEl) {
+    termTestEl.style.display = 'none';
+  }
+  if (testFinishedEl) {
+    testFinishedEl.style.display = 'inherit';
+  }
+  if (testsDoneTodayEl) {
+    testsDoneTodayEl.textContent = 'Nothing ' + (totalTests > 0 ? 'more ' : '') + 'to test here!';
+  }
+  if (testsTomorrowEl) {
+    testsTomorrowEl.style.display = 'none';
+  }
 }
 
 /**
@@ -217,14 +234,35 @@ export function updateTestsCount(testsStatus: TestStatus, contDocument: Document
     widthDivisor = testsStatus.total / 100;
   }
 
-  $('#not-tested-box', contDocument).width(testsStatus.remaining / widthDivisor);
-  $('#wrong-tests-box', contDocument).width(testsStatus.wrong / widthDivisor);
-  $('#correct-tests-box', contDocument).width(testsStatus.correct / widthDivisor);
+  const notTestedBox = contDocument.getElementById('not-tested-box') as HTMLElement | null;
+  const wrongTestsBox = contDocument.getElementById('wrong-tests-box') as HTMLElement | null;
+  const correctTestsBox = contDocument.getElementById('correct-tests-box') as HTMLElement | null;
+  const notTestedHeader = contDocument.getElementById('not-tested-header');
+  const notTested = contDocument.getElementById('not-tested');
+  const wrongTests = contDocument.getElementById('wrong-tests');
+  const correctTests = contDocument.getElementById('correct-tests');
 
-  $('#not-tested-header', contDocument).text(testsStatus.remaining);
-  $('#not-tested', contDocument).text(testsStatus.remaining);
-  $('#wrong-tests', contDocument).text(testsStatus.wrong);
-  $('#correct-tests', contDocument).text(testsStatus.correct);
+  if (notTestedBox) {
+    notTestedBox.style.width = (testsStatus.remaining / widthDivisor) + 'px';
+  }
+  if (wrongTestsBox) {
+    wrongTestsBox.style.width = (testsStatus.wrong / widthDivisor) + 'px';
+  }
+  if (correctTestsBox) {
+    correctTestsBox.style.width = (testsStatus.correct / widthDivisor) + 'px';
+  }
+  if (notTestedHeader) {
+    notTestedHeader.textContent = String(testsStatus.remaining);
+  }
+  if (notTested) {
+    notTested.textContent = String(testsStatus.remaining);
+  }
+  if (wrongTests) {
+    wrongTests.textContent = String(testsStatus.wrong);
+  }
+  if (correctTests) {
+    correctTests.textContent = String(testsStatus.correct);
+  }
 }
 
 /**
@@ -287,11 +325,13 @@ export function handleStatusChangeResult(
   const context = window.parent;
 
   // Update the word element in parent context
-  $(`.word${wordId}`, context.document)
-    .removeClass('todo todosty')
-    .addClass('done' + (statusChange >= 0 ? 'ok' : 'wrong') + 'sty')
-    .attr('data_status', String(newStatus))
-    .attr('data_todo', '0');
+  const wordEls = context.document.querySelectorAll(`.word${wordId}`);
+  wordEls.forEach(el => {
+    el.classList.remove('todo', 'todosty');
+    el.classList.add('done' + (statusChange >= 0 ? 'ok' : 'wrong') + 'sty');
+    el.setAttribute('data_status', String(newStatus));
+    el.setAttribute('data_todo', '0');
+  });
 
   const adjustedWaitTime = waitTime + 500;
 
@@ -336,7 +376,7 @@ export function initTestInteractionGlobals(config: {
 
   // Set html lang attribute if we have a valid language code
   if (config.langCode && config.langCode !== config.translateUri) {
-    $('html').attr('lang', config.langCode);
+    document.documentElement.setAttribute('lang', config.langCode);
   }
 
   LWT_DATA.test.answer_opened = false;
@@ -394,4 +434,8 @@ export function autoInitTestViews(): void {
 }
 
 // Auto-initialize on DOM ready
-$(document).ready(autoInitTestViews);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', autoInitTestViews);
+} else {
+  autoInitTestViews();
+}

@@ -9,10 +9,16 @@
  * @since 3.0.0
  */
 
-import $ from 'jquery';
 import { getLibreTranslateTranslation } from '../terms/translation_api';
 import { deepFindValue, readTextWithExternal } from '../core/user_interactions';
 import { lwtFormCheck } from '../forms/unloadformcheck';
+
+/**
+ * Build a URL query string from an object (replaces $.param).
+ */
+function buildQueryString(params: Record<string, string>): string {
+  return new URLSearchParams(params).toString();
+}
 
 // Module-level variables for dictionary URLs
 let GGTRANSLATE = '';
@@ -78,21 +84,21 @@ export const languageForm = {
     let baseUrl = window.location.href;
     baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
 
-    GGTRANSLATE = 'https://translate.google.com/?' + $.param({
+    GGTRANSLATE = 'https://translate.google.com/?' + buildQueryString({
       ie: 'UTF-8',
       sl: sourceLg,
       tl: targetLg,
       text: 'lwt_term'
     });
 
-    LIBRETRANSLATE = 'http://localhost:5000/?' + $.param({
+    LIBRETRANSLATE = 'http://localhost:5000/?' + buildQueryString({
       lwt_translator: 'libretranslate',
       source: sourceLg,
       target: targetLg,
       q: 'lwt_term'
     });
 
-    GGL = baseUrl + '/ggl.php/?' + $.param({
+    GGL = baseUrl + '/ggl.php/?' + buildQueryString({
       sl: sourceLg,
       tl: targetLg,
       text: 'lwt_term'
@@ -152,7 +158,10 @@ export const languageForm = {
       }
     }
 
-    $('#LgTranslatorKeyWrapper').css('display', usesKey ? 'inherit' : 'none');
+    const keyWrapper = document.getElementById('LgTranslatorKeyWrapper');
+    if (keyWrapper) {
+      keyWrapper.style.display = usesKey ? 'inherit' : 'none';
+    }
   },
 
   /**
@@ -161,12 +170,13 @@ export const languageForm = {
    * @param error - The error message
    */
   displayLibreTranslateError(error: string): void {
-    $('#translator_status')
-      .html(
+    const statusEl = document.getElementById('translator_status');
+    if (statusEl) {
+      statusEl.innerHTML =
         '<a href="https://libretranslate.com/">LibreTranslate</a> server seems to be unreachable. ' +
         'You can install it on your server with the <a href="">LibreTranslate installation guide</a>. ' +
-        'Error: ' + error
-      );
+        'Error: ' + error;
+    }
   },
 
   /**
@@ -209,9 +219,11 @@ export const languageForm = {
     getLibreTranslateTranslation(transUrl, 'ping', 'en', 'es')
       .then((translation: string) => {
         if (typeof translation === 'string') {
-          $('#translator_status')
-            .html('<a href="https://libretranslate.com/">LibreTranslate</a> online!')
-            .attr('class', 'msgblue');
+          const statusEl = document.getElementById('translator_status');
+          if (statusEl) {
+            statusEl.innerHTML = '<a href="https://libretranslate.com/">LibreTranslate</a> online!';
+            statusEl.className = 'msgblue';
+          }
         }
       })
       .catch((error: Error) => {
@@ -225,7 +237,10 @@ export const languageForm = {
    * @param value - The text size percentage
    */
   changeLanguageTextSize(value: string | number): void {
-    $('#LgTextSizeExample').css('font-size', value + '%');
+    const exampleEl = document.getElementById('LgTextSizeExample');
+    if (exampleEl) {
+      exampleEl.style.fontSize = value + '%';
+    }
   },
 
   /**
@@ -408,16 +423,17 @@ export const languageForm = {
    * @returns true if valid, false otherwise
    */
   checkVoiceAPI(apiValue: string): boolean {
-    const messageField = $('#voice-api-message-zone');
+    const messageField = document.getElementById('voice-api-message-zone');
+    if (!messageField) return true;
 
     if (apiValue === '') {
-      messageField.hide();
+      messageField.style.display = 'none';
       return true;
     }
 
     if (!apiValue.includes('lwt_term')) {
-      messageField.text('"lwt_term" is missing!');
-      messageField.show();
+      messageField.textContent = '"lwt_term" is missing!';
+      messageField.style.display = '';
       return false;
     }
 
@@ -425,18 +441,18 @@ export const languageForm = {
     try {
       query = JSON.parse(apiValue);
     } catch (error) {
-      messageField.text('Cannot parse as JSON! ' + error);
-      messageField.show();
+      messageField.textContent = 'Cannot parse as JSON! ' + error;
+      messageField.style.display = '';
       return false;
     }
 
     if (deepFindValue(query, 'lwt_term') === null) {
-      messageField.text("Cannot find 'lwt_term' in JSON!");
-      messageField.show();
+      messageField.textContent = "Cannot find 'lwt_term' in JSON!";
+      messageField.style.display = '';
       return false;
     }
 
-    messageField.hide();
+    messageField.style.display = 'none';
     return true;
   },
 
@@ -523,14 +539,15 @@ export function checkDuplicateLanguage(
 ): boolean {
   const langId = curr ?? languageForm.languageId;
   const allLangs = languages ?? languageForm.allLanguages;
-  const lgName = $('#LgName').val() as string;
+  const lgNameEl = document.getElementById('LgName') as HTMLInputElement | null;
+  const lgName = lgNameEl?.value ?? '';
 
   if (lgName in allLangs) {
     if (langId !== allLangs[lgName]) {
       alert(
         'Language "' + lgName + '" already exists. Please change the language name!'
       );
-      $('#LgName').trigger('focus');
+      lgNameEl?.focus();
       return false;
     }
   }
@@ -666,10 +683,8 @@ export function initLanguageForm(): void {
     });
   }
 
-  // Run initial form check
-  $(function () {
-    languageForm.fullFormCheck();
-  });
+  // Run initial form check (DOM should already be ready at this point)
+  languageForm.fullFormCheck();
 
   // Set up form check for unsaved changes
   lwtFormCheck.askBeforeExit();

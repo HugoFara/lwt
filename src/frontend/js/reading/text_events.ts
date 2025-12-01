@@ -149,10 +149,10 @@ interface FramesWithH {
  * @param this The HTML element (word) that was double-clicked
  */
 export function word_dblclick_event_do_text_text(this: HTMLElement): void {
-  const $this = $(this);
-  const t = parseInt($('#totalcharcount').text(), 10);
+  const totalCharEl = document.getElementById('totalcharcount');
+  const t = parseInt(totalCharEl?.textContent || '0', 10);
   if (t === 0) { return; }
-  let p = 100 * (parseInt(getAttr($this, 'data_pos') || '0', 10) - 5) / t;
+  let p = 100 * (parseInt(this.getAttribute('data_pos') || '0', 10) - 5) / t;
   if (p < 0) { p = 0; }
   const parentFrames = window.parent as Window & { frames: FramesWithH };
   if (typeof parentFrames.frames.h?.lwt_audio_controller?.newPosition === 'function') {
@@ -168,42 +168,44 @@ export function word_dblclick_event_do_text_text(this: HTMLElement): void {
  * @returns false
  */
 export function word_click_event_do_text_text(this: HTMLElement): boolean {
-  const $this = $(this);
-  const status = getAttr($this, 'data_status');
-  const ann = getAttr($this, 'data_ann');
+  const status = this.getAttribute('data_status') || '';
+  const ann = this.getAttribute('data_ann') || '';
+  const text = this.textContent || '';
 
   let hints: string;
   if (LWT_DATA.settings.jQuery_tooltip) {
     hints = make_tooltip(
-      $this.text(), getAttr($this, 'data_trans'), getAttr($this, 'data_rom'), status
+      text,
+      this.getAttribute('data_trans') || '',
+      this.getAttribute('data_rom') || '',
+      status
     );
   } else {
-    const titleAttr = $this.attr('title');
-    hints = typeof titleAttr === 'string' ? titleAttr : '';
+    hints = this.getAttribute('title') || '';
   }
 
   // Get multi-words containing word
   const multi_words: (string | undefined)[] = Array(7);
   for (let i = 0; i < 7; i++) {
     // Start from 2 as multi-words have at least two elements
-    const mwAttr = $this.attr('data_mw' + (i + 2));
-    multi_words[i] = typeof mwAttr === 'string' ? mwAttr : undefined;
+    const mwAttr = this.getAttribute('data_mw' + (i + 2));
+    multi_words[i] = mwAttr !== null ? mwAttr : undefined;
   }
   const statusNum = parseInt(status || '0', 10);
-  const order = getAttr($this, 'data_order');
-  const wid = getAttr($this, 'data_wid');
+  const order = this.getAttribute('data_order') || '';
+  const wid = this.getAttribute('data_wid') || '';
 
   // Check if we should use API-based mode
   if (isApiModeEnabled()) {
     word_click_event_api_mode(this, statusNum, multi_words);
   } else {
     word_click_event_frame_mode(
-      $this, statusNum, order, wid, hints, multi_words, ann
+      this, statusNum, order, wid, hints, multi_words, ann
     );
   }
 
   if (LWT_DATA.settings.hts === 2) {
-    speechDispatcher($this.text(), LWT_DATA.language.id);
+    speechDispatcher(text, LWT_DATA.language.id);
   }
   return false;
 }
@@ -213,7 +215,7 @@ export function word_click_event_do_text_text(this: HTMLElement): boolean {
  * Uses iframe navigation for word operations.
  */
 function word_click_event_frame_mode(
-  $this: JQuery<HTMLElement>,
+  element: HTMLElement,
   statusNum: number,
   order: string,
   wid: string,
@@ -221,10 +223,11 @@ function word_click_event_frame_mode(
   multi_words: (string | undefined)[],
   ann: string
 ): void {
+  const text = element.textContent || '';
   if (statusNum < 1) {
     run_overlib_status_unknown(
       LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
-      LWT_DATA.text.id, order, $this.text(), multi_words, LWT_DATA.language.rtl
+      LWT_DATA.text.id, order, text, multi_words, LWT_DATA.language.rtl
     );
     showRightFrames(
       '/word/edit?tid=' + LWT_DATA.text.id + '&ord=' + order + '&wid='
@@ -233,19 +236,19 @@ function word_click_event_frame_mode(
     run_overlib_status_99(
       LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
       LWT_DATA.text.id, order,
-      $this.text(), wid, multi_words, LWT_DATA.language.rtl, ann
+      text, wid, multi_words, LWT_DATA.language.rtl, ann
     );
   } else if (statusNum === 98) {
     run_overlib_status_98(
       LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
       LWT_DATA.text.id, order,
-      $this.text(), wid, multi_words, LWT_DATA.language.rtl, ann
+      text, wid, multi_words, LWT_DATA.language.rtl, ann
     );
   } else {
     run_overlib_status_1_to_5(
       LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
       LWT_DATA.text.id, order,
-      $this.text(), wid, String(statusNum), multi_words, LWT_DATA.language.rtl, ann
+      text, wid, String(statusNum), multi_words, LWT_DATA.language.rtl, ann
     );
   }
 }
@@ -320,31 +323,35 @@ function word_click_event_api_mode(
  * @returns false to prevent default behavior
  */
 export function mword_click_event_do_text_text(this: HTMLElement): boolean {
-  const $this = $(this);
-  const status = getAttr($this, 'data_status');
+  const status = this.getAttribute('data_status') || '';
+  const text = this.textContent || '';
   if (status !== '') {
-    const ann = getAttr($this, 'data_ann');
+    const ann = this.getAttribute('data_ann') || '';
     let hints: string;
     if (LWT_DATA.settings.jQuery_tooltip) {
       hints = make_tooltip(
-        $this.text(),
-        getAttr($this, 'data_trans'),
-        getAttr($this, 'data_rom'),
+        text,
+        this.getAttribute('data_trans') || '',
+        this.getAttribute('data_rom') || '',
         status
       );
     } else {
-      const titleAttr = $this.attr('title');
-      hints = typeof titleAttr === 'string' ? titleAttr : '';
+      hints = this.getAttribute('title') || '';
     }
     run_overlib_multiword(
       LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link,
       hints,
-      LWT_DATA.text.id, getAttr($this, 'data_order'), getAttr($this, 'data_text'),
-      getAttr($this, 'data_wid'), status, getAttr($this, 'data_code'), ann
+      LWT_DATA.text.id,
+      this.getAttribute('data_order') || '',
+      this.getAttribute('data_text') || '',
+      this.getAttribute('data_wid') || '',
+      status,
+      this.getAttribute('data_code') || '',
+      ann
     );
   }
   if (LWT_DATA.settings.hts === 2) {
-    speechDispatcher($this.text(), LWT_DATA.language.id);
+    speechDispatcher(text, LWT_DATA.language.id);
   }
   return false;
 }
@@ -356,16 +363,17 @@ export function mword_click_event_do_text_text(this: HTMLElement): boolean {
  * @param this The HTML element being hovered over
  */
 export function word_hover_over(this: HTMLElement): void {
-  if (!$('.tword')[0]) {
-    const classAttrVal = $(this).attr('class');
-    const classAttr = typeof classAttrVal === 'string' ? classAttrVal : '';
+  if (!document.querySelector('.tword')) {
+    const classAttr = this.className || '';
     const v = classAttr.replace(/.*(TERM[^ ]*)( .*)*/, '$1');
-    $('.' + v).addClass('hword');
+    document.querySelectorAll('.' + v).forEach((el) => {
+      el.classList.add('hword');
+    });
     if (LWT_DATA.settings.jQuery_tooltip) {
-      $(this).trigger('mouseover');
+      this.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
     }
     if (LWT_DATA.settings.hts === 3) {
-      speechDispatcher($(this).text(), LWT_DATA.language.id);
+      speechDispatcher(this.textContent || '', LWT_DATA.language.id);
     }
   }
 }
@@ -375,7 +383,9 @@ export function word_hover_over(this: HTMLElement): void {
  * Cleans up tooltip elements and removes the 'hword' class.
  */
 export function word_hover_out(): void {
-  $('.hword').removeClass('hword');
+  document.querySelectorAll('.hword').forEach((el) => {
+    el.classList.remove('hword');
+  });
   if (LWT_DATA.settings.jQuery_tooltip) {
     removeAllTooltips();
   }
@@ -387,23 +397,58 @@ export function word_hover_out(): void {
  * @since 2.0.3-fork
  */
 export function prepareTextInteractions(): void {
-  $('.word').each(word_each_do_text_text);
-  $('.mword').each(mword_each_do_text_text);
-  $('.word').on('click', word_click_event_do_text_text);
-  $('#thetext').on('selectstart', 'span', function() { return false; }).on(
-    'mousedown', '.wsty',
-    { annotation: LWT_DATA.settings.annotations_mode },
-    mword_drag_n_drop_select);
-  $('#thetext').on('click', '.mword', mword_click_event_do_text_text);
-  $('.word').on('dblclick', word_dblclick_event_do_text_text);
-  $('#thetext').on('dblclick', '.mword', word_dblclick_event_do_text_text);
-  document.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (!keydown_event_do_text_text(e)) {
-      e.preventDefault();
-    }
+  // Process annotations for words and multi-words
+  document.querySelectorAll<HTMLElement>('.word').forEach((el, index) => {
+    word_each_do_text_text.call(el, index);
   });
+  document.querySelectorAll<HTMLElement>('.mword').forEach((el, index) => {
+    mword_each_do_text_text.call(el, index);
+  });
+
+  // Word click events
+  document.querySelectorAll<HTMLElement>('.word').forEach((el) => {
+    el.addEventListener('click', function(this: HTMLElement) {
+      word_click_event_do_text_text.call(this);
+    });
+  });
+
   const thetext = document.getElementById('thetext');
   if (thetext) {
+    // Prevent text selection on spans
+    thetext.addEventListener('selectstart', (e) => {
+      if ((e.target as HTMLElement).tagName === 'SPAN') {
+        e.preventDefault();
+      }
+    });
+
+    // Multi-word drag and drop selection
+    thetext.addEventListener('mousedown', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('wsty')) {
+        // Create a synthetic event object with annotation data
+        const eventWithData = e as MouseEvent & { data?: { annotation: number } };
+        eventWithData.data = { annotation: LWT_DATA.settings.annotations_mode };
+        mword_drag_n_drop_select.call(target, eventWithData);
+      }
+    });
+
+    // Multi-word click events (delegated)
+    thetext.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('mword')) {
+        mword_click_event_do_text_text.call(target);
+      }
+    });
+
+    // Multi-word double-click events (delegated)
+    thetext.addEventListener('dblclick', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('mword')) {
+        word_dblclick_event_do_text_text.call(target);
+      }
+    });
+
+    // Hover intent for words
     hoverIntent(thetext, {
       over: word_hover_over,
       out: word_hover_out,
@@ -411,5 +456,19 @@ export function prepareTextInteractions(): void {
       selector: '.wsty,.mwsty'
     });
   }
+
+  // Word double-click events
+  document.querySelectorAll<HTMLElement>('.word').forEach((el) => {
+    el.addEventListener('dblclick', function(this: HTMLElement) {
+      word_dblclick_event_do_text_text.call(this);
+    });
+  });
+
+  // Keyboard events
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (!keydown_event_do_text_text(e)) {
+      e.preventDefault();
+    }
+  });
 }
 

@@ -40,15 +40,24 @@ interface LwtDataGlobal {
 declare const LWT_DATA: LwtDataGlobal;
 
 interface MwordDragNDropState {
-  event: JQuery.TriggeredEvent | undefined;
+  event: (MouseEvent & { data?: { annotation?: number } }) | undefined;
   pos: number | undefined;
   timeout: ReturnType<typeof setTimeout> | undefined;
-  context: JQuery | undefined;
-  finish: (ev: JQuery.TriggeredEvent & { handled?: boolean }) => void;
+  context: HTMLElement | undefined;
+  finish: (ev: MouseEvent & { handled?: boolean }) => void;
   twordMouseOver: (this: HTMLElement) => void;
   sentenceOver: (this: HTMLElement) => void;
   startInteraction: () => void;
   stopInteraction: () => void;
+}
+
+/**
+ * Helper to get attribute value from an element.
+ */
+function getElAttr(el: Element | null, attr: string): string {
+  if (!el) return '';
+  const val = el.getAttribute(attr);
+  return val !== null ? val : '';
 }
 
 export const mwordDragNDrop: MwordDragNDropState = {
@@ -64,40 +73,44 @@ export const mwordDragNDrop: MwordDragNDropState = {
   /**
    * Multi-word selection is finished
    */
-  finish: function (ev: JQuery.TriggeredEvent & { handled?: boolean }): void {
+  finish: function (ev: MouseEvent & { handled?: boolean }): void {
     const context = mwordDragNDrop.context;
     if (!context) return;
     if (ev.handled !== true) {
-      const len = $('.lword.tword', context).length;
+      const lwordTwordEls = context.querySelectorAll('.lword.tword');
+      const len = lwordTwordEls.length;
       if (len > 0) {
-        const word_ord = getAttr($('.lword', context).first(), 'data_order');
+        const firstLword = context.querySelector('.lword');
+        const word_ord = getElAttr(firstLword, 'data_order');
         if (len > 1) {
-          const text: string = $('.lword', context)
-            .map(function () { return $(this).text(); }).get().join('');
+          const lwordEls = context.querySelectorAll('.lword');
+          let text = '';
+          lwordEls.forEach(el => { text += el.textContent || ''; });
           if (text.length > 250) {
             alert('Selected text is too long!!!');
           } else {
-            showRightFrames(
-              'edit_mword.php?' + $.param({
-                tid: LWT_DATA.text.id,
-                len: len,
-                ord: word_ord,
-                txt: text
-              })
-            );
+            const params = new URLSearchParams({
+              tid: String(LWT_DATA.text.id),
+              len: String(len),
+              ord: word_ord,
+              txt: text
+            });
+            showRightFrames('edit_mword.php?' + params.toString());
           }
         } else {
           // Create only a normal word
-          showRightFrames(
-            '/word/edit?' + $.param({
-              tid: LWT_DATA.text.id,
-              ord: word_ord,
-              txt: $('#ID-' + word_ord + '-1').text()
-            })
-          );
+          const wordEl = document.getElementById('ID-' + word_ord + '-1');
+          const params = new URLSearchParams({
+            tid: String(LWT_DATA.text.id),
+            ord: word_ord,
+            txt: wordEl?.textContent || ''
+          });
+          showRightFrames('/word/edit?' + params.toString());
         }
       }
-      $('span', context).removeClass('tword nword');
+      context.querySelectorAll('span').forEach(el => {
+        el.classList.remove('tword', 'nword');
+      });
       ev.handled = true;
     }
   },
@@ -108,26 +121,46 @@ export const mwordDragNDrop: MwordDragNDropState = {
   twordMouseOver: function (this: HTMLElement): void {
     const context = mwordDragNDrop.context;
     if (!context) return;
-    $('html').one('mouseup', function () {
-      $('.wsty', context).each(function () {
-        $(this).addClass('status' + getAttr($(this), 'data_status'));
+    const self = this;
+
+    const mouseUpHandler = function (e: MouseEvent) {
+      context.querySelectorAll('.wsty').forEach(el => {
+        el.classList.add('status' + getElAttr(el, 'data_status'));
       });
-      if (!$(this).hasClass('tword')) {
-        $('span', context).removeClass('nword tword lword');
-        $('.wsty', context).css('background-color', '')
-          .css('border-bottom-color', '');
-        $('#pe').remove();
+      const target = e.target as HTMLElement | null;
+      if (!target?.classList.contains('tword')) {
+        context.querySelectorAll('span').forEach(el => {
+          el.classList.remove('nword', 'tword', 'lword');
+        });
+        context.querySelectorAll<HTMLElement>('.wsty').forEach(el => {
+          el.style.backgroundColor = '';
+          el.style.borderBottomColor = '';
+        });
+        document.getElementById('pe')?.remove();
       }
-    });
-    mwordDragNDrop.pos = parseInt(getAttr($(this), 'data_order') || '0', 10);
+    };
+    document.documentElement.addEventListener('mouseup', mouseUpHandler, { once: true });
+
+    mwordDragNDrop.pos = parseInt(getElAttr(self, 'data_order') || '0', 10);
 
     // Add ".lword" class on this element
-    $('.lword', context).removeClass('lword');
-    $(this).addClass('lword');
-    $(context).on('mouseleave', function () {
-      $('.lword', context).removeClass('lword');
-    });
-    $(context).one('mouseup', '.nword,.tword', mwordDragNDrop.finish);
+    context.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));
+    self.classList.add('lword');
+
+    const mouseLeaveHandler = function () {
+      context.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));
+    };
+    context.addEventListener('mouseleave', mouseLeaveHandler);
+
+    // One-time mouseup handler for .nword,.tword
+    const finishHandler = function (e: MouseEvent) {
+      const target = e.target as HTMLElement | null;
+      if (target?.matches('.nword, .tword')) {
+        mwordDragNDrop.finish(e);
+        context.removeEventListener('mouseup', finishHandler);
+      }
+    };
+    context.addEventListener('mouseup', finishHandler);
   },
 
   /**
@@ -136,22 +169,20 @@ export const mwordDragNDrop: MwordDragNDropState = {
   sentenceOver: function (this: HTMLElement): void {
     const context = mwordDragNDrop.context;
     if (!context) return;
-    $('.lword', context).removeClass('lword');
-    const lpos = parseInt(getAttr($(this), 'data_order') || '0', 10);
-    $(this).addClass('lword');
+    context.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));
+    const lpos = parseInt(getElAttr(this, 'data_order') || '0', 10);
+    this.classList.add('lword');
     if (mwordDragNDrop.pos !== undefined && lpos > mwordDragNDrop.pos) {
       for (let i = mwordDragNDrop.pos; i < lpos; i++) {
-        $(
-          '.tword[data_order="' + i + '"],.nword[data_order="' + i + '"]',
-          context
-        ).addClass('lword');
+        context.querySelectorAll(
+          '.tword[data_order="' + i + '"],.nword[data_order="' + i + '"]'
+        ).forEach(el => el.classList.add('lword'));
       }
     } else if (mwordDragNDrop.pos !== undefined) {
       for (let i = mwordDragNDrop.pos; i > lpos; i--) {
-        $(
-          '.tword[data_order="' + i + '"],.nword[data_order="' + i + '"]',
-          context
-        ).addClass('lword');
+        context.querySelectorAll(
+          '.tword[data_order="' + i + '"],.nword[data_order="' + i + '"]'
+        ).forEach(el => el.classList.add('lword'));
       }
     }
   },
@@ -162,101 +193,109 @@ export const mwordDragNDrop: MwordDragNDropState = {
   startInteraction: function (): void {
     const context = mwordDragNDrop.context;
     if (!context) return;
-    context.off('mouseout');
+
+    // Helper function to get siblings until a matching element (like jQuery's nextUntil)
+    const nextUntil = (el: Element, stopSelector: string, filterSelector: string): Element[] => {
+      const result: Element[] = [];
+      let sibling = el.nextElementSibling;
+      while (sibling) {
+        if (sibling.matches(stopSelector)) break;
+        if (sibling.matches(filterSelector)) {
+          result.push(sibling);
+        }
+        sibling = sibling.nextElementSibling;
+      }
+      return result;
+    };
+
     // Add .tword (term word) and .nword (not word) subelements
-    $('.wsty', context).css('background-color', 'inherit')
-      .css('border-bottom-color', 'rgba(0,0,0,0)').not('.hide,.word')
-      .each(function () {
-        const $el = $(this);
-        const f = parseInt(getAttr($el, 'data_code') || '0', 10) * 2 +
-        parseInt(getAttr($el, 'data_order') || '0', 10) - 1;
-        let childr_html = '';
-        $el.nextUntil($('[id^="ID-' + f + '-"]', context), '[id$="-1"]')
-          .each(function () {
-            const $child = $(this);
-            const w_order = $child.attr('data_order');
-            if (typeof w_order === 'string') {
-              childr_html += '<span class="tword" data_order="' + w_order + '">' +
-              $child.text() + '</span>';
-            } else {
-              const childIdAttr = $child.attr('id');
-              const childId = typeof childIdAttr === 'string' ? childIdAttr : '';
-              childr_html += '<span class="nword" data_order="' +
-            childId.split('-')[1] + '">' + $child.text() + '</span>';
-            }
-          });
-        $el.html(childr_html);
+    context.querySelectorAll<HTMLElement>('.wsty').forEach(el => {
+      el.style.backgroundColor = 'inherit';
+      el.style.borderBottomColor = 'rgba(0,0,0,0)';
+    });
+    context.querySelectorAll<HTMLElement>('.wsty:not(.hide):not(.word)').forEach(el => {
+      const f = parseInt(getElAttr(el, 'data_code') || '0', 10) * 2 +
+        parseInt(getElAttr(el, 'data_order') || '0', 10) - 1;
+      let childr_html = '';
+      const siblings = nextUntil(el, '[id^="ID-' + f + '-"]', '[id$="-1"]');
+      siblings.forEach(child => {
+        const w_order = child.getAttribute('data_order');
+        if (w_order !== null) {
+          childr_html += '<span class="tword" data_order="' + w_order + '">' +
+            child.textContent + '</span>';
+        } else {
+          const childId = child.id || '';
+          childr_html += '<span class="nword" data_order="' +
+            childId.split('-')[1] + '">' + child.textContent + '</span>';
+        }
       });
+      el.innerHTML = childr_html;
+    });
 
     // Replace '#pe' element
-    $('#pe').remove();
-    $('body')
-      .append(
-        '<style id="pe">#' + context.attr('id') + ' .wsty:after,#' +
-        context.attr('id') + ' .wsty:before{opacity:0}</style>'
-      );
+    document.getElementById('pe')?.remove();
+    const contextId = context.id;
+    document.body.insertAdjacentHTML('beforeend',
+      '<style id="pe">#' + contextId + ' .wsty:after,#' +
+      contextId + ' .wsty:before{opacity:0}</style>'
+    );
 
     // Add class ".nword" (not word), and set attribute "data_order"
-    $('[id$="-1"]', context).not('.hide,.wsty').addClass('nword').each(function () {
-      const $el = $(this);
-      const elIdAttr = $el.attr('id');
-      const elId = typeof elIdAttr === 'string' ? elIdAttr : '';
-      $el.attr('data_order', elId.split('-')[1]);
+    context.querySelectorAll('[id$="-1"]:not(.hide):not(.wsty)').forEach(el => {
+      el.classList.add('nword');
+      const elId = el.id || '';
+      el.setAttribute('data_order', elId.split('-')[1]);
     });
 
     // Attach children ".tword" (term) to ".word"
-    $('.word', context).not('.hide').each(function () {
-      const $el = $(this);
-      $el.html(
-        '<span class="tword" data_order="' + getAttr($el, 'data_order') + '">' +
-          $el.text() + '</span>'
-      );
+    context.querySelectorAll('.word:not(.hide)').forEach(el => {
+      el.innerHTML = '<span class="tword" data_order="' + getElAttr(el, 'data_order') + '">' +
+        el.textContent + '</span>';
     });
 
     // Edit "tword" elements by filling their attributes
     const event = mwordDragNDrop.event;
-    const annotationMode = (event?.data as { annotation?: number })?.annotation;
+    const annotationMode = event?.data?.annotation;
     if (annotationMode === 1) {
-      $('.wsty', context)
-        .not('.hide')
-        .each(function () {
-          const $el = $(this);
-          $el.children('.tword').last()
-            .attr('data_ann', getAttr($el, 'data_ann'))
-            .attr('data_trans', getAttr($el, 'data_trans'))
-            .addClass('content' + getAttr($el, 'data_status'));
-          $el.removeClass(
-            'status1 status2 status3 status4 status5 status98 status99'
-          );
-        });
+      context.querySelectorAll('.wsty:not(.hide)').forEach(el => {
+        const twords = el.querySelectorAll('.tword');
+        const lastTword = twords[twords.length - 1];
+        if (lastTword) {
+          lastTword.setAttribute('data_ann', getElAttr(el, 'data_ann'));
+          lastTword.setAttribute('data_trans', getElAttr(el, 'data_trans'));
+          lastTword.classList.add('content' + getElAttr(el, 'data_status'));
+        }
+        el.classList.remove('status1', 'status2', 'status3', 'status4', 'status5', 'status98', 'status99');
+      });
     } else if (annotationMode === 3) {
-      $('.wsty', context)
-        .not('.hide')
-        .each(function () {
-          const $el = $(this);
-          $el.children('.tword').first()
-            .attr('data_ann', getAttr($el, 'data_ann'))
-            .attr('data_trans', getAttr($el, 'data_trans'))
-            .addClass('content' + getAttr($el, 'data_status'));
-          $el.removeClass(
-            'status1 status2 status3 status4 status5 status98 status99'
-          );
-        });
-    }
-
-    // Prepare interaction on ".tword" to mouseover
-    $(context).one('mouseover', '.tword', mwordDragNDrop.twordMouseOver);
-
-    // Prepare a hover intent interaction
-    const contextElement = context[0];
-    if (contextElement) {
-      hoverIntent(contextElement, {
-        over: mwordDragNDrop.sentenceOver,
-        out: function () {},
-        sensitivity: 18,
-        selector: '.tword'
+      context.querySelectorAll('.wsty:not(.hide)').forEach(el => {
+        const firstTword = el.querySelector('.tword');
+        if (firstTword) {
+          firstTword.setAttribute('data_ann', getElAttr(el, 'data_ann'));
+          firstTword.setAttribute('data_trans', getElAttr(el, 'data_trans'));
+          firstTword.classList.add('content' + getElAttr(el, 'data_status'));
+        }
+        el.classList.remove('status1', 'status2', 'status3', 'status4', 'status5', 'status98', 'status99');
       });
     }
+
+    // Prepare interaction on ".tword" to mouseover (one-time)
+    const mouseOverHandler = function (e: MouseEvent) {
+      const target = e.target as HTMLElement | null;
+      if (target?.matches('.tword')) {
+        mwordDragNDrop.twordMouseOver.call(target);
+        context.removeEventListener('mouseover', mouseOverHandler);
+      }
+    };
+    context.addEventListener('mouseover', mouseOverHandler);
+
+    // Prepare a hover intent interaction
+    hoverIntent(context, {
+      over: mwordDragNDrop.sentenceOver,
+      out: function () {},
+      sensitivity: 18,
+      selector: '.tword'
+    });
   },
 
   /**
@@ -266,15 +305,16 @@ export const mwordDragNDrop: MwordDragNDropState = {
     if (mwordDragNDrop.timeout) {
       clearTimeout(mwordDragNDrop.timeout);
     }
-    $('.nword').removeClass('nword');
-    $('.tword').removeClass('tword');
-    $('.lword').removeClass('lword');
+    document.querySelectorAll('.nword').forEach(el => el.classList.remove('nword'));
+    document.querySelectorAll('.tword').forEach(el => el.classList.remove('tword'));
+    document.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));
     if (mwordDragNDrop.context) {
-      $('.wsty', mwordDragNDrop.context)
-        .css('background-color', '')
-        .css('border-bottom-color', '');
+      mwordDragNDrop.context.querySelectorAll<HTMLElement>('.wsty').forEach(el => {
+        el.style.backgroundColor = '';
+        el.style.borderBottomColor = '';
+      });
     }
-    $('#pe').remove();
+    document.getElementById('pe')?.remove();
   }
 };
 
@@ -285,12 +325,25 @@ export const mwordDragNDrop: MwordDragNDropState = {
  * @param this The HTML element where mousedown occurred
  * @param event The mousedown event
  */
-export function mword_drag_n_drop_select(this: HTMLElement, event: JQuery.TriggeredEvent): void {
+export function mword_drag_n_drop_select(
+  this: HTMLElement,
+  event: MouseEvent & { data?: { annotation?: number } }
+): void {
   if (LWT_DATA.settings.jQuery_tooltip) { removeAllTooltips(); }
-  const sentence = $(this).parent();
+  const sentence = this.parentElement;
+  if (!sentence) return;
+
   mwordDragNDrop.context = sentence;
   mwordDragNDrop.event = event;
-  sentence.one('mouseup mouseout', mwordDragNDrop.stopInteraction);
+
+  // One-time handlers for mouseup and mouseout
+  const stopHandler = () => {
+    mwordDragNDrop.stopInteraction();
+    sentence.removeEventListener('mouseup', stopHandler);
+    sentence.removeEventListener('mouseout', stopHandler);
+  };
+  sentence.addEventListener('mouseup', stopHandler, { once: true });
+  sentence.addEventListener('mouseout', stopHandler, { once: true });
 
   mwordDragNDrop.timeout = setTimeout(mwordDragNDrop.startInteraction, 300);
 }

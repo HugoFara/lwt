@@ -8,8 +8,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
-
 interface ModalOptions {
   title?: string;
   width?: string;
@@ -28,14 +26,15 @@ const defaultOptions: ModalOptions = {
   closeOnEscape: true
 };
 
-let modalInstance: JQuery | null = null;
-let overlayInstance: JQuery | null = null;
+let modalInstance: HTMLElement | null = null;
+let overlayInstance: HTMLElement | null = null;
+let escapeHandler: ((e: KeyboardEvent) => void) | null = null;
 
 /**
  * Create the modal HTML structure if it doesn't exist.
  */
 function ensureModalExists(): void {
-  if ($('#lwt-modal-overlay').length === 0) {
+  if (!document.getElementById('lwt-modal-overlay')) {
     const modalHtml = `
       <div id="lwt-modal-overlay" class="lwt-modal-overlay" style="display:none;">
         <div id="lwt-modal" class="lwt-modal">
@@ -47,10 +46,10 @@ function ensureModalExists(): void {
         </div>
       </div>
     `;
-    $('body').append(modalHtml);
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 
     // Add CSS if not already present
-    if ($('#lwt-modal-styles').length === 0) {
+    if (!document.getElementById('lwt-modal-styles')) {
       const styles = `
         <style id="lwt-modal-styles">
           .lwt-modal-overlay {
@@ -176,18 +175,62 @@ function ensureModalExists(): void {
           }
         </style>
       `;
-      $('head').append(styles);
+      document.head.insertAdjacentHTML('beforeend', styles);
     }
 
-    overlayInstance = $('#lwt-modal-overlay');
-    modalInstance = $('#lwt-modal');
+    overlayInstance = document.getElementById('lwt-modal-overlay');
+    modalInstance = document.getElementById('lwt-modal');
 
     // Close button click
-    overlayInstance.on('click', '.lwt-modal-close', closeModal);
+    overlayInstance?.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.lwt-modal-close')) {
+        closeModal();
+      }
+    });
   } else {
-    overlayInstance = $('#lwt-modal-overlay');
-    modalInstance = $('#lwt-modal');
+    overlayInstance = document.getElementById('lwt-modal-overlay');
+    modalInstance = document.getElementById('lwt-modal');
   }
+}
+
+/**
+ * Fade in an element
+ */
+function fadeIn(element: HTMLElement, duration: number = 200): void {
+  element.style.opacity = '0';
+  element.style.display = 'flex';
+
+  let start: number | null = null;
+  function animate(timestamp: number): void {
+    if (!start) start = timestamp;
+    const progress = timestamp - start;
+    const opacity = Math.min(progress / duration, 1);
+    element.style.opacity = String(opacity);
+    if (progress < duration) {
+      requestAnimationFrame(animate);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+/**
+ * Fade out an element
+ */
+function fadeOut(element: HTMLElement, duration: number = 200): void {
+  let start: number | null = null;
+  function animate(timestamp: number): void {
+    if (!start) start = timestamp;
+    const progress = timestamp - start;
+    const opacity = Math.max(1 - progress / duration, 0);
+    element.style.opacity = String(opacity);
+    if (progress < duration) {
+      requestAnimationFrame(animate);
+    } else {
+      element.style.display = 'none';
+    }
+  }
+  requestAnimationFrame(animate);
 }
 
 /**
@@ -204,46 +247,55 @@ export function openModal(content: string, options: ModalOptions = {}): void {
   if (!modalInstance || !overlayInstance) return;
 
   // Set title
-  modalInstance.find('.lwt-modal-title').text(opts.title || '');
-  modalInstance.find('.lwt-modal-header').toggle(!!opts.title);
+  const titleEl = modalInstance.querySelector('.lwt-modal-title');
+  const headerEl = modalInstance.querySelector('.lwt-modal-header') as HTMLElement | null;
+  if (titleEl) titleEl.textContent = opts.title || '';
+  if (headerEl) headerEl.style.display = opts.title ? '' : 'none';
 
   // Set content
-  modalInstance.find('.lwt-modal-body').html(content);
+  const bodyEl = modalInstance.querySelector('.lwt-modal-body');
+  if (bodyEl) bodyEl.innerHTML = content;
 
   // Apply styles
   if (opts.width) {
-    modalInstance.css('width', opts.width);
+    modalInstance.style.width = opts.width;
   }
   if (opts.maxWidth) {
-    modalInstance.css('max-width', opts.maxWidth);
+    modalInstance.style.maxWidth = opts.maxWidth;
   }
   if (opts.maxHeight) {
-    modalInstance.css('max-height', opts.maxHeight);
+    modalInstance.style.maxHeight = opts.maxHeight;
   }
 
   // Show modal
-  overlayInstance.fadeIn(200);
+  fadeIn(overlayInstance);
 
   // Close on overlay click
   if (opts.closeOnOverlayClick) {
-    overlayInstance.off('click.modal').on('click.modal', function (e) {
-      if (e.target === this) {
+    overlayInstance.onclick = function (e) {
+      if (e.target === overlayInstance) {
         closeModal();
       }
-    });
+    };
+  } else {
+    overlayInstance.onclick = null;
   }
 
   // Close on Escape key
+  if (escapeHandler) {
+    document.removeEventListener('keydown', escapeHandler);
+  }
   if (opts.closeOnEscape) {
-    $(document).off('keydown.modal').on('keydown.modal', function (e) {
+    escapeHandler = function (e: KeyboardEvent) {
       if (e.key === 'Escape') {
         closeModal();
       }
-    });
+    };
+    document.addEventListener('keydown', escapeHandler);
   }
 
   // Prevent body scroll
-  $('body').css('overflow', 'hidden');
+  document.body.style.overflow = 'hidden';
 }
 
 /**
@@ -251,10 +303,13 @@ export function openModal(content: string, options: ModalOptions = {}): void {
  */
 export function closeModal(): void {
   if (overlayInstance) {
-    overlayInstance.fadeOut(200);
+    fadeOut(overlayInstance);
   }
-  $(document).off('keydown.modal');
-  $('body').css('overflow', '');
+  if (escapeHandler) {
+    document.removeEventListener('keydown', escapeHandler);
+    escapeHandler = null;
+  }
+  document.body.style.overflow = '';
 }
 
 /**
@@ -264,8 +319,12 @@ export function closeModal(): void {
  * @param options Modal configuration options
  */
 export function openModalFromUrl(url: string, options: ModalOptions = {}): void {
-  $.get(url)
-    .done(function (html) {
+  fetch(url)
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+      return response.text();
+    })
+    .then(html => {
       // Extract body content if it's a full HTML document
       const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
       const content = bodyMatch ? bodyMatch[1] : html;
@@ -280,7 +339,7 @@ export function openModalFromUrl(url: string, options: ModalOptions = {}): void 
 
       openModal(content, options);
     })
-    .fail(function () {
+    .catch(() => {
       openModal('<p class="error">Failed to load content.</p>', options);
     });
 }

@@ -11,7 +11,6 @@
  * @since 3.0.0
  */
 
-import $ from 'jquery';
 import { getLangFromDict } from '../terms/dictionary';
 import { prepareTextInteractions } from './text_events';
 import { goToLastPosition, saveReadingPosition, saveAudioPosition, readRawTextAloud } from '../core/user_interactions';
@@ -176,12 +175,14 @@ export function saveTextStatus(): void {
       return;
     }
   }
-  // Fall back to jPlayer (legacy mode)
-  if (typeof $ !== 'undefined' && $('#jquery_jplayer_1').length > 0) {
-    const jPlayerData = $('#jquery_jplayer_1').data('jPlayer');
-    if (jPlayerData && jPlayerData.status) {
-      saveAudioPosition(textId, jPlayerData.status.currentTime);
-    }
+  // Fall back to jPlayer (legacy mode) - check if jPlayer element exists
+  const jPlayerEl = document.getElementById('jquery_jplayer_1') as HTMLElement & {
+    jPlayer?: { data: (key: string) => { status?: { currentTime: number } } };
+  } | null;
+  if (jPlayerEl && typeof (jPlayerEl as unknown as { jQuery?: unknown }).jQuery !== 'undefined') {
+    // jPlayer stores data on the element via jQuery - this is a legacy fallback
+    // In modern mode, we use the HTML5 audio player above
+    console.warn('jPlayer fallback not available without jQuery');
   }
 }
 
@@ -223,20 +224,23 @@ function mergeGlobals(newGlobals: Record<string, unknown>): void {
  */
 function saveCurrentPosition(): void {
   let pos = 0;
-  // First position from the top
-  const firstWord = $('.wsty').not('.hide').eq(0);
-  if (firstWord.length === 0) {
+  // First position from the top - find first visible word
+  const visibleWords = document.querySelectorAll<HTMLElement>('.wsty:not(.hide)');
+  if (visibleWords.length === 0) {
     return;
   }
-  const topPos = ($(window).scrollTop() || 0) - (firstWord.height() || 0);
-  $('.wsty').not('.hide').each(function () {
-    const offset = $(this).offset();
-    if (offset && offset.top >= topPos) {
-      const dataPos = $(this).attr('data_pos');
+  const firstWord = visibleWords[0];
+  const topPos = window.scrollY - (firstWord.offsetHeight || 0);
+
+  for (const word of visibleWords) {
+    const rect = word.getBoundingClientRect();
+    const offsetTop = rect.top + window.scrollY;
+    if (offsetTop >= topPos) {
+      const dataPos = word.getAttribute('data_pos');
       pos = parseInt(dataPos || '0', 10);
-      return false; // Break the loop
+      break;
     }
-  });
+  }
   saveReadingPosition(LWT_DATA.text.id, pos);
 }
 
@@ -290,23 +294,21 @@ export function initTextReading(): void {
 
   // Set the language of the current frame
   if (window.LANG && window.LANG !== LWT_DATA.language?.translator_link) {
-    $('html').attr('lang', window.LANG);
+    document.documentElement.setAttribute('lang', window.LANG);
   }
 
   // Initialize native tooltips if enabled
   if (LWT_DATA.settings?.jQuery_tooltip) {
-    $(function () {
-      const thetext = document.getElementById('thetext');
-      if (thetext) {
-        initNativeTooltips(thetext);
-      }
-    });
+    const thetext = document.getElementById('thetext');
+    if (thetext) {
+      initNativeTooltips(thetext);
+    }
   }
 
-  // Set up event handlers
-  $(document).ready(prepareTextInteractions);
-  $(document).ready(goToLastPosition);
-  $(window).on('beforeunload', saveCurrentPosition);
+  // Set up event handlers (DOM should already be ready at this point)
+  prepareTextInteractions();
+  goToLastPosition();
+  window.addEventListener('beforeunload', saveCurrentPosition);
 }
 
 /**
@@ -315,15 +317,16 @@ export function initTextReading(): void {
  */
 export function initTextReadingHeader(): void {
   // Set up beforeunload handler for audio position
-  $(window).on('beforeunload', saveTextStatus);
+  window.addEventListener('beforeunload', saveTextStatus);
 
   // Initialize TTS
   initTTS();
 
   // Bind click handler for TTS button
-  $(document).ready(function () {
-    $('#readTextButton').on('click', toggleReading);
-  });
+  const readTextButton = document.getElementById('readTextButton');
+  if (readTextButton) {
+    readTextButton.addEventListener('click', toggleReading);
+  }
 }
 
 /**
@@ -333,7 +336,8 @@ export function initTextReadingHeader(): void {
 export function autoInit(): void {
   // Check if we're on the text reading page (detect by config or legacy globals)
   const hasTextReadingConfig = document.getElementById('text-reading-config') !== null;
-  if ($('#thetext').length > 0 && (hasTextReadingConfig || window.new_globals)) {
+  const thetext = document.getElementById('thetext');
+  if (thetext && (hasTextReadingConfig || window.new_globals)) {
     initTextReading();
   }
 
@@ -345,7 +349,7 @@ export function autoInit(): void {
 }
 
 // Auto-initialize when DOM is ready (if Vite is already loaded)
-$(function () {
+document.addEventListener('DOMContentLoaded', () => {
   if (window.LWT_VITE_LOADED) {
     autoInit();
   }

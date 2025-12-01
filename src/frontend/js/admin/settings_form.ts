@@ -6,7 +6,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
 import { lwtFormCheck } from '../forms/unloadformcheck';
 
 /**
@@ -23,11 +22,15 @@ export function initSettingsForm(): void {
   lwtFormCheck.askBeforeExit();
 
   // Handle settings navigation buttons (reset dirty before navigating)
-  $(document).on('click', '[data-action="settings-navigate"]', function (this: HTMLElement) {
-    const url = this.dataset.url;
-    if (url) {
-      lwtFormCheck.resetDirty();
-      location.href = url;
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const button = target.closest<HTMLElement>('[data-action="settings-navigate"]');
+    if (button) {
+      const url = button.dataset.url;
+      if (url) {
+        lwtFormCheck.resetDirty();
+        location.href = url;
+      }
     }
   });
 }
@@ -37,12 +40,14 @@ export function initSettingsForm(): void {
  * Shows a confirmation dialog before form submission.
  */
 export function initConfirmSubmitForms(): void {
-  $(document).on('submit', 'form[data-action="confirm-submit"]', function (e) {
-    const form = e.target as HTMLFormElement;
-    const message = form.dataset.confirmMessage || 'Are you sure?';
-    if (!confirm(message)) {
-      e.preventDefault();
-      return false;
+  document.addEventListener('submit', (e) => {
+    const form = (e.target as HTMLElement).closest<HTMLFormElement>('form[data-action="confirm-submit"]');
+    if (form) {
+      const message = form.dataset.confirmMessage || 'Are you sure?';
+      if (!confirm(message)) {
+        e.preventDefault();
+        return false;
+      }
     }
     return true;
   });
@@ -53,10 +58,14 @@ export function initConfirmSubmitForms(): void {
  * This is a general handler for simple navigation buttons.
  */
 export function initNavigateButtons(): void {
-  $(document).on('click', '[data-action="navigate"]', function (this: HTMLElement) {
-    const url = this.dataset.url;
-    if (url) {
-      location.href = url;
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const button = target.closest<HTMLElement>('[data-action="navigate"]');
+    if (button) {
+      const url = button.dataset.url;
+      if (url) {
+        location.href = url;
+      }
     }
   });
 }
@@ -66,14 +75,18 @@ export function initNavigateButtons(): void {
  * This is a general handler for back buttons.
  */
 export function initHistoryBackButtons(): void {
-  $(document).on('click', '[data-action="history-back"]', function (e) {
-    e.preventDefault();
-    history.back();
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const button = target.closest<HTMLElement>('[data-action="history-back"]');
+    if (button) {
+      e.preventDefault();
+      history.back();
+    }
   });
 }
 
 // Auto-initialize when DOM is ready
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
   initSettingsForm();
   initConfirmSubmitForms();
   initNavigateButtons();

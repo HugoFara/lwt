@@ -6,19 +6,41 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import $ from 'jquery';
 import { extend_adv_xpath, lwt_feed_wizard } from './jq_feedwizard';
 
 // Declare filter_Array as a global variable
 declare global {
   // eslint-disable-next-line no-var
   var filter_Array: HTMLElement[];
-  function xpathQuery(expression: string, context?: Node): JQuery<HTMLElement>;
+  function xpathQuery(expression: string, context?: Node): HTMLElement[];
 }
 
 // Initialize global filter_Array if not already defined
 if (typeof window.filter_Array === 'undefined') {
   window.filter_Array = [];
+}
+
+/**
+ * Helper to get all descendants of an element including itself.
+ */
+function getAllDescendantsAndSelf(el: Element): Element[] {
+  const result: Element[] = [el];
+  const descendants = el.querySelectorAll('*');
+  descendants.forEach(d => result.push(d));
+  return result;
+}
+
+/**
+ * Helper to get all following siblings and their descendants.
+ */
+function getNextAllWithDescendants(el: Element): Element[] {
+  const result: Element[] = [];
+  let sibling = el.nextElementSibling;
+  while (sibling) {
+    result.push(...getAllDescendantsAndSelf(sibling));
+    sibling = sibling.nextElementSibling;
+  }
+  return result;
 }
 
 /**
@@ -46,31 +68,60 @@ export const lwt_wizard_filter = {
       alert('Article section is empty!');
       return;
     }
-    $('#lwt_header')
-      .nextAll()
-      .find('*')
-      .addBack()
-      .not(window.xpathQuery(articleSection).find('*').addBack())
-      .not($('#lwt_header').find('*').addBack())
-      .each(function () {
-        $(this).addClass('lwt_filtered_text');
-        window.filter_Array.push(this);
-      });
+
+    const lwtHeader = document.getElementById('lwt_header');
+    if (!lwtHeader) return;
+
+    // Get all elements after lwt_header and their descendants
+    const allAfterHeader = getNextAllWithDescendants(lwtHeader);
+
+    // Get elements matching the article selector via xpathQuery
+    const articleElements = window.xpathQuery(articleSection);
+    const articleSet = new Set<Element>();
+    articleElements.forEach(el => {
+      getAllDescendantsAndSelf(el).forEach(d => articleSet.add(d));
+    });
+
+    // Get header elements to exclude
+    const headerSet = new Set<Element>();
+    getAllDescendantsAndSelf(lwtHeader).forEach(d => headerSet.add(d));
+
+    // Filter elements not in article or header
+    allAfterHeader.forEach(el => {
+      if (!articleSet.has(el) && !headerSet.has(el)) {
+        el.classList.add('lwt_filtered_text');
+        window.filter_Array.push(el as HTMLElement);
+      }
+    });
   },
 
   /**
    * Hide all images except those in the header.
    */
   hideImages: function (): void {
-    $('img').not($('#lwt_header').find('*')).css('display', 'none');
+    const lwtHeader = document.getElementById('lwt_header');
+    const headerImages = lwtHeader ? new Set(lwtHeader.querySelectorAll('img')) : new Set();
+    document.querySelectorAll<HTMLImageElement>('img').forEach(img => {
+      if (!headerImages.has(img)) {
+        img.style.display = 'none';
+      }
+    });
   },
 
   /**
    * Cancel advanced selection mode.
    */
   clickCancel: function (): boolean {
-    $('#adv').hide();
-    $('#lwt_last').css('margin-top', $('#lwt_header').height() || 0);
+    const advEl = document.getElementById('adv');
+    const lwtLastEl = document.getElementById('lwt_last');
+    const lwtHeaderEl = document.getElementById('lwt_header');
+
+    if (advEl) {
+      advEl.style.display = 'none';
+    }
+    if (lwtLastEl && lwtHeaderEl) {
+      lwtLastEl.style.marginTop = (lwtHeaderEl.offsetHeight || 0) + 'px';
+    }
     return false;
   },
 
@@ -78,11 +129,25 @@ export const lwt_wizard_filter = {
    * Reset selection mode - clear all marked text and reset UI.
    */
   changeSelectMode: function (): boolean {
-    $('*').removeClass('lwt_marked_text');
-    $('*[class=\'\']').removeAttr('class');
-    $('#get_button').prop('disabled', true);
-    $('#mark_action').empty();
-    $('<option/>').val('').text('[Click On Text]').appendTo('#mark_action');
+    document.querySelectorAll('.lwt_marked_text').forEach(el => {
+      el.classList.remove('lwt_marked_text');
+    });
+    // Remove empty class attributes
+    document.querySelectorAll('[class=""]').forEach(el => {
+      el.removeAttribute('class');
+    });
+    const getButton = document.getElementById('get_button') as HTMLButtonElement | null;
+    if (getButton) {
+      getButton.disabled = true;
+    }
+    const markAction = document.getElementById('mark_action');
+    if (markAction) {
+      markAction.innerHTML = '';
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = '[Click On Text]';
+      markAction.appendChild(option);
+    }
     return false;
   },
 
@@ -90,10 +155,21 @@ export const lwt_wizard_filter = {
    * Toggle image visibility based on select value.
    */
   changeHideImages: function (this: HTMLSelectElement): boolean {
-    if ($(this).val() === 'no') {
-      $('img').not($('#lwt_header').find('*')).css('display', '');
+    const lwtHeader = document.getElementById('lwt_header');
+    const headerImages = lwtHeader ? new Set(lwtHeader.querySelectorAll('img')) : new Set();
+
+    if (this.value === 'no') {
+      document.querySelectorAll<HTMLImageElement>('img').forEach(img => {
+        if (!headerImages.has(img)) {
+          img.style.display = '';
+        }
+      });
     } else {
-      $('img').not($('#lwt_header').find('*')).css('display', 'none');
+      document.querySelectorAll<HTMLImageElement>('img').forEach(img => {
+        if (!headerImages.has(img)) {
+          img.style.display = 'none';
+        }
+      });
     }
     return false;
   },
@@ -102,8 +178,11 @@ export const lwt_wizard_filter = {
    * Handle feed selection change - submit form with current HTML.
    */
   changeSelectedFeed: function (): void {
-    const html = $('#lwt_sel').html();
-    $('input[name=\'html\']').val(html || '');
+    const lwtSelEl = document.getElementById('lwt_sel');
+    const htmlInput = document.querySelector<HTMLInputElement>('input[name="html"]');
+    if (htmlInput && lwtSelEl) {
+      htmlInput.value = lwtSelEl.innerHTML || '';
+    }
     (document as Document & { lwt_form1: HTMLFormElement }).lwt_form1.submit();
   },
 
@@ -111,12 +190,17 @@ export const lwt_wizard_filter = {
    * Navigate back to step 2 with current settings.
    */
   clickBack: function (): boolean {
+    const maximEl = document.getElementById('maxim') as HTMLInputElement | null;
+    const lwtSelEl = document.getElementById('lwt_sel');
+    const selectModeEl = document.querySelector<HTMLSelectElement>('select[name="select_mode"]');
+    const hideImagesEl = document.querySelector<HTMLSelectElement>('select[name="hide_images"]');
+
     location.href = '/feeds/wizard?step=2&article_tags=1&maxim=' +
-      $('#maxim').val() + '&filter_tags=' +
-      encodeURIComponent($('#lwt_sel').html() || '') + '&select_mode=' +
-      encodeURIComponent($('select[name=\'select_mode\']').val() as string) +
+      (maximEl?.value || '') + '&filter_tags=' +
+      encodeURIComponent(lwtSelEl?.innerHTML || '') + '&select_mode=' +
+      encodeURIComponent(selectModeEl?.value || '') +
       '&hide_images=' +
-      encodeURIComponent($('select[name=\'hide_images\']').val() as string);
+      encodeURIComponent(hideImagesEl?.value || '');
     return false;
   },
 
@@ -124,13 +208,21 @@ export const lwt_wizard_filter = {
    * Toggle min/max state of the wizard container.
    */
   clickMinMax: function (): boolean {
-    $('#lwt_container').toggle();
-    if ($('#lwt_container').css('display') === 'none') {
-      $('input[name=\'maxim\']').val(0);
-    } else {
-      $('input[name=\'maxim\']').val(1);
+    const lwtContainer = document.getElementById('lwt_container');
+    const maximInput = document.querySelector<HTMLInputElement>('input[name="maxim"]');
+    const lwtLastEl = document.getElementById('lwt_last');
+    const lwtHeaderEl = document.getElementById('lwt_header');
+
+    if (lwtContainer) {
+      const isHidden = lwtContainer.style.display === 'none';
+      lwtContainer.style.display = isHidden ? '' : 'none';
+      if (maximInput) {
+        maximInput.value = isHidden ? '1' : '0';
+      }
     }
-    $('#lwt_last').css('margin-top', $('#lwt_header').height() || 0);
+    if (lwtLastEl && lwtHeaderEl) {
+      lwtLastEl.style.marginTop = (lwtHeaderEl.offsetHeight || 0) + 'px';
+    }
     return false;
   },
 
@@ -138,12 +230,19 @@ export const lwt_wizard_filter = {
    * Set maxim state - minimize the container.
    */
   setMaxim: function (): void {
-    $('#lwt_container').hide();
-    $('#lwt_last').css('margin-top', $('#lwt_header').height() || 0);
-    if ($('#lwt_container').css('display') === 'none') {
-      $('input[name=\'maxim\']').val(0);
-    } else {
-      $('input[name=\'maxim\']').val(1);
+    const lwtContainer = document.getElementById('lwt_container');
+    const maximInput = document.querySelector<HTMLInputElement>('input[name="maxim"]');
+    const lwtLastEl = document.getElementById('lwt_last');
+    const lwtHeaderEl = document.getElementById('lwt_header');
+
+    if (lwtContainer) {
+      lwtContainer.style.display = 'none';
+    }
+    if (lwtLastEl && lwtHeaderEl) {
+      lwtLastEl.style.marginTop = (lwtHeaderEl.offsetHeight || 0) + 'px';
+    }
+    if (maximInput) {
+      maximInput.value = lwtContainer?.style.display === 'none' ? '0' : '1';
     }
   }
 };
@@ -154,8 +253,8 @@ export const lwt_wizard_filter = {
  * @param config - Configuration for the wizard step
  */
 export function initWizardStep3(config: WizardStep3Config): void {
-  // Extend jQuery with get_adv_xpath
-  $.fn.get_adv_xpath = extend_adv_xpath;
+  // Store extend_adv_xpath for use (it's used by jq_feedwizard)
+  (window as unknown as Record<string, unknown>).extend_adv_xpath = extend_adv_xpath;
 
   // Initialize filter array
   window.filter_Array = [];
@@ -181,48 +280,63 @@ export function initWizardStep3(config: WizardStep3Config): void {
  * Initialize event delegation for wizard step 3 buttons.
  */
 function initWizardStep3Events(): void {
-  // Cancel button in advanced selection
-  $(document).on('click', '[data-action="wizard-step3-cancel"]', function () {
-    lwt_wizard_filter.clickCancel();
-  });
+  document.addEventListener('click', function (e) {
+    const target = e.target as HTMLElement;
+    const actionEl = target.closest('[data-action]') as HTMLElement | null;
+    if (!actionEl) return;
 
-  // Selection mode change
-  $(document).on('change', '[data-action="wizard-step3-select-mode"]', function () {
-    lwt_wizard_filter.changeSelectMode();
-  });
+    const action = actionEl.dataset.action;
 
-  // Hide images change
-  $(document).on(
-    'change',
-    '[data-action="wizard-step3-hide-images"]',
-    function (this: HTMLSelectElement) {
-      lwt_wizard_filter.changeHideImages.call(this);
+    // Cancel button in advanced selection
+    if (action === 'wizard-step3-cancel') {
+      lwt_wizard_filter.clickCancel();
     }
-  );
 
-  // Back button
-  $(document).on('click', '[data-action="wizard-step3-back"]', function () {
-    lwt_wizard_filter.clickBack();
+    // Back button
+    if (action === 'wizard-step3-back') {
+      lwt_wizard_filter.clickBack();
+    }
+
+    // Min/max button
+    if (action === 'wizard-step3-minmax') {
+      lwt_wizard_filter.clickMinMax();
+    }
+
+    // Settings dialog open
+    if (action === 'wizard-settings-open') {
+      const settingsEl = document.getElementById('settings');
+      if (settingsEl) {
+        settingsEl.style.display = '';
+      }
+    }
+
+    // Settings dialog close
+    if (action === 'wizard-settings-close') {
+      const settingsEl = document.getElementById('settings');
+      if (settingsEl) {
+        settingsEl.style.display = 'none';
+      }
+    }
   });
 
-  // Min/max button
-  $(document).on('click', '[data-action="wizard-step3-minmax"]', function () {
-    lwt_wizard_filter.clickMinMax();
-  });
+  document.addEventListener('change', function (e) {
+    const target = e.target as HTMLElement;
+    const action = target.dataset.action;
 
-  // Selected feed change
-  $(document).on('change', '[data-action="wizard-step3-selected-feed"]', function () {
-    lwt_wizard_filter.changeSelectedFeed();
-  });
+    // Selection mode change
+    if (action === 'wizard-step3-select-mode') {
+      lwt_wizard_filter.changeSelectMode();
+    }
 
-  // Settings dialog open
-  $(document).on('click', '[data-action="wizard-settings-open"]', function () {
-    $('#settings').show();
-  });
+    // Hide images change
+    if (action === 'wizard-step3-hide-images' && target instanceof HTMLSelectElement) {
+      lwt_wizard_filter.changeHideImages.call(target);
+    }
 
-  // Settings dialog close
-  $(document).on('click', '[data-action="wizard-settings-close"]', function () {
-    $('#settings').hide();
+    // Selected feed change
+    if (action === 'wizard-step3-selected-feed') {
+      lwt_wizard_filter.changeSelectedFeed();
+    }
   });
 }
 
@@ -244,10 +358,15 @@ function autoInitWizardStep3(): void {
 }
 
 // Auto-initialize event handlers and step 3
-$(document).ready(function () {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function () {
+    initWizardStep3Events();
+    autoInitWizardStep3();
+  });
+} else {
   initWizardStep3Events();
   autoInitWizardStep3();
-});
+}
 
 // Expose to window for backward compatibility
 (window as unknown as Record<string, unknown>).lwt_wizard_filter = lwt_wizard_filter;

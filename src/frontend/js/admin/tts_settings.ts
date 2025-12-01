@@ -8,7 +8,6 @@
  * @since 3.0.0
  */
 
-import $ from 'jquery';
 import { getCookie } from '../core/cookies';
 import { readTextAloud } from '../core/user_interactions';
 import { lwtFormCheck } from '../forms/unloadformcheck';
@@ -52,7 +51,8 @@ export const ttsSettings = {
    * @returns Language code (e.g., "en")
    */
   getLanguageCode(): string {
-    return ($('#get-language').val() as string) || '';
+    const el = document.getElementById('get-language') as HTMLSelectElement | null;
+    return el?.value || '';
   },
 
   /**
@@ -60,12 +60,16 @@ export const ttsSettings = {
    */
   readingDemo(): void {
     const lang = ttsSettings.getLanguageCode();
+    const demoEl = document.getElementById('tts-demo') as HTMLInputElement | null;
+    const rateEl = document.getElementById('rate') as HTMLInputElement | null;
+    const pitchEl = document.getElementById('pitch') as HTMLInputElement | null;
+    const voiceEl = document.getElementById('voice') as HTMLSelectElement | null;
     readTextAloud(
-      ($('#tts-demo').val() as string) || '',
+      demoEl?.value || '',
       lang,
-      parseFloat(($('#rate').val() as string) || '1'),
-      parseFloat(($('#pitch').val() as string) || '1'),
-      ($('#voice').val() as string) || undefined
+      parseFloat(rateEl?.value || '1'),
+      parseFloat(pitchEl?.value || '1'),
+      voiceEl?.value || undefined
     );
   },
 
@@ -74,10 +78,14 @@ export const ttsSettings = {
    */
   presetTTSData(): void {
     const langName = ttsSettings.currentLanguage;
-    $('#get-language').val(langName);
-    $('#voice').val(getCookie('tts[' + langName + 'RegName]') || '');
-    $('#rate').val(getCookie('tts[' + langName + 'Rate]') || '1');
-    $('#pitch').val(getCookie('tts[' + langName + 'Pitch]') || '1');
+    const langEl = document.getElementById('get-language') as HTMLSelectElement | null;
+    const voiceEl = document.getElementById('voice') as HTMLSelectElement | null;
+    const rateEl = document.getElementById('rate') as HTMLInputElement | null;
+    const pitchEl = document.getElementById('pitch') as HTMLInputElement | null;
+    if (langEl) langEl.value = langName;
+    if (voiceEl) voiceEl.value = getCookie('tts[' + langName + 'RegName]') || '';
+    if (rateEl) rateEl.value = getCookie('tts[' + langName + 'Rate]') || '1';
+    if (pitchEl) pitchEl.value = getCookie('tts[' + langName + 'Pitch]') || '1';
   },
 
   /**
@@ -85,7 +93,9 @@ export const ttsSettings = {
    */
   populateVoiceList(): void {
     const voices = window.speechSynthesis.getVoices();
-    $('#voice').empty();
+    const voiceSelect = document.getElementById('voice') as HTMLSelectElement | null;
+    if (!voiceSelect) return;
+    voiceSelect.innerHTML = '';
     const languageCode = ttsSettings.getLanguageCode();
 
     for (let i = 0; i < voices.length; i++) {
@@ -101,7 +111,7 @@ export const ttsSettings = {
 
       option.setAttribute('data-lang', voices[i].lang);
       option.setAttribute('data-name', voices[i].name);
-      $('#voice')[0].appendChild(option);
+      voiceSelect.appendChild(option);
     }
   },
 

@@ -51,9 +51,9 @@ export function deleteTranslation(): void {
   if (frame === undefined) {
     return;
   }
-  const translationInput = $('[name="WoTranslation"]', frame.document);
-  if ((translationInput.val() as string).trim().length) {
-    translationInput.val('');
+  const translationInput = frame.document.querySelector<HTMLInputElement | HTMLTextAreaElement>('[name="WoTranslation"]');
+  if (translationInput && translationInput.value.trim().length) {
+    translationInput.value = '';
     frame.lwtFormCheck.makeDirty();
   }
 }
@@ -95,78 +95,88 @@ export function addTranslation(s: string): void {
 export function getGlosbeTranslation(text: string, lang: string, dest: string): void {
   // Note from 2.9.0: make asynchronous if possible
   // Note: the Glosbe API is closed and may not be open again
-  $.ajax({
-    url: 'http://glosbe.com/gapi/translate?' + $.param({
-      from: lang,
-      dest: dest,
-      format: 'json',
-      phrase: text,
-      callback: '?'
-    }),
-    type: 'GET',
-    dataType: 'jsonp',
-    jsonp: 'getTranslationFromGlosbeApi',
-    jsonpCallback: 'getTranslationFromGlosbeApi',
-    async: true
+  // JSONP implementation using dynamic script tag
+  const params = new URLSearchParams({
+    from: lang,
+    dest: dest,
+    format: 'json',
+    phrase: text,
+    callback: 'getTranslationFromGlosbeApi'
   });
+
+  // Register the global callback function
+  (window as unknown as Record<string, unknown>).getTranslationFromGlosbeApi = getTranslationFromGlosbeApi;
+
+  const script = document.createElement('script');
+  script.src = 'http://glosbe.com/gapi/translate?' + params.toString();
+  script.async = true;
+  script.onerror = () => {
+    const translationsEl = document.getElementById('translations');
+    if (translationsEl) {
+      translationsEl.textContent =
+        'Retrieval error. Possible reason: There is a limit of Glosbe API ' +
+        'calls that may be done from one IP address in a fixed period of time,' +
+        ' to prevent from abuse.';
+      translationsEl.insertAdjacentHTML('afterend', '<hr />');
+    }
+  };
+  document.head.appendChild(script);
 }
 
 export function getTranslationFromGlosbeApi(data: GlosbeResponse): void {
+  const translationsEl = document.getElementById('translations');
+  if (!translationsEl) return;
+
   try {
-    $.each(data.tuc, function (_i: number, rows: GlosbeTucEntry) {
+    data.tuc.forEach((rows: GlosbeTucEntry) => {
       if (rows.phrase) {
-        $('#translations')
-          .append(
-            '<span class="click" onclick="addTranslation(\'' +
-            rows.phrase.text + '\');">' +
-            '<img src="icn/tick-button.png" title="Copy" alt="Copy" />' +
-            ' &nbsp; ' + rows.phrase.text +
-            '</span><br />'
-          );
+        translationsEl.insertAdjacentHTML('beforeend',
+          '<span class="click" onclick="addTranslation(\'' +
+          rows.phrase.text + '\');">' +
+          '<img src="icn/tick-button.png" title="Copy" alt="Copy" />' +
+          ' &nbsp; ' + rows.phrase.text +
+          '</span><br />'
+        );
       } else if (rows.meanings) {
-        $('#translations')
-          .append(
-            '<span class="click" onclick="addTranslation(' + "'(" +
-            rows.meanings[0].text + ")'" + ');">' +
-            '<img src="icn/tick-button.png" title="Copy" alt="Copy" />' +
-            ' &nbsp; ' + '(' + rows.meanings[0].text + ')' +
-            '</span><br />'
-          );
+        translationsEl.insertAdjacentHTML('beforeend',
+          '<span class="click" onclick="addTranslation(' + "'(" +
+          rows.meanings[0].text + ")'" + ');">' +
+          '<img src="icn/tick-button.png" title="Copy" alt="Copy" />' +
+          ' &nbsp; ' + '(' + rows.meanings[0].text + ')' +
+          '</span><br />'
+        );
       }
     });
     if (!data.tuc.length) {
-      $('#translations')
-        .before(
-          '<p>No translations found (' + data.from + '-' + data.dest + ').</p>'
-        );
+      translationsEl.insertAdjacentHTML('beforebegin',
+        '<p>No translations found (' + data.from + '-' + data.dest + ').</p>'
+      );
       if (data.dest !== 'en' && data.from !== 'en') {
-        $('#translations').attr('id', 'no_trans')
-          .after(
-            '<hr /><p>&nbsp;</p><h3><a href="http://glosbe.com/' +
-            data.from + '/en/' + data.phrase + '">Glosbe Dictionary (' +
-            data.from + '-en):  &nbsp; <span class="red2">' +
-            data.phrase + '</span></a></h3>&nbsp;<p id="translations"></p>'
-          );
+        translationsEl.id = 'no_trans';
+        translationsEl.insertAdjacentHTML('afterend',
+          '<hr /><p>&nbsp;</p><h3><a href="http://glosbe.com/' +
+          data.from + '/en/' + data.phrase + '">Glosbe Dictionary (' +
+          data.from + '-en):  &nbsp; <span class="red2">' +
+          data.phrase + '</span></a></h3>&nbsp;<p id="translations"></p>'
+        );
         getGlosbeTranslation(data.phrase, data.from, 'en');
       } else {
-        $('#translations').after('<hr />');
+        translationsEl.insertAdjacentHTML('afterend', '<hr />');
       }
     } else {
-      $('#translations')
-        .after('<p>&nbsp;<br/>' + data.tuc.length + ' translation' +
-          (data.tuc.length === 1 ? '' : 's') +
-          ' retrieved via <a href="http://glosbe.com/a-api" target="_blank">' +
-          'Glosbe API</a>.</p><hr />'
-        );
+      translationsEl.insertAdjacentHTML('afterend',
+        '<p>&nbsp;<br/>' + data.tuc.length + ' translation' +
+        (data.tuc.length === 1 ? '' : 's') +
+        ' retrieved via <a href="http://glosbe.com/a-api" target="_blank">' +
+        'Glosbe API</a>.</p><hr />'
+      );
     }
   } catch {
-    $('#translations')
-      .text(
-        'Retrieval error. Possible reason: There is a limit of Glosbe API ' +
-        'calls that may be done from one IP address in a fixed period of time,' +
-        ' to prevent from abuse.'
-      )
-      .after('<hr />');
+    translationsEl.textContent =
+      'Retrieval error. Possible reason: There is a limit of Glosbe API ' +
+      'calls that may be done from one IP address in a fixed period of time,' +
+      ' to prevent from abuse.';
+    translationsEl.insertAdjacentHTML('afterend', '<hr />');
   }
 }
 

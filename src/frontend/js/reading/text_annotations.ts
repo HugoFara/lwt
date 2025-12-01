@@ -10,17 +10,17 @@ import { make_tooltip } from '../terms/word_status';
 /**
  * Helper to safely get an HTML attribute value as a string.
  *
- * @param $el jQuery element to get attribute from
+ * @param el HTML element to get attribute from
  * @param attr Name of the attribute to retrieve
- * @returns Attribute value as string, or empty string if undefined
+ * @returns Attribute value as string, or empty string if null
  */
-export function getAttr($el: JQuery, attr: string): string {
-  const val = $el.attr(attr);
-  return typeof val === 'string' ? val : '';
+export function getAttr(el: HTMLElement, attr: string): string {
+  return el.getAttribute(attr) || '';
 }
 
 /**
  * Helper to safely get an HTML attribute value as a string from a native element.
+ * (Alias for getAttr for backward compatibility)
  *
  * @param el HTML element to get attribute from
  * @param attr Name of the attribute to retrieve
@@ -64,16 +64,15 @@ declare const LWT_DATA: LwtDataGlobal;
 /**
  * Add annotations to a word.
  *
- * @param _index Unused iteration index (required by jQuery .each() signature)
+ * @param _index Unused iteration index (required by forEach signature)
  */
 export function word_each_do_text_text(
   this: HTMLElement,
   _index: number // eslint-disable-line @typescript-eslint/no-unused-vars
 ): void {
-  const $this = $(this);
-  const wid = getAttr($this, 'data_wid');
+  const wid = getAttr(this, 'data_wid');
   if (wid !== '') {
-    const order = getAttr($this, 'data_order');
+    const order = getAttr(this, 'data_order');
     if (order in LWT_DATA.text.annotations) {
       if (wid === LWT_DATA.text.annotations[order][1]) {
         const ann = LWT_DATA.text.annotations[order][2];
@@ -83,24 +82,21 @@ export function word_each_do_text_text(
             LWT_DATA.language.delimiter + '])',
           ''
         );
-        const dataTrans = getAttr($this, 'data_trans');
+        const dataTrans = getAttr(this, 'data_trans');
         if (!re.test(dataTrans.replace(/ \[.*$/, ''))) {
           const trans = ann + ' / ' + dataTrans;
-          $this.attr('data_trans', trans.replace(' / *', ''));
+          this.setAttribute('data_trans', trans.replace(' / *', ''));
         }
-        $this.attr('data_ann', ann);
+        this.setAttribute('data_ann', ann);
       }
     }
   }
   if (!LWT_DATA.settings.jQuery_tooltip) {
-    $this.prop(
-      'title',
-      make_tooltip(
-        $this.text(),
-        getAttr($this, 'data_trans'),
-        getAttr($this, 'data_rom'),
-        getAttr($this, 'data_status') || '0'
-      )
+    this.title = make_tooltip(
+      this.textContent || '',
+      getAttr(this, 'data_trans'),
+      getAttr(this, 'data_rom'),
+      getAttr(this, 'data_status') || '0'
     );
   }
 }
@@ -110,17 +106,16 @@ export function word_each_do_text_text(
  * Checks for matching word IDs in nearby annotations and combines translations.
  *
  * @param this The HTML element being processed (word span)
- * @param _index Unused iteration index (required by jQuery .each() signature)
+ * @param _index Unused iteration index (required by forEach signature)
  */
 export function mword_each_do_text_text(
   this: HTMLElement,
   _index: number // eslint-disable-line @typescript-eslint/no-unused-vars
 ): void {
-  const $this = $(this);
-  if (getAttr($this, 'data_status') !== '') {
-    const wid = getAttr($this, 'data_wid');
+  if (getAttr(this, 'data_status') !== '') {
+    const wid = getAttr(this, 'data_wid');
     if (wid !== '') {
-      const order = parseInt(getAttr($this, 'data_order') || '0', 10);
+      const order = parseInt(getAttr(this, 'data_order') || '0', 10);
       for (let j = 2; j <= 16; j = j + 2) {
         const index = (order + j).toString();
         if (index in LWT_DATA.text.annotations) {
@@ -132,26 +127,23 @@ export function mword_each_do_text_text(
                 LWT_DATA.language.delimiter + '])',
               ''
             );
-            const dataTrans = getAttr($this, 'data_trans');
+            const dataTrans = getAttr(this, 'data_trans');
             if (!re.test(dataTrans.replace(/ \[.*$/, ''))) {
               const trans = ann + ' / ' + dataTrans;
-              $this.attr('data_trans', trans.replace(' / *', ''));
+              this.setAttribute('data_trans', trans.replace(' / *', ''));
             }
-            $this.attr('data_ann', ann);
+            this.setAttribute('data_ann', ann);
             break;
           }
         }
       }
     }
     if (!LWT_DATA.settings.jQuery_tooltip) {
-      $this.prop(
-        'title',
-        make_tooltip(
-          getAttr($this, 'data_text'),
-          getAttr($this, 'data_trans'),
-          getAttr($this, 'data_rom'),
-          getAttr($this, 'data_status') || '0'
-        )
+      this.title = make_tooltip(
+        getAttr(this, 'data_text'),
+        getAttr(this, 'data_trans'),
+        getAttr(this, 'data_rom'),
+        getAttr(this, 'data_status') || '0'
       );
     }
   }

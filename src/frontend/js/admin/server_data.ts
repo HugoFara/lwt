@@ -8,8 +8,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
-
 interface ApiVersionResponse {
   version?: string;
   release_date?: string;
@@ -22,15 +20,25 @@ interface ApiVersionResponse {
  * @param data - The API response data
  */
 function handleApiVersionAnswer(data: ApiVersionResponse): void {
+  const versionEl = document.getElementById('rest-api-version');
+  const dateEl = document.getElementById('rest-api-release-date');
+
   if ('error' in data && data.error) {
-    $('#rest-api-version').text(
-      'Error while getting data from the REST API!' +
-      '\nMessage: ' + data.error
-    );
-    $('#rest-api-release-date').empty();
+    if (versionEl) {
+      versionEl.textContent =
+        'Error while getting data from the REST API!' +
+        '\nMessage: ' + data.error;
+    }
+    if (dateEl) {
+      dateEl.textContent = '';
+    }
   } else {
-    $('#rest-api-version').text(data.version || '');
-    $('#rest-api-release-date').text(data.release_date || '');
+    if (versionEl) {
+      versionEl.textContent = data.version || '';
+    }
+    if (dateEl) {
+      dateEl.textContent = data.release_date || '';
+    }
   }
 }
 
@@ -38,11 +46,12 @@ function handleApiVersionAnswer(data: ApiVersionResponse): void {
  * Fetch the REST API version and display it.
  */
 export function fetchApiVersion(): void {
-  $.getJSON(
-    'api.php/v1/version',
-    {},
-    handleApiVersionAnswer
-  );
+  fetch('api.php/v1/version')
+    .then(response => response.json())
+    .then(handleApiVersionAnswer)
+    .catch(error => {
+      handleApiVersionAnswer({ error: error.message });
+    });
 }
 
 /**
@@ -50,10 +59,10 @@ export function fetchApiVersion(): void {
  * Automatically fetches API version if the relevant elements exist.
  */
 export function initServerData(): void {
-  if ($('#rest-api-version').length > 0) {
+  if (document.getElementById('rest-api-version')) {
     fetchApiVersion();
   }
 }
 
 // Auto-initialize on document ready
-$(document).ready(initServerData);
+document.addEventListener('DOMContentLoaded', initServerData);

@@ -10,8 +10,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
-
 /**
  * Configuration for wizard step headers.
  */
@@ -32,10 +30,13 @@ export function setupWizardHeader(config: WizardStepConfig): void {
       '<img alt="Help" title="Help" src="/assets/icons/question-frame.png"></a>'
     : '';
 
-  $('h1')
-    .eq(-1)
-    .html(`Feed Wizard | Step ${config.step} - ${config.title}${helpHtml}`)
-    .css('text-align', 'center');
+  // Get the last h1 element
+  const h1Elements = document.querySelectorAll<HTMLElement>('h1');
+  const lastH1 = h1Elements[h1Elements.length - 1];
+  if (lastH1) {
+    lastH1.innerHTML = `Feed Wizard | Step ${config.step} - ${config.title}${helpHtml}`;
+    lastH1.style.textAlign = 'center';
+  }
 }
 
 /**
@@ -60,20 +61,33 @@ export function initWizardStep1(): void {
  * Binds cancel button and other common wizard actions.
  */
 export function initWizardCommon(): void {
-  // Handle wizard cancel buttons
-  $(document).on('click', '[data-action="wizard-cancel"]', function (e) {
-    e.preventDefault();
-    const url = $(this).data('url') as string || '/feeds/edit?del_wiz=1';
-    location.href = url;
+  // Handle wizard cancel buttons using event delegation
+  document.addEventListener('click', function (e) {
+    const target = e.target as HTMLElement;
+    const actionEl = target.closest('[data-action="wizard-cancel"]') as HTMLElement | null;
+    if (actionEl) {
+      e.preventDefault();
+      const url = actionEl.dataset.url || '/feeds/edit?del_wiz=1';
+      location.href = url;
+    }
   });
 }
 
 // Auto-initialize on document ready
-$(document).ready(function () {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function () {
+    initWizardCommon();
+
+    // Initialize specific wizard steps based on config elements present
+    if (document.getElementById('wizard-step1-config')) {
+      initWizardStep1();
+    }
+  });
+} else {
   initWizardCommon();
 
   // Initialize specific wizard steps based on config elements present
   if (document.getElementById('wizard-step1-config')) {
     initWizardStep1();
   }
-});
+}

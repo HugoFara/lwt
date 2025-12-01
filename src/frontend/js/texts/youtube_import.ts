@@ -8,8 +8,6 @@
  * @since   3.0.0
  */
 
-import $ from 'jquery';
-
 /**
  * YouTube API response structure.
  */
@@ -27,12 +25,25 @@ interface YouTubeApiResponse {
 }
 
 /**
+ * Set the value of a form input by name attribute.
+ */
+function setInputByName(name: string, value: string): void {
+  const el = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`);
+  if (el) {
+    el.value = value;
+  }
+}
+
+/**
  * Set the status message for YouTube data fetching.
  *
  * @param msg - The status message to display
  */
 function setYtDataStatus(msg: string): void {
-  $('#ytDataStatus').text(msg);
+  const statusEl = document.getElementById('ytDataStatus');
+  if (statusEl) {
+    statusEl.textContent = msg;
+  }
 }
 
 /**
@@ -48,9 +59,9 @@ function handleFetchSuccess(data: YouTubeApiResponse, videoId: string): void {
   } else {
     setYtDataStatus('Success!');
     const snippet = data.items[0].snippet;
-    $('[name=TxTitle]').val(snippet.title);
-    $('[name=TxText]').val(snippet.description);
-    $('[name=TxSourceURI]').val(`https://youtube.com/watch?v=${videoId}`);
+    setInputByName('TxTitle', snippet.title);
+    setInputByName('TxText', snippet.description);
+    setInputByName('TxSourceURI', `https://youtube.com/watch?v=${videoId}`);
   }
 }
 
@@ -84,16 +95,22 @@ export function getYtTextData(): void {
 
   const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${encodeURIComponent(ytVideoId)}&key=${encodeURIComponent(apiKey)}`;
 
-  $.get(url)
-    .done((data: YouTubeApiResponse) => handleFetchSuccess(data, ytVideoId))
-    .fail((jqXHR) => {
-      if (jqXHR.status === 403) {
-        setYtDataStatus('Error: Invalid API key or quota exceeded.');
-      } else if (jqXHR.status === 400) {
-        setYtDataStatus('Error: Invalid video ID.');
-      } else {
-        setYtDataStatus(`Error: ${jqXHR.statusText || 'Failed to fetch YouTube data.'}`);
+  fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('Invalid API key or quota exceeded.');
+        } else if (response.status === 400) {
+          throw new Error('Invalid video ID.');
+        } else {
+          throw new Error(response.statusText || 'Failed to fetch YouTube data.');
+        }
       }
+      return response.json() as Promise<YouTubeApiResponse>;
+    })
+    .then((data) => handleFetchSuccess(data, ytVideoId))
+    .catch((error: Error) => {
+      setYtDataStatus(`Error: ${error.message}`);
     });
 }
 
@@ -102,11 +119,15 @@ export function getYtTextData(): void {
  * Binds click handler to the fetch button.
  */
 export function initYouTubeImport(): void {
-  $(document).on('click', '[data-action="fetch-youtube"]', function (e) {
-    e.preventDefault();
-    getYtTextData();
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const actionEl = target.closest('[data-action="fetch-youtube"]');
+    if (actionEl) {
+      e.preventDefault();
+      getYtTextData();
+    }
   });
 }
 
 // Auto-initialize on document ready
-$(document).ready(initYouTubeImport);
+document.addEventListener('DOMContentLoaded', initYouTubeImport);

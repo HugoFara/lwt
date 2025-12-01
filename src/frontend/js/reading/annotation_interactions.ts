@@ -7,21 +7,18 @@
  * @since 3.0.0
  */
 
-import $ from 'jquery';
-
 /**
  * Handle click on an annotation (translation) to toggle visibility.
  * Clicking an annotation hides it (by matching background color),
  * clicking again reveals it.
  */
 export function clickAnnotation(this: HTMLElement): void {
-  const $el = $(this);
-  const attr = $el.attr('style');
-  if (attr !== undefined && attr !== '') {
-    $el.removeAttr('style');
+  const style = this.getAttribute('style');
+  if (style !== null && style !== '') {
+    this.removeAttribute('style');
   } else {
-    $el.css('color', '#C8DCF0');
-    $el.css('background-color', '#C8DCF0');
+    this.style.color = '#C8DCF0';
+    this.style.backgroundColor = '#C8DCF0';
   }
 }
 
@@ -31,14 +28,14 @@ export function clickAnnotation(this: HTMLElement): void {
  * clicking again reveals it.
  */
 export function clickText(this: HTMLElement): void {
-  const $el = $(this);
-  const bc = $('body').css('color');
-  if ($el.css('color') !== bc) {
-    $el.css('color', 'inherit');
-    $el.css('background-color', '');
+  const bc = getComputedStyle(document.body).color;
+  const elColor = getComputedStyle(this).color;
+  if (elColor !== bc) {
+    this.style.color = 'inherit';
+    this.style.backgroundColor = '';
   } else {
-    $el.css('color', '#E5E4E2');
-    $el.css('background-color', '#E5E4E2');
+    this.style.color = '#E5E4E2';
+    this.style.backgroundColor = '#E5E4E2';
   }
 }
 
@@ -47,21 +44,29 @@ export function clickText(this: HTMLElement): void {
  * Binds click handlers to annotation and text elements.
  */
 export function initAnnotationInteractions(): void {
-  $('.anntransruby2').on('click', clickAnnotation);
-  $('.anntermruby').on('click', clickText);
+  document.querySelectorAll<HTMLElement>('.anntransruby2').forEach((el) => {
+    el.addEventListener('click', function(this: HTMLElement) {
+      clickAnnotation.call(this);
+    });
+  });
+  document.querySelectorAll<HTMLElement>('.anntermruby').forEach((el) => {
+    el.addEventListener('click', function(this: HTMLElement) {
+      clickText.call(this);
+    });
+  });
 }
 
 /**
  * Auto-initialize if annotation elements exist on the page.
  */
 function autoInit(): void {
-  if ($('.anntransruby2').length > 0 || $('.anntermruby').length > 0) {
+  if (document.querySelector('.anntransruby2') || document.querySelector('.anntermruby')) {
     initAnnotationInteractions();
   }
 }
 
 // Initialize on DOM ready
-$(document).ready(autoInit);
+document.addEventListener('DOMContentLoaded', autoInit);
 
 // Export to window for potential external use
 declare global {

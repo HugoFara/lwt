@@ -13,9 +13,61 @@
  * @since 3.0.0
  */
 
-import $ from 'jquery';
 import { do_ajax_save_setting } from '../core/ajax_utilities';
 import { lwtFormCheck } from '../forms/unloadformcheck';
+
+/**
+ * Build a URL query string from an object (replaces $.param).
+ */
+function buildQueryString(params: Record<string, string>): string {
+  return new URLSearchParams(params).toString();
+}
+
+/**
+ * Get the value of an input or select element by selector.
+ */
+function getInputValue(selector: string, context: Document = document): string {
+  const el = context.querySelector(selector) as HTMLInputElement | HTMLSelectElement | null;
+  return el?.value ?? '';
+}
+
+/**
+ * Set the value of an input element and optionally trigger a change event.
+ */
+function setInputValue(
+  selector: string,
+  value: string | number,
+  triggerChange = false,
+  context: Document = document
+): void {
+  const el = context.querySelector(selector) as HTMLInputElement | null;
+  if (el) {
+    el.value = String(value);
+    if (triggerChange) {
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
+}
+
+/**
+ * Set the checked state of a checkbox.
+ */
+function setChecked(selector: string, checked: boolean, context: Document = document): void {
+  const el = context.querySelector(selector) as HTMLInputElement | null;
+  if (el) {
+    el.checked = checked;
+  }
+}
+
+/**
+ * Set the value of a select element.
+ */
+function setSelectValue(selector: string, value: string | number, context: Document = document): void {
+  const el = context.querySelector(selector) as HTMLSelectElement | null;
+  if (el) {
+    el.value = String(value);
+  }
+}
 
 /**
  * Language definition array structure.
@@ -76,8 +128,8 @@ export const languageWizard = {
    * Execute the wizard - validate and apply language settings.
    */
   go(): void {
-    const l1 = ($('#l1').val() as string) || '';
-    const l2 = ($('#l2').val() as string) || '';
+    const l1 = getInputValue('#l1');
+    const l2 = getInputValue('#l2');
 
     if (l1 === '') {
       alert('Please choose your native language (L1)!');
@@ -116,7 +168,7 @@ export const languageWizard = {
     const url = new URL(window.location.href);
     const baseUrl = url.protocol + '//' + url.hostname;
 
-    window.LIBRETRANSLATE = baseUrl + ':5000/?' + $.param({
+    window.LIBRETRANSLATE = baseUrl + ':5000/?' + buildQueryString({
       lwt_translator: 'libretranslate',
       lwt_translator_ajax: encodeURIComponent(baseUrl + ':5000/translate/?'),
       source: learningLg[1],
@@ -125,7 +177,7 @@ export const languageWizard = {
     });
 
     // Set language name and trigger change event
-    $('input[name="LgName"]').val(learningLgName).trigger('change');
+    setInputValue('input[name="LgName"]', learningLgName, true);
 
     // Check for language-specific UI changes (e.g., Japanese regexp field)
     if (typeof window.checkLanguageChanged === 'function') {
@@ -133,28 +185,26 @@ export const languageWizard = {
     }
 
     // Set dictionary URL (Glosbe)
-    $('input[name="LgDict1URI"]').val(
-      'https://de.glosbe.com/' + learningLg[0] + '/' +
-      knownLg[0] + '/lwt_term?lwt_popup=1'
+    setInputValue(
+      'input[name="LgDict1URI"]',
+      'https://de.glosbe.com/' + learningLg[0] + '/' + knownLg[0] + '/lwt_term?lwt_popup=1'
     );
-    $('input[name="LgDict1PopUp"]').prop('checked', true);
+    setChecked('input[name="LgDict1PopUp"]', true);
 
     // Set translator URL
     if (window.GGTRANSLATE) {
-      $('input[name="LgGoogleTranslateURI"]').val(window.GGTRANSLATE);
+      setInputValue('input[name="LgGoogleTranslateURI"]', window.GGTRANSLATE);
     }
 
     // Set text size based on language needs
-    $('input[name="LgTextSize"]')
-      .val(learningLg[2] ? 200 : 150)
-      .trigger('change');
+    setInputValue('input[name="LgTextSize"]', learningLg[2] ? 200 : 150, true);
 
     // Set language parsing rules
-    $('input[name="LgRegexpSplitSentences"]').val(learningLg[4]);
-    $('input[name="LgRegexpWordCharacters"]').val(learningLg[3]);
-    $('input[name="LgSplitEachChar"]').prop('checked', learningLg[5]);
-    $('input[name="LgRemoveSpaces"]').prop('checked', learningLg[6]);
-    $('input[name="LgRightToLeft"]').prop('checked', learningLg[7]);
+    setInputValue('input[name="LgRegexpSplitSentences"]', learningLg[4]);
+    setInputValue('input[name="LgRegexpWordCharacters"]', learningLg[3]);
+    setChecked('input[name="LgSplitEachChar"]', learningLg[5]);
+    setChecked('input[name="LgRemoveSpaces"]', learningLg[6]);
+    setChecked('input[name="LgRightToLeft"]', learningLg[7]);
   },
 
   /**
@@ -170,7 +220,11 @@ export const languageWizard = {
    * Toggle the wizard zone visibility.
    */
   toggleWizardZone(): void {
-    $('#wizard_zone').toggle(400);
+    const wizardZone = document.getElementById('wizard_zone');
+    if (wizardZone) {
+      // Simple toggle without animation (jQuery had 400ms animation)
+      wizardZone.style.display = wizardZone.style.display === 'none' ? '' : 'none';
+    }
   }
 };
 
@@ -194,8 +248,8 @@ export const languageWizardPopup = {
    * Execute the popup wizard - validate and apply language settings to opener window.
    */
   go(): void {
-    const l1 = ($('#l1').val() as string) || '';
-    const l2 = ($('#l2').val() as string) || '';
+    const l1 = getInputValue('#l1');
+    const l2 = getInputValue('#l2');
 
     if (l1 === '') {
       alert('Please choose your native language (L1)!');
@@ -236,31 +290,35 @@ export const languageWizardPopup = {
     learningLgName: string
   ): void {
     // Set language name
-    $('input[name="LgName"]', context).val(learningLgName);
+    setInputValue('input[name="LgName"]', learningLgName, false, context);
 
     // Set dictionary URL (Glosbe)
-    $('input[name="LgDict1URI"]', context).val(
-      'https://de.glosbe.com/' + learningLg[0] + '/' +
-      knownLg[0] + '/lwt_term'
+    setInputValue(
+      'input[name="LgDict1URI"]',
+      'https://de.glosbe.com/' + learningLg[0] + '/' + knownLg[0] + '/lwt_term',
+      false,
+      context
     );
-    $('input[name="LgDict1PopUp"]', context).attr('checked', 'checked');
+    setChecked('input[name="LgDict1PopUp"]', true, context);
 
     // Set Google Translate URL
-    $('input[name="LgGoogleTranslateURI"]', context).val(
-      'http://translate.google.com/?ie=UTF-8&sl=' +
-      learningLg[1] + '&tl=' + knownLg[1] + '&text=lwt_term'
+    setInputValue(
+      'input[name="LgGoogleTranslateURI"]',
+      'http://translate.google.com/?ie=UTF-8&sl=' + learningLg[1] + '&tl=' + knownLg[1] + '&text=lwt_term',
+      false,
+      context
     );
-    $('input[name="LgGoogleTranslatePopUp"]', context).attr('checked', 'checked');
+    setChecked('input[name="LgGoogleTranslatePopUp"]', true, context);
 
     // Set text size based on language needs
-    $('input[name="LgTextSize"]', context).val(learningLg[2] ? 200 : 150);
+    setInputValue('input[name="LgTextSize"]', learningLg[2] ? 200 : 150, false, context);
 
     // Set language parsing rules
-    $('input[name="LgRegexpSplitSentences"]', context).val(learningLg[4]);
-    $('input[name="LgRegexpWordCharacters"]', context).val(learningLg[3]);
-    $('select[name="LgSplitEachChar"]', context).val(learningLg[5] ? 1 : 0);
-    $('select[name="LgRemoveSpaces"]', context).val(learningLg[6] ? 1 : 0);
-    $('select[name="LgRightToLeft"]', context).val(learningLg[7] ? 1 : 0);
+    setInputValue('input[name="LgRegexpSplitSentences"]', learningLg[4], false, context);
+    setInputValue('input[name="LgRegexpWordCharacters"]', learningLg[3], false, context);
+    setSelectValue('select[name="LgSplitEachChar"]', learningLg[5] ? 1 : 0, context);
+    setSelectValue('select[name="LgRemoveSpaces"]', learningLg[6] ? 1 : 0, context);
+    setSelectValue('select[name="LgRightToLeft"]', learningLg[7] ? 1 : 0, context);
   },
 
   /**
@@ -356,10 +414,13 @@ export function initLanguageWizardPopup(): void {
   }
 
   // Apply background color styling
-  $('.center').addClass('backlightyellow');
-  const bg = $('.center').css('background-color');
-  $('body').css('background-color', bg);
-  $('.center').removeClass('backlightyellow');
+  const centerEl = document.querySelector('.center') as HTMLElement | null;
+  if (centerEl) {
+    centerEl.classList.add('backlightyellow');
+    const bg = getComputedStyle(centerEl).backgroundColor;
+    document.body.style.backgroundColor = bg;
+    centerEl.classList.remove('backlightyellow');
+  }
 }
 
 // Auto-initialize on DOM ready if config element is present

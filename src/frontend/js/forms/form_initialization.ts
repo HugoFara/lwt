@@ -8,7 +8,6 @@
  * @since 3.0.0 Extracted from inline PHP scripts
  */
 
-import $ from 'jquery';
 import { lwtFormCheck } from './unloadformcheck';
 
 /**
@@ -23,7 +22,7 @@ interface TextEditFormConfig {
  * Used in word edit forms to clean up the dictionary frame.
  */
 export function clearRightFrameOnUnload(): void {
-  $(window).on('beforeunload', function () {
+  window.addEventListener('beforeunload', function () {
     setTimeout(function () {
       if (window.parent && window.parent.frames) {
         const ruFrame = window.parent.frames['ru' as unknown as number];
@@ -48,8 +47,10 @@ export function changeTextboxesLanguage(languageData: Record<string, string>): v
   const lid = langSelect.value;
   const langCode = languageData[lid] || '';
 
-  $('#TxTitle').attr('lang', langCode);
-  $('#TxText').attr('lang', langCode);
+  const titleEl = document.getElementById('TxTitle');
+  const textEl = document.getElementById('TxText');
+  if (titleEl) titleEl.setAttribute('lang', langCode);
+  if (textEl) textEl.setAttribute('lang', langCode);
 }
 
 /**
