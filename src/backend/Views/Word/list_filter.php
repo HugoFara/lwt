@@ -28,12 +28,13 @@ namespace Lwt\Views\Word;
 
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\IconHelper;
 
 ?>
 <form name="form1" action="#">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
-<th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
+<th class="th1" colspan="4">Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
 <input type="button" value="Reset All" data-action="reset-all" /></th>
 </tr>
 <tr>

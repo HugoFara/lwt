@@ -20,6 +20,8 @@
 
 namespace Lwt\Views\Text;
 
+use Lwt\View\Helper\IconHelper;
+
 /** @var string $languagesOption */
 /** @var array $languageData */
 
@@ -36,14 +38,14 @@ namespace Lwt\Views\Text;
                 <select name="TxLgID" id="TxLgID" class="notempty setfocus">
                     <?php echo $languagesOption; ?>
                 </select>
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
             <td class="td1 right">Text:<br /><br />(max.<br />65,000<br />bytes)</td>
             <td class="td1">
                 <textarea name="TxText" id="TxText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"></textarea>
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>

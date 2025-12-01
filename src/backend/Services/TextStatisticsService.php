@@ -19,6 +19,7 @@ namespace Lwt\Services {
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+use Lwt\View\Helper\IconHelper;
 
 /**
  * Service class for text statistics operations.
@@ -184,9 +185,13 @@ class TextStatisticsService
             '&offset=0&sl=' . $sl . '&tl=' . $tl;
         $res = '<span title="Number of unknown words" class="status0 word-count-badge">' .
         $c . '</span>' .
-        '<img src="/assets/icons/script-import.png" class="bulk-translate-icon" ' .
-        'data-action="bulk-translate" data-url="' . htmlspecialchars($bulkTranslateUrl, ENT_QUOTES, 'UTF-8') . '" ' .
-        'title="Lookup New Words" alt="Lookup New Words" />';
+        IconHelper::render('file-down', [
+            'class' => 'bulk-translate-icon',
+            'data-action' => 'bulk-translate',
+            'data-url' => htmlspecialchars($bulkTranslateUrl, ENT_QUOTES, 'UTF-8'),
+            'title' => 'Lookup New Words',
+            'alt' => 'Lookup New Words'
+        ]);
 
         $show_buttons = (int) Settings::getWithDefault('set-words-to-do-buttons');
         if ($show_buttons != 2) {

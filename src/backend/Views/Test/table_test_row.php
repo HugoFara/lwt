@@ -22,6 +22,7 @@ namespace Lwt\Views\Test;
 
 use Lwt\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
+use Lwt\View\Helper\IconHelper;
 
 $span1 = $rtl ? '<span dir="rtl">' : '';
 $span2 = $rtl ? '</span>' : '';
@@ -41,7 +42,7 @@ $sent1 = str_replace(
     <td class="td1 center" nowrap="nowrap">
         <a href="edit_tword.php?wid=<?php echo $word['WoID']; ?>" target="ro"
             data-action="show-right-frames">
-            <img src="/assets/icons/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
+            <?php echo IconHelper::render('file-pen-line', ['title' => 'Edit Term', 'alt' => 'Edit Term']); ?>
         </a>
     </td>
     <td class="td1 center" nowrap="nowrap">
@@ -50,8 +51,7 @@ $sent1 = str_replace(
                 (int) $word['Score'],
                 (int) $word['WoStatus'],
                 (int) $word['WoID'],
-                StatusHelper::getAbbr((int) $word['WoStatus']),
-                \get_file_path('assets/icons/placeholder.png')
+                StatusHelper::getAbbr((int) $word['WoStatus'])
             ); ?>
         </span>
     </td>

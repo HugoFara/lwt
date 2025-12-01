@@ -19,6 +19,7 @@
 namespace Lwt\Views\Admin;
 
 use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\IconHelper;
 
 ?>
 <form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" data-lwt-settings-form>
@@ -39,8 +40,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             </select>
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -56,7 +56,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             value="<?php echo htmlspecialchars($settings['set-text-h-frameheight-no-audio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="3"
             size="3" /><br />Pixel </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -74,7 +74,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             Pixel
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -89,7 +89,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <br />Percent
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -103,7 +103,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <br />Percent
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -115,7 +115,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             </select>
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -127,8 +127,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             </select>
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -142,8 +141,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -159,7 +157,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <br />Pixel
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -174,7 +172,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <br />Percent
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -189,7 +187,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             Percent
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -207,7 +205,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             Milliseconds
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -225,8 +223,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             Milliseconds
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -249,8 +246,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             </select>
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -269,8 +265,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             </select>
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -282,7 +277,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             </select>
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -295,7 +290,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             </select>
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -308,7 +303,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             </select>
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -326,7 +321,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             maxlength="1" size="1" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -342,7 +337,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             value="<?php echo htmlspecialchars($settings['set-term-translation-delimiters'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="8" size="8" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -354,8 +349,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <?php echo ((int)$settings['set-tts'] ? "checked" : ""); ?>  />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -367,7 +361,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             </select>
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -381,8 +375,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -395,7 +388,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             value="<?php echo htmlspecialchars($settings['set-archivedtexts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -407,7 +400,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             value="<?php echo htmlspecialchars($settings['set-terms-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -420,7 +413,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -433,7 +426,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -446,8 +439,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -459,8 +451,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             </select>
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -475,8 +466,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -492,7 +482,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->
@@ -507,8 +497,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             maxlength="4" size="4" />
         </td>
         <td class="td1 center">
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <!-- ******************************************************* -->

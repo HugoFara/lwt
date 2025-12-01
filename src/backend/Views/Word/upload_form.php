@@ -22,6 +22,7 @@ namespace Lwt\Views\Word;
 
 use Lwt\Database\Settings;
 use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\IconHelper;
 
 /** @var string|null $currentLanguage */
 /** @var array $languages */
@@ -43,7 +44,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
                 echo SelectOptionsBuilder::forLanguages($languages, $langToUse, '[Choose...]');
                 ?>
             </select>
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>
@@ -176,7 +177,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
         <div class="hide" id="imp_transl_delim">
             Import Translation Delimiter:<br />
             <input class="notempty" type="text" name="transl_delim" style="width:4em;" value="<?php echo Settings::getWithDefault('set-term-translation-delimiters'); ?>" />
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </div>
         </td>
     </tr>
@@ -187,7 +188,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
             <select class="notempty respinput" name="WoStatus">
                 <?php echo SelectOptionsBuilder::forWordStatus(null, false, false); ?>
             </select>
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>

@@ -19,6 +19,8 @@
 
 namespace Lwt\Views\Language;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <script type="application/json" id="language-wizard-config">
 <?php echo json_encode(['languageDefs' => json_decode($languageDefsJson, true)]); ?>
@@ -29,7 +31,7 @@ namespace Lwt\Views\Language;
             Language Settings Wizard
         </h3>
         <div id="wizard_zone">
-            <img src="/assets/icons/wizard.png" title="Language Settings Wizard" alt="Language Settings Wizard" />
+            <?php echo IconHelper::render('wand-2', ['title' => 'Language Settings Wizard', 'alt' => 'Language Settings Wizard']); ?>
 
             <div class="flex-spaced">
                 <div>

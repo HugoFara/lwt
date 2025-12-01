@@ -20,6 +20,8 @@
 
 namespace Lwt\Views\Text;
 
+use Lwt\View\Helper\IconHelper;
+
 /** @var int $textId */
 /** @var array $record */
 
@@ -37,30 +39,30 @@ namespace Lwt\Views\Text;
                 <select name="AtLgID" class="notempty setfocus">
                     <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $record['AtLgID'], '[Choose...]'); ?>
                 </select>
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
             <td class="td1 right">Title:</td>
             <td class="td1">
                 <input type="text" class="notempty checkoutsidebmp" data_info="Title" name="AtTitle" value="<?php echo htmlspecialchars($record['AtTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200" size="60" />
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
             <td class="td1 right">Text:</td>
             <td class="td1">
                 <textarea name="AtText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"><?php echo htmlspecialchars($record['AtText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
             <td class="td1 right">Ann.Text:</td>
             <td class="td1">
                 <?php if ($record['annotlen']): ?>
-                <img src="/assets/icons/tick.png" title="With Annotation" alt="With Annotation" /> Exists - May be partially or fully lost if you change the text!
+                <?php echo IconHelper::render('check', ['title' => 'With Annotation', 'alt' => 'With Annotation']); ?> Exists - May be partially or fully lost if you change the text!
                 <?php else: ?>
-                <img src="/assets/icons/cross.png" title="No Annotation" alt="No Annotation" /> - None
+                <?php echo IconHelper::render('x', ['title' => 'No Annotation', 'alt' => 'No Annotation']); ?> - None
                 <?php endif; ?>
             </td>
         </tr>

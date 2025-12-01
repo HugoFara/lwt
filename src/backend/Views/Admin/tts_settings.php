@@ -18,6 +18,7 @@
 
 namespace Lwt\Views\Admin;
 
+use Lwt\View\Helper\IconHelper;
 ?>
 <script type="application/json" id="tts-settings-config">
 {"currentLanguageCode": <?php echo $currentLanguageCode; ?>}
@@ -38,8 +39,7 @@ namespace Lwt\Views\Admin;
             </select>
             </td>
             <td class="td1 center">
-                <img src="<?php print_file_path("icn/status-busy.png") ?>"
-                title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
@@ -49,8 +49,7 @@ namespace Lwt\Views\Admin;
                 </select>
             </td>
             <td class="td1 center">
-                <img src="<?php print_file_path("icn/status-busy.png") ?>"
-                title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
@@ -61,7 +60,7 @@ namespace Lwt\Views\Admin;
                 min="0.5" max="2" value="1" step="0.1" id="rate">
             </td>
             <td class="td1 center">
-                <img src="<?php print_file_path("icn/status.png") ?>" alt="status icon"/>
+                <?php echo IconHelper::render('circle-check', ['alt' => 'OK']); ?>
             </td>
         </tr>
         <tr>
@@ -71,7 +70,7 @@ namespace Lwt\Views\Admin;
                 max="2" value="1" step="0.1" id="pitch">
             </td>
             <td class="td1 center">
-                <img src="<?php print_file_path("icn/status.png") ?>" alt="status icon" />
+                <?php echo IconHelper::render('circle-check', ['alt' => 'OK']); ?>
             </td>
         </tr>
         <tr>

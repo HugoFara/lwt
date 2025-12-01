@@ -19,6 +19,8 @@
 
 namespace Lwt\Views\Feed;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <div id="wizard-step3-config"
     data-article-selector="<?php echo htmlspecialchars((string)($wizardData['article_selector'] ?? ''), ENT_QUOTES); ?>"
@@ -61,7 +63,7 @@ namespace Lwt\Views\Feed;
         <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
         <h1>Feed Wizard | Step 3 - Filter Text
         <a href="docs/info.html#feed_wizard" target="_blank">
-            <img alt="Help" title="Help" src="/assets/icons/question-frame.png"></img>
+            <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
         </a>
         </h1>
         <ol id="lwt_sel">
@@ -160,8 +162,7 @@ namespace Lwt\Views\Feed;
                     <option value="">[Click On Text]</option>
                 </select>
                 <button id="filter_button" name="button" disabled>Filter</button>
-                <img src="/assets/icons/wrench-screwdriver.png" title="Settings" alt="-"
-                data-action="wizard-settings-open" />
+                <?php echo IconHelper::render('settings', ['title' => 'Settings', 'alt' => 'Settings', 'data-action' => 'wizard-settings-open']); ?>
             </td>
             <td>
                 <span>

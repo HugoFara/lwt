@@ -22,6 +22,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\IconHelper;
 use Lwt\Services\TagService;
 
 ?>
@@ -36,7 +37,7 @@ data-lwt-clear-frame="true">
             <td class="td1"><input <?php echo $scrdir; ?>
             class="notempty setfocus checkoutsidebmp" data_info="New Term"
             type="text" name="WoText" id="WoText" value="" maxlength="250" size="35" />
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?></td>
         </tr>
         <?php print_similar_terms_tabrow(); ?>
         <tr>

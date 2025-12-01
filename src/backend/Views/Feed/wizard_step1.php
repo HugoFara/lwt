@@ -20,6 +20,8 @@
 
 namespace Lwt\Views\Feed;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <script type="application/json" id="wizard-step1-config"><?php echo json_encode(['step' => 1]); ?></script>
 
@@ -38,7 +40,7 @@ namespace Lwt\Views\Feed;
                     echo 'value="' . htmlspecialchars($rssUrl ?? '', ENT_QUOTES, 'UTF-8') . '" ';
                 }?>
                 />
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
     </table>

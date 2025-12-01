@@ -17,6 +17,7 @@ namespace Lwt\Controllers;
 
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\FormHelper;
+use Lwt\View\Helper\IconHelper;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
@@ -145,7 +146,7 @@ class LanguageController extends BaseController
         <h2>
             New Language
             <a target="_blank" href="docs/info.html#howtolang">
-                <img src="/assets/icons/question-frame.png" title="Help" alt="Help" />
+                <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
             </a>
         </h2>
         <?php
@@ -207,7 +208,7 @@ class LanguageController extends BaseController
         ?>
     <h2>Edit Language
         <a target="_blank" href="docs/info.html#howtolang">
-            <img src="/assets/icons/question-frame.png" title="Help" alt="Help" />
+            <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
         </a>
     </h2>
         <?php

@@ -24,16 +24,16 @@ namespace Lwt\Views\TextPrint;
         </div>
         <div>
             <a href="/text/read?start=<?php echo $textId; ?>" target="_top">
-                <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" />
+                <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
             </a>
             <a href="/test?text=<?php echo $textId; ?>" target="_top">
-                <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />
+                <?php echo \Lwt\View\Helper\IconHelper::render('circle-help', ['title' => 'Test', 'alt' => 'Test']); ?>
             </a>
             <?php if ($showImprov): ?>
                 <?php echo get_annotation_link($textId); ?>
             <?php endif; ?>
             <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
-                <img src="/assets/icons/document--pencil.png" title="Edit Text" alt="Edit Text" />
+                <?php echo \Lwt\View\Helper\IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
             </a>
         </div>
         <div>

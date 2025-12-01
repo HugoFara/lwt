@@ -21,17 +21,19 @@
 
 namespace Lwt\Views\Feed;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <h2>
     Edit Feed
     <a target="_blank" href="docs/info.html#new_feed">
-        <img src="/assets/icons/question-frame.png" title="Help" alt="Help" />
+        <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
     </a>
 </h2>
 <a href="/feeds?page=1"> My Feeds</a>
 <span class="nowrap"></span>
 <a href="/feeds/wizard?step=2&amp;edit_feed=<?php echo $feed['NfID']; ?>">
-<img src="/assets/icons/wizard.png" title="feed_wizard" alt="feed_wizard" />Feed Wizard</a>
+<?php echo IconHelper::render('wand-2', ['title' => 'Feed Wizard', 'alt' => 'Feed Wizard']); ?> Feed Wizard</a>
 <form class="validate" action="/feeds/edit" method="post">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
@@ -49,7 +51,7 @@ namespace Lwt\Views\Feed;
     <td class="td1">
         <input class="notempty feed-form-input" type="text" name="NfName"
         value="<?php echo htmlspecialchars($feed['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-        <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
     </td>
 </tr>
 <tr>
@@ -57,7 +59,7 @@ namespace Lwt\Views\Feed;
     <td class="td1">
         <input class="notempty feed-form-input" type="text" name="NfSourceURI"
         value="<?php echo htmlspecialchars($feed['NfSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-        <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
     </td>
 </tr>
 <tr>
@@ -65,7 +67,7 @@ namespace Lwt\Views\Feed;
     <td class="td1">
         <input class="notempty feed-form-input" type="text"
         name="NfArticleSectionTags" value="<?php echo htmlspecialchars($feed['NfArticleSectionTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-        <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
     </td>
 </tr>
 <tr>

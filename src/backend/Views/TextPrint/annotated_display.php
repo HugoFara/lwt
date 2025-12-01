@@ -13,6 +13,8 @@
 
 namespace Lwt\Views\TextPrint;
 
+use Lwt\View\Helper\IconHelper;
+
 $title = $viewData['title'];
 $sourceUri = $viewData['sourceUri'];
 $audioUri = $viewData['audioUri'];
@@ -23,7 +25,7 @@ $ttsClass = $viewData['ttsClass'] ?? '';
 <h1>ANN.TEXT &#9654; <?php echo htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8');
 if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
     echo ' <a href="' . $sourceUri . '" target="_blank">' .
-         '<img src="' . get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" /></a>';
+         IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']) . '</a>';
 }
 ?></h1>
 

@@ -29,29 +29,31 @@
 
 namespace Lwt\Views\Feed;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <div class="flex-spaced">
     <div title="Import of a single text, max. 65,000 bytes long, with optional audio">
         <a href="/feeds/edit?new_feed=1">
-            <img src="/assets/icons/feed--plus.png">
+            <?php echo IconHelper::render('rss', ['title' => 'New Feed', 'alt' => 'New Feed']); ?>
             New Feed
         </a>
     </div>
     <div>
         <a href="/feeds/edit?manage_feeds=1">
-            <img src="/assets/icons/plus-button.png" title="manage feeds" alt="manage feeds" />
+            <?php echo IconHelper::render('circle-plus', ['title' => 'manage feeds', 'alt' => 'manage feeds']); ?>
             Manage Feeds
         </a>
     </div>
     <div>
         <a href="/texts?query=&amp;page=1">
-            <img src="/assets/icons/drawer--plus.png">
+            <?php echo IconHelper::render('archive', ['title' => 'Active Texts', 'alt' => 'Active Texts']); ?>
             Active Texts
         </a>
     </div>
     <div>
         <a href="/text/archived?query=&amp;page=1">
-            <img src="/assets/icons/drawer--minus.png">
+            <?php echo IconHelper::render('archive-x', ['title' => 'Archived Texts', 'alt' => 'Archived Texts']); ?>
             Archived Texts
         </a>
     </div>
@@ -60,7 +62,7 @@ namespace Lwt\Views\Feed;
 <form name="form1" action="#" data-lwt-feed-browse="true">
 <table class="tab2" cellspacing="0" cellpadding="5"><tr>
     <th class="th1" colspan="4">
-        Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
+        Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
         <input type="button" value="Reset All" data-action="reset-all" data-url="/feeds" />
     </th>
     </tr>
@@ -120,7 +122,7 @@ Newsfeed:
     <?php
     if (count($feeds) == 1 || $currentFeed > 0):
         echo '<a href="' . $_SERVER['PHP_SELF'] . '?page=1&amp;load_feed=1&amp;selected_feed=' . $currentFeed . '">
-        <span title="update feed"><img src="/assets/icons/arrow-circle-135.png" alt="-" /></span></a>';
+        <span title="update feed">' . IconHelper::render('refresh-cw', ['alt' => '-']) . '</span></a>';
     else:
         echo '<a href="/feeds/edit?multi_load_feed=1&amp;selected_feed=' . implode(',', array_column($feeds, 'NfID')) . '">
         update multiple feeds</a>';
@@ -144,7 +146,7 @@ Newsfeed:
   </table></form>
   <form name="form2" action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
   <table class="tab2" cellspacing="0" cellpadding="5">
-  <tr><th class="th1" colspan="2">Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" /></th></tr>
+  <tr><th class="th1" colspan="2">Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?></th></tr>
   <tr><td class="td1 center feeds-filter-cell">
   <input type="button" value="Mark All" data-action="mark-all" data-form="form2" />
   <input type="button" value="Mark None" data-action="mark-none" data-form="form2" />
@@ -163,12 +165,12 @@ Newsfeed:
         <tr>
         <?php if ($row['TxID']): ?>
             <td class="td1 center"><a href="/text/read?start=<?php echo $row['TxID']; ?>" >
-            <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="-" /></a>
+            <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']); ?></a>
         <?php elseif ($row['AtID']): ?>
-            <td class="td1 center"><span title="archived"><img src="/assets/icons/status-busy.png" alt="-" /></span>
+            <td class="td1 center"><span title="archived"><?php echo IconHelper::render('circle-x', ['alt' => '-']); ?></span>
         <?php elseif (!empty($row['FlLink']) && str_starts_with((string)$row['FlLink'], ' ')): ?>
             <td class="td1 center">
-            <img class="not_found" name="<?php echo $row['FlID']; ?>" title="download error" src="/assets/icons/exclamation-button.png" alt="-" />
+            <span class="not_found" name="<?php echo $row['FlID']; ?>" title="download error"><?php echo IconHelper::render('alert-circle', ['alt' => '-']); ?></span>
         <?php else: ?>
             <td class="td1 center"><input type="checkbox" class="markcheck" name="marked_items[]" value="<?php echo $row['FlID']; ?>" />
         <?php endif; ?>
@@ -177,13 +179,13 @@ Newsfeed:
             <span title="<?php echo htmlentities((string)$row['FlDescription'], ENT_QUOTES, 'UTF-8', false); ?>"><b><?php echo $row['FlTitle']; ?></b></span>
         <?php if ($row['FlAudio']): ?>
             <a href="<?php echo $row['FlAudio']; ?>" data-action="popup-audio" target="_blank" rel="noopener">
-            <img src="<?php print_file_path('icn/speaker-volume.png'); ?>" alt="-" /></a>
+            <?php echo IconHelper::render('volume-2', ['alt' => 'Audio']); ?></a>
         <?php endif; ?>
         </td>
             <td class="td1 center valign-middle">
         <?php if (!empty($row['FlLink']) && !str_starts_with(trim((string)$row['FlLink']), '#')): ?>
             <a href="<?php echo trim((string)$row['FlLink']); ?>" title="<?php echo trim((string)$row['FlLink']); ?>" data-action="popup-external" target="_blank" rel="noopener">
-            <img src="/assets/icons/external.png" alt="-" /></a>
+            <?php echo IconHelper::render('external-link', ['alt' => '-']); ?></a>
         <?php endif; ?>
         </td><td class="td1 center"><?php echo $row['FlDate']; ?></td></tr>
     <?php endforeach; ?>

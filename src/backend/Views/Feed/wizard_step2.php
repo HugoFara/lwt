@@ -21,6 +21,7 @@ namespace Lwt\Views\Feed;
 
 use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Utils\ErrorHandler;
+use Lwt\View\Helper\IconHelper;
 
 ?>
 <div id="lwt_header"
@@ -63,7 +64,7 @@ use Lwt\Core\Utils\ErrorHandler;
         <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
         <h1>Feed Wizard | Step 2 - Select Article Text
         <a href="docs/info.html#feed_wizard" target="_blank">
-            <img alt="Help" title="Help" src="/assets/icons/question-frame.png"></img>
+            <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
         </a>
         </h1>
         <ol id="lwt_sel">
@@ -81,8 +82,7 @@ use Lwt\Core\Utils\ErrorHandler;
                 <td class="td1">
                     <input class="notempty" size="50" type="text" name="NfName"
                     value="<?php echo htmlspecialchars($wizardData['feed']['feed_title'], ENT_COMPAT); ?>" />
-                    <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-                    alt="Field must not be empty" />
+                    <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
                 </td>
             </tr>
             <tr>
@@ -204,8 +204,7 @@ use Lwt\Core\Utils\ErrorHandler;
                 <option value="">[Click On Text]</option>
             </select>
             <button id="get_button" name="button" disabled>Get</button>
-            <img src="/assets/icons/wrench-screwdriver.png" title="Settings" alt="-"
-            data-action="wizard-settings-open" />
+            <?php echo IconHelper::render('settings', ['title' => 'Settings', 'alt' => 'Settings', 'data-action' => 'wizard-settings-open']); ?>
         </td>
         <td>
             <span>

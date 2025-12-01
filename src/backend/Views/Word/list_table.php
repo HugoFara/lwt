@@ -14,6 +14,8 @@
  */
 
 namespace Lwt\Views\Word;
+
+use Lwt\View\Helper\IconHelper;
 ?>
 <?php if ($recno == 0) { ?>
 <p>No terms found.</p>
@@ -22,7 +24,7 @@ namespace Lwt\Views\Word;
 <input type="hidden" name="data" value="" />
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr><th class="th1 center" colspan="2">
-Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
+Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
 </th></tr>
 <tr><td class="td1 center" colspan="2">
 <b>ALL</b> <?php echo ($recno == 1 ? '1 Term' : $recno . ' Terms'); ?>:&nbsp;
@@ -46,7 +48,7 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
 <th class="th1 sorttable_nosort">Act.</th>
 <?php if ($currentlang == '') { echo '<th class="th1 clickable">Lang.</th>'; } ?>
 <th class="th1 clickable">Term /<br />Romanization</th>
-<th class="th1 clickable">Translation [Tags]<br /><span id="waitinfo">Please <img src="<?php print_file_path('icn/waiting2.gif'); ?>" /> wait ...</span></th>
+<th class="th1 clickable">Translation [Tags]<br /><span id="waitinfo">Please <?php echo IconHelper::render('loader-2', ['class' => 'icon-spin', 'alt' => 'Loading...']); ?> wait ...</span></th>
 <th class="th1 sorttable_nosort">Se.<br />?</th>
 <th class="th1 sorttable_numeric clickable">Stat./<br />Days</th>
 <th class="th1 sorttable_numeric clickable">Score<br />%</th>
@@ -63,14 +65,14 @@ foreach ($words as $record) {
     }
     $score = $record['Score'];
     if ($score < 0) {
-        $score = '<span class="scorered">0 <img src="/assets/icons/status-busy.png" title="Test today!" alt="Test today!" /></span>';
+        $score = '<span class="scorered">0 ' . IconHelper::render('circle-x', ['title' => 'Test today!', 'alt' => 'Test today!']) . '</span>';
     } else {
-        $score = '<span class="scoregreen">' . floor((int)$score) . ($record['Score2'] < 0 ? ' <img src="/assets/icons/status-away.png" title="Test tomorrow!" alt="Test tomorrow!" />' : ' <img src="/assets/icons/status.png" title="-" alt="-" />') . '</span>';
+        $score = '<span class="scoregreen">' . floor((int)$score) . ($record['Score2'] < 0 ? ' ' . IconHelper::render('circle-dot', ['title' => 'Test tomorrow!', 'alt' => 'Test tomorrow!']) : ' ' . IconHelper::render('circle-check', ['title' => '-', 'alt' => '-'])) . '</span>';
     }
     ?>
 <tr>
     <td class="td1 center"><a name="rec<?php echo $record['WoID']; ?>"><input name="marked[]" type="checkbox" class="markcheck" value="<?php echo $record['WoID']; ?>" <?php echo \Lwt\View\Helper\FormHelper::checkInRequest($record['WoID'], 'marked'); ?> /></a></td>
-    <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/words/edit?chg=<?php echo $record['WoID']; ?>"><img src="/assets/icons/sticky-note--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/words/edit?del=<?php echo $record['WoID']; ?>"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
+    <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/words/edit?chg=<?php echo $record['WoID']; ?>"><?php echo IconHelper::render('file-pen-line', ['title' => 'Edit', 'alt' => 'Edit']); ?></a>&nbsp; <a class="confirmdelete" href="/words/edit?del=<?php echo $record['WoID']; ?>"><?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?></a>&nbsp;</td>
 <?php if ($currentlang == '') { ?>
     <td class="td1 center"><?php echo htmlspecialchars($record['LgName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 <?php } ?>
@@ -83,7 +85,7 @@ foreach ($words as $record) {
     echo ($record['WoRomanization'] != '' ? (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">' . htmlspecialchars(\Lwt\Services\ExportService::replaceTabNewline($record['WoRomanization']) ?? '', ENT_QUOTES, 'UTF-8') . '</span>') : (' / <span id="roman' . $record['WoID'] . '" class="edit_area clickedit">*</span>'));
     ?></td>
     <td class="td1"><span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(\Lwt\Services\ExportService::replaceTabNewline($record['WoTranslation']) ?? '', ENT_QUOTES, 'UTF-8'); ?></span> <span class="smallgray2"><?php echo htmlspecialchars($record['taglist'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span></td>
-    <td class="td1 center"><b><?php echo ($record['SentOK'] != 0 ? '<img src="/assets/icons/status.png" title="' . htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8') . '" alt="Yes" />' : '<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />'); ?></b></td>
+    <td class="td1 center"><b><?php echo ($record['SentOK'] != 0 ? IconHelper::render('circle-check', ['title' => htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8'), 'alt' => 'Yes']) : IconHelper::render('circle-x', ['title' => '(No valid sentence)', 'alt' => 'No'])); ?></b></td>
     <td class="td1 center" title="<?php echo htmlspecialchars(\Lwt\View\Helper\StatusHelper::getName((int)$record['WoStatus']) ?? '', ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(\Lwt\View\Helper\StatusHelper::getAbbr((int)$record['WoStatus']) ?? '', ENT_QUOTES, 'UTF-8'); ?><?php echo ($record['WoStatus'] < 98 ? '/' . $days : ''); ?></td>
     <td class="td1 center" nowrap="nowrap"><?php echo $score; ?></td>
 <?php if ($currentsort == 7) { ?>

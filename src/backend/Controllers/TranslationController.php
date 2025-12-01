@@ -20,6 +20,7 @@ use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\TranslationService;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\IconHelper;
 
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../Services/DictionaryService.php';
@@ -202,12 +203,9 @@ class TranslationController extends BaseController
         ?>
         <h2 title="Translate with Google Translate">
             Word translation: <?php echo htmlspecialchars($text, ENT_QUOTES, 'UTF-8') ?>
-            <img id="textToSpeech" class="click" title="Click to read!"
-            src="<?php \print_file_path('icn/speaker-volume.png'); ?>"></img>
+            <?php echo IconHelper::render('volume-2', ['id' => 'textToSpeech', 'class' => 'click', 'title' => 'Click to read!', 'alt' => 'Click to read!']); ?>
 
-            <img id="del_translation" class="click"
-            title="Empty Translation Field" data-action="delete-translation"
-            src="<?php \print_file_path('icn/broom.png'); ?>"></img>
+            <?php echo IconHelper::render('brush', ['id' => 'del_translation', 'class' => 'click', 'title' => 'Empty Translation Field', 'alt' => 'Empty Translation Field', 'data-action' => 'delete-translation']); ?>
         </h2>
 
         <script type="application/json" data-lwt-google-translate-config>
@@ -221,12 +219,12 @@ class TranslationController extends BaseController
         foreach ($translations as $word) {
             echo '<span class="click" data-action="add-translation" data-word="' .
                 htmlspecialchars($word, ENT_QUOTES, 'UTF-8') . '">' .
-                '<img src="/assets/icons/tick-button.png" title="Copy" alt="Copy" /> &nbsp; ' .
+                IconHelper::render('circle-check', ['title' => 'Copy', 'alt' => 'Copy']) . ' &nbsp; ' .
                 htmlspecialchars($word, ENT_QUOTES, 'UTF-8') . '</span><br />';
         }
         ?>
         <p>
-            (Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
+            (Click on <?php echo IconHelper::render('circle-check', ['title' => 'Choose', 'alt' => 'Choose']); ?>
             to copy word(s) into above term)<br />&nbsp;
         </p>
         <hr />
@@ -270,9 +268,9 @@ class TranslationController extends BaseController
             '<span class="red2">' . htmlspecialchars($phrase, ENT_QUOTES, 'UTF-8') . "</span></a>";
 
         echo '<h3>' . $titleText .
-            ' <img id="del_translation" src="/assets/icons/broom.png" title="Empty Translation Field" ' .
-            'class="click" data-action="delete-translation"></img></h3>';
-        echo '<p>(Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" /> ' .
+            ' <span id="del_translation" class="click" data-action="delete-translation">' .
+            IconHelper::render('brush', ['title' => 'Empty Translation Field']) . '</span></h3>';
+        echo '<p>(Click on ' . IconHelper::render('circle-check', ['title' => 'Choose', 'alt' => 'Choose']) . ' ' .
             'to copy word(s) into above term)<br />&nbsp;</p>';
 
         $this->renderGlosbeScript($from, $dest, $phrase);

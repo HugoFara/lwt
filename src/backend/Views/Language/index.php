@@ -19,10 +19,12 @@
 
 namespace Lwt\Views\Language;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <p>
     <a href="/languages?new=1">
-        <img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Language ...
+        <?php echo IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New Language ...
     </a>
 </p>
 
@@ -53,34 +55,34 @@ namespace Lwt\Views\Language;
     <tr>
         <?php if ($isCurrent): ?>
         <td class="td1 center<?php echo $currentClass; ?>">
-            <img src="/assets/icons/exclamation-red.png" title="Current Language" alt="Current Language" />
+            <?php echo IconHelper::render('circle-alert', ['title' => 'Current Language', 'alt' => 'Current Language']); ?>
         </td>
         <?php else: ?>
         <td class="td1 center">
             <a href="/admin/save-setting?k=currentlanguage&amp;v=<?php echo $lang['id']; ?>&amp;u=/languages">
-                <img src="/assets/icons/tick-button.png" title="Set as Current Language" alt="Set as Current Language" />
+                <?php echo IconHelper::render('circle-check', ['title' => 'Set as Current Language', 'alt' => 'Set as Current Language']); ?>
             </a>
         </td>
         <?php endif; ?>
 
         <td class="td1 center<?php echo $currentClass; ?>">
             <a href="do_test.php?lang=<?php echo $lang['id']; ?>">
-                <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />
+                <?php echo IconHelper::render('circle-help', ['title' => 'Test', 'alt' => 'Test']); ?>
             </a>
         </td>
 
         <td class="td1 center<?php echo $currentClass; ?>">
             <a href="/languages?chg=<?php echo $lang['id']; ?>">
-                <img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" />
+                <?php echo IconHelper::render('file-pen', ['title' => 'Edit', 'alt' => 'Edit']); ?>
             </a>
             <?php if ($canDelete): ?>
             &nbsp;
             <span class="click" data-action="confirm-delete" data-url="/languages?del=<?php echo $lang['id']; ?>">
-                <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" />
+                <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
             </span>
             <?php else: ?>
             &nbsp;
-            <img src="/assets/icons/placeholder.png" title="Delete not possible" alt="Delete not possible" />
+            <?php echo IconHelper::render('circle', ['title' => 'Delete not possible', 'alt' => 'Delete not possible', 'class' => 'icon-muted']); ?>
             <?php endif; ?>
         </td>
 
@@ -90,10 +92,10 @@ namespace Lwt\Views\Language;
             <?php if ($lang['textCount'] > 0): ?>
             <a href="edit_texts.php?page=1&amp;query=&amp;filterlang=<?php echo $lang['id']; ?>"><?php echo $lang['textCount']; ?></a>
             <a href="/languages?refresh=<?php echo $lang['id']; ?>">
-                <img src="/assets/icons/lightning.png" title="Reparse Texts" alt="Reparse Texts" />
+                <?php echo IconHelper::render('zap', ['title' => 'Reparse Texts', 'alt' => 'Reparse Texts']); ?>
             </a>
             <?php else: ?>
-            0 <img src="/assets/icons/placeholder.png" title="No texts to reparse" alt="No texts to reparse" />
+            0 <?php echo IconHelper::render('circle', ['title' => 'No texts to reparse', 'alt' => 'No texts to reparse', 'class' => 'icon-muted']); ?>
             <?php endif; ?>
         </td>
 
@@ -123,9 +125,9 @@ namespace Lwt\Views\Language;
 
         <td class="td1 center language-last-col<?php echo $currentClass; ?>">
             <?php if ($lang['hasExportTemplate']): ?>
-            <img src="/assets/icons/status.png" title="Yes" alt="Yes" />
+            <?php echo IconHelper::render('circle-check', ['title' => 'Yes', 'alt' => 'Yes']); ?>
             <?php else: ?>
-            <img src="/assets/icons/status-busy.png" title="No" alt="No" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'No', 'alt' => 'No']); ?>
             <?php endif; ?>
         </td>
     </tr>

@@ -26,6 +26,8 @@
 
 namespace Lwt\Views\Tags;
 
+use Lwt\View\Helper\IconHelper;
+
 /** @var string $message */
 /** @var array $tags */
 /** @var int $totalCount */
@@ -42,12 +44,12 @@ $sortOptions = $service->getSortOptions();
 \Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false);
 
 ?>
-<p><a href="<?php echo $baseUrl; ?>?new=1"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New <?php echo $tagTypeLabel; ?> Tag ...</a></p>
+<p><a href="<?php echo $baseUrl; ?>?new=1"><?php echo IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New <?php echo $tagTypeLabel; ?> Tag ...</a></p>
 
 <form name="form1" action="#">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
-<th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
+<th class="th1" colspan="4">Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
 <input type="button" value="Reset All" data-action="reset-all" data-base-url="<?php echo $baseUrl; ?>" /></th>
 </tr>
 <tr>
@@ -83,7 +85,7 @@ Sort Order:
 <input type="hidden" name="data" value="" />
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr><th class="th1 center" colspan="2">
-Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
+Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
 </th></tr>
 <tr><td class="td1 center" colspan="2">
 <b>ALL</b> <?php echo ($totalCount == 1 ? '1 Tag' : $totalCount . ' Tags'); ?>:&nbsp;
@@ -117,8 +119,8 @@ Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="
         </a>
     </td>
     <td class="td1 center" nowrap="nowrap">
-        &nbsp;<a href="<?php echo $_SERVER['PHP_SELF']; ?>?chg=<?php echo $tag['id']; ?>"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp;
-        <a class="confirmdelete" href="<?php echo $_SERVER['PHP_SELF']; ?>?del=<?php echo $tag['id']; ?>"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;
+        &nbsp;<a href="<?php echo $_SERVER['PHP_SELF']; ?>?chg=<?php echo $tag['id']; ?>"><?php echo IconHelper::render('file-pen', ['title' => 'Edit', 'alt' => 'Edit']); ?></a>&nbsp;
+        <a class="confirmdelete" href="<?php echo $_SERVER['PHP_SELF']; ?>?del=<?php echo $tag['id']; ?>"><?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?></a>&nbsp;
     </td>
     <td class="td1 center"><?php echo htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
     <td class="td1 center"><?php echo htmlspecialchars($tag['comment'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>

@@ -264,9 +264,8 @@ class SimtermsTest extends TestCase
         // Should contain romanization 'heh-lo' in brackets
         $this->assertStringContainsString('[heh-lo]', $output);
 
-        // Should contain the clickable image
-        $this->assertStringContainsString('<img', $output);
-        $this->assertStringContainsString('tick-button-small.png', $output);
+        // Should contain the clickable icon (Lucide SVG icon)
+        $this->assertStringContainsString('data-lucide="check-circle"', $output);
 
         // Should contain data attributes for JS event delegation
         $this->assertStringContainsString('data-action="set-trans-roman"', $output);

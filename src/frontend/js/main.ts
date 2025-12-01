@@ -5,6 +5,9 @@
  * It imports CSS and all TypeScript modules.
  */
 
+// Import Alpine.js
+import Alpine from 'alpinejs';
+
 // Import Bulma CSS framework
 import 'bulma/css/bulma.min.css';
 
@@ -111,8 +114,7 @@ import './admin/settings_form';
 import './admin/statistics_charts';
 
 // Home
-import './home/home_warnings';
-import './home/home_menu';
+import './home/home_app';
 
 // UI Components
 import './ui/modal';
@@ -125,8 +127,15 @@ import './globals';
 declare global {
   interface Window {
     LWT_VITE_LOADED: boolean;
+    Alpine: typeof Alpine;
   }
 }
+
+// Initialize Alpine.js globally
+window.Alpine = Alpine;
+
+// Start Alpine.js
+Alpine.start();
 
 window.LWT_VITE_LOADED = true;
 

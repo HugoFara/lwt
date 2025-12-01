@@ -106,10 +106,10 @@ HTML;
         // Previous page controls
         if ($currentPage > 1) {
             $result .= '<a href="' . $scriptUrl . '?page=1" ' . $margerStyle . '>';
-            $result .= '<img src="/assets/icons/control-stop-180.png" title="First Page" alt="First Page" />';
+            $result .= IconHelper::render('chevrons-left', ['title' => 'First Page', 'alt' => 'First Page']);
             $result .= '</a>';
             $result .= '<a href="' . $scriptUrl . '?page=' . ($currentPage - 1) . '" ' . $margerStyle . '>';
-            $result .= '<img src="/assets/icons/control-180.png" title="Previous Page" alt="Previous Page" />';
+            $result .= IconHelper::render('chevron-left', ['title' => 'Previous Page', 'alt' => 'Previous Page']);
             $result .= '</a>';
         }
 
@@ -127,10 +127,10 @@ HTML;
         // Next page controls
         if ($currentPage < $totalPages) {
             $result .= '<a href="' . $scriptUrl . '?page=' . ($currentPage + 1) . '" ' . $margerStyle . '>';
-            $result .= '<img src="/assets/icons/control.png" title="Next Page" alt="Next Page" />';
+            $result .= IconHelper::render('chevron-right', ['title' => 'Next Page', 'alt' => 'Next Page']);
             $result .= '</a>';
             $result .= '<a href="' . $scriptUrl . '?page=' . $totalPages . '" ' . $margerStyle . '>';
-            $result .= '<img src="/assets/icons/control-stop.png" title="Last Page" alt="Last Page" />';
+            $result .= IconHelper::render('chevrons-right', ['title' => 'Last Page', 'alt' => 'Last Page']);
             $result .= '</a>';
         }
 

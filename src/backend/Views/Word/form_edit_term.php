@@ -27,6 +27,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\IconHelper;
 
 /** @var int $wid */
 /** @var int $lang */
@@ -49,7 +50,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr title="Only change uppercase/lowercase!">
         <td class="td1 right"><b>Edit Term:</b></td>
-        <td class="td1"><input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="Term" type="text" name="WoText" id="wordfield" value="<?php echo htmlspecialchars($term ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" /> <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <td class="td1"><input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="Term" type="text" name="WoText" id="wordfield" value="<?php echo htmlspecialchars($term ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" /> <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
     </td></tr>
         <?php print_similar_terms_tabrow(); ?>
     <tr>

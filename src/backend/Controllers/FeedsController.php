@@ -16,6 +16,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\IconHelper;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
@@ -897,8 +898,8 @@ class FeedsController extends BaseController
             if (substr_compare(trim($tag), "redirect", 0, 8) == 0) {
                 $_SESSION['wizard']['redirect'] = trim($tag) . ' | ';
             } else {
-                $_SESSION['wizard']['article_tags'] .= '<li class="left">
-                <img class="delete_selection" src="/assets/icons/cross.png" title="Delete Selection" alt="-" />'
+                $_SESSION['wizard']['article_tags'] .= '<li class="left">'
+                . IconHelper::render('x', ['class' => 'delete_selection', 'title' => 'Delete Selection', 'alt' => '-'])
                 . $tag .
                 '</li>';
             }
@@ -909,8 +910,8 @@ class FeedsController extends BaseController
         $_SESSION['wizard']['filter_tags'] = '';
         foreach ($filterTags as $tag) {
             if (trim($tag) != '') {
-                $_SESSION['wizard']['filter_tags'] .= '<li class="left">
-                <img class="delete_selection" src="/assets/icons/cross.png" title="Delete Selection" alt="-" />'
+                $_SESSION['wizard']['filter_tags'] .= '<li class="left">'
+                . IconHelper::render('x', ['class' => 'delete_selection', 'title' => 'Delete Selection', 'alt' => '-'])
                 . $tag .
                 '</li>';
             }

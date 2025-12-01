@@ -14,6 +14,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\IconHelper;
 ?>
 <h2>Edit Term</h2>
 <form name="editword" class="validate" action="/words/edit#rec<?php echo $word['WoID']; ?>" method="post">
@@ -27,7 +28,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 </tr>
 <tr title="Normally only change uppercase/lowercase here!">
    <td class="td1 right">Term:</td>
-   <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="WoText" value="<?php echo htmlspecialchars($word['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="40" /> <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+   <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="WoText" value="<?php echo htmlspecialchars($word['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="40" /> <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
    </td>
 </tr>
 <?php print_similar_terms_tabrow(); ?>

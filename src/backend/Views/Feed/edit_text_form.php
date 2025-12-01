@@ -26,6 +26,8 @@
 
 namespace Lwt\Views\Feed;
 
+use Lwt\View\Helper\IconHelper;
+
 foreach ($texts as $text):
 ?>
 <table class="tab3" cellspacing="0" cellpadding="5">
@@ -36,7 +38,7 @@ foreach ($texts as $text):
         </td>
         <td class="td1">
             <input type="text" class="notempty" name="feed[<?php echo $count; ?>][TxTitle]" value="<?php echo htmlspecialchars($text['TxTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200" size="60" />
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>
@@ -61,8 +63,7 @@ foreach ($texts as $text):
             name="feed[<?php echo $count; ?>][TxText]" class="notempty checkbytes"
             cols="60" rows="20"
             ><?php echo htmlspecialchars($text['TxText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>

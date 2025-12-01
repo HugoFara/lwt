@@ -39,10 +39,10 @@ use Lwt\View\Helper\PageLayoutHelper;
     </div>
     <div>
         <a href="/text/read?start=<?php echo $textId; ?>" target="_top">
-            <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" />
+            <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
         </a>
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
-            <img src="/assets/icons/printer.png" title="Print" alt="Print" />
+            <?php echo \Lwt\View\Helper\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
         <?php echo \get_annotation_link($textId); ?>
     </div>

@@ -26,10 +26,11 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Database\Escaping;
+use Lwt\View\Helper\IconHelper;
 
 ?>
 <p id="displ_message">
-    <img src="/assets/icons/waiting2.gif" /> Updating Texts
+    <?php echo IconHelper::render('loader-2', ['class' => 'icon-spin', 'alt' => 'Loading...']); ?> Updating Texts
 </p>
 
 <script type="application/json" data-lwt-bulk-save-result-config>

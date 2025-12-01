@@ -31,6 +31,8 @@
 
 namespace Lwt\Views\Text;
 
+use Lwt\View\Helper\IconHelper;
+
 /** @var string $message */
 /** @var array $texts */
 /** @var int $totalCount */
@@ -50,25 +52,25 @@ namespace Lwt\Views\Text;
 <div class="flex-spaced">
     <div>
         <a href="/texts?new=1">
-            <img src="/assets/icons/plus-button.png">
+            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
             New Text
         </a>
     </div>
     <div>
         <a href="/text/import-long">
-            <img src="/assets/icons/plus-button.png">
+            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
             Long Text Import
         </a>
     </div>
     <div>
         <a href="/feeds?page=1&amp;check_autoupdate=1">
-            <img src="/assets/icons/plus-button.png">
+            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
             Newsfeed Import
         </a>
     </div>
     <div>
         <a href="/texts?query=&amp;page=1">
-            <img src="/assets/icons/drawer--plus.png">
+            <?php echo IconHelper::render('archive', ['alt' => 'Active']); ?>
             Active Texts
         </a>
     </div>
@@ -77,7 +79,7 @@ namespace Lwt\Views\Text;
 <form name="form1" action="#" data-base-url="/text/archived">
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr>
-        <th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
+        <th class="th1" colspan="4">Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
             <input type="button" value="Reset All" data-action="reset-all" />
         </th>
     </tr>
@@ -157,7 +159,7 @@ namespace Lwt\Views\Text;
     <tr>
         <th class="th1" colspan="2">
             Multi Actions
-            <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
+            <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
         </th>
     </tr>
     <tr>
@@ -183,9 +185,9 @@ namespace Lwt\Views\Text;
         <?php endif; ?>
         <th class="th1 clickable">
             Title [Tags] / Audio:&nbsp;
-            <img src="<?php print_file_path('icn/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />, Src.Link:&nbsp;
-            <img src="<?php print_file_path('icn/chain.png'); ?>" title="Source Link available" alt="Source Link available" />, Ann.Text:&nbsp;
-            <img src="/assets/icons/tick.png" title="Annotated Text available" alt="Annotated Text available" />
+            <?php echo IconHelper::render('volume-2', ['title' => 'With Audio', 'alt' => 'With Audio']); ?>, Src.Link:&nbsp;
+            <?php echo IconHelper::render('link', ['title' => 'Source Link available', 'alt' => 'Source Link available']); ?>, Ann.Text:&nbsp;
+            <?php echo IconHelper::render('check', ['title' => 'Annotated Text available', 'alt' => 'Annotated Text available']); ?>
         </th>
     </tr>
     <?php foreach ($texts as $record): ?>
@@ -197,13 +199,13 @@ namespace Lwt\Views\Text;
         </td>
         <td nowrap="nowrap" class="td1 center">&nbsp;
             <a href="<?php echo $_SERVER['PHP_SELF']; ?>?unarch=<?php echo $record['AtID']; ?>">
-                <img src="/assets/icons/inbox-upload.png" title="Unarchive" alt="Unarchive" />
+                <?php echo IconHelper::render('archive-restore', ['title' => 'Unarchive', 'alt' => 'Unarchive']); ?>
             </a>&nbsp;
             <a href="<?php echo $_SERVER['PHP_SELF']; ?>?chg=<?php echo $record['AtID']; ?>">
-                <img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" />
+                <?php echo IconHelper::render('file-pen', ['title' => 'Edit', 'alt' => 'Edit']); ?>
             </a>&nbsp;
             <span class="click" data-action="confirm-delete" data-url="<?php echo $_SERVER['PHP_SELF']; ?>?del=<?php echo $record['AtID']; ?>">
-                <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" />
+                <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
             </span>&nbsp;
         </td>
         <?php if ($currentLang == ''): ?>
@@ -213,15 +215,15 @@ namespace Lwt\Views\Text;
             <?php echo htmlspecialchars($record['AtTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
             <span class="smallgray2"><?php echo htmlspecialchars($record['taglist'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span> &nbsp;
             <?php if (isset($record['AtAudioURI']) && $record['AtAudioURI']): ?>
-            <img src="<?php echo get_file_path('assets/icons/speaker-volume.png'); ?>" title="With Audio" alt="With Audio" />
+            <?php echo IconHelper::render('volume-2', ['title' => 'With Audio', 'alt' => 'With Audio']); ?>
             <?php endif; ?>
             <?php if (isset($record['AtSourceURI']) && $record['AtSourceURI']): ?>
             <a href="<?php echo $record['AtSourceURI']; ?>" target="_blank">
-                <img src="<?php echo get_file_path('assets/icons/chain.png'); ?>" title="Link to Text Source" alt="Link to Text Source" />
+                <?php echo IconHelper::render('link', ['title' => 'Link to Text Source', 'alt' => 'Link to Text Source']); ?>
             </a>
             <?php endif; ?>
             <?php if ($record['annotlen']): ?>
-            <img src="/assets/icons/tick.png" title="Annotated Text available" alt="Annotated Text available" />
+            <?php echo IconHelper::render('check', ['title' => 'Annotated Text available', 'alt' => 'Annotated Text available']); ?>
             <?php endif; ?>
         </td>
     </tr>

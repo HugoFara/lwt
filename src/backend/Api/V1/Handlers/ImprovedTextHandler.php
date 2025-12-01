@@ -4,6 +4,7 @@ namespace Lwt\Api\V1\Handlers;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+use Lwt\View\Helper\IconHelper;
 
 /**
  * Handler for improved/annotated text API operations.
@@ -62,30 +63,20 @@ class ImprovedTextHandler
         '" id="tx' . $i . '" value="' . ($set ? htmlspecialchars($trans ?? '', ENT_QUOTES, 'UTF-8') : '') .
         '" maxlength="50" size="40" />
          &nbsp;
-        <img class="click" src="/assets/icons/eraser.png" title="Erase Text Field"
-        alt="Erase Text Field"
-        data-action="erase-field" data-target="#tx' . $i . '" />
+' . IconHelper::render('eraser', ['title' => 'Erase Text Field', 'alt' => 'Erase Text Field', 'class' => 'click', 'data-action' => 'erase-field', 'data-target' => '#tx' . $i]) . '
          &nbsp;
-        <img class="click" src="/assets/icons/star.png" title="* (Set to Term)"
-        alt="* (Set to Term)"
-        data-action="set-star" data-target="#tx' . $i . '" />
+        ' . IconHelper::render('star', ['title' => '* (Set to Term)', 'alt' => '* (Set to Term)', 'class' => 'click', 'data-action' => 'set-star', 'data-target' => '#tx' . $i]) . '
         &nbsp;';
         if ($widset) {
             $r .=
-            '<img class="click" src="/assets/icons/plus-button.png"
-            title="Save another translation to existent term"
-            alt="Save another translation to existent term"
-            data-action="update-term-translation" data-wid="' . $wid . '" data-target="#tx' . $i . '" />';
+IconHelper::render('circle-plus', ['title' => 'Save another translation to existent term', 'alt' => 'Save another translation to existent term', 'class' => 'click', 'data-action' => 'update-term-translation', 'data-wid' => (string)$wid, 'data-target' => '#tx' . $i]);
         } else {
             $r .=
-            '<img class="click" src="/assets/icons/plus-button.png"
-            title="Save translation to new term"
-            alt="Save translation to new term"
-            data-action="add-term-translation" data-target="#tx' . $i . '" data-word="' . htmlspecialchars($word, ENT_QUOTES, 'UTF-8') . '" data-lang="' . $lang . '" />';
+IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'alt' => 'Save translation to new term', 'class' => 'click', 'data-action' => 'add-term-translation', 'data-target' => '#tx' . $i, 'data-word' => htmlspecialchars($word, ENT_QUOTES, 'UTF-8'), 'data-lang' => (string)$lang]);
         }
         $r .= '&nbsp;&nbsp;
         <span id="wait' . $i . '">
-            <img src="/assets/icons/empty.gif" />
+            ' . IconHelper::render('empty', []) . '
         </span>
         </span>';
         return $r;
@@ -254,7 +245,7 @@ class ImprovedTextHandler
                             $nontermbuffer .
                         '</td>
                         <td class="td1 right" colspan="3">
-                        <img class="click" src="/assets/icons/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" data-action="back-to-print-mode" data-textid="' . $textid . '" />
+                        ' . IconHelper::render('check', ['title' => "Back to 'Display/Print Mode'", 'alt' => "Back to 'Display/Print Mode'", 'class' => 'click', 'data-action' => 'back-to-print-mode', 'data-textid' => (string)$textid]) . '
                         </td>
                     </tr>';
                     $nontermbuffer = '';
@@ -286,7 +277,7 @@ class ImprovedTextHandler
                     $wordLink = '<a name="rec' . $i . '"></a>
                     <span class="click"
                     data-action="edit-term-popup" data-wid="' . $wid . '" data-textid="' . $textid . '" data-ord="' . (int)$vals[0] . '">
-                        <img src="/assets/icons/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
+                        ' . IconHelper::render('file-pen-line', ['title' => 'Edit Term', 'alt' => 'Edit Term']) . '
                     </span>';
                 }
                 $r .= '<tr>
@@ -310,7 +301,7 @@ class ImprovedTextHandler
             } else {
                 $nontermbuffer .= str_replace(
                     "¶",
-                    '<img src="/assets/icons/new_line.png" title="New Line" alt="New Line" />',
+                    '' . IconHelper::render('wrap-text', ['title' => 'New Line', 'alt' => 'New Line']) . '',
                     htmlspecialchars(trim($vals[1] ?? '') ?? '', ENT_QUOTES, 'UTF-8')
                 );
             }
@@ -321,7 +312,7 @@ class ImprovedTextHandler
                 $nontermbuffer .
                 '</td>
                 <td class="td1 right" colspan="3">
-                    <img class="click" src="/assets/icons/tick.png" title="Back to \'Display/Print Mode\'" alt="Back to \'Display/Print Mode\'" data-action="back-to-print-mode" data-textid="' . $textid . '" />
+                    ' . IconHelper::render('check', ['title' => "Back to 'Display/Print Mode'", 'alt' => "Back to 'Display/Print Mode'", 'class' => 'click', 'data-action' => 'back-to-print-mode', 'data-textid' => (string)$textid]) . '
                 </td>
             </tr>';
         }

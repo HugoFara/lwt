@@ -3,6 +3,11 @@
  * \brief Main stylesheet for the default theme.
  */
 
+/* Alpine.js cloak - hide elements until Alpine initializes */
+[x-cloak] {
+  display: none !important;
+}
+
 /* Override Bulma dark mode - force light theme */
 :root {
   color-scheme: light;

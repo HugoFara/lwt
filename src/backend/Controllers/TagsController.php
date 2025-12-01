@@ -21,6 +21,7 @@ use Lwt\Services\TagService;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\FormHelper;
+use Lwt\View\Helper\IconHelper;
 
 require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
@@ -248,7 +249,7 @@ class TagsController extends BaseController
                 <td class="td1">
                     <input class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
                     type="text" name="TgText" data_info="Tag" value="" maxlength="20" size="20" />
-                    <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                    <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
                 </td>
             </tr>
             <tr>
@@ -291,7 +292,7 @@ class TagsController extends BaseController
                     <td class="td1">
                         <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
                         type="text" name="TgText" value="<?php echo htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="20" size="20" />
-                        <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                        <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
                     </td>
                 </tr>
                 <tr>
@@ -374,12 +375,12 @@ class TagsController extends BaseController
         }
 
         ?>
-        <p><a href="/tags?new=1"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Term Tag ...</a></p>
+        <p><a href="/tags?new=1"><?php echo IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New Term Tag ...</a></p>
 
         <form name="form1" action="#">
         <table class="tab2" cellspacing="0" cellpadding="5">
         <tr>
-        <th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
+        <th class="th1" colspan="4">Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
         <button type="button" data-action="reset-all" data-base-url="/tags">Reset All</button></th>
         </tr>
         <tr>
@@ -415,7 +416,7 @@ class TagsController extends BaseController
             <input type="hidden" name="data" value="" />
             <table class="tab2" cellspacing="0" cellpadding="5">
             <tr><th class="th1 center" colspan="2">
-            Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
+            Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
             </th></tr>
             <tr><td class="td1 center" colspan="2">
             <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
@@ -452,7 +453,7 @@ class TagsController extends BaseController
                         <a name="rec' . $record['TgID'] . '">
                         <input name="marked[]" type="checkbox" class="markcheck" value="' . $record['TgID'] . '" ' . FormHelper::checkInRequest($record['TgID'], 'marked') . ' />
                         </a></td>
-                    <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags?chg=' . $record['TgID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags?del=' . $record['TgID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>
+                    <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags?chg=' . $record['TgID'] . '">' . IconHelper::render('file-pen', ['title' => 'Edit', 'alt' => 'Edit']) . '</a>&nbsp; <a class="confirmdelete" href="/tags?del=' . $record['TgID'] . '">' . IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']) . '</a>&nbsp;</td>
                     <td class="td1 center">' . htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>
                     <td class="td1 center">' . htmlspecialchars($record['TgComment'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>
                     <td class="td1 center">' . ($c > 0 ? '<a href="/words/edit?page=1&amp;query=&amp;text=&amp;status=&amp;filterlang=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['TgID'] . '">' . $c . '</a>' : '0') . '</td>
@@ -615,7 +616,7 @@ class TagsController extends BaseController
             <td class="td1">
                 <input class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
                 type="text" name="T2Text" data_info="Tag" value="" maxlength="20" />
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
@@ -657,7 +658,7 @@ class TagsController extends BaseController
                 <td class="td1">
                     <input data_info="Tag" class="notempty setfocus noblanksnocomma checkoutsidebmp respinput"
                     type="text" name="T2Text" value="<?php echo htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="20" />
-                    <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" /></td>
+                    <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?></td>
                 </tr>
                 <tr>
                     <td class="td1 right">Comment:</td>
@@ -738,13 +739,13 @@ class TagsController extends BaseController
         }
 
         ?>
-        <p><a href="/tags/text?new=1"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Text Tag ...</a></p>
+        <p><a href="/tags/text?new=1"><?php echo IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New Text Tag ...</a></p>
 
         <form name="form1" action="#">
         <table class="tab1" cellspacing="0" cellpadding="5">
         <tr>
             <th class="th1" colspan="4">
-                Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
+                Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
             <button type="button" data-action="reset-all" data-base-url="/tags/text">Reset All</button></th>
         </tr>
         <tr>
@@ -780,7 +781,7 @@ class TagsController extends BaseController
             <input type="hidden" name="data" value="" />
             <table class="tab2" cellspacing="0" cellpadding="5">
             <tr><th class="th1 center" colspan="2">
-            Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
+            Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
             </th></tr>
             <tr><td class="td1 center" colspan="2">
             <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
@@ -816,7 +817,7 @@ class TagsController extends BaseController
                 $ca = $this->getValue('select count(*) as value from ' . $this->table('archtexttags') . ' where AgT2ID=' . $record['T2ID']);
                 echo '<tr>';
                 echo '<td class="td1 center"><a name="rec' . $record['T2ID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['T2ID'] . '" ' . FormHelper::checkInRequest($record['T2ID'], 'marked') . ' /></a></td>';
-                echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags/text?chg=' . $record['T2ID'] . '"><img src="/assets/icons/document--pencil.png" title="Edit" alt="Edit" /></a>&nbsp; <a class="confirmdelete" href="/tags/text?del=' . $record['T2ID'] . '"><img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" /></a>&nbsp;</td>';
+                echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags/text?chg=' . $record['T2ID'] . '">' . IconHelper::render('file-pen', ['title' => 'Edit', 'alt' => 'Edit']) . '</a>&nbsp; <a class="confirmdelete" href="/tags/text?del=' . $record['T2ID'] . '">' . IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']) . '</a>&nbsp;</td>';
                 echo '<td class="td1 center">' . htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td class="td1 center">' . htmlspecialchars($record['T2Comment'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
                 echo '<td class="td1 center">' . ($c > 0 ? '<a href="/text/edit?page=1&amp;query=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['T2ID'] . '">' . $c . '</a>' : '0') . '</td>';

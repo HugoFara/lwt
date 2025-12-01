@@ -23,6 +23,7 @@ use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
+use Lwt\View\Helper\IconHelper;
 
 /**
  * Service class for annotation management.
@@ -252,7 +253,7 @@ class AnnotationService
     {
         if (Connection::fetchValue('select length(TxAnnotatedText) as value from ' . $this->tbpref . 'texts where TxID=' . $textId) > 0) {
             return ' &nbsp;<a href="print_impr_text.php?text=' . $textId .
-            '" target="_top"><img src="/assets/icons/tick.png" title="Annotated Text" alt="Annotated Text" /></a>';
+            '" target="_top">' . IconHelper::render('check', ['title' => 'Annotated Text', 'alt' => 'Annotated Text']) . '</a>';
         } else {
             return '';
         }

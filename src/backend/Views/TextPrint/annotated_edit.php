@@ -14,6 +14,7 @@
 namespace Lwt\Views\TextPrint;
 
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
+use Lwt\View\Helper\IconHelper;
 
 $title = $viewData['title'];
 $sourceUri = $viewData['sourceUri'];
@@ -21,14 +22,13 @@ $sourceUri = $viewData['sourceUri'];
 <h1>ANN.TEXT &#9654; <?php echo htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8');
 if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
     echo ' <a href="' . $sourceUri . '" target="_blank">' .
-         '<img src="' . get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" /></a>';
+         IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']) . '</a>';
 }
 ?></h1>
 
 <div id="printoptions">
     <h2>Improved Annotated Text (Edit Mode)
-        <img src="/assets/icons/question-frame.png" title="Help" alt="Help" class="click"
-        data-action="open-window" data-url="docs/info.html#il" />
+        <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help', 'class' => 'click', 'data-action' => 'open-window', 'data-url' => 'docs/info.html#il']); ?>
     </h2>
     <input type="button" value="Display/Print Mode" data-action="navigate" data-url="/text/print?text=<?php echo $textId; ?>" />
 </div>

@@ -26,36 +26,39 @@ namespace Lwt\Views\Text;
 // Variables injected from text_display_header.php:
 // $title, $audio, $sourceUri, $textLinks
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <h1><?php echo \htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
 <div class="flex-spaced">
     <div>
-        <img id="hidet" class="click" src="/assets/icons/light-bulb-T.png"
-        title="Toggle Text Display (Now ON)" alt="Toggle Text Display (Now ON)"
-        data-action="hide-translations" />
-        <img id="showt" style="display:none;" class="click" src="/assets/icons/light-bulb-off-T.png"
-        title="Toggle Text Display (Now OFF)" alt="Toggle Text Display (Now OFF)"
-        data-action="show-translations" />
-        <img id="hide" class="click" src="/assets/icons/light-bulb-A.png"
-        title="Toggle Annotation Display (Now ON)" alt="Toggle Annotation Display (Now ON)"
-        data-action="hide-annotations" />
-        <img id="show" style="display:none;" class="click" src="/assets/icons/light-bulb-off-A.png"
-        title="Toggle Annotation Display (Now OFF)" alt="Toggle Annotation Display (Now OFF)"
-        data-action="show-annotations" />
+        <span id="hidet" class="click" data-action="hide-translations">
+            <?php echo IconHelper::render('lightbulb', ['title' => 'Toggle Text Display (Now ON)', 'alt' => 'Toggle Text Display (Now ON)', 'class' => 'click']); ?>
+        </span>
+        <span id="showt" style="display:none;" class="click" data-action="show-translations">
+            <?php echo IconHelper::render('lightbulb-off', ['title' => 'Toggle Text Display (Now OFF)', 'alt' => 'Toggle Text Display (Now OFF)', 'class' => 'click']); ?>
+        </span>
+        <span id="hide" class="click" data-action="hide-annotations">
+            <?php echo IconHelper::render('lightbulb', ['title' => 'Toggle Annotation Display (Now ON)', 'alt' => 'Toggle Annotation Display (Now ON)', 'class' => 'click']); ?>
+        </span>
+        <span id="show" style="display:none;" class="click" data-action="show-annotations">
+            <?php echo IconHelper::render('lightbulb-off', ['title' => 'Toggle Annotation Display (Now OFF)', 'alt' => 'Toggle Annotation Display (Now OFF)', 'class' => 'click']); ?>
+        </span>
     </div>
     <div>
         <?php
         if ($sourceUri !== null && $sourceUri !== '') {
-            echo ' <a href="' . $sourceUri . '" target="_blank">
-                <img src="' . \get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" />
-            </a>';
+            echo ' <a href="' . $sourceUri . '" target="_blank">';
+            echo IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']);
+            echo '</a>';
         }
         echo $textLinks;
         ?>
     </div>
     <div>
-        <img class="click" src="/assets/icons/cross.png" title="Close Window" alt="Close Window"
-        data-action="close-window" />
+        <span class="click" data-action="close-window">
+            <?php echo IconHelper::render('x', ['title' => 'Close Window', 'alt' => 'Close Window', 'class' => 'click']); ?>
+        </span>
     </div>
 </div>
 <?php

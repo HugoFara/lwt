@@ -27,6 +27,8 @@ namespace Lwt\Views\Tags;
 /** @var \Lwt\Services\TagService $service */
 /** @var string $formFieldPrefix */
 
+use Lwt\View\Helper\IconHelper;
+
 $isEdit = $mode === 'edit';
 $pageTitle = $isEdit ? 'Edit Tag' : 'New Tag';
 $formName = $isEdit ? 'edittag' : 'newtag';
@@ -54,7 +56,7 @@ $tagComment = $isEdit && $tag !== null ? htmlspecialchars($tag['comment'] ?? '',
             <input class="notempty <?php echo $isEdit ? '' : 'setfocus '; ?>noblanksnocomma checkoutsidebmp respinput"
             type="text" name="<?php echo $formFieldPrefix; ?>Text" data_info="Tag"
             value="<?php echo $tagText; ?>" maxlength="20" size="20" />
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>

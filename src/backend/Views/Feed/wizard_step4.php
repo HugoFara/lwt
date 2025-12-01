@@ -22,6 +22,7 @@
 namespace Lwt\Views\Feed;
 
 use Lwt\Core\Http\InputValidator;
+use Lwt\View\Helper\IconHelper;
 
 ?>
 <div id="wizard-step4-config"
@@ -43,7 +44,7 @@ use Lwt\Core\Http\InputValidator;
                 }
                 ?>
                 </select>
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
@@ -51,7 +52,7 @@ use Lwt\Core\Http\InputValidator;
             <td class="td1">
                 <input class="notempty feed-form-input" type="text" name="NfName"
                 value="<?php echo htmlspecialchars($wizardData['feed']['feed_title'], ENT_COMPAT); ?>" />
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
@@ -59,7 +60,7 @@ use Lwt\Core\Http\InputValidator;
             <td class="td1">
                 <input class="notempty feed-form-input" type="text" name="NfSourceURI"
                 value="<?php echo htmlspecialchars($wizardData['rss_url']); ?>" />
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
@@ -67,7 +68,7 @@ use Lwt\Core\Http\InputValidator;
             <td class="td1">
                 <input class="notempty feed-form-input" type="text" name="NfArticleSectionTags"
                 value="<?php echo htmlspecialchars(preg_replace('/[ ]+/', ' ', trim($wizardData['redirect'] . ($wizardData['article_section'] ?? '')))); ?>" />
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>

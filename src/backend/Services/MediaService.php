@@ -21,6 +21,7 @@ namespace Lwt\Services {
 
 use Lwt\Database\Settings;
 use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\IconHelper;
 
 /**
  * Service class for media file handling and player generation.
@@ -161,12 +162,12 @@ class MediaService
             (only mp3, mp4, ogg, wav, webm files shown):
         </p>
         <p id="mediaSelectErrorMessage"></p>
-        <img id="mediaSelectLoadingImg" src="/assets/icons/waiting2.gif" alt="Loading..." />
+        ' . IconHelper::render('loader-2', ['id' => 'mediaSelectLoadingImg', 'alt' => 'Loading...', 'class' => 'icon-spin']) . '
         <select name="Dir" data-action="media-dir-select"
         data-target-field="' . htmlspecialchars($fieldName, ENT_QUOTES, 'UTF-8') . '">
         </select>
         <span class="click" data-action="refresh-media-select">
-            <img src="/assets/icons/arrow-circle-135.png" title="Refresh Media Selection" alt="Refresh Media Selection" />
+            ' . IconHelper::render('refresh-cw', ['title' => 'Refresh Media Selection', 'alt' => 'Refresh Media Selection']) . '
             Refresh
         </span>
         <script type="application/json" data-lwt-media-select-config>' . json_encode($media) . '</script>';
@@ -359,10 +360,10 @@ allowfullscreen type="text/html">
     <tr>
         <td class="center borderleft">
             <span id="do-single" class="click<?php echo ($repeatMode ? '' : ' hide'); ?>" title="Toggle Repeat (Now ON)">
-                <img src="/assets/icons/arrow-repeat.png" alt="Toggle Repeat (Now ON)" title="Toggle Repeat (Now ON)">
+                <?php echo IconHelper::render('repeat', ['alt' => 'Toggle Repeat (Now ON)', 'title' => 'Toggle Repeat (Now ON)']); ?>
             </span>
             <span id="do-repeat" class="click<?php echo ($repeatMode ? ' hide' : ''); ?>" title="Toggle Repeat (Now OFF)">
-                <img src="/assets/icons/arrow-norepeat.png" alt="Toggle Repeat (Now OFF)" title="Toggle Repeat (Now OFF)">
+                <?php echo IconHelper::render('repeat', ['alt' => 'Toggle Repeat (Now OFF)', 'title' => 'Toggle Repeat (Now OFF)', 'class' => 'icon-muted']); ?>
             </span>
         </td>
         <td class="center bordermiddle">&nbsp;</td>
@@ -395,10 +396,10 @@ allowfullscreen type="text/html">
                 </div>
                 <div class="lwt-audio-volume-section">
                     <button type="button" class="lwt-audio-volume-btn lwt-audio-mute" title="Mute">
-                        <img src="/assets/icons/speaker-volume.png" alt="Mute">
+                        <?php echo IconHelper::render('volume-2', ['alt' => 'Mute']); ?>
                     </button>
                     <button type="button" class="lwt-audio-volume-btn lwt-audio-unmute hide" title="Unmute">
-                        <img src="/assets/icons/speaker.png" alt="Unmute">
+                        <?php echo IconHelper::render('volume-x', ['alt' => 'Unmute']); ?>
                     </button>
                     <div class="lwt-audio-volume-container">
                         <div class="lwt-audio-volume-bar"></div>
@@ -413,10 +414,10 @@ allowfullscreen type="text/html">
             </select>
             <br />
             <span id="backbutt" class="click">
-                <img src="/assets/icons/arrow-circle-225-left.png" alt="Rewind n seconds" title="Rewind n seconds" />
+                <?php echo IconHelper::render('rewind', ['alt' => 'Rewind n seconds', 'title' => 'Rewind n seconds']); ?>
             </span>&nbsp;&nbsp;
             <span id="forwbutt" class="click">
-                <img src="/assets/icons/arrow-circle-315.png" alt="Forward n seconds" title="Forward n seconds" />
+                <?php echo IconHelper::render('fast-forward', ['alt' => 'Forward n seconds', 'title' => 'Forward n seconds']); ?>
             </span>
             <span id="playTime" class="hide"></span>
         </td>
@@ -427,15 +428,15 @@ allowfullscreen type="text/html">
             </select>
             <br />
             <span id="slower" class="click">
-                <img src="/assets/icons/minus.png" alt="Slower" title="Slower" />
+                <?php echo IconHelper::render('minus', ['alt' => 'Slower', 'title' => 'Slower']); ?>
             </span>
             &nbsp;
             <span id="stdspeed" class="click">
-                <img src="/assets/icons/status-away.png" alt="Normal" title="Normal" />
+                <?php echo IconHelper::render('circle-dot', ['alt' => 'Normal', 'title' => 'Normal']); ?>
             </span>
             &nbsp;
             <span id="faster" class="click">
-                <img src="/assets/icons/plus.png" alt="Faster" title="Faster" />
+                <?php echo IconHelper::render('plus', ['alt' => 'Faster', 'title' => 'Faster']); ?>
             </span>
         </td>
     </tr>

@@ -20,6 +20,8 @@
 
 namespace Lwt\Views\Language;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <script type="application/json" id="language-wizard-popup-config">
 {"languageDefs": <?php echo $languagesJson; ?>}
@@ -27,7 +29,7 @@ namespace Lwt\Views\Language;
 
 <div class="center">
     <p class="wizard">
-        <img src="/assets/icons/wizard.png" title="Language Settings Wizard" alt="Language Settings Wizard" />
+        <?php echo IconHelper::render('wand-2', ['title' => 'Language Settings Wizard', 'alt' => 'Language Settings Wizard']); ?>
     </p>
 
     <h1 class="wizard">

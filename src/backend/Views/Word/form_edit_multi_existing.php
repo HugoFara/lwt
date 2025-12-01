@@ -28,6 +28,7 @@ namespace Lwt\Views\Word;
 
 use Lwt\Core\Http\InputValidator;
 use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\IconHelper;
 
 ?>
 <form name="editword" class="validate" action="/word/edit-multi" method="post"
@@ -46,7 +47,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
             <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp"
             data_info="Term" type="text" name="WoText" id="wordfield"
             value="<?php echo htmlspecialchars($term->text ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <?php print_similar_terms_tabrow(); ?>

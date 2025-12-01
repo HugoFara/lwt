@@ -17,6 +17,8 @@
 
 namespace Lwt\Views\Text;
 
+use Lwt\View\Helper\IconHelper;
+
 // JavaScript moved to forms/form_initialization.ts (auto-detects form.validate and language-data-config)
 
 ?>
@@ -25,25 +27,25 @@ namespace Lwt\Views\Text;
 <div class="flex-spaced">
     <div title="Import of a single text, max. 65,000 bytes long, with optional audio">
         <a href="/texts?new=1">
-            <img src="/assets/icons/plus-button.png">
+            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
             Short Text Import
         </a>
     </div>
     <div>
         <a href="/feeds?page=1&amp;check_autoupdate=1">
-            <img src="/assets/icons/plus-button.png">
+            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
             Newsfeed Import
         </a>
     </div>
     <div>
         <a href="/texts?query=&amp;page=1">
-            <img src="/assets/icons/drawer--plus.png">
+            <?php echo IconHelper::render('archive', ['alt' => 'Active']); ?>
             Active Texts
         </a>
     </div>
     <div>
         <a href="/text/archived?query=&amp;page=1">
-            <img src="/assets/icons/drawer--minus.png">
+            <?php echo IconHelper::render('archive-x', ['alt' => 'Archived']); ?>
             Archived Texts
         </a>
     </div>
@@ -57,7 +59,7 @@ namespace Lwt\Views\Text;
             <select name="LgID" id="TxLgID" class="notempty setfocus">
                 <?php echo $languagesOption; ?>
             </select>
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>
@@ -65,7 +67,7 @@ namespace Lwt\Views\Text;
         <td class="td1">
             <input type="text" class="notempty checkoutsidebmp respinput"
             data_info="Title" name="TxTitle" id="TxTitle" value="" maxlength="200" />
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>
@@ -107,7 +109,7 @@ namespace Lwt\Views\Text;
                     TWO NEWLINEs: Paragraph ends. Single NEWLINE converted to SPACE
                 </option>
             </select>
-        <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+        <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>
@@ -115,7 +117,7 @@ namespace Lwt\Views\Text;
         <td class="td1">
             <input type="number" min="0" max="999" class="notempty posintnumber"
             data_info="Maximum Sentences per Text" name="maxsent" value="50" maxlength="3" size="3" />
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             <br />
             <span class="smallgray">
                 Values higher than 100 may slow down text display.

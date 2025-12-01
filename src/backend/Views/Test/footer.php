@@ -19,6 +19,8 @@
 
 namespace Lwt\Views\Test;
 
+use Lwt\View\Helper\IconHelper;
+
 $total = $wrong + $correct + $remaining;
 $divisor = $total > 0 ? $total / 100.0 : 1.0;
 $lRemaining = round($remaining / $divisor, 0);
@@ -27,7 +29,7 @@ $lCorrect = round($correct / $divisor, 0);
 ?>
 <footer id="footer">
     <span class="test-footer-stat">
-        <img src="/assets/icons/clock.png" title="Elapsed Time" alt="Elapsed Time" />
+        <?php echo IconHelper::render('clock', ['title' => 'Elapsed Time', 'alt' => 'Elapsed Time']); ?>
         <span id="timer" title="Elapsed Time"></span>
     </span>
     <span class="test-footer-stat">

@@ -31,12 +31,13 @@ namespace Lwt\Views\Text;
 /** @var bool $isNew */
 
 use Lwt\View\Helper\SelectOptionsBuilder;
+use Lwt\View\Helper\IconHelper;
 
 ?>
 <h2>
     <?php echo $isNew ? "New" : "Edit"; ?> Text
     <a target="_blank" href="docs/info.html#howtotext">
-        <img src="/assets/icons/question-frame.png" title="Help" alt="Help" />
+        <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
     </a>
 </h2>
 <script type="application/json" id="text-edit-config">
@@ -45,31 +46,31 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 <div class="flex-spaced">
     <div style="<?php echo $isNew ? "display: none" : ''; ?>">
         <a href="/texts?new=1">
-            <img src="/assets/icons/plus-button.png">
+            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
             New Text
         </a>
     </div>
     <div>
         <a href="/text/import-long">
-            <img src="/assets/icons/plus-button.png">
+            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
             Long Text Import
         </a>
     </div>
     <div>
         <a href="/feeds?page=1&amp;check_autoupdate=1">
-            <img src="/assets/icons/plus-button.png">
+            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
             Newsfeed Import
         </a>
     </div>
     <div>
         <a href="/texts?query=&amp;page=1">
-            <img src="/assets/icons/drawer--plus.png">
+            <?php echo IconHelper::render('archive', ['alt' => 'Active']); ?>
             Active Texts
         </a>
     </div>
     <div style="<?php echo $isNew ? "" : 'display: none'; ?>">
         <a href="/text/archived?query=&amp;page=1">
-            <img src="/assets/icons/drawer--minus.png">
+            <?php echo IconHelper::render('archive-x', ['alt' => 'Archived']); ?>
             Archived Texts
         </a>
     </div>
@@ -85,8 +86,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
                 data-action="change-language">
                 <?php echo SelectOptionsBuilder::forLanguages($languages, $text->lgid, "[Choose...]"); ?>
                 </select>
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-                alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
@@ -95,8 +95,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
                 <input type="text" class="notempty checkoutsidebmp respinput"
                 data_info="Title" name="TxTitle" id="TxTitle"
                 value="<?php echo \htmlspecialchars($text->title ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200" />
-                <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-                alt="Field must not be empty" />
+                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr>
@@ -109,8 +108,7 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             class="notempty checkbytes checkoutsidebmp respinput"
             data_maxlength="65000" data_info="Text" rows="20"
             ><?php echo \htmlspecialchars($text->text ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             </td>
         </tr>
         <tr <?php echo $isNew ? 'style="display: none;"' : ''; ?>>
@@ -118,12 +116,12 @@ action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
             <td class="td1">
                 <?php
                 if ($annotated) {
-                    echo '<img src="/assets/icons/tick.png" title="With Improved Annotation" alt="With Improved Annotation" /> ' .
+                    echo IconHelper::render('check', ['title' => 'With Improved Annotation', 'alt' => 'With Improved Annotation']) . ' ' .
                     'Exists - May be partially or fully lost if you change the text!<br />' .
                     '<input type="button" value="Print/Edit..." data-action="navigate" data-url="/text/print?text=' .
                     $textId . '" />';
                 } else {
-                    echo '<img src="/assets/icons/cross.png" title="No Improved Annotation" alt="No Improved Annotation" /> ' .
+                    echo IconHelper::render('x', ['title' => 'No Improved Annotation', 'alt' => 'No Improved Annotation']) . ' ' .
                     '- None | <input type="button" value="Create/Print..." data-action="navigate" data-url="print_impr_text.php?edit=1&amp;text=' .
                     $textId . '" />';
                 }

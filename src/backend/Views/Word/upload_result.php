@@ -20,6 +20,9 @@
  */
 
 namespace Lwt\Views\Word;
+
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <form name="form1" action="#"
 data-action="upload-result-form"
@@ -36,13 +39,9 @@ data-recno="<?php echo $recno; ?>">
         <th class="th1 flex-spaced" colspan="1" nowrap="nowrap">
             <span>
                 <span id="res_data-navigation-prev">
-                    <img id="res_data-navigation-prev-first"
-                    src="/assets/icons/control-stop-180.png" title="First Page"
-                    alt="First Page" />
+                    <?php echo IconHelper::render('chevrons-left', ['id' => 'res_data-navigation-prev-first', 'title' => 'First Page', 'alt' => 'First Page']); ?>
                     &nbsp;
-                    <img id="res_data-navigation-prev-minus"
-                    src="/assets/icons/control-180.png" title="Previous Page"
-                    alt="Previous Page" />
+                    <?php echo IconHelper::render('chevron-left', ['id' => 'res_data-navigation-prev-minus', 'title' => 'Previous Page', 'alt' => 'Previous Page']); ?>
                 </span>
             </span>
             <span>
@@ -53,11 +52,9 @@ data-recno="<?php echo $recno; ?>">
             </span>
             <span>
                 <span id="res_data-navigation-next">
-                    <img id="res_data-navigation-next-plus"
-                    src="/assets/icons/control.png" title="Next Page" alt="Next Page" />
+                    <?php echo IconHelper::render('chevron-right', ['id' => 'res_data-navigation-next-plus', 'title' => 'Next Page', 'alt' => 'Next Page']); ?>
                     &nbsp;
-                    <img id="res_data-navigation-next-last"
-                    src="/assets/icons/control-stop.png" title="Last Page" alt="Last Page" />
+                    <?php echo IconHelper::render('chevrons-right', ['id' => 'res_data-navigation-next-last', 'title' => 'Last Page', 'alt' => 'Last Page']); ?>
                 </span>
             </span>
         </th>

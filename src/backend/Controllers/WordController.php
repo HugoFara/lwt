@@ -1021,11 +1021,11 @@ class WordController extends BaseController
         // Show new term link
         if ($currentlang != '') {
             ?>
-<p><a href="/words/edit?new=1&amp;lang=<?php echo $currentlang; ?>"><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New <?php echo htmlspecialchars($this->languageService->getLanguageName($currentlang), ENT_QUOTES, 'UTF-8'); ?> Term ...</a></p>
+<p><a href="/words/edit?new=1&amp;lang=<?php echo $currentlang; ?>"><?php echo \Lwt\View\Helper\IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New <?php echo htmlspecialchars($this->languageService->getLanguageName($currentlang), ENT_QUOTES, 'UTF-8'); ?> Term ...</a></p>
             <?php
         } else {
             ?>
-<p><img src="/assets/icons/plus-button.png" title="New" alt="New" /> New Term? - Set Language Filter first ...</p>
+<p><?php echo \Lwt\View\Helper\IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New Term? - Set Language Filter first ...</p>
             <?php
         }
 

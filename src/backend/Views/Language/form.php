@@ -20,6 +20,8 @@
 
 namespace Lwt\Views\Language;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <script type="application/json" id="language-form-config">
 <?php echo json_encode([
@@ -41,8 +43,7 @@ namespace Lwt\Views\Language;
             <input type="text" class="notempty setfocus checkoutsidebmp respinput"
             data_info="Study Language" name="LgName" id="LgName"
             value="<?php echo htmlspecialchars($language->name ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="40" />
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>
@@ -60,8 +61,7 @@ namespace Lwt\Views\Language;
             title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                 Open in Pop-Up
             </label>
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>
@@ -142,8 +142,7 @@ namespace Lwt\Views\Language;
             value="<?php echo htmlspecialchars($language->regexpsplitsent ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="500"
             data_info="RegExp Split Sentences" />
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
     <tr>
@@ -167,8 +166,7 @@ namespace Lwt\Views\Language;
             data_info="RegExp Word Characters" name="LgRegexpWordCharacters"
             value="<?php echo htmlspecialchars($language->regexpwordchar ?? '', ENT_QUOTES, 'UTF-8'); ?>"
             maxlength="500" />
-            <img src="/assets/icons/status-busy.png" title="Field must not be empty"
-            alt="Field must not be empty" />
+            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
             <div class="red language-form-hidden" id="mecab_not_installed">
                 <a href="https://en.wikipedia.org/wiki/MeCab">MeCab</a> does
                 not seem to be installed on your server.
@@ -216,8 +214,7 @@ namespace Lwt\Views\Language;
     <tr>
         <td class="td1 right">
             Export Template
-            <img class="click" src="/assets/icons/question-frame.png" title="Help" alt="Help"
-            data-action="show-export-template-help" /> :
+            <?php echo IconHelper::render('help-circle', ['class' => 'click', 'title' => 'Help', 'alt' => 'Help', 'data-action' => 'show-export-template-help']); ?> :
         </td>
         <td class="td1">
             <input type="text" class="checkoutsidebmp respinput" data_info="Export Template"

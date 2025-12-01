@@ -49,20 +49,20 @@ function renderCurrentTextInfo(int $textid, ?array $textInfo): void
     <p class="is-italic mb-3"><?php echo htmlspecialchars($txttit ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
     <div class="buttons are-small">
         <a href="/text/read?start=<?php echo $textid; ?>" class="button is-link is-light">
-            <span class="icon is-small"><img src="/assets/icons/book-open-bookmark.png" alt="Read" /></span>
+            <span class="icon is-small"><?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['alt' => 'Read']); ?></span>
             <span>Read</span>
         </a>
         <a href="/test?text=<?php echo $textid; ?>" class="button is-info is-light">
-            <span class="icon is-small"><img src="/assets/icons/question-balloon.png" alt="Test" /></span>
+            <span class="icon is-small"><?php echo \Lwt\View\Helper\IconHelper::render('circle-help', ['alt' => 'Test']); ?></span>
             <span>Test</span>
         </a>
         <a href="/text/print-plain?text=<?php echo $textid; ?>" class="button is-light">
-            <span class="icon is-small"><img src="/assets/icons/printer.png" alt="Print" /></span>
+            <span class="icon is-small"><?php echo \Lwt\View\Helper\IconHelper::render('printer', ['alt' => 'Print']); ?></span>
             <span>Print</span>
         </a>
         <?php if ($annotated): ?>
         <a href="/text/print?text=<?php echo $textid; ?>" class="button is-success is-light">
-            <span class="icon is-small"><img src="/assets/icons/tick.png" alt="Annotated" /></span>
+            <span class="icon is-small"><?php echo \Lwt\View\Helper\IconHelper::render('check', ['alt' => 'Annotated']); ?></span>
             <span>Ann. Text</span>
         </a>
         <?php endif; ?>
@@ -121,7 +121,7 @@ function renderWordPressLogout(bool $isWordPress): void
 /**
  * Load the content of warnings for visual display.
  *
- * Outputs a JSON config element that is read by home_warnings.ts.
+ * Outputs a JSON config element that is read by home_app.ts.
  *
  * @return void
  */
@@ -148,15 +148,18 @@ $isWordPress = $dashboardData['is_wordpress'];
 $currentTextInfo = $dashboardData['current_text_info'];
 ?>
 
+<!-- Alpine.js Home App Container -->
+<div x-data="homeApp()" x-cloak>
+
 <!-- System notifications -->
-<div class="notification is-danger is-light" id="php_update_required_box" style="display: none;">
-    <p id="php_update_required"></p>
+<div class="notification is-danger is-light" x-show="warnings.phpOutdated.visible" x-transition>
+    <p x-html="warnings.phpOutdated.message"></p>
 </div>
-<div class="notification is-warning is-light" id="cookies_disabled_box" style="display: none;">
-    <p id="cookies_disabled"></p>
+<div class="notification is-warning is-light" x-show="warnings.cookiesDisabled.visible" x-transition>
+    <p x-html="warnings.cookiesDisabled.message"></p>
 </div>
-<div class="notification is-info is-light" id="lwt_new_version_box" style="display: none;">
-    <p id="lwt_new_version"></p>
+<div class="notification is-info is-light" x-show="warnings.updateAvailable.visible" x-transition>
+    <p x-html="warnings.updateAvailable.message"></p>
 </div>
 
 <!-- Welcome message -->
@@ -170,8 +173,9 @@ $currentTextInfo = $dashboardData['current_text_info'];
 <div class="columns is-multiline is-centered home-menu-container">
     <!-- Languages Card -->
     <div class="column is-one-third-desktop is-half-tablet">
-        <div class="card menu menu-languages" data-menu-id="languages">
-            <header class="card-header menu-header">
+        <div class="card menu menu-languages"
+             :class="{ 'collapsed': isCollapsed('languages') }">
+            <header class="card-header menu-header" @click="toggleMenu('languages')">
                 <p class="card-header-title">
                     <span class="icon-text">
                         <span class="icon"><i data-lucide="languages"></i></span>
@@ -213,8 +217,9 @@ $currentTextInfo = $dashboardData['current_text_info'];
 
     <!-- Texts Card -->
     <div class="column is-one-third-desktop is-half-tablet">
-        <div class="card menu menu-texts" data-menu-id="texts">
-            <header class="card-header menu-header">
+        <div class="card menu menu-texts"
+             :class="{ 'collapsed': isCollapsed('texts') }">
+            <header class="card-header menu-header" @click="toggleMenu('texts')">
                 <p class="card-header-title">
                     <span class="icon-text">
                         <span class="icon"><i data-lucide="book-open"></i></span>
@@ -252,8 +257,9 @@ $currentTextInfo = $dashboardData['current_text_info'];
 
     <!-- Vocabulary Card -->
     <div class="column is-one-third-desktop is-half-tablet">
-        <div class="card menu menu-terms" data-menu-id="terms">
-            <header class="card-header menu-header">
+        <div class="card menu menu-terms"
+             :class="{ 'collapsed': isCollapsed('terms') }">
+            <header class="card-header menu-header" @click="toggleMenu('terms')">
                 <p class="card-header-title">
                     <span class="icon-text">
                         <span class="icon"><i data-lucide="book-marked"></i></span>
@@ -283,8 +289,9 @@ $currentTextInfo = $dashboardData['current_text_info'];
 
     <!-- Content Card -->
     <div class="column is-one-third-desktop is-half-tablet">
-        <div class="card menu menu-feeds" data-menu-id="feeds">
-            <header class="card-header menu-header">
+        <div class="card menu menu-feeds"
+             :class="{ 'collapsed': isCollapsed('feeds') }">
+            <header class="card-header menu-header" @click="toggleMenu('feeds')">
                 <p class="card-header-title">
                     <span class="icon-text">
                         <span class="icon"><i data-lucide="rss"></i></span>
@@ -310,8 +317,9 @@ $currentTextInfo = $dashboardData['current_text_info'];
 
     <!-- Information Card -->
     <div class="column is-one-third-desktop is-half-tablet">
-        <div class="card menu menu-admin" data-menu-id="admin">
-            <header class="card-header menu-header">
+        <div class="card menu menu-admin"
+             :class="{ 'collapsed': isCollapsed('admin') }">
+            <header class="card-header menu-header" @click="toggleMenu('admin')">
                 <p class="card-header-title">
                     <span class="icon-text">
                         <span class="icon"><i data-lucide="info"></i></span>
@@ -341,8 +349,9 @@ $currentTextInfo = $dashboardData['current_text_info'];
 
     <!-- Settings Card -->
     <div class="column is-one-third-desktop is-half-tablet">
-        <div class="card menu menu-settings" data-menu-id="settings">
-            <header class="card-header menu-header">
+        <div class="card menu menu-settings"
+             :class="{ 'collapsed': isCollapsed('settings') }">
+            <header class="card-header menu-header" @click="toggleMenu('settings')">
                 <p class="card-header-title">
                     <span class="icon-text">
                         <span class="icon"><i data-lucide="settings"></i></span>
@@ -389,4 +398,7 @@ $currentTextInfo = $dashboardData['current_text_info'];
         </p>
     </div>
 </footer>
+
+</div><!-- End Alpine.js container -->
+
 <?php renderWarningsScript(); ?>

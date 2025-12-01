@@ -21,6 +21,7 @@ use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
+use Lwt\View\Helper\IconHelper;
 
 /**
  * Service class for sentence operations.
@@ -326,15 +327,15 @@ class SentenceService
     public function get20Sentences(int $lang, string $wordlc, ?int $wid, string $targetCtlId, int $mode): string
     {
         $r = '<p><b>Sentences in active texts with <i>' . htmlspecialchars($wordlc, ENT_QUOTES, 'UTF-8') . '</i></b></p>
-        <p>(Click on <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
+        <p>(Click on ' . IconHelper::render('circle-check', ['title' => 'Choose', 'alt' => 'Choose']) . '
         to copy sentence into above term)</p>';
         $sentences = $this->getSentencesWithWord($lang, $wordlc, $wid, $mode);
         foreach ($sentences as $sentence) {
             $r .= '<span class="click" data-action="copy-sentence" ' .
                 'data-target="' . htmlspecialchars($targetCtlId, ENT_QUOTES, 'UTF-8') . '" ' .
-                'data-sentence="' . htmlspecialchars($sentence[1], ENT_QUOTES, 'UTF-8') . '">
-            <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
-            </span> &nbsp;' . $sentence[0] . '<br />';
+                'data-sentence="' . htmlspecialchars($sentence[1], ENT_QUOTES, 'UTF-8') . '">' .
+            IconHelper::render('circle-check', ['title' => 'Choose', 'alt' => 'Choose']) .
+            '</span> &nbsp;' . $sentence[0] . '<br />';
         }
         $r .= '</p>';
         return $r;
@@ -362,18 +363,18 @@ class SentenceService
             data-termlc="<?php echo htmlspecialchars($termlc, ENT_QUOTES, 'UTF-8'); ?>"
             data-target="<?php echo htmlspecialchars($targetCtlId, ENT_QUOTES, 'UTF-8'); ?>"
             data-wid="<?php echo $wid; ?>">
-            <img src="/assets/icons/sticky-notes-stack.png" title="Show Sentences" alt="Show Sentences" />
+            <?php echo IconHelper::render('layers', ['title' => 'Show Sentences', 'alt' => 'Show Sentences']); ?>
             Show Sentences
         </span>
     </div>
     <!-- Loading icon -->
-    <img id="exsent-waiting" src="/assets/icons/waiting2.gif" alt="Loading..." />
+    <?php echo IconHelper::render('loader-2', ['id' => 'exsent-waiting', 'alt' => 'Loading...', 'class' => 'icon-spin']); ?>
     <!-- Displayed output -->
     <div id="exsent-sentences">
         <p><b>Sentences in active texts with <i><?php echo htmlspecialchars($termlc, ENT_QUOTES, 'UTF-8') ?></i></b></p>
         <p>
             (Click on
-            <img src="/assets/icons/tick-button.png" title="Choose" alt="Choose" />
+            <?php echo IconHelper::render('circle-check', ['title' => 'Choose', 'alt' => 'Choose']); ?>
             to copy sentence into above term)
         </p>
     </div>

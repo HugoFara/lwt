@@ -198,8 +198,7 @@ class StatusHelper
         int $score,
         int $status,
         int $wordId,
-        string $statusAbbr,
-        string $placeholder = '/assets/icons/placeholder.png'
+        string $statusAbbr
     ): string {
         // Format the score text
         if ($score < 0) {
@@ -210,20 +209,30 @@ class StatusHelper
 
         // Build plus button
         if ($status <= 5 || $status == 98) {
-            $plus = '<img src="/assets/icons/plus.png" class="click" title="+" alt="+" '
-                . 'data-action="change-test-status" data-word-id="' . $wordId . '" data-direction="up" />';
+            $plus = IconHelper::render('plus', [
+                'class' => 'click',
+                'title' => '+',
+                'alt' => '+',
+                'data-action' => 'change-test-status',
+                'data-word-id' => (string)$wordId,
+                'data-direction' => 'up'
+            ]);
         } else {
-            $plus = '<img src="' . htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8')
-                . '" title="" alt="" />';
+            $plus = IconHelper::render('circle', ['class' => 'icon-muted', 'title' => '', 'alt' => '']);
         }
 
         // Build minus button
         if ($status >= 1) {
-            $minus = '<img src="/assets/icons/minus.png" class="click" title="-" alt="-" '
-                . 'data-action="change-test-status" data-word-id="' . $wordId . '" data-direction="down" />';
+            $minus = IconHelper::render('minus', [
+                'class' => 'click',
+                'title' => '-',
+                'alt' => '-',
+                'data-action' => 'change-test-status',
+                'data-word-id' => (string)$wordId,
+                'data-direction' => 'down'
+            ]);
         } else {
-            $minus = '<img src="' . htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8')
-                . '" title="" alt="" />';
+            $minus = IconHelper::render('circle', ['class' => 'icon-muted', 'title' => '', 'alt' => '']);
         }
 
         return ($status == 98 ? '' : $minus . ' ') . $scoreText . ($status == 99 ? '' : ' ' . $plus);

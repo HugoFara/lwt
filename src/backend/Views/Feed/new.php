@@ -18,12 +18,14 @@
 
 namespace Lwt\Views\Feed;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <h2>New Feed</h2>
 <a href="/feeds?page=1">My Feeds</a>
 <span class="nowrap"></span>
 <a href="/feeds/wizard?step=1">
-    <img src="/assets/icons/wizard.png" title="new_feed_wizard" alt="new_feed_wizard" class="icon-small"/>
+    <?php echo IconHelper::render('wand-2', ['title' => 'New Feed Wizard', 'alt' => 'New Feed Wizard']); ?>
     New Feed Wizard
 </a>
 <br></br>
@@ -37,15 +39,15 @@ namespace Lwt\Views\Feed;
 <tr><td class="td1">
 Name: </td><td class="td1">
     <input class="notempty feed-form-input" type="text" name="NfName" />
-<img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+<?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
 </td></tr>
 <tr><td class="td1">Newsfeed url: </td>
 <td class="td1"><input class="notempty feed-form-input" type="text" name="NfSourceURI" />
-<img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+<?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
 </td></tr>
 <tr><td class="td1">Article Section: </td>
 <td class="td1"><input class="notempty feed-form-input" type="text" name="NfArticleSectionTags" />
-<img src="/assets/icons/status-busy.png" title="Field must not be empty" alt="Field must not be empty" />
+<?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
 </td></tr>
 <tr><td class="td1">Filter Tags: </td>
 <td class="td1"><input type="text" class="feed-form-input" name="NfFilterTags" /></td></tr>

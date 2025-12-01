@@ -40,14 +40,14 @@ $hasAnnotation = $viewData['hasAnnotation'];
     </div>
     <div>
         <a href="/text/read?start=<?php echo $textId; ?>" target="_top">
-            <img src="/assets/icons/book-open-bookmark.png" title="Read" alt="Read" />
+            <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
         </a>
         <a href="/test?text=<?php echo $textId; ?>" target="_top">
-            <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />
+            <?php echo \Lwt\View\Helper\IconHelper::render('circle-help', ['title' => 'Test', 'alt' => 'Test']); ?>
         </a>
         <?php echo get_annotation_link($textId); ?>
         <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
-            <img src="/assets/icons/document--pencil.png" title="Edit Text" alt="Edit Text" />
+            <?php echo \Lwt\View\Helper\IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
         </a>
     </div>
     <div>
@@ -58,7 +58,7 @@ $hasAnnotation = $viewData['hasAnnotation'];
 echo htmlspecialchars($title ?? '', ENT_QUOTES, 'UTF-8');
 if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
     echo ' <a href="' . $sourceUri . '" target="_blank">' .
-         '<img src="' . get_file_path('assets/icons/chain.png') . '" title="Text Source" alt="Text Source" /></a>';
+         \Lwt\View\Helper\IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']) . '</a>';
 }
 ?></h1>
 <p id="printoptions" data-text-id="<?php echo $textId; ?>">
@@ -88,7 +88,7 @@ if (isset($sourceUri) && substr(trim($sourceUri), 0, 1) != '#') {
         <b>Improved Annotated Text</b> <?php echo get_annotation_link($textId); ?>.
     <?php else: ?>
         <button type="button" data-action="navigate" data-url="/text/print?edit=1&amp;text=<?php echo $textId; ?>">Create</button> an
-        <b>Improved Annotated Text</b> [<img src="/assets/icons/tick.png" title="Annotated Text" alt="Annotated Text" />].
+        <b>Improved Annotated Text</b> [<?php echo \Lwt\View\Helper\IconHelper::render('check', ['title' => 'Annotated Text', 'alt' => 'Annotated Text']); ?>].
     <?php endif; ?>
 </p>
 </div>

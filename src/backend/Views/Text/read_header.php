@@ -53,14 +53,14 @@ namespace Lwt\Views\Text;
     </div>
     <div>
         <a href="/test?text=<?php echo $textId; ?>" target="_top">
-            <img src="/assets/icons/question-balloon.png" title="Test" alt="Test" />
+            <?php echo \Lwt\View\Helper\IconHelper::render('circle-help', ['title' => 'Test', 'alt' => 'Test']); ?>
         </a>
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
-            <img src="/assets/icons/printer.png" title="Print" alt="Print" />
+            <?php echo \Lwt\View\Helper\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
         <?php echo \get_annotation_link($textId); ?>
         <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
-            <img src="/assets/icons/document--pencil.png" title="Edit Text" alt="Edit Text" />
+            <?php echo \Lwt\View\Helper\IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
         </a>
     </div>
     <div>
@@ -68,7 +68,7 @@ namespace Lwt\Views\Text;
             href="/word/new?text=<?php echo $textId; ?>&amp;lang=<?php echo $langId; ?>"
             target="ro" data-action="show-right-frames"
         >
-            <img src="/assets/icons/sticky-note--plus.png" title="New Term" alt="New Term" />
+            <?php echo \Lwt\View\Helper\IconHelper::render('notepad-text-dashed', ['title' => 'New Term', 'alt' => 'New Term']); ?>
         </a>
     </div>
     <div>
@@ -82,7 +82,7 @@ namespace Lwt\Views\Text;
     if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')) {
         ?>
     <a href="<?php echo $sourceUri ?>" target="_blank">
-        <img src="<?php echo \get_file_path('assets/icons/chain.png') ?>" title="Text Source" alt="Text Source" />
+        <?php echo \Lwt\View\Helper\IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']); ?>
     </a>
         <?php
     }

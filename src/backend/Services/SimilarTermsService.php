@@ -18,6 +18,7 @@ use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
+use Lwt\View\Helper\IconHelper;
 
 /**
  * Service class for similar terms calculation.
@@ -185,11 +186,13 @@ class SimilarTermsService
                 $rom = "";
                 $romd = "";
             }
-            $output = '<img class="clickedit" src="/assets/icons/tick-button-small.png" ' .
-            'title="Copy → Translation &amp; Romanization Field(s)" ' .
-            'data-action="set-trans-roman" ' .
-            'data-translation="' . htmlspecialchars($tra, ENT_QUOTES, 'UTF-8') . '" ' .
-            'data-romanization="' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . '" /> ' .
+            $output = IconHelper::render('check-circle', [
+                'class' => 'clickedit',
+                'title' => 'Copy → Translation & Romanization Field(s)',
+                'data-action' => 'set-trans-roman',
+                'data-translation' => htmlspecialchars($tra, ENT_QUOTES, 'UTF-8'),
+                'data-romanization' => htmlspecialchars($rom, ENT_QUOTES, 'UTF-8')
+            ]) . ' ' .
             $term . htmlspecialchars($romd, ENT_QUOTES, 'UTF-8') . ' — ' . htmlspecialchars($tra, ENT_QUOTES, 'UTF-8') .
             '<br />';
             mysqli_free_result($res);

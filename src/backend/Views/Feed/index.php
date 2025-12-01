@@ -24,19 +24,21 @@
 
 namespace Lwt\Views\Feed;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <div class="flex-spaced">
     <div><a href="/feeds">My Feeds</a></div>
     <div>
         <a href="/feeds/edit?new_feed=1">
-            <img src="/assets/icons/feed--plus.png" title="new feed" alt="new feed" />
+            <?php echo IconHelper::render('rss', ['title' => 'new feed', 'alt' => 'new feed']); ?>
             New Feed...
         </a>
     </div>
 </div>
 <form name="form1" action="#">
 <table class="tab2" cellspacing="0" cellpadding="5"><tr>
-<th class="th1" colspan="4">Filter <img src="/assets/icons/funnel.png" title="Filter" alt="Filter" />&nbsp;
+<th class="th1" colspan="4">Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
 <input type="button" value="Reset All" data-action="reset-all" data-url="/feeds/edit" /></th>
 </tr>
 <tr>
@@ -58,7 +60,7 @@ namespace Lwt\Views\Feed;
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
     <th class="th1" colspan="3">
-        Multi Actions <img src="/assets/icons/lightning.png" title="Multi Actions" alt="Multi Actions" />
+        Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
     </th>
 </tr>
 <tr><td class="td1 center feeds-filter-cell">
@@ -109,16 +111,16 @@ while ($row = mysqli_fetch_assoc($feeds)):
     </td>
     <td class="td1 center nowrap">
         <a href="/feeds/edit?edit_feed=1&amp;selected_feed=<?php echo $row['NfID']; ?>">
-            <img src="/assets/icons/feed--pencil.png" title="Edit" alt="Edit" />
+            <?php echo IconHelper::render('rss', ['title' => 'Edit', 'alt' => 'Edit']); ?>
         </a>
         &nbsp; <a href="/feeds/edit?manage_feeds=1&amp;load_feed=1&amp;selected_feed=<?php echo $row['NfID']; ?>">
-            <span title="Update Feed"><img src="/assets/icons/arrow-circle-135.png" alt="-" /></span>
+            <span title="Update Feed"><?php echo IconHelper::render('refresh-cw', ['alt' => '-']); ?></span>
         </a>&nbsp;
         <a href="<?php echo $row['NfSourceURI']; ?>" data-action="open-window">
-            <img src="/assets/icons/external.png" title="Show Feed" alt="Link" />
+            <?php echo IconHelper::render('external-link', ['title' => 'Show Feed', 'alt' => 'Link']); ?>
         </a>&nbsp;
         <span class="click" data-action="delete-feed" data-feed-id="<?php echo $row['NfID']; ?>">
-            <img src="/assets/icons/minus-button.png" title="Delete" alt="Delete" />
+            <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
         </span>
     </td>
     <td class="td1 center"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>

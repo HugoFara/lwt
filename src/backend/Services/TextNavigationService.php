@@ -20,6 +20,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;
+use Lwt\View\Helper\IconHelper;
 
 /**
  * Service class for text navigation.
@@ -183,22 +184,22 @@ class TextNavigationService
             if ($list[$i] == $textId) {
                 if ($list[$i - 1] !== 0) {
                     $title = htmlspecialchars(getTextTitle($list[$i - 1]), ENT_QUOTES, 'UTF-8');
-                    $prev = '<a href="' . $url . $list[$i - 1] . '" target="_top"><img src="/assets/icons/navigation-180-button.png" title="Previous Text: ' . $title . '" alt="Previous Text: ' . $title . '" /></a>';
+                    $prev = '<a href="' . $url . $list[$i - 1] . '" target="_top">' . IconHelper::render('circle-chevron-left', ['title' => 'Previous Text: ' . $title, 'alt' => 'Previous Text: ' . $title]) . '</a>';
                 } else {
-                    $prev = '<img src="/assets/icons/navigation-180-button-light.png" title="No Previous Text" alt="No Previous Text" />';
+                    $prev = IconHelper::render('circle-chevron-left', ['title' => 'No Previous Text', 'alt' => 'No Previous Text', 'class' => 'icon-muted']);
                 }
                 if ($list[$i + 1] !== 0) {
                     $title = htmlspecialchars(getTextTitle($list[$i + 1]), ENT_QUOTES, 'UTF-8');
                     $next = '<a href="' . $url . $list[$i + 1] .
-                    '" target="_top"><img src="/assets/icons/navigation-000-button.png" title="Next Text: ' . $title . '" alt="Next Text: ' . $title . '" /></a>';
+                    '" target="_top">' . IconHelper::render('circle-chevron-right', ['title' => 'Next Text: ' . $title, 'alt' => 'Next Text: ' . $title]) . '</a>';
                 } else {
-                    $next = '<img src="/assets/icons/navigation-000-button-light.png" title="No Next Text" alt="No Next Text" />';
+                    $next = IconHelper::render('circle-chevron-right', ['title' => 'No Next Text', 'alt' => 'No Next Text', 'class' => 'icon-muted']);
                 }
                 return $add . $prev . ' ' . $next;
             }
         }
-        return $add . '<img src="/assets/icons/navigation-180-button-light.png" title="No Previous Text" alt="No Previous Text" />
-        <img src="/assets/icons/navigation-000-button-light.png" title="No Next Text" alt="No Next Text" />';
+        return $add . IconHelper::render('circle-chevron-left', ['title' => 'No Previous Text', 'alt' => 'No Previous Text', 'class' => 'icon-muted']) . '
+        ' . IconHelper::render('circle-chevron-right', ['title' => 'No Next Text', 'alt' => 'No Next Text', 'class' => 'icon-muted']);
     }
 }
 
