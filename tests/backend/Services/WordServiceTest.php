@@ -1019,13 +1019,12 @@ class WordServiceTest extends TestCase
         $res = $this->service->getNewWordsAfter($maxBefore);
 
         $found = false;
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($res as $record) {
             if ($record['WoTextLC'] === 'testnewafter') {
                 $found = true;
                 break;
             }
         }
-        mysqli_free_result($res);
 
         $this->assertTrue($found);
     }

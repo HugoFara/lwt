@@ -19,6 +19,23 @@ vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
   showAllwordsClick: vi.fn()
 }));
 
+vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+  quickMenuRedirection: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/terms/translation_api', () => ({
+  deleteTranslation: vi.fn(),
+  addTranslation: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/terms/term_operations', () => ({
+  changeTableTestStatus: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/ui/modal', () => ({
+  showExportTemplateHelp: vi.fn()
+}));
+
 import {
   goBack,
   navigateTo,
@@ -30,6 +47,10 @@ import {
 import { lwtFormCheck } from '../../../src/frontend/js/forms/unloadformcheck';
 import { showRightFrames, hideRightFrames } from '../../../src/frontend/js/reading/frame_management';
 import { showAllwordsClick } from '../../../src/frontend/js/core/ui_utilities';
+import { quickMenuRedirection } from '../../../src/frontend/js/core/user_interactions';
+import { deleteTranslation, addTranslation } from '../../../src/frontend/js/terms/translation_api';
+import { changeTableTestStatus } from '../../../src/frontend/js/terms/term_operations';
+import { showExportTemplateHelp } from '../../../src/frontend/js/ui/modal';
 
 describe('simple_interactions.ts', () => {
   let originalLocation: Location;
@@ -398,6 +419,242 @@ describe('simple_interactions.ts', () => {
         form.dispatchEvent(event);
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
+      });
+    });
+
+    describe('data-action="delete-translation"', () => {
+      it('calls deleteTranslation', () => {
+        document.body.innerHTML = `
+          <button data-action="delete-translation">Delete</button>
+        `;
+
+        const button = document.querySelector('[data-action="delete-translation"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(deleteTranslation).toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="add-translation"', () => {
+      it('calls addTranslation with word data', () => {
+        document.body.innerHTML = `
+          <button data-action="add-translation" data-word="hello">Add</button>
+        `;
+
+        const button = document.querySelector('[data-action="add-translation"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(addTranslation).toHaveBeenCalledWith('hello');
+      });
+
+      it('does nothing without word data', () => {
+        document.body.innerHTML = `
+          <button data-action="add-translation">Add</button>
+        `;
+
+        const button = document.querySelector('[data-action="add-translation"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(addTranslation).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="open-window"', () => {
+      it('opens URL in new window', () => {
+        const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+        document.body.innerHTML = `
+          <button data-action="open-window" data-url="http://example.com/page">Open</button>
+        `;
+
+        const button = document.querySelector('[data-action="open-window"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(openSpy).toHaveBeenCalledWith('http://example.com/page', '_blank');
+      });
+
+      it('uses custom window name', () => {
+        const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+        document.body.innerHTML = `
+          <button data-action="open-window" data-url="http://example.com" data-window-name="mywin">Open</button>
+        `;
+
+        const button = document.querySelector('[data-action="open-window"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(openSpy).toHaveBeenCalledWith('http://example.com', 'mywin');
+      });
+
+      it('uses anchor href if no data-url', () => {
+        const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+        document.body.innerHTML = `
+          <a data-action="open-window" href="http://example.com/link">Open</a>
+        `;
+
+        const link = document.querySelector('[data-action="open-window"]') as HTMLElement;
+        link.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(openSpy).toHaveBeenCalledWith('http://example.com/link', '_blank');
+      });
+    });
+
+    describe('data-action="know-all"', () => {
+      it('shows right frames for all words well-known', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        document.body.innerHTML = `
+          <button data-action="know-all" data-text-id="42">Know All</button>
+        `;
+
+        const button = document.querySelector('[data-action="know-all"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
+        expect(showRightFrames).toHaveBeenCalledWith('all_words_wellknown.php?text=42');
+      });
+
+      it('does nothing if cancelled', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(false);
+        document.body.innerHTML = `
+          <button data-action="know-all" data-text-id="42">Know All</button>
+        `;
+
+        const button = document.querySelector('[data-action="know-all"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(showRightFrames).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="ignore-all"', () => {
+      it('shows right frames for all words ignored', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        document.body.innerHTML = `
+          <button data-action="ignore-all" data-text-id="42">Ignore All</button>
+        `;
+
+        const button = document.querySelector('[data-action="ignore-all"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
+        expect(showRightFrames).toHaveBeenCalledWith('all_words_wellknown.php?text=42&stat=98');
+      });
+    });
+
+    describe('data-action="bulk-translate"', () => {
+      it('shows right frames with URL', () => {
+        document.body.innerHTML = `
+          <button data-action="bulk-translate" data-url="/bulk/translate">Bulk</button>
+        `;
+
+        const button = document.querySelector('[data-action="bulk-translate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(showRightFrames).toHaveBeenCalledWith('/bulk/translate');
+      });
+    });
+
+    describe('data-action="change-test-status"', () => {
+      it('changes status up', () => {
+        document.body.innerHTML = `
+          <button data-action="change-test-status" data-word-id="123" data-direction="up">+</button>
+        `;
+
+        const button = document.querySelector('[data-action="change-test-status"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(changeTableTestStatus).toHaveBeenCalledWith('123', true);
+      });
+
+      it('changes status down', () => {
+        document.body.innerHTML = `
+          <button data-action="change-test-status" data-word-id="123" data-direction="down">-</button>
+        `;
+
+        const button = document.querySelector('[data-action="change-test-status"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(changeTableTestStatus).toHaveBeenCalledWith('123', false);
+      });
+    });
+
+    describe('data-action="go-back"', () => {
+      it('navigates back in history', () => {
+        document.body.innerHTML = `
+          <button data-action="go-back">Back</button>
+        `;
+
+        const button = document.querySelector('[data-action="go-back"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.history.back).toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="show-export-template-help"', () => {
+      it('shows export template help modal', () => {
+        document.body.innerHTML = `
+          <button data-action="show-export-template-help">Help</button>
+        `;
+
+        const button = document.querySelector('[data-action="show-export-template-help"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(showExportTemplateHelp).toHaveBeenCalled();
+      });
+    });
+
+    describe('pager navigation', () => {
+      it('navigates to selected page', () => {
+        document.body.innerHTML = `
+          <select data-action="pager-navigate" data-base-url="/page">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        `;
+
+        const select = document.querySelector('select') as HTMLSelectElement;
+        select.value = '2';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+
+        expect(window.location.href).toBe('/page?page=2');
+      });
+    });
+
+    describe('quick menu navigation', () => {
+      it('calls quickMenuRedirection', () => {
+        document.body.innerHTML = `
+          <select data-action="quick-menu-redirect">
+            <option value="">Select</option>
+            <option value="option1">Option 1</option>
+          </select>
+        `;
+
+        const select = document.querySelector('select') as HTMLSelectElement;
+        select.value = 'option1';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+
+        expect(quickMenuRedirection).toHaveBeenCalledWith('option1');
+      });
+    });
+
+    describe('auto-submit button', () => {
+      it('clicks the named button on form submit', () => {
+        document.body.innerHTML = `
+          <form data-auto-submit-button="customBtn">
+            <button type="button" name="customBtn">Custom</button>
+            <button type="submit">Submit</button>
+          </form>
+        `;
+
+        const form = document.querySelector('form')!;
+        const customBtn = document.querySelector('[name="customBtn"]') as HTMLButtonElement;
+        const clickSpy = vi.spyOn(customBtn, 'click');
+
+        const event = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(event);
+
+        expect(clickSpy).toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(true);
       });
     });
   });

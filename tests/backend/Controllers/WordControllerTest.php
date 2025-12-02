@@ -913,13 +913,12 @@ class WordControllerTest extends TestCase
         $res = $service->getNewWordsAfter($maxBefore);
 
         $found = false;
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($res as $record) {
             if ($record['WoTextLC'] === 'ctrl_test_newafter') {
                 $found = true;
                 break;
             }
         }
-        mysqli_free_result($res);
 
         $this->assertTrue($found);
     }
@@ -1569,11 +1568,10 @@ class WordControllerTest extends TestCase
         $controller = new WordController();
         $service = $controller->getWordService();
 
-        // This should return a result even for non-existent text
+        // This should return an array even for non-existent text
         $result = $service->getUnknownWordsInText(999999);
 
-        $this->assertNotFalse($result);
-        mysqli_free_result($result);
+        $this->assertIsArray($result);
     }
 
     public function testLinkAllTextItemsDoesNotThrowException(): void
@@ -1788,11 +1786,10 @@ class WordControllerTest extends TestCase
         $controller = new WordController();
         $service = $controller->getWordService();
 
-        // Should return a result even for non-existent text
+        // Should return an array even for non-existent text
         $result = $service->getAllUnknownWordsInText(999999);
 
-        $this->assertNotFalse($result);
-        mysqli_free_result($result);
+        $this->assertIsArray($result);
     }
 
     public function testDeleteMultiWordMethod(): void

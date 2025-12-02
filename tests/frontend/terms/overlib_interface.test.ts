@@ -30,7 +30,23 @@ import {
   make_overlib_link_wellknown_word,
   make_overlib_link_ignore_word,
   make_overlib_audio,
+  createStatusChangeButton,
+  createStatusButtonsAll,
+  createDeleteButton,
+  createWellKnownButton,
+  createIgnoreButton,
+  createTestStatusButtons,
 } from '../../../src/frontend/js/terms/overlib_interface';
+import type { WordActionContext } from '../../../src/frontend/js/reading/word_actions';
+
+// Mock the word_actions module
+vi.mock('../../../src/frontend/js/reading/word_actions', () => ({
+  changeWordStatus: vi.fn().mockResolvedValue({ success: true }),
+  deleteWord: vi.fn().mockResolvedValue({ success: true }),
+  markWellKnown: vi.fn().mockResolvedValue({ success: true }),
+  markIgnored: vi.fn().mockResolvedValue({ success: true }),
+  incrementWordStatus: vi.fn().mockResolvedValue({ success: true }),
+}));
 
 // Mock LWT_DATA global
 const mockLWT_DATA = {
@@ -619,6 +635,361 @@ describe('overlib_interface.ts', () => {
         100, 'word', 'translation', 'roman', 3, 'test sentence', 0, 2
       );
       expect(typeof result).toBe('boolean');
+    });
+  });
+
+  // ===========================================================================
+  // Modern API-based Button Tests
+  // ===========================================================================
+
+  describe('createStatusChangeButton', () => {
+    const mockContext: WordActionContext = {
+      textId: 1,
+      wordId: 100,
+      position: 5,
+      text: 'test',
+      status: 3,
+    };
+
+    it('creates a button element', () => {
+      const btn = createStatusChangeButton(mockContext, 4);
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.type).toBe('button');
+    });
+
+    it('shows status abbreviation for different status', () => {
+      const btn = createStatusChangeButton(mockContext, 4);
+      expect(btn.textContent).toContain('[4]');
+      expect(btn.disabled).toBe(false);
+    });
+
+    it('shows diamond and disables for current status', () => {
+      const btn = createStatusChangeButton(mockContext, 3);
+      expect(btn.textContent).toBe('◆');
+      expect(btn.disabled).toBe(true);
+      expect(btn.classList.contains('lwt-status-btn--current')).toBe(true);
+    });
+
+    it('applies custom className', () => {
+      const btn = createStatusChangeButton(mockContext, 4, { className: 'custom-class' });
+      expect(btn.className).toBe('custom-class');
+    });
+
+    it('sets title to status name', () => {
+      const btn = createStatusChangeButton(mockContext, 99);
+      expect(btn.title).toBe('Well Known');
+    });
+
+    it('shows abbreviation without brackets when showAbbr is false', () => {
+      const btn = createStatusChangeButton(mockContext, 4, { showAbbr: false });
+      expect(btn.textContent).toBe('4');
+    });
+
+    it('handles click event on non-current status', async () => {
+      const { changeWordStatus } = await import('../../../src/frontend/js/reading/word_actions');
+      const btn = createStatusChangeButton(mockContext, 4);
+
+      const clickEvent = new MouseEvent('click', { bubbles: true });
+      btn.dispatchEvent(clickEvent);
+
+      // Button should be disabled after click
+      expect(btn.disabled).toBe(true);
+      expect(changeWordStatus).toHaveBeenCalledWith(mockContext, 4);
+    });
+  });
+
+  describe('createStatusButtonsAll', () => {
+    const mockContext: WordActionContext = {
+      textId: 1,
+      wordId: 100,
+      position: 5,
+      text: 'test',
+      status: 3,
+    };
+
+    it('creates a document fragment with status label', () => {
+      const fragment = createStatusButtonsAll(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      expect(container.textContent).toContain('St:');
+    });
+
+    it('creates buttons for statuses 1-5, 99, and 98', () => {
+      const fragment = createStatusButtonsAll(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      const buttons = container.querySelectorAll('button');
+      // 7 statuses: 1, 2, 3, 4, 5, 99, 98
+      expect(buttons.length).toBe(7);
+    });
+
+    it('shows diamond for current status (3)', () => {
+      const fragment = createStatusButtonsAll(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      const currentBtn = Array.from(container.querySelectorAll('button'))
+        .find(btn => btn.textContent === '◆');
+      expect(currentBtn).toBeDefined();
+      expect(currentBtn?.disabled).toBe(true);
+    });
+  });
+
+  describe('createDeleteButton', () => {
+    const mockContext: WordActionContext = {
+      textId: 1,
+      wordId: 100,
+      position: 5,
+      text: 'test',
+    };
+
+    it('creates a delete button', () => {
+      const btn = createDeleteButton(mockContext);
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.textContent).toBe('Delete term');
+      expect(btn.className).toContain('lwt-action-btn--delete');
+    });
+
+    it('shows confirmation dialog when confirm is true', async () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      const { deleteWord } = await import('../../../src/frontend/js/reading/word_actions');
+
+      const btn = createDeleteButton(mockContext, true);
+      btn.click();
+
+      expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to delete this term?');
+      expect(deleteWord).not.toHaveBeenCalled();
+
+      confirmSpy.mockRestore();
+    });
+
+    it('deletes without confirmation when confirm is false', async () => {
+      const { deleteWord } = await import('../../../src/frontend/js/reading/word_actions');
+      vi.mocked(deleteWord).mockClear();
+
+      const btn = createDeleteButton(mockContext, false);
+      btn.click();
+
+      expect(btn.disabled).toBe(true);
+      expect(deleteWord).toHaveBeenCalledWith(mockContext);
+    });
+
+    it('calls deleteWord after confirmation', async () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      const { deleteWord } = await import('../../../src/frontend/js/reading/word_actions');
+      vi.mocked(deleteWord).mockClear();
+
+      const btn = createDeleteButton(mockContext, true);
+      btn.click();
+
+      expect(btn.disabled).toBe(true);
+      expect(deleteWord).toHaveBeenCalledWith(mockContext);
+    });
+  });
+
+  describe('createWellKnownButton', () => {
+    const mockContext: WordActionContext = {
+      textId: 1,
+      position: 5,
+      text: 'test',
+    };
+
+    it('creates a well-known button', () => {
+      const btn = createWellKnownButton(mockContext);
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.textContent).toBe('I know this term well');
+      expect(btn.className).toContain('lwt-action-btn--wellknown');
+    });
+
+    it('calls markWellKnown on click', async () => {
+      const { markWellKnown } = await import('../../../src/frontend/js/reading/word_actions');
+      vi.mocked(markWellKnown).mockClear();
+
+      const btn = createWellKnownButton(mockContext);
+      btn.click();
+
+      expect(btn.disabled).toBe(true);
+      expect(markWellKnown).toHaveBeenCalledWith(mockContext);
+    });
+  });
+
+  describe('createIgnoreButton', () => {
+    const mockContext: WordActionContext = {
+      textId: 1,
+      position: 5,
+      text: 'test',
+    };
+
+    it('creates an ignore button', () => {
+      const btn = createIgnoreButton(mockContext);
+      expect(btn.tagName).toBe('BUTTON');
+      expect(btn.textContent).toBe('Ignore this term');
+      expect(btn.className).toContain('lwt-action-btn--ignore');
+    });
+
+    it('calls markIgnored on click', async () => {
+      const { markIgnored } = await import('../../../src/frontend/js/reading/word_actions');
+      vi.mocked(markIgnored).mockClear();
+
+      const btn = createIgnoreButton(mockContext);
+      btn.click();
+
+      expect(btn.disabled).toBe(true);
+      expect(markIgnored).toHaveBeenCalledWith(mockContext);
+    });
+  });
+
+  describe('createTestStatusButtons', () => {
+    it('creates test buttons for status 1-5', () => {
+      const mockContext: WordActionContext = {
+        textId: 1,
+        wordId: 100,
+        position: 5,
+        text: 'test',
+        status: 3,
+      };
+
+      const fragment = createTestStatusButtons(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      // Should have "Got it" and "Oops" buttons
+      expect(container.innerHTML).toContain('Got it!');
+      expect(container.innerHTML).toContain('Oops!');
+    });
+
+    it('shows correct status transitions', () => {
+      const mockContext: WordActionContext = {
+        textId: 1,
+        wordId: 100,
+        position: 5,
+        text: 'test',
+        status: 3,
+      };
+
+      const fragment = createTestStatusButtons(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      // Status 3 -> 4 for "Got it"
+      expect(container.innerHTML).toContain('3 ▶ 4');
+      // Status 3 -> 2 for "Oops"
+      expect(container.innerHTML).toContain('3 ▶ 2');
+    });
+
+    it('caps "Got it" at status 5', () => {
+      const mockContext: WordActionContext = {
+        textId: 1,
+        wordId: 100,
+        position: 5,
+        text: 'test',
+        status: 5,
+      };
+
+      const fragment = createTestStatusButtons(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      // Status 5 -> 5 for "Got it" (already at max)
+      expect(container.innerHTML).toContain('5 ▶ 5');
+    });
+
+    it('floors "Oops" at status 1', () => {
+      const mockContext: WordActionContext = {
+        textId: 1,
+        wordId: 100,
+        position: 5,
+        text: 'test',
+        status: 1,
+      };
+
+      const fragment = createTestStatusButtons(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      // Status 1 -> 1 for "Oops" (already at min)
+      expect(container.innerHTML).toContain('1 ▶ 1');
+    });
+
+    it('returns empty fragment for status outside 1-5', () => {
+      const mockContext: WordActionContext = {
+        textId: 1,
+        wordId: 100,
+        position: 5,
+        text: 'test',
+        status: 99,
+      };
+
+      const fragment = createTestStatusButtons(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      expect(container.innerHTML).toBe('');
+    });
+
+    it('uses status 1 as default when status is undefined', () => {
+      const mockContext: WordActionContext = {
+        textId: 1,
+        wordId: 100,
+        position: 5,
+        text: 'test',
+      };
+
+      const fragment = createTestStatusButtons(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      // Should show 1 -> 2 for "Got it" and 1 -> 1 for "Oops"
+      expect(container.innerHTML).toContain('1 ▶ 2');
+      expect(container.innerHTML).toContain('1 ▶ 1');
+    });
+
+    it('calls incrementWordStatus up on Got it click', async () => {
+      const { incrementWordStatus } = await import('../../../src/frontend/js/reading/word_actions');
+      vi.mocked(incrementWordStatus).mockClear();
+
+      const mockContext: WordActionContext = {
+        textId: 1,
+        wordId: 100,
+        position: 5,
+        text: 'test',
+        status: 3,
+      };
+
+      const fragment = createTestStatusButtons(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      const gotItBtn = container.querySelector('.lwt-test-btn--success') as HTMLButtonElement;
+      gotItBtn.click();
+
+      expect(gotItBtn.disabled).toBe(true);
+      expect(incrementWordStatus).toHaveBeenCalledWith(mockContext, 'up');
+    });
+
+    it('calls incrementWordStatus down on Oops click', async () => {
+      const { incrementWordStatus } = await import('../../../src/frontend/js/reading/word_actions');
+      vi.mocked(incrementWordStatus).mockClear();
+
+      const mockContext: WordActionContext = {
+        textId: 1,
+        wordId: 100,
+        position: 5,
+        text: 'test',
+        status: 3,
+      };
+
+      const fragment = createTestStatusButtons(mockContext);
+      const container = document.createElement('div');
+      container.appendChild(fragment);
+
+      const oopsBtn = container.querySelector('.lwt-test-btn--failure') as HTMLButtonElement;
+      oopsBtn.click();
+
+      expect(oopsBtn.disabled).toBe(true);
+      expect(incrementWordStatus).toHaveBeenCalledWith(mockContext, 'down');
     });
   });
 });

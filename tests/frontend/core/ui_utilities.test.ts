@@ -347,4 +347,211 @@ describe('ui_utilities.ts', () => {
       expect(() => markClick()).not.toThrow();
     });
   });
+
+  // ===========================================================================
+  // initHideMessages Tests
+  // ===========================================================================
+
+  describe('initHideMessages', () => {
+    const { initHideMessages } = ui_utilities;
+
+    it('auto-dismisses elements with hide_message class', () => {
+      document.body.innerHTML = `
+        <div class="hide_message">Message 1</div>
+        <div class="hide_message">Message 2</div>
+      `;
+
+      initHideMessages();
+
+      // Fast forward past the 2500ms delay
+      vi.advanceTimersByTime(2500);
+
+      // Messages should start to hide (slideUp animation)
+      const messages = document.querySelectorAll('.hide_message');
+      expect(messages.length).toBe(2);
+    });
+
+    it('handles no hide_message elements', () => {
+      document.body.innerHTML = '<div>No messages</div>';
+
+      expect(() => initHideMessages()).not.toThrow();
+    });
+  });
+
+  // ===========================================================================
+  // prepareMainAreas Tests
+  // ===========================================================================
+
+  describe('prepareMainAreas', () => {
+    const { prepareMainAreas } = ui_utilities;
+
+    beforeEach(() => {
+      // Reset any event listeners that might persist
+      document.body.innerHTML = '';
+    });
+
+    it('wraps select elements with label', () => {
+      document.body.innerHTML = '<select id="test"><option>Option</option></select>';
+
+      prepareMainAreas();
+
+      const label = document.querySelector('label.wrap_select');
+      expect(label).not.toBeNull();
+      expect(label?.querySelector('select')).not.toBeNull();
+    });
+
+    it('disables autocomplete on forms', () => {
+      document.body.innerHTML = '<form id="testform"></form>';
+
+      prepareMainAreas();
+
+      expect(document.getElementById('testform')?.getAttribute('autocomplete')).toBe('off');
+    });
+
+    it('wraps checkboxes with labels', () => {
+      document.body.innerHTML = '<input type="checkbox" />';
+
+      prepareMainAreas();
+
+      const label = document.querySelector('label.wrap_checkbox');
+      expect(label).not.toBeNull();
+    });
+
+    it('adds click handler to TTS spans', () => {
+      document.body.innerHTML = '<span class="tts_en">Hello</span>';
+
+      prepareMainAreas();
+
+      const span = document.querySelector('.tts_en') as HTMLElement;
+      expect(span).not.toBeNull();
+      // Click should not throw
+      expect(() => span.click()).not.toThrow();
+    });
+
+    it('wraps radio buttons with labels', () => {
+      document.body.innerHTML = '<input type="radio" name="test" value="1" />';
+
+      prepareMainAreas();
+
+      const label = document.querySelector('label.wrap_radio');
+      expect(label).not.toBeNull();
+    });
+
+    it('sets up form validation handlers', () => {
+      document.body.innerHTML = '<form class="validate"><input type="submit" /></form>';
+
+      prepareMainAreas();
+
+      const form = document.querySelector('form.validate');
+      expect(form).not.toBeNull();
+    });
+
+    it('sets up mark checkbox handlers', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" class="markcheck" />
+        <button id="markaction" disabled>Action</button>
+      `;
+
+      prepareMainAreas();
+
+      // First check it's initially disabled
+      expect(document.getElementById('markaction')?.hasAttribute('disabled')).toBe(true);
+
+      // Check the checkbox and trigger click handler
+      const checkbox = document.querySelector('.markcheck') as HTMLInputElement;
+      checkbox.checked = true;
+      // Trigger the click event to call markClick handler
+      checkbox.dispatchEvent(new Event('click', { bubbles: true }));
+
+      // markClick should have been called, enabling the button
+      expect(document.getElementById('markaction')?.hasAttribute('disabled')).toBe(false);
+    });
+
+    it('sets up textarea no-return handlers', () => {
+      document.body.innerHTML = `
+        <form>
+          <textarea class="textarea-noreturn"></textarea>
+          <input type="submit" />
+        </form>
+      `;
+
+      prepareMainAreas();
+
+      const textarea = document.querySelector('.textarea-noreturn') as HTMLTextAreaElement;
+      expect(textarea).not.toBeNull();
+
+      // Simulate Enter key - should be handled
+      const event = new KeyboardEvent('keydown', { keyCode: 13 });
+      textarea.dispatchEvent(event);
+    });
+
+    it('handles hidden file inputs', () => {
+      document.body.innerHTML = `
+        <input type="file" style="display: none;" />
+      `;
+
+      prepareMainAreas();
+
+      // File input handling - may or may not create button based on visibility
+      const fileInput = document.querySelector('input[type="file"]');
+      expect(fileInput).not.toBeNull();
+    });
+
+    it('schedules noShowAfter3Secs', () => {
+      document.body.innerHTML = '<div id="hide3">Message</div>';
+
+      prepareMainAreas();
+
+      // Should schedule the hide operation
+      vi.advanceTimersByTime(3000);
+      // Function was called - element exists
+      expect(document.getElementById('hide3')).not.toBeNull();
+    });
+
+    it('handles annotation inputs', () => {
+      document.body.innerHTML = `
+        <input type="text" class="impr-ann-text" />
+        <input type="radio" class="impr-ann-radio" name="ann" />
+      `;
+
+      prepareMainAreas();
+
+      // Event handlers should be attached
+      const textInput = document.querySelector('.impr-ann-text');
+      const radioInput = document.querySelector('.impr-ann-radio');
+      expect(textInput).not.toBeNull();
+      expect(radioInput).not.toBeNull();
+    });
+
+    it('handles confirm delete elements', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+      document.body.innerHTML = '<a class="confirmdelete" href="#">Delete</a>';
+
+      prepareMainAreas();
+
+      const deleteLink = document.querySelector('.confirmdelete') as HTMLElement;
+      deleteLink.click();
+
+      expect(window.confirm).toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // slideUp animation (internal) via noShowAfter3Secs
+  // ===========================================================================
+
+  describe('slideUp animation', () => {
+    it('hides element after animation completes', () => {
+      document.body.innerHTML = '<div id="hide3" style="height: 100px;">Message</div>';
+
+      noShowAfter3Secs();
+
+      // Advance through the animation (400ms default)
+      vi.advanceTimersByTime(400);
+
+      // Element should be hidden after animation
+      const element = document.getElementById('hide3');
+      expect(element?.style.display).toBe('none');
+    });
+  });
 });

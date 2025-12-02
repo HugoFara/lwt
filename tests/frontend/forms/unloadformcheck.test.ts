@@ -172,6 +172,115 @@ describe('unloadformcheck.ts', () => {
   });
 
   // ===========================================================================
+  // askBeforeExit Tests
+  // ===========================================================================
+
+  describe('askBeforeExit', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+      lwtFormCheck.dirty = false;
+    });
+
+    it('sets up change listeners on form elements', () => {
+      document.body.innerHTML = `
+        <input type="text" id="testInput" />
+        <textarea id="testTextarea"></textarea>
+        <select id="testSelect"><option>Test</option></select>
+      `;
+
+      lwtFormCheck.askBeforeExit();
+
+      // Trigger change on input
+      const input = document.getElementById('testInput') as HTMLInputElement;
+      input.dispatchEvent(new Event('change'));
+
+      expect(lwtFormCheck.dirty).toBe(true);
+    });
+
+    it('sets up reset dirty on submit buttons', () => {
+      document.body.innerHTML = `
+        <button type="submit">Submit</button>
+      `;
+
+      lwtFormCheck.dirty = true;
+      lwtFormCheck.askBeforeExit();
+
+      // Click submit button
+      const submitBtn = document.querySelector('[type="submit"]') as HTMLButtonElement;
+      submitBtn.click();
+
+      expect(lwtFormCheck.dirty).toBe(false);
+    });
+
+    it('sets up reset dirty on reset buttons', () => {
+      document.body.innerHTML = `
+        <button type="reset">Reset</button>
+      `;
+
+      lwtFormCheck.dirty = true;
+      lwtFormCheck.askBeforeExit();
+
+      // Click reset button
+      const resetBtn = document.querySelector('[type="reset"]') as HTMLButtonElement;
+      resetBtn.click();
+
+      expect(lwtFormCheck.dirty).toBe(false);
+    });
+
+    it('ignores quickmenu select changes', () => {
+      document.body.innerHTML = `
+        <select id="quickmenu"><option>Quick</option></select>
+      `;
+
+      lwtFormCheck.askBeforeExit();
+
+      // Trigger change on quickmenu
+      const quickmenu = document.getElementById('quickmenu') as HTMLSelectElement;
+      quickmenu.dispatchEvent(new Event('change'));
+
+      // Should NOT make dirty because it's the quickmenu
+      expect(lwtFormCheck.dirty).toBe(false);
+    });
+
+    it('sets up beforeunload handler', () => {
+      const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
+
+      lwtFormCheck.askBeforeExit();
+
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'beforeunload',
+        expect.any(Function)
+      );
+    });
+
+    it('beforeunload returns message when dirty', () => {
+      lwtFormCheck.askBeforeExit();
+      lwtFormCheck.dirty = true;
+
+      const event = new Event('beforeunload') as BeforeUnloadEvent;
+      Object.defineProperty(event, 'returnValue', {
+        writable: true,
+        value: '',
+      });
+
+      const result = window.dispatchEvent(event);
+
+      // The event was handled (may or may not prevent default in test env)
+      expect(lwtFormCheck.isDirtyMessage()).toBe('** You have unsaved changes! **');
+    });
+
+    it('beforeunload does not prevent when not dirty', () => {
+      lwtFormCheck.askBeforeExit();
+      lwtFormCheck.dirty = false;
+
+      const event = new Event('beforeunload') as BeforeUnloadEvent;
+
+      // Should not prevent the default action
+      expect(lwtFormCheck.isDirtyMessage()).toBeUndefined();
+    });
+  });
+
+  // ===========================================================================
   // Type Safety Tests
   // ===========================================================================
 

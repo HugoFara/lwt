@@ -274,6 +274,195 @@ describe('native_tooltip.ts', () => {
   });
 
   // ===========================================================================
+  // Tooltip Show/Hide Behavior Tests
+  // ===========================================================================
+
+  describe('Tooltip show/hide behavior', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('shows tooltip on mouseenter for hword elements', async () => {
+      const { initNativeTooltips, isTooltipVisible } = await importNativeTooltip();
+
+      document.body.innerHTML = `
+        <div id="container">
+          <span class="hword" data_status="3" data_trans="hello">word</span>
+        </div>
+      `;
+
+      initNativeTooltips('#container');
+
+      const hword = document.querySelector('.hword') as HTMLElement;
+      const event = new MouseEvent('mouseenter', { bubbles: true });
+      hword.dispatchEvent(event);
+
+      // Advance timer past show delay (100ms)
+      vi.advanceTimersByTime(150);
+
+      expect(isTooltipVisible()).toBe(true);
+    });
+
+    it('hides tooltip on mouseleave', async () => {
+      const { initNativeTooltips, isTooltipVisible } = await importNativeTooltip();
+
+      document.body.innerHTML = `
+        <div id="container">
+          <span class="hword" data_status="3" data_trans="test">word</span>
+        </div>
+      `;
+
+      initNativeTooltips('#container');
+
+      const hword = document.querySelector('.hword') as HTMLElement;
+
+      // Show tooltip
+      hword.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      vi.advanceTimersByTime(150);
+      expect(isTooltipVisible()).toBe(true);
+
+      // Hide tooltip
+      hword.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+      vi.advanceTimersByTime(150);
+      expect(isTooltipVisible()).toBe(false);
+    });
+
+    it('ignores mouseenter on non-hword elements', async () => {
+      const { initNativeTooltips, isTooltipVisible } = await importNativeTooltip();
+
+      document.body.innerHTML = `
+        <div id="container">
+          <span class="notword">normal text</span>
+        </div>
+      `;
+
+      initNativeTooltips('#container');
+
+      const span = document.querySelector('.notword') as HTMLElement;
+      span.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      vi.advanceTimersByTime(150);
+
+      expect(isTooltipVisible()).toBe(false);
+    });
+
+    it('shows tooltip on focus for accessibility', async () => {
+      const { initNativeTooltips, isTooltipVisible } = await importNativeTooltip();
+
+      document.body.innerHTML = `
+        <div id="container">
+          <span class="hword" data_status="3" data_trans="test" tabindex="0">word</span>
+        </div>
+      `;
+
+      initNativeTooltips('#container');
+
+      const hword = document.querySelector('.hword') as HTMLElement;
+      hword.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+      expect(isTooltipVisible()).toBe(true);
+    });
+
+    it('hides tooltip on focusout', async () => {
+      const { initNativeTooltips, isTooltipVisible } = await importNativeTooltip();
+
+      document.body.innerHTML = `
+        <div id="container">
+          <span class="hword" data_status="3" data_trans="test" tabindex="0">word</span>
+        </div>
+      `;
+
+      initNativeTooltips('#container');
+
+      const hword = document.querySelector('.hword') as HTMLElement;
+
+      // Show via focus
+      hword.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      expect(isTooltipVisible()).toBe(true);
+
+      // Hide via focusout
+      hword.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+      vi.advanceTimersByTime(150);
+
+      expect(isTooltipVisible()).toBe(false);
+    });
+
+    it('cancels pending show if mouseleave happens quickly', async () => {
+      const { initNativeTooltips, isTooltipVisible } = await importNativeTooltip();
+
+      document.body.innerHTML = `
+        <div id="container">
+          <span class="hword" data_status="3" data_trans="test">word</span>
+        </div>
+      `;
+
+      initNativeTooltips('#container');
+
+      const hword = document.querySelector('.hword') as HTMLElement;
+
+      // Enter and leave quickly (before show delay)
+      hword.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      vi.advanceTimersByTime(50); // Less than 100ms show delay
+      hword.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+      vi.advanceTimersByTime(150);
+
+      // Tooltip should not appear
+      expect(isTooltipVisible()).toBe(false);
+    });
+
+    it('cancels pending hide if mouseenter happens during hide delay', async () => {
+      const { initNativeTooltips, isTooltipVisible } = await importNativeTooltip();
+
+      document.body.innerHTML = `
+        <div id="container">
+          <span class="hword" data_status="3" data_trans="test">word</span>
+        </div>
+      `;
+
+      initNativeTooltips('#container');
+
+      const hword = document.querySelector('.hword') as HTMLElement;
+
+      // Show tooltip
+      hword.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      vi.advanceTimersByTime(150);
+      expect(isTooltipVisible()).toBe(true);
+
+      // Start to hide
+      hword.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+      vi.advanceTimersByTime(50); // Less than hide delay
+
+      // Re-enter
+      hword.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      vi.advanceTimersByTime(150);
+
+      // Should still be visible
+      expect(isTooltipVisible()).toBe(true);
+    });
+
+    it('getCurrentTooltipTarget returns target element', async () => {
+      const { initNativeTooltips, getCurrentTooltipTarget } = await importNativeTooltip();
+
+      document.body.innerHTML = `
+        <div id="container">
+          <span class="hword" data_status="3" data_trans="test">word</span>
+        </div>
+      `;
+
+      initNativeTooltips('#container');
+
+      const hword = document.querySelector('.hword') as HTMLElement;
+      hword.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      vi.advanceTimersByTime(150);
+
+      expect(getCurrentTooltipTarget()).toBe(hword);
+    });
+  });
+
+  // ===========================================================================
   // CSS Injection Tests
   // ===========================================================================
 

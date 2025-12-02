@@ -51,6 +51,43 @@ describe('settings_form.ts', () => {
 
       expect(unloadformcheck.lwtFormCheck.askBeforeExit).toHaveBeenCalledTimes(1);
     });
+
+    it('handles settings-navigate button clicks', () => {
+      document.body.innerHTML = `
+        <form data-lwt-settings-form>
+          <button data-action="settings-navigate" data-url="/settings/page">Settings</button>
+        </form>
+      `;
+
+      // Track location.href changes
+      const originalHref = location.href;
+      Object.defineProperty(window, 'location', {
+        value: { href: originalHref },
+        writable: true,
+      });
+
+      initSettingsForm();
+
+      // Click the settings-navigate button
+      const button = document.querySelector('[data-action="settings-navigate"]') as HTMLElement;
+      button.click();
+
+      expect(unloadformcheck.lwtFormCheck.resetDirty).toHaveBeenCalled();
+    });
+
+    it('ignores settings-navigate without url', () => {
+      document.body.innerHTML = `
+        <form data-lwt-settings-form>
+          <button data-action="settings-navigate">No URL</button>
+        </form>
+      `;
+
+      initSettingsForm();
+
+      // Click should not throw
+      const button = document.querySelector('[data-action="settings-navigate"]') as HTMLElement;
+      expect(() => button.click()).not.toThrow();
+    });
   });
 
   // ===========================================================================
@@ -91,6 +128,65 @@ describe('settings_form.ts', () => {
 
       expect(confirmSpy).toHaveBeenCalledWith('Are you sure?');
     });
+
+    it('prevents form submission when user cancels', () => {
+      document.body.innerHTML = `
+        <form data-action="confirm-submit">
+          <button type="submit">Submit</button>
+        </form>
+      `;
+
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+      initConfirmSubmitForms();
+
+      const form = document.querySelector('form') as HTMLFormElement;
+      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+      const preventDefaultSpy = vi.spyOn(submitEvent, 'preventDefault');
+
+      form.dispatchEvent(submitEvent);
+
+      expect(confirmSpy).toHaveBeenCalled();
+      expect(preventDefaultSpy).toHaveBeenCalled();
+    });
+
+    it('allows form submission when user confirms', () => {
+      document.body.innerHTML = `
+        <form data-action="confirm-submit">
+          <button type="submit">Submit</button>
+        </form>
+      `;
+
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      initConfirmSubmitForms();
+
+      const form = document.querySelector('form') as HTMLFormElement;
+      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+      const preventDefaultSpy = vi.spyOn(submitEvent, 'preventDefault');
+
+      form.dispatchEvent(submitEvent);
+
+      expect(confirmSpy).toHaveBeenCalled();
+      expect(preventDefaultSpy).not.toHaveBeenCalled();
+    });
+
+    it('ignores non-confirm-submit forms', () => {
+      document.body.innerHTML = `
+        <form>
+          <button type="submit">Submit</button>
+        </form>
+      `;
+
+      const confirmSpy = vi.spyOn(window, 'confirm');
+
+      initConfirmSubmitForms();
+
+      const form = document.querySelector('form') as HTMLFormElement;
+      form.dispatchEvent(new Event('submit', { bubbles: true }));
+
+      expect(confirmSpy).not.toHaveBeenCalled();
+    });
   });
 
   // ===========================================================================
@@ -98,16 +194,63 @@ describe('settings_form.ts', () => {
   // ===========================================================================
 
   describe('initNavigateButtons', () => {
-    it('sets up navigation handler', () => {
+    it('navigates to URL on button click', () => {
       document.body.innerHTML = `
         <button data-action="navigate" data-url="/destination/page">Go</button>
       `;
 
-      // initNavigateButtons sets up the handler
+      // Track location.href changes
+      Object.defineProperty(window, 'location', {
+        value: { href: '' },
+        writable: true,
+      });
+
       initNavigateButtons();
 
-      // The handler is set up successfully (we just verify no errors)
-      expect(true).toBe(true);
+      const button = document.querySelector('[data-action="navigate"]') as HTMLElement;
+      button.click();
+
+      expect(location.href).toBe('/destination/page');
+    });
+
+    it('ignores click without url', () => {
+      document.body.innerHTML = `
+        <button data-action="navigate">No URL</button>
+      `;
+
+      Object.defineProperty(window, 'location', {
+        value: { href: '' },
+        writable: true,
+      });
+
+      initNavigateButtons();
+
+      const button = document.querySelector('[data-action="navigate"]') as HTMLElement;
+      button.click();
+
+      // Should not navigate (href unchanged)
+      expect(location.href).toBe('');
+    });
+
+    it('works with nested elements', () => {
+      document.body.innerHTML = `
+        <button data-action="navigate" data-url="/nested">
+          <span>Click Me</span>
+        </button>
+      `;
+
+      Object.defineProperty(window, 'location', {
+        value: { href: '' },
+        writable: true,
+      });
+
+      initNavigateButtons();
+
+      // Click the nested span - should still trigger navigation
+      const span = document.querySelector('span') as HTMLElement;
+      span.click();
+
+      expect(location.href).toBe('/nested');
     });
   });
 
@@ -116,16 +259,55 @@ describe('settings_form.ts', () => {
   // ===========================================================================
 
   describe('initHistoryBackButtons', () => {
-    it('sets up history back handler', () => {
+    it('calls history.back on button click', () => {
       document.body.innerHTML = `
         <button data-action="history-back">Back</button>
       `;
 
-      // initHistoryBackButtons sets up the handler
+      const backSpy = vi.spyOn(history, 'back').mockImplementation(() => {});
+
       initHistoryBackButtons();
 
-      // The handler is set up successfully (we just verify no errors)
-      expect(true).toBe(true);
+      const button = document.querySelector('[data-action="history-back"]') as HTMLElement;
+      button.click();
+
+      expect(backSpy).toHaveBeenCalled();
+    });
+
+    it('prevents default event behavior', () => {
+      document.body.innerHTML = `
+        <button data-action="history-back">Back</button>
+      `;
+
+      vi.spyOn(history, 'back').mockImplementation(() => {});
+
+      initHistoryBackButtons();
+
+      const button = document.querySelector('[data-action="history-back"]') as HTMLElement;
+      const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+      const preventDefaultSpy = vi.spyOn(clickEvent, 'preventDefault');
+
+      button.dispatchEvent(clickEvent);
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+    });
+
+    it('works with nested elements', () => {
+      document.body.innerHTML = `
+        <button data-action="history-back">
+          <span>Go Back</span>
+        </button>
+      `;
+
+      const backSpy = vi.spyOn(history, 'back').mockImplementation(() => {});
+
+      initHistoryBackButtons();
+
+      // Click the nested span
+      const span = document.querySelector('span') as HTMLElement;
+      span.click();
+
+      expect(backSpy).toHaveBeenCalled();
     });
   });
 
