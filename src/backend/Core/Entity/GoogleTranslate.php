@@ -4,7 +4,7 @@
  * \brief Defines GoogleTranslate class for word translation
  *
  * Usage:
- * use Lwt\Classes\GoogleTranslate;
+ * use Lwt\Core\Entity\GoogleTranslate;
  *
  * require_once( 'GoogleTranslate.php' );
  * $translations = GoogleTranslate::staticTranslate('Hello','en','de');
@@ -22,7 +22,7 @@
  * @package  Lwt
  */
 
-namespace Lwt\Classes;
+namespace Lwt\Core\Entity;
 
 /**
  * Wrapper class to get translation.

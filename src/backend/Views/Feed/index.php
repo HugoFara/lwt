@@ -25,17 +25,17 @@
 namespace Lwt\Views\Feed;
 
 use Lwt\View\Helper\IconHelper;
+use Lwt\View\Helper\PageLayoutHelper;
 
+echo PageLayoutHelper::buildActionCard(
+    'Feed Actions',
+    [
+        ['url' => '/feeds', 'label' => 'My Feeds', 'icon' => 'list'],
+        ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
+    ],
+    'feeds'
+);
 ?>
-<div class="flex-spaced">
-    <div><a href="/feeds">My Feeds</a></div>
-    <div>
-        <a href="/feeds/edit?new_feed=1">
-            <?php echo IconHelper::render('rss', ['title' => 'new feed', 'alt' => 'new feed']); ?>
-            New Feed...
-        </a>
-    </div>
-</div>
 <form name="form1" action="#">
 <table class="tab2" cellspacing="0" cellpadding="5"><tr>
 <th class="th1" colspan="4">Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;

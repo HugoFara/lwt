@@ -37,6 +37,8 @@ class PageLayoutHelper
      * Generate the quick menu dropdown HTML.
      *
      * @return string HTML select element for quick navigation
+     *
+     * @deprecated 3.0.0 Use buildNavbar() instead
      */
     public static function buildQuickMenu(): string
     {
@@ -66,6 +68,165 @@ class PageLayoutHelper
         <option value="INFO">Help</option>
     </optgroup>
 </select>
+HTML;
+    }
+
+    /**
+     * Generate the main navigation bar HTML using Alpine.js and Bulma.
+     *
+     * @param string $currentPage Optional identifier for the current page to highlight
+     *
+     * @return string HTML navbar element
+     */
+    public static function buildNavbar(string $currentPage = ''): string
+    {
+        $homeIcon = IconHelper::render('home', ['alt' => 'Home']);
+        $textsIcon = IconHelper::render('book-text', ['alt' => 'Texts']);
+        $termsIcon = IconHelper::render('spell-check', ['alt' => 'Terms']);
+        $statsIcon = IconHelper::render('bar-chart-2', ['alt' => 'Statistics']);
+        $settingsIcon = IconHelper::render('settings', ['alt' => 'Settings']);
+        $chevronIcon = IconHelper::render('chevron-down', ['alt' => '']);
+
+        $isTexts = in_array($currentPage, ['texts', 'archived', 'text-tags', 'text-check', 'long-import', 'feeds']);
+        $isTerms = in_array($currentPage, ['terms', 'term-tags', 'term-import']);
+        $isAdmin = in_array($currentPage, ['statistics', 'backup', 'settings', 'tts', 'languages']);
+
+        $textsActive = $isTexts ? ' is-active' : '';
+        $termsActive = $isTerms ? ' is-active' : '';
+        $adminActive = $isAdmin ? ' is-active' : '';
+
+        return <<<HTML
+<nav class="navbar is-light" role="navigation" aria-label="main navigation" x-data="navbar()">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+            <img src="/assets/images/lwt_icon.png" alt="LWT" width="28" height="28">
+            <span class="ml-2 has-text-weight-semibold">LWT</span>
+        </a>
+
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+           :class="{ 'is-active': isOpen }" @click="toggle()">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+    </div>
+
+    <div class="navbar-menu" :class="{ 'is-active': isOpen }">
+        <div class="navbar-start">
+            <a class="navbar-item" href="/">
+                {$homeIcon}
+                <span class="ml-1">Home</span>
+            </a>
+
+            <div class="navbar-item has-dropdown{$textsActive}" :class="{ 'is-active': activeDropdown === 'texts' }">
+                <a class="navbar-link" @click.prevent="toggleDropdown('texts')">
+                    {$textsIcon}
+                    <span class="ml-1">Texts</span>
+                </a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="/texts">My Texts</a>
+                    <a class="navbar-item" href="/text/archived">Archived Texts</a>
+                    <hr class="navbar-divider">
+                    <a class="navbar-item" href="/tags/text">Text Tags</a>
+                    <a class="navbar-item" href="/text/check">Text Check</a>
+                    <hr class="navbar-divider">
+                    <a class="navbar-item" href="/text/import-long">Long Text Import</a>
+                    <a class="navbar-item" href="/feeds">Newsfeed Import</a>
+                </div>
+            </div>
+
+            <div class="navbar-item has-dropdown{$termsActive}" :class="{ 'is-active': activeDropdown === 'terms' }">
+                <a class="navbar-link" @click.prevent="toggleDropdown('terms')">
+                    {$termsIcon}
+                    <span class="ml-1">Terms</span>
+                </a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="/words/edit">My Terms</a>
+                    <a class="navbar-item" href="/tags/word">Term Tags</a>
+                    <hr class="navbar-divider">
+                    <a class="navbar-item" href="/words/import">Import Terms</a>
+                </div>
+            </div>
+
+            <a class="navbar-item" href="/languages">
+                Languages
+            </a>
+        </div>
+
+        <div class="navbar-end">
+            <div class="navbar-item has-dropdown{$adminActive}" :class="{ 'is-active': activeDropdown === 'admin' }">
+                <a class="navbar-link" @click.prevent="toggleDropdown('admin')">
+                    {$settingsIcon}
+                    <span class="ml-1">Admin</span>
+                </a>
+                <div class="navbar-dropdown is-right">
+                    <a class="navbar-item" href="/admin/statistics">
+                        {$statsIcon}
+                        <span class="ml-1">Statistics</span>
+                    </a>
+                    <hr class="navbar-divider">
+                    <a class="navbar-item" href="/admin/backup">Backup/Restore</a>
+                    <a class="navbar-item" href="/admin/settings">Settings</a>
+                    <a class="navbar-item" href="/admin/tts">Text-to-Speech</a>
+                    <hr class="navbar-divider">
+                    <a class="navbar-item" href="/docs/info.html" target="_blank">Help</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+HTML;
+    }
+
+    /**
+     * Generate an action card with buttons (non-collapsible).
+     *
+     * Creates a Bulma card with action buttons for page-level actions.
+     *
+     * @param string $title   Card title
+     * @param array  $actions Array of actions with 'url', 'label', 'icon', and optional 'class'
+     * @param string $variant Optional color variant: 'texts', 'terms', 'feeds', 'admin'
+     *
+     * @return string HTML for the action card
+     */
+    public static function buildActionCard(
+        string $title,
+        array $actions,
+        string $variant = ''
+    ): string {
+        $buttonsHtml = '';
+        foreach ($actions as $action) {
+            $url = htmlspecialchars($action['url'], ENT_QUOTES, 'UTF-8');
+            $label = htmlspecialchars($action['label'], ENT_QUOTES, 'UTF-8');
+            $icon = isset($action['icon']) ? IconHelper::render($action['icon'], ['alt' => $label]) : '';
+            $class = isset($action['class']) ? ' ' . htmlspecialchars($action['class'], ENT_QUOTES, 'UTF-8') : '';
+            $target = isset($action['target']) ? ' target="' . htmlspecialchars($action['target'], ENT_QUOTES, 'UTF-8') . '"' : '';
+
+            $buttonsHtml .= <<<HTML
+                <a href="{$url}" class="button is-small is-light{$class}"{$target}>
+                    <span class="icon is-small">{$icon}</span>
+                    <span>{$label}</span>
+                </a>
+HTML;
+        }
+
+        $titleEscaped = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+        $variantClass = $variant !== '' ? ' action-card-' . htmlspecialchars($variant, ENT_QUOTES, 'UTF-8') : '';
+
+        return <<<HTML
+<div class="card action-card mb-4{$variantClass}">
+    <header class="card-header">
+        <p class="card-header-title">
+            {$titleEscaped}
+        </p>
+    </header>
+    <div class="card-content">
+        <div class="buttons are-small is-centered">
+            {$buttonsHtml}
+        </div>
+    </div>
+</div>
 HTML;
     }
 
@@ -323,26 +484,23 @@ HTML;
     /**
      * Render a standard page header with navigation.
      *
-     * Calls renderPageStartNobody then adds logo and navigation menu.
+     * Calls renderPageStartNobody then adds navbar and page title.
      *
      * @param string $title Page title
-     * @param bool   $close Whether to wrap logo in link to index
+     * @param bool   $close Whether to show full navigation (true) or minimal header (false)
      *
      * @return void
      */
     public static function renderPageStart(string $title, bool $close): void
     {
         self::renderPageStartNobody($title);
-        echo '<div>';
         if ($close) {
-            echo '<a href="index.php" target="_top">';
+            echo self::buildNavbar();
+        } else {
+            echo '<div>';
+            echo self::buildLogo();
+            echo '</div>';
         }
-        echo self::buildLogo();
-        if ($close) {
-            echo '</a>';
-            echo self::buildQuickMenu();
-        }
-        echo '</div>';
         echo self::buildPageTitle($title, \Lwt\Core\Globals::isDebug());
     }
 

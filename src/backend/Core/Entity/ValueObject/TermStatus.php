@@ -12,7 +12,7 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Entity\ValueObject;
+namespace Lwt\Core\Entity\ValueObject;
 
 use InvalidArgumentException;
 

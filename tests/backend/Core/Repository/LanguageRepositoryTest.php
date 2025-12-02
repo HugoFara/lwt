@@ -3,7 +3,7 @@ namespace Lwt\Tests\Core\Repository;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
-use Lwt\Classes\Language;
+use Lwt\Core\Entity\Language;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Core\Repository\LanguageRepository;

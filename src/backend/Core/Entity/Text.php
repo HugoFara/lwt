@@ -12,11 +12,11 @@
  * @since    2.9.0
  */
 
-namespace Lwt\Classes;
+namespace Lwt\Core\Entity;
 
 use InvalidArgumentException;
-use Lwt\Entity\ValueObject\LanguageId;
-use Lwt\Entity\ValueObject\TextId;
+use Lwt\Core\Entity\ValueObject\LanguageId;
+use Lwt\Core\Entity\ValueObject\TextId;
 
 /**
  * A text represented as a rich domain object.

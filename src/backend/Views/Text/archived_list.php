@@ -32,6 +32,7 @@
 namespace Lwt\Views\Text;
 
 use Lwt\View\Helper\IconHelper;
+use Lwt\View\Helper\PageLayoutHelper;
 
 /** @var string $message */
 /** @var array $texts */
@@ -46,35 +47,19 @@ use Lwt\View\Helper\IconHelper;
 /** @var string|int $currentTag2 */
 /** @var string $currentTag12 */
 
-\Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false);
+PageLayoutHelper::renderMessage($message, false);
 
+echo PageLayoutHelper::buildActionCard(
+    'Archive Actions',
+    [
+        ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+        ['url' => '/text/import-long', 'label' => 'Long Text Import', 'icon' => 'file-up'],
+        ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],
+        ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'],
+    ],
+    'texts'
+);
 ?>
-<div class="flex-spaced">
-    <div>
-        <a href="/texts?new=1">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            New Text
-        </a>
-    </div>
-    <div>
-        <a href="/text/import-long">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            Long Text Import
-        </a>
-    </div>
-    <div>
-        <a href="/feeds?page=1&amp;check_autoupdate=1">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            Newsfeed Import
-        </a>
-    </div>
-    <div>
-        <a href="/texts?query=&amp;page=1">
-            <?php echo IconHelper::render('archive', ['alt' => 'Active']); ?>
-            Active Texts
-        </a>
-    </div>
-</div>
 
 <form name="form1" action="#" data-base-url="/text/archived">
 <table class="tab2" cellspacing="0" cellpadding="5">

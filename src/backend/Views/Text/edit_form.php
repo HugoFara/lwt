@@ -32,6 +32,19 @@ namespace Lwt\Views\Text;
 
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
+use Lwt\View\Helper\PageLayoutHelper;
+
+// Build actions based on whether this is a new or existing text
+$actions = [];
+if (!$isNew) {
+    $actions[] = ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'];
+}
+$actions[] = ['url' => '/text/import-long', 'label' => 'Long Text Import', 'icon' => 'file-up'];
+$actions[] = ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'];
+$actions[] = ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'];
+if ($isNew) {
+    $actions[] = ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'];
+}
 
 ?>
 <h2>
@@ -43,38 +56,7 @@ use Lwt\View\Helper\IconHelper;
 <script type="application/json" id="text-edit-config">
 <?php echo json_encode(['languageData' => $languageData]); ?>
 </script>
-<div class="flex-spaced">
-    <div style="<?php echo $isNew ? "display: none" : ''; ?>">
-        <a href="/texts?new=1">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            New Text
-        </a>
-    </div>
-    <div>
-        <a href="/text/import-long">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            Long Text Import
-        </a>
-    </div>
-    <div>
-        <a href="/feeds?page=1&amp;check_autoupdate=1">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            Newsfeed Import
-        </a>
-    </div>
-    <div>
-        <a href="/texts?query=&amp;page=1">
-            <?php echo IconHelper::render('archive', ['alt' => 'Active']); ?>
-            Active Texts
-        </a>
-    </div>
-    <div style="<?php echo $isNew ? "" : 'display: none'; ?>">
-        <a href="/text/archived?query=&amp;page=1">
-            <?php echo IconHelper::render('archive-x', ['alt' => 'Archived']); ?>
-            Archived Texts
-        </a>
-    </div>
-</div>
+<?php echo PageLayoutHelper::buildActionCard('Text Actions', $actions, 'texts'); ?>
 <form class="validate" method="post"
 action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
     <input type="hidden" name="TxID" value="<?php echo $textId; ?>" />

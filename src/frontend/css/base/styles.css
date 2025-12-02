@@ -1478,6 +1478,30 @@ Home page styles - Bulma integration
   background-color: white;
 }
 
+/* Fix icon-text alignment in card headers - prevent overlapping */
+.card-header-title .icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.card-header-title .icon-text .icon {
+  flex-shrink: 0;
+}
+
+/* Fix Bulma label contrast - ensure dark text for readability */
+.label {
+  color: #363636 !important;
+}
+
+/* Fix select/dropdown background - force white in light mode */
+.select select,
+.menu-content select,
+select {
+  background-color: white !important;
+  color: #363636 !important;
+}
+
 /* Fix Bulma notification colors in light mode */
 .notification.is-danger.is-light {
   background-color: #feecf0;
@@ -1686,6 +1710,182 @@ Statistics Page Styles
 }
 
 /**************************************************************
+Navigation Bar Styles (Alpine.js + Bulma)
+***************************************************************/
+
+/* Main navbar styling */
+.navbar.is-light {
+  background-color: #f5f5f5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar brand - logo and title */
+.navbar-brand .navbar-item img {
+  max-height: 28px;
+}
+
+/* Navbar items with icons */
+.navbar-item svg,
+.navbar-link svg {
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+}
+
+/* Dropdown animation */
+.navbar-item.has-dropdown .navbar-dropdown {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.navbar-item.has-dropdown.is-active .navbar-dropdown {
+  display: block;
+  opacity: 1;
+}
+
+/* Mobile menu improvements */
+@media screen and (max-width: 1023px) {
+  .navbar-menu {
+    background-color: #f5f5f5;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 0;
+  }
+
+  .navbar-menu.is-active {
+    display: block;
+  }
+
+  .navbar-item.has-dropdown .navbar-dropdown {
+    position: static;
+    box-shadow: none;
+    padding-left: 1rem;
+  }
+
+  .navbar-item.has-dropdown.is-active .navbar-dropdown {
+    display: block;
+  }
+
+  .navbar-divider {
+    display: none;
+  }
+}
+
+/* Desktop dropdown positioning */
+@media screen and (min-width: 1024px) {
+  .navbar-item.has-dropdown:hover .navbar-dropdown,
+  .navbar-item.has-dropdown.is-active .navbar-dropdown {
+    display: block;
+    opacity: 1;
+  }
+
+  .navbar-dropdown.is-right {
+    right: 0;
+    left: auto;
+  }
+}
+
+/**************************************************************
+Action Card Styles (Alpine.js + Bulma)
+***************************************************************/
+
+/* Action card base styling */
+.action-card {
+  margin-bottom: 1rem;
+}
+
+.action-card .card-header {
+  cursor: pointer;
+  user-select: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: background 0.2s ease;
+}
+
+.action-card .card-header:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.action-card .card-header-title {
+  color: white;
+  font-weight: 600;
+}
+
+.action-card .card-header-icon {
+  color: white;
+}
+
+/* Chevron rotation for collapsed state */
+.action-card .card-header-icon .icon {
+  transition: transform 0.3s ease;
+}
+
+.action-card .card-header-icon .icon.is-rotated {
+  transform: rotate(-90deg);
+}
+
+/* Card content styling */
+.action-card .card-content {
+  padding: 1rem;
+}
+
+/* Action buttons styling */
+.action-card .buttons {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.action-card .button {
+  margin: 0;
+}
+
+.action-card .button .icon {
+  margin-right: 0.25rem;
+}
+
+.action-card .button .icon svg {
+  width: 1em;
+  height: 1em;
+}
+
+/* Color variants for different page types */
+.action-card.action-card-texts .card-header {
+  background: linear-gradient(135deg, #48c78e 0%, #3ec487 100%);
+}
+
+.action-card.action-card-texts .card-header:hover {
+  background: linear-gradient(135deg, #3ec487 0%, #48c78e 100%);
+}
+
+.action-card.action-card-terms .card-header {
+  background: linear-gradient(135deg, #b86bff 0%, #a855f7 100%);
+}
+
+.action-card.action-card-terms .card-header:hover {
+  background: linear-gradient(135deg, #a855f7 0%, #b86bff 100%);
+}
+
+.action-card.action-card-admin .card-header {
+  background: linear-gradient(135deg, #f14668 0%, #e63a56 100%);
+}
+
+.action-card.action-card-admin .card-header:hover {
+  background: linear-gradient(135deg, #e63a56 0%, #f14668 100%);
+}
+
+.action-card.action-card-feeds .card-header {
+  background: linear-gradient(135deg, #ffdd57 0%, #ffcd00 100%);
+}
+
+.action-card.action-card-feeds .card-header:hover {
+  background: linear-gradient(135deg, #ffcd00 0%, #ffdd57 100%);
+}
+
+.action-card.action-card-feeds .card-header-title,
+.action-card.action-card-feeds .card-header-icon {
+  color: #363636;
+}
+
+/**************************************************************
 Additional styles for printing
 ***************************************************************/
 
@@ -1699,5 +1899,11 @@ Additional styles for printing
   #print
   {
     font-size: 75%;
+  }
+
+  /* Hide navbar and action cards when printing */
+  .navbar,
+  .action-card {
+    display: none;
   }
 }

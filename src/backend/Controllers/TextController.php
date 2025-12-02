@@ -430,7 +430,7 @@ class TextController extends BaseController
      */
     private function showNewTextForm(int $langId): void
     {
-        $text = new \Lwt\Classes\Text();
+        $text = new \stdClass();
         $text->id = 0;
         $text->lgid = $langId;
         $text->title = '';
@@ -467,7 +467,7 @@ class TextController extends BaseController
             return;
         }
 
-        $text = new \Lwt\Classes\Text();
+        $text = new \stdClass();
         $text->id = $record['TxID'];
         $text->lgid = $record['TxLgID'];
         $text->title = $record['TxTitle'];

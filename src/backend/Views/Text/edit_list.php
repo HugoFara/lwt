@@ -57,32 +57,18 @@ use Lwt\View\Helper\IconHelper;
 
 <?php \Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false); ?>
 
-<div class="flex-spaced">
-    <div>
-        <a href="/texts?new=1">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            New Text
-        </a>
-    </div>
-    <div>
-        <a href="/text/import-long">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            Long Text Import
-        </a>
-    </div>
-    <div>
-        <a href="/feeds?page=1&amp;check_autoupdate=1">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            Newsfeed Import
-        </a>
-    </div>
-    <div>
-        <a href="/text/archived?query=&amp;page=1">
-            <?php echo IconHelper::render('archive-x', ['alt' => 'Archived']); ?>
-            Archived Texts
-        </a>
-    </div>
-</div>
+<?php
+echo PageLayoutHelper::buildActionCard(
+    'Text Actions',
+    [
+        ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+        ['url' => '/text/import-long', 'label' => 'Long Text Import', 'icon' => 'file-up'],
+        ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],
+        ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
+    ],
+    'texts'
+);
+?>
 
 <form name="form1" action="#" data-base-url="/texts">
 <table class="tab2" cellspacing="0" cellpadding="5">

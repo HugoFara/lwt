@@ -120,6 +120,7 @@ import './home/home_app';
 import './ui/modal';
 import './ui/sorttable';
 import './ui/lucide_icons';
+import './ui/navbar';
 
 // Global exports for inline PHP scripts
 import './globals';

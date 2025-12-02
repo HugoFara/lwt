@@ -14,7 +14,7 @@
 
 namespace Lwt\Services;
 
-use Lwt\Classes\Language;
+use Lwt\Core\Entity\Language;
 use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Http\UrlUtilities;

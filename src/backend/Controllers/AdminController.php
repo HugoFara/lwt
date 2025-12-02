@@ -15,7 +15,7 @@
 
 namespace Lwt\Controllers;
 
-use Lwt\Classes\GoogleTranslate;
+use Lwt\Core\Entity\GoogleTranslate;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Services\BackupService;
 use Lwt\Services\DemoService;

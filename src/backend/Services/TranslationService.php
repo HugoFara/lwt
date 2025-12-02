@@ -19,7 +19,7 @@ namespace Lwt\Services;
 require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
 require_once __DIR__ . '/DictionaryService.php';
 
-use Lwt\Classes\GoogleTranslate;
+use Lwt\Core\Entity\GoogleTranslate;
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;

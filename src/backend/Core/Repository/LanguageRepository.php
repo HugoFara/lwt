@@ -14,8 +14,8 @@
 
 namespace Lwt\Core\Repository;
 
-use Lwt\Classes\Language;
-use Lwt\Entity\ValueObject\LanguageId;
+use Lwt\Core\Entity\Language;
+use Lwt\Core\Entity\ValueObject\LanguageId;
 
 /**
  * Repository for Language entities.

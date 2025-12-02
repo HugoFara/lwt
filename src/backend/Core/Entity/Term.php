@@ -12,13 +12,13 @@
  * @since    2.7.0
  */
 
-namespace Lwt\Classes;
+namespace Lwt\Core\Entity;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
-use Lwt\Entity\ValueObject\LanguageId;
-use Lwt\Entity\ValueObject\TermId;
-use Lwt\Entity\ValueObject\TermStatus;
+use Lwt\Core\Entity\ValueObject\LanguageId;
+use Lwt\Core\Entity\ValueObject\TermId;
+use Lwt\Core\Entity\ValueObject\TermStatus;
 
 /**
  * A term (word or multi-word) represented as a rich domain object.

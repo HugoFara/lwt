@@ -13,14 +13,14 @@ require_once __DIR__ . '/../../../../src/backend/Core/Entity/GoogleTranslate.php
 
 use DateTimeImmutable;
 use InvalidArgumentException;
-use Lwt\Classes\GoogleTranslate;
-use Lwt\Classes\Language;
-use Lwt\Classes\Term;
-use Lwt\Classes\Text;
-use Lwt\Entity\ValueObject\LanguageId;
-use Lwt\Entity\ValueObject\TermId;
-use Lwt\Entity\ValueObject\TermStatus;
-use Lwt\Entity\ValueObject\TextId;
+use Lwt\Core\Entity\GoogleTranslate;
+use Lwt\Core\Entity\Language;
+use Lwt\Core\Entity\Term;
+use Lwt\Core\Entity\Text;
+use Lwt\Core\Entity\ValueObject\LanguageId;
+use Lwt\Core\Entity\ValueObject\TermId;
+use Lwt\Core\Entity\ValueObject\TermStatus;
+use Lwt\Core\Entity\ValueObject\TextId;
 use PHPUnit\Framework\TestCase;
 
 /**
