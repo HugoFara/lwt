@@ -23,495 +23,914 @@ use Lwt\View\Helper\IconHelper;
 
 ?>
 <form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" data-lwt-settings-form>
-<table class="tab1" cellspacing="0" cellpadding="5">
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1">Group</th>
-        <th class="th1">Description</th>
-        <th class="th1" colspan="2">Value</th>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center" rowspan="1">Appearance</th>
-        <td class="td1 center">Theme</td>
-        <td class="td1 center">
-            <select name="set-theme-dir" class="notempty respinput">
-                <?php echo SelectOptionsBuilder::forThemes($themes, $settings['set-theme-dir']); ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center" rowspan="7">Read Text Screen</th>
-        <td class="td1 center">
-            Height of left top frame <wbr /><b>without</b> audioplayer
-        </td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right setfocus respinput"
-            type="number" min="0"
-            name="set-text-h-frameheight-no-audio" data_info="Height of left top frame without audioplayer"
-            value="<?php echo htmlspecialchars($settings['set-text-h-frameheight-no-audio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="3"
-            size="3" /><br />Pixel </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">
-            Height of left top frame <wbr /><b>with</b> audioplayer
-        </td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0"
-            name="set-text-h-frameheight-with-audio"
-            data_info="Height of left top frame with audioplayer"
-            value="<?php echo htmlspecialchars($settings['set-text-h-frameheight-with-audio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="3" size="3" /><br />
-            Pixel
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Width of left frames</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0"
-            name="set-text-l-framewidth-percent" data_info="Width of left frames"
-            value="<?php echo htmlspecialchars($settings['set-text-l-framewidth-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="2" size="2" />
-            <br />Percent
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Height of right top frame</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0"
-            name="set-text-r-frameheight-percent"  data_info="Height of right top frame"
-            value="<?php echo htmlspecialchars($settings['set-text-r-frameheight-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="2" size="2" />
-            <br />Percent
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Button(s) for "words to do"</td>
-        <td class="td1 center">
-            <select name="set-words-to-do-buttons" class="notempty respinput">
-            <?php echo SelectOptionsBuilder::forWordsToDoButtons($settings['set-words-to-do-buttons']); ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Tooltips</td>
-        <td class="td1 center">
-            <select name="set-tooltip-mode" class="notempty respinput">
-            <?php echo SelectOptionsBuilder::forTooltipType($settings['set-tooltip-mode']); ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">New Term Translations per Page</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0"
-            name="set-ggl-translation-per-page"  data_info="New Term Translations per Page"
-            value="<?php echo htmlspecialchars($settings['set-ggl-translation-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="4" size="4" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center middle" rowspan="5">Test<br />Screen</th>
-        <td class="td1 center">Height of left top frame</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0"
-            name="set-test-h-frameheight" data_info="Height of left top frame"
-            value="<?php echo htmlspecialchars($settings['set-test-h-frameheight'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="3" size="3" />
-            <br />Pixel
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Width of left frames</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0"
-            name="set-test-l-framewidth-percent"  data_info="Width of left frames"
-            value="<?php echo htmlspecialchars($settings['set-test-l-framewidth-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="2" size="2" />
-            <br />Percent
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Height of right top frame</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0"
-            name="set-test-r-frameheight-percent"  data_info="Height of right top frame"
-            value="<?php echo htmlspecialchars($settings['set-test-r-frameheight-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="2" size="2" /><br />
-            Percent
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">
-            Waiting time after assessment to display next test
-        </td>
-        <td class="td1 center">
-            <input class="notempty zeroposintnumber right respinput"
-            type="number" min="0"
-            name="set-test-main-frame-waiting-time"
-            data_info="Waiting time after assessment to display next test"
-            value="<?php echo htmlspecialchars($settings['set-test-main-frame-waiting-time'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="4" size="4" /><br />
-            Milliseconds
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">
-            Waiting Time to clear the message/edit frame
-        </td>
-        <td class="td1 center">
-            <input class="notempty zeroposintnumber right respinput"
-            type="number" min="0"
-            name="set-test-edit-frame-waiting-time"
-            data_info="Waiting Time to clear the message/edit frame"
-            value="<?php echo htmlspecialchars($settings['set-test-edit-frame-waiting-time'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="8" size="8" /><br />
-            Milliseconds
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center" rowspan="3">Reading</th>
-        <td class="td1 center">
-            Visit only saved terms with status(es)...<br />
-            (via keystrokes RIGHT, SPACE, LEFT, etc.)
-        </td>
-        <td class="td1 center">
-            <select name="set-text-visit-statuses-via-key" class="respinput">
-            <?php
-            echo SelectOptionsBuilder::forWordStatus(
-                $settings['set-text-visit-statuses-via-key'],
-                true,
-                true,
-                true
-            );
-            ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Display translations of terms with status(es)</td>
-        <td class="td1 center">
-            <select name="set-display-text-frame-term-translation" class="respinput">
-            <?php
-            echo SelectOptionsBuilder::forWordStatus(
-                $settings['set-display-text-frame-term-translation'],
-                true,
-                true,
-                true
-            );
-            ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Position of translations</td>
-        <td class="td1 center">
-            <select name="set-text-frame-annotation-position" class="notempty respinput">
-            <?php echo SelectOptionsBuilder::forAnnotationPosition($settings['set-text-frame-annotation-position']); ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center">Testing</th>
-        <td class="td1 center">Number of sentences <br />displayed from text, if available</td>
-        <td class="td1 center">
-            <select name="set-test-sentence-count" class="notempty respinput">
-            <?php echo SelectOptionsBuilder::forSentenceCount($settings['set-test-sentence-count']); ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center">Term Sentence<br />Generation</th>
-        <td class="td1 center">Number of sentences <br />generated from text, if available</td>
-        <td class="td1 center">
-            <select name="set-term-sentence-count" class="notempty respinput">
-            <?php echo SelectOptionsBuilder::forSentenceCount($settings['set-term-sentence-count']); ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center">Similar<br />Terms</th>
-        <td class="td1 center">
-            Similar terms to be displayed<br />while adding/editing a term
-        </td>
-        <td class="td1 center">
-            <input class="notempty zeroposintnumber right respinput"
-            type="number" min="0"
-            name="set-similar-terms-count"
-            data_info="Similar terms to be displayed while adding/editing a term"
-            value="<?php echo htmlspecialchars($settings['set-similar-terms-count'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="1" size="1" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center">Term<br />Translations</th>
-        <td class="td1 center">
-            List of characters that<br />delimit different translations<br />
-            (used in annotation selection)
-        </td>
-        <td class="td1 center">
-            <input class="notempty center respinput" type="text"
-            name="set-term-translation-delimiters"
-            value="<?php echo htmlspecialchars($settings['set-term-translation-delimiters'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="8" size="8" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center" rowspan="2">Text to Speech</th>
-        <td class="td1 center">Save Audio Files to Disk</td>
-        <td class="td1 center">
-            <input type="checkbox" name="set-tts" value="1"
-            <?php echo ((int)$settings['set-tts'] ? "checked" : ""); ?>  />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Read word aloud</td>
-        <td class="td1 center">
-            <select name="set-hts" class="notempty respinput">
-            <?php echo SelectOptionsBuilder::forHoverTranslation($settings['set-hts']); ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center" rowspan="7">Text, Term,<br />Newsfeed &amp;<br />Tag Tables</th>
-        <td class="td1 center">Texts per Page</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0" name="set-texts-per-page" data_info="Texts per Page"
-            value="<?php echo htmlspecialchars($settings['set-texts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="4" size="4" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Archived Texts per Page</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0" name="set-archivedtexts-per-page"
-            data_info="Archived Texts per Page"
-            value="<?php echo htmlspecialchars($settings['set-archivedtexts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="4" size="4" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Terms per Page</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0" name="set-terms-per-page" data_info="Terms per Page"
-            value="<?php echo htmlspecialchars($settings['set-terms-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="4" size="4" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Tags per Page</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0" name="set-tags-per-page" data_info="Tags per Page"
-            value="<?php echo htmlspecialchars($settings['set-tags-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="4" size="4" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Feed Articles per Page</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0" name="set-articles-per-page" data_info="Feed Articles per Page"
-            value="<?php echo htmlspecialchars($settings['set-articles-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="4" size="4" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Feeds per Page</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0" name="set-feeds-per-page" data_info="Feeds per Page"
-            value="<?php echo htmlspecialchars($settings['set-feeds-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="4" size="4" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">Query Mode</td>
-        <td class="td1 center">
-            <select name="set-regex-mode" class="respinput">
-            <?php echo SelectOptionsBuilder::forRegexMode($settings['set-regex-mode']); ?>
-            </select>
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <th class="th1 center" rowspan="3">Newsfeeds</th>
-        <td class="td1 center">Max Articles per Feed <b>with</b> cached text</td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0" name="set-max-articles-with-text"
-            data_info="Max Articles per Feed with cached text"
-            value="<?php echo htmlspecialchars($settings['set-max-articles-with-text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="4" size="4" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">
-            Max Articles per Feed <b>without</b> cached text
-        </td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0" name="set-max-articles-without-text"
-            data_info="Max Articles per Feed without cached text"
-            value="<?php echo htmlspecialchars($settings['set-max-articles-without-text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="4" size="4" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 center">
-            Max Texts per Feed<br />(older Texts are moved into "Text Archive")
-        </td>
-        <td class="td1 center">
-            <input class="notempty posintnumber right respinput" type="number"
-            min="0" name="set-max-texts-per-feed" data_info="Max Texts per Feed"
-            value="<?php echo htmlspecialchars($settings['set-max-texts-per-feed'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-            maxlength="4" size="4" />
-        </td>
-        <td class="td1 center">
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-    <tr>
-        <td class="td1 right" colspan="4">
-            <input type="button" value="&lt;&lt; Back"
-            data-action="settings-navigate" data-url="index.php" />
-            <span class="nowrap"></span>
-            <input type="button" value="Reset all settings to default"
-            data-action="settings-navigate" data-url="/admin/settings?op=reset" />
-            <span class="nowrap"></span>
-            <input type="submit" name="op" value="Save" />
-        </td>
-    </tr>
-    <!-- ******************************************************* -->
-</table>
+
+    <!-- Appearance Section -->
+    <div class="box">
+        <h3 class="title is-5">Appearance</h3>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-theme-dir">Theme</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="set-theme-dir" id="set-theme-dir" class="notempty" required>
+                                <?php echo SelectOptionsBuilder::forThemes($themes, $settings['set-theme-dir']); ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Read Text Screen Section -->
+    <div class="box">
+        <h3 class="title is-5">Read Text Screen</h3>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-text-h-frameheight-no-audio">
+                    Frame Height <span class="has-text-weight-normal">(without audio)</span>
+                </label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber setfocus"
+                               type="number"
+                               min="0"
+                               id="set-text-h-frameheight-no-audio"
+                               name="set-text-h-frameheight-no-audio"
+                               data_info="Height of left top frame without audioplayer"
+                               value="<?php echo htmlspecialchars($settings['set-text-h-frameheight-no-audio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="3"
+                               style="width: 100px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="button is-static">px</span>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-text-h-frameheight-with-audio">
+                    Frame Height <span class="has-text-weight-normal">(with audio)</span>
+                </label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               id="set-text-h-frameheight-with-audio"
+                               name="set-text-h-frameheight-with-audio"
+                               data_info="Height of left top frame with audioplayer"
+                               value="<?php echo htmlspecialchars($settings['set-text-h-frameheight-with-audio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="3"
+                               style="width: 100px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="button is-static">px</span>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-text-l-framewidth-percent">Width of Left Frames</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               max="100"
+                               id="set-text-l-framewidth-percent"
+                               name="set-text-l-framewidth-percent"
+                               data_info="Width of left frames"
+                               value="<?php echo htmlspecialchars($settings['set-text-l-framewidth-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="2"
+                               style="width: 80px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="button is-static">%</span>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-text-r-frameheight-percent">Height of Right Frame</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               max="100"
+                               id="set-text-r-frameheight-percent"
+                               name="set-text-r-frameheight-percent"
+                               data_info="Height of right top frame"
+                               value="<?php echo htmlspecialchars($settings['set-text-r-frameheight-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="2"
+                               style="width: 80px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="button is-static">%</span>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-words-to-do-buttons">Words To Do Buttons</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="set-words-to-do-buttons" id="set-words-to-do-buttons" class="notempty" required>
+                                <?php echo SelectOptionsBuilder::forWordsToDoButtons($settings['set-words-to-do-buttons']); ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-tooltip-mode">Tooltips</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="set-tooltip-mode" id="set-tooltip-mode" class="notempty" required>
+                                <?php echo SelectOptionsBuilder::forTooltipType($settings['set-tooltip-mode']); ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-ggl-translation-per-page">Translations per Page</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               id="set-ggl-translation-per-page"
+                               name="set-ggl-translation-per-page"
+                               data_info="New Term Translations per Page"
+                               value="<?php echo htmlspecialchars($settings['set-ggl-translation-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="4"
+                               style="width: 100px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Screen Section -->
+    <div class="box">
+        <h3 class="title is-5">Test Screen</h3>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-test-h-frameheight">Frame Height</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               id="set-test-h-frameheight"
+                               name="set-test-h-frameheight"
+                               data_info="Height of left top frame"
+                               value="<?php echo htmlspecialchars($settings['set-test-h-frameheight'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="3"
+                               style="width: 100px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="button is-static">px</span>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-test-l-framewidth-percent">Width of Left Frames</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               max="100"
+                               id="set-test-l-framewidth-percent"
+                               name="set-test-l-framewidth-percent"
+                               data_info="Width of left frames"
+                               value="<?php echo htmlspecialchars($settings['set-test-l-framewidth-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="2"
+                               style="width: 80px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="button is-static">%</span>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-test-r-frameheight-percent">Height of Right Frame</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               max="100"
+                               id="set-test-r-frameheight-percent"
+                               name="set-test-r-frameheight-percent"
+                               data_info="Height of right top frame"
+                               value="<?php echo htmlspecialchars($settings['set-test-r-frameheight-percent'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="2"
+                               style="width: 80px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="button is-static">%</span>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-test-main-frame-waiting-time">Display Next Test After</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty zeroposintnumber"
+                               type="number"
+                               min="0"
+                               id="set-test-main-frame-waiting-time"
+                               name="set-test-main-frame-waiting-time"
+                               data_info="Waiting time after assessment to display next test"
+                               value="<?php echo htmlspecialchars($settings['set-test-main-frame-waiting-time'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="4"
+                               style="width: 120px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="button is-static">ms</span>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-test-edit-frame-waiting-time">Clear Edit Frame After</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty zeroposintnumber"
+                               type="number"
+                               min="0"
+                               id="set-test-edit-frame-waiting-time"
+                               name="set-test-edit-frame-waiting-time"
+                               data_info="Waiting Time to clear the message/edit frame"
+                               value="<?php echo htmlspecialchars($settings['set-test-edit-frame-waiting-time'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="8"
+                               style="width: 120px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="button is-static">ms</span>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reading Section -->
+    <div class="box">
+        <h3 class="title is-5">Reading</h3>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-text-visit-statuses-via-key">Navigate Term Statuses</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="set-text-visit-statuses-via-key" id="set-text-visit-statuses-via-key">
+                                <?php
+                                echo SelectOptionsBuilder::forWordStatus(
+                                    $settings['set-text-visit-statuses-via-key'],
+                                    true,
+                                    true,
+                                    true
+                                );
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="help">Visit saved terms with these statuses via keystrokes (RIGHT, SPACE, LEFT, etc.)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-display-text-frame-term-translation">Show Translations For</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="set-display-text-frame-term-translation" id="set-display-text-frame-term-translation">
+                                <?php
+                                echo SelectOptionsBuilder::forWordStatus(
+                                    $settings['set-display-text-frame-term-translation'],
+                                    true,
+                                    true,
+                                    true
+                                );
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="help">Display translations of terms with these statuses</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-text-frame-annotation-position">Translation Position</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="set-text-frame-annotation-position" id="set-text-frame-annotation-position" class="notempty" required>
+                                <?php echo SelectOptionsBuilder::forAnnotationPosition($settings['set-text-frame-annotation-position']); ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testing & Terms Section -->
+    <div class="box">
+        <h3 class="title is-5">Testing &amp; Terms</h3>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-test-sentence-count">Test Sentence Count</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="set-test-sentence-count" id="set-test-sentence-count" class="notempty" required>
+                                <?php echo SelectOptionsBuilder::forSentenceCount($settings['set-test-sentence-count']); ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+                <p class="help">Number of sentences displayed from text during testing</p>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-term-sentence-count">Term Sentence Count</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="set-term-sentence-count" id="set-term-sentence-count" class="notempty" required>
+                                <?php echo SelectOptionsBuilder::forSentenceCount($settings['set-term-sentence-count']); ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+                <p class="help">Number of sentences generated from text for terms</p>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-similar-terms-count">Similar Terms Count</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty zeroposintnumber"
+                               type="number"
+                               min="0"
+                               max="9"
+                               id="set-similar-terms-count"
+                               name="set-similar-terms-count"
+                               data_info="Similar terms to be displayed while adding/editing a term"
+                               value="<?php echo htmlspecialchars($settings['set-similar-terms-count'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="1"
+                               style="width: 80px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+                <p class="help">Similar terms displayed while adding/editing a term</p>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-term-translation-delimiters">Translation Delimiters</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty"
+                               type="text"
+                               id="set-term-translation-delimiters"
+                               name="set-term-translation-delimiters"
+                               value="<?php echo htmlspecialchars($settings['set-term-translation-delimiters'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="8"
+                               style="width: 120px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+                <p class="help">Characters that delimit different translations (used in annotation selection)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text to Speech Section -->
+    <div class="box">
+        <h3 class="title is-5">Text to Speech</h3>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label">Save Audio to Disk</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <label class="checkbox">
+                            <input type="checkbox"
+                                   name="set-tts"
+                                   value="1"
+                                   <?php echo ((int)$settings['set-tts'] ? "checked" : ""); ?> />
+                            Enable saving TTS audio files to disk
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-hts">Read Word Aloud</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="set-hts" id="set-hts" class="notempty" required>
+                                <?php echo SelectOptionsBuilder::forHoverTranslation($settings['set-hts']); ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables & Pagination Section -->
+    <div class="box">
+        <h3 class="title is-5">Tables &amp; Pagination</h3>
+
+        <div class="columns">
+            <div class="column is-half">
+                <div class="field">
+                    <label class="label" for="set-texts-per-page">Texts per Page</label>
+                    <div class="field has-addons">
+                        <div class="control is-expanded">
+                            <input class="input notempty posintnumber"
+                                   type="number"
+                                   min="0"
+                                   id="set-texts-per-page"
+                                   name="set-texts-per-page"
+                                   data_info="Texts per Page"
+                                   value="<?php echo htmlspecialchars($settings['set-texts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   maxlength="4"
+                                   required />
+                        </div>
+                        <div class="control">
+                            <span class="icon has-text-danger" title="Field must not be empty">
+                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column is-half">
+                <div class="field">
+                    <label class="label" for="set-archivedtexts-per-page">Archived Texts per Page</label>
+                    <div class="field has-addons">
+                        <div class="control is-expanded">
+                            <input class="input notempty posintnumber"
+                                   type="number"
+                                   min="0"
+                                   id="set-archivedtexts-per-page"
+                                   name="set-archivedtexts-per-page"
+                                   data_info="Archived Texts per Page"
+                                   value="<?php echo htmlspecialchars($settings['set-archivedtexts-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   maxlength="4"
+                                   required />
+                        </div>
+                        <div class="control">
+                            <span class="icon has-text-danger" title="Field must not be empty">
+                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="columns">
+            <div class="column is-half">
+                <div class="field">
+                    <label class="label" for="set-terms-per-page">Terms per Page</label>
+                    <div class="field has-addons">
+                        <div class="control is-expanded">
+                            <input class="input notempty posintnumber"
+                                   type="number"
+                                   min="0"
+                                   id="set-terms-per-page"
+                                   name="set-terms-per-page"
+                                   data_info="Terms per Page"
+                                   value="<?php echo htmlspecialchars($settings['set-terms-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   maxlength="4"
+                                   required />
+                        </div>
+                        <div class="control">
+                            <span class="icon has-text-danger" title="Field must not be empty">
+                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column is-half">
+                <div class="field">
+                    <label class="label" for="set-tags-per-page">Tags per Page</label>
+                    <div class="field has-addons">
+                        <div class="control is-expanded">
+                            <input class="input notempty posintnumber"
+                                   type="number"
+                                   min="0"
+                                   id="set-tags-per-page"
+                                   name="set-tags-per-page"
+                                   data_info="Tags per Page"
+                                   value="<?php echo htmlspecialchars($settings['set-tags-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   maxlength="4"
+                                   required />
+                        </div>
+                        <div class="control">
+                            <span class="icon has-text-danger" title="Field must not be empty">
+                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="columns">
+            <div class="column is-half">
+                <div class="field">
+                    <label class="label" for="set-articles-per-page">Feed Articles per Page</label>
+                    <div class="field has-addons">
+                        <div class="control is-expanded">
+                            <input class="input notempty posintnumber"
+                                   type="number"
+                                   min="0"
+                                   id="set-articles-per-page"
+                                   name="set-articles-per-page"
+                                   data_info="Feed Articles per Page"
+                                   value="<?php echo htmlspecialchars($settings['set-articles-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   maxlength="4"
+                                   required />
+                        </div>
+                        <div class="control">
+                            <span class="icon has-text-danger" title="Field must not be empty">
+                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column is-half">
+                <div class="field">
+                    <label class="label" for="set-feeds-per-page">Feeds per Page</label>
+                    <div class="field has-addons">
+                        <div class="control is-expanded">
+                            <input class="input notempty posintnumber"
+                                   type="number"
+                                   min="0"
+                                   id="set-feeds-per-page"
+                                   name="set-feeds-per-page"
+                                   data_info="Feeds per Page"
+                                   value="<?php echo htmlspecialchars($settings['set-feeds-per-page'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   maxlength="4"
+                                   required />
+                        </div>
+                        <div class="control">
+                            <span class="icon has-text-danger" title="Field must not be empty">
+                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-regex-mode">Query Mode</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="set-regex-mode" id="set-regex-mode">
+                                <?php echo SelectOptionsBuilder::forRegexMode($settings['set-regex-mode']); ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Newsfeeds Section -->
+    <div class="box">
+        <h3 class="title is-5">Newsfeeds</h3>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-max-articles-with-text">Max Articles <span class="has-text-weight-normal">(with cache)</span></label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               id="set-max-articles-with-text"
+                               name="set-max-articles-with-text"
+                               data_info="Max Articles per Feed with cached text"
+                               value="<?php echo htmlspecialchars($settings['set-max-articles-with-text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="4"
+                               style="width: 100px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+                <p class="help">Maximum articles per feed with cached text</p>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-max-articles-without-text">Max Articles <span class="has-text-weight-normal">(no cache)</span></label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               id="set-max-articles-without-text"
+                               name="set-max-articles-without-text"
+                               data_info="Max Articles per Feed without cached text"
+                               value="<?php echo htmlspecialchars($settings['set-max-articles-without-text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="4"
+                               style="width: 100px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+                <p class="help">Maximum articles per feed without cached text</p>
+            </div>
+        </div>
+
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="set-max-texts-per-feed">Max Texts per Feed</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input notempty posintnumber"
+                               type="number"
+                               min="0"
+                               id="set-max-texts-per-feed"
+                               name="set-max-texts-per-feed"
+                               data_info="Max Texts per Feed"
+                               value="<?php echo htmlspecialchars($settings['set-max-texts-per-feed'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="4"
+                               style="width: 100px;"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+                <p class="help">Older texts are moved to the Text Archive</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="field is-grouped is-grouped-right">
+        <div class="control">
+            <button type="button"
+                    class="button is-light"
+                    data-action="settings-navigate"
+                    data-url="index.php">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('arrow-left', ['alt' => 'Back']); ?>
+                </span>
+                <span>Back</span>
+            </button>
+        </div>
+        <div class="control">
+            <button type="button"
+                    class="button is-warning is-outlined"
+                    data-action="settings-navigate"
+                    data-url="/admin/settings?op=reset">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('rotate-ccw', ['alt' => 'Reset']); ?>
+                </span>
+                <span>Reset to Defaults</span>
+            </button>
+        </div>
+        <div class="control">
+            <button type="submit" name="op" value="Save" class="button is-primary">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                </span>
+                <span>Save</span>
+            </button>
+        </div>
+    </div>
 </form>

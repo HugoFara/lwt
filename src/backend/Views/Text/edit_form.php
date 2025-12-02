@@ -47,112 +47,261 @@ if ($isNew) {
 }
 
 ?>
-<h2>
-    <?php echo $isNew ? "New" : "Edit"; ?> Text
-    <a target="_blank" href="docs/info.html#howtotext">
-        <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
-    </a>
-</h2>
 <script type="application/json" id="text-edit-config">
 <?php echo json_encode(['languageData' => $languageData]); ?>
 </script>
+
+<h2 class="title is-4 is-flex is-align-items-center">
+    <?php echo $isNew ? "New" : "Edit"; ?> Text
+    <a target="_blank" href="docs/info.html#howtotext" class="ml-2">
+        <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
+    </a>
+</h2>
+
 <?php echo PageLayoutHelper::buildActionCard('Text Actions', $actions, 'texts'); ?>
+
 <form class="validate" method="post"
-action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" >
+      action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>"
+      x-data="{ showAnnotation: <?php echo $isNew ? 'false' : 'true'; ?> }">
     <input type="hidden" name="TxID" value="<?php echo $textId; ?>" />
-    <table class="tab1" cellspacing="0" cellpadding="5">
-        <tr>
-            <td class="td1 right">Language:</td>
-            <td class="td1">
-                <select name="TxLgID" id="TxLgID" class="notempty setfocus"
-                data-action="change-language">
-                <?php echo SelectOptionsBuilder::forLanguages($languages, $text->lgid, "[Choose...]"); ?>
-                </select>
-                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right">Title:</td>
-            <td class="td1">
-                <input type="text" class="notempty checkoutsidebmp respinput"
-                data_info="Title" name="TxTitle" id="TxTitle"
-                value="<?php echo \htmlspecialchars($text->title ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200" />
-                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right">
-                Text:<br /><br />(max.<br />65,000<br />bytes)
-            </td>
-            <td class="td1">
-            <textarea <?php echo $scrdir; ?>
-            name="TxText" id="TxText"
-            class="notempty checkbytes checkoutsidebmp respinput"
-            data_maxlength="65000" data_info="Text" rows="20"
-            ><?php echo \htmlspecialchars($text->text ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-            </td>
-        </tr>
-        <tr <?php echo $isNew ? 'style="display: none;"' : ''; ?>>
-            <td class="td1 right">Ann. Text:</td>
-            <td class="td1">
-                <?php
-                if ($annotated) {
-                    echo IconHelper::render('check', ['title' => 'With Improved Annotation', 'alt' => 'With Improved Annotation']) . ' ' .
-                    'Exists - May be partially or fully lost if you change the text!<br />' .
-                    '<input type="button" value="Print/Edit..." data-action="navigate" data-url="/text/print?text=' .
-                    $textId . '" />';
-                } else {
-                    echo IconHelper::render('x', ['title' => 'No Improved Annotation', 'alt' => 'No Improved Annotation']) . ' ' .
-                    '- None | <input type="button" value="Create/Print..." data-action="navigate" data-url="print_impr_text.php?edit=1&amp;text=' .
-                    $textId . '" />';
-                }
-                ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right">Source URI:</td>
-            <td class="td1">
-                <input type="url" class="checkurl checkoutsidebmp respinput"
-                data_info="Source URI" name="TxSourceURI"
-                value="<?php echo \htmlspecialchars($text->source ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                maxlength="1000" />
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right">Tags:</td>
-            <td class="td1">
-                <?php echo \Lwt\Services\TagService::getTextTagsHtml($textId); ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right" title="A soundtrack or a video to be display while reading">
-                Media URI:
-            </td>
-            <td class="td1">
-                <input type="text" class="checkoutsidebmp respinput"
-                data_info="Audio-URI" name="TxAudioURI" maxlength="2048"
-                value="<?php echo \htmlspecialchars($text->media_uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"  />
-                <span id="mediaselect">
-                    <?php echo \selectmediapath('TxAudioURI'); ?>
-                </span>
-            </td>
-        </tr>
+
+    <div class="box">
+        <!-- Language -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="TxLgID">Language</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="TxLgID" id="TxLgID" class="notempty setfocus"
+                                    data-action="change-language" required>
+                                <?php echo SelectOptionsBuilder::forLanguages($languages, $text->lgid, "[Choose...]"); ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Title -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="TxTitle">Title</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input type="text"
+                               class="input notempty checkoutsidebmp"
+                               data_info="Title"
+                               name="TxTitle"
+                               id="TxTitle"
+                               value="<?php echo \htmlspecialchars($text->title ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="200"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="TxText">
+                    Text
+                    <span class="has-text-grey is-size-7">(max. 65,000 bytes)</span>
+                </label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <textarea <?php echo $scrdir; ?>
+                                  name="TxText"
+                                  id="TxText"
+                                  class="textarea notempty checkbytes checkoutsidebmp"
+                                  data_maxlength="65000"
+                                  data_info="Text"
+                                  rows="15"
+                                  required><?php echo \htmlspecialchars($text->text ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Annotated Text (only for existing texts) -->
+        <?php if (!$isNew): ?>
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label">Annotated Text</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <?php if ($annotated): ?>
+                        <div class="notification is-info is-light">
+                            <span class="icon-text">
+                                <span class="icon has-text-success">
+                                    <?php echo IconHelper::render('check', ['alt' => 'Has Annotation']); ?>
+                                </span>
+                                <span>Exists - May be partially or fully lost if you change the text!</span>
+                            </span>
+                            <div class="mt-2">
+                                <button type="button"
+                                        class="button is-small is-info is-outlined"
+                                        data-action="navigate"
+                                        data-url="/text/print?text=<?php echo $textId; ?>">
+                                    <span class="icon is-small">
+                                        <?php echo IconHelper::render('printer', ['alt' => 'Print']); ?>
+                                    </span>
+                                    <span>Print/Edit...</span>
+                                </button>
+                            </div>
+                        </div>
+                        <?php else: ?>
+                        <div class="notification is-light">
+                            <span class="icon-text">
+                                <span class="icon has-text-grey">
+                                    <?php echo IconHelper::render('x', ['alt' => 'No Annotation']); ?>
+                                </span>
+                                <span>None</span>
+                            </span>
+                            <div class="mt-2">
+                                <button type="button"
+                                        class="button is-small is-outlined"
+                                        data-action="navigate"
+                                        data-url="print_impr_text.php?edit=1&amp;text=<?php echo $textId; ?>">
+                                    <span class="icon is-small">
+                                        <?php echo IconHelper::render('plus', ['alt' => 'Create']); ?>
+                                    </span>
+                                    <span>Create/Print...</span>
+                                </button>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Source URI -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="TxSourceURI">Source URI</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <input type="url"
+                               class="input checkurl checkoutsidebmp"
+                               data_info="Source URI"
+                               name="TxSourceURI"
+                               id="TxSourceURI"
+                               value="<?php echo \htmlspecialchars($text->source ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="1000"
+                               placeholder="https://..." />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label">Tags</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <?php echo \Lwt\Services\TagService::getTextTagsHtml($textId); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media URI -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="TxAudioURI" title="A soundtrack or a video to be displayed while reading">
+                    Media URI
+                </label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input type="text"
+                               class="input checkoutsidebmp"
+                               data_info="Audio-URI"
+                               name="TxAudioURI"
+                               id="TxAudioURI"
+                               maxlength="2048"
+                               value="<?php echo \htmlspecialchars($text->media_uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               placeholder="Path to audio/video file or URL" />
+                    </div>
+                    <div class="control" id="mediaselect">
+                        <?php echo \selectmediapath('TxAudioURI'); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <?php if ($isNew && defined('YT_API_KEY') && YT_API_KEY != null) {
             \Lwt\Text_From_Youtube\do_form_fragment();
         } ?>
-        <tr>
-            <td class="td1 right" colspan="2">
-                <input type="button" value="Cancel"
-                data-action="cancel-form" data-url="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>" />
-                <input type="submit" name="op" value="Check" />
-                <input type="submit" name="op"
-                value="<?php echo $isNew ? 'Save' : 'Change'; ?>" />
-                <input type="submit" name="op"
-                value="<?php echo $isNew ? 'Save' : 'Change'; ?> and Open" />
-            </td>
-        </tr>
-    </table>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="field is-grouped is-grouped-right">
+        <div class="control">
+            <button type="button"
+                    class="button is-light"
+                    data-action="cancel-form"
+                    data-url="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>">
+                Cancel
+            </button>
+        </div>
+        <div class="control">
+            <button type="submit" name="op" value="Check" class="button is-info is-outlined">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('check', ['alt' => 'Check']); ?>
+                </span>
+                <span>Check</span>
+            </button>
+        </div>
+        <div class="control">
+            <button type="submit" name="op" value="<?php echo $isNew ? 'Save' : 'Change'; ?>" class="button is-primary">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                </span>
+                <span><?php echo $isNew ? 'Save' : 'Save Changes'; ?></span>
+            </button>
+        </div>
+        <div class="control">
+            <button type="submit" name="op" value="<?php echo $isNew ? 'Save' : 'Change'; ?> and Open" class="button is-success">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('book-open', ['alt' => 'Save and Open']); ?>
+                </span>
+                <span><?php echo $isNew ? 'Save' : 'Save'; ?> &amp; Open</span>
+            </button>
+        </div>
+    </div>
 </form>
 <?php if ($isNew && defined('YT_API_KEY') && YT_API_KEY != null) {
     \Lwt\Text_From_Youtube\do_js();

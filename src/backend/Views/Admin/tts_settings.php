@@ -19,80 +19,198 @@
 namespace Lwt\Views\Admin;
 
 use Lwt\View\Helper\IconHelper;
+
 ?>
 <script type="application/json" id="tts-settings-config">
 {"currentLanguageCode": <?php echo $currentLanguageCode; ?>}
 </script>
-<form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
-    <table class="tab1" cellspacing="0" cellpadding="5">
-        <tr>
-            <th class="th1">Group</th>
-            <th class="th1">Description</th>
-            <th class="th1" colspan="2">Value</th>
-        </tr>
-        <tr>
-            <th class="th1 center" rowspan="2">Language</th>
-            <td class="td1 center">Language code</td>
-            <td class="td1 center">
-            <select name="LgName" id="get-language" class="notempty respinput">
-                <?php echo $languageOptions; ?>
-            </select>
-            </td>
-            <td class="td1 center">
-                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 center">Voice <wbr />(depends on your browser)</td>
-            <td class="td1 center">
-                <select name="LgVoice" id="voice" class="notempty respinput">
-                </select>
-            </td>
-            <td class="td1 center">
-                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-            </td>
-        </tr>
-        <tr>
-            <th class="th1 center" rowspan="2">Speech</th>
-            <td class="td1 center">Reading Rate</td>
-            <td class="td1 center">
-                <input type="range" name="LgTTSRate" class="respinput"
-                min="0.5" max="2" value="1" step="0.1" id="rate">
-            </td>
-            <td class="td1 center">
-                <?php echo IconHelper::render('circle-check', ['alt' => 'OK']); ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 center">Pitch</td>
-            <td class="td1 center">
-                <input type="range" name="LgPitch" class="respinput" min="0"
-                max="2" value="1" step="0.1" id="pitch">
-            </td>
-            <td class="td1 center">
-                <?php echo IconHelper::render('circle-check', ['alt' => 'OK']); ?>
-            </td>
-        </tr>
-        <tr>
-            <th class="th1 center">Demo</th>
-            <td class="td1 center" colspan="2">
-                <textarea id="tts-demo" title="Enter your text here" class="respinput"
-                >Lorem ipsum dolor sit amet...</textarea>
-            </td>
-            <td class="td1 right">
-                <input type="button" data-action="tts-demo" value="Read"/>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right" colspan="4">
-                <input type="button" value="Cancel" data-action="tts-cancel" />
-                <input type="submit" name="op" value="Save" />
-            </td>
-        </tr>
-    </table>
+
+<form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post"
+      x-data="{
+          rate: 1,
+          pitch: 1,
+          demoText: 'Lorem ipsum dolor sit amet...'
+      }">
+
+    <div class="box">
+        <h3 class="title is-5">Language Settings</h3>
+
+        <!-- Language Code -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="get-language">Language</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="LgName" id="get-language" class="notempty" required>
+                                <?php echo $languageOptions; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Selection -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="voice">Voice</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="LgVoice" id="voice" class="notempty" required>
+                                <!-- Populated by JavaScript based on browser capabilities -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+                <p class="help">Available voices depend on your web browser</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <h3 class="title is-5">Speech Settings</h3>
+
+        <!-- Reading Rate -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="rate">Reading Rate</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <div class="columns is-vcentered is-mobile">
+                            <div class="column is-narrow">
+                                <span class="tag is-light">0.5x</span>
+                            </div>
+                            <div class="column">
+                                <input type="range"
+                                       name="LgTTSRate"
+                                       id="rate"
+                                       class="slider is-fullwidth"
+                                       min="0.5"
+                                       max="2"
+                                       step="0.1"
+                                       x-model="rate" />
+                            </div>
+                            <div class="column is-narrow">
+                                <span class="tag is-light">2x</span>
+                            </div>
+                            <div class="column is-narrow">
+                                <span class="tag is-info" x-text="rate + 'x'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pitch -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="pitch">Pitch</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <div class="columns is-vcentered is-mobile">
+                            <div class="column is-narrow">
+                                <span class="tag is-light">Low</span>
+                            </div>
+                            <div class="column">
+                                <input type="range"
+                                       name="LgPitch"
+                                       id="pitch"
+                                       class="slider is-fullwidth"
+                                       min="0"
+                                       max="2"
+                                       step="0.1"
+                                       x-model="pitch" />
+                            </div>
+                            <div class="column is-narrow">
+                                <span class="tag is-light">High</span>
+                            </div>
+                            <div class="column is-narrow">
+                                <span class="tag is-info" x-text="pitch"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <h3 class="title is-5">Demo</h3>
+
+        <!-- Demo Text -->
+        <div class="field">
+            <label class="label" for="tts-demo">Test Text</label>
+            <div class="control">
+                <textarea class="textarea"
+                          id="tts-demo"
+                          rows="3"
+                          placeholder="Enter text to test speech synthesis..."
+                          x-model="demoText"></textarea>
+            </div>
+            <p class="help">Enter any text to preview the voice settings</p>
+        </div>
+
+        <div class="field">
+            <div class="control">
+                <button type="button"
+                        class="button is-info"
+                        data-action="tts-demo">
+                    <span class="icon is-small">
+                        <?php echo IconHelper::render('play', ['alt' => 'Play']); ?>
+                    </span>
+                    <span>Read Aloud</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="field is-grouped is-grouped-right">
+        <div class="control">
+            <button type="button"
+                    class="button is-light"
+                    data-action="tts-cancel">
+                Cancel
+            </button>
+        </div>
+        <div class="control">
+            <button type="submit" name="op" value="Save" class="button is-primary">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                </span>
+                <span>Save</span>
+            </button>
+        </div>
+    </div>
 </form>
-<p>
-    <b>Note</b>: language settings depend on your web browser, as different web
-    browser have different ways to read languages. Saving anything here will save
-    it as a cookie on your browser and will not be accessible by the LWT database.
-</p>
+
+<article class="message is-info mt-5">
+    <div class="message-header">
+        <p>Note</p>
+    </div>
+    <div class="message-body">
+        Language settings depend on your web browser, as different browsers have different ways to read languages.
+        Saving these settings will store them as a cookie on your browser and will not be accessible by the LWT database.
+    </div>
+</article>

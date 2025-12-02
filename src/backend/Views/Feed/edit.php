@@ -22,119 +22,312 @@
 namespace Lwt\Views\Feed;
 
 use Lwt\View\Helper\IconHelper;
+use Lwt\View\Helper\PageLayoutHelper;
+
+$actions = [
+    ['url' => '/feeds?page=1', 'label' => 'My Feeds', 'icon' => 'list'],
+    ['url' => '/feeds/wizard?step=2&edit_feed=' . $feed['NfID'], 'label' => 'Feed Wizard', 'icon' => 'wand-2', 'class' => 'is-info']
+];
 
 ?>
-<h2>
+<h2 class="title is-4 is-flex is-align-items-center">
     Edit Feed
-    <a target="_blank" href="docs/info.html#new_feed">
+    <a target="_blank" href="docs/info.html#new_feed" class="ml-2">
         <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
     </a>
 </h2>
-<a href="/feeds?page=1"> My Feeds</a>
-<span class="nowrap"></span>
-<a href="/feeds/wizard?step=2&amp;edit_feed=<?php echo $feed['NfID']; ?>">
-<?php echo IconHelper::render('wand-2', ['title' => 'Feed Wizard', 'alt' => 'Feed Wizard']); ?> Feed Wizard</a>
-<form class="validate" action="/feeds/edit" method="post">
-<table class="tab2" cellspacing="0" cellpadding="5">
-<tr>
-    <td class="td1">Language: </td>
-    <td class="td1">
-        <select name="NfLgID">
-    <?php foreach ($languages as $lang): ?>
-        <option value="<?php echo $lang['LgID']; ?>"<?php if ($feed['NfLgID'] === $lang['LgID']) echo ' selected="selected"'; ?>><?php echo $lang['LgName']; ?></option>
-    <?php endforeach; ?>
-        </select>
-    </td>
-</tr>
-<tr>
-    <td class="td1">Name: </td>
-    <td class="td1">
-        <input class="notempty feed-form-input" type="text" name="NfName"
-        value="<?php echo htmlspecialchars($feed['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-        <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-    </td>
-</tr>
-<tr>
-    <td class="td1">Newsfeed url: </td>
-    <td class="td1">
-        <input class="notempty feed-form-input" type="text" name="NfSourceURI"
-        value="<?php echo htmlspecialchars($feed['NfSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-        <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-    </td>
-</tr>
-<tr>
-    <td class="td1">Article Section: </td>
-    <td class="td1">
-        <input class="notempty feed-form-input" type="text"
-        name="NfArticleSectionTags" value="<?php echo htmlspecialchars($feed['NfArticleSectionTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-        <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-    </td>
-</tr>
-<tr>
-    <td class="td1">Filter Tags: </td>
-    <td class="td1">
-        <input type="text" class="feed-form-input" name="NfFilterTags"
-        value="<?php echo htmlspecialchars($feed['NfFilterTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-    </td>
-</tr>
-<tr>
-    <td class="td1">Options: </td>
-    <td class="td1">
-        <table class="feed-options-table">
-        <tr>
-            <td class="option-label">
-            <input type="checkbox" name="edit_text"<?php
-            if (isset($options['edit_text'])) echo ' checked="checked"';
-            ?> />
-            Edit Text
-        </td>
-<td>
-    <input type="checkbox" name="c_autoupdate"<?php if ($autoUpdateInterval !== null) echo ' checked="checked"'; ?> />
-Auto Update Interval: <input class="posintnumber<?php if ($autoUpdateInterval !== null) echo ' notempty'; ?>" data_info="Auto Update Interval" type="number" min="0" size="4" name="autoupdate" value="<?php echo $autoUpdateInterval; ?>"<?php if ($autoUpdateInterval === null) echo ' disabled'; ?> />
-<select name="autoupdate"<?php if ($autoUpdateUnit === null) echo ' disabled'; ?>>
-<option value="h"<?php if ($autoUpdateUnit === 'h') echo ' selected="selected"'; ?>>Hour(s)</option>
-<option value="d"<?php if ($autoUpdateUnit === 'd') echo ' selected="selected"'; ?>>Day(s)</option>
-<option value="w"<?php if ($autoUpdateUnit === 'w') echo ' selected="selected"'; ?>>Week(s)</option>
-</select>
-</td>
-</tr>
-<tr>
-    <td>
-        <input type="checkbox" name="c_max_links"<?php if (isset($options['max_links'])) echo ' checked="checked"'; ?> />
-Max. Links: <input class="<?php if (isset($options['max_links'])) echo 'notempty '; ?>posintnumber maxint_300" data_info="Max. Links" type="number" min="0" max="300" size="4" name="max_links" value="<?php echo $options['max_links'] ?? ''; ?>"<?php if (!isset($options['max_links'])) echo ' disabled'; ?> />
-</td>
-<td>
-    <input type="checkbox" name="c_charset"<?php if (isset($options['charset'])) echo ' checked="checked"'; ?> />
-Charset: <input <?php if (isset($options['charset'])) echo 'class="notempty" '; ?>type="text" data_info="Charset" size="20" name="charset" value="<?php echo $options['charset'] ?? ''; ?>"<?php if (!isset($options['charset'])) echo ' disabled'; ?> />
-</td>
-</tr>
-<tr>
-    <td>
-        <input type="checkbox" name="c_max_texts"<?php if (isset($options['max_texts'])) echo ' checked="checked"'; ?> />
-Max. Texts:
-<input class="<?php if (isset($options['max_texts'])) echo 'notempty '; ?>posintnumber maxint_30" data_info="Max. Texts" type="number" min="0" max="30"
-size="4" name="max_texts"
-value="<?php echo $options['max_texts'] ?? ''; ?>"<?php if (!isset($options['max_texts'])) echo ' disabled'; ?> />
-</td>
-<td>
-    <input type="checkbox" name="c_tag"<?php if (isset($options['tag'])) echo ' checked="checked"'; ?> />
-       Tag: <input <?php if (isset($options['tag'])) echo 'class="notempty" '; ?>type="text" data_info="Tag" size="20" name="tag" value="<?php echo $options['tag'] ?? ''; ?>"<?php if (!isset($options['tag'])) echo ' disabled'; ?> />
-</td>
-</tr>
-<tr>
-    <td colspan="2">
-    <input type="checkbox" name="c_article_source"<?php if (isset($options['article_source'])) echo ' checked="checked"'; ?> />
-Article Source: <input class="<?php if (isset($options['article_source'])) echo 'notempty '; ?>" data_info="Article Source" type="text" size="20" name="article_source" value="<?php echo $options['article_source'] ?? ''; ?>"<?php if (!isset($options['article_source'])) echo ' disabled'; ?> />
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-<input type="submit" value="Update" />
-<input type="hidden" name="NfID" value="<?php echo htmlspecialchars($feed['NfID'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
-<input type="button" value="Cancel" data-action="navigate" data-url="/feeds/edit" />
-<input type="hidden" name="NfOptions" value="" />
-<input type="hidden" name="update_feed" value="1" />
+
+<?php echo PageLayoutHelper::buildActionCard('Feed Options', $actions, 'feeds'); ?>
+
+<form class="validate" action="/feeds/edit" method="post"
+      x-data="{
+          editText: <?php echo isset($options['edit_text']) ? 'true' : 'false'; ?>,
+          autoUpdate: <?php echo $autoUpdateInterval !== null ? 'true' : 'false'; ?>,
+          maxLinks: <?php echo isset($options['max_links']) ? 'true' : 'false'; ?>,
+          charset: <?php echo isset($options['charset']) ? 'true' : 'false'; ?>,
+          maxTexts: <?php echo isset($options['max_texts']) ? 'true' : 'false'; ?>,
+          tag: <?php echo isset($options['tag']) ? 'true' : 'false'; ?>,
+          articleSource: <?php echo isset($options['article_source']) ? 'true' : 'false'; ?>
+      }">
+    <input type="hidden" name="NfID" value="<?php echo htmlspecialchars($feed['NfID'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+    <input type="hidden" name="NfOptions" value="" />
+    <input type="hidden" name="update_feed" value="1" />
+
+    <div class="box">
+        <!-- Language -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="NfLgID">Language</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="NfLgID" id="NfLgID">
+                                <?php foreach ($languages as $lang): ?>
+                                <option value="<?php echo $lang['LgID']; ?>"<?php if ($feed['NfLgID'] === $lang['LgID']) echo ' selected'; ?>>
+                                    <?php echo htmlspecialchars($lang['LgName'], ENT_QUOTES, 'UTF-8'); ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Name -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="NfName">Name</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input class="input notempty"
+                               type="text"
+                               name="NfName"
+                               id="NfName"
+                               value="<?php echo htmlspecialchars($feed['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Newsfeed URL -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="NfSourceURI">Newsfeed URL</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input class="input notempty"
+                               type="url"
+                               name="NfSourceURI"
+                               id="NfSourceURI"
+                               value="<?php echo htmlspecialchars($feed['NfSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Article Section -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="NfArticleSectionTags">Article Section</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input class="input notempty"
+                               type="text"
+                               name="NfArticleSectionTags"
+                               id="NfArticleSectionTags"
+                               value="<?php echo htmlspecialchars($feed['NfArticleSectionTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tags -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="NfFilterTags">Filter Tags</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <input class="input"
+                               type="text"
+                               name="NfFilterTags"
+                               id="NfFilterTags"
+                               value="<?php echo htmlspecialchars($feed['NfFilterTags'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Options Section -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label">Options</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="box has-background-light">
+                        <div class="columns is-multiline">
+                            <!-- Edit Text -->
+                            <div class="column is-half">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="edit_text" x-model="editText" />
+                                    <strong>Edit Text</strong>
+                                </label>
+                            </div>
+
+                            <!-- Auto Update -->
+                            <div class="column is-half">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="c_autoupdate" x-model="autoUpdate" />
+                                    <strong>Auto Update Interval</strong>
+                                </label>
+                                <div class="field has-addons mt-2" x-show="autoUpdate" x-transition>
+                                    <div class="control">
+                                        <input class="input is-small posintnumber"
+                                               :class="autoUpdate ? 'notempty' : ''"
+                                               type="number"
+                                               min="1"
+                                               name="autoupdate"
+                                               data_info="Auto Update Interval"
+                                               value="<?php echo $autoUpdateInterval; ?>"
+                                               style="width: 80px;"
+                                               :disabled="!autoUpdate" />
+                                    </div>
+                                    <div class="control">
+                                        <div class="select is-small">
+                                            <select name="autoupdate_unit" :disabled="!autoUpdate">
+                                                <option value="h"<?php if ($autoUpdateUnit === 'h') echo ' selected'; ?>>Hour(s)</option>
+                                                <option value="d"<?php if ($autoUpdateUnit === 'd') echo ' selected'; ?>>Day(s)</option>
+                                                <option value="w"<?php if ($autoUpdateUnit === 'w') echo ' selected'; ?>>Week(s)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Max Links -->
+                            <div class="column is-half">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="c_max_links" x-model="maxLinks" />
+                                    <strong>Max. Links</strong>
+                                </label>
+                                <div class="control mt-2" x-show="maxLinks" x-transition>
+                                    <input class="input is-small posintnumber maxint_300"
+                                           :class="maxLinks ? 'notempty' : ''"
+                                           type="number"
+                                           min="1"
+                                           max="300"
+                                           name="max_links"
+                                           data_info="Max. Links"
+                                           value="<?php echo $options['max_links'] ?? ''; ?>"
+                                           style="width: 100px;"
+                                           :disabled="!maxLinks" />
+                                </div>
+                            </div>
+
+                            <!-- Charset -->
+                            <div class="column is-half">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="c_charset" x-model="charset" />
+                                    <strong>Charset</strong>
+                                </label>
+                                <div class="control mt-2" x-show="charset" x-transition>
+                                    <input class="input is-small"
+                                           :class="charset ? 'notempty' : ''"
+                                           type="text"
+                                           name="charset"
+                                           data_info="Charset"
+                                           value="<?php echo $options['charset'] ?? ''; ?>"
+                                           :disabled="!charset" />
+                                </div>
+                            </div>
+
+                            <!-- Max Texts -->
+                            <div class="column is-half">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="c_max_texts" x-model="maxTexts" />
+                                    <strong>Max. Texts</strong>
+                                </label>
+                                <div class="control mt-2" x-show="maxTexts" x-transition>
+                                    <input class="input is-small posintnumber maxint_30"
+                                           :class="maxTexts ? 'notempty' : ''"
+                                           type="number"
+                                           min="1"
+                                           max="30"
+                                           name="max_texts"
+                                           data_info="Max. Texts"
+                                           value="<?php echo $options['max_texts'] ?? ''; ?>"
+                                           style="width: 100px;"
+                                           :disabled="!maxTexts" />
+                                </div>
+                            </div>
+
+                            <!-- Tag -->
+                            <div class="column is-half">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="c_tag" x-model="tag" />
+                                    <strong>Tag</strong>
+                                </label>
+                                <div class="control mt-2" x-show="tag" x-transition>
+                                    <input class="input is-small"
+                                           :class="tag ? 'notempty' : ''"
+                                           type="text"
+                                           name="tag"
+                                           data_info="Tag"
+                                           value="<?php echo $options['tag'] ?? ''; ?>"
+                                           :disabled="!tag" />
+                                </div>
+                            </div>
+
+                            <!-- Article Source -->
+                            <div class="column is-full">
+                                <label class="checkbox">
+                                    <input type="checkbox" name="c_article_source" x-model="articleSource" />
+                                    <strong>Article Source</strong>
+                                </label>
+                                <div class="control mt-2" x-show="articleSource" x-transition>
+                                    <input class="input is-small"
+                                           :class="articleSource ? 'notempty' : ''"
+                                           type="text"
+                                           name="article_source"
+                                           data_info="Article Source"
+                                           value="<?php echo $options['article_source'] ?? ''; ?>"
+                                           :disabled="!articleSource" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="field is-grouped is-grouped-right">
+        <div class="control">
+            <button type="button"
+                    class="button is-light"
+                    data-action="navigate"
+                    data-url="/feeds/edit">
+                Cancel
+            </button>
+        </div>
+        <div class="control">
+            <button type="submit" class="button is-primary">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                </span>
+                <span>Update</span>
+            </button>
+        </div>
+    </div>
 </form>
 <!-- Feed form interactions handled by feeds/feed_form.ts -->

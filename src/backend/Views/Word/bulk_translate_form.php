@@ -23,6 +23,8 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\View\Helper\IconHelper;
+
 ?>
 <script type="application/json" id="bulk-translate-config">
 <?php echo json_encode([
@@ -32,88 +34,151 @@ namespace Lwt\Views\Word;
 ]); ?>
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <form name="form1" action="/word/bulk-translate" method="post">
-    <span class="notranslate">
-        <div id="google_translate_element"></div>
-        <table class="tab3" cellspacing="0">
-            <tr class="notranslate">
-                <th class="th1 center" colspan="3">
-                    <input type="button" value="Mark All" data-action="bulk-mark-all" />
-                    <input type="button" value="Mark None" data-action="bulk-mark-none" />
-                    <br />
-                </th>
-            </tr>
-            <tr class="notranslate">
-                <td class="td1">Marked Terms: </td>
-                <td class="td1">
-                    <select data-action="bulk-term-toggles">
-                        <option value="0" selected="selected">
-                            [Choose...]
-                        </option>
-                        <optgroup label="Change Status">
-                            <option value="1">Set Status To [1]</option>
-                            <option value="2">Set Status To [2]</option>
-                            <option value="3">Set Status To [3]</option>
-                            <option value="4">Set Status To [4]</option>
-                            <option value="5">Set Status To [5]</option>
-                            <option value="99">Set Status To [WKn]</option>
-                            <option value="98">Set Status To [Ign]</option>
-                        </optgroup>
-                        <option value="6">Set To Lowercase</option>
-                        <option value="7">Delete Translation</option>
-                    </select>
-                </td>
-                <td class="td1" style="min-width: 45px;">
-                    <input  type="submit" value="Save" />
-                </td>
-            </tr>
+
+<form name="form1" action="/word/bulk-translate" method="post"
+      x-data="{
+          allChecked: true,
+          toggleAll(checked) {
+              this.allChecked = checked;
+              document.querySelectorAll('.markcheck').forEach(cb => cb.checked = checked);
+          }
+      }">
+
+    <!-- Controls Panel -->
+    <div class="box notranslate mb-4">
+        <div id="google_translate_element" class="mb-3"></div>
+
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <div class="buttons are-small">
+                        <button type="button"
+                                class="button is-info is-outlined"
+                                data-action="bulk-mark-all"
+                                @click="toggleAll(true)">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('check-square', ['alt' => 'Mark All']); ?>
+                            </span>
+                            <span>Mark All</span>
+                        </button>
+                        <button type="button"
+                                class="button is-outlined"
+                                data-action="bulk-mark-none"
+                                @click="toggleAll(false)">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('square', ['alt' => 'Mark None']); ?>
+                            </span>
+                            <span>Mark None</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="level-right">
+                <div class="level-item">
+                    <div class="field has-addons">
+                        <div class="control">
+                            <span class="button is-static is-small">Marked Terms</span>
+                        </div>
+                        <div class="control">
+                            <div class="select is-small">
+                                <select data-action="bulk-term-toggles">
+                                    <option value="0" selected>[Choose...]</option>
+                                    <optgroup label="Change Status">
+                                        <option value="1">Set Status To [1]</option>
+                                        <option value="2">Set Status To [2]</option>
+                                        <option value="3">Set Status To [3]</option>
+                                        <option value="4">Set Status To [4]</option>
+                                        <option value="5">Set Status To [5]</option>
+                                        <option value="99">Set Status To [WKn]</option>
+                                        <option value="98">Set Status To [Ign]</option>
+                                    </optgroup>
+                                    <option value="6">Set To Lowercase</option>
+                                    <option value="7">Delete Translation</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="control">
+                            <button type="submit" class="button is-primary is-small">
+                                <span class="icon is-small">
+                                    <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                                </span>
+                                <span>Save</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Table -->
+    <div class="table-container">
+        <table class="table is-fullwidth is-striped is-hoverable">
+            <thead>
+                <tr class="notranslate">
+                    <th class="has-text-centered" style="width: 60px;">Mark</th>
+                    <th style="min-width: 8em;">Term</th>
+                    <th>Translation</th>
+                    <th class="has-text-centered" style="width: 100px;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php
+            $cnt = 0;
+            foreach ($terms as $record) {
+                $cnt++;
+                $value = \htmlspecialchars($record['word'] ?? '', ENT_QUOTES, 'UTF-8');
+                ?>
+                <tr>
+                    <td class="has-text-centered notranslate">
+                        <label class="checkbox">
+                            <input name="marked[<?php echo $cnt ?>]"
+                                   type="checkbox"
+                                   class="markcheck"
+                                   checked
+                                   value="<?php echo $cnt ?>" />
+                        </label>
+                    </td>
+                    <td id="Term_<?php echo $cnt ?>" class="notranslate">
+                        <span class="term tag is-medium is-light"><?php echo $value ?></span>
+                    </td>
+                    <td class="trans" id="Trans_<?php echo $cnt ?>">
+                        <?php echo mb_strtolower($value, 'UTF-8') ?>
+                    </td>
+                    <td class="has-text-centered notranslate">
+                        <div class="select is-small">
+                            <select id="Stat_<?php echo $cnt ?>" name="term[<?php echo $cnt ?>][status]">
+                                <option value="1" selected>[1]</option>
+                                <option value="2">[2]</option>
+                                <option value="3">[3]</option>
+                                <option value="4">[4]</option>
+                                <option value="5">[5]</option>
+                                <option value="99">[WKn]</option>
+                                <option value="98">[Ign]</option>
+                            </select>
+                        </div>
+                        <input type="hidden"
+                               id="Text_<?php echo $cnt ?>"
+                               name="term[<?php echo $cnt ?>][text]"
+                               value="<?php echo $value ?>" />
+                        <input type="hidden"
+                               name="term[<?php echo $cnt ?>][lg]"
+                               value="<?php echo \htmlspecialchars($record['Ti2LgID'] ?? '', ENT_QUOTES, 'UTF-8') ?>" />
+                    </td>
+                </tr>
+                <?php
+            }
+            ?>
+            </tbody>
         </table>
-    </span>
-    <table class="tab3" cellspacing="0">
-        <tr class="notranslate">
-            <th class="th1">Mark</th>
-            <th class="th1" style="min-width:5em;">Term</th>
-            <th class="th1">Translation</th>
-            <th class="th1">Status</th>
-        </tr>
-    <?php
-    $cnt = 0;
-    foreach ($terms as $record) {
-        $cnt++;
-        $value = \htmlspecialchars($record['word'] ?? '', ENT_QUOTES, 'UTF-8');
-        ?>
-        <tr>
-        <td class="td1 center notranslate">
-            <input name="marked[<?php echo $cnt ?>]" type="checkbox" class="markcheck" checked="checked" value="<?php echo $cnt ?>" />
-        </td>
-        <td id="Term_<?php echo $cnt ?>" class="td1 left notranslate">
-            <span class="term"><?php echo $value ?></span>
-        </td>
-        <td class="td1 trans" id="Trans_<?php echo $cnt ?>">
-            <?php echo mb_strtolower($value, 'UTF-8') ?>
-        </td>
-        <td class="td1 center notranslate">
-            <select id="Stat_<?php echo $cnt ?>" name="term[<?php echo $cnt ?>][status]">
-                <option value="1" selected="selected">[1]</option>
-                <option value="2">[2]</option>
-                <option value="3">[3]</option>
-                <option value="4">[4]</option>
-                <option value="5">[5]</option>
-                <option value="99">[WKn]</option>
-                <option value="98">[Ign]</option>
-            </select>
-            <input type="hidden" id="Text_<?php echo $cnt ?>" name="term[<?php echo $cnt ?>][text]" value="<?php echo $value ?>" />
-            <input type="hidden" name="term[<?php echo $cnt ?>][lg]" value="<?php echo \htmlspecialchars($record['Ti2LgID'] ?? '', ENT_QUOTES, 'UTF-8') ?>" />
-        </td>
-        </tr>
-        <?php
-    }
-    ?>
-    </table>
+    </div>
+
+    <!-- Hidden fields -->
     <input type="hidden" name="tid" value="<?php echo $tid ?>" />
     <?php if ($nextOffset !== null) : ?>
     <input type="hidden" name="offset" value="<?php echo $nextOffset ?>" />
     <input type="hidden" name="sl" value="<?php echo $sl ?>" />
     <input type="hidden" name="tl" value="<?php echo $tl ?>" />
     <?php endif; ?>
-    </form>
+</form>

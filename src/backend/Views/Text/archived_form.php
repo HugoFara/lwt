@@ -25,71 +25,196 @@ use Lwt\View\Helper\IconHelper;
 /** @var int $textId */
 /** @var array $record */
 
-// JavaScript moved to forms/form_initialization.ts (auto-detects form.validate)
-
 ?>
-<h2>Edit Archived Text</h2>
+<h2 class="title is-4">Edit Archived Text</h2>
 
 <form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>#rec<?php echo $textId; ?>" method="post">
     <input type="hidden" name="AtID" value="<?php echo $textId; ?>" />
-    <table class="tab3" cellspacing="0" cellpadding="5">
-        <tr>
-            <td class="td1 right">Language:</td>
-            <td class="td1">
-                <select name="AtLgID" class="notempty setfocus">
-                    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $record['AtLgID'], '[Choose...]'); ?>
-                </select>
-                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right">Title:</td>
-            <td class="td1">
-                <input type="text" class="notempty checkoutsidebmp" data_info="Title" name="AtTitle" value="<?php echo htmlspecialchars($record['AtTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200" size="60" />
-                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right">Text:</td>
-            <td class="td1">
-                <textarea name="AtText" class="notempty checkbytes checkoutsidebmp" data_maxlength="65000" data_info="Text" cols="60" rows="20"><?php echo htmlspecialchars($record['AtText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-                <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right">Ann.Text:</td>
-            <td class="td1">
-                <?php if ($record['annotlen']): ?>
-                <?php echo IconHelper::render('check', ['title' => 'With Annotation', 'alt' => 'With Annotation']); ?> Exists - May be partially or fully lost if you change the text!
-                <?php else: ?>
-                <?php echo IconHelper::render('x', ['title' => 'No Annotation', 'alt' => 'No Annotation']); ?> - None
-                <?php endif; ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right">Source URI:</td>
-            <td class="td1">
-                <input type="text" class="checkurl checkoutsidebmp" data_info="Source URI" name="AtSourceURI" value="<?php echo htmlspecialchars($record['AtSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="1000" size="60" />
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right">Tags:</td>
-            <td class="td1">
-                <?php echo getArchivedTextTags($textId); ?>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right">Audio-URI:</td>
-            <td class="td1">
-                <input type="text" class="checkoutsidebmp" data_info="Audio-URI" name="AtAudioURI" value="<?php echo htmlspecialchars($record['AtAudioURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="200" size="60" />
-                <span id="mediaselect"><?php echo \selectmediapath('AtAudioURI'); ?></span>
-            </td>
-        </tr>
-        <tr>
-            <td class="td1 right" colspan="2">
-                <input type="button" value="Cancel" data-action="cancel-navigate" data-url="/text/archived#rec<?php echo $textId; ?>" />
-                <input type="submit" name="op" value="Change" />
-            </td>
-        </tr>
-    </table>
+
+    <div class="box">
+        <!-- Language -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="AtLgID">Language</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="AtLgID" id="AtLgID" class="notempty setfocus" required>
+                                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $record['AtLgID'], '[Choose...]'); ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Title -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="AtTitle">Title</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input type="text"
+                               class="input notempty checkoutsidebmp"
+                               data_info="Title"
+                               name="AtTitle"
+                               id="AtTitle"
+                               value="<?php echo htmlspecialchars($record['AtTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="200"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="AtText">Text</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <textarea name="AtText"
+                                  id="AtText"
+                                  class="textarea notempty checkbytes checkoutsidebmp"
+                                  data_maxlength="65000"
+                                  data_info="Text"
+                                  rows="15"
+                                  required><?php echo htmlspecialchars($record['AtText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Annotated Text -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label">Annotated Text</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <?php if ($record['annotlen']): ?>
+                        <div class="notification is-info is-light">
+                            <span class="icon-text">
+                                <span class="icon has-text-success">
+                                    <?php echo IconHelper::render('check', ['alt' => 'Has Annotation']); ?>
+                                </span>
+                                <span>Exists - May be partially or fully lost if you change the text!</span>
+                            </span>
+                        </div>
+                        <?php else: ?>
+                        <div class="notification is-light">
+                            <span class="icon-text">
+                                <span class="icon has-text-grey">
+                                    <?php echo IconHelper::render('x', ['alt' => 'No Annotation']); ?>
+                                </span>
+                                <span>None</span>
+                            </span>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Source URI -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="AtSourceURI">Source URI</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <input type="url"
+                               class="input checkurl checkoutsidebmp"
+                               data_info="Source URI"
+                               name="AtSourceURI"
+                               id="AtSourceURI"
+                               value="<?php echo htmlspecialchars($record['AtSourceURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="1000"
+                               placeholder="https://..." />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label">Tags</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <?php echo getArchivedTextTags($textId); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio URI -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="AtAudioURI">Audio URI</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input type="text"
+                               class="input checkoutsidebmp"
+                               data_info="Audio-URI"
+                               name="AtAudioURI"
+                               id="AtAudioURI"
+                               value="<?php echo htmlspecialchars($record['AtAudioURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                               maxlength="200"
+                               placeholder="Path to audio file or URL" />
+                    </div>
+                    <div class="control" id="mediaselect">
+                        <?php echo \selectmediapath('AtAudioURI'); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="field is-grouped is-grouped-right">
+        <div class="control">
+            <button type="button"
+                    class="button is-light"
+                    data-action="cancel-navigate"
+                    data-url="/text/archived#rec<?php echo $textId; ?>">
+                Cancel
+            </button>
+        </div>
+        <div class="control">
+            <button type="submit" name="op" value="Change" class="button is-primary">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                </span>
+                <span>Save Changes</span>
+            </button>
+        </div>
+    </div>
 </form>

@@ -18,134 +18,268 @@
 namespace Lwt\Views\Text;
 
 use Lwt\View\Helper\IconHelper;
+use Lwt\View\Helper\PageLayoutHelper;
 
-// JavaScript moved to forms/form_initialization.ts (auto-detects form.validate and language-data-config)
+$actions = [
+    ['url' => '/texts?new=1', 'label' => 'Short Text Import', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+    ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],
+    ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'],
+    ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive']
+];
 
 ?>
 <script type="application/json" id="language-data-config"><?php echo json_encode($languageData); ?></script>
 
-<div class="flex-spaced">
-    <div title="Import of a single text, max. 65,000 bytes long, with optional audio">
-        <a href="/texts?new=1">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            Short Text Import
-        </a>
-    </div>
-    <div>
-        <a href="/feeds?page=1&amp;check_autoupdate=1">
-            <?php echo IconHelper::render('circle-plus', ['alt' => 'New']); ?>
-            Newsfeed Import
-        </a>
-    </div>
-    <div>
-        <a href="/texts?query=&amp;page=1">
-            <?php echo IconHelper::render('archive', ['alt' => 'Active']); ?>
-            Active Texts
-        </a>
-    </div>
-    <div>
-        <a href="/text/archived?query=&amp;page=1">
-            <?php echo IconHelper::render('archive-x', ['alt' => 'Archived']); ?>
-            Archived Texts
-        </a>
-    </div>
-</div>
+<h2 class="title is-4">Long Text Import</h2>
 
-<form enctype="multipart/form-data" class="validate" action="/text/import-long" method="post">
-<table class="tab1" cellspacing="0" cellpadding="5">
-    <tr>
-        <td class="td1 right">Language:</td>
-        <td class="td1">
-            <select name="LgID" id="TxLgID" class="notempty setfocus">
-                <?php echo $languagesOption; ?>
-            </select>
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 right">Title:</td>
-        <td class="td1">
-            <input type="text" class="notempty checkoutsidebmp respinput"
-            data_info="Title" name="TxTitle" id="TxTitle" value="" maxlength="200" />
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 right">
-            Text:
-        </td>
-        <td class="td1">
-            Either specify a <b>File to upload</b>:<br />
-            <input name="thefile" type="file" /><br /><br />
-            <b>Or</b> paste a text from the clipboard
-            (and do <b>NOT</b> specify file):<br />
+<?php echo PageLayoutHelper::buildActionCard('Import Options', $actions, 'texts'); ?>
 
-            <textarea class="checkoutsidebmp respinput" data_info="Upload"
-            name="Upload" id="TxText" rows="15"></textarea>
+<form enctype="multipart/form-data" class="validate" action="/text/import-long" method="post"
+      x-data="{ inputMethod: 'paste' }">
+    <div class="box">
+        <!-- Language -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="TxLgID">Language</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="LgID" id="TxLgID" class="notempty setfocus" required>
+                                <?php echo $languagesOption; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <p class="smallgray">
-                If the text is too long, the import may not be possible. <wbr />
-                Current upload limits (in bytes):
-                <br />
-                <b>post_max_size</b>:
-                <?php echo ini_get('post_max_size'); ?>
-                <br />
-                <b>upload_max_filesize</b>:
-                <?php echo ini_get('upload_max_filesize'); ?>
-                <br />
-                If needed, increase in <wbr />"<?php echo htmlspecialchars(php_ini_loaded_file() ?? '', ENT_QUOTES, 'UTF-8'); ?>" <wbr />
-                and restart the server.
-            </p>
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 right">NEWLINES and paragraphs:</td>
-        <td class="td1">
-            <select name="paragraph_handling" class="respinput">
-                <option value="1" selected="selected">
-                    ONE NEWLINE: Paragraph ends
-                </option>
-                <option value="2">
-                    TWO NEWLINEs: Paragraph ends. Single NEWLINE converted to SPACE
-                </option>
-            </select>
-        <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 right">Maximum sentences per text:</td>
-        <td class="td1">
-            <input type="number" min="0" max="999" class="notempty posintnumber"
-            data_info="Maximum Sentences per Text" name="maxsent" value="50" maxlength="3" size="3" />
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-            <br />
-            <span class="smallgray">
-                Values higher than 100 may slow down text display.
-                Very low values (< 5) may result in too many texts.
-                <br />
-                The maximum number of new texts must not exceed <?php echo ($maxInputVars - 20); ?>.
-                A single new text will never exceed the length of 65,000 bytes.
-            </span>
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 right">Source URI:</td>
-        <td class="td1">
-            <input type="url" class="checkurl checkoutsidebmp respinput"
-            data_info="Source URI" name="TxSourceURI" value="" maxlength="1000" />
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 right">Tags:</td>
-        <td class="td1">
-            <?php echo \Lwt\Services\TagService::getTextTagsHtml(0); ?>
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 right" colspan="2">
-            <input type="button" value="Cancel" data-action="cancel-form" data-url="index.php" />
-            <input type="submit" name="op" value="NEXT STEP: Check the Texts" />
-        </td>
-    </tr>
-</table>
+        <!-- Title -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="TxTitle">Title</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input type="text"
+                               class="input notempty checkoutsidebmp"
+                               data_info="Title"
+                               name="TxTitle"
+                               id="TxTitle"
+                               value=""
+                               maxlength="200"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Text Input Method -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label">Text</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <!-- Input method tabs -->
+                    <div class="tabs is-boxed is-small mb-3">
+                        <ul>
+                            <li :class="inputMethod === 'paste' ? 'is-active' : ''">
+                                <a @click.prevent="inputMethod = 'paste'">
+                                    <span class="icon is-small">
+                                        <?php echo IconHelper::render('clipboard', ['alt' => 'Paste']); ?>
+                                    </span>
+                                    <span>Paste Text</span>
+                                </a>
+                            </li>
+                            <li :class="inputMethod === 'file' ? 'is-active' : ''">
+                                <a @click.prevent="inputMethod = 'file'">
+                                    <span class="icon is-small">
+                                        <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>
+                                    </span>
+                                    <span>Upload File</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- File upload option -->
+                    <div x-show="inputMethod === 'file'" x-transition x-cloak>
+                        <div class="file has-name is-fullwidth">
+                            <label class="file-label">
+                                <input class="file-input" type="file" name="thefile"
+                                       @change="$refs.filename.textContent = $event.target.files[0]?.name || 'No file selected'" />
+                                <span class="file-cta">
+                                    <span class="file-icon">
+                                        <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
+                                    </span>
+                                    <span class="file-label">Choose a file...</span>
+                                </span>
+                                <span class="file-name" x-ref="filename">No file selected</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Paste text option -->
+                    <div x-show="inputMethod === 'paste'" x-transition>
+                        <div class="control">
+                            <textarea class="textarea checkoutsidebmp"
+                                      data_info="Upload"
+                                      name="Upload"
+                                      id="TxText"
+                                      rows="12"
+                                      placeholder="Paste your long text here..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Upload limits info -->
+                    <p class="help has-text-grey mt-2">
+                        <span class="icon is-small">
+                            <?php echo IconHelper::render('info', ['alt' => 'Info']); ?>
+                        </span>
+                        Upload limits:
+                        <strong>post_max_size</strong>: <?php echo ini_get('post_max_size'); ?>,
+                        <strong>upload_max_filesize</strong>: <?php echo ini_get('upload_max_filesize'); ?>
+                        <br />
+                        <span class="is-size-7">
+                            Adjust in "<?php echo htmlspecialchars(php_ini_loaded_file() ?? '', ENT_QUOTES, 'UTF-8'); ?>" and restart server if needed.
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paragraph Handling -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="paragraph_handling">Newlines &amp; Paragraphs</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <div class="select is-fullwidth">
+                            <select name="paragraph_handling" id="paragraph_handling">
+                                <option value="1" selected>
+                                    ONE NEWLINE: Paragraph ends
+                                </option>
+                                <option value="2">
+                                    TWO NEWLINEs: Paragraph ends (single newline becomes space)
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maximum Sentences -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="maxsent">Max Sentences per Text</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="field has-addons">
+                        <div class="control">
+                            <input type="number"
+                                   min="1"
+                                   max="999"
+                                   class="input notempty posintnumber"
+                                   data_info="Maximum Sentences per Text"
+                                   name="maxsent"
+                                   id="maxsent"
+                                   value="50"
+                                   maxlength="3"
+                                   style="width: 100px;"
+                                   required />
+                        </div>
+                        <div class="control">
+                            <span class="icon has-text-danger" title="Field must not be empty">
+                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            </span>
+                        </div>
+                    </div>
+                    <p class="help has-text-grey">
+                        Values higher than 100 may slow down text display.
+                        Very low values (&lt; 5) may result in too many texts.
+                        <br />
+                        Max new texts: <?php echo ($maxInputVars - 20); ?>.
+                        Each text limited to 65,000 bytes.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Source URI -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="TxSourceURI">Source URI</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <input type="url"
+                               class="input checkurl checkoutsidebmp"
+                               data_info="Source URI"
+                               name="TxSourceURI"
+                               id="TxSourceURI"
+                               value=""
+                               maxlength="1000"
+                               placeholder="https://..." />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label">Tags</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <?php echo \Lwt\Services\TagService::getTextTagsHtml(0); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="field is-grouped is-grouped-right">
+        <div class="control">
+            <button type="button"
+                    class="button is-light"
+                    data-action="cancel-form"
+                    data-url="index.php">
+                Cancel
+            </button>
+        </div>
+        <div class="control">
+            <button type="submit" name="op" value="NEXT STEP: Check the Texts" class="button is-primary">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('arrow-right', ['alt' => 'Next']); ?>
+                </span>
+                <span>Next Step: Check Texts</span>
+            </button>
+        </div>
+    </div>
 </form>

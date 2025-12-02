@@ -229,15 +229,15 @@ class LanguageController extends BaseController
     /**
      * Prepare source and target language codes for the form.
      *
-     * @param \Lwt\Classes\Language $language              Language object
-     * @param string                $currentNativeLanguage Current native language
-     * @param string                &$sourceLg             Output source language code
-     * @param string                &$targetLg             Output target language code
+     * @param \Lwt\Core\Entity\Language $language              Language object
+     * @param string                    $currentNativeLanguage Current native language
+     * @param string                    &$sourceLg             Output source language code
+     * @param string                    &$targetLg             Output target language code
      *
      * @return void
      */
     private function prepareLanguageCodes(
-        \Lwt\Classes\Language $language,
+        \Lwt\Core\Entity\Language $language,
         string $currentNativeLanguage,
         string &$sourceLg,
         string &$targetLg
@@ -246,16 +246,17 @@ class LanguageController extends BaseController
             $targetLg = LanguageDefinitions::getAll()[$currentNativeLanguage][1];
         }
 
-        if ($language->name) {
-            if (array_key_exists($language->name, LanguageDefinitions::getAll())) {
-                $sourceLg = LanguageDefinitions::getAll()[$language->name][1];
+        $langName = $language->name();
+        if ($langName) {
+            if (array_key_exists($langName, LanguageDefinitions::getAll())) {
+                $sourceLg = LanguageDefinitions::getAll()[$langName][1];
             }
-            $lgFromDict = UrlUtilities::langFromDict($language->translator ?? '');
+            $lgFromDict = UrlUtilities::langFromDict($language->translatorUri());
             if ($lgFromDict != '' && $lgFromDict != $sourceLg) {
                 $sourceLg = $lgFromDict;
             }
 
-            $targetFromDict = UrlUtilities::targetLangFromDict($language->translator ?? '');
+            $targetFromDict = UrlUtilities::targetLangFromDict($language->translatorUri());
             if ($targetFromDict != '' && $targetFromDict != $targetLg) {
                 $targetLg = $targetFromDict;
             }

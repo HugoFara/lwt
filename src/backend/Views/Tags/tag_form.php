@@ -44,35 +44,92 @@ $tagText = $isEdit && $tag !== null ? htmlspecialchars($tag['text'] ?? '', ENT_Q
 $tagComment = $isEdit && $tag !== null ? htmlspecialchars($tag['comment'] ?? '', ENT_QUOTES, 'UTF-8') : '';
 
 ?>
-<h2><?php echo $pageTitle; ?></h2>
-<form name="<?php echo $formName; ?>" class="validate" action="<?php echo $actionUrl; ?>" method="post">
-<?php if ($isEdit && $tag !== null): ?>
-<input type="hidden" name="<?php echo $formFieldPrefix; ?>ID" value="<?php echo $tag['id']; ?>" />
-<?php endif; ?>
-<table class="tab1" cellspacing="0" cellpadding="5">
-    <tr>
-        <td class="td1 right">Tag:</td>
-        <td class="td1">
-            <input class="notempty <?php echo $isEdit ? '' : 'setfocus '; ?>noblanksnocomma checkoutsidebmp respinput"
-            type="text" name="<?php echo $formFieldPrefix; ?>Text" data_info="Tag"
-            value="<?php echo $tagText; ?>" maxlength="20" size="20" />
-            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 right">Comment:</td>
-        <td class="td1">
-            <textarea class="textarea-noreturn checklength checkoutsidebmp respinput"
-            data_maxlength="200" data_info="Comment"
-            name="<?php echo $formFieldPrefix; ?>Comment" cols="40" rows="3"><?php echo $tagComment; ?></textarea>
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 right" colspan="2">
-            <input type="button" value="Cancel"
-                data-action="cancel-navigate" data-url="<?php echo htmlspecialchars($cancelUrl, ENT_QUOTES, 'UTF-8'); ?>" />
-            <input type="submit" name="op" value="<?php echo $submitValue; ?>" />
-        </td>
-    </tr>
-</table>
+<h2 class="title is-4"><?php echo $pageTitle; ?></h2>
+
+<form name="<?php echo $formName; ?>" class="validate" action="<?php echo $actionUrl; ?>" method="post"
+      x-data="{
+          tagText: '<?php echo addslashes($tagText); ?>',
+          tagComment: '<?php echo addslashes($tagComment); ?>',
+          charCount: <?php echo strlen($tagComment); ?>
+      }">
+    <?php if ($isEdit && $tag !== null): ?>
+    <input type="hidden" name="<?php echo $formFieldPrefix; ?>ID" value="<?php echo $tag['id']; ?>" />
+    <?php endif; ?>
+
+    <div class="box">
+        <!-- Tag Name -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="<?php echo $formFieldPrefix; ?>Text">Tag</label>
+            </div>
+            <div class="field-body">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input type="text"
+                               class="input notempty noblanksnocomma checkoutsidebmp <?php echo $isEdit ? '' : 'setfocus'; ?>"
+                               id="<?php echo $formFieldPrefix; ?>Text"
+                               name="<?php echo $formFieldPrefix; ?>Text"
+                               data_info="Tag"
+                               value="<?php echo $tagText; ?>"
+                               maxlength="20"
+                               placeholder="Enter tag name"
+                               x-model="tagText"
+                               required />
+                    </div>
+                    <div class="control">
+                        <span class="icon has-text-danger" title="Field must not be empty">
+                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                        </span>
+                    </div>
+                </div>
+                <p class="help">Maximum 20 characters. No spaces or commas allowed.</p>
+            </div>
+        </div>
+
+        <!-- Comment -->
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label" for="<?php echo $formFieldPrefix; ?>Comment">Comment</label>
+            </div>
+            <div class="field-body">
+                <div class="field">
+                    <div class="control">
+                        <textarea class="textarea textarea-noreturn checklength checkoutsidebmp"
+                                  id="<?php echo $formFieldPrefix; ?>Comment"
+                                  name="<?php echo $formFieldPrefix; ?>Comment"
+                                  data_maxlength="200"
+                                  data_info="Comment"
+                                  rows="3"
+                                  placeholder="Optional comment about this tag"
+                                  x-model="tagComment"
+                                  @input="charCount = $event.target.value.length"><?php echo $tagComment; ?></textarea>
+                    </div>
+                    <p class="help">
+                        <span :class="charCount > 200 ? 'has-text-danger' : 'has-text-grey'"
+                              x-text="charCount + '/200 characters'"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="field is-grouped is-grouped-right">
+        <div class="control">
+            <button type="button"
+                    class="button is-light"
+                    data-action="cancel-navigate"
+                    data-url="<?php echo htmlspecialchars($cancelUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                Cancel
+            </button>
+        </div>
+        <div class="control">
+            <button type="submit" name="op" value="<?php echo $submitValue; ?>" class="button is-primary">
+                <span class="icon is-small">
+                    <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                </span>
+                <span><?php echo $submitValue; ?></span>
+            </button>
+        </div>
+    </div>
 </form>
