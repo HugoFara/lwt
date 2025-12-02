@@ -46,7 +46,7 @@ function handleApiVersionAnswer(data: ApiVersionResponse): void {
  * Fetch the REST API version and display it.
  */
 export function fetchApiVersion(): void {
-  fetch('api.php/v1/version')
+  fetch('/api/v1/version')
     .then(response => response.json())
     .then(handleApiVersionAnswer)
     .catch(error => {

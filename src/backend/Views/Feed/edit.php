@@ -37,7 +37,7 @@ $actions = [
     </a>
 </h2>
 
-<?php echo PageLayoutHelper::buildActionCard('Feed Options', $actions, 'feeds'); ?>
+<?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
 <form class="validate" action="/feeds/edit" method="post"
       x-data="{

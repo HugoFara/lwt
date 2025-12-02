@@ -32,7 +32,7 @@ $actions = [
 
 <h2 class="title is-4">Long Text Import</h2>
 
-<?php echo PageLayoutHelper::buildActionCard('Import Options', $actions, 'texts'); ?>
+<?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
 <form enctype="multipart/form-data" class="validate" action="/text/import-long" method="post"
       x-data="{ inputMethod: 'paste' }">

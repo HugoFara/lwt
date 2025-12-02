@@ -58,7 +58,7 @@ if ($isNew) {
     </a>
 </h2>
 
-<?php echo PageLayoutHelper::buildActionCard('Text Actions', $actions, 'texts'); ?>
+<?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
 <form class="validate" method="post"
       action="/texts<?php echo $isNew ? '' : '#rec' . $textId; ?>"

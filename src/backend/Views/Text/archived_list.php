@@ -49,90 +49,78 @@ use Lwt\View\Helper\PageLayoutHelper;
 
 PageLayoutHelper::renderMessage($message, false);
 
-echo PageLayoutHelper::buildActionCard(
-    'Archive Actions',
-    [
-        ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
-        ['url' => '/text/import-long', 'label' => 'Long Text Import', 'icon' => 'file-up'],
-        ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],
-        ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'],
-    ],
-    'texts'
-);
+echo PageLayoutHelper::buildActionCard([
+    ['url' => '/texts?new=1', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+    ['url' => '/text/import-long', 'label' => 'Long Text Import', 'icon' => 'file-up'],
+    ['url' => '/feeds?page=1&check_autoupdate=1', 'label' => 'Newsfeed Import', 'icon' => 'rss'],
+    ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'],
+]);
 ?>
 
-<form name="form1" action="#" data-base-url="/text/archived">
-<table class="tab2" cellspacing="0" cellpadding="5">
-    <tr>
-        <th class="th1" colspan="4">Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
-            <input type="button" value="Reset All" data-action="reset-all" />
-        </th>
-    </tr>
-    <tr>
-        <td class="td1 center" colspan="2">
-            Language:
-            <select name="filterlang" data-action="filter-language">
-                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
-            </select>
-        </td>
-        <td class="td1 center" colspan="2">
-            <select name="query_mode" data-action="filter-query-mode">
-                <option value="title,text"<?php echo $currentQueryMode == "title,text" ? ' selected="selected"' : ''; ?>>Title &amp; Text</option>
-                <option disabled="disabled">------------</option>
-                <option value="title"<?php echo $currentQueryMode == "title" ? ' selected="selected"' : ''; ?>>Title</option>
-                <option value="text"<?php echo $currentQueryMode == "text" ? ' selected="selected"' : ''; ?>>Text</option>
-            </select>
-            <?php
-            if ($currentRegexMode == '') {
-                echo '<span style="vertical-align: middle"> (Wildc.=*): </span>';
-            } elseif ($currentRegexMode == 'r') {
-                echo '<span style="vertical-align: middle"> RegEx Mode: </span>';
-            } else {
-                echo '<span style="vertical-align: middle"> RegEx(CS) Mode: </span>';
-            }
-            ?>
-            <input type="text" name="query" value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
-            <input type="button" name="querybutton" value="Filter" data-action="filter" />&nbsp;
-            <input type="button" value="Clear" data-action="clear-filter" />
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 center" colspan="2" nowrap="nowrap">
-            Tag #1:
-            <select name="tag1" data-action="filter-tag" data-tag-num="1">
-                <?php echo \Lwt\Services\TagService::getArchivedTextTagSelectOptions($currentTag1, $currentLang); ?>
-            </select>
-        </td>
-        <td class="td1 center" nowrap="nowrap">
-            Tag #1 ..
-            <select name="tag12" data-action="filter-tag-operator">
-                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forAndOr($currentTag12); ?>
-            </select> .. Tag #2
-        </td>
-        <td class="td1 center" nowrap="nowrap">
-            Tag #2:
-            <select name="tag2" data-action="filter-tag" data-tag-num="2">
-                <?php echo \Lwt\Services\TagService::getArchivedTextTagSelectOptions($currentTag2, $currentLang); ?>
-            </select>
-        </td>
-    </tr>
-    <?php if ($totalCount > 0): ?>
-    <tr>
-        <th class="th1" colspan="2" nowrap="nowrap">
-            <?php echo $totalCount; ?> Text<?php echo $totalCount == 1 ? '' : 's'; ?>
-        </th>
-        <th class="th1" colspan="1" nowrap="nowrap">
-            <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], '/text/archived', 'form1'); ?>
-        </th>
-        <th class="th1" nowrap="nowrap">
-            Sort Order:
-            <select name="sort" data-action="sort">
-                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
-            </select>
-        </th>
-    </tr>
-    <?php endif; ?>
-</table>
+<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
+     This search bar should support:
+     - Universal search across title and text content
+     - Filter chips for active filters (language, tags)
+     - Autocomplete suggestions
+     - Advanced filter toggle for power users
+-->
+<form name="form1" action="#" data-base-url="/text/archived" data-search-placeholder="archived-texts">
+    <div class="box mb-4">
+        <div class="field has-addons">
+            <div class="control is-expanded has-icons-left">
+                <input type="text"
+                       name="query"
+                       class="input"
+                       value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       placeholder="Search archived texts... (e.g., lang:Spanish tag:news title)"
+                       disabled />
+                <span class="icon is-left">
+                    <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
+                </span>
+            </div>
+            <div class="control">
+                <button type="button" class="button is-info" disabled>
+                    Search
+                </button>
+            </div>
+        </div>
+        <p class="help has-text-grey">
+            <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'icon-inline']); ?>
+            Search functionality is being redesigned. Full filtering will be available soon.
+        </p>
+
+        <?php if ($totalCount > 0): ?>
+        <!-- Results Summary & Pagination -->
+        <div class="level mt-4 pt-4" style="border-top: 1px solid #dbdbdb;">
+            <div class="level-left">
+                <div class="level-item">
+                    <span class="tag is-info is-medium">
+                        <?php echo $totalCount; ?> Text<?php echo $totalCount == 1 ? '' : 's'; ?>
+                    </span>
+                </div>
+            </div>
+            <div class="level-item">
+                <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], '/text/archived', 'form1'); ?>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <div class="field has-addons">
+                        <div class="control">
+                            <span class="button is-static is-small">Sort</span>
+                        </div>
+                        <div class="control">
+                            <div class="select is-small">
+                                <select name="sort" data-action="sort">
+                                    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
 </form>
 
 <?php if ($totalCount == 0): ?>

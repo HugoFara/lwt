@@ -30,120 +30,89 @@
 namespace Lwt\Views\Feed;
 
 use Lwt\View\Helper\IconHelper;
+use Lwt\View\Helper\PageLayoutHelper;
 
+echo PageLayoutHelper::buildActionCard([
+    ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
+    ['url' => '/feeds/edit?manage_feeds=1', 'label' => 'Manage Feeds', 'icon' => 'settings'],
+    ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'],
+    ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
+]);
 ?>
-<div class="flex-spaced">
-    <div title="Import of a single text, max. 65,000 bytes long, with optional audio">
-        <a href="/feeds/edit?new_feed=1">
-            <?php echo IconHelper::render('rss', ['title' => 'New Feed', 'alt' => 'New Feed']); ?>
-            New Feed
-        </a>
-    </div>
-    <div>
-        <a href="/feeds/edit?manage_feeds=1">
-            <?php echo IconHelper::render('circle-plus', ['title' => 'manage feeds', 'alt' => 'manage feeds']); ?>
-            Manage Feeds
-        </a>
-    </div>
-    <div>
-        <a href="/texts?query=&amp;page=1">
-            <?php echo IconHelper::render('archive', ['title' => 'Active Texts', 'alt' => 'Active Texts']); ?>
-            Active Texts
-        </a>
-    </div>
-    <div>
-        <a href="/text/archived?query=&amp;page=1">
-            <?php echo IconHelper::render('archive-x', ['title' => 'Archived Texts', 'alt' => 'Archived Texts']); ?>
-            Archived Texts
-        </a>
-    </div>
-</div>
 
-<form name="form1" action="#" data-lwt-feed-browse="true">
-<table class="tab2" cellspacing="0" cellpadding="5"><tr>
-    <th class="th1" colspan="4">
-        Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
-        <input type="button" value="Reset All" data-action="reset-all" data-url="/feeds" />
-    </th>
-    </tr>
-    <tr>
-        <td class="td1 center feeds-filter-cell">
-            Language:&nbsp;
-            <select name="filterlang" data-action="filter-language" data-url="/feeds?page=1&amp;selected_feed=0">
-                <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
-            </select>
-        </td>
-        <td class="td1 center" colspan="3">
-            <select name="query_mode" data-action="query-mode">
-                <option value="title,desc,text"<?php
-                if ($currentQueryMode == "title,desc,text") {
-                    echo ' selected="selected"';
-                } ?>>Title, Desc., Text</option>
-                <option disabled="disabled">------------</option>
-                <option value="title"<?php
-                if ($currentQueryMode == "title") {
-                    echo ' selected="selected"';
-                } ?>>Title</option>
-            </select>
-            <span class="valign-middle">
-            <?php
-            if ($currentRegexMode == '') {
-                echo ' (Wildc.=*):';
-            } elseif ($currentRegexMode == 'r') {
-                echo 'RegEx Mode:';
-            } else {
-                echo 'RegEx(CS) Mode:';
-            }
-            ?>
-            </span>
-            <input type="text" name="query" value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
-            <input type="button" name="querybutton" value="Filter" data-action="filter-query" />&nbsp;
-            <input type="button" value="Clear" data-action="clear-query" />
-        </td>
-    </tr>
-    <tr>
-        <td class="td1 center feeds-filter-cell-wide" colspan="2">
+<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
+     This search bar should support:
+     - Universal search across article title, description, and text
+     - Filter chips for active filters (language, feed)
+     - Autocomplete suggestions
+     - Advanced filter toggle for power users
+-->
+<form name="form1" action="#" data-lwt-feed-browse="true" data-search-placeholder="feed-articles">
+    <div class="box mb-4">
+        <div class="field has-addons">
+            <div class="control is-expanded has-icons-left">
+                <input type="text"
+                       name="query"
+                       class="input"
+                       value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       placeholder="Search articles... (e.g., lang:Spanish feed:news title)"
+                       disabled />
+                <span class="icon is-left">
+                    <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
+                </span>
+            </div>
+            <div class="control">
+                <button type="button" class="button is-info" disabled>
+                    Search
+                </button>
+            </div>
+        </div>
+        <p class="help has-text-grey">
+            <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'icon-inline']); ?>
+            Search functionality is being redesigned. Full filtering will be available soon.
+        </p>
+
 <?php if (empty($feeds)): ?>
-         no feed available</td><td class="td1"></td></tr></table></form>
+        <p class="mt-4">No feed available.</p>
+    </div>
+</form>
 <?php return; endif; ?>
-Newsfeed:
-    <select name="selected_feed" data-action="filter-feed">
-        <option value="0">[Filter off]</option>
-    <?php foreach ($feeds as $row): ?>
-        <option value="<?php echo $row['NfID']; ?>"<?php
-        if ($currentFeed === (int)$row['NfID']) {
-            echo ' selected="selected"';
-        }
-        ?>><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></option>
-    <?php endforeach; ?>
-    </select>
-    </td>
-    <td class="td1 center" colspan="2">
-    <?php
-    if (count($feeds) == 1 || $currentFeed > 0):
-        echo '<a href="' . $_SERVER['PHP_SELF'] . '?page=1&amp;load_feed=1&amp;selected_feed=' . $currentFeed . '">
-        <span title="update feed">' . IconHelper::render('refresh-cw', ['alt' => '-']) . '</span></a>';
-    else:
-        echo '<a href="/feeds/edit?multi_load_feed=1&amp;selected_feed=' . implode(',', array_column($feeds, 'NfID')) . '">
-        update multiple feeds</a>';
-    endif;
 
-    if ($lastUpdateFormatted):
-        echo ' ' . $lastUpdateFormatted;
-    endif;
-    ?>
-    </td>
-</tr>
+        <?php if ($recno > 0): ?>
+        <!-- Results Summary & Pagination -->
+        <div class="level mt-4 pt-4" style="border-top: 1px solid #dbdbdb;">
+            <div class="level-left">
+                <div class="level-item">
+                    <span class="tag is-info is-medium">
+                        <?php echo $recno; ?> Article<?php echo $recno == 1 ? '' : 's'; ?>
+                    </span>
+                </div>
+            </div>
+            <div class="level-item">
+                <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form1'); ?>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <div class="field has-addons">
+                        <div class="control">
+                            <span class="button is-static is-small">Sort</span>
+                        </div>
+                        <div class="control">
+                            <div class="select is-small">
+                                <select name="sort" data-action="sort">
+                                    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+</form>
+
 <?php if ($recno > 0): ?>
-<tr><th class="th1 feeds-filter-cell"> <?php echo $recno; ?> articles </th><th class="th1">
-<?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds', 'form1'); ?>
-  </th>
-  <th class="th1" colspan="2" nowrap="nowrap">
-  Sort Order:
-  <select name="sort" data-action="sort"><?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?></select>
-  </th>
-  </tr>
-  </table></form>
   <form name="form2" action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
   <table class="tab2" cellspacing="0" cellpadding="5">
   <tr><th class="th1" colspan="2">Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?></th></tr>
@@ -201,6 +170,6 @@ Newsfeed:
         </th></tr></table></form>
 <?php endif; ?>
 <?php else: ?>
-</table></form>
+<p>No articles found.</p>
 <?php endif; ?>
 

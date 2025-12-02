@@ -374,8 +374,11 @@ class TagsController extends BaseController
             $currentsort = $lsorts;
         }
 
+        echo PageLayoutHelper::buildActionCard([
+            ['url' => '/tags?new=1', 'label' => 'New Term Tag', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+            ['url' => '/words/edit', 'label' => 'My Terms', 'icon' => 'book-a'],
+        ]);
         ?>
-        <p><a href="/tags?new=1"><?php echo IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New Term Tag ...</a></p>
 
         <form name="form1" action="#">
         <table class="tab2" cellspacing="0" cellpadding="5">
@@ -738,8 +741,11 @@ class TagsController extends BaseController
             $currentsort = $lsorts;
         }
 
+        echo PageLayoutHelper::buildActionCard([
+            ['url' => '/tags/text?new=1', 'label' => 'New Text Tag', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+            ['url' => '/texts', 'label' => 'My Texts', 'icon' => 'book-open'],
+        ]);
         ?>
-        <p><a href="/tags/text?new=1"><?php echo IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New Text Tag ...</a></p>
 
         <form name="form1" action="#">
         <table class="tab1" cellspacing="0" cellpadding="5">

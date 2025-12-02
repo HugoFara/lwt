@@ -181,6 +181,7 @@ HTML;
                     <a class="navbar-item" href="/admin/settings">Settings</a>
                     <a class="navbar-item" href="/admin/tts">Text-to-Speech</a>
                     <hr class="navbar-divider">
+                    <a class="navbar-item" href="/admin/server-data">Server Data</a>
                     <a class="navbar-item" href="/docs/info.html" target="_blank">Help</a>
                 </div>
             </div>
@@ -195,17 +196,12 @@ HTML;
      *
      * Creates a Bulma card with action buttons for page-level actions.
      *
-     * @param string $title   Card title
-     * @param array  $actions Array of actions with 'url', 'label', 'icon', and optional 'class'
-     * @param string $variant Optional color variant: 'texts', 'terms', 'feeds', 'admin'
+     * @param array $actions Array of actions with 'url', 'label', 'icon', and optional 'class'
      *
      * @return string HTML for the action card
      */
-    public static function buildActionCard(
-        string $title,
-        array $actions,
-        string $variant = ''
-    ): string {
+    public static function buildActionCard(array $actions): string
+    {
         $buttonsHtml = '';
         foreach ($actions as $action) {
             $url = htmlspecialchars($action['url'], ENT_QUOTES, 'UTF-8');
@@ -215,25 +211,17 @@ HTML;
             $target = isset($action['target']) ? ' target="' . htmlspecialchars($action['target'], ENT_QUOTES, 'UTF-8') . '"' : '';
 
             $buttonsHtml .= <<<HTML
-                <a href="{$url}" class="button is-small is-light{$class}"{$target}>
-                    <span class="icon is-small">{$icon}</span>
+                <a href="{$url}" class="button is-light{$class}"{$target}>
+                    <span class="icon">{$icon}</span>
                     <span>{$label}</span>
                 </a>
 HTML;
         }
 
-        $titleEscaped = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
-        $variantClass = $variant !== '' ? ' action-card-' . htmlspecialchars($variant, ENT_QUOTES, 'UTF-8') : '';
-
         return <<<HTML
-<div class="card action-card mb-4{$variantClass}">
-    <header class="card-header">
-        <p class="card-header-title">
-            {$titleEscaped}
-        </p>
-    </header>
+<div class="card action-card mb-4">
     <div class="card-content">
-        <div class="buttons are-small is-centered">
+        <div class="buttons is-centered">
             {$buttonsHtml}
         </div>
     </div>

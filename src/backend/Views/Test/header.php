@@ -48,6 +48,6 @@ use Lwt\View\Helper\PageLayoutHelper;
     </div>
     <?php endif; ?>
     <div>
-        <?php echo PageLayoutHelper::buildQuickMenu(); ?>
+        <?php echo PageLayoutHelper::buildNavbar(); ?>
     </div>
 </div>

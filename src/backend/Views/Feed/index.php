@@ -27,36 +27,79 @@ namespace Lwt\Views\Feed;
 use Lwt\View\Helper\IconHelper;
 use Lwt\View\Helper\PageLayoutHelper;
 
-echo PageLayoutHelper::buildActionCard(
-    'Feed Actions',
-    [
-        ['url' => '/feeds', 'label' => 'My Feeds', 'icon' => 'list'],
-        ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
-    ],
-    'feeds'
-);
+echo PageLayoutHelper::buildActionCard([
+    ['url' => '/feeds', 'label' => 'My Feeds', 'icon' => 'list'],
+    ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
+]);
 ?>
-<form name="form1" action="#">
-<table class="tab2" cellspacing="0" cellpadding="5"><tr>
-<th class="th1" colspan="4">Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
-<input type="button" value="Reset All" data-action="reset-all" data-url="/feeds/edit" /></th>
-</tr>
-<tr>
-    <td class="td1 center feeds-filter-cell" colspan="2">
-    Language:&nbsp;<select name="filterlang" data-action="filter-language" data-url="/feeds/edit?manage_feeds=1">
-    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forLanguages($languages, $currentLang, '[Filter off]'); ?>
-</select>
-</td>
-<td class="td1 center" colspan="4">
-    Feed Name (Wildc.=*):
-    <input type="text" name="query" value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
-    <input type="button" name="querybutton" value="Filter" data-action="filter-query" />&nbsp;
-    <input type="button" value="Clear" data-action="clear-query" />
-</td>
-</tr>
-</table>
+<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
+     This search bar should support:
+     - Search across feed names
+     - Filter chips for language filter
+     - Autocomplete suggestions
+-->
+<form name="form1" action="#" data-search-placeholder="feeds">
+    <div class="box mb-4">
+        <div class="field has-addons">
+            <div class="control is-expanded has-icons-left">
+                <input type="text"
+                       name="query"
+                       class="input"
+                       value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       placeholder="Search feeds... (e.g., lang:Spanish news)"
+                       disabled />
+                <span class="icon is-left">
+                    <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
+                </span>
+            </div>
+            <div class="control">
+                <button type="button" class="button is-info" disabled>
+                    Search
+                </button>
+            </div>
+        </div>
+        <p class="help has-text-grey">
+            <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'icon-inline']); ?>
+            Search functionality is being redesigned. Full filtering will be available soon.
+        </p>
+
+        <?php if ($totalFeeds > 0): ?>
+        <!-- Results Summary & Pagination -->
+        <div class="level mt-4 pt-4" style="border-top: 1px solid #dbdbdb;">
+            <div class="level-left">
+                <div class="level-item">
+                    <span class="tag is-info is-medium">
+                        <?php echo $totalFeeds; ?> Newsfeed<?php echo $totalFeeds == 1 ? '' : 's'; ?>
+                    </span>
+                </div>
+            </div>
+            <div class="level-item">
+                <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form1'); ?>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <div class="field has-addons">
+                        <div class="control">
+                            <span class="button is-static is-small">Sort</span>
+                        </div>
+                        <div class="control">
+                            <div class="select is-small">
+                                <select name="sort" data-action="sort">
+                                    <?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+</form>
 
 <input id="map" type="hidden" name="selected_feed" value="" />
+<?php if ($totalFeeds > 0): ?>
+<form name="form2" action="" method="get">
 <table class="tab2" cellspacing="0" cellpadding="5">
 <tr>
     <th class="th1" colspan="3">
@@ -78,20 +121,7 @@ echo PageLayoutHelper::buildActionCard(
     <option disabled="disabled">------------</option>
     <option value="del">Delete</option>
 </select></td></tr>
-<?php if ($totalFeeds > 0): ?>
-<tr><th class="th1 feeds-filter-cell"> <?php echo $totalFeeds; ?> newsfeeds </th>
-<th class="th1">
-<?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($currentPage, $pages, '/feeds/edit', 'form1'); ?>
-</th>
-<th class="th1" colspan="1" nowrap="nowrap">
-Sort Order:
-<select name="sort" data-action="sort">
-<?php echo \Lwt\View\Helper\SelectOptionsBuilder::forTextSort($currentSort); ?>
-</select>
-</th>
 </table>
-</form>
-<form name="form2" action="" method="get">
 <table class="sortable tab2" cellspacing="0" cellpadding="5">
 <tr>
     <th class="th1 sorttable_nosort">Mark</th>

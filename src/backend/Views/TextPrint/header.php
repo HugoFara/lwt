@@ -37,6 +37,6 @@ namespace Lwt\Views\TextPrint;
             </a>
         </div>
         <div>
-            <?php echo \Lwt\View\Helper\PageLayoutHelper::buildQuickMenu(); ?>
+            <?php echo \Lwt\View\Helper\PageLayoutHelper::buildNavbar(); ?>
         </div>
     </div>

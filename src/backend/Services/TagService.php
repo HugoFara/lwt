@@ -456,9 +456,9 @@ class TagService
     public function getItemsUrl(int $tagId): string
     {
         if ($this->tagType === 'text') {
-            return 'edit_texts.php?page=1&query=&tag12=0&tag2=&tag1=' . $tagId;
+            return '/texts?page=1&query=&tag12=0&tag2=&tag1=' . $tagId;
         }
-        return 'edit_words.php?page=1&query=&text=&status=&filterlang=&status=&tag12=0&tag2=&tag1=' . $tagId;
+        return '/words?page=1&query=&text=&status=&filterlang=&status=&tag12=0&tag2=&tag1=' . $tagId;
     }
 
     /**

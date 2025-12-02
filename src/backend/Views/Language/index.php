@@ -20,15 +20,13 @@
 namespace Lwt\Views\Language;
 
 use Lwt\View\Helper\IconHelper;
+use Lwt\View\Helper\PageLayoutHelper;
 
-?>
-<p>
-    <a href="/languages?new=1">
-        <?php echo IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New Language ...
-    </a>
-</p>
+echo PageLayoutHelper::buildActionCard([
+    ['url' => '/languages?new=1', 'label' => 'New Language', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+]);
 
-<?php if (empty($languages)): ?>
+if (empty($languages)): ?>
 <p>No languages found.</p>
 <?php else: ?>
 
@@ -83,7 +81,7 @@ use Lwt\View\Helper\IconHelper;
                         <span class="stat-label">Terms</span>
                         <span class="stat-value">
                             <?php if ($lang['wordCount'] > 0): ?>
-                            <a href="edit_words.php?page=1&amp;query=&amp;text=&amp;status=&amp;filterlang=<?php echo $lang['id']; ?>&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1="><?php echo $lang['wordCount']; ?></a>
+                            <a href="/words?page=1&amp;query=&amp;text=&amp;status=&amp;filterlang=<?php echo $lang['id']; ?>&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1="><?php echo $lang['wordCount']; ?></a>
                             <?php else: ?>
                             0
                             <?php endif; ?>
@@ -93,7 +91,7 @@ use Lwt\View\Helper\IconHelper;
                         <span class="stat-label">Feeds</span>
                         <span class="stat-value">
                             <?php if ($lang['feedCount'] > 0): ?>
-                            <a href="do_feeds.php?query=&amp;selected_feed=&amp;check_autoupdate=1&amp;filterlang=<?php echo $lang['id']; ?>"><?php echo $lang['feedCount']; ?> (<?php echo $lang['articleCount']; ?>)</a>
+                            <a href="/feeds?query=&amp;selected_feed=&amp;check_autoupdate=1&amp;filterlang=<?php echo $lang['id']; ?>"><?php echo $lang['feedCount']; ?> (<?php echo $lang['articleCount']; ?>)</a>
                             <?php else: ?>
                             0
                             <?php endif; ?>

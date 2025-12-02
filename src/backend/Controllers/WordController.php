@@ -1018,16 +1018,27 @@ class WordController extends BaseController
             $currentsort = 7;
         }
 
-        // Show new term link
+        // Show action card
+        $actions = [];
         if ($currentlang != '') {
-            ?>
-<p><a href="/words/edit?new=1&amp;lang=<?php echo $currentlang; ?>"><?php echo \Lwt\View\Helper\IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New <?php echo htmlspecialchars($this->languageService->getLanguageName($currentlang), ENT_QUOTES, 'UTF-8'); ?> Term ...</a></p>
-            <?php
-        } else {
-            ?>
-<p><?php echo \Lwt\View\Helper\IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New Term? - Set Language Filter first ...</p>
-            <?php
+            $actions[] = [
+                'url' => '/words/edit?new=1&lang=' . $currentlang,
+                'label' => 'New Term',
+                'icon' => 'circle-plus',
+                'class' => 'is-primary'
+            ];
         }
+        $actions[] = [
+            'url' => '/word/upload',
+            'label' => 'Import Terms',
+            'icon' => 'file-up'
+        ];
+        $actions[] = [
+            'url' => '/term-tags',
+            'label' => 'Term Tags',
+            'icon' => 'tags'
+        ];
+        echo PageLayoutHelper::buildActionCard($actions);
 
         // Get data for filter dropdowns
         $languages = $this->languageService->getLanguagesForSelect();

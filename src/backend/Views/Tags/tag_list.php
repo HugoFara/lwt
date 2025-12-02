@@ -27,6 +27,7 @@
 namespace Lwt\Views\Tags;
 
 use Lwt\View\Helper\IconHelper;
+use Lwt\View\Helper\PageLayoutHelper;
 
 /** @var string $message */
 /** @var array $tags */
@@ -41,41 +42,77 @@ $baseUrl = $service->getBaseUrl();
 $tagTypeLabel = $service->getTagTypeLabel();
 $sortOptions = $service->getSortOptions();
 
-\Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false);
+PageLayoutHelper::renderMessage($message, false);
 
+echo PageLayoutHelper::buildActionCard([
+    ['url' => $baseUrl . '?new=1', 'label' => 'New ' . $tagTypeLabel . ' Tag', 'icon' => 'circle-plus', 'class' => 'is-primary'],
+]);
 ?>
-<p><a href="<?php echo $baseUrl; ?>?new=1"><?php echo IconHelper::render('circle-plus', ['title' => 'New', 'alt' => 'New']); ?> New <?php echo $tagTypeLabel; ?> Tag ...</a></p>
 
-<form name="form1" action="#">
-<table class="tab2" cellspacing="0" cellpadding="5">
-<tr>
-<th class="th1" colspan="4">Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
-<input type="button" value="Reset All" data-action="reset-all" data-base-url="<?php echo $baseUrl; ?>" /></th>
-</tr>
-<tr>
-<td class="td1 center" colspan="4">
-Tag Text or Comment:
-<input type="text" name="query" value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
-<input type="button" name="querybutton" value="Filter" data-action="filter-query" />&nbsp;
-<input type="button" value="Clear" data-action="clear-query" />
-</td>
-</tr>
-<?php if ($totalCount > 0): ?>
-<tr>
-<th class="th1" colspan="1" nowrap="nowrap">
-    <?php echo $totalCount; ?> Tag<?php echo ($totalCount == 1 ? '' : 's'); ?>
-</th><th class="th1" colspan="2" nowrap="nowrap">
-    <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form1'); ?>
-</th><th class="th1" nowrap="nowrap">
-Sort Order:
-<select name="sort" data-action="sort">
-<?php foreach ($sortOptions as $option): ?>
-<option value="<?php echo $option['value']; ?>"<?php echo $currentSort == $option['value'] ? ' selected="selected"' : ''; ?>><?php echo $option['text']; ?></option>
-<?php endforeach; ?>
-</select>
-</th></tr>
-<?php endif; ?>
-</table>
+<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
+     This search bar should support:
+     - Search across tag text and comments
+     - Autocomplete suggestions
+-->
+<form name="form1" action="#" data-search-placeholder="tags">
+    <div class="box mb-4">
+        <div class="field has-addons">
+            <div class="control is-expanded has-icons-left">
+                <input type="text"
+                       name="query"
+                       class="input"
+                       value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       placeholder="Search tags..."
+                       disabled />
+                <span class="icon is-left">
+                    <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
+                </span>
+            </div>
+            <div class="control">
+                <button type="button" class="button is-info" disabled>
+                    Search
+                </button>
+            </div>
+        </div>
+        <p class="help has-text-grey">
+            <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'icon-inline']); ?>
+            Search functionality is being redesigned. Full filtering will be available soon.
+        </p>
+
+        <?php if ($totalCount > 0): ?>
+        <!-- Results Summary & Pagination -->
+        <div class="level mt-4 pt-4" style="border-top: 1px solid #dbdbdb;">
+            <div class="level-left">
+                <div class="level-item">
+                    <span class="tag is-info is-medium">
+                        <?php echo $totalCount; ?> Tag<?php echo ($totalCount == 1 ? '' : 's'); ?>
+                    </span>
+                </div>
+            </div>
+            <div class="level-item">
+                <?php echo \Lwt\View\Helper\PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], $baseUrl, 'form1'); ?>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <div class="field has-addons">
+                        <div class="control">
+                            <span class="button is-static is-small">Sort</span>
+                        </div>
+                        <div class="control">
+                            <div class="select is-small">
+                                <select name="sort" data-action="sort">
+                                    <?php foreach ($sortOptions as $option): ?>
+                                    <option value="<?php echo $option['value']; ?>"<?php echo $currentSort == $option['value'] ? ' selected="selected"' : ''; ?>><?php echo $option['text']; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
 </form>
 
 <?php if ($totalCount == 0): ?>

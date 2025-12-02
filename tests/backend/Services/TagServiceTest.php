@@ -345,14 +345,14 @@ class TagServiceTest extends TestCase
     public function testGetItemsUrlReturnsWordsUrlForTermTags(): void
     {
         $result = $this->termTagService->getItemsUrl(123);
-        $this->assertStringContainsString('edit_words.php', $result);
+        $this->assertStringContainsString('/words', $result);
         $this->assertStringContainsString('tag1=123', $result);
     }
 
     public function testGetItemsUrlReturnsTextsUrlForTextTags(): void
     {
         $result = $this->textTagService->getItemsUrl(456);
-        $this->assertStringContainsString('edit_texts.php', $result);
+        $this->assertStringContainsString('/texts', $result);
         $this->assertStringContainsString('tag1=456', $result);
     }
 

@@ -18,30 +18,26 @@
 namespace Lwt\Views\Admin;
 
 ?>
+<p>This page shows server information useful for debugging and issue reports.</p>
+
 <h2>Server</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Value</th>
-        </tr>
-    </thead>
+<table class="tab3" cellspacing="0" cellpadding="5">
     <tbody>
         <tr>
-            <td>LWT version</td>
-            <td><?php echo $data["lwt_version"]; ?></td>
+            <th class="th1">LWT version</th>
+            <td class="td1"><?php echo $data["lwt_version"]; ?></td>
         </tr>
         <tr>
-            <td>
+            <th class="th1">
                 <a href="https://en.wikipedia.org/wiki/Web_server" target="_blank">
                     Web Server
                 </a>
-            </td>
-            <td><i><?php echo $data["server_soft"]; ?></i></td>
+            </th>
+            <td class="td1"><?php echo $data["server_soft"]; ?></td>
         </tr>
         <tr>
-            <td>Server Software</td>
-            <td>
+            <th class="th1">Server Software</th>
+            <td class="td1">
                 <a href="https://en.wikipedia.org/wiki/Apache_HTTP_Server"
                 target="_blank">
                     <?php echo $data["apache"]; ?>
@@ -49,78 +45,73 @@ namespace Lwt\Views\Admin;
             </td>
         </tr>
         <tr>
-            <td>Server Location</td>
-            <td><i><?php echo $data["server_location"]; ?></i></td>
+            <th class="th1">Server Location</th>
+            <td class="td1"><?php echo $data["server_location"]; ?></td>
         </tr>
         <tr>
-            <td>
+            <th class="th1">
                 <a href="https://en.wikipedia.org/wiki/PHP" target="_blank">
                     PHP
                 </a> Version
-            </td>
-            <td><?php echo $data["php"]; ?></td>
+            </th>
+            <td class="td1"><?php echo $data["php"]; ?></td>
         </tr>
     </tbody>
 </table>
+
 <h2>Database</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Value</th>
-        </tr>
-    </thead>
+<table class="tab3" cellspacing="0" cellpadding="5">
     <tbody>
         <tr>
-            <td>
+            <th class="th1">
                 <a href="https://en.wikipedia.org/wiki/Database" target="_blank">
                     Database
-                </a> name</td>
-            <td><i><?php echo $data["db_name"]; ?></i></td>
+                </a> name
+            </th>
+            <td class="td1"><?php echo $data["db_name"]; ?></td>
         </tr>
         <tr>
-            <td>Database prefix (surrounded by "")</td>
-            <td>"<?php echo $data["db_prefix"]; ?>"</td>
+            <th class="th1">Database prefix</th>
+            <td class="td1">"<?php echo $data["db_prefix"]; ?>"</td>
         </tr>
         <tr>
-            <td>Database Size</td>
-            <td><?php echo $data["db_size"]; ?> MB</td>
+            <th class="th1">Database Size</th>
+            <td class="td1"><?php echo $data["db_size"]; ?> MB</td>
         </tr>
         <tr>
-            <td>
+            <th class="th1">
                 <a href="https://en.wikipedia.org/wiki/MySQL" target="_blank">
                     MySQL
                 </a> Version
-            </td>
-            <td><?php echo $data["mysql"]; ?></td>
+            </th>
+            <td class="td1"><?php echo $data["mysql"]; ?></td>
         </tr>
     </tbody>
 </table>
+
 <h2>Client API</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Value</th>
-        </tr>
-    </thead>
+<table class="tab3" cellspacing="0" cellpadding="5">
     <tbody>
         <tr>
-            <td>
-                <a href="https://en.wikipedia.org/wiki/REST">
+            <th class="th1">
+                <a href="https://en.wikipedia.org/wiki/REST" target="_blank">
                     REST API
                 </a> Version
-            </td>
-            <td id="rest-api-version"><!-- JS inserts version here --></td>
+            </th>
+            <td class="td1" id="rest-api-version">Loading...</td>
         </tr>
         <tr>
-            <td>
-                <a href="https://en.wikipedia.org/wiki/REST">
+            <th class="th1">
+                <a href="https://en.wikipedia.org/wiki/REST" target="_blank">
                     REST API
                 </a> Release date
-            </td>
-            <td id="rest-api-release-date"><!-- JS acts here --></td>
+            </th>
+            <td class="td1" id="rest-api-release-date">Loading...</td>
         </tr>
     </tbody>
 </table>
+
+<p style="margin-top: 20px;">
+    <input type="button" value="&lt;&lt; Back" data-action="navigate" data-url="/" />
+</p>
 <!-- API version is fetched by admin/server_data.ts module -->
