@@ -83,16 +83,19 @@ HTML;
         $homeIcon = IconHelper::render('home', ['alt' => 'Home']);
         $textsIcon = IconHelper::render('book-text', ['alt' => 'Texts']);
         $termsIcon = IconHelper::render('spell-check', ['alt' => 'Terms']);
+        $languagesIcon = IconHelper::render('languages', ['alt' => 'Languages']);
         $statsIcon = IconHelper::render('bar-chart-2', ['alt' => 'Statistics']);
         $settingsIcon = IconHelper::render('settings', ['alt' => 'Settings']);
         $chevronIcon = IconHelper::render('chevron-down', ['alt' => '']);
 
         $isTexts = in_array($currentPage, ['texts', 'archived', 'text-tags', 'text-check', 'long-import', 'feeds']);
         $isTerms = in_array($currentPage, ['terms', 'term-tags', 'term-import']);
-        $isAdmin = in_array($currentPage, ['statistics', 'backup', 'settings', 'tts', 'languages']);
+        $isLanguages = in_array($currentPage, ['languages', 'language-new', 'language-edit']);
+        $isAdmin = in_array($currentPage, ['backup', 'settings', 'tts']);
 
         $textsActive = $isTexts ? ' is-active' : '';
         $termsActive = $isTerms ? ' is-active' : '';
+        $languagesActive = $isLanguages ? ' is-active' : '';
         $adminActive = $isAdmin ? ' is-active' : '';
 
         return <<<HTML
@@ -143,14 +146,27 @@ HTML;
                 </a>
                 <div class="navbar-dropdown">
                     <a class="navbar-item" href="/words/edit">My Terms</a>
-                    <a class="navbar-item" href="/tags/word">Term Tags</a>
+                    <a class="navbar-item" href="/tags">Term Tags</a>
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="/words/import">Import Terms</a>
+                    <a class="navbar-item" href="/word/upload">Import Terms</a>
                 </div>
             </div>
 
-            <a class="navbar-item" href="/languages">
-                Languages
+            <div class="navbar-item has-dropdown{$languagesActive}" :class="{ 'is-active': activeDropdown === 'languages' }">
+                <a class="navbar-link" @click.prevent="toggleDropdown('languages')">
+                    {$languagesIcon}
+                    <span class="ml-1">Languages</span>
+                </a>
+                <div class="navbar-dropdown">
+                    <a class="navbar-item" href="/languages">My Languages</a>
+                    <hr class="navbar-divider">
+                    <a class="navbar-item" href="/languages?new=1">Add New Language</a>
+                </div>
+            </div>
+
+            <a class="navbar-item" href="/admin/statistics">
+                {$statsIcon}
+                <span class="ml-1">Statistics</span>
             </a>
         </div>
 
@@ -161,11 +177,6 @@ HTML;
                     <span class="ml-1">Admin</span>
                 </a>
                 <div class="navbar-dropdown is-right">
-                    <a class="navbar-item" href="/admin/statistics">
-                        {$statsIcon}
-                        <span class="ml-1">Statistics</span>
-                    </a>
-                    <hr class="navbar-divider">
                     <a class="navbar-item" href="/admin/backup">Backup/Restore</a>
                     <a class="navbar-item" href="/admin/settings">Settings</a>
                     <a class="navbar-item" href="/admin/tts">Text-to-Speech</a>

@@ -43,7 +43,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -80,7 +80,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -112,7 +112,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -143,7 +143,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -174,7 +174,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -196,7 +196,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -218,7 +218,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -245,7 +245,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -280,7 +280,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -311,7 +311,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -342,7 +342,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -372,7 +372,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -402,7 +402,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -479,7 +479,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -506,7 +506,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -529,7 +529,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -558,7 +558,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -584,7 +584,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -631,7 +631,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -661,7 +661,7 @@ use Lwt\View\Helper\IconHelper;
                         </div>
                         <div class="control">
                             <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
                     </div>
@@ -685,7 +685,7 @@ use Lwt\View\Helper\IconHelper;
                         </div>
                         <div class="control">
                             <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
                     </div>
@@ -711,7 +711,7 @@ use Lwt\View\Helper\IconHelper;
                         </div>
                         <div class="control">
                             <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
                     </div>
@@ -735,7 +735,7 @@ use Lwt\View\Helper\IconHelper;
                         </div>
                         <div class="control">
                             <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
                     </div>
@@ -761,7 +761,7 @@ use Lwt\View\Helper\IconHelper;
                         </div>
                         <div class="control">
                             <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
                     </div>
@@ -785,7 +785,7 @@ use Lwt\View\Helper\IconHelper;
                         </div>
                         <div class="control">
                             <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
                     </div>
@@ -835,7 +835,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -863,7 +863,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -891,7 +891,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>

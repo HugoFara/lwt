@@ -59,7 +59,7 @@ interface FrequencyTotals {
 }
 
 /**
- * Initialize the intensity chart (stacked horizontal bar).
+ * Initialize the intensity chart (stacked vertical bar).
  * Shows term status distribution by language.
  *
  * @param canvasId - The ID of the canvas element
@@ -116,7 +116,6 @@ export function initIntensityChart(
     type: 'bar',
     data: chartData,
     options: {
-      indexAxis: 'y',
       responsive: true,
       plugins: {
         legend: {
@@ -137,14 +136,14 @@ export function initIntensityChart(
       },
       scales: {
         x: {
+          stacked: true
+        },
+        y: {
           stacked: true,
           title: {
             display: true,
             text: 'Number of Terms'
           }
-        },
-        y: {
-          stacked: true
         }
       }
     }
@@ -152,8 +151,8 @@ export function initIntensityChart(
 }
 
 /**
- * Initialize the frequency chart (grouped bar).
- * Shows learning activity over time.
+ * Initialize the frequency chart (line chart).
+ * Shows learning activity evolution over time.
  *
  * @param canvasId - The ID of the canvas element
  * @param totals - The frequency totals data
@@ -173,23 +172,32 @@ export function initFrequencyChart(
       {
         label: 'Created',
         data: [totals.ct, totals.cy, totals.cw, totals.cm, totals.ca],
-        backgroundColor: STATUS_COLORS.s1
+        borderColor: STATUS_COLORS.s1,
+        backgroundColor: STATUS_COLORS.s1,
+        tension: 0.3,
+        fill: false
       },
       {
         label: 'Activity',
         data: [totals.at, totals.ay, totals.aw, totals.am, totals.aa],
-        backgroundColor: STATUS_COLORS.s3
+        borderColor: STATUS_COLORS.s3,
+        backgroundColor: STATUS_COLORS.s3,
+        tension: 0.3,
+        fill: false
       },
       {
         label: 'Known',
         data: [totals.kt, totals.ky, totals.kw, totals.km, totals.ka],
-        backgroundColor: STATUS_COLORS.s5
+        borderColor: STATUS_COLORS.s5,
+        backgroundColor: STATUS_COLORS.s5,
+        tension: 0.3,
+        fill: false
       }
     ]
   };
 
   return new Chart(canvas, {
-    type: 'bar',
+    type: 'line',
     data: chartData,
     options: {
       responsive: true,

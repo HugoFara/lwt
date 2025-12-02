@@ -118,6 +118,11 @@ class IconHelper
         'exclamation-red' => 'circle-alert',
         'exclamation-button' => 'alert-circle',
 
+        // Form Validation
+        'circle-x' => 'circle-x',
+        'asterisk' => 'asterisk',
+        'required' => 'asterisk',
+
         // Test Results
         'test_correct' => 'circle-check',
         'test_wrong' => 'circle-x',

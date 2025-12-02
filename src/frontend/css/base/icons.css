@@ -285,7 +285,31 @@ img[src*="test_notyet"] + .icon {
    ========================================================================== */
 
 /**
- * Required field indicator icon.
+ * Required field indicator - asterisk icon.
+ * Modern, universally recognized indicator for mandatory fields.
+ */
+.icon-required,
+.icon[data-lucide="asterisk"] {
+  color: #dc3545;
+  width: 10px;
+  height: 10px;
+  vertical-align: super;
+  margin-left: 2px;
+}
+
+/**
+ * Required indicator in form addons (Bulma pattern).
+ */
+.field.has-addons > .control > .icon[data-lucide="asterisk"],
+.control.has-icons-right > .icon[data-lucide="asterisk"] {
+  width: 12px;
+  height: 12px;
+  vertical-align: middle;
+}
+
+/**
+ * Legacy support: X icon in required context.
+ * @deprecated Use asterisk icon instead.
  */
 .notempty + .icon,
 input:required + .icon {

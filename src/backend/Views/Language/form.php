@@ -63,7 +63,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -86,7 +86,7 @@ use Lwt\View\Helper\IconHelper;
                                data_info="Dictionary 1 URI"
                                required />
                         <span class="icon is-right has-text-danger">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                     <label class="checkbox mt-2">
@@ -241,7 +241,7 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -294,7 +294,7 @@ use Lwt\View\Helper\IconHelper;
                         </div>
                         <div class="control">
                             <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
                     </div>

@@ -102,10 +102,16 @@ This document maps the legacy Fugue PNG icons in `assets/icons/` to their modern
 | Old Icon | Lucide Icon | Usage |
 |----------|-------------|-------|
 | `status.png` | `circle-check` (green) | OK/success/yes |
-| `status-busy.png` | `circle-x` (red) | Required/error/no |
+| `status-busy.png` | `circle-x` (red) | Error/no |
 | `status-away.png` | `circle-dot` (yellow) | Warning/pending |
 | `exclamation-red.png` | `circle-alert` | Current/active warning |
 | `exclamation-button.png` | `alert-circle` | Alert button |
+
+### Form Validation
+
+| Old Icon | Lucide Icon | Usage |
+|----------|-------------|-------|
+| *(new)* | `asterisk` (red) | Required field indicator |
 
 ### Test Results
 

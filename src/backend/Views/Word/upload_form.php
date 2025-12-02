@@ -78,7 +78,7 @@ $columnOptions = [
                     </div>
                     <div class="control">
                         <span class="icon has-text-danger mt-2" title="Required">
-                            <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
@@ -283,7 +283,7 @@ $columnOptions = [
                         </div>
                         <div class="control">
                             <span class="icon has-text-danger mt-1" title="Required">
-                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
                     </div>
@@ -304,7 +304,7 @@ $columnOptions = [
                         </div>
                         <div class="control">
                             <span class="icon has-text-danger mt-2" title="Required">
-                                <?php echo IconHelper::render('circle-x', ['alt' => 'Required']); ?>
+                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
                     </div>
