@@ -15,46 +15,14 @@ import { ReviewApi, type TableTestWord } from '../../api/review';
 import { speechDispatcher } from '../../core/user_interactions';
 
 /**
- * Icon SVG paths (inline to avoid external dependencies)
- */
-const ICONS = {
-  arrowLeft: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>',
-  clock: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-  eye: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
-  eyeOff: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>',
-  arrowUp: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>',
-  arrowDown: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
-  skipForward: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></svg>',
-  checkCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-  checkCheck: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>',
-  info: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
-  table: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>',
-  volume2: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
-  bookOpen: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
-  languages: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>',
-  filePen: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22h6a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v10"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10.4 12.6a2 2 0 1 1 3 3L8 21l-4 1 1-4Z"/></svg>',
-};
-
-/**
- * Status colors for buttons
- */
-const STATUS_COLORS: Record<number, { bg: string; text: string; border: string }> = {
-  1: { bg: '#ff6347', text: 'white', border: '#ff6347' },
-  2: { bg: '#ffa500', text: 'white', border: '#ffa500' },
-  3: { bg: '#ffff00', text: 'black', border: '#ffff00' },
-  4: { bg: '#90ee90', text: 'black', border: '#90ee90' },
-  5: { bg: '#32cd32', text: 'white', border: '#32cd32' },
-};
-
-/**
  * Test types configuration
  */
 const TEST_TYPES = [
-  { id: 1, label: '..[L2]..', title: 'Show sentence with term, guess translation' },
-  { id: 2, label: '..[L1]..', title: 'Show sentence with translation, guess term' },
-  { id: 3, label: '..[-]..', title: 'Show sentence with hidden term, guess both' },
-  { id: 4, label: '[L2]', title: 'Show term only, guess translation' },
-  { id: 5, label: '[L1]', title: 'Show translation only, guess term' },
+  { id: 1, label: 'Sentence → Translation', title: 'Show sentence with term highlighted, guess translation' },
+  { id: 2, label: 'Sentence → Term', title: 'Show sentence with translation, guess the term' },
+  { id: 3, label: 'Sentence → Both', title: 'Show sentence with hidden term, guess both term and translation' },
+  { id: 4, label: 'Term → Translation', title: 'Show term only, guess translation' },
+  { id: 5, label: 'Translation → Term', title: 'Show translation only, guess the term' },
 ];
 
 /**
@@ -88,61 +56,47 @@ function buildTestAppHTML(config: TestConfig): string {
 /**
  * Build test toolbar HTML (below main navbar).
  */
-function buildTestToolbar(langName: string): string {
+function buildTestToolbar(_langName: string): string {
   return `
-    <nav class="navbar is-white has-shadow" role="navigation" aria-label="test toolbar">
-      <div class="navbar-brand">
-        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
-           @click="navbarOpen = !navbarOpen" :class="{ 'is-active': navbarOpen }">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-        </a>
-      </div>
-
-      <div class="navbar-menu" :class="{ 'is-active': navbarOpen }">
-        <div class="navbar-start">
-          <div class="navbar-item">
-            <span class="has-text-weight-semibold">Test: <span x-text="store.title"></span></span>
+    <div class="box py-2 px-4 mb-0" style="border-radius: 0;">
+      <div class="level is-mobile">
+        <div class="level-left">
+          <div class="level-item">
+            <strong>Test: <span x-text="store.title"></span></strong>
           </div>
         </div>
-
-        <div class="navbar-end">
-          <!-- Test type buttons -->
-          <div class="navbar-item" x-show="!store.isTableMode">
-            <div class="buttons are-small">
-              ${TEST_TYPES.map(t => `
-                <button class="button"
-                        :class="{ 'is-primary': store.testType === ${t.id} }"
-                        @click="switchTestType(${t.id})"
-                        title="${escapeHtml(t.title)}">
-                  ${t.label.replace('L2', langName)}
-                </button>
-              `).join('')}
+        <div class="level-right">
+          <div class="level-item">
+            <div class="field is-grouped is-grouped-multiline">
+              <!-- Test type buttons -->
+              <div class="control">
+                <div class="buttons are-small">
+                  ${TEST_TYPES.map(t => `
+                    <button class="button"
+                            :class="{ 'is-primary': store.testType === ${t.id} && !store.isTableMode }"
+                            @click="switchTestType(${t.id})"
+                            title="${escapeHtml(t.title)}">
+                      ${escapeHtml(t.label)}
+                    </button>
+                  `).join('')}
+                  <button class="button"
+                          :class="{ 'is-primary': store.isTableMode }"
+                          @click="switchToTable">
+                    Table
+                  </button>
+                </div>
+              </div>
+              <div class="control">
+                <label class="checkbox">
+                  <input type="checkbox" x-model="store.readAloudEnabled" @change="saveReadAloudSetting">
+                  Read aloud
+                </label>
+              </div>
             </div>
           </div>
-
-          <!-- Table mode button -->
-          <div class="navbar-item">
-            <button class="button is-small"
-                    :class="{ 'is-info': store.isTableMode }"
-                    @click="switchToTable">
-              ${ICONS.table}
-              <span class="ml-1 is-hidden-mobile">Table</span>
-            </button>
-          </div>
-
-          <!-- Read aloud toggle -->
-          <div class="navbar-item">
-            <label class="checkbox is-size-7">
-              <input type="checkbox" x-model="store.readAloudEnabled" @change="saveReadAloudSetting">
-              ${ICONS.volume2}
-              <span class="ml-1 is-hidden-mobile">Read aloud</span>
-            </label>
-          </div>
         </div>
       </div>
-    </nav>
+    </div>
   `;
 }
 
@@ -155,8 +109,8 @@ function buildProgressBar(): string {
       <div class="level is-mobile">
         <div class="level-left">
           <div class="level-item">
-            ${ICONS.clock}
-            <span class="ml-2" x-text="store.timer.elapsed">00:00</span>
+            <span>Time: </span>
+            <span x-text="store.timer.elapsed">00:00</span>
           </div>
         </div>
 
@@ -173,13 +127,17 @@ function buildProgressBar(): string {
 
         <div class="level-right">
           <div class="level-item">
-            <span class="tag is-medium" x-text="store.progress.total"></span>
+            <span>Total: </span>
+            <span x-text="store.progress.total"></span>
             <span class="mx-1">=</span>
-            <span class="tag is-medium is-light" x-text="store.progress.remaining"></span>
+            <span>Remaining: </span>
+            <span x-text="store.progress.remaining"></span>
             <span class="mx-1">+</span>
-            <span class="tag is-medium is-danger is-light" x-text="store.progress.wrong"></span>
+            <span>Wrong: </span>
+            <span class="has-text-danger" x-text="store.progress.wrong"></span>
             <span class="mx-1">+</span>
-            <span class="tag is-medium is-success is-light" x-text="store.progress.correct"></span>
+            <span>Correct: </span>
+            <span class="has-text-success" x-text="store.progress.correct"></span>
           </div>
         </div>
       </div>
@@ -228,7 +186,6 @@ function buildFinishedMessage(): string {
   return `
     <div x-show="store.isFinished" class="has-text-centered py-6">
       <div class="notification is-success is-light">
-        <p class="is-size-4 mb-4">${ICONS.checkCircle}</p>
         <p class="is-size-5 has-text-weight-bold"
            x-text="store.progress.total > 0 ? 'Nothing more to test here!' : 'Nothing to test here!'"></p>
         <p class="mt-3" x-show="store.tomorrowCount > 0">
@@ -271,26 +228,21 @@ function buildWordTestArea(): string {
           <button x-show="!store.answerRevealed"
                   class="button is-primary is-large"
                   @click="revealAnswer">
-            ${ICONS.eye}
-            <span class="ml-2">Show Answer</span>
-            <span class="ml-2 is-size-7">(Space)</span>
+            Show Answer (Space)
           </button>
         </div>
 
         <!-- After answer revealed -->
         <div x-show="store.answerRevealed" class="mb-5">
           <div class="buttons is-centered">
-            <button class="button is-danger" @click="decrementStatus" title="Wrong (Arrow Down)">
-              ${ICONS.arrowDown}
-              <span class="ml-1">Wrong</span>
+            <button class="button is-danger" @click="decrementStatus" title="Arrow Down">
+              Wrong
             </button>
-            <button class="button is-success" @click="incrementStatus" title="Correct (Arrow Up)">
-              ${ICONS.arrowUp}
-              <span class="ml-1">Correct</span>
+            <button class="button is-success" @click="incrementStatus" title="Arrow Up">
+              Correct
             </button>
-            <button class="button" @click="skipWord" title="Skip (Escape)">
-              ${ICONS.skipForward}
-              <span class="ml-1">Skip</span>
+            <button class="button" @click="skipWord" title="Escape">
+              Skip
             </button>
           </div>
         </div>
@@ -304,22 +256,19 @@ function buildWordTestArea(): string {
                       :class="{ 'status-${s}': store.currentWord?.status === ${s} }"
                       @click="setStatus(${s})">${s}</button>
             `).join('')}
-            <button class="button" @click="setStatus(98)" title="Ignore (I)">
-              ${ICONS.eyeOff}
-              <span class="ml-1">Ign</span>
+            <button class="button" @click="setStatus(98)" title="Press I">
+              Ignore
             </button>
-            <button class="button" @click="setStatus(99)" title="Well Known (W)">
-              ${ICONS.checkCheck}
-              <span class="ml-1">WKn</span>
+            <button class="button" @click="setStatus(99)" title="Press W">
+              Well Known
             </button>
           </div>
         </div>
 
         <!-- Details button -->
         <div x-show="store.answerRevealed">
-          <button class="button is-text is-small" @click="store.openModal()" title="Edit (E)">
-            ${ICONS.info}
-            <span class="ml-1">Details / Edit</span>
+          <button class="button is-text is-small" @click="store.openModal()" title="Press E">
+            Details / Edit
           </button>
         </div>
       </div>
@@ -390,7 +339,7 @@ function buildTableTest(): string {
               <tr>
                 <td x-show="columns.edit" class="has-text-centered">
                   <a :href="'/word/edit-term?wid=' + word.id" class="button is-small is-text">
-                    ${ICONS.filePen}
+                    Edit
                   </a>
                 </td>
                 <td x-show="columns.status" class="has-text-centered">
@@ -445,8 +394,8 @@ function buildWordModal(): string {
                 <span class="is-size-3 has-text-weight-bold"
                       :style="store.langSettings.rtl ? 'direction: rtl' : ''"
                       x-text="store.currentWord.text"></span>
-                <button class="button is-small is-rounded" @click="speakWord" title="Listen">
-                  ${ICONS.volume2}
+                <button class="button is-small" @click="speakWord">
+                  Listen
                 </button>
               </div>
 
@@ -458,13 +407,13 @@ function buildWordModal(): string {
                 <p class="is-size-7 has-text-grey mb-2">Look up in dictionary:</p>
                 <div class="buttons">
                   <a :href="store.getDictUrl('dict1')" target="_blank" class="button is-outlined" rel="noopener">
-                    ${ICONS.bookOpen} <span class="ml-1">Dictionary 1</span>
+                    Dictionary 1
                   </a>
                   <a :href="store.getDictUrl('dict2')" target="_blank" class="button is-outlined" rel="noopener">
-                    ${ICONS.bookOpen} <span class="ml-1">Dictionary 2</span>
+                    Dictionary 2
                   </a>
                   <a :href="store.getDictUrl('translator')" target="_blank" class="button is-outlined" rel="noopener">
-                    ${ICONS.languages} <span class="ml-1">Translate</span>
+                    Translate
                   </a>
                 </div>
               </div>
@@ -473,7 +422,7 @@ function buildWordModal(): string {
         </section>
         <footer class="modal-card-foot">
           <a :href="store.getEditUrl()" class="button is-info">
-            ${ICONS.filePen} <span class="ml-1">Edit Term</span>
+            Edit Term
           </a>
           <button class="button" @click="store.closeModal()">Close</button>
         </footer>

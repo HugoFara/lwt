@@ -185,22 +185,24 @@ class SentenceService
         $removeSpaces = (int)$record["LgRemoveSpaces"] == 1;
         $splitEachChar = (int)$record['LgSplitEachChar'] != 0;
         $txtid = $record["SeTxID"];
+        $termchar = (string) $record["LgRegexpWordCharacters"];
 
         if (
             ($removeSpaces && !$splitEachChar)
-            || 'MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))
+            || 'MECAB' == strtoupper(trim($termchar))
         ) {
             $text = $record["SeText"];
             $wordlc = '[​]*' . preg_replace('/(.)/u', "$1[​]*", $wordlc);
             $pattern = "/(?<=[​])($wordlc)(?=[​])/ui";
         } else {
-            $text = str_replace(array('​​','​','\r'), array('\r','','​'), $record["SeText"]);
+            // Convert ZWS markers to proper spacing for non-remove-spaces languages
+            $text = $this->convertZwsToSpacing($record["SeText"], $termchar);
             if ($splitEachChar) {
                 $pattern = "/($wordlc)/ui";
             } else {
-                $pattern = '/(?<![' . $record["LgRegexpWordCharacters"] . '])(' .
+                $pattern = '/(?<![' . $termchar . '])(' .
                 remove_spaces($wordlc, $removeSpaces) . ')(?![' .
-                $record["LgRegexpWordCharacters"] . '])/ui';
+                $termchar . '])/ui';
             }
         }
 
@@ -208,59 +210,48 @@ class SentenceService
         $sejs = str_replace('​', '', preg_replace($pattern, '{$0}', $text));
 
         if ($mode > 1) {
-            if ($removeSpaces && !$splitEachChar) {
-                $prevseSent = Connection::fetchValue(
-                    "SELECT concat(
-                        '​',
-                        group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
-                        '​'
-                    ) AS value
-                    from {$this->tbpref}sentences, {$this->tbpref}textitems2
-                    where Ti2SeID = SeID and SeID < $seid and SeTxID = $txtid
-                    and trim(SeText) not in ('¶', '')
-                    group by SeID
-                    order by SeID desc"
-                );
-            } else {
-                $prevseSent = Connection::fetchValue(
-                    "SELECT SeText as value from {$this->tbpref}sentences
-                    where SeID < $seid and SeTxID = $txtid
-                    and trim(SeText) not in ('¶', '')
-                    order by SeID desc"
-                );
-            }
+            // Always use textitems2 to get proper sentence content with word boundaries
+            $prevseSent = Connection::fetchValue(
+                "SELECT concat(
+                    '​',
+                    group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
+                    '​'
+                ) AS value
+                from {$this->tbpref}sentences, {$this->tbpref}textitems2
+                where Ti2SeID = SeID and SeID < $seid and SeTxID = $txtid
+                and trim(SeText) not in ('¶', '')
+                group by SeID
+                order by SeID desc"
+            );
             if (isset($prevseSent)) {
-                $se = preg_replace($pattern, '<b>$0</b>', $prevseSent) . $se;
-                $sejs = preg_replace($pattern, '{$0}', $prevseSent) . $sejs;
+                if (!$removeSpaces && !($splitEachChar || 'MECAB' == strtoupper(trim($termchar)))) {
+                    $prevseSent = $this->convertZwsToSpacing($prevseSent, $termchar);
+                }
+                $se = str_replace('​', '', preg_replace($pattern, '<b>$0</b>', $prevseSent)) . $se;
+                $sejs = str_replace('​', '', preg_replace($pattern, '{$0}', $prevseSent)) . $sejs;
             }
         }
 
         if ($mode > 2) {
-            if ($removeSpaces && !$splitEachChar) {
-                $nextSent = Connection::fetchValue(
-                    "SELECT concat(
-                        '​',
-                        group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
-                        '​'
-                    ) as value
-                    from {$this->tbpref}sentences, {$this->tbpref}textitems2
-                    where Ti2SeID = SeID and SeID > $seid
-                    and SeTxID = $txtid and trim(SeText) not in ('¶','')
-                    group by SeID
-                    order by SeID asc"
-                );
-            } else {
-                $nextSent = Connection::fetchValue(
-                    "SELECT SeText as value
-                    FROM {$this->tbpref}sentences
-                    where SeID > $seid AND SeTxID = $txtid
-                    and trim(SeText) not in ('¶','')
-                    order by SeID asc"
-                );
-            }
+            // Always use textitems2 to get proper sentence content with word boundaries
+            $nextSent = Connection::fetchValue(
+                "SELECT concat(
+                    '​',
+                    group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
+                    '​'
+                ) as value
+                from {$this->tbpref}sentences, {$this->tbpref}textitems2
+                where Ti2SeID = SeID and SeID > $seid
+                and SeTxID = $txtid and trim(SeText) not in ('¶','')
+                group by SeID
+                order by SeID asc"
+            );
             if (isset($nextSent)) {
-                $se .= preg_replace($pattern, '<b>$0</b>', $nextSent);
-                $sejs .= preg_replace($pattern, '{$0}', $nextSent);
+                if (!$removeSpaces && !($splitEachChar || 'MECAB' == strtoupper(trim($termchar)))) {
+                    $nextSent = $this->convertZwsToSpacing($nextSent, $termchar);
+                }
+                $se .= str_replace('​', '', preg_replace($pattern, '<b>$0</b>', $nextSent));
+                $sejs .= str_replace('​', '', preg_replace($pattern, '{$0}', $nextSent));
             }
         }
 
@@ -271,6 +262,35 @@ class SentenceService
         }
         // [0]=html, word in bold, [1]=text, word in {}
         return array($se, $sejs);
+    }
+
+    /**
+     * Convert zero-width space (ZWS) markers to proper spacing.
+     *
+     * For languages that use spaces between words (LgRemoveSpaces = 0),
+     * this method converts ZWS markers in the text to actual spaces where
+     * appropriate (between words and after punctuation).
+     *
+     * @param string $text     Text with ZWS markers between tokens
+     * @param string $termchar Language's word character regex pattern
+     *
+     * @return string Text with proper spacing
+     */
+    private function convertZwsToSpacing(string $text, string $termchar): string
+    {
+        // Step 1: Add space between consecutive word characters
+        $pattern1 = "/([$termchar])​(?=[$termchar])/u";
+        $result = preg_replace($pattern1, "$1 ", $text);
+
+        // Step 2: Add space after punctuation (., !, ?, ,, ;, :, …) when followed by word char
+        // but not after connecting punctuation like apostrophe or hyphen
+        $pattern2 = "/([.!?,;:…])​(?=[$termchar])/u";
+        $result = preg_replace($pattern2, "$1 ", $result);
+
+        // Step 3: Remove remaining ZWS markers
+        $result = str_replace("​", "", $result);
+
+        return trim($result);
     }
 
     /**

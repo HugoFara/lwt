@@ -23,7 +23,6 @@
 
 namespace Lwt\Views\Text;
 
-use Lwt\View\Helper\IconHelper;
 use Lwt\View\Helper\PageLayoutHelper;
 
 ?>
@@ -32,88 +31,58 @@ use Lwt\View\Helper\PageLayoutHelper;
 
 <div x-data="textReader" class="reading-page" x-cloak>
   <!-- Reading toolbar -->
-  <nav class="navbar is-light" role="navigation" aria-label="reading navigation">
-    <div class="navbar-brand">
-      <a class="navbar-item" href="/texts">
-        <?php echo PageLayoutHelper::buildLogo(); ?>
-      </a>
-    </div>
-
-    <div class="navbar-menu is-active">
-      <div class="navbar-start">
-        <!-- Navigation buttons -->
-        <div class="navbar-item">
-          <div class="buttons are-small">
-            <button class="button" @click="goBack" title="Back">
-              <?php echo IconHelper::render('arrow-left', ['size' => 16]); ?>
-            </button>
-          </div>
-        </div>
-
-        <!-- Title -->
-        <div class="navbar-item">
-          <span class="has-text-weight-semibold" x-text="title || 'Loading...'"></span>
+  <div class="box py-2 px-4 mb-0" style="border-radius: 0;">
+    <div class="level is-mobile">
+      <div class="level-left">
+        <div class="level-item">
+          <strong x-text="title || 'Loading...'"></strong>
           <?php if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')): ?>
-          <a href="<?php echo htmlspecialchars($sourceUri, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" class="ml-2" rel="noopener">
-            <?php echo IconHelper::render('link', ['size' => 14, 'title' => 'Text Source']); ?>
-          </a>
+          <a href="<?php echo htmlspecialchars($sourceUri, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" class="ml-2" rel="noopener">(source)</a>
           <?php endif; ?>
         </div>
       </div>
-
-      <div class="navbar-end">
-        <!-- Action buttons -->
-        <div class="navbar-item">
-          <div class="buttons are-small">
-            <a href="/test?text=<?php echo $textId; ?>" class="button" title="Test">
-              <?php echo IconHelper::render('circle-help', ['size' => 16]); ?>
-            </a>
-            <a href="/text/print-plain?text=<?php echo $textId; ?>" class="button" title="Print">
-              <?php echo IconHelper::render('printer', ['size' => 16]); ?>
-            </a>
-            <a href="/texts?chg=<?php echo $textId; ?>" class="button" title="Edit Text">
-              <?php echo IconHelper::render('file-pen', ['size' => 16]); ?>
-            </a>
-          </div>
-        </div>
-
-        <!-- Settings toggles -->
-        <div class="navbar-item">
-          <div class="field is-grouped">
+      <div class="level-right">
+        <div class="level-item">
+          <div class="field is-grouped is-grouped-multiline">
             <div class="control">
-              <label class="checkbox is-size-7">
+              <a href="/test?text=<?php echo $textId; ?>" class="button is-small">Test</a>
+            </div>
+            <div class="control">
+              <a href="/text/print-plain?text=<?php echo $textId; ?>" class="button is-small">Print</a>
+            </div>
+            <div class="control">
+              <a href="/texts?chg=<?php echo $textId; ?>" class="button is-small">Edit</a>
+            </div>
+            <div class="control">
+              <label class="checkbox">
                 <input type="checkbox" x-model="showAll" @change="toggleShowAll">
                 Show All
               </label>
             </div>
-            <div class="control ml-3">
-              <label class="checkbox is-size-7">
+            <div class="control">
+              <label class="checkbox">
                 <input type="checkbox" x-model="showTranslations" @change="toggleTranslations">
                 Translations
               </label>
             </div>
-          </div>
-        </div>
-
-        <!-- Bulk actions dropdown -->
-        <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link is-size-7">
-            Actions
-          </a>
-          <div class="navbar-dropdown is-right">
-            <a class="navbar-item" @click.prevent="markAllWellKnown">
-              <?php echo IconHelper::render('check-check', ['size' => 14]); ?>
-              <span class="ml-2">Mark all Well Known</span>
-            </a>
-            <a class="navbar-item" @click.prevent="markAllIgnored">
-              <?php echo IconHelper::render('eye-off', ['size' => 14]); ?>
-              <span class="ml-2">Mark all Ignored</span>
-            </a>
+            <div class="control">
+              <div class="dropdown is-hoverable is-right">
+                <div class="dropdown-trigger">
+                  <button class="button is-small">Actions</button>
+                </div>
+                <div class="dropdown-menu">
+                  <div class="dropdown-content">
+                    <a class="dropdown-item" @click.prevent="markAllWellKnown">Mark all Well Known</a>
+                    <a class="dropdown-item" @click.prevent="markAllIgnored">Mark all Ignored</a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </nav>
+  </div>
 
   <!-- Audio player (if media available) -->
   <?php if (isset($media) && $media !== ''): ?>
