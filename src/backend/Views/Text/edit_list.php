@@ -66,13 +66,6 @@ echo PageLayoutHelper::buildActionCard([
 ]);
 ?>
 
-<!-- TODO: Make this search bar functional once the UI refactoring of this page is done.
-     This search bar should support:
-     - Universal search across title and text content
-     - Filter chips for active filters (language, tags)
-     - Autocomplete suggestions
-     - Advanced filter toggle for power users
--->
 <form name="form1" action="#" data-base-url="/texts" data-search-placeholder="texts">
     <div class="box mb-4">
         <div class="field has-addons">
@@ -135,176 +128,208 @@ echo PageLayoutHelper::buildActionCard([
 <?php if ($totalCount == 0): ?>
 <p>No text found.</p>
 <?php else: ?>
-<form name="form2" action="/texts" method="post">
+<form name="form2" action="/texts" method="post" x-data="textListManager()">
 <input type="hidden" name="data" value="" />
-<table class="tab2" cellspacing="0" cellpadding="5">
-    <tr>
-        <th class="th1" colspan="2">
-            Multi Actions
-            <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
-        </th>
-    </tr>
-    <tr>
-        <td class="td1 center">
-            <input type="button" value="Mark All" data-action="mark-toggle" data-mark-all="true" />
-            <input type="button" value="Mark None" data-action="mark-toggle" data-mark-all="false" />
-        </td>
-        <td class="td1 center">
-            Marked Texts:&nbsp;
-            <select name="markaction" id="markaction" disabled="disabled" data-action="multi-action">
-                <?php echo SelectOptionsBuilder::forMultipleTextsActions(); ?>
-            </select>
-        </td>
-    </tr>
-</table>
-<table class="sortable tab2" cellspacing="0" cellpadding="5">
-<thead>
-    <tr>
-        <th class="th1 sorttable_nosort">Mark</th>
-        <th class="th1 sorttable_nosort">Read<br />&amp;&nbsp;Test</th>
-        <th class="th1 sorttable_nosort">Actions</th>
-        <?php if ($currentLang == ''): ?>
-        <th class="th1 clickable">Lang.</th>
-        <?php endif; ?>
-        <th class="th1 clickable">
-            Title [Tags] / Audio:&nbsp;
-            <?php echo IconHelper::render('volume-2', ['title' => 'With Audio', 'alt' => 'With Audio']); ?>,
-            Src.Link:&nbsp;
-            <?php echo IconHelper::render('link', ['title' => 'Source Link available', 'alt' => 'Source Link available']); ?>,
-            Ann.Text:&nbsp;
-            <?php echo IconHelper::render('check', ['title' => 'Annotated Text available', 'alt' => 'Annotated Text available']); ?>
-        </th>
-        <th class="th1 sorttable_numeric clickable">
-            Total<br />Words<br />
-            <div class="wc_cont">
-                <span id="total" data_wo_cnt="<?php echo substr($showCounts, 0, 1); ?>"></span>
+
+<!-- Multi Actions Card -->
+<div class="card mb-4">
+    <div class="card-content py-3">
+        <div class="level is-mobile">
+            <div class="level-left">
+                <div class="level-item">
+                    <div class="buttons are-small">
+                        <button type="button" class="button" @click="markAll(true)">
+                            <?php echo IconHelper::render('check-square', ['size' => 14]); ?>
+                            <span class="ml-1">Mark All</span>
+                        </button>
+                        <button type="button" class="button" @click="markAll(false)">
+                            <?php echo IconHelper::render('square', ['size' => 14]); ?>
+                            <span class="ml-1">Mark None</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </th>
-        <th class="th1 sorttable_numeric clickable">
-            Saved<br />Wo+Ex<br />
-            <div class="wc_cont">
-                <span id="saved" data_wo_cnt="<?php echo substr($showCounts, 1, 1); ?>"></span>
+            <div class="level-right">
+                <div class="level-item">
+                    <div class="field has-addons">
+                        <div class="control">
+                            <span class="button is-static is-small">
+                                <?php echo IconHelper::render('zap', ['size' => 14]); ?>
+                                <span class="ml-1">Actions</span>
+                            </span>
+                        </div>
+                        <div class="control">
+                            <div class="select is-small">
+                                <select name="markaction" id="markaction" :disabled="!hasMarked" data-action="multi-action">
+                                    <?php echo SelectOptionsBuilder::forMultipleTextsActions(); ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </th>
-        <th class="th1 sorttable_numeric clickable">
-            Unkn.<br />Words<br />
-            <div class="wc_cont">
-                <span id="unknown" data_wo_cnt="<?php echo substr($showCounts, 2, 1); ?>"></span>
-            </div>
-        </th>
-        <th class="th1 sorttable_numeric clickable">
-            Unkn.<br />Perc.<br />
-            <div class="wc_cont">
-                <span id="unknownpercent" data_wo_cnt="<?php echo substr($showCounts, 3, 1); ?>"></span>
-            </div>
-        </th>
-        <th class="th1 sorttable_numeric clickable">
-            Status<br />Charts<br />
-            <div class="wc_cont">
-                <span id="chart" data_wo_cnt="<?php echo substr($showCounts, 4, 1); ?>"></span>
-            </div>
-        </th>
-    </tr>
-</thead>
-<tbody>
+        </div>
+    </div>
+</div>
+
+<!-- Text Cards Grid -->
+<div class="columns is-multiline text-cards">
     <?php foreach ($texts as $record):
         $txid = $record['TxID'];
         $audio = isset($record['TxAudioURI']) ? trim($record['TxAudioURI']) : '';
+        $sourceUri = isset($record['TxSourceURI']) ? trim($record['TxSourceURI']) : '';
+        $hasSource = $sourceUri !== '' && substr($sourceUri, 0, 1) !== '#';
     ?>
-    <tr>
-        <td class="td1 center">
-            <a name="rec<?php echo $txid; ?>">
-                <input name="marked[]" class="markcheck" type="checkbox" value="<?php echo $txid; ?>" <?php echo FormHelper::checkInRequest($txid, 'marked'); ?> />
-            </a>
-        </td>
-        <td class="td1 center">
-            <a href="/text/read?start=<?php echo $txid; ?>">
-                <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['title' => 'Read', 'alt' => 'Read']); ?>
-            </a>
-            <a href="/test?text=<?php echo $txid; ?>">
-                <?php echo \Lwt\View\Helper\IconHelper::render('circle-help', ['title' => 'Test', 'alt' => 'Test']); ?>
-            </a>
-        </td>
-        <td class="td1 center">
-            <a href="/text/print-plain?text=<?php echo $txid; ?>">
-                <?php echo \Lwt\View\Helper\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
-            </a>
-            <a href="/texts?arch=<?php echo $txid; ?>">
-                <?php echo IconHelper::render('archive', ['title' => 'Archive', 'alt' => 'Archive']); ?>
-            </a>
-            <a href="/texts?chg=<?php echo $txid; ?>">
-                <?php echo \Lwt\View\Helper\IconHelper::render('file-pen', ['title' => 'Edit', 'alt' => 'Edit']); ?>
-            </a>
-            <span class="click" data-action="confirm-delete" data-url="/texts?del=<?php echo $txid; ?>">
-                <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
-            </span>
-        </td>
-        <?php if ($currentLang == ''): ?>
-        <td class="td1 center"><?php echo \htmlspecialchars($record['LgName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-        <?php endif; ?>
-        <td class="td1 center">
-            <?php echo \htmlspecialchars($record['TxTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-            <span class="smallgray2"><?php echo \htmlspecialchars($record['taglist'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span> &nbsp;
-            <?php if ($audio != ''): ?>
-            <?php echo IconHelper::render('volume-2', ['title' => 'With Audio', 'alt' => 'With Audio']); ?>
-            <?php endif; ?>
-            <?php if (isset($record['TxSourceURI']) && substr(trim($record['TxSourceURI']), 0, 1) != '#'): ?>
-            <a href="<?php echo $record['TxSourceURI']; ?>" target="_blank">
-                <?php echo IconHelper::render('link', ['title' => 'Link to Text Source', 'alt' => 'Link to Text Source']); ?>
-            </a>
-            <?php endif; ?>
-            <?php if ($record['annotlen']): ?>
-            <a href="/text/print?text=<?php echo $txid; ?>">
-                <?php echo IconHelper::render('check', ['title' => 'Annotated Text available', 'alt' => 'Annotated Text available']); ?>
-            </a>
-            <?php endif; ?>
-        </td>
-        <!-- Word count columns -->
-        <td class="td1 center">
-            <span title="Total" id="total_<?php echo $txid; ?>"></span>
-        </td>
-        <td class="td1 center">
-            <span title="Saved" data_id="<?php echo $txid; ?>">
-                <a class="status4" id="saved_<?php echo $txid; ?>"
-                href="/words/edit?page=1&amp;query=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=&amp;text_mode=0&amp;text=<?php echo $txid; ?>">
+    <div class="column is-4-desktop is-6-tablet is-12-mobile">
+        <div class="card text-card" x-data="{ showDetails: false }">
+            <a name="rec<?php echo $txid; ?>"></a>
+            <header class="card-header">
+                <label class="card-header-icon checkbox-wrapper">
+                    <input name="marked[]"
+                           class="markcheck"
+                           type="checkbox"
+                           value="<?php echo $txid; ?>"
+                           <?php echo FormHelper::checkInRequest($txid, 'marked'); ?>
+                           @change="updateMarked($event)" />
+                </label>
+                <p class="card-header-title">
+                    <?php echo \htmlspecialchars($record['TxTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                </p>
+                <div class="card-header-icon card-icons">
+                    <?php if ($audio !== ''): ?>
+                    <span title="With Audio">
+                        <?php echo IconHelper::render('volume-2', ['size' => 16]); ?>
+                    </span>
+                    <?php endif; ?>
+                    <?php if ($hasSource): ?>
+                    <a href="<?php echo \htmlspecialchars($sourceUri, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" title="Source Link">
+                        <?php echo IconHelper::render('external-link', ['size' => 16]); ?>
+                    </a>
+                    <?php endif; ?>
+                    <?php if ($record['annotlen']): ?>
+                    <a href="/text/print?text=<?php echo $txid; ?>" title="Annotated Text">
+                        <?php echo IconHelper::render('file-text', ['size' => 16]); ?>
+                    </a>
+                    <?php endif; ?>
+                </div>
+            </header>
+
+            <div class="card-content">
+                <!-- Language & Tags -->
+                <div class="text-meta mb-3">
+                    <?php if ($currentLang == '' && isset($record['LgName'])): ?>
+                    <span class="tag is-link is-light"><?php echo \htmlspecialchars($record['LgName'], ENT_QUOTES, 'UTF-8'); ?></span>
+                    <?php endif; ?>
+                    <?php if (!empty($record['taglist'])): ?>
+                    <span class="tags-list"><?php echo \htmlspecialchars($record['taglist'], ENT_QUOTES, 'UTF-8'); ?></span>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Word Statistics -->
+                <div class="text-stats">
+                    <div class="stat-row">
+                        <div class="stat-item">
+                            <span class="stat-label">Total</span>
+                            <span class="stat-value" id="total_<?php echo $txid; ?>">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Saved</span>
+                            <span class="stat-value">
+                                <a class="status4" id="saved_<?php echo $txid; ?>"
+                                   href="/words/edit?page=1&amp;query=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=&amp;text_mode=0&amp;text=<?php echo $txid; ?>"
+                                   data_id="<?php echo $txid; ?>">-</a>
+                            </span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Unknown</span>
+                            <span class="stat-value status0" id="todo_<?php echo $txid; ?>">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Unkn.%</span>
+                            <span class="stat-value" id="unknownpercent_<?php echo $txid; ?>">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Status Chart (Chart.js) -->
+                    <div class="status-chart-wrapper">
+                        <canvas id="chart_<?php echo $txid; ?>"
+                                class="text-status-chart"
+                                data-text-id="<?php echo $txid; ?>"
+                                height="30"></canvas>
+                        <!-- Hidden spans for data storage (used by existing JS) -->
+                        <div class="chart-data-store" style="display: none;">
+                            <?php
+                            $statusOrder = array(0,1,2,3,4,5,99,98);
+                            foreach ($statusOrder as $statusNum): ?>
+                            <span id="stat_<?php echo $statusNum; ?>_<?php echo $txid; ?>"
+                                  data-status="<?php echo $statusNum; ?>"
+                                  data-label="<?php echo $statuses[$statusNum]["name"]; ?>">0</span>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="card-footer">
+                <a href="/text/read?start=<?php echo $txid; ?>" class="card-footer-item is-primary-action">
+                    <?php echo IconHelper::render('book-open', ['size' => 16]); ?>
+                    <span>Read</span>
                 </a>
-            </span>
-        </td>
-        <td class="td1 center">
-            <span title="Unknown" class="status0" id="todo_<?php echo $txid; ?>"></span>
-        </td>
-        <td class="td1 center">
-            <span title="Unknown (%)" id="unknownpercent_<?php echo $txid; ?>"></span>
-        </td>
-        <td class="td1 center">
-            <ul class="barchart">
-                <?php
-                $statusOrder = array(0,1,2,3,4,5,99,98);
-                foreach ($statusOrder as $statusNum): ?>
-                <li class="bc<?php echo $statusNum; ?>"
-                    title="<?php echo $statuses[$statusNum]["name"]; ?> (<?php echo $statuses[$statusNum]["abbr"]; ?>)"
-                    style="border-top-width: 25px;">
-                    <span id="stat_<?php echo $statusNum; ?>_<?php echo $txid; ?>">0</span>
-                </li>
-                <?php endforeach; ?>
-            </ul>
-        </td>
-    </tr>
+                <a href="/test?text=<?php echo $txid; ?>" class="card-footer-item">
+                    <?php echo IconHelper::render('circle-help', ['size' => 16]); ?>
+                    <span>Test</span>
+                </a>
+                <div class="card-footer-item has-dropdown" x-data="{ open: false }">
+                    <a @click.prevent="open = !open" class="dropdown-trigger-link">
+                        <?php echo IconHelper::render('more-horizontal', ['size' => 16]); ?>
+                        <span>More</span>
+                    </a>
+                    <div class="dropdown-menu card-dropdown" x-show="open" @click.outside="open = false" x-cloak>
+                        <div class="dropdown-content">
+                            <a href="/text/print-plain?text=<?php echo $txid; ?>" class="dropdown-item">
+                                <?php echo IconHelper::render('printer', ['size' => 14]); ?>
+                                <span>Print</span>
+                            </a>
+                            <a href="/texts?arch=<?php echo $txid; ?>" class="dropdown-item">
+                                <?php echo IconHelper::render('archive', ['size' => 14]); ?>
+                                <span>Archive</span>
+                            </a>
+                            <a href="/texts?chg=<?php echo $txid; ?>" class="dropdown-item">
+                                <?php echo IconHelper::render('file-pen', ['size' => 14]); ?>
+                                <span>Edit</span>
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item has-text-danger" data-action="confirm-delete" data-url="/texts?del=<?php echo $txid; ?>">
+                                <?php echo IconHelper::render('trash-2', ['size' => 14]); ?>
+                                <span>Delete</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
     <?php endforeach; ?>
-</tbody>
-</table>
+</div>
 
 <?php if ($pagination['pages'] > 1): ?>
-<table class="tab2" cellspacing="0" cellpadding="5">
-    <tr>
-        <th class="th1">
-            <?php echo $totalCount; ?> Text<?php echo $totalCount == 1 ? '' : 's'; ?>
-        </th>
-        <th class="th1">
-            <?php PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], '/texts', 'form2'); ?>
-        </th>
-    </tr>
-</table>
+<!-- Bottom Pagination -->
+<div class="box mt-4">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <span class="tag is-info is-medium">
+                    <?php echo $totalCount; ?> Text<?php echo $totalCount == 1 ? '' : 's'; ?>
+                </span>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <?php PageLayoutHelper::buildPager($pagination['currentPage'], $pagination['pages'], '/texts', 'form2'); ?>
+            </div>
+        </div>
+    </div>
+</div>
 <?php endif; ?>
 </form>
 

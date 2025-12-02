@@ -8,14 +8,86 @@
  * - Tag filters
  * - Sort order
  * - Multi-select actions
+ * - Card-based text display with Alpine.js
  *
  * @license unlicense
  * @since   3.0.0
  */
 
+import Alpine from 'alpinejs';
 import { setLang, resetAll } from '../core/language_settings';
 import { selectToggle, multiActionGo } from '../forms/bulk_actions';
 import { confirmDelete } from '../core/ui_utilities';
+
+/**
+ * Interface for text list manager Alpine.js component data.
+ */
+interface TextListManagerData {
+  hasMarked: boolean;
+
+  init(): void;
+  markAll(checked: boolean): void;
+  updateMarked(event: Event): void;
+  updateMarkedState(): void;
+  getMarkedCheckboxes(): NodeListOf<HTMLInputElement>;
+}
+
+/**
+ * Alpine.js data component for text list management.
+ * Handles mark all/none buttons and multi-action select enable/disable.
+ */
+export function textListManagerData(): TextListManagerData {
+  return {
+    hasMarked: false,
+
+    init() {
+      // Check initial state on page load
+      this.updateMarkedState();
+    },
+
+    markAll(checked: boolean) {
+      const checkboxes = this.getMarkedCheckboxes();
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = checked;
+      });
+      this.hasMarked = checked && checkboxes.length > 0;
+    },
+
+    updateMarked(_event: Event) {
+      this.updateMarkedState();
+    },
+
+    updateMarkedState() {
+      const checkboxes = this.getMarkedCheckboxes();
+      this.hasMarked = Array.from(checkboxes).some((cb) => cb.checked);
+    },
+
+    getMarkedCheckboxes(): NodeListOf<HTMLInputElement> {
+      const form = document.querySelector<HTMLFormElement>('form[name="form2"]');
+      if (!form) return document.querySelectorAll<HTMLInputElement>('.markcheck');
+      return form.querySelectorAll<HTMLInputElement>('.markcheck');
+    }
+  };
+}
+
+/**
+ * Initialize the text list manager Alpine.js component.
+ */
+export function initTextListManagerAlpine(): void {
+  Alpine.data('textListManager', textListManagerData);
+}
+
+// Expose for global access
+declare global {
+  interface Window {
+    textListManagerData: typeof textListManagerData;
+  }
+}
+
+window.textListManagerData = textListManagerData;
+
+// Register Alpine data component immediately
+initTextListManagerAlpine();
 
 /**
  * Get the base URL for the current text list page.

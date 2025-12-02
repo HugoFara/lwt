@@ -44,9 +44,14 @@ export async function do_ajax_word_counts(): Promise<void> {
   if (response.data) {
     (window as unknown as { WORDCOUNTS: typeof WORDCOUNTS }).WORDCOUNTS = response.data;
     word_count_click();
+    // Update legacy barcharts if present
     document.querySelectorAll('.barchart').forEach(el => {
       el.classList.remove('hide');
     });
+    // Update Chart.js status charts if present
+    if (typeof window.updateAllTextStatusCharts === 'function') {
+      window.updateAllTextStatusCharts();
+    }
   }
 }
 
