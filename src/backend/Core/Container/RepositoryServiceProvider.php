@@ -21,6 +21,8 @@ use Lwt\Core\Repository\RepositoryInterface;
  * Service provider that registers all repository classes.
  *
  * @since 3.0.0
+ *
+ * @psalm-suppress UnusedClass Class will be used when container is fully integrated
  */
 class RepositoryServiceProvider implements ServiceProviderInterface
 {

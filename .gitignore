@@ -17,7 +17,7 @@ error.log
 access.log
 plugins
 
-# Backup files (Doxygen)
+# Backup files
 *.bak
 
 /vendor/

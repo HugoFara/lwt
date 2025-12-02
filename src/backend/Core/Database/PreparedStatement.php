@@ -129,6 +129,8 @@ class PreparedStatement
      * @param array<int, mixed> $params Parameters to bind (indexed array)
      *
      * @return $this For method chaining
+     *
+     * @psalm-suppress PossiblyUnusedReturnValue Return value available for method chaining
      */
     public function bindValues(array $params): static
     {

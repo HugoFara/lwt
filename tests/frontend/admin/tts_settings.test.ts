@@ -402,7 +402,7 @@ describe('tts_settings.ts', () => {
       ttsSettings.clickCancel();
 
       expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
-      expect(window.location.href).toBe('/admin/settings/tts');
+      expect(window.location.href).toBe('/admin/settings');
 
       window.location = originalLocation;
     });

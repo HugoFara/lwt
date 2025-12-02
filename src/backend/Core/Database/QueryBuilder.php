@@ -930,6 +930,8 @@ class QueryBuilder
      * @param array<string, mixed> $data Column => value pairs to update
      *
      * @return int Number of affected rows
+     *
+     * @psalm-suppress PossiblyUnusedReturnValue Return value available for caller use
      */
     public function updatePrepared(array $data): int
     {

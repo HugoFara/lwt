@@ -86,7 +86,6 @@ HTML;
         $languagesIcon = IconHelper::render('languages', ['alt' => 'Languages']);
         $statsIcon = IconHelper::render('bar-chart-2', ['alt' => 'Statistics']);
         $settingsIcon = IconHelper::render('settings', ['alt' => 'Settings']);
-        $chevronIcon = IconHelper::render('chevron-down', ['alt' => '']);
 
         $isTexts = in_array($currentPage, ['texts', 'archived', 'text-tags', 'text-check', 'long-import', 'feeds']);
         $isTerms = in_array($currentPage, ['terms', 'term-tags', 'term-import']);
@@ -179,7 +178,6 @@ HTML;
                 <div class="navbar-dropdown is-right">
                     <a class="navbar-item" href="/admin/backup">Database Operations</a>
                     <a class="navbar-item" href="/admin/settings">Settings</a>
-                    <a class="navbar-item" href="/admin/settings/tts">Text-to-Speech</a>
                     <hr class="navbar-divider">
                     <a class="navbar-item" href="/admin/server-data">Server Data</a>
                     <a class="navbar-item" href="/docs/info.html" target="_blank">Help</a>

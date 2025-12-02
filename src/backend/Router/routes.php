@@ -165,7 +165,6 @@ function registerRoutes(Router $router): void
     // Settings
     $router->register('/admin/settings', 'AdminController@settings');
     $router->register('/admin/settings/hover', 'AdminController@settingsHover');
-    $router->register('/admin/settings/tts', 'AdminController@settingsTts');
 
     // Table management
     $router->register('/admin/tables', 'AdminController@tables');

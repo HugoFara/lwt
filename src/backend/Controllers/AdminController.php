@@ -223,6 +223,7 @@ class AdminController extends BaseController
     public function settings(array $params): void
     {
         $settingsService = new SettingsService();
+        $ttsService = new TtsService();
         $message = '';
 
         // Handle form submission
@@ -244,6 +245,14 @@ class AdminController extends BaseController
         $themeService = new \Lwt\Services\ThemeService();
         /** @psalm-suppress UnusedVariable */
         $themes = $themeService->getAvailableThemes();
+
+        // Get TTS data for the form (used by included view)
+        /** @psalm-suppress UnusedVariable */
+        $languageOptions = $ttsService->getLanguageOptions(LanguageDefinitions::getAll());
+        /** @psalm-suppress UnusedVariable */
+        $currentLanguageCode = json_encode(
+            $ttsService->getCurrentLanguageCode(LanguageDefinitions::getAll())
+        );
 
         // Render page
         $this->render('Settings/Preferences', true);
@@ -326,48 +335,6 @@ class AdminController extends BaseController
         include __DIR__ . '/../Views/Word/hover_save_result.php';
 
         PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * TTS settings page
-     *
-     * Handles:
-     * - op=Save: Save TTS settings
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     */
-    public function settingsTts(array $params): void
-    {
-        $ttsService = new TtsService();
-        $message = '';
-
-        // Handle save request
-        if ($this->param('op') === 'Save') {
-            // TTS settings service reads from InputValidator
-            $ttsService->saveSettings();
-            $message = "Settings saved!";
-        }
-
-        // Get view data (used by included view)
-        /** @psalm-suppress UnusedVariable */
-        $languageOptions = $ttsService->getLanguageOptions(LanguageDefinitions::getAll());
-        /** @psalm-suppress UnusedVariable */
-        $currentLanguageCode = json_encode(
-            $ttsService->getCurrentLanguageCode(LanguageDefinitions::getAll())
-        );
-
-        // Render page
-        $this->render('Text-to-Speech Settings', true);
-
-        if ($message != '') {
-            $this->message($message, false);
-        }
-
-        include __DIR__ . '/../Views/Admin/tts_settings.php';
-
-        $this->endRender();
     }
 
     /**

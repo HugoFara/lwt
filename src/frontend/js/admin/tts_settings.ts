@@ -150,7 +150,7 @@ export const ttsSettings = {
    */
   clickCancel(): void {
     lwtFormCheck.resetDirty();
-    location.href = '/admin/settings/tts';
+    location.href = '/admin/settings';
   }
 };
 

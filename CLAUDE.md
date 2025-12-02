@@ -276,11 +276,10 @@ Before committing:
 
 1. Update `CHANGELOG.md` with release number and date
 2. Update `LWT_APP_VERSION` and `LWT_RELEASE_DATE` in `src/backend/Core/version.php`
-3. Update `PROJECT_NUMBER` in `Doxyfile`
-4. Run `composer doc` to regenerate documentation
-5. Commit: `git commit -m "Regenerates documentation for release X.Y.Z"`
-6. Tag: `git tag -a X.Y.Z` and push
-7. Create GitHub release after CI passes
+3. Run `composer doc` to regenerate documentation
+4. Commit: `git commit -m "Regenerates documentation for release X.Y.Z"`
+5. Tag: `git tag -a X.Y.Z` and push
+6. Create GitHub release after CI passes
 
 ## Important Conventions
 

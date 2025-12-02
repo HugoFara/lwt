@@ -57,14 +57,14 @@ class SettingsHandler
         // Get the current text ID
         $currentTextId = Settings::get('currenttext');
 
-        if ($currentTextId === null || $currentTextId === '') {
+        if ($currentTextId === '') {
             return null;
         }
 
         $textId = (int)$currentTextId;
 
         // Check if the current text belongs to this language
-        $textData = Connection::fetchRow(
+        $textData = Connection::fetchOne(
             "SELECT TxID, TxTitle, TxLgID, LENGTH(TxAnnotatedText) > 0 AS annotated
              FROM {$tbpref}texts
              WHERE TxID = {$textId} AND TxLgID = {$languageId}"
@@ -72,7 +72,7 @@ class SettingsHandler
 
         if ($textData === null) {
             // Current text doesn't belong to this language, find the most recent one
-            $textData = Connection::fetchRow(
+            $textData = Connection::fetchOne(
                 "SELECT TxID, TxTitle, TxLgID, LENGTH(TxAnnotatedText) > 0 AS annotated
                  FROM {$tbpref}texts
                  WHERE TxLgID = {$languageId}

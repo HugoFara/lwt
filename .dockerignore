@@ -19,8 +19,5 @@ tools/*
 .git
 .gitignore
 
-# MarkDown and PHP documentation generation
-Doxyfile
-
 # Media files for LWT
 media/*

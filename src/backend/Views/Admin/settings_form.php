@@ -702,6 +702,159 @@ use Lwt\View\Helper\IconHelper;
                     </div>
                 </div>
             </div>
+
+            <hr class="my-4">
+
+            <h4 class="subtitle is-6 mb-3">Browser Voice Settings</h4>
+            <p class="help mb-3">These settings are stored in your browser and apply per language.</p>
+
+            <script type="application/json" id="tts-settings-config">
+            {"currentLanguageCode": <?php echo $currentLanguageCode; ?>}
+            </script>
+
+            <!-- Language Code -->
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label" for="get-language">Language</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control is-expanded">
+                            <div class="select is-fullwidth">
+                                <select name="LgName" id="get-language">
+                                    <?php echo $languageOptions; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Selection -->
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label" for="voice">Voice</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control is-expanded">
+                            <div class="select is-fullwidth">
+                                <select name="LgVoice" id="voice">
+                                    <!-- Populated by JavaScript based on browser capabilities -->
+                                </select>
+                            </div>
+                        </div>
+                        <p class="help">Available voices depend on your web browser</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reading Rate -->
+            <div class="field is-horizontal"
+                 x-data="{ rate: 1 }"
+                 x-init="$nextTick(() => { rate = parseFloat(document.getElementById('rate')?.value || '1') })">
+                <div class="field-label is-normal">
+                    <label class="label" for="rate">Reading Rate</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control">
+                            <div class="columns is-vcentered is-mobile">
+                                <div class="column is-narrow">
+                                    <span class="tag is-light">0.5x</span>
+                                </div>
+                                <div class="column">
+                                    <input type="range"
+                                           name="LgTTSRate"
+                                           id="rate"
+                                           class="slider is-fullwidth"
+                                           min="0.5"
+                                           max="2"
+                                           step="0.1"
+                                           value="1"
+                                           x-model="rate" />
+                                </div>
+                                <div class="column is-narrow">
+                                    <span class="tag is-light">2x</span>
+                                </div>
+                                <div class="column is-narrow">
+                                    <span class="tag is-info" x-text="rate + 'x'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pitch -->
+            <div class="field is-horizontal"
+                 x-data="{ pitch: 1 }"
+                 x-init="$nextTick(() => { pitch = parseFloat(document.getElementById('pitch')?.value || '1') })">
+                <div class="field-label is-normal">
+                    <label class="label" for="pitch">Pitch</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control">
+                            <div class="columns is-vcentered is-mobile">
+                                <div class="column is-narrow">
+                                    <span class="tag is-light">Low</span>
+                                </div>
+                                <div class="column">
+                                    <input type="range"
+                                           name="LgPitch"
+                                           id="pitch"
+                                           class="slider is-fullwidth"
+                                           min="0"
+                                           max="2"
+                                           step="0.1"
+                                           value="1"
+                                           x-model="pitch" />
+                                </div>
+                                <div class="column is-narrow">
+                                    <span class="tag is-light">High</span>
+                                </div>
+                                <div class="column is-narrow">
+                                    <span class="tag is-info" x-text="pitch"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo -->
+            <div class="field is-horizontal" x-data="{ demoText: 'Lorem ipsum dolor sit amet...' }">
+                <div class="field-label is-normal">
+                    <label class="label" for="tts-demo">Test</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <div class="control">
+                            <div class="columns is-vcentered">
+                                <div class="column">
+                                    <input type="text"
+                                           class="input"
+                                           id="tts-demo"
+                                           placeholder="Enter text to test speech..."
+                                           x-model="demoText" />
+                                </div>
+                                <div class="column is-narrow">
+                                    <button type="button"
+                                            class="button is-info"
+                                            data-action="tts-demo">
+                                        <span class="icon is-small">
+                                            <?php echo IconHelper::render('play', ['alt' => 'Play']); ?>
+                                        </span>
+                                        <span>Test</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="help">Voice settings are stored in your browser's local storage</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

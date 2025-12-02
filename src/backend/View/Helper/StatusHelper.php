@@ -186,11 +186,10 @@ class StatusHelper
     /**
      * Build status controls (plus/minus buttons) for test table.
      *
-     * @param int    $score       Score associated with the word
-     * @param int    $status      Current status value
-     * @param int    $wordId      Word ID for JavaScript callback
-     * @param string $statusAbbr  Status abbreviation text
-     * @param string $placeholder Path to placeholder image
+     * @param int    $score      Score associated with the word
+     * @param int    $status     Current status value
+     * @param int    $wordId     Word ID for JavaScript callback
+     * @param string $statusAbbr Status abbreviation text
      *
      * @return string HTML controls string
      */

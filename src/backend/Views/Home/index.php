@@ -409,13 +409,9 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 </button>
             </header>
             <div class="card-content menu-content">
-                <a href="/admin/settings" class="button is-fullwidth is-light mb-2">
+                <a href="/admin/settings" class="button is-fullwidth is-light">
                     <span class="icon"><i data-lucide="sliders"></i></span>
-                    <span>General Settings</span>
-                </a>
-                <a href="/admin/settings/tts" class="button is-fullwidth is-light" title="Text-to-Speech settings">
-                    <span class="icon"><i data-lucide="volume-2"></i></span>
-                    <span>Text-to-Speech</span>
+                    <span>Settings</span>
                 </a>
             </div>
         </div>

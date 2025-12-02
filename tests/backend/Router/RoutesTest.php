@@ -288,7 +288,6 @@ class RoutesTest extends TestCase
             'admin install-demo' => ['/admin/install-demo', 'AdminController@installDemo'],
             'admin settings' => ['/admin/settings', 'AdminController@settings'],
             'admin settings hover' => ['/admin/settings/hover', 'AdminController@settingsHover'],
-            'admin settings tts' => ['/admin/settings/tts', 'AdminController@settingsTts'],
             'admin tables' => ['/admin/tables', 'AdminController@tables'],
             'admin server-data' => ['/admin/server-data', 'AdminController@serverData'],
         ];

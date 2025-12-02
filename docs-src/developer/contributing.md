@@ -207,11 +207,7 @@ Code documentation (everything under `docs/html/` and `docs/php/`) is automatica
 If you see an error, the PHP code is most likely at fault.
 However, don't hesitate to signal the issue.
 
-Currently, the PHP documentation is generated two times:
-
-* With [Doxygen](https://www.doxygen.nl/index.html) (run ``doxygen Doxyfile`` to regenerate it),
-it generates documentation for MarkDown and PHP files. It will be removed in LWT 3.0.0.
-* Using [phpDocumentor](https://phpdoc.org/). phpDoc generates PHP documentation and is the preferred way to do so.
+PHP documentation is generated using [phpDocumentor](https://phpdoc.org/).
 You can use it through `php tools/phpDocumentor` if installed with [Phive](https://phar.io/).
 
 ### JS Code Documentation
@@ -228,13 +224,12 @@ The steps to publish a new version are:
 
 1. In the [CHANGELOG](./CHANGELOG.md), add the latest release number and date.
 2. In `src/backend/Core/version.php`, update `LWT_APP_VERSION` and `LWT_RELEASE_DATE`.
-3. Update `PROJECT_NUMBER` in `Doxyfile` to the latest release number.
-4. Build frontend assets with `npm run build:all`.
-5. Regenerate documentation with `composer doc`.
-6. Commit your changes, `git commit -m "Regenerates documentation for release []."`
-7. Add a version tag with annotation `git tag -a [release number]` and push the changes.
-8. If all the GitHub actions are successful, write a new release on GitHub linking to the previously created tag.
-9. The new version is live!
+3. Build frontend assets with `npm run build:all`.
+4. Regenerate documentation with `composer doc`.
+5. Commit your changes, `git commit -m "Regenerates documentation for release []."`
+6. Add a version tag with annotation `git tag -a [release number]` and push the changes.
+7. If all the GitHub actions are successful, write a new release on GitHub linking to the previously created tag.
+8. The new version is live!
 
 ## Other Ways of Contribution
 

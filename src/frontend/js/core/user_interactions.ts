@@ -79,7 +79,6 @@ const quickMenuRoutes: Record<string, string> = {
   rss_import: '/feeds',
   backup_restore: '/admin/backup',
   settings: '/admin/settings',
-  text_to_speech_settings: '/admin/settings/tts',
   INFO: '/docs/'
 };
 
