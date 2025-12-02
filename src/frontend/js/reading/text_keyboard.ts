@@ -273,9 +273,6 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
       popup = true;
       dict_link = dict_link.substring(1);
     }
-    if (dict_link.startsWith('ggl.php')) {
-      dict_link = 'http://' + dict_link;
-    }
     let open_url = true;
     let final_url: URL | undefined;
     try {
@@ -286,10 +283,12 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
         open_url = false;
       }
     }
+    // Use the translator URL directly with the current word
+    const translatorUrl = createTheDictUrl(dict_link, txt);
     if (popup) {
-      owin('trans.php?x=1&i=' + ord + '&t=' + LWT_DATA.text.id);
+      owin(translatorUrl);
     } else if (open_url) {
-      loadDictionaryFrame('trans.php?x=1&i=' + ord + '&t=' + LWT_DATA.text.id);
+      loadDictionaryFrame(translatorUrl);
     }
     return false;
   }

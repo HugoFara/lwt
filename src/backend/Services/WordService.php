@@ -1486,6 +1486,29 @@ class WordService
     }
 
     /**
+     * Get sentence text at a text position.
+     *
+     * @param int $textId Text ID
+     * @param int $ord    Position in text
+     *
+     * @return string|null Sentence text or null if not found
+     */
+    public function getSentenceTextAtPosition(int $textId, int $ord): ?string
+    {
+        $seid = $this->getSentenceIdAtPosition($textId, $ord);
+        if ($seid === null) {
+            return null;
+        }
+
+        $sentence = Connection::preparedFetchValue(
+            "SELECT SeText AS value FROM {$this->tbpref}sentences WHERE SeID = ?",
+            [$seid]
+        );
+
+        return $sentence !== null ? (string) $sentence : null;
+    }
+
+    /**
      * Check if romanization should be shown for a text's language.
      *
      * @param int $textId Text ID

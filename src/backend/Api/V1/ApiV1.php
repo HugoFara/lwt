@@ -290,6 +290,14 @@ class ApiV1
                 (int)$params["page"],
                 (int)$params["count"]
             ));
+        } elseif (($fragments[1] ?? '') === 'multi') {
+            // GET /terms/multi - get multi-word expression data for editing
+            Response::success($this->termHandler->formatGetMultiWord(
+                (int)($params['tid'] ?? 0),
+                (int)($params['ord'] ?? 0),
+                $params['txt'] ?? null,
+                isset($params['wid']) ? (int)$params['wid'] : null
+            ));
         } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
             $termId = (int)$fragments[1];
             if (($fragments[2] ?? '') === 'translations') {
@@ -297,11 +305,17 @@ class ApiV1
                     (string)$params["term_lc"],
                     (int)$params["text_id"]
                 ));
+            } elseif (($fragments[2] ?? '') === 'details') {
+                // GET /terms/{id}/details - get term details with sentence and tags
+                Response::success($this->termHandler->formatGetTermDetails(
+                    $termId,
+                    $params['ann'] ?? null
+                ));
             } elseif (!isset($fragments[2])) {
                 // GET /terms/{id} - get term by ID
                 Response::success($this->termHandler->formatGetTerm($termId));
             } else {
-                Response::error('Expected "translations" or no sub-path', 404);
+                Response::error('Expected "translations", "details", or no sub-path', 404);
             }
         } else {
             Response::error('Endpoint Not Found: ' . ($fragments[1] ?? ''), 404);
@@ -314,8 +328,16 @@ class ApiV1
             Response::success($this->statisticsHandler->formatTextsStatistics(
                 $params["texts_id"]
             ));
+        } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
+            $textId = (int)$fragments[1];
+            if (($fragments[2] ?? '') === 'words') {
+                // GET /texts/{id}/words - get all words for client-side rendering
+                Response::success($this->textHandler->formatGetWords($textId));
+            } else {
+                Response::error('Expected "words"', 404);
+            }
         } else {
-            Response::error('Expected "statistics"', 404);
+            Response::error('Expected "statistics" or text ID', 404);
         }
     }
 
@@ -384,8 +406,11 @@ class ApiV1
                 (int)$params['position'],
                 (int)$params['status']
             ));
+        } elseif (($fragments[1] ?? '') === 'multi') {
+            // POST /terms/multi - create multi-word expression
+            Response::success($this->termHandler->formatCreateMultiWord($params));
         } else {
-            Response::error('Term ID (Integer), "new", or "quick" Expected', 404);
+            Response::error('Term ID (Integer), "new", "quick", or "multi" Expected', 404);
         }
     }
 
@@ -475,6 +500,10 @@ class ApiV1
             $termIds = $params['term_ids'] ?? [];
             $status = (int)($params['status'] ?? 0);
             Response::success($this->termHandler->formatBulkStatus($termIds, $status));
+        } elseif (($fragments[1] ?? '') === 'multi' && isset($fragments[2]) && ctype_digit($fragments[2])) {
+            // PUT /terms/multi/{id} - update multi-word expression
+            $termId = (int)$fragments[2];
+            Response::success($this->termHandler->formatUpdateMultiWord($termId, $params));
         } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
             $termId = (int)$fragments[1];
             if (($fragments[2] ?? '') === 'translation') {
@@ -487,7 +516,7 @@ class ApiV1
                 Response::error('Expected "translation"', 404);
             }
         } else {
-            Response::error('Term ID (Integer) or "bulk-status" Expected', 404);
+            Response::error('Term ID (Integer), "bulk-status", or "multi/{id}" Expected', 404);
         }
     }
 

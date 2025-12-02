@@ -500,4 +500,275 @@ class TermHandler
     {
         return $this->getTerm($termId);
     }
+
+    /**
+     * Get detailed term information including sentence and tags.
+     *
+     * @param int         $termId Term ID
+     * @param string|null $ann    Annotation to highlight in translation
+     *
+     * @return array{id: int, text: string, textLc: string, translation: string, romanization: string, status: int, langId: int, sentence: string, tags: array<string>, statusLabel: string}|array{error: string}
+     */
+    public function getTermDetails(int $termId, ?string $ann = null): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        $record = Connection::preparedFetchOne(
+            "SELECT WoID, WoText, WoTextLC, WoTranslation, WoRomanization,
+                    WoStatus, WoLgID, WoSentence
+             FROM {$tbpref}words WHERE WoID = ?",
+            [$termId]
+        );
+
+        if ($record === null) {
+            return ['error' => 'Term not found'];
+        }
+
+        // Get tags for the word
+        $tagsResult = Connection::preparedFetchAll(
+            "SELECT TgText FROM {$tbpref}wordtags
+             JOIN {$tbpref}tags ON TgID = WtTgID
+             WHERE WtWoID = ?
+             ORDER BY TgText",
+            [$termId]
+        );
+        $tags = array_map(fn($row) => (string)$row['TgText'], $tagsResult);
+
+        // Process translation - highlight annotation if provided
+        $translation = (string)$record['WoTranslation'];
+        if ($ann !== null && $ann !== '' && $translation !== '' && $translation !== '*') {
+            $translation = str_replace($ann, '<b>' . $ann . '</b>', $translation);
+        }
+
+        return [
+            'id' => (int)$record['WoID'],
+            'text' => (string)$record['WoText'],
+            'textLc' => (string)$record['WoTextLC'],
+            'translation' => $translation,
+            'romanization' => (string)$record['WoRomanization'],
+            'status' => (int)$record['WoStatus'],
+            'langId' => (int)$record['WoLgID'],
+            'sentence' => (string)$record['WoSentence'],
+            'tags' => $tags,
+            'statusLabel' => WordStatusService::getStatusName((int)$record['WoStatus'])
+        ];
+    }
+
+    /**
+     * Format response for getting term details.
+     *
+     * @param int         $termId Term ID
+     * @param string|null $ann    Optional annotation to highlight
+     *
+     * @return array
+     */
+    public function formatGetTermDetails(int $termId, ?string $ann = null): array
+    {
+        return $this->getTermDetails($termId, $ann);
+    }
+
+    // =========================================================================
+    // Multi-word Expression Methods
+    // =========================================================================
+
+    /**
+     * Get multi-word expression data for editing.
+     *
+     * @param int         $textId   Text ID
+     * @param int         $position Position in text
+     * @param string|null $text     Multi-word text (for new expressions)
+     * @param int|null    $wordId   Word ID (for existing expressions)
+     *
+     * @return array Multi-word data or error
+     */
+    public function getMultiWordForEdit(int $textId, int $position, ?string $text = null, ?int $wordId = null): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        // Get language ID from text
+        $lgid = $this->wordService->getLanguageIdFromText($textId);
+        if ($lgid === null) {
+            return ['error' => 'Text not found'];
+        }
+
+        // If word ID provided, get existing multi-word
+        if ($wordId !== null && $wordId > 0) {
+            $data = $this->wordService->getMultiWordData($wordId);
+            if ($data === null) {
+                return ['error' => 'Multi-word expression not found'];
+            }
+
+            // Get word count
+            $wordCount = (int) Connection::preparedFetchValue(
+                "SELECT WoWordCount AS value FROM {$tbpref}words WHERE WoID = ?",
+                [$wordId]
+            );
+
+            return [
+                'id' => $wordId,
+                'text' => $data['text'],
+                'textLc' => mb_strtolower($data['text'], 'UTF-8'),
+                'translation' => $data['translation'],
+                'romanization' => $data['romanization'],
+                'sentence' => $data['sentence'],
+                'status' => $data['status'],
+                'langId' => $data['lgid'],
+                'wordCount' => $wordCount,
+                'isNew' => false
+            ];
+        }
+
+        // New multi-word expression
+        if ($text === null || $text === '') {
+            return ['error' => 'Multi-word text is required for new expressions'];
+        }
+
+        // Get sentence at position
+        $sentence = $this->wordService->getSentenceTextAtPosition($textId, $position);
+
+        // Count words in the text
+        $wordCount = count(preg_split('/\s+/', trim($text)) ?: []);
+
+        return [
+            'id' => null,
+            'text' => $text,
+            'textLc' => mb_strtolower($text, 'UTF-8'),
+            'translation' => '',
+            'romanization' => '',
+            'sentence' => $sentence ?? '',
+            'status' => 1,
+            'langId' => $lgid,
+            'wordCount' => $wordCount,
+            'isNew' => true
+        ];
+    }
+
+    /**
+     * Create a new multi-word expression.
+     *
+     * @param array $data Multi-word data:
+     *                    - textId: Text ID
+     *                    - position: Position in text
+     *                    - text: Multi-word text
+     *                    - wordCount: Number of words
+     *                    - translation: Translation
+     *                    - romanization: Romanization
+     *                    - sentence: Example sentence
+     *                    - status: Status (1-5)
+     *
+     * @return array{term_id?: int, term_lc?: string, hex?: string, error?: string}
+     */
+    public function createMultiWordTerm(array $data): array
+    {
+        $textId = (int) ($data['textId'] ?? 0);
+        $text = trim($data['text'] ?? '');
+
+        if ($textId === 0 || $text === '') {
+            return ['error' => 'Text ID and multi-word text are required'];
+        }
+
+        $lgid = $this->wordService->getLanguageIdFromText($textId);
+        if ($lgid === null) {
+            return ['error' => 'Text not found'];
+        }
+
+        $textLc = mb_strtolower($text, 'UTF-8');
+        $wordCount = (int) ($data['wordCount'] ?? count(preg_split('/\s+/', $text) ?: []));
+
+        try {
+            $result = $this->wordService->createMultiWord([
+                'lgid' => $lgid,
+                'text' => $text,
+                'textlc' => $textLc,
+                'status' => (int) ($data['status'] ?? 1),
+                'translation' => $data['translation'] ?? '',
+                'sentence' => $data['sentence'] ?? '',
+                'roman' => $data['romanization'] ?? '',
+                'wordcount' => $wordCount
+            ]);
+
+            return [
+                'term_id' => $result['id'],
+                'term_lc' => $textLc,
+                'hex' => strToClassName($textLc)
+            ];
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Update an existing multi-word expression.
+     *
+     * @param int   $termId Term ID
+     * @param array $data   Multi-word data (translation, romanization, sentence, status)
+     *
+     * @return array{success?: bool, status?: int, error?: string}
+     */
+    public function updateMultiWordTerm(int $termId, array $data): array
+    {
+        $existing = $this->wordService->getMultiWordData($termId);
+        if ($existing === null) {
+            return ['error' => 'Multi-word expression not found'];
+        }
+
+        $oldStatus = $existing['status'];
+        $newStatus = (int) ($data['status'] ?? $oldStatus);
+
+        try {
+            $this->wordService->updateMultiWord($termId, [
+                'text' => $existing['text'], // Don't change text
+                'translation' => $data['translation'] ?? $existing['translation'],
+                'sentence' => $data['sentence'] ?? $existing['sentence'],
+                'roman' => $data['romanization'] ?? $existing['romanization']
+            ], $oldStatus, $newStatus);
+
+            return [
+                'success' => true,
+                'status' => $newStatus
+            ];
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Format response for getting multi-word data for editing.
+     *
+     * @param int         $textId   Text ID
+     * @param int         $position Position in text
+     * @param string|null $text     Multi-word text
+     * @param int|null    $wordId   Word ID
+     *
+     * @return array
+     */
+    public function formatGetMultiWord(int $textId, int $position, ?string $text = null, ?int $wordId = null): array
+    {
+        return $this->getMultiWordForEdit($textId, $position, $text, $wordId);
+    }
+
+    /**
+     * Format response for creating a multi-word expression.
+     *
+     * @param array $data Multi-word data
+     *
+     * @return array
+     */
+    public function formatCreateMultiWord(array $data): array
+    {
+        return $this->createMultiWordTerm($data);
+    }
+
+    /**
+     * Format response for updating a multi-word expression.
+     *
+     * @param int   $termId Term ID
+     * @param array $data   Multi-word data
+     *
+     * @return array
+     */
+    public function formatUpdateMultiWord(int $termId, array $data): array
+    {
+        return $this->updateMultiWordTerm($termId, $data);
+    }
 }

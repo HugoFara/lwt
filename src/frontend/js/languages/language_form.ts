@@ -23,7 +23,6 @@ function buildQueryString(params: Record<string, string>): string {
 // Module-level variables for dictionary URLs
 let GGTRANSLATE = '';
 let LIBRETRANSLATE = '';
-let GGL = '';
 
 /**
  * Configuration for language form.
@@ -97,12 +96,6 @@ export const languageForm = {
       target: targetLg,
       q: 'lwt_term'
     });
-
-    GGL = baseUrl + '/ggl.php/?' + buildQueryString({
-      sl: sourceLg,
-      tl: targetLg,
-      text: 'lwt_term'
-    });
   },
 
   /**
@@ -139,12 +132,6 @@ export const languageForm = {
       case 'libretranslate':
         result = LIBRETRANSLATE;
         usesKey = true;
-        break;
-      case 'ggl':
-        result = GGL;
-        break;
-      case 'glosbe':
-        result = baseUrl + 'glosbe.php';
         break;
     }
 

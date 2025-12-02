@@ -212,6 +212,72 @@ class TextController extends BaseController
     }
 
     /**
+     * Read text interface (Bulma + Alpine.js version)
+     *
+     * Modern text reading interface with client-side rendering.
+     *
+     * @param array $params Route parameters
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    public function readBulma(array $params): void
+    {
+        require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
+        require_once __DIR__ . '/../Services/MediaService.php';
+
+        // Get text ID from request
+        $textId = $this->getTextIdFromRequest();
+
+        if ($textId === null) {
+            header("Location: /text/edit");
+            exit();
+        }
+
+        // Render the Bulma reading page
+        $this->renderReadPageBulma($textId);
+    }
+
+    /**
+     * Render the text reading page (Bulma version).
+     *
+     * Uses client-side rendering via Alpine.js and API.
+     *
+     * @param int $textId Text ID
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    private function renderReadPageBulma(int $textId): void
+    {
+        // Prepare minimal header data
+        $headerData = $this->textService->getTextForReading($textId);
+        if ($headerData === null) {
+            header("Location: /text/edit");
+            exit();
+        }
+
+        $title = (string) $headerData['TxTitle'];
+        $langId = (int) $headerData['TxLgID'];
+        $media = isset($headerData['TxAudioURI']) ? trim((string) $headerData['TxAudioURI']) : '';
+        $audioPosition = (int) ($headerData['TxAudioPosition'] ?? 0);
+        $sourceUri = (string) ($headerData['TxSourceURI'] ?? '');
+
+        // Save current text
+        Settings::save('currenttext', $textId);
+
+        // Start page with Bulma layout
+        PageLayoutHelper::renderPageStartNobody('Read', 'full-width');
+
+        // Render Bulma desktop layout
+        include __DIR__ . '/../Views/Text/read_desktop_bulma.php';
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
      * Edit texts list (replaces text_edit.php)
      *
      * @param array $params Route parameters

@@ -8,6 +8,59 @@
 import { apiGet, apiPost, apiPut, type ApiResponse } from '../core/api_client';
 
 /**
+ * Dictionary links for a language.
+ */
+export interface DictLinks {
+  dict1: string;
+  dict2: string;
+  translator: string;
+}
+
+/**
+ * Text configuration for reading view.
+ */
+export interface TextReadingConfig {
+  textId: number;
+  langId: number;
+  title: string;
+  audioUri: string | null;
+  sourceUri: string | null;
+  audioPosition: number;
+  rightToLeft: boolean;
+  textSize: number;
+  dictLinks: DictLinks;
+}
+
+/**
+ * Word data for client-side rendering.
+ */
+export interface TextWord {
+  position: number;
+  sentenceId: number;
+  text: string;
+  textLc: string;
+  hex: string;
+  isNotWord: boolean;
+  wordCount: number;
+  hidden: boolean;
+  wordId?: number | null;
+  status?: number;
+  translation?: string;
+  romanization?: string;
+  tags?: string;
+  // Multiword references (mw2, mw3, etc.)
+  [key: `mw${number}`]: string | undefined;
+}
+
+/**
+ * Response for getting text words.
+ */
+export interface TextWordsResponse {
+  words: TextWord[];
+  config: TextReadingConfig;
+}
+
+/**
  * Word count statistics for a text.
  */
 export interface TextWordCount {
@@ -66,6 +119,24 @@ export interface DisplayModeResponse {
 }
 
 /**
+ * Word data returned from mark-all operations.
+ */
+export interface MarkedWordData {
+  wid: number;
+  hex: string;
+  term: string;
+  status: number;
+}
+
+/**
+ * Response for mark-all operations.
+ */
+export interface MarkAllResponse {
+  count: number;
+  words?: MarkedWordData[];
+}
+
+/**
  * Texts API methods.
  */
 export const TextsApi = {
@@ -117,11 +188,33 @@ export const TextsApi = {
    * Mark all unknown words in a text as well-known.
    *
    * @param textId Text ID
-   * @returns Promise with operation result
+   * @returns Promise with count and words data
    */
   async markAllWellKnown(
     textId: number
-  ): Promise<ApiResponse<{ count: number }>> {
-    return apiPost<{ count: number }>(`/texts/${textId}/mark-all-wellknown`, {});
+  ): Promise<ApiResponse<MarkAllResponse>> {
+    return apiPut<MarkAllResponse>(`/texts/${textId}/mark-all-wellknown`, {});
+  },
+
+  /**
+   * Mark all unknown words in a text as ignored.
+   *
+   * @param textId Text ID
+   * @returns Promise with count and words data
+   */
+  async markAllIgnored(
+    textId: number
+  ): Promise<ApiResponse<MarkAllResponse>> {
+    return apiPut<MarkAllResponse>(`/texts/${textId}/mark-all-ignored`, {});
+  },
+
+  /**
+   * Get all words for a text (for client-side rendering).
+   *
+   * @param textId Text ID
+   * @returns Promise with words array and config
+   */
+  async getWords(textId: number): Promise<ApiResponse<TextWordsResponse>> {
+    return apiGet<TextWordsResponse>(`/texts/${textId}/words`);
   }
 };

@@ -137,13 +137,13 @@ export function createTheDictLink(u: string, w: string, t: string, b: string): s
  * @param url    Translator URL
  * @param txt    Word text
  * @returns HTML-formatted link.
+ *
+ * @deprecated Use direct translator URLs instead. The trans.php gateway is removed.
  */
 export function createSentLookupLink(torder: number, txid: number, url: string, txt: string): string {
   url = url.trim();
   txt = txt.trim();
   let popup = false;
-  let external = false;
-  const target_url = 'trans.php?x=1&i=' + torder + '&t=' + txid;
   if (url === '' || txt === '') {
     return '';
   }
@@ -154,21 +154,18 @@ export function createSentLookupLink(torder: number, txid: number, url: string, 
   try {
     const final_url = new URL(url);
     popup = popup || final_url.searchParams.has('lwt_popup');
-    external = true;
   } catch (err) {
     if (!(err instanceof TypeError)) {
       throw err;
     }
   }
+  // Use the translator URL directly instead of going through trans.php
   if (popup) {
-    return ' <span class="click" onclick="owin(\'' + target_url + '\');">' +
+    return ' <span class="click" onclick="owin(\'' + url + '\');">' +
       txt + '</span> ';
   }
-  if (external) {
-    return ' <a href="' + target_url + '" target="ru" onclick="showRightFramesPanel();">' +
-      txt + '</a> ';
-  }
-  return '';
+  return ' <a href="' + url + '" target="ru" onclick="showRightFramesPanel();">' +
+    txt + '</a> ';
 }
 
 /**
@@ -187,10 +184,13 @@ export function getLangFromDict(wblink3: string): string {
   if (wblink3.startsWith('*')) {
     wblink3 = wblink3.substring(1);
   }
-  if (wblink3.startsWith('trans.php') || wblink3.startsWith('ggl.php')) {
-    wblink3 = 'http://' + wblink3;
+  let dictUrl: URL;
+  try {
+    dictUrl = new URL(wblink3);
+  } catch {
+    // Invalid URL, return empty
+    return '';
   }
-  const dictUrl = new URL(wblink3);
   const urlParams = dictUrl.searchParams;
   if (urlParams.get('lwt_translator') === 'libretranslate') {
     return urlParams.get('source') || '';

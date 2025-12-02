@@ -30,6 +30,57 @@ export interface Term {
 }
 
 /**
+ * Detailed term data including sentence and tags.
+ * Returned by GET /terms/{id}/details
+ */
+export interface TermDetails extends Term {
+  sentence: string;
+  tags: string[];
+  statusLabel: string;
+}
+
+/**
+ * Multi-word expression data for editing.
+ * Returned by GET /terms/multi
+ */
+export interface MultiWordData {
+  id: number | null;
+  text: string;
+  textLc: string;
+  translation: string;
+  romanization: string;
+  sentence: string;
+  status: number;
+  langId: number;
+  wordCount: number;
+  isNew: boolean;
+  error?: string;
+}
+
+/**
+ * Data for creating/updating multi-word expressions.
+ */
+export interface MultiWordInput {
+  textId: number;
+  position?: number;
+  text: string;
+  wordCount?: number;
+  translation?: string;
+  romanization?: string;
+  sentence?: string;
+  status?: number;
+}
+
+/**
+ * Response for multi-word update operations.
+ */
+export interface MultiWordUpdateResponse {
+  success?: boolean;
+  status?: number;
+  error?: string;
+}
+
+/**
  * Response for term status operations.
  */
 export interface TermStatusResponse {
@@ -242,5 +293,81 @@ export const TermsApi = {
    */
   async getImported(): Promise<ApiResponse<Term[]>> {
     return apiGet<Term[]>('/terms/imported');
+  },
+
+  /**
+   * Get detailed term information including sentence and tags.
+   *
+   * @param termId Term ID
+   * @param ann    Optional annotation to highlight in translation
+   * @returns Promise with term details or error
+   */
+  async getDetails(
+    termId: number,
+    ann?: string
+  ): Promise<ApiResponse<TermDetails>> {
+    const params: Record<string, string> = {};
+    if (ann) {
+      params.ann = ann;
+    }
+    return apiGet<TermDetails>(`/terms/${termId}/details`, params);
+  },
+
+  // =========================================================================
+  // Multi-word Expression Methods
+  // =========================================================================
+
+  /**
+   * Get multi-word expression data for editing.
+   *
+   * @param textId   Text ID
+   * @param position Position in text
+   * @param text     Multi-word text (for new expressions)
+   * @param wordId   Word ID (for existing expressions)
+   * @returns Promise with multi-word data or error
+   */
+  async getMultiWord(
+    textId: number,
+    position: number,
+    text?: string,
+    wordId?: number
+  ): Promise<ApiResponse<MultiWordData>> {
+    const params: Record<string, string> = {
+      tid: String(textId),
+      ord: String(position)
+    };
+    if (text) {
+      params.txt = text;
+    }
+    if (wordId !== undefined) {
+      params.wid = String(wordId);
+    }
+    return apiGet<MultiWordData>('/terms/multi', params);
+  },
+
+  /**
+   * Create a new multi-word expression.
+   *
+   * @param data Multi-word data
+   * @returns Promise with new term data
+   */
+  async createMultiWord(
+    data: MultiWordInput
+  ): Promise<ApiResponse<TermQuickCreateResponse>> {
+    return apiPost<TermQuickCreateResponse>('/terms/multi', data as unknown as Record<string, unknown>);
+  },
+
+  /**
+   * Update an existing multi-word expression.
+   *
+   * @param termId Term ID
+   * @param data   Multi-word data (translation, romanization, sentence, status)
+   * @returns Promise with update result
+   */
+  async updateMultiWord(
+    termId: number,
+    data: Partial<MultiWordInput>
+  ): Promise<ApiResponse<MultiWordUpdateResponse>> {
+    return apiPut<MultiWordUpdateResponse>(`/terms/multi/${termId}`, data as unknown as Record<string, unknown>);
   }
 };

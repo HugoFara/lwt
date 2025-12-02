@@ -45,6 +45,10 @@ import './terms/overlib_interface';
 import './terms/term_operations';
 
 // Reading interface
+import './reading/stores/word_store';
+import './reading/components/word_modal';
+import './reading/components/text_reader';
+import './reading/text_renderer';
 import './reading/text_events';
 import './reading/text_display';
 import './reading/frame_management';

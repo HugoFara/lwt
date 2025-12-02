@@ -4,6 +4,12 @@
  * This module provides popup dialogs for word interactions,
  * using the native HTML <dialog> element.
  *
+ * @deprecated This module is deprecated for the new Bulma reading interface.
+ * Use the word_modal Alpine.js component from reading/components/word_modal.ts
+ * instead, which provides a Bulma modal with full reactivity.
+ *
+ * This module is kept for backward compatibility with the legacy reading interface.
+ *
  * @license unlicense
  * @since 3.0.0
  */

@@ -2,11 +2,18 @@
 namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Core\Globals;
+use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 use Lwt\Services\WordService;
+use Lwt\Services\ExportService;
+use Lwt\Services\TagService;
+use Lwt\Services\DictionaryService;
 
 require_once __DIR__ . '/../../../Services/WordService.php';
+require_once __DIR__ . '/../../../Services/ExportService.php';
+require_once __DIR__ . '/../../../Services/TagService.php';
+require_once __DIR__ . '/../../../Services/DictionaryService.php';
 
 /**
  * Handler for text-related API operations.
@@ -289,5 +296,184 @@ class TextHandler
     public function formatMarkAllIgnored(int $textId): array
     {
         return $this->markAllIgnored($textId);
+    }
+
+    // =========================================================================
+    // Text Words API (for client-side rendering)
+    // =========================================================================
+
+    /**
+     * Get all words for a text for client-side rendering.
+     *
+     * Returns word tokens with position, status, translation, etc.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{words: array, config: array}|array{error: string}
+     */
+    public function getWords(int $textId): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        // Get text info and language settings
+        $textInfo = Connection::preparedFetchOne(
+            "SELECT TxID, TxLgID, TxTitle, TxAudioURI, TxSourceURI, TxAudioPosition
+             FROM {$tbpref}texts WHERE TxID = ?",
+            [$textId]
+        );
+
+        if (!$textInfo) {
+            return ['error' => 'Text not found'];
+        }
+
+        $langId = (int)$textInfo['TxLgID'];
+
+        // Get language info including dictionary URLs
+        $langInfo = Connection::preparedFetchOne(
+            "SELECT LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
+                    LgTextSize, LgRightToLeft, LgRegexpWordCharacters
+             FROM {$tbpref}languages WHERE LgID = ?",
+            [$langId]
+        );
+
+        if (!$langInfo) {
+            return ['error' => 'Language not found'];
+        }
+
+        // Get all text items with word info
+        $sql = "SELECT
+            CASE WHEN `Ti2WordCount`>0 THEN Ti2WordCount ELSE 1 END AS Code,
+            CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE `WoText` END AS TiText,
+            CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN LOWER(Ti2Text) ELSE `WoTextLC` END AS TiTextLC,
+            Ti2Order, Ti2SeID,
+            CASE WHEN `Ti2WordCount`>0 THEN 0 ELSE 1 END AS TiIsNotWord,
+            CASE
+                WHEN CHAR_LENGTH(Ti2Text)>0
+                THEN CHAR_LENGTH(Ti2Text)
+                ELSE CHAR_LENGTH(`WoTextLC`)
+            END AS TiTextLength,
+            WoID, WoText, WoStatus, WoTranslation, WoRomanization
+            FROM {$tbpref}textitems2 LEFT JOIN {$tbpref}words ON Ti2WoID = WoID
+            WHERE Ti2TxID = ?
+            ORDER BY Ti2Order asc, Ti2WordCount desc";
+
+        $records = Connection::preparedFetchAll($sql, [$textId]);
+
+        $words = [];
+        $exprs = [];
+        $lastOrder = -1;
+
+        foreach ($records as $record) {
+            $code = (int)$record['Code'];
+            $order = (int)$record['Ti2Order'];
+            $isNotWord = (int)$record['TiIsNotWord'];
+
+            // Handle multiword expressions tracking
+            if ($code > 1) {
+                if (empty($exprs) || $exprs[count($exprs) - 1]['text'] !== $record['TiText']) {
+                    $exprs[] = [
+                        'code' => $code,
+                        'text' => $record['TiText'],
+                        'remaining' => $code
+                    ];
+                }
+            }
+
+            // Determine if hidden (for multiword display logic)
+            $hidden = $order <= $lastOrder;
+
+            // Calculate hex for TERM class
+            $hex = StringUtils::toClassName($record['TiTextLC'] ?? '');
+
+            // Build word data
+            $wordData = [
+                'position' => $order,
+                'sentenceId' => (int)$record['Ti2SeID'],
+                'text' => $record['TiText'] ?? '',
+                'textLc' => $record['TiTextLC'] ?? '',
+                'hex' => $hex,
+                'isNotWord' => $isNotWord === 1,
+                'wordCount' => $code,
+                'hidden' => $hidden,
+            ];
+
+            if ($isNotWord === 0) {
+                // It's a word or multiword
+                if (isset($record['WoID'])) {
+                    // Known word
+                    $wordData['wordId'] = (int)$record['WoID'];
+                    $wordData['status'] = (int)$record['WoStatus'];
+                    $wordData['translation'] = ExportService::replaceTabNewline($record['WoTranslation'] ?? '');
+                    $wordData['romanization'] = $record['WoRomanization'] ?? '';
+
+                    // Get tags
+                    $tags = TagService::getWordTagListFormatted((int)$record['WoID'], ' ', true, false);
+                    if ($tags) {
+                        $wordData['tags'] = $tags;
+                    }
+                } else {
+                    // Unknown word (status 0)
+                    $wordData['wordId'] = null;
+                    $wordData['status'] = 0;
+                    $wordData['translation'] = '';
+                    $wordData['romanization'] = '';
+                }
+
+                // Add multiword references
+                foreach ($exprs as $expr) {
+                    $wordData['mw' . $expr['code']] = $expr['text'];
+                }
+            }
+
+            $words[] = $wordData;
+
+            // Update tracking for single words
+            if ($code === 1) {
+                // Update expression counters
+                for ($i = count($exprs) - 1; $i >= 0; $i--) {
+                    $exprs[$i]['remaining']--;
+                    if ($exprs[$i]['remaining'] < 1) {
+                        array_splice($exprs, $i, 1);
+                    }
+                }
+            }
+
+            // Track last order for hidden calculation
+            $lastOrder = max($lastOrder, $order + ($code - 1) * 2);
+        }
+
+        // Build config
+        $config = [
+            'textId' => $textId,
+            'langId' => $langId,
+            'title' => $textInfo['TxTitle'],
+            'audioUri' => $textInfo['TxAudioURI'],
+            'sourceUri' => $textInfo['TxSourceURI'],
+            'audioPosition' => (int)$textInfo['TxAudioPosition'],
+            'rightToLeft' => (int)$langInfo['LgRightToLeft'] === 1,
+            'textSize' => (int)$langInfo['LgTextSize'],
+            'dictLinks' => [
+                'dict1' => $langInfo['LgDict1URI'] ?? '',
+                'dict2' => $langInfo['LgDict2URI'] ?? '',
+                'translator' => $langInfo['LgGoogleTranslateURI'] ?? '',
+            ],
+        ];
+
+        return [
+            'words' => $words,
+            'config' => $config,
+        ];
+    }
+
+    /**
+     * Format response for getting text words.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{words: array, config: array}|array{error: string}
+     */
+    public function formatGetWords(int $textId): array
+    {
+        return $this->getWords($textId);
     }
 }

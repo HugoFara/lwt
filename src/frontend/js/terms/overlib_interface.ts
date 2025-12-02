@@ -16,6 +16,7 @@
 import { escape_html_chars, escape_html_chars_2 } from '../core/html_utils';
 import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
 import { createTheDictLink, createSentLookupLink } from './dictionary';
+import { TermsApi, type TermDetails } from '../api/terms';
 
 // Import the popup system
 import { overlib, CAPTION, cClick } from '../ui/word_popup';
@@ -398,6 +399,94 @@ function createAudioElement(text: string): HTMLElement {
 
   container.appendChild(img);
   return container;
+}
+
+/**
+ * Build a word details panel from API data.
+ * Fetches term details via API and renders them as HTML.
+ *
+ * @param termId Term ID to fetch details for
+ * @param ann Optional annotation to highlight in translation
+ * @returns Promise resolving to HTMLElement with term details
+ */
+export async function buildWordDetailsPanel(
+  termId: number,
+  ann?: string
+): Promise<HTMLElement> {
+  const container = document.createElement('div');
+  container.className = 'lwt-word-details';
+
+  if (!termId) {
+    container.innerHTML = '<p class="lwt-error">No term ID provided</p>';
+    return container;
+  }
+
+  // Show loading state
+  container.innerHTML = '<p class="lwt-loading">Loading...</p>';
+
+  const response = await TermsApi.getDetails(termId, ann);
+
+  if (response.error || !response.data) {
+    container.innerHTML = `<p class="lwt-error">${response.error || 'Failed to load term details'}</p>`;
+    return container;
+  }
+
+  const term = response.data;
+  container.innerHTML = renderTermDetailsHtml(term);
+
+  return container;
+}
+
+/**
+ * Render term details as HTML string.
+ *
+ * @param term Term details object
+ * @returns HTML string
+ */
+function renderTermDetailsHtml(term: TermDetails): string {
+  const rows: string[] = [];
+
+  // Term text
+  rows.push(`<tr><td class="lwt-label">Term:</td><td class="lwt-value"><b>${escapeHtml(term.text)}</b></td></tr>`);
+
+  // Translation (may contain HTML if annotation was highlighted)
+  if (term.translation && term.translation !== '*') {
+    rows.push(`<tr><td class="lwt-label">Translation:</td><td class="lwt-value"><b>${term.translation}</b></td></tr>`);
+  }
+
+  // Tags
+  if (term.tags && term.tags.length > 0) {
+    rows.push(`<tr><td class="lwt-label">Tags:</td><td class="lwt-value">${escapeHtml(term.tags.join(', '))}</td></tr>`);
+  }
+
+  // Romanization
+  if (term.romanization) {
+    rows.push(`<tr><td class="lwt-label">Romaniz.:</td><td class="lwt-value">${escapeHtml(term.romanization)}</td></tr>`);
+  }
+
+  // Sentence (format {term} markers)
+  if (term.sentence) {
+    const formattedSentence = term.sentence
+      .replace(/\{([^}]+)\}/g, '<b>$1</b>');
+    rows.push(`<tr><td class="lwt-label">Sentence:</td><td class="lwt-value">${formattedSentence}</td></tr>`);
+  }
+
+  // Status
+  rows.push(`<tr><td class="lwt-label">Status:</td><td class="lwt-value status${term.status}">${escapeHtml(term.statusLabel)}</td></tr>`);
+
+  return `<table class="lwt-details-table">${rows.join('')}</table>`;
+}
+
+/**
+ * Simple HTML escaping helper.
+ *
+ * @param str String to escape
+ * @returns HTML-escaped string
+ */
+function escapeHtml(str: string): string {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 /**************************************************************
