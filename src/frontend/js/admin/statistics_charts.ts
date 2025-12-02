@@ -1,11 +1,12 @@
 /**
- * Statistics Charts Module - Renders Chart.js visualizations for statistics page
+ * Statistics Charts Module - Alpine.js component with Chart.js visualizations
  *
  * @author  HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */
 
+import Alpine from 'alpinejs';
 import { Chart, registerables } from 'chart.js';
 
 // Register all Chart.js components
@@ -56,6 +57,17 @@ interface FrequencyTotals {
   ca: number;  // Created this year
   aa: number;  // Activity this year
   ka: number;  // Known this year
+}
+
+/**
+ * Alpine.js component state interface.
+ */
+interface StatisticsAppState {
+  chartsInitialized: boolean;
+  intensityData: IntensityLanguageData[];
+  frequencyTotals: FrequencyTotals | null;
+  init(this: StatisticsAppState & { $nextTick: (cb: () => void) => void }): void;
+  initCharts(): void;
 }
 
 /**
@@ -220,38 +232,78 @@ export function initFrequencyChart(
 }
 
 /**
- * Initialize statistics charts from data attributes on the page.
- * Looks for elements with data-statistics-intensity and data-statistics-frequency.
+ * Alpine.js data component for the statistics page.
+ * Manages Chart.js initialization after DOM is ready.
  */
-export function initStatisticsCharts(): void {
-  // Initialize intensity chart
-  const intensityDataEl = document.getElementById('statistics-intensity-data');
-  if (intensityDataEl) {
-    try {
-      const intensityData = JSON.parse(
-        intensityDataEl.dataset.languages || '[]'
-      ) as IntensityLanguageData[];
-      if (intensityData.length > 0) {
-        initIntensityChart('intensityChart', intensityData);
-      }
-    } catch (e) {
-      console.error('Failed to parse intensity chart data:', e);
-    }
-  }
+export function statisticsApp(): StatisticsAppState {
+  return {
+    chartsInitialized: false,
+    intensityData: [],
+    frequencyTotals: null,
 
-  // Initialize frequency chart
-  const frequencyDataEl = document.getElementById('statistics-frequency-data');
-  if (frequencyDataEl) {
-    try {
-      const frequencyTotals = JSON.parse(
-        frequencyDataEl.dataset.totals || '{}'
-      ) as FrequencyTotals;
-      initFrequencyChart('frequencyChart', frequencyTotals);
-    } catch (e) {
-      console.error('Failed to parse frequency chart data:', e);
+    /**
+     * Initialize the component - automatically called by Alpine.
+     */
+    init() {
+      // Parse data from JSON script elements
+      const intensityDataEl = document.getElementById('statistics-intensity-data');
+      const frequencyDataEl = document.getElementById('statistics-frequency-data');
+
+      if (intensityDataEl?.textContent) {
+        try {
+          const parsed = JSON.parse(intensityDataEl.textContent);
+          this.intensityData = parsed.languages || [];
+        } catch (e) {
+          console.error('Failed to parse intensity chart data:', e);
+        }
+      }
+
+      if (frequencyDataEl?.textContent) {
+        try {
+          const parsed = JSON.parse(frequencyDataEl.textContent);
+          this.frequencyTotals = parsed.totals || null;
+        } catch (e) {
+          console.error('Failed to parse frequency chart data:', e);
+        }
+      }
+
+      // Use $nextTick to ensure DOM is fully ready
+      this.$nextTick(() => this.initCharts());
+    },
+
+    /**
+     * Initialize Chart.js charts.
+     */
+    initCharts() {
+      if (this.chartsInitialized) {
+        return;
+      }
+
+      if (this.intensityData.length > 0) {
+        initIntensityChart('intensityChart', this.intensityData);
+      }
+
+      if (this.frequencyTotals) {
+        initFrequencyChart('frequencyChart', this.frequencyTotals);
+      }
+
+      this.chartsInitialized = true;
     }
-  }
+  };
 }
 
-// Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', initStatisticsCharts);
+/**
+ * Register the Alpine.js component.
+ */
+export function initStatisticsAlpine(): void {
+  Alpine.data('statisticsApp', statisticsApp);
+}
+
+// Auto-register before Alpine.start() is called
+initStatisticsAlpine();
+
+// Legacy function for backward compatibility
+export function initStatisticsCharts(): void {
+  // No-op - charts are now initialized via Alpine component
+  console.warn('initStatisticsCharts() is deprecated. Use x-data="statisticsApp()" instead.');
+}

@@ -167,10 +167,6 @@ import {
   getTranslationFromGlosbeApi
 } from './terms/translation_api';
 import { speechDispatcher } from './core/user_interactions';
-import {
-  lwt_wiz_select_test,
-  initWizardStep2
-} from './feeds/feed_wizard_step2';
 
 // Declare global window interface extensions
 declare global {
@@ -414,9 +410,6 @@ declare global {
     getTranslationFromGlosbeApi: typeof getTranslationFromGlosbeApi;
     speechDispatcher: typeof speechDispatcher;
 
-    // Feed wizard step 2
-    lwt_wiz_select_test: typeof lwt_wiz_select_test;
-    initWizardStep2: typeof initWizardStep2;
   }
 }
 
@@ -649,6 +642,3 @@ window.getGlosbeTranslation = getGlosbeTranslation;
 window.getTranslationFromGlosbeApi = getTranslationFromGlosbeApi;
 window.speechDispatcher = speechDispatcher;
 
-// Feed wizard step 2
-window.lwt_wiz_select_test = lwt_wiz_select_test;
-window.initWizardStep2 = initWizardStep2;

@@ -302,7 +302,14 @@ class ApiV1
 
     private function handleTermsGet(array $fragments, array $params): void
     {
-        if (($fragments[1] ?? '') === 'imported') {
+        if (($fragments[1] ?? '') === 'list') {
+            // GET /terms/list - get paginated, filtered word list
+            Response::success($this->termHandler->formatGetWordList($params));
+        } elseif (($fragments[1] ?? '') === 'filter-options') {
+            // GET /terms/filter-options - get filter dropdown options
+            $langId = isset($params['lang']) && $params['lang'] !== '' ? (int)$params['lang'] : null;
+            Response::success($this->termHandler->formatGetFilterOptions($langId));
+        } elseif (($fragments[1] ?? '') === 'imported') {
             Response::success($this->importHandler->formatImportedTerms(
                 $params["last_update"],
                 (int)$params["page"],
@@ -546,6 +553,24 @@ class ApiV1
             $termIds = $params['term_ids'] ?? [];
             $status = (int)($params['status'] ?? 0);
             Response::success($this->termHandler->formatBulkStatus($termIds, $status));
+        } elseif (($fragments[1] ?? '') === 'bulk-action') {
+            // PUT /terms/bulk-action - perform bulk action on selected terms
+            $ids = $params['ids'] ?? [];
+            $action = $params['action'] ?? '';
+            $data = $params['data'] ?? null;
+            Response::success($this->termHandler->formatBulkAction($ids, $action, $data));
+        } elseif (($fragments[1] ?? '') === 'all-action') {
+            // PUT /terms/all-action - perform action on all filtered terms
+            $filters = $params['filters'] ?? [];
+            $action = $params['action'] ?? '';
+            $data = $params['data'] ?? null;
+            Response::success($this->termHandler->formatAllAction($filters, $action, $data));
+        } elseif (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'inline-edit') {
+            // PUT /terms/{id}/inline-edit - inline edit translation or romanization
+            $termId = (int)$fragments[1];
+            $field = $params['field'] ?? '';
+            $value = $params['value'] ?? '';
+            Response::success($this->termHandler->formatInlineEdit($termId, $field, $value));
         } elseif (($fragments[1] ?? '') === 'multi' && isset($fragments[2]) && ctype_digit($fragments[2])) {
             // PUT /terms/multi/{id} - update multi-word expression
             $termId = (int)$fragments[2];

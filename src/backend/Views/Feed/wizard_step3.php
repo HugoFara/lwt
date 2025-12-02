@@ -21,192 +21,247 @@ namespace Lwt\Views\Feed;
 
 use Lwt\View\Helper\IconHelper;
 
-?>
-<div id="wizard-step3-config"
-    data-article-selector="<?php echo htmlspecialchars((string)($wizardData['article_selector'] ?? ''), ENT_QUOTES); ?>"
-    data-hide-images="<?php echo $wizardData['hide_images'] == 'yes' ? 'true' : 'false'; ?>"
-    data-is-minimized="<?php echo $wizardData['maxim'] == 0 ? 'true' : 'false'; ?>"></div>
+// Prepare feed items for JSON
+$feedItemsJson = [];
+for ($i = 0; $i < $feedLen; $i++) {
+    $feedHost = parse_url($wizardData['feed'][$i]['link'], PHP_URL_HOST) ?? '';
+    $hostStatus = $wizardData['host2'][$feedHost] ?? '-';
+    $feedItemsJson[] = [
+        'index' => $i,
+        'title' => $wizardData['feed'][$i]['title'] ?? '',
+        'link' => $wizardData['feed'][$i]['link'] ?? '',
+        'host' => $feedHost,
+        'hostStatus' => $hostStatus,
+        'hasHtml' => isset($wizardData['feed'][$i]['html']) || $i == $wizardData['selected_feed']
+    ];
+}
 
-<div id="lwt_header"
-     x-data="{
-         settingsOpen: false,
-         isMinimized: <?php echo $wizardData['maxim'] == 0 ? 'true' : 'false'; ?>
-     }">
-    <form name="lwt_form1" class="validate" action="/feeds/wizard" method="post">
-        <!-- Advanced Mode Buttons (shown when minimized) -->
-        <div id="adv" class="buttons mb-2" x-show="isMinimized" x-cloak>
-            <button type="button" class="button is-small is-danger is-outlined" data-action="wizard-step3-cancel">
+// Map selection mode to typed value
+$selectionModeMap = [
+    '0' => 'smart',
+    'all' => 'all',
+    'adv' => 'adv'
+];
+$selectionMode = $selectionModeMap[$wizardData['select_mode']] ?? 'smart';
+
+// Build JSON config
+$configJson = json_encode([
+    'rssUrl' => $wizardData['rss_url'] ?? '',
+    'feedTitle' => $wizardData['feed']['feed_title'] ?? '',
+    'feedText' => $wizardData['feed']['feed_text'] ?? '',
+    'articleSection' => $wizardData['article_section'] ?? '',
+    'articleSelector' => $wizardData['article_selector'] ?? '',
+    'filterTags' => $wizardData['filter_tags'] ?? '',
+    'feedItems' => $feedItemsJson,
+    'selectedFeedIndex' => (int)($wizardData['selected_feed'] ?? 0),
+    'settings' => [
+        'selectionMode' => $selectionMode,
+        'hideImages' => $wizardData['hide_images'] === 'yes',
+        'isMinimized' => $wizardData['maxim'] == 0
+    ],
+    'editFeedId' => isset($wizardData['edit_feed']) ? (int)$wizardData['edit_feed'] : null,
+    'multipleHosts' => count($wizardData['host'] ?? []) > 1
+], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
+?>
+<script type="application/json" id="wizard-step3-config"><?php echo $configJson; ?></script>
+
+<div x-data="feedWizardStep3" x-cloak>
+    <!-- Advanced Mode Panel (shown when minimized) -->
+    <div id="adv" class="box mb-2" x-show="isMinimized" x-cloak>
+        <div class="buttons">
+            <button type="button" class="button is-small is-danger is-outlined" @click="cancel">
                 Cancel
             </button>
-            <button id="adv_get_button" class="button is-small is-info">
+            <button type="button" class="button is-small is-info" @click="getAdvanced" x-show="store.isAdvancedOpen">
                 Get
             </button>
         </div>
-
-        <!-- Settings Modal -->
-        <div class="modal" :class="settingsOpen ? 'is-active' : ''">
-            <div class="modal-background" @click="settingsOpen = false"></div>
-            <div class="modal-card">
-                <header class="modal-card-head">
-                    <p class="modal-card-title">
-                        <span class="icon mr-2">
-                            <?php echo IconHelper::render('settings', ['alt' => 'Settings']); ?>
-                        </span>
-                        Feed Wizard Settings
-                    </p>
-                    <button class="delete" aria-label="close" type="button" @click="settingsOpen = false"></button>
-                </header>
-                <section class="modal-card-body">
+        <!-- Advanced options will be rendered here when in advanced mode -->
+        <template x-if="store.isAdvancedOpen">
+            <div class="content">
+                <p class="is-size-7 mb-2">Select XPath option:</p>
+                <template x-for="option in store.advancedOptions" :key="option.value">
                     <div class="field">
-                        <label class="label">Selection Mode</label>
-                        <div class="control">
-                            <div class="select is-fullwidth">
-                                <select name="select_mode" data-action="wizard-step3-select-mode">
-                                    <option value="0"<?php if ($wizardData['select_mode'] == '0') echo ' selected'; ?>>Smart Selection</option>
-                                    <option value="all"<?php if ($wizardData['select_mode'] == 'all') echo ' selected'; ?>>Get All Attributes</option>
-                                    <option value="adv"<?php if ($wizardData['select_mode'] == 'adv') echo ' selected'; ?>>Advanced Selection</option>
-                                </select>
-                            </div>
+                        <label class="radio">
+                            <input type="radio" name="adv_xpath" :value="option.value" />
+                            <span x-text="option.label"></span>
+                            <span class="tag is-small is-light" x-text="'(' + option.count + ' matches)'"></span>
+                        </label>
+                    </div>
+                </template>
+                <div class="field">
+                    <label class="radio">
+                        <input type="radio" name="adv_xpath" value="" />
+                        Custom:
+                        <input type="text" class="input is-small" style="width: 300px;"
+                               x-model="store.customXPath"
+                               :class="{ 'is-danger': store.customXPath && !store.customXPathValid }" />
+                    </label>
+                </div>
+                <div class="buttons mt-3">
+                    <button type="button" class="button is-small" @click="cancelAdvanced">Cancel</button>
+                    <button type="button" class="button is-small is-info" @click="getAdvanced">Get</button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" :class="settingsOpen ? 'is-active' : ''">
+        <div class="modal-background" @click="settingsOpen = false"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">
+                    <span class="icon mr-2">
+                        <?php echo IconHelper::render('settings', ['alt' => 'Settings']); ?>
+                    </span>
+                    Feed Wizard Settings
+                </p>
+                <button class="delete" aria-label="close" type="button" @click="settingsOpen = false"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">Selection Mode</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select x-model="store.selectionMode" @change="changeSelectMode">
+                                <option value="smart">Smart Selection</option>
+                                <option value="all">Get All Attributes</option>
+                                <option value="adv">Advanced Selection</option>
+                            </select>
                         </div>
                     </div>
+                </div>
+                <div class="field">
+                    <label class="label">Hide Images</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select x-model="store.hideImages" @change="changeHideImages">
+                                <option :value="true">Yes</option>
+                                <option :value="false">No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button type="button" class="button is-success" @click="settingsOpen = false">OK</button>
+            </footer>
+        </div>
+    </div>
+
+    <div id="lwt_container" x-show="!isMinimized">
+        <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
+
+        <h1 class="title is-4 is-flex is-align-items-center">
+            <span class="icon mr-2">
+                <?php echo IconHelper::render('wand-2', ['alt' => 'Wizard']); ?>
+            </span>
+            Feed Wizard - Step 3: Filter Text
+            <a href="docs/info.html#feed_wizard" target="_blank" class="ml-2">
+                <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
+            </a>
+        </h1>
+
+        <!-- Steps indicator -->
+        <div class="steps is-small mb-4">
+            <div class="step-item is-completed is-success">
+                <div class="step-marker">1</div>
+                <div class="step-details"><p class="step-title">Feed URL</p></div>
+            </div>
+            <div class="step-item is-completed is-success">
+                <div class="step-marker">2</div>
+                <div class="step-details"><p class="step-title">Select Article</p></div>
+            </div>
+            <div class="step-item is-active is-primary">
+                <div class="step-marker">3</div>
+                <div class="step-details"><p class="step-title">Filter Text</p></div>
+            </div>
+            <div class="step-item">
+                <div class="step-marker">4</div>
+                <div class="step-details"><p class="step-title">Save</p></div>
+            </div>
+        </div>
+
+        <!-- Filter tags list -->
+        <div class="box has-background-light mb-4">
+            <p class="is-size-7 has-text-grey mb-2">Elements to filter out:</p>
+            <ol id="lwt_sel" class="ml-4">
+                <template x-for="selector in filterSelectors" :key="selector.id">
+                    <li class="is-flex is-align-items-center mb-1"
+                        :class="{ 'has-text-weight-bold': selector.isHighlighted }">
+                        <span class="is-family-monospace is-size-7" x-text="selector.xpath"
+                              @click="toggleSelectorHighlight(selector.id)"
+                              style="cursor: pointer;"></span>
+                        <button type="button" class="delete is-small ml-2"
+                                @click="deleteSelector(selector.id)"></button>
+                    </li>
+                </template>
+            </ol>
+        </div>
+
+        <!-- Feed Info (read-only) -->
+        <div class="box">
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label">Name</label>
+                </div>
+                <div class="field-body">
                     <div class="field">
-                        <label class="label">Hide Images</label>
-                        <div class="control">
-                            <div class="select is-fullwidth">
-                                <select name="hide_images" data-action="wizard-step3-hide-images">
-                                    <option value="yes"<?php if ($wizardData['hide_images'] == 'yes') echo ' selected'; ?>>Yes</option>
-                                    <option value="no"<?php if ($wizardData['hide_images'] == 'no') echo ' selected'; ?>>No</option>
-                                </select>
-                            </div>
-                        </div>
+                        <p class="control">
+                            <strong x-text="config.feedTitle"></strong>
+                        </p>
                     </div>
-                </section>
-                <footer class="modal-card-foot">
-                    <button type="button" class="button is-success" @click="settingsOpen = false">OK</button>
-                </footer>
-            </div>
-        </div>
-
-        <!-- Keep old settings div for JS compatibility -->
-        <div id="settings" style="display: none;">
-            <button class="settings-ok" data-action="wizard-settings-close">OK</button>
-        </div>
-
-        <div id="lwt_container" x-show="!isMinimized">
-            <?php echo \Lwt\View\Helper\PageLayoutHelper::buildLogo(); ?>
-
-            <h1 class="title is-4 is-flex is-align-items-center">
-                <span class="icon mr-2">
-                    <?php echo IconHelper::render('wand-2', ['alt' => 'Wizard']); ?>
-                </span>
-                Feed Wizard - Step 3: Filter Text
-                <a href="docs/info.html#feed_wizard" target="_blank" class="ml-2">
-                    <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
-                </a>
-            </h1>
-
-            <!-- Steps indicator -->
-            <div class="steps is-small mb-4">
-                <div class="step-item is-completed is-success">
-                    <div class="step-marker">1</div>
-                    <div class="step-details"><p class="step-title">Feed URL</p></div>
-                </div>
-                <div class="step-item is-completed is-success">
-                    <div class="step-marker">2</div>
-                    <div class="step-details"><p class="step-title">Select Article</p></div>
-                </div>
-                <div class="step-item is-active is-primary">
-                    <div class="step-marker">3</div>
-                    <div class="step-details"><p class="step-title">Filter Text</p></div>
-                </div>
-                <div class="step-item">
-                    <div class="step-marker">4</div>
-                    <div class="step-details"><p class="step-title">Save</p></div>
                 </div>
             </div>
 
-            <!-- Filter tags list -->
-            <div class="box has-background-light mb-4">
-                <p class="is-size-7 has-text-grey mb-2">Elements to filter out:</p>
-                <ol id="lwt_sel" class="ml-4">
-                    <?php echo $wizardData['filter_tags']; ?>
-                </ol>
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label">Newsfeed URL</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <p class="control">
+                            <span class="has-text-grey-dark is-size-7" x-text="config.rssUrl"></span>
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Feed Info (read-only) -->
-            <div class="box">
-                <div class="field is-horizontal">
-                    <div class="field-label is-normal">
-                        <label class="label">Name</label>
-                    </div>
-                    <div class="field-body">
-                        <div class="field">
-                            <p class="control">
-                                <strong><?php echo htmlspecialchars($wizardData['feed']['feed_title'], ENT_COMPAT); ?></strong>
-                            </p>
-                        </div>
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label">Article Section</label>
+                </div>
+                <div class="field-body">
+                    <div class="field">
+                        <p class="control">
+                            <span class="tag is-info is-light" x-text="config.articleSection"></span>
+                        </p>
                     </div>
                 </div>
+            </div>
 
-                <div class="field is-horizontal">
-                    <div class="field-label is-normal">
-                        <label class="label">Newsfeed URL</label>
-                    </div>
-                    <div class="field-body">
-                        <div class="field">
-                            <p class="control">
-                                <span class="has-text-grey-dark is-size-7">
-                                    <?php echo htmlspecialchars($wizardData['rss_url'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-                                </span>
-                            </p>
-                        </div>
-                    </div>
+            <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                    <label class="label">Article Source</label>
                 </div>
-
-                <div class="field is-horizontal">
-                    <div class="field-label is-normal">
-                        <label class="label">Article Section</label>
-                    </div>
-                    <div class="field-body">
-                        <div class="field">
-                            <p class="control">
-                                <span class="tag is-info is-light">
-                                    <?php echo htmlspecialchars($wizardData['article_section'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-                                </span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field is-horizontal">
-                    <div class="field-label is-normal">
-                        <label class="label">Article Source</label>
-                    </div>
-                    <div class="field-body">
-                        <div class="field">
-                            <p class="control">
-                                <span class="tag is-light">
-                                    <?php
-                                    if (array_key_exists('feed_text', $wizardData['feed'])) {
-                                        echo $wizardData['feed']['feed_text'];
-                                    } else {
-                                        echo 'Webpage Link';
-                                        $wizardData['feed']['feed_text'] = '';
-                                    }
-                                    ?>
-                                </span>
-                            </p>
-                        </div>
+                <div class="field-body">
+                    <div class="field">
+                        <p class="control">
+                            <span class="tag is-light" x-text="config.feedText || 'Webpage Link'"></span>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Wizard Controls -->
+    <!-- Wizard Controls -->
+    <form name="lwt_form1" class="validate" action="/feeds/wizard" method="post">
         <nav class="level wizard-controls mt-4">
             <div class="level-left">
                 <div class="level-item">
-                    <button type="button" class="button is-danger is-outlined" data-action="wizard-cancel" data-url="/feeds/edit?del_wiz=1">
+                    <button type="button" class="button is-danger is-outlined" @click="cancel">
                         Cancel
                     </button>
                 </div>
@@ -216,42 +271,28 @@ use Lwt\View\Helper\IconHelper;
                 <div class="field has-addons">
                     <div class="control">
                         <div class="select">
-                            <select name="selected_feed" class="feed-selector" data-action="wizard-step3-selected-feed">
-                                <?php
-                                $current_host = '';
-                                $current_status = '';
-                                for ($i = 0; $i < $feedLen; $i++) {
-                                    $feed_host = parse_url($wizardData['feed'][$i]['link']);
-                                    $feed_host = $feed_host['host'];
-                                    if (!isset($wizardData['host2'][$feed_host])) {
-                                        $wizardData['host2'][$feed_host] = '-';
-                                    }
-                                    echo '<option value="' . $i . '" title="' . htmlspecialchars($wizardData['feed'][$i]['title'] ?? '', ENT_QUOTES, 'UTF-8') . '"';
-                                    if ($i == $wizardData['selected_feed']) {
-                                        echo ' selected';
-                                        $current_host = $feed_host;
-                                        $current_status = $wizardData['host2'][$feed_host];
-                                    }
-                                    echo '>' .
-                                    ((isset($wizardData['feed'][$i]['html']) || $i == $wizardData['selected_feed']) ? '&#9658; ' : '- ') .
-                                    ($i + 1) . ' ' . $wizardData['host2'][$feed_host] . '&nbsp;host: ' . $feed_host . '</option>';
-                                }
-                                ?>
+                            <select name="selected_feed" x-model="selectedFeedIndex" @change="changeSelectedFeed">
+                                <template x-for="item in config.feedItems" :key="item.index">
+                                    <option :value="item.index"
+                                            :title="item.title"
+                                            x-text="(item.hasHtml ? '► ' : '- ') + (item.index + 1) + ' ' + item.hostStatus + ' host: ' + item.host">
+                                    </option>
+                                </template>
                             </select>
                         </div>
                     </div>
-                    <input type="hidden" name="host_name" value="<?php echo $current_host ?>" />
-                    <?php if (count($wizardData['host']) > 1): ?>
-                    <div class="control">
-                        <div class="select">
-                            <select id="host_status" name="host_status2">
-                                <option value="&nbsp;-&nbsp;"<?php if ($current_status == '&nbsp;-&nbsp;') echo ' selected'; ?>>&nbsp;-&nbsp;</option>
-                                <option value="&#9734;"<?php if ($current_status == '&#9734;') echo ' selected'; ?>>&#9734;</option>
-                                <option value="&#9733;"<?php if ($current_status == '&#9733;') echo ' selected'; ?>>&#9733;</option>
-                            </select>
+                    <input type="hidden" name="host_name" :value="config.feedItems[selectedFeedIndex]?.host || ''" />
+                    <template x-if="config.multipleHosts">
+                        <div class="control">
+                            <div class="select">
+                                <select name="host_status2" x-model="hostStatus">
+                                    <option value="-">-</option>
+                                    <option value="☆">☆</option>
+                                    <option value="★">★</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <?php endif; ?>
+                    </template>
                 </div>
             </div>
 
@@ -259,13 +300,18 @@ use Lwt\View\Helper\IconHelper;
                 <div class="field has-addons">
                     <div class="control">
                         <div class="select">
-                            <select name="mark_action" id="mark_action">
+                            <select name="mark_action" @change="handleMarkActionChange">
                                 <option value="">[Click On Text]</option>
+                                <template x-for="option in markActionOptions" :key="option.value">
+                                    <option :value="option.value" x-text="option.label"></option>
+                                </template>
                             </select>
                         </div>
                     </div>
                     <div class="control">
-                        <button id="filter_button" name="button" class="button is-warning" disabled>Filter</button>
+                        <button type="button" class="button is-warning"
+                                :disabled="!currentXPath"
+                                @click="filterSelection">Filter</button>
                     </div>
                     <div class="control">
                         <button type="button" class="button" @click="settingsOpen = true">
@@ -278,13 +324,13 @@ use Lwt\View\Helper\IconHelper;
             <div class="level-right">
                 <div class="level-item">
                     <div class="buttons">
-                        <button type="button" class="button" data-action="wizard-step3-back">
+                        <button type="button" class="button" @click="goBack">
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('arrow-left', ['alt' => 'Back']); ?>
                             </span>
                             <span>Back</span>
                         </button>
-                        <button id="next" class="button is-primary">
+                        <button type="button" class="button is-primary" @click="goNext">
                             <span>Next</span>
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('arrow-right', ['alt' => 'Next']); ?>
@@ -295,19 +341,19 @@ use Lwt\View\Helper\IconHelper;
             </div>
         </nav>
 
-        <button type="button" class="button is-small wizard-minmax mt-2"
-                data-action="wizard-step3-minmax"
-                @click="isMinimized = !isMinimized">
+        <button type="button" class="button is-small wizard-minmax mt-2" @click="toggleMinimize">
             <span class="icon is-small">
                 <?php echo IconHelper::render('minimize-2', ['alt' => 'Toggle']); ?>
             </span>
             <span>min/max</span>
         </button>
 
-        <input type="hidden" id="filter_tags" name="filter_tags" disabled />
+        <input type="hidden" name="filter_tags" />
         <input type="hidden" name="html" />
         <input type="hidden" name="step" value="3" />
-        <input type="hidden" id="maxim" name="maxim" value="1" />
+        <input type="hidden" id="maxim" name="maxim" :value="isMinimized ? '0' : '1'" />
+        <input type="hidden" name="select_mode" :value="selectionMode" />
+        <input type="hidden" name="hide_images" :value="hideImages ? 'yes' : 'no'" />
     </form>
 </div>
 

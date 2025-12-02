@@ -73,8 +73,8 @@ function registerRoutes(Router $router): void
     // Edit term while testing
     $router->register('/word/edit-term', 'WordController@editTerm');
 
-    // Edit words (list)
-    $router->register('/words/edit', 'WordController@listEdit');
+    // Edit words (list) - Alpine.js SPA version
+    $router->register('/words/edit', 'WordController@listEditAlpine');
 
     // Edit multi-word
     $router->register('/word/edit-multi', 'WordController@editMulti');
@@ -85,8 +85,8 @@ function registerRoutes(Router $router): void
     // Delete multi-word
     $router->register('/word/delete-multi', 'WordController@deleteMulti');
 
-    // All words (list view)
-    $router->register('/words', 'WordController@listEdit');
+    // All words (list view) - Alpine.js SPA version
+    $router->register('/words', 'WordController@listEditAlpine');
 
     // New word
     $router->register('/word/new', 'WordController@create');

@@ -645,6 +645,39 @@ class WordController extends BaseController
     }
 
     /**
+     * Edit words list - Alpine.js SPA version.
+     *
+     * This provides a full reactive SPA for word management with:
+     * - Client-side filtering, sorting, and pagination via API
+     * - Inline editing of translations and romanizations
+     * - Bulk selection and actions
+     *
+     * @param array $params Route parameters
+     *
+     * @return void
+     */
+    public function listEditAlpine(array $params): void
+    {
+        $currentlang = \Lwt\Database\Validation::language(
+            (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
+        );
+
+        $perPage = (int) \Lwt\Database\Settings::getWithDefault('set-terms-per-page');
+        if ($perPage < 1) {
+            $perPage = 50;
+        }
+
+        PageLayoutHelper::renderPageStart(
+            'My ' . $this->languageService->getLanguageName($currentlang) . ' Terms',
+            true
+        );
+
+        include __DIR__ . '/../Views/Word/list_alpine.php';
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
      * Check if current action is export or test (skip page start).
      *
      * @return bool

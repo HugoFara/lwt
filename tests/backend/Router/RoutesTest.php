@@ -165,11 +165,11 @@ class RoutesTest extends TestCase
     {
         return [
             'word edit' => ['/word/edit', 'WordController@edit'],
-            'words edit list' => ['/words/edit', 'WordController@listEdit'],
+            'words edit list' => ['/words/edit', 'WordController@listEditAlpine'],
             'word edit-multi' => ['/word/edit-multi', 'WordController@editMulti'],
             'word delete' => ['/word/delete', 'WordController@delete'],
             'word delete-multi' => ['/word/delete-multi', 'WordController@deleteMulti'],
-            'words list' => ['/words', 'WordController@listEdit'],
+            'words list' => ['/words', 'WordController@listEditAlpine'],
             'word new' => ['/word/new', 'WordController@create'],
             'word show' => ['/word/show', 'WordController@show'],
             'word insert-wellknown' => ['/word/insert-wellknown', 'WordController@insertWellknown'],

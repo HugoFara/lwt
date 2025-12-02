@@ -36,6 +36,7 @@ import './api/terms';
 import './api/texts';
 import './api/review';
 import './api/settings';
+import './api/words';
 
 // Terms/vocabulary management
 import './terms/word_status';
@@ -83,17 +84,22 @@ import './media/html5_audio_player';
 import './media/audio_player_alpine';
 
 // Feeds
-import './feeds/jq_feedwizard';
 import './feeds/feed_browse';
 import './feeds/feed_loader';
 import './feeds/feed_multi_load';
 import './feeds/feed_index';
 import './feeds/feed_form';
 import './feeds/feed_text_edit';
-import './feeds/feed_wizard_common';
-import './feeds/feed_wizard_step2';
-import './feeds/feed_wizard_step3';
-import './feeds/feed_wizard_step4';
+
+// Feed Wizard - Alpine.js components
+import './feeds/stores/feed_wizard_store';
+import './feeds/components/feed_wizard_step1';
+import './feeds/components/feed_wizard_step2';
+import './feeds/components/feed_wizard_step3';
+import './feeds/components/feed_wizard_step4';
+
+// Feed Wizard - Legacy XPath selection (still needed for core functionality)
+import './feeds/jq_feedwizard';
 
 // Texts
 import './texts/text_list';
@@ -105,6 +111,7 @@ import './texts/text_check_display';
 import './texts/text_print';
 
 // Words
+import './words/word_list_app'; // Alpine.js SPA component
 import './words/word_list_filter';
 import './words/word_list_table';
 import './words/word_dom_updates';
@@ -128,6 +135,7 @@ import './admin/tts_settings';
 import './admin/table_management';
 import './admin/settings_form';
 import './admin/statistics_charts';
+import './admin/backup_manager';
 
 // Home
 import './home/home_app';

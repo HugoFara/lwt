@@ -1,137 +1,132 @@
 /**
- * Table set management page functionality.
+ * Table Management - Alpine.js component for table set management.
  *
- * Handles event delegation for the table set management page,
- * replacing inline onclick/onsubmit handlers with event listeners.
+ * Handles table set selection, creation, and deletion with
+ * reactive validation and confirmation dialogs.
  *
  * @author  HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */
 
+import Alpine from 'alpinejs';
+
+interface TableManagementState {
+  selectedPrefix: string;
+  newPrefix: string;
+  createError: string | null;
+  deletePrefix: string;
+  confirmDelete: boolean;
+  validatePrefix(): boolean;
+  submitCreate(event: Event): void;
+  submitDelete(event: Event): void;
+}
+
 /**
  * Validate table prefix value.
  *
  * @param value The prefix value to validate
- * @returns True if valid, false otherwise
+ * @returns Error message or null if valid
+ */
+function getValidationError(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return 'Table Set Name must not be empty';
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(trimmed)) {
+    return 'Only letters, numbers, and underscores allowed';
+  }
+  if (trimmed.length > 20) {
+    return 'Maximum 20 characters';
+  }
+  return null;
+}
+
+/**
+ * Alpine.js data component for the table management page.
+ * Manages table set operations with validation and confirmations.
+ */
+export function tableManagementApp(): TableManagementState {
+  return {
+    selectedPrefix: '-',
+    newPrefix: '',
+    createError: null,
+    deletePrefix: '-',
+    confirmDelete: false,
+
+    /**
+     * Validate the new prefix input and update error state.
+     * @returns true if valid
+     */
+    validatePrefix(): boolean {
+      this.createError = getValidationError(this.newPrefix);
+      return this.createError === null;
+    },
+
+    /**
+     * Handle create form submission.
+     * Prevents submission if validation fails.
+     */
+    submitCreate(event: Event): void {
+      if (!this.validatePrefix()) {
+        event.preventDefault();
+      }
+    },
+
+    /**
+     * Handle delete form submission.
+     * Shows confirmation dialog and prevents if not confirmed.
+     */
+    submitDelete(event: Event): void {
+      if (this.deletePrefix === '-' || !this.confirmDelete) {
+        event.preventDefault();
+        return;
+      }
+
+      const confirmMessage =
+        `*** DELETING TABLE SET: ${this.deletePrefix} ***\n\n` +
+        `ALL DATA IN THIS TABLE SET WILL BE LOST!\n\n` +
+        `Are you sure?`;
+
+      if (!confirm(confirmMessage)) {
+        event.preventDefault();
+      }
+    }
+  };
+}
+
+/**
+ * Register the Alpine.js component.
+ */
+export function initTableManagementAlpine(): void {
+  Alpine.data('tableManagementApp', tableManagementApp);
+}
+
+// Auto-register before Alpine.start() is called
+initTableManagementAlpine();
+
+// Legacy exports for backward compatibility
+declare global {
+  interface Window {
+    initTableManagement: typeof initTableManagementAlpine;
+    check_table_prefix: (value: string) => boolean;
+    checkTablePrefix: (value: string) => boolean;
+  }
+}
+
+/**
+ * Legacy function for checking table prefix validity.
+ * @deprecated Use tableManagementApp().validatePrefix() instead
  */
 function checkTablePrefix(value: string): boolean {
-  if (value.trim() === '') {
-    alert('Table Set Name must not be empty!');
-    return false;
-  }
-  if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-    alert('Table Set Name must contain only letters, numbers, and underscores!');
-    return false;
-  }
-  if (value.length > 20) {
-    alert('Table Set Name must be 20 characters or less!');
+  const error = getValidationError(value);
+  if (error) {
+    alert(error);
     return false;
   }
   return true;
 }
 
-/**
- * Initialize table create form.
- */
-function initTableCreateForm(): void {
-  const form = document.querySelector<HTMLFormElement>('form.table-create-form');
-  if (!form) return;
-
-  form.addEventListener('submit', (e) => {
-    const input = form.querySelector<HTMLInputElement>('input[name="newpref"]');
-    if (input && !checkTablePrefix(input.value)) {
-      e.preventDefault();
-    }
-  });
-}
-
-/**
- * Initialize table delete form.
- */
-function initTableDeleteForm(): void {
-  const form = document.querySelector<HTMLFormElement>('form.table-delete-form');
-  if (!form) return;
-
-  form.addEventListener('submit', (e) => {
-    const select = form.querySelector<HTMLSelectElement>('select[name="delpref"]');
-    if (select && select.selectedIndex > 0) {
-      const selectedText = select.options[select.selectedIndex].text;
-      const confirmMessage =
-        '\n*** DELETING TABLE SET: ' + selectedText + ' ***\n\n' +
-        '*** ALL DATA IN THIS TABLE SET WILL BE LOST! ***\n\n' +
-        '*** ARE YOU SURE ?? ***';
-      if (!confirm(confirmMessage)) {
-        e.preventDefault();
-      }
-    }
-  });
-}
-
-/**
- * Initialize common navigation handlers.
- */
-function initNavigationHandlers(): void {
-  // Go back buttons
-  const goBackButtons = document.querySelectorAll<HTMLButtonElement>('[data-action="go-back"]');
-  goBackButtons.forEach((button) => {
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      history.back();
-    });
-  });
-
-  // Navigate buttons
-  const navigateButtons = document.querySelectorAll<HTMLButtonElement>('[data-action="navigate"]');
-  navigateButtons.forEach((button) => {
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      const url = button.dataset.url;
-      if (url) {
-        location.href = url;
-      }
-    });
-  });
-}
-
-/**
- * Initialize all table management event handlers.
- */
-export function initTableManagement(): void {
-  initTableCreateForm();
-  initTableDeleteForm();
-  initNavigationHandlers();
-}
-
-/**
- * Check if the current page is the table management page.
- */
-function isTableManagementPage(): boolean {
-  // Check for the characteristic forms
-  const createForm = document.querySelector('form.table-create-form');
-  const deleteForm = document.querySelector('form.table-delete-form');
-  // Also check for the fixed prefix warning page (has go-back button)
-  const goBackButton = document.querySelector('[data-action="go-back"]');
-
-  return createForm !== null || deleteForm !== null || goBackButton !== null;
-}
-
-// Auto-initialize on DOM ready if on table management page
-document.addEventListener('DOMContentLoaded', () => {
-  if (isTableManagementPage()) {
-    initTableManagement();
-  }
-});
-
-// Export to window for potential external use and legacy compatibility
-declare global {
-  interface Window {
-    initTableManagement: typeof initTableManagement;
-    check_table_prefix: typeof checkTablePrefix;
-    checkTablePrefix: typeof checkTablePrefix;
-  }
-}
-
-window.initTableManagement = initTableManagement;
+window.initTableManagement = initTableManagementAlpine;
 window.check_table_prefix = checkTablePrefix;
 window.checkTablePrefix = checkTablePrefix;

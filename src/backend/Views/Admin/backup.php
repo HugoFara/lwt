@@ -349,14 +349,4 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
     display: none !important;
 }
 </style>
-
-<script>
-function backupManager() {
-    return {
-        fileName: '',
-        restoring: false,
-        emptying: false,
-        confirmEmpty: false
-    };
-}
-</script>
+<!-- backupManager() is now registered via src/frontend/js/admin/backup_manager.ts -->

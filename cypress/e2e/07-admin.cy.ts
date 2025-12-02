@@ -114,8 +114,8 @@ describe('Admin Pages', () => {
 
     it('should show database tables', () => {
       cy.visit('/admin/tables');
-      // Should list database tables
-      cy.get('table, .table-list').should('exist');
+      // Should show table set management options (cards or notification for fixed prefix)
+      cy.get('.card, .notification, table, .table-list').should('exist');
     });
   });
 });
