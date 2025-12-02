@@ -22,7 +22,7 @@ use Lwt\View\Helper\IconHelper;
 use Lwt\View\Helper\PageLayoutHelper;
 
 $actions = [
-    ['url' => '/feeds?page=1', 'label' => 'My Feeds', 'icon' => 'list'],
+    ['url' => '/feeds?page=1', 'label' => 'Feeds', 'icon' => 'list'],
     ['url' => '/feeds/wizard?step=1', 'label' => 'New Feed Wizard', 'icon' => 'wand-2', 'class' => 'is-info']
 ];
 

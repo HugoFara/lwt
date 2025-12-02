@@ -30,6 +30,12 @@ if (empty($languages)): ?>
 <p>No languages found.</p>
 <?php else: ?>
 
+<!-- Notification area for confirmation messages -->
+<div id="language-notification" class="notification is-success is-light" style="display: none;">
+    <button class="delete" onclick="this.parentElement.style.display='none'"></button>
+    <span id="language-notification-text"></span>
+</div>
+
 <div class="columns is-multiline language-cards">
     <?php foreach ($languages as $lang): ?>
     <?php
@@ -38,7 +44,7 @@ if (empty($languages)): ?>
                       $lang['wordCount'] == 0 && $lang['feedCount'] == 0);
     ?>
     <div class="column is-4-desktop is-6-tablet is-12-mobile">
-        <div class="card language-card<?php echo $isCurrent ? ' is-current' : ''; ?>">
+        <div class="card language-card<?php echo $isCurrent ? ' is-current' : ''; ?>" data-lang-id="<?php echo $lang['id']; ?>">
             <header class="card-header">
                 <p class="card-header-title">
                     <?php if ($isCurrent): ?>
@@ -48,9 +54,17 @@ if (empty($languages)): ?>
                 </p>
                 <div class="card-header-icon">
                     <?php if (!$isCurrent): ?>
-                    <a href="/admin/save-setting?k=currentlanguage&amp;v=<?php echo $lang['id']; ?>&amp;u=/languages" title="Set as Current Language">
-                        <?php echo IconHelper::render('circle-check', ['title' => 'Set as Current']); ?>
-                    </a>
+                    <button
+                        type="button"
+                        class="button is-small is-primary is-outlined set-current-language-btn"
+                        data-action="set-current-language"
+                        data-lang-id="<?php echo $lang['id']; ?>"
+                        data-lang-name="<?php echo htmlspecialchars($lang['name'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                        title="Set as Current Language"
+                    >
+                        <?php echo IconHelper::render('circle-check', ['size' => 14]); ?>
+                        <span>Set as Default</span>
+                    </button>
                     <?php endif; ?>
                 </div>
             </header>

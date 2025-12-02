@@ -135,7 +135,7 @@ class RoutesTest extends TestCase
     public static function textRoutesProvider(): array
     {
         return [
-            'text read' => ['/text/read', 'TextController@read'],
+            'text read' => ['/text/read', 'TextController@readBulma'],
             'text edit' => ['/text/edit', 'TextController@edit'],
             'texts list' => ['/texts', 'TextController@edit'],
             'text display' => ['/text/display', 'TextController@display'],

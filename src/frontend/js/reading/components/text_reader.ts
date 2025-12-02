@@ -86,13 +86,13 @@ export function textReaderData(): TextReaderData {
 
       try {
         const textId = this.getTextIdFromUrl();
-        if (!textId) {
-          this.error = 'No text ID provided';
+        if (!textId || textId === 0) {
+          // No text ID - we're not on a text reading page
           this.isLoading = false;
           return;
         }
 
-        await this.store.init(textId);
+        await this.store.loadText(textId);
 
         if (!this.store.isInitialized) {
           this.error = 'Failed to load text';

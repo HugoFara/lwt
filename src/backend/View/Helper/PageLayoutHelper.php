@@ -128,7 +128,7 @@ HTML;
                     <span class="ml-1">Texts</span>
                 </a>
                 <div class="navbar-dropdown">
-                    <a class="navbar-item" href="/texts">My Texts</a>
+                    <a class="navbar-item" href="/texts">Texts</a>
                     <a class="navbar-item" href="/text/archived">Archived Texts</a>
                     <hr class="navbar-divider">
                     <a class="navbar-item" href="/tags/text">Text Tags</a>
@@ -145,7 +145,7 @@ HTML;
                     <span class="ml-1">Terms</span>
                 </a>
                 <div class="navbar-dropdown">
-                    <a class="navbar-item" href="/words/edit">My Terms</a>
+                    <a class="navbar-item" href="/words/edit">Terms</a>
                     <a class="navbar-item" href="/tags">Term Tags</a>
                     <hr class="navbar-divider">
                     <a class="navbar-item" href="/word/upload">Import Terms</a>
@@ -158,7 +158,7 @@ HTML;
                     <span class="ml-1">Languages</span>
                 </a>
                 <div class="navbar-dropdown">
-                    <a class="navbar-item" href="/languages">My Languages</a>
+                    <a class="navbar-item" href="/languages">Languages</a>
                     <hr class="navbar-divider">
                     <a class="navbar-item" href="/languages?new=1">Add New Language</a>
                 </div>
@@ -179,7 +179,7 @@ HTML;
                 <div class="navbar-dropdown is-right">
                     <a class="navbar-item" href="/admin/backup">Backup/Restore</a>
                     <a class="navbar-item" href="/admin/settings">Settings</a>
-                    <a class="navbar-item" href="/admin/tts">Text-to-Speech</a>
+                    <a class="navbar-item" href="/admin/settings/tts">Text-to-Speech</a>
                     <hr class="navbar-divider">
                     <a class="navbar-item" href="/admin/server-data">Server Data</a>
                     <a class="navbar-item" href="/docs/info.html" target="_blank">Help</a>

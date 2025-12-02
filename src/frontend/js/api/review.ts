@@ -55,6 +55,67 @@ export interface NextWordParams {
 }
 
 /**
+ * Language settings for a test.
+ */
+export interface TestLangSettings {
+  name: string;
+  dict1Uri: string;
+  dict2Uri: string;
+  translateUri: string;
+  textSize: number;
+  rtl: boolean;
+  langCode: string;
+}
+
+/**
+ * Test configuration response from server.
+ */
+export interface TestConfigResponse {
+  testKey: string;
+  selection: string;
+  testType: number;
+  isTableMode: boolean;
+  wordMode: boolean;
+  langId: number;
+  wordRegex: string;
+  langSettings: TestLangSettings;
+  progress: {
+    total: number;
+    remaining: number;
+    wrong: number;
+    correct: number;
+  };
+  timer: {
+    startTime: number;
+    serverTime: number;
+  };
+  title: string;
+  property: string;
+}
+
+/**
+ * Word data for table test.
+ */
+export interface TableTestWord {
+  id: number;
+  text: string;
+  translation: string;
+  romanization: string;
+  sentence: string;
+  sentenceHtml: string;
+  status: number;
+  score: number;
+}
+
+/**
+ * Table test words response.
+ */
+export interface TableWordsResponse {
+  words: TableTestWord[];
+  langSettings: TestLangSettings;
+}
+
+/**
  * Review API methods.
  */
 export const ReviewApi = {
@@ -109,6 +170,37 @@ export const ReviewApi = {
       word_id: wordId,
       status,
       change
+    });
+  },
+
+  /**
+   * Get test configuration.
+   *
+   * @param params Test parameters (lang, text, or selection)
+   * @returns Promise with test configuration
+   */
+  async getTestConfig(params: {
+    lang?: number;
+    text?: number;
+    selection?: number;
+  }): Promise<ApiResponse<TestConfigResponse>> {
+    return apiGet<TestConfigResponse>('/review/config', params);
+  },
+
+  /**
+   * Get all words for table test mode.
+   *
+   * @param testKey   Test session key
+   * @param selection Word selection criteria
+   * @returns Promise with table words
+   */
+  async getTableWords(
+    testKey: string,
+    selection: string
+  ): Promise<ApiResponse<TableWordsResponse>> {
+    return apiGet<TableWordsResponse>('/review/table-words', {
+      test_key: testKey,
+      selection
     });
   }
 };

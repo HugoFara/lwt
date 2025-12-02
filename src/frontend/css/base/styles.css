@@ -1137,6 +1137,30 @@ Language Cards (language list page)
   opacity: 1;
 }
 
+.language-card .set-current-language-btn {
+  font-size: 0.7rem;
+  height: auto;
+  padding: 0.25em 0.5em;
+  gap: 0.25rem;
+  border-color: rgba(255, 255, 255, 0.7);
+  color: white;
+  background: transparent;
+}
+
+.language-card .set-current-language-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: white;
+  color: white;
+}
+
+.language-card .set-current-language-btn .icon {
+  margin: 0;
+}
+
+.language-card .set-current-language-btn.is-loading::after {
+  border-color: transparent transparent white white;
+}
+
 .language-card.is-current {
   border: 2px solid #485fc7;
   box-shadow: 0 4px 12px rgba(72, 95, 199, 0.3);
@@ -1923,6 +1947,13 @@ Home page styles - Bulma integration
 
 .card-header-title .icon-text .icon {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-header-title .icon-text .icon svg {
+  vertical-align: middle;
 }
 
 /* Fix Bulma label contrast - ensure dark text for readability */

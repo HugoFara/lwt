@@ -109,8 +109,9 @@ export function renderWord(word: WordData, settings: RenderSettings): string {
   if (word.isNotWord) {
     // Punctuation or whitespace
     const hiddenClass = word.hidden ? ' hide' : '';
-    const text = word.text.replace(/¶/g, '<br />');
-    return `<span id="${spanId}" class="${hiddenClass}">${escapeHtml(text)}</span>`;
+    // Escape HTML first, then replace ¶ with <br /> to preserve line breaks
+    const text = escapeHtml(word.text).replace(/¶/g, '<br />');
+    return `<span id="${spanId}" class="${hiddenClass}">${text}</span>`;
   }
 
   // Build classes

@@ -28,7 +28,7 @@ use Lwt\View\Helper\IconHelper;
 use Lwt\View\Helper\PageLayoutHelper;
 
 echo PageLayoutHelper::buildActionCard([
-    ['url' => '/feeds', 'label' => 'My Feeds', 'icon' => 'list'],
+    ['url' => '/feeds', 'label' => 'Feeds', 'icon' => 'list'],
     ['url' => '/feeds/edit?new_feed=1', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
 ]);
 ?>

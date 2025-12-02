@@ -2,19 +2,30 @@
  * Home page Alpine.js application.
  *
  * Provides reactive state management for the home page dashboard
- * including collapsible menus and system warnings.
+ * including collapsible menus, system warnings, and language selection.
  *
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */
 
 import Alpine from 'alpinejs';
+import { createIcons, icons } from 'lucide';
+import type { LanguageChangedEvent } from '../core/language_settings';
 
 const STORAGE_KEY = 'lwt_collapsed_menus';
+
+interface LastTextInfo {
+  id: number;
+  title: string;
+  language_id: number;
+  language_name: string;
+  annotated: boolean;
+}
 
 interface HomeWarningsConfig {
   phpVersion: string;
   lwtVersion: string;
+  lastText: LastTextInfo | null;
 }
 
 interface Warning {
@@ -23,9 +34,20 @@ interface Warning {
   visible: boolean;
 }
 
+interface LanguageNotification {
+  message: string;
+  visible: boolean;
+}
+
 interface HomeData {
   // Menu state
   collapsedMenus: string[];
+
+  // Last text info (dynamically updated when language changes)
+  lastText: LastTextInfo | null;
+
+  // Language change notification
+  languageNotification: LanguageNotification;
 
   // Warnings
   warnings: {
@@ -41,6 +63,8 @@ interface HomeData {
   isCollapsed(menuId: string): boolean;
   toggleMenu(menuId: string): void;
   initWarnings(): void;
+  initLanguageChangeListener(): void;
+  handleLanguageChange(event: LanguageChangedEvent): void;
   checkCookies(): void;
   checkPHPVersion(version: string): void;
   checkLWTUpdate(currentVersion: string): void;
@@ -53,6 +77,13 @@ interface HomeData {
 export function homeData(): HomeData {
   return {
     collapsedMenus: [],
+
+    lastText: null,
+
+    languageNotification: {
+      message: '',
+      visible: false
+    },
 
     warnings: {
       phpOutdated: {
@@ -76,8 +107,11 @@ export function homeData(): HomeData {
       // Load collapsed menus from localStorage
       this.loadMenuState();
 
-      // Initialize warnings from config
+      // Initialize warnings and last text from config
       this.initWarnings();
+
+      // Listen for language changes
+      this.initLanguageChangeListener();
     },
 
     loadMenuState() {
@@ -126,6 +160,9 @@ export function homeData(): HomeData {
       try {
         const config: HomeWarningsConfig = JSON.parse(configElement.textContent || '{}');
 
+        // Load initial last text info
+        this.lastText = config.lastText;
+
         // Check all warnings
         this.checkCookies();
         this.checkPHPVersion(config.phpVersion);
@@ -133,6 +170,38 @@ export function homeData(): HomeData {
       } catch (e) {
         console.error('Failed to parse home warnings config:', e);
       }
+    },
+
+    initLanguageChangeListener() {
+      // Listen for the custom language change event
+      document.addEventListener('lwt:languageChanged', ((event: LanguageChangedEvent) => {
+        this.handleLanguageChange(event);
+      }) as EventListener);
+    },
+
+    handleLanguageChange(event: LanguageChangedEvent) {
+      const { languageName, response } = event.detail;
+
+      // Update the last text info
+      if (response.last_text) {
+        this.lastText = response.last_text;
+      } else {
+        this.lastText = null;
+      }
+
+      // Show notification
+      this.languageNotification.message = `Language changed to "${languageName}"`;
+      this.languageNotification.visible = true;
+
+      // Refresh Lucide icons for the newly rendered template
+      setTimeout(() => {
+        createIcons({ icons });
+      }, 0);
+
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        this.languageNotification.visible = false;
+      }, 3000);
     },
 
     checkCookies() {

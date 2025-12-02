@@ -2,6 +2,8 @@
 namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Database\Settings;
+use Lwt\Database\Connection;
+use Lwt\Core\Globals;
 
 /**
  * Handler for settings-related API operations.
@@ -16,15 +18,121 @@ class SettingsHandler
      * @param string $key   Setting name
      * @param string $value Setting value
      *
-     * @return array{error?: string, message?: string}
+     * @return array{error?: string, message?: string, last_text?: array}
      */
     public function saveSetting(string $key, string $value): array
     {
+        // Clear session settings when changing language
+        if ($key === 'currentlanguage') {
+            $this->clearSessionSettings();
+        }
+
         $status = Settings::save($key, $value);
         if (str_starts_with($status, "OK: ")) {
-            return ["message" => substr($status, 4)];
+            $result = ["message" => substr($status, 4)];
+
+            // For language changes, include the last text info for that language
+            if ($key === 'currentlanguage' && $value !== '') {
+                $result['last_text'] = $this->getLastTextForLanguage((int)$value);
+            }
+
+            return $result;
         }
         return ["error" => $status];
+    }
+
+    /**
+     * Get the last text information for a specific language.
+     *
+     * @param int $languageId Language ID
+     *
+     * @return array|null Last text data or null if none exists
+     *
+     * @psalm-suppress UnusedParam Parameter used in SQL queries via string interpolation
+     */
+    private function getLastTextForLanguage(int $languageId): ?array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        // Get the current text ID
+        $currentTextId = Settings::get('currenttext');
+
+        if ($currentTextId === null || $currentTextId === '') {
+            return null;
+        }
+
+        $textId = (int)$currentTextId;
+
+        // Check if the current text belongs to this language
+        $textData = Connection::fetchRow(
+            "SELECT TxID, TxTitle, TxLgID, LENGTH(TxAnnotatedText) > 0 AS annotated
+             FROM {$tbpref}texts
+             WHERE TxID = {$textId} AND TxLgID = {$languageId}"
+        );
+
+        if ($textData === null) {
+            // Current text doesn't belong to this language, find the most recent one
+            $textData = Connection::fetchRow(
+                "SELECT TxID, TxTitle, TxLgID, LENGTH(TxAnnotatedText) > 0 AS annotated
+                 FROM {$tbpref}texts
+                 WHERE TxLgID = {$languageId}
+                 ORDER BY TxID DESC
+                 LIMIT 1"
+            );
+        }
+
+        if ($textData === null) {
+            return null;
+        }
+
+        // Get language name
+        $languageName = Connection::fetchValue(
+            "SELECT LgName AS value FROM {$tbpref}languages WHERE LgID = {$languageId}"
+        );
+
+        return [
+            'id' => (int)$textData['TxID'],
+            'title' => $textData['TxTitle'],
+            'language_id' => (int)$textData['TxLgID'],
+            'language_name' => (string)$languageName,
+            'annotated' => (bool)$textData['annotated']
+        ];
+    }
+
+    /**
+     * Clear all session settings when changing language.
+     *
+     * @return void
+     */
+    private function clearSessionSettings(): void
+    {
+        // Text filters
+        unset($_SESSION['currenttextpage']);
+        unset($_SESSION['currenttextquery']);
+        unset($_SESSION['currenttextquerymode']);
+        unset($_SESSION['currenttexttag1']);
+        unset($_SESSION['currenttexttag2']);
+        unset($_SESSION['currenttexttag12']);
+
+        // Word filters
+        unset($_SESSION['currentwordpage']);
+        unset($_SESSION['currentwordquery']);
+        unset($_SESSION['currentwordquerymode']);
+        unset($_SESSION['currentwordstatus']);
+        unset($_SESSION['currentwordtext']);
+        unset($_SESSION['currentwordtag1']);
+        unset($_SESSION['currentwordtag2']);
+        unset($_SESSION['currentwordtag12']);
+        unset($_SESSION['currentwordtextmode']);
+        unset($_SESSION['currentwordtexttag']);
+
+        // Archive filters
+        unset($_SESSION['currentarchivepage']);
+        unset($_SESSION['currentarchivequery']);
+        unset($_SESSION['currentarchivequerymode']);
+        unset($_SESSION['currentarchivetexttag1']);
+        unset($_SESSION['currentarchivetexttag2']);
+        unset($_SESSION['currentarchivetexttag12']);
     }
 
     /**
@@ -49,7 +157,7 @@ class SettingsHandler
      * @param string $key   Setting key
      * @param string $value Setting value
      *
-     * @return array{error?: string, message?: string}
+     * @return array{error?: string, message?: string, last_text?: array|null}
      */
     public function formatSaveSetting(string $key, string $value): array
     {

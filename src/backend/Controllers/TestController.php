@@ -292,6 +292,129 @@ class TestController extends BaseController
      */
     private function renderTestPage(): void
     {
+        // Use new Bulma/Alpine interface
+        $this->renderTestPageBulma();
+    }
+
+    /**
+     * Render test page with Bulma CSS and Alpine.js.
+     *
+     * Modern interface with reactive state management and no iframes.
+     *
+     * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
+     */
+    private function renderTestPageBulma(): void
+    {
+        $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
+        $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
+        $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
+        $sessTestsql = $_SESSION['testsql'] ?? null;
+        $testTypeParam = $this->param('type', '1');
+        $isTableMode = $testTypeParam === 'table';
+
+        // Get test data
+        $testData = $this->testService->getTestDataFromParams(
+            $selection,
+            $sessTestsql,
+            $langId,
+            $textId
+        );
+
+        if ($testData === null) {
+            $this->redirect('/text/edit');
+            return;
+        }
+
+        // Get test identifier
+        $identifier = $this->testService->getTestIdentifier(
+            $selection,
+            $sessTestsql,
+            $langId,
+            $textId
+        );
+
+        if ($identifier[0] === '') {
+            $this->redirect('/text/edit');
+            return;
+        }
+
+        $testsql = $this->testService->getTestSql($identifier[0], $identifier[1]);
+        $testType = $isTableMode ? 1 : $this->testService->clampTestType((int) $testTypeParam);
+        $wordMode = $this->testService->isWordMode($testType);
+        $baseType = $this->testService->getBaseTestType($testType);
+
+        // Get language settings
+        $langIdFromSql = $this->testService->getLanguageIdFromTestSql($testsql);
+        if ($langIdFromSql === null) {
+            PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
+            include __DIR__ . '/../Views/Test/no_terms.php';
+            PageLayoutHelper::renderPageEnd();
+            return;
+        }
+
+        $langSettings = $this->testService->getLanguageSettings($langIdFromSql);
+
+        // Get language code for TTS
+        $languageService = new LanguageService();
+        $langCode = $languageService->getLanguageCode(
+            $langIdFromSql,
+            LanguageDefinitions::getAll()
+        );
+
+        // Initialize session
+        $this->testService->initializeTestSession($testData['counts']['due']);
+        $sessionData = $this->testService->getTestSessionData();
+
+        // Build config for JavaScript
+        $config = [
+            'testKey' => $identifier[0],
+            'selection' => is_array($identifier[1])
+                ? implode(',', $identifier[1])
+                : (string) $identifier[1],
+            'testType' => $baseType,
+            'isTableMode' => $isTableMode,
+            'wordMode' => $wordMode,
+            'langId' => $langIdFromSql,
+            'wordRegex' => $langSettings['regexWord'] ?? '',
+            'langSettings' => [
+                'name' => $langSettings['name'] ?? '',
+                'dict1Uri' => $langSettings['dict1Uri'] ?? '',
+                'dict2Uri' => $langSettings['dict2Uri'] ?? '',
+                'translateUri' => $langSettings['translateUri'] ?? '',
+                'textSize' => $langSettings['textSize'] ?? 100,
+                'rtl' => $langSettings['rtl'] ?? false,
+                'langCode' => $langCode
+            ],
+            'progress' => [
+                'total' => $testData['counts']['due'],
+                'remaining' => $testData['counts']['due'],
+                'wrong' => 0,
+                'correct' => 0
+            ],
+            'timer' => [
+                'startTime' => $sessionData['start'],
+                'serverTime' => time()
+            ],
+            'title' => $testData['title'],
+            'property' => $testData['property']
+        ];
+
+        PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
+        include __DIR__ . '/../Views/Test/test_desktop_bulma.php';
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
+     * Render the main test page (legacy frame-based version).
+     *
+     * @return void
+     *
+     * @deprecated 3.0.0 Use renderTestPageBulma() instead
+     */
+    private function renderTestPageLegacy(): void
+    {
         PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
 
         $this->renderDesktopTestPage();

@@ -78,7 +78,7 @@ class LanguageController extends BaseController
      */
     public function index(array $params): void
     {
-        PageLayoutHelper::renderPageStart('My Languages', true);
+        PageLayoutHelper::renderPageStart('Languages', true);
 
         $message = '';
 

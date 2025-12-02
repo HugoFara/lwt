@@ -36,7 +36,7 @@ use Lwt\View\Helper\IconHelper;
         Language Settings Wizard
     </h1>
     <p class="wizard">
-        <b>My Native language is:</b>
+        <b>Native language:</b>
         <br />
         L1:
         <select name="l1" id="l1">

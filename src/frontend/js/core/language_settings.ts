@@ -9,7 +9,33 @@
 import { loadModalFrame } from '../reading/frame_management';
 
 /**
- * Set the current language.
+ * Response from the settings API when changing language.
+ */
+export interface LanguageChangeResponse {
+  message?: string;
+  error?: string;
+  last_text?: {
+    id: number;
+    title: string;
+    language_id: number;
+    language_name: string;
+    annotated: boolean;
+  } | null;
+}
+
+/**
+ * Custom event dispatched when language changes via AJAX.
+ */
+export interface LanguageChangedEvent extends CustomEvent {
+  detail: {
+    languageId: string;
+    languageName: string;
+    response: LanguageChangeResponse;
+  };
+}
+
+/**
+ * Set the current language via redirect.
  *
  * @param ctl Current language selector element
  * @param url URL to redirect to
@@ -21,17 +47,67 @@ export function setLang(ctl: HTMLSelectElement, url: string): void {
 }
 
 /**
+ * Set the current language via AJAX (no page refresh).
+ *
+ * @param languageId The language ID to set
+ * @returns Promise with the API response
+ */
+export async function setLangAsync(languageId: string): Promise<LanguageChangeResponse> {
+  const response = await fetch('/api/v1/settings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      key: 'currentlanguage',
+      value: languageId
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
  * Initialize event delegation for language setting elements.
  *
  * Handles elements with data-action="set-lang".
+ * Uses AJAX when data-ajax="true" is present.
  */
 function initSetLangEventDelegation(): void {
-  document.addEventListener('change', function (e) {
+  document.addEventListener('change', async function (e) {
     const target = e.target as HTMLElement;
     if (target.matches('[data-action="set-lang"]')) {
       const selectEl = target as HTMLSelectElement;
+      const useAjax = selectEl.dataset.ajax === 'true';
       const redirectUrl = selectEl.dataset.redirect || '/';
-      setLang(selectEl, redirectUrl);
+      const languageId = selectEl.options[selectEl.selectedIndex].value;
+      const languageName = selectEl.options[selectEl.selectedIndex].text;
+
+      if (useAjax) {
+        try {
+          const response = await setLangAsync(languageId);
+
+          // Dispatch custom event for components to react to
+          const event = new CustomEvent('lwt:languageChanged', {
+            detail: {
+              languageId,
+              languageName,
+              response
+            }
+          }) as LanguageChangedEvent;
+          document.dispatchEvent(event);
+        } catch (error) {
+          console.error('Failed to change language:', error);
+          // Fall back to redirect
+          setLang(selectEl, redirectUrl);
+        }
+      } else {
+        setLang(selectEl, redirectUrl);
+      }
     }
   });
 }

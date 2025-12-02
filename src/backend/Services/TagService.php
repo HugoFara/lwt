@@ -1344,6 +1344,82 @@ class TagService
     }
 
     /**
+     * Save word tags from an array of tag names.
+     *
+     * This is an API-friendly alternative to saveWordTags() that takes an array
+     * directly instead of reading from form input.
+     *
+     * @param int   $wordId   Word ID
+     * @param array $tagNames Array of tag name strings
+     *
+     * @return void
+     */
+    public static function saveWordTagsFromArray(int $wordId, array $tagNames): void
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        // Delete existing tags for this word
+        QueryBuilder::table('wordtags')
+            ->where('WtWoID', '=', $wordId)
+            ->delete();
+
+        if (empty($tagNames)) {
+            return;
+        }
+
+        // Refresh cache
+        self::getAllTermTags(true);
+
+        foreach ($tagNames as $tag) {
+            $tag = trim((string) $tag);
+            if ($tag === '') {
+                continue;
+            }
+
+            // Create tag if it doesn't exist
+            if (!in_array($tag, $_SESSION['TAGS'])) {
+                Connection::execute(
+                    "INSERT INTO {$tbpref}tags (TgText)
+                    VALUES(" . Escaping::toSqlSyntax($tag) . ")"
+                );
+            }
+
+            // Link tag to word
+            Connection::execute(
+                "INSERT INTO {$tbpref}wordtags (WtWoID, WtTgID)
+                SELECT {$wordId}, TgID
+                FROM {$tbpref}tags
+                WHERE TgText = " . Escaping::toSqlSyntax($tag)
+            );
+        }
+
+        // Refresh cache again after changes
+        self::getAllTermTags(true);
+    }
+
+    /**
+     * Get array of tag names for a word.
+     *
+     * @param int $wordId Word ID
+     *
+     * @return array<string> Array of tag name strings
+     */
+    public static function getWordTagsArray(int $wordId): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        $result = Connection::preparedFetchAll(
+            "SELECT TgText FROM {$tbpref}wordtags
+             JOIN {$tbpref}tags ON TgID = WtTgID
+             WHERE WtWoID = ?
+             ORDER BY TgText",
+            [$wordId]
+        );
+
+        return array_map(fn($row) => (string) $row['TgText'], $result);
+    }
+
+    /**
      * Get or create a text tag, returning its ID.
      *
      * @param string $tagText Tag text

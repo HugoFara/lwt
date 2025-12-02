@@ -5,9 +5,15 @@ use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Services\TestService;
 use Lwt\Services\WordStatusService;
+use Lwt\Services\LanguageService;
+use Lwt\Services\LanguageDefinitions;
+use Lwt\Services\ExportService;
 
 require_once __DIR__ . '/../../../Services/TestService.php';
 require_once __DIR__ . '/../../../Services/WordStatusService.php';
+require_once __DIR__ . '/../../../Services/LanguageService.php';
+require_once __DIR__ . '/../../../Services/LanguageDefinitions.php';
+require_once __DIR__ . '/../../../Services/ExportService.php';
 
 /**
  * Handler for review/test-related API operations.
@@ -316,5 +322,210 @@ class ReviewHandler
         $change = isset($params['change']) ? (int)$params['change'] : null;
 
         return $this->updateReviewStatus($wordId, $status, $change);
+    }
+
+    // =========================================================================
+    // Phase 3 Methods: Bulma/Alpine Test Interface
+    // =========================================================================
+
+    /**
+     * Get full test configuration for Alpine.js initialization.
+     *
+     * @param array $params Request parameters (lang, text, or selection)
+     *
+     * @return array Test configuration
+     */
+    public function formatTestConfig(array $params): array
+    {
+        $langId = isset($params['lang']) && $params['lang'] !== ''
+            ? (int)$params['lang'] : null;
+        $textId = isset($params['text']) && $params['text'] !== ''
+            ? (int)$params['text'] : null;
+        $selection = isset($params['selection']) && $params['selection'] !== ''
+            ? (int)$params['selection'] : null;
+        $testType = isset($params['type']) && $params['type'] !== ''
+            ? (int)$params['type'] : 1;
+        $isTableMode = ($params['type'] ?? '') === 'table';
+
+        $sessTestsql = $_SESSION['testsql'] ?? null;
+
+        // Get test data
+        $testData = $this->testService->getTestDataFromParams(
+            $selection,
+            $sessTestsql,
+            $langId,
+            $textId
+        );
+
+        if ($testData === null) {
+            return ['error' => 'Invalid test parameters'];
+        }
+
+        // Get test identifier
+        $identifier = $this->testService->getTestIdentifier(
+            $selection,
+            $sessTestsql,
+            $langId,
+            $textId
+        );
+
+        if ($identifier[0] === '') {
+            return ['error' => 'Invalid test identifier'];
+        }
+
+        // Handle legacy raw_sql case differently
+        if ($identifier[0] === 'raw_sql') {
+            // Legacy: the identifier value is the raw SQL string
+            $testsql = is_string($identifier[1]) ? $identifier[1] : null;
+        } else {
+            // Normal cases: use getTestSql with proper typed selection
+            /** @var int|int[] $selection */
+            $selection = $identifier[1];
+            $testsql = $this->testService->getTestSql($identifier[0], $selection);
+        }
+        $testType = $this->testService->clampTestType($testType);
+        $wordMode = $this->testService->isWordMode($testType);
+        $baseType = $this->testService->getBaseTestType($testType);
+
+        // Get language settings
+        $langIdFromSql = $this->testService->getLanguageIdFromTestSql($testsql);
+        if ($langIdFromSql === null) {
+            return ['error' => 'No words available for testing'];
+        }
+
+        $langSettings = $this->testService->getLanguageSettings($langIdFromSql);
+
+        // Get language code for TTS
+        $languageService = new LanguageService();
+        $langCode = $languageService->getLanguageCode(
+            $langIdFromSql,
+            LanguageDefinitions::getAll()
+        );
+
+        // Initialize session
+        $this->testService->initializeTestSession($testData['counts']['due']);
+        $sessionData = $this->testService->getTestSessionData();
+
+        return [
+            'testKey' => $identifier[0],
+            'selection' => is_array($identifier[1])
+                ? implode(',', $identifier[1])
+                : (string)$identifier[1],
+            'testType' => $baseType,
+            'isTableMode' => $isTableMode,
+            'wordMode' => $wordMode,
+            'langId' => $langIdFromSql,
+            'wordRegex' => $langSettings['regexWord'] ?? '',
+            'langSettings' => [
+                'name' => $langSettings['name'] ?? '',
+                'dict1Uri' => $langSettings['dict1Uri'] ?? '',
+                'dict2Uri' => $langSettings['dict2Uri'] ?? '',
+                'translateUri' => $langSettings['translateUri'] ?? '',
+                'textSize' => $langSettings['textSize'] ?? 100,
+                'rtl' => $langSettings['rtl'] ?? false,
+                'langCode' => $langCode
+            ],
+            'progress' => [
+                'total' => $testData['counts']['due'],
+                'remaining' => $testData['counts']['due'],
+                'wrong' => 0,
+                'correct' => 0
+            ],
+            'timer' => [
+                'startTime' => $sessionData['start'],
+                'serverTime' => time()
+            ],
+            'title' => $testData['title'],
+            'property' => $testData['property']
+        ];
+    }
+
+    /**
+     * Get all words for table test mode.
+     *
+     * @param array $params Request parameters (test_key, selection)
+     *
+     * @return array Table words data
+     */
+    public function formatTableWords(array $params): array
+    {
+        $testKey = $params['test_key'] ?? '';
+        $selection = $params['selection'] ?? '';
+
+        if ($testKey === '' || $selection === '') {
+            return ['error' => 'test_key and selection are required'];
+        }
+
+        $parsedSelection = $this->parseSelection($testKey, $selection);
+        $testsql = $this->testService->getTestSql($testKey, $parsedSelection);
+
+        // Validate single language
+        $validation = $this->testService->validateTestSelection($testsql);
+        if (!$validation['valid']) {
+            return ['error' => $validation['error']];
+        }
+
+        // Get language settings
+        $langIdFromSql = $this->testService->getLanguageIdFromTestSql($testsql);
+        if ($langIdFromSql === null) {
+            return ['words' => [], 'langSettings' => null];
+        }
+
+        $langSettings = $this->testService->getLanguageSettings($langIdFromSql);
+        $regexWord = $langSettings['regexWord'] ?? '';
+
+        // Get language code for TTS
+        $languageService = new LanguageService();
+        $langCode = $languageService->getLanguageCode(
+            $langIdFromSql,
+            LanguageDefinitions::getAll()
+        );
+
+        // Get words
+        $wordsResult = $this->testService->getTableTestWords($testsql);
+        $words = [];
+
+        while ($word = mysqli_fetch_assoc($wordsResult)) {
+            // Format sentence with highlighted word
+            $sent = htmlspecialchars(
+                ExportService::replaceTabNewline($word['WoSentence'] ?? ''),
+                ENT_QUOTES,
+                'UTF-8'
+            );
+            $sentenceHtml = str_replace(
+                "{",
+                ' <b>[',
+                str_replace(
+                    "}",
+                    ']</b> ',
+                    ExportService::maskTermInSentence($sent, $regexWord)
+                )
+            );
+
+            $words[] = [
+                'id' => (int)$word['WoID'],
+                'text' => $word['WoText'] ?? '',
+                'translation' => $word['WoTranslation'] ?? '',
+                'romanization' => $word['WoRomanization'] ?? '',
+                'sentence' => $sent,
+                'sentenceHtml' => $sentenceHtml,
+                'status' => (int)($word['WoStatus'] ?? 1),
+                'score' => (int)($word['Score'] ?? 0)
+            ];
+        }
+        mysqli_free_result($wordsResult);
+
+        return [
+            'words' => $words,
+            'langSettings' => [
+                'name' => $langSettings['name'] ?? '',
+                'dict1Uri' => $langSettings['dict1Uri'] ?? '',
+                'dict2Uri' => $langSettings['dict2Uri'] ?? '',
+                'translateUri' => $langSettings['translateUri'] ?? '',
+                'textSize' => $langSettings['textSize'] ?? 100,
+                'rtl' => $langSettings['rtl'] ?? false,
+                'langCode' => $langCode
+            ]
+        ];
     }
 }

@@ -65,7 +65,7 @@ export interface WordStoreState {
   showTranslations: boolean;
 
   // Methods
-  init(textId: number): Promise<void>;
+  loadText(textId: number): Promise<void>;
   initFromData(words: TextWord[], config: TextReadingConfig): void;
   selectWord(hex: string, position: number): void;
   closeModal(): void;
@@ -114,9 +114,14 @@ function createWordStore(): WordStoreState {
     showTranslations: true,
 
     /**
-     * Initialize the store by fetching words from API.
+     * Load words for a text from the API.
+     * Note: Named 'loadText' instead of 'init' because Alpine auto-calls init() on stores.
      */
-    async init(textId: number): Promise<void> {
+    async loadText(textId: number): Promise<void> {
+      if (!textId || textId <= 0) {
+        return;
+      }
+
       this.isLoading = true;
 
       try {

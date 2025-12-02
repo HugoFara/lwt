@@ -33,11 +33,8 @@ function registerRoutes(Router $router): void
 
     // ==================== TEXT ROUTES ====================
 
-    // Read text (legacy - server-side rendering)
-    $router->register('/text/read', 'TextController@read');
-
     // Read text (Bulma + Alpine.js - client-side rendering)
-    $router->register('/text/read-bulma', 'TextController@readBulma');
+    $router->register('/text/read', 'TextController@readBulma');
 
     // Empty iframe placeholder (used in text read, test, and word pages)
     $router->register('/empty.html', 'src/backend/Core/empty.html');

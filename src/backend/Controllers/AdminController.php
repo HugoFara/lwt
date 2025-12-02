@@ -202,7 +202,7 @@ class AdminController extends BaseController
         $frequencyStats = $statisticsService->getFrequencyStatistics();
 
         // Render page
-        $this->render('My Statistics', true);
+        $this->render('Statistics', true);
 
         include __DIR__ . '/../Views/Admin/statistics.php';
 

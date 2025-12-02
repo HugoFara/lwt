@@ -86,7 +86,7 @@ function renderLanguageSelector(int $langid, array $languages): void
     <label class="label" for="filterlang">Language</label>
     <div class="control">
         <div class="select is-fullwidth">
-            <select id="filterlang" data-action="set-lang" data-redirect="/">
+            <select id="filterlang" data-action="set-lang" data-ajax="true" data-redirect="/">
                 <?php echo SelectOptionsBuilder::forLanguages($languages, $langid, '[Select...]'); ?>
             </select>
         </div>
@@ -119,17 +119,20 @@ function renderWordPressLogout(bool $isWordPress): void
 }
 
 /**
- * Load the content of warnings for visual display.
+ * Load the content of warnings and initial data for visual display.
  *
  * Outputs a JSON config element that is read by home_app.ts.
  *
+ * @param array|null $lastTextInfo Current text info for Alpine.js initial state
+ *
  * @return void
  */
-function renderWarningsScript(): void
+function renderHomeConfig(?array $lastTextInfo): void
 {
     $config = [
         'phpVersion' => phpversion(),
         'lwtVersion' => LWT_APP_VERSION,
+        'lastText' => $lastTextInfo,
     ];
     ?>
 <script type="application/json" id="home-warnings-config">
@@ -146,6 +149,18 @@ $currenttext = $dashboardData['current_text_id'];
 $langcnt = $dashboardData['language_count'];
 $isWordPress = $dashboardData['is_wordpress'];
 $currentTextInfo = $dashboardData['current_text_info'];
+
+// Prepare last text info for Alpine.js
+$lastTextInfo = null;
+if ($currentTextInfo !== null && $currenttext !== null) {
+    $lastTextInfo = [
+        'id' => $currenttext,
+        'title' => $currentTextInfo['title'],
+        'language_id' => $currentTextInfo['language_id'],
+        'language_name' => $currentTextInfo['language_name'],
+        'annotated' => $currentTextInfo['annotated'],
+    ];
+}
 ?>
 
 <!-- Alpine.js Home App Container -->
@@ -160,6 +175,12 @@ $currentTextInfo = $dashboardData['current_text_info'];
 </div>
 <div class="notification is-info is-light" x-show="warnings.updateAvailable.visible" x-transition>
     <p x-html="warnings.updateAvailable.message"></p>
+</div>
+
+<!-- Language change notification -->
+<div class="notification is-success is-light" x-show="languageNotification.visible" x-transition>
+    <button class="delete" @click="languageNotification.visible = false"></button>
+    <p x-text="languageNotification.message"></p>
 </div>
 
 <!-- Welcome message -->
@@ -201,11 +222,36 @@ $currentTextInfo = $dashboardData['current_text_info'];
                 </a>
                 <?php elseif ($langcnt > 0): ?>
                 <?php renderLanguageSelector($currentlang, $languages); ?>
-                <?php
-                if ($currenttext !== null) {
-                    renderCurrentTextInfo($currenttext, $currentTextInfo);
-                }
-                ?>
+
+                <!-- Last Text Section - dynamically updated when language changes -->
+                <template x-if="lastText">
+                    <div class="box has-background-light home-last-text">
+                        <p class="has-text-weight-medium mb-2">
+                            Last Text (<span x-text="lastText.language_name"></span>):
+                        </p>
+                        <p class="is-italic mb-3" x-text="lastText.title"></p>
+                        <div class="buttons are-small">
+                            <a :href="'/text/read?start=' + lastText.id" class="button is-link is-light">
+                                <span class="icon is-small"><i data-lucide="book-open"></i></span>
+                                <span>Read</span>
+                            </a>
+                            <a :href="'/test?text=' + lastText.id" class="button is-info is-light">
+                                <span class="icon is-small"><i data-lucide="circle-help"></i></span>
+                                <span>Test</span>
+                            </a>
+                            <a :href="'/text/print-plain?text=' + lastText.id" class="button is-light">
+                                <span class="icon is-small"><i data-lucide="printer"></i></span>
+                                <span>Print</span>
+                            </a>
+                            <template x-if="lastText.annotated">
+                                <a :href="'/text/print?text=' + lastText.id" class="button is-success is-light">
+                                    <span class="icon is-small"><i data-lucide="check"></i></span>
+                                    <span>Ann. Text</span>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
+                </template>
                 <?php endif; ?>
                 <a href="/languages" class="button is-fullwidth is-link is-light">
                     <span class="icon"><i data-lucide="settings"></i></span>
@@ -233,7 +279,7 @@ $currentTextInfo = $dashboardData['current_text_info'];
             <div class="card-content menu-content">
                 <a href="/texts" class="button is-fullwidth is-success is-light mb-2">
                     <span class="icon"><i data-lucide="file-text"></i></span>
-                    <span>My Texts</span>
+                    <span>Texts</span>
                 </a>
                 <a href="/text/archived" class="button is-fullwidth is-light mb-2">
                     <span class="icon"><i data-lucide="archive"></i></span>
@@ -273,7 +319,7 @@ $currentTextInfo = $dashboardData['current_text_info'];
             <div class="card-content menu-content">
                 <a href="/words/edit" class="button is-fullwidth is-link is-light mb-2" title="View and edit saved words and expressions">
                     <span class="icon"><i data-lucide="list"></i></span>
-                    <span>My Terms</span>
+                    <span>Terms</span>
                 </a>
                 <a href="/tags" class="button is-fullwidth is-light mb-2">
                     <span class="icon"><i data-lucide="tag"></i></span>
@@ -401,4 +447,4 @@ $currentTextInfo = $dashboardData['current_text_info'];
 
 </div><!-- End Alpine.js container -->
 
-<?php renderWarningsScript(); ?>
+<?php renderHomeConfig($lastTextInfo); ?>

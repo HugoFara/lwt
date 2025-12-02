@@ -1,0 +1,138 @@
+# Deprecated PHP Functions in LWT Codebase
+# Generated: 2025-12-02
+# These functions are marked with @deprecated and should be replaced with their modern equivalents
+
+## Global Variables (db_bootstrap.php)
+$DBCONNECTION          -> Use Globals::getDbConnection()
+$tbpref                -> Use Globals::getTablePrefix()
+$dbname                -> Use Globals::getDatabaseName()
+
+## String Utilities (string_utilities.php)
+get_sepas()                         -> Use \Lwt\Core\StringUtils::getSeparators()
+get_first_sepa()                    -> Use \Lwt\Core\StringUtils::getFirstSeparator()
+strToHex()                          -> Use \Lwt\Core\StringUtils::toHex()
+toClassName()                       -> Use \Lwt\Core\StringUtils::toClassName()
+remove_soft_hyphens()               -> Use \Lwt\Core\Utils\remove_soft_hyphens()
+replace_supp_unicode_planes_char()  -> Use \Lwt\Core\Utils\replace_supp_unicode_planes_char()
+
+## Media Service (MediaService.php)
+media_paths_search()    -> Use MediaService::searchMediaPaths()
+get_media_paths()       -> Use MediaService::getMediaPaths()
+selectmediapathoptions() -> Use MediaService::getMediaPathOptions()
+selectmediapath()       -> Use MediaService::getMediaPathSelector()
+makeMediaPlayer()       -> Use MediaService::renderMediaPlayer()
+makeVideoPlayer()       -> Use MediaService::renderVideoPlayer()
+makeAudioPlayer()       -> Use MediaService::renderAudioPlayer()
+makeHtml5AudioPlayer()  -> Use MediaService::renderHtml5AudioPlayer()
+
+## Text Statistics Service (TextStatisticsService.php)
+textwordcount()         -> Use return_textwordcount() (deprecated since 2.9.0)
+texttodocount2()        -> Use todo_words_content() (deprecated since 2.10.0)
+
+## Integration (text_from_yt.php)
+do_js()                 -> JavaScript moved to youtube_import.ts (now a no-op)
+
+## Router (routes.php)
+getRouteRegistrar()     -> Use \Lwt\Router\registerRoutes() directly
+
+## WordController Methods (WordController.php)
+delete()                -> Use DELETE /api/v1/terms/{id}
+deleteMulti()           -> Use DELETE /api/v1/terms/{id}
+insertWellKnown()       -> Use POST /api/v1/terms/quick with status=99
+insertIgnore()          -> Use POST /api/v1/terms/quick with status=98
+setStatus()             -> Use PUT /api/v1/terms/{id}/status/{status}
+
+## TestController Methods (TestController.php)
+setTestStatus()         -> Use PUT /api/v1/review/status
+renderTestPageLegacy()  -> Use renderTestPageBulma()
+
+## HomeService Methods (HomeService.php)
+getServerData()         -> Use ServerDataService::getServerData()
+
+# =============================================================================
+# Non-camelCase PHP Functions (snake_case naming convention violations)
+# =============================================================================
+# These functions use underscores instead of camelCase naming.
+# They are not necessarily deprecated but don't follow PSR naming conventions.
+
+## Core Bootstrap (start_session.php)
+set_error_reporting()
+set_configuration_options()
+start_session()
+start_session_main()
+
+## Integration (text_from_yt.php)
+do_form_fragment()
+do_js()
+
+## Version/Debug Utilities
+get_version()                    # version.php
+get_version_number()             # version.php
+get_execution_time()             # debug_utilities.php
+
+## String Utilities (string_utilities.php)
+remove_soft_hyphens()
+replace_supp_unicode_planes_char()
+print_file_path()
+get_file_path()
+get_sepas()
+get_first_sepa()
+remove_spaces()
+str_replace_first()
+
+## Annotation Service (AnnotationService.php)
+recreate_save_ann()
+create_ann()
+create_save_ann()
+process_term()
+get_first_translation()
+get_annotation_link()
+trim_value()
+annotation_to_json()
+
+## Export Service (ExportService.php)
+anki_export()
+tsv_export()
+flexible_export()
+repl_tab_nl()
+mask_term_in_sentence()
+mask_term_in_sentence_v2()
+
+## Media Service (MediaService.php)
+media_paths_search()
+get_media_paths()
+selectmediapathoptions()
+selectmediapath()
+
+## Sentence Service (SentenceService.php)
+sentences_containing_word_lc_query()
+sentences_from_word()
+sentences_with_word()
+example_sentences_area()
+
+## Similar Terms Service (SimilarTermsService.php)
+get_similar_terms()
+format_term()
+print_similar_terms()
+print_similar_terms_tabrow()
+
+## Text Parsing Service (TextParsingService.php)
+get_mecab_path()
+find_latin_sentence_end()
+
+## Text Reading Service (TextReadingService.php)
+echo_term()
+sentence_parser()
+item_parser()
+main_word_loop()
+
+## Text Statistics Service (TextStatisticsService.php)
+return_textwordcount()
+textwordcount()
+todo_words_count()
+todo_words_content()
+texttodocount2()
+
+## Build Tools (markdown_converter.php)
+markdown_converter()
+markdown_integration()

@@ -233,6 +233,12 @@ class ApiV1
             case 'tomorrow-count':
                 Response::success($this->reviewHandler->formatTomorrowCount($params));
                 break;
+            case 'config':
+                Response::success($this->reviewHandler->formatTestConfig($params));
+                break;
+            case 'table-words':
+                Response::success($this->reviewHandler->formatTableWords($params));
+                break;
             default:
                 Response::error('Endpoint Not Found: ' . ($fragments[1] ?? ''), 404);
         }
@@ -289,6 +295,13 @@ class ApiV1
                 $params["last_update"],
                 (int)$params["page"],
                 (int)$params["count"]
+            ));
+        } elseif (($fragments[1] ?? '') === 'for-edit') {
+            // GET /terms/for-edit - get term data for editing in modal
+            Response::success($this->termHandler->formatGetTermForEdit(
+                (int)($params['tid'] ?? 0),
+                (int)($params['ord'] ?? 0),
+                isset($params['wid']) && $params['wid'] !== '' ? (int)$params['wid'] : null
             ));
         } elseif (($fragments[1] ?? '') === 'multi') {
             // GET /terms/multi - get multi-word expression data for editing
@@ -406,6 +419,9 @@ class ApiV1
                 (int)$params['position'],
                 (int)$params['status']
             ));
+        } elseif (($fragments[1] ?? '') === 'full') {
+            // POST /terms/full - create term with full data
+            Response::success($this->termHandler->formatCreateTermFull($params));
         } elseif (($fragments[1] ?? '') === 'multi') {
             // POST /terms/multi - create multi-word expression
             Response::success($this->termHandler->formatCreateMultiWord($params));
@@ -512,8 +528,11 @@ class ApiV1
                     $termId,
                     $params['translation'] ?? ''
                 ));
+            } elseif (!isset($fragments[2])) {
+                // PUT /terms/{id} - update term with full data
+                Response::success($this->termHandler->formatUpdateTermFull($termId, $params));
             } else {
-                Response::error('Expected "translation"', 404);
+                Response::error('Expected "translation" or no sub-path', 404);
             }
         } else {
             Response::error('Term ID (Integer), "bulk-status", or "multi/{id}" Expected', 404);

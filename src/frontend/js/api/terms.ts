@@ -137,6 +137,100 @@ export interface SentenceWithTerm {
   textTitle?: string;
 }
 
+// =========================================================================
+// Full Term CRUD Types for Reactive UI
+// =========================================================================
+
+/**
+ * Request body for creating a term with full data.
+ */
+export interface TermCreateFullRequest {
+  textId: number;
+  position: number;
+  translation: string;
+  romanization?: string;
+  sentence?: string;
+  status: number;
+  tags?: string[];
+}
+
+/**
+ * Request body for updating a term with full data.
+ */
+export interface TermUpdateFullRequest {
+  translation: string;
+  romanization?: string;
+  sentence?: string;
+  status: number;
+  tags?: string[];
+}
+
+/**
+ * Term data returned from create/update operations.
+ */
+export interface TermFullResponse {
+  success?: boolean;
+  term?: {
+    id: number;
+    text: string;
+    textLc: string;
+    hex: string;
+    translation: string;
+    romanization: string;
+    sentence: string;
+    status: number;
+    tags: string[];
+  };
+  error?: string;
+}
+
+/**
+ * Similar term for display in edit form.
+ */
+export interface SimilarTermForEdit {
+  id: number;
+  text: string;
+  translation: string;
+  status: number;
+}
+
+/**
+ * Language settings for term editing.
+ */
+export interface TermEditLanguage {
+  id: number;
+  name: string;
+  showRomanization: boolean;
+  translateUri: string;
+}
+
+/**
+ * Term data for editing in modal.
+ */
+export interface TermForEdit {
+  id: number | null;
+  text: string;
+  textLc: string;
+  hex: string;
+  translation: string;
+  romanization: string;
+  sentence: string;
+  status: number;
+  tags: string[];
+}
+
+/**
+ * Response from GET /terms/for-edit endpoint.
+ */
+export interface TermForEditResponse {
+  isNew: boolean;
+  term: TermForEdit;
+  language: TermEditLanguage;
+  allTags: string[];
+  similarTerms: SimilarTermForEdit[];
+  error?: string;
+}
+
 /**
  * Terms API methods.
  */
@@ -369,5 +463,60 @@ export const TermsApi = {
     data: Partial<MultiWordInput>
   ): Promise<ApiResponse<MultiWordUpdateResponse>> {
     return apiPut<MultiWordUpdateResponse>(`/terms/multi/${termId}`, data as unknown as Record<string, unknown>);
+  },
+
+  // =========================================================================
+  // Full Term CRUD Methods for Reactive UI
+  // =========================================================================
+
+  /**
+   * Get term data for editing in modal.
+   *
+   * Returns term data, language settings, all tags for autocomplete, and similar terms.
+   *
+   * @param textId   Text ID
+   * @param position Word position in text
+   * @param wordId   Word ID (optional, for existing terms)
+   * @returns Promise with term edit data
+   */
+  async getForEdit(
+    textId: number,
+    position: number,
+    wordId?: number
+  ): Promise<ApiResponse<TermForEditResponse>> {
+    const params: Record<string, string> = {
+      tid: String(textId),
+      ord: String(position)
+    };
+    if (wordId !== undefined && wordId !== null) {
+      params.wid = String(wordId);
+    }
+    return apiGet<TermForEditResponse>('/terms/for-edit', params);
+  },
+
+  /**
+   * Create a new term with full data.
+   *
+   * @param data Term creation data (textId, position, translation, romanization, sentence, status, tags)
+   * @returns Promise with created term data
+   */
+  async createFull(
+    data: TermCreateFullRequest
+  ): Promise<ApiResponse<TermFullResponse>> {
+    return apiPost<TermFullResponse>('/terms/full', data as unknown as Record<string, unknown>);
+  },
+
+  /**
+   * Update an existing term with full data.
+   *
+   * @param termId Term ID
+   * @param data   Term update data (translation, romanization, sentence, status, tags)
+   * @returns Promise with updated term data
+   */
+  async updateFull(
+    termId: number,
+    data: TermUpdateFullRequest
+  ): Promise<ApiResponse<TermFullResponse>> {
+    return apiPut<TermFullResponse>(`/terms/${termId}`, data as unknown as Record<string, unknown>);
   }
 };

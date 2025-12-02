@@ -744,7 +744,404 @@ $repo->delete($language);                      // Delete
 
 ---
 
+## Phase 4: Future-Proof Architecture (Modular Monolith)
+
+**Priority:** P2 (Medium)
+**Status:** PLANNED
+**Effort:** X-Large (400+ hours)
+**Target:** Post-Phase 3 completion
+
+### Rationale
+
+The current MVC structure (Controllers → Services → Database) is solid but has scaling limitations:
+
+1. **36 services in a flat directory** - Hard to navigate as complexity grows
+2. **Mixed concerns** - Services often span multiple domains
+3. **Tight coupling** - Direct database access in services makes testing/swapping difficult
+4. **Frontend/backend mismatch** - No clear mapping between TypeScript modules and PHP services
+
+The recommended architecture combines three production-proven patterns:
+
+- **Modular Monolith** - Self-contained feature modules (bounded contexts)
+- **Vertical Slices** - Everything for a feature in one place
+- **Hexagonal Architecture** - Domain logic isolated from infrastructure
+
+### Target Structure
+
+```text
+src/
+├── Shared/                              # Cross-cutting infrastructure
+│   ├── Infrastructure/
+│   │   ├── Database/                    # Connection, QueryBuilder, DB facade
+│   │   │   ├── Connection.php
+│   │   │   ├── DB.php
+│   │   │   ├── QueryBuilder.php
+│   │   │   ├── PreparedStatement.php
+│   │   │   └── Escaping.php
+│   │   ├── Http/                        # Request/Response, InputValidator
+│   │   │   ├── InputValidator.php
+│   │   │   └── Request.php
+│   │   └── Container/                   # DI container
+│   │       ├── Container.php
+│   │       └── ServiceProviderInterface.php
+│   ├── Domain/
+│   │   └── ValueObjects/                # Shared value objects
+│   │       ├── TextId.php
+│   │       ├── TermId.php
+│   │       ├── LanguageId.php
+│   │       └── TermStatus.php
+│   └── UI/
+│       ├── Helpers/                     # PageLayoutHelper, FormHelper, etc.
+│       └── Assets/                      # ViteHelper, asset management
+│
+├── Modules/                             # Feature modules (bounded contexts)
+│   │
+│   ├── Text/                            # TEXT MODULE
+│   │   ├── Domain/                      # Business logic (framework-agnostic)
+│   │   │   ├── Text.php                 # Entity with behavior
+│   │   │   ├── TextRepositoryInterface.php  # Port (interface)
+│   │   │   └── TextStatus.php           # Value object
+│   │   ├── Application/                 # Use cases (orchestration)
+│   │   │   ├── ImportText.php           # Single-purpose use case
+│   │   │   ├── ArchiveText.php
+│   │   │   ├── ParseText.php
+│   │   │   └── GetTextForReading.php
+│   │   ├── Infrastructure/              # Adapters (implementations)
+│   │   │   ├── MySqlTextRepository.php  # Implements TextRepositoryInterface
+│   │   │   └── TextParsingAdapter.php
+│   │   ├── Http/                        # Controllers & API handlers
+│   │   │   ├── TextController.php
+│   │   │   └── TextApiHandler.php
+│   │   ├── Views/                       # Templates for this module
+│   │   │   ├── read_desktop.php
+│   │   │   ├── edit_form.php
+│   │   │   └── import_form.php
+│   │   └── TextServiceProvider.php      # Module DI registration
+│   │
+│   ├── Vocabulary/                      # VOCABULARY MODULE (Words/Terms)
+│   │   ├── Domain/
+│   │   │   ├── Term.php
+│   │   │   ├── TermRepositoryInterface.php
+│   │   │   ├── TermStatus.php
+│   │   │   └── Expression.php
+│   │   ├── Application/
+│   │   │   ├── SaveTerm.php
+│   │   │   ├── UpdateTermStatus.php
+│   │   │   ├── BulkImportTerms.php
+│   │   │   └── FindSimilarTerms.php
+│   │   ├── Infrastructure/
+│   │   │   └── MySqlTermRepository.php
+│   │   ├── Http/
+│   │   │   ├── WordController.php
+│   │   │   └── TermApiHandler.php
+│   │   ├── Views/
+│   │   │   ├── list.php
+│   │   │   ├── edit_form.php
+│   │   │   └── upload_form.php
+│   │   └── VocabularyServiceProvider.php
+│   │
+│   ├── Language/                        # LANGUAGE MODULE
+│   │   ├── Domain/
+│   │   │   ├── Language.php
+│   │   │   ├── LanguageRepositoryInterface.php
+│   │   │   └── ParsingRules.php
+│   │   ├── Application/
+│   │   │   ├── CreateLanguage.php
+│   │   │   ├── GetLanguageSettings.php
+│   │   │   └── ConfigureParser.php
+│   │   ├── Infrastructure/
+│   │   │   ├── MySqlLanguageRepository.php
+│   │   │   └── MeCabAdapter.php
+│   │   ├── Http/
+│   │   │   ├── LanguageController.php
+│   │   │   └── LanguageApiHandler.php
+│   │   ├── Views/
+│   │   └── LanguageServiceProvider.php
+│   │
+│   ├── Review/                          # REVIEW/TESTING MODULE
+│   │   ├── Domain/
+│   │   │   ├── ReviewSession.php
+│   │   │   └── TestConfiguration.php
+│   │   ├── Application/
+│   │   │   ├── StartReviewSession.php
+│   │   │   ├── SubmitAnswer.php
+│   │   │   └── GetNextTerm.php
+│   │   ├── Infrastructure/
+│   │   ├── Http/
+│   │   │   ├── TestController.php
+│   │   │   └── ReviewApiHandler.php
+│   │   ├── Views/
+│   │   └── ReviewServiceProvider.php
+│   │
+│   ├── Feed/                            # RSS FEED MODULE
+│   │   ├── Domain/
+│   │   ├── Application/
+│   │   ├── Infrastructure/
+│   │   ├── Http/
+│   │   ├── Views/
+│   │   └── FeedServiceProvider.php
+│   │
+│   ├── Admin/                           # ADMIN MODULE
+│   │   ├── Domain/
+│   │   ├── Application/
+│   │   │   ├── BackupDatabase.php
+│   │   │   ├── RestoreDatabase.php
+│   │   │   ├── UpdateSettings.php
+│   │   │   └── GetStatistics.php
+│   │   ├── Infrastructure/
+│   │   ├── Http/
+│   │   │   ├── AdminController.php
+│   │   │   └── SettingsApiHandler.php
+│   │   ├── Views/
+│   │   └── AdminServiceProvider.php
+│   │
+│   └── Tags/                            # TAGS MODULE
+│       ├── Domain/
+│       ├── Application/
+│       ├── Infrastructure/
+│       ├── Http/
+│       ├── Views/
+│       └── TagsServiceProvider.php
+│
+├── Frontend/                            # TypeScript/CSS (mirrors modules)
+│   ├── shared/
+│   │   ├── api/                         # API client, shared types
+│   │   │   ├── client.ts
+│   │   │   └── types.ts
+│   │   ├── components/                  # Reusable UI components
+│   │   │   ├── Modal.ts
+│   │   │   └── SortableTable.ts
+│   │   ├── stores/                      # Shared state
+│   │   └── utils/                       # Utilities
+│   │
+│   ├── modules/
+│   │   ├── text/
+│   │   │   ├── components/
+│   │   │   │   ├── TextReader.ts
+│   │   │   │   └── WordModal.ts
+│   │   │   ├── stores/
+│   │   │   │   └── wordStore.ts
+│   │   │   ├── api.ts
+│   │   │   └── index.ts
+│   │   ├── vocabulary/
+│   │   │   ├── components/
+│   │   │   ├── stores/
+│   │   │   └── index.ts
+│   │   ├── review/
+│   │   │   ├── components/
+│   │   │   ├── stores/
+│   │   │   └── index.ts
+│   │   ├── feed/
+│   │   ├── admin/
+│   │   └── language/
+│   │
+│   ├── styles/
+│   │   ├── base/
+│   │   └── themes/
+│   │
+│   └── main.ts                          # Entry point
+│
+├── Api/                                 # Thin API layer (delegates to modules)
+│   └── V1/
+│       ├── ApiV1.php
+│       └── Routes.php
+│
+└── Legacy/                              # Temporary home for migrating code
+    └── (empty when migration complete)
+```
+
+### Key Architectural Principles
+
+#### 1. Module Independence
+
+Each module in `Modules/` is a **bounded context** that:
+
+- Owns its domain logic, use cases, database access, and views
+- Has a single `ServiceProvider` for DI registration
+- Can be extracted to a microservice if needed
+- Communicates with other modules via well-defined interfaces
+
+```php
+// Module structure follows Hexagonal Architecture
+Modules/Text/
+├── Domain/           # Pure business logic, NO framework dependencies
+├── Application/      # Use cases that orchestrate domain objects
+├── Infrastructure/   # Adapters: database, external APIs
+├── Http/             # Controllers (thin, delegates to Application)
+└── Views/            # Templates
+```
+
+#### 2. Dependency Rule
+
+Dependencies point **inward** only:
+
+```text
+Http → Application → Domain ← Infrastructure
+         ↓              ↓
+    (uses interfaces defined in Domain)
+```
+
+- `Domain/` knows nothing about databases, HTTP, or frameworks
+- `Application/` orchestrates domain objects, defines use case boundaries
+- `Infrastructure/` implements domain interfaces (repositories, adapters)
+- `Http/` handles HTTP concerns, delegates to Application layer
+
+#### 3. Use Cases Replace Fat Services
+
+Instead of:
+```php
+// Current: Large service with many responsibilities
+class TextService {
+    public function importText(...) { /* 200 lines */ }
+    public function archiveText(...) { /* 100 lines */ }
+    public function parseText(...) { /* 150 lines */ }
+    public function getForReading(...) { /* 80 lines */ }
+}
+```
+
+Use single-purpose use cases:
+```php
+// Future: Each use case is a single class
+class ImportText {
+    public function __construct(
+        private TextRepositoryInterface $texts,
+        private TextParser $parser
+    ) {}
+
+    public function execute(ImportTextRequest $request): Text {
+        // Single responsibility: import a text
+    }
+}
+```
+
+#### 4. Repository Interfaces in Domain
+
+```php
+// Domain/TextRepositoryInterface.php - Port (interface)
+interface TextRepositoryInterface {
+    public function find(TextId $id): ?Text;
+    public function save(Text $text): void;
+    public function delete(TextId $id): void;
+    public function findByLanguage(LanguageId $langId): array;
+}
+
+// Infrastructure/MySqlTextRepository.php - Adapter (implementation)
+class MySqlTextRepository implements TextRepositoryInterface {
+    public function find(TextId $id): ?Text {
+        // MySQL-specific implementation
+    }
+}
+```
+
+#### 5. Frontend Mirrors Backend
+
+```text
+Backend:  Modules/Text/
+Frontend: modules/text/
+```
+
+Each frontend module contains:
+- `components/` - UI components for this feature
+- `stores/` - State management (Alpine.js stores)
+- `api.ts` - API client for this module's endpoints
+- `index.ts` - Module entry point
+
+### Migration Path
+
+#### Stage 1: Create Shared Infrastructure (40 hours)
+
+Move cross-cutting code to `Shared/`:
+
+| Current Location | Target Location |
+|------------------|-----------------|
+| `Core/Database/*` | `Shared/Infrastructure/Database/` |
+| `Core/Http/*` | `Shared/Infrastructure/Http/` |
+| `Core/Container/*` | `Shared/Infrastructure/Container/` |
+| `Core/Entity/ValueObject/*` | `Shared/Domain/ValueObjects/` |
+| `View/Helper/*` | `Shared/UI/Helpers/` |
+
+#### Stage 2: Pilot Module - Text (80 hours)
+
+Migrate the Text feature as a proof of concept:
+
+1. Create `Modules/Text/` directory structure
+2. Extract `Text` entity to `Modules/Text/Domain/Text.php`
+3. Define `TextRepositoryInterface` in Domain
+4. Create use cases from `TextService` methods:
+   - `ImportText`, `ArchiveText`, `ParseText`, `GetTextForReading`
+5. Implement `MySqlTextRepository` in Infrastructure
+6. Move `TextController` to `Modules/Text/Http/`
+7. Move text views to `Modules/Text/Views/`
+8. Create `TextServiceProvider` for DI registration
+9. Update frontend: move `js/reading/` to `Frontend/modules/text/`
+
+#### Stage 3: Remaining Modules (200 hours)
+
+Apply the same pattern to other modules:
+
+| Module | Current Services | Estimated Effort |
+|--------|------------------|------------------|
+| Vocabulary | WordService, WordStatusService, WordListService, DictionaryService, SimilarTermsService | 60 hours |
+| Language | LanguageService, LanguageDefinitions | 30 hours |
+| Review | TestService | 30 hours |
+| Feed | FeedService | 25 hours |
+| Admin | SettingsService, BackupService, StatisticsService, DatabaseWizardService | 35 hours |
+| Tags | TagService | 20 hours |
+
+#### Stage 4: Remove Legacy (40 hours)
+
+1. Delete empty `Legacy/` directory
+2. Update all imports to use new module paths
+3. Update autoloading in `composer.json`
+4. Update routing to point to new controller locations
+
+### Benefits
+
+| Benefit | Description |
+|---------|-------------|
+| **Easier navigation** | "Everything about texts is in `Modules/Text/`" |
+| **Framework independence** | Domain layer survives framework migrations |
+| **Microservice-ready** | Each module can be extracted when needed |
+| **Better testing** | Domain logic testable without database |
+| **Parallel development** | Teams can own entire modules |
+| **Reduced coupling** | Changes in one module don't ripple to others |
+| **Frontend/backend alignment** | Same mental model for both |
+
+### Risks and Mitigations
+
+| Risk | Mitigation |
+|------|------------|
+| Over-engineering | Start with pilot module, evaluate before proceeding |
+| Breaking changes | Maintain backward-compatible routes during migration |
+| Learning curve | Document patterns, provide examples |
+| Migration effort | Gradual migration, one module at a time |
+
+### Success Criteria
+
+- [ ] All 7 modules migrated to new structure
+- [ ] Zero circular dependencies between modules
+- [ ] Domain layer has 100% unit test coverage
+- [ ] Frontend modules mirror backend structure
+- [ ] `Legacy/` directory is empty and removed
+- [ ] Documentation updated with new patterns
+
+### Namespace Updates
+
+```json
+{
+    "autoload": {
+        "psr-4": {
+            "Lwt\\Shared\\": "src/Shared/",
+            "Lwt\\Modules\\": "src/Modules/",
+            "Lwt\\Api\\": "src/Api/"
+        }
+    }
+}
+```
+
+---
+
 **Document Owner:** LWT Maintainers
 **Review Cycle:** Quarterly
-**Last Review:** 2025-11-30
-**Next Review:** 2026-02-28
+**Last Review:** 2025-12-02
+**Next Review:** 2026-03-02

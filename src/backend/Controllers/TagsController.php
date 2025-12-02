@@ -62,7 +62,7 @@ class TagsController extends BaseController
             ? (' and (TgText like ' . $wh_query . ' or TgComment like ' . $wh_query . ')')
             : '';
 
-        $this->render('My Term Tags', true);
+        $this->render('Term Tags', true);
 
 
         // Process actions
@@ -100,7 +100,7 @@ class TagsController extends BaseController
             ? (' and (T2Text like ' . $wh_query . ' or T2Comment like ' . $wh_query . ')')
             : '';
 
-        $this->render('My Text Tags', true);
+        $this->render('Text Tags', true);
 
 
         // Process actions

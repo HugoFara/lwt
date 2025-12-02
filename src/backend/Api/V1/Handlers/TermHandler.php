@@ -771,4 +771,413 @@ class TermHandler
     {
         return $this->updateMultiWordTerm($termId, $data);
     }
+
+    // =========================================================================
+    // Full Term CRUD for Reactive UI
+    // =========================================================================
+
+    /**
+     * Get term data prepared for editing in modal.
+     *
+     * @param int      $textId   Text ID
+     * @param int      $position Position in text
+     * @param int|null $wordId   Word ID (for existing terms)
+     *
+     * @return array Term data with language settings and similar terms
+     */
+    public function getTermForEdit(int $textId, int $position, ?int $wordId = null): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        // Get language ID and settings from text
+        $textData = Connection::preparedFetchOne(
+            "SELECT TxLgID, TxTitle FROM {$tbpref}texts WHERE TxID = ?",
+            [$textId]
+        );
+
+        if ($textData === null) {
+            return ['error' => 'Text not found'];
+        }
+
+        $langId = (int) $textData['TxLgID'];
+
+        // Get language settings
+        $langData = Connection::preparedFetchOne(
+            "SELECT LgName, LgShowRomanization, LgGoogleTranslateURI
+             FROM {$tbpref}languages WHERE LgID = ?",
+            [$langId]
+        );
+
+        if ($langData === null) {
+            return ['error' => 'Language not found'];
+        }
+
+        // Get all term tags for autocomplete
+        $allTags = \Lwt\Services\TagService::getAllTermTags();
+
+        // Build language info
+        $language = [
+            'id' => $langId,
+            'name' => (string) $langData['LgName'],
+            'showRomanization' => (bool) $langData['LgShowRomanization'],
+            'translateUri' => (string) ($langData['LgGoogleTranslateURI'] ?? '')
+        ];
+
+        // If word ID provided, get existing term data
+        if ($wordId !== null && $wordId > 0) {
+            $termData = Connection::preparedFetchOne(
+                "SELECT WoID, WoText, WoTextLC, WoTranslation, WoRomanization,
+                        WoSentence, WoStatus, WoLgID
+                 FROM {$tbpref}words WHERE WoID = ?",
+                [$wordId]
+            );
+
+            if ($termData === null) {
+                return ['error' => 'Term not found'];
+            }
+
+            // Get tags for the word
+            $tagsResult = Connection::preparedFetchAll(
+                "SELECT TgText FROM {$tbpref}wordtags
+                 JOIN {$tbpref}tags ON TgID = WtTgID
+                 WHERE WtWoID = ?
+                 ORDER BY TgText",
+                [$wordId]
+            );
+            $tags = array_map(fn($row) => (string)$row['TgText'], $tagsResult);
+
+            $term = [
+                'id' => (int) $termData['WoID'],
+                'text' => (string) $termData['WoText'],
+                'textLc' => (string) $termData['WoTextLC'],
+                'hex' => strToClassName((string) $termData['WoTextLC']),
+                'translation' => (string) $termData['WoTranslation'],
+                'romanization' => (string) $termData['WoRomanization'],
+                'sentence' => (string) $termData['WoSentence'],
+                'status' => (int) $termData['WoStatus'],
+                'tags' => $tags
+            ];
+
+            // Get similar terms
+            $similarTerms = $this->getSimilarTermsForEdit($langId, (string) $termData['WoTextLC'], $wordId);
+
+            return [
+                'isNew' => false,
+                'term' => $term,
+                'language' => $language,
+                'allTags' => $allTags,
+                'similarTerms' => $similarTerms
+            ];
+        }
+
+        // New term - get word at position
+        $wordData = $this->wordService->getWordAtPosition($textId, $position);
+        if ($wordData === null) {
+            return ['error' => 'Word not found at position'];
+        }
+
+        $text = $wordData;
+        $textLc = mb_strtolower($text, 'UTF-8');
+
+        // Get sentence at position
+        $sentence = $this->wordService->getSentenceTextAtPosition($textId, $position);
+
+        // Mark the term in the sentence with curly braces if not already marked
+        if ($sentence !== null && strpos($sentence, '{') === false) {
+            // Simple replacement - replace first occurrence of the term
+            $sentence = preg_replace(
+                '/\b' . preg_quote($text, '/') . '\b/iu',
+                '{' . $text . '}',
+                $sentence,
+                1
+            );
+        }
+
+        $term = [
+            'id' => null,
+            'text' => $text,
+            'textLc' => $textLc,
+            'hex' => strToClassName($textLc),
+            'translation' => '',
+            'romanization' => '',
+            'sentence' => $sentence ?? '',
+            'status' => 1,
+            'tags' => []
+        ];
+
+        // Get similar terms for new word
+        $similarTerms = $this->getSimilarTermsForEdit($langId, $textLc, null);
+
+        return [
+            'isNew' => true,
+            'term' => $term,
+            'language' => $language,
+            'allTags' => $allTags,
+            'similarTerms' => $similarTerms
+        ];
+    }
+
+    /**
+     * Get similar terms for the edit form.
+     *
+     * @param int      $langId  Language ID
+     * @param string   $termLc  Term in lowercase
+     * @param int|null $excludeId Word ID to exclude (current term)
+     *
+     * @return array Array of similar terms
+     */
+    private function getSimilarTermsForEdit(int $langId, string $termLc, ?int $excludeId): array
+    {
+        $tbpref = Globals::getTablePrefix();
+        $similarService = new \Lwt\Services\SimilarTermsService();
+        $similarIds = $similarService->getSimilarTerms($langId, $termLc, 10, 0.33);
+
+        $result = [];
+        foreach ($similarIds as $termId) {
+            if ($excludeId !== null && $termId === $excludeId) {
+                continue;
+            }
+
+            $record = Connection::preparedFetchOne(
+                "SELECT WoID, WoText, WoTranslation, WoStatus
+                 FROM {$tbpref}words WHERE WoID = ?",
+                [$termId]
+            );
+
+            if ($record) {
+                $result[] = [
+                    'id' => (int) $record['WoID'],
+                    'text' => (string) $record['WoText'],
+                    'translation' => (string) $record['WoTranslation'],
+                    'status' => (int) $record['WoStatus']
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Create a term with full data (translation, romanization, sentence, tags, status).
+     *
+     * @param array $data Term data:
+     *                    - textId: Text ID
+     *                    - position: Position in text
+     *                    - translation: Translation
+     *                    - romanization: Romanization (optional)
+     *                    - sentence: Example sentence (optional)
+     *                    - status: Status (1-5, default: 1)
+     *                    - tags: Array of tag names (optional)
+     *
+     * @return array{success?: bool, term?: array, error?: string}
+     */
+    public function createTermFull(array $data): array
+    {
+        $tbpref = Globals::getTablePrefix();
+        $textId = (int) ($data['textId'] ?? 0);
+        $position = (int) ($data['position'] ?? 0);
+
+        if ($textId === 0) {
+            return ['error' => 'Text ID is required'];
+        }
+
+        // Get language ID from text
+        $langId = $this->wordService->getLanguageIdFromText($textId);
+        if ($langId === null) {
+            return ['error' => 'Text not found'];
+        }
+
+        // Get the word at the position
+        $wordText = $this->wordService->getWordAtPosition($textId, $position);
+        if ($wordText === null) {
+            return ['error' => 'Word not found at position'];
+        }
+
+        $textLc = mb_strtolower($wordText, 'UTF-8');
+        $status = (int) ($data['status'] ?? 1);
+
+        // Validate status
+        if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+            return ['error' => 'Status must be 1-5, 98, or 99'];
+        }
+
+        $translation = trim($data['translation'] ?? '');
+        if ($translation === '') {
+            $translation = '*';
+        }
+
+        $romanization = trim($data['romanization'] ?? '');
+        $sentence = trim($data['sentence'] ?? '');
+
+        // Insert the word
+        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+
+        $sql = "INSERT INTO {$tbpref}words (
+                WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
+                WoSentence, WoRomanization, WoStatusChanged,
+                {$scoreColumns}
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})";
+
+        $stmt = Connection::prepare($sql);
+        $stmt->bind('ississs', $langId, $textLc, $wordText, $status, $translation, $sentence, $romanization);
+        $affected = $stmt->execute();
+
+        if ($affected != 1) {
+            return ['error' => 'Failed to create term'];
+        }
+
+        $wordId = $stmt->insertId();
+
+        // Update text items to link to this word
+        Connection::preparedExecute(
+            "UPDATE {$tbpref}textitems2
+             SET Ti2WoID = ?
+             WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
+            [$wordId, $langId, $textLc]
+        );
+
+        // Save tags if provided
+        $tags = $data['tags'] ?? [];
+        if (!empty($tags) && is_array($tags)) {
+            \Lwt\Services\TagService::saveWordTagsFromArray($wordId, $tags);
+        }
+
+        // Return complete term data
+        return [
+            'success' => true,
+            'term' => [
+                'id' => $wordId,
+                'text' => $wordText,
+                'textLc' => $textLc,
+                'hex' => strToClassName($textLc),
+                'translation' => $translation === '*' ? '' : $translation,
+                'romanization' => $romanization,
+                'sentence' => $sentence,
+                'status' => $status,
+                'tags' => $tags
+            ]
+        ];
+    }
+
+    /**
+     * Update a term with full data.
+     *
+     * @param int   $termId Term ID
+     * @param array $data   Term data:
+     *                      - translation: Translation
+     *                      - romanization: Romanization (optional)
+     *                      - sentence: Example sentence (optional)
+     *                      - status: Status (1-5)
+     *                      - tags: Array of tag names (optional)
+     *
+     * @return array{success?: bool, term?: array, error?: string}
+     */
+    public function updateTermFull(int $termId, array $data): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        // Get existing term data
+        $existing = Connection::preparedFetchOne(
+            "SELECT WoID, WoText, WoTextLC, WoLgID, WoStatus
+             FROM {$tbpref}words WHERE WoID = ?",
+            [$termId]
+        );
+
+        if ($existing === null) {
+            return ['error' => 'Term not found'];
+        }
+
+        $status = (int) ($data['status'] ?? $existing['WoStatus']);
+
+        // Validate status
+        if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+            return ['error' => 'Status must be 1-5, 98, or 99'];
+        }
+
+        $translation = trim($data['translation'] ?? '');
+        if ($translation === '') {
+            $translation = '*';
+        }
+
+        $romanization = trim($data['romanization'] ?? '');
+        $sentence = trim($data['sentence'] ?? '');
+
+        // Update the word
+        $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+
+        Connection::preparedExecute(
+            "UPDATE {$tbpref}words SET
+             WoTranslation = ?,
+             WoRomanization = ?,
+             WoSentence = ?,
+             WoStatus = ?,
+             WoStatusChanged = NOW(),
+             {$scoreUpdate}
+             WHERE WoID = ?",
+            [$translation, $romanization, $sentence, $status, $termId]
+        );
+
+        // Save tags if provided
+        $tags = [];
+        if (isset($data['tags']) && is_array($data['tags'])) {
+            $tags = $data['tags'];
+            \Lwt\Services\TagService::saveWordTagsFromArray($termId, $tags);
+        }
+
+        // Return complete term data
+        return [
+            'success' => true,
+            'term' => [
+                'id' => $termId,
+                'text' => (string) $existing['WoText'],
+                'textLc' => (string) $existing['WoTextLC'],
+                'hex' => strToClassName((string) $existing['WoTextLC']),
+                'translation' => $translation === '*' ? '' : $translation,
+                'romanization' => $romanization,
+                'sentence' => $sentence,
+                'status' => $status,
+                'tags' => $tags
+            ]
+        ];
+    }
+
+    /**
+     * Format response for getting term data for editing.
+     *
+     * @param int      $textId   Text ID
+     * @param int      $position Position in text
+     * @param int|null $wordId   Word ID
+     *
+     * @return array
+     */
+    public function formatGetTermForEdit(int $textId, int $position, ?int $wordId = null): array
+    {
+        return $this->getTermForEdit($textId, $position, $wordId);
+    }
+
+    /**
+     * Format response for creating a term with full data.
+     *
+     * @param array $data Term data
+     *
+     * @return array
+     */
+    public function formatCreateTermFull(array $data): array
+    {
+        return $this->createTermFull($data);
+    }
+
+    /**
+     * Format response for updating a term with full data.
+     *
+     * @param int   $termId Term ID
+     * @param array $data   Term data
+     *
+     * @return array
+     */
+    public function formatUpdateTermFull(int $termId, array $data): array
+    {
+        return $this->updateTermFull($termId, $data);
+    }
 }

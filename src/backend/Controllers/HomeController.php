@@ -90,14 +90,7 @@ class HomeController extends BaseController
 
         $debug = $dashboardData['is_debug'];
 
-        PageLayoutHelper::renderPageStartNobody(
-            "Home",
-            "
-            body {
-                max-width: 1920px;
-                margin: 20px;
-            }"
-        );
+        PageLayoutHelper::renderPageStartNobody("Home");
         echo PageLayoutHelper::buildLogo();
         echo '<h1>Learning With Texts (LWT)</h1>
         <h2>Home' . ($debug ? ' <span class="red">DEBUG</span>' : '') . '</h2>';

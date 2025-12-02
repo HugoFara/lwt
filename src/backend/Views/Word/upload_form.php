@@ -378,7 +378,7 @@ $columnOptions = [
             <strong>Note:</strong> Sentences should contain the term in curly brackets, e.g., "... {term} ...".
             If not, such sentences can be automatically created later with the
             "Set Term Sentences" action in the
-            <a href="/texts?query=&amp;page=1" class="has-text-link">My Texts</a> screen.
+            <a href="/texts?query=&amp;page=1" class="has-text-link">Texts</a> screen.
         </p>
     </div>
 </article>

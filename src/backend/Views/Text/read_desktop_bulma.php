@@ -121,10 +121,8 @@ use Lwt\View\Helper\PageLayoutHelper;
 
   <!-- Loading state -->
   <div x-show="isLoading" class="has-text-centered py-6">
-    <span class="icon is-large">
-      <i class="fas fa-spinner fa-spin fa-3x" aria-hidden="true"></i>
-    </span>
-    <p class="mt-4 is-size-5">Loading text...</p>
+    <div class="loading-spinner"></div>
+    <p class="mt-4 has-text-grey">Loading text...</p>
   </div>
 
   <!-- Error state -->
@@ -205,6 +203,23 @@ use Lwt\View\Helper\PageLayoutHelper;
 /* Alpine.js cloak */
 [x-cloak] {
   display: none !important;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  border: 3px solid #dbdbdb;
+  border-top-color: #3273dc;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
 

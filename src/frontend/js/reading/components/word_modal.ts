@@ -10,6 +10,7 @@
 
 import Alpine from 'alpinejs';
 import type { WordStoreState, WordData } from '../stores/word_store';
+import type { WordFormStoreState, SaveResult } from '../stores/word_form_store';
 import { speechDispatcher } from '../../core/user_interactions';
 
 /**
@@ -36,17 +37,26 @@ const STATUSES: StatusInfo[] = [
 ];
 
 /**
+ * View mode for the modal.
+ */
+export type ViewMode = 'info' | 'edit';
+
+/**
  * Word modal Alpine.js component interface.
  */
 export interface WordModalData {
   // Computed properties
   readonly store: WordStoreState;
+  readonly formStore: WordFormStoreState;
   readonly word: WordData | null;
   readonly isOpen: boolean;
   readonly isLoading: boolean;
   readonly isUnknown: boolean;
   readonly modalTitle: string;
   readonly statuses: StatusInfo[];
+
+  // View mode
+  viewMode: ViewMode;
 
   // Methods
   close(): void;
@@ -59,6 +69,12 @@ export interface WordModalData {
   getDictUrl(which: 'dict1' | 'dict2' | 'translator'): string;
   isCurrentStatus(status: number): boolean;
   getStatusButtonClass(status: number): string;
+
+  // Edit mode methods
+  showEditForm(): Promise<void>;
+  hideEditForm(): void;
+  onFormSaved(result: SaveResult): void;
+  onFormCancelled(): void;
 }
 
 /**
@@ -66,8 +82,15 @@ export interface WordModalData {
  */
 export function wordModalData(): WordModalData {
   return {
+    // View mode state
+    viewMode: 'info' as ViewMode,
+
     get store(): WordStoreState {
       return Alpine.store('words') as WordStoreState;
+    },
+
+    get formStore(): WordFormStoreState {
+      return Alpine.store('wordForm') as WordFormStoreState;
     },
 
     get word(): WordData | null {
@@ -79,7 +102,7 @@ export function wordModalData(): WordModalData {
     },
 
     get isLoading(): boolean {
-      return this.store.isLoading;
+      return this.store.isLoading || this.formStore.isLoading;
     },
 
     get isUnknown(): boolean {
@@ -88,6 +111,9 @@ export function wordModalData(): WordModalData {
     },
 
     get modalTitle(): string {
+      if (this.viewMode === 'edit') {
+        return this.formStore.isNewWord ? 'Add Term' : 'Edit Term';
+      }
       if (this.isUnknown) {
         return 'New Word';
       }
@@ -99,6 +125,14 @@ export function wordModalData(): WordModalData {
     },
 
     close(): void {
+      // If in edit mode with unsaved changes, confirm
+      if (this.viewMode === 'edit' && this.formStore.isDirty) {
+        if (!confirm('You have unsaved changes. Are you sure you want to close?')) {
+          return;
+        }
+        this.formStore.reset();
+      }
+      this.viewMode = 'info';
       this.store.closeModal();
     },
 
@@ -172,6 +206,52 @@ export function wordModalData(): WordModalData {
         return `button is-small ${baseClass}`;
       }
       return `button is-small is-outlined ${baseClass}`;
+    },
+
+    // =========================================================================
+    // Edit Mode Methods
+    // =========================================================================
+
+    async showEditForm(): Promise<void> {
+      const word = this.word;
+      if (!word) return;
+
+      // Load the form data
+      await this.formStore.loadForEdit(
+        this.store.textId,
+        word.position,
+        word.wordId ?? undefined
+      );
+
+      // Switch to edit view
+      this.viewMode = 'edit';
+    },
+
+    hideEditForm(): void {
+      this.viewMode = 'info';
+      this.formStore.reset();
+    },
+
+    onFormSaved(result: SaveResult): void {
+      if (result.success && result.hex) {
+        // Update the word in the store
+        this.store.updateWordInStore(result.hex, {
+          wordId: result.wordId ?? null,
+          status: this.formStore.formData.status,
+          translation: this.formStore.formData.translation,
+          romanization: this.formStore.formData.romanization,
+          tags: this.formStore.formData.tags.join(', ')
+        });
+      }
+
+      // Switch back to info view
+      this.viewMode = 'info';
+      this.formStore.reset();
+    },
+
+    onFormCancelled(): void {
+      this.viewMode = 'info';
+      this.formStore.reset();
     }
   };
 }

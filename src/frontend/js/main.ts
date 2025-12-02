@@ -46,7 +46,9 @@ import './terms/term_operations';
 
 // Reading interface
 import './reading/stores/word_store';
+import './reading/stores/word_form_store';
 import './reading/components/word_modal';
+import './reading/components/word_edit_form';
 import './reading/components/text_reader';
 import './reading/text_renderer';
 import './reading/text_events';
@@ -64,11 +66,15 @@ import './forms/form_validation';
 import './forms/form_initialization';
 import './forms/word_form_auto';
 
-// Testing
+// Testing - Legacy
 import './testing/test_mode';
 import './testing/test_header';
 import './testing/test_table';
 import './testing/test_ajax';
+
+// Testing - Bulma/Alpine components
+import './testing/stores/test_store';
+import './testing/components/test_view';
 
 // Media
 import './media/media_selection';
@@ -110,6 +116,7 @@ import './tags/tag_list';
 // Languages
 import './languages/language_wizard';
 import './languages/language_form';
+import './languages/language_list';
 
 // Admin
 import './admin/server_data';
