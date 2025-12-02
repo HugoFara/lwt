@@ -38,6 +38,7 @@ export function initSettingsForm(): void {
 /**
  * Initialize confirm submit forms.
  * Shows a confirmation dialog before form submission.
+ * Also shows loading state on the submit button after confirmation.
  */
 export function initConfirmSubmitForms(): void {
   document.addEventListener('submit', (e) => {
@@ -47,6 +48,14 @@ export function initConfirmSubmitForms(): void {
       if (!confirm(message)) {
         e.preventDefault();
         return false;
+      }
+      // Show loading state on submit button after confirmation
+      const submitButton = form.querySelector<HTMLInputElement | HTMLButtonElement>(
+        'input[type="submit"], button[type="submit"]'
+      );
+      if (submitButton) {
+        submitButton.classList.add('is-loading');
+        submitButton.disabled = true;
       }
     }
     return true;

@@ -187,6 +187,49 @@ describe('settings_form.ts', () => {
 
       expect(confirmSpy).not.toHaveBeenCalled();
     });
+
+    it('adds loading state to submit button after confirmation', () => {
+      document.body.innerHTML = `
+        <form data-action="confirm-submit">
+          <input type="submit" value="Submit" />
+        </form>
+      `;
+
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      initConfirmSubmitForms();
+
+      const form = document.querySelector('form') as HTMLFormElement;
+      const submitButton = form.querySelector('input[type="submit"]') as HTMLInputElement;
+
+      expect(submitButton.classList.contains('is-loading')).toBe(false);
+      expect(submitButton.disabled).toBe(false);
+
+      form.dispatchEvent(new Event('submit', { bubbles: true }));
+
+      expect(submitButton.classList.contains('is-loading')).toBe(true);
+      expect(submitButton.disabled).toBe(true);
+    });
+
+    it('does not add loading state when user cancels', () => {
+      document.body.innerHTML = `
+        <form data-action="confirm-submit">
+          <button type="submit">Submit</button>
+        </form>
+      `;
+
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+      initConfirmSubmitForms();
+
+      const form = document.querySelector('form') as HTMLFormElement;
+      const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+      expect(submitButton.classList.contains('is-loading')).toBe(false);
+      expect(submitButton.disabled).toBe(false);
+    });
   });
 
   // ===========================================================================

@@ -286,6 +286,18 @@ export function initSimpleInteractions(): void {
         button.click();
       }
     }
+
+    // Show loading state on submit button
+    // Applies to forms with data-loading-submit attribute or any confirmed form
+    if (form.dataset.loadingSubmit !== undefined || form.dataset.confirmSubmit !== undefined) {
+      const submitButton = form.querySelector<HTMLInputElement | HTMLButtonElement>(
+        'input[type="submit"], button[type="submit"]'
+      );
+      if (submitButton) {
+        submitButton.classList.add('is-loading');
+        submitButton.disabled = true;
+      }
+    }
   });
 }
 

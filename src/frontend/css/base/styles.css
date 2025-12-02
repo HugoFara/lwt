@@ -280,6 +280,53 @@ input[type=submit]:active
   color: white;
 }
 
+/* Loading state for buttons - Bulma-compatible .is-loading class */
+@keyframes spinAround {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+button.is-loading,
+input[type=submit].is-loading,
+input[type=button].is-loading,
+input[type=reset].is-loading
+{
+  color: transparent !important;
+  pointer-events: none;
+  position: relative;
+}
+
+button.is-loading::after,
+input[type=submit].is-loading::after,
+input[type=button].is-loading::after,
+input[type=reset].is-loading::after
+{
+  animation: spinAround 500ms infinite linear;
+  border: 2px solid #dbdbdb;
+  border-radius: 9999px;
+  border-right-color: transparent;
+  border-top-color: transparent;
+  content: "";
+  display: block;
+  height: 1em;
+  width: 1em;
+  position: absolute;
+  left: calc(50% - 0.5em);
+  top: calc(50% - 0.5em);
+}
+
+/* White spinner for submit buttons (they have dark background) */
+input[type=submit].is-loading::after
+{
+  border-color: white;
+  border-right-color: transparent;
+  border-top-color: transparent;
+}
+
 p
 {
   margin: 5px 0 5px 0;

@@ -20,7 +20,7 @@
 namespace Lwt\Views\Admin;
 
 ?>
-<form enctype="multipart/form-data" action="<?php echo $_SERVER['PHP_SELF']; ?>"
+<form enctype="multipart/form-data" action="/admin/backup"
 method="post" data-confirm-submit="Are you sure?">
 <table class="tab2" cellspacing="0" cellpadding="5">
     <tr>
@@ -110,7 +110,7 @@ method="post" data-confirm-submit="Are you sure?">
     <tr>
         <td class="td1 right" colspan="2">
             <input type="button" value="&lt;&lt; Back"
-            data-action="navigate" data-url="index.php" />
+            data-action="navigate" data-url="/" />
         </td>
     </tr>
 </table>
