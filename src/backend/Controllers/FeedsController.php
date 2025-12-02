@@ -104,7 +104,7 @@ class FeedsController extends BaseController
         $currentLang = Validation::language(
             (string)ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
         );
-        PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Feeds', true);
+        PageLayoutHelper::renderPageStart($this->languageService->getLanguageName($currentLang) . ' Feeds', true);
 
         $currentFeed = (string)ParamHelpers::processSessParam(
             "selected_feed",

@@ -76,7 +76,7 @@ function buildTestAppHTML(config: TestConfig): string {
 
   return `
     <div x-data="testApp" class="test-page" x-cloak>
-      ${buildNavbar(langName)}
+      ${buildTestToolbar(langName)}
       ${buildProgressBar()}
       ${buildMainContent()}
       ${buildWordModal()}
@@ -86,15 +86,12 @@ function buildTestAppHTML(config: TestConfig): string {
 }
 
 /**
- * Build navbar HTML.
+ * Build test toolbar HTML (below main navbar).
  */
-function buildNavbar(langName: string): string {
+function buildTestToolbar(langName: string): string {
   return `
-    <nav class="navbar is-light" role="navigation" aria-label="test navigation">
+    <nav class="navbar is-white has-shadow" role="navigation" aria-label="test toolbar">
       <div class="navbar-brand">
-        <a class="navbar-item" href="/texts">
-          <img src="/assets/icons/lwt_icon.png" alt="LWT" width="28" height="28">
-        </a>
         <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
            @click="navbarOpen = !navbarOpen" :class="{ 'is-active': navbarOpen }">
           <span aria-hidden="true"></span>

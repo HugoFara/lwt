@@ -315,7 +315,7 @@ class TextController extends BaseController
             substr($this->param('op'), -8) == 'and Open');
 
         if (!$noPagestart) {
-            PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Texts', true);
+            PageLayoutHelper::renderPageStart($this->languageService->getLanguageName($currentLang) . ' Texts', true);
         }
 
         $message = '';
@@ -447,7 +447,7 @@ class TextController extends BaseController
         if (!$this->textService->validateTextLength($txText)) {
             $message = "Error: Text too long, must be below 65000 Bytes";
             if ($noPagestart) {
-                PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Texts', true);
+                PageLayoutHelper::renderPageStart($this->languageService->getLanguageName($currentLang) . ' Texts', true);
             }
             return ['message' => $message, 'redirect' => false];
         }
@@ -1065,7 +1065,7 @@ class TextController extends BaseController
         $markAction = $this->param('markaction');
         $noPagestart = ($markAction == 'deltag');
         if (!$noPagestart) {
-            PageLayoutHelper::renderPageStart('My ' . $this->languageService->getLanguageName($currentLang) . ' Text Archive', true);
+            PageLayoutHelper::renderPageStart($this->languageService->getLanguageName($currentLang) . ' Text Archive', true);
         }
 
         $message = '';

@@ -27,8 +27,11 @@ use Lwt\View\Helper\IconHelper;
 use Lwt\View\Helper\PageLayoutHelper;
 
 ?>
+<!-- Main navigation -->
+<?php echo PageLayoutHelper::buildNavbar('texts'); ?>
+
 <div x-data="textReader" class="reading-page" x-cloak>
-  <!-- Header -->
+  <!-- Reading toolbar -->
   <nav class="navbar is-light" role="navigation" aria-label="reading navigation">
     <div class="navbar-brand">
       <a class="navbar-item" href="/texts">

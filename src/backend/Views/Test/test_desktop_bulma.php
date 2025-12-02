@@ -18,7 +18,12 @@
 
 namespace Lwt\Views\Test;
 
+use Lwt\View\Helper\PageLayoutHelper;
+
 ?>
+<!-- Main navigation -->
+<?php echo PageLayoutHelper::buildNavbar(); ?>
+
 <!-- Test application root - all UI rendered by Alpine.js -->
 <div id="test-app"></div>
 
