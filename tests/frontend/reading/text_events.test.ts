@@ -363,7 +363,7 @@ describe('text_events.ts', () => {
       vi.spyOn(overlibInterface, 'run_overlib_status_99').mockImplementation(() => {});
       vi.spyOn(overlibInterface, 'run_overlib_status_98').mockImplementation(() => {});
       vi.spyOn(overlibInterface, 'run_overlib_status_1_to_5').mockImplementation(() => {});
-      vi.spyOn(frameManagement, 'showRightFrames').mockImplementation(() => {});
+      vi.spyOn(frameManagement, 'loadModalFrame').mockImplementation(() => {});
       vi.spyOn(wordStatus, 'make_tooltip').mockReturnValue('tooltip text');
       vi.spyOn(userInteractions, 'speechDispatcher').mockImplementation(() => ({} as JQuery.jqXHR));
     });
@@ -388,7 +388,7 @@ describe('text_events.ts', () => {
       word_click_event_do_text_text.call(word);
 
       expect(overlibInterface.run_overlib_status_unknown).toHaveBeenCalled();
-      expect(frameManagement.showRightFrames).toHaveBeenCalled();
+      expect(frameManagement.loadModalFrame).toHaveBeenCalled();
     });
 
     it('calls run_overlib_status_99 for well-known words', () => {
@@ -604,7 +604,7 @@ describe('text_events.ts', () => {
 
       // Mock the functions that would be called on click
       vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
-      vi.spyOn(frameManagement, 'showRightFrames').mockImplementation(() => {});
+      vi.spyOn(frameManagement, 'loadModalFrame').mockImplementation(() => {});
 
       prepareTextInteractions();
 
@@ -697,7 +697,7 @@ describe('text_events.ts', () => {
     it('word_click handles empty title attribute', () => {
       mockLWT_DATA.settings.jQuery_tooltip = false;
       vi.spyOn(overlibInterface, 'run_overlib_status_unknown').mockImplementation(() => {});
-      vi.spyOn(frameManagement, 'showRightFrames').mockImplementation(() => {});
+      vi.spyOn(frameManagement, 'loadModalFrame').mockImplementation(() => {});
 
       document.body.innerHTML = `
         <span class="word" data_status="0" data_order="1">Test</span>

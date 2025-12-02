@@ -286,17 +286,17 @@ describe('term_operations.ts', () => {
       expect(result.children.length).toBe(2);
     });
 
-    it('includes tick-button image for each sentence', () => {
+    it('includes tick-button icon for each sentence', () => {
       const sentences: [string, string][] = [
         ['Test sentence', 'Test']
       ];
 
       const result = display_example_sentences(sentences, 'target');
-      const img = result.querySelector('img');
+      // Now uses Lucide SVG icons instead of PNG images (tick-button maps to circle-check)
+      const icon = result.querySelector('i[data-lucide="circle-check"]');
 
-      expect(img).not.toBeNull();
-      expect(img?.src).toContain('tick-button.png');
-      expect(img?.title).toBe('Choose');
+      expect(icon).not.toBeNull();
+      expect(icon?.getAttribute('title')).toBe('Choose');
     });
 
     it('creates clickable span with data attributes', () => {
@@ -361,7 +361,7 @@ describe('term_operations.ts', () => {
       expect(result.innerHTML).toContain('Third sentence');
     });
 
-    it('creates correct structure: div > span.click > img', () => {
+    it('creates correct structure: div > span.click > icon', () => {
       const sentences: [string, string][] = [
         ['Test', 'value']
       ];
@@ -369,12 +369,15 @@ describe('term_operations.ts', () => {
       const result = display_example_sentences(sentences, 'target');
       const parentDiv = result.firstChild as HTMLDivElement;
       const clickSpan = parentDiv.firstChild as HTMLSpanElement;
-      const img = clickSpan.firstChild as HTMLImageElement;
+      // Now uses Lucide SVG icons (I element) instead of IMG
+      // tick-button maps to circle-check
+      const icon = clickSpan.firstChild as HTMLElement;
 
       expect(parentDiv.tagName).toBe('DIV');
       expect(clickSpan.tagName).toBe('SPAN');
       expect(clickSpan.classList.contains('click')).toBe(true);
-      expect(img.tagName).toBe('IMG');
+      expect(icon.tagName).toBe('I');
+      expect(icon.getAttribute('data-lucide')).toBe('circle-check');
     });
   });
 
@@ -665,7 +668,8 @@ describe('term_operations.ts', () => {
 
       do_ajax_show_similar_terms();
 
-      expect(document.getElementById('simwords')!.innerHTML).toContain('waiting2.gif');
+      // Now uses Lucide SVG spinner icon instead of waiting2.gif
+      expect(document.getElementById('simwords')!.innerHTML).toContain('data-lucide="loader-2"');
     });
 
     it('updates simwords on success', async () => {

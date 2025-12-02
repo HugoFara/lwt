@@ -50,10 +50,10 @@ vi.mock('../../../src/frontend/js/core/hover_intent', () => ({
 }));
 
 vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
-  showRightFrames: vi.fn()
+  loadModalFrame: vi.fn()
 }));
 
-import { showRightFrames } from '../../../src/frontend/js/reading/frame_management';
+import { loadModalFrame } from '../../../src/frontend/js/reading/frame_management';
 import { hoverIntent } from '../../../src/frontend/js/core/hover_intent';
 
 describe('text_multiword_selection.ts', () => {
@@ -87,7 +87,7 @@ describe('text_multiword_selection.ts', () => {
 
       mwordDragNDrop.finish(event);
 
-      expect(showRightFrames).not.toHaveBeenCalled();
+      expect(loadModalFrame).not.toHaveBeenCalled();
     });
 
     it('returns early when event is already handled', () => {
@@ -101,7 +101,7 @@ describe('text_multiword_selection.ts', () => {
 
       mwordDragNDrop.finish(event);
 
-      expect(showRightFrames).not.toHaveBeenCalled();
+      expect(loadModalFrame).not.toHaveBeenCalled();
     });
 
     it('does nothing when no lword.tword elements exist', () => {
@@ -115,7 +115,7 @@ describe('text_multiword_selection.ts', () => {
 
       mwordDragNDrop.finish(event);
 
-      expect(showRightFrames).not.toHaveBeenCalled();
+      expect(loadModalFrame).not.toHaveBeenCalled();
     });
 
     it('opens edit_word.php for single word selection', () => {
@@ -130,13 +130,13 @@ describe('text_multiword_selection.ts', () => {
 
       mwordDragNDrop.finish(event);
 
-      expect(showRightFrames).toHaveBeenCalledWith(
+      expect(loadModalFrame).toHaveBeenCalledWith(
         expect.stringContaining('/word/edit?')
       );
-      expect(showRightFrames).toHaveBeenCalledWith(
+      expect(loadModalFrame).toHaveBeenCalledWith(
         expect.stringContaining('tid=42')
       );
-      expect(showRightFrames).toHaveBeenCalledWith(
+      expect(loadModalFrame).toHaveBeenCalledWith(
         expect.stringContaining('ord=15')
       );
       expect(event.handled).toBe(true);
@@ -154,13 +154,13 @@ describe('text_multiword_selection.ts', () => {
 
       mwordDragNDrop.finish(event);
 
-      expect(showRightFrames).toHaveBeenCalledWith(
+      expect(loadModalFrame).toHaveBeenCalledWith(
         expect.stringContaining('edit_mword.php?')
       );
-      expect(showRightFrames).toHaveBeenCalledWith(
+      expect(loadModalFrame).toHaveBeenCalledWith(
         expect.stringContaining('tid=42')
       );
-      expect(showRightFrames).toHaveBeenCalledWith(
+      expect(loadModalFrame).toHaveBeenCalledWith(
         expect.stringContaining('len=2')
       );
     });
@@ -180,7 +180,7 @@ describe('text_multiword_selection.ts', () => {
       mwordDragNDrop.finish(event);
 
       expect(alertSpy).toHaveBeenCalledWith('Selected text is too long!!!');
-      expect(showRightFrames).not.toHaveBeenCalled();
+      expect(loadModalFrame).not.toHaveBeenCalled();
     });
 
     it('removes tword and nword classes after finishing', () => {
@@ -776,7 +776,7 @@ describe('text_multiword_selection.ts', () => {
       mwordDragNDrop.finish(event);
 
       // URLSearchParams encodes space as +
-      expect(showRightFrames).toHaveBeenCalledWith(
+      expect(loadModalFrame).toHaveBeenCalledWith(
         expect.stringContaining('txt=Hello+')
       );
     });

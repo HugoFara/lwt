@@ -1,9 +1,9 @@
 # Frontend Modernization Plan
 
 **Project:** Learning with Texts (LWT)
-**Document Version:** 6.0
-**Last Updated:** November 30, 2025
-**Status:** Phase 2.5 Complete - Centralized API Client, Comprehensive Test Coverage
+**Document Version:** 7.0
+**Last Updated:** December 2, 2025
+**Status:** Phase 3 Complete - jQuery Removed, Alpine.js & Bulma Adopted
 
 ---
 
@@ -23,25 +23,24 @@
 
 ## Executive Summary
 
-This document outlines a comprehensive plan to modernize the Learning with Texts (LWT) frontend codebase. The current implementation relies on jQuery and outdated patterns from 2010-2015. This modernization will improve performance, maintainability, and developer experience while maintaining backward compatibility during the transition.
+This document outlines the comprehensive plan to modernize the Learning with Texts (LWT) frontend codebase. The original implementation relied on jQuery and outdated patterns from 2010-2015. This modernization has dramatically improved performance, maintainability, and developer experience.
 
 **Key Objectives:**
 
 - ✅ Modernize build system (Vite) - **COMPLETE**
 - ✅ Add TypeScript for type safety - **COMPLETE**
-- ✅ Convert to ES6+ modules - **COMPLETE** (83 TypeScript files, ~17,500 lines)
+- ✅ Convert to ES6+ modules - **COMPLETE** (104 TypeScript files, ~25,000 lines)
 - ✅ Extract backend-embedded JavaScript - **COMPLETE** (zero inline handlers)
 - ✅ Centralized API client with type-safe wrappers - **COMPLETE**
-- ✅ Comprehensive test suite - **COMPLETE** (72 test files, ~34,000 lines)
-- 🔧 Replace jQuery with vanilla JS - **IN PROGRESS** (Phase 3)
-- Keep jQuery 1.12.4 from npm (minimize breaking changes during transition)
-- Improve CSS organization and theming
-- Enhance code maintainability and testability
+- ✅ Comprehensive test suite - **COMPLETE** (84 test files, ~41,000 lines)
+- ✅ Remove jQuery entirely - **COMPLETE**
+- ✅ Adopt Alpine.js for reactive components - **COMPLETE**
+- ✅ Adopt Bulma CSS framework - **COMPLETE**
+- 🔧 Component architecture refinement - **IN PROGRESS** (Phase 4)
+- 🎯 Performance optimization - **PLANNED** (Phase 5)
 
 **Risk Level:** Low (phased approach proven successful)
 **Expected ROI:** High (improved DX, performance, maintainability)
-
-> **Note:** The original plan suggested removing jQuery. After discussion, the decision was made to **keep jQuery 1.12.4** from npm to minimize breaking changes during the initial modernization. jQuery removal can be considered in a future phase.
 
 ---
 
@@ -51,11 +50,12 @@ This document outlines a comprehensive plan to modernize the Learning with Texts
 
 **JavaScript:**
 
-- **Total Lines:** ~17,500 lines across 83 TypeScript files
-- **Test Coverage:** 72 test files with ~34,000 lines of tests
+- **Total Lines:** ~25,000 lines across 104 TypeScript files
+- **Test Coverage:** 84 test files with ~41,000 lines of tests
 - **Module System:** ES6 modules (TypeScript)
-- **Framework:** jQuery 1.12.4 (from npm)
-- **State Management:** Centralized `LWT_DATA` object with typed interface
+- **UI Framework:** Alpine.js 3.x (reactive components)
+- **CSS Framework:** Bulma 1.x (modern CSS)
+- **State Management:** Centralized `LWT_DATA` object with typed interface + Alpine stores
 - **API Client:** Centralized fetch-based client with type-safe wrappers
 - **Build Process:** Vite with TypeScript
 
@@ -64,23 +64,23 @@ This document outlines a comprehensive plan to modernize the Learning with Texts
 ```text
 src/frontend/js/
 ├── main.ts                       - Vite entry point
-├── globals.ts                    - Global exports for inline PHP scripts (~560 lines)
-├── api/                          - Centralized API client (NEW)
+├── globals.ts                    - Global exports for inline PHP scripts
+├── api/                          - Centralized API client
 │   ├── terms.ts                  - Terms/vocabulary API
 │   ├── texts.ts                  - Texts API
 │   ├── review.ts                 - Review/testing API
 │   └── settings.ts               - Settings API
 ├── core/
-│   ├── api_client.ts             - Fetch-based API client (NEW)
+│   ├── api_client.ts             - Fetch-based API client
 │   ├── lwt_state.ts              - Centralized state management
 │   ├── app_data.ts               - Application data utilities
 │   ├── language_settings.ts      - Language filter utilities
-│   ├── user_interactions.ts      - UI interactions
 │   ├── ajax_utilities.ts         - AJAX helper functions
 │   ├── ui_utilities.ts           - UI utility functions
 │   ├── simple_interactions.ts    - Navigation, confirmation
 │   ├── hover_intent.ts           - Native hover intent implementation
 │   ├── cookies.ts                - Cookie management
+│   ├── tts_storage.ts            - TTS settings storage
 │   └── html_utils.ts             - HTML utility functions
 ├── feeds/
 │   ├── jq_feedwizard.ts          - Feed wizard functionality
@@ -111,10 +111,19 @@ src/frontend/js/
 │   ├── annotation_toggle.ts      - Annotation visibility
 │   ├── annotation_interactions.ts - Annotation interactions
 │   ├── frame_management.ts       - Frame management
-│   └── set_mode_result.ts        - Display mode results
+│   ├── text_renderer.ts          - Text rendering
+│   ├── word_actions.ts           - Word action handlers
+│   ├── set_mode_result.ts        - Display mode results
+│   ├── components/               - Alpine components
+│   │   ├── text_reader.ts        - Text reader component
+│   │   ├── word_modal.ts         - Word modal component
+│   │   └── word_edit_form.ts     - Word edit form component
+│   └── stores/                   - Alpine stores
+│       ├── word_store.ts         - Word state store
+│       └── word_form_store.ts    - Word form state store
 ├── terms/
 │   ├── translation_api.ts        - Translation APIs
-│   ├── overlib_interface.ts      - Popup library interface (jQuery UI tooltips)
+│   ├── overlib_interface.ts      - Legacy popup interface (deprecated)
 │   ├── dictionary.ts             - Dictionary link handling
 │   ├── word_status.ts            - Word status utilities
 │   ├── term_operations.ts        - Term CRUD operations
@@ -124,7 +133,11 @@ src/frontend/js/
 │   ├── test_header.ts            - Test header controls
 │   ├── test_table.ts             - Test table display
 │   ├── test_ajax.ts              - Test AJAX operations
-│   └── elapsed_timer.ts          - Timer utility
+│   ├── elapsed_timer.ts          - Timer utility
+│   ├── components/               - Alpine components
+│   │   └── test_view.ts          - Test view component
+│   └── stores/                   - Alpine stores
+│       └── test_store.ts         - Test state store
 ├── words/
 │   ├── word_list_filter.ts       - Word list filtering
 │   ├── word_list_table.ts        - Word list table
@@ -136,33 +149,42 @@ src/frontend/js/
 │   └── word_result_init.ts       - Result page initialization
 ├── texts/
 │   ├── text_list.ts              - Text list page
+│   ├── texts_grouped_app.ts      - Grouped texts Alpine app
+│   ├── archived_texts_grouped_app.ts - Archived texts Alpine app
+│   ├── text_status_chart.ts      - Text status chart
 │   ├── youtube_import.ts         - YouTube import
 │   ├── text_check_display.ts     - Text check display
 │   └── text_print.ts             - Print functionality
 ├── media/
 │   ├── html5_audio_player.ts     - HTML5 audio player
+│   ├── audio_player_alpine.ts    - Alpine audio player component
 │   └── media_selection.ts        - Media file selection
 ├── languages/
 │   ├── language_wizard.ts        - Language setup wizard
-│   └── language_form.ts          - Language form handling
+│   ├── language_form.ts          - Language form handling
+│   └── language_list.ts          - Language list page
 ├── admin/
 │   ├── server_data.ts            - Server data utilities
 │   ├── tts_settings.ts           - TTS configuration
 │   ├── table_management.ts       - Database table management
-│   └── settings_form.ts          - Settings form
+│   ├── settings_form.ts          - Settings form
+│   └── statistics_charts.ts      - Statistics charts
 ├── home/
-│   └── home_warnings.ts          - Home page warnings
+│   └── home_app.ts               - Home page Alpine app
 ├── tags/
 │   └── tag_list.ts               - Tag list management
 ├── ui/
 │   ├── modal.ts                  - Modal dialogs
-│   ├── word_popup.ts             - Word popup (overlib replacement)
-│   ├── inline_edit.ts            - Inline editing
+│   ├── word_popup.ts             - Word popup (Alpine-based)
+│   ├── inline_edit.ts            - Inline editing (native)
 │   ├── tagify_tags.ts            - Tagify integration
-│   └── sorttable.ts              - Sortable tables
-├── shims/
-│   ├── jquery-shim.ts            - jQuery compatibility
-│   └── jquery-ui-shim.ts         - jQuery UI compatibility
+│   ├── sorttable.ts              - Sortable tables
+│   ├── navbar.ts                 - Navigation bar
+│   ├── footer.ts                 - Footer component
+│   ├── result_panel.ts           - Result panel
+│   ├── native_tooltip.ts         - Native tooltip implementation
+│   ├── lucide_icons.ts           - Lucide icon integration
+│   └── icons.ts                  - Icon utilities
 └── types/
     └── globals.d.ts              - TypeScript type declarations
 ```
@@ -172,9 +194,8 @@ src/frontend/js/
 ```text
 src/frontend/css/
 ├── base/
-│   ├── styles.css                - Main stylesheet
+│   ├── styles.css                - Main stylesheet (Bulma-based)
 │   ├── css_charts.css            - Chart visualizations
-│   ├── jquery-ui.css             - jQuery UI widgets
 │   ├── html5_audio_player.css    - HTML5 audio player
 │   ├── gallery.css               - Gallery styles
 │   ├── mobile.css                - Mobile styles
@@ -190,42 +211,51 @@ src/frontend/css/
 
 **Dependencies (from npm):**
 
-- jQuery 1.12.4 (~85KB minified)
-- jQuery UI 1.12.1 (~250KB with CSS)
-- Tagify (tag input - replacement for tag-it)
-- ~~jPlayer~~ (removed - replaced with HTML5 `<audio>`)
-- ~~Overlib~~ (removed - replaced with jQuery UI tooltips)
-- ~~jquery.xpath~~ (removed - replaced with native `document.evaluate()`)
-- ~~jQuery plugins: jeditable, scrollTo, hoverIntent~~ (removed - replaced with native implementations)
+- Alpine.js 3.x (~15KB minified) - Reactive UI components
+- Bulma 1.x (~25KB minified) - CSS framework
+- Chart.js 4.x - Data visualization
+- Lucide - SVG icons
+- Tagify - Tag input widget
 
-### JavaScript Library Inventory (November 2025)
+**Removed Dependencies:**
 
-#### External Libraries (in `assets/js/`)
+- ~~jQuery 1.12.4~~ - **REMOVED** - replaced with vanilla JS + Alpine.js
+- ~~jQuery UI 1.12.1~~ - **REMOVED** - replaced with native elements + Bulma
+- ~~jPlayer~~ - **REMOVED** - replaced with HTML5 `<audio>`
+- ~~Overlib~~ - **REMOVED** - replaced with native tooltips
+- ~~jquery.xpath~~ - **REMOVED** - replaced with native `document.evaluate()`
+- ~~jQuery plugins~~ - **REMOVED** - replaced with native implementations
 
-| Library | File | Size | Purpose | Status |
-|---------|------|------|---------|--------|
-| **jQuery** | `jquery.js` | 97KB | DOM manipulation, AJAX | ✅ Kept (from npm) |
-| **jQuery UI** | `jquery-ui.min.js` | 240KB | UI widgets (dialogs, tooltips, draggable) | ✅ Kept (provides tooltip, dialog, resizable) |
-| ~~**jQuery scrollTo**~~ | ~~`jquery.scrollTo.min.js`~~ | ~~2KB~~ | ~~Smooth scrolling~~ | ✅ **REMOVED** - replaced with native `scrollTo()` in `hover_intent.ts` |
-| ~~**jQuery jeditable**~~ | ~~`jquery.jeditable.mini.js`~~ | ~~8KB~~ | ~~In-place editing~~ | ✅ **REMOVED** - was unused |
-| ~~**jQuery hoverIntent**~~ | ~~`jquery.hoverIntent.js`~~ | ~~2KB~~ | ~~Delayed hover events~~ | ✅ **REMOVED** - replaced with native `hoverIntent()` in `hover_intent.ts` |
-| ~~**jQuery jPlayer**~~ | ~~`jquery.jplayer.min.js`~~ | ~~61KB~~ | ~~Audio/video player~~ | ✅ **REMOVED** - replaced with HTML5 `<audio>` |
-| ~~**jQuery XPath**~~ | ~~`jquery.xpath.min.js`~~ | ~~80KB~~ | ~~XPath selector (feed wizard)~~ | ✅ **REMOVED** - replaced with native `document.evaluate()` |
-| ~~**tag-it**~~ | ~~`tag-it.js`~~ | ~~10KB~~ | ~~Tag input widget~~ | ✅ **REMOVED** - replaced with Tagify |
-| ~~**overlib**~~ | ~~`overlib/overlib_mini.js` + plugins~~ | ~~75KB~~ | ~~Popup/tooltip library~~ | ✅ **REMOVED** - replaced with jQuery UI tooltips |
+### JavaScript Library Inventory (December 2025)
 
-**Current JS size:** ~286KB (main bundle, uncompressed) - reduced from ~575KB
+#### Current Libraries
 
-#### Priority Removal Order (Future)
+| Library | Size | Purpose | Status |
+|---------|------|---------|--------|
+| **Alpine.js** | ~15KB | Reactive components, state management | ✅ Active |
+| **Bulma** | ~25KB | CSS framework, UI components | ✅ Active |
+| **Chart.js** | ~65KB | Data visualization | ✅ Active |
+| **Lucide** | ~5KB | SVG icons | ✅ Active |
+| **Tagify** | ~30KB | Tag input widget | ✅ Active |
 
-1. ~~**overlib** (75KB)~~ - ✅ **REMOVED** - replaced with jQuery UI tooltips
-2. ~~**jPlayer** (61KB)~~ - ✅ **REMOVED** - replaced with HTML5 `<audio>`
-3. ~~**jquery.xpath** (80KB)~~ - ✅ **REMOVED** - replaced with native `document.evaluate()`
-4. ~~**jquery.hoverIntent** (2KB)~~ - ✅ **REMOVED** - replaced with native `hoverIntent()` in `hover_intent.ts`
-5. ~~**jquery.scrollTo** (2KB)~~ - ✅ **REMOVED** - replaced with native `scrollTo()` in `hover_intent.ts`
-6. ~~**jquery.jeditable** (8KB)~~ - ✅ **REMOVED** - was unused
-7. ~~**tag-it** (10KB)~~ - ✅ **REMOVED** - replaced with Tagify
-8. **jQuery + jQuery UI** (337KB) - Last, requires significant refactoring
+#### Removed Libraries
+
+| Library | Was | Replacement |
+|---------|-----|-------------|
+| jQuery | 97KB | Vanilla JS + Alpine.js |
+| jQuery UI | 240KB | Native elements + Bulma CSS |
+| jQuery scrollTo | 2KB | Native `scrollTo()` |
+| jQuery jeditable | 8KB | Native inline edit |
+| jQuery hoverIntent | 2KB | Native `hoverIntent()` in `hover_intent.ts` |
+| jQuery jPlayer | 61KB | HTML5 `<audio>` |
+| jQuery XPath | 80KB | Native `document.evaluate()` |
+| tag-it | 10KB | Tagify |
+| overlib | 75KB | Native tooltips |
+
+**Current JS bundle:** ~995KB (unminified, includes all dependencies)
+**Previous JS bundle:** ~600KB (with jQuery ecosystem)
+
+> Note: Bundle size increased due to Alpine.js ecosystem and Chart.js, but provides significantly better functionality and developer experience.
 
 ### Issues Resolved
 
@@ -235,7 +265,7 @@ All JavaScript is now organized into TypeScript modules with explicit exports. G
 
 #### ✅ 2. Inline Event Handlers - RESOLVED
 
-Zero inline `onclick`, `onchange`, `onsubmit` handlers remain in Views. All event handling uses data attributes and event delegation.
+Zero inline `onclick`, `onchange`, `onsubmit` handlers remain in Views. All event handling uses Alpine.js directives (`@click`, `x-on:`) or data attributes with event delegation.
 
 #### ✅ 3. Backend-Embedded JavaScript - RESOLVED
 
@@ -244,31 +274,35 @@ All inline `<script>` blocks have been migrated to TypeScript modules. PHP Views
 #### ✅ 4. No Centralized API Client - RESOLVED
 
 New `src/frontend/js/api/` directory with type-safe API wrappers:
+
 - `api_client.ts` - Fetch-based client with `apiGet`, `apiPost`, `apiPut`, `apiDelete`
 - `terms.ts` - `TermsApi` with methods for term CRUD operations
 - `texts.ts` - `TextsApi` with methods for text operations
 - `review.ts` - `ReviewApi` with methods for test/review operations
 - `settings.ts` - `SettingsApi` with methods for settings
 
-#### 🔧 5. Heavy jQuery Dependency - IN PROGRESS
+#### ✅ 5. Heavy jQuery Dependency - RESOLVED
 
-jQuery is still used but migration utilities are in place. Native replacements exist for:
-- XPath selection → `document.evaluate()`
-- Scroll → `Element.scrollIntoView()`
-- Hover intent → Native implementation in `hover_intent.ts`
+jQuery has been completely removed from the codebase. Replacements:
+
+- DOM manipulation → Vanilla JS (`querySelector`, `addEventListener`)
 - AJAX → Fetch API in `api_client.ts`
+- UI widgets → Alpine.js components + Bulma CSS
+- Animations → CSS transitions
 
 #### ✅ 6. Poor Separation of Concerns - RESOLVED
 
 Clear module boundaries established:
+
 - `api/` - API communication
 - `core/` - Core utilities
 - `ui/` - UI components
 - `forms/` - Form handling
-- `reading/` - Text reading interface
+- `reading/` - Text reading interface (with Alpine components and stores)
+- `testing/` - Test mode (with Alpine components and stores)
 - etc.
 
-### Remaining Issues
+### Remaining Work
 
 #### 1. Backend-Embedded CSS
 
@@ -278,23 +312,25 @@ One file (`Views/Text/read_text.php`) contains inline CSS for dynamic annotation
 |------|-------|-------------|--------|
 | `Views/Text/read_text.php` | 80-120 | Dynamic annotation styling (::after, ::before), ruby text | Acceptable - dynamic based on config |
 
-#### 2. jQuery Usage
+#### 2. Alpine.js Migration Completion
 
-jQuery is still used for:
-- jQuery UI widgets (tooltips, dialogs, resizable)
-- Some DOM manipulation in legacy code
-- Animation effects
+Some pages still use vanilla JS patterns that could benefit from Alpine.js:
+
+- Feed wizard pages
+- Some admin pages
+- Legacy word list pages
 
 ### Technical Metrics
 
-| Metric | Phase 0 | Current | Target | Notes |
-|--------|---------|---------|--------|-------|
-| TypeScript Files | 0 | 83 | 83 | ✅ Complete |
-| Test Files | 0 | 72 | 83 | 87% coverage |
-| Test Lines | 0 | ~34,000 | - | Comprehensive |
-| Bundle Size (JS) | ~600KB | ~286KB | <200KB | 52% reduction |
+| Metric | Phase 0 | Phase 2.5 | Current | Notes |
+|--------|---------|-----------|---------|-------|
+| TypeScript Files | 0 | 83 | 104 | +25% growth |
+| Test Files | 0 | 72 | 84 | +17% growth |
+| Test Lines | 0 | ~34,000 | ~41,000 | Comprehensive |
+| Bundle Size (JS) | ~600KB | ~286KB | ~995KB | Includes Alpine + Chart.js |
 | Inline Handlers | 50+ | 0 | 0 | ✅ Complete |
-| API Endpoints Typed | 0 | 15+ | All | Good progress |
+| API Endpoints Typed | 0 | 15+ | All | ✅ Complete |
+| jQuery Usage | 100% | ~50% | 0% | ✅ Complete |
 
 ---
 
@@ -303,15 +339,14 @@ jQuery is still used for:
 ### Primary Goals
 
 1. **Performance Improvement**
-   - ✅ Reduce bundle size by 52% (from ~600KB to ~286KB)
-   - Target: <200KB with jQuery removal
-   - Implement code splitting and lazy loading
-   - Improve runtime performance (faster interactions)
+   - ✅ Remove jQuery ecosystem (~400KB saved)
+   - ✅ Implement code splitting (Chart.js, Tagify in separate chunks)
+   - Improve runtime performance (faster interactions with Alpine.js)
 
 2. **Code Quality**
-   - ✅ Establish clear module boundaries (83 TypeScript files)
-   - ✅ Implement component-based architecture
-   - ✅ Achieve comprehensive test coverage (72 test files)
+   - ✅ Establish clear module boundaries (104 TypeScript files)
+   - ✅ Implement component-based architecture (Alpine.js components)
+   - ✅ Achieve comprehensive test coverage (84 test files)
    - ✅ Reduce code duplication
 
 3. **Developer Experience**
@@ -319,18 +354,19 @@ jQuery is still used for:
    - ✅ Modern IDE support (autocomplete, refactoring)
    - ✅ Type safety (TypeScript)
    - ✅ Clear project structure
+   - ✅ Reactive UI patterns (Alpine.js)
 
 4. **Maintainability**
-   - ✅ Remove deprecated dependencies (overlib, jPlayer, etc.)
+   - ✅ Remove deprecated dependencies (jQuery, overlib, jPlayer, etc.)
    - ✅ Document component APIs
    - ✅ Establish coding standards
-   - Create reusable component library
+   - ✅ Create reusable component library (Alpine components)
 
 5. **User Experience**
    - Faster page interactions
-   - Better mobile support
+   - Better mobile support (Bulma responsive)
    - Improved accessibility (WCAG 2.1 AA)
-   - Modern UI patterns
+   - Modern UI patterns (Bulma components)
 
 ### Non-Goals (Out of Scope)
 
@@ -371,6 +407,44 @@ jQuery is still used for:
 - Safari 14+
 - No IE11 support
 
+### UI Framework: **Alpine.js** ✅
+
+**Why Alpine.js:**
+
+- Minimal footprint (~15KB)
+- Progressive enhancement (works with existing HTML)
+- Declarative syntax (`x-data`, `x-on:`, `x-bind:`)
+- No build step required (but integrates well with Vite)
+- Easy migration from jQuery patterns
+
+**Usage Patterns:**
+
+```typescript
+// src/frontend/js/reading/stores/word_store.ts
+Alpine.store('word', {
+  selectedWord: null,
+  translation: '',
+  setWord(word: Word) { ... }
+});
+
+// src/frontend/js/reading/components/word_modal.ts
+Alpine.data('wordModal', () => ({
+  isOpen: false,
+  open() { this.isOpen = true; },
+  close() { this.isOpen = false; }
+}));
+```
+
+### CSS Framework: **Bulma** ✅
+
+**Why Bulma:**
+
+- Modern flexbox-based CSS
+- No JavaScript required
+- Modular (import only what you need)
+- Great documentation
+- Responsive by default
+
 ### API Client: **Fetch-based with Type-Safe Wrappers** ✅
 
 ```typescript
@@ -406,7 +480,7 @@ export const TermsApi = {
 
 **Completed Tasks:**
 
-1. ✅ Install Node.js dependencies (Vite, TypeScript, jQuery from npm)
+1. ✅ Install Node.js dependencies (Vite, TypeScript)
 2. ✅ Set up Vite configuration with legacy browser support
 3. ✅ Create TypeScript configuration
 4. ✅ Create type declarations for PHP-injected globals
@@ -419,18 +493,12 @@ export const TermsApi = {
 
 **Completed Tasks:**
 
-1. ✅ Convert all JavaScript files to TypeScript (83 files)
-2. ✅ Fix all TypeScript errors (type safety issues with jQuery, etc.)
+1. ✅ Convert all JavaScript files to TypeScript
+2. ✅ Fix all TypeScript errors
 3. ✅ Import all modules in `main.ts` entry point
 4. ✅ Remove old `.js` source files
 5. ✅ Update `tsconfig.json` to disable `allowJs`
 6. ✅ Verify build produces working bundles
-
-**Build Output:**
-
-- Main JS bundle: `main.[hash].js` (~286 KB)
-- Main CSS: `main.[hash].css` (~37 KB)
-- All functions exported to global scope for backward compatibility
 
 ---
 
@@ -465,93 +533,61 @@ composer build                   # Alias for npm run build:all
 3. ✅ PHP functions return data instead of generating JS
 4. ✅ New TypeScript modules created and tested
 5. ✅ Centralized API client with type-safe wrappers
-6. ✅ Comprehensive test suite (72 test files)
-
-**API Client Implementation:**
-
-```typescript
-// Centralized API client
-src/frontend/js/core/api_client.ts  // Base fetch wrapper
-src/frontend/js/api/terms.ts        // TermsApi
-src/frontend/js/api/texts.ts        // TextsApi
-src/frontend/js/api/review.ts       // ReviewApi
-src/frontend/js/api/settings.ts     // SettingsApi
-```
-
-**Migration Checklist (All Complete):**
-
-- [x] `Views/Feed/browse.php` - Replace all onclick/onchange handlers
-- [x] `Views/Word/form_edit_new.php` - Extract auto-translate logic
-- [x] `Services/FeedService.php` - Refactor `load_feeds()` to return data
-- [x] `Views/Text/edit_form.php` - Extract language switching logic
-- [x] `Core/Word/dictionary_links.php` - Refactor dictionary link generation
-- [x] `Views/Feed/index.php` - Replace inline handlers
-- [x] `Views/Feed/multi_load.php` - Extract feed loading logic
-- [x] All Views - Zero inline handlers remaining
-
-**Success Criteria (All Met):**
-
-- [x] Zero inline `onclick`/`onchange` attributes in Views
-- [x] Zero PHP functions that `echo` JavaScript
-- [x] All extracted JS has TypeScript types
-- [x] Existing functionality preserved (E2E tests pass)
-- [x] Comprehensive test coverage
+6. ✅ Comprehensive test suite (84 test files)
 
 ---
 
-### Phase 3: jQuery Removal 🔧 **IN PROGRESS**
+### Phase 3: jQuery Removal ✅ **COMPLETE**
 
-**Goals:**
+**Completed Tasks:**
 
-- Replace jQuery DOM manipulation with vanilla JS
-- Replace jQuery AJAX with Fetch API (✅ done via api_client.ts)
-- Remove jQuery dependencies
-- Maintain functionality
+1. ✅ Replace jQuery DOM manipulation with vanilla JS
+2. ✅ Replace jQuery AJAX with Fetch API
+3. ✅ Remove jQuery from dependencies
+4. ✅ Remove jQuery UI widgets
+5. ✅ Adopt Alpine.js for reactive components
+6. ✅ Adopt Bulma for CSS framework
 
-#### Task 3.1: jQuery Replacement Utilities
+**jQuery Replacement Summary:**
 
-Already implemented:
-- `src/frontend/js/core/api_client.ts` - Fetch-based API client
-- `src/frontend/js/core/hover_intent.ts` - Native hover intent
-- Native `scrollTo()` replacement
-
-#### Task 3.2: Migrate Core Functions
-
-**Priority Migration Order:**
-
-1. Simple DOM queries → `document.querySelector/querySelectorAll`
-2. Event handling → `addEventListener` with delegation
-3. AJAX calls → Already migrated to `apiGet/apiPost` etc.
-4. Animations → CSS transitions or Web Animations API
-5. jQuery UI widgets → Last (most complex)
-
-#### Task 3.3: jQuery UI Replacement Strategy
-
-| Widget | Replacement | Priority |
-|--------|-------------|----------|
-| Tooltips | Native `title` + CSS or Tippy.js | Medium |
-| Dialogs | Native `<dialog>` element | High |
-| Resizable | CSS `resize` or custom | Low |
-| Draggable | Native Drag and Drop API | Low |
+| jQuery Feature | Replacement |
+|---------------|-------------|
+| `$(selector)` | `document.querySelector()` |
+| `.on()` | `addEventListener()` or Alpine `@click` |
+| `.ajax()` | Fetch API via `api_client.ts` |
+| `.animate()` | CSS transitions |
+| UI Dialog | Bulma modal + Alpine |
+| UI Tooltip | Native tooltip (`native_tooltip.ts`) |
+| UI Resizable | CSS `resize` property |
+| UI Draggable | Native Drag and Drop API |
 
 ---
 
-### Phase 4: Component Architecture 🎯 **PLANNED**
+### Phase 4: Component Architecture 🔧 **IN PROGRESS**
 
 **Goals:**
 
-- Consider Alpine.js or vanilla component patterns
-- Create reusable components
-- Establish state management
-- Improve code organization
+- Expand Alpine.js component library
+- Create reusable UI components
+- Improve state management with Alpine stores
+- Migrate remaining vanilla JS to Alpine patterns
 
-#### Task 4.1: Evaluate Framework Options
+**Completed:**
 
-| Framework | Pros | Cons | Recommendation |
-|-----------|------|------|----------------|
-| **Alpine.js** | Minimal, progressive, easy migration | Less powerful for complex UIs | Consider |
-| **Vanilla JS** | No dependencies, full control | More boilerplate | Current approach |
-| **Web Components** | Framework-agnostic, native | More complex setup | Future consideration |
+- ✅ Reading page components (`text_reader.ts`, `word_modal.ts`, `word_edit_form.ts`)
+- ✅ Reading stores (`word_store.ts`, `word_form_store.ts`)
+- ✅ Testing components (`test_view.ts`)
+- ✅ Testing stores (`test_store.ts`)
+- ✅ Text list apps (`texts_grouped_app.ts`, `archived_texts_grouped_app.ts`)
+- ✅ Home app (`home_app.ts`)
+- ✅ Audio player component (`audio_player_alpine.ts`)
+- ✅ UI components (`navbar.ts`, `footer.ts`, `word_popup.ts`)
+
+**Remaining:**
+
+- Feed wizard Alpine migration
+- Admin pages Alpine migration
+- Word list pages Alpine migration
 
 ---
 
@@ -559,10 +595,11 @@ Already implemented:
 
 **Goals:**
 
-- CSS modernization
-- Performance optimization
-- Accessibility improvements
-- Code splitting
+- CSS modernization (full Bulma adoption)
+- Performance optimization (Lighthouse 90+)
+- Accessibility improvements (WCAG 2.1 AA)
+- Code splitting optimization
+- Bundle size optimization
 
 ---
 
@@ -574,14 +611,14 @@ Already implemented:
 |------|------------|--------|
 | Breaking changes | Incremental migration, comprehensive tests | ✅ Managed |
 | Type errors | Gradual TypeScript adoption | ✅ Resolved |
-| Bundle size | Removed legacy libraries | ✅ 52% reduction |
-| Test coverage | 72 test files added | ✅ Strong coverage |
+| jQuery removal complexity | Phased approach, Alpine.js adoption | ✅ Complete |
+| Test coverage | 84 test files added | ✅ Strong coverage |
 
 ### Current Risks
 
 | Risk | Level | Mitigation |
 |------|-------|------------|
-| jQuery UI replacement | Medium | Evaluate alternatives carefully |
+| Bundle size growth | Low | Code splitting, lazy loading |
 | Browser compatibility | Low | Modern browser targets defined |
 | Performance regression | Low | Lighthouse monitoring |
 
@@ -593,20 +630,20 @@ Already implemented:
 
 | Metric | Target | Achieved | Notes |
 |--------|--------|----------|-------|
-| TypeScript Migration | 100% | ✅ 100% | 83 files |
+| TypeScript Migration | 100% | ✅ 100% | 104 files |
 | Inline Handlers | 0 | ✅ 0 | All removed |
-| Test Files | 70+ | ✅ 72 | Comprehensive |
-| Bundle Reduction | 50% | ✅ 52% | 600KB → 286KB |
-| API Type Safety | All endpoints | ✅ 15+ | Good coverage |
+| Test Files | 70+ | ✅ 84 | Comprehensive |
+| jQuery Removal | 100% | ✅ 100% | Fully removed |
+| API Type Safety | All endpoints | ✅ All | Complete coverage |
+| Alpine Components | Core pages | ✅ Done | Reading, testing, texts |
 
 ### Pending Metrics
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| Bundle Size | <200KB | 286KB | In progress |
-| jQuery Removal | 100% | ~50% | Phase 3 |
-| Lighthouse Performance | 90+ | TBD | Planned |
-| Accessibility Score | 95+ | TBD | Planned |
+| Lighthouse Performance | 90+ | TBD | Phase 5 |
+| Accessibility Score | 95+ | TBD | Phase 5 |
+| Alpine Migration | 100% | ~70% | Phase 4 |
 
 ---
 
@@ -620,13 +657,13 @@ Already implemented:
 | 1 | TypeScript migration | ✅ Nov 2025 |
 | 2 | Build pipeline | ✅ Nov 2025 |
 | 2.5 | API client + tests | ✅ Nov 2025 |
+| 3 | jQuery removal + Alpine/Bulma adoption | ✅ Dec 2025 |
 
 ### Upcoming Milestones
 
 | Phase | Milestone | Target |
 |-------|-----------|--------|
-| 3 | jQuery removal | TBD |
-| 4 | Component architecture | TBD |
+| 4 | Full Alpine component architecture | TBD |
 | 5 | Performance optimization | TBD |
 
 ---
@@ -637,6 +674,8 @@ Already implemented:
 
 - [Vite Documentation](https://vitejs.dev/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Alpine.js Documentation](https://alpinejs.dev/)
+- [Bulma Documentation](https://bulma.io/documentation/)
 - [Modern JavaScript Tutorial](https://javascript.info/)
 - [Web.dev Performance](https://web.dev/performance/)
 
@@ -664,22 +703,31 @@ npm run typecheck               # TypeScript checking
 
 ```text
 tests/frontend/
-├── admin/                       # Admin tests
+├── admin/                       # Admin tests (5 files)
 │   ├── server_data.test.ts
 │   ├── settings_form.test.ts
+│   ├── statistics_charts.test.ts
 │   ├── table_management.test.ts
 │   └── tts_settings.test.ts
-├── core/                        # Core tests
+├── api/                         # API tests (4 files)
+│   ├── review.test.ts
+│   ├── settings.test.ts
+│   ├── terms.test.ts
+│   └── texts.test.ts
+├── core/                        # Core tests (13 files)
 │   ├── ajax_utilities.test.ts
+│   ├── api_client.test.ts
 │   ├── app_data.test.ts
 │   ├── globals.test.ts
 │   ├── hover_intent.test.ts
+│   ├── language_settings.test.ts
 │   ├── lwt_state.test.ts
 │   ├── simple_interactions.test.ts
+│   ├── tts_storage.test.ts
 │   ├── ui_utilities.test.ts
 │   ├── user_interactions.test.ts
 │   └── utilities.test.ts
-├── feeds/                       # Feed tests
+├── feeds/                       # Feed tests (11 files)
 │   ├── feed_browse.test.ts
 │   ├── feed_form.test.ts
 │   ├── feed_index.test.ts
@@ -691,24 +739,23 @@ tests/frontend/
 │   ├── feed_wizard_step3.test.ts
 │   ├── feed_wizard_step4.test.ts
 │   └── jq_feedwizard.test.ts
-├── forms/                       # Form tests
+├── forms/                       # Form tests (5 files)
 │   ├── bulk_actions.test.ts
 │   ├── form_initialization.test.ts
 │   ├── form_validation.test.ts
 │   ├── unloadformcheck.test.ts
 │   └── word_form_auto.test.ts
-├── home/                        # Home tests
-│   └── home_warnings.test.ts
-├── languages/                   # Language tests
+├── home/                        # Home tests (1 file)
+│   └── home_app.test.ts
+├── languages/                   # Language tests (2 files)
 │   ├── language_form.test.ts
 │   └── language_wizard.test.ts
-├── media/                       # Media tests
+├── media/                       # Media tests (2 files)
 │   ├── html5_audio_player.test.ts
 │   └── media_selection.test.ts
-├── reading/                     # Reading tests
+├── reading/                     # Reading tests (13 files)
 │   ├── annotation_interactions.test.ts
 │   ├── annotation_toggle.test.ts
-│   ├── audio_controller.test.ts
 │   ├── frame_management.test.ts
 │   ├── set_mode_result.test.ts
 │   ├── text_annotations.test.ts
@@ -716,32 +763,36 @@ tests/frontend/
 │   ├── text_events.test.ts
 │   ├── text_keyboard.test.ts
 │   ├── text_multiword_selection.test.ts
-│   └── text_reading_init.test.ts
-├── tags/                        # Tag tests
+│   ├── text_reading_init.test.ts
+│   └── word_actions.test.ts
+├── tags/                        # Tag tests (1 file)
 │   └── tag_list.test.ts
-├── terms/                       # Term tests
+├── terms/                       # Term tests (4 files)
+│   ├── dictionary.test.ts
 │   ├── overlib_interface.test.ts
 │   ├── term_operations.test.ts
-│   ├── translation_api.test.ts
-│   └── translation_page.test.ts
-├── testing/                     # Testing tests
+│   └── translation_api.test.ts
+├── testing/                     # Testing tests (5 files)
 │   ├── elapsed_timer.test.ts
 │   ├── test_ajax.test.ts
 │   ├── test_header.test.ts
 │   ├── test_mode.test.ts
 │   └── test_table.test.ts
-├── texts/                       # Text tests
+├── texts/                       # Text tests (4 files)
 │   ├── text_check_display.test.ts
 │   ├── text_list.test.ts
 │   ├── text_print.test.ts
 │   └── youtube_import.test.ts
-├── ui/                          # UI tests
+├── ui/                          # UI tests (8 files)
 │   ├── inline_edit.test.ts
+│   ├── lucide_icons.test.ts
 │   ├── modal.test.ts
+│   ├── native_tooltip.test.ts
+│   ├── result_panel.test.ts
 │   ├── sorttable.test.ts
 │   ├── tagify_tags.test.ts
 │   └── word_popup.test.ts
-└── words/                       # Word tests
+└── words/                       # Word tests (8 files)
     ├── bulk_translate.test.ts
     ├── expression_interactable.test.ts
     ├── word_dom_updates.test.ts
@@ -750,4 +801,34 @@ tests/frontend/
     ├── word_result_init.test.ts
     ├── word_status_ajax.test.ts
     └── word_upload.test.ts
+```
+
+### Alpine.js Components Structure
+
+```text
+src/frontend/js/
+├── reading/
+│   ├── components/
+│   │   ├── text_reader.ts        - Main text reading component
+│   │   ├── word_modal.ts         - Word editing modal
+│   │   └── word_edit_form.ts     - Word form component
+│   └── stores/
+│       ├── word_store.ts         - Selected word state
+│       └── word_form_store.ts    - Form state management
+├── testing/
+│   ├── components/
+│   │   └── test_view.ts          - Test view component
+│   └── stores/
+│       └── test_store.ts         - Test state management
+├── texts/
+│   ├── texts_grouped_app.ts      - Texts list Alpine app
+│   └── archived_texts_grouped_app.ts - Archived texts Alpine app
+├── media/
+│   └── audio_player_alpine.ts    - Audio player component
+├── home/
+│   └── home_app.ts               - Home page Alpine app
+└── ui/
+    ├── navbar.ts                 - Navigation component
+    ├── footer.ts                 - Footer component
+    └── word_popup.ts             - Word popup component
 ```

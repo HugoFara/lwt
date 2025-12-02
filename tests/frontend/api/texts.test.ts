@@ -7,11 +7,12 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 vi.mock('../../../src/frontend/js/core/api_client', () => ({
   apiGet: vi.fn(),
   apiPost: vi.fn(),
-  apiPut: vi.fn()
+  apiPut: vi.fn(),
+  apiDelete: vi.fn()
 }));
 
 import { TextsApi } from '../../../src/frontend/js/api/texts';
-import { apiGet, apiPost, apiPut } from '../../../src/frontend/js/core/api_client';
+import { apiGet, apiPost, apiPut, apiDelete } from '../../../src/frontend/js/core/api_client';
 
 describe('api/texts.ts', () => {
   beforeEach(() => {
@@ -293,16 +294,16 @@ describe('api/texts.ts', () => {
   // ===========================================================================
 
   describe('TextsApi.markAllWellKnown', () => {
-    it('calls apiPost with correct endpoint', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { count: 10 } });
+    it('calls apiPut with correct endpoint', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { count: 10 } });
 
       await TextsApi.markAllWellKnown(1);
 
-      expect(apiPost).toHaveBeenCalledWith('/texts/1/mark-all-wellknown', {});
+      expect(apiPut).toHaveBeenCalledWith('/texts/1/mark-all-wellknown', {});
     });
 
     it('returns count of marked words', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { count: 25 } });
+      vi.mocked(apiPut).mockResolvedValue({ data: { count: 25 } });
 
       const result = await TextsApi.markAllWellKnown(1);
 
@@ -310,7 +311,7 @@ describe('api/texts.ts', () => {
     });
 
     it('returns zero count when no words to mark', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { count: 0 } });
+      vi.mocked(apiPut).mockResolvedValue({ data: { count: 0 } });
 
       const result = await TextsApi.markAllWellKnown(1);
 
@@ -318,7 +319,7 @@ describe('api/texts.ts', () => {
     });
 
     it('returns error on failure', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ error: 'Text not found' });
+      vi.mocked(apiPut).mockResolvedValue({ error: 'Text not found' });
 
       const result = await TextsApi.markAllWellKnown(999);
 
@@ -326,19 +327,19 @@ describe('api/texts.ts', () => {
     });
 
     it('handles different text IDs', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { count: 5 } });
+      vi.mocked(apiPut).mockResolvedValue({ data: { count: 5 } });
 
       await TextsApi.markAllWellKnown(456);
 
-      expect(apiPost).toHaveBeenCalledWith('/texts/456/mark-all-wellknown', {});
+      expect(apiPut).toHaveBeenCalledWith('/texts/456/mark-all-wellknown', {});
     });
 
     it('sends empty body', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { count: 0 } });
+      vi.mocked(apiPut).mockResolvedValue({ data: { count: 0 } });
 
       await TextsApi.markAllWellKnown(1);
 
-      expect(apiPost).toHaveBeenCalledWith(expect.any(String), {});
+      expect(apiPut).toHaveBeenCalledWith(expect.any(String), {});
     });
   });
 
@@ -398,7 +399,7 @@ describe('api/texts.ts', () => {
 
     it('handles concurrent API calls', async () => {
       vi.mocked(apiGet).mockResolvedValue({ data: { wordCounts: {} } });
-      vi.mocked(apiPost).mockResolvedValue({ data: { count: 5 } });
+      vi.mocked(apiPut).mockResolvedValue({ data: { count: 5 } });
 
       const [statsResult, markResult] = await Promise.all([
         TextsApi.getStatistics([1]),
@@ -406,7 +407,7 @@ describe('api/texts.ts', () => {
       ]);
 
       expect(apiGet).toHaveBeenCalled();
-      expect(apiPost).toHaveBeenCalled();
+      expect(apiPut).toHaveBeenCalled();
       expect(statsResult.data).toBeDefined();
       expect(markResult.data).toBeDefined();
     });

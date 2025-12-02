@@ -11,6 +11,7 @@ export default defineConfig({
     exclude: ['node_modules', 'vendor'],
     testTimeout: 10000,
     hookTimeout: 10000,
+    setupFiles: ['./tests/setup.ts'],
     // Use different environments for different test types
     environmentMatchGlobs: [
       // Frontend tests use jsdom for DOM manipulation

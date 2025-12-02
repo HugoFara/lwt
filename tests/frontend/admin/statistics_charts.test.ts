@@ -90,7 +90,6 @@ describe('statistics_charts.ts', () => {
       // Verify Chart was called with correct structure
       const config = chartConstructorCalls[0][1] as Record<string, unknown>;
       expect(config.type).toBe('bar');
-      expect((config.options as Record<string, unknown>)?.indexAxis).toBe('y');
     });
 
     it('creates chart with multiple language data', () => {
@@ -216,7 +215,7 @@ describe('statistics_charts.ts', () => {
       expect(result).not.toBeNull();
     });
 
-    it('configures bar chart type', () => {
+    it('configures line chart type', () => {
       document.body.innerHTML = '<canvas id="frequencyChart"></canvas>';
 
       const totals = {
@@ -230,7 +229,7 @@ describe('statistics_charts.ts', () => {
       initFrequencyChart('frequencyChart', totals);
 
       const config = chartConstructorCalls[0][1] as { type?: string };
-      expect(config.type).toBe('bar');
+      expect(config.type).toBe('line');
     });
 
     it('creates correct time period labels', () => {

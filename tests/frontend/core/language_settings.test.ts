@@ -3,9 +3,12 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+// Use vi.hoisted to ensure mock function is available during hoisting
+const mockLoadModalFrame = vi.hoisted(() => vi.fn());
+
 // Mock dependencies
 vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
-  showRightFrames: vi.fn()
+  loadModalFrame: mockLoadModalFrame
 }));
 
 import {
@@ -14,7 +17,6 @@ import {
   iknowall,
   check_table_prefix
 } from '../../../src/frontend/js/core/language_settings';
-import { showRightFrames } from '../../../src/frontend/js/reading/frame_management';
 
 describe('core/language_settings.ts', () => {
   const originalLocation = window.location;
@@ -167,20 +169,20 @@ describe('core/language_settings.ts', () => {
       expect(confirmSpy).toHaveBeenCalledWith('Are you sure?');
     });
 
-    it('calls showRightFrames when confirmed', () => {
+    it('calls loadModalFrame when confirmed', () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
 
       iknowall(1);
 
-      expect(showRightFrames).toHaveBeenCalledWith('all_words_wellknown.php?text=1');
+      expect(mockLoadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=1');
     });
 
-    it('does not call showRightFrames when cancelled', () => {
+    it('does not call loadModalFrame when cancelled', () => {
       vi.spyOn(window, 'confirm').mockReturnValue(false);
 
       iknowall(1);
 
-      expect(showRightFrames).not.toHaveBeenCalled();
+      expect(mockLoadModalFrame).not.toHaveBeenCalled();
     });
 
     it('handles string text ID', () => {
@@ -188,7 +190,7 @@ describe('core/language_settings.ts', () => {
 
       iknowall('42');
 
-      expect(showRightFrames).toHaveBeenCalledWith('all_words_wellknown.php?text=42');
+      expect(mockLoadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=42');
     });
 
     it('handles numeric text ID', () => {
@@ -196,7 +198,7 @@ describe('core/language_settings.ts', () => {
 
       iknowall(123);
 
-      expect(showRightFrames).toHaveBeenCalledWith('all_words_wellknown.php?text=123');
+      expect(mockLoadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=123');
     });
   });
 
@@ -408,7 +410,7 @@ describe('core/language_settings.ts', () => {
 
       iknowall(0);
 
-      expect(showRightFrames).toHaveBeenCalledWith('all_words_wellknown.php?text=0');
+      expect(mockLoadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=0');
     });
 
     it('check_table_prefix handles consecutive underscores', () => {

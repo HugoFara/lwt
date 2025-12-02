@@ -103,12 +103,14 @@ describe('pgm.ts', () => {
       expect(getLangFromDict(url)).toBe('es');
     });
 
-    it('handles trans.php and ggl.php URLs', () => {
+    it('returns empty for invalid relative URLs', () => {
+      // Old trans.php and ggl.php gateway URLs are no longer supported
+      // The function now requires valid absolute URLs
       const url1 = 'trans.php?sl=ja&tl=en';
-      expect(getLangFromDict(url1)).toBe('ja');
+      expect(getLangFromDict(url1)).toBe('');
 
       const url2 = 'ggl.php?sl=ko&tl=en';
-      expect(getLangFromDict(url2)).toBe('ko');
+      expect(getLangFromDict(url2)).toBe('');
     });
 
     it('returns empty string when no language param found', () => {
@@ -202,12 +204,14 @@ describe('pgm.ts', () => {
     it('creates popup span for URL starting with *', () => {
       const result = createSentLookupLink(10, 5, '*http://trans.com', 'Translate');
       expect(result).toContain('<span class="click"');
-      expect(result).toContain('trans.php?x=1&i=10&t=5');
+      // Now uses the translator URL directly instead of trans.php
+      expect(result).toContain('http://trans.com');
     });
 
     it('creates regular link for external URL', () => {
       const result = createSentLookupLink(10, 5, 'http://trans.com', 'Translate');
-      expect(result).toContain('<a href="trans.php?x=1&i=10&t=5"');
+      // Now uses the translator URL directly instead of trans.php
+      expect(result).toContain('<a href="http://trans.com"');
       expect(result).toContain('target="ru"');
     });
   });

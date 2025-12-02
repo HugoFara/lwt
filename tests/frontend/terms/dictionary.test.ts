@@ -194,21 +194,23 @@ describe('dictionary.ts', () => {
     it('creates popup link for URL starting with *', () => {
       const result = createSentLookupLink(5, 10, '*http://translate.com', 'Trans');
       expect(result).toContain('owin(');
-      expect(result).toContain('trans.php?x=1&i=5&t=10');
+      // Now uses the translator URL directly instead of trans.php
+      expect(result).toContain('http://translate.com');
     });
 
     it('creates frame link for external URL without *', () => {
       const result = createSentLookupLink(3, 7, 'http://translate.com', 'Translate');
       expect(result).toContain('<a href=');
-      expect(result).toContain('trans.php?x=1&i=3&t=7');
+      // Now uses the translator URL directly instead of trans.php
+      expect(result).toContain('http://translate.com');
       expect(result).toContain('target="ru"');
     });
 
-    it('returns empty for non-external, non-popup URL', () => {
-      // An invalid URL that's neither external nor popup
-      // Actually, this returns empty because the URL parser throws
-      const result = createSentLookupLink(1, 1, 'notaurl', 'Trans');
-      expect(result).toBe('');
+    it('uses direct URL for non-popup links', () => {
+      // URLs are now used directly, not through trans.php
+      const result = createSentLookupLink(1, 1, 'http://example.com', 'Trans');
+      expect(result).toContain('http://example.com');
+      expect(result).toContain('showRightFramesPanel()');
     });
 
     it('detects lwt_popup parameter', () => {
@@ -251,13 +253,15 @@ describe('dictionary.ts', () => {
       expect(result).toBe('de');
     });
 
-    it('handles trans.php URL prefix', () => {
+    it('returns empty for invalid relative URLs', () => {
+      // Old trans.php and ggl.php gateway URLs are no longer supported
+      // The function now requires valid absolute URLs
       const result = getLangFromDict('trans.php?sl=ja');
-      expect(result).toBe('ja');
+      expect(result).toBe('');
     });
 
-    it('handles ggl.php URL prefix', () => {
-      const result = getLangFromDict('ggl.php?sl=zh');
+    it('handles full Google Translate URL with sl parameter', () => {
+      const result = getLangFromDict('https://translate.google.com/?sl=zh&tl=en');
       expect(result).toBe('zh');
     });
 

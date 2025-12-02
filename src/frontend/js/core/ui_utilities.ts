@@ -410,7 +410,7 @@ export function prepareMainAreas(): void {
     textarea.addEventListener('keydown', function (e) {
       if (e.keyCode === 13) {
         if (check()) {
-          const submitBtn = document.querySelector<HTMLInputElement>('input:submit:last-of-type');
+          const submitBtn = document.querySelector<HTMLInputElement>('input[type="submit"]:last-of-type');
           submitBtn?.click();
         }
         e.preventDefault();

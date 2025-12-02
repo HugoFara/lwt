@@ -30,13 +30,13 @@ vi.mock('../../../src/frontend/js/terms/overlib_interface', () => ({
 }));
 
 vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
-  showRightFrames: vi.fn(),
+  loadModalFrame: vi.fn(),
   cleanupRightFrames: vi.fn()
 }));
 
 import { LWT_DATA } from '../../../src/frontend/js/core/lwt_state';
 import { run_overlib_test } from '../../../src/frontend/js/terms/overlib_interface';
-import { showRightFrames, cleanupRightFrames } from '../../../src/frontend/js/reading/frame_management';
+import { loadModalFrame, cleanupRightFrames } from '../../../src/frontend/js/reading/frame_management';
 
 describe('test_mode.ts', () => {
   beforeEach(() => {
@@ -190,7 +190,7 @@ describe('test_mode.ts', () => {
         const result = keydown_event_do_test_test(event);
 
         expect(cleanupRightFrames).toHaveBeenCalled();
-        expect(showRightFrames).toHaveBeenCalledWith('show_word.php?wid=123&ann=');
+        expect(loadModalFrame).toHaveBeenCalledWith('show_word.php?wid=123&ann=');
         expect(LWT_DATA.test.answer_opened).toBe(true);
         expect(result).toBe(false);
       });
@@ -211,7 +211,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('Escape', 27);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).toHaveBeenCalledWith(
+        expect(loadModalFrame).toHaveBeenCalledWith(
           expect.stringContaining('set_test_status.php?wid=123&status=2')
         );
         expect(result).toBe(false);
@@ -223,7 +223,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('I', 73);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).toHaveBeenCalledWith('set_test_status.php?wid=123&status=98');
+        expect(loadModalFrame).toHaveBeenCalledWith('set_test_status.php?wid=123&status=98');
         expect(result).toBe(false);
       });
     });
@@ -233,7 +233,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('W', 87);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).toHaveBeenCalledWith('set_test_status.php?wid=123&status=99');
+        expect(loadModalFrame).toHaveBeenCalledWith('set_test_status.php?wid=123&status=99');
         expect(result).toBe(false);
       });
     });
@@ -243,7 +243,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('E', 69);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).toHaveBeenCalledWith('/word/edit-term?wid=123');
+        expect(loadModalFrame).toHaveBeenCalledWith('/word/edit-term?wid=123');
         expect(result).toBe(false);
       });
     });
@@ -255,7 +255,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('ArrowUp', 38);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).not.toHaveBeenCalled();
+        expect(loadModalFrame).not.toHaveBeenCalled();
         expect(result).toBe(true);
       });
 
@@ -265,7 +265,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('ArrowUp', 38);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).toHaveBeenCalledWith('set_test_status.php?wid=123&stchange=1');
+        expect(loadModalFrame).toHaveBeenCalledWith('set_test_status.php?wid=123&stchange=1');
         expect(result).toBe(false);
       });
     });
@@ -277,7 +277,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('ArrowDown', 40);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).not.toHaveBeenCalled();
+        expect(loadModalFrame).not.toHaveBeenCalled();
         expect(result).toBe(true);
       });
 
@@ -287,7 +287,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('ArrowDown', 40);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).toHaveBeenCalledWith('set_test_status.php?wid=123&stchange=-1');
+        expect(loadModalFrame).toHaveBeenCalledWith('set_test_status.php?wid=123&stchange=-1');
         expect(result).toBe(false);
       });
     });
@@ -305,7 +305,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent(key, keyCode);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).toHaveBeenCalledWith(`set_test_status.php?wid=123&status=${expectedStatus}`);
+        expect(loadModalFrame).toHaveBeenCalledWith(`set_test_status.php?wid=123&status=${expectedStatus}`);
         expect(result).toBe(false);
       });
 
@@ -315,7 +315,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('1', 49);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).not.toHaveBeenCalled();
+        expect(loadModalFrame).not.toHaveBeenCalled();
         expect(result).toBe(true);
       });
 
@@ -331,7 +331,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent(key, keyCode);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).toHaveBeenCalledWith(`set_test_status.php?wid=123&status=${expectedStatus}`);
+        expect(loadModalFrame).toHaveBeenCalledWith(`set_test_status.php?wid=123&status=${expectedStatus}`);
         expect(result).toBe(false);
       });
     });
@@ -341,7 +341,7 @@ describe('test_mode.ts', () => {
         const event = createKeyEvent('A', 65);
         const result = keydown_event_do_test_test(event);
 
-        expect(showRightFrames).not.toHaveBeenCalled();
+        expect(loadModalFrame).not.toHaveBeenCalled();
         expect(result).toBe(true);
       });
     });

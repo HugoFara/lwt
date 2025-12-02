@@ -3,6 +3,12 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+// Mock frame_management module
+const mockLoadModalFrame = vi.fn();
+vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+  loadModalFrame: mockLoadModalFrame
+}));
+
 // Mock LWT_DATA global (needs to be set before import)
 const mockLWT_DATA = {
   language: {
@@ -23,7 +29,6 @@ const mockLWT_DATA = {
 
 // Set up globals before import
 (window as Record<string, unknown>).LWT_DATA = mockLWT_DATA;
-(window as Record<string, unknown>).showRightFrames = vi.fn();
 
 // Now import the module (after globals are set)
 const ui_utilities = await import('../../../src/frontend/js/core/ui_utilities');
@@ -34,7 +39,7 @@ describe('ui_utilities.ts', () => {
     document.body.innerHTML = '';
     vi.useFakeTimers();
     // Clear mock function calls between tests
-    ((window as Record<string, unknown>).showRightFrames as ReturnType<typeof vi.fn>).mockClear();
+    mockLoadModalFrame.mockClear();
   });
 
   afterEach(() => {
@@ -218,7 +223,7 @@ describe('ui_utilities.ts', () => {
   // ===========================================================================
 
   describe('showAllwordsClick', () => {
-    it('calls showRightFrames with correct parameters', () => {
+    it('calls loadModalFrame with correct parameters', () => {
       document.body.innerHTML = `
         <input type="checkbox" id="showallwords" checked />
         <input type="checkbox" id="showlearningtranslations" />
@@ -230,7 +235,7 @@ describe('ui_utilities.ts', () => {
       // Advance timers
       vi.advanceTimersByTime(500);
 
-      expect((window as Record<string, unknown>).showRightFrames).toHaveBeenCalled();
+      expect(mockLoadModalFrame).toHaveBeenCalled();
     });
 
     it('sends mode=0 when showallwords is unchecked', () => {
@@ -244,7 +249,7 @@ describe('ui_utilities.ts', () => {
 
       vi.advanceTimersByTime(500);
 
-      const call = ((window as Record<string, unknown>).showRightFrames as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = mockLoadModalFrame.mock.calls[0];
       expect(call[0]).toContain('mode=0');
     });
 
@@ -259,7 +264,7 @@ describe('ui_utilities.ts', () => {
 
       vi.advanceTimersByTime(500);
 
-      const call = ((window as Record<string, unknown>).showRightFrames as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = mockLoadModalFrame.mock.calls[0];
       expect(call[0]).toContain('showLearning=1');
     });
 

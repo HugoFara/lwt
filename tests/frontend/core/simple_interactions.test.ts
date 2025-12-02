@@ -11,8 +11,9 @@ vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
 }));
 
 vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
-  showRightFrames: vi.fn(),
-  hideRightFrames: vi.fn()
+  showRightFramesPanel: vi.fn(),
+  hideRightFrames: vi.fn(),
+  loadModalFrame: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
@@ -45,7 +46,7 @@ import {
   initSimpleInteractions
 } from '../../../src/frontend/js/core/simple_interactions';
 import { lwtFormCheck } from '../../../src/frontend/js/forms/unloadformcheck';
-import { showRightFrames, hideRightFrames } from '../../../src/frontend/js/reading/frame_management';
+import { showRightFramesPanel, hideRightFrames, loadModalFrame } from '../../../src/frontend/js/reading/frame_management';
 import { showAllwordsClick } from '../../../src/frontend/js/core/ui_utilities';
 import { quickMenuRedirection } from '../../../src/frontend/js/core/user_interactions';
 import { deleteTranslation, addTranslation } from '../../../src/frontend/js/terms/translation_api';
@@ -314,7 +315,7 @@ describe('simple_interactions.ts', () => {
         const button = document.querySelector('[data-action="show-right-frames"]') as HTMLElement;
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
-        expect(showRightFrames).toHaveBeenCalled();
+        expect(showRightFramesPanel).toHaveBeenCalled();
       });
     });
 
@@ -508,7 +509,7 @@ describe('simple_interactions.ts', () => {
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-        expect(showRightFrames).toHaveBeenCalledWith('all_words_wellknown.php?text=42');
+        expect(loadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=42');
       });
 
       it('does nothing if cancelled', () => {
@@ -520,7 +521,7 @@ describe('simple_interactions.ts', () => {
         const button = document.querySelector('[data-action="know-all"]') as HTMLElement;
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
-        expect(showRightFrames).not.toHaveBeenCalled();
+        expect(loadModalFrame).not.toHaveBeenCalled();
       });
     });
 
@@ -535,7 +536,7 @@ describe('simple_interactions.ts', () => {
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-        expect(showRightFrames).toHaveBeenCalledWith('all_words_wellknown.php?text=42&stat=98');
+        expect(loadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=42&stat=98');
       });
     });
 
@@ -548,7 +549,7 @@ describe('simple_interactions.ts', () => {
         const button = document.querySelector('[data-action="bulk-translate"]') as HTMLElement;
         button.dispatchEvent(new Event('click', { bubbles: true }));
 
-        expect(showRightFrames).toHaveBeenCalledWith('/bulk/translate');
+        expect(loadModalFrame).toHaveBeenCalledWith('/bulk/translate');
       });
     });
 

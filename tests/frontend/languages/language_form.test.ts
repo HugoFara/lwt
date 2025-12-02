@@ -251,19 +251,16 @@ describe('language_form.ts', () => {
       expect(wrapper.style.display).not.toBe('none');
     });
 
-    it('sets ggl URL for ggl option', () => {
-      languageForm.reloadDictURLs('en', 'es');
-      languageForm.multiWordsTranslateChange('ggl');
-
+    it('does not change URL for unknown option', () => {
+      // Old options like 'ggl' and 'glosbe' have been removed
+      // The function only handles 'google_translate' and 'libretranslate' now
       const input = document.querySelector('[name="LgGoogleTranslateURI"]') as HTMLInputElement;
-      expect(input.value).toContain('ggl.php');
-    });
+      input.value = 'original_url';
 
-    it('sets glosbe URL for glosbe option', () => {
-      languageForm.multiWordsTranslateChange('glosbe');
+      languageForm.multiWordsTranslateChange('unknown_option');
 
-      const input = document.querySelector('[name="LgGoogleTranslateURI"]') as HTMLInputElement;
-      expect(input.value).toContain('glosbe.php');
+      // Value should not change for unknown option
+      expect(input.value).toBe('original_url');
     });
 
     it('hides key wrapper for non-libretranslate options', () => {

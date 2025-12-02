@@ -51,7 +51,8 @@ describe('feed_wizard_common.ts', () => {
       const h1Elements = document.querySelectorAll('h1');
       const lastH1 = h1Elements[h1Elements.length - 1];
       expect(lastH1?.innerHTML).toContain('href="/docs/guide/how-to-use"');
-      expect(lastH1?.innerHTML).toContain('question-frame.png');
+      // Now uses Lucide icons: question-frame.png maps to help-circle
+      expect(lastH1?.innerHTML).toContain('data-lucide="help-circle"');
     });
 
     it('does not include help link when not provided', () => {

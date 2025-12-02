@@ -33,7 +33,7 @@ describe('server_data.ts', () => {
       fetchApiVersion();
       await vi.waitFor(() => expect(fetchSpy).toHaveBeenCalled());
 
-      expect(fetchSpy).toHaveBeenCalledWith('api.php/v1/version');
+      expect(fetchSpy).toHaveBeenCalledWith('/api/v1/version');
     });
 
     it('displays version on successful response', async () => {

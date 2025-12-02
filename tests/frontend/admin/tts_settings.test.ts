@@ -12,9 +12,17 @@ import {
   type TTSSettingsConfig
 } from '../../../src/frontend/js/admin/tts_settings';
 
+// Use vi.hoisted to ensure mock function is available during hoisting
+const mockGetTTSSettingsWithMigration = vi.hoisted(() => vi.fn());
+
 // Mock dependencies
 vi.mock('../../../src/frontend/js/core/cookies', () => ({
   getCookie: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/core/tts_storage', () => ({
+  getTTSSettingsWithMigration: mockGetTTSSettingsWithMigration,
+  saveTTSSettings: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
@@ -208,15 +216,12 @@ describe('tts_settings.ts', () => {
   // ===========================================================================
 
   describe('ttsSettings.presetTTSData', () => {
-    it('sets form values from cookies', async () => {
-      const { getCookie } = await import('../../../src/frontend/js/core/cookies');
-      (getCookie as any).mockImplementation((key: string) => {
-        const cookies: Record<string, string> = {
-          'tts[en-USRegName]': 'Google US English',
-          'tts[en-USRate]': '1.5',
-          'tts[en-USPitch]': '1.1'
-        };
-        return cookies[key] || '';
+    it('sets form values from localStorage', async () => {
+      // Mock getTTSSettingsWithMigration to return stored settings
+      mockGetTTSSettingsWithMigration.mockReturnValue({
+        voice: 'Google US English',
+        rate: 1.5,
+        pitch: 1.1
       });
 
       document.body.innerHTML = `
@@ -241,9 +246,9 @@ describe('tts_settings.ts', () => {
       expect((document.getElementById('pitch') as HTMLInputElement).value).toBe('1.1');
     });
 
-    it('uses default values when cookies are empty', async () => {
-      const { getCookie } = await import('../../../src/frontend/js/core/cookies');
-      (getCookie as any).mockReturnValue('');
+    it('uses default values when localStorage is empty', async () => {
+      // Mock getTTSSettingsWithMigration to return empty object
+      mockGetTTSSettingsWithMigration.mockReturnValue({});
 
       document.body.innerHTML = `
         <select id="get-language">

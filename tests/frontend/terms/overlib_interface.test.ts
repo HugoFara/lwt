@@ -394,7 +394,7 @@ describe('overlib_interface.ts', () => {
       expect(result).toContain('ord=5');
       expect(result).toContain('wid=100');
       expect(result).toContain('Learn term');
-      expect(result).toContain('showRightFrames()');
+      expect(result).toContain('showRightFramesPanel()');
     });
   });
 
@@ -558,8 +558,9 @@ describe('overlib_interface.ts', () => {
     it('creates audio button with speech dispatcher', () => {
       const result = make_overlib_audio('hello');
 
-      expect(result).toContain('<img');
-      expect(result).toContain('speaker-volume.png');
+      // Now uses Lucide SVG icons instead of PNG images
+      expect(result).toContain('<i');
+      expect(result).toContain('data-lucide="volume-2"');
       expect(result).toContain('speechDispatcher');
       expect(result).toContain("'hello'");
       expect(result).toContain("'" + mockLWT_DATA.language.id + "'");

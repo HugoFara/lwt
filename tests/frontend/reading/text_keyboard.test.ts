@@ -4,8 +4,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Use vi.hoisted to define mock functions that will be available during vi.mock hoisting
-const { mockShowRightFrames, mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo } = vi.hoisted(() => ({
-  mockShowRightFrames: vi.fn(),
+const { mockLoadModalFrame, mockLoadDictionaryFrame, mockSpeechDispatcher, mockOwin, mockCClick, mockScrollTo } = vi.hoisted(() => ({
+  mockLoadModalFrame: vi.fn(),
+  mockLoadDictionaryFrame: vi.fn(),
   mockSpeechDispatcher: vi.fn(),
   mockOwin: vi.fn(),
   mockCClick: vi.fn(),
@@ -34,7 +35,8 @@ vi.mock('../../../src/frontend/js/ui/word_popup', () => ({
 }));
 
 vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
-  showRightFrames: mockShowRightFrames
+  loadModalFrame: mockLoadModalFrame,
+  loadDictionaryFrame: mockLoadDictionaryFrame
 }));
 
 vi.mock('../../../src/frontend/js/core/ajax_utilities', () => ({
@@ -89,7 +91,7 @@ describe('text_keyboard.ts', () => {
     document.body.innerHTML = '';
     (window as Record<string, unknown>).LWT_DATA = JSON.parse(JSON.stringify(mockLWT_DATA));
     // Clear mock function calls between tests
-    mockShowRightFrames.mockClear();
+    mockLoadModalFrame.mockClear();
     mockSpeechDispatcher.mockClear();
     mockOwin.mockClear();
     mockCClick.mockClear();
@@ -347,7 +349,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(50); // key '2'
       keydown_event_do_text_text(event);
 
-      expect(mockShowRightFrames).toHaveBeenCalled();
+      expect(mockLoadModalFrame).toHaveBeenCalled();
     });
 
     it('updates status for a word via keyboard navigation', () => {
@@ -365,7 +367,7 @@ describe('text_keyboard.ts', () => {
       keydown_event_do_text_text(event);
 
       // Known word gets set_word_status.php call
-      expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('set_word_status.php'));
+      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('set_word_status.php'));
     });
 
     it('handles numpad keys (96-100)', () => {
@@ -380,7 +382,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(99); // numpad '3'
       keydown_event_do_text_text(event);
 
-      expect(mockShowRightFrames).toHaveBeenCalled();
+      expect(mockLoadModalFrame).toHaveBeenCalled();
     });
   });
 
@@ -401,7 +403,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(73);
       keydown_event_do_text_text(event);
 
-      expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('status=98'));
+      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('status=98'));
     });
   });
 
@@ -422,7 +424,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(87);
       const result = keydown_event_do_text_text(event);
 
-      expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('status=99'));
+      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('status=99'));
       expect(result).toBe(false);
     });
   });
@@ -503,7 +505,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(69);
       const result = keydown_event_do_text_text(event);
 
-      expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('/word/edit'));
+      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/edit'));
       expect(result).toBe(false);
     });
 
@@ -519,7 +521,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(69);
       keydown_event_do_text_text(event);
 
-      expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('edit_mword.php'));
+      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('edit_mword.php'));
     });
 
     it('opens new word form for unknown words (via hover)', () => {
@@ -543,7 +545,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(69);
       keydown_event_do_text_text(event);
 
-      expect(mockShowRightFrames).toHaveBeenCalledWith(expect.stringContaining('edit_word.php?wid=&tid='));
+      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('edit_word.php?wid=&tid='));
     });
   });
 

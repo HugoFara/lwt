@@ -513,7 +513,8 @@ describe('word_upload.ts', () => {
       showImportedTerms('2024-01-01', false, 1, 1);
 
       await vi.waitFor(() => {
-        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('status.png');
+        // Now uses Lucide icons: status.png maps to circle-check
+        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('data-lucide="circle-check"');
       });
     });
 
@@ -542,7 +543,8 @@ describe('word_upload.ts', () => {
       showImportedTerms('2024-01-01', false, 1, 1);
 
       await vi.waitFor(() => {
-        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('status-busy.png');
+        // Now uses Lucide icons: status-busy.png maps to circle-x
+        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('data-lucide="circle-x"');
       });
     });
 

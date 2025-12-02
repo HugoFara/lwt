@@ -441,7 +441,7 @@ describe('jq_feedwizard.ts', () => {
       document.body.innerHTML = `
         <p>
           <input type="radio" class="xpath" checked />
-          <img src="icn/exclamation-red.png" />
+          <span id="custom_img" data-valid="false"></span>
         </p>
         <button id="adv_get_button">Get</button>
       `;
