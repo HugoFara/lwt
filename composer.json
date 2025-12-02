@@ -3,7 +3,7 @@
     "description": "Learn languages by reading, this is a community maintained version.",
     "type": "library",
     "keywords": ["language-learning","reading","lwt","Learning-with-Texts"],
-    "homepage": "https://hugofara.github.io/lwt/docs/info.html",
+    "homepage": "https://hugofara.github.io/lwt/",
     "license": "UNLICENSE",
     "minimum-stability": "stable",
     "support": {
@@ -46,15 +46,15 @@
             "@test:cleanup-db",
             "vendor/bin/phpunit --no-coverage"
         ],
-        "info.html": "@php docs/info.php > docs/info.html",
         "doc": [
-            "@info.html",
+            "npm run docs:build",
             "./node_modules/.bin/jsdoc -c jsdoc.json",
             "php tools/phpDocumentor"
         ],
         "build": "npm run build:all",
         "clean-doc": [
-            "rm docs/info.html",
+            "rm -rf docs/guide docs/reference docs/developer docs/legal docs/assets docs/hashmap.json",
+            "rm -f docs/changelog.html docs/index.html docs/404.html",
             "rm -rf docs/api/js",
             "rm -rf docs/api/php"
         ]
@@ -63,9 +63,8 @@
         "test:cleanup-db": "Kill stale test database connections",
         "test": "Run all tests with coverage (cleans up stale DB connections first)",
         "test:no-coverage": "Run all tests without coverage (cleans up stale DB connections first)",
-        "info.html": "Regenerate one-file documentation",
-        "doc": "Regenerate all documentation",
+        "doc": "Regenerate all documentation (VitePress + JSDoc + phpDoc)",
         "build": "Build frontend assets (Vite + themes)",
-        "clean-doc": "Clear documentation"
+        "clean-doc": "Clear generated documentation"
     }
 }

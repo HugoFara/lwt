@@ -21,7 +21,10 @@
     "typecheck": "tsc --noEmit",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "e2e": "cypress run"
+    "e2e": "cypress run",
+    "docs:dev": "node scripts/docs-pre-build.js && vitepress dev docs-src",
+    "docs:build": "node scripts/docs-pre-build.js && vitepress build docs-src",
+    "docs:preview": "vitepress preview docs-src"
   },
   "type": "module",
   "repository": {
@@ -76,6 +79,8 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^6.0.0",
-    "vitest": "^4.0.14"
+    "vitepress": "^1.6.4",
+    "vitest": "^4.0.14",
+    "vue": "^3.5.25"
   }
 }
