@@ -10,6 +10,8 @@
  * @since   3.0.0
  */
 
+import { iconHtml } from '../ui/icons';
+
 /**
  * Configuration for wizard step headers.
  */
@@ -27,7 +29,7 @@ interface WizardStepConfig {
 export function setupWizardHeader(config: WizardStepConfig): void {
   const helpHtml = config.helpLink
     ? ` <a href="${config.helpLink}" target="_blank">` +
-      '<img alt="Help" title="Help" src="/assets/icons/question-frame.png"></a>'
+      iconHtml('question-frame', { alt: 'Help', title: 'Help' }) + '</a>'
     : '';
 
   // Get the last h1 element
@@ -52,7 +54,7 @@ export function initWizardStep1(): void {
   setupWizardHeader({
     step: 1,
     title: 'Insert Newsfeed URI',
-    helpLink: 'docs/info.html#feed_wizard'
+    helpLink: '/docs/guide/how-to-use'
   });
 }
 

@@ -113,7 +113,7 @@ class AdminController extends BaseController
         $dbname = $backupService->getDatabaseName();
 
         // Render page
-        $this->render('Backup/Restore/Empty Database', true);
+        $this->render('Database Operations', true);
         $this->message($message, true);
 
         include __DIR__ . '/../Views/Admin/backup.php';

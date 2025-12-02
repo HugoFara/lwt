@@ -62,7 +62,7 @@ class PageLayoutHelper
     <option value="statistics">Statistics</option>
     <option value="rss_import">Newsfeed Import</option>
     <optgroup label="Other">
-        <option value="backup_restore">Backup/Restore</option>
+        <option value="backup_restore">Database Operations</option>
         <option value="settings">Settings</option>
         <option value="text_to_speech_settings">Text-to-Speech Settings</option>
         <option value="INFO">Help</option>
@@ -177,7 +177,7 @@ HTML;
                     <span class="ml-1">Admin</span>
                 </a>
                 <div class="navbar-dropdown is-right">
-                    <a class="navbar-item" href="/admin/backup">Backup/Restore</a>
+                    <a class="navbar-item" href="/admin/backup">Database Operations</a>
                     <a class="navbar-item" href="/admin/settings">Settings</a>
                     <a class="navbar-item" href="/admin/settings/tts">Text-to-Speech</a>
                     <hr class="navbar-divider">

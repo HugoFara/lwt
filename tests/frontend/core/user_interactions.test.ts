@@ -18,7 +18,7 @@ import {
   handleReadingConfiguration,
   speechDispatcher,
 } from '../../../src/frontend/js/core/user_interactions';
-import * as cookies from '../../../src/frontend/js/core/cookies';
+import * as ttsStorage from '../../../src/frontend/js/core/tts_storage';
 
 // Mock SpeechSynthesisUtterance for jsdom environment
 class MockSpeechSynthesisUtterance {
@@ -75,9 +75,9 @@ describe('user_interactions.ts', () => {
       expect(window.top!.location.href).toBe(initialHref);
     });
 
-    it('redirects to info.html for INFO value', () => {
+    it('redirects to docs for INFO value', () => {
       quickMenuRedirection('INFO');
-      expect(window.top!.location.href).toBe('/docs/info.html');
+      expect(window.top!.location.href).toBe('/docs/');
     });
 
     it('redirects to feeds page for rss_import value', () => {
@@ -245,46 +245,50 @@ describe('user_interactions.ts', () => {
   });
 
   // ===========================================================================
-  // Cookie TTS Settings Tests
+  // Cookie TTS Settings Tests (now uses localStorage)
   // ===========================================================================
 
   describe('cookieTTSSettings', () => {
     beforeEach(() => {
-      // Clear cookies
-      document.cookie.split(';').forEach((c) => {
-        document.cookie = c
-          .replace(/^ +/, '')
-          .replace(/=.*/, '=;expires=Thu, 01 Jan 1970 00:00:00 GMT');
-      });
+      // Clear localStorage
+      localStorage.clear();
+      // Mark migration as complete so it doesn't try to read cookies
+      localStorage.setItem('lwt.tts.migrated', '1');
     });
 
-    it('returns empty object when no cookies set', () => {
+    afterEach(() => {
+      localStorage.clear();
+    });
+
+    it('returns empty object when no settings stored', () => {
       const settings = cookieTTSSettings('en');
       expect(settings).toEqual({});
     });
 
-    it('retrieves rate from cookie', () => {
-      document.cookie = 'tts[enRate]=1.5';
+    it('retrieves rate from localStorage', () => {
+      localStorage.setItem('lwt.tts.en', JSON.stringify({ rate: 1.5 }));
       const settings = cookieTTSSettings('en');
       expect(settings.rate).toBe(1.5);
     });
 
-    it('retrieves pitch from cookie', () => {
-      document.cookie = 'tts[enPitch]=0.8';
+    it('retrieves pitch from localStorage', () => {
+      localStorage.setItem('lwt.tts.en', JSON.stringify({ pitch: 0.8 }));
       const settings = cookieTTSSettings('en');
       expect(settings.pitch).toBe(0.8);
     });
 
-    it('retrieves voice from cookie', () => {
-      document.cookie = 'tts[enVoice]=Google%20US%20English';
+    it('retrieves voice from localStorage', () => {
+      localStorage.setItem('lwt.tts.en', JSON.stringify({ voice: 'Google US English' }));
       const settings = cookieTTSSettings('en');
       expect(settings.voice).toBe('Google US English');
     });
 
     it('retrieves all settings together', () => {
-      document.cookie = 'tts[frRate]=1.2';
-      document.cookie = 'tts[frPitch]=1.0';
-      document.cookie = 'tts[frVoice]=French%20Voice';
+      localStorage.setItem('lwt.tts.fr', JSON.stringify({
+        rate: 1.2,
+        pitch: 1.0,
+        voice: 'French Voice',
+      }));
       const settings = cookieTTSSettings('fr');
       expect(settings).toEqual({
         rate: 1.2,
@@ -294,14 +298,21 @@ describe('user_interactions.ts', () => {
     });
 
     it('handles different languages independently', () => {
-      document.cookie = 'tts[enRate]=1.0';
-      document.cookie = 'tts[frRate]=1.5';
+      localStorage.setItem('lwt.tts.en', JSON.stringify({ rate: 1.0 }));
+      localStorage.setItem('lwt.tts.fr', JSON.stringify({ rate: 1.5 }));
 
       const enSettings = cookieTTSSettings('en');
       const frSettings = cookieTTSSettings('fr');
 
       expect(enSettings.rate).toBe(1.0);
       expect(frSettings.rate).toBe(1.5);
+    });
+
+    it('extracts two-letter code from longer language codes', () => {
+      localStorage.setItem('lwt.tts.en', JSON.stringify({ rate: 1.3 }));
+      // cookieTTSSettings('en-US') should extract 'en' and find the settings
+      const settings = cookieTTSSettings('en-US');
+      expect(settings.rate).toBe(1.3);
     });
   });
 
@@ -329,8 +340,13 @@ describe('user_interactions.ts', () => {
         writable: true,
       });
 
-      // Mock getCookie to return empty for TTS settings
-      vi.spyOn(cookies, 'getCookie').mockReturnValue(null);
+      // Clear localStorage and mark migration complete
+      localStorage.clear();
+      localStorage.setItem('lwt.tts.migrated', '1');
+    });
+
+    afterEach(() => {
+      localStorage.clear();
     });
 
     it('creates SpeechSynthesisUtterance with text', () => {
@@ -379,11 +395,12 @@ describe('user_interactions.ts', () => {
       );
     });
 
-    it('uses TTS settings from cookies when no explicit params', () => {
-      vi.spyOn(cookies, 'getCookie')
-        .mockReturnValueOnce('1.3') // Rate
-        .mockReturnValueOnce('0.9') // Pitch
-        .mockReturnValueOnce('Google UK English'); // Voice
+    it('uses TTS settings from localStorage when no explicit params', () => {
+      localStorage.setItem('lwt.tts.en', JSON.stringify({
+        rate: 1.3,
+        pitch: 0.9,
+        voice: 'Google UK English',
+      }));
 
       const result = readRawTextAloud('Hello', 'en-US');
 
@@ -392,11 +409,11 @@ describe('user_interactions.ts', () => {
       expect(result.voice?.name).toBe('Google UK English');
     });
 
-    it('prioritizes explicit params over cookie settings', () => {
-      vi.spyOn(cookies, 'getCookie')
-        .mockReturnValueOnce('1.3') // Rate from cookie
-        .mockReturnValueOnce('0.9') // Pitch from cookie
-        .mockReturnValueOnce(null); // No voice in cookie
+    it('prioritizes explicit params over localStorage settings', () => {
+      localStorage.setItem('lwt.tts.en', JSON.stringify({
+        rate: 1.3,
+        pitch: 0.9,
+      }));
 
       const result = readRawTextAloud('Hello', 'en-US', 2.0, 1.5);
 
@@ -668,7 +685,12 @@ describe('user_interactions.ts', () => {
         },
         writable: true,
       });
-      vi.spyOn(cookies, 'getCookie').mockReturnValue(null);
+      localStorage.clear();
+      localStorage.setItem('lwt.tts.migrated', '1');
+    });
+
+    afterEach(() => {
+      localStorage.clear();
     });
 
     it('reads text directly when convert_to_phonetic is false', () => {
@@ -706,7 +728,12 @@ describe('user_interactions.ts', () => {
         },
         writable: true,
       });
-      vi.spyOn(cookies, 'getCookie').mockReturnValue(null);
+      localStorage.clear();
+      localStorage.setItem('lwt.tts.migrated', '1');
+    });
+
+    afterEach(() => {
+      localStorage.clear();
     });
 
     it('reads directly for direct mode', () => {
@@ -806,12 +833,13 @@ describe('user_interactions.ts', () => {
       expect(result).toBeNull();
     });
 
-    it('cookieTTSSettings handles malformed cookie values', () => {
-      document.cookie = 'tts[enRate]=not-a-number';
+    it('cookieTTSSettings handles malformed localStorage values', () => {
+      // Store invalid JSON
+      localStorage.setItem('lwt.tts.en', 'not-valid-json');
 
       const settings = cookieTTSSettings('en');
-      // parseFloat('not-a-number') returns NaN
-      expect(Number.isNaN(settings.rate)).toBe(true);
+      // Should return empty object when JSON parsing fails
+      expect(settings).toEqual({});
     });
 
     it('readRawTextAloud handles voice not found', () => {
@@ -819,8 +847,9 @@ describe('user_interactions.ts', () => {
       (window.speechSynthesis as unknown as Record<string, unknown>).getVoices =
         vi.fn().mockReturnValue([]);
 
-      // Mock getCookie to return no TTS settings
-      vi.spyOn(cookies, 'getCookie').mockReturnValue(null);
+      // Clear localStorage
+      localStorage.clear();
+      localStorage.setItem('lwt.tts.migrated', '1');
 
       const result = readRawTextAloud(
         'Hello',

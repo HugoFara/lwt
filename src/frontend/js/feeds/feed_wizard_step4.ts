@@ -6,6 +6,8 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
+import { iconHtml } from '../ui/icons';
+
 /**
  * Configuration for wizard step 4.
  */
@@ -168,8 +170,8 @@ export const lwt_wizard_step4 = {
     if (lastH1) {
       lastH1.innerHTML =
         'Feed Wizard | Step 4 - Edit Options ' +
-        '<a href="docs/info.html#feed_wizard" target="_blank">' +
-        '<img alt="Help" title="Help" src="/assets/icons/question-frame.png"></a>';
+        '<a href="/docs/guide/how-to-use" target="_blank">' +
+        iconHtml('question-frame', { alt: 'Help', title: 'Help' }) + '</a>';
       lastH1.style.textAlign = 'center';
     }
   }

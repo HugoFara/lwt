@@ -14,6 +14,7 @@ import { initInlineEdit } from '../ui/inline_edit';
 import { initTermTags, initTextTags } from '../ui/tagify_tags';
 import { fetchTermTags, fetchTextTags } from './app_data';
 import { loadModalFrame } from '../reading/frame_management';
+import { spinnerHtml } from '../ui/icons';
 
 /**
  * Helper to safely get an HTML attribute value as a string.
@@ -271,7 +272,7 @@ export function prepareMainAreas(): void {
     cancelText: 'Cancel',
     rows: 3,
     cols: 35,
-    indicator: '<img src="/assets/icons/indicator.gif" alt="Saving...">'
+    indicator: spinnerHtml({ alt: 'Saving...' })
   });
 
   // Wrap selects

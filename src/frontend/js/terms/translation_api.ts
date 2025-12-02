@@ -6,6 +6,8 @@
  * @since   1.6.16-fork
  */
 
+import { iconHtml } from '../ui/icons';
+
 // Type for the frame with form check
 // Uses the global lwtFormCheck type from globals.ts
 interface LwtFrame extends Window {
@@ -133,7 +135,7 @@ export function getTranslationFromGlosbeApi(data: GlosbeResponse): void {
         translationsEl.insertAdjacentHTML('beforeend',
           '<span class="click" onclick="addTranslation(\'' +
           rows.phrase.text + '\');">' +
-          '<img src="icn/tick-button.png" title="Copy" alt="Copy" />' +
+          iconHtml('tick-button', { title: 'Copy', alt: 'Copy' }) +
           ' &nbsp; ' + rows.phrase.text +
           '</span><br />'
         );
@@ -141,7 +143,7 @@ export function getTranslationFromGlosbeApi(data: GlosbeResponse): void {
         translationsEl.insertAdjacentHTML('beforeend',
           '<span class="click" onclick="addTranslation(' + "'(" +
           rows.meanings[0].text + ")'" + ');">' +
-          '<img src="icn/tick-button.png" title="Copy" alt="Copy" />' +
+          iconHtml('tick-button', { title: 'Copy', alt: 'Copy' }) +
           ' &nbsp; ' + '(' + rows.meanings[0].text + ')' +
           '</span><br />'
         );

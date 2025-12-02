@@ -303,7 +303,7 @@ describe('feed_wizard_step4.ts', () => {
       expect(h1.innerHTML).toContain('Feed Wizard');
       expect(h1.innerHTML).toContain('Step 4');
       expect(h1.innerHTML).toContain('Edit Options');
-      expect(h1.innerHTML).toContain('docs/info.html#feed_wizard');
+      expect(h1.innerHTML).toContain('/docs/guide/how-to-use');
       expect(h1.style.textAlign).toBe('center');
     });
   });

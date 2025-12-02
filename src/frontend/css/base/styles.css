@@ -1783,7 +1783,8 @@ input[name="WoTranslation"]
 
 .del_trans:after
 {
-  content: url(../../../../assets/icons/broom.png);
+  /* Using inline SVG for brush icon (Lucide equivalent of broom.png) */
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08'%3E%3C/path%3E%3Cpath d='M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z'%3E%3C/path%3E%3C/svg%3E");
   opacity: 0.2;
 }
 
@@ -2550,6 +2551,84 @@ Audio Player (Alpine.js + Bulma)
 /* Hide elements with x-show="false" properly */
 .audio-player [x-show="false"] {
   display: none !important;
+}
+
+/**************************************************************
+Horizontal Form Fields (Bulma)
+***************************************************************/
+
+/* Fix horizontal form layout - give label a fixed width instead of flex-grow */
+@media print, screen and (min-width: 769px) {
+  .field.is-horizontal > .field-label {
+    flex-basis: 200px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-inline-end: 1rem;
+  }
+
+  .field.is-horizontal > .field-body {
+    flex-basis: auto;
+    flex-grow: 1;
+  }
+
+  /* Ensure selects in horizontal forms expand properly */
+  .field.is-horizontal .field-body .select.is-fullwidth,
+  .field.is-horizontal .field-body .select.is-fullwidth select {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+/**************************************************************
+Settings Page - Collapsible Sections
+***************************************************************/
+
+.settings-section {
+  transition: box-shadow 0.2s ease;
+}
+
+.settings-section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.settings-section .card-header {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #dbdbdb;
+}
+
+.settings-section .card-header:hover {
+  background-color: #eeeeee;
+}
+
+.settings-section .card-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.settings-section .card-header-title svg {
+  width: 1.25em;
+  height: 1.25em;
+}
+
+/* Chevron rotation animation */
+.settings-section .card-header-icon .icon i,
+.settings-section .card-header-icon .icon svg {
+  transition: transform 0.3s ease;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.transition-transform {
+  transition: transform 0.3s ease;
+}
+
+/* Card content padding */
+.settings-section .card-content {
+  padding: 1.25rem;
 }
 
 @media print

@@ -45,12 +45,12 @@ describe('feed_wizard_common.ts', () => {
       setupWizardHeader({
         step: 1,
         title: 'Insert URI',
-        helpLink: 'docs/info.html#feed_wizard'
+        helpLink: '/docs/guide/how-to-use'
       });
 
       const h1Elements = document.querySelectorAll('h1');
       const lastH1 = h1Elements[h1Elements.length - 1];
-      expect(lastH1?.innerHTML).toContain('href="docs/info.html#feed_wizard"');
+      expect(lastH1?.innerHTML).toContain('href="/docs/guide/how-to-use"');
       expect(lastH1?.innerHTML).toContain('question-frame.png');
     });
 
@@ -106,7 +106,7 @@ describe('feed_wizard_common.ts', () => {
       const h1 = h1Elements[h1Elements.length - 1];
       expect(h1?.innerHTML).toContain('Step 1');
       expect(h1?.innerHTML).toContain('Insert Newsfeed URI');
-      expect(h1?.innerHTML).toContain('docs/info.html#feed_wizard');
+      expect(h1?.innerHTML).toContain('/docs/guide/how-to-use');
     });
 
     it('does nothing when config element is missing', () => {

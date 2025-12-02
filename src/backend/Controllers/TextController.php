@@ -913,6 +913,10 @@ class TextController extends BaseController
     /**
      * Archived texts management (replaces text_archived.php)
      *
+     * The list view is now API-driven with Alpine.js, so we only need
+     * to handle actions and the edit form. Texts are loaded via
+     * /api/v1/languages/with-archived-texts and /api/v1/texts/archived-by-language/{id}.
+     *
      * @param array $params Route parameters
      *
      * @return void
@@ -932,70 +936,11 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Core/Database/Restore.php';
         require_once __DIR__ . '/../Core/Http/param_helpers.php';
 
-        // Get filter parameters
-        $currentLang = Validation::language(
-            (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
-        );
-        $currentSort = (int) ParamHelpers::processDBParam("sort", 'currentarchivesort', '1', true);
-        $currentPage = (int) ParamHelpers::processSessParam("page", "currentarchivepage", '1', true);
-        $currentQuery = (string) ParamHelpers::processSessParam("query", "currentarchivequery", '', false);
-        $currentQueryMode = (string) ParamHelpers::processSessParam(
-            "query_mode",
-            "currentarchivequerymode",
-            'title,text',
-            false
-        );
-        $currentRegexMode = Settings::getWithDefault("set-regex-mode");
-        $currentTag1 = Validation::archTextTag(
-            (string) ParamHelpers::processSessParam("tag1", "currentarchivetexttag1", '', false),
-            $currentLang
-        );
-        $currentTag2 = Validation::archTextTag(
-            (string) ParamHelpers::processSessParam("tag2", "currentarchivetexttag2", '', false),
-            $currentLang
-        );
-        $currentTag12 = (string) ParamHelpers::processSessParam(
-            "tag12",
-            "currentarchivetexttag12",
-            '',
-            false
-        );
-
-        // Build WHERE clauses
-        $whLang = ($currentLang != '') ? (' and AtLgID=' . $currentLang) : '';
-
-        // Build query WHERE clause
-        $whQuery = $this->textService->buildArchivedQueryWhereClause(
-            $currentQuery,
-            $currentQueryMode,
-            $currentRegexMode
-        );
-
-        // Validate regex query
-        if ($currentQuery !== '' && $currentRegexMode !== '') {
-            if (!$this->textService->validateRegexQuery($currentQuery, $currentRegexMode)) {
-                $currentQuery = '';
-                $whQuery = '';
-                unset($_SESSION['currentwordquery']);
-                if ($this->hasParam('query')) {
-                    echo '<p id="hide3" class="warning-message">' .
-                        '+++ Warning: Invalid Search +++</p>';
-                }
-            }
-        }
-
-        // Build tag HAVING clause
-        $whTag = $this->textService->buildArchivedTagHavingClause(
-            $currentTag1,
-            $currentTag2,
-            $currentTag12
-        );
-
         // Handle mark actions that skip pagestart
         $markAction = $this->param('markaction');
         $noPagestart = ($markAction == 'deltag');
         if (!$noPagestart) {
-            PageLayoutHelper::renderPageStart($this->languageService->getLanguageName($currentLang) . ' Text Archive', true);
+            PageLayoutHelper::renderPageStart('Archived Texts', true);
         }
 
         $message = '';
@@ -1041,24 +986,11 @@ class TextController extends BaseController
                 include __DIR__ . '/../Views/Text/archived_form.php';
             }
         } else {
-            // Display list
-            $totalCount = $this->textService->getArchivedTextCount($whLang, $whQuery, $whTag);
-            $perPage = $this->textService->getArchivedTextsPerPage();
-            $pagination = $this->textService->getPagination($totalCount, $currentPage, $perPage);
-
-            $texts = [];
-            if ($totalCount > 0) {
-                $texts = $this->textService->getArchivedTextsList(
-                    $whLang,
-                    $whQuery,
-                    $whTag,
-                    $currentSort,
-                    $pagination['currentPage'],
-                    $perPage
-                );
-            }
-
-            $languages = $this->languageService->getLanguagesForSelect();
+            // Display list - now API-driven with Alpine.js
+            // Archived texts are loaded via API endpoints:
+            // - /api/v1/languages/with-archived-texts
+            // - /api/v1/texts/archived-by-language/{langId}
+            $activeLanguageId = (int) Settings::get('currentlanguage');
             include __DIR__ . '/../Views/Text/archived_list.php';
         }
 

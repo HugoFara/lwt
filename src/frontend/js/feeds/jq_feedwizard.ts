@@ -6,6 +6,8 @@
  * @since   1.6.16-fork
  */
 
+import { iconHtml, getLucideIconName } from '../ui/icons';
+
 /**
  * Execute an XPath expression and return matching elements as an array.
  * Supports pipe-separated multiple expressions (e.g., "//div | //span").
@@ -254,7 +256,7 @@ export function extend_adv_xpath(el: HTMLElement): void {
         '<input type="text" id="custom_xpath" name="custom_xpath" ' +
         'style="width:70%" value=\'\'>' +
         '</input>' +
-      '<img id="custom_img" src="icn/exclamation-red.png" alt="-" />' +
+      '<span id="custom_img" data-valid="false">' + iconHtml('exclamation-red', { alt: '-' }) + '</span>' +
       '</input>' +
     '</p>'
   );
@@ -275,13 +277,19 @@ export function extend_adv_xpath(el: HTMLElement): void {
         if (parentP?.querySelector<HTMLInputElement>(':checked')) {
           setDisabled(advGetButton, true);
         }
-        if (customImg) customImg.src = 'icn/exclamation-red.png';
+        if (customImg) {
+          customImg.innerHTML = iconHtml('exclamation-red', { alt: '-' });
+          customImg.dataset.valid = 'false';
+        }
       } else {
         if (xpathRadio) xpathRadio.value = val;
         if (parentP?.querySelector<HTMLInputElement>(':checked')) {
           setDisabled(advGetButton, false);
         }
-        if (customImg) customImg.src = 'icn/tick.png';
+        if (customImg) {
+          customImg.innerHTML = iconHtml('tick', { alt: 'Valid' });
+          customImg.dataset.valid = 'true';
+        }
       }
     };
 
@@ -779,12 +787,11 @@ export const lwt_feed_wizard = {
 
     const parentP = this.closest('p');
     if (parentP) {
-      const imgs = parentP.querySelectorAll('img');
-      imgs.forEach(img => {
-        if (img.getAttribute('src') === 'icn/exclamation-red.png') {
-          setDisabled(advGetButton, true);
-        }
-      });
+      // Check for invalid state via data-valid attribute
+      const customImg = parentP.querySelector<HTMLElement>('#custom_img');
+      if (customImg && customImg.dataset.valid === 'false') {
+        setDisabled(advGetButton, true);
+      }
     }
     return false;
   },
@@ -798,8 +805,7 @@ export const lwt_feed_wizard = {
       const lwtSel = getById('lwt_sel');
       appendHtml(lwtSel,
         '<li style=\'text-align: left\'>' +
-        '<img class=\'delete_selection\' src=\'icn/cross.png\' ' +
-        'title=\'Delete Selection\' alt=\'\' /> ' +
+        '<span class=\'delete_selection click\'>' + iconHtml('cross', { title: 'Delete Selection' }) + '</span> ' +
         checkedRadio.value +
         '</li>'
       );
@@ -948,8 +954,7 @@ export const lwt_feed_wizard = {
       const markActionVal = getInputValue('#mark_action');
       appendHtml(getById('lwt_sel'),
         '<li style=\'text-align: left\'>' +
-        '<img class=\'delete_selection\' src=\'icn/cross.png\' ' +
-        'title=\'Delete Selection\' alt=\'' + markActionVal + '\' /> ' +
+        '<span class=\'delete_selection click\'>' + iconHtml('cross', { title: 'Delete Selection', alt: markActionVal }) + '</span> ' +
         markActionVal.replace('§', '/') +
         '</li>'
       );

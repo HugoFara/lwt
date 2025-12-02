@@ -8,9 +8,9 @@
  * @since 3.0.0
  */
 
-import { getCookie } from '../core/cookies';
 import { readTextAloud } from '../core/user_interactions';
 import { lwtFormCheck } from '../forms/unloadformcheck';
+import { getTTSSettingsWithMigration, saveTTSSettings } from '../core/tts_storage';
 
 /**
  * Configuration for TTS settings.
@@ -74,7 +74,9 @@ export const ttsSettings = {
   },
 
   /**
-   * Set the Text-to-Speech data using cookies.
+   * Set the Text-to-Speech data using localStorage.
+   *
+   * @since 3.0.0 Changed from cookies to localStorage
    */
   presetTTSData(): void {
     const langName = ttsSettings.currentLanguage;
@@ -82,10 +84,38 @@ export const ttsSettings = {
     const voiceEl = document.getElementById('voice') as HTMLSelectElement | null;
     const rateEl = document.getElementById('rate') as HTMLInputElement | null;
     const pitchEl = document.getElementById('pitch') as HTMLInputElement | null;
+
     if (langEl) langEl.value = langName;
-    if (voiceEl) voiceEl.value = getCookie('tts[' + langName + 'RegName]') || '';
-    if (rateEl) rateEl.value = getCookie('tts[' + langName + 'Rate]') || '1';
-    if (pitchEl) pitchEl.value = getCookie('tts[' + langName + 'Pitch]') || '1';
+
+    // Get settings from localStorage (with automatic migration from cookies)
+    const settings = getTTSSettingsWithMigration(langName);
+    if (voiceEl) voiceEl.value = settings.voice || '';
+    if (rateEl) rateEl.value = String(settings.rate ?? 1);
+    if (pitchEl) pitchEl.value = String(settings.pitch ?? 1);
+  },
+
+  /**
+   * Save the current TTS settings to localStorage.
+   *
+   * @since 3.0.0 New function to save settings client-side
+   */
+  saveSettings(): void {
+    const langEl = document.getElementById('get-language') as HTMLSelectElement | null;
+    const voiceEl = document.getElementById('voice') as HTMLSelectElement | null;
+    const rateEl = document.getElementById('rate') as HTMLInputElement | null;
+    const pitchEl = document.getElementById('pitch') as HTMLInputElement | null;
+
+    const langName = langEl?.value || ttsSettings.currentLanguage;
+    if (!langName) {
+      console.error('Cannot save TTS settings: no language selected');
+      return;
+    }
+
+    saveTTSSettings(langName, {
+      voice: voiceEl?.value || undefined,
+      rate: rateEl ? parseFloat(rateEl.value) : undefined,
+      pitch: pitchEl ? parseFloat(pitchEl.value) : undefined
+    });
   },
 
   /**
@@ -166,6 +196,16 @@ export function initTTSSettings(): void {
   if (cancelButton) {
     cancelButton.addEventListener('click', () => ttsSettings.clickCancel());
   }
+
+  // Handle form submission - save to localStorage
+  const form = document.querySelector('form.validate') as HTMLFormElement | null;
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      // Save settings to localStorage before form submits
+      ttsSettings.saveSettings();
+      // Let the form continue to submit (shows success message)
+    });
+  }
 }
 
 // Auto-initialize on DOM ready if config element or TTS form is present
@@ -203,4 +243,12 @@ export function presetTTSData(): void {
  */
 export function populateVoiceList(): void {
   return ttsSettings.populateVoiceList();
+}
+
+/**
+ * Save TTS settings to localStorage.
+ * @since 3.0.0
+ */
+export function saveSettings(): void {
+  return ttsSettings.saveSettings();
 }

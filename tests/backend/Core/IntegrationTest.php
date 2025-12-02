@@ -175,13 +175,13 @@ class IntegrationTest extends TestCase
 
         // Test legacy path mappings
         $this->assertEquals('/assets/css/styles.css', get_file_path('css/styles.css'));
-        $this->assertEquals('/assets/icons/speaker-volume.png', get_file_path('icn/speaker-volume.png'));
+        $this->assertEquals('/assets/icons/example.svg', get_file_path('icn/example.svg'));
         $this->assertEquals('/assets/images/apple-touch-icon.png', get_file_path('img/apple-touch-icon.png'));
         $this->assertEquals('/assets/js/pgm.js', get_file_path('js/pgm.js'));
 
         // Test paths that already have assets/ prefix - should not double-prefix
         $this->assertEquals('/assets/css/styles.css', get_file_path('assets/css/styles.css'));
-        $this->assertEquals('/assets/icons/plus.png', get_file_path('assets/icons/plus.png'));
+        $this->assertEquals('/assets/sounds/click.mp3', get_file_path('assets/sounds/click.mp3'));
     }
 
     public function testGetSepas(): void

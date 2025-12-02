@@ -8,6 +8,7 @@
 
 import { escape_html_chars } from '../core/html_utils';
 import { STATUSES } from '../core/app_data';
+import { iconHtml } from '../ui/icons';
 import type { WordStatus } from '../types/globals';
 
 // Interface for imported term record
@@ -186,8 +187,8 @@ function formatImportedTerms(data: ImportedTerm[], rtl: boolean): string {
       </td>
       <td class="td1 center">
         <b>${record.SentOK !== 0
-    ? `<img src="/assets/icons/status.png" title="${escape_html_chars(record.WoSentence)}" alt="Yes" />`
-    : '<img src="/assets/icons/status-busy.png" title="(No valid sentence)" alt="No" />'
+    ? iconHtml('status', { title: escape_html_chars(record.WoSentence), alt: 'Yes' })
+    : iconHtml('status-busy', { title: '(No valid sentence)', alt: 'No' })
 }</b>
       </td>
       <td class="td1 center" title="${escape_html_chars(statusInfo.name)}">${escape_html_chars(statusInfo.abbr)}</td>

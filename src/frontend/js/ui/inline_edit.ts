@@ -8,6 +8,8 @@
  * @since 3.0.0
  */
 
+import { spinnerHtml } from './icons';
+
 export interface InlineEditOptions {
   /** URL to POST the edited value to */
   url: string;
@@ -50,7 +52,7 @@ export function initInlineEdit(
     tooltip: 'Click to edit...',
     submitText: 'Save',
     cancelText: 'Cancel',
-    indicator: '<img src="/assets/icons/indicator.gif" alt="Saving...">'
+    indicator: spinnerHtml({ alt: 'Saving...' })
   };
 
   const config = { ...defaults, ...options };

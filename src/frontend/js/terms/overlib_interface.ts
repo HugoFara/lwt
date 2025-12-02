@@ -17,6 +17,7 @@ import { escape_html_chars, escape_html_chars_2 } from '../core/html_utils';
 import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
 import { createTheDictLink, createSentLookupLink } from './dictionary';
 import { TermsApi, type TermDetails } from '../api/terms';
+import { iconHtml, createIcon, initLucideIcons } from '../ui/icons';
 
 // Import the popup system
 import { overlib, CAPTION, cClick } from '../ui/word_popup';
@@ -212,7 +213,7 @@ export function createTestStatusButtons(context: WordActionContext): DocumentFra
     const gotItBtn = document.createElement('button');
     gotItBtn.type = 'button';
     gotItBtn.className = 'lwt-test-btn lwt-test-btn--success';
-    gotItBtn.innerHTML = `<img src="icn/thumb-up.png" alt="Got it!" /> Got it! [${s} ▶ ${nextUp}]`;
+    gotItBtn.innerHTML = `${iconHtml('thumb-up', { alt: 'Got it!' })} Got it! [${s} ▶ ${nextUp}]`;
 
     gotItBtn.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -228,7 +229,7 @@ export function createTestStatusButtons(context: WordActionContext): DocumentFra
     const oopsBtn = document.createElement('button');
     oopsBtn.type = 'button';
     oopsBtn.className = 'lwt-test-btn lwt-test-btn--failure';
-    oopsBtn.innerHTML = `<img src="icn/thumb.png" alt="Oops!" /> Oops! [${s} ▶ ${nextDown}]`;
+    oopsBtn.innerHTML = `${iconHtml('thumb', { alt: 'Oops!' })} Oops! [${s} ▶ ${nextDown}]`;
 
     oopsBtn.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -389,15 +390,20 @@ function createAudioElement(text: string): HTMLElement {
   const container = document.createElement('div');
   container.className = 'lwt-popup-row lwt-popup-audio';
 
-  const img = document.createElement('img');
-  img.title = 'Click to read!';
-  img.src = 'icn/speaker-volume.png';
-  img.style.cursor = 'pointer';
-  img.addEventListener('click', () => {
+  const icon = createIcon('speaker-volume', {
+    title: 'Click to read!',
+    clickable: true
+  });
+  icon.style.cursor = 'pointer';
+  icon.addEventListener('click', () => {
     window.speechDispatcher?.(text, LWT_DATA.language.id);
   });
 
-  container.appendChild(img);
+  container.appendChild(icon);
+
+  // Initialize Lucide icons for the new element
+  initLucideIcons();
+
   return container;
 }
 
@@ -745,14 +751,14 @@ export function run_overlib_test(
         make_overlib_link_change_status_test(
           wid,
           1,
-          '<img src="icn/thumb-up.png" title="Got it!" alt="Got it!" /> Got it! [' +
+          iconHtml('thumb-up', { title: 'Got it!', alt: 'Got it!' }) + ' Got it! [' +
           cc + ']'
         ) +
         '<hr noshade size=1 />' +
         make_overlib_link_change_status_test(
           wid,
           -1,
-          '<img src="icn/thumb.png" title="Oops!" alt="Oops!" /> Oops! [' + ww + ']'
+          iconHtml('thumb', { title: 'Oops!', alt: 'Oops!' }) + ' Oops! [' + ww + ']'
         ) +
         '<hr noshade size=1 />';
     }
@@ -1229,14 +1235,15 @@ export function make_overlib_link_ignore_word(
  * @return HTML-formatted clickable icon
  */
 export function make_overlib_audio(txt: string): string {
-  const img = document.createElement('img');
-  img.title = 'Click to read!';
-  img.src = 'icn/speaker-volume.png';
-  img.style.cursor = 'pointer';
-  img.setAttribute(
+  const icon = createIcon('speaker-volume', {
+    title: 'Click to read!',
+    clickable: true
+  });
+  icon.style.cursor = 'pointer';
+  icon.setAttribute(
     'onclick',
     "speechDispatcher('" + escape_html_chars(txt) + "', '" + LWT_DATA.language.id + "')"
   );
-  return img.outerHTML;
+  return icon.outerHTML;
 }
 

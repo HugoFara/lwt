@@ -50,7 +50,7 @@ Install [Docker](https://docs.docker.com/get-docker/) (if not already done).
 ### Other Systems
 
 1. **Please follow**: [docs/install.md](docs/install.md) for setup instructions.
-2. Copy `.env.example` to `.env` and configure your database credentials. Everything is explained at [docs/info.html](https://hugofara.github.io/lwt/docs/info.html#install).
+2. Copy `.env.example` to `.env` and configure your database credentials. Everything is explained in the [installation guide](https://hugofara.github.io/lwt/docs/guide/installation).
 
 And you are ready to go!
 
@@ -154,8 +154,7 @@ Any other branch if considered under development.
 
 ## Useful links
 
-* General documentation at [docs/info.html](https://hugofara.github.io/lwt/docs/info.html).
-* Please find more help at [docs/index.html](https://hugofara.github.io/lwt/docs/index.html).
+* [Documentation](https://hugofara.github.io/lwt/docs/) - User guides, reference, and developer documentation.
 
 ## Alternatives
 

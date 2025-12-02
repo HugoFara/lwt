@@ -11,6 +11,7 @@ import { isInt } from '../forms/form_validation';
 import { scrollTo } from '../core/hover_intent';
 import { apiPost, apiGet } from '../core/api_client';
 import { TermsApi } from '../api/terms';
+import { iconHtml, spinnerHtml } from '../ui/icons';
 
 // Interface for lwtFormCheck
 interface LwtFormCheck {
@@ -84,7 +85,7 @@ export function setTransRoman(tra: string, rom: string): void {
 export async function do_ajax_save_impr_text(textid: number, elem_name: string, form_data: string): Promise<void> {
   const waitEl = document.getElementById('wait' + elem_name.substring(2));
   if (waitEl) {
-    waitEl.innerHTML = '<img src="icn/waiting2.gif" />';
+    waitEl.innerHTML = spinnerHtml();
   }
 
   const response = await apiPost<{ error?: string }>(
@@ -93,7 +94,7 @@ export async function do_ajax_save_impr_text(textid: number, elem_name: string, 
   );
 
   if (waitEl) {
-    waitEl.innerHTML = '<img src="icn/empty.gif" />';
+    waitEl.innerHTML = iconHtml('empty');
   }
   if (response.error || response.data?.error) {
     alert(
@@ -254,7 +255,7 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
     edit_word_link = `<a name="rec${trans_data.ann_index}"></a>
     <span class="click"
     onclick="oewin('/word/edit?` + escape_html_chars(params.toString()) + `');">
-          <img src="icn/sticky-note--pencil.png" title="Edit Term" alt="Edit Term" />
+          ${iconHtml('sticky-note--pencil', { title: 'Edit Term', alt: 'Edit Term' })}
       </span>`;
   } else {
     edit_word_link = '&nbsp;';
@@ -283,33 +284,29 @@ export function edit_term_ann_translations(trans_data: TransData, text_id: numbe
     (select_last ? escape_html_chars(curr_trans) : '') +
   `" maxlength="50" size="40" />
    &nbsp;
-  <img class="click" src="icn/eraser.png" title="Erase Text Field"
-  alt="Erase Text Field"
-  data-action="erase-field" data-target="#tx${trans_data.ann_index}" />
+  <span class="click" data-action="erase-field" data-target="#tx${trans_data.ann_index}">
+    ${iconHtml('eraser', { title: 'Erase Text Field', alt: 'Erase Text Field' })}
+  </span>
     &nbsp;
-  <img class="click" src="icn/star.png" title="* (Set to Term)"
-  alt="* (Set to Term)"
-  data-action="set-star" data-target="#tx${trans_data.ann_index}" />
+  <span class="click" data-action="set-star" data-target="#tx${trans_data.ann_index}">
+    ${iconHtml('star', { title: '* (Set to Term)', alt: '* (Set to Term)' })}
+  </span>
   &nbsp;`;
   // Add the "plus button" to add a translation
   if (widset) {
     translations_list +=
-    `<img class="click" src="icn/plus-button.png"
-    title="Save another translation to existent term"
-    alt="Save another translation to existent term"
-    onclick="updateTermTranslation(${trans_data.wid}, ` +
-      `'#tx${trans_data.ann_index}');" />`;
+    `<span class="click" onclick="updateTermTranslation(${trans_data.wid}, '#tx${trans_data.ann_index}');">
+      ${iconHtml('plus-button', { title: 'Save another translation to existent term', alt: 'Save another translation to existent term' })}
+    </span>`;
   } else {
     translations_list +=
-    `<img class="click" src="icn/plus-button.png"
-    title="Save translation to new term"
-    alt="Save translation to new term"
-    onclick="addTermTranslation('#tx${trans_data.ann_index}',` +
-      `${trans_data.term_lc},${trans_data.lang_id});" />`;
+    `<span class="click" onclick="addTermTranslation('#tx${trans_data.ann_index}',${trans_data.term_lc},${trans_data.lang_id});">
+      ${iconHtml('plus-button', { title: 'Save translation to new term', alt: 'Save translation to new term' })}
+    </span>`;
   }
   translations_list += `&nbsp;&nbsp;
   <span id="wait${trans_data.ann_index}">
-      <img src="icn/empty.gif" />
+      ${iconHtml('empty')}
   </span>
   </span>`;
   const transselEl = document.getElementById(`transsel${trans_data.ann_index}`);
@@ -332,7 +329,7 @@ export async function do_ajax_edit_impr_text(pagepos: number, word: string, term
   // Special case, on empty word reload the main annotations form
   if (word === '') {
     if (editImprTextDataEl) {
-      editImprTextDataEl.innerHTML = '<img src="icn/waiting2.gif" />';
+      editImprTextDataEl.innerHTML = spinnerHtml();
     }
     location.reload();
     return;
@@ -380,7 +377,7 @@ export async function do_ajax_req_sim_terms(lg_id: number, word_text: string): P
 export async function do_ajax_show_similar_terms(): Promise<void> {
   const simwordsEl = document.getElementById('simwords');
   if (simwordsEl) {
-    simwordsEl.innerHTML = '<img src="icn/waiting2.gif" />';
+    simwordsEl.innerHTML = spinnerHtml();
   }
 
   const langfieldEl = document.getElementById('langfield') as HTMLInputElement | HTMLSelectElement | null;
@@ -408,20 +405,16 @@ export function display_example_sentences(
   sentences: [string, string][],
   targetCtlId: string
 ): HTMLDivElement {
-  let img: HTMLImageElement, clickable: HTMLSpanElement, parentDiv: HTMLDivElement;
+  let clickable: HTMLSpanElement, parentDiv: HTMLDivElement;
   const outElement = document.createElement('div');
   for (let i = 0; i < sentences.length; i++) {
-    // Add the checkbox
-    img = document.createElement('img');
-    img.src = 'icn/tick-button.png';
-    img.title = 'Choose';
-    // Clickable element
+    // Clickable element with Lucide icon
     clickable = document.createElement('span');
     clickable.classList.add('click');
     clickable.dataset.action = 'copy-sentence';
     clickable.dataset.target = targetCtlId;
     clickable.dataset.sentence = sentences[i][1];
-    clickable.appendChild(img);
+    clickable.innerHTML = iconHtml('tick-button', { title: 'Choose' });
     // Create parent
     parentDiv = document.createElement('div');
     parentDiv.appendChild(clickable);

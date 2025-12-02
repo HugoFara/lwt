@@ -6,9 +6,9 @@
  * @since   2.0.3-fork
  */
 
-import { getCookie } from '../core/cookies';
 import { overlib, cClick } from '../ui/word_popup';
 import { scrollTo } from '../core/hover_intent';
+import { getTTSSettingsWithMigration, type TTSLanguageSettings } from './tts_storage';
 
 // Type for LWT_DATA global
 interface LwtLanguage {
@@ -47,12 +47,7 @@ interface ReadingConfiguration {
   voiceapi?: string;
 }
 
-// Type for TTS settings
-interface TTSSettings {
-  rate?: number;
-  pitch?: number;
-  voice?: string;
-}
+// TTSLanguageSettings is imported from tts_storage.ts
 
 // Type for fetch request structure
 interface FetchRequestOptions {
@@ -85,7 +80,7 @@ const quickMenuRoutes: Record<string, string> = {
   backup_restore: '/admin/backup',
   settings: '/admin/settings',
   text_to_speech_settings: '/admin/settings/tts',
-  INFO: '/docs/info.html'
+  INFO: '/docs/'
 };
 
 /**
@@ -369,29 +364,18 @@ export function readTextWithExternal(text: string, voice_api: string, lang: stri
 }
 
 /**
- * Retrieve TTS (Text-to-Speech) settings from cookies for a specific language.
- * Reads Rate, Pitch, and Voice settings from browser cookies.
+ * Retrieve TTS (Text-to-Speech) settings from localStorage for a specific language.
+ * Reads Rate, Pitch, and Voice settings from localStorage.
  *
  * @param language Language code to get TTS settings for
- * @returns TTSSettings object with rate, pitch, and voice properties
+ * @returns TTSLanguageSettings object with rate, pitch, and voice properties
+ *
+ * @since 3.0.0 Changed from cookies to localStorage
  */
-export function cookieTTSSettings(language: string): TTSSettings {
-  const prefix = 'tts[' + language;
-  const lang_settings: TTSSettings = {};
-  const num_vals = ['Rate', 'Pitch'];
-  const cookies = ['Rate', 'Pitch', 'Voice'];
-  let cookie_val: string | null;
-  for (const cook of cookies) {
-    cookie_val = getCookie(prefix + cook + ']');
-    if (cookie_val) {
-      if (num_vals.includes(cook)) {
-        (lang_settings as Record<string, unknown>)[cook.toLowerCase()] = parseFloat(cookie_val);
-      } else {
-        (lang_settings as Record<string, unknown>)[cook.toLowerCase()] = cookie_val;
-      }
-    }
-  }
-  return lang_settings;
+export function cookieTTSSettings(language: string): TTSLanguageSettings {
+  // Use the first two characters of the language code (e.g., "en" from "en-US")
+  const langCode = language.substring(0, 2).toLowerCase();
+  return getTTSSettingsWithMigration(langCode);
 }
 
 /**
