@@ -355,101 +355,170 @@ allowfullscreen type="text/html">
         int $currentplayerseconds,
         int $currentplaybackrate
     ): void {
+        $config = [
+            'containerId' => 'lwt-audio-player',
+            'mediaUrl' => encodeURI($audio),
+            'offset' => $offset,
+            'repeatMode' => $repeatMode,
+            'skipSeconds' => $currentplayerseconds,
+            'playbackRate' => $currentplaybackrate
+        ];
+        $skipOptions = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30];
         ?>
-<table class="lwt-audio-wrapper" cellspacing="0" cellpadding="0">
-    <tr>
-        <td class="center borderleft">
-            <span id="do-single" class="click<?php echo ($repeatMode ? '' : ' hide'); ?>" title="Toggle Repeat (Now ON)">
-                <?php echo IconHelper::render('repeat', ['alt' => 'Toggle Repeat (Now ON)', 'title' => 'Toggle Repeat (Now ON)']); ?>
-            </span>
-            <span id="do-repeat" class="click<?php echo ($repeatMode ? ' hide' : ''); ?>" title="Toggle Repeat (Now OFF)">
-                <?php echo IconHelper::render('repeat', ['alt' => 'Toggle Repeat (Now OFF)', 'title' => 'Toggle Repeat (Now OFF)', 'class' => 'icon-muted']); ?>
-            </span>
-        </td>
-        <td class="center bordermiddle">&nbsp;</td>
-        <td class="bordermiddle">
-            <!-- HTML5 Audio Player -->
-            <div id="lwt-audio-player" class="lwt-audio-player">
-                <audio preload="auto">
-                    <source src="<?php echo htmlspecialchars($audio, ENT_QUOTES, 'UTF-8'); ?>">
-                    Your browser does not support the audio element.
-                </audio>
-                <div class="lwt-audio-controls">
-                    <button type="button" class="lwt-audio-play" title="Play">
-                        <span class="sr-only">Play</span>
-                    </button>
-                    <button type="button" class="lwt-audio-pause hide" title="Pause">
-                        <span class="sr-only">Pause</span>
-                    </button>
-                    <button type="button" class="lwt-audio-stop" title="Stop">
-                        <span class="sr-only">Stop</span>
+<div x-data="audioPlayer" class="audio-player-container" x-cloak>
+    <!-- Hidden audio element -->
+    <audio preload="auto">
+        <source src="<?php echo htmlspecialchars($audio, ENT_QUOTES, 'UTF-8'); ?>">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Config data -->
+    <script type="application/json" data-audio-config><?php echo json_encode($config); ?></script>
+
+    <!-- Player UI -->
+    <div class="audio-player">
+        <!-- Play/Pause/Stop controls -->
+        <div class="audio-player-controls">
+            <button
+                type="button"
+                class="button is-small"
+                :class="isPlaying ? 'is-primary' : 'is-light'"
+                @click="togglePlay"
+                :title="isPlaying ? 'Pause' : 'Play'"
+            >
+                <?php echo IconHelper::render('play', ['x-show' => '!isPlaying', 'size' => 16]); ?>
+                <?php echo IconHelper::render('pause', ['x-show' => 'isPlaying', 'size' => 16]); ?>
+            </button>
+            <button
+                type="button"
+                class="button is-small is-light"
+                @click="stop"
+                title="Stop"
+            >
+                <?php echo IconHelper::render('square', ['size' => 16]); ?>
+            </button>
+        </div>
+
+        <!-- Progress section -->
+        <div class="audio-player-progress">
+            <div
+                class="progress-bar-container"
+                @click="seekFromEvent($event)"
+                title="Click to seek"
+            >
+                <div class="progress-bar" :style="{ width: progressPercent + '%' }"></div>
+            </div>
+            <div class="time-display">
+                <span x-text="currentTimeFormatted">0:00</span>
+                <span class="has-text-grey-light">/</span>
+                <span x-text="durationFormatted">0:00</span>
+            </div>
+        </div>
+
+        <!-- Volume control -->
+        <div class="audio-player-volume">
+            <button
+                type="button"
+                class="button is-small is-light"
+                @click="toggleMute"
+                :title="isMuted ? 'Unmute' : 'Mute'"
+            >
+                <?php echo IconHelper::render('volume-2', ['x-show' => '!isMuted && volume > 0.5', 'size' => 16]); ?>
+                <?php echo IconHelper::render('volume-1', ['x-show' => '!isMuted && volume > 0 && volume <= 0.5', 'size' => 16]); ?>
+                <?php echo IconHelper::render('volume-x', ['x-show' => 'isMuted || volume === 0', 'size' => 16]); ?>
+            </button>
+            <div
+                class="volume-bar-container"
+                @click="setVolumeFromEvent($event)"
+                title="Adjust volume"
+            >
+                <div class="volume-bar" :style="{ width: (isMuted ? 0 : volume * 100) + '%' }"></div>
+            </div>
+        </div>
+
+        <!-- Skip controls -->
+        <div class="audio-player-skip">
+            <button
+                type="button"
+                class="button is-small is-light"
+                @click="skipBackward"
+                :title="'Skip back ' + skipSeconds + 's'"
+            >
+                <?php echo IconHelper::render('skip-back', ['size' => 16]); ?>
+            </button>
+            <div class="dropdown is-hoverable is-up">
+                <div class="dropdown-trigger">
+                    <button type="button" class="button is-small is-light" aria-haspopup="true">
+                        <span x-text="skipSeconds + 's'" class="is-size-7"></span>
                     </button>
                 </div>
-                <div class="lwt-audio-progress-section">
-                    <div class="lwt-audio-progress-container">
-                        <div class="lwt-audio-progress-bar"></div>
-                    </div>
-                    <div class="lwt-audio-time">
-                        <span class="lwt-audio-current-time">0:00</span>
-                        <span class="lwt-audio-duration">0:00</span>
-                    </div>
-                </div>
-                <div class="lwt-audio-volume-section">
-                    <button type="button" class="lwt-audio-volume-btn lwt-audio-mute" title="Mute">
-                        <?php echo IconHelper::render('volume-2', ['alt' => 'Mute']); ?>
-                    </button>
-                    <button type="button" class="lwt-audio-volume-btn lwt-audio-unmute hide" title="Unmute">
-                        <?php echo IconHelper::render('volume-x', ['alt' => 'Unmute']); ?>
-                    </button>
-                    <div class="lwt-audio-volume-container">
-                        <div class="lwt-audio-volume-bar"></div>
+                <div class="dropdown-menu" role="menu">
+                    <div class="dropdown-content">
+                        <?php foreach ($skipOptions as $sec): ?>
+                        <a
+                            class="dropdown-item is-size-7"
+                            :class="{ 'is-active': skipSeconds === <?php echo $sec; ?> }"
+                            @click="setSkipSeconds(<?php echo $sec; ?>)"
+                        ><?php echo $sec; ?>s</a>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             </div>
-        </td>
-        <td class="center bordermiddle">&nbsp;</td>
-        <td class="center bordermiddle">
-            <select id="backtime" name="backtime">
-                <?php echo SelectOptionsBuilder::forSeconds($currentplayerseconds); ?>
-            </select>
-            <br />
-            <span id="backbutt" class="click">
-                <?php echo IconHelper::render('rewind', ['alt' => 'Rewind n seconds', 'title' => 'Rewind n seconds']); ?>
-            </span>&nbsp;&nbsp;
-            <span id="forwbutt" class="click">
-                <?php echo IconHelper::render('fast-forward', ['alt' => 'Forward n seconds', 'title' => 'Forward n seconds']); ?>
-            </span>
-            <span id="playTime" class="hide"></span>
-        </td>
-        <td class="center bordermiddle">&nbsp;</td>
-        <td class="center borderright">
-            <select id="playbackrate" name="playbackrate">
-                <?php echo SelectOptionsBuilder::forPlaybackRate($currentplaybackrate); ?>
-            </select>
-            <br />
-            <span id="slower" class="click">
-                <?php echo IconHelper::render('minus', ['alt' => 'Slower', 'title' => 'Slower']); ?>
-            </span>
-            &nbsp;
-            <span id="stdspeed" class="click">
-                <?php echo IconHelper::render('circle-dot', ['alt' => 'Normal', 'title' => 'Normal']); ?>
-            </span>
-            &nbsp;
-            <span id="faster" class="click">
-                <?php echo IconHelper::render('plus', ['alt' => 'Faster', 'title' => 'Faster']); ?>
-            </span>
-        </td>
-    </tr>
-</table>
-<!-- HTML5 Audio initialization config -->
-<script type="application/json" data-lwt-audio-player-config>
-<?php echo json_encode([
-    'containerId' => 'lwt-audio-player',
-    'mediaUrl' => encodeURI($audio),
-    'offset' => $offset,
-    'repeatMode' => $repeatMode
-]); ?>
-</script>
+            <button
+                type="button"
+                class="button is-small is-light"
+                @click="skipForward"
+                :title="'Skip forward ' + skipSeconds + 's'"
+            >
+                <?php echo IconHelper::render('skip-forward', ['size' => 16]); ?>
+            </button>
+        </div>
+
+        <!-- Speed controls -->
+        <div class="audio-player-speed">
+            <button
+                type="button"
+                class="button is-small is-light"
+                @click="slower"
+                title="Slower"
+                :disabled="playbackRate <= 0.5"
+            >
+                <?php echo IconHelper::render('minus', ['size' => 14]); ?>
+            </button>
+            <button
+                type="button"
+                class="button is-small"
+                :class="playbackRate === 1.0 ? 'is-light' : 'is-warning'"
+                @click="resetSpeed"
+                title="Reset to 1x speed"
+            >
+                <span x-text="playbackRateFormatted" class="is-size-7"></span>
+            </button>
+            <button
+                type="button"
+                class="button is-small is-light"
+                @click="faster"
+                title="Faster"
+                :disabled="playbackRate >= 1.5"
+            >
+                <?php echo IconHelper::render('plus', ['size' => 14]); ?>
+            </button>
+        </div>
+
+        <!-- Repeat toggle -->
+        <div class="audio-player-repeat">
+            <button
+                type="button"
+                class="button is-small"
+                :class="repeatMode ? 'is-info' : 'is-light'"
+                @click="toggleRepeat"
+                :title="repeatMode ? 'Repeat: ON' : 'Repeat: OFF'"
+            >
+                <?php echo IconHelper::render('repeat', ['size' => 16]); ?>
+            </button>
+        </div>
+    </div>
+</div>
         <?php
     }
 

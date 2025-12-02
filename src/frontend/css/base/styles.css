@@ -8,13 +8,39 @@
   display: none !important;
 }
 
-/* Override Bulma dark mode - force light theme */
+/* Override Bulma dark mode - force light theme using CSS variables */
 :root {
   color-scheme: light;
-}
 
-html {
-  background-color: #FFFFFF;
+  /* Force Bulma light scheme */
+  --bulma-scheme-brightness: light;
+
+  /* Scheme lightness values for light mode */
+  --bulma-scheme-main-l: 100%;
+  --bulma-scheme-main-bis-l: 98%;
+  --bulma-scheme-main-ter-l: 96%;
+  --bulma-scheme-invert-l: 4%;
+  --bulma-scheme-invert-bis-l: 7%;
+  --bulma-scheme-invert-ter-l: 14%;
+
+  /* Background lightness */
+  --bulma-background-l: 96%;
+
+  /* Text lightness values */
+  --bulma-text-l: 29%;
+  --bulma-text-strong-l: 21%;
+  --bulma-text-weak-l: 48%;
+
+  /* Border lightness */
+  --bulma-border-l: 86%;
+
+  /* Button lightness */
+  --bulma-button-background-l: var(--bulma-scheme-main-l);
+  --bulma-button-color-l: var(--bulma-text-strong-l);
+
+  /* Navbar item lightness */
+  --bulma-navbar-item-background-l: var(--bulma-scheme-main-l);
+  --bulma-navbar-item-color-l: var(--bulma-text-l);
 }
 
 body
@@ -27,12 +53,6 @@ body
   max-width: 900px;
   margin-left: auto;
   margin-right: auto;
-}
-
-/* Override Bulma dark mode variables */
-.hero, .card, .box, .notification, .footer {
-  background-color: inherit;
-  color: inherit;
 }
 
 /* Full-width body for test and read pages */
@@ -1439,6 +1459,7 @@ Text Cards (Active and Archived Texts)
   min-width: 160px;
   z-index: 20;
   margin-bottom: 4px;
+  display: block; /* Override Bulma's .dropdown-menu display:none - Alpine x-show handles visibility */
 }
 
 .text-card .card-dropdown .dropdown-content {
@@ -2369,6 +2390,168 @@ Action Card Styles (Alpine.js + Bulma)
 Additional styles for printing
 ***************************************************************/
 
+/**************************************************************
+Audio Player (Alpine.js + Bulma)
+***************************************************************/
+
+/* Audio player container */
+.audio-player-container {
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+}
+
+/* Hide audio element - controlled via Alpine */
+.audio-player-container audio {
+  display: none;
+}
+
+/* Main player layout - horizontal flexbox */
+.audio-player {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Play/Pause/Stop controls */
+.audio-player-controls {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* Progress section - flexible width */
+.audio-player-progress {
+  flex: 1;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background-color: #dbdbdb;
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: height 0.15s ease;
+}
+
+.progress-bar-container:hover {
+  height: 10px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(135deg, #485fc7 0%, #3273dc 100%);
+  border-radius: 4px;
+  transition: width 0.1s linear;
+  pointer-events: none;
+}
+
+.time-display {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #666;
+  justify-content: center;
+}
+
+/* Volume section */
+.audio-player-volume {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.volume-bar-container {
+  width: 60px;
+  height: 6px;
+  background-color: #dbdbdb;
+  border-radius: 3px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.volume-bar-container:hover {
+  height: 8px;
+}
+
+.volume-bar {
+  height: 100%;
+  background: linear-gradient(135deg, #48c78e 0%, #3ec487 100%);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* Skip controls */
+.audio-player-skip {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* Speed controls */
+.audio-player-speed {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex-shrink: 0;
+}
+
+/* Repeat button */
+.audio-player-repeat {
+  flex-shrink: 0;
+}
+
+/* Button icon alignment fixes */
+.audio-player .button svg {
+  width: 1em;
+  height: 1em;
+}
+
+/* Dropdown styling for skip seconds */
+.audio-player .dropdown-menu {
+  min-width: auto;
+}
+
+.audio-player .dropdown-item {
+  padding: 0.25rem 0.75rem;
+}
+
+.audio-player .dropdown-item.is-active {
+  background-color: #485fc7;
+  color: white;
+}
+
+/* Responsive: Stack controls on small screens */
+@media screen and (max-width: 600px) {
+  .audio-player {
+    justify-content: center;
+  }
+
+  .audio-player-progress {
+    order: -1;
+    width: 100%;
+    flex-basis: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .audio-player-volume {
+    display: none;
+  }
+}
+
+/* Hide elements with x-show="false" properly */
+.audio-player [x-show="false"] {
+  display: none !important;
+}
+
 @media print
 {
   .noprint
@@ -2384,6 +2567,11 @@ Additional styles for printing
   /* Hide navbar and action cards when printing */
   .navbar,
   .action-card {
+    display: none;
+  }
+
+  /* Hide audio player when printing */
+  .audio-player-container {
     display: none;
   }
 }

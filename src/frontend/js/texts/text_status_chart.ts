@@ -42,6 +42,20 @@ const STATUS_LABELS: Record<number, string> = {
 };
 
 /**
+ * Status descriptions for tooltips.
+ */
+const STATUS_DESCRIPTIONS: Record<number, string> = {
+  0: 'Words not yet saved to your vocabulary',
+  1: 'New words - just started learning',
+  2: 'Words you are beginning to recognize',
+  3: 'Words you are getting familiar with',
+  4: 'Words you almost know',
+  5: 'Words you have fully learned',
+  98: 'Words marked as ignored (punctuation, names, etc.)',
+  99: 'Words you already know well'
+};
+
+/**
  * Status order for chart segments.
  */
 const STATUS_ORDER = [0, 1, 2, 3, 4, 5, 99, 98];
@@ -127,6 +141,11 @@ export function createTextStatusChart(
         tooltip: {
           enabled: total > 0,
           callbacks: {
+            title: function(context) {
+              const datasetIndex = context[0].datasetIndex;
+              const status = STATUS_ORDER[datasetIndex];
+              return STATUS_DESCRIPTIONS[status] || '';
+            },
             label: function(context) {
               const value = context.raw as number;
               const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';

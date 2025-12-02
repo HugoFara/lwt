@@ -430,17 +430,17 @@ if ($currentTextInfo !== null && $currenttext !== null) {
     <?php echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"'); ?>
 </p>
 
-<!-- Footer -->
-<footer class="footer mt-5 py-4">
+<!-- Footer - Alpine.js Component -->
+<footer class="footer mt-5 py-4" x-data="footer()">
     <div class="content has-text-centered is-size-7">
         <p>
-            <a target="_blank" href="http://unlicense.org/" class="footer-license-link">
-                <img alt="Public Domain" title="Public Domain" src="/assets/images/public_domain.png" class="footer-license-icon" />
+            <a target="_blank" :href="licenseUrl" class="footer-license-link">
+                <img alt="Public Domain" title="Public Domain" :src="licenseImageUrl" class="footer-license-icon" />
             </a>
-            <a href="https://sourceforge.net/projects/learning-with-texts/" target="_blank">"Learning with Texts" (LWT)</a> is free
+            <a :href="links.project.href" target="_blank" x-text="links.project.text"></a> is free
             and unencumbered software released into the
-            <a href="https://en.wikipedia.org/wiki/Public_domain_software" target="_blank">PUBLIC DOMAIN</a>.
-            <a href="http://unlicense.org/" target="_blank">More information and detailed Unlicense ...</a>
+            <a :href="links.publicDomain.href" target="_blank" x-text="links.publicDomain.text"></a>.
+            <a :href="links.unlicense.href" target="_blank" x-text="links.unlicense.text"></a>
         </p>
     </div>
 </footer>

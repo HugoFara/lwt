@@ -79,6 +79,7 @@ import './testing/components/test_view';
 // Media
 import './media/media_selection';
 import './media/html5_audio_player';
+import './media/audio_player_alpine';
 
 // Feeds
 import './feeds/jq_feedwizard';
@@ -133,6 +134,7 @@ import './ui/modal';
 import './ui/sorttable';
 import './ui/lucide_icons';
 import './ui/navbar';
+import './ui/footer';
 
 // Global exports for inline PHP scripts
 import './globals';

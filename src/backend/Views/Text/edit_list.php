@@ -228,11 +228,11 @@ echo PageLayoutHelper::buildActionCard([
                 <!-- Word Statistics -->
                 <div class="text-stats">
                     <div class="stat-row">
-                        <div class="stat-item">
+                        <div class="stat-item" title="Total number of unique words in this text">
                             <span class="stat-label">Total</span>
                             <span class="stat-value" id="total_<?php echo $txid; ?>">-</span>
                         </div>
-                        <div class="stat-item">
+                        <div class="stat-item" title="Words you have saved to your vocabulary (status 1-5, Well Known, or Ignored)">
                             <span class="stat-label">Saved</span>
                             <span class="stat-value">
                                 <a class="status4" id="saved_<?php echo $txid; ?>"
@@ -240,11 +240,11 @@ echo PageLayoutHelper::buildActionCard([
                                    data_id="<?php echo $txid; ?>">-</a>
                             </span>
                         </div>
-                        <div class="stat-item">
+                        <div class="stat-item" title="Words you haven't saved yet - these appear highlighted when reading">
                             <span class="stat-label">Unknown</span>
                             <span class="stat-value status0" id="todo_<?php echo $txid; ?>">-</span>
                         </div>
-                        <div class="stat-item">
+                        <div class="stat-item" title="Percentage of unknown words - lower means easier to read">
                             <span class="stat-label">Unkn.%</span>
                             <span class="stat-value" id="unknownpercent_<?php echo $txid; ?>">-</span>
                         </div>
