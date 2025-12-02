@@ -9,11 +9,13 @@ use Lwt\Services\WordService;
 use Lwt\Services\ExportService;
 use Lwt\Services\TagService;
 use Lwt\Services\DictionaryService;
+use Lwt\Services\TextService;
 
 require_once __DIR__ . '/../../../Services/WordService.php';
 require_once __DIR__ . '/../../../Services/ExportService.php';
 require_once __DIR__ . '/../../../Services/TagService.php';
 require_once __DIR__ . '/../../../Services/DictionaryService.php';
+require_once __DIR__ . '/../../../Services/TextService.php';
 
 /**
  * Handler for text-related API operations.
@@ -23,10 +25,12 @@ require_once __DIR__ . '/../../../Services/DictionaryService.php';
 class TextHandler
 {
     private WordService $wordService;
+    private TextService $textService;
 
     public function __construct()
     {
         $this->wordService = new WordService();
+        $this->textService = new TextService();
     }
     /**
      * Save the reading position of the text.
@@ -475,5 +479,43 @@ class TextHandler
     public function formatGetWords(int $textId): array
     {
         return $this->getWords($textId);
+    }
+
+    /**
+     * Format response for getting texts by language.
+     *
+     * Returns paginated texts for a specific language (for grouped texts page).
+     *
+     * @param int   $langId Language ID
+     * @param array $params Query parameters (page, per_page, sort)
+     *
+     * @return array{texts: array, pagination: array}
+     */
+    public function formatTextsByLanguage(int $langId, array $params): array
+    {
+        $page = isset($params['page']) ? max(1, (int)$params['page']) : 1;
+        $perPage = isset($params['per_page']) ? max(1, min(100, (int)$params['per_page'])) : 10;
+        $sort = isset($params['sort']) ? (int)$params['sort'] : 1;
+
+        return $this->textService->getTextsForLanguage($langId, $page, $perPage, $sort);
+    }
+
+    /**
+     * Format response for getting archived texts by language.
+     *
+     * Returns paginated archived texts for a specific language (for grouped archived texts page).
+     *
+     * @param int   $langId Language ID
+     * @param array $params Query parameters (page, per_page, sort)
+     *
+     * @return array{texts: array, pagination: array}
+     */
+    public function formatArchivedTextsByLanguage(int $langId, array $params): array
+    {
+        $page = isset($params['page']) ? max(1, (int)$params['page']) : 1;
+        $perPage = isset($params['per_page']) ? max(1, min(100, (int)$params['per_page'])) : 10;
+        $sort = isset($params['sort']) ? (int)$params['sort'] : 1;
+
+        return $this->textService->getArchivedTextsForLanguage($langId, $page, $perPage, $sort);
     }
 }

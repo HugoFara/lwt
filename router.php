@@ -20,10 +20,45 @@
 $uri = $_SERVER['REQUEST_URI'] ?? '/';
 $path = parse_url($uri, PHP_URL_PATH);
 
+// Serve documentation files directly (VitePress output in /docs)
+if (preg_match('#^/docs(/|$)#', $path)) {
+    $docPath = __DIR__ . $path;
+
+    // If path ends with / or has no extension, try index.html
+    if (is_dir($docPath)) {
+        $docPath = rtrim($docPath, '/') . '/index.html';
+    } elseif (!pathinfo($path, PATHINFO_EXTENSION)) {
+        $docPath .= '.html';
+    }
+
+    if (file_exists($docPath)) {
+        // Set appropriate content type
+        $ext = pathinfo($docPath, PATHINFO_EXTENSION);
+        $mimeTypes = [
+            'html' => 'text/html',
+            'css' => 'text/css',
+            'js' => 'application/javascript',
+            'json' => 'application/json',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+            'ico' => 'image/x-icon',
+            'woff' => 'font/woff',
+            'woff2' => 'font/woff2',
+        ];
+        $contentType = $mimeTypes[$ext] ?? 'application/octet-stream';
+        header("Content-Type: $contentType");
+        readfile($docPath);
+        return true;
+    }
+}
+
 // Serve static files directly
 $staticExtensions = [
     'css', 'js', 'png', 'jpg', 'jpeg', 'gif',
-    'ico', 'svg', 'woff', 'woff2', 'ttf', 'eot', 'map'
+    'ico', 'svg', 'woff', 'woff2', 'ttf', 'eot', 'map', 'html'
 ];
 $ext = pathinfo($path, PATHINFO_EXTENSION);
 if (in_array(strtolower($ext), $staticExtensions) && file_exists(__DIR__ . $path)) {

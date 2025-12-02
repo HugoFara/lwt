@@ -792,4 +792,68 @@ class LanguageService
         mysqli_free_result($res);
         return $result;
     }
+
+    /**
+     * Get languages that have at least one text, with text counts.
+     *
+     * Returns only languages with texts (for display in grouped text list).
+     *
+     * @return array<int, array{id: int, name: string, text_count: int}>
+     */
+    public function getLanguagesWithTextCounts(): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        $sql = "SELECT l.LgID, l.LgName, COUNT(t.TxID) AS text_count
+                FROM {$tbpref}languages l
+                INNER JOIN {$tbpref}texts t ON t.TxLgID = l.LgID
+                WHERE l.LgName <> ''
+                GROUP BY l.LgID, l.LgName
+                HAVING COUNT(t.TxID) > 0
+                ORDER BY l.LgName";
+
+        $res = Connection::query($sql);
+        $result = [];
+        while ($record = mysqli_fetch_assoc($res)) {
+            $result[] = [
+                'id' => (int)$record['LgID'],
+                'name' => (string)$record['LgName'],
+                'text_count' => (int)$record['text_count']
+            ];
+        }
+        mysqli_free_result($res);
+        return $result;
+    }
+
+    /**
+     * Get languages that have at least one archived text, with archived text counts.
+     *
+     * Returns only languages with archived texts (for display in grouped archived text list).
+     *
+     * @return array<int, array{id: int, name: string, text_count: int}>
+     */
+    public function getLanguagesWithArchivedTextCounts(): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        $sql = "SELECT l.LgID, l.LgName, COUNT(a.AtID) AS text_count
+                FROM {$tbpref}languages l
+                INNER JOIN {$tbpref}archivedtexts a ON a.AtLgID = l.LgID
+                WHERE l.LgName <> ''
+                GROUP BY l.LgID, l.LgName
+                HAVING COUNT(a.AtID) > 0
+                ORDER BY l.LgName";
+
+        $res = Connection::query($sql);
+        $result = [];
+        while ($record = mysqli_fetch_assoc($res)) {
+            $result[] = [
+                'id' => (int)$record['LgID'],
+                'name' => (string)$record['LgName'],
+                'text_count' => (int)$record['text_count']
+            ];
+        }
+        mysqli_free_result($res);
+        return $result;
+    }
 }

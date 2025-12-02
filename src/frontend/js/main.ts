@@ -96,6 +96,7 @@ import './feeds/feed_wizard_step4';
 
 // Texts
 import './texts/text_list';
+import './texts/texts_grouped_app';
 import './texts/text_status_chart';
 import './texts/youtube_import';
 import './texts/text_check_display';

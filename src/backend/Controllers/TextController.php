@@ -315,7 +315,7 @@ class TextController extends BaseController
             substr($this->param('op'), -8) == 'and Open');
 
         if (!$noPagestart) {
-            PageLayoutHelper::renderPageStart($this->languageService->getLanguageName($currentLang) . ' Texts', true);
+            PageLayoutHelper::renderPageStart('Texts', true);
         }
 
         $message = '';
@@ -554,97 +554,27 @@ class TextController extends BaseController
     /**
      * Show the texts list.
      *
-     * @param string|int $currentLang Current language filter
+     * The view is now API-driven with Alpine.js, so we only need to pass
+     * the message and statuses for rendering. Texts are loaded via
+     * /api/v1/languages/with-texts and /api/v1/texts/by-language/{id} endpoints.
+     *
+     * @param string|int $currentLang Current language filter (kept for compatibility)
      * @param string     $message     Message to display
      *
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
-     * @psalm-suppress UnusedParam $message is used in included view file
+     * @psalm-suppress UnusedParam $currentLang is kept for compatibility
      */
     private function showTextsList(string|int $currentLang, string $message): void
     {
-        $currentSort = (int) ParamHelpers::processDBParam("sort", 'currenttextsort', '1', true);
-        $currentPage = (int) ParamHelpers::processSessParam("page", "currenttextpage", '1', true);
-        $currentQuery = (string) ParamHelpers::processSessParam("query", "currenttextquery", '', false);
-        $currentQueryMode = (string) ParamHelpers::processSessParam(
-            "query_mode",
-            "currenttextquerymode",
-            'title,text',
-            false
-        );
-        $currentRegexMode = Settings::getWithDefault("set-regex-mode");
-        // Cast to string for Validation::textTag
-        $langForTag = (string) $currentLang;
-        $currentTag1 = Validation::textTag(
-            (string) ParamHelpers::processSessParam("tag1", "currenttexttag1", '', false),
-            $langForTag
-        );
-        $currentTag2 = Validation::textTag(
-            (string) ParamHelpers::processSessParam("tag2", "currenttexttag2", '', false),
-            $langForTag
-        );
-        $currentTag12 = (string) ParamHelpers::processSessParam("tag12", "currenttexttag12", '', false);
-
-        // Build WHERE clauses
-        $whLang = ($currentLang != '') ? (' and TxLgID=' . $currentLang) : '';
-
-        // Build query WHERE clause
-        $whQuery = $this->textService->buildTextQueryWhereClause(
-            $currentQuery,
-            $currentQueryMode,
-            $currentRegexMode
-        );
-
-        // Validate regex query
-        if ($currentQuery !== '' && $currentRegexMode !== '') {
-            if (!$this->textService->validateRegexQuery($currentQuery, $currentRegexMode)) {
-                $whQuery = '';
-                unset($_SESSION['currentwordquery']);
-                if ($this->hasParam('query')) {
-                    echo '<p id="hide3" class="warning-message">' .
-                        '+++ Warning: Invalid Search +++</p>';
-                }
-            }
-        }
-
-        // Build tag HAVING clause
-        $whTag = $this->textService->buildTextTagHavingClause(
-            $currentTag1,
-            $currentTag2,
-            $currentTag12
-        );
-
-        // Get texts count and list
-        $totalCount = $this->textService->getTextCount($whLang, $whQuery, $whTag);
-        $perPage = $this->textService->getTextsPerPage();
-        $pagination = $this->textService->getPagination($totalCount, $currentPage, $perPage);
-
-        $texts = [];
-        if ($totalCount > 0) {
-            $texts = $this->textService->getTextsList(
-                $whLang,
-                $whQuery,
-                $whTag,
-                $currentSort,
-                $pagination['currentPage'],
-                $perPage
-            );
-        }
-
-        // Get word statuses for chart display
+        // Get word statuses for potential chart display
         $statuses = \Lwt\Services\WordStatusService::getStatuses();
         $statuses[0]["name"] = 'Unknown';
         $statuses[0]["abbr"] = 'Ukn';
 
-        // Get word count display settings
-        $showCounts = Settings::getWithDefault('set-show-text-word-counts');
-        if (strlen($showCounts) != 5) {
-            $showCounts = "11111";
-        }
-
-        // Get languages for filter dropdown
-        $languages = $this->languageService->getLanguagesForSelect();
+        // Get current active language ID for default expansion
+        $activeLanguageId = (int) Settings::get('currentlanguage');
 
         include __DIR__ . '/../Views/Text/edit_list.php';
     }

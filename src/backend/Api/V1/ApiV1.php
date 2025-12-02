@@ -212,8 +212,20 @@ class ApiV1
 
     private function handleLanguagesGet(array $fragments): void
     {
+        // Handle /languages/with-texts - returns languages that have texts with counts
+        if (($fragments[1] ?? '') === 'with-texts') {
+            Response::success($this->languageHandler->formatLanguagesWithTexts());
+            return;
+        }
+
+        // Handle /languages/with-archived-texts - returns languages that have archived texts with counts
+        if (($fragments[1] ?? '') === 'with-archived-texts') {
+            Response::success($this->languageHandler->formatLanguagesWithArchivedTexts());
+            return;
+        }
+
         if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
-            Response::error('Expected Language ID', 404);
+            Response::error('Expected Language ID, "with-texts", or "with-archived-texts"', 404);
         }
         if (($fragments[2] ?? '') !== 'reading-configuration') {
             Response::error('Expected "reading-configuration"', 404);
@@ -341,6 +353,24 @@ class ApiV1
             Response::success($this->statisticsHandler->formatTextsStatistics(
                 $params["texts_id"]
             ));
+        } elseif (($fragments[1] ?? '') === 'by-language') {
+            // GET /texts/by-language/{langId} - get paginated texts for a language
+            if (!isset($fragments[2]) || !ctype_digit($fragments[2])) {
+                Response::error('Expected Language ID after "by-language"', 404);
+            }
+            Response::success($this->textHandler->formatTextsByLanguage(
+                (int)$fragments[2],
+                $params
+            ));
+        } elseif (($fragments[1] ?? '') === 'archived-by-language') {
+            // GET /texts/archived-by-language/{langId} - get paginated archived texts for a language
+            if (!isset($fragments[2]) || !ctype_digit($fragments[2])) {
+                Response::error('Expected Language ID after "archived-by-language"', 404);
+            }
+            Response::success($this->textHandler->formatArchivedTextsByLanguage(
+                (int)$fragments[2],
+                $params
+            ));
         } elseif (isset($fragments[1]) && ctype_digit($fragments[1])) {
             $textId = (int)$fragments[1];
             if (($fragments[2] ?? '') === 'words') {
@@ -350,7 +380,7 @@ class ApiV1
                 Response::error('Expected "words"', 404);
             }
         } else {
-            Response::error('Expected "statistics" or text ID', 404);
+            Response::error('Expected "statistics", "by-language", "archived-by-language", or text ID', 404);
         }
     }
 

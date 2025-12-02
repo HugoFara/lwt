@@ -744,6 +744,146 @@ class TextService
     }
 
     /**
+     * Get paginated texts for a specific language.
+     *
+     * Used by the grouped texts page to load texts per language section.
+     *
+     * @param int $langId  Language ID
+     * @param int $page    Page number (1-based)
+     * @param int $perPage Items per page
+     * @param int $sort    Sort index (1-based): 1=title, 2=newest, 3=oldest
+     *
+     * @return array{texts: array, pagination: array{current_page: int, per_page: int, total: int, total_pages: int}}
+     */
+    public function getTextsForLanguage(
+        int $langId,
+        int $page,
+        int $perPage,
+        int $sort
+    ): array {
+        $sorts = ['TxTitle', 'TxID DESC', 'TxID ASC'];
+        $sortColumn = $sorts[max(0, min($sort - 1, count($sorts) - 1))];
+        $offset = ($page - 1) * $perPage;
+
+        // Get total count
+        $countSql = "SELECT COUNT(*) AS value FROM {$this->tbpref}texts WHERE TxLgID = {$langId}";
+        $total = (int) Connection::fetchValue($countSql);
+        $totalPages = (int) ceil($total / $perPage);
+
+        // Get texts with tags
+        $sql = "SELECT TxID, TxTitle, TxAudioURI, TxSourceURI,
+            LENGTH(TxAnnotatedText) AS annotlen,
+            IF(
+                COUNT(T2Text)=0,
+                '',
+                CONCAT('[', GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ', '), ']')
+            ) AS taglist
+            FROM (
+                ({$this->tbpref}texts LEFT JOIN {$this->tbpref}texttags ON TxID = TtTxID)
+                LEFT JOIN {$this->tbpref}tags2 ON T2ID = TtT2ID
+            )
+            WHERE TxLgID = {$langId}
+            GROUP BY TxID
+            ORDER BY {$sortColumn}
+            LIMIT {$offset}, {$perPage}";
+
+        $res = Connection::query($sql);
+        $texts = [];
+        while ($record = mysqli_fetch_assoc($res)) {
+            $texts[] = [
+                'id' => (int) $record['TxID'],
+                'title' => (string) $record['TxTitle'],
+                'has_audio' => !empty($record['TxAudioURI']),
+                'source_uri' => (string) ($record['TxSourceURI'] ?? ''),
+                'has_source' => !empty($record['TxSourceURI']) && substr($record['TxSourceURI'], 0, 1) !== '#',
+                'annotated' => !empty($record['annotlen']),
+                'taglist' => (string) $record['taglist']
+            ];
+        }
+        mysqli_free_result($res);
+
+        return [
+            'texts' => $texts,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => $totalPages
+            ]
+        ];
+    }
+
+    /**
+     * Get paginated archived texts for a specific language.
+     *
+     * Used by the grouped archived texts page to load texts per language section.
+     *
+     * @param int $langId  Language ID
+     * @param int $page    Page number (1-based)
+     * @param int $perPage Items per page
+     * @param int $sort    Sort index (1-based): 1=title, 2=newest, 3=oldest
+     *
+     * @return array{texts: array, pagination: array{current_page: int, per_page: int, total: int, total_pages: int}}
+     */
+    public function getArchivedTextsForLanguage(
+        int $langId,
+        int $page,
+        int $perPage,
+        int $sort
+    ): array {
+        $sorts = ['AtTitle', 'AtID DESC', 'AtID ASC'];
+        $sortColumn = $sorts[max(0, min($sort - 1, count($sorts) - 1))];
+        $offset = ($page - 1) * $perPage;
+
+        // Get total count
+        $countSql = "SELECT COUNT(*) AS value FROM {$this->tbpref}archivedtexts WHERE AtLgID = {$langId}";
+        $total = (int) Connection::fetchValue($countSql);
+        $totalPages = (int) ceil($total / $perPage);
+
+        // Get archived texts with tags
+        $sql = "SELECT AtID, AtTitle, AtAudioURI, AtSourceURI,
+            LENGTH(AtAnnotatedText) AS annotlen,
+            IF(
+                COUNT(T2Text)=0,
+                '',
+                CONCAT('[', GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ', '), ']')
+            ) AS taglist
+            FROM (
+                ({$this->tbpref}archivedtexts LEFT JOIN {$this->tbpref}archtexttags ON AtID = AgAtID)
+                LEFT JOIN {$this->tbpref}tags2 ON T2ID = AgT2ID
+            )
+            WHERE AtLgID = {$langId}
+            GROUP BY AtID
+            ORDER BY {$sortColumn}
+            LIMIT {$offset}, {$perPage}";
+
+        $res = Connection::query($sql);
+        $texts = [];
+        while ($record = mysqli_fetch_assoc($res)) {
+            $texts[] = [
+                'id' => (int) $record['AtID'],
+                'title' => (string) $record['AtTitle'],
+                'has_audio' => !empty($record['AtAudioURI']),
+                'source_uri' => (string) ($record['AtSourceURI'] ?? ''),
+                'has_source' => !empty($record['AtSourceURI']),
+                'annotated' => !empty($record['annotlen']),
+                'taglist' => (string) $record['taglist']
+            ];
+        }
+        mysqli_free_result($res);
+
+        return [
+            'texts' => $texts,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => $totalPages
+            ]
+        ];
+    }
+
+    /**
      * Build WHERE clause for query filtering (active texts).
      *
      * @param string $query     Query string

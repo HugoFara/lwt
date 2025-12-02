@@ -180,4 +180,32 @@ class LanguageHandler
         $advanced = $advancedSearch ? -1 : null;
         return $this->getSentencesWithTerm($langId, $wordLc, $advanced);
     }
+
+    /**
+     * Format response for languages with text counts.
+     *
+     * Returns languages that have at least one text, for grouped texts page.
+     *
+     * @return array{languages: array<int, array{id: int, name: string, text_count: int}>}
+     */
+    public function formatLanguagesWithTexts(): array
+    {
+        return [
+            'languages' => $this->languageService->getLanguagesWithTextCounts()
+        ];
+    }
+
+    /**
+     * Format response for languages with archived text counts.
+     *
+     * Returns languages that have at least one archived text, for grouped archived texts page.
+     *
+     * @return array{languages: array<int, array{id: int, name: string, text_count: int}>}
+     */
+    public function formatLanguagesWithArchivedTexts(): array
+    {
+        return [
+            'languages' => $this->languageService->getLanguagesWithArchivedTextCounts()
+        ];
+    }
 }

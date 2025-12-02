@@ -13,6 +13,8 @@ class Endpoints
      */
     private const ROUTES = [
         'languages' => ['GET'],
+        'languages/with-texts' => ['GET'],
+        'languages/with-archived-texts' => ['GET'],
         'media-files' => ['GET'],
         'phonetic-reading' => ['GET'],
         'review/next-word' => ['GET'],
@@ -37,6 +39,8 @@ class Endpoints
         'terms/bulk-status' => ['PUT'],
         'texts' => ['GET', 'POST', 'PUT'],
         'texts/statistics' => ['GET'],
+        'texts/by-language' => ['GET'],
+        'texts/archived-by-language' => ['GET'],
         'feeds' => ['POST'],
         'version' => ['GET'],
     ];

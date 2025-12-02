@@ -121,7 +121,7 @@ export interface TestStoreState {
   configure(config: TestConfig): void;
   nextWord(): Promise<void>;
   revealAnswer(): void;
-  updateStatus(status: number): Promise<void>;
+  updateStatus(status: number, isCorrect?: boolean): Promise<void>;
   incrementStatus(): Promise<void>;
   decrementStatus(): Promise<void>;
   skipWord(): Promise<void>;
@@ -304,14 +304,16 @@ function createTestStore(): TestStoreState {
 
     /**
      * Update the status of the current word.
+     *
+     * @param status    New status value (1-5)
+     * @param isCorrect Whether the user answered correctly (true=knew it, false=didn't know)
      */
-    async updateStatus(status: number): Promise<void> {
+    async updateStatus(status: number, isCorrect: boolean = true): Promise<void> {
       if (!this.currentWord || this.isLoading) return;
 
       this.isLoading = true;
 
       try {
-        const oldStatus = this.currentWord.status;
         const response = await ReviewApi.updateStatus(
           this.currentWord.wordId,
           status
@@ -323,10 +325,6 @@ function createTestStore(): TestStoreState {
           return;
         }
 
-        // Determine if this was correct or wrong
-        const statusChange = status - oldStatus;
-        const isCorrect = statusChange >= 0;
-
         // Update progress
         this.progress.remaining--;
         if (isCorrect) {
@@ -337,6 +335,10 @@ function createTestStore(): TestStoreState {
 
         // Play feedback sound
         this.playSound(isCorrect);
+
+        // Reset loading state before fetching next word
+        // (nextWord() checks isLoading and returns early if true)
+        this.isLoading = false;
 
         // Fetch next word
         await this.nextWord();
@@ -354,7 +356,7 @@ function createTestStore(): TestStoreState {
       if (!this.currentWord || !this.answerRevealed) return;
 
       const newStatus = calculateNewStatus(this.currentWord.status, 1);
-      await this.updateStatus(newStatus);
+      await this.updateStatus(newStatus, true);
     },
 
     /**
@@ -364,7 +366,7 @@ function createTestStore(): TestStoreState {
       if (!this.currentWord || !this.answerRevealed) return;
 
       const newStatus = calculateNewStatus(this.currentWord.status, -1);
-      await this.updateStatus(newStatus);
+      await this.updateStatus(newStatus, false);
     },
 
     /**

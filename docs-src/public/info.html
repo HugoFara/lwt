@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirecting to LWT Documentation...</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+    }
+    a {
+      color: #C00000;
+    }
+  </style>
+  <script>
+    /**
+     * Backward Compatibility Redirect
+     *
+     * Maps old info.html anchor links to new VitePress page URLs.
+     * This preserves bookmarks and external links to the old documentation.
+     */
+    const anchorMap = {
+      // Guide pages
+      'getting-started': '/docs/guide/getting-started',
+      'preface': '/docs/guide/getting-started',
+      'abstract': '/docs/guide/getting-started',
+      'install': '/docs/guide/installation',
+      'postinstall': '/docs/guide/post-installation',
+      'learn': '/docs/guide/how-to-learn',
+      'howto': '/docs/guide/how-to-use',
+      'faq': '/docs/guide/faq',
+
+      // Troubleshooting
+      'ipad': '/docs/guide/troubleshooting/ipad',
+      'wordpress': '/docs/guide/troubleshooting/wordpress',
+
+      // Reference pages
+      'features': '/docs/reference/features',
+      'newfeatures': '/docs/reference/new-features',
+      'restrictions': '/docs/reference/restrictions',
+      'langsetup': '/docs/reference/language-setup',
+      'termscores': '/docs/reference/term-scores',
+      'keybind': '/docs/reference/keyboard-shortcuts',
+      'export': '/docs/reference/export-templates',
+      'database': '/docs/reference/database-schema',
+
+      // Developer pages
+      'api': '/docs/developer/api',
+      'contribute': '/docs/developer/contributing',
+
+      // Legal pages
+      'UNLICENSE': '/docs/legal/license',
+      'thirdpartylicenses': '/docs/legal/third-party-licenses',
+      'links': '/docs/legal/links',
+
+      // Other
+      'CHANGELOG': '/docs/changelog',
+      'current': '/docs/',
+      'screencasts': '/docs/'
+    };
+
+    // Get the anchor from the URL hash
+    const hash = window.location.hash.substring(1);
+
+    // Redirect to the appropriate page
+    const target = anchorMap[hash] || '/docs/';
+    window.location.replace(target);
+  </script>
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=/docs/">
+  </noscript>
+</head>
+<body>
+  <div class="container">
+    <p>Redirecting to <a href="/docs/">LWT Documentation</a>...</p>
+    <p><small>If you are not redirected, <a href="/docs/">click here</a>.</small></p>
+  </div>
+</body>
+</html>
