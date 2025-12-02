@@ -9,7 +9,7 @@ import { getLangFromDict, createTheDictUrl, owin } from '../terms/dictionary';
 import { speechDispatcher } from '../core/user_interactions';
 import { getAttrElement } from './text_annotations';
 import { cClick } from '../ui/word_popup';
-import { showRightFrames } from './frame_management';
+import { loadModalFrame, loadDictionaryFrame } from './frame_management';
 import { get_position_from_id } from '../core/ajax_utilities';
 import { scrollTo } from '../core/hover_intent';
 
@@ -115,7 +115,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     curr.classList.add('kwordmarked');
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
-    showRightFrames(
+    loadModalFrame(
       'show_word.php?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
         encodeURIComponent(ann)
     );
@@ -128,7 +128,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     curr.classList.add('kwordmarked');
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
-    showRightFrames(
+    loadModalFrame(
       'show_word.php?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
         encodeURIComponent(ann)
     );
@@ -157,7 +157,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     curr.classList.add('kwordmarked');
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
-    showRightFrames(
+    loadModalFrame(
       'show_word.php?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
         encodeURIComponent(ann)
     );
@@ -187,7 +187,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     curr.classList.add('kwordmarked');
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
-    showRightFrames(
+    loadModalFrame(
       'show_word.php?wid=' + getAttrElement(curr, 'data_wid') + '&ann=' +
         encodeURIComponent(ann)
     );
@@ -223,11 +223,11 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
             statusVal = i + '&sl=' + sl + '&tl=' + tl;
           }
         }
-        showRightFrames(
+        loadModalFrame(
           'set_word_on_hover.php?text=' + txt + '&tid=' + LWT_DATA.text.id + '&status=' + statusVal
         );
       } else {
-        showRightFrames(
+        loadModalFrame(
           'set_word_status.php?wid=' + wid + '&tid=' + LWT_DATA.text.id + '&ord=' + ord +
             '&status=' + i
         );
@@ -237,12 +237,12 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   }
   if (keyCode === 73) { // I : status=98
     if (stat === '0') {
-      showRightFrames(
+      loadModalFrame(
         'set_word_on_hover.php?text=' + txt + '&tid=' + LWT_DATA.text.id +
           '&status=98'
       );
     } else {
-      showRightFrames(
+      loadModalFrame(
         'set_word_status.php?wid=' + wid + '&tid=' + LWT_DATA.text.id +
           '&ord=' + ord + '&status=98'
       );
@@ -251,11 +251,11 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   }
   if (keyCode === 87) { // W : status=99
     if (stat === '0') {
-      showRightFrames(
+      loadModalFrame(
         'set_word_on_hover.php?text=' + txt + '&tid=' + LWT_DATA.text.id + '&status=99'
       );
     } else {
-      showRightFrames(
+      loadModalFrame(
         'set_word_status.php?wid=' + wid + '&tid=' + LWT_DATA.text.id + '&ord=' + ord +
           '&status=99'
       );
@@ -289,7 +289,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     if (popup) {
       owin('trans.php?x=1&i=' + ord + '&t=' + LWT_DATA.text.id);
     } else if (open_url) {
-      showRightFrames(undefined, 'trans.php?x=1&i=' + ord + '&t=' + LWT_DATA.text.id);
+      loadDictionaryFrame('trans.php?x=1&i=' + ord + '&t=' + LWT_DATA.text.id);
     }
     return false;
   }
@@ -325,7 +325,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
       if (popup) {
         owin(createTheDictUrl(target_url, txt));
       } else {
-        showRightFrames(undefined, createTheDictUrl(target_url, txt));
+        loadDictionaryFrame(createTheDictUrl(target_url, txt));
       }
     }, 10);
   }
@@ -339,7 +339,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     } else {
       url = '/word/edit?wid=' + wid + '&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;
     }
-    showRightFrames(url);
+    loadModalFrame(url);
     return false;
   }
   return true;

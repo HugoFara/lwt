@@ -34,7 +34,7 @@ import {
 export { overlib, CAPTION, cClick, nd } from '../ui/word_popup';
 
 // Note: The following functions are used in HTML string templates (onclick handlers)
-// and accessed via window at runtime: showRightFrames, confirmDelete, successSound, failureSound
+// and accessed via window at runtime: showRightFramesPanel, confirmDelete, successSound, failureSound
 // They are exported to window in globals.ts
 
 // Type for LWT_DATA global
@@ -279,7 +279,7 @@ export function buildKnownWordPopupContent(
   editLink.href = `/word/edit?tid=${context.textId}&ord=${context.position}&wid=${context.wordId}`;
   editLink.target = 'ro';
   editLink.textContent = 'Edit term';
-  editLink.onclick = () => { window.showRightFrames?.(); };
+  editLink.onclick = () => { window.showRightFramesPanel?.(); };
   actionsRow.appendChild(editLink);
 
   actionsRow.appendChild(document.createTextNode(' | '));
@@ -674,7 +674,7 @@ export function run_overlib_test(
   overlib_string += '<b>' + escape_html_chars(make_tooltip(txt, trans, roman, String(stat))) +
     '</b><br />' +
     ' <a href="/word/edit-term?wid=' + wid +
-    '" target="ro" onclick="showRightFrames();">Edit term</a><br />' +
+    '" target="ro" onclick="showRightFramesPanel();">Edit term</a><br />' +
     createTheDictLink(wblink1, txt, 'Dict1', 'Lookup Term: ') +
     createTheDictLink(wblink2, txt, 'Dict2', '') +
     createTheDictLink(wblink3, txt, 'Trans', '') +
@@ -878,7 +878,7 @@ export function make_overlib_link_change_status(
   return ' <a href="set_word_status.php?tid=' + txid +
     '&amp;ord=' + torder +
     '&amp;wid=' + wid +
-    '&amp;status=' + newstat + '" target="ro" onclick="showRightFrames();">' +
+    '&amp;status=' + newstat + '" target="ro" onclick="showRightFramesPanel();">' +
     '<span title="' + getStatusName(newstat) + '">[' +
     getStatusAbbr(newstat) + ']</span></a> ';
 }
@@ -897,7 +897,7 @@ export function make_overlib_link_change_status_test2(
   newstat: number
 ): string {
   let output = ' <a href="set_test_status.php?wid=' + wid +
-    '&amp;status=' + newstat + '&amp;ajax=1" target="ro" onclick="showRightFrames();">' +
+    '&amp;status=' + newstat + '&amp;ajax=1" target="ro" onclick="showRightFramesPanel();">' +
     '<span title="' + getStatusName(newstat) + '">[';
   output += (Number(oldstat) === newstat) ? '◆' : getStatusAbbr(newstat);
   output += ']</span></a> ';
@@ -920,7 +920,7 @@ export function make_overlib_link_change_status_test(
 ): string {
   return ' <a href="set_test_status.php?wid=' + wid +
     '&amp;stchange=' + plusminus +
-    '&amp;ajax=1" target="ro" onclick="showRightFrames();' +
+    '&amp;ajax=1" target="ro" onclick="showRightFramesPanel();' +
     (plusminus > 0 ? 'successSound()' : 'failureSound()') + ';">' +
     text + '</a> ';
 }
@@ -942,7 +942,7 @@ export function make_overlib_link_new_word(
 ): string {
   return ' <a href="/word/edit?tid=' + txid +
     '&amp;ord=' + torder +
-    '&amp;wid=' + wid + '" target="ro" onclick="showRightFrames();">Learn term</a> ';
+    '&amp;wid=' + wid + '" target="ro" onclick="showRightFramesPanel();">Learn term</a> ';
 }
 
 /**
@@ -960,7 +960,7 @@ export function make_overlib_link_edit_multiword(
 ): string {
   return ' <a href="edit_mword.php?tid=' + txid +
     '&amp;ord=' + torder +
-    '&amp;wid=' + wid + '" target="ro" onclick="showRightFrames();">Edit term</a> ';
+    '&amp;wid=' + wid + '" target="ro" onclick="showRightFramesPanel();">Edit term</a> ';
 }
 
 /**
@@ -980,7 +980,7 @@ export function make_overlib_link_edit_multiword_title(
 ): string {
   return '<a style="color:yellow" href="edit_mword.php?tid=' + txid +
     '&amp;ord=' + torder +
-    '&amp;wid=' + wid + '" target="ro" onclick="showRightFrames();">' +
+    '&amp;wid=' + wid + '" target="ro" onclick="showRightFramesPanel();">' +
     text + '</a>';
 }
 
@@ -1002,7 +1002,7 @@ export function make_overlib_link_create_edit_multiword(
   return ' <a href="edit_mword.php?tid=' + txid +
     '&amp;ord=' + torder +
     '&amp;txt=' + txt +
-    '" target="ro" onclick="showRightFrames();">' +
+    '" target="ro" onclick="showRightFramesPanel();">' +
     len + '..' + escape_html_chars(txt.substring(2).trim()) + '</a> ';
 }
 
@@ -1024,7 +1024,7 @@ export function make_overlib_link_create_edit_multiword_rtl(
   return ' <a dir="rtl" href="edit_mword.php?tid=' + txid +
     '&amp;ord=' + torder +
     '&amp;txt=' + txt +
-    '" target="ro" onclick="showRightFrames();">' +
+    '" target="ro" onclick="showRightFramesPanel();">' +
     len + '..' + escape_html_chars(txt.substring(2).trim()) + '</a> ';
 }
 
@@ -1045,7 +1045,7 @@ export function make_overlib_link_edit_word(
     '&amp;ord=' + torder +
     '&amp;wid=' + wid;
   return ' <a href="' + url +
-    ' " target="ro" onclick="showRightFrames()">Edit term</a> ';
+    ' " target="ro" onclick="showRightFramesPanel()">Edit term</a> ';
 }
 
 /**
@@ -1065,7 +1065,7 @@ export function make_overlib_link_edit_word_title(
 ): string {
   return '<a style="color:yellow" href="/word/edit?tid=' +
     txid + '&amp;ord=' + torder +
-    '&amp;wid=' + wid + '" target="ro" onclick="showRightFrames();">' +
+    '&amp;wid=' + wid + '" target="ro" onclick="showRightFramesPanel();">' +
     text + '</a>';
 }
 
@@ -1080,7 +1080,7 @@ export function make_overlib_link_delete_word(
   txid: number,
   wid: string | number
 ): string {
-  return ' <a onclick="showRightFrames(); return confirmDelete();" ' +
+  return ' <a onclick="showRightFramesPanel(); return confirmDelete();" ' +
     'href="delete_word.php?wid=' + wid + '&amp;tid=' + txid +
     '" target="ro">Delete term</a> ';
 }
@@ -1096,7 +1096,7 @@ export function make_overlib_link_delete_multiword(
   txid: number,
   wid: string | number
 ): string {
-  return ' <a onclick="showRightFrames(); return confirmDelete();" ' +
+  return ' <a onclick="showRightFramesPanel(); return confirmDelete();" ' +
     'href="delete_mword.php?wid=' + wid + '&amp;tid=' + txid +
     '" target="ro">Delete term</a> ';
 }
@@ -1114,7 +1114,7 @@ export function make_overlib_link_wellknown_word(
 ): string {
   return ' <a href="insert_word_wellknown.php?tid=' +
     txid + '&amp;ord=' + torder +
-    '" target="ro" onclick="showRightFrames();">I know this term well</a> ';
+    '" target="ro" onclick="showRightFramesPanel();">I know this term well</a> ';
 }
 
 /**
@@ -1130,7 +1130,7 @@ export function make_overlib_link_ignore_word(
 ): string {
   return ' <a href="insert_word_ignore.php?tid=' + txid +
     '&amp;ord=' + torder +
-    '" target="ro" onclick="showRightFrames();">Ignore this term</a> ';
+    '" target="ro" onclick="showRightFramesPanel();">Ignore this term</a> ';
 }
 
 /**

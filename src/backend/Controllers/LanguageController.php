@@ -153,12 +153,13 @@ class LanguageController extends BaseController
 
         include __DIR__ . '/../Views/Language/wizard.php';
 
-        $language = $this->languageService->createEmptyLanguage();
+        $languageEntity = $this->languageService->createEmptyLanguage();
+        $language = $this->languageService->toViewObject($languageEntity);
         $sourceLg = '';
         $targetLg = '';
         $isNew = true;
 
-        $this->prepareLanguageCodes($language, $currentNativeLanguage, $sourceLg, $targetLg);
+        $this->prepareLanguageCodes($languageEntity, $currentNativeLanguage, $sourceLg, $targetLg);
 
         $allLanguages = $this->languageService->getAllLanguages();
 
@@ -189,19 +190,20 @@ class LanguageController extends BaseController
      */
     private function showEditForm(int $lid): void
     {
-        $language = $this->languageService->getById($lid);
+        $languageEntity = $this->languageService->getById($lid);
 
-        if ($language === null) {
+        if ($languageEntity === null) {
             echo '<p class="red">Language not found.</p>';
             return;
         }
 
+        $language = $this->languageService->toViewObject($languageEntity);
         $currentNativeLanguage = Settings::get('currentnativelanguage');
         $sourceLg = '';
         $targetLg = '';
         $isNew = false;
 
-        $this->prepareLanguageCodes($language, $currentNativeLanguage, $sourceLg, $targetLg);
+        $this->prepareLanguageCodes($languageEntity, $currentNativeLanguage, $sourceLg, $targetLg);
 
         $allLanguages = $this->languageService->getAllLanguages();
 

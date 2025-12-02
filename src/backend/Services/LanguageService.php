@@ -101,6 +101,37 @@ class LanguageService
     }
 
     /**
+     * Convert a Language entity to a view object (stdClass) for templates.
+     *
+     * Templates expect public properties rather than method accessors.
+     *
+     * @param Language $language The Language entity
+     *
+     * @return \stdClass View object with public properties
+     */
+    public function toViewObject(Language $language): \stdClass
+    {
+        $view = new \stdClass();
+        $view->id = $language->id()->toInt();
+        $view->name = $language->name();
+        $view->dict1uri = $language->dict1Uri();
+        $view->dict2uri = $language->dict2Uri();
+        $view->translator = $language->translatorUri();
+        $view->exporttemplate = $language->exportTemplate();
+        $view->textsize = $language->textSize();
+        $view->charactersubst = $language->characterSubstitutions();
+        $view->regexpsplitsent = $language->regexpSplitSentences();
+        $view->exceptionsplitsent = $language->exceptionsSplitSentences();
+        $view->regexpwordchar = $language->regexpWordCharacters();
+        $view->removespaces = $language->removeSpaces();
+        $view->spliteachchar = $language->splitEachChar();
+        $view->rightoleft = $language->rightToLeft();
+        $view->ttsvoiceapi = $language->ttsVoiceApi();
+        $view->showromanization = $language->showRomanization();
+        return $view;
+    }
+
+    /**
      * Map a database record to a Language object.
      *
      * @param array $record Database record

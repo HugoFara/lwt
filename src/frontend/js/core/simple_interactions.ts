@@ -14,7 +14,7 @@
  */
 
 import { lwtFormCheck } from '../forms/unloadformcheck';
-import { showRightFrames, hideRightFrames } from '../reading/frame_management';
+import { showRightFramesPanel, hideRightFrames, loadModalFrame } from '../reading/frame_management';
 import { showAllwordsClick } from './ui_utilities';
 import { quickMenuRedirection } from './user_interactions';
 import { deleteTranslation, addTranslation } from '../terms/translation_api';
@@ -144,7 +144,7 @@ export function initSimpleInteractions(): void {
 
     case 'show-right-frames':
       // Show the right frames panel
-      showRightFrames();
+      showRightFramesPanel();
       break;
 
     case 'hide-right-frames':
@@ -193,7 +193,7 @@ export function initSimpleInteractions(): void {
       {
         const textId = el.dataset.textId;
         if (textId && confirm('Are you sure?')) {
-          showRightFrames('all_words_wellknown.php?text=' + textId);
+          loadModalFrame('all_words_wellknown.php?text=' + textId);
         }
       }
       break;
@@ -204,7 +204,7 @@ export function initSimpleInteractions(): void {
       {
         const textId = el.dataset.textId;
         if (textId && confirm('Are you sure?')) {
-          showRightFrames('all_words_wellknown.php?text=' + textId + '&stat=98');
+          loadModalFrame('all_words_wellknown.php?text=' + textId + '&stat=98');
         }
       }
       break;
@@ -213,7 +213,7 @@ export function initSimpleInteractions(): void {
       // Open bulk translate in right frames
       e.preventDefault();
       if (url) {
-        showRightFrames(url);
+        loadModalFrame(url);
       }
       break;
 

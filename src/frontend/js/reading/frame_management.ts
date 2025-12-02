@@ -43,23 +43,59 @@ function animateStyle(
 }
 
 /**
- * Show the right frames if found, and can load an URL in those frames
+ * Show the right frames panel if found.
  *
- * @param roUrl Upper-right frame URL to load
- * @param ruUrl Lower-right frame URL to load
- * @returns true if frames were found, false otherwise
+ * This function only reveals the panel (animates it into view),
+ * without loading any content into the frames.
+ *
+ * @returns true if frames panel was found and shown, false otherwise
  */
-export function showRightFrames(roUrl?: string, ruUrl?: string): boolean {
-  if (roUrl !== undefined) {
-    top!.frames['ro' as unknown as number].location.href = roUrl;
-  }
-  if (ruUrl !== undefined) {
-    top!.frames['ru' as unknown as number].location.href = ruUrl;
-  }
+export function showRightFramesPanel(): boolean {
   const framesR = document.getElementById('frames-r');
   if (framesR) {
     animateStyle(framesR, 'right', '5px');
     return true;
+  }
+  return false;
+}
+
+/**
+ * Load content in the upper modal frame (ro).
+ *
+ * The upper frame is used for LWT internal pages like term editing forms,
+ * status changes, and word operations. These pages are always from LWT
+ * and will work in an iframe.
+ *
+ * @param url URL to load in the modal frame
+ * @returns true if the frame was found and URL loaded, false otherwise
+ */
+export function loadModalFrame(url: string): boolean {
+  if (!top?.frames) return false;
+  const frame = top.frames['ro' as unknown as number];
+  if (frame) {
+    frame.location.href = url;
+    return showRightFramesPanel();
+  }
+  return false;
+}
+
+/**
+ * Load content in the lower dictionary frame (ru).
+ *
+ * The lower frame is used for external dictionary lookups. Note that some
+ * dictionary websites may block iframe embedding via X-Frame-Options or
+ * Content-Security-Policy headers. In such cases, the iframe will show
+ * an error or blank page.
+ *
+ * @param url URL to load in the dictionary iframe
+ * @returns true if the frame was found and URL loaded, false otherwise
+ */
+export function loadDictionaryFrame(url: string): boolean {
+  if (!top?.frames) return false;
+  const frame = top.frames['ru' as unknown as number];
+  if (frame) {
+    frame.location.href = url;
+    return showRightFramesPanel();
   }
   return false;
 }

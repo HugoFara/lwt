@@ -67,9 +67,11 @@ vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
 }));
 
 vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
-  showRightFrames: vi.fn(),
+  showRightFramesPanel: vi.fn(),
   hideRightFrames: vi.fn(),
-  cleanupRightFrames: vi.fn()
+  cleanupRightFrames: vi.fn(),
+  loadModalFrame: vi.fn(),
+  loadDictionaryFrame: vi.fn()
 }));
 
 vi.mock('../../../src/frontend/js/ui/word_popup', () => ({
@@ -358,8 +360,8 @@ describe('globals.ts', () => {
   // ===========================================================================
 
   describe('Frame Management Functions', () => {
-    it('exports showRightFrames to window', () => {
-      expect(window.showRightFrames).toBeDefined();
+    it('exports showRightFramesPanel to window', () => {
+      expect(window.showRightFramesPanel).toBeDefined();
     });
 
     it('exports hideRightFrames to window', () => {
@@ -368,6 +370,14 @@ describe('globals.ts', () => {
 
     it('exports cleanupRightFrames to window', () => {
       expect(window.cleanupRightFrames).toBeDefined();
+    });
+
+    it('exports loadModalFrame to window', () => {
+      expect(window.loadModalFrame).toBeDefined();
+    });
+
+    it('exports loadDictionaryFrame to window', () => {
+      expect(window.loadDictionaryFrame).toBeDefined();
     });
   });
 

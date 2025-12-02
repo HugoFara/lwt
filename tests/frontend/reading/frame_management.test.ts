@@ -3,11 +3,13 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  showRightFrames,
+  showRightFramesPanel,
   hideRightFrames,
   cleanupRightFrames,
   successSound,
-  failureSound
+  failureSound,
+  loadModalFrame,
+  loadDictionaryFrame
 } from '../../../src/frontend/js/reading/frame_management';
 
 // Mock word_popup module
@@ -47,14 +49,14 @@ describe('frame_management.ts', () => {
   });
 
   // ===========================================================================
-  // showRightFrames Tests
+  // showRightFramesPanel Tests
   // ===========================================================================
 
-  describe('showRightFrames', () => {
+  describe('showRightFramesPanel', () => {
     it('returns true when #frames-r exists', () => {
       document.body.innerHTML = '<div id="frames-r" style="right: -100%;"></div>';
 
-      const result = showRightFrames();
+      const result = showRightFramesPanel();
 
       expect(result).toBe(true);
     });
@@ -62,7 +64,7 @@ describe('frame_management.ts', () => {
     it('returns false when #frames-r does not exist', () => {
       document.body.innerHTML = '<div>No frames</div>';
 
-      const result = showRightFrames();
+      const result = showRightFramesPanel();
 
       expect(result).toBe(false);
     });
@@ -75,59 +77,14 @@ describe('frame_management.ts', () => {
         return 1;
       });
 
-      showRightFrames();
+      showRightFramesPanel();
 
       // Verify that animation was initiated via requestAnimationFrame
       expect(rafSpy).toHaveBeenCalled();
       rafSpy.mockRestore();
     });
 
-    it('loads roUrl in upper-right frame when provided', () => {
-      const mockRoFrame = { location: { href: '' } };
-      (global as any).top = {
-        frames: {
-          ro: mockRoFrame
-        }
-      };
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      showRightFrames('edit_word.php?id=1');
-
-      expect(mockRoFrame.location.href).toBe('edit_word.php?id=1');
-    });
-
-    it('loads ruUrl in lower-right frame when provided', () => {
-      const mockRuFrame = { location: { href: '' } };
-      (global as any).top = {
-        frames: {
-          ru: mockRuFrame
-        }
-      };
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      showRightFrames(undefined, 'dictionary.php');
-
-      expect(mockRuFrame.location.href).toBe('dictionary.php');
-    });
-
-    it('loads both frames when both URLs provided', () => {
-      const mockRoFrame = { location: { href: '' } };
-      const mockRuFrame = { location: { href: '' } };
-      (global as any).top = {
-        frames: {
-          ro: mockRoFrame,
-          ru: mockRuFrame
-        }
-      };
-      document.body.innerHTML = '<div id="frames-r"></div>';
-
-      showRightFrames('upper.php', 'lower.php');
-
-      expect(mockRoFrame.location.href).toBe('upper.php');
-      expect(mockRuFrame.location.href).toBe('lower.php');
-    });
-
-    it('does not modify frames when URLs are undefined', () => {
+    it('does not modify frame contents', () => {
       const mockRoFrame = { location: { href: 'original.php' } };
       (global as any).top = {
         frames: {
@@ -136,7 +93,7 @@ describe('frame_management.ts', () => {
       };
       document.body.innerHTML = '<div id="frames-r"></div>';
 
-      showRightFrames();
+      showRightFramesPanel();
 
       expect(mockRoFrame.location.href).toBe('original.php');
     });
@@ -174,6 +131,126 @@ describe('frame_management.ts', () => {
       hideRightFrames();
 
       // Verify that animation was initiated via requestAnimationFrame
+      expect(rafSpy).toHaveBeenCalled();
+      rafSpy.mockRestore();
+    });
+  });
+
+  // ===========================================================================
+  // loadModalFrame Tests
+  // ===========================================================================
+
+  describe('loadModalFrame', () => {
+    it('returns true and loads URL in ro frame when frame exists', () => {
+      const mockRoFrame = { location: { href: '' } };
+      (global as any).top = {
+        frames: {
+          ro: mockRoFrame
+        }
+      };
+      document.body.innerHTML = '<div id="frames-r"></div>';
+
+      const result = loadModalFrame('edit_word.php?id=1');
+
+      expect(result).toBe(true);
+      expect(mockRoFrame.location.href).toBe('edit_word.php?id=1');
+    });
+
+    it('returns false when top.frames is undefined', () => {
+      (global as any).top = {};
+      document.body.innerHTML = '<div id="frames-r"></div>';
+
+      const result = loadModalFrame('edit_word.php?id=1');
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when ro frame does not exist', () => {
+      (global as any).top = {
+        frames: {}
+      };
+      document.body.innerHTML = '<div id="frames-r"></div>';
+
+      const result = loadModalFrame('edit_word.php?id=1');
+
+      expect(result).toBe(false);
+    });
+
+    it('shows the right frames panel after loading', () => {
+      const mockRoFrame = { location: { href: '' } };
+      (global as any).top = {
+        frames: {
+          ro: mockRoFrame
+        }
+      };
+      document.body.innerHTML = '<div id="frames-r" style="right: -100%;"></div>';
+      const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        cb(performance.now() + 1000);
+        return 1;
+      });
+
+      loadModalFrame('edit_word.php');
+
+      expect(rafSpy).toHaveBeenCalled();
+      rafSpy.mockRestore();
+    });
+  });
+
+  // ===========================================================================
+  // loadDictionaryFrame Tests
+  // ===========================================================================
+
+  describe('loadDictionaryFrame', () => {
+    it('returns true and loads URL in ru frame when frame exists', () => {
+      const mockRuFrame = { location: { href: '' } };
+      (global as any).top = {
+        frames: {
+          ru: mockRuFrame
+        }
+      };
+      document.body.innerHTML = '<div id="frames-r"></div>';
+
+      const result = loadDictionaryFrame('https://dict.example.com/?word=test');
+
+      expect(result).toBe(true);
+      expect(mockRuFrame.location.href).toBe('https://dict.example.com/?word=test');
+    });
+
+    it('returns false when top.frames is undefined', () => {
+      (global as any).top = {};
+      document.body.innerHTML = '<div id="frames-r"></div>';
+
+      const result = loadDictionaryFrame('https://dict.example.com');
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when ru frame does not exist', () => {
+      (global as any).top = {
+        frames: {}
+      };
+      document.body.innerHTML = '<div id="frames-r"></div>';
+
+      const result = loadDictionaryFrame('https://dict.example.com');
+
+      expect(result).toBe(false);
+    });
+
+    it('shows the right frames panel after loading', () => {
+      const mockRuFrame = { location: { href: '' } };
+      (global as any).top = {
+        frames: {
+          ru: mockRuFrame
+        }
+      };
+      document.body.innerHTML = '<div id="frames-r" style="right: -100%;"></div>';
+      const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        cb(performance.now() + 1000);
+        return 1;
+      });
+
+      loadDictionaryFrame('https://dict.example.com');
+
       expect(rafSpy).toHaveBeenCalled();
       rafSpy.mockRestore();
     });
@@ -391,7 +468,7 @@ describe('frame_management.ts', () => {
     it('show and hide frames work together', () => {
       document.body.innerHTML = '<div id="frames-r" style="right: -100%;"></div>';
 
-      const showResult = showRightFrames();
+      const showResult = showRightFramesPanel();
       expect(showResult).toBe(true);
 
       const hideResult = hideRightFrames();
@@ -410,7 +487,8 @@ describe('frame_management.ts', () => {
         }
       };
 
-      expect(showRightFrames('url1', 'url2')).toBe(false);
+      expect(showRightFramesPanel()).toBe(false);
+      expect(loadModalFrame('url1')).toBe(false);
       expect(hideRightFrames()).toBe(false);
     });
   });
@@ -420,7 +498,7 @@ describe('frame_management.ts', () => {
   // ===========================================================================
 
   describe('Edge Cases', () => {
-    it('showRightFrames handles URL with query parameters', () => {
+    it('loadModalFrame handles URL with query parameters', () => {
       const mockRoFrame = { location: { href: '' } };
       (global as any).top = {
         frames: {
@@ -429,12 +507,12 @@ describe('frame_management.ts', () => {
       };
       document.body.innerHTML = '<div id="frames-r"></div>';
 
-      showRightFrames('edit.php?id=1&action=save&data=test%20value');
+      loadModalFrame('edit.php?id=1&action=save&data=test%20value');
 
       expect(mockRoFrame.location.href).toBe('edit.php?id=1&action=save&data=test%20value');
     });
 
-    it('showRightFrames handles empty string URLs', () => {
+    it('loadModalFrame handles empty string URLs', () => {
       const mockRoFrame = { location: { href: 'original.php' } };
       (global as any).top = {
         frames: {
@@ -444,7 +522,7 @@ describe('frame_management.ts', () => {
       document.body.innerHTML = '<div id="frames-r"></div>';
 
       // Empty string is still a valid URL (goes to current page)
-      showRightFrames('');
+      loadModalFrame('');
 
       expect(mockRoFrame.location.href).toBe('');
     });

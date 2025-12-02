@@ -9,7 +9,7 @@
  */
 
 import { escape_apostrophes } from '../core/html_utils';
-import { showRightFrames } from '../reading/frame_management';
+import { showRightFramesPanel, loadDictionaryFrame } from '../reading/frame_management';
 
 /**
  * Open a window.
@@ -124,7 +124,7 @@ export function createTheDictLink(u: string, w: string, t: string, b: string): s
   } else {
     r = ' ' + txtbefore +
       ' <a href="' + createTheDictUrl(url, trm) +
-      '" target="ru" onclick="showRightFrames();">' + txt + '</a> ';
+      '" target="ru" onclick="showRightFramesPanel();">' + txt + '</a> ';
   }
   return r;
 }
@@ -165,7 +165,7 @@ export function createSentLookupLink(torder: number, txid: number, url: string, 
       txt + '</span> ';
   }
   if (external) {
-    return ' <a href="' + target_url + '" target="ru" onclick="showRightFrames();">' +
+    return ' <a href="' + target_url + '" target="ru" onclick="showRightFramesPanel();">' +
       txt + '</a> ';
   }
   return '';
@@ -209,7 +209,7 @@ export function translateSentence(url: string, sentctl: HTMLTextAreaElement | un
   if (sentctl !== undefined && url !== '') {
     const text = sentctl.value;
     if (typeof text === 'string') {
-      showRightFrames(undefined, createTheDictUrl(url, text.replace(/[{}]/g, '')));
+      loadDictionaryFrame(createTheDictUrl(url, text.replace(/[{}]/g, '')));
     }
   }
 }
@@ -240,7 +240,7 @@ export function translateWord(url: string, wordctl: HTMLInputElement | undefined
   if (wordctl !== undefined && url !== '') {
     const text = wordctl.value;
     if (typeof text === 'string') {
-      showRightFrames(undefined, createTheDictUrl(url, text));
+      loadDictionaryFrame(createTheDictUrl(url, text));
     }
   }
 }
@@ -292,7 +292,7 @@ function initDictionaryEventDelegation(): void {
 
     // Handle dict-frame: open dictionary in right frame
     if (target.closest('[data-action="dict-frame"]')) {
-      showRightFrames();
+      showRightFramesPanel();
       return;
     }
 
@@ -366,11 +366,8 @@ function initDictionaryEventDelegation(): void {
   // Handle dict-auto-frame: auto-open dictionary in frame on page load
   document.querySelectorAll<HTMLElement>('[data-action="dict-auto-frame"]').forEach(el => {
     const url = el.dataset.url;
-    if (url && top?.frames) {
-      const ruFrame = top.frames['ru' as unknown as number] as Window | undefined;
-      if (ruFrame) {
-        ruFrame.location.href = url;
-      }
+    if (url) {
+      loadDictionaryFrame(url);
     }
   });
 }

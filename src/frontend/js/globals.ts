@@ -41,7 +41,7 @@ import {
   buildUnknownWordPopupContent
 } from './terms/overlib_interface';
 import { goToLastPosition, saveReadingPosition, saveAudioPosition, quickMenuRedirection } from './core/user_interactions';
-import { showRightFrames, hideRightFrames } from './reading/frame_management';
+import { showRightFramesPanel, hideRightFrames, loadModalFrame, loadDictionaryFrame } from './reading/frame_management';
 import { overlib, cClick, nd, setCurrentEvent } from './ui/word_popup';
 import { setLang, resetAll } from './core/language_settings';
 import { markClick, confirmDelete, showAllwordsClick } from './core/ui_utilities';
@@ -221,8 +221,10 @@ declare global {
     quickMenuRedirection: typeof quickMenuRedirection;
 
     // Frame management
-    showRightFrames: typeof showRightFrames;
+    showRightFramesPanel: typeof showRightFramesPanel;
     hideRightFrames: typeof hideRightFrames;
+    loadModalFrame: typeof loadModalFrame;
+    loadDictionaryFrame: typeof loadDictionaryFrame;
 
     // Language settings
     setLang: typeof setLang;
@@ -461,8 +463,10 @@ window.buildUnknownWordPopupContent = buildUnknownWordPopupContent;
 
 window.quickMenuRedirection = quickMenuRedirection;
 
-window.showRightFrames = showRightFrames;
+window.showRightFramesPanel = showRightFramesPanel;
 window.hideRightFrames = hideRightFrames;
+window.loadModalFrame = loadModalFrame;
+window.loadDictionaryFrame = loadDictionaryFrame;
 
 window.setLang = setLang;
 window.resetAll = resetAll;

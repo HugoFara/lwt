@@ -335,151 +335,32 @@ class TagsController extends BaseController
         int $currentpage,
         bool $debug = false
     ): void {
-        // Handle duplicate entry error message
-        if (
-            substr($message, 0, 24) == "Error: Duplicate entry '"
-            && substr($message, -18) == "' for key 'TgText'"
-        ) {
-            $message = substr($message, 24);
-            $message = substr($message, 0, strlen($message) - 18);
-            $message = "Error: Term Tag '" . $message . "' already exists. Please go back and correct this!";
-        }
-        $this->message($message, false);
+        // Create service instance for term tags
+        $service = new TagService('term');
+
+        // Format error message if needed
+        $message = $service->formatDuplicateError($message);
 
         TagService::getAllTermTags(true);   // refresh tags cache
 
-        $sql = 'select count(TgID) as value from ' . $this->table('tags') . ' where (1=1) ' . $wh_query;
-        $recno = (int) $this->getValue($sql);
-        if ($debug) {
-            echo $sql . ' ===&gt; ' . $recno;
-        }
+        // Get counts and pagination
+        $totalCount = $service->getCount($wh_query);
+        $pagination = $service->getPagination($totalCount, $currentpage);
+        $currentpage = $pagination['currentPage'];
 
-        $maxperpage = (int) Settings::getWithDefault('set-tags-per-page');
-        $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
+        // Get sort column
+        $sortColumn = $service->getSortColumn($currentsort);
 
-        if ($currentpage < 1) {
-            $currentpage = 1;
-        }
-        if ($currentpage > $pages) {
-            $currentpage = $pages;
-        }
-        $limit = 'LIMIT ' . (($currentpage - 1) * $maxperpage) . ',' . $maxperpage;
+        // Get tags list
+        $tags = $service->getList($wh_query, $sortColumn, $currentpage, $pagination['perPage']);
 
-        $sorts = array('TgText', 'TgComment', 'TgID desc', 'TgID asc');
-        $lsorts = count($sorts);
-        if ($currentsort < 1) {
-            $currentsort = 1;
-        }
-        if ($currentsort > $lsorts) {
-            $currentsort = $lsorts;
-        }
+        // Set view variables
+        $currentQuery = $currentquery;
+        $currentSort = $currentsort;
+        $isTextTag = false;
 
-        echo PageLayoutHelper::buildActionCard([
-            ['url' => '/tags?new=1', 'label' => 'New Term Tag', 'icon' => 'circle-plus', 'class' => 'is-primary'],
-            ['url' => '/words/edit', 'label' => 'My Terms', 'icon' => 'book-a'],
-        ]);
-        ?>
-
-        <form name="form1" action="#">
-        <table class="tab2" cellspacing="0" cellpadding="5">
-        <tr>
-        <th class="th1" colspan="4">Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
-        <button type="button" data-action="reset-all" data-base-url="/tags">Reset All</button></th>
-        </tr>
-        <tr>
-        <td class="td1 center" colspan="4">
-        Tag Text or Comment:
-        <input type="text" name="query" value="<?php echo htmlspecialchars($currentquery, ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
-        <button type="button" name="querybutton" data-action="filter-query">Filter</button>&nbsp;
-        <button type="button" data-action="clear-query">Clear</button>
-        </td>
-        </tr>
-        <?php if ($recno > 0) { ?>
-        <tr>
-        <th class="th1" colspan="1" nowrap="nowrap">
-            <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
-        </th><th class="th1" colspan="2" nowrap="nowrap">
-            <?php echo PageLayoutHelper::buildPager($currentpage, $pages, '/tags', 'form1'); ?>
-        </th><th class="th1" nowrap="nowrap">
-        Sort Order:
-        <select name="sort" data-action="sort"><?php echo SelectOptionsBuilder::forTagSort($currentsort); ?></select>
-        </th></tr>
-        <?php } ?>
-        </table>
-        </form>
-
-        <?php
-        if ($recno == 0) {
-            ?>
-            <p>No tags found.</p>
-            <?php
-        } else {
-            ?>
-            <form name="form2" action="/tags" method="post">
-            <input type="hidden" name="data" value="" />
-            <table class="tab2" cellspacing="0" cellpadding="5">
-            <tr><th class="th1 center" colspan="2">
-            Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
-            </th></tr>
-            <tr><td class="td1 center" colspan="2">
-            <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
-            <select name="allaction" data-action="all-action" data-recno="<?php echo $recno; ?>"><?php echo SelectOptionsBuilder::forAllTagsActions(); ?></select>
-            </td></tr>
-            <tr><td class="td1 center">
-            <button type="button" data-action="mark-all">Mark All</button>
-            <button type="button" data-action="mark-none">Mark None</button>
-            </td>
-            <td class="td1 center">Marked Tags:&nbsp;
-            <select name="markaction" id="markaction" disabled="disabled" data-action="mark-action"><?php echo SelectOptionsBuilder::forMultipleTagsActions(); ?></select>
-            </td></tr></table>
-
-            <table class="sortable tab2" cellspacing="0" cellpadding="5">
-            <tr>
-            <th class="th1 sorttable_nosort">Mark</th>
-            <th class="th1 sorttable_nosort">Actions</th>
-            <th class="th1 clickable">Tag Text</th>
-            <th class="th1 clickable">Tag Comment</th>
-            <th class="th1 clickable">Terms With Tag</th>
-            </tr>
-
-            <?php
-            $sql = 'select TgID, TgText, TgComment from ' . $this->table('tags') .
-                   ' where (1=1) ' . $wh_query . ' order by ' . $sorts[$currentsort - 1] . ' ' . $limit;
-            if ($debug) {
-                echo $sql;
-            }
-            $res = $this->query($sql);
-            while ($record = mysqli_fetch_assoc($res)) {
-                $c = $this->getValue('select count(*) as value from ' . $this->table('wordtags') . ' where WtTgID=' . $record['TgID']);
-                echo '<tr>
-                    <td class="td1 center">
-                        <a name="rec' . $record['TgID'] . '">
-                        <input name="marked[]" type="checkbox" class="markcheck" value="' . $record['TgID'] . '" ' . FormHelper::checkInRequest($record['TgID'], 'marked') . ' />
-                        </a></td>
-                    <td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags?chg=' . $record['TgID'] . '">' . IconHelper::render('file-pen', ['title' => 'Edit', 'alt' => 'Edit']) . '</a>&nbsp; <a class="confirmdelete" href="/tags?del=' . $record['TgID'] . '">' . IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']) . '</a>&nbsp;</td>
-                    <td class="td1 center">' . htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>
-                    <td class="td1 center">' . htmlspecialchars($record['TgComment'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>
-                    <td class="td1 center">' . ($c > 0 ? '<a href="/words/edit?page=1&amp;query=&amp;text=&amp;status=&amp;filterlang=&amp;status=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['TgID'] . '">' . $c . '</a>' : '0') . '</td>
-                </tr>';
-            }
-            mysqli_free_result($res);
-            ?>
-            </table>
-
-            <?php if ($pages > 1) { ?>
-            <table class="tab2" cellspacing="0" cellpadding="5">
-                <tr>
-                    <th class="th1" nowrap="nowrap">
-                        <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
-                    </th>
-                    <th class="th1" nowrap="nowrap">
-                        <?php echo PageLayoutHelper::buildPager($currentpage, $pages, '/tags', 'form2'); ?>
-                    </th>
-                </tr>
-            </table>
-            </form>
-            <?php }
-        }
+        // Include the view
+        include __DIR__ . '/../Views/Tags/tag_list.php';
     }
 
     // ==================== TEXT TAGS METHODS ====================
@@ -702,147 +583,31 @@ class TagsController extends BaseController
         int $currentpage,
         bool $debug = false
     ): void {
-        // Handle duplicate entry error message
-        if (
-            substr($message, 0, 24) == "Error: Duplicate entry '"
-            && substr($message, -18) == "' for key 'T2Text'"
-        ) {
-            $message = substr($message, 24);
-            $message = substr($message, 0, strlen($message) - 18);
-            $message = "Error: Text Tag '" . $message . "' already exists. Please go back and correct this!";
-        }
-        $this->message($message, false);
+        // Create service instance for text tags
+        $service = new TagService('text');
+
+        // Format error message if needed
+        $message = $service->formatDuplicateError($message);
 
         TagService::getAllTextTags(true);   // refresh tags cache
 
-        $sql = 'select count(T2ID) as value from ' . $this->table('tags2') . ' where (1=1) ' . $wh_query;
-        $recno = (int) $this->getValue($sql);
-        if ($debug) {
-            echo $sql . ' ===&gt; ' . $recno;
-        }
+        // Get counts and pagination
+        $totalCount = $service->getCount($wh_query);
+        $pagination = $service->getPagination($totalCount, $currentpage);
+        $currentpage = $pagination['currentPage'];
 
-        $maxperpage = (int) Settings::getWithDefault('set-tags-per-page');
-        $pages = $recno == 0 ? 0 : (intval(($recno - 1) / $maxperpage) + 1);
+        // Get sort column
+        $sortColumn = $service->getSortColumn($currentsort);
 
-        if ($currentpage < 1) {
-            $currentpage = 1;
-        }
-        if ($currentpage > $pages) {
-            $currentpage = $pages;
-        }
-        $limit = 'LIMIT ' . (($currentpage - 1) * $maxperpage) . ',' . $maxperpage;
+        // Get tags list
+        $tags = $service->getList($wh_query, $sortColumn, $currentpage, $pagination['perPage']);
 
-        $sorts = array('T2Text', 'T2Comment', 'T2ID desc', 'T2ID asc');
-        $lsorts = count($sorts);
-        if ($currentsort < 1) {
-            $currentsort = 1;
-        }
-        if ($currentsort > $lsorts) {
-            $currentsort = $lsorts;
-        }
+        // Set view variables
+        $currentQuery = $currentquery;
+        $currentSort = $currentsort;
+        $isTextTag = true;
 
-        echo PageLayoutHelper::buildActionCard([
-            ['url' => '/tags/text?new=1', 'label' => 'New Text Tag', 'icon' => 'circle-plus', 'class' => 'is-primary'],
-            ['url' => '/texts', 'label' => 'My Texts', 'icon' => 'book-open'],
-        ]);
-        ?>
-
-        <form name="form1" action="#">
-        <table class="tab1" cellspacing="0" cellpadding="5">
-        <tr>
-            <th class="th1" colspan="4">
-                Filter <?php echo IconHelper::render('filter', ['title' => 'Filter', 'alt' => 'Filter']); ?>&nbsp;
-            <button type="button" data-action="reset-all" data-base-url="/tags/text">Reset All</button></th>
-        </tr>
-        <tr>
-        <td class="td1 center" colspan="4">
-            Tag Text or Comment:
-            <input type="text" name="query" value="<?php echo htmlspecialchars($currentquery, ENT_QUOTES, 'UTF-8'); ?>" maxlength="50" size="15" />&nbsp;
-            <button type="button" name="querybutton" data-action="filter-query">Filter</button>&nbsp;
-            <button type="button" data-action="clear-query">Clear</button>
-        </td>
-        </tr>
-        <?php if ($recno > 0) { ?>
-        <tr>
-        <th class="th1" colspan="1" nowrap="nowrap">
-            <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
-        </th><th class="th1" colspan="2" nowrap="nowrap">
-            <?php echo PageLayoutHelper::buildPager($currentpage, $pages, '/tags/text', 'form1'); ?>
-        </th><th class="th1" nowrap="nowrap">
-        Sort Order:
-        <select name="sort" data-action="sort"><?php echo SelectOptionsBuilder::forTagSort($currentsort); ?></select>
-        </th></tr>
-        <?php } ?>
-        </table>
-        </form>
-
-        <?php
-        if ($recno == 0) {
-            ?>
-            <p>No tags found.</p>
-            <?php
-        } else {
-            ?>
-            <form name="form2" action="/tags/text" method="post">
-            <input type="hidden" name="data" value="" />
-            <table class="tab2" cellspacing="0" cellpadding="5">
-            <tr><th class="th1 center" colspan="2">
-            Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
-            </th></tr>
-            <tr><td class="td1 center" colspan="2">
-            <b>ALL</b> <?php echo ($recno == 1 ? '1 Tag' : $recno . ' Tags'); ?>:&nbsp;
-            <select name="allaction" data-action="all-action" data-recno="<?php echo $recno; ?>"><?php echo SelectOptionsBuilder::forAllTagsActions(); ?></select>
-            </td></tr>
-            <tr><td class="td1 center">
-            <button type="button" data-action="mark-all">Mark All</button>
-            <button type="button" data-action="mark-none">Mark None</button>
-            </td>
-            <td class="td1 center">Marked Tags:&nbsp;
-            <select name="markaction" id="markaction" disabled="disabled" data-action="mark-action"><?php echo SelectOptionsBuilder::forMultipleTagsActions(); ?></select>
-            </td></tr></table>
-
-            <table class="sortable tab2" cellspacing="0" cellpadding="5">
-            <tr>
-            <th class="th1 sorttable_nosort">Mark</th>
-            <th class="th1 sorttable_nosort">Actions</th>
-            <th class="th1 clickable">Tag Text</th>
-            <th class="th1 clickable">Tag Comment</th>
-            <th class="th1 clickable">Texts<br />With Tag</th>
-            <th class="th1 clickable">Arch.Texts<br />With Tag</th>
-            </tr>
-
-            <?php
-            $sql = 'select T2ID, T2Text, T2Comment from ' . $this->table('tags2') .
-                   ' where (1=1) ' . $wh_query . ' order by ' . $sorts[$currentsort - 1] . ' ' . $limit;
-            if ($debug) {
-                echo $sql;
-            }
-            $res = $this->query($sql);
-            while ($record = mysqli_fetch_assoc($res)) {
-                $c = $this->getValue('select count(*) as value from ' . $this->table('texttags') . ' where TtT2ID=' . $record['T2ID']);
-                $ca = $this->getValue('select count(*) as value from ' . $this->table('archtexttags') . ' where AgT2ID=' . $record['T2ID']);
-                echo '<tr>';
-                echo '<td class="td1 center"><a name="rec' . $record['T2ID'] . '"><input name="marked[]" type="checkbox" class="markcheck" value="' . $record['T2ID'] . '" ' . FormHelper::checkInRequest($record['T2ID'], 'marked') . ' /></a></td>';
-                echo '<td class="td1 center" nowrap="nowrap">&nbsp;<a href="/tags/text?chg=' . $record['T2ID'] . '">' . IconHelper::render('file-pen', ['title' => 'Edit', 'alt' => 'Edit']) . '</a>&nbsp; <a class="confirmdelete" href="/tags/text?del=' . $record['T2ID'] . '">' . IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']) . '</a>&nbsp;</td>';
-                echo '<td class="td1 center">' . htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
-                echo '<td class="td1 center">' . htmlspecialchars($record['T2Comment'] ?? '', ENT_QUOTES, 'UTF-8') . '</td>';
-                echo '<td class="td1 center">' . ($c > 0 ? '<a href="/text/edit?page=1&amp;query=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['T2ID'] . '">' . $c . '</a>' : '0') . '</td>';
-                echo '<td class="td1 center">' . ($ca > 0 ? '<a href="/text/archived?page=1&amp;query=&amp;tag12=0&amp;tag2=&amp;tag1=' . $record['T2ID'] . '">' . $ca . '</a>' : '0') . '</td>';
-                echo '</tr>';
-            }
-            mysqli_free_result($res);
-            ?>
-            </table>
-
-            <?php if ($pages > 1) { ?>
-            <table class="tab2" cellspacing="0" cellpadding="5">
-            <tr>
-            <th class="th1" nowrap="nowrap">
-                <?php echo $recno; ?> Tag<?php echo ($recno == 1 ? '' : 's'); ?>
-            </th><th class="th1" nowrap="nowrap">
-                <?php echo PageLayoutHelper::buildPager($currentpage, $pages, '/tags/text', 'form2'); ?>
-            </th></tr></table></form>
-            <?php }
-        }
+        // Include the view
+        include __DIR__ . '/../Views/Tags/tag_list.php';
     }
 }

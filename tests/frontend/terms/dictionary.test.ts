@@ -19,7 +19,8 @@ import * as frameManagement from '../../../src/frontend/js/reading/frame_managem
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
-  showRightFrames: vi.fn(),
+  showRightFramesPanel: vi.fn(),
+  loadDictionaryFrame: vi.fn(),
 }));
 
 describe('dictionary.ts', () => {
@@ -274,7 +275,7 @@ describe('dictionary.ts', () => {
     it('does nothing when sentctl is undefined', () => {
       translateSentence('http://translate.com/###', undefined);
 
-      expect(frameManagement.showRightFrames).not.toHaveBeenCalled();
+      expect(frameManagement.loadDictionaryFrame).not.toHaveBeenCalled();
     });
 
     it('does nothing when URL is empty', () => {
@@ -283,7 +284,7 @@ describe('dictionary.ts', () => {
 
       translateSentence('', textarea);
 
-      expect(frameManagement.showRightFrames).not.toHaveBeenCalled();
+      expect(frameManagement.loadDictionaryFrame).not.toHaveBeenCalled();
     });
 
     it('translates sentence and removes curly braces', () => {
@@ -292,8 +293,7 @@ describe('dictionary.ts', () => {
 
       translateSentence('http://translate.com/###', textarea);
 
-      expect(frameManagement.showRightFrames).toHaveBeenCalledWith(
-        undefined,
+      expect(frameManagement.loadDictionaryFrame).toHaveBeenCalledWith(
         'http://translate.com/Hello%20world'
       );
     });
@@ -335,7 +335,7 @@ describe('dictionary.ts', () => {
     it('does nothing when wordctl is undefined', () => {
       translateWord('http://dict.com/###', undefined);
 
-      expect(frameManagement.showRightFrames).not.toHaveBeenCalled();
+      expect(frameManagement.loadDictionaryFrame).not.toHaveBeenCalled();
     });
 
     it('translates word in right frame', () => {
@@ -344,8 +344,7 @@ describe('dictionary.ts', () => {
 
       translateWord('http://dict.com/###', input);
 
-      expect(frameManagement.showRightFrames).toHaveBeenCalledWith(
-        undefined,
+      expect(frameManagement.loadDictionaryFrame).toHaveBeenCalledWith(
         'http://dict.com/bonjour'
       );
     });
@@ -437,7 +436,7 @@ describe('dictionary.ts', () => {
       const button = document.querySelector('button') as HTMLButtonElement;
       button.click();
 
-      expect(frameManagement.showRightFrames).toHaveBeenCalled();
+      expect(frameManagement.loadDictionaryFrame).toHaveBeenCalled();
     });
 
     it('handles translate-word-popup data action', () => {

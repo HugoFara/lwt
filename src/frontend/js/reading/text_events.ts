@@ -22,7 +22,7 @@ import {
 } from './text_annotations';
 import { keydown_event_do_text_text } from './text_keyboard';
 import { mword_drag_n_drop_select } from './text_multiword_selection';
-import { showRightFrames } from './frame_management';
+import { loadModalFrame } from './frame_management';
 import { removeAllTooltips } from '../ui/native_tooltip';
 import {
   run_overlib_status_unknown,
@@ -229,7 +229,7 @@ function word_click_event_frame_mode(
       LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
       LWT_DATA.text.id, order, text, multi_words, LWT_DATA.language.rtl
     );
-    showRightFrames(
+    loadModalFrame(
       '/word/edit?tid=' + LWT_DATA.text.id + '&ord=' + order + '&wid='
     );
   } else if (statusNum === 99) {
@@ -286,7 +286,7 @@ function word_click_event_api_mode(
     );
 
     // Also open the edit form in the right frame for unknown words
-    showRightFrames(
+    loadModalFrame(
       '/word/edit?tid=' + LWT_DATA.text.id + '&ord=' + context.position + '&wid='
     );
   } else if (statusNum === 99 || statusNum === 98) {

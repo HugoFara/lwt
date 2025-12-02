@@ -79,7 +79,7 @@ use Lwt\View\Helper\IconHelper;
             <button type="button"
                     class="button is-primary"
                     data-action="wizard-go">
-                <span class="icon">
+                <span class="icon is-small">
                     <?php echo IconHelper::render('wand-2', ['alt' => 'Apply']); ?>
                 </span>
                 <span>Set Language Settings</span>

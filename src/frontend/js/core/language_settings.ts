@@ -6,7 +6,7 @@
  * @since   2.10.0-fork Extracted from legacy/pgm.ts
  */
 
-import { showRightFrames } from '../reading/frame_management';
+import { loadModalFrame } from '../reading/frame_management';
 
 /**
  * Set the current language.
@@ -58,7 +58,7 @@ export function resetAll(url: string): void {
 export function iknowall(t: string | number): void {
   const answer = confirm('Are you sure?');
   if (answer) {
-    showRightFrames('all_words_wellknown.php?text=' + t);
+    loadModalFrame('all_words_wellknown.php?text=' + t);
   }
 }
 

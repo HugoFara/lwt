@@ -7,7 +7,7 @@
 
 import { getAttr } from './text_annotations';
 import { hoverIntent } from '../core/hover_intent';
-import { showRightFrames } from './frame_management';
+import { loadModalFrame } from './frame_management';
 import { removeAllTooltips } from '../ui/native_tooltip';
 
 // Type definitions
@@ -95,7 +95,7 @@ export const mwordDragNDrop: MwordDragNDropState = {
               ord: word_ord,
               txt: text
             });
-            showRightFrames('edit_mword.php?' + params.toString());
+            loadModalFrame('edit_mword.php?' + params.toString());
           }
         } else {
           // Create only a normal word
@@ -105,7 +105,7 @@ export const mwordDragNDrop: MwordDragNDropState = {
             ord: word_ord,
             txt: wordEl?.textContent || ''
           });
-          showRightFrames('/word/edit?' + params.toString());
+          loadModalFrame('/word/edit?' + params.toString());
         }
       }
       context.querySelectorAll('span').forEach(el => {

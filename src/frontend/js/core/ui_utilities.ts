@@ -13,6 +13,7 @@ import { do_ajax_save_setting } from './ajax_utilities';
 import { initInlineEdit } from '../ui/inline_edit';
 import { initTermTags, initTextTags } from '../ui/tagify_tags';
 import { fetchTermTags, fetchTextTags } from './app_data';
+import { loadModalFrame } from '../reading/frame_management';
 
 /**
  * Helper to safely get an HTML attribute value as a string.
@@ -127,7 +128,7 @@ export function showAllwordsClick(): void {
   const text = textEl?.textContent || '';
   // Timeout necessary because the button is clicked on the left (would hide frames)
   setTimeout(function () {
-    (window as unknown as { showRightFrames: (url: string) => void }).showRightFrames(
+    loadModalFrame(
       'set_text_mode.php?mode=' + showAll + '&showLearning=' + showLeaning +
       '&text=' + text
     );
