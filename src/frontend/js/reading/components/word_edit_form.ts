@@ -12,6 +12,7 @@ import Alpine from 'alpinejs';
 import type { WordFormStoreState, SaveResult } from '../stores/word_form_store';
 import type { WordStoreState } from '../stores/word_store';
 import type { SimilarTermForEdit } from '../../api/terms';
+import { updateWordStatusInDOM, updateWordTranslationInDOM } from '../text_renderer';
 
 /**
  * Status display information.
@@ -126,14 +127,24 @@ export function wordEditFormData(): WordEditFormData {
       const result = await this.formStore.save();
 
       if (result.success && result.hex) {
+        const hex = result.hex;
+        const status = this.formStore.formData.status;
+        const translation = this.formStore.formData.translation;
+        const romanization = this.formStore.formData.romanization;
+        const wordId = result.wordId ?? null;
+
         // Update the word store with new data
-        this.wordStore.updateWordInStore(result.hex, {
-          wordId: result.wordId ?? null,
-          status: this.formStore.formData.status,
-          translation: this.formStore.formData.translation,
-          romanization: this.formStore.formData.romanization,
+        this.wordStore.updateWordInStore(hex, {
+          wordId,
+          status,
+          translation,
+          romanization,
           tags: this.formStore.formData.tags.join(', ')
         });
+
+        // Update the DOM elements in the reading text
+        updateWordStatusInDOM(hex, status, wordId);
+        updateWordTranslationInDOM(hex, translation, romanization);
 
         // Call the onSaved callback if set
         if (this.onSaved) {

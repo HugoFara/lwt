@@ -250,20 +250,10 @@ export function wordModalData(): WordModalData {
     },
 
     onFormSaved(result: SaveResult): void {
-      if (result.success && result.hex) {
-        // Update the word in the store
-        this.store.updateWordInStore(result.hex, {
-          wordId: result.wordId ?? null,
-          status: this.formStore.formData.status,
-          translation: this.formStore.formData.translation,
-          romanization: this.formStore.formData.romanization,
-          tags: this.formStore.formData.tags.join(', ')
-        });
-      }
-
-      // Switch back to info view
+      // Reset form and close modal after successful save
       this.viewMode = 'info';
       this.formStore.reset();
+      this.store.closeModal();
     },
 
     onFormCancelled(): void {
