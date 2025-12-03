@@ -10,12 +10,14 @@ use Lwt\Services\ExportService;
 use Lwt\Services\TagService;
 use Lwt\Services\DictionaryService;
 use Lwt\Services\TextService;
+use Lwt\Services\TextPrintService;
 
 require_once __DIR__ . '/../../../Services/WordService.php';
 require_once __DIR__ . '/../../../Services/ExportService.php';
 require_once __DIR__ . '/../../../Services/TagService.php';
 require_once __DIR__ . '/../../../Services/DictionaryService.php';
 require_once __DIR__ . '/../../../Services/TextService.php';
+require_once __DIR__ . '/../../../Services/TextPrintService.php';
 
 /**
  * Handler for text-related API operations.
@@ -537,5 +539,113 @@ class TextHandler
         $sort = isset($params['sort']) ? (int)$params['sort'] : 1;
 
         return $this->textService->getArchivedTextsForLanguage($langId, $page, $perPage, $sort);
+    }
+
+    // =========================================================================
+    // Print Items API (for client-side print rendering)
+    // =========================================================================
+
+    /**
+     * Get print items and configuration for a text.
+     *
+     * Returns structured text items suitable for client-side rendering
+     * of the print view with annotation options.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{items: array, config: array}|array{error: string}
+     */
+    public function getPrintItems(int $textId): array
+    {
+        $printService = new TextPrintService();
+
+        $viewData = $printService->preparePlainPrintData($textId);
+        if ($viewData === null) {
+            return ['error' => 'Text not found'];
+        }
+
+        $items = $printService->getTextItemsForApi($textId);
+
+        // Get saved print settings
+        $savedAnn = $printService->getAnnotationSetting(null);
+        $savedStatus = $printService->getStatusRangeSetting(null);
+        $savedPlacement = $printService->getAnnotationPlacementSetting(null);
+
+        return [
+            'items' => $items,
+            'config' => [
+                'textId' => $textId,
+                'title' => $viewData['title'],
+                'sourceUri' => $viewData['sourceUri'],
+                'audioUri' => $viewData['audioUri'],
+                'langId' => $viewData['langId'],
+                'textSize' => $viewData['textSize'],
+                'rtlScript' => $viewData['rtlScript'],
+                'hasAnnotation' => $viewData['hasAnnotation'],
+                'savedAnn' => $savedAnn,
+                'savedStatus' => $savedStatus,
+                'savedPlacement' => $savedPlacement
+            ]
+        ];
+    }
+
+    /**
+     * Format response for getting print items.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{items: array, config: array}|array{error: string}
+     */
+    public function formatGetPrintItems(int $textId): array
+    {
+        return $this->getPrintItems($textId);
+    }
+
+    /**
+     * Get annotation items for improved/annotated text view.
+     *
+     * Returns parsed annotation data for client-side rendering.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{items: array|null, config: array}|array{error: string}
+     */
+    public function getAnnotation(int $textId): array
+    {
+        $printService = new TextPrintService();
+
+        $viewData = $printService->prepareAnnotatedPrintData($textId);
+        if ($viewData === null) {
+            return ['error' => 'Text not found'];
+        }
+
+        $items = $printService->getAnnotationForApi($textId);
+
+        return [
+            'items' => $items,
+            'config' => [
+                'textId' => $textId,
+                'title' => $viewData['title'],
+                'sourceUri' => $viewData['sourceUri'],
+                'audioUri' => $viewData['audioUri'],
+                'langId' => $viewData['langId'],
+                'textSize' => $viewData['textSize'],
+                'rtlScript' => $viewData['rtlScript'],
+                'hasAnnotation' => $viewData['hasAnnotation'],
+                'ttsClass' => $viewData['ttsClass']
+            ]
+        ];
+    }
+
+    /**
+     * Format response for getting annotation.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array{items: array|null, config: array}|array{error: string}
+     */
+    public function formatGetAnnotation(int $textId): array
+    {
+        return $this->getAnnotation($textId);
     }
 }

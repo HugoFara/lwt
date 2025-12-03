@@ -102,14 +102,9 @@ class TextPrintController extends BaseController
         }
 
         // Get print settings from request or saved settings
-        $ann = $this->printService->getAnnotationSetting($this->param('ann'));
-        $statusRange = $this->printService->getStatusRangeSetting($this->param('status'));
-        $annPlacement = $this->printService->getAnnotationPlacementSetting($this->param('annplcmnt'));
-
-        // Parse annotation flags
-        $showRom = $ann & TextPrintService::ANN_SHOW_ROM;
-        $showTrans = $ann & TextPrintService::ANN_SHOW_TRANS;
-        $showTags = $ann & TextPrintService::ANN_SHOW_TAGS;
+        $savedAnn = $this->printService->getAnnotationSetting($this->param('ann'));
+        $savedStatus = $this->printService->getStatusRangeSetting($this->param('status'));
+        $savedPlacement = $this->printService->getAnnotationPlacementSetting($this->param('annplcmnt'));
 
         // Prepare view data
         $viewData = $this->printService->preparePlainPrintData($textId);
@@ -118,15 +113,15 @@ class TextPrintController extends BaseController
         }
 
         // Save settings
-        $this->printService->savePrintSettings($textId, $ann, $statusRange, $annPlacement);
+        $this->printService->savePrintSettings($textId, $savedAnn, $savedStatus, $savedPlacement);
 
-        // Get text items
-        $textItems = $this->printService->getTextItems($textId);
+        // Set mode for Alpine view
+        $mode = 'plain';
 
         // Render the view
         PageLayoutHelper::renderPageStartNobody('Print');
 
-        include __DIR__ . '/../Views/TextPrint/plain_print.php';
+        include __DIR__ . '/../Views/TextPrint/print_alpine.php';
 
         PageLayoutHelper::renderPageEnd();
     }
@@ -139,6 +134,8 @@ class TextPrintController extends BaseController
      * @param array $params Route parameters
      *
      * @return void
+     *
+     * @psalm-suppress UnusedVariable Variables are used in included view files
      */
     public function printAnnotated(array $params): void
     {
@@ -188,241 +185,31 @@ class TextPrintController extends BaseController
         // Save current text setting
         $this->printService->setCurrentText($textId);
 
+        // Set mode and prepare edit form if needed
+        $mode = $editMode ? 'edit' : 'annotated';
+        $editFormHtml = null;
+        $savedAnn = 0;
+        $savedStatus = 0;
+        $savedPlacement = 0;
+
+        if ($editMode) {
+            // For edit mode, create annotation if needed and render edit form
+            if (!$annExists) {
+                $ann = \create_save_ann($textId);
+                $annExists = strlen($ann) > 0;
+            }
+            if ($annExists) {
+                $handler = new ImprovedTextHandler();
+                $editFormHtml = $handler->editTermForm($textId);
+            }
+        }
+
         // Render the view
         PageLayoutHelper::renderPageStartNobody('Annotated Text');
 
-        if ($editMode) {
-            $this->renderEditMode($textId, $annExists, $viewData);
-        } else {
-            $this->renderDisplayMode($textId, $viewData, $ann ?? '');
-        }
+        include __DIR__ . '/../Views/TextPrint/print_alpine.php';
 
         PageLayoutHelper::renderPageEnd();
     }
 
-    /**
-     * Render the header section for print pages.
-     *
-     * @param int    $textId     Text ID
-     * @param array  $viewData   View data array
-     * @param string $printUrl   URL for print navigation
-     * @param bool   $showImprov Show improved annotation link
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedParam Parameters are used in included view files
-     */
-    private function renderHeader(
-        int $textId,
-        array $viewData,
-        string $printUrl,
-        bool $showImprov = true
-    ): void {
-        include __DIR__ . '/../Views/TextPrint/header.php';
-    }
-
-    /**
-     * Render edit mode for annotated text.
-     *
-     * @param int   $textId    Text ID
-     * @param bool  $annExists Whether annotations exist
-     * @param array $viewData  View data array
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     */
-    private function renderEditMode(int $textId, bool $annExists, array $viewData): void
-    {
-        $this->renderHeader($textId, $viewData, '/text/print?text=', false);
-
-        if (!$annExists) {
-            // No annotations, try create them
-            $ann = \create_save_ann($textId);
-            $annExists = strlen($ann) > 0;
-        }
-
-        include __DIR__ . '/../Views/TextPrint/annotated_edit.php';
-    }
-
-    /**
-     * Render display/print mode for annotated text.
-     *
-     * @param int    $textId   Text ID
-     * @param array  $viewData View data array
-     * @param string $ann      Annotation string
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedParam Parameters are used in included view files
-     */
-    private function renderDisplayMode(int $textId, array $viewData, string $ann): void
-    {
-        $this->renderHeader($textId, $viewData, '/text/print?text=', true);
-
-        include __DIR__ . '/../Views/TextPrint/annotated_display.php';
-    }
-
-    /**
-     * Output text with annotations (used by plain print).
-     *
-     * @param string $term       Term text
-     * @param string $rom        Romanization
-     * @param string $trans      Translation
-     * @param string $tags       Tags
-     * @param bool   $showRom    Show romanization
-     * @param bool   $showTrans  Show translation
-     * @param bool   $showTags   Show tags
-     * @param int    $placement  Annotation placement
-     *
-     * @return string HTML output
-     */
-    public function formatTermOutput(
-        string $term,
-        string $rom,
-        string $trans,
-        string $tags,
-        bool $showRom,
-        bool $showTrans,
-        bool $showTags,
-        int $placement
-    ): string {
-        if ($showTags) {
-            if ($trans === '' && $tags !== '') {
-                $trans = '* ' . $tags;
-            } else {
-                $trans = trim($trans . ' ' . $tags);
-            }
-        }
-        if ($showRom && $rom === '') {
-            $showRom = false;
-        }
-        if ($showTrans && $trans === '') {
-            $showTrans = false;
-        }
-
-        switch ($placement) {
-            case TextPrintService::ANN_PLACEMENT_INFRONT:
-                return $this->formatTermInFront($term, $rom, $trans, $showRom, $showTrans);
-
-            case TextPrintService::ANN_PLACEMENT_RUBY:
-                return $this->formatTermRuby($term, $rom, $trans, $showRom, $showTrans);
-
-            default:
-                return $this->formatTermBehind($term, $rom, $trans, $showRom, $showTrans);
-        }
-    }
-
-    /**
-     * Format term with annotation in front.
-     *
-     * @param string $term      Term text
-     * @param string $rom       Romanization
-     * @param string $trans     Translation
-     * @param bool   $showRom   Show romanization
-     * @param bool   $showTrans Show translation
-     *
-     * @return string HTML output
-     */
-    private function formatTermInFront(
-        string $term,
-        string $rom,
-        string $trans,
-        bool $showRom,
-        bool $showTrans
-    ): string {
-        $output = '';
-        if ($showRom || $showTrans) {
-            $output .= ' ';
-            if ($showTrans) {
-                $output .= '<span class="anntrans">' . htmlspecialchars($trans, ENT_QUOTES, 'UTF-8') . '</span> ';
-            }
-            if ($showRom && !$showTrans) {
-                $output .= '<span class="annrom">' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . '</span> ';
-            }
-            if ($showRom && $showTrans) {
-                $output .= '<span class="annrom" dir="ltr">[' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . ']</span> ';
-            }
-            $output .= ' <span class="annterm">';
-        }
-        $output .= htmlspecialchars($term, ENT_QUOTES, 'UTF-8');
-        if ($showRom || $showTrans) {
-            $output .= '</span> ';
-        }
-        return $output;
-    }
-
-    /**
-     * Format term with annotation above (ruby).
-     *
-     * @param string $term      Term text
-     * @param string $rom       Romanization
-     * @param string $trans     Translation
-     * @param bool   $showRom   Show romanization
-     * @param bool   $showTrans Show translation
-     *
-     * @return string HTML output
-     */
-    private function formatTermRuby(
-        string $term,
-        string $rom,
-        string $trans,
-        bool $showRom,
-        bool $showTrans
-    ): string {
-        if ($showRom || $showTrans) {
-            $output = ' <ruby><rb><span class="anntermruby">' . htmlspecialchars($term, ENT_QUOTES, 'UTF-8') . '</span></rb><rt> ';
-            if ($showTrans) {
-                $output .= '<span class="anntransruby">' . htmlspecialchars($trans, ENT_QUOTES, 'UTF-8') . '</span> ';
-            }
-            if ($showRom && !$showTrans) {
-                $output .= '<span class="annromrubysolo">' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . '</span> ';
-            }
-            if ($showRom && $showTrans) {
-                $output .= '<span class="annromruby" dir="ltr">[' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . ']</span> ';
-            }
-            $output .= '</rt></ruby> ';
-            return $output;
-        }
-        return htmlspecialchars($term, ENT_QUOTES, 'UTF-8');
-    }
-
-    /**
-     * Format term with annotation behind.
-     *
-     * @param string $term      Term text
-     * @param string $rom       Romanization
-     * @param string $trans     Translation
-     * @param bool   $showRom   Show romanization
-     * @param bool   $showTrans Show translation
-     *
-     * @return string HTML output
-     */
-    private function formatTermBehind(
-        string $term,
-        string $rom,
-        string $trans,
-        bool $showRom,
-        bool $showTrans
-    ): string {
-        $output = '';
-        if ($showRom || $showTrans) {
-            $output .= ' <span class="annterm">';
-        }
-        $output .= htmlspecialchars($term, ENT_QUOTES, 'UTF-8');
-        if ($showRom || $showTrans) {
-            $output .= '</span> ';
-            if ($showRom && !$showTrans) {
-                $output .= '<span class="annrom">' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . '</span>';
-            }
-            if ($showRom && $showTrans) {
-                $output .= '<span class="annrom" dir="ltr">[' . htmlspecialchars($rom, ENT_QUOTES, 'UTF-8') . ']</span> ';
-            }
-            if ($showTrans) {
-                $output .= '<span class="anntrans">' . htmlspecialchars($trans, ENT_QUOTES, 'UTF-8') . '</span>';
-            }
-            $output .= ' ';
-        }
-        return $output;
-    }
 }

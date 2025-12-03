@@ -1,13 +1,82 @@
 /**
- * Tests for text_print.ts - Text print page functionality
+ * Tests for text_print_app.ts - Alpine.js Text Print Component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initTextPrint } from '../../../src/frontend/js/texts/text_print';
+import { textPrintAppData, type TextPrintAppData } from '../../../src/frontend/js/texts/text_print_app';
 
-describe('text_print.ts', () => {
+// Mock the API client
+vi.mock('../../../src/frontend/js/core/api_client', () => ({
+  apiGet: vi.fn(),
+  apiPost: vi.fn().mockResolvedValue({ data: { success: true } })
+}));
+
+// Mock the texts API
+vi.mock('../../../src/frontend/js/api/texts', () => ({
+  TextsApi: {
+    getPrintItems: vi.fn().mockResolvedValue({
+      data: {
+        items: [
+          { position: 1, text: 'Hello', isWord: true, isParagraph: false, wordId: 1, status: 2, translation: 'Bonjour', romanization: '', tags: '' },
+          { position: 2, text: ' ', isWord: false, isParagraph: false, wordId: null, status: null, translation: '', romanization: '', tags: '' },
+          { position: 3, text: 'world', isWord: true, isParagraph: false, wordId: 2, status: 3, translation: 'monde', romanization: '', tags: 'greeting' }
+        ],
+        config: {
+          textId: 123,
+          title: 'Test Text',
+          sourceUri: '',
+          audioUri: '',
+          langId: 1,
+          textSize: 150,
+          rtlScript: false,
+          hasAnnotation: false,
+          savedAnn: 3,
+          savedStatus: 14,
+          savedPlacement: 0
+        }
+      }
+    }),
+    getAnnotation: vi.fn().mockResolvedValue({
+      data: {
+        items: [
+          { order: 0, text: 'Hello', wordId: 1, translation: 'Bonjour', isWord: true }
+        ],
+        config: {
+          textId: 123,
+          title: 'Test Text',
+          sourceUri: '',
+          audioUri: '',
+          langId: 1,
+          textSize: 150,
+          rtlScript: false,
+          hasAnnotation: true,
+          ttsClass: 'tts_en'
+        }
+      }
+    })
+  }
+}));
+
+// Mock lucide
+vi.mock('lucide', () => ({
+  createIcons: vi.fn(),
+  icons: {}
+}));
+
+describe('text_print_app.ts', () => {
+  let component: TextPrintAppData;
+
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
+
+    // Set up default config element
+    document.body.innerHTML = `
+      <script type="application/json" id="print-config">
+        {"textId": 123, "mode": "plain", "savedAnn": 3, "savedStatus": 14, "savedPlacement": 0}
+      </script>
+    `;
+
+    component = textPrintAppData();
   });
 
   afterEach(() => {
@@ -16,384 +85,383 @@ describe('text_print.ts', () => {
   });
 
   // ===========================================================================
-  // initPlainPrint Tests
+  // Initialization Tests
   // ===========================================================================
 
-  describe('initPlainPrint', () => {
-    it('handles status filter select change', () => {
-      document.body.innerHTML = `
-        <div id="printoptions" data-text-id="123">
-          <select data-action="filter-status">
-            <option value="0">All</option>
-            <option value="1">Status 1</option>
-          </select>
-        </div>
-      `;
-
-      initTextPrint();
-
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-status"]')!;
-      select.value = '1';
-
-      // Mock location.href
-      const locationSpy = vi.spyOn(window, 'location', 'get').mockReturnValue({
-        ...window.location,
-        href: '',
-        set href(val: string) {
-          // No-op for test
-        }
-      } as Location);
-
-      select.dispatchEvent(new Event('change'));
-
-      // Event handler executed without error
-      expect(locationSpy).toBeDefined();
+  describe('initialization', () => {
+    it('initializes with correct default values', () => {
+      expect(component.loading).toBe(true);
+      expect(component.mode).toBe('plain');
+      expect(component.textId).toBe(123);
+      expect(component.statusFilter).toBe(14);
+      expect(component.annotationFlags).toBe(3);
+      expect(component.placementMode).toBe(0);
     });
 
-    it('handles annotation filter select change', () => {
+    it('reads config from script element', () => {
       document.body.innerHTML = `
-        <div id="printoptions" data-text-id="456">
-          <select data-action="filter-annotation">
-            <option value="0">None</option>
-            <option value="1">Show</option>
-          </select>
-        </div>
+        <script type="application/json" id="print-config">
+          {"textId": 456, "mode": "annotated", "savedAnn": 7, "savedStatus": 31, "savedPlacement": 2}
+        </script>
       `;
 
-      initTextPrint();
+      const comp = textPrintAppData();
 
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-annotation"]')!;
-      select.value = '1';
-
-      expect(() => select.dispatchEvent(new Event('change'))).not.toThrow();
+      expect(comp.textId).toBe(456);
+      expect(comp.mode).toBe('annotated');
+      expect(comp.statusFilter).toBe(31);
+      expect(comp.annotationFlags).toBe(7);
+      expect(comp.placementMode).toBe(2);
     });
 
-    it('handles annotation placement filter select change', () => {
+    it('handles missing config element gracefully', () => {
+      document.body.innerHTML = '';
+
+      expect(() => textPrintAppData()).not.toThrow();
+    });
+
+    it('loads print items on init for plain mode', async () => {
+      const { TextsApi } = await import('../../../src/frontend/js/api/texts');
+
+      await component.init();
+
+      expect(TextsApi.getPrintItems).toHaveBeenCalledWith(123);
+      expect(component.loading).toBe(false);
+      expect(component.items.length).toBeGreaterThan(0);
+    });
+
+    it('loads annotation on init for annotated mode', async () => {
       document.body.innerHTML = `
-        <div id="printoptions" data-text-id="789">
-          <select data-action="filter-placement">
-            <option value="0">Above</option>
-            <option value="1">Below</option>
-          </select>
-        </div>
+        <script type="application/json" id="print-config">
+          {"textId": 123, "mode": "annotated"}
+        </script>
       `;
 
-      initTextPrint();
+      const comp = textPrintAppData();
+      const { TextsApi } = await import('../../../src/frontend/js/api/texts');
 
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-placement"]')!;
-      select.value = '1';
+      await comp.init();
 
-      expect(() => select.dispatchEvent(new Event('change'))).not.toThrow();
-    });
-
-    it('does nothing when printoptions container is missing', () => {
-      document.body.innerHTML = '<div>No printoptions here</div>';
-
-      expect(() => initTextPrint()).not.toThrow();
-    });
-
-    it('does nothing when textId is missing', () => {
-      document.body.innerHTML = `
-        <div id="printoptions">
-          <select data-action="filter-status">
-            <option value="0">All</option>
-          </select>
-        </div>
-      `;
-
-      initTextPrint();
-
-      const select = document.querySelector<HTMLSelectElement>('[data-action="filter-status"]')!;
-
-      // Should not throw even without textId
-      expect(() => select.dispatchEvent(new Event('change'))).not.toThrow();
+      expect(TextsApi.getAnnotation).toHaveBeenCalledWith(123);
+      expect(comp.loading).toBe(false);
     });
   });
 
   // ===========================================================================
-  // initCommonPrintHandlers Tests
+  // Computed Properties Tests
   // ===========================================================================
 
-  describe('initCommonPrintHandlers', () => {
-    describe('print button', () => {
-      it('calls window.print on click', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="print">Print</button>
-          </div>
-        `;
+  describe('computed properties', () => {
+    it('showRom returns true when bit 2 is set', () => {
+      component.annotationFlags = 2; // Only romanization
+      expect(component.showRom).toBe(true);
 
-        const printSpy = vi.spyOn(window, 'print').mockImplementation(() => {});
+      component.annotationFlags = 3; // Both
+      expect(component.showRom).toBe(true);
 
-        initTextPrint();
-
-        const button = document.querySelector<HTMLButtonElement>('[data-action="print"]')!;
-        button.click();
-
-        expect(printSpy).toHaveBeenCalled();
-      });
-
-      it('prevents default event behavior', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="print">Print</button>
-          </div>
-        `;
-
-        vi.spyOn(window, 'print').mockImplementation(() => {});
-
-        initTextPrint();
-
-        const button = document.querySelector<HTMLButtonElement>('[data-action="print"]')!;
-        const clickEvent = new MouseEvent('click', { cancelable: true });
-        button.dispatchEvent(clickEvent);
-
-        expect(clickEvent.defaultPrevented).toBe(true);
-      });
+      component.annotationFlags = 1; // Only translation
+      expect(component.showRom).toBe(false);
     });
 
-    describe('navigate button', () => {
-      it('navigates to specified URL on click', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="navigate" data-url="/texts">Navigate</button>
-          </div>
-        `;
+    it('showTrans returns true when bit 1 is set', () => {
+      component.annotationFlags = 1; // Only translation
+      expect(component.showTrans).toBe(true);
 
-        initTextPrint();
+      component.annotationFlags = 3; // Both
+      expect(component.showTrans).toBe(true);
 
-        const button = document.querySelector<HTMLButtonElement>('[data-action="navigate"]')!;
-
-        expect(() => button.click()).not.toThrow();
-      });
-
-      it('does nothing when URL is missing', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="navigate">Navigate</button>
-          </div>
-        `;
-
-        initTextPrint();
-
-        const button = document.querySelector<HTMLButtonElement>('[data-action="navigate"]')!;
-
-        expect(() => button.click()).not.toThrow();
-      });
-
-      it('handles multiple navigate buttons', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="navigate" data-url="/url1">Nav 1</button>
-            <button data-action="navigate" data-url="/url2">Nav 2</button>
-          </div>
-        `;
-
-        initTextPrint();
-
-        const buttons = document.querySelectorAll<HTMLButtonElement>('[data-action="navigate"]');
-
-        expect(buttons.length).toBe(2);
-        buttons.forEach((button) => {
-          expect(() => button.click()).not.toThrow();
-        });
-      });
+      component.annotationFlags = 2; // Only romanization
+      expect(component.showTrans).toBe(false);
     });
 
-    describe('confirm-navigate button', () => {
-      it('navigates when confirmation is accepted', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="confirm-navigate" data-url="/delete" data-confirm="Are you sure?">
-              Delete
-            </button>
-          </div>
-        `;
+    it('showTags returns true when bit 4 is set', () => {
+      component.annotationFlags = 4; // Only tags
+      expect(component.showTags).toBe(true);
 
-        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+      component.annotationFlags = 7; // All
+      expect(component.showTags).toBe(true);
 
-        initTextPrint();
-
-        const button = document.querySelector<HTMLButtonElement>('[data-action="confirm-navigate"]')!;
-        button.click();
-
-        expect(confirmSpy).toHaveBeenCalledWith('Are you sure?');
-      });
-
-      it('does not navigate when confirmation is cancelled', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="confirm-navigate" data-url="/delete" data-confirm="Are you sure?">
-              Delete
-            </button>
-          </div>
-        `;
-
-        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-
-        initTextPrint();
-
-        const button = document.querySelector<HTMLButtonElement>('[data-action="confirm-navigate"]')!;
-        button.click();
-
-        expect(confirmSpy).toHaveBeenCalled();
-      });
-
-      it('uses default confirmation message when data-confirm is missing', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="confirm-navigate" data-url="/action">
-              Action
-            </button>
-          </div>
-        `;
-
-        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-
-        initTextPrint();
-
-        const button = document.querySelector<HTMLButtonElement>('[data-action="confirm-navigate"]')!;
-        button.click();
-
-        expect(confirmSpy).toHaveBeenCalledWith('Are you sure?');
-      });
-
-      it('does nothing when URL is missing', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="confirm-navigate" data-confirm="Are you sure?">
-              Action
-            </button>
-          </div>
-        `;
-
-        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-
-        initTextPrint();
-
-        const button = document.querySelector<HTMLButtonElement>('[data-action="confirm-navigate"]')!;
-        button.click();
-
-        // confirm should still be called but navigation won't happen due to !url check
-        expect(confirmSpy).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('open-window button', () => {
-      it('opens new window with specified URL', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="open-window" data-url="/popup">Open Popup</button>
-          </div>
-        `;
-
-        const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
-
-        initTextPrint();
-
-        const button = document.querySelector<HTMLButtonElement>('[data-action="open-window"]')!;
-        button.click();
-
-        expect(openSpy).toHaveBeenCalledWith('/popup');
-      });
-
-      it('does nothing when URL is missing', () => {
-        document.body.innerHTML = `
-          <div id="printoptions" data-text-id="123">
-            <button data-action="open-window">Open</button>
-          </div>
-        `;
-
-        const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
-
-        initTextPrint();
-
-        const button = document.querySelector<HTMLButtonElement>('[data-action="open-window"]')!;
-        button.click();
-
-        expect(openSpy).not.toHaveBeenCalled();
-      });
+      component.annotationFlags = 3; // No tags
+      expect(component.showTags).toBe(false);
     });
   });
 
   // ===========================================================================
-  // isTextPrintPage Tests (via DOMContentLoaded)
+  // Status Range Tests
   // ===========================================================================
 
-  describe('page detection', () => {
-    it('detects page with printoptions container', () => {
+  describe('checkStatusInRange', () => {
+    it('returns false for null status', () => {
+      expect(component.checkStatusInRange(null)).toBe(false);
+    });
+
+    it('checks status 1-5 against bitmask', () => {
+      component.statusFilter = 14; // 0b1110 = statuses 2, 3, 4
+
+      expect(component.checkStatusInRange(1)).toBe(false);
+      expect(component.checkStatusInRange(2)).toBe(true);
+      expect(component.checkStatusInRange(3)).toBe(true);
+      expect(component.checkStatusInRange(4)).toBe(true);
+      expect(component.checkStatusInRange(5)).toBe(false);
+    });
+
+    it('checks status 98 (ignored) against bit 5', () => {
+      component.statusFilter = 32; // Bit 5 = status 98
+      expect(component.checkStatusInRange(98)).toBe(true);
+
+      component.statusFilter = 14; // No bit 5
+      expect(component.checkStatusInRange(98)).toBe(false);
+    });
+
+    it('checks status 99 (well-known) against bit 6', () => {
+      component.statusFilter = 64; // Bit 6 = status 99
+      expect(component.checkStatusInRange(99)).toBe(true);
+
+      component.statusFilter = 14; // No bit 6
+      expect(component.checkStatusInRange(99)).toBe(false);
+    });
+  });
+
+  // ===========================================================================
+  // Format Item Tests
+  // ===========================================================================
+
+  describe('formatItem', () => {
+    beforeEach(async () => {
+      await component.init();
+    });
+
+    it('returns paragraph break for isParagraph items', () => {
+      const item = {
+        position: 1,
+        text: '¶',
+        isWord: false,
+        isParagraph: true,
+        wordId: null,
+        status: null,
+        translation: '',
+        romanization: '',
+        tags: ''
+      };
+
+      const result = component.formatItem(item);
+      expect(result).toContain('</p><p');
+    });
+
+    it('returns escaped text for non-word items', () => {
+      const item = {
+        position: 1,
+        text: ', ',
+        isWord: false,
+        isParagraph: false,
+        wordId: null,
+        status: null,
+        translation: '',
+        romanization: '',
+        tags: ''
+      };
+
+      const result = component.formatItem(item);
+      expect(result).toBe(', ');
+    });
+
+    it('returns plain text for words without matching status', () => {
+      component.statusFilter = 1; // Only status 1
+
+      const item = {
+        position: 1,
+        text: 'Hello',
+        isWord: true,
+        isParagraph: false,
+        wordId: 1,
+        status: 2, // Not in filter
+        translation: 'Bonjour',
+        romanization: '',
+        tags: ''
+      };
+
+      const result = component.formatItem(item);
+      expect(result).toBe('Hello');
+    });
+
+    it('returns annotated text for words with matching status', () => {
+      component.statusFilter = 2; // Status 2
+      component.annotationFlags = 1; // Show translation
+      component.placementMode = 0; // Behind
+
+      const item = {
+        position: 1,
+        text: 'Hello',
+        isWord: true,
+        isParagraph: false,
+        wordId: 1,
+        status: 2,
+        translation: 'Bonjour',
+        romanization: '',
+        tags: ''
+      };
+
+      const result = component.formatItem(item);
+      expect(result).toContain('annterm');
+      expect(result).toContain('Hello');
+      expect(result).toContain('anntrans');
+      expect(result).toContain('Bonjour');
+    });
+
+    it('formats with ruby placement when placementMode is 2', () => {
+      component.statusFilter = 2;
+      component.annotationFlags = 1;
+      component.placementMode = 2; // Ruby
+
+      const item = {
+        position: 1,
+        text: 'Hello',
+        isWord: true,
+        isParagraph: false,
+        wordId: 1,
+        status: 2,
+        translation: 'Bonjour',
+        romanization: '',
+        tags: ''
+      };
+
+      const result = component.formatItem(item);
+      expect(result).toContain('<ruby>');
+      expect(result).toContain('</ruby>');
+    });
+  });
+
+  // ===========================================================================
+  // Filter Handler Tests
+  // ===========================================================================
+
+  describe('filter handlers', () => {
+    it('handleStatusChange updates statusFilter', () => {
+      const event = { target: { value: '31' } } as unknown as Event;
+
+      component.handleStatusChange(event);
+
+      expect(component.statusFilter).toBe(31);
+    });
+
+    it('handleAnnotationChange updates annotationFlags', () => {
+      const event = { target: { value: '7' } } as unknown as Event;
+
+      component.handleAnnotationChange(event);
+
+      expect(component.annotationFlags).toBe(7);
+    });
+
+    it('handlePlacementChange updates placementMode', () => {
+      const event = { target: { value: '2' } } as unknown as Event;
+
+      component.handlePlacementChange(event);
+
+      expect(component.placementMode).toBe(2);
+    });
+  });
+
+  // ===========================================================================
+  // Action Tests
+  // ===========================================================================
+
+  describe('actions', () => {
+    it('handlePrint calls window.print', () => {
+      const printSpy = vi.spyOn(window, 'print').mockImplementation(() => {});
+
+      component.handlePrint();
+
+      expect(printSpy).toHaveBeenCalled();
+    });
+
+    it('navigateTo sets window.location.href', () => {
+      // Can't actually test navigation, but check it doesn't throw
+      expect(() => component.navigateTo('/texts')).not.toThrow();
+    });
+
+    it('confirmNavigateTo shows confirm dialog', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+      component.confirmNavigateTo('/delete', 'Are you sure?');
+
+      expect(confirmSpy).toHaveBeenCalledWith('Are you sure?');
+    });
+
+    it('openWindow calls window.open', () => {
+      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+      component.openWindow('/help');
+
+      expect(openSpy).toHaveBeenCalledWith('/help');
+    });
+  });
+
+  // ===========================================================================
+  // Format Annotation Item Tests
+  // ===========================================================================
+
+  describe('formatAnnotationItem', () => {
+    beforeEach(async () => {
       document.body.innerHTML = `
-        <div id="printoptions" data-text-id="123">
-          <button data-action="print">Print</button>
-        </div>
+        <script type="application/json" id="print-config">
+          {"textId": 123, "mode": "annotated"}
+        </script>
       `;
-
-      // initTextPrint should work on print pages
-      expect(() => initTextPrint()).not.toThrow();
+      component = textPrintAppData();
+      await component.init();
     });
 
-    it('handles page without printoptions container', () => {
-      document.body.innerHTML = '<div>Not a print page</div>';
+    it('returns paragraph break for paragraph markers', () => {
+      const item = {
+        order: -1,
+        text: '¶',
+        wordId: null,
+        translation: '',
+        isWord: false
+      };
 
-      // Should not throw even on non-print pages
-      expect(() => initTextPrint()).not.toThrow();
+      const result = component.formatAnnotationItem(item);
+      expect(result).toContain('</p><p');
+    });
+
+    it('returns escaped text for non-word items', () => {
+      const item = {
+        order: -1,
+        text: ', ',
+        wordId: null,
+        translation: '',
+        isWord: false
+      };
+
+      const result = component.formatAnnotationItem(item);
+      expect(result).toContain(', ');
+    });
+
+    it('returns ruby formatted text for word items', () => {
+      const item = {
+        order: 0,
+        text: 'Hello',
+        wordId: 1,
+        translation: 'Bonjour',
+        isWord: true
+      };
+
+      const result = component.formatAnnotationItem(item);
+      expect(result).toContain('<ruby>');
+      expect(result).toContain('Hello');
+      expect(result).toContain('Bonjour');
     });
   });
 
   // ===========================================================================
-  // Window Exports Tests
+  // Window Export Tests
   // ===========================================================================
 
   describe('window exports', () => {
-    it('exports initTextPrint to window', async () => {
-      await import('../../../src/frontend/js/texts/text_print');
+    it('exports textPrintAppData to window', async () => {
+      await import('../../../src/frontend/js/texts/text_print_app');
 
-      expect(typeof window.initTextPrint).toBe('function');
-    });
-  });
-
-  // ===========================================================================
-  // Combined Functionality Tests
-  // ===========================================================================
-
-  describe('combined functionality', () => {
-    it('initializes all handlers on complete print page', () => {
-      document.body.innerHTML = `
-        <div id="printoptions" data-text-id="123">
-          <select data-action="filter-status">
-            <option value="0">All</option>
-          </select>
-          <select data-action="filter-annotation">
-            <option value="0">None</option>
-          </select>
-          <select data-action="filter-placement">
-            <option value="0">Above</option>
-          </select>
-          <button data-action="print">Print</button>
-          <button data-action="navigate" data-url="/home">Home</button>
-          <button data-action="confirm-navigate" data-url="/delete">Delete</button>
-          <button data-action="open-window" data-url="/help">Help</button>
-        </div>
-      `;
-
-      vi.spyOn(window, 'print').mockImplementation(() => {});
-      vi.spyOn(window, 'confirm').mockReturnValue(false);
-      vi.spyOn(window, 'open').mockImplementation(() => null);
-
-      initTextPrint();
-
-      // All buttons should be interactive
-      const printBtn = document.querySelector<HTMLButtonElement>('[data-action="print"]')!;
-      const navBtn = document.querySelector<HTMLButtonElement>('[data-action="navigate"]')!;
-      const confirmBtn = document.querySelector<HTMLButtonElement>('[data-action="confirm-navigate"]')!;
-      const openBtn = document.querySelector<HTMLButtonElement>('[data-action="open-window"]')!;
-
-      expect(() => {
-        printBtn.click();
-        navBtn.click();
-        confirmBtn.click();
-        openBtn.click();
-      }).not.toThrow();
+      expect(typeof window.textPrintAppData).toBe('function');
     });
   });
 });

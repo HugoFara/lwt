@@ -374,6 +374,161 @@ class TextPrintService
     }
 
     // ===========================
+    // API DATA METHODS
+    // ===========================
+
+    /**
+     * Get text items formatted for API response.
+     *
+     * Returns structured data with word tags included, suitable for
+     * client-side rendering of the print view.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array Array of text items with full word data
+     */
+    public function getTextItemsForApi(int $textId): array
+    {
+        $sql = "SELECT
+                    CASE WHEN Ti2WordCount>0 THEN Ti2WordCount ELSE 1 END AS wordCount,
+                    CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE WoText END AS text,
+                    Ti2Order AS position,
+                    CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END as isNotWord,
+                    WoID AS wordId, WoTranslation AS translation,
+                    WoRomanization AS romanization, WoStatus AS status
+                FROM (
+                    {$this->tbpref}textitems2
+                    LEFT JOIN {$this->tbpref}words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
+                )
+                WHERE Ti2TxID = {$textId}
+                ORDER BY Ti2Order asc, Ti2WordCount desc";
+
+        $res = Connection::query($sql);
+        $items = [];
+        $until = 0;
+        $currentItem = null;
+
+        while ($record = mysqli_fetch_assoc($res)) {
+            $order = (int) $record['position'];
+            $wordCount = (int) $record['wordCount'];
+            $isNotWord = (int) $record['isNotWord'];
+
+            // Skip items that are part of a multi-word expression we've already started
+            if ($order <= $until) {
+                continue;
+            }
+
+            // Output previous item if we have one
+            if ($currentItem !== null) {
+                $items[] = $currentItem;
+            }
+
+            $until = $order;
+
+            if ($isNotWord !== 0) {
+                // Non-word item (punctuation, etc.)
+                $text = $record['text'] ?? '';
+                $isParagraph = str_contains($text, '¶');
+
+                $currentItem = [
+                    'position' => $order,
+                    'text' => $text,
+                    'isWord' => false,
+                    'isParagraph' => $isParagraph,
+                    'wordId' => null,
+                    'status' => null,
+                    'translation' => '',
+                    'romanization' => '',
+                    'tags' => ''
+                ];
+            } else {
+                // Word item
+                $until = $order + 2 * ($wordCount - 1);
+
+                $translation = $record['translation'] ?? '';
+                if ($translation === '*') {
+                    $translation = '';
+                }
+
+                $tags = '';
+                if (isset($record['wordId']) && $record['wordId'] !== null) {
+                    $tags = $this->getWordTags((int) $record['wordId']);
+                }
+
+                $currentItem = [
+                    'position' => $order,
+                    'text' => $record['text'] ?? '',
+                    'isWord' => true,
+                    'isParagraph' => false,
+                    'wordId' => isset($record['wordId']) ? (int) $record['wordId'] : null,
+                    'status' => isset($record['status']) ? (int) $record['status'] : null,
+                    'translation' => $translation,
+                    'romanization' => trim((string) ($record['romanization'] ?? '')),
+                    'tags' => $tags
+                ];
+            }
+        }
+
+        // Don't forget the last item
+        if ($currentItem !== null) {
+            $items[] = $currentItem;
+        }
+
+        mysqli_free_result($res);
+        return $items;
+    }
+
+    /**
+     * Get annotated text items formatted for API response.
+     *
+     * Parses the stored annotation string into structured data.
+     *
+     * @param int $textId Text ID
+     *
+     * @return array|null Array of annotation items or null if no annotation
+     */
+    public function getAnnotationForApi(int $textId): ?array
+    {
+        $ann = $this->getAnnotatedText($textId);
+        if ($ann === null) {
+            return null;
+        }
+
+        // Recreate/update the annotation
+        $ann = \recreate_save_ann($textId, $ann);
+        if (strlen($ann) === 0) {
+            return null;
+        }
+
+        $items = preg_split('/[\n]/u', $ann);
+        $parsed = [];
+
+        foreach ($items as $item) {
+            $vals = preg_split('/[\t]/u', $item);
+            $order = isset($vals[0]) ? (int) $vals[0] : -1;
+            $text = $vals[1] ?? '';
+            $wordId = (isset($vals[2]) && ctype_digit($vals[2])) ? (int) $vals[2] : null;
+            $translation = $vals[3] ?? '';
+
+            // Handle special translation marker
+            if ($translation === '*') {
+                // U+200A HAIR SPACE
+                $translation = $text . " ";
+            }
+
+            $parsed[] = [
+                'order' => $order,
+                'text' => $text,
+                'wordId' => $wordId,
+                'translation' => $translation,
+                'isWord' => $order > -1
+            ];
+        }
+
+        return $parsed;
+    }
+
+    // ===========================
     // VIEW DATA PREPARATION
     // ===========================
 

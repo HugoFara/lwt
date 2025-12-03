@@ -108,7 +108,7 @@ import './texts/archived_texts_grouped_app';
 import './texts/text_status_chart';
 import './texts/youtube_import';
 import './texts/text_check_display';
-import './texts/text_print';
+import './texts/text_print_app';
 
 // Words
 import './words/word_list_app'; // Alpine.js SPA component

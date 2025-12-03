@@ -144,6 +144,80 @@ export interface MarkAllResponse {
 }
 
 /**
+ * Print item from API - represents a word or punctuation in print view.
+ */
+export interface PrintItem {
+  position: number;
+  text: string;
+  isWord: boolean;
+  isParagraph: boolean;
+  wordId: number | null;
+  status: number | null;
+  translation: string;
+  romanization: string;
+  tags: string;
+}
+
+/**
+ * Configuration for print view.
+ */
+export interface PrintConfig {
+  textId: number;
+  title: string;
+  sourceUri: string;
+  audioUri: string;
+  langId: number;
+  textSize: number;
+  rtlScript: boolean;
+  hasAnnotation: boolean;
+  savedAnn: number;
+  savedStatus: number;
+  savedPlacement: number;
+}
+
+/**
+ * Response for getting print items.
+ */
+export interface PrintItemsResponse {
+  items: PrintItem[];
+  config: PrintConfig;
+}
+
+/**
+ * Annotation item from API - represents a term in improved annotated view.
+ */
+export interface AnnotationItem {
+  order: number;
+  text: string;
+  wordId: number | null;
+  translation: string;
+  isWord: boolean;
+}
+
+/**
+ * Configuration for annotation view.
+ */
+export interface AnnotationConfig {
+  textId: number;
+  title: string;
+  sourceUri: string;
+  audioUri: string;
+  langId: number;
+  textSize: number;
+  rtlScript: boolean;
+  hasAnnotation: boolean;
+  ttsClass: string | null;
+}
+
+/**
+ * Response for getting annotation.
+ */
+export interface AnnotationResponse {
+  items: AnnotationItem[] | null;
+  config: AnnotationConfig;
+}
+
+/**
  * Texts API methods.
  */
 export const TextsApi = {
@@ -223,5 +297,25 @@ export const TextsApi = {
    */
   async getWords(textId: number): Promise<ApiResponse<TextWordsResponse>> {
     return apiGet<TextWordsResponse>(`/texts/${textId}/words`);
+  },
+
+  /**
+   * Get print items for a text (for client-side print rendering).
+   *
+   * @param textId Text ID
+   * @returns Promise with print items and config
+   */
+  async getPrintItems(textId: number): Promise<ApiResponse<PrintItemsResponse>> {
+    return apiGet<PrintItemsResponse>(`/texts/${textId}/print-items`);
+  },
+
+  /**
+   * Get annotation data for improved/annotated text view.
+   *
+   * @param textId Text ID
+   * @returns Promise with annotation items and config
+   */
+  async getAnnotation(textId: number): Promise<ApiResponse<AnnotationResponse>> {
+    return apiGet<AnnotationResponse>(`/texts/${textId}/annotation`);
   }
 };

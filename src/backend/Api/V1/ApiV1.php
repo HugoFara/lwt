@@ -383,8 +383,14 @@ class ApiV1
             if (($fragments[2] ?? '') === 'words') {
                 // GET /texts/{id}/words - get all words for client-side rendering
                 Response::success($this->textHandler->formatGetWords($textId));
+            } elseif (($fragments[2] ?? '') === 'print-items') {
+                // GET /texts/{id}/print-items - get text items for print view
+                Response::success($this->textHandler->formatGetPrintItems($textId));
+            } elseif (($fragments[2] ?? '') === 'annotation') {
+                // GET /texts/{id}/annotation - get annotation for improved text view
+                Response::success($this->textHandler->formatGetAnnotation($textId));
             } else {
-                Response::error('Expected "words"', 404);
+                Response::error('Expected "words", "print-items", or "annotation"', 404);
             }
         } else {
             Response::error('Expected "statistics", "by-language", "archived-by-language", or text ID', 404);
