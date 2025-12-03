@@ -15,6 +15,7 @@ import Alpine from 'alpinejs';
 import { createIcons, icons } from 'lucide';
 import { apiGet } from '../core/api_client';
 import { confirmDelete } from '../core/ui_utilities';
+import { renderBulmaTags } from '../core/html_utils';
 
 const STORAGE_KEY = 'lwt_collapsed_archived_languages';
 
@@ -128,6 +129,9 @@ export interface ArchivedTextsGroupedData {
 
   // Sorting
   handleSortChange(event: Event): void;
+
+  // Utility
+  renderBulmaTags(tagList: string): string;
 }
 
 /**
@@ -424,6 +428,11 @@ export function archivedTextsGroupedData(): ArchivedTextsGroupedData {
           }
         }
       }
+    },
+
+    // Utility - render tags as Bulma components
+    renderBulmaTags(tagList: string): string {
+      return renderBulmaTags(tagList);
     }
   };
 }

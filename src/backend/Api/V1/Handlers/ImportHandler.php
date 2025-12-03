@@ -48,11 +48,8 @@ class ImportHandler
         IFNULL(WoSentence, '') LIKE CONCAT('%{', WoText, '}%') AS SentOK,
         WoStatus,
         IFNULL(
-            CONCAT(
-                '[',
-                group_concat(DISTINCT TgText ORDER BY TgText separator ', '),
-                ']'
-            ), ''
+            group_concat(DISTINCT TgText ORDER BY TgText separator ','),
+            ''
         ) AS taglist
         FROM (
             ({$tbpref}words LEFT JOIN {$tbpref}wordtags ON WoID = WtWoID)

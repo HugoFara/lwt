@@ -20,6 +20,7 @@ use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\TagHelper;
 use Lwt\Services\ExportService;
 ?>
 <?php if ($recno == 0): ?>
@@ -167,9 +168,7 @@ foreach ($words as $record):
     </td>
     <td>
         <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation']) ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-        <?php if (!empty($record['taglist'])): ?>
-        <span class="has-text-grey is-size-7"><?php echo htmlspecialchars($record['taglist'], ENT_QUOTES, 'UTF-8'); ?></span>
-        <?php endif; ?>
+        <?php echo TagHelper::renderInline($record['taglist'] ?? ''); ?>
     </td>
     <td class="has-text-centered">
         <?php echo ($record['SentOK'] != 0
@@ -246,9 +245,7 @@ foreach ($words as $record):
                 <?php if ($currentlang == '' && !empty($record['LgName'])): ?>
                 <span class="tag is-info is-light"><?php echo htmlspecialchars($record['LgName'], ENT_QUOTES, 'UTF-8'); ?></span>
                 <?php endif; ?>
-                <?php if (!empty($record['taglist'])): ?>
-                <span class="tag is-light"><?php echo htmlspecialchars($record['taglist'], ENT_QUOTES, 'UTF-8'); ?></span>
-                <?php endif; ?>
+                <?php echo TagHelper::renderInline($record['taglist'] ?? ''); ?>
                 <?php if ($record['SentOK'] != 0): ?>
                 <span class="tag is-success is-light" title="<?php echo htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     <?php echo IconHelper::render('message-square', ['alt' => 'Has sentence']); ?>

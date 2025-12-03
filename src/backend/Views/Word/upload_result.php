@@ -22,61 +22,120 @@
 namespace Lwt\Views\Word;
 
 use Lwt\View\Helper\IconHelper;
+use Lwt\View\Helper\PageLayoutHelper;
 
+// Action buttons for navigation
+$actions = [
+    ['url' => '/word/upload', 'label' => 'Import More Terms', 'icon' => 'file-up', 'class' => 'is-primary'],
+    ['url' => '/words', 'label' => 'My Terms', 'icon' => 'list'],
+    ['url' => '/', 'label' => 'Home', 'icon' => 'home']
+];
+echo PageLayoutHelper::buildActionCard($actions);
 ?>
+
+<!-- Import Result Feedback -->
+<?php if ($recno > 0): ?>
+<article class="message is-success mb-4">
+    <div class="message-body">
+        <span class="icon-text">
+            <span class="icon">
+                <?php echo IconHelper::render('check', ['alt' => 'Success']); ?>
+            </span>
+            <span>
+                <strong>Import successful!</strong>
+                <span id="recno"><?php echo $recno; ?></span>
+                term<?php echo ($recno == 1 ? '' : 's'); ?> imported.
+            </span>
+        </span>
+    </div>
+</article>
+<?php else: ?>
+<article class="message is-warning mb-4">
+    <div class="message-body">
+        <span class="icon-text">
+            <span class="icon">
+                <?php echo IconHelper::render('alert-triangle', ['alt' => 'Warning']); ?>
+            </span>
+            <span>
+                <strong>No terms were imported.</strong>
+                This could mean all terms already exist or the input was empty.
+            </span>
+        </span>
+    </div>
+</article>
+<?php endif; ?>
+
 <form name="form1" action="#"
-data-action="upload-result-form"
-data-last-update="<?php echo htmlspecialchars($lastUpdate); ?>"
-data-rtl="<?php echo $rtl ? 'true' : 'false'; ?>"
-data-recno="<?php echo $recno; ?>">
-<div id="res_data">
-    <table id="res_data-navigation" class="tab2" cellspacing="0" cellpadding="2">
-    <tr>
-        <th class="th1" colspan="2" nowrap="nowrap">
-            <span id="recno"><?php echo $recno; ?></span>
-            Term<?php echo ($recno == 1 ? '' : 's'); ?>
-        </th>
-        <th class="th1 flex-spaced" colspan="1" nowrap="nowrap">
-            <span>
-                <span id="res_data-navigation-prev">
-                    <?php echo IconHelper::render('chevrons-left', ['id' => 'res_data-navigation-prev-first', 'title' => 'First Page', 'alt' => 'First Page']); ?>
-                    &nbsp;
-                    <?php echo IconHelper::render('chevron-left', ['id' => 'res_data-navigation-prev-minus', 'title' => 'Previous Page', 'alt' => 'Previous Page']); ?>
-                </span>
-            </span>
-            <span>
-                Page
-                <span id="res_data-navigation-no_quick_nav">1</span>
-                <select id="res_data-navigation-quick_nav" name="page"></select>
-                of <span id="res_data-navigation-totalPages"></span>
-            </span>
-            <span>
-                <span id="res_data-navigation-next">
-                    <?php echo IconHelper::render('chevron-right', ['id' => 'res_data-navigation-next-plus', 'title' => 'Next Page', 'alt' => 'Next Page']); ?>
-                    &nbsp;
-                    <?php echo IconHelper::render('chevrons-right', ['id' => 'res_data-navigation-next-last', 'title' => 'Last Page', 'alt' => 'Last Page']); ?>
-                </span>
-            </span>
-        </th>
-    </table>
-    <table id="res_data-res_table" class="sortable tab2" cellspacing="0" cellpadding="5">
-        <thead id="res_data-res_table-header">
-            <tr>
-                <th class="th1 clickable">Term /<br />Romanization</th>
-                <th class="th1 clickable">Translation</th>
-                <th class="th1 sorttable_nosort">Tags</th>
-                <th class="th1 sorttable_nosort">Se.</th>
-                <th class="th1 sorttable_numeric clickable">Status</th>
-            </tr>
-        </thead>
-        <tbody id="res_data-res_table-body">
-        </tbody>
-    </table>
-    <p id="res_data-no_terms_imported" style="display: none;">
-        No terms imported.
-    </p>
-</div>
+      class="box"
+      data-action="upload-result-form"
+      data-last-update="<?php echo htmlspecialchars($lastUpdate); ?>"
+      data-rtl="<?php echo $rtl ? 'true' : 'false'; ?>"
+      data-recno="<?php echo $recno; ?>">
+
+    <div id="res_data">
+        <!-- Pagination Navigation -->
+        <nav id="res_data-navigation" class="level mb-4" style="<?php echo $recno == 0 ? 'display: none;' : ''; ?>">
+            <div class="level-left">
+                <div class="level-item">
+                    <span class="tag is-medium is-info is-light">
+                        <span id="recno-display"><?php echo $recno; ?></span>&nbsp;Term<?php echo ($recno == 1 ? '' : 's'); ?>
+                    </span>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <nav class="pagination is-small" role="navigation" aria-label="pagination">
+                        <span id="res_data-navigation-prev" class="pagination-previous" style="display: none;">
+                            <span id="res_data-navigation-prev-first" class="icon is-clickable" title="First Page">
+                                <?php echo IconHelper::render('chevrons-left', ['alt' => 'First Page']); ?>
+                            </span>
+                            <span id="res_data-navigation-prev-minus" class="icon is-clickable" title="Previous Page">
+                                <?php echo IconHelper::render('chevron-left', ['alt' => 'Previous Page']); ?>
+                            </span>
+                        </span>
+                        <span class="pagination-list">
+                            <span class="mr-2">Page</span>
+                            <span id="res_data-navigation-no_quick_nav">1</span>
+                            <select id="res_data-navigation-quick_nav" name="page" class="select is-small"></select>
+                            <span class="ml-1 mr-1">of</span>
+                            <span id="res_data-navigation-totalPages"></span>
+                        </span>
+                        <span id="res_data-navigation-next" class="pagination-next" style="display: none;">
+                            <span id="res_data-navigation-next-plus" class="icon is-clickable" title="Next Page">
+                                <?php echo IconHelper::render('chevron-right', ['alt' => 'Next Page']); ?>
+                            </span>
+                            <span id="res_data-navigation-next-last" class="icon is-clickable" title="Last Page">
+                                <?php echo IconHelper::render('chevrons-right', ['alt' => 'Last Page']); ?>
+                            </span>
+                        </span>
+                    </nav>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Results Table -->
+        <div class="table-container">
+            <table id="res_data-res_table" class="table is-striped is-hoverable is-fullwidth sortable">
+                <thead id="res_data-res_table-header">
+                    <tr>
+                        <th class="is-clickable">Term / Romanization</th>
+                        <th class="is-clickable">Translation</th>
+                        <th>Tags</th>
+                        <th class="has-text-centered" title="Sentence">Se.</th>
+                        <th class="has-text-centered is-clickable">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="res_data-res_table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <p id="res_data-no_terms_imported" class="has-text-centered has-text-grey py-4" style="display: none;">
+            No terms imported.
+        </p>
+    </div>
 </form>
+
 <script type="application/json" data-lwt-upload-result-config>
 <?php echo json_encode([
     'lastUpdate' => $lastUpdate,

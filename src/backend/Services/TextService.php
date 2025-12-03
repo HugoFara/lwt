@@ -110,11 +110,7 @@ class TextService
 
         $sql = "SELECT AtID, AtTitle, LgName, AtAudioURI, AtSourceURI,
             LENGTH(AtAnnotatedText) AS annotlen,
-            IF(
-                COUNT(T2Text)=0,
-                '',
-                CONCAT('[', GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ', '), ']')
-            ) AS taglist
+            IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 ({$this->tbpref}archivedtexts
                 LEFT JOIN {$this->tbpref}archtexttags ON AtID = AgAtID)
@@ -720,11 +716,7 @@ class TextService
 
         $sql = "SELECT TxID, TxTitle, LgName, TxAudioURI, TxSourceURI,
             LENGTH(TxAnnotatedText) AS annotlen,
-            IF(
-                COUNT(T2Text)=0,
-                '',
-                CONCAT('[', GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ', '), ']')
-            ) AS taglist
+            IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 ({$this->tbpref}texts LEFT JOIN {$this->tbpref}texttags ON TxID = TtTxID)
                 LEFT JOIN {$this->tbpref}tags2 ON T2ID = TtT2ID
@@ -773,11 +765,7 @@ class TextService
         // Get texts with tags
         $sql = "SELECT TxID, TxTitle, TxAudioURI, TxSourceURI,
             LENGTH(TxAnnotatedText) AS annotlen,
-            IF(
-                COUNT(T2Text)=0,
-                '',
-                CONCAT('[', GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ', '), ']')
-            ) AS taglist
+            IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 ({$this->tbpref}texts LEFT JOIN {$this->tbpref}texttags ON TxID = TtTxID)
                 LEFT JOIN {$this->tbpref}tags2 ON T2ID = TtT2ID
@@ -843,11 +831,7 @@ class TextService
         // Get archived texts with tags
         $sql = "SELECT AtID, AtTitle, AtAudioURI, AtSourceURI,
             LENGTH(AtAnnotatedText) AS annotlen,
-            IF(
-                COUNT(T2Text)=0,
-                '',
-                CONCAT('[', GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ', '), ']')
-            ) AS taglist
+            IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 ({$this->tbpref}archivedtexts LEFT JOIN {$this->tbpref}archtexttags ON AtID = AgAtID)
                 LEFT JOIN {$this->tbpref}tags2 ON T2ID = AgT2ID

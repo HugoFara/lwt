@@ -43,7 +43,7 @@ namespace Lwt\Views\Word;
 <?php if ($tags !== '') : ?>
 <tr>
     <td class="td1 right">Tags:</td>
-    <td class="td1 word-show-value"><b><?php echo htmlspecialchars($tags ?? '', ENT_QUOTES, 'UTF-8'); ?></b></td>
+    <td class="td1 word-show-value"><?php echo \Lwt\View\Helper\TagHelper::render($tags); ?></td>
 </tr>
 <?php endif; ?>
 <?php if ($word['romanization'] !== '') : ?>

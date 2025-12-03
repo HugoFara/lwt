@@ -172,7 +172,7 @@ echo PageLayoutHelper::buildActionCard([
                                 <div class="card-content">
                                     <!-- Tags -->
                                     <div x-show="text.taglist" class="text-meta mb-3">
-                                        <span class="tags-list" x-text="text.taglist"></span>
+                                        <div class="tags" x-html="renderBulmaTags(text.taglist)"></div>
                                     </div>
 
                                     <!-- Word Statistics -->

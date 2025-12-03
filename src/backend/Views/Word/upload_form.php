@@ -23,6 +23,7 @@ namespace Lwt\Views\Word;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
+use Lwt\View\Helper\PageLayoutHelper;
 
 /** @var string|null $currentLanguage */
 /** @var array $languages */
@@ -38,6 +39,14 @@ $columnOptions = [
     'g' => 'Tag List',
     'x' => "Don't import"
 ];
+
+// Action buttons for navigation
+$actions = [
+    ['url' => '/words', 'label' => 'My Terms', 'icon' => 'list', 'class' => 'is-primary'],
+    ['url' => '/term-tags', 'label' => 'Term Tags', 'icon' => 'tags'],
+    ['url' => '/', 'label' => 'Home', 'icon' => 'home']
+];
+echo PageLayoutHelper::buildActionCard($actions);
 ?>
 
 <!-- Info Message -->

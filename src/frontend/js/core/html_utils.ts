@@ -54,3 +54,24 @@ export function escape_apostrophes(s: string): string {
   return s.replace(/'/g, "\\'");
 }
 
+/**
+ * Render a comma-separated tag list as Bulma tag components.
+ *
+ * @param tagList Comma-separated tag list (e.g., "tag1,tag2,tag3")
+ * @returns HTML string with Bulma tags
+ */
+export function renderBulmaTags(tagList: string): string {
+  if (!tagList || tagList.trim() === '') {
+    return '';
+  }
+
+  const tags = tagList.split(',').map(t => t.trim()).filter(t => t !== '');
+  if (tags.length === 0) {
+    return '';
+  }
+
+  return tags
+    .map(tag => `<span class="tag is-info is-light is-small">${escape_html_chars(tag)}</span>`)
+    .join('');
+}
+

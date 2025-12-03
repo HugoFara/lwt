@@ -17,6 +17,7 @@ import { apiGet } from '../core/api_client';
 import { TextsApi } from '../api/texts';
 import { multiActionGo } from '../forms/bulk_actions';
 import { confirmDelete } from '../core/ui_utilities';
+import { renderBulmaTags } from '../core/html_utils';
 
 const STORAGE_KEY = 'lwt_collapsed_languages';
 
@@ -145,6 +146,9 @@ export interface TextsGroupedData {
 
   // Sorting
   handleSortChange(event: Event): void;
+
+  // Utility
+  renderBulmaTags(tagList: string): string;
 }
 
 /**
@@ -470,6 +474,11 @@ export function textsGroupedData(): TextsGroupedData {
           }
         }
       }
+    },
+
+    // Utility - render tags as Bulma components
+    renderBulmaTags(tagList: string): string {
+      return renderBulmaTags(tagList);
     }
   };
 }

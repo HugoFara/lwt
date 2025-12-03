@@ -1563,7 +1563,7 @@ class WordController extends BaseController
             return;
         }
 
-        $tags = TagService::getWordTagListFormatted($wid, '', false, false);
+        $tags = TagService::getWordTagList((int) $wid, false);
         $scrdir = $this->languageService->getScriptDirectionTag($word['langId']);
 
         include __DIR__ . '/../Views/Word/show.php';

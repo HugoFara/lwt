@@ -6,7 +6,7 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import { escape_html_chars } from '../core/html_utils';
+import { escape_html_chars, renderBulmaTags } from '../core/html_utils';
 import { STATUSES } from '../core/app_data';
 import { iconHtml } from '../ui/icons';
 import type { WordStatus } from '../types/globals';
@@ -81,7 +81,7 @@ function formatImportedTermsNavigation(
 
   const prevNav = document.getElementById('res_data-navigation-prev');
   if (prevNav) {
-    prevNav.style.display = currentPage > 1 ? 'initial' : 'none';
+    prevNav.style.display = currentPage > 1 ? 'flex' : 'none';
   }
 
   const prevFirst = document.getElementById('res_data-navigation-prev-first');
@@ -103,11 +103,11 @@ function formatImportedTermsNavigation(
   const quickNav = document.getElementById('res_data-navigation-quick_nav') as HTMLSelectElement | null;
   const noQuickNav = document.getElementById('res_data-navigation-no_quick_nav');
 
-  if (totalPages === 1) {
+  if (totalPages <= 1) {
     if (quickNav) quickNav.style.display = 'none';
-    if (noQuickNav) noQuickNav.style.display = 'initial';
+    if (noQuickNav) noQuickNav.style.display = 'inline';
   } else {
-    if (quickNav) quickNav.style.display = 'initial';
+    if (quickNav) quickNav.style.display = 'inline-block';
     if (noQuickNav) noQuickNav.style.display = 'none';
   }
 
@@ -141,7 +141,7 @@ function formatImportedTermsNavigation(
 
   const nextNav = document.getElementById('res_data-navigation-next');
   if (nextNav) {
-    nextNav.style.display = currentPage < totalPages ? 'initial' : 'none';
+    nextNav.style.display = currentPage < totalPages ? 'flex' : 'none';
   }
 
   const nextPlus = document.getElementById('res_data-navigation-next-plus');
@@ -175,23 +175,26 @@ function formatImportedTerms(data: ImportedTerm[], rtl: boolean): string {
     const statusInfo = STATUSES[record.WoStatus] || { name: 'Unknown', abbr: '?' };
 
     const row = `<tr>
-      <td class="td1">
+      <td>
         <span${rtl ? ' dir="rtl"' : ''}>${escape_html_chars(record.WoText)}</span>
-        / <span id="roman${record.WoID}" class="edit_area clickedit">${record.WoRomanization !== '' ? escape_html_chars(record.WoRomanization) : '*'}</span>
+        <span class="has-text-grey"> / </span>
+        <span id="roman${record.WoID}" class="edit_area clickedit has-text-grey-dark">${record.WoRomanization !== '' ? escape_html_chars(record.WoRomanization) : '*'}</span>
       </td>
-      <td class="td1">
+      <td>
         <span id="trans${record.WoID}" class="edit_area clickedit">${escape_html_chars(record.WoTranslation)}</span>
       </td>
-      <td class="td1">
-        <span class="smallgray2">${escape_html_chars(record.taglist)}</span>
+      <td>
+        <span class="tags">${renderBulmaTags(record.taglist)}</span>
       </td>
-      <td class="td1 center">
-        <b>${record.SentOK !== 0
-    ? iconHtml('status', { title: escape_html_chars(record.WoSentence), alt: 'Yes' })
-    : iconHtml('status-busy', { title: '(No valid sentence)', alt: 'No' })
-}</b>
+      <td class="has-text-centered">
+        ${record.SentOK !== 0
+    ? iconHtml('check', { title: escape_html_chars(record.WoSentence), alt: 'Yes', className: 'has-text-success' })
+    : iconHtml('x', { title: '(No valid sentence)', alt: 'No', className: 'has-text-danger' })
+}
       </td>
-      <td class="td1 center" title="${escape_html_chars(statusInfo.name)}">${escape_html_chars(statusInfo.abbr)}</td>
+      <td class="has-text-centered" title="${escape_html_chars(statusInfo.name)}">
+        <span class="tag is-light">${escape_html_chars(statusInfo.abbr)}</span>
+      </td>
     </tr>`;
     output += row;
   }

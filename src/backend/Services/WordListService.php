@@ -258,7 +258,7 @@ class WordListService
                 $sql = 'select WoID, WoText, WoTranslation, WoRomanization, WoSentence,
                         SentOK, WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI, Days,
                         WoTodayScore AS Score, WoTomorrowScore AS Score2,
-                        ifnull(concat(\'[\',group_concat(distinct TgText order by TgText separator \', \'),\']\'),\'\') as taglist
+                        ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist
                         from (select WoID, WoTextLC, WoText, WoTranslation, WoRomanization,
                         WoSentence,
                         ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
@@ -279,7 +279,7 @@ class WordListService
                         WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
                         DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
                         WoTomorrowScore AS Score2,
-                        ifnull(concat(\'[\',group_concat(distinct TgText order by TgText separator \', \'),\']\'),\'\') as taglist
+                        ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist
                         from ((' . $this->tbpref . 'words left JOIN ' . $this->tbpref .
                         'wordtags ON WoID = WtWoID) left join ' . $this->tbpref .
                         'tags on TgID = WtTgID), ' . $this->tbpref . 'languages
@@ -292,7 +292,7 @@ class WordListService
                     LgName, LgRightToLeft, LgGoogleTranslateURI,
                     DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
                     WoTomorrowScore AS Score2,
-                    ifnull(concat(\'[\',group_concat(distinct TgText order by TgText separator \', \'),\']\'),\'\') as taglist
+                    ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist
                     from ((' . $this->tbpref . 'words
                     left JOIN ' . $this->tbpref . 'wordtags ON WoID = WtWoID)
                     left join ' . $this->tbpref . 'tags on TgID = WtTgID), ' .
@@ -330,7 +330,7 @@ class WordListService
                     WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
                     DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
                     WoTomorrowScore AS Score2,
-                    ifnull(concat(\'[\',group_concat(distinct TgText order by TgText separator \', \'),\']\'),\'\') as taglist,
+                    ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
                     WoTextLC, WoTodayScore
                     from ((' . $this->tbpref . 'words left JOIN ' . $this->tbpref .
                     'wordtags ON WoID = WtWoID)
@@ -347,7 +347,7 @@ class WordListService
                     WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
                     DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
                     WoTomorrowScore AS Score2,
-                    ifnull(concat(\'[\',group_concat(distinct TgText order by TgText separator \', \'),\']\'),\'\') as taglist,
+                    ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
                     WoTextLC, WoTodayScore
                     from ((' . $this->tbpref . 'words left JOIN ' . $this->tbpref .
                     'wordtags ON WoID = WtWoID)
@@ -364,7 +364,7 @@ class WordListService
                     WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
                     DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
                     WoTomorrowScore AS Score2,
-                    ifnull(concat(\'[\',group_concat(distinct TgText order by TgText separator \', \'),\']\'),\'\') as taglist,
+                    ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
                     WoTextLC, WoTodayScore
                     from ((' . $this->tbpref . 'words left JOIN ' . $this->tbpref .
                     'wordtags ON WoID = WtWoID)

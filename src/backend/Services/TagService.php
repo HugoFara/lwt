@@ -814,14 +814,70 @@ class TagService
     }
 
     /**
+     * Get comma-separated tag list string for a word.
+     *
+     * @param int  $wordId     Word ID
+     * @param bool $escapeHtml Convert to HTML entities
+     *
+     * @return string Comma-separated tag list
+     */
+    public static function getWordTagList(int $wordId, bool $escapeHtml = true): string
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        $result = Connection::fetchValue(
+            "SELECT IFNULL(
+                GROUP_CONCAT(DISTINCT TgText ORDER BY TgText SEPARATOR ','),
+                ''
+            ) AS value
+            FROM (
+                (
+                    {$tbpref}words
+                    LEFT JOIN {$tbpref}wordtags ON WoID = WtWoID
+                )
+                LEFT JOIN {$tbpref}tags ON TgID = WtTgID
+            )
+            WHERE WoID = {$wordId}"
+        );
+
+        if ($escapeHtml && $result !== null) {
+            $result = htmlspecialchars($result, ENT_QUOTES, 'UTF-8');
+        }
+
+        return $result ?? '';
+    }
+
+    /**
+     * Get formatted tag list as Bulma tag components for a word.
+     *
+     * @param int    $wordId Word ID
+     * @param string $size   Bulma size class (e.g., 'is-small', 'is-normal')
+     * @param string $color  Bulma color class (e.g., 'is-info', 'is-primary')
+     * @param bool   $isLight Whether to use light variant
+     *
+     * @return string HTML for Bulma tags
+     */
+    public static function getWordTagListHtml(
+        int $wordId,
+        string $size = 'is-small',
+        string $color = 'is-info',
+        bool $isLight = true
+    ): string {
+        $tagList = self::getWordTagList($wordId, false);
+        return \Lwt\View\Helper\TagHelper::renderInline($tagList, $size, $color, $isLight);
+    }
+
+    /**
      * Get formatted tag list string for a word.
      *
      * @param int    $wordId Word ID
      * @param string $before String to prepend if tags exist
-     * @param bool   $brackets Wrap tags in brackets
+     * @param bool   $brackets Wrap tags in brackets (deprecated, kept for compatibility)
      * @param bool   $escapeHtml Convert to HTML entities
      *
      * @return string Formatted tag list
+     *
+     * @deprecated Use getWordTagList() or getWordTagListHtml() instead
      */
     public static function getWordTagListFormatted(
         int $wordId,
