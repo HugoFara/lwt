@@ -31,7 +31,8 @@
     "require-dev": {
         "vimeo/psalm": "^5.6",
         "phpunit/phpunit": "^10.5",
-        "league/commonmark": "^2.7"
+        "league/commonmark": "^2.7",
+        "phpdocumentor/shim": "*"
     },
     "suggest": {
         "squizlabs/php_codesniffer": "Following code style standards is a good thing"
@@ -49,7 +50,7 @@
         "doc": [
             "npm run docs:build",
             "./node_modules/.bin/jsdoc -c jsdoc.json",
-            "php tools/phpDocumentor"
+            "./vendor/bin/phpdoc"
         ],
         "build": "npm run build:all",
         "clean-doc": [
@@ -66,5 +67,10 @@
         "doc": "Regenerate all documentation (VitePress + JSDoc + phpDoc)",
         "build": "Build frontend assets (Vite + themes)",
         "clean-doc": "Clear generated documentation"
+    },
+    "config": {
+        "allow-plugins": {
+            "phpdocumentor/shim": true
+        }
     }
 }

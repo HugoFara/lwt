@@ -147,9 +147,6 @@ import './ui/lucide_icons';
 import './ui/navbar';
 import './ui/footer';
 
-// Global exports for inline PHP scripts
-import './globals';
-
 declare global {
   interface Window {
     LWT_VITE_LOADED: boolean;

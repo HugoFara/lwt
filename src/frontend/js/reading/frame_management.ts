@@ -13,7 +13,7 @@
  * @since   1.6.16-fork
  */
 
-import { cClick } from '../ui/word_popup';
+import { closeParentPopup } from '../ui/word_popup';
 
 /**
  * Animate an element's CSS property using requestAnimationFrame.
@@ -137,8 +137,8 @@ export function cleanupRightFrames(): void {
   window.parent.setTimeout(mytimeout, 800);
 
   window.parent.document.getElementById('frame-l')?.focus();
-  // Use imported cClick directly since it's available in the module
-  window.parent.setTimeout(cClick, 100);
+  // Close popup in parent frame via custom event
+  setTimeout(() => closeParentPopup(), 100);
 }
 
 /**

@@ -27,7 +27,8 @@ import {
 } from './word_dom_updates';
 import { make_tooltip } from '../terms/word_status';
 import { cleanupRightFrames } from '../reading/frame_management';
-import { do_ajax_edit_impr_text } from '../terms/term_operations';
+import { do_ajax_edit_impr_text, editImprTextInOpener } from '../terms/term_operations';
+import { closeParentPopup } from '../ui/word_popup';
 import { escape_html_chars } from '../core/html_utils';
 
 /**
@@ -257,14 +258,8 @@ function initAllWellKnownResult(config: AllWellKnownConfig): void {
 
   updateLearnStatus(config.todoContent);
 
-  // Trigger cClick in parent after a delay
-  try {
-    if (window.parent && typeof window.parent.cClick === 'function') {
-      window.parent.setTimeout(window.parent.cClick, 1000);
-    }
-  } catch {
-    // Parent access may be blocked, ignore
-  }
+  // Close popup in parent frame after a delay
+  setTimeout(() => closeParentPopup(), 1000);
 }
 
 /**
@@ -291,15 +286,10 @@ function initSaveResult(config: SaveResultConfig): void {
 function initEditResult(config: EditResultConfig): void {
   // Handle annotation mode (popup window context)
   if (config.fromAnn !== undefined) {
-    if (window.opener && typeof window.opener.do_ajax_edit_impr_text === 'function') {
-      window.opener.do_ajax_edit_impr_text(
-        config.fromAnn,
-        config.textlc ?? '',
-        config.wid
-      );
-    } else {
-      do_ajax_edit_impr_text(config.fromAnn, config.textlc ?? '', config.wid);
-    }
+    // Try to update opener window via custom event, fall back to local update
+    editImprTextInOpener(config.fromAnn, config.textlc ?? '', config.wid);
+    // Also run locally in case opener is same-origin or event didn't work
+    do_ajax_edit_impr_text(config.fromAnn, config.textlc ?? '', config.wid);
     return;
   }
 

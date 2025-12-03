@@ -174,36 +174,6 @@ class DictionaryService
     }
 
     /**
-     * Create JavaScript to open dictionary in frame.
-     *
-     * @param string $url Dictionary URL
-     *
-     * @return string JavaScript code
-     */
-    public function makeOpenDictStrJS(string $url): string
-    {
-        $r = '';
-        if ($url != '') {
-            $popup = false;
-            if (str_starts_with($url, "*")) {
-                $url = substr($url, 1);
-                $popup = true;
-            }
-            $query = parse_url($url, PHP_URL_QUERY);
-            if ($query !== false && $query !== null) {
-                parse_str($query, $url_query);
-                $popup = $popup || array_key_exists('lwt_popup', $url_query);
-            }
-            if ($popup) {
-                $r = "owin(" . json_encode($url) . ");\n";
-            } else {
-                $r = "top.frames['ru'].location.href=" . json_encode($url) . ";\n";
-            }
-        }
-        return $r;
-    }
-
-    /**
      * Create a dictionary open URL from a pseudo-URL for dynamic sentence.
      *
      * @param string $url       A string containing at least a URL

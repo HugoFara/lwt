@@ -75,3 +75,71 @@ export function renderBulmaTags(tagList: string): string {
     .join('');
 }
 
+/**
+ * Status labels for tooltips.
+ */
+const STATUS_LABELS: Record<number, string> = {
+  0: 'Unknown',
+  1: 'Learning (1)',
+  2: 'Learning (2)',
+  3: 'Learning (3)',
+  4: 'Learning (4)',
+  5: 'Learned (5)',
+  98: 'Ignored',
+  99: 'Well Known'
+};
+
+/**
+ * Order of statuses in the chart (left to right).
+ */
+const STATUS_ORDER = [0, 1, 2, 3, 4, 5, 99, 98];
+
+/**
+ * Statistics data from the API.
+ */
+interface StatsData {
+  total: number;
+  unknown: number;
+  statusCounts: Record<string, number>;
+}
+
+/**
+ * Render a horizontal stacked bar chart showing word status distribution.
+ *
+ * Uses CSS classes bc0-bc5, bc98, bc99 for colors (defined in css_charts.css).
+ *
+ * @param stats Statistics object with total, unknown, and statusCounts
+ * @returns HTML string for the status bar chart
+ */
+export function renderStatusBarChart(stats: StatsData | null | undefined): string {
+  if (!stats || stats.total === 0) {
+    return '<div class="status-bar-chart empty"></div>';
+  }
+
+  const { total, unknown, statusCounts } = stats;
+
+  // Build segments for each status
+  const segments: string[] = [];
+
+  for (const status of STATUS_ORDER) {
+    let count: number;
+    if (status === 0) {
+      count = unknown;
+    } else {
+      count = statusCounts[String(status)] || 0;
+    }
+
+    if (count > 0) {
+      const percent = (count / total) * 100;
+      const label = STATUS_LABELS[status];
+      segments.push(
+        `<div class="status-segment bc${status}" ` +
+        `style="width: ${percent.toFixed(2)}%" ` +
+        `title="${label}: ${count} (${percent.toFixed(1)}%)"></div>`
+      );
+    }
+  }
+
+  return `<div class="status-bar-chart">${segments.join('')}</div>`;
+}
+

@@ -8,7 +8,6 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
-import { escape_apostrophes } from '../core/html_utils';
 import { showRightFramesPanel, loadDictionaryFrame } from '../reading/frame_management';
 
 /**
@@ -116,15 +115,16 @@ export function createTheDictLink(u: string, w: string, t: string, b: string): s
       throw err;
     }
   }
+  const dictUrl = createTheDictUrl(url, trm);
   if (popup) {
     r = ' ' + txtbefore +
-      ' <span class="click" onclick="owin(\'' +
-      createTheDictUrl(url, escape_apostrophes(trm)) +
-      '\');">' + txt + '</span> ';
+      ' <span class="click" data-action="dict-popup" data-url="' +
+      dictUrl.replace(/"/g, '&quot;') +
+      '">' + txt + '</span> ';
   } else {
     r = ' ' + txtbefore +
-      ' <a href="' + createTheDictUrl(url, trm) +
-      '" target="ru" onclick="showRightFramesPanel();">' + txt + '</a> ';
+      ' <a href="' + dictUrl +
+      '" target="ru" data-action="dict-frame">' + txt + '</a> ';
   }
   return r;
 }
@@ -161,10 +161,10 @@ export function createSentLookupLink(torder: number, txid: number, url: string, 
   }
   // Use the translator URL directly instead of going through trans.php
   if (popup) {
-    return ' <span class="click" onclick="owin(\'' + url + '\');">' +
-      txt + '</span> ';
+    return ' <span class="click" data-action="dict-popup" data-url="' +
+      url.replace(/"/g, '&quot;') + '">' + txt + '</span> ';
   }
-  return ' <a href="' + url + '" target="ru" onclick="showRightFramesPanel();">' +
+  return ' <a href="' + url + '" target="ru" data-action="dict-frame">' +
     txt + '</a> ';
 }
 

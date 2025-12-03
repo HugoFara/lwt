@@ -178,28 +178,32 @@ echo PageLayoutHelper::buildActionCard([
                                     <!-- Word Statistics -->
                                     <div class="text-stats">
                                         <template x-if="getStatsForText(lang.id, text.id)">
-                                            <div class="stat-row">
-                                                <div class="stat-item" title="Total number of unique words in this text">
-                                                    <span class="stat-label">Total</span>
-                                                    <span class="stat-value" x-text="getStatsForText(lang.id, text.id)?.total ?? '-'"></span>
+                                            <div>
+                                                <div class="stat-row">
+                                                    <div class="stat-item" title="Total number of unique words in this text">
+                                                        <span class="stat-label">Total</span>
+                                                        <span class="stat-value" x-text="getStatsForText(lang.id, text.id)?.total ?? '-'"></span>
+                                                    </div>
+                                                    <div class="stat-item" title="Words you have saved to your vocabulary">
+                                                        <span class="stat-label">Saved</span>
+                                                        <span class="stat-value">
+                                                            <a class="status4"
+                                                               :href="'/words/edit?page=1&query=&status=&tag12=0&tag2=&tag1=&text_mode=0&text=' + text.id"
+                                                               @click.stop
+                                                               x-text="getStatsForText(lang.id, text.id)?.saved ?? '-'"></a>
+                                                        </span>
+                                                    </div>
+                                                    <div class="stat-item" title="Words you haven't saved yet">
+                                                        <span class="stat-label">Unknown</span>
+                                                        <span class="stat-value status0" x-text="getStatsForText(lang.id, text.id)?.unknown ?? '-'"></span>
+                                                    </div>
+                                                    <div class="stat-item" title="Percentage of unknown words">
+                                                        <span class="stat-label">Unkn.%</span>
+                                                        <span class="stat-value" x-text="(getStatsForText(lang.id, text.id)?.unknownPercent ?? '-') + '%'"></span>
+                                                    </div>
                                                 </div>
-                                                <div class="stat-item" title="Words you have saved to your vocabulary">
-                                                    <span class="stat-label">Saved</span>
-                                                    <span class="stat-value">
-                                                        <a class="status4"
-                                                           :href="'/words/edit?page=1&query=&status=&tag12=0&tag2=&tag1=&text_mode=0&text=' + text.id"
-                                                           @click.stop
-                                                           x-text="getStatsForText(lang.id, text.id)?.saved ?? '-'"></a>
-                                                    </span>
-                                                </div>
-                                                <div class="stat-item" title="Words you haven't saved yet">
-                                                    <span class="stat-label">Unknown</span>
-                                                    <span class="stat-value status0" x-text="getStatsForText(lang.id, text.id)?.unknown ?? '-'"></span>
-                                                </div>
-                                                <div class="stat-item" title="Percentage of unknown words">
-                                                    <span class="stat-label">Unkn.%</span>
-                                                    <span class="stat-value" x-text="(getStatsForText(lang.id, text.id)?.unknownPercent ?? '-') + '%'"></span>
-                                                </div>
+                                                <!-- Status distribution bar chart -->
+                                                <div x-html="renderStatusChart(lang.id, text.id)"></div>
                                             </div>
                                         </template>
                                         <template x-if="!getStatsForText(lang.id, text.id)">

@@ -614,6 +614,35 @@ function initImprovedTextEventDelegation(): void {
   });
 }
 
+// Listen for cross-window improved text edit events
+interface ImprTextEditEvent extends CustomEvent {
+  detail: {
+    pagepos: number;
+    word: string;
+    termId: number;
+  };
+}
+
+document.addEventListener('lwt-edit-impr-text', ((e: ImprTextEditEvent) => {
+  do_ajax_edit_impr_text(e.detail.pagepos, e.detail.word, e.detail.termId);
+}) as EventListener);
+
+/**
+ * Trigger improved text edit in opener window via custom event.
+ * Use this from popup windows instead of accessing window.opener.do_ajax_edit_impr_text.
+ */
+export function editImprTextInOpener(pagepos: number, word: string, termId: number): void {
+  try {
+    if (window.opener && window.opener !== window) {
+      window.opener.document.dispatchEvent(new CustomEvent('lwt-edit-impr-text', {
+        detail: { pagepos, word, termId }
+      }));
+    }
+  } catch {
+    // Opener access may be blocked by same-origin policy, ignore
+  }
+}
+
 // Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', function () {

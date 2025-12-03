@@ -17,7 +17,7 @@ import { apiGet } from '../core/api_client';
 import { TextsApi } from '../api/texts';
 import { multiActionGo } from '../forms/bulk_actions';
 import { confirmDelete } from '../core/ui_utilities';
-import { renderBulmaTags } from '../core/html_utils';
+import { renderBulmaTags, renderStatusBarChart } from '../core/html_utils';
 
 const STORAGE_KEY = 'lwt_collapsed_languages';
 
@@ -149,6 +149,7 @@ export interface TextsGroupedData {
 
   // Utility
   renderBulmaTags(tagList: string): string;
+  renderStatusChart(langId: number, textId: number): string;
 }
 
 /**
@@ -479,6 +480,12 @@ export function textsGroupedData(): TextsGroupedData {
     // Utility - render tags as Bulma components
     renderBulmaTags(tagList: string): string {
       return renderBulmaTags(tagList);
+    },
+
+    // Utility - render status bar chart
+    renderStatusChart(langId: number, textId: number): string {
+      const stats = this.getStatsForText(langId, textId);
+      return renderStatusBarChart(stats);
     }
   };
 }
