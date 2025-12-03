@@ -392,51 +392,49 @@ h4
 
 span.status0
 {
-  background-color: #ADDFFF;
+  border-bottom: solid 2px #5ABAFF;
   color: #000000;
 }
 
 span.status1
 {
-  background-color: #F5B8A9;
+  border-bottom: solid 2px #E85A3C;
   color: #000000;
 }
 
 span.status2
 {
-  background-color: #F5CCA9;
+  border-bottom: solid 2px #E8893C;
   color: #000000;
 }
 
 span.status3
 {
-  background-color: #F5E1A9;
+  border-bottom: solid 2px #E8B83C;
   color: #000000;
 }
 
 span.status4
 {
-  background-color: #F5F3A9;
+  border-bottom: solid 2px #E8E23C;
   color: #000000;
 }
 
 span.status5
 {
-  background-color: #DDFFDD;
+  border-bottom: solid 2px #66CC66;
   color: #000000;
 }
 
 span.status99
 {
-  background-color: #F8F8F8;
   border-bottom: solid 2px #CCFFCC;
   color: #000000;
 }
 
 span.status98
 {
-  background-color: #F8F8F8;
-  border-bottom: dashed 1px #000000;
+  border-bottom: dashed 1px #888888;
   color: #000000;
 }
 

@@ -151,15 +151,15 @@ use Lwt\View\Helper\PageLayoutHelper;
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Status colors */
-.status0 { background-color: #f5deb3; } /* Unknown - wheat */
-.status1 { background-color: #ff6347; } /* Level 1 - tomato */
-.status2 { background-color: #ffa500; } /* Level 2 - orange */
-.status3 { background-color: #ffff00; } /* Level 3 - yellow */
-.status4 { background-color: #90ee90; } /* Level 4 - lightgreen */
-.status5 { background-color: #32cd32; } /* Level 5 - limegreen */
-.status98 { background-color: transparent; color: #999; } /* Ignored */
-.status99 { background-color: transparent; } /* Well-known */
+/* Status colors - underlines instead of backgrounds */
+.status0 { border-bottom: solid 2px #5ABAFF; } /* Unknown - blue */
+.status1 { border-bottom: solid 2px #E85A3C; } /* Level 1 - red */
+.status2 { border-bottom: solid 2px #E8893C; } /* Level 2 - orange */
+.status3 { border-bottom: solid 2px #E8B83C; } /* Level 3 - yellow */
+.status4 { border-bottom: solid 2px #E8E23C; } /* Level 4 - pale yellow */
+.status5 { border-bottom: solid 2px #66CC66; } /* Level 5 - green */
+.status98 { border-bottom: dashed 1px #888888; color: #999; } /* Ignored */
+.status99 { border-bottom: solid 2px #CCFFCC; } /* Well-known */
 
 /* Hide translations class */
 .hide-translations .wsty[data-trans]::after,

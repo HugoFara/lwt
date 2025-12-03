@@ -39,48 +39,34 @@ h4 {
   color: #c00000;
 }
 .status0 {
-  background-color: #ade0ff60;
   color: #000;
   border-bottom: 2px solid #7dcdff;
 }
 .status1 {
-  background-color: #f5b8a96b;
   color: #000;
   border-bottom: 2px solid #ec8d75;
 }
 .status2 {
-  background-color: #f5cea996;
   color: #000;
   border-bottom: 2px solid #f3b671;
 }
 .status3 {
-  background-color: #ffecb0cf;
   color: #000;
   border-bottom: 2px solid #f3ce5c;
 }
 .status4 {
-  background-color: #e7ffbbad;
   color: #000;
   border-bottom: 2px solid #bfe774;
 }
 .status5 {
-  background-color: #e0fbe0cf;
   color: #000;
   border-bottom: 2px solid #9cda9c;
 }
 .status99 {
-  /* background-color: #f8f8f8; */
-  /* border-bottom: solid 2px rgba(18, 145, 18, 0.212); */
   color: #000;
-  border-bottom: solid 2px rgba(43, 187, 43, 0);
-}
-.status99:hover {
-  background-color: #e0f5da;
-  border-bottom: solid 2px rgba(43, 187, 43, 0.212);
-  color: #000;
+  border-bottom: solid 2px #CCFFCC;
 }
 .status98 {
-  background-color: #88888836;
   border-bottom: dashed 2px #bebebe;
   color: #000;
 }

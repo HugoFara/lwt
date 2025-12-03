@@ -49,52 +49,50 @@ h4 {
 }
 
 .status0 {
-	background-color: #7D8FEA;
-	color: #000000;
+	border-bottom: solid 2px #7D8FEA;
+	color: #FFFFFF;
 	border-radius: 3px;
 }
 
 .status1 {
-	background-color: #F57869;
-	color: #000000;
+	border-bottom: solid 2px #F57869;
+	color: #FFFFFF;
 	border-radius: 3px;
 }
 
 .status2 {
-	background-color: #F5B08B;
-	color: #000000;
+	border-bottom: solid 2px #F5B08B;
+	color: #FFFFFF;
 	border-radius: 3px;
 }
 
 .status3 {
-	background-color: #F5E1A9;
+	border-bottom: solid 2px #F5E1A9;
 	border-radius: 3px;
-	color: #000000;
+	color: #FFFFFF;
 }
 
 .status4 {
-	background-color: #F5F388;
+	border-bottom: solid 2px #F5F388;
 	border-radius: 3px;
-	color: #000000;
+	color: #FFFFFF;
 }
 
 .status5 {
-	background-color: #B2FFB2;
+	border-bottom: solid 2px #88FF88;
 	border-radius: 3px;
-	color: #000000;
+	color: #FFFFFF;
 }
 
-.status99 { /*    background-color: #080808;*/
+.status99 {
 	border-radius: 3px;
-	/*border-bottom: solid 2px #CCFFCC;
-    color: #000000;*/
+	border-bottom: solid 2px #446644;
 	color: #FFFFFF ! important;
 }
 
-.status98 { /*    background-color: #080808;*/
+.status98 {
 	border-radius: 3px;
-	border-bottom: dashed 1px #FFFFFF;
-	/*color: #000000;*/
+	border-bottom: dashed 1px #888888;
 	color: #FFFFFF ! important;
 }
 

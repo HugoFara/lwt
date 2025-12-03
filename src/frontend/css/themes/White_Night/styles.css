@@ -46,59 +46,48 @@ h4 {
 .status0 {
     color: #FFF;
     border-radius: 3px;
-    text-shadow: 0 -1px #666, 1px 0 #666, 0 1px #666, -1px 0 #666;
-    background-image: radial-gradient(ellipse farthest-corner at center, #6868C8 50%, #7D8FEA 100%);
+    border-bottom: solid 2px #7D8FEA;
 }
-
 
 .status1 {
     color: #FFF;
-    text-shadow: 0 -1px #666, 1px 0 #666, 0 1px #666, -1px 0 #666;
     border-radius: 3px;
-    background-image: radial-gradient(ellipse farthest-corner at center, #F57869 50%, #BB4433 100%);
+    border-bottom: solid 2px #F57869;
 }
 
 .status2 {
     color: #FFF;
-    text-shadow: 0 -1px #666, 1px 0 #666, 0 1px #666, -1px 0 #666;
     border-radius: 3px;
-    background-image: radial-gradient(ellipse farthest-corner at center, #ED9D7B 50%, #F5B08B 100%);
+    border-bottom: solid 2px #ED9D7B;
 }
 
 .status3 {
     border-radius: 3px;
     color: #FFF;
-    text-shadow: 0 -1px #666, 1px 0 #666, 0 1px #666, -1px 0 #666;
-    background-image: radial-gradient(ellipse farthest-corner at center, #F7CF66 50%, #F5E8A8 100%);
+    border-bottom: solid 2px #F7CF66;
 }
 
 .status4 {
     border-radius: 3px;
     color: #FFF;
-    text-shadow: 0 -1px #666, 1px 0 #666, 0 1px #666, -1px 0 #666;
-    background-image: radial-gradient(ellipse farthest-corner at center, #FAFA44 50%, #F5F388 100%);
+    border-bottom: solid 2px #FAFA44;
 }
 
 .status5 {
     border-radius: 3px;
     color: #FFF;
-    text-shadow: 0 -1px #666, 1px 0 #666, 0 1px #666, -1px 0 #666;
-    background-image: radial-gradient(ellipse farthest-corner at center, #66CC66 50%, #B2FFB2 100%);
+    border-bottom: solid 2px #66CC66;
 }
 
 .status99 {
-    /* background-color: #080808;*/
     border-radius: 3px;
-    /*border-bottom: solid 2px #CCFFCC;
-    color: #000000;*/
-    color: #FFFFFF ! important;box-shadow:inset 0 0 8px 1px #333333 ! important;
+    border-bottom: solid 2px #446644;
+    color: #FFFFFF ! important;
 }
 .status98 {
-/*    background-color: #080808;*/
     border-radius: 3px;
-    border-bottom: dashed 1px #FFFFFF; 
-    /*color: #000000;*/
-    color: #FFFFFF ! important;box-shadow:inset 0 0 8px 1px #333333 ! important;
+    border-bottom: dashed 1px #888888;
+    color: #FFFFFF ! important;
 }
 
 /* Words and multi-words hints */
