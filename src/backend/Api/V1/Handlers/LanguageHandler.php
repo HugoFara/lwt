@@ -3,6 +3,7 @@ namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\Settings;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
 
@@ -220,7 +221,7 @@ class LanguageHandler
      */
     public function formatGetAll(): array
     {
-        $currentLangId = (int)\getSettingWithDefault('currentlanguage');
+        $currentLangId = (int)Settings::get('currentlanguage');
         return [
             'languages' => $this->languageService->getLanguagesWithStats(),
             'currentLanguageId' => $currentLangId

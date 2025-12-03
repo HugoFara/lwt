@@ -20,15 +20,27 @@
 namespace Lwt\Views\Language;
 
 use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\View\Helper\IconHelper;
 
-echo PageLayoutHelper::buildActionCard([
-    ['url' => '/languages?new=1', 'label' => 'New Language', 'icon' => 'circle-plus', 'class' => 'is-primary'],
-    ['url' => '#', 'label' => 'Quick Setup Wizard', 'icon' => 'wand-2', 'class' => 'is-info', 'attrs' => '@click.prevent="$store.languages.openWizardModal()"'],
-]);
 ?>
-
 <!-- Alpine.js Language List Component -->
 <div x-data="languageList" x-init="init()">
+    <!-- Action card - inside Alpine scope for store access -->
+    <div class="card action-card mb-4">
+        <div class="card-content">
+            <div class="buttons is-centered">
+                <a href="/languages?new=1" class="button is-light is-primary">
+                    <span class="icon"><?php echo IconHelper::render('circle-plus', ['alt' => 'New Language']); ?></span>
+                    <span>New Language</span>
+                </a>
+                <a href="#" class="button is-light is-info" @click.prevent="store.openWizardModal()">
+                    <span class="icon"><?php echo IconHelper::render('wand-2', ['alt' => 'Quick Setup Wizard']); ?></span>
+                    <span>Quick Setup Wizard</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification area -->
     <div
         x-show="notification"
