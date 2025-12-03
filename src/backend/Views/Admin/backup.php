@@ -138,6 +138,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                   @submit="restoring = true"
                   x-show="!restoring"
                   data-confirm-submit="Are you sure? This will REPLACE all existing data!">
+                <input type="hidden" name="restore" value="1">
                 <div class="field">
                     <label class="label">Backup File</label>
                     <div class="file has-name is-fullwidth">
@@ -158,7 +159,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
 
                 <div class="field is-grouped is-grouped-right mt-4">
                     <div class="control">
-                        <button type="submit" name="restore" class="button is-warning"
+                        <button type="submit" class="button is-warning"
                                 :disabled="!fileName">
                             <span class="icon">
                                 <?php echo IconHelper::render('triangle-alert'); ?>
@@ -262,6 +263,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                   @submit="emptying = true"
                   x-show="!emptying"
                   data-confirm-submit="Are you sure? This will DELETE all your data!">
+                <input type="hidden" name="empty" value="1">
                 <div class="field" x-show="!emptying">
                     <label class="checkbox">
                         <input type="checkbox" x-model="confirmEmpty">
@@ -273,7 +275,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
 
                 <div class="field is-grouped is-grouped-right mt-4">
                     <div class="control">
-                        <button type="submit" name="empty" class="button is-danger"
+                        <button type="submit" class="button is-danger"
                                 :disabled="!confirmEmpty">
                             <span class="icon">
                                 <?php echo IconHelper::render('trash-2'); ?>

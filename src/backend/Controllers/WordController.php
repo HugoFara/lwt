@@ -667,8 +667,9 @@ class WordController extends BaseController
             $perPage = 50;
         }
 
+        // Use a placeholder title - Alpine.js will update it dynamically
         PageLayoutHelper::renderPageStart(
-            'My ' . $this->languageService->getLanguageName($currentlang) . ' Terms',
+            'Terms',
             true
         );
 

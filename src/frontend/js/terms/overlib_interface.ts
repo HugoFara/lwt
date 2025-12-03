@@ -18,6 +18,8 @@ import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
 import { createTheDictLink, createSentLookupLink } from './dictionary';
 import { TermsApi, type TermDetails } from '../api/terms';
 import { iconHtml, createIcon, initLucideIcons } from '../ui/icons';
+import { showRightFramesPanel } from '../reading/frame_management';
+import { speechDispatcher } from '../core/user_interactions';
 
 // Import the popup system
 import { overlib, CAPTION, cClick } from '../ui/word_popup';
@@ -281,7 +283,7 @@ export function buildKnownWordPopupContent(
   editLink.href = `/word/edit?tid=${context.textId}&ord=${context.position}&wid=${context.wordId}`;
   editLink.target = 'ro';
   editLink.textContent = 'Edit term';
-  editLink.onclick = () => { window.showRightFramesPanel?.(); };
+  editLink.onclick = () => { showRightFramesPanel(); };
   actionsRow.appendChild(editLink);
 
   actionsRow.appendChild(document.createTextNode(' | '));
@@ -396,7 +398,7 @@ function createAudioElement(text: string): HTMLElement {
   });
   icon.style.cursor = 'pointer';
   icon.addEventListener('click', () => {
-    window.speechDispatcher?.(text, LWT_DATA.language.id);
+    speechDispatcher(text, LWT_DATA.language.id);
   });
 
   container.appendChild(icon);

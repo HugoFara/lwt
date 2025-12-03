@@ -1548,10 +1548,10 @@ class TermHandler
             }
         }
 
-        // Get term tags
+        // Get term tags (from tags table - tags2 is for text tags)
         $tags = [];
         $tagResult = Connection::query(
-            "SELECT TgID, TgText FROM {$tbpref}tags WHERE TgClass = 2 ORDER BY TgText"
+            "SELECT TgID, TgText FROM {$tbpref}tags ORDER BY TgText"
         );
         while ($row = mysqli_fetch_assoc($tagResult)) {
             $tags[] = [

@@ -11,6 +11,7 @@
 
 import { setLang, resetAll } from '../core/language_settings';
 import { selectToggle } from '../forms/bulk_actions';
+import { markClick } from '../core/ui_utilities';
 
 /**
  * Initialize feed browse page event handlers.
@@ -153,9 +154,7 @@ export function initNotFoundImages(): void {
       checkbox.value = id;
       checkbox.name = 'marked_items[]';
       checkbox.addEventListener('change', () => {
-        if (typeof window.markClick === 'function') {
-          window.markClick();
-        }
+        markClick();
       });
 
       target.after(label);

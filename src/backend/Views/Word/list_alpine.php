@@ -43,7 +43,7 @@ echo PageLayoutHelper::buildActionCard([
 ?>
 
 <!-- Alpine.js container for word list -->
-<div x-data="wordListApp()" x-init="init()" x-cloak>
+<div x-data="wordListApp()" x-init="init()" x-cloak x-effect="filters.lang; filterOptions.languages; updatePageTitle()">
 
     <!-- Loading state -->
     <div x-show="loading" class="has-text-centered py-6">

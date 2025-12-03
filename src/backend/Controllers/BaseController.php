@@ -92,7 +92,7 @@ abstract class BaseController
     }
 
     /**
-     * Display a message (success/error) to the user.
+     * Display a message (success/error) to the user using Bulma notifications.
      *
      * @param string $message  The message to display
      * @param bool   $autoHide Whether to auto-hide the message (default: true)
@@ -104,15 +104,20 @@ abstract class BaseController
         if (trim($message) == '') {
             return;
         }
-        if (substr($message, 0, 5) == "Error") {
-            echo '<p class="red">*** ' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . ' ***' .
-                ($autoHide ?
-                '' :
-                '<br /><input type="button" value="&lt;&lt; Go back and correct &lt;&lt;" data-action="history-back" />' ) .
-                '</p>';
-        } else {
-            echo '<p id="hide3" class="msgblue">+++ ' . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . ' +++</p>';
+        $escapedMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+        $isError = str_starts_with($message, "Error");
+        $notificationType = $isError ? 'is-danger' : 'is-success';
+        $autoHideAttr = $autoHide && !$isError ? ' x-init="setTimeout(() => visible = false, 3000)"' : '';
+
+        echo '<div class="notification ' . $notificationType . ' is-light mb-4" '
+            . 'x-data="{ visible: true }"' . $autoHideAttr . ' x-show="visible" x-transition>';
+        echo '<button class="delete" @click="visible = false"></button>';
+        echo $escapedMessage;
+        if ($isError && !$autoHide) {
+            echo '<br><button class="button is-small mt-2" data-action="history-back">'
+                . '&larr; Go back and correct</button>';
         }
+        echo '</div>';
     }
 
     /**

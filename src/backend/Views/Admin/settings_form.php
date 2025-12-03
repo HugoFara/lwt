@@ -22,7 +22,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
 
 ?>
-<form class="validate" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" data-lwt-settings-form>
+<form class="validate" action="/admin/settings" method="post" data-lwt-settings-form>
 
     <!-- Appearance Section -->
     <div class="card settings-section mb-4" x-data="{ open: false }">

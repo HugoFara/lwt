@@ -8,6 +8,7 @@
 
 import { do_ajax_save_setting } from '../core/ajax_utilities';
 import { apiGet } from '../core/api_client';
+import { updateAllTextStatusCharts } from '../texts/text_status_chart';
 
 // Word counts globals
 declare let WORDCOUNTS: {
@@ -49,9 +50,7 @@ export async function do_ajax_word_counts(): Promise<void> {
       el.classList.remove('hide');
     });
     // Update Chart.js status charts if present
-    if (typeof window.updateAllTextStatusCharts === 'function') {
-      window.updateAllTextStatusCharts();
-    }
+    updateAllTextStatusCharts();
   }
 }
 

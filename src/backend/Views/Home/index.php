@@ -190,6 +190,81 @@ if ($currentTextInfo !== null && $currenttext !== null) {
     </div>
 </section>
 
+<?php if ($langcnt == 0): ?>
+<!-- Empty database: Getting Started section -->
+<section class="section py-4 mb-5">
+    <div class="container">
+        <div class="box has-background-warning-light">
+            <h3 class="title is-4 has-text-centered mb-4">
+                <span class="icon-text">
+                    <span class="icon"><i data-lucide="rocket"></i></span>
+                    <span>Get Started</span>
+                </span>
+            </h3>
+            <p class="has-text-centered mb-4">Your database is empty. Choose one of the options below to begin:</p>
+            <div class="columns is-centered">
+                <div class="column is-narrow">
+                    <a href="/admin/install-demo" class="button is-medium is-info">
+                        <span class="icon"><i data-lucide="database"></i></span>
+                        <span>Install Demo Database</span>
+                    </a>
+                    <p class="help has-text-centered mt-2">Try LWT with sample texts</p>
+                </div>
+                <div class="column is-narrow">
+                    <a href="/languages?new=1" class="button is-medium is-primary">
+                        <span class="icon"><i data-lucide="plus"></i></span>
+                        <span>Create Your First Language</span>
+                    </a>
+                    <p class="help has-text-centered mt-2">Start from scratch</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<?php elseif ($lastTextInfo !== null): ?>
+<!-- Current text: Continue Reading section -->
+<section class="section py-4 mb-5">
+    <div class="container">
+        <div class="box has-background-link-light" x-data="{ text: lastText }">
+            <h3 class="title is-4 mb-4">
+                <span class="icon-text">
+                    <span class="icon"><i data-lucide="book-open"></i></span>
+                    <span>Continue Reading</span>
+                </span>
+            </h3>
+            <template x-if="text">
+                <div>
+                    <p class="mb-2">
+                        <span class="tag is-info is-light" x-text="text.language_name"></span>
+                    </p>
+                    <p class="title is-5 mb-4" x-text="text.title"></p>
+                    <div class="buttons">
+                        <a :href="'/text/read?start=' + text.id" class="button is-link">
+                            <span class="icon"><i data-lucide="book-open"></i></span>
+                            <span>Read</span>
+                        </a>
+                        <a :href="'/test?text=' + text.id" class="button is-info is-light">
+                            <span class="icon"><i data-lucide="circle-help"></i></span>
+                            <span>Test</span>
+                        </a>
+                        <a :href="'/text/print-plain?text=' + text.id" class="button is-light">
+                            <span class="icon"><i data-lucide="printer"></i></span>
+                            <span>Print</span>
+                        </a>
+                        <template x-if="text.annotated">
+                            <a :href="'/text/print?text=' + text.id" class="button is-success is-light">
+                                <span class="icon"><i data-lucide="check"></i></span>
+                                <span>Annotated Text</span>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
 <!-- Main menu grid -->
 <div class="columns is-multiline is-centered home-menu-container">
     <!-- Languages Card -->

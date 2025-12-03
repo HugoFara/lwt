@@ -93,6 +93,10 @@ export interface WordListData {
   formatScore(score: number): string;
   getStatusClass(status: number): string;
   getDisplayValue(word: WordItem, field: 'translation' | 'romanization'): string;
+
+  // Page title
+  updatePageTitle(): void;
+  getSelectedLanguageName(): string;
 }
 
 /**
@@ -491,6 +495,41 @@ export function wordListData(): WordListData {
     ): string {
       const value = field === 'translation' ? word.translation : word.romanization;
       return value || '*';
+    },
+
+    /**
+     * Get the name of the currently selected language.
+     */
+    getSelectedLanguageName(): string {
+      if (!this.filters.lang) {
+        return '';
+      }
+      const langId = Number(this.filters.lang);
+      const lang = this.filterOptions.languages.find((l) => l.id === langId);
+      return lang ? lang.name : '';
+    },
+
+    /**
+     * Update the page title (h1) and document title based on selected language.
+     */
+    updatePageTitle(): void {
+      const langName = this.getSelectedLanguageName();
+      const title = langName ? `${langName} Terms` : 'Terms';
+
+      // Update the h1 element
+      const h1 = document.querySelector('h1');
+      if (h1) {
+        // Preserve any debug span that might be present
+        const debugSpan = h1.querySelector('.red');
+        h1.textContent = title;
+        if (debugSpan) {
+          h1.appendChild(document.createTextNode(' '));
+          h1.appendChild(debugSpan);
+        }
+      }
+
+      // Update the document title
+      document.title = `LWT :: ${title}`;
     },
 
     // Helper method to create and submit export form

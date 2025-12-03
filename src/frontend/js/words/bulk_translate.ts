@@ -15,6 +15,7 @@ import { selectToggle } from '../forms/bulk_actions';
 declare global {
   interface Window {
     WBLINK?: string;
+    googleTranslateElementInit?: () => void;
   }
   // Google Translate API types
   const google: {

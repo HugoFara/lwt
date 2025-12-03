@@ -15,6 +15,7 @@
 
 import { do_ajax_save_setting } from '../core/ajax_utilities';
 import { lwtFormCheck } from '../forms/unloadformcheck';
+import { languageForm } from './language_form';
 
 /**
  * Build a URL query string from an object (replaces $.param).
@@ -160,9 +161,7 @@ export const languageWizard = {
     learningLgName: string
   ): void {
     // Reload dictionary URLs with the new language codes
-    if (typeof window.reloadDictURLs === 'function') {
-      window.reloadDictURLs(learningLg[1], knownLg[1]);
-    }
+    languageForm.reloadDictURLs(learningLg[1], knownLg[1]);
 
     // Build LibreTranslate URL
     const url = new URL(window.location.href);
@@ -180,9 +179,7 @@ export const languageWizard = {
     setInputValue('input[name="LgName"]', learningLgName, true);
 
     // Check for language-specific UI changes (e.g., Japanese regexp field)
-    if (typeof window.checkLanguageChanged === 'function') {
-      window.checkLanguageChanged(learningLgName);
-    }
+    languageForm.checkLanguageChanged(learningLgName);
 
     // Set dictionary URL (Glosbe)
     setInputValue(

@@ -9,9 +9,13 @@
 import { iconHtml } from '../ui/icons';
 
 // Type for the frame with form check
-// Uses the global lwtFormCheck type from globals.ts
+interface LwtFormCheck {
+  makeDirty: () => void;
+}
+
 interface LwtFrame extends Window {
   document: Document;
+  lwtFormCheck: LwtFormCheck;
 }
 
 // Type for frames collection

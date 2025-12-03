@@ -12,6 +12,7 @@ import { scrollTo } from '../core/hover_intent';
 import { apiPost, apiGet } from '../core/api_client';
 import { TermsApi } from '../api/terms';
 import { iconHtml, spinnerHtml } from '../ui/icons';
+import { oewin } from './dictionary';
 
 // Interface for lwtFormCheck
 interface LwtFormCheck {
@@ -607,7 +608,7 @@ function initImprovedTextEventDelegation(): void {
       const scrollPos = window.scrollY || document.documentElement.scrollTop || 0;
       if (wid && textid) {
         const url = '/word/edit?fromAnn=' + scrollPos + '&wid=' + wid + '&tid=' + textid + '&ord=' + ord;
-        window.oewin(url);
+        oewin(url);
       }
     }
   });
