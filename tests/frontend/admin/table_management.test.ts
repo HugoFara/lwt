@@ -2,7 +2,10 @@
  * Tests for table_management.ts - Table set management page functionality
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initTableManagement } from '../../../src/frontend/js/admin/table_management';
+import {
+  tableManagementApp,
+  initTableManagementAlpine
+} from '../../../src/frontend/js/admin/table_management';
 
 describe('table_management.ts', () => {
   beforeEach(() => {
@@ -26,7 +29,7 @@ describe('table_management.ts', () => {
       const result = window.checkTablePrefix('');
 
       expect(result).toBe(false);
-      expect(alertSpy).toHaveBeenCalledWith('Table Set Name must not be empty!');
+      expect(alertSpy).toHaveBeenCalledWith('Table Set Name must not be empty');
     });
 
     it('returns false for whitespace only', () => {
@@ -35,7 +38,7 @@ describe('table_management.ts', () => {
       const result = window.checkTablePrefix('   ');
 
       expect(result).toBe(false);
-      expect(alertSpy).toHaveBeenCalledWith('Table Set Name must not be empty!');
+      expect(alertSpy).toHaveBeenCalledWith('Table Set Name must not be empty');
     });
 
     it('returns false for invalid characters', () => {
@@ -45,7 +48,7 @@ describe('table_management.ts', () => {
 
       expect(result).toBe(false);
       expect(alertSpy).toHaveBeenCalledWith(
-        'Table Set Name must contain only letters, numbers, and underscores!'
+        'Only letters, numbers, and underscores allowed'
       );
     });
 
@@ -56,7 +59,7 @@ describe('table_management.ts', () => {
 
       expect(result).toBe(false);
       expect(alertSpy).toHaveBeenCalledWith(
-        'Table Set Name must contain only letters, numbers, and underscores!'
+        'Only letters, numbers, and underscores allowed'
       );
     });
 
@@ -66,7 +69,7 @@ describe('table_management.ts', () => {
       const result = window.checkTablePrefix('this_is_a_very_long_prefix_name');
 
       expect(result).toBe(false);
-      expect(alertSpy).toHaveBeenCalledWith('Table Set Name must be 20 characters or less!');
+      expect(alertSpy).toHaveBeenCalledWith('Maximum 20 characters');
     });
 
     it('returns true for valid alphanumeric prefix', () => {
@@ -98,210 +101,134 @@ describe('table_management.ts', () => {
   });
 
   // ===========================================================================
-  // initTableCreateForm Tests
+  // tableManagementApp Tests (Alpine.js component)
   // ===========================================================================
 
-  describe('initTableCreateForm', () => {
-    it('prevents form submission when prefix is empty', () => {
-      document.body.innerHTML = `
-        <form class="table-create-form">
-          <input type="text" name="newpref" value="">
-          <button type="submit">Create</button>
-        </form>
-      `;
+  describe('tableManagementApp', () => {
+    it('initializes with default state', () => {
+      const app = tableManagementApp();
 
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
-      initTableManagement();
-
-      const form = document.querySelector('form')!;
-      const submitEvent = new Event('submit', { cancelable: true });
-      form.dispatchEvent(submitEvent);
-
-      expect(submitEvent.defaultPrevented).toBe(true);
-      expect(alertSpy).toHaveBeenCalled();
+      expect(app.selectedPrefix).toBe('-');
+      expect(app.newPrefix).toBe('');
+      expect(app.createError).toBeNull();
+      expect(app.deletePrefix).toBe('-');
+      expect(app.confirmDelete).toBe(false);
     });
 
-    it('allows form submission when prefix is valid', () => {
-      document.body.innerHTML = `
-        <form class="table-create-form">
-          <input type="text" name="newpref" value="valid_prefix">
-          <button type="submit">Create</button>
-        </form>
-      `;
+    describe('validatePrefix', () => {
+      it('returns true for valid prefix', () => {
+        const app = tableManagementApp();
+        app.newPrefix = 'valid_prefix';
 
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+        expect(app.validatePrefix()).toBe(true);
+        expect(app.createError).toBeNull();
+      });
 
-      initTableManagement();
+      it('returns false for empty prefix', () => {
+        const app = tableManagementApp();
+        app.newPrefix = '';
 
-      const form = document.querySelector('form')!;
-      const submitEvent = new Event('submit', { cancelable: true });
-      form.dispatchEvent(submitEvent);
+        expect(app.validatePrefix()).toBe(false);
+        expect(app.createError).toBe('Table Set Name must not be empty');
+      });
 
-      expect(submitEvent.defaultPrevented).toBe(false);
-      expect(alertSpy).not.toHaveBeenCalled();
+      it('returns false for invalid characters', () => {
+        const app = tableManagementApp();
+        app.newPrefix = 'test-prefix';
+
+        expect(app.validatePrefix()).toBe(false);
+        expect(app.createError).toBe('Only letters, numbers, and underscores allowed');
+      });
+
+      it('returns false for prefix exceeding 20 characters', () => {
+        const app = tableManagementApp();
+        app.newPrefix = 'this_is_a_very_long_prefix_name';
+
+        expect(app.validatePrefix()).toBe(false);
+        expect(app.createError).toBe('Maximum 20 characters');
+      });
     });
 
-    it('does nothing when form is not present', () => {
-      document.body.innerHTML = '<div>No form here</div>';
+    describe('submitCreate', () => {
+      it('prevents submission when validation fails', () => {
+        const app = tableManagementApp();
+        app.newPrefix = '';
 
-      expect(() => initTableManagement()).not.toThrow();
+        const event = new Event('submit', { cancelable: true });
+        app.submitCreate(event);
+
+        expect(event.defaultPrevented).toBe(true);
+      });
+
+      it('allows submission when validation passes', () => {
+        const app = tableManagementApp();
+        app.newPrefix = 'valid_prefix';
+
+        const event = new Event('submit', { cancelable: true });
+        app.submitCreate(event);
+
+        expect(event.defaultPrevented).toBe(false);
+      });
+    });
+
+    describe('submitDelete', () => {
+      it('prevents submission when no prefix selected', () => {
+        const app = tableManagementApp();
+        app.deletePrefix = '-';
+        app.confirmDelete = true;
+
+        const event = new Event('submit', { cancelable: true });
+        app.submitDelete(event);
+
+        expect(event.defaultPrevented).toBe(true);
+      });
+
+      it('prevents submission when confirmDelete is false', () => {
+        const app = tableManagementApp();
+        app.deletePrefix = 'test_prefix';
+        app.confirmDelete = false;
+
+        const event = new Event('submit', { cancelable: true });
+        app.submitDelete(event);
+
+        expect(event.defaultPrevented).toBe(true);
+      });
+
+      it('shows confirmation dialog when deleting', () => {
+        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+        const app = tableManagementApp();
+        app.deletePrefix = 'test_prefix';
+        app.confirmDelete = true;
+
+        const event = new Event('submit', { cancelable: true });
+        app.submitDelete(event);
+
+        expect(confirmSpy).toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(false);
+      });
+
+      it('prevents submission when confirmation is cancelled', () => {
+        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+        const app = tableManagementApp();
+        app.deletePrefix = 'test_prefix';
+        app.confirmDelete = true;
+
+        const event = new Event('submit', { cancelable: true });
+        app.submitDelete(event);
+
+        expect(confirmSpy).toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(true);
+      });
     });
   });
 
   // ===========================================================================
-  // initTableDeleteForm Tests
+  // initTableManagementAlpine Tests
   // ===========================================================================
 
-  describe('initTableDeleteForm', () => {
-    it('prevents form submission when confirmation is cancelled', () => {
-      document.body.innerHTML = `
-        <form class="table-delete-form">
-          <select name="delpref">
-            <option value="">-- Select --</option>
-            <option value="test_prefix" selected>Test Prefix</option>
-          </select>
-          <button type="submit">Delete</button>
-        </form>
-      `;
-
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-
-      initTableManagement();
-
-      const form = document.querySelector('form')!;
-      const submitEvent = new Event('submit', { cancelable: true });
-      form.dispatchEvent(submitEvent);
-
-      expect(submitEvent.defaultPrevented).toBe(true);
-      expect(confirmSpy).toHaveBeenCalled();
-    });
-
-    it('allows form submission when confirmation is accepted', () => {
-      document.body.innerHTML = `
-        <form class="table-delete-form">
-          <select name="delpref">
-            <option value="">-- Select --</option>
-            <option value="test_prefix" selected>Test Prefix</option>
-          </select>
-          <button type="submit">Delete</button>
-        </form>
-      `;
-
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-
-      initTableManagement();
-
-      const form = document.querySelector('form')!;
-      const submitEvent = new Event('submit', { cancelable: true });
-      form.dispatchEvent(submitEvent);
-
-      expect(submitEvent.defaultPrevented).toBe(false);
-      expect(confirmSpy).toHaveBeenCalled();
-    });
-
-    it('does not show confirmation when no option selected', () => {
-      document.body.innerHTML = `
-        <form class="table-delete-form">
-          <select name="delpref">
-            <option value="" selected>-- Select --</option>
-            <option value="test_prefix">Test Prefix</option>
-          </select>
-          <button type="submit">Delete</button>
-        </form>
-      `;
-
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
-
-      initTableManagement();
-
-      const form = document.querySelector('form')!;
-      const submitEvent = new Event('submit', { cancelable: true });
-      form.dispatchEvent(submitEvent);
-
-      // selectedIndex is 0, so no confirmation needed
-      expect(confirmSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  // ===========================================================================
-  // initNavigationHandlers Tests
-  // ===========================================================================
-
-  describe('initNavigationHandlers', () => {
-    it('handles go-back button click', () => {
-      document.body.innerHTML = `
-        <button data-action="go-back">Go Back</button>
-      `;
-
-      const historyBackSpy = vi.spyOn(history, 'back').mockImplementation(() => {});
-
-      initTableManagement();
-
-      const button = document.querySelector('button')!;
-      button.click();
-
-      expect(historyBackSpy).toHaveBeenCalled();
-    });
-
-    it('handles navigate button click', () => {
-      document.body.innerHTML = `
-        <button data-action="navigate" data-url="/admin/dashboard">Navigate</button>
-      `;
-
-      initTableManagement();
-
-      const button = document.querySelector('button')!;
-
-      // Click handler will try to set location.href
-      expect(() => button.click()).not.toThrow();
-    });
-
-    it('does nothing for navigate button without URL', () => {
-      document.body.innerHTML = `
-        <button data-action="navigate">Navigate</button>
-      `;
-
-      initTableManagement();
-
-      const button = document.querySelector('button')!;
-
-      expect(() => button.click()).not.toThrow();
-    });
-  });
-
-  // ===========================================================================
-  // isTableManagementPage Detection Tests
-  // ===========================================================================
-
-  describe('page detection', () => {
-    it('detects page with create form', () => {
-      document.body.innerHTML = `
-        <form class="table-create-form">
-          <input type="text" name="newpref" value="">
-        </form>
-      `;
-
-      // Should not throw when forms are present
-      expect(() => initTableManagement()).not.toThrow();
-    });
-
-    it('detects page with delete form', () => {
-      document.body.innerHTML = `
-        <form class="table-delete-form">
-          <select name="delpref"></select>
-        </form>
-      `;
-
-      expect(() => initTableManagement()).not.toThrow();
-    });
-
-    it('detects page with go-back button', () => {
-      document.body.innerHTML = `
-        <button data-action="go-back">Go Back</button>
-      `;
-
-      expect(() => initTableManagement()).not.toThrow();
+  describe('initTableManagementAlpine', () => {
+    it('does not throw when called', () => {
+      expect(() => initTableManagementAlpine()).not.toThrow();
     });
   });
 

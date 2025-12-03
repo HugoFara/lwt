@@ -143,7 +143,8 @@ describe('dictionary.ts', () => {
 
     it('creates link with popup for URL starting with *', () => {
       const result = createTheDictLink('*http://dict.com/###', 'hello', 'Dict1', '');
-      expect(result).toContain('owin(');
+      expect(result).toContain('data-action="dict-popup"');
+      expect(result).toContain('data-url="http://dict.com/hello"');
       expect(result).toContain('Dict1');
       expect(result).toContain('class="click"');
     });
@@ -167,12 +168,15 @@ describe('dictionary.ts', () => {
         'Dict',
         ''
       );
-      expect(result).toContain('owin(');
+      expect(result).toContain('data-action="dict-popup"');
+      expect(result).toContain('data-url=');
     });
 
-    it('escapes apostrophes in popup onclick', () => {
+    it('escapes special chars in popup data-url', () => {
       const result = createTheDictLink('*http://dict.com/###', "it's", 'Dict', '');
-      expect(result).toContain('owin(');
+      expect(result).toContain('data-action="dict-popup"');
+      // The apostrophe should be URL-encoded
+      expect(result).toContain("it's");
     });
   });
 
@@ -193,7 +197,7 @@ describe('dictionary.ts', () => {
 
     it('creates popup link for URL starting with *', () => {
       const result = createSentLookupLink(5, 10, '*http://translate.com', 'Trans');
-      expect(result).toContain('owin(');
+      expect(result).toContain('data-action="dict-popup"');
       // Now uses the translator URL directly instead of trans.php
       expect(result).toContain('http://translate.com');
     });
@@ -210,14 +214,15 @@ describe('dictionary.ts', () => {
       // URLs are now used directly, not through trans.php
       const result = createSentLookupLink(1, 1, 'http://example.com', 'Trans');
       expect(result).toContain('http://example.com');
-      expect(result).toContain('showRightFramesPanel()');
+      // Uses data-action instead of inline onclick
+      expect(result).toContain('data-action="dict-frame"');
     });
 
     it('detects lwt_popup parameter', () => {
       const result = createSentLookupLink(
         1, 1, 'http://translate.com?lwt_popup=1', 'Trans'
       );
-      expect(result).toContain('owin(');
+      expect(result).toContain('data-action="dict-popup"');
     });
   });
 

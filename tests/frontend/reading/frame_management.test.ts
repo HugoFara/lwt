@@ -14,10 +14,11 @@ import {
 
 // Mock word_popup module
 vi.mock('../../../src/frontend/js/ui/word_popup', () => ({
-  cClick: vi.fn()
+  cClick: vi.fn(),
+  closeParentPopup: vi.fn()
 }));
 
-import { cClick } from '../../../src/frontend/js/ui/word_popup';
+import { cClick, closeParentPopup } from '../../../src/frontend/js/ui/word_popup';
 
 describe('frame_management.ts', () => {
   // Store originals
@@ -304,7 +305,7 @@ describe('frame_management.ts', () => {
       expect(mockFrameL.focus).toHaveBeenCalled();
     });
 
-    it('calls cClick after 100ms', () => {
+    it('calls closeParentPopup after 100ms', () => {
       (global as any).parent = {
         document: {
           getElementById: vi.fn(() => null)
@@ -314,10 +315,9 @@ describe('frame_management.ts', () => {
 
       cleanupRightFrames();
 
-      expect((global as any).parent.setTimeout).toHaveBeenCalledWith(
-        cClick,
-        100
-      );
+      // closeParentPopup is called via window.setTimeout (not parent.setTimeout)
+      vi.advanceTimersByTime(100);
+      expect(closeParentPopup).toHaveBeenCalled();
     });
 
     it('handles missing frames-r gracefully', () => {
@@ -556,15 +556,17 @@ describe('frame_management.ts', () => {
         },
         setTimeout: vi.fn((fn: () => void, delay: number) => {
           if (delay === 800) calls.push({ fn: 'frames-r click', delay });
-          if (delay === 100) calls.push({ fn: 'cClick', delay });
           return setTimeout(fn, delay);
         })
       };
 
       cleanupRightFrames();
 
+      // frames-r click is scheduled via parent.setTimeout at 800ms
       expect(calls).toContainEqual({ fn: 'frames-r click', delay: 800 });
-      expect(calls).toContainEqual({ fn: 'cClick', delay: 100 });
+      // closeParentPopup is called via window.setTimeout at 100ms, which we verify separately
+      vi.advanceTimersByTime(100);
+      expect(closeParentPopup).toHaveBeenCalled();
     });
   });
 });

@@ -19,8 +19,16 @@ vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
   }
 }));
 
+vi.mock('../../../src/frontend/js/languages/language_form', () => ({
+  languageForm: {
+    reloadDictURLs: vi.fn(),
+    checkLanguageChanged: vi.fn()
+  }
+}));
+
 import { do_ajax_save_setting } from '../../../src/frontend/js/core/ajax_utilities';
 import { lwtFormCheck } from '../../../src/frontend/js/forms/unloadformcheck';
+import { languageForm } from '../../../src/frontend/js/languages/language_form';
 
 describe('language_wizard.ts', () => {
   beforeEach(() => {
@@ -177,7 +185,7 @@ describe('language_wizard.ts', () => {
 
       languageWizard.apply(learningLg, knownLg, 'French');
 
-      expect((window as any).reloadDictURLs).toHaveBeenCalledWith('fr', 'en');
+      expect(languageForm.reloadDictURLs).toHaveBeenCalledWith('fr', 'en');
     });
 
     it('sets up LibreTranslate URL', () => {
@@ -205,7 +213,7 @@ describe('language_wizard.ts', () => {
       expect(input.value).toBe('French');
     });
 
-    it('calls checkLanguageChanged if defined', () => {
+    it('calls checkLanguageChanged', () => {
       const learningLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
         ['ja', 'ja', true, '[\\p{Han}]', '。', true, true, false];
       const knownLg: [string, string, boolean, string, string, boolean, boolean, boolean] =
@@ -213,7 +221,7 @@ describe('language_wizard.ts', () => {
 
       languageWizard.apply(learningLg, knownLg, 'Japanese');
 
-      expect((window as any).checkLanguageChanged).toHaveBeenCalledWith('Japanese');
+      expect(languageForm.checkLanguageChanged).toHaveBeenCalledWith('Japanese');
     });
 
     it('sets Glosbe dictionary URL', () => {

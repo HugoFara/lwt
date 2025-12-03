@@ -16,6 +16,7 @@ vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
 
 import { initFeedBrowse, initNotFoundImages } from '../../../src/frontend/js/feeds/feed_browse';
 import { setLang, resetAll } from '../../../src/frontend/js/core/language_settings';
+import { markClick } from '../../../src/frontend/js/core/ui_utilities';
 
 describe('feed_browse.ts', () => {
   beforeEach(() => {
@@ -280,13 +281,10 @@ describe('feed_browse.ts', () => {
       expect(label!.getAttribute('for')).toBe('item_789');
     });
 
-    it('calls window.markClick on checkbox change if defined', () => {
+    it('calls markClick on checkbox change', () => {
       document.body.innerHTML = `
         <img class="not_found" name="item_111" />
       `;
-
-      const markClickFn = vi.fn();
-      (window as any).markClick = markClickFn;
 
       initNotFoundImages();
       document.querySelector('img.not_found')!.click();
@@ -294,7 +292,7 @@ describe('feed_browse.ts', () => {
       const checkbox = document.querySelector('input[type="checkbox"]') as HTMLInputElement;
       checkbox.dispatchEvent(new Event('change'));
 
-      expect(markClickFn).toHaveBeenCalled();
+      expect(markClick).toHaveBeenCalled();
     });
 
     it('handles missing markClick gracefully', () => {

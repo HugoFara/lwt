@@ -2,7 +2,11 @@
  * Tests for server_data.ts - Server Data admin page functionality
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { fetchApiVersion, initServerData } from '../../../src/frontend/js/admin/server_data';
+import {
+  fetchApiVersion,
+  initServerDataAlpine,
+  serverDataApp
+} from '../../../src/frontend/js/admin/server_data';
 
 describe('server_data.ts', () => {
   beforeEach(() => {
@@ -16,10 +20,10 @@ describe('server_data.ts', () => {
   });
 
   // ===========================================================================
-  // fetchApiVersion Tests
+  // fetchApiVersion (Legacy) Tests
   // ===========================================================================
 
-  describe('fetchApiVersion', () => {
+  describe('fetchApiVersion (legacy)', () => {
     it('makes GET request to api.php/v1/version', async () => {
       document.body.innerHTML = `
         <span id="rest-api-version"></span>
@@ -67,9 +71,9 @@ describe('server_data.ts', () => {
       fetchApiVersion();
 
       await vi.waitFor(() => {
-        expect(document.getElementById('rest-api-version')?.textContent).toContain('Error while getting data from the REST API!');
+        // New implementation shows the error message directly
+        expect(document.getElementById('rest-api-version')?.textContent).toBe('Connection failed');
       });
-      expect(document.getElementById('rest-api-version')?.textContent).toContain('Connection failed');
       expect(document.getElementById('rest-api-release-date')?.textContent).toBe('');
     });
 
@@ -123,47 +127,77 @@ describe('server_data.ts', () => {
   });
 
   // ===========================================================================
-  // initServerData Tests
+  // serverDataApp (Alpine.js Component) Tests
   // ===========================================================================
 
-  describe('initServerData', () => {
-    it('calls fetchApiVersion when rest-api-version element exists', async () => {
-      document.body.innerHTML = `
-        <span id="rest-api-version"></span>
-        <span id="rest-api-release-date"></span>
-      `;
+  describe('serverDataApp', () => {
+    it('initializes with loading state', () => {
+      const app = serverDataApp();
 
-      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
-        json: () => Promise.resolve({ version: '1.0.0' })
-      } as Response);
-
-      initServerData();
-
-      expect(fetchSpy).toHaveBeenCalled();
+      expect(app.apiVersion).toBe('');
+      expect(app.apiReleaseDate).toBe('');
+      expect(app.isLoading).toBe(true);
+      expect(app.error).toBeNull();
     });
 
-    it('does not call fetchApiVersion when rest-api-version element is missing', () => {
-      document.body.innerHTML = '<div>Some other content</div>';
-
-      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
-        json: () => Promise.resolve({})
+    it('fetches version on successful response', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ version: '2.5.0', release_date: '2024-03-15' })
       } as Response);
 
-      initServerData();
+      const app = serverDataApp();
+      await app.fetchApiVersion();
 
-      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(app.apiVersion).toBe('2.5.0');
+      expect(app.apiReleaseDate).toBe('2024-03-15');
+      expect(app.isLoading).toBe(false);
+      expect(app.error).toBeNull();
     });
 
-    it('does nothing on empty page', () => {
-      document.body.innerHTML = '';
-
-      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
-        json: () => Promise.resolve({})
+    it('sets error on API error response', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ error: 'Server error' })
       } as Response);
 
-      initServerData();
+      const app = serverDataApp();
+      await app.fetchApiVersion();
 
-      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(app.error).toBe('Server error');
+      expect(app.apiVersion).toBe('');
+      expect(app.isLoading).toBe(false);
+    });
+
+    it('sets error on fetch rejection', async () => {
+      vi.spyOn(global, 'fetch').mockRejectedValue(new Error('Network error'));
+
+      const app = serverDataApp();
+      await app.fetchApiVersion();
+
+      expect(app.error).toBe('Network error');
+      expect(app.isLoading).toBe(false);
+    });
+
+    it('prefers error field even if version is also present', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        json: () => Promise.resolve({ version: '1.0.0', error: 'Something went wrong' })
+      } as Response);
+
+      const app = serverDataApp();
+      await app.fetchApiVersion();
+
+      // Error takes precedence when both are present
+      expect(app.error).toBe('Something went wrong');
+      expect(app.apiVersion).toBe('');
+    });
+  });
+
+  // ===========================================================================
+  // initServerDataAlpine Tests
+  // ===========================================================================
+
+  describe('initServerDataAlpine', () => {
+    it('does not throw when called', () => {
+      expect(() => initServerDataAlpine()).not.toThrow();
     });
   });
 
@@ -203,8 +237,8 @@ describe('server_data.ts', () => {
       fetchApiVersion();
 
       await vi.waitFor(() => {
-        // Error message replaces version
-        expect(document.getElementById('rest-api-version')?.textContent).toContain('Error');
+        // Error message is shown
+        expect(document.getElementById('rest-api-version')?.textContent).toBe('Server error');
       });
       // Release date is emptied
       expect(document.getElementById('rest-api-release-date')?.textContent).toBe('');
@@ -228,25 +262,7 @@ describe('server_data.ts', () => {
       });
     });
 
-    it('prefers error field even if version is also present', async () => {
-      document.body.innerHTML = `
-        <span id="rest-api-version"></span>
-        <span id="rest-api-release-date"></span>
-      `;
-
-      vi.spyOn(global, 'fetch').mockResolvedValue({
-        json: () => Promise.resolve({ version: '1.0.0', error: 'Something went wrong' })
-      } as Response);
-
-      fetchApiVersion();
-
-      await vi.waitFor(() => {
-        // Error takes precedence when both are present
-        expect(document.getElementById('rest-api-version')?.textContent).toContain('Error');
-      });
-    });
-
-    it('handles fetch rejection', async () => {
+    it('handles fetch rejection (legacy)', async () => {
       document.body.innerHTML = `
         <span id="rest-api-version"></span>
         <span id="rest-api-release-date"></span>
@@ -257,7 +273,7 @@ describe('server_data.ts', () => {
       fetchApiVersion();
 
       await vi.waitFor(() => {
-        expect(document.getElementById('rest-api-version')?.textContent).toContain('Error');
+        expect(document.getElementById('rest-api-version')?.textContent).toBe('Network error');
       });
     });
   });

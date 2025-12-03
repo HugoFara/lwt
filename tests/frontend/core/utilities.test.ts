@@ -178,7 +178,8 @@ describe('pgm.ts', () => {
     it('creates popup span for URL starting with *', () => {
       const result = createTheDictLink('*http://dict.com?q=lwt_term', 'hello', 'Translate', '');
       expect(result).toContain('<span class="click"');
-      expect(result).toContain('onclick="owin(');
+      expect(result).toContain('data-action="dict-popup"');
+      expect(result).toContain('data-url=');
     });
 
     it('creates popup for URL with lwt_popup parameter', () => {

@@ -33,7 +33,8 @@ vi.mock('chart.js', () => {
 import {
   initIntensityChart,
   initFrequencyChart,
-  initStatisticsCharts
+  initStatisticsCharts,
+  statisticsApp
 } from '../../../src/frontend/js/admin/statistics_charts';
 import { Chart } from 'chart.js';
 
@@ -348,22 +349,27 @@ describe('statistics_charts.ts', () => {
       expect(chartConstructorCalls.length).toBe(0);
     });
 
-    it('initializes intensity chart from data attribute', () => {
+    it('initializes intensity chart from data element (statisticsApp)', () => {
       const intensityData = [
         { name: 'English', s1: 10, s2: 20, s3: 30, s4: 15, s5: 25, s99: 100 }
       ];
 
       document.body.innerHTML = `
-        <div id="statistics-intensity-data" data-languages='${JSON.stringify(intensityData)}'></div>
+        <script type="application/json" id="statistics-intensity-data">
+          ${JSON.stringify({ languages: intensityData })}
+        </script>
         <canvas id="intensityChart"></canvas>
       `;
 
-      initStatisticsCharts();
+      const app = statisticsApp();
+      // Mock $nextTick to call immediately
+      (app as unknown as { $nextTick: (cb: () => void) => void }).$nextTick = (cb) => cb();
+      app.init();
 
       expect(chartConstructorCalls.length).toBe(1);
     });
 
-    it('initializes frequency chart from data attribute', () => {
+    it('initializes frequency chart from data element (statisticsApp)', () => {
       const frequencyTotals = {
         ct: 5, at: 10, kt: 2,
         cy: 3, ay: 8, ky: 1,
@@ -373,16 +379,20 @@ describe('statistics_charts.ts', () => {
       };
 
       document.body.innerHTML = `
-        <div id="statistics-frequency-data" data-totals='${JSON.stringify(frequencyTotals)}'></div>
+        <script type="application/json" id="statistics-frequency-data">
+          ${JSON.stringify({ totals: frequencyTotals })}
+        </script>
         <canvas id="frequencyChart"></canvas>
       `;
 
-      initStatisticsCharts();
+      const app = statisticsApp();
+      (app as unknown as { $nextTick: (cb: () => void) => void }).$nextTick = (cb) => cb();
+      app.init();
 
       expect(chartConstructorCalls.length).toBe(1);
     });
 
-    it('initializes both charts when both data elements exist', () => {
+    it('initializes both charts when both data elements exist (statisticsApp)', () => {
       const intensityData = [
         { name: 'English', s1: 10, s2: 20, s3: 30, s4: 15, s5: 25, s99: 100 }
       ];
@@ -395,13 +405,19 @@ describe('statistics_charts.ts', () => {
       };
 
       document.body.innerHTML = `
-        <div id="statistics-intensity-data" data-languages='${JSON.stringify(intensityData)}'></div>
+        <script type="application/json" id="statistics-intensity-data">
+          ${JSON.stringify({ languages: intensityData })}
+        </script>
         <canvas id="intensityChart"></canvas>
-        <div id="statistics-frequency-data" data-totals='${JSON.stringify(frequencyTotals)}'></div>
+        <script type="application/json" id="statistics-frequency-data">
+          ${JSON.stringify({ totals: frequencyTotals })}
+        </script>
         <canvas id="frequencyChart"></canvas>
       `;
 
-      initStatisticsCharts();
+      const app = statisticsApp();
+      (app as unknown as { $nextTick: (cb: () => void) => void }).$nextTick = (cb) => cb();
+      app.init();
 
       expect(chartConstructorCalls.length).toBe(2);
     });
@@ -438,29 +454,33 @@ describe('statistics_charts.ts', () => {
       expect(() => initStatisticsCharts()).not.toThrow();
     });
 
-    it('handles invalid JSON in intensity data', () => {
+    it('handles invalid JSON in intensity data (statisticsApp)', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       document.body.innerHTML = `
-        <div id="statistics-intensity-data" data-languages='invalid json'></div>
+        <script type="application/json" id="statistics-intensity-data">invalid json</script>
         <canvas id="intensityChart"></canvas>
       `;
 
-      initStatisticsCharts();
+      const app = statisticsApp();
+      (app as unknown as { $nextTick: (cb: () => void) => void }).$nextTick = (cb) => cb();
+      app.init();
 
       expect(consoleSpy).toHaveBeenCalled();
       expect(chartConstructorCalls.length).toBe(0);
     });
 
-    it('handles invalid JSON in frequency data', () => {
+    it('handles invalid JSON in frequency data (statisticsApp)', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       document.body.innerHTML = `
-        <div id="statistics-frequency-data" data-totals='not valid json'></div>
+        <script type="application/json" id="statistics-frequency-data">not valid json</script>
         <canvas id="frequencyChart"></canvas>
       `;
 
-      initStatisticsCharts();
+      const app = statisticsApp();
+      (app as unknown as { $nextTick: (cb: () => void) => void }).$nextTick = (cb) => cb();
+      app.init();
 
       expect(consoleSpy).toHaveBeenCalled();
       expect(chartConstructorCalls.length).toBe(0);
