@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-  STATUSES,
+  statuses,
   fetchTermTags,
   fetchTextTags,
   getTermTagsSync,
@@ -24,32 +24,28 @@ describe('app_data.ts', () => {
   });
 
   // ===========================================================================
-  // STATUSES Tests
+  // statuses Tests
   // ===========================================================================
 
-  describe('STATUSES', () => {
+  describe('statuses', () => {
     it('contains learning statuses 1-5', () => {
-      expect(STATUSES[1]).toEqual({ abbr: '1', name: 'Learning' });
-      expect(STATUSES[2]).toEqual({ abbr: '2', name: 'Learning' });
-      expect(STATUSES[3]).toEqual({ abbr: '3', name: 'Learning' });
-      expect(STATUSES[4]).toEqual({ abbr: '4', name: 'Learning' });
-      expect(STATUSES[5]).toEqual({ abbr: '5', name: 'Learned' });
+      expect(statuses[1]).toEqual({ abbr: '1', name: 'Learning' });
+      expect(statuses[2]).toEqual({ abbr: '2', name: 'Learning' });
+      expect(statuses[3]).toEqual({ abbr: '3', name: 'Learning' });
+      expect(statuses[4]).toEqual({ abbr: '4', name: 'Learning' });
+      expect(statuses[5]).toEqual({ abbr: '5', name: 'Learned' });
     });
 
     it('contains Well Known status (99)', () => {
-      expect(STATUSES[99]).toEqual({ abbr: 'WKn', name: 'Well Known' });
+      expect(statuses[99]).toEqual({ abbr: 'WKn', name: 'Well Known' });
     });
 
     it('contains Ignored status (98)', () => {
-      expect(STATUSES[98]).toEqual({ abbr: 'Ign', name: 'Ignored' });
+      expect(statuses[98]).toEqual({ abbr: 'Ign', name: 'Ignored' });
     });
 
     it('has correct number of statuses', () => {
-      expect(Object.keys(STATUSES)).toHaveLength(7);
-    });
-
-    it('is available on window.STATUSES', () => {
-      expect(window.STATUSES).toBeDefined();
+      expect(Object.keys(statuses)).toHaveLength(7);
     });
   });
 

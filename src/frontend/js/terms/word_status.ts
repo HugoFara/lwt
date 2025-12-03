@@ -8,7 +8,7 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
-import { STATUSES } from '../core/app_data';
+import { statuses } from '../core/app_data';
 
 /**
  * Return the name of a given status.
@@ -18,7 +18,7 @@ import { STATUSES } from '../core/app_data';
  */
 export function getStatusName(status: number | string): string {
   const key = typeof status === 'string' ? parseInt(status, 10) : status;
-  return STATUSES[key] ? STATUSES[key].name : 'Unknown';
+  return statuses[key] ? statuses[key].name : 'Unknown';
 }
 
 /**
@@ -29,7 +29,7 @@ export function getStatusName(status: number | string): string {
  */
 export function getStatusAbbr(status: number | string): string {
   const key = typeof status === 'string' ? parseInt(status, 10) : status;
-  return STATUSES[key] ? STATUSES[key].abbr : '?';
+  return statuses[key] ? statuses[key].abbr : '?';
 }
 
 /**

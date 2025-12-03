@@ -70,26 +70,13 @@ const mockLWT_DATA = {
   settings: { jQuery_tooltip: false, hts: 0, word_status_filter: '' }
 };
 
-// Mock STATUSES for getStatusName and getStatusAbbr
-const mockSTATUSES: Record<string, { name: string; abbr: string; score: number; color: string }> = {
-  '1': { name: 'Learning (1)', abbr: '1', score: 1, color: '#f5b8a9' },
-  '2': { name: 'Learning (2)', abbr: '2', score: 2, color: '#f5cca9' },
-  '3': { name: 'Learning (3)', abbr: '3', score: 3, color: '#f5e1a9' },
-  '4': { name: 'Learning (4)', abbr: '4', score: 4, color: '#f5f3a9' },
-  '5': { name: 'Learned', abbr: '5', score: 5, color: '#a9f5bc' },
-  '98': { name: 'Ignored', abbr: 'Ign', score: 98, color: '#e0e0e0' },
-  '99': { name: 'Well Known', abbr: 'WKn', score: 99, color: '#a9f5f1' },
-};
-
-// Set up globals
+// Set up LWT_DATA global
 (globalThis as unknown as Record<string, unknown>).LWT_DATA = mockLWT_DATA;
-(globalThis as unknown as Record<string, unknown>).STATUSES = mockSTATUSES;
 
 describe('overlib_interface.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     (globalThis as unknown as Record<string, unknown>).LWT_DATA = JSON.parse(JSON.stringify(mockLWT_DATA));
-    (globalThis as unknown as Record<string, unknown>).STATUSES = mockSTATUSES;
   });
 
   afterEach(() => {

@@ -7,7 +7,7 @@
  */
 
 import { escape_html_chars, renderBulmaTags } from '../core/html_utils';
-import { STATUSES } from '../core/app_data';
+import { statuses } from '../core/app_data';
 import { iconHtml } from '../ui/icons';
 import type { WordStatus } from '../types/globals';
 
@@ -172,7 +172,7 @@ function formatImportedTerms(data: ImportedTerm[], rtl: boolean): string {
 
   for (let i = 0; i < data.length; i++) {
     const record = data[i];
-    const statusInfo = STATUSES[record.WoStatus] || { name: 'Unknown', abbr: '?' };
+    const statusInfo = statuses[record.WoStatus] || { name: 'Unknown', abbr: '?' };
 
     const row = `<tr>
       <td>

@@ -17,7 +17,7 @@ import type { WordStatus } from '../types/globals';
  * Word statuses - static data that never changes.
  * Keys are status codes: 1-5 for learning stages, 98 for ignored, 99 for well-known.
  */
-export const STATUSES: Record<number, WordStatus> = {
+export const statuses: Record<number, WordStatus> = {
   1: { abbr: '1', name: 'Learning' },
   2: { abbr: '2', name: 'Learning' },
   3: { abbr: '3', name: 'Learning' },
@@ -125,6 +125,3 @@ export async function initTagsData(): Promise<void> {
   ]);
 }
 
-// Set window.STATUSES immediately for legacy code
-// Type is already declared in types/globals.d.ts
-window.STATUSES = STATUSES as unknown as Record<string, WordStatus>;

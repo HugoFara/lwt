@@ -7,28 +7,15 @@ import {
   showImportedTerms
 } from '../../../src/frontend/js/words/word_upload';
 
-// Define STATUSES global for tests
-declare global {
-  interface Window {
-    STATUSES?: Record<string, { name: string; abbr: string }>;
-  }
-}
-
 describe('word_upload.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
-    window.STATUSES = {
-      '1': { name: 'Learning', abbr: 'L' },
-      '2': { name: 'Familiar', abbr: 'F' },
-      '99': { name: 'Well-known', abbr: 'WK' }
-    };
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
-    delete window.STATUSES;
   });
 
   // ===========================================================================
@@ -484,7 +471,9 @@ describe('word_upload.ts', () => {
         expect(tbody?.innerHTML).toContain('hello');
         expect(tbody?.innerHTML).toContain('hola');
         expect(tbody?.innerHTML).toContain('helo');
-        expect(tbody?.innerHTML).toContain('tag1, tag2');
+        // Tags are rendered as Bulma tag spans
+        expect(tbody?.innerHTML).toContain('tag1');
+        expect(tbody?.innerHTML).toContain('tag2');
       });
     });
 
@@ -513,8 +502,8 @@ describe('word_upload.ts', () => {
       showImportedTerms('2024-01-01', false, 1, 1);
 
       await vi.waitFor(() => {
-        // Now uses Lucide icons: status.png maps to circle-check
-        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('data-lucide="circle-check"');
+        // Uses Lucide icons: check icon for valid sentence
+        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('data-lucide="check"');
       });
     });
 
@@ -543,8 +532,8 @@ describe('word_upload.ts', () => {
       showImportedTerms('2024-01-01', false, 1, 1);
 
       await vi.waitFor(() => {
-        // Now uses Lucide icons: status-busy.png maps to circle-x
-        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('data-lucide="circle-x"');
+        // Uses Lucide icons: x icon for no valid sentence
+        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('data-lucide="x"');
       });
     });
 
@@ -573,7 +562,8 @@ describe('word_upload.ts', () => {
       showImportedTerms('2024-01-01', false, 1, 1);
 
       await vi.waitFor(() => {
-        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('WK');
+        // statuses[99] has abbr: 'WKn' for Well Known
+        expect(document.getElementById('res_data-res_table-body')?.innerHTML).toContain('WKn');
       });
     });
 

@@ -67,20 +67,8 @@ export interface WordCounts {
 
 declare global {
   interface Window {
-    STATUSES: Record<string, WordStatus>;
-    TAGS: Record<string, string>;
-    TEXTTAGS: Record<string, string>;
     LWT_DATA: LwtData;
-    WORDCOUNTS: WordCounts;
-    SUW: number;
-    SHOWUNIQUE: number;
   }
 
-  const STATUSES: Record<string, WordStatus>;
-  const TAGS: Record<string, string>;
-  const TEXTTAGS: Record<string, string>;
   const LWT_DATA: LwtData;
-  const WORDCOUNTS: WordCounts;
-  let SUW: number;
-  const SHOWUNIQUE: number;
 }

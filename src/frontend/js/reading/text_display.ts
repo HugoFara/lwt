@@ -10,17 +10,32 @@ import { do_ajax_save_setting } from '../core/ajax_utilities';
 import { apiGet } from '../core/api_client';
 import { updateAllTextStatusCharts } from '../texts/text_status_chart';
 
-// Word counts globals
-declare let WORDCOUNTS: {
+// Word counts data structure
+interface WordCounts {
   expr: Record<string, number>;
   expru: Record<string, number>;
   total: Record<string, number>;
   totalu: Record<string, number>;
   stat: Record<string, Record<string, number>>;
   statu: Record<string, Record<string, number>>;
-};
-declare let SUW: number;
-declare let SHOWUNIQUE: number;
+}
+
+// Module-scoped state (no longer window globals)
+let wordCounts: WordCounts | null = null;
+/** Show unique words bitflags */
+let showUniqueWords = 0;
+/** Original show counts setting (for detecting changes) */
+let initialShowCounts = 0;
+
+/**
+ * Initialize module state for testing purposes.
+ * @internal
+ */
+export function _initTestState(counts: WordCounts | null, suw = 0, initial = 0): void {
+  wordCounts = counts;
+  showUniqueWords = suw;
+  initialShowCounts = initial;
+}
 
 /**
  * Helper to safely get an HTML attribute value as a string.
@@ -30,7 +45,7 @@ function getAttr(el: Element | null, attr: string): string {
 }
 
 /**
- * Update WORDCOUNTS in with an AJAX request.
+ * Update word counts with an AJAX request.
  */
 export async function do_ajax_word_counts(): Promise<void> {
   const checkboxes = document.querySelectorAll<HTMLInputElement>('.markcheck');
@@ -38,12 +53,12 @@ export async function do_ajax_word_counts(): Promise<void> {
     .map(cb => cb.value)
     .join(',');
 
-  const response = await apiGet<typeof WORDCOUNTS>('/texts/statistics', {
+  const response = await apiGet<WordCounts>('/texts/statistics', {
     texts_id: textIds
   });
 
   if (response.data) {
-    (window as unknown as { WORDCOUNTS: typeof WORDCOUNTS }).WORDCOUNTS = response.data;
+    wordCounts = response.data;
     word_count_click();
     // Update legacy barcharts if present
     document.querySelectorAll('.barchart').forEach(el => {
@@ -58,17 +73,19 @@ export async function do_ajax_word_counts(): Promise<void> {
  * Set a unique item in barchart to reflect how many words are known.
  */
 export function set_barchart_item(this: HTMLElement): void {
+  if (!wordCounts) return;
+
   const spanEl = this.querySelector('span');
   const idAttr = getAttr(spanEl, 'id');
   const id = idAttr.split('_')[2] || '';
   /** @var v Number of terms in the text */
   let v: number;
-  if (SUW & 16) {
-    v = parseInt(String(WORDCOUNTS.expru[id] || 0), 10) +
-    parseInt(String(WORDCOUNTS.totalu[id]), 10);
+  if (showUniqueWords & 16) {
+    v = parseInt(String(wordCounts.expru[id] || 0), 10) +
+    parseInt(String(wordCounts.totalu[id]), 10);
   } else {
-    v = parseInt(String(WORDCOUNTS.expr[id] || 0), 10) +
-    parseInt(String(WORDCOUNTS.total[id]), 10);
+    v = parseInt(String(wordCounts.expr[id] || 0), 10) +
+    parseInt(String(wordCounts.total[id]), 10);
   }
   const children = this.querySelectorAll<HTMLElement>(':scope > li');
   children.forEach((li) => {
@@ -87,25 +104,30 @@ export function set_barchart_item(this: HTMLElement): void {
  * Set the number of words known in a text (in edit_texts.php main page).
  */
 export function set_word_counts(): void {
-  Object.entries(WORDCOUNTS.totalu).forEach(([key, value]) => {
+  if (!wordCounts) return;
+
+  // Capture in local const for TypeScript narrowing in closures
+  const counts = wordCounts;
+
+  Object.entries(counts.totalu).forEach(([key, value]) => {
     let knownu = 0, known = 0, todo: number, stat0: number;
-    const expr = WORDCOUNTS.expru[key] ? parseInt(String((SUW & 2) ? WORDCOUNTS.expru[key] : WORDCOUNTS.expr[key]), 10) : 0;
-    if (!WORDCOUNTS.stat[key]) {
-      WORDCOUNTS.statu[key] = WORDCOUNTS.stat[key] = {};
+    const expr = counts.expru[key] ? parseInt(String((showUniqueWords & 2) ? counts.expru[key] : counts.expr[key]), 10) : 0;
+    if (!counts.stat[key]) {
+      counts.statu[key] = counts.stat[key] = {};
     }
     const totalEl = document.getElementById('total_' + key);
-    if (totalEl) totalEl.innerHTML = String((SUW & 1) ? value : WORDCOUNTS.total[key]);
+    if (totalEl) totalEl.innerHTML = String((showUniqueWords & 1) ? value : counts.total[key]);
 
-    Object.entries(WORDCOUNTS.statu[key]).forEach(([k, v]) => {
-      if (SUW & 8) {
+    Object.entries(counts.statu[key]).forEach(([k, v]) => {
+      if (showUniqueWords & 8) {
         const statEl = document.getElementById('stat_' + k + '_' + key);
         if (statEl) statEl.innerHTML = String(v);
       }
       knownu += parseInt(String(v), 10);
     });
 
-    Object.entries(WORDCOUNTS.stat[key]).forEach(([k, v]) => {
-      if (!(SUW & 8)) {
+    Object.entries(counts.stat[key]).forEach(([k, v]) => {
+      if (!(showUniqueWords & 8)) {
         const statEl = document.getElementById('stat_' + k + '_' + key);
         if (statEl) statEl.innerHTML = String(v);
       }
@@ -113,33 +135,33 @@ export function set_word_counts(): void {
     });
 
     const savedEl = document.getElementById('saved_' + key);
-    if (savedEl) savedEl.innerHTML = known ? (String((SUW & 2 ? knownu : known) - expr) + '+' + expr) : '0';
+    if (savedEl) savedEl.innerHTML = known ? (String((showUniqueWords & 2 ? knownu : known) - expr) + '+' + expr) : '0';
 
-    if (SUW & 4) {
-      todo = parseInt(String(value), 10) + parseInt(String(WORDCOUNTS.expru[key] || 0), 10) - parseInt(String(knownu), 10);
+    if (showUniqueWords & 4) {
+      todo = parseInt(String(value), 10) + parseInt(String(counts.expru[key] || 0), 10) - parseInt(String(knownu), 10);
     } else {
-      todo = parseInt(String(WORDCOUNTS.total[key]), 10) + parseInt(String(WORDCOUNTS.expr[key] || 0), 10) - parseInt(String(known), 10);
+      todo = parseInt(String(counts.total[key]), 10) + parseInt(String(counts.expr[key] || 0), 10) - parseInt(String(known), 10);
     }
     const todoEl = document.getElementById('todo_' + key);
     if (todoEl) todoEl.innerHTML = String(todo);
 
     // added unknown percent
     let unknowncount: number, unknownpercent: number;
-    if (SUW & 8) {
-      unknowncount = parseInt(String(value), 10) + parseInt(String(WORDCOUNTS.expru[key] || 0), 10) - parseInt(String(knownu), 10);
+    if (showUniqueWords & 8) {
+      unknowncount = parseInt(String(value), 10) + parseInt(String(counts.expru[key] || 0), 10) - parseInt(String(knownu), 10);
       unknownpercent = Math.round(unknowncount * 10000 / (knownu + unknowncount)) / 100;
     } else {
-      unknowncount = parseInt(String(WORDCOUNTS.total[key]), 10) + parseInt(String(WORDCOUNTS.expr[key] || 0), 10) - parseInt(String(known), 10);
+      unknowncount = parseInt(String(counts.total[key]), 10) + parseInt(String(counts.expr[key] || 0), 10) - parseInt(String(known), 10);
       unknownpercent = Math.round(unknowncount * 10000 / (known + unknowncount)) / 100;
     }
     const unknownPercentEl = document.getElementById('unknownpercent_' + key);
     if (unknownPercentEl) unknownPercentEl.innerHTML = unknownpercent === 0 ? '0' : unknownpercent.toFixed(2);
     // end here
 
-    if (SUW & 16) {
-      stat0 = parseInt(String(value), 10) + parseInt(String(WORDCOUNTS.expru[key] || 0), 10) - parseInt(String(knownu), 10);
+    if (showUniqueWords & 16) {
+      stat0 = parseInt(String(value), 10) + parseInt(String(counts.expru[key] || 0), 10) - parseInt(String(knownu), 10);
     } else {
-      stat0 = parseInt(String(WORDCOUNTS.total[key]), 10) + parseInt(String(WORDCOUNTS.expr[key] || 0), 10) - parseInt(String(known), 10);
+      stat0 = parseInt(String(counts.total[key]), 10) + parseInt(String(counts.expr[key] || 0), 10) - parseInt(String(known), 10);
     }
     const stat0El = document.getElementById('stat_0_' + key);
     if (stat0El) stat0El.innerHTML = String(stat0);
@@ -171,7 +193,7 @@ export function word_count_click(): void {
   const savedEl = document.getElementById('saved');
   const totalEl = document.getElementById('total');
 
-  (window as unknown as { SUW: number }).SUW =
+  showUniqueWords =
     (parseInt(getAttr(chartEl, 'data_wo_cnt') || '0', 10) << 4) +
     (parseInt(getAttr(unknownPercentEl, 'data_wo_cnt') || '0', 10) << 3) +
     (parseInt(getAttr(unknownEl, 'data_wo_cnt') || '0', 10) << 2) +
@@ -205,7 +227,7 @@ export const lwt = {
    * Save the settings about unique/total words count.
    */
   save_text_word_count_settings: function (): void {
-    if (SUW === SHOWUNIQUE) {
+    if (showUniqueWords === initialShowCounts) {
       return;
     }
     const totalEl = document.getElementById('total');
@@ -227,9 +249,6 @@ export const lwt = {
 declare global {
   interface Window {
     lwt: typeof lwt;
-    WORDCOUNTS: typeof WORDCOUNTS;
-    SUW: number;
-    SHOWUNIQUE: number;
   }
 }
 
@@ -244,10 +263,10 @@ function autoInitTextList(): void {
 
   try {
     const config = JSON.parse(configEl.textContent || '{}');
-    // Set up globals
-    (window as unknown as { WORDCOUNTS: string }).WORDCOUNTS = '';
-    (window as unknown as { SUW: number }).SUW = config.showCounts || 0;
-    (window as unknown as { SHOWUNIQUE: number }).SHOWUNIQUE = config.showCounts || 0;
+    // Initialize module state
+    wordCounts = null;
+    showUniqueWords = config.showCounts || 0;
+    initialShowCounts = config.showCounts || 0;
 
     // Initialize word count click handlers
     lwt.prepare_word_count_click();
