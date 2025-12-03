@@ -542,6 +542,119 @@ export function checkDuplicateLanguage(
 }
 
 /**
+ * Apply wizard preset data to the form.
+ */
+function applyWizardPreset(): void {
+  const wizardData = sessionStorage.getItem('lwt_language_wizard');
+  if (!wizardData) return;
+
+  // Clear the session storage immediately
+  sessionStorage.removeItem('lwt_language_wizard');
+
+  try {
+    const data = JSON.parse(wizardData) as {
+      l1: string;
+      l2: string;
+      definitions: Record<
+        string,
+        {
+          glosbeIso: string;
+          googleIso: string;
+          biggerFont: boolean;
+          wordCharRegExp: string;
+          sentSplRegExp: string;
+          makeCharacterWord: boolean;
+          removeSpaces: boolean;
+          rightToLeft: boolean;
+        }
+      >;
+    };
+
+    const l1Def = data.definitions[data.l1];
+    const l2Def = data.definitions[data.l2];
+
+    if (!l2Def) {
+      console.error('Unknown study language:', data.l2);
+      return;
+    }
+
+    const lgForm = document.forms.namedItem('lg_form') as HTMLFormElement | null;
+    if (!lgForm) return;
+
+    // Set the language name
+    const nameInput = lgForm.elements.namedItem('LgName') as HTMLInputElement | null;
+    if (nameInput) {
+      nameInput.value = data.l2;
+      nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    // Set dictionary URL (Glosbe)
+    const l1Code = l1Def?.glosbeIso || 'en';
+    const l2Code = l2Def.glosbeIso;
+    const dict1Input = lgForm.elements.namedItem('LgDict1URI') as HTMLInputElement | null;
+    if (dict1Input) {
+      dict1Input.value = `https://glosbe.com/${l2Code}/${l1Code}/###?popup=1`;
+    }
+
+    // Set translator URL
+    const l1GoogleCode = l1Def?.googleIso || 'en';
+    const l2GoogleCode = l2Def.googleIso;
+    const translatorInput = lgForm.elements.namedItem(
+      'LgGoogleTranslateURI'
+    ) as HTMLInputElement | null;
+    if (translatorInput) {
+      translatorInput.value = `*https://translate.google.com/?sl=${l2GoogleCode}&tl=${l1GoogleCode}&text=###&op=translate`;
+    }
+
+    // Set text size based on language
+    const textSizeInput = lgForm.elements.namedItem('LgTextSize') as HTMLInputElement | null;
+    if (textSizeInput) {
+      textSizeInput.value = l2Def.biggerFont ? '150' : '100';
+      textSizeInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    // Set parsing rules
+    const regexpSentInput = lgForm.elements.namedItem(
+      'LgRegexpSplitSentences'
+    ) as HTMLInputElement | null;
+    if (regexpSentInput) {
+      regexpSentInput.value = l2Def.sentSplRegExp;
+    }
+
+    const regexpWordInput = lgForm.elements.namedItem(
+      'LgRegexpWordCharacters'
+    ) as HTMLInputElement | null;
+    if (regexpWordInput) {
+      regexpWordInput.value = l2Def.wordCharRegExp;
+    }
+
+    // Set checkboxes
+    const splitEachCharInput = lgForm.elements.namedItem(
+      'LgSplitEachChar'
+    ) as HTMLInputElement | null;
+    if (splitEachCharInput) {
+      splitEachCharInput.checked = l2Def.makeCharacterWord;
+    }
+
+    const removeSpacesInput = lgForm.elements.namedItem(
+      'LgRemoveSpaces'
+    ) as HTMLInputElement | null;
+    if (removeSpacesInput) {
+      removeSpacesInput.checked = l2Def.removeSpaces;
+    }
+
+    const rtlInput = lgForm.elements.namedItem('LgRightToLeft') as HTMLInputElement | null;
+    if (rtlInput) {
+      rtlInput.checked = l2Def.rightToLeft;
+    }
+
+    console.log(`Applied wizard preset for ${data.l2} (L1: ${data.l1})`);
+  } catch (e) {
+    console.error('Failed to apply wizard preset:', e);
+  }
+}
+
+/**
  * Initialize the language form from JSON config element.
  */
 export function initLanguageForm(): void {
@@ -557,6 +670,11 @@ export function initLanguageForm(): void {
   }
 
   languageForm.init(config);
+
+  // Check if we came from the wizard and apply preset
+  if (window.location.search.includes('wizard=1')) {
+    applyWizardPreset();
+  }
 
   // Set up event listeners
   const lgForm = document.forms.namedItem('lg_form') as HTMLFormElement | null;

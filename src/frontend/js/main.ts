@@ -37,6 +37,7 @@ import './api/texts';
 import './api/review';
 import './api/settings';
 import './api/words';
+import './api/languages';
 
 // Terms/vocabulary management
 import './terms/word_status';
@@ -125,6 +126,10 @@ import './words/word_result_init';
 import './tags/tag_list';
 
 // Languages
+import './languages/stores/language_store';
+import './languages/stores/language_form_store';
+import './languages/components/language_list_component';
+import './languages/components/language_wizard_modal';
 import './languages/language_wizard';
 import './languages/language_form';
 import './languages/language_list';

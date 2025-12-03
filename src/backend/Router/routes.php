@@ -126,9 +126,6 @@ function registerRoutes(Router $router): void
     // Edit languages
     $router->register('/languages', 'LanguageController@index');
 
-    // Select language pair
-    $router->register('/languages/select-pair', 'LanguageController@selectPair');
-
     // ==================== TAG ROUTES ====================
 
     // Term tags (TagsController)

@@ -189,6 +189,10 @@ class ApiV1
                 ));
                 break;
 
+            case 'languages':
+                $this->handleLanguagesPost($fragments, $params);
+                break;
+
             case 'texts':
                 $this->handleTextsPost($fragments, $params);
                 break;
@@ -206,34 +210,100 @@ class ApiV1
         }
     }
 
+    /**
+     * Handle POST requests for languages.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    POST parameters
+     */
+    private function handleLanguagesPost(array $fragments, array $params): void
+    {
+        // POST /languages - create new language
+        if (!isset($fragments[1]) || $fragments[1] === '') {
+            Response::success($this->languageHandler->formatCreate($params));
+            return;
+        }
+
+        // POST /languages/{id}/refresh - reparse texts
+        if (ctype_digit($fragments[1])) {
+            $langId = (int)$fragments[1];
+
+            if (($fragments[2] ?? '') === 'refresh') {
+                Response::success($this->languageHandler->formatRefresh($langId));
+                return;
+            }
+
+            if (($fragments[2] ?? '') === 'set-default') {
+                Response::success($this->languageHandler->formatSetDefault($langId));
+                return;
+            }
+
+            Response::error('Expected "refresh" or "set-default"', 404);
+        }
+
+        Response::error('Language ID (Integer) Expected', 404);
+    }
+
     // =========================================================================
     // GET Request Handlers
     // =========================================================================
 
     private function handleLanguagesGet(array $fragments): void
     {
+        // Handle /languages - list all languages with stats
+        if (!isset($fragments[1]) || $fragments[1] === '') {
+            Response::success($this->languageHandler->formatGetAll());
+            return;
+        }
+
+        // Handle /languages/definitions - get predefined language presets
+        if ($fragments[1] === 'definitions') {
+            Response::success($this->languageHandler->formatGetDefinitions());
+            return;
+        }
+
         // Handle /languages/with-texts - returns languages that have texts with counts
-        if (($fragments[1] ?? '') === 'with-texts') {
+        if ($fragments[1] === 'with-texts') {
             Response::success($this->languageHandler->formatLanguagesWithTexts());
             return;
         }
 
         // Handle /languages/with-archived-texts - returns languages that have archived texts with counts
-        if (($fragments[1] ?? '') === 'with-archived-texts') {
+        if ($fragments[1] === 'with-archived-texts') {
             Response::success($this->languageHandler->formatLanguagesWithArchivedTexts());
             return;
         }
 
-        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
-            Response::error('Expected Language ID, "with-texts", or "with-archived-texts"', 404);
-        }
-        if (($fragments[2] ?? '') !== 'reading-configuration') {
-            Response::error('Expected "reading-configuration"', 404);
+        // Handle /languages/{id} - get single language or sub-resources
+        if (!ctype_digit($fragments[1])) {
+            Response::error('Expected Language ID, "definitions", "with-texts", or "with-archived-texts"', 404);
         }
 
-        Response::success($this->languageHandler->formatReadingConfiguration(
-            (int)$fragments[1]
-        ));
+        $langId = (int)$fragments[1];
+
+        // Handle /languages/{id}/stats
+        if (($fragments[2] ?? '') === 'stats') {
+            Response::success($this->languageHandler->formatGetStats($langId));
+            return;
+        }
+
+        // Handle /languages/{id}/reading-configuration
+        if (($fragments[2] ?? '') === 'reading-configuration') {
+            Response::success($this->languageHandler->formatReadingConfiguration($langId));
+            return;
+        }
+
+        // Handle /languages/{id} - get single language for editing
+        if (!isset($fragments[2]) || $fragments[2] === '') {
+            $result = $this->languageHandler->formatGetOne($langId);
+            if ($result === null) {
+                Response::error('Language not found', 404);
+            }
+            Response::success($result);
+            return;
+        }
+
+        Response::error('Expected "reading-configuration", "stats", or no sub-path', 404);
     }
 
     private function handleReviewGet(array $fragments, array $params): void
@@ -525,6 +595,10 @@ class ApiV1
     private function handlePut(array $fragments, array $params): void
     {
         switch ($fragments[0]) {
+            case 'languages':
+                $this->handleLanguagesPut($fragments, $params);
+                break;
+
             case 'review':
                 $this->handleReviewPut($fragments, $params);
                 break;
@@ -540,6 +614,29 @@ class ApiV1
             default:
                 Response::error('Endpoint Not Found On PUT: ' . $fragments[0], 404);
         }
+    }
+
+    /**
+     * Handle PUT requests for languages.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Request body parameters
+     */
+    private function handleLanguagesPut(array $fragments, array $params): void
+    {
+        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+            Response::error('Language ID (Integer) Expected', 404);
+        }
+
+        $langId = (int)$fragments[1];
+
+        // PUT /languages/{id} - update language
+        if (!isset($fragments[2]) || $fragments[2] === '') {
+            Response::success($this->languageHandler->formatUpdate($langId, $params));
+            return;
+        }
+
+        Response::error('Unexpected sub-path for PUT /languages/{id}', 404);
     }
 
     private function handleReviewPut(array $fragments, array $params): void
@@ -641,6 +738,10 @@ class ApiV1
     private function handleDelete(array $fragments, array $params): void
     {
         switch ($fragments[0]) {
+            case 'languages':
+                $this->handleLanguagesDelete($fragments);
+                break;
+
             case 'terms':
                 $this->handleTermsDelete($fragments);
                 break;
@@ -648,6 +749,21 @@ class ApiV1
             default:
                 Response::error('Endpoint Not Found On DELETE: ' . $fragments[0], 404);
         }
+    }
+
+    /**
+     * Handle DELETE requests for languages.
+     *
+     * @param string[] $fragments Endpoint path segments
+     */
+    private function handleLanguagesDelete(array $fragments): void
+    {
+        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+            Response::error('Language ID (Integer) Expected', 404);
+        }
+
+        $langId = (int)$fragments[1];
+        Response::success($this->languageHandler->formatDelete($langId));
     }
 
     private function handleTermsDelete(array $fragments): void

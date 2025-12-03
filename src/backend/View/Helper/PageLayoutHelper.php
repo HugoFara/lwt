@@ -194,7 +194,8 @@ HTML;
      *
      * Creates a Bulma card with action buttons for page-level actions.
      *
-     * @param array $actions Array of actions with 'url', 'label', 'icon', and optional 'class'
+     * @param array $actions Array of actions with 'url', 'label', 'icon',
+     *                       and optional 'class', 'target', 'attrs'
      *
      * @return string HTML for the action card
      */
@@ -207,9 +208,11 @@ HTML;
             $icon = isset($action['icon']) ? IconHelper::render($action['icon'], ['alt' => $label]) : '';
             $class = isset($action['class']) ? ' ' . htmlspecialchars($action['class'], ENT_QUOTES, 'UTF-8') : '';
             $target = isset($action['target']) ? ' target="' . htmlspecialchars($action['target'], ENT_QUOTES, 'UTF-8') . '"' : '';
+            // Allow custom attributes (e.g., Alpine.js directives) - not escaped to allow dynamic bindings
+            $attrs = isset($action['attrs']) ? ' ' . $action['attrs'] : '';
 
             $buttonsHtml .= <<<HTML
-                <a href="{$url}" class="button is-light{$class}"{$target}>
+                <a href="{$url}" class="button is-light{$class}"{$target}{$attrs}>
                     <span class="icon">{$icon}</span>
                     <span>{$label}</span>
                 </a>

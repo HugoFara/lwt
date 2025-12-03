@@ -856,4 +856,240 @@ class LanguageService
         mysqli_free_result($res);
         return $result;
     }
+
+    // =========================================================================
+    // API-friendly CRUD methods (accept data as parameter, not from request)
+    // =========================================================================
+
+    /**
+     * Create a new language from data array.
+     *
+     * @param array $data Language data
+     *
+     * @return int Created language ID, or 0 on failure
+     */
+    public function createFromData(array $data): int
+    {
+        $tbpref = Globals::getTablePrefix();
+        $normalizedData = $this->normalizeLanguageData($data);
+
+        // Check if there's an empty language record to reuse
+        $val = Connection::fetchValue(
+            "SELECT MIN(LgID) AS value FROM {$tbpref}languages WHERE LgName=''"
+        );
+
+        $sql = $this->buildLanguageSqlFromData($normalizedData, $val !== null ? (int)$val : null);
+        Connection::execute($sql);
+
+        if ($val !== null) {
+            return (int)$val;
+        }
+
+        return (int)Connection::fetchValue(
+            "SELECT MAX(LgID) AS value FROM {$tbpref}languages"
+        );
+    }
+
+    /**
+     * Update an existing language from data array.
+     *
+     * @param int   $lid  Language ID
+     * @param array $data Language data
+     *
+     * @return array{success: bool, reparsed: int, message: string}
+     */
+    public function updateFromData(int $lid, array $data): array
+    {
+        $tbpref = Globals::getTablePrefix();
+        $normalizedData = $this->normalizeLanguageData($data);
+
+        // Get old values for comparison
+        $sql = "SELECT * FROM {$tbpref}languages where LgID = $lid";
+        $res = Connection::query($sql);
+        $record = mysqli_fetch_assoc($res);
+        mysqli_free_result($res);
+
+        if ($record === false || $record === null) {
+            return ['success' => false, 'reparsed' => 0, 'message' => 'Language not found'];
+        }
+
+        // Check if reparsing is needed
+        $needReParse = $this->needsReparsingFromData($normalizedData, $record);
+
+        // Update language
+        $updateSql = $this->buildLanguageSqlFromData($normalizedData, $lid);
+        Connection::execute($updateSql);
+
+        $reparsedCount = 0;
+        if ($needReParse) {
+            $reparsedCount = $this->reparseTexts($lid);
+        }
+
+        return [
+            'success' => true,
+            'reparsed' => $reparsedCount,
+            'message' => $needReParse ? 'Updated and reparsed' : 'Updated'
+        ];
+    }
+
+    /**
+     * Delete a language by ID.
+     *
+     * @param int $lid Language ID
+     *
+     * @return bool True if deleted
+     */
+    public function deleteById(int $lid): bool
+    {
+        $affected = QueryBuilder::table('languages')
+            ->where('LgID', '=', $lid)
+            ->delete();
+        return $affected > 0;
+    }
+
+    /**
+     * Refresh (reparse) all texts for a language and return stats.
+     *
+     * @param int $lid Language ID
+     *
+     * @return array{sentencesDeleted: int, textItemsDeleted: int, sentencesAdded: int, textItemsAdded: int}
+     */
+    public function refreshTexts(int $lid): array
+    {
+        $sentencesDeleted = QueryBuilder::table('sentences')
+            ->where('SeLgID', '=', $lid)
+            ->delete();
+        $textItemsDeleted = QueryBuilder::table('textitems2')
+            ->where('Ti2LgID', '=', $lid)
+            ->delete();
+        Maintenance::adjustAutoIncrement('sentences', 'SeID');
+
+        $tbpref = Globals::getTablePrefix();
+        $sql = "select TxID, TxText from {$tbpref}texts
+        where TxLgID = $lid
+        order by TxID";
+        $res = Connection::query($sql);
+        while ($record = mysqli_fetch_assoc($res)) {
+            $txtid = (int)$record["TxID"];
+            $txttxt = (string)$record["TxText"];
+            TextParsing::splitCheck($txttxt, $lid, $txtid);
+        }
+        mysqli_free_result($res);
+
+        $sentencesAdded = (int)Connection::fetchValue(
+            "SELECT count(*) as value FROM {$tbpref}sentences where SeLgID = $lid"
+        );
+        $textItemsAdded = (int)Connection::fetchValue(
+            "SELECT count(*) as value FROM {$tbpref}textitems2 where Ti2LgID = $lid"
+        );
+
+        return [
+            'sentencesDeleted' => $sentencesDeleted,
+            'textItemsDeleted' => $textItemsDeleted,
+            'sentencesAdded' => $sentencesAdded,
+            'textItemsAdded' => $textItemsAdded
+        ];
+    }
+
+    /**
+     * Normalize language data from API request to database fields.
+     *
+     * @param array $data API request data (camelCase keys)
+     *
+     * @return array Normalized data (LgXxx keys)
+     */
+    private function normalizeLanguageData(array $data): array
+    {
+        return [
+            'LgName' => $data['name'] ?? '',
+            'LgDict1URI' => $data['dict1Uri'] ?? '',
+            'LgDict2URI' => $data['dict2Uri'] ?? '',
+            'LgGoogleTranslateURI' => $data['translatorUri'] ?? '',
+            'LgExportTemplate' => $data['exportTemplate'] ?? '',
+            'LgTextSize' => (string)($data['textSize'] ?? '100'),
+            'LgCharacterSubstitutions' => $data['characterSubstitutions'] ?? '',
+            'LgRegexpSplitSentences' => $data['regexpSplitSentences'] ?? '.!?',
+            'LgExceptionsSplitSentences' => $data['exceptionsSplitSentences'] ?? '',
+            'LgRegexpWordCharacters' => $data['regexpWordCharacters'] ?? 'a-zA-Z',
+            'LgRemoveSpaces' => !empty($data['removeSpaces']),
+            'LgSplitEachChar' => !empty($data['splitEachChar']),
+            'LgRightToLeft' => !empty($data['rightToLeft']),
+            'LgTTSVoiceAPI' => $data['ttsVoiceApi'] ?? '',
+            'LgShowRomanization' => $data['showRomanization'] ?? true,
+        ];
+    }
+
+    /**
+     * Build SQL for inserting or updating a language from normalized data.
+     *
+     * @param array    $data Normalized language data
+     * @param int|null $id   Language ID for update, null for insert
+     *
+     * @return string SQL query
+     */
+    private function buildLanguageSqlFromData(array $data, ?int $id = null): string
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        $fields = [
+            'LgName' => Escaping::toSqlSyntax($data["LgName"]),
+            'LgDict1URI' => Escaping::toSqlSyntax($data["LgDict1URI"]),
+            'LgDict2URI' => Escaping::toSqlSyntax($data["LgDict2URI"]),
+            'LgGoogleTranslateURI' => Escaping::toSqlSyntax($data["LgGoogleTranslateURI"]),
+            'LgExportTemplate' => Escaping::toSqlSyntax($data["LgExportTemplate"]),
+            'LgTextSize' => Escaping::toSqlSyntax($data["LgTextSize"]),
+            'LgCharacterSubstitutions' => Escaping::toSqlSyntaxNoTrimNoNull($data["LgCharacterSubstitutions"]),
+            'LgRegexpSplitSentences' => Escaping::toSqlSyntax($data["LgRegexpSplitSentences"]),
+            'LgExceptionsSplitSentences' => Escaping::toSqlSyntaxNoTrimNoNull($data["LgExceptionsSplitSentences"]),
+            'LgRegexpWordCharacters' => Escaping::toSqlSyntax($data["LgRegexpWordCharacters"]),
+            'LgRemoveSpaces' => (int)$data["LgRemoveSpaces"],
+            'LgSplitEachChar' => (int)$data["LgSplitEachChar"],
+            'LgRightToLeft' => (int)$data["LgRightToLeft"],
+            'LgTTSVoiceAPI' => Escaping::toSqlSyntaxNoNull($data["LgTTSVoiceAPI"]),
+            'LgShowRomanization' => (int)$data["LgShowRomanization"],
+        ];
+
+        if ($id === null) {
+            // INSERT
+            $columns = implode(', ', array_keys($fields));
+            $values = implode(', ', array_values($fields));
+            return "INSERT INTO {$tbpref}languages ($columns) VALUES($values)";
+        }
+
+        // UPDATE
+        $setParts = [];
+        foreach ($fields as $key => $value) {
+            $setParts[] = "$key = $value";
+        }
+        return "UPDATE {$tbpref}languages SET " . implode(', ', $setParts) . " WHERE LgID = $id";
+    }
+
+    /**
+     * Check if language changes require reparsing texts (from normalized data).
+     *
+     * @param array $newData   New normalized language data
+     * @param array $oldRecord Old language data from database
+     *
+     * @return bool
+     */
+    private function needsReparsingFromData(array $newData, array $oldRecord): bool
+    {
+        return (
+            Escaping::toSqlSyntaxNoTrimNoNull($newData["LgCharacterSubstitutions"])
+            != Escaping::toSqlSyntaxNoTrimNoNull($oldRecord['LgCharacterSubstitutions'])
+        ) || (
+            Escaping::toSqlSyntax($newData["LgRegexpSplitSentences"]) !=
+            Escaping::toSqlSyntax($oldRecord['LgRegexpSplitSentences'])
+        ) || (
+            Escaping::toSqlSyntaxNoTrimNoNull($newData["LgExceptionsSplitSentences"])
+            != Escaping::toSqlSyntaxNoTrimNoNull($oldRecord['LgExceptionsSplitSentences'])
+        ) || (
+            Escaping::toSqlSyntax($newData["LgRegexpWordCharacters"]) !=
+            Escaping::toSqlSyntax($oldRecord['LgRegexpWordCharacters'])
+        ) || (
+            (int)$newData["LgRemoveSpaces"] != (int)$oldRecord['LgRemoveSpaces']
+        ) || (
+            (int)$newData["LgSplitEachChar"] != (int)$oldRecord['LgSplitEachChar']
+        );
+    }
 }

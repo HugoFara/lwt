@@ -219,7 +219,6 @@ class RoutesTest extends TestCase
     {
         return [
             'languages list' => ['/languages', 'LanguageController@index'],
-            'languages select-pair' => ['/languages/select-pair', 'LanguageController@selectPair'],
         ];
     }
 

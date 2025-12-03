@@ -165,17 +165,6 @@ class LanguageControllerTest extends TestCase
         $this->assertTrue(method_exists($controller, 'index'));
     }
 
-    public function testSelectPairMethodExists(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new LanguageController();
-
-        $this->assertTrue(method_exists($controller, 'selectPair'));
-    }
-
     // ===== Service delegation tests =====
 
     public function testControllerUsesLanguageServiceForGetAll(): void

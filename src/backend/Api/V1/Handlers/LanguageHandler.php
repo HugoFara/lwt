@@ -208,4 +208,213 @@ class LanguageHandler
             'languages' => $this->languageService->getLanguagesWithArchivedTextCounts()
         ];
     }
+
+    // =========================================================================
+    // Language CRUD Operations
+    // =========================================================================
+
+    /**
+     * Format response for getting all languages with stats.
+     *
+     * @return array{languages: array, currentLanguageId: int}
+     */
+    public function formatGetAll(): array
+    {
+        $currentLangId = (int)\getSettingWithDefault('currentlanguage');
+        return [
+            'languages' => $this->languageService->getLanguagesWithStats(),
+            'currentLanguageId' => $currentLangId
+        ];
+    }
+
+    /**
+     * Format response for getting a single language.
+     *
+     * @param int $id Language ID
+     *
+     * @return array|null Language data or null if not found
+     */
+    public function formatGetOne(int $id): ?array
+    {
+        $language = $this->languageService->getById($id);
+        if ($language === null) {
+            return null;
+        }
+
+        return [
+            'language' => [
+                'id' => $language->id()->toInt(),
+                'name' => $language->name(),
+                'dict1Uri' => $language->dict1Uri(),
+                'dict2Uri' => $language->dict2Uri(),
+                'translatorUri' => $language->translatorUri(),
+                'exportTemplate' => $language->exportTemplate(),
+                'textSize' => $language->textSize(),
+                'characterSubstitutions' => $language->characterSubstitutions(),
+                'regexpSplitSentences' => $language->regexpSplitSentences(),
+                'exceptionsSplitSentences' => $language->exceptionsSplitSentences(),
+                'regexpWordCharacters' => $language->regexpWordCharacters(),
+                'removeSpaces' => $language->removeSpaces(),
+                'splitEachChar' => $language->splitEachChar(),
+                'rightToLeft' => $language->rightToLeft(),
+                'ttsVoiceApi' => $language->ttsVoiceApi(),
+                'showRomanization' => $language->showRomanization(),
+            ],
+            'allLanguages' => $this->languageService->getAllLanguages()
+        ];
+    }
+
+    /**
+     * Format response for creating a new language.
+     *
+     * @param array $data Language data from request
+     *
+     * @return array{success: bool, id?: int, error?: string}
+     */
+    public function formatCreate(array $data): array
+    {
+        // Validate required fields
+        if (empty($data['name'])) {
+            return ['success' => false, 'error' => 'Language name is required'];
+        }
+
+        // Check for duplicate name
+        if ($this->languageService->isDuplicateName($data['name'])) {
+            return ['success' => false, 'error' => 'A language with this name already exists'];
+        }
+
+        $id = $this->languageService->createFromData($data);
+        if ($id > 0) {
+            return ['success' => true, 'id' => $id];
+        }
+
+        return ['success' => false, 'error' => 'Failed to create language'];
+    }
+
+    /**
+     * Format response for updating a language.
+     *
+     * @param int   $id   Language ID
+     * @param array $data Language data from request
+     *
+     * @return array{success: bool, reparsed?: int, error?: string}
+     */
+    public function formatUpdate(int $id, array $data): array
+    {
+        // Check language exists
+        $existing = $this->languageService->getById($id);
+        if ($existing === null) {
+            return ['success' => false, 'error' => 'Language not found'];
+        }
+
+        // Validate required fields
+        if (empty($data['name'])) {
+            return ['success' => false, 'error' => 'Language name is required'];
+        }
+
+        // Check for duplicate name (excluding current)
+        if ($this->languageService->isDuplicateName($data['name'], $id)) {
+            return ['success' => false, 'error' => 'A language with this name already exists'];
+        }
+
+        $result = $this->languageService->updateFromData($id, $data);
+        return [
+            'success' => true,
+            'reparsed' => $result['reparsed'] ?? 0,
+            'message' => $result['message'] ?? ''
+        ];
+    }
+
+    /**
+     * Format response for deleting a language.
+     *
+     * @param int $id Language ID
+     *
+     * @return array{success: bool, error?: string}
+     */
+    public function formatDelete(int $id): array
+    {
+        // Check if language can be deleted
+        if (!$this->languageService->canDelete($id)) {
+            $stats = $this->languageService->getRelatedDataCounts($id);
+            return [
+                'success' => false,
+                'error' => 'Cannot delete language with existing data',
+                'relatedData' => $stats
+            ];
+        }
+
+        $result = $this->languageService->deleteById($id);
+        return ['success' => $result];
+    }
+
+    /**
+     * Format response for getting language stats.
+     *
+     * @param int $id Language ID
+     *
+     * @return array{texts: int, archivedTexts: int, words: int, feeds: int}
+     */
+    public function formatGetStats(int $id): array
+    {
+        return $this->languageService->getRelatedDataCounts($id);
+    }
+
+    /**
+     * Format response for refreshing (reparsing) a language's texts.
+     *
+     * @param int $id Language ID
+     *
+     * @return array{success: bool, sentencesDeleted?: int, textItemsDeleted?: int, sentencesAdded?: int, textItemsAdded?: int}
+     */
+    public function formatRefresh(int $id): array
+    {
+        $result = $this->languageService->refreshTexts($id);
+        return [
+            'success' => true,
+            'sentencesDeleted' => $result['sentencesDeleted'],
+            'textItemsDeleted' => $result['textItemsDeleted'],
+            'sentencesAdded' => $result['sentencesAdded'],
+            'textItemsAdded' => $result['textItemsAdded']
+        ];
+    }
+
+    /**
+     * Format response for getting all language definitions (presets).
+     *
+     * @return array{definitions: array}
+     */
+    public function formatGetDefinitions(): array
+    {
+        $definitions = LanguageDefinitions::getAll();
+        $formatted = [];
+
+        foreach ($definitions as $name => $def) {
+            $formatted[$name] = [
+                'glosbeIso' => $def[0],
+                'googleIso' => $def[1],
+                'biggerFont' => $def[2],
+                'wordCharRegExp' => $def[3],
+                'sentSplRegExp' => $def[4],
+                'makeCharacterWord' => $def[5],
+                'removeSpaces' => $def[6],
+                'rightToLeft' => $def[7]
+            ];
+        }
+
+        return ['definitions' => $formatted];
+    }
+
+    /**
+     * Format response for setting a language as default/current.
+     *
+     * @param int $id Language ID
+     *
+     * @return array{success: bool}
+     */
+    public function formatSetDefault(int $id): array
+    {
+        \saveSetting('currentlanguage', (string)$id);
+        return ['success' => true];
+    }
 }

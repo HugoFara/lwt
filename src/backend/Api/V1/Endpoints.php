@@ -12,7 +12,8 @@ class Endpoints
      * @var array<string, string[]> Map of endpoint patterns to allowed HTTP methods
      */
     private const ROUTES = [
-        'languages' => ['GET'],
+        'languages' => ['GET', 'POST'],
+        'languages/definitions' => ['GET'],
         'languages/with-texts' => ['GET'],
         'languages/with-archived-texts' => ['GET'],
         'media-files' => ['GET'],

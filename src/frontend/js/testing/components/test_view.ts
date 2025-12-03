@@ -127,17 +127,11 @@ function buildProgressBar(): string {
 
         <div class="level-right">
           <div class="level-item">
-            <span>Total: </span>
-            <span x-text="store.progress.total"></span>
-            <span class="mx-1">=</span>
-            <span>Remaining: </span>
-            <span x-text="store.progress.remaining"></span>
-            <span class="mx-1">+</span>
-            <span>Wrong: </span>
-            <span class="has-text-danger" x-text="store.progress.wrong"></span>
-            <span class="mx-1">+</span>
-            <span>Correct: </span>
-            <span class="has-text-success" x-text="store.progress.correct"></span>
+            <span class="tag is-medium is-light" title="Remaining words / Total words">
+              <span class="has-text-weight-semibold" title="Remaining" x-text="store.progress.remaining"></span>
+              <span class="mx-1 has-text-grey">/</span>
+              <span class="has-text-grey" title="Total" x-text="store.progress.total"></span>
+            </span>
           </div>
         </div>
       </div>
