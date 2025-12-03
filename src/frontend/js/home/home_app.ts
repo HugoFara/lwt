@@ -118,8 +118,8 @@ export function homeData(): HomeData {
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored === null) {
-          // First visit: collapse all except Languages
-          this.collapsedMenus = ['texts', 'terms', 'feeds', 'admin', 'settings'];
+          // First visit: collapse all except Texts
+          this.collapsedMenus = ['terms', 'feeds', 'admin', 'settings'];
           this.saveMenuState();
         } else {
           this.collapsedMenus = JSON.parse(stored);

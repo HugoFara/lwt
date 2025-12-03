@@ -25,77 +25,6 @@ use const Lwt\Core\LWT_APP_VERSION;
 use function Lwt\Core\get_version;
 
 /**
- * Display the current text options.
- *
- * @param int         $textid      Text ID
- * @param array|null  $textInfo    Text information array
- *
- * @return void
- */
-function renderCurrentTextInfo(int $textid, ?array $textInfo): void
-{
-    if ($textInfo === null) {
-        return;
-    }
-
-    $lngname = $textInfo['language_name'];
-    $txttit = $textInfo['title'];
-    $annotated = $textInfo['annotated'];
-    ?>
-<div class="box has-background-light home-last-text">
-    <p class="has-text-weight-medium mb-2">
-        Last Text (<?php echo htmlspecialchars($lngname ?? '', ENT_QUOTES, 'UTF-8'); ?>):
-    </p>
-    <p class="is-italic mb-3"><?php echo htmlspecialchars($txttit ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
-    <div class="buttons are-small">
-        <a href="/text/read?start=<?php echo $textid; ?>" class="button is-link is-light">
-            <span class="icon is-small"><?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['alt' => 'Read']); ?></span>
-            <span>Read</span>
-        </a>
-        <a href="/test?text=<?php echo $textid; ?>" class="button is-info is-light">
-            <span class="icon is-small"><?php echo \Lwt\View\Helper\IconHelper::render('circle-help', ['alt' => 'Test']); ?></span>
-            <span>Test</span>
-        </a>
-        <a href="/text/print-plain?text=<?php echo $textid; ?>" class="button is-light">
-            <span class="icon is-small"><?php echo \Lwt\View\Helper\IconHelper::render('printer', ['alt' => 'Print']); ?></span>
-            <span>Print</span>
-        </a>
-        <?php if ($annotated): ?>
-        <a href="/text/print?text=<?php echo $textid; ?>" class="button is-success is-light">
-            <span class="icon is-small"><?php echo \Lwt\View\Helper\IconHelper::render('check', ['alt' => 'Annotated']); ?></span>
-            <span>Ann. Text</span>
-        </a>
-        <?php endif; ?>
-    </div>
-</div>
-    <?php
-}
-
-/**
- * Echo a select element to switch between languages.
- *
- * @param int   $langid    Current language ID
- * @param array $languages Languages data from LanguageService
- *
- * @return void
- */
-function renderLanguageSelector(int $langid, array $languages): void
-{
-    ?>
-<div class="field">
-    <label class="label" for="filterlang">Language</label>
-    <div class="control">
-        <div class="select is-fullwidth">
-            <select id="filterlang" data-action="set-lang" data-ajax="true" data-redirect="/">
-                <?php echo SelectOptionsBuilder::forLanguages($languages, $langid, '[Select...]'); ?>
-            </select>
-        </div>
-    </div>
-</div>
-    <?php
-}
-
-/**
  * When on a WordPress server, make a logout button.
  *
  * @param bool $isWordPress Whether WordPress session is active
@@ -221,45 +150,72 @@ if ($currentTextInfo !== null && $currenttext !== null) {
         </div>
     </div>
 </section>
-<?php elseif ($lastTextInfo !== null): ?>
-<!-- Current text: Continue Reading section -->
+<?php elseif ($langcnt > 0): ?>
+<!-- Language selection and current text section -->
 <section class="section py-4 mb-5">
     <div class="container">
-        <div class="box has-background-link-light" x-data="{ text: lastText }">
-            <h3 class="title is-4 mb-4">
-                <span class="icon-text">
-                    <span class="icon"><i data-lucide="book-open"></i></span>
-                    <span>Continue Reading</span>
-                </span>
-            </h3>
-            <template x-if="text">
-                <div>
-                    <p class="mb-2">
-                        <span class="tag is-info is-light" x-text="text.language_name"></span>
-                    </p>
-                    <p class="title is-5 mb-4" x-text="text.title"></p>
-                    <div class="buttons">
-                        <a :href="'/text/read?start=' + text.id" class="button is-link">
-                            <span class="icon"><i data-lucide="book-open"></i></span>
-                            <span>Read</span>
-                        </a>
-                        <a :href="'/test?text=' + text.id" class="button is-info is-light">
-                            <span class="icon"><i data-lucide="circle-help"></i></span>
-                            <span>Test</span>
-                        </a>
-                        <a :href="'/text/print-plain?text=' + text.id" class="button is-light">
-                            <span class="icon"><i data-lucide="printer"></i></span>
-                            <span>Print</span>
-                        </a>
-                        <template x-if="text.annotated">
-                            <a :href="'/text/print?text=' + text.id" class="button is-success is-light">
-                                <span class="icon"><i data-lucide="check"></i></span>
-                                <span>Annotated Text</span>
-                            </a>
-                        </template>
+        <div class="box has-background-link-light">
+            <div class="columns is-vcentered">
+                <!-- Language selector on the left -->
+                <div class="column is-narrow">
+                    <div class="field">
+                        <label class="label" for="filterlang">Language</label>
+                        <div class="control">
+                            <div class="select is-medium">
+                                <select id="filterlang" data-action="set-lang" data-ajax="true" data-redirect="/">
+                                    <?php echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Select...]'); ?>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </template>
+
+                <!-- Current text in the center -->
+                <div class="column">
+                    <template x-if="lastText">
+                        <div>
+                            <p class="title is-5 mb-2" x-text="lastText.title"></p>
+                            <div class="buttons">
+                                <a :href="'/text/read?start=' + lastText.id" class="button is-link">
+                                    <span class="icon"><i data-lucide="book-open"></i></span>
+                                    <span>Read</span>
+                                </a>
+                                <a :href="'/test?text=' + lastText.id" class="button is-info is-light">
+                                    <span class="icon"><i data-lucide="circle-help"></i></span>
+                                    <span>Test</span>
+                                </a>
+                                <a :href="'/text/print-plain?text=' + lastText.id" class="button is-light">
+                                    <span class="icon"><i data-lucide="printer"></i></span>
+                                    <span>Print</span>
+                                </a>
+                                <template x-if="lastText.annotated">
+                                    <a :href="'/text/print?text=' + lastText.id" class="button is-success is-light">
+                                        <span class="icon"><i data-lucide="check"></i></span>
+                                        <span>Ann. Text</span>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="!lastText">
+                        <p class="has-text-grey-light is-italic">No text selected for this language</p>
+                    </template>
+                </div>
+
+                <!-- Language management buttons on the right -->
+                <div class="column is-narrow">
+                    <div class="buttons">
+                        <a href="/languages" class="button is-link is-light" title="Manage Languages">
+                            <span class="icon"><i data-lucide="settings"></i></span>
+                            <span>Manage</span>
+                        </a>
+                        <a href="/languages?new=1" class="button is-primary is-light" title="Add New Language">
+                            <span class="icon"><i data-lucide="plus"></i></span>
+                            <span>New</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -267,75 +223,6 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
 <!-- Main menu grid -->
 <div class="columns is-multiline is-centered home-menu-container">
-    <!-- Languages Card -->
-    <div class="column is-one-third-desktop is-half-tablet">
-        <div class="card menu menu-languages"
-             :class="{ 'collapsed': isCollapsed('languages') }">
-            <header class="card-header menu-header" @click="toggleMenu('languages')">
-                <p class="card-header-title">
-                    <span class="icon-text">
-                        <span class="icon"><i data-lucide="languages"></i></span>
-                        <span>Languages</span>
-                    </span>
-                </p>
-                <button class="card-header-icon" aria-label="toggle menu">
-                    <span class="icon"><i data-lucide="chevron-down"></i></span>
-                </button>
-            </header>
-            <div class="card-content menu-content">
-                <?php if ($langcnt == 0): ?>
-                <div class="notification is-warning is-light">
-                    <p>The database seems to be empty.</p>
-                </div>
-                <a href="/admin/install-demo" class="button is-fullwidth is-info is-outlined mb-2">
-                    <span class="icon"><i data-lucide="database"></i></span>
-                    <span>Install Demo Database</span>
-                </a>
-                <a href="/languages?new=1" class="button is-fullwidth is-primary is-outlined mb-2">
-                    <span class="icon"><i data-lucide="plus"></i></span>
-                    <span>Define First Language</span>
-                </a>
-                <?php elseif ($langcnt > 0): ?>
-                <?php renderLanguageSelector($currentlang, $languages); ?>
-
-                <!-- Last Text Section - dynamically updated when language changes -->
-                <template x-if="lastText">
-                    <div class="box has-background-light home-last-text">
-                        <p class="has-text-weight-medium mb-2">
-                            Last Text (<span x-text="lastText.language_name"></span>):
-                        </p>
-                        <p class="is-italic mb-3" x-text="lastText.title"></p>
-                        <div class="buttons are-small">
-                            <a :href="'/text/read?start=' + lastText.id" class="button is-link is-light">
-                                <span class="icon is-small"><i data-lucide="book-open"></i></span>
-                                <span>Read</span>
-                            </a>
-                            <a :href="'/test?text=' + lastText.id" class="button is-info is-light">
-                                <span class="icon is-small"><i data-lucide="circle-help"></i></span>
-                                <span>Test</span>
-                            </a>
-                            <a :href="'/text/print-plain?text=' + lastText.id" class="button is-light">
-                                <span class="icon is-small"><i data-lucide="printer"></i></span>
-                                <span>Print</span>
-                            </a>
-                            <template x-if="lastText.annotated">
-                                <a :href="'/text/print?text=' + lastText.id" class="button is-success is-light">
-                                    <span class="icon is-small"><i data-lucide="check"></i></span>
-                                    <span>Ann. Text</span>
-                                </a>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-                <?php endif; ?>
-                <a href="/languages" class="button is-fullwidth is-link is-light">
-                    <span class="icon"><i data-lucide="settings"></i></span>
-                    <span>Manage Languages</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
     <!-- Texts Card -->
     <div class="column is-one-third-desktop is-half-tablet">
         <div class="card menu menu-texts"

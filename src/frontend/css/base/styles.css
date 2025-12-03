@@ -560,31 +560,6 @@ a
   text-decoration: none;
 }
 
-a:link
-{
-  color: #C00000;
-}
-
-a:visited
-{
-  color: #C00000;
-}
-
-a:active
-{
-  color: #C00000;
-}
-
-a:focus
-{
-  color: #C00000;
-}
-
-a:hover
-{
-  color: #C00000;
-}
-
 img
 {
   border: 0pt none;
@@ -2011,10 +1986,17 @@ select {
   color: #296fa8;
 }
 
-/* Footer styling */
+/* Footer styling - break out of body max-width to span full viewport */
 .footer {
   background-color: #f5f5f5 !important;
   padding: 1.5rem !important;
+  position: static !important;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Footer license image inline */
