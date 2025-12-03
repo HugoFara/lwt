@@ -8,6 +8,7 @@ use Lwt\Services\WordStatusService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
 use Lwt\Services\ExportService;
+use Lwt\View\Helper\StatusHelper;
 
 require_once __DIR__ . '/../../../Services/TestService.php';
 require_once __DIR__ . '/../../../Services/WordStatusService.php';
@@ -296,7 +297,8 @@ class ReviewHandler
         }
 
         // Return the new status and controls HTML
-        $controls = \make_status_controls_test_table(1, $newStatus, $wordId);
+        $statusAbbr = StatusHelper::getAbbr($newStatus);
+        $controls = StatusHelper::buildTestTableControls(1, $newStatus, $wordId, $statusAbbr);
 
         return [
             'status' => $newStatus,

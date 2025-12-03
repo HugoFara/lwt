@@ -11,6 +11,8 @@
 import Alpine from 'alpinejs';
 import { TermsApi } from '../../api/terms';
 import { TextsApi, type TextWord, type TextReadingConfig, type DictLinks } from '../../api/texts';
+import { injectTextStyles, generateParagraphStyles } from '../text_styles';
+import { renderText, updateWordStatusInDOM, updateWordTranslationInDOM, type RenderSettings } from '../text_renderer';
 
 /**
  * Word data stored in the word store.
@@ -51,7 +53,18 @@ export interface WordStoreState {
   audioPosition: number;
   rightToLeft: boolean;
   textSize: number;
+  removeSpaces: boolean;
   dictLinks: DictLinks;
+
+  // Annotation/display settings
+  showLearning: number;
+  displayStatTrans: number;
+  modeTrans: number;
+  termDelimiter: string;
+  annTextSize: number;
+
+  // Generated paragraph styles
+  paragraphStyles: string;
 
   // UI state
   selectedHex: string | null;
@@ -64,7 +77,11 @@ export interface WordStoreState {
   showAll: boolean;
   showTranslations: boolean;
 
+  // Rendered HTML (computed from words)
+  renderedHtml: string;
+
   // Methods
+  getRenderedHtml(): string;
   loadText(textId: number): Promise<void>;
   initFromData(words: TextWord[], config: TextReadingConfig): void;
   selectWord(hex: string, position: number): void;
@@ -96,11 +113,22 @@ function createWordStore(): WordStoreState {
     audioPosition: 0,
     rightToLeft: false,
     textSize: 100,
+    removeSpaces: false,
     dictLinks: {
       dict1: '',
       dict2: '',
       translator: ''
     },
+
+    // Annotation/display settings
+    showLearning: 1,
+    displayStatTrans: 1,
+    modeTrans: 2,
+    termDelimiter: '',
+    annTextSize: 50,
+
+    // Generated paragraph styles
+    paragraphStyles: '',
 
     // UI state
     selectedHex: null,
@@ -112,6 +140,25 @@ function createWordStore(): WordStoreState {
     // Display settings
     showAll: false,
     showTranslations: true,
+
+    // Rendered HTML
+    renderedHtml: '',
+
+    /**
+     * Get rendered HTML for the text.
+     */
+    getRenderedHtml(): string {
+      if (this.words.length === 0) return '';
+
+      const settings: RenderSettings = {
+        showAll: this.showAll,
+        showTranslations: this.showTranslations,
+        rightToLeft: this.rightToLeft,
+        textSize: this.textSize
+      };
+
+      return renderText(this.words, settings);
+    },
 
     /**
      * Load words for a text from the API.
@@ -154,7 +201,19 @@ function createWordStore(): WordStoreState {
       this.audioPosition = config.audioPosition;
       this.rightToLeft = config.rightToLeft;
       this.textSize = config.textSize;
+      this.removeSpaces = config.removeSpaces ?? false;
       this.dictLinks = config.dictLinks;
+
+      // Annotation/display settings
+      this.showLearning = config.showLearning ?? 1;
+      this.displayStatTrans = config.displayStatTrans ?? 1;
+      this.modeTrans = config.modeTrans ?? 2;
+      this.termDelimiter = config.termDelimiter ?? '';
+      this.annTextSize = config.annTextSize ?? 50;
+
+      // Generate and inject dynamic styles
+      injectTextStyles(config);
+      this.paragraphStyles = generateParagraphStyles(config);
 
       // Build word data and index
       this.words = [];
@@ -188,6 +247,9 @@ function createWordStore(): WordStoreState {
       }
 
       this.isInitialized = true;
+
+      // Generate rendered HTML
+      this.renderedHtml = this.getRenderedHtml();
     },
 
     /**
@@ -253,8 +315,9 @@ function createWordStore(): WordStoreState {
           return false;
         }
 
-        // Update all words with this hex
+        // Update all words with this hex in store and DOM
         this.updateWordInStore(hex, { status });
+        updateWordStatusInDOM(hex, status, wordId);
 
         this.isLoading = false;
         this.closeModal();
@@ -281,11 +344,14 @@ function createWordStore(): WordStoreState {
           return false;
         }
 
-        // Update all words with this hex
+        const newWordId = response.data.term_id;
+
+        // Update all words with this hex in store and DOM
         this.updateWordInStore(hex, {
-          wordId: response.data.term_id,
+          wordId: newWordId,
           status
         });
+        updateWordStatusInDOM(hex, status, newWordId);
 
         this.isLoading = false;
         this.closeModal();
@@ -318,7 +384,7 @@ function createWordStore(): WordStoreState {
           return false;
         }
 
-        // Reset all words with this hex to unknown
+        // Reset all words with this hex to unknown in store and DOM
         this.updateWordInStore(hex, {
           wordId: null,
           status: 0,
@@ -326,6 +392,8 @@ function createWordStore(): WordStoreState {
           romanization: '',
           tags: undefined
         });
+        updateWordStatusInDOM(hex, 0, null);
+        updateWordTranslationInDOM(hex, '', '');
 
         this.isLoading = false;
         this.closeModal();

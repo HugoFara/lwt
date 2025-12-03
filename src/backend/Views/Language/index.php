@@ -75,7 +75,7 @@ if (empty($languages)): ?>
                         <span class="stat-label">Texts</span>
                         <span class="stat-value">
                             <?php if ($lang['textCount'] > 0): ?>
-                            <a href="edit_texts.php?page=1&amp;query=&amp;filterlang=<?php echo $lang['id']; ?>"><?php echo $lang['textCount']; ?></a>
+                            <a href="/texts?page=1&amp;query=&amp;filterlang=<?php echo $lang['id']; ?>"><?php echo $lang['textCount']; ?></a>
                             <?php else: ?>
                             0
                             <?php endif; ?>
@@ -85,7 +85,7 @@ if (empty($languages)): ?>
                         <span class="stat-label">Archived</span>
                         <span class="stat-value">
                             <?php if ($lang['archivedTextCount'] > 0): ?>
-                            <a href="edit_archivedtexts.php?page=1&amp;query=&amp;filterlang=<?php echo $lang['id']; ?>"><?php echo $lang['archivedTextCount']; ?></a>
+                            <a href="/text/archived?page=1&amp;query=&amp;filterlang=<?php echo $lang['id']; ?>"><?php echo $lang['archivedTextCount']; ?></a>
                             <?php else: ?>
                             0
                             <?php endif; ?>
@@ -115,7 +115,7 @@ if (empty($languages)): ?>
 
                 <?php if ($lang['hasExportTemplate']): ?>
                 <div class="tags mt-3">
-                    <span class="tag is-info is-light export-template-tag">
+                    <span class="tag is-info is-light export-template-tag" title="This language has a custom export template for flexible term exports">
                         <?php echo IconHelper::render('file-down', ['size' => 12]); ?>
                         <span>Export Template</span>
                     </span>
@@ -124,7 +124,7 @@ if (empty($languages)): ?>
             </div>
 
             <footer class="card-footer">
-                <a href="do_test.php?lang=<?php echo $lang['id']; ?>" class="card-footer-item">
+                <a href="/test?lang=<?php echo $lang['id']; ?>" class="card-footer-item">
                     <?php echo IconHelper::render('circle-help', ['size' => 16]); ?>
                     Test
                 </a>

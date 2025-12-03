@@ -28,7 +28,14 @@ export interface TextReadingConfig {
   audioPosition: number;
   rightToLeft: boolean;
   textSize: number;
+  removeSpaces: boolean;
   dictLinks: DictLinks;
+  // Annotation/display settings
+  showLearning: number;
+  displayStatTrans: number;
+  modeTrans: number;
+  termDelimiter: string;
+  annTextSize: number;
 }
 
 /**

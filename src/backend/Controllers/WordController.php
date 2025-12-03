@@ -566,7 +566,7 @@ class WordController extends BaseController
 
         if (!$noPagestart) {
             PageLayoutHelper::renderPageStart(
-                'My ' . $this->languageService->getLanguageName($currentlang) . ' Terms (Words and Expressions)',
+                'Terms',
                 true
             );
         }

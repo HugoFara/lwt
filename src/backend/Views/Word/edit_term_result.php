@@ -23,11 +23,15 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\View\Helper\StatusHelper;
+
 ?>
 <p>OK: <?php echo htmlspecialchars($message ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
 
 <script type="application/json" data-lwt-edit-term-result-config>
-<?php echo json_encode([
+<?php
+$statusAbbr = StatusHelper::getAbbr((int) $status);
+echo json_encode([
     'wid' => $wid,
     'text' => $text,
     'translation' => $translation,
@@ -35,6 +39,6 @@ namespace Lwt\Views\Word;
     'romanization' => $romanization,
     'status' => $status,
     'sentence' => $sent1,
-    'statusControlsHtml' => make_status_controls_test_table(1, (int) $status, $wid)
+    'statusControlsHtml' => StatusHelper::buildTestTableControls(1, (int) $status, $wid, $statusAbbr)
 ]); ?>
 </script>

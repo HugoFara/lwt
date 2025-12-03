@@ -7,6 +7,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Services\WordService;
 use Lwt\Services\WordStatusService;
+use Lwt\View\Helper\StatusHelper;
 
 require_once __DIR__ . '/../../../Services/WordService.php';
 
@@ -207,7 +208,8 @@ class TermHandler
                 if (!isset($currstatus)) {
                     return null;
                 }
-                return \make_status_controls_test_table(1, (int)$currstatus, $wid);
+                $statusAbbr = StatusHelper::getAbbr((int)$currstatus);
+                return StatusHelper::buildTestTableControls(1, (int)$currstatus, $wid, $statusAbbr);
             }
         }
         return null;

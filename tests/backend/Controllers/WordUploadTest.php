@@ -366,8 +366,10 @@ class WordUploadTest extends TestCase
         $service = new WordUploadService();
         $tbpref = self::$tbpref;
 
-        // Get current timestamp
-        $beforeInsert = date('Y-m-d H:i:s', strtotime('-1 second'));
+        // Get current timestamp from database to avoid timezone issues
+        $beforeInsert = Connection::fetchValue(
+            "SELECT DATE_SUB(NOW(), INTERVAL 1 SECOND) AS value"
+        );
 
         // Insert test words
         Connection::query(
@@ -390,8 +392,10 @@ class WordUploadTest extends TestCase
         $service = new WordUploadService();
         $tbpref = self::$tbpref;
 
-        // Get current timestamp
-        $beforeInsert = date('Y-m-d H:i:s', strtotime('-1 second'));
+        // Get current timestamp from database to avoid timezone issues
+        $beforeInsert = Connection::fetchValue(
+            "SELECT DATE_SUB(NOW(), INTERVAL 1 SECOND) AS value"
+        );
 
         // Insert test words
         Connection::query(

@@ -86,6 +86,8 @@ function buildWordDataAttributes(word: WordData): Record<string, string> {
 
   if (word.translation) {
     attrs['data-trans'] = word.translation;
+    // data_trans is used for CSS pseudo-element content
+    attrs['data_trans'] = word.translation;
   }
 
   if (word.romanization) {

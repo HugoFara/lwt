@@ -54,16 +54,20 @@ use Lwt\View\Helper\PageLayoutHelper;
               <a href="/texts?chg=<?php echo $textId; ?>" class="button is-small">Edit</a>
             </div>
             <div class="control">
-              <label class="checkbox">
-                <input type="checkbox" x-model="showAll" @change="toggleShowAll">
-                Show All
-              </label>
+              <button class="button is-small" :class="showAll ? 'is-info' : 'is-light'" @click="toggleShowAll">
+                <span class="icon is-small">
+                  <i class="fas" :class="showAll ? 'fa-check-square' : 'fa-square'"></i>
+                </span>
+                <span>Show All</span>
+              </button>
             </div>
             <div class="control">
-              <label class="checkbox">
-                <input type="checkbox" x-model="showTranslations" @change="toggleTranslations">
-                Translations
-              </label>
+              <button class="button is-small" :class="showTranslations ? 'is-info' : 'is-light'" @click="toggleTranslations">
+                <span class="icon is-small">
+                  <i class="fas" :class="showTranslations ? 'fa-check-square' : 'fa-square'"></i>
+                </span>
+                <span>Translations</span>
+              </button>
             </div>
             <div class="control">
               <div class="dropdown is-hoverable is-right">
@@ -162,8 +166,10 @@ use Lwt\View\Helper\PageLayoutHelper;
 .status99 { border-bottom: solid 2px #CCFFCC; } /* Well-known */
 
 /* Hide translations class */
-.hide-translations .wsty[data-trans]::after,
-.hide-translations .mwsty[data-trans]::after {
+.hide-translations .wsty[data_trans]::after,
+.hide-translations .wsty[data_trans]::before,
+.hide-translations .mwsty[data_trans]::after,
+.hide-translations .mwsty[data_trans]::before {
   display: none !important;
 }
 

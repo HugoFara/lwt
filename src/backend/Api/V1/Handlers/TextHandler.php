@@ -335,7 +335,7 @@ class TextHandler
         // Get language info including dictionary URLs
         $langInfo = Connection::preparedFetchOne(
             "SELECT LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
-                    LgTextSize, LgRightToLeft, LgRegexpWordCharacters
+                    LgTextSize, LgRightToLeft, LgRegexpWordCharacters, LgRemoveSpaces
              FROM {$tbpref}languages WHERE LgID = ?",
             [$langId]
         );
@@ -447,6 +447,12 @@ class TextHandler
         }
 
         // Build config
+        $showLearning = Settings::getZeroOrOne('showlearningtranslations', 1);
+        $displayStatTrans = (int)Settings::getWithDefault('set-display-text-frame-term-translation');
+        $modeTrans = (int)Settings::getWithDefault('set-text-frame-annotation-position');
+        $termDelimiter = Settings::getWithDefault('set-term-translation-delimiters');
+        $textSize = (int)$langInfo['LgTextSize'];
+
         $config = [
             'textId' => $textId,
             'langId' => $langId,
@@ -455,12 +461,26 @@ class TextHandler
             'sourceUri' => $textInfo['TxSourceURI'],
             'audioPosition' => (int)$textInfo['TxAudioPosition'],
             'rightToLeft' => (int)$langInfo['LgRightToLeft'] === 1,
-            'textSize' => (int)$langInfo['LgTextSize'],
+            'textSize' => $textSize,
+            'removeSpaces' => (int)$langInfo['LgRemoveSpaces'] === 1,
             'dictLinks' => [
                 'dict1' => $langInfo['LgDict1URI'] ?? '',
                 'dict2' => $langInfo['LgDict2URI'] ?? '',
                 'translator' => $langInfo['LgGoogleTranslateURI'] ?? '',
             ],
+            // Annotation/display settings
+            'showLearning' => $showLearning,
+            'displayStatTrans' => $displayStatTrans,
+            'modeTrans' => $modeTrans,
+            'termDelimiter' => $termDelimiter,
+            // Annotation text size percentages (based on main text size)
+            'annTextSize' => match ($textSize) {
+                100 => 50,
+                150 => 50,
+                200 => 40,
+                250 => 25,
+                default => 50,
+            },
         ];
 
         return [
