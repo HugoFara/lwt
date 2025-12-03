@@ -169,6 +169,21 @@ button .icon,
 }
 
 /**
+ * Lucide SVG icons inside Bulma's .icon wrapper.
+ * Lucide replaces <i data-lucide="..."> with <svg>, which needs proper sizing.
+ */
+.icon > svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  vertical-align: top;
+}
+
+/**
  * Score indicators in word lists.
  */
 .scorered .icon {

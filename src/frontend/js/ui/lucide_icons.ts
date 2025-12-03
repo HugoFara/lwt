@@ -149,6 +149,15 @@ function init(): void {
   }
 }
 
+// Re-initialize after Alpine.js has finished initial render
+// Alpine dispatches 'alpine:initialized' after starting
+document.addEventListener('alpine:initialized', () => {
+  // Use requestAnimationFrame to ensure Alpine has rendered templates
+  requestAnimationFrame(() => {
+    initIcons();
+  });
+});
+
 // Also re-initialize after AJAX content loads
 // Listen for custom event that can be triggered after dynamic content loads
 document.addEventListener('lwt:contentLoaded', () => {

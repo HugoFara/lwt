@@ -25,7 +25,7 @@ export interface ApiClientConfig {
 }
 
 const defaultConfig: ApiClientConfig = {
-  baseUrl: 'api.php/v1',
+  baseUrl: '/api.php/v1',
   defaultHeaders: {
     'Content-Type': 'application/json',
     Accept: 'application/json'

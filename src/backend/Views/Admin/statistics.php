@@ -64,24 +64,30 @@ $frequencyChartTotals = [
     </script>
 
     <!-- Learning Intensity Section -->
-    <section class="mb-6">
-        <h2 class="title is-4">
-            <span class="icon-text">
-                <span class="icon has-text-info">
-                    <?php echo IconHelper::render('bar-chart-2', ['class' => 'icon']); ?>
+    <section class="box mb-4" x-data="{ open: true }">
+        <header class="collapsible-header" @click="open = !open">
+            <h2 class="title is-4 mb-0">
+                <span class="icon-text">
+                    <span class="icon has-text-info">
+                        <?php echo IconHelper::render('bar-chart-2', ['class' => 'icon']); ?>
+                    </span>
+                    <span>Learning Intensity</span>
                 </span>
-                <span>Learning Intensity</span>
+            </h2>
+            <span class="icon collapse-icon" :class="{ 'is-rotated': open }">
+                <?php echo IconHelper::render('chevron-down'); ?>
             </span>
-        </h2>
+        </header>
 
+        <div class="collapsible-content" x-show="open" x-collapse>
         <!-- Intensity Chart -->
-        <div class="box mb-4">
+        <div class="box mb-4 mt-4">
             <h3 class="subtitle is-6">Term Status Distribution by Language</h3>
             <canvas id="intensityChart" height="100"></canvas>
         </div>
 
         <!-- Intensity Data Table -->
-        <div class="box">
+        <div class="box mt-4">
             <p class="mb-3">
                 Breakdown by Language and Term Status
                 <span class="has-text-grey is-size-7">(Click on numbers to see the list of terms)</span>
@@ -213,27 +219,34 @@ $frequencyChartTotals = [
                 </table>
             </div>
         </div>
+        </div>
     </section>
 
     <!-- Learning Frequency Section -->
-    <section class="mb-6">
-        <h2 class="title is-4">
-            <span class="icon-text">
-                <span class="icon has-text-success">
-                    <?php echo IconHelper::render('trending-up', ['class' => 'icon']); ?>
+    <section class="box mb-4" x-data="{ open: false }">
+        <header class="collapsible-header" @click="open = !open">
+            <h2 class="title is-4 mb-0">
+                <span class="icon-text">
+                    <span class="icon has-text-success">
+                        <?php echo IconHelper::render('trending-up', ['class' => 'icon']); ?>
+                    </span>
+                    <span>Learning Frequency</span>
                 </span>
-                <span>Learning Frequency</span>
+            </h2>
+            <span class="icon collapse-icon" :class="{ 'is-rotated': open }">
+                <?php echo IconHelper::render('chevron-down'); ?>
             </span>
-        </h2>
+        </header>
 
+        <div class="collapsible-content" x-show="open" x-collapse>
         <!-- Frequency Chart -->
-        <div class="box mb-4">
+        <div class="box mb-4 mt-4">
             <h3 class="subtitle is-6">Learning Activity Over Time (All Languages)</h3>
             <canvas id="frequencyChart" height="80"></canvas>
         </div>
 
         <!-- Frequency Data Table -->
-        <div class="box">
+        <div class="box mt-4">
             <p class="mb-3">
                 Breakdown by Language and Time Range
                 <span class="has-text-grey is-size-7">
@@ -336,6 +349,7 @@ $frequencyChartTotals = [
                 </table>
             </div>
         </div>
+        </div>
     </section>
 
     <!-- Back Button -->
@@ -350,6 +364,27 @@ $frequencyChartTotals = [
 </div>
 
 <style>
+/* Collapsible section styles */
+.collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.collapsible-header:hover {
+    opacity: 0.8;
+}
+
+.collapse-icon {
+    transition: transform 0.2s ease;
+}
+
+.collapse-icon.is-rotated {
+    transform: rotate(180deg);
+}
+
 /* Statistics status tags - matching LWT's existing status colors */
 .tag.status-1 { background-color: #F5B8A9; color: #000; }
 .tag.status-2 { background-color: #F5CCA9; color: #000; }

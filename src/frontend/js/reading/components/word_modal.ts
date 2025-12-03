@@ -12,6 +12,7 @@ import Alpine from 'alpinejs';
 import type { WordStoreState, WordData } from '../stores/word_store';
 import type { WordFormStoreState, SaveResult } from '../stores/word_form_store';
 import { speechDispatcher } from '../../core/user_interactions';
+import { initIcons } from '../../ui/lucide_icons';
 
 /**
  * Status display information.
@@ -58,6 +59,9 @@ export interface WordModalData {
   // View mode
   viewMode: ViewMode;
 
+  // Lifecycle
+  init(): void;
+
   // Methods
   close(): void;
   speakWord(): void;
@@ -84,6 +88,19 @@ export function wordModalData(): WordModalData {
   return {
     // View mode state
     viewMode: 'info' as ViewMode,
+
+    // Initialize icons when modal opens (called by Alpine.js x-init or x-effect)
+    init(): void {
+      // Watch for modal open state changes to re-initialize icons
+      Alpine.effect(() => {
+        if (this.store.isModalOpen) {
+          // Delay slightly to ensure DOM is updated
+          requestAnimationFrame(() => {
+            initIcons();
+          });
+        }
+      });
+    },
 
     get store(): WordStoreState {
       return Alpine.store('words') as WordStoreState;
