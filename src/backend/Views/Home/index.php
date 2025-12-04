@@ -243,21 +243,13 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                     <span class="icon"><i data-lucide="file-text"></i></span>
                     <span>Texts</span>
                 </a>
-                <a href="/text/archived" class="button is-fullwidth is-light mb-2">
-                    <span class="icon"><i data-lucide="archive"></i></span>
-                    <span>Text Archive</span>
-                </a>
                 <a href="/tags/text" class="button is-fullwidth is-light mb-2">
                     <span class="icon"><i data-lucide="tags"></i></span>
                     <span>Text Tags</span>
                 </a>
-                <a href="/text/check" class="button is-fullwidth is-light mb-2">
-                    <span class="icon"><i data-lucide="check-circle"></i></span>
-                    <span>Check Text</span>
-                </a>
-                <a href="/text/import-long" class="button is-fullwidth is-light">
-                    <span class="icon"><i data-lucide="upload"></i></span>
-                    <span>Import Long Text</span>
+                <a href="/feeds?check_autoupdate=1" class="button is-fullwidth is-warning is-light">
+                    <span class="icon"><i data-lucide="newspaper"></i></span>
+                    <span>Newsfeeds</span>
                 </a>
             </div>
         </div>
@@ -290,34 +282,6 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 <a href="/word/upload" class="button is-fullwidth is-light">
                     <span class="icon"><i data-lucide="upload"></i></span>
                     <span>Import Terms</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Content Card -->
-    <div class="column is-one-third-desktop is-half-tablet">
-        <div class="card menu menu-feeds"
-             :class="{ 'collapsed': isCollapsed('feeds') }">
-            <header class="card-header menu-header" @click="toggleMenu('feeds')">
-                <p class="card-header-title">
-                    <span class="icon-text">
-                        <span class="icon"><i data-lucide="rss"></i></span>
-                        <span>Content</span>
-                    </span>
-                </p>
-                <button class="card-header-icon" aria-label="toggle menu">
-                    <span class="icon"><i data-lucide="chevron-down"></i></span>
-                </button>
-            </header>
-            <div class="card-content menu-content">
-                <a href="/feeds?check_autoupdate=1" class="button is-fullwidth is-warning is-light mb-2">
-                    <span class="icon"><i data-lucide="newspaper"></i></span>
-                    <span>Newsfeeds</span>
-                </a>
-                <a href="/admin/backup" class="button is-fullwidth is-light" title="Backup, restore or empty database">
-                    <span class="icon"><i data-lucide="database"></i></span>
-                    <span>Database</span>
                 </a>
             </div>
         </div>
@@ -371,9 +335,13 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                 </button>
             </header>
             <div class="card-content menu-content">
-                <a href="/admin/settings" class="button is-fullwidth is-light">
+                <a href="/admin/settings" class="button is-fullwidth is-light mb-2">
                     <span class="icon"><i data-lucide="sliders"></i></span>
                     <span>Settings</span>
+                </a>
+                <a href="/admin/backup" class="button is-fullwidth is-light" title="Backup, restore or empty database">
+                    <span class="icon"><i data-lucide="database"></i></span>
+                    <span>Database</span>
                 </a>
             </div>
         </div>
