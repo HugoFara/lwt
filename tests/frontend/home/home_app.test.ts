@@ -44,16 +44,17 @@ describe('home_app.ts', () => {
     });
 
     describe('init', () => {
-      it('loads menu state on first visit and collapses all except languages', () => {
+      it('loads menu state on first visit and collapses all except languages and texts', () => {
         const data = homeData();
         data.init();
 
-        expect(data.collapsedMenus).toContain('texts');
+        // The code collapses: terms, feeds, admin, settings (not texts or languages)
         expect(data.collapsedMenus).toContain('terms');
         expect(data.collapsedMenus).toContain('feeds');
         expect(data.collapsedMenus).toContain('admin');
         expect(data.collapsedMenus).toContain('settings');
         expect(data.collapsedMenus).not.toContain('languages');
+        expect(data.collapsedMenus).not.toContain('texts');
       });
 
       it('restores saved menu state from localStorage', () => {

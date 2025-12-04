@@ -854,7 +854,7 @@ describe('language_form.ts', () => {
 
       const originalLocation = window.location;
       delete (window as any).location;
-      (window as any).location = { href: '' };
+      (window as any).location = { href: '', search: '' };
 
       document.body.innerHTML = `
         <script type="application/json" id="language-form-config">
