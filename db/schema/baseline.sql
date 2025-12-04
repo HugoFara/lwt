@@ -13,7 +13,9 @@ INSERT INTO _migrations VALUES
 ('19700102_000001_lwt_fork.sql'),
 ('20231224_131202_missing_auto_increment.sql'),
 ('20240103_120316_2.10.0-fork.sql'),
-('20251130_120000_myisam_to_innodb.sql');
+('20251130_120000_myisam_to_innodb.sql'),
+('20251201_174538_remove_mobile_setting.sql'),
+('20251204_120000_fix_audio_uri_null.sql');
 
 -- Database definition
 
@@ -108,7 +110,7 @@ CREATE TABLE IF NOT EXISTS texts (
     TxTitle varchar(200) NOT NULL,
     TxText text NOT NULL,
     TxAnnotatedText longtext NOT NULL,
-    TxAudioURI varchar(200) DEFAULT NULL,
+    TxAudioURI varchar(2048) DEFAULT NULL,
     TxSourceURI varchar(1000) DEFAULT NULL,
     TxPosition smallint(5) DEFAULT 0,
     TxAudioPosition float DEFAULT 0,

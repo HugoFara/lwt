@@ -13,4 +13,4 @@ ALTER TABLE `languages`
 -- URI should be at least 2048 characters long:
 -- https://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
 ALTER TABLE `texts`
-    MODIFY COLUMN `TxAudioURI` VARCHAR(2048) NOT NULL;
+    MODIFY COLUMN `TxAudioURI` VARCHAR(2048) DEFAULT NULL;
