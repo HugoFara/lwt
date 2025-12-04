@@ -136,7 +136,10 @@ function registerRoutes(Router $router): void
 
     // ==================== FEED ROUTES ====================
 
-    // Feeds list
+    // Feeds SPA (new Alpine.js single page application)
+    $router->register('/feeds/manage', 'FeedsController@spa');
+
+    // Feeds list (legacy)
     $router->register('/feeds', 'FeedsController@index');
 
     // Edit feeds

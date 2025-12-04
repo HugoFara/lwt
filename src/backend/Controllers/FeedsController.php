@@ -1196,4 +1196,24 @@ class FeedsController extends BaseController
 
         return $_SESSION['wizard']['feed'][$i]['html'];
     }
+
+    /**
+     * Feeds SPA page - modern Alpine.js single page application.
+     *
+     * This method provides a reactive feed management interface with:
+     * - Feed list with filtering, sorting, and pagination
+     * - Article browsing with import functionality
+     * - Create/edit feed forms
+     * - Bulk actions
+     *
+     * @param array $params Route parameters
+     *
+     * @return void
+     */
+    public function spa(array $params): void
+    {
+        PageLayoutHelper::renderPageStart('Feed Manager', true);
+        include __DIR__ . '/../Views/Feed/spa.php';
+        PageLayoutHelper::renderPageEnd();
+    }
 }

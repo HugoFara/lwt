@@ -168,6 +168,10 @@ class ApiV1
                 $this->handleTextsGet($fragments, $params);
                 break;
 
+            case 'feeds':
+                $this->handleFeedsGet($fragments, $params);
+                break;
+
             default:
                 Response::error('Endpoint Not Found: ' . $fragments[0], 404);
         }
@@ -566,20 +570,53 @@ class ApiV1
 
     private function handleFeedsPost(array $fragments, array $params): void
     {
-        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
-            Response::error('Feed ID (Integer) Expected', 404);
+        // POST /feeds/articles/import - import articles as texts
+        if (($fragments[1] ?? '') === 'articles' && ($fragments[2] ?? '') === 'import') {
+            Response::success($this->feedHandler->formatImportArticles($params));
+            return;
         }
 
-        if (($fragments[2] ?? '') === 'load') {
+        // POST /feeds - create new feed
+        if (!isset($fragments[1]) || $fragments[1] === '') {
+            Response::success($this->feedHandler->formatCreateFeed($params));
+            return;
+        }
+
+        // POST /feeds/{id}/load - legacy feed load
+        if (ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'load') {
             Response::success($this->feedHandler->formatLoadFeed(
                 $params['name'],
                 (int)$fragments[1],
                 $params['source_uri'],
                 $params['options']
             ));
-        } else {
-            Response::error('Expected "load"', 404);
+            return;
         }
+
+        Response::error('Expected "articles/import", feed data, or "{id}/load"', 404);
+    }
+
+    private function handleFeedsGet(array $fragments, array $params): void
+    {
+        // GET /feeds/list - get paginated feed list
+        if (($fragments[1] ?? '') === 'list') {
+            Response::success($this->feedHandler->formatGetFeedList($params));
+            return;
+        }
+
+        // GET /feeds/articles - get articles for a feed
+        if (($fragments[1] ?? '') === 'articles') {
+            Response::success($this->feedHandler->formatGetArticles($params));
+            return;
+        }
+
+        // GET /feeds/{id} - get single feed
+        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
+            Response::success($this->feedHandler->formatGetFeed((int)$fragments[1]));
+            return;
+        }
+
+        Response::error('Expected "list", "articles", or feed ID', 404);
     }
 
     // =========================================================================
@@ -611,9 +648,23 @@ class ApiV1
                 $this->handleTextsPut($fragments, $params);
                 break;
 
+            case 'feeds':
+                $this->handleFeedsPut($fragments, $params);
+                break;
+
             default:
                 Response::error('Endpoint Not Found On PUT: ' . $fragments[0], 404);
         }
+    }
+
+    private function handleFeedsPut(array $fragments, array $params): void
+    {
+        if (!isset($fragments[1]) || !ctype_digit($fragments[1])) {
+            Response::error('Feed ID (Integer) Expected', 404);
+        }
+
+        $feedId = (int)$fragments[1];
+        Response::success($this->feedHandler->formatUpdateFeed($feedId, $params));
     }
 
     /**
@@ -746,9 +797,45 @@ class ApiV1
                 $this->handleTermsDelete($fragments);
                 break;
 
+            case 'feeds':
+                $this->handleFeedsDelete($fragments, $params);
+                break;
+
             default:
                 Response::error('Endpoint Not Found On DELETE: ' . $fragments[0], 404);
         }
+    }
+
+    private function handleFeedsDelete(array $fragments, array $params): void
+    {
+        // DELETE /feeds/articles/{feedId} - delete articles for a feed
+        if (($fragments[1] ?? '') === 'articles' && isset($fragments[2]) && ctype_digit($fragments[2])) {
+            $feedId = (int)$fragments[2];
+            $articleIds = $params['article_ids'] ?? [];
+            Response::success($this->feedHandler->formatDeleteArticles($feedId, $articleIds));
+            return;
+        }
+
+        // DELETE /feeds/{id}/reset-errors - reset error articles
+        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'reset-errors') {
+            Response::success($this->feedHandler->formatResetErrorArticles((int)$fragments[1]));
+            return;
+        }
+
+        // DELETE /feeds - bulk delete feeds (ids in body)
+        if (!isset($fragments[1]) || $fragments[1] === '') {
+            $feedIds = $params['feed_ids'] ?? [];
+            Response::success($this->feedHandler->formatDeleteFeeds($feedIds));
+            return;
+        }
+
+        // DELETE /feeds/{id} - delete single feed
+        if (ctype_digit($fragments[1])) {
+            Response::success($this->feedHandler->formatDeleteFeeds([(int)$fragments[1]]));
+            return;
+        }
+
+        Response::error('Expected feed ID or "articles/{feedId}"', 404);
     }
 
     /**

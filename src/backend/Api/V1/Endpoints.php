@@ -46,7 +46,10 @@ class Endpoints
         'texts/statistics' => ['GET'],
         'texts/by-language' => ['GET'],
         'texts/archived-by-language' => ['GET'],
-        'feeds' => ['POST'],
+        'feeds' => ['GET', 'POST', 'PUT', 'DELETE'],
+        'feeds/list' => ['GET'],
+        'feeds/articles' => ['GET'],
+        'feeds/articles/import' => ['POST'],
         'version' => ['GET'],
     ];
 

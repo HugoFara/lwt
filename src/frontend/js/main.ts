@@ -99,6 +99,11 @@ import './feeds/components/feed_wizard_step2';
 import './feeds/components/feed_wizard_step3';
 import './feeds/components/feed_wizard_step4';
 
+// Feed Manager - Alpine.js SPA
+import './feeds/stores/feed_manager_store';
+import './feeds/feed_manager_app';
+import './api/feeds';
+
 // Feed Wizard - Legacy XPath selection (still needed for core functionality)
 import './feeds/jq_feedwizard';
 

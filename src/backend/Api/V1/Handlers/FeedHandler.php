@@ -178,4 +178,595 @@ class FeedHandler
     {
         return $this->loadFeed($name, $feedId, $sourceUri, $options);
     }
+
+    // =========================================================================
+    // SPA API Methods
+    // =========================================================================
+
+    /**
+     * Get list of feeds with pagination and filtering.
+     *
+     * @param array $params Filter parameters:
+     *                      - lang: int|null (language ID filter)
+     *                      - query: string|null (search query)
+     *                      - page: int (default 1)
+     *                      - per_page: int (default 50)
+     *                      - sort: int (1=name, 2=update desc, 3=update asc)
+     *
+     * @return array{feeds: array, pagination: array, languages: array}
+     */
+    public function getFeedList(array $params): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        $page = max(1, (int)($params['page'] ?? 1));
+        $perPage = max(1, min(100, (int)($params['per_page'] ?? 50)));
+        $langId = isset($params['lang']) && $params['lang'] !== '' ? (int)$params['lang'] : null;
+        $query = $params['query'] ?? '';
+        $sort = max(1, min(3, (int)($params['sort'] ?? 2)));
+
+        // Build WHERE clause
+        $where = '1=1';
+        if ($langId !== null && $langId > 0) {
+            $where .= " AND NfLgID = $langId";
+        }
+        if (!empty($query)) {
+            $pattern = \Lwt\Database\Escaping::toSqlSyntax('%' . str_replace('*', '%', $query) . '%');
+            $where .= " AND NfName LIKE $pattern";
+        }
+
+        // Count total
+        $total = (int)Connection::fetchValue(
+            "SELECT COUNT(*) AS value FROM {$tbpref}newsfeeds WHERE $where"
+        );
+
+        // Calculate pagination
+        $totalPages = (int)ceil($total / $perPage);
+        if ($page > $totalPages && $totalPages > 0) {
+            $page = $totalPages;
+        }
+        $offset = ($page - 1) * $perPage;
+
+        // Sort order
+        $sorts = ['NfName ASC', 'NfUpdate DESC', 'NfUpdate ASC'];
+        $orderBy = $sorts[$sort - 1] ?? 'NfUpdate DESC';
+
+        // Get feeds with language names and article counts
+        $sql = "SELECT nf.*, lg.LgName,
+                       (SELECT COUNT(*) FROM {$tbpref}feedlinks WHERE FlNfID = NfID) AS articleCount
+                FROM {$tbpref}newsfeeds nf
+                LEFT JOIN {$tbpref}languages lg ON lg.LgID = nf.NfLgID
+                WHERE $where
+                ORDER BY $orderBy
+                LIMIT $offset, $perPage";
+
+        $feeds = [];
+        $result = Connection::query($sql);
+        while ($row = mysqli_fetch_assoc($result)) {
+            $feeds[] = $this->formatFeedRecord($row);
+        }
+        mysqli_free_result($result);
+
+        // Get languages for filter dropdown
+        $languages = $this->getLanguagesForSelect();
+
+        return [
+            'feeds' => $feeds,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => $totalPages
+            ],
+            'languages' => $languages
+        ];
+    }
+
+    /**
+     * Format a feed record for API response.
+     *
+     * @param array $row Database record
+     *
+     * @return array Formatted feed data
+     */
+    private function formatFeedRecord(array $row): array
+    {
+        $options = $this->feedService->getNfOption((string)$row['NfOptions'], 'all');
+        $updateTimestamp = (int)$row['NfUpdate'];
+        $lastUpdate = $updateTimestamp > 0
+            ? $this->feedService->formatLastUpdate(time() - $updateTimestamp)
+            : 'never';
+
+        return [
+            'id' => (int)$row['NfID'],
+            'name' => (string)$row['NfName'],
+            'sourceUri' => (string)$row['NfSourceURI'],
+            'langId' => (int)$row['NfLgID'],
+            'langName' => (string)($row['LgName'] ?? ''),
+            'articleSectionTags' => (string)$row['NfArticleSectionTags'],
+            'filterTags' => (string)$row['NfFilterTags'],
+            'options' => is_array($options) ? $options : [],
+            'optionsString' => (string)$row['NfOptions'],
+            'updateTimestamp' => $updateTimestamp,
+            'lastUpdate' => $lastUpdate,
+            'articleCount' => (int)($row['articleCount'] ?? 0)
+        ];
+    }
+
+    /**
+     * Get languages for filter dropdown.
+     *
+     * @return array Array of language options
+     */
+    private function getLanguagesForSelect(): array
+    {
+        $tbpref = Globals::getTablePrefix();
+        $languages = [];
+
+        $result = Connection::query(
+            "SELECT LgID, LgName FROM {$tbpref}languages ORDER BY LgName"
+        );
+        while ($row = mysqli_fetch_assoc($result)) {
+            $languages[] = [
+                'id' => (int)$row['LgID'],
+                'name' => (string)$row['LgName']
+            ];
+        }
+        mysqli_free_result($result);
+
+        return $languages;
+    }
+
+    /**
+     * Get a single feed by ID.
+     *
+     * @param int $feedId Feed ID
+     *
+     * @return array Feed data or error
+     */
+    public function getFeed(int $feedId): array
+    {
+        $feed = $this->feedService->getFeedById($feedId);
+        if ($feed === null) {
+            return ['error' => 'Feed not found'];
+        }
+
+        $feed['LgName'] = '';
+        $feed['articleCount'] = 0;
+
+        // Get language name
+        $tbpref = Globals::getTablePrefix();
+        $langResult = Connection::preparedFetchOne(
+            "SELECT LgName FROM {$tbpref}languages WHERE LgID = ?",
+            [(int)$feed['NfLgID']]
+        );
+        if ($langResult) {
+            $feed['LgName'] = $langResult['LgName'];
+        }
+
+        // Get article count
+        $countResult = Connection::preparedFetchOne(
+            "SELECT COUNT(*) AS cnt FROM {$tbpref}feedlinks WHERE FlNfID = ?",
+            [$feedId]
+        );
+        if ($countResult) {
+            $feed['articleCount'] = (int)$countResult['cnt'];
+        }
+
+        return $this->formatFeedRecord($feed);
+    }
+
+    /**
+     * Create a new feed.
+     *
+     * @param array $data Feed data
+     *
+     * @return array{success: bool, feed?: array, error?: string}
+     */
+    public function createFeed(array $data): array
+    {
+        $langId = (int)($data['langId'] ?? 0);
+        $name = trim($data['name'] ?? '');
+        $sourceUri = trim($data['sourceUri'] ?? '');
+
+        if ($langId <= 0) {
+            return ['success' => false, 'error' => 'Language is required'];
+        }
+        if (empty($name)) {
+            return ['success' => false, 'error' => 'Feed name is required'];
+        }
+        if (empty($sourceUri)) {
+            return ['success' => false, 'error' => 'Source URI is required'];
+        }
+
+        $feedId = $this->feedService->createFeed([
+            'NfLgID' => $langId,
+            'NfName' => $name,
+            'NfSourceURI' => $sourceUri,
+            'NfArticleSectionTags' => $data['articleSectionTags'] ?? '',
+            'NfFilterTags' => $data['filterTags'] ?? '',
+            'NfOptions' => $data['options'] ?? ''
+        ]);
+
+        return [
+            'success' => true,
+            'feed' => $this->getFeed($feedId)
+        ];
+    }
+
+    /**
+     * Update an existing feed.
+     *
+     * @param int   $feedId Feed ID
+     * @param array $data   Feed data
+     *
+     * @return array{success: bool, feed?: array, error?: string}
+     */
+    public function updateFeed(int $feedId, array $data): array
+    {
+        $existing = $this->feedService->getFeedById($feedId);
+        if ($existing === null) {
+            return ['success' => false, 'error' => 'Feed not found'];
+        }
+
+        $this->feedService->updateFeed($feedId, [
+            'NfLgID' => $data['langId'] ?? $existing['NfLgID'],
+            'NfName' => $data['name'] ?? $existing['NfName'],
+            'NfSourceURI' => $data['sourceUri'] ?? $existing['NfSourceURI'],
+            'NfArticleSectionTags' => $data['articleSectionTags'] ?? $existing['NfArticleSectionTags'],
+            'NfFilterTags' => $data['filterTags'] ?? $existing['NfFilterTags'],
+            'NfOptions' => $data['options'] ?? $existing['NfOptions']
+        ]);
+
+        return [
+            'success' => true,
+            'feed' => $this->getFeed($feedId)
+        ];
+    }
+
+    /**
+     * Delete feeds.
+     *
+     * @param array $feedIds Array of feed IDs to delete
+     *
+     * @return array{success: bool, deleted: int}
+     */
+    public function deleteFeeds(array $feedIds): array
+    {
+        if (empty($feedIds)) {
+            return ['success' => false, 'deleted' => 0];
+        }
+
+        $ids = implode(',', array_map('intval', $feedIds));
+        $result = $this->feedService->deleteFeeds($ids);
+
+        return [
+            'success' => true,
+            'deleted' => $result['feeds']
+        ];
+    }
+
+    /**
+     * Get articles for a feed.
+     *
+     * @param array $params Parameters:
+     *                      - feed_id: int (required)
+     *                      - query: string (search)
+     *                      - page: int
+     *                      - per_page: int
+     *                      - sort: int (1=date desc, 2=date asc, 3=title)
+     *
+     * @return array{articles?: array, pagination?: array, feed?: array, error?: string}
+     */
+    public function getArticles(array $params): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        $feedId = (int)($params['feed_id'] ?? 0);
+        if ($feedId <= 0) {
+            return ['error' => 'Feed ID is required'];
+        }
+
+        $page = max(1, (int)($params['page'] ?? 1));
+        $perPage = max(1, min(100, (int)($params['per_page'] ?? 50)));
+        $query = $params['query'] ?? '';
+        $sort = max(1, min(3, (int)($params['sort'] ?? 1)));
+
+        // Get feed info
+        $feed = $this->feedService->getFeedById($feedId);
+        if ($feed === null) {
+            return ['error' => 'Feed not found'];
+        }
+
+        // Build WHERE clause
+        $where = "FlNfID = $feedId";
+        if (!empty($query)) {
+            $pattern = \Lwt\Database\Escaping::toSqlSyntax('%' . str_replace('*', '%', $query) . '%');
+            $where .= " AND (FlTitle LIKE $pattern OR FlDescription LIKE $pattern)";
+        }
+
+        // Count total
+        $total = (int)Connection::fetchValue(
+            "SELECT COUNT(*) AS value FROM {$tbpref}feedlinks WHERE $where"
+        );
+
+        // Calculate pagination
+        $totalPages = (int)ceil($total / $perPage);
+        if ($page > $totalPages && $totalPages > 0) {
+            $page = $totalPages;
+        }
+        $offset = ($page - 1) * $perPage;
+
+        // Sort order
+        $sorts = ['FlDate DESC', 'FlDate ASC', 'FlTitle ASC'];
+        $orderBy = $sorts[$sort - 1] ?? 'FlDate DESC';
+
+        // Get articles with import status
+        $sql = "SELECT fl.*, tx.TxID, at.AtID
+                FROM {$tbpref}feedlinks fl
+                LEFT JOIN {$tbpref}texts tx ON tx.TxSourceURI = TRIM(fl.FlLink)
+                LEFT JOIN {$tbpref}archivedtexts at ON at.AtSourceURI = TRIM(fl.FlLink)
+                WHERE $where
+                ORDER BY $orderBy
+                LIMIT $offset, $perPage";
+
+        $articles = [];
+        $result = Connection::query($sql);
+        while ($row = mysqli_fetch_assoc($result)) {
+            $articles[] = $this->formatArticleRecord($row);
+        }
+        mysqli_free_result($result);
+
+        return [
+            'articles' => $articles,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => $totalPages
+            ],
+            'feed' => [
+                'id' => (int)$feed['NfID'],
+                'name' => (string)$feed['NfName'],
+                'langId' => (int)$feed['NfLgID']
+            ]
+        ];
+    }
+
+    /**
+     * Format an article record for API response.
+     *
+     * @param array $row Database record
+     *
+     * @return array Formatted article data
+     */
+    private function formatArticleRecord(array $row): array
+    {
+        $status = 'new';
+        if (!empty($row['TxID'])) {
+            $status = 'imported';
+        } elseif (!empty($row['AtID'])) {
+            $status = 'archived';
+        } elseif (str_starts_with((string)$row['FlLink'], ' ')) {
+            $status = 'error';
+        }
+
+        $textId = isset($row['TxID']) && $row['TxID'] !== null && $row['TxID'] !== ''
+            ? (int)$row['TxID'] : null;
+        $archivedTextId = isset($row['AtID']) && $row['AtID'] !== null && $row['AtID'] !== ''
+            ? (int)$row['AtID'] : null;
+
+        return [
+            'id' => (int)$row['FlID'],
+            'title' => (string)$row['FlTitle'],
+            'link' => trim((string)$row['FlLink']),
+            'description' => (string)$row['FlDescription'],
+            'date' => (string)$row['FlDate'],
+            'audio' => (string)$row['FlAudio'],
+            'hasText' => !empty($row['FlText']),
+            'status' => $status,
+            'textId' => $textId,
+            'archivedTextId' => $archivedTextId
+        ];
+    }
+
+    /**
+     * Delete articles.
+     *
+     * @param int   $feedId Feed ID
+     * @param array $articleIds Article IDs to delete (empty = all)
+     *
+     * @return array{success: bool, deleted: int}
+     */
+    public function deleteArticles(int $feedId, array $articleIds = []): array
+    {
+        $tbpref = Globals::getTablePrefix();
+
+        if (empty($articleIds)) {
+            // Delete all articles for feed
+            $deleted = $this->feedService->deleteArticles((string)$feedId);
+        } else {
+            // Delete specific articles
+            $ids = array_map('intval', $articleIds);
+            $deleted = QueryBuilder::table('feedlinks')
+                ->whereIn('FlID', $ids)
+                ->whereIn('FlNfID', [$feedId])
+                ->delete();
+        }
+
+        return [
+            'success' => true,
+            'deleted' => $deleted
+        ];
+    }
+
+    /**
+     * Import articles as texts.
+     *
+     * @param array $data Import data:
+     *                    - article_ids: array of article IDs
+     *
+     * @return array{success: bool, imported: int, errors: array}
+     */
+    public function importArticles(array $data): array
+    {
+        $articleIds = $data['article_ids'] ?? [];
+        if (empty($articleIds)) {
+            return ['success' => false, 'imported' => 0, 'errors' => ['No articles selected']];
+        }
+
+        $ids = implode(',', array_map('intval', $articleIds));
+        $feedLinks = $this->feedService->getMarkedFeedLinks($ids);
+
+        $imported = 0;
+        $errors = [];
+
+        foreach ($feedLinks as $row) {
+            $nfOptions = $row['NfOptions'] ?? '';
+            $nfName = (string)$row['NfName'];
+
+            $tagName = $this->feedService->getNfOption($nfOptions, 'tag');
+            if (!$tagName) {
+                $tagName = mb_substr($nfName, 0, 20, 'utf-8');
+            }
+
+            $maxTexts = (int)$this->feedService->getNfOption($nfOptions, 'max_texts');
+            if (!$maxTexts) {
+                $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
+            }
+
+            $doc = [[
+                'link' => empty($row['FlLink']) ? ('#' . $row['FlID']) : $row['FlLink'],
+                'title' => $row['FlTitle'],
+                'audio' => $row['FlAudio'],
+                'text' => $row['FlText']
+            ]];
+
+            $texts = $this->feedService->extractTextFromArticle(
+                $doc,
+                $row['NfArticleSectionTags'],
+                $row['NfFilterTags'],
+                $this->feedService->getNfOption($nfOptions, 'charset')
+            );
+
+            if (isset($texts['error'])) {
+                $errors[] = $texts['error']['message'];
+                foreach ($texts['error']['link'] as $errLink) {
+                    $this->feedService->markLinkAsError($errLink);
+                }
+                unset($texts['error']);
+            }
+
+            foreach ($texts as $text) {
+                $this->feedService->createTextFromFeed([
+                    'TxLgID' => $row['NfLgID'],
+                    'TxTitle' => $text['TxTitle'],
+                    'TxText' => $text['TxText'],
+                    'TxAudioURI' => $text['TxAudioURI'] ?? '',
+                    'TxSourceURI' => $text['TxSourceURI'] ?? ''
+                ], $tagName);
+                $imported++;
+            }
+
+            $this->feedService->archiveOldTexts($tagName, $maxTexts);
+        }
+
+        return [
+            'success' => true,
+            'imported' => $imported,
+            'errors' => $errors
+        ];
+    }
+
+    /**
+     * Reset error articles (remove leading space from links).
+     *
+     * @param int $feedId Feed ID
+     *
+     * @return array{success: bool, reset: int}
+     */
+    public function resetErrorArticles(int $feedId): array
+    {
+        $reset = $this->feedService->resetUnloadableArticles((string)$feedId);
+        return [
+            'success' => true,
+            'reset' => $reset
+        ];
+    }
+
+    // =========================================================================
+    // SPA API Response Formatters
+    // =========================================================================
+
+    /**
+     * Format response for getting feed list.
+     */
+    public function formatGetFeedList(array $params): array
+    {
+        return $this->getFeedList($params);
+    }
+
+    /**
+     * Format response for getting single feed.
+     */
+    public function formatGetFeed(int $feedId): array
+    {
+        return $this->getFeed($feedId);
+    }
+
+    /**
+     * Format response for creating feed.
+     */
+    public function formatCreateFeed(array $data): array
+    {
+        return $this->createFeed($data);
+    }
+
+    /**
+     * Format response for updating feed.
+     */
+    public function formatUpdateFeed(int $feedId, array $data): array
+    {
+        return $this->updateFeed($feedId, $data);
+    }
+
+    /**
+     * Format response for deleting feeds.
+     */
+    public function formatDeleteFeeds(array $feedIds): array
+    {
+        return $this->deleteFeeds($feedIds);
+    }
+
+    /**
+     * Format response for getting articles.
+     */
+    public function formatGetArticles(array $params): array
+    {
+        return $this->getArticles($params);
+    }
+
+    /**
+     * Format response for deleting articles.
+     */
+    public function formatDeleteArticles(int $feedId, array $articleIds = []): array
+    {
+        return $this->deleteArticles($feedId, $articleIds);
+    }
+
+    /**
+     * Format response for importing articles.
+     */
+    public function formatImportArticles(array $data): array
+    {
+        return $this->importArticles($data);
+    }
+
+    /**
+     * Format response for resetting error articles.
+     */
+    public function formatResetErrorArticles(int $feedId): array
+    {
+        return $this->resetErrorArticles($feedId);
+    }
 }
