@@ -10,7 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { createIcons, icons } from 'lucide';
-import type { LanguageChangedEvent } from '../core/language_settings';
+import type { LanguageChangedEvent, TextStats } from '../core/language_settings';
 
 const STORAGE_KEY = 'lwt_collapsed_menus';
 
@@ -20,6 +20,7 @@ interface LastTextInfo {
   language_id: number;
   language_name: string;
   annotated: boolean;
+  stats?: TextStats;
 }
 
 interface HomeWarningsConfig {

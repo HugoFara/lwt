@@ -19,6 +19,7 @@
 
 namespace Lwt\Views\Home;
 
+use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\SelectOptionsBuilder;
 
 use const Lwt\Core\LWT_APP_VERSION;
@@ -82,12 +83,32 @@ $currentTextInfo = $dashboardData['current_text_info'];
 // Prepare last text info for Alpine.js
 $lastTextInfo = null;
 if ($currentTextInfo !== null && $currenttext !== null) {
+    // Get text statistics
+    $textStatsService = new TextStatisticsService();
+    $textStats = $textStatsService->getTextWordCount((string)$currenttext);
+    $todoCount = $textStatsService->getTodoWordsCount($currenttext);
+
+    // Build statistics array with status counts (cast to int for JSON)
+    $stats = [
+        'unknown' => $todoCount,
+        's1' => (int)($textStats['statu'][$currenttext][1] ?? 0),
+        's2' => (int)($textStats['statu'][$currenttext][2] ?? 0),
+        's3' => (int)($textStats['statu'][$currenttext][3] ?? 0),
+        's4' => (int)($textStats['statu'][$currenttext][4] ?? 0),
+        's5' => (int)($textStats['statu'][$currenttext][5] ?? 0),
+        's98' => (int)($textStats['statu'][$currenttext][98] ?? 0),
+        's99' => (int)($textStats['statu'][$currenttext][99] ?? 0),
+    ];
+    $stats['total'] = $stats['unknown'] + $stats['s1'] + $stats['s2'] + $stats['s3']
+        + $stats['s4'] + $stats['s5'] + $stats['s98'] + $stats['s99'];
+
     $lastTextInfo = [
         'id' => $currenttext,
         'title' => $currentTextInfo['title'],
         'language_id' => $currentTextInfo['language_id'],
         'language_name' => $currentTextInfo['language_name'],
         'annotated' => $currentTextInfo['annotated'],
+        'stats' => $stats,
     ];
 }
 ?>
@@ -151,78 +172,111 @@ if ($currentTextInfo !== null && $currenttext !== null) {
     </div>
 </section>
 <?php elseif ($langcnt > 0): ?>
-<!-- Language selection and current text section -->
-<section class="section py-4 mb-5">
+<!-- Current text section -->
+<section class="section py-4 mb-4">
     <div class="container">
-        <div class="box has-background-link-light">
-            <div class="columns is-vcentered">
-                <!-- Language selector on the left -->
-                <div class="column is-narrow">
-                    <div class="field">
-                        <label class="label" for="filterlang">Language</label>
-                        <div class="control">
-                            <div class="select is-medium">
-                                <select id="filterlang" data-action="set-lang" data-ajax="true" data-redirect="/">
-                                    <?php echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Select...]'); ?>
-                                </select>
+        <!-- Language selector -->
+        <div class="field mb-4">
+            <label class="label" for="filterlang">Language</label>
+            <div class="control">
+                <div class="select is-medium">
+                    <select id="filterlang" data-action="set-lang" data-ajax="true" data-redirect="/">
+                        <?php echo SelectOptionsBuilder::forLanguages($languages, $currentlang, '[Select...]'); ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Text cards -->
+        <div class="columns">
+            <!-- Current text card -->
+            <div class="column is-narrow">
+                <template x-if="lastText">
+                    <div class="box has-background-link-light" style="width: 280px; min-height: 180px;">
+                        <p class="title is-5 mb-3" x-text="lastText.title"></p>
+                        <!-- Statistics bar - colors match word status highlights -->
+                        <div class="mb-3" x-show="lastText.stats && lastText.stats.total > 0" :title="'Unknown: ' + (lastText.stats?.unknown || 0) + ', Learning: ' + ((lastText.stats?.s1 || 0) + (lastText.stats?.s2 || 0) + (lastText.stats?.s3 || 0) + (lastText.stats?.s4 || 0)) + ', Learned: ' + (lastText.stats?.s5 || 0) + ', Well-known: ' + (lastText.stats?.s99 || 0) + ', Ignored: ' + (lastText.stats?.s98 || 0)">
+                            <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #ddd;">
+                                <div style="background: #5ABAFF;" :style="{ width: ((lastText.stats?.unknown || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
+                                <div style="background: #E85A3C;" :style="{ width: ((lastText.stats?.s1 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
+                                <div style="background: #E8893C;" :style="{ width: ((lastText.stats?.s2 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
+                                <div style="background: #E8B83C;" :style="{ width: ((lastText.stats?.s3 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
+                                <div style="background: #E8E23C;" :style="{ width: ((lastText.stats?.s4 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
+                                <div style="background: #66CC66;" :style="{ width: ((lastText.stats?.s5 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
+                                <div style="background: #CCFFCC;" :style="{ width: ((lastText.stats?.s99 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
+                                <div style="background: #888888;" :style="{ width: ((lastText.stats?.s98 || 0) / (lastText.stats?.total || 1) * 100) + '%' }"></div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Current text in the center -->
-                <div class="column">
-                    <template x-if="lastText">
-                        <div>
-                            <p class="title is-5 mb-2" x-text="lastText.title"></p>
-                            <div class="buttons">
-                                <a :href="'/text/read?start=' + lastText.id" class="button is-link">
-                                    <span class="icon"><i data-lucide="book-open"></i></span>
-                                    <span>Read</span>
-                                </a>
-                                <a :href="'/test?text=' + lastText.id" class="button is-info is-light">
-                                    <span class="icon"><i data-lucide="circle-help"></i></span>
-                                    <span>Test</span>
-                                </a>
-                                <a :href="'/text/print-plain?text=' + lastText.id" class="button is-light">
-                                    <span class="icon"><i data-lucide="printer"></i></span>
-                                    <span>Print</span>
-                                </a>
-                                <template x-if="lastText.annotated">
-                                    <a :href="'/text/print?text=' + lastText.id" class="button is-success is-light">
-                                        <span class="icon"><i data-lucide="check"></i></span>
-                                        <span>Ann. Text</span>
-                                    </a>
-                                </template>
-                            </div>
+                        <div class="buttons">
+                            <a :href="'/text/read?start=' + lastText.id" class="button is-link is-medium">
+                                <span class="icon"><i data-lucide="book-open"></i></span>
+                                <span>Read</span>
+                            </a>
+                            <a :href="'/test?text=' + lastText.id" class="button is-info is-light is-medium">
+                                <span class="icon"><i data-lucide="circle-help"></i></span>
+                                <span>Test</span>
+                            </a>
                         </div>
-                    </template>
-                    <template x-if="!lastText">
-                        <p class="has-text-grey-light is-italic">No text selected for this language</p>
-                    </template>
-                </div>
-
-                <!-- Language management buttons on the right -->
-                <div class="column is-narrow">
-                    <div class="buttons">
-                        <a href="/languages" class="button is-link is-light" title="Manage Languages">
-                            <span class="icon"><i data-lucide="settings"></i></span>
-                            <span>Manage</span>
-                        </a>
-                        <a href="/languages?new=1" class="button is-primary is-light" title="Add New Language">
-                            <span class="icon"><i data-lucide="plus"></i></span>
-                            <span>New</span>
-                        </a>
+                        <template x-if="lastText.annotated">
+                            <a :href="'/text/print?text=' + lastText.id" class="button is-success is-light is-small">
+                                <span class="icon"><i data-lucide="check"></i></span>
+                                <span>Ann. Text</span>
+                            </a>
+                        </template>
                     </div>
-                </div>
+                </template>
+                <template x-if="!lastText">
+                    <div class="box has-background-light" style="width: 280px; min-height: 180px;">
+                        <p class="has-text-grey is-italic">No text selected for this language</p>
+                    </div>
+                </template>
+            </div>
+
+            <!-- New text card -->
+            <div class="column is-narrow">
+                <a href="/text/new" class="box has-background-primary-light has-text-centered" style="width: 180px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <span class="icon is-large has-text-primary">
+                        <i data-lucide="plus" style="width: 48px; height: 48px;"></i>
+                    </span>
+                    <p class="mt-3 has-text-weight-semibold">New Text</p>
+                </a>
             </div>
         </div>
     </div>
 </section>
+
 <?php endif; ?>
 
 <!-- Main menu grid -->
 <div class="columns is-multiline is-centered home-menu-container">
+    <!-- Languages Card -->
+    <div class="column is-one-third-desktop is-half-tablet">
+        <div class="card menu menu-languages"
+             :class="{ 'collapsed': isCollapsed('languages') }">
+            <header class="card-header menu-header" @click="toggleMenu('languages')">
+                <p class="card-header-title">
+                    <span class="icon-text">
+                        <span class="icon"><i data-lucide="languages"></i></span>
+                        <span>Languages</span>
+                    </span>
+                </p>
+                <button class="card-header-icon" aria-label="toggle menu">
+                    <span class="icon"><i data-lucide="chevron-down"></i></span>
+                </button>
+            </header>
+            <div class="card-content menu-content">
+                <a href="/languages" class="button is-fullwidth is-link is-light mb-2" title="Manage Languages">
+                    <span class="icon"><i data-lucide="list"></i></span>
+                    <span>Manage Languages</span>
+                </a>
+                <a href="/languages?new=1" class="button is-fullwidth is-primary is-light" title="Add New Language">
+                    <span class="icon"><i data-lucide="plus"></i></span>
+                    <span>New Language</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Texts Card -->
     <div class="column is-one-third-desktop is-half-tablet">
         <div class="card menu menu-texts"

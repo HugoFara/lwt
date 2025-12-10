@@ -431,9 +431,12 @@ class ApiV1
     private function handleTextsGet(array $fragments, array $params): void
     {
         if (($fragments[1] ?? '') === 'statistics') {
-            Response::success($this->statisticsHandler->formatTextsStatistics(
-                $params["texts_id"]
-            ));
+            $textsId = $params["texts_id"] ?? $params["ids"] ?? null;
+            if ($textsId === null) {
+                Response::error('Missing required parameter: texts_id', 400);
+                return;
+            }
+            Response::success($this->statisticsHandler->formatTextsStatistics($textsId));
         } elseif (($fragments[1] ?? '') === 'by-language') {
             // GET /texts/by-language/{langId} - get paginated texts for a language
             if (!isset($fragments[2]) || !ctype_digit($fragments[2])) {

@@ -9,6 +9,21 @@
 import { loadModalFrame } from '../reading/frame_management';
 
 /**
+ * Statistics for a text showing word status counts.
+ */
+export interface TextStats {
+  unknown: number;
+  s1: number;
+  s2: number;
+  s3: number;
+  s4: number;
+  s5: number;
+  s98: number;
+  s99: number;
+  total: number;
+}
+
+/**
  * Response from the settings API when changing language.
  */
 export interface LanguageChangeResponse {
@@ -20,6 +35,7 @@ export interface LanguageChangeResponse {
     language_id: number;
     language_name: string;
     annotated: boolean;
+    stats?: TextStats;
   } | null;
 }
 

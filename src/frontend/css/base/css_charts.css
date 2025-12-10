@@ -61,44 +61,45 @@
   opacity: 0.9;
 }
 
+/* Status colors - matching word highlight colors from styles.css */
 .bc0
 {
-  background: #8bdadc;
+  background: #5ABAFF;
 }
 
 .bc1
 {
-  background: #f24e4e;
+  background: #E85A3C;
 }
 
 .bc2
 {
-  background: #ffac80;
+  background: #E8893C;
 }
 
 .bc3
 {
-  background: #ffe199;
+  background: #E8B83C;
 }
 
 .bc4
 {
-  background: #fffd77;
+  background: #E8E23C;
 }
 
 .bc5
 {
-  background: #9f9;
+  background: #66CC66;
 }
 
 .bc98
 {
-  background: #aaa;
+  background: #888888;
 }
 
 .bc99
 {
-  background: #999;
+  background: #CCFFCC;
 }
 
 .wc_cont

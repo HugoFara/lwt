@@ -4,6 +4,7 @@ namespace Lwt\Api\V1\Handlers;
 use Lwt\Database\Settings;
 use Lwt\Database\Connection;
 use Lwt\Core\Globals;
+use Lwt\Services\TextStatisticsService;
 
 /**
  * Handler for settings-related API operations.
@@ -90,12 +91,33 @@ class SettingsHandler
             "SELECT LgName AS value FROM {$tbpref}languages WHERE LgID = {$languageId}"
         );
 
+        $textId = (int)$textData['TxID'];
+
+        // Get text statistics
+        $textStatsService = new TextStatisticsService();
+        $textStats = $textStatsService->getTextWordCount((string)$textId);
+        $todoCount = $textStatsService->getTodoWordsCount($textId);
+
+        $stats = [
+            'unknown' => $todoCount,
+            's1' => (int)($textStats['statu'][$textId][1] ?? 0),
+            's2' => (int)($textStats['statu'][$textId][2] ?? 0),
+            's3' => (int)($textStats['statu'][$textId][3] ?? 0),
+            's4' => (int)($textStats['statu'][$textId][4] ?? 0),
+            's5' => (int)($textStats['statu'][$textId][5] ?? 0),
+            's98' => (int)($textStats['statu'][$textId][98] ?? 0),
+            's99' => (int)($textStats['statu'][$textId][99] ?? 0),
+        ];
+        $stats['total'] = $stats['unknown'] + $stats['s1'] + $stats['s2'] + $stats['s3']
+            + $stats['s4'] + $stats['s5'] + $stats['s98'] + $stats['s99'];
+
         return [
-            'id' => (int)$textData['TxID'],
+            'id' => $textId,
             'title' => $textData['TxTitle'],
             'language_id' => (int)$textData['TxLgID'],
             'language_name' => (string)$languageName,
-            'annotated' => (bool)$textData['annotated']
+            'annotated' => (bool)$textData['annotated'],
+            'stats' => $stats
         ];
     }
 
