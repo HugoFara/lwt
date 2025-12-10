@@ -29,9 +29,13 @@ require_once __DIR__ . '/../../../../src/backend/Services/ExportService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php';
 
+use Lwt\Core\StringUtils;
 use Lwt\Services\LanguageService;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\StatusHelper;
+
+use function Lwt\Core\Utils\remove_soft_hyphens;
+use function Lwt\Core\Utils\replace_supp_unicode_planes_char;
 
 /**
  * Unit tests for text processing functions.
@@ -372,7 +376,7 @@ class TextProcessingTest extends TestCase
 
     public function testGetFirstSepaReturnsString(): void
     {
-        $sepa = get_first_sepa();
+        $sepa = StringUtils::getFirstSeparator();
         $this->assertIsString($sepa);
         $this->assertNotEmpty($sepa);
         $this->assertEquals(1, mb_strlen($sepa, 'UTF-8'));
@@ -380,7 +384,7 @@ class TextProcessingTest extends TestCase
 
     public function testGetSepassReturnsString(): void
     {
-        $sepas = get_sepas();
+        $sepas = StringUtils::getSeparators();
         $this->assertIsString($sepas);
         $this->assertNotEmpty($sepas);
     }
@@ -515,12 +519,12 @@ class TextProcessingTest extends TestCase
     public function testStrToHex(): void
     {
         // strToHex returns UPPERCASE hex
-        $this->assertEquals('68656C6C6F', strToHex('hello'));
-        $this->assertEquals('776F726C64', strToHex('world'));
-        $this->assertEquals('', strToHex(''));
-        
+        $this->assertEquals('68656C6C6F', StringUtils::toHex('hello'));
+        $this->assertEquals('776F726C64', StringUtils::toHex('world'));
+        $this->assertEquals('', StringUtils::toHex(''));
+
         // Test with UTF-8
-        $hex = strToHex('你好');
+        $hex = StringUtils::toHex('你好');
         $this->assertIsString($hex);
         $this->assertNotEmpty($hex);
     }

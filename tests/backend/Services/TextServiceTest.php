@@ -26,7 +26,6 @@ require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
 class TextServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private TextService $service;
 
     public static function setUpBeforeClass(): void
@@ -45,7 +44,6 @@ class TextServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -694,7 +692,7 @@ class TextServiceTest extends TestCase
 
         // Need an existing language ID for this test
         $langId = (int) Connection::fetchValue(
-            "SELECT LgID AS value FROM " . self::$tbpref . "languages LIMIT 1"
+            "SELECT LgID AS value FROM " . Globals::table('languages') . " LIMIT 1"
         );
 
         if ($langId === 0) {

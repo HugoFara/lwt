@@ -30,7 +30,6 @@ require_once __DIR__ . '/../../../src/backend/Services/WordUploadService.php';
 class WordUploadTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private array $originalRequest;
     private array $originalServer;
@@ -54,25 +53,22 @@ class WordUploadTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            $tbpref = self::$tbpref;
-
             // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
-            Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::table('languages'));
+            Connection::query("ALTER TABLE " . Globals::table('languages') . " AUTO_INCREMENT = " . ((int)$maxId + 1));
 
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'WordUploadTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'WordUploadTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('WordUploadTestLang', 'http://test.com/###', '', 'http://translate.test/###', " .
@@ -91,18 +87,16 @@ class WordUploadTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
-
         // Clean up test words
-        Connection::query("DELETE FROM {$tbpref}wordtags WHERE WtWoID IN (SELECT WoID FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId . ")");
-        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId);
+        Connection::query("DELETE FROM " . Globals::table('wordtags') . " WHERE WtWoID IN (SELECT WoID FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId . ")");
+        Connection::query("DELETE FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId);
 
         // Clean up test language
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'WordUploadTestLang'");
+        Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'WordUploadTestLang'");
 
         // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
-        Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::table('languages'));
+        Connection::query("ALTER TABLE " . Globals::table('languages') . " AUTO_INCREMENT = " . ((int)$maxId + 1));
     }
 
     protected function setUp(): void
@@ -126,9 +120,8 @@ class WordUploadTest extends TestCase
         }
 
         // Clean up any test words from previous tests
-        $tbpref = self::$tbpref;
-        Connection::query("DELETE FROM {$tbpref}wordtags WHERE WtWoID IN (SELECT WoID FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId . ")");
-        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId);
+        Connection::query("DELETE FROM " . Globals::table('wordtags') . " WHERE WtWoID IN (SELECT WoID FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId . ")");
+        Connection::query("DELETE FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId);
     }
 
     protected function tearDown(): void
@@ -331,9 +324,8 @@ class WordUploadTest extends TestCase
         $service = new WordUploadService();
 
         // Insert a test word
-        $tbpref = self::$tbpref;
         Connection::query(
-            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
+            "INSERT INTO " . Globals::table('words') . " (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
             "VALUES (" . self::$testLangId . ", 'testword', 'testword', 1, 'test translation', NOW())"
         );
 
@@ -364,7 +356,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Get current timestamp from database to avoid timezone issues
         $beforeInsert = Connection::fetchValue(
@@ -373,7 +364,7 @@ class WordUploadTest extends TestCase
 
         // Insert test words
         Connection::query(
-            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) VALUES " .
+            "INSERT INTO " . Globals::table('words') . " (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) VALUES " .
             "(" . self::$testLangId . ", 'word1', 'word1', 1, 'trans1', NOW()), " .
             "(" . self::$testLangId . ", 'word2', 'word2', 1, 'trans2', NOW())"
         );
@@ -390,7 +381,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Get current timestamp from database to avoid timezone issues
         $beforeInsert = Connection::fetchValue(
@@ -399,7 +389,7 @@ class WordUploadTest extends TestCase
 
         // Insert test words
         Connection::query(
-            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoSentence, WoStatusChanged) VALUES " .
+            "INSERT INTO " . Globals::table('words') . " (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoSentence, WoStatusChanged) VALUES " .
             "(" . self::$testLangId . ", 'apple', 'apple', 1, 'pomme', 'I eat an {apple}.', NOW()), " .
             "(" . self::$testLangId . ", 'banana', 'banana', 2, 'banane', '', NOW())"
         );
@@ -427,7 +417,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with CSV content
         $content = "cat,chat\ndog,chien\nbird,oiseau";
@@ -452,14 +441,14 @@ class WordUploadTest extends TestCase
 
         // Verify words were imported
         $count = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId
+            "SELECT COUNT(*) AS value FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId
         );
 
         $this->assertEquals(3, $count);
 
         // Check specific word
         $word = Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'cat' AND WoLgID = " . self::$testLangId
+            "SELECT WoTranslation AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'cat' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('chat', $word);
     }
@@ -471,7 +460,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with header line
         $content = "Term,Translation\nhouse,maison\ncar,voiture";
@@ -494,14 +482,14 @@ class WordUploadTest extends TestCase
 
         // Should only import 2 rows (excluding header)
         $count = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId
+            "SELECT COUNT(*) AS value FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId
         );
 
         $this->assertEquals(2, $count);
 
         // Verify 'Term' was not imported as a word
         $termWord = Connection::fetchValue(
-            "SELECT WoID AS value FROM {$tbpref}words WHERE WoTextLC = 'term' AND WoLgID = " . self::$testLangId
+            "SELECT WoID AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'term' AND WoLgID = " . self::$testLangId
         );
         $this->assertNull($termWord);
     }
@@ -513,7 +501,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with hash-delimited content
         $content = "red#rouge\nblue#bleu";
@@ -536,7 +523,7 @@ class WordUploadTest extends TestCase
 
         // Verify words were imported
         $word = Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'red' AND WoLgID = " . self::$testLangId
+            "SELECT WoTranslation AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'red' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('rouge', $word);
     }
@@ -564,7 +551,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with only whitespace
         $content = "\n\n  \n";
@@ -587,7 +573,7 @@ class WordUploadTest extends TestCase
 
         // Should not import any words
         $count = (int) Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId
+            "SELECT COUNT(*) AS value FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId
         );
 
         $this->assertEquals(0, $count);
@@ -600,7 +586,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Content where first line is complete but second line is incomplete
         // The import should skip or handle incomplete lines gracefully
@@ -624,13 +609,13 @@ class WordUploadTest extends TestCase
 
         // At minimum, the first word should be imported
         $word = Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'word1' AND WoLgID = " . self::$testLangId
+            "SELECT WoTranslation AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'word1' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('trans1', $word);
 
         // Second word should also be imported (with empty translation)
         $word2 = Connection::fetchValue(
-            "SELECT WoID AS value FROM {$tbpref}words WHERE WoTextLC = 'word2' AND WoLgID = " . self::$testLangId
+            "SELECT WoID AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'word2' AND WoLgID = " . self::$testLangId
         );
         $this->assertNotNull($word2);
     }
@@ -644,7 +629,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Test import with status 3
         $content = "hello,bonjour";
@@ -667,7 +651,7 @@ class WordUploadTest extends TestCase
 
         // Verify word has correct status
         $status = Connection::fetchValue(
-            "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoTextLC = 'hello' AND WoLgID = " . self::$testLangId
+            "SELECT WoStatus AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'hello' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('3', $status);
     }
@@ -681,7 +665,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with CSV content
         $content = "importcomplete1,translation1\nimportcomplete2,translation2";
@@ -707,10 +690,10 @@ class WordUploadTest extends TestCase
 
         // Verify words were imported
         $word1 = Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'importcomplete1' AND WoLgID = " . self::$testLangId
+            "SELECT WoTranslation AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'importcomplete1' AND WoLgID = " . self::$testLangId
         );
         $word2 = Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'importcomplete2' AND WoLgID = " . self::$testLangId
+            "SELECT WoTranslation AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'importcomplete2' AND WoLgID = " . self::$testLangId
         );
 
         $this->assertEquals('translation1', $word1);
@@ -724,11 +707,10 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // First, create a word
         Connection::query(
-            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
+            "INSERT INTO " . Globals::table('words') . " (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
             "VALUES (" . self::$testLangId . ", 'overwrite1', 'overwrite1', 1, 'original', NOW())"
         );
 
@@ -756,10 +738,10 @@ class WordUploadTest extends TestCase
 
         // Verify word was updated
         $translation = Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'overwrite1' AND WoLgID = " . self::$testLangId
+            "SELECT WoTranslation AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'overwrite1' AND WoLgID = " . self::$testLangId
         );
         $status = Connection::fetchValue(
-            "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoTextLC = 'overwrite1' AND WoLgID = " . self::$testLangId
+            "SELECT WoStatus AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'overwrite1' AND WoLgID = " . self::$testLangId
         );
 
         $this->assertEquals('updated', $translation);
@@ -773,11 +755,10 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a word with * translation (empty)
         Connection::query(
-            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
+            "INSERT INTO " . Globals::table('words') . " (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
             "VALUES (" . self::$testLangId . ", 'fillgap1', 'fillgap1', 1, '*', NOW())"
         );
 
@@ -805,7 +786,7 @@ class WordUploadTest extends TestCase
 
         // Verify translation was filled
         $translation = Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'fillgap1' AND WoLgID = " . self::$testLangId
+            "SELECT WoTranslation AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'fillgap1' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('filled translation', $translation);
     }
@@ -817,11 +798,10 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create existing word
         Connection::query(
-            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
+            "INSERT INTO " . Globals::table('words') . " (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoStatusChanged) " .
             "VALUES (" . self::$testLangId . ", 'noNewWord1', 'nonewword1', 1, 'original', NOW())"
         );
 
@@ -849,13 +829,13 @@ class WordUploadTest extends TestCase
 
         // Verify existing word was updated
         $translation = Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'nonewword1' AND WoLgID = " . self::$testLangId
+            "SELECT WoTranslation AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'nonewword1' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('updatedTrans', $translation);
 
         // Verify new word was NOT imported
         $newWord = Connection::fetchValue(
-            "SELECT WoID AS value FROM {$tbpref}words WHERE WoTextLC = 'brandnewword' AND WoLgID = " . self::$testLangId
+            "SELECT WoID AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'brandnewword' AND WoLgID = " . self::$testLangId
         );
         $this->assertNull($newWord);
     }
@@ -867,7 +847,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with tags column
         $content = "taggedword1,translation,tag1 tag2";
@@ -893,16 +872,16 @@ class WordUploadTest extends TestCase
 
         // Verify word was imported
         $wordId = Connection::fetchValue(
-            "SELECT WoID AS value FROM {$tbpref}words WHERE WoTextLC = 'taggedword1' AND WoLgID = " . self::$testLangId
+            "SELECT WoID AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'taggedword1' AND WoLgID = " . self::$testLangId
         );
         $this->assertNotNull($wordId);
 
         // Verify tags were created
         $tag1 = Connection::fetchValue(
-            "SELECT TgID AS value FROM {$tbpref}tags WHERE TgText = 'tag1'"
+            "SELECT TgID AS value FROM " . Globals::table('tags') . " WHERE TgText = 'tag1'"
         );
         $tag2 = Connection::fetchValue(
-            "SELECT TgID AS value FROM {$tbpref}tags WHERE TgText = 'tag2'"
+            "SELECT TgID AS value FROM " . Globals::table('tags') . " WHERE TgText = 'tag2'"
         );
         $this->assertNotNull($tag1);
         $this->assertNotNull($tag2);
@@ -917,7 +896,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with tags only
         $content = "onlytag1 onlytag2\nonlytag3";
@@ -931,10 +909,10 @@ class WordUploadTest extends TestCase
 
         // Verify tags were created
         $tag1 = Connection::fetchValue(
-            "SELECT TgID AS value FROM {$tbpref}tags WHERE TgText = 'onlytag1'"
+            "SELECT TgID AS value FROM " . Globals::table('tags') . " WHERE TgText = 'onlytag1'"
         );
         $tag3 = Connection::fetchValue(
-            "SELECT TgID AS value FROM {$tbpref}tags WHERE TgText = 'onlytag3'"
+            "SELECT TgID AS value FROM " . Globals::table('tags') . " WHERE TgText = 'onlytag3'"
         );
         $this->assertNotNull($tag1);
         $this->assertNotNull($tag3);
@@ -949,11 +927,10 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Insert a test word
         Connection::query(
-            "INSERT INTO {$tbpref}words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoWordCount, WoStatusChanged) " .
+            "INSERT INTO " . Globals::table('words') . " (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoWordCount, WoStatusChanged) " .
             "VALUES (" . self::$testLangId . ", 'linktest', 'linktest', 1, 'link translation', 1, NOW())"
         );
 
@@ -987,7 +964,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with TAB-delimited content
         $content = "tabword1\ttabtrans1\ntabword2\ttabtrans2";
@@ -1010,7 +986,7 @@ class WordUploadTest extends TestCase
 
         // Verify words were imported
         $word1 = Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'tabword1' AND WoLgID = " . self::$testLangId
+            "SELECT WoTranslation AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'tabword1' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('tabtrans1', $word1);
     }
@@ -1022,7 +998,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with romanization
         $content = "romanword,translation,romanization";
@@ -1045,7 +1020,7 @@ class WordUploadTest extends TestCase
 
         // Verify word was imported with romanization
         $roman = Connection::fetchValue(
-            "SELECT WoRomanization AS value FROM {$tbpref}words WHERE WoTextLC = 'romanword' AND WoLgID = " . self::$testLangId
+            "SELECT WoRomanization AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'romanword' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('romanization', $roman);
     }
@@ -1057,7 +1032,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with sentence
         $content = "sentword,translation,This is a {sentword} sentence.";
@@ -1080,7 +1054,7 @@ class WordUploadTest extends TestCase
 
         // Verify word was imported with sentence
         $sentence = Connection::fetchValue(
-            "SELECT WoSentence AS value FROM {$tbpref}words WHERE WoTextLC = 'sentword' AND WoLgID = " . self::$testLangId
+            "SELECT WoSentence AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'sentword' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('This is a {sentword} sentence.', $sentence);
     }
@@ -1092,7 +1066,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with all columns
         $content = "fullword,fulltrans,fullroman,This is a {fullword} sentence.,fulltag1 fulltag2";
@@ -1118,22 +1091,22 @@ class WordUploadTest extends TestCase
 
         // Verify word was imported with all fields
         $word = Connection::fetchValue(
-            "SELECT WoID AS value FROM {$tbpref}words WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
+            "SELECT WoID AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
         );
         $this->assertNotNull($word);
 
         $trans = Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
+            "SELECT WoTranslation AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('fulltrans', $trans);
 
         $roman = Connection::fetchValue(
-            "SELECT WoRomanization AS value FROM {$tbpref}words WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
+            "SELECT WoRomanization AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('fullroman', $roman);
 
         $sentence = Connection::fetchValue(
-            "SELECT WoSentence AS value FROM {$tbpref}words WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
+            "SELECT WoSentence AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'fullword' AND WoLgID = " . self::$testLangId
         );
         $this->assertEquals('This is a {fullword} sentence.', $sentence);
     }
@@ -1168,7 +1141,6 @@ class WordUploadTest extends TestCase
         }
 
         $service = new WordUploadService();
-        $tbpref = self::$tbpref;
 
         // Create a temp file with mixed case
         $content = "MixedCaseWord,translation";
@@ -1191,10 +1163,10 @@ class WordUploadTest extends TestCase
 
         // Verify WoText preserves case but WoTextLC is lowercase
         $text = Connection::fetchValue(
-            "SELECT WoText AS value FROM {$tbpref}words WHERE WoTextLC = 'mixedcaseword' AND WoLgID = " . self::$testLangId
+            "SELECT WoText AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'mixedcaseword' AND WoLgID = " . self::$testLangId
         );
         $textlc = Connection::fetchValue(
-            "SELECT WoTextLC AS value FROM {$tbpref}words WHERE WoTextLC = 'mixedcaseword' AND WoLgID = " . self::$testLangId
+            "SELECT WoTextLC AS value FROM " . Globals::table('words') . " WHERE WoTextLC = 'mixedcaseword' AND WoLgID = " . self::$testLangId
         );
 
         $this->assertEquals('MixedCaseWord', $text);

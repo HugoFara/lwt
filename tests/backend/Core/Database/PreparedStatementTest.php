@@ -26,7 +26,6 @@ use Lwt\Database\QueryBuilder;
 class PreparedStatementTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
 
     public static function setUpBeforeClass(): void
     {
@@ -44,7 +43,6 @@ class PreparedStatementTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -58,9 +56,9 @@ class PreparedStatementTest extends TestCase
 
     public function testPrepareCreatesStatement(): void
     {
-        $tbpref = self::$tbpref;
+        $table = Globals::table('languages');
         $stmt = Connection::prepare(
-            "SELECT LgID FROM {$tbpref}languages WHERE LgID = ?"
+            "SELECT LgID FROM {$table} WHERE LgID = ?"
         );
 
         $this->assertInstanceOf(PreparedStatement::class, $stmt);
@@ -68,11 +66,11 @@ class PreparedStatementTest extends TestCase
 
     public function testBindAndFetchOne(): void
     {
-        $tbpref = self::$tbpref;
+        $table = Globals::table('languages');
 
         // First, get an existing language ID
         $row = Connection::fetchOne(
-            "SELECT LgID FROM {$tbpref}languages LIMIT 1"
+            "SELECT LgID FROM {$table} LIMIT 1"
         );
 
         if ($row === null) {
@@ -83,7 +81,7 @@ class PreparedStatementTest extends TestCase
 
         // Test prepared statement fetch
         $result = Connection::preparedFetchOne(
-            "SELECT LgID, LgName FROM {$tbpref}languages WHERE LgID = ?",
+            "SELECT LgID, LgName FROM {$table} WHERE LgID = ?",
             [$langId]
         );
 
@@ -93,9 +91,9 @@ class PreparedStatementTest extends TestCase
 
     public function testPreparedFetchAll(): void
     {
-        $tbpref = self::$tbpref;
+        $table = Globals::table('languages');
         $results = Connection::preparedFetchAll(
-            "SELECT LgID FROM {$tbpref}languages WHERE LgID > ?",
+            "SELECT LgID FROM {$table} WHERE LgID > ?",
             [0]
         );
 
@@ -104,9 +102,9 @@ class PreparedStatementTest extends TestCase
 
     public function testPreparedFetchValue(): void
     {
-        $tbpref = self::$tbpref;
+        $table = Globals::table('languages');
         $count = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}languages WHERE LgID > ?",
+            "SELECT COUNT(*) AS value FROM {$table} WHERE LgID > ?",
             [0]
         );
 
@@ -115,10 +113,10 @@ class PreparedStatementTest extends TestCase
 
     public function testBindWithMultipleTypes(): void
     {
-        $tbpref = self::$tbpref;
+        $table = Globals::table('languages');
         // Test binding string and int types
         $stmt = Connection::prepare(
-            "SELECT LgID FROM {$tbpref}languages WHERE LgID = ? AND LgName != ?"
+            "SELECT LgID FROM {$table} WHERE LgID = ? AND LgName != ?"
         );
 
         $stmt->bind('is', 1, 'nonexistent');
@@ -129,9 +127,9 @@ class PreparedStatementTest extends TestCase
 
     public function testBindValues(): void
     {
-        $tbpref = self::$tbpref;
+        $table = Globals::table('languages');
         $stmt = Connection::prepare(
-            "SELECT LgID FROM {$tbpref}languages WHERE LgID = ? AND LgName != ?"
+            "SELECT LgID FROM {$table} WHERE LgID = ? AND LgName != ?"
         );
 
         // bindValues auto-detects types
@@ -196,10 +194,10 @@ class PreparedStatementTest extends TestCase
 
     public function testPreparedStatementWithNullValue(): void
     {
-        $tbpref = self::$tbpref;
+        $table = Globals::table('languages');
         // Test that null values are handled correctly
         $stmt = Connection::prepare(
-            "SELECT LgID FROM {$tbpref}languages WHERE LgID = ? OR ? IS NULL"
+            "SELECT LgID FROM {$table} WHERE LgID = ? OR ? IS NULL"
         );
 
         $stmt->bindValues([1, null]);
@@ -210,9 +208,9 @@ class PreparedStatementTest extends TestCase
 
     public function testPreparedStatementTypeInference(): void
     {
-        $tbpref = self::$tbpref;
+        $table = Globals::table('languages');
         $stmt = Connection::prepare(
-            "SELECT LgID FROM {$tbpref}languages WHERE LgID > ?"
+            "SELECT LgID FROM {$table} WHERE LgID > ?"
         );
 
         // Test that float is properly handled

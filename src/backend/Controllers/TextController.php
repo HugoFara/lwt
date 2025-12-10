@@ -456,7 +456,7 @@ class TextController extends BaseController
             // Check text only
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             $this->textService->checkText(
-                \remove_soft_hyphens($txText),
+                \Lwt\Core\Utils\remove_soft_hyphens($txText),
                 $txLgId
             );
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
@@ -512,7 +512,6 @@ class TextController extends BaseController
         $scrdir = $this->languageService->getScriptDirectionTag($text->lgid);
 
         include __DIR__ . '/../Views/Text/edit_form.php';
-        \Lwt\Text_From_Youtube\do_js();
     }
 
     /**

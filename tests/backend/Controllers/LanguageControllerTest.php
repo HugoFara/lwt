@@ -29,7 +29,6 @@ require_once __DIR__ . '/../../../src/backend/Controllers/LanguageController.php
 class LanguageControllerTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private array $originalRequest;
     private array $originalServer;
     private array $originalGet;
@@ -51,13 +50,12 @@ class LanguageControllerTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-            $tbpref = self::$tbpref;
-            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
-            Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+            $languagesTable = Globals::table('languages');
+            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$languagesTable}");
+            Connection::query("ALTER TABLE {$languagesTable} AUTO_INCREMENT = " . ((int)$maxId + 1));
         }
     }
 
@@ -89,13 +87,13 @@ class LanguageControllerTest extends TestCase
         }
 
         // Clean up test languages
-        $tbpref = self::$tbpref;
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'Test_%'");
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'TestLang%'");
+        $languagesTable = Globals::table('languages');
+        Connection::query("DELETE FROM {$languagesTable} WHERE LgName LIKE 'Test_%'");
+        Connection::query("DELETE FROM {$languagesTable} WHERE LgName LIKE 'TestLang%'");
 
         // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
-        Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$languagesTable}");
+        Connection::query("ALTER TABLE {$languagesTable} AUTO_INCREMENT = " . ((int)$maxId + 1));
     }
 
     /**
@@ -107,9 +105,9 @@ class LanguageControllerTest extends TestCase
      */
     private function createTestLanguage(string $name): int
     {
-        $tbpref = self::$tbpref;
+        $languagesTable = Globals::table('languages');
         Connection::query(
-            "INSERT INTO {$tbpref}languages (
+            "INSERT INTO {$languagesTable} (
                 LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
                 LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters,
                 LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization
@@ -277,11 +275,10 @@ class LanguageControllerTest extends TestCase
         $id = $this->createTestLanguage('TestLang_ControllerDelete');
 
         // Clean up any related data that might exist for this language
-        $tbpref = self::$tbpref;
-        Connection::query("DELETE FROM {$tbpref}texts WHERE TxLgID = $id");
-        Connection::query("DELETE FROM {$tbpref}archivedtexts WHERE AtLgID = $id");
-        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = $id");
-        Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfLgID = $id");
+        Connection::query("DELETE FROM " . Globals::table('texts') . " WHERE TxLgID = $id");
+        Connection::query("DELETE FROM " . Globals::table('archivedtexts') . " WHERE AtLgID = $id");
+        Connection::query("DELETE FROM " . Globals::table('words') . " WHERE WoLgID = $id");
+        Connection::query("DELETE FROM " . Globals::table('newsfeeds') . " WHERE NfLgID = $id");
 
         $service = new LanguageService();
 

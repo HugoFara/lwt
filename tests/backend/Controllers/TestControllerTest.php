@@ -29,7 +29,6 @@ require_once __DIR__ . '/../../../src/backend/Services/TestService.php';
 class TestControllerTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private array $originalServer;
     private array $originalGet;
     private array $originalPost;
@@ -52,7 +51,6 @@ class TestControllerTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -614,7 +612,7 @@ class TestControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT WoID, WoText, WoStatus FROM " . self::$tbpref . "words LIMIT 10";
+        $sql = "SELECT WoID, WoText, WoStatus FROM " . Globals::table('words') . " LIMIT 10";
         $result = Connection::query($sql);
 
         $this->assertInstanceOf(\mysqli_result::class, $result);
@@ -627,7 +625,7 @@ class TestControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT COUNT(*) AS value FROM " . self::$tbpref . "words WHERE WoStatus BETWEEN 1 AND 5";
+        $sql = "SELECT COUNT(*) AS value FROM " . Globals::table('words') . " WHERE WoStatus BETWEEN 1 AND 5";
         $result = Connection::fetchValue($sql);
 
         $this->assertIsNumeric($result);
@@ -640,7 +638,7 @@ class TestControllerTest extends TestCase
         }
 
         $sql = "SELECT LgID, LgName, LgTextSize, LgRegexpWordCharacters, LgRightToLeft
-                FROM " . self::$tbpref . "languages LIMIT 5";
+                FROM " . Globals::table('languages') . " LIMIT 5";
         $result = Connection::query($sql);
 
         $this->assertInstanceOf(\mysqli_result::class, $result);
@@ -730,7 +728,7 @@ class TestControllerTest extends TestCase
 
         // The method expects a subquery format like "(SELECT WoID FROM words) AS t"
         // Use proper subquery syntax
-        $subquery = "(SELECT WoID, WoLgID FROM " . self::$tbpref . "words WHERE WoLgID = 1 LIMIT 1) AS subq";
+        $subquery = "(SELECT WoID, WoLgID FROM " . Globals::table('words') . " WHERE WoLgID = 1 LIMIT 1) AS subq";
 
         $result = $service->validateTestSelection($subquery);
 

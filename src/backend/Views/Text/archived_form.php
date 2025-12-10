@@ -20,6 +20,7 @@
 
 namespace Lwt\Views\Text;
 
+use Lwt\Services\MediaService;
 use Lwt\View\Helper\IconHelper;
 
 /** @var int $textId */
@@ -191,7 +192,7 @@ use Lwt\View\Helper\IconHelper;
                                placeholder="Path to audio file or URL" />
                     </div>
                     <div class="control" id="mediaselect">
-                        <?php echo \selectmediapath('AtAudioURI'); ?>
+                        <?php echo (new MediaService())->getMediaPathSelector('AtAudioURI'); ?>
                     </div>
                 </div>
             </div>

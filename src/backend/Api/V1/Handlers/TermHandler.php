@@ -99,7 +99,7 @@ class TermHandler
             if (trim($oldtrans) == '' || trim($oldtrans) == '*') {
                 $oldtrans = $newTrans;
             } else {
-                $oldtrans .= ' ' . \get_first_sepa() . ' ' . $newTrans;
+                $oldtrans .= ' ' . StringUtils::getFirstSeparator() . ' ' . $newTrans;
             }
             Connection::preparedExecute(
                 "UPDATE {$tbpref}words SET WoTranslation = ? WHERE WoID = ?",
@@ -692,7 +692,7 @@ class TermHandler
             return [
                 'term_id' => $result['id'],
                 'term_lc' => $textLc,
-                'hex' => strToClassName($textLc)
+                'hex' => StringUtils::toClassName($textLc)
             ];
         } catch (\Exception $e) {
             return ['error' => $e->getMessage()];
@@ -852,7 +852,7 @@ class TermHandler
                 'id' => (int) $termData['WoID'],
                 'text' => (string) $termData['WoText'],
                 'textLc' => (string) $termData['WoTextLC'],
-                'hex' => strToClassName((string) $termData['WoTextLC']),
+                'hex' => StringUtils::toClassName((string) $termData['WoTextLC']),
                 'translation' => (string) $termData['WoTranslation'],
                 'romanization' => (string) $termData['WoRomanization'],
                 'sentence' => (string) $termData['WoSentence'],
@@ -899,7 +899,7 @@ class TermHandler
             'id' => null,
             'text' => $text,
             'textLc' => $textLc,
-            'hex' => strToClassName($textLc),
+            'hex' => StringUtils::toClassName($textLc),
             'translation' => '',
             'romanization' => '',
             'sentence' => $sentence ?? '',
@@ -1052,7 +1052,7 @@ class TermHandler
                 'id' => $wordId,
                 'text' => $wordText,
                 'textLc' => $textLc,
-                'hex' => strToClassName($textLc),
+                'hex' => StringUtils::toClassName($textLc),
                 'translation' => $translation === '*' ? '' : $translation,
                 'romanization' => $romanization,
                 'sentence' => $sentence,
@@ -1134,7 +1134,7 @@ class TermHandler
                 'id' => $termId,
                 'text' => (string) $existing['WoText'],
                 'textLc' => (string) $existing['WoTextLC'],
-                'hex' => strToClassName((string) $existing['WoTextLC']),
+                'hex' => StringUtils::toClassName((string) $existing['WoTextLC']),
                 'translation' => $translation === '*' ? '' : $translation,
                 'romanization' => $romanization,
                 'sentence' => $sentence,

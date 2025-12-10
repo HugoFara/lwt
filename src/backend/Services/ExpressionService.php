@@ -19,6 +19,7 @@ use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
+use Lwt\Services\TextParsingService;
 
 /**
  * Service class for multi-word expression handling.
@@ -55,7 +56,8 @@ class ExpressionService
         $db_to_mecab = tempnam(sys_get_temp_dir(), "{$this->tbpref}db_to_mecab");
         $mecab_args = " -F %m\\t%t\\t\\n -U %m\\t%t\\t\\n -E \\t\\n ";
 
-        $mecab = \get_mecab_path($mecab_args);
+        $parsingService = new TextParsingService();
+        $mecab = $parsingService->getMecabPath($mecab_args);
         $sql = "SELECT SeID, SeTxID, SeFirstPos, SeText FROM {$this->tbpref}sentences
         WHERE SeLgID = ? AND
         SeText LIKE ?";

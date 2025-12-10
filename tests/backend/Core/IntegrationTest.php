@@ -11,8 +11,10 @@ use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Restore;
 use Lwt\Database\Settings;
+use Lwt\Core\StringUtils;
 use Lwt\Services\DictionaryService;
 use Lwt\Services\LanguageService;
+use Lwt\Services\MediaService;
 use Lwt\Services\TableSetService;
 use Lwt\Services\TagService;
 use Lwt\View\Helper\FormHelper;
@@ -21,6 +23,8 @@ use Lwt\View\Helper\StatusHelper;
 use PHPUnit\Framework\TestCase;
 
 use function Lwt\Core\Utils\get_execution_time;
+use function Lwt\Core\Utils\remove_soft_hyphens;
+use function Lwt\Core\Utils\replace_supp_unicode_planes_char;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
@@ -186,23 +190,23 @@ class IntegrationTest extends TestCase
 
     public function testGetSepas(): void
     {
-        $sepas = get_sepas();
+        $sepas = StringUtils::getSeparators();
         $this->assertIsString($sepas);
         $this->assertNotEmpty($sepas);
 
         // Should return same value on subsequent calls (static)
-        $sepas2 = get_sepas();
+        $sepas2 = StringUtils::getSeparators();
         $this->assertEquals($sepas, $sepas2);
     }
 
     public function testGetFirstSepa(): void
     {
-        $sepa = get_first_sepa();
+        $sepa = StringUtils::getFirstSeparator();
         $this->assertIsString($sepa);
         $this->assertEquals(1, mb_strlen($sepa, 'UTF-8'));
 
         // Should return same value on subsequent calls (static)
-        $sepa2 = get_first_sepa();
+        $sepa2 = StringUtils::getFirstSeparator();
         $this->assertEquals($sepa, $sepa2);
     }
 
@@ -229,26 +233,26 @@ class IntegrationTest extends TestCase
     public function testStrToHex(): void
     {
         // strToHex returns UPPERCASE hex
-        $this->assertEquals('68656C6C6F', strToHex('hello'));
-        $this->assertEquals('776F726C64', strToHex('world'));
-        $this->assertEquals('', strToHex(''));
+        $this->assertEquals('68656C6C6F', StringUtils::toHex('hello'));
+        $this->assertEquals('776F726C64', StringUtils::toHex('world'));
+        $this->assertEquals('', StringUtils::toHex(''));
 
         // Test with UTF-8
-        $hex = strToHex('你好');
+        $hex = StringUtils::toHex('你好');
         $this->assertIsString($hex);
         $this->assertNotEmpty($hex);
     }
 
     public function testStrToClassName(): void
     {
-        $this->assertEquals('hello', strToClassName('hello'));
-        $this->assertEquals('test123', strToClassName('test123'));
+        $this->assertEquals('hello', StringUtils::toClassName('hello'));
+        $this->assertEquals('test123', StringUtils::toClassName('test123'));
 
         // Space (ASCII 32) is outside allowed range, converted to ¤20
-        $this->assertEquals('hello¤20world', strToClassName('hello world'));
+        $this->assertEquals('hello¤20world', StringUtils::toClassName('hello world'));
 
         // Non-ASCII should be converted to hex with ¤ prefix
-        $result = strToClassName('hello 世界');
+        $result = StringUtils::toClassName('hello 世界');
         $this->assertStringStartsWith('hello', $result);
         $this->assertStringContainsString('¤', $result);
     }
@@ -525,7 +529,7 @@ class IntegrationTest extends TestCase
 
     public function testGetFirstTranslation(): void
     {
-        $sepa = get_first_sepa();
+        $sepa = StringUtils::getFirstSeparator();
         $trans = "hello{$sepa}world{$sepa}test";
         $first = get_first_translation($trans);
         $this->assertEquals('hello', $first);
@@ -538,7 +542,8 @@ class IntegrationTest extends TestCase
 
     public function testGetMediaPaths(): void
     {
-        $paths = get_media_paths();
+        $mediaService = new MediaService();
+        $paths = $mediaService->getMediaPaths();
         $this->assertIsArray($paths);
     }
 
@@ -694,13 +699,14 @@ class IntegrationTest extends TestCase
 
     public function testSelectMediaPathExtended(): void
     {
+        $mediaService = new MediaService();
         // Test with non-existent path - returns HTML with select UI
-        $result = selectmediapath('nonexistent.mp3');
+        $result = $mediaService->getMediaPathSelector('nonexistent.mp3');
         $this->assertIsString($result);
         $this->assertStringContainsString('<select', $result);
 
         // Test with empty string - also returns HTML UI
-        $result = selectmediapath('');
+        $result = $mediaService->getMediaPathSelector('');
         $this->assertIsString($result);
         $this->assertStringContainsString('select', $result);
     }
@@ -778,15 +784,17 @@ class IntegrationTest extends TestCase
 
     public function testMediaPathsSearchExtended(): void
     {
+        $mediaService = new MediaService();
         // Test with a directory
-        $result = media_paths_search('.');
+        $result = $mediaService->searchMediaPaths('.');
         $this->assertIsArray($result);
     }
 
     public function testSelectMediaPathOptionsExtended(): void
     {
+        $mediaService = new MediaService();
         // Test with current directory
-        $result = selectmediapathoptions('.');
+        $result = $mediaService->getMediaPathOptions('.');
         $this->assertIsString($result);
         $this->assertStringContainsString('<option', $result);
     }

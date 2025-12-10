@@ -15,7 +15,6 @@ use PHPUnit\Framework\TestCase;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Core/Http/param_helpers.php';
@@ -64,6 +63,7 @@ class TextControllerImportLongTest extends TestCase
                 $config['socket'] ?? ''
             );
             Globals::setDbConnection($connection);
+            Globals::setDatabaseName($testDbname);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
         self::$tbpref = Globals::getTablePrefix();

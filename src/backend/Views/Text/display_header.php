@@ -26,6 +26,7 @@ namespace Lwt\Views\Text;
 // Variables injected from text_display_header.php:
 // $title, $audio, $sourceUri, $textLinks
 
+use Lwt\Services\MediaService;
 use Lwt\View\Helper\IconHelper;
 
 ?>
@@ -62,5 +63,5 @@ use Lwt\View\Helper\IconHelper;
     </div>
 </div>
 <?php
-\makeMediaPlayer($audio);
+MediaService::renderMediaPlayer($audio);
 ?>

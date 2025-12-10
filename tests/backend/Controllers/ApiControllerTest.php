@@ -28,7 +28,6 @@ require_once __DIR__ . '/../../../src/backend/Controllers/ApiController.php';
 class ApiControllerTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private array $originalServer;
     private array $originalGet;
     private array $originalPost;
@@ -51,7 +50,6 @@ class ApiControllerTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -409,7 +407,7 @@ class ApiControllerTest extends TestCase
         }
 
         $sql = "SELECT WoID, WoText, WoTextLC, WoTranslation, WoStatus
-                FROM " . self::$tbpref . "words LIMIT 10";
+                FROM " . Globals::table('words') . " LIMIT 10";
         $result = Connection::query($sql);
 
         $this->assertInstanceOf(\mysqli_result::class, $result);
@@ -423,7 +421,7 @@ class ApiControllerTest extends TestCase
         }
 
         $sql = "SELECT TxID, TxLgID, TxTitle, TxSourceURI
-                FROM " . self::$tbpref . "texts LIMIT 10";
+                FROM " . Globals::table('texts') . " LIMIT 10";
         $result = Connection::query($sql);
 
         $this->assertInstanceOf(\mysqli_result::class, $result);
@@ -437,7 +435,7 @@ class ApiControllerTest extends TestCase
         }
 
         $sql = "SELECT LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-                FROM " . self::$tbpref . "languages LIMIT 10";
+                FROM " . Globals::table('languages') . " LIMIT 10";
         $result = Connection::query($sql);
 
         $this->assertInstanceOf(\mysqli_result::class, $result);
@@ -450,7 +448,7 @@ class ApiControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT StKey, StValue FROM " . self::$tbpref . "settings LIMIT 10";
+        $sql = "SELECT StKey, StValue FROM " . Globals::table('settings') . " LIMIT 10";
         $result = Connection::query($sql);
 
         $this->assertInstanceOf(\mysqli_result::class, $result);

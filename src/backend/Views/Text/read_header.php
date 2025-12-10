@@ -27,6 +27,8 @@
 
 namespace Lwt\Views\Text;
 
+use Lwt\Services\MediaService;
+
 ?>
 <script type="application/json" id="text-header-config"><?php echo json_encode([
     'textId' => (int) $textId,
@@ -112,4 +114,4 @@ namespace Lwt\Views\Text;
     <div><button id="readTextButton">Read in browser</button></div>
 </div>
 
-<?php \makeMediaPlayer($media, (int) $audioPosition); ?>
+<?php MediaService::renderMediaPlayer($media, (int) $audioPosition); ?>

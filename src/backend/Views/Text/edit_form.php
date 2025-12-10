@@ -33,6 +33,7 @@ namespace Lwt\Views\Text;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
 use Lwt\View\Helper\PageLayoutHelper;
+use Lwt\Services\MediaService;
 
 // Build actions based on whether this is a new or existing text
 $actions = [];
@@ -256,7 +257,7 @@ if ($isNew) {
                                placeholder="Path to audio/video file or URL" />
                     </div>
                     <div class="control" id="mediaselect">
-                        <?php echo \selectmediapath('TxAudioURI'); ?>
+                        <?php echo MediaService::getMediaPathSelector('TxAudioURI'); ?>
                     </div>
                 </div>
             </div>
@@ -303,6 +304,3 @@ if ($isNew) {
         </div>
     </div>
 </form>
-<?php if ($isNew && defined('YT_API_KEY') && YT_API_KEY != null) {
-    \Lwt\Text_From_Youtube\do_js();
-} ?>

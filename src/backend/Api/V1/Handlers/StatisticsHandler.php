@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Services\TextStatisticsService;
+
 /**
  * Handler for statistics-related API operations.
  *
@@ -17,7 +19,8 @@ class StatisticsHandler
      */
     public function getTextsStatistics(string $textsId): array
     {
-        return \return_textwordcount($textsId);
+        $service = new TextStatisticsService();
+        return $service->getTextWordCount($textsId);
     }
 
     // =========================================================================

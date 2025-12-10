@@ -33,7 +33,6 @@ require_once __DIR__ . '/../../../src/backend/Services/WordService.php';
 class WordControllerTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private array $originalRequest;
     private array $originalServer;
@@ -56,25 +55,24 @@ class WordControllerTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            $tbpref = self::$tbpref;
+            $languagesTable = Globals::table('languages');
 
             // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
-            Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$languagesTable}");
+            Connection::query("ALTER TABLE {$languagesTable} AUTO_INCREMENT = " . ((int)$maxId + 1));
 
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'WordControllerTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM {$languagesTable} WHERE LgName = 'WordControllerTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO {$languagesTable} (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('WordControllerTestLang', 'http://test.com/###', '', 'http://translate.test/###', " .
@@ -93,14 +91,15 @@ class WordControllerTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $languagesTable = Globals::table('languages');
+        $wordsTable = Globals::table('words');
         // Clean up test words and language
-        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId);
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'WordControllerTestLang'");
+        Connection::query("DELETE FROM {$wordsTable} WHERE WoLgID = " . self::$testLangId);
+        Connection::query("DELETE FROM {$languagesTable} WHERE LgName = 'WordControllerTestLang'");
 
         // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
-        Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$languagesTable}");
+        Connection::query("ALTER TABLE {$languagesTable} AUTO_INCREMENT = " . ((int)$maxId + 1));
     }
 
     protected function setUp(): void
@@ -131,8 +130,8 @@ class WordControllerTest extends TestCase
         }
 
         // Clean up test words
-        $tbpref = self::$tbpref;
-        Connection::query("DELETE FROM {$tbpref}words WHERE WoText LIKE 'ctrl_test_%'");
+        $wordsTable = Globals::table('words');
+        Connection::query("DELETE FROM {$wordsTable} WHERE WoText LIKE 'ctrl_test_%'");
     }
 
     // ===== Constructor tests =====

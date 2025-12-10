@@ -29,7 +29,6 @@ require_once __DIR__ . '/../../../src/backend/Services/WordService.php';
 class WordServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private WordService $service;
 
@@ -49,20 +48,18 @@ class WordServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
-            $tbpref = self::$tbpref;
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'TestLanguage' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'TestLanguage' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('TestLanguage', 'http://test.com/###', '', 'http://translate.test/###', " .
@@ -81,9 +78,8 @@ class WordServiceTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
         // Clean up test words
-        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId);
+        Connection::query("DELETE FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId);
     }
 
     protected function setUp(): void
@@ -98,8 +94,7 @@ class WordServiceTest extends TestCase
         }
 
         // Clean up test words after each test
-        $tbpref = self::$tbpref;
-        Connection::query("DELETE FROM {$tbpref}words WHERE WoText LIKE 'test%'");
+        Connection::query("DELETE FROM " . Globals::table('words') . " WHERE WoText LIKE 'test%'");
     }
 
     // ===== create() tests =====

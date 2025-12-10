@@ -27,6 +27,7 @@ use Lwt\Database\TextParsing;
 use Lwt\Database\Validation;
 use Lwt\Services\TagService;
 use Lwt\Services\ExportService;
+use Lwt\Services\SentenceService;
 
 /**
  * Service class for managing texts (active and archived).
@@ -1330,7 +1331,7 @@ class TextService
         } else {
             $data = Escaping::prepareTextdata($uploadText);
         }
-        $data = \replace_supp_unicode_planes_char($data);
+        $data = \Lwt\Core\Utils\replace_supp_unicode_planes_char($data);
         $data = trim($data);
 
         // Use pilcrow symbol for paragraphs separation
@@ -1414,7 +1415,7 @@ class TextService
         $imported = 0;
         for ($i = 0; $i < $textCount; $i++) {
             $texts[$i] = $this->removeSoftHyphens($texts[$i]);
-            $counter = \makeCounterWithTotal($textCount, $i + 1);
+            $counter = \Lwt\Core\Utils\makeCounterWithTotal($textCount, $i + 1);
             $thisTitle = $title . ($counter == '' ? '' : (' (' . $counter . ')'));
 
             $affected = Connection::preparedExecute(
@@ -1564,9 +1565,10 @@ class TextService
 
         $records = Connection::preparedFetchAll($sql, $ids);
         $sentenceCount = (int) Settings::getWithDefault('set-term-sentence-count');
+        $sentenceService = new SentenceService();
 
         foreach ($records as $record) {
-            $sent = \getSentence(
+            $sent = $sentenceService->formatSentence(
                 $record['SeID'],
                 $record['WoTextLC'],
                 $sentenceCount
