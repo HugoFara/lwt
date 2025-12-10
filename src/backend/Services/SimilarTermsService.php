@@ -16,7 +16,6 @@ namespace Lwt\Services {
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\IconHelper;
 
@@ -327,12 +326,12 @@ class SimilarTermsService
 
         // Fetch words with their status for weighting
         $sql = "SELECT WoID, WoTextLC, WoStatus FROM {$this->tbpref}words
-        WHERE WoLgID = $langId
-        AND WoTextLC <> " . Escaping::toSqlSyntax($comparedTermLc);
-        $res = Connection::query($sql);
+        WHERE WoLgID = ?
+        AND WoTextLC <> ?";
+        $rows = Connection::prepare($sql)->bind('is', $langId, $comparedTermLc)->fetchAll();
 
         $termlsd = array();
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             // Calculate combined similarity (character pairs + phonetic)
             $baseSimilarity = $this->getCombinedSimilarityRanking(
                 $comparedTermLc,
@@ -350,7 +349,6 @@ class SimilarTermsService
                 $termlsd[(int)$record["WoID"]] = $weightedSimilarity;
             }
         }
-        mysqli_free_result($res);
 
         // Sort by weighted similarity descending
         arsort($termlsd, SORT_NUMERIC);
@@ -379,9 +377,9 @@ class SimilarTermsService
     public function formatTerm(int $termId, string $compare): string
     {
         $sql = "SELECT WoText, WoTranslation, WoRomanization
-        FROM {$this->tbpref}words WHERE WoID = $termId";
-        $res = Connection::query($sql);
-        if ($record = mysqli_fetch_assoc($res)) {
+        FROM {$this->tbpref}words WHERE WoID = ?";
+        $record = Connection::prepare($sql)->bind('i', $termId)->fetchOne();
+        if ($record) {
             $term = htmlspecialchars($record["WoText"] ?? '', ENT_QUOTES, 'UTF-8');
             if (stripos($compare, $term) !== false) {
                 $term = '<span class="red3">' . $term . '</span>';
@@ -412,10 +410,8 @@ class SimilarTermsService
             ]) . ' ' .
             $term . htmlspecialchars($romd, ENT_QUOTES, 'UTF-8') . ' — ' . htmlspecialchars($tra, ENT_QUOTES, 'UTF-8') .
             '<br />';
-            mysqli_free_result($res);
             return $output;
         }
-        mysqli_free_result($res);
         return "";
     }
 

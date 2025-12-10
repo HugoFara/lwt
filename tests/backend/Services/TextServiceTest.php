@@ -253,7 +253,7 @@ class TextServiceTest extends TestCase
     public function testBuildArchivedQueryWhereClauseReturnsEmptyForEmptyQuery(): void
     {
         $result = $this->service->buildArchivedQueryWhereClause('', 'title,text', '');
-        $this->assertEquals('', $result);
+        $this->assertEquals(['clause' => '', 'params' => []], $result);
     }
 
     public function testBuildArchivedQueryWhereClauseForTitleAndText(): void
@@ -263,9 +263,10 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->buildArchivedQueryWhereClause('test', 'title,text', '');
-        $this->assertStringContainsString('AtTitle', $result);
-        $this->assertStringContainsString('AtText', $result);
-        $this->assertStringContainsString('OR', $result);
+        $this->assertStringContainsString('AtTitle', $result['clause']);
+        $this->assertStringContainsString('AtText', $result['clause']);
+        $this->assertStringContainsString('OR', $result['clause']);
+        $this->assertEquals(['test', 'test'], $result['params']);
     }
 
     public function testBuildArchivedQueryWhereClauseForTitleOnly(): void
@@ -275,8 +276,9 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->buildArchivedQueryWhereClause('test', 'title', '');
-        $this->assertStringContainsString('AtTitle', $result);
-        $this->assertStringNotContainsString('AtText', $result);
+        $this->assertStringContainsString('AtTitle', $result['clause']);
+        $this->assertStringNotContainsString('AtText', $result['clause']);
+        $this->assertEquals(['test'], $result['params']);
     }
 
     public function testBuildArchivedQueryWhereClauseForTextOnly(): void
@@ -286,8 +288,9 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->buildArchivedQueryWhereClause('test', 'text', '');
-        $this->assertStringNotContainsString('AtTitle LIKE', $result);
-        $this->assertStringContainsString('AtText', $result);
+        $this->assertStringNotContainsString('AtTitle LIKE', $result['clause']);
+        $this->assertStringContainsString('AtText', $result['clause']);
+        $this->assertEquals(['test'], $result['params']);
     }
 
     // ===== buildArchivedTagHavingClause tests =====
@@ -330,7 +333,7 @@ class TextServiceTest extends TestCase
     public function testBuildTextQueryWhereClauseReturnsEmptyForEmptyQuery(): void
     {
         $result = $this->service->buildTextQueryWhereClause('', 'title,text', '');
-        $this->assertEquals('', $result);
+        $this->assertEquals(['clause' => '', 'params' => []], $result);
     }
 
     public function testBuildTextQueryWhereClauseForTitleAndText(): void
@@ -340,9 +343,10 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->buildTextQueryWhereClause('test', 'title,text', '');
-        $this->assertStringContainsString('TxTitle', $result);
-        $this->assertStringContainsString('TxText', $result);
-        $this->assertStringContainsString('OR', $result);
+        $this->assertStringContainsString('TxTitle', $result['clause']);
+        $this->assertStringContainsString('TxText', $result['clause']);
+        $this->assertStringContainsString('OR', $result['clause']);
+        $this->assertEquals(['test', 'test'], $result['params']);
     }
 
     public function testBuildTextQueryWhereClauseForTitleOnly(): void
@@ -352,8 +356,9 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->buildTextQueryWhereClause('test', 'title', '');
-        $this->assertStringContainsString('TxTitle', $result);
-        $this->assertStringNotContainsString('TxText', $result);
+        $this->assertStringContainsString('TxTitle', $result['clause']);
+        $this->assertStringNotContainsString('TxText', $result['clause']);
+        $this->assertEquals(['test'], $result['params']);
     }
 
     public function testBuildTextQueryWhereClauseForTextOnly(): void
@@ -363,8 +368,9 @@ class TextServiceTest extends TestCase
         }
 
         $result = $this->service->buildTextQueryWhereClause('test', 'text', '');
-        $this->assertStringNotContainsString('TxTitle LIKE', $result);
-        $this->assertStringContainsString('TxText', $result);
+        $this->assertStringNotContainsString('TxTitle LIKE', $result['clause']);
+        $this->assertStringContainsString('TxText', $result['clause']);
+        $this->assertEquals(['test'], $result['params']);
     }
 
     // ===== buildTextTagHavingClause tests =====

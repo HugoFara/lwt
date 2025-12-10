@@ -19,7 +19,6 @@ use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Http\UrlUtilities;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Maintenance;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\TextParsing;
@@ -73,10 +72,10 @@ class LanguageService
         }
 
         $tbpref = Globals::getTablePrefix();
-        $sql = "SELECT * FROM {$tbpref}languages WHERE LgID = $lid";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = Connection::preparedFetchOne(
+            "SELECT * FROM {$tbpref}languages WHERE LgID = ?",
+            [$lid]
+        );
 
         if (!$record) {
             return null;
@@ -170,8 +169,9 @@ class LanguageService
     public function exists(int $lid): bool
     {
         $tbpref = Globals::getTablePrefix();
-        $count = Connection::fetchValue(
-            "SELECT COUNT(*) as value FROM {$tbpref}languages WHERE LgID = $lid"
+        $count = Connection::preparedFetchValue(
+            "SELECT COUNT(*) as value FROM {$tbpref}languages WHERE LgID = ?",
+            [$lid]
         );
         return $count > 0;
     }
@@ -191,9 +191,9 @@ class LanguageService
             "SELECT MIN(LgID) AS value FROM {$tbpref}languages WHERE LgName=''"
         );
 
-        $sql = $this->buildLanguageSql($data, $val !== null ? (int)$val : null);
+        $sqlData = $this->buildLanguageSql($data, $val !== null ? (int)$val : null);
 
-        $affected = Connection::execute($sql);
+        $affected = Connection::preparedExecute($sqlData['sql'], $sqlData['params']);
         return "Saved: " . $affected;
     }
 
@@ -224,48 +224,71 @@ class LanguageService
     }
 
     /**
-     * Build SQL for inserting or updating a language.
+     * Convert empty strings to null (matches old Escaping::toSqlSyntax behavior).
+     *
+     * @param string|null $value Value to convert
+     *
+     * @return string|null Trimmed value or null if empty
+     */
+    private function emptyToNull(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+        $trimmed = trim($value);
+        return $trimmed === '' ? null : $trimmed;
+    }
+
+    /**
+     * Build SQL and parameters for inserting or updating a language.
      *
      * @param array    $data Language data
      * @param int|null $id   Language ID for update, null for insert
      *
-     * @return string SQL query
+     * @return array{sql: string, params: array} SQL query and parameters
      */
-    private function buildLanguageSql(array $data, ?int $id = null): string
+    private function buildLanguageSql(array $data, ?int $id = null): array
     {
         $tbpref = Globals::getTablePrefix();
 
-        $fields = [
-            'LgName' => Escaping::toSqlSyntax($data["LgName"]),
-            'LgDict1URI' => Escaping::toSqlSyntax($data["LgDict1URI"]),
-            'LgDict2URI' => Escaping::toSqlSyntax($data["LgDict2URI"]),
-            'LgGoogleTranslateURI' => Escaping::toSqlSyntax($data["LgGoogleTranslateURI"]),
-            'LgExportTemplate' => Escaping::toSqlSyntax($data["LgExportTemplate"]),
-            'LgTextSize' => Escaping::toSqlSyntax($data["LgTextSize"]),
-            'LgCharacterSubstitutions' => Escaping::toSqlSyntaxNoTrimNoNull($data["LgCharacterSubstitutions"]),
-            'LgRegexpSplitSentences' => Escaping::toSqlSyntax($data["LgRegexpSplitSentences"]),
-            'LgExceptionsSplitSentences' => Escaping::toSqlSyntaxNoTrimNoNull($data["LgExceptionsSplitSentences"]),
-            'LgRegexpWordCharacters' => Escaping::toSqlSyntax($data["LgRegexpWordCharacters"]),
-            'LgRemoveSpaces' => (int)isset($data["LgRemoveSpaces"]),
-            'LgSplitEachChar' => (int)isset($data["LgSplitEachChar"]),
-            'LgRightToLeft' => (int)isset($data["LgRightToLeft"]),
-            'LgTTSVoiceAPI' => Escaping::toSqlSyntaxNoNull($data["LgTTSVoiceAPI"]),
-            'LgShowRomanization' => (int)isset($data["LgShowRomanization"]),
+        $columns = [
+            'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
+            'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
+            'LgRegexpSplitSentences', 'LgExceptionsSplitSentences',
+            'LgRegexpWordCharacters', 'LgRemoveSpaces', 'LgSplitEachChar',
+            'LgRightToLeft', 'LgTTSVoiceAPI', 'LgShowRomanization'
+        ];
+
+        $params = [
+            $this->emptyToNull($data["LgName"]),
+            $this->emptyToNull($data["LgDict1URI"]),
+            $this->emptyToNull($data["LgDict2URI"]),
+            $this->emptyToNull($data["LgGoogleTranslateURI"]),
+            $this->emptyToNull($data["LgExportTemplate"]),
+            $this->emptyToNull($data["LgTextSize"]),
+            $data["LgCharacterSubstitutions"],  // No trim, keeps empty strings
+            $this->emptyToNull($data["LgRegexpSplitSentences"]),
+            $data["LgExceptionsSplitSentences"],  // No trim, keeps empty strings
+            $this->emptyToNull($data["LgRegexpWordCharacters"]),
+            (int)isset($data["LgRemoveSpaces"]),
+            (int)isset($data["LgSplitEachChar"]),
+            (int)isset($data["LgRightToLeft"]),
+            $data["LgTTSVoiceAPI"] ?? '',  // This one uses empty string, not null
+            (int)isset($data["LgShowRomanization"]),
         ];
 
         if ($id === null) {
             // INSERT
-            $columns = implode(', ', array_keys($fields));
-            $values = implode(', ', array_values($fields));
-            return "INSERT INTO {$tbpref}languages ($columns) VALUES($values)";
+            $placeholders = implode(', ', array_fill(0, count($columns), '?'));
+            $sql = "INSERT INTO {$tbpref}languages (" . implode(', ', $columns) . ") VALUES($placeholders)";
+        } else {
+            // UPDATE
+            $setParts = array_map(fn($col) => "$col = ?", $columns);
+            $sql = "UPDATE {$tbpref}languages SET " . implode(', ', $setParts) . " WHERE LgID = ?";
+            $params[] = $id;
         }
 
-        // UPDATE
-        $setParts = [];
-        foreach ($fields as $key => $value) {
-            $setParts[] = "$key = $value";
-        }
-        return "UPDATE {$tbpref}languages SET " . implode(', ', $setParts) . " WHERE LgID = $id";
+        return ['sql' => $sql, 'params' => $params];
     }
 
     /**
@@ -281,9 +304,10 @@ class LanguageService
         $data = $this->getLanguageDataFromRequest();
 
         // Get old values for comparison
-        $sql = "SELECT * FROM {$tbpref}languages where LgID = $lid";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
+        $record = Connection::preparedFetchOne(
+            "SELECT * FROM {$tbpref}languages WHERE LgID = ?",
+            [$lid]
+        );
         if ($record === false || $record === null) {
             return "Cannot access language data";
         }
@@ -291,11 +315,9 @@ class LanguageService
         // Check if reparsing is needed
         $needReParse = $this->needsReparsing($data, $record);
 
-        mysqli_free_result($res);
-
         // Update language
-        $updateSql = $this->buildLanguageSql($data, $lid);
-        $affected = Connection::execute($updateSql);
+        $sqlData = $this->buildLanguageSql($data, $lid);
+        $affected = Connection::preparedExecute($sqlData['sql'], $sqlData['params']);
         $message = "Updated: " . $affected;
 
         if ($needReParse) {
@@ -318,18 +340,19 @@ class LanguageService
      */
     private function needsReparsing(array $newData, array $oldRecord): bool
     {
+        // Compare values directly (no trim for character substitutions and exceptions)
         return (
-            Escaping::toSqlSyntaxNoTrimNoNull($newData["LgCharacterSubstitutions"])
-            != Escaping::toSqlSyntaxNoTrimNoNull($oldRecord['LgCharacterSubstitutions'])
+            ($newData["LgCharacterSubstitutions"] ?? '')
+            != ($oldRecord['LgCharacterSubstitutions'] ?? '')
         ) || (
-            Escaping::toSqlSyntax($newData["LgRegexpSplitSentences"]) !=
-            Escaping::toSqlSyntax($oldRecord['LgRegexpSplitSentences'])
+            trim($newData["LgRegexpSplitSentences"] ?? '') !=
+            trim($oldRecord['LgRegexpSplitSentences'] ?? '')
         ) || (
-            Escaping::toSqlSyntaxNoTrimNoNull($newData["LgExceptionsSplitSentences"])
-            != Escaping::toSqlSyntaxNoTrimNoNull($oldRecord['LgExceptionsSplitSentences'])
+            ($newData["LgExceptionsSplitSentences"] ?? '')
+            != ($oldRecord['LgExceptionsSplitSentences'] ?? '')
         ) || (
-            Escaping::toSqlSyntax($newData["LgRegexpWordCharacters"]) !=
-            Escaping::toSqlSyntax($oldRecord['LgRegexpWordCharacters'])
+            trim($newData["LgRegexpWordCharacters"] ?? '') !=
+            trim($oldRecord['LgRegexpWordCharacters'] ?? '')
         ) || ((isset($newData["LgRemoveSpaces"]) ? 1 : 0) != $oldRecord['LgRemoveSpaces']) ||
         ((isset($newData["LgSplitEachChar"]) ? 1 : 0) != $oldRecord['LgSplitEachChar']);
     }
@@ -351,20 +374,23 @@ class LanguageService
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         $tbpref = Globals::getTablePrefix();
-        Connection::execute("UPDATE {$tbpref}words SET WoWordCount = 0 WHERE WoLgID = $lid");
+        Connection::preparedExecute(
+            "UPDATE {$tbpref}words SET WoWordCount = 0 WHERE WoLgID = ?",
+            [$lid]
+        );
         Maintenance::initWordCount();
 
-        $sql = "SELECT TxID, TxText FROM {$tbpref}texts
-        WHERE TxLgID = $lid ORDER BY TxID";
-        $res = Connection::query($sql);
+        $rows = Connection::preparedFetchAll(
+            "SELECT TxID, TxText FROM {$tbpref}texts WHERE TxLgID = ? ORDER BY TxID",
+            [$lid]
+        );
         $count = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             $txtid = (int)$record["TxID"];
             $txttxt = (string)$record["TxText"];
             TextParsing::splitCheck($txttxt, $lid, $txtid);
             $count++;
         }
-        mysqli_free_result($res);
 
         return $count;
     }
@@ -404,17 +430,21 @@ class LanguageService
         $tbpref = Globals::getTablePrefix();
 
         return [
-            'texts' => (int) Connection::fetchValue(
-                "SELECT count(TxID) as value FROM {$tbpref}texts where TxLgID = $lid"
+            'texts' => (int) Connection::preparedFetchValue(
+                "SELECT count(TxID) as value FROM {$tbpref}texts where TxLgID = ?",
+                [$lid]
             ),
-            'archivedTexts' => (int) Connection::fetchValue(
-                "SELECT count(AtID) as value FROM {$tbpref}archivedtexts where AtLgID = $lid"
+            'archivedTexts' => (int) Connection::preparedFetchValue(
+                "SELECT count(AtID) as value FROM {$tbpref}archivedtexts where AtLgID = ?",
+                [$lid]
             ),
-            'words' => (int) Connection::fetchValue(
-                "SELECT count(WoID) as value FROM {$tbpref}words where WoLgID = $lid"
+            'words' => (int) Connection::preparedFetchValue(
+                "SELECT count(WoID) as value FROM {$tbpref}words where WoLgID = ?",
+                [$lid]
             ),
-            'feeds' => (int) Connection::fetchValue(
-                "SELECT count(NfID) as value FROM {$tbpref}newsfeeds where NfLgID = $lid"
+            'feeds' => (int) Connection::preparedFetchValue(
+                "SELECT count(NfID) as value FROM {$tbpref}newsfeeds where NfLgID = ?",
+                [$lid]
             ),
         ];
     }
@@ -437,22 +467,23 @@ class LanguageService
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
         $tbpref = Globals::getTablePrefix();
-        $sql = "select TxID, TxText from {$tbpref}texts
-        where TxLgID = $lid
-        order by TxID";
-        $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
+        $rows = Connection::preparedFetchAll(
+            "SELECT TxID, TxText FROM {$tbpref}texts WHERE TxLgID = ? ORDER BY TxID",
+            [$lid]
+        );
+        foreach ($rows as $record) {
             $txtid = (int)$record["TxID"];
             $txttxt = (string)$record["TxText"];
             TextParsing::splitCheck($txttxt, $lid, $txtid);
         }
-        mysqli_free_result($res);
 
-        $sentencesAdded = Connection::fetchValue(
-            "SELECT count(*) as value FROM {$tbpref}sentences where SeLgID = $lid"
+        $sentencesAdded = Connection::preparedFetchValue(
+            "SELECT count(*) as value FROM {$tbpref}sentences where SeLgID = ?",
+            [$lid]
         );
-        $textItemsAdded = Connection::fetchValue(
-            "SELECT count(*) as value FROM {$tbpref}textitems2 where Ti2LgID = $lid"
+        $textItemsAdded = Connection::preparedFetchValue(
+            "SELECT count(*) as value FROM {$tbpref}textitems2 where Ti2LgID = ?",
+            [$lid]
         );
 
         return "Sentences deleted: " . $sentencesDeleted .
@@ -472,14 +503,15 @@ class LanguageService
     public function isDuplicateName(string $name, int $excludeLgId = 0): bool
     {
         $tbpref = Globals::getTablePrefix();
-        $escapedName = Escaping::toSqlSyntax($name);
+        $params = [trim($name)];
 
-        $sql = "SELECT LgID as value FROM {$tbpref}languages WHERE LgName = $escapedName";
+        $sql = "SELECT LgID as value FROM {$tbpref}languages WHERE LgName = ?";
         if ($excludeLgId > 0) {
-            $sql .= " AND LgID != $excludeLgId";
+            $sql .= " AND LgID != ?";
+            $params[] = $excludeLgId;
         }
 
-        $result = Connection::fetchValue($sql . " LIMIT 1");
+        $result = Connection::preparedFetchValue($sql . " LIMIT 1", $params);
         return $result !== null;
     }
 
@@ -601,10 +633,9 @@ class LanguageService
         } else {
             return '';
         }
-        $r = Connection::fetchValue(
-            "SELECT LgName AS value
-            FROM {$tbpref}languages
-            WHERE LgID = $lg_id"
+        $r = Connection::preparedFetchValue(
+            "SELECT LgName AS value FROM {$tbpref}languages WHERE LgID = ?",
+            [$lg_id]
         );
         if (isset($r)) {
             return (string)$r;
@@ -623,15 +654,12 @@ class LanguageService
     public function getLanguageCode(int $lgId, array $languagesTable): string
     {
         $tbpref = Globals::getTablePrefix();
-        $query = "SELECT LgName, LgGoogleTranslateURI
-        FROM {$tbpref}languages
-        WHERE LgID = $lgId";
+        $record = Connection::preparedFetchOne(
+            "SELECT LgName, LgGoogleTranslateURI FROM {$tbpref}languages WHERE LgID = ?",
+            [$lgId]
+        );
 
-        $res = Connection::query($query);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-
-        if ($record === null) {
+        if ($record === null || $record === false) {
             return '';
         }
 
@@ -674,10 +702,9 @@ class LanguageService
         } else {
             $lg_id = $lid;
         }
-        $r = Connection::fetchValue(
-            "SELECT LgRightToLeft as value
-            from {$tbpref}languages
-            where LgID = $lg_id"
+        $r = Connection::preparedFetchValue(
+            "SELECT LgRightToLeft as value FROM {$tbpref}languages WHERE LgID = ?",
+            [$lg_id]
         );
         if (isset($r) && $r) {
             return ' dir="rtl" ';
@@ -700,9 +727,9 @@ class LanguageService
     public function getPhoneticReadingById(string $text, int $lgId): string
     {
         $tbpref = Globals::getTablePrefix();
-        $sentenceSplit = Connection::fetchValue(
-            "SELECT LgRegexpWordCharacters AS value FROM {$tbpref}languages
-            WHERE LgID = $lgId"
+        $sentenceSplit = Connection::preparedFetchValue(
+            "SELECT LgRegexpWordCharacters AS value FROM {$tbpref}languages WHERE LgID = ?",
+            [$lgId]
         );
 
         // For now we only support phonetic text with MeCab
@@ -878,8 +905,8 @@ class LanguageService
             "SELECT MIN(LgID) AS value FROM {$tbpref}languages WHERE LgName=''"
         );
 
-        $sql = $this->buildLanguageSqlFromData($normalizedData, $val !== null ? (int)$val : null);
-        Connection::execute($sql);
+        $sqlData = $this->buildLanguageSqlFromData($normalizedData, $val !== null ? (int)$val : null);
+        Connection::preparedExecute($sqlData['sql'], $sqlData['params']);
 
         if ($val !== null) {
             return (int)$val;
@@ -904,10 +931,10 @@ class LanguageService
         $normalizedData = $this->normalizeLanguageData($data);
 
         // Get old values for comparison
-        $sql = "SELECT * FROM {$tbpref}languages where LgID = $lid";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = Connection::preparedFetchOne(
+            "SELECT * FROM {$tbpref}languages WHERE LgID = ?",
+            [$lid]
+        );
 
         if ($record === false || $record === null) {
             return ['success' => false, 'reparsed' => 0, 'message' => 'Language not found'];
@@ -917,8 +944,8 @@ class LanguageService
         $needReParse = $this->needsReparsingFromData($normalizedData, $record);
 
         // Update language
-        $updateSql = $this->buildLanguageSqlFromData($normalizedData, $lid);
-        Connection::execute($updateSql);
+        $sqlData = $this->buildLanguageSqlFromData($normalizedData, $lid);
+        Connection::preparedExecute($sqlData['sql'], $sqlData['params']);
 
         $reparsedCount = 0;
         if ($needReParse) {
@@ -965,22 +992,23 @@ class LanguageService
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
         $tbpref = Globals::getTablePrefix();
-        $sql = "select TxID, TxText from {$tbpref}texts
-        where TxLgID = $lid
-        order by TxID";
-        $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
+        $rows = Connection::preparedFetchAll(
+            "SELECT TxID, TxText FROM {$tbpref}texts WHERE TxLgID = ? ORDER BY TxID",
+            [$lid]
+        );
+        foreach ($rows as $record) {
             $txtid = (int)$record["TxID"];
             $txttxt = (string)$record["TxText"];
             TextParsing::splitCheck($txttxt, $lid, $txtid);
         }
-        mysqli_free_result($res);
 
-        $sentencesAdded = (int)Connection::fetchValue(
-            "SELECT count(*) as value FROM {$tbpref}sentences where SeLgID = $lid"
+        $sentencesAdded = (int)Connection::preparedFetchValue(
+            "SELECT count(*) as value FROM {$tbpref}sentences where SeLgID = ?",
+            [$lid]
         );
-        $textItemsAdded = (int)Connection::fetchValue(
-            "SELECT count(*) as value FROM {$tbpref}textitems2 where Ti2LgID = $lid"
+        $textItemsAdded = (int)Connection::preparedFetchValue(
+            "SELECT count(*) as value FROM {$tbpref}textitems2 where Ti2LgID = ?",
+            [$lid]
         );
 
         return [
@@ -1020,48 +1048,55 @@ class LanguageService
     }
 
     /**
-     * Build SQL for inserting or updating a language from normalized data.
+     * Build SQL and parameters for inserting or updating a language from normalized data.
      *
      * @param array    $data Normalized language data
      * @param int|null $id   Language ID for update, null for insert
      *
-     * @return string SQL query
+     * @return array{sql: string, params: array} SQL query and parameters
      */
-    private function buildLanguageSqlFromData(array $data, ?int $id = null): string
+    private function buildLanguageSqlFromData(array $data, ?int $id = null): array
     {
         $tbpref = Globals::getTablePrefix();
 
-        $fields = [
-            'LgName' => Escaping::toSqlSyntax($data["LgName"]),
-            'LgDict1URI' => Escaping::toSqlSyntax($data["LgDict1URI"]),
-            'LgDict2URI' => Escaping::toSqlSyntax($data["LgDict2URI"]),
-            'LgGoogleTranslateURI' => Escaping::toSqlSyntax($data["LgGoogleTranslateURI"]),
-            'LgExportTemplate' => Escaping::toSqlSyntax($data["LgExportTemplate"]),
-            'LgTextSize' => Escaping::toSqlSyntax($data["LgTextSize"]),
-            'LgCharacterSubstitutions' => Escaping::toSqlSyntaxNoTrimNoNull($data["LgCharacterSubstitutions"]),
-            'LgRegexpSplitSentences' => Escaping::toSqlSyntax($data["LgRegexpSplitSentences"]),
-            'LgExceptionsSplitSentences' => Escaping::toSqlSyntaxNoTrimNoNull($data["LgExceptionsSplitSentences"]),
-            'LgRegexpWordCharacters' => Escaping::toSqlSyntax($data["LgRegexpWordCharacters"]),
-            'LgRemoveSpaces' => (int)$data["LgRemoveSpaces"],
-            'LgSplitEachChar' => (int)$data["LgSplitEachChar"],
-            'LgRightToLeft' => (int)$data["LgRightToLeft"],
-            'LgTTSVoiceAPI' => Escaping::toSqlSyntaxNoNull($data["LgTTSVoiceAPI"]),
-            'LgShowRomanization' => (int)$data["LgShowRomanization"],
+        $columns = [
+            'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
+            'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
+            'LgRegexpSplitSentences', 'LgExceptionsSplitSentences',
+            'LgRegexpWordCharacters', 'LgRemoveSpaces', 'LgSplitEachChar',
+            'LgRightToLeft', 'LgTTSVoiceAPI', 'LgShowRomanization'
+        ];
+
+        $params = [
+            $this->emptyToNull($data["LgName"]),
+            $this->emptyToNull($data["LgDict1URI"]),
+            $this->emptyToNull($data["LgDict2URI"]),
+            $this->emptyToNull($data["LgGoogleTranslateURI"]),
+            $this->emptyToNull($data["LgExportTemplate"]),
+            $this->emptyToNull($data["LgTextSize"]),
+            $data["LgCharacterSubstitutions"],  // No trim, keeps empty strings
+            $this->emptyToNull($data["LgRegexpSplitSentences"]),
+            $data["LgExceptionsSplitSentences"],  // No trim, keeps empty strings
+            $this->emptyToNull($data["LgRegexpWordCharacters"]),
+            (int)$data["LgRemoveSpaces"],
+            (int)$data["LgSplitEachChar"],
+            (int)$data["LgRightToLeft"],
+            $data["LgTTSVoiceAPI"] ?? '',  // This one uses empty string, not null
+            (int)$data["LgShowRomanization"],
         ];
 
         if ($id === null) {
             // INSERT
-            $columns = implode(', ', array_keys($fields));
-            $values = implode(', ', array_values($fields));
-            return "INSERT INTO {$tbpref}languages ($columns) VALUES($values)";
+            $placeholders = implode(', ', array_fill(0, count($columns), '?'));
+            $sql = "INSERT INTO {$tbpref}languages (" . implode(', ', $columns) . ") VALUES($placeholders)";
+        } else {
+            // UPDATE
+            $setParts = array_map(fn($col) => "$col = ?", $columns);
+            $sql = "UPDATE {$tbpref}languages SET " . implode(', ', $setParts) . " WHERE LgID = ?";
+            $params[] = $id;
         }
 
-        // UPDATE
-        $setParts = [];
-        foreach ($fields as $key => $value) {
-            $setParts[] = "$key = $value";
-        }
-        return "UPDATE {$tbpref}languages SET " . implode(', ', $setParts) . " WHERE LgID = $id";
+        return ['sql' => $sql, 'params' => $params];
     }
 
     /**
@@ -1074,18 +1109,19 @@ class LanguageService
      */
     private function needsReparsingFromData(array $newData, array $oldRecord): bool
     {
+        // Compare values directly (no trim for character substitutions and exceptions)
         return (
-            Escaping::toSqlSyntaxNoTrimNoNull($newData["LgCharacterSubstitutions"])
-            != Escaping::toSqlSyntaxNoTrimNoNull($oldRecord['LgCharacterSubstitutions'])
+            ($newData["LgCharacterSubstitutions"] ?? '')
+            != ($oldRecord['LgCharacterSubstitutions'] ?? '')
         ) || (
-            Escaping::toSqlSyntax($newData["LgRegexpSplitSentences"]) !=
-            Escaping::toSqlSyntax($oldRecord['LgRegexpSplitSentences'])
+            trim($newData["LgRegexpSplitSentences"] ?? '') !=
+            trim($oldRecord['LgRegexpSplitSentences'] ?? '')
         ) || (
-            Escaping::toSqlSyntaxNoTrimNoNull($newData["LgExceptionsSplitSentences"])
-            != Escaping::toSqlSyntaxNoTrimNoNull($oldRecord['LgExceptionsSplitSentences'])
+            ($newData["LgExceptionsSplitSentences"] ?? '')
+            != ($oldRecord['LgExceptionsSplitSentences'] ?? '')
         ) || (
-            Escaping::toSqlSyntax($newData["LgRegexpWordCharacters"]) !=
-            Escaping::toSqlSyntax($oldRecord['LgRegexpWordCharacters'])
+            trim($newData["LgRegexpWordCharacters"] ?? '') !=
+            trim($oldRecord['LgRegexpWordCharacters'] ?? '')
         ) || (
             (int)$newData["LgRemoveSpaces"] != (int)$oldRecord['LgRemoveSpaces']
         ) || (

@@ -35,7 +35,6 @@ require_once __DIR__ . '/../Services/LanguageService.php';
 
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 use Lwt\Services\FeedService;
@@ -423,8 +422,8 @@ class FeedsController extends BaseController
             false
         );
 
-        $whQuery = Escaping::toSqlSyntax(str_replace("*", "%", $currentQuery));
-        $whQuery = ($currentQuery != '') ? (' and (NfName like ' . $whQuery . ')') : '';
+        // Build query pattern for prepared statement (no SQL escaping needed)
+        $queryPattern = ($currentQuery != '') ? ('%' . str_replace("*", "%", $currentQuery) . '%') : null;
 
         PageLayoutHelper::renderPageStart('Manage ' . $this->languageService->getLanguageName($currentLang) . ' Feeds', true);
 
@@ -469,7 +468,7 @@ class FeedsController extends BaseController
                 $currentQuery,
                 $currentPage,
                 $currentSort,
-                $whQuery
+                $queryPattern
             );
         }
 
@@ -645,11 +644,11 @@ class FeedsController extends BaseController
     /**
      * Show the main feeds management list.
      *
-     * @param int    $currentLang  Current language filter
-     * @param string $currentQuery Current search query
-     * @param int    $currentPage  Current page number
-     * @param int    $currentSort  Current sort index
-     * @param string $whQuery      WHERE clause for query filter
+     * @param int         $currentLang   Current language filter
+     * @param string      $currentQuery  Current search query
+     * @param int         $currentPage   Current page number
+     * @param int         $currentSort   Current sort index
+     * @param string|null $queryPattern  LIKE pattern for name filter (null if no filter)
      *
      * @return void
      */
@@ -658,9 +657,9 @@ class FeedsController extends BaseController
         string $currentQuery,
         int $currentPage,
         int $currentSort,
-        string $whQuery
+        ?string $queryPattern
     ): void {
-        $totalFeeds = $this->feedService->countFeeds($currentLang ?: null, $whQuery);
+        $totalFeeds = $this->feedService->countFeeds($currentLang ?: null, $queryPattern);
 
         if ($totalFeeds > 0) {
             $maxPerPage = (int)Settings::getWithDefault('set-feeds-per-page');
@@ -682,16 +681,23 @@ class FeedsController extends BaseController
                 $currentSort = $lsorts;
             }
 
-            // Build query
-            $sql = "SELECT * FROM {$this->tbpref}newsfeeds WHERE ";
-            if (!empty($currentLang)) {
-                $sql .= "NfLgID = $currentLang $whQuery";
-            } else {
-                $sql .= "(1=1) $whQuery";
-            }
-            $sql .= " ORDER BY " . $sorts[$currentSort - 1];
+            // Build query with prepared statement
+            $whereConditions = [];
+            $params = [];
 
-            $feeds = Connection::query($sql);
+            if (!empty($currentLang)) {
+                $whereConditions[] = "NfLgID = ?";
+                $params[] = $currentLang;
+            }
+            if ($queryPattern !== null) {
+                $whereConditions[] = "NfName LIKE ?";
+                $params[] = $queryPattern;
+            }
+
+            $where = empty($whereConditions) ? '1=1' : implode(' AND ', $whereConditions);
+            $sql = "SELECT * FROM {$this->tbpref}newsfeeds WHERE $where ORDER BY " . $sorts[$currentSort - 1];
+
+            $feeds = Connection::preparedFetchAll($sql, $params);
         } else {
             $feeds = null;
             $pages = 0;

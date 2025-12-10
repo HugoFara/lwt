@@ -60,10 +60,11 @@ class Settings
      */
     public static function get(string $key): string
     {
-        $val = Connection::fetchValue(
+        $val = Connection::preparedFetchValue(
             'SELECT StValue AS value
             FROM ' . Globals::getTablePrefix() . 'settings
-            WHERE StKey = ' . Escaping::toSqlSyntax($key)
+            WHERE StKey = ?',
+            [$key]
         );
         if (isset($val)) {
             $val = trim((string) $val);
@@ -89,10 +90,11 @@ class Settings
     {
         $tbpref = Globals::getTablePrefix();
         $dft = SettingsService::getDefinitions();
-        $val = (string) Connection::fetchValue(
+        $val = (string) Connection::preparedFetchValue(
             'SELECT StValue AS value
              FROM ' . $tbpref . 'settings
-             WHERE StKey = ' . Escaping::toSqlSyntax($key)
+             WHERE StKey = ?',
+            [$key]
         );
         if ($val != '') {
             return trim($val);
@@ -135,10 +137,9 @@ class Settings
             }
         }
         $tbpref = Globals::getTablePrefix();
-        $dum = Connection::execute(
-            "INSERT INTO {$tbpref}settings (StKey, StValue) VALUES(" .
-            Escaping::toSqlSyntax($k) . ', ' .
-            Escaping::toSqlSyntax((string)$v) . ')'
+        $dum = Connection::preparedExecute(
+            "INSERT INTO {$tbpref}settings (StKey, StValue) VALUES(?, ?)",
+            [$k, (string)$v]
         );
         return "OK: $dum rows changed";
     }
@@ -177,11 +178,10 @@ class Settings
     public static function lwtTableSet(string $key, string $val): void
     {
         self::lwtTableCheck();
-        Connection::execute(
-            "INSERT INTO _lwtgeneral (LWTKey, LWTValue) VALUES (
-                " . Escaping::toSqlSyntax($key) . ",
-                " . Escaping::toSqlSyntax($val) . "
-            ) ON DUPLICATE KEY UPDATE LWTValue = " . Escaping::toSqlSyntax($val)
+        Connection::preparedExecute(
+            "INSERT INTO _lwtgeneral (LWTKey, LWTValue) VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE LWTValue = ?",
+            [$key, $val, $val]
         );
     }
 
@@ -195,10 +195,11 @@ class Settings
     public static function lwtTableGet(string $key): string
     {
         self::lwtTableCheck();
-        return (string)Connection::fetchValue(
+        return (string)Connection::preparedFetchValue(
             "SELECT LWTValue as value
             FROM _lwtgeneral
-            WHERE LWTKey = " . Escaping::toSqlSyntax($key)
+            WHERE LWTKey = ?",
+            [$key]
         );
     }
 }

@@ -19,7 +19,6 @@ namespace Lwt\Services {
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\IconHelper;
 
@@ -61,13 +60,91 @@ class SentenceService
     public function buildSentencesContainingWordQuery(string $wordlc, int $lid): string
     {
         $mecab_str = null;
-        $res = Connection::query(
+        $record = Connection::preparedFetchOne(
             "SELECT LgRegexpWordCharacters, LgRemoveSpaces
             FROM {$this->tbpref}languages
-            WHERE LgID = $lid"
+            WHERE LgID = ?",
+            [$lid]
         );
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $removeSpaces = $record["LgRemoveSpaces"];
+
+        if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
+            $mecab_file = sys_get_temp_dir() . "/" . $this->tbpref . "mecab_to_db.txt";
+            $mecab_args = ' -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n ';
+            if (file_exists($mecab_file)) {
+                unlink($mecab_file);
+            }
+            $fp = fopen($mecab_file, 'w');
+            fwrite($fp, $wordlc . "\n");
+            fclose($fp);
+            $mecab = get_mecab_path($mecab_args);
+            $handle = popen($mecab . $mecab_file, "r");
+            if (!feof($handle)) {
+                $row = fgets($handle, 256);
+                $mecab_str = "\t" . preg_replace_callback(
+                    '([2678]?)\t[0-9]+$',
+                    function ($matches) {
+                        return isset($matches[1]) ? "\t" : "";
+                    },
+                    $row
+                );
+            }
+            pclose($handle);
+            unlink($mecab_file);
+            // Note: This method is deprecated and only kept for backward compatibility
+            // It returns an unsafe SQL string. Use executeSentencesContainingWordQuery instead.
+            $wordlc_escaped = mysqli_real_escape_string(Globals::getDbConnection(), "%$wordlc%");
+            $mecab_str_escaped = mysqli_real_escape_string(Globals::getDbConnection(), "%$mecab_str%");
+            $sql = "SELECT SeID, SeText,
+                concat(
+                    '\\t',
+                    group_concat(Ti2Text ORDER BY Ti2Order asc SEPARATOR '\\t'),
+                    '\\t'
+                ) val
+                FROM {$this->tbpref}sentences, {$this->tbpref}textitems2
+                WHERE lower(SeText)
+                LIKE '$wordlc_escaped'
+                AND SeID = Ti2SeID AND SeLgID = $lid AND Ti2WordCount<2
+                GROUP BY SeID HAVING val
+                LIKE '$mecab_str_escaped'
+                ORDER BY CHAR_LENGTH(SeText), SeText";
+        } else {
+            // Note: This method is deprecated and only kept for backward compatibility
+            // It returns an unsafe SQL string. Use executeSentencesContainingWordQuery instead.
+            if ($removeSpaces == 1) {
+                $pattern_value = $wordlc;
+            } else {
+                $pattern_value = '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
+                     . remove_spaces($wordlc, $removeSpaces)
+                     . '([^' . $record["LgRegexpWordCharacters"] . ']|$)';
+            }
+            $pattern_escaped = mysqli_real_escape_string(Globals::getDbConnection(), $pattern_value);
+            $sql = "SELECT DISTINCT SeID, SeText
+                FROM {$this->tbpref}sentences
+                WHERE SeText RLIKE '$pattern_escaped' AND SeLgID = $lid
+                ORDER BY CHAR_LENGTH(SeText), SeText";
+        }
+        return $sql;
+    }
+
+    /**
+     * Execute a SQL query to find sentences containing a word (complex search).
+     *
+     * @param string $wordlc Word to look for in lowercase
+     * @param int    $lid    Language ID
+     * @param int    $limit  Maximum number of sentences to return
+     *
+     * @return \mysqli_result|false Query result or false on failure
+     */
+    private function executeSentencesContainingWordQuery(string $wordlc, int $lid, int $limit = -1): \mysqli_result|false
+    {
+        $mecab_str = null;
+        $record = Connection::preparedFetchOne(
+            "SELECT LgRegexpWordCharacters, LgRemoveSpaces
+            FROM {$this->tbpref}languages
+            WHERE LgID = ?",
+            [$lid]
+        );
         $removeSpaces = $record["LgRemoveSpaces"];
 
         if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
@@ -100,28 +177,33 @@ class SentenceService
                     '\\t'
                 ) val
                 FROM {$this->tbpref}sentences, {$this->tbpref}textitems2
-                WHERE lower(SeText)
-                LIKE " . Escaping::toSqlSyntax("%$wordlc%") . "
-                AND SeID = Ti2SeID AND SeLgID = $lid AND Ti2WordCount<2
-                GROUP BY SeID HAVING val
-                LIKE " . Escaping::toSqlSyntaxNoTrimNoNull("%$mecab_str%") . "
+                WHERE lower(SeText) LIKE ?
+                AND SeID = Ti2SeID AND SeLgID = ? AND Ti2WordCount<2
+                GROUP BY SeID HAVING val LIKE ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
+            $params = ["%$wordlc%", $lid, "%$mecab_str%"];
         } else {
             if ($removeSpaces == 1) {
-                $pattern = Escaping::toSqlSyntax($wordlc);
+                $pattern = $wordlc;
             } else {
-                $pattern = Escaping::regexpToSqlSyntax(
-                    '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
+                $pattern = '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
                      . remove_spaces($wordlc, $removeSpaces)
-                     . '([^' . $record["LgRegexpWordCharacters"] . ']|$)'
-                );
+                     . '([^' . $record["LgRegexpWordCharacters"] . ']|$)';
             }
             $sql = "SELECT DISTINCT SeID, SeText
                 FROM {$this->tbpref}sentences
-                WHERE SeText RLIKE $pattern AND SeLgID = $lid
+                WHERE SeText RLIKE ? AND SeLgID = ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
+            $params = [$pattern, $lid];
         }
-        return $sql;
+        if ($limit > 0) {
+            $sql .= " LIMIT ?";
+            $params[] = $limit;
+        }
+        $stmt = Connection::prepare($sql);
+        $stmt->bindValues($params);
+        $stmt->execute();
+        return $stmt->getResult();
     }
 
     /**
@@ -142,21 +224,28 @@ class SentenceService
         if (empty($wid)) {
             $sql = "SELECT DISTINCT SeID, SeText
                 FROM {$this->tbpref}sentences, {$this->tbpref}textitems2
-                WHERE LOWER(Ti2Text) = " . Escaping::toSqlSyntax($wordlc) . "
-                AND Ti2WoID = 0 AND SeID = Ti2SeID AND SeLgID = $lid
+                WHERE LOWER(Ti2Text) = ?
+                AND Ti2WoID = 0 AND SeID = Ti2SeID AND SeLgID = ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
+            $params = [$wordlc, $lid];
         } elseif ($wid == -1) {
-            $sql = $this->buildSentencesContainingWordQuery($wordlc, $lid);
+            // For complex search, build the query dynamically
+            return $this->executeSentencesContainingWordQuery($wordlc, $lid, $limit);
         } else {
             $sql = "SELECT DISTINCT SeID, SeText
                 FROM {$this->tbpref}sentences, {$this->tbpref}textitems2
-                WHERE Ti2WoID = $wid AND SeID = Ti2SeID AND SeLgID = $lid
+                WHERE Ti2WoID = ? AND SeID = Ti2SeID AND SeLgID = ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
+            $params = [$wid, $lid];
         }
-        if ($limit) {
-            $sql .= " LIMIT 0,$limit";
+        if ($limit > 0) {
+            $sql .= " LIMIT ?";
+            $params[] = $limit;
         }
-        return Connection::query($sql);
+        $stmt = Connection::prepare($sql);
+        $stmt->bindValues($params);
+        $stmt->execute();
+        return $stmt->getResult();
     }
 
     /**
@@ -172,16 +261,16 @@ class SentenceService
      */
     public function formatSentence(int $seid, string $wordlc, int $mode): array
     {
-        $res = Connection::query(
+        $record = Connection::preparedFetchOne(
             "SELECT
             CONCAT(
                 '​', group_concat(Ti2Text ORDER BY Ti2Order asc SEPARATOR '​'), '​'
             ) AS SeText, Ti2TxID AS SeTxID, LgRegexpWordCharacters,
             LgRemoveSpaces, LgSplitEachChar
             FROM {$this->tbpref}textitems2, {$this->tbpref}languages
-            WHERE Ti2LgID = LgID AND Ti2WordCount < 2 AND Ti2SeID = $seid"
+            WHERE Ti2LgID = LgID AND Ti2WordCount < 2 AND Ti2SeID = ?",
+            [$seid]
         );
-        $record = mysqli_fetch_assoc($res);
         $removeSpaces = (int)$record["LgRemoveSpaces"] == 1;
         $splitEachChar = (int)$record['LgSplitEachChar'] != 0;
         $txtid = $record["SeTxID"];
@@ -211,17 +300,18 @@ class SentenceService
 
         if ($mode > 1) {
             // Always use textitems2 to get proper sentence content with word boundaries
-            $prevseSent = Connection::fetchValue(
+            $prevseSent = Connection::preparedFetchValue(
                 "SELECT concat(
                     '​',
                     group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
                     '​'
                 ) AS value
                 from {$this->tbpref}sentences, {$this->tbpref}textitems2
-                where Ti2SeID = SeID and SeID < $seid and SeTxID = $txtid
+                where Ti2SeID = SeID and SeID < ? and SeTxID = ?
                 and trim(SeText) not in ('¶', '')
                 group by SeID
-                order by SeID desc"
+                order by SeID desc",
+                [$seid, $txtid]
             );
             if (isset($prevseSent)) {
                 if (!$removeSpaces && !($splitEachChar || 'MECAB' == strtoupper(trim($termchar)))) {
@@ -234,17 +324,18 @@ class SentenceService
 
         if ($mode > 2) {
             // Always use textitems2 to get proper sentence content with word boundaries
-            $nextSent = Connection::fetchValue(
+            $nextSent = Connection::preparedFetchValue(
                 "SELECT concat(
                     '​',
                     group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
                     '​'
                 ) as value
                 from {$this->tbpref}sentences, {$this->tbpref}textitems2
-                where Ti2SeID = SeID and SeID > $seid
-                and SeTxID = $txtid and trim(SeText) not in ('¶','')
+                where Ti2SeID = SeID and SeID > ?
+                and SeTxID = ? and trim(SeText) not in ('¶','')
                 group by SeID
-                order by SeID asc"
+                order by SeID asc",
+                [$seid, $txtid]
             );
             if (isset($nextSent)) {
                 if (!$removeSpaces && !($splitEachChar || 'MECAB' == strtoupper(trim($termchar)))) {
@@ -255,7 +346,6 @@ class SentenceService
             }
         }
 
-        mysqli_free_result($res);
         if ($removeSpaces) {
             $se = str_replace('​', '', $se);
             $sejs = str_replace('​', '', $sejs);

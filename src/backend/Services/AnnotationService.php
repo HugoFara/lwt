@@ -21,8 +21,6 @@ use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
-use Lwt\Database\DB;
-use Lwt\Database\Escaping;
 use Lwt\View\Helper\IconHelper;
 
 /**
@@ -97,17 +95,18 @@ class AnnotationService
             $ann .= $item . "\n";
         }
 
-        DB::execute(
+        Connection::preparedExecute(
             "UPDATE {$this->tbpref}texts
-            SET TxAnnotatedText = " . Escaping::toSqlSyntax($ann) . "
-            WHERE TxID = $textId",
-            ""
+            SET TxAnnotatedText = ?
+            WHERE TxID = ?",
+            [$ann, $textId]
         );
 
-        return (string)Connection::fetchValue(
+        return (string)Connection::preparedFetchValue(
             "SELECT TxAnnotatedText AS value
             FROM {$this->tbpref}texts
-            where TxID = $textId"
+            WHERE TxID = ?",
+            [$textId]
         );
     }
 
@@ -135,13 +134,13 @@ class AnnotationService
                 LEFT JOIN {$this->tbpref}words
                 ON Ti2WoID = WoID AND Ti2LgID = WoLgID
             )
-            WHERE Ti2TxID = $textId
+            WHERE Ti2TxID = ?
             ORDER BY Ti2Order ASC, Ti2WordCount DESC";
 
         $until = 0;
-        $res = Connection::query($sql);
+        $results = Connection::preparedFetchAll($sql, [$textId]);
         // For each term (includes blanks)
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($results as $record) {
             $actcode = (int)$record['Code'];
             $order = (int)$record['Ti2Order'];
             if ($order <= $until) {
@@ -171,7 +170,6 @@ class AnnotationService
                 $order
             );
         }
-        mysqli_free_result($res);
         return $ann;
     }
 
@@ -185,16 +183,17 @@ class AnnotationService
     public function createSaveAnnotation(int $textId): string
     {
         $ann = $this->createAnnotation($textId);
-        DB::execute(
-            'update ' . $this->tbpref . 'texts set ' .
-            'TxAnnotatedText = ' . Escaping::toSqlSyntax($ann) . '
-            where TxID = ' . $textId,
-            ""
+        Connection::preparedExecute(
+            "UPDATE {$this->tbpref}texts
+            SET TxAnnotatedText = ?
+            WHERE TxID = ?",
+            [$ann, $textId]
         );
-        return (string)Connection::fetchValue(
-            "select TxAnnotatedText as value
-            from " . $this->tbpref . "texts
-            where TxID = " . $textId
+        return (string)Connection::preparedFetchValue(
+            "SELECT TxAnnotatedText AS value
+            FROM {$this->tbpref}texts
+            WHERE TxID = ?",
+            [$textId]
         );
     }
 
@@ -251,7 +250,12 @@ class AnnotationService
      */
     public function getAnnotationLink(int $textId): string
     {
-        if (Connection::fetchValue('select length(TxAnnotatedText) as value from ' . $this->tbpref . 'texts where TxID=' . $textId) > 0) {
+        if (Connection::preparedFetchValue(
+            "SELECT LENGTH(TxAnnotatedText) AS value
+            FROM {$this->tbpref}texts
+            WHERE TxID = ?",
+            [$textId]
+        ) > 0) {
             return ' &nbsp;<a href="print_impr_text.php?text=' . $textId .
             '" target="_top">' . IconHelper::render('check', ['title' => 'Annotated Text', 'alt' => 'Annotated Text']) . '</a>';
         } else {

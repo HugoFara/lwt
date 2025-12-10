@@ -396,7 +396,7 @@ class TextControllerEditTest extends TestCase
 
         $result = $service->buildTextQueryWhereClause('', 'title,text', '');
 
-        $this->assertEquals('', $result);
+        $this->assertEquals(['clause' => '', 'params' => []], $result);
     }
 
     public function testBuildTextQueryWhereClauseWithTitleQuery(): void
@@ -409,8 +409,9 @@ class TextControllerEditTest extends TestCase
 
         $result = $service->buildTextQueryWhereClause('test', 'title', '');
 
-        $this->assertStringContainsString('TxTitle', $result);
-        $this->assertStringContainsString('LIKE', $result);
+        $this->assertStringContainsString('TxTitle', $result['clause']);
+        $this->assertStringContainsString('LIKE', $result['clause']);
+        $this->assertEquals(['test'], $result['params']);
     }
 
     public function testBuildTextQueryWhereClauseWithTextQuery(): void
@@ -423,8 +424,9 @@ class TextControllerEditTest extends TestCase
 
         $result = $service->buildTextQueryWhereClause('test', 'text', '');
 
-        $this->assertStringContainsString('TxText', $result);
-        $this->assertStringContainsString('LIKE', $result);
+        $this->assertStringContainsString('TxText', $result['clause']);
+        $this->assertStringContainsString('LIKE', $result['clause']);
+        $this->assertEquals(['test'], $result['params']);
     }
 
     public function testBuildTextQueryWhereClauseWithTitleAndTextQuery(): void
@@ -437,9 +439,10 @@ class TextControllerEditTest extends TestCase
 
         $result = $service->buildTextQueryWhereClause('test', 'title,text', '');
 
-        $this->assertStringContainsString('TxTitle', $result);
-        $this->assertStringContainsString('TxText', $result);
-        $this->assertStringContainsString('OR', $result);
+        $this->assertStringContainsString('TxTitle', $result['clause']);
+        $this->assertStringContainsString('TxText', $result['clause']);
+        $this->assertStringContainsString('OR', $result['clause']);
+        $this->assertEquals(['test', 'test'], $result['params']);
     }
 
     public function testBuildTextQueryWhereClauseWithRegexMode(): void
@@ -454,9 +457,10 @@ class TextControllerEditTest extends TestCase
 
         // MySQL uses RLIKE instead of REGEXP in some contexts
         $this->assertTrue(
-            str_contains($result, 'REGEXP') || str_contains($result, 'rLIKE'),
-            "Expected REGEXP or rLIKE in: $result"
+            str_contains($result['clause'], 'REGEXP') || str_contains($result['clause'], 'rLIKE'),
+            "Expected REGEXP or rLIKE in: {$result['clause']}"
         );
+        $this->assertEquals(['test.*pattern'], $result['params']);
     }
 
     // ===== buildTextTagHavingClause tests =====

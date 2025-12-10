@@ -57,9 +57,10 @@ class ExpressionService
 
         $mecab = \get_mecab_path($mecab_args);
         $sql = "SELECT SeID, SeTxID, SeFirstPos, SeText FROM {$this->tbpref}sentences
-        WHERE SeLgID = $lid AND
-        SeText LIKE " . Escaping::toSqlSyntaxNoTrimNoNull("%$text%");
-        $res = Connection::query($sql);
+        WHERE SeLgID = ? AND
+        SeText LIKE ?";
+        $likeText = "%$text%";
+        $rows = Connection::preparedFetchAll($sql, [$lid, $likeText]);
 
         $parsed_text = '';
         $fp = fopen($db_to_mecab, 'w');
@@ -80,7 +81,7 @@ class ExpressionService
 
         $occurrences = [];
         // For each sentence in database containing $text
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             $sent = trim((string) $record['SeText']);
             $fp = fopen($db_to_mecab, 'w');
             fwrite($fp, $sent . "\n");
@@ -118,7 +119,6 @@ class ExpressionService
             }
             pclose($handle);
         }
-        mysqli_free_result($res);
         unlink($db_to_mecab);
 
         return $occurrences;
@@ -135,12 +135,14 @@ class ExpressionService
     public function findStandardExpression(string $textlc, string|int $lid): array
     {
         $occurrences = [];
-        $res = Connection::query("SELECT * FROM {$this->tbpref}languages WHERE LgID=$lid");
-        $record = mysqli_fetch_assoc($res);
+        $record = Connection::preparedFetchOne(
+            "SELECT * FROM {$this->tbpref}languages WHERE LgID = ?",
+            [$lid]
+        );
         $removeSpaces = $record["LgRemoveSpaces"] == 1;
         $splitEachChar = $record['LgSplitEachChar'] != 0;
         $termchar = $record['LgRegexpWordCharacters'];
-        mysqli_free_result($res);
+        $likeTextlc = "%$textlc%";
         if ($removeSpaces && !$splitEachChar) {
             $sql = "SELECT
             GROUP_CONCAT(Ti2Text ORDER BY Ti2Order SEPARATOR ' ') AS SeText, SeID,
@@ -148,26 +150,25 @@ class ExpressionService
             FROM {$this->tbpref}textitems2
             JOIN {$this->tbpref}sentences
             ON SeID=Ti2SeID AND SeLgID = Ti2LgID
-            WHERE Ti2LgID = $lid
-            AND SeText LIKE " . Escaping::toSqlSyntaxNoTrimNoNull("%$textlc%") . "
+            WHERE Ti2LgID = ?
+            AND SeText LIKE ?
             AND Ti2WordCount < 2
             GROUP BY SeID";
         } else {
             $sql = "SELECT * FROM {$this->tbpref}sentences
-            WHERE SeLgID = $lid AND SeText LIKE " .
-            Escaping::toSqlSyntaxNoTrimNoNull("%$textlc%");
+            WHERE SeLgID = ? AND SeText LIKE ?";
         }
 
         if ($splitEachChar) {
             $textlc = (string) preg_replace('/([^\s])/u', "$1 ", $textlc);
         }
         $wis = $textlc;
-        $res = Connection::query($sql);
+        $rows = Connection::preparedFetchAll($sql, [$lid, $likeTextlc]);
         $notermchar = "/[^$termchar]($textlc)[^$termchar]/ui";
         // For each sentence in the language containing the query
         $matches = null;
         $rSflag = false; // Flag to prevent repeat space-removal processing
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             $string = ' ' . $record['SeText'] . ' ';
             if ($splitEachChar) {
                 $string = preg_replace('/([^\s])/u', "$1 ", $string);
@@ -220,7 +221,6 @@ class ExpressionService
                 $last_pos = mb_strripos($string, $textlc, 0, 'UTF-8');
             }
         }
-        mysqli_free_result($res);
         return $occurrences;
     }
 
@@ -240,9 +240,10 @@ class ExpressionService
      */
     public function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mode): string|null
     {
-        $regexp = (string)Connection::fetchValue(
+        $regexp = (string)Connection::preparedFetchValue(
             "SELECT LgRegexpWordCharacters AS value
-            FROM {$this->tbpref}languages WHERE LgID=$lid"
+            FROM {$this->tbpref}languages WHERE LgID = ?",
+            [$lid]
         );
 
         if ('MECAB' == strtoupper(trim($regexp))) {
@@ -273,34 +274,36 @@ class ExpressionService
         }
         $sqltext = null;
         if (!empty($occurrences)) {
-            $sqlarr = [];
+            $placeholders = [];
+            $params = [];
             foreach ($occurrences as $occ) {
                 $txId = $occ["SeTxID"] ?? $occ["TxID"] ?? 0;
-                $sqlarr[] = "(" . implode(
-                    ",",
-                    [
-                    $wid, $lid, $txId, $occ["SeID"],
-                    $occ["position"], $len,
-                    Escaping::toSqlSyntaxNoTrimNoNull($occ["term"])
-                    ]
-                ) . ")";
+                $placeholders[] = "(?, ?, ?, ?, ?, ?, ?)";
+                $params[] = $wid;
+                $params[] = $lid;
+                $params[] = $txId;
+                $params[] = $occ["SeID"];
+                $params[] = $occ["position"];
+                $params[] = $len;
+                $params[] = $occ["term"];
             }
-            $sqltext = '';
-            if ($mode != 2) {
-                $sqltext .=
-                "INSERT INTO {$this->tbpref}textitems2
-                 (Ti2WoID,Ti2LgID,Ti2TxID,Ti2SeID,Ti2Order,Ti2WordCount,Ti2Text)
-                 VALUES ";
-            }
-            $sqltext .= implode(',', $sqlarr);
-            unset($sqlarr);
-        }
 
-        if ($mode == 2) {
-            return $sqltext;
-        }
-        if (isset($sqltext)) {
-            Connection::query($sqltext);
+            if ($mode == 2) {
+                // Legacy mode: return SQL text for external use
+                // Build the VALUES portion with escaped data
+                $sqlarr = [];
+                foreach ($occurrences as $occ) {
+                    $txId = $occ["SeTxID"] ?? $occ["TxID"] ?? 0;
+                    $term = $occ["term"] === null ? 'NULL' : "'" . mysqli_real_escape_string(Globals::getDbConnection(), $occ["term"]) . "'";
+                    $sqlarr[] = "($wid, $lid, $txId, {$occ["SeID"]}, {$occ["position"]}, $len, $term)";
+                }
+                return implode(',', $sqlarr);
+            }
+
+            $sql = "INSERT INTO {$this->tbpref}textitems2
+                 (Ti2WoID,Ti2LgID,Ti2TxID,Ti2SeID,Ti2Order,Ti2WordCount,Ti2Text)
+                 VALUES " . implode(',', $placeholders);
+            Connection::preparedExecute($sql, $params);
         }
         return null;
     }
@@ -320,10 +323,10 @@ class ExpressionService
         $showAll = (bool)Settings::getZeroOrOne('showallwords', 1);
         $showType = $showAll ? "m" : "";
 
-        $sql = "SELECT * FROM {$this->tbpref}words WHERE WoID=$wid";
-        $res = Connection::query($sql);
-
-        $record = mysqli_fetch_assoc($res);
+        $record = Connection::preparedFetchOne(
+            "SELECT * FROM {$this->tbpref}words WHERE WoID = ?",
+            [$wid]
+        );
 
         $attrs = [
             "class" => "click mword {$showType}wsty TERM$hex word$wid status" .
@@ -334,7 +337,6 @@ class ExpressionService
             "data_status" => $record["WoStatus"],
             "data_wid" => $wid
         ];
-        mysqli_free_result($res);
 
         ?>
 <script type="application/json" data-lwt-multiword-config>
@@ -364,10 +366,10 @@ class ExpressionService
         $showAll = (bool)Settings::getZeroOrOne('showallwords', 1);
         $showType = $showAll ? "m" : "";
 
-        $sql = "SELECT * FROM {$this->tbpref}words WHERE WoID=$wid";
-        $res = Connection::query($sql);
-
-        $record = mysqli_fetch_assoc($res);
+        $record = Connection::preparedFetchOne(
+            "SELECT * FROM {$this->tbpref}words WHERE WoID = ?",
+            [$wid]
+        );
 
         $attrs = [
             "class" => "click mword {$showType}wsty TERM$hex word$wid status" .
@@ -378,7 +380,6 @@ class ExpressionService
             "data_status" => $record["WoStatus"],
             "data_wid" => $wid
         ];
-        mysqli_free_result($res);
 
         $term = array_values($appendtext)[0];
 

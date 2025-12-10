@@ -318,7 +318,7 @@ class TextControllerArchivedTest extends TestCase
 
         $result = $service->buildArchivedQueryWhereClause('', 'title', '');
 
-        $this->assertEquals('', $result);
+        $this->assertEquals(['clause' => '', 'params' => []], $result);
     }
 
     public function testBuildArchivedQueryWhereClauseWithTitle(): void
@@ -331,8 +331,8 @@ class TextControllerArchivedTest extends TestCase
 
         $result = $service->buildArchivedQueryWhereClause('test', 'title', '');
 
-        $this->assertStringContainsString('AtTitle', $result);
-        $this->assertStringContainsString('test', $result);
+        $this->assertStringContainsString('AtTitle', $result['clause']);
+        $this->assertEquals(['test'], $result['params']);
     }
 
     public function testBuildArchivedQueryWhereClauseWithText(): void
@@ -345,8 +345,8 @@ class TextControllerArchivedTest extends TestCase
 
         $result = $service->buildArchivedQueryWhereClause('content', 'text', '');
 
-        $this->assertStringContainsString('AtText', $result);
-        $this->assertStringContainsString('content', $result);
+        $this->assertStringContainsString('AtText', $result['clause']);
+        $this->assertEquals(['content'], $result['params']);
     }
 
     public function testBuildArchivedQueryWhereClauseWithTitleAndText(): void
@@ -359,8 +359,9 @@ class TextControllerArchivedTest extends TestCase
 
         $result = $service->buildArchivedQueryWhereClause('search', 'title,text', '');
 
-        $this->assertStringContainsString('AtTitle', $result);
-        $this->assertStringContainsString('AtText', $result);
+        $this->assertStringContainsString('AtTitle', $result['clause']);
+        $this->assertStringContainsString('AtText', $result['clause']);
+        $this->assertEquals(['search', 'search'], $result['params']);
     }
 
     // ===== buildArchivedTagHavingClause tests =====
@@ -644,9 +645,10 @@ class TextControllerArchivedTest extends TestCase
         // Test title,text mode (default)
         $result = $service->buildArchivedQueryWhereClause('content', 'title,text', '');
 
-        $this->assertStringContainsString('AtTitle', $result);
-        $this->assertStringContainsString('AtText', $result);
-        $this->assertStringContainsString('OR', $result);
+        $this->assertStringContainsString('AtTitle', $result['clause']);
+        $this->assertStringContainsString('AtText', $result['clause']);
+        $this->assertStringContainsString('OR', $result['clause']);
+        $this->assertEquals(['content', 'content'], $result['params']);
     }
 
     public function testArchivedQueryModeWithRegex(): void
@@ -662,9 +664,10 @@ class TextControllerArchivedTest extends TestCase
 
         // MySQL uses RLIKE instead of REGEXP in some contexts
         $this->assertTrue(
-            str_contains($result, 'REGEXP') || str_contains($result, 'rLIKE'),
-            "Expected REGEXP or rLIKE in: $result"
+            str_contains($result['clause'], 'REGEXP') || str_contains($result['clause'], 'rLIKE'),
+            "Expected REGEXP or rLIKE in: {$result['clause']}"
         );
+        $this->assertEquals(['test.*'], $result['params']);
     }
 
     // ===== Concurrent access simulation tests =====

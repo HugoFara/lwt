@@ -205,19 +205,25 @@ class FeedHandler
         $query = $params['query'] ?? '';
         $sort = max(1, min(3, (int)($params['sort'] ?? 2)));
 
-        // Build WHERE clause
-        $where = '1=1';
+        // Build WHERE clause with parameters
+        $whereConditions = ['1=1'];
+        $params = [];
+
         if ($langId !== null && $langId > 0) {
-            $where .= " AND NfLgID = $langId";
+            $whereConditions[] = "NfLgID = ?";
+            $params[] = $langId;
         }
         if (!empty($query)) {
-            $pattern = \Lwt\Database\Escaping::toSqlSyntax('%' . str_replace('*', '%', $query) . '%');
-            $where .= " AND NfName LIKE $pattern";
+            $whereConditions[] = "NfName LIKE ?";
+            $params[] = '%' . str_replace('*', '%', $query) . '%';
         }
 
+        $where = implode(' AND ', $whereConditions);
+
         // Count total
-        $total = (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}newsfeeds WHERE $where"
+        $total = (int)Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$tbpref}newsfeeds WHERE $where",
+            $params
         );
 
         // Calculate pagination
@@ -238,14 +244,17 @@ class FeedHandler
                 LEFT JOIN {$tbpref}languages lg ON lg.LgID = nf.NfLgID
                 WHERE $where
                 ORDER BY $orderBy
-                LIMIT $offset, $perPage";
+                LIMIT ?, ?";
+
+        // Add pagination parameters
+        $params[] = $offset;
+        $params[] = $perPage;
 
         $feeds = [];
-        $result = Connection::query($sql);
-        while ($row = mysqli_fetch_assoc($result)) {
+        $rows = Connection::preparedFetchAll($sql, $params);
+        foreach ($rows as $row) {
             $feeds[] = $this->formatFeedRecord($row);
         }
-        mysqli_free_result($result);
 
         // Get languages for filter dropdown
         $languages = $this->getLanguagesForSelect();
@@ -478,16 +487,23 @@ class FeedHandler
             return ['error' => 'Feed not found'];
         }
 
-        // Build WHERE clause
-        $where = "FlNfID = $feedId";
+        // Build WHERE clause with parameters
+        $whereConditions = ["FlNfID = ?"];
+        $queryParams = [$feedId];
+
         if (!empty($query)) {
-            $pattern = \Lwt\Database\Escaping::toSqlSyntax('%' . str_replace('*', '%', $query) . '%');
-            $where .= " AND (FlTitle LIKE $pattern OR FlDescription LIKE $pattern)";
+            $pattern = '%' . str_replace('*', '%', $query) . '%';
+            $whereConditions[] = "(FlTitle LIKE ? OR FlDescription LIKE ?)";
+            $queryParams[] = $pattern;
+            $queryParams[] = $pattern;
         }
 
+        $where = implode(' AND ', $whereConditions);
+
         // Count total
-        $total = (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}feedlinks WHERE $where"
+        $total = (int)Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$tbpref}feedlinks WHERE $where",
+            $queryParams
         );
 
         // Calculate pagination
@@ -508,14 +524,17 @@ class FeedHandler
                 LEFT JOIN {$tbpref}archivedtexts at ON at.AtSourceURI = TRIM(fl.FlLink)
                 WHERE $where
                 ORDER BY $orderBy
-                LIMIT $offset, $perPage";
+                LIMIT ?, ?";
+
+        // Add pagination parameters
+        $queryParams[] = $offset;
+        $queryParams[] = $perPage;
 
         $articles = [];
-        $result = Connection::query($sql);
-        while ($row = mysqli_fetch_assoc($result)) {
+        $rows = Connection::preparedFetchAll($sql, $queryParams);
+        foreach ($rows as $row) {
             $articles[] = $this->formatArticleRecord($row);
         }
-        mysqli_free_result($result);
 
         return [
             'articles' => $articles,

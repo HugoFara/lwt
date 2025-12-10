@@ -16,7 +16,6 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 /**
@@ -115,7 +114,7 @@ class TableSetService
             str_replace(
                 '_',
                 "\\_",
-                "SHOW TABLES LIKE " . Escaping::toSqlSyntax('%_settings')
+                "SHOW TABLES LIKE '%\\_settings'"
             )
         );
         while ($row = \mysqli_fetch_row($res)) {

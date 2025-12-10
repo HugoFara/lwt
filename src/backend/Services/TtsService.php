@@ -17,7 +17,6 @@ namespace Lwt\Services;
 use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
@@ -161,10 +160,11 @@ class TtsService
      */
     public function getLanguageCodeFromName(string $language, array $langArray): string
     {
-        $lg_id = (int)Connection::fetchValue(
+        $lg_id = (int)Connection::preparedFetchValue(
             "SELECT LgID as value
             FROM {$this->tbpref}languages
-            WHERE LgName = " . Escaping::toSqlSyntax($language)
+            WHERE LgName = ?",
+            [$language]
         );
         return $this->languageService->getLanguageCode($lg_id, $langArray);
     }

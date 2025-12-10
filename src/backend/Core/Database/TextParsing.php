@@ -121,7 +121,7 @@ class TextParsing
             $order += (int)($term_type == 0 && $last_term_type == 0) +
             (int)($term_type != 1 || $last_term_type != 1);
             $row[2] = $order; // TiOrder
-            $row[3] = Escaping::toSqlSyntaxNoTrimNoNull($term); // TiText
+            $row[3] = $term; // TiText (no escaping needed for prepared statement)
             $row[4] = $term_type == 0 ? 1 : 0; // TiWordCount
             $values[] = $row;
             // Special case for kazu (numbers)
@@ -129,9 +129,7 @@ class TextParsing
                 $lastKey = array_key_last($values);
                 if ($lastKey !== null) {
                     // Concatenate the previous value with the current term
-                    $values[$lastKey - 1][3] = Escaping::toSqlSyntaxNoTrimNoNull(
-                        str_replace("'", '', $values[$lastKey - 1][3]) . $term
-                    );
+                    $values[$lastKey - 1][3] = $values[$lastKey - 1][3] . $term;
                 }
                 // Remove last element to avoid repetition
                 array_pop($values);
@@ -139,18 +137,33 @@ class TextParsing
             $last_node_type = $node_type;
         }
 
-        // Add parenthesis around each element
-        $formatted_string = array();
-        foreach ($values as $key => $value) {
-            $formatted_string[$key] = "(" . implode(",", $value) . ")";
+        // Build multi-row INSERT with prepared statement
+        // Generate placeholders for all rows: (?, ?, ?, ?, ?), (?, ?, ?, ?, ?), ...
+        $placeholders = array();
+        $flatParams = array();
+        foreach ($values as $row) {
+            $placeholders[] = "(?, ?, ?, ?, ?)";
+            // Flatten the row values into a single array for binding
+            $flatParams[] = $row[0]; // TiSeID
+            $flatParams[] = $row[1]; // TiCount
+            $flatParams[] = $row[2]; // TiOrder
+            $flatParams[] = $row[3]; // TiText
+            $flatParams[] = $row[4]; // TiWordCount
         }
-        Connection::query(
-            "INSERT INTO temptextitems2 (
-                TiSeID, TiCount, TiOrder, TiText, TiWordCount
-            ) VALUES " . implode(',', $formatted_string)
-        );
+
+        if (!empty($placeholders)) {
+            Connection::preparedExecute(
+                "INSERT INTO temptextitems2 (
+                    TiSeID, TiCount, TiOrder, TiText, TiWordCount
+                ) VALUES " . implode(',', $placeholders),
+                $flatParams
+            );
+        }
         // Delete elements TiOrder=@order
-        Connection::execute("DELETE FROM temptextitems2 WHERE TiOrder=$order");
+        Connection::preparedExecute(
+            "DELETE FROM temptextitems2 WHERE TiOrder=?",
+            [$order]
+        );
         Connection::query(
             "INSERT INTO {$tbpref}temptextitems (
                 TiCount, TiSeID, TiOrder, TiWordCount, TiText
@@ -186,7 +199,11 @@ class TextParsing
                 "SET @sid=(SELECT ifnull(max(`SeID`)+1,1) FROM `{$tbpref}sentences`);"
             );
         }
-        $sql = "LOAD DATA LOCAL INFILE " . Escaping::toSqlSyntax($file_name) . "
+        // LOAD DATA LOCAL INFILE does not support prepared statements for file path
+        // We need to use Connection::query() here, but we escape the file path manually
+        $connection = Globals::getDbConnection();
+        $escaped_file_name = mysqli_real_escape_string($connection, $file_name);
+        $sql = "LOAD DATA LOCAL INFILE '$escaped_file_name'
         INTO TABLE {$tbpref}temptextitems
         FIELDS TERMINATED BY '\\t' LINES TERMINATED BY '\\n' (@word_count, @term)
         SET
@@ -230,7 +247,6 @@ class TextParsing
     private static function saveWithSqlFallback(string $text, int $id): void
     {
         $tbpref = Globals::getTablePrefix();
-        $connection = Globals::getDbConnection();
 
         // Get starting sentence ID
         if ($id > 0) {
@@ -278,12 +294,11 @@ class TextParsing
             $current_count = $count;
             $count += strlen($term) + 1;
 
-            $escaped_term = mysqli_real_escape_string($connection, $term);
-
-            Connection::query(
+            Connection::preparedExecute(
                 "INSERT INTO `{$tbpref}temptextitems`
                 (TiSeID, TiCount, TiOrder, TiText, TiWordCount)
-                VALUES ($sid, $current_count, $order, '$escaped_term', $word_count)"
+                VALUES (?, ?, ?, ?, ?)",
+                [$sid, $current_count, $order, $term, $word_count]
             );
         }
     }
@@ -302,8 +317,10 @@ class TextParsing
     public static function parseStandard(string $text, int $id, int $lid): ?array
     {
         $tbpref = Globals::getTablePrefix();
-        $sql = "SELECT * FROM {$tbpref}languages WHERE LgID=$lid";
-        $record = Connection::fetchOne($sql);
+        $record = Connection::preparedFetchOne(
+            "SELECT * FROM {$tbpref}languages WHERE LgID=?",
+            [$lid]
+        );
 
         // Return null if language not found
         if ($record === null) {
@@ -405,30 +422,41 @@ class TextParsing
                 );
             }
             $count = 0;
-            $row = array(0, 0, 0, "", 0);
+            $rows = array();
             foreach (explode("\n", $text) as $line) {
                 if (trim($line) == "") {
                     continue;
                 }
                 list($word_count, $term) = explode("\t", $line);
-                $row[0] = $sid; // TiSeID
-                $row[1] = $count + 1; // TiCount
+                $tiSeID = $sid; // TiSeID
+                $tiCount = $count + 1; // TiCount
                 $count += mb_strlen($term);
                 if (str_ends_with($term, "\r")) {
                     $term = str_replace("\r", '', $term);
                     $sid++;
                     $count = 0;
                 }
-                $row[2] = ++$order; // TiOrder
-                $row[3] = Escaping::toSqlSyntaxNoTrimNoNull($term); // TiText
-                $row[4] = (int)$word_count; // TiWordCount
-                $values[] = "(" . implode(",", $row) . ")";
+                $tiOrder = ++$order; // TiOrder
+                $tiWordCount = (int)$word_count; // TiWordCount
+                $rows[] = array($tiSeID, $tiCount, $tiOrder, $term, $tiWordCount);
             }
-            Connection::query(
-                "INSERT INTO {$tbpref}temptextitems (
-                    TiSeID, TiCount, TiOrder, TiText, TiWordCount
-                ) VALUES " . implode(',', $values)
-            );
+
+            // Build multi-row INSERT with prepared statement
+            if (!empty($rows)) {
+                $placeholders = array();
+                $flatParams = array();
+                foreach ($rows as $row) {
+                    $placeholders[] = "(?, ?, ?, ?, ?)";
+                    $flatParams = array_merge($flatParams, $row);
+                }
+
+                Connection::preparedExecute(
+                    "INSERT INTO {$tbpref}temptextitems (
+                        TiSeID, TiCount, TiOrder, TiText, TiWordCount
+                    ) VALUES " . implode(',', $placeholders),
+                    $flatParams
+                );
+            }
         }
         return null;
     }
@@ -448,8 +476,10 @@ class TextParsing
     public static function prepare(string $text, int $id, int $lid): ?array
     {
         $tbpref = Globals::getTablePrefix();
-        $sql = "SELECT * FROM {$tbpref}languages WHERE LgID = $lid";
-        $record = Connection::fetchOne($sql);
+        $record = Connection::preparedFetchOne(
+            "SELECT * FROM {$tbpref}languages WHERE LgID = ?",
+            [$lid]
+        );
 
         // Return null if language not found
         if ($record === null) {
@@ -497,12 +527,13 @@ class TextParsing
             echo "<li>" . \htmlspecialchars($record['Sent'] ?? '', ENT_QUOTES, 'UTF-8') . "</li>";
         }
         echo '</ol>';
-        $rows = Connection::fetchAll(
+        $rows = Connection::preparedFetchAll(
             "SELECT count(`TiOrder`) cnt, if(0=TiWordCount,0,1) as len,
             LOWER(TiText) as word, WoTranslation
             FROM {$tbpref}temptextitems
-            LEFT JOIN {$tbpref}words ON lower(TiText)=WoTextLC AND WoLgID=$lid
-            GROUP BY lower(TiText)"
+            LEFT JOIN {$tbpref}words ON lower(TiText)=WoTextLC AND WoLgID=?
+            GROUP BY lower(TiText)",
+            [$lid]
         );
         foreach ($rows as $record) {
             if ($record['len'] == 1) {
@@ -541,40 +572,65 @@ class TextParsing
         $sql = '';
         // Text has multi-words, add them to the query
         if ($hasmultiword) {
-            $sql = "SELECT WoID, $lid, $tid, sent, TiOrder - (2*(n-1)) TiOrder,
+            $sql = "SELECT WoID, ?, ?, sent, TiOrder - (2*(n-1)) TiOrder,
             n TiWordCount, word
             FROM {$tbpref}tempexprs
             JOIN {$tbpref}words
             ON WoTextLC = lword AND WoWordCount = n
-            WHERE lword IS NOT NULL AND WoLgID = $lid
+            WHERE lword IS NOT NULL AND WoLgID = ?
             UNION ALL ";
         }
 
         // Insert text items (and eventual multi-words)
-        Connection::query(
-            "INSERT INTO {$tbpref}textitems2 (
-                Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
-            ) $sql
-            SELECT WoID, $lid, $tid, TiSeID, TiOrder, TiWordCount, TiText
-            FROM {$tbpref}temptextitems
-            LEFT JOIN {$tbpref}words
-            ON LOWER(TiText) = WoTextLC AND TiWordCount=1 AND WoLgID = $lid
-            ORDER BY TiOrder, TiWordCount"
-        );
+        // Note: This query uses dynamic SQL with UNION, which makes prepared statements complex
+        // We'll use the fluent API here for better control
+        if ($hasmultiword) {
+            $stmt = Connection::prepare(
+                "INSERT INTO {$tbpref}textitems2 (
+                    Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
+                ) SELECT WoID, ?, ?, sent, TiOrder - (2*(n-1)) TiOrder,
+                n TiWordCount, word
+                FROM {$tbpref}tempexprs
+                JOIN {$tbpref}words
+                ON WoTextLC = lword AND WoWordCount = n
+                WHERE lword IS NOT NULL AND WoLgID = ?
+                UNION ALL
+                SELECT WoID, ?, ?, TiSeID, TiOrder, TiWordCount, TiText
+                FROM {$tbpref}temptextitems
+                LEFT JOIN {$tbpref}words
+                ON LOWER(TiText) = WoTextLC AND TiWordCount=1 AND WoLgID = ?
+                ORDER BY TiOrder, TiWordCount"
+            );
+            $stmt->bindValues([$lid, $tid, $lid, $lid, $tid, $lid]);
+            $stmt->execute();
+        } else {
+            Connection::preparedExecute(
+                "INSERT INTO {$tbpref}textitems2 (
+                    Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
+                )
+                SELECT WoID, ?, ?, TiSeID, TiOrder, TiWordCount, TiText
+                FROM {$tbpref}temptextitems
+                LEFT JOIN {$tbpref}words
+                ON LOWER(TiText) = WoTextLC AND TiWordCount=1 AND WoLgID = ?
+                ORDER BY TiOrder, TiWordCount",
+                [$lid, $tid, $lid]
+            );
+        }
 
         // Add new sentences
         Connection::query('SET @i=0;');
-        Connection::query(
+        Connection::preparedExecute(
             "INSERT INTO {$tbpref}sentences (
                 SeLgID, SeTxID, SeOrder, SeFirstPos, SeText
             ) SELECT
-            $lid,
-            $tid,
+            ?,
+            ?,
             @i:=@i+1,
             MIN(IF(TiWordCount=0, TiOrder+1, TiOrder)),
             GROUP_CONCAT(TiText ORDER BY TiOrder SEPARATOR \"\")
             FROM {$tbpref}temptextitems
-            GROUP BY TiSeID"
+            GROUP BY TiSeID",
+            [$lid, $tid]
         );
     }
 
@@ -593,14 +649,15 @@ class TextParsing
 
         $mw = array();
         if ($multiwords) {
-            $rows = Connection::fetchAll(
+            $rows = Connection::preparedFetchAll(
                 "SELECT COUNT(WoID) cnt, n as len,
                 LOWER(WoText) AS word, WoTranslation
                 FROM {$tbpref}tempexprs
                 JOIN {$tbpref}words
                 ON WoTextLC = lword AND WoWordCount = n
-                WHERE lword IS NOT NULL AND WoLgID = $lid
-                GROUP BY WoID ORDER BY WoTextLC"
+                WHERE lword IS NOT NULL AND WoLgID = ?
+                GROUP BY WoID ORDER BY WoTextLC",
+                [$lid]
             );
             foreach ($rows as $record) {
                 $mw[] = array(
@@ -750,11 +807,13 @@ class TextParsing
         $tbpref = Globals::getTablePrefix();
         $wl = array();
         $lid = (int) $lid;
-        $sql = "SELECT LgRightToLeft FROM {$tbpref}languages WHERE LgID = $lid";
-        $record = Connection::fetchOne($sql);
+        $record = Connection::preparedFetchOne(
+            "SELECT LgRightToLeft FROM {$tbpref}languages WHERE LgID = ?",
+            [$lid]
+        );
         // Just checking if LgID exists with ID should be enough
         if ($record === null) {
-            ErrorHandler::die("Language data not found: $sql");
+            ErrorHandler::die("Language data not found for ID: $lid");
         }
         $rtlScript = $record['LgRightToLeft'];
 
@@ -777,10 +836,11 @@ class TextParsing
         }
 
         // Get multi-word count
-        $rows = Connection::fetchAll(
+        $rows = Connection::preparedFetchAll(
             "SELECT DISTINCT(WoWordCount)
             FROM {$tbpref}words
-            WHERE WoLgID = $lid AND WoWordCount > 1"
+            WHERE WoLgID = ? AND WoWordCount > 1",
+            [$lid]
         );
         foreach ($rows as $record) {
             $wl[] = (int)$record['WoWordCount'];

@@ -56,11 +56,10 @@ class WordUploadService
      */
     public function getLanguageData(int $langId): ?array
     {
-        $sql = "SELECT * FROM {$this->tbpref}languages WHERE LgID = $langId";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+        return Connection::preparedFetchOne(
+            "SELECT * FROM {$this->tbpref}languages WHERE LgID = ?",
+            [$langId]
+        );
     }
 
     /**
@@ -214,8 +213,9 @@ class WordUploadService
         int $status,
         bool $ignoreFirst
     ): void {
-        $removeSpaces = (bool) Connection::fetchValue(
-            "SELECT LgRemoveSpaces AS value FROM {$this->tbpref}languages WHERE LgID = $langId"
+        $removeSpaces = (bool) Connection::preparedFetchValue(
+            "SELECT LgRemoveSpaces AS value FROM {$this->tbpref}languages WHERE LgID = ?",
+            [$langId]
         );
 
         if ($this->isLocalInfileEnabled()) {
@@ -263,19 +263,21 @@ class WordUploadService
         int $status,
         bool $ignoreFirst
     ): void {
-        $sql = "LOAD DATA LOCAL INFILE " . Escaping::toSqlSyntax($fileName) .
-            " IGNORE INTO TABLE {$this->tbpref}words
+        $stmt = Connection::prepare(
+            "LOAD DATA LOCAL INFILE ?
+            IGNORE INTO TABLE {$this->tbpref}words
             FIELDS TERMINATED BY '$delimiter' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' " .
             ($ignoreFirst ? "IGNORE 1 LINES " : "") .
             "$columnsClause
-            SET WoLgID = $langId, " .
+            SET WoLgID = ?, " .
             ($removeSpaces ?
                 'WoTextLC = LOWER(REPLACE(@wotext," ","")), WoText = REPLACE(@wotext, " ", "")' :
                 'WoTextLC = LOWER(WoText)') . ",
-            WoStatus = $status, WoStatusChanged = NOW(), " .
-            WordStatusService::makeScoreRandomInsertUpdate('u');
-
-        Connection::execute($sql);
+            WoStatus = ?, WoStatusChanged = NOW(), " .
+            WordStatusService::makeScoreRandomInsertUpdate('u')
+        );
+        $stmt->bind('sis', $fileName, $langId, $status);
+        $stmt->execute();
     }
 
     /**
@@ -304,7 +306,8 @@ class WordUploadService
         $dataText = fread($handle, filesize($fileName));
         fclose($handle);
 
-        $values = [];
+        $placeholders = [];
+        $params = [];
         $i = 0;
 
         foreach (explode(PHP_EOL, $dataText) as $line) {
@@ -316,7 +319,6 @@ class WordUploadService
                 continue;
             }
 
-            $row = [];
             $parsedLine = explode($delimiter, $line);
 
             if (!isset($parsedLine[$fields["txt"] - 1])) {
@@ -327,37 +329,47 @@ class WordUploadService
 
             // Fill WoText and WoTextLC
             if ($removeSpaces) {
-                $row[] = str_replace(" ", "", $wotext);
-                $row[] = mb_strtolower(str_replace(" ", "", $wotext));
+                $params[] = str_replace(" ", "", $wotext);
+                $params[] = mb_strtolower(str_replace(" ", "", $wotext));
             } else {
-                $row[] = $wotext;
-                $row[] = mb_strtolower($wotext);
+                $params[] = $wotext;
+                $params[] = mb_strtolower($wotext);
             }
 
             if ($fields["tr"] != 0 && isset($parsedLine[$fields["tr"] - 1])) {
-                $row[] = $parsedLine[$fields["tr"] - 1];
+                $params[] = $parsedLine[$fields["tr"] - 1];
             }
             if ($fields["ro"] != 0 && isset($parsedLine[$fields["ro"] - 1])) {
-                $row[] = $parsedLine[$fields["ro"] - 1];
+                $params[] = $parsedLine[$fields["ro"] - 1];
             }
             if ($fields["se"] != 0 && isset($parsedLine[$fields["se"] - 1])) {
-                $row[] = $parsedLine[$fields["se"] - 1];
+                $params[] = $parsedLine[$fields["se"] - 1];
             }
 
-            $row = array_map([Escaping::class, 'toSqlSyntax'], $row);
-            $row = array_merge(
-                $row,
-                [
-                    (string)$langId, (string)$status, "NOW()",
-                    WordStatusService::SCORE_FORMULA_TODAY, WordStatusService::SCORE_FORMULA_TOMORROW, "RAND()"
-                ]
-            );
-            $values[] = "(" . implode(",", $row) . ")";
+            // Add language ID, status, and score parameters for each row
+            $params[] = $langId;
+            $params[] = $status;
+
+            // Build placeholder string for this row
+            $rowPlaceholders = '(?, ?';  // WoText, WoTextLC
+            if ($fields["tr"] != 0) {
+                $rowPlaceholders .= ', ?';
+            }
+            if ($fields["ro"] != 0) {
+                $rowPlaceholders .= ', ?';
+            }
+            if ($fields["se"] != 0) {
+                $rowPlaceholders .= ', ?';
+            }
+            $rowPlaceholders .= ', ?, ?, NOW(), ' .  // WoLgID, WoStatus, WoStatusChanged
+                WordStatusService::SCORE_FORMULA_TODAY . ', ' .
+                WordStatusService::SCORE_FORMULA_TOMORROW . ', RAND())';
+
+            $placeholders[] = $rowPlaceholders;
         }
 
-        if (!empty($values)) {
-            Connection::query(
-                "INSERT INTO {$this->tbpref}words(
+        if (!empty($placeholders)) {
+            $sql = "INSERT INTO {$this->tbpref}words(
                     WoText, WoTextLC, " .
                     ($fields["tr"] != 0 ? 'WoTranslation, ' : '') .
                     ($fields["ro"] != 0 ? 'WoRomanization, ' : '') .
@@ -365,8 +377,9 @@ class WordUploadService
                     "WoLgID, WoStatus, WoStatusChanged,
                     WoTodayScore, WoTomorrowScore, WoRandom
                 )
-                VALUES " . implode(',', $values)
-            );
+                VALUES " . implode(',', $placeholders);
+
+            Connection::preparedExecute($sql, $params);
         }
     }
 
@@ -398,8 +411,9 @@ class WordUploadService
         string $translDelim,
         string $tabType
     ): void {
-        $removeSpaces = (bool) Connection::fetchValue(
-            "SELECT LgRemoveSpaces AS value FROM {$this->tbpref}languages WHERE LgID = $langId"
+        $removeSpaces = (bool) Connection::preparedFetchValue(
+            "SELECT LgRemoveSpaces AS value FROM {$this->tbpref}languages WHERE LgID = ?",
+            [$langId]
         );
 
         $this->initTempTables();
@@ -484,8 +498,8 @@ class WordUploadService
         string $fileName,
         bool $ignoreFirst
     ): void {
-        $sql = "LOAD DATA LOCAL INFILE " . Escaping::toSqlSyntax($fileName) .
-            " INTO TABLE {$this->tbpref}tempwords
+        $sql = "LOAD DATA LOCAL INFILE ?
+            INTO TABLE {$this->tbpref}tempwords
             FIELDS TERMINATED BY '$delimiter' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' " .
             ($ignoreFirst ? "IGNORE 1 LINES " : "") .
             "$columnsClause SET " .
@@ -497,7 +511,9 @@ class WordUploadService
             $sql .= ', WoTaglist = REPLACE(@taglist, " ", ",")';
         }
 
-        Connection::execute($sql);
+        $stmt = Connection::prepare($sql);
+        $stmt->bind('s', $fileName);
+        $stmt->execute();
     }
 
     /**
@@ -522,7 +538,8 @@ class WordUploadService
         $dataText = fread($handle, filesize($fileName));
         fclose($handle);
 
-        $values = [];
+        $placeholders = [];
+        $params = [];
         $i = 0;
 
         foreach (explode(PHP_EOL, $dataText) as $line) {
@@ -534,7 +551,6 @@ class WordUploadService
                 continue;
             }
 
-            $row = [];
             $parsedLine = explode($delimiter, $line);
 
             if (!isset($parsedLine[$fields["txt"] - 1])) {
@@ -545,43 +561,56 @@ class WordUploadService
 
             // Fill WoText and WoTextLC
             if ($removeSpaces) {
-                $row[] = str_replace(" ", "", $wotext);
-                $row[] = mb_strtolower(str_replace(" ", "", $wotext));
+                $params[] = str_replace(" ", "", $wotext);
+                $params[] = mb_strtolower(str_replace(" ", "", $wotext));
             } else {
-                $row[] = $wotext;
-                $row[] = mb_strtolower($wotext);
+                $params[] = $wotext;
+                $params[] = mb_strtolower($wotext);
             }
 
             if ($fields["tr"] != 0 && isset($parsedLine[$fields["tr"] - 1])) {
-                $row[] = $parsedLine[$fields["tr"] - 1];
+                $params[] = $parsedLine[$fields["tr"] - 1];
             }
             if ($fields["ro"] != 0 && isset($parsedLine[$fields["ro"] - 1])) {
-                $row[] = $parsedLine[$fields["ro"] - 1];
+                $params[] = $parsedLine[$fields["ro"] - 1];
             }
             if ($fields["se"] != 0 && isset($parsedLine[$fields["se"] - 1])) {
-                $row[] = $parsedLine[$fields["se"] - 1];
+                $params[] = $parsedLine[$fields["se"] - 1];
             }
             if ($fields["tl"] != 0 && isset($parsedLine[$fields["tl"] - 1])) {
-                $row[] = str_replace(" ", ",", $parsedLine[$fields['tl'] - 1]);
+                $params[] = str_replace(" ", ",", $parsedLine[$fields['tl'] - 1]);
             }
 
-            $values[] = "(" . implode(
-                ",",
-                array_map([Escaping::class, 'toSqlSyntax'], $row)
-            ) . ")";
+            // Build placeholder string for this row
+            $rowPlaceholders = '(?, ?';  // WoText, WoTextLC
+            if ($fields["tr"] != 0) {
+                $rowPlaceholders .= ', ?';
+            }
+            if ($fields["ro"] != 0) {
+                $rowPlaceholders .= ', ?';
+            }
+            if ($fields["se"] != 0) {
+                $rowPlaceholders .= ', ?';
+            }
+            if ($fields["tl"] != 0) {
+                $rowPlaceholders .= ', ?';
+            }
+            $rowPlaceholders .= ')';
+
+            $placeholders[] = $rowPlaceholders;
         }
 
-        if (!empty($values)) {
-            Connection::query(
-                "INSERT INTO {$this->tbpref}tempwords(
+        if (!empty($placeholders)) {
+            $sql = "INSERT INTO {$this->tbpref}tempwords(
                     WoText, WoTextLC" .
                     ($fields["tr"] != 0 ? ', WoTranslation' : '') .
                     ($fields["ro"] != 0 ? ', WoRomanization' : '') .
                     ($fields["se"] != 0 ? ', WoSentence' : '') .
                     ($fields["tl"] != 0 ? ", WoTaglist" : "") .
                 ")
-                VALUES " . implode(',', $values)
-            );
+                VALUES " . implode(',', $placeholders);
+
+            Connection::preparedExecute($sql, $params);
         }
     }
 
@@ -617,20 +646,26 @@ class WordUploadService
 
         $seplen = mb_strlen($wosep, 'UTF-8');
         $woTrRepl = $this->tbpref . 'words.WoTranslation';
+        $replaceParams = [];
         for ($i = 1; $i < $seplen; $i++) {
-            $woTrRepl = 'REPLACE(' . $woTrRepl . ', ' .
-                Escaping::toSqlSyntax($wosep[$i]) . ', ' .
-                Escaping::toSqlSyntax($wosep[0]) . ')';
+            $woTrRepl = 'REPLACE(' . $woTrRepl . ', ?, ?)';
+            $replaceParams[] = $wosep[$i];
+            $replaceParams[] = $wosep[0];
         }
 
         // Insert existing translations
-        Connection::execute(
+        $params = array_merge(
+            $replaceParams,
+            [$wosep[0], $wosep[0], $langId, $wosep[0]]
+        );
+
+        $stmt = Connection::prepare(
             "INSERT IGNORE INTO {$this->tbpref}merge_words(MText,MTranslation)
             SELECT b.WoTextLC,
             trim(
                 SUBSTRING_INDEX(
-                    SUBSTRING_INDEX(b.WoTranslation, " . Escaping::toSqlSyntax($wosep[0]) . ", {$this->tbpref}numbers.n),
-                    " . Escaping::toSqlSyntax($wosep[0]) . ", -1
+                    SUBSTRING_INDEX(b.WoTranslation, ?, {$this->tbpref}numbers.n),
+                    ?, -1
                 )
             ) name
             FROM {$this->tbpref}numbers
@@ -640,12 +675,13 @@ class WordUploadService
                 LEFT JOIN {$this->tbpref}words
                 ON {$this->tbpref}words.WoTextLC = {$this->tbpref}tempwords.WoTextLC
                     AND {$this->tbpref}words.WoTranslation != '*'
-                    AND {$this->tbpref}words.WoLgID = $langId
+                    AND {$this->tbpref}words.WoLgID = ?
             ) b
-            ON CHAR_LENGTH(b.WoTranslation)-CHAR_LENGTH(REPLACE(b.WoTranslation, " .
-                Escaping::toSqlSyntax($wosep[0]) . ", ''))>= {$this->tbpref}numbers.n-1
+            ON CHAR_LENGTH(b.WoTranslation)-CHAR_LENGTH(REPLACE(b.WoTranslation, ?, ''))>= {$this->tbpref}numbers.n-1
             ORDER BY b.WoTextLC, n"
         );
+        $stmt->bindValues($params);
+        $stmt->execute();
 
         // Handle import delimiter
         $tesep = $translDelim;
@@ -659,29 +695,36 @@ class WordUploadService
 
         $seplen = mb_strlen($tesep, 'UTF-8');
         $woTrRepl = $this->tbpref . 'tempwords.WoTranslation';
+        $replaceParams2 = [];
         for ($i = 1; $i < $seplen; $i++) {
-            $woTrRepl = 'REPLACE(' . $woTrRepl . ', ' .
-                Escaping::toSqlSyntax($tesep[$i]) . ', ' .
-                Escaping::toSqlSyntax($tesep[0]) . ')';
+            $woTrRepl = 'REPLACE(' . $woTrRepl . ', ?, ?)';
+            $replaceParams2[] = $tesep[$i];
+            $replaceParams2[] = $tesep[0];
         }
 
         // Insert new translations
-        Connection::execute(
+        $params2 = array_merge(
+            $replaceParams2,
+            [$tesep[0], $tesep[0], $tesep[0]]
+        );
+
+        $stmt = Connection::prepare(
             "INSERT IGNORE INTO {$this->tbpref}merge_words(MText,MTranslation)
             SELECT {$this->tbpref}tempwords.WoTextLC,
             trim(
                 SUBSTRING_INDEX(
-                    SUBSTRING_INDEX($woTrRepl," . Escaping::toSqlSyntax($tesep[0]) . ",
+                    SUBSTRING_INDEX($woTrRepl, ?,
                         {$this->tbpref}numbers.n
-                    ), " . Escaping::toSqlSyntax($tesep[0]) . ", -1
+                    ), ?, -1
                 )
             ) name
             FROM {$this->tbpref}numbers
             INNER JOIN {$this->tbpref}tempwords
-            ON CHAR_LENGTH({$this->tbpref}tempwords.WoTranslation)-CHAR_LENGTH(REPLACE($woTrRepl, " .
-                Escaping::toSqlSyntax($tesep[0]) . ", ''))>= {$this->tbpref}numbers.n-1
+            ON CHAR_LENGTH({$this->tbpref}tempwords.WoTranslation)-CHAR_LENGTH(REPLACE($woTrRepl, ?, ''))>= {$this->tbpref}numbers.n-1
             ORDER BY {$this->tbpref}tempwords.WoTextLC, n"
         );
+        $stmt->bindValues($params2);
+        $stmt->execute();
 
         // Determine separator for output
         if ($wosep[0] == ',' || $wosep[0] == ';') {
@@ -691,18 +734,19 @@ class WordUploadService
         }
 
         // Update tempwords with merged translations
-        Connection::execute(
+        Connection::preparedExecute(
             "UPDATE {$this->tbpref}tempwords
             LEFT JOIN (
                 SELECT MText, GROUP_CONCAT(trim(MTranslation)
                     ORDER BY MID
-                    SEPARATOR " . Escaping::toSqlSyntaxNoTrimNoNull($wosep) . "
+                    SEPARATOR ?
                 ) AS Translation
                 FROM {$this->tbpref}merge_words
                 GROUP BY MText
             ) A
             ON MText=WoTextLC
-            SET WoTranslation = Translation"
+            SET WoTranslation = Translation",
+            [$wosep]
         );
 
         Connection::execute("DROP TABLE {$this->tbpref}merge_words");
@@ -817,7 +861,8 @@ class WordUploadService
         );
 
         // Link words to tags
-        Connection::execute("INSERT IGNORE INTO {$this->tbpref}wordtags
+        Connection::preparedExecute(
+            "INSERT IGNORE INTO {$this->tbpref}wordtags
             SELECT WoID, TgID
             FROM (
                 SELECT {$this->tbpref}tempwords.WoTextLC, SUBSTRING_INDEX(
@@ -829,7 +874,9 @@ class WordUploadService
                 ON CHAR_LENGTH({$this->tbpref}tempwords.WoTaglist)-CHAR_LENGTH(REPLACE({$this->tbpref}tempwords.WoTaglist, ',', ''))>={$this->tbpref}numbers.n-1
                 ORDER BY WoTextLC, n
             ) A, {$this->tbpref}tags, {$this->tbpref}words
-            WHERE name=TgText AND A.WoTextLC={$this->tbpref}words.WoTextLC AND WoLgID=$langId");
+            WHERE name=TgText AND A.WoTextLC={$this->tbpref}words.WoTextLC AND WoLgID=?",
+            [$langId]
+        );
 
         TagService::getAllTermTags(true);
     }
@@ -866,19 +913,22 @@ class WordUploadService
         $delimiter = ' ' . $this->getSqlDelimiter($tabType);
 
         if ($this->isLocalInfileEnabled()) {
-            $sql = "LOAD DATA LOCAL INFILE " . Escaping::toSqlSyntax($fileName) .
-                " IGNORE INTO TABLE {$this->tbpref}tempwords
+            $sql = "LOAD DATA LOCAL INFILE ?
+                IGNORE INTO TABLE {$this->tbpref}tempwords
                 FIELDS TERMINATED BY '$delimiter' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' " .
                 ($ignoreFirst ? "IGNORE 1 LINES " : "") .
                 "$columns
                 SET WoTextLC = REPLACE(@taglist, ' ', ',')";
-            Connection::execute($sql);
+            $stmt = Connection::prepare($sql);
+            $stmt->bind('s', $fileName);
+            $stmt->execute();
         } else {
             $handle = fopen($fileName, 'r');
             $dataText = fread($handle, filesize($fileName));
             fclose($handle);
 
-            $texts = [];
+            $params = [];
+            $placeholders = [];
             $i = 0;
             $realDelimiter = $this->getDelimiter($tabType);
 
@@ -898,14 +948,14 @@ class WordUploadService
 
                 $tags = $parts[$fields["tl"] - 1];
                 $tags = str_replace(' ', ',', $tags);
-                $texts[] = "(" . Escaping::toSqlSyntax($tags) . ")";
+                $params[] = $tags;
+                $placeholders[] = "(?)";
             }
 
-            if (!empty($texts)) {
-                Connection::query(
-                    "INSERT INTO {$this->tbpref}tempwords(WoTextLC)
-                    VALUES " . implode(',', $texts)
-                );
+            if (!empty($placeholders)) {
+                $sql = "INSERT INTO {$this->tbpref}tempwords(WoTextLC)
+                    VALUES " . implode(',', $placeholders);
+                Connection::preparedExecute($sql, $params);
             }
         }
 
@@ -942,9 +992,10 @@ class WordUploadService
      */
     public function handleMultiwords(int $langId, string $lastUpdate): void
     {
-        $mwords = (int) Connection::fetchValue(
+        $mwords = (int) Connection::preparedFetchValue(
             "SELECT count(*) AS value FROM {$this->tbpref}words
-            WHERE WoWordCount > 1 AND WoCreated > " . Escaping::toSqlSyntax($lastUpdate)
+            WHERE WoWordCount > 1 AND WoCreated > ?",
+            [$lastUpdate]
         );
 
         if ($mwords > 40) {
@@ -957,9 +1008,11 @@ class WordUploadService
                 ->delete();
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-            $sql = "SELECT TxID, TxText FROM {$this->tbpref}texts
-                WHERE TxLgID = $langId ORDER BY TxID";
-            $res = Connection::query($sql);
+            $res = Connection::prepare("SELECT TxID, TxText FROM {$this->tbpref}texts
+                WHERE TxLgID = ? ORDER BY TxID")
+                ->bind('i', $langId)
+                ->execute()
+                ->getResult();
             while ($record = mysqli_fetch_assoc($res)) {
                 $txtid = (int) $record["TxID"];
                 $txttxt = (string) $record["TxText"];
@@ -969,11 +1022,14 @@ class WordUploadService
         } elseif ($mwords > 0) {
             // Update individual multi-word expressions
             $sqlarr = [];
-            $res = Connection::query(
+            $res = Connection::prepare(
                 "SELECT WoID, WoTextLC, WoWordCount
                 FROM {$this->tbpref}words
-                WHERE WoWordCount > 1 AND WoCreated > " . Escaping::toSqlSyntax($lastUpdate)
-            );
+                WHERE WoWordCount > 1 AND WoCreated > ?"
+            )
+                ->bind('s', $lastUpdate)
+                ->execute()
+                ->getResult();
             while ($record = mysqli_fetch_assoc($res)) {
                 $len = (int) $record['WoWordCount'];
                 $wid = (int) $record['WoID'];
@@ -1028,9 +1084,10 @@ class WordUploadService
      */
     public function countImportedTerms(string $lastUpdate): int
     {
-        return (int) Connection::fetchValue(
+        return (int) Connection::preparedFetchValue(
             "SELECT count(*) AS value FROM {$this->tbpref}words
-            WHERE WoStatusChanged > " . Escaping::toSqlSyntax($lastUpdate)
+            WHERE WoStatusChanged > ?",
+            [$lastUpdate]
         );
     }
 
@@ -1053,19 +1110,12 @@ class WordUploadService
             FROM {$this->tbpref}words w
             LEFT JOIN {$this->tbpref}wordtags wt ON w.WoID = wt.WtWoID
             LEFT JOIN {$this->tbpref}tags t ON wt.WtTgID = t.TgID
-            WHERE w.WoStatusChanged > " . Escaping::toSqlSyntax($lastUpdate) . "
+            WHERE w.WoStatusChanged > ?
             GROUP BY w.WoID
             ORDER BY w.WoText
-            LIMIT $offset, $limit";
+            LIMIT ?, ?";
 
-        $result = Connection::query($sql);
-        $terms = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $terms[] = $row;
-        }
-        mysqli_free_result($result);
-
-        return $terms;
+        return Connection::preparedFetchAll($sql, [$lastUpdate, $offset, $limit]);
     }
 
     /**
@@ -1077,8 +1127,9 @@ class WordUploadService
      */
     public function isRightToLeft(int $langId): bool
     {
-        return (bool) Connection::fetchValue(
-            "SELECT LgRightToLeft AS value FROM {$this->tbpref}languages WHERE LgID = $langId"
+        return (bool) Connection::preparedFetchValue(
+            "SELECT LgRightToLeft AS value FROM {$this->tbpref}languages WHERE LgID = ?",
+            [$langId]
         );
     }
 }

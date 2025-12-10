@@ -72,10 +72,11 @@ class Maintenance
         ) AND Name';
         if (empty($tbpref)) {
             $sql .= " NOT LIKE '\\_%'";
+            $rows = Connection::fetchAll($sql);
         } else {
-            $sql .= " LIKE " . Escaping::toSqlSyntax(rtrim($tbpref, '_')) . "'\\_%" . "'";
+            $sql .= " LIKE CONCAT(?, '\\_', '%')";
+            $rows = Connection::preparedFetchAll($sql, [rtrim($tbpref, '_')]);
         }
-        $rows = Connection::fetchAll($sql);
         foreach ($rows as $row) {
             Connection::execute('OPTIMIZE TABLE ' . $row['Name']);
         }
@@ -98,8 +99,8 @@ class Maintenance
         $mecab = get_mecab_path($mecab_args);
 
         $sql = "SELECT WoID, WoTextLC FROM {$tbpref}words
-        WHERE WoLgID = $japid AND WoWordCount = 0";
-        $rows = Connection::fetchAll($sql);
+        WHERE WoLgID = ? AND WoWordCount = 0";
+        $rows = Connection::preparedFetchAll($sql, [$japid]);
         if (empty($rows)) {
             return;
         }
@@ -116,8 +117,7 @@ class Maintenance
             unlink($db_to_mecab);
             return;
         }
-        $sql = "INSERT INTO {$tbpref}mecab (MID, MWordCount) values";
-        $values = array();
+        $data = array();
         while (!feof($handle)) {
             $row = fgets($handle, 1024);
             $arr = explode("4\t", $row, 2);
@@ -130,15 +130,14 @@ class Maintenance
                 if (empty($cnt)) {
                     $cnt = 1;
                 }
-                $values[] = "(" . Escaping::toSqlSyntax($arr[0]) . ", $cnt)";
+                $data[] = ['mid' => $arr[0], 'count' => $cnt];
             }
         }
         pclose($handle);
-        if (empty($values)) {
+        if (empty($data)) {
             // Nothing to update, quit
             return;
         }
-        $sql .= join(",", $values);
 
 
         // STEP 3: edit the database
@@ -150,7 +149,12 @@ class Maintenance
             ) CHARSET=utf8"
         );
 
-        Connection::query($sql);
+        // Insert data using prepared statements
+        $insertSql = "INSERT INTO {$tbpref}mecab (MID, MWordCount) VALUES (?, ?)";
+        foreach ($data as $entry) {
+            Connection::preparedExecute($insertSql, [$entry['mid'], $entry['count']]);
+        }
+
         Connection::query(
             "UPDATE {$tbpref}words
             JOIN {$tbpref}mecab ON MID = WoID

@@ -738,6 +738,7 @@ $repo->delete($language);                      // Delete
 | **Total PHP Files** | **194** | - |
 
 **Namespace Adoption:**
+
 - 100% of files declare `Lwt\` namespace
 - 99 files actively import `Lwt\` classes
 - 100% strict_types declaration
@@ -989,6 +990,7 @@ Http → Application → Domain ← Infrastructure
 #### 3. Use Cases Replace Fat Services
 
 Instead of:
+
 ```php
 // Current: Large service with many responsibilities
 class TextService {
@@ -1000,6 +1002,7 @@ class TextService {
 ```
 
 Use single-purpose use cases:
+
 ```php
 // Future: Each use case is a single class
 class ImportText {
@@ -1041,6 +1044,7 @@ Frontend: modules/text/
 ```
 
 Each frontend module contains:
+
 - `components/` - UI components for this feature
 - `stores/` - State management (Alpine.js stores)
 - `api.ts` - API client for this module's endpoints

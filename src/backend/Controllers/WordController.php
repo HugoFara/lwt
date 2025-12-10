@@ -383,35 +383,40 @@ class WordController extends BaseController
             $woId = $this->paramInt("WoID", 0) ?? 0;
             $woSentence = $this->param("WoSentence");
             $woRomanization = $this->param("WoRomanization");
-            $xx = '';
+            $statusUpdate = '';
+            $params = [
+                $woText,
+                $translation,
+                ExportService::replaceTabNewline($woSentence),
+                $woRomanization
+            ];
             if ($oldstatus != $newstatus) {
-                $xx = ', WoStatus = ' . $newstatus . ', WoStatusChanged = NOW()';
+                $statusUpdate = ', WoStatus = ?, WoStatusChanged = NOW()';
+                $params[] = $newstatus;
             }
+            $params[] = $woId;
 
-            \Lwt\Database\Connection::execute(
-                'update ' . $tbpref . 'words set WoText = ' .
-                \Lwt\Database\Escaping::toSqlSyntax($woText) . ', WoTranslation = ' .
-                \Lwt\Database\Escaping::toSqlSyntax($translation) . ', WoSentence = ' .
-                \Lwt\Database\Escaping::toSqlSyntax(ExportService::replaceTabNewline($woSentence)) .
-                ', WoRomanization = ' .
-                \Lwt\Database\Escaping::toSqlSyntax($woRomanization) . $xx .
-                ',' . WordStatusService::makeScoreRandomInsertUpdate('u') .
-                ' where WoID = ' . $woId,
-                "Updated"
+            \Lwt\Database\Connection::preparedExecute(
+                'UPDATE ' . $tbpref . 'words SET WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?' .
+                $statusUpdate . ',' . WordStatusService::makeScoreRandomInsertUpdate('u') .
+                ' WHERE WoID = ?',
+                $params
             );
             $wid = $woId;
             TagService::saveWordTags($wid);
 
             $message = 'Updated';
 
-            $lang = \Lwt\Database\Connection::fetchValue(
-                'select WoLgID as value from ' . $tbpref . 'words where WoID = ' . $wid
+            $lang = \Lwt\Database\Connection::preparedFetchValue(
+                'SELECT WoLgID AS value FROM ' . $tbpref . 'words WHERE WoID = ?',
+                [$wid]
             );
             if (!isset($lang)) {
                 ErrorHandler::die('Cannot retrieve language in edit_tword.php');
             }
-            $regexword = \Lwt\Database\Connection::fetchValue(
-                'select LgRegexpWordCharacters as value from ' . $tbpref . 'languages where LgID = ' . $lang
+            $regexword = \Lwt\Database\Connection::preparedFetchValue(
+                'SELECT LgRegexpWordCharacters AS value FROM ' . $tbpref . 'languages WHERE LgID = ?',
+                [$lang]
             );
             if (!isset($regexword)) {
                 ErrorHandler::die('Cannot retrieve language data in edit_tword.php');

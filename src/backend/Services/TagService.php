@@ -20,7 +20,6 @@ use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Http\UrlUtilities;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
@@ -90,17 +89,19 @@ class TagService
      *
      * @param string $query Filter query string
      *
-     * @return string SQL WHERE clause fragment
+     * @return array{clause: string, params: array} Array with SQL clause and parameters
      */
-    public function buildWhereClause(string $query): string
+    public function buildWhereClause(string $query): array
     {
         if ($query === '') {
-            return '';
+            return ['clause' => '', 'params' => []];
         }
 
-        $sqlQuery = Escaping::toSqlSyntax(str_replace("*", "%", $query));
-        return ' and (' . $this->colPrefix . 'Text like ' . $sqlQuery .
-               ' or ' . $this->colPrefix . 'Comment like ' . $sqlQuery . ')';
+        $searchValue = str_replace("*", "%", $query);
+        $clause = ' AND (' . $this->colPrefix . 'Text LIKE ? OR ' .
+                  $this->colPrefix . 'Comment LIKE ?)';
+
+        return ['clause' => $clause, 'params' => [$searchValue, $searchValue]];
     }
 
     /**
@@ -133,17 +134,18 @@ class TagService
     /**
      * Delete all tags matching the filter.
      *
-     * @param string $whereClause Additional WHERE clause
+     * @param array{clause: string, params: array} $whereData WHERE clause data from buildWhereClause()
      *
      * @return string Result message
      */
-    public function deleteAll(string $whereClause = ''): string
+    public function deleteAll(array $whereData = ['clause' => '', 'params' => []]): string
     {
-        $message = Connection::execute(
-            'delete from ' . $this->tbpref . $this->tableName .
-            ' where (1=1) ' . $whereClause,
-            "Deleted"
+        $affected = Connection::preparedExecute(
+            'DELETE FROM ' . $this->tbpref . $this->tableName .
+            ' WHERE (1=1) ' . $whereData['clause'],
+            $whereData['params']
         );
+        $message = $affected > 0 ? "Deleted" : "Deleted (0 rows affected)";
 
         $this->cleanupOrphanedLinks();
         Maintenance::adjustAutoIncrement($this->tableName, $this->colPrefix . 'ID');
@@ -160,11 +162,12 @@ class TagService
      */
     public function delete(int $tagId): string
     {
-        $message = Connection::execute(
-            'delete from ' . $this->tbpref . $this->tableName .
-            ' where ' . $this->colPrefix . 'ID = ' . $tagId,
-            "Deleted"
+        $affected = Connection::preparedExecute(
+            'DELETE FROM ' . $this->tbpref . $this->tableName .
+            ' WHERE ' . $this->colPrefix . 'ID = ?',
+            [$tagId]
         );
+        $message = $affected > 0 ? "Deleted" : "Deleted (0 rows affected)";
 
         $this->cleanupOrphanedLinks();
         Maintenance::adjustAutoIncrement($this->tableName, $this->colPrefix . 'ID');
@@ -182,14 +185,16 @@ class TagService
      */
     public function create(string $text, string $comment): string
     {
-        return Connection::execute(
-            'insert into ' . $this->tbpref . $this->tableName .
-            ' (' . $this->colPrefix . 'Text, ' . $this->colPrefix . 'Comment) values(' .
-            Escaping::toSqlSyntax($text) . ', ' .
-            Escaping::toSqlSyntaxNoNull($comment) . ')',
-            "Saved",
-            false
-        );
+        try {
+            Connection::preparedInsert(
+                'INSERT INTO ' . $this->tbpref . $this->tableName .
+                ' (' . $this->colPrefix . 'Text, ' . $this->colPrefix . 'Comment) VALUES (?, ?)',
+                [$text, $comment]
+            );
+            return "Saved";
+        } catch (\mysqli_sql_exception $e) {
+            return "Error: " . $e->getMessage();
+        }
     }
 
     /**
@@ -203,14 +208,18 @@ class TagService
      */
     public function update(int $tagId, string $text, string $comment): string
     {
-        return Connection::execute(
-            'update ' . $this->tbpref . $this->tableName . ' set ' .
-            $this->colPrefix . 'Text = ' . Escaping::toSqlSyntax($text) . ', ' .
-            $this->colPrefix . 'Comment = ' . Escaping::toSqlSyntaxNoNull($comment) .
-            ' where ' . $this->colPrefix . 'ID = ' . $tagId,
-            "Updated",
-            false
-        );
+        try {
+            Connection::preparedExecute(
+                'UPDATE ' . $this->tbpref . $this->tableName . ' SET ' .
+                $this->colPrefix . 'Text = ?, ' .
+                $this->colPrefix . 'Comment = ? WHERE ' .
+                $this->colPrefix . 'ID = ?',
+                [$text, $comment, $tagId]
+            );
+            return "Updated";
+        } catch (\mysqli_sql_exception $e) {
+            return "Error: " . $e->getMessage();
+        }
     }
 
     /**
@@ -222,33 +231,35 @@ class TagService
      */
     public function getById(int $tagId): ?array
     {
-        $sql = 'select * from ' . $this->tbpref . $this->tableName .
-               ' where ' . $this->colPrefix . 'ID = ' . $tagId;
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $row = Connection::preparedFetchOne(
+            'SELECT * FROM ' . $this->tbpref . $this->tableName .
+            ' WHERE ' . $this->colPrefix . 'ID = ?',
+            [$tagId]
+        );
 
-        return $record ?: null;
+        return $row ?: null;
     }
 
     /**
      * Get total count of tags matching filter.
      *
-     * @param string $whereClause Additional WHERE clause
+     * @param array{clause: string, params: array} $whereData WHERE clause data from buildWhereClause()
      *
      * @return int Number of tags
      */
-    public function getCount(string $whereClause = ''): int
+    public function getCount(array $whereData = ['clause' => '', 'params' => []]): int
     {
-        $sql = 'select count(' . $this->colPrefix . 'ID) as value from ' .
-               $this->tbpref . $this->tableName . ' where (1=1) ' . $whereClause;
-        return (int) Connection::fetchValue($sql);
+        return (int) Connection::preparedFetchValue(
+            'SELECT COUNT(' . $this->colPrefix . 'ID) AS value FROM ' .
+            $this->tbpref . $this->tableName . ' WHERE (1=1) ' . $whereData['clause'],
+            $whereData['params']
+        );
     }
 
     /**
      * Get tags list with pagination.
      *
-     * @param string $whereClause Additional WHERE clause
+     * @param array{clause: string, params: array} $whereData WHERE clause data from buildWhereClause()
      * @param string $orderBy     Sort column name (without prefix)
      * @param int    $page        Page number (1-based)
      * @param int    $perPage     Items per page
@@ -256,7 +267,7 @@ class TagService
      * @return array Array of tag records with usage counts
      */
     public function getList(
-        string $whereClause = '',
+        array $whereData = ['clause' => '', 'params' => []],
         string $orderBy = 'Text',
         int $page = 1,
         int $perPage = 20
@@ -269,16 +280,18 @@ class TagService
         $offset = ($page - 1) * $perPage;
         $limit = 'LIMIT ' . $offset . ',' . $perPage;
 
-        $sql = 'select ' . $this->colPrefix . 'ID, ' .
-               $this->colPrefix . 'Text, ' . $this->colPrefix . 'Comment ' .
-               'from ' . $this->tbpref . $this->tableName .
-               ' where (1=1) ' . $whereClause .
-               ' order by ' . $sortColumn . ' ' . $limit;
+        $rows = Connection::preparedFetchAll(
+            'SELECT ' . $this->colPrefix . 'ID, ' .
+            $this->colPrefix . 'Text, ' . $this->colPrefix . 'Comment ' .
+            'FROM ' . $this->tbpref . $this->tableName .
+            ' WHERE (1=1) ' . $whereData['clause'] .
+            ' ORDER BY ' . $sortColumn . ' ' . $limit,
+            $whereData['params']
+        );
 
-        $res = Connection::query($sql);
         $tags = [];
 
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             $tagId = (int)$record[$this->colPrefix . 'ID'];
             $tag = [
                 'id' => $tagId,
@@ -294,7 +307,6 @@ class TagService
 
             $tags[] = $tag;
         }
-        mysqli_free_result($res);
 
         return $tags;
     }
@@ -309,13 +321,13 @@ class TagService
     public function getUsageCount(int $tagId): int
     {
         if ($this->tagType === 'text') {
-            $sql = 'select count(*) as value from ' . $this->tbpref .
-                   'texttags where TtT2ID=' . $tagId;
+            $sql = 'SELECT COUNT(*) AS value FROM ' . $this->tbpref .
+                   'texttags WHERE TtT2ID = ?';
         } else {
-            $sql = 'select count(*) as value from ' . $this->tbpref .
-                   'wordtags where WtTgID=' . $tagId;
+            $sql = 'SELECT COUNT(*) AS value FROM ' . $this->tbpref .
+                   'wordtags WHERE WtTgID = ?';
         }
-        return (int) Connection::fetchValue($sql);
+        return (int) Connection::preparedFetchValue($sql, [$tagId]);
     }
 
     /**
@@ -330,9 +342,10 @@ class TagService
         if ($this->tagType !== 'text') {
             return 0;
         }
-        $sql = 'select count(*) as value from ' . $this->tbpref .
-               'archtexttags where AgT2ID=' . $tagId;
-        return (int) Connection::fetchValue($sql);
+        return (int) Connection::preparedFetchValue(
+            'SELECT COUNT(*) AS value FROM ' . $this->tbpref . 'archtexttags WHERE AgT2ID = ?',
+            [$tagId]
+        );
     }
 
     /**
@@ -622,16 +635,17 @@ class TagService
         foreach ($tagList as $tag) {
             $tag = (string) $tag;
             if (!in_array($tag, $_SESSION['TAGS'])) {
-                Connection::execute(
-                    "INSERT INTO {$tbpref}tags (TgText)
-                    VALUES(" . Escaping::toSqlSyntax($tag) . ")"
+                Connection::preparedExecute(
+                    "INSERT INTO {$tbpref}tags (TgText) VALUES (?)",
+                    [$tag]
                 );
             }
-            Connection::execute(
+            Connection::preparedExecute(
                 "INSERT INTO {$tbpref}wordtags (WtWoID, WtTgID)
-                SELECT {$wordId}, TgID
+                SELECT ?, TgID
                 FROM {$tbpref}tags
-                WHERE TgText = " . Escaping::toSqlSyntax($tag)
+                WHERE TgText = ?",
+                [$wordId, $tag]
             );
         }
 
@@ -667,16 +681,17 @@ class TagService
         foreach ($tagList as $tag) {
             $tag = (string) $tag;
             if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
-                Connection::execute(
-                    "INSERT INTO {$tbpref}tags2 (T2Text)
-                    VALUES(" . Escaping::toSqlSyntax($tag) . ")"
+                Connection::preparedExecute(
+                    "INSERT INTO {$tbpref}tags2 (T2Text) VALUES (?)",
+                    [$tag]
                 );
             }
-            Connection::execute(
+            Connection::preparedExecute(
                 "INSERT INTO {$tbpref}texttags (TtTxID, TtT2ID)
-                SELECT {$textId}, T2ID
+                SELECT ?, T2ID
                 FROM {$tbpref}tags2
-                WHERE T2Text = " . Escaping::toSqlSyntax($tag)
+                WHERE T2Text = ?",
+                [$textId, $tag]
             );
         }
 
@@ -712,16 +727,17 @@ class TagService
         foreach ($tagList as $tag) {
             $tag = (string) $tag;
             if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
-                Connection::execute(
-                    "INSERT INTO {$tbpref}tags2 (T2Text)
-                    VALUES(" . Escaping::toSqlSyntax($tag) . ")"
+                Connection::preparedExecute(
+                    "INSERT INTO {$tbpref}tags2 (T2Text) VALUES (?)",
+                    [$tag]
                 );
             }
-            Connection::execute(
+            Connection::preparedExecute(
                 "INSERT INTO {$tbpref}archtexttags (AgAtID, AgT2ID)
-                SELECT {$textId}, T2ID
+                SELECT ?, T2ID
                 FROM {$tbpref}tags2
-                WHERE T2Text = " . Escaping::toSqlSyntax($tag)
+                WHERE T2Text = ?",
+                [$textId, $tag]
             );
         }
 
@@ -745,15 +761,16 @@ class TagService
         $html = '<ul id="termtags">';
 
         if ($wordId > 0) {
-            $sql = 'SELECT TgText
+            $rows = Connection::preparedFetchAll(
+                'SELECT TgText
                 FROM ' . $tbpref . 'wordtags, ' . $tbpref . 'tags
-                WHERE TgID = WtTgID AND WtWoID = ' . $wordId . '
-                ORDER BY TgText';
-            $res = Connection::query($sql);
-            while ($record = mysqli_fetch_assoc($res)) {
+                WHERE TgID = WtTgID AND WtWoID = ?
+                ORDER BY TgText',
+                [$wordId]
+            );
+            foreach ($rows as $record) {
                 $html .= '<li>' . htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8') . '</li>';
             }
-            mysqli_free_result($res);
         }
 
         return $html . '</ul>';
@@ -772,15 +789,16 @@ class TagService
         $html = '<ul id="texttags" class="respinput">';
 
         if ($textId > 0) {
-            $sql = "SELECT T2Text
+            $rows = Connection::preparedFetchAll(
+                "SELECT T2Text
                 FROM {$tbpref}texttags, {$tbpref}tags2
-                WHERE T2ID = TtT2ID AND TtTxID = {$textId}
-                ORDER BY T2Text";
-            $res = Connection::query($sql);
-            while ($record = mysqli_fetch_assoc($res)) {
+                WHERE T2ID = TtT2ID AND TtTxID = ?
+                ORDER BY T2Text",
+                [$textId]
+            );
+            foreach ($rows as $record) {
                 $html .= '<li>' . htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</li>';
             }
-            mysqli_free_result($res);
         }
 
         return $html . '</ul>';
@@ -799,15 +817,16 @@ class TagService
         $html = '<ul id="texttags">';
 
         if ($textId > 0) {
-            $sql = 'SELECT T2Text
+            $rows = Connection::preparedFetchAll(
+                'SELECT T2Text
                 FROM ' . $tbpref . 'archtexttags, ' . $tbpref . 'tags2
-                WHERE T2ID = AgT2ID AND AgAtID = ' . $textId . '
-                ORDER BY T2Text';
-            $res = Connection::query($sql);
-            while ($record = mysqli_fetch_assoc($res)) {
+                WHERE T2ID = AgT2ID AND AgAtID = ?
+                ORDER BY T2Text',
+                [$textId]
+            );
+            foreach ($rows as $record) {
                 $html .= '<li>' . htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</li>';
             }
-            mysqli_free_result($res);
         }
 
         return $html . '</ul>';
@@ -825,7 +844,7 @@ class TagService
     {
         $tbpref = Globals::getTablePrefix();
 
-        $result = Connection::fetchValue(
+        $result = Connection::preparedFetchValue(
             "SELECT IFNULL(
                 GROUP_CONCAT(DISTINCT TgText ORDER BY TgText SEPARATOR ','),
                 ''
@@ -837,7 +856,8 @@ class TagService
                 )
                 LEFT JOIN {$tbpref}tags ON TgID = WtTgID
             )
-            WHERE WoID = {$wordId}"
+            WHERE WoID = ?",
+            [$wordId]
         );
 
         if ($escapeHtml && $result !== null) {
@@ -889,7 +909,7 @@ class TagService
         $lbrack = $brackets ? '[' : '';
         $rbrack = $brackets ? ']' : '';
 
-        $result = Connection::fetchValue(
+        $result = Connection::preparedFetchValue(
             "SELECT IFNULL(
                 GROUP_CONCAT(DISTINCT TgText ORDER BY TgText SEPARATOR ', '),
                 ''
@@ -901,7 +921,8 @@ class TagService
                 )
                 LEFT JOIN {$tbpref}tags ON TgID = WtTgID
             )
-            WHERE WoID = {$wordId}"
+            WHERE WoID = ?",
+            [$wordId]
         );
 
         if ($result != '') {
@@ -976,9 +997,9 @@ class TagService
             return "Tag removed in 0 Terms";
         }
 
-        $tagId = Connection::fetchValue(
-            'SELECT TgID AS value FROM ' . $tbpref . 'tags
-            WHERE TgText = ' . Escaping::toSqlSyntax($tagText)
+        $tagId = Connection::preparedFetchValue(
+            'SELECT TgID AS value FROM ' . $tbpref . 'tags WHERE TgText = ?',
+            [$tagText]
         );
 
         if (!isset($tagId)) {
@@ -1057,9 +1078,9 @@ class TagService
             return "Tag removed in 0 Texts";
         }
 
-        $tagId = Connection::fetchValue(
-            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2
-            WHERE T2Text = ' . Escaping::toSqlSyntax($tagText)
+        $tagId = Connection::preparedFetchValue(
+            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2 WHERE T2Text = ?',
+            [$tagText]
         );
 
         if (!isset($tagId)) {
@@ -1140,9 +1161,9 @@ class TagService
             return "Tag removed in 0 Texts";
         }
 
-        $tagId = Connection::fetchValue(
-            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2
-            WHERE T2Text = ' . Escaping::toSqlSyntax($tagText)
+        $tagId = Connection::preparedFetchValue(
+            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2 WHERE T2Text = ?',
+            [$tagText]
         );
 
         if (!isset($tagId)) {
@@ -1188,28 +1209,32 @@ class TagService
         $html .= '[Filter off]</option>';
 
         if ($langId === '') {
-            $sql = "SELECT TgID, TgText
+            $rows = Connection::preparedFetchAll(
+                "SELECT TgID, TgText
                 FROM {$tbpref}words, {$tbpref}tags, {$tbpref}wordtags
                 WHERE TgID = WtTgID AND WtWoID = WoID
                 GROUP BY TgID
-                ORDER BY UPPER(TgText)";
+                ORDER BY UPPER(TgText)",
+                []
+            );
         } else {
-            $sql = "SELECT TgID, TgText
+            $rows = Connection::preparedFetchAll(
+                "SELECT TgID, TgText
                 FROM {$tbpref}words, {$tbpref}tags, {$tbpref}wordtags
-                WHERE TgID = WtTgID AND WtWoID = WoID AND WoLgID = {$langId}
+                WHERE TgID = WtTgID AND WtWoID = WoID AND WoLgID = ?
                 GROUP BY TgID
-                ORDER BY UPPER(TgText)";
+                ORDER BY UPPER(TgText)",
+                [$langId]
+            );
         }
 
-        $res = Connection::query($sql);
         $count = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             $count++;
             $html .= '<option value="' . $record['TgID'] . '"' .
                 FormHelper::getSelected($selected, (int) $record['TgID']) . '>' .
                 htmlspecialchars($record['TgText'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
         }
-        mysqli_free_result($res);
 
         if ($count > 0) {
             $html .= '<option disabled="disabled">--------</option>';
@@ -1238,28 +1263,32 @@ class TagService
         $html .= '[Filter off]</option>';
 
         if ($langId === '') {
-            $sql = "SELECT T2ID, T2Text
+            $rows = Connection::preparedFetchAll(
+                "SELECT T2ID, T2Text
                 FROM {$tbpref}texts, {$tbpref}tags2, {$tbpref}texttags
                 WHERE T2ID = TtT2ID AND TtTxID = TxID
                 GROUP BY T2ID
-                ORDER BY UPPER(T2Text)";
+                ORDER BY UPPER(T2Text)",
+                []
+            );
         } else {
-            $sql = "SELECT T2ID, T2Text
+            $rows = Connection::preparedFetchAll(
+                "SELECT T2ID, T2Text
                 FROM {$tbpref}texts, {$tbpref}tags2, {$tbpref}texttags
-                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxLgID = {$langId}
+                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxLgID = ?
                 GROUP BY T2ID
-                ORDER BY UPPER(T2Text)";
+                ORDER BY UPPER(T2Text)",
+                [$langId]
+            );
         }
 
-        $res = Connection::query($sql);
         $count = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             $count++;
             $html .= '<option value="' . $record['T2ID'] . '"' .
                 FormHelper::getSelected($selected, (int) $record['T2ID']) . '>' .
                 htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
         }
-        mysqli_free_result($res);
 
         if ($count > 0) {
             $html .= '<option disabled="disabled">--------</option>';
@@ -1288,18 +1317,30 @@ class TagService
         $html = '<option value="&amp;texttag"' . FormHelper::getSelected($selected, '') . '>';
         $html .= '[Filter off]</option>';
 
-        $sql = 'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
-            GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
-            FROM ' . $tbpref . 'texts
-            LEFT JOIN ' . $tbpref . 'texttags ON TxID = TtTxID
-            LEFT JOIN ' . $tbpref . 'tags2 ON TtT2ID = T2ID';
         if ($langId) {
-            $sql .= ' WHERE TxLgID=' . $langId;
+            $rows = Connection::preparedFetchAll(
+                'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
+                GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
+                FROM ' . $tbpref . 'texts
+                LEFT JOIN ' . $tbpref . 'texttags ON TxID = TtTxID
+                LEFT JOIN ' . $tbpref . 'tags2 ON TtT2ID = T2ID
+                WHERE TxLgID = ?
+                GROUP BY UPPER(TagName)',
+                [$langId]
+            );
+        } else {
+            $rows = Connection::preparedFetchAll(
+                'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
+                GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
+                FROM ' . $tbpref . 'texts
+                LEFT JOIN ' . $tbpref . 'texttags ON TxID = TtTxID
+                LEFT JOIN ' . $tbpref . 'tags2 ON TtT2ID = T2ID
+                GROUP BY UPPER(TagName)',
+                []
+            );
         }
-        $sql .= ' GROUP BY UPPER(TagName)';
 
-        $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             if ($record['TagName'] == 1) {
                 $untaggedOption = '<option disabled="disabled">--------</option>' .
                     '<option value="' . $record['TextID'] . '&amp;texttag=-1"' .
@@ -1310,7 +1351,6 @@ class TagService
                     '>' . $record['TagName'] . '</option>';
             }
         }
-        mysqli_free_result($res);
 
         return $html . $untaggedOption;
     }
@@ -1334,28 +1374,32 @@ class TagService
         $html .= '[Filter off]</option>';
 
         if ($langId === '') {
-            $sql = "SELECT T2ID, T2Text
+            $rows = Connection::preparedFetchAll(
+                "SELECT T2ID, T2Text
                 FROM {$tbpref}archivedtexts, {$tbpref}tags2, {$tbpref}archtexttags
                 WHERE T2ID = AgT2ID AND AgAtID = AtID
                 GROUP BY T2ID
-                ORDER BY UPPER(T2Text)";
+                ORDER BY UPPER(T2Text)",
+                []
+            );
         } else {
-            $sql = "SELECT T2ID, T2Text
+            $rows = Connection::preparedFetchAll(
+                "SELECT T2ID, T2Text
                 FROM {$tbpref}archivedtexts, {$tbpref}tags2, {$tbpref}archtexttags
-                WHERE T2ID = AgT2ID AND AgAtID = AtID AND AtLgID = {$langId}
+                WHERE T2ID = AgT2ID AND AgAtID = AtID AND AtLgID = ?
                 GROUP BY T2ID
-                ORDER BY UPPER(T2Text)";
+                ORDER BY UPPER(T2Text)",
+                [$langId]
+            );
         }
 
-        $res = Connection::query($sql);
         $count = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($rows as $record) {
             $count++;
             $html .= '<option value="' . $record['T2ID'] . '"' .
                 FormHelper::getSelected($selected, (int) $record['T2ID']) . '>' .
                 htmlspecialchars($record['T2Text'] ?? '', ENT_QUOTES, 'UTF-8') . '</option>';
         }
-        mysqli_free_result($res);
 
         if ($count > 0) {
             $html .= '<option disabled="disabled">--------</option>';
@@ -1380,19 +1424,19 @@ class TagService
     {
         $tbpref = Globals::getTablePrefix();
 
-        $tagId = Connection::fetchValue(
-            'SELECT TgID AS value FROM ' . $tbpref . 'tags
-            WHERE TgText = ' . Escaping::toSqlSyntax($tagText)
+        $tagId = Connection::preparedFetchValue(
+            'SELECT TgID AS value FROM ' . $tbpref . 'tags WHERE TgText = ?',
+            [$tagText]
         );
 
         if (!isset($tagId)) {
-            Connection::execute(
-                'INSERT INTO ' . $tbpref . 'tags (TgText)
-                VALUES(' . Escaping::toSqlSyntax($tagText) . ')'
+            Connection::preparedExecute(
+                'INSERT INTO ' . $tbpref . 'tags (TgText) VALUES (?)',
+                [$tagText]
             );
-            $tagId = Connection::fetchValue(
-                'SELECT TgID AS value FROM ' . $tbpref . 'tags
-                WHERE TgText = ' . Escaping::toSqlSyntax($tagText)
+            $tagId = Connection::preparedFetchValue(
+                'SELECT TgID AS value FROM ' . $tbpref . 'tags WHERE TgText = ?',
+                [$tagText]
             );
         }
 
@@ -1434,18 +1478,19 @@ class TagService
 
             // Create tag if it doesn't exist
             if (!in_array($tag, $_SESSION['TAGS'])) {
-                Connection::execute(
-                    "INSERT INTO {$tbpref}tags (TgText)
-                    VALUES(" . Escaping::toSqlSyntax($tag) . ")"
+                Connection::preparedExecute(
+                    "INSERT INTO {$tbpref}tags (TgText) VALUES (?)",
+                    [$tag]
                 );
             }
 
             // Link tag to word
-            Connection::execute(
+            Connection::preparedExecute(
                 "INSERT INTO {$tbpref}wordtags (WtWoID, WtTgID)
-                SELECT {$wordId}, TgID
+                SELECT ?, TgID
                 FROM {$tbpref}tags
-                WHERE TgText = " . Escaping::toSqlSyntax($tag)
+                WHERE TgText = ?",
+                [$wordId, $tag]
             );
         }
 
@@ -1486,19 +1531,19 @@ class TagService
     {
         $tbpref = Globals::getTablePrefix();
 
-        $tagId = Connection::fetchValue(
-            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2
-            WHERE T2Text = ' . Escaping::toSqlSyntax($tagText)
+        $tagId = Connection::preparedFetchValue(
+            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2 WHERE T2Text = ?',
+            [$tagText]
         );
 
         if (!isset($tagId)) {
-            Connection::execute(
-                'INSERT INTO ' . $tbpref . 'tags2 (T2Text)
-                VALUES(' . Escaping::toSqlSyntax($tagText) . ')'
+            Connection::preparedExecute(
+                'INSERT INTO ' . $tbpref . 'tags2 (T2Text) VALUES (?)',
+                [$tagText]
             );
-            $tagId = Connection::fetchValue(
-                'SELECT T2ID AS value FROM ' . $tbpref . 'tags2
-                WHERE T2Text = ' . Escaping::toSqlSyntax($tagText)
+            $tagId = Connection::preparedFetchValue(
+                'SELECT T2ID AS value FROM ' . $tbpref . 'tags2 WHERE T2Text = ?',
+                [$tagText]
             );
         }
 

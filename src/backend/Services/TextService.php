@@ -139,14 +139,13 @@ class TextService
      */
     public function getArchivedTextById(int $textId): ?array
     {
-        $sql = "SELECT AtLgID, AtTitle, AtText, AtAudioURI, AtSourceURI,
+        return Connection::preparedFetchOne(
+            "SELECT AtLgID, AtTitle, AtText, AtAudioURI, AtSourceURI,
             LENGTH(AtAnnotatedText) AS annotlen
             FROM {$this->tbpref}archivedtexts
-            WHERE AtID = {$textId}";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+            WHERE AtID = ?",
+            [$textId]
+        );
     }
 
     /**
@@ -198,9 +197,10 @@ class TextService
     public function unarchiveText(int $archivedId): array
     {
         // Get language ID first
-        $lgId = Connection::fetchValue(
+        $lgId = Connection::preparedFetchValue(
             "SELECT AtLgID AS value FROM {$this->tbpref}archivedtexts
-            WHERE AtID = {$archivedId}"
+            WHERE AtID = ?",
+            [$archivedId]
         );
 
         if ($lgId === null) {
@@ -208,29 +208,31 @@ class TextService
         }
 
         // Insert into active texts
-        $inserted = Connection::execute(
+        $inserted = Connection::preparedExecute(
             "INSERT INTO {$this->tbpref}texts (
                 TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
             ) SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
             FROM {$this->tbpref}archivedtexts
-            WHERE AtID = {$archivedId}",
-            "Texts added"
+            WHERE AtID = ?",
+            [$archivedId]
         );
+        $insertedMsg = "Texts added: $inserted";
 
         $textId = Connection::lastInsertId();
 
         // Copy tags
-        Connection::execute(
+        Connection::preparedExecute(
             "INSERT INTO {$this->tbpref}texttags (TtTxID, TtT2ID)
-            SELECT {$textId}, AgT2ID
+            SELECT ?, AgT2ID
             FROM {$this->tbpref}archtexttags
-            WHERE AgAtID = {$archivedId}",
-            ""
+            WHERE AgAtID = ?",
+            [$textId, $archivedId]
         );
 
         // Parse the text
-        $textContent = Connection::fetchValue(
-            "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = {$textId}"
+        $textContent = Connection::preparedFetchValue(
+            "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+            [$textId]
         );
         TextParsing::splitCheck($textContent, (int) $lgId, $textId);
 
@@ -244,14 +246,16 @@ class TextService
         $this->cleanupArchivedTextTags();
 
         // Get statistics
-        $sentenceCount = Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = {$textId}"
+        $sentenceCount = Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = ?",
+            [$textId]
         );
-        $itemCount = Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = {$textId}"
+        $itemCount = Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = ?",
+            [$textId]
         );
 
-        $message = "{$deleted} / {$inserted} / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
+        $message = "{$deleted} / {$insertedMsg} / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
 
         return ['message' => $message, 'textId' => $textId];
     }
@@ -270,35 +274,39 @@ class TextService
         }
 
         $count = 0;
-        $list = "(" . implode(",", array_map('intval', $archivedIds)) . ")";
+        $ids = array_map('intval', $archivedIds);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        $sql = "SELECT AtID, AtLgID FROM {$this->tbpref}archivedtexts WHERE AtID IN {$list}";
-        $res = Connection::query($sql);
+        $records = Connection::preparedFetchAll(
+            "SELECT AtID, AtLgID FROM {$this->tbpref}archivedtexts WHERE AtID IN ({$placeholders})",
+            $ids
+        );
 
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $ida = $record['AtID'];
-            $mess = (int) Connection::execute(
+            $mess = Connection::preparedExecute(
                 "INSERT INTO {$this->tbpref}texts (
                     TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
                 ) SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
                 FROM {$this->tbpref}archivedtexts
-                WHERE AtID = {$ida}",
-                ""
+                WHERE AtID = ?",
+                [$ida]
             );
             $count += $mess;
 
             $id = Connection::lastInsertId();
 
-            Connection::execute(
+            Connection::preparedExecute(
                 "INSERT INTO {$this->tbpref}texttags (TtTxID, TtT2ID)
-                SELECT {$id}, AgT2ID
+                SELECT ?, AgT2ID
                 FROM {$this->tbpref}archtexttags
-                WHERE AgAtID = {$ida}",
-                ""
+                WHERE AgAtID = ?",
+                [$id, $ida]
             );
 
-            $textContent = Connection::fetchValue(
-                "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = {$id}"
+            $textContent = Connection::preparedFetchValue(
+                "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+                [$id]
             );
             TextParsing::splitCheck($textContent, $record['AtLgID'], $id);
 
@@ -306,7 +314,6 @@ class TextService
                 ->where('AtID', '=', $ida)
                 ->delete();
         }
-        mysqli_free_result($res);
 
         Maintenance::adjustAutoIncrement('archivedtexts', 'AtID');
         $this->cleanupArchivedTextTags();
@@ -388,38 +395,49 @@ class TextService
      *
      * Note: This method builds dynamic SQL with escaped values for use in
      * complex queries that combine multiple WHERE clauses. The values are
-     * properly escaped using mysqli_real_escape_string.
+     * properly escaped using prepared statement binding.
      *
      * @param string $query     Query string
      * @param string $queryMode Query mode ('title,text', 'title', 'text')
      * @param string $regexMode Regex mode ('', 'r', etc.)
      *
-     * @return string SQL WHERE clause fragment
+     * @return array{clause: string, params: array} SQL WHERE clause fragment and parameters
      */
     public function buildArchivedQueryWhereClause(
         string $query,
         string $queryMode,
         string $regexMode
-    ): string {
+    ): array {
         if ($query === '') {
-            return '';
+            return ['clause' => '', 'params' => []];
         }
 
-        $whQuery = $regexMode . 'LIKE ' . Escaping::toSqlSyntax(
-            $regexMode === '' ?
-                str_replace("*", "%", mb_strtolower($query, 'UTF-8')) :
-                $query
-        );
+        $searchValue = $regexMode === ''
+            ? str_replace("*", "%", mb_strtolower($query, 'UTF-8'))
+            : $query;
+        $operator = $regexMode . 'LIKE';
 
         switch ($queryMode) {
             case 'title,text':
-                return " AND (AtTitle {$whQuery} OR AtText {$whQuery})";
+                return [
+                    'clause' => " AND (AtTitle {$operator} ? OR AtText {$operator} ?)",
+                    'params' => [$searchValue, $searchValue]
+                ];
             case 'title':
-                return " AND (AtTitle {$whQuery})";
+                return [
+                    'clause' => " AND (AtTitle {$operator} ?)",
+                    'params' => [$searchValue]
+                ];
             case 'text':
-                return " AND (AtText {$whQuery})";
+                return [
+                    'clause' => " AND (AtText {$operator} ?)",
+                    'params' => [$searchValue]
+                ];
             default:
-                return " AND (AtTitle {$whQuery} OR AtText {$whQuery})";
+                return [
+                    'clause' => " AND (AtTitle {$operator} ? OR AtText {$operator} ?)",
+                    'params' => [$searchValue, $searchValue]
+                ];
         }
     }
 
@@ -482,12 +500,13 @@ class TextService
             return true;
         }
 
-        $result = @mysqli_query(
-            $GLOBALS["DBCONNECTION"],
-            'SELECT "test" RLIKE ' . Escaping::toSqlSyntax($query)
-        );
-
-        return $result !== false;
+        try {
+            $stmt = Connection::prepare('SELECT "test" RLIKE ?');
+            $stmt->bind('s', $query)->execute();
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     // ==================
@@ -557,14 +576,13 @@ class TextService
      */
     public function getTextById(int $textId): ?array
     {
-        $sql = "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
+        return Connection::preparedFetchOne(
+            "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
             TxAnnotatedText <> '' AS annot_exists
             FROM {$this->tbpref}texts
-            WHERE TxID = {$textId}";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+            WHERE TxID = ?",
+            [$textId]
+        );
     }
 
     /**
@@ -611,24 +629,25 @@ class TextService
             ->delete();
 
         // Insert into archived
-        $msg4 = Connection::execute(
+        $msg4 = Connection::preparedExecute(
             "INSERT INTO {$this->tbpref}archivedtexts (
                 AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
             ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
             FROM {$this->tbpref}texts
-            WHERE TxID = {$textId}",
-            "Archived Texts saved"
+            WHERE TxID = ?",
+            [$textId]
         );
+        $msg4 = "Archived Texts saved: $msg4";
 
         $archiveId = Connection::lastInsertId();
 
         // Copy tags
-        Connection::execute(
+        Connection::preparedExecute(
             "INSERT INTO {$this->tbpref}archtexttags (AgAtID, AgT2ID)
-            SELECT {$archiveId}, TtT2ID
+            SELECT ?, TtT2ID
             FROM {$this->tbpref}texttags
-            WHERE TtTxID = {$textId}",
-            ""
+            WHERE TtTxID = ?",
+            [$archiveId, $textId]
         );
 
         // Delete from active
@@ -758,26 +777,30 @@ class TextService
         $offset = ($page - 1) * $perPage;
 
         // Get total count
-        $countSql = "SELECT COUNT(*) AS value FROM {$this->tbpref}texts WHERE TxLgID = {$langId}";
-        $total = (int) Connection::fetchValue($countSql);
+        $total = (int) Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}texts WHERE TxLgID = ?",
+            [$langId]
+        );
         $totalPages = (int) ceil($total / $perPage);
 
         // Get texts with tags
-        $sql = "SELECT TxID, TxTitle, TxAudioURI, TxSourceURI,
+        $records = Connection::preparedFetchAll(
+            "SELECT TxID, TxTitle, TxAudioURI, TxSourceURI,
             LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 ({$this->tbpref}texts LEFT JOIN {$this->tbpref}texttags ON TxID = TtTxID)
                 LEFT JOIN {$this->tbpref}tags2 ON T2ID = TtT2ID
             )
-            WHERE TxLgID = {$langId}
+            WHERE TxLgID = ?
             GROUP BY TxID
             ORDER BY {$sortColumn}
-            LIMIT {$offset}, {$perPage}";
+            LIMIT ?, ?",
+            [$langId, $offset, $perPage]
+        );
 
-        $res = Connection::query($sql);
         $texts = [];
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $texts[] = [
                 'id' => (int) $record['TxID'],
                 'title' => (string) $record['TxTitle'],
@@ -788,7 +811,6 @@ class TextService
                 'taglist' => (string) $record['taglist']
             ];
         }
-        mysqli_free_result($res);
 
         return [
             'texts' => $texts,
@@ -824,26 +846,30 @@ class TextService
         $offset = ($page - 1) * $perPage;
 
         // Get total count
-        $countSql = "SELECT COUNT(*) AS value FROM {$this->tbpref}archivedtexts WHERE AtLgID = {$langId}";
-        $total = (int) Connection::fetchValue($countSql);
+        $total = (int) Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS value FROM {$this->tbpref}archivedtexts WHERE AtLgID = ?",
+            [$langId]
+        );
         $totalPages = (int) ceil($total / $perPage);
 
         // Get archived texts with tags
-        $sql = "SELECT AtID, AtTitle, AtAudioURI, AtSourceURI,
+        $records = Connection::preparedFetchAll(
+            "SELECT AtID, AtTitle, AtAudioURI, AtSourceURI,
             LENGTH(AtAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 ({$this->tbpref}archivedtexts LEFT JOIN {$this->tbpref}archtexttags ON AtID = AgAtID)
                 LEFT JOIN {$this->tbpref}tags2 ON T2ID = AgT2ID
             )
-            WHERE AtLgID = {$langId}
+            WHERE AtLgID = ?
             GROUP BY AtID
             ORDER BY {$sortColumn}
-            LIMIT {$offset}, {$perPage}";
+            LIMIT ?, ?",
+            [$langId, $offset, $perPage]
+        );
 
-        $res = Connection::query($sql);
         $texts = [];
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $texts[] = [
                 'id' => (int) $record['AtID'],
                 'title' => (string) $record['AtTitle'],
@@ -854,7 +880,6 @@ class TextService
                 'taglist' => (string) $record['taglist']
             ];
         }
-        mysqli_free_result($res);
 
         return [
             'texts' => $texts,
@@ -870,36 +895,51 @@ class TextService
     /**
      * Build WHERE clause for query filtering (active texts).
      *
+     * Note: This method builds dynamic SQL with escaped values for use in
+     * complex queries that combine multiple WHERE clauses. The values are
+     * properly escaped using prepared statement binding.
+     *
      * @param string $query     Query string
      * @param string $queryMode Query mode ('title,text', 'title', 'text')
      * @param string $regexMode Regex mode ('', 'r', etc.)
      *
-     * @return string SQL WHERE clause fragment
+     * @return array{clause: string, params: array} SQL WHERE clause fragment and parameters
      */
     public function buildTextQueryWhereClause(
         string $query,
         string $queryMode,
         string $regexMode
-    ): string {
+    ): array {
         if ($query === '') {
-            return '';
+            return ['clause' => '', 'params' => []];
         }
 
-        $whQuery = $regexMode . 'LIKE ' . Escaping::toSqlSyntax(
-            $regexMode === '' ?
-                str_replace("*", "%", mb_strtolower($query, 'UTF-8')) :
-                $query
-        );
+        $searchValue = $regexMode === ''
+            ? str_replace("*", "%", mb_strtolower($query, 'UTF-8'))
+            : $query;
+        $operator = $regexMode . 'LIKE';
 
         switch ($queryMode) {
             case 'title,text':
-                return " AND (TxTitle {$whQuery} OR TxText {$whQuery})";
+                return [
+                    'clause' => " AND (TxTitle {$operator} ? OR TxText {$operator} ?)",
+                    'params' => [$searchValue, $searchValue]
+                ];
             case 'title':
-                return " AND (TxTitle {$whQuery})";
+                return [
+                    'clause' => " AND (TxTitle {$operator} ?)",
+                    'params' => [$searchValue]
+                ];
             case 'text':
-                return " AND (TxText {$whQuery})";
+                return [
+                    'clause' => " AND (TxText {$operator} ?)",
+                    'params' => [$searchValue]
+                ];
             default:
-                return " AND (TxTitle {$whQuery} OR TxText {$whQuery})";
+                return [
+                    'clause' => " AND (TxTitle {$operator} ? OR TxText {$operator} ?)",
+                    'params' => [$searchValue, $searchValue]
+                ];
         }
     }
 
@@ -1114,27 +1154,29 @@ class TextService
             ->delete();
 
         $count = 0;
-        $sql = "SELECT TxID FROM {$this->tbpref}texts WHERE TxID IN (" . implode(',', $ids) . ")";
-        $res = Connection::query($sql);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $records = Connection::preparedFetchAll(
+            "SELECT TxID FROM {$this->tbpref}texts WHERE TxID IN ({$placeholders})",
+            $ids
+        );
 
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $id = $record['TxID'];
-            $count += (int) Connection::execute(
+            $count += Connection::preparedExecute(
                 "INSERT INTO {$this->tbpref}archivedtexts (
                     AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
                 ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                FROM {$this->tbpref}texts WHERE TxID = {$id}",
-                ""
+                FROM {$this->tbpref}texts WHERE TxID = ?",
+                [$id]
             );
             $aid = Connection::lastInsertId();
-            Connection::execute(
+            Connection::preparedExecute(
                 "INSERT INTO {$this->tbpref}archtexttags (AgAtID, AgT2ID)
-                SELECT {$aid}, TtT2ID
-                FROM {$this->tbpref}texttags WHERE TtTxID = {$id}",
-                ""
+                SELECT ?, TtT2ID
+                FROM {$this->tbpref}texttags WHERE TtTxID = ?",
+                [$aid, $id]
             );
         }
-        mysqli_free_result($res);
 
         QueryBuilder::table('texts')
             ->whereIn('TxID', $ids)
@@ -1161,11 +1203,14 @@ class TextService
 
         $count = 0;
         $ids = array_map('intval', $textIds);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        $sql = "SELECT TxID, TxLgID FROM {$this->tbpref}texts WHERE TxID IN (" . implode(',', $ids) . ")";
-        $res = Connection::query($sql);
+        $records = Connection::preparedFetchAll(
+            "SELECT TxID, TxLgID FROM {$this->tbpref}texts WHERE TxID IN ({$placeholders})",
+            $ids
+        );
 
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $id = (int) $record['TxID'];
             QueryBuilder::table('sentences')
                 ->where('SeTxID', '=', $id)
@@ -1175,13 +1220,13 @@ class TextService
                 ->delete();
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-            $textContent = Connection::fetchValue(
-                "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = {$id}"
+            $textContent = Connection::preparedFetchValue(
+                "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+                [$id]
             );
             TextParsing::splitCheck($textContent, $record['TxLgID'], $id);
             $count++;
         }
-        mysqli_free_result($res);
 
         return "Text(s) reparsed: {$count}";
     }
@@ -1404,14 +1449,13 @@ class TextService
      */
     public function getTextForReading(int $textId): ?array
     {
-        $sql = "SELECT LgName, TxLgID, TxText, TxTitle, TxAudioURI, TxSourceURI, TxAudioPosition
+        return Connection::preparedFetchOne(
+            "SELECT LgName, TxLgID, TxText, TxTitle, TxAudioURI, TxSourceURI, TxAudioPosition
                 FROM {$this->tbpref}texts
                 JOIN {$this->tbpref}languages ON TxLgID = LgID
-                WHERE TxID = {$textId}";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+                WHERE TxID = ?",
+            [$textId]
+        );
     }
 
     /**
@@ -1423,13 +1467,12 @@ class TextService
      */
     public function getTextDataForContent(int $textId): ?array
     {
-        $sql = "SELECT TxLgID, TxTitle, TxAnnotatedText, TxPosition
+        return Connection::preparedFetchOne(
+            "SELECT TxLgID, TxTitle, TxAnnotatedText, TxPosition
                 FROM {$this->tbpref}texts
-                WHERE TxID = {$textId}";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+                WHERE TxID = ?",
+            [$textId]
+        );
     }
 
     /**
@@ -1441,14 +1484,13 @@ class TextService
      */
     public function getLanguageSettingsForReading(int $langId): ?array
     {
-        $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
+        return Connection::preparedFetchOne(
+            "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
                 LgTextSize, LgRegexpWordCharacters, LgRemoveSpaces, LgRightToLeft
                 FROM {$this->tbpref}languages
-                WHERE LgID = {$langId}";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+                WHERE LgID = ?",
+            [$langId]
+        );
     }
 
     /**
@@ -1460,9 +1502,10 @@ class TextService
      */
     public function getTtsVoiceApi(int $langId): ?string
     {
-        return Connection::fetchValue(
+        return Connection::preparedFetchValue(
             "SELECT LgTTSVoiceAPI AS value FROM {$this->tbpref}languages
-            WHERE LgID = {$langId}"
+            WHERE LgID = ?",
+            [$langId]
         );
     }
 
@@ -1546,14 +1589,13 @@ class TextService
      */
     public function getTextForEdit(int $textId): ?array
     {
-        $sql = "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
+        return Connection::preparedFetchOne(
+            "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
             TxAnnotatedText <> '' AS annot_exists
             FROM {$this->tbpref}texts
-            WHERE TxID = {$textId}";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+            WHERE TxID = ?",
+            [$textId]
+        );
     }
 
     /**
@@ -1672,13 +1714,24 @@ class TextService
     public function getTextsForSelect(?int $langId = null): array
     {
         $result = [];
-        $langFilter = $langId !== null ? "AND TxLgID = $langId" : '';
-        $sql = "SELECT TxID, TxTitle, LgName
-            FROM {$this->tbpref}languages, {$this->tbpref}texts
-            WHERE LgID = TxLgID $langFilter
-            ORDER BY LgName, TxTitle";
-        $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
+        if ($langId !== null) {
+            $records = Connection::preparedFetchAll(
+                "SELECT TxID, TxTitle, LgName
+                FROM {$this->tbpref}languages, {$this->tbpref}texts
+                WHERE LgID = TxLgID AND TxLgID = ?
+                ORDER BY LgName, TxTitle",
+                [$langId]
+            );
+        } else {
+            $records = Connection::preparedFetchAll(
+                "SELECT TxID, TxTitle, LgName
+                FROM {$this->tbpref}languages, {$this->tbpref}texts
+                WHERE LgID = TxLgID
+                ORDER BY LgName, TxTitle",
+                []
+            );
+        }
+        foreach ($records as $record) {
             $title = (string)$record['TxTitle'];
             if (mb_strlen($title, 'UTF-8') > 30) {
                 $title = mb_substr($title, 0, 30, 'UTF-8') . '...';
@@ -1689,7 +1742,6 @@ class TextService
                 'language' => (string)$record['LgName']
             ];
         }
-        mysqli_free_result($res);
         return $result;
     }
 }

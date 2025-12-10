@@ -303,6 +303,13 @@ abstract class BaseController
      * @param string $value String to escape
      *
      * @return string Escaped string suitable for SQL (with quotes)
+     *
+     * @deprecated Use prepared statements instead:
+     *             Connection::preparedExecute($sql, [$param1, $param2])
+     *             Connection::preparedFetchAll($sql, [$param1, $param2])
+     *             Connection::preparedFetchOne($sql, [$param1, $param2])
+     *             Connection::preparedFetchValue($sql, [$param1, $param2])
+     *             Connection::preparedInsert($sql, [$param1, $param2])
      */
     protected function escape(string $value): string
     {
@@ -315,6 +322,13 @@ abstract class BaseController
      * @param string $value String to escape
      *
      * @return string Escaped string suitable for SQL (with quotes)
+     *
+     * @deprecated Use prepared statements instead:
+     *             Connection::preparedExecute($sql, [$param1, $param2])
+     *             Connection::preparedFetchAll($sql, [$param1, $param2])
+     *             Connection::preparedFetchOne($sql, [$param1, $param2])
+     *             Connection::preparedFetchValue($sql, [$param1, $param2])
+     *             Connection::preparedInsert($sql, [$param1, $param2])
      */
     protected function escapeNonNull(string $value): string
     {

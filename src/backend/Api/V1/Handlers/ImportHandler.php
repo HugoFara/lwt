@@ -2,7 +2,6 @@
 namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 
 /**
  * Handler for imported terms API operations.
@@ -55,13 +54,11 @@ class ImportHandler
             ({$tbpref}words LEFT JOIN {$tbpref}wordtags ON WoID = WtWoID)
             LEFT JOIN {$tbpref}tags ON TgID = WtTgID
         )
-        WHERE WoStatusChanged > " . Escaping::toSqlSyntax($lastUpdate) . "
+        WHERE WoStatusChanged > ?
         GROUP BY WoID
-        LIMIT $offset, $maxTerms";
-        $res = Connection::query($sql);
-        $records = mysqli_fetch_all($res);
-        mysqli_free_result($res);
-        return $records;
+        LIMIT ?, ?";
+
+        return Connection::preparedFetchAll($sql, [$lastUpdate, $offset, $maxTerms]);
     }
 
     /**

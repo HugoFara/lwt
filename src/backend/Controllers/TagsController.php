@@ -57,16 +57,15 @@ class TagsController extends BaseController
         $currentpage = (int) $this->sessionParam("page", "currenttagpage", '1', true);
         $currentquery = (string) $this->sessionParam("query", "currenttagquery", '', false);
 
-        $wh_query = $this->escape(str_replace("*", "%", $currentquery));
-        $wh_query = ($currentquery != '')
-            ? (' and (TgText like ' . $wh_query . ' or TgComment like ' . $wh_query . ')')
-            : '';
+        // Build WHERE clause using TagService
+        $service = new TagService('term');
+        $whereData = $service->buildWhereClause($currentquery);
 
         $this->render('Term Tags', true);
 
 
         // Process actions
-        $message = $this->processTermTagActions($wh_query);
+        $message = $this->processTermTagActions($whereData);
 
         // Display appropriate view
         if ($this->param('new')) {
@@ -74,7 +73,7 @@ class TagsController extends BaseController
         } elseif ($this->param('chg')) {
             $this->showEditTermTagForm((int)$this->param('chg'));
         } else {
-            $this->showTermTagsList($message, $currentquery, $wh_query, $currentsort, $currentpage, \Lwt\Core\Globals::isDebug());
+            $this->showTermTagsList($message, $currentquery, $whereData, $currentsort, $currentpage, \Lwt\Core\Globals::isDebug());
         }
 
         $this->endRender();
@@ -95,16 +94,15 @@ class TagsController extends BaseController
         $currentpage = (int) $this->sessionParam("page", "currenttexttagpage", '1', true);
         $currentquery = (string) $this->sessionParam("query", "currenttexttagquery", '', false);
 
-        $wh_query = $this->escape(str_replace("*", "%", $currentquery));
-        $wh_query = ($currentquery != '')
-            ? (' and (T2Text like ' . $wh_query . ' or T2Comment like ' . $wh_query . ')')
-            : '';
+        // Build WHERE clause using TagService
+        $service = new TagService('text');
+        $whereData = $service->buildWhereClause($currentquery);
 
         $this->render('Text Tags', true);
 
 
         // Process actions
-        $message = $this->processTextTagActions($wh_query);
+        $message = $this->processTextTagActions($whereData);
 
         // Display appropriate view
         if ($this->param('new')) {
@@ -112,7 +110,7 @@ class TagsController extends BaseController
         } elseif ($this->param('chg')) {
             $this->showEditTextTagForm((int)$this->param('chg'));
         } else {
-            $this->showTextTagsList($message, $currentquery, $wh_query, $currentsort, $currentpage, \Lwt\Core\Globals::isDebug());
+            $this->showTextTagsList($message, $currentquery, $whereData, $currentsort, $currentpage, \Lwt\Core\Globals::isDebug());
         }
 
         $this->endRender();
@@ -123,13 +121,14 @@ class TagsController extends BaseController
     /**
      * Process term tag actions (delete, mark, save, update)
      *
-     * @param string $wh_query WHERE clause for filtering
+     * @param array{clause: string, params: array} $whereData WHERE clause data from buildWhereClause()
      *
      * @return string Result message
      */
-    private function processTermTagActions(string $wh_query): string
+    private function processTermTagActions(array $whereData): string
     {
         $message = '';
+        $service = new TagService('term');
 
         // Mark actions
         if ($this->param('markaction')) {
@@ -137,21 +136,11 @@ class TagsController extends BaseController
         } elseif ($this->param('allaction')) {
             // All actions
             if ($this->param('allaction') == 'delall') {
-                $message = $this->execute(
-                    'delete from ' . $this->table('tags') . ' where (1=1) ' . $wh_query,
-                    "Deleted"
-                );
-                $this->cleanupOrphanedTermTagLinks();
-                Maintenance::adjustAutoIncrement('tags', 'TgID');
+                $message = $service->deleteAll($whereData);
             }
         } elseif ($this->param('del')) {
             // Single delete
-            $message = $this->execute(
-                'delete from ' . $this->table('tags') . ' where TgID = ' . (int)$this->param('del'),
-                "Deleted"
-            );
-            $this->cleanupOrphanedTermTagLinks();
-            Maintenance::adjustAutoIncrement('tags', 'TgID');
+            $message = $service->delete((int)$this->param('del'));
         } elseif ($this->param('op')) {
             // Insert/Update
             $message = $this->saveTermTag();
@@ -330,7 +319,7 @@ class TagsController extends BaseController
     private function showTermTagsList(
         string $message,
         string $currentquery,
-        string $wh_query,
+        array $whereData,
         int $currentsort,
         int $currentpage,
         bool $debug = false
@@ -344,7 +333,7 @@ class TagsController extends BaseController
         TagService::getAllTermTags(true);   // refresh tags cache
 
         // Get counts and pagination
-        $totalCount = $service->getCount($wh_query);
+        $totalCount = $service->getCount($whereData);
         $pagination = $service->getPagination($totalCount, $currentpage);
         $currentpage = $pagination['currentPage'];
 
@@ -352,7 +341,7 @@ class TagsController extends BaseController
         $sortColumn = $service->getSortColumn($currentsort);
 
         // Get tags list
-        $tags = $service->getList($wh_query, $sortColumn, $currentpage, $pagination['perPage']);
+        $tags = $service->getList($whereData, $sortColumn, $currentpage, $pagination['perPage']);
 
         // Set view variables
         $currentQuery = $currentquery;
@@ -368,13 +357,14 @@ class TagsController extends BaseController
     /**
      * Process text tag actions (delete, mark, save, update)
      *
-     * @param string $wh_query WHERE clause for filtering
+     * @param array{clause: string, params: array} $whereData WHERE clause data from buildWhereClause()
      *
      * @return string Result message
      */
-    private function processTextTagActions(string $wh_query): string
+    private function processTextTagActions(array $whereData): string
     {
         $message = '';
+        $service = new TagService('text');
 
         // Mark actions
         if ($this->param('markaction')) {
@@ -382,21 +372,11 @@ class TagsController extends BaseController
         } elseif ($this->param('allaction')) {
             // All actions
             if ($this->param('allaction') == 'delall') {
-                $message = $this->execute(
-                    'delete from ' . $this->table('tags2') . ' where (1=1) ' . $wh_query,
-                    "Deleted"
-                );
-                $this->cleanupOrphanedTextTagLinks();
-                Maintenance::adjustAutoIncrement('tags2', 'T2ID');
+                $message = $service->deleteAll($whereData);
             }
         } elseif ($this->param('del')) {
             // Single delete
-            $message = $this->execute(
-                'delete from ' . $this->table('tags2') . ' where T2ID = ' . (int)$this->param('del'),
-                "Deleted"
-            );
-            $this->cleanupOrphanedTextTagLinks();
-            Maintenance::adjustAutoIncrement('tags2', 'T2ID');
+            $message = $service->delete((int)$this->param('del'));
         } elseif ($this->param('op')) {
             // Insert/Update
             $message = $this->saveTextTag();
@@ -578,7 +558,7 @@ class TagsController extends BaseController
     private function showTextTagsList(
         string $message,
         string $currentquery,
-        string $wh_query,
+        array $whereData,
         int $currentsort,
         int $currentpage,
         bool $debug = false
@@ -592,7 +572,7 @@ class TagsController extends BaseController
         TagService::getAllTextTags(true);   // refresh tags cache
 
         // Get counts and pagination
-        $totalCount = $service->getCount($wh_query);
+        $totalCount = $service->getCount($whereData);
         $pagination = $service->getPagination($totalCount, $currentpage);
         $currentpage = $pagination['currentPage'];
 
@@ -600,7 +580,7 @@ class TagsController extends BaseController
         $sortColumn = $service->getSortColumn($currentsort);
 
         // Get tags list
-        $tags = $service->getList($wh_query, $sortColumn, $currentpage, $pagination['perPage']);
+        $tags = $service->getList($whereData, $sortColumn, $currentpage, $pagination['perPage']);
 
         // Set view variables
         $currentQuery = $currentquery;

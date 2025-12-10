@@ -79,10 +79,11 @@ class Migrations
         foreach ($rows as $record) {
             $id = (int) $record['TxID'];
             TextParsing::splitCheck(
-                (string)Connection::fetchValue(
+                (string)Connection::preparedFetchValue(
                     "SELECT TxText AS value
                     FROM {$tbpref}texts
-                    WHERE TxID = $id"
+                    WHERE TxID = ?",
+                    [$id]
                 ),
                 (string)$record['TxLgID'],
                 $id
@@ -126,16 +127,20 @@ class Migrations
                 echo "<p>DEBUG: check DB collation: ";
             }
             if (
-                'utf8utf8_general_ci' != Connection::fetchValue(
+                'utf8utf8_general_ci' != Connection::preparedFetchValue(
                     'SELECT concat(default_character_set_name, default_collation_name) AS value
                 FROM information_schema.SCHEMATA
-                WHERE schema_name = "' . $dbname . '"'
+                WHERE schema_name = ?',
+                    [$dbname]
                 )
             ) {
                 Connection::query("SET collation_connection = 'utf8_general_ci'");
+                // Note: ALTER DATABASE doesn't support prepared statements
+                // Database name comes from trusted config, using backtick escaping
+                $escapedDbName = '`' . str_replace('`', '``', $dbname) . '`';
                 Connection::execute(
-                    'ALTER DATABASE `' . $dbname .
-                    '` CHARACTER SET utf8 COLLATE utf8_general_ci'
+                    'ALTER DATABASE ' . $escapedDbName .
+                    ' CHARACTER SET utf8 COLLATE utf8_general_ci'
                 );
                 if (Globals::isDebug()) {
                     echo 'changed to utf8_general_ci</p>';
@@ -191,15 +196,19 @@ class Migrations
         $tbpref = Globals::getTablePrefix();
         $tables = array();
 
-        $res = Connection::fetchAll(
-            str_replace(
-                '_',
-                "\\_",
-                "SHOW TABLES LIKE " . Escaping::toSqlSyntaxNoNull($tbpref . '%')
-            )
+        // Get database name for INFORMATION_SCHEMA query
+        $dbname = Globals::getDatabaseName();
+
+        // Use INFORMATION_SCHEMA with prepared statement instead of SHOW TABLES
+        $res = Connection::preparedFetchAll(
+            "SELECT TABLE_NAME
+             FROM INFORMATION_SCHEMA.TABLES
+             WHERE TABLE_SCHEMA = ?
+             AND TABLE_NAME LIKE ?",
+            [$dbname, $tbpref . '%']
         );
         foreach ($res as $row) {
-            $tables[] = array_values($row)[0];
+            $tables[] = $row['TABLE_NAME'];
         }
 
         /// counter for cache rebuild

@@ -16,7 +16,6 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Maintenance;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\TextParsing;
@@ -53,12 +52,18 @@ class FeedService
     {
         $sql = "SELECT NfID, NfName, NfSourceURI, NfUpdate, NfOptions, NfLgID
                 FROM {$this->tbpref}newsfeeds";
+        $params = [];
 
         if ($langId !== null && $langId > 0) {
-            $sql .= " WHERE NfLgID = $langId";
+            $sql .= " WHERE NfLgID = ?";
+            $params[] = $langId;
         }
 
         $sql .= " ORDER BY NfUpdate DESC";
+
+        if (!empty($params)) {
+            return Connection::preparedFetchAll($sql, $params);
+        }
 
         $feeds = [];
         $res = Connection::query($sql);
@@ -79,10 +84,10 @@ class FeedService
      */
     public function getFeedById(int $feedId): ?array
     {
-        $sql = "SELECT * FROM {$this->tbpref}newsfeeds WHERE NfID = $feedId";
-        $res = Connection::query($sql);
-        $row = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $row = Connection::preparedFetchOne(
+            "SELECT * FROM {$this->tbpref}newsfeeds WHERE NfID = ?",
+            [$feedId]
+        );
         return $row ?: null;
     }
 
@@ -141,20 +146,29 @@ class FeedService
     /**
      * Count newsfeeds with optional language and query filter.
      *
-     * @param int|null $langId   Language ID filter (null for all)
-     * @param string   $whQuery  Additional WHERE clause
+     * @param int|null    $langId       Language ID filter (null for all)
+     * @param string|null $queryPattern LIKE pattern for name filter (null for no filter)
      *
      * @return int Number of matching feeds
      */
-    public function countFeeds(?int $langId = null, string $whQuery = ''): int
+    public function countFeeds(?int $langId = null, ?string $queryPattern = null): int
     {
-        $sql = "SELECT COUNT(*) AS value FROM {$this->tbpref}newsfeeds WHERE ";
+        $whereConditions = [];
+        $params = [];
+
         if ($langId !== null && $langId > 0) {
-            $sql .= "NfLgID = $langId $whQuery";
-        } else {
-            $sql .= "1=1 $whQuery";
+            $whereConditions[] = "NfLgID = ?";
+            $params[] = $langId;
         }
-        return (int)Connection::fetchValue($sql);
+        if ($queryPattern !== null) {
+            $whereConditions[] = "NfName LIKE ?";
+            $params[] = $queryPattern;
+        }
+
+        $where = empty($whereConditions) ? '1=1' : implode(' AND ', $whereConditions);
+        $sql = "SELECT COUNT(*) AS value FROM {$this->tbpref}newsfeeds WHERE $where";
+
+        return (int)Connection::preparedFetchValue($sql, $params);
     }
 
     /**
@@ -166,20 +180,19 @@ class FeedService
      */
     public function createFeed(array $data): int
     {
-        Connection::execute(
+        return Connection::preparedInsert(
             "INSERT INTO {$this->tbpref}newsfeeds (
                 NfLgID, NfName, NfSourceURI, NfArticleSectionTags, NfFilterTags, NfOptions
-            ) VALUES (
-                " . Escaping::toSqlSyntax($data['NfLgID']) . ",
-                " . Escaping::toSqlSyntax($data['NfName']) . ",
-                " . Escaping::toSqlSyntax($data['NfSourceURI']) . ",
-                " . Escaping::toSqlSyntax($data['NfArticleSectionTags']) . ",
-                " . Escaping::toSqlSyntaxNoNull($data['NfFilterTags'] ?? '') . ",
-                " . Escaping::toSqlSyntaxNoNull(rtrim($data['NfOptions'] ?? '', ',')) . "
-            )"
+            ) VALUES (?, ?, ?, ?, ?, ?)",
+            [
+                $data['NfLgID'],
+                $data['NfName'],
+                $data['NfSourceURI'],
+                $data['NfArticleSectionTags'],
+                $data['NfFilterTags'] ?? '',
+                rtrim($data['NfOptions'] ?? '', ',')
+            ]
         );
-
-        return (int)Connection::lastInsertId();
     }
 
     /**
@@ -192,15 +205,24 @@ class FeedService
      */
     public function updateFeed(int $feedId, array $data): void
     {
-        Connection::execute(
+        Connection::preparedExecute(
             "UPDATE {$this->tbpref}newsfeeds SET
-                NfLgID = " . Escaping::toSqlSyntax($data['NfLgID']) . ",
-                NfName = " . Escaping::toSqlSyntax($data['NfName']) . ",
-                NfSourceURI = " . Escaping::toSqlSyntax($data['NfSourceURI']) . ",
-                NfArticleSectionTags = " . Escaping::toSqlSyntax($data['NfArticleSectionTags']) . ",
-                NfFilterTags = " . Escaping::toSqlSyntaxNoNull($data['NfFilterTags'] ?? '') . ",
-                NfOptions = " . Escaping::toSqlSyntaxNoNull(rtrim($data['NfOptions'] ?? '', ',')) . "
-            WHERE NfID = $feedId"
+                NfLgID = ?,
+                NfName = ?,
+                NfSourceURI = ?,
+                NfArticleSectionTags = ?,
+                NfFilterTags = ?,
+                NfOptions = ?
+            WHERE NfID = ?",
+            [
+                $data['NfLgID'],
+                $data['NfName'],
+                $data['NfSourceURI'],
+                $data['NfArticleSectionTags'],
+                $data['NfFilterTags'] ?? '',
+                rtrim($data['NfOptions'] ?? '', ','),
+                $feedId
+            ]
         );
     }
 
@@ -241,10 +263,12 @@ class FeedService
             ->whereIn('FlNfID', $ids)
             ->delete();
 
-        // Update the feed timestamp
-        Connection::query(
-            "UPDATE {$this->tbpref}newsfeeds SET NfUpdate = " . time() . "
-             WHERE NfID IN (" . implode(',', $ids) . ")"
+        // Update the feed timestamp - use placeholders for each ID
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        Connection::preparedExecute(
+            "UPDATE {$this->tbpref}newsfeeds SET NfUpdate = ?
+             WHERE NfID IN ($placeholders)",
+            array_merge([time()], $ids)
         );
 
         return $count;
@@ -408,6 +432,10 @@ class FeedService
     /**
      * Get the query filter condition for feed links.
      *
+     * Note: This method returns a SQL fragment with embedded values for use
+     * in dynamic queries. The returned SQL is safe because $regexMode is
+     * validated to be 'r', 'rb', or empty, and $searchValue is escaped.
+     *
      * @param string $query       Search query
      * @param string $queryMode   Query mode (title,desc,text or title)
      * @param string $regexMode   Regex mode (empty, 'r', or 'rb')
@@ -420,11 +448,13 @@ class FeedService
             return '';
         }
 
-        $pattern = $regexMode . 'LIKE ' . Escaping::toSqlSyntax(
-            ($regexMode == '') ?
+        $searchValue = ($regexMode == '') ?
             str_replace("*", "%", mb_strtolower($query, 'UTF-8')) :
-            $query
-        );
+            $query;
+
+        // Use mysqli_real_escape_string for building dynamic SQL fragments
+        $escaped = mysqli_real_escape_string($GLOBALS["DBCONNECTION"], $searchValue);
+        $pattern = $regexMode . "LIKE '" . $escaped . "'";
 
         switch ($queryMode) {
             case 'title,desc,text':
@@ -449,9 +479,10 @@ class FeedService
             return true;
         }
 
+        $escaped = mysqli_real_escape_string($GLOBALS["DBCONNECTION"], $pattern);
         $result = @mysqli_query(
             $GLOBALS["DBCONNECTION"],
-            'SELECT "test" RLIKE ' . Escaping::toSqlSyntax($pattern)
+            "SELECT 'test' RLIKE '" . $escaped . "'"
         );
 
         return $result !== false;
@@ -501,25 +532,24 @@ class FeedService
     public function createTextFromFeed(array $textData, string $tagName): int
     {
         // Ensure tag exists
-        Connection::query(
-            "INSERT IGNORE INTO {$this->tbpref}tags2 (T2Text) VALUES (" .
-            Escaping::toSqlSyntax($tagName) . ")"
+        Connection::preparedExecute(
+            "INSERT IGNORE INTO {$this->tbpref}tags2 (T2Text) VALUES (?)",
+            [$tagName]
         );
 
         // Create the text
-        Connection::query(
+        $textId = Connection::preparedInsert(
             "INSERT INTO {$this->tbpref}texts (
                 TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI
-            ) VALUES (
-                {$textData['TxLgID']},
-                " . Escaping::toSqlSyntax($textData['TxTitle']) . ",
-                " . Escaping::toSqlSyntax($textData['TxText']) . ",
-                " . Escaping::toSqlSyntax($textData['TxAudioURI'] ?? '') . ",
-                " . Escaping::toSqlSyntax($textData['TxSourceURI'] ?? '') . "
-            )"
+            ) VALUES (?, ?, ?, ?, ?)",
+            [
+                $textData['TxLgID'],
+                $textData['TxTitle'],
+                $textData['TxText'],
+                $textData['TxAudioURI'] ?? '',
+                $textData['TxSourceURI'] ?? ''
+            ]
         );
-
-        $textId = (int)Connection::lastInsertId();
 
         // Parse the text
         TextParsing::splitCheck(
@@ -529,10 +559,11 @@ class FeedService
         );
 
         // Apply tag
-        Connection::execute(
+        Connection::preparedExecute(
             "INSERT INTO {$this->tbpref}texttags (TtTxID, TtT2ID)
-             SELECT $textId, T2ID FROM {$this->tbpref}tags2
-             WHERE T2Text = " . Escaping::toSqlSyntax($tagName)
+             SELECT ?, T2ID FROM {$this->tbpref}tags2
+             WHERE T2Text = ?",
+            [$textId, $tagName]
         );
 
         return $textId;
@@ -548,17 +579,17 @@ class FeedService
      */
     public function archiveOldTexts(string $tagName, int $maxTexts): array
     {
-        $result = Connection::query(
+        $rows = Connection::preparedFetchAll(
             "SELECT TtTxID FROM {$this->tbpref}texttags
              JOIN {$this->tbpref}tags2 ON TtT2ID = T2ID
-             WHERE T2Text = " . Escaping::toSqlSyntax($tagName)
+             WHERE T2Text = ?",
+            [$tagName]
         );
 
         $textIds = [];
-        while ($row = mysqli_fetch_assoc($result)) {
+        foreach ($rows as $row) {
             $textIds[] = (int)$row['TtTxID'];
         }
-        mysqli_free_result($result);
 
         $stats = ['archived' => 0, 'sentences' => 0, 'textitems' => 0];
 
@@ -579,21 +610,23 @@ class FeedService
                 ->delete();
 
             // Archive the text
-            Connection::execute(
+            Connection::preparedExecute(
                 "INSERT INTO {$this->tbpref}archivedtexts (
                     AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
                 )
                 SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                FROM {$this->tbpref}texts WHERE TxID = $textId"
+                FROM {$this->tbpref}texts WHERE TxID = ?",
+                [$textId]
             );
 
             $archiveId = (int)Connection::lastInsertId();
 
             // Copy tags to archive
-            Connection::execute(
+            Connection::preparedExecute(
                 "INSERT INTO {$this->tbpref}archtexttags (AgAtID, AgT2ID)
-                 SELECT $archiveId, TtT2ID FROM {$this->tbpref}texttags
-                 WHERE TtTxID = $textId"
+                 SELECT ?, TtT2ID FROM {$this->tbpref}texttags
+                 WHERE TtTxID = ?",
+                [$archiveId, $textId]
             );
 
             // Delete original text
@@ -624,10 +657,11 @@ class FeedService
      */
     public function markLinkAsError(string $link): void
     {
-        Connection::execute(
+        Connection::preparedExecute(
             "UPDATE {$this->tbpref}feedlinks
              SET FlLink = CONCAT(' ', FlLink)
-             WHERE FlLink IN (" . Escaping::toSqlSyntax($link) . ")"
+             WHERE FlLink = ?",
+            [$link]
         );
     }
 
@@ -744,10 +778,11 @@ class FeedService
             if (isset($feedData[$key]['text'])) {
                 $link = trim($feedData[$key]['link']);
                 if (substr($link, 0, 1) == '#') {
-                    Connection::execute(
+                    Connection::preparedExecute(
                         "UPDATE {$this->tbpref}feedlinks
-                        SET FlLink=" . Escaping::toSqlSyntax($link) . "
-                        WHERE FlID = " . substr($link, 1)
+                        SET FlLink = ?
+                        WHERE FlID = ?",
+                        [$link, (int)substr($link, 1)]
                     );
                 }
                 $data[$key]['TxSourceURI'] = $link;
@@ -1403,9 +1438,10 @@ class FeedService
                         // Ensure tags exist
                         foreach ($text['TagList'] as $tag) {
                             if (!in_array($tag, $_SESSION['TEXTTAGS'] ?? [])) {
-                                Connection::query(
+                                Connection::preparedExecute(
                                     'INSERT INTO ' . $this->tbpref . 'tags2 (T2Text)
-                                    VALUES (' . Escaping::toSqlSyntax($tag) . ')'
+                                    VALUES (?)',
+                                    [$tag]
                                 );
                             }
                         }
@@ -1413,18 +1449,18 @@ class FeedService
                     }
 
                     // Create the text
-                    Connection::query(
+                    $id = Connection::preparedInsert(
                         'INSERT INTO ' . $this->tbpref . 'texts (
                             TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI
-                        ) VALUES (
-                            ' . $text['TxLgID'] . ',
-                            ' . Escaping::toSqlSyntax($text['TxTitle']) . ',
-                            ' . Escaping::toSqlSyntax($text['TxText']) . ',
-                            ' . Escaping::toSqlSyntax($text['TxAudioURI']) . ',
-                            ' . Escaping::toSqlSyntax($text['TxSourceURI']) . ')'
+                        ) VALUES (?, ?, ?, ?, ?)',
+                        [
+                            $text['TxLgID'],
+                            $text['TxTitle'],
+                            $text['TxText'],
+                            $text['TxAudioURI'],
+                            $text['TxSourceURI']
+                        ]
                     );
-
-                    $id = (int)Connection::lastInsertId();
 
                     // Parse the text
                     TextParsing::splitCheck(

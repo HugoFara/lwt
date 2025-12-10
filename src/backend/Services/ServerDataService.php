@@ -16,7 +16,6 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 
 use function Lwt\Core\get_version_number;
 
@@ -72,12 +71,10 @@ class ServerDataService
      */
     public function getServerData(): array
     {
-        $dbaccess_format = Escaping::toSqlSyntax($this->dbname);
-
         $data = [];
         $data["db_name"] = $this->dbname;
         $data["db_prefix"] = $this->tbpref;
-        $data["db_size"] = $this->getDatabaseSize($dbaccess_format);
+        $data["db_size"] = $this->getDatabaseSize();
         $data["server_soft"] = $_SERVER['SERVER_SOFTWARE'];
         $data["apache"] = $this->parseApacheVersion($data["server_soft"]);
         $data["php"] = phpversion();
@@ -91,16 +88,14 @@ class ServerDataService
     /**
      * Get database size in MB.
      *
-     * @param string $dbaccess_format SQL-escaped database name
-     *
      * @return float Database size in MB
      */
-    private function getDatabaseSize(string $dbaccess_format): float
+    private function getDatabaseSize(): float
     {
-        $temp_size = Connection::fetchValue(
+        $temp_size = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
             FROM information_schema.TABLES
-            WHERE table_schema = $dbaccess_format
+            WHERE table_schema = ?
             AND table_name IN (
                 '{$this->tbpref}archivedtexts', '{$this->tbpref}archtexttags',
                 '{$this->tbpref}feedlinks', '{$this->tbpref}languages',
@@ -108,7 +103,8 @@ class ServerDataService
                 '{$this->tbpref}tags', '{$this->tbpref}tags2',
                 '{$this->tbpref}textitems2', '{$this->tbpref}texts', '{$this->tbpref}texttags',
                 '{$this->tbpref}words', '{$this->tbpref}wordtags'
-            )"
+            )",
+            [$this->dbname]
         );
 
         if ($temp_size === null) {

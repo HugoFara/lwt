@@ -17,7 +17,6 @@ namespace Lwt\Services {
 use Lwt\Core\Globals;
 use Lwt\Core\Http\ParamHelpers;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\IconHelper;
@@ -61,12 +60,15 @@ class TextNavigationService
      */
     public function getPreviousAndNextTextLinks(int $textId, string $url, bool $onlyAnn, string $add): string
     {
+        $params = [];
+
         $currentlang = Validation::language(
             (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
         );
         $wh_lang = '';
         if ($currentlang != '') {
-            $wh_lang = ' AND TxLgID=' . $currentlang;
+            $wh_lang = ' AND TxLgID = ?';
+            $params[] = $currentlang;
         }
 
         $currentquery = (string) ParamHelpers::processSessParam("query", "currenttextquery", '', false);
@@ -77,27 +79,28 @@ class TextNavigationService
             false
         );
         $currentregexmode = Settings::getWithDefault("set-regex-mode");
-        $wh_query = $currentregexmode . 'LIKE ';
-        if ($currentregexmode == '') {
-            $wh_query .= Escaping::toSqlSyntax(
-                str_replace("*", "%", mb_strtolower($currentquery, 'UTF-8'))
-            );
-        } else {
-            $wh_query .= Escaping::toSqlSyntax($currentquery);
-        }
-        switch ($currentquerymode) {
-            case 'title,text':
-                $wh_query = ' AND (TxTitle ' . $wh_query . ' OR TxText ' . $wh_query . ')';
-                break;
-            case 'title':
-                $wh_query = ' AND (TxTitle ' . $wh_query . ')';
-                break;
-            case 'text':
-                $wh_query = ' AND (TxText ' . $wh_query . ')';
-                break;
-        }
-        if ($currentquery == '') {
-            $wh_query = '';
+        $wh_query = '';
+        if ($currentquery != '') {
+            $queryParam = $currentregexmode == ''
+                ? str_replace("*", "%", mb_strtolower($currentquery, 'UTF-8'))
+                : $currentquery;
+
+            $likeClause = $currentregexmode . 'LIKE ?';
+            switch ($currentquerymode) {
+                case 'title,text':
+                    $wh_query = ' AND (TxTitle ' . $likeClause . ' OR TxText ' . $likeClause . ')';
+                    $params[] = $queryParam;
+                    $params[] = $queryParam;
+                    break;
+                case 'title':
+                    $wh_query = ' AND (TxTitle ' . $likeClause . ')';
+                    $params[] = $queryParam;
+                    break;
+                case 'text':
+                    $wh_query = ' AND (TxText ' . $likeClause . ')';
+                    $params[] = $queryParam;
+                    break;
+            }
         }
 
         $currenttag1 = Validation::textTag(
@@ -173,11 +176,10 @@ class TextNavigationService
         }
 
         $list = array(0);
-        $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
+        $rows = Connection::preparedFetchAll($sql, $params);
+        foreach ($rows as $record) {
             array_push($list, (int) $record['TxID']);
         }
-        mysqli_free_result($res);
         array_push($list, 0);
         $listlen = count($list);
         for ($i = 1; $i < $listlen - 1; $i++) {
@@ -224,11 +226,9 @@ use Lwt\Database\Connection;
 function getTextTitle(int $textId): string
 {
     $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $sql = "SELECT TxTitle AS value FROM {$tbpref}texts WHERE TxID = " . (int) $textId;
-    $res = Connection::query($sql);
-    $record = mysqli_fetch_assoc($res);
-    mysqli_free_result($res);
-    return $record ? (string) $record['value'] : '';
+    $sql = "SELECT TxTitle AS value FROM {$tbpref}texts WHERE TxID = ?";
+    $result = Connection::preparedFetchValue($sql, [$textId]);
+    return $result !== null ? (string) $result : '';
 }
 
 /**

@@ -79,27 +79,35 @@ class TagServiceTest extends TestCase
     public function testBuildWhereClauseReturnsEmptyForEmptyQuery(): void
     {
         $result = $this->termTagService->buildWhereClause('');
-        $this->assertEquals('', $result);
+        $this->assertIsArray($result);
+        $this->assertEquals('', $result['clause']);
+        $this->assertEmpty($result['params']);
     }
 
     public function testBuildWhereClauseReturnsClauseForQuery(): void
     {
         $result = $this->termTagService->buildWhereClause('test');
-        $this->assertStringContainsString('TgText like', $result);
-        $this->assertStringContainsString('TgComment like', $result);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('TgText LIKE', $result['clause']);
+        $this->assertStringContainsString('TgComment LIKE', $result['clause']);
+        $this->assertCount(2, $result['params']);
+        $this->assertEquals('test', $result['params'][0]);
     }
 
     public function testBuildWhereClauseForTextTags(): void
     {
         $result = $this->textTagService->buildWhereClause('test');
-        $this->assertStringContainsString('T2Text like', $result);
-        $this->assertStringContainsString('T2Comment like', $result);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('T2Text LIKE', $result['clause']);
+        $this->assertStringContainsString('T2Comment LIKE', $result['clause']);
     }
 
     public function testBuildWhereClauseReplacesWildcard(): void
     {
         $result = $this->termTagService->buildWhereClause('test*');
-        $this->assertStringContainsString('like', $result);
+        $this->assertIsArray($result);
+        $this->assertStringContainsString('LIKE', $result['clause']);
+        $this->assertEquals('test%', $result['params'][0]);
     }
 
     // ===== getCount() tests =====
@@ -121,8 +129,8 @@ class TagServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $whereClause = $this->termTagService->buildWhereClause('nonexistent_tag_xyz');
-        $result = $this->termTagService->getCount($whereClause);
+        $whereData = $this->termTagService->buildWhereClause('nonexistent_tag_xyz');
+        $result = $this->termTagService->getCount($whereData);
         $this->assertIsInt($result);
     }
 

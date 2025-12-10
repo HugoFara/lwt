@@ -18,7 +18,6 @@ require_once __DIR__ . '/TableSetService.php';
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
-use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
 
 /**
@@ -109,26 +108,29 @@ class HomeService
      */
     public function getCurrentTextInfo(int $textId): ?array
     {
-        $title = Connection::fetchValue(
+        $title = Connection::preparedFetchValue(
             'SELECT TxTitle AS value
             FROM ' . $this->tbpref . 'texts
-            WHERE TxID=' . $textId
+            WHERE TxID = ?',
+            [$textId]
         );
 
         if ($title === null) {
             return null;
         }
 
-        $languageId = (int)Connection::fetchValue(
-            'SELECT TxLgID AS value FROM ' . $this->tbpref . 'texts WHERE TxID=' . $textId
+        $languageId = (int)Connection::preparedFetchValue(
+            'SELECT TxLgID AS value FROM ' . $this->tbpref . 'texts WHERE TxID = ?',
+            [$textId]
         );
 
         $languageName = $this->getLanguageName($languageId);
 
-        $annotated = (int)Connection::fetchValue(
+        $annotated = (int)Connection::preparedFetchValue(
             "SELECT LENGTH(TxAnnotatedText) AS value
             FROM " . $this->tbpref . "texts
-            WHERE TxID = " . $textId
+            WHERE TxID = ?",
+            [$textId]
         ) > 0;
 
         return [
@@ -149,10 +151,11 @@ class HomeService
      */
     public function getLanguageName(int $languageId): string
     {
-        $result = Connection::fetchValue(
+        $result = Connection::preparedFetchValue(
             "SELECT LgName AS value
             FROM {$this->tbpref}languages
-            WHERE LgID = $languageId"
+            WHERE LgID = ?",
+            [$languageId]
         );
 
         if ($result === null) {
@@ -220,12 +223,11 @@ class HomeService
     public function getDatabaseSize(): float
     {
         $dbname = Globals::getDatabaseName();
-        $dbaccess_format = Escaping::toSqlSyntax($dbname);
 
-        $size = Connection::fetchValue(
+        $size = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
             FROM information_schema.TABLES
-            WHERE table_schema = $dbaccess_format
+            WHERE table_schema = ?
             AND table_name IN (
                 '{$this->tbpref}archivedtexts', '{$this->tbpref}archtexttags',
                 '{$this->tbpref}feedlinks', '{$this->tbpref}languages',
@@ -233,7 +235,8 @@ class HomeService
                 '{$this->tbpref}settings', '{$this->tbpref}tags', '{$this->tbpref}tags2',
                 '{$this->tbpref}textitems2', '{$this->tbpref}texts', '{$this->tbpref}texttags',
                 '{$this->tbpref}words', '{$this->tbpref}wordtags'
-            )"
+            )",
+            [$dbname]
         );
 
         if ($size === null) {
@@ -266,7 +269,7 @@ class HomeService
         }
 
         return [
-            'prefix' => Escaping::toSqlSyntaxNoNull($this->tbpref),
+            'prefix' => $this->tbpref,
             'db_size' => $this->getDatabaseSize(),
             'server_software' => $serverSoft,
             'apache' => $apache,
