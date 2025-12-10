@@ -43,7 +43,7 @@ const LWT_RELEASE_DATE = "2024-04-01";
  *
  * @psalm-return '2.9.1-fork (December 29 2023) <span class="red">DEBUG</span>'|'2.9.1-fork (December 29 2023)'
  */
-function get_version(): string
+function getVersion(): string
 {
     $formattedDate = \date("F d Y", \strtotime(LWT_RELEASE_DATE));
     $version = LWT_APP_VERSION . " ($formattedDate)";
@@ -58,10 +58,10 @@ function get_version(): string
  *
  * @return string Machine-readable version, for instance v001.006.031 for version 1.6.31.
  */
-function get_version_number(): string
+function getVersionNumber(): string
 {
     $r = 'v';
-    $v = get_version();
+    $v = getVersion();
     // Escape any detail like "-fork"
     $v = \preg_replace('/-\w+\d*/', '', $v);
     $pos = \strpos($v, ' ', 0);

@@ -524,6 +524,28 @@ function getSimilarityRanking(string $str1, string $str2): float
 /**
  * For a language $lang_id and a term $compared_term (UTF-8).
  *
+ * @param int    $langId       Language ID
+ * @param string $comparedTerm Term to compare with
+ * @param int    $maxCount     Maximum number of terms to display
+ * @param float  $minRanking   For terms to match
+ *
+ * @return int[] All $maxCount wordids with a similarity ranking > $minRanking
+ *
+ * @see SimilarTermsService::getSimilarTerms()
+ */
+function getSimilarTerms(
+    int $langId,
+    string $comparedTerm,
+    int $maxCount,
+    float $minRanking
+): array {
+    $service = new SimilarTermsService();
+    return $service->getSimilarTerms($langId, $comparedTerm, $maxCount, $minRanking);
+}
+
+/**
+ * For a language $lang_id and a term $compared_term (UTF-8).
+ *
  * @param int    $lang_id       Language ID
  * @param string $compared_term Term to compare with
  * @param int    $max_count     Maximum number of terms to display
@@ -531,7 +553,8 @@ function getSimilarityRanking(string $str1, string $str2): float
  *
  * @return int[] All $max_count wordids with a similarity ranking > $min_ranking
  *
- * @see SimilarTermsService::getSimilarTerms()
+ * @deprecated Use getSimilarTerms() instead
+ * @see getSimilarTerms()
  */
 function get_similar_terms(
     int $lang_id,
@@ -539,8 +562,23 @@ function get_similar_terms(
     int $max_count,
     float $min_ranking
 ): array {
+    return getSimilarTerms($lang_id, $compared_term, $max_count, $min_ranking);
+}
+
+/**
+ * Prepare a field with a similar term to copy.
+ *
+ * @param int    $termId  Initial term ID
+ * @param string $compare Similar term to copy.
+ *
+ * @return string HTML-formatted string
+ *
+ * @see SimilarTermsService::formatTerm()
+ */
+function formatTerm(int $termId, string $compare): string
+{
     $service = new SimilarTermsService();
-    return $service->getSimilarTerms($lang_id, $compared_term, $max_count, $min_ranking);
+    return $service->formatTerm($termId, $compare);
 }
 
 /**
@@ -551,12 +589,28 @@ function get_similar_terms(
  *
  * @return string HTML-formatted string
  *
- * @see SimilarTermsService::formatTerm()
+ * @deprecated Use formatTerm() instead
+ * @see formatTerm()
  */
 function format_term(int $termid, string $compare): string
 {
+    return formatTerm($termid, $compare);
+}
+
+/**
+ * Get Term and translation of terms in termid array as string for echo
+ *
+ * @param int    $langId       Language ID
+ * @param string $comparedTerm Similar term we compare to
+ *
+ * @return string HTML output
+ *
+ * @see SimilarTermsService::printSimilarTerms()
+ */
+function printSimilarTerms(int $langId, string $comparedTerm): string
+{
     $service = new SimilarTermsService();
-    return $service->formatTerm($termid, $compare);
+    return $service->printSimilarTerms($langId, $comparedTerm);
 }
 
 /**
@@ -567,23 +621,36 @@ function format_term(int $termid, string $compare): string
  *
  * @return string HTML output
  *
- * @see SimilarTermsService::printSimilarTerms()
+ * @deprecated Use printSimilarTerms() instead
+ * @see printSimilarTerms()
  */
 function print_similar_terms(int $lang_id, string $compared_term): string
 {
-    $service = new SimilarTermsService();
-    return $service->printSimilarTerms($lang_id, $compared_term);
+    return printSimilarTerms($lang_id, $compared_term);
 }
 
 /**
  * Print a row for similar terms if the feature is enabled.
  *
+ * @return string HTML output
+ *
  * @see SimilarTermsService::printSimilarTermsTabRow()
+ */
+function printSimilarTermsTabRow(): string
+{
+    $service = new SimilarTermsService();
+    return $service->printSimilarTermsTabRow();
+}
+
+/**
+ * Print a row for similar terms if the feature is enabled.
+ *
+ * @deprecated Use printSimilarTermsTabRow() instead
+ * @see printSimilarTermsTabRow()
  */
 function print_similar_terms_tabrow(): void
 {
-    $service = new SimilarTermsService();
-    echo $service->printSimilarTermsTabRow();
+    echo printSimilarTermsTabRow();
 }
 
 } // End global namespace

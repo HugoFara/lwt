@@ -31,7 +31,7 @@ use Lwt\View\Helper\IconHelper;
     data_info="Term" type="text" name="WoText" id="WoText" value="" maxlength="250" />
     <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?></td>
 </tr>
-<?php print_similar_terms_tabrow(); ?>
+<?php echo printSimilarTermsTabRow(); ?>
 <tr>
 <td class="td1 right">Translation:</td>
 <td class="td1">

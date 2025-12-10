@@ -126,7 +126,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         $langid = (int)$record['TxLgID'];
         $ann = (string)$record['TxAnnotatedText'];
         if (strlen($ann) > 0) {
-            $ann = \recreate_save_ann($textid, $ann);
+            $ann = \recreateSaveAnn($textid, $ann);
         }
         mysqli_free_result($res);
 
@@ -205,7 +205,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         $langid = (int) $record['TxLgID'];
         $ann = (string) $record['TxAnnotatedText'];
         if (strlen($ann) > 0) {
-            $ann = \recreate_save_ann($textid, $ann);
+            $ann = \recreateSaveAnn($textid, $ann);
         }
         mysqli_free_result($res);
 

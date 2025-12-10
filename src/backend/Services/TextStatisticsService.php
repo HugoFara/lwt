@@ -225,7 +225,7 @@ use Lwt\Services\TextStatisticsService;
  *
  * @see TextStatisticsService::getTextWordCount()
  */
-function return_textwordcount(string|int $textsId): array
+function returnTextWordCount(string|int $textsId): array
 {
     $service = new TextStatisticsService();
     return $service->getTextWordCount((string) $textsId);
@@ -236,11 +236,11 @@ function return_textwordcount(string|int $textsId): array
  *
  * @param string $textID Text IDs separated by comma
  *
- * @deprecated 2.9.0 Use return_textwordcount instead.
+ * @deprecated 2.9.0 Use returnTextWordCount instead.
  */
 function textwordcount(string $textID): void
 {
-    echo json_encode(return_textwordcount($textID));
+    echo json_encode(returnTextWordCount($textID));
 }
 
 /**
@@ -252,7 +252,7 @@ function textwordcount(string $textID): void
  *
  * @see TextStatisticsService::getTodoWordsCount()
  */
-function todo_words_count(int $textid): int
+function todoWordsCount(int $textid): int
 {
     $service = new TextStatisticsService();
     return $service->getTodoWordsCount($textid);
@@ -267,7 +267,7 @@ function todo_words_count(int $textid): int
  *
  * @see TextStatisticsService::getTodoWordsContent()
  */
-function todo_words_content(int $textid): string
+function todoWordsContent(int $textid): string
 {
     $service = new TextStatisticsService();
     return $service->getTodoWordsContent($textid);
@@ -280,14 +280,14 @@ function todo_words_content(int $textid): string
  *
  * @return string HTML result
  *
- * @deprecated Since 2.10.0, use todo_words_content instead
+ * @deprecated Since 2.10.0, use todoWordsContent instead
  */
 function texttodocount2($textid): string
 {
     if (is_string($textid)) {
         $textid = (int) $textid;
     }
-    return todo_words_content($textid);
+    return todoWordsContent($textid);
 }
 
 } // End global namespace

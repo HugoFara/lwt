@@ -48,6 +48,6 @@ if ($status == 98) {
 <?php echo json_encode([
     'words' => $wordsData,
     'useTooltips' => $useTooltips,
-    'todoContent' => todo_words_content($textId)
+    'todoContent' => todoWordsContent($textId)
 ]); ?>
 </script>

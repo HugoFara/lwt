@@ -22,7 +22,7 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
 use PHPUnit\Framework\TestCase;
 
-use function Lwt\Core\Utils\get_execution_time;
+use function Lwt\Core\Utils\getExecutionTime;
 use function Lwt\Core\Utils\remove_soft_hyphens;
 use function Lwt\Core\Utils\replace_supp_unicode_planes_char;
 
@@ -121,25 +121,25 @@ class IntegrationTest extends TestCase
 
     public function testRemoveSoftHyphens(): void
     {
-        $this->assertEquals('hello', remove_soft_hyphens('hel­lo'));
-        $this->assertEquals('world', remove_soft_hyphens('world'));
-        $this->assertEquals('', remove_soft_hyphens(''));
+        $this->assertEquals('hello', \Lwt\Core\Utils\removeSoftHyphens('hel­lo'));
+        $this->assertEquals('world', \Lwt\Core\Utils\removeSoftHyphens('world'));
+        $this->assertEquals('', \Lwt\Core\Utils\removeSoftHyphens(''));
         // All soft hyphens are removed
-        $this->assertEquals('testing', remove_soft_hyphens('test­­ing'));
+        $this->assertEquals('testing', \Lwt\Core\Utils\removeSoftHyphens('test­­ing'));
     }
 
     public function testReplaceSupplementaryUnicodePlanes(): void
     {
         // Characters in supplementary planes (U+10000-U+10FFFF) should be replaced with U+2588 (█)
-        $result = replace_supp_unicode_planes_char('hello 𝕳𝖊𝖑𝖑𝖔 world');
+        $result = \Lwt\Core\Utils\replaceSuppUnicodePlanesChar('hello 𝕳𝖊𝖑𝖑𝖔 world');
         $this->assertStringContainsString('hello', $result);
         $this->assertStringContainsString('█', $result);
 
         // Regular characters should pass through unchanged
-        $this->assertEquals('hello world', replace_supp_unicode_planes_char('hello world'));
+        $this->assertEquals('hello world', \Lwt\Core\Utils\replaceSuppUnicodePlanesChar('hello world'));
 
         // Empty string
-        $this->assertEquals('', replace_supp_unicode_planes_char(''));
+        $this->assertEquals('', \Lwt\Core\Utils\replaceSuppUnicodePlanesChar(''));
     }
 
     public function testMakeCounterWithTotal(): void
@@ -259,10 +259,10 @@ class IntegrationTest extends TestCase
 
     public function testReplTabNl(): void
     {
-        $this->assertEquals('hello world', repl_tab_nl("hello\tworld"));
-        $this->assertEquals('line one line two', repl_tab_nl("line one\nline two"));
+        $this->assertEquals('hello world', replTabNl("hello\tworld"));
+        $this->assertEquals('line one line two', replTabNl("line one\nline two"));
         // Multiple whitespace is collapsed to single space
-        $this->assertEquals('test spaces', repl_tab_nl("test\t\nspaces"));
+        $this->assertEquals('test spaces', replTabNl("test\t\nspaces"));
     }
 
     // ========== STATUS AND VALIDATION FUNCTIONS ==========
@@ -408,7 +408,7 @@ class IntegrationTest extends TestCase
         $text_res = Connection::query("SELECT TxID FROM texts LIMIT 1");
         if ($text_row = \mysqli_fetch_assoc($text_res)) {
             $text_id = (int)$text_row['TxID'];
-            $counts = return_textwordcount($text_id);
+            $counts = returnTextWordCount($text_id);
 
             $this->assertIsArray($counts);
             // Function returns: total, expr, stat, totalu, expru, statu
@@ -429,7 +429,7 @@ class IntegrationTest extends TestCase
         $text_res = Connection::query("SELECT TxID FROM texts LIMIT 1");
         if ($text_row = \mysqli_fetch_assoc($text_res)) {
             $text_id = (int)$text_row['TxID'];
-            $count = todo_words_count($text_id);
+            $count = todoWordsCount($text_id);
 
             $this->assertIsInt($count);
             $this->assertGreaterThanOrEqual(0, $count);
@@ -442,7 +442,7 @@ class IntegrationTest extends TestCase
 
     public function testSentencesContainingWordLcQuery(): void
     {
-        $query = sentences_containing_word_lc_query('test', 1);
+        $query = sentencesContainingWordLcQuery('test', 1);
         $this->assertIsString($query);
         $this->assertStringContainsString('SELECT', strtoupper($query));
         $this->assertStringContainsString('SeID', $query);
@@ -450,14 +450,14 @@ class IntegrationTest extends TestCase
 
     public function testMaskTermInSentenceV2(): void
     {
-        $result = mask_term_in_sentence_v2('This is a test sentence');
+        $result = maskTermInSentenceV2('This is a test sentence');
         $this->assertIsString($result);
         $this->assertNotEmpty($result);
     }
 
     public function testMaskTermInSentence(): void
     {
-        $result = mask_term_in_sentence('This is a test', 'test');
+        $result = maskTermInSentence('This is a test', 'test');
         $this->assertIsString($result);
     }
 
@@ -519,11 +519,11 @@ class IntegrationTest extends TestCase
     public function testTrimValue(): void
     {
         $value = "  hello world  ";
-        trim_value($value);
+        trimValue($value);
         $this->assertEquals('hello world', $value);
 
         $value2 = "\t\ntest\n\t";
-        trim_value($value2);
+        trimValue($value2);
         $this->assertEquals('test', $value2);
     }
 
@@ -531,10 +531,10 @@ class IntegrationTest extends TestCase
     {
         $sepa = StringUtils::getFirstSeparator();
         $trans = "hello{$sepa}world{$sepa}test";
-        $first = get_first_translation($trans);
+        $first = getFirstTranslation($trans);
         $this->assertEquals('hello', $first);
 
-        $single = get_first_translation('onlyone');
+        $single = getFirstTranslation('onlyone');
         $this->assertEquals('onlyone', $single);
     }
 
@@ -901,19 +901,19 @@ class IntegrationTest extends TestCase
     }
 
     /**
-     * Test get_execution_time function
+     * Test getExecutionTime function
      */
     public function testGetExecutionTime(): void
     {
         // First call starts timer
-        $start = get_execution_time();
+        $start = getExecutionTime();
         $this->assertIsFloat($start);
 
         // Sleep briefly
         usleep(10000); // 10ms
 
         // Second call returns elapsed time
-        $elapsed = get_execution_time();
+        $elapsed = getExecutionTime();
         $this->assertIsFloat($elapsed);
         $this->assertGreaterThan(0, $elapsed);
     }

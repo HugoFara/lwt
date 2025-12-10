@@ -20,7 +20,7 @@ use Lwt\Services\SettingsService;
 use Lwt\Services\WordStatusService;
 use PHPUnit\Framework\TestCase;
 
-use function Lwt\Core\get_version_number;
+use function Lwt\Core\getVersionNumber;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
@@ -1380,11 +1380,11 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test get_version_number function
+     * Test getVersionNumber function
      */
     public function testGetVersionNumber(): void
     {
-        $version = get_version_number();
+        $version = getVersionNumber();
         $this->assertIsString($version);
         $this->assertStringStartsWith('v', $version);
         // Version format: vXXXYYYZZZ (e.g., v002009001 for 2.9.1)

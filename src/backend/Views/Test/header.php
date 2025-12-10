@@ -44,7 +44,7 @@ use Lwt\View\Helper\PageLayoutHelper;
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
             <?php echo \Lwt\View\Helper\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
-        <?php echo \get_annotation_link($textId); ?>
+        <?php echo \getAnnotationLink($textId); ?>
     </div>
     <?php endif; ?>
     <div>

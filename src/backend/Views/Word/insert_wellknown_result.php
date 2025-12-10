@@ -28,6 +28,6 @@ namespace Lwt\Views\Word;
     'wid' => (int) $wid,
     'hex' => $hex,
     'term' => $term,
-    'todoContent' => todo_words_content((int) $textId)
+    'todoContent' => todoWordsContent((int) $textId)
 ]); ?>
 </script>

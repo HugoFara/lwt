@@ -304,7 +304,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals('', $tag);
     }
 
-    // ===== todo_words_count() tests =====
+    // ===== todoWordsCount() tests =====
 
     public function testTodoWordsCountWithNoUnknownWords(): void
     {
@@ -313,7 +313,7 @@ class TextProcessingTest extends TestCase
         }
 
         // Use a non-existent text ID
-        $count = todo_words_count(999999);
+        $count = todoWordsCount(999999);
         $this->assertEquals(0, $count);
     }
 
@@ -323,12 +323,12 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $count = todo_words_count(1);
+        $count = todoWordsCount(1);
         $this->assertIsInt($count);
         $this->assertGreaterThanOrEqual(0, $count);
     }
 
-    // ===== return_textwordcount() tests =====
+    // ===== returnTextWordCount() tests =====
 
     public function testReturnTextWordCountReturnsArray(): void
     {
@@ -336,8 +336,8 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = return_textwordcount('1');
-        
+        $result = returnTextWordCount('1');
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('total', $result);
         $this->assertArrayHasKey('expr', $result);
@@ -353,8 +353,8 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = return_textwordcount('1,2');
-        
+        $result = returnTextWordCount('1,2');
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('total', $result);
     }
@@ -365,8 +365,8 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = return_textwordcount('999999');
-        
+        $result = returnTextWordCount('999999');
+
         $this->assertIsArray($result);
         // Should return empty arrays for each key
         $this->assertIsArray($result['total']);
@@ -452,24 +452,24 @@ class TextProcessingTest extends TestCase
 
     public function testRemoveSoftHyphens(): void
     {
-        $this->assertEquals('hello', remove_soft_hyphens('hel­lo'));
-        $this->assertEquals('world', remove_soft_hyphens('world'));
-        $this->assertEquals('', remove_soft_hyphens(''));
-        $this->assertEquals('testing', remove_soft_hyphens('test­­ing'));
+        $this->assertEquals('hello', \Lwt\Core\Utils\removeSoftHyphens('hel­lo'));
+        $this->assertEquals('world', \Lwt\Core\Utils\removeSoftHyphens('world'));
+        $this->assertEquals('', \Lwt\Core\Utils\removeSoftHyphens(''));
+        $this->assertEquals('testing', \Lwt\Core\Utils\removeSoftHyphens('test­­ing'));
     }
 
     public function testReplaceSupplementaryUnicodePlanes(): void
     {
         // Characters in supplementary planes should be replaced with U+2588 (█)
-        $result = replace_supp_unicode_planes_char('hello 𝕳𝖊𝖑𝖑𝖔 world');
+        $result = \Lwt\Core\Utils\replaceSuppUnicodePlanesChar('hello 𝕳𝖊𝖑𝖑𝖔 world');
         $this->assertStringContainsString('hello', $result);
         $this->assertStringContainsString('█', $result);
-        
+
         // Regular characters should pass through unchanged
-        $this->assertEquals('hello world', replace_supp_unicode_planes_char('hello world'));
+        $this->assertEquals('hello world', \Lwt\Core\Utils\replaceSuppUnicodePlanesChar('hello world'));
         
         // Empty string
-        $this->assertEquals('', replace_supp_unicode_planes_char(''));
+        $this->assertEquals('', \Lwt\Core\Utils\replaceSuppUnicodePlanesChar(''));
     }
 
     public function testMakeCounterWithTotal(): void
@@ -531,9 +531,9 @@ class TextProcessingTest extends TestCase
 
     public function testReplTabNl(): void
     {
-        $this->assertEquals('hello world', repl_tab_nl("hello\tworld"));
-        $this->assertEquals('line one line two', repl_tab_nl("line one\nline two"));
+        $this->assertEquals('hello world', replTabNl("hello\tworld"));
+        $this->assertEquals('line one line two', replTabNl("line one\nline two"));
         // Multiple whitespace is collapsed to single space
-        $this->assertEquals('test spaces', repl_tab_nl("test\t\nspaces"));
+        $this->assertEquals('test spaces', replTabNl("test\t\nspaces"));
     }
 }

@@ -23,7 +23,7 @@ use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\SelectOptionsBuilder;
 
 use const Lwt\Core\LWT_APP_VERSION;
-use function Lwt\Core\get_version;
+use function Lwt\Core\getVersion;
 
 /**
  * When on a WordPress server, make a logout button.
@@ -406,7 +406,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
 <!-- Version info -->
 <p class="has-text-centered has-text-grey is-size-7 mt-4">
-    LWT Version <?php echo get_version(); ?> &mdash;
+    LWT Version <?php echo getVersion(); ?> &mdash;
     <?php echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"'); ?>
 </p>
 

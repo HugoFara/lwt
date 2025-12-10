@@ -344,6 +344,7 @@ use Lwt\Services\TextReadingService;
  *
  * @return void
  *
+ * @deprecated 3.0.0 Use TextReadingService::echoTerm() instead
  * @see TextReadingService::echoTerm()
  */
 function echo_term(
@@ -367,6 +368,7 @@ function echo_term(
  *
  * @return int Sentence ID
  *
+ * @deprecated 3.0.0 Use TextReadingService::parseSentence() instead
  * @see TextReadingService::parseSentence()
  */
 function sentence_parser(int $sid, int $old_sid): int
@@ -386,6 +388,7 @@ function sentence_parser(int $sid, int $old_sid): int
  *
  * @return void
  *
+ * @deprecated 3.0.0 Use TextReadingService::parseItem() instead
  * @see TextReadingService::parseItem()
  */
 function item_parser(
@@ -407,6 +410,7 @@ function item_parser(
  *
  * @return void
  *
+ * @deprecated 3.0.0 Use TextReadingService::mainWordLoop() instead
  * @see TextReadingService::mainWordLoop()
  */
 function main_word_loop(int $textid, int $showAll): void

@@ -21,7 +21,7 @@ use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\WordStatusService;
 
-use function Lwt\Core\get_version_number;
+use function Lwt\Core\getVersionNumber;
 
 /**
  * Database migrations and initialization utilities.
@@ -102,7 +102,7 @@ class Migrations
         $dbname = Globals::getDatabaseName();
 
         // DB Version
-        $currversion = get_version_number();
+        $currversion = getVersionNumber();
 
         try {
             $dbversion = Connection::fetchValue(

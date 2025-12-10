@@ -456,7 +456,7 @@ class TextController extends BaseController
             // Check text only
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             $this->textService->checkText(
-                \Lwt\Core\Utils\remove_soft_hyphens($txText),
+                \Lwt\Core\Utils\removeSoftHyphens($txText),
                 $txLgId
             );
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';

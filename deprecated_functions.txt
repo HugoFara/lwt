@@ -26,11 +26,11 @@ makeAudioPlayer()       -> Use MediaService::renderAudioPlayer()
 makeHtml5AudioPlayer()  -> Use MediaService::renderHtml5AudioPlayer()
 
 ## Text Statistics Service (TextStatisticsService.php)
-textwordcount()         -> Use return_textwordcount() (deprecated since 2.9.0)
-texttodocount2()        -> Use todo_words_content() (deprecated since 2.10.0)
+textwordcount()         -> Use returnTextWordCount() (deprecated since 2.9.0)
+texttodocount2()        -> Use todoWordsContent() (deprecated since 2.10.0)
 
 ## Integration (text_from_yt.php)
-do_js()                 -> JavaScript moved to youtube_import.ts (now a no-op)
+doJs()                  -> JavaScript moved to youtube_import.ts (now a no-op)
 
 ## Router (routes.php)
 getRouteRegistrar()     -> Use \Lwt\Router\registerRoutes() directly
@@ -56,19 +56,20 @@ getServerData()         -> Use ServerDataService::getServerData()
 # They are not necessarily deprecated but don't follow PSR naming conventions.
 
 ## Core Bootstrap (start_session.php)
-set_error_reporting()
-set_configuration_options()
-start_session()
-start_session_main()
+# All functions now follow camelCase naming (renamed 2025-12-10)
+# set_error_reporting()         -> setErrorReporting()
+# set_configuration_options()   -> setConfigurationOptions()
+# start_session()                -> startSession()
+# start_session_main()           -> startSessionMain()
 
 ## Integration (text_from_yt.php)
-do_form_fragment()
-do_js()
+doFormFragment()
+doJs()
 
 ## Version/Debug Utilities
 get_version()                    # version.php
 get_version_number()             # version.php
-get_execution_time()             # debug_utilities.php
+getExecutionTime()               # debug_utilities.php (was: get_execution_time)
 
 ## String Utilities (string_utilities.php)
 remove_soft_hyphens()
@@ -127,10 +128,10 @@ item_parser()
 main_word_loop()
 
 ## Text Statistics Service (TextStatisticsService.php)
-return_textwordcount()
+returnTextWordCount()
 textwordcount()
-todo_words_count()
-todo_words_content()
+todoWordsCount()
+todoWordsContent()
 texttodocount2()
 
 ## Build Tools (markdown_converter.php)

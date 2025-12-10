@@ -30,7 +30,7 @@ namespace Lwt\Views\Word;
     <td class="td1 right">Translation:</td>
     <td class="td1 word-show-value"><b><?php
     if (!empty($ann)) {
-        echo str_replace_first(
+        echo \Lwt\Core\Utils\strReplaceFirst(
             htmlspecialchars($ann ?? '', ENT_QUOTES, 'UTF-8'),
             '<span class="word-show-highlight">' . htmlspecialchars($ann ?? '', ENT_QUOTES, 'UTF-8') . '</span>',
             htmlspecialchars($word['translation'] ?? '', ENT_QUOTES, 'UTF-8')

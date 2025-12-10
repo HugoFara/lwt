@@ -770,13 +770,13 @@ class WordController extends BaseController
                 $message = $listService->capitalizeByIdList($idList);
                 break;
             case 'exp':
-                \anki_export($listService->getAnkiExportSql($idList, '', '', '', '', ''));
+                \ankiExport($listService->getAnkiExportSql($idList, '', '', '', '', ''));
                 break;
             case 'exp2':
-                \tsv_export($listService->getTsvExportSql($idList, '', '', '', '', ''));
+                \tsvExport($listService->getTsvExportSql($idList, '', '', '', '', ''));
                 break;
             case 'exp3':
-                \flexible_export($listService->getFlexibleExportSql($idList, '', '', '', '', ''));
+                \flexibleExport($listService->getFlexibleExportSql($idList, '', '', '', '', ''));
                 break;
             case 'test':
                 $_SESSION['testsql'] = $idList;
@@ -879,15 +879,15 @@ class WordController extends BaseController
 
         // Export actions
         if ($allaction == 'expall') {
-            \anki_export($listService->getAnkiExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            \ankiExport($listService->getAnkiExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
         if ($allaction == 'expall2') {
-            \tsv_export($listService->getTsvExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            \tsvExport($listService->getTsvExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
         if ($allaction == 'expall3') {
-            \flexible_export($listService->getFlexibleExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            \flexibleExport($listService->getFlexibleExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
 

@@ -1331,7 +1331,7 @@ class TextService
         } else {
             $data = Escaping::prepareTextdata($uploadText);
         }
-        $data = \Lwt\Core\Utils\replace_supp_unicode_planes_char($data);
+        $data = \Lwt\Core\Utils\replaceSuppUnicodePlanesChar($data);
         $data = trim($data);
 
         // Use pilcrow symbol for paragraphs separation

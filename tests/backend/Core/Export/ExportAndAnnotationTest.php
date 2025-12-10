@@ -89,7 +89,7 @@ class ExportAndAnnotationTest extends TestCase
                          VALUES ('test_export_text', 'Test content', $lgId)");
         $textId = (int)Connection::lastInsertId();
         
-        $ann = create_ann($textId);
+        $ann = createAnn($textId);
         
         $this->assertIsString($ann);
         // Even with no textitems2, should return some annotation structure
@@ -105,8 +105,8 @@ class ExportAndAnnotationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $ann = create_ann(999999);
-        
+        $ann = createAnn(999999);
+
         $this->assertIsString($ann);
         // Should return empty or minimal annotation structure
     }
@@ -132,7 +132,7 @@ class ExportAndAnnotationTest extends TestCase
         $textId = (int)Connection::lastInsertId();
         
         $oldAnn = "1\tword\t0\ttranslation\n";
-        $newAnn = recreate_save_ann($textId, $oldAnn);
+        $newAnn = recreateSaveAnn($textId, $oldAnn);
         
         $this->assertIsString($newAnn);
         
@@ -158,8 +158,8 @@ class ExportAndAnnotationTest extends TestCase
         Connection::query("INSERT INTO {$tbpref}texts (TxTitle, TxText, TxLgID) 
                          VALUES ('test_export_empty_text', 'Test content', $lgId)");
         $textId = (int)Connection::lastInsertId();
-        
-        $newAnn = recreate_save_ann($textId, '');
+
+        $newAnn = recreateSaveAnn($textId, '');
         
         $this->assertIsString($newAnn);
         
@@ -187,7 +187,7 @@ class ExportAndAnnotationTest extends TestCase
         $textId = (int)Connection::lastInsertId();
         
         $oldAnn = "1\tword\t0\ttranslation\n";
-        recreate_save_ann($textId, $oldAnn);
+        recreateSaveAnn($textId, $oldAnn);
         
         // Verify database was updated
         $saved = Connection::fetchValue("SELECT TxAnnotatedText AS value FROM {$tbpref}texts WHERE TxID = $textId");
@@ -202,19 +202,19 @@ class ExportAndAnnotationTest extends TestCase
 
     public function testReplTabNlReplacesTabsAndNewlines(): void
     {
-        $this->assertEquals('hello world', repl_tab_nl("hello\tworld"));
-        $this->assertEquals('line one line two', repl_tab_nl("line one\nline two"));
-        $this->assertEquals('mixed tabs newlines', repl_tab_nl("mixed\ttabs\nnewlines"));
+        $this->assertEquals('hello world', replTabNl("hello\tworld"));
+        $this->assertEquals('line one line two', replTabNl("line one\nline two"));
+        $this->assertEquals('mixed tabs newlines', replTabNl("mixed\ttabs\nnewlines"));
     }
 
     public function testReplTabNlWithEmptyString(): void
     {
-        $this->assertEquals('', repl_tab_nl(''));
+        $this->assertEquals('', replTabNl(''));
     }
 
     public function testReplTabNlWithNormalText(): void
     {
-        $this->assertEquals('normal text', repl_tab_nl('normal text'));
+        $this->assertEquals('normal text', replTabNl('normal text'));
     }
 
     public function testHtmlEscaping(): void
@@ -248,7 +248,7 @@ class ExportAndAnnotationTest extends TestCase
                          VALUES ('test_export_struct_text', 'Test content', $lgId)");
         $textId = (int)Connection::lastInsertId();
         
-        $ann = create_ann($textId);
+        $ann = createAnn($textId);
         
         // Annotation should contain lines
         $lines = explode("\n", $ann);
@@ -296,11 +296,11 @@ class ExportAndAnnotationTest extends TestCase
         $textId = (int)Connection::lastInsertId();
         
         // Step 1: Create initial annotation
-        $ann1 = create_ann($textId);
+        $ann1 = createAnn($textId);
         $this->assertIsString($ann1);
         
         // Step 2: Recreate annotation with old data
-        $ann2 = recreate_save_ann($textId, $ann1);
+        $ann2 = recreateSaveAnn($textId, $ann1);
         $this->assertIsString($ann2);
         
         // Step 3: Verify annotation was saved
@@ -333,7 +333,7 @@ class ExportAndAnnotationTest extends TestCase
         
         // Create annotation with translation
         $oldAnn = "1\tword\t5\tmy_translation\n";
-        $newAnn = recreate_save_ann($textId, $oldAnn);
+        $newAnn = recreateSaveAnn($textId, $oldAnn);
         
         // The new annotation should preserve "my_translation" if the word is still present
         $this->assertIsString($newAnn);

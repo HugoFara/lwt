@@ -26,8 +26,8 @@ function showRequest(): void
     echo "<pre>** DEBUGGING **********************************\n";
     echo '$GLOBALS...';
     print_r($GLOBALS);
-    echo 'get_version_number()...';
-    echo \Lwt\Core\get_version_number() . "\n";
+    echo 'getVersionNumber()...';
+    echo \Lwt\Core\getVersionNumber() . "\n";
     echo 'get_magic_quotes_gpc()...';
     echo "NOT EXISTS (FALSE)\n";
     echo "********************************** DEBUGGING **</pre>";
@@ -39,7 +39,7 @@ function showRequest(): void
  *
  * @return float Time since last call
  */
-function get_execution_time()
+function getExecutionTime()
 {
     static $microtime_start = null;
     if ($microtime_start === null) {

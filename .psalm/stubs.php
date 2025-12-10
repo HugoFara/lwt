@@ -29,7 +29,7 @@ namespace Lwt\Core\Utils {
     /**
      * @return float
      */
-    function get_execution_time(): float {}
+    function getExecutionTime(): float {}
 
     /**
      * @param mixed $var
@@ -117,12 +117,12 @@ namespace Lwt\Core {
     /**
      * @return string
      */
-    function get_version(): string {}
+    function getVersion(): string {}
 
     /**
      * @return string
      */
-    function get_version_number(): string {}
+    function getVersionNumber(): string {}
 }
 
 // =============================================================================
@@ -238,12 +238,12 @@ function find_latin_sentence_end($matches, $noSentenceEnd): string {}
  * @param string $dir
  * @return array{paths: string[], folders: string[]}
  */
-function media_paths_search(string $dir): array {}
+function mediaPathsSearch(string $dir): array {}
 
 /**
  * @return array{base_path: string, paths?: string[], folders?: string[], error?: string}
  */
-function get_media_paths(): array {}
+function getMediaPaths(): array {}
 
 /**
  * @param string $dir
@@ -312,19 +312,19 @@ function getWordTagList(int $wid, string $before = ' ', int $brack = 1, int $toh
  * @param string $regexword
  * @return string
  */
-function mask_term_in_sentence($s, $regexword): string {}
+function maskTermInSentence($s, $regexword): string {}
 
 /**
  * @param string $s
  * @return string
  */
-function repl_tab_nl($s): string {}
+function replTabNl($s): string {}
 
 /**
  * @param string $ann
  * @return string|false
  */
-function annotation_to_json($ann): string|false {}
+function annotationToJson($ann): string|false {}
 
 // ---------------------------------------------------------------------------
 // From vite_helper.php
@@ -352,7 +352,7 @@ function getPreviousAndNextTextLinks(int $textId, string $urlPath, bool $showTit
  * @param int $textId
  * @return string
  */
-function get_annotation_link(int $textId): string {}
+function getAnnotationLink(int $textId): string {}
 
 // ---------------------------------------------------------------------------
 // From SelectOptionsBuilder / UI helpers

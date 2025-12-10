@@ -39,7 +39,7 @@ namespace Lwt\Views\Word;
     'text' => $text,
     'hex' => $hex,
     'textId' => $textId,
-    'todoContent' => todo_words_content($textId)
+    'todoContent' => todoWordsContent($textId)
 ]); ?>
 </script>
 <?php endif; ?>

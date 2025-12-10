@@ -17,7 +17,7 @@ namespace Lwt\Services;
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 
-use function Lwt\Core\get_version_number;
+use function Lwt\Core\getVersionNumber;
 
 /**
  * Service class for retrieving server and database information.
@@ -79,7 +79,7 @@ class ServerDataService
         $data["apache"] = $this->parseApacheVersion($data["server_soft"]);
         $data["php"] = phpversion();
         $data["mysql"] = (string)Connection::fetchValue("SELECT VERSION() AS value");
-        $data["lwt_version"] = get_version_number();
+        $data["lwt_version"] = getVersionNumber();
         $data["server_location"] = $_SERVER['HTTP_HOST'];
 
         return $data;

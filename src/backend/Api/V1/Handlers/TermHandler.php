@@ -93,7 +93,7 @@ class TermHandler
                 [$wid]
             );
         }
-        array_walk($oldtransarr, '\trim_value');
+        array_walk($oldtransarr, '\trimValue');
 
         if (!in_array($newTrans, $oldtransarr)) {
             if (trim($oldtrans) == '' || trim($oldtrans) == '*') {

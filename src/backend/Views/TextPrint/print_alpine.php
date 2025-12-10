@@ -53,7 +53,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                     <?php echo IconHelper::render('circle-help', ['title' => 'Test', 'alt' => 'Test']); ?>
                 </a>
                 <?php if ($mode !== 'edit'): ?>
-                    <?php echo get_annotation_link($textId); ?>
+                    <?php echo getAnnotationLink($textId); ?>
                 <?php endif; ?>
                 <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
                     <?php echo IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
@@ -135,7 +135,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                             Print/Edit/Delete
                         </button>
                         your <strong>Improved Annotated Text</strong>
-                        <?php echo get_annotation_link($textId); ?>.
+                        <?php echo getAnnotationLink($textId); ?>.
                     <?php else: ?>
                         <button type="button" class="button is-small" @click="navigateTo('/text/print?edit=1&text=<?php echo $textId; ?>')">
                             Create

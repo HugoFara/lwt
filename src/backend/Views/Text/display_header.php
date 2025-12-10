@@ -63,5 +63,5 @@ use Lwt\View\Helper\IconHelper;
     </div>
 </div>
 <?php
-MediaService::renderMediaPlayer($audio);
+(new MediaService())->renderMediaPlayer($audio);
 ?>

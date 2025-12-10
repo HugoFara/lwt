@@ -164,7 +164,7 @@ class TextPrintController extends BaseController
         $ann = $this->printService->getAnnotatedText($textId);
         $annExists = $ann !== null;
         if ($annExists) {
-            $ann = \recreate_save_ann($textId, $ann);
+            $ann = \recreateSaveAnn($textId, $ann);
             $annExists = strlen($ann) > 0;
         }
 
@@ -195,7 +195,7 @@ class TextPrintController extends BaseController
         if ($editMode) {
             // For edit mode, create annotation if needed and render edit form
             if (!$annExists) {
-                $ann = \create_save_ann($textId);
+                $ann = \createSaveAnn($textId);
                 $annExists = strlen($ann) > 0;
             }
             if ($annExists) {

@@ -29,10 +29,10 @@ use Lwt\View\Helper\PageLayoutHelper;
 
 <!-- Audio elements for feedback -->
 <audio id="success_sound" preload="auto">
-  <source src="<?php \print_file_path("sounds/success.mp3"); ?>" type="audio/mpeg" />
+  <source src="<?php \Lwt\Core\Utils\printFilePath("sounds/success.mp3"); ?>" type="audio/mpeg" />
 </audio>
 <audio id="failure_sound" preload="auto">
-  <source src="<?php \print_file_path("sounds/failure.mp3"); ?>" type="audio/mpeg" />
+  <source src="<?php \Lwt\Core\Utils\printFilePath("sounds/failure.mp3"); ?>" type="audio/mpeg" />
 </audio>
 
 <!-- Test configuration -->

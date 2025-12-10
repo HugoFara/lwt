@@ -21,11 +21,11 @@ final class AnnotationManagementTest extends TestCase
     public function testAnnotationToJson(): void
     {
         // Empty annotation
-        $this->assertEquals('{}', annotation_to_json(''));
+        $this->assertEquals('{}', annotationToJson(''));
 
         // Single annotation
         $annotation = "1\tword\t5\ttranslation";
-        $result = annotation_to_json($annotation);
+        $result = annotationToJson($annotation);
         $this->assertJson($result);
         $decoded = json_decode($result, true);
         $this->assertArrayHasKey(0, $decoded);
@@ -33,7 +33,7 @@ final class AnnotationManagementTest extends TestCase
 
         // Multiple annotations
         $annotation = "1\tword1\t5\ttrans1\n2\tword2\t3\ttrans2";
-        $result = annotation_to_json($annotation);
+        $result = annotationToJson($annotation);
         $this->assertJson($result);
         $decoded = json_decode($result, true);
         $this->assertCount(2, $decoded);
@@ -48,22 +48,22 @@ final class AnnotationManagementTest extends TestCase
     {
         // Annotation with special characters
         $annotation = "1\tword's\t5\t\"translation\"";
-        $result = annotation_to_json($annotation);
+        $result = annotationToJson($annotation);
         $this->assertJson($result);
 
         // Annotation with tabs in translation
         $annotation = "1\tword\t5\ttranslation\twith\ttabs";
-        $result = annotation_to_json($annotation);
+        $result = annotationToJson($annotation);
         $this->assertJson($result);
 
         // Malformed annotation (missing fields)
         $annotation = "1\tword";
-        $result = annotation_to_json($annotation);
+        $result = annotationToJson($annotation);
         $this->assertJson($result);
 
         // Unicode in annotations
         $annotation = "1\t日本語\t5\ttranslation";
-        $result = annotation_to_json($annotation);
+        $result = annotationToJson($annotation);
         $this->assertJson($result);
         $decoded = json_decode($result, true);
         $this->assertStringContainsString('日本語', $decoded[0][0]);

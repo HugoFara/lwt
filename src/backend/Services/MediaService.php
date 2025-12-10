@@ -544,7 +544,7 @@ use Lwt\Services\MediaService;
  *
  * @deprecated 3.0.0 Use MediaService::searchMediaPaths() instead
  */
-function media_paths_search(string $dir): array
+function mediaPathsSearch(string $dir): array
 {
     $service = new MediaService();
     return $service->searchMediaPaths($dir);
@@ -557,7 +557,7 @@ function media_paths_search(string $dir): array
  *
  * @deprecated 3.0.0 Use MediaService::getMediaPaths() instead
  */
-function get_media_paths(): array
+function getMediaPaths(): array
 {
     $service = new MediaService();
     return $service->getMediaPaths();

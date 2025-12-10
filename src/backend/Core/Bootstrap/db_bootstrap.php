@@ -140,7 +140,7 @@ function bootstrapDatabase(): void
 
     // Start timer if needed
     if (Globals::shouldDisplayTime()) {
-        \Lwt\Core\Utils\get_execution_time();
+        \Lwt\Core\Utils\getExecutionTime();
     }
 
     // Run database migrations

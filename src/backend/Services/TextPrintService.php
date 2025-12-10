@@ -495,7 +495,7 @@ class TextPrintService
         }
 
         // Recreate/update the annotation
-        $ann = \recreate_save_ann($textId, $ann);
+        $ann = \recreateSaveAnn($textId, $ann);
         if (strlen($ann) === 0) {
             return null;
         }

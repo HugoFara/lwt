@@ -311,7 +311,7 @@ use Lwt\Services\AnnotationService;
  *
  * @see AnnotationService::recreateSaveAnnotation()
  */
-function recreate_save_ann(int $textid, string $oldann): string
+function recreateSaveAnn(int $textid, string $oldann): string
 {
     $service = new AnnotationService();
     return $service->recreateSaveAnnotation($textid, $oldann);
@@ -326,7 +326,7 @@ function recreate_save_ann(int $textid, string $oldann): string
  *
  * @see AnnotationService::createAnnotation()
  */
-function create_ann(int $textid): string
+function createAnn(int $textid): string
 {
     $service = new AnnotationService();
     return $service->createAnnotation($textid);
@@ -341,7 +341,7 @@ function create_ann(int $textid): string
  *
  * @see AnnotationService::createSaveAnnotation()
  */
-function create_save_ann(int $textid): string
+function createSaveAnn(int $textid): string
 {
     $service = new AnnotationService();
     return $service->createSaveAnnotation($textid);
@@ -360,7 +360,7 @@ function create_save_ann(int $textid): string
  *
  * @see AnnotationService::processTerm()
  */
-function process_term(string $nonterm, string $term, string $trans, string $wordid, int $line): string
+function processTerm(string $nonterm, string $term, string $trans, string $wordid, int $line): string
 {
     $service = new AnnotationService();
     return $service->processTerm($nonterm, $term, $trans, $wordid, $line);
@@ -375,7 +375,7 @@ function process_term(string $nonterm, string $term, string $trans, string $word
  *
  * @see AnnotationService::getFirstTranslation()
  */
-function get_first_translation(string $trans): string
+function getFirstTranslation(string $trans): string
 {
     $service = new AnnotationService();
     return $service->getFirstTranslation($trans);
@@ -390,7 +390,7 @@ function get_first_translation(string $trans): string
  *
  * @see AnnotationService::getAnnotationLink()
  */
-function get_annotation_link(int $textid): string
+function getAnnotationLink(int $textid): string
 {
     $service = new AnnotationService();
     return $service->getAnnotationLink($textid);
@@ -401,7 +401,7 @@ function get_annotation_link(int $textid): string
  *
  * @param string $value Value to be trimmed
  */
-function trim_value(&$value): void
+function trimValue(&$value): void
 {
     $value = trim($value);
 }
@@ -415,7 +415,7 @@ function trim_value(&$value): void
  *
  * @see AnnotationService::annotationToJson()
  */
-function annotation_to_json(string $ann): string|false
+function annotationToJson(string $ann): string|false
 {
     $service = new AnnotationService();
     return $service->annotationToJson($ann);

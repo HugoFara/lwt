@@ -27,7 +27,7 @@ define('YT_API_KEY', null);
  *
  * @return void
  */
-function do_form_fragment(): void
+function doFormFragment(): void
 {
     ?>
 <tr>
@@ -49,7 +49,7 @@ function do_form_fragment(): void
  *
  * @return void
  */
-function do_js(): void
+function doJs(): void
 {
     // JavaScript functionality moved to src/frontend/js/texts/youtube_import.ts
     // This function is kept for backwards compatibility but does nothing.

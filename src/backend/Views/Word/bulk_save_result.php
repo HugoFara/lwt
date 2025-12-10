@@ -38,6 +38,6 @@ use Lwt\View\Helper\IconHelper;
     'words' => $newWords,
     'useTooltip' => ($tooltipMode == 1),
     'cleanUp' => $cleanUp,
-    'todoContent' => todo_words_content($tid)
+    'todoContent' => todoWordsContent($tid)
 ]); ?>
 </script>

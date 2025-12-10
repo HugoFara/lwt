@@ -10,6 +10,7 @@ use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\Settings;
+use Lwt\Services\SimilarTermsService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -21,8 +22,13 @@ require_once __DIR__ . '/../../../../src/backend/Services/SimilarTermsService.ph
 
 class SimtermsTest extends TestCase
 {
+    private static SimilarTermsService $service;
+
     public static function setUpBeforeClass(): void
     {
+        // Initialize service
+        self::$service = new SimilarTermsService();
+
         // Ensure database connection is established
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
@@ -93,28 +99,28 @@ class SimtermsTest extends TestCase
     public function testLetterPairs(): void
     {
         // Basic word
-        $pairs = letterPairs('hello');
+        $pairs = self::$service->letterPairs('hello');
         $this->assertEquals(['he', 'el', 'll', 'lo'], $pairs);
 
         // Two-character word
-        $pairs = letterPairs('hi');
+        $pairs = self::$service->letterPairs('hi');
         $this->assertEquals(['hi'], $pairs);
 
         // Single character - should return empty array
-        $pairs = letterPairs('a');
+        $pairs = self::$service->letterPairs('a');
         $this->assertEquals([], $pairs);
 
         // Empty string
-        $pairs = letterPairs('');
+        $pairs = self::$service->letterPairs('');
         $this->assertEquals([], $pairs);
 
         // UTF-8 characters
-        $pairs = letterPairs('你好');
+        $pairs = self::$service->letterPairs('你好');
         $this->assertEquals(['你好'], $pairs);
         $this->assertCount(1, $pairs);
 
         // Longer UTF-8 word
-        $pairs = letterPairs('日本語');
+        $pairs = self::$service->letterPairs('日本語');
         $this->assertCount(2, $pairs);
         $this->assertEquals(['日本', '本語'], $pairs);
     }
@@ -124,29 +130,29 @@ class SimtermsTest extends TestCase
     public function testWordLetterPairs(): void
     {
         // Single word
-        $pairs = wordLetterPairs('hello');
+        $pairs = self::$service->wordLetterPairs('hello');
         $this->assertContains('he', $pairs);
         $this->assertContains('el', $pairs);
         $this->assertContains('ll', $pairs);
         $this->assertContains('lo', $pairs);
 
         // Multiple words
-        $pairs = wordLetterPairs('hello world');
+        $pairs = self::$service->wordLetterPairs('hello world');
         $this->assertContains('he', $pairs);
         $this->assertContains('wo', $pairs);
         $this->assertContains('rl', $pairs);
 
         // Words with repeated pairs should deduplicate
-        $pairs = wordLetterPairs('hello hello');
+        $pairs = self::$service->wordLetterPairs('hello hello');
         // Check that we don't have duplicates
         $this->assertEquals(count($pairs), count(array_unique($pairs)));
 
         // Empty string
-        $pairs = wordLetterPairs('');
+        $pairs = self::$service->wordLetterPairs('');
         $this->assertEmpty($pairs);
 
         // Single character word
-        $pairs = wordLetterPairs('a b');
+        $pairs = self::$service->wordLetterPairs('a b');
         $this->assertEmpty($pairs);
     }
 
@@ -155,44 +161,44 @@ class SimtermsTest extends TestCase
     public function testGetSimilarityRanking(): void
     {
         // Identical strings should have ranking of 1.0
-        $ranking = getSimilarityRanking('hello', 'hello');
+        $ranking = self::$service->getSimilarityRanking('hello', 'hello');
         $this->assertEquals(1.0, $ranking);
 
         // Completely different strings should have low ranking
-        $ranking = getSimilarityRanking('hello', 'xyz');
+        $ranking = self::$service->getSimilarityRanking('hello', 'xyz');
         $this->assertLessThan(0.3, $ranking);
 
         // Similar strings should have high ranking
-        $ranking = getSimilarityRanking('hello', 'hallo');
+        $ranking = self::$service->getSimilarityRanking('hello', 'hallo');
         $this->assertGreaterThanOrEqual(0.5, $ranking);
         $this->assertLessThan(1.0, $ranking);
 
         // Similar words
-        $ranking = getSimilarityRanking('cat', 'cats');
+        $ranking = self::$service->getSimilarityRanking('cat', 'cats');
         $this->assertGreaterThan(0.5, $ranking);
 
-        $ranking = getSimilarityRanking('work', 'word');
+        $ranking = self::$service->getSimilarityRanking('work', 'word');
         $this->assertGreaterThan(0.5, $ranking);
 
         // Empty strings should return 0
-        $ranking = getSimilarityRanking('', '');
+        $ranking = self::$service->getSimilarityRanking('', '');
         $this->assertEquals(0, $ranking);
 
         // One empty string
-        $ranking = getSimilarityRanking('hello', '');
+        $ranking = self::$service->getSimilarityRanking('hello', '');
         $this->assertEquals(0, $ranking);
 
         // Case insensitive (should be case-sensitive by default)
-        $ranking1 = getSimilarityRanking('Hello', 'hello');
-        $ranking2 = getSimilarityRanking('hello', 'hello');
+        $ranking1 = self::$service->getSimilarityRanking('Hello', 'hello');
+        $ranking2 = self::$service->getSimilarityRanking('hello', 'hello');
         // These should be different since comparison is case-sensitive
         $this->assertNotEquals($ranking1, $ranking2);
 
         // Multi-word strings
-        $ranking = getSimilarityRanking('hello world', 'hello world');
+        $ranking = self::$service->getSimilarityRanking('hello world', 'hello world');
         $this->assertEquals(1.0, $ranking);
 
-        $ranking = getSimilarityRanking('hello world', 'hello planet');
+        $ranking = self::$service->getSimilarityRanking('hello world', 'hello planet');
         $this->assertGreaterThan(0.3, $ranking);
         $this->assertLessThan(1.0, $ranking);
     }
@@ -202,7 +208,7 @@ class SimtermsTest extends TestCase
     public function testGetSimilarTerms(): void
     {
         // Find similar terms to 'hello'
-        $similar = get_similar_terms(1, 'hello', 5, 0.3);
+        $similar = self::$service->getSimilarTerms(1, 'hello', 5, 0.3);
 
         // Should be an array
         $this->assertIsArray($similar);
@@ -218,28 +224,28 @@ class SimtermsTest extends TestCase
         $this->assertNotEmpty($similar);
 
         // Find similar terms to 'cat'
-        $similar = get_similar_terms(1, 'cat', 10, 0.3);
+        $similar = self::$service->getSimilarTerms(1, 'cat', 10, 0.3);
         $this->assertIsArray($similar);
 
         // 'cats' and 'catch' should be similar
         $this->assertNotEmpty($similar);
 
         // Test with high min_ranking threshold - should return fewer results
-        $similar_high = get_similar_terms(1, 'hello', 10, 0.9);
-        $similar_low = get_similar_terms(1, 'hello', 10, 0.1);
+        $similar_high = self::$service->getSimilarTerms(1, 'hello', 10, 0.9);
+        $similar_low = self::$service->getSimilarTerms(1, 'hello', 10, 0.1);
         $this->assertLessThanOrEqual(count($similar_low), count($similar_high));
 
         // Test with max_count limit
-        $similar = get_similar_terms(1, 'cat', 1, 0.1);
+        $similar = self::$service->getSimilarTerms(1, 'cat', 1, 0.1);
         $this->assertLessThanOrEqual(1, count($similar));
 
         // Test with non-existent term
-        $similar = get_similar_terms(1, 'xyzabc123', 10, 0.3);
+        $similar = self::$service->getSimilarTerms(1, 'xyzabc123', 10, 0.3);
         $this->assertIsArray($similar);
         // May or may not have results, but should not error
 
         // Test with non-existent language ID
-        $similar = get_similar_terms(999, 'hello', 10, 0.3);
+        $similar = self::$service->getSimilarTerms(999, 'hello', 10, 0.3);
         $this->assertIsArray($similar);
         $this->assertEmpty($similar);
     }
@@ -249,7 +255,7 @@ class SimtermsTest extends TestCase
     public function testFormatTerm(): void
     {
         // Format existing term
-        $output = format_term(1, 'hello');
+        $output = self::$service->formatTerm(1, 'hello');
 
         // Should return HTML string
         $this->assertIsString($output);
@@ -273,18 +279,18 @@ class SimtermsTest extends TestCase
         $this->assertStringContainsString('data-romanization="heh-lo"', $output);
 
         // Test with term that has matching compare string
-        $output = format_term(1, 'hello');
+        $output = self::$service->formatTerm(1, 'hello');
         // The term should be highlighted if it matches
         $this->assertStringContainsString('hello', $output);
 
         // Test with partial match - the compare string highlights part of the word
-        $output = format_term(2, 'hall');
+        $output = self::$service->formatTerm(2, 'hall');
         // 'hallo' contains 'hall' which should be highlighted with <u>
         // The full word won't appear unmodified, but should contain the term data
         $this->assertStringContainsString('another greeting', $output);
 
         // Test with term that has no romanization
-        $output = format_term(7, 'cat');
+        $output = self::$service->formatTerm(7, 'cat');
         $this->assertStringContainsString('cat', $output);
         // Should not have romanization brackets
         $this->assertStringNotContainsString('[cat]', $output);
@@ -295,12 +301,12 @@ class SimtermsTest extends TestCase
             (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
             VALUES (100, 1, 'testword', 'testword', 1, '*', '')"
         );
-        $output = format_term(100, 'test');
+        $output = self::$service->formatTerm(100, 'test');
         $this->assertStringContainsString('???', $output);
         Connection::query("DELETE FROM " . $GLOBALS['tbpref'] . "words WHERE WoID = 100");
 
         // Test with non-existent term ID
-        $output = format_term(9999, 'test');
+        $output = self::$service->formatTerm(9999, 'test');
         $this->assertEquals('', $output);
     }
 
@@ -312,7 +318,7 @@ class SimtermsTest extends TestCase
         Settings::save('set-similar-terms-count', '5');
 
         // Test with valid term
-        $output = print_similar_terms(1, 'hello');
+        $output = self::$service->printSimilarTerms(1, 'hello');
         $this->assertIsString($output);
 
         // Should return HTML with similar terms
@@ -322,25 +328,25 @@ class SimtermsTest extends TestCase
         }
 
         // Test with empty term
-        $output = print_similar_terms(1, '');
+        $output = self::$service->printSimilarTerms(1, '');
         $this->assertEquals('&nbsp;', $output);
 
         // Test with whitespace-only term
-        $output = print_similar_terms(1, '   ');
+        $output = self::$service->printSimilarTerms(1, '   ');
         $this->assertEquals('&nbsp;', $output);
 
         // Test with term that has no similar matches
-        $output = print_similar_terms(1, 'xyzabc123uniqueterm');
+        $output = self::$service->printSimilarTerms(1, 'xyzabc123uniqueterm');
         $this->assertEquals('(none)', $output);
 
         // Test when feature is disabled (count = 0)
         Settings::save('set-similar-terms-count', '0');
-        $output = print_similar_terms(1, 'hello');
+        $output = self::$service->printSimilarTerms(1, 'hello');
         $this->assertEquals('', $output);
 
         // Test when feature is disabled (count = -1)
         Settings::save('set-similar-terms-count', '-1');
-        $output = print_similar_terms(1, 'hello');
+        $output = self::$service->printSimilarTerms(1, 'hello');
         $this->assertEquals('', $output);
 
         // Re-enable for other tests
@@ -354,10 +360,8 @@ class SimtermsTest extends TestCase
         // Enable feature
         Settings::save('set-similar-terms-count', '5');
 
-        // Capture output
-        ob_start();
-        print_similar_terms_tabrow();
-        $output = ob_get_clean();
+        // Get output from service (returns string, doesn't echo)
+        $output = self::$service->printSimilarTermsTabRow();
 
         // Should output the table row
         $this->assertIsString($output);
@@ -369,10 +373,8 @@ class SimtermsTest extends TestCase
         // Disable feature
         Settings::save('set-similar-terms-count', '0');
 
-        // Capture output
-        ob_start();
-        print_similar_terms_tabrow();
-        $output = ob_get_clean();
+        // Get output from service
+        $output = self::$service->printSimilarTermsTabRow();
 
         // Should output nothing
         $this->assertEmpty($output);
@@ -395,21 +397,21 @@ class SimtermsTest extends TestCase
         );
 
         // Test letter pairs with UTF-8
-        $pairs = letterPairs('日本語');
+        $pairs = self::$service->letterPairs('日本語');
         $this->assertIsArray($pairs);
         $this->assertNotEmpty($pairs);
 
         // Test similarity ranking with UTF-8
-        $ranking = getSimilarityRanking('日本語', '日本');
+        $ranking = self::$service->getSimilarityRanking('日本語', '日本');
         $this->assertIsFloat($ranking);
         $this->assertGreaterThan(0, $ranking);
 
         // Test get_similar_terms with UTF-8
-        $similar = get_similar_terms(1, '日本語', 5, 0.3);
+        $similar = self::$service->getSimilarTerms(1, '日本語', 5, 0.3);
         $this->assertIsArray($similar);
 
         // Test format_term with UTF-8
-        $output = format_term(200, '日本');
+        $output = self::$service->formatTerm(200, '日本');
         $this->assertIsString($output);
         // The highlighted part will wrap the matching substring
         $this->assertStringContainsString('Japanese language', $output);
@@ -422,20 +424,20 @@ class SimtermsTest extends TestCase
     {
         // Very long strings
         $long_str = str_repeat('test ', 100);
-        $ranking = getSimilarityRanking($long_str, $long_str);
+        $ranking = self::$service->getSimilarityRanking($long_str, $long_str);
         $this->assertEquals(1.0, $ranking);
 
         // Strings with special characters
-        $ranking = getSimilarityRanking('test-word', 'test_word');
+        $ranking = self::$service->getSimilarityRanking('test-word', 'test_word');
         $this->assertGreaterThan(0, $ranking);
 
         // Strings with numbers
-        $ranking = getSimilarityRanking('test123', 'test456');
+        $ranking = self::$service->getSimilarityRanking('test123', 'test456');
         $this->assertGreaterThan(0, $ranking);
 
         // Mixed case (function is case-sensitive)
-        $ranking1 = getSimilarityRanking('Hello', 'HELLO');
-        $ranking2 = getSimilarityRanking('hello', 'hello');
+        $ranking1 = self::$service->getSimilarityRanking('Hello', 'HELLO');
+        $ranking2 = self::$service->getSimilarityRanking('hello', 'hello');
         $this->assertNotEquals($ranking1, $ranking2);
     }
 }

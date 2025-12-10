@@ -445,7 +445,7 @@ use Lwt\Services\ExportService;
  *
  * @deprecated Use ExportService::exportAnki() instead
  */
-function anki_export(string $sql)
+function ankiExport(string $sql)
 {
     (new ExportService())->exportAnki($sql);
 }
@@ -459,7 +459,7 @@ function anki_export(string $sql)
  *
  * @deprecated Use ExportService::exportTsv() instead
  */
-function tsv_export(string $sql)
+function tsvExport(string $sql)
 {
     (new ExportService())->exportTsv($sql);
 }
@@ -473,7 +473,7 @@ function tsv_export(string $sql)
  *
  * @deprecated Use ExportService::exportFlexible() instead
  */
-function flexible_export(string $sql)
+function flexibleExport(string $sql)
 {
     (new ExportService())->exportFlexible($sql);
 }
@@ -487,7 +487,7 @@ function flexible_export(string $sql)
  *
  * @deprecated Use ExportService::replaceTabNewline() instead
  */
-function repl_tab_nl(string $s): string
+function replTabNl(string $s): string
 {
     return ExportService::replaceTabNewline($s);
 }
@@ -502,7 +502,7 @@ function repl_tab_nl(string $s): string
  *
  * @deprecated Use ExportService::maskTermInSentence() instead
  */
-function mask_term_in_sentence(string $s, string $regexword): string
+function maskTermInSentence(string $s, string $regexword): string
 {
     return ExportService::maskTermInSentence($s, $regexword);
 }
@@ -516,7 +516,7 @@ function mask_term_in_sentence(string $s, string $regexword): string
  *
  * @deprecated Use ExportService::maskTermInSentenceV2() instead
  */
-function mask_term_in_sentence_v2(string $s): string
+function maskTermInSentenceV2(string $s): string
 {
     return ExportService::maskTermInSentenceV2($s);
 }

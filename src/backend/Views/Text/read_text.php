@@ -52,7 +52,7 @@ $varArray = [
         'text' => [
             'id'               => $textId,
             'reading_position' => $textPosition,
-            'annotations'      => json_decode(\annotation_to_json($annotatedText))
+            'annotations'      => json_decode(\annotationToJson($annotatedText))
         ],
         'settings' => [
             'hts'                => $hts,

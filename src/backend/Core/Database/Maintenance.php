@@ -96,7 +96,7 @@ class Maintenance
         // STEP 1: write the useful info to a file
         $db_to_mecab = tempnam(sys_get_temp_dir(), "{$tbpref}db_to_mecab");
         $mecab_args = ' -F %m%t\\t -U %m%t\\t -E \\n ';
-        $mecab = get_mecab_path($mecab_args);
+        $mecab = (new \Lwt\Services\TextParsingService())->getMecabPath($mecab_args);
 
         $sql = "SELECT WoID, WoTextLC FROM {$tbpref}words
         WHERE WoLgID = ? AND WoWordCount = 0";

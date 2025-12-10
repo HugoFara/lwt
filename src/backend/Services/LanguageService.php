@@ -777,7 +777,7 @@ class LanguageService
         $fp = fopen($mecab_file, 'w');
         fwrite($fp, $text . "\n");
         fclose($fp);
-        $mecab = \get_mecab_path($mecab_args);
+        $mecab = (new TextParsingService())->getMecabPath($mecab_args);
         $handle = popen($mecab . $mecab_file, "r");
         $mecab_str = '';
         while (($line = fgets($handle, 4096)) !== false) {

@@ -8,8 +8,8 @@ require_once __DIR__ . '/../../../src/backend/Core/version.php';
 use Lwt\Core\Globals;
 use PHPUnit\Framework\TestCase;
 
-use function Lwt\Core\get_version;
-use function Lwt\Core\get_version_number;
+use function Lwt\Core\getVersion;
+use function Lwt\Core\getVersionNumber;
 
 Globals::initialize();
 
@@ -23,7 +23,7 @@ final class VersionTest extends TestCase
      */
     public function testGetVersion(): void
     {
-        $version = get_version();
+        $version = getVersion();
         $this->assertIsString($version);
     }
 
@@ -32,7 +32,7 @@ final class VersionTest extends TestCase
      */
     public function testGetVersionNumber(): void
     {
-        $version = get_version_number();
+        $version = getVersionNumber();
         $this->assertTrue(str_starts_with($version, 'v'));
         $this->assertSame(10, strlen($version));
     }

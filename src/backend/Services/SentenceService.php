@@ -77,7 +77,7 @@ class SentenceService
             $fp = fopen($mecab_file, 'w');
             fwrite($fp, $wordlc . "\n");
             fclose($fp);
-            $mecab = get_mecab_path($mecab_args);
+            $mecab = (new TextParsingService())->getMecabPath($mecab_args);
             $handle = popen($mecab . $mecab_file, "r");
             if (!feof($handle)) {
                 $row = fgets($handle, 256);
@@ -115,7 +115,7 @@ class SentenceService
                 $pattern_value = $wordlc;
             } else {
                 $pattern_value = '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
-                     . remove_spaces($wordlc, $removeSpaces)
+                     . \Lwt\Core\Utils\removeSpaces($wordlc, $removeSpaces)
                      . '([^' . $record["LgRegexpWordCharacters"] . ']|$)';
             }
             $pattern_escaped = mysqli_real_escape_string(Globals::getDbConnection(), $pattern_value);
@@ -156,7 +156,7 @@ class SentenceService
             $fp = fopen($mecab_file, 'w');
             fwrite($fp, $wordlc . "\n");
             fclose($fp);
-            $mecab = get_mecab_path($mecab_args);
+            $mecab = (new TextParsingService())->getMecabPath($mecab_args);
             $handle = popen($mecab . $mecab_file, "r");
             if (!feof($handle)) {
                 $row = fgets($handle, 256);
@@ -187,7 +187,7 @@ class SentenceService
                 $pattern = $wordlc;
             } else {
                 $pattern = '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
-                     . remove_spaces($wordlc, $removeSpaces)
+                     . \Lwt\Core\Utils\removeSpaces($wordlc, $removeSpaces)
                      . '([^' . $record["LgRegexpWordCharacters"] . ']|$)';
             }
             $sql = "SELECT DISTINCT SeID, SeText
@@ -290,7 +290,7 @@ class SentenceService
                 $pattern = "/($wordlc)/ui";
             } else {
                 $pattern = '/(?<![' . $termchar . '])(' .
-                remove_spaces($wordlc, $removeSpaces) . ')(?![' .
+                \Lwt\Core\Utils\removeSpaces($wordlc, $removeSpaces) . ')(?![' .
                 $termchar . '])/ui';
             }
         }
@@ -514,10 +514,26 @@ use Lwt\Services\SentenceService;
  *
  * @see SentenceService::buildSentencesContainingWordQuery()
  */
-function sentences_containing_word_lc_query(string $wordlc, int $lid): string
+function sentencesContainingWordLcQuery(string $wordlc, int $lid): string
 {
     $service = new SentenceService();
     return $service->buildSentencesContainingWordQuery($wordlc, $lid);
+}
+
+/**
+ * Return a SQL string to find sentences containing a word.
+ *
+ * @param string $wordlc Word to look for in lowercase
+ * @param int    $lid    Language ID
+ *
+ * @return string Query in SQL format
+ *
+ * @deprecated Use sentencesContainingWordLcQuery() instead
+ * @see sentencesContainingWordLcQuery()
+ */
+function sentences_containing_word_lc_query(string $wordlc, int $lid): string
+{
+    return sentencesContainingWordLcQuery($wordlc, $lid);
 }
 
 /**
@@ -532,10 +548,28 @@ function sentences_containing_word_lc_query(string $wordlc, int $lid): string
  *
  * @see SentenceService::findSentencesFromWord()
  */
-function sentences_from_word(?int $wid, string $wordlc, int $lid, int $limit = -1): \mysqli_result|false
+function sentencesFromWord(?int $wid, string $wordlc, int $lid, int $limit = -1): \mysqli_result|false
 {
     $service = new SentenceService();
     return $service->findSentencesFromWord($wid, $wordlc, $lid, $limit);
+}
+
+/**
+ * Perform a SQL query to find sentences containing a word.
+ *
+ * @param int|null $wid    Word ID or mode
+ * @param string   $wordlc Word to look for in lowercase
+ * @param int      $lid    Language ID
+ * @param int      $limit  Maximum number of sentences to return
+ *
+ * @return \mysqli_result|false Query result or false on failure
+ *
+ * @deprecated Use sentencesFromWord() instead
+ * @see sentencesFromWord()
+ */
+function sentences_from_word(?int $wid, string $wordlc, int $lid, int $limit = -1): \mysqli_result|false
+{
+    return sentencesFromWord($wid, $wordlc, $lid, $limit);
 }
 
 /**
@@ -568,10 +602,29 @@ function getSentence(int $seid, string $wordlc, int $mode): array
  *
  * @see SentenceService::getSentencesWithWord()
  */
-function sentences_with_word(int $lang, string $wordlc, ?int $wid, ?int $mode = 0, int $limit = 20): array
+function sentencesWithWord(int $lang, string $wordlc, ?int $wid, ?int $mode = 0, int $limit = 20): array
 {
     $service = new SentenceService();
     return $service->getSentencesWithWord($lang, $wordlc, $wid, $mode, $limit);
+}
+
+/**
+ * Return sentences containing a word.
+ *
+ * @param int      $lang   Language ID
+ * @param string   $wordlc Word to look for in lowercase
+ * @param int|null $wid    Word ID
+ * @param int|null $mode   Sentences to get
+ * @param int      $limit  Maximum number of sentences to return
+ *
+ * @return string[][] Array of sentences found
+ *
+ * @deprecated Use sentencesWithWord() instead
+ * @see sentencesWithWord()
+ */
+function sentences_with_word(int $lang, string $wordlc, ?int $wid, ?int $mode = 0, int $limit = 20): array
+{
+    return sentencesWithWord($lang, $wordlc, $wid, $mode, $limit);
 }
 
 /**
@@ -584,10 +637,28 @@ function sentences_with_word(int $lang, string $wordlc, ?int $wid, ?int $mode = 
  *
  * @return void Outputs HTML directly
  */
-function example_sentences_area(int $lang, string $termlc, string $selector, int $wid): void
+function exampleSentencesArea(int $lang, string $termlc, string $selector, int $wid): void
 {
     $service = new SentenceService();
     echo $service->renderExampleSentencesArea($lang, $termlc, $selector, $wid);
+}
+
+/**
+ * Prepare the area for example sentences of a word.
+ *
+ * @param int    $lang     Language ID
+ * @param string $termlc   Term text in lowercase
+ * @param string $selector JS selector for target textarea
+ * @param int    $wid      Word ID
+ *
+ * @return void Outputs HTML directly
+ *
+ * @deprecated Use exampleSentencesArea() instead
+ * @see exampleSentencesArea()
+ */
+function example_sentences_area(int $lang, string $termlc, string $selector, int $wid): void
+{
+    exampleSentencesArea($lang, $termlc, $selector, $wid);
 }
 
 /**

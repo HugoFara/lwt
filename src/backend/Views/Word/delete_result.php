@@ -27,6 +27,6 @@ namespace Lwt\Views\Word;
 <?php echo json_encode([
     'wid' => (int) $wid,
     'term' => $term,
-    'todoContent' => todo_words_content($textId)
+    'todoContent' => todoWordsContent($textId)
 ]); ?>
 </script>

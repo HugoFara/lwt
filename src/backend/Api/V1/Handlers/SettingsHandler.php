@@ -166,7 +166,7 @@ class SettingsHandler
      */
     public function getThemePath(string $path): array
     {
-        return ["theme_path" => \get_file_path($path)];
+        return ["theme_path" => \Lwt\Core\Utils\getFilePath($path)];
     }
 
     // =========================================================================

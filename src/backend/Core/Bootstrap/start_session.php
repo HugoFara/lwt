@@ -32,7 +32,7 @@ Globals::initialize();
  *
  * @return void
  */
-function set_error_reporting(bool $displayErrors): void
+function setErrorReporting(bool $displayErrors): void
 {
     if ($displayErrors) {
         @\error_reporting(E_ALL);
@@ -50,7 +50,7 @@ function set_error_reporting(bool $displayErrors): void
  *
  * @return void
  */
-function set_configuration_options(): void
+function setConfigurationOptions(): void
 {
     // Set script time limit
     @\ini_set('max_execution_time', '600');  // 10 min.
@@ -64,7 +64,7 @@ function set_configuration_options(): void
  *
  * @return void
  */
-function start_session(): void
+function startSession(): void
 {
     // session isn't started
     $err = @\session_start();
@@ -84,14 +84,14 @@ function start_session(): void
  *
  * @return void
  */
-function start_session_main(): void
+function startSessionMain(): void
 {
-    set_error_reporting(Globals::shouldDisplayErrors());
-    set_configuration_options();
+    setErrorReporting(Globals::shouldDisplayErrors());
+    setConfigurationOptions();
     // Start a PHP session if not one already exists
     if (\session_id() == '') {
-        start_session();
+        startSession();
     }
 }
 
-start_session_main();
+startSessionMain();

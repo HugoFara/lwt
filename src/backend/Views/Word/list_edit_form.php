@@ -31,7 +31,7 @@ use Lwt\View\Helper\IconHelper;
    <td class="td1"><input <?php echo $scrdir; ?> class="notempty setfocus checkoutsidebmp" data_info="Term" type="text" name="WoText" id="WoText" value="<?php echo htmlspecialchars($word['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="40" /> <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
    </td>
 </tr>
-<?php print_similar_terms_tabrow(); ?>
+<?php echo printSimilarTermsTabRow(); ?>
 <tr>
    <td class="td1 right">Translation:</td>
    <td class="td1">
@@ -73,5 +73,5 @@ use Lwt\View\Helper\IconHelper;
 </form>
 <?php
 // Display example sentence button
-example_sentences_area($word['WoLgID'], $word['WoTextLC'], "WoSentence", $word['WoID']);
+exampleSentencesArea($word['WoLgID'], $word['WoTextLC'], "WoSentence", $word['WoID']);
 ?>

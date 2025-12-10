@@ -6,6 +6,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
+use Lwt\Services\SimilarTermsService;
 
 /**
  * Handler for language-related API operations.
@@ -20,11 +21,17 @@ class LanguageHandler
     private LanguageService $languageService;
 
     /**
+     * @var SimilarTermsService Similar terms service instance
+     */
+    private SimilarTermsService $similarTermsService;
+
+    /**
      * Constructor - initialize language service.
      */
     public function __construct()
     {
         $this->languageService = new LanguageService();
+        $this->similarTermsService = new SimilarTermsService();
     }
 
     /**
@@ -92,7 +99,7 @@ class LanguageHandler
      */
     public function getSimilarTerms(int $langId, string $term): array
     {
-        return ["similar_terms" => \print_similar_terms($langId, $term)];
+        return ["similar_terms" => $this->similarTermsService->printSimilarTerms($langId, $term)];
     }
 
     /**
@@ -106,7 +113,7 @@ class LanguageHandler
      */
     public function getSentencesWithTerm(int $langId, string $wordLc, ?int $wordId): array
     {
-        return \sentences_with_word($langId, $wordLc, $wordId);
+        return \sentencesWithWord($langId, $wordLc, $wordId);
     }
 
     // =========================================================================

@@ -30,7 +30,7 @@ namespace Lwt\Core\Utils {
      *
      * @psalm-return array<string>|string
      */
-    function remove_soft_hyphens(string $str): array|string
+    function removeSoftHyphens(string $str): array|string
     {
         return \str_replace('­', '', $str);  // first '..' contains Softhyphen 0xC2 0xAD
     }
@@ -44,7 +44,7 @@ namespace Lwt\Core\Utils {
      *
      * @psalm-return array<string>|null|string
      */
-    function replace_supp_unicode_planes_char(string $s): array|string|null
+    function replaceSuppUnicodePlanesChar(string $s): array|string|null
     {
         return \preg_replace('/[\x{10000}-\x{10FFFF}]/u', "\xE2\x96\x88", $s);
         /* U+2588 = UTF8: E2 96 88 = FULL BLOCK = ⬛︎  */
@@ -102,9 +102,9 @@ namespace Lwt\Core\Utils {
      *
      * @return void
      */
-    function print_file_path($filename): void
+    function printFilePath($filename): void
     {
-        echo get_file_path($filename);
+        echo getFilePath($filename);
     }
 
     /**
@@ -120,7 +120,7 @@ namespace Lwt\Core\Utils {
      *
      * @return string File path if it exists, otherwise the filename
      */
-    function get_file_path($filename): string
+    function getFilePath($filename): string
     {
         // Legacy path mappings
         $mappings = [
@@ -170,7 +170,7 @@ namespace Lwt\Core\Utils {
      *
      * @return string Preg-quoted separator characters
      */
-    function get_sepas()
+    function getSepas()
     {
         return \Lwt\Core\StringUtils::getSeparators();
     }
@@ -182,7 +182,7 @@ namespace Lwt\Core\Utils {
      *
      * @return string First separator character
      */
-    function get_first_sepa()
+    function getFirstSepa()
     {
         return \Lwt\Core\StringUtils::getFirstSeparator();
     }
@@ -223,7 +223,7 @@ namespace Lwt\Core\Utils {
      *
      * @return string String without spaces if requested.
      */
-    function remove_spaces($s, $remove)
+    function removeSpaces($s, $remove)
     {
         if (!$remove) {
             return $s;
@@ -241,7 +241,7 @@ namespace Lwt\Core\Utils {
      *
      * @return string String with replaced text
      */
-    function str_replace_first($needle, $replace, $haystack)
+    function strReplaceFirst($needle, $replace, $haystack)
     {
         if ($needle === '') {
             return $haystack;
@@ -261,21 +261,21 @@ namespace Lwt\Core\Utils {
 namespace {
     if (!\function_exists('remove_soft_hyphens')) {
         /**
-         * @deprecated Use \Lwt\Core\Utils\remove_soft_hyphens() instead
+         * @deprecated Use \Lwt\Core\Utils\removeSoftHyphens() instead
          */
         function remove_soft_hyphens(string $str): array|string
         {
-            return \Lwt\Core\Utils\remove_soft_hyphens($str);
+            return \Lwt\Core\Utils\removeSoftHyphens($str);
         }
     }
 
     if (!\function_exists('replace_supp_unicode_planes_char')) {
         /**
-         * @deprecated Use \Lwt\Core\Utils\replace_supp_unicode_planes_char() instead
+         * @deprecated Use \Lwt\Core\Utils\replaceSuppUnicodePlanesChar() instead
          */
         function replace_supp_unicode_planes_char(string $s): array|string|null
         {
-            return \Lwt\Core\Utils\replace_supp_unicode_planes_char($s);
+            return \Lwt\Core\Utils\replaceSuppUnicodePlanesChar($s);
         }
     }
 
@@ -301,21 +301,21 @@ namespace {
 
     if (!\function_exists('print_file_path')) {
         /**
-         * @deprecated Use \Lwt\Core\Utils\print_file_path() instead
+         * @deprecated Use \Lwt\Core\Utils\printFilePath() instead
          */
         function print_file_path($filename): void
         {
-            \Lwt\Core\Utils\print_file_path($filename);
+            \Lwt\Core\Utils\printFilePath($filename);
         }
     }
 
     if (!\function_exists('get_file_path')) {
         /**
-         * @deprecated Use \Lwt\Core\Utils\get_file_path() instead
+         * @deprecated Use \Lwt\Core\Utils\getFilePath() instead
          */
         function get_file_path($filename): string
         {
-            return \Lwt\Core\Utils\get_file_path($filename);
+            return \Lwt\Core\Utils\getFilePath($filename);
         }
     }
 
@@ -325,7 +325,7 @@ namespace {
          */
         function get_sepas()
         {
-            return \Lwt\Core\Utils\get_sepas();
+            return \Lwt\Core\Utils\getSepas();
         }
     }
 
@@ -335,7 +335,7 @@ namespace {
          */
         function get_first_sepa()
         {
-            return \Lwt\Core\Utils\get_first_sepa();
+            return \Lwt\Core\Utils\getFirstSepa();
         }
     }
 
@@ -361,21 +361,21 @@ namespace {
 
     if (!\function_exists('remove_spaces')) {
         /**
-         * @deprecated Use \Lwt\Core\Utils\remove_spaces() instead
+         * @deprecated Use \Lwt\Core\Utils\removeSpaces() instead
          */
         function remove_spaces($s, $remove)
         {
-            return \Lwt\Core\Utils\remove_spaces($s, $remove);
+            return \Lwt\Core\Utils\removeSpaces($s, $remove);
         }
     }
 
     if (!\function_exists('str_replace_first')) {
         /**
-         * @deprecated Use \Lwt\Core\Utils\str_replace_first() instead
+         * @deprecated Use \Lwt\Core\Utils\strReplaceFirst() instead
          */
         function str_replace_first($needle, $replace, $haystack)
         {
-            return \Lwt\Core\Utils\str_replace_first($needle, $replace, $haystack);
+            return \Lwt\Core\Utils\strReplaceFirst($needle, $replace, $haystack);
         }
     }
 }

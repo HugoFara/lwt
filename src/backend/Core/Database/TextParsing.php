@@ -59,7 +59,7 @@ class TextParsing
         // We use the format "word  num num" for all nodes
         $mecab_args = " -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n";
         $mecab_args .= " -o $file_name ";
-        $mecab = \get_mecab_path($mecab_args);
+        $mecab = (new \Lwt\Services\TextParsingService())->getMecabPath($mecab_args);
 
         // WARNING: \n is converted to PHP_EOL here!
         $handle = popen($mecab, 'w');
@@ -368,7 +368,7 @@ class TextParsing
             $text
         );
         if ($id == -2) {
-            $text = \remove_spaces(
+            $text = \Lwt\Core\Utils\removeSpaces(
                 str_replace(
                     array("\r\r", "\t", "\n"),
                     array("\r", "", ""),
@@ -399,7 +399,7 @@ class TextParsing
                 str_replace(array("\t", "\n\n"), array("\n", ""), $text)
             )
         );
-        $text = \remove_spaces(
+        $text = \Lwt\Core\Utils\removeSpaces(
             preg_replace("/(\n|^)(?!1\t)/u", "\n0\t", $text),
             $removeSpaces
         );

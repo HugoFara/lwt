@@ -44,7 +44,7 @@ if ($fromAnn === "") {
     } else {
         $config['oldStatus'] = $oldStatus;
     }
-    $config['todoContent'] = todo_words_content($textId);
+    $config['todoContent'] = todoWordsContent($textId);
 } else {
     // Annotation mode
     $config['fromAnn'] = (int)$fromAnn;

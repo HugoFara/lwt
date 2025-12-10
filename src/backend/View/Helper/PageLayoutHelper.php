@@ -20,8 +20,8 @@ require_once __DIR__ . '/../../Core/Utils/string_utilities.php';
 
 use Lwt\Core\Http\UrlUtilities;
 use function Lwt\Core\Utils\showRequest;
-use function Lwt\Core\Utils\get_execution_time;
-use function Lwt\Core\Utils\get_file_path;
+use function Lwt\Core\Utils\getExecutionTime;
+use function Lwt\Core\Utils\getFilePath;
 
 /**
  * Helper class for generating page layout elements.
@@ -239,7 +239,7 @@ HTML;
      */
     public static function buildLogo(string $imagePath = 'assets/images/lwt_icon.png'): string
     {
-        $path = function_exists('get_file_path') ? get_file_path($imagePath) : '/' . $imagePath;
+        $path = function_exists('getFilePath') ? \Lwt\Core\Utils\getFilePath($imagePath) : '/' . $imagePath;
         return '<img class="lwtlogo" src="' . htmlspecialchars($path, ENT_QUOTES, 'UTF-8')
             . '" title="LWT" alt="LWT logo" />';
     }
@@ -454,9 +454,9 @@ HTML;
         echo '-->';
         echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
         echo '<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>';
-        echo '<link rel="apple-touch-icon" href="' . get_file_path('img/apple-touch-icon-57x57.png') . '" />';
-        echo '<link rel="apple-touch-icon" sizes="72x72" href="' . get_file_path('img/apple-touch-icon-72x72.png') . '" />';
-        echo '<link rel="apple-touch-icon" sizes="114x114" href="' . get_file_path('img/apple-touch-icon-114x114.png') . '" />';
+        echo '<link rel="apple-touch-icon" href="' . \Lwt\Core\Utils\getFilePath('img/apple-touch-icon-57x57.png') . '" />';
+        echo '<link rel="apple-touch-icon" sizes="72x72" href="' . \Lwt\Core\Utils\getFilePath('img/apple-touch-icon-72x72.png') . '" />';
+        echo '<link rel="apple-touch-icon" sizes="114x114" href="' . \Lwt\Core\Utils\getFilePath('img/apple-touch-icon-114x114.png') . '" />';
         echo '<link rel="apple-touch-startup-image" href="/assets/images/apple-touch-startup.png" />';
         echo '<meta name="apple-mobile-web-app-capable" content="yes" />';
 
@@ -465,7 +465,7 @@ HTML;
             echo ViteHelper::assets('js/main.ts');
         } else {
             echo '<!-- Legacy assets -->';
-            echo '<link rel="stylesheet" type="text/css" href="' . get_file_path('css/styles.css') . '" />';
+            echo '<link rel="stylesheet" type="text/css" href="' . \Lwt\Core\Utils\getFilePath('css/styles.css') . '" />';
             echo '<script type="text/javascript" src="/assets/js/pgm.js" charset="utf-8"></script>';
         }
 
@@ -517,7 +517,7 @@ HTML;
             showRequest();
         }
         if (\Lwt\Core\Globals::shouldDisplayTime()) {
-            echo "\n" . self::buildExecutionTime(get_execution_time()) . "\n";
+            echo "\n" . self::buildExecutionTime(getExecutionTime()) . "\n";
         }
         echo '</body></html>';
     }
@@ -539,7 +539,7 @@ HTML;
         echo '<html lang="en">';
         echo '<head>';
         echo '<meta http-equiv="content-type" content="text/html; charset=utf-8" />';
-        echo '<link rel="stylesheet" type="text/css" href="' . get_file_path('css/styles.css') . '" />';
+        echo '<link rel="stylesheet" type="text/css" href="' . \Lwt\Core\Utils\getFilePath('css/styles.css') . '" />';
         echo '<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>';
         echo '<!--' . "\n";
         echo file_get_contents("UNLICENSE.md");

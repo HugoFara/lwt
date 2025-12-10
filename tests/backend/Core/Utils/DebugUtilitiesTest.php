@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Utils/debug_utilities.php'
 use Lwt\Core\Globals;
 use PHPUnit\Framework\TestCase;
 use function Lwt\Core\Utils\showRequest;
-use function Lwt\Core\Utils\get_execution_time;
+use function Lwt\Core\Utils\getExecutionTime;
 use function Lwt\Core\Utils\echodebug;
 
 Globals::initialize();
@@ -19,20 +19,20 @@ Globals::initialize();
 final class DebugUtilitiesTest extends TestCase
 {
     /**
-     * Test get_execution_time function
+     * Test getExecutionTime function
      */
     public function testGetExecutionTime(): void
     {
         // This function depends on REQUEST_TIME_FLOAT being set
         if (isset($_SERVER['REQUEST_TIME_FLOAT'])) {
-            $time = get_execution_time();
+            $time = getExecutionTime();
             $this->assertIsFloat($time);
             $this->assertGreaterThanOrEqual(0, $time);
         } else {
             // If REQUEST_TIME_FLOAT not set, should return 0
             $_SERVER['REQUEST_TIME_FLOAT'] = microtime(true);
             usleep(1000); // Sleep 1ms to ensure time passes
-            $time = get_execution_time();
+            $time = getExecutionTime();
             $this->assertIsFloat($time);
             $this->assertGreaterThan(0, $time);
         }

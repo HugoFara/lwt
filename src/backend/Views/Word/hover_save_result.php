@@ -36,6 +36,6 @@ namespace Lwt\Views\Word;
     'status' => $status,
     'translation' => $translation,
     'wordRaw' => $wordRaw,
-    'todoContent' => todo_words_content($textId)
+    'todoContent' => todoWordsContent($textId)
 ]); ?>
 </script>

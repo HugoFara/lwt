@@ -257,14 +257,14 @@ if ($isNew) {
                                placeholder="Path to audio/video file or URL" />
                     </div>
                     <div class="control" id="mediaselect">
-                        <?php echo MediaService::getMediaPathSelector('TxAudioURI'); ?>
+                        <?php echo (new MediaService())->getMediaPathSelector('TxAudioURI'); ?>
                     </div>
                 </div>
             </div>
         </div>
 
         <?php if ($isNew && defined('YT_API_KEY') && YT_API_KEY != null) {
-            \Lwt\Text_From_Youtube\do_form_fragment();
+            \Lwt\Text_From_Youtube\doFormFragment();
         } ?>
     </div>
 

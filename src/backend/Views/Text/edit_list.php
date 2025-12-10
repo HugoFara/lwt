@@ -28,7 +28,7 @@ use Lwt\View\Helper\IconHelper;
 /** @var array $statuses */
 
 ?>
-<link rel="stylesheet" type="text/css" href="<?php \print_file_path('css/css_charts.css');?>" />
+<link rel="stylesheet" type="text/css" href="<?php \Lwt\Core\Utils\printFilePath('css/css_charts.css');?>" />
 
 <?php \Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false); ?>
 

@@ -50,7 +50,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
             <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
-    <?php print_similar_terms_tabrow(); ?>
+    <?php echo printSimilarTermsTabRow(); ?>
     <tr>
         <td class="td1 right">Translation:</td>
         <td class="td1">
@@ -102,5 +102,5 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 </form>
 <?php
 // Display example sentences button
-example_sentences_area($term->lgid, $term->textlc, 'document.forms.editword.WoSentence', $term->id);
+exampleSentencesArea($term->lgid, $term->textlc, 'document.forms.editword.WoSentence', $term->id);
 ?>

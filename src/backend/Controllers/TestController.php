@@ -570,13 +570,13 @@ class TestController extends BaseController
     {
         echo '<audio id="success_sound">';
         echo '<source src="';
-        \print_file_path("sounds/success.mp3");
+        \Lwt\Core\Utils\printFilePath("sounds/success.mp3");
         echo '" type="audio/mpeg" />';
         echo 'Your browser does not support audio element!';
         echo '</audio>';
         echo '<audio id="failure_sound">';
         echo '<source src="';
-        \print_file_path("sounds/failure.mp3");
+        \Lwt\Core\Utils\printFilePath("sounds/failure.mp3");
         echo '" type="audio/mpeg" />';
         echo 'Your browser does not support audio element!';
         echo '</audio>';

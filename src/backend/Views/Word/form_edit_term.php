@@ -52,7 +52,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1 right"><b>Edit Term:</b></td>
         <td class="td1"><input <?php echo $scrdir; ?> class="notempty checkoutsidebmp" data_info="Term" type="text" name="WoText" id="wordfield" value="<?php echo htmlspecialchars($term ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" /> <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
     </td></tr>
-        <?php print_similar_terms_tabrow(); ?>
+        <?php echo printSimilarTermsTabRow(); ?>
     <tr>
         <td class="td1 right">Translation:</td>
         <td class="td1"><textarea name="WoTranslation" class="setfocus textarea-noreturn checklength checkoutsidebmp" data_maxlength="500" data_info="Translation" cols="35" rows="3"><?php echo htmlspecialchars($transl ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea></td>
@@ -71,7 +71,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
         <td class="td1 right">Sentence<br />Term in {...}:</td>
         <td class="td1"><textarea <?php echo $scrdir; ?> name="WoSentence" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" cols="35" rows="3"><?php echo htmlspecialchars($sentence ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea></td>
     </tr>
-        <?php print_similar_terms_tabrow(); ?>
+        <?php echo printSimilarTermsTabRow(); ?>
     <tr>
         <td class="td1 right">Status:</td>
         <td class="td1">
@@ -89,5 +89,5 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 </form>
 <?php
 // Display example sentence button
-example_sentences_area($lang, $termlc, 'document.forms.editword.WoSentence', $wid);
+exampleSentencesArea($lang, $termlc, 'document.forms.editword.WoSentence', $wid);
 ?>

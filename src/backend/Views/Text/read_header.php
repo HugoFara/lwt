@@ -60,7 +60,7 @@ use Lwt\Services\MediaService;
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
             <?php echo \Lwt\View\Helper\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
-        <?php echo \get_annotation_link($textId); ?>
+        <?php echo \getAnnotationLink($textId); ?>
         <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
             <?php echo \Lwt\View\Helper\IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
         </a>
@@ -94,7 +94,7 @@ use Lwt\Services\MediaService;
 <div class="flex-spaced">
     <div>
         Unknown words:
-        <span id="learnstatus"><?php echo \todo_words_content((int) $textId); ?></span>
+        <span id="learnstatus"><?php echo \todoWordsContent((int) $textId); ?></span>
     </div>
     <div
     title="[Show All] = ON: ALL terms are shown, and all multi-word terms are shown as superscripts before the first word. The superscript indicates the number of words in the multi-word term.
@@ -114,4 +114,4 @@ use Lwt\Services\MediaService;
     <div><button id="readTextButton">Read in browser</button></div>
 </div>
 
-<?php MediaService::renderMediaPlayer($media, (int) $audioPosition); ?>
+<?php (new MediaService())->renderMediaPlayer($media, (int) $audioPosition); ?>
