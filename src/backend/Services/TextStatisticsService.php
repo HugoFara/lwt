@@ -33,20 +33,6 @@ use Lwt\View\Helper\IconHelper;
  */
 class TextStatisticsService
 {
-    /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
-     * Constructor - initialize table prefix.
-     */
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
 
     /**
      * Return statistics about a list of text IDs.
@@ -72,10 +58,11 @@ class TextStatisticsService
             'statu' => array()
         );
 
+        $tbpref = Globals::getTablePrefix();
         $res = Connection::query(
             "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS value,
             COUNT(LOWER(Ti2Text)) AS total
-            FROM {$this->tbpref}textitems2
+            FROM {$tbpref}textitems2
             WHERE Ti2WordCount = 1 AND Ti2TxID IN($textsId)
             GROUP BY Ti2TxID"
         );
@@ -88,7 +75,7 @@ class TextStatisticsService
         $res = Connection::query(
             "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
             COUNT(Ti2WoID) AS total
-            FROM {$this->tbpref}textitems2
+            FROM {$tbpref}textitems2
             WHERE Ti2WordCount > 1 AND Ti2TxID IN({$textsId})
             GROUP BY Ti2TxID"
         );
@@ -101,7 +88,7 @@ class TextStatisticsService
         $res = Connection::query(
             "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
             COUNT(Ti2WoID) AS total, WoStatus AS status
-            FROM {$this->tbpref}textitems2, {$this->tbpref}words
+            FROM {$tbpref}textitems2, {$tbpref}words
             WHERE Ti2WoID != 0 AND Ti2TxID IN({$textsId}) AND Ti2WoID = WoID
             GROUP BY Ti2TxID, WoStatus"
         );
@@ -123,9 +110,10 @@ class TextStatisticsService
      */
     public function getTodoWordsCount(int $textId): int
     {
+        $tbpref = Globals::getTablePrefix();
         $count = Connection::fetchValue(
             "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS value
-            FROM {$this->tbpref}textitems2
+            FROM {$tbpref}textitems2
             WHERE Ti2WordCount=1 AND Ti2WoID=0 AND Ti2TxID=$textId"
         );
         if ($count === null) {
@@ -151,9 +139,10 @@ class TextStatisticsService
             $c . '</span>';
         }
 
+        $tbpref = Globals::getTablePrefix();
         $dict = (string) Connection::fetchValue(
             "SELECT LgGoogleTranslateURI AS value
-            FROM {$this->tbpref}languages, {$this->tbpref}texts
+            FROM {$tbpref}languages, {$tbpref}texts
             WHERE LgID = TxLgID and TxID = $textId"
         );
         $tl = $sl = "";

@@ -31,13 +31,6 @@ use Lwt\Database\Restore;
 class DemoService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
      * Database name.
      *
      * @var string
@@ -49,7 +42,6 @@ class DemoService
      */
     public function __construct()
     {
-        $this->tbpref = Globals::getTablePrefix();
         $this->dbname = Globals::getDatabaseName();
     }
 
@@ -60,10 +52,11 @@ class DemoService
      */
     public function getPrefixInfo(): string
     {
-        if ($this->tbpref == '') {
+        $tbpref = Globals::getTablePrefix();
+        if ($tbpref == '') {
             return "(Default Table Set)";
         }
-        return "(Table Set: <i>" . htmlspecialchars(substr($this->tbpref, 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i>)";
+        return "(Table Set: <i>" . htmlspecialchars(substr($tbpref, 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i>)";
     }
 
     /**
@@ -83,8 +76,9 @@ class DemoService
      */
     public function getLanguageCount(): int
     {
+        $tbpref = Globals::getTablePrefix();
         return (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}languages"
+            "SELECT COUNT(*) AS value FROM {$tbpref}languages"
         );
     }
 

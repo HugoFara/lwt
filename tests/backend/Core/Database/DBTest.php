@@ -52,9 +52,8 @@ class DBTest extends TestCase
         }
 
         // Clean up test data
-        $tbpref = Globals::getTablePrefix();
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_db_%'");
-        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_db_%'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey LIKE 'test_db_%'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgText LIKE 'test_db_%'");
     }
 
     // ===== table() tests =====
@@ -88,9 +87,8 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        $result = DB::query("SELECT * FROM {$tbpref}settings LIMIT 1");
-        
+        $result = DB::query("SELECT * FROM " . Globals::getTablePrefix() . "settings LIMIT 1");
+
         $this->assertInstanceOf(\mysqli_result::class, $result);
         mysqli_free_result($result);
     }
@@ -101,13 +99,12 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        $result = DB::query("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_db_query')");
-        
+        $result = DB::query("INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES ('test_db_query')");
+
         $this->assertTrue($result);
-        
+
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_db_query'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgText = 'test_db_query'");
     }
 
     // ===== fetchAll() tests =====
@@ -118,9 +115,8 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        $rows = DB::fetchAll("SELECT * FROM {$tbpref}settings LIMIT 3");
-        
+        $rows = DB::fetchAll("SELECT * FROM " . Globals::getTablePrefix() . "settings LIMIT 3");
+
         $this->assertIsArray($rows);
         $this->assertLessThanOrEqual(3, count($rows));
     }
@@ -131,9 +127,8 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        $rows = DB::fetchAll("SELECT * FROM {$tbpref}settings WHERE StKey = 'nonexistent_xyz'");
-        
+        $rows = DB::fetchAll("SELECT * FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'nonexistent_xyz'");
+
         $this->assertIsArray($rows);
         $this->assertEmpty($rows);
     }
@@ -146,16 +141,15 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_one', 'value1')");
-        
-        $row = DB::fetchOne("SELECT * FROM {$tbpref}settings WHERE StKey = 'test_db_one'");
-        
+        DB::execute("INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES ('test_db_one', 'value1')");
+
+        $row = DB::fetchOne("SELECT * FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_one'");
+
         $this->assertIsArray($row);
         $this->assertEquals('test_db_one', $row['StKey']);
-        
+
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_one'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_one'");
     }
 
     public function testFetchOneReturnsNull(): void
@@ -164,9 +158,8 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        $row = DB::fetchOne("SELECT * FROM {$tbpref}settings WHERE StKey = 'nonexistent_xyz'");
-        
+        $row = DB::fetchOne("SELECT * FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'nonexistent_xyz'");
+
         $this->assertNull($row);
     }
 
@@ -178,15 +171,14 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_value', 'myvalue')");
-        
-        $value = DB::fetchValue("SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'test_db_value'");
-        
+        DB::execute("INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES ('test_db_value', 'myvalue')");
+
+        $value = DB::fetchValue("SELECT StValue as value FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_value'");
+
         $this->assertEquals('myvalue', $value);
-        
+
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_value'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_value'");
     }
 
     public function testFetchValueWithCustomColumn(): void
@@ -195,15 +187,14 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_custom', 'customval')");
-        
-        $value = DB::fetchValue("SELECT StKey as mykey FROM {$tbpref}settings WHERE StKey = 'test_db_custom'", 'mykey');
-        
+        DB::execute("INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES ('test_db_custom', 'customval')");
+
+        $value = DB::fetchValue("SELECT StKey as mykey FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_custom'", 'mykey');
+
         $this->assertEquals('test_db_custom', $value);
-        
+
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_custom'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_custom'");
     }
 
     // ===== execute() tests =====
@@ -214,11 +205,10 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_exec', 'value')");
-        
-        $affected = DB::execute("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_exec'");
-        
+        DB::execute("INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES ('test_db_exec', 'value')");
+
+        $affected = DB::execute("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_exec'");
+
         $this->assertGreaterThanOrEqual(1, $affected);
     }
 
@@ -228,19 +218,18 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_update', 'old')");
-        
-        $affected = DB::execute("UPDATE {$tbpref}settings SET StValue = 'new' WHERE StKey = 'test_db_update'");
-        
+        DB::execute("INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES ('test_db_update', 'old')");
+
+        $affected = DB::execute("UPDATE " . Globals::getTablePrefix() . "settings SET StValue = 'new' WHERE StKey = 'test_db_update'");
+
         $this->assertEquals(1, $affected);
-        
+
         // Verify update
-        $value = DB::fetchValue("SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'test_db_update'");
+        $value = DB::fetchValue("SELECT StValue as value FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_update'");
         $this->assertEquals('new', $value);
-        
+
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_update'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_update'");
     }
 
     // ===== lastInsertId() tests =====
@@ -251,15 +240,14 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-        DB::execute("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_db_lastid')");
-        
+        DB::execute("INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES ('test_db_lastid')");
+
         $lastId = DB::lastInsertId();
-        
+
         $this->assertGreaterThan(0, $lastId);
-        
+
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}tags WHERE TgID = $lastId");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgID = $lastId");
     }
 
     // ===== escape() tests =====
@@ -361,20 +349,18 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         DB::beginTransaction();
-        DB::execute("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_db_commit')");
+        DB::execute("INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES ('test_db_commit')");
         $result = DB::commit();
-        
+
         $this->assertTrue($result);
-        
+
         // Verify committed
-        $row = DB::fetchOne("SELECT * FROM {$tbpref}tags WHERE TgText = 'test_db_commit'");
+        $row = DB::fetchOne("SELECT * FROM " . Globals::getTablePrefix() . "tags WHERE TgText = 'test_db_commit'");
         $this->assertIsArray($row);
-        
+
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_db_commit'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgText = 'test_db_commit'");
     }
 
     public function testRollbackTransaction(): void
@@ -383,18 +369,16 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         DB::beginTransaction();
-        DB::execute("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_db_rollback')");
+        DB::execute("INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES ('test_db_rollback')");
         $result = DB::rollback();
-        
+
         $this->assertTrue($result);
-        
+
         // Note: MyISAM doesn't support transactions, so rollback won't actually rollback
         // This test verifies the rollback method executes without error
         // Clean up the inserted row
-        DB::execute("DELETE FROM {$tbpref}tags WHERE TgText = 'test_db_rollback'");
+        DB::execute("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgText = 'test_db_rollback'");
     }
 
     // ===== Integration tests =====
@@ -405,26 +389,24 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         // Create
-        DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_crud', 'initial')");
-        
+        DB::execute("INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES ('test_db_crud', 'initial')");
+
         // Read
-        $value = DB::fetchValue("SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'test_db_crud'");
+        $value = DB::fetchValue("SELECT StValue as value FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_crud'");
         $this->assertEquals('initial', $value);
-        
+
         // Update
-        DB::execute("UPDATE {$tbpref}settings SET StValue = 'updated' WHERE StKey = 'test_db_crud'");
-        $value = DB::fetchValue("SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'test_db_crud'");
+        DB::execute("UPDATE " . Globals::getTablePrefix() . "settings SET StValue = 'updated' WHERE StKey = 'test_db_crud'");
+        $value = DB::fetchValue("SELECT StValue as value FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_crud'");
         $this->assertEquals('updated', $value);
-        
+
         // Delete
-        $affected = DB::execute("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_crud'");
+        $affected = DB::execute("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_crud'");
         $this->assertEquals(1, $affected);
-        
+
         // Verify deleted
-        $row = DB::fetchOne("SELECT * FROM {$tbpref}settings WHERE StKey = 'test_db_crud'");
+        $row = DB::fetchOne("SELECT * FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_crud'");
         $this->assertNull($row);
     }
 

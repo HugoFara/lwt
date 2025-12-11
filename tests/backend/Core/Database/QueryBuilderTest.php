@@ -52,9 +52,9 @@ class QueryBuilderTest extends TestCase
         }
 
         // Clean up test data
-        $tbpref = Globals::getTablePrefix();
-        Connection::query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_qb_%'");
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_qb_%'");
+        $prefix = Globals::getTablePrefix();
+        Connection::query("DELETE FROM {$prefix}tags WHERE TgText LIKE 'test_qb_%'");
+        Connection::query("DELETE FROM {$prefix}settings WHERE StKey LIKE 'test_qb_%'");
     }
 
     // ===== table() and constructor tests =====
@@ -75,8 +75,8 @@ class QueryBuilderTest extends TestCase
         $sql = $qb->toSql();
 
         // Should contain table prefix
-        $tbpref = Globals::getTablePrefix();
-        $this->assertStringContainsString("{$tbpref}tags", $sql);
+        $prefix = Globals::getTablePrefix();
+        $this->assertStringContainsString("{$prefix}tags", $sql);
     }
 
     // ===== select() tests =====
@@ -248,54 +248,54 @@ class QueryBuilderTest extends TestCase
 
     public function testJoinWithExplicitOperator(): void
     {
-        $tbpref = Globals::getTablePrefix();
+        $prefix = Globals::getTablePrefix();
         $sql = QueryBuilder::table('tags')
             ->join('wordtags', 'tags.TgID', '=', 'wordtags.WtTgID')
             ->toSql();
 
-        $this->assertStringContainsString("INNER JOIN {$tbpref}wordtags", $sql);
+        $this->assertStringContainsString("INNER JOIN {$prefix}wordtags", $sql);
         $this->assertStringContainsString("ON tags.TgID = wordtags.WtTgID", $sql);
     }
 
     public function testJoinWithImplicitEquality(): void
     {
-        $tbpref = Globals::getTablePrefix();
+        $prefix = Globals::getTablePrefix();
         $sql = QueryBuilder::table('tags')
             ->join('wordtags', 'tags.TgID', 'wordtags.WtTgID')
             ->toSql();
 
-        $this->assertStringContainsString("INNER JOIN {$tbpref}wordtags", $sql);
+        $this->assertStringContainsString("INNER JOIN {$prefix}wordtags", $sql);
         $this->assertStringContainsString("ON tags.TgID = wordtags.WtTgID", $sql);
     }
 
     public function testLeftJoin(): void
     {
-        $tbpref = Globals::getTablePrefix();
+        $prefix = Globals::getTablePrefix();
         $sql = QueryBuilder::table('tags')
             ->leftJoin('wordtags', 'tags.TgID', 'wordtags.WtTgID')
             ->toSql();
 
-        $this->assertStringContainsString("LEFT JOIN {$tbpref}wordtags", $sql);
+        $this->assertStringContainsString("LEFT JOIN {$prefix}wordtags", $sql);
     }
 
     public function testRightJoin(): void
     {
-        $tbpref = Globals::getTablePrefix();
+        $prefix = Globals::getTablePrefix();
         $sql = QueryBuilder::table('tags')
             ->rightJoin('wordtags', 'tags.TgID', 'wordtags.WtTgID')
             ->toSql();
 
-        $this->assertStringContainsString("RIGHT JOIN {$tbpref}wordtags", $sql);
+        $this->assertStringContainsString("RIGHT JOIN {$prefix}wordtags", $sql);
     }
 
     public function testJoinWithNonEqualityOperator(): void
     {
-        $tbpref = Globals::getTablePrefix();
+        $prefix = Globals::getTablePrefix();
         $sql = QueryBuilder::table('tags')
             ->join('wordtags', 'tags.TgID', '!=', 'wordtags.WtTgID')
             ->toSql();
 
-        $this->assertStringContainsString("INNER JOIN {$tbpref}wordtags", $sql);
+        $this->assertStringContainsString("INNER JOIN {$prefix}wordtags", $sql);
         $this->assertStringContainsString("ON tags.TgID != wordtags.WtTgID", $sql);
     }
 
@@ -670,8 +670,8 @@ class QueryBuilderTest extends TestCase
         }
 
         // Create a temporary test table
-        $tbpref = Globals::getTablePrefix();
-        Connection::query("CREATE TEMPORARY TABLE {$tbpref}test_truncate (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50))");
+        $prefix = Globals::getTablePrefix();
+        Connection::query("CREATE TEMPORARY TABLE {$prefix}test_truncate (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50))");
 
         // Insert data
         QueryBuilder::table('test_truncate')->insert(['name' => 'test1']);

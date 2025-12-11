@@ -67,21 +67,20 @@ class Migrations
      */
     public static function reparseAllTexts(): void
     {
-        $tbpref = Globals::getTablePrefix();
-        Connection::execute("TRUNCATE {$tbpref}sentences");
-        Connection::execute("TRUNCATE {$tbpref}textitems2");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "sentences");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "textitems2");
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         Maintenance::initWordCount();
         // Only reparse texts that have a valid language reference
-        $sql = "SELECT t.TxID, t.TxLgID FROM {$tbpref}texts t
-                INNER JOIN {$tbpref}languages l ON t.TxLgID = l.LgID";
+        $sql = "SELECT t.TxID, t.TxLgID FROM " . Globals::getTablePrefix() . "texts t
+                INNER JOIN " . Globals::getTablePrefix() . "languages l ON t.TxLgID = l.LgID";
         $rows = Connection::fetchAll($sql);
         foreach ($rows as $record) {
             $id = (int) $record['TxID'];
             TextParsing::splitCheck(
                 (string)Connection::preparedFetchValue(
                     "SELECT TxText AS value
-                    FROM {$tbpref}texts
+                    FROM " . Globals::getTablePrefix() . "texts
                     WHERE TxID = ?",
                     [$id]
                 ),
@@ -98,7 +97,6 @@ class Migrations
      */
     public static function update(): void
     {
-        $tbpref = Globals::getTablePrefix();
         $dbname = Globals::getDatabaseName();
 
         // DB Version
@@ -107,7 +105,7 @@ class Migrations
         try {
             $dbversion = Connection::fetchValue(
                 "SELECT StValue AS value
-                FROM {$tbpref}settings
+                FROM " . Globals::getTablePrefix() . "settings
                 WHERE StKey = 'dbversion'"
             );
             if ($dbversion === null) {
@@ -193,7 +191,6 @@ class Migrations
      */
     public static function checkAndUpdate(): void
     {
-        $tbpref = Globals::getTablePrefix();
         $tables = array();
 
         // Get database name for INFORMATION_SCHEMA query
@@ -205,7 +202,7 @@ class Migrations
              FROM INFORMATION_SCHEMA.TABLES
              WHERE TABLE_SCHEMA = ?
              AND TABLE_NAME LIKE ?",
-            [$dbname, $tbpref . '%']
+            [$dbname, Globals::getTablePrefix() . '%']
         );
         foreach ($res as $row) {
             $tables[] = $row['TABLE_NAME'];
@@ -221,7 +218,7 @@ class Migrations
                 // Do not prefix meta tables
                 $count += (int) Connection::execute($query);
             } else {
-                $prefixed_query = self::prefixQuery($query, $tbpref);
+                $prefixed_query = self::prefixQuery($query, Globals::getTablePrefix());
                 // Increment count for new tables only
                 $count += (int) Connection::execute($prefixed_query);
             }
@@ -230,11 +227,11 @@ class Migrations
         // Update the database (if necessary)
         self::update();
 
-        if (!in_array("{$tbpref}textitems2", $tables)) {
+        if (!in_array(Globals::getTablePrefix() . "textitems2", $tables)) {
             // Add data from the old database system
-            if (in_array("{$tbpref}textitems", $tables)) {
+            if (in_array(Globals::getTablePrefix() . "textitems", $tables)) {
                 Connection::execute(
-                    "INSERT INTO {$tbpref}textitems2 (
+                    "INSERT INTO " . Globals::getTablePrefix() . "textitems2 (
                         Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount,
                         Ti2Text
                     )
@@ -245,11 +242,11 @@ class Migrations
                         THEN TiText
                         ELSE ''
                     END AS Text
-                    FROM {$tbpref}textitems
-                    LEFT JOIN {$tbpref}words ON TiTextLC=WoTextLC AND TiLgID=WoLgID
+                    FROM " . Globals::getTablePrefix() . "textitems
+                    LEFT JOIN " . Globals::getTablePrefix() . "words ON TiTextLC=WoTextLC AND TiLgID=WoLgID
                     WHERE TiWordCount<2 OR WoID IS NOT NULL"
                 );
-                Connection::execute("TRUNCATE {$tbpref}textitems");
+                Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "textitems");
             }
             $count++;
         }
@@ -272,43 +269,43 @@ class Migrations
                 ' / Last: ' . $lastscorecalc . '</p>';
             }
             Connection::execute(
-                "UPDATE {$tbpref}words
+                "UPDATE " . Globals::getTablePrefix() . "words
                 SET " . WordStatusService::makeScoreRandomInsertUpdate('u') . "
                 WHERE WoTodayScore>=-100 AND WoStatus<98"
             );
             Connection::execute(
-                "DELETE {$tbpref}wordtags
-                FROM ({$tbpref}wordtags LEFT JOIN {$tbpref}tags on WtTgID = TgID)
+                "DELETE " . Globals::getTablePrefix() . "wordtags
+                FROM (" . Globals::getTablePrefix() . "wordtags LEFT JOIN " . Globals::getTablePrefix() . "tags on WtTgID = TgID)
                 WHERE TgID IS NULL"
             );
             Connection::execute(
-                "DELETE {$tbpref}wordtags
-                FROM ({$tbpref}wordtags LEFT JOIN {$tbpref}words ON WtWoID = WoID)
+                "DELETE " . Globals::getTablePrefix() . "wordtags
+                FROM (" . Globals::getTablePrefix() . "wordtags LEFT JOIN " . Globals::getTablePrefix() . "words ON WtWoID = WoID)
                 WHERE WoID IS NULL"
             );
             Connection::execute(
-                "DELETE {$tbpref}texttags
-                FROM ({$tbpref}texttags LEFT JOIN {$tbpref}tags2 ON TtT2ID = T2ID)
+                "DELETE " . Globals::getTablePrefix() . "texttags
+                FROM (" . Globals::getTablePrefix() . "texttags LEFT JOIN " . Globals::getTablePrefix() . "tags2 ON TtT2ID = T2ID)
                 WHERE T2ID IS NULL"
             );
             Connection::execute(
-                "DELETE {$tbpref}texttags
-                FROM ({$tbpref}texttags LEFT JOIN {$tbpref}texts ON TtTxID = TxID)
+                "DELETE " . Globals::getTablePrefix() . "texttags
+                FROM (" . Globals::getTablePrefix() . "texttags LEFT JOIN " . Globals::getTablePrefix() . "texts ON TtTxID = TxID)
                 WHERE TxID IS NULL"
             );
             Connection::execute(
-                "DELETE {$tbpref}archtexttags
+                "DELETE " . Globals::getTablePrefix() . "archtexttags
                 FROM (
-                    {$tbpref}archtexttags
-                    LEFT JOIN {$tbpref}tags2 ON AgT2ID = T2ID
+                    " . Globals::getTablePrefix() . "archtexttags
+                    LEFT JOIN " . Globals::getTablePrefix() . "tags2 ON AgT2ID = T2ID
                 )
                 WHERE T2ID IS NULL"
             );
             Connection::execute(
-                "DELETE {$tbpref}archtexttags
+                "DELETE " . Globals::getTablePrefix() . "archtexttags
                 FROM (
-                    {$tbpref}archtexttags
-                    LEFT JOIN {$tbpref}archivedtexts ON AgAtID = AtID
+                    " . Globals::getTablePrefix() . "archtexttags
+                    LEFT JOIN " . Globals::getTablePrefix() . "archivedtexts ON AgAtID = AtID
                 )
                 WHERE AtID IS NULL"
             );

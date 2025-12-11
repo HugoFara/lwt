@@ -57,16 +57,15 @@ class TextPrintControllerTest extends TestCase
 
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
-            $tbpref = Globals::getTablePrefix();
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'PrintControllerTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'PrintControllerTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('PrintControllerTestLang', 'http://test.com/###', '', 'http://translate.google.com/?sl=en&tl=fr&###', " .
@@ -79,14 +78,14 @@ class TextPrintControllerTest extends TestCase
 
             // Create a test text
             $existingText = Connection::fetchValue(
-                "SELECT TxID AS value FROM {$tbpref}texts WHERE TxTitle = 'PrintControllerTestText' LIMIT 1"
+                "SELECT TxID AS value FROM " . Globals::table('texts') . " WHERE TxTitle = 'PrintControllerTestText' LIMIT 1"
             );
 
             if ($existingText) {
                 self::$testTextId = (int)$existingText;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
+                    "INSERT INTO " . Globals::table('texts') . " (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
                     "VALUES (" . self::$testLangId . ", 'PrintControllerTestText', 'This is test text.', " .
                     "'0\tThis\t\t\n1\tis\t\t\n2\ttest\t\t\n3\ttext\t\ttranslation', " .
                     "'http://audio.test/audio.mp3', 'http://source.test')"
@@ -104,12 +103,11 @@ class TextPrintControllerTest extends TestCase
             return;
         }
 
-        $tbpref = Globals::getTablePrefix();
         // Clean up test data
-        Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = " . self::$testTextId);
-        Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID = " . self::$testTextId);
-        Connection::query("DELETE FROM {$tbpref}texts WHERE TxTitle = 'PrintControllerTestText'");
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'PrintControllerTestLang'");
+        Connection::query("DELETE FROM " . Globals::table('textitems2') . " WHERE Ti2TxID = " . self::$testTextId);
+        Connection::query("DELETE FROM " . Globals::table('sentences') . " WHERE SeTxID = " . self::$testTextId);
+        Connection::query("DELETE FROM " . Globals::table('texts') . " WHERE TxTitle = 'PrintControllerTestText'");
+        Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'PrintControllerTestLang'");
     }
 
     protected function setUp(): void

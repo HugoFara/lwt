@@ -27,10 +27,15 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Services\TagService;
+
+$tagList = TagService::getWordTagList($wid, false);
+$tagFormatted = $tagList !== '' ? ' [' . str_replace(',', ', ', $tagList) . ']' : '';
+
 $config = [
     'wid' => $wid,
     'status' => $status,
-    'translation' => $translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false),
+    'translation' => $translation . $tagFormatted,
     'romanization' => $romanization,
     'text' => $text,
     'textId' => $textId,

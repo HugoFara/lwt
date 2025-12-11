@@ -60,18 +60,16 @@ class TextControllerEditTest extends TestCase
         self::$dbConnected = (Globals::getDbConnection() !== null);
 
         if (self::$dbConnected) {
-            $tbpref = Globals::getTablePrefix();
-
             // Create a test language
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'EditControllerTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'EditControllerTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('EditControllerTestLang', 'http://dict1.test/###', 'http://dict2.test/###', " .
@@ -85,7 +83,7 @@ class TextControllerEditTest extends TestCase
 
             // Create first test text
             Connection::query(
-                "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, " .
+                "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, " .
                 "TxSourceURI, TxAudioPosition, TxPosition) " .
                 "VALUES (" . self::$testLangId . ", 'EditControllerTestText', 'Test content.', " .
                 "'0\tTest\t\t*\n0\tcontent\t\ttranslation', " .
@@ -97,7 +95,7 @@ class TextControllerEditTest extends TestCase
 
             // Create second test text
             Connection::query(
-                "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
+                "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
                 "VALUES (" . self::$testLangId . ", 'EditControllerTestText2', 'Second test content.', '')"
             );
             self::$testText2Id = (int)Connection::fetchValue(
@@ -112,12 +110,11 @@ class TextControllerEditTest extends TestCase
             return;
         }
 
-        $tbpref = Globals::getTablePrefix();
         // Clean up test data
-        Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
-        Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
-        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'EditControllerTestLang'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "sentences WHERE SeTxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'EditControllerTestLang'");
     }
 
     protected function setUp(): void

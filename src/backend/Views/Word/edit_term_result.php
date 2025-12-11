@@ -23,6 +23,7 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Services\TagService;
 use Lwt\View\Helper\StatusHelper;
 
 ?>
@@ -31,11 +32,13 @@ use Lwt\View\Helper\StatusHelper;
 <script type="application/json" data-lwt-edit-term-result-config>
 <?php
 $statusAbbr = StatusHelper::getAbbr((int) $status);
+$tagList = TagService::getWordTagList($wid, false);
+$formattedTags = $tagList !== '' ? ' [' . str_replace(',', ', ', $tagList) . ']' : '';
 echo json_encode([
     'wid' => $wid,
     'text' => $text,
     'translation' => $translation,
-    'translationWithTags' => $translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false),
+    'translationWithTags' => $translation . $formattedTags,
     'romanization' => $romanization,
     'status' => $status,
     'sentence' => $sent1,

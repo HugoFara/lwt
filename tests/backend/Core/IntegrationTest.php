@@ -27,7 +27,7 @@ use function Lwt\Core\Utils\getExecutionTime;
 use function Lwt\Core\Utils\getFilePath;
 use function Lwt\Core\Utils\makeCounterWithTotal;
 use function Lwt\Core\Utils\printFilePath;
-use function Lwt\Core\Utils\remove_soft_hyphens;
+use function Lwt\Core\Utils\removeSoftHyphens;
 use function Lwt\Core\Utils\replace_supp_unicode_planes_char;
 
 // Load config from .env and use test database
@@ -596,7 +596,7 @@ class IntegrationTest extends TestCase
         );
 
         // Test getting tag list
-        $tag_list = TagService::getWordTagListFormatted($word_id);
+        $tag_list = TagService::getWordTagList($word_id);
         $this->assertStringContainsString('testtag1', $tag_list);
 
         // Clean up

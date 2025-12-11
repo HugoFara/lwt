@@ -41,13 +41,6 @@ use Lwt\Database\Settings;
  */
 class WordService
 {
-    private string $tbpref;
-
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
-
     /**
      * Create a new word/term.
      *
@@ -71,7 +64,7 @@ class WordService
             $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
             $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-            $sql = "INSERT INTO {$this->tbpref}words (
+            $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
                     WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
                     WoSentence, WoRomanization, WoStatusChanged, {$scoreColumns}
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})";
@@ -135,14 +128,14 @@ class WordService
 
         if (isset($data['WoOldStatus']) && $data['WoOldStatus'] != $data['WoStatus']) {
             // Status changed - update status and timestamp
-            $sql = "UPDATE {$this->tbpref}words SET
+            $sql = "UPDATE " . Globals::getTablePrefix() . "words SET
                 WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
                 WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
                 WHERE WoID = ?";
             Connection::preparedExecute($sql, [$text, $translation, $sentence, $roman, $data['WoStatus'], $wordId]);
         } else {
             // Status unchanged
-            $sql = "UPDATE {$this->tbpref}words SET
+            $sql = "UPDATE " . Globals::getTablePrefix() . "words SET
                 WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?, {$scoreUpdate}
                 WHERE WoID = ?";
             Connection::preparedExecute($sql, [$text, $translation, $sentence, $roman, $wordId]);
@@ -167,7 +160,7 @@ class WordService
     public function findById(int $wordId): ?array
     {
         return Connection::preparedFetchOne(
-            "SELECT * FROM {$this->tbpref}words WHERE WoID = ?",
+            "SELECT * FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wordId]
         );
     }
@@ -183,7 +176,7 @@ class WordService
     public function findByText(string $textlc, int $langId): ?int
     {
         $id = Connection::preparedFetchValue(
-            "SELECT WoID AS value FROM {$this->tbpref}words WHERE WoLgID = ? AND WoTextLC = ?",
+            "SELECT WoID AS value FROM " . Globals::getTablePrefix() . "words WHERE WoLgID = ? AND WoTextLC = ?",
             [$langId, $textlc]
         );
         return $id !== null ? (int)$id : null;
@@ -200,7 +193,7 @@ class WordService
     public function getTermFromTextItem(int $textId, int $ord): ?array
     {
         return Connection::preparedFetchOne(
-            "SELECT Ti2Text, Ti2LgID FROM {$this->tbpref}textitems2
+            "SELECT Ti2Text, Ti2LgID FROM " . Globals::getTablePrefix() . "textitems2
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
             [$textId, $ord]
         );
@@ -218,7 +211,7 @@ class WordService
     public function linkToTextItems(int $wordId, int $langId, string $textlc): void
     {
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}textitems2 SET Ti2WoID = ?
+            "UPDATE " . Globals::getTablePrefix() . "textitems2 SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wordId, $langId, $textlc]
         );
@@ -236,7 +229,7 @@ class WordService
         // Single query instead of three
         $row = Connection::preparedFetchOne(
             "SELECT LgShowRomanization, LgGoogleTranslateURI, LgName
-             FROM {$this->tbpref}languages WHERE LgID = ?",
+             FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$langId]
         );
 
@@ -259,7 +252,7 @@ class WordService
     public function getSentenceForTerm(int $textId, int $ord, string $termlc): string
     {
         $seid = Connection::preparedFetchValue(
-            "SELECT Ti2SeID AS value FROM {$this->tbpref}textitems2
+            "SELECT Ti2SeID AS value FROM " . Globals::getTablePrefix() . "textitems2
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
             [$textId, $ord]
         );
@@ -300,7 +293,7 @@ class WordService
     public function getWordCount(int $wordId): int
     {
         return (int) Connection::preparedFetchValue(
-            "SELECT WoWordCount AS value FROM {$this->tbpref}words WHERE WoID = ?",
+            "SELECT WoWordCount AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wordId]
         );
     }
@@ -332,7 +325,7 @@ class WordService
 
         // Update text items to unlink the word
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}textitems2 SET Ti2WoID = 0
+            "UPDATE " . Globals::getTablePrefix() . "textitems2 SET Ti2WoID = 0
              WHERE Ti2WordCount = 1 AND Ti2WoID = ?",
             [$wordId]
         );
@@ -344,8 +337,8 @@ class WordService
 
         // Clean up orphaned word tags (complex DELETE with JOIN - keep as-is)
         Connection::execute(
-            'DELETE ' . $this->tbpref . 'wordtags FROM (' .
-            $this->tbpref . 'wordtags LEFT JOIN ' . $this->tbpref . 'words ON WtWoID = WoID) ' .
+            'DELETE ' . Globals::getTablePrefix() .'wordtags FROM (' .
+            Globals::getTablePrefix() . 'wordtags LEFT JOIN ' . Globals::getTablePrefix() .'words ON WtWoID = WoID) ' .
             'WHERE WoID IS NULL'
         );
 
@@ -383,8 +376,8 @@ class WordService
 
         // Clean up orphaned word tags (complex DELETE with JOIN - keep as-is)
         Connection::execute(
-            'DELETE ' . $this->tbpref . 'wordtags FROM (' .
-            $this->tbpref . 'wordtags LEFT JOIN ' . $this->tbpref . 'words ON WtWoID = WoID) ' .
+            'DELETE ' . Globals::getTablePrefix() .'wordtags FROM (' .
+            Globals::getTablePrefix() . 'wordtags LEFT JOIN ' . Globals::getTablePrefix() .'words ON WtWoID = WoID) ' .
             'WHERE WoID IS NULL'
         );
 
@@ -413,13 +406,13 @@ class WordService
         if ($relative) {
             if ($status > 0) {
                 // Increment status
-                $sql = "UPDATE {$this->tbpref}words
+                $sql = "UPDATE " . Globals::getTablePrefix() . "words
                         SET WoStatus = WoStatus + 1, WoStatusChanged = NOW(), {$scoreUpdate}
                         WHERE WoStatus IN (1,2,3,4) AND WoID IN ({$placeholders})";
                 return Connection::preparedExecute($sql, $ids);
             } else {
                 // Decrement status
-                $sql = "UPDATE {$this->tbpref}words
+                $sql = "UPDATE " . Globals::getTablePrefix() . "words
                         SET WoStatus = WoStatus - 1, WoStatusChanged = NOW(), {$scoreUpdate}
                         WHERE WoStatus IN (2,3,4,5) AND WoID IN ({$placeholders})";
                 return Connection::preparedExecute($sql, $ids);
@@ -427,7 +420,7 @@ class WordService
         }
 
         // Absolute status
-        $sql = "UPDATE {$this->tbpref}words
+        $sql = "UPDATE " . Globals::getTablePrefix() . "words
                 SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
                 WHERE WoID IN ({$placeholders})";
 
@@ -451,7 +444,7 @@ class WordService
         $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        $sql = "UPDATE {$this->tbpref}words
+        $sql = "UPDATE " . Globals::getTablePrefix() . "words
                 SET WoStatusChanged = NOW(), {$scoreUpdate}
                 WHERE WoID IN ({$placeholders})";
 
@@ -475,7 +468,7 @@ class WordService
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         return Connection::preparedExecute(
-            "UPDATE {$this->tbpref}words SET WoSentence = NULL WHERE WoID IN ({$placeholders})",
+            "UPDATE " . Globals::getTablePrefix() . "words SET WoSentence = NULL WHERE WoID IN ({$placeholders})",
             $ids
         );
     }
@@ -497,7 +490,7 @@ class WordService
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         return Connection::preparedExecute(
-            "UPDATE {$this->tbpref}words SET WoText = WoTextLC WHERE WoID IN ({$placeholders})",
+            "UPDATE " . Globals::getTablePrefix() . "words SET WoText = WoTextLC WHERE WoID IN ({$placeholders})",
             $ids
         );
     }
@@ -519,7 +512,7 @@ class WordService
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         return Connection::preparedExecute(
-            "UPDATE {$this->tbpref}words
+            "UPDATE " . Globals::getTablePrefix() . "words
              SET WoText = CONCAT(UPPER(LEFT(WoTextLC, 1)), SUBSTRING(WoTextLC, 2))
              WHERE WoID IN ({$placeholders})",
             $ids
@@ -538,8 +531,8 @@ class WordService
         return Connection::preparedFetchAll(
             "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
              FROM (
-                 {$this->tbpref}textitems2
-                 LEFT JOIN {$this->tbpref}words
+                 " . Globals::getTablePrefix() . "textitems2
+                 LEFT JOIN " . Globals::getTablePrefix() . "words
                  ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
              )
              WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
@@ -558,7 +551,7 @@ class WordService
     public function getTextLanguageId(int $textId): ?int
     {
         $langId = Connection::preparedFetchValue(
-            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+            "SELECT TxLgID AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
             [$textId]
         );
         return $langId !== null ? (int)$langId : null;
@@ -578,7 +571,7 @@ class WordService
     {
         // Check if already exists
         $existingId = Connection::preparedFetchValue(
-            "SELECT WoID AS value FROM {$this->tbpref}words WHERE WoTextLC = ?",
+            "SELECT WoID AS value FROM " . Globals::getTablePrefix() . "words WHERE WoTextLC = ?",
             [$termlc]
         );
 
@@ -589,7 +582,7 @@ class WordService
         $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-        $sql = "INSERT INTO {$this->tbpref}words (
+        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
                 WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}
             ) VALUES (?, ?, ?, ?, NOW(), {$scoreValues})";
 
@@ -607,8 +600,8 @@ class WordService
     public function linkAllTextItems(): void
     {
         Connection::execute(
-            "UPDATE {$this->tbpref}words
-             JOIN {$this->tbpref}textitems2
+            "UPDATE " . Globals::getTablePrefix() . "words
+             JOIN " . Globals::getTablePrefix() . "textitems2
              ON Ti2WoID = 0 AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
              SET Ti2WoID = WoID"
         );
@@ -673,16 +666,16 @@ class WordService
         // Build SQL
         if (empty($filters['textId'])) {
             $sql = "SELECT DISTINCT WoID FROM (
-                {$this->tbpref}words
-                LEFT JOIN {$this->tbpref}wordtags ON WoID = WtWoID
+                " . Globals::getTablePrefix() . "words
+                LEFT JOIN " . Globals::getTablePrefix() . "wordtags ON WoID = WtWoID
             ) WHERE {$whereClause}
             GROUP BY WoID {$whTag}";
         } else {
             $params[] = (int)$filters['textId'];
             $sql = "SELECT DISTINCT WoID FROM (
-                {$this->tbpref}words
-                LEFT JOIN {$this->tbpref}wordtags ON WoID = WtWoID
-            ), {$this->tbpref}textitems2
+                " . Globals::getTablePrefix() . "words
+                LEFT JOIN " . Globals::getTablePrefix() . "wordtags ON WoID = WtWoID
+            ), " . Globals::getTablePrefix() . "textitems2
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ?
             AND {$whereClause}
             GROUP BY WoID {$whTag}";
@@ -791,7 +784,7 @@ class WordService
     {
         $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}words SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate} WHERE WoID = ?",
+            "UPDATE " . Globals::getTablePrefix() . "words SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate} WHERE WoID = ?",
             [$status, $wordId]
         );
         return 'Status changed';
@@ -808,7 +801,7 @@ class WordService
     {
         $record = Connection::preparedFetchOne(
             "SELECT WoText, WoTranslation, WoRomanization
-             FROM {$this->tbpref}words WHERE WoID = ?",
+             FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wordId]
         );
 
@@ -835,7 +828,7 @@ class WordService
     {
         $word = Connection::preparedFetchValue(
             "SELECT Ti2Text AS value
-             FROM {$this->tbpref}textitems2
+             FROM " . Globals::getTablePrefix() . "textitems2
              WHERE Ti2WordCount = 1 AND Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $ord]
         );
@@ -865,7 +858,7 @@ class WordService
         $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-        $sql = "INSERT INTO {$this->tbpref}words (
+        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
                 WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged, {$scoreColumns}
             ) VALUES (?, ?, ?, ?, 1, NOW(), {$scoreValues})";
 
@@ -873,7 +866,7 @@ class WordService
 
         // Link to text items
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}textitems2 SET Ti2WoID = ?
+            "UPDATE " . Globals::getTablePrefix() . "textitems2 SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wid, $langId, $termlc]
         );
@@ -896,7 +889,7 @@ class WordService
     public function getWordText(int $wordId): ?string
     {
         $term = Connection::preparedFetchValue(
-            "SELECT WoText AS value FROM {$this->tbpref}words WHERE WoID = ?",
+            "SELECT WoText AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wordId]
         );
         return $term !== null ? (string) $term : null;
@@ -918,12 +911,12 @@ class WordService
         }
 
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}words SET WoTranslation = ? WHERE WoID = ?",
+            "UPDATE " . Globals::getTablePrefix() . "words SET WoTranslation = ? WHERE WoID = ?",
             [ExportService::replaceTabNewline($value), $wordId]
         );
 
         return (string) Connection::preparedFetchValue(
-            "SELECT WoTranslation AS value FROM {$this->tbpref}words WHERE WoID = ?",
+            "SELECT WoTranslation AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wordId]
         );
     }
@@ -944,12 +937,12 @@ class WordService
         }
 
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}words SET WoRomanization = ? WHERE WoID = ?",
+            "UPDATE " . Globals::getTablePrefix() . "words SET WoRomanization = ? WHERE WoID = ?",
             [ExportService::replaceTabNewline($value), $wordId]
         );
 
         $result = Connection::preparedFetchValue(
-            "SELECT WoRomanization AS value FROM {$this->tbpref}words WHERE WoID = ?",
+            "SELECT WoRomanization AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wordId]
         );
 
@@ -992,7 +985,7 @@ class WordService
     {
         $record = Connection::preparedFetchOne(
             "SELECT WoLgID, WoText, WoTranslation, WoSentence, WoRomanization, WoStatus
-             FROM {$this->tbpref}words WHERE WoID = ?",
+             FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wordId]
         );
 
@@ -1027,8 +1020,8 @@ class WordService
         return Connection::preparedFetchAll(
             "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
              FROM (
-                 {$this->tbpref}textitems2
-                 LEFT JOIN {$this->tbpref}words
+                 " . Globals::getTablePrefix() . "textitems2
+                 LEFT JOIN " . Globals::getTablePrefix() . "words
                  ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
              )
              WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
@@ -1050,7 +1043,7 @@ class WordService
     public function processWordForWellKnown(int $status, string $term, string $termlc, int $langId): array
     {
         $wid = Connection::preparedFetchValue(
-            "SELECT WoID AS value FROM {$this->tbpref}words WHERE WoTextLC = ?",
+            "SELECT WoID AS value FROM " . Globals::getTablePrefix() . "words WHERE WoTextLC = ?",
             [$termlc]
         );
 
@@ -1062,7 +1055,7 @@ class WordService
             $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
             $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-            $sql = "INSERT INTO {$this->tbpref}words (
+            $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
                     WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}
                 ) VALUES (?, ?, ?, ?, NOW(), {$scoreValues})";
 
@@ -1119,14 +1112,14 @@ class WordService
         $wordlc = mb_strtolower($text, 'UTF-8');
 
         $langId = (int) Connection::preparedFetchValue(
-            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+            "SELECT TxLgID AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
             [$textId]
         );
 
         $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-        $sql = "INSERT INTO {$this->tbpref}words (
+        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
                 WoRomanization, WoStatusChanged, {$scoreColumns}
             ) VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues})";
@@ -1134,7 +1127,7 @@ class WordService
         $wid = (int) Connection::preparedInsert($sql, [$langId, $wordlc, $text, $status, $translation]);
 
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}textitems2 SET Ti2WoID = ?
+            "UPDATE " . Globals::getTablePrefix() . "textitems2 SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wid, $langId, $wordlc]
         );
@@ -1164,7 +1157,7 @@ class WordService
     public function markAllWordsWithStatus(int $textId, int $status): array
     {
         $langId = Connection::preparedFetchValue(
-            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+            "SELECT TxLgID AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
             [$textId]
         );
         $wordsData = [];
@@ -1185,8 +1178,8 @@ class WordService
 
         // Associate existing textitems.
         Connection::execute(
-            "UPDATE {$this->tbpref}words
-            JOIN {$this->tbpref}textitems2
+            "UPDATE " . Globals::getTablePrefix() . "words
+            JOIN " . Globals::getTablePrefix() . "textitems2
             ON Ti2WoID = 0 AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
             SET Ti2WoID = WoID",
             ''
@@ -1209,7 +1202,7 @@ class WordService
     public function bulkSaveTerms(array $terms): int
     {
         $max = (int) Connection::fetchValue(
-            "SELECT COALESCE(MAX(WoID), 0) AS value FROM {$this->tbpref}words"
+            "SELECT COALESCE(MAX(WoID), 0) AS value FROM " . Globals::getTablePrefix() . "words"
         );
 
         if (empty($terms)) {
@@ -1224,7 +1217,7 @@ class WordService
             $trans = (!isset($row['trans']) || $row['trans'] == '') ? '*' : $row['trans'];
             $textlc = mb_strtolower($row['text'], 'UTF-8');
 
-            $sql = "INSERT INTO {$this->tbpref}words (
+            $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
                     WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
                     WoRomanization, WoStatusChanged, {$scoreColumns}
                 ) VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues})";
@@ -1246,7 +1239,7 @@ class WordService
     {
         return Connection::preparedFetchAll(
             "SELECT WoID, WoTextLC, WoStatus, WoTranslation
-             FROM {$this->tbpref}words
+             FROM " . Globals::getTablePrefix() . "words
              WHERE WoID > ?",
             [$maxWoId]
         );
@@ -1262,8 +1255,8 @@ class WordService
     public function linkNewWordsToTextItems(int $maxWoId): void
     {
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}textitems2
-             JOIN {$this->tbpref}words
+            "UPDATE " . Globals::getTablePrefix() . "textitems2
+             JOIN " . Globals::getTablePrefix() . "words
              ON LOWER(Ti2Text) = WoTextLC AND Ti2WordCount = 1 AND Ti2LgID = WoLgID AND WoID > ?
              SET Ti2WoID = WoID",
             [$maxWoId]
@@ -1281,7 +1274,7 @@ class WordService
     {
         $record = Connection::preparedFetchOne(
             "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-             FROM {$this->tbpref}languages, {$this->tbpref}texts
+             FROM " . Globals::getTablePrefix() . "languages, " . Globals::getTablePrefix() . "texts
              WHERE LgID = TxLgID AND TxID = ?",
             [$textId]
         );
@@ -1310,7 +1303,7 @@ class WordService
     ): array {
         return Connection::preparedFetchAll(
             "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos
-             FROM {$this->tbpref}textitems2
+             FROM " . Globals::getTablePrefix() . "textitems2
              WHERE Ti2WoID = 0 AND Ti2TxID = ? AND Ti2WordCount = 1
              GROUP BY LOWER(Ti2Text)
              ORDER BY pos
@@ -1341,7 +1334,7 @@ class WordService
         $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-        $sql = "INSERT INTO {$this->tbpref}words (
+        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
                 WoRomanization, WoWordCount, WoStatusChanged, {$scoreColumns}
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})";
@@ -1386,7 +1379,7 @@ class WordService
 
         if ($oldStatus != $newStatus) {
             // Status changed - update status and timestamp
-            $sql = "UPDATE {$this->tbpref}words SET
+            $sql = "UPDATE " . Globals::getTablePrefix() . "words SET
                     WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
                     WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
                     WHERE WoID = ?";
@@ -1400,7 +1393,7 @@ class WordService
             ]);
         } else {
             // Status unchanged
-            $sql = "UPDATE {$this->tbpref}words SET
+            $sql = "UPDATE " . Globals::getTablePrefix() . "words SET
                     WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?, {$scoreUpdate}
                     WHERE WoID = ?";
             Connection::preparedExecute($sql, [
@@ -1432,7 +1425,7 @@ class WordService
     {
         $record = Connection::preparedFetchOne(
             "SELECT WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus
-             FROM {$this->tbpref}words WHERE WoID = ?",
+             FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wordId]
         );
 
@@ -1460,7 +1453,7 @@ class WordService
     public function getLanguageIdFromText(int $textId): ?int
     {
         $lgid = Connection::preparedFetchValue(
-            "SELECT TxLgID AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+            "SELECT TxLgID AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
             [$textId]
         );
         return $lgid !== null ? (int) $lgid : null;
@@ -1478,7 +1471,7 @@ class WordService
     {
         $seid = Connection::preparedFetchValue(
             "SELECT Ti2SeID AS value
-             FROM {$this->tbpref}textitems2
+             FROM " . Globals::getTablePrefix() . "textitems2
              WHERE Ti2TxID = ? AND Ti2Order = ?",
             [$textId, $ord]
         );
@@ -1501,7 +1494,7 @@ class WordService
         }
 
         $sentence = Connection::preparedFetchValue(
-            "SELECT SeText AS value FROM {$this->tbpref}sentences WHERE SeID = ?",
+            "SELECT SeText AS value FROM " . Globals::getTablePrefix() . "sentences WHERE SeID = ?",
             [$seid]
         );
 
@@ -1519,7 +1512,7 @@ class WordService
     {
         return (bool) Connection::preparedFetchValue(
             "SELECT LgShowRomanization AS value
-             FROM {$this->tbpref}languages JOIN {$this->tbpref}texts
+             FROM " . Globals::getTablePrefix() . "languages JOIN " . Globals::getTablePrefix() . "texts
              ON TxLgID = LgID
              WHERE TxID = ?",
             [$textId]
@@ -1537,7 +1530,7 @@ class WordService
     public function findMultiWordByText(string $textlc, int $langId): ?int
     {
         $wid = Connection::preparedFetchValue(
-            "SELECT WoID AS value FROM {$this->tbpref}words
+            "SELECT WoID AS value FROM " . Globals::getTablePrefix() . "words
              WHERE WoLgID = ? AND WoTextLC = ?",
             [$langId, $textlc]
         );

@@ -32,13 +32,6 @@ use Lwt\View\Helper\IconHelper;
 class SimilarTermsService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
      * Weight multiplier for learned words (status 5).
      */
     private const STATUS_WEIGHT_LEARNED = 1.3;
@@ -97,14 +90,6 @@ class SimilarTermsService
         'x' => 'ks',
         // Double letters simplified
     ];
-
-    /**
-     * Constructor - initialize table prefix.
-     */
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
 
     /**
      * Normalize a string for phonetic comparison.
@@ -325,7 +310,7 @@ class SimilarTermsService
         $comparedTermLc = mb_strtolower($comparedTerm, 'UTF-8');
 
         // Fetch words with their status for weighting
-        $sql = "SELECT WoID, WoTextLC, WoStatus FROM {$this->tbpref}words
+        $sql = "SELECT WoID, WoTextLC, WoStatus FROM " . Globals::getTablePrefix() . "words
         WHERE WoLgID = ?
         AND WoTextLC <> ?";
         $rows = Connection::prepare($sql)->bind('is', $langId, $comparedTermLc)->fetchAll();
@@ -377,7 +362,7 @@ class SimilarTermsService
     public function formatTerm(int $termId, string $compare): string
     {
         $sql = "SELECT WoText, WoTranslation, WoRomanization
-        FROM {$this->tbpref}words WHERE WoID = ?";
+        FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?";
         $record = Connection::prepare($sql)->bind('i', $termId)->fetchOne();
         if ($record) {
             $term = htmlspecialchars($record["WoText"] ?? '', ENT_QUOTES, 'UTF-8');

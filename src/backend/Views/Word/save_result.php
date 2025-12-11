@@ -29,12 +29,14 @@ namespace Lwt\Views\Word;
 ?>
 <p><?php echo $message; ?></p>
 
-<?php if ($success && $len == 1): ?>
+<?php if ($success && $len == 1):
+    $tagList = \Lwt\Services\TagService::getWordTagList($wid, false);
+?>
 <script type="application/json" data-lwt-save-result-config>
 <?php echo json_encode([
     'wid' => $wid,
     'status' => $status,
-    'translation' => $translation . \Lwt\Services\TagService::getWordTagListFormatted($wid, ' ', true, false),
+    'translation' => $translation . ($tagList !== '' ? ' [' . $tagList . ']' : ''),
     'romanization' => $romanization,
     'text' => $text,
     'hex' => $hex,

@@ -69,69 +69,48 @@ class EscapingTest extends TestCase
         ];
     }
 
-    // ===== prepareTextdataJs tests =====
+    // ===== json_encode tests (replacement for deprecated prepareTextdataJs) =====
 
-    public function testPrepareTextdataJsBasicString(): void
+    public function testJsonEncodeBasicString(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = Escaping::prepareTextdataJs('test');
-        $this->assertEquals("\\'test\\'", $result);
+        $result = json_encode('test');
+        $this->assertEquals('"test"', $result);
     }
 
-    public function testPrepareTextdataJsEmptyString(): void
+    public function testJsonEncodeEmptyString(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = Escaping::prepareTextdataJs('');
-        $this->assertEquals("''", $result);
+        $result = json_encode('');
+        $this->assertEquals('""', $result);
     }
 
-    public function testPrepareTextdataJsWhitespaceOnly(): void
+    public function testJsonEncodeWhitespaceOnly(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = Escaping::prepareTextdataJs('   ');
-        $this->assertEquals("''", $result);
+        $result = json_encode('   ');
+        $this->assertEquals('"   "', $result);
     }
 
-    public function testPrepareTextdataJsSingleQuotes(): void
+    public function testJsonEncodeSingleQuotes(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = Escaping::prepareTextdataJs("test'value");
-        $this->assertStringContainsString("\\'", $result);
+        $result = json_encode("test'value");
+        $this->assertEquals('"test\'value"', $result);
     }
 
-    public function testPrepareTextdataJsLineEndings(): void
+    public function testJsonEncodeLineEndings(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = Escaping::prepareTextdataJs("line1\r\nline2");
-        // Should contain escaped newline and the text
+        $result = json_encode("line1\r\nline2");
+        // json_encode escapes newlines as \r\n
         $this->assertStringContainsString("line1", $result);
         $this->assertStringContainsString("line2", $result);
+        $this->assertStringContainsString("\\r\\n", $result);
     }
 
-    public function testPrepareTextdataJsUnicode(): void
+    public function testJsonEncodeUnicode(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = Escaping::prepareTextdataJs('日本語');
-        $this->assertStringContainsString('日本語', $result);
-        $this->assertStringStartsWith("\\'", $result);
+        $result = json_encode('日本語');
+        // json_encode escapes Unicode by default to \uXXXX format
+        $this->assertStringStartsWith('"', $result);
+        $this->assertStringEndsWith('"', $result);
+        $this->assertStringContainsString('\u', $result);
     }
 
     // ===== toSqlSyntax tests =====

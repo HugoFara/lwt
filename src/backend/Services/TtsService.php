@@ -35,13 +35,6 @@ require_once __DIR__ . '/LanguageService.php';
 class TtsService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
      * Language service instance.
      *
      * @var LanguageService
@@ -49,11 +42,10 @@ class TtsService
     private LanguageService $languageService;
 
     /**
-     * Constructor - initialize table prefix.
+     * Constructor - initialize language service.
      */
     public function __construct()
     {
-        $this->tbpref = Globals::getTablePrefix();
         $this->languageService = new LanguageService();
     }
 
@@ -162,7 +154,7 @@ class TtsService
     {
         $lg_id = (int)Connection::preparedFetchValue(
             "SELECT LgID as value
-            FROM {$this->tbpref}languages
+            FROM " . Globals::getTablePrefix() . "languages
             WHERE LgName = ?",
             [$language]
         );

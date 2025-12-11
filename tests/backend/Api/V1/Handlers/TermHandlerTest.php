@@ -61,8 +61,8 @@ class TermHandlerTest extends TestCase
     {
         // Clean up test data
         if (self::$dbConnected) {
-            $tbpref = Globals::getTablePrefix();
-            Connection::query("DELETE FROM {$tbpref}words WHERE WoText LIKE 'test_api_%'");
+            $prefix = Globals::getTablePrefix();
+            Connection::query("DELETE FROM {$prefix}words WHERE WoText LIKE 'test_api_%'");
         }
         parent::tearDown();
     }

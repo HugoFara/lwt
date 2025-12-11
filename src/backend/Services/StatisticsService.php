@@ -30,21 +30,6 @@ use Lwt\Database\Connection;
 class StatisticsService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
-     * Constructor - initialize table prefix.
-     */
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
-
-    /**
      * Get term statistics grouped by language and status.
      *
      * @return array{languages: array, totals: array} Statistics data
@@ -163,7 +148,7 @@ class StatisticsService
     private function getTermCountsByLanguageAndStatus(): array
     {
         $sql = "SELECT WoLgID, WoStatus, count(*) AS value
-                FROM {$this->tbpref}words GROUP BY WoLgID, WoStatus";
+                FROM " . Globals::getTablePrefix() . "words GROUP BY WoLgID, WoStatus";
         $res = Connection::query($sql);
 
         $termStat = [];
@@ -185,7 +170,7 @@ class StatisticsService
      */
     private function getLanguageList(): array
     {
-        $sql = "SELECT LgID, LgName FROM {$this->tbpref}languages
+        $sql = "SELECT LgID, LgName FROM " . Globals::getTablePrefix() . "languages
                 WHERE LgName <> '' ORDER BY LgName";
         $res = Connection::query($sql);
 
@@ -208,7 +193,7 @@ class StatisticsService
     {
         $sql = "SELECT WoLgID, TO_DAYS(curdate()) - TO_DAYS(cast(WoCreated as date)) Created,
                 count(WoID) as value
-                FROM {$this->tbpref}words
+                FROM " . Globals::getTablePrefix() . "words
                 WHERE WoStatus IN (1,2,3,4,5,99)
                 GROUP BY WoLgID, Created";
         $res = Connection::query($sql);
@@ -233,7 +218,7 @@ class StatisticsService
         $sql = "SELECT WoLgID, WoStatus,
                 TO_DAYS(curdate()) - TO_DAYS(cast(WoStatusChanged as date)) Changed,
                 count(WoID) as value
-                FROM {$this->tbpref}words
+                FROM " . Globals::getTablePrefix() . "words
                 GROUP BY WoLgID, WoStatus, WoStatusChanged";
         $res = Connection::query($sql);
 

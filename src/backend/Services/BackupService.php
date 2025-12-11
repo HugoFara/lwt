@@ -32,13 +32,6 @@ use Lwt\Database\Restore;
 class BackupService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
      * Database name.
      *
      * @var string
@@ -71,7 +64,6 @@ class BackupService
      */
     public function __construct()
     {
-        $this->tbpref = Globals::getTablePrefix();
         $this->dbname = Globals::getDatabaseName();
     }
 
@@ -82,10 +74,10 @@ class BackupService
      */
     public function getFilePrefix(): string
     {
-        if ($this->tbpref == '') {
+        if (Globals::getTablePrefix() == '') {
             return "";
         }
-        return substr($this->tbpref, 0, -1) . "-";
+        return substr(Globals::getTablePrefix(), 0, -1) . "-";
     }
 
     /**
@@ -95,10 +87,10 @@ class BackupService
      */
     public function getPrefixInfo(): string
     {
-        if ($this->tbpref == '') {
+        if (Globals::getTablePrefix() == '') {
             return "(Default Table Set)";
         }
-        return "(Table Set: <i>" . htmlspecialchars(substr($this->tbpref, 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i>)";
+        return "(Table Set: <i>" . htmlspecialchars(substr(Globals::getTablePrefix(), 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i>)";
     }
 
     /**
@@ -148,14 +140,14 @@ class BackupService
         $out = "-- " . $fname . "\n";
 
         foreach (self::BACKUP_TABLES as $table) {
-            $result = Connection::query('SELECT * FROM ' . $this->tbpref . $table);
+            $result = Connection::query('SELECT * FROM ' . Globals::getTablePrefix() . $table);
             $num_fields = mysqli_num_fields($result);
             $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
             $row2 = mysqli_fetch_row(
-                Connection::query("SHOW CREATE TABLE {$this->tbpref}$table")
+                Connection::query("SHOW CREATE TABLE " . Globals::getTablePrefix() . $table)
             );
             $out .= str_replace(
-                $this->tbpref . $table,
+                Globals::getTablePrefix() . $table,
                 $table,
                 str_replace("\n", " ", $row2[1])
             ) . ";\n";
@@ -198,14 +190,14 @@ class BackupService
             if ($table == 'texts') {
                 $result = Connection::query(
                     'SELECT TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
-                    TxSourceURI FROM ' . $this->tbpref . $table
+                    TxSourceURI FROM ' . Globals::getTablePrefix() . $table
                 );
                 $num_fields = 7;
             } elseif ($table == 'words') {
                 $result = Connection::query(
                     'SELECT WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation,
                     WoRomanization, WoSentence, WoCreated, WoStatusChanged, WoTodayScore,
-                    WoTomorrowScore, WoRandom FROM ' . $this->tbpref . $table
+                    WoTomorrowScore, WoRandom FROM ' . Globals::getTablePrefix() . $table
                 );
                 $num_fields = 13;
             } elseif ($table == 'languages') {
@@ -217,14 +209,14 @@ class BackupService
                     LgExportTemplate, LgTextSize, LgCharacterSubstitutions,
                     LgRegexpSplitSentences, LgExceptionsSplitSentences,
                     LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar,
-                    LgRightToLeft FROM ' . $this->tbpref . 'languages WHERE LgName<>""'
+                    LgRightToLeft FROM ' . Globals::getTablePrefix() . 'languages WHERE LgName<>""'
                 );
                 $num_fields = mysqli_num_fields($result);
             } elseif (
                 $table !== 'sentences' && $table !== 'textitems' &&
                 $table !== 'settings'
             ) {
-                $result = Connection::query('SELECT * FROM ' . $this->tbpref . $table);
+                $result = Connection::query('SELECT * FROM ' . Globals::getTablePrefix() . $table);
                 $num_fields = mysqli_num_fields($result);
             }
 

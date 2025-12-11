@@ -52,8 +52,7 @@ class SettingsTest extends TestCase
         }
 
         // Clean up test settings after each test
-        $tbpref = Globals::getTablePrefix();
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_%'");
+        Connection::query("DELETE FROM " . Globals::table('settings') . " WHERE StKey LIKE 'test_%'");
     }
 
     // ===== getZeroOrOne() tests =====
@@ -161,9 +160,8 @@ class SettingsTest extends TestCase
         }
 
         // Directly insert value with whitespace to test trimming
-        $tbpref = Globals::getTablePrefix();
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_whitespace'");
-        Connection::query("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_whitespace', '  value  ')");
+        Connection::query("DELETE FROM " . Globals::table('settings') . " WHERE StKey = 'test_whitespace'");
+        Connection::query("INSERT INTO " . Globals::table('settings') . " (StKey, StValue) VALUES ('test_whitespace', '  value  ')");
 
         $result = Settings::get('test_whitespace');
         $this->assertEquals('value', $result, 'Value should be trimmed');
@@ -175,17 +173,16 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
         // Clean up any previously saved SQL injection key
         $injectionKey = "key'; DROP TABLE settings; --";
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+        Connection::query("DELETE FROM " . Globals::table('settings') . " WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
         // The SQL injection key should return empty (not found)
         $result = Settings::get($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, the settings table should still exist (not dropped)
-        $tableExists = mysqli_num_rows(Connection::query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
+        $tableExists = mysqli_num_rows(Connection::query("SHOW TABLES LIKE '" . Globals::table('settings') . "'")) > 0;
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
     }
 
@@ -243,16 +240,15 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
         // Use a different injection key that wasn't previously saved
         $injectionKey = "newkey'; DROP TABLE settings; --";
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+        Connection::query("DELETE FROM " . Globals::table('settings') . " WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
         $result = Settings::getWithDefault($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, the settings table should still exist (not dropped)
-        $tableExists = mysqli_num_rows(Connection::query("SHOW TABLES LIKE '{$tbpref}settings'")) > 0;
+        $tableExists = mysqli_num_rows(Connection::query("SHOW TABLES LIKE '" . Globals::table('settings') . "'")) > 0;
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
     }
 

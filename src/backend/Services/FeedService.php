@@ -34,13 +34,6 @@ use Lwt\Database\TextParsing;
  */
 class FeedService
 {
-    private string $tbpref;
-
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
-
     /**
      * Get all newsfeeds for a language (or all languages).
      *
@@ -51,7 +44,7 @@ class FeedService
     public function getFeeds(?int $langId = null): array
     {
         $sql = "SELECT NfID, NfName, NfSourceURI, NfUpdate, NfOptions, NfLgID
-                FROM {$this->tbpref}newsfeeds";
+                FROM " . Globals::getTablePrefix() . "newsfeeds";
         $params = [];
 
         if ($langId !== null && $langId > 0) {
@@ -85,7 +78,7 @@ class FeedService
     public function getFeedById(int $feedId): ?array
     {
         $row = Connection::preparedFetchOne(
-            "SELECT * FROM {$this->tbpref}newsfeeds WHERE NfID = ?",
+            "SELECT * FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfID = ?",
             [$feedId]
         );
         return $row ?: null;
@@ -111,9 +104,9 @@ class FeedService
     ): array {
         $sql = "SELECT FlID, FlTitle, FlLink, FlDescription, FlDate, FlAudio,
                        TxID, AtID
-                FROM {$this->tbpref}feedlinks
-                LEFT JOIN {$this->tbpref}texts ON TxSourceURI = TRIM(FlLink)
-                LEFT JOIN {$this->tbpref}archivedtexts ON AtSourceURI = TRIM(FlLink)
+                FROM " . Globals::getTablePrefix() . "feedlinks
+                LEFT JOIN " . Globals::getTablePrefix() . "texts ON TxSourceURI = TRIM(FlLink)
+                LEFT JOIN " . Globals::getTablePrefix() . "archivedtexts ON AtSourceURI = TRIM(FlLink)
                 WHERE FlNfID IN ($feedIds) $whereQuery
                 ORDER BY $orderBy
                 LIMIT $offset, $limit";
@@ -138,7 +131,7 @@ class FeedService
      */
     public function countFeedLinks(string $feedIds, string $whereQuery = ''): int
     {
-        $sql = "SELECT COUNT(*) AS value FROM {$this->tbpref}feedlinks
+        $sql = "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "feedlinks
                 WHERE FlNfID IN ($feedIds) $whereQuery";
         return (int)Connection::fetchValue($sql);
     }
@@ -166,7 +159,7 @@ class FeedService
         }
 
         $where = empty($whereConditions) ? '1=1' : implode(' AND ', $whereConditions);
-        $sql = "SELECT COUNT(*) AS value FROM {$this->tbpref}newsfeeds WHERE $where";
+        $sql = "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "newsfeeds WHERE $where";
 
         return (int)Connection::preparedFetchValue($sql, $params);
     }
@@ -181,7 +174,7 @@ class FeedService
     public function createFeed(array $data): int
     {
         return Connection::preparedInsert(
-            "INSERT INTO {$this->tbpref}newsfeeds (
+            "INSERT INTO " . Globals::getTablePrefix() . "newsfeeds (
                 NfLgID, NfName, NfSourceURI, NfArticleSectionTags, NfFilterTags, NfOptions
             ) VALUES (?, ?, ?, ?, ?, ?)",
             [
@@ -206,7 +199,7 @@ class FeedService
     public function updateFeed(int $feedId, array $data): void
     {
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}newsfeeds SET
+            "UPDATE " . Globals::getTablePrefix() . "newsfeeds SET
                 NfLgID = ?,
                 NfName = ?,
                 NfSourceURI = ?,
@@ -266,7 +259,7 @@ class FeedService
         // Update the feed timestamp - use placeholders for each ID
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}newsfeeds SET NfUpdate = ?
+            "UPDATE " . Globals::getTablePrefix() . "newsfeeds SET NfUpdate = ?
              WHERE NfID IN ($placeholders)",
             array_merge([time()], $ids)
         );
@@ -284,7 +277,7 @@ class FeedService
     public function resetUnloadableArticles(string $feedIds): int
     {
         return (int)Connection::execute(
-            "UPDATE {$this->tbpref}feedlinks SET FlLink = TRIM(FlLink)
+            "UPDATE " . Globals::getTablePrefix() . "feedlinks SET FlLink = TRIM(FlLink)
              WHERE FlNfID IN ($feedIds)"
         );
     }
@@ -300,7 +293,7 @@ class FeedService
         $feeds = [];
 
         $result = Connection::query(
-            "SELECT * FROM {$this->tbpref}newsfeeds
+            "SELECT * FROM " . Globals::getTablePrefix() . "newsfeeds
              WHERE NfOptions LIKE '%autoupdate=%'"
         );
 
@@ -505,11 +498,11 @@ class FeedService
 
         $sql = "SELECT fl.*, nf.*
                 FROM (
-                    SELECT * FROM {$this->tbpref}feedlinks
+                    SELECT * FROM " . Globals::getTablePrefix() . "feedlinks
                     WHERE FlID IN ($ids)
                     ORDER BY FlNfID
                 ) fl
-                LEFT JOIN {$this->tbpref}newsfeeds nf ON NfID = FlNfID";
+                LEFT JOIN " . Globals::getTablePrefix() . "newsfeeds nf ON NfID = FlNfID";
 
         $links = [];
         $res = Connection::query($sql);
@@ -533,13 +526,13 @@ class FeedService
     {
         // Ensure tag exists
         Connection::preparedExecute(
-            "INSERT IGNORE INTO {$this->tbpref}tags2 (T2Text) VALUES (?)",
+            "INSERT IGNORE INTO " . Globals::getTablePrefix() . "tags2 (T2Text) VALUES (?)",
             [$tagName]
         );
 
         // Create the text
         $textId = Connection::preparedInsert(
-            "INSERT INTO {$this->tbpref}texts (
+            "INSERT INTO " . Globals::getTablePrefix() . "texts (
                 TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI
             ) VALUES (?, ?, ?, ?, ?)",
             [
@@ -560,8 +553,8 @@ class FeedService
 
         // Apply tag
         Connection::preparedExecute(
-            "INSERT INTO {$this->tbpref}texttags (TtTxID, TtT2ID)
-             SELECT ?, T2ID FROM {$this->tbpref}tags2
+            "INSERT INTO " . Globals::getTablePrefix() . "texttags (TtTxID, TtT2ID)
+             SELECT ?, T2ID FROM " . Globals::getTablePrefix() . "tags2
              WHERE T2Text = ?",
             [$textId, $tagName]
         );
@@ -580,8 +573,8 @@ class FeedService
     public function archiveOldTexts(string $tagName, int $maxTexts): array
     {
         $rows = Connection::preparedFetchAll(
-            "SELECT TtTxID FROM {$this->tbpref}texttags
-             JOIN {$this->tbpref}tags2 ON TtT2ID = T2ID
+            "SELECT TtTxID FROM " . Globals::getTablePrefix() . "texttags
+             JOIN " . Globals::getTablePrefix() . "tags2 ON TtT2ID = T2ID
              WHERE T2Text = ?",
             [$tagName]
         );
@@ -611,11 +604,11 @@ class FeedService
 
             // Archive the text
             Connection::preparedExecute(
-                "INSERT INTO {$this->tbpref}archivedtexts (
+                "INSERT INTO " . Globals::getTablePrefix() . "archivedtexts (
                     AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
                 )
                 SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                FROM {$this->tbpref}texts WHERE TxID = ?",
+                FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
                 [$textId]
             );
 
@@ -623,8 +616,8 @@ class FeedService
 
             // Copy tags to archive
             Connection::preparedExecute(
-                "INSERT INTO {$this->tbpref}archtexttags (AgAtID, AgT2ID)
-                 SELECT ?, TtT2ID FROM {$this->tbpref}texttags
+                "INSERT INTO " . Globals::getTablePrefix() . "archtexttags (AgAtID, AgT2ID)
+                 SELECT ?, TtT2ID FROM " . Globals::getTablePrefix() . "texttags
                  WHERE TtTxID = ?",
                 [$archiveId, $textId]
             );
@@ -639,8 +632,8 @@ class FeedService
 
             // Clean orphaned text tags (complex DELETE with JOIN - keep as-is)
             Connection::execute(
-                "DELETE {$this->tbpref}texttags FROM (
-                    {$this->tbpref}texttags LEFT JOIN {$this->tbpref}texts ON TtTxID = TxID
+                "DELETE " . Globals::getTablePrefix() . "texttags FROM (
+                    " . Globals::getTablePrefix() . "texttags LEFT JOIN " . Globals::getTablePrefix() . "texts ON TtTxID = TxID
                 ) WHERE TxID IS NULL"
             );
         }
@@ -658,7 +651,7 @@ class FeedService
     public function markLinkAsError(string $link): void
     {
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}feedlinks
+            "UPDATE " . Globals::getTablePrefix() . "feedlinks
              SET FlLink = CONCAT(' ', FlLink)
              WHERE FlLink = ?",
             [$link]
@@ -672,7 +665,7 @@ class FeedService
      */
     public function getLanguages(): array
     {
-        $sql = "SELECT LgID, LgName FROM {$this->tbpref}languages
+        $sql = "SELECT LgID, LgName FROM " . Globals::getTablePrefix() . "languages
                 WHERE LgName <> '' ORDER BY LgName";
 
         $languages = [];
@@ -779,7 +772,7 @@ class FeedService
                 $link = trim($feedData[$key]['link']);
                 if (substr($link, 0, 1) == '#') {
                     Connection::preparedExecute(
-                        "UPDATE {$this->tbpref}feedlinks
+                        "UPDATE " . Globals::getTablePrefix() . "feedlinks
                         SET FlLink = ?
                         WHERE FlID = ?",
                         [$link, (int)substr($link, 1)]
@@ -1439,7 +1432,7 @@ class FeedService
                         foreach ($text['TagList'] as $tag) {
                             if (!in_array($tag, $_SESSION['TEXTTAGS'] ?? [])) {
                                 Connection::preparedExecute(
-                                    'INSERT INTO ' . $this->tbpref . 'tags2 (T2Text)
+                                    'INSERT INTO ' . Globals::getTablePrefix() . 'tags2 (T2Text)
                                     VALUES (?)',
                                     [$tag]
                                 );
@@ -1450,7 +1443,7 @@ class FeedService
 
                     // Create the text
                     $id = Connection::preparedInsert(
-                        'INSERT INTO ' . $this->tbpref . 'texts (
+                        'INSERT INTO ' . Globals::getTablePrefix() . 'texts (
                             TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI
                         ) VALUES (?, ?, ?, ?, ?)',
                         [
@@ -1465,11 +1458,11 @@ class FeedService
                     // Parse the text
                     TextParsing::splitCheck(
                         Connection::fetchValue(
-                            'SELECT TxText AS value FROM ' . $this->tbpref . 'texts
+                            'SELECT TxText AS value FROM ' . Globals::getTablePrefix() . 'texts
                             WHERE TxID = ' . $id
                         ),
                         Connection::fetchValue(
-                            'SELECT TxLgID AS value FROM ' . $this->tbpref . 'texts
+                            'SELECT TxLgID AS value FROM ' . Globals::getTablePrefix() . 'texts
                             WHERE TxID = ' . $id
                         ),
                         $id
@@ -1477,8 +1470,8 @@ class FeedService
 
                     // Apply tags
                     Connection::query(
-                        'INSERT INTO ' . $this->tbpref . 'texttags (TtTxID, TtT2ID)
-                        SELECT ' . $id . ', T2ID FROM ' . $this->tbpref . 'tags2
+                        'INSERT INTO ' . Globals::getTablePrefix() . 'texttags (TtTxID, TtT2ID)
+                        SELECT ' . $id . ', T2ID FROM ' . Globals::getTablePrefix() . 'tags2
                         WHERE T2Text IN (' . $NfTag . ')'
                     );
                 }
@@ -1489,8 +1482,8 @@ class FeedService
 
             // Get all texts with this tag
             $result = Connection::query(
-                "SELECT TtTxID FROM " . $this->tbpref . "texttags
-                JOIN " . $this->tbpref . "tags2 ON TtT2ID=T2ID
+                "SELECT TtTxID FROM " . Globals::getTablePrefix() . "texttags
+                JOIN " . Globals::getTablePrefix() . "tags2 ON TtT2ID=T2ID
                 WHERE T2Text IN (" . $NfTag . ")"
             );
 
@@ -1513,19 +1506,19 @@ class FeedService
                         ->where('SeTxID', '=', $textID)
                         ->delete();
                     $message4 += (int)Connection::execute(
-                        'INSERT INTO ' . $this->tbpref . 'archivedtexts (
+                        'INSERT INTO ' . Globals::getTablePrefix() . 'archivedtexts (
                             AtLgID, AtTitle, AtText, AtAnnotatedText,
                             AtAudioURI, AtSourceURI
                         ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText,
                         TxAudioURI, TxSourceURI
-                        FROM ' . $this->tbpref . 'texts
+                        FROM ' . Globals::getTablePrefix() . 'texts
                         WHERE TxID = ' . $textID
                     );
 
                     $archiveId = (int)Connection::lastInsertId();
                     Connection::execute(
-                        'INSERT INTO ' . $this->tbpref . 'archtexttags (AgAtID, AgT2ID)
-                        SELECT ' . $archiveId . ', TtT2ID FROM ' . $this->tbpref . 'texttags
+                        'INSERT INTO ' . Globals::getTablePrefix() . 'archtexttags (AgAtID, AgT2ID)
+                        SELECT ' . $archiveId . ', TtT2ID FROM ' . Globals::getTablePrefix() . 'texttags
                         WHERE TtTxID = ' . $textID
                     );
 
@@ -1538,9 +1531,9 @@ class FeedService
 
                     // Clean orphaned text tags (complex DELETE with JOIN - keep as-is)
                     Connection::execute(
-                        "DELETE " . $this->tbpref . "texttags
-                        FROM (" . $this->tbpref . "texttags
-                            LEFT JOIN " . $this->tbpref . "texts ON TtTxID = TxID
+                        "DELETE " . Globals::getTablePrefix() . "texttags
+                        FROM (" . Globals::getTablePrefix() . "texttags
+                            LEFT JOIN " . Globals::getTablePrefix() . "texts ON TtTxID = TxID
                         ) WHERE TxID IS NULL"
                     );
                 }
@@ -1573,7 +1566,7 @@ class FeedService
 
         if ($checkAutoupdate) {
             $result = Connection::query(
-                "SELECT * FROM " . $this->tbpref . "newsfeeds
+                "SELECT * FROM " . Globals::getTablePrefix() . "newsfeeds
                 WHERE `NfOptions` LIKE '%autoupdate=%'"
             );
 
@@ -1599,7 +1592,7 @@ class FeedService
             }
             mysqli_free_result($result);
         } else {
-            $sql = "SELECT * FROM " . $this->tbpref . "newsfeeds WHERE NfID IN ($currentFeed)";
+            $sql = "SELECT * FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfID IN ($currentFeed)";
             $result = Connection::query($sql);
 
             while ($row = mysqli_fetch_assoc($result)) {

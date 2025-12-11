@@ -36,18 +36,10 @@ use Lwt\View\Helper\IconHelper;
 class AnnotationService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
      * Constructor - initialize table prefix.
      */
     public function __construct()
     {
-        $this->tbpref = Globals::getTablePrefix();
     }
 
     /**
@@ -96,7 +88,7 @@ class AnnotationService
         }
 
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}texts
+            "UPDATE " . Globals::getTablePrefix() . "texts
             SET TxAnnotatedText = ?
             WHERE TxID = ?",
             [$ann, $textId]
@@ -104,7 +96,7 @@ class AnnotationService
 
         return (string)Connection::preparedFetchValue(
             "SELECT TxAnnotatedText AS value
-            FROM {$this->tbpref}texts
+            FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = ?",
             [$textId]
         );
@@ -130,8 +122,8 @@ class AnnotationService
             CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END AS TiIsNotWord,
             WoID, WoTranslation
             FROM (
-                {$this->tbpref}textitems2
-                LEFT JOIN {$this->tbpref}words
+                " . Globals::getTablePrefix() . "textitems2
+                LEFT JOIN " . Globals::getTablePrefix() . "words
                 ON Ti2WoID = WoID AND Ti2LgID = WoLgID
             )
             WHERE Ti2TxID = ?
@@ -184,14 +176,14 @@ class AnnotationService
     {
         $ann = $this->createAnnotation($textId);
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}texts
+            "UPDATE " . Globals::getTablePrefix() . "texts
             SET TxAnnotatedText = ?
             WHERE TxID = ?",
             [$ann, $textId]
         );
         return (string)Connection::preparedFetchValue(
             "SELECT TxAnnotatedText AS value
-            FROM {$this->tbpref}texts
+            FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = ?",
             [$textId]
         );
@@ -252,7 +244,7 @@ class AnnotationService
     {
         if (Connection::preparedFetchValue(
             "SELECT LENGTH(TxAnnotatedText) AS value
-            FROM {$this->tbpref}texts
+            FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = ?",
             [$textId]
         ) > 0) {

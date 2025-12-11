@@ -139,10 +139,12 @@ class TranslationService
      */
     public function getTranslatorUrl(int $textId, int $order): array
     {
-        $tbpref = Globals::getTablePrefix();
+        $languagesTable = Globals::table('languages');
+        $sentencesTable = Globals::table('sentences');
+        $textitemsTable = Globals::table('textitems2');
 
         $sql = "SELECT SeText, LgGoogleTranslateURI
-            FROM {$tbpref}languages, {$tbpref}sentences, {$tbpref}textitems2
+            FROM {$languagesTable}, {$sentencesTable}, {$textitemsTable}
             WHERE Ti2SeID = SeID AND Ti2LgID = LgID
             AND Ti2TxID = $textId AND Ti2Order = $order";
 
@@ -213,7 +215,7 @@ class TranslationService
      */
     public function getCurrentLanguageTtsVoice(): ?string
     {
-        $tbpref = Globals::getTablePrefix();
+        $languagesTable = Globals::table('languages');
         $lgId = Settings::get('currentlangage');
 
         if (!$lgId) {
@@ -221,7 +223,7 @@ class TranslationService
         }
 
         return Connection::fetchValue(
-            "SELECT LgTTSVoiceAPI AS value FROM {$tbpref}languages WHERE LgID = $lgId"
+            "SELECT LgTTSVoiceAPI AS value FROM {$languagesTable} WHERE LgID = $lgId"
         );
     }
 

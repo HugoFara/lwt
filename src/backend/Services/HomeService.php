@@ -39,13 +39,6 @@ use Lwt\Database\Settings;
 class HomeService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
      * Whether table prefix is fixed.
      *
      * @var bool
@@ -57,7 +50,6 @@ class HomeService
      */
     public function __construct()
     {
-        $this->tbpref = Globals::getTablePrefix();
         $this->fixedTbpref = Globals::isTablePrefixFixed();
     }
 
@@ -73,10 +65,10 @@ class HomeService
      */
     public function getTableSetSpanGroups(): array
     {
-        if ($this->tbpref == '') {
+        if (Globals::getTablePrefix() == '') {
             $span2 = "<i>Default</i> Table Set</span>";
         } else {
-            $span2 = "Table Set: <i>" . htmlspecialchars(substr($this->tbpref, 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i></span>";
+            $span2 = "Table Set: <i>" . htmlspecialchars(substr(Globals::getTablePrefix(), 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i></span>";
         }
 
         if ($this->fixedTbpref) {
@@ -110,7 +102,7 @@ class HomeService
     {
         $title = Connection::preparedFetchValue(
             'SELECT TxTitle AS value
-            FROM ' . $this->tbpref . 'texts
+            FROM ' . Globals::getTablePrefix() . 'texts
             WHERE TxID = ?',
             [$textId]
         );
@@ -120,7 +112,7 @@ class HomeService
         }
 
         $languageId = (int)Connection::preparedFetchValue(
-            'SELECT TxLgID AS value FROM ' . $this->tbpref . 'texts WHERE TxID = ?',
+            'SELECT TxLgID AS value FROM ' . Globals::getTablePrefix() . 'texts WHERE TxID = ?',
             [$textId]
         );
 
@@ -128,7 +120,7 @@ class HomeService
 
         $annotated = (int)Connection::preparedFetchValue(
             "SELECT LENGTH(TxAnnotatedText) AS value
-            FROM " . $this->tbpref . "texts
+            FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = ?",
             [$textId]
         ) > 0;
@@ -153,7 +145,7 @@ class HomeService
     {
         $result = Connection::preparedFetchValue(
             "SELECT LgName AS value
-            FROM {$this->tbpref}languages
+            FROM " . Globals::getTablePrefix() . "languages
             WHERE LgID = ?",
             [$languageId]
         );
@@ -173,7 +165,7 @@ class HomeService
     public function getLanguageCount(): int
     {
         return (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}languages"
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "languages"
         );
     }
 
@@ -223,18 +215,19 @@ class HomeService
     public function getDatabaseSize(): float
     {
         $dbname = Globals::getDatabaseName();
+        $tbpref = Globals::getTablePrefix();
 
         $size = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
             FROM information_schema.TABLES
             WHERE table_schema = ?
             AND table_name IN (
-                '{$this->tbpref}archivedtexts', '{$this->tbpref}archtexttags',
-                '{$this->tbpref}feedlinks', '{$this->tbpref}languages',
-                '{$this->tbpref}newsfeeds', '{$this->tbpref}sentences',
-                '{$this->tbpref}settings', '{$this->tbpref}tags', '{$this->tbpref}tags2',
-                '{$this->tbpref}textitems2', '{$this->tbpref}texts', '{$this->tbpref}texttags',
-                '{$this->tbpref}words', '{$this->tbpref}wordtags'
+                '{$tbpref}archivedtexts', '{$tbpref}archtexttags',
+                '{$tbpref}feedlinks', '{$tbpref}languages',
+                '{$tbpref}newsfeeds', '{$tbpref}sentences',
+                '{$tbpref}settings', '{$tbpref}tags', '{$tbpref}tags2',
+                '{$tbpref}textitems2', '{$tbpref}texts', '{$tbpref}texttags',
+                '{$tbpref}words', '{$tbpref}wordtags'
             )",
             [$dbname]
         );
@@ -269,7 +262,7 @@ class HomeService
         }
 
         return [
-            'prefix' => $this->tbpref,
+            'prefix' => Globals::getTablePrefix(),
             'db_size' => $this->getDatabaseSize(),
             'server_software' => $serverSoft,
             'apache' => $apache,
@@ -285,7 +278,7 @@ class HomeService
      */
     public function getTablePrefix(): string
     {
-        return $this->tbpref;
+        return Globals::getTablePrefix();
     }
 
     /**
@@ -326,7 +319,7 @@ class HomeService
             'current_text_info' => $currentTextId !== null
                 ? $this->getCurrentTextInfo($currentTextId)
                 : null,
-            'table_prefix' => $this->tbpref,
+            'table_prefix' => Globals::getTablePrefix(),
             'is_fixed_prefix' => $this->fixedTbpref,
             'is_wordpress' => $this->isWordPressSession(),
             'is_debug' => Globals::isDebug()

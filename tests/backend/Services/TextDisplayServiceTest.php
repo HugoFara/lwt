@@ -49,18 +49,16 @@ class TextDisplayServiceTest extends TestCase
         self::$dbConnected = (Globals::getDbConnection() !== null);
 
         if (self::$dbConnected) {
-            $tbpref = Globals::getTablePrefix();
-
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'TestDisplayLanguage' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'TestDisplayLanguage' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('TestDisplayLanguage', 'http://test.com/###', '', 'http://translate.test/###', " .
@@ -74,7 +72,7 @@ class TextDisplayServiceTest extends TestCase
             // Create a test text with annotations
             $annotatedText = "-1\t.\n0\tHello\t\t*\n0\tworld\t\ttranslation";
             Connection::query(
-                "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
+                "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
                 "VALUES (" . self::$testLangId . ", 'Test Display Text', 'Hello world.', " .
                 "'" . mysqli_real_escape_string(Globals::getDbConnection(), $annotatedText) . "', " .
                 "'http://audio.test/file.mp3', 'http://source.test/article')"
@@ -85,7 +83,7 @@ class TextDisplayServiceTest extends TestCase
 
             // Create a test word with romanization
             Connection::query(
-                "INSERT INTO {$tbpref}words (WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoRomanization) " .
+                "INSERT INTO " . Globals::getTablePrefix() . "words (WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoRomanization) " .
                 "VALUES (" . self::$testLangId . ", 'testword', 'testword', 1, 'test translation', 'testwɜːd')"
             );
             self::$testWordId = (int)Connection::fetchValue(
@@ -100,14 +98,12 @@ class TextDisplayServiceTest extends TestCase
             return;
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         // Clean up test data
         if (self::$testTextId > 0) {
-            Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = " . self::$testTextId);
+            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . self::$testTextId);
         }
         if (self::$testWordId > 0) {
-            Connection::query("DELETE FROM {$tbpref}words WHERE WoID = " . self::$testWordId);
+            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoID = " . self::$testWordId);
         }
     }
 
@@ -153,11 +149,9 @@ class TextDisplayServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         // Create a text without audio
         Connection::query(
-            "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
+            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
             "VALUES (" . self::$testLangId . ", 'No Audio Text', 'Content.', '0\tContent')"
         );
         $noAudioTextId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -168,7 +162,7 @@ class TextDisplayServiceTest extends TestCase
         $this->assertEquals('', $result['audio']);
 
         // Cleanup
-        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = " . $noAudioTextId);
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . $noAudioTextId);
     }
 
     // ===== getTextDisplaySettings() tests =====
@@ -418,11 +412,9 @@ class TextDisplayServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         // Create an RTL language
         Connection::query(
-            "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+            "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
             "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
             "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
             "VALUES ('TestRTLLanguage', 'http://test.com/###', '', '', " .
@@ -432,7 +424,7 @@ class TextDisplayServiceTest extends TestCase
 
         // Create a text with RTL language
         Connection::query(
-            "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
+            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
             "VALUES (" . $rtlLangId . ", 'RTL Test Text', 'Content.', '0\tContent')"
         );
         $rtlTextId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -444,8 +436,8 @@ class TextDisplayServiceTest extends TestCase
         $this->assertTrue($settings['rtlScript']);
 
         // Cleanup
-        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = " . $rtlTextId);
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = " . $rtlLangId);
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . $rtlTextId);
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = " . $rtlLangId);
     }
 
     public function testParseAnnotationItemWithWordId(): void

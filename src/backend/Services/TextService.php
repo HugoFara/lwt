@@ -41,20 +41,6 @@ use Lwt\Services\SentenceService;
  */
 class TextService
 {
-    /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
-     * Constructor - initialize table prefix.
-     */
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
 
     // =====================
     // ARCHIVED TEXT METHODS
@@ -76,8 +62,8 @@ class TextService
     ): int {
         $sql = "SELECT COUNT(*) AS value FROM (
             SELECT AtID FROM (
-                {$this->tbpref}archivedtexts
-                LEFT JOIN {$this->tbpref}archtexttags ON AtID = AgAtID
+                " . Globals::getTablePrefix() . "archivedtexts
+                LEFT JOIN " . Globals::getTablePrefix() . "archtexttags ON AtID = AgAtID
             ) WHERE (1=1) {$whLang}{$whQuery}
             GROUP BY AtID {$whTag}
         ) AS dummy";
@@ -113,10 +99,10 @@ class TextService
             LENGTH(AtAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                ({$this->tbpref}archivedtexts
-                LEFT JOIN {$this->tbpref}archtexttags ON AtID = AgAtID)
-                LEFT JOIN {$this->tbpref}tags2 ON T2ID = AgT2ID
-            ), {$this->tbpref}languages
+                (" . Globals::getTablePrefix() . "archivedtexts
+                LEFT JOIN " . Globals::getTablePrefix() . "archtexttags ON AtID = AgAtID)
+                LEFT JOIN " . Globals::getTablePrefix() . "tags2 ON T2ID = AgT2ID
+            ), " . Globals::getTablePrefix() . "languages
             WHERE LgID=AtLgID {$whLang}{$whQuery}
             GROUP BY AtID {$whTag}
             ORDER BY {$sortColumn}
@@ -143,7 +129,7 @@ class TextService
         return Connection::preparedFetchOne(
             "SELECT AtLgID, AtTitle, AtText, AtAudioURI, AtSourceURI,
             LENGTH(AtAnnotatedText) AS annotlen
-            FROM {$this->tbpref}archivedtexts
+            FROM " . Globals::getTablePrefix() . "archivedtexts
             WHERE AtID = ?",
             [$textId]
         );
@@ -199,7 +185,7 @@ class TextService
     {
         // Get language ID first
         $lgId = Connection::preparedFetchValue(
-            "SELECT AtLgID AS value FROM {$this->tbpref}archivedtexts
+            "SELECT AtLgID AS value FROM " . Globals::getTablePrefix() . "archivedtexts
             WHERE AtID = ?",
             [$archivedId]
         );
@@ -210,10 +196,10 @@ class TextService
 
         // Insert into active texts
         $inserted = Connection::preparedExecute(
-            "INSERT INTO {$this->tbpref}texts (
+            "INSERT INTO " . Globals::getTablePrefix() . "texts (
                 TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
             ) SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
-            FROM {$this->tbpref}archivedtexts
+            FROM " . Globals::getTablePrefix() . "archivedtexts
             WHERE AtID = ?",
             [$archivedId]
         );
@@ -223,16 +209,16 @@ class TextService
 
         // Copy tags
         Connection::preparedExecute(
-            "INSERT INTO {$this->tbpref}texttags (TtTxID, TtT2ID)
+            "INSERT INTO " . Globals::getTablePrefix() . "texttags (TtTxID, TtT2ID)
             SELECT ?, AgT2ID
-            FROM {$this->tbpref}archtexttags
+            FROM " . Globals::getTablePrefix() . "archtexttags
             WHERE AgAtID = ?",
             [$textId, $archivedId]
         );
 
         // Parse the text
         $textContent = Connection::preparedFetchValue(
-            "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+            "SELECT TxText AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
             [$textId]
         );
         TextParsing::splitCheck($textContent, (int) $lgId, $textId);
@@ -248,11 +234,11 @@ class TextService
 
         // Get statistics
         $sentenceCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = ?",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "sentences WHERE SeTxID = ?",
             [$textId]
         );
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = ?",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID = ?",
             [$textId]
         );
 
@@ -279,17 +265,17 @@ class TextService
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         $records = Connection::preparedFetchAll(
-            "SELECT AtID, AtLgID FROM {$this->tbpref}archivedtexts WHERE AtID IN ({$placeholders})",
+            "SELECT AtID, AtLgID FROM " . Globals::getTablePrefix() . "archivedtexts WHERE AtID IN ({$placeholders})",
             $ids
         );
 
         foreach ($records as $record) {
             $ida = $record['AtID'];
             $mess = Connection::preparedExecute(
-                "INSERT INTO {$this->tbpref}texts (
+                "INSERT INTO " . Globals::getTablePrefix() . "texts (
                     TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
                 ) SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
-                FROM {$this->tbpref}archivedtexts
+                FROM " . Globals::getTablePrefix() . "archivedtexts
                 WHERE AtID = ?",
                 [$ida]
             );
@@ -298,15 +284,15 @@ class TextService
             $id = Connection::lastInsertId();
 
             Connection::preparedExecute(
-                "INSERT INTO {$this->tbpref}texttags (TtTxID, TtT2ID)
+                "INSERT INTO " . Globals::getTablePrefix() . "texttags (TtTxID, TtT2ID)
                 SELECT ?, AgT2ID
-                FROM {$this->tbpref}archtexttags
+                FROM " . Globals::getTablePrefix() . "archtexttags
                 WHERE AgAtID = ?",
                 [$id, $ida]
             );
 
             $textContent = Connection::preparedFetchValue(
-                "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+                "SELECT TxText AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
                 [$id]
             );
             TextParsing::splitCheck($textContent, $record['AtLgID'], $id);
@@ -344,13 +330,13 @@ class TextService
     ): string {
         // Check if text content changed
         $oldText = Connection::preparedFetchValue(
-            "SELECT AtText AS value FROM {$this->tbpref}archivedtexts WHERE AtID = ?",
+            "SELECT AtText AS value FROM " . Globals::getTablePrefix() . "archivedtexts WHERE AtID = ?",
             [$textId]
         );
         $textsdiffer = $text !== $oldText;
 
         $affected = Connection::preparedExecute(
-            "UPDATE {$this->tbpref}archivedtexts SET
+            "UPDATE " . Globals::getTablePrefix() . "archivedtexts SET
                 AtLgID = ?, AtTitle = ?, AtText = ?, AtAudioURI = ?, AtSourceURI = ?
              WHERE AtID = ?",
             [$lgId, $title, $text, $audioUri, $sourceUri, $textId]
@@ -361,7 +347,7 @@ class TextService
         // Clear annotation if text changed
         if ($affected > 0 && $textsdiffer) {
             Connection::preparedExecute(
-                "UPDATE {$this->tbpref}archivedtexts SET AtAnnotatedText = '' WHERE AtID = ?",
+                "UPDATE " . Globals::getTablePrefix() . "archivedtexts SET AtAnnotatedText = '' WHERE AtID = ?",
                 [$textId]
             );
         }
@@ -377,10 +363,10 @@ class TextService
     private function cleanupArchivedTextTags(): void
     {
         Connection::execute(
-            "DELETE {$this->tbpref}archtexttags
+            "DELETE " . Globals::getTablePrefix() . "archtexttags
             FROM (
-                {$this->tbpref}archtexttags
-                LEFT JOIN {$this->tbpref}archivedtexts ON AgAtID = AtID
+                " . Globals::getTablePrefix() . "archtexttags
+                LEFT JOIN " . Globals::getTablePrefix() . "archivedtexts ON AgAtID = AtID
             )
             WHERE AtID IS NULL",
             ''
@@ -580,7 +566,7 @@ class TextService
         return Connection::preparedFetchOne(
             "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
             TxAnnotatedText <> '' AS annot_exists
-            FROM {$this->tbpref}texts
+            FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = ?",
             [$textId]
         );
@@ -631,10 +617,10 @@ class TextService
 
         // Insert into archived
         $msg4 = Connection::preparedExecute(
-            "INSERT INTO {$this->tbpref}archivedtexts (
+            "INSERT INTO " . Globals::getTablePrefix() . "archivedtexts (
                 AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
             ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-            FROM {$this->tbpref}texts
+            FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = ?",
             [$textId]
         );
@@ -644,9 +630,9 @@ class TextService
 
         // Copy tags
         Connection::preparedExecute(
-            "INSERT INTO {$this->tbpref}archtexttags (AgAtID, AgT2ID)
+            "INSERT INTO " . Globals::getTablePrefix() . "archtexttags (AgAtID, AgT2ID)
             SELECT ?, TtT2ID
-            FROM {$this->tbpref}texttags
+            FROM " . Globals::getTablePrefix() . "texttags
             WHERE TtTxID = ?",
             [$archiveId, $textId]
         );
@@ -671,10 +657,10 @@ class TextService
     private function cleanupTextTags(): void
     {
         Connection::execute(
-            "DELETE {$this->tbpref}texttags
+            "DELETE " . Globals::getTablePrefix() . "texttags
             FROM (
-                {$this->tbpref}texttags
-                LEFT JOIN {$this->tbpref}texts ON TtTxID = TxID
+                " . Globals::getTablePrefix() . "texttags
+                LEFT JOIN " . Globals::getTablePrefix() . "texts ON TtTxID = TxID
             )
             WHERE TxID IS NULL",
             ''
@@ -701,8 +687,8 @@ class TextService
     ): int {
         $sql = "SELECT COUNT(*) AS value FROM (
             SELECT TxID FROM (
-                {$this->tbpref}texts
-                LEFT JOIN {$this->tbpref}texttags ON TxID = TtTxID
+                " . Globals::getTablePrefix() . "texts
+                LEFT JOIN " . Globals::getTablePrefix() . "texttags ON TxID = TtTxID
             ) WHERE (1=1) {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
         ) AS dummy";
@@ -738,9 +724,9 @@ class TextService
             LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                ({$this->tbpref}texts LEFT JOIN {$this->tbpref}texttags ON TxID = TtTxID)
-                LEFT JOIN {$this->tbpref}tags2 ON T2ID = TtT2ID
-            ), {$this->tbpref}languages
+                (" . Globals::getTablePrefix() . "texts LEFT JOIN " . Globals::getTablePrefix() . "texttags ON TxID = TtTxID)
+                LEFT JOIN " . Globals::getTablePrefix() . "tags2 ON T2ID = TtT2ID
+            ), " . Globals::getTablePrefix() . "languages
             WHERE LgID=TxLgID {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
             ORDER BY {$sortColumn}
@@ -779,7 +765,7 @@ class TextService
 
         // Get total count
         $total = (int) Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}texts WHERE TxLgID = ?",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID = ?",
             [$langId]
         );
         $totalPages = (int) ceil($total / $perPage);
@@ -790,8 +776,8 @@ class TextService
             LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                ({$this->tbpref}texts LEFT JOIN {$this->tbpref}texttags ON TxID = TtTxID)
-                LEFT JOIN {$this->tbpref}tags2 ON T2ID = TtT2ID
+                (" . Globals::getTablePrefix() . "texts LEFT JOIN " . Globals::getTablePrefix() . "texttags ON TxID = TtTxID)
+                LEFT JOIN " . Globals::getTablePrefix() . "tags2 ON T2ID = TtT2ID
             )
             WHERE TxLgID = ?
             GROUP BY TxID
@@ -848,7 +834,7 @@ class TextService
 
         // Get total count
         $total = (int) Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}archivedtexts WHERE AtLgID = ?",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "archivedtexts WHERE AtLgID = ?",
             [$langId]
         );
         $totalPages = (int) ceil($total / $perPage);
@@ -859,8 +845,8 @@ class TextService
             LENGTH(AtAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
-                ({$this->tbpref}archivedtexts LEFT JOIN {$this->tbpref}archtexttags ON AtID = AgAtID)
-                LEFT JOIN {$this->tbpref}tags2 ON T2ID = AgT2ID
+                (" . Globals::getTablePrefix() . "archivedtexts LEFT JOIN " . Globals::getTablePrefix() . "archtexttags ON AtID = AgAtID)
+                LEFT JOIN " . Globals::getTablePrefix() . "tags2 ON T2ID = AgT2ID
             )
             WHERE AtLgID = ?
             GROUP BY AtID
@@ -1018,7 +1004,7 @@ class TextService
         $audioValue = $audioUri === '' ? null : $audioUri;
 
         $textId = (int) Connection::preparedInsert(
-            "INSERT INTO {$this->tbpref}texts (
+            "INSERT INTO " . Globals::getTablePrefix() . "texts (
                 TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
             ) VALUES (?, ?, ?, '', ?, ?)",
             [$lgId, $title, $cleanText, $audioValue, $sourceUri]
@@ -1029,11 +1015,11 @@ class TextService
 
         // Get statistics
         $sentenceCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = ?",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "sentences WHERE SeTxID = ?",
             [$textId]
         );
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = ?",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID = ?",
             [$textId]
         );
 
@@ -1069,7 +1055,7 @@ class TextService
         $audioValue = $audioUri === '' ? null : $audioUri;
 
         Connection::preparedExecute(
-            "UPDATE {$this->tbpref}texts SET
+            "UPDATE " . Globals::getTablePrefix() . "texts SET
                 TxLgID = ?, TxTitle = ?, TxText = ?, TxAudioURI = ?, TxSourceURI = ?
              WHERE TxID = ?",
             [$lgId, $title, $cleanText, $audioValue, $sourceUri, $textId]
@@ -1088,11 +1074,11 @@ class TextService
 
         // Get statistics
         $sentenceCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = ?",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "sentences WHERE SeTxID = ?",
             [$textId]
         );
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = ?",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID = ?",
             [$textId]
         );
 
@@ -1157,24 +1143,24 @@ class TextService
         $count = 0;
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $records = Connection::preparedFetchAll(
-            "SELECT TxID FROM {$this->tbpref}texts WHERE TxID IN ({$placeholders})",
+            "SELECT TxID FROM " . Globals::getTablePrefix() . "texts WHERE TxID IN ({$placeholders})",
             $ids
         );
 
         foreach ($records as $record) {
             $id = $record['TxID'];
             $count += Connection::preparedExecute(
-                "INSERT INTO {$this->tbpref}archivedtexts (
+                "INSERT INTO " . Globals::getTablePrefix() . "archivedtexts (
                     AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
                 ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                FROM {$this->tbpref}texts WHERE TxID = ?",
+                FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
                 [$id]
             );
             $aid = Connection::lastInsertId();
             Connection::preparedExecute(
-                "INSERT INTO {$this->tbpref}archtexttags (AgAtID, AgT2ID)
+                "INSERT INTO " . Globals::getTablePrefix() . "archtexttags (AgAtID, AgT2ID)
                 SELECT ?, TtT2ID
-                FROM {$this->tbpref}texttags WHERE TtTxID = ?",
+                FROM " . Globals::getTablePrefix() . "texttags WHERE TtTxID = ?",
                 [$aid, $id]
             );
         }
@@ -1207,7 +1193,7 @@ class TextService
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         $records = Connection::preparedFetchAll(
-            "SELECT TxID, TxLgID FROM {$this->tbpref}texts WHERE TxID IN ({$placeholders})",
+            "SELECT TxID, TxLgID FROM " . Globals::getTablePrefix() . "texts WHERE TxID IN ({$placeholders})",
             $ids
         );
 
@@ -1222,7 +1208,7 @@ class TextService
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
             $textContent = Connection::preparedFetchValue(
-                "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+                "SELECT TxText AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
                 [$id]
             );
             TextParsing::splitCheck($textContent, $record['TxLgID'], $id);
@@ -1288,7 +1274,7 @@ class TextService
      */
     public function getLanguageTranslateUris(): array
     {
-        $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$this->tbpref}languages
+        $sql = "SELECT LgID, LgGoogleTranslateURI FROM " . Globals::getTablePrefix() . "languages
                 WHERE LgGoogleTranslateURI <> ''";
         $res = Connection::query($sql);
         $result = [];
@@ -1419,7 +1405,7 @@ class TextService
             $thisTitle = $title . ($counter == '' ? '' : (' (' . $counter . ')'));
 
             $affected = Connection::preparedExecute(
-                "INSERT INTO {$this->tbpref}texts (
+                "INSERT INTO " . Globals::getTablePrefix() . "texts (
                     TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
                 ) VALUES (?, ?, ?, '', '', ?)",
                 [$langId, $thisTitle, $texts[$i], $sourceUri]
@@ -1452,8 +1438,8 @@ class TextService
     {
         return Connection::preparedFetchOne(
             "SELECT LgName, TxLgID, TxText, TxTitle, TxAudioURI, TxSourceURI, TxAudioPosition
-                FROM {$this->tbpref}texts
-                JOIN {$this->tbpref}languages ON TxLgID = LgID
+                FROM " . Globals::getTablePrefix() . "texts
+                JOIN " . Globals::getTablePrefix() . "languages ON TxLgID = LgID
                 WHERE TxID = ?",
             [$textId]
         );
@@ -1470,7 +1456,7 @@ class TextService
     {
         return Connection::preparedFetchOne(
             "SELECT TxLgID, TxTitle, TxAnnotatedText, TxPosition
-                FROM {$this->tbpref}texts
+                FROM " . Globals::getTablePrefix() . "texts
                 WHERE TxID = ?",
             [$textId]
         );
@@ -1488,7 +1474,7 @@ class TextService
         return Connection::preparedFetchOne(
             "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
                 LgTextSize, LgRegexpWordCharacters, LgRemoveSpaces, LgRightToLeft
-                FROM {$this->tbpref}languages
+                FROM " . Globals::getTablePrefix() . "languages
                 WHERE LgID = ?",
             [$langId]
         );
@@ -1504,7 +1490,7 @@ class TextService
     public function getTtsVoiceApi(int $langId): ?string
     {
         return Connection::preparedFetchValue(
-            "SELECT LgTTSVoiceAPI AS value FROM {$this->tbpref}languages
+            "SELECT LgTTSVoiceAPI AS value FROM " . Globals::getTablePrefix() . "languages
             WHERE LgID = ?",
             [$langId]
         );
@@ -1520,7 +1506,7 @@ class TextService
     public function getLanguageIdByName(string $langName): ?int
     {
         $result = Connection::preparedFetchValue(
-            "SELECT LgID as value FROM {$this->tbpref}languages WHERE LgName = ?",
+            "SELECT LgID as value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = ?",
             [$langName]
         );
         return $result !== null ? (int) $result : null;
@@ -1556,7 +1542,7 @@ class TextService
             : "";
 
         $sql = "SELECT WoID, WoTextLC, MIN(Ti2SeID) AS SeID
-            FROM {$this->tbpref}words, {$this->tbpref}textitems2
+            FROM " . Globals::getTablePrefix() . "words, " . Globals::getTablePrefix() . "textitems2
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ({$placeholders})
             {$statusFilter}
             AND IFNULL(WoSentence,'') NOT LIKE CONCAT('%{',WoText,'}%')
@@ -1574,7 +1560,7 @@ class TextService
                 $sentenceCount
             );
             $count += Connection::preparedExecute(
-                "UPDATE {$this->tbpref}words SET WoSentence = ? WHERE WoID = ?",
+                "UPDATE " . Globals::getTablePrefix() . "words SET WoSentence = ? WHERE WoID = ?",
                 [ExportService::replaceTabNewline($sent[1]), $record['WoID']]
             );
         }
@@ -1594,7 +1580,7 @@ class TextService
         return Connection::preparedFetchOne(
             "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
             TxAnnotatedText <> '' AS annot_exists
-            FROM {$this->tbpref}texts
+            FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = ?",
             [$textId]
         );
@@ -1607,7 +1593,7 @@ class TextService
      */
     public function getLanguageDataForForm(): array
     {
-        $sql = "SELECT LgID, LgGoogleTranslateURI FROM {$this->tbpref}languages
+        $sql = "SELECT LgID, LgGoogleTranslateURI FROM " . Globals::getTablePrefix() . "languages
                 WHERE LgGoogleTranslateURI <> ''";
         $res = Connection::query($sql);
         $result = [];
@@ -1646,7 +1632,7 @@ class TextService
         if ($textId === 0) {
             // New text
             $textId = (int) Connection::preparedInsert(
-                "INSERT INTO {$this->tbpref}texts (
+                "INSERT INTO " . Globals::getTablePrefix() . "texts (
                     TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
                 ) VALUES (?, ?, ?, '', ?, ?)",
                 [$lgId, $title, $cleanText, $audioValue, $sourceUri]
@@ -1654,7 +1640,7 @@ class TextService
         } else {
             // Update existing text
             Connection::preparedExecute(
-                "UPDATE {$this->tbpref}texts SET
+                "UPDATE " . Globals::getTablePrefix() . "texts SET
                     TxLgID = ?, TxTitle = ?, TxText = ?, TxAudioURI = ?, TxSourceURI = ?
                  WHERE TxID = ?",
                 [$lgId, $title, $cleanText, $audioValue, $sourceUri, $textId]
@@ -1676,7 +1662,7 @@ class TextService
         // Reparse
         TextParsing::splitCheck(
             Connection::preparedFetchValue(
-                "SELECT TxText AS value FROM {$this->tbpref}texts WHERE TxID = ?",
+                "SELECT TxText AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
                 [$textId]
             ),
             $lgId,
@@ -1685,11 +1671,11 @@ class TextService
 
         // Get statistics
         $sentenceCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}sentences WHERE SeTxID = ?",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "sentences WHERE SeTxID = ?",
             [$textId]
         );
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$this->tbpref}textitems2 WHERE Ti2TxID = ?",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID = ?",
             [$textId]
         );
 
@@ -1719,7 +1705,7 @@ class TextService
         if ($langId !== null) {
             $records = Connection::preparedFetchAll(
                 "SELECT TxID, TxTitle, LgName
-                FROM {$this->tbpref}languages, {$this->tbpref}texts
+                FROM " . Globals::getTablePrefix() . "languages, " . Globals::getTablePrefix() . "texts
                 WHERE LgID = TxLgID AND TxLgID = ?
                 ORDER BY LgName, TxTitle",
                 [$langId]
@@ -1727,7 +1713,7 @@ class TextService
         } else {
             $records = Connection::preparedFetchAll(
                 "SELECT TxID, TxTitle, LgName
-                FROM {$this->tbpref}languages, {$this->tbpref}texts
+                FROM " . Globals::getTablePrefix() . "languages, " . Globals::getTablePrefix() . "texts
                 WHERE LgID = TxLgID
                 ORDER BY LgName, TxTitle",
                 []

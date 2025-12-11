@@ -35,21 +35,6 @@ use Lwt\Services\TagService;
 class TextReadingService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
-     * Constructor - initialize table prefix.
-     */
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
-
-    /**
      * Print the output when the word is a term.
      *
      * @param int                   $actcode       Action code, > 1 for multiword
@@ -95,7 +80,7 @@ class TextReadingService
                     'data_wid' => $record['WoID'],
                     'data_trans' => htmlspecialchars(
                         ExportService::replaceTabNewline($record['WoTranslation'] ?? '') .
-                        TagService::getWordTagListFormatted((int)$record['WoID'], ' ', true, false),
+                        (($tags = TagService::getWordTagList((int)$record['WoID'], false)) ? ' [' . $tags . ']' : ''),
                         ENT_QUOTES,
                         'UTF-8'
                     ),
@@ -136,7 +121,7 @@ class TextReadingService
                     'data_wid' => $record['WoID'],
                     'data_trans' => htmlspecialchars(
                         ExportService::replaceTabNewline($record['WoTranslation'] ?? '') .
-                        TagService::getWordTagListFormatted((int)$record['WoID'], ' ', true, false),
+                        (($tags = TagService::getWordTagList((int)$record['WoID'], false)) ? ' [' . $tags . ']' : ''),
                         ENT_QUOTES,
                         'UTF-8'
                     ),
@@ -266,7 +251,7 @@ class TextReadingService
                 ELSE CHAR_LENGTH(`WoTextLC`)
             END AS TiTextLength,
             WoID, WoText, WoStatus, WoTranslation, WoRomanization
-            FROM {$this->tbpref}textitems2 LEFT JOIN {$this->tbpref}words ON Ti2WoID = WoID
+            FROM {" . Globals::getTablePrefix() . "}textitems2 LEFT JOIN {" . Globals::getTablePrefix() . "}words ON Ti2WoID = WoID
             WHERE Ti2TxID = $textId
             ORDER BY Ti2Order asc, Ti2WordCount desc";
 

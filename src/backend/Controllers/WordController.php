@@ -1195,11 +1195,13 @@ class WordController extends BaseController
             $result = $this->wordService->updateMultiWord($wid, $data, $oldStatus, $newStatus);
 
             // Prepare data for view
+            $tagList = TagService::getWordTagList($wid, false);
+            $formattedTags = $tagList !== '' ? ' [' . $tagList . ']' : '';
             $termJson = $this->wordService->exportTermAsJson(
                 $wid,
                 $data['text'],
                 $data['roman'],
-                $translation . TagService::getWordTagListFormatted($wid, ' ', true, false),
+                $translation . $formattedTags,
                 $newStatus
             );
             $oldStatusValue = $oldStatus;
@@ -1820,7 +1822,9 @@ class WordController extends BaseController
         }
 
         $term = $wordData['text'];
-        $translation = $wordData['translation'] . TagService::getWordTagListFormatted($wordId, ' ', true, false);
+        $tagList = TagService::getWordTagList($wordId, false);
+        $formattedTags = $tagList !== '' ? ' [' . $tagList . ']' : '';
+        $translation = $wordData['translation'] . $formattedTags;
         $romanization = $wordData['romanization'];
         $wid = $wordId;
 

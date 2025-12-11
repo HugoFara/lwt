@@ -770,11 +770,11 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test prepare_textdata_js function
+     * Test json_encode function (replacement for prepare_textdata_js)
      */
     public function testPrepareTextdataJs(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
@@ -784,31 +784,30 @@ class DatabaseConnectTest extends TestCase
             Globals::setDbConnection($connection);
         }
 
-        // Basic string should be single-quoted and JS-escaped
-        $result = Escaping::prepareTextdataJs('test');
-        $this->assertEquals("\\'test\\'", $result);
+        // Basic string should be JSON-encoded
+        $result = json_encode('test');
+        $this->assertEquals('"test"', $result);
 
-        // Empty string should return empty single-quoted string
-        $result = Escaping::prepareTextdataJs('');
-        $this->assertEquals("''", $result);
+        // Empty string should return empty JSON string
+        $result = json_encode('');
+        $this->assertEquals('""', $result);
 
-        // String with whitespace only should return empty single-quoted string
-        $result = Escaping::prepareTextdataJs('   ');
-        $this->assertEquals("''", $result);
+        // String with whitespace should be preserved
+        $result = json_encode('   ');
+        $this->assertEquals('"   "', $result);
 
-        // String with single quotes should be JS-escaped
-        $result = Escaping::prepareTextdataJs("test'value");
-        $this->assertStringContainsString("\\'", $result);
+        // String with single quotes should be JSON-encoded
+        $result = json_encode("test'value");
+        $this->assertEquals('"test\'value"', $result);
 
         // String with line endings should be normalized
-        $result = Escaping::prepareTextdataJs("line1\r\nline2");
+        $result = json_encode("line1\r\nline2");
         $this->assertStringContainsString("line1", $result);
         $this->assertStringContainsString("line2", $result);
 
-        // SQL special characters should be escaped for JS
-        $result = Escaping::prepareTextdataJs("test\"value");
-        $this->assertStringStartsWith("\\'", $result);
-        $this->assertStringEndsWith("\\'", $result);
+        // SQL special characters should be escaped for JSON
+        $result = json_encode("test\"value");
+        $this->assertStringContainsString('\\"', $result);
     }
 
     /**
@@ -1147,47 +1146,52 @@ class DatabaseConnectTest extends TestCase
     }
 
     /**
-     * Test prepare_textdata_js function (escaping for JavaScript) - Extended tests
+     * Test json_encode function (replacement for prepare_textdata_js) - Extended tests
      */
     public function testPrepareTextdataJsExtended(): void
     {
         // Basic string with space - should be quoted
-        $result = Escaping::prepareTextdataJs('hello world');
-        $this->assertEquals("\\'hello world\\'", $result);
+        $result = json_encode('hello world');
+        $this->assertEquals('"hello world"', $result);
 
-        // String with single quotes - should be escaped
-        $result = Escaping::prepareTextdataJs("it's working");
-        $this->assertStringContainsString("\\'", $result, 'Single quotes should be escaped');
+        // String with single quotes - preserved as-is in JSON
+        $result = json_encode("it's working");
+        $this->assertEquals('"it\'s working"', $result);
 
         // String with double quotes - should be escaped
-        $result = Escaping::prepareTextdataJs('He said "hello"');
+        $result = json_encode('He said "hello"');
         $this->assertStringContainsString('\\"', $result, 'Double quotes should be escaped');
 
         // String with backslashes - should be escaped
-        $result = Escaping::prepareTextdataJs('path\\to\\file');
+        $result = json_encode('path\\to\\file');
         $this->assertStringContainsString('\\\\', $result, 'Backslashes should be escaped');
 
         // String with newlines - should be converted to \n
-        $result = Escaping::prepareTextdataJs("line1\nline2");
+        $result = json_encode("line1\nline2");
         $this->assertStringContainsString('\\n', $result, 'Newlines should be escaped');
 
         // String with Windows line endings
-        $result = Escaping::prepareTextdataJs("line1\r\nline2");
+        $result = json_encode("line1\r\nline2");
         $this->assertStringContainsString('\\n', $result, 'Windows line endings should be converted');
         $this->assertStringNotContainsString("\r", $result, 'Carriage returns should be removed');
 
-        // Empty string - should return '' (two single quotes)
-        $result = Escaping::prepareTextdataJs('');
-        $this->assertEquals("''", $result);
+        // Empty string - should return "" (two double quotes)
+        $result = json_encode('');
+        $this->assertEquals('""', $result);
 
-        // UTF-8 characters should pass through (but still be quoted)
-        $result = Escaping::prepareTextdataJs('日本語');
+        // UTF-8 characters - json_encode escapes them by default
+        $result = json_encode('日本語');
+        $this->assertIsString($result);
+        $this->assertStringStartsWith('"', $result);
+
+        // Or use JSON_UNESCAPED_UNICODE to keep UTF-8 characters
+        $result = json_encode('日本語', JSON_UNESCAPED_UNICODE);
         $this->assertStringContainsString('日本語', $result);
-        $this->assertStringStartsWith("\\'", $result);
+        $this->assertStringStartsWith('"', $result);
 
         // Combined special characters
-        $result = Escaping::prepareTextdataJs("It's a \"test\"\nwith\\backslash");
-        $this->assertStringContainsString("\\'", $result);
+        $result = json_encode("It's a \"test\"\nwith\\backslash");
+        $this->assertStringContainsString("It's", $result);
         $this->assertStringContainsString('\\"', $result);
         $this->assertStringContainsString('\\n', $result);
         $this->assertStringContainsString('\\\\', $result);
@@ -1277,8 +1281,8 @@ class DatabaseConnectTest extends TestCase
         $this->assertStringContainsString("line1\n", $result);
         $this->assertStringContainsString("line2\n", $result);
 
-        // prepare_textdata_js with control characters
-        $result = Escaping::prepareTextdataJs("test\ttab\bbackspace");
+        // json_encode with control characters
+        $result = json_encode("test\ttab\bbackspace");
         $this->assertIsString($result);
     }
 

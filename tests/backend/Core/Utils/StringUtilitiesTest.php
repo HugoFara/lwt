@@ -168,23 +168,23 @@ final class StringUtilitiesTest extends TestCase
     public function testStrReplaceFirst(): void
     {
         // Basic replacement (only first occurrence should be replaced)
-        $this->assertEquals('goodbye world hello', str_replace_first('hello', 'goodbye', 'hello world hello'));
-        $this->assertEquals('xbc abc', str_replace_first('a', 'x', 'abc abc'));
+        $this->assertEquals('goodbye world hello', \Lwt\Core\Utils\strReplaceFirst('hello', 'goodbye', 'hello world hello'));
+        $this->assertEquals('xbc abc', \Lwt\Core\Utils\strReplaceFirst('a', 'x', 'abc abc'));
 
         // No match
-        $this->assertEquals('hello world', str_replace_first('goodbye', 'hi', 'hello world'));
+        $this->assertEquals('hello world', \Lwt\Core\Utils\strReplaceFirst('goodbye', 'hi', 'hello world'));
 
         // Empty needle
-        $this->assertEquals('test', str_replace_first('', 'x', 'test'));
+        $this->assertEquals('test', \Lwt\Core\Utils\strReplaceFirst('', 'x', 'test'));
 
         // Empty haystack
-        $this->assertEquals('', str_replace_first('a', 'b', ''));
+        $this->assertEquals('', \Lwt\Core\Utils\strReplaceFirst('a', 'b', ''));
 
         // Needle at start
-        $this->assertEquals('replaced test', str_replace_first('original', 'replaced', 'original test'));
+        $this->assertEquals('replaced test', \Lwt\Core\Utils\strReplaceFirst('original', 'replaced', 'original test'));
 
         // Needle at end
-        $this->assertEquals('test replaced', str_replace_first('original', 'replaced', 'test original'));
+        $this->assertEquals('test replaced', \Lwt\Core\Utils\strReplaceFirst('original', 'replaced', 'test original'));
     }
 
     /**
@@ -194,11 +194,11 @@ final class StringUtilitiesTest extends TestCase
     {
         // Needle with regex special characters - str_replace_first is NOT regex based
         // so special characters should be treated literally
-        $this->assertEquals('[bcd]efg[abc]', str_replace_first('[abc]', '[bcd]', '[abc]efg[abc]'));
-        $this->assertEquals('testworld...', str_replace_first('...', 'test', '...world...'));
+        $this->assertEquals('[bcd]efg[abc]', \Lwt\Core\Utils\strReplaceFirst('[abc]', '[bcd]', '[abc]efg[abc]'));
+        $this->assertEquals('testworld...', \Lwt\Core\Utils\strReplaceFirst('...', 'test', '...world...'));
 
         // Replacement with regex special characters
-        $this->assertEquals('$test world', str_replace_first('hello', '$test', 'hello world'));
-        $this->assertEquals('\\test world', str_replace_first('hello', '\\test', 'hello world'));
+        $this->assertEquals('$test world', \Lwt\Core\Utils\strReplaceFirst('hello', '$test', 'hello world'));
+        $this->assertEquals('\\test world', \Lwt\Core\Utils\strReplaceFirst('hello', '\\test', 'hello world'));
     }
 }

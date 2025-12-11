@@ -37,13 +37,6 @@ use Lwt\Services\TagService;
 class TextPrintService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
      * Annotation options - show romanization.
      */
     public const ANN_SHOW_ROM = 2;
@@ -73,14 +66,6 @@ class TextPrintService
      */
     public const ANN_PLACEMENT_RUBY = 2;
 
-    /**
-     * Constructor - initialize table prefix.
-     */
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
-
     // ===========================
     // TEXT DATA METHODS
     // ===========================
@@ -95,7 +80,7 @@ class TextPrintService
     public function getTextData(int $textId): ?array
     {
         $sql = "SELECT TxID, TxLgID, TxTitle, TxSourceURI, TxAudioURI
-                FROM {$this->tbpref}texts
+                FROM " . Globals::getTablePrefix() . "texts
                 WHERE TxID = {$textId}";
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
@@ -113,7 +98,7 @@ class TextPrintService
     public function getLanguageData(int $langId): ?array
     {
         $sql = "SELECT LgTextSize, LgRemoveSpaces, LgRightToLeft, LgGoogleTranslateURI
-                FROM {$this->tbpref}languages
+                FROM " . Globals::getTablePrefix() . "languages
                 WHERE LgID = {$langId}";
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
@@ -131,7 +116,7 @@ class TextPrintService
     public function getAnnotatedText(int $textId): ?string
     {
         $ann = (string) Connection::fetchValue(
-            "SELECT TxAnnotatedText AS value FROM {$this->tbpref}texts
+            "SELECT TxAnnotatedText AS value FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = {$textId}"
         );
         return strlen($ann) > 0 ? $ann : null;
@@ -147,7 +132,7 @@ class TextPrintService
     public function hasAnnotation(int $textId): bool
     {
         $length = (int) Connection::fetchValue(
-            "SELECT LENGTH(TxAnnotatedText) AS value FROM {$this->tbpref}texts
+            "SELECT LENGTH(TxAnnotatedText) AS value FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = {$textId}"
         );
         return $length > 0;
@@ -163,7 +148,7 @@ class TextPrintService
     public function deleteAnnotation(int $textId): bool
     {
         Connection::execute(
-            "UPDATE {$this->tbpref}texts
+            "UPDATE " . Globals::getTablePrefix() . "texts
             SET TxAnnotatedText = NULL
             WHERE TxID = {$textId}"
         );
@@ -276,8 +261,8 @@ class TextPrintService
                     CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END as TiIsNotWord,
                     WoID, WoTranslation, WoRomanization, WoStatus
                 FROM (
-                    {$this->tbpref}textitems2
-                    LEFT JOIN {$this->tbpref}words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
+                    " . Globals::getTablePrefix() . "textitems2
+                    LEFT JOIN " . Globals::getTablePrefix() . "words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
                 )
                 WHERE Ti2TxID = {$textId}
                 ORDER BY Ti2Order asc, Ti2WordCount desc";
@@ -300,7 +285,7 @@ class TextPrintService
      */
     public function getWordTags(int $wordId): string
     {
-        return TagService::getWordTagListFormatted($wordId, '', true, false);
+        return TagService::getWordTagList($wordId, false);
     }
 
     // ===========================
@@ -398,8 +383,8 @@ class TextPrintService
                     WoID AS wordId, WoTranslation AS translation,
                     WoRomanization AS romanization, WoStatus AS status
                 FROM (
-                    {$this->tbpref}textitems2
-                    LEFT JOIN {$this->tbpref}words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
+                    " . Globals::getTablePrefix() . "textitems2
+                    LEFT JOIN " . Globals::getTablePrefix() . "words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
                 )
                 WHERE Ti2TxID = {$textId}
                 ORDER BY Ti2Order asc, Ti2WordCount desc";

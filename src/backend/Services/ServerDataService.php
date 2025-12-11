@@ -32,13 +32,6 @@ use function Lwt\Core\getVersionNumber;
 class ServerDataService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
      * Database name.
      *
      * @var string
@@ -50,7 +43,6 @@ class ServerDataService
      */
     public function __construct()
     {
-        $this->tbpref = Globals::getTablePrefix();
         $this->dbname = Globals::getDatabaseName();
     }
 
@@ -73,7 +65,7 @@ class ServerDataService
     {
         $data = [];
         $data["db_name"] = $this->dbname;
-        $data["db_prefix"] = $this->tbpref;
+        $data["db_prefix"] = Globals::getTablePrefix();
         $data["db_size"] = $this->getDatabaseSize();
         $data["server_soft"] = $_SERVER['SERVER_SOFTWARE'];
         $data["apache"] = $this->parseApacheVersion($data["server_soft"]);
@@ -92,17 +84,18 @@ class ServerDataService
      */
     private function getDatabaseSize(): float
     {
+        $tbpref = Globals::getTablePrefix();
         $temp_size = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
             FROM information_schema.TABLES
             WHERE table_schema = ?
             AND table_name IN (
-                '{$this->tbpref}archivedtexts', '{$this->tbpref}archtexttags',
-                '{$this->tbpref}feedlinks', '{$this->tbpref}languages',
-                '{$this->tbpref}newsfeeds', '{$this->tbpref}sentences', '{$this->tbpref}settings',
-                '{$this->tbpref}tags', '{$this->tbpref}tags2',
-                '{$this->tbpref}textitems2', '{$this->tbpref}texts', '{$this->tbpref}texttags',
-                '{$this->tbpref}words', '{$this->tbpref}wordtags'
+                '{$tbpref}archivedtexts', '{$tbpref}archtexttags',
+                '{$tbpref}feedlinks', '{$tbpref}languages',
+                '{$tbpref}newsfeeds', '{$tbpref}sentences', '{$tbpref}settings',
+                '{$tbpref}tags', '{$tbpref}tags2',
+                '{$tbpref}textitems2', '{$tbpref}texts', '{$tbpref}texttags',
+                '{$tbpref}words', '{$tbpref}wordtags'
             )",
             [$this->dbname]
         );

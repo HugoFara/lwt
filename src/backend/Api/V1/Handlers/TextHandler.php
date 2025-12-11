@@ -405,7 +405,7 @@ class TextHandler
                     $wordData['romanization'] = $record['WoRomanization'] ?? '';
 
                     // Get tags
-                    $tags = TagService::getWordTagListFormatted((int)$record['WoID'], ' ', true, false);
+                    $tags = TagService::getWordTagList((int)$record['WoID'], false);
                     if ($tags) {
                         $wordData['tags'] = $tags;
                     }

@@ -221,17 +221,15 @@ class MigrationsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         // Clean up any texts that reference non-existent languages
         // to avoid "Language data not found" errors
-        Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID IN (
-            SELECT TxID FROM {$tbpref}texts WHERE TxLgID NOT IN (SELECT LgID FROM {$tbpref}languages)
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID IN (
+            SELECT TxID FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID NOT IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages)
         )");
-        Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID IN (
-            SELECT TxID FROM {$tbpref}texts WHERE TxLgID NOT IN (SELECT LgID FROM {$tbpref}languages)
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "sentences WHERE SeTxID IN (
+            SELECT TxID FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID NOT IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages)
         )");
-        Connection::query("DELETE FROM {$tbpref}texts WHERE TxLgID NOT IN (SELECT LgID FROM {$tbpref}languages)");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID NOT IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages)");
 
         // This function truncates and rebuilds text data
         // Should run without error on empty/minimal database
@@ -273,8 +271,6 @@ class MigrationsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         Migrations::checkAndUpdate();
 
         // Verify core tables exist
@@ -284,10 +280,10 @@ class MigrationsTest extends TestCase
         ];
 
         foreach ($tables as $table) {
-            $result = Connection::query("SHOW TABLES LIKE '{$tbpref}{$table}'");
+            $result = Connection::query("SHOW TABLES LIKE '" . Globals::getTablePrefix() . "{$table}'");
             $exists = mysqli_num_rows($result) > 0;
             mysqli_free_result($result);
-            $this->assertTrue($exists, "Table {$tbpref}{$table} should exist after checkAndUpdate");
+            $this->assertTrue($exists, "Table " . Globals::getTablePrefix() . "{$table} should exist after checkAndUpdate");
         }
     }
 
@@ -360,16 +356,14 @@ class MigrationsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         // Clear lastscorecalc to force recalculation
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'lastscorecalc'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'lastscorecalc'");
 
         Migrations::checkAndUpdate();
 
         // Verify lastscorecalc was set
         $result = Connection::fetchValue(
-            "SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'lastscorecalc'"
+            "SELECT StValue as value FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'lastscorecalc'"
         );
 
         $this->assertNotEmpty($result, 'lastscorecalc should be set after checkAndUpdate');
@@ -400,13 +394,11 @@ class MigrationsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         Migrations::update();
 
         // Verify dbversion is set
         $result = Connection::fetchValue(
-            "SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'dbversion'"
+            "SELECT StValue as value FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'dbversion'"
         );
 
         $this->assertNotEmpty($result, 'dbversion should be set after update');

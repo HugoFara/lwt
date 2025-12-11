@@ -63,8 +63,8 @@ class LanguageRepositoryTest extends TestCase
         }
 
         // Clean up test languages after each test
-        $tbpref = Globals::getTablePrefix();
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'RepoTest_%'");
+        $prefix = Globals::getTablePrefix();
+        Connection::query("DELETE FROM {$prefix}languages WHERE LgName LIKE 'RepoTest_%'");
         self::$testLanguageIds = [];
     }
 
@@ -87,9 +87,9 @@ class LanguageRepositoryTest extends TestCase
      */
     private function createTestLanguageInDb(string $name): int
     {
-        $tbpref = Globals::getTablePrefix();
+        $prefix = Globals::getTablePrefix();
         Connection::query(
-            "INSERT INTO {$tbpref}languages (
+            "INSERT INTO {$prefix}languages (
                 LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
                 LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters,
                 LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization
@@ -390,11 +390,11 @@ class LanguageRepositoryTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
+        $prefix = Globals::getTablePrefix();
         // Try to insert language with empty name (may already exist)
         try {
             Connection::query(
-                "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters)
+                "INSERT INTO {$prefix}languages (LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters)
                  VALUES ('', 'https://test.com', 100, '.!?', 'a-z')"
             );
         } catch (\RuntimeException $e) {
@@ -528,10 +528,10 @@ class LanguageRepositoryTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = Globals::getTablePrefix();
+        $prefix = Globals::getTablePrefix();
         // Create RTL language
         Connection::query(
-            "INSERT INTO {$tbpref}languages (
+            "INSERT INTO {$prefix}languages (
                 LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences,
                 LgRegexpWordCharacters, LgRightToLeft
             ) VALUES (

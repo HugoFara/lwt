@@ -36,13 +36,6 @@ use Lwt\Services\TextParsingService;
  */
 class ExpressionService
 {
-    private string $tbpref;
-
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
-
     /**
      * Find all occurrences of an expression using MeCab.
      *
@@ -53,12 +46,12 @@ class ExpressionService
      */
     public function findMecabExpression(string $text, string|int $lid): array
     {
-        $db_to_mecab = tempnam(sys_get_temp_dir(), "{$this->tbpref}db_to_mecab");
+        $db_to_mecab = tempnam(sys_get_temp_dir(), Globals::getTablePrefix() . "db_to_mecab");
         $mecab_args = " -F %m\\t%t\\t\\n -U %m\\t%t\\t\\n -E \\t\\n ";
 
         $parsingService = new TextParsingService();
         $mecab = $parsingService->getMecabPath($mecab_args);
-        $sql = "SELECT SeID, SeTxID, SeFirstPos, SeText FROM {$this->tbpref}sentences
+        $sql = "SELECT SeID, SeTxID, SeFirstPos, SeText FROM " . Globals::getTablePrefix() . "sentences
         WHERE SeLgID = ? AND
         SeText LIKE ?";
         $likeText = "%$text%";
@@ -138,7 +131,7 @@ class ExpressionService
     {
         $occurrences = [];
         $record = Connection::preparedFetchOne(
-            "SELECT * FROM {$this->tbpref}languages WHERE LgID = ?",
+            "SELECT * FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lid]
         );
         $removeSpaces = $record["LgRemoveSpaces"] == 1;
@@ -149,15 +142,15 @@ class ExpressionService
             $sql = "SELECT
             GROUP_CONCAT(Ti2Text ORDER BY Ti2Order SEPARATOR ' ') AS SeText, SeID,
             SeTxID, SeFirstPos, SeTxID
-            FROM {$this->tbpref}textitems2
-            JOIN {$this->tbpref}sentences
+            FROM " . Globals::getTablePrefix() . "textitems2
+            JOIN " . Globals::getTablePrefix() . "sentences
             ON SeID=Ti2SeID AND SeLgID = Ti2LgID
             WHERE Ti2LgID = ?
             AND SeText LIKE ?
             AND Ti2WordCount < 2
             GROUP BY SeID";
         } else {
-            $sql = "SELECT * FROM {$this->tbpref}sentences
+            $sql = "SELECT * FROM " . Globals::getTablePrefix() . "sentences
             WHERE SeLgID = ? AND SeText LIKE ?";
         }
 
@@ -244,7 +237,7 @@ class ExpressionService
     {
         $regexp = (string)Connection::preparedFetchValue(
             "SELECT LgRegexpWordCharacters AS value
-            FROM {$this->tbpref}languages WHERE LgID = ?",
+            FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lid]
         );
 
@@ -302,7 +295,7 @@ class ExpressionService
                 return implode(',', $sqlarr);
             }
 
-            $sql = "INSERT INTO {$this->tbpref}textitems2
+            $sql = "INSERT INTO " . Globals::getTablePrefix() . "textitems2
                  (Ti2WoID,Ti2LgID,Ti2TxID,Ti2SeID,Ti2Order,Ti2WordCount,Ti2Text)
                  VALUES " . implode(',', $placeholders);
             Connection::preparedExecute($sql, $params);
@@ -326,7 +319,7 @@ class ExpressionService
         $showType = $showAll ? "m" : "";
 
         $record = Connection::preparedFetchOne(
-            "SELECT * FROM {$this->tbpref}words WHERE WoID = ?",
+            "SELECT * FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wid]
         );
 
@@ -369,7 +362,7 @@ class ExpressionService
         $showType = $showAll ? "m" : "";
 
         $record = Connection::preparedFetchOne(
-            "SELECT * FROM {$this->tbpref}words WHERE WoID = ?",
+            "SELECT * FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wid]
         );
 

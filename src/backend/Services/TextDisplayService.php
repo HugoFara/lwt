@@ -32,13 +32,6 @@ use Lwt\Database\Settings;
  */
 class TextDisplayService
 {
-    private string $tbpref;
-
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
-
     /**
      * Get header data for a text.
      *
@@ -49,7 +42,7 @@ class TextDisplayService
     public function getHeaderData(int $textId): ?array
     {
         $sql = "SELECT TxTitle, TxAudioURI, TxSourceURI
-                FROM {$this->tbpref}texts
+                FROM " . Globals::getTablePrefix() . "texts
                 WHERE TxID = $textId";
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
@@ -83,8 +76,8 @@ class TextDisplayService
     public function getTextDisplaySettings(int $textId): ?array
     {
         $sql = "SELECT LgTextSize, LgRightToLeft
-                FROM {$this->tbpref}texts
-                JOIN {$this->tbpref}languages ON LgID = TxLgID
+                FROM " . Globals::getTablePrefix() . "texts
+                JOIN " . Globals::getTablePrefix() . "languages ON LgID = TxLgID
                 WHERE TxID = $textId";
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
@@ -111,7 +104,7 @@ class TextDisplayService
     {
         $ann = Connection::fetchValue(
             "SELECT TxAnnotatedText AS value
-            FROM {$this->tbpref}texts
+            FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = $textId"
         );
         return (string) $ann;
@@ -127,7 +120,7 @@ class TextDisplayService
     public function getAudioUri(int $textId): ?string
     {
         $audio = Connection::fetchValue(
-            "SELECT TxAudioURI AS value FROM {$this->tbpref}texts
+            "SELECT TxAudioURI AS value FROM " . Globals::getTablePrefix() . "texts
             WHERE TxID = $textId"
         );
         return $audio !== null ? (string) $audio : null;
@@ -144,7 +137,7 @@ class TextDisplayService
     {
         $rom = Connection::fetchValue(
             "SELECT WoRomanization AS value
-            FROM {$this->tbpref}words
+            FROM " . Globals::getTablePrefix() . "words
             WHERE WoID = $wordId"
         );
         return $rom !== null ? (string) $rom : '';

@@ -58,18 +58,16 @@ class TextServiceCrudTest extends TestCase
         self::$dbConnected = (Globals::getDbConnection() !== null);
 
         if (self::$dbConnected) {
-            $tbpref = Globals::getTablePrefix();
-
             // Create a test language
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'TextServiceCrudTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'TextServiceCrudTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('TextServiceCrudTestLang', 'http://dict.test/###', '', 'http://translate.test/###', " .
@@ -88,8 +86,7 @@ class TextServiceCrudTest extends TestCase
             return;
         }
 
-        $tbpref = Globals::getTablePrefix();
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'TextServiceCrudTestLang'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'TextServiceCrudTestLang'");
     }
 
     protected function setUp(): void
@@ -105,18 +102,16 @@ class TextServiceCrudTest extends TestCase
             return;
         }
 
-        $tbpref = Globals::getTablePrefix();
-
         // Clean up created texts
         foreach ($this->createdTextIds as $id) {
-            Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = " . $id);
-            Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID = " . $id);
-            Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = " . $id);
+            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID = " . $id);
+            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "sentences WHERE SeTxID = " . $id);
+            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . $id);
         }
 
         // Clean up created archived texts
         foreach ($this->createdArchivedTextIds as $id) {
-            Connection::query("DELETE FROM {$tbpref}archivedtexts WHERE AtID = " . $id);
+            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "archivedtexts WHERE AtID = " . $id);
         }
     }
 
@@ -130,9 +125,8 @@ class TextServiceCrudTest extends TestCase
      */
     private function createTestText(string $title, string $text): int
     {
-        $tbpref = Globals::getTablePrefix();
         Connection::query(
-            "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
+            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
             "VALUES (" . self::$testLangId . ", " .
             "'" . mysqli_real_escape_string(Globals::getDbConnection(), $title) . "', " .
             "'" . mysqli_real_escape_string(Globals::getDbConnection(), $text) . "', " .
@@ -153,9 +147,8 @@ class TextServiceCrudTest extends TestCase
      */
     private function createTestArchivedText(string $title, string $text): int
     {
-        $tbpref = Globals::getTablePrefix();
         Connection::query(
-            "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+            "INSERT INTO " . Globals::getTablePrefix() . "archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
             "VALUES (" . self::$testLangId . ", " .
             "'" . mysqli_real_escape_string(Globals::getDbConnection(), $title) . "', " .
             "'" . mysqli_real_escape_string(Globals::getDbConnection(), $text) . "', " .
@@ -319,9 +312,8 @@ class TextServiceCrudTest extends TestCase
         $this->assertNull($this->service->getTextById($textId));
 
         // Find in archived texts
-        $tbpref = Globals::getTablePrefix();
         $archivedId = Connection::fetchValue(
-            "SELECT AtID AS value FROM {$tbpref}archivedtexts WHERE AtTitle = 'Archive Test' LIMIT 1"
+            "SELECT AtID AS value FROM " . Globals::getTablePrefix() . "archivedtexts WHERE AtTitle = 'Archive Test' LIMIT 1"
         );
 
         $this->assertNotNull($archivedId);
@@ -354,10 +346,9 @@ class TextServiceCrudTest extends TestCase
         $this->assertNull($this->service->getTextById($textId2));
 
         // Find and cleanup archived texts
-        $tbpref = Globals::getTablePrefix();
         $archivedIds = [];
         $res = Connection::query(
-            "SELECT AtID FROM {$tbpref}archivedtexts WHERE AtTitle LIKE 'Archive Multi%'"
+            "SELECT AtID FROM " . Globals::getTablePrefix() . "archivedtexts WHERE AtTitle LIKE 'Archive Multi%'"
         );
         while ($row = mysqli_fetch_assoc($res)) {
             $archivedIds[] = (int)$row['AtID'];
@@ -414,9 +405,8 @@ class TextServiceCrudTest extends TestCase
         $this->assertIsString($message);
 
         // Find created texts
-        $tbpref = Globals::getTablePrefix();
         $res = Connection::query(
-            "SELECT TxID FROM {$tbpref}texts WHERE TxTitle LIKE 'Unarchive Multi%'"
+            "SELECT TxID FROM " . Globals::getTablePrefix() . "texts WHERE TxTitle LIKE 'Unarchive Multi%'"
         );
         while ($row = mysqli_fetch_assoc($res)) {
             $this->createdTextIds[] = (int)$row['TxID'];

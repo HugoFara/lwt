@@ -91,8 +91,8 @@ class BaseControllerTest extends TestCase
 
     public function testConstructorSetsTablePrefix(): void
     {
-        $tbpref = $this->controller->getTablePrefix();
-        $this->assertIsString($tbpref);
+        $tablePrefix = $this->controller->getTablePrefix();
+        $this->assertIsString($tablePrefix);
     }
 
     public function testConstructorSetsDbConnection(): void
@@ -389,7 +389,7 @@ class TestableController extends BaseController
 {
     public function getTablePrefix(): string
     {
-        return $this->tbpref;
+        return \Lwt\Core\Globals::getTablePrefix();
     }
 
     public function getDbConnection(): ?\mysqli

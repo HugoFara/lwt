@@ -48,16 +48,15 @@ class FeedServiceTest extends TestCase
 
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
-            $tbpref = Globals::getTablePrefix();
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'FeedServiceTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'FeedServiceTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('FeedServiceTestLang', 'http://test.com/###', '', 'http://translate.test/###', " .
@@ -76,11 +75,10 @@ class FeedServiceTest extends TestCase
             return;
         }
 
-        $tbpref = Globals::getTablePrefix();
         // Clean up test feeds and feedlinks
-        Connection::query("DELETE FROM {$tbpref}feedlinks WHERE FlNfID IN (SELECT NfID FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Test Feed%')");
-        Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Test Feed%'");
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'FeedServiceTestLang'");
+        Connection::query("DELETE FROM " . Globals::table('feedlinks') . " WHERE FlNfID IN (SELECT NfID FROM " . Globals::table('newsfeeds') . " WHERE NfName LIKE 'Test Feed%')");
+        Connection::query("DELETE FROM " . Globals::table('newsfeeds') . " WHERE NfName LIKE 'Test Feed%'");
+        Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'FeedServiceTestLang'");
     }
 
     protected function setUp(): void
@@ -95,9 +93,8 @@ class FeedServiceTest extends TestCase
         }
 
         // Clean up test feeds after each test
-        $tbpref = Globals::getTablePrefix();
-        Connection::query("DELETE FROM {$tbpref}feedlinks WHERE FlNfID IN (SELECT NfID FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Test Feed%')");
-        Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Test Feed%'");
+        Connection::query("DELETE FROM " . Globals::table('feedlinks') . " WHERE FlNfID IN (SELECT NfID FROM " . Globals::table('newsfeeds') . " WHERE NfName LIKE 'Test Feed%')");
+        Connection::query("DELETE FROM " . Globals::table('newsfeeds') . " WHERE NfName LIKE 'Test Feed%'");
     }
 
     // ===== getFeeds() tests =====
@@ -296,15 +293,14 @@ class FeedServiceTest extends TestCase
         ]);
 
         // Add a feedlink (article) to the feed
-        $tbpref = Globals::getTablePrefix();
         Connection::execute(
-            "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+            "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
              VALUES ($feedId, 'Test Article', 'https://example.com/article', 'Description', " . time() . ")"
         );
 
         // Verify article exists
         $count = (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}feedlinks WHERE FlNfID = $feedId"
+            "SELECT COUNT(*) AS value FROM " . Globals::table('feedlinks') . " WHERE FlNfID = $feedId"
         );
         $this->assertEquals(1, $count);
 
@@ -600,17 +596,16 @@ class FeedServiceTest extends TestCase
         ]);
 
         // Add articles
-        $tbpref = Globals::getTablePrefix();
         for ($i = 1; $i <= 3; $i++) {
             Connection::execute(
-                "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+                "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
                  VALUES ($feedId, 'Article $i', 'https://example.com/art$i', 'Desc', " . time() . ")"
             );
         }
 
         // Verify articles exist
         $count = (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}feedlinks WHERE FlNfID = $feedId"
+            "SELECT COUNT(*) AS value FROM " . Globals::table('feedlinks') . " WHERE FlNfID = $feedId"
         );
         $this->assertEquals(3, $count);
 
@@ -620,7 +615,7 @@ class FeedServiceTest extends TestCase
 
         // Verify articles are gone
         $count = (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}feedlinks WHERE FlNfID = $feedId"
+            "SELECT COUNT(*) AS value FROM " . Globals::table('feedlinks') . " WHERE FlNfID = $feedId"
         );
         $this->assertEquals(0, $count);
 
@@ -646,9 +641,8 @@ class FeedServiceTest extends TestCase
         ]);
 
         // Add article with space prefix (unloadable)
-        $tbpref = Globals::getTablePrefix();
         Connection::execute(
-            "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+            "INSERT INTO " . Globals::table('feedlinks') . " (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
              VALUES ($feedId, 'Unloadable Article', ' https://example.com/unloadable', 'Desc', " . time() . ")"
         );
 
@@ -658,7 +652,7 @@ class FeedServiceTest extends TestCase
 
         // Verify link is trimmed
         $link = Connection::fetchValue(
-            "SELECT FlLink AS value FROM {$tbpref}feedlinks WHERE FlNfID = $feedId"
+            "SELECT FlLink AS value FROM " . Globals::table('feedlinks') . " WHERE FlNfID = $feedId"
         );
         $this->assertEquals('https://example.com/unloadable', $link);
     }

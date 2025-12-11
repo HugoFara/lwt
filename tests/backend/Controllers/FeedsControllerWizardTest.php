@@ -55,26 +55,24 @@ class FeedsControllerWizardTest extends TestCase
         self::$dbConnected = (Globals::getDbConnection() !== null);
 
         if (self::$dbConnected) {
-            $tbpref = Globals::getTablePrefix();
-
             // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
-            Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::getTablePrefix() . "languages");
+            Connection::query("ALTER TABLE " . Globals::getTablePrefix() . "languages AUTO_INCREMENT = " . ((int)$maxId + 1));
 
             // Reset auto_increment for newsfeeds table (NfID is tinyint max 255)
-            $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM {$tbpref}newsfeeds");
-            Connection::query("ALTER TABLE {$tbpref}newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
+            $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM " . Globals::getTablePrefix() . "newsfeeds");
+            Connection::query("ALTER TABLE " . Globals::getTablePrefix() . "newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
 
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'FeedsWizardTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'FeedsWizardTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('FeedsWizardTestLang', 'http://test.com/###', '', 'http://translate.test/###', " .
@@ -104,15 +102,14 @@ class FeedsControllerWizardTest extends TestCase
             return;
         }
 
-        $tbpref = Globals::getTablePrefix();
         // Clean up test feeds
-        Connection::query("DELETE FROM {$tbpref}feedlinks WHERE FlNfID IN (SELECT NfID FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Wizard Test%')");
-        Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Wizard Test%'");
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'FeedsWizardTestLang'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "feedlinks WHERE FlNfID IN (SELECT NfID FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfName LIKE 'Wizard Test%')");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfName LIKE 'Wizard Test%'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'FeedsWizardTestLang'");
 
         // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
-        Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::getTablePrefix() . "languages");
+        Connection::query("ALTER TABLE " . Globals::getTablePrefix() . "languages AUTO_INCREMENT = " . ((int)$maxId + 1));
     }
 
     protected function setUp(): void
@@ -146,9 +143,8 @@ class FeedsControllerWizardTest extends TestCase
         }
 
         // Clean up test feeds
-        $tbpref = Globals::getTablePrefix();
-        Connection::query("DELETE FROM {$tbpref}feedlinks WHERE FlNfID IN (SELECT NfID FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Ctrl Test Wizard%')");
-        Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Ctrl Test Wizard%'");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "feedlinks WHERE FlNfID IN (SELECT NfID FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfName LIKE 'Ctrl Test Wizard%')");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfName LIKE 'Ctrl Test Wizard%'");
     }
 
     // ===== Controller wizard method tests =====

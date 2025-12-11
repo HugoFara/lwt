@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Http/param_helpers.php';
 require_once __DIR__ . '/../../../../src/backend/Services/SettingsService.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Http\ParamHelpers;
 use Lwt\Services\SettingsService;
 use PHPUnit\Framework\TestCase;
@@ -28,13 +29,13 @@ final class ParamHelpersTest extends TestCase
         $_REQUEST['empty'] = '';
 
         // Should trim values
-        $this->assertEquals('test_value', ParamHelpers::getreq('test_key'));
+        $this->assertEquals('test_value', InputValidator::getString('test_key'));
 
         // Should return empty string for empty values
-        $this->assertEquals('', ParamHelpers::getreq('empty'));
+        $this->assertEquals('', InputValidator::getString('empty'));
 
         // Should return empty string for non-existent keys
-        $this->assertEquals('', ParamHelpers::getreq('nonexistent'));
+        $this->assertEquals('', InputValidator::getString('nonexistent'));
 
         // Clean up
         unset($_REQUEST['test_key']);
@@ -48,17 +49,17 @@ final class ParamHelpersTest extends TestCase
     {
         // HTML in request
         $_REQUEST['html_test'] = '<script>alert("XSS")</script>';
-        $result = ParamHelpers::getreq('html_test');
+        $result = InputValidator::getString('html_test');
         $this->assertEquals('<script>alert("XSS")</script>', $result);
         $this->assertStringNotContainsString('&lt;', $result);
 
         // Unicode with whitespace
         $_REQUEST['unicode_test'] = '  日本語  ';
-        $this->assertEquals('日本語', ParamHelpers::getreq('unicode_test'));
+        $this->assertEquals('日本語', InputValidator::getString('unicode_test'));
 
         // Newlines and tabs in value
         $_REQUEST['whitespace_test'] = "  value\twith\nnewlines  ";
-        $result = ParamHelpers::getreq('whitespace_test');
+        $result = InputValidator::getString('whitespace_test');
         // trim() only removes leading/trailing whitespace, not internal
         $this->assertEquals("value\twith\nnewlines", $result);
 
