@@ -4,6 +4,8 @@ namespace Lwt\Api\V1\Handlers;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+use Lwt\Services\AnnotationService;
+use Lwt\Services\DictionaryService;
 use Lwt\View\Helper\IconHelper;
 
 /**
@@ -126,7 +128,8 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         $langid = (int)$record['TxLgID'];
         $ann = (string)$record['TxAnnotatedText'];
         if (strlen($ann) > 0) {
-            $ann = \recreateSaveAnn($textid, $ann);
+            $annotationService = new AnnotationService();
+            $ann = $annotationService->recreateSaveAnnotation($textid, $ann);
         }
         mysqli_free_result($res);
 
@@ -205,7 +208,8 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         $langid = (int) $record['TxLgID'];
         $ann = (string) $record['TxAnnotatedText'];
         if (strlen($ann) > 0) {
-            $ann = \recreateSaveAnn($textid, $ann);
+            $annotationService = new AnnotationService();
+            $ann = $annotationService->recreateSaveAnnotation($textid, $ann);
         }
         mysqli_free_result($res);
 
@@ -287,7 +291,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
                         '</span>
                     </td>
                     <td class="td1 center" nowrap="nowrap">' .
-                        \makeDictLinks($langid, $vals[1]) .
+                        (new DictionaryService())->makeDictLinks($langid, $vals[1]) .
                     '</td>
                     <td class="td1 center">
                         <span id="editlink' . $i . '">' . $wordLink . '</span>

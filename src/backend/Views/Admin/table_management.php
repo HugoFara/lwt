@@ -21,6 +21,7 @@
 
 namespace Lwt\Views\Admin;
 
+use Lwt\Core\Globals;
 use Lwt\View\Helper\IconHelper;
 
 if ($fixedTbpref):
@@ -39,7 +40,7 @@ if ($fixedTbpref):
                     <p><strong>Reason:</strong> <code>DB_TABLE_PREFIX</code> is set to a fixed value in <code>.env</code>.</p>
                     <p>
                         Please remove the definition
-                        <code class="has-text-danger has-text-weight-bold">DB_TABLE_PREFIX=<?php echo htmlspecialchars(substr($tbpref, 0, -1), ENT_QUOTES, 'UTF-8'); ?></code>
+                        <code class="has-text-danger has-text-weight-bold">DB_TABLE_PREFIX=<?php echo htmlspecialchars(substr(Globals::getTablePrefix(), 0, -1), ENT_QUOTES, 'UTF-8'); ?></code>
                         in <code>.env</code> to make these features available.
                     </p>
                 </div>

@@ -60,9 +60,8 @@ class TableSetService
      */
     public function __construct()
     {
-        global $fixed_tbpref;
         $this->tbpref = Globals::getTablePrefix();
-        $this->fixedTbpref = $fixed_tbpref ?? false;
+        $this->fixedTbpref = Globals::isTablePrefixFixed();
     }
 
     /**

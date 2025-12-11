@@ -27,7 +27,6 @@ require_once __DIR__ . '/../../../src/backend/Services/SettingsService.php';
 class SettingsServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private SettingsService $service;
 
     /** @var array<string, mixed> Original $_REQUEST for cleanup */
@@ -49,7 +48,6 @@ class SettingsServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -68,10 +66,10 @@ class SettingsServiceTest extends TestCase
         }
 
         // Clean up test settings after each test
-        $tbpref = self::$tbpref;
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_%'");
+        $settingsTable = Globals::table('settings');
+        Connection::query("DELETE FROM {$settingsTable} WHERE StKey LIKE 'test_%'");
         // Reset known settings to defaults
-        Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'set-texts-per-page'");
+        Connection::query("DELETE FROM {$settingsTable} WHERE StKey = 'set-texts-per-page'");
     }
 
     // ===== get() tests =====

@@ -422,7 +422,7 @@ class LanguageHandler
      */
     public function formatSetDefault(int $id): array
     {
-        \saveSetting('currentlanguage', (string)$id);
+        Settings::save('currentlanguage', (string)$id);
         return ['success' => true];
     }
 }

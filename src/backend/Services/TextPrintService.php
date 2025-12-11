@@ -21,6 +21,7 @@ require_once __DIR__ . '/../View/Helper/StatusHelper.php';
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
+use Lwt\Services\AnnotationService;
 use Lwt\Services\TagService;
 
 /**
@@ -495,7 +496,8 @@ class TextPrintService
         }
 
         // Recreate/update the annotation
-        $ann = \recreateSaveAnn($textId, $ann);
+        $annotationService = new AnnotationService();
+        $ann = $annotationService->recreateSaveAnnotation($textId, $ann);
         if (strlen($ann) === 0) {
             return null;
         }

@@ -28,7 +28,6 @@ require_once __DIR__ . '/../../../src/backend/Services/SimilarTermsService.php';
 class SimilarTermsServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private SimilarTermsService $service;
 
     public static function setUpBeforeClass(): void
@@ -47,15 +46,14 @@ class SimilarTermsServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         // Ensure clean test data
-        Connection::query("TRUNCATE TABLE " . self::$tbpref . "words");
-        Connection::query("DELETE FROM " . self::$tbpref . "languages WHERE LgID = 1");
+        Connection::query("TRUNCATE TABLE " . Globals::getTablePrefix() . "words");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = 1");
 
         // Insert a test language
         Connection::query(
-            "INSERT INTO " . self::$tbpref . "languages (LgID, LgName, LgDict1URI, LgGoogleTranslateURI, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgCharacterSubstitutions)
+            "INSERT INTO " . Globals::getTablePrefix() . "languages (LgID, LgName, LgDict1URI, LgGoogleTranslateURI, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgCharacterSubstitutions)
             VALUES (1, 'English', 'http://example.com/dict', 'http://translate.google.com', '.!?', 'Mr.|Mrs.|Dr.', 'a-zA-Z', '')"
         );
 
@@ -83,7 +81,7 @@ class SimilarTermsServiceTest extends TestCase
             $status = $word[3];
 
             Connection::query(
-                "INSERT INTO " . self::$tbpref . "words
+                "INSERT INTO " . Globals::getTablePrefix() . "words
                 (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
                 VALUES (" . ($i + 1) . ", 1, $woText, $woTextLC, $status, $woTranslation, $woRomanization)"
             );
@@ -97,8 +95,8 @@ class SimilarTermsServiceTest extends TestCase
 
     public static function tearDownAfterClass(): void
     {
-        Connection::query("TRUNCATE TABLE " . self::$tbpref . "words");
-        Connection::query("DELETE FROM " . self::$tbpref . "languages WHERE LgID = 1");
+        Connection::query("TRUNCATE TABLE " . Globals::getTablePrefix() . "words");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = 1");
     }
 
     // ========== PHONETIC NORMALIZATION TESTS ==========
@@ -251,10 +249,9 @@ class SimilarTermsServiceTest extends TestCase
     public function testGetSimilarTermsWeightedExcludesSelf(): void
     {
         $similar = $this->service->getSimilarTermsWeighted(1, 'hello', 10, 0.3);
-        $tbpref = Globals::getTablePrefix();
 
         foreach ($similar as $wordId) {
-            $sql = "SELECT WoTextLC FROM " . $tbpref . "words WHERE WoID = $wordId";
+            $sql = "SELECT WoTextLC FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId";
             $text = Connection::fetchValue($sql);
             $this->assertNotEquals('hello', $text);
         }
@@ -289,9 +286,8 @@ class SimilarTermsServiceTest extends TestCase
         // Find positions of similar terms
         $positions = [];
         $i = 1;
-        $tbpref = Globals::getTablePrefix();
         foreach ($similar as $wordId) {
-            $sql = "SELECT WoTextLC FROM " . $tbpref . "words WHERE WoID = $wordId";
+            $sql = "SELECT WoTextLC FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId";
             $text = Connection::fetchValue($sql);
             if ($text !== null) {
                 $positions[$text] = $i;

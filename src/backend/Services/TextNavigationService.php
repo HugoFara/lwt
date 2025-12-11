@@ -33,20 +33,6 @@ use Lwt\View\Helper\IconHelper;
  */
 class TextNavigationService
 {
-    /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
-     * Constructor - initialize table prefix.
-     */
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
 
     /**
      * Return navigation arrows to previous and next texts.
@@ -153,11 +139,11 @@ class TextNavigationService
         if ($onlyAnn) {
             $sql = 'SELECT TxID
             FROM (
-                (' . $this->tbpref . 'texts
-                    LEFT JOIN ' . $this->tbpref . 'texttags ON TxID = TtTxID
+                (' . Globals::table('texts') . '
+                    LEFT JOIN ' . Globals::table('texttags') . ' ON TxID = TtTxID
                 )
-                LEFT JOIN ' . $this->tbpref . 'tags2 ON T2ID = TtT2ID
-            ), ' . $this->tbpref . 'languages
+                LEFT JOIN ' . Globals::table('tags2') . ' ON T2ID = TtT2ID
+            ), ' . Globals::table('languages') . '
             WHERE LgID = TxLgID AND LENGTH(TxAnnotatedText) > 0 '
             . $wh_lang . $wh_query . '
             GROUP BY TxID ' . $wh_tag . '
@@ -165,11 +151,11 @@ class TextNavigationService
         } else {
             $sql = 'SELECT TxID
             FROM (
-                (' . $this->tbpref . 'texts
-                    LEFT JOIN ' . $this->tbpref . 'texttags ON TxID = TtTxID
+                (' . Globals::table('texts') . '
+                    LEFT JOIN ' . Globals::table('texttags') . ' ON TxID = TtTxID
                 )
-                LEFT JOIN ' . $this->tbpref . 'tags2 ON T2ID = TtT2ID
-            ), ' . $this->tbpref . 'languages
+                LEFT JOIN ' . Globals::table('tags2') . ' ON T2ID = TtT2ID
+            ), ' . Globals::table('languages') . '
             WHERE LgID = TxLgID ' . $wh_lang . $wh_query . '
             GROUP BY TxID ' . $wh_tag . '
             ORDER BY ' . $sorts[$currentsort - 1];
@@ -225,8 +211,7 @@ use Lwt\Database\Connection;
  */
 function getTextTitle(int $textId): string
 {
-    $tbpref = \Lwt\Core\Globals::getTablePrefix();
-    $sql = "SELECT TxTitle AS value FROM {$tbpref}texts WHERE TxID = ?";
+    $sql = "SELECT TxTitle AS value FROM " . \Lwt\Core\Globals::table('texts') . " WHERE TxID = ?";
     $result = Connection::preparedFetchValue($sql, [$textId]);
     return $result !== null ? (string) $result : '';
 }

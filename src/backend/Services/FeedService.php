@@ -453,7 +453,7 @@ class FeedService
             $query;
 
         // Use mysqli_real_escape_string for building dynamic SQL fragments
-        $escaped = mysqli_real_escape_string($GLOBALS["DBCONNECTION"], $searchValue);
+        $escaped = mysqli_real_escape_string(Globals::getDbConnection(), $searchValue);
         $pattern = $regexMode . "LIKE '" . $escaped . "'";
 
         switch ($queryMode) {
@@ -479,9 +479,9 @@ class FeedService
             return true;
         }
 
-        $escaped = mysqli_real_escape_string($GLOBALS["DBCONNECTION"], $pattern);
+        $escaped = mysqli_real_escape_string(Globals::getDbConnection(), $pattern);
         $result = @mysqli_query(
-            $GLOBALS["DBCONNECTION"],
+            Globals::getDbConnection(),
             "SELECT 'test' RLIKE '" . $escaped . "'"
         );
 

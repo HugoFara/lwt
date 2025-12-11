@@ -19,6 +19,7 @@
 
 namespace Lwt\Views\Home;
 
+use Lwt\Core\Globals;
 use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\SelectOptionsBuilder;
 
@@ -72,7 +73,6 @@ function renderHomeConfig(?array $lastTextInfo): void
 }
 
 // Extract variables from dashboard data
-$tbpref = $dashboardData['table_prefix'];
 $debug = $dashboardData['is_debug'];
 $currentlang = $dashboardData['current_language_id'] ?? 0;
 $currenttext = $dashboardData['current_text_id'];
@@ -407,7 +407,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 <!-- Version info -->
 <p class="has-text-centered has-text-grey is-size-7 mt-4">
     LWT Version <?php echo getVersion(); ?> &mdash;
-    <?php echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"'); ?>
+    <?php $tbpref = Globals::getTablePrefix(); echo ($tbpref == '' ? 'default table set' : 'table prefixed with "' . $tbpref . '"'); ?>
 </p>
 
 <!-- Footer - Alpine.js Component -->

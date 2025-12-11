@@ -53,7 +53,8 @@ class SettingsHandler
      */
     private function getLastTextForLanguage(int $languageId): ?array
     {
-        $tbpref = Globals::getTablePrefix();
+        $textsTable = Globals::table('texts');
+        $languagesTable = Globals::table('languages');
 
         // Get the current text ID
         $currentTextId = Settings::get('currenttext');
@@ -67,7 +68,7 @@ class SettingsHandler
         // Check if the current text belongs to this language
         $textData = Connection::fetchOne(
             "SELECT TxID, TxTitle, TxLgID, LENGTH(TxAnnotatedText) > 0 AS annotated
-             FROM {$tbpref}texts
+             FROM {$textsTable}
              WHERE TxID = {$textId} AND TxLgID = {$languageId}"
         );
 
@@ -75,7 +76,7 @@ class SettingsHandler
             // Current text doesn't belong to this language, find the most recent one
             $textData = Connection::fetchOne(
                 "SELECT TxID, TxTitle, TxLgID, LENGTH(TxAnnotatedText) > 0 AS annotated
-                 FROM {$tbpref}texts
+                 FROM {$textsTable}
                  WHERE TxLgID = {$languageId}
                  ORDER BY TxID DESC
                  LIMIT 1"
@@ -88,7 +89,7 @@ class SettingsHandler
 
         // Get language name
         $languageName = Connection::fetchValue(
-            "SELECT LgName AS value FROM {$tbpref}languages WHERE LgID = {$languageId}"
+            "SELECT LgName AS value FROM {$languagesTable} WHERE LgID = {$languageId}"
         );
 
         $textId = (int)$textData['TxID'];

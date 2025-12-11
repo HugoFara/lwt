@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../../src/backend/Api/V1/ApiV1.php';
 require_once __DIR__ . '/../../../../../src/backend/Api/V1/Handlers/SettingsHandler.php';

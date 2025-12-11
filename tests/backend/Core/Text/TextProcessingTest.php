@@ -34,8 +34,8 @@ use Lwt\Services\LanguageService;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\StatusHelper;
 
-use function Lwt\Core\Utils\remove_soft_hyphens;
-use function Lwt\Core\Utils\replace_supp_unicode_planes_char;
+use function Lwt\Core\Utils\removeSoftHyphens;
+use function Lwt\Core\Utils\replaceSuppUnicodePlanesChar;
 
 /**
  * Unit tests for text processing functions.
@@ -452,24 +452,24 @@ class TextProcessingTest extends TestCase
 
     public function testRemoveSoftHyphens(): void
     {
-        $this->assertEquals('hello', \Lwt\Core\Utils\removeSoftHyphens('hel­lo'));
-        $this->assertEquals('world', \Lwt\Core\Utils\removeSoftHyphens('world'));
-        $this->assertEquals('', \Lwt\Core\Utils\removeSoftHyphens(''));
-        $this->assertEquals('testing', \Lwt\Core\Utils\removeSoftHyphens('test­­ing'));
+        $this->assertEquals('hello', removeSoftHyphens('hel­lo'));
+        $this->assertEquals('world', removeSoftHyphens('world'));
+        $this->assertEquals('', removeSoftHyphens(''));
+        $this->assertEquals('testing', removeSoftHyphens('test­­ing'));
     }
 
     public function testReplaceSupplementaryUnicodePlanes(): void
     {
         // Characters in supplementary planes should be replaced with U+2588 (█)
-        $result = \Lwt\Core\Utils\replaceSuppUnicodePlanesChar('hello 𝕳𝖊𝖑𝖑𝖔 world');
+        $result = replaceSuppUnicodePlanesChar('hello 𝕳𝖊𝖑𝖑𝖔 world');
         $this->assertStringContainsString('hello', $result);
         $this->assertStringContainsString('█', $result);
 
         // Regular characters should pass through unchanged
-        $this->assertEquals('hello world', \Lwt\Core\Utils\replaceSuppUnicodePlanesChar('hello world'));
-        
+        $this->assertEquals('hello world', replaceSuppUnicodePlanesChar('hello world'));
+
         // Empty string
-        $this->assertEquals('', \Lwt\Core\Utils\replaceSuppUnicodePlanesChar(''));
+        $this->assertEquals('', replaceSuppUnicodePlanesChar(''));
     }
 
     public function testMakeCounterWithTotal(): void

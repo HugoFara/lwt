@@ -10,6 +10,7 @@ use Lwt\Core\Globals;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\TextParsing;
+use Lwt\Services\TextParsingService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
@@ -528,82 +529,84 @@ class TextParsingTest extends TestCase
      */
     public function testFindLatinSentenceEnd(): void
     {
+        $service = new TextParsingService();
+
         // Test 1: Real sentence end (period followed by capital letter with space in match[6])
         // Pattern typically captures: [1]=word, [2]=., [3]=space, [6]=space/empty, [7]=NextWord
         // When match[6] is empty and match[7] has alphanumeric after, it adds \t instead of \r
         $matches = ['End. Start', 'End', '.', '', '', '', '', 'Start'];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         // This specific case adds \t based on the code logic (line 305-306)
         $this->assertStringContainsString("\t", $result, 'Period before capital may mark with tab');
 
         // Test 2: Abbreviation - single letter followed by period (Dr. Smith)
         // Single letter abbreviation should NOT end sentence
         $matches = ['A. Smith', 'A', '.', '', '', '', '', 'Smith'];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         $this->assertStringEndsNotWith("\r", $result, 'Single letter abbreviation should not end sentence');
 
         // Test 3: Number with decimal point (3.14)
         $matches = ['3.14', '3', '.', '', '', '', '', '14'];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         $this->assertStringEndsNotWith("\r", $result, 'Decimal number should not end sentence');
 
         // Test 4: Number with period at end (Year 2023.)
         // Small number (< 3 digits) with period should not end sentence
         $matches = ['10.', '10', '.', '', '', '', '', ''];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         $this->assertStringEndsNotWith("\r", $result, 'Small number with period should not end sentence');
 
         // Test 5: Large number with period (Year 2023.) - should end sentence
         $matches = ['2023.', '2023', '.', '', '', '', '', ''];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         $this->assertStringEndsWith("\r", $result, 'Large number (3+ digits) with period should end sentence');
 
         // Test 6: Period followed by lowercase (ellipsis or mid-sentence)
         $matches = ['test. then', 'test', '.', '', '', '', '', 'then'];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         $this->assertStringEndsNotWith("\r", $result, 'Period before lowercase should not end sentence');
 
         // Test 7: Custom exception - "Dr." in exception list
         $matches = ['Dr. Smith', 'Dr', '.', '', '', '', '', 'Smith'];
-        $result = find_latin_sentence_end($matches, 'Dr.|Mr.|Mrs.');
+        $result = $service->findLatinSentenceEnd($matches, 'Dr.|Mr.|Mrs.');
         $this->assertStringEndsNotWith("\r", $result, 'Exception list should prevent sentence end');
 
         // Test 8: Custom exception - "Mr." in exception list
         $matches = ['Mr. Jones', 'Mr', '.', '', '', '', '', 'Jones'];
-        $result = find_latin_sentence_end($matches, 'Dr.|Mr.|Mrs.');
+        $result = $service->findLatinSentenceEnd($matches, 'Dr.|Mr.|Mrs.');
         $this->assertStringEndsNotWith("\r", $result, 'Mr. in exception list should not end sentence');
 
         // Test 9: Not in exception list - may end with \t or \r depending on match structure
         $matches = ['End. Start', 'End', '.', '', '', '', '', 'Start'];
-        $result = find_latin_sentence_end($matches, 'Dr.|Mr.|Mrs.');
+        $result = $service->findLatinSentenceEnd($matches, 'Dr.|Mr.|Mrs.');
         // With empty match[6] and alphanumeric match[7], returns \t (line 305-306)
         $this->assertStringContainsString("\t", $result, 'Word not in exception list marks sentence (with tab)');
 
         // Test 10: Common abbreviation patterns - consonant clusters
         // Abbreviations like "St.", "Rd." (street, road) should not end sentence
         $matches = ['St. John', 'St', '.', true, '', '', '', 'John'];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         $this->assertStringEndsNotWith("\r", $result, 'Consonant abbreviation should not end sentence');
 
         // Test 11: Single vowel abbreviation (e.g., "A.")
         $matches = ['A. Smith', 'A', '.', true, '', '', '', 'Smith'];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         $this->assertStringEndsNotWith("\r", $result, 'Single vowel abbreviation should not end sentence');
 
         // Test 12: Colon followed by lowercase (list continuation)
         $matches = ['test: item', 'test', ':', '', '', '', '', 'item'];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         $this->assertStringEndsNotWith("\r", $result, 'Colon before lowercase should not end sentence');
 
         // Test 13: Empty exception string (no exceptions)
         $matches = ['End. Start', 'End', '.', '', '', '', '', 'Start'];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         // Still returns \t because match[6] is empty and match[7] has alphanumeric
         $this->assertStringContainsString("\t", $result, 'No exceptions marks with tab based on structure');
 
         // Test 14: Match at end of text (no following word)
         $matches = ['End.', 'End', '.', '', '', '', '', ''];
-        $result = find_latin_sentence_end($matches, '');
+        $result = $service->findLatinSentenceEnd($matches, '');
         $this->assertStringEndsWith("\r", $result, 'Period at text end should mark sentence end');
     }
 }

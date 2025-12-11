@@ -29,7 +29,6 @@ require_once __DIR__ . '/../../../src/backend/Controllers/TranslationController.
 class TranslationControllerTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private array $originalRequest;
     private array $originalServer;
@@ -52,7 +51,6 @@ class TranslationControllerTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             self::setupTestData();
@@ -61,22 +59,20 @@ class TranslationControllerTest extends TestCase
 
     private static function setupTestData(): void
     {
-        $tbpref = self::$tbpref;
-
         // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
-        Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::table('languages'));
+        Connection::query("ALTER TABLE " . Globals::table('languages') . " AUTO_INCREMENT = " . ((int)$maxId + 1));
 
         // Create a test language
         $existingLang = Connection::fetchValue(
-            "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'TranslationControllerTestLang' LIMIT 1"
+            "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'TranslationControllerTestLang' LIMIT 1"
         );
 
         if ($existingLang) {
             self::$testLangId = (int)$existingLang;
         } else {
             Connection::query(
-                "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                 "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                 "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                 "VALUES ('TranslationControllerTestLang', 'http://dict1.test/lwt_term', " .
@@ -95,14 +91,13 @@ class TranslationControllerTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
         // Clean up test data
-        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId);
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'TranslationControllerTestLang'");
+        Connection::query("DELETE FROM " . Globals::table('words') . " WHERE WoLgID = " . self::$testLangId);
+        Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgName = 'TranslationControllerTestLang'");
 
         // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
-        Connection::query("ALTER TABLE {$tbpref}languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::table('languages'));
+        Connection::query("ALTER TABLE " . Globals::table('languages') . " AUTO_INCREMENT = " . ((int)$maxId + 1));
     }
 
     protected function setUp(): void

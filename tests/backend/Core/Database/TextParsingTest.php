@@ -25,7 +25,6 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
 class TextParsingTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static ?int $testLanguageId = null;
 
     public static function setUpBeforeClass(): void
@@ -44,7 +43,6 @@ class TextParsingTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             self::createTestLanguage();
@@ -53,17 +51,21 @@ class TextParsingTest extends TestCase
 
     private static function createTestLanguage(): void
     {
-        $tbpref = self::$tbpref;
+        $textitems2 = Globals::table('textitems2');
+        $languages = Globals::table('languages');
+        $sentences = Globals::table('sentences');
+        $texts = Globals::table('texts');
+        $words = Globals::table('words');
 
         // Clean up any existing test language first
-        Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2LgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgName = 'Test TextParsing Language')");
-        Connection::query("DELETE FROM {$tbpref}sentences WHERE SeLgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgName = 'Test TextParsing Language')");
-        Connection::query("DELETE FROM {$tbpref}texts WHERE TxLgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgName = 'Test TextParsing Language')");
-        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgName = 'Test TextParsing Language')");
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'Test TextParsing Language'");
+        Connection::query("DELETE FROM $textitems2 WHERE Ti2LgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
+        Connection::query("DELETE FROM $sentences WHERE SeLgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
+        Connection::query("DELETE FROM $texts WHERE TxLgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
+        Connection::query("DELETE FROM $words WHERE WoLgID IN (SELECT LgID FROM $languages WHERE LgName = 'Test TextParsing Language')");
+        Connection::query("DELETE FROM $languages WHERE LgName = 'Test TextParsing Language'");
 
         // Create test language
-        $sql = "INSERT INTO {$tbpref}languages (
+        $sql = "INSERT INTO $languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
             LgCharacterSubstitutions, LgRegexpSplitSentences,
             LgExceptionsSplitSentences, LgRegexpWordCharacters,
@@ -84,15 +86,19 @@ class TextParsingTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
-
         if (self::$testLanguageId) {
+            $textitems2 = Globals::table('textitems2');
+            $sentences = Globals::table('sentences');
+            $texts = Globals::table('texts');
+            $words = Globals::table('words');
+            $languages = Globals::table('languages');
+
             // Clean up any test texts and associated data
-            Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2LgID = " . self::$testLanguageId);
-            Connection::query("DELETE FROM {$tbpref}sentences WHERE SeLgID = " . self::$testLanguageId);
-            Connection::query("DELETE FROM {$tbpref}texts WHERE TxLgID = " . self::$testLanguageId);
-            Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLanguageId);
-            Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM $textitems2 WHERE Ti2LgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM $sentences WHERE SeLgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM $texts WHERE TxLgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM $words WHERE WoLgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM $languages WHERE LgID = " . self::$testLanguageId);
         }
     }
 
@@ -346,10 +352,12 @@ class TextParsingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $texts = Globals::table('texts');
+        $sentences = Globals::table('sentences');
+        $textitems2 = Globals::table('textitems2');
 
         // Create a test text
-        $sql = "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAudioURI)
+        $sql = "INSERT INTO $texts (TxLgID, TxTitle, TxText, TxAudioURI)
                 VALUES (" . self::$testLanguageId . ", 'Register Test', 'Hello world.', '')";
         Connection::query($sql);
         $textId = mysqli_insert_id(Globals::getDbConnection());
@@ -362,20 +370,20 @@ class TextParsingTest extends TestCase
 
         // Check that sentences were created
         $sentenceCount = Connection::fetchValue(
-            "SELECT COUNT(*) as value FROM {$tbpref}sentences WHERE SeTxID = $textId"
+            "SELECT COUNT(*) as value FROM $sentences WHERE SeTxID = $textId"
         );
         $this->assertGreaterThan(0, (int)$sentenceCount, 'Should create sentences');
 
         // Check that text items were created
         $itemCount = Connection::fetchValue(
-            "SELECT COUNT(*) as value FROM {$tbpref}textitems2 WHERE Ti2TxID = $textId"
+            "SELECT COUNT(*) as value FROM $textitems2 WHERE Ti2TxID = $textId"
         );
         $this->assertGreaterThan(0, (int)$itemCount, 'Should create text items');
 
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = $textId");
-        Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID = $textId");
-        Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM $textitems2 WHERE Ti2TxID = $textId");
+        Connection::query("DELETE FROM $sentences WHERE SeTxID = $textId");
+        Connection::query("DELETE FROM $texts WHERE TxID = $textId");
     }
 
     // ===== displayStatistics() tests =====
@@ -430,7 +438,7 @@ class TextParsingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tempexprs = Globals::table('tempexprs');
 
         // First prepare some text
         $this->callPrepare("Hello world test.", -1, self::$testLanguageId);
@@ -439,14 +447,14 @@ class TextParsingTest extends TestCase
         TextParsing::checkExpressions([2, 3]);
 
         // Check that tempexprs table exists and has been used
-        $result = Connection::query("SHOW TABLES LIKE '{$tbpref}tempexprs'");
+        $result = Connection::query("SHOW TABLES LIKE '$tempexprs'");
         $exists = mysqli_num_rows($result) > 0;
         mysqli_free_result($result);
 
         $this->assertTrue($exists, 'tempexprs table should exist');
 
         // Clean up
-        Connection::query("TRUNCATE TABLE {$tbpref}tempexprs");
+        Connection::query("TRUNCATE TABLE $tempexprs");
     }
 
     // ===== Edge cases =====
@@ -517,10 +525,10 @@ class TextParsingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $languages = Globals::table('languages');
 
         // Create language with character substitutions
-        $sql = "INSERT INTO {$tbpref}languages (
+        $sql = "INSERT INTO $languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
             LgCharacterSubstitutions, LgRegexpSplitSentences,
             LgExceptionsSplitSentences, LgRegexpWordCharacters,
@@ -541,7 +549,7 @@ class TextParsingTest extends TestCase
         $this->assertNotEmpty($result);
 
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $germanLangId");
+        Connection::query("DELETE FROM $languages WHERE LgID = $germanLangId");
     }
 
     // ===== Split each char language tests =====
@@ -552,10 +560,10 @@ class TextParsingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $languages = Globals::table('languages');
 
         // Create language with split each char enabled
-        $sql = "INSERT INTO {$tbpref}languages (
+        $sql = "INSERT INTO $languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
             LgCharacterSubstitutions, LgRegexpSplitSentences,
             LgExceptionsSplitSentences, LgRegexpWordCharacters,
@@ -575,7 +583,7 @@ class TextParsingTest extends TestCase
         $this->assertIsArray($result);
 
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $splitLangId");
+        Connection::query("DELETE FROM $languages WHERE LgID = $splitLangId");
     }
 
     // ===== RTL language tests =====
@@ -586,10 +594,10 @@ class TextParsingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $languages = Globals::table('languages');
 
         // Create RTL language
-        $sql = "INSERT INTO {$tbpref}languages (
+        $sql = "INSERT INTO $languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
             LgCharacterSubstitutions, LgRegexpSplitSentences,
             LgExceptionsSplitSentences, LgRegexpWordCharacters,
@@ -609,6 +617,6 @@ class TextParsingTest extends TestCase
         $this->assertIsArray($result);
 
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $rtlLangId");
+        Connection::query("DELETE FROM $languages WHERE LgID = $rtlLangId");
     }
 }

@@ -308,10 +308,9 @@ class WordController extends BaseController
             }
 
             // Get showRoman from language joined with text
-            $tbpref = \Lwt\Core\Globals::getTablePrefix();
             $showRoman = (bool) \Lwt\Database\Connection::fetchValue(
                 "SELECT LgShowRomanization AS value
-                FROM {$tbpref}languages JOIN {$tbpref}texts
+                FROM " . \Lwt\Core\Globals::table('languages') . " JOIN " . \Lwt\Core\Globals::table('texts') . "
                 ON TxLgID = LgID
                 WHERE TxID = $textId"
             );
@@ -332,15 +331,13 @@ class WordController extends BaseController
      */
     public function editTerm(array $params): void
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-
         $translation_raw = ExportService::replaceTabNewline($this->param("WoTranslation"));
         $translation = ($translation_raw == '') ? '*' : $translation_raw;
 
         if ($this->hasParam('op')) {
-            $this->handleEditTermOperation($tbpref, $translation);
+            $this->handleEditTermOperation($translation);
         } else {
-            $this->displayEditTermForm($tbpref);
+            $this->displayEditTermForm();
         }
 
         PageLayoutHelper::renderPageEnd();
@@ -349,12 +346,11 @@ class WordController extends BaseController
     /**
      * Handle update operation for edit term.
      *
-     * @param string $tbpref      Table prefix
      * @param string $translation Translation value
      *
      * @return void
      */
-    private function handleEditTermOperation(string $tbpref, string $translation): void
+    private function handleEditTermOperation(string $translation): void
     {
         $woTextLC = $this->param("WoTextLC");
         $woText = $this->param("WoText");
@@ -397,7 +393,7 @@ class WordController extends BaseController
             $params[] = $woId;
 
             \Lwt\Database\Connection::preparedExecute(
-                'UPDATE ' . $tbpref . 'words SET WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?' .
+                'UPDATE ' . \Lwt\Core\Globals::table('words') . ' SET WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?' .
                 $statusUpdate . ',' . WordStatusService::makeScoreRandomInsertUpdate('u') .
                 ' WHERE WoID = ?',
                 $params
@@ -408,14 +404,14 @@ class WordController extends BaseController
             $message = 'Updated';
 
             $lang = \Lwt\Database\Connection::preparedFetchValue(
-                'SELECT WoLgID AS value FROM ' . $tbpref . 'words WHERE WoID = ?',
+                'SELECT WoLgID AS value FROM ' . \Lwt\Core\Globals::table('words') . ' WHERE WoID = ?',
                 [$wid]
             );
             if (!isset($lang)) {
                 ErrorHandler::die('Cannot retrieve language in edit_tword.php');
             }
             $regexword = \Lwt\Database\Connection::preparedFetchValue(
-                'SELECT LgRegexpWordCharacters AS value FROM ' . $tbpref . 'languages WHERE LgID = ?',
+                'SELECT LgRegexpWordCharacters AS value FROM ' . \Lwt\Core\Globals::table('languages') . ' WHERE LgID = ?',
                 [$lang]
             );
             if (!isset($regexword)) {
@@ -443,11 +439,9 @@ class WordController extends BaseController
     /**
      * Display the edit term form.
      *
-     * @param string $tbpref Table prefix
-     *
      * @return void
      */
-    private function displayEditTermForm(string $tbpref): void
+    private function displayEditTermForm(): void
     {
         $widParam = $this->param('wid');
 
@@ -457,7 +451,7 @@ class WordController extends BaseController
         $wid = (int) $widParam;
 
         $sql = 'select WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus from ' .
-            $tbpref . 'words where WoID = ' . $wid;
+            \Lwt\Core\Globals::table('words') . ' where WoID = ' . $wid;
         $res = \Lwt\Database\Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         if ($record) {
@@ -472,7 +466,7 @@ class WordController extends BaseController
             $status = $record['WoStatus'];
             $showRoman = (bool) \Lwt\Database\Connection::fetchValue(
                 "SELECT LgShowRomanization AS value
-                FROM {$tbpref}languages
+                FROM " . \Lwt\Core\Globals::table('languages') . "
                 WHERE LgID = $lang"
             );
         } else {

@@ -17,10 +17,12 @@
 
 namespace Lwt\Integration;
 
+use Lwt\Core\Globals;
+
 require_once __DIR__ . '/../Bootstrap/start_session.php';
 
 if (isset($_SESSION['LWT-WP-User'])) {
-    $tbpref = $_SESSION['LWT-WP-User'];
+    Globals::setTablePrefix($_SESSION['LWT-WP-User']);
 } else {
     $url = '';
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') == 'GET') {

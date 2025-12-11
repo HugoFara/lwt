@@ -14,8 +14,6 @@
 
 namespace Lwt\Services;
 
-require_once __DIR__ . '/../Core/Utils/string_utilities.php';
-
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 
