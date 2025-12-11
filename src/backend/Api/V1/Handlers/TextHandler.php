@@ -44,9 +44,8 @@ class TextHandler
      */
     public function saveTextPosition(int $textid, int $position): void
     {
-        $tbpref = Globals::getTablePrefix();
         Connection::preparedExecute(
-            "UPDATE {$tbpref}texts SET TxPosition = ? WHERE TxID = ?",
+            "UPDATE " . Globals::getTablePrefix() . "texts SET TxPosition = ? WHERE TxID = ?",
             [$position, $textid]
         );
     }
@@ -61,9 +60,8 @@ class TextHandler
      */
     public function saveAudioPosition(int $textid, int $audioposition): void
     {
-        $tbpref = Globals::getTablePrefix();
         Connection::preparedExecute(
-            "UPDATE {$tbpref}texts SET TxAudioPosition = ? WHERE TxID = ?",
+            "UPDATE " . Globals::getTablePrefix() . "texts SET TxAudioPosition = ? WHERE TxID = ?",
             [$audioposition, $textid]
         );
     }
@@ -79,10 +77,8 @@ class TextHandler
      */
     public function saveImprTextData(int $textid, int $line, string $val): string
     {
-        $tbpref = Globals::getTablePrefix();
-
         $ann = (string) Connection::preparedFetchValue(
-            "SELECT TxAnnotatedText AS value FROM {$tbpref}texts WHERE TxID = ?",
+            "SELECT TxAnnotatedText AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
             [$textid]
         );
 
@@ -103,7 +99,7 @@ class TextHandler
         $items[$line] = implode("\t", array($vals[0], $vals[1], $vals[2], $val));
 
         Connection::preparedExecute(
-            "UPDATE {$tbpref}texts SET TxAnnotatedText = ? WHERE TxID = ?",
+            "UPDATE " . Globals::getTablePrefix() . "texts SET TxAnnotatedText = ? WHERE TxID = ?",
             [implode("\n", $items), $textid]
         );
 
@@ -199,11 +195,9 @@ class TextHandler
      */
     public function setDisplayMode(int $textId, ?int $annotations, ?bool $romanization, ?bool $translation): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         // Validate text exists
         $exists = Connection::preparedFetchValue(
-            "SELECT COUNT(TxID) AS value FROM {$tbpref}texts WHERE TxID = ?",
+            "SELECT COUNT(TxID) AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
             [$textId]
         );
 
@@ -319,12 +313,10 @@ class TextHandler
      */
     public function getWords(int $textId): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         // Get text info and language settings
         $textInfo = Connection::preparedFetchOne(
             "SELECT TxID, TxLgID, TxTitle, TxAudioURI, TxSourceURI, TxAudioPosition
-             FROM {$tbpref}texts WHERE TxID = ?",
+             FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
             [$textId]
         );
 
@@ -338,7 +330,7 @@ class TextHandler
         $langInfo = Connection::preparedFetchOne(
             "SELECT LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
                     LgTextSize, LgRightToLeft, LgRegexpWordCharacters, LgRemoveSpaces
-             FROM {$tbpref}languages WHERE LgID = ?",
+             FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$langId]
         );
 
@@ -359,7 +351,7 @@ class TextHandler
                 ELSE CHAR_LENGTH(`WoTextLC`)
             END AS TiTextLength,
             WoID, WoText, WoStatus, WoTranslation, WoRomanization
-            FROM {$tbpref}textitems2 LEFT JOIN {$tbpref}words ON Ti2WoID = WoID
+            FROM " . Globals::getTablePrefix() . "textitems2 LEFT JOIN " . Globals::getTablePrefix() . "words ON Ti2WoID = WoID
             WHERE Ti2TxID = ?
             ORDER BY Ti2Order asc, Ti2WordCount desc";
 

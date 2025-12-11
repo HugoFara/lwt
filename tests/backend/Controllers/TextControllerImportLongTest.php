@@ -39,7 +39,6 @@ require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
 class TextControllerImportLongTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private array $originalRequest;
     private array $originalServer;
@@ -66,10 +65,9 @@ class TextControllerImportLongTest extends TestCase
             Globals::setDatabaseName($testDbname);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
 
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
@@ -97,7 +95,7 @@ class TextControllerImportLongTest extends TestCase
     public static function tearDownAfterClass(): void
     {
         if (self::$dbConnected && self::$testLangId > 0) {
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
 
             // Clean up test language
             Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLangId);
@@ -129,7 +127,7 @@ class TextControllerImportLongTest extends TestCase
     {
         // Clean up created texts
         if (!empty($this->createdTextIds) && self::$dbConnected) {
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
             foreach ($this->createdTextIds as $textId) {
                 Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = {$textId}");
                 Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID = {$textId}");
@@ -357,7 +355,7 @@ class TextControllerImportLongTest extends TestCase
         }
 
         $service = new TextService();
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         $texts = ["First sentence. Second sentence."];
 
@@ -392,7 +390,7 @@ class TextControllerImportLongTest extends TestCase
         }
 
         $service = new TextService();
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         $texts = [
             "First text content.",
@@ -454,7 +452,7 @@ class TextControllerImportLongTest extends TestCase
         }
 
         $service = new TextService();
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         $texts = [
             "First part.",
@@ -513,7 +511,7 @@ class TextControllerImportLongTest extends TestCase
         }
 
         $service = new TextService();
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Step 1: Prepare data
         $rawText = "First sentence of the long text. Second sentence.\n\nNew paragraph starts here. More content.";

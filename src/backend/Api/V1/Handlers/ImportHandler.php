@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 
 /**
@@ -42,7 +43,9 @@ class ImportHandler
      */
     public function selectImportedTerms(string $lastUpdate, int $offset, int $maxTerms): array
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
+        $wordsTable = Globals::table('words');
+        $wordtagsTable = Globals::table('wordtags');
+        $tagsTable = Globals::table('tags');
         $sql = "SELECT WoID, WoText, WoTranslation, WoRomanization, WoSentence,
         IFNULL(WoSentence, '') LIKE CONCAT('%{', WoText, '}%') AS SentOK,
         WoStatus,
@@ -51,8 +54,8 @@ class ImportHandler
             ''
         ) AS taglist
         FROM (
-            ({$tbpref}words LEFT JOIN {$tbpref}wordtags ON WoID = WtWoID)
-            LEFT JOIN {$tbpref}tags ON TgID = WtTgID
+            ({$wordsTable} LEFT JOIN {$wordtagsTable} ON WoID = WtWoID)
+            LEFT JOIN {$tagsTable} ON TgID = WtTgID
         )
         WHERE WoStatusChanged > ?
         GROUP BY WoID

@@ -43,7 +43,6 @@ class Restore
      */
     public static function restoreFile($handle, string $title): string
     {
-        $tbpref = Globals::getTablePrefix();
         $message = "";
         $install_status = [
             "queries" => 0,
@@ -104,7 +103,7 @@ class Restore
                     if (!str_starts_with($query, '-- ')) {
                         $res = mysqli_query(
                             Globals::getDbConnection(),
-                            Migrations::prefixQuery($query, $tbpref)
+                            Migrations::prefixQuery($query, Globals::getTablePrefix())
                         );
                         $install_status["queries"]++;
                         if ($res == false) {
@@ -126,6 +125,7 @@ class Restore
 
         /** @psalm-suppress TypeDoesNotContainType - Value can change in loop */
         if ($install_status["errors"] == 0) {
+            $tbpref = Globals::getTablePrefix();
             Connection::execute("DROP TABLE IF EXISTS {$tbpref}textitems");
             Migrations::checkAndUpdate();
             Migrations::reparseAllTexts();

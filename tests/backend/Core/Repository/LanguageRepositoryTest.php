@@ -30,7 +30,6 @@ require_once __DIR__ . '/../../../../src/backend/Core/Repository/LanguageReposit
 class LanguageRepositoryTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private LanguageRepository $repository;
     private static array $testLanguageIds = [];
 
@@ -50,7 +49,6 @@ class LanguageRepositoryTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -65,7 +63,7 @@ class LanguageRepositoryTest extends TestCase
         }
 
         // Clean up test languages after each test
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'RepoTest_%'");
         self::$testLanguageIds = [];
     }
@@ -89,7 +87,7 @@ class LanguageRepositoryTest extends TestCase
      */
     private function createTestLanguageInDb(string $name): int
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query(
             "INSERT INTO {$tbpref}languages (
                 LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
@@ -392,7 +390,7 @@ class LanguageRepositoryTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Try to insert language with empty name (may already exist)
         try {
             Connection::query(
@@ -530,7 +528,7 @@ class LanguageRepositoryTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Create RTL language
         Connection::query(
             "INSERT INTO {$tbpref}languages (

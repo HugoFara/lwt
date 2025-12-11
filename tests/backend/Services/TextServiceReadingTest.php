@@ -26,7 +26,6 @@ require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
 class TextServiceReadingTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private static int $testTextId = 0;
     private TextService $service;
@@ -47,10 +46,9 @@ class TextServiceReadingTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
 
             // Create a test language
             $existingLang = Connection::fetchValue(
@@ -95,7 +93,7 @@ class TextServiceReadingTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Clean up test data
         if (self::$testTextId > 0) {
@@ -241,7 +239,7 @@ class TextServiceReadingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create an RTL language
         Connection::query(
@@ -292,7 +290,7 @@ class TextServiceReadingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create a language without TTS voice API
         Connection::query(
@@ -397,7 +395,7 @@ class TextServiceReadingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create a text without audio
         Connection::query(
@@ -425,7 +423,7 @@ class TextServiceReadingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create a text without annotations
         Connection::query(
@@ -449,7 +447,7 @@ class TextServiceReadingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create a text with zero positions (default)
         Connection::query(
@@ -474,7 +472,7 @@ class TextServiceReadingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create a language with remove spaces enabled (like Japanese)
         Connection::query(
@@ -503,7 +501,7 @@ class TextServiceReadingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $specialTitle = "Test's \"Special\" & <Characters>";
 
         // Create a text with special characters in title
@@ -530,7 +528,7 @@ class TextServiceReadingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $unicodeText = "こんにちは世界 - Привет мир - مرحبا";
 
         // Create a text with Unicode content

@@ -83,7 +83,6 @@ class Validation
      */
     public static function tag(string $currenttag, string $currentlang): string
     {
-        $tbpref = Globals::getTablePrefix();
         if ($currenttag != '' && $currenttag != '-1') {
             // Sanitize inputs to prevent SQL injection
             if (!is_numeric($currenttag)) {
@@ -100,6 +99,7 @@ class Validation
                 $lang_condition = " AND WoLgID = " . $currentlang_int;
             }
 
+            $tbpref = Globals::getTablePrefix();
             $sql = "SELECT (
                 " . $currenttag_int . " IN (
                     SELECT TgID
@@ -127,7 +127,6 @@ class Validation
      */
     public static function archTextTag(string $currenttag, string $currentlang): string
     {
-        $tbpref = Globals::getTablePrefix();
         if ($currenttag != '' && $currenttag != '-1') {
             // Sanitize inputs to prevent SQL injection
             if (!is_numeric($currenttag)) {
@@ -135,6 +134,7 @@ class Validation
             }
             $currenttag_int = (int)$currenttag;
 
+            $tbpref = Globals::getTablePrefix();
             if ($currentlang == '') {
                 $sql = "select (
                     " . $currenttag_int . " in (
@@ -180,7 +180,6 @@ class Validation
      */
     public static function textTag(string $currenttag, string $currentlang): string
     {
-        $tbpref = Globals::getTablePrefix();
         if ($currenttag != '' && $currenttag != '-1') {
             // Sanitize inputs to prevent SQL injection
             if (!is_numeric($currenttag)) {
@@ -188,6 +187,7 @@ class Validation
             }
             $currenttag_int = (int)$currenttag;
 
+            $tbpref = Globals::getTablePrefix();
             if ($currentlang == '') {
                 $sql = "select (
                     $currenttag_int in (

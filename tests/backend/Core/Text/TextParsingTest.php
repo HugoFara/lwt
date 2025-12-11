@@ -62,10 +62,8 @@ class TextParsingTest extends TestCase
      */
     private static function createTestLanguage(): void
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-
         // Insert test language
-        $sql = "INSERT INTO {$tbpref}languages (
+        $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (
             LgName,
             LgDict1URI,
             LgGoogleTranslateURI,
@@ -100,10 +98,8 @@ class TextParsingTest extends TestCase
      */
     public static function tearDownAfterClass(): void
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-
         if (self::$testLanguageId) {
-            Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = " . self::$testLanguageId);
         }
     }
 
@@ -148,14 +144,12 @@ class TextParsingTest extends TestCase
      */
     public function testPrepareTextParsingCharacterSubstitution(): void
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }
 
         // Create language with character substitutions
-        $sql = "INSERT INTO {$tbpref}languages (
+        $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
             LgCharacterSubstitutions, LgRegexpSplitSentences,
             LgExceptionsSplitSentences, LgRegexpWordCharacters,
@@ -186,7 +180,7 @@ class TextParsingTest extends TestCase
         $this->assertNotEmpty($result, 'Should parse German text');
 
         // Clean up
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = $germanLangId");
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $germanLangId");
     }
 
     /**

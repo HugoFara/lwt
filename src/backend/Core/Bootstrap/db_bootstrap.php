@@ -151,13 +151,7 @@ function bootstrapDatabase(): void
 bootstrapDatabase();
 
 // Set up legacy globals for backwards compatibility
-global $DBCONNECTION, $tbpref, $dbname;
-
-/**
- * @var \mysqli $DBCONNECTION
- * @deprecated 3.0.0 Use Globals::getDbConnection() instead
- */
-$DBCONNECTION = Globals::getDbConnection();
+global $tbpref, $dbname;
 
 /**
  * @deprecated 3.0.0 Use Globals::getTablePrefix() instead

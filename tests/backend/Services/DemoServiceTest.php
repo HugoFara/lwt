@@ -24,7 +24,6 @@ require_once __DIR__ . '/../../../src/backend/Services/DemoService.php';
 class DemoServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private DemoService $service;
 
     public static function setUpBeforeClass(): void
@@ -43,7 +42,6 @@ class DemoServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -71,7 +69,7 @@ class DemoServiceTest extends TestCase
 
         $result = $this->service->getPrefixInfo();
 
-        if (self::$tbpref === '') {
+        if (Globals::getTablePrefix() === '') {
             $this->assertStringContainsString('Default Table Set', $result);
         } else {
             $this->assertStringContainsString('Table Set:', $result);

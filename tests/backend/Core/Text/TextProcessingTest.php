@@ -45,7 +45,6 @@ use function Lwt\Core\Utils\replaceSuppUnicodePlanesChar;
 class TextProcessingTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static ?LanguageService $languageService = null;
 
     public static function setUpBeforeClass(): void
@@ -64,7 +63,6 @@ class TextProcessingTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
         self::$languageService = new LanguageService();
     }
 
@@ -75,7 +73,7 @@ class TextProcessingTest extends TestCase
         }
 
         // Clean up test data
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'test_proc_%'");
     }
 
@@ -97,7 +95,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
@@ -119,7 +117,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert language with empty name
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
@@ -143,7 +141,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
@@ -164,7 +162,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert test language
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI)
@@ -217,7 +215,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert test language (LTR)
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
@@ -238,7 +236,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert test language (RTL)
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
@@ -259,7 +257,7 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert test language (RTL)
         Connection::query("INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)

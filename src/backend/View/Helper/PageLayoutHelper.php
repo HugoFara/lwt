@@ -18,6 +18,7 @@ namespace Lwt\View\Helper;
 require_once __DIR__ . '/../../Core/Http/url_utilities.php';
 require_once __DIR__ . '/../../Core/Utils/string_utilities.php';
 
+use Lwt\Core\Globals;
 use Lwt\Core\Http\UrlUtilities;
 use function Lwt\Core\Utils\showRequest;
 use function Lwt\Core\Utils\getExecutionTime;
@@ -385,8 +386,7 @@ HTML;
      */
     public static function renderPageStartKernelNobody(string $title): void
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        $debug = \Lwt\Core\Globals::isDebug();
+        $debug = Globals::isDebug();
 
         self::sendNoCacheHeaders();
 
@@ -414,7 +414,7 @@ HTML;
         }
 
         echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
-        echo '<!-- TBPREF  : "' . htmlspecialchars($tbpref, ENT_QUOTES, 'UTF-8') . '" -->';
+        echo '<!-- TBPREF  : "' . htmlspecialchars(Globals::getTablePrefix(), ENT_QUOTES, 'UTF-8') . '" -->';
         echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
         echo '<body>';
@@ -440,8 +440,7 @@ HTML;
         string $title,
         string $bodyClass = ''
     ): void {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
-        $debug = \Lwt\Core\Globals::isDebug();
+        $debug = Globals::isDebug();
 
         self::sendNoCacheHeaders();
 
@@ -470,7 +469,7 @@ HTML;
         }
 
         echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
-        echo '<!-- TBPREF  : "' . htmlspecialchars($tbpref, ENT_QUOTES, 'UTF-8') . '" -->';
+        echo '<!-- TBPREF  : "' . htmlspecialchars(Globals::getTablePrefix(), ENT_QUOTES, 'UTF-8') . '" -->';
         echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
         echo '<body' . ($bodyClass !== '' ? ' class="' . htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8') . '"' : '') . '>';
@@ -501,7 +500,7 @@ HTML;
             echo self::buildLogo();
             echo '</div>';
         }
-        echo self::buildPageTitle($title, \Lwt\Core\Globals::isDebug());
+        echo self::buildPageTitle($title, Globals::isDebug());
     }
 
     /**
@@ -513,10 +512,10 @@ HTML;
      */
     public static function renderPageEnd(): void
     {
-        if (\Lwt\Core\Globals::isDebug()) {
+        if (Globals::isDebug()) {
             showRequest();
         }
-        if (\Lwt\Core\Globals::shouldDisplayTime()) {
+        if (Globals::shouldDisplayTime()) {
             echo "\n" . self::buildExecutionTime(getExecutionTime()) . "\n";
         }
         echo '</body></html>';

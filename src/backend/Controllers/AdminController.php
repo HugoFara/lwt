@@ -16,6 +16,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\Core\Entity\GoogleTranslate;
+use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Services\BackupService;
 use Lwt\Services\DemoService;
@@ -411,7 +412,7 @@ class AdminController extends BaseController
         /** @psalm-suppress UnusedVariable */
         $fixedTbpref = $tableSetService->isFixedPrefix();
         /** @psalm-suppress UnusedVariable */
-        $tbpref = $tableSetService->getCurrentPrefix();
+        $tbpref = Globals::getTablePrefix();
         /** @psalm-suppress UnusedVariable */
         $prefixes = $tableSetService->getPrefixes();
 

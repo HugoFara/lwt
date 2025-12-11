@@ -30,7 +30,6 @@ require_once __DIR__ . '/../../../src/backend/Services/WordListService.php';
 class WordListServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
 
     public static function setUpBeforeClass(): void
@@ -49,10 +48,9 @@ class WordListServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
 
             // Reset auto_increment
             $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
@@ -84,7 +82,7 @@ class WordListServiceTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Clean up test words and language
         Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId);
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'WordListTestLang'");
@@ -101,7 +99,7 @@ class WordListServiceTest extends TestCase
         }
 
         // Clean up test words
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}words WHERE WoText LIKE 'list_test_%'");
     }
 

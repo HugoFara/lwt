@@ -26,7 +26,6 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
 class QueryBuilderTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
 
     public static function setUpBeforeClass(): void
     {
@@ -44,7 +43,6 @@ class QueryBuilderTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function tearDown(): void
@@ -54,7 +52,7 @@ class QueryBuilderTest extends TestCase
         }
 
         // Clean up test data
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_qb_%'");
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_qb_%'");
     }
@@ -75,9 +73,9 @@ class QueryBuilderTest extends TestCase
 
         $qb = new QueryBuilder('tags');
         $sql = $qb->toSql();
-        
+
         // Should contain table prefix
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $this->assertStringContainsString("{$tbpref}tags", $sql);
     }
 
@@ -250,53 +248,53 @@ class QueryBuilderTest extends TestCase
 
     public function testJoinWithExplicitOperator(): void
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $sql = QueryBuilder::table('tags')
             ->join('wordtags', 'tags.TgID', '=', 'wordtags.WtTgID')
             ->toSql();
-        
+
         $this->assertStringContainsString("INNER JOIN {$tbpref}wordtags", $sql);
         $this->assertStringContainsString("ON tags.TgID = wordtags.WtTgID", $sql);
     }
 
     public function testJoinWithImplicitEquality(): void
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $sql = QueryBuilder::table('tags')
             ->join('wordtags', 'tags.TgID', 'wordtags.WtTgID')
             ->toSql();
-        
+
         $this->assertStringContainsString("INNER JOIN {$tbpref}wordtags", $sql);
         $this->assertStringContainsString("ON tags.TgID = wordtags.WtTgID", $sql);
     }
 
     public function testLeftJoin(): void
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $sql = QueryBuilder::table('tags')
             ->leftJoin('wordtags', 'tags.TgID', 'wordtags.WtTgID')
             ->toSql();
-        
+
         $this->assertStringContainsString("LEFT JOIN {$tbpref}wordtags", $sql);
     }
 
     public function testRightJoin(): void
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $sql = QueryBuilder::table('tags')
             ->rightJoin('wordtags', 'tags.TgID', 'wordtags.WtTgID')
             ->toSql();
-        
+
         $this->assertStringContainsString("RIGHT JOIN {$tbpref}wordtags", $sql);
     }
 
     public function testJoinWithNonEqualityOperator(): void
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $sql = QueryBuilder::table('tags')
             ->join('wordtags', 'tags.TgID', '!=', 'wordtags.WtTgID')
             ->toSql();
-        
+
         $this->assertStringContainsString("INNER JOIN {$tbpref}wordtags", $sql);
         $this->assertStringContainsString("ON tags.TgID != wordtags.WtTgID", $sql);
     }
@@ -672,20 +670,20 @@ class QueryBuilderTest extends TestCase
         }
 
         // Create a temporary test table
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("CREATE TEMPORARY TABLE {$tbpref}test_truncate (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50))");
-        
+
         // Insert data
         QueryBuilder::table('test_truncate')->insert(['name' => 'test1']);
         QueryBuilder::table('test_truncate')->insert(['name' => 'test2']);
-        
+
         // Verify data exists
         $count = QueryBuilder::table('test_truncate')->count();
         $this->assertEquals(2, $count);
-        
+
         // Truncate
         QueryBuilder::table('test_truncate')->truncate();
-        
+
         // Verify empty
         $count = QueryBuilder::table('test_truncate')->count();
         $this->assertEquals(0, $count);

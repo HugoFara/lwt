@@ -40,7 +40,6 @@ require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
 class TextControllerArchivedTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private static int $testArchivedTextId = 0;
     private static int $testArchivedText2Id = 0;
@@ -66,21 +65,18 @@ class TextControllerArchivedTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            $tbpref = self::$tbpref;
-
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'ArchivedTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::table('languages') . " WHERE LgName = 'ArchivedTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO " . Globals::table('languages') . " (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('ArchivedTestLang', 'http://dict1.test/###', 'http://dict2.test/###', " .
@@ -94,7 +90,7 @@ class TextControllerArchivedTest extends TestCase
 
             // Create first archived test text
             Connection::query(
-                "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+                "INSERT INTO " . Globals::table('archivedtexts') . " (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
                 "VALUES (" . self::$testLangId . ", 'ArchivedTestText', 'Test archived content.', " .
                 "'0\tTest\t\t*\n0\tarchived\t\ttranslation', " .
                 "'http://audio.test/audio.mp3', 'http://source.test/article')"
@@ -105,7 +101,7 @@ class TextControllerArchivedTest extends TestCase
 
             // Create second archived test text
             Connection::query(
-                "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+                "INSERT INTO " . Globals::table('archivedtexts') . " (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
                 "VALUES (" . self::$testLangId . ", 'ArchivedTestText2', 'Second archived content.', " .
                 "'0\tSecond\t\t*', " .
                 "'', '')"
@@ -119,28 +115,26 @@ class TextControllerArchivedTest extends TestCase
     public static function tearDownAfterClass(): void
     {
         if (self::$dbConnected && self::$testLangId > 0) {
-            $tbpref = self::$tbpref;
-
             // Clean up archived texts
             if (self::$testArchivedTextId > 0) {
                 Connection::query(
-                    "DELETE FROM {$tbpref}archtexttags WHERE AgAtID = " . self::$testArchivedTextId
+                    "DELETE FROM " . Globals::table('archtexttags') . " WHERE AgAtID = " . self::$testArchivedTextId
                 );
                 Connection::query(
-                    "DELETE FROM {$tbpref}archivedtexts WHERE AtID = " . self::$testArchivedTextId
+                    "DELETE FROM " . Globals::table('archivedtexts') . " WHERE AtID = " . self::$testArchivedTextId
                 );
             }
             if (self::$testArchivedText2Id > 0) {
                 Connection::query(
-                    "DELETE FROM {$tbpref}archtexttags WHERE AgAtID = " . self::$testArchivedText2Id
+                    "DELETE FROM " . Globals::table('archtexttags') . " WHERE AgAtID = " . self::$testArchivedText2Id
                 );
                 Connection::query(
-                    "DELETE FROM {$tbpref}archivedtexts WHERE AtID = " . self::$testArchivedText2Id
+                    "DELETE FROM " . Globals::table('archivedtexts') . " WHERE AtID = " . self::$testArchivedText2Id
                 );
             }
 
             // Clean up test language
-            Connection::query("DELETE FROM {$tbpref}languages WHERE LgID = " . self::$testLangId);
+            Connection::query("DELETE FROM " . Globals::table('languages') . " WHERE LgID = " . self::$testLangId);
         }
     }
 
@@ -388,11 +382,10 @@ class TextControllerArchivedTest extends TestCase
         }
 
         $service = new TextService();
-        $tbpref = self::$tbpref;
 
         // Create a temporary archived text to update
         Connection::query(
-            "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+            "INSERT INTO " . Globals::table('archivedtexts') . " (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
             "VALUES (" . self::$testLangId . ", 'TempUpdateTest', 'Temp content.', '', '', '')"
         );
         $tempId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -414,7 +407,7 @@ class TextControllerArchivedTest extends TestCase
         $this->assertEquals('Updated content.', $updated['AtText']);
 
         // Cleanup
-        Connection::query("DELETE FROM {$tbpref}archivedtexts WHERE AtID = {$tempId}");
+        Connection::query("DELETE FROM " . Globals::table('archivedtexts') . " WHERE AtID = {$tempId}");
     }
 
     public function testDeleteArchivedText(): void
@@ -424,11 +417,10 @@ class TextControllerArchivedTest extends TestCase
         }
 
         $service = new TextService();
-        $tbpref = self::$tbpref;
 
         // Create a temporary archived text to delete
         Connection::query(
-            "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+            "INSERT INTO " . Globals::table('archivedtexts') . " (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
             "VALUES (" . self::$testLangId . ", 'TempDeleteTest', 'Temp content.', '', '', '')"
         );
         $tempId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -448,17 +440,16 @@ class TextControllerArchivedTest extends TestCase
         }
 
         $service = new TextService();
-        $tbpref = self::$tbpref;
 
         // Create temporary archived texts to delete
         Connection::query(
-            "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+            "INSERT INTO " . Globals::table('archivedtexts') . " (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
             "VALUES (" . self::$testLangId . ", 'TempMultiDel1', 'Temp1.', '', '', '')"
         );
         $tempId1 = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
 
         Connection::query(
-            "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+            "INSERT INTO " . Globals::table('archivedtexts') . " (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
             "VALUES (" . self::$testLangId . ", 'TempMultiDel2', 'Temp2.', '', '', '')"
         );
         $tempId2 = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -482,11 +473,10 @@ class TextControllerArchivedTest extends TestCase
         }
 
         $service = new TextService();
-        $tbpref = self::$tbpref;
 
         // Create a temporary archived text to unarchive
         Connection::query(
-            "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+            "INSERT INTO " . Globals::table('archivedtexts') . " (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
             "VALUES (" . self::$testLangId . ", 'TempUnarchiveTest', 'Temp content.', " .
             "'0\tTemp\t\t*', 'http://audio.test/temp.mp3', 'http://source.test/temp')"
         );
@@ -502,12 +492,12 @@ class TextControllerArchivedTest extends TestCase
 
         // Find and clean up the restored text
         $restoredId = Connection::fetchValue(
-            "SELECT TxID AS value FROM {$tbpref}texts WHERE TxTitle = 'TempUnarchiveTest' LIMIT 1"
+            "SELECT TxID AS value FROM " . Globals::table('texts') . " WHERE TxTitle = 'TempUnarchiveTest' LIMIT 1"
         );
         if ($restoredId) {
-            Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = {$restoredId}");
-            Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID = {$restoredId}");
-            Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = {$restoredId}");
+            Connection::query("DELETE FROM " . Globals::table('textitems2') . " WHERE Ti2TxID = {$restoredId}");
+            Connection::query("DELETE FROM " . Globals::table('sentences') . " WHERE SeTxID = {$restoredId}");
+            Connection::query("DELETE FROM " . Globals::table('texts') . " WHERE TxID = {$restoredId}");
         }
     }
 
@@ -518,17 +508,16 @@ class TextControllerArchivedTest extends TestCase
         }
 
         $service = new TextService();
-        $tbpref = self::$tbpref;
 
         // Create temporary archived texts to unarchive
         Connection::query(
-            "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+            "INSERT INTO " . Globals::table('archivedtexts') . " (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
             "VALUES (" . self::$testLangId . ", 'TempMultiUnarch1', 'Temp1.', '0\tTemp1\t\t*', '', '')"
         );
         $tempId1 = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
 
         Connection::query(
-            "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
+            "INSERT INTO " . Globals::table('archivedtexts') . " (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
             "VALUES (" . self::$testLangId . ", 'TempMultiUnarch2', 'Temp2.', '0\tTemp2\t\t*', '', '')"
         );
         $tempId2 = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -546,7 +535,7 @@ class TextControllerArchivedTest extends TestCase
         // Clean up restored texts
         $restoredIds = [];
         $res = Connection::query(
-            "SELECT TxID FROM {$tbpref}texts WHERE TxTitle LIKE 'TempMultiUnarch%'"
+            "SELECT TxID FROM " . Globals::table('texts') . " WHERE TxTitle LIKE 'TempMultiUnarch%'"
         );
         while ($row = mysqli_fetch_assoc($res)) {
             $restoredIds[] = (int)$row['TxID'];
@@ -554,9 +543,9 @@ class TextControllerArchivedTest extends TestCase
         mysqli_free_result($res);
 
         foreach ($restoredIds as $restoredId) {
-            Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = {$restoredId}");
-            Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID = {$restoredId}");
-            Connection::query("DELETE FROM {$tbpref}texts WHERE TxID = {$restoredId}");
+            Connection::query("DELETE FROM " . Globals::table('textitems2') . " WHERE Ti2TxID = {$restoredId}");
+            Connection::query("DELETE FROM " . Globals::table('sentences') . " WHERE SeTxID = {$restoredId}");
+            Connection::query("DELETE FROM " . Globals::table('texts') . " WHERE TxID = {$restoredId}");
         }
     }
 

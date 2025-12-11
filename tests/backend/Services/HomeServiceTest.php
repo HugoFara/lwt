@@ -27,7 +27,6 @@ require_once __DIR__ . '/../../../src/backend/Services/HomeService.php';
 class HomeServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private HomeService $service;
 
     public static function setUpBeforeClass(): void
@@ -46,7 +45,6 @@ class HomeServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -117,7 +115,7 @@ class HomeServiceTest extends TestCase
 
         // First check if there's any text in the database
         $textId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . self::$tbpref . "texts LIMIT 1"
+            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts LIMIT 1"
         );
 
         if ($textId === null) {
@@ -141,7 +139,7 @@ class HomeServiceTest extends TestCase
         }
 
         $textId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . self::$tbpref . "texts LIMIT 1"
+            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts LIMIT 1"
         );
 
         if ($textId === null) {
@@ -160,7 +158,7 @@ class HomeServiceTest extends TestCase
         }
 
         $textId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . self::$tbpref . "texts LIMIT 1"
+            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts LIMIT 1"
         );
 
         if ($textId === null) {
@@ -179,7 +177,7 @@ class HomeServiceTest extends TestCase
         }
 
         $textId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . self::$tbpref . "texts LIMIT 1"
+            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts LIMIT 1"
         );
 
         if ($textId === null) {
@@ -198,7 +196,7 @@ class HomeServiceTest extends TestCase
         }
 
         $textId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . self::$tbpref . "texts LIMIT 1"
+            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts LIMIT 1"
         );
 
         if ($textId === null) {
@@ -230,7 +228,7 @@ class HomeServiceTest extends TestCase
         }
 
         $langId = Connection::fetchValue(
-            "SELECT LgID AS value FROM " . self::$tbpref . "languages LIMIT 1"
+            "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages LIMIT 1"
         );
 
         if ($langId === null) {
@@ -567,7 +565,7 @@ class HomeServiceTest extends TestCase
         if ($count > 0) {
             // If there are languages, we should be able to get at least one name
             $langId = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . self::$tbpref . "languages LIMIT 1"
+                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages LIMIT 1"
             );
 
             if ($langId !== null) {

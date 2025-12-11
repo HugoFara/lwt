@@ -33,7 +33,6 @@ require_once __DIR__ . '/../../../src/backend/Services/TextService.php';
 class TextControllerEditTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private static int $testTextId = 0;
     private static int $testText2Id = 0;
@@ -59,10 +58,9 @@ class TextControllerEditTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
 
             // Create a test language
             $existingLang = Connection::fetchValue(
@@ -114,7 +112,7 @@ class TextControllerEditTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Clean up test data
         Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");
         Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID IN (" . self::$testTextId . ", " . self::$testText2Id . ")");

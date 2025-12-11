@@ -88,11 +88,10 @@ class Settings
      */
     public static function getWithDefault(string $key): string
     {
-        $tbpref = Globals::getTablePrefix();
         $dft = SettingsService::getDefinitions();
         $val = (string) Connection::preparedFetchValue(
             'SELECT StValue AS value
-             FROM ' . $tbpref . 'settings
+             FROM ' . Globals::getTablePrefix() . 'settings
              WHERE StKey = ?',
             [$key]
         );
@@ -136,9 +135,8 @@ class Settings
                 $v = $dft[$k]['dft'];
             }
         }
-        $tbpref = Globals::getTablePrefix();
         $dum = Connection::preparedExecute(
-            "INSERT INTO {$tbpref}settings (StKey, StValue) VALUES(?, ?)",
+            "INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES(?, ?)",
             [$k, (string)$v]
         );
         return "OK: $dum rows changed";

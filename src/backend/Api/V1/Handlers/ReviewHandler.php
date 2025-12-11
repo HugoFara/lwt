@@ -239,11 +239,9 @@ class ReviewHandler
      */
     public function updateReviewStatus(int $wordId, ?int $status, ?int $change): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         // Get current status using prepared statement
         $currentStatus = Connection::preparedFetchValue(
-            "SELECT WoStatus AS value FROM {$tbpref}words WHERE WoID = ?",
+            "SELECT WoStatus AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
             [$wordId]
         );
 
@@ -286,7 +284,7 @@ class ReviewHandler
         // Update the status using prepared statement
         $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
         $result = Connection::preparedExecute(
-            "UPDATE {$tbpref}words
+            "UPDATE " . Globals::getTablePrefix() . "words
              SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
              WHERE WoID = ?",
             [$newStatus, $wordId]

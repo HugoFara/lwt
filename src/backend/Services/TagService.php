@@ -38,13 +38,6 @@ use Lwt\View\Helper\FormHelper;
 class TagService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
      * Tag type: 'term' for term tags, 'text' for text tags.
      *
      * @var string
@@ -66,13 +59,12 @@ class TagService
     private string $colPrefix;
 
     /**
-     * Constructor - initialize table prefix and tag type.
+     * Constructor - initialize tag type.
      *
      * @param string $tagType 'term' for term tags, 'text' for text tags
      */
     public function __construct(string $tagType = 'term')
     {
-        $this->tbpref = Globals::getTablePrefix();
         $this->tagType = $tagType;
 
         if ($tagType === 'text') {
@@ -120,7 +112,7 @@ class TagService
         $list = "(" . implode(",", array_map('intval', $tagIds)) . ")";
 
         $message = Connection::execute(
-            'delete from ' . $this->tbpref . $this->tableName .
+            'delete from ' . Globals::getTablePrefix() . $this->tableName .
             ' where ' . $this->colPrefix . 'ID in ' . $list,
             "Deleted"
         );
@@ -141,7 +133,7 @@ class TagService
     public function deleteAll(array $whereData = ['clause' => '', 'params' => []]): string
     {
         $affected = Connection::preparedExecute(
-            'DELETE FROM ' . $this->tbpref . $this->tableName .
+            'DELETE FROM ' . Globals::getTablePrefix() . $this->tableName .
             ' WHERE (1=1) ' . $whereData['clause'],
             $whereData['params']
         );
@@ -163,7 +155,7 @@ class TagService
     public function delete(int $tagId): string
     {
         $affected = Connection::preparedExecute(
-            'DELETE FROM ' . $this->tbpref . $this->tableName .
+            'DELETE FROM ' . Globals::getTablePrefix() . $this->tableName .
             ' WHERE ' . $this->colPrefix . 'ID = ?',
             [$tagId]
         );
@@ -187,7 +179,7 @@ class TagService
     {
         try {
             Connection::preparedInsert(
-                'INSERT INTO ' . $this->tbpref . $this->tableName .
+                'INSERT INTO ' . Globals::getTablePrefix() . $this->tableName .
                 ' (' . $this->colPrefix . 'Text, ' . $this->colPrefix . 'Comment) VALUES (?, ?)',
                 [$text, $comment]
             );
@@ -210,7 +202,7 @@ class TagService
     {
         try {
             Connection::preparedExecute(
-                'UPDATE ' . $this->tbpref . $this->tableName . ' SET ' .
+                'UPDATE ' . Globals::getTablePrefix() . $this->tableName . ' SET ' .
                 $this->colPrefix . 'Text = ?, ' .
                 $this->colPrefix . 'Comment = ? WHERE ' .
                 $this->colPrefix . 'ID = ?',
@@ -232,7 +224,7 @@ class TagService
     public function getById(int $tagId): ?array
     {
         $row = Connection::preparedFetchOne(
-            'SELECT * FROM ' . $this->tbpref . $this->tableName .
+            'SELECT * FROM ' . Globals::getTablePrefix() . $this->tableName .
             ' WHERE ' . $this->colPrefix . 'ID = ?',
             [$tagId]
         );
@@ -251,7 +243,7 @@ class TagService
     {
         return (int) Connection::preparedFetchValue(
             'SELECT COUNT(' . $this->colPrefix . 'ID) AS value FROM ' .
-            $this->tbpref . $this->tableName . ' WHERE (1=1) ' . $whereData['clause'],
+            Globals::getTablePrefix() . $this->tableName . ' WHERE (1=1) ' . $whereData['clause'],
             $whereData['params']
         );
     }
@@ -283,7 +275,7 @@ class TagService
         $rows = Connection::preparedFetchAll(
             'SELECT ' . $this->colPrefix . 'ID, ' .
             $this->colPrefix . 'Text, ' . $this->colPrefix . 'Comment ' .
-            'FROM ' . $this->tbpref . $this->tableName .
+            'FROM ' . Globals::getTablePrefix() . $this->tableName .
             ' WHERE (1=1) ' . $whereData['clause'] .
             ' ORDER BY ' . $sortColumn . ' ' . $limit,
             $whereData['params']
@@ -321,10 +313,10 @@ class TagService
     public function getUsageCount(int $tagId): int
     {
         if ($this->tagType === 'text') {
-            $sql = 'SELECT COUNT(*) AS value FROM ' . $this->tbpref .
+            $sql = 'SELECT COUNT(*) AS value FROM ' . Globals::getTablePrefix() .
                    'texttags WHERE TtT2ID = ?';
         } else {
-            $sql = 'SELECT COUNT(*) AS value FROM ' . $this->tbpref .
+            $sql = 'SELECT COUNT(*) AS value FROM ' . Globals::getTablePrefix() .
                    'wordtags WHERE WtTgID = ?';
         }
         return (int) Connection::preparedFetchValue($sql, [$tagId]);
@@ -343,7 +335,7 @@ class TagService
             return 0;
         }
         return (int) Connection::preparedFetchValue(
-            'SELECT COUNT(*) AS value FROM ' . $this->tbpref . 'archtexttags WHERE AgT2ID = ?',
+            'SELECT COUNT(*) AS value FROM ' . Globals::getTablePrefix() . 'archtexttags WHERE AgT2ID = ?',
             [$tagId]
         );
     }
@@ -495,21 +487,21 @@ class TagService
     {
         if ($this->tagType === 'text') {
             Connection::execute(
-                "DELETE " . $this->tbpref . "texttags FROM (" .
-                $this->tbpref . "texttags LEFT JOIN " . $this->tbpref .
+                "DELETE " . Globals::getTablePrefix() . "texttags FROM (" .
+                Globals::getTablePrefix() . "texttags LEFT JOIN " . Globals::getTablePrefix() .
                 "tags2 on TtT2ID = T2ID) WHERE T2ID IS NULL",
                 ''
             );
             Connection::execute(
-                "DELETE " . $this->tbpref . "archtexttags FROM (" .
-                $this->tbpref . "archtexttags LEFT JOIN " . $this->tbpref .
+                "DELETE " . Globals::getTablePrefix() . "archtexttags FROM (" .
+                Globals::getTablePrefix() . "archtexttags LEFT JOIN " . Globals::getTablePrefix() .
                 "tags2 on AgT2ID = T2ID) WHERE T2ID IS NULL",
                 ''
             );
         } else {
             Connection::execute(
-                "DELETE " . $this->tbpref . "wordtags FROM (" .
-                $this->tbpref . "wordtags LEFT JOIN " . $this->tbpref .
+                "DELETE " . Globals::getTablePrefix() . "wordtags FROM (" .
+                Globals::getTablePrefix() . "wordtags LEFT JOIN " . Globals::getTablePrefix() .
                 "tags on WtTgID = TgID) WHERE TgID IS NULL",
                 ''
             );
@@ -529,8 +521,7 @@ class TagService
      */
     public static function getAllTermTags(bool $refresh = false): array
     {
-        $tbpref = Globals::getTablePrefix();
-        $cacheKey = $tbpref . self::getUrlBase();
+        $cacheKey = Globals::getTablePrefix() . self::getUrlBase();
 
         if (
             !$refresh
@@ -543,7 +534,7 @@ class TagService
         }
 
         $tags = [];
-        $sql = 'SELECT TgText FROM ' . $tbpref . 'tags ORDER BY TgText';
+        $sql = 'SELECT TgText FROM ' . Globals::getTablePrefix() . 'tags ORDER BY TgText';
         $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $tags[] = (string) $record['TgText'];
@@ -565,8 +556,7 @@ class TagService
      */
     public static function getAllTextTags(bool $refresh = false): array
     {
-        $tbpref = Globals::getTablePrefix();
-        $cacheKey = $tbpref . self::getUrlBase();
+        $cacheKey = Globals::getTablePrefix() . self::getUrlBase();
 
         if (
             !$refresh
@@ -579,7 +569,7 @@ class TagService
         }
 
         $tags = [];
-        $sql = 'SELECT T2Text FROM ' . $tbpref . 'tags2 ORDER BY T2Text';
+        $sql = 'SELECT T2Text FROM ' . Globals::getTablePrefix() . 'tags2 ORDER BY T2Text';
         $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $tags[] = (string) $record['T2Text'];
@@ -615,7 +605,6 @@ class TagService
      */
     public static function saveWordTags(int $wordId): void
     {
-        $tbpref = Globals::getTablePrefix();
         QueryBuilder::table('wordtags')
             ->where('WtWoID', '=', $wordId)
             ->delete();
@@ -636,14 +625,14 @@ class TagService
             $tag = (string) $tag;
             if (!in_array($tag, $_SESSION['TAGS'])) {
                 Connection::preparedExecute(
-                    "INSERT INTO {$tbpref}tags (TgText) VALUES (?)",
+                    "INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES (?)",
                     [$tag]
                 );
             }
             Connection::preparedExecute(
-                "INSERT INTO {$tbpref}wordtags (WtWoID, WtTgID)
+                "INSERT INTO " . Globals::getTablePrefix() . "wordtags (WtWoID, WtTgID)
                 SELECT ?, TgID
-                FROM {$tbpref}tags
+                FROM " . Globals::getTablePrefix() . "tags
                 WHERE TgText = ?",
                 [$wordId, $tag]
             );
@@ -661,7 +650,6 @@ class TagService
      */
     public static function saveTextTags(int $textId): void
     {
-        $tbpref = Globals::getTablePrefix();
         QueryBuilder::table('texttags')
             ->where('TtTxID', '=', $textId)
             ->delete();
@@ -682,14 +670,14 @@ class TagService
             $tag = (string) $tag;
             if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
                 Connection::preparedExecute(
-                    "INSERT INTO {$tbpref}tags2 (T2Text) VALUES (?)",
+                    "INSERT INTO " . Globals::getTablePrefix() . "tags2 (T2Text) VALUES (?)",
                     [$tag]
                 );
             }
             Connection::preparedExecute(
-                "INSERT INTO {$tbpref}texttags (TtTxID, TtT2ID)
+                "INSERT INTO " . Globals::getTablePrefix() . "texttags (TtTxID, TtT2ID)
                 SELECT ?, T2ID
-                FROM {$tbpref}tags2
+                FROM " . Globals::getTablePrefix() . "tags2
                 WHERE T2Text = ?",
                 [$textId, $tag]
             );
@@ -707,7 +695,6 @@ class TagService
      */
     public static function saveArchivedTextTags(int $textId): void
     {
-        $tbpref = Globals::getTablePrefix();
         QueryBuilder::table('archtexttags')
             ->where('AgAtID', '=', $textId)
             ->delete();
@@ -728,14 +715,14 @@ class TagService
             $tag = (string) $tag;
             if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
                 Connection::preparedExecute(
-                    "INSERT INTO {$tbpref}tags2 (T2Text) VALUES (?)",
+                    "INSERT INTO " . Globals::getTablePrefix() . "tags2 (T2Text) VALUES (?)",
                     [$tag]
                 );
             }
             Connection::preparedExecute(
-                "INSERT INTO {$tbpref}archtexttags (AgAtID, AgT2ID)
+                "INSERT INTO " . Globals::getTablePrefix() . "archtexttags (AgAtID, AgT2ID)
                 SELECT ?, T2ID
-                FROM {$tbpref}tags2
+                FROM " . Globals::getTablePrefix() . "tags2
                 WHERE T2Text = ?",
                 [$textId, $tag]
             );
@@ -757,13 +744,12 @@ class TagService
      */
     public static function getWordTagsHtml(int $wordId): string
     {
-        $tbpref = Globals::getTablePrefix();
         $html = '<ul id="termtags">';
 
         if ($wordId > 0) {
             $rows = Connection::preparedFetchAll(
                 'SELECT TgText
-                FROM ' . $tbpref . 'wordtags, ' . $tbpref . 'tags
+                FROM ' . Globals::getTablePrefix() . 'wordtags, ' . Globals::getTablePrefix() . 'tags
                 WHERE TgID = WtTgID AND WtWoID = ?
                 ORDER BY TgText',
                 [$wordId]
@@ -785,13 +771,12 @@ class TagService
      */
     public static function getTextTagsHtml(int $textId): string
     {
-        $tbpref = Globals::getTablePrefix();
         $html = '<ul id="texttags" class="respinput">';
 
         if ($textId > 0) {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2Text
-                FROM {$tbpref}texttags, {$tbpref}tags2
+                FROM " . Globals::getTablePrefix() . "texttags, " . Globals::getTablePrefix() . "tags2
                 WHERE T2ID = TtT2ID AND TtTxID = ?
                 ORDER BY T2Text",
                 [$textId]
@@ -813,13 +798,12 @@ class TagService
      */
     public static function getArchivedTextTagsHtml(int $textId): string
     {
-        $tbpref = Globals::getTablePrefix();
         $html = '<ul id="texttags">';
 
         if ($textId > 0) {
             $rows = Connection::preparedFetchAll(
                 'SELECT T2Text
-                FROM ' . $tbpref . 'archtexttags, ' . $tbpref . 'tags2
+                FROM ' . Globals::getTablePrefix() . 'archtexttags, ' . Globals::getTablePrefix() . 'tags2
                 WHERE T2ID = AgT2ID AND AgAtID = ?
                 ORDER BY T2Text',
                 [$textId]
@@ -842,8 +826,6 @@ class TagService
      */
     public static function getWordTagList(int $wordId, bool $escapeHtml = true): string
     {
-        $tbpref = Globals::getTablePrefix();
-
         $result = Connection::preparedFetchValue(
             "SELECT IFNULL(
                 GROUP_CONCAT(DISTINCT TgText ORDER BY TgText SEPARATOR ','),
@@ -851,10 +833,10 @@ class TagService
             ) AS value
             FROM (
                 (
-                    {$tbpref}words
-                    LEFT JOIN {$tbpref}wordtags ON WoID = WtWoID
+                    " . Globals::getTablePrefix() . "words
+                    LEFT JOIN " . Globals::getTablePrefix() . "wordtags ON WoID = WtWoID
                 )
-                LEFT JOIN {$tbpref}tags ON TgID = WtTgID
+                LEFT JOIN " . Globals::getTablePrefix() . "tags ON TgID = WtTgID
             )
             WHERE WoID = ?",
             [$wordId]
@@ -905,7 +887,6 @@ class TagService
         bool $brackets = true,
         bool $escapeHtml = true
     ): string {
-        $tbpref = Globals::getTablePrefix();
         $lbrack = $brackets ? '[' : '';
         $rbrack = $brackets ? ']' : '';
 
@@ -916,10 +897,10 @@ class TagService
             ) AS value
             FROM (
                 (
-                    {$tbpref}words
-                    LEFT JOIN {$tbpref}wordtags ON WoID = WtWoID
+                    " . Globals::getTablePrefix() . "words
+                    LEFT JOIN " . Globals::getTablePrefix() . "wordtags ON WoID = WtWoID
                 )
-                LEFT JOIN {$tbpref}tags ON TgID = WtTgID
+                LEFT JOIN " . Globals::getTablePrefix() . "tags ON TgID = WtTgID
             )
             WHERE WoID = ?",
             [$wordId]
@@ -950,8 +931,6 @@ class TagService
      */
     public static function addTagToWords(string $tagText, string $idList): string
     {
-        $tbpref = Globals::getTablePrefix();
-
         if ($idList === '()') {
             return "Tag added in 0 Terms";
         }
@@ -962,15 +941,15 @@ class TagService
         }
 
         $sql = 'SELECT WoID
-            FROM ' . $tbpref . 'words
-            LEFT JOIN ' . $tbpref . 'wordtags ON WoID = WtWoID AND WtTgID = ' . $tagId . '
+            FROM ' . Globals::getTablePrefix() . 'words
+            LEFT JOIN ' . Globals::getTablePrefix() . 'wordtags ON WoID = WtWoID AND WtTgID = ' . $tagId . '
             WHERE WtTgID IS NULL AND WoID IN ' . $idList;
         $res = Connection::query($sql);
 
         $count = 0;
         while ($record = mysqli_fetch_assoc($res)) {
             $count += (int) Connection::execute(
-                'INSERT IGNORE INTO ' . $tbpref . 'wordtags (WtWoID, WtTgID)
+                'INSERT IGNORE INTO ' . Globals::getTablePrefix() . 'wordtags (WtWoID, WtTgID)
                 VALUES(' . $record['WoID'] . ', ' . $tagId . ')'
             );
         }
@@ -991,14 +970,12 @@ class TagService
      */
     public static function removeTagFromWords(string $tagText, string $idList): string
     {
-        $tbpref = Globals::getTablePrefix();
-
         if ($idList === '()') {
             return "Tag removed in 0 Terms";
         }
 
         $tagId = Connection::preparedFetchValue(
-            'SELECT TgID AS value FROM ' . $tbpref . 'tags WHERE TgText = ?',
+            'SELECT TgID AS value FROM ' . Globals::getTablePrefix() . 'tags WHERE TgText = ?',
             [$tagText]
         );
 
@@ -1006,7 +983,7 @@ class TagService
             return "Tag " . $tagText . " not found";
         }
 
-        $sql = 'SELECT WoID FROM ' . $tbpref . 'words WHERE WoID IN ' . $idList;
+        $sql = 'SELECT WoID FROM ' . Globals::getTablePrefix() . 'words WHERE WoID IN ' . $idList;
         $res = Connection::query($sql);
 
         $count = 0;
@@ -1032,8 +1009,6 @@ class TagService
      */
     public static function addTagToTexts(string $tagText, string $idList): string
     {
-        $tbpref = Globals::getTablePrefix();
-
         if ($idList === '()') {
             return "Tag added in 0 Texts";
         }
@@ -1043,15 +1018,15 @@ class TagService
             return "Failed to create tag";
         }
 
-        $sql = 'SELECT TxID FROM ' . $tbpref . 'texts
-            LEFT JOIN ' . $tbpref . 'texttags ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
+        $sql = 'SELECT TxID FROM ' . Globals::getTablePrefix() . 'texts
+            LEFT JOIN ' . Globals::getTablePrefix() . 'texttags ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
             WHERE TtT2ID IS NULL AND TxID IN ' . $idList;
         $res = Connection::query($sql);
 
         $count = 0;
         while ($record = mysqli_fetch_assoc($res)) {
             $count += (int) Connection::execute(
-                'INSERT IGNORE INTO ' . $tbpref . 'texttags (TtTxID, TtT2ID)
+                'INSERT IGNORE INTO ' . Globals::getTablePrefix() . 'texttags (TtTxID, TtT2ID)
                 VALUES(' . $record['TxID'] . ', ' . $tagId . ')'
             );
         }
@@ -1072,14 +1047,12 @@ class TagService
      */
     public static function removeTagFromTexts(string $tagText, string $idList): string
     {
-        $tbpref = Globals::getTablePrefix();
-
         if ($idList === '()') {
             return "Tag removed in 0 Texts";
         }
 
         $tagId = Connection::preparedFetchValue(
-            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2 WHERE T2Text = ?',
+            'SELECT T2ID AS value FROM ' . Globals::getTablePrefix() . 'tags2 WHERE T2Text = ?',
             [$tagText]
         );
 
@@ -1087,7 +1060,7 @@ class TagService
             return "Tag " . $tagText . " not found";
         }
 
-        $sql = 'SELECT TxID FROM ' . $tbpref . 'texts WHERE TxID IN ' . $idList;
+        $sql = 'SELECT TxID FROM ' . Globals::getTablePrefix() . 'texts WHERE TxID IN ' . $idList;
         $res = Connection::query($sql);
 
         $count = 0;
@@ -1113,8 +1086,6 @@ class TagService
      */
     public static function addTagToArchivedTexts(string $tagText, string $idList): string
     {
-        $tbpref = Globals::getTablePrefix();
-
         if ($idList === '()') {
             return "Tag added in 0 Texts";
         }
@@ -1124,15 +1095,15 @@ class TagService
             return "Failed to create tag";
         }
 
-        $sql = 'SELECT AtID FROM ' . $tbpref . 'archivedtexts
-            LEFT JOIN ' . $tbpref . 'archtexttags ON AtID = AgAtID AND AgT2ID = ' . $tagId . '
+        $sql = 'SELECT AtID FROM ' . Globals::getTablePrefix() . 'archivedtexts
+            LEFT JOIN ' . Globals::getTablePrefix() . 'archtexttags ON AtID = AgAtID AND AgT2ID = ' . $tagId . '
             WHERE AgT2ID IS NULL AND AtID IN ' . $idList;
         $res = Connection::query($sql);
 
         $count = 0;
         while ($record = mysqli_fetch_assoc($res)) {
             $count += (int) Connection::execute(
-                'INSERT IGNORE INTO ' . $tbpref . 'archtexttags (AgAtID, AgT2ID)
+                'INSERT IGNORE INTO ' . Globals::getTablePrefix() . 'archtexttags (AgAtID, AgT2ID)
                 VALUES(' . $record['AtID'] . ', ' . $tagId . ')'
             );
         }
@@ -1155,14 +1126,12 @@ class TagService
         string $tagText,
         string $idList
     ): string {
-        $tbpref = Globals::getTablePrefix();
-
         if ($idList === '()') {
             return "Tag removed in 0 Texts";
         }
 
         $tagId = Connection::preparedFetchValue(
-            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2 WHERE T2Text = ?',
+            'SELECT T2ID AS value FROM ' . Globals::getTablePrefix() . 'tags2 WHERE T2Text = ?',
             [$tagText]
         );
 
@@ -1170,7 +1139,7 @@ class TagService
             return "Tag " . $tagText . " not found";
         }
 
-        $sql = 'SELECT AtID FROM ' . $tbpref . 'archivedtexts WHERE AtID IN ' . $idList;
+        $sql = 'SELECT AtID FROM ' . Globals::getTablePrefix() . 'archivedtexts WHERE AtID IN ' . $idList;
         $res = Connection::query($sql);
 
         $count = 0;
@@ -1202,7 +1171,6 @@ class TagService
         int|string|null $selected,
         int|string $langId
     ): string {
-        $tbpref = Globals::getTablePrefix();
         $selected = $selected ?? '';
 
         $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
@@ -1211,7 +1179,7 @@ class TagService
         if ($langId === '') {
             $rows = Connection::preparedFetchAll(
                 "SELECT TgID, TgText
-                FROM {$tbpref}words, {$tbpref}tags, {$tbpref}wordtags
+                FROM " . Globals::getTablePrefix() . "words, " . Globals::getTablePrefix() . "tags, " . Globals::getTablePrefix() . "wordtags
                 WHERE TgID = WtTgID AND WtWoID = WoID
                 GROUP BY TgID
                 ORDER BY UPPER(TgText)",
@@ -1220,7 +1188,7 @@ class TagService
         } else {
             $rows = Connection::preparedFetchAll(
                 "SELECT TgID, TgText
-                FROM {$tbpref}words, {$tbpref}tags, {$tbpref}wordtags
+                FROM " . Globals::getTablePrefix() . "words, " . Globals::getTablePrefix() . "tags, " . Globals::getTablePrefix() . "wordtags
                 WHERE TgID = WtTgID AND WtWoID = WoID AND WoLgID = ?
                 GROUP BY TgID
                 ORDER BY UPPER(TgText)",
@@ -1256,7 +1224,6 @@ class TagService
         int|string|null $selected,
         int|string $langId
     ): string {
-        $tbpref = Globals::getTablePrefix();
         $selected = $selected ?? '';
 
         $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
@@ -1265,7 +1232,7 @@ class TagService
         if ($langId === '') {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM {$tbpref}texts, {$tbpref}tags2, {$tbpref}texttags
+                FROM " . Globals::getTablePrefix() . "texts, " . Globals::getTablePrefix() . "tags2, " . Globals::getTablePrefix() . "texttags
                 WHERE T2ID = TtT2ID AND TtTxID = TxID
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1274,7 +1241,7 @@ class TagService
         } else {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM {$tbpref}texts, {$tbpref}tags2, {$tbpref}texttags
+                FROM " . Globals::getTablePrefix() . "texts, " . Globals::getTablePrefix() . "tags2, " . Globals::getTablePrefix() . "texttags
                 WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxLgID = ?
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1310,7 +1277,6 @@ class TagService
         int|string $langId,
         int|string|null $selected
     ): string {
-        $tbpref = Globals::getTablePrefix();
         $selected = $selected ?? '';
         $untaggedOption = '';
 
@@ -1321,9 +1287,9 @@ class TagService
             $rows = Connection::preparedFetchAll(
                 'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
                 GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
-                FROM ' . $tbpref . 'texts
-                LEFT JOIN ' . $tbpref . 'texttags ON TxID = TtTxID
-                LEFT JOIN ' . $tbpref . 'tags2 ON TtT2ID = T2ID
+                FROM ' . Globals::getTablePrefix() . 'texts
+                LEFT JOIN ' . Globals::getTablePrefix() . 'texttags ON TxID = TtTxID
+                LEFT JOIN ' . Globals::getTablePrefix() . 'tags2 ON TtT2ID = T2ID
                 WHERE TxLgID = ?
                 GROUP BY UPPER(TagName)',
                 [$langId]
@@ -1332,9 +1298,9 @@ class TagService
             $rows = Connection::preparedFetchAll(
                 'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
                 GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
-                FROM ' . $tbpref . 'texts
-                LEFT JOIN ' . $tbpref . 'texttags ON TxID = TtTxID
-                LEFT JOIN ' . $tbpref . 'tags2 ON TtT2ID = T2ID
+                FROM ' . Globals::getTablePrefix() . 'texts
+                LEFT JOIN ' . Globals::getTablePrefix() . 'texttags ON TxID = TtTxID
+                LEFT JOIN ' . Globals::getTablePrefix() . 'tags2 ON TtT2ID = T2ID
                 GROUP BY UPPER(TagName)',
                 []
             );
@@ -1367,7 +1333,6 @@ class TagService
         int|string|null $selected,
         int|string $langId
     ): string {
-        $tbpref = Globals::getTablePrefix();
         $selected = $selected ?? '';
 
         $html = '<option value=""' . FormHelper::getSelected($selected, '') . '>';
@@ -1376,7 +1341,7 @@ class TagService
         if ($langId === '') {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM {$tbpref}archivedtexts, {$tbpref}tags2, {$tbpref}archtexttags
+                FROM " . Globals::getTablePrefix() . "archivedtexts, " . Globals::getTablePrefix() . "tags2, " . Globals::getTablePrefix() . "archtexttags
                 WHERE T2ID = AgT2ID AND AgAtID = AtID
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1385,7 +1350,7 @@ class TagService
         } else {
             $rows = Connection::preparedFetchAll(
                 "SELECT T2ID, T2Text
-                FROM {$tbpref}archivedtexts, {$tbpref}tags2, {$tbpref}archtexttags
+                FROM " . Globals::getTablePrefix() . "archivedtexts, " . Globals::getTablePrefix() . "tags2, " . Globals::getTablePrefix() . "archtexttags
                 WHERE T2ID = AgT2ID AND AgAtID = AtID AND AtLgID = ?
                 GROUP BY T2ID
                 ORDER BY UPPER(T2Text)",
@@ -1422,20 +1387,18 @@ class TagService
      */
     private static function getOrCreateTermTag(string $tagText): ?int
     {
-        $tbpref = Globals::getTablePrefix();
-
         $tagId = Connection::preparedFetchValue(
-            'SELECT TgID AS value FROM ' . $tbpref . 'tags WHERE TgText = ?',
+            'SELECT TgID AS value FROM ' . Globals::getTablePrefix() . 'tags WHERE TgText = ?',
             [$tagText]
         );
 
         if (!isset($tagId)) {
             Connection::preparedExecute(
-                'INSERT INTO ' . $tbpref . 'tags (TgText) VALUES (?)',
+                'INSERT INTO ' . Globals::getTablePrefix() . 'tags (TgText) VALUES (?)',
                 [$tagText]
             );
             $tagId = Connection::preparedFetchValue(
-                'SELECT TgID AS value FROM ' . $tbpref . 'tags WHERE TgText = ?',
+                'SELECT TgID AS value FROM ' . Globals::getTablePrefix() . 'tags WHERE TgText = ?',
                 [$tagText]
             );
         }
@@ -1456,8 +1419,6 @@ class TagService
      */
     public static function saveWordTagsFromArray(int $wordId, array $tagNames): void
     {
-        $tbpref = Globals::getTablePrefix();
-
         // Delete existing tags for this word
         QueryBuilder::table('wordtags')
             ->where('WtWoID', '=', $wordId)
@@ -1479,16 +1440,16 @@ class TagService
             // Create tag if it doesn't exist
             if (!in_array($tag, $_SESSION['TAGS'])) {
                 Connection::preparedExecute(
-                    "INSERT INTO {$tbpref}tags (TgText) VALUES (?)",
+                    "INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES (?)",
                     [$tag]
                 );
             }
 
             // Link tag to word
             Connection::preparedExecute(
-                "INSERT INTO {$tbpref}wordtags (WtWoID, WtTgID)
+                "INSERT INTO " . Globals::getTablePrefix() . "wordtags (WtWoID, WtTgID)
                 SELECT ?, TgID
-                FROM {$tbpref}tags
+                FROM " . Globals::getTablePrefix() . "tags
                 WHERE TgText = ?",
                 [$wordId, $tag]
             );
@@ -1507,11 +1468,9 @@ class TagService
      */
     public static function getWordTagsArray(int $wordId): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         $result = Connection::preparedFetchAll(
-            "SELECT TgText FROM {$tbpref}wordtags
-             JOIN {$tbpref}tags ON TgID = WtTgID
+            "SELECT TgText FROM " . Globals::getTablePrefix() . "wordtags
+             JOIN " . Globals::getTablePrefix() . "tags ON TgID = WtTgID
              WHERE WtWoID = ?
              ORDER BY TgText",
             [$wordId]
@@ -1529,20 +1488,18 @@ class TagService
      */
     private static function getOrCreateTextTag(string $tagText): ?int
     {
-        $tbpref = Globals::getTablePrefix();
-
         $tagId = Connection::preparedFetchValue(
-            'SELECT T2ID AS value FROM ' . $tbpref . 'tags2 WHERE T2Text = ?',
+            'SELECT T2ID AS value FROM ' . Globals::getTablePrefix() . 'tags2 WHERE T2Text = ?',
             [$tagText]
         );
 
         if (!isset($tagId)) {
             Connection::preparedExecute(
-                'INSERT INTO ' . $tbpref . 'tags2 (T2Text) VALUES (?)',
+                'INSERT INTO ' . Globals::getTablePrefix() . 'tags2 (T2Text) VALUES (?)',
                 [$tagText]
             );
             $tagId = Connection::preparedFetchValue(
-                'SELECT T2ID AS value FROM ' . $tbpref . 'tags2 WHERE T2Text = ?',
+                'SELECT T2ID AS value FROM ' . Globals::getTablePrefix() . 'tags2 WHERE T2Text = ?',
                 [$tagText]
             );
         }

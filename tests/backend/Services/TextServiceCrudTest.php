@@ -35,7 +35,6 @@ require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 class TextServiceCrudTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private TextService $service;
     private array $createdTextIds = [];
@@ -57,10 +56,9 @@ class TextServiceCrudTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
 
             // Create a test language
             $existingLang = Connection::fetchValue(
@@ -90,7 +88,7 @@ class TextServiceCrudTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'TextServiceCrudTestLang'");
     }
 
@@ -107,7 +105,7 @@ class TextServiceCrudTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Clean up created texts
         foreach ($this->createdTextIds as $id) {
@@ -132,7 +130,7 @@ class TextServiceCrudTest extends TestCase
      */
     private function createTestText(string $title, string $text): int
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query(
             "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
             "VALUES (" . self::$testLangId . ", " .
@@ -155,7 +153,7 @@ class TextServiceCrudTest extends TestCase
      */
     private function createTestArchivedText(string $title, string $text): int
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query(
             "INSERT INTO {$tbpref}archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI) " .
             "VALUES (" . self::$testLangId . ", " .
@@ -321,7 +319,7 @@ class TextServiceCrudTest extends TestCase
         $this->assertNull($this->service->getTextById($textId));
 
         // Find in archived texts
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $archivedId = Connection::fetchValue(
             "SELECT AtID AS value FROM {$tbpref}archivedtexts WHERE AtTitle = 'Archive Test' LIMIT 1"
         );
@@ -356,7 +354,7 @@ class TextServiceCrudTest extends TestCase
         $this->assertNull($this->service->getTextById($textId2));
 
         // Find and cleanup archived texts
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $archivedIds = [];
         $res = Connection::query(
             "SELECT AtID FROM {$tbpref}archivedtexts WHERE AtTitle LIKE 'Archive Multi%'"
@@ -416,7 +414,7 @@ class TextServiceCrudTest extends TestCase
         $this->assertIsString($message);
 
         // Find created texts
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $res = Connection::query(
             "SELECT TxID FROM {$tbpref}texts WHERE TxTitle LIKE 'Unarchive Multi%'"
         );

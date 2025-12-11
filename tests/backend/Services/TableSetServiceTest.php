@@ -25,7 +25,6 @@ require_once __DIR__ . '/../../../src/backend/Services/TableSetService.php';
 class TableSetServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private TableSetService $service;
 
     public static function setUpBeforeClass(): void
@@ -44,7 +43,6 @@ class TableSetServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void

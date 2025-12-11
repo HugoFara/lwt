@@ -25,7 +25,6 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
 class MaintenanceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static ?int $testLanguageId = null;
 
     public static function setUpBeforeClass(): void
@@ -44,7 +43,6 @@ class MaintenanceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             self::createTestData();
@@ -53,7 +51,7 @@ class MaintenanceTest extends TestCase
 
     private static function createTestData(): void
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Clean up any existing test language first
         Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID IN (SELECT LgID FROM {$tbpref}languages WHERE LgName = 'Test Maintenance Language')");
@@ -92,7 +90,7 @@ class MaintenanceTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Clean up test language and associated data
         if (self::$testLanguageId) {
@@ -187,7 +185,7 @@ class MaintenanceTest extends TestCase
         }
 
         // Create a temporary empty table
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("CREATE TEMPORARY TABLE {$tbpref}test_empty (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(50)
@@ -220,7 +218,7 @@ class MaintenanceTest extends TestCase
         }
 
         // Get current auto_increment value for languages
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $before = Connection::fetchValue(
             "SELECT AUTO_INCREMENT as value
              FROM information_schema.tables
@@ -262,7 +260,7 @@ class MaintenanceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert a test word with WoWordCount = 0
         $sql = "INSERT INTO {$tbpref}words (
@@ -298,7 +296,7 @@ class MaintenanceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert a multi-word expression with WoWordCount = 0
         $sql = "INSERT INTO {$tbpref}words (
@@ -334,7 +332,7 @@ class MaintenanceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert a word with existing word count
         $sql = "INSERT INTO {$tbpref}words (
@@ -378,7 +376,7 @@ class MaintenanceTest extends TestCase
             $this->markTestSkipped('MeCab not installed - skipping Japanese word count test');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create a Japanese-like language with MECAB
         $sql = "INSERT INTO {$tbpref}languages (
@@ -424,7 +422,7 @@ class MaintenanceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Insert multiple words with WoWordCount = 0
         // The function processes in batches of 1000
@@ -465,7 +463,7 @@ class MaintenanceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create a language that supports accented characters
         $sql = "INSERT INTO {$tbpref}languages (
@@ -515,7 +513,7 @@ class MaintenanceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create a Chinese-like language with LgSplitEachChar = 1
         $sql = "INSERT INTO {$tbpref}languages (

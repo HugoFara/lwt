@@ -27,7 +27,6 @@ require_once __DIR__ . '/../../../src/backend/Services/TextPrintService.php';
 class TextPrintServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private static int $testTextId = 0;
 
@@ -47,11 +46,10 @@ class TextPrintServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
             $existingLang = Connection::fetchValue(
                 "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'TextPrintTestLang' LIMIT 1"
             );
@@ -98,7 +96,7 @@ class TextPrintServiceTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Clean up test data
         Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = " . self::$testTextId);
         Connection::query("DELETE FROM {$tbpref}sentences WHERE SeTxID = " . self::$testTextId);
@@ -198,7 +196,7 @@ class TextPrintServiceTest extends TestCase
         }
 
         // Create a text without annotation
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query(
             "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
             "VALUES (" . self::$testLangId . ", 'NoAnnotationTest', 'Test text.', '')"
@@ -235,7 +233,7 @@ class TextPrintServiceTest extends TestCase
         }
 
         // Create a text without annotation
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query(
             "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
             "VALUES (" . self::$testLangId . ", 'NoAnnotationTest2', 'Test text.', '')"

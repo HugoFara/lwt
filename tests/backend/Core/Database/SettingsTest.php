@@ -26,7 +26,6 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
 class SettingsTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
 
     public static function setUpBeforeClass(): void
     {
@@ -44,7 +43,6 @@ class SettingsTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function tearDown(): void
@@ -54,7 +52,7 @@ class SettingsTest extends TestCase
         }
 
         // Clean up test settings after each test
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_%'");
     }
 
@@ -163,7 +161,7 @@ class SettingsTest extends TestCase
         }
 
         // Directly insert value with whitespace to test trimming
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_whitespace'");
         Connection::query("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_whitespace', '  value  ')");
 
@@ -177,7 +175,7 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Clean up any previously saved SQL injection key
         $injectionKey = "key'; DROP TABLE settings; --";
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
@@ -245,7 +243,7 @@ class SettingsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Use a different injection key that wasn't previously saved
         $injectionKey = "newkey'; DROP TABLE settings; --";
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));

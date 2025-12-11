@@ -29,7 +29,6 @@ require_once __DIR__ . '/../../../src/backend/Services/FeedService.php';
 class FeedsControllerWizardTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private static int $testFeedId = 0;
     private array $originalRequest;
@@ -54,10 +53,9 @@ class FeedsControllerWizardTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
 
             // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
             $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM {$tbpref}languages");
@@ -106,7 +104,7 @@ class FeedsControllerWizardTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Clean up test feeds
         Connection::query("DELETE FROM {$tbpref}feedlinks WHERE FlNfID IN (SELECT NfID FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Wizard Test%')");
         Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Wizard Test%'");
@@ -148,7 +146,7 @@ class FeedsControllerWizardTest extends TestCase
         }
 
         // Clean up test feeds
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}feedlinks WHERE FlNfID IN (SELECT NfID FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Ctrl Test Wizard%')");
         Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Ctrl Test Wizard%'");
     }

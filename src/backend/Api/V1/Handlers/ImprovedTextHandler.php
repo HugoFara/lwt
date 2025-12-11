@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace Lwt\Api\V1\Handlers;
 
+use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
@@ -28,7 +29,6 @@ class ImprovedTextHandler
      */
     public function makeTrans(int $i, ?int $wid, string $trans, string $word, int $lang): string
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
         $trans = trim($trans);
         $widset = is_numeric($wid);
         $r = "";
@@ -36,7 +36,7 @@ class ImprovedTextHandler
         $setDefault = null;
         if ($widset) {
             $alltrans = (string) Connection::fetchValue(
-                "SELECT WoTranslation AS value FROM {$tbpref}words
+                "SELECT WoTranslation AS value FROM " . Globals::getTablePrefix() . "words
                 WHERE WoID = $wid"
             );
             $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
@@ -93,10 +93,9 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
      */
     public function getTranslations(int $wordId): array
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
         $translations = array();
         $alltrans = (string) Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM {$tbpref}words
+            "SELECT WoTranslation AS value FROM " . Globals::getTablePrefix() . "words
             WHERE WoID = $wordId"
         );
         $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
@@ -120,9 +119,8 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
      */
     public function getTermTranslations(string $wordlc, int $textid): array
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
         $sql = "SELECT TxLgID, TxAnnotatedText
-        FROM {$tbpref}texts WHERE TxID = $textid";
+        FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textid";
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         $langid = (int)$record['TxLgID'];
@@ -173,7 +171,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
             $wid = (int)$vals[2];
             $tempWid = (int)Connection::fetchValue(
                 "SELECT COUNT(WoID) AS value
-                FROM {$tbpref}words
+                FROM " . Globals::getTablePrefix() . "words
                 WHERE WoID = $wid"
             );
             if ($tempWid < 1) {
@@ -200,9 +198,8 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
      */
     public function editTermForm(int $textid): string
     {
-        $tbpref = \Lwt\Core\Globals::getTablePrefix();
         $sql = "SELECT TxLgID, TxAnnotatedText
-        FROM {$tbpref}texts WHERE TxID = $textid";
+        FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textid";
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         $langid = (int) $record['TxLgID'];
@@ -214,7 +211,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         mysqli_free_result($res);
 
         $sql = "SELECT LgTextSize, LgRightToLeft
-        FROM {$tbpref}languages WHERE LgID = $langid";
+        FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $langid";
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         $textsize = (int)$record['LgTextSize'];
@@ -261,7 +258,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
                     if (is_numeric($strWid)) {
                         $tempWid = (int)Connection::fetchValue(
                             "SELECT COUNT(WoID) AS value
-                            FROM {$tbpref}words
+                            FROM " . Globals::getTablePrefix() . "words
                             WHERE WoID = $strWid"
                         );
                         if ($tempWid < 1) {

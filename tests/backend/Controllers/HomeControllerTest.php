@@ -30,7 +30,6 @@ require_once __DIR__ . '/../../../src/backend/Services/HomeService.php';
 class HomeControllerTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private array $originalServer;
     private array $originalGet;
     private array $originalPost;
@@ -52,7 +51,6 @@ class HomeControllerTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void

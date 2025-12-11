@@ -29,7 +29,6 @@ class ValidationTest extends TestCase
     private static ?int $testTextId = null;
     private static ?int $testTagId = null;
     private static ?int $testTag2Id = null;
-    private static string $tbpref = '';
 
     public static function setUpBeforeClass(): void
     {
@@ -47,7 +46,6 @@ class ValidationTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             self::createTestData();
@@ -56,7 +54,7 @@ class ValidationTest extends TestCase
 
     private static function createTestData(): void
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Clean up any existing test data first
         Connection::query("DELETE FROM {$tbpref}texttags WHERE TtTxID IN (SELECT TxID FROM {$tbpref}texts WHERE TxTitle = 'Test Validation Text')");
@@ -111,7 +109,7 @@ class ValidationTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Clean up test data in reverse order
         if (self::$testTag2Id) {

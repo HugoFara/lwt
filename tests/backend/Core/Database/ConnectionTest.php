@@ -25,7 +25,6 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
 class ConnectionTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
 
     public static function setUpBeforeClass(): void
     {
@@ -43,7 +42,6 @@ class ConnectionTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function tearDown(): void
@@ -53,7 +51,7 @@ class ConnectionTest extends TestCase
         }
 
         // Clean up test data after each test
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_conn_%'");
         Connection::query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_conn_%'");
     }
@@ -106,7 +104,7 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $result = Connection::query("SELECT COUNT(*) as cnt FROM {$tbpref}settings");
         
         $this->assertInstanceOf(\mysqli_result::class, $result);
@@ -119,11 +117,11 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $result = Connection::query("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_conn_tag')");
-        
+
         $this->assertTrue($result);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_conn_tag'");
     }
@@ -148,7 +146,7 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $rows = Connection::fetchAll("SELECT * FROM {$tbpref}settings LIMIT 5");
         
         $this->assertIsArray($rows);
@@ -166,7 +164,7 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $rows = Connection::fetchAll("SELECT * FROM {$tbpref}settings WHERE StKey = 'nonexistent_key_xyz'");
         
         $this->assertIsArray($rows);
@@ -179,13 +177,13 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // INSERT returns true, not a result set
         $rows = Connection::fetchAll("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_conn_fetchall')");
-        
+
         $this->assertIsArray($rows);
         $this->assertEmpty($rows);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}tags WHERE TgText = 'test_conn_fetchall'");
     }
@@ -198,16 +196,16 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Insert a test setting
         Connection::query("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_conn_one', 'value1')");
-        
+
         $row = Connection::fetchOne("SELECT * FROM {$tbpref}settings WHERE StKey = 'test_conn_one'");
-        
+
         $this->assertIsArray($row);
         $this->assertEquals('test_conn_one', $row['StKey']);
         $this->assertEquals('value1', $row['StValue']);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_one'");
     }
@@ -218,7 +216,7 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $row = Connection::fetchOne("SELECT * FROM {$tbpref}settings WHERE StKey = 'nonexistent_key_xyz'");
         
         $this->assertNull($row);
@@ -230,7 +228,7 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $row = Connection::fetchOne("SELECT * FROM {$tbpref}settings LIMIT 1");
         
         $this->assertIsArray($row);
@@ -243,7 +241,7 @@ class ConnectionTest extends TestCase
         }
 
         // Test with a non-SELECT query (returns true from mysqli_query)
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Use SHOW TABLES which returns a result set, or a query that doesn't return rows
         $result = Connection::fetchOne("DO 1");
         
@@ -258,13 +256,13 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_conn_value', 'myvalue')");
-        
+
         $value = Connection::fetchValue("SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'test_conn_value'");
-        
+
         $this->assertEquals('myvalue', $value);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_value'");
     }
@@ -275,13 +273,13 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_conn_custom', 'customvalue')");
-        
+
         $value = Connection::fetchValue("SELECT StValue FROM {$tbpref}settings WHERE StKey = 'test_conn_custom'", 'StValue');
-        
+
         $this->assertEquals('customvalue', $value);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_custom'");
     }
@@ -292,7 +290,7 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $value = Connection::fetchValue("SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'nonexistent_xyz'");
         
         $this->assertNull($value);
@@ -304,7 +302,7 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $value = Connection::fetchValue("SELECT StKey FROM {$tbpref}settings LIMIT 1", 'nonexistent_column');
         
         $this->assertNull($value);
@@ -318,9 +316,9 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::execute("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_conn_exec')");
-        
+
         $affected = Connection::execute("DELETE FROM {$tbpref}tags WHERE TgText = 'test_conn_exec'");
         
         $this->assertGreaterThanOrEqual(1, $affected);
@@ -332,13 +330,13 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_conn_update', 'old')");
-        
+
         $affected = Connection::execute("UPDATE {$tbpref}settings SET StValue = 'new' WHERE StKey = 'test_conn_update'");
-        
+
         $this->assertEquals(1, $affected);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_update'");
     }
@@ -351,13 +349,13 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::execute("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_conn_lastid')");
-        
+
         $lastId = Connection::lastInsertId();
-        
+
         $this->assertGreaterThan(0, $lastId);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}tags WHERE TgID = $lastId");
     }
@@ -505,17 +503,17 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $testValue = "test's \"special\" \\ value";
-        
+
         $escaped = Connection::escapeString($testValue);
         Connection::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_conn_escape', $escaped)");
-        
+
         $retrieved = Connection::fetchValue("SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'test_conn_escape'");
-        
+
         // The value should be retrieved exactly as it was inserted (after unescaping by MySQL)
         $this->assertEquals($testValue, $retrieved);
-        
+
         // Clean up
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_escape'");
     }
@@ -526,22 +524,22 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
-        
+        $tbpref = Globals::getTablePrefix();
+
         // Insert
         Connection::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_conn_chain', 'chain_val')");
-        
+
         // Fetch
         $value = Connection::fetchValue("SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'test_conn_chain'");
         $this->assertEquals('chain_val', $value);
-        
+
         // Update
         Connection::execute("UPDATE {$tbpref}settings SET StValue = 'chain_val_2' WHERE StKey = 'test_conn_chain'");
-        
+
         // Fetch again
         $value = Connection::fetchValue("SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'test_conn_chain'");
         $this->assertEquals('chain_val_2', $value);
-        
+
         // Delete
         $affected = Connection::execute("DELETE FROM {$tbpref}settings WHERE StKey = 'test_conn_chain'");
         $this->assertEquals(1, $affected);
@@ -555,14 +553,14 @@ class ConnectionTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
-        
+        $tbpref = Globals::getTablePrefix();
+
         // Use tags table which has AUTO_INCREMENT
         Connection::execute("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_last_insert_id')");
         $lastId = Connection::lastInsertId();
-        
+
         $this->assertGreaterThan(0, $lastId);
-        
+
         // Clean up
         Connection::execute("DELETE FROM {$tbpref}tags WHERE TgText = 'test_last_insert_id'");
     }

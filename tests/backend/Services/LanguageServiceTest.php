@@ -29,7 +29,6 @@ require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 class LanguageServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private LanguageService $service;
     private static array $testLanguageIds = [];
 
@@ -52,7 +51,6 @@ class LanguageServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -71,7 +69,7 @@ class LanguageServiceTest extends TestCase
         }
 
         // Clean up test languages after each test
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'Test_%'");
         Connection::query("DELETE FROM {$tbpref}languages WHERE LgName LIKE 'TestLang%'");
         self::$testLanguageIds = [];
@@ -96,7 +94,7 @@ class LanguageServiceTest extends TestCase
      */
     private function createTestLanguage(string $name): int
     {
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query(
             "INSERT INTO {$tbpref}languages (
                 LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
@@ -146,7 +144,7 @@ class LanguageServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Insert language with empty name (placeholder)
         Connection::query(
             "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters)
@@ -467,7 +465,7 @@ class LanguageServiceTest extends TestCase
         }
 
         $id = $this->createTestLanguage('TestLang_WithTexts');
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Add a related text
         Connection::query(
@@ -491,7 +489,7 @@ class LanguageServiceTest extends TestCase
         }
 
         $id = $this->createTestLanguage('TestLang_WithWords');
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Add a related word
         Connection::query(
@@ -533,7 +531,7 @@ class LanguageServiceTest extends TestCase
         }
 
         $id = $this->createTestLanguage('TestLang_WithData');
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Add texts
         Connection::query(
@@ -581,7 +579,7 @@ class LanguageServiceTest extends TestCase
         }
 
         $id = $this->createTestLanguage('TestLang_CannotDelete');
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Add a related text
         Connection::query(
@@ -686,7 +684,7 @@ class LanguageServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // First create a valid test language to ensure we have at least one result
         $this->createTestLanguage('TestLang_StatsNotEmpty');

@@ -71,9 +71,8 @@ class LanguageService
             return $this->createEmptyLanguage();
         }
 
-        $tbpref = Globals::getTablePrefix();
         $record = Connection::preparedFetchOne(
-            "SELECT * FROM {$tbpref}languages WHERE LgID = ?",
+            "SELECT * FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lid]
         );
 
@@ -168,9 +167,8 @@ class LanguageService
      */
     public function exists(int $lid): bool
     {
-        $tbpref = Globals::getTablePrefix();
         $count = Connection::preparedFetchValue(
-            "SELECT COUNT(*) as value FROM {$tbpref}languages WHERE LgID = ?",
+            "SELECT COUNT(*) as value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lid]
         );
         return $count > 0;
@@ -183,12 +181,11 @@ class LanguageService
      */
     public function create(): string
     {
-        $tbpref = Globals::getTablePrefix();
         $data = $this->getLanguageDataFromRequest();
 
         // Check if there's an empty language record to reuse
         $val = Connection::fetchValue(
-            "SELECT MIN(LgID) AS value FROM {$tbpref}languages WHERE LgName=''"
+            "SELECT MIN(LgID) AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName=''"
         );
 
         $sqlData = $this->buildLanguageSql($data, $val !== null ? (int)$val : null);
@@ -249,8 +246,6 @@ class LanguageService
      */
     private function buildLanguageSql(array $data, ?int $id = null): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         $columns = [
             'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
             'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
@@ -280,11 +275,11 @@ class LanguageService
         if ($id === null) {
             // INSERT
             $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-            $sql = "INSERT INTO {$tbpref}languages (" . implode(', ', $columns) . ") VALUES($placeholders)";
+            $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (" . implode(', ', $columns) . ") VALUES($placeholders)";
         } else {
             // UPDATE
             $setParts = array_map(fn($col) => "$col = ?", $columns);
-            $sql = "UPDATE {$tbpref}languages SET " . implode(', ', $setParts) . " WHERE LgID = ?";
+            $sql = "UPDATE " . Globals::getTablePrefix() . "languages SET " . implode(', ', $setParts) . " WHERE LgID = ?";
             $params[] = $id;
         }
 
@@ -300,12 +295,11 @@ class LanguageService
      */
     public function update(int $lid): string
     {
-        $tbpref = Globals::getTablePrefix();
         $data = $this->getLanguageDataFromRequest();
 
         // Get old values for comparison
         $record = Connection::preparedFetchOne(
-            "SELECT * FROM {$tbpref}languages WHERE LgID = ?",
+            "SELECT * FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lid]
         );
         if ($record === false || $record === null) {
@@ -373,15 +367,14 @@ class LanguageService
             ->where('Ti2LgID', '=', $lid)
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
-        $tbpref = Globals::getTablePrefix();
         Connection::preparedExecute(
-            "UPDATE {$tbpref}words SET WoWordCount = 0 WHERE WoLgID = ?",
+            "UPDATE " . Globals::getTablePrefix() . "words SET WoWordCount = 0 WHERE WoLgID = ?",
             [$lid]
         );
         Maintenance::initWordCount();
 
         $rows = Connection::preparedFetchAll(
-            "SELECT TxID, TxText FROM {$tbpref}texts WHERE TxLgID = ? ORDER BY TxID",
+            "SELECT TxID, TxText FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID = ? ORDER BY TxID",
             [$lid]
         );
         $count = 0;
@@ -427,23 +420,21 @@ class LanguageService
      */
     public function getRelatedDataCounts(int $lid): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         return [
             'texts' => (int) Connection::preparedFetchValue(
-                "SELECT count(TxID) as value FROM {$tbpref}texts where TxLgID = ?",
+                "SELECT count(TxID) as value FROM " . Globals::getTablePrefix() . "texts where TxLgID = ?",
                 [$lid]
             ),
             'archivedTexts' => (int) Connection::preparedFetchValue(
-                "SELECT count(AtID) as value FROM {$tbpref}archivedtexts where AtLgID = ?",
+                "SELECT count(AtID) as value FROM " . Globals::getTablePrefix() . "archivedtexts where AtLgID = ?",
                 [$lid]
             ),
             'words' => (int) Connection::preparedFetchValue(
-                "SELECT count(WoID) as value FROM {$tbpref}words where WoLgID = ?",
+                "SELECT count(WoID) as value FROM " . Globals::getTablePrefix() . "words where WoLgID = ?",
                 [$lid]
             ),
             'feeds' => (int) Connection::preparedFetchValue(
-                "SELECT count(NfID) as value FROM {$tbpref}newsfeeds where NfLgID = ?",
+                "SELECT count(NfID) as value FROM " . Globals::getTablePrefix() . "newsfeeds where NfLgID = ?",
                 [$lid]
             ),
         ];
@@ -466,9 +457,8 @@ class LanguageService
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-        $tbpref = Globals::getTablePrefix();
         $rows = Connection::preparedFetchAll(
-            "SELECT TxID, TxText FROM {$tbpref}texts WHERE TxLgID = ? ORDER BY TxID",
+            "SELECT TxID, TxText FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID = ? ORDER BY TxID",
             [$lid]
         );
         foreach ($rows as $record) {
@@ -478,11 +468,11 @@ class LanguageService
         }
 
         $sentencesAdded = Connection::preparedFetchValue(
-            "SELECT count(*) as value FROM {$tbpref}sentences where SeLgID = ?",
+            "SELECT count(*) as value FROM " . Globals::getTablePrefix() . "sentences where SeLgID = ?",
             [$lid]
         );
         $textItemsAdded = Connection::preparedFetchValue(
-            "SELECT count(*) as value FROM {$tbpref}textitems2 where Ti2LgID = ?",
+            "SELECT count(*) as value FROM " . Globals::getTablePrefix() . "textitems2 where Ti2LgID = ?",
             [$lid]
         );
 
@@ -502,10 +492,9 @@ class LanguageService
      */
     public function isDuplicateName(string $name, int $excludeLgId = 0): bool
     {
-        $tbpref = Globals::getTablePrefix();
         $params = [trim($name)];
 
-        $sql = "SELECT LgID as value FROM {$tbpref}languages WHERE LgName = ?";
+        $sql = "SELECT LgID as value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = ?";
         if ($excludeLgId > 0) {
             $sql .= " AND LgID != ?";
             $params[] = $excludeLgId;
@@ -522,11 +511,9 @@ class LanguageService
      */
     public function getLanguagesWithStats(): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         // Get base language data
         $sql = "SELECT LgID, LgName, LgExportTemplate
-        FROM {$tbpref}languages
+        FROM " . Globals::getTablePrefix() . "languages
         WHERE LgName<>'' ORDER BY LgName";
         $res = Connection::query($sql);
 
@@ -562,9 +549,8 @@ class LanguageService
      */
     private function getFeedCounts(): array
     {
-        $tbpref = Globals::getTablePrefix();
         $res = Connection::query(
-            "SELECT NfLgID, count(*) as value FROM {$tbpref}newsfeeds group by NfLgID"
+            "SELECT NfLgID, count(*) as value FROM " . Globals::getTablePrefix() . "newsfeeds group by NfLgID"
         );
         $counts = [];
         while ($record = mysqli_fetch_assoc($res)) {
@@ -581,10 +567,9 @@ class LanguageService
      */
     private function getArticleCounts(): array
     {
-        $tbpref = Globals::getTablePrefix();
         $res = Connection::query(
             "SELECT NfLgID, count(*) AS value
-            FROM {$tbpref}newsfeeds, {$tbpref}feedlinks
+            FROM " . Globals::getTablePrefix() . "newsfeeds, " . Globals::getTablePrefix() . "feedlinks
             WHERE NfID=FlNfID
             GROUP BY NfLgID"
         );
@@ -625,7 +610,6 @@ class LanguageService
      */
     public function getLanguageName($lid): string
     {
-        $tbpref = Globals::getTablePrefix();
         if (is_int($lid)) {
             $lg_id = $lid;
         } elseif (isset($lid) && trim($lid) != '' && ctype_digit($lid)) {
@@ -634,7 +618,7 @@ class LanguageService
             return '';
         }
         $r = Connection::preparedFetchValue(
-            "SELECT LgName AS value FROM {$tbpref}languages WHERE LgID = ?",
+            "SELECT LgName AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lg_id]
         );
         if (isset($r)) {
@@ -653,9 +637,8 @@ class LanguageService
      */
     public function getLanguageCode(int $lgId, array $languagesTable): string
     {
-        $tbpref = Globals::getTablePrefix();
         $record = Connection::preparedFetchOne(
-            "SELECT LgName, LgGoogleTranslateURI FROM {$tbpref}languages WHERE LgID = ?",
+            "SELECT LgName, LgGoogleTranslateURI FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lgId]
         );
 
@@ -690,7 +673,6 @@ class LanguageService
      */
     public function getScriptDirectionTag($lid): string
     {
-        $tbpref = Globals::getTablePrefix();
         if (!isset($lid)) {
             return '';
         }
@@ -703,7 +685,7 @@ class LanguageService
             $lg_id = $lid;
         }
         $r = Connection::preparedFetchValue(
-            "SELECT LgRightToLeft as value FROM {$tbpref}languages WHERE LgID = ?",
+            "SELECT LgRightToLeft as value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lg_id]
         );
         if (isset($r) && $r) {
@@ -726,9 +708,8 @@ class LanguageService
      */
     public function getPhoneticReadingById(string $text, int $lgId): string
     {
-        $tbpref = Globals::getTablePrefix();
         $sentenceSplit = Connection::preparedFetchValue(
-            "SELECT LgRegexpWordCharacters AS value FROM {$tbpref}languages WHERE LgID = ?",
+            "SELECT LgRegexpWordCharacters AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lgId]
         );
 
@@ -737,7 +718,7 @@ class LanguageService
             return $text;
         }
 
-        return $this->processMecabPhonetic($text, $tbpref);
+        return $this->processMecabPhonetic($text);
     }
 
     /**
@@ -750,26 +731,24 @@ class LanguageService
      */
     public function getPhoneticReadingByCode(string $text, string $lang): string
     {
-        $tbpref = Globals::getTablePrefix();
         // Many languages are already phonetic
         if (!str_starts_with($lang, "ja") && !str_starts_with($lang, "jp")) {
             return $text;
         }
 
-        return $this->processMecabPhonetic($text, $tbpref);
+        return $this->processMecabPhonetic($text);
     }
 
     /**
      * Process text through MeCab for phonetic reading.
      *
-     * @param string $text   Text to process
-     * @param string $tbpref Table prefix
+     * @param string $text Text to process
      *
      * @return string Phonetic reading from MeCab
      */
-    private function processMecabPhonetic(string $text, string $tbpref): string
+    private function processMecabPhonetic(string $text): string
     {
-        $mecab_file = sys_get_temp_dir() . "/" . $tbpref . "mecab_to_db.txt";
+        $mecab_file = sys_get_temp_dir() . "/" . Globals::getTablePrefix() . "mecab_to_db.txt";
         $mecab_args = ' -O yomi ';
         if (file_exists($mecab_file)) {
             unlink($mecab_file);
@@ -829,11 +808,9 @@ class LanguageService
      */
     public function getLanguagesWithTextCounts(): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         $sql = "SELECT l.LgID, l.LgName, COUNT(t.TxID) AS text_count
-                FROM {$tbpref}languages l
-                INNER JOIN {$tbpref}texts t ON t.TxLgID = l.LgID
+                FROM " . Globals::getTablePrefix() . "languages l
+                INNER JOIN " . Globals::getTablePrefix() . "texts t ON t.TxLgID = l.LgID
                 WHERE l.LgName <> ''
                 GROUP BY l.LgID, l.LgName
                 HAVING COUNT(t.TxID) > 0
@@ -861,11 +838,9 @@ class LanguageService
      */
     public function getLanguagesWithArchivedTextCounts(): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         $sql = "SELECT l.LgID, l.LgName, COUNT(a.AtID) AS text_count
-                FROM {$tbpref}languages l
-                INNER JOIN {$tbpref}archivedtexts a ON a.AtLgID = l.LgID
+                FROM " . Globals::getTablePrefix() . "languages l
+                INNER JOIN " . Globals::getTablePrefix() . "archivedtexts a ON a.AtLgID = l.LgID
                 WHERE l.LgName <> ''
                 GROUP BY l.LgID, l.LgName
                 HAVING COUNT(a.AtID) > 0
@@ -897,12 +872,11 @@ class LanguageService
      */
     public function createFromData(array $data): int
     {
-        $tbpref = Globals::getTablePrefix();
         $normalizedData = $this->normalizeLanguageData($data);
 
         // Check if there's an empty language record to reuse
         $val = Connection::fetchValue(
-            "SELECT MIN(LgID) AS value FROM {$tbpref}languages WHERE LgName=''"
+            "SELECT MIN(LgID) AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName=''"
         );
 
         $sqlData = $this->buildLanguageSqlFromData($normalizedData, $val !== null ? (int)$val : null);
@@ -913,7 +887,7 @@ class LanguageService
         }
 
         return (int)Connection::fetchValue(
-            "SELECT MAX(LgID) AS value FROM {$tbpref}languages"
+            "SELECT MAX(LgID) AS value FROM " . Globals::getTablePrefix() . "languages"
         );
     }
 
@@ -927,12 +901,11 @@ class LanguageService
      */
     public function updateFromData(int $lid, array $data): array
     {
-        $tbpref = Globals::getTablePrefix();
         $normalizedData = $this->normalizeLanguageData($data);
 
         // Get old values for comparison
         $record = Connection::preparedFetchOne(
-            "SELECT * FROM {$tbpref}languages WHERE LgID = ?",
+            "SELECT * FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lid]
         );
 
@@ -991,9 +964,8 @@ class LanguageService
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-        $tbpref = Globals::getTablePrefix();
         $rows = Connection::preparedFetchAll(
-            "SELECT TxID, TxText FROM {$tbpref}texts WHERE TxLgID = ? ORDER BY TxID",
+            "SELECT TxID, TxText FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID = ? ORDER BY TxID",
             [$lid]
         );
         foreach ($rows as $record) {
@@ -1003,11 +975,11 @@ class LanguageService
         }
 
         $sentencesAdded = (int)Connection::preparedFetchValue(
-            "SELECT count(*) as value FROM {$tbpref}sentences where SeLgID = ?",
+            "SELECT count(*) as value FROM " . Globals::getTablePrefix() . "sentences where SeLgID = ?",
             [$lid]
         );
         $textItemsAdded = (int)Connection::preparedFetchValue(
-            "SELECT count(*) as value FROM {$tbpref}textitems2 where Ti2LgID = ?",
+            "SELECT count(*) as value FROM " . Globals::getTablePrefix() . "textitems2 where Ti2LgID = ?",
             [$lid]
         );
 
@@ -1057,8 +1029,6 @@ class LanguageService
      */
     private function buildLanguageSqlFromData(array $data, ?int $id = null): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         $columns = [
             'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
             'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
@@ -1088,11 +1058,11 @@ class LanguageService
         if ($id === null) {
             // INSERT
             $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-            $sql = "INSERT INTO {$tbpref}languages (" . implode(', ', $columns) . ") VALUES($placeholders)";
+            $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (" . implode(', ', $columns) . ") VALUES($placeholders)";
         } else {
             // UPDATE
             $setParts = array_map(fn($col) => "$col = ?", $columns);
-            $sql = "UPDATE {$tbpref}languages SET " . implode(', ', $setParts) . " WHERE LgID = ?";
+            $sql = "UPDATE " . Globals::getTablePrefix() . "languages SET " . implode(', ', $setParts) . " WHERE LgID = ?";
             $params[] = $id;
         }
 

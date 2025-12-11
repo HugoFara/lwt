@@ -27,7 +27,6 @@ require_once __DIR__ . '/../../../src/backend/Controllers/TagsController.php';
 class TagsControllerTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private array $originalServer;
     private array $originalGet;
     private array $originalPost;
@@ -50,7 +49,6 @@ class TagsControllerTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -419,7 +417,7 @@ class TagsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT COUNT(TgID) AS value FROM " . self::$tbpref . "tags WHERE (1=1)";
+        $sql = "SELECT COUNT(TgID) AS value FROM " . Globals::getTablePrefix() . "tags WHERE (1=1)";
         $result = Connection::fetchValue($sql);
 
         $this->assertIsNumeric($result);
@@ -432,7 +430,7 @@ class TagsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT TgID, TgText, TgComment FROM " . self::$tbpref . "tags LIMIT 10";
+        $sql = "SELECT TgID, TgText, TgComment FROM " . Globals::getTablePrefix() . "tags LIMIT 10";
         $result = Connection::query($sql);
 
         $this->assertInstanceOf(\mysqli_result::class, $result);
@@ -447,7 +445,7 @@ class TagsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT COUNT(T2ID) AS value FROM " . self::$tbpref . "tags2 WHERE (1=1)";
+        $sql = "SELECT COUNT(T2ID) AS value FROM " . Globals::getTablePrefix() . "tags2 WHERE (1=1)";
         $result = Connection::fetchValue($sql);
 
         $this->assertIsNumeric($result);
@@ -460,7 +458,7 @@ class TagsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT T2ID, T2Text, T2Comment FROM " . self::$tbpref . "tags2 LIMIT 10";
+        $sql = "SELECT T2ID, T2Text, T2Comment FROM " . Globals::getTablePrefix() . "tags2 LIMIT 10";
         $result = Connection::query($sql);
 
         $this->assertInstanceOf(\mysqli_result::class, $result);

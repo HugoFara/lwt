@@ -24,7 +24,6 @@ require_once __DIR__ . '/../../../src/backend/Services/ServerDataService.php';
 class ServerDataServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private ServerDataService $service;
 
     public static function setUpBeforeClass(): void
@@ -43,7 +42,6 @@ class ServerDataServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void

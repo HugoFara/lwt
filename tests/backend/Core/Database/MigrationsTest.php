@@ -25,7 +25,6 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
 class MigrationsTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
 
     public static function setUpBeforeClass(): void
     {
@@ -43,7 +42,6 @@ class MigrationsTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     // ===== prefixQuery() tests =====
@@ -223,7 +221,7 @@ class MigrationsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Clean up any texts that reference non-existent languages
         // to avoid "Language data not found" errors
@@ -275,7 +273,7 @@ class MigrationsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         Migrations::checkAndUpdate();
 
@@ -362,7 +360,7 @@ class MigrationsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Clear lastscorecalc to force recalculation
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey = 'lastscorecalc'");
@@ -402,7 +400,7 @@ class MigrationsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         Migrations::update();
 

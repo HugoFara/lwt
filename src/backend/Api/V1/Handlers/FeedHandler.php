@@ -30,8 +30,6 @@ class FeedHandler
      */
     public function getFeedsList(array $feed, int $nfid): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         if (empty($feed)) {
             return [0, 0];
         }
@@ -40,7 +38,7 @@ class FeedHandler
         $placeholderRow = '(?, ?, ?, ?, ?, ?, ?)';
         $placeholders = array_fill(0, count($feed), $placeholderRow);
 
-        $sql = 'INSERT IGNORE INTO ' . $tbpref . 'feedlinks
+        $sql = 'INSERT IGNORE INTO ' . Globals::getTablePrefix() . 'feedlinks
                 (FlTitle, FlLink, FlText, FlDescription, FlDate, FlAudio, FlNfID)
                 VALUES ' . implode(', ', $placeholders);
 
@@ -79,11 +77,9 @@ class FeedHandler
      */
     public function getFeedResult(int $importedFeed, int $nif, string $nfname, int $nfid, string $nfoptions): string
     {
-        $tbpref = Globals::getTablePrefix();
-
         // Update feed timestamp using prepared statement
         Connection::preparedExecute(
-            "UPDATE {$tbpref}newsfeeds SET NfUpdate = ? WHERE NfID = ?",
+            "UPDATE " . Globals::getTablePrefix() . "newsfeeds SET NfUpdate = ? WHERE NfID = ?",
             [time(), $nfid]
         );
 
@@ -115,7 +111,7 @@ class FeedHandler
 
         // Count total feedlinks using prepared statement
         $row = Connection::preparedFetchOne(
-            "SELECT COUNT(*) AS total FROM {$tbpref}feedlinks WHERE FlNfID = ?",
+            "SELECT COUNT(*) AS total FROM " . Globals::getTablePrefix() . "feedlinks WHERE FlNfID = ?",
             [$nfid]
         );
 
@@ -197,8 +193,6 @@ class FeedHandler
      */
     public function getFeedList(array $params): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         $page = max(1, (int)($params['page'] ?? 1));
         $perPage = max(1, min(100, (int)($params['per_page'] ?? 50)));
         $langId = isset($params['lang']) && $params['lang'] !== '' ? (int)$params['lang'] : null;
@@ -222,7 +216,7 @@ class FeedHandler
 
         // Count total
         $total = (int)Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}newsfeeds WHERE $where",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "newsfeeds WHERE $where",
             $params
         );
 
@@ -239,9 +233,9 @@ class FeedHandler
 
         // Get feeds with language names and article counts
         $sql = "SELECT nf.*, lg.LgName,
-                       (SELECT COUNT(*) FROM {$tbpref}feedlinks WHERE FlNfID = NfID) AS articleCount
-                FROM {$tbpref}newsfeeds nf
-                LEFT JOIN {$tbpref}languages lg ON lg.LgID = nf.NfLgID
+                       (SELECT COUNT(*) FROM " . Globals::getTablePrefix() . "feedlinks WHERE FlNfID = NfID) AS articleCount
+                FROM " . Globals::getTablePrefix() . "newsfeeds nf
+                LEFT JOIN " . Globals::getTablePrefix() . "languages lg ON lg.LgID = nf.NfLgID
                 WHERE $where
                 ORDER BY $orderBy
                 LIMIT ?, ?";
@@ -309,11 +303,10 @@ class FeedHandler
      */
     private function getLanguagesForSelect(): array
     {
-        $tbpref = Globals::getTablePrefix();
         $languages = [];
 
         $result = Connection::query(
-            "SELECT LgID, LgName FROM {$tbpref}languages ORDER BY LgName"
+            "SELECT LgID, LgName FROM " . Globals::getTablePrefix() . "languages ORDER BY LgName"
         );
         while ($row = mysqli_fetch_assoc($result)) {
             $languages[] = [
@@ -344,9 +337,8 @@ class FeedHandler
         $feed['articleCount'] = 0;
 
         // Get language name
-        $tbpref = Globals::getTablePrefix();
         $langResult = Connection::preparedFetchOne(
-            "SELECT LgName FROM {$tbpref}languages WHERE LgID = ?",
+            "SELECT LgName FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [(int)$feed['NfLgID']]
         );
         if ($langResult) {
@@ -355,7 +347,7 @@ class FeedHandler
 
         // Get article count
         $countResult = Connection::preparedFetchOne(
-            "SELECT COUNT(*) AS cnt FROM {$tbpref}feedlinks WHERE FlNfID = ?",
+            "SELECT COUNT(*) AS cnt FROM " . Globals::getTablePrefix() . "feedlinks WHERE FlNfID = ?",
             [$feedId]
         );
         if ($countResult) {
@@ -469,8 +461,6 @@ class FeedHandler
      */
     public function getArticles(array $params): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         $feedId = (int)($params['feed_id'] ?? 0);
         if ($feedId <= 0) {
             return ['error' => 'Feed ID is required'];
@@ -502,7 +492,7 @@ class FeedHandler
 
         // Count total
         $total = (int)Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}feedlinks WHERE $where",
+            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "feedlinks WHERE $where",
             $queryParams
         );
 
@@ -519,9 +509,9 @@ class FeedHandler
 
         // Get articles with import status
         $sql = "SELECT fl.*, tx.TxID, at.AtID
-                FROM {$tbpref}feedlinks fl
-                LEFT JOIN {$tbpref}texts tx ON tx.TxSourceURI = TRIM(fl.FlLink)
-                LEFT JOIN {$tbpref}archivedtexts at ON at.AtSourceURI = TRIM(fl.FlLink)
+                FROM " . Globals::getTablePrefix() . "feedlinks fl
+                LEFT JOIN " . Globals::getTablePrefix() . "texts tx ON tx.TxSourceURI = TRIM(fl.FlLink)
+                LEFT JOIN " . Globals::getTablePrefix() . "archivedtexts at ON at.AtSourceURI = TRIM(fl.FlLink)
                 WHERE $where
                 ORDER BY $orderBy
                 LIMIT ?, ?";
@@ -599,8 +589,6 @@ class FeedHandler
      */
     public function deleteArticles(int $feedId, array $articleIds = []): array
     {
-        $tbpref = Globals::getTablePrefix();
-
         if (empty($articleIds)) {
             // Delete all articles for feed
             $deleted = $this->feedService->deleteArticles((string)$feedId);

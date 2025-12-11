@@ -24,7 +24,6 @@ require_once __DIR__ . '/../../../src/backend/Services/BackupService.php';
 class BackupServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private BackupService $service;
 
     public static function setUpBeforeClass(): void
@@ -43,7 +42,6 @@ class BackupServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function setUp(): void
@@ -70,7 +68,7 @@ class BackupServiceTest extends TestCase
         }
 
         // If using default table set, prefix should be empty
-        if (self::$tbpref === '') {
+        if (Globals::getTablePrefix() === '') {
             $this->assertEquals('', $this->service->getFilePrefix());
         } else {
             // If using a custom prefix, it should end with '-'
@@ -99,7 +97,7 @@ class BackupServiceTest extends TestCase
 
         $result = $this->service->getPrefixInfo();
 
-        if (self::$tbpref === '') {
+        if (Globals::getTablePrefix() === '') {
             $this->assertStringContainsString('Default Table Set', $result);
         } else {
             $this->assertStringContainsString('Table Set:', $result);

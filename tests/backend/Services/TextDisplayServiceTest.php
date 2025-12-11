@@ -26,7 +26,6 @@ require_once __DIR__ . '/../../../src/backend/Services/TextDisplayService.php';
 class TextDisplayServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private static int $testTextId = 0;
     private static int $testWordId = 0;
@@ -48,10 +47,9 @@ class TextDisplayServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
 
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
@@ -102,7 +100,7 @@ class TextDisplayServiceTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Clean up test data
         if (self::$testTextId > 0) {
@@ -155,7 +153,7 @@ class TextDisplayServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create a text without audio
         Connection::query(
@@ -420,7 +418,7 @@ class TextDisplayServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
 
         // Create an RTL language
         Connection::query(

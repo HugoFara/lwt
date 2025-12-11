@@ -26,7 +26,6 @@ require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php
 class DBTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
 
     public static function setUpBeforeClass(): void
     {
@@ -44,7 +43,6 @@ class DBTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
     }
 
     protected function tearDown(): void
@@ -54,7 +52,7 @@ class DBTest extends TestCase
         }
 
         // Clean up test data
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}settings WHERE StKey LIKE 'test_db_%'");
         Connection::query("DELETE FROM {$tbpref}tags WHERE TgText LIKE 'test_db_%'");
     }
@@ -90,7 +88,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $result = DB::query("SELECT * FROM {$tbpref}settings LIMIT 1");
         
         $this->assertInstanceOf(\mysqli_result::class, $result);
@@ -103,7 +101,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $result = DB::query("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_db_query')");
         
         $this->assertTrue($result);
@@ -120,7 +118,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $rows = DB::fetchAll("SELECT * FROM {$tbpref}settings LIMIT 3");
         
         $this->assertIsArray($rows);
@@ -133,7 +131,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $rows = DB::fetchAll("SELECT * FROM {$tbpref}settings WHERE StKey = 'nonexistent_xyz'");
         
         $this->assertIsArray($rows);
@@ -148,7 +146,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_one', 'value1')");
         
         $row = DB::fetchOne("SELECT * FROM {$tbpref}settings WHERE StKey = 'test_db_one'");
@@ -166,7 +164,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         $row = DB::fetchOne("SELECT * FROM {$tbpref}settings WHERE StKey = 'nonexistent_xyz'");
         
         $this->assertNull($row);
@@ -180,7 +178,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_value', 'myvalue')");
         
         $value = DB::fetchValue("SELECT StValue as value FROM {$tbpref}settings WHERE StKey = 'test_db_value'");
@@ -197,7 +195,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_custom', 'customval')");
         
         $value = DB::fetchValue("SELECT StKey as mykey FROM {$tbpref}settings WHERE StKey = 'test_db_custom'", 'mykey');
@@ -216,7 +214,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_exec', 'value')");
         
         $affected = DB::execute("DELETE FROM {$tbpref}settings WHERE StKey = 'test_db_exec'");
@@ -230,7 +228,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_update', 'old')");
         
         $affected = DB::execute("UPDATE {$tbpref}settings SET StValue = 'new' WHERE StKey = 'test_db_update'");
@@ -253,7 +251,7 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         DB::execute("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_db_lastid')");
         
         $lastId = DB::lastInsertId();
@@ -363,8 +361,8 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
-        
+        $tbpref = Globals::getTablePrefix();
+
         DB::beginTransaction();
         DB::execute("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_db_commit')");
         $result = DB::commit();
@@ -385,8 +383,8 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
-        
+        $tbpref = Globals::getTablePrefix();
+
         DB::beginTransaction();
         DB::execute("INSERT INTO {$tbpref}tags (TgText) VALUES ('test_db_rollback')");
         $result = DB::rollback();
@@ -407,8 +405,8 @@ class DBTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $tbpref = self::$tbpref;
-        
+        $tbpref = Globals::getTablePrefix();
+
         // Create
         DB::execute("INSERT INTO {$tbpref}settings (StKey, StValue) VALUES ('test_db_crud', 'initial')");
         

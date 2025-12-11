@@ -30,7 +30,6 @@ use Lwt\Services\LanguageDefinitions;
 class TtsServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private TtsService $service;
     private static ?LanguageService $languageService = null;
 
@@ -50,7 +49,6 @@ class TtsServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
         self::$languageService = new LanguageService();
     }
 

@@ -26,7 +26,6 @@ require_once __DIR__ . '/../../../src/backend/Services/FeedService.php';
 class FeedServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
-    private static string $tbpref = '';
     private static int $testLangId = 0;
     private FeedService $service;
 
@@ -46,11 +45,10 @@ class FeedServiceTest extends TestCase
             Globals::setDbConnection($connection);
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
-        self::$tbpref = Globals::getTablePrefix();
 
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
-            $tbpref = self::$tbpref;
+            $tbpref = Globals::getTablePrefix();
             $existingLang = Connection::fetchValue(
                 "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'FeedServiceTestLang' LIMIT 1"
             );
@@ -78,7 +76,7 @@ class FeedServiceTest extends TestCase
             return;
         }
 
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         // Clean up test feeds and feedlinks
         Connection::query("DELETE FROM {$tbpref}feedlinks WHERE FlNfID IN (SELECT NfID FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Test Feed%')");
         Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Test Feed%'");
@@ -97,7 +95,7 @@ class FeedServiceTest extends TestCase
         }
 
         // Clean up test feeds after each test
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::query("DELETE FROM {$tbpref}feedlinks WHERE FlNfID IN (SELECT NfID FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Test Feed%')");
         Connection::query("DELETE FROM {$tbpref}newsfeeds WHERE NfName LIKE 'Test Feed%'");
     }
@@ -298,7 +296,7 @@ class FeedServiceTest extends TestCase
         ]);
 
         // Add a feedlink (article) to the feed
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::execute(
             "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
              VALUES ($feedId, 'Test Article', 'https://example.com/article', 'Description', " . time() . ")"
@@ -602,7 +600,7 @@ class FeedServiceTest extends TestCase
         ]);
 
         // Add articles
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         for ($i = 1; $i <= 3; $i++) {
             Connection::execute(
                 "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
@@ -648,7 +646,7 @@ class FeedServiceTest extends TestCase
         ]);
 
         // Add article with space prefix (unloadable)
-        $tbpref = self::$tbpref;
+        $tbpref = Globals::getTablePrefix();
         Connection::execute(
             "INSERT INTO {$tbpref}feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
              VALUES ($feedId, 'Unloadable Article', ' https://example.com/unloadable', 'Desc', " . time() . ")"

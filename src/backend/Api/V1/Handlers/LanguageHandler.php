@@ -43,11 +43,11 @@ class LanguageHandler
      */
     public function getReadingConfiguration(int $langId): array
     {
-        $tbpref = Globals::getTablePrefix();
+        $tableName = Globals::table('languages');
 
         $record = Connection::preparedFetchOne(
             "SELECT LgName, LgTTSVoiceAPI, LgRegexpWordCharacters
-             FROM {$tbpref}languages WHERE LgID = ?",
+             FROM {$tableName} WHERE LgID = ?",
             [$langId]
         );
 
