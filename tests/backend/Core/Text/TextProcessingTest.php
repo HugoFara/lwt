@@ -36,6 +36,8 @@ use Lwt\View\Helper\StatusHelper;
 
 use function Lwt\Core\Utils\removeSoftHyphens;
 use function Lwt\Core\Utils\replaceSuppUnicodePlanesChar;
+use function Lwt\Core\Utils\makeCounterWithTotal;
+use function Lwt\Core\Utils\encodeURI;
 
 /**
  * Unit tests for text processing functions.

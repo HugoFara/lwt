@@ -125,8 +125,7 @@ class Restore
 
         /** @psalm-suppress TypeDoesNotContainType - Value can change in loop */
         if ($install_status["errors"] == 0) {
-            $tbpref = Globals::getTablePrefix();
-            Connection::execute("DROP TABLE IF EXISTS {$tbpref}textitems");
+            Connection::execute("DROP TABLE IF EXISTS " . Globals::getTablePrefix() . "textitems");
             Migrations::checkAndUpdate();
             Migrations::reparseAllTexts();
             Maintenance::optimizeDatabase();
@@ -159,20 +158,19 @@ class Restore
      */
     public static function truncateUserDatabase(): void
     {
-        $tbpref = Globals::getTablePrefix();
-        Connection::execute("TRUNCATE {$tbpref}archivedtexts");
-        Connection::execute("TRUNCATE {$tbpref}archtexttags");
-        Connection::execute("TRUNCATE {$tbpref}feedlinks");
-        Connection::execute("TRUNCATE {$tbpref}languages");
-        Connection::execute("TRUNCATE {$tbpref}textitems2");
-        Connection::execute("TRUNCATE {$tbpref}newsfeeds");
-        Connection::execute("TRUNCATE {$tbpref}sentences");
-        Connection::execute("TRUNCATE {$tbpref}tags");
-        Connection::execute("TRUNCATE {$tbpref}tags2");
-        Connection::execute("TRUNCATE {$tbpref}texts");
-        Connection::execute("TRUNCATE {$tbpref}texttags");
-        Connection::execute("TRUNCATE {$tbpref}words");
-        Connection::execute("TRUNCATE {$tbpref}wordtags");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "archivedtexts");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "archtexttags");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "feedlinks");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "languages");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "textitems2");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "newsfeeds");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "sentences");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "tags");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "tags2");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "texts");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "texttags");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "words");
+        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "wordtags");
         QueryBuilder::table('settings')
             ->where('StKey', '=', 'currenttext')
             ->delete();

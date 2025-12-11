@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Utils/string_utilities.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\Utils;
 use Lwt\Database\Escaping;
 use PHPUnit\Framework\TestCase;
 
@@ -100,21 +101,21 @@ final class StringUtilitiesTest extends TestCase
     public function testRemoveSpaces(): void
     {
         // Remove spaces when requested
-        $this->assertEquals('test', remove_spaces('t e s t', true));
-        $this->assertEquals('hello', remove_spaces('h e l l o', true));
-        $this->assertEquals('nospaceshere', remove_spaces('n o s p a c e s h e r e', true));
+        $this->assertEquals('test', Utils::removeSpaces('t e s t', true));
+        $this->assertEquals('hello', Utils::removeSpaces('h e l l o', true));
+        $this->assertEquals('nospaceshere', Utils::removeSpaces('n o s p a c e s h e r e', true));
 
         // Don't remove spaces when not requested
-        $this->assertEquals('t e s t', remove_spaces('t e s t', false));
-        $this->assertEquals('hello world', remove_spaces('hello world', false));
+        $this->assertEquals('t e s t', Utils::removeSpaces('t e s t', false));
+        $this->assertEquals('hello world', Utils::removeSpaces('hello world', false));
 
         // Empty string handling
-        $this->assertEquals('', remove_spaces('', true));
-        $this->assertEquals('', remove_spaces('', false));
+        $this->assertEquals('', Utils::removeSpaces('', true));
+        $this->assertEquals('', Utils::removeSpaces('', false));
 
         // String with no spaces
-        $this->assertEquals('test', remove_spaces('test', true));
-        $this->assertEquals('test', remove_spaces('test', false));
+        $this->assertEquals('test', Utils::removeSpaces('test', true));
+        $this->assertEquals('test', Utils::removeSpaces('test', false));
     }
 
     /**
@@ -129,16 +130,16 @@ final class StringUtilitiesTest extends TestCase
         $text_with_zwsp = "test\u{200B}word";
 
         // When remove is true, only regular spaces are removed (not zero-width)
-        $result = remove_spaces($text_with_zwsp, true);
+        $result = Utils::removeSpaces($text_with_zwsp, true);
         $this->assertEquals($text_with_zwsp, $result, 'Current implementation does not remove zero-width spaces');
 
         // When remove is false, everything remains
-        $result = remove_spaces($text_with_zwsp, false);
+        $result = Utils::removeSpaces($text_with_zwsp, false);
         $this->assertEquals($text_with_zwsp, $result, 'Should keep all characters when not removing');
 
         // Multiple regular spaces are removed, but zero-width spaces remain
         $complex = "a b\u{200B}c d";
-        $result = remove_spaces($complex, true);
+        $result = Utils::removeSpaces($complex, true);
         $this->assertEquals("ab\u{200B}cd", $result, 'Should remove regular spaces but keep zero-width');
     }
 
@@ -148,17 +149,17 @@ final class StringUtilitiesTest extends TestCase
     public function testRemoveSpacesUnicode(): void
     {
         // Chinese characters with spaces
-        $this->assertEquals('你好世界', remove_spaces('你 好 世 界', true));
-        $this->assertEquals('你 好 世 界', remove_spaces('你 好 世 界', false));
+        $this->assertEquals('你好世界', Utils::removeSpaces('你 好 世 界', true));
+        $this->assertEquals('你 好 世 界', Utils::removeSpaces('你 好 世 界', false));
 
         // Japanese with spaces
-        $this->assertEquals('こんにちは', remove_spaces('こ ん に ち は', true));
+        $this->assertEquals('こんにちは', Utils::removeSpaces('こ ん に ち は', true));
 
         // Arabic with spaces
-        $this->assertEquals('مرحبا', remove_spaces('م ر ح ب ا', true));
+        $this->assertEquals('مرحبا', Utils::removeSpaces('م ر ح ب ا', true));
 
         // Mixed languages
-        $this->assertEquals('Hello世界', remove_spaces('Hello 世界', true));
+        $this->assertEquals('Hello世界', Utils::removeSpaces('Hello 世界', true));
     }
 
     /**

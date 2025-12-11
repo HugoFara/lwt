@@ -19,6 +19,7 @@
 
 namespace Lwt\Services {
 
+use Lwt\Core\Utils;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
@@ -357,7 +358,7 @@ allowfullscreen type="text/html">
     ): void {
         $config = [
             'containerId' => 'lwt-audio-player',
-            'mediaUrl' => encodeURI($audio),
+            'mediaUrl' => Utils\encodeURI($audio),
             'offset' => $offset,
             'repeatMode' => $repeatMode,
             'skipSeconds' => $currentplayerseconds,

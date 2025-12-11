@@ -8,6 +8,8 @@ use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Configuration;
+
+use function Lwt\Core\Utils\removeSpaces;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
@@ -1334,19 +1336,19 @@ class DatabaseConnectTest extends TestCase
     public function testRemoveSpaces(): void
     {
         // Test with remove spaces = 0 (no removal)
-        $result = remove_spaces('hello world', '0');
+        $result = removeSpaces('hello world', '0');
         $this->assertEquals('hello world', $result);
 
         // Test with remove spaces = 1 (remove all spaces)
-        $result = remove_spaces('hello world test', '1');
+        $result = removeSpaces('hello world test', '1');
         $this->assertEquals('helloworldtest', $result);
 
         // Test with empty string
-        $result = remove_spaces('', '1');
+        $result = removeSpaces('', '1');
         $this->assertEquals('', $result);
 
         // Test with multiple spaces
-        $result = remove_spaces('test  multiple   spaces', '1');
+        $result = removeSpaces('test  multiple   spaces', '1');
         $this->assertEquals('testmultiplespaces', $result);
     }
 

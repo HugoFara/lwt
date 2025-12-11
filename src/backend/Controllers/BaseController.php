@@ -43,13 +43,6 @@ require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 abstract class BaseController
 {
     /**
-     * Database table prefix (from LWT settings)
-     *
-     * @var string
-     */
-    protected string $tbpref;
-
-    /**
      * Database connection (may be null if session_utility.php not yet loaded)
      *
      * @var \mysqli|null
@@ -64,7 +57,6 @@ abstract class BaseController
      */
     public function __construct()
     {
-        $this->tbpref = \Lwt\Core\Globals::getTablePrefix();
         $this->db = \Lwt\Core\Globals::getDbConnection();
     }
 
@@ -294,7 +286,7 @@ abstract class BaseController
      */
     protected function table(string $table): string
     {
-        return $this->tbpref . $table;
+        return \Lwt\Core\Globals::getTablePrefix() . $table;
     }
 
     /**

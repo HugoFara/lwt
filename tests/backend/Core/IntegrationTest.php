@@ -22,7 +22,11 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
 use PHPUnit\Framework\TestCase;
 
+use function Lwt\Core\Utils\encodeURI;
 use function Lwt\Core\Utils\getExecutionTime;
+use function Lwt\Core\Utils\getFilePath;
+use function Lwt\Core\Utils\makeCounterWithTotal;
+use function Lwt\Core\Utils\printFilePath;
 use function Lwt\Core\Utils\remove_soft_hyphens;
 use function Lwt\Core\Utils\replace_supp_unicode_planes_char;
 
@@ -169,23 +173,23 @@ class IntegrationTest extends TestCase
     public function testGetFilePath(): void
     {
         // Test with a file that doesn't exist - should return absolute path
-        $result = get_file_path('nonexistent_file.png');
+        $result = getFilePath('nonexistent_file.png');
         $this->assertEquals('/nonexistent_file.png', $result);
 
         // Test with path separator - should return absolute path
-        $result = get_file_path('path/to/file.png');
+        $result = getFilePath('path/to/file.png');
         $this->assertStringStartsWith('/', $result);
         $this->assertStringContainsString('file.png', $result);
 
         // Test legacy path mappings
-        $this->assertEquals('/assets/css/styles.css', get_file_path('css/styles.css'));
-        $this->assertEquals('/assets/icons/example.svg', get_file_path('icn/example.svg'));
-        $this->assertEquals('/assets/images/apple-touch-icon.png', get_file_path('img/apple-touch-icon.png'));
-        $this->assertEquals('/assets/js/pgm.js', get_file_path('js/pgm.js'));
+        $this->assertEquals('/assets/css/styles.css', getFilePath('css/styles.css'));
+        $this->assertEquals('/assets/icons/example.svg', getFilePath('icn/example.svg'));
+        $this->assertEquals('/assets/images/apple-touch-icon.png', getFilePath('img/apple-touch-icon.png'));
+        $this->assertEquals('/assets/js/pgm.js', getFilePath('js/pgm.js'));
 
         // Test paths that already have assets/ prefix - should not double-prefix
-        $this->assertEquals('/assets/css/styles.css', get_file_path('assets/css/styles.css'));
-        $this->assertEquals('/assets/sounds/click.mp3', get_file_path('assets/sounds/click.mp3'));
+        $this->assertEquals('/assets/css/styles.css', getFilePath('assets/css/styles.css'));
+        $this->assertEquals('/assets/sounds/click.mp3', getFilePath('assets/sounds/click.mp3'));
     }
 
     public function testGetSepas(): void
@@ -711,7 +715,7 @@ class IntegrationTest extends TestCase
     {
         // Test that it outputs something
         ob_start();
-        print_file_path('test.mp3');
+        printFilePath('test.mp3');
         $output = ob_get_clean();
 
         $this->assertIsString($output);

@@ -99,11 +99,10 @@ class Validation
                 $lang_condition = " AND WoLgID = " . $currentlang_int;
             }
 
-            $tbpref = Globals::getTablePrefix();
             $sql = "SELECT (
                 " . $currenttag_int . " IN (
                     SELECT TgID
-                    FROM {$tbpref}words, {$tbpref}tags, {$tbpref}wordtags
+                    FROM " . Globals::getTablePrefix() . "words, " . Globals::getTablePrefix() . "tags, " . Globals::getTablePrefix() . "wordtags
                     WHERE TgID = WtTgID AND WtWoID = WoID" .
                     $lang_condition .
                     " group by TgID order by TgText
@@ -134,14 +133,13 @@ class Validation
             }
             $currenttag_int = (int)$currenttag;
 
-            $tbpref = Globals::getTablePrefix();
             if ($currentlang == '') {
                 $sql = "select (
                     " . $currenttag_int . " in (
                         select T2ID
-                        from {$tbpref}archivedtexts,
-                        {$tbpref}tags2,
-                        {$tbpref}archtexttags
+                        from " . Globals::getTablePrefix() . "archivedtexts,
+                        " . Globals::getTablePrefix() . "tags2,
+                        " . Globals::getTablePrefix() . "archtexttags
                         where T2ID = AgT2ID and AgAtID = AtID
                         group by T2ID order by T2Text
                     )
@@ -154,9 +152,9 @@ class Validation
                 $sql = "select (
                     " . $currenttag_int . " in (
                         select T2ID
-                        from {$tbpref}archivedtexts,
-                        {$tbpref}tags2,
-                        {$tbpref}archtexttags
+                        from " . Globals::getTablePrefix() . "archivedtexts,
+                        " . Globals::getTablePrefix() . "tags2,
+                        " . Globals::getTablePrefix() . "archtexttags
                         where T2ID = AgT2ID and AgAtID = AtID and AtLgID = " . $currentlang_int . "
                         group by T2ID order by T2Text
                     )
@@ -187,12 +185,11 @@ class Validation
             }
             $currenttag_int = (int)$currenttag;
 
-            $tbpref = Globals::getTablePrefix();
             if ($currentlang == '') {
                 $sql = "select (
                     $currenttag_int in (
                         select T2ID
-                        from {$tbpref}texts, {$tbpref}tags2, {$tbpref}texttags
+                        from " . Globals::getTablePrefix() . "texts, " . Globals::getTablePrefix() . "tags2, " . Globals::getTablePrefix() . "texttags
                         where T2ID = TtT2ID and TtTxID = TxID
                         group by T2ID
                         order by T2Text
@@ -206,7 +203,7 @@ class Validation
                 $sql = "select (
                     $currenttag_int in (
                         select T2ID
-                        from {$tbpref}texts, {$tbpref}tags2, {$tbpref}texttags
+                        from " . Globals::getTablePrefix() . "texts, " . Globals::getTablePrefix() . "tags2, " . Globals::getTablePrefix() . "texttags
                         where T2ID = TtT2ID and TtTxID = TxID and TxLgID = $currentlang_int
                         group by T2ID order by T2Text
                     )

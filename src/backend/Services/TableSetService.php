@@ -31,13 +31,6 @@ use Lwt\Database\Settings;
 class TableSetService
 {
     /**
-     * Database table prefix.
-     *
-     * @var string
-     */
-    private string $tbpref;
-
-    /**
      * Whether table prefix is fixed.
      *
      * @var bool
@@ -60,7 +53,6 @@ class TableSetService
      */
     public function __construct()
     {
-        $this->tbpref = Globals::getTablePrefix();
         $this->fixedTbpref = Globals::isTablePrefixFixed();
     }
 
@@ -81,7 +73,7 @@ class TableSetService
      */
     public function getCurrentPrefix(): string
     {
-        return $this->tbpref;
+        return Globals::getTablePrefix();
     }
 
     /**
@@ -143,7 +135,7 @@ class TableSetService
         $message = 'Table Set "' . $prefix . '" deleted';
 
         // If we deleted the current table set, switch to default
-        if ($prefix == substr($this->tbpref, 0, -1)) {
+        if ($prefix == substr(Globals::getTablePrefix(), 0, -1)) {
             Settings::lwtTableSet("current_table_prefix", "");
         }
 
