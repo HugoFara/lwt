@@ -39,18 +39,6 @@ namespace Lwt\Core\Utils {
     function echodebug($var, $text): void {}
 
     /**
-     * @param string $str
-     * @return array|string
-     */
-    function remove_soft_hyphens(string $str): array|string {}
-
-    /**
-     * @param string $s
-     * @return array|string|null
-     */
-    function replace_supp_unicode_planes_char(string $s): array|string|null {}
-
-    /**
      * @param int $max
      * @param int $num
      * @return string
@@ -64,53 +52,12 @@ namespace Lwt\Core\Utils {
     function encodeURI(string $url): string {}
 
     /**
-     * @param string $filename
-     * @return void
-     */
-    function print_file_path($filename): void {}
-
-    /**
-     * @param string $filename
-     * @return string
-     */
-    function get_file_path($filename): string {}
-
-    /**
-     * @return string
-     */
-    function get_sepas(): string {}
-
-    /**
-     * @return string
-     */
-    function get_first_sepa(): string {}
-
-    /**
-     * @param string $string
-     * @return string
-     */
-    function strToHex(string $string): string {}
-
-    /**
-     * @param string $string
-     * @return string
-     */
-    function strToClassName($string): string {}
-
-    /**
-     * @param string $s
-     * @param mixed $remove
-     * @return string
-     */
-    function remove_spaces($s, $remove): string {}
-
-    /**
      * @param string $needle
      * @param string $replace
      * @param string $haystack
      * @return string
      */
-    function str_replace_first($needle, $replace, $haystack): string {}
+    function strReplaceFirst($needle, $replace, $haystack): string {}
 }
 
 namespace Lwt\Core {
@@ -147,43 +94,6 @@ define('LWT_BASE_PATH', __DIR__ . '/..');
 // From string_utilities.php (global namespace section)
 // ---------------------------------------------------------------------------
 
-/**
- * @param string $s
- * @param mixed $remove Value used in boolean context
- * @return string
- * @see \Lwt\Core\Utils\remove_spaces()
- */
-function remove_spaces($s, $remove): string {}
-
-/**
- * @param string $needle
- * @param string $replace
- * @param string $haystack
- * @return string
- * @see \Lwt\Core\Utils\str_replace_first()
- */
-function str_replace_first($needle, $replace, $haystack): string {}
-
-/**
- * @param string $string
- * @return string
- * @see \Lwt\Core\StringUtils::toClassName()
- */
-function strToClassName($string): string {}
-
-/**
- * @param string $filename
- * @return string
- * @see \Lwt\Core\Utils\get_file_path()
- */
-function get_file_path($filename): string {}
-
-/**
- * @param string $filename
- * @return void
- * @see \Lwt\Core\Utils\print_file_path()
- */
-function print_file_path($filename): void {}
 
 /**
  * @param string $url
@@ -191,25 +101,6 @@ function print_file_path($filename): void {}
  * @see \Lwt\Core\Utils\encodeURI()
  */
 function encodeURI($url): string {}
-
-/**
- * @return string
- * @see \Lwt\Core\Utils\get_sepas()
- */
-function get_sepas(): string {}
-
-/**
- * @return string
- * @see \Lwt\Core\Utils\get_first_sepa()
- */
-function get_first_sepa(): string {}
-
-/**
- * @param string $string
- * @return string
- * @see \Lwt\Core\Utils\strToHex()
- */
-function strToHex(string $string): string {}
 
 // ---------------------------------------------------------------------------
 // From TextParsingService.php (global namespace section)
@@ -234,42 +125,6 @@ function find_latin_sentence_end($matches, $noSentenceEnd): string {}
 // From MediaService.php (global namespace section)
 // ---------------------------------------------------------------------------
 
-/**
- * @param string $dir
- * @return array{paths: string[], folders: string[]}
- */
-function mediaPathsSearch(string $dir): array {}
-
-/**
- * @return array{base_path: string, paths?: string[], folders?: string[], error?: string}
- */
-function getMediaPaths(): array {}
-
-/**
- * @param string $dir
- * @return string
- */
-function selectmediapathoptions(string $dir): string {}
-
-/**
- * @param string $f
- * @return string
- */
-function selectmediapath(string $f): string {}
-
-/**
- * @param string $path
- * @param int $offset
- * @return void
- */
-function makeMediaPlayer(string $path, int $offset = 0): void {}
-
-/**
- * @param string $path
- * @param int $offset
- * @return void
- */
-function makeVideoPlayer(string $path, int $offset = 0): void {}
 
 /**
  * @param string $audio

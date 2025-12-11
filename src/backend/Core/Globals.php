@@ -30,7 +30,7 @@ namespace Lwt\Core;
  * // Instead of: global $tbpref;
  * $prefix = Globals::getTablePrefix();
  *
- * // Instead of: global $DBCONNECTION;
+ * // Get database connection
  * $db = Globals::getDbConnection();
  * ```
  *

@@ -664,7 +664,6 @@ $repo->delete($language);                      // Delete
 | `strToClassName()` | 4 | 1 | `StringUtils::toClassName()` | Delegating ✓ |
 | `encodeURI()` | 1 | 1 | Keep as-is (matches JS `encodeURI()` behavior) | **Reviewed** |
 | `getsess()` | 0 | 0 | Direct `$_SESSION` access | **DONE** |
-| `get_sepas()` | 4 | 1 | `StringUtils::getSeparators()` | Delegating ✓ |
 | `mask_term_in_sentence()` | 0 | 0 | `ExportService::maskTermInSentence()` | **DONE** |
 
 **Total:** ~370 calls across ~80 files (down from ~550)
@@ -676,7 +675,7 @@ $repo->delete($language);                      // Delete
    - ~~`encodeURI()` → `rawurlencode()`~~ **Reviewed** - kept as-is, different behavior from `rawurlencode()`
    - ~~`mask_term_in_sentence()` → move to ExportService~~ **DONE** (2025-11-29)
    - ~~`strToClassName()` → `StringUtils::toClassName()`~~ **Delegating** (2025-11-30)
-   - ~~`get_sepas()` → `StringUtils::getSeparators()`~~ **Delegating** (2025-11-30)
+   - ~~`get_sepas()` → `StringUtils::getSeparators()`~~ **DONE** (2025-12-12)
    - ~~`error_message_with_hide()` → removed~~ **DONE** (2025-11-30)
 
 2. **Medium effort** (utility consolidation):

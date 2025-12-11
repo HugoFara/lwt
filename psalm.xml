@@ -31,7 +31,6 @@
 
     <globals>
         <!-- Database globals from db_bootstrap.php -->
-        <var name="$DBCONNECTION" type="mysqli|null" />
         <var name="$tbpref" type="string" />
         <!-- Debug mode from debug_utilities.php -->
         <var name="$debug" type="bool" />

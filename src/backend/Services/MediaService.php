@@ -536,95 +536,9 @@ namespace {
 
 use Lwt\Services\MediaService;
 
-/**
- * Return the list of media files found in folder, recursively.
- *
- * @param string $dir Directory to search into.
- *
- * @return array{paths: string[], folders: string[]}
- *
- * @deprecated 3.0.0 Use MediaService::searchMediaPaths() instead
- */
-function mediaPathsSearch(string $dir): array
-{
-    $service = new MediaService();
-    return $service->searchMediaPaths($dir);
-}
 
-/**
- * Return the paths for all media files.
- *
- * @return array{base_path: string, paths?: string[], folders?: string[], error?: string}
- *
- * @deprecated 3.0.0 Use MediaService::getMediaPaths() instead
- */
-function getMediaPaths(): array
-{
-    $service = new MediaService();
-    return $service->getMediaPaths();
-}
 
-/**
- * Get the different options to display as acceptable media files.
- *
- * @param string $dir Directory containing files
- *
- * @return string HTML-formatted OPTION tags
- *
- * @deprecated 3.0.0 Use MediaService::getMediaPathOptions() instead
- */
-function selectmediapathoptions(string $dir): string
-{
-    $service = new MediaService();
-    return $service->getMediaPathOptions($dir);
-}
 
-/**
- * Select the path for a media (audio or video).
- *
- * @param string $f HTML field name for media string in form.
- *
- * @return string HTML-formatted string for media selection
- *
- * @deprecated 3.0.0 Use MediaService::getMediaPathSelector() instead
- */
-function selectmediapath(string $f): string
-{
-    $service = new MediaService();
-    return $service->getMediaPathSelector($f);
-}
-
-/**
- * Create an HTML media player, audio or video.
- *
- * @param string $path   URL or local file path
- * @param int    $offset Offset from the beginning of the video
- *
- * @return void
- *
- * @deprecated 3.0.0 Use MediaService::renderMediaPlayer() instead
- */
-function makeMediaPlayer(string $path, int $offset = 0): void
-{
-    $service = new MediaService();
-    $service->renderMediaPlayer($path, $offset);
-}
-
-/**
- * Create an embed video player.
- *
- * @param string $path   URL or local file path
- * @param int    $offset Offset from the beginning of the video
- *
- * @return void
- *
- * @deprecated 3.0.0 Use MediaService::renderVideoPlayer() instead
- */
-function makeVideoPlayer(string $path, int $offset = 0): void
-{
-    $service = new MediaService();
-    $service->renderVideoPlayer($path, $offset);
-}
 
 /**
  * Create an HTML audio player.

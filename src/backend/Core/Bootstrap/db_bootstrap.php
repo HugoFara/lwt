@@ -60,8 +60,7 @@ require_once __DIR__ . '/../Database/Restore.php';
  *     userid: string,
  *     passwd: string,
  *     dbname: string,
- *     socket: string,
- *     tbpref: string|null
+ *     socket: string
  * }
  *
  * @since 3.0.0
@@ -82,7 +81,6 @@ function loadDbConfiguration(): array
         'passwd' => '',
         'dbname' => 'learning-with-texts',
         'socket' => '',
-        'tbpref' => null,
     ];
 }
 
@@ -110,11 +108,6 @@ function bootstrapDatabase(): void
     // Load configuration
     $config = loadDbConfiguration();
 
-    // Set tbpref global if provided in .env (for backwards compatibility)
-    global $tbpref;
-    if ($config['tbpref'] !== null) {
-        $tbpref = $config['tbpref'];
-    }
 
     // Connect to database
     $connection = Configuration::connect(
@@ -135,9 +128,6 @@ function bootstrapDatabase(): void
     Globals::setTablePrefix($prefix, $isFixed);
     Globals::setDatabaseName($config['dbname']);
 
-    // Set legacy globals for backwards compatibility
-    $tbpref = $prefix;
-
     // Start timer if needed
     if (Globals::shouldDisplayTime()) {
         \Lwt\Core\Utils\getExecutionTime();
@@ -149,16 +139,3 @@ function bootstrapDatabase(): void
 
 // Run bootstrap
 bootstrapDatabase();
-
-// Set up legacy globals for backwards compatibility
-global $tbpref, $dbname;
-
-/**
- * @deprecated 3.0.0 Use Globals::getTablePrefix() instead
- */
-$tbpref = Globals::getTablePrefix();
-
-/**
- * @deprecated 3.0.0 Use Globals::getDatabaseName() instead
- */
-$dbname = Globals::getDatabaseName();

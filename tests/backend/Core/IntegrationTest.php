@@ -22,13 +22,11 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
 use PHPUnit\Framework\TestCase;
 
-use function Lwt\Core\Utils\encodeURI;
 use function Lwt\Core\Utils\getExecutionTime;
 use function Lwt\Core\Utils\getFilePath;
-use function Lwt\Core\Utils\makeCounterWithTotal;
 use function Lwt\Core\Utils\printFilePath;
 use function Lwt\Core\Utils\removeSoftHyphens;
-use function Lwt\Core\Utils\replace_supp_unicode_planes_char;
+use function Lwt\Core\Utils\replaceSuppUnicodePlanesChar;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
@@ -149,25 +147,25 @@ class IntegrationTest extends TestCase
     public function testMakeCounterWithTotal(): void
     {
         // Single item - should return empty
-        $this->assertEquals('', makeCounterWithTotal(1, 1));
+        $this->assertEquals('', \Lwt\Core\Utils\makeCounterWithTotal(1, 1));
 
         // Less than 10 items
-        $this->assertEquals('3/5', makeCounterWithTotal(5, 3));
-        $this->assertEquals('1/9', makeCounterWithTotal(9, 1));
+        $this->assertEquals('3/5', \Lwt\Core\Utils\makeCounterWithTotal(5, 3));
+        $this->assertEquals('1/9', \Lwt\Core\Utils\makeCounterWithTotal(9, 1));
 
         // 10 or more items - should pad with zeros
-        $this->assertEquals('03/10', makeCounterWithTotal(10, 3));
-        $this->assertEquals('025/100', makeCounterWithTotal(100, 25));
-        $this->assertEquals('0005/1000', makeCounterWithTotal(1000, 5));
+        $this->assertEquals('03/10', \Lwt\Core\Utils\makeCounterWithTotal(10, 3));
+        $this->assertEquals('025/100', \Lwt\Core\Utils\makeCounterWithTotal(100, 25));
+        $this->assertEquals('0005/1000', \Lwt\Core\Utils\makeCounterWithTotal(1000, 5));
     }
 
     public function testEncodeURI(): void
     {
-        $this->assertEquals('hello%20world', encodeURI('hello world'));
-        $this->assertEquals('test-file_name.txt', encodeURI('test-file_name.txt'));
-        $this->assertEquals('path/to/file', encodeURI('path/to/file'));
-        $this->assertEquals('query?param=value&other=2', encodeURI('query?param=value&other=2'));
-        $this->assertEquals('#anchor', encodeURI('#anchor'));
+        $this->assertEquals('hello%20world', \Lwt\Core\Utils\encodeURI('hello world'));
+        $this->assertEquals('test-file_name.txt', \Lwt\Core\Utils\encodeURI('test-file_name.txt'));
+        $this->assertEquals('path/to/file', \Lwt\Core\Utils\encodeURI('path/to/file'));
+        $this->assertEquals('query?param=value&other=2', \Lwt\Core\Utils\encodeURI('query?param=value&other=2'));
+        $this->assertEquals('#anchor', \Lwt\Core\Utils\encodeURI('#anchor'));
     }
 
     public function testGetFilePath(): void

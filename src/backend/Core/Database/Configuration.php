@@ -34,7 +34,7 @@ class Configuration
      *
      * @param string $envPath Path to the .env file
      *
-     * @return array{server: string, userid: string, passwd: string, dbname: string, socket: string, tbpref: string|null}
+     * @return array{server: string, userid: string, passwd: string, dbname: string, socket: string}
      */
     public static function loadFromEnv(string $envPath): array
     {
@@ -43,8 +43,7 @@ class Configuration
             'userid' => 'root',
             'passwd' => '',
             'dbname' => 'learning-with-texts',
-            'socket' => '',
-            'tbpref' => null
+            'socket' => ''
         ];
 
         if (EnvLoader::load($envPath)) {

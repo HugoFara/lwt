@@ -3,22 +3,17 @@
 # These functions are marked with @deprecated and should be replaced with their modern equivalents
 
 ## Global Variables (db_bootstrap.php)
-$DBCONNECTION          -> Use Globals::getDbConnection()
-$tbpref                -> Use Globals::getTablePrefix()
 $dbname                -> Use Globals::getDatabaseName()
+# $tbpref - REMOVED (was deprecated in favor of Globals::getTablePrefix())
 
 ## String Utilities (string_utilities.php)
-get_sepas()                         -> Use \Lwt\Core\StringUtils::getSeparators()
-get_first_sepa()                    -> Use \Lwt\Core\StringUtils::getFirstSeparator()
 strToHex()                          -> Use \Lwt\Core\StringUtils::toHex()
 toClassName()                       -> Use \Lwt\Core\StringUtils::toClassName()
-remove_soft_hyphens()               -> Use \Lwt\Core\Utils\remove_soft_hyphens()
 replace_supp_unicode_planes_char()  -> Use \Lwt\Core\Utils\replace_supp_unicode_planes_char()
 
 ## Media Service (MediaService.php)
 media_paths_search()    -> Use MediaService::searchMediaPaths()
 get_media_paths()       -> Use MediaService::getMediaPaths()
-selectmediapathoptions() -> Use MediaService::getMediaPathOptions()
 selectmediapath()       -> Use MediaService::getMediaPathSelector()
 makeMediaPlayer()       -> Use MediaService::renderMediaPlayer()
 makeVideoPlayer()       -> Use MediaService::renderVideoPlayer()
@@ -72,12 +67,9 @@ get_version_number()             # version.php
 getExecutionTime()               # debug_utilities.php (was: get_execution_time)
 
 ## String Utilities (string_utilities.php)
-remove_soft_hyphens()
+# remove_soft_hyphens() - REMOVED (2025-12-12)
+# get_file_path() - REMOVED (2025-12-12)
 replace_supp_unicode_planes_char()
-print_file_path()
-get_file_path()
-get_sepas()
-get_first_sepa()
 remove_spaces()
 str_replace_first()
 
@@ -102,7 +94,6 @@ mask_term_in_sentence_v2()
 ## Media Service (MediaService.php)
 media_paths_search()
 get_media_paths()
-selectmediapathoptions()
 selectmediapath()
 
 ## Sentence Service (SentenceService.php)
