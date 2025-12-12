@@ -18,6 +18,7 @@ require_once __DIR__ . '/TableSetService.php';
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 
 /**
@@ -100,30 +101,25 @@ class HomeService
      */
     public function getCurrentTextInfo(int $textId): ?array
     {
-        $title = Connection::preparedFetchValue(
-            'SELECT TxTitle AS value
-            FROM ' . Globals::getTablePrefix() . 'texts
-            WHERE TxID = ?',
-            [$textId]
-        );
+        $title = QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->valuePrepared('TxTitle');
 
         if ($title === null) {
             return null;
         }
 
-        $languageId = (int)Connection::preparedFetchValue(
-            'SELECT TxLgID AS value FROM ' . Globals::getTablePrefix() . 'texts WHERE TxID = ?',
-            [$textId]
-        );
+        $languageId = (int)QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->valuePrepared('TxLgID');
 
         $languageName = $this->getLanguageName($languageId);
 
-        $annotated = (int)Connection::preparedFetchValue(
-            "SELECT LENGTH(TxAnnotatedText) AS value
-            FROM " . Globals::getTablePrefix() . "texts
-            WHERE TxID = ?",
-            [$textId]
-        ) > 0;
+        $row = QueryBuilder::table('texts')
+            ->select(['LENGTH(TxAnnotatedText) AS annotated_length'])
+            ->where('TxID', '=', $textId)
+            ->firstPrepared();
+        $annotated = isset($row['annotated_length']) && (int)$row['annotated_length'] > 0;
 
         return [
             'exists' => true,
@@ -143,12 +139,9 @@ class HomeService
      */
     public function getLanguageName(int $languageId): string
     {
-        $result = Connection::preparedFetchValue(
-            "SELECT LgName AS value
-            FROM " . Globals::getTablePrefix() . "languages
-            WHERE LgID = ?",
-            [$languageId]
-        );
+        $result = QueryBuilder::table('languages')
+            ->where('LgID', '=', $languageId)
+            ->valuePrepared('LgName');
 
         if ($result === null) {
             return '';
@@ -164,9 +157,7 @@ class HomeService
      */
     public function getLanguageCount(): int
     {
-        return (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "languages"
-        );
+        return QueryBuilder::table('languages')->count();
     }
 
     /**
@@ -217,18 +208,20 @@ class HomeService
         $dbname = Globals::getDatabaseName();
         $prefix = Globals::getTablePrefix();
 
+        // Build the table names with prefix
+        $tables = [
+            'archivedtexts', 'archtexttags', 'feedlinks', 'languages',
+            'newsfeeds', 'sentences', 'settings', 'tags', 'tags2',
+            'textitems2', 'texts', 'texttags', 'words', 'wordtags'
+        ];
+        $tableNames = array_map(fn($t) => "'{$prefix}{$t}'", $tables);
+        $tableList = implode(', ', $tableNames);
+
         $size = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
             FROM information_schema.TABLES
             WHERE table_schema = ?
-            AND table_name IN (
-                '{$prefix}archivedtexts', '{$prefix}archtexttags',
-                '{$prefix}feedlinks', '{$prefix}languages',
-                '{$prefix}newsfeeds', '{$prefix}sentences',
-                '{$prefix}settings', '{$prefix}tags', '{$prefix}tags2',
-                '{$prefix}textitems2', '{$prefix}texts', '{$prefix}texttags',
-                '{$prefix}words', '{$prefix}wordtags'
-            )",
+            AND table_name IN ({$tableList})",
             [$dbname]
         );
 

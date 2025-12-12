@@ -14,8 +14,8 @@
 
 namespace Lwt\Services;
 
-use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 
 /**
  * Service class for computing and retrieving learning statistics.
@@ -147,18 +147,16 @@ class StatisticsService
      */
     private function getTermCountsByLanguageAndStatus(): array
     {
-        $sql = "SELECT WoLgID, WoStatus, count(*) AS value
-                FROM " . Globals::getTablePrefix() . "words GROUP BY WoLgID, WoStatus";
-        $res = Connection::query($sql);
+        $results = QueryBuilder::table('words')
+            ->select(['WoLgID', 'WoStatus', 'count(*) AS value'])
+            ->groupBy(['WoLgID', 'WoStatus'])
+            ->getPrepared();
 
         $termStat = [];
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $lgId = (string)$record['WoLgID'];
-                $status = (string)$record['WoStatus'];
-                $termStat[$lgId][$status] = (int)$record['value'];
-            }
-            mysqli_free_result($res);
+        foreach ($results as $record) {
+            $lgId = (string)$record['WoLgID'];
+            $status = (string)$record['WoStatus'];
+            $termStat[$lgId][$status] = (int)$record['value'];
         }
         return $termStat;
     }
@@ -170,18 +168,11 @@ class StatisticsService
      */
     private function getLanguageList(): array
     {
-        $sql = "SELECT LgID, LgName FROM " . Globals::getTablePrefix() . "languages
-                WHERE LgName <> '' ORDER BY LgName";
-        $res = Connection::query($sql);
-
-        $languages = [];
-        if ($res instanceof \mysqli_result) {
-            while ($record = mysqli_fetch_assoc($res)) {
-                $languages[] = $record;
-            }
-            mysqli_free_result($res);
-        }
-        return $languages;
+        return QueryBuilder::table('languages')
+            ->select(['LgID', 'LgName'])
+            ->where('LgName', '<>', '')
+            ->orderBy('LgName')
+            ->getPrepared();
     }
 
     /**
@@ -191,15 +182,18 @@ class StatisticsService
      */
     private function getTermsCreatedByDay(): array
     {
-        $sql = "SELECT WoLgID, TO_DAYS(curdate()) - TO_DAYS(cast(WoCreated as date)) Created,
-                count(WoID) as value
-                FROM " . Globals::getTablePrefix() . "words
-                WHERE WoStatus IN (1,2,3,4,5,99)
-                GROUP BY WoLgID, Created";
-        $res = Connection::query($sql);
+        $results = QueryBuilder::table('words')
+            ->select([
+                'WoLgID',
+                'TO_DAYS(curdate()) - TO_DAYS(cast(WoCreated as date)) AS Created',
+                'count(WoID) as value'
+            ])
+            ->whereIn('WoStatus', [1, 2, 3, 4, 5, 99])
+            ->groupBy(['WoLgID', 'Created'])
+            ->getPrepared();
 
         $termCreated = [];
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($results as $record) {
             $termCreated[$record['WoLgID']][$record['Created']] = $record['value'];
         }
         return $termCreated;
@@ -215,14 +209,17 @@ class StatisticsService
      */
     private function getTermActivityByDay(array &$termActive, array &$termKnown): void
     {
-        $sql = "SELECT WoLgID, WoStatus,
-                TO_DAYS(curdate()) - TO_DAYS(cast(WoStatusChanged as date)) Changed,
-                count(WoID) as value
-                FROM " . Globals::getTablePrefix() . "words
-                GROUP BY WoLgID, WoStatus, WoStatusChanged";
-        $res = Connection::query($sql);
+        $results = QueryBuilder::table('words')
+            ->select([
+                'WoLgID',
+                'WoStatus',
+                'TO_DAYS(curdate()) - TO_DAYS(cast(WoStatusChanged as date)) AS Changed',
+                'count(WoID) as value'
+            ])
+            ->groupBy(['WoLgID', 'WoStatus', 'WoStatusChanged'])
+            ->getPrepared();
 
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($results as $record) {
             if (!empty($record['WoStatus'])) {
                 $lgId = $record['WoLgID'];
                 $changed = $record['Changed'];

@@ -18,7 +18,9 @@ namespace Lwt\Services {
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
+use Lwt\Database\UserScopedQuery;
 use Lwt\View\Helper\IconHelper;
 
 /**
@@ -58,39 +60,46 @@ class TextStatisticsService
             'statu' => array()
         );
 
-        $res = Connection::query(
-            "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS value,
+        // Raw SQL needed for complex aggregation with DISTINCT LOWER()
+        // textitems2 inherits user context via Ti2TxID -> texts FK
+        $bindings = [];
+        $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS value,
             COUNT(LOWER(Ti2Text)) AS total
-            FROM " . Globals::getTablePrefix() . "textitems2
+            FROM textitems2
             WHERE Ti2WordCount = 1 AND Ti2TxID IN($textsId)
-            GROUP BY Ti2TxID"
-        );
+            GROUP BY Ti2TxID";
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $r["total"][$record['text']] = $record['total'];
             $r["totalu"][$record['text']] = $record['value'];
         }
         mysqli_free_result($res);
 
-        $res = Connection::query(
-            "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
+        // Raw SQL needed for complex aggregation with DISTINCT
+        // textitems2 inherits user context via Ti2TxID -> texts FK
+        $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
             COUNT(Ti2WoID) AS total
-            FROM " . Globals::getTablePrefix() . "textitems2
+            FROM textitems2
             WHERE Ti2WordCount > 1 AND Ti2TxID IN({$textsId})
-            GROUP BY Ti2TxID"
-        );
+            GROUP BY Ti2TxID";
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $r["expr"][$record['text']] = $record['total'];
             $r["expru"][$record['text']] = $record['value'];
         }
         mysqli_free_result($res);
 
-        $res = Connection::query(
-            "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
+        // Raw SQL needed for complex aggregation with DISTINCT and implicit JOIN
+        // textitems2 inherits user context via Ti2TxID -> texts FK
+        // words has user scope (WoUsID), need to apply user filtering
+        $bindings = [];
+        $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
             COUNT(Ti2WoID) AS total, WoStatus AS status
-            FROM " . Globals::getTablePrefix() . "textitems2, " . Globals::getTablePrefix() . "words
-            WHERE Ti2WoID != 0 AND Ti2TxID IN({$textsId}) AND Ti2WoID = WoID
-            GROUP BY Ti2TxID, WoStatus"
-        );
+            FROM textitems2, words
+            WHERE Ti2WoID != 0 AND Ti2TxID IN({$textsId}) AND Ti2WoID = WoID"
+            . UserScopedQuery::forTablePrepared('words', $bindings, 'words') .
+            " GROUP BY Ti2TxID, WoStatus";
+        $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $r["stat"][$record['text']][$record['status']] = $record['total'];
             $r["statu"][$record['text']][$record['status']] = $record['value'];
@@ -109,9 +118,11 @@ class TextStatisticsService
      */
     public function getTodoWordsCount(int $textId): int
     {
+        // Raw SQL needed for COUNT(DISTINCT LOWER())
+        // textitems2 inherits user context via Ti2TxID -> texts FK
         $count = Connection::fetchValue(
             "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS value
-            FROM " . Globals::getTablePrefix() . "textitems2
+            FROM textitems2
             WHERE Ti2WordCount=1 AND Ti2WoID=0 AND Ti2TxID=$textId"
         );
         if ($count === null) {
@@ -137,11 +148,15 @@ class TextStatisticsService
             $c . '</span>';
         }
 
-        $dict = (string) Connection::fetchValue(
-            "SELECT LgGoogleTranslateURI AS value
-            FROM " . Globals::getTablePrefix() . "languages, " . Globals::getTablePrefix() . "texts
+        // Raw SQL with implicit JOIN
+        // languages and texts both have user scope (LgUsID, TxUsID)
+        $bindings = [];
+        $sql = "SELECT LgGoogleTranslateURI AS value
+            FROM languages, texts
             WHERE LgID = TxLgID and TxID = $textId"
-        );
+            . UserScopedQuery::forTablePrepared('languages', $bindings, 'languages')
+            . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts');
+        $dict = (string) Connection::fetchValue($sql);
         $tl = $sl = "";
         if ($dict) {
             // @deprecated(2.5.2-fork) For future version of LWT: do not use translator uri

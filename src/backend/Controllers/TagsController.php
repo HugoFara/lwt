@@ -15,6 +15,7 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\Services\TagService;
@@ -166,10 +167,11 @@ class TagsController extends BaseController
             $list = "(" . implode(",", $ids) . ")";
 
             if ($action == 'del') {
-                $message = $this->execute(
-                    'delete from ' . $this->table('tags') . ' where TgID in ' . $list,
-                    "Deleted"
-                );
+                QueryBuilder::table('tags')
+                    ->whereIn('TgID', $ids)
+                    ->deletePrepared();
+                $count = count($ids);
+                $message = "Deleted: " . $count;
                 $this->cleanupOrphanedTermTagLinks();
                 Maintenance::adjustAutoIncrement('tags', 'TgID');
             }
@@ -186,22 +188,24 @@ class TagsController extends BaseController
     private function saveTermTag(): string
     {
         $op = $this->param('op');
-        $text = $this->escape($this->param('TgText', ''));
-        $comment = $this->escapeNonNull($this->param('TgComment', ''));
+        $text = $this->param('TgText', '');
+        $comment = $this->param('TgComment', '');
 
         if ($op == 'Save') {
-            return $this->execute(
-                'insert into ' . $this->table('tags') . ' (TgText, TgComment) values(' . $text . ', ' . $comment . ')',
-                "Saved",
-                false
-            );
+            QueryBuilder::table('tags')
+                ->insertPrepared([
+                    'TgText' => $text,
+                    'TgComment' => $comment
+                ]);
+            return "Saved: 1";
         } elseif ($op == 'Change') {
-            return $this->execute(
-                'update ' . $this->table('tags') . ' set TgText = ' . $text . ', TgComment = ' . $comment .
-                ' where TgID = ' . (int)$this->param('TgID'),
-                "Updated",
-                false
-            );
+            QueryBuilder::table('tags')
+                ->where('TgID', '=', (int)$this->param('TgID'))
+                ->updatePrepared([
+                    'TgText' => $text,
+                    'TgComment' => $comment
+                ]);
+            return "Updated: 1";
         }
 
         return '';
@@ -214,12 +218,10 @@ class TagsController extends BaseController
      */
     private function cleanupOrphanedTermTagLinks(): void
     {
-        $this->execute(
-            "DELETE " . $this->table('wordtags') . " FROM (" .
-            $this->table('wordtags') . " LEFT JOIN " . $this->table('tags') .
-            " on WtTgID = TgID) WHERE TgID IS NULL",
-            ''
-        );
+        // Delete orphaned wordtags that reference non-existent tags
+        // wordtags inherits user context via WtWoID -> words FK
+        $sql = "DELETE wordtags FROM wordtags LEFT JOIN tags ON WtTgID = TgID WHERE TgID IS NULL";
+        $this->execute($sql, '');
     }
 
     /**
@@ -268,9 +270,11 @@ class TagsController extends BaseController
      */
     private function showEditTermTagForm(int $tagId): void
     {
-        $sql = 'select * from ' . $this->table('tags') . ' where TgID = ' . $tagId;
-        $res = $this->query($sql);
-        if (($record = mysqli_fetch_assoc($res)) !== false) {
+        $record = QueryBuilder::table('tags')
+            ->where('TgID', '=', $tagId)
+            ->getPrepared();
+        if ($record !== false && count($record) > 0) {
+            $record = $record[0];
             ?>
             <h2>Edit Tag</h2>
             <form name="edittag" class="validate lwt-form-check" action="/tags#rec<?php echo $tagId; ?>" method="post">
@@ -301,7 +305,6 @@ class TagsController extends BaseController
             </form>
             <?php
         }
-        mysqli_free_result($res);
     }
 
     /**
@@ -402,10 +405,11 @@ class TagsController extends BaseController
             $list = "(" . implode(",", $ids) . ")";
 
             if ($action == 'del') {
-                $message = $this->execute(
-                    'delete from ' . $this->table('tags2') . ' where T2ID in ' . $list,
-                    "Deleted"
-                );
+                QueryBuilder::table('tags2')
+                    ->whereIn('T2ID', $ids)
+                    ->deletePrepared();
+                $count = count($ids);
+                $message = "Deleted: " . $count;
                 $this->cleanupOrphanedTextTagLinks();
                 Maintenance::adjustAutoIncrement('tags2', 'T2ID');
             }
@@ -422,22 +426,24 @@ class TagsController extends BaseController
     private function saveTextTag(): string
     {
         $op = $this->param('op');
-        $text = $this->escape($this->param('T2Text', ''));
-        $comment = $this->escapeNonNull($this->param('T2Comment', ''));
+        $text = $this->param('T2Text', '');
+        $comment = $this->param('T2Comment', '');
 
         if ($op == 'Save') {
-            return $this->execute(
-                'insert into ' . $this->table('tags2') . ' (T2Text, T2Comment) values(' . $text . ', ' . $comment . ')',
-                "Saved",
-                false
-            );
+            QueryBuilder::table('tags2')
+                ->insertPrepared([
+                    'T2Text' => $text,
+                    'T2Comment' => $comment
+                ]);
+            return "Saved: 1";
         } elseif ($op == 'Change') {
-            return $this->execute(
-                'update ' . $this->table('tags2') . ' set T2Text = ' . $text . ', T2Comment = ' . $comment .
-                ' where T2ID = ' . (int)$this->param('T2ID'),
-                "Updated",
-                false
-            );
+            QueryBuilder::table('tags2')
+                ->where('T2ID', '=', (int)$this->param('T2ID'))
+                ->updatePrepared([
+                    'T2Text' => $text,
+                    'T2Comment' => $comment
+                ]);
+            return "Updated: 1";
         }
 
         return '';
@@ -450,18 +456,15 @@ class TagsController extends BaseController
      */
     private function cleanupOrphanedTextTagLinks(): void
     {
-        $this->execute(
-            "DELETE " . $this->table('texttags') . " FROM (" .
-            $this->table('texttags') . " LEFT JOIN " . $this->table('tags2') .
-            " on TtT2ID = T2ID) WHERE T2ID IS NULL",
-            ''
-        );
-        $this->execute(
-            "DELETE " . $this->table('archtexttags') . " FROM (" .
-            $this->table('archtexttags') . " LEFT JOIN " . $this->table('tags2') .
-            " on AgT2ID = T2ID) WHERE T2ID IS NULL",
-            ''
-        );
+        // Delete orphaned texttags that reference non-existent tags2
+        // texttags inherits user context via TtTxID -> texts FK
+        $sql = "DELETE texttags FROM texttags LEFT JOIN tags2 ON TtT2ID = T2ID WHERE T2ID IS NULL";
+        $this->execute($sql, '');
+
+        // Delete orphaned archtexttags that reference non-existent tags2
+        // archtexttags inherits user context via AgAtID -> archivedtexts FK
+        $sql = "DELETE archtexttags FROM archtexttags LEFT JOIN tags2 ON AgT2ID = T2ID WHERE T2ID IS NULL";
+        $this->execute($sql, '');
     }
 
     /**
@@ -509,9 +512,11 @@ class TagsController extends BaseController
      */
     private function showEditTextTagForm(int $tagId): void
     {
-        $sql = 'select * from ' . $this->table('tags2') . ' where T2ID = ' . $tagId;
-        $res = $this->query($sql);
-        if (($record = mysqli_fetch_assoc($res)) !== false) {
+        $record = QueryBuilder::table('tags2')
+            ->where('T2ID', '=', $tagId)
+            ->getPrepared();
+        if ($record !== false && count($record) > 0) {
+            $record = $record[0];
             ?>
             <h2>Edit Tag</h2>
             <form name="edittag" class="validate lwt-form-check" action="/tags/text#rec<?php echo $tagId; ?>" method="post">
@@ -540,7 +545,6 @@ class TagsController extends BaseController
             </form>
             <?php
         }
-        mysqli_free_result($res);
     }
 
     /**

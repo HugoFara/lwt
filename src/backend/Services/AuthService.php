@@ -20,11 +20,15 @@ use Lwt\Core\Entity\ValueObject\UserId;
 use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 
 require_once __DIR__ . '/../Core/Entity/ValueObject/UserId.php';
 require_once __DIR__ . '/../Core/Entity/User.php';
 require_once __DIR__ . '/../Core/Exception/AuthException.php';
 require_once __DIR__ . '/PasswordService.php';
+require_once __DIR__ . '/../Core/Database/PreparedStatement.php';
+require_once __DIR__ . '/../Core/Database/Connection.php';
+require_once __DIR__ . '/../Core/Database/QueryBuilder.php';
 
 /**
  * Service class for user authentication.
@@ -407,16 +411,6 @@ class AuthService
     // =========================================================================
 
     /**
-     * Get the users table name with prefix.
-     *
-     * @return string
-     */
-    private function usersTable(): string
-    {
-        return Globals::getTablePrefix() . 'users';
-    }
-
-    /**
      * Save a new user to the database.
      *
      * @param User $user The user to save
@@ -427,27 +421,21 @@ class AuthService
      */
     private function saveUser(User $user): void
     {
-        $table = $this->usersTable();
-
-        $sql = "INSERT INTO {$table} (
-            UsUsername, UsEmail, UsPasswordHash, UsApiToken, UsApiTokenExpires,
-            UsWordPressId, UsCreated, UsLastLogin, UsIsActive, UsRole
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        $params = [
-            $user->username(),
-            $user->email(),
-            $user->passwordHash(),
-            $user->apiToken(),
-            $user->apiTokenExpires()?->format('Y-m-d H:i:s'),
-            $user->wordPressId(),
-            $user->created()->format('Y-m-d H:i:s'),
-            $user->lastLogin()?->format('Y-m-d H:i:s'),
-            $user->isActive() ? 1 : 0,
-            $user->role(),
+        $data = [
+            'UsUsername' => $user->username(),
+            'UsEmail' => $user->email(),
+            'UsPasswordHash' => $user->passwordHash(),
+            'UsApiToken' => $user->apiToken(),
+            'UsApiTokenExpires' => $user->apiTokenExpires()?->format('Y-m-d H:i:s'),
+            'UsWordPressId' => $user->wordPressId(),
+            'UsCreated' => $user->created()->format('Y-m-d H:i:s'),
+            'UsLastLogin' => $user->lastLogin()?->format('Y-m-d H:i:s'),
+            'UsIsActive' => $user->isActive() ? 1 : 0,
+            'UsRole' => $user->role(),
         ];
 
-        $insertId = Connection::preparedInsert($sql, $params);
+        $insertId = QueryBuilder::table('users')
+            ->insertPrepared($data);
         $insertIdInt = (int) $insertId;
 
         if ($insertIdInt === 0) {
@@ -466,34 +454,21 @@ class AuthService
      */
     private function updateUser(User $user): void
     {
-        $table = $this->usersTable();
-
-        $sql = "UPDATE {$table} SET
-            UsUsername = ?,
-            UsEmail = ?,
-            UsPasswordHash = ?,
-            UsApiToken = ?,
-            UsApiTokenExpires = ?,
-            UsWordPressId = ?,
-            UsLastLogin = ?,
-            UsIsActive = ?,
-            UsRole = ?
-            WHERE UsID = ?";
-
-        $params = [
-            $user->username(),
-            $user->email(),
-            $user->passwordHash(),
-            $user->apiToken(),
-            $user->apiTokenExpires()?->format('Y-m-d H:i:s'),
-            $user->wordPressId(),
-            $user->lastLogin()?->format('Y-m-d H:i:s'),
-            $user->isActive() ? 1 : 0,
-            $user->role(),
-            $user->id()->toInt(),
+        $data = [
+            'UsUsername' => $user->username(),
+            'UsEmail' => $user->email(),
+            'UsPasswordHash' => $user->passwordHash(),
+            'UsApiToken' => $user->apiToken(),
+            'UsApiTokenExpires' => $user->apiTokenExpires()?->format('Y-m-d H:i:s'),
+            'UsWordPressId' => $user->wordPressId(),
+            'UsLastLogin' => $user->lastLogin()?->format('Y-m-d H:i:s'),
+            'UsIsActive' => $user->isActive() ? 1 : 0,
+            'UsRole' => $user->role(),
         ];
 
-        Connection::preparedExecute($sql, $params);
+        QueryBuilder::table('users')
+            ->where('UsID', '=', $user->id()->toInt())
+            ->updatePrepared($data);
     }
 
     /**
@@ -507,11 +482,16 @@ class AuthService
      */
     private function findUserById(int $id): ?User
     {
-        $table = $this->usersTable();
-        $sql = "SELECT * FROM {$table} WHERE UsID = ? LIMIT 1";
-        $row = Connection::preparedFetchOne($sql, [$id]);
+        try {
+            $row = QueryBuilder::table('users')
+                ->where('UsID', '=', $id)
+                ->firstPrepared();
 
-        return $row ? $this->hydrateUser($row) : null;
+            return $row ? $this->hydrateUser($row) : null;
+        } catch (\RuntimeException $e) {
+            // Database not initialized or query failed
+            return null;
+        }
     }
 
     /**
@@ -525,11 +505,16 @@ class AuthService
      */
     private function findUserByUsername(string $username): ?User
     {
-        $table = $this->usersTable();
-        $sql = "SELECT * FROM {$table} WHERE UsUsername = ? LIMIT 1";
-        $row = Connection::preparedFetchOne($sql, [$username]);
+        try {
+            $row = QueryBuilder::table('users')
+                ->where('UsUsername', '=', $username)
+                ->firstPrepared();
 
-        return $row ? $this->hydrateUser($row) : null;
+            return $row ? $this->hydrateUser($row) : null;
+        } catch (\RuntimeException $e) {
+            // Database not initialized or query failed
+            return null;
+        }
     }
 
     /**
@@ -543,11 +528,16 @@ class AuthService
      */
     private function findUserByEmail(string $email): ?User
     {
-        $table = $this->usersTable();
-        $sql = "SELECT * FROM {$table} WHERE UsEmail = ? LIMIT 1";
-        $row = Connection::preparedFetchOne($sql, [strtolower($email)]);
+        try {
+            $row = QueryBuilder::table('users')
+                ->where('UsEmail', '=', strtolower($email))
+                ->firstPrepared();
 
-        return $row ? $this->hydrateUser($row) : null;
+            return $row ? $this->hydrateUser($row) : null;
+        } catch (\RuntimeException $e) {
+            // Database not initialized or query failed
+            return null;
+        }
     }
 
     /**
@@ -561,11 +551,16 @@ class AuthService
      */
     private function findUserByApiToken(string $token): ?User
     {
-        $table = $this->usersTable();
-        $sql = "SELECT * FROM {$table} WHERE UsApiToken = ? LIMIT 1";
-        $row = Connection::preparedFetchOne($sql, [$token]);
+        try {
+            $row = QueryBuilder::table('users')
+                ->where('UsApiToken', '=', $token)
+                ->firstPrepared();
 
-        return $row ? $this->hydrateUser($row) : null;
+            return $row ? $this->hydrateUser($row) : null;
+        } catch (\RuntimeException $e) {
+            // Database not initialized or query failed
+            return null;
+        }
     }
 
     /**
@@ -579,11 +574,16 @@ class AuthService
      */
     private function findUserByWordPressId(int $wpUserId): ?User
     {
-        $table = $this->usersTable();
-        $sql = "SELECT * FROM {$table} WHERE UsWordPressId = ? LIMIT 1";
-        $row = Connection::preparedFetchOne($sql, [$wpUserId]);
+        try {
+            $row = QueryBuilder::table('users')
+                ->where('UsWordPressId', '=', $wpUserId)
+                ->firstPrepared();
 
-        return $row ? $this->hydrateUser($row) : null;
+            return $row ? $this->hydrateUser($row) : null;
+        } catch (\RuntimeException $e) {
+            // Database not initialized or query failed
+            return null;
+        }
     }
 
     /**

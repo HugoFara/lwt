@@ -26,15 +26,16 @@ use Lwt\Core\Globals;
  *
  * Usage:
  * ```php
- * // Get user scope condition for WHERE clause
- * $condition = UserScopedQuery::getWhereCondition('words', 'WoUsID');
- * $sql = "SELECT * FROM {$tbpref}words WHERE WoLgID = 1" . $condition;
- *
- * // Or use the helper to build a complete condition
- * $sql = "SELECT * FROM {$tbpref}words WHERE WoLgID = 1"
+ * // Get user scope condition for WHERE clause (for raw SQL)
+ * $sql = "SELECT * FROM words WHERE WoLgID = 1"
  *      . UserScopedQuery::forTable('words');
  *
- * // Get user_id for INSERT
+ * // For prepared statements
+ * $bindings = [1]; // WoLgID = 1
+ * $sql = "SELECT * FROM words WHERE WoLgID = ?"
+ *      . UserScopedQuery::forTablePrepared('words', $bindings);
+ *
+ * // Get user_id for INSERT (when using raw SQL)
  * $userId = UserScopedQuery::getUserIdForInsert('words');
  * if ($userId !== null) {
  *     $data['WoUsID'] = $userId;

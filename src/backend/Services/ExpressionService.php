@@ -18,7 +18,9 @@ use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
+use Lwt\Database\UserScopedQuery;
 use Lwt\Services\TextParsingService;
 
 /**
@@ -46,16 +48,17 @@ class ExpressionService
      */
     public function findMecabExpression(string $text, string|int $lid): array
     {
-        $db_to_mecab = tempnam(sys_get_temp_dir(), Globals::getTablePrefix() . "db_to_mecab");
+        $db_to_mecab = tempnam(sys_get_temp_dir(), "lwt_db_to_mecab");
         $mecab_args = " -F %m\\t%t\\t\\n -U %m\\t%t\\t\\n -E \\t\\n ";
 
         $parsingService = new TextParsingService();
         $mecab = $parsingService->getMecabPath($mecab_args);
-        $sql = "SELECT SeID, SeTxID, SeFirstPos, SeText FROM " . Globals::getTablePrefix() . "sentences
-        WHERE SeLgID = ? AND
-        SeText LIKE ?";
         $likeText = "%$text%";
-        $rows = Connection::preparedFetchAll($sql, [$lid, $likeText]);
+        $rows = QueryBuilder::table('sentences')
+            ->select(['SeID', 'SeTxID', 'SeFirstPos', 'SeText'])
+            ->where('SeLgID', '=', $lid)
+            ->where('SeText', 'LIKE', $likeText)
+            ->getPrepared();
 
         $parsed_text = '';
         $fp = fopen($db_to_mecab, 'w');
@@ -130,35 +133,39 @@ class ExpressionService
     public function findStandardExpression(string $textlc, string|int $lid): array
     {
         $occurrences = [];
-        $record = Connection::preparedFetchOne(
-            "SELECT * FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$lid]
-        );
+        $record = QueryBuilder::table('languages')
+            ->where('LgID', '=', $lid)
+            ->getPrepared()[0] ?? null;
+
         $removeSpaces = $record["LgRemoveSpaces"] == 1;
         $splitEachChar = $record['LgSplitEachChar'] != 0;
         $termchar = $record['LgRegexpWordCharacters'];
         $likeTextlc = "%$textlc%";
         if ($removeSpaces && !$splitEachChar) {
+            // Complex JOIN query - use raw SQL with UserScopedQuery
+            $bindings = [$lid, $likeTextlc];
             $sql = "SELECT
             GROUP_CONCAT(Ti2Text ORDER BY Ti2Order SEPARATOR ' ') AS SeText, SeID,
             SeTxID, SeFirstPos, SeTxID
-            FROM " . Globals::getTablePrefix() . "textitems2
-            JOIN " . Globals::getTablePrefix() . "sentences
+            FROM textitems2
+            JOIN sentences
             ON SeID=Ti2SeID AND SeLgID = Ti2LgID
             WHERE Ti2LgID = ?
             AND SeText LIKE ?
             AND Ti2WordCount < 2
             GROUP BY SeID";
+            $rows = Connection::preparedFetchAll($sql, $bindings);
         } else {
-            $sql = "SELECT * FROM " . Globals::getTablePrefix() . "sentences
-            WHERE SeLgID = ? AND SeText LIKE ?";
+            $rows = QueryBuilder::table('sentences')
+                ->where('SeLgID', '=', $lid)
+                ->where('SeText', 'LIKE', $likeTextlc)
+                ->getPrepared();
         }
 
         if ($splitEachChar) {
             $textlc = (string) preg_replace('/([^\s])/u', "$1 ", $textlc);
         }
         $wis = $textlc;
-        $rows = Connection::preparedFetchAll($sql, [$lid, $likeTextlc]);
         $notermchar = "/[^$termchar]($textlc)[^$termchar]/ui";
         // For each sentence in the language containing the query
         $matches = null;
@@ -235,11 +242,10 @@ class ExpressionService
      */
     public function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mode): string|null
     {
-        $regexp = (string)Connection::preparedFetchValue(
-            "SELECT LgRegexpWordCharacters AS value
-            FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$lid]
-        );
+        $regexp = (string)QueryBuilder::table('languages')
+            ->select(['LgRegexpWordCharacters'])
+            ->where('LgID', '=', $lid)
+            ->getPrepared()[0]['LgRegexpWordCharacters'] ?? '';
 
         if ('MECAB' == strtoupper(trim($regexp))) {
             $occurrences = $this->findMecabExpression($textlc, $lid);
@@ -295,7 +301,7 @@ class ExpressionService
                 return implode(',', $sqlarr);
             }
 
-            $sql = "INSERT INTO " . Globals::getTablePrefix() . "textitems2
+            $sql = "INSERT INTO textitems2
                  (Ti2WoID,Ti2LgID,Ti2TxID,Ti2SeID,Ti2Order,Ti2WordCount,Ti2Text)
                  VALUES " . implode(',', $placeholders);
             Connection::preparedExecute($sql, $params);
@@ -318,10 +324,9 @@ class ExpressionService
         $showAll = (bool)Settings::getZeroOrOne('showallwords', 1);
         $showType = $showAll ? "m" : "";
 
-        $record = Connection::preparedFetchOne(
-            "SELECT * FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$wid]
-        );
+        $record = QueryBuilder::table('words')
+            ->where('WoID', '=', $wid)
+            ->getPrepared()[0] ?? null;
 
         $attrs = [
             "class" => "click mword {$showType}wsty TERM$hex word$wid status" .
@@ -361,10 +366,9 @@ class ExpressionService
         $showAll = (bool)Settings::getZeroOrOne('showallwords', 1);
         $showType = $showAll ? "m" : "";
 
-        $record = Connection::preparedFetchOne(
-            "SELECT * FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$wid]
-        );
+        $record = QueryBuilder::table('words')
+            ->where('WoID', '=', $wid)
+            ->getPrepared()[0] ?? null;
 
         $attrs = [
             "class" => "click mword {$showType}wsty TERM$hex word$wid status" .

@@ -53,11 +53,10 @@ class DemoService
      */
     public function getPrefixInfo(): string
     {
-        $prefix = Globals::getTablePrefix();
-        if ($prefix == '') {
+        if (Globals::getTablePrefix() == '') {
             return "(Default Table Set)";
         }
-        return "(Table Set: <i>" . htmlspecialchars(substr($prefix, 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i>)";
+        return "(Table Set: <i>" . htmlspecialchars(substr(Globals::getTablePrefix(), 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i>)";
     }
 
     /**

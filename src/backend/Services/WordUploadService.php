@@ -1121,9 +1121,8 @@ class WordUploadService
      */
     public function isRightToLeft(int $langId): bool
     {
-        return (bool) Connection::preparedFetchValue(
-            "SELECT LgRightToLeft AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$langId]
-        );
+        return (bool) QueryBuilder::table('languages')
+            ->where('LgID', '=', $langId)
+            ->valuePrepared('LgRightToLeft');
     }
 }

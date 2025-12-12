@@ -16,6 +16,7 @@ namespace Lwt\Services {
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\IconHelper;
 
@@ -310,10 +311,11 @@ class SimilarTermsService
         $comparedTermLc = mb_strtolower($comparedTerm, 'UTF-8');
 
         // Fetch words with their status for weighting
-        $sql = "SELECT WoID, WoTextLC, WoStatus FROM " . Globals::getTablePrefix() . "words
-        WHERE WoLgID = ?
-        AND WoTextLC <> ?";
-        $rows = Connection::prepare($sql)->bind('is', $langId, $comparedTermLc)->fetchAll();
+        $rows = QueryBuilder::table('words')
+            ->select(['WoID', 'WoTextLC', 'WoStatus'])
+            ->where('WoLgID', '=', $langId)
+            ->where('WoTextLC', '<>', $comparedTermLc)
+            ->getPrepared();
 
         $termlsd = array();
         foreach ($rows as $record) {
@@ -361,9 +363,10 @@ class SimilarTermsService
      */
     public function formatTerm(int $termId, string $compare): string
     {
-        $sql = "SELECT WoText, WoTranslation, WoRomanization
-        FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?";
-        $record = Connection::prepare($sql)->bind('i', $termId)->fetchOne();
+        $record = QueryBuilder::table('words')
+            ->select(['WoText', 'WoTranslation', 'WoRomanization'])
+            ->where('WoID', '=', $termId)
+            ->getOnePrepared();
         if ($record) {
             $term = htmlspecialchars($record["WoText"] ?? '', ENT_QUOTES, 'UTF-8');
             if (stripos($compare, $term) !== false) {

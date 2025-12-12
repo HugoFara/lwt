@@ -84,19 +84,28 @@ class ServerDataService
      */
     private function getDatabaseSize(): float
     {
+        // Get the prefixed table names for all LWT tables
+        $tableNames = [
+            'archivedtexts', 'archtexttags', 'feedlinks', 'languages',
+            'newsfeeds', 'sentences', 'settings', 'tags', 'tags2',
+            'textitems2', 'texts', 'texttags', 'words', 'wordtags'
+        ];
+
+        $prefix = Globals::getTablePrefix();
+        $prefixedTables = array_map(
+            fn($table) => $prefix . $table,
+            $tableNames
+        );
+
+        $placeholders = implode(', ', array_fill(0, count($prefixedTables), '?'));
+        $bindings = array_merge([$this->dbname], $prefixedTables);
+
         $temp_size = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
             FROM information_schema.TABLES
             WHERE table_schema = ?
-            AND table_name IN (
-                '" . Globals::getTablePrefix() . "archivedtexts', '" . Globals::getTablePrefix() . "archtexttags',
-                '" . Globals::getTablePrefix() . "feedlinks', '" . Globals::getTablePrefix() . "languages',
-                '" . Globals::getTablePrefix() . "newsfeeds', '" . Globals::getTablePrefix() . "sentences', '" . Globals::getTablePrefix() . "settings',
-                '" . Globals::getTablePrefix() . "tags', '" . Globals::getTablePrefix() . "tags2',
-                '" . Globals::getTablePrefix() . "textitems2', '" . Globals::getTablePrefix() . "texts', '" . Globals::getTablePrefix() . "texttags',
-                '" . Globals::getTablePrefix() . "words', '" . Globals::getTablePrefix() . "wordtags'
-            )",
-            [$this->dbname]
+            AND table_name IN ($placeholders)",
+            $bindings
         );
 
         if ($temp_size === null) {

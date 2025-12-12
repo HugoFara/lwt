@@ -16,6 +16,7 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 
 /**
@@ -41,12 +42,10 @@ class TextDisplayService
      */
     public function getHeaderData(int $textId): ?array
     {
-        $sql = "SELECT TxTitle, TxAudioURI, TxSourceURI
-                FROM " . Globals::getTablePrefix() . "texts
-                WHERE TxID = $textId";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = QueryBuilder::table('texts')
+            ->select(['TxTitle', 'TxAudioURI', 'TxSourceURI'])
+            ->where('TxID', '=', $textId)
+            ->firstPrepared();
 
         if ($record === null) {
             return null;
@@ -75,13 +74,11 @@ class TextDisplayService
      */
     public function getTextDisplaySettings(int $textId): ?array
     {
-        $sql = "SELECT LgTextSize, LgRightToLeft
-                FROM " . Globals::getTablePrefix() . "texts
-                JOIN " . Globals::getTablePrefix() . "languages ON LgID = TxLgID
-                WHERE TxID = $textId";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = QueryBuilder::table('texts')
+            ->select(['LgTextSize', 'LgRightToLeft'])
+            ->join('languages', 'LgID', '=', 'TxLgID')
+            ->where('TxID', '=', $textId)
+            ->firstPrepared();
 
         if ($record === null) {
             return null;
@@ -102,12 +99,12 @@ class TextDisplayService
      */
     public function getAnnotatedText(int $textId): string
     {
-        $ann = Connection::fetchValue(
-            "SELECT TxAnnotatedText AS value
-            FROM " . Globals::getTablePrefix() . "texts
-            WHERE TxID = $textId"
-        );
-        return (string) $ann;
+        $record = QueryBuilder::table('texts')
+            ->select(['TxAnnotatedText'])
+            ->where('TxID', '=', $textId)
+            ->firstPrepared();
+
+        return $record !== null ? (string) $record['TxAnnotatedText'] : '';
     }
 
     /**
@@ -119,11 +116,14 @@ class TextDisplayService
      */
     public function getAudioUri(int $textId): ?string
     {
-        $audio = Connection::fetchValue(
-            "SELECT TxAudioURI AS value FROM " . Globals::getTablePrefix() . "texts
-            WHERE TxID = $textId"
-        );
-        return $audio !== null ? (string) $audio : null;
+        $record = QueryBuilder::table('texts')
+            ->select(['TxAudioURI'])
+            ->where('TxID', '=', $textId)
+            ->firstPrepared();
+
+        return $record !== null && $record['TxAudioURI'] !== null
+            ? (string) $record['TxAudioURI']
+            : null;
     }
 
     /**
@@ -135,12 +135,14 @@ class TextDisplayService
      */
     public function getWordRomanization(int $wordId): string
     {
-        $rom = Connection::fetchValue(
-            "SELECT WoRomanization AS value
-            FROM " . Globals::getTablePrefix() . "words
-            WHERE WoID = $wordId"
-        );
-        return $rom !== null ? (string) $rom : '';
+        $record = QueryBuilder::table('words')
+            ->select(['WoRomanization'])
+            ->where('WoID', '=', $wordId)
+            ->firstPrepared();
+
+        return $record !== null && $record['WoRomanization'] !== null
+            ? (string) $record['WoRomanization']
+            : '';
     }
 
     /**

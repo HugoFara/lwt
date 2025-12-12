@@ -527,7 +527,7 @@ class TagService
      */
     public static function getAllTermTags(bool $refresh = false): array
     {
-        $cacheKey = Globals::getTablePrefix() . self::getUrlBase();
+        $cacheKey = self::getUrlBase();
 
         if (
             !$refresh
@@ -561,7 +561,7 @@ class TagService
      */
     public static function getAllTextTags(bool $refresh = false): array
     {
-        $cacheKey = Globals::getTablePrefix() . self::getUrlBase();
+        $cacheKey = self::getUrlBase();
 
         if (
             !$refresh

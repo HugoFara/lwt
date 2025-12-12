@@ -140,14 +140,17 @@ class BackupService
         $out = "-- " . $fname . "\n";
 
         foreach (self::BACKUP_TABLES as $table) {
-            $result = Connection::query('SELECT * FROM ' . Globals::getTablePrefix() . $table);
+            // Get prefixed table name for this database instance
+            $prefixedTable = Globals::getTablePrefix() . $table;
+
+            $result = Connection::query('SELECT * FROM ' . $prefixedTable);
             $num_fields = mysqli_num_fields($result);
             $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
             $row2 = mysqli_fetch_row(
-                Connection::query("SHOW CREATE TABLE " . Globals::getTablePrefix() . $table)
+                Connection::query("SHOW CREATE TABLE " . $prefixedTable)
             );
             $out .= str_replace(
-                Globals::getTablePrefix() . $table,
+                $prefixedTable,
                 $table,
                 str_replace("\n", " ", $row2[1])
             ) . ";\n";
@@ -188,19 +191,22 @@ class BackupService
             $num_fields = 0;
 
             if ($table == 'texts') {
+                $prefixedTable = Globals::getTablePrefix() . $table;
                 $result = Connection::query(
                     'SELECT TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
-                    TxSourceURI FROM ' . Globals::getTablePrefix() . $table
+                    TxSourceURI FROM ' . $prefixedTable
                 );
                 $num_fields = 7;
             } elseif ($table == 'words') {
+                $prefixedTable = Globals::getTablePrefix() . $table;
                 $result = Connection::query(
                     'SELECT WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation,
                     WoRomanization, WoSentence, WoCreated, WoStatusChanged, WoTodayScore,
-                    WoTomorrowScore, WoRandom FROM ' . Globals::getTablePrefix() . $table
+                    WoTomorrowScore, WoRandom FROM ' . $prefixedTable
                 );
                 $num_fields = 13;
             } elseif ($table == 'languages') {
+                $prefixedTable = Globals::getTablePrefix() . 'languages';
                 $result = Connection::query(
                     'SELECT LgID, LgName, LgDict1URI, LgDict2URI,
                     REPLACE(
@@ -209,14 +215,15 @@ class BackupService
                     LgExportTemplate, LgTextSize, LgCharacterSubstitutions,
                     LgRegexpSplitSentences, LgExceptionsSplitSentences,
                     LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar,
-                    LgRightToLeft FROM ' . Globals::getTablePrefix() . 'languages WHERE LgName<>""'
+                    LgRightToLeft FROM ' . $prefixedTable . ' WHERE LgName<>""'
                 );
                 $num_fields = mysqli_num_fields($result);
             } elseif (
                 $table !== 'sentences' && $table !== 'textitems' &&
                 $table !== 'settings'
             ) {
-                $result = Connection::query('SELECT * FROM ' . Globals::getTablePrefix() . $table);
+                $prefixedTable = Globals::getTablePrefix() . $table;
+                $result = Connection::query('SELECT * FROM ' . $prefixedTable);
                 $num_fields = mysqli_num_fields($result);
             }
 

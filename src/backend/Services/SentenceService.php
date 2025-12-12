@@ -19,6 +19,7 @@ namespace Lwt\Services {
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\IconHelper;
 
@@ -52,12 +53,10 @@ class SentenceService
     public function buildSentencesContainingWordQuery(string $wordlc, int $lid): string
     {
         $mecab_str = null;
-        $record = Connection::preparedFetchOne(
-            "SELECT LgRegexpWordCharacters, LgRemoveSpaces
-            FROM " . Globals::getTablePrefix() . "languages
-            WHERE LgID = ?",
-            [$lid]
-        );
+        $record = QueryBuilder::table('languages')
+            ->select(['LgRegexpWordCharacters', 'LgRemoveSpaces'])
+            ->where('LgID', '=', $lid)
+            ->getOnePrepared();
         $removeSpaces = $record["LgRemoveSpaces"];
 
         if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
@@ -93,7 +92,7 @@ class SentenceService
                     group_concat(Ti2Text ORDER BY Ti2Order asc SEPARATOR '\\t'),
                     '\\t'
                 ) val
-                FROM " . Globals::getTablePrefix() . "sentences, " . Globals::getTablePrefix() . "textitems2
+                FROM sentences, textitems2
                 WHERE lower(SeText)
                 LIKE '$wordlc_escaped'
                 AND SeID = Ti2SeID AND SeLgID = $lid AND Ti2WordCount<2
@@ -112,7 +111,7 @@ class SentenceService
             }
             $pattern_escaped = mysqli_real_escape_string(Globals::getDbConnection(), $pattern_value);
             $sql = "SELECT DISTINCT SeID, SeText
-                FROM " . Globals::getTablePrefix() . "sentences
+                FROM sentences
                 WHERE SeText RLIKE '$pattern_escaped' AND SeLgID = $lid
                 ORDER BY CHAR_LENGTH(SeText), SeText";
         }
@@ -131,12 +130,10 @@ class SentenceService
     private function executeSentencesContainingWordQuery(string $wordlc, int $lid, int $limit = -1): \mysqli_result|false
     {
         $mecab_str = null;
-        $record = Connection::preparedFetchOne(
-            "SELECT LgRegexpWordCharacters, LgRemoveSpaces
-            FROM " . Globals::getTablePrefix() . "languages
-            WHERE LgID = ?",
-            [$lid]
-        );
+        $record = QueryBuilder::table('languages')
+            ->select(['LgRegexpWordCharacters', 'LgRemoveSpaces'])
+            ->where('LgID', '=', $lid)
+            ->getOnePrepared();
         $removeSpaces = $record["LgRemoveSpaces"];
 
         if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
@@ -168,7 +165,7 @@ class SentenceService
                     group_concat(Ti2Text ORDER BY Ti2Order asc SEPARATOR '\\t'),
                     '\\t'
                 ) val
-                FROM " . Globals::getTablePrefix() . "sentences, " . Globals::getTablePrefix() . "textitems2
+                FROM sentences, textitems2
                 WHERE lower(SeText) LIKE ?
                 AND SeID = Ti2SeID AND SeLgID = ? AND Ti2WordCount<2
                 GROUP BY SeID HAVING val LIKE ?
@@ -183,7 +180,7 @@ class SentenceService
                      . '([^' . $record["LgRegexpWordCharacters"] . ']|$)';
             }
             $sql = "SELECT DISTINCT SeID, SeText
-                FROM " . Globals::getTablePrefix() . "sentences
+                FROM sentences
                 WHERE SeText RLIKE ? AND SeLgID = ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
             $params = [$pattern, $lid];
@@ -215,7 +212,7 @@ class SentenceService
     {
         if (empty($wid)) {
             $sql = "SELECT DISTINCT SeID, SeText
-                FROM " . Globals::getTablePrefix() . "sentences, " . Globals::getTablePrefix() . "textitems2
+                FROM sentences, textitems2
                 WHERE LOWER(Ti2Text) = ?
                 AND Ti2WoID = 0 AND SeID = Ti2SeID AND SeLgID = ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
@@ -225,7 +222,7 @@ class SentenceService
             return $this->executeSentencesContainingWordQuery($wordlc, $lid, $limit);
         } else {
             $sql = "SELECT DISTINCT SeID, SeText
-                FROM " . Globals::getTablePrefix() . "sentences, " . Globals::getTablePrefix() . "textitems2
+                FROM sentences, textitems2
                 WHERE Ti2WoID = ? AND SeID = Ti2SeID AND SeLgID = ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
             $params = [$wid, $lid];
@@ -259,7 +256,7 @@ class SentenceService
                 '​', group_concat(Ti2Text ORDER BY Ti2Order asc SEPARATOR '​'), '​'
             ) AS SeText, Ti2TxID AS SeTxID, LgRegexpWordCharacters,
             LgRemoveSpaces, LgSplitEachChar
-            FROM " . Globals::getTablePrefix() . "textitems2, " . Globals::getTablePrefix() . "languages
+            FROM textitems2, languages
             WHERE Ti2LgID = LgID AND Ti2WordCount < 2 AND Ti2SeID = ?",
             [$seid]
         );
@@ -298,7 +295,7 @@ class SentenceService
                     group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
                     '​'
                 ) AS value
-                from " . Globals::getTablePrefix() . "sentences, " . Globals::getTablePrefix() . "textitems2
+                from sentences, textitems2
                 where Ti2SeID = SeID and SeID < ? and SeTxID = ?
                 and trim(SeText) not in ('¶', '')
                 group by SeID
@@ -322,7 +319,7 @@ class SentenceService
                     group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
                     '​'
                 ) as value
-                from " . Globals::getTablePrefix() . "sentences, " . Globals::getTablePrefix() . "textitems2
+                from sentences, textitems2
                 where Ti2SeID = SeID and SeID > ?
                 and SeTxID = ? and trim(SeText) not in ('¶','')
                 group by SeID

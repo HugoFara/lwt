@@ -21,6 +21,8 @@ use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
+use Lwt\Database\UserScopedQuery;
 use Lwt\View\Helper\IconHelper;
 
 /**
@@ -87,19 +89,13 @@ class AnnotationService
             $ann .= $item . "\n";
         }
 
-        Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "texts
-            SET TxAnnotatedText = ?
-            WHERE TxID = ?",
-            [$ann, $textId]
-        );
+        QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->updatePrepared(['TxAnnotatedText' => $ann]);
 
-        return (string)Connection::preparedFetchValue(
-            "SELECT TxAnnotatedText AS value
-            FROM " . Globals::getTablePrefix() . "texts
-            WHERE TxID = ?",
-            [$textId]
-        );
+        return (string)QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->valuePrepared('TxAnnotatedText');
     }
 
     /**
@@ -115,6 +111,7 @@ class AnnotationService
     public function createAnnotation(int $textId): string
     {
         $ann = '';
+        $bindings = [$textId];
         $sql = "SELECT
             CASE WHEN Ti2WordCount>0 THEN Ti2WordCount ELSE 1 END AS Code,
             CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE WoText END AS TiText,
@@ -122,15 +119,16 @@ class AnnotationService
             CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END AS TiIsNotWord,
             WoID, WoTranslation
             FROM (
-                " . Globals::getTablePrefix() . "textitems2
-                LEFT JOIN " . Globals::getTablePrefix() . "words
+                textitems2
+                LEFT JOIN words
                 ON Ti2WoID = WoID AND Ti2LgID = WoLgID
             )
-            WHERE Ti2TxID = ?
+            WHERE Ti2TxID = ?"
+            . UserScopedQuery::forTablePrepared('textitems2', $bindings) . "
             ORDER BY Ti2Order ASC, Ti2WordCount DESC";
 
         $until = 0;
-        $results = Connection::preparedFetchAll($sql, [$textId]);
+        $results = Connection::preparedFetchAll($sql, $bindings);
         // For each term (includes blanks)
         foreach ($results as $record) {
             $actcode = (int)$record['Code'];
@@ -175,18 +173,12 @@ class AnnotationService
     public function createSaveAnnotation(int $textId): string
     {
         $ann = $this->createAnnotation($textId);
-        Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "texts
-            SET TxAnnotatedText = ?
-            WHERE TxID = ?",
-            [$ann, $textId]
-        );
-        return (string)Connection::preparedFetchValue(
-            "SELECT TxAnnotatedText AS value
-            FROM " . Globals::getTablePrefix() . "texts
-            WHERE TxID = ?",
-            [$textId]
-        );
+        QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->updatePrepared(['TxAnnotatedText' => $ann]);
+        return (string)QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->valuePrepared('TxAnnotatedText');
     }
 
     /**
@@ -242,12 +234,11 @@ class AnnotationService
      */
     public function getAnnotationLink(int $textId): string
     {
-        if (Connection::preparedFetchValue(
-            "SELECT LENGTH(TxAnnotatedText) AS value
-            FROM " . Globals::getTablePrefix() . "texts
-            WHERE TxID = ?",
-            [$textId]
-        ) > 0) {
+        $length = QueryBuilder::table('texts')
+            ->selectRaw('LENGTH(TxAnnotatedText) AS value')
+            ->where('TxID', '=', $textId)
+            ->valuePrepared('value');
+        if ($length > 0) {
             return ' &nbsp;<a href="print_impr_text.php?text=' . $textId .
             '" target="_top">' . IconHelper::render('check', ['title' => 'Annotated Text', 'alt' => 'Annotated Text']) . '</a>';
         } else {

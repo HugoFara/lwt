@@ -18,6 +18,7 @@ namespace Lwt\Controllers;
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
+use Lwt\Database\UserScopedQuery;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 
@@ -385,20 +386,28 @@ class WordController extends BaseController
 
             if ($oldstatus != $newstatus) {
                 // Status changed - update with status change timestamp
-                $sql = "UPDATE " . Globals::getTablePrefix() . "words SET
+                $sql = "UPDATE words SET
                     WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
                     WoStatus = ?, WoStatusChanged = NOW(), {$scoreRandomUpdate}
-                    WHERE WoID = ?";
+                    WHERE WoID = ?"
+                    . \Lwt\Database\UserScopedQuery::forTablePrepared('words', [
+                        $woText, $translation, $sentenceEscaped, $woRomanization,
+                        $newstatus, $woId
+                    ]);
                 Connection::preparedExecute($sql, [
                     $woText, $translation, $sentenceEscaped, $woRomanization,
                     $newstatus, $woId
                 ]);
             } else {
                 // Status unchanged
-                $sql = "UPDATE " . Globals::getTablePrefix() . "words SET
+                $sql = "UPDATE words SET
                     WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
                     {$scoreRandomUpdate}
-                    WHERE WoID = ?";
+                    WHERE WoID = ?"
+                    . \Lwt\Database\UserScopedQuery::forTablePrepared('words', [
+                        $woText, $translation, $sentenceEscaped, $woRomanization,
+                        $woId
+                    ]);
                 Connection::preparedExecute($sql, [
                     $woText, $translation, $sentenceEscaped, $woRomanization,
                     $woId

@@ -414,7 +414,6 @@ HTML;
         }
 
         echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
-        echo '<!-- TBPREF  : "' . htmlspecialchars(Globals::getTablePrefix(), ENT_QUOTES, 'UTF-8') . '" -->';
         echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
         echo '<body>';
@@ -469,7 +468,6 @@ HTML;
         }
 
         echo '<!-- URLBASE : "' . htmlspecialchars(UrlUtilities::urlBase(), ENT_QUOTES, 'UTF-8') . '" -->';
-        echo '<!-- TBPREF  : "' . htmlspecialchars(Globals::getTablePrefix(), ENT_QUOTES, 'UTF-8') . '" -->';
         echo '<title>LWT :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</title>';
         echo '</head>';
         echo '<body' . ($bodyClass !== '' ? ' class="' . htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8') . '"' : '') . '>';

@@ -19,6 +19,7 @@ namespace Lwt\Services {
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Services\ExportService;
 use Lwt\Services\TagService;
 
@@ -241,23 +242,19 @@ class TextReadingService
      */
     public function mainWordLoop(int $textId, int $showAll): void
     {
-        $sql = "SELECT
-            CASE WHEN `Ti2WordCount`>0 THEN Ti2WordCount ELSE 1 END AS Code,
-            CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE `WoText` END AS TiText,
-            CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN LOWER(Ti2Text) ELSE `WoTextLC` END AS TiTextLC,
-            Ti2Order, Ti2SeID,
-            CASE WHEN `Ti2WordCount`>0 THEN 0 ELSE 1 END AS TiIsNotWord,
-            CASE
-                WHEN CHAR_LENGTH(Ti2Text)>0
-                THEN CHAR_LENGTH(Ti2Text)
-                ELSE CHAR_LENGTH(`WoTextLC`)
-            END AS TiTextLength,
-            WoID, WoText, WoStatus, WoTranslation, WoRomanization
-            FROM {" . Globals::getTablePrefix() . "}textitems2 LEFT JOIN {" . Globals::getTablePrefix() . "}words ON Ti2WoID = WoID
-            WHERE Ti2TxID = $textId
-            ORDER BY Ti2Order asc, Ti2WordCount desc";
-
-        $res = Connection::query($sql);
+        $res = QueryBuilder::table('textitems2')
+            ->selectRaw('CASE WHEN `Ti2WordCount`>0 THEN Ti2WordCount ELSE 1 END AS Code')
+            ->selectRaw('CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE `WoText` END AS TiText')
+            ->selectRaw('CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN LOWER(Ti2Text) ELSE `WoTextLC` END AS TiTextLC')
+            ->select(['Ti2Order', 'Ti2SeID'])
+            ->selectRaw('CASE WHEN `Ti2WordCount`>0 THEN 0 ELSE 1 END AS TiIsNotWord')
+            ->selectRaw('CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN CHAR_LENGTH(Ti2Text) ELSE CHAR_LENGTH(`WoTextLC`) END AS TiTextLength')
+            ->select(['WoID', 'WoText', 'WoStatus', 'WoTranslation', 'WoRomanization'])
+            ->leftJoin('words', 'Ti2WoID', '=', 'WoID')
+            ->where('Ti2TxID', '=', $textId)
+            ->orderBy('Ti2Order', 'ASC')
+            ->orderBy('Ti2WordCount', 'DESC')
+            ->get();
         $currcharcount = 0;
         $hidden_items = array();
         $exprs = array();
