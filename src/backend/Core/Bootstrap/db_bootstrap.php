@@ -138,6 +138,10 @@ function bootstrapDatabase(): void
 
     // Run database migrations
     \Lwt\Database\Migrations::checkAndUpdate();
+
+    // Configure multi-user mode from environment
+    $multiUserEnabled = EnvLoader::getBool('MULTI_USER_ENABLED', false);
+    Globals::setMultiUserEnabled($multiUserEnabled);
 }
 
 // Run bootstrap
