@@ -15,12 +15,41 @@ INSERT INTO _migrations VALUES
 ('20240103_120316_2.10.0-fork.sql'),
 ('20251130_120000_myisam_to_innodb.sql'),
 ('20251201_174538_remove_mobile_setting.sql'),
-('20251204_120000_fix_audio_uri_null.sql');
+('20251204_120000_fix_audio_uri_null.sql'),
+('20251212_000001_add_users_table.sql'),
+('20251212_000002_add_user_id_columns.sql'),
+('20251212_000003_add_foreign_keys.sql'),
+('20251212_000004_migrate_prefix_to_user.sql');
 
 -- Database definition
 
+-- Users table for multi-user authentication
+CREATE TABLE IF NOT EXISTS users (
+    UsID int(10) unsigned NOT NULL AUTO_INCREMENT,
+    UsUsername varchar(100) NOT NULL,
+    UsEmail varchar(255) NOT NULL,
+    UsPasswordHash varchar(255) DEFAULT NULL,
+    UsApiToken varchar(64) DEFAULT NULL,
+    UsApiTokenExpires datetime DEFAULT NULL,
+    UsWordPressId int(10) unsigned DEFAULT NULL,
+    UsCreated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UsLastLogin timestamp NULL DEFAULT NULL,
+    UsIsActive tinyint(1) unsigned NOT NULL DEFAULT 1,
+    UsRole enum('user','admin') NOT NULL DEFAULT 'user',
+    PRIMARY KEY (UsID),
+    UNIQUE KEY UsUsername (UsUsername),
+    UNIQUE KEY UsEmail (UsEmail),
+    UNIQUE KEY UsApiToken (UsApiToken),
+    KEY UsWordPressId (UsWordPressId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Insert default admin user
+INSERT IGNORE INTO users (UsID, UsUsername, UsEmail, UsRole)
+VALUES (1, 'admin', 'admin@localhost', 'admin');
+
 CREATE TABLE IF NOT EXISTS archivedtexts (
     AtID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+    AtUsID int(10) unsigned DEFAULT NULL,
     AtLgID tinyint(3) unsigned NOT NULL,
     AtTitle varchar(200) NOT NULL,
     AtText text NOT NULL,
@@ -28,13 +57,16 @@ CREATE TABLE IF NOT EXISTS archivedtexts (
     AtAudioURI varchar(200) DEFAULT NULL,
     AtSourceURI varchar(1000) DEFAULT NULL,
     PRIMARY KEY (AtID),
+    KEY AtUsID (AtUsID),
     KEY AtLgID (AtLgID),
-    KEY AtLgIDSourceURI (AtSourceURI(20),AtLgID)
+    KEY AtLgIDSourceURI (AtSourceURI(20),AtLgID),
+    CONSTRAINT fk_archivedtexts_user FOREIGN KEY (AtUsID) REFERENCES users(UsID) ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS languages (
     LgID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+    LgUsID int(10) unsigned DEFAULT NULL,
     LgName varchar(40) NOT NULL,
     LgDict1URI varchar(200) NOT NULL,
     LgDict2URI varchar(200) DEFAULT NULL,
@@ -49,7 +81,9 @@ CREATE TABLE IF NOT EXISTS languages (
     LgSplitEachChar tinyint(1) unsigned NOT NULL DEFAULT '0',
     LgRightToLeft tinyint(1) unsigned NOT NULL DEFAULT '0',
     PRIMARY KEY (LgID),
-    UNIQUE KEY LgName (LgName)
+    KEY LgUsID (LgUsID),
+    UNIQUE KEY LgName (LgName),
+    CONSTRAINT fk_languages_user FOREIGN KEY (LgUsID) REFERENCES users(UsID) ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -69,8 +103,10 @@ ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS settings (
     StKey varchar(40) NOT NULL,
+    StUsID int(10) unsigned DEFAULT NULL,
     StValue varchar(40) DEFAULT NULL,
-    PRIMARY KEY (StKey)
+    PRIMARY KEY (StKey),
+    KEY StUsID (StUsID)
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -106,6 +142,7 @@ CREATE TABLE IF NOT EXISTS tempwords (
 
 CREATE TABLE IF NOT EXISTS texts (
     TxID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+    TxUsID int(10) unsigned DEFAULT NULL,
     TxLgID tinyint(3) unsigned NOT NULL,
     TxTitle varchar(200) NOT NULL,
     TxText text NOT NULL,
@@ -115,12 +152,15 @@ CREATE TABLE IF NOT EXISTS texts (
     TxPosition smallint(5) DEFAULT 0,
     TxAudioPosition float DEFAULT 0,
     PRIMARY KEY (TxID),
+    KEY TxUsID (TxUsID),
     KEY TxLgID (TxLgID),
-    KEY TxLgIDSourceURI (TxSourceURI(20),TxLgID)
+    KEY TxLgIDSourceURI (TxSourceURI(20),TxLgID),
+    CONSTRAINT fk_texts_user FOREIGN KEY (TxUsID) REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS words (
     WoID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+    WoUsID int(10) unsigned DEFAULT NULL,
     WoLgID tinyint(3) unsigned NOT NULL,
     WoText varchar(250) NOT NULL,
     WoTextLC varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
@@ -135,6 +175,7 @@ CREATE TABLE IF NOT EXISTS words (
     WoTomorrowScore double NOT NULL DEFAULT '0',
     WoRandom double NOT NULL DEFAULT '0',
     PRIMARY KEY (WoID),
+    KEY WoUsID (WoUsID),
     UNIQUE KEY WoTextLCLgID (WoTextLC,WoLgID),
     KEY WoLgID (WoLgID),
     KEY WoStatus (WoStatus),
@@ -144,16 +185,20 @@ CREATE TABLE IF NOT EXISTS words (
     KEY WoWordCount(WoWordCount),
     KEY WoTodayScore (WoTodayScore),
     KEY WoTomorrowScore (WoTomorrowScore),
-    KEY WoRandom (WoRandom)
+    KEY WoRandom (WoRandom),
+    CONSTRAINT fk_words_user FOREIGN KEY (WoUsID) REFERENCES users(UsID) ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS tags (
     TgID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+    TgUsID int(10) unsigned DEFAULT NULL,
     TgText varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
     TgComment varchar(200) NOT NULL DEFAULT '',
     PRIMARY KEY (TgID),
-    UNIQUE KEY TgText (TgText)
+    KEY TgUsID (TgUsID),
+    UNIQUE KEY TgText (TgText),
+    CONSTRAINT fk_tags_user FOREIGN KEY (TgUsID) REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -166,10 +211,13 @@ CREATE TABLE IF NOT EXISTS wordtags (
 
 CREATE TABLE IF NOT EXISTS tags2 (
     T2ID smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+    T2UsID int(10) unsigned DEFAULT NULL,
     T2Text varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
     T2Comment varchar(200) NOT NULL DEFAULT '',
     PRIMARY KEY (T2ID),
-    UNIQUE KEY T2Text (T2Text)
+    KEY T2UsID (T2UsID),
+    UNIQUE KEY T2Text (T2Text),
+    CONSTRAINT fk_tags2_user FOREIGN KEY (T2UsID) REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS texttags (
@@ -180,6 +228,7 @@ CREATE TABLE IF NOT EXISTS texttags (
 
 CREATE TABLE IF NOT EXISTS newsfeeds (
     NfID tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+    NfUsID int(10) unsigned DEFAULT NULL,
     NfLgID tinyint(3) unsigned NOT NULL,
     NfName varchar(40) NOT NULL,
     NfSourceURI varchar(200) NOT NULL,
@@ -188,8 +237,10 @@ CREATE TABLE IF NOT EXISTS newsfeeds (
     NfUpdate int(12) unsigned NOT NULL,
     NfOptions varchar(200) NOT NULL,
     PRIMARY KEY (NfID),
+    KEY NfUsID (NfUsID),
     KEY NfLgID (NfLgID),
-    KEY NfUpdate (NfUpdate)
+    KEY NfUpdate (NfUpdate),
+    CONSTRAINT fk_newsfeeds_user FOREIGN KEY (NfUsID) REFERENCES users(UsID) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS feedlinks (
@@ -213,3 +264,16 @@ CREATE TABLE IF NOT EXISTS archtexttags (
     PRIMARY KEY (AgAtID,AgT2ID),
     KEY AgT2ID (AgT2ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Prefix migration tracking table for multi-user conversion
+CREATE TABLE IF NOT EXISTS _prefix_migration_log (
+    prefix VARCHAR(40) NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    tables_migrated INT DEFAULT 0,
+    migrated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (prefix)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- NOTE: Foreign key constraints are added via migrations (20251212_000003_add_foreign_keys.sql)
+-- This ensures they are only applied once and allows for proper data cleanup before adding constraints.
+-- The migration handles: column type fixes, orphan cleanup, and FK constraint creation.

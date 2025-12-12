@@ -67,8 +67,10 @@ class Migrations
      */
     public static function reparseAllTexts(): void
     {
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "sentences");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "textitems2");
+        // Use DELETE instead of TRUNCATE to respect foreign key constraints
+        // Delete textitems2 first (child), then sentences (parent)
+        Connection::execute("DELETE FROM " . Globals::getTablePrefix() . "textitems2");
+        Connection::execute("DELETE FROM " . Globals::getTablePrefix() . "sentences");
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         Maintenance::initWordCount();
         // Only reparse texts that have a valid language reference
