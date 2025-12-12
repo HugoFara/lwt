@@ -3,7 +3,9 @@ namespace Lwt\Tests\Core;
 
 require_once __DIR__ . '/../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../src/backend/Core/Exception/AuthException.php';
 
+use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Database\QueryBuilder;
 use PHPUnit\Framework\TestCase;
@@ -240,11 +242,13 @@ class GlobalsTest extends TestCase
         Globals::setDebug(1);
         Globals::setDisplayErrors(1);
         Globals::setDisplayTime(1);
+        Globals::setCurrentUserId(42);
+        Globals::setMultiUserEnabled(true);
         Globals::initialize();
-        
+
         // Reset
         Globals::reset();
-        
+
         // Verify all values are cleared
         $this->assertNull(Globals::getDbConnection());
         $this->assertEquals('', Globals::getTablePrefix());
@@ -253,5 +257,75 @@ class GlobalsTest extends TestCase
         $this->assertEquals(0, Globals::getDebug());
         $this->assertFalse(Globals::shouldDisplayErrors());
         $this->assertFalse(Globals::shouldDisplayTime());
+        $this->assertNull(Globals::getCurrentUserId());
+        $this->assertFalse(Globals::isMultiUserEnabled());
+    }
+
+    // ===== User context tests =====
+
+    public function testSetAndGetCurrentUserId(): void
+    {
+        Globals::setCurrentUserId(42);
+
+        $this->assertEquals(42, Globals::getCurrentUserId());
+    }
+
+    public function testCurrentUserIdDefaultsToNull(): void
+    {
+        $this->assertNull(Globals::getCurrentUserId());
+    }
+
+    public function testSetCurrentUserIdToNull(): void
+    {
+        Globals::setCurrentUserId(42);
+        Globals::setCurrentUserId(null);
+
+        $this->assertNull(Globals::getCurrentUserId());
+    }
+
+    public function testRequireUserIdReturnsIdWhenSet(): void
+    {
+        Globals::setCurrentUserId(42);
+
+        $this->assertEquals(42, Globals::requireUserId());
+    }
+
+    public function testRequireUserIdThrowsWhenNotSet(): void
+    {
+        $this->expectException(AuthException::class);
+
+        Globals::requireUserId();
+    }
+
+    public function testIsAuthenticatedReturnsTrueWhenUserIdSet(): void
+    {
+        Globals::setCurrentUserId(42);
+
+        $this->assertTrue(Globals::isAuthenticated());
+    }
+
+    public function testIsAuthenticatedReturnsFalseWhenUserIdNull(): void
+    {
+        $this->assertFalse(Globals::isAuthenticated());
+    }
+
+    public function testSetAndGetMultiUserEnabled(): void
+    {
+        Globals::setMultiUserEnabled(true);
+
+        $this->assertTrue(Globals::isMultiUserEnabled());
+    }
+
+    public function testMultiUserEnabledDefaultsToFalse(): void
+    {
+        $this->assertFalse(Globals::isMultiUserEnabled());
+    }
+
+    public function testSetMultiUserEnabledToFalse(): void
+    {
+        Globals::setMultiUserEnabled(true);
+        Globals::setMultiUserEnabled(false);
+
+        $this->assertFalse(Globals::isMultiUserEnabled());
     }
 }

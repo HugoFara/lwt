@@ -19,6 +19,8 @@
 
 namespace Lwt\Core;
 
+use Lwt\Core\Exception\AuthException;
+
 /**
  * Centralized management of LWT global variables.
  *
@@ -32,6 +34,12 @@ namespace Lwt\Core;
  *
  * // Get database connection
  * $db = Globals::getDbConnection();
+ *
+ * // Get current user ID
+ * $userId = Globals::getCurrentUserId();
+ *
+ * // Require user ID (throws if not authenticated)
+ * $userId = Globals::requireUserId();
  * ```
  *
  * @category Lwt
@@ -98,6 +106,22 @@ class Globals
      * @var bool
      */
     private static bool $initialized = false;
+
+    /**
+     * Current authenticated user ID
+     *
+     * @var int|null
+     */
+    private static ?int $currentUserId = null;
+
+    /**
+     * Whether multi-user mode is enabled
+     *
+     * When enabled, user_id filtering is applied to queries.
+     *
+     * @var bool
+     */
+    private static bool $multiUserEnabled = false;
 
     /**
      * Initialize all global variables.
@@ -321,6 +345,112 @@ class Globals
         return \Lwt\Database\QueryBuilder::table($tableName);
     }
 
+    // =========================================================================
+    // User Context Management
+    // =========================================================================
+
+    /**
+     * Set the current authenticated user ID.
+     *
+     * This should be called after successful authentication to establish
+     * the user context for all subsequent database operations.
+     *
+     * @param int|null $userId The authenticated user's ID, or null to clear
+     *
+     * @return void
+     *
+     * @since 3.0.0
+     */
+    public static function setCurrentUserId(?int $userId): void
+    {
+        self::$currentUserId = $userId;
+    }
+
+    /**
+     * Get the current authenticated user ID.
+     *
+     * Returns null if no user is authenticated.
+     *
+     * @return int|null The current user ID or null
+     *
+     * @since 3.0.0
+     */
+    public static function getCurrentUserId(): ?int
+    {
+        return self::$currentUserId;
+    }
+
+    /**
+     * Get the current user ID, throwing if not authenticated.
+     *
+     * Use this method when a user must be authenticated for the operation
+     * to proceed. It provides a cleaner alternative to checking for null.
+     *
+     * Usage:
+     * ```php
+     * try {
+     *     $userId = Globals::requireUserId();
+     *     // Proceed with user-specific operation
+     * } catch (AuthException $e) {
+     *     // Handle unauthenticated user
+     * }
+     * ```
+     *
+     * @return int The current user ID
+     *
+     * @throws AuthException If no user is authenticated
+     *
+     * @since 3.0.0
+     */
+    public static function requireUserId(): int
+    {
+        if (self::$currentUserId === null) {
+            throw AuthException::userNotAuthenticated();
+        }
+        return self::$currentUserId;
+    }
+
+    /**
+     * Check if a user is currently authenticated.
+     *
+     * @return bool True if a user is authenticated
+     *
+     * @since 3.0.0
+     */
+    public static function isAuthenticated(): bool
+    {
+        return self::$currentUserId !== null;
+    }
+
+    /**
+     * Enable multi-user mode.
+     *
+     * When enabled, QueryBuilder will automatically filter queries by user_id
+     * for user-scoped tables.
+     *
+     * @param bool $enabled Whether to enable multi-user mode
+     *
+     * @return void
+     *
+     * @since 3.0.0
+     */
+    public static function setMultiUserEnabled(bool $enabled): void
+    {
+        self::$multiUserEnabled = $enabled;
+    }
+
+    /**
+     * Check if multi-user mode is enabled.
+     *
+     * @return bool True if multi-user mode is enabled
+     *
+     * @since 3.0.0
+     */
+    public static function isMultiUserEnabled(): bool
+    {
+        return self::$multiUserEnabled;
+    }
+
     /**
      * Reset all globals to initial state.
      *
@@ -338,5 +468,7 @@ class Globals
         self::$displayTime = 0;
         self::$databaseName = '';
         self::$initialized = false;
+        self::$currentUserId = null;
+        self::$multiUserEnabled = false;
     }
 }

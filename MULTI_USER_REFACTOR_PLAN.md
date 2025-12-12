@@ -271,7 +271,7 @@ Strategy:
 
 **Modify**: `.env.example`
 
-```
+```text
 # Set to true after migration is complete
 MULTI_USER_ENABLED=false
 ```
