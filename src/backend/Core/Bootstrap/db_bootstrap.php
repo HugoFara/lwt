@@ -41,6 +41,7 @@ require_once __DIR__ . '/EnvLoader.php';
 require_once __DIR__ . '/../Database/PreparedStatement.php';
 require_once __DIR__ . '/../Database/Connection.php';
 require_once __DIR__ . '/../Database/QueryBuilder.php';
+require_once __DIR__ . '/../Database/UserScopedQuery.php';
 require_once __DIR__ . '/../Database/DB.php';
 require_once __DIR__ . '/../Database/Escaping.php';
 require_once __DIR__ . '/../Database/Configuration.php';

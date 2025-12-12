@@ -67,9 +67,38 @@ use Lwt\Core\Globals;
 class QueryBuilder
 {
     /**
+     * Mapping of user-scoped tables to their user ID column.
+     *
+     * Tables listed here will automatically have user_id filtering applied
+     * when multi-user mode is enabled and a user is authenticated.
+     *
+     * @var array<string, string>
+     */
+    private const USER_SCOPED_TABLES = [
+        'languages' => 'LgUsID',
+        'texts' => 'TxUsID',
+        'archivedtexts' => 'AtUsID',
+        'words' => 'WoUsID',
+        'tags' => 'TgUsID',
+        'tags2' => 'T2UsID',
+        'newsfeeds' => 'NfUsID',
+        'settings' => 'StUsID',
+    ];
+
+    /**
      * @var string The table name (with prefix)
      */
     private string $table;
+
+    /**
+     * @var string The base table name (without prefix) for user scope lookup
+     */
+    private string $baseTableName;
+
+    /**
+     * @var bool Whether user scope filtering is enabled for this query
+     */
+    private bool $userScopeEnabled = true;
 
     /**
      * @var array<int, string> Columns to select
@@ -123,6 +152,7 @@ class QueryBuilder
      */
     public function __construct(string $tableName)
     {
+        $this->baseTableName = $tableName;
         $this->table = Globals::getTablePrefix() . $tableName;
     }
 
@@ -156,6 +186,116 @@ class QueryBuilder
     {
         $this->distinct = true;
         return $this;
+    }
+
+    /**
+     * Disable automatic user scope filtering for this query.
+     *
+     * Use this for admin operations, migrations, or queries that need
+     * to access data across all users.
+     *
+     * Usage:
+     * ```php
+     * // Get all words across all users (admin only)
+     * $allWords = QueryBuilder::table('words')
+     *     ->withoutUserScope()
+     *     ->get();
+     * ```
+     *
+     * @return static
+     *
+     * @since 3.0.0
+     */
+    public function withoutUserScope(): static
+    {
+        $this->userScopeEnabled = false;
+        return $this;
+    }
+
+    /**
+     * Get the user ID column name for this table.
+     *
+     * @return string|null The column name or null if not user-scoped
+     */
+    private function getUserIdColumn(): ?string
+    {
+        return self::USER_SCOPED_TABLES[$this->baseTableName] ?? null;
+    }
+
+    /**
+     * Apply user scope filtering to the query if applicable.
+     *
+     * This method is called automatically before executing SELECT, UPDATE,
+     * and DELETE queries. It adds a WHERE clause filtering by the current
+     * user's ID when:
+     * - Multi-user mode is enabled
+     * - A user is authenticated
+     * - The table is user-scoped
+     * - User scope hasn't been disabled via withoutUserScope()
+     *
+     * @return void
+     */
+    private function applyUserScope(): void
+    {
+        // Skip if user scope is disabled for this query
+        if (!$this->userScopeEnabled) {
+            return;
+        }
+
+        // Skip if multi-user mode is not enabled
+        if (!Globals::isMultiUserEnabled()) {
+            return;
+        }
+
+        // Skip if no user is authenticated
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return;
+        }
+
+        // Skip if this table is not user-scoped
+        $userIdColumn = $this->getUserIdColumn();
+        if ($userIdColumn === null) {
+            return;
+        }
+
+        // Add the user ID filter as the first WHERE condition
+        $this->where($userIdColumn, '=', $userId);
+    }
+
+    /**
+     * Get data to auto-inject for INSERT operations.
+     *
+     * When multi-user mode is enabled and a user is authenticated,
+     * this returns the user_id column and value to add to inserts.
+     *
+     * @return array<string, int> Column => value pairs to inject
+     */
+    private function getUserScopeInsertData(): array
+    {
+        // Skip if user scope is disabled for this query
+        if (!$this->userScopeEnabled) {
+            return [];
+        }
+
+        // Skip if multi-user mode is not enabled
+        if (!Globals::isMultiUserEnabled()) {
+            return [];
+        }
+
+        // Skip if no user is authenticated
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return [];
+        }
+
+        // Skip if this table is not user-scoped
+        $userIdColumn = $this->getUserIdColumn();
+        if ($userIdColumn === null) {
+            return [];
+        }
+
+        return [$userIdColumn => $userId];
     }
 
     /**
@@ -517,6 +657,7 @@ class QueryBuilder
      */
     public function get(): array
     {
+        $this->applyUserScope();
         return Connection::fetchAll($this->toSql());
     }
 
@@ -529,6 +670,7 @@ class QueryBuilder
      */
     public function first(): array|null
     {
+        $this->applyUserScope();
         $this->limit(1);
         return Connection::fetchOne($this->toSql());
     }
@@ -557,6 +699,7 @@ class QueryBuilder
      */
     public function count(string $column = '*'): int
     {
+        $this->applyUserScope();
         $this->columns = ["COUNT($column) AS cnt"];
         $row = Connection::fetchOne($this->toSql());
 
@@ -576,12 +719,17 @@ class QueryBuilder
     /**
      * Insert a new row.
      *
+     * Automatically injects user_id when multi-user mode is enabled.
+     *
      * @param array<string, mixed> $data Column => value pairs to insert
      *
      * @return int|string The last insert ID
      */
     public function insert(array $data): int|string
     {
+        // Auto-inject user_id for user-scoped tables
+        $data = array_merge($this->getUserScopeInsertData(), $data);
+
         $columns = array_keys($data);
         $values = array_map(fn($v) => $this->quoteValue($v), array_values($data));
 
@@ -597,6 +745,8 @@ class QueryBuilder
     /**
      * Insert multiple rows.
      *
+     * Automatically injects user_id when multi-user mode is enabled.
+     *
      * @param array<int, array<string, mixed>> $rows Array of column => value pairs
      *
      * @return int Number of inserted rows
@@ -605,6 +755,15 @@ class QueryBuilder
     {
         if (empty($rows)) {
             return 0;
+        }
+
+        // Auto-inject user_id for user-scoped tables
+        $userScopeData = $this->getUserScopeInsertData();
+        if (!empty($userScopeData)) {
+            $rows = array_map(
+                fn($row) => array_merge($userScopeData, $row),
+                $rows
+            );
         }
 
         $columns = array_keys($rows[0]);
@@ -631,6 +790,8 @@ class QueryBuilder
      */
     public function update(array $data): int
     {
+        $this->applyUserScope();
+
         $setClauses = [];
         foreach ($data as $column => $value) {
             $setClauses[] = $column . ' = ' . $this->quoteValue($value);
@@ -655,6 +816,8 @@ class QueryBuilder
      */
     public function delete(): int
     {
+        $this->applyUserScope();
+
         $sql = 'DELETE FROM ' . $this->table;
 
         if (!empty($this->wheres)) {
@@ -816,6 +979,7 @@ class QueryBuilder
      */
     public function getPrepared(): array
     {
+        $this->applyUserScope();
         $sql = $this->toSqlPrepared();
         return Connection::preparedFetchAll($sql, $this->bindings);
     }
@@ -827,6 +991,7 @@ class QueryBuilder
      */
     public function firstPrepared(): ?array
     {
+        $this->applyUserScope();
         $this->limit(1);
         $sql = $this->toSqlPrepared();
         return Connection::preparedFetchOne($sql, $this->bindings);
@@ -856,6 +1021,7 @@ class QueryBuilder
      */
     public function countPrepared(string $column = '*'): int
     {
+        $this->applyUserScope();
         $this->columns = ["COUNT($column) AS cnt"];
         $sql = $this->toSqlPrepared();
         $row = Connection::preparedFetchOne($sql, $this->bindings);
@@ -876,12 +1042,17 @@ class QueryBuilder
     /**
      * Insert a new row using prepared statement.
      *
+     * Automatically injects user_id when multi-user mode is enabled.
+     *
      * @param array<string, mixed> $data Column => value pairs to insert
      *
      * @return int|string The last insert ID
      */
     public function insertPrepared(array $data): int|string
     {
+        // Auto-inject user_id for user-scoped tables
+        $data = array_merge($this->getUserScopeInsertData(), $data);
+
         $columns = array_keys($data);
         $placeholders = array_fill(0, count($data), '?');
         $values = array_values($data);
@@ -896,6 +1067,8 @@ class QueryBuilder
     /**
      * Insert multiple rows using prepared statement.
      *
+     * Automatically injects user_id when multi-user mode is enabled.
+     *
      * @param array<int, array<string, mixed>> $rows Array of column => value pairs
      *
      * @return int Number of inserted rows
@@ -904,6 +1077,15 @@ class QueryBuilder
     {
         if (empty($rows)) {
             return 0;
+        }
+
+        // Auto-inject user_id for user-scoped tables
+        $userScopeData = $this->getUserScopeInsertData();
+        if (!empty($userScopeData)) {
+            $rows = array_map(
+                fn($row) => array_merge($userScopeData, $row),
+                $rows
+            );
         }
 
         $columns = array_keys($rows[0]);
@@ -935,6 +1117,7 @@ class QueryBuilder
      */
     public function updatePrepared(array $data): int
     {
+        $this->applyUserScope();
         $this->resetBindings();
 
         $setClauses = [];
@@ -964,6 +1147,7 @@ class QueryBuilder
      */
     public function deletePrepared(): int
     {
+        $this->applyUserScope();
         $this->resetBindings();
 
         $sql = 'DELETE FROM ' . $this->table;
