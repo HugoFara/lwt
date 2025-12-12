@@ -5,6 +5,8 @@ use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
+use Lwt\Database\QueryBuilder;
+use Lwt\Database\UserScopedQuery;
 use Lwt\Services\WordService;
 use Lwt\Services\WordStatusService;
 use Lwt\View\Helper\StatusHelper;
@@ -41,11 +43,14 @@ class TermHandler
         $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
+        // Use raw SQL for complex INSERT with dynamic columns
+        $bindings = [$lang, $textlc, $text, $data, '', ''];
+        $sql = "INSERT INTO words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
                 WoSentence, WoRomanization, WoStatusChanged,
                 {$scoreColumns}
-            ) VALUES(?, ?, ?, 1, ?, ?, ?, NOW(), {$scoreValues})";
+            ) VALUES(?, ?, ?, 1, ?, ?, ?, NOW(), {$scoreValues})"
+            . UserScopedQuery::forTablePrepared('words', $bindings);
 
         $stmt = Connection::prepare($sql);
         $stmt->bind('isssss', $lang, $textlc, $text, $data, '', '');
@@ -58,8 +63,9 @@ class TermHandler
         $wid = $stmt->insertId();
 
         // Update text items using prepared statement
+        // textitems2 inherits user context via Ti2TxID -> texts FK
         Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "textitems2
+            "UPDATE textitems2
             SET Ti2WoID = ?
             WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wid, $lang, $textlc]
@@ -78,17 +84,17 @@ class TermHandler
      */
     public function editTermTranslation(int $wid, string $newTrans): string
     {
-        $oldtrans = (string) Connection::preparedFetchValue(
-            "SELECT WoTranslation AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$wid]
-        );
+        $oldtrans = (string) QueryBuilder::table('words')
+            ->select(['WoTranslation'])
+            ->where('WoID', '=', $wid)
+            ->valuePrepared('WoTranslation');
 
         $oldtransarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $oldtrans);
         if ($oldtransarr === false) {
-            return (string) Connection::preparedFetchValue(
-                "SELECT WoTextLC AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-                [$wid]
-            );
+            return (string) QueryBuilder::table('words')
+                ->select(['WoTextLC'])
+                ->where('WoID', '=', $wid)
+                ->valuePrepared('WoTextLC');
         }
         array_walk($oldtransarr, '\trimValue');
 
@@ -98,16 +104,15 @@ class TermHandler
             } else {
                 $oldtrans .= ' ' . StringUtils::getFirstSeparator() . ' ' . $newTrans;
             }
-            Connection::preparedExecute(
-                "UPDATE " . Globals::getTablePrefix() . "words SET WoTranslation = ? WHERE WoID = ?",
-                [$oldtrans, $wid]
-            );
+            QueryBuilder::table('words')
+                ->where('WoID', '=', $wid)
+                ->updatePrepared(['WoTranslation' => $oldtrans]);
         }
 
-        return (string) Connection::preparedFetchValue(
-            "SELECT WoTextLC AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$wid]
-        );
+        return (string) QueryBuilder::table('words')
+            ->select(['WoTextLC'])
+            ->where('WoID', '=', $wid)
+            ->valuePrepared('WoTextLC');
     }
 
     /**
@@ -120,10 +125,9 @@ class TermHandler
      */
     public function checkUpdateTranslation(int $wid, string $newTrans): string
     {
-        $cntWords = (int) Connection::preparedFetchValue(
-            "SELECT COUNT(WoID) AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$wid]
-        );
+        $cntWords = (int) QueryBuilder::table('words')
+            ->where('WoID', '=', $wid)
+            ->countPrepared();
 
         if ($cntWords == 1) {
             return $this->editTermTranslation($wid, $newTrans);
@@ -143,10 +147,13 @@ class TermHandler
     {
         $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
 
+        // Use raw SQL for dynamic score update
+        $bindings = [$status, $wid];
         return Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "words
+            "UPDATE words
             SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
-            WHERE WoID = ?",
+            WHERE WoID = ?"
+            . UserScopedQuery::forTablePrepared('words', $bindings),
             [$status, $wid]
         );
     }
@@ -193,10 +200,10 @@ class TermHandler
         if (($currstatus >= 1 && $currstatus <= 5) || $currstatus == 99 || $currstatus == 98) {
             $m1 = $this->setWordStatus($wid, $currstatus);
             if ($m1 == 1) {
-                $currstatus = Connection::preparedFetchValue(
-                    "SELECT WoStatus AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-                    [$wid]
-                );
+                $currstatus = QueryBuilder::table('words')
+                    ->select(['WoStatus'])
+                    ->where('WoID', '=', $wid)
+                    ->valuePrepared('WoStatus');
                 if (!isset($currstatus)) {
                     return null;
                 }
@@ -217,10 +224,10 @@ class TermHandler
      */
     public function incrementTermStatus(int $wid, bool $up): string
     {
-        $tempstatus = Connection::preparedFetchValue(
-            "SELECT WoStatus AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$wid]
-        );
+        $tempstatus = QueryBuilder::table('words')
+            ->select(['WoStatus'])
+            ->where('WoID', '=', $wid)
+            ->valuePrepared('WoStatus');
 
         if (!isset($tempstatus)) {
             return '';
@@ -326,20 +333,19 @@ class TermHandler
     public function deleteTerm(int $termId): array
     {
         // Check if term exists
-        $exists = Connection::preparedFetchValue(
-            "SELECT COUNT(WoID) AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$termId]
-        );
+        $exists = QueryBuilder::table('words')
+            ->where('WoID', '=', $termId)
+            ->countPrepared();
 
         if ((int)$exists === 0) {
             return ['deleted' => false, 'error' => 'Term not found'];
         }
 
         // Get word count to determine if multi-word
-        $wordCount = (int) Connection::preparedFetchValue(
-            "SELECT WoWordCount AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$termId]
-        );
+        $wordCount = (int) QueryBuilder::table('words')
+            ->select(['WoWordCount'])
+            ->where('WoID', '=', $termId)
+            ->valuePrepared('WoWordCount');
 
         if ($wordCount > 1) {
             $this->wordService->deleteMultiWord($termId);
@@ -413,11 +419,10 @@ class TermHandler
      */
     public function getTerm(int $termId): array
     {
-        $record = Connection::preparedFetchOne(
-            "SELECT WoID, WoText, WoTextLC, WoTranslation, WoRomanization, WoStatus, WoLgID
-             FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$termId]
-        );
+        $record = QueryBuilder::table('words')
+            ->select(['WoID', 'WoText', 'WoTextLC', 'WoTranslation', 'WoRomanization', 'WoStatus', 'WoLgID'])
+            ->where('WoID', '=', $termId)
+            ->firstPrepared();
 
         if ($record === null) {
             return ['error' => 'Term not found'];
@@ -499,25 +504,22 @@ class TermHandler
      */
     public function getTermDetails(int $termId, ?string $ann = null): array
     {
-        $record = Connection::preparedFetchOne(
-            "SELECT WoID, WoText, WoTextLC, WoTranslation, WoRomanization,
-                    WoStatus, WoLgID, WoSentence
-             FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$termId]
-        );
+        $record = QueryBuilder::table('words')
+            ->select(['WoID', 'WoText', 'WoTextLC', 'WoTranslation', 'WoRomanization', 'WoStatus', 'WoLgID', 'WoSentence'])
+            ->where('WoID', '=', $termId)
+            ->firstPrepared();
 
         if ($record === null) {
             return ['error' => 'Term not found'];
         }
 
-        // Get tags for the word
-        $tagsResult = Connection::preparedFetchAll(
-            "SELECT TgText FROM " . Globals::getTablePrefix() . "wordtags
-             JOIN " . Globals::getTablePrefix() . "tags ON TgID = WtTgID
-             WHERE WtWoID = ?
-             ORDER BY TgText",
-            [$termId]
-        );
+        // Get tags for the word - using JOIN with user-scoped tables
+        $tagsResult = QueryBuilder::table('wordtags')
+            ->select(['tags.TgText'])
+            ->join('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
+            ->where('wordtags.WtWoID', '=', $termId)
+            ->orderBy('tags.TgText')
+            ->getPrepared();
         $tags = array_map(fn($row) => (string)$row['TgText'], $tagsResult);
 
         // Process translation - highlight annotation if provided
@@ -583,10 +585,10 @@ class TermHandler
             }
 
             // Get word count
-            $wordCount = (int) Connection::preparedFetchValue(
-                "SELECT WoWordCount AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-                [$wordId]
-            );
+            $wordCount = (int) QueryBuilder::table('words')
+                ->select(['WoWordCount'])
+                ->where('WoID', '=', $wordId)
+                ->valuePrepared('WoWordCount');
 
             return [
                 'id' => $wordId,
@@ -772,10 +774,10 @@ class TermHandler
     public function getTermForEdit(int $textId, int $position, ?int $wordId = null): array
     {
         // Get language ID and settings from text
-        $textData = Connection::preparedFetchOne(
-            "SELECT TxLgID, TxTitle FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
-            [$textId]
-        );
+        $textData = QueryBuilder::table('texts')
+            ->select(['TxLgID', 'TxTitle'])
+            ->where('TxID', '=', $textId)
+            ->firstPrepared();
 
         if ($textData === null) {
             return ['error' => 'Text not found'];
@@ -784,11 +786,10 @@ class TermHandler
         $langId = (int) $textData['TxLgID'];
 
         // Get language settings
-        $langData = Connection::preparedFetchOne(
-            "SELECT LgName, LgShowRomanization, LgGoogleTranslateURI
-             FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$langId]
-        );
+        $langData = QueryBuilder::table('languages')
+            ->select(['LgName', 'LgShowRomanization', 'LgGoogleTranslateURI'])
+            ->where('LgID', '=', $langId)
+            ->firstPrepared();
 
         if ($langData === null) {
             return ['error' => 'Language not found'];
@@ -807,25 +808,22 @@ class TermHandler
 
         // If word ID provided, get existing term data
         if ($wordId !== null && $wordId > 0) {
-            $termData = Connection::preparedFetchOne(
-                "SELECT WoID, WoText, WoTextLC, WoTranslation, WoRomanization,
-                        WoSentence, WoStatus, WoLgID
-                 FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-                [$wordId]
-            );
+            $termData = QueryBuilder::table('words')
+                ->select(['WoID', 'WoText', 'WoTextLC', 'WoTranslation', 'WoRomanization', 'WoSentence', 'WoStatus', 'WoLgID'])
+                ->where('WoID', '=', $wordId)
+                ->firstPrepared();
 
             if ($termData === null) {
                 return ['error' => 'Term not found'];
             }
 
             // Get tags for the word
-            $tagsResult = Connection::preparedFetchAll(
-                "SELECT TgText FROM " . Globals::getTablePrefix() . "wordtags
-                 JOIN " . Globals::getTablePrefix() . "tags ON TgID = WtTgID
-                 WHERE WtWoID = ?
-                 ORDER BY TgText",
-                [$wordId]
-            );
+            $tagsResult = QueryBuilder::table('wordtags')
+                ->select(['tags.TgText'])
+                ->join('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
+                ->where('wordtags.WtWoID', '=', $wordId)
+                ->orderBy('tags.TgText')
+                ->getPrepared();
             $tags = array_map(fn($row) => (string)$row['TgText'], $tagsResult);
 
             $term = [
@@ -919,11 +917,10 @@ class TermHandler
                 continue;
             }
 
-            $record = Connection::preparedFetchOne(
-                "SELECT WoID, WoText, WoTranslation, WoStatus
-                 FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-                [$termId]
-            );
+            $record = QueryBuilder::table('words')
+                ->select(['WoID', 'WoText', 'WoTranslation', 'WoStatus'])
+                ->where('WoID', '=', $termId)
+                ->firstPrepared();
 
             if ($record) {
                 $result[] = [
@@ -993,11 +990,14 @@ class TermHandler
         $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
+        // Use raw SQL for complex INSERT with dynamic columns
+        $bindings = [$langId, $textLc, $wordText, $status, $translation, $sentence, $romanization];
+        $sql = "INSERT INTO words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
                 WoSentence, WoRomanization, WoStatusChanged,
                 {$scoreColumns}
-            ) VALUES(?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})";
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})"
+            . UserScopedQuery::forTablePrepared('words', $bindings);
 
         $stmt = Connection::prepare($sql);
         $stmt->bind('ississs', $langId, $textLc, $wordText, $status, $translation, $sentence, $romanization);
@@ -1010,8 +1010,9 @@ class TermHandler
         $wordId = $stmt->insertId();
 
         // Update text items to link to this word
+        // textitems2 inherits user context via Ti2TxID -> texts FK
         Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "textitems2
+            "UPDATE textitems2
              SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wordId, $langId, $textLc]
@@ -1056,11 +1057,10 @@ class TermHandler
     public function updateTermFull(int $termId, array $data): array
     {
         // Get existing term data
-        $existing = Connection::preparedFetchOne(
-            "SELECT WoID, WoText, WoTextLC, WoLgID, WoStatus
-             FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$termId]
-        );
+        $existing = QueryBuilder::table('words')
+            ->select(['WoID', 'WoText', 'WoTextLC', 'WoLgID', 'WoStatus'])
+            ->where('WoID', '=', $termId)
+            ->firstPrepared();
 
         if ($existing === null) {
             return ['error' => 'Term not found'];
@@ -1084,15 +1084,18 @@ class TermHandler
         // Update the word
         $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
 
+        // Use raw SQL for dynamic score update
+        $bindings = [$translation, $romanization, $sentence, $status, $termId];
         Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "words SET
+            "UPDATE words SET
              WoTranslation = ?,
              WoRomanization = ?,
              WoSentence = ?,
              WoStatus = ?,
              WoStatusChanged = NOW(),
              {$scoreUpdate}
-             WHERE WoID = ?",
+             WHERE WoID = ?"
+            . UserScopedQuery::forTablePrepared('words', $bindings),
             [$translation, $romanization, $sentence, $status, $termId]
         );
 
@@ -1449,10 +1452,9 @@ class TermHandler
         }
 
         // Check term exists
-        $exists = Connection::preparedFetchValue(
-            "SELECT COUNT(WoID) AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$termId]
-        );
+        $exists = QueryBuilder::table('words')
+            ->where('WoID', '=', $termId)
+            ->countPrepared();
 
         if ((int) $exists === 0) {
             return ['success' => false, 'value' => '', 'error' => 'Term not found'];
@@ -1467,19 +1469,17 @@ class TermHandler
                 $value = '*';
                 $displayValue = '*';
             }
-            Connection::preparedExecute(
-                "UPDATE " . Globals::getTablePrefix() . "words SET WoTranslation = ? WHERE WoID = ?",
-                [$value, $termId]
-            );
+            QueryBuilder::table('words')
+                ->where('WoID', '=', $termId)
+                ->updatePrepared(['WoTranslation' => $value]);
         } else {
             // romanization
             if ($value === '') {
                 $displayValue = '*';
             }
-            Connection::preparedExecute(
-                "UPDATE " . Globals::getTablePrefix() . "words SET WoRomanization = ? WHERE WoID = ?",
-                [$value, $termId]
-            );
+            QueryBuilder::table('words')
+                ->where('WoID', '=', $termId)
+                ->updatePrepared(['WoRomanization' => $value]);
         }
 
         return ['success' => true, 'value' => $displayValue];
@@ -1496,9 +1496,10 @@ class TermHandler
     {
         // Get languages
         $languages = [];
-        $langResult = Connection::query(
-            "SELECT LgID, LgName FROM " . Globals::getTablePrefix() . "languages ORDER BY LgName"
-        );
+        $langResult = QueryBuilder::table('languages')
+            ->select(['LgID', 'LgName'])
+            ->orderBy('LgName')
+            ->get();
         while ($row = mysqli_fetch_assoc($langResult)) {
             $languages[] = [
                 'id' => (int) $row['LgID'],
@@ -1510,10 +1511,11 @@ class TermHandler
         // Get texts (optionally filtered by language)
         $texts = [];
         if ($langId !== null && $langId > 0) {
-            $textResult = Connection::preparedFetchAll(
-                "SELECT TxID, TxTitle FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID = ? ORDER BY TxTitle",
-                [$langId]
-            );
+            $textResult = QueryBuilder::table('texts')
+                ->select(['TxID', 'TxTitle'])
+                ->where('TxLgID', '=', $langId)
+                ->orderBy('TxTitle')
+                ->getPrepared();
             foreach ($textResult as $row) {
                 $texts[] = [
                     'id' => (int) $row['TxID'],
@@ -1524,9 +1526,10 @@ class TermHandler
 
         // Get term tags (from tags table - tags2 is for text tags)
         $tags = [];
-        $tagResult = Connection::query(
-            "SELECT TgID, TgText FROM " . Globals::getTablePrefix() . "tags ORDER BY TgText"
-        );
+        $tagResult = QueryBuilder::table('tags')
+            ->select(['TgID', 'TgText'])
+            ->orderBy('TgText')
+            ->get();
         while ($row = mysqli_fetch_assoc($tagResult)) {
             $tags[] = [
                 'id' => (int) $row['TgID'],

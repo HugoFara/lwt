@@ -183,14 +183,6 @@ class BaseControllerTest extends TestCase
         $this->assertFalse($this->controller->testIsGet());
     }
 
-    // ===== table() tests =====
-
-    public function testTableAddsPrefix(): void
-    {
-        $tableName = $this->controller->testTable('tags');
-        $this->assertEquals(Globals::getTablePrefix() . 'tags', $tableName);
-    }
-
     // ===== escape() tests =====
 
     public function testEscapeHandlesQuotes(): void
@@ -419,11 +411,6 @@ class TestableController extends BaseController
     public function testIsGet(): bool
     {
         return $this->isGet();
-    }
-
-    public function testTable(string $table): string
-    {
-        return $this->table($table);
     }
 
     public function testEscape(string $value): string

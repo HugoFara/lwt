@@ -125,7 +125,10 @@ class Restore
 
         /** @psalm-suppress TypeDoesNotContainType - Value can change in loop */
         if ($install_status["errors"] == 0) {
-            Connection::execute("DROP TABLE IF EXISTS " . Globals::getTablePrefix() . "textitems");
+            // Drop legacy textitems table if it exists (replaced by textitems2)
+            // Note: This is a special case for legacy cleanup during restore
+            $prefix = Globals::getTablePrefix();
+            Connection::execute("DROP TABLE IF EXISTS {$prefix}textitems");
             Migrations::checkAndUpdate();
             Migrations::reparseAllTexts();
             Maintenance::optimizeDatabase();
@@ -158,19 +161,19 @@ class Restore
      */
     public static function truncateUserDatabase(): void
     {
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "archivedtexts");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "archtexttags");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "feedlinks");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "languages");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "textitems2");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "newsfeeds");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "sentences");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "tags");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "tags2");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "texts");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "texttags");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "words");
-        Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "wordtags");
+        QueryBuilder::table('archivedtexts')->truncate();
+        QueryBuilder::table('archtexttags')->truncate();
+        QueryBuilder::table('feedlinks')->truncate();
+        QueryBuilder::table('languages')->truncate();
+        QueryBuilder::table('textitems2')->truncate();
+        QueryBuilder::table('newsfeeds')->truncate();
+        QueryBuilder::table('sentences')->truncate();
+        QueryBuilder::table('tags')->truncate();
+        QueryBuilder::table('tags2')->truncate();
+        QueryBuilder::table('texts')->truncate();
+        QueryBuilder::table('texttags')->truncate();
+        QueryBuilder::table('words')->truncate();
+        QueryBuilder::table('wordtags')->truncate();
         QueryBuilder::table('settings')
             ->where('StKey', '=', 'currenttext')
             ->delete();

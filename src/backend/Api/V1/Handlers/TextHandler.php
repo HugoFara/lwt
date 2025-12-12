@@ -4,6 +4,7 @@ namespace Lwt\Api\V1\Handlers;
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Services\WordService;
 use Lwt\Services\ExportService;
@@ -44,10 +45,9 @@ class TextHandler
      */
     public function saveTextPosition(int $textid, int $position): void
     {
-        Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "texts SET TxPosition = ? WHERE TxID = ?",
-            [$position, $textid]
-        );
+        QueryBuilder::table('texts')
+            ->where('TxID', '=', $textid)
+            ->updatePrepared(['TxPosition' => $position]);
     }
 
     /**
@@ -60,10 +60,9 @@ class TextHandler
      */
     public function saveAudioPosition(int $textid, int $audioposition): void
     {
-        Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "texts SET TxAudioPosition = ? WHERE TxID = ?",
-            [$audioposition, $textid]
-        );
+        QueryBuilder::table('texts')
+            ->where('TxID', '=', $textid)
+            ->updatePrepared(['TxAudioPosition' => $audioposition]);
     }
 
     /**
@@ -77,10 +76,10 @@ class TextHandler
      */
     public function saveImprTextData(int $textid, int $line, string $val): string
     {
-        $ann = (string) Connection::preparedFetchValue(
-            "SELECT TxAnnotatedText AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
-            [$textid]
-        );
+        $ann = (string) QueryBuilder::table('texts')
+            ->select(['TxAnnotatedText AS value'])
+            ->where('TxID', '=', $textid)
+            ->fetchValuePrepared();
 
         $items = preg_split('/[\n]/u', $ann);
         if (count($items) <= $line) {
@@ -98,10 +97,9 @@ class TextHandler
 
         $items[$line] = implode("\t", array($vals[0], $vals[1], $vals[2], $val));
 
-        Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "texts SET TxAnnotatedText = ? WHERE TxID = ?",
-            [implode("\n", $items), $textid]
-        );
+        QueryBuilder::table('texts')
+            ->where('TxID', '=', $textid)
+            ->updatePrepared(['TxAnnotatedText' => implode("\n", $items)]);
 
         return "OK";
     }
@@ -196,10 +194,10 @@ class TextHandler
     public function setDisplayMode(int $textId, ?int $annotations, ?bool $romanization, ?bool $translation): array
     {
         // Validate text exists
-        $exists = Connection::preparedFetchValue(
-            "SELECT COUNT(TxID) AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
-            [$textId]
-        );
+        $exists = QueryBuilder::table('texts')
+            ->select(['COUNT(TxID) AS value'])
+            ->where('TxID', '=', $textId)
+            ->fetchValuePrepared();
 
         if ((int)$exists === 0) {
             return ['updated' => false, 'error' => 'Text not found'];
@@ -314,11 +312,10 @@ class TextHandler
     public function getWords(int $textId): array
     {
         // Get text info and language settings
-        $textInfo = Connection::preparedFetchOne(
-            "SELECT TxID, TxLgID, TxTitle, TxAudioURI, TxSourceURI, TxAudioPosition
-             FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
-            [$textId]
-        );
+        $textInfo = QueryBuilder::table('texts')
+            ->select(['TxID', 'TxLgID', 'TxTitle', 'TxAudioURI', 'TxSourceURI', 'TxAudioPosition'])
+            ->where('TxID', '=', $textId)
+            ->fetchOnePrepared();
 
         if (!$textInfo) {
             return ['error' => 'Text not found'];
@@ -327,35 +324,37 @@ class TextHandler
         $langId = (int)$textInfo['TxLgID'];
 
         // Get language info including dictionary URLs
-        $langInfo = Connection::preparedFetchOne(
-            "SELECT LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
-                    LgTextSize, LgRightToLeft, LgRegexpWordCharacters, LgRemoveSpaces
-             FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$langId]
-        );
+        $langInfo = QueryBuilder::table('languages')
+            ->select(['LgID', 'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
+                    'LgTextSize', 'LgRightToLeft', 'LgRegexpWordCharacters', 'LgRemoveSpaces'])
+            ->where('LgID', '=', $langId)
+            ->fetchOnePrepared();
 
         if (!$langInfo) {
             return ['error' => 'Language not found'];
         }
 
         // Get all text items with word info
-        $sql = "SELECT
-            CASE WHEN `Ti2WordCount`>0 THEN Ti2WordCount ELSE 1 END AS Code,
-            CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE `WoText` END AS TiText,
-            CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN LOWER(Ti2Text) ELSE `WoTextLC` END AS TiTextLC,
-            Ti2Order, Ti2SeID,
-            CASE WHEN `Ti2WordCount`>0 THEN 0 ELSE 1 END AS TiIsNotWord,
-            CASE
-                WHEN CHAR_LENGTH(Ti2Text)>0
-                THEN CHAR_LENGTH(Ti2Text)
-                ELSE CHAR_LENGTH(`WoTextLC`)
-            END AS TiTextLength,
-            WoID, WoText, WoStatus, WoTranslation, WoRomanization
-            FROM " . Globals::getTablePrefix() . "textitems2 LEFT JOIN " . Globals::getTablePrefix() . "words ON Ti2WoID = WoID
-            WHERE Ti2TxID = ?
-            ORDER BY Ti2Order asc, Ti2WordCount desc";
-
-        $records = Connection::preparedFetchAll($sql, [$textId]);
+        $records = QueryBuilder::table('textitems2')
+            ->select([
+                'CASE WHEN `Ti2WordCount`>0 THEN Ti2WordCount ELSE 1 END AS Code',
+                'CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE `WoText` END AS TiText',
+                'CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN LOWER(Ti2Text) ELSE `WoTextLC` END AS TiTextLC',
+                'Ti2Order',
+                'Ti2SeID',
+                'CASE WHEN `Ti2WordCount`>0 THEN 0 ELSE 1 END AS TiIsNotWord',
+                'CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN CHAR_LENGTH(Ti2Text) ELSE CHAR_LENGTH(`WoTextLC`) END AS TiTextLength',
+                'WoID',
+                'WoText',
+                'WoStatus',
+                'WoTranslation',
+                'WoRomanization'
+            ])
+            ->leftJoin('words', 'textitems2.Ti2WoID', '=', 'words.WoID')
+            ->where('textitems2.Ti2TxID', '=', $textId)
+            ->orderBy('Ti2Order', 'ASC')
+            ->orderBy('Ti2WordCount', 'DESC')
+            ->getPrepared();
 
         $words = [];
         $exprs = [];

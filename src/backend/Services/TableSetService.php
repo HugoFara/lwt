@@ -128,8 +128,12 @@ class TableSetService
             return '';
         }
 
+        // Note: Using raw SQL with interpolation here because we're explicitly
+        // managing arbitrary table prefixes (not the current user's prefix).
+        // This is DROP TABLE DDL on cross-prefix table sets.
         foreach (self::TABLE_SET_TABLES as $table) {
-            Connection::execute("DROP TABLE {$prefix}_{$table}");
+            $tableName = $prefix . '_' . $table;
+            Connection::execute("DROP TABLE IF EXISTS " . $tableName);
         }
 
         $message = 'Table Set "' . $prefix . '" deleted';

@@ -71,23 +71,23 @@ class Migrations
     {
         // Use DELETE instead of TRUNCATE to respect foreign key constraints
         // Delete textitems2 first (child), then sentences (parent)
-        Connection::execute("DELETE FROM " . Globals::getTablePrefix() . "textitems2");
-        Connection::execute("DELETE FROM " . Globals::getTablePrefix() . "sentences");
+        // Use raw DELETE FROM to delete all records
+        Connection::execute("DELETE FROM textitems2");
+        Connection::execute("DELETE FROM sentences");
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
         Maintenance::initWordCount();
         // Only reparse texts that have a valid language reference
-        $sql = "SELECT t.TxID, t.TxLgID FROM " . Globals::getTablePrefix() . "texts t
-                INNER JOIN " . Globals::getTablePrefix() . "languages l ON t.TxLgID = l.LgID";
-        $rows = Connection::fetchAll($sql);
+        $rows = QueryBuilder::table('texts')
+            ->select(['texts.TxID', 'texts.TxLgID'])
+            ->join('languages', 'texts.TxLgID', '=', 'languages.LgID')
+            ->getPrepared();
         foreach ($rows as $record) {
             $id = (int) $record['TxID'];
+            $textValue = QueryBuilder::table('texts')
+                ->where('TxID', '=', $id)
+                ->valuePrepared('TxText');
             TextParsing::splitCheck(
-                (string)Connection::preparedFetchValue(
-                    "SELECT TxText AS value
-                    FROM " . Globals::getTablePrefix() . "texts
-                    WHERE TxID = ?",
-                    [$id]
-                ),
+                (string)$textValue,
                 (string)$record['TxLgID'],
                 $id
             );
@@ -224,11 +224,9 @@ class Migrations
         $currversion = getVersionNumber();
 
         try {
-            $dbversion = Connection::fetchValue(
-                "SELECT StValue AS value
-                FROM " . Globals::getTablePrefix() . "settings
-                WHERE StKey = 'dbversion'"
-            );
+            $dbversion = QueryBuilder::table('settings')
+                ->where('StKey', '=', 'dbversion')
+                ->valuePrepared('StValue');
             if ($dbversion === null) {
                 $dbversion = 'v001000000';
             }
@@ -325,13 +323,18 @@ class Migrations
         // Get database name for INFORMATION_SCHEMA query
         $dbname = Globals::getDatabaseName();
 
-        // Use INFORMATION_SCHEMA with prepared statement instead of SHOW TABLES
+        // Get all core LWT tables (no prefix in multi-user system)
         $res = Connection::preparedFetchAll(
             "SELECT TABLE_NAME
              FROM INFORMATION_SCHEMA.TABLES
              WHERE TABLE_SCHEMA = ?
-             AND TABLE_NAME LIKE ?",
-            [$dbname, Globals::getTablePrefix() . '%']
+             AND TABLE_NAME IN (
+                'languages', 'texts', 'archivedtexts', 'words', 'sentences',
+                'textitems2', 'textitems', 'tags', 'tags2', 'wordtags',
+                'texttags', 'archtexttags', 'newsfeeds', 'feedlinks',
+                'settings', '_migrations', 'tts'
+             )",
+            [$dbname]
         );
         foreach ($res as $row) {
             $tables[] = $row['TABLE_NAME'];
@@ -343,14 +346,8 @@ class Migrations
         // Rebuild in missing table
         $queries = SqlFileParser::parseFile(__DIR__ . "/../../../../db/schema/baseline.sql");
         foreach ($queries as $query) {
-            if (str_contains($query, "_migrations")) {
-                // Do not prefix meta tables
-                $count += (int) Connection::execute($query);
-            } else {
-                $prefixed_query = self::prefixQuery($query, Globals::getTablePrefix());
-                // Increment count for new tables only
-                $count += (int) Connection::execute($prefixed_query);
-            }
+            // Execute schema queries directly - no prefix in multi-user system
+            $count += (int) Connection::execute($query);
         }
 
         // Ensure _migrations table has the new schema with applied_at column
@@ -359,11 +356,12 @@ class Migrations
         // Update the database (if necessary)
         self::update();
 
-        if (!in_array(Globals::getTablePrefix() . "textitems2", $tables)) {
+        if (!in_array("textitems2", $tables)) {
             // Add data from the old database system
-            if (in_array(Globals::getTablePrefix() . "textitems", $tables)) {
+            if (in_array("textitems", $tables)) {
+                // Complex migration query - use raw SQL
                 Connection::execute(
-                    "INSERT INTO " . Globals::getTablePrefix() . "textitems2 (
+                    "INSERT INTO textitems2 (
                         Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount,
                         Ti2Text
                     )
@@ -374,11 +372,11 @@ class Migrations
                         THEN TiText
                         ELSE ''
                     END AS Text
-                    FROM " . Globals::getTablePrefix() . "textitems
-                    LEFT JOIN " . Globals::getTablePrefix() . "words ON TiTextLC=WoTextLC AND TiLgID=WoLgID
+                    FROM textitems
+                    LEFT JOIN words ON TiTextLC=WoTextLC AND TiLgID=WoLgID
                     WHERE TiWordCount<2 OR WoID IS NOT NULL"
                 );
-                Connection::execute("TRUNCATE " . Globals::getTablePrefix() . "textitems");
+                QueryBuilder::table('textitems')->truncate();
             }
             $count++;
         }
@@ -400,44 +398,51 @@ class Migrations
                 echo '<p>DEBUG: Doing score recalc. Today: ' . $today .
                 ' / Last: ' . $lastscorecalc . '</p>';
             }
+            // Update word scores - complex SQL expression, use raw query
             Connection::execute(
-                "UPDATE " . Globals::getTablePrefix() . "words
+                "UPDATE words
                 SET " . WordStatusService::makeScoreRandomInsertUpdate('u') . "
                 WHERE WoTodayScore>=-100 AND WoStatus<98"
             );
+            // Clean up orphaned wordtags (tags deleted)
             Connection::execute(
-                "DELETE " . Globals::getTablePrefix() . "wordtags
-                FROM (" . Globals::getTablePrefix() . "wordtags LEFT JOIN " . Globals::getTablePrefix() . "tags on WtTgID = TgID)
+                "DELETE wordtags
+                FROM (wordtags LEFT JOIN tags on WtTgID = TgID)
                 WHERE TgID IS NULL"
             );
+            // Clean up orphaned wordtags (words deleted)
             Connection::execute(
-                "DELETE " . Globals::getTablePrefix() . "wordtags
-                FROM (" . Globals::getTablePrefix() . "wordtags LEFT JOIN " . Globals::getTablePrefix() . "words ON WtWoID = WoID)
+                "DELETE wordtags
+                FROM (wordtags LEFT JOIN words ON WtWoID = WoID)
                 WHERE WoID IS NULL"
             );
+            // Clean up orphaned texttags (tags2 deleted)
             Connection::execute(
-                "DELETE " . Globals::getTablePrefix() . "texttags
-                FROM (" . Globals::getTablePrefix() . "texttags LEFT JOIN " . Globals::getTablePrefix() . "tags2 ON TtT2ID = T2ID)
+                "DELETE texttags
+                FROM (texttags LEFT JOIN tags2 ON TtT2ID = T2ID)
                 WHERE T2ID IS NULL"
             );
+            // Clean up orphaned texttags (texts deleted)
             Connection::execute(
-                "DELETE " . Globals::getTablePrefix() . "texttags
-                FROM (" . Globals::getTablePrefix() . "texttags LEFT JOIN " . Globals::getTablePrefix() . "texts ON TtTxID = TxID)
+                "DELETE texttags
+                FROM (texttags LEFT JOIN texts ON TtTxID = TxID)
                 WHERE TxID IS NULL"
             );
+            // Clean up orphaned archtexttags (tags2 deleted)
             Connection::execute(
-                "DELETE " . Globals::getTablePrefix() . "archtexttags
+                "DELETE archtexttags
                 FROM (
-                    " . Globals::getTablePrefix() . "archtexttags
-                    LEFT JOIN " . Globals::getTablePrefix() . "tags2 ON AgT2ID = T2ID
+                    archtexttags
+                    LEFT JOIN tags2 ON AgT2ID = T2ID
                 )
                 WHERE T2ID IS NULL"
             );
+            // Clean up orphaned archtexttags (archivedtexts deleted)
             Connection::execute(
-                "DELETE " . Globals::getTablePrefix() . "archtexttags
+                "DELETE archtexttags
                 FROM (
-                    " . Globals::getTablePrefix() . "archtexttags
-                    LEFT JOIN " . Globals::getTablePrefix() . "archivedtexts ON AgAtID = AtID
+                    archtexttags
+                    LEFT JOIN archivedtexts ON AgAtID = AtID
                 )
                 WHERE AtID IS NULL"
             );

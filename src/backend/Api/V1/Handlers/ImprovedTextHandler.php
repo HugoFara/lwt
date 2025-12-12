@@ -4,6 +4,7 @@ namespace Lwt\Api\V1\Handlers;
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Services\AnnotationService;
 use Lwt\Services\DictionaryService;
@@ -35,10 +36,10 @@ class ImprovedTextHandler
         $set = null;
         $setDefault = null;
         if ($widset) {
-            $alltrans = (string) Connection::fetchValue(
-                "SELECT WoTranslation AS value FROM " . Globals::getTablePrefix() . "words
-                WHERE WoID = $wid"
-            );
+            $alltrans = (string) QueryBuilder::table('words')
+                ->select(['WoTranslation'])
+                ->where('WoID', '=', $wid)
+                ->getPreparedValue();
             $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
             $set = false;
             foreach ($transarr as $t) {
@@ -94,10 +95,10 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
     public function getTranslations(int $wordId): array
     {
         $translations = array();
-        $alltrans = (string) Connection::fetchValue(
-            "SELECT WoTranslation AS value FROM " . Globals::getTablePrefix() . "words
-            WHERE WoID = $wordId"
-        );
+        $alltrans = (string) QueryBuilder::table('words')
+            ->select(['WoTranslation'])
+            ->where('WoID', '=', $wordId)
+            ->getPreparedValue();
         $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
         foreach ($transarr as $t) {
             $tt = trim($t);
@@ -119,17 +120,16 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
      */
     public function getTermTranslations(string $wordlc, int $textid): array
     {
-        $sql = "SELECT TxLgID, TxAnnotatedText
-        FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textid";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
+        $record = QueryBuilder::table('texts')
+            ->select(['TxLgID', 'TxAnnotatedText'])
+            ->where('TxID', '=', $textid)
+            ->getPreparedFirst();
         $langid = (int)$record['TxLgID'];
         $ann = (string)$record['TxAnnotatedText'];
         if (strlen($ann) > 0) {
             $annotationService = new AnnotationService();
             $ann = $annotationService->recreateSaveAnnotation($textid, $ann);
         }
-        mysqli_free_result($res);
 
         $annotations = preg_split('/[\n]/u', $ann);
         $i = -1;
@@ -169,11 +169,9 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         $wid = null;
         if (count($vals) > 2 && ctype_digit($vals[2])) {
             $wid = (int)$vals[2];
-            $tempWid = (int)Connection::fetchValue(
-                "SELECT COUNT(WoID) AS value
-                FROM " . Globals::getTablePrefix() . "words
-                WHERE WoID = $wid"
-            );
+            $tempWid = (int)QueryBuilder::table('words')
+                ->where('WoID', '=', $wid)
+                ->countPrepared();
             if ($tempWid < 1) {
                 $wid = null;
             }
@@ -198,28 +196,26 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
      */
     public function editTermForm(int $textid): string
     {
-        $sql = "SELECT TxLgID, TxAnnotatedText
-        FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textid";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
+        $record = QueryBuilder::table('texts')
+            ->select(['TxLgID', 'TxAnnotatedText'])
+            ->where('TxID', '=', $textid)
+            ->getPreparedFirst();
         $langid = (int) $record['TxLgID'];
         $ann = (string) $record['TxAnnotatedText'];
         if (strlen($ann) > 0) {
             $annotationService = new AnnotationService();
             $ann = $annotationService->recreateSaveAnnotation($textid, $ann);
         }
-        mysqli_free_result($res);
 
-        $sql = "SELECT LgTextSize, LgRightToLeft
-        FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $langid";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
+        $record = QueryBuilder::table('languages')
+            ->select(['LgTextSize', 'LgRightToLeft'])
+            ->where('LgID', '=', $langid)
+            ->getPreparedFirst();
         $textsize = (int)$record['LgTextSize'];
         if ($textsize > 100) {
             $textsize = intval($textsize * 0.8);
         }
         $rtlScript = $record['LgRightToLeft'];
-        mysqli_free_result($res);
 
         $r =
         '<form action="" method="post">
@@ -256,11 +252,9 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
                 if (count($vals) > 2) {
                     $strWid = $vals[2];
                     if (is_numeric($strWid)) {
-                        $tempWid = (int)Connection::fetchValue(
-                            "SELECT COUNT(WoID) AS value
-                            FROM " . Globals::getTablePrefix() . "words
-                            WHERE WoID = $strWid"
-                        );
+                        $tempWid = (int)QueryBuilder::table('words')
+                            ->where('WoID', '=', $strWid)
+                            ->countPrepared();
                         if ($tempWid < 1) {
                             $wid = null;
                         } else {

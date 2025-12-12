@@ -19,6 +19,7 @@ require_once __DIR__ . '/../../Services/SettingsService.php';
 
 use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;
+use Lwt\Database\QueryBuilder;
 use Lwt\Services\SettingsService;
 
 /**
@@ -60,12 +61,9 @@ class Settings
      */
     public static function get(string $key): string
     {
-        $val = Connection::preparedFetchValue(
-            'SELECT StValue AS value
-            FROM ' . Globals::getTablePrefix() . 'settings
-            WHERE StKey = ?',
-            [$key]
-        );
+        $val = QueryBuilder::table('settings')
+            ->where('StKey', '=', $key)
+            ->valuePrepared('StValue');
         if (isset($val)) {
             $val = trim((string) $val);
             if ($key == 'currentlanguage') {
@@ -89,12 +87,9 @@ class Settings
     public static function getWithDefault(string $key): string
     {
         $dft = SettingsService::getDefinitions();
-        $val = (string) Connection::preparedFetchValue(
-            'SELECT StValue AS value
-             FROM ' . Globals::getTablePrefix() . 'settings
-             WHERE StKey = ?',
-            [$key]
-        );
+        $val = (string) QueryBuilder::table('settings')
+            ->where('StKey', '=', $key)
+            ->valuePrepared('StValue');
         if ($val != '') {
             return trim($val);
         }
@@ -125,7 +120,7 @@ class Settings
         }
         QueryBuilder::table('settings')
             ->where('StKey', '=', $k)
-            ->delete();
+            ->deletePrepared();
         if (isset($dft[$k]) && $dft[$k]['num']) {
             $v = (int)$v;
             if ($v < $dft[$k]['min']) {
@@ -135,10 +130,8 @@ class Settings
                 $v = $dft[$k]['dft'];
             }
         }
-        $dum = Connection::preparedExecute(
-            "INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES(?, ?)",
-            [$k, (string)$v]
-        );
+        $dum = QueryBuilder::table('settings')
+            ->insertPrepared(['StKey' => $k, 'StValue' => (string)$v]);
         return "OK: $dum rows changed";
     }
 

@@ -16,6 +16,8 @@
 namespace Lwt\Database;
 
 use Lwt\Core\Globals;
+use Lwt\Database\QueryBuilder;
+use Lwt\Database\UserScopedQuery;
 
 /**
  * Database ID and tag validation utilities.
@@ -41,10 +43,10 @@ class Validation
         }
         // Cast to integer for safety against SQL injection
         $currentlang_int = (int)$currentlang;
-        $sql_string = 'SELECT count(LgID) AS value
-        FROM ' . Globals::getTablePrefix() . 'languages
-        WHERE LgID=' . $currentlang_int;
-        if (Connection::fetchValue($sql_string) == 0) {
+        $count = QueryBuilder::table('languages')
+            ->where('LgID', '=', $currentlang_int)
+            ->count();
+        if ($count == 0) {
             return '';
         }
         return (string)$currentlang_int;
@@ -64,10 +66,10 @@ class Validation
         }
         // Cast to integer for safety against SQL injection
         $currenttext_int = (int)$currenttext;
-        $sql_string = 'SELECT count(TxID) AS value
-        FROM ' . Globals::getTablePrefix() . 'texts WHERE TxID=' .
-        $currenttext_int;
-        if (Connection::fetchValue($sql_string) == 0) {
+        $count = QueryBuilder::table('texts')
+            ->where('TxID', '=', $currenttext_int)
+            ->count();
+        if ($count == 0) {
             return '';
         }
         return (string)$currenttext_int;
@@ -90,6 +92,7 @@ class Validation
             }
             $currenttag_int = (int)$currenttag;
 
+            $bindings = [];
             $lang_condition = '';
             if ($currentlang != '') {
                 if (!is_numeric($currentlang)) {
@@ -102,12 +105,13 @@ class Validation
             $sql = "SELECT (
                 " . $currenttag_int . " IN (
                     SELECT TgID
-                    FROM " . Globals::getTablePrefix() . "words, " . Globals::getTablePrefix() . "tags, " . Globals::getTablePrefix() . "wordtags
+                    FROM words, tags, wordtags
                     WHERE TgID = WtTgID AND WtWoID = WoID" .
                     $lang_condition .
                     " group by TgID order by TgText
                 )
-            ) AS value";
+            ) AS value"
+                . UserScopedQuery::forTablePrepared('words', $bindings);
             $r = Connection::fetchValue($sql);
             if ($r == 0) {
                 $currenttag = '';
@@ -133,17 +137,19 @@ class Validation
             }
             $currenttag_int = (int)$currenttag;
 
+            $bindings = [];
             if ($currentlang == '') {
                 $sql = "select (
                     " . $currenttag_int . " in (
                         select T2ID
-                        from " . Globals::getTablePrefix() . "archivedtexts,
-                        " . Globals::getTablePrefix() . "tags2,
-                        " . Globals::getTablePrefix() . "archtexttags
+                        from archivedtexts,
+                        tags2,
+                        archtexttags
                         where T2ID = AgT2ID and AgAtID = AtID
                         group by T2ID order by T2Text
                     )
-                ) as value";
+                ) as value"
+                    . UserScopedQuery::forTablePrepared('archivedtexts', $bindings);
             } else {
                 if (!is_numeric($currentlang)) {
                     return '';
@@ -152,13 +158,14 @@ class Validation
                 $sql = "select (
                     " . $currenttag_int . " in (
                         select T2ID
-                        from " . Globals::getTablePrefix() . "archivedtexts,
-                        " . Globals::getTablePrefix() . "tags2,
-                        " . Globals::getTablePrefix() . "archtexttags
+                        from archivedtexts,
+                        tags2,
+                        archtexttags
                         where T2ID = AgT2ID and AgAtID = AtID and AtLgID = " . $currentlang_int . "
                         group by T2ID order by T2Text
                     )
-                ) as value";
+                ) as value"
+                    . UserScopedQuery::forTablePrepared('archivedtexts', $bindings);
             }
             $r = Connection::fetchValue($sql);
             if ($r == 0) {
@@ -185,16 +192,18 @@ class Validation
             }
             $currenttag_int = (int)$currenttag;
 
+            $bindings = [];
             if ($currentlang == '') {
                 $sql = "select (
                     $currenttag_int in (
                         select T2ID
-                        from " . Globals::getTablePrefix() . "texts, " . Globals::getTablePrefix() . "tags2, " . Globals::getTablePrefix() . "texttags
+                        from texts, tags2, texttags
                         where T2ID = TtT2ID and TtTxID = TxID
                         group by T2ID
                         order by T2Text
                     )
-                ) as value";
+                ) as value"
+                    . UserScopedQuery::forTablePrepared('texts', $bindings);
             } else {
                 if (!is_numeric($currentlang)) {
                     return '';
@@ -203,11 +212,12 @@ class Validation
                 $sql = "select (
                     $currenttag_int in (
                         select T2ID
-                        from " . Globals::getTablePrefix() . "texts, " . Globals::getTablePrefix() . "tags2, " . Globals::getTablePrefix() . "texttags
+                        from texts, tags2, texttags
                         where T2ID = TtT2ID and TtTxID = TxID and TxLgID = $currentlang_int
                         group by T2ID order by T2Text
                     )
-                ) as value";
+                ) as value"
+                    . UserScopedQuery::forTablePrepared('texts', $bindings);
             }
             $r = Connection::fetchValue($sql);
             if ($r == 0) {

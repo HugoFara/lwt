@@ -366,7 +366,7 @@ class SimilarTermsService
         $record = QueryBuilder::table('words')
             ->select(['WoText', 'WoTranslation', 'WoRomanization'])
             ->where('WoID', '=', $termId)
-            ->getOnePrepared();
+            ->firstPrepared();
         if ($record) {
             $term = htmlspecialchars($record["WoText"] ?? '', ENT_QUOTES, 'UTF-8');
             if (stripos($compare, $term) !== false) {

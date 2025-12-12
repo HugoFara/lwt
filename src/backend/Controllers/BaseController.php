@@ -50,7 +50,7 @@ abstract class BaseController
     protected ?\mysqli $db = null;
 
     /**
-     * Initialize controller with database connection and table prefix.
+     * Initialize controller with database connection.
      *
      * Note: The database connection may not be available until Globals are
      * loaded by the controller action.
@@ -277,17 +277,6 @@ abstract class BaseController
         return Connection::fetchValue($sql);
     }
 
-    /**
-     * Get the table name with prefix.
-     *
-     * @param string $table Table name without prefix
-     *
-     * @return string Table name with prefix
-     */
-    protected function table(string $table): string
-    {
-        return \Lwt\Core\Globals::getTablePrefix() . $table;
-    }
 
     /**
      * Escape a string for safe SQL insertion.

@@ -14,7 +14,6 @@
 
 namespace Lwt\Core\Repository;
 
-use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 
@@ -52,16 +51,6 @@ abstract class AbstractRepository implements RepositoryInterface
      * @var array<string, string>
      */
     protected array $columnMap = [];
-
-    /**
-     * Get the full table name with prefix.
-     *
-     * @return string
-     */
-    protected function table(): string
-    {
-        return Globals::getTablePrefix() . $this->tableName;
-    }
 
     /**
      * Get a query builder for this repository's table.

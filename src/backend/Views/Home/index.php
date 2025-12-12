@@ -407,7 +407,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 <!-- Version info -->
 <p class="has-text-centered has-text-grey is-size-7 mt-4">
     LWT Version <?php echo getVersion(); ?> &mdash;
-    <?php $tablePrefix = Globals::getTablePrefix(); echo ($tablePrefix == '' ? 'default table set' : 'table prefixed with "' . $tablePrefix . '"'); ?>
+    <?php echo (Globals::getTablePrefix() == '' ? 'default table set' : 'table prefixed with "' . Globals::getTablePrefix() . '"'); ?>
 </p>
 
 <!-- Footer - Alpine.js Component -->

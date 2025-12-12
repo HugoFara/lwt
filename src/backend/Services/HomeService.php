@@ -206,23 +206,29 @@ class HomeService
     public function getDatabaseSize(): float
     {
         $dbname = Globals::getDatabaseName();
-        $prefix = Globals::getTablePrefix();
 
-        // Build the table names with prefix
-        $tables = [
+        // Get the prefixed table names for all LWT tables
+        $tableNames = [
             'archivedtexts', 'archtexttags', 'feedlinks', 'languages',
             'newsfeeds', 'sentences', 'settings', 'tags', 'tags2',
             'textitems2', 'texts', 'texttags', 'words', 'wordtags'
         ];
-        $tableNames = array_map(fn($t) => "'{$prefix}{$t}'", $tables);
-        $tableList = implode(', ', $tableNames);
+
+        // Use Globals::table() to get properly prefixed table names
+        $prefixedTables = array_map(
+            fn($table) => Globals::table($table),
+            $tableNames
+        );
+
+        $placeholders = implode(', ', array_fill(0, count($prefixedTables), '?'));
+        $bindings = array_merge([$dbname], $prefixedTables);
 
         $size = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
             FROM information_schema.TABLES
             WHERE table_schema = ?
-            AND table_name IN ({$tableList})",
-            [$dbname]
+            AND table_name IN ($placeholders)",
+            $bindings
         );
 
         if ($size === null) {

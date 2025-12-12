@@ -56,7 +56,7 @@ class SentenceService
         $record = QueryBuilder::table('languages')
             ->select(['LgRegexpWordCharacters', 'LgRemoveSpaces'])
             ->where('LgID', '=', $lid)
-            ->getOnePrepared();
+            ->firstPrepared();
         $removeSpaces = $record["LgRemoveSpaces"];
 
         if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
@@ -133,7 +133,7 @@ class SentenceService
         $record = QueryBuilder::table('languages')
             ->select(['LgRegexpWordCharacters', 'LgRemoveSpaces'])
             ->where('LgID', '=', $lid)
-            ->getOnePrepared();
+            ->firstPrepared();
         $removeSpaces = $record["LgRemoveSpaces"];
 
         if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {

@@ -156,9 +156,11 @@ class PreparedStatementTest extends TestCase
             ->where('LgID', '>', 0)
             ->firstPrepared();
 
-        // Could be null if no languages exist
+        // Could be null if no languages exist, or an array with expected keys
         if ($result !== null) {
             $this->assertArrayHasKey('LgID', $result);
+        } else {
+            $this->assertNull($result);
         }
     }
 

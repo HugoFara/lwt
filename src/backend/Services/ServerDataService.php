@@ -91,9 +91,9 @@ class ServerDataService
             'textitems2', 'texts', 'texttags', 'words', 'wordtags'
         ];
 
-        $prefix = Globals::getTablePrefix();
+        // Use Globals::table() to get properly prefixed table names
         $prefixedTables = array_map(
-            fn($table) => $prefix . $table,
+            fn($table) => Globals::table($table),
             $tableNames
         );
 

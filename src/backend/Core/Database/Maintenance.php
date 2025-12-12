@@ -16,6 +16,7 @@
 namespace Lwt\Database;
 
 use Lwt\Core\Globals;
+use Lwt\Database\QueryBuilder;
 
 /**
  * Database maintenance and optimization utilities.
@@ -37,13 +38,15 @@ class Maintenance
      */
     public static function adjustAutoIncrement(string $table, string $key): void
     {
-        $val = Connection::fetchValue(
-            'SELECT max(' . $key . ')+1 AS value FROM ' . Globals::getTablePrefix() . $table
-        );
+        $row = QueryBuilder::table($table)
+            ->selectRaw('max(' . $key . ')+1 AS value')
+            ->first();
+        $val = $row['value'] ?? null;
         if (!isset($val)) {
             $val = 1;
         }
-        $sql = 'ALTER TABLE ' . Globals::getTablePrefix() . $table . ' AUTO_INCREMENT = ' . $val;
+        // ALTER TABLE is DDL - use raw SQL with fixed table name
+        $sql = 'ALTER TABLE ' . $table . ' AUTO_INCREMENT = ' . $val;
         Connection::query($sql);
     }
 
@@ -63,18 +66,14 @@ class Maintenance
         self::adjustAutoIncrement('tags2', 'T2ID');
         self::adjustAutoIncrement('newsfeeds', 'NfID');
         self::adjustAutoIncrement('feedlinks', 'FlID');
+        // SHOW TABLE STATUS queries physical table names, not logical table names
+        // In the new system, tables don't have prefixes - they're just "words", "texts", etc.
         $sql =
         'SHOW TABLE STATUS
         WHERE Engine IN ("MyISAM","Aria") AND (
             (Data_free / Data_length > 0.1 AND Data_free > 102400) OR Data_free > 1048576
-        ) AND Name';
-        if (empty(Globals::getTablePrefix())) {
-            $sql .= " NOT LIKE '\\_%'";
-            $rows = Connection::fetchAll($sql);
-        } else {
-            $sql .= " LIKE CONCAT(?, '\\_', '%')";
-            $rows = Connection::preparedFetchAll($sql, [rtrim(Globals::getTablePrefix(), '_')]);
-        }
+        ) AND Name NOT LIKE "\\_%"';
+        $rows = Connection::fetchAll($sql);
         foreach ($rows as $row) {
             Connection::execute('OPTIMIZE TABLE ' . $row['Name']);
         }
@@ -90,13 +89,15 @@ class Maintenance
     public static function updateJapaneseWordCount(int $japid): void
     {
         // STEP 1: write the useful info to a file
-        $db_to_mecab = tempnam(sys_get_temp_dir(), Globals::getTablePrefix() . "db_to_mecab");
+        $db_to_mecab = tempnam(sys_get_temp_dir(), "db_to_mecab");
         $mecab_args = ' -F %m%t\\t -U %m%t\\t -E \\n ';
         $mecab = (new \Lwt\Services\TextParsingService())->getMecabPath($mecab_args);
 
-        $sql = "SELECT WoID, WoTextLC FROM " . Globals::getTablePrefix() . "words
-        WHERE WoLgID = ? AND WoWordCount = 0";
-        $rows = Connection::preparedFetchAll($sql, [$japid]);
+        $rows = QueryBuilder::table('words')
+            ->select(['WoID', 'WoTextLC'])
+            ->where('WoLgID', '=', $japid)
+            ->where('WoWordCount', '=', 0)
+            ->getPrepared();
         if (empty($rows)) {
             return;
         }
@@ -137,8 +138,9 @@ class Maintenance
 
 
         // STEP 3: edit the database
+        // Temporary tables are session-scoped, no prefix needed
         Connection::query(
-            "CREATE TEMPORARY TABLE " . Globals::getTablePrefix() . "mecab (
+            "CREATE TEMPORARY TABLE mecab (
                 MID mediumint(8) unsigned NOT NULL,
                 MWordCount tinyint(3) unsigned NOT NULL,
                 PRIMARY KEY (MID)
@@ -146,17 +148,18 @@ class Maintenance
         );
 
         // Insert data using prepared statements
-        $insertSql = "INSERT INTO " . Globals::getTablePrefix() . "mecab (MID, MWordCount) VALUES (?, ?)";
+        $insertSql = "INSERT INTO mecab (MID, MWordCount) VALUES (?, ?)";
         foreach ($data as $entry) {
             Connection::preparedExecute($insertSql, [$entry['mid'], $entry['count']]);
         }
 
+        // UPDATE with JOIN - use raw SQL with fixed table names
         Connection::query(
-            "UPDATE " . Globals::getTablePrefix() . "words
-            JOIN " . Globals::getTablePrefix() . "mecab ON MID = WoID
+            "UPDATE words
+            JOIN mecab ON MID = WoID
             SET WoWordCount = MWordCount"
         );
-        Connection::execute("DROP TABLE " . Globals::getTablePrefix() . "mecab");
+        Connection::execute("DROP TABLE mecab");
 
         unlink($db_to_mecab);
     }
@@ -176,20 +179,21 @@ class Maintenance
         /**
          * @var string|null ID for the Japanese language using MeCab
          */
-        $japid = Connection::fetchValue(
-            "SELECT group_concat(LgID) value
-            FROM " . Globals::getTablePrefix() . "languages
-            WHERE UPPER(LgRegexpWordCharacters)='MECAB'"
-        );
+        $row = QueryBuilder::table('languages')
+            ->selectRaw('group_concat(LgID) AS value')
+            ->whereRaw("UPPER(LgRegexpWordCharacters)='MECAB'")
+            ->first();
+        $japid = $row['value'] ?? null;
 
         if ($japid !== null && $japid !== '') {
             self::updateJapaneseWordCount((int)$japid);
         }
-        $sql = "SELECT WoID, WoTextLC, LgRegexpWordCharacters, LgSplitEachChar
-        FROM " . Globals::getTablePrefix() . "words, " . Globals::getTablePrefix() . "languages
-        WHERE WoWordCount = 0 AND WoLgID = LgID
-        ORDER BY WoID";
-        $rows = Connection::fetchAll($sql);
+        $rows = QueryBuilder::table('words')
+            ->select(['WoID', 'WoTextLC', 'LgRegexpWordCharacters', 'LgSplitEachChar'])
+            ->join('languages', 'words.WoLgID', '=', 'languages.LgID')
+            ->where('WoWordCount', '=', 0)
+            ->orderBy('WoID')
+            ->getPrepared();
         foreach ($rows as $rec) {
             if ((int)$rec['LgSplitEachChar'] === 1) {
                 $textlc = preg_replace('/([^\s])/u', "$1 ", $rec['WoTextLC']);
@@ -208,7 +212,7 @@ class Maintenance
             $sqlarr[] = ' WHEN ' . $rec['WoID'] . ' THEN ' . $wordCount;
             if (++$i % 1000 == 0) {
                 $max = $rec['WoID'];
-                $sqltext = "UPDATE  " . Globals::getTablePrefix() . "words
+                $sqltext = "UPDATE words
                 SET WoWordCount = CASE WoID" . implode(' ', $sqlarr) . "
                 END
                 WHERE WoWordCount=0 AND WoID BETWEEN $min AND $max";
@@ -218,7 +222,7 @@ class Maintenance
             }
         }
         if (!empty($sqlarr)) {
-            $sqltext = "UPDATE " . Globals::getTablePrefix() . "words
+            $sqltext = "UPDATE words
             SET WoWordCount = CASE WoID" . implode(' ', $sqlarr) . '
             END where WoWordCount=0';
             Connection::query($sqltext);

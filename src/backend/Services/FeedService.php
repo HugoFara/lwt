@@ -19,6 +19,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\Maintenance;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\TextParsing;
+use Lwt\Database\UserScopedQuery;
 
 /**
  * Service class for managing RSS feeds.
@@ -43,29 +44,15 @@ class FeedService
      */
     public function getFeeds(?int $langId = null): array
     {
-        $sql = "SELECT NfID, NfName, NfSourceURI, NfUpdate, NfOptions, NfLgID
-                FROM " . Globals::getTablePrefix() . "newsfeeds";
-        $params = [];
+        $query = QueryBuilder::table('newsfeeds')
+            ->select(['NfID', 'NfName', 'NfSourceURI', 'NfUpdate', 'NfOptions', 'NfLgID'])
+            ->orderBy('NfUpdate', 'DESC');
 
         if ($langId !== null && $langId > 0) {
-            $sql .= " WHERE NfLgID = ?";
-            $params[] = $langId;
+            $query->where('NfLgID', '=', $langId);
         }
 
-        $sql .= " ORDER BY NfUpdate DESC";
-
-        if (!empty($params)) {
-            return Connection::preparedFetchAll($sql, $params);
-        }
-
-        $feeds = [];
-        $res = Connection::query($sql);
-        while ($row = mysqli_fetch_assoc($res)) {
-            $feeds[] = $row;
-        }
-        mysqli_free_result($res);
-
-        return $feeds;
+        return $query->getPrepared();
     }
 
     /**
@@ -77,10 +64,9 @@ class FeedService
      */
     public function getFeedById(int $feedId): ?array
     {
-        $row = Connection::preparedFetchOne(
-            "SELECT * FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfID = ?",
-            [$feedId]
-        );
+        $row = QueryBuilder::table('newsfeeds')
+            ->where('NfID', '=', $feedId)
+            ->firstPrepared();
         return $row ?: null;
     }
 
@@ -102,13 +88,18 @@ class FeedService
         int $offset = 0,
         int $limit = 50
     ): array {
+        // Complex query with raw SQL and TRIM() in JOIN condition
+        // feedlinks inherits user context via FlNfID -> newsfeeds FK
+        $bindings = [];
         $sql = "SELECT FlID, FlTitle, FlLink, FlDescription, FlDate, FlAudio,
                        TxID, AtID
-                FROM " . Globals::getTablePrefix() . "feedlinks
-                LEFT JOIN " . Globals::getTablePrefix() . "texts ON TxSourceURI = TRIM(FlLink)
-                LEFT JOIN " . Globals::getTablePrefix() . "archivedtexts ON AtSourceURI = TRIM(FlLink)
-                WHERE FlNfID IN ($feedIds) $whereQuery
-                ORDER BY $orderBy
+                FROM feedlinks
+                LEFT JOIN texts ON TxSourceURI = TRIM(FlLink)
+                LEFT JOIN archivedtexts ON AtSourceURI = TRIM(FlLink)
+                WHERE FlNfID IN ($feedIds) $whereQuery"
+                . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts')
+                . UserScopedQuery::forTablePrepared('archivedtexts', $bindings, 'archivedtexts')
+                . " ORDER BY $orderBy
                 LIMIT $offset, $limit";
 
         $links = [];
@@ -131,7 +122,8 @@ class FeedService
      */
     public function countFeedLinks(string $feedIds, string $whereQuery = ''): int
     {
-        $sql = "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "feedlinks
+        // feedlinks inherits user context via FlNfID -> newsfeeds FK
+        $sql = "SELECT COUNT(*) AS value FROM feedlinks
                 WHERE FlNfID IN ($feedIds) $whereQuery";
         return (int)Connection::fetchValue($sql);
     }
@@ -146,22 +138,16 @@ class FeedService
      */
     public function countFeeds(?int $langId = null, ?string $queryPattern = null): int
     {
-        $whereConditions = [];
-        $params = [];
+        $query = QueryBuilder::table('newsfeeds');
 
         if ($langId !== null && $langId > 0) {
-            $whereConditions[] = "NfLgID = ?";
-            $params[] = $langId;
+            $query->where('NfLgID', '=', $langId);
         }
         if ($queryPattern !== null) {
-            $whereConditions[] = "NfName LIKE ?";
-            $params[] = $queryPattern;
+            $query->where('NfName', 'LIKE', $queryPattern);
         }
 
-        $where = empty($whereConditions) ? '1=1' : implode(' AND ', $whereConditions);
-        $sql = "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "newsfeeds WHERE $where";
-
-        return (int)Connection::preparedFetchValue($sql, $params);
+        return $query->countPrepared();
     }
 
     /**
@@ -173,19 +159,15 @@ class FeedService
      */
     public function createFeed(array $data): int
     {
-        return Connection::preparedInsert(
-            "INSERT INTO " . Globals::getTablePrefix() . "newsfeeds (
-                NfLgID, NfName, NfSourceURI, NfArticleSectionTags, NfFilterTags, NfOptions
-            ) VALUES (?, ?, ?, ?, ?, ?)",
-            [
-                $data['NfLgID'],
-                $data['NfName'],
-                $data['NfSourceURI'],
-                $data['NfArticleSectionTags'],
-                $data['NfFilterTags'] ?? '',
-                rtrim($data['NfOptions'] ?? '', ',')
-            ]
-        );
+        return QueryBuilder::table('newsfeeds')
+            ->insertPrepared([
+                'NfLgID' => $data['NfLgID'],
+                'NfName' => $data['NfName'],
+                'NfSourceURI' => $data['NfSourceURI'],
+                'NfArticleSectionTags' => $data['NfArticleSectionTags'],
+                'NfFilterTags' => $data['NfFilterTags'] ?? '',
+                'NfOptions' => rtrim($data['NfOptions'] ?? '', ',')
+            ]);
     }
 
     /**
@@ -198,25 +180,16 @@ class FeedService
      */
     public function updateFeed(int $feedId, array $data): void
     {
-        Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "newsfeeds SET
-                NfLgID = ?,
-                NfName = ?,
-                NfSourceURI = ?,
-                NfArticleSectionTags = ?,
-                NfFilterTags = ?,
-                NfOptions = ?
-            WHERE NfID = ?",
-            [
-                $data['NfLgID'],
-                $data['NfName'],
-                $data['NfSourceURI'],
-                $data['NfArticleSectionTags'],
-                $data['NfFilterTags'] ?? '',
-                rtrim($data['NfOptions'] ?? '', ','),
-                $feedId
-            ]
-        );
+        QueryBuilder::table('newsfeeds')
+            ->where('NfID', '=', $feedId)
+            ->updatePrepared([
+                'NfLgID' => $data['NfLgID'],
+                'NfName' => $data['NfName'],
+                'NfSourceURI' => $data['NfSourceURI'],
+                'NfArticleSectionTags' => $data['NfArticleSectionTags'],
+                'NfFilterTags' => $data['NfFilterTags'] ?? '',
+                'NfOptions' => rtrim($data['NfOptions'] ?? '', ',')
+            ]);
     }
 
     /**
@@ -256,13 +229,10 @@ class FeedService
             ->whereIn('FlNfID', $ids)
             ->delete();
 
-        // Update the feed timestamp - use placeholders for each ID
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "newsfeeds SET NfUpdate = ?
-             WHERE NfID IN ($placeholders)",
-            array_merge([time()], $ids)
-        );
+        // Update the feed timestamp
+        QueryBuilder::table('newsfeeds')
+            ->whereIn('NfID', $ids)
+            ->updatePrepared(['NfUpdate' => time()]);
 
         return $count;
     }
@@ -276,8 +246,10 @@ class FeedService
      */
     public function resetUnloadableArticles(string $feedIds): int
     {
+        // feedlinks inherits user context via FlNfID -> newsfeeds FK
+        // Use raw SQL for TRIM(FlLink) expression
         return (int)Connection::execute(
-            "UPDATE " . Globals::getTablePrefix() . "feedlinks SET FlLink = TRIM(FlLink)
+            "UPDATE feedlinks SET FlLink = TRIM(FlLink)
              WHERE FlNfID IN ($feedIds)"
         );
     }
@@ -292,12 +264,11 @@ class FeedService
         $currentTime = time();
         $feeds = [];
 
-        $result = Connection::query(
-            "SELECT * FROM " . Globals::getTablePrefix() . "newsfeeds
-             WHERE NfOptions LIKE '%autoupdate=%'"
-        );
+        $rows = QueryBuilder::table('newsfeeds')
+            ->where('NfOptions', 'LIKE', '%autoupdate=%')
+            ->getPrepared();
 
-        while ($row = mysqli_fetch_assoc($result)) {
+        foreach ($rows as $row) {
             $autoupdate = $this->getNfOption((string)$row['NfOptions'], 'autoupdate');
             if (!$autoupdate) {
                 continue;
@@ -312,7 +283,6 @@ class FeedService
                 $feeds[] = $row;
             }
         }
-        mysqli_free_result($result);
 
         return $feeds;
     }
@@ -496,13 +466,15 @@ class FeedService
             $ids = $markedItems;
         }
 
+        // Complex subquery with JOIN
+        // feedlinks inherits user context via FlNfID -> newsfeeds FK
         $sql = "SELECT fl.*, nf.*
                 FROM (
-                    SELECT * FROM " . Globals::getTablePrefix() . "feedlinks
+                    SELECT * FROM feedlinks
                     WHERE FlID IN ($ids)
                     ORDER BY FlNfID
                 ) fl
-                LEFT JOIN " . Globals::getTablePrefix() . "newsfeeds nf ON NfID = FlNfID";
+                LEFT JOIN newsfeeds nf ON NfID = FlNfID";
 
         $links = [];
         $res = Connection::query($sql);
@@ -524,25 +496,21 @@ class FeedService
      */
     public function createTextFromFeed(array $textData, string $tagName): int
     {
-        // Ensure tag exists
-        Connection::preparedExecute(
-            "INSERT IGNORE INTO " . Globals::getTablePrefix() . "tags2 (T2Text) VALUES (?)",
-            [$tagName]
-        );
+        // Ensure tag exists - use raw SQL for INSERT IGNORE
+        $bindings = [$tagName];
+        $sql = "INSERT IGNORE INTO tags2 (T2Text) VALUES (?)"
+            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+        Connection::preparedExecute($sql, $bindings);
 
         // Create the text
-        $textId = Connection::preparedInsert(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (
-                TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI
-            ) VALUES (?, ?, ?, ?, ?)",
-            [
-                $textData['TxLgID'],
-                $textData['TxTitle'],
-                $textData['TxText'],
-                $textData['TxAudioURI'] ?? '',
-                $textData['TxSourceURI'] ?? ''
-            ]
-        );
+        $textId = QueryBuilder::table('texts')
+            ->insertPrepared([
+                'TxLgID' => $textData['TxLgID'],
+                'TxTitle' => $textData['TxTitle'],
+                'TxText' => $textData['TxText'],
+                'TxAudioURI' => $textData['TxAudioURI'] ?? '',
+                'TxSourceURI' => $textData['TxSourceURI'] ?? ''
+            ]);
 
         // Parse the text
         TextParsing::splitCheck(
@@ -551,13 +519,13 @@ class FeedService
             $textId
         );
 
-        // Apply tag
-        Connection::preparedExecute(
-            "INSERT INTO " . Globals::getTablePrefix() . "texttags (TtTxID, TtT2ID)
-             SELECT ?, T2ID FROM " . Globals::getTablePrefix() . "tags2
-             WHERE T2Text = ?",
-            [$textId, $tagName]
-        );
+        // Apply tag - texttags inherits user context via TtTxID -> texts FK
+        $bindings = [$textId, $tagName];
+        $sql = "INSERT INTO texttags (TtTxID, TtT2ID)
+             SELECT ?, T2ID FROM tags2
+             WHERE T2Text = ?"
+            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+        Connection::preparedExecute($sql, $bindings);
 
         return $textId;
     }
@@ -572,12 +540,13 @@ class FeedService
      */
     public function archiveOldTexts(string $tagName, int $maxTexts): array
     {
-        $rows = Connection::preparedFetchAll(
-            "SELECT TtTxID FROM " . Globals::getTablePrefix() . "texttags
-             JOIN " . Globals::getTablePrefix() . "tags2 ON TtT2ID = T2ID
-             WHERE T2Text = ?",
-            [$tagName]
-        );
+        // texttags inherits user context via TtTxID -> texts FK
+        $bindings = [$tagName];
+        $sql = "SELECT TtTxID FROM texttags
+             JOIN tags2 ON TtT2ID = T2ID
+             WHERE T2Text = ?"
+            . UserScopedQuery::forTablePrepared('tags2', $bindings);
+        $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $textIds = [];
         foreach ($rows as $row) {
@@ -603,21 +572,23 @@ class FeedService
                 ->delete();
 
             // Archive the text
-            Connection::preparedExecute(
-                "INSERT INTO " . Globals::getTablePrefix() . "archivedtexts (
+            $bindings = [$textId];
+            $sql = "INSERT INTO archivedtexts (
                     AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
                 )
                 SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                FROM " . Globals::getTablePrefix() . "texts WHERE TxID = ?",
-                [$textId]
-            );
+                FROM texts WHERE TxID = ?"
+                . UserScopedQuery::forTablePrepared('texts', $bindings)
+                . UserScopedQuery::forTablePrepared('archivedtexts', $bindings);
+            Connection::preparedExecute($sql, $bindings);
 
             $archiveId = (int)Connection::lastInsertId();
 
-            // Copy tags to archive
+            // Copy tags to archive - archtexttags inherits user context via AgAtID -> archivedtexts FK
+            // texttags inherits user context via TtTxID -> texts FK
             Connection::preparedExecute(
-                "INSERT INTO " . Globals::getTablePrefix() . "archtexttags (AgAtID, AgT2ID)
-                 SELECT ?, TtT2ID FROM " . Globals::getTablePrefix() . "texttags
+                "INSERT INTO archtexttags (AgAtID, AgT2ID)
+                 SELECT ?, TtT2ID FROM texttags
                  WHERE TtTxID = ?",
                 [$archiveId, $textId]
             );
@@ -632,8 +603,8 @@ class FeedService
 
             // Clean orphaned text tags (complex DELETE with JOIN - keep as-is)
             Connection::execute(
-                "DELETE " . Globals::getTablePrefix() . "texttags FROM (
-                    " . Globals::getTablePrefix() . "texttags LEFT JOIN " . Globals::getTablePrefix() . "texts ON TtTxID = TxID
+                "DELETE texttags FROM (
+                    texttags LEFT JOIN texts ON TtTxID = TxID
                 ) WHERE TxID IS NULL"
             );
         }
@@ -650,8 +621,10 @@ class FeedService
      */
     public function markLinkAsError(string $link): void
     {
+        // feedlinks inherits user context via FlNfID -> newsfeeds FK
+        // Use raw SQL for CONCAT expression
         Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "feedlinks
+            "UPDATE feedlinks
              SET FlLink = CONCAT(' ', FlLink)
              WHERE FlLink = ?",
             [$link]
@@ -665,17 +638,11 @@ class FeedService
      */
     public function getLanguages(): array
     {
-        $sql = "SELECT LgID, LgName FROM " . Globals::getTablePrefix() . "languages
-                WHERE LgName <> '' ORDER BY LgName";
-
-        $languages = [];
-        $res = Connection::query($sql);
-        while ($row = mysqli_fetch_assoc($res)) {
-            $languages[] = $row;
-        }
-        mysqli_free_result($res);
-
-        return $languages;
+        return QueryBuilder::table('languages')
+            ->select(['LgID', 'LgName'])
+            ->where('LgName', '<>', '')
+            ->orderBy('LgName', 'ASC')
+            ->getPrepared();
     }
 
     /**
@@ -771,8 +738,9 @@ class FeedService
             if (isset($feedData[$key]['text'])) {
                 $link = trim($feedData[$key]['link']);
                 if (substr($link, 0, 1) == '#') {
+                    // feedlinks inherits user context via FlNfID -> newsfeeds FK
                     Connection::preparedExecute(
-                        "UPDATE " . Globals::getTablePrefix() . "feedlinks
+                        "UPDATE feedlinks
                         SET FlLink = ?
                         WHERE FlID = ?",
                         [$link, (int)substr($link, 1)]
@@ -1431,48 +1399,46 @@ class FeedService
                         // Ensure tags exist
                         foreach ($text['TagList'] as $tag) {
                             if (!in_array($tag, $_SESSION['TEXTTAGS'] ?? [])) {
-                                Connection::preparedExecute(
-                                    'INSERT INTO ' . Globals::getTablePrefix() . 'tags2 (T2Text)
-                                    VALUES (?)',
-                                    [$tag]
-                                );
+                                $bindings = [$tag];
+                                $sql = 'INSERT INTO tags2 (T2Text) VALUES (?)'
+                                    . UserScopedQuery::forTablePrepared('tags2', $bindings);
+                                Connection::preparedExecute($sql, $bindings);
                             }
                         }
                         $nfMaxTexts = $text['Nf_Max_Texts'];
                     }
 
                     // Create the text
-                    $id = Connection::preparedInsert(
-                        'INSERT INTO ' . Globals::getTablePrefix() . 'texts (
-                            TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI
-                        ) VALUES (?, ?, ?, ?, ?)',
-                        [
-                            $text['TxLgID'],
-                            $text['TxTitle'],
-                            $text['TxText'],
-                            $text['TxAudioURI'],
-                            $text['TxSourceURI']
-                        ]
-                    );
+                    $id = QueryBuilder::table('texts')
+                        ->insertPrepared([
+                            'TxLgID' => $text['TxLgID'],
+                            'TxTitle' => $text['TxTitle'],
+                            'TxText' => $text['TxText'],
+                            'TxAudioURI' => $text['TxAudioURI'],
+                            'TxSourceURI' => $text['TxSourceURI']
+                        ]);
 
                     // Parse the text
-                    TextParsing::splitCheck(
-                        Connection::fetchValue(
-                            'SELECT TxText AS value FROM ' . Globals::getTablePrefix() . 'texts
-                            WHERE TxID = ' . $id
-                        ),
-                        Connection::fetchValue(
-                            'SELECT TxLgID AS value FROM ' . Globals::getTablePrefix() . 'texts
-                            WHERE TxID = ' . $id
-                        ),
-                        $id
+                    $bindings = [$id];
+                    $textContent = Connection::preparedFetchValue(
+                        'SELECT TxText AS value FROM texts WHERE TxID = ?'
+                        . UserScopedQuery::forTablePrepared('texts', $bindings),
+                        $bindings
                     );
+                    $textLgId = Connection::preparedFetchValue(
+                        'SELECT TxLgID AS value FROM texts WHERE TxID = ?'
+                        . UserScopedQuery::forTablePrepared('texts', $bindings),
+                        $bindings
+                    );
+                    TextParsing::splitCheck($textContent, $textLgId, $id);
 
-                    // Apply tags
+                    // Apply tags - texttags inherits user context via TtTxID -> texts FK
+                    $bindings = [];
                     Connection::query(
-                        'INSERT INTO ' . Globals::getTablePrefix() . 'texttags (TtTxID, TtT2ID)
-                        SELECT ' . $id . ', T2ID FROM ' . Globals::getTablePrefix() . 'tags2
+                        'INSERT INTO texttags (TtTxID, TtT2ID)
+                        SELECT ' . $id . ', T2ID FROM tags2
                         WHERE T2Text IN (' . $NfTag . ')'
+                        . UserScopedQuery::forTablePrepared('tags2', $bindings)
                     );
                 }
             }
@@ -1480,11 +1446,13 @@ class FeedService
             // Refresh text tags
             TagService::getAllTextTags(true);
 
-            // Get all texts with this tag
+            // Get all texts with this tag - texttags inherits user context via TtTxID -> texts FK
+            $bindings = [];
             $result = Connection::query(
-                "SELECT TtTxID FROM " . Globals::getTablePrefix() . "texttags
-                JOIN " . Globals::getTablePrefix() . "tags2 ON TtT2ID=T2ID
+                "SELECT TtTxID FROM texttags
+                JOIN tags2 ON TtT2ID=T2ID
                 WHERE T2Text IN (" . $NfTag . ")"
+                . UserScopedQuery::forTablePrepared('tags2', $bindings)
             );
 
             $textCount = 0;
@@ -1505,20 +1473,26 @@ class FeedService
                     $message2 += QueryBuilder::table('sentences')
                         ->where('SeTxID', '=', $textID)
                         ->delete();
+
+                    $bindings = [$textID];
                     $message4 += (int)Connection::execute(
-                        'INSERT INTO ' . Globals::getTablePrefix() . 'archivedtexts (
+                        'INSERT INTO archivedtexts (
                             AtLgID, AtTitle, AtText, AtAnnotatedText,
                             AtAudioURI, AtSourceURI
                         ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText,
                         TxAudioURI, TxSourceURI
-                        FROM ' . Globals::getTablePrefix() . 'texts
+                        FROM texts
                         WHERE TxID = ' . $textID
+                        . UserScopedQuery::forTable('texts')
+                        . UserScopedQuery::forTable('archivedtexts')
                     );
 
                     $archiveId = (int)Connection::lastInsertId();
+                    // archtexttags inherits user context via AgAtID -> archivedtexts FK
+                    // texttags inherits user context via TtTxID -> texts FK
                     Connection::execute(
-                        'INSERT INTO ' . Globals::getTablePrefix() . 'archtexttags (AgAtID, AgT2ID)
-                        SELECT ' . $archiveId . ', TtT2ID FROM ' . Globals::getTablePrefix() . 'texttags
+                        'INSERT INTO archtexttags (AgAtID, AgT2ID)
+                        SELECT ' . $archiveId . ', TtT2ID FROM texttags
                         WHERE TtTxID = ' . $textID
                     );
 
@@ -1531,9 +1505,9 @@ class FeedService
 
                     // Clean orphaned text tags (complex DELETE with JOIN - keep as-is)
                     Connection::execute(
-                        "DELETE " . Globals::getTablePrefix() . "texttags
-                        FROM (" . Globals::getTablePrefix() . "texttags
-                            LEFT JOIN " . Globals::getTablePrefix() . "texts ON TtTxID = TxID
+                        "DELETE texttags
+                        FROM (texttags
+                            LEFT JOIN texts ON TtTxID = TxID
                         ) WHERE TxID IS NULL"
                     );
                 }
@@ -1565,12 +1539,11 @@ class FeedService
         $feeds = [];
 
         if ($checkAutoupdate) {
-            $result = Connection::query(
-                "SELECT * FROM " . Globals::getTablePrefix() . "newsfeeds
-                WHERE `NfOptions` LIKE '%autoupdate=%'"
-            );
+            $rows = QueryBuilder::table('newsfeeds')
+                ->where('NfOptions', 'LIKE', '%autoupdate=%')
+                ->getPrepared();
 
-            while ($row = mysqli_fetch_assoc($result)) {
+            foreach ($rows as $row) {
                 $autoupdate = $this->getNfOption((string)$row['NfOptions'], 'autoupdate');
                 if (!$autoupdate) {
                     continue;
@@ -1590,9 +1563,8 @@ class FeedService
                     ];
                 }
             }
-            mysqli_free_result($result);
         } else {
-            $sql = "SELECT * FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfID IN ($currentFeed)";
+            $sql = "SELECT * FROM newsfeeds WHERE NfID IN ($currentFeed)";
             $result = Connection::query($sql);
 
             while ($row = mysqli_fetch_assoc($result)) {

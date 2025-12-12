@@ -346,26 +346,6 @@ class TagsControllerTest extends TestCase
         $this->assertEquals("NULL", $result);
     }
 
-    // ===== Table method tests =====
-
-    public function testTableMethodReturnsTableWithPrefix(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TagsController();
-
-        // Use reflection to test protected method
-        $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('table');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller, 'tags');
-
-        $this->assertStringContainsString('tags', $result);
-    }
-
     // ===== GetMarkedIds tests =====
 
     public function testGetMarkedIdsReturnsIntegerArray(): void

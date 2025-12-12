@@ -3,6 +3,8 @@ namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
+use Lwt\Database\UserScopedQuery;
 use Lwt\Services\TestService;
 use Lwt\Services\WordStatusService;
 use Lwt\Services\LanguageService;
@@ -239,11 +241,11 @@ class ReviewHandler
      */
     public function updateReviewStatus(int $wordId, ?int $status, ?int $change): array
     {
-        // Get current status using prepared statement
-        $currentStatus = Connection::preparedFetchValue(
-            "SELECT WoStatus AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = ?",
-            [$wordId]
-        );
+        // Get current status using QueryBuilder
+        $currentStatus = QueryBuilder::table('words')
+            ->select(['WoStatus'])
+            ->where('WoID', '=', $wordId)
+            ->fetchValuePrepared();
 
         if ($currentStatus === null) {
             return ['error' => 'Word not found'];
@@ -281,13 +283,15 @@ class ReviewHandler
             return ['error' => 'Must provide either status or change'];
         }
 
-        // Update the status using prepared statement
+        // Update the status using raw SQL for dynamic score update
         $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+        $bindings = [$newStatus, $wordId];
         $result = Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "words
+            "UPDATE words
              SET WoStatus = ?, WoStatusChanged = NOW(), {$scoreUpdate}
-             WHERE WoID = ?",
-            [$newStatus, $wordId]
+             WHERE WoID = ?"
+            . UserScopedQuery::forTablePrepared('words', $bindings),
+            $bindings
         );
 
         if ($result !== 1) {
