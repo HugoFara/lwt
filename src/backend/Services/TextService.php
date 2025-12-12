@@ -1317,7 +1317,8 @@ class TextService
         } else {
             $data = Escaping::prepareTextdata($uploadText);
         }
-        $data = \Lwt\Core\Utils\replaceSuppUnicodePlanesChar($data);
+        // Replace supplementary Unicode planes characters (emoji, etc.) with a block character
+        $data = preg_replace('/[\x{10000}-\x{10FFFF}]/u', "\xE2\x96\x88", $data);
         $data = trim($data);
 
         // Use pilcrow symbol for paragraphs separation

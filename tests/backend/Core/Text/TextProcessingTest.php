@@ -35,7 +35,6 @@ use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\StatusHelper;
 
 use function Lwt\Core\Utils\removeSoftHyphens;
-use function Lwt\Core\Utils\replaceSuppUnicodePlanesChar;
 
 /**
  * Unit tests for text processing functions.
@@ -439,20 +438,6 @@ class TextProcessingTest extends TestCase
         $this->assertEquals('world', removeSoftHyphens('world'));
         $this->assertEquals('', removeSoftHyphens(''));
         $this->assertEquals('testing', removeSoftHyphens('test­­ing'));
-    }
-
-    public function testReplaceSupplementaryUnicodePlanes(): void
-    {
-        // Characters in supplementary planes should be replaced with U+2588 (█)
-        $result = replaceSuppUnicodePlanesChar('hello 𝕳𝖊𝖑𝖑𝖔 world');
-        $this->assertStringContainsString('hello', $result);
-        $this->assertStringContainsString('█', $result);
-
-        // Regular characters should pass through unchanged
-        $this->assertEquals('hello world', replaceSuppUnicodePlanesChar('hello world'));
-
-        // Empty string
-        $this->assertEquals('', replaceSuppUnicodePlanesChar(''));
     }
 
     public function testMakeCounterWithTotal(): void

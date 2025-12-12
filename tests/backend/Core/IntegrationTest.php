@@ -27,7 +27,6 @@ use function Lwt\Core\Utils\getExecutionTime;
 use function Lwt\Core\Utils\getFilePath;
 use function Lwt\Core\Utils\printFilePath;
 use function Lwt\Core\Utils\removeSoftHyphens;
-use function Lwt\Core\Utils\replaceSuppUnicodePlanesChar;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
@@ -128,20 +127,6 @@ class IntegrationTest extends TestCase
         $this->assertEquals('', \Lwt\Core\Utils\removeSoftHyphens(''));
         // All soft hyphens are removed
         $this->assertEquals('testing', \Lwt\Core\Utils\removeSoftHyphens('test­­ing'));
-    }
-
-    public function testReplaceSupplementaryUnicodePlanes(): void
-    {
-        // Characters in supplementary planes (U+10000-U+10FFFF) should be replaced with U+2588 (█)
-        $result = \Lwt\Core\Utils\replaceSuppUnicodePlanesChar('hello 𝕳𝖊𝖑𝖑𝖔 world');
-        $this->assertStringContainsString('hello', $result);
-        $this->assertStringContainsString('█', $result);
-
-        // Regular characters should pass through unchanged
-        $this->assertEquals('hello world', \Lwt\Core\Utils\replaceSuppUnicodePlanesChar('hello world'));
-
-        // Empty string
-        $this->assertEquals('', \Lwt\Core\Utils\replaceSuppUnicodePlanesChar(''));
     }
 
     public function testMakeCounterWithTotal(): void
