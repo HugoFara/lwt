@@ -5,12 +5,14 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Database\Configuration;
 use Lwt\Services\BackupService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/BackupService.php';
@@ -29,6 +31,9 @@ class BackupServiceTest extends TestCase
     {
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
+
+        // Always ensure the database name is set (important for test isolation)
+        Globals::setDatabaseName($testDbname);
 
         if (!Globals::getDbConnection()) {
             $connection = Configuration::connect(

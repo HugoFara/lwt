@@ -60,7 +60,7 @@ class PrefixMigration
     /**
      * Migration log entries.
      *
-     * @var array<string, mixed>
+     * @var array<int|string, mixed>
      */
     private array $log = [];
 
@@ -132,6 +132,8 @@ class PrefixMigration
      * @return int The user ID created for this prefix
      *
      * @throws \RuntimeException If migration fails
+     *
+     * @psalm-suppress PossiblyUnusedReturnValue - Return value useful for callers
      */
     public function migratePrefix(string $prefix, bool $dropAfterMigration = false): int
     {
@@ -249,7 +251,7 @@ class PrefixMigration
             [$username, $username . '@migrated.local']
         );
 
-        return (int)Connection::getLastInsertId();
+        return (int)Connection::lastInsertId();
     }
 
     /**
@@ -303,7 +305,7 @@ class PrefixMigration
 
             try {
                 Connection::preparedExecute($sql, array_values($row));
-                $newId = Connection::getLastInsertId();
+                $newId = Connection::lastInsertId();
 
                 if ($oldId !== null) {
                     $idMapping[(int)$oldId] = (int)$newId;
@@ -533,10 +535,11 @@ class PrefixMigration
 
         $status = [];
         foreach ($rows as $row) {
-            $status[$row['prefix']] = [
+            $prefix = (string)$row['prefix'];
+            $status[$prefix] = [
                 'user_id' => (int)$row['user_id'],
                 'tables_migrated' => (int)$row['tables_migrated'],
-                'migrated_at' => $row['migrated_at']
+                'migrated_at' => (string)($row['migrated_at'] ?? '')
             ];
         }
 

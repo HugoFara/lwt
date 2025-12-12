@@ -31,6 +31,8 @@ use Lwt\Services\TagService;
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @psalm-suppress UnusedClass - Service class for text reading functionality
  */
 class TextReadingService
 {

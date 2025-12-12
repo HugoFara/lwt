@@ -15,6 +15,7 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Core\Globals;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\IconHelper;
 
@@ -695,7 +696,7 @@ class FeedsController extends BaseController
             }
 
             $where = empty($whereConditions) ? '1=1' : implode(' AND ', $whereConditions);
-            $sql = "SELECT * FROM {$this->tbpref}newsfeeds WHERE $where ORDER BY " . $sorts[$currentSort - 1];
+            $sql = "SELECT * FROM " . Globals::getTablePrefix() . "newsfeeds WHERE $where ORDER BY " . $sorts[$currentSort - 1];
 
             $feeds = Connection::preparedFetchAll($sql, $params);
         } else {

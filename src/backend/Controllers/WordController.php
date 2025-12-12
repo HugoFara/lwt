@@ -764,13 +764,13 @@ class WordController extends BaseController
                 $message = $listService->capitalizeByIdList($idList);
                 break;
             case 'exp':
-                ExportService::exportAnki($listService->getAnkiExportSql($idList, '', '', '', '', ''));
+                (new ExportService())->exportAnki($listService->getAnkiExportSql($idList, '', '', '', '', ''));
                 break;
             case 'exp2':
-                ExportService::exportTsv($listService->getTsvExportSql($idList, '', '', '', '', ''));
+                (new ExportService())->exportTsv($listService->getTsvExportSql($idList, '', '', '', '', ''));
                 break;
             case 'exp3':
-                ExportService::exportFlexible($listService->getFlexibleExportSql($idList, '', '', '', '', ''));
+                (new ExportService())->exportFlexible($listService->getFlexibleExportSql($idList, '', '', '', '', ''));
                 break;
             case 'test':
                 $_SESSION['testsql'] = $idList;
@@ -873,15 +873,15 @@ class WordController extends BaseController
 
         // Export actions
         if ($allaction == 'expall') {
-            ExportService::exportAnki($listService->getAnkiExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            (new ExportService())->exportAnki($listService->getAnkiExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
         if ($allaction == 'expall2') {
-            ExportService::exportTsv($listService->getTsvExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            (new ExportService())->exportTsv($listService->getTsvExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
         if ($allaction == 'expall3') {
-            ExportService::exportFlexible($listService->getFlexibleExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            (new ExportService())->exportFlexible($listService->getFlexibleExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
 

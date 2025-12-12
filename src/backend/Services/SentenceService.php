@@ -195,7 +195,7 @@ class SentenceService
         $stmt = Connection::prepare($sql);
         $stmt->bindValues($params);
         $stmt->execute();
-        return $stmt->getResult();
+        return $stmt->fetchAll();
     }
 
     /**
@@ -237,7 +237,7 @@ class SentenceService
         $stmt = Connection::prepare($sql);
         $stmt->bindValues($params);
         $stmt->execute();
-        return $stmt->getResult();
+        return $stmt->fetchAll();
     }
 
     /**

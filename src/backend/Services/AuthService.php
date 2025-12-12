@@ -501,6 +501,8 @@ class AuthService
      * @param int $id The user ID
      *
      * @return User|null The user or null if not found
+     *
+     * @psalm-suppress UnusedParam - Psalm false positive, $id is used in query
      */
     private function findUserById(int $id): ?User
     {
@@ -517,6 +519,8 @@ class AuthService
      * @param string $username The username
      *
      * @return User|null The user or null if not found
+     *
+     * @psalm-suppress UnusedParam - Psalm false positive, $username is used in query
      */
     private function findUserByUsername(string $username): ?User
     {
@@ -533,6 +537,8 @@ class AuthService
      * @param string $email The email address
      *
      * @return User|null The user or null if not found
+     *
+     * @psalm-suppress UnusedParam - Psalm false positive, $email is used in query
      */
     private function findUserByEmail(string $email): ?User
     {
@@ -549,6 +555,8 @@ class AuthService
      * @param string $token The API token
      *
      * @return User|null The user or null if not found
+     *
+     * @psalm-suppress UnusedParam - Psalm false positive, $token is used in query
      */
     private function findUserByApiToken(string $token): ?User
     {
@@ -565,6 +573,8 @@ class AuthService
      * @param int $wpUserId The WordPress user ID
      *
      * @return User|null The user or null if not found
+     *
+     * @psalm-suppress UnusedParam - Psalm false positive, $wpUserId is used in query
      */
     private function findUserByWordPressId(int $wpUserId): ?User
     {

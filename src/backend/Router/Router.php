@@ -109,6 +109,8 @@ class Router
      * @param string $method     HTTP method (GET, POST, or *)
      *
      * @return void
+     *
+     * @psalm-suppress PossiblyUnusedMethod - Public API for route registration
      */
     public function registerPrefixWithMiddleware(
         string $prefix,

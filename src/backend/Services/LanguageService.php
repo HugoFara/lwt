@@ -302,7 +302,7 @@ class LanguageService
             "SELECT * FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
             [$lid]
         );
-        if ($record === false || $record === null) {
+        if ($record === null) {
             return "Cannot access language data";
         }
 
@@ -642,7 +642,7 @@ class LanguageService
             [$lgId]
         );
 
-        if ($record === null || $record === false) {
+        if ($record === null) {
             return '';
         }
 
@@ -909,7 +909,7 @@ class LanguageService
             [$lid]
         );
 
-        if ($record === false || $record === null) {
+        if ($record === null) {
             return ['success' => false, 'reparsed' => 0, 'message' => 'Language not found'];
         }
 

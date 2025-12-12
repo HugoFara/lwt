@@ -50,6 +50,8 @@ class AuthMiddleware implements MiddlewareInterface
      * Create a new AuthMiddleware.
      *
      * @param AuthService|null $authService Optional auth service instance
+     *
+     * @psalm-suppress PossiblyUnusedMethod - Public API for middleware instantiation
      */
     public function __construct(?AuthService $authService = null)
     {

@@ -108,13 +108,15 @@ function bootstrapDatabase(): void
     // Load configuration
     $config = loadDbConfiguration();
 
+    // Allow tests to override database name via Globals::setDatabaseName()
+    $dbname = Globals::getDatabaseName() ?: $config['dbname'];
 
     // Connect to database
     $connection = Configuration::connect(
         $config['server'],
         $config['userid'],
         $config['passwd'],
-        $config['dbname'],
+        $dbname,
         $config['socket']
     );
 
@@ -126,7 +128,7 @@ function bootstrapDatabase(): void
 
     // Register prefix with Globals
     Globals::setTablePrefix($prefix, $isFixed);
-    Globals::setDatabaseName($config['dbname']);
+    Globals::setDatabaseName($dbname);
 
     // Start timer if needed
     if (Globals::shouldDisplayTime()) {

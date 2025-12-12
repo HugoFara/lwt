@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Database\Configuration;
 use Lwt\Services\DemoService;
 use PHPUnit\Framework\TestCase;
 
@@ -30,6 +31,9 @@ class DemoServiceTest extends TestCase
     {
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
+
+        // Always ensure the database name is set (important for test isolation)
+        Globals::setDatabaseName($testDbname);
 
         if (!Globals::getDbConnection()) {
             $connection = Configuration::connect(

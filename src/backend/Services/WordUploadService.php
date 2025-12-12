@@ -1009,37 +1009,30 @@ class WordUploadService
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
             $tbpref = Globals::getTablePrefix();
-            $res = Connection::prepare("SELECT TxID, TxText FROM " . $tbpref . "texts
-                WHERE TxLgID = ? ORDER BY TxID")
-                ->bind('i', $langId)
-                ->execute()
-                ->getResult();
-            while ($record = mysqli_fetch_assoc($res)) {
+            $rows = Connection::preparedFetchAll(
+                "SELECT TxID, TxText FROM " . $tbpref . "texts WHERE TxLgID = ? ORDER BY TxID",
+                [$langId]
+            );
+            foreach ($rows as $record) {
                 $txtid = (int) $record["TxID"];
                 $txttxt = (string) $record["TxText"];
                 TextParsing::splitCheck($txttxt, $langId, $txtid);
             }
-            mysqli_free_result($res);
         } elseif ($mwords > 0) {
             // Update individual multi-word expressions
             $sqlarr = [];
             $tbpref = Globals::getTablePrefix();
-            $res = Connection::prepare(
-                "SELECT WoID, WoTextLC, WoWordCount
-                FROM " . $tbpref . "words
-                WHERE WoWordCount > 1 AND WoCreated > ?"
-            )
-                ->bind('s', $lastUpdate)
-                ->execute()
-                ->getResult();
-            while ($record = mysqli_fetch_assoc($res)) {
+            $rows = Connection::preparedFetchAll(
+                "SELECT WoID, WoTextLC, WoWordCount FROM " . $tbpref . "words WHERE WoWordCount > 1 AND WoCreated > ?",
+                [$lastUpdate]
+            );
+            foreach ($rows as $record) {
                 $len = (int) $record['WoWordCount'];
                 $wid = (int) $record['WoID'];
                 $textlc = (string) $record['WoTextLC'];
                 $expressionService = new ExpressionService();
                 $sqlarr[] = $expressionService->insertExpressions($textlc, $langId, $wid, $len, 2);
             }
-            mysqli_free_result($res);
             $sqlarr = array_filter($sqlarr);
 
             if (!empty($sqlarr)) {

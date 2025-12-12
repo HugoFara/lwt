@@ -197,78 +197,80 @@ CREATE TABLE `languages` (
   `LgRemoveSpaces` int(1) unsigned NOT NULL DEFAULT '0',
   `LgSplitEachChar` int(1) unsigned NOT NULL DEFAULT '0',
   `LgRightToLeft` int(1) unsigned NOT NULL DEFAULT '0',
+  `LgTTSVoiceAPI` varchar(2048) NOT NULL DEFAULT '',
+  `LgShowRomanization` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`LgID`),
   UNIQUE KEY `LgName` (`LgName`)
 ) ENGINE = MyISAM AUTO_INCREMENT = 9 DEFAULT CHARSET = utf8;
-INSERT INTO languages
+INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
     '1', 'French', 'http://www.wordreference.com/fren/lwt_term?lwt_popup=1',
     NULL, 'https://translate.google.com/?ie=UTF-8&sl=fr&tl=en&text=lwt_term&lwt_popup=1',
     '$y\\t$t\\n', '100', '´=\'|`=\'|’=\'|‘=\'|...=…|..=‥',
     '.!?:;', '[A-Z].|Dr.', 'a-zA-ZÀ-ÖØ-öø-ȳ',
-    '0', '0', '0'
+    '0', '0', '0', '', '1'
   );
-INSERT INTO languages
+INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
     '2', 'Chinese', 'https://ce.linedict.com/dict.html#/cnen/search?query=lwt_term',
     'http://chinesedictionary.mobi/?handler=QueryWorddict&mwdqb=lwt_term',
     'https://translate.google.com/?ie=UTF-8&sl=zh&tl=en&text=lwt_term&lwt_popup=1',
     '$y\\t$t\\n', '200', '', '.!?:;。！？：；',
-    '', '一-龥', '1', '1', '0'
+    '', '一-龥', '1', '1', '0', '', '1'
   );
-INSERT INTO languages
+INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
     '3', 'German', 'http://de-en.syn.dict.cc/?s=lwt_term',
     NULL, 'https://translate.google.com/?ie=UTF-8&sl=de&tl=en&text=lwt_term&lwt_popup=1',
     '$y\\t$t\\n', '150', '´=\'|`=\'|’=\'|‘=\'|...=…|..=‥',
     '.!?:;', '[A-Z].|Dr.', 'a-zA-ZäöüÄÖÜß',
-    '0', '0', '0'
+    '0', '0', '0', '', '1'
   );
-INSERT INTO languages
+INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
     '4', 'Chinese2', 'https://ce.linedict.com/dict.html#/cnen/search?query=lwt_term',
     'http://chinesedictionary.mobi/?handler=QueryWorddict&mwdqb=lwt_term',
     'https://translate.google.com/?ie=UTF-8&sl=zh&tl=en&text=lwt_term&lwt_popup=1',
     '$y\\t$t\\n', '200', '', '.!?:;。！？：；',
-    '', '一-龥', '1', '0', '0'
+    '', '一-龥', '1', '0', '0', '', '1'
   );
-INSERT INTO languages
+INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
     '5', 'Japanese', 'https://jisho.org/words?eng=&dict=edict&jap=lwt_term',
     'http://jisho.org/kanji/details/lwt_term',
     'https://translate.google.com/?ie=UTF-8&sl=ja&tl=en&text=lwt_term&lwt_popup=1',
     '$y\\t$t\\n', '200', '', '.!?:;。！？：；',
-    '', '一-龥ぁ-ヾ', '1', '1', '0'
+    '', '一-龥ぁ-ヾ', '1', '1', '0', '', '1'
   );
-INSERT INTO languages
+INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
     '6', 'Korean', 'http://endic.naver.com/search.nhn?sLn=kr&isOnlyViewEE=N&query=lwt_term&lwt_popup=1',
     NULL, 'https://translate.google.com/?text=lwt_term&ie=UTF-8&sl=ko&tl=en&lwt_popup=1',
     '$y\\t$t\\n', '150', '', '.!?:;。！？：；',
-    '', '가-힣ᄀ-ᇂ', '0', '0', '0'
+    '', '가-힣ᄀ-ᇂ', '0', '0', '0', '', '1'
   );
-INSERT INTO languages
+INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
     '7', 'Thai', 'http://dict.longdo.com/search/lwt_term',
     NULL, 'https://translate.google.com/?ie=UTF-8&sl=th&tl=en&text=lwt_term&lwt_popup=1',
     '$y\\t$t\\n', '250', '', '.!?:;',
-    '', 'ก-๛', '1', '0', '0'
+    '', 'ก-๛', '1', '0', '0', '', '1'
   );
-INSERT INTO languages
+INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
     '8', 'Hebrew', 'http://dictionary.reverso.net/hebrew-english/lwt_term&lwt_popup=1',
     NULL, 'https://translate.google.com/?ie=UTF-8&sl=iw&tl=en&text=lwt_term&lwt_popup=1',
     '$y\\t$t\\n', '150', '', '.!?:;',
     '', '\\x{0590}-\\x{05FF}', '0', '0',
-    '1'
+    '1', '', '1'
   );
 DROP
   TABLE IF EXISTS sentences;
@@ -578,12 +580,14 @@ CREATE TABLE `texts` (
   `TxTitle` varchar(200) NOT NULL,
   `TxText` text NOT NULL,
   `TxAnnotatedText` longtext NOT NULL,
-  `TxAudioURI` varchar(200) DEFAULT NULL,
+  `TxAudioURI` varchar(2048) DEFAULT NULL,
   `TxSourceURI` varchar(1000) DEFAULT NULL,
+  `TxPosition` smallint(5) NOT NULL DEFAULT '0',
+  `TxAudioPosition` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`TxID`),
   KEY `TxLgID` (`TxLgID`)
 ) ENGINE = MyISAM AUTO_INCREMENT = 10 DEFAULT CHARSET = utf8;
-INSERT INTO texts
+INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES
   (
     '1', '1', 'Mon premier don du sang',
@@ -591,7 +595,7 @@ VALUES
     '', 'https://learning-with-texts.sourceforge.io/media/dondusang.mp3',
     'http://francebienvenue1.wordpress.com/2011/06/18/generosite/'
   );
-INSERT INTO texts
+INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES
   (
     '2', '2', 'The Man and the Dog (annotated version)',
@@ -600,7 +604,7 @@ VALUES
     'https://learning-with-texts.sourceforge.io/media/manandthedog.mp3',
     'http://chinesepod.com/lessons/the-man-and-the-dog'
   );
-INSERT INTO texts
+INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES
   (
     '3', '3', 'Die Leiden des jungen Werther',
@@ -608,42 +612,42 @@ VALUES
     '', 'https://learning-with-texts.sourceforge.io/media/werther.mp3',
     'http://www.gutenberg.org/ebooks/2407'
   );
-INSERT INTO texts
+INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES
   (
     '4', '4', 'The Man and the Dog', '一天，一 个 男人 走 在 街上。 突然，他 看见 前面 有 一 只 黑色 的 大 狗，看起来 很 凶。 男人 非常 害怕，不敢 往前 走。 狗 的 旁边 站着 一 个 女人，男人 问 她： 你 的 狗 咬 人 吗？ 女人 说： 我 的 狗 不 咬 人。 这时，那 只 狗 咬 了 男人。 他 气坏 了，大 叫： 你 说 你 的 狗 不 咬 人！ 女人 回答： 这 不是 我 的 狗。',
     '', 'https://learning-with-texts.sourceforge.io/media/manandthedog.mp3',
     'http://chinesepod.com/lessons/the-man-and-the-dog'
   );
-INSERT INTO texts
+INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES
   (
     '5', '5', 'Some expressions', 'はい。いいえ。\nすみません。\nどうも。\nありがとうございます。\n日本語を話しますか。はい、少し。\nイギリスから来ました。',
     '', 'https://learning-with-texts.sourceforge.io/media/jap.mp3',
     NULL
   );
-INSERT INTO texts
+INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES
   (
     '6', '6', 'Test in Korean', '좋은 아침.\n안녕하세요.\n잘자요.\n잘가요.\n안녕하세요, 잘지냈어요?\n네, 잘지냈어요?\n네 그럼요.\n이름이 뭐에요?\n제 이름은 존이에요, 이름이 뭐에요?\n제 이름은 메리에요.',
     '', 'https://learning-with-texts.sourceforge.io/media/korean.mp3',
     NULL
   );
-INSERT INTO texts
+INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES
   (
     '7', '7', 'Hello in Thai', 'ส วัส ดี ครับ\nส วัส ดี ค่ะ',
     '', 'https://learning-with-texts.sourceforge.io/media/thai.mp3',
     NULL
   );
-INSERT INTO texts
+INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES
   (
     '8', '8', 'Greetings', 'בוקר טוב\nאחר צהריים טובים\nערב טוב\nלילה טוב\nלהתראות',
     '', 'https://learning-with-texts.sourceforge.io/media/hebrew.mp3',
     NULL
   );
-INSERT INTO texts
+INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES
   (
     '9', '1', 'Mon premier don du sang (Short & annotated version)',

@@ -407,7 +407,6 @@ class TextParsing
         if ($use_local_infile) {
             self::saveWithSql($text, $id);
         } else {
-            $values = array();
             $order = 0;
             $sid = 1;
             if ($id > 0) {
@@ -537,8 +536,8 @@ class TextParsing
                 );
             } else {
                 $nw[] = array(
-                    htmlspecialchars((string)$record['word'] ?? '', ENT_QUOTES, 'UTF-8'),
-                    htmlspecialchars((string)$record['cnt'] ?? '', ENT_QUOTES, 'UTF-8')
+                    htmlspecialchars((string)($record['word'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                    htmlspecialchars((string)($record['cnt'] ?? ''), ENT_QUOTES, 'UTF-8')
                 );
             }
         }
@@ -560,18 +559,6 @@ class TextParsing
      */
     public static function registerSentencesTextItems(int $tid, int $lid, bool $hasmultiword): void
     {
-        $sql = '';
-        // Text has multi-words, add them to the query
-        if ($hasmultiword) {
-            $sql = "SELECT WoID, ?, ?, sent, TiOrder - (2*(n-1)) TiOrder,
-            n TiWordCount, word
-            FROM " . Globals::getTablePrefix() . "tempexprs
-            JOIN " . Globals::getTablePrefix() . "words
-            ON WoTextLC = lword AND WoWordCount = n
-            WHERE lword IS NOT NULL AND WoLgID = ?
-            UNION ALL ";
-        }
-
         // Insert text items (and eventual multi-words)
         // Note: This query uses dynamic SQL with UNION, which makes prepared statements complex
         // We'll use the fluent API here for better control
@@ -650,9 +637,9 @@ class TextParsing
             );
             foreach ($rows as $record) {
                 $mw[] = array(
-                    htmlspecialchars((string)$record['word'] ?? '', ENT_QUOTES, 'UTF-8'),
+                    htmlspecialchars((string)($record['word'] ?? ''), ENT_QUOTES, 'UTF-8'),
                     $record['cnt'],
-                    htmlspecialchars((string)$record['WoTranslation'] ?? '', ENT_QUOTES, 'UTF-8')
+                    htmlspecialchars((string)($record['WoTranslation'] ?? ''), ENT_QUOTES, 'UTF-8')
                 );
             }
         }

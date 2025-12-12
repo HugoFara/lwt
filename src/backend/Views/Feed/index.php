@@ -132,7 +132,7 @@ echo PageLayoutHelper::buildActionCard([
 </tr>
 <?php
 $time = time();
-while ($row = mysqli_fetch_assoc($feeds)):
+foreach ($feeds as $row):
     $diff = $time - (int)$row['NfUpdate'];
 ?>
 <tr>
@@ -159,7 +159,7 @@ while ($row = mysqli_fetch_assoc($feeds)):
         <?php if ($row['NfUpdate']) { echo $feedService->formatLastUpdate($diff); } ?>
     </td>
 </tr>
-<?php endwhile; ?>
+<?php endforeach; ?>
 </table>
 </form>
 <?php if ($pages > 1): ?>

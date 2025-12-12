@@ -305,7 +305,7 @@ class LanguageHandler
      * @param int   $id   Language ID
      * @param array $data Language data from request
      *
-     * @return array{success: bool, reparsed?: int, error?: string}
+     * @return array{success: bool, reparsed?: int, error?: string, message?: string}
      */
     public function formatUpdate(int $id, array $data): array
     {
@@ -338,7 +338,7 @@ class LanguageHandler
      *
      * @param int $id Language ID
      *
-     * @return array{success: bool, error?: string}
+     * @return array{success: bool, error?: string, relatedData?: array{texts: int, archivedTexts: int, words: int, feeds: int}}
      */
     public function formatDelete(int $id): array
     {
