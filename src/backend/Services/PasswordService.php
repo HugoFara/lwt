@@ -191,7 +191,7 @@ class PasswordService
      *
      * Useful for password reset tokens, API tokens, etc.
      *
-     * @param int $length The length of the token in bytes (will be hex-encoded to 2x length)
+     * @param int<1, max> $length The length of the token in bytes (will be hex-encoded to 2x length)
      *
      * @return string The generated token
      *
