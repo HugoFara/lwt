@@ -41,16 +41,3 @@ function doFormFragment(): void
 </tr>
     <?php
 }
-
-/**
- * Output the YouTube import JavaScript.
- *
- * @deprecated 3.0.0 JavaScript moved to youtube_import.ts, this function is now a no-op.
- *
- * @return void
- */
-function doJs(): void
-{
-    // JavaScript functionality moved to src/frontend/js/texts/youtube_import.ts
-    // This function is kept for backwards compatibility but does nothing.
-}

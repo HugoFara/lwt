@@ -79,71 +79,6 @@ class TestController extends BaseController
     }
 
     /**
-     * Set test status (AJAX endpoint for status changes during tests).
-     *
-     * @param array $params Route parameters
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     *
-     * @deprecated 3.0.0 Use PUT /api/v1/review/status instead.
-     *             This endpoint is kept for backward compatibility with frame-based mode.
-     *             The frontend now uses API mode by default (see setUseApiMode in text_events.ts).
-     */
-    public function setStatus(array $params): void
-    {
-        $wid = (int) $this->param('wid');
-        $status = $this->param('status');
-        $stchange = $this->param('stchange');
-        $useAjax = $this->hasParam('ajax');
-
-        if (!is_numeric($status) && !is_numeric($stchange)) {
-            ErrorHandler::die('status or stchange should be specified!');
-        }
-
-        // Get old status
-        $oldStatus = (int) $this->getValue(
-            "SELECT WoStatus AS value FROM {$this->tbpref}words WHERE WoID = $wid"
-        );
-
-        // Calculate new status
-        if (is_numeric($stchange)) {
-            $statusChange = (int) $stchange;
-            $newStatus = $this->testService->calculateNewStatus($oldStatus, $statusChange);
-        } else {
-            $newStatus = (int) $status;
-            $statusChange = $this->testService->calculateStatusChange($oldStatus, $newStatus);
-        }
-
-        // Update status and get scores
-        $result = $this->testService->updateWordStatus($wid, $newStatus);
-
-        // Get word text
-        $wordText = $this->testService->getWordText($wid) ?? '';
-
-        // Update session progress
-        $testStatus = $this->testService->updateSessionProgress($statusChange);
-
-        // Render result - prepare variables for views
-        $oldStatus = $result['oldStatus'];
-        $newStatus = $result['newStatus'];
-        $oldScore = $result['oldScore'];
-        $newScore = $result['newScore'];
-
-        include __DIR__ . '/../Views/Test/status_change_result.php';
-
-        // Render status change config
-        $wordId = $wid;
-        $ajax = $useAjax;
-        $waitTime = $this->testService->getWaitingTime();
-
-        include __DIR__ . '/../Views/Test/status_change_config.php';
-
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
      * Render test header frame.
      *
      * @param array $params Route parameters
@@ -403,22 +338,6 @@ class TestController extends BaseController
 
         PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
         include __DIR__ . '/../Views/Test/test_desktop_bulma.php';
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Render the main test page (legacy frame-based version).
-     *
-     * @return void
-     *
-     * @deprecated 3.0.0 Use renderTestPageBulma() instead
-     */
-    private function renderTestPageLegacy(): void
-    {
-        PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
-
-        $this->renderDesktopTestPage();
-
         PageLayoutHelper::renderPageEnd();
     }
 

@@ -110,8 +110,6 @@ class AdminController extends BaseController
         // Get view data (used by included view)
         /** @psalm-suppress UnusedVariable */
         $prefinfo = $backupService->getPrefixInfo();
-        /** @psalm-suppress UnusedVariable */
-        $dbname = $backupService->getDatabaseName();
 
         // Render page
         $this->render('Database Operations', true);
@@ -361,8 +359,6 @@ class AdminController extends BaseController
         // Get view data (used by included view)
         /** @psalm-suppress UnusedVariable */
         $prefinfo = $demoService->getPrefixInfo();
-        /** @psalm-suppress UnusedVariable */
-        $dbname = $demoService->getDatabaseName();
         /** @psalm-suppress UnusedVariable */
         $langcnt = $demoService->getLanguageCount();
 

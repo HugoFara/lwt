@@ -12,7 +12,6 @@ use PHPUnit\Framework\TestCase;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/backend/View/Helper/FormHelper.php';
@@ -30,6 +29,7 @@ require_once __DIR__ . '/../../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../../src/backend/Services/WordStatusService.php';
 
 use Lwt\Core\StringUtils;
+use Lwt\Services\ExportService;
 use Lwt\Services\LanguageService;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\StatusHelper;
@@ -514,9 +514,9 @@ class TextProcessingTest extends TestCase
 
     public function testReplTabNl(): void
     {
-        $this->assertEquals('hello world', replTabNl("hello\tworld"));
-        $this->assertEquals('line one line two', replTabNl("line one\nline two"));
+        $this->assertEquals('hello world', ExportService::replaceTabNewline("hello\tworld"));
+        $this->assertEquals('line one line two', ExportService::replaceTabNewline("line one\nline two"));
         // Multiple whitespace is collapsed to single space
-        $this->assertEquals('test spaces', replTabNl("test\t\nspaces"));
+        $this->assertEquals('test spaces', ExportService::replaceTabNewline("test\t\nspaces"));
     }
 }

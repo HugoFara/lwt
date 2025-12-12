@@ -58,11 +58,10 @@ class TextStatisticsService
             'statu' => array()
         );
 
-        $tbpref = Globals::getTablePrefix();
         $res = Connection::query(
             "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS value,
             COUNT(LOWER(Ti2Text)) AS total
-            FROM {$tbpref}textitems2
+            FROM " . Globals::getTablePrefix() . "textitems2
             WHERE Ti2WordCount = 1 AND Ti2TxID IN($textsId)
             GROUP BY Ti2TxID"
         );
@@ -75,7 +74,7 @@ class TextStatisticsService
         $res = Connection::query(
             "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
             COUNT(Ti2WoID) AS total
-            FROM {$tbpref}textitems2
+            FROM " . Globals::getTablePrefix() . "textitems2
             WHERE Ti2WordCount > 1 AND Ti2TxID IN({$textsId})
             GROUP BY Ti2TxID"
         );
@@ -88,7 +87,7 @@ class TextStatisticsService
         $res = Connection::query(
             "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
             COUNT(Ti2WoID) AS total, WoStatus AS status
-            FROM {$tbpref}textitems2, {$tbpref}words
+            FROM " . Globals::getTablePrefix() . "textitems2, " . Globals::getTablePrefix() . "words
             WHERE Ti2WoID != 0 AND Ti2TxID IN({$textsId}) AND Ti2WoID = WoID
             GROUP BY Ti2TxID, WoStatus"
         );
@@ -110,10 +109,9 @@ class TextStatisticsService
      */
     public function getTodoWordsCount(int $textId): int
     {
-        $tbpref = Globals::getTablePrefix();
         $count = Connection::fetchValue(
             "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS value
-            FROM {$tbpref}textitems2
+            FROM " . Globals::getTablePrefix() . "textitems2
             WHERE Ti2WordCount=1 AND Ti2WoID=0 AND Ti2TxID=$textId"
         );
         if ($count === null) {
@@ -139,10 +137,9 @@ class TextStatisticsService
             $c . '</span>';
         }
 
-        $tbpref = Globals::getTablePrefix();
         $dict = (string) Connection::fetchValue(
             "SELECT LgGoogleTranslateURI AS value
-            FROM {$tbpref}languages, {$tbpref}texts
+            FROM " . Globals::getTablePrefix() . "languages, " . Globals::getTablePrefix() . "texts
             WHERE LgID = TxLgID and TxID = $textId"
         );
         $tl = $sl = "";
@@ -218,18 +215,6 @@ function returnTextWordCount(string|int $textsId): array
 {
     $service = new TextStatisticsService();
     return $service->getTextWordCount((string) $textsId);
-}
-
-/**
- * Compute and echo word statistics about a list of text ID.
- *
- * @param string $textID Text IDs separated by comma
- *
- * @deprecated 2.9.0 Use returnTextWordCount instead.
- */
-function textwordcount(string $textID): void
-{
-    echo json_encode(returnTextWordCount($textID));
 }
 
 /**

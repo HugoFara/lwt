@@ -16,7 +16,6 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
-use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
@@ -140,24 +139,4 @@ class TtsService
         setcookie($prefix . 'Pitch]', InputValidator::getString('LgPitch'), $cookie_options);
     }
 
-    /**
-     * Get two-letter language code from language name.
-     *
-     * @param string $language  Language name (e.g., "English")
-     * @param array  $langArray Languages array from langdefs
-     *
-     * @return string Two-letter language code
-     *
-     * @deprecated Since 2.9.1-fork, use getLanguageCode with ID instead
-     */
-    public function getLanguageCodeFromName(string $language, array $langArray): string
-    {
-        $lg_id = (int)Connection::preparedFetchValue(
-            "SELECT LgID as value
-            FROM " . Globals::getTablePrefix() . "languages
-            WHERE LgName = ?",
-            [$language]
-        );
-        return $this->languageService->getLanguageCode($lg_id, $langArray);
-    }
 }

@@ -94,24 +94,9 @@ define('LWT_BASE_PATH', __DIR__ . '/..');
 // From string_utilities.php (global namespace section)
 // ---------------------------------------------------------------------------
 
-
-/**
- * @param string $url
- * @return string
- * @see \Lwt\Core\Utils\encodeURI()
- */
-function encodeURI($url): string {}
-
 // ---------------------------------------------------------------------------
 // From TextParsingService.php (global namespace section)
 // ---------------------------------------------------------------------------
-
-/**
- * @param string $mecab_args
- * @return string
- * @see \Lwt\Services\TextParsingService::getMecabPath()
- */
-function get_mecab_path($mecab_args = ''): string {}
 
 /**
  * @param array $matches
@@ -124,30 +109,6 @@ function find_latin_sentence_end($matches, $noSentenceEnd): string {}
 // ---------------------------------------------------------------------------
 // From MediaService.php (global namespace section)
 // ---------------------------------------------------------------------------
-
-
-/**
- * @param string $audio
- * @param int $offset
- * @return void
- */
-function makeAudioPlayer(string $audio, int $offset = 0): void {}
-
-/**
- * @param string $audio
- * @param int $offset
- * @param bool $repeatMode
- * @param int $currentplayerseconds
- * @param int $currentplaybackrate
- * @return void
- */
-function makeHtml5AudioPlayer(
-    string $audio,
-    int $offset,
-    bool $repeatMode,
-    int $currentplayerseconds,
-    int $currentplaybackrate
-): void {}
 
 // ---------------------------------------------------------------------------
 // From ExportService.php / export_helpers.php

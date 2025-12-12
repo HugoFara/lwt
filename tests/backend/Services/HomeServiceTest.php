@@ -9,12 +9,12 @@ use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
 use Lwt\Services\HomeService;
+use Lwt\Services\ServerDataService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/HomeService.php';
@@ -28,6 +28,7 @@ class HomeServiceTest extends TestCase
 {
     private static bool $dbConnected = false;
     private HomeService $service;
+    private ServerDataService $serverDataService;
 
     public static function setUpBeforeClass(): void
     {
@@ -50,6 +51,7 @@ class HomeServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->service = new HomeService();
+        $this->serverDataService = new ServerDataService();
     }
 
     // ===== getTableSetSpanGroups() tests =====
@@ -360,7 +362,11 @@ class HomeServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getServerData();
+        // Set up server environment variables for testing
+        $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
+        $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        $result = $this->serverDataService->getServerData();
 
         $this->assertIsArray($result);
     }
@@ -371,9 +377,13 @@ class HomeServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getServerData();
+        // Set up server environment variables for testing
+        $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
+        $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-        $expectedKeys = ['prefix', 'db_size', 'server_software', 'apache', 'php', 'mysql'];
+        $result = $this->serverDataService->getServerData();
+
+        $expectedKeys = ['db_name', 'db_prefix', 'db_size', 'server_soft', 'apache', 'php', 'mysql', 'lwt_version', 'server_location'];
         foreach ($expectedKeys as $key) {
             $this->assertArrayHasKey($key, $result, "Missing key: $key");
         }
@@ -385,9 +395,13 @@ class HomeServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getServerData();
+        // Set up server environment variables for testing
+        $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
+        $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-        $this->assertIsString($result['prefix']);
+        $result = $this->serverDataService->getServerData();
+
+        $this->assertIsString($result['db_prefix']);
     }
 
     public function testGetServerDataDbSizeIsFloat(): void
@@ -396,20 +410,28 @@ class HomeServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getServerData();
+        // Set up server environment variables for testing
+        $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
+        $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        $result = $this->serverDataService->getServerData();
 
         $this->assertIsFloat($result['db_size']);
     }
 
-    public function testGetServerDataServerSoftwareIsArray(): void
+    public function testGetServerDataServerSoftwareIsString(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getServerData();
+        // Set up server environment variables for testing
+        $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
+        $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-        $this->assertIsArray($result['server_software']);
+        $result = $this->serverDataService->getServerData();
+
+        $this->assertIsString($result['server_soft']);
     }
 
     public function testGetServerDataMysqlIsString(): void
@@ -418,7 +440,11 @@ class HomeServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->service->getServerData();
+        // Set up server environment variables for testing
+        $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
+        $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        $result = $this->serverDataService->getServerData();
 
         $this->assertIsString($result['mysql']);
     }

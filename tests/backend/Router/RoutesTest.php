@@ -168,7 +168,6 @@ class RoutesTest extends TestCase
             'words edit list' => ['/words/edit', 'WordController@listEditAlpine'],
             'word edit-multi' => ['/word/edit-multi', 'WordController@editMulti'],
             'word delete' => ['/word/delete', 'WordController@delete'],
-            'word delete-multi' => ['/word/delete-multi', 'WordController@deleteMulti'],
             'words list' => ['/words', 'WordController@listEditAlpine'],
             'word new' => ['/word/new', 'WordController@create'],
             'word show' => ['/word/show', 'WordController@show'],
@@ -198,7 +197,6 @@ class RoutesTest extends TestCase
     {
         return [
             'test index' => ['/test', 'TestController@index'],
-            'test set-status' => ['/test/set-status', 'TestController@setStatus'],
         ];
     }
 
@@ -427,13 +425,11 @@ class RoutesTest extends TestCase
             // New routes should use hyphens for word separation
             '/text/import-long' => 'should use hyphens',
             '/word/edit-multi' => 'should use hyphens',
-            '/word/delete-multi' => 'should use hyphens',
             '/word/insert-wellknown' => 'should use hyphens',
             '/word/insert-ignore' => 'should use hyphens',
             '/word/inline-edit' => 'should use hyphens',
             '/word/bulk-translate' => 'should use hyphens',
             '/word/set-status' => 'should use hyphens',
-            '/test/set-status' => 'should use hyphens',
             '/admin/install-demo' => 'should use hyphens',
             '/admin/server-data' => 'should use hyphens',
         ];

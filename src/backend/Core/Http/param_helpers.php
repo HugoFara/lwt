@@ -90,19 +90,6 @@ class ParamHelpers
     }
 
     /**
-     * Get a request when possible. Otherwise, return an empty string.
-     *
-     * @param  string $s Request key
-     * @return string Trimmed request or empty string
-     *
-     * @deprecated Use InputValidator::getString() instead
-     */
-    public static function getreq($s)
-    {
-        return InputValidator::getString($s);
-    }
-
-    /**
      * Get a session variable when possible. Otherwise, return an empty string.
      *
      * @param  string $s Session variable key

@@ -19,22 +19,22 @@ Globals::initialize();
 final class UiHelpersTest extends TestCase
 {
     /**
-     * Test PageLayoutHelper::buildQuickMenu() function
+     * Test PageLayoutHelper::buildNavbar() function
      */
     public function testQuickMenu(): void
     {
-        $output = PageLayoutHelper::buildQuickMenu();
+        $output = PageLayoutHelper::buildNavbar();
 
-        // Should output a select element
-        $this->assertStringContainsString('<select', $output);
-        $this->assertStringContainsString('id="quickmenu"', $output);
-        $this->assertStringContainsString('data-action="quick-menu-redirect"', $output);
+        // Should output a nav element
+        $this->assertStringContainsString('<nav', $output);
+        $this->assertStringContainsString('class="navbar', $output);
+        $this->assertStringContainsString('role="navigation"', $output);
 
-        // Should contain various menu options
-        $this->assertStringContainsString('value="index"', $output);
-        $this->assertStringContainsString('value="edit_languages"', $output);
-        $this->assertStringContainsString('value="edit_texts"', $output);
-        $this->assertStringContainsString('value="edit_words"', $output);
+        // Should contain various menu sections
+        $this->assertStringContainsString('href="/"', $output);
+        $this->assertStringContainsString('href="/languages"', $output);
+        $this->assertStringContainsString('href="/texts"', $output);
+        $this->assertStringContainsString('href="/words/edit"', $output);
     }
 
     /**

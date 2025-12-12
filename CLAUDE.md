@@ -232,7 +232,7 @@ Key modules:
 - **Character Encoding:** UTF-8 throughout
 - **Namespaces:** PSR-4 autoloading with `Lwt\` prefix
 - **ID Columns:** `LgID` (language), `TxID`/`AtID` (text/archived), `WoID` (word)
-- **SQL Escaping:** Use `Globals::getDbConnection()` with prepared statements or `convert_string_to_sqlsyntax()`
+- **SQL Escaping:** Use `Globals::getDbConnection()` with prepared statements or `Escaping::toSqlSyntax()`
 
 ## Database Migrations
 

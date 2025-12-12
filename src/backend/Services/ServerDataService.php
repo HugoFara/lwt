@@ -84,18 +84,17 @@ class ServerDataService
      */
     private function getDatabaseSize(): float
     {
-        $tbpref = Globals::getTablePrefix();
         $temp_size = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
             FROM information_schema.TABLES
             WHERE table_schema = ?
             AND table_name IN (
-                '{$tbpref}archivedtexts', '{$tbpref}archtexttags',
-                '{$tbpref}feedlinks', '{$tbpref}languages',
-                '{$tbpref}newsfeeds', '{$tbpref}sentences', '{$tbpref}settings',
-                '{$tbpref}tags', '{$tbpref}tags2',
-                '{$tbpref}textitems2', '{$tbpref}texts', '{$tbpref}texttags',
-                '{$tbpref}words', '{$tbpref}wordtags'
+                '" . Globals::getTablePrefix() . "archivedtexts', '" . Globals::getTablePrefix() . "archtexttags',
+                '" . Globals::getTablePrefix() . "feedlinks', '" . Globals::getTablePrefix() . "languages',
+                '" . Globals::getTablePrefix() . "newsfeeds', '" . Globals::getTablePrefix() . "sentences', '" . Globals::getTablePrefix() . "settings',
+                '" . Globals::getTablePrefix() . "tags', '" . Globals::getTablePrefix() . "tags2',
+                '" . Globals::getTablePrefix() . "textitems2', '" . Globals::getTablePrefix() . "texts', '" . Globals::getTablePrefix() . "texttags',
+                '" . Globals::getTablePrefix() . "words', '" . Globals::getTablePrefix() . "wordtags'
             )",
             [$this->dbname]
         );

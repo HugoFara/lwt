@@ -80,10 +80,9 @@ function registerRoutes(Router $router): void
     $router->register('/word/edit-multi', 'WordController@editMulti');
 
     // Delete word
+    // @deprecated 3.0.0 Use DELETE /api/v1/terms/{id} instead.
+    //             Kept for backward compatibility with frame-based mode.
     $router->register('/word/delete', 'WordController@delete');
-
-    // Delete multi-word
-    $router->register('/word/delete-multi', 'WordController@deleteMulti');
 
     // All words (list view) - Alpine.js SPA version
     $router->register('/words', 'WordController@listEditAlpine');
@@ -95,7 +94,11 @@ function registerRoutes(Router $router): void
     $router->register('/word/show', 'WordController@show');
 
     // Insert word (wellknown/ignore)
+    // @deprecated 3.0.0 Use POST /api/v1/terms/quick with status=99 instead.
+    //             Kept for backward compatibility with frame-based mode.
     $router->register('/word/insert-wellknown', 'WordController@insertWellknown');
+    // @deprecated 3.0.0 Use POST /api/v1/terms/quick with status=98 instead.
+    //             Kept for backward compatibility with frame-based mode.
     $router->register('/word/insert-ignore', 'WordController@insertIgnore');
 
     // Inline edit
@@ -105,6 +108,8 @@ function registerRoutes(Router $router): void
     $router->register('/word/bulk-translate', 'WordController@bulkTranslate');
 
     // Set word status
+    // @deprecated 3.0.0 Use PUT /api/v1/terms/{id}/status/{status} instead.
+    //             Kept for backward compatibility with frame-based mode.
     $router->register('/word/set-status', 'WordController@setStatus');
 
     // Set all words status (wellknown/ignore)
@@ -117,9 +122,6 @@ function registerRoutes(Router $router): void
 
     // Test interface
     $router->register('/test', 'TestController@index');
-
-    // Set test status
-    $router->register('/test/set-status', 'TestController@setStatus');
 
     // ==================== LANGUAGE ROUTES ====================
 
@@ -192,23 +194,3 @@ function registerRoutes(Router $router): void
     $router->register('/api/google', 'ApiController@google');
     $router->register('/api/glosbe', 'ApiController@glosbe');
 }
-
-/**
- * Get the route registration closure.
- *
- * This function returns a closure for backward compatibility with code
- * that expects `require routes.php` to return a callable.
- *
- * @return \Closure
- *
- * @deprecated 3.0.0 Use \Lwt\Router\registerRoutes() directly instead
- */
-function getRouteRegistrar(): \Closure
-{
-    return function (Router $router): void {
-        registerRoutes($router);
-    };
-}
-
-// Return closure for backward compatibility
-return getRouteRegistrar();

@@ -15,7 +15,6 @@ use PHPUnit\Framework\TestCase;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/SimilarTermsService.php';
@@ -333,7 +332,7 @@ class SimilarTermsServiceTest extends TestCase
     public function testGetSimilarTermsCallsWeightedVersion(): void
     {
         // The deprecated getSimilarTerms should now call getSimilarTermsWeighted
-        $oldMethod = $this->service->getSimilarTerms(1, 'hello', 5, 0.3);
+        $oldMethod = $this->service->getSimilarTermsWeighted(1, 'hello', 5, 0.3);
         $newMethod = $this->service->getSimilarTermsWeighted(1, 'hello', 5, 0.3);
 
         // Both should return the same results

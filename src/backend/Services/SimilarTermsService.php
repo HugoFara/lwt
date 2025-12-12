@@ -529,28 +529,6 @@ function getSimilarTerms(
 }
 
 /**
- * For a language $lang_id and a term $compared_term (UTF-8).
- *
- * @param int    $lang_id       Language ID
- * @param string $compared_term Term to compare with
- * @param int    $max_count     Maximum number of terms to display
- * @param float  $min_ranking   For terms to match
- *
- * @return int[] All $max_count wordids with a similarity ranking > $min_ranking
- *
- * @deprecated Use getSimilarTerms() instead
- * @see getSimilarTerms()
- */
-function get_similar_terms(
-    int $lang_id,
-    string $compared_term,
-    int $max_count,
-    float $min_ranking
-): array {
-    return getSimilarTerms($lang_id, $compared_term, $max_count, $min_ranking);
-}
-
-/**
  * Prepare a field with a similar term to copy.
  *
  * @param int    $termId  Initial term ID
@@ -566,21 +544,6 @@ function formatTerm(int $termId, string $compare): string
     return $service->formatTerm($termId, $compare);
 }
 
-/**
- * Prepare a field with a similar term to copy.
- *
- * @param int    $termid  Initial term ID
- * @param string $compare Similar term to copy.
- *
- * @return string HTML-formatted string
- *
- * @deprecated Use formatTerm() instead
- * @see formatTerm()
- */
-function format_term(int $termid, string $compare): string
-{
-    return formatTerm($termid, $compare);
-}
 
 /**
  * Get Term and translation of terms in termid array as string for echo
@@ -599,22 +562,6 @@ function printSimilarTerms(int $langId, string $comparedTerm): string
 }
 
 /**
- * Get Term and translation of terms in termid array as string for echo
- *
- * @param int    $lang_id       Language ID
- * @param string $compared_term Similar term we compare to
- *
- * @return string HTML output
- *
- * @deprecated Use printSimilarTerms() instead
- * @see printSimilarTerms()
- */
-function print_similar_terms(int $lang_id, string $compared_term): string
-{
-    return printSimilarTerms($lang_id, $compared_term);
-}
-
-/**
  * Print a row for similar terms if the feature is enabled.
  *
  * @return string HTML output
@@ -625,17 +572,6 @@ function printSimilarTermsTabRow(): string
 {
     $service = new SimilarTermsService();
     return $service->printSimilarTermsTabRow();
-}
-
-/**
- * Print a row for similar terms if the feature is enabled.
- *
- * @deprecated Use printSimilarTermsTabRow() instead
- * @see printSimilarTermsTabRow()
- */
-function print_similar_terms_tabrow(): void
-{
-    echo printSimilarTermsTabRow();
 }
 
 } // End global namespace

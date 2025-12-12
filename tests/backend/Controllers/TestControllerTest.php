@@ -14,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
@@ -125,17 +124,6 @@ class TestControllerTest extends TestCase
         $controller = new TestController();
 
         $this->assertTrue(method_exists($controller, 'index'));
-    }
-
-    public function testControllerHasSetStatusMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TestController();
-
-        $this->assertTrue(method_exists($controller, 'setStatus'));
     }
 
     public function testControllerHasHeaderMethod(): void

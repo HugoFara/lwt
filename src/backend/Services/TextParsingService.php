@@ -120,22 +120,6 @@ namespace {
 use Lwt\Services\TextParsingService;
 
 /**
- * Returns path to the MeCab application.
- * MeCab can split Japanese text word by word
- *
- * @param string $mecab_args Arguments to add
- *
- * @return string OS-compatible command
- *
- * @see TextParsingService::getMecabPath()
- */
-function get_mecab_path(string $mecab_args = ''): string
-{
-    $service = new TextParsingService();
-    return $service->getMecabPath($mecab_args);
-}
-
-/**
  * Find end-of-sentence characters in a sentence using latin alphabet.
  *
  * @param string[] $matches       All the matches from a capturing regex

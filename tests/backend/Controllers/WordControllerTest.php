@@ -3,6 +3,7 @@ namespace Lwt\Tests\Controllers;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
+use Lwt\Api\V1\Handlers\TermHandler;
 use Lwt\Controllers\WordController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
@@ -14,7 +15,6 @@ use PHPUnit\Framework\TestCase;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
@@ -23,6 +23,7 @@ require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/BaseController.php';
 require_once __DIR__ . '/../../../src/backend/Controllers/WordController.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordService.php';
+require_once __DIR__ . '/../../../src/backend/Api/V1/Handlers/TermHandler.php';
 
 /**
  * Unit tests for the WordController class.
@@ -502,12 +503,9 @@ class WordControllerTest extends TestCase
         $this->assertTrue(method_exists($controller, 'listEdit'));
         $this->assertTrue(method_exists($controller, 'editMulti'));
         $this->assertTrue(method_exists($controller, 'delete'));
-        $this->assertTrue(method_exists($controller, 'deleteMulti'));
         $this->assertTrue(method_exists($controller, 'all'));
         $this->assertTrue(method_exists($controller, 'create'));
         $this->assertTrue(method_exists($controller, 'show'));
-        $this->assertTrue(method_exists($controller, 'insertWellknown'));
-        $this->assertTrue(method_exists($controller, 'insertIgnore'));
         $this->assertTrue(method_exists($controller, 'inlineEdit'));
         $this->assertTrue(method_exists($controller, 'bulkTranslate'));
         $this->assertTrue(method_exists($controller, 'setStatus'));
@@ -611,6 +609,7 @@ class WordControllerTest extends TestCase
 
         $controller = new WordController();
         $service = $controller->getWordService();
+        $termHandler = new TermHandler();
 
         // Create a word with status 1
         $data = [
@@ -622,8 +621,8 @@ class WordControllerTest extends TestCase
         $result = $service->create($data);
         $wordId = $result['id'];
 
-        // Set status to 5
-        $service->setStatus($wordId, 5);
+        // Set status to 5 using modern API
+        $termHandler->formatSetStatus($wordId, 5);
 
         // Verify
         $word = $service->findById($wordId);
@@ -638,6 +637,7 @@ class WordControllerTest extends TestCase
 
         $controller = new WordController();
         $service = $controller->getWordService();
+        $termHandler = new TermHandler();
 
         $data = [
             'WoLgID' => self::$testLangId,
@@ -648,7 +648,8 @@ class WordControllerTest extends TestCase
         $result = $service->create($data);
         $wordId = $result['id'];
 
-        $service->setStatus($wordId, 99);
+        // Set status to 99 (well-known) using modern API
+        $termHandler->formatSetStatus($wordId, 99);
 
         $word = $service->findById($wordId);
         $this->assertEquals('99', $word['WoStatus']);
@@ -662,6 +663,7 @@ class WordControllerTest extends TestCase
 
         $controller = new WordController();
         $service = $controller->getWordService();
+        $termHandler = new TermHandler();
 
         $data = [
             'WoLgID' => self::$testLangId,
@@ -672,7 +674,8 @@ class WordControllerTest extends TestCase
         $result = $service->create($data);
         $wordId = $result['id'];
 
-        $service->setStatus($wordId, 98);
+        // Set status to 98 (ignored) using modern API
+        $termHandler->formatSetStatus($wordId, 98);
 
         $word = $service->findById($wordId);
         $this->assertEquals('98', $word['WoStatus']);
@@ -763,22 +766,53 @@ class WordControllerTest extends TestCase
 
     // ===== Controller action parameter validation tests =====
 
-    public function testDeleteActionReturnsEarlyWithMissingParams(): void
+    public function testDeleteTermWithNonExistentIdReturnsError(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $termHandler = new TermHandler();
+
+        // Attempting to delete a non-existent term should return error
+        $result = $termHandler->deleteTerm(999999);
+
+        $this->assertFalse($result['deleted']);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertEquals('Term not found', $result['error']);
+    }
+
+    public function testDeleteTermSuccessfully(): void
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection required');
         }
 
         $controller = new WordController();
+        $service = $controller->getWordService();
+        $termHandler = new TermHandler();
 
-        // Without any parameters, should return early
-        $_REQUEST = [];
-        ob_start();
-        $controller->delete([]);
-        $output = ob_get_clean();
+        // Create a word first
+        $data = [
+            'WoLgID' => self::$testLangId,
+            'WoText' => 'ctrl_test_api_delete',
+            'WoStatus' => 1,
+            'WoTranslation' => 'to delete via API',
+        ];
+        $createResult = $service->create($data);
+        $wordId = $createResult['id'];
 
-        // Should produce no output (early return)
-        $this->assertEmpty($output);
+        // Verify it exists
+        $word = $service->findById($wordId);
+        $this->assertNotNull($word);
+
+        // Delete it using the modern API
+        $deleteResult = $termHandler->deleteTerm($wordId);
+        $this->assertTrue($deleteResult['deleted']);
+
+        // Verify it's gone
+        $deletedWord = $service->findById($wordId);
+        $this->assertNull($deletedWord);
     }
 
     public function testInsertWellknownReturnsEarlyWithMissingParams(): void
@@ -787,14 +821,12 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController();
+        $termHandler = new TermHandler();
 
-        $_REQUEST = [];
-        ob_start();
-        $controller->insertWellknown([]);
-        $output = ob_get_clean();
+        // Test that createQuickTerm returns error with invalid parameters
+        $result = $termHandler->createQuickTerm(999999, 999999, 99);
 
-        $this->assertEmpty($output);
+        $this->assertArrayHasKey('error', $result);
     }
 
     public function testInsertIgnoreReturnsEarlyWithMissingParams(): void
@@ -803,14 +835,12 @@ class WordControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordController();
+        $termHandler = new TermHandler();
 
-        $_REQUEST = [];
-        ob_start();
-        $controller->insertIgnore([]);
-        $output = ob_get_clean();
+        // Test that createQuickTerm returns error with invalid parameters (status=98 for ignored)
+        $result = $termHandler->createQuickTerm(999999, 999999, 98);
 
-        $this->assertEmpty($output);
+        $this->assertArrayHasKey('error', $result);
     }
 
     public function testSetStatusReturnsEarlyWithMissingParams(): void
@@ -1262,18 +1292,6 @@ class WordControllerTest extends TestCase
         $output = ob_get_clean();
 
         $this->assertEquals('*', $output);
-    }
-
-    // ===== deleteMulti() method tests =====
-
-    public function testDeleteMultiMethodExists(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new WordController();
-        $this->assertTrue(method_exists($controller, 'deleteMulti'));
     }
 
     // ===== show() method tests =====

@@ -27,7 +27,6 @@ use function Lwt\Core\getVersionNumber;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
@@ -1258,7 +1257,7 @@ class DatabaseConnectTest extends TestCase
             Globals::setDbConnection($connection);
         }
 
-        // Test convert_string_to_sqlsyntax with various edge cases
+        // Test Escaping::toSqlSyntax with various edge cases
         // Very long string
         $long_string = str_repeat('test ', 1000);
         $result = Escaping::toSqlSyntax($long_string);
@@ -1393,17 +1392,6 @@ class DatabaseConnectTest extends TestCase
         $this->assertStringStartsWith('v', $version);
         // Version format: vXXXYYYZZZ (e.g., v002009001 for 2.9.1)
         $this->assertMatchesRegularExpression('/^v\d{9}$/', $version);
-    }
-
-    /**
-     * Test get_mecab_path function
-     * Note: Only tests that function exists, as MeCab may not be installed
-     */
-    public function testGetMecabPath(): void
-    {
-        // Just verify function exists
-        // Actual execution would require MeCab installation
-        $this->assertTrue(function_exists('get_mecab_path'));
     }
 
     /**

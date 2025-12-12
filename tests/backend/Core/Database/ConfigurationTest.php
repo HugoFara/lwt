@@ -12,7 +12,6 @@ use PHPUnit\Framework\TestCase;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 
@@ -294,9 +293,8 @@ class ConfigurationTest extends TestCase
         $connection = Globals::getDbConnection();
         Configuration::getPrefix($connection, 'test');
 
-        // The function sets the connection in Globals and $GLOBALS
+        // The function sets the connection in Globals
         $this->assertSame($connection, Globals::getDbConnection());
-        $this->assertSame($connection, $GLOBALS['DBCONNECTION']);
     }
 
     // ===== Integration tests =====

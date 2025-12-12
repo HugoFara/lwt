@@ -16,7 +16,6 @@ use PHPUnit\Framework\TestCase;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../../src/backend/Services/SimilarTermsService.php';
 
@@ -208,7 +207,7 @@ class SimtermsTest extends TestCase
     public function testGetSimilarTerms(): void
     {
         // Find similar terms to 'hello'
-        $similar = self::$service->getSimilarTerms(1, 'hello', 5, 0.3);
+        $similar = self::$service->getSimilarTermsWeighted(1, 'hello', 5, 0.3);
 
         // Should be an array
         $this->assertIsArray($similar);
@@ -224,28 +223,28 @@ class SimtermsTest extends TestCase
         $this->assertNotEmpty($similar);
 
         // Find similar terms to 'cat'
-        $similar = self::$service->getSimilarTerms(1, 'cat', 10, 0.3);
+        $similar = self::$service->getSimilarTermsWeighted(1, 'cat', 10, 0.3);
         $this->assertIsArray($similar);
 
         // 'cats' and 'catch' should be similar
         $this->assertNotEmpty($similar);
 
         // Test with high min_ranking threshold - should return fewer results
-        $similar_high = self::$service->getSimilarTerms(1, 'hello', 10, 0.9);
-        $similar_low = self::$service->getSimilarTerms(1, 'hello', 10, 0.1);
+        $similar_high = self::$service->getSimilarTermsWeighted(1, 'hello', 10, 0.9);
+        $similar_low = self::$service->getSimilarTermsWeighted(1, 'hello', 10, 0.1);
         $this->assertLessThanOrEqual(count($similar_low), count($similar_high));
 
         // Test with max_count limit
-        $similar = self::$service->getSimilarTerms(1, 'cat', 1, 0.1);
+        $similar = self::$service->getSimilarTermsWeighted(1, 'cat', 1, 0.1);
         $this->assertLessThanOrEqual(1, count($similar));
 
         // Test with non-existent term
-        $similar = self::$service->getSimilarTerms(1, 'xyzabc123', 10, 0.3);
+        $similar = self::$service->getSimilarTermsWeighted(1, 'xyzabc123', 10, 0.3);
         $this->assertIsArray($similar);
         // May or may not have results, but should not error
 
         // Test with non-existent language ID
-        $similar = self::$service->getSimilarTerms(999, 'hello', 10, 0.3);
+        $similar = self::$service->getSimilarTermsWeighted(999, 'hello', 10, 0.3);
         $this->assertIsArray($similar);
         $this->assertEmpty($similar);
     }
@@ -407,7 +406,7 @@ class SimtermsTest extends TestCase
         $this->assertGreaterThan(0, $ranking);
 
         // Test get_similar_terms with UTF-8
-        $similar = self::$service->getSimilarTerms(1, '日本語', 5, 0.3);
+        $similar = self::$service->getSimilarTermsWeighted(1, '日本語', 5, 0.3);
         $this->assertIsArray($similar);
 
         // Test format_term with UTF-8

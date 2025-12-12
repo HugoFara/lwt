@@ -215,19 +215,19 @@ class HomeService
     public function getDatabaseSize(): float
     {
         $dbname = Globals::getDatabaseName();
-        $tbpref = Globals::getTablePrefix();
+        $prefix = Globals::getTablePrefix();
 
         $size = Connection::preparedFetchValue(
             "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
             FROM information_schema.TABLES
             WHERE table_schema = ?
             AND table_name IN (
-                '{$tbpref}archivedtexts', '{$tbpref}archtexttags',
-                '{$tbpref}feedlinks', '{$tbpref}languages',
-                '{$tbpref}newsfeeds', '{$tbpref}sentences',
-                '{$tbpref}settings', '{$tbpref}tags', '{$tbpref}tags2',
-                '{$tbpref}textitems2', '{$tbpref}texts', '{$tbpref}texttags',
-                '{$tbpref}words', '{$tbpref}wordtags'
+                '{$prefix}archivedtexts', '{$prefix}archtexttags',
+                '{$prefix}feedlinks', '{$prefix}languages',
+                '{$prefix}newsfeeds', '{$prefix}sentences',
+                '{$prefix}settings', '{$prefix}tags', '{$prefix}tags2',
+                '{$prefix}textitems2', '{$prefix}texts', '{$prefix}texttags',
+                '{$prefix}words', '{$prefix}wordtags'
             )",
             [$dbname]
         );

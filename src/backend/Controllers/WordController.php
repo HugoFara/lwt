@@ -764,13 +764,13 @@ class WordController extends BaseController
                 $message = $listService->capitalizeByIdList($idList);
                 break;
             case 'exp':
-                \ankiExport($listService->getAnkiExportSql($idList, '', '', '', '', ''));
+                ExportService::exportAnki($listService->getAnkiExportSql($idList, '', '', '', '', ''));
                 break;
             case 'exp2':
-                \tsvExport($listService->getTsvExportSql($idList, '', '', '', '', ''));
+                ExportService::exportTsv($listService->getTsvExportSql($idList, '', '', '', '', ''));
                 break;
             case 'exp3':
-                \flexibleExport($listService->getFlexibleExportSql($idList, '', '', '', '', ''));
+                ExportService::exportFlexible($listService->getFlexibleExportSql($idList, '', '', '', '', ''));
                 break;
             case 'test':
                 $_SESSION['testsql'] = $idList;
@@ -873,15 +873,15 @@ class WordController extends BaseController
 
         // Export actions
         if ($allaction == 'expall') {
-            \ankiExport($listService->getAnkiExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            ExportService::exportAnki($listService->getAnkiExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
         if ($allaction == 'expall2') {
-            \tsvExport($listService->getTsvExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            ExportService::exportTsv($listService->getTsvExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
         if ($allaction == 'expall3') {
-            \flexibleExport($listService->getFlexibleExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            ExportService::exportFlexible($listService->getFlexibleExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
 
@@ -1389,41 +1389,6 @@ class WordController extends BaseController
         PageLayoutHelper::renderPageEnd();
     }
 
-    /**
-     * Delete multi-word expression (replaces word_delete_multi.php)
-     *
-     * Call: ?wid=[wordid]&tid=[textid]
-     *
-     * @param array $params Route parameters
-     *
-     * @return void
-     *
-     * @deprecated 3.0.0 Use DELETE /api/v1/terms/{id} instead.
-     *             This endpoint is kept for backward compatibility with frame-based mode.
-     *             The frontend now uses API mode by default (see setUseApiMode in text_events.ts).
-     */
-    public function deleteMulti(array $params): void
-    {
-        $textId = $this->paramInt('tid', 0) ?? 0;
-        $wordId = $this->paramInt('wid', 0) ?? 0;
-
-        $term = $this->wordService->getWordText($wordId);
-        if ($term === null) {
-            ErrorHandler::die('Word not found');
-            return;
-        }
-
-        PageLayoutHelper::renderPageStart("Term: " . $term, false);
-
-        $rowsAffected = $this->wordService->deleteMultiWord($wordId);
-
-        $showAll = \Lwt\Database\Settings::getZeroOrOne('showallwords', 1);
-        $wid = $wordId;
-
-        include __DIR__ . '/../Views/Word/delete_multi_result.php';
-
-        PageLayoutHelper::renderPageEnd();
-    }
 
     /**
      * Mark all words as well-known or ignored (replaces words_all.php)

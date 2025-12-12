@@ -512,21 +512,6 @@ function sentencesContainingWordLcQuery(string $wordlc, int $lid): string
     return $service->buildSentencesContainingWordQuery($wordlc, $lid);
 }
 
-/**
- * Return a SQL string to find sentences containing a word.
- *
- * @param string $wordlc Word to look for in lowercase
- * @param int    $lid    Language ID
- *
- * @return string Query in SQL format
- *
- * @deprecated Use sentencesContainingWordLcQuery() instead
- * @see sentencesContainingWordLcQuery()
- */
-function sentences_containing_word_lc_query(string $wordlc, int $lid): string
-{
-    return sentencesContainingWordLcQuery($wordlc, $lid);
-}
 
 /**
  * Perform a SQL query to find sentences containing a word.
@@ -544,24 +529,6 @@ function sentencesFromWord(?int $wid, string $wordlc, int $lid, int $limit = -1)
 {
     $service = new SentenceService();
     return $service->findSentencesFromWord($wid, $wordlc, $lid, $limit);
-}
-
-/**
- * Perform a SQL query to find sentences containing a word.
- *
- * @param int|null $wid    Word ID or mode
- * @param string   $wordlc Word to look for in lowercase
- * @param int      $lid    Language ID
- * @param int      $limit  Maximum number of sentences to return
- *
- * @return \mysqli_result|false Query result or false on failure
- *
- * @deprecated Use sentencesFromWord() instead
- * @see sentencesFromWord()
- */
-function sentences_from_word(?int $wid, string $wordlc, int $lid, int $limit = -1): \mysqli_result|false
-{
-    return sentencesFromWord($wid, $wordlc, $lid, $limit);
 }
 
 /**
@@ -600,24 +567,6 @@ function sentencesWithWord(int $lang, string $wordlc, ?int $wid, ?int $mode = 0,
     return $service->getSentencesWithWord($lang, $wordlc, $wid, $mode, $limit);
 }
 
-/**
- * Return sentences containing a word.
- *
- * @param int      $lang   Language ID
- * @param string   $wordlc Word to look for in lowercase
- * @param int|null $wid    Word ID
- * @param int|null $mode   Sentences to get
- * @param int      $limit  Maximum number of sentences to return
- *
- * @return string[][] Array of sentences found
- *
- * @deprecated Use sentencesWithWord() instead
- * @see sentencesWithWord()
- */
-function sentences_with_word(int $lang, string $wordlc, ?int $wid, ?int $mode = 0, int $limit = 20): array
-{
-    return sentencesWithWord($lang, $wordlc, $wid, $mode, $limit);
-}
 
 /**
  * Prepare the area for example sentences of a word.
@@ -635,23 +584,6 @@ function exampleSentencesArea(int $lang, string $termlc, string $selector, int $
     echo $service->renderExampleSentencesArea($lang, $termlc, $selector, $wid);
 }
 
-/**
- * Prepare the area for example sentences of a word.
- *
- * @param int    $lang     Language ID
- * @param string $termlc   Term text in lowercase
- * @param string $selector JS selector for target textarea
- * @param int    $wid      Word ID
- *
- * @return void Outputs HTML directly
- *
- * @deprecated Use exampleSentencesArea() instead
- * @see exampleSentencesArea()
- */
-function example_sentences_area(int $lang, string $termlc, string $selector, int $wid): void
-{
-    exampleSentencesArea($lang, $termlc, $selector, $wid);
-}
 
 /**
  * Show 20 sentences containing $wordlc.

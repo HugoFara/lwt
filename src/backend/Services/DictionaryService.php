@@ -31,13 +31,6 @@ use Lwt\Database\Connection;
  */
 class DictionaryService
 {
-    private string $tbpref;
-
-    public function __construct()
-    {
-        $this->tbpref = Globals::getTablePrefix();
-    }
-
     /**
      * Create and verify a dictionary URL link.
      *
@@ -99,7 +92,7 @@ class DictionaryService
     public function createDictLinksInEditWin(int $lang, string $word, string $sentctlid, bool $openfirst): string
     {
         $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-        FROM ' . $this->tbpref . 'languages
+        FROM ' . Globals::getTablePrefix() . 'languages
         WHERE LgID = ' . $lang;
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
@@ -229,7 +222,7 @@ class DictionaryService
     public function createDictLinksInEditWin2(int $lang, string $sentctlid, string $wordctlid): string
     {
         $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-        FROM " . $this->tbpref . "languages WHERE LgID = $lang";
+        FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lang";
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
@@ -281,7 +274,7 @@ class DictionaryService
     public function makeDictLinks(int $lang, string $word): string
     {
         $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-        FROM ' . $this->tbpref . 'languages WHERE LgID = ' . $lang;
+        FROM ' . Globals::getTablePrefix() . 'languages WHERE LgID = ' . $lang;
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
@@ -329,7 +322,7 @@ class DictionaryService
     public function createDictLinksInEditWin3(int $lang, string $sentctlid, string $wordctlid): string
     {
         $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-        FROM " . $this->tbpref . "languages WHERE LgID = $lang";
+        FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lang";
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
 
@@ -408,7 +401,7 @@ class DictionaryService
     public function getLanguageDictionaries(int $langId): array
     {
         $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-        FROM ' . $this->tbpref . 'languages WHERE LgID = ' . $langId;
+        FROM ' . Globals::getTablePrefix() . 'languages WHERE LgID = ' . $langId;
         $res = Connection::query($sql);
         $record = mysqli_fetch_assoc($res);
         mysqli_free_result($res);

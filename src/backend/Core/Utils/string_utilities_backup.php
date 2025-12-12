@@ -201,24 +201,4 @@ namespace {
             return \Lwt\Core\Utils\makeCounterWithTotal($max, $num);
         }
     }
-
-    if (!\function_exists('encodeURI')) {
-        /**
-         * @deprecated Use \Lwt\Core\Utils\encodeURI() instead
-         */
-        function encodeURI(string $url): string
-        {
-            return \Lwt\Core\Utils\encodeURI($url);
-        }
-    }
-
-    if (!\function_exists('remove_spaces')) {
-        /**
-         * @deprecated Use \Lwt\Core\Utils\removeSpaces() instead
-         */
-        function remove_spaces($s, $remove)
-        {
-            return \Lwt\Core\Utils\removeSpaces($s, $remove);
-        }
-    }
 }

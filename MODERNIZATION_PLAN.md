@@ -27,7 +27,7 @@ LWT carried significant technical debt from its 2007 origins. This document trac
 
 - All database queries used string concatenation with `mysqli_real_escape_string()`
 - 63 root PHP files + 15 AJAX endpoints affected
-- Pattern: `'UPDATE table SET col=' . convert_string_to_sqlsyntax($_REQUEST['val'])`
+- Pattern: `'UPDATE table SET col=' . Escaping::toSqlSyntax($_REQUEST['val'])`
 
 **Current State (2025-11-28):**
 

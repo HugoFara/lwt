@@ -9,12 +9,12 @@ use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
+use Lwt\Services\ExportService;
 use PHPUnit\Framework\TestCase;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/backend/Services/TextStatisticsService.php';
@@ -191,19 +191,19 @@ class ExportAndAnnotationTest extends TestCase
 
     public function testReplTabNlReplacesTabsAndNewlines(): void
     {
-        $this->assertEquals('hello world', replTabNl("hello\tworld"));
-        $this->assertEquals('line one line two', replTabNl("line one\nline two"));
-        $this->assertEquals('mixed tabs newlines', replTabNl("mixed\ttabs\nnewlines"));
+        $this->assertEquals('hello world', ExportService::replaceTabNewline("hello\tworld"));
+        $this->assertEquals('line one line two', ExportService::replaceTabNewline("line one\nline two"));
+        $this->assertEquals('mixed tabs newlines', ExportService::replaceTabNewline("mixed\ttabs\nnewlines"));
     }
 
     public function testReplTabNlWithEmptyString(): void
     {
-        $this->assertEquals('', replTabNl(''));
+        $this->assertEquals('', ExportService::replaceTabNewline(''));
     }
 
     public function testReplTabNlWithNormalText(): void
     {
-        $this->assertEquals('normal text', replTabNl('normal text'));
+        $this->assertEquals('normal text', ExportService::replaceTabNewline('normal text'));
     }
 
     public function testHtmlEscaping(): void

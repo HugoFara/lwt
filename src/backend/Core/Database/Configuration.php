@@ -192,8 +192,6 @@ class Configuration
     {
         // Set connection in Globals for backward compatibility
         Globals::setDbConnection($dbconnection);
-        // Also set global for legacy code during transition
-        $GLOBALS['DBCONNECTION'] = $dbconnection;
 
         if ($configuredPrefix === null) {
             $fixed_tbpref = false;

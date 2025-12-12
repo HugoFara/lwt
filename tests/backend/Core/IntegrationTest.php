@@ -13,6 +13,7 @@ use Lwt\Database\Restore;
 use Lwt\Database\Settings;
 use Lwt\Core\StringUtils;
 use Lwt\Services\DictionaryService;
+use Lwt\Services\ExportService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\MediaService;
 use Lwt\Services\TableSetService;
@@ -31,7 +32,6 @@ use function Lwt\Core\Utils\replaceSuppUnicodePlanesChar;
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
 $config = EnvLoader::getDatabaseConfig();
-$GLOBALS['dbname'] = "test_" . $config['dbname'];
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../src/backend/View/Helper/FormHelper.php';
@@ -261,10 +261,10 @@ class IntegrationTest extends TestCase
 
     public function testReplTabNl(): void
     {
-        $this->assertEquals('hello world', replTabNl("hello\tworld"));
-        $this->assertEquals('line one line two', replTabNl("line one\nline two"));
+        $this->assertEquals('hello world', ExportService::replaceTabNewline("hello\tworld"));
+        $this->assertEquals('line one line two', ExportService::replaceTabNewline("line one\nline two"));
         // Multiple whitespace is collapsed to single space
-        $this->assertEquals('test spaces', replTabNl("test\t\nspaces"));
+        $this->assertEquals('test spaces', ExportService::replaceTabNewline("test\t\nspaces"));
     }
 
     // ========== STATUS AND VALIDATION FUNCTIONS ==========
@@ -452,14 +452,14 @@ class IntegrationTest extends TestCase
 
     public function testMaskTermInSentenceV2(): void
     {
-        $result = maskTermInSentenceV2('This is a test sentence');
+        $result = ExportService::maskTermInSentenceV2('This is a test sentence');
         $this->assertIsString($result);
         $this->assertNotEmpty($result);
     }
 
     public function testMaskTermInSentence(): void
     {
-        $result = maskTermInSentence('This is a test', 'test');
+        $result = ExportService::maskTermInSentence('This is a test', 'test');
         $this->assertIsString($result);
     }
 

@@ -911,7 +911,7 @@ class TermHandler
     private function getSimilarTermsForEdit(int $langId, string $termLc, ?int $excludeId): array
     {
         $similarService = new \Lwt\Services\SimilarTermsService();
-        $similarIds = $similarService->getSimilarTerms($langId, $termLc, 10, 0.33);
+        $similarIds = $similarService->getSimilarTermsWeighted($langId, $termLc, 10, 0.33);
 
         $result = [];
         foreach ($similarIds as $termId) {
