@@ -12,6 +12,14 @@ class Endpoints
      * @var array<string, string[]> Map of endpoint patterns to allowed HTTP methods
      */
     private const ROUTES = [
+        // Auth endpoints
+        'auth' => ['GET', 'POST'],
+        'auth/login' => ['POST'],
+        'auth/register' => ['POST'],
+        'auth/refresh' => ['POST'],
+        'auth/logout' => ['POST'],
+        'auth/me' => ['GET'],
+
         'languages' => ['GET', 'POST'],
         'languages/definitions' => ['GET'],
         'languages/with-texts' => ['GET'],

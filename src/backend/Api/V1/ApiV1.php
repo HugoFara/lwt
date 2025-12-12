@@ -36,6 +36,7 @@ require_once __DIR__ . '/../../Services/LanguageService.php';
 require_once __DIR__ . '/../../Services/LanguageDefinitions.php';
 require_once __DIR__ . '/../../Services/TagService.php';
 
+use Lwt\Api\V1\Handlers\AuthHandler;
 use Lwt\Api\V1\Handlers\FeedHandler;
 use Lwt\Api\V1\Handlers\ImportHandler;
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
@@ -46,6 +47,7 @@ use Lwt\Api\V1\Handlers\SettingsHandler;
 use Lwt\Api\V1\Handlers\StatisticsHandler;
 use Lwt\Api\V1\Handlers\TermHandler;
 use Lwt\Api\V1\Handlers\TextHandler;
+use Lwt\Core\Globals;
 
 /**
  * Main API V1 handler class.
@@ -55,6 +57,7 @@ class ApiV1
     private const VERSION = "0.1.1";
     private const RELEASE_DATE = "2023-12-29";
 
+    private AuthHandler $authHandler;
     private FeedHandler $feedHandler;
     private ImportHandler $importHandler;
     private ImprovedTextHandler $improvedTextHandler;
@@ -66,8 +69,20 @@ class ApiV1
     private TermHandler $termHandler;
     private TextHandler $textHandler;
 
+    /**
+     * Endpoints that do not require authentication.
+     *
+     * @var array<string, bool>
+     */
+    private const PUBLIC_ENDPOINTS = [
+        'auth/login' => true,
+        'auth/register' => true,
+        'version' => true,
+    ];
+
     public function __construct()
     {
+        $this->authHandler = new AuthHandler();
         $this->feedHandler = new FeedHandler();
         $this->importHandler = new ImportHandler();
         $this->improvedTextHandler = new ImprovedTextHandler();
@@ -94,6 +109,11 @@ class ApiV1
         $endpoint = Endpoints::resolve($method, $uri);
         $fragments = Endpoints::parseFragments($endpoint);
 
+        // Validate authentication for protected endpoints
+        if (!$this->isPublicEndpoint($endpoint)) {
+            $this->validateAuth();
+        }
+
         if ($method === 'GET') {
             $this->handleGet($fragments, $this->parseQueryParams($uri));
         } elseif ($method === 'POST') {
@@ -106,6 +126,54 @@ class ApiV1
     }
 
     /**
+     * Check if an endpoint is public (does not require authentication).
+     *
+     * @param string $endpoint The endpoint path
+     *
+     * @return bool True if endpoint is public
+     */
+    private function isPublicEndpoint(string $endpoint): bool
+    {
+        // Check exact match
+        if (isset(self::PUBLIC_ENDPOINTS[$endpoint])) {
+            return true;
+        }
+
+        // Check if endpoint starts with 'auth/' for login/register
+        // but NOT for auth/me, auth/refresh, auth/logout which need auth
+        if ($endpoint === 'auth/login' || $endpoint === 'auth/register') {
+            return true;
+        }
+
+        // In non-multi-user mode, all endpoints are effectively public
+        if (!Globals::isMultiUserEnabled()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Validate authentication for the current request.
+     *
+     * Checks for Bearer token or session authentication.
+     * Responds with 401 Unauthorized if authentication fails.
+     *
+     * @return void
+     */
+    private function validateAuth(): void
+    {
+        // Skip auth validation if multi-user mode is not enabled
+        if (!Globals::isMultiUserEnabled()) {
+            return;
+        }
+
+        if (!$this->authHandler->isAuthenticated()) {
+            Response::error('Authentication required', 401);
+        }
+    }
+
+    /**
      * Handle GET requests.
      *
      * @param string[] $fragments Endpoint path segments
@@ -114,6 +182,10 @@ class ApiV1
     private function handleGet(array $fragments, array $params): void
     {
         switch ($fragments[0]) {
+            case 'auth':
+                $this->handleAuthGet($fragments);
+                break;
+
             case 'version':
                 Response::success([
                     "version" => self::VERSION,
@@ -186,6 +258,10 @@ class ApiV1
     private function handlePost(array $fragments, array $params): void
     {
         switch ($fragments[0]) {
+            case 'auth':
+                $this->handleAuthPost($fragments, $params);
+                break;
+
             case 'settings':
                 Response::success($this->settingsHandler->formatSaveSetting(
                     $params['key'],
@@ -246,6 +322,57 @@ class ApiV1
         }
 
         Response::error('Language ID (Integer) Expected', 404);
+    }
+
+    // =========================================================================
+    // Auth Request Handlers
+    // =========================================================================
+
+    /**
+     * Handle GET requests for auth endpoints.
+     *
+     * @param string[] $fragments Endpoint path segments
+     */
+    private function handleAuthGet(array $fragments): void
+    {
+        switch ($fragments[1] ?? '') {
+            case 'me':
+                // GET /auth/me - get current user info
+                Response::success($this->authHandler->formatMe());
+                break;
+            default:
+                Response::error('Endpoint Not Found: auth/' . ($fragments[1] ?? ''), 404);
+        }
+    }
+
+    /**
+     * Handle POST requests for auth endpoints.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    POST parameters
+     */
+    private function handleAuthPost(array $fragments, array $params): void
+    {
+        switch ($fragments[1] ?? '') {
+            case 'login':
+                // POST /auth/login - authenticate user
+                Response::success($this->authHandler->formatLogin($params));
+                break;
+            case 'register':
+                // POST /auth/register - create new user
+                Response::success($this->authHandler->formatRegister($params));
+                break;
+            case 'refresh':
+                // POST /auth/refresh - refresh API token
+                Response::success($this->authHandler->formatRefresh());
+                break;
+            case 'logout':
+                // POST /auth/logout - invalidate token and logout
+                Response::success($this->authHandler->formatLogout());
+                break;
+            default:
+                Response::error('Endpoint Not Found: auth/' . ($fragments[1] ?? ''), 404);
+        }
     }
 
     // =========================================================================
