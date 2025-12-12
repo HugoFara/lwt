@@ -2,8 +2,10 @@
 namespace Tests\Router;
 
 require_once __DIR__ . '/../../../src/backend/Router/Router.php';
+require_once __DIR__ . '/../../../src/backend/Router/Middleware/MiddlewareInterface.php';
 
 use Lwt\Router\Router;
+use Lwt\Router\Middleware\MiddlewareInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -337,5 +339,118 @@ class RouterTest extends TestCase
 
         // Should default to /
         $this->assertEquals('handler', $result['type']);
+    }
+
+    // ==================== MIDDLEWARE TESTS ====================
+
+    public function testRegisterWithMiddleware(): void
+    {
+        $this->router->registerWithMiddleware(
+            '/protected',
+            'handler.php',
+            ['TestMiddleware']
+        );
+
+        $result = $this->simulateRequest('/protected');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('handler.php', $result['handler']);
+        $this->assertArrayHasKey('middleware', $result);
+        $this->assertContains('TestMiddleware', $result['middleware']);
+    }
+
+    public function testRegisterWithMiddlewareMultiple(): void
+    {
+        $middleware = ['AuthMiddleware', 'LoggingMiddleware'];
+        $this->router->registerWithMiddleware(
+            '/protected',
+            'handler.php',
+            $middleware
+        );
+
+        $result = $this->simulateRequest('/protected');
+
+        $this->assertCount(2, $result['middleware']);
+        $this->assertEquals($middleware, $result['middleware']);
+    }
+
+    public function testRegisterWithMiddlewareMethod(): void
+    {
+        $this->router->registerWithMiddleware(
+            '/protected',
+            'get_handler.php',
+            ['AuthMiddleware'],
+            'GET'
+        );
+        $this->router->registerWithMiddleware(
+            '/protected',
+            'post_handler.php',
+            ['AdminMiddleware'],
+            'POST'
+        );
+
+        $getResult = $this->simulateRequest('/protected', 'GET');
+        $this->assertEquals('get_handler.php', $getResult['handler']);
+        $this->assertContains('AuthMiddleware', $getResult['middleware']);
+
+        $postResult = $this->simulateRequest('/protected', 'POST');
+        $this->assertEquals('post_handler.php', $postResult['handler']);
+        $this->assertContains('AdminMiddleware', $postResult['middleware']);
+    }
+
+    public function testRouteWithoutMiddlewareHasEmptyMiddlewareArray(): void
+    {
+        $this->router->register('/public', 'handler.php');
+
+        $result = $this->simulateRequest('/public');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertArrayHasKey('middleware', $result);
+        $this->assertEmpty($result['middleware']);
+    }
+
+    public function testRegisterPrefixWithMiddleware(): void
+    {
+        $this->router->registerPrefixWithMiddleware(
+            '/api',
+            'ApiHandler@handle',
+            ['ApiAuthMiddleware']
+        );
+
+        $result = $this->simulateRequest('/api/users');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('ApiHandler@handle', $result['handler']);
+        $this->assertContains('ApiAuthMiddleware', $result['middleware']);
+    }
+
+    public function testPatternRouteWithMiddleware(): void
+    {
+        $this->router->registerWithMiddleware(
+            '/user/{id}',
+            'UserController@show',
+            ['AuthMiddleware']
+        );
+
+        $result = $this->simulateRequest('/user/123');
+
+        $this->assertEquals('handler', $result['type']);
+        $this->assertEquals('UserController@show', $result['handler']);
+        $this->assertEquals('123', $result['params']['id']);
+        $this->assertContains('AuthMiddleware', $result['middleware']);
+    }
+
+    public function testMiddlewareNotIncludedForNotFoundRoute(): void
+    {
+        $this->router->registerWithMiddleware(
+            '/protected',
+            'handler.php',
+            ['AuthMiddleware']
+        );
+
+        $result = $this->simulateRequest('/nonexistent');
+
+        $this->assertEquals('not_found', $result['type']);
+        $this->assertArrayNotHasKey('middleware', $result);
     }
 }

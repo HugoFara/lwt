@@ -14,6 +14,8 @@
 
 namespace Lwt\Router;
 
+use Lwt\Router\Middleware\MiddlewareInterface;
+
 /**
  * Simple Router for LWT Front Controller
  *
@@ -32,6 +34,22 @@ class Router
     private array $prefixRoutes = [];
 
     /**
+     * Middleware stack for routes.
+     *
+     * Structure: ['path' => ['method' => [middleware1, middleware2, ...]]]
+     *
+     * @var array<string, array<string, array<MiddlewareInterface|string>>>
+     */
+    private array $middleware = [];
+
+    /**
+     * Middleware stack for prefix routes.
+     *
+     * @var array<string, array<string, array<MiddlewareInterface|string>>>
+     */
+    private array $prefixMiddleware = [];
+
+    /**
      * Register a route
      *
      * @param string $path    The URL path
@@ -43,6 +61,26 @@ class Router
     public function register(string $path, string $handler, string $method = '*'): void
     {
         $this->routes[$path][$method] = $handler;
+    }
+
+    /**
+     * Register a route with middleware.
+     *
+     * @param string $path       The URL path
+     * @param string $handler    The handler (file path or controller@method)
+     * @param array  $middleware Array of middleware class names or instances
+     * @param string $method     HTTP method (GET, POST, or *)
+     *
+     * @return void
+     */
+    public function registerWithMiddleware(
+        string $path,
+        string $handler,
+        array $middleware,
+        string $method = '*'
+    ): void {
+        $this->routes[$path][$method] = $handler;
+        $this->middleware[$path][$method] = $middleware;
     }
 
     /**
@@ -63,11 +101,31 @@ class Router
     }
 
     /**
+     * Register a prefix route with middleware.
+     *
+     * @param string $prefix     The URL prefix (e.g., '/api/v1')
+     * @param string $handler    The handler (file path or method)
+     * @param array  $middleware Array of middleware class names or instances
+     * @param string $method     HTTP method (GET, POST, or *)
+     *
+     * @return void
+     */
+    public function registerPrefixWithMiddleware(
+        string $prefix,
+        string $handler,
+        array $middleware,
+        string $method = '*'
+    ): void {
+        $this->prefixRoutes[$prefix][$method] = $handler;
+        $this->prefixMiddleware[$prefix][$method] = $middleware;
+    }
+
+    /**
      * Resolve the current request to a handler
      *
      * @return (((array|string)[]|string)[]|int|mixed|string)[]
      *
-     * @psalm-return array{type: 'handler'|'not_found'|'redirect'|'static', path?: string, url?: string, code?: 301, handler?: mixed, params?: array<array<int|string, array<int|string, mixed>|string>|string>, file?: string, mime?: string}
+     * @psalm-return array{type: 'handler'|'not_found'|'redirect'|'static', path?: string, url?: string, code?: 301, handler?: mixed, params?: array<array<int|string, array<int|string, mixed>|string>|string>, file?: string, mime?: string, middleware?: array}
      */
     public function resolve(): array
     {
@@ -111,16 +169,20 @@ class Router
 
             // Check specific method first, then wildcard
             if (isset($methodRoutes[$requestMethod])) {
+                $middleware = $this->middleware[$path][$requestMethod] ?? [];
                 return [
                     'type' => 'handler',
                     'handler' => $methodRoutes[$requestMethod],
-                    'params' => $_GET
+                    'params' => $_GET,
+                    'middleware' => $middleware,
                 ];
             } elseif (isset($methodRoutes['*'])) {
+                $middleware = $this->middleware[$path]['*'] ?? [];
                 return [
                     'type' => 'handler',
                     'handler' => $methodRoutes['*'],
-                    'params' => $_GET
+                    'params' => $_GET,
+                    'middleware' => $middleware,
                 ];
             }
         }
@@ -132,13 +194,20 @@ class Router
                 array_shift($matches); // Remove full match
 
                 $methodRoutes = $methods;
-                $handler = $methodRoutes[$requestMethod] ?? $methodRoutes['*'] ?? null;
+                $matchedMethod = isset($methodRoutes[$requestMethod])
+                    ? $requestMethod
+                    : (isset($methodRoutes['*']) ? '*' : null);
+                $handler = $matchedMethod !== null
+                    ? $methodRoutes[$matchedMethod]
+                    : null;
 
                 if ($handler) {
+                    $middleware = $this->middleware[$pattern][$matchedMethod] ?? [];
                     return [
                         'type' => 'handler',
                         'handler' => $handler,
-                        'params' => array_merge($_GET, $matches)
+                        'params' => array_merge($_GET, $matches),
+                        'middleware' => $middleware,
                     ];
                 }
             }
@@ -147,12 +216,20 @@ class Router
         // Try prefix matching (for API routes that handle multiple sub-paths)
         foreach ($this->prefixRoutes as $prefix => $methods) {
             if (str_starts_with($path, $prefix)) {
-                $handler = $methods[$requestMethod] ?? $methods['*'] ?? null;
+                $matchedMethod = isset($methods[$requestMethod])
+                    ? $requestMethod
+                    : (isset($methods['*']) ? '*' : null);
+                $handler = $matchedMethod !== null
+                    ? $methods[$matchedMethod]
+                    : null;
+
                 if ($handler) {
+                    $middleware = $this->prefixMiddleware[$prefix][$matchedMethod] ?? [];
                     return [
                         'type' => 'handler',
                         'handler' => $handler,
-                        'params' => $_GET
+                        'params' => $_GET,
+                        'middleware' => $middleware,
                     ];
                 }
             }
@@ -324,6 +401,13 @@ class Router
                 break;
 
             case 'handler':
+                // Execute middleware chain first
+                $middleware = $resolution['middleware'] ?? [];
+                if (!$this->executeMiddleware($middleware)) {
+                    // Middleware halted the request
+                    return;
+                }
+
                 $this->executeHandler(
                     $resolution['handler'],
                     $resolution['params']
@@ -338,6 +422,58 @@ class Router
                     "Unknown resolution type: {$resolution['type']}"
                 );
         }
+    }
+
+    /**
+     * Execute the middleware chain.
+     *
+     * @param array $middlewareList List of middleware class names or instances
+     *
+     * @return bool True if all middleware passed, false if halted
+     */
+    private function executeMiddleware(array $middlewareList): bool
+    {
+        foreach ($middlewareList as $middleware) {
+            $instance = $this->resolveMiddleware($middleware);
+            if (!$instance->handle()) {
+                // Middleware halted the request
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Resolve a middleware to an instance.
+     *
+     * @param MiddlewareInterface|string $middleware Middleware instance or class name
+     *
+     * @return MiddlewareInterface The resolved middleware instance
+     *
+     * @throws \RuntimeException If middleware class not found or invalid
+     */
+    private function resolveMiddleware(
+        MiddlewareInterface|string $middleware
+    ): MiddlewareInterface {
+        // Already an instance
+        if ($middleware instanceof MiddlewareInterface) {
+            return $middleware;
+        }
+
+        // It's a class name - instantiate it
+        if (!class_exists($middleware)) {
+            throw new \RuntimeException("Middleware class not found: {$middleware}");
+        }
+
+        $instance = new $middleware();
+
+        if (!$instance instanceof MiddlewareInterface) {
+            throw new \RuntimeException(
+                "Middleware must implement MiddlewareInterface: {$middleware}"
+            );
+        }
+
+        return $instance;
     }
 
     /**
