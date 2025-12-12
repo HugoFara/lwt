@@ -16,6 +16,8 @@
 namespace Lwt\Database;
 
 require_once __DIR__ . '/../../Services/WordStatusService.php';
+require_once __DIR__ . '/../../Services/TableSetService.php';
+require_once __DIR__ . '/PrefixMigration.php';
 
 use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;
@@ -93,6 +95,123 @@ class Migrations
     }
 
     /**
+     * Get list of all migration files from the migrations directory.
+     *
+     * @return array<string> Sorted list of migration filenames
+     */
+    public static function getMigrationFiles(): array
+    {
+        $migrationsDir = __DIR__ . '/../../../../db/migrations/';
+        $files = glob($migrationsDir . '*.sql');
+        if ($files === false) {
+            return [];
+        }
+        // Extract just the filenames and sort them
+        $filenames = array_map('basename', $files);
+        sort($filenames);
+        return $filenames;
+    }
+
+    /**
+     * Get list of migrations that have already been applied.
+     *
+     * @return array<string> List of applied migration filenames
+     */
+    public static function getAppliedMigrations(): array
+    {
+        try {
+            $rows = Connection::fetchAll("SELECT filename FROM _migrations");
+            return array_column($rows, 'filename');
+        } catch (\RuntimeException $e) {
+            // Table doesn't exist yet
+            return [];
+        }
+    }
+
+    /**
+     * Record a migration as applied.
+     *
+     * @param string $filename The migration filename
+     *
+     * @return void
+     */
+    public static function recordMigration(string $filename): void
+    {
+        Connection::preparedExecute(
+            "INSERT IGNORE INTO _migrations (filename, applied_at) VALUES (?, NOW())",
+            [$filename]
+        );
+    }
+
+    /**
+     * Upgrade the _migrations table from old schema to new schema.
+     *
+     * Old schema stored migrations to be run; new schema tracks applied migrations.
+     * This method adds the applied_at column and marks all existing entries as applied.
+     *
+     * @return void
+     */
+    public static function upgradeMigrationsTable(): void
+    {
+        // Check if applied_at column exists
+        $dbname = Globals::getDatabaseName();
+        $columns = Connection::preparedFetchAll(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = '_migrations'",
+            [$dbname]
+        );
+        $columnNames = array_column($columns, 'COLUMN_NAME');
+
+        if (!in_array('applied_at', $columnNames)) {
+            // Add applied_at column
+            Connection::execute(
+                "ALTER TABLE _migrations ADD COLUMN applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            );
+            if (Globals::isDebug()) {
+                echo "<p>DEBUG: Upgraded _migrations table schema</p>";
+            }
+        }
+    }
+
+    /**
+     * Run prefix-to-user migration if there are prefixed table sets.
+     *
+     * This converts old prefix-based multi-project data (e.g., "john_languages")
+     * to the new user_id-based multi-user system.
+     *
+     * @return void
+     */
+    public static function runPrefixMigration(): void
+    {
+        // Check if there are any prefixed table sets to migrate
+        $prefixes = \Lwt\Services\TableSetService::getAllPrefixes();
+
+        if (empty($prefixes)) {
+            if (Globals::isDebug()) {
+                echo "<p>DEBUG: No prefixed table sets found. Skipping prefix migration.</p>";
+            }
+            return;
+        }
+
+        if (Globals::isDebug()) {
+            echo "<p>DEBUG: Found " . count($prefixes) . " prefixed table set(s) to migrate: "
+                . implode(', ', $prefixes) . "</p>";
+        }
+
+        // Run the prefix migration
+        $migration = new PrefixMigration(Globals::isDebug());
+        $result = $migration->migrate(false); // Don't drop tables automatically
+
+        if (Globals::isDebug()) {
+            echo "<p>DEBUG: Prefix migration complete. Migrated "
+                . $result['prefixes_migrated'] . " prefix(es).</p>";
+            if (!empty($result['errors'])) {
+                echo "<p>DEBUG: Migration errors: " . implode(', ', $result['errors']) . "</p>";
+            }
+        }
+    }
+
+    /**
      * Update the database if it is using an outdate version.
      *
      * @return void
@@ -153,19 +272,27 @@ class Migrations
                 echo "<p>DEBUG: do DB updates: $dbversion --&gt; $currversion</p>";
             }
 
-            $migrations = Connection::fetchAll("SELECT filename FROM _migrations");
-            foreach ($migrations as $record) {
+            // Get pending migrations (not yet applied)
+            $allMigrations = self::getMigrationFiles();
+            $appliedMigrations = self::getAppliedMigrations();
+            $pendingMigrations = array_diff($allMigrations, $appliedMigrations);
+
+            foreach ($pendingMigrations as $filename) {
+                if (Globals::isDebug()) {
+                    echo "<p>DEBUG: Running migration: $filename</p>";
+                }
                 $queries = SqlFileParser::parseFile(
-                    __DIR__ . '/../../../../db/migrations/' . $record["filename"]
+                    __DIR__ . '/../../../../db/migrations/' . $filename
                 );
                 foreach ($queries as $sql_query) {
-                    try {
-                        Connection::execute($sql_query);
-                    } catch (\RuntimeException $e) {
-                        // Ignore errors in migration queries (they may already be applied)
-                    }
+                    Connection::execute($sql_query);
                 }
+                // Record migration as applied
+                self::recordMigration($filename);
             }
+
+            // Run prefix-to-user migration if there are prefixed table sets
+            self::runPrefixMigration();
 
             if (Globals::isDebug()) {
                 echo '<p>DEBUG: rebuilding tts</p>';
@@ -225,6 +352,9 @@ class Migrations
                 $count += (int) Connection::execute($prefixed_query);
             }
         }
+
+        // Ensure _migrations table has the new schema with applied_at column
+        self::upgradeMigrationsTable();
 
         // Update the database (if necessary)
         self::update();

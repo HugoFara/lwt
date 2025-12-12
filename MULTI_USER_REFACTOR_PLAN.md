@@ -42,6 +42,7 @@ CREATE TABLE users (
 **New file**: `db/migrations/YYYYMMDD_HHMMSS_add_user_id_columns.sql`
 
 Add to primary ownership tables:
+
 | Table | New Column | Index |
 |-------|------------|-------|
 | `languages` | `LgUsID int(10) unsigned` | `KEY LgUsID` |
@@ -54,6 +55,7 @@ Add to primary ownership tables:
 | `settings` | `StUsID int(10) unsigned` | Composite PK `(StKey, StUsID)` |
 
 **NOT modified** (inherit user context via FK):
+
 - `sentences` (via `SeTxID` → texts)
 - `textitems2` (via `Ti2TxID` → texts)
 - `wordtags` (via `WtWoID` → words)
@@ -77,6 +79,7 @@ Add to primary ownership tables:
 **Modify**: `src/backend/Core/Globals.php`
 
 Add:
+
 ```php
 private static ?int $currentUserId = null;
 
@@ -98,6 +101,7 @@ Properties: `id`, `username`, `email`, `passwordHash`, `apiToken`, `wordPressId`
 ### 3.1 Auth Services
 
 **New file**: `src/backend/Services/AuthService.php`
+
 - `register(username, email, password): User`
 - `login(usernameOrEmail, password): ?User`
 - `logout(): void`
@@ -109,6 +113,7 @@ Properties: `id`, `username`, `email`, `passwordHash`, `apiToken`, `wordPressId`
 - `findOrCreateWordPressUser(wpUserId): User`
 
 **New file**: `src/backend/Services/PasswordService.php`
+
 - `hash(password): string` (using Argon2ID)
 - `verify(password, hash): bool`
 - `needsRehash(hash): bool`
@@ -116,6 +121,7 @@ Properties: `id`, `username`, `email`, `passwordHash`, `apiToken`, `wordPressId`
 ### 3.2 Auth Controller
 
 **New file**: `src/backend/Controllers/AuthController.php`
+
 - `loginForm()` - GET /login
 - `login()` - POST /login
 - `registerForm()` - GET /register
@@ -125,6 +131,7 @@ Properties: `id`, `username`, `email`, `passwordHash`, `apiToken`, `wordPressId`
 ### 3.3 Auth Views
 
 **New files**:
+
 - `src/backend/Views/Auth/login.php`
 - `src/backend/Views/Auth/register.php`
 
@@ -150,6 +157,7 @@ public function handle(): bool
 **Modify**: `src/backend/Router/Router.php`
 
 Add:
+
 - `registerWithMiddleware(path, handler, middlewareArray, method)`
 - Execute middleware chain before controller in `execute()`
 
@@ -213,6 +221,7 @@ For services using raw SQL - helper to add user_id conditions.
 ### 6.1 API Auth Handler
 
 **New file**: `src/backend/Api/V1/Handlers/AuthHandler.php`
+
 - `POST /api/v1/auth/login` - Returns token
 - `POST /api/v1/auth/register` - Creates user, returns token
 - `POST /api/v1/auth/refresh` - Refresh token
@@ -233,6 +242,7 @@ For services using raw SQL - helper to add user_id conditions.
 **Modify**: `src/backend/Services/WordPressService.php`
 
 Update `handleStart()`:
+
 1. Authenticate with WordPress (existing)
 2. Get WordPress user ID
 3. Call `AuthService::findOrCreateWordPressUser(wpUserId)`
@@ -249,6 +259,7 @@ This links WordPress users to LWT users while maintaining existing WP auth flow.
 **New file**: `db/migrations/YYYYMMDD_HHMMSS_migrate_prefix_data.php`
 
 Strategy:
+
 1. Find all existing table prefixes (scan `_lwtgeneral` or look for `*_settings` tables)
 2. For each prefix:
    - Create user account (username from prefix, or link to WP user if available)
@@ -259,12 +270,14 @@ Strategy:
 ### 8.2 Backward Compatibility Flag
 
 **Modify**: `.env.example`
+
 ```
 # Set to true after migration is complete
 MULTI_USER_ENABLED=false
 ```
 
 **Modify**: `src/backend/Core/Globals.php`
+
 ```php
 public static function isMultiUserEnabled(): bool
 ```
@@ -291,16 +304,19 @@ Services needing updates for user context:
 ## Phase 10: Testing
 
 ### Unit Tests
+
 - `tests/backend/Services/AuthServiceTest.php`
 - `tests/backend/Services/PasswordServiceTest.php`
 - `tests/backend/Core/Database/QueryBuilderUserScopeTest.php`
 
 ### Integration Tests
+
 - User isolation (User A can't see User B's data)
 - WordPress user linking
 - API token auth flow
 
 ### E2E Tests
+
 - Login/logout flow
 - Registration flow
 - Data isolation verification

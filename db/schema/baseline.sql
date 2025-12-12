@@ -1,25 +1,12 @@
 -- Basefile to install LWT
 
--- Migration files to update the database
-DROP TABLE IF EXISTS _migrations;
--- Redundant but necessary "IF NOT EXISTS" because this file will be read line by line.
--- Another process my have recreated _migrations
+-- Migration tracking table
+-- Migrations are discovered from db/migrations/*.sql files and tracked here when applied
 CREATE TABLE IF NOT EXISTS _migrations (
 	filename VARCHAR(255) NOT NULL,
+	applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (filename)
 );
-INSERT INTO _migrations VALUES
-('19700101_000001_lwt_original.sql'),
-('19700102_000001_lwt_fork.sql'),
-('20231224_131202_missing_auto_increment.sql'),
-('20240103_120316_2.10.0-fork.sql'),
-('20251130_120000_myisam_to_innodb.sql'),
-('20251201_174538_remove_mobile_setting.sql'),
-('20251204_120000_fix_audio_uri_null.sql'),
-('20251212_000001_add_users_table.sql'),
-('20251212_000002_add_user_id_columns.sql'),
-('20251212_000003_add_foreign_keys.sql'),
-('20251212_000004_migrate_prefix_to_user.sql');
 
 -- Database definition
 

@@ -404,4 +404,134 @@ class MigrationsTest extends TestCase
         // Should match current version format (vXXXYYYZZZ)
         $this->assertMatchesRegularExpression('/^v\d{9}$/', $result, 'dbversion should match version format');
     }
+
+    // ===== New migration tracking tests =====
+
+    public function testGetMigrationFilesReturnsSortedList(): void
+    {
+        $files = Migrations::getMigrationFiles();
+
+        $this->assertIsArray($files);
+        $this->assertNotEmpty($files, 'Should find migration files in db/migrations/');
+
+        // Verify files are sorted
+        $sortedFiles = $files;
+        sort($sortedFiles);
+        $this->assertEquals($sortedFiles, $files, 'Migration files should be sorted');
+
+        // Verify all entries are SQL files
+        foreach ($files as $file) {
+            $this->assertStringEndsWith('.sql', $file, 'All migration files should be .sql');
+        }
+    }
+
+    public function testGetAppliedMigrationsReturnsArray(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $applied = Migrations::getAppliedMigrations();
+
+        $this->assertIsArray($applied);
+    }
+
+    public function testRecordMigrationTracksNewMigration(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $testFilename = 'test_migration_' . time() . '.sql';
+
+        // Record a test migration
+        Migrations::recordMigration($testFilename);
+
+        // Verify it was recorded
+        $applied = Migrations::getAppliedMigrations();
+        $this->assertContains($testFilename, $applied, 'Recorded migration should appear in applied list');
+
+        // Clean up
+        Connection::preparedExecute("DELETE FROM _migrations WHERE filename = ?", [$testFilename]);
+    }
+
+    public function testRecordMigrationIsIdempotent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $testFilename = 'test_idempotent_' . time() . '.sql';
+
+        // Record the same migration twice
+        Migrations::recordMigration($testFilename);
+        Migrations::recordMigration($testFilename);
+
+        // Should not throw an error and should only have one entry
+        $count = Connection::preparedFetchValue(
+            "SELECT COUNT(*) as value FROM _migrations WHERE filename = ?",
+            [$testFilename]
+        );
+        $this->assertEquals(1, $count, 'Recording the same migration twice should result in one entry');
+
+        // Clean up
+        Connection::preparedExecute("DELETE FROM _migrations WHERE filename = ?", [$testFilename]);
+    }
+
+    public function testUpgradeMigrationsTableAddsAppliedAtColumn(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Run upgrade (should be idempotent)
+        Migrations::upgradeMigrationsTable();
+
+        // Verify applied_at column exists
+        $dbname = Globals::getDatabaseName();
+        $columns = Connection::preparedFetchAll(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = '_migrations'",
+            [$dbname]
+        );
+        $columnNames = array_column($columns, 'COLUMN_NAME');
+
+        $this->assertContains('applied_at', $columnNames, '_migrations should have applied_at column');
+    }
+
+    public function testMigrationsOnlyRunOnce(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Get currently applied migrations
+        $appliedBefore = Migrations::getAppliedMigrations();
+
+        // Run update again
+        Migrations::update();
+
+        // Applied migrations should be the same (no new runs)
+        $appliedAfter = Migrations::getAppliedMigrations();
+
+        $this->assertEquals(
+            count($appliedBefore),
+            count($appliedAfter),
+            'Running update twice should not add new migration entries'
+        );
+    }
+
+    public function testRunPrefixMigrationIsIdempotent(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Running prefix migration multiple times should not cause errors
+        // (it checks _prefix_migration_log to avoid re-migrating)
+        Migrations::runPrefixMigration();
+        Migrations::runPrefixMigration();
+
+        $this->assertTrue(true, 'runPrefixMigration should be idempotent');
+    }
 }
