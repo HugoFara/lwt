@@ -177,6 +177,19 @@ function registerRoutes(Router $router): void
     // Save setting and redirect
     $router->register('/admin/save-setting', 'AdminController@saveSetting');
 
+    // ==================== AUTHENTICATION ROUTES ====================
+
+    // Login
+    $router->register('/login', 'AuthController@loginForm', 'GET');
+    $router->register('/login', 'AuthController@login', 'POST');
+
+    // Registration
+    $router->register('/register', 'AuthController@registerForm', 'GET');
+    $router->register('/register', 'AuthController@register', 'POST');
+
+    // Logout
+    $router->register('/logout', 'AuthController@logout');
+
     // ==================== WORDPRESS INTEGRATION ====================
 
     $router->register('/wordpress/start', 'WordPressController@start');
