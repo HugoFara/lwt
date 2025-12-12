@@ -267,8 +267,7 @@ class EnvLoader
      *     userid: string,
      *     passwd: string,
      *     dbname: string,
-     *     socket: string,
-     *     tbpref: string|null
+     *     socket: string
      * }
      */
     public static function getDatabaseConfig(): array
@@ -279,7 +278,6 @@ class EnvLoader
             'passwd' => self::get('DB_PASSWORD', '') ?? '',
             'dbname' => self::get('DB_NAME', 'learning-with-texts') ?? 'learning-with-texts',
             'socket' => self::get('DB_SOCKET', '') ?? '',
-            'tbpref' => self::get('DB_TABLE_PREFIX'),
         ];
     }
 }

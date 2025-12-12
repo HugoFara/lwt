@@ -14,8 +14,7 @@
 
 namespace Lwt\Services;
 
-use Lwt\Core\Globals;
-use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 
 /**
  * Service class for dictionary link operations.
@@ -91,16 +90,14 @@ class DictionaryService
      */
     public function createDictLinksInEditWin(int $lang, string $word, string $sentctlid, bool $openfirst): string
     {
-        $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-        FROM ' . Globals::getTablePrefix() . 'languages
-        WHERE LgID = ' . $lang;
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
+        $record = QueryBuilder::table('languages')
+            ->select(['LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI'])
+            ->where('LgID', '=', $lang)
+            ->firstPrepared();
         $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
         $wb2 = isset($record['LgDict2URI']) ? (string) $record['LgDict2URI'] : "";
         $wb3 = isset($record['LgGoogleTranslateURI']) ?
         (string) $record['LgGoogleTranslateURI'] : "";
-        mysqli_free_result($res);
         $r = '';
         $dictUrl = self::createTheDictLink($wb1, $word);
         if ($openfirst) {
@@ -221,10 +218,10 @@ class DictionaryService
      */
     public function createDictLinksInEditWin2(int $lang, string $sentctlid, string $wordctlid): string
     {
-        $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-        FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lang";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
+        $record = QueryBuilder::table('languages')
+            ->select(['LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI'])
+            ->where('LgID', '=', $lang)
+            ->firstPrepared();
         $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
         if (substr($wb1, 0, 1) == '*') {
             $wb1 = substr($wb1, 1);
@@ -238,7 +235,6 @@ class DictionaryService
         if (substr($wb3, 0, 1) == '*') {
             $wb3 = substr($wb3, 1);
         }
-        mysqli_free_result($res);
 
         $r = 'Lookup Term:
         <span class="click" data-action="translate-word-popup" ' .
@@ -273,10 +269,10 @@ class DictionaryService
      */
     public function makeDictLinks(int $lang, string $word): string
     {
-        $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-        FROM ' . Globals::getTablePrefix() . 'languages WHERE LgID = ' . $lang;
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
+        $record = QueryBuilder::table('languages')
+            ->select(['LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI'])
+            ->where('LgID', '=', $lang)
+            ->firstPrepared();
         $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
         if (substr($wb1, 0, 1) == '*') {
             $wb1 = substr($wb1, 1);
@@ -290,7 +286,6 @@ class DictionaryService
         if (substr($wb3, 0, 1) == '*') {
             $wb3 = substr($wb3, 1);
         }
-        mysqli_free_result($res);
         $escapedWord = htmlspecialchars($word, ENT_QUOTES, 'UTF-8');
         $r = '<span class="smaller">';
         $r .= '<span class="click" data-action="translate-word-direct" ' .
@@ -321,10 +316,10 @@ class DictionaryService
      */
     public function createDictLinksInEditWin3(int $lang, string $sentctlid, string $wordctlid): string
     {
-        $sql = "SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-        FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lang";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
+        $record = QueryBuilder::table('languages')
+            ->select(['LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI'])
+            ->where('LgID', '=', $lang)
+            ->firstPrepared();
 
         $wb1 = isset($record['LgDict1URI']) ? (string) $record['LgDict1URI'] : "";
         $popup1 = false;
@@ -361,7 +356,6 @@ class DictionaryService
         $sentUrl = (str_ends_with($parsed_url['path'] ?? '', "/ggl.php")) ?
             str_replace('?', '?sent=1&', $wb3) : $wb3;
 
-        mysqli_free_result($res);
         $r = '';
         $r .= 'Lookup Term: ';
         $action1 = $popup1 ? 'translate-word-popup' : 'translate-word';
@@ -400,11 +394,10 @@ class DictionaryService
      */
     public function getLanguageDictionaries(int $langId): array
     {
-        $sql = 'SELECT LgDict1URI, LgDict2URI, LgGoogleTranslateURI
-        FROM ' . Globals::getTablePrefix() . 'languages WHERE LgID = ' . $langId;
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = QueryBuilder::table('languages')
+            ->select(['LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI'])
+            ->where('LgID', '=', $langId)
+            ->firstPrepared();
 
         return [
             'dict1' => $record['LgDict1URI'] ?? '',

@@ -17,7 +17,9 @@ namespace Lwt\Services;
 use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
+use Lwt\Database\UserScopedQuery;
 
 require_once __DIR__ . '/WordStatusService.php';
 require_once __DIR__ . '/ExportService.php';
@@ -97,9 +99,11 @@ class TestService
             case 'words':
                 // Test words in a list of words ID
                 $idString = implode(",", $selection);
-                $testsql = " " . Globals::getTablePrefix() . "words WHERE WoID IN ($idString) ";
+                $testsql = " words WHERE WoID IN ($idString) ";
+                $bindings = [];
                 $cntlang = Connection::fetchValue(
                     "SELECT COUNT(DISTINCT WoLgID) AS value FROM $testsql"
+                        . UserScopedQuery::forTablePrepared('words', $bindings)
                 );
                 if ($cntlang > 1) {
                     echo "<p>Sorry - The selected terms are in $cntlang languages," .
@@ -110,10 +114,12 @@ class TestService
             case 'texts':
                 // Test text items from a list of texts ID
                 $idString = implode(",", $selection);
-                $testsql = " " . Globals::getTablePrefix() . "words, " . Globals::getTablePrefix() . "textitems2
+                $testsql = " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($idString) ";
+                $bindings = [];
                 $cntlang = Connection::fetchValue(
                     "SELECT COUNT(DISTINCT WoLgID) AS value FROM $testsql"
+                        . UserScopedQuery::forTablePrepared('words', $bindings)
                 );
                 if ($cntlang > 1) {
                     echo "<p>Sorry - The selected terms are in $cntlang languages," .
@@ -123,11 +129,11 @@ class TestService
                 break;
             case 'lang':
                 // Test words from a specific language
-                $testsql = " " . Globals::getTablePrefix() . "words WHERE WoLgID = $selection ";
+                $testsql = " words WHERE WoLgID = $selection ";
                 break;
             case 'text':
                 // Test text items from a specific text ID
-                $testsql = " " . Globals::getTablePrefix() . "words, " . Globals::getTablePrefix() . "textitems2
+                $testsql = " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $selection ";
                 break;
             default:
@@ -182,19 +188,19 @@ class TestService
         ?string $testsql = null
     ): string {
         if ($lang !== null) {
-            $name = Connection::fetchValue(
-                "SELECT LgName AS value FROM " . Globals::getTablePrefix() . "languages
-                WHERE LgID = $lang LIMIT 1"
-            );
+            $name = QueryBuilder::table('languages')
+                ->where('LgID', '=', $lang)
+                ->valuePrepared('LgName');
             return $name !== null ? (string) $name : 'L2';
         }
 
         if ($text !== null) {
-            $name = Connection::fetchValue(
-                "SELECT LgName AS value FROM " . Globals::getTablePrefix() . "texts
-                JOIN " . Globals::getTablePrefix() . "languages ON TxLgID = LgID
-                WHERE TxID = $text LIMIT 1"
-            );
+            $row = QueryBuilder::table('texts')
+                ->select(['LgName'])
+                ->join('languages', 'TxLgID', '=', 'LgID')
+                ->where('TxID', '=', $text)
+                ->firstPrepared();
+            $name = $row['LgName'] ?? null;
             return $name !== null ? (string) $name : 'L2';
         }
 
@@ -203,10 +209,13 @@ class TestService
             if ($testSqlProjection !== null) {
                 $validation = $this->validateTestSelection($testSqlProjection);
                 if ($validation['langCount'] == 1) {
-                    $name = Connection::fetchValue(
+                    $bindings = [];
+                    $name = Connection::preparedFetchValue(
                         "SELECT LgName AS value
-                        FROM " . Globals::getTablePrefix() . "languages, {$testSqlProjection} AND LgID = WoLgID
-                        LIMIT 1"
+                        FROM languages, {$testSqlProjection} AND LgID = WoLgID"
+                        . UserScopedQuery::forTablePrepared('words', $bindings) . "
+                        LIMIT 1",
+                        $bindings
                     );
                     return $name !== null ? (string) $name : 'L2';
                 }
@@ -334,18 +343,20 @@ class TestService
     public function getSentenceForWord(int $wordId, string $wordlc): array
     {
         // Find sentence with at least 70% known words
+        // This is a complex query with subqueries - using raw SQL
+        // textitems2 inherits user context via Ti2TxID -> texts FK, so no user_id needed
         $sql = "SELECT DISTINCT ti.Ti2SeID AS SeID,
             1 - IFNULL(sUnknownCount.c, 0) / sWordCount.c AS KnownRatio
-            FROM " . Globals::getTablePrefix() . "textitems2 ti
+            FROM textitems2 ti
             JOIN (
                 SELECT t.Ti2SeID, COUNT(*) AS c
-                FROM " . Globals::getTablePrefix() . "textitems2 t
+                FROM textitems2 t
                 WHERE t.Ti2WordCount = 1
                 GROUP BY t.Ti2SeID
             ) AS sWordCount ON sWordCount.Ti2SeID = ti.Ti2SeID
             LEFT JOIN (
                 SELECT t.Ti2SeID, COUNT(*) AS c
-                FROM " . Globals::getTablePrefix() . "textitems2 t
+                FROM textitems2 t
                 WHERE t.Ti2WordCount = 1 AND t.Ti2WoID = 0
                 GROUP BY t.Ti2SeID
             ) AS sUnknownCount ON sUnknownCount.Ti2SeID = ti.Ti2SeID
@@ -377,14 +388,12 @@ class TestService
      */
     public function getLanguageSettings(int $langId): array
     {
-        $sql = "SELECT LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
-            LgTextSize, LgRemoveSpaces, LgRegexpWordCharacters, LgRightToLeft,
-            LgTTSVoiceAPI
-            FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $langId";
-
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = QueryBuilder::table('languages')
+            ->select(['LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
+                'LgTextSize', 'LgRemoveSpaces', 'LgRegexpWordCharacters', 'LgRightToLeft',
+                'LgTTSVoiceAPI'])
+            ->where('LgID', '=', $langId)
+            ->firstPrepared();
 
         if (!$record) {
             return [];
@@ -428,26 +437,25 @@ class TestService
      */
     public function updateWordStatus(int $wordId, int $newStatus): array
     {
-        $oldStatus = (int) Connection::fetchValue(
-            "SELECT WoStatus AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId"
-        );
+        $oldStatus = (int) QueryBuilder::table('words')
+            ->where('WoID', '=', $wordId)
+            ->valuePrepared('WoStatus');
 
-        $oldScore = (int) Connection::fetchValue(
-            "SELECT GREATEST(0, ROUND(WoTodayScore, 0)) AS value
-            FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId"
-        );
+        $oldScore = (int) QueryBuilder::table('words')
+            ->where('WoID', '=', $wordId)
+            ->valuePrepared('GREATEST(0, ROUND(WoTodayScore, 0))');
 
+        // Complex UPDATE with dynamic score calculation - use raw SQL
         Connection::execute(
-            "UPDATE " . Globals::getTablePrefix() . "words
+            "UPDATE words
             SET WoStatus = $newStatus, WoStatusChanged = NOW(), " .
             WordStatusService::makeScoreRandomInsertUpdate('u') . "
             WHERE WoID = $wordId"
         );
 
-        $newScore = (int) Connection::fetchValue(
-            "SELECT GREATEST(0, ROUND(WoTodayScore, 0)) AS value
-            FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId"
-        );
+        $newScore = (int) QueryBuilder::table('words')
+            ->where('WoID', '=', $wordId)
+            ->valuePrepared('GREATEST(0, ROUND(WoTodayScore, 0))');
 
         return [
             'oldStatus' => $oldStatus,
@@ -500,9 +508,9 @@ class TestService
      */
     public function getWordText(int $wordId): ?string
     {
-        $text = Connection::fetchValue(
-            "SELECT WoText AS value FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId"
-        );
+        $text = QueryBuilder::table('words')
+            ->where('WoID', '=', $wordId)
+            ->valuePrepared('WoText');
         return $text !== null ? (string) $text : null;
     }
 
@@ -610,35 +618,41 @@ class TestService
                 return null;
             }
 
-            $totalCount = (int) Connection::fetchValue(
+            $bindings = [];
+            $totalCount = (int) Connection::preparedFetchValue(
                 "SELECT COUNT(DISTINCT WoID) AS value FROM $testsql"
+                    . UserScopedQuery::forTablePrepared('words', $bindings),
+                $bindings
             );
             $title = 'Selected ' . $totalCount . ' Term' . ($totalCount < 2 ? '' : 's');
 
-            $langName = Connection::fetchValue(
+            $bindings = [];
+            $langName = Connection::preparedFetchValue(
                 "SELECT LgName AS value
-                FROM " . Globals::getTablePrefix() . "languages, {$testsql} AND LgID = WoLgID
-                LIMIT 1"
+                FROM languages, {$testsql} AND LgID = WoLgID"
+                . UserScopedQuery::forTablePrepared('words', $bindings) . "
+                LIMIT 1",
+                $bindings
             );
             if ($langName) {
                 $title .= ' IN ' . $langName;
             }
         } elseif ($langId !== null) {
             $property = "lang=$langId";
-            $testsql = " " . Globals::getTablePrefix() . "words WHERE WoLgID = $langId ";
+            $testsql = " words WHERE WoLgID = $langId ";
 
-            $langName = Connection::fetchValue(
-                "SELECT LgName AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $langId"
-            );
+            $langName = QueryBuilder::table('languages')
+                ->where('LgID', '=', $langId)
+                ->valuePrepared('LgName');
             $title = "All Terms in " . ($langName ?? 'Unknown');
         } elseif ($textId !== null) {
             $property = "text=$textId";
-            $testsql = " " . Globals::getTablePrefix() . "words, " . Globals::getTablePrefix() . "textitems2
+            $testsql = " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = $textId ";
 
-            $title = Connection::fetchValue(
-                "SELECT TxTitle AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textId"
-            );
+            $title = QueryBuilder::table('texts')
+                ->where('TxID', '=', $textId)
+                ->valuePrepared('TxTitle');
             $title = $title ?? 'Unknown Text';
 
             Settings::save('currenttext', (string) $textId);

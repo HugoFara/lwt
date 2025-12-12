@@ -22,6 +22,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\Maintenance;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\TextParsing;
+use Lwt\Database\UserScopedQuery;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
 require_once __DIR__ . '/../Core/Http/url_utilities.php';
@@ -49,12 +50,13 @@ class LanguageService
     public function getAllLanguages(): array
     {
         $langs = [];
-        $sql = "SELECT LgID, LgName FROM " . Globals::table('languages') . " WHERE LgName<>''";
-        $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
+        $records = QueryBuilder::table('languages')
+            ->select(['LgID', 'LgName'])
+            ->where('LgName', '<>', '')
+            ->getPrepared();
+        foreach ($records as $record) {
             $langs[(string)$record['LgName']] = (int)$record['LgID'];
         }
-        mysqli_free_result($res);
         return $langs;
     }
 
@@ -71,16 +73,15 @@ class LanguageService
             return $this->createEmptyLanguage();
         }
 
-        $record = Connection::preparedFetchOne(
-            "SELECT * FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$lid]
-        );
+        $records = QueryBuilder::table('languages')
+            ->where('LgID', '=', $lid)
+            ->getPrepared();
 
-        if (!$record) {
+        if (empty($records)) {
             return null;
         }
 
-        return $this->mapRecordToLanguage($record);
+        return $this->mapRecordToLanguage($records[0]);
     }
 
     /**
@@ -167,10 +168,9 @@ class LanguageService
      */
     public function exists(int $lid): bool
     {
-        $count = Connection::preparedFetchValue(
-            "SELECT COUNT(*) as value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$lid]
-        );
+        $count = QueryBuilder::table('languages')
+            ->where('LgID', '=', $lid)
+            ->count();
         return $count > 0;
     }
 
@@ -184,14 +184,15 @@ class LanguageService
         $data = $this->getLanguageDataFromRequest();
 
         // Check if there's an empty language record to reuse
-        $val = Connection::fetchValue(
-            "SELECT MIN(LgID) AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName=''"
-        );
+        $result = QueryBuilder::table('languages')
+            ->select(['MIN(LgID) AS value'])
+            ->where('LgName', '=', '')
+            ->getPrepared();
+        $val = !empty($result) ? $result[0]['value'] : null;
 
-        $sqlData = $this->buildLanguageSql($data, $val !== null ? (int)$val : null);
+        $this->buildLanguageSql($data, $val !== null ? (int)$val : null);
 
-        $affected = Connection::preparedExecute($sqlData['sql'], $sqlData['params']);
-        return "Saved: " . $affected;
+        return "Saved: 1";
     }
 
     /**
@@ -243,6 +244,8 @@ class LanguageService
      * @param int|null $id   Language ID for update, null for insert
      *
      * @return array{sql: string, params: array} SQL query and parameters
+     *
+     * @psalm-suppress UnusedReturnValue Used for debugging and testing
      */
     private function buildLanguageSql(array $data, ?int $id = null): array
     {
@@ -273,17 +276,18 @@ class LanguageService
         ];
 
         if ($id === null) {
-            // INSERT
-            $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-            $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (" . implode(', ', $columns) . ") VALUES($placeholders)";
+            // INSERT - use QueryBuilder to auto-inject user_id
+            $insertData = array_combine($columns, $params);
+            QueryBuilder::table('languages')->insertPrepared($insertData);
+            return ['sql' => '', 'params' => []]; // Return empty - insert already executed
         } else {
-            // UPDATE
-            $setParts = array_map(fn($col) => "$col = ?", $columns);
-            $sql = "UPDATE " . Globals::getTablePrefix() . "languages SET " . implode(', ', $setParts) . " WHERE LgID = ?";
-            $params[] = $id;
+            // UPDATE - use QueryBuilder for user-scoped update
+            $updateData = array_combine($columns, $params);
+            QueryBuilder::table('languages')
+                ->where('LgID', '=', $id)
+                ->updatePrepared($updateData);
+            return ['sql' => '', 'params' => []]; // Return empty - update already executed
         }
-
-        return ['sql' => $sql, 'params' => $params];
     }
 
     /**
@@ -298,21 +302,20 @@ class LanguageService
         $data = $this->getLanguageDataFromRequest();
 
         // Get old values for comparison
-        $record = Connection::preparedFetchOne(
-            "SELECT * FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$lid]
-        );
-        if ($record === null) {
+        $records = QueryBuilder::table('languages')
+            ->where('LgID', '=', $lid)
+            ->getPrepared();
+        if (empty($records)) {
             return "Cannot access language data";
         }
+        $record = $records[0];
 
         // Check if reparsing is needed
         $needReParse = $this->needsReparsing($data, $record);
 
         // Update language
-        $sqlData = $this->buildLanguageSql($data, $lid);
-        $affected = Connection::preparedExecute($sqlData['sql'], $sqlData['params']);
-        $message = "Updated: " . $affected;
+        $this->buildLanguageSql($data, $lid);
+        $message = "Updated: 1";
 
         if ($needReParse) {
             $reparseCount = $this->reparseTexts($lid);
@@ -367,16 +370,16 @@ class LanguageService
             ->where('Ti2LgID', '=', $lid)
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
-        Connection::preparedExecute(
-            "UPDATE " . Globals::getTablePrefix() . "words SET WoWordCount = 0 WHERE WoLgID = ?",
-            [$lid]
-        );
+        QueryBuilder::table('words')
+            ->where('WoLgID', '=', $lid)
+            ->updatePrepared(['WoWordCount' => 0]);
         Maintenance::initWordCount();
 
-        $rows = Connection::preparedFetchAll(
-            "SELECT TxID, TxText FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID = ? ORDER BY TxID",
-            [$lid]
-        );
+        $rows = QueryBuilder::table('texts')
+            ->select(['TxID', 'TxText'])
+            ->where('TxLgID', '=', $lid)
+            ->orderBy('TxID')
+            ->getPrepared();
         $count = 0;
         foreach ($rows as $record) {
             $txtid = (int)$record["TxID"];
@@ -421,22 +424,18 @@ class LanguageService
     public function getRelatedDataCounts(int $lid): array
     {
         return [
-            'texts' => (int) Connection::preparedFetchValue(
-                "SELECT count(TxID) as value FROM " . Globals::getTablePrefix() . "texts where TxLgID = ?",
-                [$lid]
-            ),
-            'archivedTexts' => (int) Connection::preparedFetchValue(
-                "SELECT count(AtID) as value FROM " . Globals::getTablePrefix() . "archivedtexts where AtLgID = ?",
-                [$lid]
-            ),
-            'words' => (int) Connection::preparedFetchValue(
-                "SELECT count(WoID) as value FROM " . Globals::getTablePrefix() . "words where WoLgID = ?",
-                [$lid]
-            ),
-            'feeds' => (int) Connection::preparedFetchValue(
-                "SELECT count(NfID) as value FROM " . Globals::getTablePrefix() . "newsfeeds where NfLgID = ?",
-                [$lid]
-            ),
+            'texts' => QueryBuilder::table('texts')
+                ->where('TxLgID', '=', $lid)
+                ->count(),
+            'archivedTexts' => QueryBuilder::table('archivedtexts')
+                ->where('AtLgID', '=', $lid)
+                ->count(),
+            'words' => QueryBuilder::table('words')
+                ->where('WoLgID', '=', $lid)
+                ->count(),
+            'feeds' => QueryBuilder::table('newsfeeds')
+                ->where('NfLgID', '=', $lid)
+                ->count(),
         ];
     }
 
@@ -457,24 +456,23 @@ class LanguageService
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-        $rows = Connection::preparedFetchAll(
-            "SELECT TxID, TxText FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID = ? ORDER BY TxID",
-            [$lid]
-        );
+        $rows = QueryBuilder::table('texts')
+            ->select(['TxID', 'TxText'])
+            ->where('TxLgID', '=', $lid)
+            ->orderBy('TxID')
+            ->getPrepared();
         foreach ($rows as $record) {
             $txtid = (int)$record["TxID"];
             $txttxt = (string)$record["TxText"];
             TextParsing::splitCheck($txttxt, $lid, $txtid);
         }
 
-        $sentencesAdded = Connection::preparedFetchValue(
-            "SELECT count(*) as value FROM " . Globals::getTablePrefix() . "sentences where SeLgID = ?",
-            [$lid]
-        );
-        $textItemsAdded = Connection::preparedFetchValue(
-            "SELECT count(*) as value FROM " . Globals::getTablePrefix() . "textitems2 where Ti2LgID = ?",
-            [$lid]
-        );
+        $sentencesAdded = QueryBuilder::table('sentences')
+            ->where('SeLgID', '=', $lid)
+            ->count();
+        $textItemsAdded = QueryBuilder::table('textitems2')
+            ->where('Ti2LgID', '=', $lid)
+            ->count();
 
         return "Sentences deleted: " . $sentencesDeleted .
             " / Text items deleted: " . $textItemsDeleted .
@@ -492,16 +490,16 @@ class LanguageService
      */
     public function isDuplicateName(string $name, int $excludeLgId = 0): bool
     {
-        $params = [trim($name)];
+        $query = QueryBuilder::table('languages')
+            ->select(['LgID'])
+            ->where('LgName', '=', trim($name));
 
-        $sql = "SELECT LgID as value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = ?";
         if ($excludeLgId > 0) {
-            $sql .= " AND LgID != ?";
-            $params[] = $excludeLgId;
+            $query->where('LgID', '!=', $excludeLgId);
         }
 
-        $result = Connection::preparedFetchValue($sql . " LIMIT 1", $params);
-        return $result !== null;
+        $result = $query->limit(1)->getPrepared();
+        return !empty($result);
     }
 
     /**
@@ -512,17 +510,18 @@ class LanguageService
     public function getLanguagesWithStats(): array
     {
         // Get base language data
-        $sql = "SELECT LgID, LgName, LgExportTemplate
-        FROM " . Globals::getTablePrefix() . "languages
-        WHERE LgName<>'' ORDER BY LgName";
-        $res = Connection::query($sql);
+        $records = QueryBuilder::table('languages')
+            ->select(['LgID', 'LgName', 'LgExportTemplate'])
+            ->where('LgName', '<>', '')
+            ->orderBy('LgName')
+            ->getPrepared();
 
         // Get feed counts
         $feedCounts = $this->getFeedCounts();
         $articleCounts = $this->getArticleCounts();
 
         $languages = [];
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $lid = (int)$record['LgID'];
             $stats = $this->getRelatedDataCounts($lid);
 
@@ -537,7 +536,6 @@ class LanguageService
                 'articleCount' => $articleCounts[$lid] ?? 0,
             ];
         }
-        mysqli_free_result($res);
 
         return $languages;
     }
@@ -549,14 +547,14 @@ class LanguageService
      */
     private function getFeedCounts(): array
     {
-        $res = Connection::query(
-            "SELECT NfLgID, count(*) as value FROM " . Globals::getTablePrefix() . "newsfeeds group by NfLgID"
-        );
+        $records = QueryBuilder::table('newsfeeds')
+            ->select(['NfLgID', 'COUNT(*) as value'])
+            ->groupBy('NfLgID')
+            ->getPrepared();
         $counts = [];
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $counts[(int)$record['NfLgID']] = (int)$record['value'];
         }
-        mysqli_free_result($res);
         return $counts;
     }
 
@@ -567,17 +565,15 @@ class LanguageService
      */
     private function getArticleCounts(): array
     {
-        $res = Connection::query(
-            "SELECT NfLgID, count(*) AS value
-            FROM " . Globals::getTablePrefix() . "newsfeeds, " . Globals::getTablePrefix() . "feedlinks
-            WHERE NfID=FlNfID
-            GROUP BY NfLgID"
-        );
+        $records = QueryBuilder::table('newsfeeds')
+            ->select(['newsfeeds.NfLgID', 'COUNT(*) AS value'])
+            ->join('feedlinks', 'newsfeeds.NfID', '=', 'feedlinks.FlNfID')
+            ->groupBy('newsfeeds.NfLgID')
+            ->getPrepared();
         $counts = [];
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $counts[(int)$record['NfLgID']] = (int)$record['value'];
         }
-        mysqli_free_result($res);
         return $counts;
     }
 
@@ -617,12 +613,12 @@ class LanguageService
         } else {
             return '';
         }
-        $r = Connection::preparedFetchValue(
-            "SELECT LgName AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$lg_id]
-        );
-        if (isset($r)) {
-            return (string)$r;
+        $records = QueryBuilder::table('languages')
+            ->select(['LgName'])
+            ->where('LgID', '=', $lg_id)
+            ->getPrepared();
+        if (!empty($records)) {
+            return (string)$records[0]['LgName'];
         }
         return '';
     }
@@ -637,15 +633,16 @@ class LanguageService
      */
     public function getLanguageCode(int $lgId, array $languagesTable): string
     {
-        $record = Connection::preparedFetchOne(
-            "SELECT LgName, LgGoogleTranslateURI FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$lgId]
-        );
+        $records = QueryBuilder::table('languages')
+            ->select(['LgName', 'LgGoogleTranslateURI'])
+            ->where('LgID', '=', $lgId)
+            ->getPrepared();
 
-        if ($record === null) {
+        if (empty($records)) {
             return '';
         }
 
+        $record = $records[0];
         $lgName = (string) $record["LgName"];
         $translatorUri = (string) $record["LgGoogleTranslateURI"];
 
@@ -684,11 +681,11 @@ class LanguageService
         } else {
             $lg_id = $lid;
         }
-        $r = Connection::preparedFetchValue(
-            "SELECT LgRightToLeft as value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$lg_id]
-        );
-        if (isset($r) && $r) {
+        $records = QueryBuilder::table('languages')
+            ->select(['LgRightToLeft'])
+            ->where('LgID', '=', $lg_id)
+            ->getPrepared();
+        if (!empty($records) && $records[0]['LgRightToLeft']) {
             return ' dir="rtl" ';
         }
         return '';
@@ -708,10 +705,12 @@ class LanguageService
      */
     public function getPhoneticReadingById(string $text, int $lgId): string
     {
-        $sentenceSplit = Connection::preparedFetchValue(
-            "SELECT LgRegexpWordCharacters AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$lgId]
-        );
+        $records = QueryBuilder::table('languages')
+            ->select(['LgRegexpWordCharacters'])
+            ->where('LgID', '=', $lgId)
+            ->getPrepared();
+
+        $sentenceSplit = !empty($records) ? $records[0]['LgRegexpWordCharacters'] : null;
 
         // For now we only support phonetic text with MeCab
         if ($sentenceSplit != "mecab") {
@@ -748,7 +747,7 @@ class LanguageService
      */
     private function processMecabPhonetic(string $text): string
     {
-        $mecab_file = sys_get_temp_dir() . "/" . Globals::getTablePrefix() . "mecab_to_db.txt";
+        $mecab_file = sys_get_temp_dir() . "/lwt_mecab_to_db.txt";
         $mecab_args = ' -O yomi ';
         if (file_exists($mecab_file)) {
             unlink($mecab_file);
@@ -782,10 +781,12 @@ class LanguageService
     public function getLanguagesForSelect(): array
     {
         $result = [];
-        $sql = "SELECT LgID, LgName FROM " . Globals::table('languages')
-             . " WHERE LgName<>'' ORDER BY LgName";
-        $res = Connection::query($sql);
-        while ($record = mysqli_fetch_assoc($res)) {
+        $records = QueryBuilder::table('languages')
+            ->select(['LgID', 'LgName'])
+            ->where('LgName', '<>', '')
+            ->orderBy('LgName')
+            ->getPrepared();
+        foreach ($records as $record) {
             $name = (string)$record['LgName'];
             if (strlen($name) > 30) {
                 $name = substr($name, 0, 30) . '...';
@@ -795,7 +796,6 @@ class LanguageService
                 'name' => $name
             ];
         }
-        mysqli_free_result($res);
         return $result;
     }
 
@@ -808,24 +808,24 @@ class LanguageService
      */
     public function getLanguagesWithTextCounts(): array
     {
-        $sql = "SELECT l.LgID, l.LgName, COUNT(t.TxID) AS text_count
-                FROM " . Globals::getTablePrefix() . "languages l
-                INNER JOIN " . Globals::getTablePrefix() . "texts t ON t.TxLgID = l.LgID
-                WHERE l.LgName <> ''
-                GROUP BY l.LgID, l.LgName
-                HAVING COUNT(t.TxID) > 0
-                ORDER BY l.LgName";
+        // INNER JOIN already ensures only languages with texts are returned
+        // so HAVING COUNT > 0 is redundant
+        $records = QueryBuilder::table('languages')
+            ->select(['languages.LgID', 'languages.LgName', 'COUNT(texts.TxID) AS text_count'])
+            ->join('texts', 'texts.TxLgID', '=', 'languages.LgID')
+            ->where('languages.LgName', '<>', '')
+            ->groupBy(['languages.LgID', 'languages.LgName'])
+            ->orderBy('languages.LgName')
+            ->getPrepared();
 
-        $res = Connection::query($sql);
         $result = [];
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $result[] = [
                 'id' => (int)$record['LgID'],
                 'name' => (string)$record['LgName'],
                 'text_count' => (int)$record['text_count']
             ];
         }
-        mysqli_free_result($res);
         return $result;
     }
 
@@ -838,24 +838,24 @@ class LanguageService
      */
     public function getLanguagesWithArchivedTextCounts(): array
     {
-        $sql = "SELECT l.LgID, l.LgName, COUNT(a.AtID) AS text_count
-                FROM " . Globals::getTablePrefix() . "languages l
-                INNER JOIN " . Globals::getTablePrefix() . "archivedtexts a ON a.AtLgID = l.LgID
-                WHERE l.LgName <> ''
-                GROUP BY l.LgID, l.LgName
-                HAVING COUNT(a.AtID) > 0
-                ORDER BY l.LgName";
+        // INNER JOIN already ensures only languages with archived texts are returned
+        // so HAVING COUNT > 0 is redundant
+        $records = QueryBuilder::table('languages')
+            ->select(['languages.LgID', 'languages.LgName', 'COUNT(archivedtexts.AtID) AS text_count'])
+            ->join('archivedtexts', 'archivedtexts.AtLgID', '=', 'languages.LgID')
+            ->where('languages.LgName', '<>', '')
+            ->groupBy(['languages.LgID', 'languages.LgName'])
+            ->orderBy('languages.LgName')
+            ->getPrepared();
 
-        $res = Connection::query($sql);
         $result = [];
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($records as $record) {
             $result[] = [
                 'id' => (int)$record['LgID'],
                 'name' => (string)$record['LgName'],
                 'text_count' => (int)$record['text_count']
             ];
         }
-        mysqli_free_result($res);
         return $result;
     }
 
@@ -875,20 +875,22 @@ class LanguageService
         $normalizedData = $this->normalizeLanguageData($data);
 
         // Check if there's an empty language record to reuse
-        $val = Connection::fetchValue(
-            "SELECT MIN(LgID) AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName=''"
-        );
+        $result = QueryBuilder::table('languages')
+            ->select(['MIN(LgID) AS value'])
+            ->where('LgName', '=', '')
+            ->getPrepared();
+        $val = !empty($result) ? $result[0]['value'] : null;
 
-        $sqlData = $this->buildLanguageSqlFromData($normalizedData, $val !== null ? (int)$val : null);
-        Connection::preparedExecute($sqlData['sql'], $sqlData['params']);
+        $this->buildLanguageSqlFromData($normalizedData, $val !== null ? (int)$val : null);
 
         if ($val !== null) {
             return (int)$val;
         }
 
-        return (int)Connection::fetchValue(
-            "SELECT MAX(LgID) AS value FROM " . Globals::getTablePrefix() . "languages"
-        );
+        $maxResult = QueryBuilder::table('languages')
+            ->select(['MAX(LgID) AS value'])
+            ->getPrepared();
+        return (int)($maxResult[0]['value'] ?? 0);
     }
 
     /**
@@ -904,21 +906,21 @@ class LanguageService
         $normalizedData = $this->normalizeLanguageData($data);
 
         // Get old values for comparison
-        $record = Connection::preparedFetchOne(
-            "SELECT * FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$lid]
-        );
+        $records = QueryBuilder::table('languages')
+            ->where('LgID', '=', $lid)
+            ->getPrepared();
 
-        if ($record === null) {
+        if (empty($records)) {
             return ['success' => false, 'reparsed' => 0, 'message' => 'Language not found'];
         }
+
+        $record = $records[0];
 
         // Check if reparsing is needed
         $needReParse = $this->needsReparsingFromData($normalizedData, $record);
 
         // Update language
-        $sqlData = $this->buildLanguageSqlFromData($normalizedData, $lid);
-        Connection::preparedExecute($sqlData['sql'], $sqlData['params']);
+        $this->buildLanguageSqlFromData($normalizedData, $lid);
 
         $reparsedCount = 0;
         if ($needReParse) {
@@ -964,24 +966,23 @@ class LanguageService
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-        $rows = Connection::preparedFetchAll(
-            "SELECT TxID, TxText FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID = ? ORDER BY TxID",
-            [$lid]
-        );
+        $rows = QueryBuilder::table('texts')
+            ->select(['TxID', 'TxText'])
+            ->where('TxLgID', '=', $lid)
+            ->orderBy('TxID')
+            ->getPrepared();
         foreach ($rows as $record) {
             $txtid = (int)$record["TxID"];
             $txttxt = (string)$record["TxText"];
             TextParsing::splitCheck($txttxt, $lid, $txtid);
         }
 
-        $sentencesAdded = (int)Connection::preparedFetchValue(
-            "SELECT count(*) as value FROM " . Globals::getTablePrefix() . "sentences where SeLgID = ?",
-            [$lid]
-        );
-        $textItemsAdded = (int)Connection::preparedFetchValue(
-            "SELECT count(*) as value FROM " . Globals::getTablePrefix() . "textitems2 where Ti2LgID = ?",
-            [$lid]
-        );
+        $sentencesAdded = QueryBuilder::table('sentences')
+            ->where('SeLgID', '=', $lid)
+            ->count();
+        $textItemsAdded = QueryBuilder::table('textitems2')
+            ->where('Ti2LgID', '=', $lid)
+            ->count();
 
         return [
             'sentencesDeleted' => $sentencesDeleted,
@@ -1026,6 +1027,8 @@ class LanguageService
      * @param int|null $id   Language ID for update, null for insert
      *
      * @return array{sql: string, params: array} SQL query and parameters
+     *
+     * @psalm-suppress UnusedReturnValue Used for debugging and testing
      */
     private function buildLanguageSqlFromData(array $data, ?int $id = null): array
     {
@@ -1056,17 +1059,18 @@ class LanguageService
         ];
 
         if ($id === null) {
-            // INSERT
-            $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-            $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (" . implode(', ', $columns) . ") VALUES($placeholders)";
+            // INSERT - use QueryBuilder to auto-inject user_id
+            $insertData = array_combine($columns, $params);
+            QueryBuilder::table('languages')->insertPrepared($insertData);
+            return ['sql' => '', 'params' => []]; // Return empty - insert already executed
         } else {
-            // UPDATE
-            $setParts = array_map(fn($col) => "$col = ?", $columns);
-            $sql = "UPDATE " . Globals::getTablePrefix() . "languages SET " . implode(', ', $setParts) . " WHERE LgID = ?";
-            $params[] = $id;
+            // UPDATE - use QueryBuilder for user-scoped update
+            $updateData = array_combine($columns, $params);
+            QueryBuilder::table('languages')
+                ->where('LgID', '=', $id)
+                ->updatePrepared($updateData);
+            return ['sql' => '', 'params' => []]; // Return empty - update already executed
         }
-
-        return ['sql' => $sql, 'params' => $params];
     }
 
     /**

@@ -16,6 +16,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\Core\Globals;
+use Lwt\Database\QueryBuilder;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\IconHelper;
 
@@ -673,7 +674,11 @@ class FeedsController extends BaseController
                 $currentPage = $pages;
             }
 
-            $sorts = ['NfName', 'NfUpdate DESC', 'NfUpdate ASC'];
+            $sorts = [
+                ['column' => 'NfName', 'direction' => 'ASC'],
+                ['column' => 'NfUpdate', 'direction' => 'DESC'],
+                ['column' => 'NfUpdate', 'direction' => 'ASC'],
+            ];
             $lsorts = count($sorts);
             if ($currentSort < 1) {
                 $currentSort = 1;
@@ -682,23 +687,20 @@ class FeedsController extends BaseController
                 $currentSort = $lsorts;
             }
 
-            // Build query with prepared statement
-            $whereConditions = [];
-            $params = [];
+            // Build query with QueryBuilder
+            $query = QueryBuilder::table('newsfeeds')->select(['*']);
 
             if (!empty($currentLang)) {
-                $whereConditions[] = "NfLgID = ?";
-                $params[] = $currentLang;
+                $query->where('NfLgID', '=', $currentLang);
             }
             if ($queryPattern !== null) {
-                $whereConditions[] = "NfName LIKE ?";
-                $params[] = $queryPattern;
+                $query->where('NfName', 'LIKE', $queryPattern);
             }
 
-            $where = empty($whereConditions) ? '1=1' : implode(' AND ', $whereConditions);
-            $sql = "SELECT * FROM " . Globals::getTablePrefix() . "newsfeeds WHERE $where ORDER BY " . $sorts[$currentSort - 1];
+            $sortConfig = $sorts[$currentSort - 1];
+            $query->orderBy($sortConfig['column'], $sortConfig['direction']);
 
-            $feeds = Connection::preparedFetchAll($sql, $params);
+            $feeds = $query->getPrepared();
         } else {
             $feeds = null;
             $pages = 0;

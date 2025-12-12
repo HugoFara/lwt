@@ -6,7 +6,6 @@
  *
  * Variables expected:
  * - $fixedTbpref: bool Whether prefix is fixed in .env
- * - $tbpref: string Current table prefix
  * - $prefixes: array List of available prefixes
  *
  * PHP version 8.1

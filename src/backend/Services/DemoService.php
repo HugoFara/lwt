@@ -16,6 +16,7 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Restore;
 
 /**
@@ -52,11 +53,11 @@ class DemoService
      */
     public function getPrefixInfo(): string
     {
-        $tbpref = Globals::getTablePrefix();
-        if ($tbpref == '') {
+        $prefix = Globals::getTablePrefix();
+        if ($prefix == '') {
             return "(Default Table Set)";
         }
-        return "(Table Set: <i>" . htmlspecialchars(substr($tbpref, 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i>)";
+        return "(Table Set: <i>" . htmlspecialchars(substr($prefix, 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i>)";
     }
 
     /**
@@ -76,10 +77,7 @@ class DemoService
      */
     public function getLanguageCount(): int
     {
-        $tbpref = Globals::getTablePrefix();
-        return (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM {$tbpref}languages"
-        );
+        return QueryBuilder::table('languages')->count();
     }
 
     /**

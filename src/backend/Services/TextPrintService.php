@@ -20,7 +20,9 @@ require_once __DIR__ . '/../View/Helper/StatusHelper.php';
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
+use Lwt\Database\UserScopedQuery;
 use Lwt\Services\AnnotationService;
 use Lwt\Services\TagService;
 
@@ -79,13 +81,11 @@ class TextPrintService
      */
     public function getTextData(int $textId): ?array
     {
-        $sql = "SELECT TxID, TxLgID, TxTitle, TxSourceURI, TxAudioURI
-                FROM " . Globals::getTablePrefix() . "texts
-                WHERE TxID = {$textId}";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+        $result = QueryBuilder::table('texts')
+            ->select(['TxID', 'TxLgID', 'TxTitle', 'TxSourceURI', 'TxAudioURI'])
+            ->where('TxID', '=', $textId)
+            ->getPrepared();
+        return !empty($result) ? $result[0] : null;
     }
 
     /**
@@ -97,13 +97,11 @@ class TextPrintService
      */
     public function getLanguageData(int $langId): ?array
     {
-        $sql = "SELECT LgTextSize, LgRemoveSpaces, LgRightToLeft, LgGoogleTranslateURI
-                FROM " . Globals::getTablePrefix() . "languages
-                WHERE LgID = {$langId}";
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
-        return $record ?: null;
+        $result = QueryBuilder::table('languages')
+            ->select(['LgTextSize', 'LgRemoveSpaces', 'LgRightToLeft', 'LgGoogleTranslateURI'])
+            ->where('LgID', '=', $langId)
+            ->getPrepared();
+        return !empty($result) ? $result[0] : null;
     }
 
     /**
@@ -115,10 +113,11 @@ class TextPrintService
      */
     public function getAnnotatedText(int $textId): ?string
     {
-        $ann = (string) Connection::fetchValue(
-            "SELECT TxAnnotatedText AS value FROM " . Globals::getTablePrefix() . "texts
-            WHERE TxID = {$textId}"
-        );
+        $result = QueryBuilder::table('texts')
+            ->select(['TxAnnotatedText'])
+            ->where('TxID', '=', $textId)
+            ->getPrepared();
+        $ann = !empty($result) ? (string) ($result[0]['TxAnnotatedText'] ?? '') : '';
         return strlen($ann) > 0 ? $ann : null;
     }
 
@@ -131,10 +130,11 @@ class TextPrintService
      */
     public function hasAnnotation(int $textId): bool
     {
-        $length = (int) Connection::fetchValue(
-            "SELECT LENGTH(TxAnnotatedText) AS value FROM " . Globals::getTablePrefix() . "texts
-            WHERE TxID = {$textId}"
-        );
+        $bindings = [$textId];
+        $sql = "SELECT LENGTH(TxAnnotatedText) AS len FROM texts WHERE TxID = ?"
+            . UserScopedQuery::forTablePrepared('texts', $bindings);
+        $result = Connection::preparedFetchAll($sql, $bindings);
+        $length = !empty($result) ? (int) ($result[0]['len'] ?? 0) : 0;
         return $length > 0;
     }
 
@@ -147,11 +147,9 @@ class TextPrintService
      */
     public function deleteAnnotation(int $textId): bool
     {
-        Connection::execute(
-            "UPDATE " . Globals::getTablePrefix() . "texts
-            SET TxAnnotatedText = NULL
-            WHERE TxID = {$textId}"
-        );
+        QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->updatePrepared(['TxAnnotatedText' => null]);
         return !$this->hasAnnotation($textId);
     }
 
@@ -254,26 +252,19 @@ class TextPrintService
      */
     public function getTextItems(int $textId): array
     {
+        $bindings = [$textId];
         $sql = "SELECT
                     CASE WHEN Ti2WordCount>0 THEN Ti2WordCount ELSE 1 END AS Code,
                     CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE WoText END AS TiText,
                     Ti2Order,
                     CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END as TiIsNotWord,
                     WoID, WoTranslation, WoRomanization, WoStatus
-                FROM (
-                    " . Globals::getTablePrefix() . "textitems2
-                    LEFT JOIN " . Globals::getTablePrefix() . "words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
-                )
-                WHERE Ti2TxID = {$textId}
+                FROM textitems2
+                LEFT JOIN words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
+                WHERE Ti2TxID = ?"
+            . UserScopedQuery::forTablePrepared('words', $bindings, 'words') . "
                 ORDER BY Ti2Order asc, Ti2WordCount desc";
-
-        $res = Connection::query($sql);
-        $items = [];
-        while ($record = mysqli_fetch_assoc($res)) {
-            $items[] = $record;
-        }
-        mysqli_free_result($res);
-        return $items;
+        return Connection::preparedFetchAll($sql, $bindings);
     }
 
     /**
@@ -375,6 +366,7 @@ class TextPrintService
      */
     public function getTextItemsForApi(int $textId): array
     {
+        $bindings = [$textId];
         $sql = "SELECT
                     CASE WHEN Ti2WordCount>0 THEN Ti2WordCount ELSE 1 END AS wordCount,
                     CASE WHEN CHAR_LENGTH(Ti2Text)>0 THEN Ti2Text ELSE WoText END AS text,
@@ -382,19 +374,18 @@ class TextPrintService
                     CASE WHEN Ti2WordCount > 0 THEN 0 ELSE 1 END as isNotWord,
                     WoID AS wordId, WoTranslation AS translation,
                     WoRomanization AS romanization, WoStatus AS status
-                FROM (
-                    " . Globals::getTablePrefix() . "textitems2
-                    LEFT JOIN " . Globals::getTablePrefix() . "words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
-                )
-                WHERE Ti2TxID = {$textId}
+                FROM textitems2
+                LEFT JOIN words ON (Ti2WoID = WoID) AND (Ti2LgID = WoLgID)
+                WHERE Ti2TxID = ?"
+            . UserScopedQuery::forTablePrepared('words', $bindings, 'words') . "
                 ORDER BY Ti2Order asc, Ti2WordCount desc";
+        $results = Connection::preparedFetchAll($sql, $bindings);
 
-        $res = Connection::query($sql);
         $items = [];
         $until = 0;
         $currentItem = null;
 
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($results as $record) {
             $order = (int) $record['position'];
             $wordCount = (int) $record['wordCount'];
             $isNotWord = (int) $record['isNotWord'];
@@ -460,7 +451,6 @@ class TextPrintService
             $items[] = $currentItem;
         }
 
-        mysqli_free_result($res);
         return $items;
     }
 

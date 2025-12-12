@@ -22,6 +22,7 @@ require_once __DIR__ . '/DictionaryService.php';
 use Lwt\Core\Entity\GoogleTranslate;
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 
 /**
@@ -139,18 +140,15 @@ class TranslationService
      */
     public function getTranslatorUrl(int $textId, int $order): array
     {
-        $languagesTable = Globals::table('languages');
-        $sentencesTable = Globals::table('sentences');
-        $textitemsTable = Globals::table('textitems2');
+        $result = QueryBuilder::table('textitems2')
+            ->select(['sentences.SeText', 'languages.LgGoogleTranslateURI'])
+            ->join('sentences', 'textitems2.Ti2SeID', '=', 'sentences.SeID')
+            ->join('languages', 'textitems2.Ti2LgID', '=', 'languages.LgID')
+            ->where('textitems2.Ti2TxID', '=', $textId)
+            ->where('textitems2.Ti2Order', '=', $order)
+            ->getPrepared();
 
-        $sql = "SELECT SeText, LgGoogleTranslateURI
-            FROM {$languagesTable}, {$sentencesTable}, {$textitemsTable}
-            WHERE Ti2SeID = SeID AND Ti2LgID = LgID
-            AND Ti2TxID = $textId AND Ti2Order = $order";
-
-        $res = Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
-        mysqli_free_result($res);
+        $record = $result[0] ?? null;
 
         if (!$record) {
             return [
@@ -215,16 +213,18 @@ class TranslationService
      */
     public function getCurrentLanguageTtsVoice(): ?string
     {
-        $languagesTable = Globals::table('languages');
         $lgId = Settings::get('currentlangage');
 
         if (!$lgId) {
             return null;
         }
 
-        return Connection::fetchValue(
-            "SELECT LgTTSVoiceAPI AS value FROM {$languagesTable} WHERE LgID = $lgId"
-        );
+        $result = QueryBuilder::table('languages')
+            ->select(['LgTTSVoiceAPI'])
+            ->where('LgID', '=', $lgId)
+            ->getPrepared();
+
+        return $result[0]['LgTTSVoiceAPI'] ?? null;
     }
 
     /**

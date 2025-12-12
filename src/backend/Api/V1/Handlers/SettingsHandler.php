@@ -3,6 +3,7 @@ namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Database\Settings;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Core\Globals;
 use Lwt\Services\TextStatisticsService;
 
@@ -48,14 +49,9 @@ class SettingsHandler
      * @param int $languageId Language ID
      *
      * @return array|null Last text data or null if none exists
-     *
-     * @psalm-suppress UnusedParam Parameter used in SQL queries via string interpolation
      */
     private function getLastTextForLanguage(int $languageId): ?array
     {
-        $textsTable = Globals::table('texts');
-        $languagesTable = Globals::table('languages');
-
         // Get the current text ID
         $currentTextId = Settings::get('currenttext');
 
@@ -66,21 +62,20 @@ class SettingsHandler
         $textId = (int)$currentTextId;
 
         // Check if the current text belongs to this language
-        $textData = Connection::fetchOne(
-            "SELECT TxID, TxTitle, TxLgID, LENGTH(TxAnnotatedText) > 0 AS annotated
-             FROM {$textsTable}
-             WHERE TxID = {$textId} AND TxLgID = {$languageId}"
-        );
+        $textData = QueryBuilder::table('texts')
+            ->selectRaw('TxID, TxTitle, TxLgID, LENGTH(TxAnnotatedText) > 0 AS annotated')
+            ->where('TxID', '=', $textId)
+            ->where('TxLgID', '=', $languageId)
+            ->firstPrepared();
 
         if ($textData === null) {
             // Current text doesn't belong to this language, find the most recent one
-            $textData = Connection::fetchOne(
-                "SELECT TxID, TxTitle, TxLgID, LENGTH(TxAnnotatedText) > 0 AS annotated
-                 FROM {$textsTable}
-                 WHERE TxLgID = {$languageId}
-                 ORDER BY TxID DESC
-                 LIMIT 1"
-            );
+            $textData = QueryBuilder::table('texts')
+                ->selectRaw('TxID, TxTitle, TxLgID, LENGTH(TxAnnotatedText) > 0 AS annotated')
+                ->where('TxLgID', '=', $languageId)
+                ->orderBy('TxID', 'DESC')
+                ->limit(1)
+                ->firstPrepared();
         }
 
         if ($textData === null) {
@@ -88,9 +83,9 @@ class SettingsHandler
         }
 
         // Get language name
-        $languageName = Connection::fetchValue(
-            "SELECT LgName AS value FROM {$languagesTable} WHERE LgID = {$languageId}"
-        );
+        $languageName = QueryBuilder::table('languages')
+            ->where('LgID', '=', $languageId)
+            ->valuePrepared('LgName');
 
         $textId = (int)$textData['TxID'];
 

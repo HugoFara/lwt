@@ -383,17 +383,16 @@ class EnvLoaderTest extends TestCase
         file_put_contents(
             $this->testEnvFile, 
             "DB_HOST=testhost\nDB_USER=testuser\nDB_PASSWORD=testpass\n" .
-            "DB_NAME=testdb\nDB_SOCKET=/tmp/mysql.sock\nDB_TABLE_PREFIX=test_\n"
+            "DB_NAME=testdb\nDB_SOCKET=/tmp/mysql.sock\n"
         );
         EnvLoader::load($this->testEnvFile);
-        
+
         $config = EnvLoader::getDatabaseConfig();
-        
+
         $this->assertEquals('testhost', $config['server']);
         $this->assertEquals('testuser', $config['userid']);
         $this->assertEquals('testpass', $config['passwd']);
         $this->assertEquals('testdb', $config['dbname']);
         $this->assertEquals('/tmp/mysql.sock', $config['socket']);
-        $this->assertEquals('test_', $config['tbpref']);
     }
 }

@@ -180,6 +180,21 @@ class QueryBuilder
     }
 
     /**
+     * Set the columns to select using raw SQL expression.
+     *
+     * This method accepts a raw SQL string for the SELECT clause, allowing
+     * complex expressions like function calls, aliases, and computed columns.
+     *
+     * @param string $expression Raw SQL expression for SELECT clause
+     */
+    public function selectRaw(string $expression): static
+    {
+        // Split by comma, preserving function calls with parentheses
+        $this->columns = [$expression];
+        return $this;
+    }
+
+    /**
      * Add DISTINCT to the query.
      */
     public function distinct(): static

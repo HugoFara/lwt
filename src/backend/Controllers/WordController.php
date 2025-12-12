@@ -15,7 +15,9 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 
@@ -308,12 +310,10 @@ class WordController extends BaseController
             }
 
             // Get showRoman from language joined with text
-            $showRoman = (bool) \Lwt\Database\Connection::fetchValue(
-                "SELECT LgShowRomanization AS value
-                FROM " . \Lwt\Core\Globals::table('languages') . " JOIN " . \Lwt\Core\Globals::table('texts') . "
-                ON TxLgID = LgID
-                WHERE TxID = $textId"
-            );
+            $showRoman = (bool) QueryBuilder::table('languages')
+                ->join('texts', 'TxLgID', '=', 'LgID')
+                ->where('TxID', '=', $textId)
+                ->valuePrepared('LgShowRomanization');
 
             include __DIR__ . '/../Views/Word/form_edit_existing.php';
         }
@@ -379,41 +379,45 @@ class WordController extends BaseController
             $woId = $this->paramInt("WoID", 0) ?? 0;
             $woSentence = $this->param("WoSentence");
             $woRomanization = $this->param("WoRomanization");
-            $statusUpdate = '';
-            $params = [
-                $woText,
-                $translation,
-                ExportService::replaceTabNewline($woSentence),
-                $woRomanization
-            ];
-            if ($oldstatus != $newstatus) {
-                $statusUpdate = ', WoStatus = ?, WoStatusChanged = NOW()';
-                $params[] = $newstatus;
-            }
-            $params[] = $woId;
 
-            \Lwt\Database\Connection::preparedExecute(
-                'UPDATE ' . \Lwt\Core\Globals::table('words') . ' SET WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?' .
-                $statusUpdate . ',' . WordStatusService::makeScoreRandomInsertUpdate('u') .
-                ' WHERE WoID = ?',
-                $params
-            );
+            $scoreRandomUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
+            $sentenceEscaped = ExportService::replaceTabNewline($woSentence);
+
+            if ($oldstatus != $newstatus) {
+                // Status changed - update with status change timestamp
+                $sql = "UPDATE " . Globals::getTablePrefix() . "words SET
+                    WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
+                    WoStatus = ?, WoStatusChanged = NOW(), {$scoreRandomUpdate}
+                    WHERE WoID = ?";
+                Connection::preparedExecute($sql, [
+                    $woText, $translation, $sentenceEscaped, $woRomanization,
+                    $newstatus, $woId
+                ]);
+            } else {
+                // Status unchanged
+                $sql = "UPDATE " . Globals::getTablePrefix() . "words SET
+                    WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
+                    {$scoreRandomUpdate}
+                    WHERE WoID = ?";
+                Connection::preparedExecute($sql, [
+                    $woText, $translation, $sentenceEscaped, $woRomanization,
+                    $woId
+                ]);
+            }
             $wid = $woId;
             TagService::saveWordTags($wid);
 
             $message = 'Updated';
 
-            $lang = \Lwt\Database\Connection::preparedFetchValue(
-                'SELECT WoLgID AS value FROM ' . \Lwt\Core\Globals::table('words') . ' WHERE WoID = ?',
-                [$wid]
-            );
+            $lang = QueryBuilder::table('words')
+                ->where('WoID', '=', $wid)
+                ->valuePrepared('WoLgID');
             if (!isset($lang)) {
                 ErrorHandler::die('Cannot retrieve language in edit_tword.php');
             }
-            $regexword = \Lwt\Database\Connection::preparedFetchValue(
-                'SELECT LgRegexpWordCharacters AS value FROM ' . \Lwt\Core\Globals::table('languages') . ' WHERE LgID = ?',
-                [$lang]
-            );
+            $regexword = QueryBuilder::table('languages')
+                ->where('LgID', '=', $lang)
+                ->valuePrepared('LgRegexpWordCharacters');
             if (!isset($regexword)) {
                 ErrorHandler::die('Cannot retrieve language data in edit_tword.php');
             }
@@ -450,10 +454,10 @@ class WordController extends BaseController
         }
         $wid = (int) $widParam;
 
-        $sql = 'select WoText, WoLgID, WoTranslation, WoSentence, WoRomanization, WoStatus from ' .
-            \Lwt\Core\Globals::table('words') . ' where WoID = ' . $wid;
-        $res = \Lwt\Database\Connection::query($sql);
-        $record = mysqli_fetch_assoc($res);
+        $record = QueryBuilder::table('words')
+            ->select(['WoText', 'WoLgID', 'WoTranslation', 'WoSentence', 'WoRomanization', 'WoStatus'])
+            ->where('WoID', '=', $wid)
+            ->firstPrepared();
         if ($record) {
             $term = (string) $record['WoText'];
             $lang = (int) $record['WoLgID'];
@@ -464,15 +468,12 @@ class WordController extends BaseController
             $sentence = ExportService::replaceTabNewline($record['WoSentence']);
             $rom = $record['WoRomanization'];
             $status = $record['WoStatus'];
-            $showRoman = (bool) \Lwt\Database\Connection::fetchValue(
-                "SELECT LgShowRomanization AS value
-                FROM " . \Lwt\Core\Globals::table('languages') . "
-                WHERE LgID = $lang"
-            );
+            $showRoman = (bool) QueryBuilder::table('languages')
+                ->where('LgID', '=', $lang)
+                ->valuePrepared('LgShowRomanization');
         } else {
             ErrorHandler::die("Term data not found in edit_tword.php");
         }
-        mysqli_free_result($res);
 
         $termlc = mb_strtolower($term, 'UTF-8');
         $titletext = "Edit Term: " . htmlspecialchars($term, ENT_QUOTES, 'UTF-8');

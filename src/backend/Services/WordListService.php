@@ -16,6 +16,7 @@ namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\View\Helper\StatusHelper;
@@ -224,13 +225,13 @@ class WordListService
     ): int {
         if ($textId == '') {
             $sql = 'select count(*) as value from (select WoID from (' .
-                Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
+                'words left JOIN wordtags' .
                 ' ON WoID = WtWoID) where (1=1) ' .
                 $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag . ') as dummy';
         } else {
             $sql = 'select count(*) as value from (select WoID from (' .
-                Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-                ' ON WoID = WtWoID), ' . Globals::table('textitems2') .
+                'words left JOIN wordtags' .
+                ' ON WoID = WtWoID), textitems2' .
                 ' where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' .
                 $textId . ')' . $whLang . $whStat . $whQuery .
                 ' group by WoID ' . $whTag . ') as dummy';
@@ -294,12 +295,12 @@ class WordListService
                         WoStatus, LgName, LgRightToLeft, LgGoogleTranslateURI,
                         DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore,
                         WoTomorrowScore
-                        from ' . Globals::table('words') . ', ' . Globals::table('languages') . '
+                        from words, languages
                         where WoLgID = LgID ' . $whLang . $whStat . $whQuery . '
                         group by WoID
                         order by ' . $sorts[$sort - 1] . ' ' . $limit . ') AS AA
-                        left JOIN ' . Globals::table('wordtags') . ' ON WoID = WtWoID
-                        left join ' . Globals::table('tags') . ' on TgID = WtTgID
+                        left JOIN wordtags ON WoID = WtWoID
+                        left join tags on TgID = WtTgID
                         group by WoID
                         order by ' . $sorts[$sort - 1];
             } else {
@@ -309,9 +310,9 @@ class WordListService
                         DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
                         WoTomorrowScore AS Score2,
                         ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist
-                        from ((' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-                        ' ON WoID = WtWoID) left join ' . Globals::table('tags') .
-                        ' on TgID = WtTgID), ' . Globals::table('languages') . '
+                        from ((words left JOIN wordtags
+                        ON WoID = WtWoID) left join tags
+                        on TgID = WtTgID), languages
                         where WoLgID = LgID ' . $whLang . $whStat . $whQuery .
                         ' group by WoID ' . $whTag . ' order by ' . $sorts[$sort - 1] . ' ' . $limit;
             }
@@ -322,10 +323,10 @@ class WordListService
                     DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore AS Score,
                     WoTomorrowScore AS Score2,
                     ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist
-                    from ((' . Globals::table('words') . '
-                    left JOIN ' . Globals::table('wordtags') . ' ON WoID = WtWoID)
-                    left join ' . Globals::table('tags') . ' on TgID = WtTgID), ' .
-                    Globals::table('languages') . ', ' . Globals::table('textitems2') . '
+                    from ((words
+                    left JOIN wordtags ON WoID = WtWoID)
+                    left join tags on TgID = WtTgID),
+                    languages, textitems2
                     where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' .
                     $textId . ') and WoLgID = LgID ' . $whLang . $whStat . $whQuery . '
                     group by WoID ' . $whTag . '
@@ -361,10 +362,10 @@ class WordListService
                     WoTomorrowScore AS Score2,
                     ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
                     WoTextLC, WoTodayScore
-                    from ((' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-                    ' ON WoID = WtWoID)
-                    left join ' . Globals::table('tags') . ' on TgID = WtTgID), ' .
-                    Globals::table('languages') . ', ' . Globals::table('textitems2') . '
+                    from ((words left JOIN wordtags
+                    ON WoID = WtWoID)
+                    left join tags on TgID = WtTgID),
+                    languages, textitems2
                     where Ti2LgID = WoLgID and Ti2WoID = WoID and WoLgID = LgID
                     and Ti2TxID in (' . $textId . ') ' .
                     $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag .
@@ -378,12 +379,12 @@ class WordListService
                     WoTomorrowScore AS Score2,
                     ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
                     WoTextLC, WoTodayScore
-                    from ((' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-                    ' ON WoID = WtWoID)
-                    left join ' . Globals::table('tags') . ' on TgID = WtTgID), ' .
-                    Globals::table('languages') . '
+                    from ((words left JOIN wordtags
+                    ON WoID = WtWoID)
+                    left join tags on TgID = WtTgID),
+                    languages
                     where WoLgID = LgID and WoID NOT IN (SELECT DISTINCT Ti2WoID
-                    from ' . Globals::table('textitems2') . ' where Ti2LgID = LgID) ' .
+                    from textitems2 where Ti2LgID = LgID) ' .
                     $whLang . $whStat . $whQuery . '
                     group by WoID ' . $whTag . '
                     UNION
@@ -395,10 +396,10 @@ class WordListService
                     WoTomorrowScore AS Score2,
                     ifnull(group_concat(distinct TgText order by TgText separator \',\'),\'\') as taglist,
                     WoTextLC, WoTodayScore
-                    from ((' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-                    ' ON WoID = WtWoID)
-                    left join ' . Globals::table('tags') . ' on TgID = WtTgID), ' .
-                    Globals::table('languages') . ', ' . Globals::table('textitems2') . '
+                    from ((words left JOIN wordtags
+                    ON WoID = WtWoID)
+                    left join tags on TgID = WtTgID),
+                    languages, textitems2
                     where Ti2LgID = WoLgID and Ti2WoID = WoID and WoLgID = LgID ' .
                     $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag .
                     ' order by ' . $sortExpr . ' ' . $limit;
@@ -417,28 +418,28 @@ class WordListService
     public function deleteByIdList(string $idList): string
     {
         $message = Connection::execute(
-            'delete from ' . Globals::table('words') . ' where WoID in ' . $idList,
+            'delete from words where WoID in ' . $idList,
             "Deleted"
         );
 
         Connection::query(
-            'update ' . Globals::table('textitems2') . '
+            'update textitems2
             set Ti2WoID = 0
             where Ti2WordCount = 1 and Ti2WoID in ' . $idList
         );
 
         Connection::query(
-            'delete from ' . Globals::table('textitems2') . '
+            'delete from textitems2
             where Ti2WoID in ' . $idList
         );
 
         Maintenance::adjustAutoIncrement('words', 'WoID');
 
         Connection::execute(
-            "DELETE " . Globals::table('wordtags') . "
+            "DELETE wordtags
             FROM (
-                " . Globals::table('wordtags') . "
-                LEFT JOIN " . Globals::table('words') . "
+                wordtags
+                LEFT JOIN words
                 on WtWoID = WoID
             ) WHERE WoID IS NULL",
             ''
@@ -464,7 +465,7 @@ class WordListService
         if ($relative && $newStatus > 0) {
             // Status +1
             return Connection::execute(
-                'update ' . Globals::table('words') . '
+                'update words
                 set WoStatus=WoStatus+1, WoStatusChanged = NOW(),' . $scoreUpdate . '
                 where WoStatus in (1,2,3,4) and WoID in ' . $idList,
                 "Updated Status (+1)"
@@ -472,7 +473,7 @@ class WordListService
         } elseif ($relative && $newStatus < 0) {
             // Status -1
             return Connection::execute(
-                'update ' . Globals::table('words') . '
+                'update words
                 set WoStatus=WoStatus-1, WoStatusChanged = NOW(),' . $scoreUpdate . '
                 where WoStatus in (2,3,4,5) and WoID in ' . $idList,
                 "Updated Status (-1)"
@@ -481,7 +482,7 @@ class WordListService
 
         // Absolute status
         return Connection::execute(
-            'update ' . Globals::table('words') . '
+            'update words
             set WoStatus=' . $newStatus . ', WoStatusChanged = NOW(),' . $scoreUpdate . '
             where WoID in ' . $idList,
             "Updated Status (=" . $newStatus . ")"
@@ -498,7 +499,7 @@ class WordListService
     public function updateStatusDateByIdList(string $idList): string
     {
         return Connection::execute(
-            'update ' . Globals::table('words') . '
+            'update words
             set WoStatusChanged = NOW(),' . WordStatusService::makeScoreRandomInsertUpdate('u') . '
             where WoID in ' . $idList,
             "Updated Status Date (= Now)"
@@ -515,7 +516,7 @@ class WordListService
     public function deleteSentencesByIdList(string $idList): string
     {
         return Connection::execute(
-            'update ' . Globals::table('words') . '
+            'update words
             set WoSentence = NULL
             where WoID in ' . $idList,
             "Term Sentence(s) deleted"
@@ -532,7 +533,7 @@ class WordListService
     public function toLowercaseByIdList(string $idList): string
     {
         return Connection::execute(
-            'update ' . Globals::table('words') . '
+            'update words
             set WoText = WoTextLC
             where WoID in ' . $idList,
             "Term(s) set to lowercase"
@@ -549,7 +550,7 @@ class WordListService
     public function capitalizeByIdList(string $idList): string
     {
         return Connection::execute(
-            'update ' . Globals::table('words') . '
+            'update words
             set WoText = CONCAT(
                 UPPER(LEFT(WoTextLC,1)),SUBSTRING(WoTextLC,2)
             )
@@ -578,17 +579,17 @@ class WordListService
     ): array {
         if ($textId == '') {
             $sql = 'select distinct WoID from (
-                ' . Globals::table('words') . '
-                left JOIN ' . Globals::table('wordtags') . '
+                words
+                left JOIN wordtags
                 ON WoID = WtWoID
             ) where (1=1) ' . $whLang . $whStat . $whQuery . '
             group by WoID ' . $whTag;
         } else {
             $sql = 'select distinct WoID
             from (
-                ' . Globals::table('words') . '
-                left JOIN ' . Globals::table('wordtags') . ' ON WoID = WtWoID
-            ), ' . Globals::table('textitems2') . '
+                words
+                left JOIN wordtags ON WoID = WtWoID
+            ), textitems2
             where Ti2LgID = WoLgID and Ti2WoID = WoID and
             Ti2TxID in (' . $textId . ')' . $whLang . $whStat . $whQuery .
             ' group by WoID ' . $whTag;
@@ -614,7 +615,7 @@ class WordListService
     public function deleteSingleWord(int $wordId): string
     {
         Connection::preparedExecute(
-            'DELETE FROM ' . Globals::table('words') . ' WHERE WoID = ?',
+            'DELETE FROM words WHERE WoID = ?',
             [$wordId]
         );
         $message = "Deleted";
@@ -622,20 +623,20 @@ class WordListService
         Maintenance::adjustAutoIncrement('words', 'WoID');
 
         Connection::preparedExecute(
-            'UPDATE ' . Globals::table('textitems2') . ' SET Ti2WoID = 0
+            'UPDATE textitems2 SET Ti2WoID = 0
             WHERE Ti2WordCount = 1 AND Ti2WoID = ?',
             [$wordId]
         );
 
         Connection::preparedExecute(
-            'DELETE FROM ' . Globals::table('textitems2') . ' WHERE Ti2WoID = ?',
+            'DELETE FROM textitems2 WHERE Ti2WoID = ?',
             [$wordId]
         );
 
         Connection::execute(
-            "DELETE " . Globals::table('wordtags') . " FROM (" .
-            Globals::table('wordtags') . " LEFT JOIN " . Globals::table('words') .
-            " on WtWoID = WoID) WHERE WoID IS NULL",
+            "DELETE wordtags FROM (
+            wordtags LEFT JOIN words
+            on WtWoID = WoID) WHERE WoID IS NULL",
             ''
         );
 
@@ -675,14 +676,14 @@ class WordListService
                 ) as taglist
                 from (
                     (
-                        ' . Globals::table('words') . '
-                        left JOIN ' . Globals::table('wordtags') . '
+                        words
+                        left JOIN wordtags
                         ON WoID = WtWoID
                     )
-                    left join ' . Globals::table('tags') . '
+                    left join tags
                     on TgID = WtTgID
                 ),
-                ' . Globals::table('languages') . '
+                languages
                 where WoLgID = LgID AND WoTranslation != \'\' AND
                 WoTranslation != \'*\' and
                 WoSentence like concat(\'%{\',WoText,\'}%\') and
@@ -699,13 +700,13 @@ class WordListService
                 ) as taglist
                 from (
                     (
-                        ' . Globals::table('words') . '
-                        left JOIN ' . Globals::table('wordtags') . '
+                        words
+                        left JOIN wordtags
                         ON WoID = WtWoID
                     )
-                    left join ' . Globals::table('tags') . '
+                    left join tags
                     on TgID = WtTgID
-                ), ' . Globals::table('languages') . '
+                ), languages
                 where WoLgID = LgID AND WoTranslation != \'*\' and
                 WoSentence like concat(\'%{\',WoText,\'}%\') ' .
                 $whLang . $whStat . $whQuery . '
@@ -715,10 +716,10 @@ class WordListService
         return 'select distinct WoID, LgRightToLeft, LgRegexpWordCharacters,
             LgName, WoText, WoTranslation, WoRomanization, WoSentence,
             ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-            from ((' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-            ' ON WoID = WtWoID) left join ' . Globals::table('tags') .
-            ' on TgID = WtTgID), ' . Globals::table('languages') . ', ' .
-            Globals::table('textitems2') . ' where Ti2LgID = WoLgID and Ti2WoID = WoID
+            from ((words left JOIN wordtags
+            ON WoID = WtWoID) left join tags
+            on TgID = WtTgID), languages,
+            textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID
             and Ti2TxID in (' . $textId . ') and WoLgID = LgID AND
             WoTranslation != \'*\' and WoSentence like concat(\'%{\',WoText,\'}%\') ' .
             $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag;
@@ -754,12 +755,12 @@ class WordListService
                 ) as taglist
                 from (
                     (
-                        ' . Globals::table('words') . '
-                        left JOIN ' . Globals::table('wordtags') . '
+                        words
+                        left JOIN wordtags
                         ON WoID = WtWoID
                     )
-                    left join ' . Globals::table('tags') . ' on TgID = WtTgID
-                ), ' . Globals::table('languages') . '
+                    left join tags on TgID = WtTgID
+                ), languages
                 where WoLgID = LgID and WoID in ' . $idList . '
                 group by WoID';
         }
@@ -768,9 +769,9 @@ class WordListService
             return 'select distinct WoID, LgName, WoText, WoTranslation,
                 WoRomanization, WoSentence, WoStatus,
                 ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-                from ((' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-                ' ON WoID = WtWoID) left join ' . Globals::table('tags') .
-                ' on TgID = WtTgID), ' . Globals::table('languages') . '
+                from ((words left JOIN wordtags
+                ON WoID = WtWoID) left join tags
+                on TgID = WtTgID), languages
                 where WoLgID = LgID ' . $whLang . $whStat . $whQuery .
                 ' group by WoID ' . $whTag;
         }
@@ -778,10 +779,10 @@ class WordListService
         return 'select distinct WoID, LgName, WoText, WoTranslation,
             WoRomanization, WoSentence, WoStatus,
             ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-            from ((' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-            ' ON WoID = WtWoID) left join ' . Globals::table('tags') .
-            ' on TgID = WtTgID), ' . Globals::table('languages') . ', ' .
-            Globals::table('textitems2') . ' where Ti2LgID = WoLgID and Ti2WoID = WoID
+            from ((words left JOIN wordtags
+            ON WoID = WtWoID) left join tags
+            on TgID = WtTgID), languages,
+            textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID
             and Ti2TxID in (' . $textId . ') and WoLgID = LgID ' .
             $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag;
     }
@@ -816,12 +817,12 @@ class WordListService
                 ) as taglist
                 from (
                     (
-                        ' . Globals::table('words') . '
-                        left JOIN ' . Globals::table('wordtags') . '
+                        words
+                        left JOIN wordtags
                         ON WoID = WtWoID
                     )
-                    left join ' . Globals::table('tags') . ' on TgID = WtTgID
-                ), ' . Globals::table('languages') . '
+                    left join tags on TgID = WtTgID
+                ), languages
                 where WoLgID = LgID and WoID in ' . $idList . '
                 group by WoID';
         }
@@ -831,9 +832,9 @@ class WordListService
                 WoText, WoTextLC, WoTranslation, WoRomanization, WoSentence,
                 WoStatus,
                 ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-                from ((' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-                ' ON WoID = WtWoID) left join ' . Globals::table('tags') .
-                ' on TgID = WtTgID), ' . Globals::table('languages') . '
+                from ((words left JOIN wordtags
+                ON WoID = WtWoID) left join tags
+                on TgID = WtTgID), languages
                 where WoLgID = LgID ' . $whLang . $whStat . $whQuery .
                 ' group by WoID ' . $whTag;
         }
@@ -842,10 +843,10 @@ class WordListService
             WoText, WoTextLC, WoTranslation, WoRomanization, WoSentence,
             WoStatus,
             ifnull(group_concat(distinct TgText order by TgText separator \' \'),\'\') as taglist
-            from ((' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-            ' ON WoID = WtWoID) left join ' . Globals::table('tags') .
-            ' on TgID = WtTgID), ' . Globals::table('languages') . ', ' .
-            Globals::table('textitems2') . ' where Ti2LgID = WoLgID and Ti2WoID = WoID
+            from ((words left JOIN wordtags
+            ON WoID = WtWoID) left join tags
+            on TgID = WtTgID), languages,
+            textitems2 where Ti2LgID = WoLgID and Ti2WoID = WoID
             and Ti2TxID in (' . $textId . ') and WoLgID = LgID ' .
             $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag;
     }
@@ -872,15 +873,15 @@ class WordListService
     ): string {
         if ($textId == '') {
             return 'select distinct WoID
-            from (' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') . '
+            from (words left JOIN wordtags
             ON WoID = WtWoID)
             where (1=1) ' . $whLang . $whStat . $whQuery .
             ' group by WoID ' . $whTag;
         }
 
         return 'select distinct WoID
-        from (' . Globals::table('words') . ' left JOIN ' . Globals::table('wordtags') .
-        ' ON WoID = WtWoID), ' . Globals::table('textitems2') . '
+        from (words left JOIN wordtags
+        ON WoID = WtWoID), textitems2
         where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in (' .
         $textId . ')' . $whLang . $whStat . $whQuery . '
         group by WoID ' . $whTag;
@@ -896,7 +897,7 @@ class WordListService
     public function getNewTermFormData(int $langId): array
     {
         $showRoman = (bool) Connection::preparedFetchValue(
-            'SELECT LgShowRomanization AS value FROM ' . Globals::table('languages') . ' WHERE LgID = ?',
+            'SELECT LgShowRomanization AS value FROM languages WHERE LgID = ?',
             [$langId]
         );
 
@@ -917,8 +918,7 @@ class WordListService
     public function getEditFormData(int $wordId): ?array
     {
         $record = Connection::preparedFetchOne(
-            'SELECT * FROM ' . Globals::table('words') . ', ' .
-            Globals::table('languages') . '
+            'SELECT * FROM words, languages
             WHERE LgID = WoLgID AND WoID = ?',
             [$wordId]
         );
@@ -967,7 +967,7 @@ class WordListService
         $romanization = $data["WoRomanization"] ?? '';
 
         $wid = Connection::preparedInsert(
-            'INSERT INTO ' . Globals::table('words') . ' (WoLgID, WoTextLC, WoText, ' .
+            'INSERT INTO words (WoLgID, WoTextLC, WoText, ' .
             'WoStatus, WoTranslation, WoSentence, WoRomanization, WoStatusChanged,' .
             WordStatusService::makeScoreRandomInsertUpdate('iv') . ') VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ' .
             WordStatusService::makeScoreRandomInsertUpdate('id') . ')',
@@ -977,14 +977,14 @@ class WordListService
         if ($wid > 0) {
             Maintenance::initWordCount();
             $len = (int)Connection::preparedFetchValue(
-                'SELECT WoWordCount AS value FROM ' . Globals::table('words') . ' WHERE WoID = ?',
+                'SELECT WoWordCount AS value FROM words WHERE WoID = ?',
                 [$wid]
             );
             if ($len > 1) {
                 (new ExpressionService())->insertExpressions($textLc, (int)$data["WoLgID"], $wid, $len, 1);
             } else {
                 Connection::preparedExecute(
-                    'UPDATE ' . Globals::table('textitems2') . '
+                    'UPDATE textitems2
                     SET Ti2WoID = ?
                     WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?',
                     [$wid, $data["WoLgID"], $textLc]
@@ -1019,7 +1019,7 @@ class WordListService
 
         if ($oldstatus != $newstatus) {
             $affected = Connection::preparedExecute(
-                'UPDATE ' . Globals::table('words') . '
+                'UPDATE words
                 SET WoText = ?, WoTextLC = ?, WoTranslation = ?, WoSentence = ?,
                     WoRomanization = ?, WoStatus = ?, WoStatusChanged = NOW(),' .
                 WordStatusService::makeScoreRandomInsertUpdate('u') .
@@ -1028,7 +1028,7 @@ class WordListService
             );
         } else {
             $affected = Connection::preparedExecute(
-                'UPDATE ' . Globals::table('words') . '
+                'UPDATE words
                 SET WoText = ?, WoTextLC = ?, WoTranslation = ?, WoSentence = ?,
                     WoRomanization = ?,' .
                 WordStatusService::makeScoreRandomInsertUpdate('u') .

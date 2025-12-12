@@ -408,8 +408,6 @@ class AdminController extends BaseController
         /** @psalm-suppress UnusedVariable */
         $fixedTbpref = $tableSetService->isFixedPrefix();
         /** @psalm-suppress UnusedVariable */
-        $tbpref = Globals::getTablePrefix();
-        /** @psalm-suppress UnusedVariable */
         $prefixes = $tableSetService->getPrefixes();
 
         // Render page

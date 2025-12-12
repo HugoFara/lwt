@@ -21,6 +21,7 @@ use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
 use Lwt\Database\TextParsing;
+use Lwt\Database\UserScopedQuery;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/WordStatusService.php';
@@ -49,10 +50,9 @@ class WordUploadService
      */
     public function getLanguageData(int $langId): ?array
     {
-        return Connection::preparedFetchOne(
-            "SELECT * FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$langId]
-        );
+        return QueryBuilder::table('languages')
+            ->where('LgID', '=', $langId)
+            ->firstPrepared();
     }
 
     /**
@@ -206,10 +206,9 @@ class WordUploadService
         int $status,
         bool $ignoreFirst
     ): void {
-        $removeSpaces = (bool) Connection::preparedFetchValue(
-            "SELECT LgRemoveSpaces AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$langId]
-        );
+        $removeSpaces = (bool) QueryBuilder::table('languages')
+            ->where('LgID', '=', $langId)
+            ->valuePrepared('LgRemoveSpaces');
 
         if ($this->isLocalInfileEnabled()) {
             $this->importSimpleWithLoadData(
@@ -256,9 +255,9 @@ class WordUploadService
         int $status,
         bool $ignoreFirst
     ): void {
-        $stmt = Connection::prepare(
-            "LOAD DATA LOCAL INFILE ?
-            IGNORE INTO TABLE " . Globals::getTablePrefix() . "words
+        $bindings = [$fileName, $langId, $status];
+        $sql = "LOAD DATA LOCAL INFILE ?
+            IGNORE INTO TABLE words
             FIELDS TERMINATED BY '$delimiter' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' " .
             ($ignoreFirst ? "IGNORE 1 LINES " : "") .
             "$columnsClause
@@ -267,8 +266,9 @@ class WordUploadService
                 'WoTextLC = LOWER(REPLACE(@wotext," ","")), WoText = REPLACE(@wotext, " ", "")' :
                 'WoTextLC = LOWER(WoText)') . ",
             WoStatus = ?, WoStatusChanged = NOW(), " .
-            WordStatusService::makeScoreRandomInsertUpdate('u')
-        );
+            WordStatusService::makeScoreRandomInsertUpdate('u');
+
+        $stmt = Connection::prepare($sql);
         $stmt->bind('sis', $fileName, $langId, $status);
         $stmt->execute();
     }
@@ -362,7 +362,7 @@ class WordUploadService
         }
 
         if (!empty($placeholders)) {
-            $sql = "INSERT INTO " . Globals::getTablePrefix() . "words(
+            $sql = "INSERT INTO words(
                     WoText, WoTextLC, " .
                     ($fields["tr"] != 0 ? 'WoTranslation, ' : '') .
                     ($fields["ro"] != 0 ? 'WoRomanization, ' : '') .
@@ -404,10 +404,9 @@ class WordUploadService
         string $translDelim,
         string $tabType
     ): void {
-        $removeSpaces = (bool) Connection::preparedFetchValue(
-            "SELECT LgRemoveSpaces AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgID = ?",
-            [$langId]
-        );
+        $removeSpaces = (bool) QueryBuilder::table('languages')
+            ->where('LgID', '=', $langId)
+            ->valuePrepared('LgRemoveSpaces');
 
         $this->initTempTables();
 
@@ -461,12 +460,12 @@ class WordUploadService
             // Ignore - this is an optimization, not a requirement
         }
         Connection::execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS " . Globals::getTablePrefix() . "numbers(
+            "CREATE TEMPORARY TABLE IF NOT EXISTS numbers(
                 n tinyint(3) unsigned NOT NULL
             )"
         );
         Connection::execute(
-            "INSERT IGNORE INTO " . Globals::getTablePrefix() . "numbers(n) VALUES ('1'),('2'),('3'),
+            "INSERT IGNORE INTO numbers(n) VALUES ('1'),('2'),('3'),
             ('4'),('5'),('6'),('7'),('8'),('9')"
         );
     }
@@ -492,7 +491,7 @@ class WordUploadService
         bool $ignoreFirst
     ): void {
         $sql = "LOAD DATA LOCAL INFILE ?
-            INTO TABLE " . Globals::getTablePrefix() . "tempwords
+            INTO TABLE tempwords
             FIELDS TERMINATED BY '$delimiter' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' " .
             ($ignoreFirst ? "IGNORE 1 LINES " : "") .
             "$columnsClause SET " .
@@ -594,7 +593,7 @@ class WordUploadService
         }
 
         if (!empty($placeholders)) {
-            $sql = "INSERT INTO " . Globals::getTablePrefix() . "tempwords(
+            $sql = "INSERT INTO tempwords(
                     WoText, WoTextLC" .
                     ($fields["tr"] != 0 ? ', WoTranslation' : '') .
                     ($fields["ro"] != 0 ? ', WoRomanization' : '') .
@@ -619,7 +618,7 @@ class WordUploadService
     private function handleTranslationMerge(int $langId, string $translDelim, string $tabType): void
     {
         Connection::execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS " . Globals::getTablePrefix() . "merge_words(
+            "CREATE TEMPORARY TABLE IF NOT EXISTS merge_words(
                 MID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
                 MText varchar(250) NOT NULL,
                 MTranslation varchar(250) NOT NULL,
@@ -638,8 +637,7 @@ class WordUploadService
         }
 
         $seplen = mb_strlen($wosep, 'UTF-8');
-        $tbpref = Globals::getTablePrefix();
-        $woTrRepl = $tbpref . 'words.WoTranslation';
+        $woTrRepl = 'words.WoTranslation';
         $replaceParams = [];
         for ($i = 1; $i < $seplen; $i++) {
             $woTrRepl = 'REPLACE(' . $woTrRepl . ', ?, ?)';
@@ -653,27 +651,29 @@ class WordUploadService
             [$wosep[0], $wosep[0], $langId, $wosep[0]]
         );
 
-        $stmt = Connection::prepare(
-            "INSERT IGNORE INTO " . $tbpref . "merge_words(MText,MTranslation)
+        $bindings = $params;
+        $sql = "INSERT IGNORE INTO merge_words(MText,MTranslation)
             SELECT b.WoTextLC,
             trim(
                 SUBSTRING_INDEX(
-                    SUBSTRING_INDEX(b.WoTranslation, ?, " . $tbpref . "numbers.n),
+                    SUBSTRING_INDEX(b.WoTranslation, ?, numbers.n),
                     ?, -1
                 )
             ) name
-            FROM " . $tbpref . "numbers
+            FROM numbers
             INNER JOIN (
-                SELECT " . $tbpref . "words.WoTextLC as WoTextLC, $woTrRepl as WoTranslation
-                FROM " . $tbpref . "tempwords
-                LEFT JOIN " . $tbpref . "words
-                ON " . $tbpref . "words.WoTextLC = " . $tbpref . "tempwords.WoTextLC
-                    AND " . $tbpref . "words.WoTranslation != '*'
-                    AND " . $tbpref . "words.WoLgID = ?
+                SELECT words.WoTextLC as WoTextLC, $woTrRepl as WoTranslation
+                FROM tempwords
+                LEFT JOIN words
+                ON words.WoTextLC = tempwords.WoTextLC
+                    AND words.WoTranslation != '*'
+                    AND words.WoLgID = ?
             ) b
-            ON CHAR_LENGTH(b.WoTranslation)-CHAR_LENGTH(REPLACE(b.WoTranslation, ?, ''))>= " . $tbpref . "numbers.n-1
+            ON CHAR_LENGTH(b.WoTranslation)-CHAR_LENGTH(REPLACE(b.WoTranslation, ?, ''))>= numbers.n-1
             ORDER BY b.WoTextLC, n"
-        );
+            . UserScopedQuery::forTablePrepared('words', $bindings);
+
+        $stmt = Connection::prepare($sql);
         $stmt->bindValues($params);
         $stmt->execute();
 
@@ -688,7 +688,7 @@ class WordUploadService
         }
 
         $seplen = mb_strlen($tesep, 'UTF-8');
-        $woTrRepl = $tbpref . 'tempwords.WoTranslation';
+        $woTrRepl = 'tempwords.WoTranslation';
         $replaceParams2 = [];
         for ($i = 1; $i < $seplen; $i++) {
             $woTrRepl = 'REPLACE(' . $woTrRepl . ', ?, ?)';
@@ -703,19 +703,19 @@ class WordUploadService
         );
 
         $stmt = Connection::prepare(
-            "INSERT IGNORE INTO " . $tbpref . "merge_words(MText,MTranslation)
-            SELECT " . $tbpref . "tempwords.WoTextLC,
+            "INSERT IGNORE INTO merge_words(MText,MTranslation)
+            SELECT tempwords.WoTextLC,
             trim(
                 SUBSTRING_INDEX(
                     SUBSTRING_INDEX($woTrRepl, ?,
-                        " . $tbpref . "numbers.n
+                        numbers.n
                     ), ?, -1
                 )
             ) name
-            FROM " . $tbpref . "numbers
-            INNER JOIN " . $tbpref . "tempwords
-            ON CHAR_LENGTH(" . $tbpref . "tempwords.WoTranslation)-CHAR_LENGTH(REPLACE($woTrRepl, ?, ''))>= " . $tbpref . "numbers.n-1
-            ORDER BY " . $tbpref . "tempwords.WoTextLC, n"
+            FROM numbers
+            INNER JOIN tempwords
+            ON CHAR_LENGTH(tempwords.WoTranslation)-CHAR_LENGTH(REPLACE($woTrRepl, ?, ''))>= numbers.n-1
+            ORDER BY tempwords.WoTextLC, n"
         );
         $stmt->bindValues($params2);
         $stmt->execute();
@@ -729,13 +729,13 @@ class WordUploadService
 
         // Update tempwords with merged translations
         Connection::preparedExecute(
-            "UPDATE " . $tbpref . "tempwords
+            "UPDATE tempwords
             LEFT JOIN (
                 SELECT MText, GROUP_CONCAT(trim(MTranslation)
                     ORDER BY MID
                     SEPARATOR ?
                 ) AS Translation
-                FROM " . $tbpref . "merge_words
+                FROM merge_words
                 GROUP BY MText
             ) A
             ON MText=WoTextLC
@@ -743,7 +743,7 @@ class WordUploadService
             [$wosep]
         );
 
-        Connection::execute("DROP TABLE " . $tbpref . "merge_words");
+        Connection::execute("DROP TABLE merge_words");
     }
 
     /**
@@ -758,10 +758,9 @@ class WordUploadService
      */
     private function executeMainImportQuery(int $langId, array $fields, int $status, int $overwrite): void
     {
-        $tbpref = Globals::getTablePrefix();
         if ($overwrite != 3 && $overwrite != 5) {
             $sql = "INSERT " . ($overwrite != 0 ? '' : 'IGNORE ') .
-                " INTO " . $tbpref . "words (
+                " INTO words (
                     WoTextLC, WoText, WoTranslation, WoRomanization, WoSentence,
                     WoStatus, WoStatusChanged, WoLgID,
                     " . WordStatusService::makeScoreRandomInsertUpdate('iv') . "
@@ -771,42 +770,43 @@ class WordUploadService
                     SELECT WoTextLC, WoText, WoTranslation, WoRomanization,
                     WoSentence, $status AS WoStatus,
                     NOW() AS WoStatusChanged
-                    FROM " . $tbpref . "tempwords
+                    FROM tempwords
                 ) AS tw";
 
             if ($overwrite == 1 || $overwrite == 4) {
                 $sql .= " ON DUPLICATE KEY UPDATE " .
-                    ($fields["tr"] ? $tbpref . "words.WoTranslation = tw.WoTranslation, " : "") .
-                    ($fields["ro"] ? $tbpref . "words.WoRomanization = tw.WoRomanization, " : '') .
-                    ($fields["se"] ? $tbpref . "words.WoSentence = tw.WoSentence, " : '') .
-                    $tbpref . "words.WoStatus = tw.WoStatus,
-                    " . $tbpref . "words.WoStatusChanged = tw.WoStatusChanged";
+                    ($fields["tr"] ? "words.WoTranslation = tw.WoTranslation, " : "") .
+                    ($fields["ro"] ? "words.WoRomanization = tw.WoRomanization, " : '') .
+                    ($fields["se"] ? "words.WoSentence = tw.WoSentence, " : '') .
+                    "words.WoStatus = tw.WoStatus,
+                    words.WoStatusChanged = tw.WoStatusChanged";
             }
 
             if ($overwrite == 2) {
                 $sql .= " ON DUPLICATE KEY UPDATE
-                    " . $tbpref . "words.WoTranslation = CASE
-                        WHEN " . $tbpref . "words.WoTranslation = \"*\" THEN tw.WoTranslation
-                        ELSE " . $tbpref . "words.WoTranslation
+                    words.WoTranslation = CASE
+                        WHEN words.WoTranslation = \"*\" THEN tw.WoTranslation
+                        ELSE words.WoTranslation
                     END,
-                    " . $tbpref . "words.WoRomanization = CASE
-                        WHEN " . $tbpref . "words.WoRomanization IS NULL THEN tw.WoRomanization
-                        ELSE " . $tbpref . "words.WoRomanization
+                    words.WoRomanization = CASE
+                        WHEN words.WoRomanization IS NULL THEN tw.WoRomanization
+                        ELSE words.WoRomanization
                     END,
-                    " . $tbpref . "words.WoSentence = CASE
-                        WHEN " . $tbpref . "words.WoSentence IS NULL THEN tw.WoSentence
-                        ELSE " . $tbpref . "words.WoSentence
+                    words.WoSentence = CASE
+                        WHEN words.WoSentence IS NULL THEN tw.WoSentence
+                        ELSE words.WoSentence
                     END,
-                    " . $tbpref . "words.WoStatusChanged = CASE
-                        WHEN " . $tbpref . "words.WoSentence IS NULL OR " . $tbpref . "words.WoRomanization IS NULL OR " . $tbpref . "words.WoTranslation = \"*\"
+                    words.WoStatusChanged = CASE
+                        WHEN words.WoSentence IS NULL OR words.WoRomanization IS NULL OR words.WoTranslation = \"*\"
                         THEN tw.WoStatusChanged
-                        ELSE " . $tbpref . "words.WoStatusChanged
+                        ELSE words.WoStatusChanged
                     END";
             }
         } else {
             // Overwrite modes 3 and 5: only update existing, don't insert new
-            $sql = "UPDATE " . $tbpref . "words AS a
-                JOIN " . $tbpref . "tempwords AS b
+            $bindings = [];
+            $sql = "UPDATE words AS a
+                JOIN tempwords AS b
                 ON a.WoTextLC = b.WoTextLC SET
                 a.WoTranslation = CASE
                     WHEN b.WoTranslation = '' OR b.WoTranslation = '*' THEN a.WoTranslation
@@ -824,7 +824,8 @@ class WordUploadService
                     WHEN (b.WoTranslation = '' OR b.WoTranslation = '*') AND (b.WoRomanization IS NULL OR b.WoRomanization = '') AND (b.WoSentence IS NULL OR b.WoSentence = '')
                     THEN a.WoStatusChanged
                     ELSE NOW()
-                END";
+                END"
+                . UserScopedQuery::forTablePrepared('words', $bindings, 'a');
         }
 
         Connection::execute($sql);
@@ -839,40 +840,40 @@ class WordUploadService
      */
     private function handleTagsImport(int $langId): void
     {
-        $tbpref = Globals::getTablePrefix();
         // Insert new tags
         Connection::execute(
-            "INSERT IGNORE INTO " . $tbpref . "tags (TgText)
+            "INSERT IGNORE INTO tags (TgText)
             SELECT name FROM (
-                SELECT " . $tbpref . "tempwords.WoTextLC,
+                SELECT tempwords.WoTextLC,
                 SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
-                        " . $tbpref . "tempwords.WoTaglist, ',',
-                        " . $tbpref . "numbers.n
+                        tempwords.WoTaglist, ',',
+                        numbers.n
                     ), ',', -1) name
-                FROM " . $tbpref . "numbers
-                INNER JOIN " . $tbpref . "tempwords
-                ON CHAR_LENGTH(" . $tbpref . "tempwords.WoTaglist)-CHAR_LENGTH(REPLACE(" . $tbpref . "tempwords.WoTaglist, ',', ''))>=" . $tbpref . "numbers.n-1
+                FROM numbers
+                INNER JOIN tempwords
+                ON CHAR_LENGTH(tempwords.WoTaglist)-CHAR_LENGTH(REPLACE(tempwords.WoTaglist, ',', ''))>= numbers.n-1
                 ORDER BY WoTextLC, n) A"
         );
 
         // Link words to tags
-        Connection::preparedExecute(
-            "INSERT IGNORE INTO " . $tbpref . "wordtags
+        $bindings = [$langId];
+        $sql = "INSERT IGNORE INTO wordtags
             SELECT WoID, TgID
             FROM (
-                SELECT " . $tbpref . "tempwords.WoTextLC, SUBSTRING_INDEX(
+                SELECT tempwords.WoTextLC, SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
-                        " . $tbpref . "tempwords.WoTaglist, ',', " . $tbpref . "numbers.n
+                        tempwords.WoTaglist, ',', numbers.n
                     ), ',', -1) name
-                FROM " . $tbpref . "numbers
-                INNER JOIN " . $tbpref . "tempwords
-                ON CHAR_LENGTH(" . $tbpref . "tempwords.WoTaglist)-CHAR_LENGTH(REPLACE(" . $tbpref . "tempwords.WoTaglist, ',', ''))>=" . $tbpref . "numbers.n-1
+                FROM numbers
+                INNER JOIN tempwords
+                ON CHAR_LENGTH(tempwords.WoTaglist)-CHAR_LENGTH(REPLACE(tempwords.WoTaglist, ',', ''))>= numbers.n-1
                 ORDER BY WoTextLC, n
-            ) A, " . $tbpref . "tags, " . $tbpref . "words
-            WHERE name=TgText AND A.WoTextLC=" . $tbpref . "words.WoTextLC AND WoLgID=?",
-            [$langId]
-        );
+            ) A, tags, words
+            WHERE name=TgText AND A.WoTextLC=words.WoTextLC AND WoLgID=?"
+            . UserScopedQuery::forTablePrepared('words', $bindings);
+
+        Connection::preparedExecute($sql, [$langId]);
 
         TagService::getAllTermTags(true);
     }
@@ -884,9 +885,8 @@ class WordUploadService
      */
     private function cleanupTempTables(): void
     {
-        $tbpref = Globals::getTablePrefix();
-        Connection::execute("DROP TABLE IF EXISTS " . $tbpref . "numbers");
-        Connection::execute("TRUNCATE " . $tbpref . "tempwords");
+        Connection::execute("DROP TABLE IF EXISTS numbers");
+        QueryBuilder::table('tempwords')->truncate();
     }
 
     /**
@@ -910,9 +910,8 @@ class WordUploadService
         $delimiter = ' ' . $this->getSqlDelimiter($tabType);
 
         if ($this->isLocalInfileEnabled()) {
-            $tbpref = Globals::getTablePrefix();
             $sql = "LOAD DATA LOCAL INFILE ?
-                IGNORE INTO TABLE " . $tbpref . "tempwords
+                IGNORE INTO TABLE tempwords
                 FIELDS TERMINATED BY '$delimiter' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' " .
                 ($ignoreFirst ? "IGNORE 1 LINES " : "") .
                 "$columns
@@ -951,31 +950,29 @@ class WordUploadService
             }
 
             if (!empty($placeholders)) {
-                $tbpref = Globals::getTablePrefix();
-                $sql = "INSERT INTO " . $tbpref . "tempwords(WoTextLC)
+                $sql = "INSERT INTO tempwords(WoTextLC)
                     VALUES " . implode(',', $placeholders);
                 Connection::preparedExecute($sql, $params);
             }
         }
 
         // Create numbers table and insert tags
-        $tbpref = Globals::getTablePrefix();
         Connection::execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS " . $tbpref . "numbers(
+            "CREATE TEMPORARY TABLE IF NOT EXISTS numbers(
                 n tinyint(3) unsigned NOT NULL
             )");
-        Connection::execute("INSERT IGNORE INTO " . $tbpref . "numbers(n) VALUES ('1'),('2'),('3'),
+        Connection::execute("INSERT IGNORE INTO numbers(n) VALUES ('1'),('2'),('3'),
             ('4'),('5'),('6'),('7'),('8'),('9')");
 
-        Connection::execute("INSERT IGNORE INTO " . $tbpref . "tags (TgText)
+        Connection::execute("INSERT IGNORE INTO tags (TgText)
             SELECT NAME FROM (
                 SELECT SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
-                        " . $tbpref . "tempwords.WoTextLC, ',', " . $tbpref . "numbers.n
+                        tempwords.WoTextLC, ',', numbers.n
                     ), ',', -1) name
-                FROM " . $tbpref . "numbers
-                INNER JOIN " . $tbpref . "tempwords
-                ON CHAR_LENGTH(" . $tbpref . "tempwords.WoTextLC)-CHAR_LENGTH(REPLACE(" . $tbpref . "tempwords.WoTextLC, ',', ''))>= " . $tbpref . "numbers.n-1
+                FROM numbers
+                INNER JOIN tempwords
+                ON CHAR_LENGTH(tempwords.WoTextLC)-CHAR_LENGTH(REPLACE(tempwords.WoTextLC, ',', ''))>= numbers.n-1
                 ORDER BY WoTextLC, n) A");
 
         $this->cleanupTempTables();
@@ -992,11 +989,10 @@ class WordUploadService
      */
     public function handleMultiwords(int $langId, string $lastUpdate): void
     {
-        $mwords = (int) Connection::preparedFetchValue(
-            "SELECT count(*) AS value FROM " . Globals::getTablePrefix() . "words
-            WHERE WoWordCount > 1 AND WoCreated > ?",
-            [$lastUpdate]
-        );
+        $mwords = QueryBuilder::table('words')
+            ->where('WoWordCount', '>', 1)
+            ->where('WoCreated', '>', $lastUpdate)
+            ->countPrepared();
 
         if ($mwords > 40) {
             // Bulk update: delete and recreate all text items
@@ -1008,11 +1004,11 @@ class WordUploadService
                 ->delete();
             Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-            $tbpref = Globals::getTablePrefix();
-            $rows = Connection::preparedFetchAll(
-                "SELECT TxID, TxText FROM " . $tbpref . "texts WHERE TxLgID = ? ORDER BY TxID",
-                [$langId]
-            );
+            $rows = QueryBuilder::table('texts')
+                ->select(['TxID', 'TxText'])
+                ->where('TxLgID', '=', $langId)
+                ->orderBy('TxID')
+                ->getPrepared();
             foreach ($rows as $record) {
                 $txtid = (int) $record["TxID"];
                 $txttxt = (string) $record["TxText"];
@@ -1021,11 +1017,11 @@ class WordUploadService
         } elseif ($mwords > 0) {
             // Update individual multi-word expressions
             $sqlarr = [];
-            $tbpref = Globals::getTablePrefix();
-            $rows = Connection::preparedFetchAll(
-                "SELECT WoID, WoTextLC, WoWordCount FROM " . $tbpref . "words WHERE WoWordCount > 1 AND WoCreated > ?",
-                [$lastUpdate]
-            );
+            $rows = QueryBuilder::table('words')
+                ->select(['WoID', 'WoTextLC', 'WoWordCount'])
+                ->where('WoWordCount', '>', 1)
+                ->where('WoCreated', '>', $lastUpdate)
+                ->getPrepared();
             foreach ($rows as $record) {
                 $len = (int) $record['WoWordCount'];
                 $wid = (int) $record['WoID'];
@@ -1036,7 +1032,7 @@ class WordUploadService
             $sqlarr = array_filter($sqlarr);
 
             if (!empty($sqlarr)) {
-                $sqltext = "INSERT INTO " . $tbpref . "textitems2 (
+                $sqltext = "INSERT INTO textitems2 (
                     Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
                 ) VALUES " . rtrim(implode(',', $sqlarr), ',');
                 Connection::query($sqltext);
@@ -1051,9 +1047,10 @@ class WordUploadService
      */
     public function getLastWordUpdate(): ?string
     {
-        return Connection::fetchValue(
-            "SELECT max(WoStatusChanged) AS value FROM " . Globals::getTablePrefix() . "words"
-        );
+        $result = QueryBuilder::table('words')
+            ->select(['MAX(WoStatusChanged) AS max_date'])
+            ->first();
+        return $result !== null ? (string)$result['max_date'] : null;
     }
 
     /**
@@ -1063,12 +1060,13 @@ class WordUploadService
      */
     public function linkWordsToTextItems(): void
     {
-        $tbpref = Globals::getTablePrefix();
-        Connection::execute(
-            "UPDATE " . $tbpref . "words
-            JOIN " . $tbpref . "textitems2
+        $bindings = [];
+        $sql = "UPDATE words
+            JOIN textitems2
             ON WoWordCount=1 AND Ti2WoID=0 AND lower(Ti2Text)=WoTextLC AND Ti2LgID = WoLgID
-            SET Ti2WoID=WoID");
+            SET Ti2WoID=WoID"
+            . UserScopedQuery::forTablePrepared('words', $bindings);
+        Connection::execute($sql);
     }
 
     /**
@@ -1080,11 +1078,9 @@ class WordUploadService
      */
     public function countImportedTerms(string $lastUpdate): int
     {
-        return (int) Connection::preparedFetchValue(
-            "SELECT count(*) AS value FROM " . Globals::getTablePrefix() . "words
-            WHERE WoStatusChanged > ?",
-            [$lastUpdate]
-        );
+        return QueryBuilder::table('words')
+            ->where('WoStatusChanged', '>', $lastUpdate)
+            ->countPrepared();
     }
 
     /**
@@ -1098,19 +1094,20 @@ class WordUploadService
      */
     public function getImportedTerms(string $lastUpdate, int $offset, int $limit): array
     {
-        $tbpref = Globals::getTablePrefix();
+        $bindings = [$lastUpdate, $offset, $limit];
         $sql = "SELECT w.WoID, w.WoText, w.WoTextLC, w.WoTranslation,
                 w.WoRomanization, w.WoSentence, w.WoStatus,
                 GROUP_CONCAT(t.TgText ORDER BY t.TgText SEPARATOR ', ') as taglist,
                 CASE WHEN w.WoSentence != '' AND w.WoSentence LIKE CONCAT('%{', w.WoText, '}%')
                     THEN 1 ELSE 0 END as SentOK
-            FROM " . $tbpref . "words w
-            LEFT JOIN " . $tbpref . "wordtags wt ON w.WoID = wt.WtWoID
-            LEFT JOIN " . $tbpref . "tags t ON wt.WtTgID = t.TgID
+            FROM words w
+            LEFT JOIN wordtags wt ON w.WoID = wt.WtWoID
+            LEFT JOIN tags t ON wt.WtTgID = t.TgID
             WHERE w.WoStatusChanged > ?
             GROUP BY w.WoID
             ORDER BY w.WoText
-            LIMIT ?, ?";
+            LIMIT ?, ?"
+            . UserScopedQuery::forTablePrepared('words', $bindings, 'w');
 
         return Connection::preparedFetchAll($sql, [$lastUpdate, $offset, $limit]);
     }

@@ -17,6 +17,8 @@ namespace Lwt\Services {
 use Lwt\Core\Globals;
 use Lwt\Core\Http\ParamHelpers;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
+use Lwt\Database\UserScopedQuery;
 use Lwt\Database\Validation;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\IconHelper;
@@ -139,26 +141,28 @@ class TextNavigationService
         if ($onlyAnn) {
             $sql = 'SELECT TxID
             FROM (
-                (' . Globals::table('texts') . '
-                    LEFT JOIN ' . Globals::table('texttags') . ' ON TxID = TtTxID
+                (texts
+                    LEFT JOIN texttags ON TxID = TtTxID
                 )
-                LEFT JOIN ' . Globals::table('tags2') . ' ON T2ID = TtT2ID
-            ), ' . Globals::table('languages') . '
+                LEFT JOIN tags2 ON T2ID = TtT2ID
+            ), languages
             WHERE LgID = TxLgID AND LENGTH(TxAnnotatedText) > 0 '
             . $wh_lang . $wh_query . '
             GROUP BY TxID ' . $wh_tag . '
-            ORDER BY ' . $sorts[$currentsort - 1];
+            ORDER BY ' . $sorts[$currentsort - 1]
+            . UserScopedQuery::forTablePrepared('texts', $params);
         } else {
             $sql = 'SELECT TxID
             FROM (
-                (' . Globals::table('texts') . '
-                    LEFT JOIN ' . Globals::table('texttags') . ' ON TxID = TtTxID
+                (texts
+                    LEFT JOIN texttags ON TxID = TtTxID
                 )
-                LEFT JOIN ' . Globals::table('tags2') . ' ON T2ID = TtT2ID
-            ), ' . Globals::table('languages') . '
+                LEFT JOIN tags2 ON T2ID = TtT2ID
+            ), languages
             WHERE LgID = TxLgID ' . $wh_lang . $wh_query . '
             GROUP BY TxID ' . $wh_tag . '
-            ORDER BY ' . $sorts[$currentsort - 1];
+            ORDER BY ' . $sorts[$currentsort - 1]
+            . UserScopedQuery::forTablePrepared('texts', $params);
         }
 
         $list = array(0);
@@ -200,7 +204,7 @@ namespace {
 // =============================================================================
 
 use Lwt\Services\TextNavigationService;
-use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 
 /**
  * Get the title of a text by its ID.
@@ -211,8 +215,9 @@ use Lwt\Database\Connection;
  */
 function getTextTitle(int $textId): string
 {
-    $sql = "SELECT TxTitle AS value FROM " . \Lwt\Core\Globals::table('texts') . " WHERE TxID = ?";
-    $result = Connection::preparedFetchValue($sql, [$textId]);
+    $result = QueryBuilder::table('texts')
+        ->where('TxID', '=', $textId)
+        ->valuePrepared('TxTitle');
     return $result !== null ? (string) $result : '';
 }
 

@@ -2,7 +2,7 @@
 namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Core\Globals;
-use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
@@ -43,13 +43,10 @@ class LanguageHandler
      */
     public function getReadingConfiguration(int $langId): array
     {
-        $tableName = Globals::table('languages');
-
-        $record = Connection::preparedFetchOne(
-            "SELECT LgName, LgTTSVoiceAPI, LgRegexpWordCharacters
-             FROM {$tableName} WHERE LgID = ?",
-            [$langId]
-        );
+        $record = QueryBuilder::table('languages')
+            ->select(['LgName', 'LgTTSVoiceAPI', 'LgRegexpWordCharacters'])
+            ->where('LgID', '=', $langId)
+            ->firstPrepared();
 
         $abbr = $this->languageService->getLanguageCode($langId, LanguageDefinitions::getAll());
 

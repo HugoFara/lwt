@@ -3,6 +3,7 @@ namespace Lwt\Api\V1\Handlers;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 
 /**
  * Handler for imported terms API operations.
@@ -43,25 +44,24 @@ class ImportHandler
      */
     public function selectImportedTerms(string $lastUpdate, int $offset, int $maxTerms): array
     {
-        $wordsTable = Globals::table('words');
-        $wordtagsTable = Globals::table('wordtags');
-        $tagsTable = Globals::table('tags');
-        $sql = "SELECT WoID, WoText, WoTranslation, WoRomanization, WoSentence,
-        IFNULL(WoSentence, '') LIKE CONCAT('%{', WoText, '}%') AS SentOK,
-        WoStatus,
-        IFNULL(
-            group_concat(DISTINCT TgText ORDER BY TgText separator ','),
-            ''
-        ) AS taglist
-        FROM (
-            ({$wordsTable} LEFT JOIN {$wordtagsTable} ON WoID = WtWoID)
-            LEFT JOIN {$tagsTable} ON TgID = WtTgID
-        )
-        WHERE WoStatusChanged > ?
-        GROUP BY WoID
-        LIMIT ?, ?";
-
-        return Connection::preparedFetchAll($sql, [$lastUpdate, $offset, $maxTerms]);
+        return QueryBuilder::table('words')
+            ->select([
+                'words.WoID',
+                'words.WoText',
+                'words.WoTranslation',
+                'words.WoRomanization',
+                'words.WoSentence',
+                "IFNULL(words.WoSentence, '') LIKE CONCAT('%{', words.WoText, '}%') AS SentOK",
+                'words.WoStatus',
+                "IFNULL(group_concat(DISTINCT tags.TgText ORDER BY tags.TgText separator ','), '') AS taglist"
+            ])
+            ->leftJoin('wordtags', 'words.WoID', '=', 'wordtags.WtWoID')
+            ->leftJoin('tags', 'tags.TgID', '=', 'wordtags.WtTgID')
+            ->where('words.WoStatusChanged', '>', $lastUpdate)
+            ->groupBy('words.WoID')
+            ->limit($maxTerms)
+            ->offset($offset)
+            ->getPrepared();
     }
 
     /**

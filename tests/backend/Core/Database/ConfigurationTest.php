@@ -63,7 +63,6 @@ class ConfigurationTest extends TestCase
         $this->assertArrayHasKey('passwd', $config);
         $this->assertArrayHasKey('dbname', $config);
         $this->assertArrayHasKey('socket', $config);
-        $this->assertArrayHasKey('tbpref', $config);
     }
 
     public function testLoadFromEnvWithInvalidPath(): void
@@ -77,7 +76,6 @@ class ConfigurationTest extends TestCase
         $this->assertEquals('', $config['passwd']);
         $this->assertEquals('learning-with-texts', $config['dbname']);
         $this->assertEquals('', $config['socket']);
-        $this->assertNull($config['tbpref']);
     }
 
     public function testLoadFromEnvReturnsCompleteConfig(): void
@@ -91,7 +89,7 @@ class ConfigurationTest extends TestCase
         $config = Configuration::loadFromEnv($envPath);
 
         // All required keys should be present
-        $requiredKeys = ['server', 'userid', 'passwd', 'dbname', 'socket', 'tbpref'];
+        $requiredKeys = ['server', 'userid', 'passwd', 'dbname', 'socket'];
         foreach ($requiredKeys as $key) {
             $this->assertArrayHasKey($key, $config, "Config should contain key: $key");
         }
