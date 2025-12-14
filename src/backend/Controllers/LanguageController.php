@@ -164,21 +164,6 @@ class LanguageController extends BaseController
         $allLanguages = $this->languageService->getAllLanguages();
 
         include __DIR__ . '/../Views/Language/form.php';
-
-        ?>
-        <p class="smallgray">
-            <b>Important:</b>
-            <br />
-            The placeholders "••" for the from/sl and dest/tl language codes in the
-            URIs must be <b>replaced</b> by the actual source and target language
-            codes!<br />
-            <a href="docs/info.html#howtolang" target="_blank">Please read the documentation</a>.
-            Languages with a <b>non-Latin alphabet need special attention</b>,
-            <a href="docs/info.html#langsetup" target="_blank">see also here</a>.
-        </p>
-        <?php
-
-        include __DIR__ . '/../Views/Language/voice_api_help.php';
     }
 
     /**
@@ -216,16 +201,6 @@ class LanguageController extends BaseController
         <?php
 
         include __DIR__ . '/../Views/Language/form.php';
-
-        ?>
-    <p class="smallgray">
-        <b>Warning:</b> Changing certain language settings
-        (e.g. RegExp Word Characters, etc.)<wbr />
-        may cause partial or complete loss of improved annotated texts!
-    </p>
-        <?php
-
-        include __DIR__ . '/../Views/Language/voice_api_help.php';
     }
 
     /**

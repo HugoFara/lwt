@@ -425,17 +425,13 @@ export function prepareMainAreas(): void {
   // Tags are fetched from API asynchronously
   if (document.getElementById('termtags')) {
     fetchTermTags().then(tags => {
-      if (tags.length > 0) {
-        initTermTags(tags);
-      }
+      initTermTags(tags);
     });
   }
 
   if (document.getElementById('texttags')) {
     fetchTextTags().then(tags => {
-      if (tags.length > 0) {
-        initTextTags(tags);
-      }
+      initTextTags(tags);
     });
   }
 

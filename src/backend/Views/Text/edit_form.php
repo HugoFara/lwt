@@ -68,204 +68,192 @@ if ($isNew) {
 
     <div class="box">
         <!-- Language -->
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label" for="TxLgID">Language</label>
-            </div>
-            <div class="field-body">
-                <div class="field has-addons">
-                    <div class="control is-expanded">
-                        <div class="select is-fullwidth">
-                            <select name="TxLgID" id="TxLgID" class="notempty setfocus"
-                                    data-action="change-language" required>
-                                <?php echo SelectOptionsBuilder::forLanguages($languages, $text->lgid, "[Choose...]"); ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                        </span>
-                    </div>
+        <div class="field">
+            <label class="label" for="TxLgID">
+                Language
+                <span class="icon has-text-danger is-small" title="Required field">
+                    <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                </span>
+            </label>
+            <div class="control">
+                <div class="select is-fullwidth">
+                    <select name="TxLgID" id="TxLgID" class="notempty setfocus"
+                            data-action="change-language"
+                            title="Select the language of your text"
+                            required>
+                        <?php echo SelectOptionsBuilder::forLanguages($languages, $text->lgid, "[Choose...]"); ?>
+                    </select>
                 </div>
             </div>
+            <p class="help">The language determines how the text will be parsed into words and sentences.</p>
         </div>
 
         <!-- Title -->
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label" for="TxTitle">Title</label>
-            </div>
-            <div class="field-body">
-                <div class="field has-addons">
-                    <div class="control is-expanded">
-                        <input type="text"
-                               class="input notempty checkoutsidebmp"
-                               data_info="Title"
-                               name="TxTitle"
-                               id="TxTitle"
-                               value="<?php echo \htmlspecialchars($text->title ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                               maxlength="200"
-                               required />
-                    </div>
-                    <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                        </span>
-                    </div>
-                </div>
+        <div class="field">
+            <label class="label" for="TxTitle">
+                Title
+                <span class="icon has-text-danger is-small" title="Required field">
+                    <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                </span>
+            </label>
+            <div class="control">
+                <input type="text"
+                       class="input notempty checkoutsidebmp"
+                       data_info="Title"
+                       name="TxTitle"
+                       id="TxTitle"
+                       value="<?php echo \htmlspecialchars($text->title ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       maxlength="200"
+                       placeholder="Enter a descriptive title for your text"
+                       title="A short, memorable title to identify this text"
+                       required />
             </div>
         </div>
 
         <!-- Text Content -->
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label" for="TxText">
-                    Text
-                    <span class="has-text-grey is-size-7">(max. 65,000 bytes)</span>
-                </label>
+        <div class="field">
+            <label class="label" for="TxText">
+                Text
+                <span class="icon has-text-danger is-small" title="Required field">
+                    <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                </span>
+            </label>
+            <div class="control">
+                <textarea <?php echo $scrdir; ?>
+                          name="TxText"
+                          id="TxText"
+                          class="textarea notempty checkbytes checkoutsidebmp"
+                          data_maxlength="65000"
+                          data_info="Text"
+                          rows="15"
+                          placeholder="Paste or type your text here..."
+                          title="The text you want to study"
+                          required><?php echo \htmlspecialchars($text->text ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
-            <div class="field-body">
-                <div class="field has-addons">
-                    <div class="control is-expanded">
-                        <textarea <?php echo $scrdir; ?>
-                                  name="TxText"
-                                  id="TxText"
-                                  class="textarea notempty checkbytes checkoutsidebmp"
-                                  data_maxlength="65000"
-                                  data_info="Text"
-                                  rows="15"
-                                  required><?php echo \htmlspecialchars($text->text ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-                    </div>
-                    <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                        </span>
-                    </div>
-                </div>
-            </div>
+            <p class="help">Maximum 65,000 bytes. For longer texts, use the Long Text Import feature.</p>
         </div>
 
         <!-- Annotated Text (only for existing texts) -->
         <?php if (!$isNew): ?>
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label">Annotated Text</label>
-            </div>
-            <div class="field-body">
-                <div class="field">
-                    <div class="control">
-                        <?php if ($annotated): ?>
-                        <div class="notification is-info is-light">
-                            <span class="icon-text">
-                                <span class="icon has-text-success">
-                                    <?php echo IconHelper::render('check', ['alt' => 'Has Annotation']); ?>
-                                </span>
-                                <span>Exists - May be partially or fully lost if you change the text!</span>
+        <div class="field">
+            <label class="label">Annotated Text</label>
+            <div class="control">
+                <?php if ($annotated): ?>
+                <div class="notification is-info is-light">
+                    <span class="icon-text">
+                        <span class="icon has-text-success">
+                            <?php echo IconHelper::render('check', ['alt' => 'Has Annotation']); ?>
+                        </span>
+                        <span>Exists - May be partially or fully lost if you change the text!</span>
+                    </span>
+                    <div class="mt-2">
+                        <button type="button"
+                                class="button is-small is-info is-outlined"
+                                data-action="navigate"
+                                data-url="/text/print?text=<?php echo $textId; ?>">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('printer', ['alt' => 'Print']); ?>
                             </span>
-                            <div class="mt-2">
-                                <button type="button"
-                                        class="button is-small is-info is-outlined"
-                                        data-action="navigate"
-                                        data-url="/text/print?text=<?php echo $textId; ?>">
-                                    <span class="icon is-small">
-                                        <?php echo IconHelper::render('printer', ['alt' => 'Print']); ?>
-                                    </span>
-                                    <span>Print/Edit...</span>
-                                </button>
-                            </div>
-                        </div>
-                        <?php else: ?>
-                        <div class="notification is-light">
-                            <span class="icon-text">
-                                <span class="icon has-text-grey">
-                                    <?php echo IconHelper::render('x', ['alt' => 'No Annotation']); ?>
-                                </span>
-                                <span>None</span>
-                            </span>
-                            <div class="mt-2">
-                                <button type="button"
-                                        class="button is-small is-outlined"
-                                        data-action="navigate"
-                                        data-url="print_impr_text.php?edit=1&amp;text=<?php echo $textId; ?>">
-                                    <span class="icon is-small">
-                                        <?php echo IconHelper::render('plus', ['alt' => 'Create']); ?>
-                                    </span>
-                                    <span>Create/Print...</span>
-                                </button>
-                            </div>
-                        </div>
-                        <?php endif; ?>
+                            <span>Print/Edit...</span>
+                        </button>
                     </div>
                 </div>
+                <?php else: ?>
+                <div class="notification is-light">
+                    <span class="icon-text">
+                        <span class="icon has-text-grey">
+                            <?php echo IconHelper::render('x', ['alt' => 'No Annotation']); ?>
+                        </span>
+                        <span>None</span>
+                    </span>
+                    <div class="mt-2">
+                        <button type="button"
+                                class="button is-small is-outlined"
+                                data-action="navigate"
+                                data-url="print_impr_text.php?edit=1&amp;text=<?php echo $textId; ?>">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render('plus', ['alt' => 'Create']); ?>
+                            </span>
+                            <span>Create/Print...</span>
+                        </button>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
         <?php endif; ?>
 
         <!-- Source URI -->
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label" for="TxSourceURI">Source URI</label>
+        <div class="field">
+            <label class="label" for="TxSourceURI">Source URI</label>
+            <div class="control">
+                <input type="url"
+                       class="input checkurl checkoutsidebmp"
+                       data_info="Source URI"
+                       name="TxSourceURI"
+                       id="TxSourceURI"
+                       value="<?php echo \htmlspecialchars($text->source ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       maxlength="1000"
+                       placeholder="https://example.com/article"
+                       title="Link to the original source of this text" />
             </div>
-            <div class="field-body">
-                <div class="field">
-                    <div class="control">
-                        <input type="url"
-                               class="input checkurl checkoutsidebmp"
-                               data_info="Source URI"
-                               name="TxSourceURI"
-                               id="TxSourceURI"
-                               value="<?php echo \htmlspecialchars($text->source ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                               maxlength="1000"
-                               placeholder="https://..." />
-                    </div>
-                </div>
-            </div>
+            <p class="help">Optional. The original webpage or document where this text came from.</p>
         </div>
 
         <!-- Tags -->
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label">Tags</label>
+        <div class="field">
+            <label class="label" title="Organize texts with tags for easy filtering">Tags</label>
+            <div class="control">
+                <?php echo \Lwt\Services\TagService::getTextTagsHtml($textId); ?>
             </div>
-            <div class="field-body">
-                <div class="field">
-                    <div class="control">
-                        <?php echo \Lwt\Services\TagService::getTextTagsHtml($textId); ?>
-                    </div>
-                </div>
-            </div>
+            <p class="help">Optional. Add tags to categorize and filter your texts.</p>
         </div>
 
         <!-- Media URI -->
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label" for="TxAudioURI" title="A soundtrack or a video to be displayed while reading">
-                    Media URI
-                </label>
+        <div class="field">
+            <label class="label" for="TxAudioURI">Media URI</label>
+            <div class="control">
+                <input type="text"
+                       class="input checkoutsidebmp"
+                       data_info="Audio-URI"
+                       name="TxAudioURI"
+                       id="TxAudioURI"
+                       maxlength="2048"
+                       value="<?php echo \htmlspecialchars($text->media_uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       placeholder="media/audio.mp3 or https://example.com/video.mp4"
+                       title="Audio or video file to play while reading" />
             </div>
-            <div class="field-body">
-                <div class="field has-addons">
-                    <div class="control is-expanded">
-                        <input type="text"
-                               class="input checkoutsidebmp"
-                               data_info="Audio-URI"
-                               name="TxAudioURI"
-                               id="TxAudioURI"
-                               maxlength="2048"
-                               value="<?php echo \htmlspecialchars($text->media_uri ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                               placeholder="Path to audio/video file or URL" />
-                    </div>
-                    <div class="control" id="mediaselect">
-                        <?php echo (new MediaService())->getMediaPathSelector('TxAudioURI'); ?>
-                    </div>
-                </div>
+            <p class="help">Optional. Audio or video file to accompany the text (YouTube, Dailymotion, Vimeo URLs also supported).</p>
+            <div class="mt-2" id="mediaselect">
+                <?php echo (new MediaService())->getMediaPathSelector('TxAudioURI'); ?>
             </div>
         </div>
 
-        <?php if ($isNew && defined('YT_API_KEY') && YT_API_KEY != null) {
-            \Lwt\Text_From_Youtube\doFormFragment();
-        } ?>
+        <?php if ($isNew && defined('YT_API_KEY') && YT_API_KEY != null): ?>
+        <!-- YouTube Import -->
+        <div class="field">
+            <label class="label" for="ytVideoId">YouTube Video</label>
+            <div class="control">
+                <div class="field has-addons mb-0">
+                    <div class="control is-expanded">
+                        <input type="text"
+                               class="input"
+                               id="ytVideoId"
+                               placeholder="e.g., dQw4w9WgXcQ"
+                               title="The video ID from a YouTube URL" />
+                    </div>
+                    <div class="control">
+                        <button type="button" class="button is-info" data-action="fetch-youtube">
+                            Fetch from YouTube
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" id="ytApiKey" value="<?php echo YT_API_KEY ?>" />
+            </div>
+            <p class="help">Optional. Enter a YouTube video ID to import its captions as text.</p>
+            <p id="ytDataStatus" class="help"></p>
+        </div>
+        <?php endif; ?>
     </div>
 
     <!-- Form Actions -->
