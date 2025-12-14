@@ -2,6 +2,10 @@
 /**
  * Table Set Service - Business logic for table set management
  *
+ * This service manages table prefixes for the legacy multi-instance system.
+ * When multi-user mode is enabled, this functionality is replaced by
+ * user_id-based data isolation and this service becomes deprecated.
+ *
  * PHP version 8.1
  *
  * @category Lwt
@@ -10,6 +14,9 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @deprecated 3.0.0 Use user_id-based isolation instead when multi-user mode is enabled.
+ *             This service will be removed in a future version.
  */
 
 namespace Lwt\Services;
@@ -21,12 +28,18 @@ use Lwt\Database\Settings;
 /**
  * Service class for managing table sets (prefixes).
  *
+ * This is a legacy service for the table-prefix-based multi-instance system.
+ * When multi-user mode is enabled (MULTI_USER_ENABLED=true), user isolation
+ * is handled via user_id columns and this service should not be used.
+ *
  * @category Lwt
  * @package  Lwt\Services
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
  * @since    3.0.0
+ *
+ * @deprecated 3.0.0 Replaced by user_id-based isolation in multi-user mode
  */
 class TableSetService
 {
@@ -54,6 +67,43 @@ class TableSetService
     public function __construct()
     {
         $this->fixedTbpref = Globals::isTablePrefixFixed();
+    }
+
+    /**
+     * Check if table set management is available.
+     *
+     * Table set management is NOT available when:
+     * - Multi-user mode is enabled (uses user_id isolation instead)
+     * - Table prefix is fixed in .env
+     *
+     * @return bool True if table set management is available
+     */
+    public function isAvailable(): bool
+    {
+        // In multi-user mode, table sets are replaced by user_id isolation
+        if (Globals::isMultiUserEnabled()) {
+            return false;
+        }
+
+        // If prefix is fixed, management is not available
+        if ($this->fixedTbpref) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if multi-user mode is enabled.
+     *
+     * When multi-user mode is enabled, table set management is deprecated
+     * and replaced by user_id-based data isolation.
+     *
+     * @return bool True if multi-user mode is enabled
+     */
+    public function isMultiUserMode(): bool
+    {
+        return Globals::isMultiUserEnabled();
     }
 
     /**

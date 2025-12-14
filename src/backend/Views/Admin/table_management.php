@@ -23,7 +23,42 @@ namespace Lwt\Views\Admin;
 use Lwt\Core\Globals;
 use Lwt\View\Helper\IconHelper;
 
-if ($fixedTbpref):
+if ($isMultiUserMode):
+?>
+<div class="container">
+    <div class="notification is-info">
+        <div class="columns is-vcentered">
+            <div class="column is-narrow">
+                <span class="icon is-large has-text-info">
+                    <?php echo IconHelper::render('info', ['width' => 32, 'height' => 32]); ?>
+                </span>
+            </div>
+            <div class="column">
+                <p class="title is-5 mb-2">Multi-User Mode Enabled</p>
+                <div class="content">
+                    <p>
+                        Table set management is not available in multi-user mode.
+                        User data isolation is now handled automatically through user accounts.
+                    </p>
+                    <p class="has-text-grey">
+                        Each user's data (languages, texts, vocabulary) is isolated by their user account,
+                        replacing the legacy table prefix system.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="field">
+        <div class="control">
+            <a href="/" class="button is-light">
+                <?php echo IconHelper::render('arrow-left'); ?>
+                <span>Back to Main Menu</span>
+            </a>
+        </div>
+    </div>
+</div>
+<?php elseif ($fixedTbpref):
 ?>
 <div class="container">
     <div class="notification is-warning">

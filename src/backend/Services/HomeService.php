@@ -62,10 +62,24 @@ class HomeService
      * - span2: Current table set name
      * - span3: Select Table Set link (if not fixed prefix and other sets exist)
      *
+     * Note: When multi-user mode is enabled, table set management is hidden
+     * as user isolation is handled via user_id columns instead.
+     *
      * @return array{span1: string, span2: string, span3: string}
+     *
+     * @deprecated 3.0.0 Table sets are replaced by user_id-based isolation in multi-user mode
      */
     public function getTableSetSpanGroups(): array
     {
+        // In multi-user mode, table set UI is hidden - user isolation uses user_id columns
+        if (Globals::isMultiUserEnabled()) {
+            return [
+                'span1' => '<span>',
+                'span2' => '</span>',
+                'span3' => '<span>'
+            ];
+        }
+
         if (Globals::getTablePrefix() == '') {
             $span2 = "<i>Default</i> Table Set</span>";
         } else {
@@ -291,6 +305,30 @@ class HomeService
     }
 
     /**
+     * Check if table set management UI should be shown.
+     *
+     * Returns false when:
+     * - Multi-user mode is enabled (uses user_id isolation instead)
+     * - Table prefix is fixed in .env
+     *
+     * @return bool True if table set management should be available
+     */
+    public function shouldShowTableSetManagement(): bool
+    {
+        // In multi-user mode, table sets are replaced by user_id isolation
+        if (Globals::isMultiUserEnabled()) {
+            return false;
+        }
+
+        // If prefix is fixed, management is not available
+        if ($this->fixedTbpref) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Get dashboard data for rendering the home page.
      *
      * This is a convenience method that gathers all data needed
@@ -304,7 +342,9 @@ class HomeService
      *   table_prefix: string,
      *   is_fixed_prefix: bool,
      *   is_wordpress: bool,
-     *   is_debug: bool
+     *   is_debug: bool,
+     *   is_multi_user: bool,
+     *   show_table_set_management: bool
      * }
      */
     public function getDashboardData(): array
@@ -321,7 +361,9 @@ class HomeService
             'table_prefix' => Globals::getTablePrefix(),
             'is_fixed_prefix' => $this->fixedTbpref,
             'is_wordpress' => $this->isWordPressSession(),
-            'is_debug' => Globals::isDebug()
+            'is_debug' => Globals::isDebug(),
+            'is_multi_user' => Globals::isMultiUserEnabled(),
+            'show_table_set_management' => $this->shouldShowTableSetManagement()
         ];
     }
 }
