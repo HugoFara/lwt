@@ -51,8 +51,22 @@ class AuthMiddlewareTest extends TestCase
         $this->assertInstanceOf(MiddlewareInterface::class, $middleware);
     }
 
+    public function testReturnsTrueWhenMultiUserModeIsDisabled(): void
+    {
+        // Ensure multi-user mode is disabled (default)
+        Globals::setMultiUserEnabled(false);
+
+        $middleware = new AuthMiddleware();
+        $result = $middleware->handle();
+
+        // Should return true without checking authentication
+        $this->assertTrue($result);
+    }
+
     public function testReturnsTrueWhenAlreadyAuthenticated(): void
     {
+        // Enable multi-user mode to test auth behavior
+        Globals::setMultiUserEnabled(true);
         // Set user as already authenticated in Globals
         Globals::setCurrentUserId(1);
 
@@ -64,6 +78,9 @@ class AuthMiddlewareTest extends TestCase
 
     public function testReturnsTrueWhenSessionIsValid(): void
     {
+        // Enable multi-user mode to test auth behavior
+        Globals::setMultiUserEnabled(true);
+
         // Create a mock AuthService that returns true for session validation
         $mockAuthService = $this->createMock(AuthService::class);
         $mockAuthService->method('validateSession')->willReturn(true);

@@ -70,6 +70,11 @@ class AuthMiddleware implements MiddlewareInterface
      */
     public function handle(): bool
     {
+        // Skip authentication if multi-user mode is disabled
+        if (!Globals::isMultiUserEnabled()) {
+            return true;
+        }
+
         // Already authenticated in this request?
         if (Globals::isAuthenticated()) {
             return true;
