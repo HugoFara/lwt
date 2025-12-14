@@ -13,6 +13,8 @@ import { existsSync } from 'fs';
 
 const THEMES_SRC = 'src/frontend/css/themes';
 const THEMES_DEST = 'assets/themes';
+const BASE_CSS_SRC = 'src/frontend/css/base/styles.css';
+const BASE_CSS_DEST = 'assets/css/styles.css';
 
 /**
  * Simple CSS minifier - removes comments, extra whitespace, and newlines.
@@ -76,10 +78,24 @@ async function processTheme(themeName) {
 }
 
 /**
+ * Build the base CSS file.
+ */
+async function buildBaseCSS() {
+  console.log('Building base CSS...');
+  const css = await readFile(BASE_CSS_SRC, 'utf-8');
+  const minified = minifyCSS(css);
+  await writeFile(BASE_CSS_DEST, minified);
+  console.log(`  ✓ ${BASE_CSS_SRC} -> ${BASE_CSS_DEST} (minified)\n`);
+}
+
+/**
  * Main function - process all themes.
  */
 async function main() {
   console.log('Building themes...\n');
+
+  // Build base CSS first
+  await buildBaseCSS();
 
   // Ensure destination directory exists
   if (!existsSync(THEMES_DEST)) {

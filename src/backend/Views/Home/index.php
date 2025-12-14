@@ -269,7 +269,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                     <span class="icon"><i data-lucide="list"></i></span>
                     <span>Manage Languages</span>
                 </a>
-                <a href="/languages?new=1" class="button is-fullwidth is-primary is-light" title="Add New Language">
+                <a href="/languages?new=1" class="button is-fullwidth is-link is-light" title="Add New Language">
                     <span class="icon"><i data-lucide="plus"></i></span>
                     <span>New Language</span>
                 </a>
@@ -297,11 +297,11 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                     <span class="icon"><i data-lucide="file-text"></i></span>
                     <span>Texts</span>
                 </a>
-                <a href="/tags/text" class="button is-fullwidth is-light mb-2">
+                <a href="/tags/text" class="button is-fullwidth is-success is-light mb-2">
                     <span class="icon"><i data-lucide="tags"></i></span>
                     <span>Text Tags</span>
                 </a>
-                <a href="/feeds?check_autoupdate=1" class="button is-fullwidth is-warning is-light">
+                <a href="/feeds?check_autoupdate=1" class="button is-fullwidth is-success is-light">
                     <span class="icon"><i data-lucide="newspaper"></i></span>
                     <span>Newsfeeds</span>
                 </a>
@@ -329,11 +329,11 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                     <span class="icon"><i data-lucide="list"></i></span>
                     <span>Terms</span>
                 </a>
-                <a href="/tags" class="button is-fullwidth is-light mb-2">
+                <a href="/tags" class="button is-fullwidth is-link is-light mb-2">
                     <span class="icon"><i data-lucide="tag"></i></span>
                     <span>Term Tags</span>
                 </a>
-                <a href="/word/upload" class="button is-fullwidth is-light">
+                <a href="/word/upload" class="button is-fullwidth is-link is-light">
                     <span class="icon"><i data-lucide="upload"></i></span>
                     <span>Import Terms</span>
                 </a>
@@ -361,11 +361,11 @@ if ($currentTextInfo !== null && $currenttext !== null) {
                     <span class="icon"><i data-lucide="bar-chart-2"></i></span>
                     <span>Statistics</span>
                 </a>
-                <a href="docs/info.html" class="button is-fullwidth is-light mb-2">
+                <a href="docs/info.html" class="button is-fullwidth is-info is-light mb-2">
                     <span class="icon"><i data-lucide="help-circle"></i></span>
                     <span>Help</span>
                 </a>
-                <a href="/admin/server-data" class="button is-fullwidth is-light" title="Various data useful for debug">
+                <a href="/admin/server-data" class="button is-fullwidth is-info is-light" title="Various data useful for debug">
                     <span class="icon"><i data-lucide="server"></i></span>
                     <span>Server Data</span>
                 </a>
@@ -406,8 +406,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
 <!-- Version info -->
 <p class="has-text-centered has-text-grey is-size-7 mt-4">
-    LWT Version <?php echo getVersion(); ?> &mdash;
-    <?php echo (Globals::getTablePrefix() == '' ? 'default table set' : 'table prefixed with "' . Globals::getTablePrefix() . '"'); ?>
+    LWT Version <?php echo getVersion(); ?>
 </p>
 
 <!-- Footer - Alpine.js Component -->
