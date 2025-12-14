@@ -185,6 +185,15 @@ class WordPressServiceTest extends TestCase
         $this->assertNull($result);
     }
 
+    // ===== getCurrentUserInfo tests =====
+
+    public function testGetCurrentUserInfoReturnsNullWithoutWordPress(): void
+    {
+        // Without WordPress functions defined, should return null
+        $result = $this->service->getCurrentUserInfo();
+        $this->assertNull($result);
+    }
+
     // ===== loadWordPress tests =====
 
     public function testLoadWordPressReturnsBool(): void

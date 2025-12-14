@@ -14,10 +14,15 @@
 
 namespace Lwt\Services;
 
+use Lwt\Core\Globals;
+
+require_once __DIR__ . '/AuthService.php';
+
 /**
  * Service class for WordPress integration.
  *
  * Handles WordPress authentication and session management.
+ * Links WordPress users to LWT users for multi-user support.
  *
  * @category Lwt
  * @package  Lwt\Services
@@ -32,6 +37,11 @@ class WordPressService
      * Session key for WordPress user ID.
      */
     private const SESSION_KEY = 'LWT-WP-User';
+
+    /**
+     * @var AuthService|null Auth service for LWT user management
+     */
+    private ?AuthService $authService = null;
 
     /**
      * Check if WordPress is available and load it.
@@ -94,6 +104,48 @@ class WordPressService
         }
 
         return isset($current_user->ID) ? (int) $current_user->ID : null;
+    }
+
+    /**
+     * Get the current WordPress user information.
+     *
+     * @return array{id: int, username: string, email: string}|null User info or null if not logged in
+     */
+    public function getCurrentUserInfo(): ?array
+    {
+        if (!$this->isUserLoggedIn()) {
+            return null;
+        }
+
+        /** @psalm-suppress InvalidGlobal */
+        global $current_user;
+
+        if (function_exists('get_currentuserinfo')) {
+            \get_currentuserinfo();
+        }
+
+        if (!isset($current_user->ID)) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $current_user->ID,
+            'username' => $current_user->user_login ?? 'wp_user_' . $current_user->ID,
+            'email' => $current_user->user_email ?? 'wp_user_' . $current_user->ID . '@localhost'
+        ];
+    }
+
+    /**
+     * Get the AuthService instance (lazy initialization).
+     *
+     * @return AuthService
+     */
+    private function getAuthService(): AuthService
+    {
+        if ($this->authService === null) {
+            $this->authService = new AuthService();
+        }
+        return $this->authService;
     }
 
     /**
@@ -248,6 +300,10 @@ class WordPressService
     /**
      * Handle the WordPress start flow.
      *
+     * Authenticates via WordPress and links the WP user to an LWT user.
+     * If multi-user mode is enabled, creates or finds the corresponding
+     * LWT user and sets up the user context.
+     *
      * @param string|null $redirectUrl Requested redirect URL
      *
      * @return array{success: bool, redirect: string, error: string|null}
@@ -272,9 +328,9 @@ class WordPressService
             ];
         }
 
-        // Get user ID
-        $userId = $this->getCurrentUserId();
-        if ($userId === null) {
+        // Get WordPress user info
+        $wpUserInfo = $this->getCurrentUserInfo();
+        if ($wpUserInfo === null) {
             return [
                 'success' => false,
                 'redirect' => $this->getLoginUrl('./lwt/wp_lwt_start.php'),
@@ -292,8 +348,27 @@ class WordPressService
             ];
         }
 
-        // Store user in session
-        $this->setSessionUser($userId);
+        // Store WordPress user ID in session (for backward compatibility)
+        $this->setSessionUser($wpUserInfo['id']);
+
+        // Link WordPress user to LWT user (for multi-user support)
+        if (Globals::isMultiUserEnabled()) {
+            try {
+                $authService = $this->getAuthService();
+                $lwtUser = $authService->findOrCreateWordPressUser(
+                    $wpUserInfo['id'],
+                    $wpUserInfo['username'],
+                    $wpUserInfo['email']
+                );
+                $authService->setCurrentUser($lwtUser);
+            } catch (\Exception $e) {
+                return [
+                    'success' => false,
+                    'redirect' => '',
+                    'error' => 'Failed to create LWT user: ' . $e->getMessage()
+                ];
+            }
+        }
 
         // Validate redirect URL
         $redirectTo = $this->validateRedirectUrl($redirectUrl);
@@ -308,6 +383,8 @@ class WordPressService
     /**
      * Handle the WordPress stop flow.
      *
+     * Logs out from WordPress and clears the LWT user context.
+     *
      * @return array{success: bool, redirect: string}
      */
     public function handleStop(): array
@@ -315,7 +392,12 @@ class WordPressService
         // Load WordPress (if available)
         $this->loadWordPress();
 
-        // Logout and destroy session
+        // Clear LWT user context if multi-user mode is enabled
+        if (Globals::isMultiUserEnabled()) {
+            $this->getAuthService()->logout();
+        }
+
+        // Logout from WordPress and destroy session
         $this->logout();
 
         return [
