@@ -23,6 +23,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
+use Lwt\Database\UserScopedQuery;
 use Lwt\View\Helper\FormHelper;
 
 /**
@@ -944,10 +945,12 @@ class TagService
         }
 
         // Use raw SQL for LEFT JOIN with dynamic IN clause
+        // Add user scope to ensure we only modify current user's words
         $sql = 'SELECT WoID
             FROM words
             LEFT JOIN wordtags ON WoID = WtWoID AND WtTgID = ' . $tagId . '
-            WHERE WtTgID IS NULL AND WoID IN ' . $idList;
+            WHERE WtTgID IS NULL AND WoID IN ' . $idList
+            . UserScopedQuery::forTable('words');
         $res = Connection::query($sql);
 
         $count = 0;
@@ -988,7 +991,9 @@ class TagService
         }
 
         // Use raw SQL for dynamic IN clause
-        $sql = 'SELECT WoID FROM words WHERE WoID IN ' . $idList;
+        // Add user scope to ensure we only modify current user's words
+        $sql = 'SELECT WoID FROM words WHERE WoID IN ' . $idList
+            . UserScopedQuery::forTable('words');
         $res = Connection::query($sql);
 
         $count = 0;
@@ -1024,9 +1029,11 @@ class TagService
         }
 
         // Use raw SQL for LEFT JOIN with dynamic IN clause
+        // Add user scope to ensure we only modify current user's texts
         $sql = 'SELECT TxID FROM texts
             LEFT JOIN texttags ON TxID = TtTxID AND TtT2ID = ' . $tagId . '
-            WHERE TtT2ID IS NULL AND TxID IN ' . $idList;
+            WHERE TtT2ID IS NULL AND TxID IN ' . $idList
+            . UserScopedQuery::forTable('texts');
         $res = Connection::query($sql);
 
         $count = 0;
@@ -1067,7 +1074,9 @@ class TagService
         }
 
         // Use raw SQL for dynamic IN clause
-        $sql = 'SELECT TxID FROM texts WHERE TxID IN ' . $idList;
+        // Add user scope to ensure we only modify current user's texts
+        $sql = 'SELECT TxID FROM texts WHERE TxID IN ' . $idList
+            . UserScopedQuery::forTable('texts');
         $res = Connection::query($sql);
 
         $count = 0;
@@ -1103,9 +1112,11 @@ class TagService
         }
 
         // Use raw SQL for LEFT JOIN with dynamic IN clause
+        // Add user scope to ensure we only modify current user's archived texts
         $sql = 'SELECT AtID FROM archivedtexts
             LEFT JOIN archtexttags ON AtID = AgAtID AND AgT2ID = ' . $tagId . '
-            WHERE AgT2ID IS NULL AND AtID IN ' . $idList;
+            WHERE AgT2ID IS NULL AND AtID IN ' . $idList
+            . UserScopedQuery::forTable('archivedtexts');
         $res = Connection::query($sql);
 
         $count = 0;
@@ -1148,7 +1159,9 @@ class TagService
         }
 
         // Use raw SQL for dynamic IN clause
-        $sql = 'SELECT AtID FROM archivedtexts WHERE AtID IN ' . $idList;
+        // Add user scope to ensure we only modify current user's archived texts
+        $sql = 'SELECT AtID FROM archivedtexts WHERE AtID IN ' . $idList
+            . UserScopedQuery::forTable('archivedtexts');
         $res = Connection::query($sql);
 
         $count = 0;
