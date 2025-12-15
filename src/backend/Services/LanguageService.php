@@ -184,11 +184,11 @@ class LanguageService
         $data = $this->getLanguageDataFromRequest();
 
         // Check if there's an empty language record to reuse
-        $result = QueryBuilder::table('languages')
-            ->select(['MIN(LgID) AS value'])
+        $row = QueryBuilder::table('languages')
+            ->selectRaw('MIN(LgID) AS min_id')
             ->where('LgName', '=', '')
-            ->getPrepared();
-        $val = !empty($result) ? $result[0]['value'] : null;
+            ->firstPrepared();
+        $val = $row['min_id'] ?? null;
 
         $this->buildLanguageSql($data, $val !== null ? (int)$val : null);
 
@@ -566,13 +566,13 @@ class LanguageService
     private function getArticleCounts(): array
     {
         $records = QueryBuilder::table('newsfeeds')
-            ->select(['newsfeeds.NfLgID', 'COUNT(*) AS value'])
+            ->selectRaw('newsfeeds.NfLgID, COUNT(*) AS article_count')
             ->join('feedlinks', 'newsfeeds.NfID', '=', 'feedlinks.FlNfID')
             ->groupBy('newsfeeds.NfLgID')
             ->getPrepared();
         $counts = [];
         foreach ($records as $record) {
-            $counts[(int)$record['NfLgID']] = (int)$record['value'];
+            $counts[(int)$record['NfLgID']] = (int)$record['article_count'];
         }
         return $counts;
     }
@@ -875,11 +875,11 @@ class LanguageService
         $normalizedData = $this->normalizeLanguageData($data);
 
         // Check if there's an empty language record to reuse
-        $result = QueryBuilder::table('languages')
-            ->select(['MIN(LgID) AS value'])
+        $row = QueryBuilder::table('languages')
+            ->selectRaw('MIN(LgID) AS min_id')
             ->where('LgName', '=', '')
-            ->getPrepared();
-        $val = !empty($result) ? $result[0]['value'] : null;
+            ->firstPrepared();
+        $val = $row['min_id'] ?? null;
 
         $this->buildLanguageSqlFromData($normalizedData, $val !== null ? (int)$val : null);
 
@@ -887,10 +887,10 @@ class LanguageService
             return (int)$val;
         }
 
-        $maxResult = QueryBuilder::table('languages')
-            ->select(['MAX(LgID) AS value'])
-            ->getPrepared();
-        return (int)($maxResult[0]['value'] ?? 0);
+        $row = QueryBuilder::table('languages')
+            ->selectRaw('MAX(LgID) AS max_id')
+            ->firstPrepared();
+        return (int)($row['max_id'] ?? 0);
     }
 
     /**

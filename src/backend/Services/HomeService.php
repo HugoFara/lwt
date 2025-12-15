@@ -238,11 +238,12 @@ class HomeService
         $bindings = array_merge([$dbname], $prefixedTables);
 
         $size = Connection::preparedFetchValue(
-            "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
+            "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS size_mb
             FROM information_schema.TABLES
             WHERE table_schema = ?
             AND table_name IN ($placeholders)",
-            $bindings
+            $bindings,
+            'size_mb'
         );
 
         if ($size === null) {
@@ -280,7 +281,7 @@ class HomeService
             'server_software' => $serverSoft,
             'apache' => $apache,
             'php' => phpversion(),
-            'mysql' => (string)Connection::fetchValue("SELECT VERSION() AS value")
+            'mysql' => (string)Connection::fetchValue("SELECT VERSION() AS version", 'version')
         ];
     }
 

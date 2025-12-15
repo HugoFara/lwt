@@ -185,8 +185,9 @@ class PrefixMigration
     private function isPrefixMigrated(string $prefix): bool
     {
         $result = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM _prefix_migration_log WHERE prefix = ?",
-            [$prefix]
+            "SELECT COUNT(*) AS cnt FROM _prefix_migration_log WHERE prefix = ?",
+            [$prefix],
+            'cnt'
         );
         return (int)$result > 0;
     }
@@ -201,8 +202,9 @@ class PrefixMigration
     private function getMigratedUserId(string $prefix): int
     {
         return (int)Connection::preparedFetchValue(
-            "SELECT user_id AS value FROM _prefix_migration_log WHERE prefix = ?",
-            [$prefix]
+            "SELECT user_id FROM _prefix_migration_log WHERE prefix = ?",
+            [$prefix],
+            'user_id'
         );
     }
 
@@ -223,8 +225,9 @@ class PrefixMigration
 
         // Check if username already exists
         $existingId = Connection::preparedFetchValue(
-            "SELECT UsID AS value FROM users WHERE UsUsername = ?",
-            [$username]
+            "SELECT UsID FROM users WHERE UsUsername = ?",
+            [$username],
+            'UsID'
         );
 
         if ($existingId !== null) {
@@ -233,8 +236,9 @@ class PrefixMigration
             while (true) {
                 $newUsername = $username . '_' . $suffix;
                 $existingId = Connection::preparedFetchValue(
-                    "SELECT UsID AS value FROM users WHERE UsUsername = ?",
-                    [$newUsername]
+                    "SELECT UsID FROM users WHERE UsUsername = ?",
+                    [$newUsername],
+                    'UsID'
                 );
                 if ($existingId === null) {
                     $username = $newUsername;
@@ -401,10 +405,11 @@ class PrefixMigration
     {
         $dbName = Globals::getDatabaseName();
         $result = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value
+            "SELECT COUNT(*) AS cnt
              FROM INFORMATION_SCHEMA.TABLES
              WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
-            [$dbName, $tableName]
+            [$dbName, $tableName],
+            'cnt'
         );
         return (int)$result > 0;
     }

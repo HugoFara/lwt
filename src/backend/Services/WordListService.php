@@ -897,8 +897,9 @@ class WordListService
     public function getNewTermFormData(int $langId): array
     {
         $showRoman = (bool) Connection::preparedFetchValue(
-            'SELECT LgShowRomanization AS value FROM languages WHERE LgID = ?',
-            [$langId]
+            'SELECT LgShowRomanization FROM languages WHERE LgID = ?',
+            [$langId],
+            'LgShowRomanization'
         );
 
         $languageService = new LanguageService();
@@ -977,8 +978,9 @@ class WordListService
         if ($wid > 0) {
             Maintenance::initWordCount();
             $len = (int)Connection::preparedFetchValue(
-                'SELECT WoWordCount AS value FROM words WHERE WoID = ?',
-                [$wid]
+                'SELECT WoWordCount FROM words WHERE WoID = ?',
+                [$wid],
+                'WoWordCount'
             );
             if ($len > 1) {
                 (new ExpressionService())->insertExpressions($textLc, (int)$data["WoLgID"], $wid, $len, 1);

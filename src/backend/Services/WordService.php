@@ -187,9 +187,10 @@ class WordService
     {
         $bindings = [$langId, $textlc];
         $id = Connection::preparedFetchValue(
-            "SELECT WoID AS value FROM words WHERE WoLgID = ? AND WoTextLC = ?"
+            "SELECT WoID FROM words WHERE WoLgID = ? AND WoTextLC = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
-            $bindings
+            $bindings,
+            'WoID'
         );
         return $id !== null ? (int)$id : null;
     }
@@ -269,9 +270,10 @@ class WordService
     {
         // textitems2 inherits user context via Ti2TxID -> texts FK
         $seid = Connection::preparedFetchValue(
-            "SELECT Ti2SeID AS value FROM textitems2
+            "SELECT Ti2SeID FROM textitems2
              WHERE Ti2TxID = ? AND Ti2WordCount = 1 AND Ti2Order = ?",
-            [$textId, $ord]
+            [$textId, $ord],
+            'Ti2SeID'
         );
 
         if ($seid === null) {
@@ -311,9 +313,10 @@ class WordService
     {
         $bindings = [$wordId];
         return (int) Connection::preparedFetchValue(
-            "SELECT WoWordCount AS value FROM words WHERE WoID = ?"
+            "SELECT WoWordCount FROM words WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
-            $bindings
+            $bindings,
+            'WoWordCount'
         );
     }
 
@@ -572,9 +575,10 @@ class WordService
     {
         $bindings = [$textId];
         $langId = Connection::preparedFetchValue(
-            "SELECT TxLgID AS value FROM texts WHERE TxID = ?"
+            "SELECT TxLgID FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings),
-            $bindings
+            $bindings,
+            'TxLgID'
         );
         return $langId !== null ? (int)$langId : null;
     }
@@ -594,9 +598,10 @@ class WordService
         // Check if already exists
         $bindings = [$termlc];
         $existingId = Connection::preparedFetchValue(
-            "SELECT WoID AS value FROM words WHERE WoTextLC = ?"
+            "SELECT WoID FROM words WHERE WoTextLC = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
-            $bindings
+            $bindings,
+            'WoID'
         );
 
         if ($existingId !== null) {
@@ -858,10 +863,11 @@ class WordService
     {
         // textitems2 inherits user context via Ti2TxID -> texts FK
         $word = Connection::preparedFetchValue(
-            "SELECT Ti2Text AS value
+            "SELECT Ti2Text
              FROM textitems2
              WHERE Ti2WordCount = 1 AND Ti2TxID = ? AND Ti2Order = ?",
-            [$textId, $ord]
+            [$textId, $ord],
+            'Ti2Text'
         );
         return $word !== null ? (string) $word : null;
     }
@@ -923,9 +929,10 @@ class WordService
     {
         $bindings = [$wordId];
         $term = Connection::preparedFetchValue(
-            "SELECT WoText AS value FROM words WHERE WoID = ?"
+            "SELECT WoText FROM words WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
-            $bindings
+            $bindings,
+            'WoText'
         );
         return $term !== null ? (string) $term : null;
     }
@@ -952,9 +959,10 @@ class WordService
 
         $bindings = [$wordId];
         return (string) Connection::preparedFetchValue(
-            "SELECT WoTranslation AS value FROM words WHERE WoID = ?"
+            "SELECT WoTranslation FROM words WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
-            $bindings
+            $bindings,
+            'WoTranslation'
         );
     }
 
@@ -980,9 +988,10 @@ class WordService
 
         $bindings = [$wordId];
         $result = Connection::preparedFetchValue(
-            "SELECT WoRomanization AS value FROM words WHERE WoID = ?"
+            "SELECT WoRomanization FROM words WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
-            $bindings
+            $bindings,
+            'WoRomanization'
         );
 
         return ($result === '' || $result === null) ? '*' : (string) $result;
@@ -1085,9 +1094,10 @@ class WordService
     {
         $bindings = [$termlc];
         $wid = Connection::preparedFetchValue(
-            "SELECT WoID AS value FROM words WHERE WoTextLC = ?"
+            "SELECT WoID FROM words WHERE WoTextLC = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
-            $bindings
+            $bindings,
+            'WoID'
         );
 
         if ($wid !== null) {
@@ -1158,9 +1168,10 @@ class WordService
 
         $bindings = [$textId];
         $langId = (int) Connection::preparedFetchValue(
-            "SELECT TxLgID AS value FROM texts WHERE TxID = ?"
+            "SELECT TxLgID FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings),
-            $bindings
+            $bindings,
+            'TxLgID'
         );
 
         $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
@@ -1208,9 +1219,10 @@ class WordService
     {
         $bindings = [$textId];
         $langId = Connection::preparedFetchValue(
-            "SELECT TxLgID AS value FROM texts WHERE TxID = ?"
+            "SELECT TxLgID FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings),
-            $bindings
+            $bindings,
+            'TxLgID'
         );
         $wordsData = [];
         $count = 0;
@@ -1257,8 +1269,9 @@ class WordService
     {
         $bindings = [];
         $max = (int) Connection::fetchValue(
-            "SELECT COALESCE(MAX(WoID), 0) AS value FROM words"
-            . UserScopedQuery::forTablePrepared('words', $bindings)
+            "SELECT COALESCE(MAX(WoID), 0) AS max_id FROM words"
+            . UserScopedQuery::forTablePrepared('words', $bindings),
+            'max_id'
         );
 
         if (empty($terms)) {
@@ -1531,9 +1544,10 @@ class WordService
     {
         $bindings = [$textId];
         $lgid = Connection::preparedFetchValue(
-            "SELECT TxLgID AS value FROM texts WHERE TxID = ?"
+            "SELECT TxLgID FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings),
-            $bindings
+            $bindings,
+            'TxLgID'
         );
         return $lgid !== null ? (int) $lgid : null;
     }
@@ -1550,10 +1564,11 @@ class WordService
     {
         // textitems2 inherits user context via Ti2TxID -> texts FK
         $seid = Connection::preparedFetchValue(
-            "SELECT Ti2SeID AS value
+            "SELECT Ti2SeID
              FROM textitems2
              WHERE Ti2TxID = ? AND Ti2Order = ?",
-            [$textId, $ord]
+            [$textId, $ord],
+            'Ti2SeID'
         );
         return $seid !== null ? (int) $seid : null;
     }
@@ -1575,8 +1590,9 @@ class WordService
 
         // sentences inherits user context via SeTxID -> texts FK
         $sentence = Connection::preparedFetchValue(
-            "SELECT SeText AS value FROM sentences WHERE SeID = ?",
-            [$seid]
+            "SELECT SeText FROM sentences WHERE SeID = ?",
+            [$seid],
+            'SeText'
         );
 
         return $sentence !== null ? (string) $sentence : null;
@@ -1595,12 +1611,13 @@ class WordService
         // texts has TxUsID - user scope auto-applied
         $bindings = [$textId];
         return (bool) Connection::preparedFetchValue(
-            "SELECT LgShowRomanization AS value
+            "SELECT LgShowRomanization
              FROM languages JOIN texts ON TxLgID = LgID
              WHERE TxID = ?"
              . UserScopedQuery::forTablePrepared('languages', $bindings, 'languages')
              . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts'),
-            $bindings
+            $bindings,
+            'LgShowRomanization'
         );
     }
 
@@ -1616,10 +1633,11 @@ class WordService
     {
         $bindings = [$langId, $textlc];
         $wid = Connection::preparedFetchValue(
-            "SELECT WoID AS value FROM words
+            "SELECT WoID FROM words
              WHERE WoLgID = ? AND WoTextLC = ?"
              . UserScopedQuery::forTablePrepared('words', $bindings),
-            $bindings
+            $bindings,
+            'WoID'
         );
         return $wid !== null ? (int) $wid : null;
     }

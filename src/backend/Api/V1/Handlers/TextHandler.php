@@ -77,9 +77,8 @@ class TextHandler
     public function saveImprTextData(int $textid, int $line, string $val): string
     {
         $ann = (string) QueryBuilder::table('texts')
-            ->select(['TxAnnotatedText AS value'])
             ->where('TxID', '=', $textid)
-            ->fetchValuePrepared();
+            ->valuePrepared('TxAnnotatedText');
 
         $items = preg_split('/[\n]/u', $ann);
         if (count($items) <= $line) {
@@ -195,11 +194,10 @@ class TextHandler
     {
         // Validate text exists
         $exists = QueryBuilder::table('texts')
-            ->select(['COUNT(TxID) AS value'])
             ->where('TxID', '=', $textId)
-            ->fetchValuePrepared();
+            ->existsPrepared();
 
-        if ((int)$exists === 0) {
+        if (!$exists) {
             return ['updated' => false, 'error' => 'Text not found'];
         }
 
@@ -315,7 +313,7 @@ class TextHandler
         $textInfo = QueryBuilder::table('texts')
             ->select(['TxID', 'TxLgID', 'TxTitle', 'TxAudioURI', 'TxSourceURI', 'TxAudioPosition'])
             ->where('TxID', '=', $textId)
-            ->fetchOnePrepared();
+            ->firstPrepared();
 
         if (!$textInfo) {
             return ['error' => 'Text not found'];
@@ -328,7 +326,7 @@ class TextHandler
             ->select(['LgID', 'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
                     'LgTextSize', 'LgRightToLeft', 'LgRegexpWordCharacters', 'LgRemoveSpaces'])
             ->where('LgID', '=', $langId)
-            ->fetchOnePrepared();
+            ->firstPrepared();
 
         if (!$langInfo) {
             return ['error' => 'Language not found'];

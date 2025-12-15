@@ -110,9 +110,9 @@ class Validation
                     $lang_condition .
                     " group by TgID order by TgText
                 )
-            ) AS value"
+            ) AS tag_exists"
                 . UserScopedQuery::forTablePrepared('words', $bindings);
-            $r = Connection::fetchValue($sql);
+            $r = Connection::fetchValue($sql, 'tag_exists');
             if ($r == 0) {
                 $currenttag = '';
             }

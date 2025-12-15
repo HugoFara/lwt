@@ -70,7 +70,7 @@ class ServerDataService
         $data["server_soft"] = $_SERVER['SERVER_SOFTWARE'];
         $data["apache"] = $this->parseApacheVersion($data["server_soft"]);
         $data["php"] = phpversion();
-        $data["mysql"] = (string)Connection::fetchValue("SELECT VERSION() AS value");
+        $data["mysql"] = (string)Connection::fetchValue("SELECT VERSION() AS version", 'version');
         $data["lwt_version"] = getVersionNumber();
         $data["server_location"] = $_SERVER['HTTP_HOST'];
 
@@ -101,11 +101,12 @@ class ServerDataService
         $bindings = array_merge([$this->dbname], $prefixedTables);
 
         $temp_size = Connection::preparedFetchValue(
-            "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS value
+            "SELECT ROUND(SUM(data_length+index_length)/1024/1024, 1) AS size_mb
             FROM information_schema.TABLES
             WHERE table_schema = ?
             AND table_name IN ($placeholders)",
-            $bindings
+            $bindings,
+            'size_mb'
         );
 
         if ($temp_size === null) {

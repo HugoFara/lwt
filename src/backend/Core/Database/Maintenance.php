@@ -39,9 +39,9 @@ class Maintenance
     public static function adjustAutoIncrement(string $table, string $key): void
     {
         $row = QueryBuilder::table($table)
-            ->selectRaw('max(' . $key . ')+1 AS value')
+            ->selectRaw('MAX(' . $key . ')+1 AS next_id')
             ->first();
-        $val = $row['value'] ?? null;
+        $val = $row['next_id'] ?? null;
         if (!isset($val)) {
             $val = 1;
         }
@@ -180,10 +180,10 @@ class Maintenance
          * @var string|null ID for the Japanese language using MeCab
          */
         $row = QueryBuilder::table('languages')
-            ->selectRaw('group_concat(LgID) AS value')
+            ->selectRaw('GROUP_CONCAT(LgID) AS lang_ids')
             ->whereRaw("UPPER(LgRegexpWordCharacters)='MECAB'")
             ->first();
-        $japid = $row['value'] ?? null;
+        $japid = $row['lang_ids'] ?? null;
 
         if ($japid !== null && $japid !== '') {
             self::updateJapaneseWordCount((int)$japid);

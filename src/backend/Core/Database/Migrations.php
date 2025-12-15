@@ -245,10 +245,11 @@ class Migrations
             }
             if (
                 'utf8utf8_general_ci' != Connection::preparedFetchValue(
-                    'SELECT concat(default_character_set_name, default_collation_name) AS value
+                    'SELECT concat(default_character_set_name, default_collation_name) AS collation
                 FROM information_schema.SCHEMATA
                 WHERE schema_name = ?',
-                    [$dbname]
+                    [$dbname],
+                    'collation'
                 )
             ) {
                 Connection::query("SET collation_connection = 'utf8_general_ci'");

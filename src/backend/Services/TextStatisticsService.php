@@ -63,7 +63,7 @@ class TextStatisticsService
         // Raw SQL needed for complex aggregation with DISTINCT LOWER()
         // textitems2 inherits user context via Ti2TxID -> texts FK
         $bindings = [];
-        $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS value,
+        $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT LOWER(Ti2Text)) AS unique_cnt,
             COUNT(LOWER(Ti2Text)) AS total
             FROM textitems2
             WHERE Ti2WordCount = 1 AND Ti2TxID IN($textsId)
@@ -71,13 +71,13 @@ class TextStatisticsService
         $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $r["total"][$record['text']] = $record['total'];
-            $r["totalu"][$record['text']] = $record['value'];
+            $r["totalu"][$record['text']] = $record['unique_cnt'];
         }
         mysqli_free_result($res);
 
         // Raw SQL needed for complex aggregation with DISTINCT
         // textitems2 inherits user context via Ti2TxID -> texts FK
-        $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
+        $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS unique_cnt,
             COUNT(Ti2WoID) AS total
             FROM textitems2
             WHERE Ti2WordCount > 1 AND Ti2TxID IN({$textsId})
@@ -85,7 +85,7 @@ class TextStatisticsService
         $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $r["expr"][$record['text']] = $record['total'];
-            $r["expru"][$record['text']] = $record['value'];
+            $r["expru"][$record['text']] = $record['unique_cnt'];
         }
         mysqli_free_result($res);
 
@@ -93,7 +93,7 @@ class TextStatisticsService
         // textitems2 inherits user context via Ti2TxID -> texts FK
         // words has user scope (WoUsID), need to apply user filtering
         $bindings = [];
-        $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS value,
+        $sql = "SELECT Ti2TxID AS text, COUNT(DISTINCT Ti2WoID) AS unique_cnt,
             COUNT(Ti2WoID) AS total, WoStatus AS status
             FROM textitems2, words
             WHERE Ti2WoID != 0 AND Ti2TxID IN({$textsId}) AND Ti2WoID = WoID"
@@ -102,7 +102,7 @@ class TextStatisticsService
         $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
             $r["stat"][$record['text']][$record['status']] = $record['total'];
-            $r["statu"][$record['text']][$record['status']] = $record['value'];
+            $r["statu"][$record['text']][$record['status']] = $record['unique_cnt'];
         }
         mysqli_free_result($res);
 
@@ -121,9 +121,10 @@ class TextStatisticsService
         // Raw SQL needed for COUNT(DISTINCT LOWER())
         // textitems2 inherits user context via Ti2TxID -> texts FK
         $count = Connection::fetchValue(
-            "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS value
+            "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
             FROM textitems2
-            WHERE Ti2WordCount=1 AND Ti2WoID=0 AND Ti2TxID=$textId"
+            WHERE Ti2WordCount=1 AND Ti2WoID=0 AND Ti2TxID=$textId",
+            'cnt'
         );
         if ($count === null) {
             return 0;
@@ -151,12 +152,12 @@ class TextStatisticsService
         // Raw SQL with implicit JOIN
         // languages and texts both have user scope (LgUsID, TxUsID)
         $bindings = [];
-        $sql = "SELECT LgGoogleTranslateURI AS value
+        $sql = "SELECT LgGoogleTranslateURI
             FROM languages, texts
             WHERE LgID = TxLgID and TxID = $textId"
             . UserScopedQuery::forTablePrepared('languages', $bindings, 'languages')
             . UserScopedQuery::forTablePrepared('texts', $bindings, 'texts');
-        $dict = (string) Connection::fetchValue($sql);
+        $dict = (string) Connection::fetchValue($sql, 'LgGoogleTranslateURI');
         $tl = $sl = "";
         if ($dict) {
             // @deprecated(2.5.2-fork) For future version of LWT: do not use translator uri

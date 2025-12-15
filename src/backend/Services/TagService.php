@@ -244,9 +244,10 @@ class TagService
         // Use raw SQL if WHERE clause provided, otherwise QueryBuilder
         if (!empty($whereData['clause'])) {
             return (int) Connection::preparedFetchValue(
-                'SELECT COUNT(' . $this->colPrefix . 'ID) AS value FROM ' .
+                'SELECT COUNT(' . $this->colPrefix . 'ID) AS cnt FROM ' .
                 $this->tableName . ' WHERE (1=1) ' . $whereData['clause'],
-                $whereData['params']
+                $whereData['params'],
+                'cnt'
             );
         } else {
             return (int) QueryBuilder::table($this->tableName)
@@ -833,7 +834,7 @@ class TagService
             "SELECT IFNULL(
                 GROUP_CONCAT(DISTINCT TgText ORDER BY TgText SEPARATOR ','),
                 ''
-            ) AS value
+            ) AS taglist
             FROM (
                 (
                     words
@@ -842,7 +843,8 @@ class TagService
                 LEFT JOIN tags ON TgID = WtTgID
             )
             WHERE WoID = ?",
-            [$wordId]
+            [$wordId],
+            'taglist'
         );
 
         if ($escapeHtml && $result !== null) {
@@ -898,7 +900,7 @@ class TagService
             "SELECT IFNULL(
                 GROUP_CONCAT(DISTINCT TgText ORDER BY TgText SEPARATOR ', '),
                 ''
-            ) AS value
+            ) AS taglist
             FROM (
                 (
                     words
@@ -907,7 +909,8 @@ class TagService
                 LEFT JOIN tags ON TgID = WtTgID
             )
             WHERE WoID = ?",
-            [$wordId]
+            [$wordId],
+            'taglist'
         );
 
         if ($result != '') {
@@ -982,8 +985,9 @@ class TagService
         }
 
         $tagId = Connection::preparedFetchValue(
-            'SELECT TgID AS value FROM tags WHERE TgText = ?',
-            [$tagText]
+            'SELECT TgID FROM tags WHERE TgText = ?',
+            [$tagText],
+            'TgID'
         );
 
         if (!isset($tagId)) {
@@ -1065,8 +1069,9 @@ class TagService
         }
 
         $tagId = Connection::preparedFetchValue(
-            'SELECT T2ID AS value FROM tags2 WHERE T2Text = ?',
-            [$tagText]
+            'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+            [$tagText],
+            'T2ID'
         );
 
         if (!isset($tagId)) {
@@ -1150,8 +1155,9 @@ class TagService
         }
 
         $tagId = Connection::preparedFetchValue(
-            'SELECT T2ID AS value FROM tags2 WHERE T2Text = ?',
-            [$tagText]
+            'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+            [$tagText],
+            'T2ID'
         );
 
         if (!isset($tagId)) {
@@ -1414,15 +1420,17 @@ class TagService
     private static function getOrCreateTermTag(string $tagText): ?int
     {
         $tagId = Connection::preparedFetchValue(
-            'SELECT TgID AS value FROM tags WHERE TgText = ?',
-            [$tagText]
+            'SELECT TgID FROM tags WHERE TgText = ?',
+            [$tagText],
+            'TgID'
         );
 
         if (!isset($tagId)) {
             QueryBuilder::table('tags')->insertPrepared(['TgText' => $tagText]);
             $tagId = Connection::preparedFetchValue(
-                'SELECT TgID AS value FROM tags WHERE TgText = ?',
-                [$tagText]
+                'SELECT TgID FROM tags WHERE TgText = ?',
+                [$tagText],
+                'TgID'
             );
         }
 
@@ -1510,15 +1518,17 @@ class TagService
     private static function getOrCreateTextTag(string $tagText): ?int
     {
         $tagId = Connection::preparedFetchValue(
-            'SELECT T2ID AS value FROM tags2 WHERE T2Text = ?',
-            [$tagText]
+            'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+            [$tagText],
+            'T2ID'
         );
 
         if (!isset($tagId)) {
             QueryBuilder::table('tags2')->insertPrepared(['T2Text' => $tagText]);
             $tagId = Connection::preparedFetchValue(
-                'SELECT T2ID AS value FROM tags2 WHERE T2Text = ?',
-                [$tagText]
+                'SELECT T2ID FROM tags2 WHERE T2Text = ?',
+                [$tagText],
+                'T2ID'
             );
         }
 

@@ -243,9 +243,8 @@ class ReviewHandler
     {
         // Get current status using QueryBuilder
         $currentStatus = QueryBuilder::table('words')
-            ->select(['WoStatus'])
             ->where('WoID', '=', $wordId)
-            ->fetchValuePrepared();
+            ->valuePrepared('WoStatus');
 
         if ($currentStatus === null) {
             return ['error' => 'Word not found'];

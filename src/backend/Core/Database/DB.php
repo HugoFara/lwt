@@ -33,7 +33,7 @@ use Lwt\Database\PreparedStatement;
  * $result = DB::query('SELECT * FROM words WHERE WoID = 1');
  * $rows = DB::fetchAll('SELECT * FROM words LIMIT 10');
  * $row = DB::fetchOne('SELECT * FROM words WHERE WoID = 1');
- * $value = DB::fetchValue('SELECT COUNT(*) AS value FROM words');
+ * $value = DB::fetchValue('SELECT COUNT(*) AS cnt FROM words', 'cnt');
  *
  * // Execute non-SELECT queries
  * $affected = DB::execute('UPDATE words SET WoStatus = 2 WHERE WoID = 1');

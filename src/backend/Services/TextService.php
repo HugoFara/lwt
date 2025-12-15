@@ -61,14 +61,14 @@ class TextService
         string $whQuery,
         string $whTag
     ): int {
-        $sql = "SELECT COUNT(*) AS value FROM (
+        $sql = "SELECT COUNT(*) AS cnt FROM (
             SELECT AtID FROM (
                 archivedtexts
                 LEFT JOIN archtexttags ON AtID = AgAtID
             ) WHERE (1=1) {$whLang}{$whQuery}
             GROUP BY AtID {$whTag}
         ) AS dummy" . UserScopedQuery::forTable('archivedtexts');
-        return (int) Connection::fetchValue($sql);
+        return (int) Connection::fetchValue($sql, 'cnt');
     }
 
     /**
@@ -192,10 +192,11 @@ class TextService
         // Get language ID first
         $bindings = [$archivedId];
         $lgId = Connection::preparedFetchValue(
-            "SELECT AtLgID AS value FROM archivedtexts
+            "SELECT AtLgID FROM archivedtexts
             WHERE AtID = ?"
             . UserScopedQuery::forTablePrepared('archivedtexts', $bindings),
-            $bindings
+            $bindings,
+            'AtLgID'
         );
 
         if ($lgId === null) {
@@ -231,9 +232,10 @@ class TextService
         // Parse the text
         $bindings3 = [$textId];
         $textContent = Connection::preparedFetchValue(
-            "SELECT TxText AS value FROM texts WHERE TxID = ?"
+            "SELECT TxText FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings3),
-            $bindings3
+            $bindings3,
+            'TxText'
         );
         TextParsing::splitCheck($textContent, (int) $lgId, $textId);
 
@@ -249,15 +251,17 @@ class TextService
         // Get statistics
         $bindings4 = [$textId];
         $sentenceCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM sentences WHERE SeTxID = ?"
+            "SELECT COUNT(*) AS cnt FROM sentences WHERE SeTxID = ?"
             . UserScopedQuery::forTablePrepared('sentences', $bindings4, '', 'texts'),
-            $bindings4
+            $bindings4,
+            'cnt'
         );
         $bindings5 = [$textId];
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM textitems2 WHERE Ti2TxID = ?"
+            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = ?"
             . UserScopedQuery::forTablePrepared('textitems2', $bindings5, '', 'texts'),
-            $bindings5
+            $bindings5,
+            'cnt'
         );
 
         $message = "{$deleted} / {$insertedMsg} / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
@@ -316,9 +320,10 @@ class TextService
 
             $bindings3 = [$id];
             $textContent = Connection::preparedFetchValue(
-                "SELECT TxText AS value FROM texts WHERE TxID = ?"
+                "SELECT TxText FROM texts WHERE TxID = ?"
                 . UserScopedQuery::forTablePrepared('texts', $bindings3),
-                $bindings3
+                $bindings3,
+                'TxText'
             );
             TextParsing::splitCheck($textContent, $record['AtLgID'], $id);
 
@@ -356,9 +361,10 @@ class TextService
         // Check if text content changed
         $bindings1 = [$textId];
         $oldText = Connection::preparedFetchValue(
-            "SELECT AtText AS value FROM archivedtexts WHERE AtID = ?"
+            "SELECT AtText FROM archivedtexts WHERE AtID = ?"
             . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
-            $bindings1
+            $bindings1,
+            'AtText'
         );
         $textsdiffer = $text !== $oldText;
 
@@ -724,14 +730,14 @@ class TextService
         string $whQuery,
         string $whTag
     ): int {
-        $sql = "SELECT COUNT(*) AS value FROM (
+        $sql = "SELECT COUNT(*) AS cnt FROM (
             SELECT TxID FROM (
                 texts
                 LEFT JOIN texttags ON TxID = TtTxID
             ) WHERE (1=1) {$whLang}{$whQuery}
             GROUP BY TxID {$whTag}
         ) AS dummy" . UserScopedQuery::forTable('texts');
-        return (int) Connection::fetchValue($sql);
+        return (int) Connection::fetchValue($sql, 'cnt');
     }
 
     /**
@@ -808,9 +814,10 @@ class TextService
         // Get total count
         $bindings1 = [$langId];
         $total = (int) Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM texts WHERE TxLgID = ?"
+            "SELECT COUNT(*) AS cnt FROM texts WHERE TxLgID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings1),
-            $bindings1
+            $bindings1,
+            'cnt'
         );
         $totalPages = (int) ceil($total / $perPage);
 
@@ -882,9 +889,10 @@ class TextService
         // Get total count
         $bindings1 = [$langId];
         $total = (int) Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM archivedtexts WHERE AtLgID = ?"
+            "SELECT COUNT(*) AS cnt FROM archivedtexts WHERE AtLgID = ?"
             . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
-            $bindings1
+            $bindings1,
+            'cnt'
         );
         $totalPages = (int) ceil($total / $perPage);
 
@@ -1070,15 +1078,17 @@ class TextService
         // Get statistics
         $bindings2 = [$textId];
         $sentenceCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM sentences WHERE SeTxID = ?"
+            "SELECT COUNT(*) AS cnt FROM sentences WHERE SeTxID = ?"
             . UserScopedQuery::forTablePrepared('sentences', $bindings2, '', 'texts'),
-            $bindings2
+            $bindings2,
+            'cnt'
         );
         $bindings3 = [$textId];
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM textitems2 WHERE Ti2TxID = ?"
+            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = ?"
             . UserScopedQuery::forTablePrepared('textitems2', $bindings3, '', 'texts'),
-            $bindings3
+            $bindings3,
+            'cnt'
         );
 
         $message = "Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
@@ -1135,15 +1145,17 @@ class TextService
         // Get statistics
         $bindings2 = [$textId];
         $sentenceCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM sentences WHERE SeTxID = ?"
+            "SELECT COUNT(*) AS cnt FROM sentences WHERE SeTxID = ?"
             . UserScopedQuery::forTablePrepared('sentences', $bindings2, '', 'texts'),
-            $bindings2
+            $bindings2,
+            'cnt'
         );
         $bindings3 = [$textId];
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM textitems2 WHERE Ti2TxID = ?"
+            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = ?"
             . UserScopedQuery::forTablePrepared('textitems2', $bindings3, '', 'texts'),
-            $bindings3
+            $bindings3,
+            'cnt'
         );
 
         return "Sentences deleted: $count1 / Text items deleted: $count2 / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
@@ -1279,9 +1291,10 @@ class TextService
 
             $bindings = [$id];
             $textContent = Connection::preparedFetchValue(
-                "SELECT TxText AS value FROM texts WHERE TxID = ?"
+                "SELECT TxText FROM texts WHERE TxID = ?"
                 . UserScopedQuery::forTablePrepared('texts', $bindings),
-                $bindings
+                $bindings,
+                'TxText'
             );
             TextParsing::splitCheck($textContent, $record['TxLgID'], $id);
             $count++;
@@ -1574,10 +1587,11 @@ class TextService
     {
         $bindings = [$langId];
         return Connection::preparedFetchValue(
-            "SELECT LgTTSVoiceAPI AS value FROM languages
+            "SELECT LgTTSVoiceAPI FROM languages
             WHERE LgID = ?"
             . UserScopedQuery::forTablePrepared('languages', $bindings),
-            $bindings
+            $bindings,
+            'LgTTSVoiceAPI'
         );
     }
 
@@ -1761,9 +1775,10 @@ class TextService
         $bindings2 = [$textId];
         TextParsing::splitCheck(
             Connection::preparedFetchValue(
-                "SELECT TxText AS value FROM texts WHERE TxID = ?"
+                "SELECT TxText FROM texts WHERE TxID = ?"
                 . UserScopedQuery::forTablePrepared('texts', $bindings2),
-                $bindings2
+                $bindings2,
+                'TxText'
             ),
             $lgId,
             $textId
@@ -1772,15 +1787,17 @@ class TextService
         // Get statistics
         $bindings3 = [$textId];
         $sentenceCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM sentences WHERE SeTxID = ?"
+            "SELECT COUNT(*) AS cnt FROM sentences WHERE SeTxID = ?"
             . UserScopedQuery::forTablePrepared('sentences', $bindings3, '', 'texts'),
-            $bindings3
+            $bindings3,
+            'cnt'
         );
         $bindings4 = [$textId];
         $itemCount = Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM textitems2 WHERE Ti2TxID = ?"
+            "SELECT COUNT(*) AS cnt FROM textitems2 WHERE Ti2TxID = ?"
             . UserScopedQuery::forTablePrepared('textitems2', $bindings4, '', 'texts'),
-            $bindings4
+            $bindings4,
+            'cnt'
         );
 
         $message = "Sentences deleted: {$sentencesDeleted} / Textitems deleted: {$textitemsDeleted} / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";

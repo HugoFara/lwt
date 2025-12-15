@@ -102,8 +102,9 @@ class TestService
                 $testsql = " words WHERE WoID IN ($idString) ";
                 $bindings = [];
                 $cntlang = Connection::fetchValue(
-                    "SELECT COUNT(DISTINCT WoLgID) AS value FROM $testsql"
-                        . UserScopedQuery::forTablePrepared('words', $bindings)
+                    "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $testsql"
+                        . UserScopedQuery::forTablePrepared('words', $bindings),
+                    'cnt'
                 );
                 if ($cntlang > 1) {
                     echo "<p>Sorry - The selected terms are in $cntlang languages," .
@@ -118,8 +119,9 @@ class TestService
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($idString) ";
                 $bindings = [];
                 $cntlang = Connection::fetchValue(
-                    "SELECT COUNT(DISTINCT WoLgID) AS value FROM $testsql"
-                        . UserScopedQuery::forTablePrepared('words', $bindings)
+                    "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $testsql"
+                        . UserScopedQuery::forTablePrepared('words', $bindings),
+                    'cnt'
                 );
                 if ($cntlang > 1) {
                     echo "<p>Sorry - The selected terms are in $cntlang languages," .
@@ -152,7 +154,8 @@ class TestService
     public function validateTestSelection(string $testsql): array
     {
         $langCount = (int) Connection::fetchValue(
-            "SELECT COUNT(DISTINCT WoLgID) AS value FROM $testsql"
+            "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $testsql",
+            'cnt'
         );
 
         if ($langCount > 1) {
@@ -211,11 +214,12 @@ class TestService
                 if ($validation['langCount'] == 1) {
                     $bindings = [];
                     $name = Connection::preparedFetchValue(
-                        "SELECT LgName AS value
+                        "SELECT LgName
                         FROM languages, {$testSqlProjection} AND LgID = WoLgID"
                         . UserScopedQuery::forTablePrepared('words', $bindings) . "
                         LIMIT 1",
-                        $bindings
+                        $bindings,
+                        'LgName'
                     );
                     return $name !== null ? (string) $name : 'L2';
                 }
@@ -247,7 +251,8 @@ class TestService
             default:
                 $testSql = $selectionData;
                 $cntlang = Connection::fetchValue(
-                    "SELECT COUNT(DISTINCT WoLgID) AS value FROM $testSql"
+                    "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $testSql",
+                    'cnt'
                 );
                 if ($cntlang > 1) {
                     echo "<p>Sorry - The selected terms are in $cntlang languages," .
@@ -268,15 +273,17 @@ class TestService
     public function getTestCounts(string $testsql): array
     {
         $due = (int) Connection::fetchValue(
-            "SELECT COUNT(DISTINCT WoID) AS value
+            "SELECT COUNT(DISTINCT WoID) AS cnt
             FROM $testsql AND WoStatus BETWEEN 1 AND 5
-            AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0"
+            AND WoTranslation != '' AND WoTranslation != '*' AND WoTodayScore < 0",
+            'cnt'
         );
 
         $total = (int) Connection::fetchValue(
-            "SELECT COUNT(DISTINCT WoID) AS value
+            "SELECT COUNT(DISTINCT WoID) AS cnt
             FROM $testsql AND WoStatus BETWEEN 1 AND 5
-            AND WoTranslation != '' AND WoTranslation != '*'"
+            AND WoTranslation != '' AND WoTranslation != '*'",
+            'cnt'
         );
 
         return ['due' => $due, 'total' => $total];
@@ -292,9 +299,10 @@ class TestService
     public function getTomorrowTestCount(string $testsql): int
     {
         return (int) Connection::fetchValue(
-            "SELECT COUNT(DISTINCT WoID) AS value
+            "SELECT COUNT(DISTINCT WoID) AS cnt
             FROM $testsql AND WoStatus BETWEEN 1 AND 5
-            AND WoTranslation != '' AND WoTranslation != '*' AND WoTomorrowScore < 0"
+            AND WoTranslation != '' AND WoTranslation != '*' AND WoTomorrowScore < 0",
+            'cnt'
         );
     }
 
@@ -422,7 +430,8 @@ class TestService
     public function getLanguageIdFromTestSql(string $testsql): ?int
     {
         $langId = Connection::fetchValue(
-            "SELECT WoLgID AS value FROM $testsql LIMIT 1"
+            "SELECT WoLgID FROM $testsql LIMIT 1",
+            'WoLgID'
         );
         return $langId !== null ? (int) $langId : null;
     }
@@ -620,19 +629,21 @@ class TestService
 
             $bindings = [];
             $totalCount = (int) Connection::preparedFetchValue(
-                "SELECT COUNT(DISTINCT WoID) AS value FROM $testsql"
+                "SELECT COUNT(DISTINCT WoID) AS cnt FROM $testsql"
                     . UserScopedQuery::forTablePrepared('words', $bindings),
-                $bindings
+                $bindings,
+                'cnt'
             );
             $title = 'Selected ' . $totalCount . ' Term' . ($totalCount < 2 ? '' : 's');
 
             $bindings = [];
             $langName = Connection::preparedFetchValue(
-                "SELECT LgName AS value
+                "SELECT LgName
                 FROM languages, {$testsql} AND LgID = WoLgID"
                 . UserScopedQuery::forTablePrepared('words', $bindings) . "
                 LIMIT 1",
-                $bindings
+                $bindings,
+                'LgName'
             );
             if ($langName) {
                 $title .= ' IN ' . $langName;

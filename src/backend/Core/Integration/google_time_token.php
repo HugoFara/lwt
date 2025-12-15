@@ -72,7 +72,8 @@ function regenGoogleTimeToken(): array|null
 function getGoogleTimeToken(): array|null
 {
     $val = (string) Connection::fetchValue(
-        'SELECT LWTValue AS value from _lwtgeneral WHERE LWTKey = "GoogleTimeToken"'
+        'SELECT LWTValue AS token from _lwtgeneral WHERE LWTKey = "GoogleTimeToken"',
+        'token'
     );
     $arr = empty($val) ? array('0') : explode('.', $val);
     if (intval($arr[0]) < floor(time() / 3600) - 100) {

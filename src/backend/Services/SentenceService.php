@@ -294,13 +294,14 @@ class SentenceService
                     '​',
                     group_concat(Ti2Text order by Ti2Order asc SEPARATOR '​'),
                     '​'
-                ) AS value
+                ) AS sentence_text
                 from sentences, textitems2
                 where Ti2SeID = SeID and SeID < ? and SeTxID = ?
                 and trim(SeText) not in ('¶', '')
                 group by SeID
                 order by SeID desc",
-                [$seid, $txtid]
+                [$seid, $txtid],
+                'sentence_text'
             );
             if (isset($prevseSent)) {
                 if (!$removeSpaces && !($splitEachChar || 'MECAB' == strtoupper(trim($termchar)))) {

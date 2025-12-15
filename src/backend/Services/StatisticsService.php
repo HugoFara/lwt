@@ -148,7 +148,7 @@ class StatisticsService
     private function getTermCountsByLanguageAndStatus(): array
     {
         $results = QueryBuilder::table('words')
-            ->select(['WoLgID', 'WoStatus', 'count(*) AS value'])
+            ->selectRaw('WoLgID, WoStatus, COUNT(*) AS term_count')
             ->groupBy(['WoLgID', 'WoStatus'])
             ->getPrepared();
 
@@ -156,7 +156,7 @@ class StatisticsService
         foreach ($results as $record) {
             $lgId = (string)$record['WoLgID'];
             $status = (string)$record['WoStatus'];
-            $termStat[$lgId][$status] = (int)$record['value'];
+            $termStat[$lgId][$status] = (int)$record['term_count'];
         }
         return $termStat;
     }

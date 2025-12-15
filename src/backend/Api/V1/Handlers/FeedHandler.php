@@ -214,8 +214,9 @@ class FeedHandler
 
         // Count total using raw SQL with fixed table name
         $total = (int)Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM newsfeeds WHERE $where",
-            $params
+            "SELECT COUNT(*) AS cnt FROM newsfeeds WHERE $where",
+            $params,
+            'cnt'
         );
 
         // Calculate pagination
@@ -491,8 +492,9 @@ class FeedHandler
 
         // Count total using raw SQL with fixed table name
         $total = (int)Connection::preparedFetchValue(
-            "SELECT COUNT(*) AS value FROM feedlinks WHERE $where",
-            $queryParams
+            "SELECT COUNT(*) AS cnt FROM feedlinks WHERE $where",
+            $queryParams,
+            'cnt'
         );
 
         // Calculate pagination

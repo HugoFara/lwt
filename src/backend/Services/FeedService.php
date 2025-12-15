@@ -123,9 +123,9 @@ class FeedService
     public function countFeedLinks(string $feedIds, string $whereQuery = ''): int
     {
         // feedlinks inherits user context via FlNfID -> newsfeeds FK
-        $sql = "SELECT COUNT(*) AS value FROM feedlinks
+        $sql = "SELECT COUNT(*) AS cnt FROM feedlinks
                 WHERE FlNfID IN ($feedIds) $whereQuery";
-        return (int)Connection::fetchValue($sql);
+        return (int)Connection::fetchValue($sql, 'cnt');
     }
 
     /**
@@ -1421,14 +1421,16 @@ class FeedService
                     // Parse the text
                     $bindings = [$id];
                     $textContent = Connection::preparedFetchValue(
-                        'SELECT TxText AS value FROM texts WHERE TxID = ?'
+                        'SELECT TxText FROM texts WHERE TxID = ?'
                         . UserScopedQuery::forTablePrepared('texts', $bindings),
-                        $bindings
+                        $bindings,
+                        'TxText'
                     );
                     $textLgId = Connection::preparedFetchValue(
-                        'SELECT TxLgID AS value FROM texts WHERE TxID = ?'
+                        'SELECT TxLgID FROM texts WHERE TxID = ?'
                         . UserScopedQuery::forTablePrepared('texts', $bindings),
-                        $bindings
+                        $bindings,
+                        'TxLgID'
                     );
                     TextParsing::splitCheck($textContent, $textLgId, $id);
 
