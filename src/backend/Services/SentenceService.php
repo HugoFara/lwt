@@ -257,7 +257,8 @@ class SentenceService
             ) AS SeText, Ti2TxID AS SeTxID, LgRegexpWordCharacters,
             LgRemoveSpaces, LgSplitEachChar
             FROM textitems2, languages
-            WHERE Ti2LgID = LgID AND Ti2WordCount < 2 AND Ti2SeID = ?",
+            WHERE Ti2LgID = LgID AND Ti2WordCount < 2 AND Ti2SeID = ?
+            AND Ti2Text != '¶'",
             [$seid]
         );
         $removeSpaces = (int)$record["LgRemoveSpaces"] == 1;
@@ -298,6 +299,7 @@ class SentenceService
                 from sentences, textitems2
                 where Ti2SeID = SeID and SeID < ? and SeTxID = ?
                 and trim(SeText) not in ('¶', '')
+                and Ti2Text != '¶'
                 group by SeID
                 order by SeID desc",
                 [$seid, $txtid],
@@ -323,6 +325,7 @@ class SentenceService
                 from sentences, textitems2
                 where Ti2SeID = SeID and SeID > ?
                 and SeTxID = ? and trim(SeText) not in ('¶','')
+                and Ti2Text != '¶'
                 group by SeID
                 order by SeID asc",
                 [$seid, $txtid]
@@ -362,15 +365,271 @@ class SentenceService
         $pattern1 = "/([$termchar])​(?=[$termchar])/u";
         $result = preg_replace($pattern1, "$1 ", $text);
 
-        // Step 2: Add space after punctuation (., !, ?, ,, ;, :, …) when followed by word char
-        // but not after connecting punctuation like apostrophe or hyphen
+        // Step 2: Add space after sentence punctuation when followed by word char
         $pattern2 = "/([.!?,;:…])​(?=[$termchar])/u";
         $result = preg_replace($pattern2, "$1 ", $result);
 
-        // Step 3: Remove remaining ZWS markers
+        // Step 3: Add space after closing quotes/brackets when followed by word char
+        $pattern3 = '/([\]})»›"\'」』])​(?=[' . $termchar . '])/u';
+        $result = preg_replace($pattern3, '$1 ', $result);
+
+        // Step 4: Remove remaining ZWS markers (preserving any actual space tokens)
         $result = str_replace("​", "", $result);
 
         return trim($result);
+    }
+
+    /**
+     * Get the formatted text of a sentence by its ID.
+     *
+     * Reconstructs the sentence from textitems2 table with proper spacing.
+     * Use this instead of reading SeText directly from sentences table.
+     *
+     * @param int $seid Sentence ID
+     *
+     * @return string|null Formatted sentence text, or null if not found
+     */
+    public function getSentenceText(int $seid): ?string
+    {
+        $record = Connection::preparedFetchOne(
+            "SELECT
+                CONCAT(
+                    '​', GROUP_CONCAT(Ti2Text ORDER BY Ti2Order ASC SEPARATOR '​'), '​'
+                ) AS SeText,
+                LgRegexpWordCharacters,
+                LgRemoveSpaces,
+                LgSplitEachChar
+            FROM textitems2
+            JOIN languages ON Ti2LgID = LgID
+            WHERE Ti2WordCount < 2
+              AND Ti2SeID = ?
+              AND Ti2Text != '¶'",
+            [$seid]
+        );
+
+        if ($record === null || $record['SeText'] === null) {
+            return null;
+        }
+
+        $removeSpaces = (int) $record['LgRemoveSpaces'] == 1;
+        $splitEachChar = (int) $record['LgSplitEachChar'] != 0;
+        $termchar = (string) $record['LgRegexpWordCharacters'];
+
+        // For languages that don't remove spaces and don't split each char
+        // (like most Western languages), apply spacing conversion
+        if (!$removeSpaces && !$splitEachChar && strtoupper(trim($termchar)) !== 'MECAB') {
+            $text = $this->convertZwsToSpacing($record['SeText'], $termchar);
+        } else {
+            // For Asian languages etc., just remove the ZWS markers
+            $text = str_replace('​', '', $record['SeText']);
+        }
+
+        return trim($text);
+    }
+
+    /**
+     * Get the sentence text at a specific position in a text.
+     *
+     * This method extracts the sentence containing the word at the given position.
+     * It handles cases where texts weren't properly split into sentences during parsing
+     * by finding sentence boundaries (punctuation) around the target position.
+     *
+     * @param int $textId   Text ID
+     * @param int $position Word position (Ti2Order)
+     *
+     * @return string|null The sentence containing the word, or null if not found
+     */
+    public function getSentenceAtPosition(int $textId, int $position): ?string
+    {
+        // Get the sentence ID for this position
+        $seid = Connection::preparedFetchValue(
+            "SELECT Ti2SeID FROM textitems2 WHERE Ti2TxID = ? AND Ti2Order = ?",
+            [$textId, $position],
+            'Ti2SeID'
+        );
+
+        if ($seid === null) {
+            return null;
+        }
+
+        // Get language settings
+        $langRecord = Connection::preparedFetchOne(
+            "SELECT LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar,
+                    LgRegexpSplitSentences
+             FROM textitems2
+             JOIN languages ON Ti2LgID = LgID
+             WHERE Ti2TxID = ? LIMIT 1",
+            [$textId]
+        );
+
+        if ($langRecord === null) {
+            return null;
+        }
+
+        $removeSpaces = (int) $langRecord['LgRemoveSpaces'] == 1;
+        $splitEachChar = (int) $langRecord['LgSplitEachChar'] != 0;
+        $termchar = (string) $langRecord['LgRegexpWordCharacters'];
+        $splitSentence = (string) $langRecord['LgRegexpSplitSentences'];
+
+        // Get tokens around the position (larger context to find sentence boundaries)
+        // We'll get ~100 tokens before and after the target position
+        $contextRange = 100;
+        $minOrder = max(1, $position - $contextRange);
+        $maxOrder = $position + $contextRange;
+
+        $tokens = Connection::preparedFetchAll(
+            "SELECT Ti2Order, Ti2Text, Ti2WordCount
+             FROM textitems2
+             WHERE Ti2TxID = ? AND Ti2SeID = ?
+               AND Ti2Order >= ? AND Ti2Order <= ?
+               AND Ti2Text != '¶'
+             ORDER BY Ti2Order ASC",
+            [$textId, $seid, $minOrder, $maxOrder]
+        );
+
+        if (empty($tokens)) {
+            return null;
+        }
+
+        // Build the text with ZWS markers, tracking positions
+        $textWithZws = '​';
+        $positionMap = []; // Map token order to character position in text
+        $currentPos = 1; // Start after initial ZWS
+
+        foreach ($tokens as $token) {
+            $order = (int) $token['Ti2Order'];
+            $tokenText = (string) $token['Ti2Text'];
+
+            $positionMap[$order] = $currentPos;
+            $textWithZws .= $tokenText . '​';
+            $currentPos += mb_strlen($tokenText) + 1; // +1 for ZWS
+        }
+
+        // Convert ZWS to proper spacing
+        if (!$removeSpaces && !$splitEachChar && strtoupper(trim($termchar)) !== 'MECAB') {
+            $text = $this->convertZwsToSpacing($textWithZws, $termchar);
+        } else {
+            $text = str_replace('​', '', $textWithZws);
+        }
+
+        // Get the target word text to locate it in the formatted string
+        $targetWord = null;
+        foreach ($tokens as $token) {
+            if ((int) $token['Ti2Order'] === $position) {
+                $targetWord = (string) $token['Ti2Text'];
+                break;
+            }
+        }
+
+        if ($targetWord === null) {
+            return $this->extractCenteredPortion($text, 500);
+        }
+
+        // Find the position of the target word in the text (character position)
+        $targetPos = mb_stripos($text, $targetWord);
+        if ($targetPos === false) {
+            return $this->extractCenteredPortion($text, 500);
+        }
+
+        // Build sentence boundary pattern - matches sentence-ending punctuation
+        // followed by optional closing quotes/brackets and then whitespace or end
+        $sentenceEndChars = '.!?…';
+        if (!empty($splitSentence)) {
+            $sentenceEndChars .= $splitSentence;
+        }
+        $sentenceEndPattern = '/[' . preg_quote($sentenceEndChars, '/') . ']+[\'\"\'\"»›」』\])]*(?:\s|$)/u';
+
+        // Find the previous sentence boundary (before the target word)
+        $textBefore = mb_substr($text, 0, $targetPos);
+        $sentenceStart = 0;
+        if (preg_match_all($sentenceEndPattern, $textBefore, $matches, PREG_OFFSET_CAPTURE)) {
+            // Get the last match - this is the end of the previous sentence
+            $lastMatch = end($matches[0]);
+            if ($lastMatch !== false) {
+                // PREG_OFFSET_CAPTURE returns byte offsets, convert to character offset
+                $byteOffset = $lastMatch[1] + strlen($lastMatch[0]);
+                $sentenceStart = mb_strlen(substr($textBefore, 0, $byteOffset));
+            }
+        }
+
+        // Find the next sentence boundary (after the target word)
+        $textAfter = mb_substr($text, $targetPos + mb_strlen($targetWord));
+        $sentenceEnd = mb_strlen($text);
+        if (preg_match($sentenceEndPattern, $textAfter, $match, PREG_OFFSET_CAPTURE)) {
+            // PREG_OFFSET_CAPTURE returns byte offsets, convert to character offset
+            $byteOffset = $match[0][1] + strlen(trim($match[0][0]));
+            $charsAfterTarget = mb_strlen(substr($textAfter, 0, $byteOffset));
+            $sentenceEnd = $targetPos + mb_strlen($targetWord) + $charsAfterTarget;
+        }
+
+        // Extract the sentence
+        $result = trim(mb_substr($text, $sentenceStart, $sentenceEnd - $sentenceStart));
+
+        // If still too long, extract a portion around the word
+        if (mb_strlen($result) > 800) {
+            $result = $this->extractPortionAroundWord($result, $targetWord, 400);
+        }
+
+        return $result ?: null;
+    }
+
+    /**
+     * Extract a centered portion of text.
+     *
+     * @param string $text      The text to extract from
+     * @param int    $maxLength Maximum length of the result
+     *
+     * @return string The extracted portion
+     */
+    private function extractCenteredPortion(string $text, int $maxLength): string
+    {
+        $length = mb_strlen($text);
+        if ($length <= $maxLength) {
+            return $text;
+        }
+
+        $start = (int) (($length - $maxLength) / 2);
+        $result = mb_substr($text, $start, $maxLength);
+
+        // Try to start/end at word boundaries
+        $result = preg_replace('/^\S*\s/', '', $result);
+        $result = preg_replace('/\s\S*$/', '', $result);
+
+        return '...' . trim($result) . '...';
+    }
+
+    /**
+     * Extract a portion of text centered around a specific word.
+     *
+     * @param string $text      The text to extract from
+     * @param string $word      The word to center around
+     * @param int    $maxLength Maximum characters on each side of the word
+     *
+     * @return string The extracted portion
+     */
+    private function extractPortionAroundWord(string $text, string $word, int $maxLength): string
+    {
+        $pos = mb_stripos($text, $word);
+        if ($pos === false) {
+            return $this->extractCenteredPortion($text, $maxLength * 2);
+        }
+
+        $start = max(0, $pos - $maxLength);
+        $end = min(mb_strlen($text), $pos + mb_strlen($word) + $maxLength);
+
+        $result = mb_substr($text, $start, $end - $start);
+
+        // Try to start/end at word boundaries
+        if ($start > 0) {
+            $result = preg_replace('/^\S*\s/', '', $result);
+            $result = '...' . trim($result);
+        }
+        if ($end < mb_strlen($text)) {
+            $result = preg_replace('/\s\S*$/', '', $result);
+            $result = trim($result) . '...';
+        }
+
+        return $result;
     }
 
     /**

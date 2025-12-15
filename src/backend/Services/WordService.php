@@ -1583,19 +1583,11 @@ class WordService
      */
     public function getSentenceTextAtPosition(int $textId, int $ord): ?string
     {
-        $seid = $this->getSentenceIdAtPosition($textId, $ord);
-        if ($seid === null) {
-            return null;
-        }
-
-        // sentences inherits user context via SeTxID -> texts FK
-        $sentence = Connection::preparedFetchValue(
-            "SELECT SeText FROM sentences WHERE SeID = ?",
-            [$seid],
-            'SeText'
-        );
-
-        return $sentence !== null ? (string) $sentence : null;
+        // Use SentenceService to get properly formatted sentence text
+        // This handles cases where texts weren't properly split into sentences
+        // by finding sentence boundaries around the target position
+        $sentenceService = new SentenceService();
+        return $sentenceService->getSentenceAtPosition($textId, $ord);
     }
 
     /**

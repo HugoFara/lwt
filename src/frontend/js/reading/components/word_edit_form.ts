@@ -146,9 +146,12 @@ export function wordEditFormData(): WordEditFormData {
         updateWordStatusInDOM(hex, status, wordId);
         updateWordTranslationInDOM(hex, translation, romanization);
 
-        // Call the onSaved callback if set
+        // Call the onSaved callback if set, otherwise signal to close the modal
         if (this.onSaved) {
           this.onSaved(result);
+        } else {
+          // Default behavior: signal the modal to close
+          this.formStore.shouldCloseModal = true;
         }
       }
     },
@@ -160,12 +163,12 @@ export function wordEditFormData(): WordEditFormData {
         }
       }
 
-      // Reset the form store
-      this.formStore.reset();
-
-      // Call the onCancelled callback if set
+      // Call the onCancelled callback if set, otherwise signal to return to info view
       if (this.onCancelled) {
         this.onCancelled();
+      } else {
+        // Default behavior: signal the modal to return to info view
+        this.formStore.shouldReturnToInfo = true;
       }
     },
 

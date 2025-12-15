@@ -75,6 +75,8 @@ export interface WordFormStoreState {
   isVisible: boolean;
   isSubmitting: boolean;
   isLoading: boolean;
+  shouldCloseModal: boolean;
+  shouldReturnToInfo: boolean;
 
   // Validation
   errors: ValidationErrors;
@@ -165,6 +167,8 @@ function createWordFormStore(): WordFormStoreState {
     isVisible: false,
     isSubmitting: false,
     isLoading: false,
+    shouldCloseModal: false,
+    shouldReturnToInfo: false,
 
     // Validation
     errors: createEmptyErrors(),
@@ -278,6 +282,8 @@ function createWordFormStore(): WordFormStoreState {
       this.isVisible = false;
       this.isSubmitting = false;
       this.isLoading = false;
+      this.shouldCloseModal = false;
+      this.shouldReturnToInfo = false;
       this.errors = createEmptyErrors();
     },
 

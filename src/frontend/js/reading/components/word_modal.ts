@@ -100,6 +100,25 @@ export function wordModalData(): WordModalData {
           });
         }
       });
+
+      // Watch for form store signals to close modal
+      Alpine.effect(() => {
+        if (this.formStore.shouldCloseModal) {
+          this.formStore.shouldCloseModal = false;
+          this.formStore.reset();
+          this.viewMode = 'info';
+          this.store.closeModal();
+        }
+      });
+
+      // Watch for form store signals to return to info view (cancel)
+      Alpine.effect(() => {
+        if (this.formStore.shouldReturnToInfo) {
+          this.formStore.shouldReturnToInfo = false;
+          this.formStore.reset();
+          this.viewMode = 'info';
+        }
+      });
     },
 
     get store(): WordStoreState {

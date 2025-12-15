@@ -38,7 +38,7 @@ use Lwt\View\Helper\PageLayoutHelper;
         <div class="level-item">
           <strong x-text="title || 'Loading...'"></strong>
           <?php if (isset($sourceUri) && $sourceUri !== '' && !str_starts_with(trim($sourceUri), '#')): ?>
-          <a href="<?php echo htmlspecialchars($sourceUri, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" class="ml-2" rel="noopener">(source)</a>
+          <?php echo \Lwt\View\Helper\IconHelper::link('external-link', $sourceUri, ['alt' => 'Source'], ['target' => '_blank', 'rel' => 'noopener', 'class' => 'ml-2', 'title' => 'Source']); ?>
           <?php endif; ?>
         </div>
       </div>

@@ -158,7 +158,7 @@ namespace Lwt\Views\Text;
 
         <!-- EDIT VIEW -->
         <template x-if="viewMode === 'edit' && !formStore.isLoading">
-          <div x-data="wordEditForm" x-init="onSaved = $parent.onFormSaved.bind($parent); onCancelled = $parent.onFormCancelled.bind($parent)">
+          <div x-data="wordEditForm">
             <!-- General error message -->
             <template x-if="formStore.errors.general">
               <div class="notification is-danger is-light mb-4">
