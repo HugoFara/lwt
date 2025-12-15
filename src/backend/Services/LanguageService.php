@@ -268,11 +268,11 @@ class LanguageService
             $this->emptyToNull($data["LgRegexpSplitSentences"]),
             $data["LgExceptionsSplitSentences"],  // No trim, keeps empty strings
             $this->emptyToNull($data["LgRegexpWordCharacters"]),
-            (int)isset($data["LgRemoveSpaces"]),
-            (int)isset($data["LgSplitEachChar"]),
-            (int)isset($data["LgRightToLeft"]),
+            (int)$data["LgRemoveSpaces"],
+            (int)$data["LgSplitEachChar"],
+            (int)$data["LgRightToLeft"],
             $data["LgTTSVoiceAPI"] ?? '',  // This one uses empty string, not null
-            (int)isset($data["LgShowRomanization"]),
+            (int)$data["LgShowRomanization"],
         ];
 
         if ($id === null) {
@@ -350,8 +350,8 @@ class LanguageService
         ) || (
             trim($newData["LgRegexpWordCharacters"] ?? '') !=
             trim($oldRecord['LgRegexpWordCharacters'] ?? '')
-        ) || ((isset($newData["LgRemoveSpaces"]) ? 1 : 0) != $oldRecord['LgRemoveSpaces']) ||
-        ((isset($newData["LgSplitEachChar"]) ? 1 : 0) != $oldRecord['LgSplitEachChar']);
+        ) || ((int)$newData["LgRemoveSpaces"] != $oldRecord['LgRemoveSpaces']) ||
+        ((int)$newData["LgSplitEachChar"] != $oldRecord['LgSplitEachChar']);
     }
 
     /**

@@ -142,6 +142,11 @@ class LanguageServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
+        // Clean up any existing empty-name language first
+        Connection::query(
+            "DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = ''"
+        );
+
         // Insert language with empty name (placeholder)
         Connection::query(
             "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgTextSize, LgRegexpSplitSentences, LgRegexpWordCharacters)
@@ -151,6 +156,11 @@ class LanguageServiceTest extends TestCase
         $result = $this->service->getAllLanguages();
 
         $this->assertArrayNotHasKey('', $result);
+
+        // Clean up
+        Connection::query(
+            "DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = ''"
+        );
     }
 
     // ===== getById() tests =====
@@ -435,8 +445,8 @@ class LanguageServiceTest extends TestCase
 
         $result = $this->service->update($id);
 
-        // When no parsing-related fields change, it says "Reparsed texts: 0"
-        $this->assertStringContainsString('Reparsed texts: 0', $result);
+        // When no parsing-related fields change, it says "Reparsing not needed"
+        $this->assertStringContainsString('Reparsing not needed', $result);
     }
 
     // ===== delete() tests =====

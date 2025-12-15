@@ -113,6 +113,9 @@ class TextProcessingTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
+        // Clean up any existing empty-name language first
+        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = ''");
+
         // Insert language with empty name
         Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('', 'http://test', 'http://test')");

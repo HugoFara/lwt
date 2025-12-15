@@ -72,6 +72,7 @@ npm run e2e                      # Run Cypress E2E tests
 - Controllers (`src/backend/Controllers/`)
 - Form handling or navigation
 - REST API endpoints
+- Fix the test failures, even if they are unrelated to the current changes.
 
 ### Code Quality
 
