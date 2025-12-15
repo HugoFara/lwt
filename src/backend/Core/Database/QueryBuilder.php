@@ -148,12 +148,12 @@ class QueryBuilder
     /**
      * Create a new query builder instance for a table.
      *
-     * @param string $tableName The table name (without prefix)
+     * @param string $tableName The table name
      */
     public function __construct(string $tableName)
     {
         $this->baseTableName = $tableName;
-        $this->table = Globals::getTablePrefix() . $tableName;
+        $this->table = $tableName;
     }
 
     /**
@@ -449,7 +449,7 @@ class QueryBuilder
 
         $this->joins[] = [
             'type' => strtoupper($type),
-            'table' => Globals::getTablePrefix() . $table,
+            'table' => $table,
             'first' => $first,
             'operator' => $operator,
             'second' => $second

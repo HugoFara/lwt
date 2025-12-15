@@ -50,14 +50,14 @@ class TextServiceReadingTest extends TestCase
         if (self::$dbConnected) {
             // Create a test language
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'TestReadingLanguage' LIMIT 1"
+                "SELECT LgID AS value FROM languages WHERE LgName = 'TestReadingLanguage' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization, " .
                     "LgTTSVoiceAPI) " .
@@ -73,7 +73,7 @@ class TextServiceReadingTest extends TestCase
             // Create a test text with annotations and audio
             $annotatedText = "-1\t.\n0\tHello\t\t*\n0\tworld\t\ttranslation";
             Connection::query(
-                "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, " .
+                "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, " .
                 "TxSourceURI, TxAudioPosition, TxPosition) " .
                 "VALUES (" . self::$testLangId . ", 'Test Reading Text', 'Hello world.', " .
                 "'" . mysqli_real_escape_string(Globals::getDbConnection(), $annotatedText) . "', " .
@@ -93,10 +93,10 @@ class TextServiceReadingTest extends TestCase
 
         // Clean up test data
         if (self::$testTextId > 0) {
-            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . self::$testTextId);
+            Connection::query("DELETE FROM texts WHERE TxID = " . self::$testTextId);
         }
         if (self::$testLangId > 0) {
-            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'TestReadingLanguage'");
+            Connection::query("DELETE FROM languages WHERE LgName = 'TestReadingLanguage'");
         }
     }
 
@@ -237,7 +237,7 @@ class TextServiceReadingTest extends TestCase
 
         // Create an RTL language
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+            "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
             "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
             "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
             "VALUES ('TestRTLReadingLang', 'http://test.com/###', '', '', " .
@@ -251,7 +251,7 @@ class TextServiceReadingTest extends TestCase
         $this->assertEquals(1, (int)$result['LgRightToLeft']);
 
         // Cleanup
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = " . $rtlLangId);
+        Connection::query("DELETE FROM languages WHERE LgID = " . $rtlLangId);
     }
 
     // ===== getTtsVoiceApi() tests =====
@@ -286,7 +286,7 @@ class TextServiceReadingTest extends TestCase
 
         // Create a language without TTS voice API
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+            "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
             "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
             "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
             "VALUES ('TestNoTtsLang', 'http://test.com/###', '', '', " .
@@ -300,7 +300,7 @@ class TextServiceReadingTest extends TestCase
         $this->assertTrue($result === null || $result === '');
 
         // Cleanup
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = " . $noTtsLangId);
+        Connection::query("DELETE FROM languages WHERE LgID = " . $noTtsLangId);
     }
 
     // ===== getLanguageIdByName() tests =====
@@ -389,7 +389,7 @@ class TextServiceReadingTest extends TestCase
 
         // Create a text without audio
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxSourceURI) " .
+            "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxSourceURI) " .
             "VALUES (" . self::$testLangId . ", 'No Audio Reading Text', 'Test content.', '', " .
             "'http://source.test')"
         );
@@ -404,7 +404,7 @@ class TextServiceReadingTest extends TestCase
         );
 
         // Cleanup
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . $noAudioTextId);
+        Connection::query("DELETE FROM texts WHERE TxID = " . $noAudioTextId);
     }
 
     public function testTextWithEmptyAnnotatedText(): void
@@ -415,7 +415,7 @@ class TextServiceReadingTest extends TestCase
 
         // Create a text without annotations
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
+            "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
             "VALUES (" . self::$testLangId . ", 'No Annotation Text', 'Plain text.', '')"
         );
         $noAnnTextId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -426,7 +426,7 @@ class TextServiceReadingTest extends TestCase
         $this->assertEquals('', $result['TxAnnotatedText']);
 
         // Cleanup
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . $noAnnTextId);
+        Connection::query("DELETE FROM texts WHERE TxID = " . $noAnnTextId);
     }
 
     public function testTextWithZeroPositions(): void
@@ -437,7 +437,7 @@ class TextServiceReadingTest extends TestCase
 
         // Create a text with zero positions (default)
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
+            "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
             "VALUES (" . self::$testLangId . ", 'Zero Position Text', 'Content.', '')"
         );
         $zeroPosTextId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -449,7 +449,7 @@ class TextServiceReadingTest extends TestCase
         $this->assertEquals(0, (int)($contentResult['TxPosition'] ?? 0));
 
         // Cleanup
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . $zeroPosTextId);
+        Connection::query("DELETE FROM texts WHERE TxID = " . $zeroPosTextId);
     }
 
     public function testLanguageWithRemoveSpaces(): void
@@ -460,7 +460,7 @@ class TextServiceReadingTest extends TestCase
 
         // Create a language with remove spaces enabled (like Japanese)
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+            "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
             "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
             "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
             "VALUES ('TestRemoveSpacesLang', 'http://test.com/###', '', '', " .
@@ -474,7 +474,7 @@ class TextServiceReadingTest extends TestCase
         $this->assertEquals(1, (int)$result['LgRemoveSpaces']);
 
         // Cleanup
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = " . $removeSpacesLangId);
+        Connection::query("DELETE FROM languages WHERE LgID = " . $removeSpacesLangId);
     }
 
     // ===== Edge case tests =====
@@ -489,7 +489,7 @@ class TextServiceReadingTest extends TestCase
 
         // Create a text with special characters in title
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
+            "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
             "VALUES (" . self::$testLangId . ", " .
             "'" . mysqli_real_escape_string(Globals::getDbConnection(), $specialTitle) . "', " .
             "'Content.', '')"
@@ -502,7 +502,7 @@ class TextServiceReadingTest extends TestCase
         $this->assertEquals($specialTitle, $result['TxTitle']);
 
         // Cleanup
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . $specialTextId);
+        Connection::query("DELETE FROM texts WHERE TxID = " . $specialTextId);
     }
 
     public function testGetTextForReadingWithUnicodeText(): void
@@ -515,7 +515,7 @@ class TextServiceReadingTest extends TestCase
 
         // Create a text with Unicode content
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
+            "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
             "VALUES (" . self::$testLangId . ", 'Unicode Test', " .
             "'" . mysqli_real_escape_string(Globals::getDbConnection(), $unicodeText) . "', '')"
         );
@@ -527,6 +527,6 @@ class TextServiceReadingTest extends TestCase
         $this->assertEquals($unicodeText, $result['TxText']);
 
         // Cleanup
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . $unicodeTextId);
+        Connection::query("DELETE FROM texts WHERE TxID = " . $unicodeTextId);
     }
 }

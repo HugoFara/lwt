@@ -94,10 +94,6 @@ use Lwt\View\Helper\IconHelper;
                     <td><code><?php echo htmlspecialchars($data["db_name"] ?? '', ENT_QUOTES, 'UTF-8'); ?></code></td>
                 </tr>
                 <tr>
-                    <th>Database prefix</th>
-                    <td><code>"<?php echo htmlspecialchars($data["db_prefix"] ?? '', ENT_QUOTES, 'UTF-8'); ?>"</code></td>
-                </tr>
-                <tr>
                     <th>Database Size</th>
                     <td><?php echo htmlspecialchars((string)($data["db_size"] ?? ''), ENT_QUOTES, 'UTF-8'); ?> MB</td>
                 </tr>

@@ -80,19 +80,13 @@ class BaseControllerTest extends TestCase
         
         // Clean up test data
         if (self::$dbConnected) {
-            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgText LIKE 'test_ctrl_%'");
+            Connection::query("DELETE FROM tags WHERE TgText LIKE 'test_ctrl_%'");
         }
         
         parent::tearDown();
     }
 
     // ===== Constructor tests =====
-
-    public function testConstructorSetsTablePrefix(): void
-    {
-        $tablePrefix = $this->controller->getTablePrefix();
-        $this->assertIsString($tablePrefix);
-    }
 
     public function testConstructorSetsDbConnection(): void
     {
@@ -237,7 +231,7 @@ class BaseControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $result = $this->controller->testQuery("SELECT * FROM " . Globals::getTablePrefix() . "tags LIMIT 1");
+        $result = $this->controller->testQuery("SELECT * FROM tags LIMIT 1");
 
         $this->assertInstanceOf(\mysqli_result::class, $result);
         mysqli_free_result($result);
@@ -252,14 +246,14 @@ class BaseControllerTest extends TestCase
         }
 
         $result = $this->controller->testExecute(
-            "INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES ('test_ctrl_exec')"
+            "INSERT INTO tags (TgText) VALUES ('test_ctrl_exec')"
         );
 
         // execute returns number of affected rows
         $this->assertEquals(1, $result);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgText = 'test_ctrl_exec'");
+        Connection::query("DELETE FROM tags WHERE TgText = 'test_ctrl_exec'");
     }
 
     // ===== getValue() tests =====
@@ -271,16 +265,16 @@ class BaseControllerTest extends TestCase
         }
 
         // Insert test data
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES ('test_ctrl_value')");
+        Connection::query("INSERT INTO tags (TgText) VALUES ('test_ctrl_value')");
 
         $value = $this->controller->testGetValue(
-            "SELECT TgText as value FROM " . Globals::getTablePrefix() . "tags WHERE TgText = 'test_ctrl_value'"
+            "SELECT TgText as value FROM tags WHERE TgText = 'test_ctrl_value'"
         );
 
         $this->assertEquals('test_ctrl_value', $value);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgText = 'test_ctrl_value'");
+        Connection::query("DELETE FROM tags WHERE TgText = 'test_ctrl_value'");
     }
 
     // ===== getMarkedIds() tests =====
@@ -367,7 +361,7 @@ class BaseControllerTest extends TestCase
         $this->assertEquals('123', $saved);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_db_key'");
+        Connection::query("DELETE FROM settings WHERE StKey = 'test_db_key'");
     }
 }
 
@@ -378,11 +372,6 @@ class BaseControllerTest extends TestCase
  */
 class TestableController extends BaseController
 {
-    public function getTablePrefix(): string
-    {
-        return \Lwt\Core\Globals::getTablePrefix();
-    }
-
     public function getDbConnection(): ?\mysqli
     {
         return $this->db;

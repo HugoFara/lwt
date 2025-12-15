@@ -49,13 +49,13 @@ class SimtermsTest extends TestCase
 
         if ($res) {
             // Truncate words table for clean test data
-            Connection::query("TRUNCATE TABLE " . Globals::getTablePrefix() . "words");
-            Connection::query("TRUNCATE TABLE " . Globals::getTablePrefix() . "languages");
+            Connection::query("TRUNCATE TABLE words");
+            Connection::query("TRUNCATE TABLE languages");
         }
 
         // Insert a test language
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "languages (LgID, LgName, LgDict1URI, LgGoogleTranslateURI)
+            "INSERT INTO languages (LgID, LgName, LgDict1URI, LgGoogleTranslateURI)
             VALUES (1, 'English', 'http://example.com/dict', 'http://translate.google.com')"
         );
 
@@ -79,7 +79,7 @@ class SimtermsTest extends TestCase
             $woRomanization = Escaping::toSqlSyntax($word[2]);
 
             Connection::query(
-                "INSERT INTO " . Globals::getTablePrefix() . "words
+                "INSERT INTO words
                 (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
                 VALUES (" . ($i + 1) . ", 1, $woText, $woTextLC, 1, $woTranslation, $woRomanization)"
             );
@@ -89,8 +89,8 @@ class SimtermsTest extends TestCase
     public static function tearDownAfterClass(): void
     {
         // Clean up test data
-        Connection::query("TRUNCATE TABLE " . Globals::getTablePrefix() . "words");
-        Connection::query("TRUNCATE TABLE " . Globals::getTablePrefix() . "languages");
+        Connection::query("TRUNCATE TABLE words");
+        Connection::query("TRUNCATE TABLE languages");
     }
 
     // ========== LETTER PAIRS FUNCTION ==========
@@ -214,7 +214,7 @@ class SimtermsTest extends TestCase
 
         // Should not include 'hello' itself (it's excluded by SQL query)
         foreach ($similar as $termid) {
-            $sql = "SELECT WoTextLC FROM " . Globals::getTablePrefix() . "words WHERE WoID = $termid";
+            $sql = "SELECT WoTextLC FROM words WHERE WoID = $termid";
             $result = Connection::fetchValue($sql);
             $this->assertNotEquals('hello', $result);
         }
@@ -296,13 +296,13 @@ class SimtermsTest extends TestCase
 
         // Test with wildcard translation (*)
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "words
+            "INSERT INTO words
             (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
             VALUES (100, 1, 'testword', 'testword', 1, '*', '')"
         );
         $output = self::$service->formatTerm(100, 'test');
         $this->assertStringContainsString('???', $output);
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoID = 100");
+        Connection::query("DELETE FROM words WHERE WoID = 100");
 
         // Test with non-existent term ID
         $output = self::$service->formatTerm(9999, 'test');
@@ -385,12 +385,12 @@ class SimtermsTest extends TestCase
     {
         // Insert UTF-8 words
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "words
+            "INSERT INTO words
             (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
             VALUES (200, 1, '日本語', '日本語', 1, 'Japanese language', 'nihongo')"
         );
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "words
+            "INSERT INTO words
             (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
             VALUES (201, 1, '日本', '日本', 1, 'Japan', 'nihon')"
         );
@@ -416,7 +416,7 @@ class SimtermsTest extends TestCase
         $this->assertStringContainsString('Japanese language', $output);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoID IN (200, 201)");
+        Connection::query("DELETE FROM words WHERE WoID IN (200, 201)");
     }
 
     public function testSimilarityRankingEdgeCases(): void

@@ -51,7 +51,6 @@ class ServerDataService
      *
      * @return array{
      *   db_name: string,
-     *   db_prefix: string,
      *   db_size: float,
      *   server_soft: string,
      *   apache: string,
@@ -65,7 +64,6 @@ class ServerDataService
     {
         $data = [];
         $data["db_name"] = $this->dbname;
-        $data["db_prefix"] = Globals::getTablePrefix();
         $data["db_size"] = $this->getDatabaseSize();
         $data["server_soft"] = $_SERVER['SERVER_SOFTWARE'];
         $data["apache"] = $this->parseApacheVersion($data["server_soft"]);

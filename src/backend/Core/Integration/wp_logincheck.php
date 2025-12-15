@@ -17,13 +17,12 @@
 
 namespace Lwt\Integration;
 
-use Lwt\Core\Globals;
-
 require_once __DIR__ . '/../Bootstrap/start_session.php';
 
 if (isset($_SESSION['LWT-WP-User'])) {
-    // Note: Table prefix feature is deprecated since 3.0.0, suppress warning
-    @Globals::setTablePrefix($_SESSION['LWT-WP-User']);
+    // WordPress user is authenticated
+    // Note: Table prefix feature has been removed in 3.0.0
+    // WordPress integration may need to be updated for multi-user mode
 } else {
     $url = '';
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') == 'GET') {

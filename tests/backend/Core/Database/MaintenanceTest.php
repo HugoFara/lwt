@@ -51,22 +51,22 @@ class MaintenanceTest extends TestCase
     private static function createTestData(): void
     {
         // Clean up any existing test language first
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoLgID IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'Test Maintenance Language')");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'Test Maintenance Language'");
+        Connection::query("DELETE FROM words WHERE WoLgID IN (SELECT LgID FROM languages WHERE LgName = 'Test Maintenance Language')");
+        Connection::query("DELETE FROM languages WHERE LgName = 'Test Maintenance Language'");
         // Also clean up Japanese test languages to avoid MeCab issues
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoLgID IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'Test Japanese')");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'Test Japanese'");
+        Connection::query("DELETE FROM words WHERE WoLgID IN (SELECT LgID FROM languages WHERE LgName = 'Test Japanese')");
+        Connection::query("DELETE FROM languages WHERE LgName = 'Test Japanese'");
         // Clean up any MECAB languages that could trigger the MeCab requirement
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoLgID IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB')");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB'");
+        Connection::query("DELETE FROM words WHERE WoLgID IN (SELECT LgID FROM languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB')");
+        Connection::query("DELETE FROM languages WHERE UPPER(LgRegexpWordCharacters) = 'MECAB'");
         // Clean up split-each-char languages (Chinese) to avoid bug with initWordCount
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoLgID IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages WHERE LgSplitEachChar = 1)");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgSplitEachChar = 1");
+        Connection::query("DELETE FROM words WHERE WoLgID IN (SELECT LgID FROM languages WHERE LgSplitEachChar = 1)");
+        Connection::query("DELETE FROM languages WHERE LgSplitEachChar = 1");
         // Clean up any words with WoWordCount=0 from languages that don't exist (orphaned words)
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoWordCount = 0 AND WoLgID NOT IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages)");
+        Connection::query("DELETE FROM words WHERE WoWordCount = 0 AND WoLgID NOT IN (SELECT LgID FROM languages)");
 
         // Create test language
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (
+        $sql = "INSERT INTO languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
             LgCharacterSubstitutions, LgRegexpSplitSentences,
             LgExceptionsSplitSentences, LgRegexpWordCharacters,
@@ -89,8 +89,8 @@ class MaintenanceTest extends TestCase
 
         // Clean up test language and associated data
         if (self::$testLanguageId) {
-            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoLgID = " . self::$testLanguageId);
-            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM words WHERE WoLgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM languages WHERE LgID = " . self::$testLanguageId);
         }
     }
 
@@ -180,7 +180,7 @@ class MaintenanceTest extends TestCase
         }
 
         // Create a temporary empty table
-        Connection::query("CREATE TEMPORARY TABLE " . Globals::getTablePrefix() . "test_empty (
+        Connection::query("CREATE TEMPORARY TABLE test_empty (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(50)
         )");
@@ -216,7 +216,7 @@ class MaintenanceTest extends TestCase
             "SELECT AUTO_INCREMENT as value
              FROM information_schema.tables
              WHERE table_schema = DATABASE()
-             AND table_name = '" . Globals::getTablePrefix() . "languages'"
+             AND table_name = 'languages'"
         );
 
         Maintenance::optimizeDatabase();
@@ -226,7 +226,7 @@ class MaintenanceTest extends TestCase
             "SELECT AUTO_INCREMENT as value
              FROM information_schema.tables
              WHERE table_schema = DATABASE()
-             AND table_name = '" . Globals::getTablePrefix() . "languages'"
+             AND table_name = 'languages'"
         );
 
         // Both should be valid integers (the actual values depend on DB state)
@@ -254,7 +254,7 @@ class MaintenanceTest extends TestCase
         }
 
         // Insert a test word with WoWordCount = 0
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
+        $sql = "INSERT INTO words (
             WoLgID, WoText, WoTextLC, WoStatus, WoWordCount
         ) VALUES (
             " . self::$testLanguageId . ",
@@ -271,14 +271,14 @@ class MaintenanceTest extends TestCase
 
         // Check that word count was updated
         $count = Connection::fetchValue(
-            "SELECT WoWordCount as value FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId"
+            "SELECT WoWordCount as value FROM words WHERE WoID = $wordId"
         );
 
         // 'testword' is a single word, so count should be 1
         $this->assertEquals('1', $count, 'Word count should be updated from 0 to 1');
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId");
+        Connection::query("DELETE FROM words WHERE WoID = $wordId");
     }
 
     public function testInitWordCountMultiwordExpression(): void
@@ -288,7 +288,7 @@ class MaintenanceTest extends TestCase
         }
 
         // Insert a multi-word expression with WoWordCount = 0
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
+        $sql = "INSERT INTO words (
             WoLgID, WoText, WoTextLC, WoStatus, WoWordCount
         ) VALUES (
             " . self::$testLanguageId . ",
@@ -305,14 +305,14 @@ class MaintenanceTest extends TestCase
 
         // Check that word count was updated
         $count = Connection::fetchValue(
-            "SELECT WoWordCount as value FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId"
+            "SELECT WoWordCount as value FROM words WHERE WoID = $wordId"
         );
 
         // 'hello world test' is 3 words
         $this->assertEquals('3', $count, 'Multi-word expression count should be 3');
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId");
+        Connection::query("DELETE FROM words WHERE WoID = $wordId");
     }
 
     public function testInitWordCountPreservesExistingCounts(): void
@@ -322,7 +322,7 @@ class MaintenanceTest extends TestCase
         }
 
         // Insert a word with existing word count
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
+        $sql = "INSERT INTO words (
             WoLgID, WoText, WoTextLC, WoStatus, WoWordCount
         ) VALUES (
             " . self::$testLanguageId . ",
@@ -339,13 +339,13 @@ class MaintenanceTest extends TestCase
 
         // Check that word count was NOT changed (only updates WoWordCount = 0)
         $count = Connection::fetchValue(
-            "SELECT WoWordCount as value FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId"
+            "SELECT WoWordCount as value FROM words WHERE WoID = $wordId"
         );
 
         $this->assertEquals('5', $count, 'Existing word count should be preserved');
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId");
+        Connection::query("DELETE FROM words WHERE WoID = $wordId");
     }
 
     // ===== updateJapaneseWordCount() tests =====
@@ -364,7 +364,7 @@ class MaintenanceTest extends TestCase
         }
 
         // Create a Japanese-like language with MECAB
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (
+        $sql = "INSERT INTO languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
             LgCharacterSubstitutions, LgRegexpSplitSentences,
             LgExceptionsSplitSentences, LgRegexpWordCharacters,
@@ -383,7 +383,7 @@ class MaintenanceTest extends TestCase
         $this->assertTrue(true, 'updateJapaneseWordCount should work with MeCab');
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $japLangId");
+        Connection::query("DELETE FROM languages WHERE LgID = $japLangId");
     }
 
     // ===== Edge cases and robustness tests =====
@@ -412,7 +412,7 @@ class MaintenanceTest extends TestCase
         $wordIds = [];
         for ($i = 0; $i < 10; $i++) {
             $word = "batchtest$i";
-            $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
+            $sql = "INSERT INTO words (
                 WoLgID, WoText, WoTextLC, WoStatus, WoWordCount
             ) VALUES (
                 " . self::$testLanguageId . ",
@@ -431,13 +431,13 @@ class MaintenanceTest extends TestCase
         // Check all words were updated
         foreach ($wordIds as $wordId) {
             $count = Connection::fetchValue(
-                "SELECT WoWordCount as value FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId"
+                "SELECT WoWordCount as value FROM words WHERE WoID = $wordId"
             );
             $this->assertEquals('1', $count, "Word $wordId should have count updated");
         }
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoID IN (" . implode(',', $wordIds) . ")");
+        Connection::query("DELETE FROM words WHERE WoID IN (" . implode(',', $wordIds) . ")");
     }
 
     public function testInitWordCountUnicodeWords(): void
@@ -447,7 +447,7 @@ class MaintenanceTest extends TestCase
         }
 
         // Create a language that supports accented characters
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (
+        $sql = "INSERT INTO languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
             LgCharacterSubstitutions, LgRegexpSplitSentences,
             LgExceptionsSplitSentences, LgRegexpWordCharacters,
@@ -462,7 +462,7 @@ class MaintenanceTest extends TestCase
         $frLangId = mysqli_insert_id(Globals::getDbConnection());
 
         // Insert a French word with accents
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
+        $sql = "INSERT INTO words (
             WoLgID, WoText, WoTextLC, WoStatus, WoWordCount
         ) VALUES (
             $frLangId,
@@ -479,13 +479,13 @@ class MaintenanceTest extends TestCase
 
         // Check word count was updated
         $count = Connection::fetchValue(
-            "SELECT WoWordCount as value FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId"
+            "SELECT WoWordCount as value FROM words WHERE WoID = $wordId"
         );
         $this->assertEquals('1', $count, 'Unicode word count should be updated');
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $frLangId");
+        Connection::query("DELETE FROM words WHERE WoID = $wordId");
+        Connection::query("DELETE FROM languages WHERE LgID = $frLangId");
     }
 
     public function testInitWordCountSplitEachChar(): void
@@ -495,7 +495,7 @@ class MaintenanceTest extends TestCase
         }
 
         // Create a Chinese-like language with LgSplitEachChar = 1
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (
+        $sql = "INSERT INTO languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
             LgCharacterSubstitutions, LgRegexpSplitSentences,
             LgExceptionsSplitSentences, LgRegexpWordCharacters,
@@ -510,7 +510,7 @@ class MaintenanceTest extends TestCase
         $chLangId = mysqli_insert_id(Globals::getDbConnection());
 
         // Insert a Chinese word with WoWordCount = 0
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "words (
+        $sql = "INSERT INTO words (
             WoLgID, WoText, WoTextLC, WoStatus, WoWordCount
         ) VALUES (
             $chLangId,
@@ -527,12 +527,12 @@ class MaintenanceTest extends TestCase
 
         // Check that word count was updated (should be at least 1)
         $count = Connection::fetchValue(
-            "SELECT WoWordCount as value FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId"
+            "SELECT WoWordCount as value FROM words WHERE WoID = $wordId"
         );
         $this->assertGreaterThanOrEqual(1, (int)$count, 'Split-each-char word count should be at least 1');
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $chLangId");
+        Connection::query("DELETE FROM words WHERE WoID = $wordId");
+        Connection::query("DELETE FROM languages WHERE LgID = $chLangId");
     }
 }

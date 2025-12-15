@@ -62,7 +62,7 @@ class SettingsHandlerTest extends TestCase
     {
         // Clean up test settings
         if (self::$dbConnected) {
-            $prefix = Globals::getTablePrefix();
+            $prefix = '';
             Connection::query("DELETE FROM {$prefix}settings WHERE StKey LIKE 'test_api_%'");
         }
         parent::tearDown();

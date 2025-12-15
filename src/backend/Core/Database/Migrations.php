@@ -16,8 +16,6 @@
 namespace Lwt\Database;
 
 require_once __DIR__ . '/../../Services/WordStatusService.php';
-require_once __DIR__ . '/../../Services/TableSetService.php';
-require_once __DIR__ . '/PrefixMigration.php';
 
 use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;
@@ -174,44 +172,6 @@ class Migrations
     }
 
     /**
-     * Run prefix-to-user migration if there are prefixed table sets.
-     *
-     * This converts old prefix-based multi-project data (e.g., "john_languages")
-     * to the new user_id-based multi-user system.
-     *
-     * @return void
-     */
-    public static function runPrefixMigration(): void
-    {
-        // Check if there are any prefixed table sets to migrate
-        $prefixes = \Lwt\Services\TableSetService::getAllPrefixes();
-
-        if (empty($prefixes)) {
-            if (Globals::isDebug()) {
-                echo "<p>DEBUG: No prefixed table sets found. Skipping prefix migration.</p>";
-            }
-            return;
-        }
-
-        if (Globals::isDebug()) {
-            echo "<p>DEBUG: Found " . count($prefixes) . " prefixed table set(s) to migrate: "
-                . implode(', ', $prefixes) . "</p>";
-        }
-
-        // Run the prefix migration
-        $migration = new PrefixMigration(Globals::isDebug());
-        $result = $migration->migrate(false); // Don't drop tables automatically
-
-        if (Globals::isDebug()) {
-            echo "<p>DEBUG: Prefix migration complete. Migrated "
-                . $result['prefixes_migrated'] . " prefix(es).</p>";
-            if (!empty($result['errors'])) {
-                echo "<p>DEBUG: Migration errors: " . implode(', ', $result['errors']) . "</p>";
-            }
-        }
-    }
-
-    /**
      * Update the database if it is using an outdate version.
      *
      * @return void
@@ -289,9 +249,6 @@ class Migrations
                 // Record migration as applied
                 self::recordMigration($filename);
             }
-
-            // Run prefix-to-user migration if there are prefixed table sets
-            self::runPrefixMigration();
 
             if (Globals::isDebug()) {
                 echo '<p>DEBUG: rebuilding tts</p>';

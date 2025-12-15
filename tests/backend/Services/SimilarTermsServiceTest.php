@@ -47,12 +47,12 @@ class SimilarTermsServiceTest extends TestCase
         self::$dbConnected = (Globals::getDbConnection() !== null);
 
         // Ensure clean test data
-        Connection::query("TRUNCATE TABLE " . Globals::getTablePrefix() . "words");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = 1");
+        Connection::query("TRUNCATE TABLE words");
+        Connection::query("DELETE FROM languages WHERE LgID = 1");
 
         // Insert a test language
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "languages (LgID, LgName, LgDict1URI, LgGoogleTranslateURI, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgCharacterSubstitutions)
+            "INSERT INTO languages (LgID, LgName, LgDict1URI, LgGoogleTranslateURI, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgCharacterSubstitutions)
             VALUES (1, 'English', 'http://example.com/dict', 'http://translate.google.com', '.!?', 'Mr.|Mrs.|Dr.', 'a-zA-Z', '')"
         );
 
@@ -80,7 +80,7 @@ class SimilarTermsServiceTest extends TestCase
             $status = $word[3];
 
             Connection::query(
-                "INSERT INTO " . Globals::getTablePrefix() . "words
+                "INSERT INTO words
                 (WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, WoRomanization)
                 VALUES (" . ($i + 1) . ", 1, $woText, $woTextLC, $status, $woTranslation, $woRomanization)"
             );
@@ -94,8 +94,8 @@ class SimilarTermsServiceTest extends TestCase
 
     public static function tearDownAfterClass(): void
     {
-        Connection::query("TRUNCATE TABLE " . Globals::getTablePrefix() . "words");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = 1");
+        Connection::query("TRUNCATE TABLE words");
+        Connection::query("DELETE FROM languages WHERE LgID = 1");
     }
 
     // ========== PHONETIC NORMALIZATION TESTS ==========
@@ -250,7 +250,7 @@ class SimilarTermsServiceTest extends TestCase
         $similar = $this->service->getSimilarTermsWeighted(1, 'hello', 10, 0.3);
 
         foreach ($similar as $wordId) {
-            $sql = "SELECT WoTextLC FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId";
+            $sql = "SELECT WoTextLC FROM words WHERE WoID = $wordId";
             $text = Connection::fetchValue($sql);
             $this->assertNotEquals('hello', $text);
         }
@@ -286,7 +286,7 @@ class SimilarTermsServiceTest extends TestCase
         $positions = [];
         $i = 1;
         foreach ($similar as $wordId) {
-            $sql = "SELECT WoTextLC FROM " . Globals::getTablePrefix() . "words WHERE WoID = $wordId";
+            $sql = "SELECT WoTextLC FROM words WHERE WoID = $wordId";
             $text = Connection::fetchValue($sql);
             if ($text !== null) {
                 $positions[$text] = $i;

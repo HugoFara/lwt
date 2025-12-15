@@ -71,14 +71,8 @@ class BackupServiceTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        // If using default table set, prefix should be empty
-        if (Globals::getTablePrefix() === '') {
-            $this->assertEquals('', $this->service->getFilePrefix());
-        } else {
-            // If using a custom prefix, it should end with '-'
-            $prefix = $this->service->getFilePrefix();
-            $this->assertStringEndsWith('-', $prefix);
-        }
+        // File prefix should always be empty now (no table prefix feature)
+        $this->assertEquals('', $this->service->getFilePrefix());
     }
 
     // ===== getPrefixInfo() tests =====
@@ -101,11 +95,8 @@ class BackupServiceTest extends TestCase
 
         $result = $this->service->getPrefixInfo();
 
-        if (Globals::getTablePrefix() === '') {
-            $this->assertStringContainsString('Default Table Set', $result);
-        } else {
-            $this->assertStringContainsString('Table Set:', $result);
-        }
+        // No table prefix feature - returns empty string
+        $this->assertEquals('', $result);
     }
 
     // ===== getDatabaseName() tests =====

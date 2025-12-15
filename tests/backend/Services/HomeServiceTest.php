@@ -54,48 +54,6 @@ class HomeServiceTest extends TestCase
         $this->serverDataService = new ServerDataService();
     }
 
-    // ===== getTableSetSpanGroups() tests =====
-
-    public function testGetTableSetSpanGroupsReturnsArray(): void
-    {
-        $result = $this->service->getTableSetSpanGroups();
-
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('span1', $result);
-        $this->assertArrayHasKey('span2', $result);
-        $this->assertArrayHasKey('span3', $result);
-    }
-
-    public function testGetTableSetSpanGroupsContainsStrings(): void
-    {
-        $result = $this->service->getTableSetSpanGroups();
-
-        $this->assertIsString($result['span1']);
-        $this->assertIsString($result['span2']);
-        $this->assertIsString($result['span3']);
-    }
-
-    public function testGetTableSetSpanGroupsSpan1StartsWithSpan(): void
-    {
-        $result = $this->service->getTableSetSpanGroups();
-
-        $this->assertStringStartsWith('<span', $result['span1']);
-    }
-
-    public function testGetTableSetSpanGroupsSpan2ContainsTableSet(): void
-    {
-        $result = $this->service->getTableSetSpanGroups();
-
-        $this->assertStringContainsString('Table Set', $result['span2']);
-    }
-
-    public function testGetTableSetSpanGroupsSpan3StartsWithSpan(): void
-    {
-        $result = $this->service->getTableSetSpanGroups();
-
-        $this->assertStringStartsWith('<span', $result['span3']);
-    }
-
     // ===== getCurrentTextInfo() tests =====
 
     public function testGetCurrentTextInfoReturnsNullForNonExistentText(): void
@@ -117,7 +75,7 @@ class HomeServiceTest extends TestCase
 
         // First check if there's any text in the database
         $textId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts LIMIT 1"
+            "SELECT TxID AS value FROM texts LIMIT 1"
         );
 
         if ($textId === null) {
@@ -141,7 +99,7 @@ class HomeServiceTest extends TestCase
         }
 
         $textId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts LIMIT 1"
+            "SELECT TxID AS value FROM texts LIMIT 1"
         );
 
         if ($textId === null) {
@@ -160,7 +118,7 @@ class HomeServiceTest extends TestCase
         }
 
         $textId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts LIMIT 1"
+            "SELECT TxID AS value FROM texts LIMIT 1"
         );
 
         if ($textId === null) {
@@ -179,7 +137,7 @@ class HomeServiceTest extends TestCase
         }
 
         $textId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts LIMIT 1"
+            "SELECT TxID AS value FROM texts LIMIT 1"
         );
 
         if ($textId === null) {
@@ -198,7 +156,7 @@ class HomeServiceTest extends TestCase
         }
 
         $textId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts LIMIT 1"
+            "SELECT TxID AS value FROM texts LIMIT 1"
         );
 
         if ($textId === null) {
@@ -230,7 +188,7 @@ class HomeServiceTest extends TestCase
         }
 
         $langId = Connection::fetchValue(
-            "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages LIMIT 1"
+            "SELECT LgID AS value FROM languages LIMIT 1"
         );
 
         if ($langId === null) {
@@ -383,25 +341,10 @@ class HomeServiceTest extends TestCase
 
         $result = $this->serverDataService->getServerData();
 
-        $expectedKeys = ['db_name', 'db_prefix', 'db_size', 'server_soft', 'apache', 'php', 'mysql', 'lwt_version', 'server_location'];
+        $expectedKeys = ['db_name', 'db_size', 'server_soft', 'apache', 'php', 'mysql', 'lwt_version', 'server_location'];
         foreach ($expectedKeys as $key) {
             $this->assertArrayHasKey($key, $result, "Missing key: $key");
         }
-    }
-
-    public function testGetServerDataPrefixIsString(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        // Set up server environment variables for testing
-        $_SERVER['SERVER_SOFTWARE'] = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/2.4.0 (Test)';
-        $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
-
-        $result = $this->serverDataService->getServerData();
-
-        $this->assertIsString($result['db_prefix']);
     }
 
     public function testGetServerDataDbSizeIsFloat(): void
@@ -449,24 +392,6 @@ class HomeServiceTest extends TestCase
         $this->assertIsString($result['mysql']);
     }
 
-    // ===== getTablePrefix() tests =====
-
-    public function testGetTablePrefixReturnsString(): void
-    {
-        $result = $this->service->getTablePrefix();
-
-        $this->assertIsString($result);
-    }
-
-    // ===== isTablePrefixFixed() tests =====
-
-    public function testIsTablePrefixFixedReturnsBool(): void
-    {
-        $result = $this->service->isTablePrefixFixed();
-
-        $this->assertIsBool($result);
-    }
-
     // ===== getDashboardData() tests =====
 
     public function testGetDashboardDataReturnsArray(): void
@@ -493,10 +418,9 @@ class HomeServiceTest extends TestCase
             'current_language_id',
             'current_text_id',
             'current_text_info',
-            'table_prefix',
-            'is_fixed_prefix',
             'is_wordpress',
-            'is_debug'
+            'is_debug',
+            'is_multi_user'
         ];
 
         foreach ($expectedKeys as $key) {
@@ -513,28 +437,6 @@ class HomeServiceTest extends TestCase
         $result = $this->service->getDashboardData();
 
         $this->assertIsInt($result['language_count']);
-    }
-
-    public function testGetDashboardDataTablePrefixIsString(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->service->getDashboardData();
-
-        $this->assertIsString($result['table_prefix']);
-    }
-
-    public function testGetDashboardDataIsFixedPrefixIsBool(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->service->getDashboardData();
-
-        $this->assertIsBool($result['is_fixed_prefix']);
     }
 
     public function testGetDashboardDataIsWordpressIsBool(): void
@@ -591,7 +493,7 @@ class HomeServiceTest extends TestCase
         if ($count > 0) {
             // If there are languages, we should be able to get at least one name
             $langId = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages LIMIT 1"
+                "SELECT LgID AS value FROM languages LIMIT 1"
             );
 
             if ($langId !== null) {
@@ -615,18 +517,6 @@ class HomeServiceTest extends TestCase
             $this->service->getLanguageCount(),
             $dashboardData['language_count'],
             'Language count should match'
-        );
-
-        $this->assertSame(
-            $this->service->getTablePrefix(),
-            $dashboardData['table_prefix'],
-            'Table prefix should match'
-        );
-
-        $this->assertSame(
-            $this->service->isTablePrefixFixed(),
-            $dashboardData['is_fixed_prefix'],
-            'Fixed prefix flag should match'
         );
 
         $this->assertSame(

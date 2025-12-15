@@ -82,18 +82,6 @@ class ServerDataServiceTest extends TestCase
         $this->assertNotEmpty($result['db_name']);
     }
 
-    public function testGetServerDataContainsDbPrefix(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->service->getServerData();
-
-        $this->assertArrayHasKey('db_prefix', $result);
-        $this->assertIsString($result['db_prefix']);
-    }
-
     public function testGetServerDataContainsDbSize(): void
     {
         if (!self::$dbConnected) {

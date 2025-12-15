@@ -62,7 +62,7 @@ class TextParsingTest extends TestCase
     private static function createTestLanguage(): void
     {
         // Insert test language
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (
+        $sql = "INSERT INTO languages (
             LgName,
             LgDict1URI,
             LgGoogleTranslateURI,
@@ -98,7 +98,7 @@ class TextParsingTest extends TestCase
     public static function tearDownAfterClass(): void
     {
         if (self::$testLanguageId) {
-            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = " . self::$testLanguageId);
+            Connection::query("DELETE FROM languages WHERE LgID = " . self::$testLanguageId);
         }
     }
 
@@ -148,7 +148,7 @@ class TextParsingTest extends TestCase
         }
 
         // Create language with character substitutions
-        $sql = "INSERT INTO " . Globals::getTablePrefix() . "languages (
+        $sql = "INSERT INTO languages (
             LgName, LgDict1URI, LgGoogleTranslateURI, LgTextSize,
             LgCharacterSubstitutions, LgRegexpSplitSentences,
             LgExceptionsSplitSentences, LgRegexpWordCharacters,
@@ -179,7 +179,7 @@ class TextParsingTest extends TestCase
         $this->assertNotEmpty($result, 'Should parse German text');
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $germanLangId");
+        Connection::query("DELETE FROM languages WHERE LgID = $germanLangId");
     }
 
     /**

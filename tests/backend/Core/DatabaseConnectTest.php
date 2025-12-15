@@ -554,13 +554,13 @@ class DatabaseConnectTest extends TestCase
 
         // SQL injection in key - first clean up any previously saved value
         $injectionKey = "key'; DROP TABLE settings; --";
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+        Connection::query("DELETE FROM settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
         $result = Settings::get($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, verify the table still exists (injection didn't work)
-        $tableExists = \mysqli_num_rows(Connection::query("SHOW TABLES LIKE '" . Globals::getTablePrefix() . "settings'")) > 0;
+        $tableExists = \mysqli_num_rows(Connection::query("SHOW TABLES LIKE 'settings'")) > 0;
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
 
         // Test special key 'currentlanguage' (triggers validateLang)
@@ -604,13 +604,13 @@ class DatabaseConnectTest extends TestCase
 
         // SQL injection attempt - first clean up any previously saved value
         $injectionKey = "injectkey'; DROP TABLE settings; --";
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
+        Connection::query("DELETE FROM settings WHERE StKey = " . Escaping::toSqlSyntax($injectionKey));
 
         $result = Settings::getWithDefault($injectionKey);
         $this->assertEquals('', $result, 'SQL injection key should return empty when not present');
 
         // More importantly, verify the table still exists (injection didn't work)
-        $tableExists = \mysqli_num_rows(Connection::query("SHOW TABLES LIKE '" . Globals::getTablePrefix() . "settings'")) > 0;
+        $tableExists = \mysqli_num_rows(Connection::query("SHOW TABLES LIKE 'settings'")) > 0;
         $this->assertTrue($tableExists, 'SQL injection should not drop the table');
 
         // Empty key
@@ -671,9 +671,9 @@ class DatabaseConnectTest extends TestCase
         $this->assertStringContainsString('OK:', $result, 'Valid numeric value should save');
 
         // Clean up test keys (including SQL injection test keys)
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey LIKE 'test_%'");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey LIKE 'key%'");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'safe_key'");
+        Connection::query("DELETE FROM settings WHERE StKey LIKE 'test_%'");
+        Connection::query("DELETE FROM settings WHERE StKey LIKE 'key%'");
+        Connection::query("DELETE FROM settings WHERE StKey = 'safe_key'");
     }
 
     /**
@@ -711,7 +711,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals(1, $result, 'Non-existent setting should return default');
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey LIKE 'test_bool_%'");
+        Connection::query("DELETE FROM settings WHERE StKey LIKE 'test_bool_%'");
     }
 
     /**
@@ -764,8 +764,8 @@ class DatabaseConnectTest extends TestCase
         // This is actually correct behavior - keys should be required
 
         // Clean up test keys
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "_lwtgeneral WHERE LWTKey LIKE 'test_%'");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "_lwtgeneral WHERE LWTKey LIKE 'safe_%'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey LIKE 'test_%'");
+        Connection::query("DELETE FROM _lwtgeneral WHERE LWTKey LIKE 'safe_%'");
     }
 
     /**
@@ -826,7 +826,7 @@ class DatabaseConnectTest extends TestCase
 
         // Valid INSERT query - returns affected rows
         $result = DB::execute(
-            "INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue)
+            "INSERT INTO settings (StKey, StValue)
              VALUES ('test_runsql_1', 'value1')
              ON DUPLICATE KEY UPDATE StValue='value1'"
         );
@@ -835,14 +835,14 @@ class DatabaseConnectTest extends TestCase
 
         // UPDATE query - returns affected rows
         $result = DB::execute(
-            "UPDATE " . Globals::getTablePrefix() . "settings
+            "UPDATE settings
              SET StValue='value2' WHERE StKey='test_runsql_1'"
         );
         $this->assertIsInt($result);
         $this->assertEquals(1, $result);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey='test_runsql_1'");
+        Connection::query("DELETE FROM settings WHERE StKey='test_runsql_1'");
     }
 
     /**
@@ -897,7 +897,7 @@ class DatabaseConnectTest extends TestCase
      */
     public function testGetFirstValueAdvanced(): void
     {
-        
+
         // Ensure DB connection exists
         if (!Globals::getDbConnection()) {
             list($userid, $passwd, $server, $dbname) = user_logging();
@@ -912,27 +912,25 @@ class DatabaseConnectTest extends TestCase
 
         // Query that returns a value
         $result = Connection::fetchValue(
-            "SELECT StValue as value FROM " . Globals::getTablePrefix() .
-            "settings WHERE StKey='test_first_value'"
+            "SELECT StValue as value FROM settings WHERE StKey='test_first_value'"
         );
         $this->assertEquals('42', $result);
 
         // Query that returns nothing should return null
         $result = Connection::fetchValue(
-            "SELECT StValue as value FROM " . Globals::getTablePrefix() .
-            "settings WHERE StKey='nonexistent_key_xyz123'"
+            "SELECT StValue as value FROM settings WHERE StKey='nonexistent_key_xyz123'"
         );
         $this->assertNull($result);
 
         // Query with numeric result
         $result = Connection::fetchValue(
-            "SELECT COUNT(*) as value FROM " . Globals::getTablePrefix() . "settings"
+            "SELECT COUNT(*) as value FROM settings"
         );
         $this->assertIsNumeric($result);
         $this->assertTrue($result >= 0);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey='test_first_value'");
+        Connection::query("DELETE FROM settings WHERE StKey='test_first_value'");
     }
 
     /**
@@ -954,65 +952,6 @@ class DatabaseConnectTest extends TestCase
 
         // Restore proper connection (already have valid one)
         Globals::setDbConnection($connection);
-    }
-
-    /**
-     * Test getDatabasePrefix function
-     */
-    public function testGetDatabasePrefix(): void
-    {
-        
-        // Ensure DB connection exists
-        if (!Globals::getDbConnection()) {
-            list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
-            );
-            Globals::setDbConnection($connection);
-        }
-
-        // Get the prefix for the current database
-        $result = Configuration::getPrefix(Globals::getDbConnection());
-
-        // The function returns an array with [$tbpref, $fixed_tbpref]
-        $this->assertIsArray($result);
-        $this->assertCount(2, $result);
-
-        list($prefix, $fixed) = $result;
-
-        // The prefix should be a string (empty string by default)
-        $this->assertTrue(is_string($prefix));
-
-        // The fixed flag should be a boolean
-        $this->assertTrue(is_bool($fixed));
-
-        // If there's a prefix set in settings, it should be returned
-        // By default, LWT uses empty prefix
-        $this->assertTrue($prefix === '' || strlen($prefix) > 0);
-    }
-
-    /**
-     * Test Configuration::getPrefix function
-     */
-    public function testGetDatabasePrefixes(): void
-    {
-        // Ensure DB connection exists
-        if (!Globals::getDbConnection()) {
-            list($userid, $passwd, $server, $dbname) = user_logging();
-            $connection = Configuration::connect(
-                $server, $userid, $passwd, $dbname, $socket ?? ""
-            );
-            Globals::setDbConnection($connection);
-        }
-
-        // Get prefixes - returns array of [prefix, is_fixed]
-        list($prefix, $fixed) = Configuration::getPrefix(Globals::getDbConnection());
-
-        // $fixed should be a boolean
-        $this->assertIsBool($fixed);
-
-        // $prefix should be set to a string
-        $this->assertIsString($prefix);
     }
 
     /**
@@ -1045,14 +984,14 @@ class DatabaseConnectTest extends TestCase
 
         // Valid INSERT query
         $result = Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue)
+            "INSERT INTO settings (StKey, StValue)
              VALUES ('test_mysqli_query', 'test')
              ON DUPLICATE KEY UPDATE StValue='test'"
         );
         $this->assertNotFalse($result, 'Valid INSERT should return true');
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey='test_mysqli_query'");
+        Connection::query("DELETE FROM settings WHERE StKey='test_mysqli_query'");
     }
 
     /**
@@ -1135,12 +1074,12 @@ class DatabaseConnectTest extends TestCase
 
         // Test with empty result set
         $result = Connection::fetchValue(
-            "SELECT 'value' FROM " . Globals::getTablePrefix() . "settings WHERE StKey='nonexistent_key_xyz123'"
+            "SELECT 'value' FROM settings WHERE StKey='nonexistent_key_xyz123'"
         );
         $this->assertEquals('', $result, 'Empty result set should return empty string');
 
         // Test with COUNT query (needs 'value' alias)
-        $result = Connection::fetchValue("SELECT COUNT(*) as value FROM " . Globals::getTablePrefix() . "settings");
+        $result = Connection::fetchValue("SELECT COUNT(*) as value FROM settings");
         $this->assertTrue(is_numeric($result) || $result === null, 'COUNT should return numeric value or null');
     }
 
@@ -1495,7 +1434,7 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Check if table uses MyISAM (which doesn't support transactions)
-        $engine_result = Connection::query("SHOW TABLE STATUS LIKE '" . Globals::getTablePrefix() . "settings'");
+        $engine_result = Connection::query("SHOW TABLE STATUS LIKE 'settings'");
         $engine_row = \mysqli_fetch_assoc($engine_result);
         $is_myisam = ($engine_row['Engine'] === 'MyISAM');
 
@@ -1504,7 +1443,7 @@ class DatabaseConnectTest extends TestCase
 
         // Insert test data
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue)
+            "INSERT INTO settings (StKey, StValue)
              VALUES ('test_transaction', 'value1')"
         );
 
@@ -1522,12 +1461,12 @@ class DatabaseConnectTest extends TestCase
         }
 
         // Clean up first insert if it exists
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey='test_transaction'");
+        Connection::query("DELETE FROM settings WHERE StKey='test_transaction'");
 
         // Test commit
         \mysqli_begin_transaction(Globals::getDbConnection());
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue)
+            "INSERT INTO settings (StKey, StValue)
              VALUES ('test_transaction', 'value2')"
         );
         \mysqli_commit(Globals::getDbConnection());
@@ -1537,7 +1476,7 @@ class DatabaseConnectTest extends TestCase
         $this->assertEquals('value2', $result);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey='test_transaction'");
+        Connection::query("DELETE FROM settings WHERE StKey='test_transaction'");
     }
 
 }

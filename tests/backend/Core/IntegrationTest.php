@@ -51,7 +51,6 @@ require_once __DIR__ . '/../../../src/backend/Services/MediaService.php';
 require_once __DIR__ . '/../../../src/backend/Services/DictionaryService.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/backend/Services/WordStatusService.php';
-require_once __DIR__ . '/../../../src/backend/Services/TableSetService.php';
 
 /**
  * Integration tests for core functionality.
@@ -492,7 +491,7 @@ class IntegrationTest extends TestCase
     {
         // Insert a test record and get its ID
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES ('test_tag_" . time() . "')"
+            "INSERT INTO tags (TgText) VALUES ('test_tag_" . time() . "')"
         );
 
         $last_id = (int)Connection::lastInsertId();
@@ -500,7 +499,7 @@ class IntegrationTest extends TestCase
         $this->assertGreaterThan(0, $last_id);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgID = $last_id");
+        Connection::query("DELETE FROM tags WHERE TgID = $last_id");
     }
 
     public function testTrimValue(): void
@@ -559,24 +558,24 @@ class IntegrationTest extends TestCase
     {
         // Create a test word with tags
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+            "INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
              VALUES ('Test Lang', 'http://test', 'http://test')"
         );
         $lang_id = (int)Connection::lastInsertId();
 
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "words (WoText, WoTextLC, WoStatus, WoLgID)
+            "INSERT INTO words (WoText, WoTextLC, WoStatus, WoLgID)
              VALUES ('testword', 'testword', 1, $lang_id)"
         );
         $word_id = (int)Connection::lastInsertId();
 
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES ('testtag1')"
+            "INSERT INTO tags (TgText) VALUES ('testtag1')"
         );
         $tag_id = (int)Connection::lastInsertId();
 
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "wordtags (WtWoID, WtTgID) VALUES ($word_id, $tag_id)"
+            "INSERT INTO wordtags (WtWoID, WtTgID) VALUES ($word_id, $tag_id)"
         );
 
         // Test getting tag list
@@ -584,10 +583,10 @@ class IntegrationTest extends TestCase
         $this->assertStringContainsString('testtag1', $tag_list);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "wordtags WHERE WtWoID = $word_id");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoID = $word_id");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgID = $tag_id");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lang_id");
+        Connection::query("DELETE FROM wordtags WHERE WtWoID = $word_id");
+        Connection::query("DELETE FROM words WHERE WoID = $word_id");
+        Connection::query("DELETE FROM tags WHERE TgID = $tag_id");
+        Connection::query("DELETE FROM languages WHERE LgID = $lang_id");
     }
 
     // ========== ADDITIONAL HELPER FUNCTIONS TESTS ==========
@@ -669,16 +668,7 @@ class IntegrationTest extends TestCase
         // Clean up
         unset($_REQUEST['test_db_param']);
         unset($_REQUEST['test_db_string']);
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey IN ('db_key', 'db_str_key', 'db_none_key')");
-    }
-
-    public function testGetPrefixesExtended(): void
-    {
-        $prefixes = TableSetService::getAllPrefixes();
-        $this->assertIsArray($prefixes);
-        // TableSetService::getAllPrefixes() returns table prefixes by looking for *_settings tables
-        // In a test environment, there may be 0 or more prefixes depending on setup
-        // Just verify it returns an array
+        Connection::query("DELETE FROM settings WHERE StKey IN ('db_key', 'db_str_key', 'db_none_key')");
     }
 
     public function testSelectMediaPathExtended(): void
@@ -721,25 +711,25 @@ class IntegrationTest extends TestCase
     {
         // Create test texts
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+            "INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
              VALUES ('Test Lang', 'http://test', 'http://test')"
         );
         $lang_id = (int)Connection::lastInsertId();
 
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxTitle, TxText, TxLgID)
+            "INSERT INTO texts (TxTitle, TxText, TxLgID)
              VALUES ('Text 1', 'Content 1', $lang_id)"
         );
         $text1_id = (int)Connection::lastInsertId();
 
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxTitle, TxText, TxLgID)
+            "INSERT INTO texts (TxTitle, TxText, TxLgID)
              VALUES ('Text 2', 'Content 2', $lang_id)"
         );
         $text2_id = (int)Connection::lastInsertId();
 
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxTitle, TxText, TxLgID)
+            "INSERT INTO texts (TxTitle, TxText, TxLgID)
              VALUES ('Text 3', 'Content 3', $lang_id)"
         );
         $text3_id = (int)Connection::lastInsertId();
@@ -759,8 +749,8 @@ class IntegrationTest extends TestCase
         $this->assertIsString($result);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID = $lang_id");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lang_id");
+        Connection::query("DELETE FROM texts WHERE TxLgID = $lang_id");
+        Connection::query("DELETE FROM languages WHERE LgID = $lang_id");
     }
 
 
@@ -789,8 +779,8 @@ class IntegrationTest extends TestCase
     public function testRestoreFileBasic(): void
     {
         // Create a simple SQL dump
-        $sql_content = "INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES ('test_restore', 'value1');\n";
-        $sql_content .= "INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES ('test_restore2', 'value2');";
+        $sql_content = "INSERT INTO settings (StKey, StValue) VALUES ('test_restore', 'value1');\n";
+        $sql_content .= "INSERT INTO settings (StKey, StValue) VALUES ('test_restore2', 'value2');";
 
         // Create temporary file
         $temp_file = tmpfile();
@@ -809,7 +799,7 @@ class IntegrationTest extends TestCase
 
         // Clean up - fclose is automatic for tmpfile when it goes out of scope
         // Don't call fclose() as the resource may already be closed by restore_file
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey IN ('test_restore', 'test_restore2')");
+        Connection::query("DELETE FROM settings WHERE StKey IN ('test_restore', 'test_restore2')");
 
         // Assertions (may vary based on restore success)
         $this->assertTrue(
@@ -825,12 +815,12 @@ class IntegrationTest extends TestCase
     {
         // Insert test data
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "settings (StKey, StValue) VALUES ('test_truncate', 'value1')"
+            "INSERT INTO settings (StKey, StValue) VALUES ('test_truncate', 'value1')"
         );
 
         // Get initial count
         $count_before = (int)Connection::fetchValue(
-            "SELECT COUNT(*) as value FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'test_truncate'"
+            "SELECT COUNT(*) as value FROM settings WHERE StKey = 'test_truncate'"
         );
         $this->assertEquals(1, $count_before);
 
@@ -839,7 +829,7 @@ class IntegrationTest extends TestCase
         $this->assertTrue(method_exists(Restore::class, 'truncateUserDatabase'));
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey='test_truncate'");
+        Connection::query("DELETE FROM settings WHERE StKey='test_truncate'");
     }
 
     /**

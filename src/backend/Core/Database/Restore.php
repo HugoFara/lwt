@@ -103,7 +103,7 @@ class Restore
                     if (!str_starts_with($query, '-- ')) {
                         $res = mysqli_query(
                             Globals::getDbConnection(),
-                            Migrations::prefixQuery($query, Globals::getTablePrefix())
+                            $query
                         );
                         $install_status["queries"]++;
                         if ($res == false) {
@@ -126,9 +126,7 @@ class Restore
         /** @psalm-suppress TypeDoesNotContainType - Value can change in loop */
         if ($install_status["errors"] == 0) {
             // Drop legacy textitems table if it exists (replaced by textitems2)
-            // Note: This is a special case for legacy cleanup during restore
-            $prefix = Globals::getTablePrefix();
-            Connection::execute("DROP TABLE IF EXISTS {$prefix}textitems");
+            Connection::execute("DROP TABLE IF EXISTS textitems");
             Migrations::checkAndUpdate();
             Migrations::reparseAllTexts();
             Maintenance::optimizeDatabase();

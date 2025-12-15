@@ -222,13 +222,13 @@ class MigrationsTest extends TestCase
 
         // Clean up any texts that reference non-existent languages
         // to avoid "Language data not found" errors
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID IN (
-            SELECT TxID FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID NOT IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages)
+        Connection::query("DELETE FROM textitems2 WHERE Ti2TxID IN (
+            SELECT TxID FROM texts WHERE TxLgID NOT IN (SELECT LgID FROM languages)
         )");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "sentences WHERE SeTxID IN (
-            SELECT TxID FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID NOT IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages)
+        Connection::query("DELETE FROM sentences WHERE SeTxID IN (
+            SELECT TxID FROM texts WHERE TxLgID NOT IN (SELECT LgID FROM languages)
         )");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxLgID NOT IN (SELECT LgID FROM " . Globals::getTablePrefix() . "languages)");
+        Connection::query("DELETE FROM texts WHERE TxLgID NOT IN (SELECT LgID FROM languages)");
 
         // This function truncates and rebuilds text data
         // Should run without error on empty/minimal database
@@ -279,10 +279,10 @@ class MigrationsTest extends TestCase
         ];
 
         foreach ($tables as $table) {
-            $result = Connection::query("SHOW TABLES LIKE '" . Globals::getTablePrefix() . "{$table}'");
+            $result = Connection::query("SHOW TABLES LIKE '{$table}'");
             $exists = mysqli_num_rows($result) > 0;
             mysqli_free_result($result);
-            $this->assertTrue($exists, "Table " . Globals::getTablePrefix() . "{$table} should exist after checkAndUpdate");
+            $this->assertTrue($exists, "Table {$table} should exist after checkAndUpdate");
         }
     }
 
@@ -356,13 +356,13 @@ class MigrationsTest extends TestCase
         }
 
         // Clear lastscorecalc to force recalculation
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'lastscorecalc'");
+        Connection::query("DELETE FROM settings WHERE StKey = 'lastscorecalc'");
 
         Migrations::checkAndUpdate();
 
         // Verify lastscorecalc was set
         $result = Connection::fetchValue(
-            "SELECT StValue as value FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'lastscorecalc'"
+            "SELECT StValue as value FROM settings WHERE StKey = 'lastscorecalc'"
         );
 
         $this->assertNotEmpty($result, 'lastscorecalc should be set after checkAndUpdate');
@@ -397,7 +397,7 @@ class MigrationsTest extends TestCase
 
         // Verify dbversion is set
         $result = Connection::fetchValue(
-            "SELECT StValue as value FROM " . Globals::getTablePrefix() . "settings WHERE StKey = 'dbversion'"
+            "SELECT StValue as value FROM settings WHERE StKey = 'dbversion'"
         );
 
         $this->assertNotEmpty($result, 'dbversion should be set after update');
@@ -519,19 +519,5 @@ class MigrationsTest extends TestCase
             count($appliedAfter),
             'Running update twice should not add new migration entries'
         );
-    }
-
-    public function testRunPrefixMigrationIsIdempotent(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        // Running prefix migration multiple times should not cause errors
-        // (it checks _prefix_migration_log to avoid re-migrating)
-        Migrations::runPrefixMigration();
-        Migrations::runPrefixMigration();
-
-        $this->assertTrue(true, 'runPrefixMigration should be idempotent');
     }
 }

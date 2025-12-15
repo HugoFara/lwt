@@ -50,14 +50,14 @@ class TextPrintServiceTest extends TestCase
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'TextPrintTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM languages WHERE LgName = 'TextPrintTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('TextPrintTestLang', 'http://test.com/###', '', 'http://translate.google.com/?sl=en&tl=fr&###', " .
@@ -70,14 +70,14 @@ class TextPrintServiceTest extends TestCase
 
             // Create a test text
             $existingText = Connection::fetchValue(
-                "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxTitle = 'TextPrintTestText' LIMIT 1"
+                "SELECT TxID AS value FROM texts WHERE TxTitle = 'TextPrintTestText' LIMIT 1"
             );
 
             if ($existingText) {
                 self::$testTextId = (int)$existingText;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
+                    "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI) " .
                     "VALUES (" . self::$testLangId . ", 'TextPrintTestText', 'This is test text.', " .
                     "'0\tThis\t\t\n1\tis\t\t\n2\ttest\t\t\n3\ttext\t\ttranslation', " .
                     "'http://audio.test/audio.mp3', 'http://source.test')"
@@ -96,10 +96,10 @@ class TextPrintServiceTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID = " . self::$testTextId);
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "sentences WHERE SeTxID = " . self::$testTextId);
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxTitle = 'TextPrintTestText'");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'TextPrintTestLang'");
+        Connection::query("DELETE FROM textitems2 WHERE Ti2TxID = " . self::$testTextId);
+        Connection::query("DELETE FROM sentences WHERE SeTxID = " . self::$testTextId);
+        Connection::query("DELETE FROM texts WHERE TxTitle = 'TextPrintTestText'");
+        Connection::query("DELETE FROM languages WHERE LgName = 'TextPrintTestLang'");
     }
 
     // ===== Constructor tests =====
@@ -195,7 +195,7 @@ class TextPrintServiceTest extends TestCase
 
         // Create a text without annotation
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
+            "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
             "VALUES (" . self::$testLangId . ", 'NoAnnotationTest', 'Test text.', '')"
         );
         $textId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -206,7 +206,7 @@ class TextPrintServiceTest extends TestCase
         $this->assertNull($ann);
 
         // Cleanup
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = {$textId}");
+        Connection::query("DELETE FROM texts WHERE TxID = {$textId}");
     }
 
     // ===== hasAnnotation tests =====
@@ -231,7 +231,7 @@ class TextPrintServiceTest extends TestCase
 
         // Create a text without annotation
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
+            "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText) " .
             "VALUES (" . self::$testLangId . ", 'NoAnnotationTest2', 'Test text.', '')"
         );
         $textId = (int)Connection::fetchValue("SELECT LAST_INSERT_ID() AS value");
@@ -242,7 +242,7 @@ class TextPrintServiceTest extends TestCase
         $this->assertFalse($result);
 
         // Cleanup
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = {$textId}");
+        Connection::query("DELETE FROM texts WHERE TxID = {$textId}");
     }
 
     // ===== Settings tests =====

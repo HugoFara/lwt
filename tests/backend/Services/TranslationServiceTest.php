@@ -55,18 +55,16 @@ class TranslationServiceTest extends TestCase
 
     private static function setupTestData(): void
     {
-        $tbpref = Globals::getTablePrefix();
-
         // Create a test language
         $existingLang = Connection::fetchValue(
-            "SELECT LgID AS value FROM {$tbpref}languages WHERE LgName = 'TranslationServiceTestLang' LIMIT 1"
+            "SELECT LgID AS value FROM languages WHERE LgName = 'TranslationServiceTestLang' LIMIT 1"
         );
 
         if ($existingLang) {
             self::$testLangId = (int)$existingLang;
         } else {
             Connection::query(
-                "INSERT INTO {$tbpref}languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                 "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                 "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                 "VALUES ('TranslationServiceTestLang', 'http://dict1.test/lwt_term', " .
@@ -80,14 +78,14 @@ class TranslationServiceTest extends TestCase
 
         // Create a test text
         $existingText = Connection::fetchValue(
-            "SELECT TxID AS value FROM {$tbpref}texts WHERE TxTitle = 'TranslationServiceTestText' LIMIT 1"
+            "SELECT TxID AS value FROM texts WHERE TxTitle = 'TranslationServiceTestText' LIMIT 1"
         );
 
         if ($existingText) {
             self::$testTextId = (int)$existingText;
         } else {
             Connection::query(
-                "INSERT INTO {$tbpref}texts (TxLgID, TxTitle, TxText, TxAudioURI) " .
+                "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAudioURI) " .
                 "VALUES (" . self::$testLangId . ", 'TranslationServiceTestText', " .
                 "'This is a test sentence. Another test sentence.', '')"
             );
@@ -103,13 +101,12 @@ class TranslationServiceTest extends TestCase
             return;
         }
 
-        $tbpref = Globals::getTablePrefix();
         // Clean up in reverse order
-        Connection::query("DELETE FROM {$tbpref}textitems2 WHERE Ti2TxID = " . self::$testTextId);
-        Connection::query("DELETE FROM {$tbpref}sentences WHERE SeLgID = " . self::$testLangId);
-        Connection::query("DELETE FROM {$tbpref}texts WHERE TxTitle = 'TranslationServiceTestText'");
-        Connection::query("DELETE FROM {$tbpref}words WHERE WoLgID = " . self::$testLangId);
-        Connection::query("DELETE FROM {$tbpref}languages WHERE LgName = 'TranslationServiceTestLang'");
+        Connection::query("DELETE FROM textitems2 WHERE Ti2TxID = " . self::$testTextId);
+        Connection::query("DELETE FROM sentences WHERE SeLgID = " . self::$testLangId);
+        Connection::query("DELETE FROM texts WHERE TxTitle = 'TranslationServiceTestText'");
+        Connection::query("DELETE FROM words WHERE WoLgID = " . self::$testLangId);
+        Connection::query("DELETE FROM languages WHERE LgName = 'TranslationServiceTestLang'");
     }
 
     protected function setUp(): void

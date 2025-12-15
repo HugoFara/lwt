@@ -74,33 +74,6 @@ class GlobalsTest extends TestCase
         $this->assertNull(Globals::getDbConnection());
     }
 
-    // ===== tablePrefix tests =====
-
-    public function testSetAndGetTablePrefix(): void
-    {
-        Globals::setTablePrefix('test_');
-        
-        $this->assertEquals('test_', Globals::getTablePrefix());
-    }
-
-    public function testTablePrefixDefaultsToEmpty(): void
-    {
-        $this->assertEquals('', Globals::getTablePrefix());
-    }
-
-    public function testSetTablePrefixWithFixed(): void
-    {
-        Globals::setTablePrefix('lwt_', true);
-        
-        $this->assertEquals('lwt_', Globals::getTablePrefix());
-        $this->assertTrue(Globals::isTablePrefixFixed());
-    }
-
-    public function testIsTablePrefixFixedDefaultsFalse(): void
-    {
-        $this->assertFalse(Globals::isTablePrefixFixed());
-    }
-
     // ===== databaseName tests =====
 
     public function testSetAndGetDatabaseName(): void
@@ -197,17 +170,8 @@ class GlobalsTest extends TestCase
 
     // ===== table() tests =====
 
-    public function testTableReturnsTableNameWithPrefix(): void
+    public function testTableReturnsTableName(): void
     {
-        Globals::setTablePrefix('lwt_');
-        
-        $this->assertEquals('lwt_words', Globals::table('words'));
-    }
-
-    public function testTableReturnsTableNameWithoutPrefixWhenEmpty(): void
-    {
-        Globals::setTablePrefix('');
-        
         $this->assertEquals('words', Globals::table('words'));
     }
 
@@ -220,14 +184,12 @@ class GlobalsTest extends TestCase
         $this->assertInstanceOf(QueryBuilder::class, $qb);
     }
 
-    public function testQueryUsesCorrectTablePrefix(): void
+    public function testQueryUsesCorrectTableName(): void
     {
-        Globals::setTablePrefix('test_');
-        
         $qb = Globals::query('words');
         $sql = $qb->toSql();
-        
-        $this->assertStringContainsString('test_words', $sql);
+
+        $this->assertStringContainsString('words', $sql);
     }
 
     // ===== reset() tests =====
@@ -237,7 +199,6 @@ class GlobalsTest extends TestCase
         // Set various values
         $mockConnection = $this->createMock(\mysqli::class);
         Globals::setDbConnection($mockConnection);
-        Globals::setTablePrefix('test_', true);
         Globals::setDatabaseName('testdb');
         Globals::setDebug(1);
         Globals::setDisplayErrors(1);
@@ -251,8 +212,6 @@ class GlobalsTest extends TestCase
 
         // Verify all values are cleared
         $this->assertNull(Globals::getDbConnection());
-        $this->assertEquals('', Globals::getTablePrefix());
-        $this->assertFalse(Globals::isTablePrefixFixed());
         $this->assertEquals('', Globals::getDatabaseName());
         $this->assertEquals(0, Globals::getDebug());
         $this->assertFalse(Globals::shouldDisplayErrors());

@@ -91,9 +91,8 @@ function loadDbConfiguration(): array
  * This function:
  * 1. Loads configuration from .env
  * 2. Establishes the database connection
- * 3. Determines the table prefix
- * 4. Registers everything with Globals
- * 5. Runs database migrations if needed
+ * 3. Registers connection with Globals
+ * 4. Runs database migrations if needed
  *
  * @return void
  *
@@ -123,13 +122,6 @@ function bootstrapDatabase(): void
 
     // Register connection with Globals
     Globals::setDbConnection($connection);
-
-    // Get table prefix (from .env or database)
-    // Note: Table prefix feature is deprecated since 3.0.0, suppress warnings during bootstrap
-    list($prefix, $isFixed) = @Configuration::getPrefix($connection);
-
-    // Register prefix with Globals (deprecated since 3.0.0)
-    @Globals::setTablePrefix($prefix, $isFixed);
     Globals::setDatabaseName($dbname);
 
     // Start timer if needed

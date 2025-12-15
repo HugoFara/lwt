@@ -71,14 +71,11 @@ class BackupService
     /**
      * Get prefix string for filenames.
      *
-     * @return string Prefix for backup filename
+     * @return string Prefix for backup filename (always empty now that table prefixes are removed)
      */
     public function getFilePrefix(): string
     {
-        if (Globals::getTablePrefix() == '') {
-            return "";
-        }
-        return substr(Globals::getTablePrefix(), 0, -1) . "-";
+        return "";
     }
 
     /**
@@ -88,10 +85,7 @@ class BackupService
      */
     public function getPrefixInfo(): string
     {
-        if (Globals::getTablePrefix() == '') {
-            return "(Default Table Set)";
-        }
-        return "(Table Set: <i>" . htmlspecialchars(substr(Globals::getTablePrefix(), 0, -1) ?? '', ENT_QUOTES, 'UTF-8') . "</i>)";
+        return "";
     }
 
     /**

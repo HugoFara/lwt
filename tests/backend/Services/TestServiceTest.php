@@ -70,14 +70,14 @@ class TestServiceTest extends TestCase
     {
         // Create test language
         $existingLang = Connection::fetchValue(
-            "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'TestLanguage' LIMIT 1"
+            "SELECT LgID AS value FROM languages WHERE LgName = 'TestLanguage' LIMIT 1"
         );
 
         if ($existingLang) {
             self::$testLangId = (int)$existingLang;
         } else {
             Connection::query(
-                "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                 "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                 "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                 "VALUES ('TestLanguage', 'http://test.com/###', 'http://test2.com/###', 'http://translate.test/###', " .
@@ -90,7 +90,7 @@ class TestServiceTest extends TestCase
 
         // Create test text
         Connection::query(
-            "INSERT INTO " . Globals::getTablePrefix() . "texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI) " .
+            "INSERT INTO texts (TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI) " .
             "VALUES (" . self::$testLangId . ", 'Test Text', 'This is a test.', '', '')"
         );
         self::$testTextId = (int)Connection::fetchValue(
@@ -100,7 +100,7 @@ class TestServiceTest extends TestCase
         // Create test words
         for ($i = 1; $i <= 5; $i++) {
             Connection::query(
-                "INSERT INTO " . Globals::getTablePrefix() . "words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, " .
+                "INSERT INTO words (WoLgID, WoText, WoTextLC, WoStatus, WoTranslation, " .
                 "WoStatusChanged, WoTodayScore, WoTomorrowScore) " .
                 "VALUES (" . self::$testLangId . ", 'testword{$i}', 'testword{$i}', {$i}, 'translation{$i}', " .
                 "NOW(), -1.0, -0.5)"
@@ -113,7 +113,7 @@ class TestServiceTest extends TestCase
         // Create text items linking words to text
         foreach (self::$testWordIds as $index => $wordId) {
             Connection::query(
-                "INSERT INTO " . Globals::getTablePrefix() . "textitems2 (Ti2TxID, Ti2LgID, Ti2WoID, Ti2SeID, Ti2Order, " .
+                "INSERT INTO textitems2 (Ti2TxID, Ti2LgID, Ti2WoID, Ti2SeID, Ti2Order, " .
                 "Ti2WordCount, Ti2Text) " .
                 "VALUES (" . self::$testTextId . ", " . self::$testLangId . ", {$wordId}, 1, {$index}, " .
                 "1, 'testword" . ($index + 1) . "')"
@@ -128,9 +128,9 @@ class TestServiceTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID = " . self::$testTextId);
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoLgID = " . self::$testLangId);
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = " . self::$testTextId);
+        Connection::query("DELETE FROM textitems2 WHERE Ti2TxID = " . self::$testTextId);
+        Connection::query("DELETE FROM words WHERE WoLgID = " . self::$testLangId);
+        Connection::query("DELETE FROM texts WHERE TxID = " . self::$testTextId);
     }
 
     protected function setUp(): void

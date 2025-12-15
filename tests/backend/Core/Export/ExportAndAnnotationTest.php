@@ -62,8 +62,8 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxTitle LIKE 'test_export_%'");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName LIKE 'test_export_%'");
+        Connection::query("DELETE FROM texts WHERE TxTitle LIKE 'test_export_%'");
+        Connection::query("DELETE FROM languages WHERE LgName LIKE 'test_export_%'");
     }
 
     // ===== create_ann() tests =====
@@ -75,12 +75,12 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         // Create test language
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_export_lang', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
         // Create test text
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "texts (TxTitle, TxText, TxLgID)
+        Connection::query("INSERT INTO texts (TxTitle, TxText, TxLgID)
                          VALUES ('test_export_text', 'Test content', $lgId)");
         $textId = (int)Connection::lastInsertId();
 
@@ -90,8 +90,8 @@ class ExportAndAnnotationTest extends TestCase
         // Even with no textitems2, should return some annotation structure
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textId");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testCreateAnnWithNonExistentText(): void
@@ -115,12 +115,12 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         // Create test language
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_export_recreate', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
         // Create test text
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "texts (TxTitle, TxText, TxLgID)
+        Connection::query("INSERT INTO texts (TxTitle, TxText, TxLgID)
                          VALUES ('test_export_recreate_text', 'Test content', $lgId)");
         $textId = (int)Connection::lastInsertId();
 
@@ -130,8 +130,8 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsString($newAnn);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textId");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testRecreateSaveAnnWithEmptyOldAnn(): void
@@ -141,12 +141,12 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         // Create test language
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_export_empty', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
         // Create test text
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "texts (TxTitle, TxText, TxLgID)
+        Connection::query("INSERT INTO texts (TxTitle, TxText, TxLgID)
                          VALUES ('test_export_empty_text', 'Test content', $lgId)");
         $textId = (int)Connection::lastInsertId();
 
@@ -155,8 +155,8 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsString($newAnn);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textId");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testRecreateSaveAnnUpdatesDatabase(): void
@@ -166,12 +166,12 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         // Create test language
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_export_update', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
         // Create test text
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "texts (TxTitle, TxText, TxLgID, TxAnnotatedText)
+        Connection::query("INSERT INTO texts (TxTitle, TxText, TxLgID, TxAnnotatedText)
                          VALUES ('test_export_update_text', 'Test content', $lgId, '')");
         $textId = (int)Connection::lastInsertId();
 
@@ -179,12 +179,12 @@ class ExportAndAnnotationTest extends TestCase
         recreateSaveAnn($textId, $oldAnn);
 
         // Verify database was updated
-        $saved = Connection::fetchValue("SELECT TxAnnotatedText AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textId");
+        $saved = Connection::fetchValue("SELECT TxAnnotatedText AS value FROM texts WHERE TxID = $textId");
         $this->assertNotNull($saved);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textId");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     // ===== Helper function tests =====
@@ -226,12 +226,12 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         // Create test language
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_export_struct', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
         // Create test text
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "texts (TxTitle, TxText, TxLgID)
+        Connection::query("INSERT INTO texts (TxTitle, TxText, TxLgID)
                          VALUES ('test_export_struct_text', 'Test content', $lgId)");
         $textId = (int)Connection::lastInsertId();
 
@@ -242,8 +242,8 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsArray($lines);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textId");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testAnnotationWithTabSeparatedValues(): void
@@ -271,12 +271,12 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         // Create test language
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_export_workflow', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
         // Create test text
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "texts (TxTitle, TxText, TxLgID)
+        Connection::query("INSERT INTO texts (TxTitle, TxText, TxLgID)
                          VALUES ('test_export_workflow_text', 'Test content for workflow', $lgId)");
         $textId = (int)Connection::lastInsertId();
 
@@ -289,13 +289,13 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsString($ann2);
 
         // Step 3: Verify annotation was saved
-        $saved = Connection::fetchValue("SELECT TxAnnotatedText AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textId");
+        $saved = Connection::fetchValue("SELECT TxAnnotatedText AS value FROM texts WHERE TxID = $textId");
         $this->assertNotNull($saved);
         $this->assertIsString($saved);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textId");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testAnnotationPreservesTranslations(): void
@@ -305,12 +305,12 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         // Create test language
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_export_preserve', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
         // Create test text
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "texts (TxTitle, TxText, TxLgID)
+        Connection::query("INSERT INTO texts (TxTitle, TxText, TxLgID)
                          VALUES ('test_export_preserve_text', 'Test', $lgId)");
         $textId = (int)Connection::lastInsertId();
 
@@ -322,8 +322,8 @@ class ExportAndAnnotationTest extends TestCase
         $this->assertIsString($newAnn);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = $textId");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM texts WHERE TxID = $textId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     // ===== Additional utility tests =====
@@ -378,15 +378,15 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         // Insert test data
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES ('test_export_firstval')");
+        Connection::query("INSERT INTO tags (TgText) VALUES ('test_export_firstval')");
         $id = (int)Connection::lastInsertId();
 
-        $value = Connection::fetchValue("SELECT TgText AS value FROM " . Globals::getTablePrefix() . "tags WHERE TgID = $id");
+        $value = Connection::fetchValue("SELECT TgText AS value FROM tags WHERE TgID = $id");
 
         $this->assertEquals('test_export_firstval', $value);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgID = $id");
+        Connection::query("DELETE FROM tags WHERE TgID = $id");
     }
 
     public function testGetFirstValueReturnsNullForNoResults(): void
@@ -395,7 +395,7 @@ class ExportAndAnnotationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $value = Connection::fetchValue("SELECT TgText AS value FROM " . Globals::getTablePrefix() . "tags WHERE TgID = 999999");
+        $value = Connection::fetchValue("SELECT TgText AS value FROM tags WHERE TgID = 999999");
 
         $this->assertNull($value);
     }
@@ -407,13 +407,13 @@ class ExportAndAnnotationTest extends TestCase
         }
 
         $result = DB::execute(
-            "INSERT INTO " . Globals::getTablePrefix() . "tags (TgText) VALUES ('test_export_runsql')"
+            "INSERT INTO tags (TgText) VALUES ('test_export_runsql')"
         );
 
         // DB::execute returns number of affected rows
         $this->assertEquals(1, $result);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "tags WHERE TgText = 'test_export_runsql'");
+        Connection::query("DELETE FROM tags WHERE TgText = 'test_export_runsql'");
     }
 }

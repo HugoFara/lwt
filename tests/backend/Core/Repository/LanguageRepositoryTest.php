@@ -63,7 +63,7 @@ class LanguageRepositoryTest extends TestCase
         }
 
         // Clean up test languages after each test
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         Connection::query("DELETE FROM {$prefix}languages WHERE LgName LIKE 'RepoTest_%'");
         self::$testLanguageIds = [];
     }
@@ -87,7 +87,7 @@ class LanguageRepositoryTest extends TestCase
      */
     private function createTestLanguageInDb(string $name): int
     {
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         Connection::query(
             "INSERT INTO {$prefix}languages (
                 LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI,
@@ -390,7 +390,7 @@ class LanguageRepositoryTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         // Try to insert language with empty name (may already exist)
         try {
             Connection::query(
@@ -528,7 +528,7 @@ class LanguageRepositoryTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         // Create RTL language
         Connection::query(
             "INSERT INTO {$prefix}languages (

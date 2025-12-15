@@ -69,14 +69,14 @@ class TextControllerImportLongTest extends TestCase
         if (self::$dbConnected) {
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'ImportLongTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM languages WHERE LgName = 'ImportLongTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('ImportLongTestLang', 'http://dict1.test/###', 'http://dict2.test/###', " .
@@ -94,7 +94,7 @@ class TextControllerImportLongTest extends TestCase
     {
         if (self::$dbConnected && self::$testLangId > 0) {
             // Clean up test language
-            Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = " . self::$testLangId);
+            Connection::query("DELETE FROM languages WHERE LgID = " . self::$testLangId);
         }
     }
 
@@ -124,10 +124,10 @@ class TextControllerImportLongTest extends TestCase
         // Clean up created texts
         if (!empty($this->createdTextIds) && self::$dbConnected) {
             foreach ($this->createdTextIds as $textId) {
-                Connection::query("DELETE FROM " . Globals::getTablePrefix() . "textitems2 WHERE Ti2TxID = {$textId}");
-                Connection::query("DELETE FROM " . Globals::getTablePrefix() . "sentences WHERE SeTxID = {$textId}");
-                Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texttags WHERE TtTxID = {$textId}");
-                Connection::query("DELETE FROM " . Globals::getTablePrefix() . "texts WHERE TxID = {$textId}");
+                Connection::query("DELETE FROM textitems2 WHERE Ti2TxID = {$textId}");
+                Connection::query("DELETE FROM sentences WHERE SeTxID = {$textId}");
+                Connection::query("DELETE FROM texttags WHERE TtTxID = {$textId}");
+                Connection::query("DELETE FROM texts WHERE TxID = {$textId}");
             }
         }
         $this->createdTextIds = [];
@@ -370,7 +370,7 @@ class TextControllerImportLongTest extends TestCase
 
         // Find and cleanup created text
         $createdId = Connection::fetchValue(
-            "SELECT TxID AS value FROM " . Globals::getTablePrefix() . "texts WHERE TxTitle = 'Import Test Single' LIMIT 1"
+            "SELECT TxID AS value FROM texts WHERE TxTitle = 'Import Test Single' LIMIT 1"
         );
         if ($createdId) {
             $this->createdTextIds[] = (int)$createdId;
@@ -405,7 +405,7 @@ class TextControllerImportLongTest extends TestCase
 
         // Find and cleanup created texts
         $res = Connection::query(
-            "SELECT TxID FROM " . Globals::getTablePrefix() . "texts WHERE TxTitle LIKE 'Import Test Multi%'"
+            "SELECT TxID FROM texts WHERE TxTitle LIKE 'Import Test Multi%'"
         );
         while ($row = mysqli_fetch_assoc($res)) {
             $this->createdTextIds[] = (int)$row['TxID'];
@@ -464,7 +464,7 @@ class TextControllerImportLongTest extends TestCase
         // Check that titles are numbered
         $titles = [];
         $res = Connection::query(
-            "SELECT TxID, TxTitle FROM " . Globals::getTablePrefix() . "texts WHERE TxTitle LIKE 'Numbered Title Test%' ORDER BY TxID"
+            "SELECT TxID, TxTitle FROM texts WHERE TxTitle LIKE 'Numbered Title Test%' ORDER BY TxID"
         );
         while ($row = mysqli_fetch_assoc($res)) {
             $titles[] = $row['TxTitle'];
@@ -536,7 +536,7 @@ class TextControllerImportLongTest extends TestCase
 
         // Cleanup
         $res = Connection::query(
-            "SELECT TxID FROM " . Globals::getTablePrefix() . "texts WHERE TxTitle LIKE 'Full Workflow Test%'"
+            "SELECT TxID FROM texts WHERE TxTitle LIKE 'Full Workflow Test%'"
         );
         while ($row = mysqli_fetch_assoc($res)) {
             $this->createdTextIds[] = (int)$row['TxID'];

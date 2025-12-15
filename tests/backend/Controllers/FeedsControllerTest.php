@@ -54,23 +54,23 @@ class FeedsControllerTest extends TestCase
 
         if (self::$dbConnected) {
             // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::getTablePrefix() . "languages");
-            Connection::query("ALTER TABLE " . Globals::getTablePrefix() . "languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM languages");
+            Connection::query("ALTER TABLE languages AUTO_INCREMENT = " . ((int)$maxId + 1));
 
             // Reset auto_increment for newsfeeds table (NfID is tinyint max 255)
-            $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM " . Globals::getTablePrefix() . "newsfeeds");
-            Connection::query("ALTER TABLE " . Globals::getTablePrefix() . "newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
+            $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM newsfeeds");
+            Connection::query("ALTER TABLE newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
 
             // Create a test language if it doesn't exist
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'FeedsControllerTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM languages WHERE LgName = 'FeedsControllerTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('FeedsControllerTestLang', 'http://test.com/###', '', 'http://translate.test/###', " .
@@ -90,17 +90,17 @@ class FeedsControllerTest extends TestCase
         }
 
         // Clean up test feeds
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "feedlinks WHERE FlNfID IN (SELECT NfID FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%')");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%'");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'FeedsControllerTestLang'");
+        Connection::query("DELETE FROM feedlinks WHERE FlNfID IN (SELECT NfID FROM newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%')");
+        Connection::query("DELETE FROM newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%'");
+        Connection::query("DELETE FROM languages WHERE LgName = 'FeedsControllerTestLang'");
 
         // Reset auto_increment to prevent overflow (LgID is tinyint max 255)
-        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::getTablePrefix() . "languages");
-        Connection::query("ALTER TABLE " . Globals::getTablePrefix() . "languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM languages");
+        Connection::query("ALTER TABLE languages AUTO_INCREMENT = " . ((int)$maxId + 1));
 
         // Reset auto_increment for newsfeeds table
-        $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM " . Globals::getTablePrefix() . "newsfeeds");
-        Connection::query("ALTER TABLE " . Globals::getTablePrefix() . "newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
+        $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM newsfeeds");
+        Connection::query("ALTER TABLE newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
     }
 
     protected function setUp(): void
@@ -131,12 +131,12 @@ class FeedsControllerTest extends TestCase
         }
 
         // Clean up test feeds
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "feedlinks WHERE FlNfID IN (SELECT NfID FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%')");
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%'");
+        Connection::query("DELETE FROM feedlinks WHERE FlNfID IN (SELECT NfID FROM newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%')");
+        Connection::query("DELETE FROM newsfeeds WHERE NfName LIKE 'Ctrl Test Feed%'");
 
         // Reset auto_increment for newsfeeds table to prevent overflow
-        $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM " . Globals::getTablePrefix() . "newsfeeds");
-        Connection::query("ALTER TABLE " . Globals::getTablePrefix() . "newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
+        $maxNfId = Connection::fetchValue("SELECT COALESCE(MAX(NfID), 0) AS value FROM newsfeeds");
+        Connection::query("ALTER TABLE newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
     }
 
     // ===== Constructor tests =====
@@ -261,7 +261,7 @@ class FeedsControllerTest extends TestCase
         // Add articles
         for ($i = 1; $i <= 3; $i++) {
             Connection::execute(
-                "INSERT INTO " . Globals::getTablePrefix() . "feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+                "INSERT INTO feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
                  VALUES ($feedId, 'Ctrl Article $i', 'https://example.com/ctrl-art$i', 'Desc', " . time() . ")"
             );
         }
@@ -272,7 +272,7 @@ class FeedsControllerTest extends TestCase
 
         // Verify articles are gone but feed remains
         $articleCount = (int)Connection::fetchValue(
-            "SELECT COUNT(*) AS value FROM " . Globals::getTablePrefix() . "feedlinks WHERE FlNfID = $feedId"
+            "SELECT COUNT(*) AS value FROM feedlinks WHERE FlNfID = $feedId"
         );
         $this->assertEquals(0, $articleCount);
         $this->assertNotNull($service->getFeedById($feedId));
@@ -477,7 +477,7 @@ class FeedsControllerTest extends TestCase
         // Add articles
         for ($i = 1; $i <= 2; $i++) {
             Connection::execute(
-                "INSERT INTO " . Globals::getTablePrefix() . "feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+                "INSERT INTO feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
                  VALUES ($feedId, 'Integration Article $i', 'https://example.com/int-art$i', 'Desc', " . time() . ")"
             );
         }
@@ -550,7 +550,7 @@ class FeedsControllerTest extends TestCase
         // Add articles
         for ($i = 1; $i <= 5; $i++) {
             Connection::execute(
-                "INSERT INTO " . Globals::getTablePrefix() . "feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+                "INSERT INTO feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
                  VALUES ($feedId, 'Count Article $i', 'https://example.com/count-art$i', 'Desc', " . time() . ")"
             );
         }
@@ -701,7 +701,7 @@ class FeedsControllerTest extends TestCase
 
         // Add articles
         Connection::execute(
-            "INSERT INTO " . Globals::getTablePrefix() . "feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlText)
+            "INSERT INTO feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlText)
              VALUES ($feedId, 'Link Article 1', 'https://example.com/link1', 'Description 1', " . time() . ", 'Text content')"
         );
 
@@ -732,7 +732,7 @@ class FeedsControllerTest extends TestCase
         // Add 10 articles
         for ($i = 1; $i <= 10; $i++) {
             Connection::execute(
-                "INSERT INTO " . Globals::getTablePrefix() . "feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+                "INSERT INTO feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
                  VALUES ($feedId, 'Page Article $i', 'https://example.com/page$i', 'Desc $i', " . (time() + $i) . ")"
             );
         }
@@ -766,7 +766,7 @@ class FeedsControllerTest extends TestCase
         ]);
 
         Connection::execute(
-            "INSERT INTO " . Globals::getTablePrefix() . "feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlText)
+            "INSERT INTO feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate, FlText)
              VALUES ($feedId, 'Marked Article', 'https://example.com/marked-art', 'Desc', " . time() . ", 'Text content')"
         );
 
@@ -850,14 +850,14 @@ class FeedsControllerTest extends TestCase
 
         $linkUrl = 'https://example.com/error-link';
         Connection::execute(
-            "INSERT INTO " . Globals::getTablePrefix() . "feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+            "INSERT INTO feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
              VALUES ($feedId, 'Error Article', '$linkUrl', 'Desc', " . time() . ")"
         );
 
         $service->markLinkAsError($linkUrl);
 
         $result = Connection::fetchValue(
-            "SELECT FlLink AS value FROM " . Globals::getTablePrefix() . "feedlinks WHERE FlNfID = $feedId"
+            "SELECT FlLink AS value FROM feedlinks WHERE FlNfID = $feedId"
         );
 
         $this->assertStringStartsWith(' ', $result);
@@ -885,7 +885,7 @@ class FeedsControllerTest extends TestCase
 
         // Insert article with leading space (error state)
         Connection::execute(
-            "INSERT INTO " . Globals::getTablePrefix() . "feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
+            "INSERT INTO feedlinks (FlNfID, FlTitle, FlLink, FlDescription, FlDate)
              VALUES ($feedId, 'Reset Article', ' https://example.com/reset-link', 'Desc', " . time() . ")"
         );
 
@@ -894,7 +894,7 @@ class FeedsControllerTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $count);
 
         $result = Connection::fetchValue(
-            "SELECT FlLink AS value FROM " . Globals::getTablePrefix() . "feedlinks WHERE FlNfID = $feedId"
+            "SELECT FlLink AS value FROM feedlinks WHERE FlNfID = $feedId"
         );
 
         $this->assertEquals('https://example.com/reset-link', $result);

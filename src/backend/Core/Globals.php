@@ -29,9 +29,6 @@ use Lwt\Core\Exception\AuthException;
  *
  * Usage:
  * ```php
- * // Instead of: global $tbpref;
- * $prefix = Globals::getTablePrefix();
- *
  * // Get database connection
  * $db = Globals::getDbConnection();
  *
@@ -57,28 +54,6 @@ class Globals
      * @var \mysqli|null
      */
     private static ?\mysqli $dbConnection = null;
-
-    /**
-     * Database table prefix (usually empty string)
-     *
-     * @var string
-     *
-     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
-     *             is now handled via user_id columns instead of table prefixes.
-     *             Will be removed in a future version.
-     */
-    private static string $tablePrefix = '';
-
-    /**
-     * Whether the table prefix is fixed (from .env) or from DB
-     *
-     * @var bool
-     *
-     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
-     *             is now handled via user_id columns instead of table prefixes.
-     *             Will be removed in a future version.
-     */
-    private static bool $tablePrefixIsFixed = false;
 
     /**
      * Debug mode flag (0=off, 1=on)
@@ -172,72 +147,6 @@ class Globals
     public static function getDbConnection(): ?\mysqli
     {
         return self::$dbConnection;
-    }
-
-    /**
-     * Set the database table prefix.
-     *
-     * @param string $prefix  The table prefix
-     * @param bool   $isFixed Whether the prefix is fixed
-     *
-     * @return void
-     *
-     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
-     *             is now handled via user_id columns instead of table prefixes.
-     *             Will be removed in a future version.
-     */
-    public static function setTablePrefix(
-        string $prefix,
-        bool $isFixed = false
-    ): void {
-        @trigger_error(
-            'Globals::setTablePrefix() is deprecated since version 3.0.0 ' .
-            'and will be removed in a future version.',
-            E_USER_DEPRECATED
-        );
-        self::$tablePrefix = $prefix;
-        self::$tablePrefixIsFixed = $isFixed;
-    }
-
-    /**
-     * Get the database table prefix.
-     *
-     * @return string The table prefix (may be empty string)
-     *
-     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
-     *             is now handled via user_id columns instead of table prefixes.
-     *             Will be removed in a future version. Use table names directly.
-     */
-    public static function getTablePrefix(): string
-    {
-        @trigger_error(
-            'Globals::getTablePrefix() is deprecated since version 3.0.0 ' .
-            'and will be removed in a future version.',
-            E_USER_DEPRECATED
-        );
-        return self::$tablePrefix;
-    }
-
-    /**
-     * Check if the table prefix is fixed.
-     *
-     * A fixed prefix means it was set in .env rather than
-     * being determined from the database.
-     *
-     * @return bool True if prefix is fixed
-     *
-     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
-     *             is now handled via user_id columns instead of table prefixes.
-     *             Will be removed in a future version.
-     */
-    public static function isTablePrefixFixed(): bool
-    {
-        @trigger_error(
-            'Globals::isTablePrefixFixed() is deprecated since version 3.0.0 ' .
-            'and will be removed in a future version.',
-            E_USER_DEPRECATED
-        );
-        return self::$tablePrefixIsFixed;
     }
 
     /**
@@ -339,20 +248,17 @@ class Globals
     }
 
     /**
-     * Get a prefixed table name.
+     * Get a table name.
      *
-     * Convenience method to get a full table name with prefix.
-     * Note: Table prefixes are deprecated since version 3.0.0. This method
-     * will continue to work but will return the table name unchanged once
-     * table prefix support is removed.
+     * Convenience method to get a full table name.
      *
      * @param string $tableName The base table name (e.g., 'words')
      *
-     * @return string The prefixed table name (e.g., 'lwt_words')
+     * @return string The table name
      */
     public static function table(string $tableName): string
     {
-        return self::$tablePrefix . $tableName;
+        return $tableName;
     }
 
     /**
@@ -499,8 +405,6 @@ class Globals
     public static function reset(): void
     {
         self::$dbConnection = null;
-        self::$tablePrefix = '';
-        self::$tablePrefixIsFixed = false;
         self::$debug = 0;
         self::$displayErrors = 0;
         self::$displayTime = 0;

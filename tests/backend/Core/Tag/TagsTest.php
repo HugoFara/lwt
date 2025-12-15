@@ -47,8 +47,6 @@ class TagsTest extends TestCase
      */
     public function testAddTagToWords(): void
     {
-        \Lwt\Core\Globals::getTablePrefix();
-
         if (!Globals::getDbConnection()) {
             $this->markTestSkipped('Database connection not available');
         }

@@ -145,9 +145,9 @@ class HomeControllerTest extends TestCase
         $this->assertArrayHasKey('language_count', $data);
         $this->assertArrayHasKey('current_language_id', $data);
         $this->assertArrayHasKey('current_text_id', $data);
-        $this->assertArrayHasKey('table_prefix', $data);
         $this->assertArrayHasKey('is_debug', $data);
         $this->assertArrayHasKey('is_wordpress', $data);
+        $this->assertArrayHasKey('is_multi_user', $data);
     }
 
     public function testHomeServiceGetsLanguageCount(): void
@@ -164,35 +164,6 @@ class HomeControllerTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $count);
     }
 
-    public function testHomeServiceGetsTablePrefix(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new HomeController();
-        $service = $controller->getHomeService();
-        $prefix = $service->getTablePrefix();
-
-        $this->assertIsString($prefix);
-    }
-
-    public function testHomeServiceGetsTableSetSpanGroups(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new HomeController();
-        $service = $controller->getHomeService();
-        $groups = $service->getTableSetSpanGroups();
-
-        $this->assertIsArray($groups);
-        $this->assertArrayHasKey('span1', $groups);
-        $this->assertArrayHasKey('span2', $groups);
-        $this->assertArrayHasKey('span3', $groups);
-    }
-
     // ===== Data type verification tests =====
 
     public function testDashboardDataLanguageCountIsInt(): void
@@ -205,18 +176,6 @@ class HomeControllerTest extends TestCase
         $data = $controller->getHomeService()->getDashboardData();
 
         $this->assertIsInt($data['language_count']);
-    }
-
-    public function testDashboardDataTablePrefixIsString(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new HomeController();
-        $data = $controller->getHomeService()->getDashboardData();
-
-        $this->assertIsString($data['table_prefix']);
     }
 
     public function testDashboardDataIsDebugIsBool(): void
@@ -241,18 +200,6 @@ class HomeControllerTest extends TestCase
         $data = $controller->getHomeService()->getDashboardData();
 
         $this->assertIsBool($data['is_wordpress']);
-    }
-
-    public function testDashboardDataIsFixedPrefixIsBool(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new HomeController();
-        $data = $controller->getHomeService()->getDashboardData();
-
-        $this->assertIsBool($data['is_fixed_prefix']);
     }
 
     // ===== Current text info tests =====
@@ -320,18 +267,6 @@ class HomeControllerTest extends TestCase
             $dashboardData['language_count'],
             'Language count should match'
         );
-
-        $this->assertSame(
-            $service->getTablePrefix(),
-            $dashboardData['table_prefix'],
-            'Table prefix should match'
-        );
-
-        $this->assertSame(
-            $service->isTablePrefixFixed(),
-            $dashboardData['is_fixed_prefix'],
-            'Fixed prefix flag should match'
-        );
     }
 
     public function testMultipleControllerInstancesShareService(): void
@@ -351,12 +286,6 @@ class HomeControllerTest extends TestCase
             $data1['language_count'],
             $data2['language_count'],
             'Language count should be consistent across instances'
-        );
-
-        $this->assertSame(
-            $data1['table_prefix'],
-            $data2['table_prefix'],
-            'Table prefix should be consistent across instances'
         );
     }
 

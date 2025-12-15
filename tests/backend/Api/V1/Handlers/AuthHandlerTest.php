@@ -66,7 +66,7 @@ class AuthHandlerTest extends TestCase
     {
         // Clean up test users
         if (self::$dbConnected) {
-            $prefix = Globals::getTablePrefix();
+            $prefix = '';
             Connection::query("DELETE FROM {$prefix}users WHERE UsUsername LIKE 'api_test_user_%'");
         }
         Globals::setCurrentUserId(null);

@@ -60,7 +60,7 @@ class SentenceService
         $removeSpaces = $record["LgRemoveSpaces"];
 
         if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
-            $mecab_file = sys_get_temp_dir() . "/" . Globals::getTablePrefix() . "mecab_to_db.txt";
+            $mecab_file = sys_get_temp_dir() . "/lwt_mecab_to_db.txt";
             $mecab_args = ' -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n ';
             if (file_exists($mecab_file)) {
                 unlink($mecab_file);
@@ -137,7 +137,7 @@ class SentenceService
         $removeSpaces = $record["LgRemoveSpaces"];
 
         if ('MECAB' == strtoupper(trim((string) $record["LgRegexpWordCharacters"]))) {
-            $mecab_file = sys_get_temp_dir() . "/" . Globals::getTablePrefix() . "mecab_to_db.txt";
+            $mecab_file = sys_get_temp_dir() . "/lwt_mecab_to_db.txt";
             $mecab_args = ' -F %m\\t%t\\t%h\\n -U %m\\t%t\\t%h\\n -E EOP\\t3\\t7\\n ';
             if (file_exists($mecab_file)) {
                 unlink($mecab_file);

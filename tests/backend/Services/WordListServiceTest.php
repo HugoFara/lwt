@@ -51,19 +51,19 @@ class WordListServiceTest extends TestCase
 
         if (self::$dbConnected) {
             // Reset auto_increment
-            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::getTablePrefix() . "languages");
-            Connection::query("ALTER TABLE " . Globals::getTablePrefix() . "languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+            $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM languages");
+            Connection::query("ALTER TABLE languages AUTO_INCREMENT = " . ((int)$maxId + 1));
 
             // Create a test language
             $existingLang = Connection::fetchValue(
-                "SELECT LgID AS value FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'WordListTestLang' LIMIT 1"
+                "SELECT LgID AS value FROM languages WHERE LgName = 'WordListTestLang' LIMIT 1"
             );
 
             if ($existingLang) {
                 self::$testLangId = (int)$existingLang;
             } else {
                 Connection::query(
-                    "INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
+                    "INSERT INTO languages (LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, " .
                     "LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, " .
                     "LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgShowRomanization) " .
                     "VALUES ('WordListTestLang', 'http://test.com/###', '', 'http://translate.test/###', " .
@@ -81,12 +81,12 @@ class WordListServiceTest extends TestCase
         }
 
         // Clean up test words and language
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoLgID = " . self::$testLangId);
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = 'WordListTestLang'");
+        Connection::query("DELETE FROM words WHERE WoLgID = " . self::$testLangId);
+        Connection::query("DELETE FROM languages WHERE LgName = 'WordListTestLang'");
 
         // Reset auto_increment
-        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM " . Globals::getTablePrefix() . "languages");
-        Connection::query("ALTER TABLE " . Globals::getTablePrefix() . "languages AUTO_INCREMENT = " . ((int)$maxId + 1));
+        $maxId = Connection::fetchValue("SELECT COALESCE(MAX(LgID), 0) AS value FROM languages");
+        Connection::query("ALTER TABLE languages AUTO_INCREMENT = " . ((int)$maxId + 1));
     }
 
     protected function tearDown(): void
@@ -96,7 +96,7 @@ class WordListServiceTest extends TestCase
         }
 
         // Clean up test words
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "words WHERE WoText LIKE 'list_test_%'");
+        Connection::query("DELETE FROM words WHERE WoText LIKE 'list_test_%'");
     }
 
     // ===== Constructor and basic tests =====

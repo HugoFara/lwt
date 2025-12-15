@@ -60,7 +60,7 @@ class TermHandlerTest extends TestCase
     {
         // Clean up test data
         if (self::$dbConnected) {
-            $prefix = Globals::getTablePrefix();
+            $prefix = '';
             Connection::query("DELETE FROM {$prefix}words WHERE WoText LIKE 'test_api_%'");
         }
         parent::tearDown();

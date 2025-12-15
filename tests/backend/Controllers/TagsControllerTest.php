@@ -396,7 +396,7 @@ class TagsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT COUNT(TgID) AS value FROM " . Globals::getTablePrefix() . "tags WHERE (1=1)";
+        $sql = "SELECT COUNT(TgID) AS value FROM tags WHERE (1=1)";
         $result = Connection::fetchValue($sql);
 
         $this->assertIsNumeric($result);
@@ -409,7 +409,7 @@ class TagsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT TgID, TgText, TgComment FROM " . Globals::getTablePrefix() . "tags LIMIT 10";
+        $sql = "SELECT TgID, TgText, TgComment FROM tags LIMIT 10";
         $result = Connection::query($sql);
 
         $this->assertInstanceOf(\mysqli_result::class, $result);
@@ -424,7 +424,7 @@ class TagsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT COUNT(T2ID) AS value FROM " . Globals::getTablePrefix() . "tags2 WHERE (1=1)";
+        $sql = "SELECT COUNT(T2ID) AS value FROM tags2 WHERE (1=1)";
         $result = Connection::fetchValue($sql);
 
         $this->assertIsNumeric($result);
@@ -437,7 +437,7 @@ class TagsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $sql = "SELECT T2ID, T2Text, T2Comment FROM " . Globals::getTablePrefix() . "tags2 LIMIT 10";
+        $sql = "SELECT T2ID, T2Text, T2Comment FROM tags2 LIMIT 10";
         $result = Connection::query($sql);
 
         $this->assertInstanceOf(\mysqli_result::class, $result);

@@ -72,7 +72,7 @@ class TextProcessingTest extends TestCase
         }
 
         // Clean up test data
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName LIKE 'test_proc_%'");
+        Connection::query("DELETE FROM languages WHERE LgName LIKE 'test_proc_%'");
     }
 
     // ===== getAllLanguages() tests =====
@@ -94,7 +94,7 @@ class TextProcessingTest extends TestCase
         }
 
         // Insert test language
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_proc_lang', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
@@ -104,7 +104,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals($lgId, $languages['test_proc_lang']);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testGetLanguagesExcludesEmptyNames(): void
@@ -114,10 +114,10 @@ class TextProcessingTest extends TestCase
         }
 
         // Clean up any existing empty-name language first
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgName = ''");
+        Connection::query("DELETE FROM languages WHERE LgName = ''");
 
         // Insert language with empty name
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
@@ -127,7 +127,7 @@ class TextProcessingTest extends TestCase
         $this->assertNotContains($lgId, $languages);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     // ===== getLanguageName() tests =====
@@ -139,7 +139,7 @@ class TextProcessingTest extends TestCase
         }
 
         // Insert test language
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_proc_getlang', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
@@ -148,7 +148,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals('test_proc_getlang', $name);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testGetLanguageWithStringId(): void
@@ -158,7 +158,7 @@ class TextProcessingTest extends TestCase
         }
 
         // Insert test language
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI)
                          VALUES ('test_proc_string', 'http://test', 'http://test')");
         $lgId = (int)Connection::lastInsertId();
 
@@ -167,7 +167,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals('test_proc_string', $name);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testGetLanguageWithInvalidId(): void
@@ -209,7 +209,7 @@ class TextProcessingTest extends TestCase
         }
 
         // Insert test language (LTR)
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
                          VALUES ('test_proc_ltr', 'http://test', 'http://test', 0)");
         $lgId = (int)Connection::lastInsertId();
 
@@ -218,7 +218,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals('', $tag);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testGetScriptDirectionTagWithRTLLanguage(): void
@@ -228,7 +228,7 @@ class TextProcessingTest extends TestCase
         }
 
         // Insert test language (RTL)
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
                          VALUES ('test_proc_rtl', 'http://test', 'http://test', 1)");
         $lgId = (int)Connection::lastInsertId();
 
@@ -237,7 +237,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals(' dir="rtl" ', $tag);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testGetScriptDirectionTagWithStringId(): void
@@ -247,7 +247,7 @@ class TextProcessingTest extends TestCase
         }
 
         // Insert test language (RTL)
-        Connection::query("INSERT INTO " . Globals::getTablePrefix() . "languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
+        Connection::query("INSERT INTO languages (LgName, LgDict1URI, LgGoogleTranslateURI, LgRightToLeft)
                          VALUES ('test_proc_rtl_str', 'http://test', 'http://test', 1)");
         $lgId = (int)Connection::lastInsertId();
 
@@ -256,7 +256,7 @@ class TextProcessingTest extends TestCase
         $this->assertEquals(' dir="rtl" ', $tag);
 
         // Clean up
-        Connection::query("DELETE FROM " . Globals::getTablePrefix() . "languages WHERE LgID = $lgId");
+        Connection::query("DELETE FROM languages WHERE LgID = $lgId");
     }
 
     public function testGetScriptDirectionTagWithNull(): void

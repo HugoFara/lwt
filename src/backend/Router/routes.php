@@ -184,9 +184,6 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/admin/settings', 'AdminController@settings', AUTH_MIDDLEWARE);
     $router->registerWithMiddleware('/admin/settings/hover', 'AdminController@settingsHover', AUTH_MIDDLEWARE);
 
-    // Table management
-    $router->registerWithMiddleware('/admin/tables', 'AdminController@tables', AUTH_MIDDLEWARE);
-
     // Server data
     $router->registerWithMiddleware('/admin/server-data', 'AdminController@serverData', AUTH_MIDDLEWARE);
 

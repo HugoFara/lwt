@@ -51,7 +51,7 @@ class QueryBuilderTest extends TestCase
         }
 
         // Clean up test data
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         Connection::query("DELETE FROM {$prefix}tags WHERE TgText LIKE 'test_qb_%'");
         Connection::query("DELETE FROM {$prefix}settings WHERE StKey LIKE 'test_qb_%'");
     }
@@ -74,7 +74,7 @@ class QueryBuilderTest extends TestCase
         $sql = $qb->toSql();
 
         // Should contain table prefix
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         $this->assertStringContainsString("{$prefix}tags", $sql);
     }
 
@@ -247,7 +247,7 @@ class QueryBuilderTest extends TestCase
 
     public function testJoinWithExplicitOperator(): void
     {
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         $sql = QueryBuilder::table('tags')
             ->join('wordtags', 'tags.TgID', '=', 'wordtags.WtTgID')
             ->toSql();
@@ -258,7 +258,7 @@ class QueryBuilderTest extends TestCase
 
     public function testJoinWithImplicitEquality(): void
     {
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         $sql = QueryBuilder::table('tags')
             ->join('wordtags', 'tags.TgID', 'wordtags.WtTgID')
             ->toSql();
@@ -269,7 +269,7 @@ class QueryBuilderTest extends TestCase
 
     public function testLeftJoin(): void
     {
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         $sql = QueryBuilder::table('tags')
             ->leftJoin('wordtags', 'tags.TgID', 'wordtags.WtTgID')
             ->toSql();
@@ -279,7 +279,7 @@ class QueryBuilderTest extends TestCase
 
     public function testRightJoin(): void
     {
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         $sql = QueryBuilder::table('tags')
             ->rightJoin('wordtags', 'tags.TgID', 'wordtags.WtTgID')
             ->toSql();
@@ -289,7 +289,7 @@ class QueryBuilderTest extends TestCase
 
     public function testJoinWithNonEqualityOperator(): void
     {
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         $sql = QueryBuilder::table('tags')
             ->join('wordtags', 'tags.TgID', '!=', 'wordtags.WtTgID')
             ->toSql();
@@ -669,7 +669,7 @@ class QueryBuilderTest extends TestCase
         }
 
         // Create a temporary test table
-        $prefix = Globals::getTablePrefix();
+        $prefix = '';
         Connection::query("CREATE TEMPORARY TABLE {$prefix}test_truncate (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50))");
 
         // Insert data

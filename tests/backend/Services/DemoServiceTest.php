@@ -73,11 +73,8 @@ class DemoServiceTest extends TestCase
 
         $result = $this->service->getPrefixInfo();
 
-        if (Globals::getTablePrefix() === '') {
-            $this->assertStringContainsString('Default Table Set', $result);
-        } else {
-            $this->assertStringContainsString('Table Set:', $result);
-        }
+        // No table prefix feature - returns empty string
+        $this->assertEquals('', $result);
     }
 
     // ===== getDatabaseName() tests =====

@@ -23,7 +23,6 @@ use Lwt\Services\DemoService;
 use Lwt\Services\ServerDataService;
 use Lwt\Services\SettingsService;
 use Lwt\Services\StatisticsService;
-use Lwt\Services\TableSetService;
 use Lwt\Services\TtsService;
 use Lwt\Services\WordService;
 use Lwt\Services\LanguageDefinitions;
@@ -50,7 +49,6 @@ require_once __DIR__ . '/../Services/DemoService.php';
 require_once __DIR__ . '/../Services/ServerDataService.php';
 require_once __DIR__ . '/../Services/SettingsService.php';
 require_once __DIR__ . '/../Services/StatisticsService.php';
-require_once __DIR__ . '/../Services/TableSetService.php';
 require_once __DIR__ . '/../Services/TtsService.php';
 require_once __DIR__ . '/../Services/WordService.php';
 
@@ -63,7 +61,6 @@ require_once __DIR__ . '/../Services/WordService.php';
  * - Statistics
  * - Settings
  * - Install demo
- * - Table management
  * - Server data
  * - TTS settings
  *
@@ -367,56 +364,6 @@ class AdminController extends BaseController
         $this->message($message, true);
 
         include __DIR__ . '/../Views/Admin/install_demo.php';
-
-        $this->endRender();
-    }
-
-    /**
-     * Table management page
-     *
-     * Handles:
-     * - delpref=xxx: Delete a table set
-     * - newpref=xxx: Create a new table set
-     * - prefix=xxx: Select a table set
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     */
-    public function tables(array $params): void
-    {
-        $tableSetService = new TableSetService();
-        $message = "";
-
-        // Handle operations
-        if ($this->hasParam('delpref')) {
-            $message = $tableSetService->deleteTableSet($this->param('delpref'));
-        } elseif ($this->hasParam('newpref')) {
-            $result = $tableSetService->createTableSet($this->param('newpref'));
-            if ($result['redirect']) {
-                $this->redirect('/');
-            }
-            $message = $result['message'];
-        } elseif ($this->hasParam('prefix')) {
-            $result = $tableSetService->selectTableSet($this->param('prefix'));
-            if ($result['redirect']) {
-                $this->redirect('/');
-            }
-        }
-
-        // Get view data (used by included view)
-        /** @psalm-suppress UnusedVariable */
-        $fixedTbpref = $tableSetService->isFixedPrefix();
-        /** @psalm-suppress UnusedVariable */
-        $isMultiUserMode = $tableSetService->isMultiUserMode();
-        /** @psalm-suppress UnusedVariable */
-        $prefixes = $tableSetService->getPrefixes();
-
-        // Render page
-        $this->render('Select, Create or Delete a Table Set', false);
-        $this->message($message, false);
-
-        include __DIR__ . '/../Views/Admin/table_management.php';
 
         $this->endRender();
     }
