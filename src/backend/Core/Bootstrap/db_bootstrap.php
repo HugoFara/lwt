@@ -125,10 +125,11 @@ function bootstrapDatabase(): void
     Globals::setDbConnection($connection);
 
     // Get table prefix (from .env or database)
-    list($prefix, $isFixed) = Configuration::getPrefix($connection);
+    // Note: Table prefix feature is deprecated since 3.0.0, suppress warnings during bootstrap
+    list($prefix, $isFixed) = @Configuration::getPrefix($connection);
 
-    // Register prefix with Globals
-    Globals::setTablePrefix($prefix, $isFixed);
+    // Register prefix with Globals (deprecated since 3.0.0)
+    @Globals::setTablePrefix($prefix, $isFixed);
     Globals::setDatabaseName($dbname);
 
     // Start timer if needed

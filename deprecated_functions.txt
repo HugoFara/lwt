@@ -1,130 +1,44 @@
-# Deprecated PHP Functions in LWT Codebase
-# Generated: 2025-12-02
-# These functions are marked with @deprecated and should be replaced with their modern equivalents
+# Table Prefix Deprecation - Functions to Process
+# These functions/properties need to be modified or removed to complete the table prefix deprecation.
 
-## Global Variables (db_bootstrap.php)
-# $dbname - REMOVED (was deprecated in favor of Globals::getDatabaseName(), removed 2025-12-12)
-# $tbpref - REMOVED (was deprecated in favor of Globals::getTablePrefix())
+## Globals.php (src/backend/Core/Globals.php)
+- [ ] $tablePrefix (private static property, line 70)
+- [ ] $tablePrefixIsFixed (private static property, line 81)
+- [ ] setTablePrefix() (lines 189-200)
+- [ ] getTablePrefix() (lines 211-219)
+- [ ] isTablePrefixFixed() (lines 233-241)
+- [ ] table() - update to return tableName directly (lines 353-356)
+- [ ] reset() - remove $tablePrefix and $tablePrefixIsFixed resets (lines 497-509)
 
-## String Utilities (string_utilities.php)
-strToHex()                          -> Use \Lwt\Core\StringUtils::toHex()
-toClassName()                       -> Use \Lwt\Core\StringUtils::toClassName()
-replace_supp_unicode_planes_char()  -> Use \Lwt\Core\Utils\replace_supp_unicode_planes_char()
+## Configuration.php (src/backend/Core/Database/Configuration.php)
+- [ ] getPrefix() (lines 195-249)
 
-## Media Service (MediaService.php)
-media_paths_search()    -> Use MediaService::searchMediaPaths()
-get_media_paths()       -> Use MediaService::getMediaPaths()
-selectmediapath()       -> Use MediaService::getMediaPathSelector()
-makeMediaPlayer()       -> Use MediaService::renderMediaPlayer()
-makeVideoPlayer()       -> Use MediaService::renderVideoPlayer()
-makeAudioPlayer()       -> Use MediaService::renderAudioPlayer()
-makeHtml5AudioPlayer()  -> Use MediaService::renderHtml5AudioPlayer()
+## HomeService.php (src/backend/Services/HomeService.php)
+- [ ] $fixedTbpref (private property, line 50)
+- [ ] constructor - remove $fixedTbpref initialization (lines 57-61)
+- [ ] getTableSetSpanGroups() (lines 79-121)
+- [ ] getServerData() - remove 'prefix' field (lines 285-301)
+- [ ] getTablePrefix() (lines 312-320)
+- [ ] isTablePrefixFixed() (lines 331-339)
+- [ ] shouldShowTableSetManagement() (lines 354-373)
+- [ ] getDashboardData() - remove table_prefix, is_fixed_prefix, show_table_set_management fields (lines 398-422)
 
-## Text Statistics Service (TextStatisticsService.php)
-textwordcount()         -> Use returnTextWordCount() (deprecated since 2.9.0)
-texttodocount2()        -> Use todoWordsContent() (deprecated since 2.10.0)
+## TableSetService.php (src/backend/Services/TableSetService.php)
+- [ ] Entire class should be removed
 
-## Integration (text_from_yt.php)
-doJs()                  -> JavaScript moved to youtube_import.ts (now a no-op)
+## db_bootstrap.php (src/backend/Core/Bootstrap/db_bootstrap.php)
+- [ ] Remove Configuration::getPrefix() call (line 129)
+- [ ] Remove Globals::setTablePrefix() call (line 132)
 
-## Router (routes.php)
-getRouteRegistrar()     -> Use \Lwt\Router\registerRoutes() directly
+## wp_logincheck.php (src/backend/Core/Integration/wp_logincheck.php)
+- [ ] Remove Globals::setTablePrefix() call (lines 24-26)
 
-## WordController Methods (WordController.php)
-delete()                -> Use DELETE /api/v1/terms/{id}
-deleteMulti()           -> REMOVED (2025-12-12) Use DELETE /api/v1/terms/{id}
-insertWellKnown()       -> Use POST /api/v1/terms/quick with status=99
-insertIgnore()          -> Use POST /api/v1/terms/quick with status=98
-setStatus()             -> Use PUT /api/v1/terms/{id}/status/{status}
+## Settings.php (src/backend/Core/Database/Settings.php)
+- [ ] lwtTableSet() - review if still needed
+- [ ] lwtTableGet() - review if still needed
 
-## TestController Methods (TestController.php)
-setTestStatus()         -> Use PUT /api/v1/review/status
-renderTestPageLegacy()  -> Use renderTestPageBulma()
+## Views/Admin/tables.php (if exists)
+- [ ] Remove or redirect table set management UI
 
-## HomeService Methods (HomeService.php)
-getServerData()         -> Use ServerDataService::getServerData()
-
-# =============================================================================
-# Non-camelCase PHP Functions (snake_case naming convention violations)
-# =============================================================================
-# These functions use underscores instead of camelCase naming.
-# They are not necessarily deprecated but don't follow PSR naming conventions.
-
-## Core Bootstrap (start_session.php)
-# All functions now follow camelCase naming (renamed 2025-12-10)
-# set_error_reporting()         -> setErrorReporting()
-# set_configuration_options()   -> setConfigurationOptions()
-# start_session()                -> startSession()
-# start_session_main()           -> startSessionMain()
-
-## Integration (text_from_yt.php)
-doFormFragment()
-doJs()
-
-## Version/Debug Utilities
-get_version()                    # version.php
-get_version_number()             # version.php
-getExecutionTime()               # debug_utilities.php (was: get_execution_time)
-
-## String Utilities (string_utilities.php)
-# remove_soft_hyphens() - REMOVED (2025-12-12)
-# get_file_path() - REMOVED (2025-12-12)
-replace_supp_unicode_planes_char()
-remove_spaces()
-str_replace_first()
-
-## Annotation Service (AnnotationService.php)
-recreate_save_ann()
-create_ann()
-create_save_ann()
-process_term()
-get_first_translation()
-get_annotation_link()
-trim_value()
-annotation_to_json()
-
-## Export Service (ExportService.php)
-anki_export()
-tsv_export()
-flexible_export()
-repl_tab_nl()
-mask_term_in_sentence()
-mask_term_in_sentence_v2()
-
-## Media Service (MediaService.php)
-media_paths_search()
-get_media_paths()
-selectmediapath()
-
-## Sentence Service (SentenceService.php)
-sentences_containing_word_lc_query()  # REMOVED 2025-12-12
-sentences_from_word()
-sentences_with_word()
-example_sentences_area()  # REMOVED 2025-12-12
-
-## Similar Terms Service (SimilarTermsService.php)
-get_similar_terms()
-# format_term() - REMOVED (2025-12-12)
-# print_similar_terms() - REMOVED (2025-12-12)
-# print_similar_terms_tabrow() - REMOVED (2025-12-12)
-
-## Text Parsing Service (TextParsingService.php)
-get_mecab_path()
-find_latin_sentence_end()
-
-## Text Reading Service (TextReadingService.php)
-echo_term()
-sentence_parser()      # REMOVED 2025-12-12
-item_parser()          # REMOVED 2025-12-12
-main_word_loop()       # REMOVED 2025-12-12
-
-## Text Statistics Service (TextStatisticsService.php)
-returnTextWordCount()
-textwordcount()
-todoWordsCount()
-todoWordsContent()
-texttodocount2()
-
-## Build Tools (markdown_converter.php)
-markdown_converter()
-markdown_integration()
+## Routes (src/backend/Router/routes.php)
+- [ ] Remove /admin/tables route if exists

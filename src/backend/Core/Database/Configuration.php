@@ -187,9 +187,20 @@ class Configuration
      * @return (bool|string)[]
      *
      * @psalm-return list{string, bool}
+     *
+     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
+     *             is now handled via user_id columns instead of table prefixes.
+     *             Will be removed in a future version.
      */
     public static function getPrefix(\mysqli $dbconnection, ?string $configuredPrefix = null): array
     {
+        @trigger_error(
+            'Configuration::getPrefix() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version. ' .
+            'Table prefix feature is replaced by user_id-based isolation.',
+            E_USER_DEPRECATED
+        );
+
         // Set connection in Globals for backward compatibility
         Globals::setDbConnection($dbconnection);
 

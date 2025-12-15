@@ -62,6 +62,10 @@ class Globals
      * Database table prefix (usually empty string)
      *
      * @var string
+     *
+     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
+     *             is now handled via user_id columns instead of table prefixes.
+     *             Will be removed in a future version.
      */
     private static string $tablePrefix = '';
 
@@ -69,6 +73,10 @@ class Globals
      * Whether the table prefix is fixed (from .env) or from DB
      *
      * @var bool
+     *
+     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
+     *             is now handled via user_id columns instead of table prefixes.
+     *             Will be removed in a future version.
      */
     private static bool $tablePrefixIsFixed = false;
 
@@ -173,11 +181,20 @@ class Globals
      * @param bool   $isFixed Whether the prefix is fixed
      *
      * @return void
+     *
+     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
+     *             is now handled via user_id columns instead of table prefixes.
+     *             Will be removed in a future version.
      */
     public static function setTablePrefix(
         string $prefix,
         bool $isFixed = false
     ): void {
+        @trigger_error(
+            'Globals::setTablePrefix() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
         self::$tablePrefix = $prefix;
         self::$tablePrefixIsFixed = $isFixed;
     }
@@ -186,9 +203,18 @@ class Globals
      * Get the database table prefix.
      *
      * @return string The table prefix (may be empty string)
+     *
+     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
+     *             is now handled via user_id columns instead of table prefixes.
+     *             Will be removed in a future version. Use table names directly.
      */
     public static function getTablePrefix(): string
     {
+        @trigger_error(
+            'Globals::getTablePrefix() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
         return self::$tablePrefix;
     }
 
@@ -199,9 +225,18 @@ class Globals
      * being determined from the database.
      *
      * @return bool True if prefix is fixed
+     *
+     * @deprecated 3.0.0 Table prefix feature is deprecated. Multi-user isolation
+     *             is now handled via user_id columns instead of table prefixes.
+     *             Will be removed in a future version.
      */
     public static function isTablePrefixFixed(): bool
     {
+        @trigger_error(
+            'Globals::isTablePrefixFixed() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
         return self::$tablePrefixIsFixed;
     }
 
@@ -307,6 +342,9 @@ class Globals
      * Get a prefixed table name.
      *
      * Convenience method to get a full table name with prefix.
+     * Note: Table prefixes are deprecated since version 3.0.0. This method
+     * will continue to work but will return the table name unchanged once
+     * table prefix support is removed.
      *
      * @param string $tableName The base table name (e.g., 'words')
      *
@@ -314,7 +352,7 @@ class Globals
      */
     public static function table(string $tableName): string
     {
-        return self::getTablePrefix() . $tableName;
+        return self::$tablePrefix . $tableName;
     }
 
     /**

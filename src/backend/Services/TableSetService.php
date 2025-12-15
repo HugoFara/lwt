@@ -47,6 +47,8 @@ class TableSetService
      * Whether table prefix is fixed.
      *
      * @var bool
+     *
+     * @deprecated 3.0.0 Table prefix feature is deprecated.
      */
     private bool $fixedTbpref;
 
@@ -54,6 +56,8 @@ class TableSetService
      * Tables that make up a table set.
      *
      * @var string[]
+     *
+     * @deprecated 3.0.0 Table sets are deprecated.
      */
     private const TABLE_SET_TABLES = [
         'archivedtexts', 'archtexttags', 'languages', 'sentences', 'tags',
@@ -63,10 +67,18 @@ class TableSetService
 
     /**
      * Constructor - initialize settings.
+     *
+     * @deprecated 3.0.0 TableSetService is deprecated. Use user_id-based isolation instead.
      */
     public function __construct()
     {
-        $this->fixedTbpref = Globals::isTablePrefixFixed();
+        @trigger_error(
+            'TableSetService is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version. Use user_id-based isolation instead.',
+            E_USER_DEPRECATED
+        );
+        // Suppress deprecation warning from isTablePrefixFixed during construction
+        $this->fixedTbpref = @Globals::isTablePrefixFixed();
     }
 
     /**
@@ -77,9 +89,17 @@ class TableSetService
      * - Table prefix is fixed in .env
      *
      * @return bool True if table set management is available
+     *
+     * @deprecated 3.0.0 Table sets are deprecated. Use user_id-based isolation instead.
      */
     public function isAvailable(): bool
     {
+        @trigger_error(
+            'TableSetService::isAvailable() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
+
         // In multi-user mode, table sets are replaced by user_id isolation
         if (Globals::isMultiUserEnabled()) {
             return false;
@@ -100,9 +120,16 @@ class TableSetService
      * and replaced by user_id-based data isolation.
      *
      * @return bool True if multi-user mode is enabled
+     *
+     * @deprecated 3.0.0 Table sets are deprecated. Use Globals::isMultiUserEnabled() directly.
      */
     public function isMultiUserMode(): bool
     {
+        @trigger_error(
+            'TableSetService::isMultiUserMode() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version. Use Globals::isMultiUserEnabled() directly.',
+            E_USER_DEPRECATED
+        );
         return Globals::isMultiUserEnabled();
     }
 
@@ -110,9 +137,16 @@ class TableSetService
      * Check if table prefix is fixed.
      *
      * @return bool True if prefix is fixed
+     *
+     * @deprecated 3.0.0 Table prefix feature is deprecated.
      */
     public function isFixedPrefix(): bool
     {
+        @trigger_error(
+            'TableSetService::isFixedPrefix() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
         return $this->fixedTbpref;
     }
 
@@ -120,10 +154,17 @@ class TableSetService
      * Get the current table prefix.
      *
      * @return string Current prefix
+     *
+     * @deprecated 3.0.0 Table prefix feature is deprecated.
      */
     public function getCurrentPrefix(): string
     {
-        return Globals::getTablePrefix();
+        @trigger_error(
+            'TableSetService::getCurrentPrefix() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
+        return @Globals::getTablePrefix();
     }
 
     /**
@@ -132,9 +173,16 @@ class TableSetService
      * @return string[] List of prefixes
      *
      * @psalm-return list<string>
+     *
+     * @deprecated 3.0.0 Table sets are deprecated.
      */
     public function getPrefixes(): array
     {
+        @trigger_error(
+            'TableSetService::getPrefixes() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
         return self::getAllPrefixes();
     }
 
@@ -147,9 +195,17 @@ class TableSetService
      * @return string[] A list of prefixes
      *
      * @psalm-return list<string>
+     *
+     * @deprecated 3.0.0 Table sets are deprecated.
      */
     public static function getAllPrefixes(): array
     {
+        @trigger_error(
+            'TableSetService::getAllPrefixes() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
+
         $prefix = [];
         $res = Connection::query(
             str_replace(
@@ -171,9 +227,17 @@ class TableSetService
      * @param string $prefix Prefix of the table set to delete
      *
      * @return string Status message
+     *
+     * @deprecated 3.0.0 Table sets are deprecated.
      */
     public function deleteTableSet(string $prefix): string
     {
+        @trigger_error(
+            'TableSetService::deleteTableSet() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
+
         if ($prefix === '-') {
             return '';
         }
@@ -189,7 +253,8 @@ class TableSetService
         $message = 'Table Set "' . $prefix . '" deleted';
 
         // If we deleted the current table set, switch to default
-        if ($prefix == substr(Globals::getTablePrefix(), 0, -1)) {
+        // Suppress deprecation warning for internal use
+        if ($prefix == substr(@Globals::getTablePrefix(), 0, -1)) {
             Settings::lwtTableSet("current_table_prefix", "");
         }
 
@@ -202,10 +267,19 @@ class TableSetService
      * @param string $prefix New prefix to create
      *
      * @return array{success: bool, message: string, redirect: bool}
+     *
+     * @deprecated 3.0.0 Table sets are deprecated.
      */
     public function createTableSet(string $prefix): array
     {
-        $existingPrefixes = $this->getPrefixes();
+        @trigger_error(
+            'TableSetService::createTableSet() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
+
+        // Suppress deprecation warning for internal use
+        $existingPrefixes = @$this->getPrefixes();
 
         if (in_array($prefix, $existingPrefixes)) {
             return [
@@ -230,9 +304,17 @@ class TableSetService
      * @param string $prefix Prefix to select
      *
      * @return array{success: bool, redirect: bool}
+     *
+     * @deprecated 3.0.0 Table sets are deprecated.
      */
     public function selectTableSet(string $prefix): array
     {
+        @trigger_error(
+            'TableSetService::selectTableSet() is deprecated since version 3.0.0 ' .
+            'and will be removed in a future version.',
+            E_USER_DEPRECATED
+        );
+
         if ($prefix === '-') {
             return ['success' => false, 'redirect' => false];
         }
