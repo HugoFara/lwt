@@ -15,7 +15,7 @@ LWT carried significant technical debt from its 2007 origins. This document trac
 | Phase | Status | Completion |
 |-------|--------|------------|
 | Quick Wins | **COMPLETE** | 100% |
-| Phase 1: Security & Safety | **SUBSTANTIAL** | ~75% |
+| Phase 1: Security & Safety | **SUBSTANTIAL** | ~85% |
 | Phase 2: Refactoring | **COMPLETE** | ~95% |
 | Phase 3: Modernization | **IN PROGRESS** | ~70% |
 
@@ -270,8 +270,8 @@ class InputValidator {
 #### 1.3 Session Security Hardening
 
 **Priority:** P1 (High)
-**Status:** PARTIAL
-**Effort:** Small (8 hours) - 4 hours done, 4 hours remaining
+**Status:** COMPLETE
+**Effort:** Small (8 hours) - DONE
 
 **Current State (2025-12-18):**
 
@@ -279,13 +279,23 @@ class InputValidator {
 - [x] Session ID validation checks implemented
 - [x] `session_regenerate_id(true)` called after login (AuthService:370)
 - [x] Remember-me cookie has httponly/secure/samesite flags (AuthController:300-311)
-- [ ] Session cookie itself has NO explicit security configuration
-- [ ] TTS cookie missing httponly/secure flags (only has samesite)
+- [x] **Session cookie has HttpOnly, Secure, SameSite flags** (start_session.php:96-108)
+- [x] **TTS cookie has secure flag** (TtsService.php:131-142) - httponly=false intentional for JS access
 
 **Implemented:**
 
 ```php
-// Remember-me cookie (DONE - AuthController.php:300-311)
+// Session cookie security (start_session.php:96-108)
+session_set_cookie_params([
+    'lifetime' => 0,           // Session cookie (expires when browser closes)
+    'path' => '/',             // Available across entire domain
+    'domain' => '',            // Current domain only
+    'secure' => $isSecure,     // Only send over HTTPS when available
+    'httponly' => true,        // Prevent JavaScript access (XSS protection)
+    'samesite' => 'Lax'        // CSRF protection while allowing normal navigation
+]);
+
+// Remember-me cookie (AuthController.php:300-311)
 setcookie('lwt_remember', $token, [
     'expires' => $expires,
     'path' => '/',
@@ -294,29 +304,22 @@ setcookie('lwt_remember', $token, [
     'samesite' => 'Lax',
 ]);
 
-// Session regeneration after login (DONE - AuthService.php:370)
-session_regenerate_id(true);
-```
-
-**Missing Security Settings:**
-
-```php
-// Session cookie params NOT configured in start_session.php:
-session_set_cookie_params([
-    'lifetime' => 0,
+// TTS cookie (TtsService.php:136-142)
+$cookie_options = [
+    'expires' => strtotime('+5 years'),
     'path' => '/',
-    'secure' => true,
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
+    'secure' => $isSecure,
+    'httponly' => false,    // TTS settings need to be readable by JavaScript
+    'samesite' => 'Strict'
+];
 ```
 
 **Success Criteria:**
 
 - [x] Session regeneration after login
 - [x] Remember-me cookie secured
-- [ ] Session cookie has HttpOnly, Secure, SameSite flags
-- [ ] TTS cookie has httponly and secure flags
+- [x] Session cookie has HttpOnly, Secure, SameSite flags
+- [x] TTS cookie has secure flag (httponly=false is intentional)
 
 #### 1.4 XSS Prevention Audit
 
@@ -681,7 +684,7 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 
 - [x] SQL injection protection (prepared statements - 95% adopted)
 - [x] InputValidator widely adopted (16 files, ~90% of input handling)
-- [ ] Session security audit passed (session cookie flags missing)
+- [x] Session security audit passed (all cookies have proper flags)
 - [ ] Security headers configured (CSP, X-Frame-Options, etc.)
 
 ### Phase 2 Completion
@@ -703,7 +706,7 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 ### P0 (Critical - Security)
 
 1. ~~**Prepared Statements** - Migrate from string escaping~~ **DONE** (95% complete)
-2. **Session Security** - Add session cookie flags (HttpOnly, Secure, SameSite)
+2. ~~**Session Security** - Add session cookie flags (HttpOnly, Secure, SameSite)~~ **DONE**
 3. **Security Headers** - Add CSP, X-Frame-Options, X-Content-Type-Options, HSTS
 
 ### P1 (High)
@@ -717,10 +720,10 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 
 1. ~~**DI Container Infrastructure** - Build container classes~~ **DONE** (2025-12-01)
 2. ~~**Repository Layer Infrastructure** - Build repository classes~~ **DONE** (2025-12-01)
-3. **Migrate Services to use Container** - Wire existing services into container
-4. **Create Remaining Repositories** - Text, Term, User repositories
-5. **Deprecated Function Migration** - processDBParam/processSessParam (39 calls)
-6. **TTS Cookie Security** - Add httponly and secure flags
+3. ~~**TTS Cookie Security** - Add secure flag~~ **DONE** (httponly=false intentional for JS)
+4. **Migrate Services to use Container** - Wire existing services into container
+5. **Create Remaining Repositories** - Text, Term, User repositories
+6. **Deprecated Function Migration** - processDBParam/processSessParam (39 calls)
 
 ## Deprecated Global Functions
 
@@ -808,13 +811,13 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 | Phase | Original Estimate | Actual Status | Remaining |
 |-------|-------------------|---------------|-----------|
 | Quick Wins | 2 weeks | 100% complete | - |
-| Phase 1 | 3-6 months | 75% complete | Session/security headers |
+| Phase 1 | 3-6 months | 85% complete | Security headers only |
 | Phase 2 | 6-12 months | 95% complete | Minor cleanup |
 | Phase 3 | 12-18 months | 70% complete | DI integration, exceptions |
 
 **Original Total Duration:** 18-24 months
 **Elapsed Time:** ~12 months (estimated based on architecture changes)
-**Remaining Effort:** ~150 hours for P0/P1 items (down from 300)
+**Remaining Effort:** ~140 hours for P0/P1 items
 
 ## Architecture Summary (2025-12-18)
 

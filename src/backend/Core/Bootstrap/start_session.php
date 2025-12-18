@@ -60,12 +60,63 @@ function setConfigurationOptions(): void
 }
 
 /**
+ * Detect if the current request is over HTTPS.
+ *
+ * Checks multiple indicators to handle proxies and load balancers.
+ *
+ * @return bool True if the connection is secure
+ */
+function isSecureConnection(): bool
+{
+    // Direct HTTPS
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        return true;
+    }
+    // Behind a proxy/load balancer that terminates SSL
+    if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+        return true;
+    }
+    // Standard HTTPS port
+    if (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Configure secure session cookie parameters.
+ *
+ * Sets HttpOnly, Secure, and SameSite flags to protect against:
+ * - XSS attacks (HttpOnly prevents JavaScript access)
+ * - Man-in-the-middle attacks (Secure ensures HTTPS-only transmission)
+ * - CSRF attacks (SameSite restricts cross-site cookie sending)
+ *
+ * @return void
+ */
+function configureSessionCookie(): void
+{
+    $isSecure = isSecureConnection();
+
+    \session_set_cookie_params([
+        'lifetime' => 0,           // Session cookie (expires when browser closes)
+        'path' => '/',             // Available across entire domain
+        'domain' => '',            // Current domain only
+        'secure' => $isSecure,     // Only send over HTTPS when available
+        'httponly' => true,        // Prevent JavaScript access (XSS protection)
+        'samesite' => 'Lax'        // CSRF protection while allowing normal navigation
+    ]);
+}
+
+/**
  * Start the session and checks for its sanity.
  *
  * @return void
  */
 function startSession(): void
 {
+    // Configure secure cookie parameters before starting session
+    configureSessionCookie();
+
     // session isn't started
     $err = @\session_start();
     if ($err === false) {

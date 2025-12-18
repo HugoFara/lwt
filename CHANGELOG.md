@@ -25,6 +25,7 @@ ones are marked like "v1.0.0-fork".
 
 ### Security
 
+* Adds session security cookie to protect against session hijacking.
 * Fixed SQL injection vulnerabilities in `validateLang()`, `validateText()`,
   `validateTag()`, and `validateArchTextTag()` functions. All validation
   functions now properly sanitize non-numeric input before executing SQL

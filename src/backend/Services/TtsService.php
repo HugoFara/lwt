@@ -128,9 +128,16 @@ class TtsService
         $lgname = InputValidator::getString('LgName');
         $prefix = 'tts[' . $lgname;
 
+        // Detect HTTPS for secure cookie flag
+        $isSecure = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+            || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+
         $cookie_options = array(
             'expires' => strtotime('+5 years'),
             'path' => '/',
+            'secure' => $isSecure,  // Only send over HTTPS when available
+            'httponly' => false,    // TTS settings need to be readable by JavaScript
             'samesite' => 'Strict'
         );
 
