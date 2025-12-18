@@ -14,6 +14,7 @@
 
 namespace Lwt\Router;
 
+use Lwt\Core\Http\SecurityHeaders;
 use Lwt\Router\Middleware\MiddlewareInterface;
 
 /**
@@ -389,6 +390,9 @@ class Router
      */
     public function execute(array $resolution): void
     {
+        // Send security headers on all responses
+        SecurityHeaders::send();
+
         switch ($resolution['type']) {
             case 'redirect':
                 $code = $resolution['code'];

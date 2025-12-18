@@ -39,22 +39,21 @@ class GlobalsTest extends TestCase
     public function testInitialize(): void
     {
         Globals::initialize();
-        
-        // After initialization, debug/display settings should be 0
-        $this->assertEquals(0, Globals::getDebug());
-        $this->assertFalse(Globals::isDebug());
-        $this->assertFalse(Globals::shouldDisplayErrors());
+
+        // After initialization, debug/display settings should be false
+        $this->assertFalse(Globals::isDebugMode());
+        $this->assertFalse(Globals::isErrorDisplayEnabled());
     }
 
     public function testInitializeOnlyOnce(): void
     {
         Globals::initialize();
-        Globals::setDebug(1);
-        
+        Globals::setDebugMode(true);
+
         // Second initialize should not reset values
         Globals::initialize();
-        
-        $this->assertEquals(1, Globals::getDebug());
+
+        $this->assertTrue(Globals::isDebugMode());
     }
 
     // ===== dbConnection tests =====
@@ -87,58 +86,56 @@ class GlobalsTest extends TestCase
         $this->assertEquals('', Globals::getDatabaseName());
     }
 
-    // ===== debug tests =====
+    // ===== debugMode tests =====
 
-    public function testSetDebugOn(): void
+    public function testSetDebugModeOn(): void
     {
-        Globals::setDebug(1);
-        
-        $this->assertEquals(1, Globals::getDebug());
-        $this->assertTrue(Globals::isDebug());
+        Globals::setDebugMode(true);
+
+        $this->assertTrue(Globals::isDebugMode());
     }
 
-    public function testSetDebugOff(): void
+    public function testSetDebugModeOff(): void
     {
-        Globals::setDebug(1);
-        Globals::setDebug(0);
-        
-        $this->assertEquals(0, Globals::getDebug());
-        $this->assertFalse(Globals::isDebug());
+        Globals::setDebugMode(true);
+        Globals::setDebugMode(false);
+
+        $this->assertFalse(Globals::isDebugMode());
     }
 
-    public function testIsDebugReturnsBool(): void
+    public function testIsDebugModeReturnsBool(): void
     {
-        Globals::setDebug(0);
-        $this->assertIsBool(Globals::isDebug());
-        
-        Globals::setDebug(1);
-        $this->assertIsBool(Globals::isDebug());
+        Globals::setDebugMode(false);
+        $this->assertIsBool(Globals::isDebugMode());
+
+        Globals::setDebugMode(true);
+        $this->assertIsBool(Globals::isDebugMode());
     }
 
-    // ===== displayErrors tests =====
+    // ===== errorDisplay tests =====
 
-    public function testSetDisplayErrorsOn(): void
+    public function testSetErrorDisplayOn(): void
     {
-        Globals::setDisplayErrors(1);
-        
-        $this->assertTrue(Globals::shouldDisplayErrors());
+        Globals::setErrorDisplay(true);
+
+        $this->assertTrue(Globals::isErrorDisplayEnabled());
     }
 
-    public function testSetDisplayErrorsOff(): void
+    public function testSetErrorDisplayOff(): void
     {
-        Globals::setDisplayErrors(1);
-        Globals::setDisplayErrors(0);
-        
-        $this->assertFalse(Globals::shouldDisplayErrors());
+        Globals::setErrorDisplay(true);
+        Globals::setErrorDisplay(false);
+
+        $this->assertFalse(Globals::isErrorDisplayEnabled());
     }
 
-    public function testShouldDisplayErrorsReturnsBool(): void
+    public function testIsErrorDisplayEnabledReturnsBool(): void
     {
-        Globals::setDisplayErrors(0);
-        $this->assertIsBool(Globals::shouldDisplayErrors());
+        Globals::setErrorDisplay(false);
+        $this->assertIsBool(Globals::isErrorDisplayEnabled());
 
-        Globals::setDisplayErrors(1);
-        $this->assertIsBool(Globals::shouldDisplayErrors());
+        Globals::setErrorDisplay(true);
+        $this->assertIsBool(Globals::isErrorDisplayEnabled());
     }
 
     // ===== table() tests =====
@@ -173,8 +170,8 @@ class GlobalsTest extends TestCase
         $mockConnection = $this->createMock(\mysqli::class);
         Globals::setDbConnection($mockConnection);
         Globals::setDatabaseName('testdb');
-        Globals::setDebug(1);
-        Globals::setDisplayErrors(1);
+        Globals::setDebugMode(true);
+        Globals::setErrorDisplay(true);
         Globals::setCurrentUserId(42);
         Globals::setMultiUserEnabled(true);
         Globals::initialize();
@@ -185,8 +182,8 @@ class GlobalsTest extends TestCase
         // Verify all values are cleared
         $this->assertNull(Globals::getDbConnection());
         $this->assertEquals('', Globals::getDatabaseName());
-        $this->assertEquals(0, Globals::getDebug());
-        $this->assertFalse(Globals::shouldDisplayErrors());
+        $this->assertFalse(Globals::isDebugMode());
+        $this->assertFalse(Globals::isErrorDisplayEnabled());
         $this->assertNull(Globals::getCurrentUserId());
         $this->assertFalse(Globals::isMultiUserEnabled());
     }

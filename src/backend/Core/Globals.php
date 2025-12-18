@@ -56,18 +56,18 @@ class Globals
     private static ?\mysqli $dbConnection = null;
 
     /**
-     * Debug mode flag (0=off, 1=on)
+     * Whether debug mode is enabled
      *
-     * @var int
+     * @var bool
      */
-    private static int $debug = 0;
+    private static bool $debugModeEnabled = false;
 
     /**
-     * Error display flag (0=off, 1=on)
+     * Whether error display is enabled
      *
-     * @var int
+     * @var bool
      */
-    private static int $displayErrors = 0;
+    private static bool $errorDisplayEnabled = false;
 
     /**
      * Database name
@@ -112,9 +112,9 @@ class Globals
             return;
         }
 
-        // All settings default to 0 (off)
-        self::$debug = 0;
-        self::$displayErrors = 0;
+        // All settings default to off
+        self::$debugModeEnabled = false;
+        self::$errorDisplayEnabled = false;
 
         self::$initialized = true;
     }
@@ -164,15 +164,15 @@ class Globals
     }
 
     /**
-     * Set debug mode.
+     * Enable or disable debug mode.
      *
-     * @param int $value 1 for debug on, 0 for off
+     * @param bool $enabled True to enable debug mode
      *
      * @return void
      */
-    public static function setDebug(int $value): void
+    public static function setDebugMode(bool $enabled): void
     {
-        self::$debug = $value;
+        self::$debugModeEnabled = $enabled;
     }
 
     /**
@@ -180,31 +180,21 @@ class Globals
      *
      * @return bool True if debug mode is on
      */
-    public static function isDebug(): bool
+    public static function isDebugMode(): bool
     {
-        return (bool) self::$debug;
+        return self::$debugModeEnabled;
     }
 
     /**
-     * Get debug value as integer.
+     * Enable or disable error display.
      *
-     * @return int Debug flag (0 or 1)
-     */
-    public static function getDebug(): int
-    {
-        return self::$debug;
-    }
-
-    /**
-     * Set error display mode.
-     *
-     * @param int $value 1 for display on, 0 for off
+     * @param bool $enabled True to enable error display
      *
      * @return void
      */
-    public static function setDisplayErrors(int $value): void
+    public static function setErrorDisplay(bool $enabled): void
     {
-        self::$displayErrors = $value;
+        self::$errorDisplayEnabled = $enabled;
     }
 
     /**
@@ -212,9 +202,9 @@ class Globals
      *
      * @return bool True if error display is on
      */
-    public static function shouldDisplayErrors(): bool
+    public static function isErrorDisplayEnabled(): bool
     {
-        return (bool) self::$displayErrors;
+        return self::$errorDisplayEnabled;
     }
 
     /**
@@ -375,8 +365,8 @@ class Globals
     public static function reset(): void
     {
         self::$dbConnection = null;
-        self::$debug = 0;
-        self::$displayErrors = 0;
+        self::$debugModeEnabled = false;
+        self::$errorDisplayEnabled = false;
         self::$databaseName = '';
         self::$initialized = false;
         self::$currentUserId = null;

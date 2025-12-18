@@ -486,7 +486,7 @@ HTML;
             echo self::buildLogo();
             echo '</div>';
         }
-        echo self::buildPageTitle($title, Globals::isDebug());
+        echo self::buildPageTitle($title, Globals::isDebugMode());
     }
 
     /**

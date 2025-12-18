@@ -165,7 +165,7 @@ class Migrations
             Connection::execute(
                 "ALTER TABLE _migrations ADD COLUMN applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
             );
-            if (Globals::isDebug()) {
+            if (Globals::isDebugMode()) {
                 echo "<p>DEBUG: Upgraded _migrations table schema</p>";
             }
         }
@@ -200,7 +200,7 @@ class Migrations
         // Do DB Updates if tables seem to be old versions
 
         if ($dbversion < $currversion) {
-            if (Globals::isDebug()) {
+            if (Globals::isDebugMode()) {
                 echo "<p>DEBUG: check DB collation: ";
             }
             if (
@@ -220,14 +220,14 @@ class Migrations
                     'ALTER DATABASE ' . $escapedDbName .
                     ' CHARACTER SET utf8 COLLATE utf8_general_ci'
                 );
-                if (Globals::isDebug()) {
+                if (Globals::isDebugMode()) {
                     echo 'changed to utf8_general_ci</p>';
                 }
-            } elseif (Globals::isDebug()) {
+            } elseif (Globals::isDebugMode()) {
                 echo 'OK</p>';
             }
 
-            if (Globals::isDebug()) {
+            if (Globals::isDebugMode()) {
                 echo "<p>DEBUG: do DB updates: $dbversion --&gt; $currversion</p>";
             }
 
@@ -237,7 +237,7 @@ class Migrations
             $pendingMigrations = array_diff($allMigrations, $appliedMigrations);
 
             foreach ($pendingMigrations as $filename) {
-                if (Globals::isDebug()) {
+                if (Globals::isDebugMode()) {
                     echo "<p>DEBUG: Running migration: $filename</p>";
                 }
                 $queries = SqlFileParser::parseFile(
@@ -250,7 +250,7 @@ class Migrations
                 self::recordMigration($filename);
             }
 
-            if (Globals::isDebug()) {
+            if (Globals::isDebugMode()) {
                 echo '<p>DEBUG: rebuilding tts</p>';
             }
             Connection::execute(
@@ -341,7 +341,7 @@ class Migrations
 
         if ($count > 0) {
             // Rebuild Text Cache if cache tables new
-            if (Globals::isDebug()) {
+            if (Globals::isDebugMode()) {
                 echo '<p>DEBUG: rebuilding cache tables</p>';
             }
             self::reparseAllTexts();
@@ -352,7 +352,7 @@ class Migrations
         $lastscorecalc = Settings::get('lastscorecalc');
         $today = date('Y-m-d');
         if ($lastscorecalc != $today) {
-            if (Globals::isDebug()) {
+            if (Globals::isDebugMode()) {
                 echo '<p>DEBUG: Doing score recalc. Today: ' . $today .
                 ' / Last: ' . $lastscorecalc . '</p>';
             }

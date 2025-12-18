@@ -310,7 +310,7 @@ class FeedsController extends BaseController
      */
     private function renderFeedsIndex(int $currentLang, int $currentFeed): void
     {
-        $debug = \Lwt\Core\Globals::isDebug();
+        $debug = \Lwt\Core\Globals::isDebugMode();
 
         $currentQuery = (string)ParamHelpers::processSessParam("query", "currentrssquery", '', false);
         $currentQueryMode = (string)ParamHelpers::processSessParam("query_mode", "currentrssquerymode", 'title,desc,text', false);

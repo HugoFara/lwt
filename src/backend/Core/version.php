@@ -47,7 +47,7 @@ function getVersion(): string
 {
     $formattedDate = \date("F d Y", \strtotime(LWT_RELEASE_DATE));
     $version = LWT_APP_VERSION . " ($formattedDate)";
-    if (Globals::isDebug()) {
+    if (Globals::isDebugMode()) {
         $version .= ' <span class="red">DEBUG</span>';
     }
     return $version;

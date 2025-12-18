@@ -137,7 +137,7 @@ function startSession(): void
  */
 function startSessionMain(): void
 {
-    setErrorReporting(Globals::shouldDisplayErrors());
+    setErrorReporting(Globals::isErrorDisplayEnabled());
     setConfigurationOptions();
     // Start a PHP session if not one already exists
     if (\session_id() == '') {
