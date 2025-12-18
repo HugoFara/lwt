@@ -44,7 +44,6 @@ class GlobalsTest extends TestCase
         $this->assertEquals(0, Globals::getDebug());
         $this->assertFalse(Globals::isDebug());
         $this->assertFalse(Globals::shouldDisplayErrors());
-        $this->assertFalse(Globals::shouldDisplayTime());
     }
 
     public function testInitializeOnlyOnce(): void
@@ -137,35 +136,9 @@ class GlobalsTest extends TestCase
     {
         Globals::setDisplayErrors(0);
         $this->assertIsBool(Globals::shouldDisplayErrors());
-        
+
         Globals::setDisplayErrors(1);
         $this->assertIsBool(Globals::shouldDisplayErrors());
-    }
-
-    // ===== displayTime tests =====
-
-    public function testSetDisplayTimeOn(): void
-    {
-        Globals::setDisplayTime(1);
-        
-        $this->assertTrue(Globals::shouldDisplayTime());
-    }
-
-    public function testSetDisplayTimeOff(): void
-    {
-        Globals::setDisplayTime(1);
-        Globals::setDisplayTime(0);
-        
-        $this->assertFalse(Globals::shouldDisplayTime());
-    }
-
-    public function testShouldDisplayTimeReturnsBool(): void
-    {
-        Globals::setDisplayTime(0);
-        $this->assertIsBool(Globals::shouldDisplayTime());
-        
-        Globals::setDisplayTime(1);
-        $this->assertIsBool(Globals::shouldDisplayTime());
     }
 
     // ===== table() tests =====
@@ -202,7 +175,6 @@ class GlobalsTest extends TestCase
         Globals::setDatabaseName('testdb');
         Globals::setDebug(1);
         Globals::setDisplayErrors(1);
-        Globals::setDisplayTime(1);
         Globals::setCurrentUserId(42);
         Globals::setMultiUserEnabled(true);
         Globals::initialize();
@@ -215,7 +187,6 @@ class GlobalsTest extends TestCase
         $this->assertEquals('', Globals::getDatabaseName());
         $this->assertEquals(0, Globals::getDebug());
         $this->assertFalse(Globals::shouldDisplayErrors());
-        $this->assertFalse(Globals::shouldDisplayTime());
         $this->assertNull(Globals::getCurrentUserId());
         $this->assertFalse(Globals::isMultiUserEnabled());
     }

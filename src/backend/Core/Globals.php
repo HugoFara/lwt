@@ -70,13 +70,6 @@ class Globals
     private static int $displayErrors = 0;
 
     /**
-     * Execution time display flag (0=off, 1=on)
-     *
-     * @var int
-     */
-    private static int $displayTime = 0;
-
-    /**
      * Database name
      *
      * @var string
@@ -122,7 +115,6 @@ class Globals
         // All settings default to 0 (off)
         self::$debug = 0;
         self::$displayErrors = 0;
-        self::$displayTime = 0;
 
         self::$initialized = true;
     }
@@ -223,28 +215,6 @@ class Globals
     public static function shouldDisplayErrors(): bool
     {
         return (bool) self::$displayErrors;
-    }
-
-    /**
-     * Set execution time display mode.
-     *
-     * @param int $value 1 for display on, 0 for off
-     *
-     * @return void
-     */
-    public static function setDisplayTime(int $value): void
-    {
-        self::$displayTime = $value;
-    }
-
-    /**
-     * Check if execution time display is enabled.
-     *
-     * @return bool True if time display is on
-     */
-    public static function shouldDisplayTime(): bool
-    {
-        return (bool) self::$displayTime;
     }
 
     /**
@@ -407,7 +377,6 @@ class Globals
         self::$dbConnection = null;
         self::$debug = 0;
         self::$displayErrors = 0;
-        self::$displayTime = 0;
         self::$databaseName = '';
         self::$initialized = false;
         self::$currentUserId = null;
