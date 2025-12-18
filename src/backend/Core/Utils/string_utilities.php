@@ -186,19 +186,3 @@ namespace Lwt\Core\Utils {
         return $haystack;
     }
 }
-
-// =============================================================================
-// Global function aliases for backward compatibility
-// =============================================================================
-
-namespace {
-    if (!\function_exists('makeCounterWithTotal')) {
-        /**
-         * @deprecated Use \Lwt\Core\Utils\makeCounterWithTotal() instead
-         */
-        function makeCounterWithTotal(int $max, int $num): string
-        {
-            return \Lwt\Core\Utils\makeCounterWithTotal($max, $num);
-        }
-    }
-}

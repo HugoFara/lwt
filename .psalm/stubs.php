@@ -22,23 +22,6 @@
 
 namespace Lwt\Core\Utils {
     /**
-     * @return void
-     */
-    function showRequest(): void {}
-
-    /**
-     * @return float
-     */
-    function getExecutionTime(): float {}
-
-    /**
-     * @param mixed $var
-     * @param string $text
-     * @return void
-     */
-    function echodebug($var, $text): void {}
-
-    /**
      * @param int $max
      * @param int $num
      * @return string
@@ -89,10 +72,6 @@ define('LWT_BASE_PATH', __DIR__ . '/..');
 // These are backward-compatibility wrappers defined in various files.
 // They delegate to namespaced implementations.
 // =============================================================================
-
-// ---------------------------------------------------------------------------
-// From string_utilities.php (global namespace section)
-// ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
 // From TextParsingService.php (global namespace section)

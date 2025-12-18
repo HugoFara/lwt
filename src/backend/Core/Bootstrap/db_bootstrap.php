@@ -33,7 +33,6 @@ use Lwt\Database\Configuration;
 // Initialize globals (this was previously done in settings.php)
 Globals::initialize();
 require_once __DIR__ . '/../Utils/string_utilities.php';
-require_once __DIR__ . '/../Utils/debug_utilities.php';
 require_once __DIR__ . '/../Utils/error_handling.php';
 
 // Database classes
@@ -123,11 +122,6 @@ function bootstrapDatabase(): void
     // Register connection with Globals
     Globals::setDbConnection($connection);
     Globals::setDatabaseName($dbname);
-
-    // Start timer if needed
-    if (Globals::shouldDisplayTime()) {
-        \Lwt\Core\Utils\getExecutionTime();
-    }
 
     // Run database migrations
     \Lwt\Database\Migrations::checkAndUpdate();

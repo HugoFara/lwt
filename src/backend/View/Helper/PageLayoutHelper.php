@@ -20,8 +20,6 @@ require_once __DIR__ . '/../../Core/Utils/string_utilities.php';
 
 use Lwt\Core\Globals;
 use Lwt\Core\Http\UrlUtilities;
-use function Lwt\Core\Utils\showRequest;
-use function Lwt\Core\Utils\getExecutionTime;
 use function Lwt\Core\Utils\getFilePath;
 
 /**
@@ -386,8 +384,6 @@ HTML;
      */
     public static function renderPageStartKernelNobody(string $title): void
     {
-        $debug = Globals::isDebug();
-
         self::sendNoCacheHeaders();
 
         echo '<!DOCTYPE html>';
@@ -419,9 +415,6 @@ HTML;
         echo '<body>';
 
         flush();
-        if ($debug) {
-            showRequest();
-        }
     }
 
     /**
@@ -439,8 +432,6 @@ HTML;
         string $title,
         string $bodyClass = ''
     ): void {
-        $debug = Globals::isDebug();
-
         self::sendNoCacheHeaders();
 
         echo '<!DOCTYPE html>';
@@ -473,9 +464,6 @@ HTML;
         echo '<body' . ($bodyClass !== '' ? ' class="' . htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8') . '"' : '') . '>';
 
         flush();
-        if ($debug) {
-            showRequest();
-        }
     }
 
     /**
@@ -504,18 +492,10 @@ HTML;
     /**
      * Render the page footer (closing body and html tags).
      *
-     * Outputs directly to browser. Shows debug info and execution time if configured.
-     *
      * @return void
      */
     public static function renderPageEnd(): void
     {
-        if (Globals::isDebug()) {
-            showRequest();
-        }
-        if (Globals::shouldDisplayTime()) {
-            echo "\n" . self::buildExecutionTime(getExecutionTime()) . "\n";
-        }
         echo '</body></html>';
     }
 

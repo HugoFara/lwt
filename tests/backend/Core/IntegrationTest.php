@@ -23,7 +23,6 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
 use PHPUnit\Framework\TestCase;
 
-use function Lwt\Core\Utils\getExecutionTime;
 use function Lwt\Core\Utils\getFilePath;
 use function Lwt\Core\Utils\printFilePath;
 use function Lwt\Core\Utils\removeSoftHyphens;
@@ -866,24 +865,6 @@ class IntegrationTest extends TestCase
         $result = SelectOptionsBuilder::forAnnotationPosition(2);
         $this->assertStringContainsString('<option', $result);
         $this->assertStringContainsString('value="2"', $result);
-    }
-
-    /**
-     * Test getExecutionTime function
-     */
-    public function testGetExecutionTime(): void
-    {
-        // First call starts timer
-        $start = getExecutionTime();
-        $this->assertIsFloat($start);
-
-        // Sleep briefly
-        usleep(10000); // 10ms
-
-        // Second call returns elapsed time
-        $elapsed = getExecutionTime();
-        $this->assertIsFloat($elapsed);
-        $this->assertGreaterThan(0, $elapsed);
     }
 
     /**
