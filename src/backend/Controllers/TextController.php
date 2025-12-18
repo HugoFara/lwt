@@ -808,9 +808,7 @@ class TextController extends BaseController
 
         // TextTags comes as JSON-encoded string from hidden field
         $textTagsJson = $this->param('TextTags');
-        if ($textTagsJson !== '') {
-            $_REQUEST["TextTags"] = json_decode($textTagsJson, true);
-        }
+        $textTags = ($textTagsJson !== '') ? json_decode($textTagsJson, true) : null;
 
         $textCount = $this->paramInt('TextCount', 0) ?? 0;
         $texts = $this->paramArray('text');
@@ -820,7 +818,8 @@ class TextController extends BaseController
             $title,
             $sourceUri,
             $texts,
-            $textCount
+            $textCount,
+            $textTags
         );
 
         $message = $result['message'];

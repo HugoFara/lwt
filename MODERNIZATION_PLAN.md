@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-19 (Migrated processDBParam/processSessParam to InputValidator)
+**Last Updated:** 2025-12-19 (Removed last direct superglobal access from controllers)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -127,7 +127,7 @@ src/backend/
 - Inconsistent type casting
 - No length validation against database constraints
 
-**Current State (2025-12-18):** LARGELY COMPLETE
+**Current State (2025-12-19):** COMPLETE
 
 - [x] `BaseController` provides `param()`, `get()`, `post()` abstraction
 - [x] Type casting used consistently (`(int)`, `(string)`)
@@ -135,7 +135,7 @@ src/backend/
 - [x] **IMPLEMENTED**: `InputValidator` class in `src/backend/Core/Http/InputValidator.php` (782 lines)
 - [x] `InputValidator` provides: `getString()`, `getInt()`, `getBool()`, `getArray()`, `getEnum()`, `getUrl()`, `getUploadedFile()`, etc.
 - [x] **16 files** now use `InputValidator` class
-- [ ] Direct superglobal access remains in **6 files** (~20 occurrences)
+- [x] Direct superglobal access reduced to **2 infrastructure files** only (Router.php, ApiV1.php)
 
 **Current Pattern:**
 
@@ -152,22 +152,17 @@ protected function param(string $key, mixed $default = null): mixed {
 }
 ```
 
-**Remaining Direct Superglobal Access (6 files):**
+**Remaining Direct Superglobal Access (2 infrastructure files):**
 
 | File | Occurrences | Reason |
 |------|-------------|--------|
 | `Router.php` | 4 | Intentional - core routing infrastructure |
-| `ApiV1.php` | 1 | JSON/POST body handling |
-| `WordController.php` | 2 | Inline AJAX editor |
-| `TextController.php` | 1 | JSON to REQUEST conversion |
-| `AdminController.php` | 0 | Comment only, not actual code |
-| `param_helpers.php` | 0 | Documentation only |
+| `ApiV1.php` | 1 | Intentional - JSON/POST body handling for API router |
 
-**Remaining Work:**
+**Migrated (2025-12-19):**
 
-- [ ] Migrate `WordController.php` inline editor to InputValidator (2 occurrences)
-- [ ] Refactor `TextController.php` JSON handling (1 occurrence)
-- [ ] Consider InputValidator wrapper for `ApiV1.php` body parsing
+- [x] `WordController.php` - Migrated to `InputValidator::getStringFromPost()`
+- [x] `TextController.php` - Refactored to pass tags via method parameter instead of `$_REQUEST`
 
 ### 4. Code Duplication (HIGH - Maintainability)
 
@@ -259,13 +254,14 @@ class InputValidator {
 }
 ```
 
-**Adoption:** 16 files now use `InputValidator`, only 6 files retain direct superglobal access (~20 occurrences, mostly intentional)
+**Adoption:** 16 files now use `InputValidator`, only 2 infrastructure files retain intentional direct superglobal access (Router.php, ApiV1.php)
 
 **Success Criteria:**
 
 - [x] InputValidator class implemented with comprehensive methods
-- [x] Majority of input handling uses InputValidator (~90%)
-- [ ] Remaining 3 files could be migrated (low priority - WordController, TextController, ApiV1)
+- [x] Majority of input handling uses InputValidator (~95%)
+- [x] WordController and TextController migrated (2025-12-19)
+- [x] Only infrastructure files (Router.php, ApiV1.php) retain intentional direct superglobal access
 
 #### 1.3 Session Security Hardening
 

@@ -1462,11 +1462,12 @@ class TextService
     /**
      * Save long text import (multiple texts).
      *
-     * @param int    $langId    Language ID
-     * @param string $title     Base title
-     * @param string $sourceUri Source URI
-     * @param array  $texts     Array of text contents
-     * @param int    $textCount Expected text count
+     * @param int        $langId    Language ID
+     * @param string     $title     Base title
+     * @param string     $sourceUri Source URI
+     * @param array      $texts     Array of text contents
+     * @param int        $textCount Expected text count
+     * @param array|null $textTags  Optional tags array
      *
      * @return array{success: bool, message: string, imported: int}
      */
@@ -1475,7 +1476,8 @@ class TextService
         string $title,
         string $sourceUri,
         array $texts,
-        int $textCount
+        int $textCount,
+        ?array $textTags = null
     ): array {
         if (count($texts) != $textCount) {
             return [
@@ -1501,7 +1503,7 @@ class TextService
             );
             $imported += $affected;
             $id = Connection::lastInsertId();
-            TagService::saveTextTags($id);
+            TagService::saveTextTags($id, $textTags);
             TextParsing::splitCheck($texts[$i], $langId, $id);
         }
 

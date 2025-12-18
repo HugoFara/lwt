@@ -648,17 +648,20 @@ class TagService
     /**
      * Save tags for a text from form input.
      *
-     * @param int $textId Text ID
+     * @param int        $textId   Text ID
+     * @param array|null $textTags Optional tags array. If null, reads from request.
      *
      * @return void
      */
-    public static function saveTextTags(int $textId): void
+    public static function saveTextTags(int $textId, ?array $textTags = null): void
     {
         QueryBuilder::table('texttags')
             ->where('TtTxID', '=', $textId)
             ->delete();
 
-        $textTags = InputValidator::getArray('TextTags');
+        if ($textTags === null) {
+            $textTags = InputValidator::getArray('TextTags');
+        }
         if (
             empty($textTags)
             || !isset($textTags['TagList'])

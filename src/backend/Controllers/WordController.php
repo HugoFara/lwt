@@ -1638,8 +1638,8 @@ class WordController extends BaseController
      */
     public function inlineEdit(array $params): void
     {
-        $value = isset($_POST['value']) ? $_POST['value'] : '';
-        $id = isset($_POST['id']) ? $_POST['id'] : '';
+        $value = InputValidator::getStringFromPost('value');
+        $id = InputValidator::getStringFromPost('id');
 
         if (substr($id, 0, 5) === 'trans') {
             $wordId = (int) substr($id, 5);
