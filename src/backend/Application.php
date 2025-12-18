@@ -17,6 +17,11 @@
 
 namespace Lwt;
 
+use Lwt\Core\Container\Container;
+use Lwt\Core\Container\ControllerServiceProvider;
+use Lwt\Core\Container\CoreServiceProvider;
+use Lwt\Core\Container\RepositoryServiceProvider;
+use Lwt\Core\Container\ServiceProviderInterface;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Router\Router;
 use Lwt\Services\DatabaseWizardService;
@@ -41,6 +46,20 @@ class Application
     private string $basePath;
 
     /**
+     * The dependency injection container.
+     *
+     * @var Container
+     */
+    private Container $container;
+
+    /**
+     * Service providers to register.
+     *
+     * @var ServiceProviderInterface[]
+     */
+    private array $providers = [];
+
+    /**
      * Create a new Application instance.
      *
      * @param string $basePath The base path of the application
@@ -48,12 +67,16 @@ class Application
     public function __construct(string $basePath)
     {
         $this->basePath = $basePath;
+        $this->container = new Container();
+
+        // Set the global container instance for static access
+        Container::setInstance($this->container);
     }
 
     /**
      * Bootstrap the application.
      *
-     * Sets up error reporting, include paths, and autoloading.
+     * Sets up error reporting, include paths, autoloading, and DI container.
      *
      * @return void
      */
@@ -82,6 +105,46 @@ class Application
 
         // Register autoloader for Lwt namespace
         $this->registerAutoloader();
+
+        // Register service providers with the DI container
+        $this->registerServiceProviders();
+    }
+
+    /**
+     * Register all service providers with the container.
+     *
+     * @return void
+     */
+    private function registerServiceProviders(): void
+    {
+        // Core service providers
+        $this->providers = [
+            new CoreServiceProvider(),
+            new ControllerServiceProvider(),
+            new RepositoryServiceProvider(),
+        ];
+
+        // Register phase: all providers register their bindings
+        foreach ($this->providers as $provider) {
+            $provider->register($this->container);
+        }
+
+        // Boot phase: providers can perform additional setup
+        foreach ($this->providers as $provider) {
+            $provider->boot($this->container);
+        }
+    }
+
+    /**
+     * Get the DI container instance.
+     *
+     * @return Container
+     *
+     * @psalm-suppress PossiblyUnusedMethod
+     */
+    public function getContainer(): Container
+    {
+        return $this->container;
     }
 
     /**
@@ -135,8 +198,8 @@ class Application
             return;
         }
 
-        // Initialize router and handle request
-        $router = new Router();
+        // Initialize router with DI container
+        $router = new Router($this->container);
 
         // Load route configuration
         require_once $this->basePath . '/src/backend/Router/routes.php';

@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-19 (Removed last direct superglobal access from controllers)
+**Last Updated:** 2025-12-19 (DI Container integrated into Application bootstrap)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -17,7 +17,7 @@ LWT carried significant technical debt from its 2007 origins. This document trac
 | Quick Wins | **COMPLETE** | 100% |
 | Phase 1: Security & Safety | **COMPLETE** | ~95% |
 | Phase 2: Refactoring | **COMPLETE** | ~95% |
-| Phase 3: Modernization | **IN PROGRESS** | ~70% |
+| Phase 3: Modernization | **IN PROGRESS** | ~75% |
 
 ## Critical Issues
 
@@ -445,7 +445,7 @@ Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
 **Status:** SUBSTANTIAL PROGRESS
 **Effort:** X-Large (400+ hours) - ONGOING
 
-**Achievements (2025-12-18):**
+**Achievements (2025-12-19):**
 
 - [x] Service Layer Pattern implemented (36 services, 18,571 lines)
 - [x] Controller pattern implemented (14 controllers, 8,223 lines)
@@ -455,7 +455,7 @@ Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
 - [x] `Globals` class for configuration access
 - [x] `StringUtils` class for string utilities
 - [x] `InputValidator` class for input handling
-- [x] **DI Container INFRASTRUCTURE BUILT** (code exists, not integrated)
+- [x] **DI Container INTEGRATED** (2025-12-19)
 - [x] **Repository Pattern INFRASTRUCTURE BUILT** (code exists, not integrated)
 - [ ] Factory Pattern NOT implemented
 
@@ -463,20 +463,22 @@ Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
 
 ```text
 src/backend/Core/
-├── Container/                    # DI Container (BUILT, NOT INTEGRATED)
+├── Container/                    # DI Container (INTEGRATED)
 │   ├── Container.php             # PSR-11 compliant DI container (479 lines)
 │   ├── ContainerInterface.php    # PSR-11 interface
 │   ├── ContainerException.php    # Container exceptions
 │   ├── NotFoundException.php     # Service not found exception
 │   ├── ServiceProviderInterface.php  # Service provider interface
-│   └── RepositoryServiceProvider.php # Repository registration (@psalm-suppress UnusedClass)
+│   ├── CoreServiceProvider.php   # Core services registration (NEW)
+│   ├── ControllerServiceProvider.php # Controller registration (NEW)
+│   └── RepositoryServiceProvider.php # Repository registration
 └── Repository/                   # Repository Layer (BUILT, NOT INTEGRATED)
     ├── RepositoryInterface.php   # Base repository interface
     ├── AbstractRepository.php    # Base repository with CRUD + prepared statements
     └── LanguageRepository.php    # Only concrete implementation (unused)
 ```
 
-**DI Container Features (implemented but not used):**
+**DI Container Features (INTEGRATED 2025-12-19):**
 
 - PSR-11 compliant interface
 - Singleton and factory bindings
@@ -486,7 +488,15 @@ src/backend/Core/
 - Service providers for organizing registrations
 - Comprehensive test suite (`tests/backend/Core/Container/ContainerTest.php`)
 
-**Repository Pattern Features (implemented but not used):**
+**Container Integration (2025-12-19):**
+
+- `Application` initializes Container in constructor
+- `Container::setInstance()` makes container globally accessible
+- Three service providers registered: `CoreServiceProvider`, `ControllerServiceProvider`, `RepositoryServiceProvider`
+- `Router` accepts Container and uses it to resolve controllers
+- Controllers resolved via `Container::get()` with auto-wiring fallback
+
+**Repository Pattern Features (built but not yet integrated):**
 
 - Generic CRUD operations via `RepositoryInterface`
 - Uses prepared statements for security
@@ -497,19 +507,15 @@ src/backend/Core/
 
 | Component | Code Exists | Files Using It | Status |
 |-----------|-------------|----------------|--------|
-| Container | Yes (479 lines) | 0 | NOT INTEGRATED |
+| Container | Yes (479 lines) | 3 (Application, Router, providers) | **INTEGRATED** |
+| CoreServiceProvider | Yes | 1 (Application) | **INTEGRATED** |
+| ControllerServiceProvider | Yes | 1 (Application) | **INTEGRATED** |
 | LanguageRepository | Yes | 0 | NOT INTEGRATED |
 | Other Repositories | No | N/A | NOT CREATED |
 
-**Why Not Integrated:**
-
-- `Container::getInstance()` - **0 occurrences** in production code
-- `RepositoryServiceProvider` marked `@psalm-suppress UnusedClass`
-- All 50 services/controllers instantiate dependencies manually via `new`
-
 **Remaining Work:**
 
-- [ ] **HIGH PRIORITY**: Wire Container into Application bootstrap
+- [x] ~~**HIGH PRIORITY**: Wire Container into Application bootstrap~~ **DONE** (2025-12-19)
 - [ ] Refactor services to accept dependencies via constructor injection
 - [ ] Create repositories for other entities (Text, Term, User)
 - [ ] Migrate LanguageService to use LanguageRepository
@@ -725,7 +731,7 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 
 1. ~~**InputValidator** - Centralized input validation~~ **DONE**
 2. ~~**Database Migration** - MyISAM to InnoDB~~ **DONE**
-3. **DI Container Integration** - Wire Container into Application bootstrap
+3. ~~**DI Container Integration** - Wire Container into Application bootstrap~~ **DONE** (2025-12-19)
 4. **Exception Handling** - Reduce die()/exit() calls, add global handler
 
 ### P2 (Medium)
@@ -837,7 +843,7 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
 | Quick Wins | 2 weeks | 100% complete | - |
 | Phase 1 | 3-6 months | 95% complete | CSP refinement (future) |
 | Phase 2 | 6-12 months | 95% complete | Minor cleanup |
-| Phase 3 | 12-18 months | 70% complete | DI integration, exceptions |
+| Phase 3 | 12-18 months | 75% complete | Exceptions, constructor injection |
 
 **Original Total Duration:** 18-24 months
 **Elapsed Time:** ~12 months (estimated based on architecture changes)

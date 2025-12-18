@@ -14,6 +14,7 @@
 
 namespace Lwt\Router;
 
+use Lwt\Core\Container\Container;
 use Lwt\Core\Http\SecurityHeaders;
 use Lwt\Router\Middleware\MiddlewareInterface;
 
@@ -49,6 +50,23 @@ class Router
      * @var array<string, array<string, array<MiddlewareInterface|string>>>
      */
     private array $prefixMiddleware = [];
+
+    /**
+     * The dependency injection container.
+     *
+     * @var Container|null
+     */
+    private ?Container $container;
+
+    /**
+     * Create a new Router instance.
+     *
+     * @param Container|null $container Optional DI container for resolving controllers
+     */
+    public function __construct(?Container $container = null)
+    {
+        $this->container = $container;
+    }
 
     /**
      * Register a route
@@ -466,12 +484,17 @@ class Router
             return $middleware;
         }
 
-        // It's a class name - instantiate it
+        // It's a class name - try to resolve from container or instantiate directly
         if (!class_exists($middleware)) {
             throw new \RuntimeException("Middleware class not found: {$middleware}");
         }
 
-        $instance = new $middleware();
+        // Use DI container if available
+        if ($this->container !== null && $this->container->has($middleware)) {
+            $instance = $this->container->get($middleware);
+        } else {
+            $instance = new $middleware();
+        }
 
         if (!$instance instanceof MiddlewareInterface) {
             throw new \RuntimeException(
@@ -547,7 +570,8 @@ class Router
             $this->handle500("Controller not found: {$controllerClass}");
         }
 
-        $controller = new $controllerClass();
+        // Resolve controller from DI container if available, otherwise instantiate directly
+        $controller = $this->resolveController($controllerClass);
 
         if (!method_exists($controller, $method)) {
             $this->handle500(
@@ -557,6 +581,24 @@ class Router
 
         // Call the controller method
         call_user_func([$controller, $method], $params);
+    }
+
+    /**
+     * Resolve a controller instance from the container or create directly.
+     *
+     * @param string $controllerClass The fully qualified controller class name
+     *
+     * @return object The controller instance
+     */
+    private function resolveController(string $controllerClass): object
+    {
+        // Use DI container if available
+        if ($this->container !== null) {
+            return $this->container->get($controllerClass);
+        }
+
+        // Fallback to direct instantiation
+        return new $controllerClass();
     }
 
     /**
