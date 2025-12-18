@@ -106,6 +106,28 @@ class Escaping
     }
 
     /**
+     * Format a value for SQL output (e.g., backup files, SQL dumps).
+     *
+     * Unlike prepared statements which pass values separately from queries,
+     * this method produces properly escaped SQL literals for use in generated
+     * SQL statements (like INSERT INTO ... VALUES(...)).
+     *
+     * @param string|int|float|null $value Database value to format
+     *
+     * @return string SQL literal: "NULL" for null, "'escaped'" for strings
+     */
+    public static function formatValueForSqlOutput(string|int|float|null $value): string
+    {
+        if ($value === null) {
+            return 'NULL';
+        }
+
+        // Convert to string and escape for SQL
+        $stringValue = (string)$value;
+        return "'" . mysqli_real_escape_string(Globals::getDbConnection(), $stringValue) . "'";
+    }
+
+    /**
      * Convert a regexp pattern to SQL-safe format.
      *
      * @param string $input Regexp pattern

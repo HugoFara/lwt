@@ -154,7 +154,7 @@ class BackupService
                 while ($row = mysqli_fetch_row($result)) {
                     $return = 'INSERT INTO ' . $table . ' VALUES(';
                     for ($j = 0; $j < $num_fields; $j++) {
-                        $return .= Escaping::toSqlSyntaxNoNull($row[$j]);
+                        $return .= Escaping::formatValueForSqlOutput($row[$j]);
                         if ($j < ($num_fields - 1)) {
                             $return .= ',';
                         }
@@ -232,7 +232,7 @@ class BackupService
                 while ($row = mysqli_fetch_row($result)) {
                     $return = 'INSERT INTO ' . $table . ' VALUES(';
                     for ($j = 0; $j < $num_fields; $j++) {
-                        $return .= Escaping::toSqlSyntaxNoNull($row[$j]);
+                        $return .= Escaping::formatValueForSqlOutput($row[$j]);
                         if ($j < ($num_fields - 1)) {
                             $return .= ',';
                         }

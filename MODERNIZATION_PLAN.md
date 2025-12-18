@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-18 (Comprehensive audit and update)
+**Last Updated:** 2025-12-19 (BackupService migration to formatValueForSqlOutput)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -36,7 +36,7 @@ LWT carried significant technical debt from its 2007 origins. This document trac
 - [x] `Connection::prepare()` method available with convenience methods
 - [x] QueryBuilder has full prepared statement support (`getPrepared()`, `insertPrepared()`, etc.)
 - [x] **233 prepared statement calls** across 26 backend files
-- [x] Only ~10 legacy `mysqli_query` calls remain (mainly in BackupService for SQL export)
+- [x] Legacy `mysqli_query` calls minimized (only legitimate use cases like DDL operations)
 
 **Risk Level:** LOW - Prepared statements are the primary pattern
 
@@ -62,7 +62,7 @@ Connection::preparedFetchAll('SELECT * FROM words WHERE WoLgID = ?', 'i', $langI
 
 - [x] ~~Implement prepared statements in `Connection` class~~ **DONE**
 - [x] ~~Add parameterized query support to QueryBuilder~~ **DONE**
-- [ ] Migrate BackupService legacy escaping (2 occurrences) - low priority, used for SQL export generation
+- [x] ~~Migrate BackupService legacy escaping~~ **DONE** - Now uses `formatValueForSqlOutput()` for SQL dump generation
 
 ### 2. Monolithic File Structure (CRITICAL - Maintainability)
 
@@ -858,7 +858,7 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 **Prepared Statement Adoption:**
 
 - 233 prepared statement calls across 26 files
-- ~10 legacy query calls remaining (BackupService)
+- BackupService now uses `formatValueForSqlOutput()` for SQL dump generation (type-safe replacement)
 
 ---
 

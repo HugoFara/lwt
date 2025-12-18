@@ -407,6 +407,101 @@ class EscapingTest extends TestCase
         $this->assertStringEndsWith("'", $result);
     }
 
+    // ===== formatValueForSqlOutput tests =====
+
+    public function testFormatValueForSqlOutputNull(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = Escaping::formatValueForSqlOutput(null);
+        $this->assertEquals('NULL', $result);
+    }
+
+    public function testFormatValueForSqlOutputString(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = Escaping::formatValueForSqlOutput('test');
+        $this->assertEquals("'test'", $result);
+    }
+
+    public function testFormatValueForSqlOutputEmptyString(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = Escaping::formatValueForSqlOutput('');
+        $this->assertEquals("''", $result);
+    }
+
+    public function testFormatValueForSqlOutputInteger(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = Escaping::formatValueForSqlOutput(42);
+        $this->assertEquals("'42'", $result);
+    }
+
+    public function testFormatValueForSqlOutputFloat(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = Escaping::formatValueForSqlOutput(3.14);
+        $this->assertEquals("'3.14'", $result);
+    }
+
+    public function testFormatValueForSqlOutputQuotes(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = Escaping::formatValueForSqlOutput("test'value");
+        $this->assertStringContainsString("\\'", $result);
+    }
+
+    public function testFormatValueForSqlOutputSqlInjection(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = Escaping::formatValueForSqlOutput("test'; DROP TABLE users; --");
+        $this->assertStringContainsString("\\'", $result);
+        $this->assertStringStartsWith("'", $result);
+        $this->assertStringEndsWith("'", $result);
+    }
+
+    public function testFormatValueForSqlOutputBackslash(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $result = Escaping::formatValueForSqlOutput('test\\value');
+        $this->assertStringContainsString("\\\\", $result);
+    }
+
+    public function testFormatValueForSqlOutputPreservesWhitespace(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // Unlike toSqlSyntax, this should preserve whitespace (no trim)
+        $result = Escaping::formatValueForSqlOutput('  test  ');
+        $this->assertStringContainsString('  test  ', $result);
+    }
+
     // ===== Edge cases and security tests =====
 
     public function testToSqlSyntaxVeryLongString(): void
