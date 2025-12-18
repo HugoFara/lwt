@@ -247,65 +247,6 @@ class TagsControllerTest extends TestCase
         $this->assertEquals('postvalue', $method->invoke($controller, 'testparam'));
     }
 
-    // ===== Session param tests =====
-
-    public function testSessionParamStoresValueInSession(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $_REQUEST['page'] = '5';
-        $controller = new TagsController();
-
-        // Use reflection to test protected method
-        $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('sessionParam');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller, 'page', 'currenttagpage', '1', true);
-
-        $this->assertEquals('5', $result);
-        $this->assertEquals('5', $_SESSION['currenttagpage']);
-    }
-
-    public function testSessionParamUsesSessionValueWhenRequestNotSet(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $_SESSION['currenttagpage'] = '3';
-        $controller = new TagsController();
-
-        // Use reflection to test protected method
-        $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('sessionParam');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller, 'page', 'currenttagpage', '1', true);
-
-        $this->assertEquals('3', $result);
-    }
-
-    public function testSessionParamReturnsDefaultWhenNothingSet(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TagsController();
-
-        // Use reflection to test protected method
-        $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('sessionParam');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($controller, 'page', 'currenttagpage', '1', true);
-
-        $this->assertEquals('1', $result);
-    }
-
     // ===== Escape method tests =====
 
     public function testEscapeMethodEscapesString(): void
@@ -442,29 +383,6 @@ class TagsControllerTest extends TestCase
 
         $this->assertInstanceOf(\mysqli_result::class, $result);
         mysqli_free_result($result);
-    }
-
-    // ===== Database param tests =====
-
-    public function testDbParamStoresValueInSettings(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TagsController();
-
-        // Use reflection to test protected method
-        $reflection = new \ReflectionClass($controller);
-        $method = $reflection->getMethod('dbParam');
-        $method->setAccessible(true);
-
-        // Request a sort parameter
-        $_REQUEST['sort'] = '2';
-        $result = $method->invoke($controller, 'sort', 'currenttagsort', '1', true);
-
-        // Should return the value from request
-        $this->assertEquals('2', $result);
     }
 
     // ===== Query escaping tests =====

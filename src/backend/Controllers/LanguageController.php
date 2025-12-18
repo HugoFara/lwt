@@ -22,7 +22,6 @@ use Lwt\View\Helper\IconHelper;
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../View/Helper/FormHelper.php';
-require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Core/Http/url_utilities.php';
 require_once __DIR__ . '/../Core/Entity/Language.php';
 require_once __DIR__ . '/../Services/LanguageService.php';

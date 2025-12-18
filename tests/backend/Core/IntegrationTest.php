@@ -6,7 +6,6 @@ require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
-use Lwt\Core\Http\ParamHelpers;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Restore;
@@ -45,7 +44,6 @@ require_once __DIR__ . '/../../../src/backend/Services/TextParsingService.php';
 require_once __DIR__ . '/../../../src/backend/Services/ExpressionService.php';
 require_once __DIR__ . '/../../../src/backend/Core/Database/Restore.php';
 require_once __DIR__ . '/../../../src/backend/Services/ExportService.php';
-require_once __DIR__ . '/../../../src/backend/Core/Http/param_helpers.php';
 require_once __DIR__ . '/../../../src/backend/Services/MediaService.php';
 require_once __DIR__ . '/../../../src/backend/Services/DictionaryService.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
@@ -614,61 +612,6 @@ class IntegrationTest extends TestCase
     }
 
     // ========== ADDITIONAL FUNCTIONS FOR BETTER COVERAGE ==========
-
-    public function testProcessSessParamExtended(): void
-    {
-        // Mock a request parameter
-        $_REQUEST['test_param'] = '42';
-
-        // Test with numeric parameter
-        $result = ParamHelpers::processSessParam('test_param', 'sess_key', '0', 1);
-        $this->assertEquals(42, $result);
-        $this->assertEquals(42, $_SESSION['sess_key']);
-
-        // Test with string parameter
-        $_REQUEST['test_string'] = 'hello';
-        $result = ParamHelpers::processSessParam('test_string', 'sess_str', 'default', 0);
-        $this->assertEquals('hello', $result);
-
-        // Test with missing parameter (should return default)
-        $result = ParamHelpers::processSessParam('nonexistent', 'sess_none', 'default_val', 0);
-        $this->assertEquals('default_val', $result);
-
-        // Clean up
-        unset($_REQUEST['test_param']);
-        unset($_REQUEST['test_string']);
-        unset($_SESSION['sess_key']);
-        unset($_SESSION['sess_str']);
-        unset($_SESSION['sess_none']);
-    }
-
-    public function testProcessDBParamExtended(): void
-    {
-        // Mock a request parameter
-        $_REQUEST['test_db_param'] = '123';
-
-        // Test with numeric parameter
-        $result = ParamHelpers::processDBParam('test_db_param', 'db_key', '0', 1);
-        $this->assertEquals(123, $result);
-
-        // Verify it was saved to settings
-        $saved = Settings::get('db_key');
-        $this->assertEquals('123', $saved);
-
-        // Test with string parameter
-        $_REQUEST['test_db_string'] = 'test_value';
-        $result = ParamHelpers::processDBParam('test_db_string', 'db_str_key', 'default', 0);
-        $this->assertEquals('test_value', $result);
-
-        // Test with missing parameter (should return default)
-        $result = ParamHelpers::processDBParam('nonexistent_db', 'db_none_key', 'default_val', 0);
-        $this->assertEquals('default_val', $result);
-
-        // Clean up
-        unset($_REQUEST['test_db_param']);
-        unset($_REQUEST['test_db_string']);
-        Connection::query("DELETE FROM settings WHERE StKey IN ('db_key', 'db_str_key', 'db_none_key')");
-    }
 
     public function testSelectMediaPathExtended(): void
     {

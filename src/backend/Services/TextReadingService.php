@@ -254,7 +254,7 @@ class TextReadingService
             ->where('Ti2TxID', '=', $textId)
             ->orderBy('Ti2Order', 'ASC')
             ->orderBy('Ti2WordCount', 'DESC')
-            ->get();
+            ->getPrepared();
         $currcharcount = 0;
         $hidden_items = array();
         $exprs = array();
@@ -263,7 +263,7 @@ class TextReadingService
         $last = -1;
 
         // Loop over words and punctuation
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($res as $record) {
             $sid = $this->parseSentence($sid, (int) $record['Ti2SeID']);
             if ($cnt < $record['Ti2Order']) {
                 echo '<span id="ID-' . $cnt++ . '-1"></span>';
@@ -300,7 +300,6 @@ class TextReadingService
             }
         }
 
-        mysqli_free_result($res);
         echo '<span id="totalcharcount" class="hide">' . $currcharcount . '</span>';
     }
 }

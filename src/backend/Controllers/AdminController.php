@@ -31,7 +31,6 @@ use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
-require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Services/TextStatisticsService.php';
 require_once __DIR__ . '/../Services/SentenceService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';

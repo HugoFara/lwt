@@ -37,9 +37,8 @@ class ImprovedTextHandler
         $setDefault = null;
         if ($widset) {
             $alltrans = (string) QueryBuilder::table('words')
-                ->select(['WoTranslation'])
                 ->where('WoID', '=', $wid)
-                ->getPreparedValue();
+                ->valuePrepared('WoTranslation');
             $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
             $set = false;
             foreach ($transarr as $t) {
@@ -96,9 +95,8 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
     {
         $translations = array();
         $alltrans = (string) QueryBuilder::table('words')
-            ->select(['WoTranslation'])
             ->where('WoID', '=', $wordId)
-            ->getPreparedValue();
+            ->valuePrepared('WoTranslation');
         $transarr = preg_split('/[' . StringUtils::getSeparators() . ']/u', $alltrans);
         foreach ($transarr as $t) {
             $tt = trim($t);
@@ -123,7 +121,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         $record = QueryBuilder::table('texts')
             ->select(['TxLgID', 'TxAnnotatedText'])
             ->where('TxID', '=', $textid)
-            ->getPreparedFirst();
+            ->firstPrepared();
         $langid = (int)$record['TxLgID'];
         $ann = (string)$record['TxAnnotatedText'];
         if (strlen($ann) > 0) {
@@ -169,7 +167,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         $wid = null;
         if (count($vals) > 2 && ctype_digit($vals[2])) {
             $wid = (int)$vals[2];
-            $tempWid = (int)QueryBuilder::table('words')
+            $tempWid = QueryBuilder::table('words')
                 ->where('WoID', '=', $wid)
                 ->countPrepared();
             if ($tempWid < 1) {
@@ -199,7 +197,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         $record = QueryBuilder::table('texts')
             ->select(['TxLgID', 'TxAnnotatedText'])
             ->where('TxID', '=', $textid)
-            ->getPreparedFirst();
+            ->firstPrepared();
         $langid = (int) $record['TxLgID'];
         $ann = (string) $record['TxAnnotatedText'];
         if (strlen($ann) > 0) {
@@ -210,7 +208,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
         $record = QueryBuilder::table('languages')
             ->select(['LgTextSize', 'LgRightToLeft'])
             ->where('LgID', '=', $langid)
-            ->getPreparedFirst();
+            ->firstPrepared();
         $textsize = (int)$record['LgTextSize'];
         if ($textsize > 100) {
             $textsize = intval($textsize * 0.8);
@@ -252,7 +250,7 @@ IconHelper::render('circle-plus', ['title' => 'Save translation to new term', 'a
                 if (count($vals) > 2) {
                     $strWid = $vals[2];
                     if (is_numeric($strWid)) {
-                        $tempWid = (int)QueryBuilder::table('words')
+                        $tempWid = QueryBuilder::table('words')
                             ->where('WoID', '=', $strWid)
                             ->countPrepared();
                         if ($tempWid < 1) {

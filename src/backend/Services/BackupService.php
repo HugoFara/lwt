@@ -135,17 +135,14 @@ class BackupService
         $out = "-- " . $fname . "\n";
 
         foreach (self::BACKUP_TABLES as $table) {
-            // Get the internal table name with prefix for DDL operations
-            $internalTableName = QueryBuilder::getInternalTableName($table);
-
-            $result = Connection::query('SELECT * FROM ' . $internalTableName);
+            $result = Connection::query('SELECT * FROM ' . $table);
             $num_fields = mysqli_num_fields($result);
             $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
             $row2 = mysqli_fetch_row(
-                Connection::query("SHOW CREATE TABLE " . $internalTableName)
+                Connection::query("SHOW CREATE TABLE " . $table)
             );
             $out .= str_replace(
-                $internalTableName,
+                $table,
                 $table,
                 str_replace("\n", " ", $row2[1])
             ) . ";\n";
@@ -186,22 +183,19 @@ class BackupService
             $num_fields = 0;
 
             if ($table == 'texts') {
-                $internalTableName = QueryBuilder::getInternalTableName($table);
                 $result = Connection::query(
                     'SELECT TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
-                    TxSourceURI FROM ' . $internalTableName
+                    TxSourceURI FROM ' . $table
                 );
                 $num_fields = 7;
             } elseif ($table == 'words') {
-                $internalTableName = QueryBuilder::getInternalTableName($table);
                 $result = Connection::query(
                     'SELECT WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation,
                     WoRomanization, WoSentence, WoCreated, WoStatusChanged, WoTodayScore,
-                    WoTomorrowScore, WoRandom FROM ' . $internalTableName
+                    WoTomorrowScore, WoRandom FROM ' . $table
                 );
                 $num_fields = 13;
             } elseif ($table == 'languages') {
-                $internalTableName = QueryBuilder::getInternalTableName('languages');
                 $result = Connection::query(
                     'SELECT LgID, LgName, LgDict1URI, LgDict2URI,
                     REPLACE(
@@ -210,15 +204,14 @@ class BackupService
                     LgExportTemplate, LgTextSize, LgCharacterSubstitutions,
                     LgRegexpSplitSentences, LgExceptionsSplitSentences,
                     LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar,
-                    LgRightToLeft FROM ' . $internalTableName . ' WHERE LgName<>""'
+                    LgRightToLeft FROM ' . $table . ' WHERE LgName<>""'
                 );
                 $num_fields = mysqli_num_fields($result);
             } elseif (
                 $table !== 'sentences' && $table !== 'textitems' &&
                 $table !== 'settings'
             ) {
-                $internalTableName = QueryBuilder::getInternalTableName($table);
-                $result = Connection::query('SELECT * FROM ' . $internalTableName);
+                $result = Connection::query('SELECT * FROM ' . $table);
                 $num_fields = mysqli_num_fields($result);
             }
 

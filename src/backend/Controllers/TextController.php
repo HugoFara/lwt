@@ -98,7 +98,6 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Services/ExpressionService.php';
         require_once __DIR__ . '/../Core/Database/Restore.php';
         require_once __DIR__ . '/../Services/TextReadingService.php';
-        require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Services/MediaService.php';
         require_once __DIR__ . '/../Services/WordStatusService.php';
         require_once __DIR__ . '/../Services/ExportService.php';
@@ -297,7 +296,6 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Services/TextParsingService.php';
         require_once __DIR__ . '/../Services/ExpressionService.php';
         require_once __DIR__ . '/../Core/Database/Restore.php';
-        require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Services/MediaService.php';
         require_once __DIR__ . '/../Services/WordStatusService.php';
         require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
@@ -598,7 +596,6 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Services/TextParsingService.php';
         require_once __DIR__ . '/../Services/ExpressionService.php';
         require_once __DIR__ . '/../Core/Database/Restore.php';
-        require_once __DIR__ . '/../Core/Http/param_helpers.php';
         require_once __DIR__ . '/../Services/MediaService.php';
 
         $textId = $this->paramInt('text', 0);
@@ -694,7 +691,6 @@ class TextController extends BaseController
     public function importLong(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/Http/param_helpers.php';
 
         PageLayoutHelper::renderPageStart('Long Text Import', true);
 
@@ -838,7 +834,6 @@ class TextController extends BaseController
     public function setMode(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Core/Http/param_helpers.php';
 
         $textId = $this->param('text');
         if ($textId === '') {
@@ -932,7 +927,6 @@ class TextController extends BaseController
         require_once __DIR__ . '/../Services/TextParsingService.php';
         require_once __DIR__ . '/../Services/ExpressionService.php';
         require_once __DIR__ . '/../Core/Database/Restore.php';
-        require_once __DIR__ . '/../Core/Http/param_helpers.php';
 
         // Handle mark actions that skip pagestart
         $markAction = $this->param('markaction');

@@ -22,7 +22,6 @@ use Lwt\Database\Escaping;
 use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../Core/Http/param_helpers.php';
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 
@@ -258,6 +257,8 @@ abstract class BaseController
      * @param string $sql SQL query
      *
      * @return int Number of affected rows
+     *
+     * @psalm-suppress PossiblyUnusedReturnValue
      */
     protected function execute(string $sql): int
     {

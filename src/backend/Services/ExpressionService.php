@@ -242,10 +242,9 @@ class ExpressionService
      */
     public function insertExpressions(string $textlc, int $lid, int $wid, int $len, int $mode): string|null
     {
-        $regexp = (string)QueryBuilder::table('languages')
-            ->select(['LgRegexpWordCharacters'])
+        $regexp = (string)(QueryBuilder::table('languages')
             ->where('LgID', '=', $lid)
-            ->getPrepared()[0]['LgRegexpWordCharacters'] ?? '';
+            ->valuePrepared('LgRegexpWordCharacters') ?? '');
 
         if ('MECAB' == strtoupper(trim($regexp))) {
             $occurrences = $this->findMecabExpression($textlc, $lid);

@@ -125,7 +125,7 @@ class TermHandler
      */
     public function checkUpdateTranslation(int $wid, string $newTrans): string
     {
-        $cntWords = (int) QueryBuilder::table('words')
+        $cntWords = QueryBuilder::table('words')
             ->where('WoID', '=', $wid)
             ->countPrepared();
 
@@ -337,7 +337,7 @@ class TermHandler
             ->where('WoID', '=', $termId)
             ->countPrepared();
 
-        if ((int)$exists === 0) {
+        if ($exists === 0) {
             return ['deleted' => false, 'error' => 'Term not found'];
         }
 
@@ -1456,7 +1456,7 @@ class TermHandler
             ->where('WoID', '=', $termId)
             ->countPrepared();
 
-        if ((int) $exists === 0) {
+        if ($exists === 0) {
             return ['success' => false, 'value' => '', 'error' => 'Term not found'];
         }
 
@@ -1499,14 +1499,13 @@ class TermHandler
         $langResult = QueryBuilder::table('languages')
             ->select(['LgID', 'LgName'])
             ->orderBy('LgName')
-            ->get();
-        while ($row = mysqli_fetch_assoc($langResult)) {
+            ->getPrepared();
+        foreach ($langResult as $row) {
             $languages[] = [
                 'id' => (int) $row['LgID'],
                 'name' => (string) $row['LgName']
             ];
         }
-        mysqli_free_result($langResult);
 
         // Get texts (optionally filtered by language)
         $texts = [];
@@ -1529,14 +1528,13 @@ class TermHandler
         $tagResult = QueryBuilder::table('tags')
             ->select(['TgID', 'TgText'])
             ->orderBy('TgText')
-            ->get();
-        while ($row = mysqli_fetch_assoc($tagResult)) {
+            ->getPrepared();
+        foreach ($tagResult as $row) {
             $tags[] = [
                 'id' => (int) $row['TgID'],
                 'name' => (string) $row['TgText']
             ];
         }
-        mysqli_free_result($tagResult);
 
         // Static status options
         $statuses = [

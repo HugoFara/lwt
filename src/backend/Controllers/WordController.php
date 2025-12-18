@@ -386,32 +386,28 @@ class WordController extends BaseController
 
             if ($oldstatus != $newstatus) {
                 // Status changed - update with status change timestamp
+                $bindings = [
+                    $woText, $translation, $sentenceEscaped, $woRomanization,
+                    $newstatus, $woId
+                ];
                 $sql = "UPDATE words SET
                     WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
                     WoStatus = ?, WoStatusChanged = NOW(), {$scoreRandomUpdate}
                     WHERE WoID = ?"
-                    . \Lwt\Database\UserScopedQuery::forTablePrepared('words', [
-                        $woText, $translation, $sentenceEscaped, $woRomanization,
-                        $newstatus, $woId
-                    ]);
-                Connection::preparedExecute($sql, [
-                    $woText, $translation, $sentenceEscaped, $woRomanization,
-                    $newstatus, $woId
-                ]);
+                    . \Lwt\Database\UserScopedQuery::forTablePrepared('words', $bindings);
+                Connection::preparedExecute($sql, $bindings);
             } else {
                 // Status unchanged
+                $bindings = [
+                    $woText, $translation, $sentenceEscaped, $woRomanization,
+                    $woId
+                ];
                 $sql = "UPDATE words SET
                     WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
                     {$scoreRandomUpdate}
                     WHERE WoID = ?"
-                    . \Lwt\Database\UserScopedQuery::forTablePrepared('words', [
-                        $woText, $translation, $sentenceEscaped, $woRomanization,
-                        $woId
-                    ]);
-                Connection::preparedExecute($sql, [
-                    $woText, $translation, $sentenceEscaped, $woRomanization,
-                    $woId
-                ]);
+                    . \Lwt\Database\UserScopedQuery::forTablePrepared('words', $bindings);
+                Connection::preparedExecute($sql, $bindings);
             }
             $wid = $woId;
             TagService::saveWordTags($wid);

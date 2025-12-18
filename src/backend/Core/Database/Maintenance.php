@@ -177,13 +177,13 @@ class Maintenance
         $i = 0;
         $min = 0;
         /**
-         * @var string|null ID for the Japanese language using MeCab
+         * @var array<string, mixed>|null $row ID for the Japanese language using MeCab
          */
         $row = QueryBuilder::table('languages')
             ->selectRaw('GROUP_CONCAT(LgID) AS lang_ids')
             ->whereRaw("UPPER(LgRegexpWordCharacters)='MECAB'")
             ->first();
-        $japid = $row['lang_ids'] ?? null;
+        $japid = $row !== null ? ($row['lang_ids'] ?? null) : null;
 
         if ($japid !== null && $japid !== '') {
             self::updateJapaneseWordCount((int)$japid);

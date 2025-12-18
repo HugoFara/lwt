@@ -111,7 +111,7 @@ class FeedHandler
         $row = QueryBuilder::table('feedlinks')
             ->select(['COUNT(*) AS total'])
             ->where('FlNfID', '=', $nfid)
-            ->getPreparedOne();
+            ->firstPrepared();
 
         $to = ((int)$row['total'] - $nfMaxLinks);
         if ($to > 0) {
@@ -340,7 +340,7 @@ class FeedHandler
         $langResult = QueryBuilder::table('languages')
             ->select(['LgName'])
             ->where('LgID', '=', (int)$feed['NfLgID'])
-            ->getPreparedOne();
+            ->firstPrepared();
         if ($langResult) {
             $feed['LgName'] = $langResult['LgName'];
         }
@@ -349,7 +349,7 @@ class FeedHandler
         $countResult = QueryBuilder::table('feedlinks')
             ->select(['COUNT(*) AS cnt'])
             ->where('FlNfID', '=', $feedId)
-            ->getPreparedOne();
+            ->firstPrepared();
         if ($countResult) {
             $feed['articleCount'] = (int)$countResult['cnt'];
         }

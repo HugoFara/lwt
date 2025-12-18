@@ -306,63 +306,6 @@ class BaseControllerTest extends TestCase
         $this->assertEquals(0, $ids[3]); // intval('invalid') = 0
     }
 
-    // ===== sessionParam() tests =====
-
-    public function testSessionParamWithRequestValue(): void
-    {
-        $_REQUEST['test_sess_req'] = '42';
-        
-        $value = $this->controller->testSessionParam(
-            'test_sess_req',
-            'test_sess_key',
-            '0',
-            true
-        );
-        
-        $this->assertEquals(42, $value);
-        $this->assertEquals(42, $_SESSION['test_sess_key'] ?? null);
-    }
-
-    public function testSessionParamWithoutRequestValue(): void
-    {
-        $_SESSION['test_sess_existing'] = 'existing_value';
-        
-        $value = $this->controller->testSessionParam(
-            'nonexistent_req',
-            'test_sess_existing',
-            'default',
-            false
-        );
-        
-        $this->assertEquals('existing_value', $value);
-    }
-
-    // ===== dbParam() tests =====
-
-    public function testDbParamWithRequestValue(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $_REQUEST['test_db_req'] = '123';
-        
-        $value = $this->controller->testDbParam(
-            'test_db_req',
-            'test_db_key',
-            '0',
-            true
-        );
-        
-        $this->assertEquals(123, $value);
-        
-        // Verify saved to database
-        $saved = Settings::get('test_db_key');
-        $this->assertEquals('123', $saved);
-
-        // Clean up
-        Connection::query("DELETE FROM settings WHERE StKey = 'test_db_key'");
-    }
 }
 
 /**
@@ -432,21 +375,4 @@ class TestableController extends BaseController
         return $this->getMarkedIds($marked);
     }
 
-    public function testSessionParam(
-        string $reqKey,
-        string $sessKey,
-        mixed $default,
-        bool $isNumeric = false
-    ): mixed {
-        return $this->sessionParam($reqKey, $sessKey, $default, $isNumeric);
-    }
-
-    public function testDbParam(
-        string $reqKey,
-        string $dbKey,
-        mixed $default,
-        bool $isNumeric = false
-    ): mixed {
-        return $this->dbParam($reqKey, $dbKey, $default, $isNumeric);
-    }
 }
