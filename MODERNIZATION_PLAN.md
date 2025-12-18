@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-19 (BackupService migration to formatValueForSqlOutput)
+**Last Updated:** 2025-12-19 (Migrated processDBParam/processSessParam to InputValidator)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -739,7 +739,7 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 3. ~~**TTS Cookie Security** - Add secure flag~~ **DONE** (httponly=false intentional for JS)
 4. **Migrate Services to use Container** - Wire existing services into container
 5. **Create Remaining Repositories** - Text, Term, User repositories
-6. **Deprecated Function Migration** - processDBParam/processSessParam (39 calls)
+6. ~~**Deprecated Function Migration** - processDBParam/processSessParam~~ **DONE** ✓
 
 ## Deprecated Global Functions
 
@@ -759,8 +759,8 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 | Function | Calls | Files | Suggested Replacement | Status |
 |----------|-------|-------|----------------------|--------|
 | `tohtml()` | 0 | 0 | N/A | **REMOVED** ✓ |
-| `processDBParam()` | 14 | 8 | `InputValidator` | Pending |
-| `processSessParam()` | 25 | 7 | `InputValidator` | Pending |
+| `processDBParam()` | 0 | 0 | `InputValidator::getStringWithDb()` / `getIntWithDb()` | **MIGRATED** ✓ |
+| `processSessParam()` | 0 | 0 | `InputValidator::getStringWithSession()` / `getIntWithSession()` | **MIGRATED** ✓ |
 | `repl_tab_nl()` | 1 | 1 | `str_replace()` inline | Pending |
 | `getreq()` | 0 | 0 | `InputValidator::getString()` | **DONE** |
 | `error_message_with_hide()` | 0 | 0 | Removed | **DONE** |
@@ -769,18 +769,30 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 | `getsess()` | 0 | 0 | Direct `$_SESSION` access | **DONE** |
 | `mask_term_in_sentence()` | 0 | 0 | `ExportService::maskTermInSentence()` | **DONE** |
 
-**Total:** ~40 calls across ~8 files (down from ~550)
+**Total:** ~2 calls remaining across ~2 files (down from ~550)
 
-### processDBParam/processSessParam Usage
+### InputValidator Session/DB Persistence Methods (NEW)
 
-| File | processDBParam | processSessParam |
-|------|----------------|------------------|
-| WordController.php | 3 | 10 |
-| FeedsController.php | 2 | 4 |
-| TextNavigationService.php | 2 | 5 |
-| TextController.php | 1 | 0 |
-| BaseController.php | 1 (wrapper) | 1 (wrapper) |
-| param_helpers.php | 1 (definition) | 1 (definition) |
+New type-safe methods added to `InputValidator`:
+
+```php
+// Session persistence - updates session on request, returns current value
+InputValidator::getStringWithSession('reqKey', 'sessKey', 'default');
+InputValidator::getIntWithSession('reqKey', 'sessKey', 0);
+
+// Database settings persistence - updates settings on request, returns current value
+InputValidator::getStringWithDb('reqKey', 'dbKey', 'default');
+InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
+```
+
+**Migration completed in:**
+
+- WordController.php (13 calls migrated)
+- FeedsController.php (11 calls migrated)
+- TextController.php (1 call migrated)
+- TextNavigationService.php (7 calls migrated)
+- TagsController.php (6 calls migrated)
+- BaseController.php (wrapper methods removed)
 
 ### Migration Priority
 
@@ -794,7 +806,7 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 
 2. **Medium effort** (remaining):
    - `repl_tab_nl()` → inline replacement (only 1 call remaining)
-   - `processDBParam()`/`processSessParam()` → `InputValidator` migration (39 calls in 7 files)
+   - ~~`processDBParam()`/`processSessParam()` → `InputValidator` migration~~ **DONE** ✓
 
 ## Inline JavaScript Migration
 

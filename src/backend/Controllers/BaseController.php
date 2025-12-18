@@ -16,7 +16,6 @@
 namespace Lwt\Controllers;
 
 use Lwt\Core\Http\InputValidator;
-use Lwt\Core\Http\ParamHelpers;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
@@ -347,43 +346,5 @@ abstract class BaseController
             return [];
         }
         return array_map('intval', $marked);
-    }
-
-    /**
-     * Process a session parameter using LWT utility.
-     *
-     * @param string $reqKey    Request parameter key
-     * @param string $sessKey   Session key
-     * @param mixed  $default   Default value
-     * @param bool   $isNumeric Whether the value is numeric
-     *
-     * @return mixed The processed value
-     */
-    protected function sessionParam(
-        string $reqKey,
-        string $sessKey,
-        mixed $default,
-        bool $isNumeric = false
-    ): mixed {
-        return ParamHelpers::processSessParam($reqKey, $sessKey, $default, $isNumeric);
-    }
-
-    /**
-     * Process a database setting parameter using LWT utility.
-     *
-     * @param string $reqKey    Request parameter key
-     * @param string $dbKey     Database setting key
-     * @param mixed  $default   Default value
-     * @param bool   $isNumeric Whether the value is numeric
-     *
-     * @return mixed The processed value
-     */
-    protected function dbParam(
-        string $reqKey,
-        string $dbKey,
-        mixed $default,
-        bool $isNumeric = false
-    ): mixed {
-        return ParamHelpers::processDBParam($reqKey, $dbKey, $default, $isNumeric);
     }
 }

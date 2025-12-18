@@ -18,6 +18,7 @@ class InputValidatorTest extends TestCase
     private array $originalPost;
     private array $originalFiles;
     private array $originalServer;
+    private array $originalSession;
 
     protected function setUp(): void
     {
@@ -29,6 +30,7 @@ class InputValidatorTest extends TestCase
         $this->originalPost = $_POST;
         $this->originalFiles = $_FILES;
         $this->originalServer = $_SERVER;
+        $this->originalSession = $_SESSION ?? [];
 
         // Reset superglobals
         $_REQUEST = [];
@@ -36,6 +38,7 @@ class InputValidatorTest extends TestCase
         $_POST = [];
         $_FILES = [];
         $_SERVER = ['REQUEST_METHOD' => 'GET'];
+        $_SESSION = [];
     }
 
     protected function tearDown(): void
@@ -46,6 +49,7 @@ class InputValidatorTest extends TestCase
         $_POST = $this->originalPost;
         $_FILES = $this->originalFiles;
         $_SERVER = $this->originalServer;
+        $_SESSION = $this->originalSession;
 
         parent::tearDown();
     }
@@ -598,5 +602,107 @@ class InputValidatorTest extends TestCase
         $this->assertEquals('default', $result['name']);
         $this->assertEquals(10, $result['count']);
         $this->assertTrue($result['enabled']);
+    }
+
+    // ===== getStringWithSession tests =====
+
+    public function testGetStringWithSessionFromRequest(): void
+    {
+        $_REQUEST['filter'] = 'test_value';
+        $_SESSION = [];
+
+        $result = InputValidator::getStringWithSession('filter', 'session_key');
+
+        $this->assertEquals('test_value', $result);
+        $this->assertEquals('test_value', $_SESSION['session_key']);
+    }
+
+    public function testGetStringWithSessionFromSession(): void
+    {
+        $_SESSION = ['session_key' => 'session_value'];
+
+        $result = InputValidator::getStringWithSession('missing', 'session_key');
+
+        $this->assertEquals('session_value', $result);
+    }
+
+    public function testGetStringWithSessionReturnsDefault(): void
+    {
+        $_SESSION = [];
+
+        $result = InputValidator::getStringWithSession('missing', 'missing_key', 'default_value');
+
+        $this->assertEquals('default_value', $result);
+    }
+
+    public function testGetStringWithSessionUpdatesSession(): void
+    {
+        $_SESSION = ['session_key' => 'old_value'];
+        $_REQUEST['filter'] = 'new_value';
+
+        $result = InputValidator::getStringWithSession('filter', 'session_key');
+
+        $this->assertEquals('new_value', $result);
+        $this->assertEquals('new_value', $_SESSION['session_key']);
+    }
+
+    // ===== getIntWithSession tests =====
+
+    public function testGetIntWithSessionFromRequest(): void
+    {
+        $_REQUEST['page'] = '42';
+        $_SESSION = [];
+
+        $result = InputValidator::getIntWithSession('page', 'session_page');
+
+        $this->assertEquals(42, $result);
+        $this->assertEquals(42, $_SESSION['session_page']);
+    }
+
+    public function testGetIntWithSessionFromSession(): void
+    {
+        $_SESSION = ['session_page' => 25];
+
+        $result = InputValidator::getIntWithSession('missing', 'session_page');
+
+        $this->assertEquals(25, $result);
+    }
+
+    public function testGetIntWithSessionReturnsDefault(): void
+    {
+        $_SESSION = [];
+
+        $result = InputValidator::getIntWithSession('missing', 'missing_key', 10);
+
+        $this->assertEquals(10, $result);
+    }
+
+    public function testGetIntWithSessionUpdatesSession(): void
+    {
+        $_SESSION = ['session_page' => 5];
+        $_REQUEST['page'] = '15';
+
+        $result = InputValidator::getIntWithSession('page', 'session_page');
+
+        $this->assertEquals(15, $result);
+        $this->assertEquals(15, $_SESSION['session_page']);
+    }
+
+    public function testGetIntWithSessionHandlesNonNumericSession(): void
+    {
+        $_SESSION = ['session_page' => 'not_a_number'];
+
+        $result = InputValidator::getIntWithSession('missing', 'session_page', 1);
+
+        $this->assertEquals(1, $result);
+    }
+
+    public function testGetIntWithSessionHandlesStringNumericInSession(): void
+    {
+        $_SESSION = ['session_page' => '99'];
+
+        $result = InputValidator::getIntWithSession('missing', 'session_page', 1);
+
+        $this->assertEquals(99, $result);
     }
 }

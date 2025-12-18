@@ -15,6 +15,7 @@
 
 namespace Lwt\Controllers;
 
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
@@ -54,9 +55,9 @@ class TagsController extends BaseController
      */
     public function index(array $params): void
     {
-        $currentsort = (int) $this->dbParam("sort", 'currenttagsort', '1', true);
-        $currentpage = (int) $this->sessionParam("page", "currenttagpage", '1', true);
-        $currentquery = (string) $this->sessionParam("query", "currenttagquery", '', false);
+        $currentsort = InputValidator::getIntWithDb("sort", 'currenttagsort', 1);
+        $currentpage = InputValidator::getIntWithSession("page", "currenttagpage", 1);
+        $currentquery = InputValidator::getStringWithSession("query", "currenttagquery");
 
         // Build WHERE clause using TagService
         $service = new TagService('term');
@@ -74,7 +75,7 @@ class TagsController extends BaseController
         } elseif ($this->param('chg')) {
             $this->showEditTermTagForm((int)$this->param('chg'));
         } else {
-            $this->showTermTagsList($message, $currentquery, $whereData, $currentsort, $currentpage, \Lwt\Core\Globals::isDebugMode());
+            $this->showTermTagsList($message, $currentquery, $whereData, $currentsort, $currentpage);
         }
 
         $this->endRender();
@@ -91,9 +92,9 @@ class TagsController extends BaseController
      */
     public function textTags(array $params): void
     {
-        $currentsort = (int) $this->dbParam("sort", 'currenttexttagsort', '1', true);
-        $currentpage = (int) $this->sessionParam("page", "currenttexttagpage", '1', true);
-        $currentquery = (string) $this->sessionParam("query", "currenttexttagquery", '', false);
+        $currentsort = InputValidator::getIntWithDb("sort", 'currenttexttagsort', 1);
+        $currentpage = InputValidator::getIntWithSession("page", "currenttexttagpage", 1);
+        $currentquery = InputValidator::getStringWithSession("query", "currenttexttagquery");
 
         // Build WHERE clause using TagService
         $service = new TagService('text');
@@ -111,7 +112,7 @@ class TagsController extends BaseController
         } elseif ($this->param('chg')) {
             $this->showEditTextTagForm((int)$this->param('chg'));
         } else {
-            $this->showTextTagsList($message, $currentquery, $whereData, $currentsort, $currentpage, \Lwt\Core\Globals::isDebugMode());
+            $this->showTextTagsList($message, $currentquery, $whereData, $currentsort, $currentpage);
         }
 
         $this->endRender();
@@ -312,10 +313,9 @@ class TagsController extends BaseController
      *
      * @param string $message      Result message to display
      * @param string $currentquery Current search query
-     * @param string $wh_query     WHERE clause
+     * @param array  $whereData    WHERE clause data
      * @param int    $currentsort  Current sort order
      * @param int    $currentpage  Current page number
-     * @param bool   $debug        Debug mode
      *
      * @return void
      */
@@ -324,8 +324,7 @@ class TagsController extends BaseController
         string $currentquery,
         array $whereData,
         int $currentsort,
-        int $currentpage,
-        bool $debug = false
+        int $currentpage
     ): void {
         // Create service instance for term tags
         $service = new TagService('term');
@@ -552,10 +551,9 @@ class TagsController extends BaseController
      *
      * @param string $message      Result message to display
      * @param string $currentquery Current search query
-     * @param string $wh_query     WHERE clause
+     * @param array  $whereData    WHERE clause data
      * @param int    $currentsort  Current sort order
      * @param int    $currentpage  Current page number
-     * @param bool   $debug        Debug mode
      *
      * @return void
      */
@@ -564,8 +562,7 @@ class TagsController extends BaseController
         string $currentquery,
         array $whereData,
         int $currentsort,
-        int $currentpage,
-        bool $debug = false
+        int $currentpage
     ): void {
         // Create service instance for text tags
         $service = new TagService('text');

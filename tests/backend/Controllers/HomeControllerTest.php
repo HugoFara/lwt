@@ -145,7 +145,6 @@ class HomeControllerTest extends TestCase
         $this->assertArrayHasKey('language_count', $data);
         $this->assertArrayHasKey('current_language_id', $data);
         $this->assertArrayHasKey('current_text_id', $data);
-        $this->assertArrayHasKey('is_debug', $data);
         $this->assertArrayHasKey('is_wordpress', $data);
         $this->assertArrayHasKey('is_multi_user', $data);
     }
@@ -176,18 +175,6 @@ class HomeControllerTest extends TestCase
         $data = $controller->getHomeService()->getDashboardData();
 
         $this->assertIsInt($data['language_count']);
-    }
-
-    public function testDashboardDataIsDebugIsBool(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new HomeController();
-        $data = $controller->getHomeService()->getDashboardData();
-
-        $this->assertIsBool($data['is_debug']);
     }
 
     public function testDashboardDataIsWordpressIsBool(): void

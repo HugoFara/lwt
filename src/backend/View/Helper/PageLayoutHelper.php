@@ -18,7 +18,6 @@ namespace Lwt\View\Helper;
 require_once __DIR__ . '/../../Core/Http/url_utilities.php';
 require_once __DIR__ . '/../../Core/Utils/string_utilities.php';
 
-use Lwt\Core\Globals;
 use Lwt\Core\Http\UrlUtilities;
 use function Lwt\Core\Utils\getFilePath;
 
@@ -332,16 +331,14 @@ HTML;
     /**
      * Build the page title HTML element.
      *
-     * @param string $title   Page title
-     * @param bool   $isDebug Whether to show debug indicator
+     * @param string $title Page title
      *
      * @return string HTML h1 element with title
      */
-    public static function buildPageTitle(string $title, bool $isDebug = false): string
+    public static function buildPageTitle(string $title): string
     {
         $escapedTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
-        $debugSpan = $isDebug ? ' <span class="red">DEBUG</span>' : '';
-        return '<h1>' . $escapedTitle . $debugSpan . '</h1>';
+        return '<h1>' . $escapedTitle . '</h1>';
     }
 
     /**
@@ -486,7 +483,7 @@ HTML;
             echo self::buildLogo();
             echo '</div>';
         }
-        echo self::buildPageTitle($title, Globals::isDebugMode());
+        echo self::buildPageTitle($title);
     }
 
     /**

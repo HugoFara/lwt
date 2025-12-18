@@ -42,7 +42,7 @@ use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
 use Lwt\Services\TextService;
-use Lwt\Core\Http\ParamHelpers;
+use Lwt\Core\Http\InputValidator;
 
 /**
  * Controller for vocabulary/term management.
@@ -523,33 +523,32 @@ class WordController extends BaseController
 
         // Process filter parameters
         $currentlang = \Lwt\Database\Validation::language(
-            (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
-        $currentsort = (int) ParamHelpers::processDBParam("sort", 'currentwordsort', '1', true);
-        $currentpage = (int) ParamHelpers::processSessParam("page", "currentwordpage", '1', true);
-        $currentquery = (string) ParamHelpers::processSessParam("query", "currentwordquery", '', false);
-        $currentquerymode = (string) ParamHelpers::processSessParam(
+        $currentsort = InputValidator::getIntWithDb("sort", 'currentwordsort', 1);
+        $currentpage = InputValidator::getIntWithSession("page", "currentwordpage", 1);
+        $currentquery = InputValidator::getStringWithSession("query", "currentwordquery");
+        $currentquerymode = InputValidator::getStringWithSession(
             "query_mode",
             "currentwordquerymode",
-            'term,rom,transl',
-            false
+            'term,rom,transl'
         );
         $currentregexmode = \Lwt\Database\Settings::getWithDefault("set-regex-mode");
-        $currentstatus = (string) ParamHelpers::processSessParam("status", "currentwordstatus", '', false);
+        $currentstatus = InputValidator::getStringWithSession("status", "currentwordstatus");
         $currenttext = \Lwt\Database\Validation::text(
-            (string) ParamHelpers::processSessParam("text", "currentwordtext", '', false)
+            InputValidator::getStringWithSession("text", "currentwordtext")
         );
-        $currenttexttag = (string) ParamHelpers::processSessParam("texttag", "currentwordtexttag", '', false);
-        $currenttextmode = (string) ParamHelpers::processSessParam("text_mode", "currentwordtextmode", 0, false);
+        $currenttexttag = InputValidator::getStringWithSession("texttag", "currentwordtexttag");
+        $currenttextmode = InputValidator::getStringWithSession("text_mode", "currentwordtextmode", '0');
         $currenttag1 = \Lwt\Database\Validation::tag(
-            (string) ParamHelpers::processSessParam("tag1", "currentwordtag1", '', false),
+            InputValidator::getStringWithSession("tag1", "currentwordtag1"),
             $currentlang
         );
         $currenttag2 = \Lwt\Database\Validation::tag(
-            (string) ParamHelpers::processSessParam("tag2", "currentwordtag2", '', false),
+            InputValidator::getStringWithSession("tag2", "currentwordtag2"),
             $currentlang
         );
-        $currenttag12 = (string) ParamHelpers::processSessParam("tag12", "currentwordtag12", '', false);
+        $currenttag12 = InputValidator::getStringWithSession("tag12", "currentwordtag12");
 
         // Build filter conditions
         $whLang = $listService->buildLangCondition($currentlang);
@@ -668,7 +667,7 @@ class WordController extends BaseController
     public function listEditAlpine(array $params): void
     {
         $currentlang = \Lwt\Database\Validation::language(
-            (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
 
         $perPage = (int) \Lwt\Database\Settings::getWithDefault('set-terms-per-page');

@@ -165,9 +165,6 @@ class Migrations
             Connection::execute(
                 "ALTER TABLE _migrations ADD COLUMN applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
             );
-            if (Globals::isDebugMode()) {
-                echo "<p>DEBUG: Upgraded _migrations table schema</p>";
-            }
         }
     }
 
@@ -200,9 +197,6 @@ class Migrations
         // Do DB Updates if tables seem to be old versions
 
         if ($dbversion < $currversion) {
-            if (Globals::isDebugMode()) {
-                echo "<p>DEBUG: check DB collation: ";
-            }
             if (
                 'utf8utf8_general_ci' != Connection::preparedFetchValue(
                     'SELECT concat(default_character_set_name, default_collation_name) AS collation
@@ -220,15 +214,6 @@ class Migrations
                     'ALTER DATABASE ' . $escapedDbName .
                     ' CHARACTER SET utf8 COLLATE utf8_general_ci'
                 );
-                if (Globals::isDebugMode()) {
-                    echo 'changed to utf8_general_ci</p>';
-                }
-            } elseif (Globals::isDebugMode()) {
-                echo 'OK</p>';
-            }
-
-            if (Globals::isDebugMode()) {
-                echo "<p>DEBUG: do DB updates: $dbversion --&gt; $currversion</p>";
             }
 
             // Get pending migrations (not yet applied)
@@ -237,9 +222,6 @@ class Migrations
             $pendingMigrations = array_diff($allMigrations, $appliedMigrations);
 
             foreach ($pendingMigrations as $filename) {
-                if (Globals::isDebugMode()) {
-                    echo "<p>DEBUG: Running migration: $filename</p>";
-                }
                 $queries = SqlFileParser::parseFile(
                     __DIR__ . '/../../../../db/migrations/' . $filename
                 );
@@ -250,9 +232,6 @@ class Migrations
                 self::recordMigration($filename);
             }
 
-            if (Globals::isDebugMode()) {
-                echo '<p>DEBUG: rebuilding tts</p>';
-            }
             Connection::execute(
                 "CREATE TABLE IF NOT EXISTS tts (
                     TtsID mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
@@ -341,9 +320,6 @@ class Migrations
 
         if ($count > 0) {
             // Rebuild Text Cache if cache tables new
-            if (Globals::isDebugMode()) {
-                echo '<p>DEBUG: rebuilding cache tables</p>';
-            }
             self::reparseAllTexts();
         }
 
@@ -352,10 +328,6 @@ class Migrations
         $lastscorecalc = Settings::get('lastscorecalc');
         $today = date('Y-m-d');
         if ($lastscorecalc != $today) {
-            if (Globals::isDebugMode()) {
-                echo '<p>DEBUG: Doing score recalc. Today: ' . $today .
-                ' / Last: ' . $lastscorecalc . '</p>';
-            }
             // Update word scores - complex SQL expression, use raw query
             Connection::execute(
                 "UPDATE words

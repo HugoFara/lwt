@@ -40,17 +40,11 @@ const LWT_RELEASE_DATE = "2024-04-01";
  * For instance 1.6.31 (October 03 2016)
  *
  * @return string Version number HTML-formatted
- *
- * @psalm-return '2.9.1-fork (December 29 2023) <span class="red">DEBUG</span>'|'2.9.1-fork (December 29 2023)'
  */
 function getVersion(): string
 {
     $formattedDate = \date("F d Y", \strtotime(LWT_RELEASE_DATE));
-    $version = LWT_APP_VERSION . " ($formattedDate)";
-    if (Globals::isDebugMode()) {
-        $version .= ' <span class="red">DEBUG</span>';
-    }
-    return $version;
+    return LWT_APP_VERSION . " ($formattedDate)";
 }
 
 /**

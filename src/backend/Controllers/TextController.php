@@ -24,7 +24,7 @@ use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
-use Lwt\Core\Http\ParamHelpers;
+use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Http\UrlUtilities;
 
 require_once __DIR__ . '/../Services/TextService.php';
@@ -306,7 +306,7 @@ class TextController extends BaseController
 
         // Get filter parameters
         $currentLang = Validation::language(
-            (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
 
         // Check for actions that skip page start

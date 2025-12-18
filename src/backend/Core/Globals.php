@@ -56,13 +56,6 @@ class Globals
     private static ?\mysqli $dbConnection = null;
 
     /**
-     * Whether debug mode is enabled
-     *
-     * @var bool
-     */
-    private static bool $debugModeEnabled = false;
-
-    /**
      * Whether error display is enabled
      *
      * @var bool
@@ -113,7 +106,6 @@ class Globals
         }
 
         // All settings default to off
-        self::$debugModeEnabled = false;
         self::$errorDisplayEnabled = false;
 
         self::$initialized = true;
@@ -161,28 +153,6 @@ class Globals
     public static function getDatabaseName(): string
     {
         return self::$databaseName;
-    }
-
-    /**
-     * Enable or disable debug mode.
-     *
-     * @param bool $enabled True to enable debug mode
-     *
-     * @return void
-     */
-    public static function setDebugMode(bool $enabled): void
-    {
-        self::$debugModeEnabled = $enabled;
-    }
-
-    /**
-     * Check if debug mode is enabled.
-     *
-     * @return bool True if debug mode is on
-     */
-    public static function isDebugMode(): bool
-    {
-        return self::$debugModeEnabled;
     }
 
     /**
@@ -365,7 +335,6 @@ class Globals
     public static function reset(): void
     {
         self::$dbConnection = null;
-        self::$debugModeEnabled = false;
         self::$errorDisplayEnabled = false;
         self::$databaseName = '';
         self::$initialized = false;

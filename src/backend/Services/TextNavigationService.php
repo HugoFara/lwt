@@ -15,7 +15,7 @@
 namespace Lwt\Services {
 
 use Lwt\Core\Globals;
-use Lwt\Core\Http\ParamHelpers;
+use Lwt\Core\Http\InputValidator;
 use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\UserScopedQuery;
@@ -51,7 +51,7 @@ class TextNavigationService
         $params = [];
 
         $currentlang = Validation::language(
-            (string) ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
         $wh_lang = '';
         if ($currentlang != '') {
@@ -59,12 +59,11 @@ class TextNavigationService
             $params[] = $currentlang;
         }
 
-        $currentquery = (string) ParamHelpers::processSessParam("query", "currenttextquery", '', false);
-        $currentquerymode = (string) ParamHelpers::processSessParam(
+        $currentquery = InputValidator::getStringWithSession("query", "currenttextquery");
+        $currentquerymode = InputValidator::getStringWithSession(
             "query_mode",
             "currenttextquerymode",
-            'title,text',
-            false
+            'title,text'
         );
         $currentregexmode = Settings::getWithDefault("set-regex-mode");
         $wh_query = '';
@@ -92,14 +91,14 @@ class TextNavigationService
         }
 
         $currenttag1 = Validation::textTag(
-            (string) ParamHelpers::processSessParam("tag1", "currenttexttag1", '', false),
+            InputValidator::getStringWithSession("tag1", "currenttexttag1"),
             $currentlang
         );
         $currenttag2 = Validation::textTag(
-            (string) ParamHelpers::processSessParam("tag2", "currenttexttag2", '', false),
+            InputValidator::getStringWithSession("tag2", "currenttexttag2"),
             $currentlang
         );
-        $currenttag12 = (string) ParamHelpers::processSessParam("tag12", "currenttexttag12", '', false);
+        $currenttag12 = InputValidator::getStringWithSession("tag12", "currenttexttag12");
         $wh_tag1 = null;
         $wh_tag2 = null;
         if ($currenttag1 == '' && $currenttag2 == '') {
@@ -128,7 +127,7 @@ class TextNavigationService
             }
         }
 
-        $currentsort = (int) ParamHelpers::processDBParam("sort", 'currenttextsort', '1', true);
+        $currentsort = InputValidator::getIntWithDb("sort", 'currenttextsort', 1);
         $sorts = array('TxTitle','TxID desc','TxID asc');
         $lsorts = count($sorts);
         if ($currentsort < 1) {

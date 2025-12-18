@@ -212,7 +212,6 @@ class HomeService
                 ? $this->getCurrentTextInfo($currentTextId)
                 : null,
             'is_wordpress' => $this->isWordPressSession(),
-            'is_debug' => Globals::isDebugMode(),
             'is_multi_user' => Globals::isMultiUserEnabled()
         ];
     }

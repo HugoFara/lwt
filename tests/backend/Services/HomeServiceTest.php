@@ -419,7 +419,6 @@ class HomeServiceTest extends TestCase
             'current_text_id',
             'current_text_info',
             'is_wordpress',
-            'is_debug',
             'is_multi_user'
         ];
 
@@ -448,17 +447,6 @@ class HomeServiceTest extends TestCase
         $result = $this->service->getDashboardData();
 
         $this->assertIsBool($result['is_wordpress']);
-    }
-
-    public function testGetDashboardDataIsDebugIsBool(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $result = $this->service->getDashboardData();
-
-        $this->assertIsBool($result['is_debug']);
     }
 
     public function testGetDashboardDataCurrentTextInfoMatchesCurrentTextId(): void

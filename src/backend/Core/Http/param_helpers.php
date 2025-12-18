@@ -43,6 +43,8 @@ class ParamHelpers
      * @param bool       $isnum   If true, convert the result to an int
      *
      * @return string|int The required data unless $isnum is specified
+     *
+     * @deprecated 3.0.0 Use InputValidator::getStringWithSession() or getIntWithSession() instead
      */
     public static function processSessParam($reqkey, $sesskey, $default, $isnum)
     {
@@ -70,6 +72,8 @@ class ParamHelpers
      * @param bool   $isnum   If true, convert the result to an int
      *
      * @return string|int The string data unless $isnum is specified
+     *
+     * @deprecated 3.0.0 Use InputValidator::getStringWithDb() or getIntWithDb() instead
      */
     public static function processDBParam($reqkey, $dbkey, $default, $isnum)
     {

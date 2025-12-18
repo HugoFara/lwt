@@ -779,4 +779,135 @@ class InputValidator
 
         return $result;
     }
+
+    // ===== Session persistence methods =====
+
+    /**
+     * Get a string from request, persisting to session.
+     *
+     * If the request parameter exists, updates the session with its value.
+     * Otherwise returns the session value or default.
+     *
+     * @param string $reqKey  Request parameter key
+     * @param string $sessKey Session key for persistence
+     * @param string $default Default value if neither exists
+     *
+     * @return string The current value
+     */
+    public static function getStringWithSession(
+        string $reqKey,
+        string $sessKey,
+        string $default = ''
+    ): string {
+        if (self::has($reqKey)) {
+            $value = self::getString($reqKey);
+            $_SESSION[$sessKey] = $value;
+            return $value;
+        }
+
+        if (isset($_SESSION[$sessKey])) {
+            $value = $_SESSION[$sessKey];
+            return is_string($value) ? $value : $default;
+        }
+
+        return $default;
+    }
+
+    /**
+     * Get an integer from request, persisting to session.
+     *
+     * If the request parameter exists, updates the session with its value.
+     * Otherwise returns the session value or default.
+     *
+     * @param string $reqKey  Request parameter key
+     * @param string $sessKey Session key for persistence
+     * @param int    $default Default value if neither exists
+     *
+     * @return int The current value
+     */
+    public static function getIntWithSession(
+        string $reqKey,
+        string $sessKey,
+        int $default = 0
+    ): int {
+        if (self::has($reqKey)) {
+            $value = self::getInt($reqKey, $default);
+            $_SESSION[$sessKey] = $value;
+            return $value ?? $default;
+        }
+
+        if (isset($_SESSION[$sessKey])) {
+            $value = $_SESSION[$sessKey];
+            return is_numeric($value) ? (int) $value : $default;
+        }
+
+        return $default;
+    }
+
+    // ===== Database settings persistence methods =====
+
+    /**
+     * Get a string from request, persisting to database settings.
+     *
+     * If the request parameter exists, saves it to database settings.
+     * Otherwise returns the database value or default.
+     *
+     * @param string $reqKey  Request parameter key
+     * @param string $dbKey   Database settings key for persistence
+     * @param string $default Default value if neither exists
+     *
+     * @return string The current value
+     */
+    public static function getStringWithDb(
+        string $reqKey,
+        string $dbKey,
+        string $default = ''
+    ): string {
+        // Import Settings class - it's already loaded via db_bootstrap.php
+        $dbValue = \Lwt\Database\Settings::get($dbKey);
+
+        if (self::has($reqKey)) {
+            $value = self::getString($reqKey);
+            \Lwt\Database\Settings::save($dbKey, $value);
+            return $value;
+        }
+
+        if ($dbValue !== '') {
+            return $dbValue;
+        }
+
+        return $default;
+    }
+
+    /**
+     * Get an integer from request, persisting to database settings.
+     *
+     * If the request parameter exists, saves it to database settings.
+     * Otherwise returns the database value or default.
+     *
+     * @param string $reqKey  Request parameter key
+     * @param string $dbKey   Database settings key for persistence
+     * @param int    $default Default value if neither exists
+     *
+     * @return int The current value
+     */
+    public static function getIntWithDb(
+        string $reqKey,
+        string $dbKey,
+        int $default = 0
+    ): int {
+        $dbValue = \Lwt\Database\Settings::get($dbKey);
+
+        if (self::has($reqKey)) {
+            $value = self::getInt($reqKey, $default);
+            \Lwt\Database\Settings::save($dbKey, (string) ($value ?? $default));
+            return $value ?? $default;
+        }
+
+        if ($dbValue !== '' && is_numeric($dbValue)) {
+            return (int) $dbValue;
+        }
+
+        return $default;
+    }
 }

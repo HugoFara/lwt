@@ -42,7 +42,7 @@ use Lwt\Database\Validation;
 use Lwt\Services\FeedService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
-use Lwt\Core\Http\ParamHelpers;
+use Lwt\Core\Http\InputValidator;
 
 /**
  * Controller for RSS feed management.
@@ -103,15 +103,13 @@ class FeedsController extends BaseController
         session_start();
 
         $currentLang = Validation::language(
-            (string)ParamHelpers::processDBParam("filterlang", 'currentlanguage', '', false)
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
         PageLayoutHelper::renderPageStart($this->languageService->getLanguageName($currentLang) . ' Feeds', true);
 
-        $currentFeed = (string)ParamHelpers::processSessParam(
+        $currentFeed = InputValidator::getStringWithSession(
             "selected_feed",
-            "currentrssfeed",
-            '',
-            false
+            "currentrssfeed"
         );
 
         $editText = 0;
@@ -310,10 +308,8 @@ class FeedsController extends BaseController
      */
     private function renderFeedsIndex(int $currentLang, int $currentFeed): void
     {
-        $debug = \Lwt\Core\Globals::isDebugMode();
-
-        $currentQuery = (string)ParamHelpers::processSessParam("query", "currentrssquery", '', false);
-        $currentQueryMode = (string)ParamHelpers::processSessParam("query_mode", "currentrssquerymode", 'title,desc,text', false);
+        $currentQuery = InputValidator::getStringWithSession("query", "currentrssquery");
+        $currentQueryMode = InputValidator::getStringWithSession("query_mode", "currentrssquerymode", 'title,desc,text');
         $currentRegexMode = Settings::getWithDefault("set-regex-mode");
 
         $whQuery = $this->feedService->buildQueryFilter($currentQuery, $currentQueryMode, $currentRegexMode);
@@ -329,8 +325,8 @@ class FeedsController extends BaseController
             }
         }
 
-        $currentPage = (int)ParamHelpers::processSessParam("page", "currentrsspage", '1', true);
-        $currentSort = (int)ParamHelpers::processDBParam("sort", 'currentrsssort', '2', true);
+        $currentPage = InputValidator::getIntWithSession("page", "currentrsspage", 1);
+        $currentSort = InputValidator::getIntWithDb("sort", 'currentrsssort', 2);
 
         $feeds = $this->feedService->getFeeds($currentLang ?: null);
 
@@ -352,10 +348,6 @@ class FeedsController extends BaseController
 
         $feedIds = (string)$currentFeed;
         $recno = $currentFeed ? $this->feedService->countFeedLinks($feedIds, $whQuery) : 0;
-
-        if ($debug) {
-            echo "Feed IDs: $feedIds, Count: $recno";
-        }
 
         // Pagination
         $maxPerPage = (int)Settings::getWithDefault('set-articles-per-page');
@@ -412,16 +404,14 @@ class FeedsController extends BaseController
     public function edit(array $params): void
     {
         $currentLang = Validation::language(
-            (string)$this->dbParam("filterlang", 'currentlanguage', '', false)
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
-        $currentSort = (int)$this->dbParam("sort", 'currentmanagefeedssort', '2', true);
-        $currentQuery = (string)$this->sessionParam("query", "currentmanagefeedsquery", '', false);
-        $currentPage = (int)$this->sessionParam("page", "currentmanagefeedspage", '1', true);
-        $currentFeed = (string)$this->sessionParam(
+        $currentSort = InputValidator::getIntWithDb("sort", 'currentmanagefeedssort', 2);
+        $currentQuery = InputValidator::getStringWithSession("query", "currentmanagefeedsquery");
+        $currentPage = InputValidator::getIntWithSession("page", "currentmanagefeedspage", 1);
+        $currentFeed = InputValidator::getStringWithSession(
             "selected_feed",
-            "currentmanagefeedsfeed",
-            '',
-            false
+            "currentmanagefeedsfeed"
         );
 
         // Build query pattern for prepared statement (no SQL escaping needed)
