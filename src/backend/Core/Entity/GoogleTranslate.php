@@ -32,31 +32,20 @@ namespace Lwt\Core\Entity;
  * @author   LWT Project <lwt-project@hotmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
- */ class GoogleTranslate
+ */
+class GoogleTranslate
 {
-    /**
-     * @var false|string|string[]
-     *
-     * @psalm-var ''|array<string>|false
-     */
+    /** @var ''|list<string>|false */
     public array|string|false $lastResult = "";
 
-    /**
-     * @var null|string
-     */
-    private $langFrom;
+    private ?string $langFrom = null;
 
-    /**
-     * @var null|string
-     */
-    private $langTo;
-    const DEFAULT_DOMAIN = null;//change the domain here / NULL <> random domain
-    private static string|null $gglDomain;
+    private ?string $langTo = null;
+    private const DEFAULT_DOMAIN = null; // change the domain here / NULL <> random domain
+    private static ?string $gglDomain = null;
 
-    /**
-     * @var null|string[]
-     */
-    private static array|null $headers;
+    /** @var list<string>|null */
+    private static ?array $headers = null;
     //&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss
     private static string $urlFormat = "http://translate.google.%s/translate_a/single" .
     "?client=t&q=%s&hl=en&sl=%s&tl=%s&dt=t&dt=at&dt=bd&ie=UTF-8&oe=UTF-8&oc=1&" .

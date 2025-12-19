@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-19 (AbstractCrudController + TermTagsController/TextTagsController refactor)
+**Last Updated:** 2025-12-19 (Entity docblocks converted to native property types)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -436,7 +436,7 @@ Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
 **Remaining Work:**
 
 - [x] ~~Add `declare(strict_types=1)` to all files~~ **COMPLETE**
-- [ ] Convert Entity docblocks to native property types
+- [x] ~~Convert Entity docblocks to native property types~~ **COMPLETE** (2025-12-19)
 - [ ] Achieve Psalm level 1 compliance
 
 ### Phase 3: Modernization
@@ -1297,5 +1297,5 @@ Apply the same pattern to other modules:
 
 **Document Owner:** LWT Maintainers
 **Review Cycle:** Quarterly
-**Last Review:** 2025-12-18
-**Next Review:** 2026-03-18
+**Last Review:** 2025-12-19
+**Next Review:** 2026-03-19
