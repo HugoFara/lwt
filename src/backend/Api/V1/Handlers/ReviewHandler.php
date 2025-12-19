@@ -251,7 +251,6 @@ class ReviewHandler
         }
 
         $currentStatus = (int)$currentStatus;
-        $newStatus = $currentStatus;
 
         if ($status !== null) {
             // Explicit status - validate it

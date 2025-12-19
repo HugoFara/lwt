@@ -1324,7 +1324,6 @@ class TermHandler
 
         $idList = '(' . implode(',', $wordIds) . ')';
         $count = count($wordIds);
-        $message = '';
 
         switch ($action) {
             case 'del':

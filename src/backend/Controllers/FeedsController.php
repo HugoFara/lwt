@@ -164,7 +164,7 @@ class FeedsController extends BaseController
         $markedItems = implode(',', array_filter($markedItemsArray, 'is_scalar'));
         $feedLinks = $this->feedService->getMarkedFeedLinks($markedItems);
 
-        $stats = ['archived' => 0, 'sentences' => 0, 'textitems' => 0, 'texts' => 0];
+        $stats = ['archived' => 0, 'sentences' => 0, 'textitems' => 0];
         $count = 0;
         $languages = null;
 
@@ -229,7 +229,7 @@ class FeedsController extends BaseController
             }
         }
 
-        if ($stats['archived'] > 0 || $stats['texts'] > 0) {
+        if ($stats['archived'] > 0) {
             $message = "Texts archived: {$stats['archived']} / Sentences deleted: {$stats['sentences']}" .
                        " / Text items deleted: {$stats['textitems']}";
         }
@@ -451,7 +451,7 @@ class FeedsController extends BaseController
                 $_SERVER['PHP_SELF'] ?? '/'
             );
         } elseif ($this->hasParam('new_feed')) {
-            $this->showNewForm((int)$currentLang);
+            $this->showNewForm();
         } elseif ($this->hasParam('edit_feed')) {
             $this->showEditForm((int)$currentFeed);
         } elseif ($this->hasParam('multi_load_feed')) {
@@ -569,11 +569,9 @@ class FeedsController extends BaseController
     /**
      * Show the new feed form.
      *
-     * @param int $currentLang Current language filter
-     *
      * @return void
      */
-    private function showNewForm(int $currentLang): void
+    private function showNewForm(): void
     {
         $languages = $this->feedService->getLanguages();
 
@@ -657,7 +655,7 @@ class FeedsController extends BaseController
 
         if ($totalFeeds > 0) {
             $maxPerPage = (int)Settings::getWithDefault('set-feeds-per-page');
-            $pages = $totalFeeds == 0 ? 0 : (intval(($totalFeeds - 1) / $maxPerPage) + 1);
+            $pages = intval(($totalFeeds - 1) / $maxPerPage) + 1;
 
             if ($currentPage < 1) {
                 $currentPage = 1;

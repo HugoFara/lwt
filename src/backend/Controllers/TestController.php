@@ -82,7 +82,6 @@ class TestController extends BaseController
 
         if ($property === '') {
             $this->redirect('/text/edit');
-            return;
         }
 
         $this->renderTestPage();
@@ -168,6 +167,7 @@ class TestController extends BaseController
             return;
         }
 
+        /** @psalm-suppress InvalidScalarArgument - $identifier[1] type depends on $identifier[0] */
         $testsql = $this->testService->getTestSql($identifier[0], $identifier[1]);
 
         // Validate single language
@@ -258,7 +258,6 @@ class TestController extends BaseController
 
         if ($testData === null) {
             $this->redirect('/text/edit');
-            return;
         }
 
         // Get test identifier
@@ -271,9 +270,9 @@ class TestController extends BaseController
 
         if ($identifier[0] === '') {
             $this->redirect('/text/edit');
-            return;
         }
 
+        /** @psalm-suppress InvalidScalarArgument - $identifier[1] type depends on $identifier[0] */
         $testsql = $this->testService->getTestSql($identifier[0], $identifier[1]);
         $testType = $isTableMode ? 1 : $this->testService->clampTestType((int) $testTypeParam);
         $wordMode = $this->testService->isWordMode($testType);

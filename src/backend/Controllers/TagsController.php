@@ -180,9 +180,9 @@ class TagsController extends BaseController
     private function handleTermTagMarkAction(string $action): string
     {
         $message = "Multiple Actions: 0";
-        $marked = $this->param('marked');
+        $marked = $this->paramArray('marked');
 
-        if (is_array($marked) && count($marked) > 0) {
+        if (count($marked) > 0) {
             $ids = $this->getMarkedIds($marked);
             $list = "(" . implode(",", $ids) . ")";
 
@@ -241,7 +241,7 @@ class TagsController extends BaseController
         // Delete orphaned wordtags that reference non-existent tags
         // wordtags inherits user context via WtWoID -> words FK
         $sql = "DELETE wordtags FROM wordtags LEFT JOIN tags ON WtTgID = TgID WHERE TgID IS NULL";
-        $this->execute($sql, '');
+        $this->execute($sql);
     }
 
     /**
@@ -293,7 +293,7 @@ class TagsController extends BaseController
         $record = QueryBuilder::table('tags')
             ->where('TgID', '=', $tagId)
             ->getPrepared();
-        if ($record !== false && count($record) > 0) {
+        if (count($record) > 0) {
             $record = $record[0];
             ?>
             <h2>Edit Tag</h2>
@@ -412,9 +412,9 @@ class TagsController extends BaseController
     private function handleTextTagMarkAction(string $action): string
     {
         $message = "Multiple Actions: 0";
-        $marked = $this->param('marked');
+        $marked = $this->paramArray('marked');
 
-        if (is_array($marked) && count($marked) > 0) {
+        if (count($marked) > 0) {
             $ids = $this->getMarkedIds($marked);
             $list = "(" . implode(",", $ids) . ")";
 
@@ -473,12 +473,12 @@ class TagsController extends BaseController
         // Delete orphaned texttags that reference non-existent tags2
         // texttags inherits user context via TtTxID -> texts FK
         $sql = "DELETE texttags FROM texttags LEFT JOIN tags2 ON TtT2ID = T2ID WHERE T2ID IS NULL";
-        $this->execute($sql, '');
+        $this->execute($sql);
 
         // Delete orphaned archtexttags that reference non-existent tags2
         // archtexttags inherits user context via AgAtID -> archivedtexts FK
         $sql = "DELETE archtexttags FROM archtexttags LEFT JOIN tags2 ON AgT2ID = T2ID WHERE T2ID IS NULL";
-        $this->execute($sql, '');
+        $this->execute($sql);
     }
 
     /**
@@ -529,7 +529,7 @@ class TagsController extends BaseController
         $record = QueryBuilder::table('tags2')
             ->where('T2ID', '=', $tagId)
             ->getPrepared();
-        if ($record !== false && count($record) > 0) {
+        if (count($record) > 0) {
             $record = $record[0];
             ?>
             <h2>Edit Tag</h2>

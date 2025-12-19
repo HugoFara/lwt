@@ -296,9 +296,11 @@ class AuthController extends BaseController
     /**
      * Set a "remember me" cookie.
      *
-     * @param int $userId The user ID
+     * @param int $userId The user ID (will be used when token storage is implemented)
      *
      * @return void
+     *
+     * @psalm-suppress UnusedParam - userId needed for future token storage implementation
      */
     private function setRememberCookie(int $userId): void
     {

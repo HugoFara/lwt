@@ -131,9 +131,9 @@ class SentenceService
      * @param int    $lid    Language ID
      * @param int    $limit  Maximum number of sentences to return
      *
-     * @return \mysqli_result|false Query result or false on failure
+     * @return array<int, array<string, mixed>> Query result rows
      */
-    private function executeSentencesContainingWordQuery(string $wordlc, int $lid, int $limit = -1): \mysqli_result|false
+    private function executeSentencesContainingWordQuery(string $wordlc, int $lid, int $limit = -1): array
     {
         $mecab_str = null;
         $record = QueryBuilder::table('languages')
@@ -212,9 +212,9 @@ class SentenceService
      * @param int      $lid    Language ID
      * @param int      $limit  Maximum number of sentences to return
      *
-     * @return \mysqli_result|false Query result or false on failure
+     * @return array<int, array<string, mixed>> Query result rows
      */
-    public function findSentencesFromWord(?int $wid, string $wordlc, int $lid, int $limit = -1): \mysqli_result|false
+    public function findSentencesFromWord(?int $wid, string $wordlc, int $lid, int $limit = -1): array
     {
         if (empty($wid)) {
             $sql = "SELECT DISTINCT SeID, SeText
@@ -663,16 +663,15 @@ class SentenceService
         if (is_null($mode)) {
             $mode = (int) Settings::getWithDefault('set-term-sentence-count');
         }
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($res as $record) {
             if ($last != $record['SeText']) {
-                $sent = $this->formatSentence($record['SeID'], $wordlc, $mode);
+                $sent = $this->formatSentence((int)$record['SeID'], $wordlc, $mode);
                 if (mb_strstr($sent[1], '}', false, 'UTF-8')) {
                     $r[] = $sent;
                 }
             }
             $last = $record['SeText'];
         }
-        mysqli_free_result($res);
         return $r;
     }
 

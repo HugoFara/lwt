@@ -119,12 +119,13 @@ class UserScopedQuery
      * Returns a SQL fragment like " AND WoUsID = 1" when user scope
      * should be applied, or empty string otherwise.
      *
-     * @param string $tableName The table name (without prefix)
-     * @param string $alias     Optional table alias to prefix the column
+     * @param string $tableName   The table name (without prefix)
+     * @param string $alias       Optional table alias to prefix the column
+     * @param string $parentTable Optional parent table for inherited scope (unused, for API compat)
      *
      * @return string SQL WHERE condition fragment (includes leading AND)
      */
-    public static function forTable(string $tableName, string $alias = ''): string
+    public static function forTable(string $tableName, string $alias = '', string $parentTable = ''): string
     {
         if (!Globals::isMultiUserEnabled()) {
             return '';
@@ -150,16 +151,18 @@ class UserScopedQuery
      * Returns a SQL fragment like " AND WoUsID = ?" and adds the user ID
      * to the provided bindings array.
      *
-     * @param string             $tableName The table name (without prefix)
-     * @param array<int, mixed>  &$bindings Reference to bindings array
-     * @param string             $alias     Optional table alias
+     * @param string             $tableName   The table name (without prefix)
+     * @param array<int, mixed>  &$bindings   Reference to bindings array
+     * @param string             $alias       Optional table alias
+     * @param string             $parentTable Optional parent table for inherited scope (unused, for API compat)
      *
      * @return string SQL WHERE condition fragment (includes leading AND)
      */
     public static function forTablePrepared(
         string $tableName,
         array &$bindings,
-        string $alias = ''
+        string $alias = '',
+        string $parentTable = ''
     ): string {
         if (!Globals::isMultiUserEnabled()) {
             return '';

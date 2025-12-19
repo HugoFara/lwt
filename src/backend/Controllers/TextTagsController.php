@@ -274,7 +274,7 @@ class TextTagsController extends AbstractCrudController
             ->where('T2ID', '=', $id)
             ->getPrepared();
 
-        if ($record === false || count($record) === 0) {
+        if (count($record) === 0) {
             $this->message("Tag not found", false);
             return;
         }

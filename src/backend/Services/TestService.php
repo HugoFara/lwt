@@ -571,9 +571,9 @@ class TestService
      *
      * @param string $testsql SQL projection string
      *
-     * @return \mysqli_result|false Query result
+     * @return \mysqli_result|bool Query result
      */
-    public function getTableTestWords(string $testsql)
+    public function getTableTestWords(string $testsql): \mysqli_result|bool
     {
         $sql = "SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization,
             WoSentence, WoStatus, WoTodayScore AS Score
@@ -600,10 +600,6 @@ class TestService
         ?int $langId,
         ?int $textId
     ): ?array {
-        $title = '';
-        $property = '';
-        $testsql = '';
-
         if ($selection !== null && $sessTestsql !== null) {
             $property = "selection=$selection";
             $testsql = $this->buildSelectionTestSql($selection, $sessTestsql);

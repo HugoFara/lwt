@@ -33,8 +33,7 @@ class ImprovedTextHandler
         $trans = trim($trans);
         $widset = is_numeric($wid);
         $r = "";
-        $set = null;
-        $setDefault = null;
+        $set = false;
         if ($widset) {
             $alltrans = (string) QueryBuilder::table('words')
                 ->where('WoID', '=', $wid)
@@ -56,7 +55,6 @@ class ImprovedTextHandler
                 <br />';
             }
         }
-        $set = $set || $setDefault;
         $r .= '<span class="nowrap">
         <input class="impr-ann-radio" type="radio" name="rg' . $i . '" ' .
         ($set ? 'checked="checked" ' : '') . 'value="" />

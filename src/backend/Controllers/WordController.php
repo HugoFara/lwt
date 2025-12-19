@@ -366,7 +366,7 @@ class WordController extends BaseController
         $text = trim(\Lwt\Database\Escaping::prepareTextdata($woText));
 
         if (mb_strtolower($text, 'UTF-8') != $textlc) {
-            $titletext = "New/Edit Term: " . htmlspecialchars(\Lwt\Database\Escaping::prepareTextdata($woTextLC, ENT_QUOTES, 'UTF-8'));
+            $titletext = "New/Edit Term: " . htmlspecialchars(\Lwt\Database\Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
             $message = 'Error: Term in lowercase must be exactly = "' . $textlc .
@@ -378,7 +378,7 @@ class WordController extends BaseController
 
         $op = $this->param('op');
         if ($op == 'Change') {
-            $titletext = "Edit Term: " . htmlspecialchars(\Lwt\Database\Escaping::prepareTextdata($woTextLC, ENT_QUOTES, 'UTF-8'));
+            $titletext = "Edit Term: " . htmlspecialchars(\Lwt\Database\Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
             PageLayoutHelper::renderPageStartNobody($titletext);
             echo '<h1>' . $titletext . '</h1>';
 
@@ -433,7 +433,7 @@ class WordController extends BaseController
             if (!isset($regexword)) {
                 ErrorHandler::die('Cannot retrieve language data in edit_tword.php');
             }
-            $sent = htmlspecialchars(ExportService::replaceTabNewline($woSentence, ENT_QUOTES, 'UTF-8'));
+            $sent = htmlspecialchars(ExportService::replaceTabNewline($woSentence), ENT_QUOTES, 'UTF-8');
             $sent1 = str_replace(
                 "{",
                 ' <b>[',
@@ -777,13 +777,13 @@ class WordController extends BaseController
                 break;
             case 'exp':
                 $this->exportService->exportAnki($listService->getAnkiExportSql($idList, '', '', '', '', ''));
-                break;
+                // @codeCoverageIgnoreStart - exportAnki returns never
             case 'exp2':
                 $this->exportService->exportTsv($listService->getTsvExportSql($idList, '', '', '', '', ''));
-                break;
+                // @codeCoverageIgnoreStart - exportTsv returns never
             case 'exp3':
                 $this->exportService->exportFlexible($listService->getFlexibleExportSql($idList, '', '', '', '', ''));
-                break;
+                // @codeCoverageIgnoreStart - exportFlexible returns never
             case 'test':
                 $_SESSION['testsql'] = $idList;
                 header("Location: /test?selection=2");
@@ -886,15 +886,12 @@ class WordController extends BaseController
         // Export actions
         if ($allaction == 'expall') {
             $this->exportService->exportAnki($listService->getAnkiExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
-            return '';
         }
         if ($allaction == 'expall2') {
             $this->exportService->exportTsv($listService->getTsvExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
-            return '';
         }
         if ($allaction == 'expall3') {
             $this->exportService->exportFlexible($listService->getFlexibleExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
-            return '';
         }
 
         // Test action
@@ -1719,14 +1716,13 @@ class WordController extends BaseController
 
         // Prepare data for view
         $newWords = [];
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($res as $record) {
             $record['hex'] = StringUtils::toClassName(
                 \Lwt\Database\Escaping::prepareTextdata($record['WoTextLC'])
             );
             $record['translation'] = $record['WoTranslation'];
             $newWords[] = $record;
         }
-        mysqli_free_result($res);
 
         include __DIR__ . '/../Views/Word/bulk_save_result.php';
     }
@@ -1752,7 +1748,7 @@ class WordController extends BaseController
         $terms = [];
         $hasMore = false;
         $cnt = 0;
-        while ($record = mysqli_fetch_assoc($res)) {
+        foreach ($res as $record) {
             $cnt++;
             if ($cnt < $limit) {
                 $terms[] = $record;
@@ -1760,7 +1756,6 @@ class WordController extends BaseController
                 $hasMore = true;
             }
         }
-        mysqli_free_result($res);
 
         // Calculate next offset if there are more terms
         $nextOffset = $hasMore ? $pos + $limit - 1 : null;
