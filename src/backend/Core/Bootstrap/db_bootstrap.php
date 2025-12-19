@@ -24,14 +24,13 @@ namespace Lwt\Core\Bootstrap;
 
 // Core utilities
 require_once __DIR__ . '/../Globals.php';
-require_once __DIR__ . '/../version.php';
+require_once __DIR__ . '/../StringUtils.php';
+require_once __DIR__ . '/../Utils/error_handling.php';
 
 use Lwt\Core\Globals;
 
 // Initialize globals (this was previously done in settings.php)
 Globals::initialize();
-require_once __DIR__ . '/../Utils/string_utilities.php';
-require_once __DIR__ . '/../Utils/error_handling.php';
 
 // Database classes
 require_once __DIR__ . '/EnvLoader.php';
@@ -50,44 +49,6 @@ require_once __DIR__ . '/../Database/TextParsing.php';
 require_once __DIR__ . '/../Database/SqlFileParser.php';
 require_once __DIR__ . '/../Database/Migrations.php';
 require_once __DIR__ . '/../Database/Restore.php';
-
-/**
- * Load database configuration from .env file.
- *
- * @return array{
- *     server: string,
- *     userid: string,
- *     passwd: string,
- *     dbname: string,
- *     socket: string
- * }
- *
- * @since 3.0.0
- * @deprecated Use DatabaseBootstrap::loadConfiguration() instead
- */
-function loadDbConfiguration(): array
-{
-    return DatabaseBootstrap::loadConfiguration();
-}
-
-/**
- * Bootstrap the database connection.
- *
- * This function:
- * 1. Loads configuration from .env
- * 2. Establishes the database connection
- * 3. Registers connection with Globals
- * 4. Runs database migrations if needed
- *
- * @return void
- *
- * @since 3.0.0
- * @deprecated Use DatabaseBootstrap::bootstrap() instead
- */
-function bootstrapDatabase(): void
-{
-    DatabaseBootstrap::bootstrap();
-}
 
 // Run bootstrap
 DatabaseBootstrap::bootstrap();

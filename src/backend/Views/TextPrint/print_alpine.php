@@ -18,6 +18,7 @@
 
 namespace Lwt\Views\TextPrint;
 
+use Lwt\Services\AnnotationService;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\PageLayoutHelper;
@@ -53,7 +54,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                     <?php echo IconHelper::render('circle-help', ['title' => 'Test', 'alt' => 'Test']); ?>
                 </a>
                 <?php if ($mode !== 'edit'): ?>
-                    <?php echo getAnnotationLink($textId); ?>
+                    <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
                 <?php endif; ?>
                 <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
                     <?php echo IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
@@ -135,7 +136,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                             Print/Edit/Delete
                         </button>
                         your <strong>Improved Annotated Text</strong>
-                        <?php echo getAnnotationLink($textId); ?>.
+                        <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>.
                     <?php else: ?>
                         <button type="button" class="button is-small" @click="navigateTo('/text/print?edit=1&text=<?php echo $textId; ?>')">
                             Create

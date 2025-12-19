@@ -17,6 +17,7 @@
 
 namespace Lwt\Views\Test;
 
+use Lwt\Services\AnnotationService;
 use Lwt\View\Helper\PageLayoutHelper;
 
 ?>
@@ -44,7 +45,7 @@ use Lwt\View\Helper\PageLayoutHelper;
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
             <?php echo \Lwt\View\Helper\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
-        <?php echo \getAnnotationLink($textId); ?>
+        <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
     </div>
     <?php endif; ?>
     <div>

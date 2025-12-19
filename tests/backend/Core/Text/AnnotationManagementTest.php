@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Services/AnnotationService.php';
 
 use Lwt\Core\Globals;
+use Lwt\Services\AnnotationService;
 use PHPUnit\Framework\TestCase;
 
 Globals::initialize();
@@ -15,17 +16,24 @@ Globals::initialize();
  */
 final class AnnotationManagementTest extends TestCase
 {
+    private AnnotationService $annotationService;
+
+    protected function setUp(): void
+    {
+        $this->annotationService = new AnnotationService();
+    }
+
     /**
      * Test annotation to JSON conversion
      */
     public function testAnnotationToJson(): void
     {
         // Empty annotation
-        $this->assertEquals('{}', annotationToJson(''));
+        $this->assertEquals('{}', $this->annotationService->annotationToJson(''));
 
         // Single annotation
         $annotation = "1\tword\t5\ttranslation";
-        $result = annotationToJson($annotation);
+        $result = $this->annotationService->annotationToJson($annotation);
         $this->assertJson($result);
         $decoded = json_decode($result, true);
         $this->assertArrayHasKey(0, $decoded);
@@ -33,7 +41,7 @@ final class AnnotationManagementTest extends TestCase
 
         // Multiple annotations
         $annotation = "1\tword1\t5\ttrans1\n2\tword2\t3\ttrans2";
-        $result = annotationToJson($annotation);
+        $result = $this->annotationService->annotationToJson($annotation);
         $this->assertJson($result);
         $decoded = json_decode($result, true);
         $this->assertCount(2, $decoded);
@@ -48,22 +56,22 @@ final class AnnotationManagementTest extends TestCase
     {
         // Annotation with special characters
         $annotation = "1\tword's\t5\t\"translation\"";
-        $result = annotationToJson($annotation);
+        $result = $this->annotationService->annotationToJson($annotation);
         $this->assertJson($result);
 
         // Annotation with tabs in translation
         $annotation = "1\tword\t5\ttranslation\twith\ttabs";
-        $result = annotationToJson($annotation);
+        $result = $this->annotationService->annotationToJson($annotation);
         $this->assertJson($result);
 
         // Malformed annotation (missing fields)
         $annotation = "1\tword";
-        $result = annotationToJson($annotation);
+        $result = $this->annotationService->annotationToJson($annotation);
         $this->assertJson($result);
 
         // Unicode in annotations
         $annotation = "1\t日本語\t5\ttranslation";
-        $result = annotationToJson($annotation);
+        $result = $this->annotationService->annotationToJson($annotation);
         $this->assertJson($result);
         $decoded = json_decode($result, true);
         $this->assertStringContainsString('日本語', $decoded[0][0]);

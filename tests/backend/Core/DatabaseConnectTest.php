@@ -4,12 +4,12 @@ namespace Lwt\Tests\Core;
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
+use Lwt\Core\ApplicationInfo;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Configuration;
-
-use function Lwt\Core\Utils\removeSpaces;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
@@ -21,8 +21,6 @@ use Lwt\Database\Validation;
 use Lwt\Services\SettingsService;
 use Lwt\Services\WordStatusService;
 use PHPUnit\Framework\TestCase;
-
-use function Lwt\Core\getVersionNumber;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
@@ -1278,19 +1276,19 @@ class DatabaseConnectTest extends TestCase
     public function testRemoveSpaces(): void
     {
         // Test with remove spaces = 0 (no removal)
-        $result = removeSpaces('hello world', '0');
+        $result = StringUtils::removeSpaces('hello world', '0');
         $this->assertEquals('hello world', $result);
 
         // Test with remove spaces = 1 (remove all spaces)
-        $result = removeSpaces('hello world test', '1');
+        $result = StringUtils::removeSpaces('hello world test', '1');
         $this->assertEquals('helloworldtest', $result);
 
         // Test with empty string
-        $result = removeSpaces('', '1');
+        $result = StringUtils::removeSpaces('', '1');
         $this->assertEquals('', $result);
 
         // Test with multiple spaces
-        $result = removeSpaces('test  multiple   spaces', '1');
+        $result = StringUtils::removeSpaces('test  multiple   spaces', '1');
         $this->assertEquals('testmultiplespaces', $result);
     }
 
@@ -1326,7 +1324,7 @@ class DatabaseConnectTest extends TestCase
      */
     public function testGetVersionNumber(): void
     {
-        $version = getVersionNumber();
+        $version = ApplicationInfo::getVersionNumber();
         $this->assertIsString($version);
         $this->assertStringStartsWith('v', $version);
         // Version format: vXXXYYYZZZ (e.g., v002009001 for 2.9.1)

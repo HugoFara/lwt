@@ -34,7 +34,6 @@ use Lwt\Services\LanguageService;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\StatusHelper;
 
-use function Lwt\Core\Utils\removeSoftHyphens;
 
 /**
  * Unit tests for text processing functions.
@@ -437,34 +436,34 @@ class TextProcessingTest extends TestCase
 
     public function testRemoveSoftHyphens(): void
     {
-        $this->assertEquals('hello', removeSoftHyphens('hel­lo'));
-        $this->assertEquals('world', removeSoftHyphens('world'));
-        $this->assertEquals('', removeSoftHyphens(''));
-        $this->assertEquals('testing', removeSoftHyphens('test­­ing'));
+        $this->assertEquals('hello', StringUtils::removeSoftHyphens('hel­lo'));
+        $this->assertEquals('world', StringUtils::removeSoftHyphens('world'));
+        $this->assertEquals('', StringUtils::removeSoftHyphens(''));
+        $this->assertEquals('testing', StringUtils::removeSoftHyphens('test­­ing'));
     }
 
     public function testMakeCounterWithTotal(): void
     {
         // Single item - should return empty
-        $this->assertEquals('', \Lwt\Core\Utils\makeCounterWithTotal(1, 1));
+        $this->assertEquals('', StringUtils::makeCounterWithTotal(1, 1));
 
         // Less than 10 items
-        $this->assertEquals('3/5', \Lwt\Core\Utils\makeCounterWithTotal(5, 3));
-        $this->assertEquals('1/9', \Lwt\Core\Utils\makeCounterWithTotal(9, 1));
+        $this->assertEquals('3/5', StringUtils::makeCounterWithTotal(5, 3));
+        $this->assertEquals('1/9', StringUtils::makeCounterWithTotal(9, 1));
 
         // 10 or more items - should pad with zeros
-        $this->assertEquals('03/10', \Lwt\Core\Utils\makeCounterWithTotal(10, 3));
-        $this->assertEquals('025/100', \Lwt\Core\Utils\makeCounterWithTotal(100, 25));
-        $this->assertEquals('0005/1000', \Lwt\Core\Utils\makeCounterWithTotal(1000, 5));
+        $this->assertEquals('03/10', StringUtils::makeCounterWithTotal(10, 3));
+        $this->assertEquals('025/100', StringUtils::makeCounterWithTotal(100, 25));
+        $this->assertEquals('0005/1000', StringUtils::makeCounterWithTotal(1000, 5));
     }
 
     public function testEncodeURI(): void
     {
-        $this->assertEquals('hello%20world', \Lwt\Core\Utils\encodeURI('hello world'));
-        $this->assertEquals('test-file_name.txt', \Lwt\Core\Utils\encodeURI('test-file_name.txt'));
-        $this->assertEquals('path/to/file', \Lwt\Core\Utils\encodeURI('path/to/file'));
-        $this->assertEquals('query?param=value&other=2', \Lwt\Core\Utils\encodeURI('query?param=value&other=2'));
-        $this->assertEquals('#anchor', \Lwt\Core\Utils\encodeURI('#anchor'));
+        $this->assertEquals('hello%20world', StringUtils::encodeURI('hello world'));
+        $this->assertEquals('test-file_name.txt', StringUtils::encodeURI('test-file_name.txt'));
+        $this->assertEquals('path/to/file', StringUtils::encodeURI('path/to/file'));
+        $this->assertEquals('query?param=value&other=2', StringUtils::encodeURI('query?param=value&other=2'));
+        $this->assertEquals('#anchor', StringUtils::encodeURI('#anchor'));
     }
 
     public function testGetChecked(): void

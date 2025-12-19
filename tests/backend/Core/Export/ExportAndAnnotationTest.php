@@ -9,6 +9,7 @@ use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\DB;
 use Lwt\Database\Escaping;
+use Lwt\Services\AnnotationService;
 use Lwt\Services\ExportService;
 use PHPUnit\Framework\TestCase;
 
@@ -84,7 +85,7 @@ class ExportAndAnnotationTest extends TestCase
                          VALUES ('test_export_text', 'Test content', $lgId)");
         $textId = (int)Connection::lastInsertId();
 
-        $ann = createAnn($textId);
+        $ann = (new AnnotationService())->createAnnotation($textId);
 
         $this->assertIsString($ann);
         // Even with no textitems2, should return some annotation structure
@@ -100,7 +101,7 @@ class ExportAndAnnotationTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $ann = createAnn(999999);
+        $ann = (new AnnotationService())->createAnnotation(999999);
 
         $this->assertIsString($ann);
         // Should return empty or minimal annotation structure
@@ -125,7 +126,7 @@ class ExportAndAnnotationTest extends TestCase
         $textId = (int)Connection::lastInsertId();
 
         $oldAnn = "1\tword\t0\ttranslation\n";
-        $newAnn = recreateSaveAnn($textId, $oldAnn);
+        $newAnn = (new AnnotationService())->recreateSaveAnnotation($textId, $oldAnn);
 
         $this->assertIsString($newAnn);
 
@@ -150,7 +151,7 @@ class ExportAndAnnotationTest extends TestCase
                          VALUES ('test_export_empty_text', 'Test content', $lgId)");
         $textId = (int)Connection::lastInsertId();
 
-        $newAnn = recreateSaveAnn($textId, '');
+        $newAnn = (new AnnotationService())->recreateSaveAnnotation($textId, '');
 
         $this->assertIsString($newAnn);
 
@@ -176,7 +177,7 @@ class ExportAndAnnotationTest extends TestCase
         $textId = (int)Connection::lastInsertId();
 
         $oldAnn = "1\tword\t0\ttranslation\n";
-        recreateSaveAnn($textId, $oldAnn);
+        (new AnnotationService())->recreateSaveAnnotation($textId, $oldAnn);
 
         // Verify database was updated
         $saved = Connection::fetchValue("SELECT TxAnnotatedText AS value FROM texts WHERE TxID = $textId");
@@ -235,7 +236,7 @@ class ExportAndAnnotationTest extends TestCase
                          VALUES ('test_export_struct_text', 'Test content', $lgId)");
         $textId = (int)Connection::lastInsertId();
 
-        $ann = createAnn($textId);
+        $ann = (new AnnotationService())->createAnnotation($textId);
 
         // Annotation should contain lines
         $lines = explode("\n", $ann);
@@ -281,11 +282,11 @@ class ExportAndAnnotationTest extends TestCase
         $textId = (int)Connection::lastInsertId();
 
         // Step 1: Create initial annotation
-        $ann1 = createAnn($textId);
+        $ann1 = (new AnnotationService())->createAnnotation($textId);
         $this->assertIsString($ann1);
 
         // Step 2: Recreate annotation with old data
-        $ann2 = recreateSaveAnn($textId, $ann1);
+        $ann2 = (new AnnotationService())->recreateSaveAnnotation($textId, $ann1);
         $this->assertIsString($ann2);
 
         // Step 3: Verify annotation was saved
@@ -316,7 +317,7 @@ class ExportAndAnnotationTest extends TestCase
 
         // Create annotation with translation
         $oldAnn = "1\tword\t5\tmy_translation\n";
-        $newAnn = recreateSaveAnn($textId, $oldAnn);
+        $newAnn = (new AnnotationService())->recreateSaveAnnotation($textId, $oldAnn);
 
         // The new annotation should preserve "my_translation" if the word is still present
         $this->assertIsString($newAnn);

@@ -3,18 +3,16 @@
 namespace Lwt\Tests\Core;
 
 require_once __DIR__ . '/../../../src/backend/Core/Globals.php';
-require_once __DIR__ . '/../../../src/backend/Core/version.php';
+require_once __DIR__ . '/../../../src/backend/Core/ApplicationInfo.php';
 
+use Lwt\Core\ApplicationInfo;
 use Lwt\Core\Globals;
 use PHPUnit\Framework\TestCase;
-
-use function Lwt\Core\getVersion;
-use function Lwt\Core\getVersionNumber;
 
 Globals::initialize();
 
 /**
- * Tests for version.php functions
+ * Tests for ApplicationInfo class
  */
 final class VersionTest extends TestCase
 {
@@ -23,7 +21,7 @@ final class VersionTest extends TestCase
      */
     public function testGetVersion(): void
     {
-        $version = getVersion();
+        $version = ApplicationInfo::getVersion();
         $this->assertIsString($version);
     }
 
@@ -32,7 +30,7 @@ final class VersionTest extends TestCase
      */
     public function testGetVersionNumber(): void
     {
-        $version = getVersionNumber();
+        $version = ApplicationInfo::getVersionNumber();
         $this->assertTrue(str_starts_with($version, 'v'));
         $this->assertSame(10, strlen($version));
     }

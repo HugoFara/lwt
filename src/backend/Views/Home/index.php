@@ -23,8 +23,7 @@ use Lwt\Core\Globals;
 use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\SelectOptionsBuilder;
 
-use const Lwt\Core\LWT_APP_VERSION;
-use function Lwt\Core\getVersion;
+use Lwt\Core\ApplicationInfo;
 
 /**
  * When on a WordPress server, make a logout button.
@@ -62,7 +61,7 @@ function renderHomeConfig(?array $lastTextInfo): void
 {
     $config = [
         'phpVersion' => phpversion(),
-        'lwtVersion' => LWT_APP_VERSION,
+        'lwtVersion' => ApplicationInfo::VERSION,
         'lastText' => $lastTextInfo,
     ];
     ?>
@@ -405,7 +404,7 @@ if ($currentTextInfo !== null && $currenttext !== null) {
 
 <!-- Version info -->
 <p class="has-text-centered has-text-grey is-size-7 mt-4">
-    LWT Version <?php echo getVersion(); ?>
+    LWT Version <?php echo ApplicationInfo::getVersion(); ?>
 </p>
 
 <!-- Footer - Alpine.js Component -->

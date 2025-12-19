@@ -16,6 +16,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\Core\Http\InputValidator;
+use Lwt\Core\Integration\GoogleTimeToken;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\TranslationService;
 use Lwt\Database\Settings;
@@ -132,8 +133,7 @@ class TranslationController extends BaseController
         bool $sentenceMode
     ): void {
         // Get time token for Google API
-        require_once __DIR__ . '/../Core/Integration/google_time_token.php';
-        $timeToken = \Lwt\Includes\getGoogleTimeToken();
+        $timeToken = GoogleTimeToken::get();
 
         $result = $this->translationService->translateViaGoogle(
             $text,

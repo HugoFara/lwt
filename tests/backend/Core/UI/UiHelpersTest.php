@@ -3,8 +3,8 @@
 namespace Lwt\Tests\Core\UI;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Utils/string_utilities.php';
-require_once __DIR__ . '/../../../../src/backend/Core/version.php';
+require_once __DIR__ . '/../../../../src/backend/Core/StringUtils.php';
+require_once __DIR__ . '/../../../../src/backend/Core/ApplicationInfo.php';
 require_once __DIR__ . '/../../../../src/backend/View/Helper/PageLayoutHelper.php';
 
 use Lwt\Core\Globals;

@@ -27,6 +27,7 @@
 
 namespace Lwt\Views\Text;
 
+use Lwt\Services\AnnotationService;
 use Lwt\Services\MediaService;
 
 ?>
@@ -60,7 +61,7 @@ use Lwt\Services\MediaService;
         <a href="/text/print-plain?text=<?php echo $textId; ?>" target="_top">
             <?php echo \Lwt\View\Helper\IconHelper::render('printer', ['title' => 'Print', 'alt' => 'Print']); ?>
         </a>
-        <?php echo \getAnnotationLink($textId); ?>
+        <?php echo (new AnnotationService())->getAnnotationLink($textId); ?>
         <a target="_top" href="/texts?chg=<?php echo $textId; ?>">
             <?php echo \Lwt\View\Helper\IconHelper::render('file-pen', ['title' => 'Edit Text', 'alt' => 'Edit Text']); ?>
         </a>

@@ -22,9 +22,6 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\StatusHelper;
 use PHPUnit\Framework\TestCase;
 
-use function Lwt\Core\Utils\getFilePath;
-use function Lwt\Core\Utils\printFilePath;
-use function Lwt\Core\Utils\removeSoftHyphens;
 
 // Load config from .env and use test database
 EnvLoader::load(__DIR__ . '/../../../.env');
@@ -119,57 +116,57 @@ class IntegrationTest extends TestCase
 
     public function testRemoveSoftHyphens(): void
     {
-        $this->assertEquals('hello', \Lwt\Core\Utils\removeSoftHyphens('hel­lo'));
-        $this->assertEquals('world', \Lwt\Core\Utils\removeSoftHyphens('world'));
-        $this->assertEquals('', \Lwt\Core\Utils\removeSoftHyphens(''));
+        $this->assertEquals('hello', StringUtils::removeSoftHyphens('hel­lo'));
+        $this->assertEquals('world', StringUtils::removeSoftHyphens('world'));
+        $this->assertEquals('', StringUtils::removeSoftHyphens(''));
         // All soft hyphens are removed
-        $this->assertEquals('testing', \Lwt\Core\Utils\removeSoftHyphens('test­­ing'));
+        $this->assertEquals('testing', StringUtils::removeSoftHyphens('test­­ing'));
     }
 
     public function testMakeCounterWithTotal(): void
     {
         // Single item - should return empty
-        $this->assertEquals('', \Lwt\Core\Utils\makeCounterWithTotal(1, 1));
+        $this->assertEquals('', StringUtils::makeCounterWithTotal(1, 1));
 
         // Less than 10 items
-        $this->assertEquals('3/5', \Lwt\Core\Utils\makeCounterWithTotal(5, 3));
-        $this->assertEquals('1/9', \Lwt\Core\Utils\makeCounterWithTotal(9, 1));
+        $this->assertEquals('3/5', StringUtils::makeCounterWithTotal(5, 3));
+        $this->assertEquals('1/9', StringUtils::makeCounterWithTotal(9, 1));
 
         // 10 or more items - should pad with zeros
-        $this->assertEquals('03/10', \Lwt\Core\Utils\makeCounterWithTotal(10, 3));
-        $this->assertEquals('025/100', \Lwt\Core\Utils\makeCounterWithTotal(100, 25));
-        $this->assertEquals('0005/1000', \Lwt\Core\Utils\makeCounterWithTotal(1000, 5));
+        $this->assertEquals('03/10', StringUtils::makeCounterWithTotal(10, 3));
+        $this->assertEquals('025/100', StringUtils::makeCounterWithTotal(100, 25));
+        $this->assertEquals('0005/1000', StringUtils::makeCounterWithTotal(1000, 5));
     }
 
     public function testEncodeURI(): void
     {
-        $this->assertEquals('hello%20world', \Lwt\Core\Utils\encodeURI('hello world'));
-        $this->assertEquals('test-file_name.txt', \Lwt\Core\Utils\encodeURI('test-file_name.txt'));
-        $this->assertEquals('path/to/file', \Lwt\Core\Utils\encodeURI('path/to/file'));
-        $this->assertEquals('query?param=value&other=2', \Lwt\Core\Utils\encodeURI('query?param=value&other=2'));
-        $this->assertEquals('#anchor', \Lwt\Core\Utils\encodeURI('#anchor'));
+        $this->assertEquals('hello%20world', StringUtils::encodeURI('hello world'));
+        $this->assertEquals('test-file_name.txt', StringUtils::encodeURI('test-file_name.txt'));
+        $this->assertEquals('path/to/file', StringUtils::encodeURI('path/to/file'));
+        $this->assertEquals('query?param=value&other=2', StringUtils::encodeURI('query?param=value&other=2'));
+        $this->assertEquals('#anchor', StringUtils::encodeURI('#anchor'));
     }
 
     public function testGetFilePath(): void
     {
         // Test with a file that doesn't exist - should return absolute path
-        $result = getFilePath('nonexistent_file.png');
+        $result = StringUtils::getFilePath('nonexistent_file.png');
         $this->assertEquals('/nonexistent_file.png', $result);
 
         // Test with path separator - should return absolute path
-        $result = getFilePath('path/to/file.png');
+        $result = StringUtils::getFilePath('path/to/file.png');
         $this->assertStringStartsWith('/', $result);
         $this->assertStringContainsString('file.png', $result);
 
         // Test legacy path mappings
-        $this->assertEquals('/assets/css/styles.css', getFilePath('css/styles.css'));
-        $this->assertEquals('/assets/icons/example.svg', getFilePath('icn/example.svg'));
-        $this->assertEquals('/assets/images/apple-touch-icon.png', getFilePath('img/apple-touch-icon.png'));
-        $this->assertEquals('/assets/js/pgm.js', getFilePath('js/pgm.js'));
+        $this->assertEquals('/assets/css/styles.css', StringUtils::getFilePath('css/styles.css'));
+        $this->assertEquals('/assets/icons/example.svg', StringUtils::getFilePath('icn/example.svg'));
+        $this->assertEquals('/assets/images/apple-touch-icon.png', StringUtils::getFilePath('img/apple-touch-icon.png'));
+        $this->assertEquals('/assets/js/pgm.js', StringUtils::getFilePath('js/pgm.js'));
 
         // Test paths that already have assets/ prefix - should not double-prefix
-        $this->assertEquals('/assets/css/styles.css', getFilePath('assets/css/styles.css'));
-        $this->assertEquals('/assets/sounds/click.mp3', getFilePath('assets/sounds/click.mp3'));
+        $this->assertEquals('/assets/css/styles.css', StringUtils::getFilePath('assets/css/styles.css'));
+        $this->assertEquals('/assets/sounds/click.mp3', StringUtils::getFilePath('assets/sounds/click.mp3'));
     }
 
     public function testGetSepas(): void
@@ -502,22 +499,23 @@ class IntegrationTest extends TestCase
     public function testTrimValue(): void
     {
         $value = "  hello world  ";
-        trimValue($value);
+        $value = trim($value);
         $this->assertEquals('hello world', $value);
 
         $value2 = "\t\ntest\n\t";
-        trimValue($value2);
+        $value2 = trim($value2);
         $this->assertEquals('test', $value2);
     }
 
     public function testGetFirstTranslation(): void
     {
+        $annotationService = new \Lwt\Services\AnnotationService();
         $sepa = StringUtils::getFirstSeparator();
         $trans = "hello{$sepa}world{$sepa}test";
-        $first = getFirstTranslation($trans);
+        $first = $annotationService->getFirstTranslation($trans);
         $this->assertEquals('hello', $first);
 
-        $single = getFirstTranslation('onlyone');
+        $single = $annotationService->getFirstTranslation('onlyone');
         $this->assertEquals('onlyone', $single);
     }
 
@@ -631,7 +629,7 @@ class IntegrationTest extends TestCase
     {
         // Test that it outputs something
         ob_start();
-        printFilePath('test.mp3');
+        StringUtils::printFilePath('test.mp3');
         $output = ob_get_clean();
 
         $this->assertIsString($output);
