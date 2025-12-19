@@ -574,12 +574,13 @@ class FeedService
             // Archive the text
             $bindings = [$textId];
             $sql = "INSERT INTO archivedtexts (
-                    AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
-                )
-                SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                FROM texts WHERE TxID = ?"
-                . UserScopedQuery::forTablePrepared('texts', $bindings)
-                . UserScopedQuery::forTablePrepared('archivedtexts', $bindings);
+                    AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
+                    . UserScopedQuery::insertColumn('archivedtexts')
+                . ")
+                SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
+                    . UserScopedQuery::insertValue('archivedtexts')
+                . " FROM texts WHERE TxID = ?"
+                . UserScopedQuery::forTablePrepared('texts', $bindings);
             Connection::preparedExecute($sql, $bindings);
 
             $archiveId = (int)Connection::lastInsertId();
@@ -1400,8 +1401,11 @@ class FeedService
                         foreach ($text['TagList'] as $tag) {
                             if (!in_array($tag, $_SESSION['TEXTTAGS'] ?? [])) {
                                 $bindings = [$tag];
-                                $sql = 'INSERT INTO tags2 (T2Text) VALUES (?)'
-                                    . UserScopedQuery::forTablePrepared('tags2', $bindings);
+                                $sql = 'INSERT INTO tags2 (T2Text'
+                                    . UserScopedQuery::insertColumn('tags2')
+                                    . ') VALUES (?'
+                                    . UserScopedQuery::insertValuePrepared('tags2', $bindings)
+                                    . ')';
                                 Connection::preparedExecute($sql, $bindings);
                             }
                         }
@@ -1480,13 +1484,14 @@ class FeedService
                     $message4 += (int)Connection::execute(
                         'INSERT INTO archivedtexts (
                             AtLgID, AtTitle, AtText, AtAnnotatedText,
-                            AtAudioURI, AtSourceURI
-                        ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText,
-                        TxAudioURI, TxSourceURI
-                        FROM texts
+                            AtAudioURI, AtSourceURI'
+                            . UserScopedQuery::insertColumn('archivedtexts')
+                        . ') SELECT TxLgID, TxTitle, TxText, TxAnnotatedText,
+                        TxAudioURI, TxSourceURI'
+                            . UserScopedQuery::insertValue('archivedtexts')
+                        . ' FROM texts
                         WHERE TxID = ' . $textID
                         . UserScopedQuery::forTable('texts')
-                        . UserScopedQuery::forTable('archivedtexts')
                     );
 
                     $archiveId = (int)Connection::lastInsertId();

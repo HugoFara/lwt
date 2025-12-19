@@ -230,9 +230,11 @@ class TextService
         $bindings1 = [$archivedId];
         $inserted = Connection::preparedExecute(
             "INSERT INTO texts (
-                TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-            ) SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
-            FROM archivedtexts
+                TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
+                . UserScopedQuery::insertColumn('texts')
+            . ") SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
+                . UserScopedQuery::insertValue('texts')
+            . " FROM archivedtexts
             WHERE AtID = ?"
             . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
             $bindings1
@@ -320,9 +322,11 @@ class TextService
             $bindings1 = [$ida];
             $mess = Connection::preparedExecute(
                 "INSERT INTO texts (
-                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                ) SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
-                FROM archivedtexts
+                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
+                    . UserScopedQuery::insertColumn('texts')
+                . ") SELECT AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
+                    . UserScopedQuery::insertValue('texts')
+                . " FROM archivedtexts
                 WHERE AtID = ?"
                 . UserScopedQuery::forTablePrepared('archivedtexts', $bindings1),
                 $bindings1
@@ -699,9 +703,11 @@ class TextService
         $bindings1 = [$textId];
         $msg4 = Connection::preparedExecute(
             "INSERT INTO archivedtexts (
-                AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
-            ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-            FROM texts
+                AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
+                . UserScopedQuery::insertColumn('archivedtexts')
+            . ") SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
+                . UserScopedQuery::insertValue('archivedtexts')
+            . " FROM texts
             WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings1),
             $bindings1
@@ -1106,9 +1112,11 @@ class TextService
         $bindings1 = [$lgId, $title, $cleanText, $audioValue, $sourceUri];
         $textId = (int) Connection::preparedInsert(
             "INSERT INTO texts (
-                TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-            ) VALUES (?, ?, ?, '', ?, ?)"
-            . UserScopedQuery::forTablePrepared('texts', $bindings1),
+                TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
+                . UserScopedQuery::insertColumn('texts')
+            . ") VALUES (?, ?, ?, '', ?, ?"
+                . UserScopedQuery::insertValuePrepared('texts', $bindings1)
+            . ")",
             $bindings1
         );
 
@@ -1269,9 +1277,11 @@ class TextService
             $bindings1 = [$id];
             $count += Connection::preparedExecute(
                 "INSERT INTO archivedtexts (
-                    AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI
-                ) SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                FROM texts WHERE TxID = ?"
+                    AtLgID, AtTitle, AtText, AtAnnotatedText, AtAudioURI, AtSourceURI"
+                    . UserScopedQuery::insertColumn('archivedtexts')
+                . ") SELECT TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
+                    . UserScopedQuery::insertValue('archivedtexts')
+                . " FROM texts WHERE TxID = ?"
                 . UserScopedQuery::forTablePrepared('texts', $bindings1),
                 $bindings1
             );
@@ -1536,9 +1546,11 @@ class TextService
             $bindings = [$langId, $thisTitle, $texts[$i], $sourceUri];
             $affected = Connection::preparedExecute(
                 "INSERT INTO texts (
-                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                ) VALUES (?, ?, ?, '', '', ?)"
-                . UserScopedQuery::forTablePrepared('texts', $bindings),
+                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
+                    . UserScopedQuery::insertColumn('texts')
+                . ") VALUES (?, ?, ?, '', '', ?"
+                    . UserScopedQuery::insertValuePrepared('texts', $bindings)
+                . ")",
                 $bindings
             );
             $imported += $affected;
@@ -1776,9 +1788,11 @@ class TextService
             $bindings1 = [$lgId, $title, $cleanText, $audioValue, $sourceUri];
             $textId = (int) Connection::preparedInsert(
                 "INSERT INTO texts (
-                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI
-                ) VALUES (?, ?, ?, '', ?, ?)"
-                . UserScopedQuery::forTablePrepared('texts', $bindings1),
+                    TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI"
+                    . UserScopedQuery::insertColumn('texts')
+                . ") VALUES (?, ?, ?, '', ?, ?"
+                    . UserScopedQuery::insertValuePrepared('texts', $bindings1)
+                . ")",
                 $bindings1
             );
         } else {

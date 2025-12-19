@@ -975,13 +975,18 @@ class WordListService
         $sentence = ExportService::replaceTabNewline($data["WoSentence"] ?? '');
         $romanization = $data["WoRomanization"] ?? '';
 
-        $wid = Connection::preparedInsert(
-            'INSERT INTO words (WoLgID, WoTextLC, WoText, ' .
-            'WoStatus, WoTranslation, WoSentence, WoRomanization, WoStatusChanged,' .
-            WordStatusService::makeScoreRandomInsertUpdate('iv') . ') VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ' .
-            WordStatusService::makeScoreRandomInsertUpdate('id') . ')',
-            [$data["WoLgID"], $textLc, $data["WoText"], $data["WoStatus"], $translation, $sentence, $romanization]
-        );
+        $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
+        $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
+
+        $bindings = [$data["WoLgID"], $textLc, $data["WoText"], $data["WoStatus"], $translation, $sentence, $romanization];
+        $sql = "INSERT INTO words (WoLgID, WoTextLC, WoText, "
+            . "WoStatus, WoTranslation, WoSentence, WoRomanization, WoStatusChanged, {$scoreColumns}"
+            . UserScopedQuery::insertColumn('words')
+            . ") VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues}"
+            . UserScopedQuery::insertValuePrepared('words', $bindings)
+            . ")";
+
+        $wid = Connection::preparedInsert($sql, $bindings);
 
         if ($wid > 0) {
             Maintenance::initWordCount();

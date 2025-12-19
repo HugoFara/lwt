@@ -368,9 +368,43 @@ class WordUploadService
                     ($fields["ro"] != 0 ? 'WoRomanization, ' : '') .
                     ($fields["se"] != 0 ? 'WoSentence, ' : '') .
                     "WoLgID, WoStatus, WoStatusChanged,
-                    WoTodayScore, WoTomorrowScore, WoRandom
-                )
+                    WoTodayScore, WoTomorrowScore, WoRandom"
+                    . UserScopedQuery::insertColumn('words')
+                . ")
                 VALUES " . implode(',', $placeholders);
+
+            // Add user ID to each row's params if multi-user enabled
+            $userId = UserScopedQuery::getUserIdForInsert('words');
+            if ($userId !== null) {
+                // params is structured as repeated groups, need to inject userId at end of each group
+                $paramCount = count($params);
+                $rowCount = count($placeholders);
+                $paramsPerRow = $paramCount / $rowCount;
+                $newParams = [];
+                for ($i = 0; $i < $rowCount; $i++) {
+                    $start = $i * $paramsPerRow;
+                    for ($j = 0; $j < $paramsPerRow; $j++) {
+                        $newParams[] = $params[$start + $j];
+                    }
+                    $newParams[] = $userId;
+                }
+                $params = $newParams;
+                // Update placeholders to include extra ?
+                $placeholders = array_map(
+                    fn($p) => substr($p, 0, -1) . ', ?)',
+                    $placeholders
+                );
+                $sql = "INSERT INTO words(
+                        WoText, WoTextLC, " .
+                        ($fields["tr"] != 0 ? 'WoTranslation, ' : '') .
+                        ($fields["ro"] != 0 ? 'WoRomanization, ' : '') .
+                        ($fields["se"] != 0 ? 'WoSentence, ' : '') .
+                        "WoLgID, WoStatus, WoStatusChanged,
+                        WoTodayScore, WoTomorrowScore, WoRandom"
+                        . UserScopedQuery::insertColumn('words')
+                    . ")
+                    VALUES " . implode(',', $placeholders);
+            }
 
             Connection::preparedExecute($sql, $params);
         }

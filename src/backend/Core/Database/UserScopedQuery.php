@@ -114,6 +114,100 @@ class UserScopedQuery
     }
 
     /**
+     * Get INSERT column fragment for user scope.
+     *
+     * Returns a SQL fragment like ", WoUsID" to append to INSERT column list
+     * when user scope should be applied, or empty string otherwise.
+     *
+     * Usage:
+     * ```php
+     * $sql = "INSERT INTO words (WoLgID, WoText" . UserScopedQuery::insertColumn('words') . ") VALUES (?, ?" . UserScopedQuery::insertValuePrepared('words', $bindings) . ")";
+     * ```
+     *
+     * @param string $tableName The table name (without prefix)
+     *
+     * @return string SQL column fragment (includes leading comma) or empty string
+     */
+    public static function insertColumn(string $tableName): string
+    {
+        if (!Globals::isMultiUserEnabled()) {
+            return '';
+        }
+
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return '';
+        }
+
+        $column = self::getUserIdColumn($tableName);
+        if ($column === null) {
+            return '';
+        }
+
+        return ", {$column}";
+    }
+
+    /**
+     * Get INSERT value fragment for user scope (prepared statement version).
+     *
+     * Returns a SQL fragment like ", ?" and adds the user ID to bindings
+     * when user scope should be applied, or empty string otherwise.
+     *
+     * @param string            $tableName The table name (without prefix)
+     * @param array<int, mixed> &$bindings Reference to bindings array
+     *
+     * @return string SQL value fragment (includes leading comma) or empty string
+     */
+    public static function insertValuePrepared(string $tableName, array &$bindings): string
+    {
+        if (!Globals::isMultiUserEnabled()) {
+            return '';
+        }
+
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return '';
+        }
+
+        $column = self::getUserIdColumn($tableName);
+        if ($column === null) {
+            return '';
+        }
+
+        $bindings[] = $userId;
+        return ', ?';
+    }
+
+    /**
+     * Get INSERT value fragment for user scope (raw SQL version).
+     *
+     * Returns a SQL fragment like ", 1" with the actual user ID value
+     * when user scope should be applied, or empty string otherwise.
+     *
+     * @param string $tableName The table name (without prefix)
+     *
+     * @return string SQL value fragment (includes leading comma) or empty string
+     */
+    public static function insertValue(string $tableName): string
+    {
+        if (!Globals::isMultiUserEnabled()) {
+            return '';
+        }
+
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return '';
+        }
+
+        $column = self::getUserIdColumn($tableName);
+        if ($column === null) {
+            return '';
+        }
+
+        return ', ' . (int) $userId;
+    }
+
+    /**
      * Get WHERE condition for user scope filtering.
      *
      * Returns a SQL fragment like " AND WoUsID = 1" when user scope

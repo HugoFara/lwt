@@ -91,14 +91,7 @@ class WordService
             $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
             $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
-            $sql = "INSERT INTO words (
-                    WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
-                    WoSentence, WoRomanization, WoStatusChanged, {$scoreColumns}
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})";
-
-            $stmt = Connection::prepare($sql);
-            $stmt->bind(
-                'ississs',
+            $bindings = [
                 $data['WoLgID'],
                 $textlc,
                 $text,
@@ -106,9 +99,16 @@ class WordService
                 $translation,
                 ExportService::replaceTabNewline($data['WoSentence'] ?? ''),
                 $data['WoRomanization'] ?? ''
-            );
-            $stmt->execute();
-            $wid = (int) $stmt->insertId();
+            ];
+            $sql = "INSERT INTO words (
+                    WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
+                    WoSentence, WoRomanization, WoStatusChanged, {$scoreColumns}"
+                    . UserScopedQuery::insertColumn('words')
+                . ") VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues}"
+                    . UserScopedQuery::insertValuePrepared('words', $bindings)
+                . ")";
+
+            $wid = (int) Connection::preparedInsert($sql, $bindings);
 
             return [
                 'id' => $wid,
@@ -666,9 +666,11 @@ class WordService
 
         $bindings = [$langId, $term, $termlc, $status];
         $sql = "INSERT INTO words (
-                WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}
-            ) VALUES (?, ?, ?, ?, NOW(), {$scoreValues})"
-            . UserScopedQuery::forTablePrepared('words', $bindings);
+                WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}"
+                . UserScopedQuery::insertColumn('words')
+            . ") VALUES (?, ?, ?, ?, NOW(), {$scoreValues}"
+                . UserScopedQuery::insertValuePrepared('words', $bindings)
+            . ")";
 
         $wid = Connection::preparedInsert($sql, $bindings);
         return ['id' => (int)$wid, 'rows' => 1];
@@ -950,9 +952,11 @@ class WordService
 
         $bindings = [$langId, $term, $termlc, $status];
         $sql = "INSERT INTO words (
-                WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged, {$scoreColumns}
-            ) VALUES (?, ?, ?, ?, 1, NOW(), {$scoreValues})"
-            . UserScopedQuery::forTablePrepared('words', $bindings);
+                WoLgID, WoText, WoTextLC, WoStatus, WoWordCount, WoStatusChanged, {$scoreColumns}"
+                . UserScopedQuery::insertColumn('words')
+            . ") VALUES (?, ?, ?, ?, 1, NOW(), {$scoreValues}"
+                . UserScopedQuery::insertValuePrepared('words', $bindings)
+            . ")";
 
         $wid = (int) Connection::preparedInsert($sql, $bindings);
 
@@ -1163,9 +1167,11 @@ class WordService
 
             $bindings = [$langId, $term, $termlc, $status];
             $sql = "INSERT INTO words (
-                    WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}
-                ) VALUES (?, ?, ?, ?, NOW(), {$scoreValues})"
-                . UserScopedQuery::forTablePrepared('words', $bindings);
+                    WoLgID, WoText, WoTextLC, WoStatus, WoStatusChanged, {$scoreColumns}"
+                    . UserScopedQuery::insertColumn('words')
+                . ") VALUES (?, ?, ?, ?, NOW(), {$scoreValues}"
+                    . UserScopedQuery::insertValuePrepared('words', $bindings)
+                . ")";
 
             $stmt = Connection::prepare($sql);
             $stmt->bindValues($bindings);
@@ -1233,9 +1239,11 @@ class WordService
         $bindings = [$langId, $wordlc, $text, $status, $translation];
         $sql = "INSERT INTO words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
-                WoRomanization, WoStatusChanged, {$scoreColumns}
-            ) VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues})"
-            . UserScopedQuery::forTablePrepared('words', $bindings);
+                WoRomanization, WoStatusChanged, {$scoreColumns}"
+                . UserScopedQuery::insertColumn('words')
+            . ") VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues}"
+                . UserScopedQuery::insertValuePrepared('words', $bindings)
+            . ")";
 
         $wid = (int) Connection::preparedInsert($sql, $bindings);
 
@@ -1342,9 +1350,11 @@ class WordService
             $bindings = [$row['lg'], $textlc, $row['text'], $row['status'], $trans];
             $sql = "INSERT INTO words (
                     WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
-                    WoRomanization, WoStatusChanged, {$scoreColumns}
-                ) VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues})"
-                . UserScopedQuery::forTablePrepared('words', $bindings);
+                    WoRomanization, WoStatusChanged, {$scoreColumns}"
+                    . UserScopedQuery::insertColumn('words')
+                . ") VALUES (?, ?, ?, ?, ?, '', '', NOW(), {$scoreValues}"
+                    . UserScopedQuery::insertValuePrepared('words', $bindings)
+                . ")";
 
             Connection::preparedExecute($sql, $bindings);
         }
@@ -1483,9 +1493,11 @@ class WordService
 
         $sql = "INSERT INTO words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation, WoSentence,
-                WoRomanization, WoWordCount, WoStatusChanged, {$scoreColumns}
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})"
-            . UserScopedQuery::forTablePrepared('words', $bindings);
+                WoRomanization, WoWordCount, WoStatusChanged, {$scoreColumns}"
+                . UserScopedQuery::insertColumn('words')
+            . ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues}"
+                . UserScopedQuery::insertValuePrepared('words', $bindings)
+            . ")";
 
         $wid = (int) Connection::preparedInsert($sql, $bindings);
 
