@@ -128,34 +128,6 @@ class LanguageService
         return $view;
     }
 
-    /**
-     * Map a database record to a Language object.
-     *
-     * @param array $record Database record
-     *
-     * @return Language
-     */
-    private function mapRecordToLanguage(array $record): Language
-    {
-        return Language::reconstitute(
-            (int) $record["LgID"],
-            (string) $record["LgName"],
-            (string) $record["LgDict1URI"],
-            (string) ($record["LgDict2URI"] ?? ''),
-            (string) ($record["LgGoogleTranslateURI"] ?? ''),
-            (string) ($record["LgExportTemplate"] ?? ''),
-            (int) ($record["LgTextSize"] ?? 100),
-            (string) ($record["LgCharacterSubstitutions"] ?? ''),
-            (string) $record["LgRegexpSplitSentences"],
-            (string) ($record["LgExceptionsSplitSentences"] ?? ''),
-            (string) $record["LgRegexpWordCharacters"],
-            (bool) ($record["LgRemoveSpaces"] ?? false),
-            (bool) ($record["LgSplitEachChar"] ?? false),
-            (bool) ($record["LgRightToLeft"] ?? false),
-            (string) ($record["LgTTSVoiceAPI"] ?? ''),
-            (bool) ($record["LgShowRomanization"] ?? true)
-        );
-    }
 
     /**
      * Check if a language exists by ID.

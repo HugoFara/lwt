@@ -16,20 +16,13 @@ namespace Lwt\Services;
 
 use DateTimeImmutable;
 use Lwt\Core\Entity\User;
-use Lwt\Core\Entity\ValueObject\UserId;
 use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
 use Lwt\Core\Repository\UserRepository;
-use Lwt\Database\Connection;
-use Lwt\Database\QueryBuilder;
 
-require_once __DIR__ . '/../Core/Entity/ValueObject/UserId.php';
 require_once __DIR__ . '/../Core/Entity/User.php';
 require_once __DIR__ . '/../Core/Exception/AuthException.php';
 require_once __DIR__ . '/PasswordService.php';
-require_once __DIR__ . '/../Core/Database/PreparedStatement.php';
-require_once __DIR__ . '/../Core/Database/Connection.php';
-require_once __DIR__ . '/../Core/Database/QueryBuilder.php';
 require_once __DIR__ . '/../Core/Repository/RepositoryInterface.php';
 require_once __DIR__ . '/../Core/Repository/AbstractRepository.php';
 require_once __DIR__ . '/../Core/Repository/UserRepository.php';
