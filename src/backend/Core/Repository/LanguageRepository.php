@@ -301,4 +301,38 @@ class LanguageRepository extends AbstractRepository
             'a-zA-Z'
         );
     }
+
+    /**
+     * Get the name of a language by ID.
+     *
+     * @param int $id Language ID
+     *
+     * @return string|null The language name or null if not found
+     */
+    public function getName(int $id): ?string
+    {
+        $row = $this->query()
+            ->select('LgName')
+            ->where('LgID', '=', $id)
+            ->firstPrepared();
+
+        return $row !== null ? (string) $row['LgName'] : null;
+    }
+
+    /**
+     * Get the translator URI for a language.
+     *
+     * @param int $id Language ID
+     *
+     * @return string|null The translator URI or null if not found
+     */
+    public function getTranslatorUri(int $id): ?string
+    {
+        $row = $this->query()
+            ->select('LgGoogleTranslateURI')
+            ->where('LgID', '=', $id)
+            ->firstPrepared();
+
+        return $row !== null ? (string) $row['LgGoogleTranslateURI'] : null;
+    }
 }

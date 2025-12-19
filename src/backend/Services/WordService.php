@@ -18,8 +18,13 @@ require_once __DIR__ . '/SentenceService.php';
 require_once __DIR__ . '/ExportService.php';
 require_once __DIR__ . '/WordStatusService.php';
 require_once __DIR__ . '/ExpressionService.php';
+require_once __DIR__ . '/../Core/Repository/RepositoryInterface.php';
+require_once __DIR__ . '/../Core/Repository/AbstractRepository.php';
+require_once __DIR__ . '/../Core/Repository/TermRepository.php';
 
+use Lwt\Core\Entity\Term;
 use Lwt\Core\Globals;
+use Lwt\Core\Repository\TermRepository;
 use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\Connection;
@@ -44,19 +49,23 @@ class WordService
 {
     private ExpressionService $expressionService;
     private SentenceService $sentenceService;
+    private TermRepository $repository;
 
     /**
      * Constructor - initialize dependencies.
      *
      * @param ExpressionService|null $expressionService Expression service (optional for BC)
      * @param SentenceService|null   $sentenceService   Sentence service (optional for BC)
+     * @param TermRepository|null    $repository        Term repository (optional for BC)
      */
     public function __construct(
         ?ExpressionService $expressionService = null,
-        ?SentenceService $sentenceService = null
+        ?SentenceService $sentenceService = null,
+        ?TermRepository $repository = null
     ) {
         $this->expressionService = $expressionService ?? new ExpressionService();
         $this->sentenceService = $sentenceService ?? new SentenceService();
+        $this->repository = $repository ?? new TermRepository();
     }
 
     /**
@@ -184,12 +193,45 @@ class WordService
      */
     public function findById(int $wordId): ?array
     {
-        $bindings = [$wordId];
-        return Connection::preparedFetchOne(
-            "SELECT * FROM words WHERE WoID = ?"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
-            $bindings
-        );
+        $term = $this->repository->find($wordId);
+        if ($term === null) {
+            return null;
+        }
+
+        return $this->termEntityToArray($term);
+    }
+
+    /**
+     * Convert a Term entity to an array format for backward compatibility.
+     *
+     * @param Term $term Term entity
+     *
+     * @return array Term data as associative array
+     */
+    private function termEntityToArray(Term $term): array
+    {
+        // Preserve null semantics for WoSentence - empty string means null in DB
+        $sentence = $term->sentence();
+        if ($sentence === '') {
+            $sentence = null;
+        }
+
+        return [
+            'WoID' => $term->id()->toInt(),
+            'WoLgID' => $term->languageId()->toInt(),
+            'WoText' => $term->text(),
+            'WoTextLC' => $term->textLowercase(),
+            'WoStatus' => $term->status()->toInt(),
+            'WoTranslation' => $term->translation(),
+            'WoSentence' => $sentence,
+            'WoRomanization' => $term->romanization(),
+            'WoWordCount' => $term->wordCount(),
+            'WoCreated' => $term->createdAt()->format('Y-m-d H:i:s'),
+            'WoStatusChanged' => $term->statusChangedAt()->format('Y-m-d H:i:s'),
+            'WoTodayScore' => $term->todayScore(),
+            'WoTomorrowScore' => $term->tomorrowScore(),
+            'WoRandom' => $term->random(),
+        ];
     }
 
     /**
@@ -202,14 +244,8 @@ class WordService
      */
     public function findByText(string $textlc, int $langId): ?int
     {
-        $bindings = [$langId, $textlc];
-        $id = Connection::preparedFetchValue(
-            "SELECT WoID FROM words WHERE WoLgID = ? AND WoTextLC = ?"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
-            $bindings,
-            'WoID'
-        );
-        return $id !== null ? (int)$id : null;
+        $term = $this->repository->findByTextLc($langId, $textlc);
+        return $term !== null ? $term->id()->toInt() : null;
     }
 
     /**

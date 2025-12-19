@@ -19,6 +19,7 @@ use Lwt\Core\Entity\User;
 use Lwt\Core\Entity\ValueObject\UserId;
 use Lwt\Core\Exception\AuthException;
 use Lwt\Core\Globals;
+use Lwt\Core\Repository\UserRepository;
 use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 
@@ -29,6 +30,9 @@ require_once __DIR__ . '/PasswordService.php';
 require_once __DIR__ . '/../Core/Database/PreparedStatement.php';
 require_once __DIR__ . '/../Core/Database/Connection.php';
 require_once __DIR__ . '/../Core/Database/QueryBuilder.php';
+require_once __DIR__ . '/../Core/Repository/RepositoryInterface.php';
+require_once __DIR__ . '/../Core/Repository/AbstractRepository.php';
+require_once __DIR__ . '/../Core/Repository/UserRepository.php';
 
 /**
  * Service class for user authentication.
@@ -68,6 +72,13 @@ class AuthService
     private PasswordService $passwordService;
 
     /**
+     * User repository instance.
+     *
+     * @var UserRepository
+     */
+    private UserRepository $repository;
+
+    /**
      * Current authenticated user (cached).
      *
      * @var User|null
@@ -78,10 +89,14 @@ class AuthService
      * Create a new AuthService.
      *
      * @param PasswordService|null $passwordService Optional password service
+     * @param UserRepository|null  $repository      Optional user repository
      */
-    public function __construct(?PasswordService $passwordService = null)
-    {
+    public function __construct(
+        ?PasswordService $passwordService = null,
+        ?UserRepository $repository = null
+    ) {
         $this->passwordService = $passwordService ?? new PasswordService();
+        $this->repository = $repository ?? new UserRepository();
     }
 
     /**
@@ -421,28 +436,7 @@ class AuthService
      */
     private function saveUser(User $user): void
     {
-        $data = [
-            'UsUsername' => $user->username(),
-            'UsEmail' => $user->email(),
-            'UsPasswordHash' => $user->passwordHash(),
-            'UsApiToken' => $user->apiToken(),
-            'UsApiTokenExpires' => $user->apiTokenExpires()?->format('Y-m-d H:i:s'),
-            'UsWordPressId' => $user->wordPressId(),
-            'UsCreated' => $user->created()->format('Y-m-d H:i:s'),
-            'UsLastLogin' => $user->lastLogin()?->format('Y-m-d H:i:s'),
-            'UsIsActive' => $user->isActive() ? 1 : 0,
-            'UsRole' => $user->role(),
-        ];
-
-        $insertId = QueryBuilder::table('users')
-            ->insertPrepared($data);
-        $insertIdInt = (int) $insertId;
-
-        if ($insertIdInt === 0) {
-            throw new \RuntimeException('Failed to save user');
-        }
-
-        $user->setId(UserId::fromInt($insertIdInt));
+        $this->repository->save($user);
     }
 
     /**
@@ -454,21 +448,8 @@ class AuthService
      */
     private function updateUser(User $user): void
     {
-        $data = [
-            'UsUsername' => $user->username(),
-            'UsEmail' => $user->email(),
-            'UsPasswordHash' => $user->passwordHash(),
-            'UsApiToken' => $user->apiToken(),
-            'UsApiTokenExpires' => $user->apiTokenExpires()?->format('Y-m-d H:i:s'),
-            'UsWordPressId' => $user->wordPressId(),
-            'UsLastLogin' => $user->lastLogin()?->format('Y-m-d H:i:s'),
-            'UsIsActive' => $user->isActive() ? 1 : 0,
-            'UsRole' => $user->role(),
-        ];
-
-        QueryBuilder::table('users')
-            ->where('UsID', '=', $user->id()->toInt())
-            ->updatePrepared($data);
+        // Repository save() handles both insert and update based on entity ID
+        $this->repository->save($user);
     }
 
     /**
@@ -477,17 +458,11 @@ class AuthService
      * @param int $id The user ID
      *
      * @return User|null The user or null if not found
-     *
-     * @psalm-suppress UnusedParam - Psalm false positive, $id is used in query
      */
     private function findUserById(int $id): ?User
     {
         try {
-            $row = QueryBuilder::table('users')
-                ->where('UsID', '=', $id)
-                ->firstPrepared();
-
-            return $row ? $this->hydrateUser($row) : null;
+            return $this->repository->find($id);
         } catch (\RuntimeException $e) {
             // Database not initialized or query failed
             return null;
@@ -500,17 +475,11 @@ class AuthService
      * @param string $username The username
      *
      * @return User|null The user or null if not found
-     *
-     * @psalm-suppress UnusedParam - Psalm false positive, $username is used in query
      */
     private function findUserByUsername(string $username): ?User
     {
         try {
-            $row = QueryBuilder::table('users')
-                ->where('UsUsername', '=', $username)
-                ->firstPrepared();
-
-            return $row ? $this->hydrateUser($row) : null;
+            return $this->repository->findByUsername($username);
         } catch (\RuntimeException $e) {
             // Database not initialized or query failed
             return null;
@@ -523,17 +492,11 @@ class AuthService
      * @param string $email The email address
      *
      * @return User|null The user or null if not found
-     *
-     * @psalm-suppress UnusedParam - Psalm false positive, $email is used in query
      */
     private function findUserByEmail(string $email): ?User
     {
         try {
-            $row = QueryBuilder::table('users')
-                ->where('UsEmail', '=', strtolower($email))
-                ->firstPrepared();
-
-            return $row ? $this->hydrateUser($row) : null;
+            return $this->repository->findByEmail($email);
         } catch (\RuntimeException $e) {
             // Database not initialized or query failed
             return null;
@@ -546,17 +509,11 @@ class AuthService
      * @param string $token The API token
      *
      * @return User|null The user or null if not found
-     *
-     * @psalm-suppress UnusedParam - Psalm false positive, $token is used in query
      */
     private function findUserByApiToken(string $token): ?User
     {
         try {
-            $row = QueryBuilder::table('users')
-                ->where('UsApiToken', '=', $token)
-                ->firstPrepared();
-
-            return $row ? $this->hydrateUser($row) : null;
+            return $this->repository->findByApiToken($token);
         } catch (\RuntimeException $e) {
             // Database not initialized or query failed
             return null;
@@ -569,48 +526,15 @@ class AuthService
      * @param int $wpUserId The WordPress user ID
      *
      * @return User|null The user or null if not found
-     *
-     * @psalm-suppress UnusedParam - Psalm false positive, $wpUserId is used in query
      */
     private function findUserByWordPressId(int $wpUserId): ?User
     {
         try {
-            $row = QueryBuilder::table('users')
-                ->where('UsWordPressId', '=', $wpUserId)
-                ->firstPrepared();
-
-            return $row ? $this->hydrateUser($row) : null;
+            return $this->repository->findByWordPressId($wpUserId);
         } catch (\RuntimeException $e) {
             // Database not initialized or query failed
             return null;
         }
     }
 
-    /**
-     * Hydrate a User entity from a database row.
-     *
-     * @param array<string, mixed> $row The database row
-     *
-     * @return User The hydrated user
-     */
-    private function hydrateUser(array $row): User
-    {
-        return User::reconstitute(
-            (int) $row['UsID'],
-            (string) $row['UsUsername'],
-            (string) $row['UsEmail'],
-            $row['UsPasswordHash'] !== null ? (string) $row['UsPasswordHash'] : null,
-            $row['UsApiToken'] !== null ? (string) $row['UsApiToken'] : null,
-            $row['UsApiTokenExpires'] !== null
-                ? new DateTimeImmutable($row['UsApiTokenExpires'])
-                : null,
-            $row['UsWordPressId'] !== null ? (int) $row['UsWordPressId'] : null,
-            new DateTimeImmutable($row['UsCreated']),
-            $row['UsLastLogin'] !== null
-                ? new DateTimeImmutable($row['UsLastLogin'])
-                : null,
-            (bool) $row['UsIsActive'],
-            (string) $row['UsRole']
-        );
-    }
 }

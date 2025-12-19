@@ -39,6 +39,9 @@ use Lwt\Services\WordListService;
 use Lwt\Services\WordPressService;
 use Lwt\Services\WordService;
 use Lwt\Services\WordUploadService;
+use Lwt\Core\Repository\TermRepository;
+use Lwt\Core\Repository\TextRepository;
+use Lwt\Core\Repository\UserRepository;
 
 /**
  * Core service provider that registers essential application services.
@@ -70,8 +73,11 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new LanguageService();
         });
 
-        $container->singleton(AuthService::class, function (Container $_c) {
-            return new AuthService();
+        $container->singleton(AuthService::class, function (Container $c) {
+            return new AuthService(
+                $c->get(PasswordService::class),
+                $c->get(UserRepository::class)
+            );
         });
 
         $container->singleton(FeedService::class, function (Container $_c) {
@@ -166,14 +172,16 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $container->singleton(TextService::class, function (Container $c) {
             return new TextService(
-                $c->get(SentenceService::class)
+                $c->get(SentenceService::class),
+                $c->get(TextRepository::class)
             );
         });
 
         $container->singleton(WordService::class, function (Container $c) {
             return new WordService(
                 $c->get(ExpressionService::class),
-                $c->get(SentenceService::class)
+                $c->get(SentenceService::class),
+                $c->get(TermRepository::class)
             );
         });
     }

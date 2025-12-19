@@ -16,8 +16,10 @@
 
 namespace Lwt\Services;
 
+use Lwt\Core\Entity\Text;
 use Lwt\Core\Globals;
 use Lwt\Core\Http\UrlUtilities;
+use Lwt\Core\Repository\TextRepository;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\QueryBuilder;
@@ -29,6 +31,10 @@ use Lwt\Database\Validation;
 use Lwt\Services\TagService;
 use Lwt\Services\ExportService;
 use Lwt\Services\SentenceService;
+
+require_once __DIR__ . '/../Core/Repository/RepositoryInterface.php';
+require_once __DIR__ . '/../Core/Repository/AbstractRepository.php';
+require_once __DIR__ . '/../Core/Repository/TextRepository.php';
 
 /**
  * Service class for managing texts (active and archived).
@@ -43,15 +49,20 @@ use Lwt\Services\SentenceService;
 class TextService
 {
     private SentenceService $sentenceService;
+    private TextRepository $repository;
 
     /**
      * Constructor - initialize dependencies.
      *
      * @param SentenceService|null $sentenceService Sentence service (optional for BC)
+     * @param TextRepository|null  $repository      Text repository (optional for BC)
      */
-    public function __construct(?SentenceService $sentenceService = null)
-    {
+    public function __construct(
+        ?SentenceService $sentenceService = null,
+        ?TextRepository $repository = null
+    ) {
         $this->sentenceService = $sentenceService ?? new SentenceService();
+        $this->repository = $repository ?? new TextRepository();
     }
 
     // =====================
@@ -612,15 +623,32 @@ class TextService
      */
     public function getTextById(int $textId): ?array
     {
-        $bindings = [$textId];
-        return Connection::preparedFetchOne(
-            "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
-            TxAnnotatedText <> '' AS annot_exists
-            FROM texts
-            WHERE TxID = ?"
-            . UserScopedQuery::forTablePrepared('texts', $bindings),
-            $bindings
-        );
+        $text = $this->repository->find($textId);
+        if ($text === null) {
+            return null;
+        }
+
+        return $this->textEntityToArray($text);
+    }
+
+    /**
+     * Convert a Text entity to an array format for backward compatibility.
+     *
+     * @param Text $text Text entity
+     *
+     * @return array Text data as associative array
+     */
+    private function textEntityToArray(Text $text): array
+    {
+        return [
+            'TxID' => $text->id()->toInt(),
+            'TxLgID' => $text->languageId()->toInt(),
+            'TxTitle' => $text->title(),
+            'TxText' => $text->text(),
+            'TxAudioURI' => $text->mediaUri(),
+            'TxSourceURI' => $text->sourceUri(),
+            'annot_exists' => $text->isAnnotated() ? 1 : 0,
+        ];
     }
 
     /**
@@ -1694,15 +1722,8 @@ class TextService
      */
     public function getTextForEdit(int $textId): ?array
     {
-        $bindings = [$textId];
-        return Connection::preparedFetchOne(
-            "SELECT TxID, TxLgID, TxTitle, TxText, TxAudioURI, TxSourceURI,
-            TxAnnotatedText <> '' AS annot_exists
-            FROM texts
-            WHERE TxID = ?"
-            . UserScopedQuery::forTablePrepared('texts', $bindings),
-            $bindings
-        );
+        // Reuse getTextById as it returns the same data
+        return $this->getTextById($textId);
     }
 
     /**

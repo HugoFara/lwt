@@ -18,6 +18,7 @@ use Lwt\Core\Entity\Language;
 use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Http\UrlUtilities;
+use Lwt\Core\Repository\LanguageRepository;
 use Lwt\Database\Connection;
 use Lwt\Database\Maintenance;
 use Lwt\Database\QueryBuilder;
@@ -26,6 +27,9 @@ use Lwt\Database\UserScopedQuery;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
 require_once __DIR__ . '/../Core/Http/url_utilities.php';
+require_once __DIR__ . '/../Core/Repository/RepositoryInterface.php';
+require_once __DIR__ . '/../Core/Repository/AbstractRepository.php';
+require_once __DIR__ . '/../Core/Repository/LanguageRepository.php';
 
 /**
  * Service class for managing languages.
@@ -43,21 +47,28 @@ require_once __DIR__ . '/../Core/Http/url_utilities.php';
 class LanguageService
 {
     /**
+     * Language repository for data access.
+     */
+    private LanguageRepository $repository;
+
+    /**
+     * Create a new LanguageService.
+     *
+     * @param LanguageRepository|null $repository Optional repository instance
+     */
+    public function __construct(?LanguageRepository $repository = null)
+    {
+        $this->repository = $repository ?? new LanguageRepository();
+    }
+
+    /**
      * Get all languages as a name => id dictionary.
      *
      * @return array<string, int>
      */
     public function getAllLanguages(): array
     {
-        $langs = [];
-        $records = QueryBuilder::table('languages')
-            ->select(['LgID', 'LgName'])
-            ->where('LgName', '<>', '')
-            ->getPrepared();
-        foreach ($records as $record) {
-            $langs[(string)$record['LgName']] = (int)$record['LgID'];
-        }
-        return $langs;
+        return $this->repository->getAllAsDict();
     }
 
     /**
@@ -73,15 +84,7 @@ class LanguageService
             return $this->createEmptyLanguage();
         }
 
-        $records = QueryBuilder::table('languages')
-            ->where('LgID', '=', $lid)
-            ->getPrepared();
-
-        if (empty($records)) {
-            return null;
-        }
-
-        return $this->mapRecordToLanguage($records[0]);
+        return $this->repository->find($lid);
     }
 
     /**
@@ -91,12 +94,7 @@ class LanguageService
      */
     public function createEmptyLanguage(): Language
     {
-        return Language::create(
-            'New Language',
-            '',
-            '.!?',
-            'a-zA-Z'
-        );
+        return $this->repository->createEmpty();
     }
 
     /**
@@ -168,10 +166,7 @@ class LanguageService
      */
     public function exists(int $lid): bool
     {
-        $count = QueryBuilder::table('languages')
-            ->where('LgID', '=', $lid)
-            ->count();
-        return $count > 0;
+        return $this->repository->exists($lid);
     }
 
     /**
@@ -490,16 +485,10 @@ class LanguageService
      */
     public function isDuplicateName(string $name, int $excludeLgId = 0): bool
     {
-        $query = QueryBuilder::table('languages')
-            ->select(['LgID'])
-            ->where('LgName', '=', trim($name));
-
-        if ($excludeLgId > 0) {
-            $query->where('LgID', '!=', $excludeLgId);
-        }
-
-        $result = $query->limit(1)->getPrepared();
-        return !empty($result);
+        return $this->repository->nameExists(
+            trim($name),
+            $excludeLgId > 0 ? $excludeLgId : null
+        );
     }
 
     /**
@@ -613,14 +602,8 @@ class LanguageService
         } else {
             return '';
         }
-        $records = QueryBuilder::table('languages')
-            ->select(['LgName'])
-            ->where('LgID', '=', $lg_id)
-            ->getPrepared();
-        if (!empty($records)) {
-            return (string)$records[0]['LgName'];
-        }
-        return '';
+
+        return $this->repository->getName($lg_id) ?? '';
     }
 
     /**
@@ -633,18 +616,14 @@ class LanguageService
      */
     public function getLanguageCode(int $lgId, array $languagesTable): string
     {
-        $records = QueryBuilder::table('languages')
-            ->select(['LgName', 'LgGoogleTranslateURI'])
-            ->where('LgID', '=', $lgId)
-            ->getPrepared();
+        $language = $this->repository->find($lgId);
 
-        if (empty($records)) {
+        if ($language === null) {
             return '';
         }
 
-        $record = $records[0];
-        $lgName = (string) $record["LgName"];
-        $translatorUri = (string) $record["LgGoogleTranslateURI"];
+        $lgName = $language->name();
+        $translatorUri = $language->translatorUri();
 
         // If we are using a standard language name, use it
         if (array_key_exists($lgName, $languagesTable)) {
@@ -681,11 +660,8 @@ class LanguageService
         } else {
             $lg_id = $lid;
         }
-        $records = QueryBuilder::table('languages')
-            ->select(['LgRightToLeft'])
-            ->where('LgID', '=', $lg_id)
-            ->getPrepared();
-        if (!empty($records) && $records[0]['LgRightToLeft']) {
+
+        if ($this->repository->isRightToLeft($lg_id)) {
             return ' dir="rtl" ';
         }
         return '';
@@ -705,15 +681,10 @@ class LanguageService
      */
     public function getPhoneticReadingById(string $text, int $lgId): string
     {
-        $records = QueryBuilder::table('languages')
-            ->select(['LgRegexpWordCharacters'])
-            ->where('LgID', '=', $lgId)
-            ->getPrepared();
-
-        $sentenceSplit = !empty($records) ? $records[0]['LgRegexpWordCharacters'] : null;
+        $wordCharacters = $this->repository->getWordCharacters($lgId);
 
         // For now we only support phonetic text with MeCab
-        if ($sentenceSplit != "mecab") {
+        if ($wordCharacters !== "mecab") {
             return $text;
         }
 
@@ -780,23 +751,7 @@ class LanguageService
      */
     public function getLanguagesForSelect(): array
     {
-        $result = [];
-        $records = QueryBuilder::table('languages')
-            ->select(['LgID', 'LgName'])
-            ->where('LgName', '<>', '')
-            ->orderBy('LgName')
-            ->getPrepared();
-        foreach ($records as $record) {
-            $name = (string)$record['LgName'];
-            if (strlen($name) > 30) {
-                $name = substr($name, 0, 30) . '...';
-            }
-            $result[] = [
-                'id' => (int)$record['LgID'],
-                'name' => $name
-            ];
-        }
-        return $result;
+        return $this->repository->getForSelect(30);
     }
 
     /**
