@@ -84,6 +84,7 @@ interface RepositoryInterface
      * @return int The entity ID (useful for inserts)
      *
      * @psalm-param T $entity
+     * @psalm-suppress PossiblyUnusedReturnValue - Return value is optional; useful for inserts
      */
     public function save(object $entity): int;
 

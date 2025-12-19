@@ -154,6 +154,7 @@ abstract class AbstractRepository implements RepositoryInterface
      * {@inheritdoc}
      *
      * @psalm-suppress MoreSpecificImplementedParamType
+     * @psalm-suppress PossiblyUnusedReturnValue - Return value is optional; useful for inserts
      */
     public function save(object $entity): int
     {

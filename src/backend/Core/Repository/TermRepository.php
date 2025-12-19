@@ -887,18 +887,7 @@ class TermRepository extends AbstractRepository
      */
     public function findWithoutTranslation(?int $languageId = null): array
     {
-        $query = $this->query()
-            ->where(function ($q) {
-                // Translation is empty or just '*'
-                return $q;
-            })
-            ->orderBy('WoText');
-
-        if ($languageId !== null) {
-            $query->where('WoLgID', '=', $languageId);
-        }
-
-        // Manual condition for empty or '*' translation
+        // Use raw SQL for OR condition on translation (empty or '*')
         $rows = Connection::preparedFetchAll(
             "SELECT * FROM words WHERE (WoTranslation = '' OR WoTranslation = '*')"
             . ($languageId !== null ? " AND WoLgID = ?" : "")

@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-19 (All repositories integrated - Repository Pattern complete)
+**Last Updated:** 2025-12-19 (Repository Pattern complete, cleanup done, 0 Psalm errors)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -8,7 +8,7 @@
 
 LWT carried significant technical debt from its 2007 origins. This document tracks the modernization progress and remaining work. **Major architectural transformation has been achieved** with the v3 release.
 
-**Overall Technical Debt Score:** 2.5/10 (Low) - *Down from 6.75/10*
+**Overall Technical Debt Score:** 2.0/10 (Low) - *Down from 6.75/10*
 
 ## Progress Overview
 
@@ -17,7 +17,7 @@ LWT carried significant technical debt from its 2007 origins. This document trac
 | Quick Wins | **COMPLETE** | 100% |
 | Phase 1: Security & Safety | **COMPLETE** | ~95% |
 | Phase 2: Refactoring | **COMPLETE** | ~95% |
-| Phase 3: Modernization | **IN PROGRESS** | ~95% |
+| Phase 3: Modernization | **COMPLETE** | ~98% |
 
 ## Critical Issues
 
@@ -547,6 +547,10 @@ src/backend/Core/
 - [x] ~~Migrate TextService to use TextRepository~~ **DONE** (2025-12-19)
 - [x] ~~Migrate WordService to use TermRepository~~ **DONE** (2025-12-19)
 - [x] ~~Migrate AuthService to use UserRepository~~ **DONE** (2025-12-19)
+- [x] ~~Code cleanup: remove unused imports and dead code~~ **DONE** (2025-12-19)
+  - AuthService: Removed 5 unused imports (Connection, QueryBuilder, UserId, etc.)
+  - LanguageService: Removed unused `mapRecordToLanguage()` method
+  - TermRepository: Removed dead code (unused closure in `findWithoutTranslation()`)
 
 #### 3.2 Database Modernization
 
@@ -796,7 +800,7 @@ ContainerException                      # Core/Container/ContainerException.php
 - [x] Average file size < 500 lines (achieved for most files)
 - [x] Code duplication < 5% (helper classes consolidated)
 - [x] Type coverage: ~90% (strict_types in 100% of files)
-- [ ] Test coverage: 60%+ (91 test files, 2295 tests exist)
+- [ ] Test coverage: 60%+ (91 test files, 2462 tests exist)
 
 ### Phase 3 Completion
 
@@ -930,11 +934,11 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
 | Quick Wins | 2 weeks | 100% complete | - |
 | Phase 1 | 3-6 months | 95% complete | CSP refinement (future) |
 | Phase 2 | 6-12 months | 95% complete | Minor cleanup |
-| Phase 3 | 12-18 months | ~95% complete | Repository Pattern complete |
+| Phase 3 | 12-18 months | ~98% complete | Repository Pattern complete, 0 Psalm errors |
 
 **Original Total Duration:** 18-24 months
 **Elapsed Time:** ~12 months (estimated based on architecture changes)
-**Remaining Effort:** ~10 hours for remaining P2 items (minor cleanup only)
+**Remaining Effort:** Minimal - Phase 3 effectively complete
 
 ## Architecture Summary (2025-12-19)
 
@@ -942,13 +946,14 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
 |-----------|-------|-------|
 | Controllers | 17 | ~9,000 |
 | Services | 36 | 18,571 |
+| Repositories | 4 | ~3,000 |
 | Views | 92 | 8,499 |
 | Core Files | 35 | - |
 | API Handlers | 14 | - |
 | Entity Classes | 5 | - |
 | Value Objects | 5 | - |
 | Custom Exceptions | 6 | - |
-| **Total PHP Files** | **198** | - |
+| **Total PHP Files** | **202** | - |
 
 **Namespace Adoption:**
 
@@ -960,6 +965,13 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
 
 - 233 prepared statement calls across 26 files
 - BackupService now uses `formatValueForSqlOutput()` for SQL dump generation (type-safe replacement)
+
+**Repository Pattern Adoption:**
+
+- 4 repositories fully integrated (Language, Text, Term, User)
+- All core services use repository for entity CRUD operations
+- Direct database access reduced to complex queries with joins/aggregations
+- Entity hydration centralized in repository classes
 
 ---
 
