@@ -18,6 +18,7 @@ use Lwt\Core\Repository\LanguageRepository;
 use Lwt\Core\Repository\RepositoryInterface;
 use Lwt\Core\Repository\TermRepository;
 use Lwt\Core\Repository\TextRepository;
+use Lwt\Core\Repository\UserRepository;
 
 /**
  * Service provider that registers all repository classes.
@@ -46,6 +47,11 @@ class RepositoryServiceProvider implements ServiceProviderInterface
         // Register TermRepository as a singleton
         $container->singleton(TermRepository::class, function (Container $_c) {
             return new TermRepository();
+        });
+
+        // Register UserRepository as a singleton
+        $container->singleton(UserRepository::class, function (Container $_c) {
+            return new UserRepository();
         });
     }
 
