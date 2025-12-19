@@ -1,9 +1,26 @@
 <?php declare(strict_types=1);
+/**
+ * \file
+ * \brief Google Translate time token functions - DEPRECATED wrappers.
+ *
+ * Use Lwt\Core\Integration\GoogleTimeToken class instead.
+ *
+ * PHP version 8.1
+ *
+ * @category Integration
+ * @package  Lwt\Core\Integration
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ * @deprecated Use Lwt\Core\Integration\GoogleTimeToken class instead
+ */
+
 namespace Lwt\Includes;
 
-require_once __DIR__ . '/../Database/Connection.php';
+require_once __DIR__ . '/GoogleTimeToken.php';
 
-use Lwt\Database\Connection;
+use Lwt\Core\Integration\GoogleTimeToken;
 
 /**
  * Generate a new token for Google.
@@ -11,55 +28,12 @@ use Lwt\Database\Connection;
  * @return int[]|null
  *
  * @psalm-return list{int, int}|null
+ *
+ * @deprecated Use GoogleTimeToken::regenerate() instead
  */
-function regenGoogleTimeToken(): array|null
+function regenGoogleTimeToken(): ?array
 {
-    if (is_callable('curl_init')) {
-        $curl = curl_init("https://translate.google.com");
-        curl_setopt(
-            $curl,
-            CURLOPT_HTTPHEADER,
-            array("User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
-        );
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        $g = (string) curl_exec($curl);
-        curl_close($curl);
-        if ($g == '') {
-            return null;
-        }
-    } else {
-        $ctx = stream_context_create(
-            array("http" => array(
-                "method" => "GET",
-                "header" => "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1\r\n"
-            ))
-        );
-        $g = file_get_contents(
-            "https://translate.google.com",
-            false,
-            $ctx
-        );
-        if ($g === false) {
-            return null;
-        }
-    }
-    // May be replaced by /TKK=eval\D+3d([\d-]+)\D+3d([\d-]+)\D+(\d+)\D/
-    preg_match_all(
-        "/TKK=eval[^0-9]+3d([0-9-]+)[^0-9]+3d([0-9-]+)[^0-9]+([0-9]+)[^0-9]/u",
-        $g,
-        $ma
-    );
-    if (isset($ma[1][0]) && isset($ma[2][0]) && isset($ma[3][0])) {
-        $tok = strval($ma[3][0]) . "." .
-            strval(intval($ma[1][0]) + intval($ma[2][0]));
-        Connection::query(
-            "INSERT INTO _lwtgeneral (LWTKey, LWTValue)
-            VALUES ('GoogleTimeToken', '$tok')
-            ON DUPLICATE KEY UPDATE LWTValue = '$tok'"
-        );
-        return array(intval($ma[3][0]), intval($ma[1][0]) + intval($ma[2][0]));
-    }
-    return null;
+    return GoogleTimeToken::regenerate();
 }
 
 /**
@@ -68,17 +42,10 @@ function regenGoogleTimeToken(): array|null
  * @return int[]|null
  *
  * @psalm-return list{int, int}|null
+ *
+ * @deprecated Use GoogleTimeToken::get() instead
  */
-function getGoogleTimeToken(): array|null
+function getGoogleTimeToken(): ?array
 {
-    $val = (string) Connection::fetchValue(
-        'SELECT LWTValue AS token from _lwtgeneral WHERE LWTKey = "GoogleTimeToken"',
-        'token'
-    );
-    $arr = empty($val) ? array('0') : explode('.', $val);
-    if (intval($arr[0]) < floor(time() / 3600) - 100) {
-        //Token renewed after 100 hours
-        return regenGoogleTimeToken();
-    }
-    return array(intval($arr[0]), intval($arr[1]));
+    return GoogleTimeToken::get();
 }

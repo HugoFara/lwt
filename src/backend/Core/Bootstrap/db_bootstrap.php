@@ -27,8 +27,6 @@ require_once __DIR__ . '/../Globals.php';
 require_once __DIR__ . '/../version.php';
 
 use Lwt\Core\Globals;
-use Lwt\Core\EnvLoader;
-use Lwt\Database\Configuration;
 
 // Initialize globals (this was previously done in settings.php)
 Globals::initialize();
@@ -37,6 +35,7 @@ require_once __DIR__ . '/../Utils/error_handling.php';
 
 // Database classes
 require_once __DIR__ . '/EnvLoader.php';
+require_once __DIR__ . '/DatabaseBootstrap.php';
 require_once __DIR__ . '/../Database/PreparedStatement.php';
 require_once __DIR__ . '/../Database/Connection.php';
 require_once __DIR__ . '/../Database/QueryBuilder.php';
@@ -64,24 +63,11 @@ require_once __DIR__ . '/../Database/Restore.php';
  * }
  *
  * @since 3.0.0
+ * @deprecated Use DatabaseBootstrap::loadConfiguration() instead
  */
 function loadDbConfiguration(): array
 {
-    $envPath = __DIR__ . '/../../../../.env';
-
-    // Load .env file
-    if (EnvLoader::load($envPath)) {
-        return EnvLoader::getDatabaseConfig();
-    }
-
-    // No configuration found - use defaults
-    return [
-        'server' => 'localhost',
-        'userid' => 'root',
-        'passwd' => '',
-        'dbname' => 'learning-with-texts',
-        'socket' => '',
-    ];
+    return DatabaseBootstrap::loadConfiguration();
 }
 
 /**
@@ -96,40 +82,12 @@ function loadDbConfiguration(): array
  * @return void
  *
  * @since 3.0.0
+ * @deprecated Use DatabaseBootstrap::bootstrap() instead
  */
 function bootstrapDatabase(): void
 {
-    // Skip if already initialized
-    if (Globals::getDbConnection() !== null) {
-        return;
-    }
-
-    // Load configuration
-    $config = loadDbConfiguration();
-
-    // Allow tests to override database name via Globals::setDatabaseName()
-    $dbname = Globals::getDatabaseName() ?: $config['dbname'];
-
-    // Connect to database
-    $connection = Configuration::connect(
-        $config['server'],
-        $config['userid'],
-        $config['passwd'],
-        $dbname,
-        $config['socket']
-    );
-
-    // Register connection with Globals
-    Globals::setDbConnection($connection);
-    Globals::setDatabaseName($dbname);
-
-    // Run database migrations
-    \Lwt\Database\Migrations::checkAndUpdate();
-
-    // Configure multi-user mode from environment
-    $multiUserEnabled = EnvLoader::getBool('MULTI_USER_ENABLED', false);
-    Globals::setMultiUserEnabled($multiUserEnabled);
+    DatabaseBootstrap::bootstrap();
 }
 
 // Run bootstrap
-bootstrapDatabase();
+DatabaseBootstrap::bootstrap();

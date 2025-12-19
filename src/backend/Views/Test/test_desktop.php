@@ -18,6 +18,8 @@
 
 namespace Lwt\Views\Test;
 
+use Lwt\Core\StringUtils;
+
 use Lwt\View\Helper\PageLayoutHelper;
 
 ?>
@@ -29,10 +31,10 @@ use Lwt\View\Helper\PageLayoutHelper;
 
 <!-- Audio elements for feedback -->
 <audio id="success_sound" preload="auto">
-  <source src="<?php \Lwt\Core\Utils\printFilePath("sounds/success.mp3"); ?>" type="audio/mpeg" />
+  <source src="<?php StringUtils::printFilePath("sounds/success.mp3"); ?>" type="audio/mpeg" />
 </audio>
 <audio id="failure_sound" preload="auto">
-  <source src="<?php \Lwt\Core\Utils\printFilePath("sounds/failure.mp3"); ?>" type="audio/mpeg" />
+  <source src="<?php StringUtils::printFilePath("sounds/failure.mp3"); ?>" type="audio/mpeg" />
 </audio>
 
 <!-- Test configuration -->

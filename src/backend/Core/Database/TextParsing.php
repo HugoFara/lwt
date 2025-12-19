@@ -18,6 +18,7 @@ namespace Lwt\Database;
 require_once __DIR__ . '/../../Services/TextParsingService.php';
 
 use Lwt\Core\Globals;
+use Lwt\Core\StringUtils;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\UserScopedQuery;
@@ -366,7 +367,7 @@ class TextParsing
             $text
         );
         if ($id == -2) {
-            $text = \Lwt\Core\Utils\removeSpaces(
+            $text = StringUtils::removeSpaces(
                 str_replace(
                     array("\r\r", "\t", "\n"),
                     array("\r", "", ""),
@@ -397,7 +398,7 @@ class TextParsing
                 str_replace(array("\t", "\n\n"), array("\n", ""), $text)
             )
         );
-        $text = \Lwt\Core\Utils\removeSpaces(
+        $text = StringUtils::removeSpaces(
             preg_replace("/(\n|^)(?!1\t)/u", "\n0\t", $text),
             $removeSpaces
         );

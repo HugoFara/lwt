@@ -26,6 +26,7 @@ use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Http\UrlUtilities;
+use Lwt\Core\StringUtils;
 
 require_once __DIR__ . '/../Services/TextService.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
@@ -337,7 +338,7 @@ class TextController extends BaseController
             // Check text only
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
             $this->textService->checkText(
-                \Lwt\Core\Utils\removeSoftHyphens($txText),
+                StringUtils::removeSoftHyphens($txText),
                 $txLgId
             );
             echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';

@@ -20,6 +20,7 @@ use Lwt\Core\Entity\Text;
 use Lwt\Core\Globals;
 use Lwt\Core\Http\UrlUtilities;
 use Lwt\Core\Repository\TextRepository;
+use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;
 use Lwt\Database\QueryBuilder;
@@ -1529,7 +1530,7 @@ class TextService
         $imported = 0;
         for ($i = 0; $i < $textCount; $i++) {
             $texts[$i] = $this->removeSoftHyphens($texts[$i]);
-            $counter = \Lwt\Core\Utils\makeCounterWithTotal($textCount, $i + 1);
+            $counter = StringUtils::makeCounterWithTotal($textCount, $i + 1);
             $thisTitle = $title . ($counter == '' ? '' : (' (' . $counter . ')'));
 
             $bindings = [$langId, $thisTitle, $texts[$i], $sourceUri];

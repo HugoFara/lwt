@@ -16,6 +16,7 @@
 namespace Lwt\Controllers;
 
 use Lwt\Services\TextPrintService;
+use Lwt\Services\AnnotationService;
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
 use Lwt\View\Helper\PageLayoutHelper;
 
@@ -164,7 +165,8 @@ class TextPrintController extends BaseController
         $ann = $this->printService->getAnnotatedText($textId);
         $annExists = $ann !== null;
         if ($annExists) {
-            $ann = \recreateSaveAnn($textId, $ann);
+            $annotationService = new AnnotationService();
+            $ann = $annotationService->recreateSaveAnnotation($textId, $ann);
             $annExists = strlen($ann) > 0;
         }
 
@@ -195,7 +197,8 @@ class TextPrintController extends BaseController
         if ($editMode) {
             // For edit mode, create annotation if needed and render edit form
             if (!$annExists) {
-                $ann = \createSaveAnn($textId);
+                $annotationService = new AnnotationService();
+                $ann = $annotationService->createSaveAnnotation($textId);
                 $annExists = strlen($ann) > 0;
             }
             if ($annExists) {

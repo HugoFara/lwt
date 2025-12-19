@@ -18,9 +18,9 @@ namespace Lwt\Core\Bootstrap;
 // Core utilities (replaces kernel_utility.php)
 require_once __DIR__ . '/../Globals.php';
 require_once __DIR__ . '/../Utils/error_handling.php';
+require_once __DIR__ . '/SessionBootstrap.php';
 
 use Lwt\Core\Globals;
-use Lwt\Core\Utils\ErrorHandler;
 
 // Initialize globals (this was previously done in settings.php)
 Globals::initialize();
@@ -31,32 +31,24 @@ Globals::initialize();
  * @param bool $displayErrors True to start error reporting for ALL errors
  *
  * @return void
+ *
+ * @deprecated Use SessionBootstrap::setErrorReporting() instead
  */
 function setErrorReporting(bool $displayErrors): void
 {
-    if ($displayErrors) {
-        @\error_reporting(E_ALL);
-        @\ini_set('display_errors', '1');
-        @\ini_set('display_startup_errors', '1');
-    } else {
-        @\error_reporting(0);
-        @\ini_set('display_errors', '0');
-        @\ini_set('display_startup_errors', '0');
-    }
+    SessionBootstrap::setErrorReporting($displayErrors);
 }
 
 /**
  * Set configuration values as script limit time and such...
  *
  * @return void
+ *
+ * @deprecated Use SessionBootstrap::setConfigurationOptions() instead
  */
 function setConfigurationOptions(): void
 {
-    // Set script time limit
-    @\ini_set('max_execution_time', '600');  // 10 min.
-    @\set_time_limit(600);  // 10 min.
-
-    @\ini_set('memory_limit', '999M');
+    SessionBootstrap::setConfigurationOptions();
 }
 
 /**
@@ -65,22 +57,12 @@ function setConfigurationOptions(): void
  * Checks multiple indicators to handle proxies and load balancers.
  *
  * @return bool True if the connection is secure
+ *
+ * @deprecated Use SessionBootstrap::isSecureConnection() instead
  */
 function isSecureConnection(): bool
 {
-    // Direct HTTPS
-    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-        return true;
-    }
-    // Behind a proxy/load balancer that terminates SSL
-    if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-        return true;
-    }
-    // Standard HTTPS port
-    if (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) {
-        return true;
-    }
-    return false;
+    return SessionBootstrap::isSecureConnection();
 }
 
 /**
@@ -92,57 +74,36 @@ function isSecureConnection(): bool
  * - CSRF attacks (SameSite restricts cross-site cookie sending)
  *
  * @return void
+ *
+ * @deprecated Use SessionBootstrap::configureSessionCookie() instead
  */
 function configureSessionCookie(): void
 {
-    $isSecure = isSecureConnection();
-
-    \session_set_cookie_params([
-        'lifetime' => 0,           // Session cookie (expires when browser closes)
-        'path' => '/',             // Available across entire domain
-        'domain' => '',            // Current domain only
-        'secure' => $isSecure,     // Only send over HTTPS when available
-        'httponly' => true,        // Prevent JavaScript access (XSS protection)
-        'samesite' => 'Lax'        // CSRF protection while allowing normal navigation
-    ]);
+    SessionBootstrap::configureSessionCookie();
 }
 
 /**
  * Start the session and checks for its sanity.
  *
  * @return void
+ *
+ * @deprecated Use SessionBootstrap::startSession() instead
  */
 function startSession(): void
 {
-    // Configure secure cookie parameters before starting session
-    configureSessionCookie();
-
-    // session isn't started
-    $err = @\session_start();
-    if ($err === false) {
-        ErrorHandler::die('SESSION error (Impossible to start a PHP session)');
-    }
-    if (\session_id() == '') {
-        ErrorHandler::die('SESSION ID empty (Impossible to start a PHP session)');
-    }
-    if (!isset($_SESSION)) {
-        ErrorHandler::die('SESSION array not set (Impossible to start a PHP session)');
-    }
+    SessionBootstrap::startSession();
 }
 
 /**
  * Launch a new session for WordPress.
  *
  * @return void
+ *
+ * @deprecated Use SessionBootstrap::bootstrap() instead
  */
 function startSessionMain(): void
 {
-    setErrorReporting(Globals::isErrorDisplayEnabled());
-    setConfigurationOptions();
-    // Start a PHP session if not one already exists
-    if (\session_id() == '') {
-        startSession();
-    }
+    SessionBootstrap::bootstrap();
 }
 
-startSessionMain();
+SessionBootstrap::bootstrap();

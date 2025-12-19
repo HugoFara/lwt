@@ -18,6 +18,7 @@ namespace Lwt\View\Helper;
 require_once __DIR__ . '/../../Core/Http/url_utilities.php';
 
 use Lwt\Core\Http\UrlUtilities;
+use Lwt\Core\StringUtils;
 
 /**
  * Helper class for generating page layout elements.
@@ -235,7 +236,7 @@ HTML;
      */
     public static function buildLogo(string $imagePath = 'assets/images/lwt_icon.png'): string
     {
-        $path = function_exists('getFilePath') ? \Lwt\Core\Utils\getFilePath($imagePath) : '/' . $imagePath;
+        $path = StringUtils::getFilePath($imagePath);
         return '<img class="lwtlogo" src="' . htmlspecialchars($path, ENT_QUOTES, 'UTF-8')
             . '" title="LWT" alt="LWT logo" />';
     }

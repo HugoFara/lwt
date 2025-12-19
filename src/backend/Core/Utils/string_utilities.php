@@ -1,9 +1,10 @@
 <?php declare(strict_types=1);
 /**
  * \file
- * \brief String manipulation utilities.
+ * \brief String manipulation utilities - DEPRECATED wrappers.
  *
- * Functions for string encoding, escaping, and transformation.
+ * All functions in this file are deprecated and delegate to StringUtils class.
+ * Use Lwt\Core\StringUtils methods directly instead.
  *
  * PHP version 8.1
  *
@@ -13,176 +14,113 @@
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/files/inc-string-utilities.html
  * @since    3.0.0
+ * @deprecated Use Lwt\Core\StringUtils class methods instead
  */
 
-namespace Lwt\Core\Utils {
+namespace Lwt\Core\Utils;
 
-    require_once __DIR__ . '/../Database/Settings.php';
+require_once __DIR__ . '/../StringUtils.php';
 
-    use Lwt\Database\Settings;
+use Lwt\Core\StringUtils;
 
-    /**
-     * Remove soft hyphens from a string.
-     *
-     * @param string $str Input string
-     *
-     * @return array|string String without soft hyphens
-     *
-     * @psalm-return array<string>|string
-     */
-    function removeSoftHyphens(string $str): array|string
-    {
-        return \str_replace('­', '', $str);  // first '..' contains Softhyphen 0xC2 0xAD
-    }
+/**
+ * Remove soft hyphens from a string.
+ *
+ * @param string $str Input string
+ *
+ * @return string String without soft hyphens
+ *
+ * @deprecated Use StringUtils::removeSoftHyphens() instead
+ */
+function removeSoftHyphens(string $str): array|string
+{
+    return StringUtils::removeSoftHyphens($str);
+}
 
-    /**
-     * Create a counter string with total (e.g., "01/10").
-     *
-     * @param int $max Total count
-     * @param int $num Current number
-     *
-     * @return string Formatted counter string
-     */
-    function makeCounterWithTotal(int $max, int $num): string
-    {
-        if ($max == 1) {
-            return '';
-        }
-        if ($max < 10) {
-            return $num . "/" . $max;
-        }
-        return \substr(
-            \str_repeat("0", \strlen((string)$max)) . $num,
-            -\strlen((string)$max)
-        ) . "/" . $max;
-    }
+/**
+ * Create a counter string with total (e.g., "01/10").
+ *
+ * @param int $max Total count
+ * @param int $num Current number
+ *
+ * @return string Formatted counter string
+ *
+ * @deprecated Use StringUtils::makeCounterWithTotal() instead
+ */
+function makeCounterWithTotal(int $max, int $num): string
+{
+    return StringUtils::makeCounterWithTotal($max, $num);
+}
 
-    /**
-     * Encode a URI string.
-     *
-     * @param string $url URL to encode
-     *
-     * @return string Encoded URL
-     */
-    function encodeURI(string $url): string
-    {
-        $reserved = array(
-        '%2D' => '-','%5F' => '_','%2E' => '.','%21' => '!',
-        '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')'
-        );
-        $unescaped = array(
-        '%3B' => ';','%2C' => ',','%2F' => '/','%3F' => '?','%3A' => ':',
-        '%40' => '@','%26' => '&','%3D' => '=','%2B' => '+','%24' => '$'
-        );
-        $score = array(
-        '%23' => '#'
-        );
-        return \strtr(\rawurlencode($url), \array_merge($reserved, $unescaped, $score));
-    }
+/**
+ * Encode a URI string.
+ *
+ * @param string $url URL to encode
+ *
+ * @return string Encoded URL
+ *
+ * @deprecated Use StringUtils::encodeURI() instead
+ */
+function encodeURI(string $url): string
+{
+    return StringUtils::encodeURI($url);
+}
 
-    /**
-     * Echo the path of a file using the theme directory.
-     *
-     * @param string $filename Filename
-     *
-     * @return void
-     */
-    function printFilePath($filename): void
-    {
-        echo getFilePath($filename);
-    }
+/**
+ * Echo the path of a file using the theme directory.
+ *
+ * @param string $filename Filename
+ *
+ * @return void
+ *
+ * @deprecated Use StringUtils::printFilePath() instead
+ */
+function printFilePath($filename): void
+{
+    StringUtils::printFilePath((string)$filename);
+}
 
-    /**
-     * Get the path of a file using the theme directory.
-     *
-     * Maps legacy paths to new asset locations:
-     * - css/* -> assets/css/*
-     * - icn/* -> assets/icons/*
-     * - img/* -> assets/images/*
-     * - js/* -> assets/js/*
-     *
-     * @param string $filename Filename
-     *
-     * @return string File path if it exists, otherwise the filename
-     */
-    function getFilePath($filename): string
-    {
-        // Legacy path mappings
-        $mappings = [
-            'css/' => 'assets/css/',
-            'icn/' => 'assets/icons/',
-            'img/' => 'assets/images/',
-            'js/' => 'assets/js/',
-            'sounds/' => 'assets/sounds/',
-        ];
+/**
+ * Get the path of a file using the theme directory.
+ *
+ * @param string $filename Filename
+ *
+ * @return string File path if it exists, otherwise the filename
+ *
+ * @deprecated Use StringUtils::getFilePath() instead
+ */
+function getFilePath($filename): string
+{
+    return StringUtils::getFilePath((string)$filename);
+}
 
-        // Normalize the path (remove leading slash if present)
-        $normalizedPath = \ltrim($filename, '/');
+/**
+ * Remove all spaces from a string.
+ *
+ * @param string          $s      Input string
+ * @param string|bool|int $remove Do not do anything if empty, false, or 0
+ *
+ * @return string String without spaces if requested.
+ *
+ * @deprecated Use StringUtils::removeSpaces() instead
+ */
+function removeSpaces($s, $remove): string
+{
+    return StringUtils::removeSpaces((string)$s, $remove);
+}
 
-        // Apply legacy path mappings
-        foreach ($mappings as $oldPrefix => $newPrefix) {
-            if (\str_starts_with($normalizedPath, $oldPrefix)) {
-                $normalizedPath = $newPrefix . \substr($normalizedPath, \strlen($oldPrefix));
-                break;
-            }
-        }
-
-        // Check if theme has an override for this file (for CSS/icons)
-        $themeDir = Settings::getWithDefault('set-theme-dir');
-        if ($themeDir) {
-            $basename = \basename($normalizedPath);
-            $themePath = $themeDir . $basename;
-            if (\file_exists($themePath)) {
-                // Return absolute path for clean URL compatibility
-                return '/' . $themePath;
-            }
-        }
-
-        // Check if the file exists at the normalized path
-        if (\file_exists($normalizedPath)) {
-            return '/' . $normalizedPath;
-        }
-
-        // Return the normalized path even if file doesn't exist
-        // (let the browser/router handle 404)
-        return '/' . $normalizedPath;
-    }
-
-    /**
-     * Remove all spaces from a string.
-     *
-     * @param string      $s      Input string
-     * @param string|bool $remove Do not do anything if empty or false
-     *
-     * @return string String without spaces if requested.
-     */
-    function removeSpaces($s, $remove)
-    {
-        if (!$remove) {
-            return $s;
-        }
-        // '' enthält &#x200B;
-        return \str_replace(' ', '', $s);
-    }
-
-    /**
-     * Replace the first occurence of $needle in $haystack by $replace.
-     *
-     * @param string $needle   Text to replace
-     * @param string $replace  Text to replace by
-     * @param string $haystack Input string
-     *
-     * @return string String with replaced text
-     */
-    function strReplaceFirst($needle, $replace, $haystack)
-    {
-        if ($needle === '') {
-            return $haystack;
-        }
-        $pos = \strpos($haystack, $needle);
-        if ($pos !== false) {
-            return \substr_replace($haystack, $replace, $pos, \strlen($needle));
-        }
-        return $haystack;
-    }
+/**
+ * Replace the first occurence of $needle in $haystack by $replace.
+ *
+ * @param string $needle   Text to replace
+ * @param string $replace  Text to replace by
+ * @param string $haystack Input string
+ *
+ * @return string String with replaced text
+ *
+ * @deprecated Use StringUtils::replaceFirst() instead
+ */
+function strReplaceFirst($needle, $replace, $haystack): string
+{
+    return StringUtils::replaceFirst((string)$needle, (string)$replace, (string)$haystack);
 }

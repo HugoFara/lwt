@@ -1,0 +1,94 @@
+<?php declare(strict_types=1);
+/**
+ * \file
+ * \brief Application information and version utilities.
+ *
+ * PHP version 8.1
+ *
+ * @category Core
+ * @package  Lwt\Core
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Core;
+
+use Lwt\Core\Utils\ErrorHandler;
+
+/**
+ * Application information and version utilities.
+ *
+ * Provides version information and utility methods for the LWT application.
+ *
+ * @since 3.0.0
+ */
+class ApplicationInfo
+{
+    /**
+     * Version of this current LWT application.
+     */
+    public const VERSION = '2.10.0-fork';
+
+    /**
+     * Date of the latest published release of LWT.
+     */
+    public const RELEASE_DATE = '2024-04-01';
+
+    /**
+     * Get the application version for display to humans.
+     *
+     * @return string Version number with formatted date (e.g., "2.10.0-fork (April 01 2024)")
+     */
+    public static function getVersion(): string
+    {
+        $formattedDate = \date("F d Y", \strtotime(self::RELEASE_DATE));
+        return self::VERSION . " ($formattedDate)";
+    }
+
+    /**
+     * Get a machine-readable version number.
+     *
+     * @return string Machine-readable version (e.g., "v002.010.000" for version 2.10.0)
+     */
+    public static function getVersionNumber(): string
+    {
+        $r = 'v';
+        $v = self::getVersion();
+        // Escape any detail like "-fork"
+        $v = \preg_replace('/-\w+\d*/', '', $v);
+        $pos = \strpos($v, ' ', 0);
+        if ($pos === false) {
+            ErrorHandler::die('Wrong version: ' . $v);
+        }
+        $vn = \preg_split("/[.]/", \substr($v, 0, $pos));
+        if (\count($vn) < 3) {
+            ErrorHandler::die('Wrong version: ' . $v);
+        }
+        for ($i = 0; $i < 3; $i++) {
+            $r .= \substr('000' . $vn[$i], -3);
+        }
+        return $r;
+    }
+
+    /**
+     * Get the raw version string without formatting.
+     *
+     * @return string Raw version string (e.g., "2.10.0-fork")
+     */
+    public static function getRawVersion(): string
+    {
+        return self::VERSION;
+    }
+
+    /**
+     * Get the release date.
+     *
+     * @return string Release date in YYYY-MM-DD format
+     */
+    public static function getReleaseDate(): string
+    {
+        return self::RELEASE_DATE;
+    }
+}

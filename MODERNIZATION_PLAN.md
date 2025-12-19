@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-19 (Repository Pattern complete, cleanup done, 0 Psalm errors)
+**Last Updated:** 2025-12-19 (Procedural helpers migration complete, 0 Psalm errors)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -640,8 +640,18 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 
 **Remaining Work:**
 
-- [x] ~~Migrate remaining procedural files to namespaced classes~~ SUBSTANTIAL PROGRESS
-- [ ] Complete migration of remaining procedural helpers
+- [x] ~~Migrate remaining procedural files to namespaced classes~~ COMPLETE
+- [x] ~~Complete migration of remaining procedural helpers~~ **COMPLETE** (2025-12-19)
+
+**New Utility Classes Added (2025-12-19):**
+
+| Class | Location | Purpose |
+|-------|----------|---------|
+| `StringUtils` | `Core/StringUtils.php` | String manipulation (extended with 7 new methods) |
+| `DatabaseBootstrap` | `Core/Bootstrap/DatabaseBootstrap.php` | Database initialization |
+| `SessionBootstrap` | `Core/Bootstrap/SessionBootstrap.php` | Session initialization |
+| `ApplicationInfo` | `Core/ApplicationInfo.php` | Version information |
+| `GoogleTimeToken` | `Core/Integration/GoogleTimeToken.php` | Google Translate token management |
 
 #### 3.4 Exception Handling
 
@@ -934,7 +944,7 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
 | Quick Wins | 2 weeks | 100% complete | - |
 | Phase 1 | 3-6 months | 95% complete | CSP refinement (future) |
 | Phase 2 | 6-12 months | 95% complete | Minor cleanup |
-| Phase 3 | 12-18 months | ~98% complete | Repository Pattern complete, 0 Psalm errors |
+| Phase 3 | 12-18 months | ~99% complete | Procedural helpers migration complete, 0 Psalm errors |
 
 **Original Total Duration:** 18-24 months
 **Elapsed Time:** ~12 months (estimated based on architecture changes)
@@ -948,12 +958,14 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
 | Services | 36 | 18,571 |
 | Repositories | 4 | ~3,000 |
 | Views | 92 | 8,499 |
-| Core Files | 35 | - |
+| Core Files | 40 | - |
 | API Handlers | 14 | - |
 | Entity Classes | 5 | - |
 | Value Objects | 5 | - |
 | Custom Exceptions | 6 | - |
-| **Total PHP Files** | **202** | - |
+| Bootstrap Classes | 3 | - |
+| Utility Classes | 4 | - |
+| **Total PHP Files** | **207** | - |
 
 **Namespace Adoption:**
 

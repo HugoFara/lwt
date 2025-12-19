@@ -18,6 +18,7 @@
 namespace Lwt\Services {
 
 use Lwt\Core\Globals;
+use Lwt\Core\StringUtils;
 use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
@@ -111,7 +112,7 @@ class SentenceService
                 $pattern_value = $wordlc;
             } else {
                 $pattern_value = '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
-                     . \Lwt\Core\Utils\removeSpaces($wordlc, $removeSpaces)
+                     . StringUtils::removeSpaces($wordlc, $removeSpaces)
                      . '([^' . $record["LgRegexpWordCharacters"] . ']|$)';
             }
             $pattern_escaped = mysqli_real_escape_string(Globals::getDbConnection(), $pattern_value);
@@ -181,7 +182,7 @@ class SentenceService
                 $pattern = $wordlc;
             } else {
                 $pattern = '(^|[^' . $record["LgRegexpWordCharacters"] . '])'
-                     . \Lwt\Core\Utils\removeSpaces($wordlc, $removeSpaces)
+                     . StringUtils::removeSpaces($wordlc, $removeSpaces)
                      . '([^' . $record["LgRegexpWordCharacters"] . ']|$)';
             }
             $sql = "SELECT DISTINCT SeID, SeText
@@ -285,7 +286,7 @@ class SentenceService
                 $pattern = "/($wordlc)/ui";
             } else {
                 $pattern = '/(?<![' . $termchar . '])(' .
-                \Lwt\Core\Utils\removeSpaces($wordlc, $removeSpaces) . ')(?![' .
+                StringUtils::removeSpaces($wordlc, $removeSpaces) . ')(?![' .
                 $termchar . '])/ui';
             }
         }

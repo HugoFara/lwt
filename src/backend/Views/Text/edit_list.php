@@ -23,12 +23,13 @@ namespace Lwt\Views\Text;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\IconHelper;
+use Lwt\Core\StringUtils;
 
 /** @var string $message */
 /** @var array $statuses */
 
 ?>
-<link rel="stylesheet" type="text/css" href="<?php \Lwt\Core\Utils\printFilePath('css/css_charts.css');?>" />
+<link rel="stylesheet" type="text/css" href="<?php StringUtils::printFilePath('css/css_charts.css');?>" />
 
 <?php \Lwt\View\Helper\PageLayoutHelper::renderMessage($message, false); ?>
 

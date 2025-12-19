@@ -5,6 +5,7 @@ use Lwt\Database\Settings;
 use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 use Lwt\Core\Globals;
+use Lwt\Core\StringUtils;
 use Lwt\Services\TextStatisticsService;
 
 /**
@@ -162,7 +163,7 @@ class SettingsHandler
      */
     public function getThemePath(string $path): array
     {
-        return ["theme_path" => \Lwt\Core\Utils\getFilePath($path)];
+        return ["theme_path" => StringUtils::getFilePath($path)];
     }
 
     // =========================================================================

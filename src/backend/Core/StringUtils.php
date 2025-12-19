@@ -147,4 +147,166 @@ class StringUtils
         self::$separators = null;
         self::$firstSeparator = null;
     }
+
+    /**
+     * Remove soft hyphens from a string.
+     *
+     * @param string $str Input string
+     *
+     * @return string String without soft hyphens
+     */
+    public static function removeSoftHyphens(string $str): string
+    {
+        // Soft hyphen is 0xC2 0xAD (­)
+        return str_replace('­', '', $str);
+    }
+
+    /**
+     * Create a counter string with total (e.g., "01/10").
+     *
+     * @param int $max Total count
+     * @param int $num Current number
+     *
+     * @return string Formatted counter string
+     */
+    public static function makeCounterWithTotal(int $max, int $num): string
+    {
+        if ($max == 1) {
+            return '';
+        }
+        if ($max < 10) {
+            return $num . "/" . $max;
+        }
+        return substr(
+            str_repeat("0", strlen((string)$max)) . $num,
+            -strlen((string)$max)
+        ) . "/" . $max;
+    }
+
+    /**
+     * Encode a URI string matching JavaScript's encodeURI behavior.
+     *
+     * @param string $url URL to encode
+     *
+     * @return string Encoded URL
+     */
+    public static function encodeURI(string $url): string
+    {
+        $reserved = [
+            '%2D' => '-', '%5F' => '_', '%2E' => '.', '%21' => '!',
+            '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')'
+        ];
+        $unescaped = [
+            '%3B' => ';', '%2C' => ',', '%2F' => '/', '%3F' => '?', '%3A' => ':',
+            '%40' => '@', '%26' => '&', '%3D' => '=', '%2B' => '+', '%24' => '$'
+        ];
+        $score = ['%23' => '#'];
+        return strtr(rawurlencode($url), array_merge($reserved, $unescaped, $score));
+    }
+
+    /**
+     * Get the path of a file using the theme directory.
+     *
+     * Maps legacy paths to new asset locations:
+     * - css/* -> assets/css/*
+     * - icn/* -> assets/icons/*
+     * - img/* -> assets/images/*
+     * - js/* -> assets/js/*
+     *
+     * @param string $filename Filename
+     *
+     * @return string File path if it exists, otherwise the filename
+     */
+    public static function getFilePath(string $filename): string
+    {
+        // Legacy path mappings
+        $mappings = [
+            'css/' => 'assets/css/',
+            'icn/' => 'assets/icons/',
+            'img/' => 'assets/images/',
+            'js/' => 'assets/js/',
+            'sounds/' => 'assets/sounds/',
+        ];
+
+        // Normalize the path (remove leading slash if present)
+        $normalizedPath = ltrim($filename, '/');
+
+        // Apply legacy path mappings
+        foreach ($mappings as $oldPrefix => $newPrefix) {
+            if (str_starts_with($normalizedPath, $oldPrefix)) {
+                $normalizedPath = $newPrefix . substr($normalizedPath, strlen($oldPrefix));
+                break;
+            }
+        }
+
+        // Check if theme has an override for this file (for CSS/icons)
+        $themeDir = Settings::getWithDefault('set-theme-dir');
+        if ($themeDir) {
+            $basename = basename($normalizedPath);
+            $themePath = $themeDir . $basename;
+            if (file_exists($themePath)) {
+                // Return absolute path for clean URL compatibility
+                return '/' . $themePath;
+            }
+        }
+
+        // Check if the file exists at the normalized path
+        if (file_exists($normalizedPath)) {
+            return '/' . $normalizedPath;
+        }
+
+        // Return the normalized path even if file doesn't exist
+        // (let the browser/router handle 404)
+        return '/' . $normalizedPath;
+    }
+
+    /**
+     * Echo the path of a file using the theme directory.
+     *
+     * @param string $filename Filename
+     *
+     * @return void
+     */
+    public static function printFilePath(string $filename): void
+    {
+        echo self::getFilePath($filename);
+    }
+
+    /**
+     * Remove all spaces from a string.
+     *
+     * @param string          $s      Input string
+     * @param string|bool|int $remove Do not do anything if empty, false, or 0
+     *
+     * @return string String without spaces if requested
+     */
+    public static function removeSpaces(string $s, string|bool|int $remove): string
+    {
+        if (!$remove) {
+            return $s;
+        }
+        // '' contains &#x200B; (zero-width space)
+        return str_replace(' ', '', $s);
+    }
+
+    /**
+     * Replace the first occurrence of $needle in $haystack with $replace.
+     *
+     * @param string $needle   Text to replace
+     * @param string $replace  Replacement text
+     * @param string $haystack Input string
+     *
+     * @return string String with first occurrence replaced
+     */
+    public static function replaceFirst(string $needle, string $replace, string $haystack): string
+    {
+        if ($needle === '') {
+            return $haystack;
+        }
+        $pos = strpos($haystack, $needle);
+        if ($pos !== false) {
+            return substr_replace($haystack, $replace, $pos, strlen($needle));
+        }
+        return $haystack;
+    }
 }
