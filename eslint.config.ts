@@ -129,16 +129,15 @@ export default defineConfig([
     language: "css/css",
     extends: ["css/recommended"],
     rules: {
-      // Allow !important - sometimes necessary for theme overrides
+      // Allow !important - this codebase legitimately uses !important for:
+      // - Alpine.js [x-cloak] pattern (required by Alpine)
+      // - Overriding Bulma framework defaults
+      // - State/utility classes (.is-loading, .lwt_selected_text, etc.)
+      // Refactoring to avoid !important would require major CSS architecture changes
       "css/no-important": "off",
-      // Allow newer CSS features that may not be in baseline yet
+      // The flagged properties (user-select, resize, accent-color) are well-supported
+      // in all modern browsers since 2021-2022. Disabling to avoid false positives.
       "css/use-baseline": "off",
-      // Some vendor-specific or newer properties may not be recognized
-      "css/no-invalid-properties": "off",
-      // Allow custom font stacks without generic fallback requirement
-      "css/font-family-fallbacks": "off",
-      // Allow vendor-prefixed at-rules like @-moz-document
-      "css/no-invalid-at-rules": "off",
     },
   },
 ]);

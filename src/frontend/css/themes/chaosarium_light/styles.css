@@ -7,8 +7,8 @@
 body {
   background-color: #fff;
   color: #000;
-  font: 100%/1.25 "Lucida Grande", Arial, sans-serif, STHeiti,
-    "Arial Unicode MS", mingLiu;
+  font: 100%/1.25 "Lucida Grande", Arial, STHeiti,
+    "Arial Unicode MS", mingLiu, sans-serif;
   margin: 20px;
   padding: 0;
   cursor: default;
@@ -17,8 +17,8 @@ body {
   margin-right: auto;
 }
 input[type="text"] {
-  font: 85% "Lucida Grande", Arial, sans-serif, STHeiti, "Arial Unicode MS",
-    mingLiu;
+  font: 85% "Lucida Grande", Arial, STHeiti, "Arial Unicode MS",
+    mingLiu, sans-serif;
   border: 1px solid #c6c6c6;
   padding: 3px;
 }
@@ -123,7 +123,6 @@ h4 {
   background-color: #fff;
 }
 #thetext {
-  -webkit-touch-callout: text;
   -webkit-user-select: text;
   -khtml-user-select: text;
   -moz-user-select: text;
@@ -131,8 +130,8 @@ h4 {
   user-select: text;
 }
 textarea {
-  font: 85% "Lucida Grande", Arial, sans-serif, STHeiti, "Arial Unicode MS",
-    mingLiu;
+  font: 85% "Lucida Grande", Arial, STHeiti, "Arial Unicode MS",
+    mingLiu, sans-serif;
   border: 1px solid #c6c6c6;
   padding: 3px;
 }

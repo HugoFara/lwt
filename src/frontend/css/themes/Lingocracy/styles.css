@@ -5,7 +5,7 @@
 body {
 	background-color: #FFFFFF;
 	color: #000000;
-	font: 100%/1.25 "Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu;
+	font: 100%/1.25 "Lucida Grande",Arial,STHeiti,"Arial Unicode MS",MingLiu,sans-serif;
 	margin: 20px;
 	padding: 0px;
 	cursor: default;
@@ -14,7 +14,7 @@ body {
 	margin-right: auto;
 }
 input[type=text] {
-	font: 85% "Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu;
+	font: 85% "Lucida Grande",Arial,STHeiti,"Arial Unicode MS",MingLiu,sans-serif;
 	border: 1px solid #C6C6C6;
 	padding: 3px;
 	border-radius: 4px;
@@ -177,7 +177,7 @@ h4 {
 	user-select: none;
 }
 textarea {
-	font: 85% "Lucida Grande",Arial,sans-serif,STHeiti,"Arial Unicode MS",MingLiu;
+	font: 85% "Lucida Grande",Arial,STHeiti,"Arial Unicode MS",MingLiu,sans-serif;
 	border: 1px solid #C6C6C6;
 	padding: 3px;
 	border-radius: 4px;
@@ -186,8 +186,8 @@ textarea {
 	display:none;
 }
 .bgdis {
-	background-color: #EAEAE5 ! important;
-	border-radius: 3px ! important;
+	background-color: #EAEAE5 !important;
+	border-radius: 3px !important;
 	padding: 1px 2px;
 }
 .tab1 {
