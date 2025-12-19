@@ -1,0 +1,414 @@
+<?php declare(strict_types=1);
+/**
+ * \file
+ * \brief Abstract CRUD Controller for standardized resource management
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Controllers
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+
+namespace Lwt\Controllers;
+
+use Lwt\Core\Http\InputValidator;
+use Lwt\View\Helper\PageLayoutHelper;
+
+/**
+ * Abstract base controller providing standardized CRUD operations.
+ *
+ * Extends BaseController with common patterns for Create, Read, Update, Delete
+ * operations. Controllers managing simple resources can extend this class to
+ * reduce boilerplate code.
+ *
+ * ## Request Parameter Conventions
+ *
+ * This controller expects these standard request parameters:
+ * - `new=1` - Display the create form
+ * - `chg=ID` - Display the edit form for record ID
+ * - `del=ID` - Delete record ID
+ * - `op=Save` - Create a new record (from form submission)
+ * - `op=Change` - Update an existing record (from form submission)
+ * - `marked[]` - Array of IDs for bulk operations
+ * - `markaction` - Bulk action to perform on marked items
+ * - `allaction` - Action to perform on all filtered items
+ *
+ * ## Usage
+ *
+ * ```php
+ * class MyResourceController extends AbstractCrudController
+ * {
+ *     protected string $pageTitle = 'My Resources';
+ *     protected string $resourceName = 'resource';
+ *
+ *     protected function handleCreate(): string { ... }
+ *     protected function handleUpdate(int $id): string { ... }
+ *     protected function handleDelete(int $id): string { ... }
+ *     protected function renderList(string $message): void { ... }
+ *     protected function renderCreateForm(): void { ... }
+ *     protected function renderEditForm(int $id): void { ... }
+ * }
+ * ```
+ *
+ * @category Lwt
+ * @package  Lwt\Controllers
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
+abstract class AbstractCrudController extends BaseController
+{
+    /**
+     * Page title for the resource index page.
+     *
+     * @var string
+     */
+    protected string $pageTitle = 'Resources';
+
+    /**
+     * Singular name of the resource (for messages).
+     *
+     * @var string
+     */
+    protected string $resourceName = 'item';
+
+    /**
+     * Whether to show the navigation menu.
+     *
+     * @var bool
+     */
+    protected bool $showMenu = true;
+
+    /**
+     * Main index action - dispatches to appropriate CRUD operation.
+     *
+     * This method handles the standard CRUD flow:
+     * 1. Process any pending actions (delete, save, update, bulk)
+     * 2. Display the appropriate view (list, create form, or edit form)
+     *
+     * Override this method if you need custom routing logic.
+     *
+     * @param array $params Route parameters
+     *
+     * @return void
+     */
+    public function index(array $params): void
+    {
+        $this->render($this->pageTitle, $this->showMenu);
+
+        // Process actions and get result message
+        $message = $this->processActions();
+
+        // Display appropriate view based on request
+        $this->dispatchView($message);
+
+        $this->endRender();
+    }
+
+    /**
+     * Process CRUD actions from request parameters.
+     *
+     * Handles the standard action flow:
+     * 1. Bulk actions (markaction, allaction)
+     * 2. Single delete (del parameter)
+     * 3. Create/Update (op parameter)
+     *
+     * @return string Result message from the action
+     */
+    protected function processActions(): string
+    {
+        $message = '';
+
+        // Bulk actions on marked items
+        $markAction = $this->param('markaction');
+        if ($markAction !== '') {
+            $message = $this->processBulkAction($markAction);
+            return $message;
+        }
+
+        // Actions on all filtered items
+        $allAction = $this->param('allaction');
+        if ($allAction !== '') {
+            $message = $this->processAllAction($allAction);
+            return $message;
+        }
+
+        // Single delete
+        $deleteId = $this->paramInt('del');
+        if ($deleteId !== null) {
+            $message = $this->handleDelete($deleteId);
+            return $message;
+        }
+
+        // Create or Update
+        $op = $this->param('op');
+        if ($op === 'Save') {
+            $message = $this->handleCreate();
+        } elseif ($op === 'Change') {
+            $id = $this->paramInt($this->getIdParameterName(), 0) ?? 0;
+            $message = $this->handleUpdate($id);
+        }
+
+        return $message;
+    }
+
+    /**
+     * Dispatch to the appropriate view based on request parameters.
+     *
+     * @param string $message Message from processed action
+     *
+     * @return void
+     */
+    protected function dispatchView(string $message): void
+    {
+        if ($this->hasParam('new')) {
+            $this->renderCreateForm();
+        } elseif ($this->hasParam('chg')) {
+            $id = $this->paramInt('chg', 0) ?? 0;
+            $this->renderEditForm($id);
+        } else {
+            $this->renderList($message);
+        }
+    }
+
+    /**
+     * Process bulk action on marked items.
+     *
+     * Override this method to handle bulk operations like bulk delete,
+     * bulk status change, etc.
+     *
+     * @param string $action The action code (e.g., 'del', 'export')
+     *
+     * @return string Result message
+     */
+    protected function processBulkAction(string $action): string
+    {
+        $marked = InputValidator::getArray('marked');
+        if (empty($marked)) {
+            return "No items selected";
+        }
+
+        $ids = $this->getMarkedIds($marked);
+        if (empty($ids)) {
+            return "No valid items selected";
+        }
+
+        return $this->handleBulkAction($action, $ids);
+    }
+
+    /**
+     * Handle a bulk action on the given IDs.
+     *
+     * Override this method to implement bulk operations.
+     *
+     * @param string $action The action code
+     * @param int[]  $ids    Array of record IDs
+     *
+     * @return string Result message
+     */
+    protected function handleBulkAction(string $action, array $ids): string
+    {
+        if ($action === 'del') {
+            return $this->handleBulkDelete($ids);
+        }
+
+        return "Unknown action: $action";
+    }
+
+    /**
+     * Handle bulk delete operation.
+     *
+     * Override this method to implement bulk delete with proper cleanup.
+     *
+     * @param int[] $ids Array of record IDs to delete
+     *
+     * @return string Result message
+     */
+    protected function handleBulkDelete(array $ids): string
+    {
+        $count = 0;
+        foreach ($ids as $id) {
+            $result = $this->handleDelete($id);
+            if (!str_starts_with($result, 'Error')) {
+                $count++;
+            }
+        }
+        return "Deleted: $count";
+    }
+
+    /**
+     * Process action on all filtered items.
+     *
+     * Override this method to handle actions like "delete all matching filter".
+     *
+     * @param string $action The action code (e.g., 'delall')
+     *
+     * @return string Result message
+     */
+    protected function processAllAction(string $action): string
+    {
+        return "Action '$action' not implemented";
+    }
+
+    /**
+     * Get the name of the ID parameter for update operations.
+     *
+     * Override this if your ID parameter has a different name.
+     * Default is based on resource name (e.g., 'resourceId').
+     *
+     * @return string Parameter name
+     */
+    protected function getIdParameterName(): string
+    {
+        return $this->resourceName . 'Id';
+    }
+
+    // ==================== ABSTRACT METHODS ====================
+    // Subclasses must implement these core CRUD operations
+
+    /**
+     * Handle create operation.
+     *
+     * Called when `op=Save` is submitted. Read form data from request
+     * and create the new record.
+     *
+     * @return string Result message (e.g., "Created successfully")
+     */
+    abstract protected function handleCreate(): string;
+
+    /**
+     * Handle update operation.
+     *
+     * Called when `op=Change` is submitted. Read form data from request
+     * and update the existing record.
+     *
+     * @param int $id Record ID to update
+     *
+     * @return string Result message (e.g., "Updated successfully")
+     */
+    abstract protected function handleUpdate(int $id): string;
+
+    /**
+     * Handle delete operation.
+     *
+     * Called when `del=ID` is in the request.
+     *
+     * @param int $id Record ID to delete
+     *
+     * @return string Result message (e.g., "Deleted")
+     */
+    abstract protected function handleDelete(int $id): string;
+
+    /**
+     * Render the list view.
+     *
+     * Called when no create/edit parameters are present.
+     *
+     * @param string $message Optional message to display (from previous action)
+     *
+     * @return void
+     */
+    abstract protected function renderList(string $message): void;
+
+    /**
+     * Render the create form.
+     *
+     * Called when `new=1` is in the request.
+     *
+     * @return void
+     */
+    abstract protected function renderCreateForm(): void;
+
+    /**
+     * Render the edit form.
+     *
+     * Called when `chg=ID` is in the request.
+     *
+     * @param int $id Record ID to edit
+     *
+     * @return void
+     */
+    abstract protected function renderEditForm(int $id): void;
+
+    // ==================== HELPER METHODS ====================
+
+    /**
+     * Get current page number from request/session.
+     *
+     * @param string $requestKey  Request parameter name
+     * @param string $sessionKey  Session key for persistence
+     * @param int    $default     Default page number
+     *
+     * @return int Current page number
+     */
+    protected function getCurrentPage(
+        string $requestKey = 'page',
+        string $sessionKey = 'currentpage',
+        int $default = 1
+    ): int {
+        return InputValidator::getIntWithSession($requestKey, $sessionKey, $default);
+    }
+
+    /**
+     * Get current sort order from request/database.
+     *
+     * @param string $requestKey Request parameter name
+     * @param string $dbKey      Database setting key for persistence
+     * @param int    $default    Default sort order
+     *
+     * @return int Current sort order
+     */
+    protected function getCurrentSort(
+        string $requestKey = 'sort',
+        string $dbKey = 'currentsort',
+        int $default = 1
+    ): int {
+        return InputValidator::getIntWithDb($requestKey, $dbKey, $default);
+    }
+
+    /**
+     * Get current search query from request/session.
+     *
+     * @param string $requestKey Request parameter name
+     * @param string $sessionKey Session key for persistence
+     * @param string $default    Default query
+     *
+     * @return string Current search query
+     */
+    protected function getCurrentQuery(
+        string $requestKey = 'query',
+        string $sessionKey = 'currentquery',
+        string $default = ''
+    ): string {
+        return InputValidator::getStringWithSession($requestKey, $sessionKey, $default);
+    }
+
+    /**
+     * Display a success message.
+     *
+     * @param string $action Action that was performed (e.g., "Created", "Updated")
+     *
+     * @return string Formatted message
+     */
+    protected function successMessage(string $action): string
+    {
+        return ucfirst($this->resourceName) . " $action successfully";
+    }
+
+    /**
+     * Display an error message.
+     *
+     * @param string $error Error description
+     *
+     * @return string Formatted error message
+     */
+    protected function errorMessage(string $error): string
+    {
+        return "Error: $error";
+    }
+}

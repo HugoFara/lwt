@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-19 (Refactored exit() calls: 64→58; QueryBuilder 22/36 services)
+**Last Updated:** 2025-12-19 (AbstractCrudController + TermTagsController/TextTagsController refactor)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -86,7 +86,7 @@ Connection::preparedFetchAll('SELECT * FROM words WHERE WoLgID = ?', 'i', $langI
 src/backend/
 ├── Api/V1/                    # REST API
 │   └── Handlers/              # 10 API handlers
-├── Controllers/               # 14 controllers (8,223 lines total)
+├── Controllers/               # 17 controllers (includes AbstractCrudController, TermTagsController, TextTagsController)
 │   ├── BaseController.php     # Abstract base
 │   ├── TextController.php
 │   ├── WordController.php
@@ -411,7 +411,8 @@ Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
 - [x] DELETE queries modernized - 51 use QueryBuilder, ~5 direct SQL (using prepared statements or intval-sanitized)
 - [x] QueryBuilder widely adopted - 22 of 36 services (61%) use it with 188 calls total
 - [x] Only 5 services use direct Connection without QueryBuilder (BackupService, ExportService, ServerDataService, TextStatisticsService, WordListService) - most have legitimate reasons (system queries, backup operations)
-- [ ] No `AbstractCrudController` (chose Service pattern instead)
+- [x] `AbstractCrudController` implemented (2025-12-19) - provides standard CRUD action dispatching
+- [x] TagsController refactored into `TermTagsController` and `TextTagsController` extending AbstractCrudController (2025-12-19)
 
 #### 2.3 Add Type Hints
 
@@ -728,14 +729,14 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 - [x] Average file size < 500 lines (achieved for most files)
 - [x] Code duplication < 5% (helper classes consolidated)
 - [x] Type coverage: ~90% (strict_types in 100% of files)
-- [ ] Test coverage: 60%+ (80 test files exist)
+- [ ] Test coverage: 60%+ (91 test files, 2295 tests exist)
 
 ### Phase 3 Completion
 
 - [x] OOP code: 80%+ (achieved via MVC)
 - [x] Database: InnoDB + user ownership foreign keys
 - [ ] Psalm level: 1 (currently level 4 with suppressions)
-- [ ] DI container actively used (infrastructure built, not integrated)
+- [x] DI container integrated into Application bootstrap (2025-12-19)
 
 ## Remaining High-Priority Work
 
@@ -871,7 +872,7 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
 
 | Component | Count | Lines |
 |-----------|-------|-------|
-| Controllers | 14 | 8,223 |
+| Controllers | 17 | ~9,000 |
 | Services | 36 | 18,571 |
 | Views | 92 | 8,499 |
 | Core Files | 31 | - |

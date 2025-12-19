@@ -35,12 +35,16 @@ require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
  * - Term tags (tags table) - tags applied to vocabulary words
  * - Text tags (tags2 table) - tags applied to texts
  *
- * @category Lwt
- * @package  Lwt
- * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
- * @since    3.0.0
+ * @category   Lwt
+ * @package    Lwt
+ * @author     HugoFara <hugo.farajallah@protonmail.com>
+ * @license    Unlicense <http://unlicense.org/>
+ * @link       https://hugofara.github.io/lwt/docs/php/
+ * @since      3.0.0
+ * @deprecated 3.0.0 Use TermTagsController and TextTagsController instead.
+ *             This controller is kept for backward compatibility only.
+ * @see        TermTagsController For term tag management
+ * @see        TextTagsController For text tag management
  */
 class TagsController extends BaseController
 {

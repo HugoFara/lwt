@@ -146,11 +146,11 @@ function registerRoutes(Router $router): void
 
     // ==================== TAG ROUTES (PROTECTED) ====================
 
-    // Term tags (TagsController)
-    $router->registerWithMiddleware('/tags', 'TagsController@index', AUTH_MIDDLEWARE);
+    // Term tags (TermTagsController - extends AbstractCrudController)
+    $router->registerWithMiddleware('/tags', 'TermTagsController@index', AUTH_MIDDLEWARE);
 
-    // Text tags (TagsController)
-    $router->registerWithMiddleware('/tags/text', 'TagsController@textTags', AUTH_MIDDLEWARE);
+    // Text tags (TextTagsController - extends AbstractCrudController)
+    $router->registerWithMiddleware('/tags/text', 'TextTagsController@index', AUTH_MIDDLEWARE);
 
     // ==================== FEED ROUTES (PROTECTED) ====================
 

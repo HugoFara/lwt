@@ -236,8 +236,8 @@ class RoutesTest extends TestCase
     public static function tagRoutesProvider(): array
     {
         return [
-            'tags list' => ['/tags', 'TagsController@index'],
-            'tags text' => ['/tags/text', 'TagsController@textTags'],
+            'tags list' => ['/tags', 'TermTagsController@index'],
+            'tags text' => ['/tags/text', 'TextTagsController@index'],
         ];
     }
 
