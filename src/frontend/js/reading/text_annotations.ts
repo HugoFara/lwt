@@ -63,12 +63,9 @@ declare const LWT_DATA: LwtDataGlobal;
 
 /**
  * Add annotations to a word.
- *
- * @param _index Unused iteration index (required by forEach signature)
  */
 export function word_each_do_text_text(
-  this: HTMLElement,
-  _index: number  
+  this: HTMLElement
 ): void {
   const wid = getAttr(this, 'data_wid');
   if (wid !== '') {
@@ -106,11 +103,9 @@ export function word_each_do_text_text(
  * Checks for matching word IDs in nearby annotations and combines translations.
  *
  * @param this The HTML element being processed (word span)
- * @param _index Unused iteration index (required by forEach signature)
  */
 export function mword_each_do_text_text(
-  this: HTMLElement,
-  _index: number  
+  this: HTMLElement
 ): void {
   if (getAttr(this, 'data_status') !== '') {
     const wid = getAttr(this, 'data_wid');

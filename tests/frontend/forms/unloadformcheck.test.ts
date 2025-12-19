@@ -263,7 +263,7 @@ describe('unloadformcheck.ts', () => {
         value: '',
       });
 
-      const _result = window.dispatchEvent(event);
+      window.dispatchEvent(event);
 
       // The event was handled (may or may not prevent default in test env)
       expect(lwtFormCheck.isDirtyMessage()).toBe('** You have unsaved changes! **');
@@ -273,9 +273,7 @@ describe('unloadformcheck.ts', () => {
       lwtFormCheck.askBeforeExit();
       lwtFormCheck.dirty = false;
 
-      const _event = new Event('beforeunload') as BeforeUnloadEvent;
-
-      // Should not prevent the default action
+      // Should not prevent the default action when not dirty
       expect(lwtFormCheck.isDirtyMessage()).toBeUndefined();
     });
   });

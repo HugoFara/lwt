@@ -206,7 +206,8 @@ export async function deleteFeed(
  * Delete multiple feeds.
  */
 export async function deleteFeeds(
-  _feedIds: number[]
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  feedIds: number[]
 ): Promise<ApiResponse<{ success: boolean; deleted: number }>> {
   // TODO: Pass feedIds to API when bulk delete is implemented
   return apiDelete('/feeds');
@@ -242,7 +243,8 @@ export async function getArticles(
  */
 export async function deleteArticles(
   feedId: number,
-  _articleIds: number[] = []
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  articleIds: number[] = []
 ): Promise<ApiResponse<{ success: boolean; deleted: number }>> {
   // TODO: Pass articleIds to API when selective delete is implemented
   return apiDelete(`/feeds/articles/${feedId}`);

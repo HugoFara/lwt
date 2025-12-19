@@ -180,7 +180,7 @@ export function textReaderData(): TextReaderData {
       // speechDispatcher(wordEl.textContent || '', this.store.langId);
     },
 
-    handleKeydown(_event: KeyboardEvent): void {
+    handleKeydown(): void {
       // Only handle if modal is not open
       if (this.store.isModalOpen) return;
 

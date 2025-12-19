@@ -38,7 +38,6 @@ const ANN_SHOW_TAGS = 4;
 /**
  * Annotation placement options.
  */
-const _ANN_PLACEMENT_BEHIND = 0; // Reserved for future use
 const ANN_PLACEMENT_INFRONT = 1;
 const ANN_PLACEMENT_RUBY = 2;
 

@@ -36,7 +36,6 @@ import {
   initStatisticsCharts,
   statisticsApp
 } from '../../../src/frontend/js/admin/statistics_charts';
-import type { Chart as _Chart } from 'chart.js';
 
 describe('statistics_charts.ts', () => {
   beforeEach(() => {

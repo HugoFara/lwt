@@ -207,7 +207,6 @@ describe('html5_audio_player.ts', () => {
       });
 
       it('isPaused() returns audio paused state', () => {
-        const _audio = document.querySelector('audio') as HTMLAudioElement;
         // Audio is paused by default
         expect(player.isPaused()).toBe(true);
       });

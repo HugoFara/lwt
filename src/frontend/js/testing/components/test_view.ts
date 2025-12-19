@@ -28,9 +28,9 @@ const TEST_TYPES = [
 /**
  * Render the complete test interface.
  */
-export function renderTestApp(container: HTMLElement, config: TestConfig): void {
+export function renderTestApp(container: HTMLElement): void {
   // Build the complete HTML structure
-  container.innerHTML = buildTestAppHTML(config);
+  container.innerHTML = buildTestAppHTML();
 
   // Initialize Alpine on the container
   Alpine.initTree(container);
@@ -39,7 +39,7 @@ export function renderTestApp(container: HTMLElement, config: TestConfig): void 
 /**
  * Build the complete test app HTML.
  */
-function buildTestAppHTML(_config: TestConfig): string {
+function buildTestAppHTML(): string {
   return `
     <div x-data="testApp" class="test-page" x-cloak>
       ${buildTestToolbar()}
@@ -543,7 +543,7 @@ export function initTestApp(): void {
     registerTableTestComponent();
 
     // Render the app
-    renderTestApp(container, config);
+    renderTestApp(container);
 
   } catch (err) {
     console.error('Error initializing test app:', err);
@@ -747,7 +747,7 @@ function registerTableTestComponent(): void {
           if (s.columns) this.columns = { ...this.columns, ...s.columns };
           if (typeof s.hideTermContent === 'boolean') this.hideTermContent = s.hideTermContent;
           if (typeof s.hideTransContent === 'boolean') this.hideTransContent = s.hideTransContent;
-        } catch (_e) { /* ignore */ }
+        } catch { /* ignore */ }
       }
     }
   }));

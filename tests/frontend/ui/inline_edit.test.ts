@@ -241,7 +241,8 @@ describe('inline_edit.ts', () => {
       document.body.innerHTML = '<span id="item_123" class="editable">Original</span>';
 
       let capturedBody: FormData | null = null;
-      (global.fetch as any).mockImplementation((_url: string, options: any) => {
+      (global.fetch as any).mockImplementation((url: string, options: any) => {
+        void url; // URL is used implicitly by fetch mock
         capturedBody = options.body;
         return Promise.resolve({
           ok: true,

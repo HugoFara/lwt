@@ -53,7 +53,7 @@ export function textListManagerData(): TextListManagerData {
       this.hasMarked = checked && checkboxes.length > 0;
     },
 
-    updateMarked(_event: Event) {
+    updateMarked() {
       this.updateMarkedState();
     },
 

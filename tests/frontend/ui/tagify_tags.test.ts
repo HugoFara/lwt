@@ -12,12 +12,13 @@ import {
 
 // Mock Tagify module
 vi.mock('@yaireo/tagify', () => {
-  const MockTagify = vi.fn().mockImplementation(function(this: any, _input: HTMLInputElement, _options: any) {
+  const MockTagify = vi.fn().mockImplementation(function(this: any, input: HTMLInputElement, options: unknown) {
+    void options; // Options are used implicitly by Tagify
     this.addTags = vi.fn();
     this.removeTags = vi.fn();
     this.on = vi.fn().mockReturnThis();
     this.off = vi.fn().mockReturnThis();
-    this.DOM = { input: _input };
+    this.DOM = { input };
     return this;
   });
   return { default: MockTagify };
@@ -65,7 +66,7 @@ describe('tagify_tags.ts', () => {
         </ul>
       `;
 
-      const _tagify = initTagify('#mytags');
+      initTagify('#mytags');
 
       expect(Tagify).toHaveBeenCalled();
       const mockInstance = (Tagify as any).mock.results[0].value;

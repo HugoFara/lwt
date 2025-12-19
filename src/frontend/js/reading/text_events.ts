@@ -396,11 +396,11 @@ export function word_hover_out(): void {
  */
 export function prepareTextInteractions(): void {
   // Process annotations for words and multi-words
-  document.querySelectorAll<HTMLElement>('.word').forEach((el, index) => {
-    word_each_do_text_text.call(el, index);
+  document.querySelectorAll<HTMLElement>('.word').forEach((el) => {
+    word_each_do_text_text.call(el);
   });
-  document.querySelectorAll<HTMLElement>('.mword').forEach((el, index) => {
-    mword_each_do_text_text.call(el, index);
+  document.querySelectorAll<HTMLElement>('.mword').forEach((el) => {
+    mword_each_do_text_text.call(el);
   });
 
   // Word click events

@@ -113,7 +113,7 @@ describe('api/settings.ts', () => {
       };
       vi.mocked(apiClient.apiGet).mockResolvedValue(mockResponse);
 
-      const _result = await SettingsApi.getThemePath('images/logo.png');
+      await SettingsApi.getThemePath('images/logo.png');
 
       expect(apiClient.apiGet).toHaveBeenCalledWith('/settings/theme-path', {
         path: 'images/logo.png',

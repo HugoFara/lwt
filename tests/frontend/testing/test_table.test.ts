@@ -518,18 +518,9 @@ describe('test_table.ts', () => {
       initTableTest();
 
       const tdElements = document.querySelectorAll('td');
-      const cellCount = tdElements.length;
-      let _whiteCells = 0;
-      tdElements.forEach((cell) => {
-        const bgColor = window.getComputedStyle(cell as HTMLElement).backgroundColor;
-        // JSDOM normalizes 'white' to 'rgb(255, 255, 255)' or may not set it
-        if (bgColor === 'white' || bgColor === 'rgb(255, 255, 255)' || bgColor === 'rgba(0, 0, 0, 0)') {
-          _whiteCells++;
-        }
-      });
 
       // Just verify initialization doesn't throw
-      expect(cellCount).toBeGreaterThan(0);
+      expect(tdElements.length).toBeGreaterThan(0);
     });
   });
 });

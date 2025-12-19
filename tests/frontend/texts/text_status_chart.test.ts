@@ -23,7 +23,8 @@ vi.mock('chart.js', () => {
   class MockChart {
     static instances: Array<typeof mockChartInstance> = [];
 
-    constructor(_canvas: HTMLCanvasElement, config: { data: { datasets: Array<{ data: number[] }> } }) {
+    constructor(canvas: HTMLCanvasElement, config: { data: { datasets: Array<{ data: number[] }> } }) {
+      void canvas; // Canvas element is used implicitly by Chart.js
       mockChartInstance.data.datasets = config.data.datasets.map(ds => ({ ...ds }));
       MockChart.instances.push(mockChartInstance);
       return mockChartInstance;

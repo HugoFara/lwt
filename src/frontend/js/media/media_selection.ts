@@ -18,16 +18,12 @@ interface MediaSelectResponse {
  *
  * @param paths      All paths (files and folders)
  * @param folders    Folders paths, should be a subset of paths
- * @param _base_path Base path for LWT to append (deprecated, no longer used since 2.9.1-fork)
  *
  * @returns List of options to append to the select.
- *
- * @since 2.9.1-fork Base path is no longer used
  */
 export function select_media_path(
   paths: string[],
-  folders: string[],
-  _base_path: string  
+  folders: string[]
 ): HTMLOptionElement[] {
   const options: HTMLOptionElement[] = [];
   let temp_option = document.createElement('option');
@@ -76,7 +72,7 @@ export function media_select_receive_data(data: MediaSelectResponse): void {
       errorEl.style.display = 'inherit';
     }
   } else {
-    const options = select_media_path(data.paths || [], data.folders || [], data.base_path || '');
+    const options = select_media_path(data.paths || [], data.folders || []);
     if (selectEl) {
       selectEl.innerHTML = '';
       for (let i = 0; i < options.length; i++) {

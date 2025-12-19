@@ -25,7 +25,7 @@ describe('media_selection.ts', () => {
 
   describe('select_media_path', () => {
     it('returns options array with Choose option first', () => {
-      const options = select_media_path([], [], '');
+      const options = select_media_path([], []);
 
       expect(options.length).toBe(1);
       expect(options[0].value).toBe('');
@@ -36,7 +36,7 @@ describe('media_selection.ts', () => {
       const paths = ['audio1.mp3', 'audio2.mp3', 'video.mp4'];
       const folders: string[] = [];
 
-      const options = select_media_path(paths, folders, '');
+      const options = select_media_path(paths, folders);
 
       expect(options.length).toBe(4); // 1 Choose + 3 files
       expect(options[1].value).toBe('audio1.mp3');
@@ -49,7 +49,7 @@ describe('media_selection.ts', () => {
       const paths = ['folder1', 'file.mp3', 'folder2'];
       const folders = ['folder1', 'folder2'];
 
-      const options = select_media_path(paths, folders, '');
+      const options = select_media_path(paths, folders);
 
       expect(options.length).toBe(4);
 
@@ -75,7 +75,7 @@ describe('media_selection.ts', () => {
       ];
       const folders = ['subfolder', 'another_folder'];
 
-      const options = select_media_path(paths, folders, '');
+      const options = select_media_path(paths, folders);
 
       expect(options[1].disabled).toBe(true);  // subfolder
       expect(options[2].disabled).toBe(false); // subfolder/audio.mp3
@@ -84,19 +84,8 @@ describe('media_selection.ts', () => {
       expect(options[4].disabled).toBe(true);  // another_folder
     });
 
-    it('ignores base_path parameter (deprecated)', () => {
-      const paths = ['file.mp3'];
-      const folders: string[] = [];
-
-      // base_path is ignored since 2.9.1-fork
-      const options = select_media_path(paths, folders, 'some/path');
-
-      expect(options[1].value).toBe('file.mp3');
-      expect(options[1].text).toBe('file.mp3');
-    });
-
     it('returns HTMLOptionElement instances', () => {
-      const options = select_media_path(['test.mp3'], [], '');
+      const options = select_media_path(['test.mp3'], []);
 
       expect(options[0]).toBeInstanceOf(HTMLOptionElement);
       expect(options[1]).toBeInstanceOf(HTMLOptionElement);

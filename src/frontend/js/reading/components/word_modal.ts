@@ -10,7 +10,7 @@
 
 import Alpine from 'alpinejs';
 import type { WordStoreState, WordData } from '../stores/word_store';
-import type { WordFormStoreState, SaveResult } from '../stores/word_form_store';
+import type { WordFormStoreState } from '../stores/word_form_store';
 import { speechDispatcher } from '../../core/user_interactions';
 import { initIcons } from '../../ui/lucide_icons';
 
@@ -77,7 +77,7 @@ export interface WordModalData {
   // Edit mode methods
   showEditForm(): Promise<void>;
   hideEditForm(): void;
-  onFormSaved(result: SaveResult): void;
+  onFormSaved(): void;
   onFormCancelled(): void;
 }
 
@@ -268,7 +268,7 @@ export function wordModalData(): WordModalData {
       this.formStore.reset();
     },
 
-    onFormSaved(_result: SaveResult): void {
+    onFormSaved(): void {
       // Reset form and close modal after successful save
       this.viewMode = 'info';
       this.formStore.reset();

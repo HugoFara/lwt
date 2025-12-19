@@ -140,10 +140,10 @@ describe('set_mode_result.ts', () => {
       showAnnotations(document.body);
 
       const spans = document.querySelectorAll('span:not(.mword):not([id])');
-      const _firstTwo = Array.from(spans).slice(0, 2);
-      const _lastOne = Array.from(spans).slice(2);
 
       // Note: The logic in showAnnotations calculates u = code * 2 + order - 1
+      // Verify spans exist
+      expect(spans.length).toBeGreaterThan(0);
       // For code=1, order=1: u = 1*2 + 1 - 1 = 2
       // So it looks for ID-2-*
       // This test checks the basic structure

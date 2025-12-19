@@ -98,7 +98,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('updates learnstatus in parent frame-h', async () => {
-      const { updateWordStatusInDOM: _updateWordStatusInDOM } = await import('../../../src/frontend/js/words/word_dom_updates');
+      await import('../../../src/frontend/js/words/word_dom_updates');
 
       document.body.innerHTML = `
         <div id="status_change_log"></div>
@@ -185,7 +185,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('calls applyWordUpdate on successful response', async () => {
-      const { updateWordStatusInDOM: _updateWordStatusInDOM } = await import('../../../src/frontend/js/words/word_dom_updates');
+      await import('../../../src/frontend/js/words/word_dom_updates');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({
@@ -212,7 +212,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('calls wordUpdateError on empty response', async () => {
-      const { cleanupRightFrames: _cleanupRightFrames } = await import('../../../src/frontend/js/reading/frame_management');
+      await import('../../../src/frontend/js/reading/frame_management');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({
@@ -238,7 +238,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('calls wordUpdateError on error response', async () => {
-      const { cleanupRightFrames: _cleanupRightFrames } = await import('../../../src/frontend/js/reading/frame_management');
+      await import('../../../src/frontend/js/reading/frame_management');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({
@@ -370,7 +370,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('handles special characters in term', async () => {
-      const { updateWordStatusInDOM: _updateWordStatusInDOM } = await import('../../../src/frontend/js/words/word_dom_updates');
+      await import('../../../src/frontend/js/words/word_dom_updates');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({
@@ -396,7 +396,7 @@ describe('word_status_ajax.ts', () => {
     });
 
     it('handles Unicode characters in term', async () => {
-      const { updateWordStatusInDOM: _updateWordStatusInDOM } = await import('../../../src/frontend/js/words/word_dom_updates');
+      await import('../../../src/frontend/js/words/word_dom_updates');
 
       global.fetch = vi.fn(() =>
         Promise.resolve({
