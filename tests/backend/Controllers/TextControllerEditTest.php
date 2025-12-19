@@ -150,7 +150,7 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertInstanceOf(TextController::class, $controller);
     }
@@ -163,7 +163,7 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertTrue(method_exists($controller, 'edit'));
     }
@@ -174,7 +174,7 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertTrue(method_exists($controller, 'display'));
     }
@@ -185,7 +185,7 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertTrue(method_exists($controller, 'printText'));
     }
@@ -196,7 +196,7 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertTrue(method_exists($controller, 'printPlain'));
     }
@@ -207,7 +207,7 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertTrue(method_exists($controller, 'importLong'));
     }
@@ -218,7 +218,7 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertTrue(method_exists($controller, 'setMode'));
     }
@@ -229,7 +229,7 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertTrue(method_exists($controller, 'check'));
     }
@@ -240,7 +240,7 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertTrue(method_exists($controller, 'archived'));
     }
@@ -366,7 +366,7 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'handleMarkAction');
@@ -734,8 +734,8 @@ class TextControllerEditTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller1 = new TextController();
-        $controller2 = new TextController();
+        $controller1 = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
+        $controller2 = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertInstanceOf(TextController::class, $controller1);
         $this->assertInstanceOf(TextController::class, $controller2);

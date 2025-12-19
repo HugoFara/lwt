@@ -7,6 +7,7 @@ use Lwt\Controllers\FeedsController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Services\FeedService;
+use Lwt\Services\LanguageService;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
@@ -139,6 +140,16 @@ class FeedsControllerTest extends TestCase
         Connection::query("ALTER TABLE newsfeeds AUTO_INCREMENT = " . ((int)$maxNfId + 1));
     }
 
+    /**
+     * Helper method to create a FeedsController with its dependencies.
+     *
+     * @return FeedsController
+     */
+    private function createController(): FeedsController
+    {
+        return new FeedsController(new FeedService(), new LanguageService());
+    }
+
     // ===== Constructor tests =====
 
     public function testControllerCanBeInstantiated(): void
@@ -147,7 +158,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new FeedsController();
+        $controller = $this->createController();
 
         $this->assertInstanceOf(FeedsController::class, $controller);
     }
@@ -286,7 +297,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new FeedsController();
+        $controller = $this->createController();
 
         $this->assertTrue(method_exists($controller, 'index'));
         $this->assertTrue(method_exists($controller, 'edit'));
@@ -568,7 +579,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new FeedsController();
+        $controller = $this->createController();
 
         $this->assertTrue(method_exists($controller, 'getFeedService'));
     }
@@ -579,7 +590,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new FeedsController();
+        $controller = $this->createController();
         $service = $controller->getFeedService();
 
         $this->assertInstanceOf(FeedService::class, $service);
@@ -591,7 +602,7 @@ class FeedsControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new FeedsController();
+        $controller = $this->createController();
         $service1 = $controller->getFeedService();
         $service2 = $controller->getFeedService();
 

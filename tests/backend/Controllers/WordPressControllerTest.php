@@ -87,7 +87,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
 
         $this->assertInstanceOf(WordPressController::class, $controller);
     }
@@ -98,7 +98,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         $this->assertInstanceOf(WordPressService::class, $service);
@@ -112,7 +112,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
 
         $this->assertTrue(method_exists($controller, 'start'));
     }
@@ -123,7 +123,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
 
         $this->assertTrue(method_exists($controller, 'stop'));
     }
@@ -134,7 +134,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
 
         $this->assertTrue(method_exists($controller, 'getWordPressService'));
     }
@@ -147,7 +147,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         $result = $service->validateRedirectUrl(null);
@@ -161,7 +161,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         $result = $service->validateRedirectUrl('');
@@ -175,7 +175,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         $result = $service->validateRedirectUrl('nonexistent_file_12345.php');
@@ -189,7 +189,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         $result = $service->getLoginUrl();
@@ -204,7 +204,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         $result = $service->getLoginUrl('./custom/path.php');
@@ -219,7 +219,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         // Without WordPress loaded, this should return false
@@ -234,7 +234,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         // Without WordPress loaded, this should return null
@@ -249,7 +249,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         // In test environment, WordPress is typically not installed
@@ -265,7 +265,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         // Initially null
@@ -286,7 +286,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         $result = $service->handleStart(null);
@@ -303,7 +303,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         $result = $service->handleStop();
@@ -324,7 +324,7 @@ class WordPressControllerTest extends TestCase
 
         // Note: This test might behave differently depending on whether
         // a session is already active
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
         $service = $controller->getWordPressService();
 
         $result = $service->startSession();
@@ -344,7 +344,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
 
         // Test that start() accepts an array parameter
         $reflection = new \ReflectionMethod($controller, 'start');
@@ -361,7 +361,7 @@ class WordPressControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new WordPressController();
+        $controller = new WordPressController(new \Lwt\Services\WordPressService());
 
         // Test that stop() accepts an array parameter
         $reflection = new \ReflectionMethod($controller, 'stop');

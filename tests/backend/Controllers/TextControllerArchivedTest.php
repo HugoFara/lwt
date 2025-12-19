@@ -7,6 +7,7 @@ use Lwt\Controllers\TextController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Services\TextService;
+use Lwt\Services\LanguageService;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use Lwt\Database\Settings;
@@ -175,7 +176,9 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $textService = new TextService();
+        $languageService = new LanguageService();
+        $controller = new TextController($textService, $languageService);
 
         $this->assertInstanceOf(TextController::class, $controller);
     }
@@ -186,7 +189,9 @@ class TextControllerArchivedTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $textService = new TextService();
+        $languageService = new LanguageService();
+        $controller = new TextController($textService, $languageService);
 
         $this->assertTrue(method_exists($controller, 'archived'));
     }

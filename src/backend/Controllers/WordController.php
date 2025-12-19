@@ -83,13 +83,16 @@ class WordController extends BaseController
     protected LanguageService $languageService;
 
     /**
-     * Initialize controller with WordService.
+     * Create a new WordController.
+     *
+     * @param WordService     $wordService     Word service for vocabulary operations
+     * @param LanguageService $languageService Language service for language operations
      */
-    public function __construct()
+    public function __construct(WordService $wordService, LanguageService $languageService)
     {
         parent::__construct();
-        $this->wordService = new WordService();
-        $this->languageService = new LanguageService();
+        $this->wordService = $wordService;
+        $this->languageService = $languageService;
     }
 
     /**

@@ -119,6 +119,16 @@ class LanguageControllerTest extends TestCase
         return (int) mysqli_insert_id(Globals::getDbConnection());
     }
 
+    /**
+     * Helper method to create a LanguageController with its dependencies.
+     *
+     * @return LanguageController
+     */
+    private function createController(): LanguageController
+    {
+        return new LanguageController(new LanguageService());
+    }
+
     // ===== Constructor tests =====
 
     public function testControllerCanBeInstantiated(): void
@@ -127,7 +137,7 @@ class LanguageControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new LanguageController();
+        $controller = $this->createController();
 
         $this->assertInstanceOf(LanguageController::class, $controller);
     }
@@ -138,7 +148,7 @@ class LanguageControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new LanguageController();
+        $controller = $this->createController();
 
         // Use reflection to check private property
         $reflection = new \ReflectionClass($controller);
@@ -157,7 +167,7 @@ class LanguageControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new LanguageController();
+        $controller = $this->createController();
 
         $this->assertTrue(method_exists($controller, 'index'));
     }
@@ -173,7 +183,7 @@ class LanguageControllerTest extends TestCase
         // Create a test language to ensure there's data
         $this->createTestLanguage('TestLang_ServiceCheck');
 
-        $controller = new LanguageController();
+        $controller = $this->createController();
 
         // Get the service from the controller
         $reflection = new \ReflectionClass($controller);
@@ -194,7 +204,7 @@ class LanguageControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new LanguageController();
+        $controller = $this->createController();
 
         // Test that index() accepts an array parameter
         $reflection = new \ReflectionMethod($controller, 'index');
@@ -312,7 +322,7 @@ class LanguageControllerTest extends TestCase
 
         $id = $this->createTestLanguage('TestLang_ControllerGetById');
 
-        $controller = new LanguageController();
+        $controller = $this->createController();
         $reflection = new \ReflectionClass($controller);
         $property = $reflection->getProperty('languageService');
         $property->setAccessible(true);
@@ -332,7 +342,7 @@ class LanguageControllerTest extends TestCase
 
         $this->createTestLanguage('TestLang_ControllerStats');
 
-        $controller = new LanguageController();
+        $controller = $this->createController();
         $reflection = new \ReflectionClass($controller);
         $property = $reflection->getProperty('languageService');
         $property->setAccessible(true);

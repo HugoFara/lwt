@@ -7,6 +7,7 @@ use Lwt\Controllers\FeedsController;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
 use Lwt\Services\FeedService;
+use Lwt\Services\LanguageService;
 use Lwt\Database\Configuration;
 use Lwt\Database\Connection;
 use PHPUnit\Framework\TestCase;
@@ -146,6 +147,16 @@ class FeedsControllerWizardTest extends TestCase
         Connection::query("DELETE FROM newsfeeds WHERE NfName LIKE 'Ctrl Test Wizard%'");
     }
 
+    /**
+     * Helper method to create a FeedsController with its dependencies.
+     *
+     * @return FeedsController
+     */
+    private function createController(): FeedsController
+    {
+        return new FeedsController(new FeedService(), new LanguageService());
+    }
+
     // ===== Controller wizard method tests =====
 
     public function testControllerHasWizardMethod(): void
@@ -154,7 +165,7 @@ class FeedsControllerWizardTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new FeedsController();
+        $controller = $this->createController();
 
         $this->assertTrue(method_exists($controller, 'wizard'));
     }

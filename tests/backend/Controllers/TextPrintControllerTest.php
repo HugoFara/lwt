@@ -140,7 +140,8 @@ class TextPrintControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextPrintController();
+        $service = new TextPrintService();
+        $controller = new TextPrintController($service);
 
         $this->assertInstanceOf(TextPrintController::class, $controller);
     }
@@ -151,7 +152,8 @@ class TextPrintControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextPrintController();
+        $printService = new TextPrintService();
+        $controller = new TextPrintController($printService);
         $service = $controller->getPrintService();
 
         $this->assertInstanceOf(TextPrintService::class, $service);
@@ -165,7 +167,8 @@ class TextPrintControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextPrintController();
+        $service = new TextPrintService();
+        $controller = new TextPrintController($service);
 
         $this->assertTrue(method_exists($controller, 'printPlain'));
         $this->assertTrue(method_exists($controller, 'printAnnotated'));
@@ -183,7 +186,8 @@ class TextPrintControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextPrintController();
+        $printService = new TextPrintService();
+        $controller = new TextPrintController($printService);
         $service = $controller->getPrintService();
 
         $this->assertInstanceOf(TextPrintService::class, $service);

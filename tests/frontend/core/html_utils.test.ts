@@ -6,7 +6,7 @@ import {
   escape_html_chars,
   escape_html_chars_2,
   escape_apostrophes,
-  renderBulmaTags,
+  renderTags,
   renderStatusBarChart
 } from '../../../src/frontend/js/core/html_utils';
 
@@ -136,27 +136,27 @@ describe('core/html_utils.ts', () => {
   });
 
   // ===========================================================================
-  // renderBulmaTags Tests
+  // renderTags Tests
   // ===========================================================================
 
-  describe('renderBulmaTags', () => {
+  describe('renderTags', () => {
     it('returns empty string for empty input', () => {
-      expect(renderBulmaTags('')).toBe('');
+      expect(renderTags('')).toBe('');
     });
 
     it('returns empty string for whitespace-only input', () => {
-      expect(renderBulmaTags('   ')).toBe('');
+      expect(renderTags('   ')).toBe('');
     });
 
     it('renders single tag', () => {
-      const result = renderBulmaTags('important');
+      const result = renderTags('important');
 
       expect(result).toContain('class="tag is-info is-light is-small"');
       expect(result).toContain('important');
     });
 
     it('renders multiple comma-separated tags', () => {
-      const result = renderBulmaTags('tag1,tag2,tag3');
+      const result = renderTags('tag1,tag2,tag3');
 
       expect(result).toContain('tag1');
       expect(result).toContain('tag2');
@@ -164,7 +164,7 @@ describe('core/html_utils.ts', () => {
     });
 
     it('trims whitespace from tags', () => {
-      const result = renderBulmaTags(' tag1 , tag2 , tag3 ');
+      const result = renderTags(' tag1 , tag2 , tag3 ');
 
       expect(result).toContain('>tag1</span>');
       expect(result).toContain('>tag2</span>');
@@ -172,7 +172,7 @@ describe('core/html_utils.ts', () => {
     });
 
     it('filters empty tags', () => {
-      const result = renderBulmaTags('tag1,,tag2');
+      const result = renderTags('tag1,,tag2');
 
       expect(result).toContain('tag1');
       expect(result).toContain('tag2');
@@ -180,14 +180,14 @@ describe('core/html_utils.ts', () => {
     });
 
     it('escapes HTML in tags', () => {
-      const result = renderBulmaTags('<script>');
+      const result = renderTags('<script>');
 
       expect(result).not.toContain('<script>');
       expect(result).toContain('&lt;script&gt;');
     });
 
     it('handles unicode tags', () => {
-      const result = renderBulmaTags('日本語,中文');
+      const result = renderTags('日本語,中文');
 
       expect(result).toContain('日本語');
       expect(result).toContain('中文');
@@ -344,12 +344,12 @@ describe('core/html_utils.ts', () => {
       expect(escape_html_chars(input)).toBe(expected);
     });
 
-    it('renderBulmaTags handles single comma', () => {
-      expect(renderBulmaTags(',')).toBe('');
+    it('renderTags handles single comma', () => {
+      expect(renderTags(',')).toBe('');
     });
 
-    it('renderBulmaTags handles trailing comma', () => {
-      const result = renderBulmaTags('tag1,tag2,');
+    it('renderTags handles trailing comma', () => {
+      const result = renderTags('tag1,tag2,');
 
       expect((result.match(/<span/g) || []).length).toBe(2);
     });

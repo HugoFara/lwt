@@ -40,12 +40,14 @@ class WordPressController extends BaseController
     protected WordPressService $wordPressService;
 
     /**
-     * Initialize controller with WordPressService.
+     * Create a new WordPressController.
+     *
+     * @param WordPressService $wordPressService WordPress service for import operations
      */
-    public function __construct()
+    public function __construct(WordPressService $wordPressService)
     {
         parent::__construct();
-        $this->wordPressService = new WordPressService();
+        $this->wordPressService = $wordPressService;
     }
 
     /**

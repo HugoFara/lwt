@@ -71,13 +71,16 @@ class FeedsController extends BaseController
     private LanguageService $languageService;
 
     /**
-     * Constructor - initialize feed service.
+     * Create a new FeedsController.
+     *
+     * @param FeedService     $feedService     Feed service for RSS feed operations
+     * @param LanguageService $languageService Language service for language operations
      */
-    public function __construct()
+    public function __construct(FeedService $feedService, LanguageService $languageService)
     {
         parent::__construct();
-        $this->feedService = new FeedService();
-        $this->languageService = new LanguageService();
+        $this->feedService = $feedService;
+        $this->languageService = $languageService;
     }
 
     /**

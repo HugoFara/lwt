@@ -328,7 +328,7 @@ class ReviewHandler
     }
 
     // =========================================================================
-    // Phase 3 Methods: Bulma/Alpine Test Interface
+    // Phase 3 Methods: Alpine Test Interface
     // =========================================================================
 
     /**

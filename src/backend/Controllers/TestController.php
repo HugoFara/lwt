@@ -51,10 +51,15 @@ class TestController extends BaseController
 {
     private TestService $testService;
 
-    public function __construct()
+    /**
+     * Create a new TestController.
+     *
+     * @param TestService $testService Test service for review/test operations
+     */
+    public function __construct(TestService $testService)
     {
         parent::__construct();
-        $this->testService = new TestService();
+        $this->testService = $testService;
     }
 
     /**
@@ -223,24 +228,13 @@ class TestController extends BaseController
     /**
      * Render the main test page.
      *
-     * @return void
-     */
-    private function renderTestPage(): void
-    {
-        // Use new Bulma/Alpine interface
-        $this->renderTestPageBulma();
-    }
-
-    /**
-     * Render test page with Bulma CSS and Alpine.js.
-     *
      * Modern interface with reactive state management and no iframes.
      *
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    private function renderTestPageBulma(): void
+    private function renderTestPage(): void
     {
         $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
         $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
@@ -337,7 +331,7 @@ class TestController extends BaseController
         ];
 
         PageLayoutHelper::renderPageStartNobody('Test', 'full-width');
-        include __DIR__ . '/../Views/Test/test_desktop_bulma.php';
+        include __DIR__ . '/../Views/Test/test_desktop.php';
         PageLayoutHelper::renderPageEnd();
     }
 

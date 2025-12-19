@@ -68,17 +68,22 @@ class TextController extends BaseController
     private LanguageService $languageService;
 
     /**
-     * Constructor - initialize services.
+     * Create a new TextController.
+     *
+     * @param TextService     $textService     Text service for text operations
+     * @param LanguageService $languageService Language service for language operations
      */
-    public function __construct()
+    public function __construct(TextService $textService, LanguageService $languageService)
     {
         parent::__construct();
-        $this->textService = new TextService();
-        $this->languageService = new LanguageService();
+        $this->textService = $textService;
+        $this->languageService = $languageService;
     }
 
     /**
-     * Read text interface (replaces text_read.php)
+     * Read text interface.
+     *
+     * Modern text reading interface with client-side rendering using Alpine.js.
      *
      * @param array $params Route parameters
      *
@@ -89,18 +94,7 @@ class TextController extends BaseController
     public function read(array $params): void
     {
         require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Services/TextStatisticsService.php';
-        require_once __DIR__ . '/../Services/SentenceService.php';
-        require_once __DIR__ . '/../Services/AnnotationService.php';
-        require_once __DIR__ . '/../Services/SimilarTermsService.php';
-        require_once __DIR__ . '/../Services/TextNavigationService.php';
-        require_once __DIR__ . '/../Services/TextParsingService.php';
-        require_once __DIR__ . '/../Services/ExpressionService.php';
-        require_once __DIR__ . '/../Core/Database/Restore.php';
-        require_once __DIR__ . '/../Services/TextReadingService.php';
         require_once __DIR__ . '/../Services/MediaService.php';
-        require_once __DIR__ . '/../Services/WordStatusService.php';
-        require_once __DIR__ . '/../Services/ExportService.php';
 
         // Get text ID from request
         $textId = $this->getTextIdFromRequest();
@@ -135,112 +129,6 @@ class TextController extends BaseController
     /**
      * Render the text reading page.
      *
-     * @param int $textId Text ID
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     */
-    private function renderReadPage(int $textId): void
-    {
-        // Prepare header data
-        $headerData = $this->textService->getTextForReading($textId);
-        if ($headerData === null) {
-            header("Location: /text/edit");
-            exit();
-        }
-
-        $title = (string) $headerData['TxTitle'];
-        $langId = (int) $headerData['TxLgID'];
-        $media = isset($headerData['TxAudioURI']) ? trim((string) $headerData['TxAudioURI']) : '';
-        $audioPosition = (int) ($headerData['TxAudioPosition'] ?? 0);
-        $sourceUri = (string) ($headerData['TxSourceURI'] ?? '');
-        $text = (string) $headerData['TxText'];
-        $languageName = (string) $headerData['LgName'];
-
-        // Save current text
-        Settings::save('currenttext', $textId);
-
-        // User settings for header
-        $showAll = Settings::getZeroOrOne('showallwords', 1);
-        $showLearning = Settings::getZeroOrOne('showlearningtranslations', 1);
-
-        // Get language code and phonetic text for TTS
-        $languageCode = $this->languageService->getLanguageCode($langId, LanguageDefinitions::getAll());
-        $phoneticText = $this->languageService->getPhoneticReadingById($text, $langId);
-        $voiceApi = $this->textService->getTtsVoiceApi($langId);
-
-        // Prepare text content data
-        $textData = $this->textService->getTextDataForContent($textId);
-        $annotatedText = (string) ($textData['TxAnnotatedText'] ?? '');
-        $textPosition = (int) ($textData['TxPosition'] ?? 0);
-
-        // Language settings for text display
-        $langSettings = $this->textService->getLanguageSettingsForReading($langId);
-        $dictLink1 = $langSettings['LgDict1URI'] ?? '';
-        $dictLink2 = $langSettings['LgDict2URI'] ?? '';
-        $translatorLink = $langSettings['LgGoogleTranslateURI'] ?? '';
-        $textSize = (int) $langSettings['LgTextSize'];
-        $regexpWordChars = $langSettings['LgRegexpWordCharacters'] ?? '';
-        $removeSpaces = (int) $langSettings['LgRemoveSpaces'];
-        $rtlScript = (bool) $langSettings['LgRightToLeft'];
-
-        // Additional settings for text view
-        $modeTrans = (int) Settings::getWithDefault('set-text-frame-annotation-position');
-        $visitStatus = Settings::getWithDefault('set-text-visit-statuses-via-key');
-        if ($visitStatus == '') {
-            $visitStatus = '0';
-        }
-        $termDelimiter = Settings::getWithDefault('set-term-translation-delimiters');
-        $tooltipMode = (int) Settings::getWithDefault('set-tooltip-mode');
-        $hts = Settings::getWithDefault('set-hts');
-
-        // For text content view, reassign the title
-        $textTitle = $title;
-
-        // Desktop frame width
-        $frameLWidth = (int) Settings::getWithDefault('set-text-l-framewidth-percent');
-
-        // Start page
-        PageLayoutHelper::renderPageStartNobody('Read', 'full-width');
-
-        // Render desktop layout
-        include __DIR__ . '/../Views/Text/read_desktop.php';
-
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Read text interface (Bulma + Alpine.js version)
-     *
-     * Modern text reading interface with client-side rendering.
-     *
-     * @param array $params Route parameters
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     */
-    public function readBulma(array $params): void
-    {
-        require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-        require_once __DIR__ . '/../Services/MediaService.php';
-
-        // Get text ID from request
-        $textId = $this->getTextIdFromRequest();
-
-        if ($textId === null) {
-            header("Location: /text/edit");
-            exit();
-        }
-
-        // Render the Bulma reading page
-        $this->renderReadPageBulma($textId);
-    }
-
-    /**
-     * Render the text reading page (Bulma version).
-     *
      * Uses client-side rendering via Alpine.js and API.
      *
      * @param int $textId Text ID
@@ -249,7 +137,7 @@ class TextController extends BaseController
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
      */
-    private function renderReadPageBulma(int $textId): void
+    private function renderReadPage(int $textId): void
     {
         // Prepare minimal header data
         $headerData = $this->textService->getTextForReading($textId);
@@ -267,11 +155,11 @@ class TextController extends BaseController
         // Save current text
         Settings::save('currenttext', $textId);
 
-        // Start page with Bulma layout
+        // Start page layout
         PageLayoutHelper::renderPageStartNobody('Read', 'full-width');
 
-        // Render Bulma desktop layout
-        include __DIR__ . '/../Views/Text/read_desktop_bulma.php';
+        // Render desktop layout
+        include __DIR__ . '/../Views/Text/read_desktop.php';
 
         PageLayoutHelper::renderPageEnd();
     }

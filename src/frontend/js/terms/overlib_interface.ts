@@ -464,7 +464,7 @@ function renderTermDetailsHtml(term: TermDetails): string {
 
   // Tags
   if (term.tags && term.tags.length > 0) {
-    rows.push(`<tr><td class="lwt-label">Tags:</td><td class="lwt-value">${renderBulmaTags(term.tags)}</td></tr>`);
+    rows.push(`<tr><td class="lwt-label">Tags:</td><td class="lwt-value">${renderTags(term.tags)}</td></tr>`);
   }
 
   // Romanization
@@ -498,12 +498,12 @@ function escapeHtml(str: string): string {
 }
 
 /**
- * Render tags as Bulma tag components.
+ * Render tags as tag components.
  *
  * @param tags Array of tag strings
- * @returns HTML string with Bulma tags
+ * @returns HTML string with tags
  */
-function renderBulmaTags(tags: string[]): string {
+function renderTags(tags: string[]): string {
   if (!tags || tags.length === 0) {
     return '';
   }

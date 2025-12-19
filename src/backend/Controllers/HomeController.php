@@ -63,13 +63,16 @@ class HomeController extends BaseController
     private LanguageService $languageService;
 
     /**
-     * Initialize controller with HomeService.
+     * Create a new HomeController.
+     *
+     * @param HomeService     $homeService     Home service for dashboard data
+     * @param LanguageService $languageService Language service for language operations
      */
-    public function __construct()
+    public function __construct(HomeService $homeService, LanguageService $languageService)
     {
         parent::__construct();
-        $this->homeService = new HomeService();
-        $this->languageService = new LanguageService();
+        $this->homeService = $homeService;
+        $this->languageService = $languageService;
     }
 
     /**

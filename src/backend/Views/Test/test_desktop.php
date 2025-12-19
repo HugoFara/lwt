@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 /**
- * Desktop Test Layout View (Bulma + Alpine.js)
+ * Desktop Test Layout View
  *
  * Minimal container for client-side rendered test interface.
- * All UI is rendered by JavaScript/Alpine.js.
+ * All UI is rendered by Alpine.js.
  *
  * Variables expected:
  * - $config: array - Test configuration (from TestController)

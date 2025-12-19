@@ -47,11 +47,13 @@ class AuthController extends BaseController
 
     /**
      * Create a new AuthController.
+     *
+     * @param AuthService $authService Auth service for authentication operations
      */
-    public function __construct()
+    public function __construct(AuthService $authService)
     {
         parent::__construct();
-        $this->authService = new AuthService();
+        $this->authService = $authService;
     }
 
     /**

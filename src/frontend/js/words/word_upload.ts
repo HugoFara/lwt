@@ -6,7 +6,7 @@
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 
-import { escape_html_chars, renderBulmaTags } from '../core/html_utils';
+import { escape_html_chars, renderTags } from '../core/html_utils';
 import { statuses } from '../core/app_data';
 import { iconHtml } from '../ui/icons';
 import type { WordStatus } from '../types/globals';
@@ -184,7 +184,7 @@ function formatImportedTerms(data: ImportedTerm[], rtl: boolean): string {
         <span id="trans${record.WoID}" class="edit_area clickedit">${escape_html_chars(record.WoTranslation)}</span>
       </td>
       <td>
-        <span class="tags">${renderBulmaTags(record.taglist)}</span>
+        <span class="tags">${renderTags(record.taglist)}</span>
       </td>
       <td class="has-text-centered">
         ${record.SentOK !== 0

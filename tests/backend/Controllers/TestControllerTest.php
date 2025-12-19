@@ -84,6 +84,16 @@ class TestControllerTest extends TestCase
     }
 
     /**
+     * Helper method to create a TestController with its dependencies.
+     *
+     * @return TestController
+     */
+    private function createController(): TestController
+    {
+        return new TestController(new TestService());
+    }
+
+    /**
      * Helper method to call protected param() method.
      *
      * @param TestController $controller The controller instance
@@ -108,7 +118,7 @@ class TestControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertInstanceOf(TestController::class, $controller);
     }
@@ -121,7 +131,7 @@ class TestControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertTrue(method_exists($controller, 'index'));
     }
@@ -132,7 +142,7 @@ class TestControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertTrue(method_exists($controller, 'header'));
     }
@@ -143,7 +153,7 @@ class TestControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertTrue(method_exists($controller, 'tableTest'));
     }
@@ -156,7 +166,7 @@ class TestControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertInstanceOf(\Lwt\Controllers\BaseController::class, $controller);
     }
@@ -404,7 +414,7 @@ class TestControllerTest extends TestCase
 
         $_REQUEST['lang'] = '5';
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertEquals('5', $this->invokeParam($controller, 'lang'));
     }
@@ -417,7 +427,7 @@ class TestControllerTest extends TestCase
 
         $_REQUEST['text'] = '10';
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertEquals('10', $this->invokeParam($controller, 'text'));
     }
@@ -430,7 +440,7 @@ class TestControllerTest extends TestCase
 
         $_REQUEST['selection'] = '3';
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertEquals('3', $this->invokeParam($controller, 'selection'));
     }
@@ -443,7 +453,7 @@ class TestControllerTest extends TestCase
 
         $_REQUEST['type'] = '2';
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertEquals('2', $this->invokeParam($controller, 'type'));
     }
@@ -456,7 +466,7 @@ class TestControllerTest extends TestCase
 
         $_REQUEST['wid'] = '100';
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertEquals('100', $this->invokeParam($controller, 'wid'));
     }
@@ -469,7 +479,7 @@ class TestControllerTest extends TestCase
 
         $_REQUEST['status'] = '4';
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertEquals('4', $this->invokeParam($controller, 'status'));
     }
@@ -482,7 +492,7 @@ class TestControllerTest extends TestCase
 
         $_REQUEST['stchange'] = '1';
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         $this->assertEquals('1', $this->invokeParam($controller, 'stchange'));
     }
@@ -522,7 +532,7 @@ class TestControllerTest extends TestCase
         $_REQUEST['selection'] = '1';
         $_SESSION['testsql'] = 'SELECT * FROM words';
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
@@ -542,7 +552,7 @@ class TestControllerTest extends TestCase
 
         $_REQUEST['lang'] = '5';
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
@@ -562,7 +572,7 @@ class TestControllerTest extends TestCase
 
         $_REQUEST['text'] = '10';
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
@@ -580,7 +590,7 @@ class TestControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TestController();
+        $controller = $this->createController();
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
@@ -641,8 +651,8 @@ class TestControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller1 = new TestController();
-        $controller2 = new TestController();
+        $controller1 = $this->createController();
+        $controller2 = $this->createController();
 
         $this->assertInstanceOf(TestController::class, $controller1);
         $this->assertInstanceOf(TestController::class, $controller2);

@@ -53,10 +53,15 @@ class LanguageController extends BaseController
 {
     private LanguageService $languageService;
 
-    public function __construct()
+    /**
+     * Create a new LanguageController.
+     *
+     * @param LanguageService $languageService Language service for language operations
+     */
+    public function __construct(LanguageService $languageService)
     {
         parent::__construct();
-        $this->languageService = new LanguageService();
+        $this->languageService = $languageService;
     }
 
     /**

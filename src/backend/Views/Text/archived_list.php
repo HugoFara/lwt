@@ -168,7 +168,7 @@ echo PageLayoutHelper::buildActionCard([
                                 <div class="card-content">
                                     <!-- Tags -->
                                     <div x-show="text.taglist" class="text-meta mb-3">
-                                        <div class="tags" x-html="renderBulmaTags(text.taglist)"></div>
+                                        <div class="tags" x-html="renderTags(text.taglist)"></div>
                                     </div>
 
                                     <!-- Archive Status Badge -->

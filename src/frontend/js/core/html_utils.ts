@@ -55,12 +55,12 @@ export function escape_apostrophes(s: string): string {
 }
 
 /**
- * Render a comma-separated tag list as Bulma tag components.
+ * Render a comma-separated tag list as tag components.
  *
  * @param tagList Comma-separated tag list (e.g., "tag1,tag2,tag3")
- * @returns HTML string with Bulma tags
+ * @returns HTML string with tags
  */
-export function renderBulmaTags(tagList: string): string {
+export function renderTags(tagList: string): string {
   if (!tagList || tagList.trim() === '') {
     return '';
   }

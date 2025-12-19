@@ -218,7 +218,7 @@ class ApiControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController();
+        $controller = new TranslationController(new \Lwt\Services\TranslationService());
 
         $this->assertInstanceOf(TranslationController::class, $controller);
     }
@@ -229,7 +229,7 @@ class ApiControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController();
+        $controller = new TranslationController(new \Lwt\Services\TranslationService());
 
         $this->assertTrue(method_exists($controller, 'translate'));
     }
@@ -240,7 +240,7 @@ class ApiControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController();
+        $controller = new TranslationController(new \Lwt\Services\TranslationService());
 
         $this->assertTrue(method_exists($controller, 'google'));
     }
@@ -251,7 +251,7 @@ class ApiControllerTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TranslationController();
+        $controller = new TranslationController(new \Lwt\Services\TranslationService());
 
         $this->assertTrue(method_exists($controller, 'glosbe'));
     }

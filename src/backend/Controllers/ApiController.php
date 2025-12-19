@@ -16,6 +16,7 @@
 namespace Lwt\Controllers;
 
 require_once __DIR__ . '/TranslationController.php';
+require_once __DIR__ . '/../Services/TranslationService.php';
 require_once __DIR__ . '/../Api/V1/Response.php';
 require_once __DIR__ . '/../Api/V1/Endpoints.php';
 require_once __DIR__ . '/../Api/V1/ApiV1.php';
@@ -31,6 +32,7 @@ require_once __DIR__ . '/../Api/V1/Handlers/TermHandler.php';
 require_once __DIR__ . '/../Api/V1/Handlers/TextHandler.php';
 
 use Lwt\Api\V1\ApiV1;
+use Lwt\Services\TranslationService;
 
 /**
  * Controller for REST API endpoints.
@@ -63,7 +65,7 @@ class ApiController extends BaseController
     protected function getTranslationController(): TranslationController
     {
         if ($this->translationController === null) {
-            $this->translationController = new TranslationController();
+            $this->translationController = new TranslationController(new TranslationService());
         }
         return $this->translationController;
     }

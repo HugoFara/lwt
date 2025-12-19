@@ -150,7 +150,7 @@ class TextControllerReadTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertInstanceOf(TextController::class, $controller);
     }
@@ -163,7 +163,7 @@ class TextControllerReadTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $this->assertTrue(method_exists($controller, 'read'));
     }
@@ -213,7 +213,7 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = (string)self::$testTextId;
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -232,7 +232,7 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['start'] = (string)self::$testTextId;
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -252,7 +252,7 @@ class TextControllerReadTest extends TestCase
         $_REQUEST['text'] = (string)self::$testTextId;
         $_REQUEST['start'] = (string)self::$testText2Id;
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -272,7 +272,7 @@ class TextControllerReadTest extends TestCase
 
         // No text or start parameter set
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -291,7 +291,7 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = 'not-a-number';
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -310,7 +310,7 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '0';
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         // Use reflection to test private method
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
@@ -489,7 +489,7 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '2147483647'; // Max 32-bit int
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
         $method->setAccessible(true);
@@ -507,7 +507,7 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '-1';
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
         $method->setAccessible(true);
@@ -526,7 +526,7 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '123.45';
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
         $method->setAccessible(true);
@@ -545,7 +545,7 @@ class TextControllerReadTest extends TestCase
 
         $_REQUEST['text'] = '  123  ';
 
-        $controller = new TextController();
+        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         $method = new \ReflectionMethod(TextController::class, 'getTextIdFromRequest');
         $method->setAccessible(true);
@@ -570,8 +570,8 @@ class TextControllerReadTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        $controller1 = new TextController();
-        $controller2 = new TextController();
+        $controller1 = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
+        $controller2 = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
 
         // Both controllers should be functional
         $this->assertInstanceOf(TextController::class, $controller1);

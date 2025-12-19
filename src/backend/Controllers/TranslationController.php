@@ -52,12 +52,14 @@ class TranslationController extends BaseController
     protected TranslationService $translationService;
 
     /**
-     * Initialize controller with translation service.
+     * Create a new TranslationController.
+     *
+     * @param TranslationService $translationService Translation service for translation operations
      */
-    public function __construct()
+    public function __construct(TranslationService $translationService)
     {
         parent::__construct();
-        $this->translationService = new TranslationService();
+        $this->translationService = $translationService;
     }
 
     /**

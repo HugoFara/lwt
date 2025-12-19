@@ -48,8 +48,8 @@ function registerRoutes(Router $router): void
 
     // ==================== TEXT ROUTES (PROTECTED) ====================
 
-    // Read text (Bulma + Alpine.js - client-side rendering)
-    $router->registerWithMiddleware('/text/read', 'TextController@readBulma', AUTH_MIDDLEWARE);
+    // Read text (Alpine.js - client-side rendering)
+    $router->registerWithMiddleware('/text/read', 'TextController@read', AUTH_MIDDLEWARE);
 
     // Empty iframe placeholder (used in text read, test, and word pages)
     // These are static files, no auth needed

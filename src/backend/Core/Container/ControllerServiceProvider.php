@@ -27,6 +27,16 @@ use Lwt\Controllers\TextPrintController;
 use Lwt\Controllers\TranslationController;
 use Lwt\Controllers\WordController;
 use Lwt\Controllers\WordPressController;
+use Lwt\Services\AuthService;
+use Lwt\Services\FeedService;
+use Lwt\Services\HomeService;
+use Lwt\Services\LanguageService;
+use Lwt\Services\TestService;
+use Lwt\Services\TextPrintService;
+use Lwt\Services\TextService;
+use Lwt\Services\TranslationService;
+use Lwt\Services\WordPressService;
+use Lwt\Services\WordService;
 
 /**
  * Controller service provider that registers all controllers.
@@ -45,7 +55,9 @@ class ControllerServiceProvider implements ServiceProviderInterface
     {
         // Controllers are registered as factories (new instance each time)
         // This ensures clean state for each request
+        // Dependencies are injected from the container
 
+        // Controllers without service dependencies
         $container->bind(AdminController::class, function (Container $_c) {
             return new AdminController();
         });
@@ -54,52 +66,75 @@ class ControllerServiceProvider implements ServiceProviderInterface
             return new ApiController();
         });
 
-        $container->bind(AuthController::class, function (Container $_c) {
-            return new AuthController();
-        });
-
-        $container->bind(FeedsController::class, function (Container $_c) {
-            return new FeedsController();
-        });
-
-        $container->bind(HomeController::class, function (Container $_c) {
-            return new HomeController();
-        });
-
-        $container->bind(LanguageController::class, function (Container $_c) {
-            return new LanguageController();
-        });
-
         $container->bind(TagsController::class, function (Container $_c) {
             return new TagsController();
         });
 
-        $container->bind(TestController::class, function (Container $_c) {
-            return new TestController();
+        // Controllers with single service dependency
+        $container->bind(AuthController::class, function (Container $c) {
+            return new AuthController(
+                $c->get(AuthService::class)
+            );
         });
 
-        $container->bind(TextController::class, function (Container $_c) {
-            return new TextController();
+        $container->bind(LanguageController::class, function (Container $c) {
+            return new LanguageController(
+                $c->get(LanguageService::class)
+            );
         });
 
-        $container->bind(TextPrintController::class, function (Container $_c) {
-            return new TextPrintController();
+        $container->bind(TestController::class, function (Container $c) {
+            return new TestController(
+                $c->get(TestService::class)
+            );
         });
 
-        $container->bind(TranslationController::class, function (Container $_c) {
-            return new TranslationController();
+        $container->bind(TextPrintController::class, function (Container $c) {
+            return new TextPrintController(
+                $c->get(TextPrintService::class)
+            );
         });
 
-        $container->bind(WordController::class, function (Container $_c) {
-            return new WordController();
+        $container->bind(TranslationController::class, function (Container $c) {
+            return new TranslationController(
+                $c->get(TranslationService::class)
+            );
         });
 
-        $container->bind(WordPressController::class, function (Container $_c) {
-            return new WordPressController();
+        $container->bind(WordPressController::class, function (Container $c) {
+            return new WordPressController(
+                $c->get(WordPressService::class)
+            );
         });
 
-        // Note: Controllers without explicit registration will be auto-wired
-        // by the container since they have no-argument constructors
+        // Controllers with multiple service dependencies
+        $container->bind(FeedsController::class, function (Container $c) {
+            return new FeedsController(
+                $c->get(FeedService::class),
+                $c->get(LanguageService::class)
+            );
+        });
+
+        $container->bind(HomeController::class, function (Container $c) {
+            return new HomeController(
+                $c->get(HomeService::class),
+                $c->get(LanguageService::class)
+            );
+        });
+
+        $container->bind(TextController::class, function (Container $c) {
+            return new TextController(
+                $c->get(TextService::class),
+                $c->get(LanguageService::class)
+            );
+        });
+
+        $container->bind(WordController::class, function (Container $c) {
+            return new WordController(
+                $c->get(WordService::class),
+                $c->get(LanguageService::class)
+            );
+        });
     }
 
     /**

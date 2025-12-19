@@ -52,12 +52,14 @@ class TextPrintController extends BaseController
     private TextPrintService $printService;
 
     /**
-     * Constructor - initialize services.
+     * Create a new TextPrintController.
+     *
+     * @param TextPrintService $printService Print service for text printing operations
      */
-    public function __construct()
+    public function __construct(TextPrintService $printService)
     {
         parent::__construct();
-        $this->printService = new TextPrintService();
+        $this->printService = $printService;
     }
 
     /**
