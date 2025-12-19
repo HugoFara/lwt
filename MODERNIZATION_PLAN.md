@@ -478,7 +478,8 @@ src/backend/Core/
     ├── RepositoryInterface.php   # Base repository interface
     ├── AbstractRepository.php    # Base repository with CRUD + prepared statements
     ├── LanguageRepository.php    # Concrete implementation (unused)
-    └── TextRepository.php        # Concrete implementation (2025-12-19)
+    ├── TextRepository.php        # Concrete implementation (2025-12-19)
+    └── TermRepository.php        # Concrete implementation (2025-12-19)
 ```
 
 **DI Container Features (INTEGRATED 2025-12-19):**
@@ -515,7 +516,8 @@ src/backend/Core/
 | ControllerServiceProvider | Yes | 1 (Application) | **INTEGRATED** |
 | LanguageRepository | Yes | 0 | NOT INTEGRATED |
 | TextRepository | Yes (587 lines) | 0 | BUILT (2025-12-19) |
-| Other Repositories | No | N/A | NOT CREATED |
+| TermRepository | Yes (940 lines) | 0 | BUILT (2025-12-19) |
+| Other Repositories (User) | No | N/A | NOT CREATED |
 
 **Remaining Work:**
 
@@ -538,9 +540,11 @@ src/backend/Core/
   - **TestController**: TestService + LanguageService injection
   - All service providers updated, 2319 tests pass
 - [x] ~~Create TextRepository~~ **DONE** (2025-12-19)
-- [ ] Create repositories for remaining entities (Term, User)
+- [x] ~~Create TermRepository~~ **DONE** (2025-12-19)
+- [ ] Create repository for remaining entity (User)
 - [ ] Migrate LanguageService to use LanguageRepository
 - [ ] Migrate TextService to use TextRepository
+- [ ] Migrate WordService to use TermRepository
 
 #### 3.2 Database Modernization
 
@@ -821,7 +825,7 @@ ContainerException                      # Core/Container/ContainerException.php
 3. ~~**TTS Cookie Security** - Add secure flag~~ **DONE** (httponly=false intentional for JS)
 4. ~~**Constructor Injection for Core Services** - Wire services with dependencies~~ **DONE** (2025-12-19)
 5. ~~**All Controllers Refactored for DI** - Wire all controllers with dependencies~~ **DONE** (2025-12-19)
-6. **Create Remaining Repositories** - Term, User repositories (TextRepository DONE 2025-12-19)
+6. **Create Remaining Repositories** - User repository (Text & Term DONE 2025-12-19)
 7. ~~**Deprecated Function Migration** - processDBParam/processSessParam~~ **DONE** ✓
 
 ## Deprecated Global Functions
