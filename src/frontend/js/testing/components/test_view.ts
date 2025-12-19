@@ -9,7 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
-import type { TestStoreState, TestConfig } from '../stores/test_store';
+import type { TestStoreState, TestConfig, LangSettings } from '../stores/test_store';
 import { getTestStore } from '../stores/test_store';
 import { ReviewApi, type TableTestWord } from '../../api/review';
 import { speechDispatcher } from '../../core/user_interactions';
@@ -683,7 +683,7 @@ function registerTestAppComponent(config: TestConfig): void {
 function registerTableTestComponent(): void {
   Alpine.data('tableTest', () => ({
     words: [] as TableTestWord[],
-    langSettings: null as any,
+    langSettings: null as LangSettings | null,
     columns: { edit: true, status: true, term: true, trans: true, rom: false, sentence: true },
     hideTermContent: false,
     hideTransContent: false,
@@ -749,7 +749,7 @@ function registerTableTestComponent(): void {
           if (s.columns) this.columns = { ...this.columns, ...s.columns };
           if (typeof s.hideTermContent === 'boolean') this.hideTermContent = s.hideTermContent;
           if (typeof s.hideTransContent === 'boolean') this.hideTransContent = s.hideTransContent;
-        } catch (e) { /* ignore */ }
+        } catch (_e) { /* ignore */ }
       }
     }
   }));

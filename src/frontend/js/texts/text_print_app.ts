@@ -38,7 +38,7 @@ const ANN_SHOW_TAGS = 4;
 /**
  * Annotation placement options.
  */
-const ANN_PLACEMENT_BEHIND = 0;
+const _ANN_PLACEMENT_BEHIND = 0; // Reserved for future use
 const ANN_PLACEMENT_INFRONT = 1;
 const ANN_PLACEMENT_RUBY = 2;
 
@@ -334,7 +334,7 @@ export function textPrintAppData(): TextPrintAppData {
 
       // Get annotation values
       let translation = item.translation;
-      let romanization = item.romanization;
+      const romanization = item.romanization;
       const tags = item.tags;
 
       // Add tags to translation if showing tags

@@ -12,7 +12,7 @@ vi.mock('../../../src/frontend/js/core/api_client', () => ({
 }));
 
 import { TextsApi } from '../../../src/frontend/js/api/texts';
-import { apiGet, apiPost, apiPut, apiDelete } from '../../../src/frontend/js/core/api_client';
+import { apiGet, apiPost, apiPut } from '../../../src/frontend/js/core/api_client';
 
 describe('api/texts.ts', () => {
   beforeEach(() => {

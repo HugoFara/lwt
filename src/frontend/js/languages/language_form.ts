@@ -80,9 +80,6 @@ export const languageForm = {
    * @param targetLg - Target language code (default: 'en')
    */
   reloadDictURLs(sourceLg = 'auto', targetLg = 'en'): void {
-    let baseUrl = window.location.href;
-    baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
-
     GGTRANSLATE = 'https://translate.google.com/?' + buildQueryString({
       ie: 'UTF-8',
       sl: sourceLg,
@@ -122,8 +119,6 @@ export const languageForm = {
   multiWordsTranslateChange(value: string): void {
     let result: string | undefined;
     let usesKey = false;
-    let baseUrl = window.location.href;
-    baseUrl = baseUrl.replace('//languages', '/');
 
     switch (value) {
       case 'google_translate':

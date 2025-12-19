@@ -16,7 +16,6 @@ import { make_tooltip } from '../terms/word_status';
 import { speechDispatcher } from '../core/user_interactions';
 import { hoverIntent } from '../core/hover_intent';
 import {
-  getAttr,
   word_each_do_text_text,
   mword_each_do_text_text
 } from './text_annotations';
@@ -35,7 +34,7 @@ import {
   overlib,
   CAPTION
 } from '../terms/overlib_interface';
-import { getContextFromElement, type WordActionContext } from './word_actions';
+import { getContextFromElement } from './word_actions';
 
 // Re-export from submodules
 export {

@@ -6,7 +6,7 @@
  * @since   1.6.16-fork
  */
 
-import { iconHtml, getLucideIconName } from '../ui/icons';
+import { iconHtml } from '../ui/icons';
 
 /**
  * Execute an XPath expression and return matching elements as an array.
@@ -108,6 +108,7 @@ function removeClassAll(selector: string, className: string): void {
 /**
  * Helper: Add class to all elements matching selector
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function addClassAll(selector: string, className: string): void {
   document.querySelectorAll(selector).forEach(el => addClass(el, className));
 }
@@ -226,6 +227,7 @@ function getDescendantsAndSelf(el: Element): HTMLElement[] {
 /**
  * Helper: Filter elements not matching selector or not in a set
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function filterNot(elements: HTMLElement[], excludeSelector: string): HTMLElement[] {
   return elements.filter(el => !el.matches(excludeSelector));
 }
@@ -233,6 +235,7 @@ function filterNot(elements: HTMLElement[], excludeSelector: string): HTMLElemen
 /**
  * Helper: Get elements excluding those within a container
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function excludeWithinContainer(elements: HTMLElement[], container: Element | null): HTMLElement[] {
   if (!container) return elements;
   const containerDescendants = new Set(getDescendantsAndSelf(container));

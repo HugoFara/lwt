@@ -33,8 +33,7 @@ vi.mock('../../../src/frontend/js/media/html5_audio_player', () => ({
 }));
 
 import { getLangFromDict } from '../../../src/frontend/js/terms/dictionary';
-import { prepareTextInteractions } from '../../../src/frontend/js/reading/text_events';
-import { goToLastPosition, saveReadingPosition, saveAudioPosition, readRawTextAloud } from '../../../src/frontend/js/core/user_interactions';
+import { saveAudioPosition, readRawTextAloud } from '../../../src/frontend/js/core/user_interactions';
 import { getAudioPlayer } from '../../../src/frontend/js/media/html5_audio_player';
 
 describe('text_reading_init.ts', () => {

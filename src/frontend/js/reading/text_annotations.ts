@@ -68,7 +68,7 @@ declare const LWT_DATA: LwtDataGlobal;
  */
 export function word_each_do_text_text(
   this: HTMLElement,
-  _index: number // eslint-disable-line @typescript-eslint/no-unused-vars
+  _index: number  
 ): void {
   const wid = getAttr(this, 'data_wid');
   if (wid !== '') {
@@ -110,7 +110,7 @@ export function word_each_do_text_text(
  */
 export function mword_each_do_text_text(
   this: HTMLElement,
-  _index: number // eslint-disable-line @typescript-eslint/no-unused-vars
+  _index: number  
 ): void {
   if (getAttr(this, 'data_status') !== '') {
     const wid = getAttr(this, 'data_wid');

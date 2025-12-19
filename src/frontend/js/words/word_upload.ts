@@ -9,7 +9,6 @@
 import { escape_html_chars, renderTags } from '../core/html_utils';
 import { statuses } from '../core/app_data';
 import { iconHtml } from '../ui/icons';
-import type { WordStatus } from '../types/globals';
 
 // Interface for imported term record
 interface ImportedTerm {

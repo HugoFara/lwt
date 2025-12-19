@@ -11,8 +11,6 @@
 import Alpine from 'alpinejs';
 import {
   TermsApi,
-  type TermForEdit,
-  type TermEditLanguage,
   type SimilarTermForEdit,
   type TermCreateFullRequest,
   type TermUpdateFullRequest

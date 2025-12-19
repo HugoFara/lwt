@@ -413,14 +413,11 @@ function buildFullXPathWithAncestors(
 export function xpathToCssSelector(xpath: string): string | null {
   try {
     // Simple conversions for common patterns
-    let css = xpath
+    return xpath
       .replace(/@/g, '')
       .replace('//', '')
       .replace(/ and /g, '][')
       .replace('§', '>');
-
-    // This is a simplified conversion - may not work for all XPaths
-    return css;
   } catch {
     return null;
   }

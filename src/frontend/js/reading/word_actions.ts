@@ -19,9 +19,9 @@ import {
   markWordIgnoredInDOM,
   updateLearnStatus
 } from '../words/word_dom_updates';
-import { cleanupRightFrames, successSound, failureSound } from './frame_management';
+import { successSound, failureSound } from './frame_management';
 import { cClick } from '../ui/word_popup';
-import { showResultPanel, hideResultPanel, showErrorInPanel } from '../ui/result_panel';
+import { showResultPanel, showErrorInPanel } from '../ui/result_panel';
 
 /**
  * Context for word actions - contains all data needed to perform operations.

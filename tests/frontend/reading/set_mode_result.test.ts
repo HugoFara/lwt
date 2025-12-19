@@ -140,8 +140,8 @@ describe('set_mode_result.ts', () => {
       showAnnotations(document.body);
 
       const spans = document.querySelectorAll('span:not(.mword):not([id])');
-      const firstTwo = Array.from(spans).slice(0, 2);
-      const lastOne = Array.from(spans).slice(2);
+      const _firstTwo = Array.from(spans).slice(0, 2);
+      const _lastOne = Array.from(spans).slice(2);
 
       // Note: The logic in showAnnotations calculates u = code * 2 + order - 1
       // For code=1, order=1: u = 1*2 + 1 - 1 = 2

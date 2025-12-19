@@ -5,7 +5,7 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { getAttr } from './text_annotations';
+// getAttr not needed - using native getAttribute
 import { hoverIntent } from '../core/hover_intent';
 import { loadModalFrame } from './frame_management';
 import { removeAllTooltips } from '../ui/native_tooltip';
@@ -121,7 +121,8 @@ export const mwordDragNDrop: MwordDragNDropState = {
   twordMouseOver: function (this: HTMLElement): void {
     const context = mwordDragNDrop.context;
     if (!context) return;
-    const self = this;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const selfEl = this;
 
     const mouseUpHandler = function (e: MouseEvent) {
       context.querySelectorAll('.wsty').forEach(el => {
@@ -141,11 +142,11 @@ export const mwordDragNDrop: MwordDragNDropState = {
     };
     document.documentElement.addEventListener('mouseup', mouseUpHandler, { once: true });
 
-    mwordDragNDrop.pos = parseInt(getElAttr(self, 'data_order') || '0', 10);
+    mwordDragNDrop.pos = parseInt(getElAttr(selfEl, 'data_order') || '0', 10);
 
     // Add ".lword" class on this element
     context.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));
-    self.classList.add('lword');
+    selfEl.classList.add('lword');
 
     const mouseLeaveHandler = function () {
       context.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));

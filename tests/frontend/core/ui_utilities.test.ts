@@ -150,7 +150,7 @@ describe('ui_utilities.ts', () => {
     it('focuses element with setfocus class', () => {
       document.body.innerHTML = '<input type="text" class="setfocus" />';
       const input = document.querySelector('.setfocus') as HTMLInputElement;
-      const focusSpy = vi.spyOn(input, 'focus');
+      const _focusSpy = vi.spyOn(input, 'focus');
 
       setTheFocus();
 

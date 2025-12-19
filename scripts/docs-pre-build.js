@@ -6,7 +6,7 @@
  * remain in the repository root while being included in the documentation.
  */
 
-import { copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync, readdirSync, cpSync } from 'fs'
+import { mkdirSync, existsSync, readFileSync, writeFileSync, cpSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 

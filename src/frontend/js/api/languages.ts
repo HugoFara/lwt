@@ -90,10 +90,9 @@ export interface LanguageCreateRequest {
 
 /**
  * Request body for updating a language.
+ * Same fields as create, all optional except name.
  */
-export interface LanguageUpdateRequest extends LanguageCreateRequest {
-  // Same fields as create, all optional except name
-}
+export type LanguageUpdateRequest = LanguageCreateRequest;
 
 /**
  * Response for language list.

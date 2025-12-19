@@ -24,7 +24,7 @@ interface SortableHeader extends HTMLTableCellElement {
 }
 
 // Date regex: dd/mm/yyyy or mm/dd/yyyy with /, ., or - separators
-const DATE_RE = /^(\d\d?)[/.\-](\d\d?)[/.\-]((\d\d)?\d\d)$/;
+const DATE_RE = /^(\d\d?)[/.\\-](\d\d?)[/.\\-]((\d\d)?\d\d)$/;
 
 /**
  * Sort comparison for numeric values

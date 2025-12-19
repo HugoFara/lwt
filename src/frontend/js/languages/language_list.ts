@@ -53,7 +53,7 @@ function iconHtml(name: string, size = 16, title = ''): string {
  * @param newLangId The ID of the newly selected language
  * @param newLangName The name of the newly selected language
  */
-function updateLanguageCards(newLangId: string, newLangName: string): void {
+function updateLanguageCards(newLangId: string, _newLangName: string): void {
   const allCards = document.querySelectorAll<HTMLElement>('.language-card');
 
   allCards.forEach(card => {

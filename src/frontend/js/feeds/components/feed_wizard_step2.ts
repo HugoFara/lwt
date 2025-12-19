@@ -9,7 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
-import type { FeedWizardStoreState, WizardConfig, FeedItem, XPathOption } from '../types/feed_wizard_types';
+import type { FeedWizardStoreState, FeedItem, XPathOption } from '../types/feed_wizard_types';
 import { getFeedWizardStore } from '../stores/feed_wizard_store';
 import { getHighlightService, initHighlightService } from '../services/highlight_service';
 import {
@@ -19,7 +19,6 @@ import {
   getAncestorsAndSelf,
   parseSelectionList
 } from '../utils/xpath_utils';
-import { iconHtml } from '../../ui/icons';
 
 /**
  * Step 2 component configuration from PHP.

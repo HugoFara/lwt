@@ -33,6 +33,17 @@ export default defineConfig([
   {
     files: ["src/frontend/js/**/*.{ts,mts,cts}"],
     extends: [tseslint.configs.recommended],
+    rules: {
+      // Allow unused variables that start with underscore (intentionally unused params)
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
   },
 
   // Test files (Cypress, Vitest, etc.)
@@ -55,6 +66,17 @@ export default defineConfig([
     rules: {
       // Allow namespace declarations for Cypress type augmentation
       "@typescript-eslint/no-namespace": "off",
+      // Allow unused variables that start with underscore
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+      // Allow explicit any in tests (common for mocking)
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
 
@@ -72,6 +94,17 @@ export default defineConfig([
   {
     files: ["*.config.ts"],
     extends: [tseslint.configs.recommended],
+    rules: {
+      // Allow unused variables that start with underscore
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
   },
 
   // Markdown files

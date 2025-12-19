@@ -143,7 +143,7 @@ describe('api/review.ts', () => {
       };
       vi.mocked(apiClient.apiPut).mockResolvedValue(mockResponse);
 
-      const result = await ReviewApi.updateStatus(456, undefined, 1);
+      const _result = await ReviewApi.updateStatus(456, undefined, 1);
 
       expect(apiClient.apiPut).toHaveBeenCalledWith('/review/status', {
         word_id: 456,

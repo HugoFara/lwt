@@ -18,7 +18,7 @@ vi.mock('../../../src/frontend/js/ui/word_popup', () => ({
   closeParentPopup: vi.fn()
 }));
 
-import { cClick, closeParentPopup } from '../../../src/frontend/js/ui/word_popup';
+import { closeParentPopup } from '../../../src/frontend/js/ui/word_popup';
 
 describe('frame_management.ts', () => {
   // Store originals

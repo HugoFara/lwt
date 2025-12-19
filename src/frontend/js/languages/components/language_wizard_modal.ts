@@ -19,7 +19,7 @@ import {
   getLanguageFormStore,
   type LanguageFormStoreState
 } from '../stores/language_form_store';
-import type { LanguageDefinition } from '../../api/languages';
+// LanguageDefinition available if needed for future wizard features
 
 /**
  * Wizard modal component data interface.

@@ -18,7 +18,7 @@ import {
   handleReadingConfiguration,
   speechDispatcher,
 } from '../../../src/frontend/js/core/user_interactions';
-import * as ttsStorage from '../../../src/frontend/js/core/tts_storage';
+import * as _ttsStorage from '../../../src/frontend/js/core/tts_storage';
 
 // Mock SpeechSynthesisUtterance for jsdom environment
 class MockSpeechSynthesisUtterance {

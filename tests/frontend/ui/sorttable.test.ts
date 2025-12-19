@@ -681,7 +681,7 @@ describe('sorttable.ts', () => {
       document.body.appendChild(table);
 
       initSortable();
-      const firstHeader = table.tHead?.rows[0].cells[0];
+      const _firstHeader = table.tHead?.rows[0].cells[0];
 
       // Run again
       initSortable();

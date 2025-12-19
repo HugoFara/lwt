@@ -268,7 +268,7 @@ export function wordModalData(): WordModalData {
       this.formStore.reset();
     },
 
-    onFormSaved(result: SaveResult): void {
+    onFormSaved(_result: SaveResult): void {
       // Reset form and close modal after successful save
       this.viewMode = 'info';
       this.formStore.reset();

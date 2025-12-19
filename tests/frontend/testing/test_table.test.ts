@@ -519,12 +519,12 @@ describe('test_table.ts', () => {
 
       const tdElements = document.querySelectorAll('td');
       const cellCount = tdElements.length;
-      let whiteCells = 0;
+      let _whiteCells = 0;
       tdElements.forEach((cell) => {
         const bgColor = window.getComputedStyle(cell as HTMLElement).backgroundColor;
         // JSDOM normalizes 'white' to 'rgb(255, 255, 255)' or may not set it
         if (bgColor === 'white' || bgColor === 'rgb(255, 255, 255)' || bgColor === 'rgba(0, 0, 0, 0)') {
-          whiteCells++;
+          _whiteCells++;
         }
       });
 

@@ -200,7 +200,7 @@ export function initTTSSettings(): void {
   // Handle form submission - save to localStorage
   const form = document.querySelector('form.validate') as HTMLFormElement | null;
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', (_e) => {
       // Save settings to localStorage before form submits
       ttsSettings.saveSettings();
       // Let the form continue to submit (shows success message)

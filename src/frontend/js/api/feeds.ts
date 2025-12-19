@@ -206,8 +206,9 @@ export async function deleteFeed(
  * Delete multiple feeds.
  */
 export async function deleteFeeds(
-  feedIds: number[]
+  _feedIds: number[]
 ): Promise<ApiResponse<{ success: boolean; deleted: number }>> {
+  // TODO: Pass feedIds to API when bulk delete is implemented
   return apiDelete('/feeds');
 }
 
@@ -241,8 +242,9 @@ export async function getArticles(
  */
 export async function deleteArticles(
   feedId: number,
-  articleIds: number[] = []
+  _articleIds: number[] = []
 ): Promise<ApiResponse<{ success: boolean; deleted: number }>> {
+  // TODO: Pass articleIds to API when selective delete is implemented
   return apiDelete(`/feeds/articles/${feedId}`);
 }
 

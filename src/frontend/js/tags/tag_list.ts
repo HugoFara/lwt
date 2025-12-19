@@ -134,7 +134,7 @@ function initTagListTable(): void {
 function initTagForm(): void {
   // Initialize form check for forms with lwt-form-check class
   const formCheckForms = document.querySelectorAll<HTMLFormElement>('form.lwt-form-check');
-  formCheckForms.forEach((form) => {
+  formCheckForms.forEach((_form) => {
     lwtFormCheck.askBeforeExit();
   });
 

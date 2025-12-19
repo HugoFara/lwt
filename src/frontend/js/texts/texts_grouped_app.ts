@@ -15,7 +15,6 @@ import Alpine from 'alpinejs';
 import { createIcons, icons } from 'lucide';
 import { apiGet } from '../core/api_client';
 import { TextsApi } from '../api/texts';
-import { multiActionGo } from '../forms/bulk_actions';
 import { confirmDelete } from '../core/ui_utilities';
 import { renderTags, renderStatusBarChart } from '../core/html_utils';
 

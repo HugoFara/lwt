@@ -27,7 +27,7 @@ interface MediaSelectResponse {
 export function select_media_path(
   paths: string[],
   folders: string[],
-  _base_path: string // eslint-disable-line @typescript-eslint/no-unused-vars
+  _base_path: string  
 ): HTMLOptionElement[] {
   const options: HTMLOptionElement[] = [];
   let temp_option = document.createElement('option');

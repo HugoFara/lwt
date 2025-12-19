@@ -65,7 +65,7 @@ describe('tagify_tags.ts', () => {
         </ul>
       `;
 
-      const tagify = initTagify('#mytags');
+      const _tagify = initTagify('#mytags');
 
       expect(Tagify).toHaveBeenCalled();
       const mockInstance = (Tagify as any).mock.results[0].value;

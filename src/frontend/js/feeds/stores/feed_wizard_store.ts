@@ -15,10 +15,7 @@ import type {
   SelectionItem,
   XPathOption,
   AdvancedXPathOption,
-  FeedItem,
-  FeedOptions,
-  DEFAULT_FEED_OPTIONS,
-  generateSelectionId
+  FeedOptions
 } from '../types/feed_wizard_types';
 import { isValidXPath, xpathQuery } from '../utils/xpath_utils';
 

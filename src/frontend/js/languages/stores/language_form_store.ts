@@ -11,7 +11,6 @@
 import Alpine from 'alpinejs';
 import {
   LanguagesApi,
-  type LanguageFull,
   type LanguageDefinition,
   type LanguageCreateRequest,
   type LanguageUpdateRequest

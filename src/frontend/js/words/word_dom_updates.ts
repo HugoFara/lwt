@@ -11,7 +11,6 @@
 
 import { make_tooltip } from '../terms/word_status';
 import { cleanupRightFrames } from '../reading/frame_management';
-import { LWT_DATA } from '../core/lwt_state';
 
 /**
  * Get the parent document context (for frame-based layouts).

@@ -1794,6 +1794,7 @@ Test page styles
 #frames-l
 {
   /* Width set dynamically based on user setting */
+  display: block;
 }
 
 /* Test right frames panel - desktop */

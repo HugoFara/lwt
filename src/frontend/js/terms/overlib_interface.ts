@@ -22,7 +22,7 @@ import { showRightFramesPanel } from '../reading/frame_management';
 import { speechDispatcher } from '../core/user_interactions';
 
 // Import the popup system
-import { overlib, CAPTION, cClick } from '../ui/word_popup';
+import { overlib, CAPTION } from '../ui/word_popup';
 
 // Import API-based word actions
 import {
@@ -627,7 +627,7 @@ export function run_overlib_status_1_to_5(
   stat: string | number,
   multi_words: (string | undefined)[],
   rtl: boolean,
-  _ann: string // eslint-disable-line @typescript-eslint/no-unused-vars
+  _ann: string  
 ): boolean {
   return overlib(
     '<div>' + make_overlib_audio(txt) + '<span>(Read)</span></div>' +
@@ -749,7 +749,7 @@ export function run_overlib_test(
   stat: string | number,
   sent: string,
   todo: number,
-  _oldstat: unknown // eslint-disable-line @typescript-eslint/no-unused-vars
+  _oldstat: unknown  
 ): boolean {
   const s = parseInt(String(stat), 10);
   let c = s + 1;

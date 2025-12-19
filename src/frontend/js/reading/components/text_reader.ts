@@ -9,9 +9,9 @@
  */
 
 import Alpine from 'alpinejs';
-import type { WordStoreState, WordData } from '../stores/word_store';
+import type { WordStoreState } from '../stores/word_store';
 import { renderText, updateWordStatusInDOM, type RenderSettings } from '../text_renderer';
-import { speechDispatcher } from '../../core/user_interactions';
+// speechDispatcher available when TTS is implemented
 
 /**
  * Text reader Alpine.js component interface.
@@ -180,7 +180,7 @@ export function textReaderData(): TextReaderData {
       // speechDispatcher(wordEl.textContent || '', this.store.langId);
     },
 
-    handleKeydown(event: KeyboardEvent): void {
+    handleKeydown(_event: KeyboardEvent): void {
       // Only handle if modal is not open
       if (this.store.isModalOpen) return;
 

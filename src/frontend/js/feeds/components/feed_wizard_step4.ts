@@ -9,7 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
-import type { FeedWizardStoreState, FeedOptions, WizardConfig } from '../types/feed_wizard_types';
+import type { FeedWizardStoreState, FeedOptions } from '../types/feed_wizard_types';
 import { getFeedWizardStore } from '../stores/feed_wizard_store';
 
 /**

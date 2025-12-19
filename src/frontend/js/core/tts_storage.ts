@@ -9,7 +9,7 @@
  * @since   3.0.0
  */
 
-import { getCookie, deleteCookie } from './cookies';
+import { deleteCookie } from './cookies';
 
 /**
  * Storage key prefix for TTS settings.

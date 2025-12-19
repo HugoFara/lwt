@@ -152,7 +152,7 @@ function slideUp(element: HTMLElement, duration = 400, callback?: () => void): v
   element.style.transition = `height ${duration}ms ease-out, padding ${duration}ms ease-out, margin ${duration}ms ease-out`;
 
   // Force reflow to ensure initial height is applied
-  element.offsetHeight;
+  void element.offsetHeight;
 
   // Animate to 0
   element.style.height = '0';
