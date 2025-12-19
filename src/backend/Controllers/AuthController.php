@@ -46,14 +46,25 @@ class AuthController extends BaseController
     private AuthService $authService;
 
     /**
+     * Password service instance.
+     *
+     * @var PasswordService
+     */
+    private PasswordService $passwordService;
+
+    /**
      * Create a new AuthController.
      *
-     * @param AuthService $authService Auth service for authentication operations
+     * @param AuthService|null     $authService     Auth service (optional for BC)
+     * @param PasswordService|null $passwordService Password service (optional for BC)
      */
-    public function __construct(AuthService $authService)
-    {
+    public function __construct(
+        ?AuthService $authService = null,
+        ?PasswordService $passwordService = null
+    ) {
         parent::__construct();
-        $this->authService = $authService;
+        $this->authService = $authService ?? new AuthService();
+        $this->passwordService = $passwordService ?? new PasswordService();
     }
 
     /**
@@ -291,8 +302,7 @@ class AuthController extends BaseController
      */
     private function setRememberCookie(int $userId): void
     {
-        $passwordService = new PasswordService();
-        $token = $passwordService->generateToken(32);
+        $token = $this->passwordService->generateToken(32);
         $expires = time() + (30 * 24 * 60 * 60); // 30 days
 
         // Store token in database (would need a remember_tokens table)

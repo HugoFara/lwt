@@ -30,20 +30,26 @@ use Lwt\Controllers\WordPressController;
 use Lwt\Services\AuthService;
 use Lwt\Services\BackupService;
 use Lwt\Services\DemoService;
+use Lwt\Services\ExportService;
+use Lwt\Services\ExpressionService;
 use Lwt\Services\FeedService;
 use Lwt\Services\HomeService;
 use Lwt\Services\LanguageService;
+use Lwt\Services\PasswordService;
 use Lwt\Services\ServerDataService;
 use Lwt\Services\SettingsService;
 use Lwt\Services\StatisticsService;
 use Lwt\Services\TestService;
+use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextPrintService;
 use Lwt\Services\TextService;
 use Lwt\Services\ThemeService;
 use Lwt\Services\TranslationService;
 use Lwt\Services\TtsService;
+use Lwt\Services\WordListService;
 use Lwt\Services\WordPressService;
 use Lwt\Services\WordService;
+use Lwt\Services\WordUploadService;
 
 /**
  * Controller service provider that registers all controllers.
@@ -64,19 +70,23 @@ class ControllerServiceProvider implements ServiceProviderInterface
         // This ensures clean state for each request
         // Dependencies are injected from the container
 
-        // Controllers without service dependencies
-        $container->bind(ApiController::class, function (Container $_c) {
-            return new ApiController();
-        });
-
+        // Controllers with optional dependencies (use fallback if not injected)
+        // TagsController uses parameterized TagService - leave to fallback
         $container->bind(TagsController::class, function (Container $_c) {
             return new TagsController();
         });
 
-        // Controllers with single service dependency
+        // Controllers with service dependencies
+        $container->bind(ApiController::class, function (Container $c) {
+            return new ApiController(
+                $c->get(TranslationController::class)
+            );
+        });
+
         $container->bind(AuthController::class, function (Container $c) {
             return new AuthController(
-                $c->get(AuthService::class)
+                $c->get(AuthService::class),
+                $c->get(PasswordService::class)
             );
         });
 
@@ -88,7 +98,8 @@ class ControllerServiceProvider implements ServiceProviderInterface
 
         $container->bind(TestController::class, function (Container $c) {
             return new TestController(
-                $c->get(TestService::class)
+                $c->get(TestService::class),
+                $c->get(LanguageService::class)
             );
         });
 
@@ -128,14 +139,20 @@ class ControllerServiceProvider implements ServiceProviderInterface
         $container->bind(TextController::class, function (Container $c) {
             return new TextController(
                 $c->get(TextService::class),
-                $c->get(LanguageService::class)
+                $c->get(LanguageService::class),
+                $c->get(TextDisplayService::class)
             );
         });
 
         $container->bind(WordController::class, function (Container $c) {
             return new WordController(
                 $c->get(WordService::class),
-                $c->get(LanguageService::class)
+                $c->get(LanguageService::class),
+                $c->get(WordListService::class),
+                $c->get(WordUploadService::class),
+                $c->get(ExportService::class),
+                $c->get(TextService::class),
+                $c->get(ExpressionService::class)
             );
         });
 

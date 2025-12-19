@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-19 (AdminController refactored for DI)
+**Last Updated:** 2025-12-19 (All controllers refactored for DI)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -17,7 +17,7 @@ LWT carried significant technical debt from its 2007 origins. This document trac
 | Quick Wins | **COMPLETE** | 100% |
 | Phase 1: Security & Safety | **COMPLETE** | ~95% |
 | Phase 2: Refactoring | **COMPLETE** | ~95% |
-| Phase 3: Modernization | **IN PROGRESS** | ~75% |
+| Phase 3: Modernization | **IN PROGRESS** | ~85% |
 
 ## Critical Issues
 
@@ -525,7 +525,16 @@ src/backend/Core/
 - [x] ~~AdminController refactored for DI~~ **DONE** (2025-12-19)
   - 8 services injected: BackupService, StatisticsService, SettingsService, TtsService, WordService, DemoService, ServerDataService, ThemeService
   - ControllerServiceProvider updated to wire AdminController
-- [ ] Refactor remaining controllers for full DI
+- [x] ~~Refactor remaining controllers for full DI~~ **DONE** (2025-12-19)
+  - **WordController**: 7 services (WordService, LanguageService, WordListService, WordUploadService, ExportService, TextService, ExpressionService)
+  - **TextController**: 3 services (TextService, LanguageService, TextDisplayService)
+  - **TagsController**: Uses parameterized TagService (term/text) via fallback
+  - **TermTagsController**: TagService('term') injection
+  - **TextTagsController**: TagService('text') injection
+  - **ApiController**: TranslationController injection
+  - **AuthController**: AuthService + PasswordService injection
+  - **TestController**: TestService + LanguageService injection
+  - All service providers updated, 2319 tests pass
 - [ ] Create repositories for other entities (Text, Term, User)
 - [ ] Migrate LanguageService to use LanguageRepository
 
@@ -766,7 +775,7 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 2. ~~**Repository Layer Infrastructure** - Build repository classes~~ **DONE** (2025-12-01)
 3. ~~**TTS Cookie Security** - Add secure flag~~ **DONE** (httponly=false intentional for JS)
 4. ~~**Constructor Injection for Core Services** - Wire services with dependencies~~ **DONE** (2025-12-19)
-5. **Migrate Remaining Services to use Container** - Wire remaining services/controllers
+5. ~~**All Controllers Refactored for DI** - Wire all controllers with dependencies~~ **DONE** (2025-12-19)
 6. **Create Remaining Repositories** - Text, Term, User repositories
 7. ~~**Deprecated Function Migration** - processDBParam/processSessParam~~ **DONE** ✓
 
@@ -870,11 +879,11 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
 | Quick Wins | 2 weeks | 100% complete | - |
 | Phase 1 | 3-6 months | 95% complete | CSP refinement (future) |
 | Phase 2 | 6-12 months | 95% complete | Minor cleanup |
-| Phase 3 | 12-18 months | 75% complete | Exceptions, constructor injection |
+| Phase 3 | 12-18 months | 85% complete | Exceptions, repositories |
 
 **Original Total Duration:** 18-24 months
 **Elapsed Time:** ~12 months (estimated based on architecture changes)
-**Remaining Effort:** ~120 hours for P1/P2 items (P0 complete)
+**Remaining Effort:** ~80 hours for P1/P2 items (P0 complete, controller DI complete)
 
 ## Architecture Summary (2025-12-18)
 

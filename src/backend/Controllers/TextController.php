@@ -53,31 +53,26 @@ require_once __DIR__ . '/../Services/LanguageDefinitions.php';
  */
 class TextController extends BaseController
 {
-    /**
-     * Text service for business logic.
-     *
-     * @var TextService
-     */
     private TextService $textService;
-
-    /**
-     * Language service for language operations.
-     *
-     * @var LanguageService
-     */
     private LanguageService $languageService;
+    private TextDisplayService $displayService;
 
     /**
      * Create a new TextController.
      *
-     * @param TextService     $textService     Text service for text operations
-     * @param LanguageService $languageService Language service for language operations
+     * @param TextService|null        $textService     Text service for text operations
+     * @param LanguageService|null    $languageService Language service for language operations
+     * @param TextDisplayService|null $displayService  Text display service
      */
-    public function __construct(TextService $textService, LanguageService $languageService)
-    {
+    public function __construct(
+        ?TextService $textService = null,
+        ?LanguageService $languageService = null,
+        ?TextDisplayService $displayService = null
+    ) {
         parent::__construct();
-        $this->textService = $textService;
-        $this->languageService = $languageService;
+        $this->textService = $textService ?? new TextService();
+        $this->languageService = $languageService ?? new LanguageService();
+        $this->displayService = $displayService ?? new TextDisplayService();
     }
 
     /**
@@ -493,24 +488,22 @@ class TextController extends BaseController
             exit();
         }
 
-        $displayService = new TextDisplayService();
-
         // Get annotated text
-        $annotatedText = $displayService->getAnnotatedText($textId);
+        $annotatedText = $this->displayService->getAnnotatedText($textId);
         if (strlen($annotatedText) <= 0) {
             header("Location: /text/edit");
             exit();
         }
 
         // Get display settings
-        $settings = $displayService->getTextDisplaySettings($textId);
+        $settings = $this->displayService->getTextDisplaySettings($textId);
         if ($settings === null) {
             header("Location: /text/edit");
             exit();
         }
 
         // Get header data
-        $headerData = $displayService->getHeaderData($textId);
+        $headerData = $this->displayService->getHeaderData($textId);
         if ($headerData === null) {
             header("Location: /text/edit");
             exit();
@@ -532,10 +525,10 @@ class TextController extends BaseController
         );
 
         // Parse annotations
-        $annotations = $displayService->parseAnnotations($annotatedText);
+        $annotations = $this->displayService->parseAnnotations($annotatedText);
 
         // Save current text
-        $displayService->saveCurrentText($textId);
+        $this->displayService->saveCurrentText($textId);
 
         // Render page
         PageLayoutHelper::renderPageStartNobody('Display');

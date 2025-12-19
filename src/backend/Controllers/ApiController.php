@@ -53,20 +53,28 @@ class ApiController extends BaseController
     /**
      * Translation controller for handling translation endpoints
      *
-     * @var TranslationController|null
+     * @var TranslationController
      */
-    protected ?TranslationController $translationController = null;
+    protected TranslationController $translationController;
 
     /**
-     * Get or create the translation controller.
+     * Initialize the controller with dependencies.
+     *
+     * @param TranslationController|null $translationController Translation controller (optional for BC)
+     */
+    public function __construct(?TranslationController $translationController = null)
+    {
+        parent::__construct();
+        $this->translationController = $translationController ?? new TranslationController(new TranslationService());
+    }
+
+    /**
+     * Get the translation controller.
      *
      * @return TranslationController
      */
     protected function getTranslationController(): TranslationController
     {
-        if ($this->translationController === null) {
-            $this->translationController = new TranslationController(new TranslationService());
-        }
         return $this->translationController;
     }
 

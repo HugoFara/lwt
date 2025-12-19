@@ -52,12 +52,14 @@ class TextTagsController extends AbstractCrudController
     private string $currentQuery;
 
     /**
-     * Initialize the controller.
+     * Initialize the controller with dependencies.
+     *
+     * @param TagService|null $service Tag service for text tags (optional for BC)
      */
-    public function __construct()
+    public function __construct(?TagService $service = null)
     {
         parent::__construct();
-        $this->service = new TagService('text');
+        $this->service = $service ?? new TagService('text');
     }
 
     /**
@@ -217,6 +219,7 @@ class TextTagsController extends AbstractCrudController
         $currentQuery = $this->currentQuery;
         $currentSort = $this->currentSort;
         $isTextTag = true;
+        $service = $this->service;
 
         // Include the view
         include __DIR__ . '/../Views/Tags/tag_list.php';

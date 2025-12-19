@@ -62,62 +62,61 @@ use Lwt\Core\Http\InputValidator;
  */
 class WordController extends BaseController
 {
-    /**
-     * @var WordService Word service instance
-     */
     protected WordService $wordService;
-
-    /**
-     * @var WordListService|null Word list service instance
-     */
-    protected ?WordListService $listService = null;
-
-    /**
-     * @var WordUploadService|null Word upload service instance
-     */
-    protected ?WordUploadService $uploadService = null;
-
-    /**
-     * @var LanguageService Language service instance
-     */
     protected LanguageService $languageService;
+    protected WordListService $listService;
+    protected WordUploadService $uploadService;
+    protected ExportService $exportService;
+    protected TextService $textService;
+    protected ExpressionService $expressionService;
 
     /**
      * Create a new WordController.
      *
-     * @param WordService     $wordService     Word service for vocabulary operations
-     * @param LanguageService $languageService Language service for language operations
+     * @param WordService|null       $wordService       Word service for vocabulary operations
+     * @param LanguageService|null   $languageService   Language service for language operations
+     * @param WordListService|null   $listService       Word list service
+     * @param WordUploadService|null $uploadService     Word upload service
+     * @param ExportService|null     $exportService     Export service
+     * @param TextService|null       $textService       Text service
+     * @param ExpressionService|null $expressionService Expression service
      */
-    public function __construct(WordService $wordService, LanguageService $languageService)
-    {
+    public function __construct(
+        ?WordService $wordService = null,
+        ?LanguageService $languageService = null,
+        ?WordListService $listService = null,
+        ?WordUploadService $uploadService = null,
+        ?ExportService $exportService = null,
+        ?TextService $textService = null,
+        ?ExpressionService $expressionService = null
+    ) {
         parent::__construct();
-        $this->wordService = $wordService;
-        $this->languageService = $languageService;
+        $this->wordService = $wordService ?? new WordService();
+        $this->languageService = $languageService ?? new LanguageService();
+        $this->listService = $listService ?? new WordListService();
+        $this->uploadService = $uploadService ?? new WordUploadService();
+        $this->exportService = $exportService ?? new ExportService();
+        $this->textService = $textService ?? new TextService();
+        $this->expressionService = $expressionService ?? new ExpressionService();
     }
 
     /**
-     * Get or create WordListService instance.
+     * Get the word list service instance.
      *
      * @return WordListService
      */
     protected function getListService(): WordListService
     {
-        if ($this->listService === null) {
-            $this->listService = new WordListService();
-        }
         return $this->listService;
     }
 
     /**
-     * Get or create WordUploadService instance.
+     * Get the word upload service instance.
      *
      * @return WordUploadService
      */
     protected function getUploadService(): WordUploadService
     {
-        if ($this->uploadService === null) {
-            $this->uploadService = new WordUploadService();
-        }
         return $this->uploadService;
     }
 
@@ -772,13 +771,13 @@ class WordController extends BaseController
                 $message = $listService->capitalizeByIdList($idList);
                 break;
             case 'exp':
-                (new ExportService())->exportAnki($listService->getAnkiExportSql($idList, '', '', '', '', ''));
+                $this->exportService->exportAnki($listService->getAnkiExportSql($idList, '', '', '', '', ''));
                 break;
             case 'exp2':
-                (new ExportService())->exportTsv($listService->getTsvExportSql($idList, '', '', '', '', ''));
+                $this->exportService->exportTsv($listService->getTsvExportSql($idList, '', '', '', '', ''));
                 break;
             case 'exp3':
-                (new ExportService())->exportFlexible($listService->getFlexibleExportSql($idList, '', '', '', '', ''));
+                $this->exportService->exportFlexible($listService->getFlexibleExportSql($idList, '', '', '', '', ''));
                 break;
             case 'test':
                 $_SESSION['testsql'] = $idList;
@@ -881,15 +880,15 @@ class WordController extends BaseController
 
         // Export actions
         if ($allaction == 'expall') {
-            (new ExportService())->exportAnki($listService->getAnkiExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            $this->exportService->exportAnki($listService->getAnkiExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
         if ($allaction == 'expall2') {
-            (new ExportService())->exportTsv($listService->getTsvExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            $this->exportService->exportTsv($listService->getTsvExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
         if ($allaction == 'expall3') {
-            (new ExportService())->exportFlexible($listService->getFlexibleExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
+            $this->exportService->exportFlexible($listService->getFlexibleExportSql('', $textId, $whLang, $whStat, $whQuery, $whTag));
             return '';
         }
 
@@ -1083,9 +1082,8 @@ class WordController extends BaseController
 
         // Get data for filter dropdowns
         $languages = $this->languageService->getLanguagesForSelect();
-        $textService = new TextService();
         $langId = $currentlang !== '' ? (int)$currentlang : null;
-        $texts = $textService->getTextsForSelect($langId);
+        $texts = $this->textService->getTextsForSelect($langId);
 
         // Include filter view
         include __DIR__ . '/../Views/Word/list_filter.php';
@@ -1472,7 +1470,7 @@ class WordController extends BaseController
                 $woLgId = $this->paramInt("WoLgID", 0) ?? 0;
                 $len = $this->wordService->getWordCount($wid);
                 if ($len > 1) {
-                    (new ExpressionService())->insertExpressions($result['textlc'], $woLgId, $wid, $len, 0);
+                    $this->expressionService->insertExpressions($result['textlc'], $woLgId, $wid, $len, 0);
                 } elseif ($len == 1) {
                     $this->wordService->linkToTextItems($wid, $woLgId, $result['textlc']);
 

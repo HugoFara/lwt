@@ -17,23 +17,28 @@ namespace Lwt\Core\Container;
 use Lwt\Services\AuthService;
 use Lwt\Services\BackupService;
 use Lwt\Services\DemoService;
+use Lwt\Services\ExportService;
 use Lwt\Services\ExpressionService;
 use Lwt\Services\FeedService;
 use Lwt\Services\HomeService;
 use Lwt\Services\LanguageService;
+use Lwt\Services\PasswordService;
 use Lwt\Services\SentenceService;
 use Lwt\Services\ServerDataService;
 use Lwt\Services\SettingsService;
 use Lwt\Services\StatisticsService;
 use Lwt\Services\TestService;
+use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextParsingService;
 use Lwt\Services\TextPrintService;
 use Lwt\Services\TextService;
 use Lwt\Services\ThemeService;
 use Lwt\Services\TranslationService;
 use Lwt\Services\TtsService;
+use Lwt\Services\WordListService;
 use Lwt\Services\WordPressService;
 use Lwt\Services\WordService;
+use Lwt\Services\WordUploadService;
 
 /**
  * Core service provider that registers essential application services.
@@ -115,6 +120,26 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $container->singleton(ThemeService::class, function (Container $_c) {
             return new ThemeService();
+        });
+
+        $container->singleton(PasswordService::class, function (Container $_c) {
+            return new PasswordService();
+        });
+
+        $container->singleton(TextDisplayService::class, function (Container $_c) {
+            return new TextDisplayService();
+        });
+
+        $container->singleton(WordListService::class, function (Container $_c) {
+            return new WordListService();
+        });
+
+        $container->singleton(WordUploadService::class, function (Container $_c) {
+            return new WordUploadService();
+        });
+
+        $container->singleton(ExportService::class, function (Container $_c) {
+            return new ExportService();
         });
 
         // =====================

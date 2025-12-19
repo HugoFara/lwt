@@ -50,16 +50,21 @@ require_once __DIR__ . '/../Core/Bootstrap/start_session.php';
 class TestController extends BaseController
 {
     private TestService $testService;
+    private LanguageService $languageService;
 
     /**
      * Create a new TestController.
      *
-     * @param TestService $testService Test service for review/test operations
+     * @param TestService|null     $testService     Test service (optional for BC)
+     * @param LanguageService|null $languageService Language service (optional for BC)
      */
-    public function __construct(TestService $testService)
-    {
+    public function __construct(
+        ?TestService $testService = null,
+        ?LanguageService $languageService = null
+    ) {
         parent::__construct();
-        $this->testService = $testService;
+        $this->testService = $testService ?? new TestService();
+        $this->languageService = $languageService ?? new LanguageService();
     }
 
     /**
@@ -286,8 +291,7 @@ class TestController extends BaseController
         $langSettings = $this->testService->getLanguageSettings($langIdFromSql);
 
         // Get language code for TTS
-        $languageService = new LanguageService();
-        $langCode = $languageService->getLanguageCode(
+        $langCode = $this->languageService->getLanguageCode(
             $langIdFromSql,
             LanguageDefinitions::getAll()
         );

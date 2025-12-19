@@ -48,6 +48,24 @@ require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
  */
 class TagsController extends BaseController
 {
+    private TagService $termTagService;
+    private TagService $textTagService;
+
+    /**
+     * Create a new TagsController.
+     *
+     * @param TagService|null $termTagService Service for term tags
+     * @param TagService|null $textTagService Service for text tags
+     */
+    public function __construct(
+        ?TagService $termTagService = null,
+        ?TagService $textTagService = null
+    ) {
+        parent::__construct();
+        $this->termTagService = $termTagService ?? new TagService('term');
+        $this->textTagService = $textTagService ?? new TagService('text');
+    }
+
     /**
      * Term tags index page (replaces tags_edit.php)
      *
@@ -64,8 +82,7 @@ class TagsController extends BaseController
         $currentquery = InputValidator::getStringWithSession("query", "currenttagquery");
 
         // Build WHERE clause using TagService
-        $service = new TagService('term');
-        $whereData = $service->buildWhereClause($currentquery);
+        $whereData = $this->termTagService->buildWhereClause($currentquery);
 
         $this->render('Term Tags', true);
 
@@ -101,8 +118,7 @@ class TagsController extends BaseController
         $currentquery = InputValidator::getStringWithSession("query", "currenttexttagquery");
 
         // Build WHERE clause using TagService
-        $service = new TagService('text');
-        $whereData = $service->buildWhereClause($currentquery);
+        $whereData = $this->textTagService->buildWhereClause($currentquery);
 
         $this->render('Text Tags', true);
 
@@ -134,7 +150,6 @@ class TagsController extends BaseController
     private function processTermTagActions(array $whereData): string
     {
         $message = '';
-        $service = new TagService('term');
 
         // Mark actions
         if ($this->param('markaction')) {
@@ -142,11 +157,11 @@ class TagsController extends BaseController
         } elseif ($this->param('allaction')) {
             // All actions
             if ($this->param('allaction') == 'delall') {
-                $message = $service->deleteAll($whereData);
+                $message = $this->termTagService->deleteAll($whereData);
             }
         } elseif ($this->param('del')) {
             // Single delete
-            $message = $service->delete((int)$this->param('del'));
+            $message = $this->termTagService->delete((int)$this->param('del'));
         } elseif ($this->param('op')) {
             // Insert/Update
             $message = $this->saveTermTag();
@@ -330,24 +345,21 @@ class TagsController extends BaseController
         int $currentsort,
         int $currentpage
     ): void {
-        // Create service instance for term tags
-        $service = new TagService('term');
-
         // Format error message if needed
-        $message = $service->formatDuplicateError($message);
+        $message = $this->termTagService->formatDuplicateError($message);
 
         TagService::getAllTermTags(true);   // refresh tags cache
 
         // Get counts and pagination
-        $totalCount = $service->getCount($whereData);
-        $pagination = $service->getPagination($totalCount, $currentpage);
+        $totalCount = $this->termTagService->getCount($whereData);
+        $pagination = $this->termTagService->getPagination($totalCount, $currentpage);
         $currentpage = $pagination['currentPage'];
 
         // Get sort column
-        $sortColumn = $service->getSortColumn($currentsort);
+        $sortColumn = $this->termTagService->getSortColumn($currentsort);
 
         // Get tags list
-        $tags = $service->getList($whereData, $sortColumn, $currentpage, $pagination['perPage']);
+        $tags = $this->termTagService->getList($whereData, $sortColumn, $currentpage, $pagination['perPage']);
 
         // Set view variables
         $currentQuery = $currentquery;
@@ -370,7 +382,6 @@ class TagsController extends BaseController
     private function processTextTagActions(array $whereData): string
     {
         $message = '';
-        $service = new TagService('text');
 
         // Mark actions
         if ($this->param('markaction')) {
@@ -378,11 +389,11 @@ class TagsController extends BaseController
         } elseif ($this->param('allaction')) {
             // All actions
             if ($this->param('allaction') == 'delall') {
-                $message = $service->deleteAll($whereData);
+                $message = $this->textTagService->deleteAll($whereData);
             }
         } elseif ($this->param('del')) {
             // Single delete
-            $message = $service->delete((int)$this->param('del'));
+            $message = $this->textTagService->delete((int)$this->param('del'));
         } elseif ($this->param('op')) {
             // Insert/Update
             $message = $this->saveTextTag();
@@ -568,24 +579,21 @@ class TagsController extends BaseController
         int $currentsort,
         int $currentpage
     ): void {
-        // Create service instance for text tags
-        $service = new TagService('text');
-
         // Format error message if needed
-        $message = $service->formatDuplicateError($message);
+        $message = $this->textTagService->formatDuplicateError($message);
 
         TagService::getAllTextTags(true);   // refresh tags cache
 
         // Get counts and pagination
-        $totalCount = $service->getCount($whereData);
-        $pagination = $service->getPagination($totalCount, $currentpage);
+        $totalCount = $this->textTagService->getCount($whereData);
+        $pagination = $this->textTagService->getPagination($totalCount, $currentpage);
         $currentpage = $pagination['currentPage'];
 
         // Get sort column
-        $sortColumn = $service->getSortColumn($currentsort);
+        $sortColumn = $this->textTagService->getSortColumn($currentsort);
 
         // Get tags list
-        $tags = $service->getList($whereData, $sortColumn, $currentpage, $pagination['perPage']);
+        $tags = $this->textTagService->getList($whereData, $sortColumn, $currentpage, $pagination['perPage']);
 
         // Set view variables
         $currentQuery = $currentquery;
