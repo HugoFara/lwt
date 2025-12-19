@@ -6,7 +6,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/phpDocumentor/phpDocumentor/master/data/xsd/phpdoc.xsd"
 >
     <paths>
-        <output>docs/php</output>
+        <output>docs/api/php</output>
         <cache>.phpdoc/cache</cache>
     </paths>
     <version number="3.0.0">
@@ -16,7 +16,6 @@
             </source>
             <ignore hidden="true" symlinks="true">
                 <path>vendor</path>
-                <path>connect.inc.php</path>
             </ignore>
             <default-package-name>Lwt</default-package-name>
         </api>

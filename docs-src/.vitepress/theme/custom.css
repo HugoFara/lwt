@@ -1,0 +1,224 @@
+/**
+ * LWT VitePress Theme - Bulma-aligned Styling
+ *
+ * Customizes VitePress default theme to match the LWT application's
+ * Bulma-based styling and color scheme.
+ */
+
+:root {
+  /* Primary brand colors - match LWT's link color (#C00000) */
+  --vp-c-brand-1: #C00000;
+  --vp-c-brand-2: #a00000;
+  --vp-c-brand-3: #800000;
+  --vp-c-brand-soft: rgba(192, 0, 0, 0.14);
+
+  /* Text colors - match Bulma text colors */
+  --vp-c-text-1: #363636;
+  --vp-c-text-2: #4a4a4a;
+  --vp-c-text-3: #7a7a7a;
+
+  /* Background colors */
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-soft: #f5f5f5;
+  --vp-c-bg-muted: #fafafa;
+
+  /* Border colors - Bulma style */
+  --vp-c-border: #dbdbdb;
+  --vp-c-divider: #ededed;
+
+  /* Typography - match LWT font stack */
+  --vp-font-family-base: "Lucida Grande", Arial, sans-serif, STHeiti, "Arial Unicode MS", MingLiu;
+  --vp-font-family-mono: Menlo, Monaco, Consolas, "Courier New", monospace;
+
+  /* Bulma semantic colors */
+  --vp-c-success-1: #48c78e;
+  --vp-c-warning-1: #ffe08a;
+  --vp-c-danger-1: #f14668;
+  --vp-c-info-1: #3e8ed0;
+}
+
+/* Dark mode overrides - based on LWT Night_Mode theme */
+.dark {
+  --vp-c-bg: #000000;
+  --vp-c-bg-soft: #080808;
+  --vp-c-bg-muted: #111111;
+
+  --vp-c-text-1: #ffffff;
+  --vp-c-text-2: #eeeeee;
+  --vp-c-text-3: #aaaaaa;
+
+  --vp-c-border: #404040;
+  --vp-c-divider: #333333;
+
+  /* Slightly brighter brand color for dark mode */
+  --vp-c-brand-1: #E00000;
+  --vp-c-brand-2: #ff3333;
+  --vp-c-brand-3: #ff6666;
+}
+
+/* ===== Word Status Colors ===== */
+/* These match the LWT application's word status indicators */
+
+.status-new {
+  background-color: #ADDFFF;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.status-1 {
+  background-color: #F5B8A9;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.status-2 {
+  background-color: #F5CCA9;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.status-3 {
+  background-color: #F5E1A9;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.status-4 {
+  background-color: #F5F3A9;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.status-5 {
+  background-color: #DDFFDD;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.status-known {
+  background-color: #F8F8F8;
+  border-bottom: 2px solid #CCFFCC;
+  color: #000;
+  padding: 2px 6px;
+}
+
+.status-ignored {
+  background-color: #F8F8F8;
+  border-bottom: 1px dashed #000;
+  color: #000;
+  padding: 2px 6px;
+}
+
+/* Dark mode status colors */
+.dark .status-new { background-color: #7D8FEA; }
+.dark .status-1 { background-color: #F57869; }
+.dark .status-2 { background-color: #F5B08B; }
+.dark .status-3 { background-color: #F5E1A9; }
+.dark .status-4 { background-color: #F5F388; }
+.dark .status-5 { background-color: #B2FFB2; }
+.dark .status-known { color: #fff; border-bottom-color: transparent; }
+.dark .status-ignored { border-bottom-color: #fff; color: #fff; }
+
+/* ===== Table Styling ===== */
+/* Match LWT's table appearance */
+
+.vp-doc table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #808080;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  margin: 16px 0;
+}
+
+.dark .vp-doc table {
+  background-color: #080808;
+  border-color: #404040;
+}
+
+.vp-doc th {
+  background-color: #DDDDDD;
+  border-bottom: 1px solid #808080;
+  border-right: 1px solid #808080;
+  padding: 8px 12px;
+}
+
+.dark .vp-doc th {
+  background-color: #222222;
+  border-color: #404040;
+}
+
+.vp-doc td {
+  border-bottom: 1px solid #808080;
+  border-right: 1px solid #808080;
+  padding: 8px 12px;
+}
+
+.dark .vp-doc td {
+  border-color: #404040;
+}
+
+.vp-doc th:last-child,
+.vp-doc td:last-child {
+  border-right: none;
+}
+
+.vp-doc tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== Button Styling ===== */
+/* Match Bulma button appearance */
+
+.VPButton {
+  border-radius: 4px !important;
+  font-weight: 400 !important;
+  box-shadow: none !important;
+}
+
+/* ===== Feature Cards ===== */
+/* Match Bulma box styling */
+
+.VPFeature {
+  border-radius: 6px;
+  box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
+              0 0 0 1px rgba(10, 10, 10, 0.02);
+}
+
+/* ===== Custom Containers ===== */
+/* Match Bulma notification colors */
+
+.custom-block.tip {
+  border-color: #48c78e;
+  background-color: rgba(72, 199, 142, 0.1);
+}
+
+.custom-block.warning {
+  border-color: #ffe08a;
+  background-color: rgba(255, 224, 138, 0.1);
+}
+
+.custom-block.danger {
+  border-color: #f14668;
+  background-color: rgba(241, 70, 104, 0.1);
+}
+
+.custom-block.info {
+  border-color: #3e8ed0;
+  background-color: rgba(62, 142, 208, 0.1);
+}
+
+/* ===== Responsive Tables ===== */
+
+@media (max-width: 768px) {
+  .vp-doc table {
+    display: block;
+    overflow-x: auto;
+  }
+}

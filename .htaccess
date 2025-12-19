@@ -1,0 +1,60 @@
+# LWT Front Controller - Apache Configuration
+# This file enables clean URLs and routes all requests through index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Deny access to sensitive files
+    <FilesMatch "^(connect\.inc\.php|composer\.json|composer\.lock|\.env)$">
+        Require all denied
+    </FilesMatch>
+
+    # Legacy asset redirects (for backward compatibility, can remove in future)
+    RedirectMatch 301 ^/icn/(.*)$ /assets/icons/$1
+    RedirectMatch 301 ^/img/(.*)$ /assets/images/$1
+    RedirectMatch 301 ^/iui/(.*)$ /assets/vendor/iui/$1
+    RedirectMatch 301 ^/css/(.*)$ /assets/css/$1
+    RedirectMatch 301 ^/js/(.*)$ /assets/js/$1
+    RedirectMatch 301 ^/themes/(.*)$ /assets/themes/$1
+    RedirectMatch 301 ^/sounds/(.*)$ /assets/sounds/$1
+
+    # Allow direct access to assets (CSS, JS, images, fonts)
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]
+    RewriteRule ^ - [L]
+
+    # Allow direct access to existing files (for backward compatibility)
+    # This allows migrated .php files to still be accessed directly
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Route everything else through index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Disable directory listings
+Options -Indexes
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Enable GZIP compression (optional, for better performance)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Set cache headers for static assets (optional)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+</IfModule>

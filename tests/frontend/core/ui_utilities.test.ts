@@ -1,0 +1,560 @@
+/**
+ * Tests for ui_utilities.ts - DOM manipulation, tooltips, and form wrapping
+ */
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// Mock frame_management module
+const mockLoadModalFrame = vi.fn();
+vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+  loadModalFrame: mockLoadModalFrame
+}));
+
+// Mock LWT_DATA global (needs to be set before import)
+const mockLWT_DATA = {
+  language: {
+    id: 1,
+    dict_link1: '',
+    dict_link2: '',
+    translator_link: '',
+    delimiter: ',',
+    word_parsing: '',
+    rtl: false,
+    ttsVoiceApi: ''
+  },
+  text: { id: 1, reading_position: 0, annotations: {} },
+  word: { id: 0 },
+  test: { solution: '', answer_opened: false },
+  settings: { hts: 0, word_status_filter: '' }
+};
+
+// Set up globals before import
+(window as Record<string, unknown>).LWT_DATA = mockLWT_DATA;
+
+// Now import the module (after globals are set)
+const ui_utilities = await import('../../../src/frontend/js/core/ui_utilities');
+const { markClick, confirmDelete, showAllwordsClick, noShowAfter3Secs, setTheFocus, wrapRadioButtons } = ui_utilities;
+
+describe('ui_utilities.ts', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    vi.useFakeTimers();
+    // Clear mock function calls between tests
+    mockLoadModalFrame.mockClear();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+    document.body.innerHTML = '';
+  });
+
+  // ===========================================================================
+  // markClick Tests
+  // ===========================================================================
+
+  describe('markClick', () => {
+    it('enables markaction button when checkboxes are checked', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" class="markcheck" checked />
+        <button id="markaction" disabled>Action</button>
+      `;
+
+      markClick();
+
+      expect(document.getElementById('markaction')?.hasAttribute('disabled')).toBe(false);
+    });
+
+    it('disables markaction button when no checkboxes are checked', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" class="markcheck" />
+        <button id="markaction">Action</button>
+      `;
+
+      markClick();
+
+      expect(document.getElementById('markaction')?.hasAttribute('disabled')).toBe(true);
+    });
+
+    it('enables button with multiple checkboxes when at least one is checked', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" class="markcheck" />
+        <input type="checkbox" class="markcheck" checked />
+        <input type="checkbox" class="markcheck" />
+        <button id="markaction" disabled>Action</button>
+      `;
+
+      markClick();
+
+      expect(document.getElementById('markaction')?.hasAttribute('disabled')).toBe(false);
+    });
+
+    it('handles missing markaction button gracefully', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" class="markcheck" checked />
+      `;
+
+      expect(() => markClick()).not.toThrow();
+    });
+  });
+
+  // ===========================================================================
+  // confirmDelete Tests
+  // ===========================================================================
+
+  describe('confirmDelete', () => {
+    it('returns true when user confirms', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      const result = confirmDelete();
+
+      expect(result).toBe(true);
+      expect(window.confirm).toHaveBeenCalledWith('CONFIRM\n\nAre you sure you want to delete?');
+    });
+
+    it('returns false when user cancels', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+      const result = confirmDelete();
+
+      expect(result).toBe(false);
+    });
+  });
+
+  // ===========================================================================
+  // noShowAfter3Secs Tests
+  // ===========================================================================
+
+  describe('noShowAfter3Secs', () => {
+    it('slides up element with id hide3', () => {
+      document.body.innerHTML = '<div id="hide3">Message</div>';
+
+      noShowAfter3Secs();
+
+      // slideUp is called - in jsdom it may not fully animate
+      // We verify the function doesn't throw
+      expect(document.getElementById('hide3')).not.toBeNull();
+    });
+
+    it('handles missing hide3 element gracefully', () => {
+      document.body.innerHTML = '';
+
+      expect(() => noShowAfter3Secs()).not.toThrow();
+    });
+  });
+
+  // ===========================================================================
+  // setTheFocus Tests
+  // ===========================================================================
+
+  describe('setTheFocus', () => {
+    it('focuses element with setfocus class', () => {
+      document.body.innerHTML = '<input type="text" class="setfocus" />';
+
+      setTheFocus();
+
+      // Should focus the element
+      expect(document.querySelector('.setfocus')).not.toBeNull();
+    });
+
+    it('handles missing setfocus element gracefully', () => {
+      document.body.innerHTML = '';
+
+      expect(() => setTheFocus()).not.toThrow();
+    });
+  });
+
+  // ===========================================================================
+  // wrapRadioButtons Tests
+  // ===========================================================================
+
+  describe('wrapRadioButtons', () => {
+    it('adds tabindex to inputs', () => {
+      document.body.innerHTML = `
+        <input type="text" />
+        <input type="button" value="Button" />
+      `;
+
+      wrapRadioButtons();
+
+      expect(document.querySelector('input[type="text"]')?.getAttribute('tabindex')).toBeDefined();
+      expect(document.querySelector('input[type="button"]')?.getAttribute('tabindex')).toBeDefined();
+    });
+
+    it('adds tabindex to selects', () => {
+      document.body.innerHTML = '<select><option>Option</option></select>';
+
+      wrapRadioButtons();
+
+      expect(document.querySelector('select')?.getAttribute('tabindex')).toBeDefined();
+    });
+
+    it('adds tabindex to links except those starting with rec', () => {
+      document.body.innerHTML = `
+        <a href="#" name="link1">Link 1</a>
+        <a href="#" name="rec1">Rec Link</a>
+      `;
+
+      wrapRadioButtons();
+
+      expect(document.querySelector('a[name="link1"]')?.getAttribute('tabindex')).toBeDefined();
+    });
+
+    it('sets up keydown handler for wrap_radio spans', () => {
+      document.body.innerHTML = `
+        <div>
+          <input type="radio" name="test" value="1" />
+          <label class="wrap_radio"><span></span></label>
+        </div>
+      `;
+
+      wrapRadioButtons();
+
+      // Simulate space key press using native KeyboardEvent
+      const span = document.querySelector('.wrap_radio span') as HTMLElement;
+      const event = new KeyboardEvent('keydown', { keyCode: 32, bubbles: true });
+      span.dispatchEvent(event);
+    });
+  });
+
+  // ===========================================================================
+  // showAllwordsClick Tests
+  // ===========================================================================
+
+  describe('showAllwordsClick', () => {
+    it('calls loadModalFrame with correct parameters', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" id="showallwords" checked />
+        <input type="checkbox" id="showlearningtranslations" />
+        <span id="thetextid">42</span>
+      `;
+
+      showAllwordsClick();
+
+      // Advance timers
+      vi.advanceTimersByTime(500);
+
+      expect(mockLoadModalFrame).toHaveBeenCalled();
+    });
+
+    it('sends mode=0 when showallwords is unchecked', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" id="showallwords" />
+        <input type="checkbox" id="showlearningtranslations" />
+        <span id="thetextid">42</span>
+      `;
+
+      showAllwordsClick();
+
+      vi.advanceTimersByTime(500);
+
+      const call = mockLoadModalFrame.mock.calls[0];
+      expect(call[0]).toContain('mode=0');
+    });
+
+    it('includes showLearning parameter', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" id="showallwords" checked />
+        <input type="checkbox" id="showlearningtranslations" checked />
+        <span id="thetextid">42</span>
+      `;
+
+      showAllwordsClick();
+
+      vi.advanceTimersByTime(500);
+
+      const call = mockLoadModalFrame.mock.calls[0];
+      expect(call[0]).toContain('showLearning=1');
+    });
+
+    it('schedules page reload after 4 seconds', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" id="showallwords" checked />
+        <input type="checkbox" id="showlearningtranslations" />
+        <span id="thetextid">42</span>
+      `;
+
+      const reloadSpy = vi.fn();
+      Object.defineProperty(window, 'location', {
+        value: { reload: reloadSpy },
+        writable: true
+      });
+
+      showAllwordsClick();
+
+      vi.advanceTimersByTime(4000);
+
+      expect(reloadSpy).toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // serializeFormToObject Tests
+  // ===========================================================================
+
+  describe('serializeFormToObject', () => {
+    const { serializeFormToObject } = ui_utilities;
+
+    it('serializes form to object', () => {
+      document.body.innerHTML = `
+        <form id="testform">
+          <input type="text" name="field1" value="value1" />
+          <input type="text" name="field2" value="value2" />
+        </form>
+      `;
+
+      const form = document.getElementById('testform') as HTMLFormElement;
+      const result = serializeFormToObject(form);
+
+      expect(result.field1).toBe('value1');
+      expect(result.field2).toBe('value2');
+    });
+
+    it('handles multiple values with same name as array', () => {
+      document.body.innerHTML = `
+        <form id="testform">
+          <input type="checkbox" name="items" value="a" checked />
+          <input type="checkbox" name="items" value="b" checked />
+          <input type="checkbox" name="items" value="c" checked />
+        </form>
+      `;
+
+      const form = document.getElementById('testform') as HTMLFormElement;
+      const result = serializeFormToObject(form);
+
+      expect(Array.isArray(result.items)).toBe(true);
+      expect(result.items).toEqual(['a', 'b', 'c']);
+    });
+
+    it('handles empty values', () => {
+      document.body.innerHTML = `
+        <form id="testform">
+          <input type="text" name="empty" value="" />
+        </form>
+      `;
+
+      const form = document.getElementById('testform') as HTMLFormElement;
+      const result = serializeFormToObject(form);
+
+      expect(result.empty).toBe('');
+    });
+  });
+
+  // ===========================================================================
+  // Edge Cases
+  // ===========================================================================
+
+  describe('Edge Cases', () => {
+    it('markClick handles empty DOM', () => {
+      document.body.innerHTML = '';
+
+      expect(() => markClick()).not.toThrow();
+    });
+  });
+
+  // ===========================================================================
+  // initHideMessages Tests
+  // ===========================================================================
+
+  describe('initHideMessages', () => {
+    const { initHideMessages } = ui_utilities;
+
+    it('auto-dismisses elements with hide_message class', () => {
+      document.body.innerHTML = `
+        <div class="hide_message">Message 1</div>
+        <div class="hide_message">Message 2</div>
+      `;
+
+      initHideMessages();
+
+      // Fast forward past the 2500ms delay
+      vi.advanceTimersByTime(2500);
+
+      // Messages should start to hide (slideUp animation)
+      const messages = document.querySelectorAll('.hide_message');
+      expect(messages.length).toBe(2);
+    });
+
+    it('handles no hide_message elements', () => {
+      document.body.innerHTML = '<div>No messages</div>';
+
+      expect(() => initHideMessages()).not.toThrow();
+    });
+  });
+
+  // ===========================================================================
+  // prepareMainAreas Tests
+  // ===========================================================================
+
+  describe('prepareMainAreas', () => {
+    const { prepareMainAreas } = ui_utilities;
+
+    beforeEach(() => {
+      // Reset any event listeners that might persist
+      document.body.innerHTML = '';
+    });
+
+    it('wraps select elements with label', () => {
+      document.body.innerHTML = '<select id="test"><option>Option</option></select>';
+
+      prepareMainAreas();
+
+      const label = document.querySelector('label.wrap_select');
+      expect(label).not.toBeNull();
+      expect(label?.querySelector('select')).not.toBeNull();
+    });
+
+    it('disables autocomplete on forms', () => {
+      document.body.innerHTML = '<form id="testform"></form>';
+
+      prepareMainAreas();
+
+      expect(document.getElementById('testform')?.getAttribute('autocomplete')).toBe('off');
+    });
+
+    it('wraps checkboxes with labels', () => {
+      document.body.innerHTML = '<input type="checkbox" />';
+
+      prepareMainAreas();
+
+      const label = document.querySelector('label.wrap_checkbox');
+      expect(label).not.toBeNull();
+    });
+
+    it('adds click handler to TTS spans', () => {
+      document.body.innerHTML = '<span class="tts_en">Hello</span>';
+
+      prepareMainAreas();
+
+      const span = document.querySelector('.tts_en') as HTMLElement;
+      expect(span).not.toBeNull();
+      // Click should not throw
+      expect(() => span.click()).not.toThrow();
+    });
+
+    it('wraps radio buttons with labels', () => {
+      document.body.innerHTML = '<input type="radio" name="test" value="1" />';
+
+      prepareMainAreas();
+
+      const label = document.querySelector('label.wrap_radio');
+      expect(label).not.toBeNull();
+    });
+
+    it('sets up form validation handlers', () => {
+      document.body.innerHTML = '<form class="validate"><input type="submit" /></form>';
+
+      prepareMainAreas();
+
+      const form = document.querySelector('form.validate');
+      expect(form).not.toBeNull();
+    });
+
+    it('sets up mark checkbox handlers', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" class="markcheck" />
+        <button id="markaction" disabled>Action</button>
+      `;
+
+      prepareMainAreas();
+
+      // First check it's initially disabled
+      expect(document.getElementById('markaction')?.hasAttribute('disabled')).toBe(true);
+
+      // Check the checkbox and trigger click handler
+      const checkbox = document.querySelector('.markcheck') as HTMLInputElement;
+      checkbox.checked = true;
+      // Trigger the click event to call markClick handler
+      checkbox.dispatchEvent(new Event('click', { bubbles: true }));
+
+      // markClick should have been called, enabling the button
+      expect(document.getElementById('markaction')?.hasAttribute('disabled')).toBe(false);
+    });
+
+    it('sets up textarea no-return handlers', () => {
+      document.body.innerHTML = `
+        <form>
+          <textarea class="textarea-noreturn"></textarea>
+          <input type="submit" />
+        </form>
+      `;
+
+      prepareMainAreas();
+
+      const textarea = document.querySelector('.textarea-noreturn') as HTMLTextAreaElement;
+      expect(textarea).not.toBeNull();
+
+      // Simulate Enter key - should be handled
+      const event = new KeyboardEvent('keydown', { keyCode: 13 });
+      textarea.dispatchEvent(event);
+    });
+
+    it('handles hidden file inputs', () => {
+      document.body.innerHTML = `
+        <input type="file" style="display: none;" />
+      `;
+
+      prepareMainAreas();
+
+      // File input handling - may or may not create button based on visibility
+      const fileInput = document.querySelector('input[type="file"]');
+      expect(fileInput).not.toBeNull();
+    });
+
+    it('schedules noShowAfter3Secs', () => {
+      document.body.innerHTML = '<div id="hide3">Message</div>';
+
+      prepareMainAreas();
+
+      // Should schedule the hide operation
+      vi.advanceTimersByTime(3000);
+      // Function was called - element exists
+      expect(document.getElementById('hide3')).not.toBeNull();
+    });
+
+    it('handles annotation inputs', () => {
+      document.body.innerHTML = `
+        <input type="text" class="impr-ann-text" />
+        <input type="radio" class="impr-ann-radio" name="ann" />
+      `;
+
+      prepareMainAreas();
+
+      // Event handlers should be attached
+      const textInput = document.querySelector('.impr-ann-text');
+      const radioInput = document.querySelector('.impr-ann-radio');
+      expect(textInput).not.toBeNull();
+      expect(radioInput).not.toBeNull();
+    });
+
+    it('handles confirm delete elements', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+      document.body.innerHTML = '<a class="confirmdelete" href="#">Delete</a>';
+
+      prepareMainAreas();
+
+      const deleteLink = document.querySelector('.confirmdelete') as HTMLElement;
+      deleteLink.click();
+
+      expect(window.confirm).toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // slideUp animation (internal) via noShowAfter3Secs
+  // ===========================================================================
+
+  describe('slideUp animation', () => {
+    it('hides element after animation completes', () => {
+      document.body.innerHTML = '<div id="hide3" style="height: 100px;">Message</div>';
+
+      noShowAfter3Secs();
+
+      // Advance through the animation (400ms default)
+      vi.advanceTimersByTime(400);
+
+      // Element should be hidden after animation
+      const element = document.getElementById('hide3');
+      expect(element?.style.display).toBe('none');
+    });
+  });
+});

@@ -2,7 +2,7 @@
     "plugins": [],
     "recurseDepth": 10,
     "source": {
-        "include": ["src/js"],
+        "include": ["src/frontend/js"],
         "includePattern": ".+\\.js$",
         "excludePattern": "(^|\\/|\\\\)_",
         "includeSource": false
@@ -19,7 +19,7 @@
     "opts": {
         "template": "templates/default", 
         "encoding": "utf8",
-        "destination": "docs/js/", 
+        "destination": "docs/api/js/", 
         "recurse": false,
         "readme": "./README.md"
     }

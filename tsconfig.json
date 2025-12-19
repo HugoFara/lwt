@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": false,
+    "declaration": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/frontend/js/*"],
+      "@css/*": ["src/frontend/css/base/*"],
+      "@themes/*": ["src/frontend/css/themes/*"]
+    },
+    "types": ["vite/client", "node"]
+  },
+  "include": ["src/frontend/js/**/*", "vite.config.ts"],
+  "exclude": ["node_modules", "assets"]
+}

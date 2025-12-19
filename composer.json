@@ -3,7 +3,7 @@
     "description": "Learn languages by reading, this is a community maintained version.",
     "type": "library",
     "keywords": ["language-learning","reading","lwt","Learning-with-Texts"],
-    "homepage": "https://hugofara.github.io/lwt/docs/info.html",
+    "homepage": "https://hugofara.github.io/lwt/",
     "license": "UNLICENSE",
     "minimum-stability": "stable",
     "support": {
@@ -11,6 +11,17 @@
         "forum": "https://github.com/HugoFara/lwt/discussions",
         "issues": "https://github.com/HugoFara/lwt/issues",
         "source": "https://github.com/HugoFara/lwt"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lwt\\": "src/backend/",
+            "Lwt\\Database\\": "src/backend/Core/Database/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Lwt\\Tests\\": "tests/backend/"
+        }
     },
     "require": {
         "php": "^8.1 | ^8.2 | ^8.3 | ^8.4",
@@ -21,42 +32,52 @@
     "require-dev": {
         "vimeo/psalm": "^5.6",
         "phpunit/phpunit": "^10.5",
-        "matthiasmullie/minify": "^1.3",
-        "league/commonmark": "^2.7"
+        "league/commonmark": "^2.7",
+        "phpdocumentor/shim": "*"
     },
     "suggest": {
         "squizlabs/php_codesniffer": "Following code style standards is a good thing"
     },
     "scripts": {
-        "test": "vendor/bin/phpunit",
-        "info.html": "@php docs/info.php > docs/info.html",
+        "test:cleanup-db": "@php tests/cleanup_db_connections.php",
+        "test": [
+            "@test:cleanup-db",
+            "XDEBUG_MODE=coverage vendor/bin/phpunit"
+        ],
+        "test:no-coverage": [
+            "@test:cleanup-db",
+            "vendor/bin/phpunit --no-coverage"
+        ],
+        "psalm": "vendor/bin/psalm",
+        "psalm:level3": "vendor/bin/psalm --error-level=3",
+        "psalm:level1": "vendor/bin/psalm --error-level=1",
         "doc": [
-            "@info.html",
-            "doxygen Doxyfile",
+            "npm run docs:build",
             "./node_modules/.bin/jsdoc -c jsdoc.json",
-            "php tools/phpDocumentor"
+            "./vendor/bin/phpdoc"
         ],
-        "minify": "php -r \"require 'src/php/minifier.php';minify_everything();\"",
-        "no-minify": [
-            "rm js/pgm.js",
-            "cat src/js/third_party/* >> js/pgm.js",
-            "cat src/js/*.js >> js/pgm.js",
-            "cp -r src/css .",
-            "cp -r src/themes ."
-        ],
+        "build": "npm run build:all",
         "clean-doc": [
-            "rm docs/info.html",
-            "rm -rf docs/html",
-            "rm -rf docs/js",
-            "rm -rf docs/php"
+            "rm -rf docs/guide docs/reference docs/developer docs/legal docs/assets docs/hashmap.json",
+            "rm -f docs/changelog.html docs/index.html docs/404.html",
+            "rm -rf docs/api/js",
+            "rm -rf docs/api/php"
         ]
     },
     "scripts-descriptions": {
-        "test": "Run all tests!",
-        "info.html": "Regenerate one-file documentation",
-        "doc": "Regenerate all documentation",
-        "minify": "Regenerate minified JS, CSS and themes",
-        "no-minify": "Development versions do not need minification",
-        "clean-doc": "Clear documentation"
+        "test:cleanup-db": "Kill stale test database connections",
+        "test": "Run all tests with coverage (cleans up stale DB connections first)",
+        "test:no-coverage": "Run all tests without coverage (cleans up stale DB connections first)",
+        "psalm": "Run Psalm static analysis (current config level)",
+        "psalm:level3": "Run Psalm at level 3 (stricter)",
+        "psalm:level1": "Run Psalm at level 1 (strictest)",
+        "doc": "Regenerate all documentation (VitePress + JSDoc + phpDoc)",
+        "build": "Build frontend assets (Vite + themes)",
+        "clean-doc": "Clear generated documentation"
+    },
+    "config": {
+        "allow-plugins": {
+            "phpdocumentor/shim": true
+        }
     }
 }

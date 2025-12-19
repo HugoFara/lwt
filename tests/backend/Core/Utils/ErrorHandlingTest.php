@@ -1,0 +1,51 @@
+<?php declare(strict_types=1);
+
+namespace Lwt\Tests\Core\Utils;
+
+require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
+require_once __DIR__ . '/../../../../src/backend/Core/StringUtils.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Utils/error_handling.php';
+
+use Lwt\Core\Globals;
+use Lwt\Core\Utils\ErrorHandler;
+use PHPUnit\Framework\TestCase;
+
+Globals::initialize();
+
+/**
+ * Tests for ErrorHandler class
+ */
+final class ErrorHandlingTest extends TestCase
+{
+    /**
+     * Test ErrorHandler::messageWithHide method
+     */
+    public function testErrorMessageWithHide(): void
+    {
+        // Test with non-error message (noback=true - no back button)
+        $result = ErrorHandler::messageWithHide('Test message', true);
+        $this->assertStringContainsString('Test message', $result);
+        $this->assertStringContainsString('msgblue', $result);
+        $this->assertStringNotContainsString('onclick="history.back();"', $result);
+
+        // Test with Error prefix (should show red error with back button when noback=false)
+        $result = ErrorHandler::messageWithHide('Error: Something went wrong', false);
+        $this->assertStringContainsString('Error: Something went wrong', $result);
+        $this->assertStringContainsString('class="red"', $result);
+        $this->assertStringContainsString('data-action="back"', $result);
+
+        // Test with Error prefix and noback=true (no back button)
+        $result = ErrorHandler::messageWithHide('Error: Another problem', true);
+        $this->assertStringContainsString('Error: Another problem', $result);
+        $this->assertStringContainsString('class="red"', $result);
+        $this->assertStringNotContainsString('onclick="history.back()"', $result);
+
+        // Test empty message (should return empty string)
+        $result = ErrorHandler::messageWithHide('', true);
+        $this->assertEquals('', $result);
+
+        // Test whitespace-only message (should return empty string)
+        $result = ErrorHandler::messageWithHide('   ', false);
+        $this->assertEquals('', $result);
+    }
+}

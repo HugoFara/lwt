@@ -16,15 +16,15 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" && \
 
 COPY . /var/www/html/lwt
 
-# creating connect.inc.php
+# creating .env configuration file
 ARG DB_HOSTNAME=db
 ARG DB_USER=root
 ARG DB_PASSWORD=root
 ARG DB_DATABASE=learning-with-texts
 
-RUN printf '<?php\n$server = "%s";\n$userid = "%s";\n$passwd = "%s";\n$dbname = "%s";\n?>' \
+RUN printf 'DB_HOST=%s\nDB_USER=%s\nDB_PASSWORD=%s\nDB_NAME=%s\n' \
     "$DB_HOSTNAME" \
     "$DB_USER" \
     "$DB_PASSWORD" \
     "$DB_DATABASE" \
-    > /var/www/html/lwt/connect.inc.php
+    > /var/www/html/lwt/.env

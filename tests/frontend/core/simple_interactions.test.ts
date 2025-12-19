@@ -1,0 +1,662 @@
+/**
+ * Tests for simple_interactions.ts - Navigation and confirmation utilities.
+ */
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// Mock the dependencies
+vi.mock('../../../src/frontend/js/forms/unloadformcheck', () => ({
+  lwtFormCheck: {
+    resetDirty: vi.fn()
+  }
+}));
+
+vi.mock('../../../src/frontend/js/reading/frame_management', () => ({
+  showRightFramesPanel: vi.fn(),
+  hideRightFrames: vi.fn(),
+  loadModalFrame: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/core/ui_utilities', () => ({
+  showAllwordsClick: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/core/user_interactions', () => ({
+  quickMenuRedirection: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/terms/translation_api', () => ({
+  deleteTranslation: vi.fn(),
+  addTranslation: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/terms/term_operations', () => ({
+  changeTableTestStatus: vi.fn()
+}));
+
+vi.mock('../../../src/frontend/js/ui/modal', () => ({
+  showExportTemplateHelp: vi.fn()
+}));
+
+import {
+  goBack,
+  navigateTo,
+  cancelAndNavigate,
+  cancelAndGoBack,
+  confirmSubmit,
+  initSimpleInteractions
+} from '../../../src/frontend/js/core/simple_interactions';
+import { lwtFormCheck } from '../../../src/frontend/js/forms/unloadformcheck';
+import { showRightFramesPanel, hideRightFrames, loadModalFrame } from '../../../src/frontend/js/reading/frame_management';
+import { showAllwordsClick } from '../../../src/frontend/js/core/ui_utilities';
+import { quickMenuRedirection } from '../../../src/frontend/js/core/user_interactions';
+import { deleteTranslation, addTranslation } from '../../../src/frontend/js/terms/translation_api';
+import { changeTableTestStatus } from '../../../src/frontend/js/terms/term_operations';
+import { showExportTemplateHelp } from '../../../src/frontend/js/ui/modal';
+
+describe('simple_interactions.ts', () => {
+  let originalLocation: Location;
+  let originalHistory: History;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    document.body.innerHTML = '';
+
+    // Mock location
+    originalLocation = window.location;
+    delete (window as any).location;
+    window.location = {
+      href: 'http://localhost/',
+      assign: vi.fn(),
+      replace: vi.fn(),
+      reload: vi.fn()
+    } as unknown as Location;
+
+    // Mock history
+    originalHistory = window.history;
+    Object.defineProperty(window, 'history', {
+      value: {
+        back: vi.fn(),
+        forward: vi.fn(),
+        go: vi.fn(),
+        pushState: vi.fn(),
+        replaceState: vi.fn(),
+        length: 1,
+        state: null,
+        scrollRestoration: 'auto'
+      },
+      writable: true
+    });
+  });
+
+  afterEach(() => {
+    window.location = originalLocation;
+    Object.defineProperty(window, 'history', {
+      value: originalHistory,
+      writable: true
+    });
+  });
+
+  describe('goBack', () => {
+    it('calls history.back()', () => {
+      goBack();
+      expect(window.history.back).toHaveBeenCalled();
+    });
+  });
+
+  describe('navigateTo', () => {
+    it('sets location.href to the given URL', () => {
+      navigateTo('http://example.com/page');
+      expect(window.location.href).toBe('http://example.com/page');
+    });
+
+    it('works with relative URLs', () => {
+      navigateTo('/relative/path');
+      expect(window.location.href).toBe('/relative/path');
+    });
+  });
+
+  describe('cancelAndNavigate', () => {
+    it('resets form dirty state before navigating', () => {
+      cancelAndNavigate('http://example.com/cancel');
+
+      expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
+      expect(window.location.href).toBe('http://example.com/cancel');
+    });
+
+    it('resets dirty state before setting href', () => {
+      const calls: string[] = [];
+      (lwtFormCheck.resetDirty as any).mockImplementation(() => calls.push('resetDirty'));
+
+      // Create a getter/setter to track order
+      let href = 'http://localhost/';
+      Object.defineProperty(window.location, 'href', {
+        get: () => href,
+        set: (value) => {
+          calls.push('setHref');
+          href = value;
+        },
+        configurable: true
+      });
+
+      cancelAndNavigate('http://example.com/test');
+
+      expect(calls).toEqual(['resetDirty', 'setHref']);
+    });
+  });
+
+  describe('cancelAndGoBack', () => {
+    it('resets form dirty state before going back', () => {
+      cancelAndGoBack();
+
+      expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
+      expect(window.history.back).toHaveBeenCalled();
+    });
+  });
+
+  describe('confirmSubmit', () => {
+    it('shows confirmation dialog with default message', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      const result = confirmSubmit();
+
+      expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
+      expect(result).toBe(true);
+    });
+
+    it('shows confirmation dialog with custom message', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      const result = confirmSubmit('Delete this item?');
+
+      expect(window.confirm).toHaveBeenCalledWith('Delete this item?');
+      expect(result).toBe(true);
+    });
+
+    it('returns false when user cancels', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+      const result = confirmSubmit('Test message');
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('initSimpleInteractions', () => {
+    beforeEach(() => {
+      initSimpleInteractions();
+    });
+
+    describe('data-action="cancel-navigate"', () => {
+      it('cancels and navigates to the specified URL', () => {
+        document.body.innerHTML = `
+          <button data-action="cancel-navigate" data-url="/cancel/url">Cancel</button>
+        `;
+
+        const button = document.querySelector('[data-action="cancel-navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
+        expect(window.location.href).toBe('/cancel/url');
+      });
+
+      it('does nothing if no URL is provided', () => {
+        document.body.innerHTML = `
+          <button data-action="cancel-navigate">Cancel</button>
+        `;
+
+        const button = document.querySelector('[data-action="cancel-navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(lwtFormCheck.resetDirty).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="cancel-back"', () => {
+      it('cancels and goes back in history', () => {
+        document.body.innerHTML = `
+          <button data-action="cancel-back">Go Back</button>
+        `;
+
+        const button = document.querySelector('[data-action="cancel-back"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
+        expect(window.history.back).toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="navigate"', () => {
+      it('navigates to the specified URL', () => {
+        document.body.innerHTML = `
+          <button data-action="navigate" data-url="/new/page">Go</button>
+        `;
+
+        const button = document.querySelector('[data-action="navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.location.href).toBe('/new/page');
+      });
+
+      it('does nothing if no URL is provided', () => {
+        document.body.innerHTML = `
+          <button data-action="navigate">Go</button>
+        `;
+        window.location.href = 'http://localhost/original';
+
+        const button = document.querySelector('[data-action="navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.location.href).toBe('http://localhost/original');
+      });
+    });
+
+    describe('data-action="back"', () => {
+      it('goes back in browser history', () => {
+        document.body.innerHTML = `
+          <button data-action="back">Back</button>
+        `;
+
+        const button = document.querySelector('[data-action="back"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.history.back).toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="confirm-delete"', () => {
+      it('shows confirmation and navigates if confirmed', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        document.body.innerHTML = `
+          <button data-action="confirm-delete" data-url="/delete/item">Delete</button>
+        `;
+
+        const button = document.querySelector('[data-action="confirm-delete"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.confirm).toHaveBeenCalledWith('CONFIRM\n\nAre you sure you want to delete?');
+        expect(window.location.href).toBe('/delete/item');
+      });
+
+      it('does nothing if user cancels', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(false);
+        document.body.innerHTML = `
+          <button data-action="confirm-delete" data-url="/delete/item">Delete</button>
+        `;
+        window.location.href = 'http://localhost/original';
+
+        const button = document.querySelector('[data-action="confirm-delete"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.confirm).toHaveBeenCalled();
+        expect(window.location.href).toBe('http://localhost/original');
+      });
+    });
+
+    describe('data-action="cancel-form"', () => {
+      it('cancels and navigates to URL', () => {
+        document.body.innerHTML = `
+          <button data-action="cancel-form" data-url="/form/list">Cancel Form</button>
+        `;
+
+        const button = document.querySelector('[data-action="cancel-form"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(lwtFormCheck.resetDirty).toHaveBeenCalled();
+        expect(window.location.href).toBe('/form/list');
+      });
+    });
+
+    describe('data-action="show-right-frames"', () => {
+      it('shows the right frames panel', () => {
+        document.body.innerHTML = `
+          <button data-action="show-right-frames">Show Frames</button>
+        `;
+
+        const button = document.querySelector('[data-action="show-right-frames"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(showRightFramesPanel).toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="hide-right-frames"', () => {
+      it('hides the right frames panel', () => {
+        document.body.innerHTML = `
+          <button data-action="hide-right-frames">Hide Frames</button>
+        `;
+
+        const button = document.querySelector('[data-action="hide-right-frames"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(hideRightFrames).toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="toggle-show-all"', () => {
+      it('toggles show all words mode', () => {
+        document.body.innerHTML = `
+          <button data-action="toggle-show-all">Toggle</button>
+        `;
+
+        const button = document.querySelector('[data-action="toggle-show-all"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(showAllwordsClick).toHaveBeenCalled();
+      });
+    });
+
+    describe('data-confirm attribute', () => {
+      it('shows confirmation before executing action', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        document.body.innerHTML = `
+          <button data-action="navigate" data-url="/page" data-confirm="Are you sure you want to navigate?">Go</button>
+        `;
+
+        const button = document.querySelector('[data-action="navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to navigate?');
+        expect(window.location.href).toBe('/page');
+      });
+
+      it('prevents action if confirmation is cancelled', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(false);
+        document.body.innerHTML = `
+          <button data-action="navigate" data-url="/page" data-confirm="Are you sure?">Go</button>
+        `;
+        window.location.href = 'http://localhost/original';
+
+        const button = document.querySelector('[data-action="navigate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.confirm).toHaveBeenCalled();
+        expect(window.location.href).toBe('http://localhost/original');
+      });
+    });
+
+    describe('form submission confirmation', () => {
+      it('shows confirmation before form submission', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        document.body.innerHTML = `
+          <form data-confirm-submit="Submit this form?">
+            <button type="submit">Submit</button>
+          </form>
+        `;
+
+        const form = document.querySelector('form')!;
+        const event = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(event);
+
+        expect(window.confirm).toHaveBeenCalledWith('Submit this form?');
+        expect(event.defaultPrevented).toBe(false);
+      });
+
+      it('prevents submission if confirmation is cancelled', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(false);
+        document.body.innerHTML = `
+          <form data-confirm-submit="Submit this form?">
+            <button type="submit">Submit</button>
+          </form>
+        `;
+
+        const form = document.querySelector('form')!;
+        const event = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(event);
+
+        expect(window.confirm).toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(true);
+      });
+
+      it('uses default message if not specified', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        document.body.innerHTML = `
+          <form data-confirm-submit>
+            <button type="submit">Submit</button>
+          </form>
+        `;
+
+        const form = document.querySelector('form')!;
+        const event = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(event);
+
+        expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
+      });
+    });
+
+    describe('data-action="delete-translation"', () => {
+      it('calls deleteTranslation', () => {
+        document.body.innerHTML = `
+          <button data-action="delete-translation">Delete</button>
+        `;
+
+        const button = document.querySelector('[data-action="delete-translation"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(deleteTranslation).toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="add-translation"', () => {
+      it('calls addTranslation with word data', () => {
+        document.body.innerHTML = `
+          <button data-action="add-translation" data-word="hello">Add</button>
+        `;
+
+        const button = document.querySelector('[data-action="add-translation"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(addTranslation).toHaveBeenCalledWith('hello');
+      });
+
+      it('does nothing without word data', () => {
+        document.body.innerHTML = `
+          <button data-action="add-translation">Add</button>
+        `;
+
+        const button = document.querySelector('[data-action="add-translation"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(addTranslation).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="open-window"', () => {
+      it('opens URL in new window', () => {
+        const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+        document.body.innerHTML = `
+          <button data-action="open-window" data-url="http://example.com/page">Open</button>
+        `;
+
+        const button = document.querySelector('[data-action="open-window"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(openSpy).toHaveBeenCalledWith('http://example.com/page', '_blank');
+      });
+
+      it('uses custom window name', () => {
+        const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+        document.body.innerHTML = `
+          <button data-action="open-window" data-url="http://example.com" data-window-name="mywin">Open</button>
+        `;
+
+        const button = document.querySelector('[data-action="open-window"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(openSpy).toHaveBeenCalledWith('http://example.com', 'mywin');
+      });
+
+      it('uses anchor href if no data-url', () => {
+        const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+        document.body.innerHTML = `
+          <a data-action="open-window" href="http://example.com/link">Open</a>
+        `;
+
+        const link = document.querySelector('[data-action="open-window"]') as HTMLElement;
+        link.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(openSpy).toHaveBeenCalledWith('http://example.com/link', '_blank');
+      });
+    });
+
+    describe('data-action="know-all"', () => {
+      it('shows right frames for all words well-known', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        document.body.innerHTML = `
+          <button data-action="know-all" data-text-id="42">Know All</button>
+        `;
+
+        const button = document.querySelector('[data-action="know-all"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
+        expect(loadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=42');
+      });
+
+      it('does nothing if cancelled', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(false);
+        document.body.innerHTML = `
+          <button data-action="know-all" data-text-id="42">Know All</button>
+        `;
+
+        const button = document.querySelector('[data-action="know-all"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(loadModalFrame).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="ignore-all"', () => {
+      it('shows right frames for all words ignored', () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+        document.body.innerHTML = `
+          <button data-action="ignore-all" data-text-id="42">Ignore All</button>
+        `;
+
+        const button = document.querySelector('[data-action="ignore-all"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
+        expect(loadModalFrame).toHaveBeenCalledWith('all_words_wellknown.php?text=42&stat=98');
+      });
+    });
+
+    describe('data-action="bulk-translate"', () => {
+      it('shows right frames with URL', () => {
+        document.body.innerHTML = `
+          <button data-action="bulk-translate" data-url="/bulk/translate">Bulk</button>
+        `;
+
+        const button = document.querySelector('[data-action="bulk-translate"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(loadModalFrame).toHaveBeenCalledWith('/bulk/translate');
+      });
+    });
+
+    describe('data-action="change-test-status"', () => {
+      it('changes status up', () => {
+        document.body.innerHTML = `
+          <button data-action="change-test-status" data-word-id="123" data-direction="up">+</button>
+        `;
+
+        const button = document.querySelector('[data-action="change-test-status"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(changeTableTestStatus).toHaveBeenCalledWith('123', true);
+      });
+
+      it('changes status down', () => {
+        document.body.innerHTML = `
+          <button data-action="change-test-status" data-word-id="123" data-direction="down">-</button>
+        `;
+
+        const button = document.querySelector('[data-action="change-test-status"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(changeTableTestStatus).toHaveBeenCalledWith('123', false);
+      });
+    });
+
+    describe('data-action="go-back"', () => {
+      it('navigates back in history', () => {
+        document.body.innerHTML = `
+          <button data-action="go-back">Back</button>
+        `;
+
+        const button = document.querySelector('[data-action="go-back"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(window.history.back).toHaveBeenCalled();
+      });
+    });
+
+    describe('data-action="show-export-template-help"', () => {
+      it('shows export template help modal', () => {
+        document.body.innerHTML = `
+          <button data-action="show-export-template-help">Help</button>
+        `;
+
+        const button = document.querySelector('[data-action="show-export-template-help"]') as HTMLElement;
+        button.dispatchEvent(new Event('click', { bubbles: true }));
+
+        expect(showExportTemplateHelp).toHaveBeenCalled();
+      });
+    });
+
+    describe('pager navigation', () => {
+      it('navigates to selected page', () => {
+        document.body.innerHTML = `
+          <select data-action="pager-navigate" data-base-url="/page">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        `;
+
+        const select = document.querySelector('select') as HTMLSelectElement;
+        select.value = '2';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+
+        expect(window.location.href).toBe('/page?page=2');
+      });
+    });
+
+    describe('quick menu navigation', () => {
+      it('calls quickMenuRedirection', () => {
+        document.body.innerHTML = `
+          <select data-action="quick-menu-redirect">
+            <option value="">Select</option>
+            <option value="option1">Option 1</option>
+          </select>
+        `;
+
+        const select = document.querySelector('select') as HTMLSelectElement;
+        select.value = 'option1';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+
+        expect(quickMenuRedirection).toHaveBeenCalledWith('option1');
+      });
+    });
+
+    describe('auto-submit button', () => {
+      it('clicks the named button on form submit', () => {
+        document.body.innerHTML = `
+          <form data-auto-submit-button="customBtn">
+            <button type="button" name="customBtn">Custom</button>
+            <button type="submit">Submit</button>
+          </form>
+        `;
+
+        const form = document.querySelector('form')!;
+        const customBtn = document.querySelector('[name="customBtn"]') as HTMLButtonElement;
+        const clickSpy = vi.spyOn(customBtn, 'click');
+
+        const event = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(event);
+
+        expect(clickSpy).toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(true);
+      });
+    });
+  });
+});

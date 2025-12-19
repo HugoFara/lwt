@@ -1,0 +1,149 @@
+.barchart
+{
+  font-weight: bold;
+  position: relative;
+  width: 56px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: #eee;
+  overflow: hidden;
+  margin: 0;
+  height: 25px;
+  border-radius: 3px;
+  box-shadow: 0 0 1px 1px #999;
+}
+
+.barchart li
+{
+  width: 7px;
+  float: left;
+  display: block;
+  height: 200px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #e3e3e3;
+  border-right-width: 0;
+  border-left: 0;
+  border-bottom: 0;
+}
+
+.barchart li span
+{
+  position: absolute;
+  left: -99999px;
+  top: 0;
+  text-align: center;
+  width: 5em;
+  margin: 0;
+  pointer-events: none;
+}
+
+.barchart li:hover
+{
+  opacity: 0.9;
+  border-color: #d1d1d1;
+}
+
+.barchart li:hover span
+{
+  font-size: 15px;
+  width: auto;
+  background: transparent;
+  border: 0;
+  left: 99%;
+  text-align: right;
+  text-indent: -3.4em;
+  right: 0;
+  font-weight: bold;
+  z-index: 10;
+  top: 0;
+  opacity: 0.9;
+}
+
+/* Status colors - matching word highlight colors from styles.css */
+.bc0
+{
+  background: #5ABAFF;
+}
+
+.bc1
+{
+  background: #E85A3C;
+}
+
+.bc2
+{
+  background: #E8893C;
+}
+
+.bc3
+{
+  background: #E8B83C;
+}
+
+.bc4
+{
+  background: #E8E23C;
+}
+
+.bc5
+{
+  background: #66CC66;
+}
+
+.bc98
+{
+  background: #888888;
+}
+
+.bc99
+{
+  background: #CCFFCC;
+}
+
+.wc_cont
+{
+  border-radius: 50%;
+  width: 1em;
+  height: 1em;
+  background-color: #ff5f5f;
+  display: inline-block;
+  position: relative;
+}
+
+#total,
+#saved,
+#unknown,
+#chart,
+#unknownpercent
+{
+  position: relative;
+  bottom: 15%;
+  display: block;
+}
+
+/* Status bar chart for text cards */
+.status-bar-chart {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #eee;
+  margin-top: 0.5rem;
+}
+
+.status-bar-chart.empty {
+  background: #f5f5f5;
+}
+
+.status-bar-chart .status-segment {
+  height: 100%;
+  min-width: 1px;
+  transition: opacity 0.2s;
+}
+
+.status-bar-chart .status-segment:hover {
+  opacity: 0.8;
+}

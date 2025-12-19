@@ -9,9 +9,9 @@ Learning with Texts (LWT) is a self-hosted web application for language learning
 **Tech Stack:**
 
 - Backend: PHP 8.1+ with MySQLi
-- Frontend: Vanilla JavaScript, jQuery
-- Database: MySQL/MariaDB with MyISAM engine
-- Build Tools: Composer (PHP), NPM (JS/docs)
+- Frontend: TypeScript, Alpine.js, Bulma CSS, jQuery (legacy)
+- Database: MySQL/MariaDB with InnoDB engine
+- Build Tools: Composer (PHP), NPM with Vite (JS/CSS)
 
 ## Development Setup
 
@@ -21,234 +21,233 @@ Learning with Texts (LWT) is a self-hosted web application for language learning
 git clone https://github.com/HugoFara/lwt
 cd lwt
 composer install --dev
-npm install  # Optional, for API testing and JS documentation
+npm install
 ```
 
 ### Database Configuration
 
-Create `connect.inc.php` with your database credentials. Example templates exist for different server setups:
+Copy `.env.example` to `.env` and update the database credentials:
 
-- `connect_xampp.inc.php` - For XAMPP
-- `connect_mamp.inc.php` - For MAMP
-- `connect_easyphp.inc.php` - For EasyPHP
+```bash
+cp .env.example .env
+# Edit .env with your database credentials
+```
+
+The `.env` file contains:
+
+- `DB_HOST` - Database server (default: localhost)
+- `DB_USER` - Database username (default: root)
+- `DB_PASSWORD` - Database password
+- `DB_NAME` - Database name (default: learning-with-texts)
+- `DB_SOCKET` - Optional database socket
+- `DB_TABLE_PREFIX` - Optional table prefix for multiple instances
 
 ## Common Commands
 
 ### Testing
 
 ```bash
-composer test                    # Run PHPUnit tests
-./vendor/bin/phpunit             # Alternative test command
-npm test                         # Test REST API (requires Node.js)
+# PHP tests
+composer test                    # Run PHPUnit tests with coverage
+composer test:no-coverage        # Run PHPUnit tests without coverage (faster)
+
+# Run a single test file
+./vendor/bin/phpunit tests/backend/Services/TextServiceTest.php
+
+# Run a specific test method
+./vendor/bin/phpunit --filter testMethodName
+
+# Frontend tests (Vitest)
+npm test                         # Run all frontend tests
+npm run test:watch               # Watch mode for frontend tests
+npm run test:coverage            # Run with coverage
+
+# E2E tests (requires server on localhost:8000)
+npm run e2e                      # Run Cypress E2E tests
 ```
+
+**When to run E2E tests:** Run `npm run e2e` after making changes to:
+
+- Routes or URL handling (`src/backend/Router/`)
+- Controllers (`src/backend/Controllers/`)
+- Form handling or navigation
+- REST API endpoints
+- Fix the test failures, even if they are unrelated to the current changes.
 
 ### Code Quality
 
 ```bash
-./vendor/bin/psalm               # Static analysis and security checks
-php ./vendor/bin/squizlabs/phpcs.phar [file]   # Check code style
-php ./vendor/bin/squizlabs/phpcbf.phar [file]  # Auto-fix code style
+./vendor/bin/psalm                                   # Static analysis
+npm run lint                                         # ESLint for TypeScript/JS
+npm run lint:fix                                     # Auto-fix lint issues
+npm run typecheck                                    # TypeScript type checking
+php ./vendor/bin/squizlabs/phpcs.phar [file]        # PHP code style check
+php ./vendor/bin/squizlabs/phpcbf.phar [file]       # PHP code style auto-fix
 ```
 
 ### Asset Building
 
 ```bash
-composer minify                  # Minify all JS, CSS, and themes (production)
-composer no-minify               # Copy unminified assets (development)
+npm run dev                      # Start Vite dev server with HMR
+npm run build                    # Build Vite JS/CSS bundles
+npm run build:themes             # Build theme CSS files
+npm run build:all                # Build everything (Vite + themes)
+composer build                   # Alias for npm run build:all
 ```
 
-**Important:** During development, use `composer no-minify` to work with readable source. Before committing changes to JS/CSS/themes, run `composer minify` to generate production assets.
+**Frontend Development Workflow:**
+
+1. Run `npm run dev` for development with Hot Module Replacement
+2. Run `npm run typecheck` to check TypeScript errors
+3. Run `npm run build:all` for production build before committing
 
 ### Documentation Generation
 
 ```bash
-composer info.html               # Regenerate single-file documentation
-composer doc                     # Regenerate all documentation (PHP + JS + Markdown)
+composer doc                     # Regenerate all documentation (VitePress + JSDoc + phpDoc)
 composer clean-doc               # Clear all generated documentation
 ```
 
 ## Architecture Overview
 
-### File Structure
+### Request Flow (v3 Front Controller)
 
-**Root Directory:** Contains 60+ PHP page files that render directly to the client. Each file represents a specific user-facing feature:
+All requests route through `index.php` → `Router` → `Controller` → `Service` → `View`:
 
-- `do_text.php` - Main text reading interface
-- `do_test.php` - Word testing/review interface
-- `edit_*.php` - Management interfaces (languages, texts, words, tags, feeds)
-- `backup_restore.php` - Database backup/restore
-- `api.php` - REST API entry point
+1. `index.php` bootstraps the application and invokes the Router
+2. `src/backend/Router/routes.php` maps URLs to controller methods
+3. Controllers in `src/backend/Controllers/` handle request/response
+4. Services in `src/backend/Services/` contain business logic
+5. Views in `src/backend/Views/` render HTML output
 
-**Key Directories:**
+### Key Directories
 
-- `inc/` - Core PHP modules not rendered directly
-  - `database_connect.php` - Database connection and query wrappers
-  - `session_utility.php` - Session management and utility functions (4000+ lines)
-  - `kernel_utility.php` - Core utilities that don't require full session
-  - `feeds.php` - RSS feed parsing and import
-  - `tags.php` - Tag management functions
-  - `ajax_*.php` - AJAX endpoints (15+ files)
-  - `classes/` - PHP classes (GoogleTranslate, Language, Term, Text)
+```text
+src/backend/
+├── Controllers/     # MVC Controllers (14 classes)
+├── Services/        # Business logic layer (22 classes)
+├── Views/           # PHP templates organized by feature
+├── Router/          # URL routing (Router.php, routes.php)
+├── Api/V1/          # REST API handlers
+│   ├── Handlers/    # Endpoint handlers by resource
+│   ├── ApiV1.php    # Main API router
+│   └── Endpoints.php # Endpoint registry
+└── Core/            # Shared utilities
+    ├── Bootstrap/   # App initialization (EnvLoader, db_bootstrap)
+    ├── Database/    # DB classes (Connection, QueryBuilder, Settings)
+    ├── Entity/      # Domain entities (Language, Term, Text)
+    ├── Export/      # Export functionality (Anki, TSV)
+    └── Globals.php  # Type-safe global state access
 
-- `src/` - Source files for assets requiring build step
-  - `src/js/` - Unminified JavaScript source
-  - `src/css/` - Unminified CSS source
-  - `src/themes/` - Theme source files
-  - `src/php/` - Development-only PHP utilities (minifier, markdown converter)
-
-- `js/` - Minified JavaScript (generated, do not edit directly)
-- `css/` - Minified CSS (generated, do not edit directly)
-- `themes/` - Minified themes (generated, do not edit directly)
-
-- `db/` - Database schema and migrations
-  - `db/schema/baseline.sql` - Complete database schema
-  - `db/migrations/` - Migration files for database updates
-
-- `tests/` - PHPUnit tests and API tests
-- `docs/` - Markdown documentation and generated API docs
+src/frontend/
+├── js/              # TypeScript source (built with Vite)
+│   ├── main.ts      # Entry point
+│   ├── types/       # TypeScript declarations
+│   └── *.ts         # Feature modules
+└── css/
+    ├── base/        # Core styles
+    └── themes/      # Theme overrides
+```
 
 ### Database Architecture
 
-LWT uses a MySQL/MariaDB database with MyISAM engine. Key tables:
+Key tables (InnoDB engine):
 
-- `languages` - Language configurations (text parsing rules, dictionaries)
-- `texts` - User texts for reading
-- `archivedtexts` - Archived texts with annotations
-- `words` - User vocabulary with status tracking (1-5, 98=ignored, 99=well-known)
+- `languages` - Language configurations (parsing rules, dictionaries)
+- `texts` / `archivedtexts` - User texts for reading
+- `words` - User vocabulary with status tracking
 - `sentences` - Parsed sentences from texts
-- `textitems2` - Word occurrences in texts (links words to sentences)
-- `tags`, `tags2`, `texttags`, `wordtags` - Tagging system
-- `feeds` - RSS feed sources for automatic text import
+- `textitems2` - Word occurrences linking words to sentences
 - `settings` - Application settings (key-value pairs)
-- `_migrations` - Database version tracking
 
-**Word Status Values:**
+**Word Status Values:** 1-5 (learning stages), 98 (ignored), 99 (well-known)
 
-- 1-5: Learning stages (1=new, 5=learned)
-- 98: Ignored words
-- 99: Well-known words
+### Global State Access
 
-### Code Organization Principles
+Use `Lwt\Core\Globals` class instead of PHP globals:
 
-**Frontend-Backend Split:**
+```php
+use Lwt\Core\Globals;
 
-- Root PHP files handle routing, HTML generation, and form processing
-- `inc/` provides business logic, database operations, and utilities
-- AJAX endpoints in `inc/ajax_*.php` provide dynamic functionality
-- Client-side JS in `src/js/` handles interactivity
+// Database operations
+$db = Globals::getDbConnection();
+$prefix = Globals::getTablePrefix();
+$tableName = Globals::table('words');  // Returns prefixed table name
 
-**Text Processing Flow:**
-
-1. User imports/creates text (`edit_texts.php`)
-2. Text is parsed into sentences and word items (`session_utility.php` functions)
-3. Items stored in `sentences` and `textitems2` tables
-4. Reading interface (`do_text.php`) displays annotated text
-5. User clicks unknown words to look up and save translations
-6. Words tracked with status and reviewed via `do_test.php`
-
-**Theme System:**
-
-- Themes in `src/themes/[theme-name]/` with CSS files
-- Relative paths auto-adjusted during minification
-- Can reference shared images from `css/images/` using `../../../css/theimage`
-- Missing theme files fall back to `src/css/` defaults
+// Query builder
+$words = Globals::query('words')->where('WoLgID', '=', 1)->get();
+```
 
 ### REST API
 
-Base URL: `/api.php/v1` (RESTful, currently no authentication)
+Base URL: `/api/v1` (also supports legacy `/api.php/v1`)
 
-Key endpoints in `api.php`:
+Key endpoint groups (see `src/backend/Api/V1/Endpoints.php` for full list):
 
-- `/media-files` - Get audio/video file paths
-- `/languages/{id}/reading-configuration` - Language parsing rules
-- `/phonetic-reading` - Get phonetic transcription
-- More documented in `docs/api.md`
+- `languages` - Language CRUD and definitions
+- `texts` - Text management and statistics
+- `terms` - Vocabulary CRUD, status changes, bulk operations
+- `feeds` - RSS feed management
+- `review` - Spaced repetition test interface
+- `settings` - Application configuration
+- `tags` - Term and text tagging
 
 ## Working with the Codebase
 
+### Creating New Features
+
+1. **Add route** in `src/backend/Router/routes.php`
+2. **Create/extend controller** in `src/backend/Controllers/`
+3. **Extract business logic** to `src/backend/Services/`
+4. **Create view templates** in `src/backend/Views/[Feature]/`
+
 ### Modifying PHP Code
 
-PHP code is spread across root files (user-facing pages) and `inc/` (shared logic). When editing:
+- Use `do_mysqli_query()` wrapper for database queries (automatic error handling)
+- Use `Globals::table('tablename')` for prefixed table names
+- Use `getSettingWithDefault()` for application settings
+- Controllers extend `BaseController` which provides helper methods
 
-1. Use functions from `session_utility.php` for database queries and utilities
-2. Follow the existing pattern: root files include `inc/session_utility.php` which includes `database_connect.php`
-3. Use `do_mysqli_query()` wrapper instead of direct `mysqli_query()` for better error handling
-4. Database queries use `$tbpref` global variable for table prefix (usually empty, but supports multi-tenant)
+### Modifying TypeScript
 
-### Modifying JavaScript/CSS
+1. Edit files in `src/frontend/js/*.ts`
+2. Run `npm run dev` for HMR during development
+3. Run `npm run typecheck` before committing
+4. Run `npm run build` to generate production bundles
 
-1. Edit source files in `src/js/` or `src/css/` or `src/themes/`
-2. Test with `composer no-minify` (copies unminified to working directories)
-3. Before committing, run `composer minify` to generate production assets
-4. JS modules in `src/js/`:
-   - `pgm.js` - Main program logic
-   - `jq_pgm.js` - jQuery-dependent functionality
-   - `text_events.js` - Text reading interface events
-   - `audio_controller.js` - Audio playback
-   - `translation_api.js` - Translation API integration
-   - `user_interactions.js` - UI interactions
+Key modules:
+
+- `pgm.ts` - Main program logic and utilities
+- `text_events.ts` - Text reading interface
+- `audio_controller.ts` - Audio playback
+- `translation_api.ts` - Translation integration
 
 ### Creating/Editing Themes
 
-1. Create folder `src/themes/your-theme/`
-2. Add CSS files (don't need all files from `src/css/`, missing files fall back to defaults)
-3. Reference images: `../../../css/images/file.png` (for shared images) or `./file.png` (theme-specific)
-4. Run `composer minify` to build, or `composer no-minify` for debugging (warning: breaks relative paths to shared images)
-
-### Writing Tests
-
-- PHP tests go in `tests/` directory, use PHPUnit 10.5+
-- API tests in `tests/api.test.js`, use Mocha and require `npm test`
-- Run tests before submitting PRs: `composer test`
-
-### Contributing Workflow
-
-Branches:
-
-- `master` - Stable, bug-free releases
-- `dev` - Unstable development branch
-- `official` - Tracks official LWT releases
-
-Before committing:
-
-1. Run `composer test` and `./vendor/bin/psalm` to check for issues
-2. Ensure code follows PSR standards (use phpcs/phpcbf)
-3. If you modified `src/js/`, `src/css/`, or `src/themes/`, run `composer minify`
-4. Update documentation if adding new features
-
-### Version Release Process
-
-(For maintainers)
-
-1. Update `CHANGELOG.md` with release number and date
-2. Update `LWT_APP_VERSION` and `LWT_RELEASE_DATE` in `inc/kernel_utility.php`
-3. Update `PROJECT_NUMBER` in `Doxyfile`
-4. Run `composer doc` to regenerate documentation
-5. Commit: `git commit -m "Regenerates documentation for release X.Y.Z"`
-6. Tag: `git tag -a X.Y.Z` and push
-7. Create GitHub release after CI passes
+1. Create folder `src/frontend/css/themes/your-theme/`
+2. Add CSS files (missing files fall back to `base/` defaults)
+3. Run `npm run build:themes` to generate minified themes
 
 ## Important Conventions
 
-- **Character Encoding:** UTF-8 throughout (database and PHP)
-- **Table Prefix:** Use `$tbpref` global variable before table names (empty string by default)
-- **SQL Queries:** Always use `do_mysqli_query()` wrapper for automatic error handling
-- **Settings:** Use `getSettingWithDefault()` for application settings
-- **Language IDs:** Stored as `LgID` (tinyint), referenced throughout as language identifier
-- **Text IDs:** Stored as `TxID` (smallint) for active texts, `AtID` for archived texts
-- **Word IDs:** Stored as `WoID` (mediumint)
+- **Character Encoding:** UTF-8 throughout
+- **Namespaces:** PSR-4 autoloading with `Lwt\` prefix
+- **ID Columns:** `LgID` (language), `TxID`/`AtID` (text/archived), `WoID` (word)
+- **SQL Escaping:** Use `Globals::getDbConnection()` with prepared statements or `Escaping::toSqlSyntax()`
 
 ## Database Migrations
 
-Migration files in `db/migrations/` track schema changes. Format: `YYYYMMDD_HHMMSS_description.sql`
+Migration files in `db/migrations/` with format `YYYYMMDD_HHMMSS_description.sql`. The `_migrations` table tracks applied migrations.
 
-The `_migrations` table tracks applied migrations. When adding migrations:
+## Contributing Workflow
 
-1. Create new file with timestamp and descriptive name
-2. Add SQL commands for schema changes
-3. Update `db/schema/baseline.sql` to reflect final schema state
-4. Test on clean database install
+Branches:
 
-## MeCab Support
+- `master` - Stable releases
+- `dev` - Development branch
 
-For Japanese word-by-word translation, LWT supports MeCab integration. This is optional and requires external MeCab installation on the server.
+Before committing:
+
+1. Run `composer test` and `./vendor/bin/psalm`
+2. Run `npm run typecheck` and `npm run lint`
+3. If you modified frontend assets, run `npm run build:all`
