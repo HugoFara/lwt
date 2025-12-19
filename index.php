@@ -21,8 +21,8 @@
 // Define base path constant
 define('LWT_BASE_PATH', __DIR__);
 
-// Load the Application class
-require_once LWT_BASE_PATH . '/src/backend/Application.php';
+// Load Composer autoloader for PSR-4 class autoloading
+require_once LWT_BASE_PATH . '/vendor/autoload.php';
 
 // Create and run the application
 $app = new \Lwt\Application(LWT_BASE_PATH);

@@ -73,7 +73,6 @@ function renderHomeConfig(?array $lastTextInfo): void
 }
 
 // Extract variables from dashboard data
-$debug = $dashboardData['is_debug'];
 $currentlang = $dashboardData['current_language_id'] ?? 0;
 $currenttext = $dashboardData['current_text_id'];
 $langcnt = $dashboardData['language_count'];

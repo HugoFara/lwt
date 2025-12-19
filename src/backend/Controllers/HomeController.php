@@ -91,12 +91,10 @@ class HomeController extends BaseController
         /** @psalm-suppress UnusedVariable - Used by included view */
         $languages = $this->languageService->getLanguagesForSelect();
 
-        $debug = $dashboardData['is_debug'];
-
         PageLayoutHelper::renderPageStartNobody("Home");
         echo PageLayoutHelper::buildLogo();
         echo '<h1>Learning With Texts (LWT)</h1>
-        <h2>Home' . ($debug ? ' <span class="red">DEBUG</span>' : '') . '</h2>';
+        <h2>Home</h2>';
 
         include __DIR__ . '/../Views/Home/index.php';
 
