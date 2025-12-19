@@ -22,7 +22,7 @@ import { showRightFramesPanel } from '../reading/frame_management';
 import { speechDispatcher } from '../core/user_interactions';
 
 // Import the popup system
-import { overlib, CAPTION } from '../ui/word_popup';
+import { overlib } from '../ui/word_popup';
 
 // Import API-based word actions
 import {
@@ -35,7 +35,7 @@ import {
 } from '../reading/word_actions';
 
 // Re-export for backward compatibility
-export { overlib, CAPTION, cClick, nd } from '../ui/word_popup';
+export { overlib, cClick, nd } from '../ui/word_popup';
 
 // Note: The following functions are used in HTML string templates (onclick handlers)
 // and accessed via window at runtime: showRightFramesPanel, confirmDelete, successSound, failureSound
@@ -552,7 +552,6 @@ export function run_overlib_status_98(
     make_overlib_link_delete_word(txid, wid) +
     make_overlib_link_new_multiword(txid, torder, multi_words, rtl) + ' <br /> ' +
     make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
-    CAPTION,
     'Word'
   );
 }
@@ -593,7 +592,6 @@ export function run_overlib_status_99(
     make_overlib_link_delete_word(txid, wid) +
     make_overlib_link_new_multiword(txid, torder, multi_words, rtl) + ' <br /> ' +
     make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
-    CAPTION,
     'Word'
   );
 }
@@ -612,7 +610,6 @@ export function run_overlib_status_99(
  * @param stat
  * @param multi_words
  * @param rtl         Right-to-left text indicator
- * @param _ann        Unused annotation parameter (kept for API consistency)
  * @returns
  */
 export function run_overlib_status_1_to_5(
@@ -626,8 +623,7 @@ export function run_overlib_status_1_to_5(
   wid: string | number,
   stat: string | number,
   multi_words: (string | undefined)[],
-  rtl: boolean,
-  _ann: string  
+  rtl: boolean
 ): boolean {
   return overlib(
     '<div>' + make_overlib_audio(txt) + '<span>(Read)</span></div>' +
@@ -636,7 +632,6 @@ export function run_overlib_status_1_to_5(
     make_overlib_link_delete_word(txid, wid) +
     make_overlib_link_new_multiword(txid, torder, multi_words, rtl) + ' <br /> ' +
     make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
-    CAPTION,
     make_overlib_link_edit_word_title(
       'Word &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;',
       txid, torder, wid
@@ -675,7 +670,6 @@ export function run_overlib_status_unknown(
     make_overlib_link_ignore_word(txid, torder) +
     make_overlib_link_new_multiword(txid, torder, multi_words, rtl) + ' <br /> ' +
     make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
-    CAPTION,
     'New Word'
   );
 }
@@ -715,7 +709,6 @@ export function run_overlib_multiword(
     make_overlib_link_edit_multiword(txid, torder, wid) + ' | ' +
     make_overlib_link_delete_multiword(txid, wid) + ' <br /> ' +
     make_overlib_link_wb(wblink1, wblink2, wblink3, txt, txid, torder),
-    CAPTION,
     make_overlib_link_edit_multiword_title(
       wcnt.trim() + '-Word-Expression', txid, torder, wid
     )
@@ -735,7 +728,6 @@ export function run_overlib_multiword(
  * @param stat    Word learning status
  * @param sent    Lookup sentence in Google Translate
  * @param todo    If 1, the user should say if he knows the word.
- * @param _oldstat Old status, unused (kept for API consistency)
  * @returns An overlib object
  */
 export function run_overlib_test(
@@ -748,8 +740,7 @@ export function run_overlib_test(
   roman: string,
   stat: string | number,
   sent: string,
-  todo: number,
-  _oldstat: unknown  
+  todo: number
 ): boolean {
   const s = parseInt(String(stat), 10);
   let c = s + 1;
@@ -792,7 +783,7 @@ export function run_overlib_test(
     createTheDictLink(wblink3, txt, 'Trans', '') +
     createTheDictLink(wblink3, sent, 'Trans', '<br />Lookup Sentence:');
 
-  return overlib(overlib_string, CAPTION, 'Got it?');
+  return overlib(overlib_string, 'Got it?');
 }
 
 /**

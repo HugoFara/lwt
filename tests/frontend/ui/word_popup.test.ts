@@ -62,17 +62,6 @@ describe('word_popup.ts', () => {
   });
 
   // ===========================================================================
-  // CAPTION Constant Tests
-  // ===========================================================================
-
-  describe('CAPTION constant', () => {
-    it('exports CAPTION constant', async () => {
-      const { CAPTION } = await importWordPopup();
-      expect(CAPTION).toBe('CAPTION');
-    });
-  });
-
-  // ===========================================================================
   // cClick Tests
   // ===========================================================================
 
@@ -81,7 +70,7 @@ describe('word_popup.ts', () => {
       const { overlib, cClick } = await importWordPopup();
 
       // Open a popup
-      overlib('Test content', undefined, 'Test Title');
+      overlib('Test content', 'Test Title');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       expect(dialog.open).toBe(true);
@@ -163,9 +152,9 @@ describe('word_popup.ts', () => {
     });
 
     it('sets title from parameter', async () => {
-      const { overlib, CAPTION } = await importWordPopup();
+      const { overlib } = await importWordPopup();
 
-      overlib('Content', CAPTION, 'My Title');
+      overlib('Content', 'My Title');
 
       const title = document.querySelector('.lwt-popup-title');
       expect(title?.textContent).toBe('My Title');
@@ -223,7 +212,7 @@ describe('word_popup.ts', () => {
     it('creates proper dialog structure', async () => {
       const { overlib } = await importWordPopup();
 
-      overlib('Test content', undefined, 'Test Title');
+      overlib('Test content', 'Test Title');
 
       const dialog = document.getElementById('lwt-word-popup') as HTMLDialogElement;
       const titlebar = dialog.querySelector('.lwt-popup-titlebar');
@@ -414,7 +403,7 @@ describe('word_popup.ts', () => {
 
   describe('Integration', () => {
     it('full workflow: open, position, close', async () => {
-      const { overlib, setCurrentEvent, nd, CAPTION } = await importWordPopup();
+      const { overlib, setCurrentEvent, nd } = await importWordPopup();
 
       // Set event position
       const clickEvent = new MouseEvent('click', {
@@ -424,7 +413,7 @@ describe('word_popup.ts', () => {
       setCurrentEvent(clickEvent);
 
       // Open popup
-      const openResult = overlib('<b>Term</b>: Definition', CAPTION, 'Vocabulary');
+      const openResult = overlib('<b>Term</b>: Definition', 'Vocabulary');
       expect(openResult).toBe(true);
 
       // Verify container exists and is open
@@ -526,7 +515,7 @@ describe('word_popup.ts', () => {
     it('handles undefined title', async () => {
       const { overlib } = await importWordPopup();
 
-      expect(() => overlib('Content', undefined, undefined)).not.toThrow();
+      expect(() => overlib('Content', undefined)).not.toThrow();
 
       const title = document.querySelector('.lwt-popup-title');
       expect(title?.textContent).toBe('Word');

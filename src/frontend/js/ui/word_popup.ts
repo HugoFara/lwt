@@ -142,14 +142,13 @@ export function nd(): boolean {
 }
 
 /**
- * Show a popup dialog with content and caption
+ * Show a popup dialog with content and title
  *
  * @param content HTML content for the popup body
- * @param _caption Ignored (legacy parameter)
  * @param title Title for the popup header
  * @returns true for compatibility
  */
-export function overlib(content: string, _caption?: unknown, title?: string): boolean {
+export function overlib(content: string, title?: string): boolean {
   // Close any existing popup
   cClick();
 
@@ -273,8 +272,6 @@ if (typeof document !== 'undefined') {
   });
 }
 
-// Export CAPTION constant for compatibility (unused but referenced)
-export const CAPTION = 'CAPTION';
 
 /**
  * Close popup in parent frame via custom event.

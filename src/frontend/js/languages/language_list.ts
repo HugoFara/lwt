@@ -51,9 +51,8 @@ function iconHtml(name: string, size = 16, title = ''): string {
  * Update the UI to reflect the new current language.
  *
  * @param newLangId The ID of the newly selected language
- * @param newLangName The name of the newly selected language
  */
-function updateLanguageCards(newLangId: string, _newLangName: string): void {
+function updateLanguageCards(newLangId: string): void {
   const allCards = document.querySelectorAll<HTMLElement>('.language-card');
 
   allCards.forEach(card => {
@@ -133,7 +132,7 @@ async function handleSetCurrentLanguage(button: HTMLElement): Promise<void> {
 
     if (!response.error) {
       // Update UI reactively
-      updateLanguageCards(langId, langName || '');
+      updateLanguageCards(langId);
       showNotification(`"${langName}" is now the default language.`);
     } else {
       showNotification('Failed to set default language. Please try again.', false);

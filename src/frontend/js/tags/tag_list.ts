@@ -132,11 +132,11 @@ function initTagListTable(): void {
  * Initialize tag form event handlers (new/edit forms).
  */
 function initTagForm(): void {
-  // Initialize form check for forms with lwt-form-check class
+  // Initialize form check if any forms with lwt-form-check class exist
   const formCheckForms = document.querySelectorAll<HTMLFormElement>('form.lwt-form-check');
-  formCheckForms.forEach((_form) => {
+  if (formCheckForms.length > 0) {
     lwtFormCheck.askBeforeExit();
-  });
+  }
 
   // Cancel buttons with data-action="cancel"
   const cancelButtons = document.querySelectorAll<HTMLButtonElement>('[data-action="cancel"]');

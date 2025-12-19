@@ -31,8 +31,7 @@ export function word_click_event_do_test_test(this: HTMLElement): boolean {
     getAttr(this, 'data_rom'),
     getAttr(this, 'data_status'),
     getAttr(this, 'data_sent'),
-    parseInt(getAttr(this, 'data_todo'), 10),
-    null // oldstat - unused legacy parameter
+    parseInt(getAttr(this, 'data_todo'), 10)
   );
   const todoEl = document.querySelector('.todo');
   if (todoEl) {

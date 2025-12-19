@@ -588,7 +588,7 @@ describe('overlib_interface.ts', () => {
     it('run_overlib_status_1_to_5 returns boolean', () => {
       const result = run_overlib_status_1_to_5(
         'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
-        'hint', 1, '5', 'word', 100, 3, ['', '', '', '', '', '', '', ''], false, ''
+        'hint', 1, '5', 'word', 100, 3, ['', '', '', '', '', '', '', ''], false
       );
       expect(typeof result).toBe('boolean');
     });
@@ -612,7 +612,7 @@ describe('overlib_interface.ts', () => {
     it('run_overlib_test returns boolean', () => {
       const result = run_overlib_test(
         'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
-        100, 'word', 'translation', 'roman', 3, 'test sentence', 1, 2
+        100, 'word', 'translation', 'roman', 3, 'test sentence', 1
       );
       expect(typeof result).toBe('boolean');
     });
@@ -620,7 +620,7 @@ describe('overlib_interface.ts', () => {
     it('run_overlib_test with todo=0 skips interactive buttons', () => {
       const result = run_overlib_test(
         'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
-        100, 'word', 'translation', 'roman', 3, 'test sentence', 0, 2
+        100, 'word', 'translation', 'roman', 3, 'test sentence', 0
       );
       expect(typeof result).toBe('boolean');
     });

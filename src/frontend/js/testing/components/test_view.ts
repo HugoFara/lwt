@@ -39,12 +39,10 @@ export function renderTestApp(container: HTMLElement, config: TestConfig): void 
 /**
  * Build the complete test app HTML.
  */
-function buildTestAppHTML(config: TestConfig): string {
-  const langName = escapeHtml(config.langSettings?.name || 'L2');
-
+function buildTestAppHTML(_config: TestConfig): string {
   return `
     <div x-data="testApp" class="test-page" x-cloak>
-      ${buildTestToolbar(langName)}
+      ${buildTestToolbar()}
       ${buildProgressBar()}
       ${buildMainContent()}
       ${buildWordModal()}
@@ -56,7 +54,7 @@ function buildTestAppHTML(config: TestConfig): string {
 /**
  * Build test toolbar HTML (below main navbar).
  */
-function buildTestToolbar(_langName: string): string {
+function buildTestToolbar(): string {
   return `
     <div class="box py-2 px-4 mb-0" style="border-radius: 0;">
       <div class="level is-mobile">

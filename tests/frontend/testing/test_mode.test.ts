@@ -83,8 +83,7 @@ describe('test_mode.ts', () => {
         'helo',
         '2',
         'Hello world',
-        5,
-        null
+        5
       );
     });
 
@@ -150,8 +149,7 @@ describe('test_mode.ts', () => {
         '',
         '',
         '',
-        NaN,  // parseInt on empty string
-        null
+        NaN  // parseInt on empty string
       );
     });
   });

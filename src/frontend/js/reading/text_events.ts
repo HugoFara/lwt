@@ -31,8 +31,7 @@ import {
   run_overlib_multiword,
   buildKnownWordPopupContent,
   buildUnknownWordPopupContent,
-  overlib,
-  CAPTION
+  overlib
 } from '../terms/overlib_interface';
 import { getContextFromElement } from './word_actions';
 
@@ -247,7 +246,7 @@ function word_click_event_frame_mode(
     run_overlib_status_1_to_5(
       LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
       LWT_DATA.text.id, order,
-      text, wid, String(statusNum), multi_words, LWT_DATA.language.rtl, ann
+      text, wid, String(statusNum), multi_words, LWT_DATA.language.rtl
     );
   }
 }
@@ -308,9 +307,9 @@ function word_click_event_api_mode(
 
   // Show popup with API-based content
   if (typeof content === 'string') {
-    overlib(content, CAPTION, 'Word');
+    overlib(content, 'Word');
   } else {
-    overlib(content.outerHTML, CAPTION, 'Word');
+    overlib(content.outerHTML, 'Word');
   }
 }
 
