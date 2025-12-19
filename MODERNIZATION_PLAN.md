@@ -913,29 +913,47 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
 
 ## Inline JavaScript Migration
 
-**Status (2025-11-30):** 39 PHP files contain inline `<script>` blocks that should be migrated to TypeScript modules.
+**Status (2025-12-19):** Most inline JS has been migrated to TypeScript modules. Remaining inline JS is either JSON config (not executable) or trivial Alpine.js state.
 
-### Files with Inline JS (by directory)
+### Migration Status by Directory
 
-| Directory | Files | Notes |
-|-----------|-------|-------|
-| Views/Word/ | 16 | Result pages, forms |
-| Views/Text/ | 7 | Read interface, forms |
-| Views/Feed/ | 2 | Wizard steps |
-| Views/Language/ | 4 | Forms, wizard |
-| Views/Test/ | 3 | Test configuration |
-| Views/Admin/ | 1 | TTS settings |
-| Views/Mobile/ | 1 | Index |
-| Views/Home/ | 1 | Index |
-| Controllers/ | 1 | TranslationController |
-| Services/ | 2 | MediaService, FeedService |
-| Core/ | 1 | TextParsing |
+| Directory | Status | Notes |
+|-----------|--------|-------|
+| Views/Word/ | **COMPLETE** | 16 files use JSON config + TypeScript handlers (`word_result_init.ts`, etc.) |
+| Views/Auth/ | **COMPLETE** | `register.php` migrated to `auth/register_form.ts` (2025-12-19) |
+| Views/Text/ | JSON config | Uses data attributes + TypeScript handlers |
+| Views/Feed/ | JSON config | Wizard steps use TypeScript modules |
+| Views/Language/ | JSON config | Forms use TypeScript modules |
+| Views/Test/ | JSON config | Test configuration via TypeScript |
+| Views/Admin/ | JSON config | TTS settings via TypeScript |
+| Views/Home/ | **COMPLETE** | Uses `home_app.ts` Alpine.js component |
 
-### Migration Strategy
+### Remaining Inline JS (Trivial - Not Worth Migrating)
+
+| File | Type | Code |
+|------|------|------|
+| `login.php` | Alpine state | `x-data="{ loading: false }"` |
+| `wizard.php` | Alpine state | `x-data="{ showPassword: false }"` |
+| 3 files | Notification dismiss | `onclick="this.parentElement.remove()"` |
+
+These are intentionally kept inline as they are simpler than the overhead of a separate module.
+
+### TypeScript Modules Created
+
+| Module | Location | Purpose |
+|--------|----------|---------|
+| `word_result_init.ts` | `js/words/` | All 11 word result views |
+| `word_dom_updates.ts` | `js/words/` | DOM manipulation for words |
+| `word_status_ajax.ts` | `js/words/` | Word status AJAX calls |
+| `word_list_app.ts` | `js/words/` | Alpine.js word list SPA |
+| `register_form.ts` | `js/auth/` | Registration form validation |
+| `home_app.ts` | `js/home/` | Home page Alpine.js component |
+
+### Migration Strategy (for future migrations)
 
 1. Extract JS to TypeScript modules in `src/frontend/js/`
-2. Use Vite bundling and expose functions via `window` or custom events
-3. Replace inline `<script>` blocks with data attributes + event listeners
+2. Use Vite bundling and register Alpine.js components with `Alpine.data()`
+3. Replace inline `<script>` blocks with JSON config (`type="application/json"`) + data attributes
 
 ## Timeline Update
 

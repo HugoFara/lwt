@@ -147,6 +147,9 @@ import './admin/settings_form';
 import './admin/statistics_charts';
 import './admin/backup_manager';
 
+// Auth
+import './auth/register_form';
+
 // Home
 import './home/home_app';
 
