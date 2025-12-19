@@ -631,34 +631,91 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 
 #### 3.4 Exception Handling
 
-**Priority:** P3 (Low)
-**Status:** PARTIAL
-**Effort:** Medium (60 hours) - 15 hours done
+**Priority:** P1 (High)
+**Status:** COMPLETE
+**Effort:** Medium (60 hours) - DONE
 
-**Current State (2025-12-18):**
+**Current State (2025-12-19):**
 
-- [x] 3 custom exception classes implemented
+- [x] 6 custom exception classes implemented
 - [x] `ErrorHandler` class for fatal errors (`src/backend/Core/Utils/error_handling.php`)
 - [x] `ErrorHandler::die()` throws `RuntimeException` in PHPUnit tests (testable error handling)
-- [ ] No global error handler registered
+- [x] **Global exception handler registered** (`ExceptionHandler` class)
+- [x] **Error logging to file** (`var/logs/error.log`)
 - [x] 58 `die()`/`exit()` calls across 18 files - **most are legitimate** (see analysis below)
 - [x] Refactored TestService/TestController to remove 6 unnecessary exit() calls (2025-12-19)
 
+**Exception Hierarchy (2025-12-19):**
+
+```text
+LwtException (base)                     # Core/Exception/LwtException.php
+├── AuthException                       # Core/Exception/AuthException.php
+├── DatabaseException                   # Core/Exception/DatabaseException.php
+└── ValidationException                 # Core/Exception/ValidationException.php
+
+ContainerException                      # Core/Container/ContainerException.php
+└── NotFoundException                   # Core/Container/NotFoundException.php
+```
+
 **Implemented Exceptions:**
 
-| Exception | Location | Usage |
-|-----------|----------|-------|
-| `AuthException` | `Core/Exception/AuthException.php` | Actively used in auth flow (3 files) |
+| Exception | Location | Purpose |
+|-----------|----------|---------|
+| `LwtException` | `Core/Exception/LwtException.php` | Base exception with context, HTTP status, logging control |
+| `AuthException` | `Core/Exception/AuthException.php` | Authentication/authorization errors (401/403) |
+| `DatabaseException` | `Core/Exception/DatabaseException.php` | Database errors with query/SQL state context |
+| `ValidationException` | `Core/Exception/ValidationException.php` | Input validation errors with field-level details (422) |
 | `ContainerException` | `Core/Container/ContainerException.php` | DI container errors |
-| `NotFoundException` | `Core/Container/NotFoundException.php` | Service not found |
+| `NotFoundException` | `Core/Container/NotFoundException.php` | Service not found in container |
+
+**LwtException Features:**
+
+- Structured context data for logging (`getContext()`, `withContext()`)
+- HTTP status code mapping (`getHttpStatusCode()`, `setHttpStatusCode()`)
+- Logging control (`shouldLog()`)
+- User-safe messages (`getUserMessage()`)
+- Array serialization (`toArray()`)
 
 **AuthException Factory Methods:**
 
-- `userNotAuthenticated()` - User not logged in
-- `invalidCredentials()` - Invalid username/password
-- `sessionExpired()` - Session has expired
-- `invalidApiToken()` - Invalid or expired API token
-- `accountDisabled()` - Account has been disabled
+- `userNotAuthenticated()` - User not logged in (401)
+- `invalidCredentials()` - Invalid username/password (401)
+- `sessionExpired()` - Session has expired (401)
+- `invalidApiToken()` - Invalid or expired API token (401)
+- `accountDisabled()` - Account has been disabled (403)
+- `insufficientPermissions()` - Permission denied (403)
+
+**DatabaseException Factory Methods:**
+
+- `connectionFailed()` - Database connection failure
+- `queryFailed()` - Query execution error with SQL state
+- `prepareFailed()` - Prepared statement creation error
+- `transactionFailed()` - Transaction operation error
+- `foreignKeyViolation()` - FK constraint violation (409)
+- `duplicateEntry()` - Unique constraint violation (409)
+- `recordNotFound()` - Record not found (404)
+
+**ValidationException Factory Methods:**
+
+- `forField()` - Single field validation error
+- `requiredField()` - Missing required field
+- `invalidType()` - Type mismatch
+- `outOfRange()` - Value out of allowed range
+- `invalidLength()` - String length violation
+- `invalidEnum()` - Value not in allowed set
+- `invalidUrl()` / `invalidEmail()` - Format validation
+- `entityNotFound()` - Referenced entity doesn't exist
+- `withErrors()` - Multiple field errors
+
+**Global ExceptionHandler (2025-12-19):**
+
+- Registered in `Application::bootstrap()` via `registerExceptionHandler()`
+- Handles uncaught exceptions and PHP errors
+- Logs to `var/logs/error.log` with timestamps and stack traces
+- JSON responses for API requests
+- Styled HTML error pages for web requests
+- Debug mode shows detailed error info (controlled by `APP_DEBUG` env var)
+- Skips registration during PHPUnit tests (to allow exception testing)
 
 **Die/Exit Call Analysis (2025-12-19):**
 
@@ -670,32 +727,16 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 | `exit()` after page render | ~5 | ✅ Refactored to use `return` where possible |
 | `exit()` in TestService | 0 | ✅ Refactored - validation now uses `return` |
 
-**Top Files:**
-
-| File | Count | Type |
-|------|-------|------|
-| WordController.php | 15 | 11 ErrorHandler::die() + 4 exit() (redirects) |
-| TextController.php | 11 | 11 exit() (all redirects/renders) |
-| TestService.php | 1 | 1 ErrorHandler::die() (invalid params) |
-| Configuration.php | 4 | 4 ErrorHandler::die() (fatal config errors) |
-| FeedsController.php | 4 | 3 exit() + 1 ErrorHandler::die() |
-| Others (13 files) | 23 | Mixed |
-
-**Planned Exceptions (not yet implemented):**
-
-- [ ] `LwtException` (base)
-- [ ] `DatabaseException`
-- [ ] `ValidationException`
-
 **Success Criteria:**
 
-- [x] Custom exception classes exist
+- [x] Custom exception classes exist (6 classes)
+- [x] Exception hierarchy with base LwtException
 - [x] AuthException actively used in auth flow
 - [x] ErrorHandler::die() is testable (throws in PHPUnit)
 - [x] Most exit() calls are legitimate (after redirects/downloads)
 - [x] TestService/TestController refactored - removed 6 unnecessary exit() calls
-- [ ] Global error handler configured
-- [ ] All errors logged
+- [x] Global error handler configured
+- [x] All errors logged to file
 
 ## Quick Wins
 
@@ -767,7 +808,7 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 1. ~~**InputValidator** - Centralized input validation~~ **DONE**
 2. ~~**Database Migration** - MyISAM to InnoDB~~ **DONE**
 3. ~~**DI Container Integration** - Wire Container into Application bootstrap~~ **DONE** (2025-12-19)
-4. **Exception Handling** - Reduce die()/exit() calls, add global handler
+4. ~~**Exception Handling** - Exception hierarchy, global handler, error logging~~ **DONE** (2025-12-19)
 
 ### P2 (Medium)
 
@@ -879,25 +920,25 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
 | Quick Wins | 2 weeks | 100% complete | - |
 | Phase 1 | 3-6 months | 95% complete | CSP refinement (future) |
 | Phase 2 | 6-12 months | 95% complete | Minor cleanup |
-| Phase 3 | 12-18 months | 85% complete | Exceptions, repositories |
+| Phase 3 | 12-18 months | ~90% complete | Repositories (P2) |
 
 **Original Total Duration:** 18-24 months
 **Elapsed Time:** ~12 months (estimated based on architecture changes)
-**Remaining Effort:** ~80 hours for P1/P2 items (P0 complete, controller DI complete)
+**Remaining Effort:** ~40 hours for P2 items (P0, P1 complete as of 2025-12-19)
 
-## Architecture Summary (2025-12-18)
+## Architecture Summary (2025-12-19)
 
 | Component | Count | Lines |
 |-----------|-------|-------|
 | Controllers | 17 | ~9,000 |
 | Services | 36 | 18,571 |
 | Views | 92 | 8,499 |
-| Core Files | 31 | - |
+| Core Files | 35 | - |
 | API Handlers | 14 | - |
 | Entity Classes | 5 | - |
 | Value Objects | 5 | - |
-| Custom Exceptions | 3 | - |
-| **Total PHP Files** | **194** | - |
+| Custom Exceptions | 6 | - |
+| **Total PHP Files** | **198** | - |
 
 **Namespace Adoption:**
 

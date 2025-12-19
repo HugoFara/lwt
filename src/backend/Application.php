@@ -22,6 +22,7 @@ use Lwt\Core\Container\ControllerServiceProvider;
 use Lwt\Core\Container\CoreServiceProvider;
 use Lwt\Core\Container\RepositoryServiceProvider;
 use Lwt\Core\Container\ServiceProviderInterface;
+use Lwt\Core\Exception\ExceptionHandler;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Router\Router;
 use Lwt\Services\DatabaseWizardService;
@@ -82,14 +83,25 @@ class Application
      */
     public function bootstrap(): void
     {
-        // Error reporting for development (disable in production)
-        error_reporting(E_ALL);
-        ini_set('display_errors', '1');
-
         // Define base path constant if not already defined
         if (!defined('LWT_BASE_PATH')) {
             define('LWT_BASE_PATH', $this->basePath);
         }
+
+        // Determine if we're in debug mode (development)
+        $debug = $this->isDebugMode();
+
+        // Error reporting based on debug mode
+        if ($debug) {
+            error_reporting(E_ALL);
+            ini_set('display_errors', '1');
+        } else {
+            error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+            ini_set('display_errors', '0');
+        }
+
+        // Register global exception handler
+        $this->registerExceptionHandler($debug);
 
         // Set include path so legacy files can use their original relative paths
         // This allows 'Core/session_utility.php' to work from any location
@@ -179,6 +191,46 @@ class Application
                 require $file;
             }
         });
+    }
+
+    /**
+     * Check if the application is running in debug mode.
+     *
+     * Debug mode is enabled when:
+     * - APP_DEBUG environment variable is set to 'true' or '1'
+     * - Or APP_ENV is 'development' or 'local'
+     *
+     * @return bool
+     */
+    private function isDebugMode(): bool
+    {
+        // Check APP_DEBUG env variable
+        $appDebug = getenv('APP_DEBUG') ?: ($_ENV['APP_DEBUG'] ?? null);
+        if ($appDebug !== null && $appDebug !== false) {
+            return in_array(strtolower((string)$appDebug), ['true', '1', 'yes'], true);
+        }
+
+        // Check APP_ENV
+        $appEnv = getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? 'production');
+        return in_array(strtolower($appEnv), ['development', 'local', 'dev'], true);
+    }
+
+    /**
+     * Register the global exception handler.
+     *
+     * @param bool $debug Whether to show detailed error information
+     *
+     * @return void
+     */
+    private function registerExceptionHandler(bool $debug): void
+    {
+        $logFile = $this->basePath . '/var/logs/error.log';
+
+        $handler = ExceptionHandler::getInstance($debug, $logFile);
+        $handler->register();
+
+        // Store in container for access elsewhere
+        $this->container->singleton(ExceptionHandler::class, fn() => $handler);
     }
 
     /**
