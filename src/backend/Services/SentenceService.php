@@ -35,11 +35,16 @@ use Lwt\View\Helper\IconHelper;
  */
 class SentenceService
 {
+    private TextParsingService $textParsingService;
+
     /**
-     * Constructor - initialize table prefix.
+     * Constructor - initialize dependencies.
+     *
+     * @param TextParsingService|null $textParsingService Text parsing service (optional for BC)
      */
-    public function __construct()
+    public function __construct(?TextParsingService $textParsingService = null)
     {
+        $this->textParsingService = $textParsingService ?? new TextParsingService();
     }
 
     /**
@@ -68,7 +73,7 @@ class SentenceService
             $fp = fopen($mecab_file, 'w');
             fwrite($fp, $wordlc . "\n");
             fclose($fp);
-            $mecab = (new TextParsingService())->getMecabPath($mecab_args);
+            $mecab = $this->textParsingService->getMecabPath($mecab_args);
             $handle = popen($mecab . $mecab_file, "r");
             if (!feof($handle)) {
                 $row = fgets($handle, 256);
@@ -145,7 +150,7 @@ class SentenceService
             $fp = fopen($mecab_file, 'w');
             fwrite($fp, $wordlc . "\n");
             fclose($fp);
-            $mecab = (new TextParsingService())->getMecabPath($mecab_args);
+            $mecab = $this->textParsingService->getMecabPath($mecab_args);
             $handle = popen($mecab . $mecab_file, "r");
             if (!feof($handle)) {
                 $row = fgets($handle, 256);

@@ -42,6 +42,23 @@ use Lwt\Database\UserScopedQuery;
  */
 class WordService
 {
+    private ExpressionService $expressionService;
+    private SentenceService $sentenceService;
+
+    /**
+     * Constructor - initialize dependencies.
+     *
+     * @param ExpressionService|null $expressionService Expression service (optional for BC)
+     * @param SentenceService|null   $sentenceService   Sentence service (optional for BC)
+     */
+    public function __construct(
+        ?ExpressionService $expressionService = null,
+        ?SentenceService $sentenceService = null
+    ) {
+        $this->expressionService = $expressionService ?? new ExpressionService();
+        $this->sentenceService = $sentenceService ?? new SentenceService();
+    }
+
     /**
      * Create a new word/term.
      *
@@ -1438,7 +1455,7 @@ class WordService
 
         \Lwt\Database\Maintenance::initWordCount();
         TagService::saveWordTags($wid);
-        (new ExpressionService())->insertExpressions($data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
+        $this->expressionService->insertExpressions($data['textlc'], (int) $data['lgid'], $wid, (int) $data['wordcount'], 0);
 
         return [
             'id' => $wid,
@@ -1586,8 +1603,7 @@ class WordService
         // Use SentenceService to get properly formatted sentence text
         // This handles cases where texts weren't properly split into sentences
         // by finding sentence boundaries around the target position
-        $sentenceService = new SentenceService();
-        return $sentenceService->getSentenceAtPosition($textId, $ord);
+        return $this->sentenceService->getSentenceAtPosition($textId, $ord);
     }
 
     /**

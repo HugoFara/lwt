@@ -23,6 +23,7 @@ use Lwt\Services\DemoService;
 use Lwt\Services\ServerDataService;
 use Lwt\Services\SettingsService;
 use Lwt\Services\StatisticsService;
+use Lwt\Services\ThemeService;
 use Lwt\Services\TtsService;
 use Lwt\Services\WordService;
 use Lwt\Services\LanguageDefinitions;
@@ -72,6 +73,48 @@ require_once __DIR__ . '/../Services/WordService.php';
  */
 class AdminController extends BaseController
 {
+    private BackupService $backupService;
+    private StatisticsService $statisticsService;
+    private SettingsService $settingsService;
+    private TtsService $ttsService;
+    private WordService $wordService;
+    private DemoService $demoService;
+    private ServerDataService $serverDataService;
+    private ThemeService $themeService;
+
+    /**
+     * Constructor - initialize dependencies.
+     *
+     * @param BackupService|null      $backupService      Backup service
+     * @param StatisticsService|null  $statisticsService  Statistics service
+     * @param SettingsService|null    $settingsService    Settings service
+     * @param TtsService|null         $ttsService         TTS service
+     * @param WordService|null        $wordService        Word service
+     * @param DemoService|null        $demoService        Demo service
+     * @param ServerDataService|null  $serverDataService  Server data service
+     * @param ThemeService|null       $themeService       Theme service
+     */
+    public function __construct(
+        ?BackupService $backupService = null,
+        ?StatisticsService $statisticsService = null,
+        ?SettingsService $settingsService = null,
+        ?TtsService $ttsService = null,
+        ?WordService $wordService = null,
+        ?DemoService $demoService = null,
+        ?ServerDataService $serverDataService = null,
+        ?ThemeService $themeService = null
+    ) {
+        parent::__construct();
+        $this->backupService = $backupService ?? new BackupService();
+        $this->statisticsService = $statisticsService ?? new StatisticsService();
+        $this->settingsService = $settingsService ?? new SettingsService();
+        $this->ttsService = $ttsService ?? new TtsService();
+        $this->wordService = $wordService ?? new WordService();
+        $this->demoService = $demoService ?? new DemoService();
+        $this->serverDataService = $serverDataService ?? new ServerDataService();
+        $this->themeService = $themeService ?? new ThemeService();
+    }
+
     /**
      * Backup and restore page
      *
@@ -87,25 +130,24 @@ class AdminController extends BaseController
      */
     public function backup(array $params): void
     {
-        $backupService = new BackupService();
         $message = '';
 
         // Handle operations
         if ($this->hasParam('restore')) {
-            $message = $backupService->restoreFromUpload($_FILES);
+            $message = $this->backupService->restoreFromUpload($_FILES);
         } elseif ($this->hasParam('backup')) {
-            $backupService->downloadBackup();
+            $this->backupService->downloadBackup();
             // downloadBackup exits, so we never reach here
         } elseif ($this->hasParam('orig_backup')) {
-            $backupService->downloadOfficialBackup();
+            $this->backupService->downloadOfficialBackup();
             // downloadOfficialBackup exits, so we never reach here
         } elseif ($this->hasParam('empty')) {
-            $message = $backupService->emptyDatabase();
+            $message = $this->backupService->emptyDatabase();
         }
 
         // Get view data (used by included view)
         /** @psalm-suppress UnusedVariable */
-        $prefinfo = $backupService->getPrefixInfo();
+        $prefinfo = $this->backupService->getPrefixInfo();
 
         // Render page
         $this->render('Database Operations', true);
@@ -190,11 +232,10 @@ class AdminController extends BaseController
      */
     public function statistics(array $params): void
     {
-        $statisticsService = new StatisticsService();
         /** @psalm-suppress UnusedVariable - Used by included view */
-        $intensityStats = $statisticsService->getIntensityStatistics();
+        $intensityStats = $this->statisticsService->getIntensityStatistics();
         /** @psalm-suppress UnusedVariable - Used by included view */
-        $frequencyStats = $statisticsService->getFrequencyStatistics();
+        $frequencyStats = $this->statisticsService->getFrequencyStatistics();
 
         // Render page
         $this->render('Statistics', true);
@@ -217,36 +258,33 @@ class AdminController extends BaseController
      */
     public function settings(array $params): void
     {
-        $settingsService = new SettingsService();
-        $ttsService = new TtsService();
         $message = '';
 
         // Handle form submission
         $op = $this->param('op');
         if ($op !== '') {
             if ($op === 'Save') {
-                // Settings are saved via $settingsService which reads from $_REQUEST
-                $message = $settingsService->saveAll();
+                // Settings are saved via settingsService which reads from $_REQUEST
+                $message = $this->settingsService->saveAll();
             } else {
-                $message = $settingsService->resetAll();
+                $message = $this->settingsService->resetAll();
             }
         }
 
         // Load current settings for the form (used by included view)
         /** @psalm-suppress UnusedVariable */
-        $settings = $settingsService->getAll();
+        $settings = $this->settingsService->getAll();
 
         // Get available themes for the dropdown (used by included view)
-        $themeService = new \Lwt\Services\ThemeService();
         /** @psalm-suppress UnusedVariable */
-        $themes = $themeService->getAvailableThemes();
+        $themes = $this->themeService->getAvailableThemes();
 
         // Get TTS data for the form (used by included view)
         /** @psalm-suppress UnusedVariable */
-        $languageOptions = $ttsService->getLanguageOptions(LanguageDefinitions::getAll());
+        $languageOptions = $this->ttsService->getLanguageOptions(LanguageDefinitions::getAll());
         /** @psalm-suppress UnusedVariable */
         $currentLanguageCode = json_encode(
-            $ttsService->getCurrentLanguageCode(LanguageDefinitions::getAll())
+            $this->ttsService->getCurrentLanguageCode(LanguageDefinitions::getAll())
         );
 
         // Render page
@@ -279,8 +317,6 @@ class AdminController extends BaseController
      */
     public function settingsHover(array $params): void
     {
-        $wordService = new WordService();
-
         $text = $this->param('text');
         $textId = $this->paramInt('tid', 0) ?? 0;
         $status = $this->paramInt('status', 1) ?? 1;
@@ -306,7 +342,7 @@ class AdminController extends BaseController
         }
 
         // Create the word
-        $result = $wordService->createOnHover($textId, $text, $status, $translation);
+        $result = $this->wordService->createOnHover($textId, $text, $status, $translation);
 
         // Render page
         PageLayoutHelper::renderPageStart("New Term: " . $result['word'], false);
@@ -344,19 +380,18 @@ class AdminController extends BaseController
      */
     public function installDemo(array $params): void
     {
-        $demoService = new DemoService();
         $message = '';
 
         // Handle install request
         if ($this->hasParam('install')) {
-            $message = $demoService->installDemo();
+            $message = $this->demoService->installDemo();
         }
 
         // Get view data (used by included view)
         /** @psalm-suppress UnusedVariable */
-        $prefinfo = $demoService->getPrefixInfo();
+        $prefinfo = $this->demoService->getPrefixInfo();
         /** @psalm-suppress UnusedVariable */
-        $langcnt = $demoService->getLanguageCount();
+        $langcnt = $this->demoService->getLanguageCount();
 
         // Render page
         $this->render('Install LWT Demo Database', true);
@@ -376,9 +411,8 @@ class AdminController extends BaseController
      */
     public function serverData(array $params): void
     {
-        $serverDataService = new ServerDataService();
         /** @psalm-suppress UnusedVariable - Used by included view */
-        $data = $serverDataService->getServerData();
+        $data = $this->serverDataService->getServerData();
 
         // Render page
         $this->render("Server Data", true);
@@ -404,15 +438,13 @@ class AdminController extends BaseController
      */
     public function saveSetting(array $params): void
     {
-        $settingsService = new SettingsService();
-
         $key = $this->param('k');
         $value = $this->param('v');
         $url = $this->param('u');
 
         // Save the setting if key is provided
         if ($key !== '') {
-            $settingsService->saveAndClearSession($key, $value);
+            $this->settingsService->saveAndClearSession($key, $value);
         }
 
         // Redirect if URL is provided

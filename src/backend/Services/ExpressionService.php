@@ -38,6 +38,18 @@ use Lwt\Services\TextParsingService;
  */
 class ExpressionService
 {
+    private TextParsingService $textParsingService;
+
+    /**
+     * Constructor - initialize dependencies.
+     *
+     * @param TextParsingService|null $textParsingService Text parsing service (optional for BC)
+     */
+    public function __construct(?TextParsingService $textParsingService = null)
+    {
+        $this->textParsingService = $textParsingService ?? new TextParsingService();
+    }
+
     /**
      * Find all occurrences of an expression using MeCab.
      *
@@ -51,8 +63,7 @@ class ExpressionService
         $db_to_mecab = tempnam(sys_get_temp_dir(), "lwt_db_to_mecab");
         $mecab_args = " -F %m\\t%t\\t\\n -U %m\\t%t\\t\\n -E \\t\\n ";
 
-        $parsingService = new TextParsingService();
-        $mecab = $parsingService->getMecabPath($mecab_args);
+        $mecab = $this->textParsingService->getMecabPath($mecab_args);
         $likeText = "%$text%";
         $rows = QueryBuilder::table('sentences')
             ->select(['SeID', 'SeTxID', 'SeFirstPos', 'SeText'])

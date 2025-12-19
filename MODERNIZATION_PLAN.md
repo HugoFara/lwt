@@ -1,6 +1,6 @@
 # LWT Modernization Plan
 
-**Last Updated:** 2025-12-19 (Entity docblocks converted to native property types)
+**Last Updated:** 2025-12-19 (AdminController refactored for DI)
 **Current Version:** 3.0.0-fork
 **Target PHP Version:** 8.1-8.4
 
@@ -518,7 +518,14 @@ src/backend/Core/
 **Remaining Work:**
 
 - [x] ~~**HIGH PRIORITY**: Wire Container into Application bootstrap~~ **DONE** (2025-12-19)
-- [ ] Refactor services to accept dependencies via constructor injection
+- [x] ~~Refactor core services to accept dependencies via constructor injection~~ **DONE** (2025-12-19)
+  - SentenceService, ExpressionService, WordService, TextService, TtsService now use constructor injection
+  - CoreServiceProvider updated to wire dependencies
+  - Backward compatible (optional parameters with fallbacks)
+- [x] ~~AdminController refactored for DI~~ **DONE** (2025-12-19)
+  - 8 services injected: BackupService, StatisticsService, SettingsService, TtsService, WordService, DemoService, ServerDataService, ThemeService
+  - ControllerServiceProvider updated to wire AdminController
+- [ ] Refactor remaining controllers for full DI
 - [ ] Create repositories for other entities (Text, Term, User)
 - [ ] Migrate LanguageService to use LanguageRepository
 
@@ -758,9 +765,10 @@ Inter-table relationships (texts→languages, words→languages, sentences→tex
 1. ~~**DI Container Infrastructure** - Build container classes~~ **DONE** (2025-12-01)
 2. ~~**Repository Layer Infrastructure** - Build repository classes~~ **DONE** (2025-12-01)
 3. ~~**TTS Cookie Security** - Add secure flag~~ **DONE** (httponly=false intentional for JS)
-4. **Migrate Services to use Container** - Wire existing services into container
-5. **Create Remaining Repositories** - Text, Term, User repositories
-6. ~~**Deprecated Function Migration** - processDBParam/processSessParam~~ **DONE** ✓
+4. ~~**Constructor Injection for Core Services** - Wire services with dependencies~~ **DONE** (2025-12-19)
+5. **Migrate Remaining Services to use Container** - Wire remaining services/controllers
+6. **Create Remaining Repositories** - Text, Term, User repositories
+7. ~~**Deprecated Function Migration** - processDBParam/processSessParam~~ **DONE** ✓
 
 ## Deprecated Global Functions
 

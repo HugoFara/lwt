@@ -15,13 +15,23 @@
 namespace Lwt\Core\Container;
 
 use Lwt\Services\AuthService;
+use Lwt\Services\BackupService;
+use Lwt\Services\DemoService;
+use Lwt\Services\ExpressionService;
 use Lwt\Services\FeedService;
 use Lwt\Services\HomeService;
 use Lwt\Services\LanguageService;
+use Lwt\Services\SentenceService;
+use Lwt\Services\ServerDataService;
+use Lwt\Services\SettingsService;
+use Lwt\Services\StatisticsService;
 use Lwt\Services\TestService;
+use Lwt\Services\TextParsingService;
 use Lwt\Services\TextPrintService;
 use Lwt\Services\TextService;
+use Lwt\Services\ThemeService;
 use Lwt\Services\TranslationService;
+use Lwt\Services\TtsService;
 use Lwt\Services\WordPressService;
 use Lwt\Services\WordService;
 
@@ -43,6 +53,18 @@ class CoreServiceProvider implements ServiceProviderInterface
         // Register core services as singletons
         // These are the most commonly used services throughout the application
 
+        // =====================
+        // Base services (no dependencies)
+        // =====================
+
+        $container->singleton(TextParsingService::class, function (Container $_c) {
+            return new TextParsingService();
+        });
+
+        $container->singleton(LanguageService::class, function (Container $_c) {
+            return new LanguageService();
+        });
+
         $container->singleton(AuthService::class, function (Container $_c) {
             return new AuthService();
         });
@@ -55,20 +77,12 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new HomeService();
         });
 
-        $container->singleton(LanguageService::class, function (Container $_c) {
-            return new LanguageService();
-        });
-
         $container->singleton(TestService::class, function (Container $_c) {
             return new TestService();
         });
 
         $container->singleton(TextPrintService::class, function (Container $_c) {
             return new TextPrintService();
-        });
-
-        $container->singleton(TextService::class, function (Container $_c) {
-            return new TextService();
         });
 
         $container->singleton(TranslationService::class, function (Container $_c) {
@@ -79,12 +93,64 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new WordPressService();
         });
 
-        $container->singleton(WordService::class, function (Container $_c) {
-            return new WordService();
+        $container->singleton(BackupService::class, function (Container $_c) {
+            return new BackupService();
         });
 
-        // Note: Other services will be auto-wired on demand by the container
-        // since they have no-argument constructors
+        $container->singleton(StatisticsService::class, function (Container $_c) {
+            return new StatisticsService();
+        });
+
+        $container->singleton(SettingsService::class, function (Container $_c) {
+            return new SettingsService();
+        });
+
+        $container->singleton(DemoService::class, function (Container $_c) {
+            return new DemoService();
+        });
+
+        $container->singleton(ServerDataService::class, function (Container $_c) {
+            return new ServerDataService();
+        });
+
+        $container->singleton(ThemeService::class, function (Container $_c) {
+            return new ThemeService();
+        });
+
+        // =====================
+        // Services with dependencies
+        // =====================
+
+        $container->singleton(SentenceService::class, function (Container $c) {
+            return new SentenceService(
+                $c->get(TextParsingService::class)
+            );
+        });
+
+        $container->singleton(ExpressionService::class, function (Container $c) {
+            return new ExpressionService(
+                $c->get(TextParsingService::class)
+            );
+        });
+
+        $container->singleton(TtsService::class, function (Container $c) {
+            return new TtsService(
+                $c->get(LanguageService::class)
+            );
+        });
+
+        $container->singleton(TextService::class, function (Container $c) {
+            return new TextService(
+                $c->get(SentenceService::class)
+            );
+        });
+
+        $container->singleton(WordService::class, function (Container $c) {
+            return new WordService(
+                $c->get(ExpressionService::class),
+                $c->get(SentenceService::class)
+            );
+        });
     }
 
     /**
@@ -96,3 +162,6 @@ class CoreServiceProvider implements ServiceProviderInterface
         // Services are lazily instantiated when first requested
     }
 }
+
+// Note: Services not registered here will be auto-wired on demand by the container
+// if they have constructors with type-hinted dependencies that are also registered.

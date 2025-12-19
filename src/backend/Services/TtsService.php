@@ -41,11 +41,13 @@ class TtsService
     private LanguageService $languageService;
 
     /**
-     * Constructor - initialize language service.
+     * Constructor - initialize dependencies.
+     *
+     * @param LanguageService|null $languageService Language service (optional for BC)
      */
-    public function __construct()
+    public function __construct(?LanguageService $languageService = null)
     {
-        $this->languageService = new LanguageService();
+        $this->languageService = $languageService ?? new LanguageService();
     }
 
     /**

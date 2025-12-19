@@ -28,13 +28,20 @@ use Lwt\Controllers\TranslationController;
 use Lwt\Controllers\WordController;
 use Lwt\Controllers\WordPressController;
 use Lwt\Services\AuthService;
+use Lwt\Services\BackupService;
+use Lwt\Services\DemoService;
 use Lwt\Services\FeedService;
 use Lwt\Services\HomeService;
 use Lwt\Services\LanguageService;
+use Lwt\Services\ServerDataService;
+use Lwt\Services\SettingsService;
+use Lwt\Services\StatisticsService;
 use Lwt\Services\TestService;
 use Lwt\Services\TextPrintService;
 use Lwt\Services\TextService;
+use Lwt\Services\ThemeService;
 use Lwt\Services\TranslationService;
+use Lwt\Services\TtsService;
 use Lwt\Services\WordPressService;
 use Lwt\Services\WordService;
 
@@ -58,10 +65,6 @@ class ControllerServiceProvider implements ServiceProviderInterface
         // Dependencies are injected from the container
 
         // Controllers without service dependencies
-        $container->bind(AdminController::class, function (Container $_c) {
-            return new AdminController();
-        });
-
         $container->bind(ApiController::class, function (Container $_c) {
             return new ApiController();
         });
@@ -133,6 +136,19 @@ class ControllerServiceProvider implements ServiceProviderInterface
             return new WordController(
                 $c->get(WordService::class),
                 $c->get(LanguageService::class)
+            );
+        });
+
+        $container->bind(AdminController::class, function (Container $c) {
+            return new AdminController(
+                $c->get(BackupService::class),
+                $c->get(StatisticsService::class),
+                $c->get(SettingsService::class),
+                $c->get(TtsService::class),
+                $c->get(WordService::class),
+                $c->get(DemoService::class),
+                $c->get(ServerDataService::class),
+                $c->get(ThemeService::class)
             );
         });
     }

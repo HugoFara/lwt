@@ -42,6 +42,17 @@ use Lwt\Services\SentenceService;
  */
 class TextService
 {
+    private SentenceService $sentenceService;
+
+    /**
+     * Constructor - initialize dependencies.
+     *
+     * @param SentenceService|null $sentenceService Sentence service (optional for BC)
+     */
+    public function __construct(?SentenceService $sentenceService = null)
+    {
+        $this->sentenceService = $sentenceService ?? new SentenceService();
+    }
 
     // =====================
     // ARCHIVED TEXT METHODS
@@ -1656,10 +1667,9 @@ class TextService
 
         $records = Connection::preparedFetchAll($sql, $ids);
         $sentenceCount = (int) Settings::getWithDefault('set-term-sentence-count');
-        $sentenceService = new SentenceService();
 
         foreach ($records as $record) {
-            $sent = $sentenceService->formatSentence(
+            $sent = $this->sentenceService->formatSentence(
                 $record['SeID'],
                 $record['WoTextLC'],
                 $sentenceCount
