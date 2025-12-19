@@ -24,6 +24,7 @@ use Lwt\Database\UserScopedQuery;
 require_once __DIR__ . '/WordStatusService.php';
 require_once __DIR__ . '/ExportService.php';
 require_once __DIR__ . '/TagService.php';
+require_once __DIR__ . '/SentenceService.php';
 require_once __DIR__ . '/../Core/Utils/error_handling.php';
 
 /**
@@ -41,6 +42,22 @@ require_once __DIR__ . '/../Core/Utils/error_handling.php';
  */
 class TestService
 {
+    /**
+     * Sentence service instance
+     *
+     * @var SentenceService
+     */
+    private SentenceService $sentenceService;
+
+    /**
+     * Constructor - initialize dependencies.
+     *
+     * @param SentenceService|null $sentenceService Sentence service (optional)
+     */
+    public function __construct(?SentenceService $sentenceService = null)
+    {
+        $this->sentenceService = $sentenceService ?? new SentenceService();
+    }
 
     /**
      * Get test identifier from request parameters.
@@ -355,7 +372,7 @@ class TestService
 
         $seid = (int) $record['SeID'];
         $sentenceCount = (int) Settings::getWithDefault('set-test-sentence-count');
-        list($_, $sentence) = \getSentence($seid, $wordlc, $sentenceCount);
+        list($_, $sentence) = $this->sentenceService->formatSentence($seid, $wordlc, $sentenceCount);
 
         return ['sentence' => $sentence, 'found' => true];
     }

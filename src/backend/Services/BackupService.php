@@ -135,11 +135,11 @@ class BackupService
         $out = "-- " . $fname . "\n";
 
         foreach (self::BACKUP_TABLES as $table) {
-            $result = Connection::query('SELECT * FROM ' . $table);
+            $result = Connection::querySelect('SELECT * FROM ' . $table);
             $num_fields = mysqli_num_fields($result);
             $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
             $row2 = mysqli_fetch_row(
-                Connection::query("SHOW CREATE TABLE " . $table)
+                Connection::querySelect("SHOW CREATE TABLE " . $table)
             );
             $out .= str_replace(
                 $table,
@@ -183,20 +183,20 @@ class BackupService
             $num_fields = 0;
 
             if ($table == 'texts') {
-                $result = Connection::query(
+                $result = Connection::querySelect(
                     'SELECT TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
                     TxSourceURI FROM ' . $table
                 );
                 $num_fields = 7;
             } elseif ($table == 'words') {
-                $result = Connection::query(
+                $result = Connection::querySelect(
                     'SELECT WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation,
                     WoRomanization, WoSentence, WoCreated, WoStatusChanged, WoTodayScore,
                     WoTomorrowScore, WoRandom FROM ' . $table
                 );
                 $num_fields = 13;
             } elseif ($table == 'languages') {
-                $result = Connection::query(
+                $result = Connection::querySelect(
                     'SELECT LgID, LgName, LgDict1URI, LgDict2URI,
                     REPLACE(
                         LgGoogleTranslateURI, "ggl.php", "http://translate.google.com"
@@ -211,7 +211,7 @@ class BackupService
                 $table !== 'sentences' && $table !== 'textitems' &&
                 $table !== 'settings'
             ) {
-                $result = Connection::query('SELECT * FROM ' . $table);
+                $result = Connection::querySelect('SELECT * FROM ' . $table);
                 $num_fields = mysqli_num_fields($result);
             }
 

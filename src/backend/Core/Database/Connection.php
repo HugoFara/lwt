@@ -93,6 +93,32 @@ class Connection
     }
 
     /**
+     * Execute a SELECT query and return the result set.
+     *
+     * Use this instead of query() when you know the query returns a result set
+     * (SELECT, SHOW, DESCRIBE, EXPLAIN). This provides better type safety.
+     *
+     * @param string $sql The SELECT query to execute
+     *
+     * @return \mysqli_result Query result set
+     *
+     * @throws \RuntimeException On query failure or if query doesn't return a result set
+     */
+    public static function querySelect(string $sql): \mysqli_result
+    {
+        $result = self::query($sql);
+
+        if ($result === true) {
+            throw new \RuntimeException(
+                'Query did not return a result set. Use query() for INSERT/UPDATE/DELETE. ' .
+                'Query: ' . $sql
+            );
+        }
+
+        return $result;
+    }
+
+    /**
      * Execute a query and return all rows as an array.
      *
      * @param string $sql The SQL query to execute

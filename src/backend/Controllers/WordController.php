@@ -38,6 +38,7 @@ use Lwt\Services\WordUploadService;
 use Lwt\Services\WordStatusService;
 use Lwt\Services\ExpressionService;
 use Lwt\Services\ExportService;
+use Lwt\Services\SentenceService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
@@ -69,6 +70,7 @@ class WordController extends BaseController
     protected ExportService $exportService;
     protected TextService $textService;
     protected ExpressionService $expressionService;
+    protected SentenceService $sentenceService;
 
     /**
      * Create a new WordController.
@@ -80,6 +82,7 @@ class WordController extends BaseController
      * @param ExportService|null     $exportService     Export service
      * @param TextService|null       $textService       Text service
      * @param ExpressionService|null $expressionService Expression service
+     * @param SentenceService|null   $sentenceService   Sentence service
      */
     public function __construct(
         ?WordService $wordService = null,
@@ -88,7 +91,8 @@ class WordController extends BaseController
         ?WordUploadService $uploadService = null,
         ?ExportService $exportService = null,
         ?TextService $textService = null,
-        ?ExpressionService $expressionService = null
+        ?ExpressionService $expressionService = null,
+        ?SentenceService $sentenceService = null
     ) {
         parent::__construct();
         $this->wordService = $wordService ?? new WordService();
@@ -98,6 +102,7 @@ class WordController extends BaseController
         $this->exportService = $exportService ?? new ExportService();
         $this->textService = $textService ?? new TextService();
         $this->expressionService = $expressionService ?? new ExpressionService();
+        $this->sentenceService = $sentenceService ?? new SentenceService();
     }
 
     /**
@@ -1286,7 +1291,7 @@ class WordController extends BaseController
 
         $scrdir = $this->languageService->getScriptDirectionTag((int) $lgid);
         $seid = $this->wordService->getSentenceIdAtPosition($tid, $ord);
-        $sent = \getSentence(
+        $sent = $this->sentenceService->formatSentence(
             $seid,
             $textlc,
             (int) \Lwt\Database\Settings::getWithDefault('set-term-sentence-count')
@@ -1332,7 +1337,7 @@ class WordController extends BaseController
         $sentence = $wordData['sentence'];
         if ($sentence == '') {
             $seid = $this->wordService->getSentenceIdAtPosition($tid, $ord);
-            $sent = \getSentence(
+            $sent = $this->sentenceService->formatSentence(
                 $seid,
                 $textlc,
                 (int) \Lwt\Database\Settings::getWithDefault('set-term-sentence-count')

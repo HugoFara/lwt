@@ -29,15 +29,6 @@
         </ignoreFiles>
     </projectFiles>
 
-    <globals>
-        <!-- Database globals from db_bootstrap.php -->
-        <var name="$tbpref" type="string" />
-        <!-- Debug mode from debug_utilities.php -->
-        <var name="$debug" type="bool" />
-        <!-- Alternative table prefix used in some contexts -->
-        <var name="$fixed_tbpref" type="string" />
-    </globals>
-
     <issueHandlers>
         <!--
             =================================================================
@@ -52,13 +43,17 @@
             </errorLevel>
         </UndefinedGlobalVariable>
 
+        <!--
+            UndefinedFunction: Still needed for legacy global functions
+            TODO: Migrate these to classes:
+            - todoWordsContent, printSimilarTermsTabRow, exampleSentencesArea (view helpers)
+            - sentencesWithWord, getSentence (SentenceService)
+            - makeOpenDictStr, createTheDictLink (DictionaryService)
+            - trimValue (InputValidator)
+        -->
         <UndefinedFunction>
             <errorLevel type="suppress">
-                <directory name="src/backend/Api" />
                 <directory name="src/backend/Views" />
-                <directory name="src/backend/Services" />
-                <directory name="src/backend/Controllers" />
-                <directory name="src/backend/Core" />
             </errorLevel>
         </UndefinedFunction>
 

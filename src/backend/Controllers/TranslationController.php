@@ -18,6 +18,7 @@ namespace Lwt\Controllers;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Integration\GoogleTimeToken;
 use Lwt\Core\Utils\ErrorHandler;
+use Lwt\Services\DictionaryService;
 use Lwt\Services\TranslationService;
 use Lwt\Database\Settings;
 use Lwt\View\Helper\PageLayoutHelper;
@@ -53,6 +54,13 @@ class TranslationController extends BaseController
     protected TranslationService $translationService;
 
     /**
+     * Dictionary service instance
+     *
+     * @var DictionaryService
+     */
+    protected DictionaryService $dictionaryService;
+
+    /**
      * Create a new TranslationController.
      *
      * @param TranslationService $translationService Translation service for translation operations
@@ -61,6 +69,7 @@ class TranslationController extends BaseController
     {
         parent::__construct();
         $this->translationService = $translationService;
+        $this->dictionaryService = new DictionaryService();
     }
 
     /**
@@ -147,8 +156,8 @@ class TranslationController extends BaseController
         }
 
         // Build Google Translate link
-        $ggLink = \makeOpenDictStr(
-            \createTheDictLink(
+        $ggLink = $this->dictionaryService->makeOpenDictStr(
+            DictionaryService::createTheDictLink(
                 $this->translationService->buildGoogleTranslateUrl($text, $srcLang, $tgtLang),
                 $text
             ),

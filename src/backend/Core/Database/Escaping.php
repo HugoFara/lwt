@@ -28,6 +28,22 @@ use Lwt\Core\Globals;
 class Escaping
 {
     /**
+     * Get the database connection, asserting it's not null.
+     *
+     * @return \mysqli The active database connection
+     *
+     * @throws \RuntimeException If database connection is not initialized
+     */
+    private static function getConnection(): \mysqli
+    {
+        $conn = Globals::getDbConnection();
+        if ($conn === null) {
+            throw new \RuntimeException('Database connection not initialized');
+        }
+        return $conn;
+    }
+
+    /**
      * Replace Windows line return ("\r\n") by Linux ones ("\n").
      *
      * @param string $s Input string
@@ -71,7 +87,7 @@ class Escaping
         $data = trim(self::prepareTextdata((string)$data));
         if ($data != "") {
             $result = "'" . mysqli_real_escape_string(
-                Globals::getDbConnection(),
+                self::getConnection(),
                 $data
             ) . "'";
         }
@@ -88,7 +104,7 @@ class Escaping
     public static function toSqlSyntaxNoNull(string $data): string
     {
         $data = trim(self::prepareTextdata($data));
-        return "'" . mysqli_real_escape_string(Globals::getDbConnection(), $data) . "'";
+        return "'" . mysqli_real_escape_string(self::getConnection(), $data) . "'";
     }
 
     /**
@@ -101,7 +117,7 @@ class Escaping
     public static function toSqlSyntaxNoTrimNoNull(string $data): string
     {
         return "'" .
-        mysqli_real_escape_string(Globals::getDbConnection(), self::prepareTextdata($data)) .
+        mysqli_real_escape_string(self::getConnection(), self::prepareTextdata($data)) .
         "'";
     }
 
@@ -124,7 +140,7 @@ class Escaping
 
         // Convert to string and escape for SQL
         $stringValue = (string)$value;
-        return "'" . mysqli_real_escape_string(Globals::getDbConnection(), $stringValue) . "'";
+        return "'" . mysqli_real_escape_string(self::getConnection(), $stringValue) . "'";
     }
 
     /**

@@ -333,7 +333,7 @@ class WordService
             return '';
         }
 
-        $sent = \getSentence(
+        $sent = $this->sentenceService->formatSentence(
             (int) $seid,
             $termlc,
             (int) Settings::getWithDefault('set-term-sentence-count')

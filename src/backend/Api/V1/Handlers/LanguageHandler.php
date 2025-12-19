@@ -6,6 +6,7 @@ use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
+use Lwt\Services\SentenceService;
 use Lwt\Services\SimilarTermsService;
 
 /**
@@ -21,16 +22,22 @@ class LanguageHandler
     private LanguageService $languageService;
 
     /**
+     * @var SentenceService Sentence service instance
+     */
+    private SentenceService $sentenceService;
+
+    /**
      * @var SimilarTermsService Similar terms service instance
      */
     private SimilarTermsService $similarTermsService;
 
     /**
-     * Constructor - initialize language service.
+     * Constructor - initialize services.
      */
     public function __construct()
     {
         $this->languageService = new LanguageService();
+        $this->sentenceService = new SentenceService();
         $this->similarTermsService = new SimilarTermsService();
     }
 
@@ -110,7 +117,7 @@ class LanguageHandler
      */
     public function getSentencesWithTerm(int $langId, string $wordLc, ?int $wordId): array
     {
-        return \sentencesWithWord($langId, $wordLc, $wordId);
+        return $this->sentenceService->getSentencesWithWord($langId, $wordLc, $wordId);
     }
 
     // =========================================================================

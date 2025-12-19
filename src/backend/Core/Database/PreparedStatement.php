@@ -168,11 +168,9 @@ class PreparedStatement
     /**
      * Execute the prepared statement.
      *
-     * @return int Number of affected rows (for INSERT/UPDATE/DELETE)
+     * @return int Number of affected rows (for INSERT/UPDATE/DELETE), -1 on error
      *
      * @throws \RuntimeException If execution fails
-     *
-     * @psalm-return int<-1, max>
      */
     public function execute(): int
     {
@@ -285,9 +283,7 @@ class PreparedStatement
     /**
      * Get the number of affected rows from the last query.
      *
-     * @return int Number of affected rows
-     *
-     * @psalm-return int<-1, max>
+     * @return int Number of affected rows, -1 on error
      */
     public function affectedRows(): int
     {
@@ -300,9 +296,7 @@ class PreparedStatement
      * Note: This only works after fetchAll() has been called,
      * or after execute() for queries that return a result.
      *
-     * @return int Number of rows
-     *
-     * @psalm-return int<0, max>
+     * @return int Number of rows (0 or more)
      */
     public function numRows(): int
     {

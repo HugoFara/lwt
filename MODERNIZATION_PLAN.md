@@ -864,7 +864,7 @@ ContainerException                      # Core/Container/ContainerException.php
 | `tohtml()` | 0 | 0 | N/A | **REMOVED** ✓ |
 | `processDBParam()` | 0 | 0 | `InputValidator::getStringWithDb()` / `getIntWithDb()` | **MIGRATED** ✓ |
 | `processSessParam()` | 0 | 0 | `InputValidator::getStringWithSession()` / `getIntWithSession()` | **MIGRATED** ✓ |
-| `repl_tab_nl()` | 1 | 1 | `str_replace()` inline | Pending |
+| `repl_tab_nl()` | 0 | 0 | N/A | **REMOVED** ✓ |
 | `getreq()` | 0 | 0 | `InputValidator::getString()` | **DONE** |
 | `error_message_with_hide()` | 0 | 0 | Removed | **DONE** |
 | `strToClassName()` | 4 | 1 | `StringUtils::toClassName()` | Delegating ✓ |
@@ -872,7 +872,7 @@ ContainerException                      # Core/Container/ContainerException.php
 | `getsess()` | 0 | 0 | Direct `$_SESSION` access | **DONE** |
 | `mask_term_in_sentence()` | 0 | 0 | `ExportService::maskTermInSentence()` | **DONE** |
 
-**Total:** ~2 calls remaining across ~2 files (down from ~550)
+**Total:** All deprecated functions removed or delegating to classes (down from ~550 calls)
 
 ### InputValidator Session/DB Persistence Methods (NEW)
 
@@ -907,8 +907,8 @@ InputValidator::getIntWithDb('reqKey', 'dbKey', 0);
    - ~~`get_sepas()` → `StringUtils::getSeparators()`~~ **DONE**
    - ~~`error_message_with_hide()` → removed~~ **DONE**
 
-2. **Medium effort** (remaining):
-   - `repl_tab_nl()` → inline replacement (only 1 call remaining)
+2. **Medium effort** (completed):
+   - ~~`repl_tab_nl()` → inline replacement~~ **REMOVED** ✓
    - ~~`processDBParam()`/`processSessParam()` → `InputValidator` migration~~ **DONE** ✓
 
 ## Inline JavaScript Migration

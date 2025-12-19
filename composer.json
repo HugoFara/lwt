@@ -48,6 +48,9 @@
             "@test:cleanup-db",
             "vendor/bin/phpunit --no-coverage"
         ],
+        "psalm": "vendor/bin/psalm",
+        "psalm:level3": "vendor/bin/psalm --error-level=3",
+        "psalm:level1": "vendor/bin/psalm --error-level=1",
         "doc": [
             "npm run docs:build",
             "./node_modules/.bin/jsdoc -c jsdoc.json",
@@ -65,6 +68,9 @@
         "test:cleanup-db": "Kill stale test database connections",
         "test": "Run all tests with coverage (cleans up stale DB connections first)",
         "test:no-coverage": "Run all tests without coverage (cleans up stale DB connections first)",
+        "psalm": "Run Psalm static analysis (current config level)",
+        "psalm:level3": "Run Psalm at level 3 (stricter)",
+        "psalm:level1": "Run Psalm at level 1 (strictest)",
         "doc": "Regenerate all documentation (VitePress + JSDoc + phpDoc)",
         "build": "Build frontend assets (Vite + themes)",
         "clean-doc": "Clear generated documentation"

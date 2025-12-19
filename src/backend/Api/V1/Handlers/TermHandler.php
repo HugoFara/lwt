@@ -96,7 +96,7 @@ class TermHandler
                 ->where('WoID', '=', $wid)
                 ->valuePrepared('WoTextLC');
         }
-        array_walk($oldtransarr, '\trimValue');
+        $oldtransarr = array_map('trim', $oldtransarr);
 
         if (!in_array($newTrans, $oldtransarr)) {
             if (trim($oldtrans) == '' || trim($oldtrans) == '*') {
