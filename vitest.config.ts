@@ -28,7 +28,6 @@ export default defineConfig({
       include: ['src/frontend/js/**/*.ts'],
       exclude: [
         'src/frontend/js/types/**',
-        'src/frontend/js/third_party/**',
         'src/frontend/js/main.ts',
       ],
     },

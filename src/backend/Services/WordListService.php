@@ -19,6 +19,7 @@ use Lwt\Database\Connection;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\Maintenance;
+use Lwt\Database\UserScopedQuery;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\Services\ExportService;
 
@@ -614,9 +615,11 @@ class WordListService
      */
     public function deleteSingleWord(int $wordId): string
     {
+        $bindings = [$wordId];
         Connection::preparedExecute(
-            'DELETE FROM words WHERE WoID = ?',
-            [$wordId]
+            'DELETE FROM words WHERE WoID = ?'
+            . UserScopedQuery::forTablePrepared('words', $bindings),
+            $bindings
         );
         $message = "Deleted";
 
@@ -896,9 +899,11 @@ class WordListService
      */
     public function getNewTermFormData(int $langId): array
     {
+        $bindings = [$langId];
         $showRoman = (bool) Connection::preparedFetchValue(
-            'SELECT LgShowRomanization FROM languages WHERE LgID = ?',
-            [$langId],
+            'SELECT LgShowRomanization FROM languages WHERE LgID = ?'
+            . UserScopedQuery::forTablePrepared('languages', $bindings),
+            $bindings,
             'LgShowRomanization'
         );
 
@@ -918,10 +923,13 @@ class WordListService
      */
     public function getEditFormData(int $wordId): ?array
     {
+        $bindings = [$wordId];
         $record = Connection::preparedFetchOne(
             'SELECT * FROM words, languages
-            WHERE LgID = WoLgID AND WoID = ?',
-            [$wordId]
+            WHERE LgID = WoLgID AND WoID = ?'
+            . UserScopedQuery::forTablePrepared('words', $bindings)
+            . UserScopedQuery::forTablePrepared('languages', $bindings, 'languages'),
+            $bindings
         );
 
         if (!$record) {
@@ -977,9 +985,11 @@ class WordListService
 
         if ($wid > 0) {
             Maintenance::initWordCount();
+            $bindings = [$wid];
             $len = (int)Connection::preparedFetchValue(
-                'SELECT WoWordCount FROM words WHERE WoID = ?',
-                [$wid],
+                'SELECT WoWordCount FROM words WHERE WoID = ?'
+                . UserScopedQuery::forTablePrepared('words', $bindings),
+                $bindings,
                 'WoWordCount'
             );
             if ($len > 1) {
@@ -1020,22 +1030,26 @@ class WordListService
         $newstatus = $data["WoStatus"];
 
         if ($oldstatus != $newstatus) {
+            $bindings = [$data["WoText"], $textLc, $translation, $sentence, $romanization, $newstatus, $data["WoID"]];
             $affected = Connection::preparedExecute(
                 'UPDATE words
                 SET WoText = ?, WoTextLC = ?, WoTranslation = ?, WoSentence = ?,
                     WoRomanization = ?, WoStatus = ?, WoStatusChanged = NOW(),' .
                 WordStatusService::makeScoreRandomInsertUpdate('u') .
-                ' WHERE WoID = ?',
-                [$data["WoText"], $textLc, $translation, $sentence, $romanization, $newstatus, $data["WoID"]]
+                ' WHERE WoID = ?'
+                . UserScopedQuery::forTablePrepared('words', $bindings),
+                $bindings
             );
         } else {
+            $bindings = [$data["WoText"], $textLc, $translation, $sentence, $romanization, $data["WoID"]];
             $affected = Connection::preparedExecute(
                 'UPDATE words
                 SET WoText = ?, WoTextLC = ?, WoTranslation = ?, WoSentence = ?,
                     WoRomanization = ?,' .
                 WordStatusService::makeScoreRandomInsertUpdate('u') .
-                ' WHERE WoID = ?',
-                [$data["WoText"], $textLc, $translation, $sentence, $romanization, $data["WoID"]]
+                ' WHERE WoID = ?'
+                . UserScopedQuery::forTablePrepared('words', $bindings),
+                $bindings
             );
         }
 
