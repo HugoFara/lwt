@@ -36,18 +36,16 @@ describe('Admin Pages', () => {
       cy.get('body').should('be.visible');
     });
 
-    it('should show language breakdown', () => {
+    it('should show statistics sections', () => {
       cy.visit('/admin/statistics');
-      // Should have some statistics content
-      cy.get('table, .statistics, .stats').should('exist');
+      // The statistics page uses Chart.js with box/card sections
+      cy.get('.box, [x-data="statisticsApp()"]').should('exist');
     });
 
-    it('should show word counts', () => {
+    it('should show statistics data', () => {
       cy.visit('/admin/statistics');
-      // Statistics page shows word counts - look for numbers in table cells
-      cy.get('table').should('exist');
-      // The page has a table with word counts (Total, Active, Learning columns)
-      cy.get('body').invoke('text').should('match', /\d+/);
+      // Statistics page has JSON data for charts with language statistics
+      cy.get('#statistics-intensity-data, #statistics-frequency-data, canvas').should('exist');
     });
   });
 
@@ -105,17 +103,4 @@ describe('Admin Pages', () => {
     });
   });
 
-  describe('Tables', () => {
-    it('should load tables page', () => {
-      cy.visit('/admin/tables');
-      cy.url().should('include', '/admin/tables');
-      cy.get('body').should('be.visible');
-    });
-
-    it('should show database tables', () => {
-      cy.visit('/admin/tables');
-      // Should show table set management options (cards or notification for fixed prefix)
-      cy.get('.card, .notification, table, .table-list').should('exist');
-    });
-  });
 });

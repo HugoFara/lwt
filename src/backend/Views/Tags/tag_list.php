@@ -234,9 +234,10 @@ echo PageLayoutHelper::buildActionCard([
     </td>
     <?php if ($isTextTag): ?>
     <td class="has-text-centered">
-        <?php if ($tag['archivedUsageCount'] > 0): ?>
+        <?php $archivedCount = $tag['archivedUsageCount'] ?? 0; ?>
+        <?php if ($archivedCount > 0): ?>
         <a href="<?php echo $service->getArchivedItemsUrl($tag['id']); ?>" class="tag is-link is-light">
-            <?php echo $tag['archivedUsageCount']; ?>
+            <?php echo $archivedCount; ?>
         </a>
         <?php else: ?>
         <span class="tag is-light">0</span>
@@ -295,8 +296,9 @@ echo PageLayoutHelper::buildActionCard([
             <?php if ($isTextTag): ?>
             <div class="tags has-addons mb-0">
                 <span class="tag is-dark">Archived</span>
-                <?php if ($tag['archivedUsageCount'] > 0): ?>
-                <a href="<?php echo $service->getArchivedItemsUrl($tag['id']); ?>" class="tag is-link"><?php echo $tag['archivedUsageCount']; ?></a>
+                <?php $archivedCountMobile = $tag['archivedUsageCount'] ?? 0; ?>
+                <?php if ($archivedCountMobile > 0): ?>
+                <a href="<?php echo $service->getArchivedItemsUrl($tag['id']); ?>" class="tag is-link"><?php echo $archivedCountMobile; ?></a>
                 <?php else: ?>
                 <span class="tag is-light">0</span>
                 <?php endif; ?>

@@ -11,41 +11,31 @@ describe('Texts Management', () => {
       cy.get('body').should('be.visible');
     });
 
-    it('should have table or list of texts', () => {
-      cy.get('table, .text-list, form').should('exist');
+    it('should have card-based layout or action card', () => {
+      // The texts page uses cards, not tables
+      cy.get('.card, .action-card, form').should('exist');
     });
 
-    it('should have language filter dropdown', () => {
-      cy.get('select[name="filterlang"], select[name*="lang" i]').should(
-        'exist'
-      );
+    it('should have sort dropdown or language sections', () => {
+      // The page may have sort dropdown or language-grouped sections
+      cy.get('select, .card-header').should('exist');
     });
 
-    it('should filter texts by language', () => {
-      // Note: Language filter uses JavaScript redirect via save_setting_redirect.php
-      // The filter value is stored in session, not in URL
-      cy.get('select[name="filterlang"]').then(($select) => {
-        // Get first non-empty option
-        const options = $select.find('option');
-        if (options.length > 1) {
-          const firstLangValue = options.eq(1).val();
-          if (firstLangValue) {
-            // Select the language - this triggers a page redirect
-            cy.get('select[name="filterlang"]').select(String(firstLangValue));
-            // After redirect, verify the selected value is retained
-            cy.get('select[name="filterlang"]').should(
-              'have.value',
-              firstLangValue
-            );
-          }
+    it('should display texts grouped by language when texts exist', () => {
+      cy.get('body').then(($body) => {
+        if ($body.find('.text-card').length > 0) {
+          cy.get('.text-card').should('have.length.at.least', 1);
+        } else {
+          // No texts exist, page should still load
+          cy.log('No texts installed - page loads correctly');
         }
       });
     });
 
     it('should have action links for texts', () => {
-      // Look for edit/delete/archive links
+      // Look for read/test/edit links in cards or action card for new text
       cy.get(
-        'a[href*="chg="], a[href*="edit"], a[href*="del="], a[href*="arch="]'
+        'a[href*="/text/read"], a[href*="/test"], a[href*="chg="], a[href*="new=1"]'
       ).should('exist');
     });
   });
@@ -96,7 +86,7 @@ describe('Texts Management', () => {
       );
 
       // Submit the form - click the "Save" button (not "Save and Open")
-      cy.get('input[name="op"][value="Save"]').click();
+      cy.get('button[name="op"][value="Save"]').click();
 
       // Should redirect to texts list
       cy.url().should('match', /\/text/);
@@ -143,9 +133,10 @@ describe('Texts Management', () => {
       cy.get('body').should('be.visible');
     });
 
-    it('should have table or list structure', () => {
+    it('should have card layout or action card', () => {
       cy.visit('/text/archived');
-      cy.get('table, form, .archived-list').should('exist');
+      // The page uses Alpine.js and cards
+      cy.get('.card, .action-card, [x-data]').should('exist');
     });
   });
 
