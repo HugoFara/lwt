@@ -169,7 +169,7 @@ class TestController extends BaseController
         $validation = $this->testService->validateTestSelection($testsql);
         if (!$validation['valid']) {
             echo '<p>Sorry - ' . $validation['error'] . '</p>';
-            exit();
+            return;
         }
 
         // Get language settings
@@ -177,7 +177,7 @@ class TestController extends BaseController
         if ($langIdFromSql === null) {
             include __DIR__ . '/../Views/Test/no_terms.php';
             PageLayoutHelper::renderPageEnd();
-            exit();
+            return;
         }
 
         $langSettings = $this->testService->getLanguageSettings($langIdFromSql);

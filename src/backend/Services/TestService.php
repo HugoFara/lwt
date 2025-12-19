@@ -100,34 +100,14 @@ class TestService
                 // Test words in a list of words ID
                 $idString = implode(",", $selection);
                 $testsql = " words WHERE WoID IN ($idString) ";
-                $bindings = [];
-                $cntlang = Connection::fetchValue(
-                    "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $testsql"
-                        . UserScopedQuery::forTablePrepared('words', $bindings),
-                    'cnt'
-                );
-                if ($cntlang > 1) {
-                    echo "<p>Sorry - The selected terms are in $cntlang languages," .
-                        " but tests are only possible in one language at a time.</p>";
-                    exit();
-                }
+                // Note: Multi-language validation is done by caller via validateTestSelection()
                 break;
             case 'texts':
                 // Test text items from a list of texts ID
                 $idString = implode(",", $selection);
                 $testsql = " words, textitems2
                 WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($idString) ";
-                $bindings = [];
-                $cntlang = Connection::fetchValue(
-                    "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $testsql"
-                        . UserScopedQuery::forTablePrepared('words', $bindings),
-                    'cnt'
-                );
-                if ($cntlang > 1) {
-                    echo "<p>Sorry - The selected terms are in $cntlang languages," .
-                        " but tests are only possible in one language at a time.</p>";
-                    exit();
-                }
+                // Note: Multi-language validation is done by caller via validateTestSelection()
                 break;
             case 'lang':
                 // Test words from a specific language
@@ -249,16 +229,9 @@ class TestService
                 $testSql = $this->getTestSql('texts', $dataIntArray);
                 break;
             default:
+                // Legacy: raw SQL passed directly
+                // Note: Multi-language validation is done by caller via validateTestSelection()
                 $testSql = $selectionData;
-                $cntlang = Connection::fetchValue(
-                    "SELECT COUNT(DISTINCT WoLgID) AS cnt FROM $testSql",
-                    'cnt'
-                );
-                if ($cntlang > 1) {
-                    echo "<p>Sorry - The selected terms are in $cntlang languages," .
-                        " but tests are only possible in one language at a time.</p>";
-                    exit();
-                }
         }
         return $testSql;
     }
