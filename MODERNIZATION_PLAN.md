@@ -477,7 +477,8 @@ src/backend/Core/
 └── Repository/                   # Repository Layer (BUILT, NOT INTEGRATED)
     ├── RepositoryInterface.php   # Base repository interface
     ├── AbstractRepository.php    # Base repository with CRUD + prepared statements
-    └── LanguageRepository.php    # Only concrete implementation (unused)
+    ├── LanguageRepository.php    # Concrete implementation (unused)
+    └── TextRepository.php        # Concrete implementation (2025-12-19)
 ```
 
 **DI Container Features (INTEGRATED 2025-12-19):**
@@ -513,6 +514,7 @@ src/backend/Core/
 | CoreServiceProvider | Yes | 1 (Application) | **INTEGRATED** |
 | ControllerServiceProvider | Yes | 1 (Application) | **INTEGRATED** |
 | LanguageRepository | Yes | 0 | NOT INTEGRATED |
+| TextRepository | Yes (587 lines) | 0 | BUILT (2025-12-19) |
 | Other Repositories | No | N/A | NOT CREATED |
 
 **Remaining Work:**
@@ -535,8 +537,10 @@ src/backend/Core/
   - **AuthController**: AuthService + PasswordService injection
   - **TestController**: TestService + LanguageService injection
   - All service providers updated, 2319 tests pass
-- [ ] Create repositories for other entities (Text, Term, User)
+- [x] ~~Create TextRepository~~ **DONE** (2025-12-19)
+- [ ] Create repositories for remaining entities (Term, User)
 - [ ] Migrate LanguageService to use LanguageRepository
+- [ ] Migrate TextService to use TextRepository
 
 #### 3.2 Database Modernization
 
@@ -817,7 +821,7 @@ ContainerException                      # Core/Container/ContainerException.php
 3. ~~**TTS Cookie Security** - Add secure flag~~ **DONE** (httponly=false intentional for JS)
 4. ~~**Constructor Injection for Core Services** - Wire services with dependencies~~ **DONE** (2025-12-19)
 5. ~~**All Controllers Refactored for DI** - Wire all controllers with dependencies~~ **DONE** (2025-12-19)
-6. **Create Remaining Repositories** - Text, Term, User repositories
+6. **Create Remaining Repositories** - Term, User repositories (TextRepository DONE 2025-12-19)
 7. ~~**Deprecated Function Migration** - processDBParam/processSessParam~~ **DONE** ✓
 
 ## Deprecated Global Functions
