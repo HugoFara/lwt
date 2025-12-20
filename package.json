@@ -1,51 +1,63 @@
 {
   "name": "lwt",
-  "version": "1.0.0",
-  "description": "NPM package for hugofara/LWT, a fork of LWT",
+  "version": "2.10.0",
+  "description": "Learning with Texts - A self-hosted language learning application for reading-based vocabulary acquisition",
+  "type": "module",
   "main": "index.js",
+  "homepage": "https://hugofara.github.io/lwt/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HugoFara/lwt.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HugoFara/lwt/issues"
+  },
+  "author": {
+    "name": "HugoFara",
+    "url": "https://github.com/HugoFara"
+  },
+  "contributors": [
+    {
+      "name": "lang-learn-guy",
+      "url": "https://sourceforge.net/u/lang-learn-guy/profile/"
+    }
+  ],
+  "license": "Unlicense",
+  "keywords": [
+    "lwt",
+    "language-learning",
+    "spaced-repetition",
+    "vocabulary",
+    "reading",
+    "self-hosted",
+    "education"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "directories": {
     "doc": "docs",
     "test": "tests"
   },
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
     "dev": "vite",
     "build": "vite build",
     "build:themes": "node scripts/build-themes.js",
     "build:all": "npm run build && npm run build:themes",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "e2e": "cypress run",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "e2e": "cypress run",
     "docs:dev": "node scripts/docs-pre-build.js && vitepress dev docs-src",
     "docs:build": "node scripts/docs-pre-build.js && vitepress build docs-src",
     "docs:preview": "vitepress preview docs-src"
   },
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/HugoFara/lwt.git"
-  },
-  "keywords": [
-    "lwt",
-    "language",
-    "learning",
-    "spaced-repetition",
-    "system",
-    "web",
-    "reader"
-  ],
-  "author": "lang-learn-guy, hugofara",
-  "license": "Unlicense",
-  "bugs": {
-    "url": "https://github.com/HugoFara/lwt/issues"
-  },
-  "homepage": "https://github.com/HugoFara/lwt#readme",
   "dependencies": {
     "@yaireo/tagify": "^4.35.6",
     "alpinejs": "^3.15.2",
