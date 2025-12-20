@@ -1,174 +1,225 @@
 # Learning with Texts
 
-[![Latest Stable Version](https://poser.pugx.org/hugofara/lwt/v)](https://packagist.org/packages/hugofara/lwt)
-[![License](https://poser.pugx.org/hugofara/lwt/license)](https://packagist.org/packages/hugofara/lwt)
-[![PHP Version Require](https://poser.pugx.org/hugofara/lwt/require/php)](https://packagist.org/packages/hugofara/lwt)
-![Composer Continuous Integration](https://github.com/hugofara/lwt/actions/workflows/php.yml/badge.svg)
-[![Docker Image](https://github.com/HugoFara/lwt/actions/workflows/docker-image.yml/badge.svg)](https://github.com/HugoFara/lwt/actions/workflows/docker-image.yml)
+<p align="center">
+  <img src="https://github.com/HugoFara/lwt/raw/master/img/lwt_icon_big.jpg" alt="LWT logo - an open book" width="200"/>
+</p>
 
-**Learning with Texts** (LWT) is a tool for language learning by reading. It is a self-hosted web application.
+<p align="center">
+  <strong>Learn languages by reading texts you love</strong>
+</p>
 
-<div style="text-align: center;">
-<img src="https://github.com/HugoFara/lwt/raw/master/img/lwt_icon_big.jpg" alt="LWT icon of a book"/>
-</div>
+<p align="center">
+  <a href="https://packagist.org/packages/hugofara/lwt"><img src="https://poser.pugx.org/hugofara/lwt/v" alt="Latest Stable Version"></a>
+  <a href="https://packagist.org/packages/hugofara/lwt"><img src="https://poser.pugx.org/hugofara/lwt/require/php" alt="PHP Version"></a>
+  <a href="https://github.com/HugoFara/lwt/actions/workflows/php.yml"><img src="https://github.com/hugofara/lwt/actions/workflows/php.yml/badge.svg" alt="CI Status"></a>
+  <a href="https://github.com/HugoFara/lwt/actions/workflows/docker-image.yml"><img src="https://github.com/HugoFara/lwt/actions/workflows/docker-image.yml/badge.svg" alt="Docker"></a>
+  <a href="http://unlicense.org/"><img src="https://poser.pugx.org/hugofara/lwt/license" alt="License"></a>
+</p>
 
-You feel that you won't learn much by translating dumb sentences or using grammar books? Learning With Texts offers you the possibility to learn by reading texts in your target language. Concept: when you don't know a word in a text, just click it. We show you the translation, and you will have regular tests to remember it. Ready to go?
+---
 
-> [!IMPORTANT]  
-> **THIS IS A THIRD PARTY VERSION**. This version is not the
-official one, and brings many improvements and new features.
-It is quicker, has smaller database size,
-and is open for contributions. The official version is on
-[source forge](https://sourceforge.net/projects/learning-with-texts)
+**Learning with Texts** (LWT) is a self-hosted web application for language learning through reading. Import any text, click unknown words to see translations, and build vocabulary with spaced repetition.
 
-> [!NOTE]  
-> HugoFara: I don't plan to continue developping LWT on a regular basis. While I may keep maintaining for fun, I recommend [jzohrab/lute-v3](https://github.com/jzohrab/lute-v3) as the main target for development effort in the LWT software family.
+> [!IMPORTANT]
+> This is a **community-maintained fork** with significant improvements over the [official version](https://sourceforge.net/projects/learning-with-texts): modern PHP support (8.1-8.4), smaller database footprint, mobile support, and active development.
 
-## Installation
+## Table of Contents
 
-As LWT is self-hosted, you will need a server, which can be your computer.
-You can either use Docker (recommended), or install it on your machine.
+- [Quick Start](#quick-start)
+- [How It Works](#how-it-works)
+- [Features](#features)
+- [Installation](#installation)
+- [Requirements](#requirements)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [Alternatives](#alternatives)
+- [License](#license)
 
-### Docker (any OS)
+## Quick Start
 
-Install [Docker](https://docs.docker.com/get-docker/) (if not already done).
+The fastest way to get started is with Docker:
 
-* For an light-weight installation, you may use [HugoFara/lwt-docker-installer](https://github.com/HugoFara/lwt-docker-installer).
+```bash
+git clone https://github.com/HugoFara/lwt.git
+cd lwt
+docker compose up
+```
 
-* To build from source, download the latest release and run:
+Then open <http://localhost:8010/lwt/> in your browser.
 
-  ```bash
-  cd lwt
-  docker compose up  # Now open http://localhost:8010/lwt/ in a browser
-  ```
+## How It Works
 
-### Linux
-
-1. Get the [latest GitHub release](https://github.com/HugoFara/lwt/releases). You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/master.zip) if you want the cutting-edge updates (that may include some bugs).
-2. Start a shell in the downloaded folder an run: ``./INSTALL.sh``. You may need to run ``chmod +x ./INSTALL.sh`` first.
-
-### Other Systems
-
-1. **Please follow**: [docs/install.md](docs/install.md) for setup instructions.
-2. Copy `.env.example` to `.env` and configure your database credentials. Everything is explained in the [installation guide](https://hugofara.github.io/lwt/docs/guide/installation).
-
-And you are ready to go!
-
-## Description
-
-LWT is a language learning web application. To learn a language, you
-need to practice, and we guide you in reading exercises.
-
-First copy/paste any text you want to read. It can be raw text or an RSS feed.
+**1. Import a text** — Paste any content you want to read, or import from RSS feeds.
 
 ![Adding French text](https://github.com/HugoFara/lwt/raw/master/img/05.jpg)
 
-Then, we parse the text. Unknown words will be displayed with different colors,
-just click them to see it in a dictionary.
+**2. Read and learn** — Unknown words are highlighted. Click any word to see its translation and save it to your vocabulary.
 
 ![Learning French text](https://github.com/HugoFara/lwt/raw/master/img/06.jpg)
 
-Read as much as you want!
-
-To make sure you memorize new words, you can take review exercises.
+**3. Review with context** — Practice vocabulary with spaced repetition, always seeing words in their original context.
 
 ![Reviewing French word](https://github.com/HugoFara/lwt/raw/master/img/07.jpg)
 
-The difference with popular remembering software like
-[Anki](https://apps.ankiweb.net/) is that we keep track of the
-context to help you. By the way, we also ship
-an Anki exporter.
+Unlike flashcard apps like [Anki](https://apps.ankiweb.net/), LWT keeps words connected to the texts where you found them. We also include an Anki exporter if you want both.
 
 ## Features
 
-> **Full features list**: [docs/features.md](docs/features.md)
+### Core Features
 
-Features included from the official LWT software:
+- **40+ languages supported** — Roman, right-to-left, and East-Asian writing systems
+- **Click-to-translate** — Instant dictionary lookups while reading
+- **Audio integration** — Sync audio tracks with your texts
+- **Spaced repetition** — Review words at optimal intervals
+- **Progress tracking** — Statistics to monitor your learning
 
-* Support for almost 40 languages.
-* Text parsing for roman languages, right-to-left,
-and East-Asian ideogram systems
-* Translate words on-the-fly
-* Add an audio track and read it online
-* Practice words you don't remember
-* Statistics to record your progress
+### Community Additions
 
-### Features not in the official LWT
+This fork adds features not in the official LWT:
 
-> **Full new features list**: [docs/newfeatures.md](docs/newfeatures.md)
+| Feature | Description |
+| --- | --- |
+| Mobile support | Responsive design for phones and tablets |
+| RSS feeds | Automatically import texts from feeds |
+| Themes | Customizable appearance |
+| Multi-word selection | Click and drag to select phrases |
+| Bulk translation | Translate multiple new words at once |
+| Text-to-speech | Hear pronunciation of words |
+| Keyboard shortcuts | Navigate efficiently while reading |
+| Video embedding | Include videos from YouTube and other platforms |
+| MeCab integration | Japanese word-by-word translation |
 
-Features that were added by the community:
+### Technical Improvements
 
-* Support for mobile
-* Automatically import texts from RSS feeds
-* Support for different themes
-* Display translations of terms with status in the reading frame
-* Multiwords selection (click and hold on a word
-→ move to another word → release mouse button)
-* Bulk translate new words in the reading frame
-* Text to speech
-* Optional "ignore all" button in read texts
-* Key bindings in the reading frame
-* Selecting terms according to a text tag
-* Two database backup modes (new or old structure)
+- **Smaller database** — Optimized schema reduces storage significantly
+- **Long expressions** — Save phrases up to 250 characters (was limited to 9)
+- **Better search** — Improved querying for words and texts
+- **Position memory** — Resume reading where you left off
+- **Modern PHP** — Supports PHP 8.1, 8.2, 8.3, and 8.4
 
-### Improvements compared to the official LWT
+## Installation
 
-* Database improvements (db size is much smaller now)
-* Longer (>9) expressions can now be saved (up to 250 characters)
-* Save text/audio position in the reading frame
-* Google api (use 'ggl.php' instead of '*<http://translate.google.com>' for Google Translate)
-* Improved Search/Query for Words/Texts
-* Term import with more options (i.e.: combine translations, multiple tag import)
-* Support for MeCab for Japanese word-by-word automatic translation.
-* You can include video files from popular video platforms.
-* Code documentation.
-* Code is well organised, making debugging and contribution easier.
+### Docker (Recommended)
 
-## Contribute
+Works on any OS with Docker installed.
 
-> **Complete explanation**: [docs/contribute.md](docs/contribute.md)
-
-To contribute, you need to clone or fork this repository, and [Composer](https://getcomposer.org/download/).
-The composer package is at [hugofara/lwt](https://packagist.org/packages/hugofara/lwt).
-
-Run ``git clone https://github.com/HugoFara/lwt``
-
-Next, got to the lwt folder and use ``composer install --dev``.
-
-In short:
+#### Option A: Quick installer
 
 ```bash
-git clone https://github.com/HugoFara/lwt
-cd lwt
-composer install --dev
+# Use the lightweight installer
+git clone https://github.com/HugoFara/lwt-docker-installer.git
+cd lwt-docker-installer
+docker compose up
 ```
 
-## Branches
+#### Option B: Build from source
 
-* The stable branch is *master*. Last commit on this branch is
-considered to be bug-free.
-* The *dev* branch is for unstable versions.
-* The *official* branch is for the official LWT Releases.
-Any other branch if considered under development.
+```bash
+git clone https://github.com/HugoFara/lwt.git
+cd lwt
+docker compose up
+```
 
-## Useful links
+Access at <http://localhost:8010/lwt/>
 
-* [Documentation](https://hugofara.github.io/lwt/docs/) - User guides, reference, and developer documentation.
+### Linux
+
+```bash
+# Download and extract the latest release
+wget https://github.com/HugoFara/lwt/archive/refs/heads/master.zip
+unzip master.zip && cd lwt-master
+
+# Run the installer
+chmod +x ./INSTALL.sh
+./INSTALL.sh
+```
+
+### Manual Installation (Windows/macOS/Linux)
+
+1. Install prerequisites: PHP 8.1+, MySQL/MariaDB, a web server (Apache/Nginx)
+2. Clone or download the repository
+3. Configure the database:
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your database credentials
+   ```
+
+4. Install dependencies:
+
+   ```bash
+   composer install
+   npm install && npm run build:all
+   ```
+
+See the [Installation Guide](https://hugofara.github.io/lwt/docs/guide/installation) for detailed instructions.
+
+## Requirements
+
+| Component | Version |
+| --- | --- |
+| PHP | 8.1, 8.2, 8.3, or 8.4 |
+| MySQL/MariaDB | 5.7+ / 10.3+ |
+| PHP Extensions | mysqli, mbstring, dom |
+
+For development, you'll also need [Composer](https://getcomposer.org/) and [Node.js](https://nodejs.org/) 18+.
+
+## Documentation
+
+- **[User Guide](https://hugofara.github.io/lwt/docs/guide/)** — Getting started and usage
+- **[API Reference](https://hugofara.github.io/lwt/docs/reference/)** — REST API documentation
+- **[Developer Docs](https://hugofara.github.io/lwt/docs/developer/)** — Architecture and contribution guide
+
+## Contributing
+
+Contributions are welcome! Here's how to set up a development environment:
+
+```bash
+git clone https://github.com/HugoFara/lwt.git
+cd lwt
+composer install --dev
+npm install
+```
+
+### Development Commands
+
+```bash
+# Run tests
+composer test              # PHP tests with coverage
+npm test                   # Frontend tests
+
+# Code quality
+./vendor/bin/psalm         # Static analysis
+npm run lint               # ESLint
+npm run typecheck          # TypeScript checking
+
+# Build assets
+npm run dev                # Development server with HMR
+npm run build:all          # Production build
+```
+
+### Branch Strategy
+
+| Branch | Purpose |
+| --- | --- |
+| `master` | Stable releases |
+| `dev` | Development and testing |
+| `official` | Tracks official LWT releases |
 
 ## Alternatives
 
-> *See also*: [docs/links.md](docs/links.md)
+If LWT doesn't fit your needs, consider these projects:
 
-* [jzohrab/LUTE](https://github.com/jzohrab/lute) is a rewrite of LWT with modern tools such as Symfony.
-* [FLTR ◆ Foreign Language Text Reader](https://sourceforge.net/projects/foreign-language-text-reader/),
-a Java clone, by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/profile/)
-(original author of LWT), it is a standalone installation.
-* [simjanos-dev/LinguaCafe](https://github.com/simjanos-dev/LinguaCafe): a beautiful
-equivalent in Vue.js and PHP.
+- **[LUTE v3](https://github.com/jzohrab/lute-v3)** — Modern rewrite using Python/Flask, actively developed
+- **[LinguaCafe](https://github.com/simjanos-dev/LinguaCafe)** — Beautiful Vue.js/PHP implementation
+- **[FLTR](https://sourceforge.net/projects/foreign-language-text-reader/)** — Java desktop app by LWT's original author
 
-## Unlicense
+## License
 
-Under unlicense, view [UNLICENSE.md](UNLICENSE.md), please look at <http://unlicense.org/>.
+This project is released into the **public domain** under the [Unlicense](UNLICENSE.md). You're free to use, modify, and distribute it however you like.
 
-**Let's learn new languages!**
+---
+
+<p align="center">
+  <strong>Happy reading, happy learning!</strong>
+</p>
