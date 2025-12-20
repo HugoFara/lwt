@@ -10,6 +10,45 @@ ones are marked like "v1.0.0-fork".
 ### Added
 
 * Official support for PHP 8.3 and 8.4.
+* **Multi-user support** ([#221](https://github.com/HugoFara/lwt/issues/221)):
+  Users are now stored in a dedicated `users` table with proper foreign key
+  relationships instead of using table prefixes. Includes user authentication,
+  registration, and role-based access (user/admin).
+* **MVC Architecture** ([#212](https://github.com/HugoFara/lwt/issues/212),
+  [#215](https://github.com/HugoFara/lwt/issues/215)): Complete restructure of
+  the PHP codebase following the Model-View-Controller pattern:
+  * Controllers in `src/backend/Controllers/` (17 controller classes)
+  * Services in `src/backend/Services/` (35 service classes)
+  * Views in `src/backend/Views/`
+  * Router-based URL handling in `src/backend/Router/`
+* **Front Controller Pattern** ([#213](https://github.com/HugoFara/lwt/issues/213)):
+  All requests now route through `index.php`. The root folder no longer contains
+  dozens of PHP files - only `index.php` and `router.php` remain.
+* **Alpine.js Frontend Framework** ([#208](https://github.com/HugoFara/lwt/issues/208)):
+  Adopted Alpine.js for reactive UI components, reducing reliance on PHP-rendered
+  pages for user interactions.
+* **TypeScript Migration** ([#209](https://github.com/HugoFara/lwt/issues/209)):
+  Frontend JavaScript converted to TypeScript with 90+ `.ts` files organized in
+  `src/frontend/js/` with proper module structure (api/, core/, reading/, testing/,
+  feeds/, languages/, etc.).
+* **jQuery Removal** ([#211](https://github.com/HugoFara/lwt/issues/211)):
+  jQuery has been replaced with modern vanilla JavaScript and Alpine.js.
+* **Overlib Replacement** ([#214](https://github.com/HugoFara/lwt/issues/214)):
+  The 20-year-old overlib library has been removed in favor of modern alternatives.
+* **HoverIntent Replacement** ([#210](https://github.com/HugoFara/lwt/issues/210)):
+  The `briancherne/jquery-hoverintent` plugin has been replaced with a native
+  TypeScript implementation.
+
+### Changed
+
+* **Database Engine Migration** ([#220](https://github.com/HugoFara/lwt/issues/220)):
+  All permanent tables converted from MyISAM to InnoDB engine. Benefits include:
+  * ACID transaction support
+  * Row-level locking for better concurrency
+  * Foreign key constraints for data integrity
+  * Improved crash recovery
+* Database schema now includes foreign key constraints linking user-owned data
+  (languages, texts, words, tags, feeds) to the `users` table with CASCADE delete.
 
 ### Fixed
 
@@ -40,6 +79,9 @@ ones are marked like "v1.0.0-fork".
 ### Deprecated
 
 * Removed testing for PHP 8.0.
+* Legacy table prefix system (`$tbpref`) is deprecated in favor of the new
+  user-based multi-tenancy. Existing prefixed tables will be migrated to the
+  new system automatically.
 
 ## 2.10.0-fork (April 1 2024)
 
