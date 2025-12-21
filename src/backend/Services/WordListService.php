@@ -418,33 +418,21 @@ class WordListService
      */
     public function deleteByIdList(string $idList): string
     {
+        // Delete multi-word text items first (before word deletion triggers FK SET NULL)
+        Connection::query(
+            'DELETE FROM textitems2
+            WHERE Ti2WordCount > 1 AND Ti2WoID in ' . $idList
+        );
+
+        // Delete words - FK constraints handle:
+        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - wordtags deleted (ON DELETE CASCADE)
         $message = Connection::execute(
-            'delete from words where WoID in ' . $idList,
+            'DELETE FROM words WHERE WoID in ' . $idList,
             "Deleted"
         );
 
-        Connection::query(
-            'update textitems2
-            set Ti2WoID = 0
-            where Ti2WordCount = 1 and Ti2WoID in ' . $idList
-        );
-
-        Connection::query(
-            'delete from textitems2
-            where Ti2WoID in ' . $idList
-        );
-
         Maintenance::adjustAutoIncrement('words', 'WoID');
-
-        Connection::execute(
-            "DELETE wordtags
-            FROM (
-                wordtags
-                LEFT JOIN words
-                on WtWoID = WoID
-            ) WHERE WoID IS NULL",
-            ''
-        );
 
         return $message;
     }
@@ -615,35 +603,25 @@ class WordListService
      */
     public function deleteSingleWord(int $wordId): string
     {
+        // Delete multi-word text items first (before word deletion triggers FK SET NULL)
+        Connection::preparedExecute(
+            'DELETE FROM textitems2 WHERE Ti2WordCount > 1 AND Ti2WoID = ?',
+            [$wordId]
+        );
+
+        // Delete word - FK constraints handle:
+        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - wordtags deleted (ON DELETE CASCADE)
         $bindings = [$wordId];
         Connection::preparedExecute(
             'DELETE FROM words WHERE WoID = ?'
             . UserScopedQuery::forTablePrepared('words', $bindings),
             $bindings
         );
-        $message = "Deleted";
 
         Maintenance::adjustAutoIncrement('words', 'WoID');
 
-        Connection::preparedExecute(
-            'UPDATE textitems2 SET Ti2WoID = 0
-            WHERE Ti2WordCount = 1 AND Ti2WoID = ?',
-            [$wordId]
-        );
-
-        Connection::preparedExecute(
-            'DELETE FROM textitems2 WHERE Ti2WoID = ?',
-            [$wordId]
-        );
-
-        Connection::execute(
-            "DELETE wordtags FROM (
-            wordtags LEFT JOIN words
-            on WtWoID = WoID) WHERE WoID IS NULL",
-            ''
-        );
-
-        return $message;
+        return "Deleted";
     }
 
     /**

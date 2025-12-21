@@ -220,7 +220,7 @@ class SentenceService
             $sql = "SELECT DISTINCT SeID, SeText
                 FROM sentences, textitems2
                 WHERE LOWER(Ti2Text) = ?
-                AND Ti2WoID = 0 AND SeID = Ti2SeID AND SeLgID = ?
+                AND Ti2WoID IS NULL AND SeID = Ti2SeID AND SeLgID = ?
                 ORDER BY CHAR_LENGTH(SeText), SeText";
             $params = [$wordlc, $lid];
         } elseif ($wid == -1) {

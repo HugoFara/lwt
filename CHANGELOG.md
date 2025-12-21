@@ -38,6 +38,9 @@ ones are marked like "v1.0.0-fork".
 * **HoverIntent Replacement** ([#210](https://github.com/HugoFara/lwt/issues/210)):
   The `briancherne/jquery-hoverintent` plugin has been replaced with a native
   TypeScript implementation.
+* **Iframe Replacement** ([#166](https://github.com/HugoFara/lwt/issues/166)):
+  Legacy iframe-based dynamic content loading replaced with Alpine.js components
+  and REST API calls. Only dictionary iframes remain for external dictionary display.
 
 ### Changed
 
@@ -47,8 +50,20 @@ ones are marked like "v1.0.0-fork".
   * Row-level locking for better concurrency
   * Foreign key constraints for data integrity
   * Improved crash recovery
+* **Inter-Table Foreign Keys** ([#220](https://github.com/HugoFara/lwt/issues/220)):
+  Added 16 foreign key constraints for referential integrity between tables:
+  * Language references: texts, words, sentences, archivedtexts, newsfeeds → languages (CASCADE)
+  * Text references: sentences, textitems2, texttags → texts (CASCADE)
+  * Other references: textitems2 → sentences (CASCADE), textitems2 → words (SET NULL),
+    wordtags → words/tags, texttags → tags2, archtexttags → archivedtexts/tags2,
+    feedlinks → newsfeeds (all CASCADE)
+  * Migration: `20251221_120000_add_inter_table_foreign_keys.sql`
+  * **Breaking change**: `textitems2.Ti2WoID` now uses NULL instead of 0 for unknown words
 * Database schema now includes foreign key constraints linking user-owned data
   (languages, texts, words, tags, feeds) to the `users` table with CASCADE delete.
+* **TTS Settings Storage** ([#186](https://github.com/HugoFara/lwt/issues/186)):
+  Text-to-Speech language settings (voice, rate, pitch) now use browser localStorage
+  instead of cookies. Includes automatic migration from old cookie format.
 
 ### Fixed
 

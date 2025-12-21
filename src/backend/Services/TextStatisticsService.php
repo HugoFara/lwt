@@ -123,7 +123,7 @@ class TextStatisticsService
         $count = Connection::fetchValue(
             "SELECT COUNT(DISTINCT LOWER(Ti2Text)) AS cnt
             FROM textitems2
-            WHERE Ti2WordCount=1 AND Ti2WoID=0 AND Ti2TxID=$textId",
+            WHERE Ti2WordCount=1 AND Ti2WoID IS NULL AND Ti2TxID=$textId",
             'cnt'
         );
         if ($count === null) {
