@@ -67,6 +67,10 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Text Parsing** ([#114](https://github.com/HugoFara/lwt/issues/114)): Fixed
+  last word of text not being recognized when text ends without punctuation.
+  Words at the end of a text are now correctly identified regardless of trailing
+  punctuation.
 * **PHP 8.3 Compatibility**: Fixed deprecation warnings in `langFromDict()` and
   `targetLangFromDict()` - both functions now check for null query strings before
   calling `parse_str()`.

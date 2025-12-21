@@ -516,6 +516,59 @@ class TextParsingTest extends TestCase
         $this->assertNotEmpty($result, 'Should still return the text');
     }
 
+    /**
+     * Tests fix for issue #114: Last word of text not recognized without punctuation.
+     *
+     * When a text ends without punctuation, the last word should still be
+     * recognized as a word (WordCount=1), not as a non-word (WordCount=0).
+     */
+    public function testPrepareLastWordRecognizedWithoutPunctuation(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $temptextitems = 'temptextitems';
+        Connection::query("DROP TEMPORARY TABLE IF EXISTS $temptextitems");
+        Connection::query("CREATE TEMPORARY TABLE $temptextitems (
+            TiSeID INT,
+            TiCount INT,
+            TiOrder INT,
+            TiText VARCHAR(250),
+            TiWordCount INT
+        )");
+
+        // Test text WITHOUT punctuation
+        Connection::query("TRUNCATE $temptextitems");
+        TextParsing::prepare("Hello world", 1, self::$testLanguageId);
+        $result = Connection::fetchAll(
+            "SELECT TiText, TiWordCount FROM $temptextitems ORDER BY TiOrder"
+        );
+
+        // Both "Hello" and "world" should be recognized as words (WordCount=1)
+        $this->assertCount(2, $result, 'Should have 2 words');
+        $this->assertEquals('Hello', $result[0]['TiText']);
+        $this->assertEquals(1, (int)$result[0]['TiWordCount'], 'First word should have WordCount=1');
+        $this->assertEquals('world', $result[1]['TiText']);
+        $this->assertEquals(1, (int)$result[1]['TiWordCount'], 'Last word should have WordCount=1 even without trailing punctuation');
+
+        // Test text WITH punctuation for comparison
+        Connection::query("TRUNCATE $temptextitems");
+        TextParsing::prepare("Hello world.", 1, self::$testLanguageId);
+        $resultWithPunct = Connection::fetchAll(
+            "SELECT TiText, TiWordCount FROM $temptextitems ORDER BY TiOrder"
+        );
+
+        // Both words should still be recognized, plus the period as non-word
+        $this->assertCount(3, $resultWithPunct, 'Should have 2 words + 1 punctuation');
+        $this->assertEquals('Hello', $resultWithPunct[0]['TiText']);
+        $this->assertEquals(1, (int)$resultWithPunct[0]['TiWordCount']);
+        $this->assertEquals('world', $resultWithPunct[1]['TiText']);
+        $this->assertEquals(1, (int)$resultWithPunct[1]['TiWordCount']);
+        $this->assertEquals('.', $resultWithPunct[2]['TiText']);
+        $this->assertEquals(0, (int)$resultWithPunct[2]['TiWordCount'], 'Punctuation should have WordCount=0');
+    }
+
     // ===== Character substitution tests =====
 
     public function testPrepareWithCharacterSubstitutions(): void
