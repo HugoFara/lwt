@@ -25,7 +25,7 @@ require_once __DIR__ . '/WordStatusService.php';
 require_once __DIR__ . '/ExportService.php';
 require_once __DIR__ . '/TagService.php';
 require_once __DIR__ . '/SentenceService.php';
-require_once __DIR__ . '/../Core/Utils/error_handling.php';
+require_once __DIR__ . '/../Core/Utils/ErrorHandler.php';
 
 /**
  * Service class for managing word tests/reviews.

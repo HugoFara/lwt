@@ -17,7 +17,7 @@ namespace Lwt\Core\Bootstrap;
 
 // Core utilities (replaces kernel_utility.php)
 require_once __DIR__ . '/../Globals.php';
-require_once __DIR__ . '/../Utils/error_handling.php';
+require_once __DIR__ . '/../Utils/ErrorHandler.php';
 require_once __DIR__ . '/SessionBootstrap.php';
 
 use Lwt\Core\Globals;

@@ -81,7 +81,7 @@ class WordPressController extends BaseController
         $result = $this->wordPressService->handleStart($redirectUrl);
 
         if (!$result['success'] && $result['error'] !== null) {
-            require_once __DIR__ . '/../Core/Utils/error_handling.php';
+            require_once __DIR__ . '/../Core/Utils/ErrorHandler.php';
             ErrorHandler::die($result['error']);
         }
 

@@ -25,7 +25,7 @@ namespace Lwt\Core\Bootstrap;
 // Core utilities
 require_once __DIR__ . '/../Globals.php';
 require_once __DIR__ . '/../StringUtils.php';
-require_once __DIR__ . '/../Utils/error_handling.php';
+require_once __DIR__ . '/../Utils/ErrorHandler.php';
 
 use Lwt\Core\Globals;
 

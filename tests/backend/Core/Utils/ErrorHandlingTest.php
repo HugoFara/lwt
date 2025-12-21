@@ -4,7 +4,7 @@ namespace Lwt\Tests\Core\Utils;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Globals.php';
 require_once __DIR__ . '/../../../../src/backend/Core/StringUtils.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Utils/error_handling.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Utils/ErrorHandler.php';
 
 use Lwt\Core\Globals;
 use Lwt\Core\Utils\ErrorHandler;

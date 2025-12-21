@@ -560,7 +560,7 @@ class TextParsing
         echo "<div id=\"check_text\" style=\"margin-right:50px;\">
         <h4>Text</h4>
         <p " . ($rtlScript ? 'dir="rtl"' : '') . ">" .
-        str_replace("¶", "<br /><br />", \htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8')) .
+        str_replace("¶", "<br /><br />", \htmlspecialchars($text, ENT_QUOTES, 'UTF-8')) .
         "</p>";
     }
 
@@ -1050,6 +1050,8 @@ class TextParsing
      * @return null|string[] The sentence array if $id = -2
      *
      * @psalm-return non-empty-list<string>|null
+     *
+     * @psalm-suppress PossiblyUnusedReturnValue Return only used when $id = -2
      *
      * @deprecated Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
      */
