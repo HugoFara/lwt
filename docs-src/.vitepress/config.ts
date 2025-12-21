@@ -124,7 +124,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/HugoFara/lwt/edit/master/docs-src/:path',
+      pattern: 'https://github.com/HugoFara/lwt/edit/main/docs-src/:path',
       text: 'Edit this page on GitHub'
     }
   }

@@ -27,7 +27,7 @@ To run LWT, you'll need:
     * [EasyPHP](http://www.easyphp.org/) or [XAMPP](https://www.apachefriends.org/download.html) (Windows), or
     * [MAMP](http://mamp.info/en/index.html) (macOS), or
     * a [LAMP (Linux-Apache-MariaDB-PHP) server](http://en.wikipedia.org/wiki/LAMP_%28software_bundle%29) (Linux).
-3. **The LWT Application**. The latest version  _lwt\_v\_x\_y.zip_ can be downloaded at <https://github.com/HugoFara/lwt/archive/refs/heads/master.zip>. View the [installation guide](installation.md).
+3. **The LWT Application**. The latest version  _lwt\_v\_x\_y.zip_ can be downloaded at <https://github.com/HugoFara/lwt/archive/refs/heads/main.zip>. View the [installation guide](installation.md).
 
 ## History
 

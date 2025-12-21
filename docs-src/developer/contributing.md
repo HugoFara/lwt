@@ -215,20 +215,32 @@ You can use it through `php tools/phpDocumentor` if installed with [Phive](https
 Code documentation for JavaScript is available at `docs/js/` is is generated thourgh [JSDoc](https://jsdoc.app/).
 The JSDoc configuration file is `jsdoc.json`.
 
-## New version
+## New Version
 
 LWT-fork follows a strict procedure for new versions.
-This section is mainly intended for the maintainers, but feel free to take a peak at it.
+This section is mainly intended for the maintainers, but feel free to take a peek at it.
 
-The steps to publish a new version are:
+### Version Locations
 
-1. In the [CHANGELOG](./CHANGELOG.md), add the latest release number and date.
-2. In `src/backend/Core/version.php`, update `LWT_APP_VERSION` and `LWT_RELEASE_DATE`.
+The version number must be updated in multiple places:
+
+| File | Field/Constant |
+| --- | --- |
+| `src/backend/Core/ApplicationInfo.php` | `VERSION` and `RELEASE_DATE` constants |
+| `package.json` | `version` field |
+| `CHANGELOG.md` | New version section header |
+
+The authoritative version is in `ApplicationInfo.php`. The `package.json` version should match (without the `-fork` suffix).
+
+### Release Steps
+
+1. Update the version in all locations listed above.
+2. In the [CHANGELOG](./CHANGELOG.md), move items from `[UNRELEASED]` to the new version section with the release date.
 3. Build frontend assets with `npm run build:all`.
 4. Regenerate documentation with `composer doc`.
-5. Commit your changes, `git commit -m "Regenerates documentation for release []."`
-6. Add a version tag with annotation `git tag -a [release number]` and push the changes.
-7. If all the GitHub actions are successful, write a new release on GitHub linking to the previously created tag.
+5. Commit your changes: `git commit -m "Release [version]"`
+6. Add a version tag with annotation: `git tag -a v[version] -m "Release [version]"` and push with `git push --tags`.
+7. If all GitHub Actions pass, create a new release on GitHub linking to the tag.
 8. The new version is live!
 
 ## Other Ways of Contribution

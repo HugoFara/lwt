@@ -3,7 +3,7 @@
 * [**Original Project Page** @ Sourceforge](http://sourceforge.net/projects/learning-with-texts/)
 * **Download Page**:
   * [Lastest release @ GitHub](https://github.com/HugoFara/lwt/releases/latest)
-  * [Lastest pushed @ GitHub](https://github.com/HugoFara/lwt/archive/refs/heads/master.zip)
+  * [Lastest pushed @ GitHub](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip)
   * [Official version @ Sourceforge](http://sourceforge.net/projects/learning-with-texts/files/)
 * [**Community Maintained Version** @ GitHub](https://github.com/HugoFara/lwt)
 * **Documentation**: try either the [local link](index.html) or the [absolute link](https://hugofara.github.io/lwt/index.html).

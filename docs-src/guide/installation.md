@@ -30,7 +30,7 @@ Two main softwares can be used to set up a local server on your computer: XAMPP 
 
 2. Get the [latest GitHub release](https://github.com/HugoFara/lwt/releases), unzip it.
 
-   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/master.zip) if you want the cutting-edge updates (that may include some bugs)
+   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip) if you want the cutting-edge updates (that may include some bugs)
 
 3. Now go into "C:\xampp\htdocs\lwt". Copy the file ".env.example" to ".env" and edit it with your database credentials (the defaults usually work for XAMPP).
 
@@ -63,7 +63,7 @@ Now you must only do step 4.2 to start LWT.
 
 3. Get the [latest GitHub release](https://github.com/HugoFara/lwt/releases), unzip it.
 
-   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/master.zip) if you want the cutting-edge updates (that may include some bugs)
+   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip) if you want the cutting-edge updates (that may include some bugs)
 
 4. Install everything
    1. Go to "C:\Program Files (x86)\EasyPHP-Devserver-17\eds-www\lwt".
@@ -93,7 +93,7 @@ Now you must only do step 5.2 to start LWT.
 
 4. Get the [latest GitHub release](https://github.com/HugoFara/lwt/releases), unzip it.
 
-   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/master.zip) if you want the cutting-edge updates (that may include some bugs)
+   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip) if you want the cutting-edge updates (that may include some bugs)
 
 5. Go to ``/Applications/MAMP/htdocs/lwt``. Copy the file ``.env.example`` to ``.env``. Edit it and set ``DB_HOST=localhost:8889`` (MAMP uses port 8889 for MySQL).
 
@@ -171,7 +171,7 @@ The following instruction were tested on Raspbian Stretch.
 
 2. Get the [latest GitHub release](https://github.com/HugoFara/lwt/releases).
 
-   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/master.zip) if you want the cutting-edge updates (that may include some bugs)
+   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip) if you want the cutting-edge updates (that may include some bugs)
   
 3. Unzip it.
 
@@ -233,7 +233,7 @@ The official repository is at <https://packagist.org/packages/hugofara/lwt>.
 
 2. Get the [latest GitHub release](https://github.com/HugoFara/lwt/releases).
 
-   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/master.zip) if you want the cutting-edge updates (that may include some bugs)
+   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip) if you want the cutting-edge updates (that may include some bugs)
 
 3. Unzip it.
 

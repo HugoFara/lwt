@@ -243,7 +243,7 @@ Migration files in `db/migrations/` with format `YYYYMMDD_HHMMSS_description.sql
 
 Branches:
 
-- `master` - Stable releases
+- `main` - Stable releases
 - `dev` - Development branch
 
 Before committing:
