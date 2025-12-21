@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS settings (
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS textitems2 (
-    Ti2WoID mediumint(8) unsigned NOT NULL,
+    Ti2WoID mediumint(8) unsigned DEFAULT NULL,
     Ti2LgID tinyint(3) unsigned NOT NULL,
     Ti2TxID smallint(5) unsigned NOT NULL,
     Ti2SeID mediumint(8) unsigned NOT NULL,
@@ -261,6 +261,14 @@ CREATE TABLE IF NOT EXISTS _prefix_migration_log (
     PRIMARY KEY (prefix)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- NOTE: Foreign key constraints are added via migrations (20251212_000003_add_foreign_keys.sql)
--- This ensures they are only applied once and allows for proper data cleanup before adding constraints.
--- The migration handles: column type fixes, orphan cleanup, and FK constraint creation.
+-- ============================================================================
+-- Inter-table foreign key constraints
+-- NOTE: FK constraints are added via migration 20251221_120000_add_inter_table_foreign_keys.sql
+-- This ensures they are only applied once and allows for proper data cleanup.
+-- The migration adds 16 FK constraints:
+-- - Language references: texts, words, sentences, archivedtexts, newsfeeds -> languages
+-- - Text references: sentences, textitems2, texttags -> texts
+-- - Other: textitems2 -> sentences, textitems2 -> words (SET NULL),
+--   wordtags -> words/tags, texttags -> tags2, archtexttags -> archivedtexts/tags2,
+--   feedlinks -> newsfeeds
+-- ============================================================================

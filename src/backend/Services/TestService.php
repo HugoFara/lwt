@@ -355,7 +355,7 @@ class TestService
             LEFT JOIN (
                 SELECT t.Ti2SeID, COUNT(*) AS c
                 FROM textitems2 t
-                WHERE t.Ti2WordCount = 1 AND t.Ti2WoID = 0
+                WHERE t.Ti2WordCount = 1 AND t.Ti2WoID IS NULL
                 GROUP BY t.Ti2SeID
             ) AS sUnknownCount ON sUnknownCount.Ti2SeID = ti.Ti2SeID
             WHERE ti.Ti2WoID = $wordId

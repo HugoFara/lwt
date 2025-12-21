@@ -1097,7 +1097,7 @@ class WordUploadService
         $bindings = [];
         $sql = "UPDATE words
             JOIN textitems2
-            ON WoWordCount=1 AND Ti2WoID=0 AND lower(Ti2Text)=WoTextLC AND Ti2LgID = WoLgID
+            ON WoWordCount=1 AND Ti2WoID IS NULL AND lower(Ti2Text)=WoTextLC AND Ti2LgID = WoLgID
             SET Ti2WoID=WoID"
             . UserScopedQuery::forTablePrepared('words', $bindings);
         Connection::execute($sql);

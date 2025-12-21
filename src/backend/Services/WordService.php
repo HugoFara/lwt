@@ -394,26 +394,18 @@ class WordService
      */
     public function delete(int $wordId): string
     {
+        // Delete multi-word text items first (before word deletion triggers FK SET NULL)
+        QueryBuilder::table('textitems2')
+            ->where('Ti2WoID', '=', $wordId)
+            ->where('Ti2WordCount', '>', 1)
+            ->deletePrepared();
+
+        // Delete the word - FK constraints handle:
+        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - wordtags deleted (ON DELETE CASCADE)
         QueryBuilder::table('words')
             ->where('WoID', '=', $wordId)
             ->deletePrepared();
-
-        // Update text items to unlink the word (textitems2 inherits user context via Ti2TxID -> texts FK)
-        Connection::preparedExecute(
-            "UPDATE textitems2 SET Ti2WoID = 0
-             WHERE Ti2WordCount = 1 AND Ti2WoID = ?",
-            [$wordId]
-        );
-
-        // Delete multi-word text items (textitems2 inherits user context via Ti2TxID -> texts FK)
-        QueryBuilder::table('textitems2')
-            ->where('Ti2WoID', '=', $wordId)
-            ->deletePrepared();
-
-        // Clean up orphaned word tags (wordtags inherits user context via WtWoID -> words FK)
-        Connection::execute(
-            'DELETE wordtags FROM (wordtags LEFT JOIN words ON WtWoID = WoID) WHERE WoID IS NULL'
-        );
 
         return 'Deleted';
     }
@@ -433,24 +425,18 @@ class WordService
 
         $ids = array_map('intval', $wordIds);
 
+        // Delete multi-word text items first (before word deletion triggers FK SET NULL)
+        QueryBuilder::table('textitems2')
+            ->where('Ti2WordCount', '>', 1)
+            ->whereIn('Ti2WoID', $ids)
+            ->deletePrepared();
+
+        // Delete words - FK constraints handle:
+        // - Single-word textitems2.Ti2WoID set to NULL (ON DELETE SET NULL)
+        // - wordtags deleted (ON DELETE CASCADE)
         $count = QueryBuilder::table('words')
             ->whereIn('WoID', $ids)
             ->deletePrepared();
-
-        // Update text items
-        QueryBuilder::table('textitems2')
-            ->where('Ti2WordCount', '=', 1)
-            ->whereIn('Ti2WoID', $ids)
-            ->updatePrepared(['Ti2WoID' => 0]);
-
-        QueryBuilder::table('textitems2')
-            ->whereIn('Ti2WoID', $ids)
-            ->deletePrepared();
-
-        // Clean up orphaned word tags (wordtags inherits user context via WtWoID -> words FK)
-        Connection::execute(
-            'DELETE wordtags FROM (wordtags LEFT JOIN words ON WtWoID = WoID) WHERE WoID IS NULL'
-        );
 
         return $count;
     }
@@ -690,7 +676,7 @@ class WordService
         Connection::execute(
             "UPDATE words
              JOIN textitems2
-             ON Ti2WoID = 0 AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
+             ON Ti2WoID IS NULL AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
              SET Ti2WoID = WoID"
         );
     }
@@ -1307,7 +1293,7 @@ class WordService
         Connection::execute(
             "UPDATE words
             JOIN textitems2
-            ON Ti2WoID = 0 AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
+            ON Ti2WoID IS NULL AND LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID
             SET Ti2WoID = WoID",
             ''
         );
@@ -1448,7 +1434,7 @@ class WordService
         return Connection::preparedFetchAll(
             "SELECT Ti2Text AS word, Ti2LgID, MIN(Ti2Order) AS pos
              FROM textitems2
-             WHERE Ti2WoID = 0 AND Ti2TxID = ? AND Ti2WordCount = 1
+             WHERE Ti2WoID IS NULL AND Ti2TxID = ? AND Ti2WordCount = 1
              GROUP BY LOWER(Ti2Text)
              ORDER BY pos
              LIMIT ?, ?",
