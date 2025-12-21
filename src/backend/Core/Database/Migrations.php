@@ -83,9 +83,9 @@ class Migrations
             $textValue = QueryBuilder::table('texts')
                 ->where('TxID', '=', $id)
                 ->valuePrepared('TxText');
-            TextParsing::splitCheck(
+            TextParsing::parseAndSave(
                 (string)$textValue,
-                (string)$record['TxLgID'],
+                (int)$record['TxLgID'],
                 $id
             );
         }

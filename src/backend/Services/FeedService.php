@@ -513,7 +513,7 @@ class FeedService
             ]);
 
         // Parse the text
-        TextParsing::splitCheck(
+        TextParsing::parseAndSave(
             $textData['TxText'],
             (int)$textData['TxLgID'],
             $textId
@@ -1436,7 +1436,7 @@ class FeedService
                         $bindings,
                         'TxLgID'
                     );
-                    TextParsing::splitCheck($textContent, $textLgId, $id);
+                    TextParsing::parseAndSave($textContent, (int) $textLgId, $id);
 
                     // Apply tags - texttags inherits user context via TtTxID -> texts FK
                     $bindings = [];

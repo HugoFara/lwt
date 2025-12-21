@@ -33,29 +33,118 @@ use Lwt\Database\UserScopedQuery;
  */
 class TextParsing
 {
+    // =========================================================================
+    // NEW PUBLIC API - Use these methods instead of the deprecated ones
+    // =========================================================================
+
     /**
-     * Parse a Japanese text using MeCab and add it to the database.
+     * Split text into sentences without database operations.
      *
-     * @param string $text Text to parse.
-     * @param int    $id   Text ID. If $id = -1 print results,
-     *                     if $id = -2 return splitted texts
+     * Use this method when you only need to split text into sentences
+     * without saving to the database (e.g., for long text splitting).
      *
-     * @return null|string[] Splitted sentence if $id = -2
+     * @param string $text Text to parse
+     * @param int    $lid  Language ID
      *
-     * @psalm-return non-empty-list<string>|null
+     * @return string[] Array of sentences
+     *
+     * @psalm-return non-empty-list<string>
      */
-    public static function parseJapanese(string $text, int $id): ?array
+    public static function splitIntoSentences(string $text, int $lid): array
+    {
+        $result = self::prepare($text, -2, $lid);
+        return $result ?? [''];
+    }
+
+    /**
+     * Parse text and display preview HTML for validation.
+     *
+     * Use this method for the text checking UI. Outputs HTML directly
+     * to show parsed sentences and word statistics.
+     *
+     * @param string $text Text to parse
+     * @param int    $lid  Language ID
+     *
+     * @return void
+     */
+    public static function parseAndDisplayPreview(string $text, int $lid): void
+    {
+        self::splitCheck($text, $lid, -1);
+    }
+
+    /**
+     * Parse text and save to database.
+     *
+     * Use this method when creating or updating texts. Parses the text
+     * and inserts sentences and text items into the database.
+     *
+     * @param string $text   Text to parse
+     * @param int    $lid    Language ID
+     * @param int    $textId Text ID (must be positive)
+     *
+     * @return void
+     *
+     * @throws \InvalidArgumentException If textId is not positive
+     */
+    public static function parseAndSave(string $text, int $lid, int $textId): void
+    {
+        if ($textId <= 0) {
+            throw new \InvalidArgumentException(
+                "Text ID must be positive, got: $textId"
+            );
+        }
+        self::splitCheck($text, $lid, $textId);
+    }
+
+    // =========================================================================
+    // INTERNAL HELPERS - Japanese text parsing
+    // =========================================================================
+
+    /**
+     * Split Japanese text into sentences (split-only mode).
+     *
+     * @param string $text Preprocessed text
+     *
+     * @return string[] Array of sentences
+     *
+     * @psalm-return non-empty-list<string>
+     */
+    private static function splitJapaneseSentences(string $text): array
     {
         $text = preg_replace('/[ \t]+/u', ' ', $text);
         $text = trim($text);
-        if ($id == -1) {
-            echo '<div id="check_text" style="margin-right:50px;">
-            <h2>Text</h2>
-            <p>' . str_replace("\n", "<br /><br />", \htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8')) . '</p>';
-        } elseif ($id == -2) {
-            $text = preg_replace("/[\n]+/u", "\n¶", $text);
-            return explode("\n", $text);
-        }
+        $text = preg_replace("/[\n]+/u", "\n¶", $text);
+        return explode("\n", $text);
+    }
+
+    /**
+     * Display preview HTML for Japanese text.
+     *
+     * @param string $text Preprocessed text
+     *
+     * @return void
+     */
+    private static function displayJapanesePreview(string $text): void
+    {
+        $text = preg_replace('/[ \t]+/u', ' ', $text);
+        $text = trim($text);
+        echo '<div id="check_text" style="margin-right:50px;">
+        <h2>Text</h2>
+        <p>' . str_replace("\n", "<br /><br />", \htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8')) . '</p>';
+    }
+
+    /**
+     * Parse Japanese text with MeCab and insert into temptextitems.
+     *
+     * @param string $text         Preprocessed text
+     * @param bool   $useMaxSeID   Whether to query for max sentence ID (true for existing texts)
+     *
+     * @return void
+     */
+    private static function parseJapaneseToDatabase(string $text, bool $useMaxSeID): void
+    {
+        $text = preg_replace('/[ \t]+/u', ' ', $text);
+        $text = trim($text);
 
         $file_name = tempnam(sys_get_temp_dir(), "tmpti");
         // We use the format "word  num num" for all nodes
@@ -84,7 +173,7 @@ class TextParsing
         $values = array();
         $order = 0;
         $sid = 1;
-        if ($id > 0) {
+        if ($useMaxSeID) {
             $sid = (int)Connection::fetchValue(
                 "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
                 . UserScopedQuery::forTable('sentences')
@@ -177,6 +266,36 @@ class TextParsing
         );
         Connection::execute("DROP TABLE temptextitems2");
         unlink($file_name);
+    }
+
+    // =========================================================================
+    // DEPRECATED METHODS - Kept for backwards compatibility
+    // =========================================================================
+
+    /**
+     * Parse a Japanese text using MeCab and add it to the database.
+     *
+     * @param string $text Text to parse.
+     * @param int    $id   Text ID. If $id = -1 print results,
+     *                     if $id = -2 return splitted texts
+     *
+     * @return null|string[] Splitted sentence if $id = -2
+     *
+     * @psalm-return non-empty-list<string>|null
+     *
+     * @deprecated Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
+     */
+    public static function parseJapanese(string $text, int $id): ?array
+    {
+        if ($id == -2) {
+            return self::splitJapaneseSentences($text);
+        }
+
+        if ($id == -1) {
+            self::displayJapanesePreview($text);
+        }
+
+        self::parseJapaneseToDatabase($text, $id > 0);
         return null;
     }
 
@@ -304,47 +423,82 @@ class TextParsing
         }
     }
 
+    // =========================================================================
+    // INTERNAL HELPERS - Standard text parsing
+    // =========================================================================
+
     /**
-     * Parse a text using the default tools. It is a not-japanese text.
+     * Get language settings for parsing.
      *
-     * @param string $text Text to parse
-     * @param int    $id   Text ID. If $id == -2, only split the text.
-     * @param int    $lid  Language ID.
+     * @param int $lid Language ID
      *
-     * @return null|string[] If $id == -2 return a splitted version of the text.
-     *
-     * @psalm-return non-empty-list<string>|null
+     * @return array{
+     *     removeSpaces: string,
+     *     splitSentence: string,
+     *     noSentenceEnd: string,
+     *     termchar: string,
+     *     rtlScript: mixed,
+     *     splitEachChar: bool
+     * }|null Language settings or null if not found
      */
-    public static function parseStandard(string $text, int $id, int $lid): ?array
+    private static function getLanguageSettings(int $lid): ?array
     {
         $record = QueryBuilder::table('languages')
             ->where('LgID', '=', $lid)
             ->firstPrepared();
 
-        // Return null if language not found
         if ($record === null) {
             return null;
         }
 
-        $removeSpaces = (string)$record['LgRemoveSpaces'];
-        $splitSentence = (string)$record['LgRegexpSplitSentences'];
-        $noSentenceEnd = (string)$record['LgExceptionsSplitSentences'];
-        $termchar = (string)$record['LgRegexpWordCharacters'];
-        $rtlScript = $record['LgRightToLeft'];
+        return [
+            'removeSpaces' => (string)$record['LgRemoveSpaces'],
+            'splitSentence' => (string)$record['LgRegexpSplitSentences'],
+            'noSentenceEnd' => (string)$record['LgExceptionsSplitSentences'],
+            'termchar' => (string)$record['LgRegexpWordCharacters'],
+            'rtlScript' => $record['LgRightToLeft'],
+            'splitEachChar' => ((int)$record['LgSplitEachChar'] === 1),
+        ];
+    }
+
+    /**
+     * Apply initial text transformations (before display preview).
+     *
+     * @param string $text          Raw text
+     * @param bool   $splitEachChar Whether to split each character
+     *
+     * @return string Text after initial transformations
+     */
+    private static function applyInitialTransformations(
+        string $text,
+        bool $splitEachChar
+    ): string {
         // Split text paragraphs using " ¶" symbol
         $text = str_replace("\n", " ¶", $text);
         $text = trim($text);
-        if ((int)$record['LgSplitEachChar'] === 1) {
+        if ($splitEachChar) {
             $text = preg_replace('/([^\s])/u', "$1\t", $text);
         }
         $text = preg_replace('/\s+/u', ' ', $text);
-        if ($id == -1) {
-            echo "<div id=\"check_text\" style=\"margin-right:50px;\">
-            <h4>Text</h4>
-            <p " . ($rtlScript ? 'dir="rtl"' : '') . ">" .
-            str_replace("¶", "<br /><br />", \htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8')) .
-            "</p>";
-        }
+        return $text;
+    }
+
+    /**
+     * Apply word-splitting transformations (after display preview).
+     *
+     * @param string $text          Text after initial transformations
+     * @param string $splitSentence Sentence split regex
+     * @param string $noSentenceEnd Exception patterns
+     * @param string $termchar      Word character regex
+     *
+     * @return string Preprocessed text ready for parsing
+     */
+    private static function applyWordSplitting(
+        string $text,
+        string $splitSentence,
+        string $noSentenceEnd,
+        string $termchar
+    ): string {
         // "\r" => Sentence delimiter, "\t" and "\n" => Word delimiter
         $text = preg_replace_callback(
             "/(\S+)\s*((\.+)|([$splitSentence]))([]'`\"”)‘’‹›“„«»』」]*)(?=(\s*)(\S+|$))/u",
@@ -356,7 +510,7 @@ class TextParsing
             $text
         );
         // Paragraph delimiters become a combination of ¶ and carriage return \r
-        $text = str_replace(array("¶"," ¶"), array("¶\r","\r¶"), $text);
+        $text = str_replace(array("¶", " ¶"), array("¶\r", "\r¶"), $text);
         $text = preg_replace(
             array(
                 '/([^' . $termchar . '])/u',
@@ -366,19 +520,66 @@ class TextParsing
             array("\n$1\n", "$1", "$1$2$3"),
             $text
         );
-        if ($id == -2) {
-            $text = StringUtils::removeSpaces(
-                str_replace(
-                    array("\r\r", "\t", "\n"),
-                    array("\r", "", ""),
-                    $text
-                ),
-                $removeSpaces
-            );
-            return explode("\r", $text);
-        }
 
+        return $text;
+    }
 
+    /**
+     * Split standard text into sentences (split-only mode).
+     *
+     * @param string $text         Preprocessed text
+     * @param string $removeSpaces Space removal setting
+     *
+     * @return string[] Array of sentences
+     *
+     * @psalm-return non-empty-list<string>
+     */
+    private static function splitStandardSentences(string $text, string $removeSpaces): array
+    {
+        $text = StringUtils::removeSpaces(
+            str_replace(
+                array("\r\r", "\t", "\n"),
+                array("\r", "", ""),
+                $text
+            ),
+            $removeSpaces
+        );
+        return explode("\r", $text);
+    }
+
+    /**
+     * Display preview HTML for standard text.
+     *
+     * @param string $text      Preprocessed text (after initial transformations)
+     * @param bool   $rtlScript Whether text is right-to-left
+     *
+     * @return void
+     */
+    private static function displayStandardPreview(string $text, bool $rtlScript): void
+    {
+        echo "<div id=\"check_text\" style=\"margin-right:50px;\">
+        <h4>Text</h4>
+        <p " . ($rtlScript ? 'dir="rtl"' : '') . ">" .
+        str_replace("¶", "<br /><br />", \htmlspecialchars($text ?? '', ENT_QUOTES, 'UTF-8')) .
+        "</p>";
+    }
+
+    /**
+     * Parse standard text and insert into temptextitems.
+     *
+     * @param string $text         Preprocessed text
+     * @param string $termchar     Word character regex
+     * @param string $removeSpaces Space removal setting
+     * @param bool   $useMaxSeID   Whether to query for max sentence ID
+     *
+     * @return void
+     */
+    private static function parseStandardToDatabase(
+        string $text,
+        string $termchar,
+        string $removeSpaces,
+        bool $useMaxSeID
+    ): void {
         $text = trim(
             preg_replace(
                 array(
@@ -402,18 +603,22 @@ class TextParsing
             preg_replace("/(\n|^)(?!1\t)/u", "\n0\t", $text),
             $removeSpaces
         );
+
         // It is faster to write to a file and let SQL do its magic, but may run into
         // security restrictions
         $use_local_infile = in_array(
             Connection::fetchValue("SELECT @@GLOBAL.local_infile as value"),
             array(1, '1', 'ON')
         );
+        // For database mode, we use a positive ID placeholder (1) since saveWithSql
+        // only checks if id > 0 for sentence ID calculation
+        $idForSql = $useMaxSeID ? 1 : 0;
         if ($use_local_infile) {
-            self::saveWithSql($text, $id);
+            self::saveWithSql($text, $idForSql);
         } else {
             $order = 0;
             $sid = 1;
-            if ($id > 0) {
+            if ($useMaxSeID) {
                 $sid = (int)Connection::fetchValue(
                     "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
                     . UserScopedQuery::forTable('sentences')
@@ -456,6 +661,62 @@ class TextParsing
                 );
             }
         }
+    }
+
+    /**
+     * Parse a text using the default tools. It is a not-japanese text.
+     *
+     * @param string $text Text to parse
+     * @param int    $id   Text ID. If $id == -2, only split the text.
+     * @param int    $lid  Language ID.
+     *
+     * @return null|string[] If $id == -2 return a splitted version of the text.
+     *
+     * @psalm-return non-empty-list<string>|null
+     *
+     * @deprecated Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
+     */
+    public static function parseStandard(string $text, int $id, int $lid): ?array
+    {
+        $settings = self::getLanguageSettings($lid);
+
+        // Return null if language not found
+        if ($settings === null) {
+            return null;
+        }
+
+        // Apply initial transformations (paragraph markers, trim, collapse spaces)
+        $text = self::applyInitialTransformations(
+            $text,
+            $settings['splitEachChar']
+        );
+
+        // Preview mode - display HTML BEFORE word splitting
+        if ($id == -1) {
+            self::displayStandardPreview($text, (bool)$settings['rtlScript']);
+        }
+
+        // Apply word-splitting transformations
+        $text = self::applyWordSplitting(
+            $text,
+            $settings['splitSentence'],
+            $settings['noSentenceEnd'],
+            $settings['termchar']
+        );
+
+        // Split-only mode
+        if ($id == -2) {
+            return self::splitStandardSentences($text, $settings['removeSpaces']);
+        }
+
+        // Database insertion (for both preview mode -1 and actual save mode > 0)
+        self::parseStandardToDatabase(
+            $text,
+            $settings['termchar'],
+            $settings['removeSpaces'],
+            $id > 0
+        );
+
         return null;
     }
 
@@ -470,6 +731,8 @@ class TextParsing
      * @return null|string[] If $id = -2 return a splitted version of the text
      *
      * @psalm-return non-empty-list<string>|null
+     *
+     * @deprecated Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
      */
     public static function prepare(string $text, int $id, int $lid): ?array
     {
@@ -787,6 +1050,8 @@ class TextParsing
      * @return null|string[] The sentence array if $id = -2
      *
      * @psalm-return non-empty-list<string>|null
+     *
+     * @deprecated Use splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
      */
     public static function splitCheck(string $text, string|int $lid, int $id): ?array
     {

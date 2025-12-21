@@ -1046,7 +1046,7 @@ class WordUploadService
             foreach ($rows as $record) {
                 $txtid = (int) $record["TxID"];
                 $txttxt = (string) $record["TxText"];
-                TextParsing::splitCheck($txttxt, $langId, $txtid);
+                TextParsing::parseAndSave($txttxt, $langId, $txtid);
             }
         } elseif ($mwords > 0) {
             // Update individual multi-word expressions

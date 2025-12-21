@@ -262,7 +262,7 @@ class TextService
             $bindings3,
             'TxText'
         );
-        TextParsing::splitCheck($textContent, (int) $lgId, $textId);
+        TextParsing::parseAndSave($textContent, (int) $lgId, $textId);
 
         // Delete from archived
         $deleted = QueryBuilder::table('archivedtexts')
@@ -352,7 +352,7 @@ class TextService
                 $bindings3,
                 'TxText'
             );
-            TextParsing::splitCheck($textContent, $record['AtLgID'], $id);
+            TextParsing::parseAndSave($textContent, (int) $record['AtLgID'], $id);
 
             QueryBuilder::table('archivedtexts')
                 ->where('AtID', '=', $ida)
@@ -1121,7 +1121,7 @@ class TextService
         );
 
         // Parse the text
-        TextParsing::splitCheck($cleanText, $lgId, $textId);
+        TextParsing::parseAndSave($cleanText, $lgId, $textId);
 
         // Get statistics
         $bindings2 = [$textId];
@@ -1188,7 +1188,7 @@ class TextService
             ->delete();
         Maintenance::adjustAutoIncrement('sentences', 'SeID');
 
-        TextParsing::splitCheck($cleanText, $lgId, $textId);
+        TextParsing::parseAndSave($cleanText, $lgId, $textId);
 
         // Get statistics
         $bindings2 = [$textId];
@@ -1346,7 +1346,7 @@ class TextService
                 $bindings,
                 'TxText'
             );
-            TextParsing::splitCheck($textContent, $record['TxLgID'], $id);
+            TextParsing::parseAndSave($textContent, (int) $record['TxLgID'], $id);
             $count++;
         }
 
@@ -1370,7 +1370,7 @@ class TextService
         if (strlen(Escaping::prepareTextdata($text)) > 65000) {
             echo "<p>Error: Text too long, must be below 65000 Bytes.</p>";
         } else {
-            TextParsing::splitCheck($text, $lgId, -1);
+            TextParsing::parseAndDisplayPreview($text, $lgId);
         }
     }
 
@@ -1483,7 +1483,7 @@ class TextService
      */
     public function splitLongText(string $data, int $langId, int $maxSent): array
     {
-        $sentArray = TextParsing::splitCheck($data, $langId, -2);
+        $sentArray = TextParsing::splitIntoSentences($data, $langId);
         $texts = [];
         $textIndex = 0;
         $texts[$textIndex] = [];
@@ -1556,7 +1556,7 @@ class TextService
             $imported += $affected;
             $id = Connection::lastInsertId();
             TagService::saveTextTags($id, $textTags);
-            TextParsing::splitCheck($texts[$i], $langId, $id);
+            TextParsing::parseAndSave($texts[$i], $langId, $id);
         }
 
         return [
@@ -1821,7 +1821,7 @@ class TextService
 
         // Reparse
         $bindings2 = [$textId];
-        TextParsing::splitCheck(
+        TextParsing::parseAndSave(
             Connection::preparedFetchValue(
                 "SELECT TxText FROM texts WHERE TxID = ?"
                 . UserScopedQuery::forTablePrepared('texts', $bindings2),

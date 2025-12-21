@@ -351,7 +351,7 @@ class LanguageService
         foreach ($rows as $record) {
             $txtid = (int)$record["TxID"];
             $txttxt = (string)$record["TxText"];
-            TextParsing::splitCheck($txttxt, $lid, $txtid);
+            TextParsing::parseAndSave($txttxt, $lid, $txtid);
             $count++;
         }
 
@@ -431,7 +431,7 @@ class LanguageService
         foreach ($rows as $record) {
             $txtid = (int)$record["TxID"];
             $txttxt = (string)$record["TxText"];
-            TextParsing::splitCheck($txttxt, $lid, $txtid);
+            TextParsing::parseAndSave($txttxt, $lid, $txtid);
         }
 
         $sentencesAdded = QueryBuilder::table('sentences')
@@ -901,7 +901,7 @@ class LanguageService
         foreach ($rows as $record) {
             $txtid = (int)$record["TxID"];
             $txttxt = (string)$record["TxText"];
-            TextParsing::splitCheck($txttxt, $lid, $txtid);
+            TextParsing::parseAndSave($txttxt, $lid, $txtid);
         }
 
         $sentencesAdded = QueryBuilder::table('sentences')
