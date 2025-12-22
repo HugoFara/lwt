@@ -521,7 +521,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(69);
       keydown_event_do_text_text(event);
 
-      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('edit_mword.php'));
+      expect(mockLoadModalFrame).toHaveBeenCalledWith(expect.stringContaining('/word/edit-multi'));
     });
 
     it('opens new word form for unknown words (via hover)', () => {

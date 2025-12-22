@@ -73,30 +73,26 @@ function buildWordClasses(word: WordData, showAll: boolean): string {
  * Build data attributes for a word span.
  */
 function buildWordDataAttributes(word: WordData): Record<string, string> {
+  // Use underscore attributes to match PHP backend (TextReadingService)
+  // The multi-word selection code and other JS expects these underscore attributes
   const attrs: Record<string, string> = {
-    'data-hex': word.hex,
-    'data-position': String(word.position),
-    'data-status': String(word.status),
-    'data-order': String(word.position)
+    'data_pos': String(word.position),
+    'data_order': String(word.position),
+    'data_status': String(word.status),
+    'data_wid': word.wordId ? String(word.wordId) : ''
   };
 
-  if (word.wordId) {
-    attrs['data-wid'] = String(word.wordId);
-  }
-
   if (word.translation) {
-    attrs['data-trans'] = word.translation;
-    // data_trans is used for CSS pseudo-element content
     attrs['data_trans'] = word.translation;
   }
 
   if (word.romanization) {
-    attrs['data-rom'] = word.romanization;
+    attrs['data_rom'] = word.romanization;
   }
 
   if (word.wordCount > 1) {
-    attrs['data-code'] = String(word.wordCount);
-    attrs['data-text'] = word.text;
+    attrs['data_code'] = String(word.wordCount);
+    attrs['data_text'] = word.text;
   }
 
   return attrs;
@@ -186,8 +182,8 @@ export function updateWordStatusInDOM(
     // Update status class
     el.className = el.className.replace(/status\d+/g, `status${newStatus}`);
 
-    // Update data attribute
-    el.setAttribute('data-status', String(newStatus));
+    // Update data attribute (use underscore to match PHP backend)
+    el.setAttribute('data_status', String(newStatus));
 
     // Update word ID if provided
     if (newWordId !== null) {
@@ -195,9 +191,9 @@ export function updateWordStatusInDOM(
       el.className = el.className.replace(/word\d+/g, '');
       if (newWordId > 0) {
         el.classList.add(`word${newWordId}`);
-        el.setAttribute('data-wid', String(newWordId));
+        el.setAttribute('data_wid', String(newWordId));
       } else {
-        el.removeAttribute('data-wid');
+        el.removeAttribute('data_wid');
       }
     }
   });
@@ -217,15 +213,15 @@ export function updateWordTranslationInDOM(
 
   elements.forEach(el => {
     if (translation) {
-      el.setAttribute('data-trans', translation);
+      el.setAttribute('data_trans', translation);
     } else {
-      el.removeAttribute('data-trans');
+      el.removeAttribute('data_trans');
     }
 
     if (romanization) {
-      el.setAttribute('data-rom', romanization);
+      el.setAttribute('data_rom', romanization);
     } else {
-      el.removeAttribute('data-rom');
+      el.removeAttribute('data_rom');
     }
   });
 }

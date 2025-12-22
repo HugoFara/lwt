@@ -127,46 +127,46 @@ describe('reading/text_renderer.ts', () => {
       expect(result).toContain('id="ID-3-2"');
     });
 
-    it('includes data-hex attribute', () => {
-      const word = createWordData({ hex: 'deadbeef' });
+    it('includes data_order attribute', () => {
+      const word = createWordData({ position: 5 });
       const result = renderWord(word, defaultSettings);
 
-      expect(result).toContain('data-hex="deadbeef"');
+      expect(result).toContain('data_order="5"');
     });
 
-    it('includes data-status attribute', () => {
+    it('includes data_status attribute', () => {
       const word = createWordData({ status: 5 });
       const result = renderWord(word, defaultSettings);
 
-      expect(result).toContain('data-status="5"');
+      expect(result).toContain('data_status="5"');
     });
 
-    it('includes data-wid when wordId present', () => {
+    it('includes data_wid when wordId present', () => {
       const word = createWordData({ wordId: 123 });
       const result = renderWord(word, defaultSettings);
 
-      expect(result).toContain('data-wid="123"');
+      expect(result).toContain('data_wid="123"');
     });
 
-    it('includes data-trans when translation present', () => {
+    it('includes data_trans when translation present', () => {
       const word = createWordData({ translation: 'hola' });
       const result = renderWord(word, defaultSettings);
 
-      expect(result).toContain('data-trans="hola"');
+      expect(result).toContain('data_trans="hola"');
     });
 
-    it('includes data-rom when romanization present', () => {
+    it('includes data_rom when romanization present', () => {
       const word = createWordData({ romanization: 'nihao' });
       const result = renderWord(word, defaultSettings);
 
-      expect(result).toContain('data-rom="nihao"');
+      expect(result).toContain('data_rom="nihao"');
     });
 
-    it('includes data-code for multiwords', () => {
+    it('includes data_code for multiwords', () => {
       const word = createWordData({ wordCount: 3 });
       const result = renderWord(word, defaultSettings);
 
-      expect(result).toContain('data-code="3"');
+      expect(result).toContain('data_code="3"');
     });
 
     it('escapes HTML in text', () => {
@@ -268,13 +268,13 @@ describe('reading/text_renderer.ts', () => {
       expect(element.classList.contains('status0')).toBe(false);
     });
 
-    it('updates data-status attribute', () => {
-      document.body.innerHTML = '<span class="TERM123 status0" data-status="0">word</span>';
+    it('updates data_status attribute', () => {
+      document.body.innerHTML = '<span class="TERM123 status0" data_status="0">word</span>';
       const element = document.querySelector('.TERM123') as HTMLElement;
 
       updateWordStatusInDOM('123', 5);
 
-      expect(element.getAttribute('data-status')).toBe('5');
+      expect(element.getAttribute('data_status')).toBe('5');
     });
 
     it('updates multiple matching elements', () => {
@@ -300,22 +300,22 @@ describe('reading/text_renderer.ts', () => {
       expect(element.classList.contains('word456')).toBe(true);
     });
 
-    it('sets data-wid when word ID provided', () => {
+    it('sets data_wid when word ID provided', () => {
       document.body.innerHTML = '<span class="TERM123 status0">word</span>';
       const element = document.querySelector('.TERM123') as HTMLElement;
 
       updateWordStatusInDOM('123', 1, 789);
 
-      expect(element.getAttribute('data-wid')).toBe('789');
+      expect(element.getAttribute('data_wid')).toBe('789');
     });
 
-    it('removes data-wid when word ID is 0', () => {
-      document.body.innerHTML = '<span class="TERM123 status1" data-wid="123">word</span>';
+    it('removes data_wid when word ID is 0', () => {
+      document.body.innerHTML = '<span class="TERM123 status1" data_wid="123">word</span>';
       const element = document.querySelector('.TERM123') as HTMLElement;
 
       updateWordStatusInDOM('123', 0, 0);
 
-      expect(element.hasAttribute('data-wid')).toBe(false);
+      expect(element.hasAttribute('data_wid')).toBe(false);
     });
 
     it('uses custom container when provided', () => {
@@ -340,40 +340,40 @@ describe('reading/text_renderer.ts', () => {
   // ===========================================================================
 
   describe('updateWordTranslationInDOM', () => {
-    it('sets data-trans attribute', () => {
+    it('sets data_trans attribute', () => {
       document.body.innerHTML = '<span class="TERM123">word</span>';
       const element = document.querySelector('.TERM123') as HTMLElement;
 
       updateWordTranslationInDOM('123', 'translation', '');
 
-      expect(element.getAttribute('data-trans')).toBe('translation');
+      expect(element.getAttribute('data_trans')).toBe('translation');
     });
 
-    it('sets data-rom attribute', () => {
+    it('sets data_rom attribute', () => {
       document.body.innerHTML = '<span class="TERM123">word</span>';
       const element = document.querySelector('.TERM123') as HTMLElement;
 
       updateWordTranslationInDOM('123', '', 'romanization');
 
-      expect(element.getAttribute('data-rom')).toBe('romanization');
+      expect(element.getAttribute('data_rom')).toBe('romanization');
     });
 
-    it('removes data-trans when empty', () => {
-      document.body.innerHTML = '<span class="TERM123" data-trans="old">word</span>';
+    it('removes data_trans when empty', () => {
+      document.body.innerHTML = '<span class="TERM123" data_trans="old">word</span>';
       const element = document.querySelector('.TERM123') as HTMLElement;
 
       updateWordTranslationInDOM('123', '', '');
 
-      expect(element.hasAttribute('data-trans')).toBe(false);
+      expect(element.hasAttribute('data_trans')).toBe(false);
     });
 
-    it('removes data-rom when empty', () => {
-      document.body.innerHTML = '<span class="TERM123" data-rom="old">word</span>';
+    it('removes data_rom when empty', () => {
+      document.body.innerHTML = '<span class="TERM123" data_rom="old">word</span>';
       const element = document.querySelector('.TERM123') as HTMLElement;
 
       updateWordTranslationInDOM('123', '', '');
 
-      expect(element.hasAttribute('data-rom')).toBe(false);
+      expect(element.hasAttribute('data_rom')).toBe(false);
     });
 
     it('updates multiple elements', () => {
@@ -386,8 +386,8 @@ describe('reading/text_renderer.ts', () => {
 
       const elements = document.querySelectorAll('.TERM123');
       elements.forEach(el => {
-        expect(el.getAttribute('data-trans')).toBe('new trans');
-        expect(el.getAttribute('data-rom')).toBe('new rom');
+        expect(el.getAttribute('data_trans')).toBe('new trans');
+        expect(el.getAttribute('data_rom')).toBe('new rom');
       });
     });
 
@@ -399,7 +399,7 @@ describe('reading/text_renderer.ts', () => {
       updateWordTranslationInDOM('123', 'trans', 'rom', container);
 
       const el = container.querySelector('.TERM123') as HTMLElement;
-      expect(el.getAttribute('data-trans')).toBe('trans');
+      expect(el.getAttribute('data_trans')).toBe('trans');
     });
   });
 

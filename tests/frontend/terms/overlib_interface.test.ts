@@ -98,15 +98,14 @@ describe('overlib_interface.ts', () => {
       expect(result).toBe('');
     });
 
-    it('creates LTR multiword links for valid multiwords', () => {
+    it('creates LTR multiword links for valid multiwords via modal', () => {
       const multiWords = ['2 word1 word2', undefined, '4 word1 word2 word3 word4', '', '', '', '', ''];
       const result = make_overlib_link_new_multiword(1, '5', multiWords, false);
 
       expect(result).toContain('Expr:');
       expect(result).toContain('2..');
       expect(result).toContain('4..');
-      expect(result).toContain('href="edit_mword.php?tid=1');
-      expect(result).toContain('&amp;ord=5');
+      expect(result).toContain('openMultiWordModal');
     });
 
     it('creates RTL multiword links when rtl is true', () => {
@@ -121,7 +120,7 @@ describe('overlib_interface.ts', () => {
       const multiWords = ['2 test', '', '', '', '', '', '', ''];
       const result = make_overlib_link_new_multiword(1, 10, multiWords, false);
 
-      expect(result).toContain('&amp;ord=10');
+      expect(result).toContain('openMultiWordModal(1, 10,');
     });
   });
 
@@ -390,13 +389,11 @@ describe('overlib_interface.ts', () => {
   // ===========================================================================
 
   describe('make_overlib_link_edit_multiword', () => {
-    it('creates link to edit a multiword', () => {
+    it('creates button to edit a multiword via modal', () => {
       const result = make_overlib_link_edit_multiword(1, '5', 100);
 
-      expect(result).toContain('edit_mword.php');
-      expect(result).toContain('tid=1');
-      expect(result).toContain('ord=5');
-      expect(result).toContain('wid=100');
+      expect(result).toContain('openMultiWordModal');
+      expect(result).toContain("1, 5, '', 0, 100");  // textId, position, text='', wordCount=0, wordId
       expect(result).toContain('Edit term');
     });
   });
@@ -406,11 +403,12 @@ describe('overlib_interface.ts', () => {
   // ===========================================================================
 
   describe('make_overlib_link_edit_multiword_title', () => {
-    it('creates styled title link for multiword', () => {
+    it('creates styled title button for multiword via modal', () => {
       const result = make_overlib_link_edit_multiword_title('2-Word-Expression', 1, '5', 100);
 
       expect(result).toContain('style="color:yellow"');
-      expect(result).toContain('edit_mword.php');
+      expect(result).toContain('openMultiWordModal');
+      expect(result).toContain("1, 5, '', 0, 100");  // textId, position, text='', wordCount=0, wordId
       expect(result).toContain('2-Word-Expression');
     });
   });
@@ -420,13 +418,11 @@ describe('overlib_interface.ts', () => {
   // ===========================================================================
 
   describe('make_overlib_link_create_edit_multiword', () => {
-    it('creates link to create/edit multiword with length and text', () => {
+    it('creates button to create/edit multiword via modal', () => {
       const result = make_overlib_link_create_edit_multiword(3, 1, '5', '3 word1 word2 word3');
 
-      expect(result).toContain('edit_mword.php');
-      expect(result).toContain('tid=1');
-      expect(result).toContain('ord=5');
-      expect(result).toContain('txt=3 word1 word2 word3');
+      expect(result).toContain('openMultiWordModal');
+      expect(result).toContain("1, 5, '3 word1 word2 word3', 3");  // textId, position, text, wordCount
       expect(result).toContain('3..');
     });
   });
@@ -436,11 +432,11 @@ describe('overlib_interface.ts', () => {
   // ===========================================================================
 
   describe('make_overlib_link_create_edit_multiword_rtl', () => {
-    it('creates RTL link for multiword', () => {
+    it('creates RTL button for multiword via modal', () => {
       const result = make_overlib_link_create_edit_multiword_rtl(3, 1, '5', '3 מילה1 מילה2');
 
       expect(result).toContain('dir="rtl"');
-      expect(result).toContain('edit_mword.php');
+      expect(result).toContain('openMultiWordModal');
       expect(result).toContain('3..');
     });
   });

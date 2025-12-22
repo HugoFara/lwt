@@ -50,8 +50,10 @@ import './terms/term_operations';
 // Reading interface
 import './reading/stores/word_store';
 import './reading/stores/word_form_store';
+import './reading/stores/multi_word_form_store';
 import './reading/components/word_modal';
 import './reading/components/word_edit_form';
+import './reading/components/multi_word_modal';
 import './reading/components/text_reader';
 import './reading/text_renderer';
 import './reading/text_events';

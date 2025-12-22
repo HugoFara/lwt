@@ -124,6 +124,9 @@ use Lwt\View\Helper\PageLayoutHelper;
 
   <!-- Word modal -->
   <?php include __DIR__ . '/word_modal.php'; ?>
+
+  <!-- Multi-word modal -->
+  <?php include __DIR__ . '/multi_word_modal.php'; ?>
 </div>
 
 <style>

@@ -13,6 +13,7 @@
  * @license Unlicense <http://unlicense.org/>
  */
 
+import Alpine from 'alpinejs';
 import { escape_html_chars, escape_html_chars_2 } from '../core/html_utils';
 import { make_tooltip, getStatusName, getStatusAbbr } from './word_status';
 import { createTheDictLink, createSentLookupLink } from './dictionary';
@@ -20,6 +21,7 @@ import { TermsApi, type TermDetails } from '../api/terms';
 import { iconHtml, createIcon, initLucideIcons } from '../ui/icons';
 import { showRightFramesPanel } from '../reading/frame_management';
 import { speechDispatcher } from '../core/user_interactions';
+import type { MultiWordFormStoreState } from '../reading/stores/multi_word_form_store';
 
 // Import the popup system
 import { overlib } from '../ui/word_popup';
@@ -1049,6 +1051,35 @@ export function make_overlib_link_new_word(
 }
 
 /**
+ * Open the multi-word edit modal.
+ * Exposed to window for use in onclick handlers.
+ *
+ * @param textId   Text ID
+ * @param position Position in text
+ * @param text     Multi-word text (for new expressions)
+ * @param wordCount Number of words
+ * @param wordId   Word ID (for existing expressions)
+ */
+export function openMultiWordModal(
+  textId: number,
+  position: number,
+  text: string,
+  wordCount: number,
+  wordId?: number
+): void {
+  const store = Alpine.store('multiWordForm') as MultiWordFormStoreState;
+  store.loadForEdit(textId, position, text, wordCount, wordId);
+}
+
+// Expose to window for onclick handlers in HTML strings
+declare global {
+  interface Window {
+    openMultiWordModal: typeof openMultiWordModal;
+  }
+}
+window.openMultiWordModal = openMultiWordModal;
+
+/**
  * Create a link to edit a multiword.
  *
  * @param txid Text ID
@@ -1061,9 +1092,7 @@ export function make_overlib_link_edit_multiword(
   torder: string | number,
   wid: string | number
 ): string {
-  return ' <a href="edit_mword.php?tid=' + txid +
-    '&amp;ord=' + torder +
-    '&amp;wid=' + wid + '" target="ro" onclick="showRightFramesPanel();">Edit term</a> ';
+  return ` <a href="#" onclick="openMultiWordModal(${txid}, ${torder}, '', 0, ${wid}); return false;">Edit term</a> `;
 }
 
 /**
@@ -1081,10 +1110,7 @@ export function make_overlib_link_edit_multiword_title(
   torder: string | number,
   wid: string | number
 ): string {
-  return '<a style="color:yellow" href="edit_mword.php?tid=' + txid +
-    '&amp;ord=' + torder +
-    '&amp;wid=' + wid + '" target="ro" onclick="showRightFramesPanel();">' +
-    text + '</a>';
+  return `<a style="color:yellow" href="#" onclick="openMultiWordModal(${txid}, ${torder}, '', 0, ${wid}); return false;">${text}</a>`;
 }
 
 /**
@@ -1102,11 +1128,9 @@ export function make_overlib_link_create_edit_multiword(
   torder: string | number,
   txt: string
 ): string {
-  return ' <a href="edit_mword.php?tid=' + txid +
-    '&amp;ord=' + torder +
-    '&amp;txt=' + txt +
-    '" target="ro" onclick="showRightFramesPanel();">' +
-    len + '..' + escape_html_chars(txt.substring(2).trim()) + '</a> ';
+  // Escape the text for use in JavaScript string
+  const escapedTxt = txt.replace(/'/g, "\\'").replace(/"/g, '\\"');
+  return ` <a href="#" onclick="openMultiWordModal(${txid}, ${torder}, '${escapedTxt}', ${len}); return false;">${len}..${escape_html_chars(txt.substring(2).trim())}</a> `;
 }
 
 /**
@@ -1124,11 +1148,9 @@ export function make_overlib_link_create_edit_multiword_rtl(
   torder: string | number,
   txt: string
 ): string {
-  return ' <a dir="rtl" href="edit_mword.php?tid=' + txid +
-    '&amp;ord=' + torder +
-    '&amp;txt=' + txt +
-    '" target="ro" onclick="showRightFramesPanel();">' +
-    len + '..' + escape_html_chars(txt.substring(2).trim()) + '</a> ';
+  // Escape the text for use in JavaScript string
+  const escapedTxt = txt.replace(/'/g, "\\'").replace(/"/g, '\\"');
+  return ` <a dir="rtl" href="#" onclick="openMultiWordModal(${txid}, ${torder}, '${escapedTxt}', ${len}); return false;">${len}..${escape_html_chars(txt.substring(2).trim())}</a> `;
 }
 
 /**

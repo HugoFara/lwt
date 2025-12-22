@@ -331,7 +331,7 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   if (keyCode === 69 || keyCode === 71) { //  E / G: edit term
     let url = '';
     if (curr.classList.contains('mword')) {
-      url = 'edit_mword.php?wid=' + wid + '&len=' + getAttrElement(curr, 'data_code') +
+      url = '/word/edit-multi?wid=' + wid + '&len=' + getAttrElement(curr, 'data_code') +
         '&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;
     } else if (stat === '0') {
       url = '/word/edit?wid=&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;

@@ -37,6 +37,23 @@ vi.mock('../../../src/frontend/js/ui/native_tooltip', () => ({
   removeAllTooltips: mockRemoveAllTooltips
 }));
 
+// Mock Alpine.js store for multi-word modal
+const mockLoadForEdit = vi.hoisted(() => vi.fn());
+const mockMultiWordFormStore = vi.hoisted(() => ({
+  loadForEdit: mockLoadForEdit
+}));
+
+vi.mock('alpinejs', () => ({
+  default: {
+    store: vi.fn((name: string) => {
+      if (name === 'multiWordForm') {
+        return mockMultiWordFormStore;
+      }
+      return undefined;
+    })
+  }
+}));
+
 // Mock imports
 vi.mock('../../../src/frontend/js/reading/text_annotations', () => ({
   getAttr: vi.fn((el: HTMLElement, attr: string) => {
@@ -142,7 +159,7 @@ describe('text_multiword_selection.ts', () => {
       expect(event.handled).toBe(true);
     });
 
-    it('opens edit_mword.php for multi-word selection', () => {
+    it('opens multi-word modal via Alpine store for multi-word selection', () => {
       document.body.innerHTML = `
         <div id="sentence">
           <span class="lword tword" data_order="10">Hello</span>
@@ -154,15 +171,14 @@ describe('text_multiword_selection.ts', () => {
 
       mwordDragNDrop.finish(event);
 
-      expect(loadModalFrame).toHaveBeenCalledWith(
-        expect.stringContaining('edit_mword.php?')
+      // Should call Alpine store's loadForEdit instead of loadModalFrame
+      expect(mockLoadForEdit).toHaveBeenCalledWith(
+        42,    // textId from LWT_DATA.text.id
+        10,    // position from first lword data_order
+        'HelloWorld',  // combined text from lword elements
+        2      // word count (number of lword.tword elements)
       );
-      expect(loadModalFrame).toHaveBeenCalledWith(
-        expect.stringContaining('tid=42')
-      );
-      expect(loadModalFrame).toHaveBeenCalledWith(
-        expect.stringContaining('len=2')
-      );
+      expect(loadModalFrame).not.toHaveBeenCalled();
     });
 
     it('alerts when selected text is too long (>250 chars)', () => {
@@ -775,9 +791,12 @@ describe('text_multiword_selection.ts', () => {
 
       mwordDragNDrop.finish(event);
 
-      // URLSearchParams encodes space as +
-      expect(loadModalFrame).toHaveBeenCalledWith(
-        expect.stringContaining('txt=Hello+')
+      // Alpine store's loadForEdit is called with combined text
+      expect(mockLoadForEdit).toHaveBeenCalledWith(
+        42,           // textId
+        10,           // position from first lword
+        'Hello World', // combined text from all lword elements
+        3             // word count (3 lword.tword elements)
       );
     });
   });

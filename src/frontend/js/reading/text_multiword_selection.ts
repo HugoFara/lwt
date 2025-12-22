@@ -6,9 +6,11 @@
  */
 
 // getAttr not needed - using native getAttribute
+import Alpine from 'alpinejs';
 import { hoverIntent } from '../core/hover_intent';
 import { loadModalFrame } from './frame_management';
 import { removeAllTooltips } from '../ui/native_tooltip';
+import type { MultiWordFormStoreState } from './stores/multi_word_form_store';
 
 // Type definitions
 interface LwtSettings {
@@ -89,13 +91,14 @@ export const mwordDragNDrop: MwordDragNDropState = {
           if (text.length > 250) {
             alert('Selected text is too long!!!');
           } else {
-            const params = new URLSearchParams({
-              tid: String(LWT_DATA.text.id),
-              len: String(len),
-              ord: word_ord,
-              txt: text
-            });
-            loadModalFrame('edit_mword.php?' + params.toString());
+            // Open multi-word modal via Alpine.js store
+            const store = Alpine.store('multiWordForm') as MultiWordFormStoreState;
+            store.loadForEdit(
+              LWT_DATA.text.id,
+              parseInt(word_ord, 10),
+              text,
+              len
+            );
           }
         } else {
           // Create only a normal word
