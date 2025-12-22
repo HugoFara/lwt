@@ -48,27 +48,6 @@ class SettingsService
      * @var array<string, array{dft: string, num: int, min?: int, max?: int}>
      */
     private const SETTING_DEFINITIONS = [
-        'set-text-h-frameheight-no-audio' => [
-            "dft" => '140', "num" => 1, "min" => 10, "max" => 999
-        ],
-        'set-text-h-frameheight-with-audio' => [
-            "dft" => '200', "num" => 1, "min" => 10, "max" => 999
-        ],
-        'set-text-l-framewidth-percent' => [
-            "dft" => '60', "num" => 1, "min" => 5, "max" => 95
-        ],
-        'set-text-r-frameheight-percent' => [
-            "dft" => '37', "num" => 1, "min" => 5, "max" => 95
-        ],
-        'set-test-h-frameheight' => [
-            "dft" => '140', "num" => 1, "min" => 10, "max" => 999
-        ],
-        'set-test-l-framewidth-percent' => [
-            "dft" => '50', "num" => 1, "min" => 5, "max" => 95
-        ],
-        'set-test-r-frameheight-percent' => [
-            "dft" => '50', "num" => 1, "min" => 5, "max" => 95
-        ],
         'set-words-to-do-buttons' => [
             "dft" => '1', "num" => 0
         ],
@@ -156,13 +135,6 @@ class SettingsService
      */
     private const SETTING_KEYS = [
         'set-theme-dir',
-        'set-text-h-frameheight-no-audio',
-        'set-text-h-frameheight-with-audio',
-        'set-text-l-framewidth-percent',
-        'set-text-r-frameheight-percent',
-        'set-test-h-frameheight',
-        'set-test-l-framewidth-percent',
-        'set-test-r-frameheight-percent',
         'set-words-to-do-buttons',
         'set-tooltip-mode',
         'set-ggl-translation-per-page',

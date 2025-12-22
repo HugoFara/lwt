@@ -336,9 +336,6 @@ class TextControllerReadTest extends TestCase
 
         $showLearningTrans = Settings::getZeroOrOne('showlearningtranslations', 1);
         $this->assertContains($showLearningTrans, [0, 1]);
-
-        $frameLWidth = Settings::getWithDefault('set-text-l-framewidth-percent');
-        $this->assertIsString($frameLWidth);
     }
 
     // ===== Integration tests =====

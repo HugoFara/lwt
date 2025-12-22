@@ -310,45 +310,6 @@ VALUES
 INSERT INTO settings
 VALUES
   (
-    'set-text-h-frameheight-no-audio',
-    '140'
-  );
-INSERT INTO settings
-VALUES
-  (
-    'set-text-h-frameheight-with-audio',
-    '200'
-  );
-INSERT INTO settings
-VALUES
-  (
-    'set-text-l-framewidth-percent',
-    '50'
-  );
-INSERT INTO settings
-VALUES
-  (
-    'set-text-r-frameheight-percent',
-    '50'
-  );
-INSERT INTO settings
-VALUES
-  ('set-test-h-frameheight', '140');
-INSERT INTO settings
-VALUES
-  (
-    'set-test-l-framewidth-percent',
-    '50'
-  );
-INSERT INTO settings
-VALUES
-  (
-    'set-test-r-frameheight-percent',
-    '50'
-  );
-INSERT INTO settings
-VALUES
-  (
     'set-test-main-frame-waiting-time',
     '0'
   );

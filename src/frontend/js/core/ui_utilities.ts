@@ -9,7 +9,6 @@
 import { check } from '../forms/form_validation';
 import { changeImprAnnText, changeImprAnnRadio, do_ajax_show_similar_terms } from '../terms/term_operations';
 import { readRawTextAloud } from './user_interactions';
-import { do_ajax_save_setting } from './ajax_utilities';
 import { initInlineEdit } from '../ui/inline_edit';
 import { initTermTags, initTextTags } from '../ui/tagify_tags';
 import { fetchTermTags, fetchTextTags } from './app_data';
@@ -22,72 +21,6 @@ import { spinnerHtml } from '../ui/icons';
 function getAttr(el: HTMLElement, attr: string): string {
   const val = el.getAttribute(attr);
   return typeof val === 'string' ? val : '';
-}
-
-/**
- * Initialize native resizable behavior for the right frames panel.
- * Replaces jQuery UI resizable with a custom implementation.
- * Creates a drag handle on the west (left) side of #frames-r.
- */
-function initFrameResizable(): void {
-  const framesR = document.getElementById('frames-r');
-  const framesL = document.getElementById('frames-l');
-  if (!framesR || !framesL) return;
-
-  // Create the resize handle
-  const handle = document.createElement('div');
-  handle.className = 'resize-handle-w';
-  handle.style.cssText = `
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 8px;
-    height: 100%;
-    cursor: ew-resize;
-    background: transparent;
-    z-index: 100;
-  `;
-  framesR.style.position = 'fixed';
-  framesR.appendChild(handle);
-
-  let isResizing = false;
-  let startX = 0;
-  let startLeft = 0;
-
-  const onMouseDown = (e: MouseEvent): void => {
-    isResizing = true;
-    startX = e.clientX;
-    startLeft = framesR.offsetLeft;
-    document.body.style.cursor = 'ew-resize';
-    document.body.style.userSelect = 'none';
-    e.preventDefault();
-  };
-
-  const onMouseMove = (e: MouseEvent): void => {
-    if (!isResizing) return;
-    const deltaX = e.clientX - startX;
-    const newLeft = startLeft + deltaX;
-    // Apply position change during drag
-    framesR.style.left = newLeft + 'px';
-    framesR.style.width = `calc(100% - ${newLeft}px)`;
-    framesL.style.width = (newLeft - 20) + 'px';
-  };
-
-  const onMouseUp = (): void => {
-    if (!isResizing) return;
-    isResizing = false;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-    // Save the setting when resize stops
-    const leftWidth = framesL.offsetWidth;
-    const windowWidth = window.innerWidth;
-    const percent = Math.round((leftWidth / windowWidth) * 100);
-    do_ajax_save_setting('set-text-l-framewidth-percent', String(percent));
-  };
-
-  handle.addEventListener('mousedown', onMouseDown);
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('mouseup', onMouseUp);
 }
 
 /**
@@ -417,9 +350,6 @@ export function prepareMainAreas(): void {
       }
     });
   });
-
-  // Resizable from right frames (native implementation)
-  initFrameResizable();
 
   // Initialize Tagify for term and text tags
   // Tags are fetched from API asynchronously

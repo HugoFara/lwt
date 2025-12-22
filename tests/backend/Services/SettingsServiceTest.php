@@ -122,13 +122,6 @@ class SettingsServiceTest extends TestCase
 
         $expectedKeys = [
             'set-theme-dir',
-            'set-text-h-frameheight-no-audio',
-            'set-text-h-frameheight-with-audio',
-            'set-text-l-framewidth-percent',
-            'set-text-r-frameheight-percent',
-            'set-test-h-frameheight',
-            'set-test-l-framewidth-percent',
-            'set-test-r-frameheight-percent',
             'set-words-to-do-buttons',
             'set-tooltip-mode',
             'set-tts',

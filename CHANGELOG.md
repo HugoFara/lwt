@@ -107,6 +107,24 @@ ones are marked like "v1.0.0-fork".
   user-based multi-tenancy. Existing prefixed tables will be migrated to the
   new system automatically.
 
+### Removed
+
+* **Orphaned Frame Settings** ([#116](https://github.com/HugoFara/lwt/issues/116)):
+  Removed all legacy frame-related settings from the admin settings page:
+  * `set-text-h-frameheight-no-audio` - Frame height without audio
+  * `set-text-h-frameheight-with-audio` - Frame height with audio
+  * `set-text-l-framewidth-percent` - Width of left frames (text)
+  * `set-text-r-frameheight-percent` - Height of right frame (text)
+  * `set-test-h-frameheight` - Frame height (test)
+  * `set-test-l-framewidth-percent` - Width of left frames (test)
+  * `set-test-r-frameheight-percent` - Height of right frame (test)
+
+  These settings controlled frame dimensions in the text reading and test
+  interfaces, but became non-functional after the iframe-based layout was
+  replaced with Alpine.js components ([#166](https://github.com/HugoFara/lwt/issues/166)).
+  Also removed the dead `initFrameResizable()` function from TypeScript.
+  Closes #116.
+
 ## 2.10.0-fork (April 1 2024)
 
 ### Added in 2.10.0-fork
