@@ -79,7 +79,8 @@ function buildWordDataAttributes(word: WordData): Record<string, string> {
     'data_pos': String(word.position),
     'data_order': String(word.position),
     'data_status': String(word.status),
-    'data_wid': word.wordId ? String(word.wordId) : ''
+    'data_wid': word.wordId ? String(word.wordId) : '',
+    'data_hex': word.hex
   };
 
   if (word.translation) {

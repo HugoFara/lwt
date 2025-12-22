@@ -81,7 +81,7 @@ class LanguageRepository extends AbstractRepository
             (bool) ($row['LgSplitEachChar'] ?? false),
             (bool) ($row['LgRightToLeft'] ?? false),
             (string) ($row['LgTTSVoiceAPI'] ?? ''),
-            (bool) ($row['LgShowRomanization'] ?? true)
+            (bool) ($row['LgShowRomanization'] ?? false)
         );
     }
 

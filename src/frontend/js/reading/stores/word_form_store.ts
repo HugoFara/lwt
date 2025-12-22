@@ -25,6 +25,7 @@ export interface WordFormData {
   translation: string;
   romanization: string;
   sentence: string;
+  notes: string;
   status: number;
   tags: string[];
 }
@@ -36,6 +37,7 @@ export interface ValidationErrors {
   translation: string | null;
   romanization: string | null;
   sentence: string | null;
+  notes: string | null;
   general: string | null;
 }
 
@@ -103,6 +105,7 @@ function createEmptyFormData(): WordFormData {
     translation: '',
     romanization: '',
     sentence: '',
+    notes: '',
     status: 1,
     tags: []
   };
@@ -116,6 +119,7 @@ function createEmptyErrors(): ValidationErrors {
     translation: null,
     romanization: null,
     sentence: null,
+    notes: null,
     general: null
   };
 }
@@ -180,6 +184,7 @@ function createWordFormStore(): WordFormStoreState {
         this.formData.translation !== this.originalData.translation ||
         this.formData.romanization !== this.originalData.romanization ||
         this.formData.sentence !== this.originalData.sentence ||
+        this.formData.notes !== this.originalData.notes ||
         this.formData.status !== this.originalData.status ||
         !arraysEqual(this.formData.tags, this.originalData.tags)
       );
@@ -193,6 +198,7 @@ function createWordFormStore(): WordFormStoreState {
         this.errors.translation === null &&
         this.errors.romanization === null &&
         this.errors.sentence === null &&
+        this.errors.notes === null &&
         this.errors.general === null
       );
     },
@@ -247,6 +253,7 @@ function createWordFormStore(): WordFormStoreState {
           translation: data.term.translation === '*' ? '' : data.term.translation,
           romanization: data.term.romanization,
           sentence: data.term.sentence,
+          notes: data.term.notes || '',
           status: data.term.status,
           tags: [...data.term.tags]
         };
@@ -292,6 +299,7 @@ function createWordFormStore(): WordFormStoreState {
       this.validateField('translation');
       this.validateField('romanization');
       this.validateField('sentence');
+      this.validateField('notes');
       return this.isValid;
     },
 
@@ -323,6 +331,14 @@ function createWordFormStore(): WordFormStoreState {
             this.errors.sentence = null;
           }
           break;
+
+        case 'notes':
+          if (this.formData.notes.length > 1000) {
+            this.errors.notes = 'Notes must be 1000 characters or less';
+          } else {
+            this.errors.notes = null;
+          }
+          break;
       }
     },
 
@@ -349,6 +365,7 @@ function createWordFormStore(): WordFormStoreState {
             translation: this.formData.translation,
             romanization: this.formData.romanization,
             sentence: this.formData.sentence,
+            notes: this.formData.notes,
             status: this.formData.status,
             tags: this.formData.tags
           };
@@ -365,6 +382,7 @@ function createWordFormStore(): WordFormStoreState {
             translation: this.formData.translation,
             romanization: this.formData.romanization,
             sentence: this.formData.sentence,
+            notes: this.formData.notes,
             status: this.formData.status,
             tags: this.formData.tags
           };

@@ -37,6 +37,7 @@ use Lwt\View\Helper\IconHelper;
 /** @var bool $showRoman */
 /** @var string $transl */
 /** @var string $sentence */
+/** @var string $notes */
 /** @var string $rom */
 /** @var int $status */
 
@@ -70,6 +71,10 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
     <tr>
         <td class="td1 right">Sentence<br />Term in {...}:</td>
         <td class="td1"><textarea <?php echo $scrdir; ?> name="WoSentence" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Sentence" cols="35" rows="3"><?php echo htmlspecialchars($sentence ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea></td>
+    </tr>
+    <tr>
+        <td class="td1 right">Notes:</td>
+        <td class="td1"><textarea name="WoNotes" class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000" data_info="Notes" cols="35" rows="3"><?php echo htmlspecialchars($notes ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea></td>
     </tr>
         <?php echo printSimilarTermsTabRow(); ?>
     <tr>

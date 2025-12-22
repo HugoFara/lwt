@@ -150,6 +150,7 @@ export interface TermCreateFullRequest {
   translation: string;
   romanization?: string;
   sentence?: string;
+  notes?: string;
   status: number;
   tags?: string[];
 }
@@ -161,6 +162,7 @@ export interface TermUpdateFullRequest {
   translation: string;
   romanization?: string;
   sentence?: string;
+  notes?: string;
   status: number;
   tags?: string[];
 }
@@ -215,6 +217,7 @@ export interface TermForEdit {
   translation: string;
   romanization: string;
   sentence: string;
+  notes: string;
   status: number;
   tags: string[];
 }

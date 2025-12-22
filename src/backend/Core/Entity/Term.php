@@ -44,6 +44,7 @@ class Term
     private TermStatus $status;
     private string $translation;
     private string $sentence;
+    private string $notes;
     private string $romanization;
     private int $wordCount;
     private DateTimeImmutable $createdAt;
@@ -63,6 +64,7 @@ class Term
         TermStatus $status,
         string $translation,
         string $sentence,
+        string $notes,
         string $romanization,
         int $wordCount,
         DateTimeImmutable $createdAt,
@@ -78,6 +80,7 @@ class Term
         $this->status = $status;
         $this->translation = $translation;
         $this->sentence = $sentence;
+        $this->notes = $notes;
         $this->romanization = $romanization;
         $this->wordCount = $wordCount;
         $this->createdAt = $createdAt;
@@ -119,6 +122,7 @@ class Term
             $translation,
             '',
             '',
+            '',
             $wordCount,
             new DateTimeImmutable(),
             new DateTimeImmutable(),
@@ -141,6 +145,7 @@ class Term
      * @param int               $status          The status value
      * @param string            $translation     The translation
      * @param string            $sentence        The example sentence
+     * @param string            $notes           Personal notes
      * @param string            $romanization    The romanization
      * @param int               $wordCount       The word count
      * @param DateTimeImmutable $createdAt       When the term was created
@@ -161,6 +166,7 @@ class Term
         int $status,
         string $translation,
         string $sentence,
+        string $notes,
         string $romanization,
         int $wordCount,
         DateTimeImmutable $createdAt,
@@ -177,6 +183,7 @@ class Term
             TermStatus::fromInt($status),
             $translation,
             $sentence,
+            $notes,
             $romanization,
             $wordCount,
             $createdAt,
@@ -297,6 +304,18 @@ class Term
     }
 
     /**
+     * Update the notes.
+     *
+     * @param string $notes The new notes
+     *
+     * @return void
+     */
+    public function updateNotes(string $notes): void
+    {
+        $this->notes = trim($notes);
+    }
+
+    /**
      * Update review scores.
      *
      * @param float $todayScore    Today's score
@@ -410,6 +429,11 @@ class Term
     public function romanization(): string
     {
         return $this->romanization;
+    }
+
+    public function notes(): string
+    {
+        return $this->notes;
     }
 
     public function wordCount(): int

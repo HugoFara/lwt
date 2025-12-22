@@ -8,6 +8,7 @@
  * - $ord: int - Text order position
  * - $scrdir: string - Script direction tag
  * - $sentence: string - Example sentence
+ * - $notes: string - Notes text
  * - $transl: string - Translation text
  * - $romanization: string - Romanization text
  * - $status: int - Current status (adjusted for editing)
@@ -78,6 +79,14 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
             <textarea <?php echo $scrdir; ?> name="WoSentence"
             class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000"
             data_info="Sentence" cols="35" rows="3"><?php echo htmlspecialchars($sentence ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td class="td1 right">Notes:</td>
+        <td class="td1">
+            <textarea name="WoNotes"
+            class="textarea-noreturn checklength checkoutsidebmp" data_maxlength="1000"
+            data_info="Notes" cols="35" rows="3"><?php echo htmlspecialchars($notes ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
         </td>
     </tr>
     <tr>

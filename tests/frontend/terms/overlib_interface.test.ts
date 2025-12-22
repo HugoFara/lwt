@@ -584,7 +584,7 @@ describe('overlib_interface.ts', () => {
     it('run_overlib_status_1_to_5 returns boolean', () => {
       const result = run_overlib_status_1_to_5(
         'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
-        'hint', 1, '5', 'word', 100, 3, ['', '', '', '', '', '', '', ''], false
+        'hint', 1, '5', 'word', 100, 3, ['', '', '', '', '', '', '', ''], false, ''
       );
       expect(typeof result).toBe('boolean');
     });

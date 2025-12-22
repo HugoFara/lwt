@@ -500,12 +500,12 @@ class TermHandler
      * @param int         $termId Term ID
      * @param string|null $ann    Annotation to highlight in translation
      *
-     * @return array{id: int, text: string, textLc: string, translation: string, romanization: string, status: int, langId: int, sentence: string, tags: array<string>, statusLabel: string}|array{error: string}
+     * @return array{id: int, text: string, textLc: string, translation: string, romanization: string, status: int, langId: int, sentence: string, notes: string, tags: array<string>, statusLabel: string}|array{error: string}
      */
     public function getTermDetails(int $termId, ?string $ann = null): array
     {
         $record = QueryBuilder::table('words')
-            ->select(['WoID', 'WoText', 'WoTextLC', 'WoTranslation', 'WoRomanization', 'WoStatus', 'WoLgID', 'WoSentence'])
+            ->select(['WoID', 'WoText', 'WoTextLC', 'WoTranslation', 'WoRomanization', 'WoStatus', 'WoLgID', 'WoSentence', 'WoNotes'])
             ->where('WoID', '=', $termId)
             ->firstPrepared();
 
@@ -537,6 +537,7 @@ class TermHandler
             'status' => (int)$record['WoStatus'],
             'langId' => (int)$record['WoLgID'],
             'sentence' => (string)$record['WoSentence'],
+            'notes' => (string)($record['WoNotes'] ?? ''),
             'tags' => $tags,
             'statusLabel' => WordStatusService::getStatusName((int)$record['WoStatus'])
         ];
@@ -597,6 +598,7 @@ class TermHandler
                 'translation' => $data['translation'],
                 'romanization' => $data['romanization'],
                 'sentence' => $data['sentence'],
+                'notes' => $data['notes'] ?? '',
                 'status' => $data['status'],
                 'langId' => $data['lgid'],
                 'wordCount' => $wordCount,
@@ -622,6 +624,7 @@ class TermHandler
             'translation' => '',
             'romanization' => '',
             'sentence' => $sentence ?? '',
+            'notes' => '',
             'status' => 1,
             'langId' => $lgid,
             'wordCount' => $wordCount,
@@ -640,6 +643,7 @@ class TermHandler
      *                    - translation: Translation
      *                    - romanization: Romanization
      *                    - sentence: Example sentence
+     *                    - notes: Notes (optional)
      *                    - status: Status (1-5)
      *
      * @return array{term_id?: int, term_lc?: string, hex?: string, error?: string}
@@ -669,6 +673,7 @@ class TermHandler
                 'status' => (int) ($data['status'] ?? 1),
                 'translation' => $data['translation'] ?? '',
                 'sentence' => $data['sentence'] ?? '',
+                'notes' => $data['notes'] ?? '',
                 'roman' => $data['romanization'] ?? '',
                 'wordcount' => $wordCount
             ]);
@@ -687,7 +692,7 @@ class TermHandler
      * Update an existing multi-word expression.
      *
      * @param int   $termId Term ID
-     * @param array $data   Multi-word data (translation, romanization, sentence, status)
+     * @param array $data   Multi-word data (translation, romanization, sentence, notes, status)
      *
      * @return array{success?: bool, status?: int, error?: string}
      */
@@ -706,6 +711,7 @@ class TermHandler
                 'text' => $existing['text'], // Don't change text
                 'translation' => $data['translation'] ?? $existing['translation'],
                 'sentence' => $data['sentence'] ?? $existing['sentence'],
+                'notes' => $data['notes'] ?? $existing['notes'] ?? '',
                 'roman' => $data['romanization'] ?? $existing['romanization']
             ], $oldStatus, $newStatus);
 
@@ -809,7 +815,7 @@ class TermHandler
         // If word ID provided, get existing term data
         if ($wordId !== null && $wordId > 0) {
             $termData = QueryBuilder::table('words')
-                ->select(['WoID', 'WoText', 'WoTextLC', 'WoTranslation', 'WoRomanization', 'WoSentence', 'WoStatus', 'WoLgID'])
+                ->select(['WoID', 'WoText', 'WoTextLC', 'WoTranslation', 'WoRomanization', 'WoSentence', 'WoNotes', 'WoStatus', 'WoLgID'])
                 ->where('WoID', '=', $wordId)
                 ->firstPrepared();
 
@@ -834,6 +840,7 @@ class TermHandler
                 'translation' => (string) $termData['WoTranslation'],
                 'romanization' => (string) $termData['WoRomanization'],
                 'sentence' => (string) $termData['WoSentence'],
+                'notes' => (string) ($termData['WoNotes'] ?? ''),
                 'status' => (int) $termData['WoStatus'],
                 'tags' => $tags
             ];
@@ -881,6 +888,7 @@ class TermHandler
             'translation' => '',
             'romanization' => '',
             'sentence' => $sentence ?? '',
+            'notes' => '',
             'status' => 1,
             'tags' => []
         ];
@@ -944,6 +952,7 @@ class TermHandler
      *                    - translation: Translation
      *                    - romanization: Romanization (optional)
      *                    - sentence: Example sentence (optional)
+     *                    - notes: Notes (optional)
      *                    - status: Status (1-5, default: 1)
      *                    - tags: Array of tag names (optional)
      *
@@ -985,22 +994,23 @@ class TermHandler
 
         $romanization = trim($data['romanization'] ?? '');
         $sentence = trim($data['sentence'] ?? '');
+        $notes = trim($data['notes'] ?? '');
 
         // Insert the word
         $scoreColumns = WordStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = WordStatusService::makeScoreRandomInsertUpdate('id');
 
         // Use raw SQL for complex INSERT with dynamic columns
-        $bindings = [$langId, $textLc, $wordText, $status, $translation, $sentence, $romanization];
+        $bindings = [$langId, $textLc, $wordText, $status, $translation, $sentence, $notes, $romanization];
         $sql = "INSERT INTO words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
-                WoSentence, WoRomanization, WoStatusChanged,
+                WoSentence, WoNotes, WoRomanization, WoStatusChanged,
                 {$scoreColumns}
-            ) VALUES(?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})"
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})"
             . UserScopedQuery::forTablePrepared('words', $bindings);
 
         $stmt = Connection::prepare($sql);
-        $stmt->bind('ississs', $langId, $textLc, $wordText, $status, $translation, $sentence, $romanization);
+        $stmt->bind('ississss', $langId, $textLc, $wordText, $status, $translation, $sentence, $notes, $romanization);
         $affected = $stmt->execute();
 
         if ($affected != 1) {
@@ -1035,6 +1045,7 @@ class TermHandler
                 'translation' => $translation === '*' ? '' : $translation,
                 'romanization' => $romanization,
                 'sentence' => $sentence,
+                'notes' => $notes,
                 'status' => $status,
                 'tags' => $tags
             ]
@@ -1049,6 +1060,7 @@ class TermHandler
      *                      - translation: Translation
      *                      - romanization: Romanization (optional)
      *                      - sentence: Example sentence (optional)
+     *                      - notes: Notes (optional)
      *                      - status: Status (1-5)
      *                      - tags: Array of tag names (optional)
      *
@@ -1080,23 +1092,25 @@ class TermHandler
 
         $romanization = trim($data['romanization'] ?? '');
         $sentence = trim($data['sentence'] ?? '');
+        $notes = trim($data['notes'] ?? '');
 
         // Update the word
         $scoreUpdate = WordStatusService::makeScoreRandomInsertUpdate('u');
 
         // Use raw SQL for dynamic score update
-        $bindings = [$translation, $romanization, $sentence, $status, $termId];
+        $bindings = [$translation, $romanization, $sentence, $notes, $status, $termId];
         Connection::preparedExecute(
             "UPDATE words SET
              WoTranslation = ?,
              WoRomanization = ?,
              WoSentence = ?,
+             WoNotes = ?,
              WoStatus = ?,
              WoStatusChanged = NOW(),
              {$scoreUpdate}
              WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
-            [$translation, $romanization, $sentence, $status, $termId]
+            [$translation, $romanization, $sentence, $notes, $status, $termId]
         );
 
         // Save tags if provided
@@ -1117,6 +1131,7 @@ class TermHandler
                 'translation' => $translation === '*' ? '' : $translation,
                 'romanization' => $romanization,
                 'sentence' => $sentence,
+                'notes' => $notes,
                 'status' => $status,
                 'tags' => $tags
             ]

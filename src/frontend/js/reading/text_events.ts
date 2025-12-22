@@ -20,7 +20,7 @@ import {
   mword_each_do_text_text
 } from './text_annotations';
 import { keydown_event_do_text_text } from './text_keyboard';
-import { mword_drag_n_drop_select } from './text_multiword_selection';
+import { mword_drag_n_drop_select, mword_touch_select } from './text_multiword_selection';
 import { loadModalFrame } from './frame_management';
 import { removeAllTooltips } from '../ui/native_tooltip';
 import {
@@ -44,7 +44,8 @@ export {
 export { keydown_event_do_text_text } from './text_keyboard';
 export {
   mwordDragNDrop,
-  mword_drag_n_drop_select
+  mword_drag_n_drop_select,
+  mword_touch_select
 } from './text_multiword_selection';
 
 // Re-export word actions for external use
@@ -246,7 +247,7 @@ function word_click_event_frame_mode(
     run_overlib_status_1_to_5(
       LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
       LWT_DATA.text.id, order,
-      text, wid, String(statusNum), multi_words, LWT_DATA.language.rtl
+      text, wid, String(statusNum), multi_words, LWT_DATA.language.rtl, ann
     );
   }
 }
@@ -419,7 +420,7 @@ export function prepareTextInteractions(): void {
       }
     });
 
-    // Multi-word drag and drop selection
+    // Multi-word drag and drop selection (mouse)
     thetext.addEventListener('mousedown', (e) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('wsty')) {
@@ -429,6 +430,17 @@ export function prepareTextInteractions(): void {
         mword_drag_n_drop_select.call(target, eventWithData);
       }
     });
+
+    // Multi-word selection for touch devices
+    thetext.addEventListener('touchstart', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains('wsty')) {
+        // Create a synthetic event object with annotation data
+        const eventWithData = e as TouchEvent & { data?: { annotation: number } };
+        eventWithData.data = { annotation: LWT_DATA.settings.annotations_mode };
+        mword_touch_select.call(target, eventWithData);
+      }
+    }, { passive: true });
 
     // Multi-word click events (delegated)
     thetext.addEventListener('click', (e) => {
