@@ -388,8 +388,15 @@ class SelectOptionsBuilder
     /**
      * Build theme select options from data array.
      *
-     * @param array<int, array{path: string, name: string}> $themes   Theme data from ThemeService
-     * @param string|null                                   $selected Selected theme path
+     * @param array<int, array{
+     *     path: string,
+     *     name: string,
+     *     description?: string,
+     *     mode?: string,
+     *     highlighting?: string,
+     *     wordBreaking?: string
+     * }> $themes   Theme data from ThemeService
+     * @param string|null $selected Selected theme path
      *
      * @return string HTML options string
      */
@@ -397,9 +404,18 @@ class SelectOptionsBuilder
     {
         $result = '';
         foreach ($themes as $theme) {
+            $modeIndicator = '';
+            if (isset($theme['mode'])) {
+                $modeIndicator = $theme['mode'] === 'dark' ? ' [Dark]' : ' [Light]';
+            }
             $result .= '<option value="' . htmlspecialchars($theme['path'], ENT_QUOTES, 'UTF-8') . '"'
                     . FormHelper::getSelected($selected, $theme['path'])
-                    . '>' . htmlspecialchars($theme['name'], ENT_QUOTES, 'UTF-8') . '</option>';
+                    . ' data-description="' . htmlspecialchars($theme['description'] ?? '', ENT_QUOTES, 'UTF-8') . '"'
+                    . ' data-mode="' . htmlspecialchars($theme['mode'] ?? 'light', ENT_QUOTES, 'UTF-8') . '"'
+                    . ' data-highlighting="' . htmlspecialchars($theme['highlighting'] ?? '', ENT_QUOTES, 'UTF-8') . '"'
+                    . ' data-word-breaking="' . htmlspecialchars($theme['wordBreaking'] ?? '', ENT_QUOTES, 'UTF-8') . '"'
+                    . '>' . htmlspecialchars($theme['name'], ENT_QUOTES, 'UTF-8')
+                    . htmlspecialchars($modeIndicator, ENT_QUOTES, 'UTF-8') . '</option>';
         }
         return $result;
     }

@@ -38,23 +38,74 @@ use Lwt\View\Helper\IconHelper;
             </button>
         </header>
         <div class="card-content" x-show="open" x-transition>
-            <div class="field is-horizontal">
+            <div class="field is-horizontal"
+                 x-data="{
+                     currentTheme: '<?php echo htmlspecialchars($settings['set-theme-dir'] ?? '', ENT_QUOTES, 'UTF-8'); ?>',
+                     description: '',
+                     mode: '',
+                     highlighting: '',
+                     wordBreaking: '',
+                     updateInfo() {
+                         const select = document.getElementById('set-theme-dir');
+                         const option = select.options[select.selectedIndex];
+                         this.description = option.dataset.description || '';
+                         this.mode = option.dataset.mode || 'light';
+                         this.highlighting = option.dataset.highlighting || '';
+                         this.wordBreaking = option.dataset.wordBreaking || '';
+                     },
+                     previewTheme() {
+                         const themePath = document.getElementById('set-theme-dir').value;
+                         const styleId = 'theme-preview-styles';
+                         let styleEl = document.getElementById(styleId);
+                         if (!styleEl) {
+                             styleEl = document.createElement('link');
+                             styleEl.id = styleId;
+                             styleEl.rel = 'stylesheet';
+                             document.head.appendChild(styleEl);
+                         }
+                         styleEl.href = '/' + themePath + 'styles.css?preview=' + Date.now();
+                     }
+                 }"
+                 x-init="updateInfo()">
                 <div class="field-label is-normal">
                     <label class="label" for="set-theme-dir">Theme</label>
                 </div>
                 <div class="field-body">
-                    <div class="field has-addons">
-                        <div class="control is-expanded">
-                            <div class="select is-fullwidth">
-                                <select name="set-theme-dir" id="set-theme-dir" class="notempty" required>
-                                    <?php echo SelectOptionsBuilder::forThemes($themes, $settings['set-theme-dir']); ?>
-                                </select>
+                    <div class="field">
+                        <div class="field has-addons">
+                            <div class="control is-expanded">
+                                <div class="select is-fullwidth">
+                                    <select name="set-theme-dir" id="set-theme-dir" class="notempty" required
+                                            x-model="currentTheme"
+                                            @change="updateInfo(); previewTheme()">
+                                        <?php echo SelectOptionsBuilder::forThemes($themes, $settings['set-theme-dir']); ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="control">
+                                <span class="icon has-text-danger" title="Field must not be empty">
+                                    <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                                </span>
                             </div>
                         </div>
-                        <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
-                            </span>
+                        <div class="box mt-3" x-show="description || highlighting || wordBreaking" x-transition>
+                            <p class="mb-2" x-show="description">
+                                <strong>Description:</strong> <span x-text="description"></span>
+                            </p>
+                            <div class="tags">
+                                <span class="tag" :class="mode === 'dark' ? 'is-dark' : 'is-light'" x-show="mode">
+                                    <i data-lucide="sun" style="width:14px;height:14px;margin-right:4px"></i>
+                                    <span x-text="mode === 'dark' ? 'Dark Mode' : 'Light Mode'"></span>
+                                </span>
+                                <span class="tag is-info is-light" x-show="highlighting">
+                                    <i data-lucide="palette" style="width:14px;height:14px;margin-right:4px"></i>
+                                    <span x-text="highlighting"></span>
+                                </span>
+                                <span class="tag is-primary is-light" x-show="wordBreaking">
+                                    <i data-lucide="wrap-text" style="width:14px;height:14px;margin-right:4px"></i>
+                                    <span x-text="wordBreaking"></span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

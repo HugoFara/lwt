@@ -1,0 +1,7 @@
+{
+    "name": "Default Modified",
+    "description": "Light theme with modified word breaking rules. Punctuation may wrap separately from words.",
+    "mode": "light",
+    "highlighting": "Background color highlighting",
+    "wordBreaking": "Modified - punctuation can break separately"
+}

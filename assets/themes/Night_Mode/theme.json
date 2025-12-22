@@ -1,0 +1,7 @@
+{
+    "name": "Night Mode",
+    "description": "Dark theme with black background and standard highlighting. Easy on the eyes for nighttime reading.",
+    "mode": "dark",
+    "highlighting": "Background color highlighting",
+    "wordBreaking": "Standard"
+}

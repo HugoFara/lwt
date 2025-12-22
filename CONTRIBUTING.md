@@ -24,15 +24,54 @@ This is required for building frontend assets, running the dev server, and type 
 
 ## Create and Edit Themes
 
-Themes are stored at `src/frontend/css/themes/`. If you want to create a new theme, simply add it to a subfolder. You can also edit existing themes.
+Themes are stored at `src/frontend/css/themes/`. Each theme is a folder containing CSS overrides and optional assets.
 
-To build themes, run:
+### Creating a New Theme
 
-```bash
-npm run build:themes
-```
+1. Create a new folder in `src/frontend/css/themes/` with your theme name (use underscores for spaces, e.g., `My_Theme`)
 
-This minifies CSS files and copies assets to `assets/themes/`.
+2. Create a `theme.json` file with metadata:
+
+   ```json
+   {
+       "name": "My Theme",
+       "description": "A brief description of what this theme changes.",
+       "mode": "light",
+       "highlighting": "Description of word highlighting style",
+       "wordBreaking": "Standard"
+   }
+   ```
+
+   | Field | Description |
+   |-------|-------------|
+   | `name` | Display name shown in settings |
+   | `description` | Explains what the theme changes |
+   | `mode` | `"light"` or `"dark"` |
+   | `highlighting` | How words are highlighted (e.g., "Background color", "Underline") |
+   | `wordBreaking` | Word wrapping behavior (e.g., "Standard", "Modified") |
+
+3. Create a `styles.css` file with your CSS overrides. Key classes to customize:
+
+   ```css
+   /* Status colors for word learning stages */
+   .status0 { /* Unknown words */ }
+   .status1 { /* Learning stage 1 */ }
+   .status2 { /* Learning stage 2 */ }
+   .status3 { /* Learning stage 3 */ }
+   .status4 { /* Learning stage 4 */ }
+   .status5 { /* Learned */ }
+   .status98 { /* Ignored */ }
+   .status99 { /* Well-known */ }
+
+   /* General styling */
+   body { background-color: #fff; color: #000; }
+   ```
+
+4. Build your theme:
+
+   ```bash
+   npm run build:themes
+   ```
 
 ### Add Images to your Themes
 
@@ -41,9 +80,20 @@ You can include images in your theme:
 * Use images from `assets/css/images/` with path `../../../assets/css/images/theimage.png`
 * Add your own files to your theme folder and reference with `./myimage.png`
 
-### My theme does not contain all the Skinning Files
+### Theme Fallback System
 
-That's not a problem at all. When LWT looks for a file that should be contained in `assets/themes/{{The Theme}}/`, it checks if the file exists. If not, it falls back to `assets/css/` and tries to get the same file. With this system, your themes **do not need to have all the same files as `src/frontend/css/base/`**.
+When LWT looks for a file in `assets/themes/{{Theme}}/`, it checks if the file exists. If not, it falls back to `assets/css/`. This means your themes **only need to override files you want to change** - you don't need to copy all files from `src/frontend/css/base/`.
+
+### Existing Themes
+
+| Theme | Mode | Description |
+|-------|------|-------------|
+| Default | Light | Standard theme with background color highlighting |
+| Default_Mod | Light | Modified word breaking rules |
+| Lingocracy | Light | Subtle underline highlighting |
+| Lingocracy_Dark | Dark | Dark version of Lingocracy |
+| Night_Mode | Dark | Black background, easy on the eyes |
+| White_Night | Dark | Dark theme with white highlighted text |
 
 ## Frontend Development (JavaScript/TypeScript)
 
