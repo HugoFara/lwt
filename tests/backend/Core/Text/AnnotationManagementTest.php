@@ -25,28 +25,30 @@ final class AnnotationManagementTest extends TestCase
 
     /**
      * Test annotation to JSON conversion
+     *
+     * @since 2.9.0 Annotation keys now match Ti2Order directly (no offset)
      */
     public function testAnnotationToJson(): void
     {
         // Empty annotation
         $this->assertEquals('{}', $this->annotationService->annotationToJson(''));
 
-        // Single annotation
+        // Single annotation - key should match the order value (1)
         $annotation = "1\tword\t5\ttranslation";
         $result = $this->annotationService->annotationToJson($annotation);
         $this->assertJson($result);
         $decoded = json_decode($result, true);
-        $this->assertArrayHasKey(0, $decoded);
-        $this->assertEquals(['word', '5', 'translation'], $decoded[0]);
+        $this->assertArrayHasKey(1, $decoded);
+        $this->assertEquals(['word', '5', 'translation'], $decoded[1]);
 
-        // Multiple annotations
+        // Multiple annotations - keys should match order values (1 and 2)
         $annotation = "1\tword1\t5\ttrans1\n2\tword2\t3\ttrans2";
         $result = $this->annotationService->annotationToJson($annotation);
         $this->assertJson($result);
         $decoded = json_decode($result, true);
         $this->assertCount(2, $decoded);
-        $this->assertEquals(['word1', '5', 'trans1'], $decoded[0]);
-        $this->assertEquals(['word2', '3', 'trans2'], $decoded[1]);
+        $this->assertEquals(['word1', '5', 'trans1'], $decoded[1]);
+        $this->assertEquals(['word2', '3', 'trans2'], $decoded[2]);
     }
 
     /**
@@ -69,11 +71,11 @@ final class AnnotationManagementTest extends TestCase
         $result = $this->annotationService->annotationToJson($annotation);
         $this->assertJson($result);
 
-        // Unicode in annotations
+        // Unicode in annotations - key should match order value (1)
         $annotation = "1\t日本語\t5\ttranslation";
         $result = $this->annotationService->annotationToJson($annotation);
         $this->assertJson($result);
         $decoded = json_decode($result, true);
-        $this->assertStringContainsString('日本語', $decoded[0][0]);
+        $this->assertStringContainsString('日本語', $decoded[1][0]);
     }
 }

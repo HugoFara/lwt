@@ -67,6 +67,11 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Japanese Annotations** ([#101](https://github.com/HugoFara/lwt/issues/101)):
+  Fixed annotations not displaying correctly in Japanese texts. The
+  `annotationToJson()` function was using an off-by-one index that didn't
+  match the `Ti2Order` values used by the frontend, causing approximately
+  50% of annotations to fail to display.
 * **Text Parsing** ([#114](https://github.com/HugoFara/lwt/issues/114)): Fixed
   last word of text not being recognized when text ends without punctuation.
   Words at the end of a text are now correctly identified regardless of trailing

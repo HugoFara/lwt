@@ -263,7 +263,7 @@ class AnnotationService
         foreach ($items as $item) {
             $vals = preg_split('/[\t]/u', $item);
             if (count($vals) > 3 && $vals[0] >= 0 && $vals[2] > 0) {
-                $arr[intval($vals[0]) - 1] = array($vals[1], $vals[2], $vals[3]);
+                $arr[intval($vals[0])] = array($vals[1], $vals[2], $vals[3]);
             }
         }
         $json_data = json_encode($arr);
