@@ -64,6 +64,11 @@ ones are marked like "v1.0.0-fork".
 * **TTS Settings Storage** ([#186](https://github.com/HugoFara/lwt/issues/186)):
   Text-to-Speech language settings (voice, rate, pitch) now use browser localStorage
   instead of cookies. Includes automatic migration from old cookie format.
+* **Removed SYSTEM_VARIABLES_ADMIN Privilege Requirement**
+  ([#167](https://github.com/HugoFara/lwt/issues/167)): LWT no longer requires
+  elevated database privileges for word imports. The `SET GLOBAL max_heap_table_size`
+  call has been removed and replaced with chunked batch inserts (500 rows per batch)
+  that stream files line-by-line, reducing memory usage for large imports.
 
 ### Fixed
 

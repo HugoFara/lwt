@@ -42,6 +42,12 @@ require_once __DIR__ . '/ExpressionService.php';
 class WordUploadService
 {
     /**
+     * Maximum number of rows to insert in a single batch.
+     * Keeps memory usage reasonable for large imports.
+     */
+    private const BATCH_SIZE = 500;
+
+    /**
      * Get language data for a specific language.
      *
      * @param int $langId Language ID
@@ -275,6 +281,7 @@ class WordUploadService
 
     /**
      * Import terms using PHP parsing (fallback when LOAD DATA not available).
+     * Uses chunked batch inserts to handle large files without excessive memory.
      *
      * @param int    $langId       Language ID
      * @param array  $fields       Field indexes
@@ -296,18 +303,19 @@ class WordUploadService
         bool $ignoreFirst
     ): void {
         $handle = fopen($fileName, 'r');
-        $dataText = fread($handle, filesize($fileName));
-        fclose($handle);
+        if ($handle === false) {
+            return;
+        }
 
-        $placeholders = [];
-        $params = [];
-        $i = 0;
+        $rows = [];
+        $lineNum = 0;
 
-        foreach (explode(PHP_EOL, $dataText) as $line) {
-            if ($i++ == 0 && $ignoreFirst) {
+        while (($line = fgets($handle)) !== false) {
+            if ($lineNum++ == 0 && $ignoreFirst) {
                 continue;
             }
 
+            $line = rtrim($line, "\r\n");
             if (empty(trim($line))) {
                 continue;
             }
@@ -320,94 +328,105 @@ class WordUploadService
 
             $wotext = $parsedLine[$fields["txt"] - 1];
 
+            $row = [];
             // Fill WoText and WoTextLC
             if ($removeSpaces) {
-                $params[] = str_replace(" ", "", $wotext);
-                $params[] = mb_strtolower(str_replace(" ", "", $wotext));
+                $row[] = str_replace(" ", "", $wotext);
+                $row[] = mb_strtolower(str_replace(" ", "", $wotext));
             } else {
-                $params[] = $wotext;
-                $params[] = mb_strtolower($wotext);
+                $row[] = $wotext;
+                $row[] = mb_strtolower($wotext);
             }
 
             if ($fields["tr"] != 0 && isset($parsedLine[$fields["tr"] - 1])) {
-                $params[] = $parsedLine[$fields["tr"] - 1];
+                $row[] = $parsedLine[$fields["tr"] - 1];
             }
             if ($fields["ro"] != 0 && isset($parsedLine[$fields["ro"] - 1])) {
-                $params[] = $parsedLine[$fields["ro"] - 1];
+                $row[] = $parsedLine[$fields["ro"] - 1];
             }
             if ($fields["se"] != 0 && isset($parsedLine[$fields["se"] - 1])) {
-                $params[] = $parsedLine[$fields["se"] - 1];
+                $row[] = $parsedLine[$fields["se"] - 1];
             }
 
-            // Add language ID, status, and score parameters for each row
-            $params[] = $langId;
-            $params[] = $status;
+            $row[] = $langId;
+            $row[] = $status;
 
-            // Build placeholder string for this row
-            $rowPlaceholders = '(?, ?';  // WoText, WoTextLC
-            if ($fields["tr"] != 0) {
-                $rowPlaceholders .= ', ?';
-            }
-            if ($fields["ro"] != 0) {
-                $rowPlaceholders .= ', ?';
-            }
-            if ($fields["se"] != 0) {
-                $rowPlaceholders .= ', ?';
-            }
-            $rowPlaceholders .= ', ?, ?, NOW(), ' .  // WoLgID, WoStatus, WoStatusChanged
-                WordStatusService::SCORE_FORMULA_TODAY . ', ' .
-                WordStatusService::SCORE_FORMULA_TOMORROW . ', RAND())';
+            $rows[] = $row;
 
-            $placeholders[] = $rowPlaceholders;
+            // Execute batch when we reach the batch size
+            if (count($rows) >= self::BATCH_SIZE) {
+                $this->executeSimpleImportBatch($rows, $fields);
+                $rows = [];
+            }
         }
 
-        if (!empty($placeholders)) {
-            $sql = "INSERT INTO words(
-                    WoText, WoTextLC, " .
-                    ($fields["tr"] != 0 ? 'WoTranslation, ' : '') .
-                    ($fields["ro"] != 0 ? 'WoRomanization, ' : '') .
-                    ($fields["se"] != 0 ? 'WoSentence, ' : '') .
-                    "WoLgID, WoStatus, WoStatusChanged,
-                    WoTodayScore, WoTomorrowScore, WoRandom"
-                    . UserScopedQuery::insertColumn('words')
-                . ")
-                VALUES " . implode(',', $placeholders);
+        fclose($handle);
 
-            // Add user ID to each row's params if multi-user enabled
-            $userId = UserScopedQuery::getUserIdForInsert('words');
+        // Execute remaining rows
+        if (!empty($rows)) {
+            $this->executeSimpleImportBatch($rows, $fields);
+        }
+    }
+
+    /**
+     * Execute a batch insert for simple import.
+     *
+     * @param array $rows   Array of row data
+     * @param array $fields Field indexes
+     *
+     * @return void
+     */
+    private function executeSimpleImportBatch(array $rows, array $fields): void
+    {
+        if (empty($rows)) {
+            return;
+        }
+
+        $userId = UserScopedQuery::getUserIdForInsert('words');
+
+        // Build placeholder string for one row
+        $rowPlaceholders = '(?, ?';  // WoText, WoTextLC
+        if ($fields["tr"] != 0) {
+            $rowPlaceholders .= ', ?';
+        }
+        if ($fields["ro"] != 0) {
+            $rowPlaceholders .= ', ?';
+        }
+        if ($fields["se"] != 0) {
+            $rowPlaceholders .= ', ?';
+        }
+        $rowPlaceholders .= ', ?, ?, NOW(), ' .  // WoLgID, WoStatus, WoStatusChanged
+            WordStatusService::SCORE_FORMULA_TODAY . ', ' .
+            WordStatusService::SCORE_FORMULA_TOMORROW . ', RAND()';
+
+        if ($userId !== null) {
+            $rowPlaceholders .= ', ?';
+        }
+        $rowPlaceholders .= ')';
+
+        $placeholders = array_fill(0, count($rows), $rowPlaceholders);
+        $params = [];
+        foreach ($rows as $row) {
+            foreach ($row as $value) {
+                $params[] = $value;
+            }
             if ($userId !== null) {
-                // params is structured as repeated groups, need to inject userId at end of each group
-                $paramCount = count($params);
-                $rowCount = count($placeholders);
-                $paramsPerRow = $paramCount / $rowCount;
-                $newParams = [];
-                for ($i = 0; $i < $rowCount; $i++) {
-                    $start = $i * $paramsPerRow;
-                    for ($j = 0; $j < $paramsPerRow; $j++) {
-                        $newParams[] = $params[$start + $j];
-                    }
-                    $newParams[] = $userId;
-                }
-                $params = $newParams;
-                // Update placeholders to include extra ?
-                $placeholders = array_map(
-                    fn($p) => substr($p, 0, -1) . ', ?)',
-                    $placeholders
-                );
-                $sql = "INSERT INTO words(
-                        WoText, WoTextLC, " .
-                        ($fields["tr"] != 0 ? 'WoTranslation, ' : '') .
-                        ($fields["ro"] != 0 ? 'WoRomanization, ' : '') .
-                        ($fields["se"] != 0 ? 'WoSentence, ' : '') .
-                        "WoLgID, WoStatus, WoStatusChanged,
-                        WoTodayScore, WoTomorrowScore, WoRandom"
-                        . UserScopedQuery::insertColumn('words')
-                    . ")
-                    VALUES " . implode(',', $placeholders);
+                $params[] = $userId;
             }
-
-            Connection::preparedExecute($sql, $params);
         }
+
+        $sql = "INSERT IGNORE INTO words(
+                WoText, WoTextLC, " .
+                ($fields["tr"] != 0 ? 'WoTranslation, ' : '') .
+                ($fields["ro"] != 0 ? 'WoRomanization, ' : '') .
+                ($fields["se"] != 0 ? 'WoSentence, ' : '') .
+                "WoLgID, WoStatus, WoStatusChanged,
+                WoTodayScore, WoTomorrowScore, WoRandom"
+                . UserScopedQuery::insertColumn('words')
+            . ")
+            VALUES " . implode(',', $placeholders);
+
+        Connection::preparedExecute($sql, $params);
     }
 
     /**
@@ -486,13 +505,6 @@ class WordUploadService
      */
     private function initTempTables(): void
     {
-        // Try to increase heap table size for better performance
-        // This requires SUPER privileges, so we gracefully handle failures
-        try {
-            Connection::execute('SET GLOBAL max_heap_table_size = 1024 * 1024 * 1024 * 2');
-        } catch (\Exception $e) {
-            // Ignore - this is an optimization, not a requirement
-        }
         Connection::execute(
             "CREATE TEMPORARY TABLE IF NOT EXISTS numbers(
                 n tinyint(3) unsigned NOT NULL
@@ -544,6 +556,7 @@ class WordUploadService
 
     /**
      * Load data into temporary table using PHP (fallback).
+     * Uses chunked batch inserts to handle large files without excessive memory.
      *
      * @param bool   $removeSpaces Whether to remove spaces
      * @param array  $fields       Field indexes
@@ -561,18 +574,19 @@ class WordUploadService
         bool $ignoreFirst
     ): void {
         $handle = fopen($fileName, 'r');
-        $dataText = fread($handle, filesize($fileName));
-        fclose($handle);
+        if ($handle === false) {
+            return;
+        }
 
-        $placeholders = [];
-        $params = [];
-        $i = 0;
+        $rows = [];
+        $lineNum = 0;
 
-        foreach (explode(PHP_EOL, $dataText) as $line) {
-            if ($i++ == 0 && $ignoreFirst) {
+        while (($line = fgets($handle)) !== false) {
+            if ($lineNum++ == 0 && $ignoreFirst) {
                 continue;
             }
 
+            $line = rtrim($line, "\r\n");
             if (empty(trim($line))) {
                 continue;
             }
@@ -585,59 +599,94 @@ class WordUploadService
 
             $wotext = $parsedLine[$fields["txt"] - 1];
 
+            $row = [];
             // Fill WoText and WoTextLC
             if ($removeSpaces) {
-                $params[] = str_replace(" ", "", $wotext);
-                $params[] = mb_strtolower(str_replace(" ", "", $wotext));
+                $row[] = str_replace(" ", "", $wotext);
+                $row[] = mb_strtolower(str_replace(" ", "", $wotext));
             } else {
-                $params[] = $wotext;
-                $params[] = mb_strtolower($wotext);
+                $row[] = $wotext;
+                $row[] = mb_strtolower($wotext);
             }
 
             if ($fields["tr"] != 0 && isset($parsedLine[$fields["tr"] - 1])) {
-                $params[] = $parsedLine[$fields["tr"] - 1];
+                $row[] = $parsedLine[$fields["tr"] - 1];
             }
             if ($fields["ro"] != 0 && isset($parsedLine[$fields["ro"] - 1])) {
-                $params[] = $parsedLine[$fields["ro"] - 1];
+                $row[] = $parsedLine[$fields["ro"] - 1];
             }
             if ($fields["se"] != 0 && isset($parsedLine[$fields["se"] - 1])) {
-                $params[] = $parsedLine[$fields["se"] - 1];
+                $row[] = $parsedLine[$fields["se"] - 1];
             }
             if ($fields["tl"] != 0 && isset($parsedLine[$fields["tl"] - 1])) {
-                $params[] = str_replace(" ", ",", $parsedLine[$fields['tl'] - 1]);
+                $row[] = str_replace(" ", ",", $parsedLine[$fields['tl'] - 1]);
             }
 
-            // Build placeholder string for this row
-            $rowPlaceholders = '(?, ?';  // WoText, WoTextLC
-            if ($fields["tr"] != 0) {
-                $rowPlaceholders .= ', ?';
-            }
-            if ($fields["ro"] != 0) {
-                $rowPlaceholders .= ', ?';
-            }
-            if ($fields["se"] != 0) {
-                $rowPlaceholders .= ', ?';
-            }
-            if ($fields["tl"] != 0) {
-                $rowPlaceholders .= ', ?';
-            }
-            $rowPlaceholders .= ')';
+            $rows[] = $row;
 
-            $placeholders[] = $rowPlaceholders;
+            // Execute batch when we reach the batch size
+            if (count($rows) >= self::BATCH_SIZE) {
+                $this->executeTempTableBatch($rows, $fields);
+                $rows = [];
+            }
         }
 
-        if (!empty($placeholders)) {
-            $sql = "INSERT INTO tempwords(
-                    WoText, WoTextLC" .
-                    ($fields["tr"] != 0 ? ', WoTranslation' : '') .
-                    ($fields["ro"] != 0 ? ', WoRomanization' : '') .
-                    ($fields["se"] != 0 ? ', WoSentence' : '') .
-                    ($fields["tl"] != 0 ? ", WoTaglist" : "") .
-                ")
-                VALUES " . implode(',', $placeholders);
+        fclose($handle);
 
-            Connection::preparedExecute($sql, $params);
+        // Execute remaining rows
+        if (!empty($rows)) {
+            $this->executeTempTableBatch($rows, $fields);
         }
+    }
+
+    /**
+     * Execute a batch insert for temp table import.
+     *
+     * @param array $rows   Array of row data
+     * @param array $fields Field indexes
+     *
+     * @return void
+     */
+    private function executeTempTableBatch(array $rows, array $fields): void
+    {
+        if (empty($rows)) {
+            return;
+        }
+
+        // Build placeholder string for one row
+        $rowPlaceholders = '(?, ?';  // WoText, WoTextLC
+        if ($fields["tr"] != 0) {
+            $rowPlaceholders .= ', ?';
+        }
+        if ($fields["ro"] != 0) {
+            $rowPlaceholders .= ', ?';
+        }
+        if ($fields["se"] != 0) {
+            $rowPlaceholders .= ', ?';
+        }
+        if ($fields["tl"] != 0) {
+            $rowPlaceholders .= ', ?';
+        }
+        $rowPlaceholders .= ')';
+
+        $placeholders = array_fill(0, count($rows), $rowPlaceholders);
+        $params = [];
+        foreach ($rows as $row) {
+            foreach ($row as $value) {
+                $params[] = $value;
+            }
+        }
+
+        $sql = "INSERT INTO tempwords(
+                WoText, WoTextLC" .
+                ($fields["tr"] != 0 ? ', WoTranslation' : '') .
+                ($fields["ro"] != 0 ? ', WoRomanization' : '') .
+                ($fields["se"] != 0 ? ', WoSentence' : '') .
+                ($fields["tl"] != 0 ? ", WoTaglist" : "") .
+            ")
+            VALUES " . implode(',', $placeholders);
+
+        Connection::preparedExecute($sql, $params);
     }
 
     /**
