@@ -38,6 +38,7 @@ class TestServiceTest extends TestCase
     private static bool $dbConnected = false;
     private static int $testLangId = 0;
     private static int $testTextId = 0;
+    private static int $testSentenceId = 0;
     private static array $testWordIds = [];
     private TestService $service;
 
@@ -97,6 +98,15 @@ class TestServiceTest extends TestCase
             "SELECT LAST_INSERT_ID() AS value"
         );
 
+        // Create test sentence (required for FK constraint on textitems2)
+        Connection::query(
+            "INSERT INTO sentences (SeLgID, SeTxID, SeOrder, SeFirstPos, SeText) " .
+            "VALUES (" . self::$testLangId . ", " . self::$testTextId . ", 1, 1, 'This is a test.')"
+        );
+        self::$testSentenceId = (int)Connection::fetchValue(
+            "SELECT LAST_INSERT_ID() AS value"
+        );
+
         // Create test words
         for ($i = 1; $i <= 5; $i++) {
             Connection::query(
@@ -115,8 +125,8 @@ class TestServiceTest extends TestCase
             Connection::query(
                 "INSERT INTO textitems2 (Ti2TxID, Ti2LgID, Ti2WoID, Ti2SeID, Ti2Order, " .
                 "Ti2WordCount, Ti2Text) " .
-                "VALUES (" . self::$testTextId . ", " . self::$testLangId . ", {$wordId}, 1, {$index}, " .
-                "1, 'testword" . ($index + 1) . "')"
+                "VALUES (" . self::$testTextId . ", " . self::$testLangId . ", {$wordId}, " .
+                self::$testSentenceId . ", {$index}, 1, 'testword" . ($index + 1) . "')"
             );
         }
     }

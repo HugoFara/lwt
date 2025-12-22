@@ -19,15 +19,22 @@ declare(strict_types=1);
 namespace Lwt\Tests;
 
 use Lwt\Core\EnvLoader;
+use Lwt\Core\Globals;
 
 // Load Composer autoloader
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// Load EnvLoader and load the .env file
+// Load EnvLoader and Globals
 require_once __DIR__ . '/../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../src/backend/Core/Globals.php';
 
 // Load the .env configuration
 EnvLoader::load(__DIR__ . '/../.env');
+
+// Set up test database name BEFORE any db_bootstrap.php includes
+// This ensures all tests use the test database, not the production one
+$config = EnvLoader::getDatabaseConfig();
+Globals::setDatabaseName("test_" . $config['dbname']);
 
 // Register shutdown function to close database connections
 // This prevents zombie connections from holding locks after test interruptions

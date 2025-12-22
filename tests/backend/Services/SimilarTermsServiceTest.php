@@ -46,8 +46,10 @@ class SimilarTermsServiceTest extends TestCase
         }
         self::$dbConnected = (Globals::getDbConnection() !== null);
 
-        // Ensure clean test data
-        Connection::query("TRUNCATE TABLE words");
+        // Ensure clean test data (respect FK order: delete from child tables first)
+        Connection::query("DELETE FROM textitems2");
+        Connection::query("DELETE FROM wordtags");
+        Connection::query("DELETE FROM words");
         Connection::query("DELETE FROM languages WHERE LgID = 1");
 
         // Insert a test language

@@ -48,9 +48,13 @@ class SimtermsTest extends TestCase
         $res = mysqli_fetch_assoc($result);
 
         if ($res) {
-            // Truncate words table for clean test data
-            Connection::query("TRUNCATE TABLE words");
-            Connection::query("TRUNCATE TABLE languages");
+            // Delete from tables in FK order for clean test data
+            Connection::query("DELETE FROM textitems2");
+            Connection::query("DELETE FROM wordtags");
+            Connection::query("DELETE FROM sentences");
+            Connection::query("DELETE FROM texts");
+            Connection::query("DELETE FROM words");
+            Connection::query("DELETE FROM languages");
         }
 
         // Insert a test language

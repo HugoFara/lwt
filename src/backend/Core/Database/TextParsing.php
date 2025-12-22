@@ -315,10 +315,21 @@ class TextParsing
         fclose($fp);
         Connection::query("SET @order=0, @sid=1, @count = 0;");
         if ($id > 0) {
-            Connection::query(
-                "SET @sid=(SELECT ifnull(max(`SeID`)+1,1) FROM sentences"
-                . UserScopedQuery::forTable('sentences') . ");"
+            // Get next auto-increment value for accurate TiSeID calculation
+            $dbname = Globals::getDatabaseName();
+            $sentencesTable = Globals::table('sentences');
+            $autoInc = (int)Connection::fetchValue(
+                "SELECT AUTO_INCREMENT as value FROM information_schema.TABLES
+                 WHERE TABLE_SCHEMA = '$dbname' AND TABLE_NAME = '$sentencesTable'"
             );
+            // Fall back to MAX+1 if AUTO_INCREMENT is not available
+            if ($autoInc <= 0) {
+                $autoInc = (int)Connection::fetchValue(
+                    "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
+                    . UserScopedQuery::forTable('sentences')
+                );
+            }
+            Connection::query("SET @sid = $autoInc;");
         }
         // LOAD DATA LOCAL INFILE does not support prepared statements for file path
         // We need to use Connection::query() here, but we escape the file path manually
@@ -368,19 +379,22 @@ class TextParsing
     private static function saveWithSqlFallback(string $text, int $id): void
     {
         // Get starting sentence ID
+        $sid = 1;
         if ($id > 0) {
-            $result = Connection::query(
-                "SELECT ifnull(max(`SeID`)+1,1) as maxid FROM sentences"
-                . UserScopedQuery::forTable('sentences')
+            // Get next auto-increment value for accurate TiSeID calculation
+            $dbname = Globals::getDatabaseName();
+            $sentencesTable = Globals::table('sentences');
+            $sid = (int)Connection::fetchValue(
+                "SELECT AUTO_INCREMENT as value FROM information_schema.TABLES
+                 WHERE TABLE_SCHEMA = '$dbname' AND TABLE_NAME = '$sentencesTable'"
             );
-            if ($result === false || $result === true) {
-                $sid = 1;
-            } else {
-                $row = mysqli_fetch_assoc($result);
-                $sid = $row ? (int)$row['maxid'] : 1;
+            // Fall back to MAX+1 if AUTO_INCREMENT is not available
+            if ($sid <= 0) {
+                $sid = (int)Connection::fetchValue(
+                    "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
+                    . UserScopedQuery::forTable('sentences')
+                );
             }
-        } else {
-            $sid = 1;
         }
 
         $lines = explode("\n", $text);
@@ -619,10 +633,21 @@ class TextParsing
             $order = 0;
             $sid = 1;
             if ($useMaxSeID) {
+                // Get next auto-increment value from table status
+                // This is more reliable than MAX(SeID)+1 when there are gaps
+                $dbname = Globals::getDatabaseName();
+                $sentencesTable = Globals::table('sentences');
                 $sid = (int)Connection::fetchValue(
-                    "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
-                    . UserScopedQuery::forTable('sentences')
+                    "SELECT AUTO_INCREMENT as value FROM information_schema.TABLES
+                     WHERE TABLE_SCHEMA = '$dbname' AND TABLE_NAME = '$sentencesTable'"
                 );
+                // Fall back to MAX+1 if AUTO_INCREMENT is not available
+                if ($sid <= 0) {
+                    $sid = (int)Connection::fetchValue(
+                        "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
+                        . UserScopedQuery::forTable('sentences')
+                    );
+                }
             }
             $count = 0;
             $rows = array();
@@ -819,6 +844,11 @@ class TextParsing
     /**
      * Append sentences and text items in the database.
      *
+     * TiSeID in temptextitems is pre-computed to match future SeID values.
+     * When parseStandardToDatabase runs with useMaxSeID=true, it sets TiSeID
+     * to MAX(SeID)+1, MAX(SeID)+2, etc. When we insert sentences here, they
+     * get those exact SeID values via auto-increment, so TiSeID = SeID.
+     *
      * @param int  $tid          ID of text from which insert data
      * @param int  $lid          ID of the language of the text
      * @param bool $hasmultiword Set to true to insert multi-words as well.
@@ -827,9 +857,26 @@ class TextParsing
      */
     public static function registerSentencesTextItems(int $tid, int $lid, bool $hasmultiword): void
     {
-        // Insert text items (and eventual multi-words)
-        // Note: This query uses dynamic SQL with UNION, which makes prepared statements complex
-        // We'll use the fluent API here for better control
+        // STEP 1: Insert sentences FIRST to satisfy FK constraint.
+        // TiSeID values in temptextitems are pre-computed to match the SeID
+        // values these sentences will receive via auto-increment.
+        Connection::query('SET @i=0;');
+        Connection::preparedExecute(
+            "INSERT INTO sentences (
+                SeLgID, SeTxID, SeOrder, SeFirstPos, SeText
+            ) SELECT
+            ?,
+            ?,
+            @i:=@i+1,
+            MIN(IF(TiWordCount=0, TiOrder+1, TiOrder)),
+            GROUP_CONCAT(TiText ORDER BY TiOrder SEPARATOR \"\")
+            FROM temptextitems
+            GROUP BY TiSeID
+            ORDER BY TiSeID",
+            [$lid, $tid]
+        );
+
+        // STEP 2: Insert text items. TiSeID directly equals SeID (pre-computed).
         if ($hasmultiword) {
             $bindings = [$lid, $tid, $lid, $lid, $tid, $lid];
             $stmt = Connection::prepare(
@@ -867,22 +914,6 @@ class TextParsing
                 $bindings
             );
         }
-
-        // Add new sentences
-        Connection::query('SET @i=0;');
-        Connection::preparedExecute(
-            "INSERT INTO sentences (
-                SeLgID, SeTxID, SeOrder, SeFirstPos, SeText
-            ) SELECT
-            ?,
-            ?,
-            @i:=@i+1,
-            MIN(IF(TiWordCount=0, TiOrder+1, TiOrder)),
-            GROUP_CONCAT(TiText ORDER BY TiOrder SEPARATOR \"\")
-            FROM temptextitems
-            GROUP BY TiSeID",
-            [$lid, $tid]
-        );
     }
 
     /**

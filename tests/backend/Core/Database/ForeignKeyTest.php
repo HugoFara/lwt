@@ -30,6 +30,7 @@ class ForeignKeyTest extends TestCase
 {
     private static bool $dbConnected = false;
     private static int $testLangId = 0;
+    private static bool $hasForeignKeys = false;
 
     public static function setUpBeforeClass(): void
     {
@@ -59,6 +60,16 @@ class ForeignKeyTest extends TestCase
                 "SELECT LgID FROM languages WHERE LgName = 'FK_Test_Language'",
                 'LgID'
             );
+
+            // Check if FK constraints are present by querying INFORMATION_SCHEMA
+            $fkCount = (int) Connection::fetchValue(
+                "SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+                 WHERE TABLE_SCHEMA = '$testDbname'
+                 AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+                 AND TABLE_NAME = 'textitems2'",
+                'cnt'
+            );
+            self::$hasForeignKeys = ($fkCount > 0);
         }
     }
 
@@ -74,6 +85,16 @@ class ForeignKeyTest extends TestCase
     {
         if (!self::$dbConnected) {
             $this->markTestSkipped('Database connection not available');
+        }
+    }
+
+    /**
+     * Skip test if FK constraints are not present.
+     */
+    private function requireForeignKeys(): void
+    {
+        if (!self::$hasForeignKeys) {
+            $this->markTestSkipped('FK constraints not present - run migrations to enable');
         }
     }
 
@@ -108,8 +129,8 @@ class ForeignKeyTest extends TestCase
 
         // Insert text item with NULL Ti2WoID
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
-             VALUES (NULL, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_unknown', '')"
+            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+             VALUES (NULL, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_unknown')"
         );
 
         // Verify it was inserted with NULL
@@ -131,8 +152,8 @@ class ForeignKeyTest extends TestCase
         $wordId = $this->createTestWord('fktest_known');
 
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
-             VALUES ($wordId, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_known', '')"
+            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+             VALUES ($wordId, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_known')"
         );
 
         $result = Connection::fetchValue(
@@ -150,6 +171,7 @@ class ForeignKeyTest extends TestCase
      */
     public function testTextDeleteCascadesToSentences(): void
     {
+        $this->requireForeignKeys();
         $textId = $this->createTestText('FK_Test_SentenceCascade');
         $sentenceId = $this->createTestSentence($textId, 'FK Test cascade sentence');
 
@@ -176,12 +198,13 @@ class ForeignKeyTest extends TestCase
      */
     public function testTextDeleteCascadesToTextItems(): void
     {
+        $this->requireForeignKeys();
         $textId = $this->createTestText('FK_Test_TextItemCascade');
         $sentenceId = $this->createTestSentence($textId, 'FK Test sentence');
 
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
-             VALUES (NULL, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_cascade', '')"
+            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+             VALUES (NULL, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_cascade')"
         );
 
         // Verify text item exists
@@ -207,13 +230,14 @@ class ForeignKeyTest extends TestCase
      */
     public function testWordDeleteSetsTextItemToNull(): void
     {
+        $this->requireForeignKeys();
         $textId = $this->createTestText('FK_Test_SetNull');
         $sentenceId = $this->createTestSentence($textId, 'FK Test sentence');
         $wordId = $this->createTestWord('fktest_setnull');
 
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
-             VALUES ($wordId, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_setnull', '')"
+            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+             VALUES ($wordId, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_setnull')"
         );
 
         // Verify Ti2WoID is set
@@ -245,6 +269,7 @@ class ForeignKeyTest extends TestCase
      */
     public function testWordDeleteCascadesToWordTags(): void
     {
+        $this->requireForeignKeys();
         $wordId = $this->createTestWord('fktest_tagged');
 
         Connection::query(
@@ -280,6 +305,7 @@ class ForeignKeyTest extends TestCase
      */
     public function testTagDeleteCascadesToWordTags(): void
     {
+        $this->requireForeignKeys();
         $wordId = $this->createTestWord('fktest_tagged2');
 
         Connection::query(
@@ -315,6 +341,7 @@ class ForeignKeyTest extends TestCase
      */
     public function testTextDeleteCascadesToTextTags(): void
     {
+        $this->requireForeignKeys();
         $textId = $this->createTestText('FK_Test_TextTag');
 
         Connection::query(
@@ -350,6 +377,7 @@ class ForeignKeyTest extends TestCase
      */
     public function testFullCascadeChain(): void
     {
+        $this->requireForeignKeys();
         // Create a separate language for this test
         Connection::query(
             "INSERT INTO languages (LgName, LgDict1URI, LgCharacterSubstitutions,
@@ -380,8 +408,8 @@ class ForeignKeyTest extends TestCase
         );
 
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
-             VALUES (NULL, $langId, $textId, $sentenceId, 1, 1, 'fktest_fullcascade', '')"
+            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+             VALUES (NULL, $langId, $textId, $sentenceId, 1, 1, 'fktest_fullcascade')"
         );
 
         // Verify all exist
@@ -415,6 +443,7 @@ class ForeignKeyTest extends TestCase
      */
     public function testNewsfeedDeleteCascadesToFeedlinks(): void
     {
+        $this->requireForeignKeys();
         Connection::query(
             "INSERT INTO newsfeeds (NfLgID, NfName, NfSourceURI, NfArticleSectionTags,
              NfFilterTags, NfUpdate, NfOptions)
@@ -458,6 +487,7 @@ class ForeignKeyTest extends TestCase
      */
     public function testArchivedTextDeleteCascadesToArchTextTags(): void
     {
+        $this->requireForeignKeys();
         Connection::query(
             "INSERT INTO archivedtexts (AtLgID, AtTitle, AtText, AtAnnotatedText)
              VALUES (" . self::$testLangId . ", 'FK_Test_Archived', 'Archived content', '')"
@@ -502,6 +532,7 @@ class ForeignKeyTest extends TestCase
      */
     public function testInvalidLanguageReferenceRejected(): void
     {
+        $this->requireForeignKeys();
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessageMatches('/foreign key constraint fails/i');
 
@@ -516,6 +547,7 @@ class ForeignKeyTest extends TestCase
      */
     public function testInvalidTextReferenceRejected(): void
     {
+        $this->requireForeignKeys();
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessageMatches('/foreign key constraint fails/i');
 
@@ -530,6 +562,7 @@ class ForeignKeyTest extends TestCase
      */
     public function testInvalidWordReferenceRejected(): void
     {
+        $this->requireForeignKeys();
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessageMatches('/foreign key constraint fails/i');
 
@@ -537,8 +570,8 @@ class ForeignKeyTest extends TestCase
         $sentenceId = $this->createTestSentence($textId, 'FK Test sentence');
 
         Connection::query(
-            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text, Ti2Translation)
-             VALUES (16777215, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_invalid', '')"
+            "INSERT INTO textitems2 (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
+             VALUES (16777215, " . self::$testLangId . ", $textId, $sentenceId, 1, 1, 'fktest_invalid')"
         );
     }
 

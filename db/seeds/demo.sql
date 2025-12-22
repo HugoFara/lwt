@@ -33,12 +33,14 @@
 -- --------------------------------------------------------------
 -- Installing an LWT demo database
 -- --------------------------------------------------------------
+-- Schema updated to use InnoDB engine
+-- Compatible with FK constraints when migrations are applied
 DROP
   TABLE IF EXISTS archivedtexts;
 
 CREATE TABLE `archivedtexts` (
-  `AtID` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `AtLgID` int(11) unsigned NOT NULL,
+  `AtID` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `AtLgID` tinyint(3) unsigned NOT NULL,
   `AtTitle` varchar(200) NOT NULL,
   `AtText` text NOT NULL,
   `AtAnnotatedText` longtext NOT NULL,
@@ -46,7 +48,7 @@ CREATE TABLE `archivedtexts` (
   `AtSourceURI` varchar(1000) DEFAULT NULL,
   PRIMARY KEY (`AtID`),
   KEY `AtLgID` (`AtLgID`)
-) ENGINE = MyISAM AUTO_INCREMENT = 2 DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 
 INSERT INTO archivedtexts
 VALUES
@@ -58,12 +60,12 @@ VALUES
 DROP
   TABLE IF EXISTS archtexttags;
 CREATE TABLE `archtexttags` (
-  `AgAtID` int(11) unsigned NOT NULL,
-  `AgT2ID` int(11) unsigned NOT NULL,
+  `AgAtID` smallint(5) unsigned NOT NULL,
+  `AgT2ID` smallint(5) unsigned NOT NULL,
   PRIMARY KEY (`AgAtID`, `AgT2ID`),
   KEY `AgAtID` (`AgAtID`),
   KEY `AgT2ID` (`AgT2ID`)
-) ENGINE = MyISAM DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 
 INSERT INTO archtexttags
 VALUES
@@ -90,7 +92,7 @@ CREATE TABLE `newsfeeds` (
   PRIMARY KEY (`NfID`),
   KEY `NfLgID` (`NfLgID`),
   KEY `NfUpdate` (`NfUpdate`)
-) ENGINE = MyISAM DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO newsfeeds
 VALUES
   (
@@ -183,7 +185,7 @@ VALUES
 DROP
   TABLE IF EXISTS languages;
 CREATE TABLE `languages` (
-  `LgID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `LgID` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
   `LgName` varchar(40) NOT NULL,
   `LgDict1URI` varchar(200) NOT NULL,
   `LgDict2URI` varchar(200) DEFAULT NULL,
@@ -201,7 +203,7 @@ CREATE TABLE `languages` (
   `LgShowRomanization` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`LgID`),
   UNIQUE KEY `LgName` (`LgName`)
-) ENGINE = MyISAM AUTO_INCREMENT = 9 DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO languages (LgID, LgName, LgDict1URI, LgDict2URI, LgGoogleTranslateURI, LgExportTemplate, LgTextSize, LgCharacterSubstitutions, LgRegexpSplitSentences, LgExceptionsSplitSentences, LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar, LgRightToLeft, LgTTSVoiceAPI, LgShowRomanization)
 VALUES
   (
@@ -275,24 +277,24 @@ VALUES
 DROP
   TABLE IF EXISTS sentences;
 CREATE TABLE `sentences` (
-  `SeID` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `SeLgID` int(11) unsigned NOT NULL,
-  `SeTxID` int(11) unsigned NOT NULL,
-  `SeOrder` int(11) unsigned NOT NULL,
+  `SeID` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `SeLgID` tinyint(3) unsigned NOT NULL,
+  `SeTxID` smallint(5) unsigned NOT NULL,
+  `SeOrder` smallint(5) unsigned NOT NULL,
   `SeText` text,
   `SeFirstPos` smallint(5) unsigned NOT NULL,
   PRIMARY KEY (`SeID`),
   KEY `SeLgID` (`SeLgID`),
   KEY `SeTxID` (`SeTxID`),
   KEY `SeOrder` (`SeOrder`)
-) ENGINE = MyISAM AUTO_INCREMENT = 357 DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 DROP
   TABLE IF EXISTS settings;
 CREATE TABLE `settings` (
   `StKey` varchar(40) NOT NULL,
   `StValue` varchar(40) DEFAULT NULL,
   PRIMARY KEY (`StKey`)
-) ENGINE = MyISAM DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO settings
 VALUES
   ('dbversion', 'v002000000');
@@ -396,12 +398,12 @@ VALUES
 DROP
   TABLE IF EXISTS tags;
 CREATE TABLE `tags` (
-  `TgID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `TgID` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `TgText` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `TgComment` varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY (`TgID`),
   UNIQUE KEY `TgText` (`TgText`)
-) ENGINE = MyISAM AUTO_INCREMENT = 29 DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO tags
 VALUES
   ('1', 'masc', '');
@@ -483,12 +485,12 @@ VALUES
 DROP
   TABLE IF EXISTS tags2;
 CREATE TABLE `tags2` (
-  `T2ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `T2ID` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
   `T2Text` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `T2Comment` varchar(200) NOT NULL DEFAULT '',
   PRIMARY KEY (`T2ID`),
   UNIQUE KEY `T2Text` (`T2Text`)
-) ENGINE = MyISAM AUTO_INCREMENT = 10 DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO tags2
 VALUES
   ('1', 'demo', '');
@@ -535,23 +537,22 @@ CREATE TABLE `textitems` (
   KEY `TiOrder` (`TiOrder`),
   KEY `TiTextLC` (`TiTextLC`),
   KEY `TiIsNotWord` (`TiIsNotWord`)
-) ENGINE = MyISAM AUTO_INCREMENT = 12761 DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 DROP
   TABLE IF EXISTS textitems2;
 CREATE TABLE `textitems2` (
-  `Ti2WoID` mediumint(8) unsigned NOT NULL,
+  `Ti2WoID` mediumint(8) unsigned DEFAULT NULL,
   `Ti2LgID` tinyint(3) unsigned NOT NULL,
   `Ti2TxID` smallint(5) unsigned NOT NULL,
   `Ti2SeID` mediumint(8) unsigned NOT NULL,
   `Ti2Order` smallint(5) unsigned NOT NULL,
   `Ti2WordCount` tinyint(3) unsigned NOT NULL,
   `Ti2Text` varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `Ti2Translation` varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   PRIMARY KEY (
     `Ti2TxID`, `Ti2Order`, `Ti2WordCount`
   ),
   KEY `Ti2WoID` (`Ti2WoID`)
-) ENGINE = MyISAM DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 DROP
   TABLE IF EXISTS temptextitems;
 CREATE TABLE `temptextitems` (
@@ -575,8 +576,8 @@ CREATE TABLE `tempwords` (
 DROP
   TABLE IF EXISTS texts;
 CREATE TABLE `texts` (
-  `TxID` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `TxLgID` int(11) unsigned NOT NULL,
+  `TxID` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `TxLgID` tinyint(3) unsigned NOT NULL,
   `TxTitle` varchar(200) NOT NULL,
   `TxText` text NOT NULL,
   `TxAnnotatedText` longtext NOT NULL,
@@ -586,7 +587,7 @@ CREATE TABLE `texts` (
   `TxAudioPosition` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`TxID`),
   KEY `TxLgID` (`TxLgID`)
-) ENGINE = MyISAM AUTO_INCREMENT = 10 DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO texts (TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI, TxSourceURI)
 VALUES
   (
@@ -659,12 +660,12 @@ VALUES
 DROP
   TABLE IF EXISTS texttags;
 CREATE TABLE `texttags` (
-  `TtTxID` int(11) unsigned NOT NULL,
-  `TtT2ID` int(11) unsigned NOT NULL,
+  `TtTxID` smallint(5) unsigned NOT NULL,
+  `TtT2ID` smallint(5) unsigned NOT NULL,
   PRIMARY KEY (`TtTxID`, `TtT2ID`),
   KEY `TtTxID` (`TtTxID`),
   KEY `TtT2ID` (`TtT2ID`)
-) ENGINE = MyISAM DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO texttags
 VALUES
   ('1', '1');
@@ -737,8 +738,8 @@ VALUES
 DROP
   TABLE IF EXISTS words;
 CREATE TABLE `words` (
-  `WoID` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `WoLgID` int(11) unsigned NOT NULL,
+  `WoID` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `WoLgID` tinyint(3) unsigned NOT NULL,
   `WoText` varchar(250) NOT NULL,
   `WoTextLC` varchar(250) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `WoStatus` tinyint(4) NOT NULL,
@@ -765,7 +766,7 @@ CREATE TABLE `words` (
   KEY `WoTodayScore` (`WoTodayScore`),
   KEY `WoTomorrowScore` (`WoTomorrowScore`),
   KEY `WoRandom` (`WoRandom`)
-) ENGINE = MyISAM AUTO_INCREMENT = 221 DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO words
 VALUES
   (
@@ -2537,12 +2538,12 @@ VALUES
 DROP
   TABLE IF EXISTS wordtags;
 CREATE TABLE `wordtags` (
-  `WtWoID` int(11) unsigned NOT NULL,
-  `WtTgID` int(11) unsigned NOT NULL,
+  `WtWoID` mediumint(8) unsigned NOT NULL,
+  `WtTgID` smallint(5) unsigned NOT NULL,
   PRIMARY KEY (`WtWoID`, `WtTgID`),
   KEY `WtTgID` (`WtTgID`),
   KEY `WtWoID` (`WtWoID`)
-) ENGINE = MyISAM DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;
 INSERT INTO wordtags
 VALUES
   ('1', '27');
@@ -2711,4 +2712,4 @@ CREATE TABLE `feedlinks` (
   KEY `FlLink` (`FlLink`),
   KEY `FlDate` (`FlDate`),
   UNIQUE KEY `FlTitle` (`FlNfID`, `FlTitle`)
-) ENGINE = MyISAM DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET = utf8;

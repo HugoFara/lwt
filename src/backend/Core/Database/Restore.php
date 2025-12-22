@@ -159,19 +159,30 @@ class Restore
      */
     public static function truncateUserDatabase(): void
     {
-        QueryBuilder::table('archivedtexts')->truncate();
-        QueryBuilder::table('archtexttags')->truncate();
-        QueryBuilder::table('feedlinks')->truncate();
-        QueryBuilder::table('languages')->truncate();
-        QueryBuilder::table('textitems2')->truncate();
-        QueryBuilder::table('newsfeeds')->truncate();
-        QueryBuilder::table('sentences')->truncate();
-        QueryBuilder::table('tags')->truncate();
-        QueryBuilder::table('tags2')->truncate();
-        QueryBuilder::table('texts')->truncate();
-        QueryBuilder::table('texttags')->truncate();
-        QueryBuilder::table('words')->truncate();
-        QueryBuilder::table('wordtags')->truncate();
+        // Delete from tables in correct order to respect foreign key constraints.
+        // Child tables (with FKs) must be deleted from before parent tables.
+        // Use DELETE instead of TRUNCATE because TRUNCATE fails when FK constraints
+        // exist on a table, even if those constraints would allow the operation.
+
+        // Level 1: Tables with FKs to multiple parents
+        Connection::execute('DELETE FROM ' . Globals::table('archtexttags'));
+        Connection::execute('DELETE FROM ' . Globals::table('texttags'));
+        Connection::execute('DELETE FROM ' . Globals::table('wordtags'));
+        Connection::execute('DELETE FROM ' . Globals::table('textitems2'));
+        Connection::execute('DELETE FROM ' . Globals::table('feedlinks'));
+
+        // Level 2: Tables with FKs to languages only
+        Connection::execute('DELETE FROM ' . Globals::table('sentences'));
+        Connection::execute('DELETE FROM ' . Globals::table('newsfeeds'));
+        Connection::execute('DELETE FROM ' . Globals::table('texts'));
+        Connection::execute('DELETE FROM ' . Globals::table('archivedtexts'));
+        Connection::execute('DELETE FROM ' . Globals::table('words'));
+
+        // Level 3: Parent tables with no FKs to other content tables
+        Connection::execute('DELETE FROM ' . Globals::table('tags'));
+        Connection::execute('DELETE FROM ' . Globals::table('tags2'));
+        Connection::execute('DELETE FROM ' . Globals::table('languages'));
+
         QueryBuilder::table('settings')
             ->where('StKey', '=', 'currenttext')
             ->delete();
