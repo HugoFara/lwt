@@ -14,6 +14,10 @@ ones are marked like "v1.0.0-fork".
 
 ### Added
 
+* **Notes Field for Terms** ([#128](https://github.com/HugoFara/lwt/issues/128)):
+  Added a dedicated "Notes" field to terms/words, allowing users to add personal
+  notes separate from translations. Includes database migration, updated entity
+  classes, service layer, UI forms, and API endpoints.
 * Official support for PHP 8.3 and 8.4.
 * **Multi-user support** ([#221](https://github.com/HugoFara/lwt/issues/221)):
   Users are now stored in a dedicated `users` table with proper foreign key
@@ -69,9 +73,28 @@ ones are marked like "v1.0.0-fork".
 * **TTS Settings Storage** ([#186](https://github.com/HugoFara/lwt/issues/186)):
   Text-to-Speech language settings (voice, rate, pitch) now use browser localStorage
   instead of cookies. Includes automatic migration from old cookie format.
+* **Removed SYSTEM_VARIABLES_ADMIN Privilege Requirement**
+  ([#167](https://github.com/HugoFara/lwt/issues/167)): LWT no longer requires
+  elevated database privileges for word imports. The `SET GLOBAL max_heap_table_size`
+  call has been removed and replaced with chunked batch inserts (500 rows per batch)
+  that stream files line-by-line, reducing memory usage for large imports.
 
 ### Fixed
 
+* **Tag Duplicate Key Error** ([#120](https://github.com/HugoFara/lwt/issues/120)):
+  Fixed rare error when updating a word with tags. When the session cache was
+  stale, saving a word with an existing tag would fail with "Duplicate entry
+  for key 'TgText'" and remove the tag from the word. Changed tag insertion
+  to use `INSERT IGNORE` to handle race conditions and stale cache gracefully.
+* **Japanese Annotations** ([#101](https://github.com/HugoFara/lwt/issues/101)):
+  Fixed annotations not displaying correctly in Japanese texts. The
+  `annotationToJson()` function was using an off-by-one index that didn't
+  match the `Ti2Order` values used by the frontend, causing approximately
+  50% of annotations to fail to display.
+* **Text Parsing** ([#114](https://github.com/HugoFara/lwt/issues/114)): Fixed
+  last word of text not being recognized when text ends without punctuation.
+  Words at the end of a text are now correctly identified regardless of trailing
+  punctuation.
 * **PHP 8.3 Compatibility**: Fixed deprecation warnings in `langFromDict()` and
   `targetLangFromDict()` - both functions now check for null query strings before
   calling `parse_str()`.
@@ -81,6 +104,10 @@ ones are marked like "v1.0.0-fork".
 * **SQL Prefix Queries**: Fixed `prefixQuery()` in database migrations:
   * Now handles `DROP TABLE IF EXISTS` syntax (previously only `IF NOT EXISTS`).
   * Now case-insensitive for SQL keywords (CREATE, DROP, ALTER, INSERT).
+* **Punctuation Formatting** ([#125](https://github.com/HugoFara/lwt/issues/125)):
+  Fixed punctuation marks (periods, commas, quotation marks) breaking away from
+  adjacent words onto separate lines. Punctuation now stays "stuck" to the word
+  it belongs to by wrapping word+punctuation pairs in non-breaking groups.
 
 ### Security
 
@@ -102,6 +129,24 @@ ones are marked like "v1.0.0-fork".
 * Legacy table prefix system (`$tbpref`) is deprecated in favor of the new
   user-based multi-tenancy. Existing prefixed tables will be migrated to the
   new system automatically.
+
+### Removed
+
+* **Orphaned Frame Settings** ([#116](https://github.com/HugoFara/lwt/issues/116)):
+  Removed all legacy frame-related settings from the admin settings page:
+  * `set-text-h-frameheight-no-audio` - Frame height without audio
+  * `set-text-h-frameheight-with-audio` - Frame height with audio
+  * `set-text-l-framewidth-percent` - Width of left frames (text)
+  * `set-text-r-frameheight-percent` - Height of right frame (text)
+  * `set-test-h-frameheight` - Frame height (test)
+  * `set-test-l-framewidth-percent` - Width of left frames (test)
+  * `set-test-r-frameheight-percent` - Height of right frame (test)
+
+  These settings controlled frame dimensions in the text reading and test
+  interfaces, but became non-functional after the iframe-based layout was
+  replaced with Alpine.js components ([#166](https://github.com/HugoFara/lwt/issues/166)).
+  Also removed the dead `initFrameResizable()` function from TypeScript.
+  Closes #116.
 
 ## 2.10.0-fork (April 1 2024)
 

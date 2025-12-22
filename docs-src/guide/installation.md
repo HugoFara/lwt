@@ -229,17 +229,12 @@ The official repository is at <https://packagist.org/packages/hugofara/lwt>.
 
 ## Upgrade LWT
 
-1. Backup the LWT directory. Backup your database (within LWT).
+Already have LWT installed? See the [Upgrading Guide](./upgrade.md) for detailed instructions on how to safely upgrade to a newer version, including:
 
-2. Get the [latest GitHub release](https://github.com/HugoFara/lwt/releases).
-
-   You can also try to download the [latest stable version](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip) if you want the cutting-edge updates (that may include some bugs)
-
-3. Unzip it.
-
-4. Copy the following (if not already at its place and OK) from your LWT backup into the LWT directory: ".env" and the whole "media" sub-directory (if you created one; contains your MP3 audio files).
-
-5. Clear the web browser cache and open LWT as usual.
+- Backup procedures
+- Automatic database migrations
+- Upgrading from very old versions
+- Troubleshooting common issues
 
 ## Something Went Wrong
 
