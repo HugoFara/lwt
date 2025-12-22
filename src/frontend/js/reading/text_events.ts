@@ -20,7 +20,7 @@ import {
   mword_each_do_text_text
 } from './text_annotations';
 import { keydown_event_do_text_text } from './text_keyboard';
-import { mword_drag_n_drop_select, mword_touch_select } from './text_multiword_selection';
+import { setupMultiWordSelection, mword_drag_n_drop_select, mword_touch_select } from './text_multiword_selection';
 import { loadModalFrame } from './frame_management';
 import { removeAllTooltips } from '../ui/native_tooltip';
 import {
@@ -45,7 +45,9 @@ export { keydown_event_do_text_text } from './text_keyboard';
 export {
   mwordDragNDrop,
   mword_drag_n_drop_select,
-  mword_touch_select
+  mword_touch_select,
+  setupMultiWordSelection,
+  handleTextSelection
 } from './text_multiword_selection';
 
 // Re-export word actions for external use
@@ -413,34 +415,9 @@ export function prepareTextInteractions(): void {
 
   const thetext = document.getElementById('thetext');
   if (thetext) {
-    // Prevent text selection on spans
-    thetext.addEventListener('selectstart', (e) => {
-      if ((e.target as HTMLElement).tagName === 'SPAN') {
-        e.preventDefault();
-      }
-    });
-
-    // Multi-word drag and drop selection (mouse)
-    thetext.addEventListener('mousedown', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.classList.contains('wsty')) {
-        // Create a synthetic event object with annotation data
-        const eventWithData = e as MouseEvent & { data?: { annotation: number } };
-        eventWithData.data = { annotation: LWT_DATA.settings.annotations_mode };
-        mword_drag_n_drop_select.call(target, eventWithData);
-      }
-    });
-
-    // Multi-word selection for touch devices
-    thetext.addEventListener('touchstart', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.classList.contains('wsty')) {
-        // Create a synthetic event object with annotation data
-        const eventWithData = e as TouchEvent & { data?: { annotation: number } };
-        eventWithData.data = { annotation: LWT_DATA.settings.annotations_mode };
-        mword_touch_select.call(target, eventWithData);
-      }
-    }, { passive: true });
+    // Multi-word selection via native text selection
+    // When user selects multiple words, the multi-word modal opens
+    setupMultiWordSelection(thetext);
 
     // Multi-word click events (delegated)
     thetext.addEventListener('click', (e) => {

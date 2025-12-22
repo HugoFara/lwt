@@ -1,465 +1,185 @@
 /**
- * Multi-word drag-and-drop selection for text reading.
- * Handles the creation of multi-word expressions by click-and-drag selection.
+ * Multi-word selection for text reading.
+ * Handles the creation of multi-word expressions using native text selection.
+ *
+ * Users can select text normally (click and drag), and if multiple words
+ * are selected, the multi-word modal opens automatically.
  *
  * @license Unlicense <http://unlicense.org/>
  */
 
-// getAttr not needed - using native getAttribute
 import Alpine from 'alpinejs';
-import { hoverIntent } from '../core/hover_intent';
 import { loadModalFrame } from './frame_management';
-import { removeAllTooltips } from '../ui/native_tooltip';
 import type { MultiWordFormStoreState } from './stores/multi_word_form_store';
 
-// Type definitions
-interface LwtSettings {
-  jQuery_tooltip: boolean;
-  hts: number;
-  word_status_filter: string;
-  annotations_mode: number;
-}
-
-interface LwtText {
-  id: number;
-  reading_position: number;
-  annotations: Record<string, [unknown, string, string]>;
-}
-
-interface LwtDataGlobal {
-  language: {
-    id: number;
-    dict_link1: string;
-    dict_link2: string;
-    translator_link: string;
-    delimiter: string;
-    rtl: boolean;
-  };
-  text: LwtText;
-  settings: LwtSettings;
-}
-
-declare const LWT_DATA: LwtDataGlobal;
-
-
-interface MwordDragNDropState {
-  event: ((MouseEvent | TouchEvent) & { data?: { annotation?: number } }) | undefined;
-  pos: number | undefined;
-  timeout: ReturnType<typeof setTimeout> | undefined;
-  context: HTMLElement | undefined;
-  /** Whether touch interaction is active (for touch event handling) */
-  isTouchActive: boolean;
-  finish: (ev: (MouseEvent | TouchEvent) & { handled?: boolean }) => void;
-  twordMouseOver: (this: HTMLElement) => void;
-  /** Handle touch move during selection */
-  handleTouchMove: (ev: TouchEvent) => void;
-  sentenceOver: (this: HTMLElement) => void;
-  startInteraction: () => void;
-  stopInteraction: () => void;
+/**
+ * Get text ID from URL (fallback when LWT_DATA is not available).
+ */
+function getTextIdFromUrl(): number {
+  // Try to get from URL path: /text/read/123
+  const pathMatch = window.location.pathname.match(/\/text\/read\/(\d+)/);
+  if (pathMatch) {
+    return parseInt(pathMatch[1], 10);
+  }
+  // Try to get from query string: ?text=123 or ?tid=123 or ?start=123
+  const params = new URLSearchParams(window.location.search);
+  const textParam = params.get('text') || params.get('tid') || params.get('start');
+  if (textParam) {
+    return parseInt(textParam, 10);
+  }
+  return 0;
 }
 
 /**
- * Helper to get attribute value from an element.
+ * Get the text ID from LWT_DATA or URL.
  */
-function getElAttr(el: Element | null, attr: string): string {
-  if (!el) return '';
-  const val = el.getAttribute(attr);
-  return val !== null ? val : '';
+function getTextId(): number {
+  if (typeof window !== 'undefined') {
+    const win = window as unknown as { LWT_DATA?: { text?: { id?: number } } };
+    if (win.LWT_DATA?.text?.id) {
+      return win.LWT_DATA.text.id;
+    }
+  }
+  return getTextIdFromUrl();
 }
 
-export const mwordDragNDrop: MwordDragNDropState = {
-
-  event: undefined,
-
-  pos: undefined,
-
-  timeout: undefined,
-
-  context: undefined,
-
-  isTouchActive: false,
-
-  /**
-   * Multi-word selection is finished
-   */
-  finish: function (ev: (MouseEvent | TouchEvent) & { handled?: boolean }): void {
-    const context = mwordDragNDrop.context;
-    if (!context) return;
-    if (ev.handled !== true) {
-      const lwordTwordEls = context.querySelectorAll('.lword.tword');
-      const len = lwordTwordEls.length;
-      if (len > 0) {
-        const firstLword = context.querySelector('.lword');
-        const word_ord = getElAttr(firstLword, 'data_order');
-        if (len > 1) {
-          const lwordEls = context.querySelectorAll('.lword');
-          let text = '';
-          lwordEls.forEach(el => { text += el.textContent || ''; });
-          if (text.length > 250) {
-            alert('Selected text is too long!!!');
-          } else {
-            // Open multi-word modal via Alpine.js store
-            const store = Alpine.store('multiWordForm') as MultiWordFormStoreState;
-            store.loadForEdit(
-              LWT_DATA.text.id,
-              parseInt(word_ord, 10),
-              text,
-              len
-            );
-          }
-        } else {
-          // Create only a normal word
-          const wordEl = document.getElementById('ID-' + word_ord + '-1');
-          const params = new URLSearchParams({
-            tid: String(LWT_DATA.text.id),
-            ord: word_ord,
-            txt: wordEl?.textContent || ''
-          });
-          loadModalFrame('/word/edit?' + params.toString());
-        }
-      }
-      context.querySelectorAll('span').forEach(el => {
-        el.classList.remove('tword', 'nword');
-      });
-      ev.handled = true;
-    }
-  },
-
-  /**
-   * Function to trigger above a term word
-   */
-  twordMouseOver: function (this: HTMLElement): void {
-    const context = mwordDragNDrop.context;
-    if (!context) return;
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const selfEl = this;
-
-    const mouseUpHandler = function (e: MouseEvent) {
-      context.querySelectorAll('.wsty').forEach(el => {
-        el.classList.add('status' + getElAttr(el, 'data_status'));
-      });
-      const target = e.target as HTMLElement | null;
-      if (!target?.classList.contains('tword')) {
-        context.querySelectorAll('span').forEach(el => {
-          el.classList.remove('nword', 'tword', 'lword');
-        });
-        context.querySelectorAll<HTMLElement>('.wsty').forEach(el => {
-          el.style.backgroundColor = '';
-          el.style.borderBottomColor = '';
-        });
-        document.getElementById('pe')?.remove();
-      }
-    };
-    document.documentElement.addEventListener('mouseup', mouseUpHandler, { once: true });
-
-    mwordDragNDrop.pos = parseInt(getElAttr(selfEl, 'data_order') || '0', 10);
-
-    // Add ".lword" class on this element
-    context.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));
-    selfEl.classList.add('lword');
-
-    const mouseLeaveHandler = function () {
-      context.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));
-    };
-    context.addEventListener('mouseleave', mouseLeaveHandler);
-
-    // One-time mouseup handler for .nword,.tword
-    const finishHandler = function (e: MouseEvent) {
-      const target = e.target as HTMLElement | null;
-      if (target?.matches('.nword, .tword')) {
-        mwordDragNDrop.finish(e);
-        context.removeEventListener('mouseup', finishHandler);
-      }
-    };
-    context.addEventListener('mouseup', finishHandler);
-  },
-
-  /**
-   * When having the cursor over the sentence.
-   */
-  sentenceOver: function (this: HTMLElement): void {
-    const context = mwordDragNDrop.context;
-    if (!context) return;
-    context.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));
-    const lpos = parseInt(getElAttr(this, 'data_order') || '0', 10);
-    this.classList.add('lword');
-    if (mwordDragNDrop.pos !== undefined && lpos > mwordDragNDrop.pos) {
-      for (let i = mwordDragNDrop.pos; i < lpos; i++) {
-        context.querySelectorAll(
-          '.tword[data_order="' + i + '"],.nword[data_order="' + i + '"]'
-        ).forEach(el => el.classList.add('lword'));
-      }
-    } else if (mwordDragNDrop.pos !== undefined) {
-      for (let i = mwordDragNDrop.pos; i > lpos; i--) {
-        context.querySelectorAll(
-          '.tword[data_order="' + i + '"],.nword[data_order="' + i + '"]'
-        ).forEach(el => el.classList.add('lword'));
-      }
-    }
-  },
-
-  /**
-   * Handle touch move during multi-word selection.
-   * Finds the element under the touch point and triggers sentenceOver.
-   */
-  handleTouchMove: function (ev: TouchEvent): void {
-    if (!mwordDragNDrop.isTouchActive || !mwordDragNDrop.context) return;
-
-    const touch = ev.touches[0];
-    if (!touch) return;
-
-    // Find element under touch point
-    const elementUnderTouch = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
-    if (!elementUnderTouch) return;
-
-    // Check if it's a tword or nword element
-    if (elementUnderTouch.matches('.tword, .nword')) {
-      mwordDragNDrop.sentenceOver.call(elementUnderTouch);
-    }
-  },
-
-  /**
-   * Start creating a multi-word.
-   */
-  startInteraction: function (): void {
-    const context = mwordDragNDrop.context;
-    if (!context) return;
-
-    // Helper function to get siblings until a matching element (like jQuery's nextUntil)
-    const nextUntil = (el: Element, stopSelector: string, filterSelector: string): Element[] => {
-      const result: Element[] = [];
-      let sibling = el.nextElementSibling;
-      while (sibling) {
-        if (sibling.matches(stopSelector)) break;
-        if (sibling.matches(filterSelector)) {
-          result.push(sibling);
-        }
-        sibling = sibling.nextElementSibling;
-      }
-      return result;
-    };
-
-    // Add .tword (term word) and .nword (not word) subelements
-    context.querySelectorAll<HTMLElement>('.wsty').forEach(el => {
-      el.style.backgroundColor = 'inherit';
-      el.style.borderBottomColor = 'rgba(0,0,0,0)';
-    });
-    context.querySelectorAll<HTMLElement>('.wsty:not(.hide):not(.word)').forEach(el => {
-      const f = parseInt(getElAttr(el, 'data_code') || '0', 10) * 2 +
-        parseInt(getElAttr(el, 'data_order') || '0', 10) - 1;
-      let childr_html = '';
-      const siblings = nextUntil(el, '[id^="ID-' + f + '-"]', '[id$="-1"]');
-      siblings.forEach(child => {
-        const w_order = child.getAttribute('data_order');
-        if (w_order !== null) {
-          childr_html += '<span class="tword" data_order="' + w_order + '">' +
-            child.textContent + '</span>';
-        } else {
-          const childId = child.id || '';
-          childr_html += '<span class="nword" data_order="' +
-            childId.split('-')[1] + '">' + child.textContent + '</span>';
-        }
-      });
-      el.innerHTML = childr_html;
-    });
-
-    // Replace '#pe' element
-    document.getElementById('pe')?.remove();
-    const contextId = context.id;
-    document.body.insertAdjacentHTML('beforeend',
-      '<style id="pe">#' + contextId + ' .wsty:after,#' +
-      contextId + ' .wsty:before{opacity:0}</style>'
-    );
-
-    // Add class ".nword" (not word), and set attribute "data_order"
-    context.querySelectorAll('[id$="-1"]:not(.hide):not(.wsty)').forEach(el => {
-      el.classList.add('nword');
-      const elId = el.id || '';
-      el.setAttribute('data_order', elId.split('-')[1]);
-    });
-
-    // Attach children ".tword" (term) to ".word"
-    context.querySelectorAll('.word:not(.hide)').forEach(el => {
-      el.innerHTML = '<span class="tword" data_order="' + getElAttr(el, 'data_order') + '">' +
-        el.textContent + '</span>';
-    });
-
-    // Edit "tword" elements by filling their attributes
-    const event = mwordDragNDrop.event;
-    const annotationMode = event?.data?.annotation;
-    if (annotationMode === 1) {
-      context.querySelectorAll('.wsty:not(.hide)').forEach(el => {
-        const twords = el.querySelectorAll('.tword');
-        const lastTword = twords[twords.length - 1];
-        if (lastTword) {
-          lastTword.setAttribute('data_ann', getElAttr(el, 'data_ann'));
-          lastTword.setAttribute('data_trans', getElAttr(el, 'data_trans'));
-          lastTword.classList.add('content' + getElAttr(el, 'data_status'));
-        }
-        el.classList.remove('status1', 'status2', 'status3', 'status4', 'status5', 'status98', 'status99');
-      });
-    } else if (annotationMode === 3) {
-      context.querySelectorAll('.wsty:not(.hide)').forEach(el => {
-        const firstTword = el.querySelector('.tword');
-        if (firstTword) {
-          firstTword.setAttribute('data_ann', getElAttr(el, 'data_ann'));
-          firstTword.setAttribute('data_trans', getElAttr(el, 'data_trans'));
-          firstTword.classList.add('content' + getElAttr(el, 'data_status'));
-        }
-        el.classList.remove('status1', 'status2', 'status3', 'status4', 'status5', 'status98', 'status99');
-      });
-    }
-
-    // Prepare interaction on ".tword" to mouseover (one-time)
-    const mouseOverHandler = function (e: MouseEvent) {
-      const target = e.target as HTMLElement | null;
-      if (target?.matches('.tword')) {
-        mwordDragNDrop.twordMouseOver.call(target);
-        context.removeEventListener('mouseover', mouseOverHandler);
-      }
-    };
-    context.addEventListener('mouseover', mouseOverHandler);
-
-    // Prepare a hover intent interaction
-    hoverIntent(context, {
-      over: mwordDragNDrop.sentenceOver,
-      out: function () {},
-      sensitivity: 18,
-      selector: '.tword'
-    });
-  },
-
-  /**
-   * Stop the multi-word creation interaction
-   */
-  stopInteraction: function (): void {
-    if (mwordDragNDrop.timeout) {
-      clearTimeout(mwordDragNDrop.timeout);
-    }
-    mwordDragNDrop.isTouchActive = false;
-    document.querySelectorAll('.nword').forEach(el => el.classList.remove('nword'));
-    document.querySelectorAll('.tword').forEach(el => el.classList.remove('tword'));
-    document.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));
-    if (mwordDragNDrop.context) {
-      mwordDragNDrop.context.querySelectorAll<HTMLElement>('.wsty').forEach(el => {
-        el.style.backgroundColor = '';
-        el.style.borderBottomColor = '';
-      });
-    }
-    document.getElementById('pe')?.remove();
+/**
+ * Find all word elements (.wsty) within a selection range.
+ * Returns words in document order.
+ */
+function getSelectedWords(container: HTMLElement): HTMLElement[] {
+  const selection = window.getSelection();
+  if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+    return [];
   }
+
+  const range = selection.getRangeAt(0);
+  const words: HTMLElement[] = [];
+
+  // Get all word elements in the container
+  const allWords = container.querySelectorAll<HTMLElement>('.wsty');
+
+  for (const word of allWords) {
+    // Check if this word intersects with the selection range
+    if (range.intersectsNode(word)) {
+      words.push(word);
+    }
+  }
+
+  return words;
+}
+
+/**
+ * Get the combined text from selected word elements.
+ * Includes punctuation/spaces between words.
+ */
+function getSelectedText(words: HTMLElement[]): string {
+  if (words.length === 0) return '';
+  if (words.length === 1) return words[0].textContent || '';
+
+  // Get the range of positions
+  const firstPos = parseInt(words[0].getAttribute('data_order') || '0', 10);
+  const lastWord = words[words.length - 1];
+  const lastPos = parseInt(lastWord.getAttribute('data_order') || '0', 10);
+  const lastWordCount = parseInt(lastWord.getAttribute('data_code') || '1', 10);
+  const endPos = lastPos + (lastWordCount > 1 ? lastWordCount * 2 - 1 : 0);
+
+  // Find all elements between first and last position
+  let text = '';
+  const container = words[0].closest('[id^="sent_"]');
+  if (!container) {
+    // Fallback: just concatenate word texts
+    return words.map(w => w.textContent || '').join('');
+  }
+
+  // Get all elements with IDs in the range
+  for (let pos = firstPos; pos <= endPos; pos++) {
+    // Try to find element at this position (could be word or punctuation)
+    const el = container.querySelector(`[id^="ID-${pos}-"]`);
+    if (el) {
+      text += el.textContent || '';
+    }
+  }
+
+  return text || words.map(w => w.textContent || '').join('');
+}
+
+/**
+ * Handle text selection for multi-word creation.
+ * Called on mouseup to check if user selected multiple words.
+ *
+ * @param container The text container element (#thetext)
+ */
+export function handleTextSelection(container: HTMLElement): void {
+  const selectedWords = getSelectedWords(container);
+
+  // Clear selection after processing
+  const clearSelection = () => {
+    window.getSelection()?.removeAllRanges();
+  };
+
+  // Need at least 2 words for multi-word
+  if (selectedWords.length < 2) {
+    return;
+  }
+
+  // Get the selected text
+  const text = getSelectedText(selectedWords);
+
+  if (text.length > 250) {
+    alert('Selected text is too long!!!');
+    clearSelection();
+    return;
+  }
+
+  // Get the first word's position
+  const firstWord = selectedWords[0];
+  const position = parseInt(firstWord.getAttribute('data_order') || '0', 10);
+
+  // Get text ID
+  const textId = getTextId();
+
+  // Open multi-word modal via Alpine.js store
+  const store = Alpine.store('multiWordForm') as MultiWordFormStoreState;
+  if (store && typeof store.loadForEdit === 'function') {
+    store.loadForEdit(textId, position, text, selectedWords.length);
+  } else {
+    // Fallback to frame-based editing
+    const params = new URLSearchParams({
+      tid: String(textId),
+      ord: String(position),
+      txt: text
+    });
+    loadModalFrame('/word/edit?' + params.toString());
+  }
+
+  clearSelection();
+}
+
+/**
+ * Set up multi-word selection on a container.
+ * Listens for mouseup events and checks for text selection.
+ *
+ * @param container The text container element (#thetext)
+ */
+export function setupMultiWordSelection(container: HTMLElement): void {
+  container.addEventListener('mouseup', () => {
+    // Small delay to ensure selection is complete
+    setTimeout(() => handleTextSelection(container), 10);
+  });
+}
+
+// Legacy exports for backwards compatibility
+// These are no longer used but kept to avoid breaking imports
+export const mwordDragNDrop = {
+  context: undefined as HTMLElement | undefined,
+  stopInteraction: () => {}
 };
 
-/**
- * Initialize multi-word drag-and-drop selection when mousedown occurs on a word.
- * Sets up the selection context and starts a timeout for the interaction.
- *
- * @param this The HTML element where mousedown occurred
- * @param event The mousedown event
- */
-export function mword_drag_n_drop_select(
-  this: HTMLElement,
-  event: MouseEvent & { data?: { annotation?: number } }
-): void {
-  if (LWT_DATA.settings.jQuery_tooltip) { removeAllTooltips(); }
-  const sentence = this.parentElement;
-  if (!sentence) return;
-
-  mwordDragNDrop.context = sentence;
-  mwordDragNDrop.event = event;
-
-  // One-time handlers for mouseup and mouseout
-  const stopHandler = () => {
-    mwordDragNDrop.stopInteraction();
-    sentence.removeEventListener('mouseup', stopHandler);
-    sentence.removeEventListener('mouseout', stopHandler);
-  };
-  sentence.addEventListener('mouseup', stopHandler, { once: true });
-  sentence.addEventListener('mouseout', stopHandler, { once: true });
-
-  mwordDragNDrop.timeout = setTimeout(mwordDragNDrop.startInteraction, 300);
+export function mword_drag_n_drop_select(): void {
+  // No longer used - selection is handled via native text selection
 }
 
-/**
- * Initialize multi-word selection when touchstart occurs on a word.
- * Similar to mword_drag_n_drop_select but designed for touch devices.
- *
- * On touch devices:
- * - Long press (hold for 300ms) initiates the multi-word selection mode
- * - Dragging across words selects them
- * - Releasing finger completes the selection
- *
- * @param this The HTML element where touchstart occurred
- * @param event The touch event with optional annotation data
- */
-export function mword_touch_select(
-  this: HTMLElement,
-  event: TouchEvent & { data?: { annotation?: number } }
-): void {
-  if (LWT_DATA.settings.jQuery_tooltip) { removeAllTooltips(); }
-  const sentence = this.parentElement;
-  if (!sentence) return;
-
-  mwordDragNDrop.context = sentence;
-  mwordDragNDrop.event = event;
-  mwordDragNDrop.isTouchActive = false;
-
-  // Handler for touchend - finish or cancel selection
-  const touchEndHandler = (e: TouchEvent) => {
-    if (mwordDragNDrop.isTouchActive) {
-      // Selection was active, finish it
-      const finishEvent = e as TouchEvent & { handled?: boolean };
-      mwordDragNDrop.finish(finishEvent);
-    }
-    mwordDragNDrop.stopInteraction();
-    document.removeEventListener('touchend', touchEndHandler);
-    document.removeEventListener('touchcancel', touchEndHandler);
-    document.removeEventListener('touchmove', touchMoveHandler);
-  };
-
-  // Handler for touchmove - update selection
-  const touchMoveHandler = (e: TouchEvent) => {
-    if (mwordDragNDrop.isTouchActive) {
-      // Prevent page scroll while selecting
-      e.preventDefault();
-      mwordDragNDrop.handleTouchMove(e);
-    }
-  };
-
-  // Handler for touchmove before interaction starts - cancel if moved too much
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const preTouchMoveHandler = (_e: TouchEvent) => {
-    // If user moves finger before long-press completes, cancel
-    if (mwordDragNDrop.timeout) {
-      clearTimeout(mwordDragNDrop.timeout);
-      mwordDragNDrop.timeout = undefined;
-      document.removeEventListener('touchmove', preTouchMoveHandler);
-      document.removeEventListener('touchend', touchEndHandler);
-      document.removeEventListener('touchcancel', touchEndHandler);
-    }
-  };
-
-  document.addEventListener('touchend', touchEndHandler);
-  document.addEventListener('touchcancel', touchEndHandler);
-  document.addEventListener('touchmove', preTouchMoveHandler, { passive: false });
-
-  // Start interaction after long press (300ms)
-  mwordDragNDrop.timeout = setTimeout(() => {
-    // Remove pre-touch handler, add selection touch handler
-    document.removeEventListener('touchmove', preTouchMoveHandler);
-    document.addEventListener('touchmove', touchMoveHandler, { passive: false });
-
-    mwordDragNDrop.isTouchActive = true;
-    mwordDragNDrop.startInteraction();
-
-    // Find the initial tword under touch point and trigger initial selection
-    const touch = event.touches[0];
-    if (touch) {
-      const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
-      if (target?.matches('.tword')) {
-        mwordDragNDrop.twordMouseOver.call(target);
-      }
-    }
-  }, 300);
+export function mword_touch_select(): void {
+  // No longer used - selection is handled via native text selection
 }
-

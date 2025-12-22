@@ -11,6 +11,7 @@
 import Alpine from 'alpinejs';
 import type { WordStoreState } from '../stores/word_store';
 import { renderText, updateWordStatusInDOM, type RenderSettings } from '../text_renderer';
+import { setupMultiWordSelection } from '../text_multiword_selection';
 // speechDispatcher available when TTS is implemented
 
 /**
@@ -154,6 +155,10 @@ export function textReaderData(): TextReaderData {
 
       // Keyboard navigation
       document.addEventListener('keydown', (e) => this.handleKeydown(e));
+
+      // Multi-word selection via native text selection
+      // When user selects multiple words, the multi-word modal opens
+      setupMultiWordSelection(container);
     },
 
     handleWordClick(event: MouseEvent): void {
