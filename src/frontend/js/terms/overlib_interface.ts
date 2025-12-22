@@ -612,6 +612,7 @@ export function run_overlib_status_99(
  * @param stat
  * @param multi_words
  * @param rtl         Right-to-left text indicator
+ * @param ann         Annotation
  * @returns
  */
 export function run_overlib_status_1_to_5(
@@ -625,10 +626,12 @@ export function run_overlib_status_1_to_5(
   wid: string | number,
   stat: string | number,
   multi_words: (string | undefined)[],
-  rtl: boolean
+  rtl: boolean,
+  ann: string
 ): boolean {
   return overlib(
-    '<div>' + make_overlib_audio(txt) + '<span>(Read)</span></div>' +
+    make_overlib_audio(txt) +
+    '<b>' + escape_html_chars_2(hints, ann) + '</b><br/>' +
     make_overlib_link_change_status_all(txid, torder, wid, stat) + ' <br /> ' +
     make_overlib_link_edit_word(txid, torder, wid) + ' | ' +
     make_overlib_link_delete_word(txid, wid) +
