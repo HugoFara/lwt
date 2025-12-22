@@ -15,7 +15,7 @@
 
 namespace Lwt\View\Helper;
 
-require_once __DIR__ . '/../../Core/Http/url_utilities.php';
+require_once __DIR__ . '/../../Core/Http/UrlUtilities.php';
 
 use Lwt\Core\Http\UrlUtilities;
 use Lwt\Core\StringUtils;

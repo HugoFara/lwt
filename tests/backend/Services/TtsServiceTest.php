@@ -14,7 +14,7 @@ $config = EnvLoader::getDatabaseConfig();
 Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../src/backend/Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../../../src/backend/Core/Http/url_utilities.php';
+require_once __DIR__ . '/../../../src/backend/Core/Http/UrlUtilities.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageService.php';
 require_once __DIR__ . '/../../../src/backend/Services/LanguageDefinitions.php';
 require_once __DIR__ . '/../../../src/backend/Services/TtsService.php';

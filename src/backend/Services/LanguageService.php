@@ -26,7 +26,7 @@ use Lwt\Database\TextParsing;
 use Lwt\Database\UserScopedQuery;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
-require_once __DIR__ . '/../Core/Http/url_utilities.php';
+require_once __DIR__ . '/../Core/Http/UrlUtilities.php';
 require_once __DIR__ . '/../Core/Repository/RepositoryInterface.php';
 require_once __DIR__ . '/../Core/Repository/AbstractRepository.php';
 require_once __DIR__ . '/../Core/Repository/LanguageRepository.php';

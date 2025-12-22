@@ -3,7 +3,7 @@
 namespace Lwt\Tests\Core\Tag;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Http/url_utilities.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Http/UrlUtilities.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;

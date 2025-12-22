@@ -375,7 +375,6 @@ class EnvLoaderTest extends TestCase
         $this->assertEquals('', $config['passwd']);
         $this->assertEquals('learning-with-texts', $config['dbname']);
         $this->assertEquals('', $config['socket']);
-        $this->assertNull($config['tbpref']);
     }
 
     public function testGetDatabaseConfigReturnsLoadedValues(): void
