@@ -78,7 +78,7 @@ namespace Lwt\Views\Text;
                   <template x-for="s in [1,2,3,4,5]" :key="s">
                     <button
                       class="button"
-                      :class="isCurrentStatus(s) ? getStatusButtonClass(s) : 'is-outlined'"
+                      :class="getStatusButtonClass(s)"
                       :disabled="isLoading"
                       @click="setStatus(s)"
                       x-text="s"
@@ -86,13 +86,13 @@ namespace Lwt\Views\Text;
                   </template>
                   <button
                     class="button"
-                    :class="isCurrentStatus(99) ? 'is-success' : 'is-outlined'"
+                    :class="isCurrentStatus(99) ? 'is-success' : 'is-outlined is-success'"
                     :disabled="isLoading"
                     @click="setStatus(99)"
                   >WKn</button>
                   <button
                     class="button"
-                    :class="isCurrentStatus(98) ? 'is-warning' : 'is-outlined'"
+                    :class="isCurrentStatus(98) ? 'is-warning' : 'is-outlined is-warning'"
                     :disabled="isLoading"
                     @click="setStatus(98)"
                   >Ign</button>
@@ -147,15 +147,15 @@ namespace Lwt\Views\Text;
             <div class="pt-3" style="border-top: 1px solid #dbdbdb;">
               <p class="is-size-7 has-text-grey mb-2">Lookup:</p>
               <div class="buttons are-small">
-                <a :href="getDictUrl('dict1')" target="_blank" class="button is-outlined" rel="noopener">
+                <a :href="getDictUrl('dict1')" target="_blank" class="button is-outlined is-link" rel="noopener">
                   <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['size' => 14]); ?>
                   <span class="ml-1">Dict 1</span>
                 </a>
-                <a :href="getDictUrl('dict2')" target="_blank" class="button is-outlined" rel="noopener">
+                <a :href="getDictUrl('dict2')" target="_blank" class="button is-outlined is-link" rel="noopener">
                   <?php echo \Lwt\View\Helper\IconHelper::render('book-open', ['size' => 14]); ?>
                   <span class="ml-1">Dict 2</span>
                 </a>
-                <a :href="getDictUrl('translator')" target="_blank" class="button is-outlined" rel="noopener">
+                <a :href="getDictUrl('translator')" target="_blank" class="button is-outlined is-link" rel="noopener">
                   <?php echo \Lwt\View\Helper\IconHelper::render('languages', ['size' => 14]); ?>
                   <span class="ml-1">Translate</span>
                 </a>
