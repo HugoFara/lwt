@@ -232,6 +232,24 @@ namespace Lwt\Views\Text;
               <p class="help">Use {curly braces} around the term</p>
             </div>
 
+            <!-- Notes -->
+            <div class="field">
+              <label class="label is-small">Notes</label>
+              <div class="control">
+                <textarea
+                  class="textarea"
+                  :class="{ 'is-danger': formStore.errors.notes }"
+                  x-model="formStore.formData.notes"
+                  @blur="validateField('notes')"
+                  rows="2"
+                  placeholder="Personal notes about this term..."
+                ></textarea>
+              </div>
+              <template x-if="formStore.errors.notes">
+                <p class="help is-danger" x-text="formStore.errors.notes"></p>
+              </template>
+            </div>
+
             <!-- Status -->
             <div class="field">
               <label class="label is-small">Status</label>

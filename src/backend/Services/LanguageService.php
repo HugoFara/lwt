@@ -943,7 +943,7 @@ class LanguageService
             'LgSplitEachChar' => !empty($data['splitEachChar']),
             'LgRightToLeft' => !empty($data['rightToLeft']),
             'LgTTSVoiceAPI' => $data['ttsVoiceApi'] ?? '',
-            'LgShowRomanization' => $data['showRomanization'] ?? true,
+            'LgShowRomanization' => $data['showRomanization'] ?? false,
         ];
     }
 
