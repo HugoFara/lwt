@@ -216,8 +216,12 @@ class TextReadingService
 
         if ($record['TiIsNotWord'] != 0) {
             // The current item is not a term (likely punctuation)
-            echo "<span id=\"$spanid\" class=\"$hidetag\">" .
-            str_replace("¶", '<br />', htmlspecialchars($record['TiText'] ?? '', ENT_QUOTES, 'UTF-8')) . '</span>';
+            $text = $record['TiText'] ?? '';
+            // Add 'punc' class for punctuation (non-whitespace non-words)
+            $puncClass = (trim($text) !== '' && !ctype_space($text)) ? 'punc' : '';
+            $classes = trim($hidetag . ' ' . $puncClass);
+            echo "<span id=\"$spanid\" class=\"$classes\">" .
+            str_replace("¶", '<br />', htmlspecialchars($text, ENT_QUOTES, 'UTF-8')) . '</span>';
         } else {
             // A term (word or multi-word)
             $this->echoTerm(

@@ -445,6 +445,34 @@ span.wsty, span.mwsty
   color: #000000;
 }
 
+/* Punctuation marks - stick to adjacent words */
+.punc
+{
+  /* Negative margin closes the gap created by word's margin-right */
+  margin-left: -2px;
+}
+
+/* Word groups - prevent line breaks between word and punctuation */
+.word-group
+{
+  /* Prevent line breaks within the group */
+  white-space: nowrap;
+  display: inline;
+}
+
+/* Inside word groups, restore normal margin for punctuation */
+.word-group .punc
+{
+  margin-left: -2px;
+}
+
+/* Remove margin from last element in word group */
+.word-group > span:last-child.wsty,
+.word-group > span:last-child.mwsty
+{
+  margin-right: 0;
+}
+
 /* Multi-words hint */
 span.mwsty
 {

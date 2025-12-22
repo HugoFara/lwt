@@ -95,6 +95,10 @@ ones are marked like "v1.0.0-fork".
 * **SQL Prefix Queries**: Fixed `prefixQuery()` in database migrations:
   * Now handles `DROP TABLE IF EXISTS` syntax (previously only `IF NOT EXISTS`).
   * Now case-insensitive for SQL keywords (CREATE, DROP, ALTER, INSERT).
+* **Punctuation Formatting** ([#125](https://github.com/HugoFara/lwt/issues/125)):
+  Fixed punctuation marks (periods, commas, quotation marks) breaking away from
+  adjacent words onto separate lines. Punctuation now stays "stuck" to the word
+  it belongs to by wrapping word+punctuation pairs in non-breaking groups.
 
 ### Security
 

@@ -99,6 +99,14 @@ function buildWordDataAttributes(word: WordData): Record<string, string> {
 }
 
 /**
+ * Check if text is pure whitespace (spaces, tabs, etc. but NOT paragraph markers).
+ */
+function isWhitespace(text: string): boolean {
+  // Paragraph markers (¶) are NOT whitespace - they become <br />
+  return /^[\s]+$/.test(text) && !text.includes('¶');
+}
+
+/**
  * Render a single word as HTML.
  */
 export function renderWord(word: WordData, settings: RenderSettings): string {
@@ -106,10 +114,14 @@ export function renderWord(word: WordData, settings: RenderSettings): string {
 
   if (word.isNotWord) {
     // Punctuation or whitespace
-    const hiddenClass = word.hidden ? ' hide' : '';
+    const hiddenClass = word.hidden ? 'hide' : '';
     // Escape HTML first, then replace ¶ with <br /> to preserve line breaks
     const text = escapeHtml(word.text).replace(/¶/g, '<br />');
-    return `<span id="${spanId}" class="${hiddenClass}">${text}</span>`;
+    // Add 'punc' class for punctuation (non-whitespace non-words)
+    // This allows CSS to control line-breaking behavior
+    const puncClass = !isWhitespace(word.text) ? 'punc' : '';
+    const classes = [hiddenClass, puncClass].filter(Boolean).join(' ');
+    return `<span id="${spanId}" class="${classes}">${text}</span>`;
   }
 
   // Build classes
@@ -134,7 +146,34 @@ export function renderWord(word: WordData, settings: RenderSettings): string {
 }
 
 /**
+ * Check if a word item is trailing punctuation (should stick to preceding word).
+ * Trailing punctuation includes: . , ; : ! ? ) ] } » " ' etc.
+ */
+function isTrailingPunctuation(word: WordData): boolean {
+  if (!word.isNotWord) return false;
+  const text = word.text.trim();
+  if (!text || isWhitespace(word.text)) return false;
+  // Check if starts with common trailing punctuation
+  const trailingPunc = /^[.,;:!?\])}\u00BB\u201D\u2019\u203A\u300B\u3009\u3011\u3015\u3017\u3019\u301B'"\u2026\u2014\u2013]/;
+  return trailingPunc.test(text);
+}
+
+/**
+ * Check if a word item is leading punctuation (should stick to following word).
+ * Leading punctuation includes: ( [ { « " ' etc.
+ */
+function isLeadingPunctuation(word: WordData): boolean {
+  if (!word.isNotWord) return false;
+  const text = word.text.trim();
+  if (!text || isWhitespace(word.text)) return false;
+  // Check if starts with common leading punctuation
+  const leadingPunc = /^[(\[{\u00AB\u201C\u2018\u2039\u300A\u3008\u3010\u3014\u3016\u3018\u301A]/;
+  return leadingPunc.test(text);
+}
+
+/**
  * Render all words as HTML, grouped by sentences.
+ * Words and adjacent punctuation are wrapped together to prevent line breaks.
  */
 export function renderText(words: WordData[], settings: RenderSettings): string {
   if (words.length === 0) return '';
@@ -142,8 +181,11 @@ export function renderText(words: WordData[], settings: RenderSettings): string 
   const parts: string[] = [];
   let currentSentenceId = -1;
   let sentenceOpen = false;
+  let i = 0;
 
-  for (const word of words) {
+  while (i < words.length) {
+    const word = words[i];
+
     // Handle sentence boundaries
     if (word.sentenceId !== currentSentenceId) {
       if (sentenceOpen) {
@@ -154,8 +196,59 @@ export function renderText(words: WordData[], settings: RenderSettings): string 
       sentenceOpen = true;
     }
 
-    // Render the word
-    parts.push(renderWord(word, settings));
+    // Check if this is a word (not punctuation/whitespace)
+    if (!word.isNotWord) {
+      // Collect leading punctuation (already rendered), the word, and trailing punctuation
+      const group: string[] = [];
+
+      // Check for leading punctuation that was already added
+      // (We handle this by looking ahead from leading punctuation instead)
+
+      // Add the word
+      group.push(renderWord(word, settings));
+      i++;
+
+      // Collect trailing punctuation
+      while (i < words.length && words[i].sentenceId === currentSentenceId && isTrailingPunctuation(words[i])) {
+        group.push(renderWord(words[i], settings));
+        i++;
+      }
+
+      // Wrap in a non-breaking group if we have trailing punctuation
+      if (group.length > 1) {
+        parts.push(`<span class="word-group">${group.join('')}</span>`);
+      } else {
+        parts.push(group[0]);
+      }
+    } else if (isLeadingPunctuation(word)) {
+      // Leading punctuation - collect it with the following word
+      const group: string[] = [];
+      group.push(renderWord(word, settings));
+      i++;
+
+      // Get the following word if it exists and is in the same sentence
+      if (i < words.length && !words[i].isNotWord && words[i].sentenceId === currentSentenceId) {
+        group.push(renderWord(words[i], settings));
+        i++;
+
+        // Also collect any trailing punctuation after the word
+        while (i < words.length && words[i].sentenceId === currentSentenceId && isTrailingPunctuation(words[i])) {
+          group.push(renderWord(words[i], settings));
+          i++;
+        }
+      }
+
+      // Wrap in a non-breaking group
+      if (group.length > 1) {
+        parts.push(`<span class="word-group">${group.join('')}</span>`);
+      } else {
+        parts.push(group[0]);
+      }
+    } else {
+      // Regular non-word (whitespace or other punctuation)
+      parts.push(renderWord(word, settings));
+      i++;
+    }
   }
 
   // Close last sentence
