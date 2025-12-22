@@ -30,6 +30,7 @@ export interface WordData {
   status: number;
   translation: string;
   romanization: string;
+  notes?: string;
   tags?: string;
 }
 
@@ -154,7 +155,12 @@ function createWordStore(): WordStoreState {
         showAll: this.showAll,
         showTranslations: this.showTranslations,
         rightToLeft: this.rightToLeft,
-        textSize: this.textSize
+        textSize: this.textSize,
+        // Annotation settings for Markdown-rendered annotations
+        showLearning: this.showLearning,
+        displayStatTrans: this.displayStatTrans,
+        modeTrans: this.modeTrans,
+        annTextSize: this.annTextSize
       };
 
       return renderText(this.words, settings);
@@ -233,6 +239,7 @@ function createWordStore(): WordStoreState {
           status: word.status ?? 0,
           translation: word.translation ?? '',
           romanization: word.romanization ?? '',
+          notes: word.notes ?? '',
           tags: word.tags
         };
 

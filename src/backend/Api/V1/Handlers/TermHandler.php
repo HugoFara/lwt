@@ -606,11 +606,38 @@ class TermHandler
             ];
         }
 
-        // New multi-word expression
+        // Check if text is provided
         if ($text === null || $text === '') {
             return ['error' => 'Multi-word text is required for new expressions'];
         }
 
+        // Try to find existing term by text (case-insensitive)
+        $textLc = mb_strtolower($text, 'UTF-8');
+        $existingWord = QueryBuilder::table('words')
+            ->select(['WoID', 'WoText', 'WoTranslation', 'WoRomanization', 'WoSentence', 'WoStatus', 'WoWordCount'])
+            ->where('WoTextLC', '=', $textLc)
+            ->where('WoLgID', '=', $lgid)
+            ->where('WoWordCount', '>', 1)
+            ->firstPrepared();
+
+        if ($existingWord) {
+            // Found existing multi-word term
+            return [
+                'id' => (int) $existingWord['WoID'],
+                'text' => $existingWord['WoText'],
+                'textLc' => $textLc,
+                'translation' => $existingWord['WoTranslation'] ?? '',
+                'romanization' => $existingWord['WoRomanization'] ?? '',
+                'sentence' => $existingWord['WoSentence'] ?? '',
+                'notes' => '',
+                'status' => (int) $existingWord['WoStatus'],
+                'langId' => $lgid,
+                'wordCount' => (int) $existingWord['WoWordCount'],
+                'isNew' => false
+            ];
+        }
+
+        // New multi-word expression
         // Get sentence at position
         $sentence = $this->wordService->getSentenceTextAtPosition($textId, $position);
 
@@ -620,7 +647,7 @@ class TermHandler
         return [
             'id' => null,
             'text' => $text,
-            'textLc' => mb_strtolower($text, 'UTF-8'),
+            'textLc' => $textLc,
             'translation' => '',
             'romanization' => '',
             'sentence' => $sentence ?? '',

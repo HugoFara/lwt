@@ -105,6 +105,8 @@ describe('text_multiword_selection.ts', () => {
     });
 
     it('opens modal when multiple words are selected', () => {
+      // In the real database, words are stored consecutively without space elements
+      // The getSelectedText function adds spaces between consecutive word elements
       document.body.innerHTML = `
         <div id="thetext">
           <span id="sent_1">
@@ -136,17 +138,18 @@ describe('text_multiword_selection.ts', () => {
       expect(mockStore.loadForEdit).toHaveBeenCalledWith(
         1, // textId from URL
         1, // position (first word's data_order)
-        expect.any(String), // text
+        'Hello World', // text extracted with space added between consecutive words
         2 // word count
       );
     });
 
     it('shows alert when selected text is too long', () => {
+      // Words are stored consecutively without space elements
       document.body.innerHTML = `
         <div id="thetext">
           <span id="sent_1">
-            <span class="wsty" data_order="1">${'A'.repeat(200)}</span>
-            <span class="wsty" data_order="2">${'B'.repeat(100)}</span>
+            <span id="ID-1-1" class="wsty" data_order="1">${'A'.repeat(200)}</span>
+            <span id="ID-2-1" class="wsty" data_order="2">${'B'.repeat(100)}</span>
           </span>
         </div>
       `;
@@ -216,6 +219,7 @@ describe('text_multiword_selection.ts', () => {
         writable: true
       });
 
+      // Words are stored consecutively without space elements
       document.body.innerHTML = `
         <div id="thetext">
           <span id="sent_1">
@@ -245,7 +249,7 @@ describe('text_multiword_selection.ts', () => {
       expect(mockStore.loadForEdit).toHaveBeenCalledWith(
         42, // textId extracted from URL
         1,
-        expect.any(String),
+        'Hello World',
         2
       );
     });

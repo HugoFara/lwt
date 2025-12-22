@@ -228,13 +228,38 @@ function createMultiWordFormStore(): MultiWordFormStoreState {
         // For now, show if there's existing romanization or language supports it
         this.showRomanization = data.romanization !== '';
 
+        // Add curly braces around the term in sentence if not present
+        let sentence = data.sentence;
+        if (sentence && !sentence.includes('{') && data.text) {
+          const termText = data.text.trim();
+          // Escape regex special characters and allow flexible whitespace matching
+          const escapedText = termText
+            .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            .replace(/\s+/g, '\\s+'); // Allow any whitespace to match any whitespace
+
+          try {
+            // Case-insensitive match with flexible whitespace
+            const regex = new RegExp('(' + escapedText + ')', 'iu');
+            sentence = sentence.replace(regex, '{$1}');
+          } catch {
+            // If regex fails, try simple case-insensitive indexOf
+            const lowerSentence = sentence.toLowerCase();
+            const lowerTerm = termText.toLowerCase();
+            const idx = lowerSentence.indexOf(lowerTerm);
+            if (idx !== -1) {
+              const matchedText = sentence.substring(idx, idx + termText.length);
+              sentence = sentence.substring(0, idx) + '{' + matchedText + '}' + sentence.substring(idx + termText.length);
+            }
+          }
+        }
+
         // Set form data
         this.formData = {
           text: data.text,
           textLc: data.textLc,
           translation: data.translation === '*' ? '' : data.translation,
           romanization: data.romanization,
-          sentence: data.sentence,
+          sentence: sentence,
           status: data.status || 1,
           wordCount: data.wordCount || wordCount
         };

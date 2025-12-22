@@ -346,7 +346,8 @@ class TextHandler
                 'WoText',
                 'WoStatus',
                 'WoTranslation',
-                'WoRomanization'
+                'WoRomanization',
+                'WoNotes'
             ])
             ->leftJoin('words', 'textitems2.Ti2WoID', '=', 'words.WoID')
             ->where('textitems2.Ti2TxID', '=', $textId)
@@ -400,6 +401,7 @@ class TextHandler
                     $wordData['status'] = (int)$record['WoStatus'];
                     $wordData['translation'] = ExportService::replaceTabNewline($record['WoTranslation'] ?? '');
                     $wordData['romanization'] = $record['WoRomanization'] ?? '';
+                    $wordData['notes'] = $record['WoNotes'] ?? '';
 
                     // Get tags
                     $tags = TagService::getWordTagList((int)$record['WoID'], false);
@@ -412,6 +414,7 @@ class TextHandler
                     $wordData['status'] = 0;
                     $wordData['translation'] = '';
                     $wordData['romanization'] = '';
+                    $wordData['notes'] = '';
                 }
 
                 // Add multiword references

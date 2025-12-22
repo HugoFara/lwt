@@ -23,6 +23,7 @@ export interface Term {
   textLc: string;
   translation: string;
   romanization?: string;
+  notes?: string;
   status: number;
   langId: number;
   sentence?: string;

@@ -54,6 +54,7 @@ export interface TextWord {
   status?: number;
   translation?: string;
   romanization?: string;
+  notes?: string;
   tags?: string;
   // Multiword references (mw2, mw3, etc.)
   [key: `mw${number}`]: string | undefined;
