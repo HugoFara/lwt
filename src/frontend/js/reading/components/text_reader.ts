@@ -142,7 +142,12 @@ export function textReaderData(): TextReaderData {
         showAll: this.showAll,
         showTranslations: this.showTranslations,
         rightToLeft: this.store.rightToLeft,
-        textSize: this.store.textSize
+        textSize: this.store.textSize,
+        // Annotation settings required for Markdown-rendered translations
+        showLearning: this.store.showLearning,
+        displayStatTrans: this.store.displayStatTrans,
+        modeTrans: this.store.modeTrans,
+        annTextSize: this.store.annTextSize
       };
     },
 

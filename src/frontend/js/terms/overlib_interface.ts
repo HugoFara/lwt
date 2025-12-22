@@ -22,6 +22,7 @@ import { iconHtml, createIcon, initLucideIcons } from '../ui/icons';
 import { showRightFramesPanel } from '../reading/frame_management';
 import { speechDispatcher } from '../core/user_interactions';
 import type { MultiWordFormStoreState } from '../reading/stores/multi_word_form_store';
+import { parseInlineMarkdown } from '../core/inline_markdown';
 
 // Import the popup system
 import { overlib } from '../ui/word_popup';
@@ -459,9 +460,14 @@ function renderTermDetailsHtml(term: TermDetails): string {
   // Term text
   rows.push(`<tr><td class="lwt-label">Term:</td><td class="lwt-value"><b>${escapeHtml(term.text)}</b></td></tr>`);
 
-  // Translation (may contain HTML if annotation was highlighted)
+  // Translation (supports inline Markdown)
   if (term.translation && term.translation !== '*') {
-    rows.push(`<tr><td class="lwt-label">Translation:</td><td class="lwt-value"><b>${term.translation}</b></td></tr>`);
+    rows.push(`<tr><td class="lwt-label">Translation:</td><td class="lwt-value"><b>${parseInlineMarkdown(term.translation)}</b></td></tr>`);
+  }
+
+  // Notes (supports inline Markdown)
+  if (term.notes) {
+    rows.push(`<tr><td class="lwt-label">Notes:</td><td class="lwt-value">${parseInlineMarkdown(term.notes)}</td></tr>`);
   }
 
   // Tags

@@ -20,6 +20,7 @@
 
 namespace Lwt\Views\Test;
 
+use Lwt\Core\StringUtils;
 use Lwt\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
 use Lwt\View\Helper\IconHelper;
@@ -64,7 +65,7 @@ $sent1 = str_replace(
     </td>
     <td class="td1 center">
         <span id="TRAN<?php echo $word['WoID']; ?>">
-            <?php echo \htmlspecialchars($word['WoTranslation'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+            <?php echo StringUtils::parseInlineMarkdown($word['WoTranslation'] ?? ''); ?>
         </span>
     </td>
     <td class="td1 center">

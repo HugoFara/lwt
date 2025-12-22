@@ -30,6 +30,7 @@ import './core/ui_utilities';
 import './core/user_interactions';
 import './core/language_settings';
 import './core/simple_interactions';
+import { parseInlineMarkdown } from './core/inline_markdown';
 
 // API modules (Phase 1 - centralized API client)
 import './api/terms';
@@ -171,6 +172,10 @@ declare global {
 
 // Initialize Alpine.js globally
 window.Alpine = Alpine;
+
+// Register Alpine.js magic method for inline Markdown parsing
+// Usage in templates: x-html="$markdown(text)"
+Alpine.magic('markdown', () => (text: string) => parseInlineMarkdown(text));
 
 // Start Alpine.js
 Alpine.start();

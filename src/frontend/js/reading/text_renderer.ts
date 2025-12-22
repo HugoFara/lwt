@@ -9,6 +9,7 @@
  */
 
 import type { WordData } from './stores/word_store';
+import { parseInlineMarkdown } from '../core/inline_markdown';
 
 /**
  * Render settings for text display.
@@ -18,6 +19,11 @@ export interface RenderSettings {
   showTranslations: boolean;
   rightToLeft: boolean;
   textSize: number;
+  // Annotation settings
+  showLearning?: number;
+  displayStatTrans?: number;
+  modeTrans?: number;
+  annTextSize?: number;
 }
 
 /**
@@ -27,6 +33,47 @@ function escapeHtml(text: string): string {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+/**
+ * Check if a status should display translations based on displayStatTrans setting.
+ *
+ * @param status Status value (1-5, 98, 99)
+ * @param displayStatTrans Setting value for which statuses show translations
+ * @returns Whether translation should be shown for this status
+ */
+function shouldShowTransForStatus(status: number, displayStatTrans: number): boolean {
+  // displayStatTrans is a bitmap: 1=status1, 2=status2, 4=status3, 8=status4, 16=status5, 32=ignored, 64=wellknown
+  switch (status) {
+    case 1: return (displayStatTrans & 1) !== 0;
+    case 2: return (displayStatTrans & 2) !== 0;
+    case 3: return (displayStatTrans & 4) !== 0;
+    case 4: return (displayStatTrans & 8) !== 0;
+    case 5: return (displayStatTrans & 16) !== 0;
+    case 98: return (displayStatTrans & 32) !== 0;
+    case 99: return (displayStatTrans & 64) !== 0;
+    default: return false;
+  }
+}
+
+/**
+ * Build annotation span HTML for a word.
+ *
+ * @param word Word data
+ * @param settings Render settings
+ * @returns Annotation span HTML or empty string
+ */
+function buildAnnotationSpan(word: WordData, settings: RenderSettings): string {
+  const { showLearning, displayStatTrans } = settings;
+
+  // Check if annotations should be shown for this word
+  if (!showLearning || !displayStatTrans) return '';
+  if (!word.translation) return '';
+  if (!shouldShowTransForStatus(word.status, displayStatTrans)) return '';
+
+  // Parse Markdown and render annotation
+  const annotationHtml = parseInlineMarkdown(word.translation);
+  return `<span class="word-ann">${annotationHtml}</span>`;
 }
 
 /**
@@ -135,12 +182,27 @@ export function renderWord(word: WordData, settings: RenderSettings): string {
     .join(' ');
 
   // Text content
-  let content: string;
+  let wordText: string;
   if (settings.showAll && word.wordCount > 1) {
     // In "show all" mode, multiwords display their word count
-    content = String(word.wordCount);
+    wordText = String(word.wordCount);
   } else {
-    content = escapeHtml(word.text);
+    wordText = escapeHtml(word.text);
+  }
+
+  // Build annotation span (with Markdown support)
+  const annotationSpan = buildAnnotationSpan(word, settings);
+
+  // Position annotation based on modeTrans (1=after, 2=ruby above, 3=before, 4=ruby below)
+  // For modes 3 and 4, annotation comes before text; for 1 and 2, after
+  const modeTrans = settings.modeTrans ?? 1;
+  const annotationBefore = modeTrans >= 3;
+
+  let content: string;
+  if (annotationBefore) {
+    content = annotationSpan + wordText;
+  } else {
+    content = wordText + annotationSpan;
   }
 
   return `<span id="${spanId}" class="${classes}" ${dataAttrString}>${content}</span>`;
@@ -316,6 +378,16 @@ export function updateWordTranslationInDOM(
       el.setAttribute('data_rom', romanization);
     } else {
       el.removeAttribute('data_rom');
+    }
+
+    // Update annotation span content (with Markdown support)
+    const annSpan = el.querySelector('.word-ann');
+    if (annSpan) {
+      if (translation) {
+        annSpan.innerHTML = parseInlineMarkdown(translation);
+      } else {
+        annSpan.remove();
+      }
     }
   });
 }

@@ -309,4 +309,58 @@ class StringUtils
         }
         return $haystack;
     }
+
+    /**
+     * Parse inline Markdown to HTML.
+     *
+     * Supports: **bold**, *italic*, [links](url), ~~strikethrough~~
+     *
+     * Security:
+     * - HTML is escaped before parsing (XSS prevention)
+     * - Only http/https/relative URLs allowed in links
+     * - Generated tags: <strong>, <em>, <del>, <a>
+     *
+     * @param string $text Input text with Markdown
+     *
+     * @return string HTML string
+     */
+    public static function parseInlineMarkdown(string $text): string
+    {
+        if (empty($text)) {
+            return '';
+        }
+
+        // Step 1: Escape HTML first (security)
+        $result = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+
+        // Step 2: Links [text](url) - sanitize URLs
+        $result = preg_replace_callback(
+            '/\[([^\]]+)\]\(([^)]+)\)/',
+            function (array $matches): string {
+                $linkText = $matches[1];
+                $url = trim($matches[2]);
+
+                // Only allow http, https, and relative URLs
+                if (preg_match('#^(https?://|/|\./|\.\./.)#i', $url)) {
+                    $safeUrl = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+                    return '<a href="' . $safeUrl . '" target="_blank" rel="noopener noreferrer">' . $linkText . '</a>';
+                }
+
+                // Block dangerous protocols (javascript:, data:, etc.)
+                return $linkText;
+            },
+            $result
+        );
+
+        // Step 3: Bold **text**
+        $result = preg_replace('/\*\*([^*]+)\*\*/', '<strong>$1</strong>', $result);
+
+        // Step 4: Italic *text* (not preceded/followed by asterisk)
+        $result = preg_replace('/(?<!\*)\*([^*]+)\*(?!\*)/', '<em>$1</em>', $result);
+
+        // Step 5: Strikethrough ~~text~~
+        $result = preg_replace('/~~([^~]+)~~/', '<del>$1</del>', $result);
+
+        return $result;
+    }
 }

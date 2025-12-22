@@ -170,10 +170,7 @@ use Lwt\View\Helper\PageLayoutHelper;
 .status99 { border-bottom: solid 2px #CCFFCC; } /* Well-known */
 
 /* Hide translations class */
-.hide-translations .wsty[data_trans]::after,
-.hide-translations .wsty[data_trans]::before,
-.hide-translations .mwsty[data_trans]::after,
-.hide-translations .mwsty[data_trans]::before {
+.hide-translations .word-ann {
   display: none !important;
 }
 

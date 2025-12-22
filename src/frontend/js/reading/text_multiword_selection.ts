@@ -71,37 +71,72 @@ function getSelectedWords(container: HTMLElement): HTMLElement[] {
 
 /**
  * Get the combined text from selected word elements.
- * Includes punctuation/spaces between words.
+ * Extends partial selections to complete words and includes spaces/punctuation between.
+ *
+ * @param words The selected word elements (.wsty)
+ * @param container The sentence container element
  */
-function getSelectedText(words: HTMLElement[]): string {
+function getSelectedText(words: HTMLElement[], container: HTMLElement): string {
   if (words.length === 0) return '';
   if (words.length === 1) return words[0].textContent || '';
 
-  // Get the range of positions
-  const firstPos = parseInt(words[0].getAttribute('data_order') || '0', 10);
+  const firstWord = words[0];
   const lastWord = words[words.length - 1];
+
+  // Get positions
+  const firstPos = parseInt(firstWord.getAttribute('data_order') || '0', 10);
   const lastPos = parseInt(lastWord.getAttribute('data_order') || '0', 10);
+  // For multi-words, the end position includes all component words
   const lastWordCount = parseInt(lastWord.getAttribute('data_code') || '1', 10);
-  const endPos = lastPos + (lastWordCount > 1 ? lastWordCount * 2 - 1 : 0);
 
-  // Find all elements between first and last position
+  // Find the sentence container that holds both words
+  const sentence = firstWord.closest('[id^="sent_"]') || container;
+
+  // Collect all text from first word to last word, including punctuation
+  // Since spaces are not explicitly stored in the DOM, we need to add them
+  // between word elements that don't have punctuation between them.
   let text = '';
-  const container = words[0].closest('[id^="sent_"]');
-  if (!container) {
-    // Fallback: just concatenate word texts
-    return words.map(w => w.textContent || '').join('');
-  }
+  const allElements = sentence.querySelectorAll<HTMLElement>('[id^="ID-"]');
 
-  // Get all elements with IDs in the range
-  for (let pos = firstPos; pos <= endPos; pos++) {
-    // Try to find element at this position (could be word or punctuation)
-    const el = container.querySelector(`[id^="ID-${pos}-"]`);
-    if (el) {
-      text += el.textContent || '';
+  let collecting = false;
+  let lastWasWord = false;
+
+  for (const el of allElements) {
+    const elId = el.id;
+    const match = elId.match(/^ID-(\d+)-(\d+)$/);
+    if (!match) continue;
+
+    const elPos = parseInt(match[1], 10);
+    const elCount = parseInt(match[2], 10);
+
+    // Start collecting when we reach the first word's position
+    if (elPos === firstPos && elCount === 1) {
+      collecting = true;
+    }
+
+    if (collecting) {
+      const elContent = el.textContent || '';
+      const isWord = el.classList.contains('wsty');
+
+      // Add a space before this word if the previous element was also a word
+      // (meaning there's no punctuation/space element between them)
+      if (isWord && lastWasWord && elContent) {
+        text += ' ';
+      }
+
+      text += elContent;
+      lastWasWord = isWord && elContent.length > 0;
+    }
+
+    // Stop after we've collected the last word
+    // For multi-words, we need to account for the word count
+    const lastEndPos = lastWordCount > 1 ? lastPos + (lastWordCount * 2 - 2) : lastPos;
+    if (elPos >= lastEndPos && el.classList.contains('wsty')) {
+      break;
     }
   }
 
-  return text || words.map(w => w.textContent || '').join('');
+  return text;
 }
 
 /**
@@ -123,8 +158,8 @@ export function handleTextSelection(container: HTMLElement): void {
     return;
   }
 
-  // Get the selected text
-  const text = getSelectedText(selectedWords);
+  // Get the complete text from selected words (extends to full words, includes spaces)
+  const text = getSelectedText(selectedWords, container);
 
   if (text.length > 250) {
     alert('Selected text is too long!!!');

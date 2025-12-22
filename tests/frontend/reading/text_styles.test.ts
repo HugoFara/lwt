@@ -60,32 +60,11 @@ describe('reading/text_styles.ts', () => {
       expect(css).toContain('.hide{display:none !important;}');
     });
 
-    it('generates rules for status translations when showLearning is true', () => {
-      const config = createConfig({ showLearning: true, displayStatTrans: 1 }); // Show status 1
+    it('generates .word-ann styles', () => {
+      const config = createConfig();
       const css = generateTextStyles(config);
 
-      expect(css).toContain('.wsty.status1');
-    });
-
-    it('skips status rules when showLearning is false', () => {
-      const config = createConfig({ showLearning: false });
-      const css = generateTextStyles(config);
-
-      expect(css).not.toContain('.wsty.status1:after');
-    });
-
-    it('uses after pseudo-element for modeTrans 1', () => {
-      const config = createConfig({ modeTrans: 1 });
-      const css = generateTextStyles(config);
-
-      expect(css).toContain(':after');
-    });
-
-    it('uses before pseudo-element for modeTrans 3', () => {
-      const config = createConfig({ modeTrans: 3 });
-      const css = generateTextStyles(config);
-
-      expect(css).toContain(':before');
+      expect(css).toContain('.word-ann');
     });
 
     it('generates ruby layout for modeTrans 2', () => {
@@ -107,39 +86,46 @@ describe('reading/text_styles.ts', () => {
       const config = createConfig({ annTextSize: 80 });
       const css = generateTextStyles(config);
 
-      expect(css).toContain('font-size:80%');
-    });
-
-    it('generates rules for each enabled status', () => {
-      // displayStatTrans: 1=status1, 2=status2, 4=status3, 8=status4, 16=status5
-      const config = createConfig({ displayStatTrans: 7 }); // status 1, 2, 3
-      const css = generateTextStyles(config);
-
-      expect(css).toContain('status1');
-      expect(css).toContain('status2');
-      expect(css).toContain('status3');
-      expect(css).not.toContain('status4:');
-    });
-
-    it('handles ignored status (98) in displayStatTrans', () => {
-      const config = createConfig({ displayStatTrans: 32 }); // 32 = ignored
-      const css = generateTextStyles(config);
-
-      expect(css).toContain('status98');
-    });
-
-    it('handles well-known status (99) in displayStatTrans', () => {
-      const config = createConfig({ displayStatTrans: 64 }); // 64 = well-known
-      const css = generateTextStyles(config);
-
-      expect(css).toContain('status99');
+      expect(css).toContain('font-size: 80%');
     });
 
     it('includes max-width constraint', () => {
       const config = createConfig();
       const css = generateTextStyles(config);
 
-      expect(css).toContain('max-width:15em');
+      expect(css).toContain('max-width: 15em');
+    });
+
+    it('includes annotation styling for bold', () => {
+      const config = createConfig();
+      const css = generateTextStyles(config);
+
+      expect(css).toContain('.word-ann strong');
+      expect(css).toContain('font-weight: bold');
+    });
+
+    it('includes annotation styling for italic', () => {
+      const config = createConfig();
+      const css = generateTextStyles(config);
+
+      expect(css).toContain('.word-ann em');
+      expect(css).toContain('font-style: italic');
+    });
+
+    it('includes annotation styling for strikethrough', () => {
+      const config = createConfig();
+      const css = generateTextStyles(config);
+
+      expect(css).toContain('.word-ann del');
+      expect(css).toContain('text-decoration: line-through');
+    });
+
+    it('includes annotation styling for links', () => {
+      const config = createConfig();
+      const css = generateTextStyles(config);
+
+      expect(css).toContain('.word-ann a');
+      expect(css).toContain('text-decoration: underline');
     });
   });
 
@@ -173,7 +159,7 @@ describe('reading/text_styles.ts', () => {
       injectTextStyles(config);
 
       const styleEl = document.getElementById('text-dynamic-styles');
-      expect(styleEl?.textContent).toContain('font-size:60%');
+      expect(styleEl?.textContent).toContain('font-size: 60%');
     });
 
     it('removes existing style element before adding new one', () => {
@@ -185,7 +171,7 @@ describe('reading/text_styles.ts', () => {
 
       const styleElements = document.querySelectorAll('#text-dynamic-styles');
       expect(styleElements.length).toBe(1);
-      expect(styleElements[0].textContent).toContain('font-size:90%');
+      expect(styleElements[0].textContent).toContain('font-size: 90%');
     });
 
     it('appends style to document head', () => {
@@ -279,60 +265,6 @@ describe('reading/text_styles.ts', () => {
   });
 
   // ===========================================================================
-  // Status Bitmap Tests
-  // ===========================================================================
-
-  describe('Status Bitmap', () => {
-    it('shows status 1 when bit 1 is set', () => {
-      const config = createConfig({ displayStatTrans: 1 });
-      const css = generateTextStyles(config);
-
-      expect(css).toContain('status1');
-    });
-
-    it('shows status 2 when bit 2 is set', () => {
-      const config = createConfig({ displayStatTrans: 2 });
-      const css = generateTextStyles(config);
-
-      expect(css).toContain('status2');
-    });
-
-    it('shows status 3 when bit 4 is set', () => {
-      const config = createConfig({ displayStatTrans: 4 });
-      const css = generateTextStyles(config);
-
-      expect(css).toContain('status3');
-    });
-
-    it('shows status 4 when bit 8 is set', () => {
-      const config = createConfig({ displayStatTrans: 8 });
-      const css = generateTextStyles(config);
-
-      expect(css).toContain('status4');
-    });
-
-    it('shows status 5 when bit 16 is set', () => {
-      const config = createConfig({ displayStatTrans: 16 });
-      const css = generateTextStyles(config);
-
-      expect(css).toContain('status5');
-    });
-
-    it('shows all statuses when all bits set', () => {
-      const config = createConfig({ displayStatTrans: 127 }); // All bits 1-64
-      const css = generateTextStyles(config);
-
-      expect(css).toContain('status1');
-      expect(css).toContain('status2');
-      expect(css).toContain('status3');
-      expect(css).toContain('status4');
-      expect(css).toContain('status5');
-      expect(css).toContain('status98');
-      expect(css).toContain('status99');
-    });
-  });
-
-  // ===========================================================================
   // Edge Cases
   // ===========================================================================
 
@@ -341,7 +273,7 @@ describe('reading/text_styles.ts', () => {
       const config = createConfig({ annTextSize: 0 });
       const css = generateTextStyles(config);
 
-      expect(css).toContain('font-size:0%');
+      expect(css).toContain('font-size: 0%');
     });
 
     it('handles very large textSize', () => {
@@ -351,20 +283,26 @@ describe('reading/text_styles.ts', () => {
       expect(style).toContain('font-size: 500%');
     });
 
-    it('handles displayStatTrans of 0', () => {
-      const config = createConfig({ displayStatTrans: 0 });
-      const css = generateTextStyles(config);
-
-      // Should not have status-specific rules (except general rules)
-      expect(css).not.toMatch(/\.wsty\.status\d+:after\{content/);
-    });
-
     it('handles modeTrans value 0 (hidden)', () => {
       const config = createConfig({ modeTrans: 0 });
       const css = generateTextStyles(config);
 
       // Should still generate valid CSS
       expect(css.length).toBeGreaterThan(0);
+    });
+
+    it('generates margin-left for modeTrans 1 (after text)', () => {
+      const config = createConfig({ modeTrans: 1 });
+      const css = generateTextStyles(config);
+
+      expect(css).toContain('margin-left: 0.2em');
+    });
+
+    it('generates margin-right for modeTrans 3 (before text)', () => {
+      const config = createConfig({ modeTrans: 3 });
+      const css = generateTextStyles(config);
+
+      expect(css).toContain('margin-right: 0.2em');
     });
   });
 });

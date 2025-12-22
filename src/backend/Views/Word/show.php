@@ -31,17 +31,25 @@ use Lwt\Core\StringUtils;
 <tr>
     <td class="td1 right">Translation:</td>
     <td class="td1 word-show-value"><b><?php
+    $translationHtml = StringUtils::parseInlineMarkdown($word['translation'] ?? '');
     if (!empty($ann)) {
+        // Highlight annotation in the rendered HTML
         echo StringUtils::replaceFirst(
-            htmlspecialchars($ann ?? '', ENT_QUOTES, 'UTF-8'),
-            '<span class="word-show-highlight">' . htmlspecialchars($ann ?? '', ENT_QUOTES, 'UTF-8') . '</span>',
-            htmlspecialchars($word['translation'] ?? '', ENT_QUOTES, 'UTF-8')
+            htmlspecialchars($ann, ENT_QUOTES, 'UTF-8'),
+            '<span class="word-show-highlight">' . htmlspecialchars($ann, ENT_QUOTES, 'UTF-8') . '</span>',
+            $translationHtml
         );
     } else {
-        echo htmlspecialchars($word['translation'] ?? '', ENT_QUOTES, 'UTF-8');
+        echo $translationHtml;
     }
     ?></b></td>
 </tr>
+<?php if (!empty($word['notes'])) : ?>
+<tr>
+    <td class="td1 right">Notes:</td>
+    <td class="td1 word-show-value"><?php echo StringUtils::parseInlineMarkdown($word['notes']); ?></td>
+</tr>
+<?php endif; ?>
 <?php if ($tags !== '') : ?>
 <tr>
     <td class="td1 right">Tags:</td>

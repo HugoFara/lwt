@@ -45,29 +45,11 @@ function shouldShowTransForStatus(status: number, displayStatTrans: number): boo
  * @returns CSS string
  */
 export function generateTextStyles(config: TextReadingConfig): string {
-  const { showLearning, displayStatTrans, modeTrans, annTextSize } = config;
+  const { modeTrans, annTextSize } = config;
 
   const isRuby = modeTrans === 2 || modeTrans === 4;
-  const pseudoElement = modeTrans < 3 ? 'after' : 'before';
-  // When there's annotated text, use data_ann, otherwise data_trans
-  const dataTrans = 'data_trans'; // Will be overridden by PHP if annotations exist
 
   const cssRules: string[] = [];
-
-  // Status-specific translation display rules
-  if (showLearning) {
-    const statArr = [1, 2, 3, 4, 5, 98, 99];
-    for (const status of statArr) {
-      if (shouldShowTransForStatus(status, displayStatTrans)) {
-        cssRules.push(
-          `.wsty.status${status}:${pseudoElement},.tword.content${status}:${pseudoElement}{content: attr(${dataTrans});}`
-        );
-        cssRules.push(
-          `.tword.content${status}:${pseudoElement}{color:rgba(0,0,0,0)}`
-        );
-      }
-    }
-  }
 
   // Ruby-style layout rules
   if (isRuby) {
@@ -82,23 +64,23 @@ export function generateTextStyles(config: TextReadingConfig): string {
   ${verticalAlign}
 }`);
 
-    const pseudoMargin = modeTrans === 2 ? 'margin-top: -0.05em;' : 'margin-bottom: -0.15em;';
+    const annMargin = modeTrans === 2 ? 'margin-top: -0.05em;' : 'margin-bottom: -0.15em;';
     cssRules.push(`
-.wsty:${pseudoElement} {
+.wsty .word-ann {
   display: block !important;
-  ${pseudoMargin}
+  ${annMargin}
 }`);
   }
 
-  // General pseudo-element styling
+  // General annotation styling
   const textAlign = isRuby ? 'text-align: center;' : '';
   const marginLeft = modeTrans === 1 ? 'margin-left: 0.2em;' : '';
   const marginRight = modeTrans === 3 ? 'margin-right: 0.2em;' : '';
 
   cssRules.push(`
-.tword:${pseudoElement},.wsty:${pseudoElement} {
+.word-ann {
   ${textAlign}
-  font-size:${annTextSize}%;
+  font-size: ${annTextSize}%;
   ${marginLeft}
   ${marginRight}
   overflow: hidden;
@@ -106,13 +88,25 @@ export function generateTextStyles(config: TextReadingConfig): string {
   text-overflow: ellipsis;
   display: inline-block;
   vertical-align: -25%;
+  color: #006699;
+  max-width: 15em;
 }`);
 
-  // Max width for annotations
-  const maxWidthSelector = isRuby
-    ? `.tword:${pseudoElement},.word:${pseudoElement}`
-    : `.tword:${pseudoElement},.wsty:${pseudoElement}`;
-  cssRules.push(`${maxWidthSelector}{max-width:15em;}`);
+  // Allow rich text formatting within annotations
+  cssRules.push(`
+.word-ann strong, .word-ann b {
+  font-weight: bold;
+}
+.word-ann em, .word-ann i {
+  font-style: italic;
+}
+.word-ann del {
+  text-decoration: line-through;
+}
+.word-ann a {
+  color: #006699;
+  text-decoration: underline;
+}`);
 
   // Hide class
   cssRules.push('.hide{display:none !important;}');
