@@ -41,13 +41,18 @@ interface LwtDataGlobal {
 
 declare const LWT_DATA: LwtDataGlobal;
 
+
 interface MwordDragNDropState {
-  event: (MouseEvent & { data?: { annotation?: number } }) | undefined;
+  event: ((MouseEvent | TouchEvent) & { data?: { annotation?: number } }) | undefined;
   pos: number | undefined;
   timeout: ReturnType<typeof setTimeout> | undefined;
   context: HTMLElement | undefined;
-  finish: (ev: MouseEvent & { handled?: boolean }) => void;
+  /** Whether touch interaction is active (for touch event handling) */
+  isTouchActive: boolean;
+  finish: (ev: (MouseEvent | TouchEvent) & { handled?: boolean }) => void;
   twordMouseOver: (this: HTMLElement) => void;
+  /** Handle touch move during selection */
+  handleTouchMove: (ev: TouchEvent) => void;
   sentenceOver: (this: HTMLElement) => void;
   startInteraction: () => void;
   stopInteraction: () => void;
@@ -72,10 +77,12 @@ export const mwordDragNDrop: MwordDragNDropState = {
 
   context: undefined,
 
+  isTouchActive: false,
+
   /**
    * Multi-word selection is finished
    */
-  finish: function (ev: MouseEvent & { handled?: boolean }): void {
+  finish: function (ev: (MouseEvent | TouchEvent) & { handled?: boolean }): void {
     const context = mwordDragNDrop.context;
     if (!context) return;
     if (ev.handled !== true) {
@@ -188,6 +195,26 @@ export const mwordDragNDrop: MwordDragNDropState = {
           '.tword[data_order="' + i + '"],.nword[data_order="' + i + '"]'
         ).forEach(el => el.classList.add('lword'));
       }
+    }
+  },
+
+  /**
+   * Handle touch move during multi-word selection.
+   * Finds the element under the touch point and triggers sentenceOver.
+   */
+  handleTouchMove: function (ev: TouchEvent): void {
+    if (!mwordDragNDrop.isTouchActive || !mwordDragNDrop.context) return;
+
+    const touch = ev.touches[0];
+    if (!touch) return;
+
+    // Find element under touch point
+    const elementUnderTouch = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
+    if (!elementUnderTouch) return;
+
+    // Check if it's a tword or nword element
+    if (elementUnderTouch.matches('.tword, .nword')) {
+      mwordDragNDrop.sentenceOver.call(elementUnderTouch);
     }
   },
 
@@ -309,6 +336,7 @@ export const mwordDragNDrop: MwordDragNDropState = {
     if (mwordDragNDrop.timeout) {
       clearTimeout(mwordDragNDrop.timeout);
     }
+    mwordDragNDrop.isTouchActive = false;
     document.querySelectorAll('.nword').forEach(el => el.classList.remove('nword'));
     document.querySelectorAll('.tword').forEach(el => el.classList.remove('tword'));
     document.querySelectorAll('.lword').forEach(el => el.classList.remove('lword'));
@@ -350,5 +378,88 @@ export function mword_drag_n_drop_select(
   sentence.addEventListener('mouseout', stopHandler, { once: true });
 
   mwordDragNDrop.timeout = setTimeout(mwordDragNDrop.startInteraction, 300);
+}
+
+/**
+ * Initialize multi-word selection when touchstart occurs on a word.
+ * Similar to mword_drag_n_drop_select but designed for touch devices.
+ *
+ * On touch devices:
+ * - Long press (hold for 300ms) initiates the multi-word selection mode
+ * - Dragging across words selects them
+ * - Releasing finger completes the selection
+ *
+ * @param this The HTML element where touchstart occurred
+ * @param event The touch event with optional annotation data
+ */
+export function mword_touch_select(
+  this: HTMLElement,
+  event: TouchEvent & { data?: { annotation?: number } }
+): void {
+  if (LWT_DATA.settings.jQuery_tooltip) { removeAllTooltips(); }
+  const sentence = this.parentElement;
+  if (!sentence) return;
+
+  mwordDragNDrop.context = sentence;
+  mwordDragNDrop.event = event;
+  mwordDragNDrop.isTouchActive = false;
+
+  // Handler for touchend - finish or cancel selection
+  const touchEndHandler = (e: TouchEvent) => {
+    if (mwordDragNDrop.isTouchActive) {
+      // Selection was active, finish it
+      const finishEvent = e as TouchEvent & { handled?: boolean };
+      mwordDragNDrop.finish(finishEvent);
+    }
+    mwordDragNDrop.stopInteraction();
+    document.removeEventListener('touchend', touchEndHandler);
+    document.removeEventListener('touchcancel', touchEndHandler);
+    document.removeEventListener('touchmove', touchMoveHandler);
+  };
+
+  // Handler for touchmove - update selection
+  const touchMoveHandler = (e: TouchEvent) => {
+    if (mwordDragNDrop.isTouchActive) {
+      // Prevent page scroll while selecting
+      e.preventDefault();
+      mwordDragNDrop.handleTouchMove(e);
+    }
+  };
+
+  // Handler for touchmove before interaction starts - cancel if moved too much
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const preTouchMoveHandler = (_e: TouchEvent) => {
+    // If user moves finger before long-press completes, cancel
+    if (mwordDragNDrop.timeout) {
+      clearTimeout(mwordDragNDrop.timeout);
+      mwordDragNDrop.timeout = undefined;
+      document.removeEventListener('touchmove', preTouchMoveHandler);
+      document.removeEventListener('touchend', touchEndHandler);
+      document.removeEventListener('touchcancel', touchEndHandler);
+    }
+  };
+
+  document.addEventListener('touchend', touchEndHandler);
+  document.addEventListener('touchcancel', touchEndHandler);
+  document.addEventListener('touchmove', preTouchMoveHandler, { passive: false });
+
+  // Start interaction after long press (300ms)
+  mwordDragNDrop.timeout = setTimeout(() => {
+    // Remove pre-touch handler, add selection touch handler
+    document.removeEventListener('touchmove', preTouchMoveHandler);
+    document.addEventListener('touchmove', touchMoveHandler, { passive: false });
+
+    mwordDragNDrop.isTouchActive = true;
+    mwordDragNDrop.startInteraction();
+
+    // Find the initial tword under touch point and trigger initial selection
+    const touch = event.touches[0];
+    if (touch) {
+      const target = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement;
+      if (target?.matches('.tword')) {
+        mwordDragNDrop.twordMouseOver.call(target);
+      }
+    }
+  }, 300);
 }
 
