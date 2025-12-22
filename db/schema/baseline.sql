@@ -157,6 +157,7 @@ CREATE TABLE IF NOT EXISTS words (
     WoTranslation varchar(500) NOT NULL DEFAULT '*',
     WoRomanization varchar(100) DEFAULT NULL,
     WoSentence varchar(1000) DEFAULT NULL,
+    WoNotes varchar(1000) DEFAULT NULL,
     WoWordCount tinyint(3) unsigned NOT NULL DEFAULT 0,
     WoCreated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     WoStatusChanged timestamp NOT NULL DEFAULT '1970-01-01 12:00:00',

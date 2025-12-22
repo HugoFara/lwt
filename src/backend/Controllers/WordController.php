@@ -467,7 +467,7 @@ class WordController extends BaseController
         $wid = (int) $widParam;
 
         $record = QueryBuilder::table('words')
-            ->select(['WoText', 'WoLgID', 'WoTranslation', 'WoSentence', 'WoRomanization', 'WoStatus'])
+            ->select(['WoText', 'WoLgID', 'WoTranslation', 'WoSentence', 'WoNotes', 'WoRomanization', 'WoStatus'])
             ->where('WoID', '=', $wid)
             ->firstPrepared();
         if ($record) {
@@ -478,6 +478,7 @@ class WordController extends BaseController
                 $transl = '';
             }
             $sentence = ExportService::replaceTabNewline($record['WoSentence']);
+            $notes = ExportService::replaceTabNewline($record['WoNotes'] ?? '');
             $rom = $record['WoRomanization'];
             $status = $record['WoStatus'];
             $showRoman = (bool) QueryBuilder::table('languages')
@@ -1346,6 +1347,8 @@ class WordController extends BaseController
         if ($transl == '*') {
             $transl = '';
         }
+
+        $notes = $wordData['notes'] ?? '';
 
         // Variables for view
         $term = (object) [

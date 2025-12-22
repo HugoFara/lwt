@@ -9,6 +9,10 @@ ones are marked like "v1.0.0-fork".
 
 ### Added
 
+* **Notes Field for Terms** ([#128](https://github.com/HugoFara/lwt/issues/128)):
+  Added a dedicated "Notes" field to terms/words, allowing users to add personal
+  notes separate from translations. Includes database migration, updated entity
+  classes, service layer, UI forms, and API endpoints.
 * Official support for PHP 8.3 and 8.4.
 * **Multi-user support** ([#221](https://github.com/HugoFara/lwt/issues/221)):
   Users are now stored in a dedicated `users` table with proper foreign key

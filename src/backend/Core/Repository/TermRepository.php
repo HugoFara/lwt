@@ -53,6 +53,7 @@ class TermRepository extends AbstractRepository
         'status' => 'WoStatus',
         'translation' => 'WoTranslation',
         'sentence' => 'WoSentence',
+        'notes' => 'WoNotes',
         'romanization' => 'WoRomanization',
         'wordCount' => 'WoWordCount',
         'createdAt' => 'WoCreated',
@@ -75,6 +76,7 @@ class TermRepository extends AbstractRepository
             (int) $row['WoStatus'],
             (string) ($row['WoTranslation'] ?? ''),
             (string) ($row['WoSentence'] ?? ''),
+            (string) ($row['WoNotes'] ?? ''),
             (string) ($row['WoRomanization'] ?? ''),
             (int) ($row['WoWordCount'] ?? 1),
             $this->parseDateTime($row['WoCreated'] ?? null),
@@ -102,6 +104,7 @@ class TermRepository extends AbstractRepository
             'WoStatus' => $entity->status()->toInt(),
             'WoTranslation' => $entity->translation(),
             'WoSentence' => $entity->sentence(),
+            'WoNotes' => $entity->notes(),
             'WoRomanization' => $entity->romanization(),
             'WoWordCount' => $entity->wordCount(),
             'WoCreated' => $entity->createdAt()->format('Y-m-d H:i:s'),
@@ -436,6 +439,23 @@ class TermRepository extends AbstractRepository
         $affected = $this->query()
             ->where('WoID', '=', $termId)
             ->updatePrepared(['WoSentence' => $sentence]);
+
+        return $affected > 0;
+    }
+
+    /**
+     * Update the notes of a term.
+     *
+     * @param int    $termId Term ID
+     * @param string $notes  New notes
+     *
+     * @return bool True if updated
+     */
+    public function updateNotes(int $termId, string $notes): bool
+    {
+        $affected = $this->query()
+            ->where('WoID', '=', $termId)
+            ->updatePrepared(['WoNotes' => $notes]);
 
         return $affected > 0;
     }

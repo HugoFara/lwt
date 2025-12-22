@@ -91,6 +91,15 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            rows="3"><?php echo htmlspecialchars($sentence ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
        </td>
    </tr>
+   <tr>
+       <td class="td1 right">Notes:</td>
+       <td class="td1">
+           <textarea name="WoNotes"
+           class="textarea-noreturn checklength checkoutsidebmp"
+           data_maxlength="1000" data_info="Notes" cols="35"
+           rows="3"></textarea>
+       </td>
+   </tr>
    <?php echo printSimilarTermsTabRow(); ?>
    <tr>
        <td class="td1 right">Status:</td>
