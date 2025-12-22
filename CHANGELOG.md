@@ -67,6 +67,11 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Tag Duplicate Key Error** ([#120](https://github.com/HugoFara/lwt/issues/120)):
+  Fixed rare error when updating a word with tags. When the session cache was
+  stale, saving a word with an existing tag would fail with "Duplicate entry
+  for key 'TgText'" and remove the tag from the word. Changed tag insertion
+  to use `INSERT IGNORE` to handle race conditions and stale cache gracefully.
 * **Japanese Annotations** ([#101](https://github.com/HugoFara/lwt/issues/101)):
   Fixed annotations not displaying correctly in Japanese texts. The
   `annotationToJson()` function was using an off-by-one index that didn't

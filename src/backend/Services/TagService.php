@@ -630,7 +630,11 @@ class TagService
         foreach ($tagList as $tag) {
             $tag = (string) $tag;
             if (!in_array($tag, $_SESSION['TAGS'])) {
-                QueryBuilder::table('tags')->insertPrepared(['TgText' => $tag]);
+                // Use INSERT IGNORE to handle race condition / stale cache (Issue #120)
+                Connection::preparedExecute(
+                    'INSERT IGNORE INTO tags (TgText) VALUES (?)',
+                    [$tag]
+                );
             }
             // Use raw SQL for INSERT...SELECT subquery
             Connection::preparedExecute(
@@ -676,7 +680,11 @@ class TagService
         foreach ($tagList as $tag) {
             $tag = (string) $tag;
             if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
-                QueryBuilder::table('tags2')->insertPrepared(['T2Text' => $tag]);
+                // Use INSERT IGNORE to handle race condition / stale cache (Issue #120)
+                Connection::preparedExecute(
+                    'INSERT IGNORE INTO tags2 (T2Text) VALUES (?)',
+                    [$tag]
+                );
             }
             // Use raw SQL for INSERT...SELECT subquery
             Connection::preparedExecute(
@@ -719,7 +727,11 @@ class TagService
         foreach ($tagList as $tag) {
             $tag = (string) $tag;
             if (!in_array($tag, $_SESSION['TEXTTAGS'])) {
-                QueryBuilder::table('tags2')->insertPrepared(['T2Text' => $tag]);
+                // Use INSERT IGNORE to handle race condition / stale cache (Issue #120)
+                Connection::preparedExecute(
+                    'INSERT IGNORE INTO tags2 (T2Text) VALUES (?)',
+                    [$tag]
+                );
             }
             // Use raw SQL for INSERT...SELECT subquery
             Connection::preparedExecute(
@@ -1472,8 +1484,12 @@ class TagService
             }
 
             // Create tag if it doesn't exist
+            // Use INSERT IGNORE to handle race condition / stale cache (Issue #120)
             if (!in_array($tag, $_SESSION['TAGS'])) {
-                QueryBuilder::table('tags')->insertPrepared(['TgText' => $tag]);
+                Connection::preparedExecute(
+                    'INSERT IGNORE INTO tags (TgText) VALUES (?)',
+                    [$tag]
+                );
             }
 
             // Link tag to word using raw SQL for INSERT...SELECT

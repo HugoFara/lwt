@@ -3,9 +3,12 @@
 namespace Lwt\Tests\Core\Tag;
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
+require_once __DIR__ . '/../../../../src/backend/Core/Http/url_utilities.php';
 
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
+use Lwt\Database\Connection;
+use Lwt\Database\QueryBuilder;
 use Lwt\Services\TagService;
 use PHPUnit\Framework\TestCase;
 
@@ -749,5 +752,59 @@ class TagsTest extends TestCase
         $result = TagService::removeTagFromArchivedTexts('', '(1)');
         $this->assertIsString($result);
         $this->assertStringContainsString('not found', $result);
+    }
+
+    /**
+     * Test saveWordTagsFromArray handles duplicate tags gracefully (Issue #120)
+     *
+     * This tests the scenario where a tag exists in the database but the
+     * session cache is stale. The function should not throw a duplicate
+     * key error.
+     */
+    public function testSaveWordTagsFromArrayHandlesDuplicateTags(): void
+    {
+        if (!Globals::getDbConnection()) {
+            $this->markTestSkipped('Database connection not available');
+        }
+
+        // Use a highly unique tag name with microseconds
+        $uniqueTagName = 'DupTest_' . uniqid('', true);
+
+        // Clean up any pre-existing tag with this name (shouldn't exist, but be safe)
+        Connection::preparedExecute(
+            'DELETE FROM tags WHERE TgText = ?',
+            [$uniqueTagName]
+        );
+
+        try {
+            // Insert the tag directly into the database
+            Connection::preparedExecute(
+                'INSERT INTO tags (TgText) VALUES (?)',
+                [$uniqueTagName]
+            );
+
+            // Clear the session cache to simulate stale cache
+            $_SESSION['TAGS'] = [];
+
+            // Try to save a word with this tag - should NOT throw exception
+            // even though the tag exists but is not in the cache
+            TagService::saveWordTagsFromArray(1, [$uniqueTagName]);
+            $this->assertTrue(true, 'saveWordTagsFromArray should handle duplicate tags gracefully');
+        } catch (\RuntimeException $e) {
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                $this->fail('Issue #120: saveWordTagsFromArray throws duplicate key error when cache is stale: ' . $e->getMessage());
+            }
+            throw $e;
+        } finally {
+            // Cleanup: remove the test tag and wordtags associations
+            Connection::preparedExecute(
+                'DELETE FROM wordtags WHERE WtTgID IN (SELECT TgID FROM tags WHERE TgText = ?)',
+                [$uniqueTagName]
+            );
+            Connection::preparedExecute(
+                'DELETE FROM tags WHERE TgText = ?',
+                [$uniqueTagName]
+            );
+        }
     }
 }
