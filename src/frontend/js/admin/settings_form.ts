@@ -1,12 +1,72 @@
 /**
- * Settings Form Module - Handles settings form interactions
+ * Settings Form Module - Alpine.js component for settings form interactions
  *
  * @author  HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
+ * @since   3.1.0 Migrated to Alpine.js component
  */
 
+import Alpine from 'alpinejs';
 import { lwtFormCheck } from '../forms/unloadformcheck';
+
+/**
+ * Alpine.js component for settings form management.
+ * Handles form change tracking, navigation, and submission.
+ */
+export function settingsFormApp() {
+  return {
+    /** Whether the form has unsaved changes */
+    isDirty: false,
+
+    /** Loading state for submit buttons */
+    isSubmitting: false,
+
+    /**
+     * Initialize the component.
+     */
+    init() {
+      // Set up form change tracking
+      lwtFormCheck.askBeforeExit();
+    },
+
+    /**
+     * Navigate to a URL, resetting dirty state first.
+     */
+    navigate(url: string) {
+      lwtFormCheck.resetDirty();
+      location.href = url;
+    },
+
+    /**
+     * Go back in browser history.
+     */
+    historyBack() {
+      history.back();
+    },
+
+    /**
+     * Handle form submission with confirmation.
+     */
+    confirmSubmit(event: Event, message: string = 'Are you sure?') {
+      if (!confirm(message)) {
+        event.preventDefault();
+        return false;
+      }
+      this.isSubmitting = true;
+      return true;
+    }
+  };
+}
+
+// Register Alpine component
+if (typeof Alpine !== 'undefined') {
+  Alpine.data('settingsFormApp', settingsFormApp);
+}
+
+// ============================================================================
+// Legacy API - For backward compatibility with non-Alpine pages
+// ============================================================================
 
 /**
  * Initialize settings form event handlers.

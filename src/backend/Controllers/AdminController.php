@@ -26,7 +26,7 @@ use Lwt\Services\StatisticsService;
 use Lwt\Services\ThemeService;
 use Lwt\Services\TtsService;
 use Lwt\Services\WordService;
-use Lwt\Services\LanguageDefinitions;
+use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 
 use Lwt\View\Helper\PageLayoutHelper;
 
@@ -43,7 +43,7 @@ require_once __DIR__ . '/../Core/Database/Restore.php';
 require_once __DIR__ . '/../Services/MediaService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
 require_once __DIR__ . '/../Core/Entity/GoogleTranslate.php';
-require_once __DIR__ . '/../Services/LanguageDefinitions.php';
+// LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../Services/BackupService.php';
 require_once __DIR__ . '/../Services/DemoService.php';
 require_once __DIR__ . '/../Services/ServerDataService.php';
@@ -281,10 +281,10 @@ class AdminController extends BaseController
 
         // Get TTS data for the form (used by included view)
         /** @psalm-suppress UnusedVariable */
-        $languageOptions = $this->ttsService->getLanguageOptions(LanguageDefinitions::getAll());
+        $languageOptions = $this->ttsService->getLanguageOptions(LanguagePresets::getAll());
         /** @psalm-suppress UnusedVariable */
         $currentLanguageCode = json_encode(
-            $this->ttsService->getCurrentLanguageCode(LanguageDefinitions::getAll())
+            $this->ttsService->getCurrentLanguageCode(LanguagePresets::getAll())
         );
 
         // Render page

@@ -45,8 +45,11 @@ namespace Lwt\Views\Admin;
             <h1 class="title is-3 has-text-centered">Database Connection Wizard</h1>
 
             <?php if ($errorMessage !== null): ?>
-            <div class="notification <?php echo str_contains($errorMessage, 'Success') ? 'is-success' : 'is-danger'; ?> is-light">
-                <button class="delete" onclick="this.parentElement.remove()"></button>
+            <div class="notification <?php echo str_contains($errorMessage, 'Success') ? 'is-success' : 'is-danger'; ?> is-light"
+                 x-data="{ show: true }"
+                 x-show="show"
+                 x-transition>
+                <button class="delete" @click="show = false"></button>
                 <?php echo htmlspecialchars($errorMessage); ?>
             </div>
             <?php endif; ?>
