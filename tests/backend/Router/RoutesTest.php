@@ -26,8 +26,8 @@ class RoutesTest extends TestCase
     {
         parent::setUp();
 
-        $this->router = new Router();
         $this->basePath = dirname(__DIR__, 3); // Go up to project root
+        $this->router = new Router($this->basePath);
 
         // Load routes
         require_once $this->basePath . '/src/backend/Router/routes.php';

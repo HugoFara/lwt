@@ -8,9 +8,6 @@
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
-    <stubs>
-        <file name=".psalm/stubs.php" />
-    </stubs>
     <projectFiles>
         <directory name="." />
         <ignoreFiles>
@@ -19,7 +16,6 @@
             <directory name="assets" />
             <directory name="docs" />
             <directory name="src/tools" />
-            <directory name=".psalm" />
             <directory name="tests" />
         </ignoreFiles>
     </projectFiles>
@@ -90,13 +86,6 @@
                 <directory name="src/backend/Core/Entity" />
             </errorLevel>
         </UnusedClass>
-
-        <!-- Legacy files may be missing during refactoring -->
-        <MissingFile>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Controllers" />
-            </errorLevel>
-        </MissingFile>
 
         <!-- Views call global functions that may be dynamically loaded -->
         <UndefinedFunction>

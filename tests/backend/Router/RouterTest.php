@@ -21,7 +21,7 @@ class RouterTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->router = new Router();
+        $this->router = new Router(dirname(__DIR__, 3));
 
         // Save original superglobals
         $this->originalServer = $_SERVER;

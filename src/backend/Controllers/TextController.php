@@ -539,30 +539,6 @@ class TextController extends BaseController
     }
 
     /**
-     * Print text (replaces text_print.php)
-     *
-     * @param array $params Route parameters
-     *
-     * @return void
-     */
-    public function printText(array $params): void
-    {
-        include __DIR__ . '/../Legacy/text_print.php';
-    }
-
-    /**
-     * Print plain text (replaces text_print_plain.php)
-     *
-     * @param array $params Route parameters
-     *
-     * @return void
-     */
-    public function printPlain(array $params): void
-    {
-        include __DIR__ . '/../Legacy/text_print_plain.php';
-    }
-
-    /**
      * Import long text (replaces text_import_long.php)
      *
      * @param array $params Route parameters

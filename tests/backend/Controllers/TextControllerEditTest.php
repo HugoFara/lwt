@@ -179,28 +179,6 @@ class TextControllerEditTest extends TestCase
         $this->assertTrue(method_exists($controller, 'display'));
     }
 
-    public function testControllerHasPrintTextMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
-
-        $this->assertTrue(method_exists($controller, 'printText'));
-    }
-
-    public function testControllerHasPrintPlainMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = new TextController(new \Lwt\Services\TextService(), new \Lwt\Services\LanguageService());
-
-        $this->assertTrue(method_exists($controller, 'printPlain'));
-    }
-
     public function testControllerHasImportLongMethod(): void
     {
         if (!self::$dbConnected) {

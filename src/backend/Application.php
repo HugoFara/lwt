@@ -83,11 +83,6 @@ class Application
      */
     public function bootstrap(): void
     {
-        // Define base path constant if not already defined
-        if (!defined('LWT_BASE_PATH')) {
-            define('LWT_BASE_PATH', $this->basePath);
-        }
-
         // Determine if we're in debug mode (development)
         $debug = $this->isDebugMode();
 
@@ -250,8 +245,8 @@ class Application
             return;
         }
 
-        // Initialize router with DI container
-        $router = new Router($this->container);
+        // Initialize router with base path and DI container
+        $router = new Router($this->basePath, $this->container);
 
         // Load route configuration
         require_once $this->basePath . '/src/backend/Router/routes.php';

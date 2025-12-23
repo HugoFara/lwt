@@ -59,12 +59,21 @@ class Router
     private ?Container $container;
 
     /**
+     * Base path for resolving file paths.
+     *
+     * @var string
+     */
+    private string $basePath;
+
+    /**
      * Create a new Router instance.
      *
+     * @param string         $basePath  Base path for resolving file paths
      * @param Container|null $container Optional DI container for resolving controllers
      */
-    public function __construct(?Container $container = null)
+    public function __construct(string $basePath, ?Container $container = null)
     {
+        $this->basePath = $basePath;
         $this->container = $container;
     }
 
@@ -294,7 +303,7 @@ class Router
         foreach ($mappings as $oldPrefix => $newPrefix) {
             if (str_starts_with($path, $oldPrefix)) {
                 $newPath = $newPrefix . substr($path, strlen($oldPrefix));
-                $filePath = LWT_BASE_PATH . $newPath;
+                $filePath = $this->basePath . $newPath;
 
                 if (file_exists($filePath) && is_file($filePath)) {
                     return [
@@ -312,7 +321,7 @@ class Router
         $directPaths = ['/assets/', '/docs/', '/media/'];
         foreach ($directPaths as $prefix) {
             if (str_starts_with($path, $prefix)) {
-                $filePath = LWT_BASE_PATH . $path;
+                $filePath = $this->basePath . $path;
                 if (file_exists($filePath) && is_file($filePath)) {
                     return [
                         'type' => 'static',
@@ -328,7 +337,7 @@ class Router
         // Special files at root level
         $rootFiles = ['/favicon.ico', '/UNLICENSE.md'];
         if (in_array($path, $rootFiles)) {
-            $filePath = LWT_BASE_PATH . $path;
+            $filePath = $this->basePath . $path;
             if (file_exists($filePath)) {
                 return [
                     'type' => 'static',
