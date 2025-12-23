@@ -1,7 +1,7 @@
 # Learning with Texts
 
 <p align="center">
-  <img src="https://github.com/HugoFara/lwt/raw/main/img/lwt_icon_big.jpg" alt="LWT logo - an open book" width="200"/>
+  <img src="https://github.com/HugoFara/lwt/raw/main/docs/assets/images/lwt_icon_big.jpg" alt="LWT logo - an open book" width="200"/>
 </p>
 
 <p align="center">
@@ -51,15 +51,15 @@ Then open <http://localhost:8010/lwt/> in your browser.
 
 **1. Import a text** — Paste any content you want to read, or import from RSS feeds.
 
-![Adding French text](https://github.com/HugoFara/lwt/raw/main/img/05.jpg)
+![Adding French text](https://github.com/HugoFara/lwt/raw/main/docs/assets/images/05.jpg)
 
 **2. Read and learn** — Unknown words are highlighted. Click any word to see its translation and save it to your vocabulary.
 
-![Learning French text](https://github.com/HugoFara/lwt/raw/main/img/06.jpg)
+![Learning French text](https://github.com/HugoFara/lwt/raw/main/docs/assets/images/06.jpg)
 
 **3. Review with context** — Practice vocabulary with spaced repetition, always seeing words in their original context.
 
-![Reviewing French word](https://github.com/HugoFara/lwt/raw/main/img/07.jpg)
+![Reviewing French word](https://github.com/HugoFara/lwt/raw/main/docs/assets/images/07.jpg)
 
 Unlike flashcard apps like [Anki](https://apps.ankiweb.net/), LWT keeps words connected to the texts where you found them. We also include an Anki exporter if you want both.
 
@@ -166,9 +166,9 @@ For development, you'll also need [Composer](https://getcomposer.org/) and [Node
 
 ## Documentation
 
-- **[User Guide](https://hugofara.github.io/lwt/docs/guide/)** — Getting started and usage
-- **[API Reference](https://hugofara.github.io/lwt/docs/reference/)** — REST API documentation
-- **[Developer Docs](https://hugofara.github.io/lwt/docs/developer/)** — Architecture and contribution guide
+- **[User Guide](https://hugofara.github.io/lwt/docs/guide/getting-started)** — Getting started and usage
+- **[API Reference](https://hugofara.github.io/lwt/docs/reference/features)** — Features and REST API documentation
+- **[Developer Docs](https://hugofara.github.io/lwt/docs/developer/api)** — Architecture and contribution guide
 
 ## Contributing
 
