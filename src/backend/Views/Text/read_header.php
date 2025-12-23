@@ -97,7 +97,7 @@ use Lwt\Services\TextStatisticsService;
 <div class="flex-spaced">
     <div>
         Unknown words:
-        <span id="learnstatus"><?php echo (new TextStatisticsService())->getTodoWordsContent((int) $textId); ?></span>
+        <span id="learnstatus"><?php echo (new TextStatisticsService())->getTodoWordsContent($textId); ?></span>
     </div>
     <div
     title="[Show All] = ON: ALL terms are shown, and all multi-word terms are shown as superscripts before the first word. The superscript indicates the number of words in the multi-word term.

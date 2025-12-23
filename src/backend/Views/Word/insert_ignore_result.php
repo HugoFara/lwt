@@ -30,6 +30,6 @@ use Lwt\Services\TextStatisticsService;
     'wid' => (int) $wid,
     'hex' => $hex,
     'term' => $term,
-    'todoContent' => (new TextStatisticsService())->getTodoWordsContent((int) $textId)
+    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
 ]); ?>
 </script>

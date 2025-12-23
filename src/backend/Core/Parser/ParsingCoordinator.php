@@ -212,21 +212,19 @@ class ParsingCoordinator
             $rows[] = [$tiSeID, $tiCount, $tiOrder, $token->getText(), $tiWordCount];
         }
 
-        if (!empty($rows)) {
-            $placeholders = [];
-            $flatParams = [];
-            foreach ($rows as $row) {
-                $placeholders[] = "(?, ?, ?, ?, ?)";
-                $flatParams = array_merge($flatParams, $row);
-            }
-
-            Connection::preparedExecute(
-                "INSERT INTO temptextitems (
-                    TiSeID, TiCount, TiOrder, TiText, TiWordCount
-                ) VALUES " . implode(',', $placeholders),
-                $flatParams
-            );
+        $placeholders = [];
+        $flatParams = [];
+        foreach ($rows as $row) {
+            $placeholders[] = "(?, ?, ?, ?, ?)";
+            $flatParams = array_merge($flatParams, $row);
         }
+
+        Connection::preparedExecute(
+            "INSERT INTO temptextitems (
+                TiSeID, TiCount, TiOrder, TiText, TiWordCount
+            ) VALUES " . implode(',', $placeholders),
+            $flatParams
+        );
     }
 
     /**

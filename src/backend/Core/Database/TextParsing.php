@@ -217,10 +217,8 @@ class TextParsing
             // Special case for kazu (numbers)
             if ($last_node_type == 8 && $node_type == 8) {
                 $lastKey = array_key_last($values);
-                if ($lastKey !== null) {
-                    // Concatenate the previous value with the current term
-                    $values[$lastKey - 1][3] = $values[$lastKey - 1][3] . $term;
-                }
+                // Concatenate the previous value with the current term
+                $values[$lastKey - 1][3] = $values[$lastKey - 1][3] . $term;
                 // Remove last element to avoid repetition
                 array_pop($values);
             }
@@ -951,7 +949,7 @@ class TextParsing
             'words' => [], // Will be populated from text-check-words-config
             'multiWords' => $mw,
             'nonWords' => [], // Will be populated from text-check-words-config
-            'rtlScript' => (bool)$rtlScript
+            'rtlScript' => $rtlScript
         ]);
         echo '</script>';
     }

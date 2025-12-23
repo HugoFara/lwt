@@ -849,7 +849,8 @@ class WordService
             return " HAVING ($whTag1)";
         } elseif ($whTag2 !== null && $whTag1 === null) {
             return " HAVING ($whTag2)";
-        } elseif ($whTag1 !== null && $whTag2 !== null) {
+        } elseif ($whTag1 !== null) {
+            // At this point $whTag2 is also non-null (Psalm flow analysis)
             $op = $tag12 ? ' AND ' : ' OR ';
             return " HAVING (($whTag1)$op($whTag2))";
         }

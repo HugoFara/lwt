@@ -204,7 +204,7 @@ class UserScopedQuery
             return '';
         }
 
-        return ', ' . (int) $userId;
+        return ', ' . $userId;
     }
 
     /**
@@ -216,6 +216,8 @@ class UserScopedQuery
      * @param string $tableName   The table name (without prefix)
      * @param string $alias       Optional table alias to prefix the column
      * @param string $parentTable Optional parent table for inherited scope (unused, for API compat)
+     *
+     * @psalm-suppress PossiblyUnusedParam $parentTable kept for API compatibility
      *
      * @return string SQL WHERE condition fragment (includes leading AND)
      */
@@ -236,7 +238,7 @@ class UserScopedQuery
         }
 
         $columnRef = $alias !== '' ? "{$alias}.{$column}" : $column;
-        return " AND {$columnRef} = " . (int) $userId;
+        return " AND {$columnRef} = " . $userId;
     }
 
     /**
@@ -249,6 +251,8 @@ class UserScopedQuery
      * @param array<int, mixed>  &$bindings   Reference to bindings array
      * @param string             $alias       Optional table alias
      * @param string             $parentTable Optional parent table for inherited scope (unused, for API compat)
+     *
+     * @psalm-suppress PossiblyUnusedParam $parentTable kept for API compatibility
      *
      * @return string SQL WHERE condition fragment (includes leading AND)
      */
@@ -305,7 +309,7 @@ class UserScopedQuery
         }
 
         $columnRef = $alias !== '' ? "{$alias}.{$column}" : $column;
-        return "WHERE {$columnRef} = " . (int) $userId;
+        return "WHERE {$columnRef} = " . $userId;
     }
 
     /**

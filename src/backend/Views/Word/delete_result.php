@@ -27,7 +27,7 @@ use Lwt\Services\TextStatisticsService;
 
 <script type="application/json" data-lwt-delete-result-config>
 <?php echo json_encode([
-    'wid' => (int) $wid,
+    'wid' => $wid,
     'term' => $term,
     'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
 ]); ?>

@@ -28,13 +28,6 @@
             </errorLevel>
         </UndefinedGlobalVariable>
 
-        <!-- Views use $this from controller context when included -->
-        <InvalidScope>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-            </errorLevel>
-        </InvalidScope>
-
         <!-- Controllers pass variables to views, services have template vars -->
         <UnusedVariable>
             <errorLevel type="suppress">
@@ -50,7 +43,6 @@
                 <directory name="src/backend/Controllers" />
                 <directory name="src/backend/Services" />
                 <directory name="src/backend/View" />
-                <directory name="src/backend/Core" />
             </errorLevel>
         </PossiblyUnusedParam>
 
@@ -76,19 +68,15 @@
         <RedundantCondition>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
-                <directory name="src/backend/Services" />
-                <directory name="src/backend/Core" />
             </errorLevel>
         </RedundantCondition>
 
-        <!-- Defensive casts for type safety with dynamic data -->
-        <RedundantCast>
+        <!-- Views receive variables from controllers via extract(), psalm cannot infer types -->
+        <TypeDoesNotContainType>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
-                <directory name="src/backend/Services" />
-                <directory name="src/backend/Core" />
             </errorLevel>
-        </RedundantCast>
+        </TypeDoesNotContainType>
 
         <!-- Return value may not be used by callers -->
         <PossiblyUnusedReturnValue>
@@ -96,12 +84,5 @@
                 <directory name="src/backend/Services" />
             </errorLevel>
         </PossiblyUnusedReturnValue>
-
-        <!-- shell_exec used for feature detection (MeCab) -->
-        <ForbiddenCode>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </ForbiddenCode>
     </issueHandlers>
 </psalm>
