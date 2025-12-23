@@ -295,20 +295,6 @@ describe('text_events.ts', () => {
       expect(highlighted.length).toBe(0);
     });
 
-    it('removes tooltip elements when jQuery_tooltip is enabled', () => {
-      document.body.innerHTML = `
-        <div class="ui-tooltip">Old jQuery tooltip</div>
-        <span class="word hword">Word</span>
-      `;
-      mockLWT_DATA.settings.jQuery_tooltip = true;
-
-      word_hover_out();
-
-      // jQuery UI tooltips should be removed by removeAllTooltips
-      const jqueryTooltips = document.querySelectorAll('.ui-tooltip');
-      expect(jqueryTooltips.length).toBe(0);
-    });
-
     it('does not affect elements without hword class', () => {
       document.body.innerHTML = `
         <span class="word">Word 1</span>
@@ -461,18 +447,6 @@ describe('text_events.ts', () => {
       expect(overlibInterface.run_overlib_status_1_to_5).toHaveBeenCalled();
     });
 
-    it('uses make_tooltip when jQuery_tooltip is true', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = true;
-      document.body.innerHTML = `
-        <span class="word" data_status="3" data_order="1" data_wid="1" data_trans="trans" data_rom="rom">Test</span>
-      `;
-
-      const word = document.querySelector('.word') as HTMLElement;
-      word_click_event_do_text_text.call(word);
-
-      expect(wordStatus.make_tooltip).toHaveBeenCalled();
-    });
-
     it('collects multi-word data attributes', () => {
       document.body.innerHTML = `
         <span class="word" data_status="0" data_order="1" data_mw2="mw2data" data_mw3="mw3data">Test</span>
@@ -550,18 +524,6 @@ describe('text_events.ts', () => {
       mword_click_event_do_text_text.call(mword);
 
       expect(userInteractions.speechDispatcher).toHaveBeenCalledWith('Hello World', 1);
-    });
-
-    it('uses make_tooltip when jQuery_tooltip is true', () => {
-      mockLWT_DATA.settings.jQuery_tooltip = true;
-      document.body.innerHTML = `
-        <span class="mword" data_status="3" data_order="1" data_trans="translation" data_rom="roman">Test</span>
-      `;
-
-      const mword = document.querySelector('.mword') as HTMLElement;
-      mword_click_event_do_text_text.call(mword);
-
-      expect(wordStatus.make_tooltip).toHaveBeenCalled();
     });
 
     it('uses title attribute when jQuery_tooltip is false', () => {

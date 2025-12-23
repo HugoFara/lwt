@@ -38,7 +38,7 @@ describe('core/api_client.ts', () => {
       await apiGet('/terms/1');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/terms/1'),
+        expect.stringContaining('/api/v1/terms/1'),
         expect.objectContaining({ method: 'GET' })
       );
     });
@@ -183,7 +183,7 @@ describe('core/api_client.ts', () => {
       await apiPost('/terms', { text: 'hello' });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/terms'),
+        expect.stringContaining('/api/v1/terms'),
         expect.objectContaining({ method: 'POST' })
       );
     });
@@ -303,7 +303,7 @@ describe('core/api_client.ts', () => {
       await apiPut('/terms/1', { translation: 'bonjour' });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/terms/1'),
+        expect.stringContaining('/api/v1/terms/1'),
         expect.objectContaining({ method: 'PUT' })
       );
     });
@@ -371,7 +371,7 @@ describe('core/api_client.ts', () => {
       await apiDelete('/terms/1');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/terms/1'),
+        expect.stringContaining('/api/v1/terms/1'),
         expect.objectContaining({ method: 'DELETE' })
       );
     });
@@ -441,7 +441,7 @@ describe('core/api_client.ts', () => {
       await apiPostForm('/terms/1/status', { status: '3' });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('api.php/v1/terms/1/status'),
+        expect.stringContaining('/api/v1/terms/1/status'),
         expect.objectContaining({ method: 'POST' })
       );
     });

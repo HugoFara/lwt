@@ -48,6 +48,14 @@ vi.mock('../../../src/frontend/js/core/hover_intent', () => ({
 }));
 
 import { keydown_event_do_text_text } from '../../../src/frontend/js/reading/text_keyboard';
+import {
+  getReadingPosition,
+  setReadingPosition,
+  resetReadingPosition
+} from '../../../src/frontend/js/core/reading_state';
+import { initLanguageConfig, resetLanguageConfig, getLanguageId } from '../../../src/frontend/js/core/language_config';
+import { initTextConfig, resetTextConfig } from '../../../src/frontend/js/core/text_config';
+import { initSettingsConfig, resetSettingsConfig } from '../../../src/frontend/js/core/settings_config';
 
 /**
  * Helper to create a KeyboardEvent
@@ -89,7 +97,27 @@ const mockLWT_DATA = {
 describe('text_keyboard.ts', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
+    // Set up legacy LWT_DATA for backward compatibility
     (window as Record<string, unknown>).LWT_DATA = JSON.parse(JSON.stringify(mockLWT_DATA));
+
+    // Initialize new state modules
+    initLanguageConfig({
+      id: 1,
+      dictLink1: 'http://dict1.example.com/###',
+      dictLink2: 'http://dict2.example.com/###',
+      translatorLink: 'http://translator.example.com/###',
+      delimiter: ',',
+      rtl: false
+    });
+    initTextConfig({
+      id: 42
+    });
+    initSettingsConfig({
+      hts: 0,
+      wordStatusFilter: ''
+    });
+    resetReadingPosition();
+
     // Clear mock function calls between tests
     mockLoadModalFrame.mockClear();
     mockSpeechDispatcher.mockClear();
@@ -101,6 +129,11 @@ describe('text_keyboard.ts', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
+    // Reset all state modules
+    resetLanguageConfig();
+    resetTextConfig();
+    resetSettingsConfig();
+    resetReadingPosition();
   });
 
   // ===========================================================================
@@ -109,13 +142,12 @@ describe('text_keyboard.ts', () => {
 
   describe('ESC key (27)', () => {
     it('resets reading position to -1', () => {
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 5;
+      setReadingPosition(5);
 
       const event = createKeyEvent(27);
       const result = keydown_event_do_text_text(event);
 
-      expect(LWT_DATA.text.reading_position).toBe(-1);
+      expect(getReadingPosition()).toBe(-1);
       expect(result).toBe(false);
     });
 
@@ -204,8 +236,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(36);
       const result = keydown_event_do_text_text(event);
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      expect(LWT_DATA.text.reading_position).toBe(0);
+      expect(getReadingPosition()).toBe(0);
       expect(result).toBe(false);
     });
 
@@ -260,8 +291,7 @@ describe('text_keyboard.ts', () => {
       const event = createKeyEvent(35);
       keydown_event_do_text_text(event);
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      expect(LWT_DATA.text.reading_position).toBe(2);
+      expect(getReadingPosition()).toBe(2);
     });
   });
 
@@ -343,8 +373,7 @@ describe('text_keyboard.ts', () => {
               data_wid="100" data_order="5" data_status="3">word</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       const event = createKeyEvent(50); // key '2'
       keydown_event_do_text_text(event);
@@ -359,8 +388,7 @@ describe('text_keyboard.ts', () => {
         <span id="w1" class="word status1 kwordmarked" data_wid="100" data_order="5" data_status="1" data_ann="">known</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       // Press number key to change the status of the marked known word
       const event = createKeyEvent(49); // key '1'
@@ -376,8 +404,7 @@ describe('text_keyboard.ts', () => {
               data_wid="100" data_order="5" data_status="3">word</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       const event = createKeyEvent(99); // numpad '3'
       keydown_event_do_text_text(event);
@@ -397,8 +424,7 @@ describe('text_keyboard.ts', () => {
               data_wid="100" data_order="5" data_status="3">word</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       const event = createKeyEvent(73);
       keydown_event_do_text_text(event);
@@ -418,8 +444,7 @@ describe('text_keyboard.ts', () => {
               data_wid="100" data_order="5" data_status="3">word</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       const event = createKeyEvent(87);
       const result = keydown_event_do_text_text(event);
@@ -440,13 +465,12 @@ describe('text_keyboard.ts', () => {
               data_wid="100" data_order="5" data_status="3">hello</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       const event = createKeyEvent(80);
       const result = keydown_event_do_text_text(event);
 
-      expect(mockSpeechDispatcher).toHaveBeenCalledWith('hello', LWT_DATA.language.id);
+      expect(mockSpeechDispatcher).toHaveBeenCalledWith('hello', getLanguageId());
       expect(result).toBe(false);
     });
   });
@@ -462,8 +486,7 @@ describe('text_keyboard.ts', () => {
               data_wid="100" data_order="5" data_status="3">word</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       const event = createKeyEvent(84);
       const result = keydown_event_do_text_text(event);
@@ -477,9 +500,16 @@ describe('text_keyboard.ts', () => {
               data_wid="100" data_order="5" data_status="3">word</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.language.translator_link = '*http://translator.com/###';
-      LWT_DATA.text.reading_position = 0;
+      // Reinitialize with popup translator link (starts with *)
+      initLanguageConfig({
+        id: 1,
+        dictLink1: 'http://dict1.example.com/###',
+        dictLink2: 'http://dict2.example.com/###',
+        translatorLink: '*http://translator.com/###',
+        delimiter: ',',
+        rtl: false
+      });
+      setReadingPosition(0);
 
       const event = createKeyEvent(84);
       keydown_event_do_text_text(event);
@@ -499,8 +529,7 @@ describe('text_keyboard.ts', () => {
               data_wid="100" data_order="5" data_status="3">word</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       const event = createKeyEvent(69);
       const result = keydown_event_do_text_text(event);
@@ -515,8 +544,7 @@ describe('text_keyboard.ts', () => {
               data_wid="100" data_order="5" data_status="3" data_code="2">multi word</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       const event = createKeyEvent(69);
       keydown_event_do_text_text(event);
@@ -539,8 +567,7 @@ describe('text_keyboard.ts', () => {
               data_wid="" data_order="5" data_status="0">unknown</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = -1;
+      setReadingPosition(-1);
 
       const event = createKeyEvent(69);
       keydown_event_do_text_text(event);
@@ -561,8 +588,7 @@ describe('text_keyboard.ts', () => {
         <span id="totalcharcount">1000</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       const event = createKeyEvent(65);
       const result = keydown_event_do_text_text(event);
@@ -577,8 +603,7 @@ describe('text_keyboard.ts', () => {
         <span id="totalcharcount">0</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = 0;
+      setReadingPosition(0);
 
       const event = createKeyEvent(65);
       const result = keydown_event_do_text_text(event);
@@ -624,8 +649,7 @@ describe('text_keyboard.ts', () => {
       // Simulate hover
       document.getElementById('w1')?.classList.add('hword');
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.text.reading_position = -1;
+      setReadingPosition(-1);
 
       const event = createKeyEvent(80);
       keydown_event_do_text_text(event);
@@ -639,8 +663,13 @@ describe('text_keyboard.ts', () => {
         <span id="w2" class="word status2" data_wid="101" data_ann="">status2</span>
       `;
 
-      const LWT_DATA = (window as Record<string, unknown>).LWT_DATA as typeof mockLWT_DATA;
-      LWT_DATA.settings.word_status_filter = ':not(.status2)';
+      // Reinitialize with word status filter
+      initSettingsConfig({
+        hts: 0,
+        wordStatusFilter: ':not(.status2)',
+        annotationsMode: 0,
+        useFrameMode: false
+      });
 
       const event = createKeyEvent(36);
       keydown_event_do_text_text(event);

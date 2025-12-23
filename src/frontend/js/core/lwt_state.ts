@@ -1,6 +1,15 @@
 /**
  * LWT State Management - Core data structures and legacy globals
  *
+ * This module provides the legacy LWT_DATA global object for backwards
+ * compatibility. New code should use the focused state modules instead:
+ *
+ * - reading_state.ts - Reading position state
+ * - language_config.ts - Language configuration
+ * - text_config.ts - Text configuration
+ * - settings_config.ts - Application settings
+ * - test_state.ts - Test mode state
+ *
  * @license unlicense
  * @author  andreask7 <andreasks7@users.noreply.github.com>
  * @since   1.6.16-fork
@@ -9,13 +18,29 @@
 // Import types from globals.d.ts to ensure consistency
 import type { LwtData, LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings } from '../types/globals.d';
 
+// Re-export new state modules for easier migration
+export * from './reading_state';
+export * from './language_config';
+export * from './text_config';
+export * from './settings_config';
+export * from './test_state';
+
 // Re-export types for backward compatibility
 export type { LwtLanguage, LwtText, LwtWord, LwtTest, LwtSettings };
 
 // LwtDataInterface is now an alias to LwtData for consistency
 export type LwtDataInterface = LwtData;
 
-// Global LWT_DATA object initialization
+/**
+ * Legacy LWT_DATA global object.
+ *
+ * @deprecated Use the focused state modules instead:
+ * - getReadingPosition() / setReadingPosition() from reading_state
+ * - getLanguageConfig() / getLanguageId() from language_config
+ * - getTextId() / getAnnotations() from text_config
+ * - getHtsMode() / isApiModeEnabled() from settings_config
+ * - getTestSolution() / isAnswerOpened() from test_state
+ */
 export const LWT_DATA: LwtDataInterface = {
   /** Language data */
   language: {

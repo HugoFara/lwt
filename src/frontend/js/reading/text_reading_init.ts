@@ -17,6 +17,15 @@ import { goToLastPosition, saveReadingPosition, saveAudioPosition, readRawTextAl
 import { getAudioPlayer } from '../media/html5_audio_player';
 import { LWT_DATA } from '../core/lwt_state';
 import { initNativeTooltips } from '../ui/native_tooltip';
+import { resetReadingPosition } from '../core/reading_state';
+import {
+  initLanguageConfig,
+  getDictionaryLinks,
+  setTtsVoiceApi
+} from '../core/language_config';
+import { initTextConfig, getTextId, setAnnotations } from '../core/text_config';
+import { initSettingsConfig } from '../core/settings_config';
+import { resetAnswer } from '../core/test_state';
 
 // Type definitions for text reader
 interface TextReader {
@@ -101,8 +110,9 @@ export function initTTS(): void {
     return;
   }
 
+  const dictLinks = getDictionaryLinks();
   const langFromDict = typeof getLangFromDict === 'function'
-    ? getLangFromDict(LWT_DATA.language?.translator_link || '')
+    ? getLangFromDict(dictLinks.translator || '')
     : '';
 
   text_reader = {
@@ -111,6 +121,10 @@ export function initTTS(): void {
     rate: 0.8
   };
 
+  // Update TTS voice API in language config
+  setTtsVoiceApi(config.voiceApi || '');
+
+  // Also update legacy LWT_DATA for backwards compatibility
   if (typeof LWT_DATA !== 'undefined' && LWT_DATA.language) {
     LWT_DATA.language.ttsVoiceApi = config.voiceApi || '';
   }
@@ -133,8 +147,9 @@ function initReading(): void {
   if (!text_reader) {
     return;
   }
+  const dictLinks = getDictionaryLinks();
   const langFromDict = typeof getLangFromDict === 'function'
-    ? getLangFromDict(LWT_DATA.language?.translator_link || '')
+    ? getLangFromDict(dictLinks.translator || '')
     : '';
   const lang = langFromDict || text_reader.lang;
   if (typeof readRawTextAloud === 'function') {
@@ -231,7 +246,7 @@ function saveCurrentPosition(): void {
       break;
     }
   }
-  saveReadingPosition(LWT_DATA.text.id, pos);
+  saveReadingPosition(getTextId(), pos);
 }
 
 /**
@@ -261,29 +276,72 @@ function loadTextReadingConfig(): TextReadingConfig | null {
  * Called after LWT Vite bundle is loaded.
  */
 export function initTextReading(): void {
-  // Load and merge config into LWT_DATA
+  // Load and merge config into LWT_DATA (for backwards compatibility)
   const config = loadTextReadingConfig();
   if (config) {
     mergeGlobals(config as unknown as Record<string, unknown>);
+
+    // Also initialize new state modules from config
+    if (config.LWT_DATA) {
+      const lwtConfig = config.LWT_DATA;
+
+      // Initialize language config
+      if (lwtConfig.language) {
+        const lang = lwtConfig.language as Record<string, unknown>;
+        initLanguageConfig({
+          id: (lang.id as number) || 0,
+          dictLink1: (lang.dict_link1 as string) || '',
+          dictLink2: (lang.dict_link2 as string) || '',
+          translatorLink: (lang.translator_link as string) || '',
+          delimiter: (lang.delimiter as string) || '',
+          wordParsing: lang.word_parsing as number | string || '',
+          rtl: (lang.rtl as boolean) || false,
+          ttsVoiceApi: (lang.ttsVoiceApi as string) || ''
+        });
+      }
+
+      // Initialize text config
+      if (lwtConfig.text) {
+        const text = lwtConfig.text as Record<string, unknown>;
+        initTextConfig({
+          id: (text.id as number) || 0,
+          annotations: text.annotations as Record<string, [unknown, string, string]> | number || 0
+        });
+      }
+
+      // Initialize settings config
+      if (lwtConfig.settings) {
+        const settings = lwtConfig.settings as Record<string, unknown>;
+        initSettingsConfig({
+          hts: (settings.hts as number) || 0,
+          wordStatusFilter: (settings.word_status_filter as string) || '',
+          annotationsMode: (settings.annotations_mode as number) || 1,
+          useFrameMode: (settings.use_frame_mode as boolean) || false
+        });
+      }
+    }
   }
 
   // Set LANG global
-  if (typeof getLangFromDict === 'function' && LWT_DATA.language?.translator_link) {
-    window.LANG = getLangFromDict(LWT_DATA.language.translator_link);
+  const dictLinks = getDictionaryLinks();
+  if (typeof getLangFromDict === 'function' && dictLinks.translator) {
+    window.LANG = getLangFromDict(dictLinks.translator);
   }
 
   // Reset reading position (will be set by goToLastPosition)
+  resetReadingPosition();
   if (LWT_DATA.text) {
     LWT_DATA.text.reading_position = -1;
   }
 
-  // Initialize test answer state if test object exists
+  // Initialize test answer state
+  resetAnswer();
   if (LWT_DATA.test) {
     LWT_DATA.test.answer_opened = false;
   }
 
   // Set the language of the current frame
-  if (window.LANG && window.LANG !== LWT_DATA.language?.translator_link) {
+  if (window.LANG && window.LANG !== dictLinks.translator) {
     document.documentElement.setAttribute('lang', window.LANG);
   }
 

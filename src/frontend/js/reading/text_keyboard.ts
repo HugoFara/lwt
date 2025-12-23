@@ -12,37 +12,17 @@ import { cClick } from '../ui/word_popup';
 import { loadModalFrame, loadDictionaryFrame } from './frame_management';
 import { get_position_from_id } from '../core/ajax_utilities';
 import { scrollTo } from '../core/hover_intent';
-
-// Type definitions
-interface LwtLanguage {
-  id: number;
-  dict_link1: string;
-  dict_link2: string;
-  translator_link: string;
-  delimiter: string;
-  rtl: boolean;
-}
-
-interface LwtText {
-  id: number;
-  reading_position: number;
-  annotations: Record<string, [unknown, string, string]>;
-}
-
-interface LwtSettings {
-  jQuery_tooltip: boolean;
-  hts: number;
-  word_status_filter: string;
-  annotations_mode: number;
-}
-
-interface LwtDataGlobal {
-  language: LwtLanguage;
-  text: LwtText;
-  settings: LwtSettings;
-}
-
-declare const LWT_DATA: LwtDataGlobal;
+import {
+  getReadingPosition,
+  setReadingPosition,
+  resetReadingPosition
+} from '../core/reading_state';
+import {
+  getLanguageId,
+  getDictionaryLinks
+} from '../core/language_config';
+import { getTextId } from '../core/text_config';
+import { getWordStatusFilter } from '../core/settings_config';
 
 // Audio controller type for frame access
 // We only need the newPosition method for seeking audio
@@ -75,9 +55,11 @@ function removeClassFromAll(selector: string, className: string): void {
  */
 export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   const keyCode = e.which || e.keyCode;
+  const textId = getTextId();
+  const dictLinks = getDictionaryLinks();
 
   if (keyCode === 27) { // esc = reset all
-    LWT_DATA.text.reading_position = -1;
+    resetReadingPosition();
     removeClassFromAll('span.uwordmarked', 'uwordmarked');
     removeClassFromAll('span.kwordmarked', 'kwordmarked');
     cClick();
@@ -97,9 +79,10 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     return false;
   }
 
+  const wordStatusFilter = getWordStatusFilter();
   const knownwordlist = Array.from(document.querySelectorAll<HTMLElement>(
-    'span.word:not(.hide):not(.status0)' + LWT_DATA.settings.word_status_filter +
-      ',span.mword:not(.hide)' + LWT_DATA.settings.word_status_filter
+    'span.word:not(.hide):not(.status0)' + wordStatusFilter +
+      ',span.mword:not(.hide)' + wordStatusFilter
   ));
   const l_knownwordlist = knownwordlist.length;
   if (l_knownwordlist === 0) return true;
@@ -107,11 +90,12 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   // the following only for a non-zero known words list
   let curr: HTMLElement;
   let ann: string;
+  let readingPos: number;
 
   if (keyCode === 36) { // home : known word navigation -> first
     removeClassFromAll('span.kwordmarked', 'kwordmarked');
-    LWT_DATA.text.reading_position = 0;
-    curr = knownwordlist[LWT_DATA.text.reading_position];
+    setReadingPosition(0);
+    curr = knownwordlist[0];
     curr.classList.add('kwordmarked');
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
@@ -123,8 +107,8 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   }
   if (keyCode === 35) { // end : known word navigation -> last
     removeClassFromAll('span.kwordmarked', 'kwordmarked');
-    LWT_DATA.text.reading_position = l_knownwordlist - 1;
-    curr = knownwordlist[LWT_DATA.text.reading_position];
+    setReadingPosition(l_knownwordlist - 1);
+    curr = knownwordlist[l_knownwordlist - 1];
     curr.classList.add('kwordmarked');
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
@@ -144,16 +128,17 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
       currid = get_position_from_id(markedId || '');
     }
     removeClassFromAll('span.kwordmarked', 'kwordmarked');
-    LWT_DATA.text.reading_position = l_knownwordlist - 1;
+    readingPos = l_knownwordlist - 1;
     for (let i = l_knownwordlist - 1; i >= 0; i--) {
       const itemId = knownwordlist[i].id;
       const iid = get_position_from_id(itemId || '');
       if (iid < currid) {
-        LWT_DATA.text.reading_position = i;
+        readingPos = i;
         break;
       }
     }
-    curr = knownwordlist[LWT_DATA.text.reading_position];
+    setReadingPosition(readingPos);
+    curr = knownwordlist[readingPos];
     curr.classList.add('kwordmarked');
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
@@ -173,17 +158,18 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
       currid = get_position_from_id(markedId || '');
     }
     removeClassFromAll('span.kwordmarked', 'kwordmarked');
-    LWT_DATA.text.reading_position = 0;
+    readingPos = 0;
     for (let i = 0; i < l_knownwordlist; i++) {
       const itemId = knownwordlist[i].id;
       const iid = get_position_from_id(itemId || '');
       if (iid > currid) {
-        LWT_DATA.text.reading_position = i;
+        readingPos = i;
         break;
       }
     }
+    setReadingPosition(readingPos);
 
-    curr = knownwordlist[LWT_DATA.text.reading_position];
+    curr = knownwordlist[readingPos];
     curr.classList.add('kwordmarked');
     scrollTo(curr, { offset: -150 });
     ann = getAttrElement(curr, 'data_ann');
@@ -197,11 +183,12 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   // Check if there's no marked word but there's a hovered word
   const hasMarkedWord = document.querySelector('.kwordmarked, .uwordmarked');
   const hoveredWord = document.querySelector<HTMLElement>('.hword:hover');
+  readingPos = getReadingPosition();
   if (!hasMarkedWord && hoveredWord) {
     curr = hoveredWord;
   } else {
-    if (LWT_DATA.text.reading_position < 0 || LWT_DATA.text.reading_position >= l_knownwordlist) return true;
-    curr = knownwordlist[LWT_DATA.text.reading_position];
+    if (readingPos < 0 || readingPos >= l_knownwordlist) return true;
+    curr = knownwordlist[readingPos];
   }
   const wid = getAttrElement(curr, 'data_wid');
   const ord = getAttrElement(curr, 'data_order');
@@ -217,18 +204,18 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
         let statusVal: string | number = i;
         if (i === 1) {
           /** @var sl Source language */
-          const sl = getLangFromDict(LWT_DATA.language.translator_link);
-          const tl = LWT_DATA.language.translator_link.replace(/.*[?&]tl=([a-zA-Z-]*)(&.*)*$/, '$1');
-          if (sl !== LWT_DATA.language.translator_link && tl !== LWT_DATA.language.translator_link) {
+          const sl = getLangFromDict(dictLinks.translator);
+          const tl = dictLinks.translator.replace(/.*[?&]tl=([a-zA-Z-]*)(&.*)*$/, '$1');
+          if (sl !== dictLinks.translator && tl !== dictLinks.translator) {
             statusVal = i + '&sl=' + sl + '&tl=' + tl;
           }
         }
         loadModalFrame(
-          'set_word_on_hover.php?text=' + txt + '&tid=' + LWT_DATA.text.id + '&status=' + statusVal
+          'set_word_on_hover.php?text=' + txt + '&tid=' + textId + '&status=' + statusVal
         );
       } else {
         loadModalFrame(
-          'set_word_status.php?wid=' + wid + '&tid=' + LWT_DATA.text.id + '&ord=' + ord +
+          'set_word_status.php?wid=' + wid + '&tid=' + textId + '&ord=' + ord +
             '&status=' + i
         );
         return false;
@@ -238,12 +225,12 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   if (keyCode === 73) { // I : status=98
     if (stat === '0') {
       loadModalFrame(
-        'set_word_on_hover.php?text=' + txt + '&tid=' + LWT_DATA.text.id +
+        'set_word_on_hover.php?text=' + txt + '&tid=' + textId +
           '&status=98'
       );
     } else {
       loadModalFrame(
-        'set_word_status.php?wid=' + wid + '&tid=' + LWT_DATA.text.id +
+        'set_word_status.php?wid=' + wid + '&tid=' + textId +
           '&ord=' + ord + '&status=98'
       );
       return false;
@@ -252,24 +239,24 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   if (keyCode === 87) { // W : status=99
     if (stat === '0') {
       loadModalFrame(
-        'set_word_on_hover.php?text=' + txt + '&tid=' + LWT_DATA.text.id + '&status=99'
+        'set_word_on_hover.php?text=' + txt + '&tid=' + textId + '&status=99'
       );
     } else {
       loadModalFrame(
-        'set_word_status.php?wid=' + wid + '&tid=' + LWT_DATA.text.id + '&ord=' + ord +
+        'set_word_status.php?wid=' + wid + '&tid=' + textId + '&ord=' + ord +
           '&status=99'
       );
     }
     return false;
   }
   if (keyCode === 80) { // P : pronounce term
-    speechDispatcher(txt, LWT_DATA.language.id);
+    speechDispatcher(txt, getLanguageId());
     return false;
   }
   if (keyCode === 84) { // T : translate sentence
     let popup = false;
-    let dict_link = LWT_DATA.language.translator_link;
-    if (LWT_DATA.language.translator_link.startsWith('*')) {
+    let dict_link = dictLinks.translator;
+    if (dictLinks.translator.startsWith('*')) {
       popup = true;
       dict_link = dict_link.substring(1);
     }
@@ -309,10 +296,9 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
   }
   if (keyCode === 71) { //  G : edit term and open GTr
     dict = '&nodict';
+    const target_url = dictLinks.translator;
     setTimeout(function () {
-      const target_url = LWT_DATA.language.translator_link;
-      let popup = false;
-      popup = target_url.startsWith('*');
+      let popup = target_url.startsWith('*');
       try {
         const final_url = new URL(target_url);
         popup = popup || final_url.searchParams.has('lwt_popup');
@@ -332,11 +318,11 @@ export function keydown_event_do_text_text(e: KeyboardEvent): boolean {
     let url = '';
     if (curr.classList.contains('mword')) {
       url = '/word/edit-multi?wid=' + wid + '&len=' + getAttrElement(curr, 'data_code') +
-        '&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;
+        '&tid=' + textId + '&ord=' + ord + dict;
     } else if (stat === '0') {
-      url = '/word/edit?wid=&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;
+      url = '/word/edit?wid=&tid=' + textId + '&ord=' + ord + dict;
     } else {
-      url = '/word/edit?wid=' + wid + '&tid=' + LWT_DATA.text.id + '&ord=' + ord + dict;
+      url = '/word/edit?wid=' + wid + '&tid=' + textId + '&ord=' + ord + dict;
     }
     loadModalFrame(url);
     return false;

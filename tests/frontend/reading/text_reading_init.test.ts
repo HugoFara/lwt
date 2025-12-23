@@ -35,6 +35,7 @@ vi.mock('../../../src/frontend/js/media/html5_audio_player', () => ({
 import { getLangFromDict } from '../../../src/frontend/js/terms/dictionary';
 import { saveAudioPosition, readRawTextAloud } from '../../../src/frontend/js/core/user_interactions';
 import { getAudioPlayer } from '../../../src/frontend/js/media/html5_audio_player';
+import { initLanguageConfig, resetLanguageConfig } from '../../../src/frontend/js/core/language_config';
 
 describe('text_reading_init.ts', () => {
   let mockSpeechSynthesis: any;
@@ -84,6 +85,7 @@ describe('text_reading_init.ts', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     document.body.innerHTML = '';
+    resetLanguageConfig();
   });
 
   // ===========================================================================
@@ -224,7 +226,15 @@ describe('text_reading_init.ts', () => {
     });
 
     it('sets window.LANG from getLangFromDict', () => {
-      LWT_DATA.language = { translator_link: 'https://example.com' };
+      // Initialize language config with translator link
+      initLanguageConfig({
+        id: 1,
+        translatorLink: 'https://example.com',
+        dictLink1: '',
+        dictLink2: '',
+        delimiter: '',
+        rtl: false
+      });
       (getLangFromDict as any).mockReturnValue('fr');
 
       initTextReading();
@@ -394,7 +404,15 @@ describe('text_reading_init.ts', () => {
 
     it('sets html lang attribute when LANG differs from translator_link', () => {
       document.body.innerHTML = '<html><body></body></html>';
-      LWT_DATA.language = { translator_link: 'https://different.com' };
+      // Initialize language config with translator link
+      initLanguageConfig({
+        id: 1,
+        translatorLink: 'https://different.com',
+        dictLink1: '',
+        dictLink2: '',
+        delimiter: '',
+        rtl: false
+      });
       (getLangFromDict as any).mockReturnValue('de');
 
       initTextReading();

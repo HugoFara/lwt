@@ -34,6 +34,18 @@ import {
   overlib
 } from '../terms/overlib_interface';
 import { getContextFromElement } from './word_actions';
+import {
+  getLanguageId,
+  getDictionaryLinks,
+  isRtl
+} from '../core/language_config';
+import { getTextId } from '../core/text_config';
+import {
+  getHtsMode,
+  isTtsOnHover,
+  isTtsOnClick,
+  isFrameModeEnabled
+} from '../core/settings_config';
 
 // Re-export from submodules
 export {
@@ -63,41 +75,6 @@ export {
   type WordActionResult
 } from './word_actions';
 
-// Type definitions
-interface LwtLanguage {
-  id: number;
-  dict_link1: string;
-  dict_link2: string;
-  translator_link: string;
-  delimiter: string;
-  rtl: boolean;
-}
-
-interface LwtText {
-  id: number;
-  reading_position: number;
-  annotations: Record<string, [unknown, string, string]>;
-}
-
-interface LwtSettings {
-  jQuery_tooltip: boolean;
-  hts: number;
-  word_status_filter: string;
-  annotations_mode: number;
-  /** @deprecated Use use_frame_mode instead. API mode is now default. */
-  use_api_mode?: boolean;
-  /** If true, use legacy frame-based navigation instead of API mode */
-  use_frame_mode?: boolean;
-}
-
-interface LwtDataGlobal {
-  language: LwtLanguage;
-  text: LwtText;
-  settings: LwtSettings;
-}
-
-declare const LWT_DATA: LwtDataGlobal;
-
 // Module-level flag for API mode (default: true since v3.0.0)
 // Can be disabled for backward compatibility with legacy frame-based mode
 let useApiMode = true;
@@ -110,7 +87,7 @@ let useApiMode = true;
  * will use the REST API instead of frame navigation.
  *
  * To use legacy frame-based mode, call setUseApiMode(false) or
- * set LWT_DATA.settings.use_frame_mode = true.
+ * configure frame mode in settings.
  *
  * @param enabled Whether to enable API mode
  */
@@ -123,11 +100,11 @@ export function setUseApiMode(enabled: boolean): void {
  *
  * API mode is the default since v3.0.0.
  * Returns false only if explicitly disabled via setUseApiMode(false)
- * or LWT_DATA.settings.use_frame_mode = true.
+ * or if frame mode is enabled in settings.
  */
 export function isApiModeEnabled(): boolean {
   // Check if frame mode is explicitly requested (opt-out)
-  if (typeof LWT_DATA !== 'undefined' && LWT_DATA.settings?.use_frame_mode === true) {
+  if (isFrameModeEnabled()) {
     return false;
   }
   return useApiMode;
@@ -173,17 +150,8 @@ export function word_click_event_do_text_text(this: HTMLElement): boolean {
   const ann = this.getAttribute('data_ann') || '';
   const text = this.textContent || '';
 
-  let hints: string;
-  if (LWT_DATA.settings.jQuery_tooltip) {
-    hints = make_tooltip(
-      text,
-      this.getAttribute('data_trans') || '',
-      this.getAttribute('data_rom') || '',
-      status
-    );
-  } else {
-    hints = this.getAttribute('title') || '';
-  }
+  // Native tooltips are now used by default
+  const hints = this.getAttribute('title') || '';
 
   // Get multi-words containing word
   const multi_words: (string | undefined)[] = Array(7);
@@ -205,8 +173,8 @@ export function word_click_event_do_text_text(this: HTMLElement): boolean {
     );
   }
 
-  if (LWT_DATA.settings.hts === 2) {
-    speechDispatcher(text, LWT_DATA.language.id);
+  if (isTtsOnHover()) {
+    speechDispatcher(text, getLanguageId());
   }
   return false;
 }
@@ -225,31 +193,35 @@ function word_click_event_frame_mode(
   ann: string
 ): void {
   const text = element.textContent || '';
+  const textId = getTextId();
+  const dictLinks = getDictionaryLinks();
+  const rtl = isRtl();
+
   if (statusNum < 1) {
     run_overlib_status_unknown(
-      LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
-      LWT_DATA.text.id, order, text, multi_words, LWT_DATA.language.rtl
+      dictLinks.dict1, dictLinks.dict2, dictLinks.translator, hints,
+      textId, order, text, multi_words, rtl
     );
     loadModalFrame(
-      '/word/edit?tid=' + LWT_DATA.text.id + '&ord=' + order + '&wid='
+      '/word/edit?tid=' + textId + '&ord=' + order + '&wid='
     );
   } else if (statusNum === 99) {
     run_overlib_status_99(
-      LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
-      LWT_DATA.text.id, order,
-      text, wid, multi_words, LWT_DATA.language.rtl, ann
+      dictLinks.dict1, dictLinks.dict2, dictLinks.translator, hints,
+      textId, order,
+      text, wid, multi_words, rtl, ann
     );
   } else if (statusNum === 98) {
     run_overlib_status_98(
-      LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
-      LWT_DATA.text.id, order,
-      text, wid, multi_words, LWT_DATA.language.rtl, ann
+      dictLinks.dict1, dictLinks.dict2, dictLinks.translator, hints,
+      textId, order,
+      text, wid, multi_words, rtl, ann
     );
   } else {
     run_overlib_status_1_to_5(
-      LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link, hints,
-      LWT_DATA.text.id, order,
-      text, wid, String(statusNum), multi_words, LWT_DATA.language.rtl, ann
+      dictLinks.dict1, dictLinks.dict2, dictLinks.translator, hints,
+      textId, order,
+      text, wid, String(statusNum), multi_words, rtl, ann
     );
   }
 }
@@ -266,14 +238,11 @@ function word_click_event_api_mode(
   // Build context from element
   const context = getContextFromElement(element);
 
-  // Add text ID from global state
-  context.textId = LWT_DATA.text.id;
+  // Add text ID from config
+  context.textId = getTextId();
 
-  const dictLinks = {
-    dict1: LWT_DATA.language.dict_link1,
-    dict2: LWT_DATA.language.dict_link2,
-    translator: LWT_DATA.language.translator_link
-  };
+  const dictLinks = getDictionaryLinks();
+  const rtl = isRtl();
 
   let content: HTMLElement | string;
 
@@ -283,12 +252,12 @@ function word_click_event_api_mode(
       context,
       dictLinks,
       multi_words,
-      LWT_DATA.language.rtl
+      rtl
     );
 
     // Also open the edit form in the right frame for unknown words
     loadModalFrame(
-      '/word/edit?tid=' + LWT_DATA.text.id + '&ord=' + context.position + '&wid='
+      '/word/edit?tid=' + context.textId + '&ord=' + context.position + '&wid='
     );
   } else if (statusNum === 99 || statusNum === 98) {
     // Well-known or ignored - show edit/delete options
@@ -296,7 +265,7 @@ function word_click_event_api_mode(
       context,
       dictLinks,
       multi_words,
-      LWT_DATA.language.rtl
+      rtl
     );
   } else {
     // Learning word (1-5) - show status change options
@@ -304,7 +273,7 @@ function word_click_event_api_mode(
       context,
       dictLinks,
       multi_words,
-      LWT_DATA.language.rtl
+      rtl
     );
   }
 
@@ -328,21 +297,14 @@ export function mword_click_event_do_text_text(this: HTMLElement): boolean {
   const text = this.textContent || '';
   if (status !== '') {
     const ann = this.getAttribute('data_ann') || '';
-    let hints: string;
-    if (LWT_DATA.settings.jQuery_tooltip) {
-      hints = make_tooltip(
-        text,
-        this.getAttribute('data_trans') || '',
-        this.getAttribute('data_rom') || '',
-        status
-      );
-    } else {
-      hints = this.getAttribute('title') || '';
-    }
+    // Native tooltips are now used by default
+    const hints = this.getAttribute('title') || '';
+    const dictLinks = getDictionaryLinks();
+
     run_overlib_multiword(
-      LWT_DATA.language.dict_link1, LWT_DATA.language.dict_link2, LWT_DATA.language.translator_link,
+      dictLinks.dict1, dictLinks.dict2, dictLinks.translator,
       hints,
-      LWT_DATA.text.id,
+      getTextId(),
       this.getAttribute('data_order') || '',
       this.getAttribute('data_text') || '',
       this.getAttribute('data_wid') || '',
@@ -351,8 +313,8 @@ export function mword_click_event_do_text_text(this: HTMLElement): boolean {
       ann
     );
   }
-  if (LWT_DATA.settings.hts === 2) {
-    speechDispatcher(text, LWT_DATA.language.id);
+  if (isTtsOnHover()) {
+    speechDispatcher(text, getLanguageId());
   }
   return false;
 }
@@ -370,11 +332,8 @@ export function word_hover_over(this: HTMLElement): void {
     document.querySelectorAll('.' + v).forEach((el) => {
       el.classList.add('hword');
     });
-    if (LWT_DATA.settings.jQuery_tooltip) {
-      this.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
-    }
-    if (LWT_DATA.settings.hts === 3) {
-      speechDispatcher(this.textContent || '', LWT_DATA.language.id);
+    if (isTtsOnClick()) {
+      speechDispatcher(this.textContent || '', getLanguageId());
     }
   }
 }
@@ -387,9 +346,6 @@ export function word_hover_out(): void {
   document.querySelectorAll('.hword').forEach((el) => {
     el.classList.remove('hword');
   });
-  if (LWT_DATA.settings.jQuery_tooltip) {
-    removeAllTooltips();
-  }
 }
 
 /**
