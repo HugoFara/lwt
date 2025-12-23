@@ -285,6 +285,36 @@ class Feed
         $this->languageId = $languageId;
     }
 
+    /**
+     * Update multiple feed properties at once.
+     *
+     * @param int         $languageId         Language ID
+     * @param string      $name               Feed name
+     * @param string      $sourceUri          Source URI
+     * @param string      $articleSectionTags XPath selectors for article content
+     * @param string      $filterTags         XPath selectors for elements to remove
+     * @param FeedOptions $options            Feed options
+     *
+     * @return void
+     *
+     * @throws InvalidArgumentException If any value is invalid
+     */
+    public function update(
+        int $languageId,
+        string $name,
+        string $sourceUri,
+        string $articleSectionTags,
+        string $filterTags,
+        FeedOptions $options
+    ): void {
+        $this->changeLanguage($languageId);
+        $this->rename($name);
+        $this->updateSourceUri($sourceUri);
+        $this->updateArticleSectionTags($articleSectionTags);
+        $this->updateFilterTags($filterTags);
+        $this->updateOptions($options);
+    }
+
     // Query methods
 
     /**
