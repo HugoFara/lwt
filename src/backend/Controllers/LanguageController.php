@@ -31,6 +31,7 @@ use Lwt\Database\Settings;
 use Lwt\Services\LanguageDefinitions;
 use Lwt\Services\LanguageService;
 use Lwt\Core\Http\UrlUtilities;
+use Lwt\Core\Parser\ParserRegistry;
 
 /**
  * Controller for language configuration.
@@ -166,6 +167,7 @@ class LanguageController extends BaseController
         $this->prepareLanguageCodes($languageEntity, $currentNativeLanguage, $sourceLg, $targetLg);
 
         $allLanguages = $this->languageService->getAllLanguages();
+        $parserInfo = (new ParserRegistry())->getParserInfo();
 
         include __DIR__ . '/../Views/Language/form.php';
     }
@@ -195,6 +197,7 @@ class LanguageController extends BaseController
         $this->prepareLanguageCodes($languageEntity, $currentNativeLanguage, $sourceLg, $targetLg);
 
         $allLanguages = $this->languageService->getAllLanguages();
+        $parserInfo = (new ParserRegistry())->getParserInfo();
 
         ?>
     <h2>Edit Language

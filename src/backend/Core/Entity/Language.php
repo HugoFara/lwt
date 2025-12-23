@@ -46,6 +46,7 @@ class Language
     private bool $rightToLeft;
     private string $ttsVoiceApi;
     private bool $showRomanization;
+    private ?string $parserType;
 
     /**
      * Private constructor - use factory methods instead.
@@ -66,7 +67,8 @@ class Language
         bool $splitEachChar,
         bool $rightToLeft,
         string $ttsVoiceApi,
-        bool $showRomanization
+        bool $showRomanization,
+        ?string $parserType = null
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -84,6 +86,7 @@ class Language
         $this->rightToLeft = $rightToLeft;
         $this->ttsVoiceApi = $ttsVoiceApi;
         $this->showRomanization = $showRomanization;
+        $this->parserType = $parserType;
     }
 
     /**
@@ -132,22 +135,23 @@ class Language
     /**
      * Reconstitute a language from persistence.
      *
-     * @param int    $id                        The language ID
-     * @param string $name                      Language name
-     * @param string $dict1Uri                  Primary dictionary URI
-     * @param string $dict2Uri                  Secondary dictionary URI
-     * @param string $translatorUri             Translator URI
-     * @param string $exportTemplate            Export template
-     * @param int    $textSize                  Text size percentage
-     * @param string $characterSubstitutions    Character substitutions
-     * @param string $regexpSplitSentences      Sentence split regex
-     * @param string $exceptionsSplitSentences  Split exceptions
-     * @param string $regexpWordCharacters      Word character regex
-     * @param bool   $removeSpaces              Remove spaces flag
-     * @param bool   $splitEachChar             Split each character flag
-     * @param bool   $rightToLeft               Right-to-left flag
-     * @param string $ttsVoiceApi               TTS API URL
-     * @param bool   $showRomanization          Show romanization flag
+     * @param int         $id                        The language ID
+     * @param string      $name                      Language name
+     * @param string      $dict1Uri                  Primary dictionary URI
+     * @param string      $dict2Uri                  Secondary dictionary URI
+     * @param string      $translatorUri             Translator URI
+     * @param string      $exportTemplate            Export template
+     * @param int         $textSize                  Text size percentage
+     * @param string      $characterSubstitutions    Character substitutions
+     * @param string      $regexpSplitSentences      Sentence split regex
+     * @param string      $exceptionsSplitSentences  Split exceptions
+     * @param string      $regexpWordCharacters      Word character regex
+     * @param bool        $removeSpaces              Remove spaces flag
+     * @param bool        $splitEachChar             Split each character flag
+     * @param bool        $rightToLeft               Right-to-left flag
+     * @param string      $ttsVoiceApi               TTS API URL
+     * @param bool        $showRomanization          Show romanization flag
+     * @param string|null $parserType                Parser type (regex, character, mecab, etc.)
      *
      * @return self
      *
@@ -169,7 +173,8 @@ class Language
         bool $splitEachChar,
         bool $rightToLeft,
         string $ttsVoiceApi,
-        bool $showRomanization
+        bool $showRomanization,
+        ?string $parserType = null
     ): self {
         return new self(
             LanguageId::fromInt($id),
@@ -187,7 +192,8 @@ class Language
             $splitEachChar,
             $rightToLeft,
             $ttsVoiceApi,
-            $showRomanization
+            $showRomanization,
+            $parserType
         );
     }
 
@@ -356,10 +362,59 @@ class Language
      * Check if the language uses MeCab for parsing.
      *
      * @return bool
+     *
+     * @deprecated Use parserType() or getEffectiveParserType() instead
      */
     public function usesMecab(): bool
     {
-        return $this->regexpWordCharacters === 'mecab';
+        return strtoupper(trim($this->regexpWordCharacters)) === 'MECAB';
+    }
+
+    /**
+     * Get the explicitly set parser type.
+     *
+     * @return string|null Parser type or null if not set
+     */
+    public function parserType(): ?string
+    {
+        return $this->parserType;
+    }
+
+    /**
+     * Get the effective parser type, deriving from settings if not explicitly set.
+     *
+     * @return string Parser type ('regex', 'character', 'mecab')
+     */
+    public function getEffectiveParserType(): string
+    {
+        // Use explicit parser type if set
+        if ($this->parserType !== null && $this->parserType !== '') {
+            return $this->parserType;
+        }
+
+        // Legacy detection: check magic word in regexpWordCharacters
+        if (strtoupper(trim($this->regexpWordCharacters)) === 'MECAB') {
+            return 'mecab';
+        }
+
+        // Legacy detection: check splitEachChar flag
+        if ($this->splitEachChar) {
+            return 'character';
+        }
+
+        return 'regex';
+    }
+
+    /**
+     * Set the parser type.
+     *
+     * @param string|null $parserType Parser type (regex, character, mecab, etc.)
+     *
+     * @return void
+     */
+    public function setParserType(?string $parserType): void
+    {
+        $this->parserType = $parserType !== '' ? $parserType : null;
     }
 
     /**

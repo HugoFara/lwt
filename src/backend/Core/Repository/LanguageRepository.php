@@ -53,6 +53,7 @@ class LanguageRepository extends AbstractRepository
         'regexpsplitsent' => 'LgRegexpSplitSentences',
         'exceptionsplitsent' => 'LgExceptionsSplitSentences',
         'regexpwordchar' => 'LgRegexpWordCharacters',
+        'parsertype' => 'LgParserType',
         'removespaces' => 'LgRemoveSpaces',
         'spliteachchar' => 'LgSplitEachChar',
         'rightoleft' => 'LgRightToLeft',
@@ -81,7 +82,8 @@ class LanguageRepository extends AbstractRepository
             (bool) ($row['LgSplitEachChar'] ?? false),
             (bool) ($row['LgRightToLeft'] ?? false),
             (string) ($row['LgTTSVoiceAPI'] ?? ''),
-            (bool) ($row['LgShowRomanization'] ?? false)
+            (bool) ($row['LgShowRomanization'] ?? false),
+            isset($row['LgParserType']) ? (string) $row['LgParserType'] : null
         );
     }
 
@@ -106,6 +108,7 @@ class LanguageRepository extends AbstractRepository
             'LgRegexpSplitSentences' => $entity->regexpSplitSentences(),
             'LgExceptionsSplitSentences' => $entity->exceptionsSplitSentences(),
             'LgRegexpWordCharacters' => $entity->regexpWordCharacters(),
+            'LgParserType' => $entity->parserType(),
             'LgRemoveSpaces' => (int) $entity->removeSpaces(),
             'LgSplitEachChar' => (int) $entity->splitEachChar(),
             'LgRightToLeft' => (int) $entity->rightToLeft(),

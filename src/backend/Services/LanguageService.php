@@ -125,6 +125,7 @@ class LanguageService
         $view->rightoleft = $language->rightToLeft();
         $view->ttsvoiceapi = $language->ttsVoiceApi();
         $view->showromanization = $language->showRomanization();
+        $view->parsertype = $language->parserType();
         return $view;
     }
 
@@ -165,7 +166,7 @@ class LanguageService
     /**
      * Get language data from request using InputValidator.
      *
-     * @return array<string, string|int|bool>
+     * @return array<string, string|int|bool|null>
      */
     private function getLanguageDataFromRequest(): array
     {
@@ -180,6 +181,7 @@ class LanguageService
             'LgRegexpSplitSentences' => InputValidator::getString('LgRegexpSplitSentences'),
             'LgExceptionsSplitSentences' => InputValidator::getString('LgExceptionsSplitSentences', '', false),
             'LgRegexpWordCharacters' => InputValidator::getString('LgRegexpWordCharacters'),
+            'LgParserType' => InputValidator::getString('LgParserType') ?: null,
             'LgRemoveSpaces' => InputValidator::has('LgRemoveSpaces'),
             'LgSplitEachChar' => InputValidator::has('LgSplitEachChar'),
             'LgRightToLeft' => InputValidator::has('LgRightToLeft'),
@@ -220,7 +222,7 @@ class LanguageService
             'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
             'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
             'LgRegexpSplitSentences', 'LgExceptionsSplitSentences',
-            'LgRegexpWordCharacters', 'LgRemoveSpaces', 'LgSplitEachChar',
+            'LgRegexpWordCharacters', 'LgParserType', 'LgRemoveSpaces', 'LgSplitEachChar',
             'LgRightToLeft', 'LgTTSVoiceAPI', 'LgShowRomanization'
         ];
 
@@ -235,6 +237,7 @@ class LanguageService
             $this->emptyToNull($data["LgRegexpSplitSentences"]),
             $data["LgExceptionsSplitSentences"],  // No trim, keeps empty strings
             $this->emptyToNull($data["LgRegexpWordCharacters"]),
+            $data["LgParserType"] ?? null,  // Parser type (nullable)
             (int)$data["LgRemoveSpaces"],
             (int)$data["LgSplitEachChar"],
             (int)$data["LgRightToLeft"],
@@ -318,7 +321,8 @@ class LanguageService
             trim($newData["LgRegexpWordCharacters"] ?? '') !=
             trim($oldRecord['LgRegexpWordCharacters'] ?? '')
         ) || ((int)$newData["LgRemoveSpaces"] != $oldRecord['LgRemoveSpaces']) ||
-        ((int)$newData["LgSplitEachChar"] != $oldRecord['LgSplitEachChar']);
+        ((int)$newData["LgSplitEachChar"] != $oldRecord['LgSplitEachChar']) ||
+        (($newData["LgParserType"] ?? null) != ($oldRecord['LgParserType'] ?? null));
     }
 
     /**
@@ -939,6 +943,7 @@ class LanguageService
             'LgRegexpSplitSentences' => $data['regexpSplitSentences'] ?? '.!?',
             'LgExceptionsSplitSentences' => $data['exceptionsSplitSentences'] ?? '',
             'LgRegexpWordCharacters' => $data['regexpWordCharacters'] ?? 'a-zA-Z',
+            'LgParserType' => $data['parserType'] ?? null,
             'LgRemoveSpaces' => !empty($data['removeSpaces']),
             'LgSplitEachChar' => !empty($data['splitEachChar']),
             'LgRightToLeft' => !empty($data['rightToLeft']),
@@ -963,7 +968,7 @@ class LanguageService
             'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
             'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
             'LgRegexpSplitSentences', 'LgExceptionsSplitSentences',
-            'LgRegexpWordCharacters', 'LgRemoveSpaces', 'LgSplitEachChar',
+            'LgRegexpWordCharacters', 'LgParserType', 'LgRemoveSpaces', 'LgSplitEachChar',
             'LgRightToLeft', 'LgTTSVoiceAPI', 'LgShowRomanization'
         ];
 
@@ -978,6 +983,7 @@ class LanguageService
             $this->emptyToNull($data["LgRegexpSplitSentences"]),
             $data["LgExceptionsSplitSentences"],  // No trim, keeps empty strings
             $this->emptyToNull($data["LgRegexpWordCharacters"]),
+            $data["LgParserType"] ?? null,  // Parser type (nullable)
             (int)$data["LgRemoveSpaces"],
             (int)$data["LgSplitEachChar"],
             (int)$data["LgRightToLeft"],
@@ -1027,6 +1033,8 @@ class LanguageService
             (int)$newData["LgRemoveSpaces"] != (int)$oldRecord['LgRemoveSpaces']
         ) || (
             (int)$newData["LgSplitEachChar"] != (int)$oldRecord['LgSplitEachChar']
+        ) || (
+            ($newData["LgParserType"] ?? null) != ($oldRecord['LgParserType'] ?? null)
         );
     }
 }

@@ -57,7 +57,8 @@
         "sentSplRegExp": ".!?:;。！？：；",
         "makeCharacterWord": true,
         "removeSpaces": true,
-        "rightToLeft": false
+        "rightToLeft": false,
+        "parserType": "character"
     },
     "Chinese (Traditional)": {
         "glosbeIso": "zh",
@@ -67,7 +68,8 @@
         "sentSplRegExp": ".!?:;。！？：；",
         "makeCharacterWord": true,
         "removeSpaces": true,
-        "rightToLeft": false
+        "rightToLeft": false,
+        "parserType": "character"
     },
     "Croatian": {
         "glosbeIso": "hr",
@@ -217,7 +219,8 @@
         "sentSplRegExp": ".!?:;。！？：；",
         "makeCharacterWord": true,
         "removeSpaces": true,
-        "rightToLeft": false
+        "rightToLeft": false,
+        "parserType": "mecab"
     },
     "Korean": {
         "glosbeIso": "ko",

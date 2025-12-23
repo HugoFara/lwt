@@ -42,6 +42,8 @@ use Lwt\Services\WordUploadService;
 use Lwt\Core\Repository\TermRepository;
 use Lwt\Core\Repository\TextRepository;
 use Lwt\Core\Repository\UserRepository;
+use Lwt\Core\Parser\ParserRegistry;
+use Lwt\Core\Parser\ParsingCoordinator;
 
 /**
  * Core service provider that registers essential application services.
@@ -67,6 +69,16 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $container->singleton(TextParsingService::class, function (Container $_c) {
             return new TextParsingService();
+        });
+
+        $container->singleton(ParserRegistry::class, function (Container $_c) {
+            return new ParserRegistry();
+        });
+
+        $container->singleton(ParsingCoordinator::class, function (Container $c) {
+            return new ParsingCoordinator(
+                $c->get(ParserRegistry::class)
+            );
         });
 
         $container->singleton(LanguageService::class, function (Container $_c) {

@@ -3,10 +3,11 @@
  * Language Form View
  *
  * Variables expected:
- * - $language: Language object
+ * - $language: Language view object (stdClass)
  * - $sourceLg: string source language code
  * - $targetLg: string target language code
  * - $isNew: bool true if creating new language
+ * - $parserInfo: array parser info from ParserRegistry::getParserInfo()
  *
  * PHP version 8.1
  *
@@ -37,13 +38,13 @@ use Lwt\View\Helper\IconHelper;
 <form class="validate" action="/languages" method="post" name="lg_form"
       x-data="{
           textSize: <?php echo $language->textsize ?: 100; ?>,
+          parserType: '<?php echo htmlspecialchars($language->parsertype ?? 'regex', ENT_QUOTES, 'UTF-8'); ?>',
           showJapaneseOptions: <?php echo ($language->name === 'Japanese') ? 'true' : 'false'; ?>,
           showTranslatorKey: false,
           sections: {
               dictionaries: true,
               display: false,
               textProcessing: false,
-              scriptOptions: false,
               advanced: false
           }
       }">
@@ -268,6 +269,33 @@ use Lwt\View\Helper\IconHelper;
         </header>
 
         <div x-show="open" x-transition x-cloak class="mt-4">
+            <!-- Parser Type -->
+            <div class="field">
+                <label class="label">Parser Type</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <select name="LgParserType" id="LgParserType" x-model="parserType">
+                            <?php foreach ($parserInfo as $type => $info): ?>
+                            <option value="<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>"
+                                    <?php echo ($language->parsertype === $type) ? 'selected' : ''; ?>
+                                    <?php echo !$info['available'] ? 'disabled' : ''; ?>>
+                                <?php echo htmlspecialchars($info['name'], ENT_QUOTES, 'UTF-8'); ?>
+                                <?php echo !$info['available'] ? ' (unavailable)' : ''; ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <p class="help">Select the parsing algorithm for this language</p>
+                <?php foreach ($parserInfo as $type => $info): ?>
+                    <?php if (!$info['available'] && $info['message']): ?>
+                    <p class="help is-warning" x-show="parserType === '<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>'" x-cloak>
+                        <?php echo htmlspecialchars($info['message'], ENT_QUOTES, 'UTF-8'); ?>
+                    </p>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+
             <!-- Character Substitutions -->
             <div class="field">
                 <label class="label">Character Substitutions</label>
@@ -282,26 +310,27 @@ use Lwt\View\Helper\IconHelper;
                 <p class="help">Replace characters before parsing (format: from=to, separated by |)</p>
             </div>
 
-            <!-- RegExp Split Sentences -->
-            <div class="field">
+            <!-- RegExp Split Sentences (not needed for mecab) -->
+            <div class="field" x-show="parserType !== 'mecab'" x-transition x-cloak>
                 <label class="label">
                     RegExp Split Sentences
-                    <span class="has-text-danger" title="Required">*</span>
+                    <span class="has-text-danger" title="Required" x-show="parserType === 'regex'">*</span>
                 </label>
                 <div class="control">
                     <input type="text"
-                           class="input notempty checkoutsidebmp"
+                           class="input checkoutsidebmp"
+                           :class="{ 'notempty': parserType === 'regex' }"
                            name="LgRegexpSplitSentences"
                            value="<?php echo htmlspecialchars($language->regexpsplitsent ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="500"
                            data_info="RegExp Split Sentences"
-                           required />
+                           :required="parserType === 'regex'" />
                 </div>
                 <p class="help">Regular expression to split text into sentences</p>
             </div>
 
-            <!-- Exceptions Split Sentences -->
-            <div class="field">
+            <!-- Exceptions Split Sentences (not needed for mecab) -->
+            <div class="field" x-show="parserType !== 'mecab'" x-transition x-cloak>
                 <label class="label">Exceptions Split Sentences</label>
                 <div class="control">
                     <input type="text"
@@ -314,8 +343,8 @@ use Lwt\View\Helper\IconHelper;
                 <p class="help">Words that should not trigger sentence splitting (e.g., Mr., Dr.)</p>
             </div>
 
-            <!-- RegExp Word Characters -->
-            <div class="field">
+            <!-- RegExp Word Characters (only for regex parser) -->
+            <div class="field" x-show="parserType === 'regex'" x-transition x-cloak>
                 <label class="label">
                     RegExp Word Characters
                     <span class="has-text-danger" title="Required">*</span>
@@ -337,35 +366,16 @@ use Lwt\View\Helper\IconHelper;
                            name="LgRegexpWordCharacters"
                            value="<?php echo htmlspecialchars($language->regexpwordchar ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="500"
-                           required />
+                           :required="parserType === 'regex'" />
                 </div>
                 <p class="help">Regular expression defining valid word characters</p>
-                <p class="help is-danger is-hidden" id="mecab_not_installed">
-                    <a href="https://en.wikipedia.org/wiki/MeCab">MeCab</a> does
-                    not seem to be installed on your server.
-                    Please read the <a href="">MeCab installation guide</a>.
-                </p>
             </div>
-        </div>
-    </div>
 
-    <!-- Script Options Section -->
-    <div class="box mb-4" x-data="{ open: sections.scriptOptions }">
-        <header class="is-flex is-align-items-center is-justify-content-space-between is-clickable mb-0"
-                @click="open = !open; sections.scriptOptions = open">
-            <h4 class="title is-5 mb-0 is-flex is-align-items-center">
-                <span class="icon mr-2">
-                    <?php echo IconHelper::render('file-text', ['alt' => 'Script Options']); ?>
-                </span>
-                Script Options
-            </h4>
-            <span class="icon">
-                <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
-            </span>
-        </header>
+            <!-- Divider before script options -->
+            <hr class="my-4" />
 
-        <div x-show="open" x-transition x-cloak class="mt-4">
-            <div class="field">
+            <!-- Split Each Char (only for regex parser - implied by character parser) -->
+            <div class="field" x-show="parserType === 'regex'" x-transition x-cloak>
                 <label class="checkbox">
                     <input type="checkbox"
                            name="LgSplitEachChar"
@@ -374,7 +384,21 @@ use Lwt\View\Helper\IconHelper;
                            <?php echo $language->spliteachchar ? "checked" : ""; ?> />
                     <strong>Make each character a word</strong>
                 </label>
-                <p class="help ml-5">For Chinese, Japanese, etc.</p>
+                <p class="help ml-5">For Chinese, Japanese, etc. (Use "Character" parser instead)</p>
+            </div>
+
+            <!-- Info message when using character/mecab parser -->
+            <div class="field" x-show="parserType === 'character'" x-transition x-cloak>
+                <p class="help is-info">
+                    <span class="icon"><i data-lucide="info"></i></span>
+                    The Character parser automatically treats each character as a word.
+                </p>
+            </div>
+            <div class="field" x-show="parserType === 'mecab'" x-transition x-cloak>
+                <p class="help is-info">
+                    <span class="icon"><i data-lucide="info"></i></span>
+                    MeCab automatically handles word segmentation for Japanese.
+                </p>
             </div>
 
             <div class="field">

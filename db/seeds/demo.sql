@@ -196,6 +196,7 @@ CREATE TABLE `languages` (
   `LgRegexpSplitSentences` varchar(500) NOT NULL,
   `LgExceptionsSplitSentences` varchar(500) NOT NULL,
   `LgRegexpWordCharacters` varchar(500) NOT NULL,
+  `LgParserType` varchar(50) DEFAULT NULL,
   `LgRemoveSpaces` int(1) unsigned NOT NULL DEFAULT '0',
   `LgSplitEachChar` int(1) unsigned NOT NULL DEFAULT '0',
   `LgRightToLeft` int(1) unsigned NOT NULL DEFAULT '0',

@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS languages (
     LgRegexpSplitSentences varchar(500) NOT NULL,
     LgExceptionsSplitSentences varchar(500) NOT NULL,
     LgRegexpWordCharacters varchar(500) NOT NULL,
+    LgParserType varchar(50) DEFAULT NULL,
     LgRemoveSpaces tinyint(1) unsigned NOT NULL DEFAULT '0',
     LgSplitEachChar tinyint(1) unsigned NOT NULL DEFAULT '0',
     LgRightToLeft tinyint(1) unsigned NOT NULL DEFAULT '0',

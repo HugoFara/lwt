@@ -52,6 +52,17 @@ ones are marked like "v1.0.0-fork".
 * **Iframe Replacement** ([#166](https://github.com/HugoFara/lwt/issues/166)):
   Legacy iframe-based dynamic content loading replaced with Alpine.js components
   and REST API calls. Only dictionary iframes remain for external dictionary display.
+* **Extensible Language Parsers** ([#222](https://github.com/HugoFara/lwt/issues/222)):
+  Implemented a clean, extensible parser architecture using the Strategy Pattern.
+  Each language can now specify its parser type via the `LgParserType` database column:
+  * **Regex Parser** (default): Standard regex-based tokenization for most languages
+  * **Character Parser**: Character-by-character splitting for CJK languages (Chinese)
+  * **MeCab Parser**: Japanese morphological analyzer integration
+  New parser infrastructure in `src/backend/Core/Parser/` includes `ParserInterface`,
+  `ParserRegistry`, `ParsingCoordinator`, and value objects (`Token`, `ParserResult`,
+  `ParserConfig`). The language edit form dynamically shows/hides relevant options
+  based on the selected parser. Future parsers can be added by implementing
+  `ParserInterface` and registering in `ParserRegistry`.
 
 ### Changed
 
