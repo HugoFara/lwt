@@ -88,14 +88,11 @@ class BaseControllerTest extends TestCase
 
     // ===== Constructor tests =====
 
-    public function testConstructorSetsDbConnection(): void
+    public function testConstructorCreatesInstance(): void
     {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $db = $this->controller->getDbConnection();
-        $this->assertInstanceOf(\mysqli::class, $db);
+        // BaseController no longer stores a $db property - it uses
+        // static Connection methods. Test that controller instantiates.
+        $this->assertInstanceOf(TestableController::class, $this->controller);
     }
 
     // ===== param() tests =====
@@ -315,11 +312,6 @@ class BaseControllerTest extends TestCase
  */
 class TestableController extends BaseController
 {
-    public function getDbConnection(): ?\mysqli
-    {
-        return $this->db;
-    }
-
     public function testParam(string $key, string $default = ''): string
     {
         return $this->param($key, $default);
