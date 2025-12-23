@@ -114,6 +114,11 @@ class LanguageService
         $view->dict1uri = $language->dict1Uri();
         $view->dict2uri = $language->dict2Uri();
         $view->translator = $language->translatorUri();
+        $view->dict1popup = $language->isDict1PopUp();
+        $view->dict2popup = $language->isDict2PopUp();
+        $view->translatorpopup = $language->isTranslatorPopUp();
+        $view->sourcelang = $language->sourceLang();
+        $view->targetlang = $language->targetLang();
         $view->exporttemplate = $language->exportTemplate();
         $view->textsize = $language->textSize();
         $view->charactersubst = $language->characterSubstitutions();
@@ -176,6 +181,11 @@ class LanguageService
             'LgDict1URI' => InputValidator::getString('LgDict1URI'),
             'LgDict2URI' => InputValidator::getString('LgDict2URI'),
             'LgGoogleTranslateURI' => InputValidator::getString('LgGoogleTranslateURI'),
+            'LgDict1PopUp' => InputValidator::has('LgDict1PopUp'),
+            'LgDict2PopUp' => InputValidator::has('LgDict2PopUp'),
+            'LgGoogleTranslatePopUp' => InputValidator::has('LgGoogleTranslatePopUp'),
+            'LgSourceLang' => InputValidator::getString('LgSourceLang') ?: null,
+            'LgTargetLang' => InputValidator::getString('LgTargetLang') ?: null,
             'LgExportTemplate' => InputValidator::getString('LgExportTemplate'),
             'LgTextSize' => InputValidator::getString('LgTextSize', '100'),
             'LgCharacterSubstitutions' => InputValidator::getString('LgCharacterSubstitutions', '', false),
@@ -222,6 +232,8 @@ class LanguageService
     {
         $columns = [
             'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
+            'LgDict1PopUp', 'LgDict2PopUp', 'LgGoogleTranslatePopUp',
+            'LgSourceLang', 'LgTargetLang',
             'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
             'LgRegexpSplitSentences', 'LgExceptionsSplitSentences',
             'LgRegexpWordCharacters', 'LgParserType', 'LgRemoveSpaces', 'LgSplitEachChar',
@@ -233,6 +245,11 @@ class LanguageService
             $this->emptyToNull($data["LgDict1URI"]),
             $this->emptyToNull($data["LgDict2URI"]),
             $this->emptyToNull($data["LgGoogleTranslateURI"]),
+            (int)($data["LgDict1PopUp"] ?? false),
+            (int)($data["LgDict2PopUp"] ?? false),
+            (int)($data["LgGoogleTranslatePopUp"] ?? false),
+            $this->emptyToNull($data["LgSourceLang"] ?? null),
+            $this->emptyToNull($data["LgTargetLang"] ?? null),
             $this->emptyToNull($data["LgExportTemplate"]),
             $this->emptyToNull($data["LgTextSize"]),
             $data["LgCharacterSubstitutions"],  // No trim, keeps empty strings
@@ -940,6 +957,11 @@ class LanguageService
             'LgDict1URI' => $data['dict1Uri'] ?? '',
             'LgDict2URI' => $data['dict2Uri'] ?? '',
             'LgGoogleTranslateURI' => $data['translatorUri'] ?? '',
+            'LgDict1PopUp' => !empty($data['dict1PopUp']),
+            'LgDict2PopUp' => !empty($data['dict2PopUp']),
+            'LgGoogleTranslatePopUp' => !empty($data['translatorPopUp']),
+            'LgSourceLang' => $data['sourceLang'] ?? null,
+            'LgTargetLang' => $data['targetLang'] ?? null,
             'LgExportTemplate' => $data['exportTemplate'] ?? '',
             'LgTextSize' => (string)($data['textSize'] ?? '100'),
             'LgCharacterSubstitutions' => $data['characterSubstitutions'] ?? '',
@@ -970,6 +992,8 @@ class LanguageService
     {
         $columns = [
             'LgName', 'LgDict1URI', 'LgDict2URI', 'LgGoogleTranslateURI',
+            'LgDict1PopUp', 'LgDict2PopUp', 'LgGoogleTranslatePopUp',
+            'LgSourceLang', 'LgTargetLang',
             'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
             'LgRegexpSplitSentences', 'LgExceptionsSplitSentences',
             'LgRegexpWordCharacters', 'LgParserType', 'LgRemoveSpaces', 'LgSplitEachChar',
@@ -981,6 +1005,11 @@ class LanguageService
             $this->emptyToNull($data["LgDict1URI"]),
             $this->emptyToNull($data["LgDict2URI"]),
             $this->emptyToNull($data["LgGoogleTranslateURI"]),
+            (int)($data["LgDict1PopUp"] ?? false),
+            (int)($data["LgDict2PopUp"] ?? false),
+            (int)($data["LgGoogleTranslatePopUp"] ?? false),
+            $this->emptyToNull($data["LgSourceLang"] ?? null),
+            $this->emptyToNull($data["LgTargetLang"] ?? null),
             $this->emptyToNull($data["LgExportTemplate"]),
             $this->emptyToNull($data["LgTextSize"]),
             $data["LgCharacterSubstitutions"],  // No trim, keeps empty strings

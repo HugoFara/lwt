@@ -124,7 +124,8 @@ use Lwt\View\Helper\IconHelper;
                            required />
                 </div>
                 <label class="checkbox mt-2">
-                    <input type="checkbox" name="LgDict1PopUp" id="LgDict1PopUp" />
+                    <input type="checkbox" name="LgDict1PopUp" id="LgDict1PopUp" value="1"
+                           <?php echo ($language->dict1popup ?? false) ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
@@ -143,7 +144,8 @@ use Lwt\View\Helper\IconHelper;
                            data_info="Dictionary 2 URI" />
                 </div>
                 <label class="checkbox mt-2">
-                    <input type="checkbox" name="LgDict2PopUp" id="LgDict2PopUp" />
+                    <input type="checkbox" name="LgDict2PopUp" id="LgDict2PopUp" value="1"
+                           <?php echo ($language->dict2popup ?? false) ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some dictionaries cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
@@ -189,12 +191,47 @@ use Lwt\View\Helper\IconHelper;
                 </div>
 
                 <label class="checkbox mt-2">
-                    <input type="checkbox" name="LgGoogleTranslatePopUp" id="LgGoogleTranslatePopUp" />
+                    <input type="checkbox" name="LgGoogleTranslatePopUp" id="LgGoogleTranslatePopUp" value="1"
+                           <?php echo ($language->translatorpopup ?? false) ? 'checked' : ''; ?> />
                     <span class="has-text-grey-dark" title="Open in a new window. Some translators cannot be displayed in iframes">
                         Open in Pop-Up
                     </span>
                 </label>
                 <p id="translator_error" class="help is-danger"></p>
+            </div>
+
+            <!-- Source/Target Language Codes -->
+            <div class="columns mt-4">
+                <div class="column">
+                    <div class="field">
+                        <label class="label">Source Language Code</label>
+                        <div class="control">
+                            <input type="text"
+                                   class="input"
+                                   name="LgSourceLang"
+                                   id="LgSourceLang"
+                                   value="<?php echo htmlspecialchars($language->sourcelang ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   maxlength="10"
+                                   placeholder="e.g., de, ja, zh" />
+                        </div>
+                        <p class="help">ISO code of the language you're learning (used for translation APIs)</p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="field">
+                        <label class="label">Target Language Code</label>
+                        <div class="control">
+                            <input type="text"
+                                   class="input"
+                                   name="LgTargetLang"
+                                   id="LgTargetLang"
+                                   value="<?php echo htmlspecialchars($language->targetlang ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   maxlength="10"
+                                   placeholder="e.g., en" />
+                        </div>
+                        <p class="help">ISO code of your native language (used for translation APIs)</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Placeholder help note -->

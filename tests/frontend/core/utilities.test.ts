@@ -88,8 +88,9 @@ describe('pgm.ts', () => {
       expect(getLangFromDict('   ')).toBe('');
     });
 
-    it('handles popup marker (*)', () => {
-      const url = '*http://translate.google.com?sl=en&tl=fr';
+    it('handles Google Translate URL', () => {
+      // Asterisk prefix is no longer used - popup is stored in database
+      const url = 'http://translate.google.com?sl=en&tl=fr';
       expect(getLangFromDict(url)).toBe('en');
     });
 
@@ -130,8 +131,8 @@ describe('pgm.ts', () => {
       expect(result).toBe('http://dict.com/search?q=world');
     });
 
-    it('replaces ### placeholder', () => {
-      const result = createTheDictUrl('http://dict.com/search?q=###', 'test');
+    it('replaces lwt_term placeholder', () => {
+      const result = createTheDictUrl('http://dict.com/search?q=lwt_term', 'test');
       expect(result).toBe('http://dict.com/search?q=test');
     });
 
@@ -150,12 +151,10 @@ describe('pgm.ts', () => {
       expect(result).toBe('http://dict.com/test');
     });
 
-    it('handles deprecated double ### encoding format', () => {
-      // This tests the warning path for deprecated encoding syntax
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const result = createTheDictUrl('http://dict.com/###UTF-8###end', 'test');
-      expect(consoleSpy).toHaveBeenCalled();
-      expect(result).toContain('test');
+    it('handles URL with lwt_term in path', () => {
+      // Simple replacement of lwt_term placeholder
+      const result = createTheDictUrl('http://dict.com/search/lwt_term/details', 'test');
+      expect(result).toBe('http://dict.com/search/test/details');
     });
   });
 
@@ -175,16 +174,18 @@ describe('pgm.ts', () => {
       expect(result).toContain('target="ru"');
     });
 
-    it('creates popup span for URL starting with *', () => {
-      const result = createTheDictLink('*http://dict.com?q=lwt_term', 'hello', 'Translate', '');
+    it('creates popup span when popup=true', () => {
+      // Popup is now determined by boolean parameter, not URL prefix
+      const result = createTheDictLink('http://dict.com?q=lwt_term', 'hello', 'Translate', '', true);
       expect(result).toContain('<span class="click"');
       expect(result).toContain('data-action="dict-popup"');
       expect(result).toContain('data-url=');
     });
 
-    it('creates popup for URL with lwt_popup parameter', () => {
-      const result = createTheDictLink('http://dict.com?q=lwt_term&lwt_popup=1', 'hello', 'Translate', '');
-      expect(result).toContain('<span class="click"');
+    it('creates regular link when popup=false', () => {
+      const result = createTheDictLink('http://dict.com?q=lwt_term', 'hello', 'Translate', '', false);
+      expect(result).toContain('<a href=');
+      expect(result).toContain('target="ru"');
     });
 
     it('includes txtbefore content', () => {
@@ -202,10 +203,10 @@ describe('pgm.ts', () => {
       expect(createSentLookupLink(1, 1, 'http://trans.com', '')).toBe('');
     });
 
-    it('creates popup span for URL starting with *', () => {
-      const result = createSentLookupLink(10, 5, '*http://trans.com', 'Translate');
+    it('creates popup span when popup=true', () => {
+      // Popup is now determined by boolean parameter, not URL prefix
+      const result = createSentLookupLink(10, 5, 'http://trans.com', 'Translate', true);
       expect(result).toContain('<span class="click"');
-      // Now uses the translator URL directly instead of trans.php
       expect(result).toContain('http://trans.com');
     });
 

@@ -79,9 +79,9 @@ describe('text_keyboard.ts', () => {
     resetSettingsConfig();
     initLanguageConfig({
       id: 1,
-      dictLink1: 'http://dict1.example.com/###',
-      dictLink2: 'http://dict2.example.com/###',
-      translatorLink: 'http://translator.example.com/###',
+      dictLink1: 'http://dict1.example.com/lwt_term',
+      dictLink2: 'http://dict2.example.com/lwt_term',
+      translatorLink: 'http://translator.example.com/lwt_term',
       delimiter: ',',
       rtl: false
     });
@@ -479,9 +479,9 @@ describe('text_keyboard.ts', () => {
       // Reinitialize with popup translator link (starts with *)
       initLanguageConfig({
         id: 1,
-        dictLink1: 'http://dict1.example.com/###',
-        dictLink2: 'http://dict2.example.com/###',
-        translatorLink: '*http://translator.com/###',
+        dictLink1: 'http://dict1.example.com/lwt_term',
+        dictLink2: 'http://dict2.example.com/lwt_term',
+        translatorLink: '*http://translator.com/lwt_term',
         delimiter: ',',
         rtl: false
       });

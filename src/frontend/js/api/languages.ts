@@ -40,6 +40,11 @@ export interface LanguageFull {
   dict1Uri: string;
   dict2Uri: string;
   translatorUri: string;
+  dict1PopUp: boolean;
+  dict2PopUp: boolean;
+  translatorPopUp: boolean;
+  sourceLang: string | null;
+  targetLang: string | null;
   exportTemplate: string;
   textSize: number;
   characterSubstitutions: string;
@@ -75,6 +80,11 @@ export interface LanguageCreateRequest {
   dict1Uri?: string;
   dict2Uri?: string;
   translatorUri?: string;
+  dict1PopUp?: boolean;
+  dict2PopUp?: boolean;
+  translatorPopUp?: boolean;
+  sourceLang?: string;
+  targetLang?: string;
   exportTemplate?: string;
   textSize?: number;
   characterSubstitutions?: string;

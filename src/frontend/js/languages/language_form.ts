@@ -167,10 +167,6 @@ export const languageForm = {
    * @param url - The translator URL to check
    */
   checkTranslatorStatus(url: string): void {
-    if (url.startsWith('*')) {
-      url = url.substring(1);
-    }
-
     let urlObj: URL;
     try {
       urlObj = new URL(url);
@@ -257,103 +253,30 @@ export const languageForm = {
   },
 
   /**
-   * Add or remove the popup option from a dictionary URL.
-   *
-   * @param url - The dictionary URL
-   * @param checked - Whether the popup option should be enabled
-   * @returns The modified URL
-   */
-  addPopUpOption(url: string, checked: boolean): string {
-    if (url.startsWith('*')) {
-      url = url.substring(1);
-    }
-
-    let builtUrl: URL;
-    try {
-      builtUrl = new URL(url);
-    } catch {
-      return url;
-    }
-
-    if (checked && builtUrl.searchParams.has('lwt_popup')) {
-      return builtUrl.href;
-    }
-    if (!checked && !builtUrl.searchParams.has('lwt_popup')) {
-      return builtUrl.href;
-    }
-    if (checked) {
-      builtUrl.searchParams.append('lwt_popup', 'true');
-      return builtUrl.href;
-    }
-    builtUrl.searchParams.delete('lwt_popup');
-    return builtUrl.href;
-  },
-
-  /**
    * Handle popup checkbox state change.
+   * Popup setting is now stored in the database, not in the URL.
    *
    * @param elem - The checkbox element
+   *
+   * @since 3.1.0 No longer modifies URLs, popup is stored in database column
    */
   changePopUpState(elem: HTMLInputElement): void {
-    const lgForm = document.forms.namedItem('lg_form') as HTMLFormElement | null;
-    if (!lgForm) return;
-
-    let target: HTMLInputElement | null = null;
-    switch (elem.name) {
-      case 'LgDict1PopUp':
-        target = lgForm.elements.namedItem('LgDict1URI') as HTMLInputElement | null;
-        break;
-      case 'LgDict2PopUp':
-        target = lgForm.elements.namedItem('LgDict2URI') as HTMLInputElement | null;
-        break;
-      case 'LgGoogleTranslatePopUp':
-        target = lgForm.elements.namedItem('LgGoogleTranslateURI') as HTMLInputElement | null;
-        break;
-    }
-
-    if (target) {
-      target.value = this.addPopUpOption(target.value, elem.checked);
-    }
+    // Popup is now just a form field, no URL manipulation needed
+    // The checkbox state will be submitted with the form
   },
 
   /**
    * Handle dictionary URL input change.
-   * Updates the popup checkbox based on the URL.
+   * Validates the URL and triggers related checks.
    *
    * @param inputBox - The input element
+   *
+   * @since 3.1.0 No longer detects popup from URL (asterisk or lwt_popup param)
    */
   checkDictionaryChanged(inputBox: HTMLInputElement): void {
-    const lgForm = document.forms.namedItem('lg_form') as HTMLFormElement | null;
-    if (!lgForm || inputBox.value === '') return;
-
-    let target: HTMLInputElement | null = null;
-    switch (inputBox.name) {
-      case 'LgDict1URI':
-        target = lgForm.elements.namedItem('LgDict1PopUp') as HTMLInputElement | null;
-        break;
-      case 'LgDict2URI':
-        target = lgForm.elements.namedItem('LgDict2PopUp') as HTMLInputElement | null;
-        break;
-      case 'LgGoogleTranslateURI':
-        target = lgForm.elements.namedItem('LgGoogleTranslatePopUp') as HTMLInputElement | null;
-        break;
-    }
-
-    if (!target) return;
-
-    let popup = false;
-    if (inputBox.value.startsWith('*')) {
-      inputBox.value = inputBox.value.substring(1);
-      popup = true;
-    }
-
-    try {
-      popup = popup || new URL(inputBox.value).searchParams.has('lwt_popup');
-    } catch {
-      // Invalid URL, keep current popup state
-    }
-
-    target.checked = popup;
+    // Previously this would detect popup settings from URLs
+    // Now popup settings are stored in separate database columns
+    // This method is kept for potential future URL validation
   },
 
   /**
@@ -588,7 +511,13 @@ function applyWizardPreset(): void {
     const l2Code = l2Def.glosbeIso;
     const dict1Input = lgForm.elements.namedItem('LgDict1URI') as HTMLInputElement | null;
     if (dict1Input) {
-      dict1Input.value = `https://glosbe.com/${l2Code}/${l1Code}/###?popup=1`;
+      dict1Input.value = `https://glosbe.com/${l2Code}/${l1Code}/lwt_term`;
+    }
+
+    // Set dictionary popup (enabled by default for wizard)
+    const dict1PopUp = lgForm.elements.namedItem('LgDict1PopUp') as HTMLInputElement | null;
+    if (dict1PopUp) {
+      dict1PopUp.checked = true;
     }
 
     // Set translator URL
@@ -598,7 +527,23 @@ function applyWizardPreset(): void {
       'LgGoogleTranslateURI'
     ) as HTMLInputElement | null;
     if (translatorInput) {
-      translatorInput.value = `*https://translate.google.com/?sl=${l2GoogleCode}&tl=${l1GoogleCode}&text=###&op=translate`;
+      translatorInput.value = `https://translate.google.com/?sl=${l2GoogleCode}&tl=${l1GoogleCode}&text=lwt_term&op=translate`;
+    }
+
+    // Set translator popup (enabled by default for wizard)
+    const translatorPopUp = lgForm.elements.namedItem('LgGoogleTranslatePopUp') as HTMLInputElement | null;
+    if (translatorPopUp) {
+      translatorPopUp.checked = true;
+    }
+
+    // Set source/target language codes
+    const sourceLangInput = lgForm.elements.namedItem('LgSourceLang') as HTMLInputElement | null;
+    if (sourceLangInput) {
+      sourceLangInput.value = l2GoogleCode;
+    }
+    const targetLangInput = lgForm.elements.namedItem('LgTargetLang') as HTMLInputElement | null;
+    if (targetLangInput) {
+      targetLangInput.value = l1GoogleCode;
     }
 
     // Set text size based on language

@@ -201,6 +201,11 @@ class ClassesTest extends TestCase
             'http://dict1.test',
             'http://dict2.test',
             'http://translate.test',
+            false,  // dict1PopUp
+            false,  // dict2PopUp
+            false,  // translatorPopUp
+            'de',   // sourceLang
+            'en',   // targetLang
             'Template: %s',
             150,
             'ß=ss',
@@ -293,7 +298,7 @@ class ClassesTest extends TestCase
 
     public function testLanguageGetDictionaryUrl(): void
     {
-        $lang = Language::create('English', 'http://dict.test/###', '.!?', 'a-z');
+        $lang = Language::create('English', 'http://dict.test/lwt_term', '.!?', 'a-z');
         $url = $lang->getDictionaryUrl('hello');
         $this->assertEquals('http://dict.test/hello', $url);
     }
@@ -302,6 +307,7 @@ class ClassesTest extends TestCase
     {
         $lang = Language::reconstitute(
             42, 'Test', 'http://dict1', 'http://dict2', 'http://trans',
+            false, false, false, null, null,  // popup and lang fields
             'Template', 100, 'a=b', '.!?', 'Dr.', 'a-z',
             true, false, true, 'http://tts', true
         );
@@ -844,7 +850,9 @@ class ClassesTest extends TestCase
     public function testLanguageSetIdOnPersistedEntityFails(): void
     {
         $lang = Language::reconstitute(
-            1, 'English', '', '', '', '', 100, '', '.!?', '', 'a-z',
+            1, 'English', '', '', '',
+            false, false, false, null, null,  // popup and lang fields
+            '', 100, '', '.!?', '', 'a-z',
             false, false, false, '', true
         );
 

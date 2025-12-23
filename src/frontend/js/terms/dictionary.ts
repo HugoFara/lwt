@@ -41,47 +41,29 @@ export function oewin(url: string): Window | null {
  *
  * JS alter ego of the createTheDictLink PHP function.
  *
- * Case 1: url without any ### or "lwt_term": append term
- * Case 2: url with one ### or "lwt_term": substitute term
+ * Case 1: url without "lwt_term": append term
+ * Case 2: url with "lwt_term": substitute term
  *
  * @param u Dictionary URL
  * @param w Term to be inserted in the URL
  * @returns A link to external dictionary to get a translation of the word
  *
  * @since 2.6.0-fork Internals rewrote, do no longer use PHP code.
- *                   The option putting encoding between ###enc### does no
- *                   longer work. It is deprecated and will be removed.
- * @since 2.7.0-fork Using "###" is deprecated, "lwt_term" recommended instead
+ * @since 2.7.0-fork Use "lwt_term" placeholder
+ * @since 3.1.0 Removed support for deprecated "###" placeholder
  */
 export function createTheDictUrl(u: string, w: string): string {
   const url = u.trim();
   const trm = w.trim();
-  const term_elem = url.match(/lwt_term|###/);
-  // No ###/lwt_term found
-  if (term_elem === null) {
-    return url + encodeURIComponent(trm);
+  const encodedTrm = trm === '' ? '+' : encodeURIComponent(trm);
+
+  // Check for lwt_term placeholder
+  if (url.includes('lwt_term')) {
+    return url.replace('lwt_term', encodedTrm);
   }
-  const pos = url.indexOf(term_elem[0]);
-  // ###/lwt_term found
-  const pos2 = url.indexOf('###', pos + 1);
-  if (pos2 === -1) {
-    // 1 ###/lwt_term found
-    return url.replace(term_elem[0], trm === '' ? '+' : encodeURIComponent(trm));
-  }
-  // 2 ### found
-  // Get encoding
-  const enc = url.substring(
-    pos + term_elem[0].length, pos2 - pos - term_elem[0].length
-  ).trim();
-  console.warn(
-    "Trying to use encoding '" + enc + "'. This feature is abandonned since " +
-    '2.6.0-fork. Using default UTF-8.'
-  );
-  let output = url.substring(0, pos) + encodeURIComponent(trm);
-  if (pos2 + 3 < url.length) {
-    output += url.substring(pos2 + 3);
-  }
-  return output;
+
+  // No placeholder found - append term to URL
+  return url + encodedTrm;
 }
 
 /**
@@ -91,73 +73,51 @@ export function createTheDictUrl(u: string, w: string): string {
  * @param w Word or sentence to be translated
  * @param t Text to display
  * @param b Some other text to display before the link
+ * @param popup Whether to open in popup window
  * @returns HTML-formatted link
+ *
+ * @since 3.1.0 Added popup parameter, removed asterisk prefix and lwt_popup URL detection
  */
-export function createTheDictLink(u: string, w: string, t: string, b: string): string {
-  let url = u.trim();
-  let popup = false;
+export function createTheDictLink(u: string, w: string, t: string, b: string, popup = false): string {
+  const url = u.trim();
   const trm = w.trim();
   const txt = t.trim();
   const txtbefore = b.trim();
-  let r = '';
+
   if (url === '' || txt === '') {
-    return r;
+    return '';
   }
-  if (url.startsWith('*')) {
-    url = url.substring(1);
-    popup = true;
-  }
-  try {
-    const final_url = new URL(url);
-    popup = popup || final_url.searchParams.has('lwt_popup');
-  } catch (err) {
-    if (!(err instanceof TypeError)) {
-      throw err;
-    }
-  }
+
   const dictUrl = createTheDictUrl(url, trm);
   if (popup) {
-    r = ' ' + txtbefore +
+    return ' ' + txtbefore +
       ' <span class="click" data-action="dict-popup" data-url="' +
       dictUrl.replace(/"/g, '&quot;') +
       '">' + txt + '</span> ';
-  } else {
-    r = ' ' + txtbefore +
-      ' <a href="' + dictUrl +
-      '" target="ru" data-action="dict-frame">' + txt + '</a> ';
   }
-  return r;
+  return ' ' + txtbefore +
+    ' <a href="' + dictUrl +
+    '" target="ru" data-action="dict-frame">' + txt + '</a> ';
 }
 
 /**
  * Create a sentence lookup link.
  *
- * @param torder Text order
- * @param txid   Text ID
+ * @param torder Text order (unused, kept for compatibility)
+ * @param txid   Text ID (unused, kept for compatibility)
  * @param url    Translator URL
  * @param txt    Word text
+ * @param popup  Whether to open in popup window
  * @returns HTML-formatted link.
  *
  * @deprecated Use direct translator URLs instead. The trans.php gateway is removed.
+ * @since 3.1.0 Added popup parameter, removed asterisk prefix and lwt_popup URL detection
  */
-export function createSentLookupLink(torder: number, txid: number, url: string, txt: string): string {
+export function createSentLookupLink(torder: number, txid: number, url: string, txt: string, popup = false): string {
   url = url.trim();
   txt = txt.trim();
-  let popup = false;
   if (url === '' || txt === '') {
     return '';
-  }
-  if (url.startsWith('*')) {
-    url = url.substring(1);
-    popup = true;
-  }
-  try {
-    const final_url = new URL(url);
-    popup = popup || final_url.searchParams.has('lwt_popup');
-  } catch (err) {
-    if (!(err instanceof TypeError)) {
-      throw err;
-    }
   }
   // Use the translator URL directly instead of going through trans.php
   if (popup) {
@@ -175,14 +135,12 @@ export function createSentLookupLink(torder: number, txid: number, url: string, 
  * @returns Language name
  *
  * @since 2.7.0 Also works with a LibreTranslate URL
+ * @deprecated Use the LgSourceLang database column instead of parsing URLs.
+ *             This function will be removed in a future version.
  */
 export function getLangFromDict(wblink3: string): string {
   if (wblink3.trim() === '') {
     return '';
-  }
-  // Replace pop-up marker '*'
-  if (wblink3.startsWith('*')) {
-    wblink3 = wblink3.substring(1);
   }
   let dictUrl: URL;
   try {

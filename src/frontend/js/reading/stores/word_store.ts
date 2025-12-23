@@ -422,7 +422,7 @@ function createWordStore(): WordStoreState {
       const template = this.dictLinks[which];
       if (!template) return '#';
 
-      return template.replace('###', encodeURIComponent(word.text));
+      return template.replace('lwt_term', encodeURIComponent(word.text));
     },
 
     /**

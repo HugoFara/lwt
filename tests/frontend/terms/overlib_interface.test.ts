@@ -61,9 +61,9 @@ describe('overlib_interface.ts', () => {
     resetSettingsConfig();
     initLanguageConfig({
       id: 1,
-      dictLink1: 'http://dict1.example.com/###',
-      dictLink2: 'http://dict2.example.com/###',
-      translatorLink: 'http://translator.example.com/###',
+      dictLink1: 'http://dict1.example.com/lwt_term',
+      dictLink2: 'http://dict2.example.com/lwt_term',
+      translatorLink: 'http://translator.example.com/lwt_term',
       delimiter: ',',
       rtl: false,
       ttsVoiceApi: ''
@@ -124,9 +124,9 @@ describe('overlib_interface.ts', () => {
   describe('make_overlib_link_wb', () => {
     it('creates dictionary links with lookup term', () => {
       const result = make_overlib_link_wb(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         1,
         '5'
@@ -140,9 +140,9 @@ describe('overlib_interface.ts', () => {
 
     it('includes sentence lookup when torder and txid are valid', () => {
       const result = make_overlib_link_wb(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         1,
         '5'
@@ -153,9 +153,9 @@ describe('overlib_interface.ts', () => {
 
     it('excludes sentence lookup when torder is 0', () => {
       const result = make_overlib_link_wb(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         1,
         '0'
@@ -166,9 +166,9 @@ describe('overlib_interface.ts', () => {
 
     it('excludes sentence lookup when txid is 0', () => {
       const result = make_overlib_link_wb(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         0,
         '5'
@@ -185,9 +185,9 @@ describe('overlib_interface.ts', () => {
   describe('make_overlib_link_wbnl', () => {
     it('creates dictionary links with term prefix', () => {
       const result = make_overlib_link_wbnl(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         1,
         '5'
@@ -198,9 +198,9 @@ describe('overlib_interface.ts', () => {
 
     it('includes sentence link when valid', () => {
       const result = make_overlib_link_wbnl(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         1,
         '5'
@@ -217,9 +217,9 @@ describe('overlib_interface.ts', () => {
   describe('make_overlib_link_wbnl2', () => {
     it('creates dictionary links for term and sentence', () => {
       const result = make_overlib_link_wbnl2(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         'This is a test sentence.'
       );
@@ -230,9 +230,9 @@ describe('overlib_interface.ts', () => {
 
     it('excludes sentence when empty', () => {
       const result = make_overlib_link_wbnl2(
-        'http://dict1.com/###',
-        'http://dict2.com/###',
-        'http://trans.com/###',
+        'http://dict1.com/lwt_term',
+        'http://dict2.com/lwt_term',
+        'http://trans.com/lwt_term',
         'test',
         ''
       );
@@ -560,7 +560,7 @@ describe('overlib_interface.ts', () => {
   describe.skip('run_overlib functions (require popup dialog)', () => {
     it('run_overlib_status_98 returns boolean', () => {
       const result = run_overlib_status_98(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', 100, ['', '', '', '', '', '', '', ''], false, ''
       );
       expect(typeof result).toBe('boolean');
@@ -568,7 +568,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_status_99 returns boolean', () => {
       const result = run_overlib_status_99(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', 100, ['', '', '', '', '', '', '', ''], false, ''
       );
       expect(typeof result).toBe('boolean');
@@ -576,7 +576,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_status_1_to_5 returns boolean', () => {
       const result = run_overlib_status_1_to_5(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', 100, 3, ['', '', '', '', '', '', '', ''], false, ''
       );
       expect(typeof result).toBe('boolean');
@@ -584,7 +584,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_status_unknown returns boolean', () => {
       const result = run_overlib_status_unknown(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'word', ['', '', '', '', '', '', '', ''], false
       );
       expect(typeof result).toBe('boolean');
@@ -592,7 +592,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_multiword returns boolean', () => {
       const result = run_overlib_multiword(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         'hint', 1, '5', 'multi word', 100, 3, '2 ', ''
       );
       expect(typeof result).toBe('boolean');
@@ -600,7 +600,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_test returns boolean', () => {
       const result = run_overlib_test(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         100, 'word', 'translation', 'roman', 3, 'test sentence', 1
       );
       expect(typeof result).toBe('boolean');
@@ -608,7 +608,7 @@ describe('overlib_interface.ts', () => {
 
     it('run_overlib_test with todo=0 skips interactive buttons', () => {
       const result = run_overlib_test(
-        'http://dict1.com/###', 'http://dict2.com/###', 'http://trans.com/###',
+        'http://dict1.com/lwt_term', 'http://dict2.com/lwt_term', 'http://trans.com/lwt_term',
         100, 'word', 'translation', 'roman', 3, 'test sentence', 0
       );
       expect(typeof result).toBe('boolean');

@@ -24,6 +24,11 @@ export interface LanguageFormData {
   dict1Uri: string;
   dict2Uri: string;
   translatorUri: string;
+  dict1PopUp: boolean;
+  dict2PopUp: boolean;
+  translatorPopUp: boolean;
+  sourceLang: string;
+  targetLang: string;
   exportTemplate: string;
   textSize: number;
   characterSubstitutions: string;
@@ -103,6 +108,11 @@ function createEmptyFormData(): LanguageFormData {
     dict1Uri: '',
     dict2Uri: '',
     translatorUri: '',
+    dict1PopUp: false,
+    dict2PopUp: false,
+    translatorPopUp: false,
+    sourceLang: '',
+    targetLang: '',
     exportTemplate: '$y\\t$t\\n',
     textSize: 100,
     characterSubstitutions: '',
@@ -223,6 +233,11 @@ function createLanguageFormStore(): LanguageFormStoreState {
           dict1Uri: lang.dict1Uri,
           dict2Uri: lang.dict2Uri,
           translatorUri: lang.translatorUri,
+          dict1PopUp: lang.dict1PopUp ?? false,
+          dict2PopUp: lang.dict2PopUp ?? false,
+          translatorPopUp: lang.translatorPopUp ?? false,
+          sourceLang: lang.sourceLang ?? '',
+          targetLang: lang.targetLang ?? '',
           exportTemplate: lang.exportTemplate,
           textSize: lang.textSize,
           characterSubstitutions: lang.characterSubstitutions,
@@ -288,12 +303,18 @@ function createLanguageFormStore(): LanguageFormStoreState {
       // Set dictionary URLs
       const l1Code = l1Def?.glosbeIso || 'en';
       const l2Code = l2Def.glosbeIso;
-      this.formData.dict1Uri = `https://glosbe.com/${l2Code}/${l1Code}/###?popup=1`;
+      this.formData.dict1Uri = `https://glosbe.com/${l2Code}/${l1Code}/lwt_term`;
+      this.formData.dict1PopUp = true;
 
       // Set translator URL
       const l1GoogleCode = l1Def?.googleIso || 'en';
       const l2GoogleCode = l2Def.googleIso;
-      this.formData.translatorUri = `*https://translate.google.com/?sl=${l2GoogleCode}&tl=${l1GoogleCode}&text=###&op=translate`;
+      this.formData.translatorUri = `https://translate.google.com/?sl=${l2GoogleCode}&tl=${l1GoogleCode}&text=lwt_term&op=translate`;
+      this.formData.translatorPopUp = true;
+
+      // Set source/target language codes
+      this.formData.sourceLang = l2GoogleCode;
+      this.formData.targetLang = l1GoogleCode;
 
       // Set text size based on language
       this.formData.textSize = l2Def.biggerFont ? 150 : 100;

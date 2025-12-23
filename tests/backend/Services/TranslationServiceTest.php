@@ -249,7 +249,8 @@ class TranslationServiceTest extends TestCase
 
     public function testCreateDictLinkWithHashPlaceholder(): void
     {
-        $url = $this->service->createDictLink('http://dict.test/search?q=###', 'world');
+        // Note: ### placeholder is deprecated, use lwt_term instead
+        $url = $this->service->createDictLink('http://dict.test/search?q=lwt_term', 'world');
 
         $this->assertEquals('http://dict.test/search?q=world', $url);
     }
@@ -263,14 +264,14 @@ class TranslationServiceTest extends TestCase
 
     public function testCreateDictLinkWithSpecialCharacters(): void
     {
-        $url = $this->service->createDictLink('http://dict.test/###', 'café');
+        $url = $this->service->createDictLink('http://dict.test/lwt_term', 'café');
 
         $this->assertStringContainsString(urlencode('café'), $url);
     }
 
     public function testCreateDictLinkWithEmptyTerm(): void
     {
-        $url = $this->service->createDictLink('http://dict.test/###', '');
+        $url = $this->service->createDictLink('http://dict.test/lwt_term', '');
 
         // With empty term, should replace with + or be empty
         $this->assertStringContainsString('dict.test', $url);
@@ -363,11 +364,11 @@ class TranslationServiceTest extends TestCase
 
     public function testCreateDictLinkWithMultiplePlaceholders(): void
     {
-        // Test URL with two ### placeholders (encoding scenario)
-        $url = $this->service->createDictLink('http://dict.test/###UTF-8###', 'test');
+        // Test URL with lwt_term placeholder
+        $url = $this->service->createDictLink('http://dict.test/search/lwt_term/details', 'test');
 
-        // Should handle encoding placeholder
-        $this->assertStringContainsString('dict.test', $url);
+        // Should replace lwt_term with the encoded search term
+        $this->assertEquals('http://dict.test/search/test/details', $url);
     }
 
     public function testBuildGoogleTranslateUrlWithEmptyText(): void

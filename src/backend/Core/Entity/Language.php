@@ -35,6 +35,11 @@ class Language
     private string $dict1Uri;
     private string $dict2Uri;
     private string $translatorUri;
+    private bool $dict1PopUp;
+    private bool $dict2PopUp;
+    private bool $translatorPopUp;
+    private ?string $sourceLang;
+    private ?string $targetLang;
     private string $exportTemplate;
     private int $textSize;
     private string $characterSubstitutions;
@@ -58,6 +63,11 @@ class Language
         string $dict1Uri,
         string $dict2Uri,
         string $translatorUri,
+        bool $dict1PopUp,
+        bool $dict2PopUp,
+        bool $translatorPopUp,
+        ?string $sourceLang,
+        ?string $targetLang,
         string $exportTemplate,
         int $textSize,
         string $characterSubstitutions,
@@ -77,6 +87,11 @@ class Language
         $this->dict1Uri = $dict1Uri;
         $this->dict2Uri = $dict2Uri;
         $this->translatorUri = $translatorUri;
+        $this->dict1PopUp = $dict1PopUp;
+        $this->dict2PopUp = $dict2PopUp;
+        $this->translatorPopUp = $translatorPopUp;
+        $this->sourceLang = $sourceLang;
+        $this->targetLang = $targetLang;
         $this->exportTemplate = $exportTemplate;
         $this->textSize = $textSize;
         $this->characterSubstitutions = $characterSubstitutions;
@@ -96,7 +111,7 @@ class Language
      * Create a new language with required settings.
      *
      * @param string $name                    Language name
-     * @param string $dict1Uri                Primary dictionary URL (### is replaced with word)
+     * @param string $dict1Uri                Primary dictionary URL (lwt_term is replaced with word)
      * @param string $regexpSplitSentences    Regex for sentence splitting
      * @param string $regexpWordCharacters    Regex for word characters
      *
@@ -121,6 +136,11 @@ class Language
             trim($dict1Uri),
             '',
             '',
+            false,    // dict1PopUp
+            false,    // dict2PopUp
+            false,    // translatorPopUp
+            null,     // sourceLang
+            null,     // targetLang
             '',
             100,
             '',
@@ -143,6 +163,11 @@ class Language
      * @param string      $dict1Uri                  Primary dictionary URI
      * @param string      $dict2Uri                  Secondary dictionary URI
      * @param string      $translatorUri             Translator URI
+     * @param bool        $dict1PopUp                Dictionary 1 opens in popup
+     * @param bool        $dict2PopUp                Dictionary 2 opens in popup
+     * @param bool        $translatorPopUp           Translator opens in popup
+     * @param string|null $sourceLang                Source language code (BCP 47)
+     * @param string|null $targetLang                Target language code (BCP 47)
      * @param string      $exportTemplate            Export template
      * @param int         $textSize                  Text size percentage
      * @param string      $characterSubstitutions    Character substitutions
@@ -167,6 +192,11 @@ class Language
         string $dict1Uri,
         string $dict2Uri,
         string $translatorUri,
+        bool $dict1PopUp,
+        bool $dict2PopUp,
+        bool $translatorPopUp,
+        ?string $sourceLang,
+        ?string $targetLang,
         string $exportTemplate,
         int $textSize,
         string $characterSubstitutions,
@@ -187,6 +217,11 @@ class Language
             $dict1Uri,
             $dict2Uri,
             $translatorUri,
+            $dict1PopUp,
+            $dict2PopUp,
+            $translatorPopUp,
+            $sourceLang,
+            $targetLang,
             $exportTemplate,
             $textSize,
             $characterSubstitutions,
@@ -474,7 +509,13 @@ class Language
     public function getDictionaryUrl(string $word, int $dictNum = 1): string
     {
         $uri = $dictNum === 2 ? $this->dict2Uri : $this->dict1Uri;
-        return str_replace('###', urlencode($word), $uri);
+        $encodedWord = $word === '' ? '+' : urlencode($word);
+        // Only support lwt_term placeholder; ### is no longer supported
+        if (str_contains($uri, 'lwt_term')) {
+            return str_replace('lwt_term', $encodedWord, $uri);
+        }
+        // No placeholder - append word to URL
+        return $uri . $encodedWord;
     }
 
     /**
@@ -486,7 +527,13 @@ class Language
      */
     public function getTranslatorUrl(string $word): string
     {
-        return str_replace('###', urlencode($word), $this->translatorUri);
+        $encodedWord = $word === '' ? '+' : urlencode($word);
+        // Only support lwt_term placeholder; ### is no longer supported
+        if (str_contains($this->translatorUri, 'lwt_term')) {
+            return str_replace('lwt_term', $encodedWord, $this->translatorUri);
+        }
+        // No placeholder - append word to URL
+        return $this->translatorUri . $encodedWord;
     }
 
     /**
@@ -511,6 +558,11 @@ class Language
             'dict1uri'           => $this->dict1Uri,
             'dict2uri'           => $this->dict2Uri,
             'translator'         => $this->translatorUri,
+            'dict1popup'         => $this->dict1PopUp,
+            'dict2popup'         => $this->dict2PopUp,
+            'translatorpopup'    => $this->translatorPopUp,
+            'sourcelang'         => $this->sourceLang,
+            'targetlang'         => $this->targetLang,
             'exporttemplate'     => $this->exportTemplate,
             'textsize'           => $this->textSize,
             'charactersubst'     => $this->characterSubstitutions,
@@ -551,6 +603,86 @@ class Language
     public function translatorUri(): string
     {
         return $this->translatorUri;
+    }
+
+    /**
+     * Check if dictionary 1 should open in a popup window.
+     *
+     * @return bool
+     */
+    public function isDict1PopUp(): bool
+    {
+        return $this->dict1PopUp;
+    }
+
+    /**
+     * Check if dictionary 2 should open in a popup window.
+     *
+     * @return bool
+     */
+    public function isDict2PopUp(): bool
+    {
+        return $this->dict2PopUp;
+    }
+
+    /**
+     * Check if translator should open in a popup window.
+     *
+     * @return bool
+     */
+    public function isTranslatorPopUp(): bool
+    {
+        return $this->translatorPopUp;
+    }
+
+    /**
+     * Get the source language code (BCP 47).
+     *
+     * @return string|null Source language code or null if not set
+     */
+    public function sourceLang(): ?string
+    {
+        return $this->sourceLang;
+    }
+
+    /**
+     * Get the target language code (BCP 47).
+     *
+     * @return string|null Target language code or null if not set
+     */
+    public function targetLang(): ?string
+    {
+        return $this->targetLang;
+    }
+
+    /**
+     * Configure popup settings for dictionaries.
+     *
+     * @param bool $dict1     Dictionary 1 opens in popup
+     * @param bool $dict2     Dictionary 2 opens in popup
+     * @param bool $translator Translator opens in popup
+     *
+     * @return void
+     */
+    public function configureDictionaryPopups(bool $dict1, bool $dict2, bool $translator): void
+    {
+        $this->dict1PopUp = $dict1;
+        $this->dict2PopUp = $dict2;
+        $this->translatorPopUp = $translator;
+    }
+
+    /**
+     * Configure translator language codes.
+     *
+     * @param string|null $sourceLang Source language code (BCP 47)
+     * @param string|null $targetLang Target language code (BCP 47)
+     *
+     * @return void
+     */
+    public function configureTranslatorLanguages(?string $sourceLang, ?string $targetLang): void
+    {
+        $this->sourceLang = $sourceLang !== '' ? $sourceLang : null;
+        $this->targetLang = $targetLang !== '' ? $targetLang : null;
     }
 
     public function exportTemplate(): string

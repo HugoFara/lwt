@@ -91,8 +91,8 @@ describe('dictionary.ts', () => {
       expect(result).toBe('http://dict.com/lookup?q=hello');
     });
 
-    it('replaces ### with encoded term', () => {
-      const result = createTheDictUrl('http://dict.com/###/translate', 'test word');
+    it('replaces lwt_term with encoded term', () => {
+      const result = createTheDictUrl('http://dict.com/lwt_term/translate', 'test word');
       expect(result).toBe('http://dict.com/test%20word/translate');
     });
 
@@ -102,27 +102,24 @@ describe('dictionary.ts', () => {
     });
 
     it('replaces placeholder with + when term is empty', () => {
-      const result = createTheDictUrl('http://dict.com/###', '');
+      const result = createTheDictUrl('http://dict.com/lwt_term', '');
       expect(result).toBe('http://dict.com/+');
     });
 
     it('handles URL encoding for special characters', () => {
-      const result = createTheDictUrl('http://dict.com/###', 'café');
+      const result = createTheDictUrl('http://dict.com/lwt_term', 'café');
       expect(result).toBe('http://dict.com/caf%C3%A9');
     });
 
     it('trims whitespace from URL and term', () => {
-      const result = createTheDictUrl('  http://dict.com/###  ', '  hello  ');
+      const result = createTheDictUrl('  http://dict.com/lwt_term  ', '  hello  ');
       expect(result).toBe('http://dict.com/hello');
     });
 
-    it('handles double ### for deprecated encoding format', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-      const result = createTheDictUrl('http://dict.com/###UTF-8###/lookup', 'test');
-
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('UTF-8'));
-      expect(result).toContain('test');
+    it('handles lwt_term in URL path', () => {
+      // Simple replacement test - lwt_term is replaced with encoded term
+      const result = createTheDictUrl('http://dict.com/search/lwt_term/lookup', 'test');
+      expect(result).toBe('http://dict.com/search/test/lookup');
     });
   });
 
@@ -141,39 +138,39 @@ describe('dictionary.ts', () => {
       expect(result).toBe('');
     });
 
-    it('creates link with popup for URL starting with *', () => {
-      const result = createTheDictLink('*http://dict.com/###', 'hello', 'Dict1', '');
+    it('creates link with popup when popup=true', () => {
+      const result = createTheDictLink('http://dict.com/lwt_term', 'hello', 'Dict1', '', true);
       expect(result).toContain('data-action="dict-popup"');
       expect(result).toContain('data-url="http://dict.com/hello"');
       expect(result).toContain('Dict1');
       expect(result).toContain('class="click"');
     });
 
-    it('creates regular link for non-popup URL', () => {
-      const result = createTheDictLink('http://dict.com/###', 'hello', 'Dict2', '');
+    it('creates regular link when popup=false', () => {
+      const result = createTheDictLink('http://dict.com/lwt_term', 'hello', 'Dict2', '', false);
       expect(result).toContain('<a href=');
       expect(result).toContain('Dict2');
       expect(result).toContain('target="ru"');
     });
 
     it('includes txtbefore in output', () => {
-      const result = createTheDictLink('http://dict.com/###', 'hello', 'Dict', 'Look up:');
+      const result = createTheDictLink('http://dict.com/lwt_term', 'hello', 'Dict', 'Look up:');
       expect(result).toContain('Look up:');
     });
 
-    it('detects lwt_popup parameter for popup mode', () => {
+    it('defaults to non-popup mode when popup not specified', () => {
       const result = createTheDictLink(
-        'http://dict.com?lwt_popup=1&q=###',
+        'http://dict.com?q=lwt_term',
         'hello',
         'Dict',
         ''
       );
-      expect(result).toContain('data-action="dict-popup"');
-      expect(result).toContain('data-url=');
+      expect(result).toContain('<a href=');
+      expect(result).toContain('target="ru"');
     });
 
     it('escapes special chars in popup data-url', () => {
-      const result = createTheDictLink('*http://dict.com/###', "it's", 'Dict', '');
+      const result = createTheDictLink('http://dict.com/lwt_term', "it's", 'Dict', '', true);
       expect(result).toContain('data-action="dict-popup"');
       // The apostrophe should be URL-encoded
       expect(result).toContain("it's");
@@ -195,17 +192,15 @@ describe('dictionary.ts', () => {
       expect(result).toBe('');
     });
 
-    it('creates popup link for URL starting with *', () => {
-      const result = createSentLookupLink(5, 10, '*http://translate.com', 'Trans');
+    it('creates popup link when popup=true', () => {
+      const result = createSentLookupLink(5, 10, 'http://translate.com', 'Trans', true);
       expect(result).toContain('data-action="dict-popup"');
-      // Now uses the translator URL directly instead of trans.php
       expect(result).toContain('http://translate.com');
     });
 
-    it('creates frame link for external URL without *', () => {
-      const result = createSentLookupLink(3, 7, 'http://translate.com', 'Translate');
+    it('creates frame link when popup=false', () => {
+      const result = createSentLookupLink(3, 7, 'http://translate.com', 'Translate', false);
       expect(result).toContain('<a href=');
-      // Now uses the translator URL directly instead of trans.php
       expect(result).toContain('http://translate.com');
       expect(result).toContain('target="ru"');
     });
@@ -218,11 +213,10 @@ describe('dictionary.ts', () => {
       expect(result).toContain('data-action="dict-frame"');
     });
 
-    it('detects lwt_popup parameter', () => {
-      const result = createSentLookupLink(
-        1, 1, 'http://translate.com?lwt_popup=1', 'Trans'
-      );
-      expect(result).toContain('data-action="dict-popup"');
+    it('defaults to non-popup when popup not specified', () => {
+      const result = createSentLookupLink(1, 1, 'http://translate.com', 'Trans');
+      expect(result).toContain('<a href=');
+      expect(result).toContain('target="ru"');
     });
   });
 
@@ -253,8 +247,8 @@ describe('dictionary.ts', () => {
       expect(result).toBe('fr');
     });
 
-    it('handles URL starting with *', () => {
-      const result = getLangFromDict('*http://translate.google.com?sl=de');
+    it('handles standard Google Translate URL', () => {
+      const result = getLangFromDict('http://translate.google.com?sl=de');
       expect(result).toBe('de');
     });
 
@@ -282,7 +276,7 @@ describe('dictionary.ts', () => {
 
   describe('translateSentence', () => {
     it('does nothing when sentctl is undefined', () => {
-      translateSentence('http://translate.com/###', undefined);
+      translateSentence('http://translate.com/lwt_term', undefined);
 
       expect(frameManagement.loadDictionaryFrame).not.toHaveBeenCalled();
     });
@@ -300,7 +294,7 @@ describe('dictionary.ts', () => {
       const textarea = document.createElement('textarea');
       textarea.value = 'Hello {world}';
 
-      translateSentence('http://translate.com/###', textarea);
+      translateSentence('http://translate.com/lwt_term', textarea);
 
       expect(frameManagement.loadDictionaryFrame).toHaveBeenCalledWith(
         'http://translate.com/Hello%20world'
@@ -316,7 +310,7 @@ describe('dictionary.ts', () => {
     it('does nothing when sentctl is undefined', () => {
       const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
 
-      translateSentence2('http://translate.com/###', undefined);
+      translateSentence2('http://translate.com/lwt_term', undefined);
 
       expect(openSpy).not.toHaveBeenCalled();
     });
@@ -326,7 +320,7 @@ describe('dictionary.ts', () => {
       const textarea = document.createElement('textarea');
       textarea.value = 'Test sentence';
 
-      translateSentence2('http://translate.com/###', textarea);
+      translateSentence2('http://translate.com/lwt_term', textarea);
 
       expect(openSpy).toHaveBeenCalledWith(
         'http://translate.com/Test%20sentence',
@@ -342,7 +336,7 @@ describe('dictionary.ts', () => {
 
   describe('translateWord', () => {
     it('does nothing when wordctl is undefined', () => {
-      translateWord('http://dict.com/###', undefined);
+      translateWord('http://dict.com/lwt_term', undefined);
 
       expect(frameManagement.loadDictionaryFrame).not.toHaveBeenCalled();
     });
@@ -351,7 +345,7 @@ describe('dictionary.ts', () => {
       const input = document.createElement('input');
       input.value = 'bonjour';
 
-      translateWord('http://dict.com/###', input);
+      translateWord('http://dict.com/lwt_term', input);
 
       expect(frameManagement.loadDictionaryFrame).toHaveBeenCalledWith(
         'http://dict.com/bonjour'
@@ -367,7 +361,7 @@ describe('dictionary.ts', () => {
     it('does nothing when wordctl is undefined', () => {
       const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
 
-      translateWord2('http://dict.com/###', undefined);
+      translateWord2('http://dict.com/lwt_term', undefined);
 
       expect(openSpy).not.toHaveBeenCalled();
     });
@@ -377,7 +371,7 @@ describe('dictionary.ts', () => {
       const input = document.createElement('input');
       input.value = 'hello';
 
-      translateWord2('http://dict.com/###', input);
+      translateWord2('http://dict.com/lwt_term', input);
 
       expect(openSpy).toHaveBeenCalledWith(
         'http://dict.com/hello',
@@ -395,7 +389,7 @@ describe('dictionary.ts', () => {
     it('opens popup with word directly', () => {
       const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
 
-      translateWord3('http://dict.com/###', 'world');
+      translateWord3('http://dict.com/lwt_term', 'world');
 
       expect(openSpy).toHaveBeenCalledWith(
         'http://dict.com/world',
@@ -435,7 +429,7 @@ describe('dictionary.ts', () => {
         <input type="text" id="wordInput" value="hola" />
         <button
           data-action="translate-word"
-          data-url="http://dict.com/###"
+          data-url="http://dict.com/lwt_term"
           data-wordctl="wordInput"
         >Translate</button>
       `;
@@ -454,7 +448,7 @@ describe('dictionary.ts', () => {
         <input type="text" id="wordInput2" value="guten" />
         <button
           data-action="translate-word-popup"
-          data-url="http://dict.com/###"
+          data-url="http://dict.com/lwt_term"
           data-wordctl="wordInput2"
         >Translate Popup</button>
       `;
@@ -472,7 +466,7 @@ describe('dictionary.ts', () => {
       document.body.innerHTML = `
         <button
           data-action="translate-word-direct"
-          data-url="http://dict.com/###"
+          data-url="http://dict.com/lwt_term"
           data-word="ciao"
         >Direct</button>
       `;

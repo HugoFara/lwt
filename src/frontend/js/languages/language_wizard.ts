@@ -171,12 +171,16 @@ export const languageWizard = {
     // Check for language-specific UI changes (e.g., Japanese regexp field)
     languageForm.checkLanguageChanged(learningLgName);
 
-    // Set dictionary URL (Glosbe)
+    // Set dictionary URL (Glosbe) and popup checkbox
     setInputValue(
       'input[name="LgDict1URI"]',
-      'https://de.glosbe.com/' + learningLg[0] + '/' + knownLg[0] + '/lwt_term?lwt_popup=1'
+      'https://de.glosbe.com/' + learningLg[0] + '/' + knownLg[0] + '/lwt_term'
     );
     setChecked('input[name="LgDict1PopUp"]', true);
+
+    // Set source/target language codes
+    setInputValue('input[name="LgSourceLang"]', learningLg[1]);
+    setInputValue('input[name="LgTargetLang"]', knownLg[1]);
 
     // Set translator URL
     if (window.GGTRANSLATE) {

@@ -446,7 +446,7 @@ function createTestStore(): TestStoreState {
 
       if (!template) return '#';
 
-      return template.replace('###', encodeURIComponent(this.currentWord.text));
+      return template.replace('lwt_term', encodeURIComponent(this.currentWord.text));
     },
 
     /**
