@@ -71,22 +71,6 @@
             </errorLevel>
         </PossiblyUnusedMethod>
 
-        <!-- Properties set from database results or declared for future use -->
-        <PossiblyUnusedProperty>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Core/Entity" />
-                <directory name="src/backend/Controllers" />
-            </errorLevel>
-        </PossiblyUnusedProperty>
-
-        <!-- Classes instantiated by router or kept for API completeness -->
-        <UnusedClass>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Controllers" />
-                <directory name="src/backend/Core/Entity" />
-            </errorLevel>
-        </UnusedClass>
-
         <!-- Views call global functions that may be dynamically loaded -->
         <UndefinedFunction>
             <errorLevel type="suppress">
