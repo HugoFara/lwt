@@ -42,7 +42,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="fromAnn" value="<?php echo $fromAnn; ?>" />
 <input type="hidden" name="WoID" value="<?php echo $wid; ?>" />
 <input type="hidden" name="WoOldStatus" value="<?php echo $wordData['WoStatus']; ?>" />
-<input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($termlc ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+<input type="hidden" name="WoTextLC" value="<?php echo htmlspecialchars($termlc, ENT_QUOTES, 'UTF-8'); ?>" />
 <input type="hidden" name="tid" value="<?php echo InputValidator::getString('tid'); ?>" />
 <input type="hidden" name="ord" value="<?php echo InputValidator::getString('ord'); ?>" />
 <table class="tab2" cellspacing="0" cellpadding="5">
@@ -52,7 +52,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp"
            data_info="Term" type="text"
            name="WoText" id="WoText"
-           value="<?php echo htmlspecialchars($term ?? '', ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
+           value="<?php echo htmlspecialchars($term, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
            <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
        </td>
    </tr>
@@ -63,7 +63,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            <textarea name="WoTranslation"
            class="setfocus textarea-noreturn checklength checkoutsidebmp"
            data_maxlength="500" data_info="Translation" cols="35"
-           rows="3"><?php echo htmlspecialchars($transl ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+           rows="3"><?php echo htmlspecialchars($transl, ENT_QUOTES, 'UTF-8'); ?></textarea>
        </td>
    </tr>
    <tr>
@@ -87,7 +87,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
            <textarea <?php echo $scrdir; ?> name="WoSentence" id="WoSentence"
            class="textarea-noreturn checklength checkoutsidebmp"
            data_maxlength="1000" data_info="Sentence" cols="35"
-           rows="3"><?php echo htmlspecialchars($sentence ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+           rows="3"><?php echo htmlspecialchars($sentence, ENT_QUOTES, 'UTF-8'); ?></textarea>
        </td>
    </tr>
    <tr>

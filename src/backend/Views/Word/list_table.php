@@ -160,14 +160,14 @@ foreach ($words as $record):
         ?>><strong><?php echo htmlspecialchars($record['WoText'] ?? '', ENT_QUOTES, 'UTF-8'); ?></strong></span>
         <?php
         $romanization = $record['WoRomanization'] != ''
-            ? htmlspecialchars(ExportService::replaceTabNewline($record['WoRomanization']) ?? '', ENT_QUOTES, 'UTF-8')
+            ? htmlspecialchars(ExportService::replaceTabNewline($record['WoRomanization']), ENT_QUOTES, 'UTF-8')
             : '*';
         ?>
         <span class="has-text-grey"> / </span>
         <span id="roman<?php echo $record['WoID']; ?>" class="edit_area clickedit has-text-grey-dark"><?php echo $romanization; ?></span>
     </td>
     <td>
-        <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation']) ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
+        <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation']), ENT_QUOTES, 'UTF-8'); ?></span>
         <?php echo TagHelper::renderInline($record['taglist'] ?? ''); ?>
     </td>
     <td class="has-text-centered">
@@ -175,8 +175,8 @@ foreach ($words as $record):
             ? IconHelper::render('circle-check', ['title' => htmlspecialchars($record['WoSentence'] ?? '', ENT_QUOTES, 'UTF-8'), 'alt' => 'Yes', 'class' => 'has-text-success'])
             : IconHelper::render('circle-x', ['title' => '(No valid sentence)', 'alt' => 'No', 'class' => 'has-text-danger'])); ?>
     </td>
-    <td class="has-text-centered" title="<?php echo htmlspecialchars($statusName ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-        <span class="tag is-light"><?php echo htmlspecialchars($statusAbbr ?? '', ENT_QUOTES, 'UTF-8'); ?><?php echo ($record['WoStatus'] < 98 ? '/' . $days : ''); ?></span>
+    <td class="has-text-centered" title="<?php echo htmlspecialchars($statusName, ENT_QUOTES, 'UTF-8'); ?>">
+        <span class="tag is-light"><?php echo htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8'); ?><?php echo ($record['WoStatus'] < 98 ? '/' . $days : ''); ?></span>
     </td>
     <td class="has-text-centered" style="white-space: nowrap;"><?php echo $scoreHtml; ?></td>
     <?php if ($currentsort == 7): ?>
@@ -223,7 +223,7 @@ foreach ($words as $record):
             <div class="level-right">
                 <div class="level-item">
                     <div class="tags has-addons mb-0">
-                        <span class="tag is-light"><?php echo htmlspecialchars($statusAbbr ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
+                        <span class="tag is-light"><?php echo htmlspecialchars($statusAbbr, ENT_QUOTES, 'UTF-8'); ?></span>
                         <span class="tag <?php echo $scoreClass; ?> is-light"><?php echo $scoreValue; ?>%</span>
                     </div>
                 </div>
@@ -232,12 +232,12 @@ foreach ($words as $record):
 
         <?php if ($record['WoRomanization'] != ''): ?>
         <p class="has-text-grey is-size-7 mb-1">
-            <span id="roman<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoRomanization']) ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
+            <span id="roman<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoRomanization']), ENT_QUOTES, 'UTF-8'); ?></span>
         </p>
         <?php endif; ?>
 
         <p class="mb-2">
-            <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation']) ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
+            <span id="trans<?php echo $record['WoID']; ?>" class="edit_area clickedit"><?php echo htmlspecialchars(ExportService::replaceTabNewline($record['WoTranslation']), ENT_QUOTES, 'UTF-8'); ?></span>
         </p>
 
         <div class="is-flex is-justify-content-space-between is-align-items-center">

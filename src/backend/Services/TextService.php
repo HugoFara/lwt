@@ -291,7 +291,7 @@ class TextService
 
         $message = "{$deleted} / {$insertedMsg} / Sentences added: {$sentenceCount} / Text items added: {$itemCount}";
 
-        return ['message' => $message, 'textId' => $textId];
+        return ['message' => $message, 'textId' => (int) $textId];
     }
 
     /**
@@ -1405,7 +1405,7 @@ class TextService
     /**
      * Get language data for Google Translate URIs.
      *
-     * @return array Mapping of language ID to language code
+     * @return array<int, string> Mapping of language ID to language code
      */
     public function getLanguageTranslateUris(): array
     {
@@ -1415,7 +1415,7 @@ class TextService
         $res = Connection::query($sql);
         $result = [];
         while ($record = mysqli_fetch_assoc($res)) {
-            $result[$record['LgID']] = $record['LgGoogleTranslateURI'];
+            $result[(int) $record['LgID']] = (string) $record['LgGoogleTranslateURI'];
         }
         mysqli_free_result($res);
         return $result;
@@ -1752,7 +1752,7 @@ class TextService
         $res = Connection::query($sql);
         $result = [];
         while ($record = mysqli_fetch_assoc($res)) {
-            $result[$record['LgID']] = UrlUtilities::langFromDict($record['LgGoogleTranslateURI']);
+            $result[(int) $record['LgID']] = UrlUtilities::langFromDict((string) $record['LgGoogleTranslateURI']);
         }
         mysqli_free_result($res);
         return $result;

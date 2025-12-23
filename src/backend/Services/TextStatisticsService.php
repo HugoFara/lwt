@@ -43,7 +43,7 @@ class TextStatisticsService
      *
      * @param string $textsId Texts ID separated by comma
      *
-     * @return array{total: array, expr: array, stat: array, totalu: array, expru: array, statu: array}
+     * @return array{total: array<int, int>, expr: array<int, int>, stat: array<int, array<int, int>>, totalu: array<int, int>, expru: array<int, int>, statu: array<int, array<int, int>>}
      *               Total number of words, number of expressions, statistics, total unique,
      *               number of unique expressions, unique statistics
      */
@@ -70,8 +70,9 @@ class TextStatisticsService
             GROUP BY Ti2TxID";
         $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
-            $r["total"][$record['text']] = $record['total'];
-            $r["totalu"][$record['text']] = $record['unique_cnt'];
+            $textId = (int) $record['text'];
+            $r["total"][$textId] = (int) $record['total'];
+            $r["totalu"][$textId] = (int) $record['unique_cnt'];
         }
         mysqli_free_result($res);
 
@@ -84,8 +85,9 @@ class TextStatisticsService
             GROUP BY Ti2TxID";
         $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
-            $r["expr"][$record['text']] = $record['total'];
-            $r["expru"][$record['text']] = $record['unique_cnt'];
+            $textId = (int) $record['text'];
+            $r["expr"][$textId] = (int) $record['total'];
+            $r["expru"][$textId] = (int) $record['unique_cnt'];
         }
         mysqli_free_result($res);
 
@@ -101,8 +103,10 @@ class TextStatisticsService
             " GROUP BY Ti2TxID, WoStatus";
         $res = Connection::query($sql);
         while ($record = mysqli_fetch_assoc($res)) {
-            $r["stat"][$record['text']][$record['status']] = $record['total'];
-            $r["statu"][$record['text']][$record['status']] = $record['unique_cnt'];
+            $textId = (int) $record['text'];
+            $status = (int) $record['status'];
+            $r["stat"][$textId][$status] = (int) $record['total'];
+            $r["statu"][$textId][$status] = (int) $record['unique_cnt'];
         }
         mysqli_free_result($res);
 

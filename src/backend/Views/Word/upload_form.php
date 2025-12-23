@@ -25,10 +25,10 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
 use Lwt\View\Helper\PageLayoutHelper;
 
-/** @var string|null $currentLanguage */
+/** @var string $currentLanguage */
 /** @var array $languages */
 
-$langToUse = isset($currentLanguage) ? $currentLanguage : Settings::get('currentlanguage');
+$langToUse = $currentLanguage;
 
 // Column options for reuse
 $columnOptions = [

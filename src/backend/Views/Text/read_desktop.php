@@ -92,7 +92,7 @@ use Lwt\View\Helper\PageLayoutHelper;
   <!-- Audio player (if media available) -->
   <?php if (isset($media) && $media !== ''): ?>
   <div class="box py-2 px-4 mb-0" style="border-radius: 0;">
-    <?php (new MediaService())->renderMediaPlayer($media, (int)($audioPosition ?? 0)); ?>
+    <?php (new MediaService())->renderMediaPlayer($media, $audioPosition); ?>
   </div>
   <?php endif; ?>
 
@@ -204,5 +204,5 @@ use Lwt\View\Helper\PageLayoutHelper;
 
 <script type="application/json" id="text-reader-config"><?php echo json_encode([
     'textId' => (int) $textId,
-    'langId' => (int) ($langId ?? 0),
+    'langId' => $langId,
 ]); ?></script>

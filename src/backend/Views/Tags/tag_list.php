@@ -64,7 +64,7 @@ echo PageLayoutHelper::buildActionCard([
                 <input type="text"
                        name="query"
                        class="input"
-                       value="<?php echo htmlspecialchars($currentQuery ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       value="<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>"
                        placeholder="Search tags..."
                        disabled />
                 <span class="icon is-left">

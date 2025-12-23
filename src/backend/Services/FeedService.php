@@ -159,7 +159,7 @@ class FeedService
      */
     public function createFeed(array $data): int
     {
-        return QueryBuilder::table('newsfeeds')
+        return (int) QueryBuilder::table('newsfeeds')
             ->insertPrepared([
                 'NfLgID' => $data['NfLgID'],
                 'NfName' => $data['NfName'],
@@ -527,7 +527,7 @@ class FeedService
             . UserScopedQuery::forTablePrepared('tags2', $bindings);
         Connection::preparedExecute($sql, $bindings);
 
-        return $textId;
+        return (int) $textId;
     }
 
     /**

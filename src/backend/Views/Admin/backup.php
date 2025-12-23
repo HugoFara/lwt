@@ -24,7 +24,7 @@ use Lwt\Core\Globals;
 use Lwt\View\Helper\IconHelper;
 
 $escapedDbName = htmlspecialchars(Globals::getDatabaseName(), ENT_QUOTES, 'UTF-8');
-$escapedIniFile = htmlspecialchars(php_ini_loaded_file() ?? '', ENT_QUOTES, 'UTF-8');
+$escapedIniFile = htmlspecialchars(php_ini_loaded_file() ?: '', ENT_QUOTES, 'UTF-8');
 $postMaxSize = ini_get('post_max_size');
 $uploadMaxFilesize = ini_get('upload_max_filesize');
 ?>

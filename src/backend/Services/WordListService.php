@@ -434,7 +434,7 @@ class WordListService
 
         Maintenance::adjustAutoIncrement('words', 'WoID');
 
-        return $message;
+        return (string) $message;
     }
 
     /**
@@ -453,7 +453,7 @@ class WordListService
 
         if ($relative && $newStatus > 0) {
             // Status +1
-            return Connection::execute(
+            return (string) Connection::execute(
                 'update words
                 set WoStatus=WoStatus+1, WoStatusChanged = NOW(),' . $scoreUpdate . '
                 where WoStatus in (1,2,3,4) and WoID in ' . $idList,
@@ -461,7 +461,7 @@ class WordListService
             );
         } elseif ($relative && $newStatus < 0) {
             // Status -1
-            return Connection::execute(
+            return (string) Connection::execute(
                 'update words
                 set WoStatus=WoStatus-1, WoStatusChanged = NOW(),' . $scoreUpdate . '
                 where WoStatus in (2,3,4,5) and WoID in ' . $idList,
@@ -470,7 +470,7 @@ class WordListService
         }
 
         // Absolute status
-        return Connection::execute(
+        return (string) Connection::execute(
             'update words
             set WoStatus=' . $newStatus . ', WoStatusChanged = NOW(),' . $scoreUpdate . '
             where WoID in ' . $idList,
@@ -487,7 +487,7 @@ class WordListService
      */
     public function updateStatusDateByIdList(string $idList): string
     {
-        return Connection::execute(
+        return (string) Connection::execute(
             'update words
             set WoStatusChanged = NOW(),' . WordStatusService::makeScoreRandomInsertUpdate('u') . '
             where WoID in ' . $idList,
@@ -504,7 +504,7 @@ class WordListService
      */
     public function deleteSentencesByIdList(string $idList): string
     {
-        return Connection::execute(
+        return (string) Connection::execute(
             'update words
             set WoSentence = NULL
             where WoID in ' . $idList,
@@ -521,7 +521,7 @@ class WordListService
      */
     public function toLowercaseByIdList(string $idList): string
     {
-        return Connection::execute(
+        return (string) Connection::execute(
             'update words
             set WoText = WoTextLC
             where WoID in ' . $idList,
@@ -538,7 +538,7 @@ class WordListService
      */
     public function capitalizeByIdList(string $idList): string
     {
-        return Connection::execute(
+        return (string) Connection::execute(
             'update words
             set WoText = CONCAT(
                 UPPER(LEFT(WoTextLC,1)),SUBSTRING(WoTextLC,2)

@@ -103,12 +103,6 @@
             </errorLevel>
         </RedundantCondition>
 
-        <TypeDoesNotContainNull>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-            </errorLevel>
-        </TypeDoesNotContainNull>
-
         <TypeDoesNotContainType>
             <errorLevel type="suppress">
                 <directory name="src/backend/Views" />
@@ -137,12 +131,6 @@
                 <directory name="src/backend/Services" />
             </errorLevel>
         </InvalidReturnType>
-
-        <InvalidReturnStatement>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </InvalidReturnStatement>
 
         <!-- Foreach values used for iteration control only -->
         <UnusedForeachValue>

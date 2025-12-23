@@ -27,7 +27,7 @@ use Lwt\Services\TagService;
 use Lwt\View\Helper\StatusHelper;
 
 ?>
-<p>OK: <?php echo htmlspecialchars($message ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+<p>OK: <?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></p>
 
 <script type="application/json" data-lwt-edit-term-result-config>
 <?php

@@ -46,7 +46,7 @@ use Lwt\View\Helper\IconHelper;
                 <input type="text"
                        name="query"
                        class="input"
-                       value="<?php echo htmlspecialchars($currentquery ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                       value="<?php echo htmlspecialchars($currentquery, ENT_QUOTES, 'UTF-8'); ?>"
                        placeholder="Search terms... (e.g., lang:Spanish status:learning verb)"
                        disabled />
                 <span class="icon is-left">

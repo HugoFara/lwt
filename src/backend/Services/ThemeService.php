@@ -110,6 +110,17 @@ class ThemeService
             return $defaults;
         }
 
-        return array_merge($defaults, $metadata);
+        return [
+            'name' => isset($metadata['name']) && is_string($metadata['name'])
+                ? $metadata['name'] : $defaults['name'],
+            'description' => isset($metadata['description']) && is_string($metadata['description'])
+                ? $metadata['description'] : $defaults['description'],
+            'mode' => isset($metadata['mode']) && is_string($metadata['mode'])
+                ? $metadata['mode'] : $defaults['mode'],
+            'highlighting' => isset($metadata['highlighting']) && is_string($metadata['highlighting'])
+                ? $metadata['highlighting'] : $defaults['highlighting'],
+            'wordBreaking' => isset($metadata['wordBreaking']) && is_string($metadata['wordBreaking'])
+                ? $metadata['wordBreaking'] : $defaults['wordBreaking'],
+        ];
     }
 }

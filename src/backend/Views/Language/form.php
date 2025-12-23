@@ -30,7 +30,7 @@ use Lwt\View\Helper\IconHelper;
     'sourceLg' => $sourceLg,
     'targetLg' => $targetLg,
     'languageDefs' => \Lwt\Services\LanguageDefinitions::getAll(),
-    'allLanguages' => $allLanguages ?? []
+    'allLanguages' => $allLanguages
 ]); ?>
 </script>
 
