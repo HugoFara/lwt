@@ -147,20 +147,6 @@
             </errorLevel>
         </UndefinedPropertyFetch>
 
-        <!-- Dynamic array access patterns -->
-        <InvalidArrayOffset>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </InvalidArrayOffset>
-
-        <!-- Unused function calls that have side effects -->
-        <UnusedFunctionCall>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </UnusedFunctionCall>
-
         <!-- Var annotations for clarity in views/controllers -->
         <UnnecessaryVarAnnotation>
             <errorLevel type="suppress">
