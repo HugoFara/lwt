@@ -192,15 +192,21 @@ export function handleTextSelection(container: HTMLElement): void {
 
 /**
  * Set up multi-word selection on a container.
- * Listens for mouseup events and checks for text selection.
+ * Listens for mouseup and touchend events and checks for text selection.
  *
  * @param container The text container element (#thetext)
  */
 export function setupMultiWordSelection(container: HTMLElement): void {
-  container.addEventListener('mouseup', () => {
+  const handler = () => {
     // Small delay to ensure selection is complete
     setTimeout(() => handleTextSelection(container), 10);
-  });
+  };
+
+  // Desktop: mouseup fires after click-and-drag selection
+  container.addEventListener('mouseup', handler);
+
+  // Mobile: touchend fires after touch selection
+  container.addEventListener('touchend', handler);
 }
 
 // Legacy exports for backwards compatibility
