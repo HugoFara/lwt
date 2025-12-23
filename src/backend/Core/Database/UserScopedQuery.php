@@ -64,6 +64,7 @@ class UserScopedQuery
         'tags2' => 'T2UsID',
         'newsfeeds' => 'NfUsID',
         'settings' => 'StUsID',
+        'local_dictionaries' => 'LdUsID',
     ];
 
     /**

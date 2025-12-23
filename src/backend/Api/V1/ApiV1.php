@@ -40,6 +40,7 @@ use Lwt\Api\V1\Handlers\FeedHandler;
 use Lwt\Api\V1\Handlers\ImportHandler;
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
 use Lwt\Api\V1\Handlers\LanguageHandler;
+use Lwt\Api\V1\Handlers\LocalDictionaryHandler;
 use Lwt\Api\V1\Handlers\MediaHandler;
 use Lwt\Api\V1\Handlers\ReviewHandler;
 use Lwt\Api\V1\Handlers\SettingsHandler;
@@ -61,6 +62,7 @@ class ApiV1
     private ImportHandler $importHandler;
     private ImprovedTextHandler $improvedTextHandler;
     private LanguageHandler $languageHandler;
+    private LocalDictionaryHandler $localDictionaryHandler;
     private MediaHandler $mediaHandler;
     private ReviewHandler $reviewHandler;
     private SettingsHandler $settingsHandler;
@@ -86,6 +88,7 @@ class ApiV1
         $this->importHandler = new ImportHandler();
         $this->improvedTextHandler = new ImprovedTextHandler();
         $this->languageHandler = new LanguageHandler();
+        $this->localDictionaryHandler = new LocalDictionaryHandler();
         $this->mediaHandler = new MediaHandler();
         $this->reviewHandler = new ReviewHandler();
         $this->settingsHandler = new SettingsHandler();
@@ -243,6 +246,10 @@ class ApiV1
                 $this->handleFeedsGet($fragments, $params);
                 break;
 
+            case 'local-dictionaries':
+                $this->handleLocalDictionariesGet($fragments, $params);
+                break;
+
             default:
                 Response::error('Endpoint Not Found: ' . $fragments[0], 404);
         }
@@ -282,6 +289,10 @@ class ApiV1
 
             case 'feeds':
                 $this->handleFeedsPost($fragments, $params);
+                break;
+
+            case 'local-dictionaries':
+                $this->handleLocalDictionariesPost($fragments, $params);
                 break;
 
             default:
@@ -781,6 +792,10 @@ class ApiV1
                 $this->handleFeedsPut($fragments, $params);
                 break;
 
+            case 'local-dictionaries':
+                $this->handleLocalDictionariesPut($fragments, $params);
+                break;
+
             default:
                 Response::error('Endpoint Not Found On PUT: ' . $fragments[0], 404);
         }
@@ -930,6 +945,10 @@ class ApiV1
                 $this->handleFeedsDelete($fragments, $params);
                 break;
 
+            case 'local-dictionaries':
+                $this->handleLocalDictionariesDelete($fragments);
+                break;
+
             default:
                 Response::error('Endpoint Not Found On DELETE: ' . $fragments[0], 404);
         }
@@ -990,6 +1009,129 @@ class ApiV1
 
         $termId = (int)$fragments[1];
         Response::success($this->termHandler->formatDeleteTerm($termId));
+    }
+
+    // =========================================================================
+    // Local Dictionary Request Handlers
+    // =========================================================================
+
+    /**
+     * Handle GET requests for local dictionaries.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Query parameters
+     */
+    private function handleLocalDictionariesGet(array $fragments, array $params): void
+    {
+        // GET /local-dictionaries/lookup - look up a term
+        if (($fragments[1] ?? '') === 'lookup') {
+            $langId = (int)($params['lang_id'] ?? 0);
+            $term = $params['term'] ?? '';
+
+            if ($langId <= 0) {
+                Response::error('lang_id is required', 400);
+            }
+            if (empty($term)) {
+                Response::error('term is required', 400);
+            }
+
+            Response::success($this->localDictionaryHandler->formatLookup($langId, $term));
+            return;
+        }
+
+        // GET /local-dictionaries/entries/{dictId} - get entries for dictionary
+        if (($fragments[1] ?? '') === 'entries' && isset($fragments[2]) && ctype_digit($fragments[2])) {
+            Response::success($this->localDictionaryHandler->formatGetEntries((int)$fragments[2], $params));
+            return;
+        }
+
+        // GET /local-dictionaries/{id} - get single dictionary
+        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
+            Response::success($this->localDictionaryHandler->formatGetDictionary((int)$fragments[1]));
+            return;
+        }
+
+        // GET /local-dictionaries?lang_id=N - list dictionaries for language
+        $langId = (int)($params['lang_id'] ?? 0);
+        if ($langId <= 0) {
+            Response::error('lang_id is required', 400);
+        }
+
+        Response::success($this->localDictionaryHandler->formatGetDictionaries($langId));
+    }
+
+    /**
+     * Handle POST requests for local dictionaries.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    POST parameters
+     */
+    private function handleLocalDictionariesPost(array $fragments, array $params): void
+    {
+        // POST /local-dictionaries/preview - preview file before import
+        if (($fragments[1] ?? '') === 'preview') {
+            Response::success($this->localDictionaryHandler->formatPreview($params));
+            return;
+        }
+
+        // POST /local-dictionaries/entries/{dictId} - add entry to dictionary
+        if (($fragments[1] ?? '') === 'entries' && isset($fragments[2]) && ctype_digit($fragments[2])) {
+            Response::success($this->localDictionaryHandler->formatAddEntry((int)$fragments[2], $params));
+            return;
+        }
+
+        // POST /local-dictionaries/{id}/import - import entries into dictionary
+        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'import') {
+            Response::success($this->localDictionaryHandler->formatImport((int)$fragments[1], $params));
+            return;
+        }
+
+        // POST /local-dictionaries/{id}/clear - clear all entries
+        if (isset($fragments[1]) && ctype_digit($fragments[1]) && ($fragments[2] ?? '') === 'clear') {
+            Response::success($this->localDictionaryHandler->formatClearEntries((int)$fragments[1]));
+            return;
+        }
+
+        // POST /local-dictionaries - create new dictionary
+        if (!isset($fragments[1]) || $fragments[1] === '') {
+            Response::success($this->localDictionaryHandler->formatCreateDictionary($params));
+            return;
+        }
+
+        Response::error('Endpoint Not Found: local-dictionaries/' . ($fragments[1] ?? ''), 404);
+    }
+
+    /**
+     * Handle PUT requests for local dictionaries.
+     *
+     * @param string[] $fragments Endpoint path segments
+     * @param array    $params    Request body parameters
+     */
+    private function handleLocalDictionariesPut(array $fragments, array $params): void
+    {
+        // PUT /local-dictionaries/{id} - update dictionary
+        if (isset($fragments[1]) && ctype_digit($fragments[1]) && !isset($fragments[2])) {
+            Response::success($this->localDictionaryHandler->formatUpdateDictionary((int)$fragments[1], $params));
+            return;
+        }
+
+        Response::error('Dictionary ID (Integer) Expected', 404);
+    }
+
+    /**
+     * Handle DELETE requests for local dictionaries.
+     *
+     * @param string[] $fragments Endpoint path segments
+     */
+    private function handleLocalDictionariesDelete(array $fragments): void
+    {
+        // DELETE /local-dictionaries/{id} - delete dictionary
+        if (isset($fragments[1]) && ctype_digit($fragments[1])) {
+            Response::success($this->localDictionaryHandler->formatDeleteDictionary((int)$fragments[1]));
+            return;
+        }
+
+        Response::error('Dictionary ID (Integer) Expected', 404);
     }
 
     // =========================================================================

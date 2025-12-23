@@ -47,6 +47,7 @@ class Language
     private string $ttsVoiceApi;
     private bool $showRomanization;
     private ?string $parserType;
+    private int $localDictMode;
 
     /**
      * Private constructor - use factory methods instead.
@@ -68,7 +69,8 @@ class Language
         bool $rightToLeft,
         string $ttsVoiceApi,
         bool $showRomanization,
-        ?string $parserType = null
+        ?string $parserType = null,
+        int $localDictMode = 0
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -87,6 +89,7 @@ class Language
         $this->ttsVoiceApi = $ttsVoiceApi;
         $this->showRomanization = $showRomanization;
         $this->parserType = $parserType;
+        $this->localDictMode = $localDictMode;
     }
 
     /**
@@ -152,6 +155,7 @@ class Language
      * @param string      $ttsVoiceApi               TTS API URL
      * @param bool        $showRomanization          Show romanization flag
      * @param string|null $parserType                Parser type (regex, character, mecab, etc.)
+     * @param int         $localDictMode             Local dictionary mode (0-3)
      *
      * @return self
      *
@@ -174,7 +178,8 @@ class Language
         bool $rightToLeft,
         string $ttsVoiceApi,
         bool $showRomanization,
-        ?string $parserType = null
+        ?string $parserType = null,
+        int $localDictMode = 0
     ): self {
         return new self(
             LanguageId::fromInt($id),
@@ -193,7 +198,8 @@ class Language
             $rightToLeft,
             $ttsVoiceApi,
             $showRomanization,
-            $parserType
+            $parserType,
+            $localDictMode
         );
     }
 
@@ -516,6 +522,7 @@ class Language
             'rightoleft'         => $this->rightToLeft,
             'ttsvoiceapi'        => $this->ttsVoiceApi,
             'showromanization'   => $this->showRomanization,
+            'localdictmode'      => $this->localDictMode,
         ]);
     }
 
@@ -599,6 +606,33 @@ class Language
     public function showRomanization(): bool
     {
         return $this->showRomanization;
+    }
+
+    /**
+     * Get the local dictionary mode.
+     *
+     * @return int Mode (0=online only, 1=local first, 2=local only, 3=combined)
+     */
+    public function localDictMode(): int
+    {
+        return $this->localDictMode;
+    }
+
+    /**
+     * Set the local dictionary mode.
+     *
+     * @param int $mode Mode (0=online only, 1=local first, 2=local only, 3=combined)
+     *
+     * @return void
+     *
+     * @throws \InvalidArgumentException If mode is invalid
+     */
+    public function setLocalDictMode(int $mode): void
+    {
+        if ($mode < 0 || $mode > 3) {
+            throw new \InvalidArgumentException('Local dictionary mode must be between 0 and 3');
+        }
+        $this->localDictMode = $mode;
     }
 
     /**

@@ -83,6 +83,7 @@ class QueryBuilder
         'tags2' => 'T2UsID',
         'newsfeeds' => 'NfUsID',
         'settings' => 'StUsID',
+        'local_dictionaries' => 'LdUsID',
     ];
 
     /**

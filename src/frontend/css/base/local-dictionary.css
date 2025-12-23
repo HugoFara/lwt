@@ -1,0 +1,232 @@
+/**
+ * Local Dictionary Panel Styles
+ *
+ * Styles for the inline local dictionary lookup panel
+ * that appears below terms in the text reading interface.
+ *
+ * @since 3.0.0
+ */
+
+/* ============================================================
+   Panel Container
+   ============================================================ */
+
+.local-dict-panel {
+  background: var(--bulma-scheme-main-bis, #f5f5f5);
+  border: 1px solid var(--bulma-border, #dbdbdb);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  min-width: 280px;
+  font-size: 0.9rem;
+  overflow: hidden;
+}
+
+.local-dict-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bulma-primary, #485fc7);
+  color: var(--bulma-primary-invert, #fff);
+}
+
+.local-dict-panel-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.local-dict-panel-close {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.local-dict-panel-close:hover {
+  opacity: 1;
+}
+
+.local-dict-panel-content {
+  padding: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* ============================================================
+   Dictionary Entries
+   ============================================================ */
+
+.local-dict-entry {
+  padding: 8px 0;
+}
+
+.local-dict-entry:first-child {
+  padding-top: 0;
+}
+
+.local-dict-entry:last-child {
+  padding-bottom: 0;
+}
+
+.local-dict-term {
+  margin-bottom: 4px;
+}
+
+.local-dict-headword {
+  font-weight: 700;
+  font-size: 1.05em;
+  color: var(--bulma-text-strong, #363636);
+}
+
+.local-dict-reading {
+  color: var(--bulma-grey, #7a7a7a);
+  font-size: 0.9em;
+  margin-left: 4px;
+}
+
+.local-dict-pos {
+  color: var(--bulma-info, #3e8ed0);
+  font-size: 0.8em;
+  font-style: italic;
+  margin-left: 4px;
+}
+
+.local-dict-definition {
+  color: var(--bulma-text, #4a4a4a);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.local-dict-source {
+  font-size: 0.75rem;
+  color: var(--bulma-grey-light, #b5b5b5);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.local-dict-separator {
+  margin: 8px 0;
+  border: none;
+  border-top: 1px dashed var(--bulma-border, #dbdbdb);
+}
+
+/* ============================================================
+   Loading / Error / Empty States
+   ============================================================ */
+
+.local-dict-loading {
+  font-size: 0.8em;
+  animation: local-dict-pulse 1s infinite;
+}
+
+@keyframes local-dict-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.local-dict-loading-inline {
+  padding: 8px;
+  color: var(--bulma-grey, #7a7a7a);
+  font-style: italic;
+}
+
+.local-dict-error {
+  padding: 8px;
+  color: var(--bulma-danger, #f14668);
+  background: var(--bulma-danger-light, #feecf0);
+  border-radius: 4px;
+}
+
+.local-dict-empty {
+  padding: 8px;
+  color: var(--bulma-grey, #7a7a7a);
+  font-style: italic;
+  text-align: center;
+}
+
+/* ============================================================
+   Inline Results (Alternative Display)
+   ============================================================ */
+
+.local-dict-results-inline {
+  background: var(--bulma-scheme-main-bis, #f5f5f5);
+  border: 1px solid var(--bulma-border, #dbdbdb);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-top: 8px;
+}
+
+/* ============================================================
+   Dark Theme Support
+   ============================================================ */
+
+.dark-theme .local-dict-panel,
+[data-theme="dark"] .local-dict-panel {
+  background: #363636;
+  border-color: #4a4a4a;
+}
+
+.dark-theme .local-dict-panel-header,
+[data-theme="dark"] .local-dict-panel-header {
+  background: #485fc7;
+}
+
+.dark-theme .local-dict-headword,
+[data-theme="dark"] .local-dict-headword {
+  color: #f5f5f5;
+}
+
+.dark-theme .local-dict-definition,
+[data-theme="dark"] .local-dict-definition {
+  color: #dbdbdb;
+}
+
+.dark-theme .local-dict-results-inline,
+[data-theme="dark"] .local-dict-results-inline {
+  background: #363636;
+  border-color: #4a4a4a;
+}
+
+/* ============================================================
+   Management UI (dictionaries page)
+   ============================================================ */
+
+.dict-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dict-priority-input {
+  width: 60px;
+}
+
+/* Import progress */
+.import-progress {
+  margin-top: 1rem;
+}
+
+.import-progress-bar {
+  height: 20px;
+  background: var(--bulma-progress-bar-background-color, #ededed);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.import-progress-fill {
+  height: 100%;
+  background: var(--bulma-primary, #485fc7);
+  transition: width 0.3s ease;
+}
+
+.import-status {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--bulma-grey, #7a7a7a);
+}

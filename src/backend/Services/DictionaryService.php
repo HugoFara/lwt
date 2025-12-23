@@ -405,4 +405,59 @@ class DictionaryService
             'translator' => $record['LgGoogleTranslateURI'] ?? '',
         ];
     }
+
+    /**
+     * Get the local dictionary mode for a language.
+     *
+     * @param int $langId Language ID
+     *
+     * @return int Mode (0=online only, 1=local first, 2=local only, 3=combined)
+     */
+    public function getLocalDictMode(int $langId): int
+    {
+        $record = QueryBuilder::table('languages')
+            ->select(['LgLocalDictMode'])
+            ->where('LgID', '=', $langId)
+            ->firstPrepared();
+
+        return (int) ($record['LgLocalDictMode'] ?? 0);
+    }
+
+    /**
+     * Look up a term with local dictionary support.
+     *
+     * Based on the language's local dictionary mode:
+     * - 0: Online only (returns online dictionary URLs)
+     * - 1: Local first, fallback to online if no results
+     * - 2: Local only (no online lookups)
+     * - 3: Combined (show both local and online results)
+     *
+     * @param int    $langId Language ID
+     * @param string $term   Term to look up
+     *
+     * @return array{local: array, online: array{dict1: string, dict2: string, translator: string}}
+     */
+    public function lookupWithLocal(int $langId, string $term): array
+    {
+        $mode = $this->getLocalDictMode($langId);
+        $localService = new LocalDictionaryService();
+
+        $results = [
+            'local' => [],
+            'online' => ['dict1' => '', 'dict2' => '', 'translator' => ''],
+        ];
+
+        // Modes 1, 2, 3 include local lookup
+        if ($mode >= 1) {
+            $results['local'] = $localService->lookup($langId, $term);
+        }
+
+        // Modes 0, 1, 3 include online dictionaries
+        // Mode 1: only include online if local found nothing
+        if ($mode === 0 || $mode === 3 || ($mode === 1 && empty($results['local']))) {
+            $results['online'] = $this->getLanguageDictionaries($langId);
+        }
+
+        return $results;
+    }
 }

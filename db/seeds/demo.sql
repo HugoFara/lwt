@@ -202,6 +202,7 @@ CREATE TABLE `languages` (
   `LgRightToLeft` int(1) unsigned NOT NULL DEFAULT '0',
   `LgTTSVoiceAPI` varchar(2048) NOT NULL DEFAULT '',
   `LgShowRomanization` tinyint(1) DEFAULT '1',
+  `LgLocalDictMode` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`LgID`),
   UNIQUE KEY `LgName` (`LgName`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8;
@@ -2676,3 +2677,33 @@ CREATE TABLE `feedlinks` (
   KEY `FlDate` (`FlDate`),
   UNIQUE KEY `FlTitle` (`FlNfID`, `FlTitle`)
 ) ENGINE=InnoDB DEFAULT CHARSET = utf8;
+DROP TABLE IF EXISTS local_dictionary_entries;
+DROP TABLE IF EXISTS local_dictionaries;
+CREATE TABLE `local_dictionaries` (
+  `LdID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `LdLgID` TINYINT(3) UNSIGNED NOT NULL,
+  `LdName` VARCHAR(100) NOT NULL,
+  `LdDescription` VARCHAR(500) DEFAULT NULL,
+  `LdSourceFormat` VARCHAR(20) NOT NULL DEFAULT 'csv',
+  `LdEntryCount` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  `LdPriority` TINYINT(3) UNSIGNED NOT NULL DEFAULT 1,
+  `LdEnabled` TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
+  `LdCreated` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `LdUsID` INT(10) UNSIGNED DEFAULT NULL,
+  PRIMARY KEY (`LdID`),
+  KEY `LdLgID` (`LdLgID`),
+  KEY `LdUsID` (`LdUsID`),
+  KEY `LdEnabled_LdPriority` (`LdEnabled`, `LdPriority`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `local_dictionary_entries` (
+  `LeID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `LeLdID` INT(10) UNSIGNED NOT NULL,
+  `LeTerm` VARCHAR(250) NOT NULL,
+  `LeTermLc` VARCHAR(250) NOT NULL,
+  `LeDefinition` TEXT NOT NULL,
+  `LeReading` VARCHAR(250) DEFAULT NULL,
+  `LePartOfSpeech` VARCHAR(50) DEFAULT NULL,
+  PRIMARY KEY (`LeID`),
+  KEY `LeLdID` (`LeLdID`),
+  KEY `LeTermLc` (`LeTermLc`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

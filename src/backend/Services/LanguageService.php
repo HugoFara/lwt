@@ -126,6 +126,7 @@ class LanguageService
         $view->ttsvoiceapi = $language->ttsVoiceApi();
         $view->showromanization = $language->showRomanization();
         $view->parsertype = $language->parserType();
+        $view->localdictmode = $language->localDictMode();
         return $view;
     }
 
@@ -187,6 +188,7 @@ class LanguageService
             'LgRightToLeft' => InputValidator::has('LgRightToLeft'),
             'LgTTSVoiceAPI' => InputValidator::getString('LgTTSVoiceAPI'),
             'LgShowRomanization' => InputValidator::has('LgShowRomanization'),
+            'LgLocalDictMode' => (int) InputValidator::getString('LgLocalDictMode', '0'),
         ];
     }
 
@@ -223,7 +225,7 @@ class LanguageService
             'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
             'LgRegexpSplitSentences', 'LgExceptionsSplitSentences',
             'LgRegexpWordCharacters', 'LgParserType', 'LgRemoveSpaces', 'LgSplitEachChar',
-            'LgRightToLeft', 'LgTTSVoiceAPI', 'LgShowRomanization'
+            'LgRightToLeft', 'LgTTSVoiceAPI', 'LgShowRomanization', 'LgLocalDictMode'
         ];
 
         $params = [
@@ -243,6 +245,7 @@ class LanguageService
             (int)$data["LgRightToLeft"],
             $data["LgTTSVoiceAPI"] ?? '',  // This one uses empty string, not null
             (int)$data["LgShowRomanization"],
+            (int)($data["LgLocalDictMode"] ?? 0),  // Local dictionary mode
         ];
 
         if ($id === null) {
@@ -949,6 +952,7 @@ class LanguageService
             'LgRightToLeft' => !empty($data['rightToLeft']),
             'LgTTSVoiceAPI' => $data['ttsVoiceApi'] ?? '',
             'LgShowRomanization' => $data['showRomanization'] ?? false,
+            'LgLocalDictMode' => (int)($data['localDictMode'] ?? 0),
         ];
     }
 
@@ -969,7 +973,7 @@ class LanguageService
             'LgExportTemplate', 'LgTextSize', 'LgCharacterSubstitutions',
             'LgRegexpSplitSentences', 'LgExceptionsSplitSentences',
             'LgRegexpWordCharacters', 'LgParserType', 'LgRemoveSpaces', 'LgSplitEachChar',
-            'LgRightToLeft', 'LgTTSVoiceAPI', 'LgShowRomanization'
+            'LgRightToLeft', 'LgTTSVoiceAPI', 'LgShowRomanization', 'LgLocalDictMode'
         ];
 
         $params = [
@@ -989,6 +993,7 @@ class LanguageService
             (int)$data["LgRightToLeft"],
             $data["LgTTSVoiceAPI"] ?? '',  // This one uses empty string, not null
             (int)$data["LgShowRomanization"],
+            (int)($data["LgLocalDictMode"] ?? 0),  // Local dictionary mode
         ];
 
         if ($id === null) {

@@ -28,6 +28,15 @@ import { getLanguageId } from '../core/language_config';
 // Import the popup system
 import { overlib } from '../ui/word_popup';
 
+// Import local dictionary API
+import {
+  lookupLocal,
+  formatResults,
+  hasLocalDictionaries,
+  shouldUseOnline,
+  type LocalDictResult
+} from '../dictionaries';
+
 // Import API-based word actions
 import {
   changeWordStatus,
@@ -112,6 +121,95 @@ export function createStatusButtonsAll(context: WordActionContext): DocumentFrag
   fragment.appendChild(createStatusChangeButton(context, 98));
 
   return fragment;
+}
+
+/**
+ * Create a local dictionary results section for the popup.
+ *
+ * @param langId Language ID
+ * @param term   Term to look up
+ * @returns Promise with HTMLElement containing results, or null if no local dictionaries
+ */
+export async function createLocalDictSection(
+  langId: number,
+  term: string
+): Promise<HTMLElement | null> {
+  // Check if local dictionaries are enabled
+  const hasLocal = await hasLocalDictionaries(langId);
+  if (!hasLocal) {
+    return null;
+  }
+
+  const container = document.createElement('div');
+  container.className = 'lwt-local-dict-section';
+
+  // Add header
+  const header = document.createElement('div');
+  header.className = 'lwt-local-dict-header';
+  header.innerHTML = '<strong>Local Dictionary</strong>';
+  container.appendChild(header);
+
+  // Add loading indicator
+  const loading = document.createElement('div');
+  loading.className = 'lwt-local-dict-loading';
+  loading.textContent = 'Looking up...';
+  container.appendChild(loading);
+
+  // Fetch results
+  try {
+    const response = await lookupLocal(langId, term);
+    loading.remove();
+
+    if (response.error) {
+      const error = document.createElement('div');
+      error.className = 'local-dict-error';
+      error.textContent = response.error;
+      container.appendChild(error);
+    } else if (response.data && response.data.results.length > 0) {
+      const results = document.createElement('div');
+      results.className = 'local-dict-results';
+      results.innerHTML = formatResults(response.data.results);
+      container.appendChild(results);
+    } else {
+      const empty = document.createElement('div');
+      empty.className = 'local-dict-empty';
+      empty.textContent = 'No local results found.';
+      container.appendChild(empty);
+    }
+  } catch (err) {
+    loading.remove();
+    const error = document.createElement('div');
+    error.className = 'local-dict-error';
+    error.textContent = 'Failed to look up term.';
+    container.appendChild(error);
+  }
+
+  return container;
+}
+
+/**
+ * Add local dictionary results to a popup container.
+ *
+ * @param container Popup container element
+ * @param langId    Language ID
+ * @param term      Term to look up
+ * @returns Promise resolving to true if results were added
+ */
+export async function addLocalDictToPopup(
+  container: HTMLElement,
+  langId: number,
+  term: string
+): Promise<boolean> {
+  const section = await createLocalDictSection(langId, term);
+  if (section) {
+    // Add separator
+    const hr = document.createElement('hr');
+    hr.className = 'lwt-popup-separator';
+    container.appendChild(hr);
+    container.appendChild(section);
+    return true;
+  }
+  return false;
 }
 
 /**

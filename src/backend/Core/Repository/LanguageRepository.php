@@ -59,6 +59,7 @@ class LanguageRepository extends AbstractRepository
         'rightoleft' => 'LgRightToLeft',
         'ttsvoiceapi' => 'LgTTSVoiceAPI',
         'showromanization' => 'LgShowRomanization',
+        'localdictmode' => 'LgLocalDictMode',
     ];
 
     /**
@@ -83,7 +84,8 @@ class LanguageRepository extends AbstractRepository
             (bool) ($row['LgRightToLeft'] ?? false),
             (string) ($row['LgTTSVoiceAPI'] ?? ''),
             (bool) ($row['LgShowRomanization'] ?? false),
-            isset($row['LgParserType']) ? (string) $row['LgParserType'] : null
+            isset($row['LgParserType']) ? (string) $row['LgParserType'] : null,
+            (int) ($row['LgLocalDictMode'] ?? 0)
         );
     }
 
@@ -114,6 +116,7 @@ class LanguageRepository extends AbstractRepository
             'LgRightToLeft' => (int) $entity->rightToLeft(),
             'LgTTSVoiceAPI' => $entity->ttsVoiceApi(),
             'LgShowRomanization' => (int) $entity->showRomanization(),
+            'LgLocalDictMode' => $entity->localDictMode(),
         ];
     }
 

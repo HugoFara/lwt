@@ -92,9 +92,12 @@ class SimtermsTest extends TestCase
 
     public static function tearDownAfterClass(): void
     {
-        // Clean up test data
-        Connection::query("TRUNCATE TABLE words");
-        Connection::query("TRUNCATE TABLE languages");
+        // Clean up test data - order matters due to FK constraints
+        // Must truncate child tables before parent tables
+        Connection::query("DELETE FROM words");
+        Connection::query("DELETE FROM local_dictionary_entries");
+        Connection::query("DELETE FROM local_dictionaries");
+        Connection::query("DELETE FROM languages");
     }
 
     // ========== LETTER PAIRS FUNCTION ==========

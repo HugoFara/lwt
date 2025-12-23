@@ -166,6 +166,21 @@ function registerRoutes(Router $router): void
     // Feed wizard
     $router->registerWithMiddleware('/feeds/wizard', 'FeedsController@wizard', AUTH_MIDDLEWARE);
 
+    // ==================== LOCAL DICTIONARY ROUTES (PROTECTED) ====================
+
+    // Dictionaries list
+    $router->registerWithMiddleware('/dictionaries', 'LocalDictionaryController@index', AUTH_MIDDLEWARE);
+
+    // Import wizard
+    $router->registerWithMiddleware('/dictionaries/import', 'LocalDictionaryController@import', AUTH_MIDDLEWARE, 'GET');
+    $router->registerWithMiddleware('/dictionaries/import', 'LocalDictionaryController@processImport', AUTH_MIDDLEWARE, 'POST');
+
+    // Delete dictionary
+    $router->registerWithMiddleware('/dictionaries/delete', 'LocalDictionaryController@delete', AUTH_MIDDLEWARE, 'POST');
+
+    // Preview (AJAX)
+    $router->registerWithMiddleware('/dictionaries/preview', 'LocalDictionaryController@preview', AUTH_MIDDLEWARE, 'POST');
+
     // ==================== ADMIN ROUTES (PROTECTED) ====================
 
     // Backup & Restore

@@ -208,6 +208,37 @@ use Lwt\View\Helper\IconHelper;
                     <a href="docs/info.html#langsetup" target="_blank">see also here</a>.
                 </div>
             </article>
+
+            <!-- Local Dictionary Mode -->
+            <div class="field mt-4">
+                <label class="label">Local Dictionary Mode</label>
+                <div class="control">
+                    <div class="select">
+                        <select name="LgLocalDictMode" id="LgLocalDictMode">
+                            <option value="0" <?php echo ($language->localdictmode ?? 0) == 0 ? 'selected' : ''; ?>>
+                                Online dictionaries only
+                            </option>
+                            <option value="1" <?php echo ($language->localdictmode ?? 0) == 1 ? 'selected' : ''; ?>>
+                                Local first, online fallback
+                            </option>
+                            <option value="2" <?php echo ($language->localdictmode ?? 0) == 2 ? 'selected' : ''; ?>>
+                                Local dictionaries only
+                            </option>
+                            <option value="3" <?php echo ($language->localdictmode ?? 0) == 3 ? 'selected' : ''; ?>>
+                                Combined (show both)
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <p class="help">
+                    Configure how local (offline) dictionaries are used.
+                    <?php if (($language->id ?? 0) > 0): ?>
+                    <a href="/dictionaries?lang=<?php echo $language->id; ?>">
+                        Manage local dictionaries
+                    </a>
+                    <?php endif; ?>
+                </p>
+            </div>
         </div>
     </div>
 
