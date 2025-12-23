@@ -18,27 +18,6 @@ import type { TextReadingConfig } from '../api/texts';
 const STYLE_ELEMENT_ID = 'text-dynamic-styles';
 
 /**
- * Check if a status should display translations based on displayStatTrans setting.
- *
- * @param status Status value (1-5, 98, 99)
- * @param displayStatTrans Setting value for which statuses show translations
- * @returns Whether translation should be shown for this status
- */
-function shouldShowTransForStatus(status: number, displayStatTrans: number): boolean {
-  // displayStatTrans is a bitmap: 1=status1, 2=status2, 4=status3, 8=status4, 16=status5, 32=ignored, 64=wellknown
-  switch (status) {
-    case 1: return (displayStatTrans & 1) !== 0;
-    case 2: return (displayStatTrans & 2) !== 0;
-    case 3: return (displayStatTrans & 4) !== 0;
-    case 4: return (displayStatTrans & 8) !== 0;
-    case 5: return (displayStatTrans & 16) !== 0;
-    case 98: return (displayStatTrans & 32) !== 0;
-    case 99: return (displayStatTrans & 64) !== 0;
-    default: return false;
-  }
-}
-
-/**
  * Generate dynamic CSS for text annotation display.
  *
  * @param config Text reading configuration

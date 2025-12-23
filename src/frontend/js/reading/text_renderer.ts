@@ -230,7 +230,7 @@ function isLeadingPunctuation(word: WordData): boolean {
   const text = word.text.trim();
   if (!text || isWhitespace(word.text)) return false;
   // Check if starts with common leading punctuation
-  const leadingPunc = /^[(\[{\u00AB\u201C\u2018\u2039\u300A\u3008\u3010\u3014\u3016\u3018\u301A]/;
+  const leadingPunc = /^[([{\u00AB\u201C\u2018\u2039\u300A\u3008\u3010\u3014\u3016\u3018\u301A]/;
   return leadingPunc.test(text);
 }
 

@@ -1,8 +1,7 @@
 /**
  * Test State Module - Manages mutable test/review mode state.
  *
- * This module replaces LWT_DATA.test and LWT_DATA.word with explicit
- * getter/setter functions for test mode operations.
+ * This module provides explicit getter/setter functions for test mode operations.
  *
  * @license Unlicense <http://unlicense.org/>
  * @since 3.1.0

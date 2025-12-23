@@ -6,13 +6,11 @@
  * 1. Legacy frame-based mode (default) - uses iframe navigation for word operations
  * 2. API-based mode - uses REST API calls with in-page updates
  *
- * The mode can be switched using setUseApiMode() or by setting
- * LWT_DATA.settings.use_api_mode = true.
+ * The mode can be switched using setUseApiMode().
  *
  * @license Unlicense <http://unlicense.org/>
  */
 
-import { make_tooltip } from '../terms/word_status';
 import { speechDispatcher } from '../core/user_interactions';
 import { hoverIntent } from '../core/hover_intent';
 import {
@@ -20,9 +18,8 @@ import {
   mword_each_do_text_text
 } from './text_annotations';
 import { keydown_event_do_text_text } from './text_keyboard';
-import { setupMultiWordSelection, mword_drag_n_drop_select, mword_touch_select } from './text_multiword_selection';
+import { setupMultiWordSelection } from './text_multiword_selection';
 import { loadModalFrame } from './frame_management';
-import { removeAllTooltips } from '../ui/native_tooltip';
 import {
   run_overlib_status_unknown,
   run_overlib_status_99,
@@ -41,7 +38,6 @@ import {
 } from '../core/language_config';
 import { getTextId } from '../core/text_config';
 import {
-  getHtsMode,
   isTtsOnHover,
   isTtsOnClick,
   isFrameModeEnabled
@@ -141,7 +137,7 @@ export function word_dblclick_event_do_text_text(this: HTMLElement): void {
 /**
  * Do a word edition window. Usually called when the user clicks on a word.
  *
- * @since 2.9.10-fork Read word aloud if LWT_DATA.settings.hts equals 2.
+ * @since 2.9.10-fork Reads word aloud if hover-to-speak setting equals 2.
  *
  * @returns false
  */
