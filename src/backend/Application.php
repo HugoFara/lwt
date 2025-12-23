@@ -24,6 +24,7 @@ use Lwt\Core\Container\RepositoryServiceProvider;
 use Lwt\Core\Container\ServiceProviderInterface;
 use Lwt\Modules\Text\TextServiceProvider;
 use Lwt\Modules\Language\LanguageServiceProvider;
+use Lwt\Modules\Feed\FeedServiceProvider;
 use Lwt\Core\Exception\ExceptionHandler;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Router\Router;
@@ -134,6 +135,7 @@ class Application
             // Module service providers
             new TextServiceProvider(),
             new LanguageServiceProvider(),
+            new FeedServiceProvider(),
         ];
 
         // Register phase: all providers register their bindings

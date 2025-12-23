@@ -26,12 +26,16 @@ use Lwt\Database\UserScopedQuery;
  *
  * Handles CRUD operations and business logic for newsfeeds.
  *
- * @category Lwt
- * @package  Lwt\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
- * @license  Unlicense <http://unlicense.org/>
- * @link     https://hugofara.github.io/lwt/docs/php/
- * @since    3.0.0
+ * @category   Lwt
+ * @package    Lwt\Services
+ * @author     HugoFara <hugo.farajallah@protonmail.com>
+ * @license    Unlicense <http://unlicense.org/>
+ * @link       https://hugofara.github.io/lwt/docs/php/
+ * @since      3.0.0
+ * @deprecated 3.0.0 Use Lwt\Modules\Feed\Application\FeedFacade instead.
+ *                   This class will be removed in a future version.
+ *                   Migrate to the Feed module for new functionality.
+ * @see        \Lwt\Modules\Feed\Application\FeedFacade
  */
 class FeedService
 {
