@@ -14,7 +14,7 @@
 
 namespace Lwt\Core\Parser;
 
-use Lwt\Core\Entity\Language;
+use Lwt\Modules\Language\Domain\Language;
 use Lwt\Core\Parser\Parsers\RegexParser;
 use Lwt\Core\Parser\Parsers\CharacterParser;
 use Lwt\Core\Parser\Parsers\MecabParser;

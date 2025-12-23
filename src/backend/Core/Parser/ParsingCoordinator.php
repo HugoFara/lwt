@@ -14,7 +14,7 @@
 
 namespace Lwt\Core\Parser;
 
-use Lwt\Core\Entity\Language;
+use Lwt\Modules\Language\Domain\Language;
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
 use Lwt\Database\Escaping;

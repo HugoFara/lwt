@@ -5,7 +5,7 @@ namespace Lwt\Tests\Core\Repository;
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/EnvLoader.php';
 
 use Lwt\Core\Entity\Text;
-use Lwt\Core\Entity\ValueObject\LanguageId;
+use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use Lwt\Core\Entity\ValueObject\TextId;
 use Lwt\Core\EnvLoader;
 use Lwt\Core\Globals;
@@ -22,7 +22,6 @@ Globals::setDatabaseName("test_" . $config['dbname']);
 
 require_once __DIR__ . '/../../../../src/backend/Core/Bootstrap/db_bootstrap.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TextId.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/LanguageId.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/Text.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Database/PreparedStatement.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Repository/RepositoryInterface.php';

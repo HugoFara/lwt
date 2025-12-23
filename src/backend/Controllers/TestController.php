@@ -18,12 +18,12 @@ namespace Lwt\Controllers;
 use Lwt\Core\Utils\ErrorHandler;
 use Lwt\Services\TestService;
 use Lwt\Services\LanguageService;
-use Lwt\Services\LanguageDefinitions;
+use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\View\Helper\PageLayoutHelper;
 
 require_once __DIR__ . '/../Services/TestService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
-require_once __DIR__ . '/../Services/LanguageDefinitions.php';
+// LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../Services/TextNavigationService.php';
 require_once __DIR__ . '/../Services/AnnotationService.php';
 require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
@@ -292,7 +292,7 @@ class TestController extends BaseController
         // Get language code for TTS
         $langCode = $this->languageService->getLanguageCode(
             $langIdFromSql,
-            LanguageDefinitions::getAll()
+            LanguagePresets::getAll()
         );
 
         // Initialize session

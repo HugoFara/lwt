@@ -20,7 +20,7 @@ use Lwt\Services\TextDisplayService;
 use Lwt\Services\TextNavigationService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
-use Lwt\Services\LanguageDefinitions;
+use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Database\Settings;
 use Lwt\Database\Validation;
 use Lwt\View\Helper\PageLayoutHelper;
@@ -41,7 +41,7 @@ require_once LWT_BACKEND_PATH . '/View/Helper/SelectOptionsBuilder.php';
 require_once LWT_BACKEND_PATH . '/Services/TextDisplayService.php';
 require_once LWT_BACKEND_PATH . '/Services/TagService.php';
 require_once LWT_BACKEND_PATH . '/Services/LanguageService.php';
-require_once LWT_BACKEND_PATH . '/Services/LanguageDefinitions.php';
+// LanguagePresets loaded via autoloader
 
 /**
  * Controller for text management and reading interface.

@@ -31,15 +31,14 @@ require_once __DIR__ . '/../../Core/Database/Restore.php';
 require_once __DIR__ . '/../../Services/WordStatusService.php';
 require_once __DIR__ . '/../../Services/DictionaryService.php';
 require_once __DIR__ . '/../../Services/MediaService.php';
-require_once __DIR__ . '/../../Services/LanguageService.php';
-require_once __DIR__ . '/../../Services/LanguageDefinitions.php';
+// Language module now loaded via autoloader
 require_once __DIR__ . '/../../Services/TagService.php';
 
 use Lwt\Api\V1\Handlers\AuthHandler;
 use Lwt\Api\V1\Handlers\FeedHandler;
 use Lwt\Api\V1\Handlers\ImportHandler;
 use Lwt\Api\V1\Handlers\ImprovedTextHandler;
-use Lwt\Api\V1\Handlers\LanguageHandler;
+use Lwt\Modules\Language\Http\LanguageApiHandler;
 use Lwt\Api\V1\Handlers\LocalDictionaryHandler;
 use Lwt\Api\V1\Handlers\MediaHandler;
 use Lwt\Api\V1\Handlers\ReviewHandler;
@@ -61,7 +60,7 @@ class ApiV1
     private FeedHandler $feedHandler;
     private ImportHandler $importHandler;
     private ImprovedTextHandler $improvedTextHandler;
-    private LanguageHandler $languageHandler;
+    private LanguageApiHandler $languageHandler;
     private LocalDictionaryHandler $localDictionaryHandler;
     private MediaHandler $mediaHandler;
     private ReviewHandler $reviewHandler;
@@ -87,7 +86,7 @@ class ApiV1
         $this->feedHandler = new FeedHandler();
         $this->importHandler = new ImportHandler();
         $this->improvedTextHandler = new ImprovedTextHandler();
-        $this->languageHandler = new LanguageHandler();
+        $this->languageHandler = new LanguageApiHandler();
         $this->localDictionaryHandler = new LocalDictionaryHandler();
         $this->mediaHandler = new MediaHandler();
         $this->reviewHandler = new ReviewHandler();

@@ -8,14 +8,13 @@ use Lwt\Database\UserScopedQuery;
 use Lwt\Services\TestService;
 use Lwt\Services\WordStatusService;
 use Lwt\Services\LanguageService;
-use Lwt\Services\LanguageDefinitions;
+use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\ExportService;
 use Lwt\View\Helper\StatusHelper;
 
 require_once __DIR__ . '/../../../Services/TestService.php';
 require_once __DIR__ . '/../../../Services/WordStatusService.php';
 require_once __DIR__ . '/../../../Services/LanguageService.php';
-require_once __DIR__ . '/../../../Services/LanguageDefinitions.php';
 require_once __DIR__ . '/../../../Services/ExportService.php';
 
 /**
@@ -401,7 +400,7 @@ class ReviewHandler
         $languageService = new LanguageService();
         $langCode = $languageService->getLanguageCode(
             $langIdFromSql,
-            LanguageDefinitions::getAll()
+            LanguagePresets::getAll()
         );
 
         // Initialize session
@@ -480,7 +479,7 @@ class ReviewHandler
         $languageService = new LanguageService();
         $langCode = $languageService->getLanguageCode(
             $langIdFromSql,
-            LanguageDefinitions::getAll()
+            LanguagePresets::getAll()
         );
 
         // Get words

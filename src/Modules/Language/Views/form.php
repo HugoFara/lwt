@@ -12,7 +12,7 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt\Views
+ * @package  Lwt\Modules\Language\Views
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/docs/php/
@@ -21,9 +21,10 @@
  * @psalm-suppress TypeDoesNotContainType View included from different contexts
  */
 
-namespace Lwt\Views\Language;
+namespace Lwt\Modules\Language\Views;
 
 use Lwt\View\Helper\IconHelper;
+use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 
 ?>
 <script type="application/json" id="language-form-config">
@@ -32,7 +33,7 @@ use Lwt\View\Helper\IconHelper;
     'languageName' => $language->name,
     'sourceLg' => $sourceLg,
     'targetLg' => $targetLg,
-    'languageDefs' => \Lwt\Modules\Language\Infrastructure\LanguagePresets::getAll(),
+    'languageDefs' => LanguagePresets::getAll(),
     'allLanguages' => $allLanguages
 ]); ?>
 </script>

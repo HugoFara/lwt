@@ -16,7 +16,7 @@ namespace Lwt\Core\Entity;
 
 use DateTimeImmutable;
 use InvalidArgumentException;
-use Lwt\Core\Entity\ValueObject\LanguageId;
+use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use Lwt\Core\Entity\ValueObject\TermId;
 use Lwt\Core\Entity\ValueObject\TermStatus;
 

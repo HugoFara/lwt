@@ -1,25 +1,37 @@
 <?php declare(strict_types=1);
-namespace Lwt\Api\V1\Handlers;
+/**
+ * Language API Handler
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Modules\Language\Http
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @link     https://hugofara.github.io/lwt/docs/php/
+ * @since    3.0.0
+ */
 
-use Lwt\Core\Globals;
+namespace Lwt\Modules\Language\Http;
+
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
-use Lwt\Services\LanguageService;
-use Lwt\Services\LanguageDefinitions;
+use Lwt\Modules\Language\Application\LanguageFacade;
+use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\SentenceService;
 use Lwt\Services\SimilarTermsService;
 
 /**
  * Handler for language-related API operations.
  *
- * Extracted from api_v1.php.
+ * @since 3.0.0
  */
-class LanguageHandler
+class LanguageApiHandler
 {
     /**
-     * @var LanguageService Language service instance
+     * @var LanguageFacade Language facade instance
      */
-    private LanguageService $languageService;
+    private LanguageFacade $languageFacade;
 
     /**
      * @var SentenceService Sentence service instance
@@ -33,10 +45,12 @@ class LanguageHandler
 
     /**
      * Constructor - initialize services.
+     *
+     * @param LanguageFacade|null $languageFacade Language facade instance
      */
-    public function __construct()
+    public function __construct(?LanguageFacade $languageFacade = null)
     {
-        $this->languageService = new LanguageService();
+        $this->languageFacade = $languageFacade ?? new LanguageFacade();
         $this->sentenceService = new SentenceService();
         $this->similarTermsService = new SimilarTermsService();
     }
@@ -55,7 +69,7 @@ class LanguageHandler
             ->where('LgID', '=', $langId)
             ->firstPrepared();
 
-        $abbr = $this->languageService->getLanguageCode($langId, LanguageDefinitions::getAll());
+        $abbr = $this->languageFacade->getLanguageCode($langId, LanguagePresets::getAll());
 
         if ($record["LgTTSVoiceAPI"] != '') {
             $readingMode = "external";
@@ -86,9 +100,9 @@ class LanguageHandler
     public function getPhoneticReading(string $text, ?int $langId = null, ?string $langCode = null): array
     {
         if ($langId !== null) {
-            $data = $this->languageService->getPhoneticReadingById($text, $langId);
+            $data = $this->languageFacade->getPhoneticReadingById($text, $langId);
         } else {
-            $data = $this->languageService->getPhoneticReadingByCode($text, $langCode ?? '');
+            $data = $this->languageFacade->getPhoneticReadingByCode($text, $langCode ?? '');
         }
         return ["phonetic_reading" => $data];
     }
@@ -203,7 +217,7 @@ class LanguageHandler
     public function formatLanguagesWithTexts(): array
     {
         return [
-            'languages' => $this->languageService->getLanguagesWithTextCounts()
+            'languages' => $this->languageFacade->getLanguagesWithTextCounts()
         ];
     }
 
@@ -217,7 +231,7 @@ class LanguageHandler
     public function formatLanguagesWithArchivedTexts(): array
     {
         return [
-            'languages' => $this->languageService->getLanguagesWithArchivedTextCounts()
+            'languages' => $this->languageFacade->getLanguagesWithArchivedTextCounts()
         ];
     }
 
@@ -234,7 +248,7 @@ class LanguageHandler
     {
         $currentLangId = (int)Settings::get('currentlanguage');
         return [
-            'languages' => $this->languageService->getLanguagesWithStats(),
+            'languages' => $this->languageFacade->getLanguagesWithStats(),
             'currentLanguageId' => $currentLangId
         ];
     }
@@ -248,7 +262,7 @@ class LanguageHandler
      */
     public function formatGetOne(int $id): ?array
     {
-        $language = $this->languageService->getById($id);
+        $language = $this->languageFacade->getById($id);
         if ($language === null) {
             return null;
         }
@@ -272,7 +286,7 @@ class LanguageHandler
                 'ttsVoiceApi' => $language->ttsVoiceApi(),
                 'showRomanization' => $language->showRomanization(),
             ],
-            'allLanguages' => $this->languageService->getAllLanguages()
+            'allLanguages' => $this->languageFacade->getAllLanguages()
         ];
     }
 
@@ -291,11 +305,11 @@ class LanguageHandler
         }
 
         // Check for duplicate name
-        if ($this->languageService->isDuplicateName($data['name'])) {
+        if ($this->languageFacade->isDuplicateName($data['name'])) {
             return ['success' => false, 'error' => 'A language with this name already exists'];
         }
 
-        $id = $this->languageService->createFromData($data);
+        $id = $this->languageFacade->createFromData($data);
         if ($id > 0) {
             return ['success' => true, 'id' => $id];
         }
@@ -314,7 +328,7 @@ class LanguageHandler
     public function formatUpdate(int $id, array $data): array
     {
         // Check language exists
-        $existing = $this->languageService->getById($id);
+        $existing = $this->languageFacade->getById($id);
         if ($existing === null) {
             return ['success' => false, 'error' => 'Language not found'];
         }
@@ -325,11 +339,11 @@ class LanguageHandler
         }
 
         // Check for duplicate name (excluding current)
-        if ($this->languageService->isDuplicateName($data['name'], $id)) {
+        if ($this->languageFacade->isDuplicateName($data['name'], $id)) {
             return ['success' => false, 'error' => 'A language with this name already exists'];
         }
 
-        $result = $this->languageService->updateFromData($id, $data);
+        $result = $this->languageFacade->updateFromData($id, $data);
         return [
             'success' => true,
             'reparsed' => $result['reparsed'] ?? 0,
@@ -347,8 +361,8 @@ class LanguageHandler
     public function formatDelete(int $id): array
     {
         // Check if language can be deleted
-        if (!$this->languageService->canDelete($id)) {
-            $stats = $this->languageService->getRelatedDataCounts($id);
+        if (!$this->languageFacade->canDelete($id)) {
+            $stats = $this->languageFacade->getRelatedDataCounts($id);
             return [
                 'success' => false,
                 'error' => 'Cannot delete language with existing data',
@@ -356,7 +370,7 @@ class LanguageHandler
             ];
         }
 
-        $result = $this->languageService->deleteById($id);
+        $result = $this->languageFacade->deleteById($id);
         return ['success' => $result];
     }
 
@@ -369,7 +383,7 @@ class LanguageHandler
      */
     public function formatGetStats(int $id): array
     {
-        return $this->languageService->getRelatedDataCounts($id);
+        return $this->languageFacade->getRelatedDataCounts($id);
     }
 
     /**
@@ -381,7 +395,7 @@ class LanguageHandler
      */
     public function formatRefresh(int $id): array
     {
-        $result = $this->languageService->refreshTexts($id);
+        $result = $this->languageFacade->refreshTexts($id);
         return [
             'success' => true,
             'sentencesDeleted' => $result['sentencesDeleted'],
@@ -398,7 +412,7 @@ class LanguageHandler
      */
     public function formatGetDefinitions(): array
     {
-        $definitions = LanguageDefinitions::getAll();
+        $definitions = LanguagePresets::getAll();
         $formatted = [];
 
         foreach ($definitions as $name => $def) {

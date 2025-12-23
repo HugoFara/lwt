@@ -26,7 +26,7 @@ require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
 require_once __DIR__ . '/../View/Helper/SelectOptionsBuilder.php';
 require_once __DIR__ . '/../Services/TagService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
-require_once __DIR__ . '/../Services/LanguageDefinitions.php';
+// LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../Services/SimilarTermsService.php';
 require_once __DIR__ . '/../Services/TextService.php';
 
@@ -41,7 +41,7 @@ use Lwt\Services\ExportService;
 use Lwt\Services\SentenceService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
-use Lwt\Services\LanguageDefinitions;
+use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Services\TextService;
 use Lwt\Core\Http\InputValidator;
 
@@ -289,8 +289,8 @@ class WordController extends BaseController
             $sentence = $this->wordService->getSentenceForTerm($textId, $ord, $termlc);
             $transUri = $langData['translateUri'];
             $lgname = $langData['name'];
-            $langShort = array_key_exists($lgname, LanguageDefinitions::getAll()) ?
-                LanguageDefinitions::getAll()[$lgname][1] : '';
+            $langShort = array_key_exists($lgname, LanguagePresets::getAll()) ?
+                LanguagePresets::getAll()[$lgname][1] : '';
 
             include __DIR__ . '/../Views/Word/form_edit_new.php';
         } else {

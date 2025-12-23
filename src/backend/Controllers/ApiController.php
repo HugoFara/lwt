@@ -23,7 +23,7 @@ require_once __DIR__ . '/../Api/V1/ApiV1.php';
 require_once __DIR__ . '/../Api/V1/Handlers/FeedHandler.php';
 require_once __DIR__ . '/../Api/V1/Handlers/ImportHandler.php';
 require_once __DIR__ . '/../Api/V1/Handlers/ImprovedTextHandler.php';
-require_once __DIR__ . '/../Api/V1/Handlers/LanguageHandler.php';
+// LanguageApiHandler now in Modules/Language/Http/
 require_once __DIR__ . '/../Api/V1/Handlers/MediaHandler.php';
 require_once __DIR__ . '/../Api/V1/Handlers/ReviewHandler.php';
 require_once __DIR__ . '/../Api/V1/Handlers/SettingsHandler.php';

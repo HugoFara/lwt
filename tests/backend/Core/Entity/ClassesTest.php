@@ -2,11 +2,9 @@
 
 namespace Lwt\Tests\Core\Entity;
 
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/LanguageId.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TextId.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TermId.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/ValueObject/TermStatus.php';
-require_once __DIR__ . '/../../../../src/backend/Core/Entity/Language.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/Term.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/Text.php';
 require_once __DIR__ . '/../../../../src/backend/Core/Entity/GoogleTranslate.php';
@@ -14,10 +12,10 @@ require_once __DIR__ . '/../../../../src/backend/Core/Entity/GoogleTranslate.php
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Lwt\Core\Entity\GoogleTranslate;
-use Lwt\Core\Entity\Language;
+use Lwt\Modules\Language\Domain\Language;
 use Lwt\Core\Entity\Term;
 use Lwt\Core\Entity\Text;
-use Lwt\Core\Entity\ValueObject\LanguageId;
+use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use Lwt\Core\Entity\ValueObject\TermId;
 use Lwt\Core\Entity\ValueObject\TermStatus;
 use Lwt\Core\Entity\ValueObject\TextId;

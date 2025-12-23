@@ -14,11 +14,11 @@
 
 namespace Lwt\Services;
 
-use Lwt\Core\Entity\Language;
+use Lwt\Modules\Language\Domain\Language;
+use Lwt\Modules\Language\Infrastructure\MySqlLanguageRepository;
 use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
 use Lwt\Core\Http\UrlUtilities;
-use Lwt\Core\Repository\LanguageRepository;
 use Lwt\Database\Connection;
 use Lwt\Database\Maintenance;
 use Lwt\Database\QueryBuilder;
@@ -27,9 +27,6 @@ use Lwt\Database\UserScopedQuery;
 
 require_once __DIR__ . '/../Core/Http/InputValidator.php';
 require_once __DIR__ . '/../Core/Http/UrlUtilities.php';
-require_once __DIR__ . '/../Core/Repository/RepositoryInterface.php';
-require_once __DIR__ . '/../Core/Repository/AbstractRepository.php';
-require_once __DIR__ . '/../Core/Repository/LanguageRepository.php';
 
 /**
  * Service class for managing languages.
@@ -49,16 +46,16 @@ class LanguageService
     /**
      * Language repository for data access.
      */
-    private LanguageRepository $repository;
+    private MySqlLanguageRepository $repository;
 
     /**
      * Create a new LanguageService.
      *
-     * @param LanguageRepository|null $repository Optional repository instance
+     * @param MySqlLanguageRepository|null $repository Optional repository instance
      */
-    public function __construct(?LanguageRepository $repository = null)
+    public function __construct(?MySqlLanguageRepository $repository = null)
     {
-        $this->repository = $repository ?? new LanguageRepository();
+        $this->repository = $repository ?? new MySqlLanguageRepository();
     }
 
     /**
@@ -606,7 +603,7 @@ class LanguageService
      * Try to get language code from its ID.
      *
      * @param int   $lgId           Language ID
-     * @param array $languagesTable Table of languages, usually from LanguageDefinitions::getAll()
+     * @param array $languagesTable Table of languages, usually from LanguagePresets::getAll()
      *
      * @return string Two-letter code (e.g., BCP 47) or empty string
      */

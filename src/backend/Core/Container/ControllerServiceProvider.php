@@ -19,7 +19,7 @@ use Lwt\Controllers\ApiController;
 use Lwt\Controllers\AuthController;
 use Lwt\Controllers\FeedsController;
 use Lwt\Controllers\HomeController;
-use Lwt\Controllers\LanguageController;
+use Lwt\Modules\Language\Http\LanguageController;
 use Lwt\Controllers\TagsController;
 use Lwt\Controllers\TestController;
 use Lwt\Controllers\TextController;
@@ -34,7 +34,7 @@ use Lwt\Services\ExportService;
 use Lwt\Services\ExpressionService;
 use Lwt\Services\FeedService;
 use Lwt\Services\HomeService;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Services\PasswordService;
 use Lwt\Services\ServerDataService;
 use Lwt\Services\SettingsService;
@@ -92,8 +92,13 @@ class ControllerServiceProvider implements ServiceProviderInterface
 
         $container->bind(LanguageController::class, function (Container $c) {
             return new LanguageController(
-                $c->get(LanguageService::class)
+                $c->get(LanguageFacade::class)
             );
+        });
+
+        // Also bind the old namespace for backward compatibility
+        $container->bind(\Lwt\Controllers\LanguageController::class, function (Container $c) {
+            return $c->get(LanguageController::class);
         });
 
         $container->bind(TestController::class, function (Container $c) {

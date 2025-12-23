@@ -1,13 +1,14 @@
 /**
- * TTS Settings - Text-to-Speech settings management.
+ * TTS Settings - Text-to-Speech settings management as Alpine.js component.
  *
- * Extracted from Views/Admin/tts_settings.php
  * Manages voice selection, reading rate/pitch, and demo playback.
  *
  * @license Unlicense
  * @since 3.0.0
+ * @since 3.1.0 Migrated to Alpine.js component
  */
 
+import Alpine from 'alpinejs';
 import { readTextAloud } from '../core/user_interactions';
 import { lwtFormCheck } from '../forms/unloadformcheck';
 import { getTTSSettingsWithMigration, saveTTSSettings } from '../core/tts_storage';
@@ -21,8 +22,197 @@ export interface TTSSettingsConfig {
 }
 
 /**
- * TTS settings object.
- * Handles voice management and demo playback for Text-to-Speech.
+ * Voice option interface for type safety.
+ */
+interface VoiceOption {
+  name: string;
+  lang: string;
+  isDefault: boolean;
+}
+
+/**
+ * Alpine.js component for TTS settings management.
+ * Replaces the vanilla JS ttsSettings object.
+ */
+export function ttsSettingsApp(config: TTSSettingsConfig = { currentLanguageCode: '' }) {
+  return {
+    /** Current language being learnt */
+    currentLanguage: config.currentLanguageCode,
+
+    /** Available voice options */
+    voices: [] as VoiceOption[],
+
+    /** Selected voice name */
+    selectedVoice: '',
+
+    /** Reading rate (0.5-2) */
+    rate: 1,
+
+    /** Pitch (0-2) */
+    pitch: 1,
+
+    /** Demo text for testing */
+    demoText: 'Lorem ipsum dolor sit amet...',
+
+    /** Whether voices are loading */
+    voicesLoading: true,
+
+    /**
+     * Initialize the component.
+     */
+    init() {
+      // Auto-set language from URL if present
+      this.autoSetCurrentLanguage();
+
+      // Load saved settings from localStorage
+      this.loadSavedSettings();
+
+      // Populate voices (may need to wait for speechSynthesis)
+      this.initVoices();
+    },
+
+    /**
+     * Auto-set current language from URL parameters.
+     */
+    autoSetCurrentLanguage() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('lang')) {
+        this.currentLanguage = urlParams.get('lang') || '';
+      }
+    },
+
+    /**
+     * Load saved TTS settings from localStorage.
+     */
+    loadSavedSettings() {
+      if (!this.currentLanguage) return;
+
+      const settings = getTTSSettingsWithMigration(this.currentLanguage);
+      if (settings.voice) this.selectedVoice = settings.voice;
+      if (settings.rate !== undefined) this.rate = settings.rate;
+      if (settings.pitch !== undefined) this.pitch = settings.pitch;
+    },
+
+    /**
+     * Initialize voice list from speechSynthesis API.
+     */
+    initVoices() {
+      if (typeof window.speechSynthesis === 'undefined') {
+        this.voicesLoading = false;
+        return;
+      }
+
+      // Voices may not be immediately available
+      const loadVoices = () => {
+        this.populateVoiceList();
+        this.voicesLoading = false;
+      };
+
+      // Try immediately
+      if (window.speechSynthesis.getVoices().length > 0) {
+        loadVoices();
+      } else {
+        // Wait for voices to load
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+      }
+    },
+
+    /**
+     * Populate the voice list based on current language.
+     */
+    populateVoiceList() {
+      const voices = window.speechSynthesis.getVoices();
+      this.voices = [];
+
+      for (const voice of voices) {
+        if (voice.lang !== this.currentLanguage && !voice.default) {
+          continue;
+        }
+        this.voices.push({
+          name: voice.name,
+          lang: voice.lang,
+          isDefault: voice.default
+        });
+      }
+
+      // If no matching voices, show all available
+      if (this.voices.length === 0) {
+        for (const voice of voices) {
+          this.voices.push({
+            name: voice.name,
+            lang: voice.lang,
+            isDefault: voice.default
+          });
+        }
+      }
+    },
+
+    /**
+     * Handle language selection change.
+     */
+    onLanguageChange() {
+      this.populateVoiceList();
+      this.loadSavedSettings();
+    },
+
+    /**
+     * Play demo text with current settings.
+     */
+    playDemo() {
+      readTextAloud(
+        this.demoText,
+        this.currentLanguage,
+        this.rate,
+        this.pitch,
+        this.selectedVoice || undefined
+      );
+    },
+
+    /**
+     * Save current settings to localStorage.
+     */
+    saveSettings() {
+      if (!this.currentLanguage) {
+        console.error('Cannot save TTS settings: no language selected');
+        return;
+      }
+
+      saveTTSSettings(this.currentLanguage, {
+        voice: this.selectedVoice || undefined,
+        rate: this.rate,
+        pitch: this.pitch
+      });
+    },
+
+    /**
+     * Handle cancel - reset form and redirect.
+     */
+    cancel() {
+      lwtFormCheck.resetDirty();
+      location.href = '/admin/settings';
+    },
+
+    /**
+     * Get display name for a voice (with DEFAULT label if applicable).
+     */
+    getVoiceDisplayName(voice: VoiceOption): string {
+      return voice.isDefault ? `${voice.name} -- DEFAULT` : voice.name;
+    }
+  };
+}
+
+// Register Alpine component
+if (typeof Alpine !== 'undefined') {
+  Alpine.data('ttsSettingsApp', ttsSettingsApp);
+}
+
+// ============================================================================
+// Legacy API - Deprecated wrapper for backward compatibility
+// ============================================================================
+
+/**
+ * Legacy TTS settings object.
+ * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component
  */
 export const ttsSettings = {
   /** Current language being learnt */
@@ -30,6 +220,7 @@ export const ttsSettings = {
 
   /**
    * Initialize with configuration.
+   * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component
    */
   init(config: TTSSettingsConfig): void {
     this.currentLanguage = config.currentLanguageCode;
@@ -37,18 +228,18 @@ export const ttsSettings = {
 
   /**
    * Auto-set current language from URL parameters.
+   * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component
    */
   autoSetCurrentLanguage(): void {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('lang')) {
-      ttsSettings.currentLanguage = urlParams.get('lang') || '';
+      this.currentLanguage = urlParams.get('lang') || '';
     }
   },
 
   /**
    * Get the language country code from the page.
-   *
-   * @returns Language code (e.g., "en")
+   * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component
    */
   getLanguageCode(): string {
     const el = document.getElementById('get-language') as HTMLSelectElement | null;
@@ -57,9 +248,10 @@ export const ttsSettings = {
 
   /**
    * Gather data in the page to read the demo.
+   * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component
    */
   readingDemo(): void {
-    const lang = ttsSettings.getLanguageCode();
+    const lang = this.getLanguageCode();
     const demoEl = document.getElementById('tts-demo') as HTMLInputElement | null;
     const rateEl = document.getElementById('rate') as HTMLInputElement | null;
     const pitchEl = document.getElementById('pitch') as HTMLInputElement | null;
@@ -75,11 +267,10 @@ export const ttsSettings = {
 
   /**
    * Set the Text-to-Speech data using localStorage.
-   *
-   * @since 3.0.0 Changed from cookies to localStorage
+   * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component
    */
   presetTTSData(): void {
-    const langName = ttsSettings.currentLanguage;
+    const langName = this.currentLanguage;
     const langEl = document.getElementById('get-language') as HTMLSelectElement | null;
     const voiceEl = document.getElementById('voice') as HTMLSelectElement | null;
     const rateEl = document.getElementById('rate') as HTMLInputElement | null;
@@ -87,7 +278,6 @@ export const ttsSettings = {
 
     if (langEl) langEl.value = langName;
 
-    // Get settings from localStorage (with automatic migration from cookies)
     const settings = getTTSSettingsWithMigration(langName);
     if (voiceEl) voiceEl.value = settings.voice || '';
     if (rateEl) rateEl.value = String(settings.rate ?? 1);
@@ -96,8 +286,7 @@ export const ttsSettings = {
 
   /**
    * Save the current TTS settings to localStorage.
-   *
-   * @since 3.0.0 New function to save settings client-side
+   * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component
    */
   saveSettings(): void {
     const langEl = document.getElementById('get-language') as HTMLSelectElement | null;
@@ -105,7 +294,7 @@ export const ttsSettings = {
     const rateEl = document.getElementById('rate') as HTMLInputElement | null;
     const pitchEl = document.getElementById('pitch') as HTMLInputElement | null;
 
-    const langName = langEl?.value || ttsSettings.currentLanguage;
+    const langName = langEl?.value || this.currentLanguage;
     if (!langName) {
       console.error('Cannot save TTS settings: no language selected');
       return;
@@ -120,13 +309,14 @@ export const ttsSettings = {
 
   /**
    * Populate the languages region list.
+   * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component
    */
   populateVoiceList(): void {
     const voices = window.speechSynthesis.getVoices();
     const voiceSelect = document.getElementById('voice') as HTMLSelectElement | null;
     if (!voiceSelect) return;
     voiceSelect.innerHTML = '';
-    const languageCode = ttsSettings.getLanguageCode();
+    const languageCode = this.getLanguageCode();
 
     for (let i = 0; i < voices.length; i++) {
       if (voices[i].lang !== languageCode && !voices[i].default) {
@@ -147,6 +337,7 @@ export const ttsSettings = {
 
   /**
    * Handle cancel button click.
+   * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component
    */
   clickCancel(): void {
     lwtFormCheck.resetDirty();
@@ -156,6 +347,7 @@ export const ttsSettings = {
 
 /**
  * Initialize TTS settings from the page.
+ * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component with x-data
  */
 export function initTTSSettings(): void {
   const configEl = document.getElementById('tts-settings-config');
@@ -169,7 +361,6 @@ export function initTTSSettings(): void {
       config = { currentLanguageCode: '' };
     }
   } else {
-    // Fallback: try to get from data attribute on form
     const form = document.querySelector('form.validate');
     config = {
       currentLanguageCode: form?.getAttribute('data-current-language') || ''
@@ -181,7 +372,6 @@ export function initTTSSettings(): void {
   ttsSettings.presetTTSData();
   ttsSettings.populateVoiceList();
 
-  // Set up event listeners
   const languageSelect = document.getElementById('get-language');
   if (languageSelect) {
     languageSelect.addEventListener('change', () => ttsSettings.populateVoiceList());
@@ -197,24 +387,13 @@ export function initTTSSettings(): void {
     cancelButton.addEventListener('click', () => ttsSettings.clickCancel());
   }
 
-  // Handle form submission - save to localStorage
   const form = document.querySelector('form.validate') as HTMLFormElement | null;
   if (form) {
     form.addEventListener('submit', () => {
-      // Save settings to localStorage before form submits
       ttsSettings.saveSettings();
-      // Let the form continue to submit (shows success message)
     });
   }
 }
-
-// Auto-initialize on DOM ready if config element or TTS form is present
-document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('tts-settings-config') ||
-      document.querySelector('form.validate select#get-language')) {
-    initTTSSettings();
-  }
-});
 
 // Deprecated wrapper functions for backward compatibility
 /**
@@ -248,6 +427,7 @@ export function populateVoiceList(): void {
 /**
  * Save TTS settings to localStorage.
  * @since 3.0.0
+ * @deprecated Since 3.1.0, use ttsSettingsApp() Alpine component
  */
 export function saveSettings(): void {
   return ttsSettings.saveSettings();

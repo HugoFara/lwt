@@ -33,7 +33,7 @@ require_once __DIR__ . '/../Services/ExpressionService.php';
 require_once __DIR__ . '/../Core/Database/Restore.php';
 require_once __DIR__ . '/../Services/MediaService.php';
 require_once __DIR__ . '/../Services/LanguageService.php';
-require_once __DIR__ . '/../Services/LanguageDefinitions.php';
+// LanguagePresets loaded via autoloader
 require_once __DIR__ . '/../Services/HomeService.php';
 
 /**

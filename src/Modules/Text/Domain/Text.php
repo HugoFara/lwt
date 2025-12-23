@@ -15,7 +15,7 @@
 namespace Lwt\Modules\Text\Domain;
 
 use InvalidArgumentException;
-use Lwt\Core\Entity\ValueObject\LanguageId;
+use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
 use Lwt\Modules\Text\Domain\ValueObject\TextId;
 
 /**

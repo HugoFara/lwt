@@ -16,7 +16,7 @@
 
 namespace Lwt\Modules\Language\Infrastructure;
 
-use Lwt\Core\Repository\AbstractRepository;
+use Lwt\Database\QueryBuilder;
 use Lwt\Modules\Language\Domain\Language;
 use Lwt\Modules\Language\Domain\LanguageRepositoryInterface;
 use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
@@ -26,26 +26,24 @@ use Lwt\Modules\Language\Domain\ValueObject\LanguageId;
  *
  * Provides database access for language management operations.
  *
- * @extends AbstractRepository<Language>
- *
  * @since 3.0.0
  */
-class MySqlLanguageRepository extends AbstractRepository implements LanguageRepositoryInterface
+class MySqlLanguageRepository implements LanguageRepositoryInterface
 {
     /**
      * @var string Table name without prefix
      */
-    protected string $tableName = 'languages';
+    private string $tableName = 'languages';
 
     /**
      * @var string Primary key column
      */
-    protected string $primaryKey = 'LgID';
+    private string $primaryKey = 'LgID';
 
     /**
      * @var array<string, string> Property to column mapping
      */
-    protected array $columnMap = [
+    private array $columnMap = [
         'id' => 'LgID',
         'name' => 'LgName',
         'dict1uri' => 'LgDict1URI',
@@ -72,9 +70,23 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     ];
 
     /**
-     * {@inheritdoc}
+     * Get a query builder for this repository's table.
+     *
+     * @return QueryBuilder
      */
-    protected function mapToEntity(array $row): Language
+    private function query(): QueryBuilder
+    {
+        return QueryBuilder::table($this->tableName);
+    }
+
+    /**
+     * Map a database row to a Language entity.
+     *
+     * @param array<string, mixed> $row Database row
+     *
+     * @return Language
+     */
+    private function mapToEntity(array $row): Language
     {
         return Language::reconstitute(
             (int) $row['LgID'],
@@ -104,13 +116,13 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     }
 
     /**
-     * {@inheritdoc}
+     * Map a Language entity to database row.
      *
-     * @param Language $entity
+     * @param Language $entity The language entity
      *
      * @return array<string, mixed>
      */
-    protected function mapToRow(object $entity): array
+    private function mapToRow(Language $entity): array
     {
         return [
             'LgID' => $entity->id()->toInt(),
@@ -136,31 +148,69 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
 
     /**
      * {@inheritdoc}
-     *
-     * @param Language $entity
      */
-    protected function getEntityId(object $entity): int
+    public function find(int $id): ?Language
     {
-        return $entity->id()->toInt();
+        $row = $this->query()
+            ->where($this->primaryKey, '=', $id)
+            ->firstPrepared();
+
+        if ($row === null) {
+            return null;
+        }
+
+        return $this->mapToEntity($row);
     }
 
     /**
      * {@inheritdoc}
-     *
-     * @param Language $entity
      */
-    protected function setEntityId(object $entity, int $id): void
+    public function save(Language $entity): void
     {
-        $entity->setId(LanguageId::fromInt($id));
+        $data = $this->mapToRow($entity);
+        $id = $entity->id()->toInt();
+
+        if ($id > 0 && !$entity->id()->isNew()) {
+            // Update existing
+            $query = $this->query()->where($this->primaryKey, '=', $id);
+            $query->updatePrepared($data);
+            return;
+        }
+
+        // Insert new
+        $insertData = $data;
+        unset($insertData[$this->primaryKey]); // Remove ID for auto-increment
+
+        $newId = (int) $this->query()->insertPrepared($insertData);
+        $entity->setId(LanguageId::fromInt($newId));
     }
 
     /**
-     * Find all non-empty languages (those with a name).
-     *
-     * @param string $orderBy Column to order by (default: 'LgName')
-     * @param string $direction Sort direction (default: 'ASC')
-     *
-     * @return Language[]
+     * {@inheritdoc}
+     */
+    public function delete(int $id): void
+    {
+        if ($id <= 0) {
+            return;
+        }
+
+        $this->query()
+            ->where($this->primaryKey, '=', $id)
+            ->deletePrepared();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function exists(int $id): bool
+    {
+        return $this->query()
+            ->where($this->primaryKey, '=', $id)
+            ->existsPrepared();
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function findAllActive(string $orderBy = 'LgName', string $direction = 'ASC'): array
     {
@@ -176,24 +226,19 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     }
 
     /**
-     * Find a language by name.
-     *
-     * @param string $name Language name
-     *
-     * @return Language|null
+     * {@inheritdoc}
      */
     public function findByName(string $name): ?Language
     {
-        return $this->findOneBy(['name' => $name]);
+        $row = $this->query()
+            ->where('LgName', '=', $name)
+            ->firstPrepared();
+
+        return $row !== null ? $this->mapToEntity($row) : null;
     }
 
     /**
-     * Check if a language name exists.
-     *
-     * @param string   $name      Language name
-     * @param int|null $excludeId Language ID to exclude (for updates)
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function nameExists(string $name, ?int $excludeId = null): bool
     {
@@ -207,9 +252,7 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     }
 
     /**
-     * Get languages as name => id dictionary.
-     *
-     * @return array<string, int>
+     * {@inheritdoc}
      */
     public function getAllAsDict(): array
     {
@@ -227,11 +270,7 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     }
 
     /**
-     * Get languages formatted for select dropdown options.
-     *
-     * @param int $maxNameLength Maximum name length before truncation
-     *
-     * @return array<int, array{id: int, name: string}>
+     * {@inheritdoc}
      */
     public function getForSelect(int $maxNameLength = 30): array
     {
@@ -257,9 +296,7 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     }
 
     /**
-     * Find the first empty language record (for reuse on insert).
-     *
-     * @return int|null The empty language ID or null
+     * {@inheritdoc}
      */
     public function findEmptyLanguageId(): ?int
     {
@@ -274,11 +311,7 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     }
 
     /**
-     * Check if a language is RTL (right-to-left).
-     *
-     * @param int $id Language ID
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isRightToLeft(int $id): bool
     {
@@ -291,11 +324,7 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     }
 
     /**
-     * Get the word character regex for a language.
-     *
-     * @param int $id Language ID
-     *
-     * @return string|null The regex or null if not found
+     * {@inheritdoc}
      */
     public function getWordCharacters(int $id): ?string
     {
@@ -308,9 +337,7 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     }
 
     /**
-     * Create a new empty language entity with default values.
-     *
-     * @return Language
+     * {@inheritdoc}
      */
     public function createEmpty(): Language
     {
@@ -323,11 +350,7 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     }
 
     /**
-     * Get the name of a language by ID.
-     *
-     * @param int $id Language ID
-     *
-     * @return string|null The language name or null if not found
+     * {@inheritdoc}
      */
     public function getName(int $id): ?string
     {
@@ -340,11 +363,7 @@ class MySqlLanguageRepository extends AbstractRepository implements LanguageRepo
     }
 
     /**
-     * Get the translator URI for a language.
-     *
-     * @param int $id Language ID
-     *
-     * @return string|null The translator URI or null if not found
+     * {@inheritdoc}
      */
     public function getTranslatorUri(int $id): ?string
     {

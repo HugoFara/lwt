@@ -6,30 +6,29 @@
  * PHP version 8.1
  *
  * @category Lwt
- * @package  Lwt
+ * @package  Lwt\Modules\Language\Http
  * @author   HugoFara <hugo.farajallah@protonmail.com>
  * @license Unlicense <http://unlicense.org/>
  * @link    https://hugofara.github.io/lwt/docs/php/files/src-php-controllers-languagecontroller.html
  * @since   3.0.0
  */
 
-namespace Lwt\Controllers;
+namespace Lwt\Modules\Language\Http;
 
+use Lwt\Controllers\BaseController;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\IconHelper;
 
-require_once __DIR__ . '/../Core/Bootstrap/db_bootstrap.php';
-require_once __DIR__ . '/../View/Helper/PageLayoutHelper.php';
-require_once __DIR__ . '/../View/Helper/FormHelper.php';
-require_once __DIR__ . '/../Core/Http/UrlUtilities.php';
-require_once __DIR__ . '/../Core/Entity/Language.php';
-require_once __DIR__ . '/../Services/LanguageService.php';
-require_once __DIR__ . '/../Services/LanguageDefinitions.php';
+require_once __DIR__ . '/../../../backend/Core/Bootstrap/db_bootstrap.php';
+require_once __DIR__ . '/../../../backend/View/Helper/PageLayoutHelper.php';
+require_once __DIR__ . '/../../../backend/View/Helper/FormHelper.php';
+require_once __DIR__ . '/../../../backend/Core/Http/UrlUtilities.php';
 
 use Lwt\Database\Settings;
-use Lwt\Services\LanguageDefinitions;
-use Lwt\Services\LanguageService;
+use Lwt\Modules\Language\Application\LanguageFacade;
+use Lwt\Modules\Language\Domain\Language;
+use Lwt\Modules\Language\Infrastructure\LanguagePresets;
 use Lwt\Core\Http\UrlUtilities;
 use Lwt\Core\Parser\ParserRegistry;
 
@@ -52,17 +51,17 @@ use Lwt\Core\Parser\ParserRegistry;
  */
 class LanguageController extends BaseController
 {
-    private LanguageService $languageService;
+    private LanguageFacade $languageFacade;
 
     /**
      * Create a new LanguageController.
      *
-     * @param LanguageService $languageService Language service for language operations
+     * @param LanguageFacade $languageFacade Language facade for language operations
      */
-    public function __construct(LanguageService $languageService)
+    public function __construct(LanguageFacade $languageFacade)
     {
         parent::__construct();
-        $this->languageService = $languageService;
+        $this->languageFacade = $languageFacade;
     }
 
     /**
@@ -90,19 +89,19 @@ class LanguageController extends BaseController
         // Handle actions
         $refreshId = $this->paramInt('refresh');
         if ($refreshId !== null) {
-            $message = $this->languageService->refresh($refreshId);
+            $message = $this->languageFacade->refresh($refreshId);
         }
 
         $delId = $this->paramInt('del');
         $op = $this->param('op');
         if ($delId !== null) {
-            $message = $this->languageService->delete($delId);
+            $message = $this->languageFacade->delete($delId);
         } elseif ($op !== '') {
             if ($op === 'Save') {
-                $message = $this->languageService->create();
+                $message = $this->languageFacade->create();
             } elseif ($op === 'Change') {
                 $lgId = $this->paramInt('LgID', 0) ?? 0;
-                $message = $this->languageService->update($lgId);
+                $message = $this->languageFacade->update($lgId);
             }
         }
 
@@ -130,9 +129,9 @@ class LanguageController extends BaseController
         $this->message($message, false);
 
         $currentLanguageId = (int) Settings::get('currentlanguage');
-        $languages = $this->languageService->getLanguagesWithStats();
+        $languages = $this->languageFacade->getLanguagesWithStats();
 
-        include __DIR__ . '/../Views/Language/index.php';
+        include __DIR__ . '/../Views/index.php';
     }
 
     /**
@@ -145,7 +144,7 @@ class LanguageController extends BaseController
         $currentNativeLanguage = Settings::get('currentnativelanguage');
         $languageOptions = $this->getWizardSelectOptions($currentNativeLanguage);
         $languageOptionsEmpty = $this->getWizardSelectOptions('');
-        $languageDefsJson = json_encode(LanguageDefinitions::getAll());
+        $languageDefsJson = json_encode(LanguagePresets::getAll());
 
         ?>
         <h2>
@@ -156,20 +155,20 @@ class LanguageController extends BaseController
         </h2>
         <?php
 
-        include __DIR__ . '/../Views/Language/wizard.php';
+        include __DIR__ . '/../Views/wizard.php';
 
-        $languageEntity = $this->languageService->createEmptyLanguage();
-        $language = $this->languageService->toViewObject($languageEntity);
+        $languageEntity = $this->languageFacade->createEmptyLanguage();
+        $language = $this->languageFacade->toViewObject($languageEntity);
         $sourceLg = '';
         $targetLg = '';
         $isNew = true;
 
         $this->prepareLanguageCodes($languageEntity, $currentNativeLanguage, $sourceLg, $targetLg);
 
-        $allLanguages = $this->languageService->getAllLanguages();
+        $allLanguages = $this->languageFacade->getAllLanguages();
         $parserInfo = (new ParserRegistry())->getParserInfo();
 
-        include __DIR__ . '/../Views/Language/form.php';
+        include __DIR__ . '/../Views/form.php';
     }
 
     /**
@@ -181,14 +180,14 @@ class LanguageController extends BaseController
      */
     private function showEditForm(int $lid): void
     {
-        $languageEntity = $this->languageService->getById($lid);
+        $languageEntity = $this->languageFacade->getById($lid);
 
         if ($languageEntity === null) {
             echo '<p class="red">Language not found.</p>';
             return;
         }
 
-        $language = $this->languageService->toViewObject($languageEntity);
+        $language = $this->languageFacade->toViewObject($languageEntity);
         $currentNativeLanguage = Settings::get('currentnativelanguage');
         $sourceLg = '';
         $targetLg = '';
@@ -196,7 +195,7 @@ class LanguageController extends BaseController
 
         $this->prepareLanguageCodes($languageEntity, $currentNativeLanguage, $sourceLg, $targetLg);
 
-        $allLanguages = $this->languageService->getAllLanguages();
+        $allLanguages = $this->languageFacade->getAllLanguages();
         $parserInfo = (new ParserRegistry())->getParserInfo();
 
         ?>
@@ -207,33 +206,33 @@ class LanguageController extends BaseController
     </h2>
         <?php
 
-        include __DIR__ . '/../Views/Language/form.php';
+        include __DIR__ . '/../Views/form.php';
     }
 
     /**
      * Prepare source and target language codes for the form.
      *
-     * @param \Lwt\Core\Entity\Language $language              Language object
-     * @param string                    $currentNativeLanguage Current native language
-     * @param string                    &$sourceLg             Output source language code
-     * @param string                    &$targetLg             Output target language code
+     * @param Language $language              Language object
+     * @param string   $currentNativeLanguage Current native language
+     * @param string   &$sourceLg             Output source language code
+     * @param string   &$targetLg             Output target language code
      *
      * @return void
      */
     private function prepareLanguageCodes(
-        \Lwt\Core\Entity\Language $language,
+        Language $language,
         string $currentNativeLanguage,
         string &$sourceLg,
         string &$targetLg
     ): void {
-        if (array_key_exists($currentNativeLanguage, LanguageDefinitions::getAll())) {
-            $targetLg = LanguageDefinitions::getAll()[$currentNativeLanguage][1];
+        if (array_key_exists($currentNativeLanguage, LanguagePresets::getAll())) {
+            $targetLg = LanguagePresets::getAll()[$currentNativeLanguage][1];
         }
 
         $langName = $language->name();
         if ($langName) {
-            if (array_key_exists($langName, LanguageDefinitions::getAll())) {
-                $sourceLg = LanguageDefinitions::getAll()[$langName][1];
+            if (array_key_exists($langName, LanguagePresets::getAll())) {
+                $sourceLg = LanguagePresets::getAll()[$langName][1];
             }
             $lgFromDict = UrlUtilities::langFromDict($language->translatorUri());
             if ($lgFromDict != '' && $lgFromDict != $sourceLg) {
@@ -257,7 +256,7 @@ class LanguageController extends BaseController
     private function getWizardSelectOptions(string $selected): string
     {
         $r = '<option value=""' . FormHelper::getSelected($selected, '') . '>[Choose...]</option>';
-        $keys = array_keys(LanguageDefinitions::getAll());
+        $keys = array_keys(LanguagePresets::getAll());
         foreach ($keys as $item) {
             $r .= '<option value="' . $item . '"' .
                 FormHelper::getSelected($selected, $item) . '>' . $item . '</option>';
