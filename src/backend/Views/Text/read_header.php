@@ -29,6 +29,8 @@ namespace Lwt\Views\Text;
 
 use Lwt\Services\AnnotationService;
 use Lwt\Services\MediaService;
+use Lwt\Services\TextNavigationService;
+use Lwt\Services\TextStatisticsService;
 
 ?>
 <script type="application/json" id="text-header-config"><?php echo json_encode([
@@ -46,7 +48,7 @@ use Lwt\Services\MediaService;
     </div>
     <div>
         <?php
-        echo \getPreviousAndNextTextLinks(
+        echo (new TextNavigationService())->getPreviousAndNextTextLinks(
             $textId,
             '/text/read?start=',
             false,
@@ -95,7 +97,7 @@ use Lwt\Services\MediaService;
 <div class="flex-spaced">
     <div>
         Unknown words:
-        <span id="learnstatus"><?php echo \todoWordsContent((int) $textId); ?></span>
+        <span id="learnstatus"><?php echo (new TextStatisticsService())->getTodoWordsContent((int) $textId); ?></span>
     </div>
     <div
     title="[Show All] = ON: ALL terms are shown, and all multi-word terms are shown as superscripts before the first word. The superscript indicates the number of words in the multi-word term.

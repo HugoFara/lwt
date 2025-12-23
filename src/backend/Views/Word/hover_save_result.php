@@ -23,6 +23,8 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Services\TextStatisticsService;
+
 ?>
 <p>Status: <?php echo get_colored_status_msg($status); ?></p><br />
 <?php if ($translation != '*'): ?>
@@ -36,6 +38,6 @@ namespace Lwt\Views\Word;
     'status' => $status,
     'translation' => $translation,
     'wordRaw' => $wordRaw,
-    'todoContent' => todoWordsContent($textId)
+    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
 ]); ?>
 </script>

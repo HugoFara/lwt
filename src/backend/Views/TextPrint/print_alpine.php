@@ -19,6 +19,7 @@
 namespace Lwt\Views\TextPrint;
 
 use Lwt\Services\AnnotationService;
+use Lwt\Services\TextNavigationService;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\PageLayoutHelper;
@@ -44,7 +45,7 @@ $printUrl = $mode === 'plain' ? '/text/print-plain?text=' : '/text/print?text=';
                 <?php echo PageLayoutHelper::buildLogo(); ?>
             </div>
             <div>
-                <?php echo getPreviousAndNextTextLinks($textId, $printUrl, false, ''); ?>
+                <?php echo (new TextNavigationService())->getPreviousAndNextTextLinks($textId, $printUrl, false, ''); ?>
             </div>
             <div>
                 <a href="/text/read?start=<?php echo $textId; ?>" target="_top">

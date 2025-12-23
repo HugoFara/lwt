@@ -19,7 +19,7 @@
  * @since    3.0.0
  */
 
-namespace Lwt\Services {
+namespace Lwt\Services;
 
 use Lwt\Database\Connection;
 
@@ -425,5 +425,3 @@ class ExportService
         exit();
     }
 }
-
-} // End namespace Lwt\Services

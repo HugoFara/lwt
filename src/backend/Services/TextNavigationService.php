@@ -12,7 +12,7 @@
  * @since    3.0.0 Migrated from Core/Text/text_navigation.php
  */
 
-namespace Lwt\Services {
+namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Core\Http\InputValidator;
@@ -174,13 +174,13 @@ class TextNavigationService
         for ($i = 1; $i < $listlen - 1; $i++) {
             if ($list[$i] == $textId) {
                 if ($list[$i - 1] !== 0) {
-                    $title = htmlspecialchars(getTextTitle($list[$i - 1]), ENT_QUOTES, 'UTF-8');
+                    $title = htmlspecialchars(self::getTextTitle($list[$i - 1]), ENT_QUOTES, 'UTF-8');
                     $prev = '<a href="' . $url . $list[$i - 1] . '" target="_top">' . IconHelper::render('circle-chevron-left', ['title' => 'Previous Text: ' . $title, 'alt' => 'Previous Text: ' . $title]) . '</a>';
                 } else {
                     $prev = IconHelper::render('circle-chevron-left', ['title' => 'No Previous Text', 'alt' => 'No Previous Text', 'class' => 'icon-muted']);
                 }
                 if ($list[$i + 1] !== 0) {
-                    $title = htmlspecialchars(getTextTitle($list[$i + 1]), ENT_QUOTES, 'UTF-8');
+                    $title = htmlspecialchars(self::getTextTitle($list[$i + 1]), ENT_QUOTES, 'UTF-8');
                     $next = '<a href="' . $url . $list[$i + 1] .
                     '" target="_top">' . IconHelper::render('circle-chevron-right', ['title' => 'Next Text: ' . $title, 'alt' => 'Next Text: ' . $title]) . '</a>';
                 } else {
@@ -192,50 +192,19 @@ class TextNavigationService
         return $add . IconHelper::render('circle-chevron-left', ['title' => 'No Previous Text', 'alt' => 'No Previous Text', 'class' => 'icon-muted']) . '
         ' . IconHelper::render('circle-chevron-right', ['title' => 'No Next Text', 'alt' => 'No Next Text', 'class' => 'icon-muted']);
     }
+
+    /**
+     * Get the title of a text by its ID.
+     *
+     * @param int $textId Text ID
+     *
+     * @return string Text title, or empty string if not found
+     */
+    public static function getTextTitle(int $textId): string
+    {
+        $result = QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->valuePrepared('TxTitle');
+        return $result !== null ? (string) $result : '';
+    }
 }
-
-} // End namespace Lwt\Services
-
-namespace {
-
-// =============================================================================
-// GLOBAL FUNCTION WRAPPERS (for backward compatibility)
-// =============================================================================
-
-use Lwt\Services\TextNavigationService;
-use Lwt\Database\QueryBuilder;
-
-/**
- * Get the title of a text by its ID.
- *
- * @param int $textId Text ID
- *
- * @return string Text title, or empty string if not found
- */
-function getTextTitle(int $textId): string
-{
-    $result = QueryBuilder::table('texts')
-        ->where('TxID', '=', $textId)
-        ->valuePrepared('TxTitle');
-    return $result !== null ? (string) $result : '';
-}
-
-/**
- * Return navigation arrows to previous and next texts.
- *
- * @param int    $textid  ID of the current text
- * @param string $url     Base URL to append before $textid
- * @param bool   $onlyann Restrict to annotated texts only
- * @param string $add     Some content to add before the output
- *
- * @return string Arrows to previous and next texts.
- *
- * @see \Lwt\Services\TextNavigationService::getPreviousAndNextTextLinks()
- */
-function getPreviousAndNextTextLinks(int $textid, string $url, bool|int $onlyann, string $add): string
-{
-    $service = new TextNavigationService();
-    return $service->getPreviousAndNextTextLinks($textid, $url, (bool) $onlyann, $add);
-}
-
-} // End global namespace

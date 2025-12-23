@@ -15,7 +15,7 @@
  * @since    3.0.0 Migrated from Core/Text/sentence_operations.php
  */
 
-namespace Lwt\Services {
+namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Core\StringUtils;
@@ -747,31 +747,3 @@ class SentenceService
         return ob_get_clean();
     }
 }
-
-} // End namespace Lwt\Services
-
-namespace {
-
-// =============================================================================
-// GLOBAL FUNCTION WRAPPERS (for backward compatibility)
-// =============================================================================
-
-use Lwt\Services\SentenceService;
-
-/**
- * Prepare the area for example sentences of a word.
- *
- * @param int    $lang     Language ID
- * @param string $termlc   Term text in lowercase
- * @param string $selector JS selector for target textarea
- * @param int    $wid      Word ID
- *
- * @return void Outputs HTML directly
- */
-function exampleSentencesArea(int $lang, string $termlc, string $selector, int $wid): void
-{
-    $service = new SentenceService();
-    echo $service->renderExampleSentencesArea($lang, $termlc, $selector, $wid);
-}
-
-} // End global namespace

@@ -28,6 +28,8 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Core\Http\InputValidator;
+use Lwt\Services\SentenceService;
+use Lwt\Services\SimilarTermsService;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
 
@@ -51,7 +53,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
             <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?>
         </td>
     </tr>
-    <?php echo printSimilarTermsTabRow(); ?>
+    <?php echo (new SimilarTermsService())->printSimilarTermsTabRow(); ?>
     <tr>
         <td class="td1 right">Translation:</td>
         <td class="td1">
@@ -111,5 +113,5 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 </form>
 <?php
 // Display example sentences button
-exampleSentencesArea($term->lgid, $term->textlc, 'document.forms.editword.WoSentence', $term->id);
+echo (new SentenceService())->renderExampleSentencesArea($term->lgid, $term->textlc, 'document.forms.editword.WoSentence', $term->id);
 ?>

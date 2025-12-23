@@ -12,7 +12,7 @@
  * @since    3.0.0 Migrated from Core/Text/simterms.php
  */
 
-namespace Lwt\Services {
+namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
@@ -452,26 +452,3 @@ class SimilarTermsService
         return '';
     }
 }
-
-} // End namespace Lwt\Services
-
-namespace {
-
-// =============================================================================
-// GLOBAL FUNCTION WRAPPERS (for backward compatibility)
-// =============================================================================
-
-use Lwt\Services\SimilarTermsService;
-
-/**
- * Print a row for similar terms if the feature is enabled.
- *
- * @return string HTML output
- */
-function printSimilarTermsTabRow(): string
-{
-    $service = new SimilarTermsService();
-    return $service->printSimilarTermsTabRow();
-}
-
-} // End global namespace

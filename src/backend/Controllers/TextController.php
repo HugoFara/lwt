@@ -17,6 +17,7 @@ namespace Lwt\Controllers;
 
 use Lwt\Services\TextService;
 use Lwt\Services\TextDisplayService;
+use Lwt\Services\TextNavigationService;
 use Lwt\Services\TagService;
 use Lwt\Services\LanguageService;
 use Lwt\Services\LanguageDefinitions;
@@ -518,7 +519,7 @@ class TextController extends BaseController
         $rtlScript = $settings['rtlScript'];
 
         // Get navigation links
-        $textLinks = \getPreviousAndNextTextLinks(
+        $textLinks = (new TextNavigationService())->getPreviousAndNextTextLinks(
             $textId,
             'display_impr_text.php?text=',
             true,

@@ -18,6 +18,7 @@
 namespace Lwt\Views\Test;
 
 use Lwt\Services\AnnotationService;
+use Lwt\Services\TextNavigationService;
 use Lwt\View\Helper\PageLayoutHelper;
 
 ?>
@@ -30,7 +31,7 @@ use Lwt\View\Helper\PageLayoutHelper;
     <?php if ($textId !== null): ?>
     <div>
         <?php
-        echo \getPreviousAndNextTextLinks(
+        echo (new TextNavigationService())->getPreviousAndNextTextLinks(
             $textId,
             '/test?text=',
             false,

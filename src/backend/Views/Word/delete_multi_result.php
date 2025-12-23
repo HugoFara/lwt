@@ -21,6 +21,8 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Services\TextStatisticsService;
+
 ?>
 <p>OK, term deleted (<?php echo $rowsAffected; ?>).</p>
 
@@ -28,6 +30,6 @@ namespace Lwt\Views\Word;
 <?php echo json_encode([
     'wid' => (int) $wid,
     'showAll' => $showAll,
-    'todoContent' => todoWordsContent((int) $textId)
+    'todoContent' => (new TextStatisticsService())->getTodoWordsContent((int) $textId)
 ]); ?>
 </script>

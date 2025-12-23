@@ -21,9 +21,10 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Services\SimilarTermsService;
+use Lwt\Services\TagService;
 use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
-use Lwt\Services\TagService;
 
 ?>
 
@@ -39,7 +40,7 @@ data-lwt-clear-frame="true">
             type="text" name="WoText" id="WoText" value="" maxlength="250" size="35" />
             <?php echo IconHelper::render('circle-x', ['title' => 'Field must not be empty', 'alt' => 'Field must not be empty']); ?></td>
         </tr>
-        <?php echo printSimilarTermsTabRow(); ?>
+        <?php echo (new SimilarTermsService())->printSimilarTermsTabRow(); ?>
         <tr>
             <td class="td1 right">Translation:</td>
             <td class="td1">

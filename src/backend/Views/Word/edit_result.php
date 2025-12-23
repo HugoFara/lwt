@@ -28,6 +28,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Services\TagService;
+use Lwt\Services\TextStatisticsService;
 
 $tagList = TagService::getWordTagList($wid, false);
 $tagFormatted = $tagList !== '' ? ' [' . str_replace(',', ', ', $tagList) . ']' : '';
@@ -49,7 +50,7 @@ if ($fromAnn === "") {
     } else {
         $config['oldStatus'] = $oldStatus;
     }
-    $config['todoContent'] = todoWordsContent($textId);
+    $config['todoContent'] = (new TextStatisticsService())->getTodoWordsContent($textId);
 } else {
     // Annotation mode
     $config['fromAnn'] = (int)$fromAnn;

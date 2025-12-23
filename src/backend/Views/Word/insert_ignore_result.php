@@ -20,6 +20,8 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Services\TextStatisticsService;
+
 ?>
 <p>OK, this term will be ignored!</p>
 
@@ -28,6 +30,6 @@ namespace Lwt\Views\Word;
     'wid' => (int) $wid,
     'hex' => $hex,
     'term' => $term,
-    'todoContent' => todoWordsContent((int) $textId)
+    'todoContent' => (new TextStatisticsService())->getTodoWordsContent((int) $textId)
 ]); ?>
 </script>

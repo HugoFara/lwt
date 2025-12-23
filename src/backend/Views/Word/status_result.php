@@ -22,7 +22,9 @@
 
 namespace Lwt\Views\Word;
 
-$todoContent = todoWordsContent((int) $textId);
+use Lwt\Services\TextStatisticsService;
+
+$todoContent = (new TextStatisticsService())->getTodoWordsContent((int) $textId);
 ?>
 <p id='status_change_log'>Term status updating...</p>
 

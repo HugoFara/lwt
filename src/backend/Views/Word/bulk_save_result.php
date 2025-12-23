@@ -26,6 +26,7 @@
 namespace Lwt\Views\Word;
 
 use Lwt\Database\Escaping;
+use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\IconHelper;
 
 ?>
@@ -38,6 +39,6 @@ use Lwt\View\Helper\IconHelper;
     'words' => $newWords,
     'useTooltip' => ($tooltipMode == 1),
     'cleanUp' => $cleanUp,
-    'todoContent' => todoWordsContent($tid)
+    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($tid)
 ]); ?>
 </script>

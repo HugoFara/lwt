@@ -18,6 +18,7 @@ use Lwt\Services\MediaService;
 use Lwt\Services\SentenceService;
 use Lwt\Services\TableSetService;
 use Lwt\Services\TagService;
+use Lwt\Services\TextNavigationService;
 use Lwt\Services\TextStatisticsService;
 use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\SelectOptionsBuilder;
@@ -680,17 +681,18 @@ class IntegrationTest extends TestCase
         $text3_id = (int)Connection::lastInsertId();
 
         // Test getting navigation for middle text
-        $result = getPreviousAndNextTextLinks($text2_id, 'do_text.php', 0, '');
+        $navService = new TextNavigationService();
+        $result = $navService->getPreviousAndNextTextLinks($text2_id, 'do_text.php', false, '');
         $this->assertIsString($result);
         // Should contain navigation elements
         $this->assertNotEmpty($result);
 
         // Test with first text (no previous)
-        $result = getPreviousAndNextTextLinks($text1_id, 'do_text.php', 0, '');
+        $result = $navService->getPreviousAndNextTextLinks($text1_id, 'do_text.php', false, '');
         $this->assertIsString($result);
 
         // Test with last text (no next)
-        $result = getPreviousAndNextTextLinks($text3_id, 'do_text.php', 0, '');
+        $result = $navService->getPreviousAndNextTextLinks($text3_id, 'do_text.php', false, '');
         $this->assertIsString($result);
 
         // Clean up

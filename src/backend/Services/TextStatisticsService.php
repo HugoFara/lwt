@@ -14,7 +14,7 @@
  * @since    3.0.0 Migrated from Core/Text/text_statistics.php
  */
 
-namespace Lwt\Services {
+namespace Lwt\Services;
 
 use Lwt\Core\Globals;
 use Lwt\Database\Connection;
@@ -207,30 +207,3 @@ class TextStatisticsService
         return $res;
     }
 }
-
-} // End namespace Lwt\Services
-
-namespace {
-
-// =============================================================================
-// GLOBAL FUNCTION WRAPPERS (for backward compatibility)
-// =============================================================================
-
-use Lwt\Services\TextStatisticsService;
-
-/**
- * Prepare HTML interactions for the words left to do in this text.
- *
- * @param int $textid Text ID
- *
- * @return string HTML result
- *
- * @see \Lwt\Services\TextStatisticsService::getTodoWordsContent()
- */
-function todoWordsContent(int $textid): string
-{
-    $service = new TextStatisticsService();
-    return $service->getTodoWordsContent($textid);
-}
-
-} // End global namespace

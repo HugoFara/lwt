@@ -26,6 +26,8 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Services\TextStatisticsService;
+
 ?>
 <p><?php echo $message; ?></p>
 
@@ -41,7 +43,7 @@ namespace Lwt\Views\Word;
     'text' => $text,
     'hex' => $hex,
     'textId' => $textId,
-    'todoContent' => todoWordsContent($textId)
+    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
 ]); ?>
 </script>
 <?php endif; ?>

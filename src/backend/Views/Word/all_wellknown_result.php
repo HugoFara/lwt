@@ -21,6 +21,8 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Services\TextStatisticsService;
+
 ?>
 <p>
 <?php
@@ -48,6 +50,6 @@ if ($status == 98) {
 <?php echo json_encode([
     'words' => $wordsData,
     'useTooltips' => $useTooltips,
-    'todoContent' => todoWordsContent($textId)
+    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
 ]); ?>
 </script>

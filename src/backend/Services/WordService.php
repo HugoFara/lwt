@@ -32,6 +32,7 @@ use Lwt\Database\Escaping;
 use Lwt\Database\QueryBuilder;
 use Lwt\Database\Settings;
 use Lwt\Database\UserScopedQuery;
+use Lwt\View\Helper\StatusHelper;
 
 /**
  * Service class for managing words/terms.
@@ -720,7 +721,7 @@ class WordService
 
         // Status filter
         if (!empty($filters['status'])) {
-            $conditions[] = \makeStatusCondition('WoStatus', (int)$filters['status']);
+            $conditions[] = StatusHelper::makeCondition('WoStatus', (int)$filters['status']);
         }
 
         // Query filter - builds LIKE/REGEXP condition with placeholders

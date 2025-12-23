@@ -20,6 +20,8 @@
 
 namespace Lwt\Views\Word;
 
+use Lwt\Services\TextStatisticsService;
+
 ?>
 <p>OK, term deleted, now unknown (<?php echo htmlspecialchars($message ?? '', ENT_QUOTES, 'UTF-8'); ?>).</p>
 
@@ -27,6 +29,6 @@ namespace Lwt\Views\Word;
 <?php echo json_encode([
     'wid' => (int) $wid,
     'term' => $term,
-    'todoContent' => todoWordsContent($textId)
+    'todoContent' => (new TextStatisticsService())->getTodoWordsContent($textId)
 ]); ?>
 </script>
