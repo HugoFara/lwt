@@ -24,9 +24,6 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\IconHelper;
 
-/** @var string $message */
-/** @var int $activeLanguageId */
-
 PageLayoutHelper::renderMessage($message, false);
 
 echo PageLayoutHelper::buildActionCard([

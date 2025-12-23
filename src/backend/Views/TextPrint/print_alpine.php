@@ -25,6 +25,9 @@ use Lwt\View\Helper\FormHelper;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\View\Helper\IconHelper;
 
+/** @psalm-suppress TypeDoesNotContainType */
+$mode = (string)$mode;
+
 $title = $viewData['title'] ?? '';
 $sourceUri = $viewData['sourceUri'] ?? '';
 $audioUri = $viewData['audioUri'] ?? '';

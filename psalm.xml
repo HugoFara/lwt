@@ -54,12 +54,6 @@
             </errorLevel>
         </PossiblyUnusedParam>
 
-        <UnusedParam>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Controllers" />
-            </errorLevel>
-        </UnusedParam>
-
         <!-- Public methods called via routing or kept for API completeness -->
         <PossiblyUnusedMethod>
             <errorLevel type="suppress">
@@ -87,12 +81,6 @@
             </errorLevel>
         </RedundantCondition>
 
-        <TypeDoesNotContainType>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-            </errorLevel>
-        </TypeDoesNotContainType>
-
         <!-- Defensive casts for type safety with dynamic data -->
         <RedundantCast>
             <errorLevel type="suppress">
@@ -108,36 +96,6 @@
                 <directory name="src/backend/Services" />
             </errorLevel>
         </PossiblyUnusedReturnValue>
-
-        <!-- Services handle data from various sources with different types -->
-        <InvalidReturnType>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </InvalidReturnType>
-
-        <!-- Foreach values used for iteration control only -->
-        <UnusedForeachValue>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-                <directory name="src/backend/Controllers" />
-            </errorLevel>
-        </UnusedForeachValue>
-
-        <!-- DOMNameSpaceNode has attributes in practice -->
-        <UndefinedPropertyFetch>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Services" />
-            </errorLevel>
-        </UndefinedPropertyFetch>
-
-        <!-- Var annotations for clarity in views/controllers -->
-        <UnnecessaryVarAnnotation>
-            <errorLevel type="suppress">
-                <directory name="src/backend/Views" />
-                <directory name="src/backend/Controllers" />
-            </errorLevel>
-        </UnnecessaryVarAnnotation>
 
         <!-- shell_exec used for feature detection (MeCab) -->
         <ForbiddenCode>

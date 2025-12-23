@@ -19,6 +19,7 @@
  * @since    3.0.0
  *
  * @psalm-suppress UndefinedVariable - Variables are set by the including controller
+ * @psalm-suppress TypeDoesNotContainType View included from different contexts
  */
 
 namespace Lwt\Views\Text;
@@ -34,6 +35,11 @@ use Lwt\View\Helper\SelectOptionsBuilder;
 use Lwt\View\Helper\IconHelper;
 use Lwt\View\Helper\PageLayoutHelper;
 use Lwt\Services\MediaService;
+
+/** @psalm-suppress TypeDoesNotContainType */
+$isNew = (bool)$isNew;
+/** @psalm-suppress TypeDoesNotContainType */
+$annotated = (bool)$annotated;
 
 // Build actions based on whether this is a new or existing text
 $actions = [];

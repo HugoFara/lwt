@@ -580,6 +580,7 @@ class TextController extends BaseController
      * @return void
      *
      * @psalm-suppress UnusedVariable Variables are used in included view files
+     * @psalm-suppress UnusedParam Used in included view file
      */
     private function importLongForm(int $maxInputVars): void
     {

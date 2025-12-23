@@ -896,7 +896,8 @@ class FeedService
 
         foreach ($xPath->query($redirect) as $node) {
             if (
-                empty(trim($node->localName))
+                !$node instanceof \DOMElement
+                || empty(trim($node->localName))
                 || $node->nodeType == XML_TEXT_NODE
                 || !$node->hasAttributes()
             ) {

@@ -11,6 +11,8 @@
  * - $words: Array of word records from query result
  *
  * PHP version 8.1
+ *
+ * @psalm-suppress TypeDoesNotContainType View included from different contexts
  */
 
 namespace Lwt\Views\Word;
