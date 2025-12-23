@@ -40,6 +40,9 @@
     },
     "scripts": {
         "test:cleanup-db": "@php tests/cleanup_db_connections.php",
+        "test:setup-db": "@php tests/setup_test_db.php",
+        "test:reset-db": "@php tests/setup_test_db.php --drop",
+        "test:db-status": "@php tests/setup_test_db.php --status",
         "test": [
             "@test:cleanup-db",
             "XDEBUG_MODE=coverage vendor/bin/phpunit"
@@ -47,6 +50,11 @@
         "test:no-coverage": [
             "@test:cleanup-db",
             "vendor/bin/phpunit --no-coverage"
+        ],
+        "test:integration": [
+            "@test:setup-db",
+            "@test:cleanup-db",
+            "vendor/bin/phpunit --no-coverage --testsuite integration"
         ],
         "psalm": "vendor/bin/psalm",
         "psalm:level3": "vendor/bin/psalm --error-level=3",
@@ -66,6 +74,10 @@
     },
     "scripts-descriptions": {
         "test:cleanup-db": "Kill stale test database connections",
+        "test:setup-db": "Create test database and apply all migrations",
+        "test:reset-db": "Drop and recreate test database from scratch",
+        "test:db-status": "Show test database status (tables, migrations, FK constraints)",
+        "test:integration": "Run integration tests (requires database)",
         "test": "Run all tests with coverage (cleans up stale DB connections first)",
         "test:no-coverage": "Run all tests without coverage (cleans up stale DB connections first)",
         "psalm": "Run Psalm static analysis (current config level)",

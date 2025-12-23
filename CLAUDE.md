@@ -67,6 +67,12 @@ composer test:no-coverage        # Run PHPUnit tests without coverage (faster)
 # Run a specific test method
 ./vendor/bin/phpunit --filter testMethodName
 
+# Integration tests (requires test database)
+composer test:setup-db           # Create test database and apply migrations
+composer test:db-status          # Show test database status
+composer test:reset-db           # Drop and recreate test database
+composer test:integration        # Run integration tests (sets up DB automatically)
+
 # Frontend tests (Vitest)
 npm test                         # Run all frontend tests
 npm run test:watch               # Watch mode for frontend tests
@@ -76,6 +82,8 @@ npm run test:coverage            # Run with coverage
 npm run e2e                      # Run Cypress E2E tests
 npm run cy:open                  # Interactive Cypress test runner
 ```
+
+**Integration Tests:** Some tests require a MySQL database with FK constraints. Run `composer test:setup-db` once to create the test database (`test_<dbname>` from your `.env`). The integration test suite includes FK cascade tests, tag service tests, and other database-dependent tests.
 
 **When to run E2E tests:** Run `npm run e2e` after making changes to:
 

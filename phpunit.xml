@@ -4,6 +4,14 @@
     <testsuite name="LWT Test Suite">
       <directory>tests/</directory>
     </testsuite>
+    <testsuite name="integration">
+      <file>tests/backend/Core/Database/ForeignKeyTest.php</file>
+      <file>tests/backend/Core/Database/PreparedStatementTest.php</file>
+      <file>tests/backend/Core/Tag/TagsTest.php</file>
+      <file>tests/backend/Services/BackupServiceTest.php</file>
+      <file>tests/backend/Services/LanguageServiceTest.php</file>
+      <file>tests/backend/Services/TextDisplayServiceTest.php</file>
+    </testsuite>
   </testsuites>
   <coverage>
     <report>
